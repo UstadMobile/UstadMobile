@@ -24,7 +24,6 @@
     <string name="device">وزله</string>
     <string name="register">نومکښنه</string>
     <string name="phone_number">د تیلیفون شمیره</string>
-    <string name="name">نوم</string>
     <string name="male">نارینه</string>
     <string name="female">شځینه</string>
     <string name="settings">امستن/تنظیمات</string>
@@ -107,7 +106,6 @@
     <string name="deleting">ړنګوی</string>
     <string name="share_application">د اپلیکیشن شریکول</string>
     <string name="share">شریک کول</string>
-    <string name="location_permission_message">دا اپلیکیشن د ځای موقعیت اجازې ته اړتیا لری ترڅو له نږدې کارونکو سره په لوړ سرعت نالیکی شریکول فعاله شی.</string>
     <string name="download_summary_title">٪ فعاله کښته کیدل</string>
     <string name="download_pause_download">ځنډ</string>
     <string name="download_entry_state_paused">ځنډ ورکړی شوی</string>
@@ -237,7 +235,6 @@
     <string name="save_as_template">د بیلگي په توګه ثبتول</string>
     <string name="audio">غږیز</string>
     <string name="compress">کوټه کول</string>
-    <string name="and">او</string>
     <string name="added">ورزیات شو</string>
     <string name="fixed_date">ځانګړی نیټه</string>
     <string name="relative_date">اړونده نیټه</string>
@@ -313,8 +310,6 @@
     <string name="people">خلک</string>
     <string name="record_attendance">د حاضری ثبتول</string>
     <string name="today">نن</string>
-    <string name="first">لومړی</string>
-    <string name="last">آخری</string>
     <string name="last_week">تیره اوونۍ</string>
     <string name="field_content_progress">د محتویاتو پرمختګ</string>
     <string name="mark_all">ټول په نښه کول</string>
@@ -329,12 +324,10 @@
     <string name="add_person_to_class">په ټولګۍ کې د شخص زیاتول</string>
     <string name="add_verb_filter">د فعل فلټر زیاتول</string>
     <string name="student_image">د زده کوونکی انځور</string>
-    <string name="question">پوښتنه</string>
     <string name="add_class">د ټولګۍ زیاتول</string>
     <string name="class_name">د ټولګۍ نوم</string>
     <string name="class_description">د ټولګۍ تفصیل</string>
     <string name="licence_type_cc_by_sa">د CC جواز د SA لخوا</string>
-    <string name="to">ته</string>
     <string name="holiday">رخصتی</string>
     <string name="holidays">رخصتي</string>
     <string name="holiday_calendar">د رخصتي کلیزه</string>
@@ -389,14 +382,12 @@
     <string name="rols_assignment">د رول سپارل</string>
     <string name="search">پلټنه</string>
     <string name="filter">فلټر</string>
-    <string name="over">پای</string>
     <string name="not_recorded">ثبت نشو</string>
     <string name="roles">رول</string>
     <string name="edit_person">د شخص سمون</string>
     <string name="role_assignment_setting_desc">یو کارن یا ډلې ته د رول ټاکل</string>
     <string name="audit_log_setting_desc">د حاسبی چارو خبرال لیدل او صادرول</string>
     <string name="permission_sel_question_select">د ټولنیز احساسی زده کړو پوښتنو لیدل</string>
-    <string name="permission">اجازه</string>
     <string name="role_name">د رول نوم</string>
     <string name="timezone">د وخت زون</string>
     <string name="add_a_new_school">د نوی ښوونځی زیاتول</string>
@@ -422,7 +413,6 @@
     <string name="school">ښوونځی</string>
     <string name="schools">ښوونځي</string>
     <string name="not_started">پیل شوی نه دی</string>
-    <string name="None">هیڅ</string>
     <string name="instructions_for_students">د زده کوونکو لپاره لارښووني</string>
     <string name="percentage_complete" formatted="false">%1$s بشپړ</string>
     <string name="started">پیل شوی</string>
@@ -442,7 +432,6 @@
     <string name="attendance_percentage">د حاضری سلنه:</string>
     <string name="role">رول</string>
     <string name="audit_log">د حسابی چارو خبرال</string>
-    <string name="member">غړی</string>
     <string name="permission_person_update">د خلکو اوسمهالول</string>
     <string name="permission_attendance_update">د حاضری اوسمهالول</string>
     <string name="permission_sel_question_update">د ټولنیز احساسی زده کړو پوښتنو اوسمهالول</string>
@@ -497,8 +486,6 @@
     <string name="teacher">ښوونکی</string>
     <string name="add_a_teacher">د ښوونکی زیاتول</string>
     <string name="participant">ګډون کوونکي</string>
-    <string name="up">پورته</string>
-    <string name="down">کښته</string>
     <string name="activity_went_good">چارندتیا ښه وو</string>
     <string name="measurement_type">د اندازه کولو ډول</string>
     <string name="frequency">تکرار</string>
@@ -511,8 +498,6 @@
     <string name="apply">کارول</string>
     <string name="add_a_new_role">د نوی رول زیاتول</string>
     <string name="edit_role">د رول سمون</string>
-    <string name="entry">ننوت</string>
-    <string name="members">غړي</string>
     <string name="role_assignment">د رول ټاکل</string>
     <string name="scope_by">لیدلوری د</string>
     <string name="assign_to">چا ته چې سپارل شوی</string>
@@ -580,8 +565,6 @@
     <string name="not_answered">ځواب نه دی ورکول شوی</string>
     <string name="clazz_work">د ټولګۍ کار</string>
     <string name="not_submitted">نه دی لیږل شوی</string>
-    <string name="marked">نښه شوي</string>
-    <string name="submitted">لیږل شوی</string>
     <string name="visible_from_date">د لیدو وړ له دې نیټې څخه</string>
     <string name="submission_type">د لیږلو ډول</string>
     <string name="no_submission_required">لیږلو ته اړتیا نشته</string>

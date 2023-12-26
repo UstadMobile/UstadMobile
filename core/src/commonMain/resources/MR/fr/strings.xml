@@ -46,7 +46,6 @@
     <string name="memory_card">Carte mémoire</string>
     <string name="device">Appareil</string>
     <string name="phone_number">Numéro de téléphone</string>
-    <string name="name">Nom</string>
     <string name="description">Description</string>
     <string name="other">Autre</string>
     <string name="logout">Se déconnecter</string>
@@ -201,8 +200,6 @@
     <string name="schedule">Planning</string>
     <string name="add_a_schedule">Ajout un planning</string>
     <string name="edit_schedule">Modifier le planning</string>
-    <string name="first">premier</string>
-    <string name="last">dernier</string>
     <string name="last_week">Dernière semaine</string>
     <string name="mark_all">Tout marquer</string>
     <string name="present">Présent</string>
@@ -221,7 +218,6 @@
     <string name="add_a_class">Ajouter une classe</string>
     <string name="join_existing_class">Rejoindre une classe existante</string>
     <string name="student_image">Photo de l\'étudiant</string>
-    <string name="question">Question</string>
     <string name="add_question">Ajouter une question</string>
     <string name="edit_question">Modifier une question</string>
     <string name="questions">Questions</string>
@@ -229,7 +225,6 @@
     <string name="add_class">Ajouter une classe</string>
     <string name="class_name">Nom de la classe</string>
     <string name="class_description">Description de la classe</string>
-    <string name="to">à</string>
     <string name="holiday">Jour férié</string>
     <string name="add_a_new_holiday_calendar">Ajouter un nouveau calendrier de jours fériés</string>
     <string name="edit_holiday_calendar">Modifier le calendrier des jours fériés</string>
@@ -262,7 +257,6 @@
     <string name="unhide">Afficher</string>
     <string name="compress">Compresser</string>
     <string name="add_activity_literal">Ajouter une activité</string>
-    <string name="and">et</string>
     <string name="field_required_prompt">Ce champ est requis</string>
     <string name="field_password_error_min">Le mot de passe doit comporter au moins 5 caractères</string>
     <string name="xapi_clear">Effacer</string>
@@ -355,7 +349,6 @@
     <string name="you_are_already_in_school">Erreur : Vous êtes déjà membre de l\'école : %1$s</string>
     <string name="assign_to">Assigner à</string>
     <string name="permission_person_insert">Ajouter une personne</string>
-    <string name="members">membres</string>
     <string name="permission_clazz_add_teacher">Ajouter des enseignants à la classe</string>
     <string name="permission_person_select">Voir la personne</string>
     <string name="permission_clazz_update">Mettre à jour les classes</string>
@@ -367,7 +360,6 @@
     <string name="password_unchanged">Mot de passe (non modifié)</string>
     <string name="permission_person_picture_update">Mettre à jour les photos de profil</string>
     <string name="permission_clazz_select">Voir les classes</string>
-    <string name="member">membre</string>
     <string name="add_a_new_person">Ajouter une nouvelle personne</string>
     <string name="edit_person">Modifier la personne</string>
     <string name="person">Personne</string>
@@ -402,8 +394,6 @@
     <string name="enrolment">Recrutement</string>
     <string name="attendance_high_to_low">Présence (forte vers faible)</string>
     <string name="attendance_low_to_high">Présence (faible vers forte)</string>
-    <string name="up">haut</string>
-    <string name="down">bas</string>
     <string name="time_period">Période</string>
     <string name="location">Emplacement</string>
     <string name="last_three_months">Trois derniers mois</string>
@@ -466,13 +456,11 @@
     <string name="join_existing_school">Rejoindre une école existante</string>
     <string name="schools">Écoles</string>
     <string name="assignments">Devoirs</string>
-    <string name="None">Aucun</string>
     <string name="instructions_for_students">Instructions pour les étudiants</string>
     <string name="not_started">Non commencé</string>
     <string name="percentage_complete" formatted="false">%1$s%% terminé</string>
     <string name="percentage_score" formatted="false">Résultat %1$s%%</string>
     <string name="started_date" formatted="false">%1$s démarré</string>
-
     <string name="started">Démarré</string>
     <string name="due_date">Date d\'échéance</string>
     <string name="add_new_content">Ajouter un nouveau contenu</string>
@@ -513,8 +501,6 @@
     <string name="completion_criteria">Critère de complétion</string>
     <string name="mark_complete">Marquer comme complet</string>
     <string name="late_penalty">(%1$s%% de pénalité de retard)</string>
-    <string name="marked">noté</string>
-    <string name="submitted">envoyé</string>
     <string name="not_submitted">non envoyé</string>
     <string name="deadline">Date limite</string>
     <string name="class_timezone">Fuseau horaire de la classe</string>

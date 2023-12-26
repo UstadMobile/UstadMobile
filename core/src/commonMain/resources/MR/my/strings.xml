@@ -27,7 +27,6 @@
     <string name="onboarding_no_internet_subheadline">ပညာရေးဆိုင်ရာဗီဒီယိုများ, ဆောင်းပါးများနှင့်အပြန်အလှန်စစ်ရေးလေ့ကျင့်ခန်းနောက်ပိုင်းတွင်အသုံးပြုမှုအတွက်ဒေါင်းလုဒ်လုပ်ပါ။.</string>
     <string name="new_tab">ပြတင်းပေါက်အသစ်တစ်ခုတွင်ပြသခြင်း</string>
     <string name="save_as_template">တင်းပလိတ်အဖြစ်သိမ်းဆည်းပါ</string>
-    <string name="location_permission_message">ဒီ app ကိုအနီးအနားမှာအသုံးပြုသူများနှင့်မြန်နှုန်းမြင့်အော့ဖ်လိုင်းခွဲဝေမှုကို enable တည်နေရာခွင့်ပြုချက်လိုအပ်သည်။.</string>
     <string name="download_wifi_only">ဝိုင်ဖိုင်သာ</string>
     <string name="download_calculating">ဆက်လက်တွက်ချက်သည်…</string>
     <string name="download_state_download"><b>ဒေါင်းလုပ်</b> စုစုပေါင်းပစ္စည်းများ၏ %1$s, သူတို့သည်သင်၏ device ကိုသိုလှောင်မှုအပေါ် %2$s စုစုပေါင်းသုံးပါလိမ့်မယ်။.</string>
@@ -110,7 +109,6 @@
     <string name="device">စက်ကိရိယာ</string>
     <string name="register">မှတ်ပုံတင်ပါ</string>
     <string name="phone_number">ဖုန်းနံပါတ်</string>
-    <string name="name">အမည်</string>
     <string name="description">ဖော်ပြချက်</string>
     <string name="male">အထီး</string>
     <string name="female">အမျိုးသမီ</string>
@@ -148,7 +146,6 @@
     <string name="hide">ဝှက်ထား</string>
     <string name="unhide">မဟုတ်ဝှက်</string>
     <string name="compress">သိပ်</string>
-    <string name="and">နှင့်</string>
     <string name="share_offline_zip_checkbox_label">တစ်ဦးဇစ်ဖိုင်ထဲမှာပို့ပါ</string>
     <string name="preparing">ပြင်ဆင်နေသည်</string>
     <string name="fixed_date">ရက်စွဲသတ်မှတ်သည်</string>
@@ -254,7 +251,6 @@
     <string name="repo_loading_status_failed_noconnection">ကွန်နက်ရှင်သို့မဟုတ်သက်တူရွယ်တူအဘယ်သူမျှမ</string>
     <string name="licence_type_cc_by">ဖြင့် ဂဂ</string>
     <string name="license_type_cc_0">ဂဂ0</string>
-    <string name="first">ပဌမ</string>
     <string name="clazz">အမျိုးခဲွခြား</string>
     <string name="edit_clazz">တည်းဖြတ်ပါ ကိုအတန်းအစား</string>
     <string name="student_image">ကျောင်းသားပုံ</string>
@@ -278,9 +274,7 @@
     <string name="person_enrolment_in_class">%1$s ကျောင်းအပ်ရန်အတွက် %2$s</string>
     <string name="error_start_date_before_previous_enrolment_date">နယူးကျောင်းအပ်ဤပုဂ္ဂိုလ် %1$s ကိုနောက်ဆုံးကျောင်းအပ်၏အဆုံးအပြီးဖြစ်ရပါမည်</string>
     <string name="attendance_low_to_high">တက်ရောက်သူ (အနိမ့်မှအမြင့်သို့)</string>
-    <string name="down">ဆင်းလျက်</string>
     <string name="activity_went_bad">လုပ်ဆောင်မှုကမကောင်းဘူး</string>
-    <string name="last">နောက်ဆုံး</string>
     <string name="last_week">ပြီးခဲ့သောအပတ်က</string>
     <string name="mark_all">မာကုအားလုံး</string>
     <string name="mark_all_present">အားလုံးအမှတ်အသား</string>
@@ -418,13 +412,11 @@
     <string name="add_a_new_class">အတန်းသစ်တစ်ခုကိုထည့်ပါ</string>
     <string name="add_a_class">အတန်းတစ်ခုထည့်ပါ</string>
     <string name="join_existing_class">ရှိပြီးသားအတန်းသို့ဝင်ပါ</string>
-    <string name="question">မေးခွန်း</string>
     <string name="add_question">မေးခွန်းထည့်ပါ</string>
     <string name="edit_question">မေးခွန်းတည်းဖြတ်ပါ</string>
     <string name="add_person">လူတစ်ယောက်ထည့်ပါ</string>
     <string name="add_class">အတန်းအစားထည့်ပါ</string>
     <string name="class_name">အတန်းအစားအမည်</string>
-    <string name="to">သို့</string>
     <string name="holiday">အားလပ်ရက်</string>
     <string name="add_a_holiday">အားလပ်ရက်တစ်ခုထည့်ပါ</string>
     <string name="holidays">အားလပ်ရက်များ</string>
@@ -476,7 +468,6 @@
     <string name="teachers_literal">ဆရာများ</string>
     <string name="participant">ပါဝင်သူ</string>
     <string name="primary_user">မူလတန်းအသုံးပြုသူ</string>
-    <string name="up">အထက်</string>
     <string name="activity_went_good">လုပ်ဆောင်ချက်အကောင်းသွား၏</string>
     <string name="uom_frequency_title">ဘယ်နှစ်ခါ</string>
     <string name="uom_duration_title">ကြာချိန်</string>
@@ -504,7 +495,6 @@
     <string name="gender_literal" value="306">ကျားမ</string>
     <string name="search">ရှာပါ</string>
     <string name="filter">စိမ့်ထွက်</string>
-    <string name="over">အထက်မှာ</string>
     <string name="sync">ထပ်တူပြုပါ</string>
     <string name="not_recorded">မှတျတမျးတငျထားမဟုတ်</string>
     <string name="groups">အဖွဲ့များ</string>
@@ -516,11 +506,7 @@
     <string name="locations">တည်နေရာများ</string>
     <string name="locations_setting_desc">တည်နေရာများကိုစီမံပါ</string>
     <string name="audit_log">စာရင်းစစ်မှတ်တမ်း</string>
-    <string name="entry">ဝင်သွားခြင်း</string>
-    <string name="permission">ခွင့်ပြုချက်</string>
     <string name="role_name">အခန်းကဏ္ဍအမည်</string>
-    <string name="members">အဖွဲ့ဝင်များ</string>
-    <string name="member">အဖွဲ့ဝင်</string>
     <string name="scope_by">နယ်ပယ်အားဖြင့်</string>
     <string name="assign_to">သတ်မှတ်ဖို့</string>
     <string name="person">ပုဂ္ဂိုလ်</string>
@@ -561,7 +547,6 @@
     <string name="edit_school">ကျောင်းကိုတည်းဖြတ်ပါ</string>
     <string name="schools">ကျောင်းများ</string>
     <string name="assignments">လွှဲအပ်စာတမ်း</string>
-    <string name="None">အဘယ်သူမျှမ</string>
     <string name="not_started">စတင်ခဲ့ပြီးမဟုတ်</string>
     <string name="started_date" formatted="false">စတင်ခဲ့သည် %1$s%</string>
     <string name="started">စတင်ခဲ့သည်</string>
@@ -601,8 +586,6 @@
     <string name="not_answered">ဖြေကြားမရ</string>
     <string name="clazz_work">အတန်းအစားအလုပ်</string>
     <string name="add_a_new_clazzwork">အသစ်တစ်ခုကိုလူတန်းစားအလုပ်ထည့်ပါ</string>
-    <string name="marked">မှတ်သား</string>
-    <string name="submitted">တင်သွင်းခဲ့သည်</string>
     <string name="not_submitted">တင်သွင်းမှုမရှိပါ</string>
     <string name="submission_type">တင်သွင်းမှုအမျိုးအစား</string>
     <string name="no_submission_required">အဘယ်သူမျှမတင်သွင်းခဲ့တဲ့လိုအပ်</string>
