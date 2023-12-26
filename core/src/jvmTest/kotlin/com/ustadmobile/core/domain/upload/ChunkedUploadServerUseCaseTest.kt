@@ -27,10 +27,7 @@ class ChunkedUploadServerUseCaseTest {
             "/com/ustadmobile/core/container/testfile1.png"
         )!!.readAllBytes()
         val uploadDir = temporaryFolder.newFolder()
-        val useCase = ChunkedUploadServerUseCaseJvm { uploadDir }
         val finalCallMessage = "Hello World"
-
-        val uploadUuid = UUID.randomUUID().toString()
         val completedUploadDeferred =
             CompletableDeferred<CompletedChunkedUpload>()
         val onUploadCompleteFn: (CompletedChunkedUpload) -> ChunkedUploadResponse = {
@@ -39,6 +36,13 @@ class ChunkedUploadServerUseCaseTest {
                 statusCode = 200, body = finalCallMessage, headers = emptyMap(), contentType = "text/plain"
             )
         }
+        val useCase = ChunkedUploadServerUseCaseJvm(
+            uploadDir = uploadDir ,
+            onUploadComplete = onUploadCompleteFn
+        )
+
+        val uploadUuid = UUID.randomUUID().toString()
+
         val uploadHeaders = mapOf(
             HEADER_UPLOAD_UUID to listOf(uploadUuid),
             HEADER_IS_FINAL_CHUNK to listOf(true.toString()),
@@ -59,7 +63,6 @@ class ChunkedUploadServerUseCaseTest {
                             headers = uploadHeaders,
                             chunkData = slice,
                         ),
-                        onUploadComplete = onUploadCompleteFn
                     )
                 }
 
@@ -71,7 +74,6 @@ class ChunkedUploadServerUseCaseTest {
                             headers = uploadHeaders,
                             chunkData = slice,
                         ),
-                        onUploadComplete = onUploadCompleteFn
                     )
                 }
             }

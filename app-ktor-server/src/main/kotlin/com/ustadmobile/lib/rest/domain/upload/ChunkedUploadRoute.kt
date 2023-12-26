@@ -1,9 +1,7 @@
-package com.ustadmobile.lib.rest.upload
+package com.ustadmobile.lib.rest.domain.upload
 
 import com.ustadmobile.core.domain.upload.ChunkedUploadRequest
-import com.ustadmobile.core.domain.upload.ChunkedUploadResponse
 import com.ustadmobile.core.domain.upload.ChunkedUploadServerUseCase
-import com.ustadmobile.core.domain.upload.CompletedChunkedUpload
 import com.ustadmobile.core.util.ext.firstCaseInsensitiveOrNull
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
@@ -16,26 +14,15 @@ import io.ktor.util.toByteArray
 import io.ktor.util.toMap
 
 /**
- * Upload Receiver that can accept a file upload in one or more chunks. Each upload request must
- * have a UUID in the header ( HEADER_UPLOAD_UUID ).
- *
- * The final chunk must include the header:
- * upload-final-chunk: true
- *
- * When receiving the final chunk, the onUploadCompleted callback will be called. The callback will
- * be responsible for sending a response.
- *
- * For other chunks, the data will be appended a 204 (no content) response will be sent.
+ * KTOR Route for ChunkedUploadServerUseCase
  *
  * @param useCase ChunkedUploadServerUseCase to process requests
- * @param path the path on which this endpoint will use (e.g. server side url)
- * @param onUploadCompleted Completed upload handler
+ * @param path the path on which this endpoint will use (e.g. server side url, NOT the file storage path)
  */
 
 fun Route.ChunkedUploadRoute(
     useCase: (ApplicationCall) -> ChunkedUploadServerUseCase,
     path: String,
-    onUploadCompleted: suspend (CompletedChunkedUpload) -> ChunkedUploadResponse,
 ) {
     post(path) {
         val uploadUseCase = useCase(call)
@@ -46,7 +33,6 @@ fun Route.ChunkedUploadRoute(
                 headers = call.request.headers.toMap(),
                 chunkData = chunkData,
             ),
-            onUploadComplete = onUploadCompleted,
         )
 
         call.respondText(

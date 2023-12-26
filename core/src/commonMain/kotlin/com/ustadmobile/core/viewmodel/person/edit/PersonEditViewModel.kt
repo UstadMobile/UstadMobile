@@ -3,7 +3,7 @@ package com.ustadmobile.core.viewmodel.person.edit
 import com.ustadmobile.core.account.AccountRegisterOptions
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorUseCase
-import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
+import com.ustadmobile.core.domain.blob.savepicture.SavePictureUseCase
 import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
@@ -33,7 +33,6 @@ import com.ustadmobile.lib.db.entities.PersonParentJoin
 import com.ustadmobile.lib.db.entities.PersonPicture
 import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
@@ -45,6 +44,7 @@ import kotlinx.datetime.Instant
 import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.instanceOrNull
+import org.kodein.di.on
 
 data class PersonEditUiState(
 
@@ -152,7 +152,7 @@ class PersonEditViewModel(
 
     private val genderConfig : GenderConfig by instance()
 
-    private val saveLocalUrisAsBlobsUseCase: SaveLocalUrisAsBlobsUseCase? by instanceOrNull()
+    private val savePictureUseCase: SavePictureUseCase? by on(accountManager.activeEndpoint).instanceOrNull()
 
     init {
         loadingState = LoadingUiState.INDETERMINATE
@@ -559,23 +559,11 @@ class PersonEditViewModel(
                     if(initPictureUri != personPictureUriVal) {
                         //Save if changed
                         activeDb.personPictureDao.upsert(personPictureVal)
-                        GlobalScope.launch {
-                            try {
-                                saveLocalUrisAsBlobsUseCase?.invoke(
-                                    endpoint = accountManager.activeEndpoint,
-                                    tableId = PersonPicture.TABLE_ID,
-                                    blobs = listOf(
-                                        SaveLocalUrisAsBlobsUseCase.BlobToSave(
-                                            uid = savePerson.personUid,
-                                            localUri = personPictureUriVal
-                                        )
-                                    )
-                                )
-                            }catch(e: Exception) {
-                                e.printStackTrace()
-                            }
-
-                        }
+                        savePictureUseCase?.invoke(
+                            entityUid = savePerson.personUid,
+                            tableId = Person.TABLE_ID,
+                            pictureUri = personPictureUriVal
+                        )
                     }
                 }
 

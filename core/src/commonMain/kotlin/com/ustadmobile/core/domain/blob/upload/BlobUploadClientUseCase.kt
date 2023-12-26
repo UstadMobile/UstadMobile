@@ -43,6 +43,8 @@ interface BlobUploadClientUseCase {
          */
         const val BLOB_RESPONSE_HEADER_PREFIX = "X-Blob-Response-"
 
+        const val BLOB_UPLOAD_HEADER_BATCH_UUID = "Blob-Upload-Batch-Uuid"
+
     }
 
 }

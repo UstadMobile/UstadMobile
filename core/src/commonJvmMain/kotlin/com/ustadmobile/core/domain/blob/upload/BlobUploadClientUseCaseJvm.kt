@@ -38,7 +38,8 @@ class BlobUploadClientUseCaseJvm(
      * Get a chunk for upload by making an http range request to the cache.
      */
     inner class CacheResponseChunkGetter(
-        private val url: String
+        private val url: String,
+        private val batchUuid: String,
     ) : ChunkedUploadClientUseCase.UploadChunkGetter{
 
         override suspend fun invoke(
@@ -57,10 +58,16 @@ class BlobUploadClientUseCaseJvm(
             partialResponse.bodyAsSource()?.readTo(buffer, 0, chunk.size)
             return if(chunk.isLastChunk) {
                 ChunkedUploadClientUseCase.ChunkResponseInfo(
-                    extraHeaders = partialResponse.headers.names().map { headerName ->
-                        "$BLOB_RESPONSE_HEADER_PREFIX$headerName" to
-                                partialResponse.headers.getAllByName(headerName)
-                    }.toMap()
+                    extraHeaders = buildMap {
+                        put(
+                            key = BlobUploadClientUseCase.BLOB_UPLOAD_HEADER_BATCH_UUID,
+                            value = listOf(batchUuid)
+                        )
+                        partialResponse.headers.names().forEach { headerName ->
+                            put("$BLOB_RESPONSE_HEADER_PREFIX$headerName",
+                                partialResponse.headers.getAllByName(headerName))
+                        }
+                    }
                 )
             }else {
                 null
@@ -71,6 +78,7 @@ class BlobUploadClientUseCaseJvm(
 
     private suspend fun asyncUploadItemsFromChannelProcessor(
         channel: ReceiveChannel<BlobAndResponse>,
+        batchUuid: String,
         remoteUrl: String,
     ) = coroutineScope {
         async {
@@ -78,7 +86,10 @@ class BlobUploadClientUseCaseJvm(
                 chunkedUploadUseCase(
                     uploadUuid = item.blob.uploadUuid,
                     totalSize = item.response.headers["content-length"]?.toLong() ?: -1,
-                    getChunk = CacheResponseChunkGetter(item.blob.blobUrl),
+                    getChunk = CacheResponseChunkGetter(
+                        url = item.blob.blobUrl,
+                        batchUuid = batchUuid,
+                    ),
                     remoteUrl = remoteUrl,
                     fromByte = item.blob.fromByte,
                     chunkSize = item.chunkSize,
@@ -136,7 +147,8 @@ class BlobUploadClientUseCaseJvm(
             val jobs = (0..4).map {
                 asyncUploadItemsFromChannelProcessor(
                     channel = receiveChannel,
-                    remoteUrl = "${endpoint.url}api/blob/upload"
+                    remoteUrl = "${endpoint.url}api/blob/upload",
+                    batchUuid = batchUuid,
                 )
             }
 

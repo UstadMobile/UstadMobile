@@ -15,14 +15,11 @@ interface ChunkedUploadServerUseCase {
      *  Body: should contain the binary chunk data
      *
      * @param request ChunkedUploadRequest representing the request received by the server
-     * @param onUploadComplete function that will be invoked when all chunks have been received
-     *        (e.g. to complete processing of an upload) .
      * @return ChunkedUploadResponse representing the response to provide to the client including
      *         response code.
      */
     suspend fun onChunkReceived(
         request: ChunkedUploadRequest,
-        onUploadComplete: suspend (CompletedChunkedUpload) -> ChunkedUploadResponse
     ): ChunkedUploadResponse
 
 }

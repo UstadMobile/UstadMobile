@@ -8,13 +8,28 @@ import java.io.File
 import java.io.FileOutputStream
 import java.util.UUID
 
+/**
+ * @param uploadDir The directory that will be used for temporary storage of uploads. If the
+ *        directory does not exist yet, it will be created.
+ * @param onUploadComplete function that will be invoked when all chunks have been received
+ *        (e.g. to complete processing of an upload) .
+ */
 class ChunkedUploadServerUseCaseJvm(
-    private val uploadDir: (ChunkedUploadRequest) -> File,
+    private val uploadDir: File,
+    private val onUploadComplete: suspend (CompletedChunkedUpload) -> ChunkedUploadResponse
 ): ChunkedUploadServerUseCase {
+
+    @Volatile
+    private var uploadDirChecked = false
+
     override suspend fun onChunkReceived(
         request: ChunkedUploadRequest,
-        onUploadComplete: suspend (CompletedChunkedUpload) -> ChunkedUploadResponse
     ): ChunkedUploadResponse {
+        if(!uploadDirChecked) {
+            uploadDir.takeIf { !it.exists() }?.mkdirs()
+            uploadDirChecked = true
+        }
+
         val uploadUuid = request.headers.entries.firstOrNull {
             it.key.equals(HEADER_UPLOAD_UUID, true)
         }?.value?.firstOrNull()
@@ -31,7 +46,7 @@ class ChunkedUploadServerUseCaseJvm(
             it.key.equals(HEADER_IS_FINAL_CHUNK, true)
         }?.value?.firstOrNull()?.toBoolean() ?: false
 
-        val tmpFile = File(uploadDir(request), uploadUuid)
+        val tmpFile = File(uploadDir, uploadUuid)
         withContext(Dispatchers.IO) {
             FileOutputStream(tmpFile, true).use { fileOut ->
                 fileOut.write(request.chunkData)

@@ -30,6 +30,14 @@ import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.core.db.ext.migrationList
+import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
+import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCaseJvm
+import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
+import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCaseAndroid
+import com.ustadmobile.core.domain.blob.savepicture.SavePictureUseCase
+import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCase
+import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCaseJvm
+import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCase
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
 import kotlinx.serialization.json.Json
@@ -60,6 +68,7 @@ import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.io.files.Path
+import kotlinx.io.files.SystemFileSystem
 import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
 import nl.adaptivity.xmlutil.serialization.XML
 import nl.adaptivity.xmlutil.serialization.XmlConfig
@@ -292,17 +301,49 @@ class UstadApp : Application(), DIAware{
             )
         }
 
+        bind<ChunkedUploadClientUseCase>() with singleton {
+            ChunkedUploadClientUseCase(
+                httpClient = instance()
+            )
+        }
+
+        bind<SaveLocalUrisAsBlobsUseCase>() with scoped(EndpointScope.Default).singleton {
+            SaveLocalUrisAsBlobsUseCaseJvm(
+                endpoint = context,
+                cache = instance(),
+                uriHelper = instance(),
+                tmpDir = Path(applicationContext.cacheDir.absolutePath, "savelocaluriaslblobtmp"),
+                blobUploadClientUseCase = on(context).instance(),
+                fileSystem = SystemFileSystem
+            )
+        }
+
+        bind<BlobUploadClientUseCase>() with scoped(EndpointScope.Default).singleton {
+            BlobUploadClientUseCaseJvm(
+                chunkedUploadUseCase = on(context).instance(),
+                httpClient = instance(),
+                httpCache = instance()
+            )
+        }
+
+        bind<EnqueueSavePictureUseCase>() with scoped(EndpointScope.Default).singleton {
+            EnqueueSavePictureUseCaseAndroid(
+                appContext = applicationContext,
+                endpoint = context,
+            )
+        }
+
+        bind<SavePictureUseCase>() with scoped(EndpointScope.Default).singleton {
+            SavePictureUseCase(
+                saveLocalUrisAsBlobUseCase = on(context).instance(),
+                db = on(context).instance(tag = DoorTag.TAG_DB),
+                repo = on(context).instance(tag = DoorTag.TAG_REPO),
+            )
+        }
+
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
     }
 
-
-    private fun LocaleListCompat.getFirstLang() : String? {
-        return try {
-            this.get(0)?.toString()
-        }catch(e: Exception) {
-            null
-        }
-    }
 
     override fun onCreate() {
         super.onCreate()

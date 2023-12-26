@@ -1,23 +1,76 @@
 package com.ustadmobile.core.domain.blob.savelocaluris
 
-import com.ustadmobile.core.account.Endpoint
 
+/**
+ * Save a list of local Uri(s) (e.g. Android Uri, JVM file URI, JS blob URI) as blobs.
+ *
+ * On Android/Desktop: Runs an SHA-256 checksum on the content and stores it into the local httpcache
+ * under the blob url (e.g. https://endpoint.com/api/blob/sha256), and then uses
+ * BlobUploadClientUseCase to upload the blobs to the upstream node/server.
+ *
+ * On Web: Directly uploads the blob contents using ChunkedUploadClientUseCase
+ *
+ */
 interface SaveLocalUrisAsBlobsUseCase {
 
-    data class BlobToSave(
+    data class SaveLocalUriAsBlobItem(
+        val localUri: String,
         val uid: Long,
-        //The uri of the data on the device (e.g. android Uri, Java.net.URI, JS blob: uri)
-        val localUri: String?
+        //Optional: tableId can be set if desired
+        val tableId: Int = 0,
+    )
+
+    data class SavedBlob(
+        val uid: Long,
+        val localUri: String,
+        val blobUrl: String,
+    )
+
+    data class BlobUploadProgress(
+        val uid: Long,
+        val localUri: String,
+        val blobUrl: String,
+        val bytesUploaded: Int,
+        val totalBytes: Int,
+    )
+
+    data class BlobUploadResult(
+        val uid: Long,
+        val localUri: String,
+        val blobUrl: String,
+        val status: Int,
     )
 
     /**
+     *
+     */
+    interface OnLocalUrisSavedToBlobUrls {
+
+        suspend operator fun invoke(savedBlobs: List<SavedBlob>)
+
+    }
+
+    interface OnLocalUriBlobUploadProgress {
+
+        suspend fun onUploadProgressUpdate(progressUpdates: List<BlobUploadProgress>)
+
+        suspend fun onComplete(uploadResults: List<BlobUploadResult>)
+
+    }
+
+
+    /**
      * Save a list of LocalUris as blobs.
+     *
+     * @param localUrisToSave event listener that will receive an event as local URIs are
+     *        stored as blob URLs. This will be triggered when local storage is complete, so can be
+     *        used to update the local database. If on Desktop/JVM, upload to the server is not yet
+     *        done.
      */
     suspend operator fun invoke(
-        endpoint: Endpoint,
-        tableId: Int,
-        blobs: List<BlobToSave>,
-        //Could add params if needed e.g. resolution etc.
+        localUrisToSave: List<SaveLocalUriAsBlobItem>,
+        onLocalUrisSavedToBlobUrls: OnLocalUrisSavedToBlobUrls,
+        onUploadProgress: OnLocalUriBlobUploadProgress,
     )
 
 }

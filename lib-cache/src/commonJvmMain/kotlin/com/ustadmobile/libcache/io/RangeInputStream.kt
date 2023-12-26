@@ -20,7 +20,7 @@ class RangeInputStream(
     private var pos: Long = 0
 
     init {
-        skipNBytes(fromByte)
+        skipExactly(fromByte)
         pos = fromByte
     }
 

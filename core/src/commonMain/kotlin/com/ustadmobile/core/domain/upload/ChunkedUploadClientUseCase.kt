@@ -2,6 +2,7 @@ package com.ustadmobile.core.domain.upload
 
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.door.DoorUri
+import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.request.header
 import io.ktor.client.request.post
@@ -101,17 +102,32 @@ class ChunkedUploadClientUseCase(
             fromByte = fromByte
         )
 
+        Napier.d {
+            "ChunkedUploadClientUseCase($uploadUuid): Uploading $totalSize bytes in " +
+                    "${chunkInfo.numChunks} chunks to $remoteUrl starting from byte=$fromByte"
+        }
         try {
             val buffer = ByteArray(chunkSize)
             chunkInfo.forEach { chunk ->
-                getChunk(chunk, buffer)
+                val chunkResponseInfo = getChunk(chunk, buffer)
                 httpClient.post(remoteUrl) {
                     header(HEADER_UPLOAD_UUID, uploadUuid)
                     header(HEADER_IS_FINAL_CHUNK, chunk.isLastChunk.toString())
+                    chunkResponseInfo?.extraHeaders?.forEach { extraHeader ->
+                        extraHeader.value.forEach { headerVal ->
+                            header(extraHeader.key, headerVal)
+                        }
+                    }
+
                     setBody(ByteReadChannel(buffer, 0, chunk.size))
                 }
             }
+            Napier.d {
+                "ChunkedUploadClientUseCase($uploadUuid): Upload complete of $totalSize bytes in " +
+                        "${chunkInfo.numChunks} chunks to $remoteUrl"
+            }
         }catch(e: Exception) {
+            Napier.e("ChunkedUploadClientUseCase($uploadUuid): Exception uploading", e)
             throw e
         }
     }

@@ -13,8 +13,7 @@ import com.ustadmobile.core.contentjob.ContentJobManagerJvm
 import com.ustadmobile.core.contentjob.ContentImportersManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
-import com.ustadmobile.core.domain.upload.ChunkedUploadServerUseCase
-import com.ustadmobile.core.domain.upload.ChunkedUploadServerUseCaseJvm
+import com.ustadmobile.core.domain.blob.upload.BlobUploadServerUseCase
 import com.ustadmobile.core.impl.di.CommonJvmDiModule
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.DiTag.TAG_CONTEXT_DATA_ROOT
@@ -49,6 +48,10 @@ import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.uri.UriHelperJvm
 import com.ustadmobile.door.http.DoorHttpServerConfig
 import com.ustadmobile.lib.rest.dimodules.makeJvmBackendDiModule
+import com.ustadmobile.lib.rest.api.blob.BlobUploadServerRoute
+import com.ustadmobile.lib.rest.domain.contententry.getmetadatafromuri.ContentEntryGetMetadataServerUseCase
+import com.ustadmobile.lib.rest.api.contentupload.ContentUploadRoute
+import com.ustadmobile.lib.rest.api.contentupload.UPLOAD_TMP_SUBDIR
 import com.ustadmobile.lib.rest.ffmpeghelper.InvalidFffmpegException
 import com.ustadmobile.lib.rest.ffmpeghelper.NoFfmpegException
 import io.ktor.server.response.*
@@ -383,11 +386,23 @@ fun Application.umRestApplication(
             }
         }
 
-        bind<ChunkedUploadServerUseCase>(
-            tag = DiTag.TAG_SERVER_UPLOAD_USE_CASE_CONTENT
-        ) with scoped(EndpointScope.Default).singleton {
+        bind<ContentEntryGetMetadataServerUseCase>() with scoped(EndpointScope.Default).singleton {
             val uploadDir: File = instance(DiTag.TAG_FILE_UPLOAD_TMP_DIR)
-            ChunkedUploadServerUseCaseJvm(uploadDir = { uploadDir })
+            ContentEntryGetMetadataServerUseCase(
+                uploadDir = uploadDir,
+                importersManager = on(context).instance(),
+                json = instance()
+            )
+        }
+
+        bind<BlobUploadServerUseCase>() with singleton {
+            BlobUploadServerUseCase(
+                httpCache = instance(),
+                tmpDir = Path(
+                    File(appConfig.absoluteDataDir(), "blob-uploads-tmp").absolutePath.toString()
+                ),
+                json = instance(),
+            )
         }
 
         try {
@@ -489,11 +504,11 @@ fun Application.umRestApplication(
         }
         SiteRoute()
 
-        ContentUploadRoute()
-
         GetAppRoute()
 
         route("api") {
+            val di: DI by closestDI()
+
             route("pbkdf2"){
                 Pbkdf2Route()
             }
@@ -506,8 +521,13 @@ fun Application.umRestApplication(
                 ContentEntryImportRoute()
             }
 
-            val di: DI by closestDI()
-            ContentEntryVersionRoute(
+            route("blob") {
+                BlobUploadServerRoute(
+                    useCase = di.direct.instance()
+                )
+            }
+
+            CacheRoute(
                 cache = di.direct.instance()
             )
         }

@@ -37,6 +37,7 @@ import kotlinx.io.files.SystemFileSystem
 
 class UstadCacheImpl(
     private val fileSystem: FileSystem = SystemFileSystem,
+    cacheName: String = "",
     storagePath: Path,
     private val db: UstadCacheDb,
     internal val mimeTypeHelper: MimeTypeHelper,
@@ -54,7 +55,7 @@ class UstadCacheImpl(
 
     private val batchIdAtomic = atomic(0)
 
-    private val logPrefix = "UstadCache($storagePath):"
+    private val logPrefix = "UstadCache($cacheName):"
 
     data class CacheEntryAndTmpFile(
         val cacheEntry: CacheEntry,

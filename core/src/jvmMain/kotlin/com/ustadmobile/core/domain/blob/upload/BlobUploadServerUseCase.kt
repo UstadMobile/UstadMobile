@@ -1,12 +1,17 @@
 package com.ustadmobile.core.domain.blob.upload
 
 import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCase.Companion.BLOB_RESPONSE_HEADER_PREFIX
+import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCase.Companion.BLOB_UPLOAD_HEADER_BATCH_UUID
+import com.ustadmobile.core.domain.upload.ChunkedUploadResponse
+import com.ustadmobile.core.domain.upload.ChunkedUploadServerUseCase
+import com.ustadmobile.core.domain.upload.ChunkedUploadServerUseCaseJvm
 import com.ustadmobile.libcache.CacheEntryToStore
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.headers.HttpHeaders
 import com.ustadmobile.libcache.headers.headersBuilder
 import com.ustadmobile.libcache.request.requestBuilder
 import com.ustadmobile.libcache.response.HttpPathResponse
+import io.github.aakira.napier.Napier
 import io.github.reactivecircus.cache4k.Cache
 import kotlinx.io.buffered
 import kotlinx.io.files.FileSystem
@@ -14,6 +19,7 @@ import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
 import kotlinx.io.readString
 import kotlinx.serialization.json.Json
+import java.io.File
 import java.util.UUID
 
 /**
@@ -36,6 +42,41 @@ class BlobUploadServerUseCase(
         Cache.Builder<String, BlobUploadResponse>()
             .maximumCacheSize(responseCacheSize.toLong())
             .build()
+
+    val chunkedUploadServerUseCase: ChunkedUploadServerUseCase = ChunkedUploadServerUseCaseJvm(
+        uploadDir = File(tmpDir.toString()),
+        onUploadComplete = { completedChunkedUpload ->
+            val batchUuid = completedChunkedUpload.request.headers[BLOB_UPLOAD_HEADER_BATCH_UUID]
+                ?.firstOrNull()
+
+            if(batchUuid == null){
+                Napier.e("BlobUpload: no batch uuid")
+                return@ChunkedUploadServerUseCaseJvm ChunkedUploadResponse(
+                    statusCode = 400, body = null, contentType = null, headers = emptyMap()
+                )
+            }
+
+
+            onBlobItemFinished(
+                batchUuid = batchUuid,
+                uploadUuid = completedChunkedUpload.uploadUuid,
+                bodyPath = completedChunkedUpload.path,
+                requestHeaders = headersBuilder {
+                    completedChunkedUpload.request.headers.filter {
+                        it.key.startsWith(BLOB_RESPONSE_HEADER_PREFIX)
+                    }.forEach { headerEntry ->
+                        headerEntry.value.firstOrNull()?.also { headerVal ->
+                            header(headerEntry.key, headerVal)
+                        }
+                    }
+                }
+            )
+
+            ChunkedUploadResponse(
+                statusCode = 204, body = null, contentType = null, headers = emptyMap()
+            )
+        }
+    )
 
     private suspend fun loadResponse(
         batchUuid: String

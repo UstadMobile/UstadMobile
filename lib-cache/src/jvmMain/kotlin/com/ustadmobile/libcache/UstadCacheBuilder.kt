@@ -7,10 +7,17 @@ import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.logging.UstadCacheLogger
 import kotlinx.io.files.Path
 
+/**
+ * @param dbUrl JDBC URL for the Cache Database
+ * @param storagePath the path where cache data will be stored
+ * @param logger logging adapter (optional)
+ * @param cacheName name (used in logging)
+ */
 class UstadCacheBuilder(
     var dbUrl: String,
     var storagePath: Path,
     var logger: UstadCacheLogger? = null,
+    var cacheName: String = "",
 ){
 
     fun build(): UstadCache {
@@ -21,6 +28,7 @@ class UstadCacheBuilder(
                 .build(),
             mimeTypeHelper = FileMimeTypeHelperImpl(),
             logger = logger,
+            cacheName = cacheName,
         )
     }
 }

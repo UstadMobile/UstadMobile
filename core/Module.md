@@ -40,8 +40,8 @@ retention lock is removed, which allows for the file to be evicted from the cach
 
 Client:
 
-* SaveLocalUrisAsBlobsUseCase : save data from local URI(s) as a blob(s). 
-** Android/JVM: SaveLocalUrisAsBlobsUseCase will run an SHA256 checksum and store the blob in its 
+* SaveLocalUrisAsBlobsUseCase : saves data from local URI(s) as blob(s). 
+** Android/Desktop: SaveLocalUrisAsBlobsUseCase will run an SHA256 checksum and store the blob in its 
    own local cache as /api/blob/sha256. It will then use BlobUploadClientUseCase to upload the blobs
    saved to the upstream server. BlobUploadClientUseCase uses ChunkedUploadClientUseCase to upload
    each blob (in chunks) to the server.

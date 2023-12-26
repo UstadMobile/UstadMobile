@@ -1,59 +1,37 @@
-package com.ustadmobile.lib.rest
+package com.ustadmobile.lib.rest.domain.contententry.getmetadatafromuri
 
-import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.contentjob.*
-import com.ustadmobile.core.domain.contententry.getmetadatafromuri.IContentEntryGetMetaDataFromUriUseCase.Companion.HEADER_ORIGINAL_FILENAME
+import com.ustadmobile.core.contentjob.ContentImportersManager
+import com.ustadmobile.core.contentjob.InvalidContentException
+import com.ustadmobile.core.contentjob.MetadataResult
+import com.ustadmobile.core.domain.contententry.getmetadatafromuri.IContentEntryGetMetaDataFromUriUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadResponse
-import io.ktor.server.routing.*
-import org.kodein.di.instance
-import org.kodein.di.ktor.closestDI
-import org.kodein.di.on
-import com.ustadmobile.door.ext.toDoorUri
-import com.ustadmobile.core.util.DiTag
-import com.ustadmobile.core.util.ext.clientEndpoint
+import com.ustadmobile.core.domain.upload.ChunkedUploadServerUseCase
+import com.ustadmobile.core.domain.upload.ChunkedUploadServerUseCaseJvm
 import com.ustadmobile.core.util.ext.firstCaseInsensitiveOrNull
-import com.ustadmobile.core.util.stringvalues.MapStringValues
-import com.ustadmobile.lib.rest.ext.dbModeProperty
-import com.ustadmobile.lib.rest.upload.ChunkedUploadRoute
-import io.ktor.http.*
-import io.ktor.server.application.ApplicationCall
+import com.ustadmobile.door.ext.toDoorUri
+import io.ktor.http.HttpStatusCode
 import kotlinx.serialization.json.Json
-import org.kodein.di.DI
-import org.kodein.di.direct
 import java.io.File
 
-const val UPLOAD_TMP_SUBDIR = "upload-tmp"
-
 /**
- * This route provides a simple endpoint that will take content files submitted via the web client
- * as 'normal' multipart file uploads, store them in a temporary directory, and return the
- * MetadataResult.
+ * Use case which handles receiving content uploads from the web (JS) client. It uses a
+ * ChunkedUploadServerUseCase to receive and append ChunkedUploads.
+ * ContentEntryGetMetadataServerUseCase will then use the ContentImportersManager to extract metadata
+ * from the uploaded content.
  *
- * Use as follows
- * POST a multipart request with one file field
- * Returns MetadataResult (as JSON)
  */
-fun Route.ContentUploadRoute() {
-    val di: DI by closestDI()
-    val config = application.environment.config
-    val dbModeProp = config.dbModeProperty()
-    val json: Json = di.direct.instance()
+class ContentEntryGetMetadataServerUseCase(
+    uploadDir: File,
+    private val importersManager: ContentImportersManager,
+    private val json: Json,
+) {
 
-    ChunkedUploadRoute(
-        useCase = { call: ApplicationCall ->
-            di.on(call).direct.instance(tag = DiTag.TAG_SERVER_UPLOAD_USE_CASE_CONTENT)
-        },
-        path = "upload",
-        onUploadCompleted = { completedUpload ->
+    val chunkedUploadServerUseCase: ChunkedUploadServerUseCase = ChunkedUploadServerUseCaseJvm(
+        uploadDir = uploadDir,
+        onUploadComplete = { completedUpload ->
             val originalFilenameParam: String? = completedUpload.request.headers
-                .firstCaseInsensitiveOrNull(HEADER_ORIGINAL_FILENAME)
-            val endpoint = if(dbModeProp == CONF_DBMODE_SINGLETON) {
-                Endpoint(config.property(CONF_KEY_SITE_URL).getString())
-            }else {
-                MapStringValues(completedUpload.request.headers).clientEndpoint()
-            }
+                .firstCaseInsensitiveOrNull(IContentEntryGetMetaDataFromUriUseCase.HEADER_ORIGINAL_FILENAME)
 
-            val importersManager: ContentImportersManager by di.on(endpoint).instance()
             val completedUploadFile = File(completedUpload.path.toString())
 
             try {
@@ -95,6 +73,6 @@ fun Route.ContentUploadRoute() {
                 )
             }
         }
-
     )
+
 }
