@@ -1,4 +1,4 @@
-describe('001_001_add_content.cy.js ', () => {
+describe('007_001_admin_enable_or_disable_user_registration', () => {
  it('Start Ustad Test Server ', () => {
   // Start Test Server
     cy.ustadStartTestServer()
