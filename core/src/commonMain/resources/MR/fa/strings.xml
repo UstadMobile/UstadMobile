@@ -760,7 +760,7 @@
     <string name="student_marks_content">شاگران به خود امتیاز می‌دهند</string>
     <string name="completion_criteria">شاخص تکمیل</string>
     <string name="mark_complete">نشان‌گذاری بشکل تکمیل شده</string>
-    <string name="late_penalty">(%1$s%% جریمه تاخیر)</string>
+    <string name="late_penalty">(%1$s جریمه تاخیر)</string>
     <string name="manage_parental_consent">تنظیم موافقه والدین</string>
     <string name="view_socioeconomic_details_of_members">دیدن جزئیات اجتماعی اقتصادی اعضا</string>
     <string name="add_folder">اضافه نمودن همه از دوسیه</string>
