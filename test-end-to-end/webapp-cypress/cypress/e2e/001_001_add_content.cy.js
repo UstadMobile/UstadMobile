@@ -9,7 +9,7 @@ it('Admin user add content to the library', () => {
   // Admin user login
   cy.ustadClearDbAndLogin('admin','testpass',{timeout:8000})
   // Add H5p File
-  cy.ustadAddContentToLibrary('../test-end-to-end/test-files/content/H5p_Content.h5p','Content_001')
+  cy.ustadAddContentToLibrary('../test-files/content/H5p_Content.h5p','Content_001')
   cy.contains('Content_001').click()
   cy.contains('OPEN').click({force: true})
   cy.get('#appbar_title').should('be.visible').invoke('text').should('eq', 'Content_001');
@@ -29,11 +29,11 @@ it('Admin user add content to the library', () => {
   .find(".h5p-question-check-answer.h5p-joubelui-button").click()
   cy.go('back')
  //Add Epub content
-  cy.ustadAddContentToLibrary('../test-end-to-end/test-files/content/Epub_Content1.epub','Content_002')
+  cy.ustadAddContentToLibrary('../test-files/content/Epub_Content1.epub','Content_002')
   cy.contains('Content_002').click()
   cy.go('back')
  // Add Video Content
-  cy.ustadAddContentToLibrary('../test-end-to-end/test-files/content/Video_Content.mp4','Content_003')
+  cy.ustadAddContentToLibrary('../test-files/content/Video_Content.mp4','Content_003')
   cy.contains('Content_003').click()
   cy.contains("button","OPEN").click()
   cy.get('#appbar_title').should('be.visible').invoke('text').should('eq', 'Content_003');
