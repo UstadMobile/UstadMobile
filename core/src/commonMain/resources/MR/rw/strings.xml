@@ -803,7 +803,7 @@
     <string name="clazz_assignment">Umukoro</string>
     <string name="new_assignment">Umukoro mushya</string>
     <string name="mark_complete">Garagaza ko birangiye</string>
-    <string name="late_penalty">(%1$s%% igihano cy\'ubukererwe)</string>
+    <string name="late_penalty">(%1$s igihano cy\'ubukererwe)</string>
     <string name="mark_penalty">Garagaza igihano</string>
     <string name="late_submission_penalty">Igihano cy\'ubukererwe mukohereza</string>
     <string name="moved_x_entries">Ibyinjijwe %1$s byimuwe</string>
