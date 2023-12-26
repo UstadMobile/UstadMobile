@@ -554,6 +554,7 @@ class PersonEditViewModel(
                 if(personPictureVal != null) {
                     personPictureVal.personPictureUid = savePerson.personUid
                     personPictureVal.personPicturePersonUid = savePerson.personUid
+                    personPictureVal.personPictureLct = systemTimeInMillis()
                     val initPictureUri = savedStateHandle[INIT_PIC_URI] ?: ""
                     val personPictureUriVal = personPictureVal.personPictureUri
                     if(initPictureUri != personPictureUriVal) {

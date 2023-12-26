@@ -61,15 +61,7 @@ class BlobUploadServerUseCase(
                 batchUuid = batchUuid,
                 uploadUuid = completedChunkedUpload.uploadUuid,
                 bodyPath = completedChunkedUpload.path,
-                requestHeaders = headersBuilder {
-                    completedChunkedUpload.request.headers.filter {
-                        it.key.startsWith(BLOB_RESPONSE_HEADER_PREFIX)
-                    }.forEach { headerEntry ->
-                        headerEntry.value.firstOrNull()?.also { headerVal ->
-                            header(headerEntry.key, headerVal)
-                        }
-                    }
-                }
+                requestHeaders = HttpHeaders.fromMap(completedChunkedUpload.request.headers)
             )
 
             ChunkedUploadResponse(
@@ -198,9 +190,8 @@ class BlobUploadServerUseCase(
                                 it.startsWith(BLOB_RESPONSE_HEADER_PREFIX)
                             }.forEach { headerName ->
                                 header(
-                                    name = headerName,
+                                    name = headerName.removePrefix(BLOB_RESPONSE_HEADER_PREFIX),
                                     value = requestHeaders[headerName]!!
-                                        .removePrefix(BLOB_RESPONSE_HEADER_PREFIX)
                                 )
                             }
                         }

@@ -310,4 +310,6 @@ expect abstract class UmAppDatabase : RoomDatabase {
 
     abstract val contentEntryVersionDao: ContentEntryVersionDao
 
+    abstract val outgoingReplicationDao: OutgoingReplicationDao
+
 }

@@ -3,7 +3,9 @@ package com.ustadmobile.core.domain.blob.savepicture
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
 import com.ustadmobile.door.DoorDatabaseRepository
+import com.ustadmobile.door.entities.OutgoingReplication
 import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.lib.db.entities.PersonPicture
 
 class SavePictureUseCase(
     private val saveLocalUrisAsBlobUseCase: SaveLocalUrisAsBlobsUseCase,
@@ -27,7 +29,7 @@ class SavePictureUseCase(
 
                         db.personPictureDao.updateUri(
                             uid = entityUid,
-                            uri = savedBlob.localUri,
+                            uri = savedBlob.blobUrl,
                             time = systemTimeInMillis()
                         )
                     }
@@ -43,8 +45,17 @@ class SavePictureUseCase(
                     override suspend fun onComplete(
                         uploadResults: List<SaveLocalUrisAsBlobsUseCase.BlobUploadResult>
                     ) {
-                        //Here: need to get the server node id
-                        val activeRepoUid = (repo as DoorDatabaseRepository)
+                        val activeRepo = (repo as DoorDatabaseRepository)
+                        val serverNodeId = activeRepo.remoteNodeIdOrFake()
+                        val outgoingReplications = uploadResults.map {
+                            OutgoingReplication(
+                                destNodeId = serverNodeId,
+                                orPk1 = it.uid,
+                                orTableId = PersonPicture.TABLE_ID
+                            )
+                        }
+
+                        db.outgoingReplicationDao.insert(outgoingReplications)
                     }
                 }
 

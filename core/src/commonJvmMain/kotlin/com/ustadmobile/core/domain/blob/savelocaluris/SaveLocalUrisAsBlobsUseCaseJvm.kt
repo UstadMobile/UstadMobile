@@ -73,13 +73,14 @@ class SaveLocalUrisAsBlobsUseCaseJvm(
 
             val blobUrlStr = blobUrl.toString()
             val blobRequest = requestBuilder(blobUrlStr) {  }
+            val mimeType = uriHelper.getMimeType(blobDoorUri) ?: "application/octet-stream"
 
             saveItem.uid to CacheEntryToStore(
                 request = blobRequest,
                 response = HttpPathResponse(
                     path = tmpBlobPath,
                     fileSystem = fileSystem,
-                    mimeType = uriHelper.getMimeType(blobDoorUri) ?: "application/octet-stream",
+                    mimeType = mimeType,
                     request = blobRequest,
                     extraHeaders = headersBuilder {
                         header("cache-control", "immutable")

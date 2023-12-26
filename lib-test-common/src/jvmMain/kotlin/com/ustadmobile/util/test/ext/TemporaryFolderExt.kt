@@ -10,8 +10,9 @@ import java.io.FileOutputStream
 fun TemporaryFolder.newFileFromResource(
     clazz: Class<*>,
     resourcePath: String,
+    fileName: String? = null,
 ): File {
-    val file = newFile()
+    val file = if(fileName != null) newFile(fileName) else newFile()
     clazz.getResourceAsStream(resourcePath)!!.use { resourceIn ->
         FileOutputStream(file).use { fileOut ->
             resourceIn.copyTo(fileOut)

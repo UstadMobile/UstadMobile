@@ -35,6 +35,7 @@ import kotlinx.io.files.Path
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.internal.headersContentLength
 import java.io.File
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -149,7 +150,9 @@ class SaveLocalUrisAsBlobsUseCaseJvmIntegrationTest {
     @Test
     fun givenLocalUris_whenInvoked_thenBlobsAreUploadedAndCanBeRetrievedViaCache() {
         val pdfFile = temporaryFolder.newFileFromResource(javaClass,
-            "/com/ustadmobile/core//container/validPDFMetadata.pdf")
+            "/com/ustadmobile/core//container/validPDFMetadata.pdf",
+            "validPDFMetadata.pdf"
+        )
 
         val useCase = SaveLocalUrisAsBlobsUseCaseJvm(
             endpoint = endpoint,
@@ -201,6 +204,9 @@ class SaveLocalUrisAsBlobsUseCaseJvmIntegrationTest {
         ).execute()
 
         assertEquals(200, blobHttpResponse.code)
+        assertEquals("application/pdf", blobHttpResponse.header("content-type"))
+        assertTrue(blobHttpResponse.header("cache-control")?.contains("immutable") == true)
+        assertEquals(pdfFile.length(), blobHttpResponse.headersContentLength())
         val blobBodyBytes = blobHttpResponse.body!!.bytes()
         assertTrue(pdfFile.readBytes().contentEquals(blobBodyBytes))
     }
