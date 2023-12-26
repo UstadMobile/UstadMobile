@@ -24,7 +24,6 @@
     <string name="device">دستگاه</string>
     <string name="register">ثبت نام</string>
     <string name="phone_number">شماره تلفن</string>
-    <string name="name">نام </string>
     <string name="male">مذکر</string>
     <string name="female">مونث</string>
     <string name="settings">تنظیمات</string>
@@ -98,7 +97,6 @@
     <string name="download_continue_btn_label">ادامه</string>
     <string name="update">بروزرسانی</string>
     <string name="also_available_in">همچنان موجود است در</string>
-    <string name="location_permission_message">این اپلیکیشن به موقعیت‌یابی نیاز دارد تا اشتراک‌گذاری آفلاین با سرعت بالا با کاربران نزدیک فعال گردد.</string>
     <string name="download_wifi_only">تنها وای‌فای</string>
     <string name="download_calculating">در حال شمارش…</string>
     <string name="download_state_download"><b>دانلود</b> مجموعاً %1$s اشیأ، که مجموعاً %2$s جای را در حافظه دستگاه شما خواهد گرفت.</string>
@@ -286,7 +284,6 @@
     <string name="today">امروز</string>
     <string name="sort_by">مرتب کردن توسط</string>
     <string name="log">ثبت وقایع</string>
-    <string name="first">اول</string>
     <string name="last_week">هفته اخیر</string>
     <string name="role_not_selected_error">نقش باید انتخاب گردد</string>
     <string name="this_field_is_mandatory">این ساحه حتمی است</string>
@@ -305,13 +302,11 @@
     <string name="permission_school_update">بروزسازی و ویرایش مکاتب موجود</string>
     <string name="add_staff_to_school">اضافه نمودن کارمند به مکتب</string>
     <string name="permission_password_reset">تنظیم مجدد و بروزرانس رمز عبور اشخاص</string>
-    <string name="question">سوال</string>
     <string name="add_class">اضافه کردن صنف</string>
     <string name="class_name">نام صنف</string>
     <string name="class_description">جزئیات صنف</string>
     <string name="school_code">کود مکتب</string>
     <string name="entity_code">کود %1$s</string>
-    <string name="to">به</string>
     <string name="holiday">رخصتی</string>
     <string name="holidays">رخصتی‌ها</string>
     <string name="holiday_calendar">تقویم رخصتی</string>
@@ -337,8 +332,6 @@
     <string name="teacher">استاد</string>
     <string name="partial">جزئی</string>
     <string name="teachers_literal">استادان</string>
-    <string name="up">بالا</string>
-    <string name="down">پایین</string>
     <string name="activity_went_good">فعالیت خوب گذشت</string>
     <string name="active_classes">صنوف فعال</string>
     <string name="terms_and_policies">شرایط و پالیسیها</string>
@@ -359,14 +352,12 @@
     <string name="class_id">شناسۀ صنف</string>
     <string name="gender_literal" value="306">جنسیت</string>
     <string name="search">جستجو</string>
-    <string name="over">تمام</string>
     <string name="sync">همگام سازی</string>
     <string name="not_recorded">ضبط نشده</string>
     <string name="rols_assignment">واگذاری نقشها</string>
     <string name="add_verb_filter">اضافه نمودن فلتر فعل</string>
     <string name="sel_question_set_to_use">سوالات SEL برای استفاده</string>
     <string name="licence_type_cc_by">مجوز CC توسط</string>
-    <string name="members">اعضأ</string>
     <string name="licence_type_cc_by_sa">مجوز CC توسط SA</string>
     <string name="licence_type_cc_by_sa_nc">مجوز CC توسط SA NC</string>
     <string name="permission_person_update">بروز ساختن اشخاص</string>
@@ -377,7 +368,6 @@
     <string name="permission_attendance_update">بروزرسانی حاضری</string>
     <string name="permission_activity_select">مشاهده فعالیت صنف</string>
     <string name="schedule">تقسیم اوقات</string>
-    <string name="permission">اجازه</string>
     <string name="permission_sel_question_insert">اضافه نمودن سوالات آموزش احساس اجتماعی</string>
     <string name="permission_sel_question_update">بروزرسانی سوالات آموزش احساس اجتماعی</string>
     <string name="permission_sel_select">مشاهده نتایج آموزش احساس اجتماعی</string>
@@ -412,7 +402,6 @@
     <string name="remove_from">حذف نمودن از %1$s</string>
     <string name="items_selected">%1$d انتخاب گردید</string>
     <string name="remove_photo">حذف تصویر</string>
-    <string name="None">هیچ</string>
     <string name="select_new_photo_from_gallery">انتخاب تصویر جدید از گالری</string>
     <string name="toC">به</string>
     <string name="instructions_for_students">رهنمایی‌هایی برای شاگردان</string>
@@ -428,8 +417,6 @@
     <string name="activity_went_bad">فعالیت آنقدر خوب نگذشت</string>
     <string name="add_activity_literal">اضافه ساختن فعالیت</string>
     <string name="started">آغاز گردیده</string>
-    <string name="marked">علامت گذاری شده</string>
-    <string name="submitted">تحویل شده</string>
     <string name="not_submitted">تحویل نشده</string>
     <string name="visible_from_date">قابل مشاهده از تاریخ</string>
     <string name="submission_type">نوع تحویلی</string>
@@ -459,7 +446,6 @@
     <string name="organisation">سازمان %1$s</string>
     <string name="connect_as_guest">اتصال منحیث مهمان</string>
     <string name="create_account">ایجاد حساب</string>
-    <string name="member">عضو</string>
     <string name="role_assignment">واگذاری نقش</string>
     <string name="add_another">اضافه نمودن %1$s دیگر</string>
     <string name="logged_in_as">وارد شده منحیث %1$s در %2$s</string>
@@ -512,7 +498,6 @@
     <string name="role_assignment_setting_desc">واگذاری نقشها به یک کاربر یا یک گروپ</string>
     <string name="audit_log">ثبت وقایع تفتیش</string>
     <string name="audit_log_setting_desc">مشاهده و صادر کردن ثبت وقایع تفتیش</string>
-    <string name="entry">ورودی</string>
     <string name="assign_to">واگذار نمودن به</string>
     <string name="person">شخص</string>
     <string name="permission_person_picture_insert">اضافه نمودن عکس‌های نمایه</string>
@@ -594,7 +579,6 @@
     <string name="move">حرکت</string>
     <string name="hide">پنهان کردن</string>
     <string name="unhide">آشکار ساختن</string>
-    <string name="and">و</string>
     <string name="added">اضافه شد</string>
     <string name="fixed_date">تاریخ معین</string>
     <string name="relative_date">تاریخ نسبی</string>
@@ -643,7 +627,6 @@
     <string name="supported_link">انواع پیوندهای قابل قبول: گوگل درایو (فولدر و یا فایل) و پیوند های ساده HTTP</string>
     <string name="add_a_schedule">اضافه نمودن تقسیم اوقات</string>
     <string name="edit_schedule">ویرایش تقسیم اوقات</string>
-    <string name="last">آخر</string>
     <string name="address">آدرس</string>
     <string name="edit_clazz">ویرایش صنف</string>
     <string name="add_a_class">اضافه نمودن یک صنف</string>
@@ -676,7 +659,6 @@
     <string name="prefer_not_to_say">نمیخواهم چیزی بگویم</string>
     <string name="connectivity_full">پر - من هر قدر که بخواهم دانلود میکنم</string>
     <string name="last_active">آخرین بار فعال</string>
-
     <string name="strings_not_allowed">درین ساحه به حروف ویژه اجازه داده نمی‌شود</string>
     <string name="undo">بازگردانی</string>
     <string name="content_pieces_completed">اجزای محتوی تکمیل شد</string>
