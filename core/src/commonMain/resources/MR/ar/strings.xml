@@ -877,7 +877,7 @@
     <string name="late_submission">عمليات الإرسال المتأخرة</string>
     <string name="allow_class_comments">السماح بتعليقات الفصل من الطلاب</string>
     <string name="completion_criteria">معايير الإنجاز</string>
-    <string name="late_penalty">(%1$s%% غرامة متأخرة)</string>
+    <string name="late_penalty">(%1$s غرامة متأخرة)</string>
     <string name="add_folder">أضف الكل من المجلد</string>
     <string name="importing">استيراد %1$s</string>
     <string name="parent">الأبوين</string>
