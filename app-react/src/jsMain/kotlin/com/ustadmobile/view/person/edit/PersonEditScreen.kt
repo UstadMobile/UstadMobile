@@ -70,6 +70,7 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
             }
 
             TextField {
+                id = "person_first_names"
                 value = props.uiState.person?.firstNames ?: ""
                 label = ReactNode(strings[MR.strings.first_names] + "*")
                 error = props.uiState.firstNameError != null
@@ -85,6 +86,7 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
             }
 
             TextField {
+                id = "person_last_names"
                 value = props.uiState.person?.lastName ?: ""
                 label = ReactNode(strings[MR.strings.last_name] + "*")
                 error = props.uiState.lastNameError != null
@@ -144,6 +146,7 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
 
             if (props.uiState.parentalEmailVisible){
                 TextField {
+                    id = "person_parent_email"
                     value = props.uiState.approvalPersonParentJoin?.ppjEmail ?: ""
                     label = ReactNode(strings[MR.strings.parents_email_address] + "*")
                     error = props.uiState.parentContactError != null
@@ -161,6 +164,7 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
 
             if(props.uiState.dateOfBirthVisible) {
                 UstadDateField {
+                    id = "person_date_of_birth"
                     timeInMillis = props.uiState.person?.dateOfBirth ?: 0
                     label = ReactNode(strings[MR.strings.birthday])
                     timeZoneId = UstadMobileConstants.UTC
@@ -177,6 +181,7 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
 
             if(props.uiState.phoneNumVisible) {
                 MuiTelInput {
+                    id = "person_phone_num"
                     value = props.uiState.person?.phoneNum ?: ""
                     label = ReactNode(strings[MR.strings.phone_number])
                     disabled = !props.uiState.fieldsEnabled
@@ -197,6 +202,7 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
 
             if(props.uiState.emailVisible) {
                 TextField {
+                    id = "person_email_addr"
                     value = props.uiState.person?.emailAddr ?: ""
                     label = ReactNode(strings[MR.strings.email])
                     error = props.uiState.emailError != null
@@ -213,6 +219,7 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
 
             if(props.uiState.personAddressVisible) {
                 TextField {
+                    id = "person_address"
                     value = props.uiState.person?.personAddress ?: ""
                     label = ReactNode(strings[MR.strings.address])
                     disabled = !props.uiState.fieldsEnabled
@@ -228,6 +235,7 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
 
             if (props.uiState.usernameVisible){
                 TextField {
+                    id = "person_username"
                     value = props.uiState.person?.username ?: ""
                     label = ReactNode(strings[MR.strings.username] + "*")
                     disabled = !props.uiState.fieldsEnabled
@@ -244,6 +252,7 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
 
             if (props.uiState.passwordVisible){
                 UstadPasswordTextField {
+                    id = "person_password"
                     value = props.uiState.password ?: ""
                     label = ReactNode(strings[MR.strings.password] + "*")
                     disabled = !props.uiState.fieldsEnabled
