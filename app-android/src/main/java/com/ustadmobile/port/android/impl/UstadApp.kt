@@ -37,6 +37,8 @@ import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCaseAnd
 import com.ustadmobile.core.domain.blob.savepicture.SavePictureUseCase
 import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCase
 import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCaseJvm
+import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCase
+import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCaseAndroid
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCase
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
@@ -313,8 +315,16 @@ class UstadApp : Application(), DIAware{
                 cache = instance(),
                 uriHelper = instance(),
                 tmpDir = Path(applicationContext.cacheDir.absolutePath, "savelocaluriaslblobtmp"),
-                blobUploadClientUseCase = on(context).instance(),
                 fileSystem = SystemFileSystem
+            )
+        }
+
+        bind<EnqueueBlobUploadClientUseCase>() with scoped(EndpointScope.Default).singleton {
+            EnqueueBlobUploadClientUseCaseAndroid(
+                appContext = applicationContext,
+                endpoint = context,
+                db = on(context).instance(tag = DoorTag.TAG_DB),
+                cache = instance(),
             )
         }
 
@@ -322,7 +332,9 @@ class UstadApp : Application(), DIAware{
             BlobUploadClientUseCaseJvm(
                 chunkedUploadUseCase = on(context).instance(),
                 httpClient = instance(),
-                httpCache = instance()
+                httpCache = instance(),
+                db = on(context).instance(tag = DoorTag.TAG_DB),
+                endpoint = context,
             )
         }
 
@@ -338,6 +350,7 @@ class UstadApp : Application(), DIAware{
                 saveLocalUrisAsBlobUseCase = on(context).instance(),
                 db = on(context).instance(tag = DoorTag.TAG_DB),
                 repo = on(context).instance(tag = DoorTag.TAG_REPO),
+                enqueueBlobUploadClientUseCase = on(context).instance()
             )
         }
 

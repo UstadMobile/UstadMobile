@@ -1,6 +1,7 @@
 package com.ustadmobile.core.domain.blob.upload
 
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.upload.ChunkInfo
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCase
 import com.ustadmobile.core.io.ext.readSha256
@@ -63,6 +64,7 @@ class BlobUploadClientUseCaseJvmTest {
 
     private val testChunkSize = 20 * 1024
 
+    private lateinit var mockDatabase: UmAppDatabase
 
     @BeforeTest
     fun setup() {
@@ -122,6 +124,7 @@ class BlobUploadClientUseCaseJvmTest {
                 )
             }
         }
+        mockDatabase = mock { }
     }
 
     @AfterTest
@@ -166,7 +169,7 @@ class BlobUploadClientUseCaseJvmTest {
         )
 
         val useCase = BlobUploadClientUseCaseJvm(
-            mockChunkedUploadUseCase, httpClient, mockCache
+            mockChunkedUploadUseCase, httpClient, mockCache, mockDatabase, endpoint
         )
 
         val serverUploadResponse = BlobUploadResponse(

@@ -22,6 +22,8 @@ import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCase
 interface BlobUploadClientUseCase {
 
     /**
+     * Run the blob upload itself.
+     *
      * @param blobUrls a list of urls (e.g. in the form of http://endpoint.com/api/sha256)
      * @param batchUuid UUID for this batch upload
      * @param endpoint the endpoint that we are uploading to
@@ -34,6 +36,14 @@ interface BlobUploadClientUseCase {
         onProgress: (Int) -> Unit,
         chunkSize: Int = ChunkedUploadClientUseCase.DEFAULT_CHUNK_SIZE,
     )
+
+    /**
+     * Run the blob upload using data stored in the database as a TransferJob
+     */
+    suspend operator fun invoke(
+        transferJobUid: Int,
+    )
+
 
     companion object {
 

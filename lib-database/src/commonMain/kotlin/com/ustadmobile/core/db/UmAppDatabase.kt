@@ -54,6 +54,8 @@ import com.ustadmobile.lib.db.entities.*
     MessageRead::class,
     StudentResult::class,
     ContentEntryVersion::class,
+    TransferJob::class,
+    TransferJobItem::class,
 
     //Door entities
     OutgoingReplication::class,
@@ -63,7 +65,7 @@ import com.ustadmobile.lib.db.entities.*
 
 
 
-], version = 126)
+], version = 127)
 /*
  Replicate entities (e.g. trackers) to drop:
      ClazzLogReplicate
@@ -311,5 +313,9 @@ expect abstract class UmAppDatabase : RoomDatabase {
     abstract val contentEntryVersionDao: ContentEntryVersionDao
 
     abstract val outgoingReplicationDao: OutgoingReplicationDao
+
+    abstract val transferJobDao: TransferJobDao
+
+    abstract val transferJobItemDao: TransferJobItemDao
 
 }

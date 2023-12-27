@@ -1,7 +1,6 @@
 package com.ustadmobile.core.domain.blob.savelocaluris
 
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCase
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.url.UrlKmp
 import com.ustadmobile.core.util.UMURLEncoder
@@ -26,7 +25,6 @@ class SaveLocalUrisAsBlobsUseCaseJvm(
     private val cache: UstadCache,
     private val uriHelper: UriHelper,
     private val tmpDir: Path,
-    private val blobUploadClientUseCase: BlobUploadClientUseCase,
     private val fileSystem: FileSystem = SystemFileSystem,
 ) : SaveLocalUrisAsBlobsUseCase {
 
@@ -51,9 +49,7 @@ class SaveLocalUrisAsBlobsUseCaseJvm(
      */
     override suspend fun invoke(
         localUrisToSave: List<SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem>,
-        onLocalUrisSavedToBlobUrls: SaveLocalUrisAsBlobsUseCase.OnLocalUrisSavedToBlobUrls,
-        onUploadProgress: SaveLocalUrisAsBlobsUseCase.OnLocalUriBlobUploadProgress,
-    ) = withContext(Dispatchers.Default) {
+    ): List<SaveLocalUrisAsBlobsUseCase.SavedBlob> = withContext(Dispatchers.Default) {
         createTmpPathIfNeeded()
 
         val endpointUrl = UrlKmp(endpoint.url)
@@ -95,38 +91,12 @@ class SaveLocalUrisAsBlobsUseCaseJvm(
             it.uid to it.localUri
         }
 
-        onLocalUrisSavedToBlobUrls(
-            entriesToStore.map {
-                //Blob local uri must be in the map
-                val blobLocalUri = uidToLocalUriMap[it.first]!!
-                SaveLocalUrisAsBlobsUseCase.SavedBlob(it.first, blobLocalUri, it.second.request.url)
-            }
-        )
 
-        blobUploadClientUseCase(
-            endpoint = endpoint,
-            blobUrls = entriesToStore.map { it.second.request.url },
-            batchUuid = UUID.randomUUID().toString(),
-            onProgress = {
-                //TODO
-            }
-        )
-
-        Napier.d { "$logPrefix Uploading ${entriesToStore.size} uris" }
-
-        onUploadProgress.onComplete(
-            entriesToStore.map {
-                val blobLocalUri = uidToLocalUriMap[it.first]!!
-                SaveLocalUrisAsBlobsUseCase.BlobUploadResult(
-                    uid = it.first,
-                    localUri = blobLocalUri,
-                    blobUrl = it.second.request.url,
-                    status = 1,
-                )
-            }
-        )
-
-        Napier.d { "$logPrefix Uploading ${entriesToStore.size} uris: done" }
+        entriesToStore.map {
+            //Blob local uri must be in the map
+            val blobLocalUri = uidToLocalUriMap[it.first]!!
+            SaveLocalUrisAsBlobsUseCase.SavedBlob(it.first, blobLocalUri, it.second.request.url)
+        }
     }
 
 }

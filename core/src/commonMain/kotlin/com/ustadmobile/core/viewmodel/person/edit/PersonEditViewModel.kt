@@ -2,8 +2,8 @@ package com.ustadmobile.core.viewmodel.person.edit
 
 import com.ustadmobile.core.account.AccountRegisterOptions
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
 import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorUseCase
-import com.ustadmobile.core.domain.blob.savepicture.SavePictureUseCase
 import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
@@ -152,7 +152,7 @@ class PersonEditViewModel(
 
     private val genderConfig : GenderConfig by instance()
 
-    private val savePictureUseCase: SavePictureUseCase? by on(accountManager.activeEndpoint).instanceOrNull()
+    private val savePictureUseCase: EnqueueSavePictureUseCase? by on(accountManager.activeEndpoint).instanceOrNull()
 
     init {
         loadingState = LoadingUiState.INDETERMINATE

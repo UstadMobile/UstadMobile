@@ -1279,13 +1279,28 @@ val MIGRATION_125_126 = DoorMigrationStatementList(125, 126) { db ->
     emptyList()
 }
 
+/**
+ * Add TransferJob and TransferJobItem
+ */
+val MIGRATION_126_127 = DoorMigrationStatementList(126, 127) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS TransferJob (  tjType  INTEGER  NOT NULL , tjStatus  INTEGER  NOT NULL , tjName  TEXT , tjUuid  TEXT , tjUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+            add("CREATE TABLE IF NOT EXISTS TransferJobItem (  tjiTjUid  INTEGER  NOT NULL , tjTotalSize  INTEGER  NOT NULL , tjTransferred  INTEGER  NOT NULL , tjAttemptCount  INTEGER  NOT NULL , tjiSrc  TEXT , tjiDest  TEXT , tjiType  INTEGER  NOT NULL , tjiUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS TransferJob (  tjType  INTEGER  NOT NULL , tjStatus  INTEGER  NOT NULL , tjName  TEXT , tjUuid  TEXT , tjUid  SERIAL  PRIMARY KEY  NOT NULL )")
+            add("CREATE TABLE IF NOT EXISTS TransferJobItem (  tjiTjUid  INTEGER  NOT NULL , tjTotalSize  BIGINT  NOT NULL , tjTransferred  BIGINT  NOT NULL , tjAttemptCount  INTEGER  NOT NULL , tjiSrc  TEXT , tjiDest  TEXT , tjiType  INTEGER  NOT NULL , tjiUid  SERIAL  PRIMARY KEY  NOT NULL )")
+        }
+    }
+}
+
 
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_102_103,
     MIGRATION_103_104, MIGRATION_104_105, MIGRATION_105_106, MIGRATION_106_107,
     MIGRATION_107_108, MIGRATION_108_109,
     MIGRATION_120_121, MIGRATION_121_122, MIGRATION_122_123, MIGRATION_123_124,
-    MIGRATION_124_125, MIGRATION_125_126,
+    MIGRATION_124_125, MIGRATION_125_126, MIGRATION_126_127,
 )
 
 

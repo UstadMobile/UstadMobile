@@ -5,10 +5,7 @@ package com.ustadmobile.core.domain.blob.savelocaluris
  * Save a list of local Uri(s) (e.g. Android Uri, JVM file URI, JS blob URI) as blobs.
  *
  * On Android/Desktop: Runs an SHA-256 checksum on the content and stores it into the local httpcache
- * under the blob url (e.g. https://endpoint.com/api/blob/sha256), and then uses
- * BlobUploadClientUseCase to upload the blobs to the upstream node/server.
- *
- * On Web: Directly uploads the blob contents using ChunkedUploadClientUseCase
+ * under the blob url (e.g. https://endpoint.com/api/blob/sha256).
  *
  */
 interface SaveLocalUrisAsBlobsUseCase {
@@ -69,8 +66,6 @@ interface SaveLocalUrisAsBlobsUseCase {
      */
     suspend operator fun invoke(
         localUrisToSave: List<SaveLocalUriAsBlobItem>,
-        onLocalUrisSavedToBlobUrls: OnLocalUrisSavedToBlobUrls,
-        onUploadProgress: OnLocalUriBlobUploadProgress,
-    )
+    ): List<SavedBlob>
 
 }

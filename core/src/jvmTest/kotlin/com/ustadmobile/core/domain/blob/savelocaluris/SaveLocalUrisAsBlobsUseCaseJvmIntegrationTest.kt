@@ -1,6 +1,7 @@
 package com.ustadmobile.core.domain.blob.savelocaluris
 
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCaseJvm
 import com.ustadmobile.core.domain.blob.upload.BlobUploadServerUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCase
@@ -40,7 +41,9 @@ import java.io.File
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import org.junit.Test
+import org.mockito.kotlin.mock
 import java.net.URLEncoder
+import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
@@ -77,6 +80,8 @@ class SaveLocalUrisAsBlobsUseCaseJvmIntegrationTest {
 
     private lateinit var blobUploadServerUseCase: BlobUploadServerUseCase
 
+    private lateinit var mockUmAppDatabase: UmAppDatabase
+
     @BeforeTest
     fun setup() {
         initNapierLog()
@@ -95,6 +100,9 @@ class SaveLocalUrisAsBlobsUseCaseJvmIntegrationTest {
             cacheName = "server",
             logger = NapierLoggingAdapter()
         ).build()
+
+        mockUmAppDatabase = mock { }
+
 
         okHttpClient = OkHttpClient.Builder().build()
         httpClient = HttpClient(OkHttp) {
@@ -154,16 +162,19 @@ class SaveLocalUrisAsBlobsUseCaseJvmIntegrationTest {
             "validPDFMetadata.pdf"
         )
 
-        val useCase = SaveLocalUrisAsBlobsUseCaseJvm(
+        val saveLocalUrisAsBlobsUseCase = SaveLocalUrisAsBlobsUseCaseJvm(
             endpoint = endpoint,
             cache = clientCache,
             uriHelper = uriHelper,
             tmpDir = Path(temporaryFolder.newFolder().absolutePath),
-            blobUploadClientUseCase = BlobUploadClientUseCaseJvm(
-                chunkedUploadUseCase = ChunkedUploadClientUseCase(httpClient),
-                httpClient = httpClient,
-                httpCache = clientCache,
-            )
+        )
+
+        val blobUploadClientUseCase = BlobUploadClientUseCaseJvm(
+            chunkedUploadUseCase = ChunkedUploadClientUseCase(httpClient),
+            httpClient = httpClient,
+            httpCache = clientCache,
+            db = mockUmAppDatabase,
+            endpoint = endpoint,
         )
 
         val blobsToSave = listOf(
@@ -175,27 +186,21 @@ class SaveLocalUrisAsBlobsUseCaseJvmIntegrationTest {
         )
 
         runBlocking {
-            useCase(
+            val savedBlobs = saveLocalUrisAsBlobsUseCase(
                 localUrisToSave = blobsToSave,
-                onLocalUrisSavedToBlobUrls = object: SaveLocalUrisAsBlobsUseCase.OnLocalUrisSavedToBlobUrls {
-                    override suspend fun invoke(savedBlobs: List<SaveLocalUrisAsBlobsUseCase.SavedBlob>) {
+            )
 
-                    }
-                },
-                onUploadProgress = object: SaveLocalUrisAsBlobsUseCase.OnLocalUriBlobUploadProgress {
-                    override suspend fun onUploadProgressUpdate(progressUpdates: List<SaveLocalUrisAsBlobsUseCase.BlobUploadProgress>) {
+            blobUploadClientUseCase(
+                blobUrls = savedBlobs.map { it.blobUrl },
+                batchUuid = UUID.randomUUID().toString(),
+                endpoint = endpoint,
+                onProgress = {
 
-                    }
-
-                    override suspend fun onComplete(uploadResults: List<SaveLocalUrisAsBlobsUseCase.BlobUploadResult>) {
-
-                    }
                 }
             )
         }
 
         //Should add a check on the client cache.
-
         val sha256 = pdfFile.inputStream().use { it.readSha256() }.encodeBase64()
         val blobHttpResponse = okHttpClient.newCall(
             Request.Builder()

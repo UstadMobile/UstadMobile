@@ -21,11 +21,14 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.coroutineScope
 import kotlinx.io.readTo
+import com.ustadmobile.core.db.UmAppDatabase
 
 class BlobUploadClientUseCaseJvm(
     private val chunkedUploadUseCase: ChunkedUploadClientUseCase,
     private val httpClient: HttpClient,
     private val httpCache: UstadCache,
+    private val db: UmAppDatabase,
+    private val endpoint: Endpoint,
 ): BlobUploadClientUseCase {
 
     data class BlobAndResponse(
@@ -154,6 +157,22 @@ class BlobUploadClientUseCaseJvm(
 
             jobs.awaitAll()
         }
+    }
 
+
+    override suspend fun invoke(transferJobUid: Int) {
+        val transferJob = db.transferJobDao.findByUid(transferJobUid)
+            ?: throw IllegalArgumentException("BlobUpload: TransferJob #$transferJobUid does not exist")
+        val transferJobItems = db.transferJobItemDao.findByJobUid(transferJobUid)
+        invoke(
+            blobUrls = transferJobItems.mapNotNull {
+                it.tjiSrc
+            },
+            batchUuid =transferJob.tjUuid!!,
+            endpoint = endpoint,
+            onProgress = {
+
+            }
+        )
     }
 }
