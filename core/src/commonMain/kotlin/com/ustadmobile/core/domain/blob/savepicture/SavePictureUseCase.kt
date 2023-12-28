@@ -20,7 +20,7 @@ class SavePictureUseCase(
                 localUrisToSave = listOf(
                     SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem(
                         localUri = pictureUri,
-                        uid = entityUid,
+                        entityUid = entityUid,
                         tableId = tableId
                     )
                 ),
@@ -33,7 +33,12 @@ class SavePictureUseCase(
             )
 
             enqueueBlobUploadClientUseCase?.invoke(
-                blobUrls = listOf(savedBlob.blobUrl),
+                items = listOf(
+                    EnqueueBlobUploadClientUseCase.EnqueueBlobUploadItem(
+                    blobUrl = savedBlob.blobUrl,
+                    tableId = tableId,
+                    entityUid = entityUid,
+                )),
                 batchUuid = randomUuidAsString(),
             )
         }else {

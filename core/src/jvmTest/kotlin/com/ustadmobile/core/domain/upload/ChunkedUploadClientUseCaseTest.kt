@@ -1,5 +1,6 @@
 package com.ustadmobile.core.domain.upload
 
+import com.ustadmobile.core.domain.blob.TransferJobItemStatus
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.uri.UriHelperJvm
 import com.ustadmobile.door.ext.toDoorUri
@@ -82,6 +83,8 @@ class ChunkedUploadClientUseCaseTest  {
         val expectedChunkInfo = ChunkInfo(
             totalSize = testFile.length(), chunkSize = chunkSize, fromByte = fromByte
         )
+        val progressUpdatesReceived = mutableListOf<Long>()
+        val statusUpdatesReceived = mutableListOf<TransferJobItemStatus>()
 
         runBlocking {
             uploader(
@@ -91,6 +94,12 @@ class ChunkedUploadClientUseCaseTest  {
                 remoteUrl = mockWebServer.url("/").toString(),
                 chunkSize = chunkSize,
                 fromByte = fromByte,
+                onProgress = {
+                    progressUpdatesReceived.add(it)
+                },
+                onStatusChange = {
+                    statusUpdatesReceived.add(it)
+                }
             )
         }
 
@@ -107,11 +116,16 @@ class ChunkedUploadClientUseCaseTest  {
         (0 until requestCount).forEach { index ->
             val request = mockWebServer.takeRequest()
             val requestBodyBytes = request.body.readByteArray()
-            assertEquals(expectedChunkInfo[index].size, requestBodyBytes.size,
+            val expectedChunkForRequest = expectedChunkInfo[index]
+            assertEquals(expectedChunkForRequest.size, requestBodyBytes.size,
                 "Chunk $index should match expected size")
             assertEquals(uuid.toString(), request.headers[HEADER_UPLOAD_UUID])
             if(index == requestCount - 1)
                 assertEquals("true", request.headers[HEADER_IS_FINAL_CHUNK])
+            assertTrue(
+                (expectedChunkForRequest.start + expectedChunkForRequest.size) in progressUpdatesReceived,
+                "Received progress update as expected for upload of chunk $index"
+            )
 
             byteArrayOutput.writeBytes(requestBodyBytes)
         }
@@ -119,6 +133,10 @@ class ChunkedUploadClientUseCaseTest  {
         val allBytesReceived = byteArrayOutput.toByteArray()
         assertTrue(testFile.readBytes().contentEquals(allBytesReceived),
             "Concatenation of bytes upload equals the original bytes")
+        assertTrue(TransferJobItemStatus.IN_PROGRESS in statusUpdatesReceived,
+            "Received started status update")
+        assertTrue(TransferJobItemStatus.COMPLETE in statusUpdatesReceived,
+            "Received completion status update")
     }
 
     @Test

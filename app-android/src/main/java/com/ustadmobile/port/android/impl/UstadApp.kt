@@ -334,6 +334,7 @@ class UstadApp : Application(), DIAware{
                 httpClient = instance(),
                 httpCache = instance(),
                 db = on(context).instance(tag = DoorTag.TAG_DB),
+                repo = on(context).instance(tag = DoorTag.TAG_REPO),
                 endpoint = context,
             )
         }

@@ -12,49 +12,16 @@ interface SaveLocalUrisAsBlobsUseCase {
 
     data class SaveLocalUriAsBlobItem(
         val localUri: String,
-        val uid: Long,
+        val entityUid: Long,
         //Optional: tableId can be set if desired
         val tableId: Int = 0,
     )
 
     data class SavedBlob(
-        val uid: Long,
+        val entityUid: Long,
         val localUri: String,
         val blobUrl: String,
     )
-
-    data class BlobUploadProgress(
-        val uid: Long,
-        val localUri: String,
-        val blobUrl: String,
-        val bytesUploaded: Int,
-        val totalBytes: Int,
-    )
-
-    data class BlobUploadResult(
-        val uid: Long,
-        val localUri: String,
-        val blobUrl: String,
-        val status: Int,
-    )
-
-    /**
-     *
-     */
-    interface OnLocalUrisSavedToBlobUrls {
-
-        suspend operator fun invoke(savedBlobs: List<SavedBlob>)
-
-    }
-
-    interface OnLocalUriBlobUploadProgress {
-
-        suspend fun onUploadProgressUpdate(progressUpdates: List<BlobUploadProgress>)
-
-        suspend fun onComplete(uploadResults: List<BlobUploadResult>)
-
-    }
-
 
     /**
      * Save a list of LocalUris as blobs.

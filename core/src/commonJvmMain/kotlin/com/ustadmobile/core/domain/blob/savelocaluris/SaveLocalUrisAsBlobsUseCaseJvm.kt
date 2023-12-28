@@ -71,7 +71,7 @@ class SaveLocalUrisAsBlobsUseCaseJvm(
             val blobRequest = requestBuilder(blobUrlStr) {  }
             val mimeType = uriHelper.getMimeType(blobDoorUri) ?: "application/octet-stream"
 
-            saveItem.uid to CacheEntryToStore(
+            saveItem.entityUid to CacheEntryToStore(
                 request = blobRequest,
                 response = HttpPathResponse(
                     path = tmpBlobPath,
@@ -88,7 +88,7 @@ class SaveLocalUrisAsBlobsUseCaseJvm(
         Napier.d { "$logPrefix Storing ${entriesToStore.size} local uris as blobs (${entriesToStore.joinToString { it.second.request.url }})" }
         cache.store(entriesToStore.map { it.second })
         val uidToLocalUriMap = localUrisToSave.associate {
-            it.uid to it.localUri
+            it.entityUid to it.localUri
         }
 
 

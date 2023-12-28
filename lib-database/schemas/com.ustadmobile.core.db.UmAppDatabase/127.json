@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 127,
-    "identityHash": "5d51f30b5aa04db435f12faf08b248b4",
+    "identityHash": "04058d426c91746fa41e50d5149591ff",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -6320,7 +6320,7 @@
       },
       {
         "tableName": "TransferJobItem",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`tjiUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `tjiTjUid` INTEGER NOT NULL, `tjTotalSize` INTEGER NOT NULL, `tjTransferred` INTEGER NOT NULL, `tjAttemptCount` INTEGER NOT NULL, `tjiSrc` TEXT, `tjiDest` TEXT, `tjiType` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`tjiUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `tjiTjUid` INTEGER NOT NULL, `tjTotalSize` INTEGER NOT NULL, `tjTransferred` INTEGER NOT NULL, `tjAttemptCount` INTEGER NOT NULL, `tjiSrc` TEXT, `tjiDest` TEXT, `tjiType` INTEGER NOT NULL, `tjiStatus` INTEGER NOT NULL, `tjiTableId` INTEGER NOT NULL, `tjiEntityUid` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "tjiUid",
@@ -6367,6 +6367,24 @@
           {
             "fieldPath": "tjiType",
             "columnName": "tjiType",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tjiStatus",
+            "columnName": "tjiStatus",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tjiTableId",
+            "columnName": "tjiTableId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tjiEntityUid",
+            "columnName": "tjiEntityUid",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -6493,7 +6511,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '5d51f30b5aa04db435f12faf08b248b4')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '04058d426c91746fa41e50d5149591ff')"
     ]
   }
 }

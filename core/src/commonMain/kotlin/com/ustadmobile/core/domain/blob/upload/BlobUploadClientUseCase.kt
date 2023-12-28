@@ -22,6 +22,29 @@ import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCase
 interface BlobUploadClientUseCase {
 
     /**
+     * Represents the item to be uploaded
+     *
+     * @param blobUrl the blob URL
+     * @param transferJobItemUid The TransferJobItem.tjiUid if the upload is connected to a TransferJobItem,
+     *        0 otherwise
+     */
+    data class BlobToUpload(
+        val blobUrl: String,
+        val transferJobItemUid: Int,
+    )
+
+    data class BlobUploadProgressUpdate(
+        val uploadItem: BlobToUpload,
+        val bytesTransferred: Long,
+    )
+
+    data class BlobUploadStatusUpdate(
+        val uploadItem: BlobToUpload,
+        val status: Int,
+    )
+
+
+    /**
      * Run the blob upload itself.
      *
      * @param blobUrls a list of urls (e.g. in the form of http://endpoint.com/api/sha256)
@@ -30,15 +53,19 @@ interface BlobUploadClientUseCase {
      * @param onProgress
      */
     suspend operator fun invoke(
-        blobUrls: List<String>,
+        blobUrls: List<BlobToUpload>,
         batchUuid: String,
         endpoint: Endpoint,
-        onProgress: (Int) -> Unit,
+        onProgress: (BlobUploadProgressUpdate) -> Unit = { },
+        onStatusUpdate: (BlobUploadStatusUpdate) -> Unit = { },
         chunkSize: Int = ChunkedUploadClientUseCase.DEFAULT_CHUNK_SIZE,
     )
 
     /**
-     * Run the blob upload using data stored in the database as a TransferJob
+     * Run the blob upload using data stored in the database as a TransferJob. Progress updates will
+     * be saved to the database to the TransferJobItem table.
+     *
+     * @param transferJobUid the uid of the TransferJob to run
      */
     suspend operator fun invoke(
         transferJobUid: Int,

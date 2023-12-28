@@ -6,7 +6,6 @@ import com.ustadmobile.core.domain.upload.ChunkInfo
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCase
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.request.requestBuilder
-import com.ustadmobile.libcache.response.HttpResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.post
@@ -22,18 +21,35 @@ import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.coroutineScope
 import kotlinx.io.readTo
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.blob.TransferJobItemStatus
+import com.ustadmobile.core.util.ext.lastDistinctBy
+import com.ustadmobile.door.DoorDatabaseRepository
+import com.ustadmobile.door.entities.OutgoingReplication
+import com.ustadmobile.door.ext.withDoorTransactionAsync
+import com.ustadmobile.lib.db.entities.TransferJobItem
+import com.ustadmobile.libcache.response.requireHeadersContentLength
+import io.github.aakira.napier.Napier
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import java.util.concurrent.atomic.AtomicReference
 
 class BlobUploadClientUseCaseJvm(
     private val chunkedUploadUseCase: ChunkedUploadClientUseCase,
     private val httpClient: HttpClient,
     private val httpCache: UstadCache,
     private val db: UmAppDatabase,
+    private val repo: UmAppDatabase,
     private val endpoint: Endpoint,
 ): BlobUploadClientUseCase {
 
-    data class BlobAndResponse(
-        val blob: BlobUploadResponseItem,
-        val response: HttpResponse,
+    /*
+     * Data class that has everything required by the fan-out processor.
+     */
+    data class UploadQueueItem(
+        val blobUploadResponseItem: BlobUploadResponseItem,
+        val blobUploadItem: BlobUploadClientUseCase.BlobToUpload,
+        val totalSize: Long,
         val chunkSize: Int,
     )
 
@@ -80,22 +96,40 @@ class BlobUploadClientUseCaseJvm(
 
 
     private suspend fun asyncUploadItemsFromChannelProcessor(
-        channel: ReceiveChannel<BlobAndResponse>,
+        channel: ReceiveChannel<UploadQueueItem>,
         batchUuid: String,
         remoteUrl: String,
+        onProgress: (BlobUploadClientUseCase.BlobUploadProgressUpdate) -> Unit,
+        onStatusUpdate: (BlobUploadClientUseCase.BlobUploadStatusUpdate) -> Unit,
     ) = coroutineScope {
         async {
-            for (item in channel) {
+            for (queueItem in channel) {
                 chunkedUploadUseCase(
-                    uploadUuid = item.blob.uploadUuid,
-                    totalSize = item.response.headers["content-length"]?.toLong() ?: -1,
+                    uploadUuid = queueItem.blobUploadResponseItem.uploadUuid,
+                    totalSize = queueItem.totalSize,
                     getChunk = CacheResponseChunkGetter(
-                        url = item.blob.blobUrl,
+                        url = queueItem.blobUploadResponseItem.blobUrl,
                         batchUuid = batchUuid,
                     ),
                     remoteUrl = remoteUrl,
-                    fromByte = item.blob.fromByte,
-                    chunkSize = item.chunkSize,
+                    fromByte = queueItem.blobUploadResponseItem.fromByte,
+                    chunkSize = queueItem.chunkSize,
+                    onProgress = { bytesUploaded ->
+                        onProgress(
+                            BlobUploadClientUseCase.BlobUploadProgressUpdate(
+                                uploadItem = queueItem.blobUploadItem,
+                                bytesTransferred = bytesUploaded,
+                            )
+                        )
+                    },
+                    onStatusChange = { status ->
+                        onStatusUpdate(
+                            BlobUploadClientUseCase.BlobUploadStatusUpdate(
+                                uploadItem = queueItem.blobUploadItem,
+                                status = status.value
+                            )
+                        )
+                    }
                 )
             }
         }
@@ -103,23 +137,31 @@ class BlobUploadClientUseCaseJvm(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override suspend fun invoke(
-        blobUrls: List<String>,
+        blobUrls: List<BlobUploadClientUseCase.BlobToUpload>,
         batchUuid: String,
         endpoint: Endpoint,
-        onProgress: (Int) -> Unit,
+        onProgress: (BlobUploadClientUseCase.BlobUploadProgressUpdate) -> Unit,
+        onStatusUpdate: (BlobUploadClientUseCase.BlobUploadStatusUpdate) -> Unit,
         chunkSize: Int,
     ) {
-        val cacheResponses = blobUrls.associateWith { url ->
-            httpCache.retrieve(requestBuilder(url))
+        val blobToUploadItemMap = blobUrls.associateBy {
+            it.blobUrl
         }
-        val uploadRequestItems = cacheResponses.mapNotNull { entry ->
-            val entrySize = entry.value?.headers?.get("content-length")?.toLong() ?: -1
-            entry.value?.takeIf { entrySize > 0 }?.let {
-                BlobUploadRequestItem(
-                    blobUrl = entry.key,
-                    size = entrySize
-                )
-            }
+
+        val uploadRequestItems = blobUrls.map { uploadItem ->
+            val contentLength = httpCache.retrieve(
+                requestBuilder(uploadItem.blobUrl)
+            )?.requireHeadersContentLength() ?: throw IllegalArgumentException(
+                "${uploadItem.blobUrl} not available in cache!"
+            )
+            BlobUploadRequestItem(
+                blobUrl = uploadItem.blobUrl,
+                size = contentLength
+            )
+        }
+
+        val urlToRequestItemMap = uploadRequestItems.associateBy {
+            it.blobUrl
         }
 
         coroutineScope {
@@ -133,10 +175,18 @@ class BlobUploadClientUseCaseJvm(
                 )
             }.body()
 
-            val blobsAndResponses = response.blobsToUpload.mapNotNull { blobItem ->
-                cacheResponses[blobItem.blobUrl]?.let { httpResponse ->
-                    BlobAndResponse(blob = blobItem, response = httpResponse, chunkSize = chunkSize)
-                }
+            val blobsAndResponses = response.blobsToUpload.map { blobItem ->
+                val blobUploadRequestItem = urlToRequestItemMap[blobItem.blobUrl]
+                    ?: throw IllegalArgumentException("Server returned ${blobItem.blobUrl} that was not in request")
+                val blobUploadItem = blobToUploadItemMap[blobItem.blobUrl]
+                    ?: throw IllegalArgumentException("Internal error: ${blobItem.blobUrl} ")
+
+                UploadQueueItem(
+                    blobUploadResponseItem = blobItem,
+                    blobUploadItem = blobUploadItem,
+                    totalSize = blobUploadRequestItem.size,
+                    chunkSize = chunkSize,
+                )
             }
 
             val receiveChannel = produce(
@@ -152,10 +202,66 @@ class BlobUploadClientUseCaseJvm(
                     channel = receiveChannel,
                     remoteUrl = "${endpoint.url}api/blob/upload",
                     batchUuid = batchUuid,
+                    onProgress = onProgress,
+                    onStatusUpdate = onStatusUpdate,
                 )
             }
 
             jobs.awaitAll()
+        }
+    }
+
+    /**
+     * Commit the given progress updates to the database. This is done in batches to avoid running
+     * hundreds or thousands of updates individually when small files are being transferred.
+     */
+    private suspend fun commitStatus(
+        progressUpdates: List<BlobUploadClientUseCase.BlobUploadProgressUpdate>,
+        statusUpdates: List<BlobUploadClientUseCase.BlobUploadStatusUpdate>,
+        transferJobItemMap: Map<Int, TransferJobItem>,
+    ) {
+        val progressUpdatesToCommit = progressUpdates.lastDistinctBy {
+            it.uploadItem.transferJobItemUid
+        }
+        val statusUpdatesToCommit = statusUpdates.lastDistinctBy {
+            it.uploadItem.transferJobItemUid
+        }
+
+        val repoNodeId = (repo as? DoorDatabaseRepository)?.remoteNodeIdOrFake()
+
+        db.takeIf {
+            progressUpdatesToCommit.isNotEmpty() || statusUpdatesToCommit.isNotEmpty()
+        }?.withDoorTransactionAsync {
+            progressUpdatesToCommit.forEach {
+                db.transferJobItemDao.updateTransferredProgress(
+                    jobItemUid = it.uploadItem.transferJobItemUid,
+                    transferred = it.bytesTransferred,
+                )
+            }
+
+            val outgoingReplications = mutableListOf<OutgoingReplication>()
+            statusUpdatesToCommit.forEach {
+                db.transferJobItemDao.updateStatus(
+                    jobItemUid = it.uploadItem.transferJobItemUid,
+                    status = it.status
+                )
+
+                //If the blob upload is complete and associated with an entityUid, then put in an
+                // OutgoingReplication so that the new value is sent to the server.
+                if(it.status == TransferJobItemStatus.COMPLETE.value && repoNodeId != null) {
+                    val transferJobItem = transferJobItemMap[it.uploadItem.transferJobItemUid]
+                    if(transferJobItem != null && transferJobItem.tjiTableId != 0) {
+                        outgoingReplications += OutgoingReplication(
+                            orTableId = transferJobItem.tjiTableId,
+                            orPk1 = transferJobItem.tjiEntityUid,
+                            destNodeId = repoNodeId
+                        )
+                    }
+                }
+            }
+
+            db.takeIf { outgoingReplications.isNotEmpty() }?.outgoingReplicationDao
+                ?.insert(outgoingReplications)
         }
     }
 
@@ -164,15 +270,64 @@ class BlobUploadClientUseCaseJvm(
         val transferJob = db.transferJobDao.findByUid(transferJobUid)
             ?: throw IllegalArgumentException("BlobUpload: TransferJob #$transferJobUid does not exist")
         val transferJobItems = db.transferJobItemDao.findByJobUid(transferJobUid)
-        invoke(
-            blobUrls = transferJobItems.mapNotNull {
-                it.tjiSrc
-            },
-            batchUuid =transferJob.tjUuid!!,
-            endpoint = endpoint,
-            onProgress = {
+        val transferJobItemMap = transferJobItems.associateBy { it.tjiUid }
 
-            }
+        val progressUpdates = AtomicReference(
+            emptyList<BlobUploadClientUseCase.BlobUploadProgressUpdate>()
         )
+        val statusUpdates = AtomicReference(
+            emptyList<BlobUploadClientUseCase.BlobUploadStatusUpdate>()
+        )
+
+        suspend fun invokeCommitUpdates() {
+            val progressUpdatesToCommit = progressUpdates.getAndUpdate {
+                emptyList()
+            }
+            val statusUpdatesToCommit = statusUpdates.getAndUpdate {
+                emptyList()
+            }
+
+            commitStatus(progressUpdatesToCommit, statusUpdatesToCommit, transferJobItemMap)
+        }
+
+        coroutineScope {
+            val updateJob = launch {
+                while(isActive) {
+                    delay(1000)
+                    invokeCommitUpdates()
+                }
+            }
+
+            try {
+                invoke(
+                    blobUrls = transferJobItems.mapNotNull { jobItem ->
+                        jobItem.tjiSrc?.let {
+                            BlobUploadClientUseCase.BlobToUpload(
+                                blobUrl = it,
+                                transferJobItemUid = jobItem.tjiUid,
+                            )
+                        }
+                    },
+                    batchUuid = transferJob.tjUuid!!,
+                    endpoint = endpoint,
+                    onProgress = { progressItem ->
+                        progressUpdates.updateAndGet {
+                            it + progressItem
+                        }
+                    },
+                    onStatusUpdate = { statusUpdate ->
+                        statusUpdates.updateAndGet {
+                            it + statusUpdate
+                        }
+                    }
+                )
+            }catch(e: Exception) {
+                Napier.e("BlobUploadClientUseCase: Exception", e)
+                throw e
+            }finally {
+                updateJob.cancel()
+                invokeCommitUpdates()
+            }
+        }
     }
 }

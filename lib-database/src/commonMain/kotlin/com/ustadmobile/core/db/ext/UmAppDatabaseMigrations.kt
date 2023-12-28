@@ -1286,10 +1286,10 @@ val MIGRATION_126_127 = DoorMigrationStatementList(126, 127) { db ->
     buildList {
         if(db.dbType() == DoorDbType.SQLITE) {
             add("CREATE TABLE IF NOT EXISTS TransferJob (  tjType  INTEGER  NOT NULL , tjStatus  INTEGER  NOT NULL , tjName  TEXT , tjUuid  TEXT , tjUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
-            add("CREATE TABLE IF NOT EXISTS TransferJobItem (  tjiTjUid  INTEGER  NOT NULL , tjTotalSize  INTEGER  NOT NULL , tjTransferred  INTEGER  NOT NULL , tjAttemptCount  INTEGER  NOT NULL , tjiSrc  TEXT , tjiDest  TEXT , tjiType  INTEGER  NOT NULL , tjiUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+            add("CREATE TABLE IF NOT EXISTS TransferJobItem (  tjiTjUid  INTEGER  NOT NULL , tjTotalSize  INTEGER  NOT NULL , tjTransferred  INTEGER  NOT NULL , tjAttemptCount  INTEGER  NOT NULL , tjiSrc  TEXT , tjiDest  TEXT , tjiType  INTEGER  NOT NULL , tjiStatus  INTEGER  NOT NULL , tjiTableId  INTEGER  NOT NULL , tjiEntityUid  INTEGER  NOT NULL , tjiUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
         }else {
             add("CREATE TABLE IF NOT EXISTS TransferJob (  tjType  INTEGER  NOT NULL , tjStatus  INTEGER  NOT NULL , tjName  TEXT , tjUuid  TEXT , tjUid  SERIAL  PRIMARY KEY  NOT NULL )")
-            add("CREATE TABLE IF NOT EXISTS TransferJobItem (  tjiTjUid  INTEGER  NOT NULL , tjTotalSize  BIGINT  NOT NULL , tjTransferred  BIGINT  NOT NULL , tjAttemptCount  INTEGER  NOT NULL , tjiSrc  TEXT , tjiDest  TEXT , tjiType  INTEGER  NOT NULL , tjiUid  SERIAL  PRIMARY KEY  NOT NULL )")
+            add("CREATE TABLE IF NOT EXISTS TransferJobItem (  tjiTjUid  INTEGER  NOT NULL , tjTotalSize  BIGINT  NOT NULL , tjTransferred  BIGINT  NOT NULL , tjAttemptCount  INTEGER  NOT NULL , tjiSrc  TEXT , tjiDest  TEXT , tjiType  INTEGER  NOT NULL , tjiStatus  INTEGER  NOT NULL , tjiTableId  INTEGER  NOT NULL , tjiEntityUid  BIGINT  NOT NULL , tjiUid  SERIAL  PRIMARY KEY  NOT NULL )")
         }
     }
 }

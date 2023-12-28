@@ -169,7 +169,7 @@ class BlobUploadClientUseCaseJvmTest {
         )
 
         val useCase = BlobUploadClientUseCaseJvm(
-            mockChunkedUploadUseCase, httpClient, mockCache, mockDatabase, endpoint
+            mockChunkedUploadUseCase, httpClient, mockCache, mockDatabase, mockDatabase, endpoint
         )
 
         val serverUploadResponse = BlobUploadResponse(
@@ -194,7 +194,9 @@ class BlobUploadClientUseCaseJvmTest {
 
         runBlocking {
             useCase(
-                blobUrls = itemsToUpload.map { it.blobUrl },
+                blobUrls = itemsToUpload.map {
+                    BlobUploadClientUseCase.BlobToUpload(it.blobUrl, 0)
+                },
                 batchUuid = batchUuid.toString(),
                 endpoint = endpoint,
                 onProgress = { },
@@ -223,7 +225,9 @@ class BlobUploadClientUseCaseJvmTest {
                         getChunk = capture(),
                         remoteUrl = eq("${endpoint.url}api/blob/upload"),
                         fromByte = eq(0),
-                        chunkSize = eq(testChunkSize)
+                        chunkSize = eq(testChunkSize),
+                        onProgress = any(),
+                        onStatusChange = any(),
                     )
                 }
 

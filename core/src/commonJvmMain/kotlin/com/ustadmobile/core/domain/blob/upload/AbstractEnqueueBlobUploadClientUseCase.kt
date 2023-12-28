@@ -15,7 +15,7 @@ abstract class AbstractEnqueueBlobUploadClientUseCase(
 
     //Create transferjob and transferjob items in the database.
     protected suspend fun createTransferJob(
-        blobUrls: List<String>,
+        blobUrls: List<EnqueueBlobUploadClientUseCase.EnqueueBlobUploadItem>,
         batchUuid: String,
     ): TransferJob {
         return db.withDoorTransactionAsync {
@@ -26,12 +26,14 @@ abstract class AbstractEnqueueBlobUploadClientUseCase(
             val jobUid = db.transferJobDao.insert(transferJob).toInt()
 
             db.transferJobItemDao.insertList(
-                blobUrls.mapNotNull { blobUrl ->
-                    cache.retrieve(requestBuilder(blobUrl))?.let { httpResponse ->
+                blobUrls.mapNotNull { enqueueUploadItem ->
+                    cache.retrieve(requestBuilder(enqueueUploadItem.blobUrl))?.let { httpResponse ->
                         TransferJobItem(
                             tjiTjUid = jobUid,
-                            tjiSrc = blobUrl,
-                            tjTotalSize = httpResponse.headers["content-length"]?.toLong() ?: 0
+                            tjiSrc = enqueueUploadItem.blobUrl,
+                            tjTotalSize = httpResponse.headers["content-length"]?.toLong() ?: 0,
+                            tjiEntityUid =  enqueueUploadItem.entityUid,
+                            tjiTableId = enqueueUploadItem.tableId,
                         )
                     }
                 }

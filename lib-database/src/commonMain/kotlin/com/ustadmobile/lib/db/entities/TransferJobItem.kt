@@ -6,6 +6,11 @@ import androidx.room.PrimaryKey
 /**
  * @param tjiSrc: the source of the TransferJobItem - the value of the string depends on the type
  * @param tjiDest: the destination of the TransferJobItem - the value of the string depends on the type
+ * @param tjiTableId if not zero, BlobUploadClientUseCase will insert an OutgoingReplication when the
+ *        TransferJobItem is complete. This can be useful when handling the upload of blobs that
+ *        are associated with entities in the database such as PersonPicture. This will update the
+ *        uri on the server after the blob itself is successfully uploaded.
+ * @param tjiEntityUid used with tjiTableId
  */
 @Entity
 data class TransferJobItem(
@@ -25,4 +30,10 @@ data class TransferJobItem(
     var tjiDest: String? = null,
 
     var tjiType: Int = 0,
+
+    var tjiStatus: Int = 0,
+
+    var tjiTableId: Int = 0,
+
+    var tjiEntityUid: Long = 0,
 )

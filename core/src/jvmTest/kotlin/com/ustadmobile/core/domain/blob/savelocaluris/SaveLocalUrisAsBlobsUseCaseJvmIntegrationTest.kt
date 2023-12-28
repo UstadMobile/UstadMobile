@@ -2,6 +2,7 @@ package com.ustadmobile.core.domain.blob.savelocaluris
 
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCase
 import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCaseJvm
 import com.ustadmobile.core.domain.blob.upload.BlobUploadServerUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCase
@@ -174,13 +175,14 @@ class SaveLocalUrisAsBlobsUseCaseJvmIntegrationTest {
             httpClient = httpClient,
             httpCache = clientCache,
             db = mockUmAppDatabase,
+            repo = mockUmAppDatabase,
             endpoint = endpoint,
         )
 
         val blobsToSave = listOf(
             SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem(
                 localUri = pdfFile.toDoorUri().toString(),
-                uid = 42,
+                entityUid = 42,
                 tableId = 0,
             )
         )
@@ -191,7 +193,9 @@ class SaveLocalUrisAsBlobsUseCaseJvmIntegrationTest {
             )
 
             blobUploadClientUseCase(
-                blobUrls = savedBlobs.map { it.blobUrl },
+                blobUrls = savedBlobs.map {
+                    BlobUploadClientUseCase.BlobToUpload(it.blobUrl, transferJobItemUid = 0)
+                },
                 batchUuid = UUID.randomUUID().toString(),
                 endpoint = endpoint,
                 onProgress = {

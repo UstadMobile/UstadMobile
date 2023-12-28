@@ -1,5 +1,6 @@
 package com.ustadmobile.core.domain.upload
 
+import com.ustadmobile.core.domain.blob.TransferJobItemStatus
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.door.DoorUri
 import io.github.aakira.napier.Napier
@@ -54,6 +55,9 @@ class ChunkedUploadClientUseCase(
      * @param remoteUrl the endpoint to which the data will be uploaded (should use UploadRoute)
      * @param fromByte the first byte to start uploading from (e.g. use if resuming).
      * @param chunkSize the maximum size of each chunk
+     * @param onProgress event handler that will be called each time a chunk is uploaded.
+     * @param onStatusChange event handler that will be called when status changes e.g. on start,
+     *        on successful completion, or on failure.
      */
     @OptIn(ExperimentalStdlibApi::class)
     suspend operator fun invoke(
@@ -63,6 +67,8 @@ class ChunkedUploadClientUseCase(
         remoteUrl: String,
         fromByte: Long = 0,
         chunkSize: Int = DEFAULT_CHUNK_SIZE,
+        onProgress: (Long) -> Unit = { },
+        onStatusChange: (TransferJobItemStatus) -> Unit = { },
     ) {
 
         invoke(
@@ -72,6 +78,8 @@ class ChunkedUploadClientUseCase(
             remoteUrl = remoteUrl,
             chunkSize = chunkSize,
             fromByte =  fromByte,
+            onProgress = onProgress,
+            onStatusChange = onStatusChange,
         )
     }
 
@@ -91,7 +99,9 @@ class ChunkedUploadClientUseCase(
         getChunk: UploadChunkGetter,
         remoteUrl: String,
         fromByte: Long = 0,
-        chunkSize: Int = DEFAULT_CHUNK_SIZE
+        chunkSize: Int = DEFAULT_CHUNK_SIZE,
+        onProgress: (Long) -> Unit = { },
+        onStatusChange: (TransferJobItemStatus) -> Unit = { },
     ) {
         if(totalSize <= 0)
             throw IllegalArgumentException("Upload size <= 0")
@@ -108,6 +118,7 @@ class ChunkedUploadClientUseCase(
         }
         try {
             val buffer = ByteArray(chunkSize)
+            onStatusChange(TransferJobItemStatus.IN_PROGRESS)
             chunkInfo.forEach { chunk ->
                 val chunkResponseInfo = getChunk(chunk, buffer)
                 httpClient.post(remoteUrl) {
@@ -121,13 +132,16 @@ class ChunkedUploadClientUseCase(
 
                     setBody(ByteReadChannel(buffer, 0, chunk.size))
                 }
+                onProgress(chunk.start + chunk.size)
             }
             Napier.d {
                 "ChunkedUploadClientUseCase($uploadUuid): Upload complete of $totalSize bytes in " +
                         "${chunkInfo.numChunks} chunks to $remoteUrl"
             }
+            onStatusChange(TransferJobItemStatus.COMPLETE)
         }catch(e: Exception) {
             Napier.e("ChunkedUploadClientUseCase($uploadUuid): Exception uploading", e)
+            onStatusChange(TransferJobItemStatus.FAILED)
             throw e
         }
     }

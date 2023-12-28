@@ -19,4 +19,24 @@ expect abstract class TransferJobItemDao {
     abstract suspend fun findByJobUid(jobUid: Int): List<TransferJobItem>
 
 
+    @Query("""
+        UPDATE TransferJobItem
+           SET tjTransferred = :transferred
+         WHERE tjiUid = :jobItemUid
+    """)
+    abstract suspend fun updateTransferredProgress(
+        jobItemUid: Int,
+        transferred: Long,
+    )
+
+    @Query("""
+        UPDATE TransferJobItem
+           SET tjiStatus = :status
+         WHERE tjiUid = :jobItemUid  
+    """)
+    abstract suspend fun updateStatus(
+        jobItemUid: Int,
+        status: Int,
+    )
+
 }

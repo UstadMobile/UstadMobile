@@ -152,7 +152,8 @@ class PersonEditViewModel(
 
     private val genderConfig : GenderConfig by instance()
 
-    private val savePictureUseCase: EnqueueSavePictureUseCase? by on(accountManager.activeEndpoint).instanceOrNull()
+    private val enqueueSavePictureUseCase: EnqueueSavePictureUseCase? by
+        on(accountManager.activeEndpoint).instanceOrNull()
 
     init {
         loadingState = LoadingUiState.INDETERMINATE
@@ -560,9 +561,9 @@ class PersonEditViewModel(
                     if(initPictureUri != personPictureUriVal) {
                         //Save if changed
                         activeDb.personPictureDao.upsert(personPictureVal)
-                        savePictureUseCase?.invoke(
+                        enqueueSavePictureUseCase?.invoke(
                             entityUid = savePerson.personUid,
-                            tableId = Person.TABLE_ID,
+                            tableId = PersonPicture.TABLE_ID,
                             pictureUri = personPictureUriVal
                         )
                     }
