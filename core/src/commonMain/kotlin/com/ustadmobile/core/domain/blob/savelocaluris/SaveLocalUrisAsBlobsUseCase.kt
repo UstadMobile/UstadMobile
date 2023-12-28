@@ -10,11 +10,23 @@ package com.ustadmobile.core.domain.blob.savelocaluris
  */
 interface SaveLocalUrisAsBlobsUseCase {
 
+    /**
+     * Item to be saved in the cache as a blob
+     *
+     * @param localUri the local uri on the system (as per DoorUri)
+     * @param entityUid (optional) primary key for the related entity - will be passed on to become
+     *        the TransferJobItem.tjiEntityUid . See its doc for details.
+     * @param tableId (optional) table id for the related entitiy - will be passed on to become
+     *        the TransferJobItem.tjiTableId. See its doc for details.
+     * @param mimeType (optional), if not null, explicitly sets the content-type when it is stored
+     *        as a blob. If not specified, the system UriHelper will be used to guess the mime type.
+     *
+     */
     data class SaveLocalUriAsBlobItem(
         val localUri: String,
-        val entityUid: Long,
-        //Optional: tableId can be set if desired
+        val entityUid: Long = 0,
         val tableId: Int = 0,
+        val mimeType: String? = null,
     )
 
     data class SavedBlob(

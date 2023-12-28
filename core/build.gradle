@@ -21,6 +21,7 @@ android {
     defaultConfig {
         minSdkVersion 21
         targetSdkVersion rootProject.ext.version_android_target_sdk
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     packagingOptions {
         resources {
@@ -34,10 +35,15 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-
-        //This will apparently prevent Android Studio from recognizing the project
-        //coreLibraryDesugaringEnabled true
+        coreLibraryDesugaringEnabled = true
     }
+
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
+
     namespace 'com.ustadmobile.core'
     lint {
         disable 'MissingTranslation', 'ExtraTranslation'
@@ -243,9 +249,17 @@ kotlin {
                 implementation libs.libphonenumber.android
 
                 implementation libs.process.phoenix
+                implementation libs.compressor
             }
+        }
 
-
+        androidUnitTest {
+            dependencies {
+                implementation "androidx.test:runner:$version_android_junit_runner"
+                implementation "junit:junit:$version_junit"
+                implementation "org.robolectric:robolectric:$version_android_roboelectric"
+                implementation "androidx.test:core:$version_androidx_test_core"
+            }
         }
 
         jsMain {
@@ -282,6 +296,10 @@ kotlin {
         }
 
     }
+}
+
+dependencies {
+    coreLibraryDesugaring libs.android.desugar.libs
 }
 
 afterEvaluate {

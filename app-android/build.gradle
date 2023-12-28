@@ -321,10 +321,6 @@ dependencies {
     implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
     implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
 
-    //image compressor
-    implementation "id.zelory:compressor:$version_compressor"
-
-
     //Android play core for update support within the application
     implementation "com.google.android.play:core:$version_play_core"
     implementation libs.androidx.navigation.fragment.ktx

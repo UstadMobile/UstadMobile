@@ -41,3 +41,11 @@ fun File.gzipAndGetMd5(dest: File) = GZIPOutputStream(FileOutputStream(dest)).us
     copyAndGetMd5(it)
 }
 
+fun File.requireExtension(extension: String) : File{
+    return if(this.extension == extension) {
+        this
+    }else {
+        File(parentFile, name + ".$extension")
+    }
+}
+

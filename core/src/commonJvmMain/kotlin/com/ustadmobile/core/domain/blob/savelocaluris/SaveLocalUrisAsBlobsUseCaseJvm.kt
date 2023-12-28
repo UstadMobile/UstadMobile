@@ -69,7 +69,8 @@ class SaveLocalUrisAsBlobsUseCaseJvm(
 
             val blobUrlStr = blobUrl.toString()
             val blobRequest = requestBuilder(blobUrlStr) {  }
-            val mimeType = uriHelper.getMimeType(blobDoorUri) ?: "application/octet-stream"
+            val mimeType = saveItem.mimeType ?: uriHelper.getMimeType(blobDoorUri)
+                ?: "application/octet-stream"
 
             saveItem.entityUid to CacheEntryToStore(
                 request = blobRequest,

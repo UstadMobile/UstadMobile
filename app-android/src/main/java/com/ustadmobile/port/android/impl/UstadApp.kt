@@ -39,6 +39,7 @@ import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCase
 import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCaseJvm
 import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCase
 import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCaseAndroid
+import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseAndroid
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCase
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
@@ -351,7 +352,8 @@ class UstadApp : Application(), DIAware{
                 saveLocalUrisAsBlobUseCase = on(context).instance(),
                 db = on(context).instance(tag = DoorTag.TAG_DB),
                 repo = on(context).instance(tag = DoorTag.TAG_REPO),
-                enqueueBlobUploadClientUseCase = on(context).instance()
+                enqueueBlobUploadClientUseCase = on(context).instance(),
+                compressImageUseCase = CompressImageUseCaseAndroid(applicationContext),
             )
         }
 
