@@ -75,6 +75,7 @@ val CourseGroupSetListComponent = FC<CourseGroupSetListComponentProps> { props -
             if(props.uiState.showAddItem) {
                 item(key = "new") {
                     UstadAddListItem.create {
+                        id = "add_new_groups"
                         text = strings[MR.strings.add_new_groups]
                         onClickAdd = props.onClickAddItem
                     }
