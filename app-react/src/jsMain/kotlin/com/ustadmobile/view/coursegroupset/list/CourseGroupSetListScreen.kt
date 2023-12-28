@@ -28,6 +28,7 @@ import mui.material.ListItemButton
 import mui.material.ListItemText
 import mui.material.List
 import react.FC
+import react.Fragment
 import react.Props
 import react.ReactNode
 import react.create
@@ -72,15 +73,23 @@ val CourseGroupSetListComponent = FC<CourseGroupSetListComponentProps> { props -
                 }
             }
 
-            if(props.uiState.showAddItem) {
-                item(key = "new") {
-                    UstadAddListItem.create {
-                        id = "add_new_groups"
-                        text = strings[MR.strings.add_new_groups]
-                        onClickAdd = props.onClickAddItem
+            //Using the if statement around the items does not seem to get invalidated as expected
+            // This might require reconsideration of how virtualListcontent works. In the meantime
+            // always create a fragment, and put the showAdditem within it.
+            item(key = "new") {
+                Fragment.create {
+                    if(props.uiState.showAddItem) {
+                        UstadAddListItem {
+                            id = "add_new_groups"
+                            text = strings[MR.strings.add_new_groups]
+                            onClickAdd = props.onClickAddItem
+                        }
+                    }else {
+                        + " "
                     }
                 }
             }
+
 
             infiniteQueryPagingItems(
                 items = infiniteQueryResult,
