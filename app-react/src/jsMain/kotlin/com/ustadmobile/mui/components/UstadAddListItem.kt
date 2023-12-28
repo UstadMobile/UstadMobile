@@ -25,7 +25,7 @@ val UstadAddListItem = FC<UstadAddListItemProps> { props ->
 
     ListItem {
         ListItemButton{
-            id?.also {
+            props.id?.also {
                 id = it
             }
 
