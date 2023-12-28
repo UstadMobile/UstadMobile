@@ -17,6 +17,7 @@ import com.ustadmobile.mui.components.UstadAddListItem
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
+import emotion.react.css
 import web.cssom.Contain
 import web.cssom.Height
 import web.cssom.Overflow
@@ -32,6 +33,8 @@ import react.Fragment
 import react.Props
 import react.ReactNode
 import react.create
+import react.dom.html.ReactHTML.div
+import web.cssom.px
 
 external interface CourseGroupSetListComponentProps: Props {
 
@@ -85,7 +88,11 @@ val CourseGroupSetListComponent = FC<CourseGroupSetListComponentProps> { props -
                             onClickAdd = props.onClickAddItem
                         }
                     }else {
-                        + " "
+                        div {
+                            css {
+                                height = 1.px
+                            }
+                        }
                     }
                 }
             }
