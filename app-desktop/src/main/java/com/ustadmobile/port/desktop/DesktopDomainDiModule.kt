@@ -27,7 +27,9 @@ import com.ustadmobile.core.domain.phonenumber.OnClickPhoneNumUseCase
 import com.ustadmobile.core.domain.phonenumber.OnClickPhoneNumUseCaseJvm
 import com.ustadmobile.core.domain.sendemail.OnClickEmailUseCase
 import com.ustadmobile.core.domain.sendemail.OnClickEmailUseCaseJvm
-import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCase
+import com.ustadmobile.core.domain.upload.ChunkedUploadClientChunkGetterUseCase
+import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
+import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.ext.DoorTag
 import kotlinx.io.files.Path
@@ -67,10 +69,19 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         OnClickEmailUseCaseJvm()
     }
 
-    bind<ChunkedUploadClientUseCase>() with singleton {
-        ChunkedUploadClientUseCase(
-            httpClient = instance()
+    bind<ChunkedUploadClientUseCaseKtorImpl>() with singleton {
+        ChunkedUploadClientUseCaseKtorImpl(
+            httpClient = instance(),
+            uriHelper = instance(),
         )
+    }
+
+    bind<ChunkedUploadClientLocalUriUseCase>() with singleton {
+        instance<ChunkedUploadClientUseCaseKtorImpl>()
+    }
+
+    bind<ChunkedUploadClientChunkGetterUseCase>() with singleton {
+        instance<ChunkedUploadClientUseCaseKtorImpl>()
     }
 
     bind<SaveLocalUrisAsBlobsUseCase>() with scoped(EndpointScope.Default).singleton {

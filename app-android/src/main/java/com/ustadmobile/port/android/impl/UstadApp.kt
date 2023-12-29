@@ -40,7 +40,9 @@ import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCaseJvm
 import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCase
 import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCaseAndroid
 import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseAndroid
-import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCase
+import com.ustadmobile.core.domain.upload.ChunkedUploadClientChunkGetterUseCase
+import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
+import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
 import kotlinx.serialization.json.Json
@@ -304,10 +306,19 @@ class UstadApp : Application(), DIAware{
             )
         }
 
-        bind<ChunkedUploadClientUseCase>() with singleton {
-            ChunkedUploadClientUseCase(
-                httpClient = instance()
+        bind<ChunkedUploadClientUseCaseKtorImpl>() with singleton {
+            ChunkedUploadClientUseCaseKtorImpl(
+                httpClient = instance(),
+                uriHelper = instance(),
             )
+        }
+
+        bind<ChunkedUploadClientLocalUriUseCase>() with singleton {
+            instance<ChunkedUploadClientUseCaseKtorImpl>()
+        }
+
+        bind<ChunkedUploadClientChunkGetterUseCase>() with singleton {
+            instance<ChunkedUploadClientUseCaseKtorImpl>()
         }
 
         bind<SaveLocalUrisAsBlobsUseCase>() with scoped(EndpointScope.Default).singleton {

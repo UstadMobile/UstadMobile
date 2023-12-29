@@ -1,14 +1,20 @@
 package com.ustadmobile.core.domain.blob.upload
 
+import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
 import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCase.Companion.BLOB_RESPONSE_HEADER_PREFIX
 import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCase.Companion.BLOB_UPLOAD_HEADER_BATCH_UUID
 import com.ustadmobile.core.domain.upload.ChunkedUploadResponse
 import com.ustadmobile.core.domain.upload.ChunkedUploadServerUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadServerUseCaseJvm
+import com.ustadmobile.core.url.UrlKmp
+import com.ustadmobile.core.util.UMURLEncoder
+import com.ustadmobile.core.util.ext.encodeBase64
 import com.ustadmobile.libcache.CacheEntryToStore
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.headers.HttpHeaders
 import com.ustadmobile.libcache.headers.headersBuilder
+import com.ustadmobile.libcache.io.sha256
 import com.ustadmobile.libcache.request.requestBuilder
 import com.ustadmobile.libcache.response.HttpPathResponse
 import io.github.aakira.napier.Napier
@@ -32,6 +38,7 @@ class BlobUploadServerUseCase(
     private val httpCache: UstadCache,
     private val tmpDir: Path,
     private val json: Json,
+    private val endpoint: Endpoint,
     private val fileSystem: FileSystem = SystemFileSystem,
     responseCacheSize: Int = 100
 ) {
@@ -43,7 +50,11 @@ class BlobUploadServerUseCase(
             .maximumCacheSize(responseCacheSize.toLong())
             .build()
 
-    val chunkedUploadServerUseCase: ChunkedUploadServerUseCase = ChunkedUploadServerUseCaseJvm(
+    /**
+     * ChunkedUploadServerUseCase that handles items being uploaded as part of a batch. See HTTP API
+     * for details.
+     */
+    val batchChunkedUploadServerUseCase: ChunkedUploadServerUseCase = ChunkedUploadServerUseCaseJvm(
         uploadDir = File(tmpDir.toString()),
         onUploadComplete = { completedChunkedUpload ->
             val batchUuid = completedChunkedUpload.request.headers[BLOB_UPLOAD_HEADER_BATCH_UUID]
@@ -56,16 +67,52 @@ class BlobUploadServerUseCase(
                 )
             }
 
+            UUID.fromString(batchUuid)
+            val batchResponse = loadResponse(batchUuid)
+            val blobToUploadResponseItem = batchResponse.blobsToUpload.firstOrNull {
+                it.uploadUuid == completedChunkedUpload.uploadUuid
+            } ?: throw IllegalArgumentException("Upload ${completedChunkedUpload.uploadUuid} is not part of batch $batchUuid")
 
-            onBlobItemFinished(
-                batchUuid = batchUuid,
-                uploadUuid = completedChunkedUpload.uploadUuid,
+            onStoreItem(
+                blobUrl = blobToUploadResponseItem.blobUrl,
                 bodyPath = completedChunkedUpload.path,
                 requestHeaders = HttpHeaders.fromMap(completedChunkedUpload.request.headers)
             )
 
             ChunkedUploadResponse(
                 statusCode = 204, body = null, contentType = null, headers = emptyMap()
+            )
+        }
+    )
+
+    /**
+     * ChnkedUploadServerUseCase handles items being uploaded individually (e.g. by web clients).
+     */
+    val individualItemUploadServerUseCase: ChunkedUploadServerUseCase = ChunkedUploadServerUseCaseJvm(
+        uploadDir = File(tmpDir.toString()),
+        onUploadComplete = { completedChunkedUpload ->
+            val sha256  = fileSystem.source(completedChunkedUpload.path).buffered().use {
+                it.sha256()
+            }
+            val blobUrl = UrlKmp(endpoint.url).resolve("/api/blob/" +
+                    UMURLEncoder.encodeUTF8(sha256.encodeBase64()))
+            val blobUrlStr = blobUrl.toString()
+            onStoreItem(
+                blobUrl = blobUrlStr,
+                bodyPath = completedChunkedUpload.path,
+                requestHeaders = HttpHeaders.fromMap(completedChunkedUpload.request.headers),
+            )
+            val serverSavedBlobItem = SaveLocalUrisAsBlobsUseCase.ServerSavedBlob(
+                blobUrl = blobUrlStr
+            )
+            ChunkedUploadResponse(
+                statusCode = 200,
+                body = json.encodeToString(
+                    SaveLocalUrisAsBlobsUseCase.ServerSavedBlob.serializer(),
+                    serverSavedBlobItem
+                ),
+                contentType = "application/json",
+                headers = mapOf()
             )
         }
     )
@@ -149,8 +196,7 @@ class BlobUploadServerUseCase(
      *
      * It will store the content of the blob in the httpCache.
      *
-     * @param batchUuid the upload batch uuid
-     * @param uploadUuid uuid for the individual blob as per BlobToUploadResponse
+     * @param blobUrl the blobUrl to be stored
      * @param bodyPath the path where the blob has been stored (temporary file, will be moved, not
      *        copied, into the cache)
      * @param requestHeaders the headers from the final chunk upload request. Headers that should be
@@ -159,20 +205,12 @@ class BlobUploadServerUseCase(
      *        Content-Type header the final chunk upload request should include the header
      *        X-Blob-Response-Content-Type.
      */
-    suspend fun onBlobItemFinished(
-        batchUuid: String,
-        uploadUuid: String,
+    fun onStoreItem(
+        blobUrl: String,
         bodyPath: Path,
         requestHeaders: HttpHeaders,
     ) {
-        UUID.fromString(batchUuid)
-        val batchResponse = loadResponse(batchUuid)
-        val blobToUploadResponse = batchResponse.blobsToUpload.firstOrNull {
-            it.uploadUuid == uploadUuid
-        } ?: throw IllegalArgumentException("Upload $uploadUuid is not part of batch $batchUuid")
-
-
-        val request = requestBuilder(blobToUploadResponse.blobUrl)
+        val request = requestBuilder(blobUrl)
         val mimeType = requestHeaders["${BLOB_RESPONSE_HEADER_PREFIX}content-type"]
             ?: "application/octet-stream"
 
@@ -200,7 +238,6 @@ class BlobUploadServerUseCase(
                 )
             )
         )
-
     }
 
     companion object {

@@ -10,7 +10,7 @@ indefinitely (eg. where a user has selected those items for offline use).
 
 ## HTTP API
 
-### POST /api/blob/upload-init (start a batch upload)
+### POST /api/blob/upload-init-batch (start a batch upload)
 
 Initiates a blob batch upload with a list of blobs that the client intends to upload. The server will
 reply with a list of those blobs that it does not yet have (allowing the client to skip those already
@@ -18,11 +18,17 @@ on the server). The response also includes info on any partial upload progress (
 can resume the upload from the next required chunk. The server will create a UUID to identify each 
 upload.
 
-### POST /api/blob/upload (upload blob data in chunks)
+### POST /api/blob/upload-batch-data (upload blob data in chunks)
 
 Data is uploaded in chunks (via ChunkedUploadUseCase). Each request contains the batch uuid and 
 upload uuid. The server appends data as it is received in chunks. The last chunk includes http 
 headers.
+
+### POST /api/blob/upload-item
+
+Data is uploaded in chunks for a single item without any batch. The HTTP endpoint will run the SHA256,
+store the data under the appropriate blob URL, and then return the URL used. This endpoint is used by
+the Javascript client.
 
 ### GET /api/blob/sha256 (Retrieve the blob itself)
 

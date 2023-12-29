@@ -395,13 +395,14 @@ fun Application.umRestApplication(
             )
         }
 
-        bind<BlobUploadServerUseCase>() with singleton {
+        bind<BlobUploadServerUseCase>() with scoped(EndpointScope.Default).singleton {
             BlobUploadServerUseCase(
                 httpCache = instance(),
                 tmpDir = Path(
                     File(appConfig.absoluteDataDir(), "blob-uploads-tmp").absolutePath.toString()
                 ),
                 json = instance(),
+                endpoint = context,
             )
         }
 
@@ -523,7 +524,9 @@ fun Application.umRestApplication(
 
             route("blob") {
                 BlobUploadServerRoute(
-                    useCase = di.direct.instance()
+                    useCase = { call ->
+                        di.on(call).direct.instance()
+                    }
                 )
             }
 

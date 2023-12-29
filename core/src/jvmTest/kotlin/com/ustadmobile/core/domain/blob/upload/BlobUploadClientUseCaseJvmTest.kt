@@ -3,7 +3,8 @@ package com.ustadmobile.core.domain.blob.upload
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.upload.ChunkInfo
-import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCase
+import com.ustadmobile.core.domain.upload.ChunkedUploadClientChunkGetterUseCase
+import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
 import com.ustadmobile.core.io.ext.readSha256
 import com.ustadmobile.core.util.ext.encodeBase64
 import com.ustadmobile.libcache.UstadCache
@@ -50,7 +51,7 @@ class BlobUploadClientUseCaseJvmTest {
 
     private lateinit var batchUuid: UUID
 
-    private lateinit var mockChunkedUploadUseCase: ChunkedUploadClientUseCase
+    private lateinit var mockChunkedUploadUseCase: ChunkedUploadClientUseCaseKtorImpl
 
     private lateinit var httpClient : HttpClient
 
@@ -217,13 +218,13 @@ class BlobUploadClientUseCaseJvmTest {
                 it.blobUrl == item.blobUrl
             }
 
-            argumentCaptor<ChunkedUploadClientUseCase.UploadChunkGetter> {
+            argumentCaptor<ChunkedUploadClientChunkGetterUseCase.UploadChunkGetter> {
                 verifyBlocking(mockChunkedUploadUseCase) {
                     invoke(
                         uploadUuid = eq(blobResponseItem.uploadUuid),
                         totalSize = eq(item.size),
                         getChunk = capture(),
-                        remoteUrl = eq("${endpoint.url}api/blob/upload"),
+                        remoteUrl = eq("${endpoint.url}api/blob/upload-batch-data"),
                         fromByte = eq(0),
                         chunkSize = eq(testChunkSize),
                         onProgress = any(),

@@ -7,6 +7,11 @@ import com.ustadmobile.core.domain.compress.CompressUseCase
 import com.ustadmobile.core.util.uuid.randomUuidAsString
 import com.ustadmobile.door.util.systemTimeInMillis
 
+/**
+ * @param enqueueBlobUploadClientUseCase on platforms where a separate upload is required (e.g.
+ *        Android and Desktop). On the web, SaveLocalUriAsBlob does the uploads itself, so no
+ *        upload client is required.
+ */
 class SavePictureUseCase(
     private val saveLocalUrisAsBlobUseCase: SaveLocalUrisAsBlobsUseCase,
     private val enqueueBlobUploadClientUseCase: EnqueueBlobUploadClientUseCase?,
@@ -37,21 +42,30 @@ class SavePictureUseCase(
                 ),
             ).first()
 
-            db.personPictureDao.updateUri(
-                uid = entityUid,
-                uri = savedBlob.blobUrl,
-                time = systemTimeInMillis()
-            )
-
-            enqueueBlobUploadClientUseCase?.invoke(
-                items = listOf(
-                    EnqueueBlobUploadClientUseCase.EnqueueBlobUploadItem(
-                    blobUrl = savedBlob.blobUrl,
-                    tableId = tableId,
-                    entityUid = entityUid,
-                )),
-                batchUuid = randomUuidAsString(),
-            )
+            if(enqueueBlobUploadClientUseCase != null) {
+                db.personPictureDao.updateUri(
+                    uid = entityUid,
+                    uri = savedBlob.blobUrl,
+                    time = systemTimeInMillis()
+                )
+                enqueueBlobUploadClientUseCase.invoke(
+                    items = listOf(
+                        EnqueueBlobUploadClientUseCase.EnqueueBlobUploadItem(
+                            blobUrl = savedBlob.blobUrl,
+                            tableId = tableId,
+                            entityUid = entityUid,
+                        )
+                    ),
+                    batchUuid = randomUuidAsString(),
+                )
+            }else {
+                //No upload needed, directly update repo
+                repo.personPictureDao.updateUri(
+                    uid = entityUid,
+                    uri = savedBlob.blobUrl,
+                    time = systemTimeInMillis()
+                )
+            }
         }else {
             repo.personPictureDao.updateUri(
                 uid = entityUid,

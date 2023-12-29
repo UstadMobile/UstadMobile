@@ -1,5 +1,6 @@
 package com.ustadmobile.core.domain.blob.upload
 
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.io.ext.readSha256
 import com.ustadmobile.core.util.ext.encodeBase64
 import com.ustadmobile.libcache.UstadCache
@@ -51,6 +52,8 @@ class BlobUploadServerUseCaseTest {
 
     private lateinit var batchUuid: UUID
 
+    private lateinit var endpoint: Endpoint
+
     @BeforeTest
     fun setup() {
         cache = mock {  }
@@ -63,6 +66,7 @@ class BlobUploadServerUseCaseTest {
         val filesToUpload = (1..3).map {
             temporaryFolder.newFileFromResource(javaClass, "/com/ustadmobile/core/container/testfile${it}.png")
         }
+        endpoint = Endpoint("https://endpoint.com/")
         val urlPrefix = "https://endpoint.com/api/blob/"
 
         batchUuid = UUID.randomUUID()
@@ -97,6 +101,7 @@ class BlobUploadServerUseCaseTest {
             httpCache = cache,
             tmpDir = Path(tmpDir.absolutePath),
             json = json,
+            endpoint = endpoint,
         )
 
         cache.stub {
@@ -115,9 +120,9 @@ class BlobUploadServerUseCaseTest {
             uploadResponse.blobsToUpload.forEach {  blobToUpload ->
                 val testUpload = testUploads.first { it.url == blobToUpload.blobUrl }
                 val bodyPath = Path(testUpload.tmpFile.absolutePath)
-                batchUploadEndpoint.onBlobItemFinished(
-                    batchUuid = batchUuid.toString(),
-                    uploadUuid = blobToUpload.uploadUuid,
+
+                batchUploadEndpoint.onStoreItem(
+                    blobToUpload.blobUrl,
                     bodyPath = bodyPath,
                     requestHeaders = headersBuilder {  }
                 )
@@ -144,6 +149,7 @@ class BlobUploadServerUseCaseTest {
             httpCache = cache,
             tmpDir = tmpPath,
             json = json,
+            endpoint = endpoint,
         )
 
         //Mark first url as completed - it should not appear in response.

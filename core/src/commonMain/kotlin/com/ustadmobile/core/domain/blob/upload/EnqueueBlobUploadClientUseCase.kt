@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.blob.upload
 
-import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCase
+import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
 
 /**
  * Enqueue a blob upload. Running it is done by WorkManager on Android and by Quartz on JVM,
@@ -28,7 +28,7 @@ interface EnqueueBlobUploadClientUseCase{
     suspend operator fun invoke(
         items: List<EnqueueBlobUploadItem>,
         batchUuid: String,
-        chunkSize: Int = ChunkedUploadClientUseCase.DEFAULT_CHUNK_SIZE,
+        chunkSize: Int = ChunkedUploadClientUseCaseKtorImpl.DEFAULT_CHUNK_SIZE,
     )
 
 }

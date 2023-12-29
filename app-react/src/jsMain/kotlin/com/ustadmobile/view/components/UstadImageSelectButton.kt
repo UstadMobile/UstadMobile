@@ -1,6 +1,5 @@
 package com.ustadmobile.view.components
 
-import com.ustadmobile.hooks.useAttachmentUriSrc
 import com.ustadmobile.mui.components.ThemeContext
 import web.cssom.*
 import emotion.react.css
@@ -20,12 +19,12 @@ external interface UstadImageSelectButtonProps: Props {
 
     var onImageUriChanged: (String?) -> Unit
 
+    var id: String?
+
 }
 
 val UstadImageSelectButton = FC<UstadImageSelectButtonProps> { props ->
     val inputRef = useRef<HTMLInputElement>(null)
-
-    val imageHref = useAttachmentUriSrc(props.imageUri, false)?.toString()
 
     val theme by useRequiredContext(ThemeContext)
 
@@ -39,6 +38,7 @@ val UstadImageSelectButton = FC<UstadImageSelectButtonProps> { props ->
         input {
             type = InputType.file
             ref = inputRef
+            id = props.id
             accept = ".jpg,.webp,.png,image/jpg,image/webp,image/png"
             css {
                 asDynamic().display = "none"
@@ -78,7 +78,7 @@ val UstadImageSelectButton = FC<UstadImageSelectButtonProps> { props ->
             }
 
             Avatar {
-                src = imageHref
+                src = props.imageUri
                 onClick = {
                     inputRef.current?.click()
                 }

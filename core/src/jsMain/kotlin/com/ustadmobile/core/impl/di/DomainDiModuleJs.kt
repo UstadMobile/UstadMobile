@@ -1,6 +1,11 @@
 package com.ustadmobile.core.impl.di
 
 import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobUseCaseJs
+import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
+import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
+import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCaseJs
+import com.ustadmobile.core.domain.blob.savepicture.SavePictureUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.ImportContentUseCase
 import com.ustadmobile.core.domain.contententry.import.ImportContentUseCaseJs
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
@@ -16,6 +21,9 @@ import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorUseCase
 import com.ustadmobile.core.domain.phonenumber.PhoneNumberUtilJs
 import com.ustadmobile.core.domain.sendemail.OnClickEmailUseCase
 import com.ustadmobile.core.domain.sendemail.OnClickSendEmailUseCaseJs
+import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
+import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCaseJs
+import com.ustadmobile.door.ext.DoorTag
 import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.instance
@@ -65,4 +73,33 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
             languagesConfig = instance()
         )
     }
+
+    bind<ChunkedUploadClientLocalUriUseCase>() with singleton {
+        ChunkedUploadClientLocalUriUseCaseJs()
+    }
+
+    bind<EnqueueSavePictureUseCase>() with scoped(endpointScope).singleton {
+        EnqueueSavePictureUseCaseJs(
+            savePictureUseCase = instance()
+        )
+    }
+
+    bind<SavePictureUseCase>() with scoped(endpointScope).singleton {
+        SavePictureUseCase(
+            saveLocalUrisAsBlobUseCase = instance(),
+            enqueueBlobUploadClientUseCase = null,
+            db = instance(tag = DoorTag.TAG_DB),
+            repo = instance(tag = DoorTag.TAG_REPO),
+            compressImageUseCase = null,
+        )
+    }
+
+    bind<SaveLocalUrisAsBlobsUseCase>() with scoped(endpointScope).singleton {
+        SaveLocalUrisAsBlobUseCaseJs(
+            chunkedUploadClientLocalUriUseCase = instance(),
+            endpoint = context,
+            json = instance(),
+        )
+    }
+
 }

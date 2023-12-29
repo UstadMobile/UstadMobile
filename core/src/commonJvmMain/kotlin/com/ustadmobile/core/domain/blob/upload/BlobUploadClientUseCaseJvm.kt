@@ -3,7 +3,7 @@ package com.ustadmobile.core.domain.blob.upload
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCase.Companion.BLOB_RESPONSE_HEADER_PREFIX
 import com.ustadmobile.core.domain.upload.ChunkInfo
-import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCase
+import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.request.requestBuilder
 import io.ktor.client.HttpClient
@@ -22,6 +22,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.io.readTo
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.TransferJobItemStatus
+import com.ustadmobile.core.domain.upload.ChunkedUploadClientChunkGetterUseCase
 import com.ustadmobile.core.util.ext.lastDistinctBy
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.entities.OutgoingReplication
@@ -34,8 +35,11 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicReference
 
+/**
+ * Blob upload client implementation that uses local http cache (UstadCache from lib-cache).
+ */
 class BlobUploadClientUseCaseJvm(
-    private val chunkedUploadUseCase: ChunkedUploadClientUseCase,
+    private val chunkedUploadUseCase: ChunkedUploadClientChunkGetterUseCase,
     private val httpClient: HttpClient,
     private val httpCache: UstadCache,
     private val db: UmAppDatabase,
@@ -59,12 +63,12 @@ class BlobUploadClientUseCaseJvm(
     inner class CacheResponseChunkGetter(
         private val url: String,
         private val batchUuid: String,
-    ) : ChunkedUploadClientUseCase.UploadChunkGetter{
+    ) : ChunkedUploadClientChunkGetterUseCase.UploadChunkGetter {
 
         override suspend fun invoke(
             chunk: ChunkInfo.Chunk,
             buffer: ByteArray
-        ): ChunkedUploadClientUseCase.ChunkResponseInfo? {
+        ): ChunkedUploadClientUseCaseKtorImpl.ChunkResponseInfo? {
             val partialResponse = httpCache.retrieve(
                 requestBuilder(url) {
                     //ChunkInfo.Chunk is exclusive, range bytes are inclusive.
@@ -76,7 +80,7 @@ class BlobUploadClientUseCaseJvm(
 
             partialResponse.bodyAsSource()?.readTo(buffer, 0, chunk.size)
             return if(chunk.isLastChunk) {
-                ChunkedUploadClientUseCase.ChunkResponseInfo(
+                ChunkedUploadClientUseCaseKtorImpl.ChunkResponseInfo(
                     extraHeaders = buildMap {
                         put(
                             key = BlobUploadClientUseCase.BLOB_UPLOAD_HEADER_BATCH_UUID,
@@ -167,7 +171,7 @@ class BlobUploadClientUseCaseJvm(
         }
 
         coroutineScope {
-            val response: BlobUploadResponse = httpClient.post("${endpoint.url}api/blob/upload-init") {
+            val response: BlobUploadResponse = httpClient.post("${endpoint.url}api/blob/upload-init-batch") {
                 contentType(ContentType.Application.Json)
                 setBody(
                     BlobUploadRequest(
@@ -202,7 +206,7 @@ class BlobUploadClientUseCaseJvm(
             val jobs = (0..4).map {
                 asyncUploadItemsFromChannelProcessor(
                     channel = receiveChannel,
-                    remoteUrl = "${endpoint.url}api/blob/upload",
+                    remoteUrl = "${endpoint.url}api/blob/upload-batch-data",
                     batchUuid = batchUuid,
                     onProgress = onProgress,
                     onStatusUpdate = onStatusUpdate,

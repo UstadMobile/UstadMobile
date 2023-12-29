@@ -77,7 +77,7 @@ class ChunkedUploadClientUseCaseTest  {
         fromByte: Long,
     ) {
         val testFile = tempFolder.newFileFromResource(javaClass, resourcePath)
-        val uploader = ChunkedUploadClientUseCase(httpClient)
+        val uploader = ChunkedUploadClientUseCaseKtorImpl(httpClient, uriHelper)
         val uuid = UUID.randomUUID()
         val chunkSize = (20 * 1024)
         val expectedChunkInfo = ChunkInfo(
@@ -90,7 +90,6 @@ class ChunkedUploadClientUseCaseTest  {
             uploader(
                 uploadUuid = uuid.toString(),
                 localUri = testFile.toDoorUri(),
-                uriHelper = uriHelper,
                 remoteUrl = mockWebServer.url("/").toString(),
                 chunkSize = chunkSize,
                 fromByte = fromByte,

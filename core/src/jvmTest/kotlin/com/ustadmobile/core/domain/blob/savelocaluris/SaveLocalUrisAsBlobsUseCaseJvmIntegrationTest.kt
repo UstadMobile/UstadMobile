@@ -5,7 +5,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCase
 import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCaseJvm
 import com.ustadmobile.core.domain.blob.upload.BlobUploadServerUseCase
-import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCase
+import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
 import com.ustadmobile.core.io.ext.readSha256
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.uri.UriHelperJvm
@@ -86,6 +86,7 @@ class SaveLocalUrisAsBlobsUseCaseJvmIntegrationTest {
     @BeforeTest
     fun setup() {
         initNapierLog()
+        endpoint = Endpoint("http://localhost:8094/")
         clientCacheDir = temporaryFolder.newFolder()
         clientCache = UstadCacheBuilder(
             dbUrl = "jdbc:sqlite::memory:",
@@ -116,6 +117,7 @@ class SaveLocalUrisAsBlobsUseCaseJvmIntegrationTest {
             httpCache = serverCache,
             json = json,
             tmpDir = Path(serverCacheDir.absolutePath),
+            endpoint = endpoint,
         )
 
         ktorServer = embeddedServer(Netty, 8094) {
@@ -128,7 +130,7 @@ class SaveLocalUrisAsBlobsUseCaseJvmIntegrationTest {
                 route("api") {
                     route("blob") {
                         BlobUploadServerRoute(
-                            useCase = blobUploadServerUseCase
+                            useCase = { blobUploadServerUseCase }
                         )
 
                         CacheRoute(
@@ -146,8 +148,6 @@ class SaveLocalUrisAsBlobsUseCaseJvmIntegrationTest {
             httpClient = httpClient,
             okHttpClient = okHttpClient,
         )
-
-        endpoint = Endpoint("http://localhost:8094/")
     }
 
     @AfterTest
@@ -171,7 +171,7 @@ class SaveLocalUrisAsBlobsUseCaseJvmIntegrationTest {
         )
 
         val blobUploadClientUseCase = BlobUploadClientUseCaseJvm(
-            chunkedUploadUseCase = ChunkedUploadClientUseCase(httpClient),
+            chunkedUploadUseCase = ChunkedUploadClientUseCaseKtorImpl(httpClient, uriHelper),
             httpClient = httpClient,
             httpCache = clientCache,
             db = mockUmAppDatabase,

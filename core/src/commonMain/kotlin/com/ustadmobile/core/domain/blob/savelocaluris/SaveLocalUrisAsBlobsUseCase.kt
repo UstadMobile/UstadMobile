@@ -1,11 +1,16 @@
 package com.ustadmobile.core.domain.blob.savelocaluris
 
+import kotlinx.serialization.Serializable
+
 
 /**
  * Save a list of local Uri(s) (e.g. Android Uri, JVM file URI, JS blob URI) as blobs.
  *
  * On Android/Desktop: Runs an SHA-256 checksum on the content and stores it into the local httpcache
  * under the blob url (e.g. https://endpoint.com/api/blob/sha256).
+ *
+ * On Javascript: uploads each item to the server using the blob upload-item API endpoint (see
+ * Module.md)
  *
  */
 interface SaveLocalUrisAsBlobsUseCase {
@@ -33,6 +38,15 @@ interface SaveLocalUrisAsBlobsUseCase {
         val entityUid: Long,
         val localUri: String,
         val blobUrl: String,
+    )
+
+    /**
+     * Represents a blob that was saved on the server side via the individual item upload endpoint.
+     * Returned as the body on the last response
+     */
+    @Serializable
+    data class ServerSavedBlob(
+        val blobUrl: String
     )
 
     /**
