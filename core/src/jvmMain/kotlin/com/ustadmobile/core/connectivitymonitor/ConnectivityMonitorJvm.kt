@@ -1,5 +1,6 @@
 package com.ustadmobile.core.connectivitymonitor
 
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -34,7 +35,7 @@ class ConnectivityMonitorJvm(
     val state: Flow<ConnectivityStatus> = _state.asStateFlow()
 
     @Suppress("unused")
-    private val currentStatus: ConnectivityStatus = _state.value
+    val currentStatus: ConnectivityStatus = _state.value
 
     init {
         scope.launch {
@@ -44,14 +45,16 @@ class ConnectivityMonitorJvm(
                 currentJob = scope.launch {
                     try {
                         Socket(checkInetAddr(), checkPort).close()
-                        _state.takeIf {
-                            it.value != ConnectivityStatus.CONNECTED
-                        }?.value = ConnectivityStatus.CONNECTED
+                        if(_state.value != ConnectivityStatus.CONNECTED) {
+                            Napier.i("ConnectivityMonitorJvm: Connectivity available/restored")
+                            _state.value = ConnectivityStatus.CONNECTED
+                        }
                     }catch(e: Throwable) {
                         //Will also catch cancellation exception caused by timeout
-                        _state.takeIf {
-                            it.value != ConnectivityStatus.DISCONNECTED
-                        }?.value = ConnectivityStatus.DISCONNECTED
+                        if(_state.value != ConnectivityStatus.DISCONNECTED) {
+                            Napier.i("ConnectivityMonitorJvm: Connectivity not available/lost")
+                            _state.value = ConnectivityStatus.DISCONNECTED
+                        }
                     }
                 }
                 delay(interval.toLong())

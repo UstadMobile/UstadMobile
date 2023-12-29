@@ -1,14 +1,13 @@
 package com.ustadmobile.core.domain.blob.upload
 
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.connectivitymonitor.ConnectivityTriggerGroupController
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.libcache.UstadCache
 import org.quartz.JobBuilder
-import org.quartz.JobKey
 import org.quartz.Scheduler
 import org.quartz.TriggerBuilder
 import org.quartz.TriggerKey
-import org.quartz.impl.matchers.GroupMatcher
 
 /**
  * Implementation of EnqueueBlobUploadClient using Quartz as the scheduler.
@@ -29,16 +28,15 @@ class EnqueueBlobUploadClientUseCaseJvm(
         chunkSize: Int
     ) {
         val transferJob = createTransferJob(items, batchUuid)
-        val jobKey = JobKey("foo")
         val quartzJob = JobBuilder.newJob(BlobUploadClientJob::class.java)
-            .withIdentity(jobKey)
             .usingJobData(DATA_JOB_UID, transferJob.tjUid)
             .usingJobData(DATA_ENDPOINT, endpoint.url)
             .build()
 
-        scheduler.getJobDetail(jobKey)
-        scheduler.getJobKeys(GroupMatcher.groupEquals("pending-connectivity"))
-        val triggerKey = TriggerKey("blob-upload-${endpoint.url}-${transferJob.tjUid}")
+        val triggerKey = TriggerKey(
+            "blob-upload-${endpoint.url}-${transferJob.tjUid}",
+            ConnectivityTriggerGroupController.TRIGGERKEY_CONNECTIVITY_REQUIRED_GROUP
+        )
         scheduler.unscheduleJob(triggerKey)
         val jobTrigger = TriggerBuilder.newTrigger()
             .withIdentity(triggerKey)

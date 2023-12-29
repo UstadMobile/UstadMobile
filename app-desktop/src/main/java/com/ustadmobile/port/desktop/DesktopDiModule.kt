@@ -6,6 +6,8 @@ import com.ustadmobile.core.account.AuthManager
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.connectivitymonitor.ConnectivityMonitorJvm
+import com.ustadmobile.core.connectivitymonitor.ConnectivityTriggerGroupController
 import com.ustadmobile.core.contentformats.epub.XhtmlFixer
 import com.ustadmobile.core.contentformats.epub.XhtmlFixerJsoup
 import com.ustadmobile.core.db.ContentJobItemTriggersCallback
@@ -65,6 +67,7 @@ import org.quartz.Scheduler
 import org.quartz.impl.StdSchedulerFactory
 import java.io.FileReader
 import java.io.FileWriter
+import java.net.InetAddress
 import java.util.Properties
 import javax.naming.InitialContext
 
@@ -73,6 +76,8 @@ const val TAG_APP_HOME = "AppHome"
 const val TAG_DATA_DIR = "DataDir"
 
 const val TAG_CACHE_DIR = "CacheDir"
+
+const val CONNECTIVITY_CHECK_HOST = "google.com"
 
 fun ustadAppHomeDir(): File {
     return System.getProperty("app_home")?.let { File(it) } ?: File(System.getProperty("user.dir"))
@@ -327,8 +332,24 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         }
     }
 
+    bind<ConnectivityMonitorJvm>() with singleton {
+        ConnectivityMonitorJvm(
+            checkInetAddr = { InetAddress.getByName(CONNECTIVITY_CHECK_HOST) },
+            checkPort = 80,
+        )
+    }
+
+    bind<ConnectivityTriggerGroupController>() with singleton {
+        ConnectivityTriggerGroupController(
+            scheduler = instance(),
+            connectivityMonitorJvm = instance(),
+        )
+    }
+
     onReady {
         instance<File>(tag = TAG_DATA_DIR).takeIf { !it.exists() }?.mkdirs()
+        instance<ConnectivityMonitorJvm>()
+        instance<ConnectivityTriggerGroupController>()
         instance<Scheduler>().start()
         Runtime.getRuntime().addShutdownHook(Thread{
             instance<Scheduler>().shutdown()
