@@ -9,7 +9,10 @@ import org.kodein.di.android.closestDI
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
-
+import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase.Companion.DATA_ENDPOINT
+import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase.Companion.DATA_TABLE_ID
+import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase.Companion.DATA_ENTITY_UID
+import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase.Companion.DATA_LOCAL_URI
 class SavePictureWorker(
     context: Context,
     params: WorkerParameters
@@ -31,15 +34,5 @@ class SavePictureWorker(
         return Result.success()
     }
 
-    companion object {
 
-        const val DATA_ENDPOINT = "endpoint"
-
-        const val DATA_TABLE_ID = "tableId"
-
-        const val DATA_ENTITY_UID = "entityUid"
-
-        const val DATA_LOCAL_URI = "localUri"
-
-    }
 }

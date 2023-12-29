@@ -319,4 +319,20 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
     bind<GenderConfig>() with singleton {
         GenderConfig()
     }
+
+    bind<File>(tag = DiTag.TAG_TMP_DIR) with singleton {
+        File(ustadAppDataDir(), "tmp").also {
+            if(!it.exists())
+                it.mkdirs()
+        }
+    }
+
+    onReady {
+        instance<File>(tag = TAG_DATA_DIR).takeIf { !it.exists() }?.mkdirs()
+        instance<Scheduler>().start()
+        Runtime.getRuntime().addShutdownHook(Thread{
+            instance<Scheduler>().shutdown()
+        })
+    }
+
 }

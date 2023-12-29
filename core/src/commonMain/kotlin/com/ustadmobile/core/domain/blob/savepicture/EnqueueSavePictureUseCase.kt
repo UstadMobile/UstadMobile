@@ -25,4 +25,16 @@ interface EnqueueSavePictureUseCase {
         pictureUri: String?
     )
 
+    companion object {
+
+        const val DATA_ENDPOINT = "endpoint"
+
+        const val DATA_TABLE_ID = "tableId"
+
+        const val DATA_ENTITY_UID = "entityUid"
+
+        const val DATA_LOCAL_URI = "localUri"
+
+    }
+
 }

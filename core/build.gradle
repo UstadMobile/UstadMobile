@@ -169,6 +169,8 @@ kotlin {
                 implementation "org.kodein.di:kodein-di-framework-ktor-server-jvm:$version_kodein_di"
                 implementation libs.javaffmpeg
                 implementation libs.libphonenumber.google
+                implementation libs.thumbnailator
+                implementation libs.webpimageio
             }
         }
 

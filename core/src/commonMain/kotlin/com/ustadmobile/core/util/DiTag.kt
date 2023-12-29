@@ -23,4 +23,7 @@ object DiTag {
 
     const val TAG_FILE_UPLOAD_TMP_DIR = 32
 
+    const val TAG_TMP_DIR = 42
+
+
 }

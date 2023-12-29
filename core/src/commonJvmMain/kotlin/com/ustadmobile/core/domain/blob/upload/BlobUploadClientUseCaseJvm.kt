@@ -82,7 +82,9 @@ class BlobUploadClientUseCaseJvm(
                             key = BlobUploadClientUseCase.BLOB_UPLOAD_HEADER_BATCH_UUID,
                             value = listOf(batchUuid)
                         )
-                        partialResponse.headers.names().forEach { headerName ->
+                        partialResponse.headers.names().filter { headerName ->
+                            !DO_NOT_SEND_HEADERS.any { it.equals(headerName, true) }
+                        }.forEach { headerName ->
                             put("$BLOB_RESPONSE_HEADER_PREFIX$headerName",
                                 partialResponse.headers.getAllByName(headerName))
                         }
@@ -330,4 +332,20 @@ class BlobUploadClientUseCaseJvm(
             }
         }
     }
+    companion object {
+
+        /**
+         * Headers that should not be sent as part of the final upload chunk.
+         * Content-Range: because the chunk getter makes a partial request from the cache, the
+         *   response will include a content-range header from getting that specific chunk. This
+         *   should not be included on the stored blob
+         * Content-Length: because teh chunk getter makes a partial request from the cache, the
+         *   response length will only be the length of the chunk. This is wrong. The server side
+         *   will automatically determine the length based on the size uploaded.
+         *
+         */
+        private val DO_NOT_SEND_HEADERS = listOf("content-range", "content-length")
+
+    }
+
 }
