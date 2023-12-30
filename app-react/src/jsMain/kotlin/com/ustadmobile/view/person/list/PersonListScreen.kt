@@ -1,5 +1,6 @@
 package com.ustadmobile.view.person.list
 
+import app.cash.paging.PagingSourceLoadResult
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
@@ -32,6 +33,7 @@ import react.Props
 import react.ReactNode
 import react.create
 import react.router.useLocation
+import tanstack.react.query.UseInfiniteQueryResult
 
 
 external interface PersonListProps: Props {
@@ -44,7 +46,7 @@ external interface PersonListProps: Props {
 val PersonListComponent2 = FC<PersonListProps> { props ->
     val strings = useStringProvider()
 
-    val infiniteQueryResult = usePagingSource(
+    val infiniteQueryResult : UseInfiniteQueryResult<PagingSourceLoadResult<Int, PersonAndListDisplayDetails>, Throwable> = usePagingSource(
         props.uiState.personList, true, 50
     )
     val muiAppState = useMuiAppState()

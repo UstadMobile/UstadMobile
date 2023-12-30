@@ -10,14 +10,13 @@ import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.locale.mapLookup
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
-import com.ustadmobile.hooks.useAttachmentUriSrc
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.mui.components.UstadDetailField
 import com.ustadmobile.mui.components.UstadQuickActionButton
+import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.view.components.UstadFab
-import web.cssom.ObjectFit
 import mui.material.List
 //WARNING: DO NOT Replace with import mui.icons.material.[*] - Leads to severe IDE performance issues 10/Apr/23 https://youtrack.jetbrains.com/issue/KT-57897/Intellisense-and-code-analysis-is-extremely-slow-and-unusable-on-Kotlin-JS
 import mui.material.*
@@ -31,17 +30,16 @@ import mui.icons.material.AccountCircle as AccountCircleIcon
 import mui.icons.material.LocationOn as LocationOnIcon
 import mui.icons.material.Person as PersonIcon
 import mui.icons.material.People as PeopleIcon
-import react.dom.html.ReactHTML.img
 import mui.icons.material.Badge
-import mui.material.Container
 import mui.material.styles.TypographyVariant
 import mui.system.*
 import mui.system.Stack
 import mui.system.StackDirection
 import react.*
+import web.cssom.Display
 import kotlin.js.Date
 import web.cssom.px
-import emotion.react.css
+import web.cssom.JustifyContent
 
 val PersonDetailScreen = FC<Props> {
     val viewModel = useUstadViewModel { di, savedStateHandle ->
@@ -117,28 +115,34 @@ val PersonDetailComponent2 = FC<PersonDetailProps> { props ->
 
     val strings = useStringProvider()
 
-    Container {
-        maxWidth = "lg"
-
+    UstadStandardContainer {
         Stack {
             direction = responsive(StackDirection.column)
-            spacing = responsive(10.px)
+            spacing = responsive(8.px)
 
-            val personImgSrc = useAttachmentUriSrc(
-                attachmentUri = props.uiState.personPicture?.personPictureUri,
-                revokeOnCleanup = true,
-            )
 
-            if(personImgSrc != null) {
-                img {
-                    src = personImgSrc.toString()
-                    alt = "user image"
-                    css {
-                        maxHeight = 304.px
-                        objectFit = ObjectFit.contain
-                        asDynamic().objectPosition = "center"
+            props.uiState.personPicture?.personPictureUri?.also { imgSrc ->
+                mui.material.Box {
+                    sx {
+                        justifyContent = JustifyContent.center
+                        display = Display.flex
+                    }
+
+                    Avatar {
+                        sx {
+                            width = 304.px
+                            height = 304.px
+                        }
+
+                        src = imgSrc
+                        alt = "user image"
                     }
                 }
+
+                Divider {
+                    orientation = Orientation.horizontal
+                }
+
             }
 
             QuickActionBar {

@@ -14,7 +14,7 @@ external interface UstadPersonAvatarProps: Props {
 
 val UstadPersonAvatar = FC<UstadPersonAvatarProps> { props ->
     Avatar {
-
+        src = props.pictureUri
     }
 
 }
