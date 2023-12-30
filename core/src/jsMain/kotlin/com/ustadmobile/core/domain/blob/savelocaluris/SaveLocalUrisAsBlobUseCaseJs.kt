@@ -1,7 +1,9 @@
 package com.ustadmobile.core.domain.blob.savelocaluris
 
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCase.Companion.BLOB_RESPONSE_HEADER_PREFIX
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
+import com.ustadmobile.core.util.stringvalues.asIStringValues
 import com.ustadmobile.core.util.uuid.randomUuidAsString
 import com.ustadmobile.door.DoorUri
 import io.github.aakira.napier.Napier
@@ -22,7 +24,13 @@ class SaveLocalUrisAsBlobUseCaseJs(
                 uploadUuid = randomUuidAsString(),
                 localUri = DoorUri.parse(itemToSave.localUri),
                 remoteUrl = "${endpoint.url}api/blob/upload-item",
+                lastChunkHeaders = buildMap {
+                    itemToSave.mimeType?.also { blobMimeType ->
+                        put("${BLOB_RESPONSE_HEADER_PREFIX}Content-Type", listOf(blobMimeType))
+                    }
+                }.asIStringValues()
             )
+
             val responseJsonStr = response.body
                 ?: throw IllegalStateException("SaveLocalUrisAsBlobUseCaseJs: no response body!")
 

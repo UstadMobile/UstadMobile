@@ -6,6 +6,7 @@ import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCas
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCaseJs
 import com.ustadmobile.core.domain.blob.savepicture.SavePictureUseCase
+import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseJs
 import com.ustadmobile.core.domain.contententry.importcontent.ImportContentUseCase
 import com.ustadmobile.core.domain.contententry.import.ImportContentUseCaseJs
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
@@ -90,7 +91,7 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
             enqueueBlobUploadClientUseCase = null,
             db = instance(tag = DoorTag.TAG_DB),
             repo = instance(tag = DoorTag.TAG_REPO),
-            compressImageUseCase = null,
+            compressImageUseCase = CompressImageUseCaseJs(),
         )
     }
 

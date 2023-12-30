@@ -2,6 +2,8 @@ package com.ustadmobile.core.domain.upload
 
 import com.ustadmobile.core.domain.blob.TransferJobItemStatus
 import com.ustadmobile.core.uri.UriHelper
+import com.ustadmobile.core.util.ext.toMap
+import com.ustadmobile.core.util.stringvalues.IStringValues
 import com.ustadmobile.core.util.stringvalues.asIStringValues
 import com.ustadmobile.door.DoorUri
 import io.github.aakira.napier.Napier
@@ -32,6 +34,7 @@ class ChunkedUploadClientUseCaseKtorImpl(
     class LocalUriChunkGetter(
         private val localUri: DoorUri,
         private val uriHelper: UriHelper,
+        private val finalHeaders: IStringValues? = null
     ): ChunkedUploadClientChunkGetterUseCase.UploadChunkGetter {
         @OptIn(ExperimentalStdlibApi::class)
         override suspend fun invoke(chunk: ChunkInfo.Chunk, buffer: ByteArray): ChunkResponseInfo? {
@@ -39,7 +42,11 @@ class ChunkedUploadClientUseCaseKtorImpl(
                 it.skip(chunk.start)
                 it.readTo(buffer, 0, chunk.size)
             }
-            return null
+            return if(chunk.isLastChunk && finalHeaders != null) {
+                ChunkResponseInfo(finalHeaders.toMap())
+            }else {
+                null
+            }
         }
     }
 
@@ -65,6 +72,7 @@ class ChunkedUploadClientUseCaseKtorImpl(
         chunkSize: Int,
         onProgress: (Long) -> Unit,
         onStatusChange: (TransferJobItemStatus) -> Unit,
+        lastChunkHeaders: IStringValues?,
     ): ChunkedUploadClientLocalUriUseCase.LastChunkResponse {
         return invoke(
             uploadUuid = uploadUuid,

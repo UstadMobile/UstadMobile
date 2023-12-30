@@ -3,6 +3,7 @@ package com.ustadmobile.core.util.ext
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.util.directivesToMap
 import com.ustadmobile.core.util.stringvalues.IStringValues
+import com.ustadmobile.core.util.stringvalues.MapStringValues
 
 /**
  * Gets the protocol that the client used, using headers to adjust as needed when a reverse proxy
@@ -47,5 +48,15 @@ fun IStringValues.clientEndpoint(
     defaultProtocol: String = "http"
 ): Endpoint {
     return Endpoint(clientProtocolAndHost(defaultProtocol = defaultProtocol))
+}
+
+fun IStringValues.toMap(): Map<String, List<String>> {
+    return if(this is MapStringValues) {
+        this.map
+    }else {
+        names().map { headerName ->
+            headerName to getAll(headerName)
+        }.toMap()
+    }
 }
 

@@ -19,6 +19,10 @@ interface ChunkedUploadClientLocalUriUseCase {
         val headers: IStringValues,
     )
 
+    /**
+     * @param lastChunkHeaders headers that will be included on the last chunk uploaded. Can be used
+     *        to send additional info that is used to complete processing once the upload is complete.
+     */
     suspend operator fun invoke(
         uploadUuid: String,
         localUri: DoorUri,
@@ -27,6 +31,7 @@ interface ChunkedUploadClientLocalUriUseCase {
         chunkSize: Int = DEFAULT_CHUNK_SIZE,
         onProgress: (Long) -> Unit = { },
         onStatusChange: (TransferJobItemStatus) -> Unit = { },
+        lastChunkHeaders: IStringValues? = null,
     ): LastChunkResponse
 
 

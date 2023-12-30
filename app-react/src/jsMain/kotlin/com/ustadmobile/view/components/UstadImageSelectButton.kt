@@ -40,6 +40,12 @@ val UstadImageSelectButton = FC<UstadImageSelectButtonProps> { props ->
             ref = inputRef
             id = props.id
             accept = ".jpg,.webp,.png,image/jpg,image/webp,image/png"
+
+            //Note: if the value is not set then React doesn't recognize this as a controlled component
+            // Components should not change between controlled and uncontrolled. We are just using the
+            // input to get the file from the onChange event.
+            value = ""
+
             css {
                 asDynamic().display = "none"
             }

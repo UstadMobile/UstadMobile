@@ -1,6 +1,7 @@
 package com.ustadmobile.core.domain.upload
 
 import com.ustadmobile.core.domain.blob.TransferJobItemStatus
+import com.ustadmobile.core.util.stringvalues.IStringValues
 import com.ustadmobile.core.util.stringvalues.asIStringValues
 import com.ustadmobile.door.DoorUri
 import io.github.aakira.napier.Napier
@@ -21,6 +22,7 @@ class ChunkedUploadClientLocalUriUseCaseJs: ChunkedUploadClientLocalUriUseCase {
         chunkSize: Int,
         onProgress: (Long) -> Unit,
         onStatusChange: (TransferJobItemStatus) -> Unit,
+        lastChunkHeaders: IStringValues?,
     ): ChunkedUploadClientLocalUriUseCase.LastChunkResponse {
         try {
             Napier.d("ChunkedUploadClientLocalUriUseCaseJs: Starting upload " +
@@ -42,15 +44,24 @@ class ChunkedUploadClientLocalUriUseCaseJs: ChunkedUploadClientLocalUriUseCase {
             onStatusChange(TransferJobItemStatus.IN_PROGRESS)
             chunkInfo.forEach { chunk ->
                 val uploadChunkBlob = blob.slice(chunk.start.toInt(), chunk.end.toInt())
+                val headerPairs = buildList {
+                    add(HEADER_UPLOAD_UUID to uploadUuid)
+                    add(HEADER_IS_FINAL_CHUNK to chunk.isLastChunk.toString())
+                    if(chunk.isLastChunk && lastChunkHeaders != null) {
+                        lastChunkHeaders.names().forEach { headerName ->
+                            lastChunkHeaders.getAll(headerName).forEach { headerVal ->
+                                add(headerName to headerVal)
+                            }
+                        }
+                    }
+                }
+
                 val fetchResponse = fetchAsync(
                     input = remoteUrl,
                     init = jso {
                         body = uploadChunkBlob
                         method = "POST"
-                        headers = json(
-                            HEADER_UPLOAD_UUID to uploadUuid,
-                            HEADER_IS_FINAL_CHUNK to chunk.isLastChunk.toString(),
-                        )
+                        headers = json(*headerPairs.toTypedArray())
                     }
                 ).await()
                 onProgress(chunk.end)

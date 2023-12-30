@@ -2,7 +2,7 @@ package com.ustadmobile.core.util.stringvalues
 
 import com.ustadmobile.core.util.ext.firstCaseInsensitiveOrNull
 
-class MapStringValues(private val map: Map<String, List<String>>) : IStringValues{
+class MapStringValues(internal val map: Map<String, List<String>>) : IStringValues{
     override fun get(key: String): String? {
         return map.firstCaseInsensitiveOrNull(key)
     }
@@ -16,3 +16,6 @@ class MapStringValues(private val map: Map<String, List<String>>) : IStringValue
     }
 
 }
+
+fun Map<String, List<String>>.asIStringValues() = MapStringValues(this)
+

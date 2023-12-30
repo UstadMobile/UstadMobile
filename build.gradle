@@ -229,10 +229,6 @@ ext {
     version_npm_joda_timezone = "2.3.0"
 
     version_npm_timezones = "^1.6.1"
-    version_npm_buffer = "^6.0.3"
-    version_npm_asmcrypto = "2.3.2" //required for client side one-way password encryption
-    version_crypto_browserify = "3.12.0" //required by asmcrypto
-    version_stream_browserify = "3.0.0" //required by cipher-base
 
     version_npm_emotion = "11.10.5"
     version_npm_google_charts = "^3.0.15"
@@ -249,6 +245,9 @@ ext {
     version_pdfview_android = "1.1.0"
     version_pdfbox_apache = "3.0.0"
     version_pdfview_android = "1.1.0"
+
+    version_npm_uuid = "^9.0.1"
+    version_compressorjs = "^1.2.1"
 }
 
 /*

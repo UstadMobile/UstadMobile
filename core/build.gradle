@@ -86,6 +86,8 @@ kotlin {
     android()
 
     js(IR) {
+        useCommonJs()
+
         browser {
             testTask {
                 useKarma {
@@ -279,15 +281,9 @@ kotlin {
                 implementation "org.jetbrains.kotlin-wrappers:kotlin-react"
                 implementation "org.jetbrains.kotlin-wrappers:kotlin-react-router-dom"
 
-                //Required to do encryption for tokens etc.
-                implementation npm("asmcrypto.js","$version_npm_asmcrypto")
-                //required by asmcrypto - see webpack.confg.d
-                implementation npm("crypto-browserify", "$version_crypto_browserify")
-                //required by asmcrypto - see webpack.confg.d
-                implementation npm("stream-browserify", "$version_stream_browserify")
-                implementation npm("buffer","$version_npm_buffer")
-
                 implementation npm("libphonenumber-js", "$version_npm_libphonenumber_js")
+                implementation npm("uuid", "$version_npm_uuid")
+                implementation npm("compressorjs", "$version_compressorjs")
             }
         }
 
