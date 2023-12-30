@@ -17,13 +17,18 @@ external interface UstadAddListItemProps: Props {
 
     var onClickAdd: () -> Unit
 
+    var id: String?
+
 }
 
 val UstadAddListItem = FC<UstadAddListItemProps> { props ->
 
     ListItem {
-
         ListItemButton{
+            props.id?.also {
+                id = it
+            }
+
             disabled = !(props.enabled ?: true)
 
             ListItemIcon {

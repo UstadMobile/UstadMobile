@@ -884,7 +884,7 @@
     <string name="automatic">Автоматически</string>
     <string name="student_marks_content">Участники оценивают себя сами</string>
     <string name="completion_criteria">Критерии завершения</string>
-    <string name="late_penalty">(%1$s%% штраф за опоздание)</string>
+    <string name="late_penalty">(%1$s штраф за опоздание)</string>
     <string name="add_folder">Добавить все из папки</string>
     <string name="add_folder_description">Добавить весь поддерживаемый образовательный контент из папки</string>
     <string name="content_already_added_to_class">%1$s уже было в материалах курса</string>

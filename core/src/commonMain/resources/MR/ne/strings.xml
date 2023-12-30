@@ -9,7 +9,6 @@
     <string name="error_opening_file">फाइल खुल्न त्रुटि:</string>
     <string name="logout">लगआउट</string>
     <string name="next">अर्को</string>
-    <string name="name">नाम</string>
     <string name="canceled">रद्द भयो</string>
     <string name="field_password_error_min">पासवर्ड कम्तीमा पनि ५ वटा वर्णहरू भएको हुनुपर्छ</string>
     <string name="num_items_with_name_with_comma">%1$d %2$s, %3$d %4$s</string>
@@ -40,7 +39,6 @@
     <string name="download_all">सबै डाउनलोड गरौं</string>
     <string name="previous">पहिलेको</string>
     <string name="clazz_work">कक्षा कार्य</string>
-    <string name="submitted">पेश गरिएको</string>
     <string name="back">पछाडि फर्कौं</string>
     <string name="username">प्रयोगकर्ता नाम</string>
     <string name="password">पासवर्ड</string>
@@ -143,7 +141,6 @@
     <string name="mother">आमा</string>
     <string name="birthday">जन्म दिन</string>
     <string name="student_image">विद्यार्थीको फोटो</string>
-    <string name="question">प्रश्न</string>
     <string name="add_person">व्यक्ति थपौं</string>
     <string name="add_class">कक्षा थपौं</string>
     <string name="class_description">कक्षाको विवरण</string>
@@ -165,8 +162,6 @@
     <string name="attendance_high_to_low">हाजिरी (उच्चदेखि न्यून)</string>
     <string name="teacher">शिक्षक</string>
     <string name="teachers_literal">शिक्षकहरू</string>
-    <string name="up">माथि</string>
-    <string name="down">तल</string>
     <string name="uom_frequency_title">कति धेरै पटक</string>
     <string name="uom_duration_title">समय अवधि</string>
     <string name="uom_boolean_title">सत्य वा असत्य</string>
@@ -188,13 +183,11 @@
     <string name="interactive">अन्तरक्रियात्मक</string>
     <string name="update_content">विषयसामग्री अपडेट गरौं</string>
     <string name="filter">फिल्टर</string>
-    <string name="over">माथि</string>
     <string name="sync">सिंक गरौं</string>
     <string name="not_recorded">रेकर्ड नगरिएको</string>
     <string name="collection">सङ्कलन</string>
     <string name="document">डकुमेन्ट</string>
     <string name="audio">अडियो</string>
-    <string name="and">र</string>
     <string name="added">थपियो</string>
     <string name="error_this_device_doesnt_support_bluetooth_sharing">माफ गर्नुहोस्, यो डिभाइसले फाइलहरू ब्लूटूथबाट पठाउन सपोर्ट गर्दैन।</string>
     <string name="preparing">तयार गर्दै</string>
@@ -385,7 +378,6 @@
     <string name="attendance_low_to_high">हाजिरी (न्यूनदेखि उच्च)</string>
     <string name="not_started">सुरू गरिएको छैन</string>
     <string name="select_subtitle_video">सबटाइटल भाषा छनौट गरौं</string>
-    <string name="to">लाई</string>
     <string name="started">सुरू गरिएको</string>
     <string name="mixed">मिश्रित</string>
     <string name="store_title">उस्ताद मोबाइल - अफलाइन खुला शैक्षिक स्रोतहरू</string>
@@ -427,7 +419,6 @@
     <string name="x_percent_attended">%1.0f%% हाजिरी</string>
     <string name="add_a_new_clazzwork">एउटा नयाँ कक्षा कार्य थपौं</string>
     <string name="edit_clazzwork">कक्षा कार्य सम्पादन गरौं</string>
-    <string name="marked">मार्क गरिएको</string>
     <string name="submit">पेश गरौं</string>
     <string name="share_offline_zip_checkbox_label">जीप फाइल बनाएर पठाऔं</string>
     <string name="change_implemented_if_any">परिवर्तन लागू गरियो (यदि कुनै छ भने)</string>
@@ -451,7 +442,6 @@
 \n1. सेटिङ खोल्नुहोस् &gt; ब्लूटूथ सेटिङमा जानुहोस्।
 \n2. डिभाइस देखिएको निश्चित गर्नुहोस्।</string>
     <string name="sort_by_name_desc">नाम (झर्दो क्रम)</string>
-    <string name="member">सदस्य</string>
     <string name="return_only">फर्कौं र समाप्त गरौं</string>
     <string name="workspace">कार्यठाउँ</string>
     <string name="organisation">संस्था %1$s</string>
@@ -482,7 +472,6 @@
     <string name="text">टेक्स्ट</string>
     <string name="update">अपडेट गरौं</string>
     <string name="dialog_download_from_playstore_ok">अहिले डाउनलोड गरौं (नि:शुल्क)</string>
-    <string name="None">कुनै पनि छैन</string>
     <string name="create_a_new_report">नयाँ रिपोर्ट बनाऔं</string>
     <string name="class_enrolment_leaving">छोड्नुको कक्षा भर्ना कारण</string>
     <string name="onboarding_offline_sharing_subheading">नजिकैका अन्य कुनै प्रयोगकर्तासँग उच्च गतिमा विषयसामग्री सेयर गरौं।</string>
@@ -510,12 +499,9 @@
     <string name="groups">समूहहरू</string>
     <string name="add_a_new_role">एउटा नयाँ भूमिका थपौं</string>
     <string name="role_assignment_setting_desc">एउटा प्रयोगकर्ता वा समूहलाई भूमिकाहरू तोकौं</string>
-    <string name="members">सदस्यहरू</string>
     <string name="role_assignment">भूमिका प्रदान</string>
     <string name="edit_person">व्यक्ति सम्पादन गरौं</string>
-    <string name="first">पहिलो</string>
     <string name="feedback_hint">कृपया तपाईंको पृष्ठपोषण हाल्नुहोस्</string>
-    <string name="last">अन्तिम</string>
     <string name="processing">प्रोसेस हुँदै</string>
     <string name="uploading">अपलोड हुँदै</string>
     <string name="move">सारौँ</string>
@@ -576,8 +562,6 @@
     <string name="locations">लोकेसनहरू</string>
     <string name="locations_setting_desc">लोकेसनहरू व्यस्थापन गरौं</string>
     <string name="audit_log_setting_desc">अडिट लग हेरौं र एक्सपोर्ट गरौं</string>
-    <string name="entry">इन्ट्री/प्रविष्टि</string>
-    <string name="permission">अनुमति</string>
     <string name="person">व्यक्ति</string>
     <string name="add_a_new_person">एउटा नयाँ व्यक्ति थपौं</string>
     <string name="permission_person_select">मानिस हेरौं</string>

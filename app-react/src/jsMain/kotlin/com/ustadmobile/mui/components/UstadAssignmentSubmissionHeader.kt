@@ -60,7 +60,7 @@ val UstadAssignmentSubmissionHeader = FC<UstadAssignmentSubmissionHeaderProps> {
                         }
 
                         + strings.format(MR.strings.late_penalty,
-                            (props.uiState.courseBlock?.cbLateSubmissionPenalty ?: 0).toString()
+                            (props.uiState.courseBlock?.cbLateSubmissionPenalty ?: 0).toString() + "%"
                         )
                     }
                 }

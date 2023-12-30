@@ -115,7 +115,7 @@ expect abstract class SiteTermsDao : OneToManyJoinDao<SiteTerms> {
     @Query("""
         SELECT SiteTerms.sTermsLang
           FROM SiteTerms
-         WHERE CAST(sTermsActive AS INTEGER) = :active 
+         WHERE CAST(SiteTerms.sTermsActive AS INTEGER) = :active 
     """)
     abstract suspend fun findAvailableSiteTermLanguages(active: Int): List<String?>
 

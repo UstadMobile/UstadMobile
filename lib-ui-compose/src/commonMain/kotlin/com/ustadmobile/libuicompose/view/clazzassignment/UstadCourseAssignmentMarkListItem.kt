@@ -74,8 +74,10 @@ fun UstadCourseAssignmentMarkListItem(
                                 ) {
                                     append(" ")
                                     append(
-                                        stringResource(MR.strings.late_penalty,
-                                            uiState.mark.courseAssignmentMark?.penaltyPercentage() ?: 0)
+                                        stringResource(
+                                            MR.strings.late_penalty,
+                                            (uiState.mark.courseAssignmentMark?.penaltyPercentage() ?: 0).toString() + "%"
+                                        )
                                     )
                                 }
                             }
