@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.db.entities
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -36,4 +37,8 @@ data class TransferJobItem(
     var tjiTableId: Int = 0,
 
     var tjiEntityUid: Long = 0,
+
+    //This should be set when the transferjobitem is created - by query.
+    @ColumnInfo(defaultValue = "0")
+    var tjiEntityEtag: Long = 0,
 )

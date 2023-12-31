@@ -284,7 +284,6 @@ class PersonEditViewModel(
         val personPicture: PersonPicture = PersonPicture().apply {
             personPictureUid = _uiState.value.personPicture?.personPictureUid ?: 0
             personPictureUri = pictureUri
-            picTimestamp = systemTimeInMillis()
         }
 
         _uiState.update { prev ->
@@ -554,7 +553,6 @@ class PersonEditViewModel(
 
                 if(personPictureVal != null) {
                     personPictureVal.personPictureUid = savePerson.personUid
-                    personPictureVal.personPicturePersonUid = savePerson.personUid
                     personPictureVal.personPictureLct = systemTimeInMillis()
                     val initPictureUri = savedStateHandle[INIT_PIC_URI] ?: ""
                     val personPictureUriVal = personPictureVal.personPictureUri

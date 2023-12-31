@@ -54,6 +54,7 @@ class SaveLocalUrisAsBlobsUseCaseJvm(
 
         val endpointUrl = UrlKmp(endpoint.url)
 
+        //List of Pair (SaveLocalUriAsBlobItem to CacheEntryToStore)
         val entriesToStore = localUrisToSave.map { saveItem ->
             val tmpBlobPath = Path(tmpDir, UUID.randomUUID().toString())
 
@@ -72,7 +73,7 @@ class SaveLocalUrisAsBlobsUseCaseJvm(
             val mimeType = saveItem.mimeType ?: uriHelper.getMimeType(blobDoorUri)
                 ?: "application/octet-stream"
 
-            saveItem.entityUid to CacheEntryToStore(
+            saveItem to CacheEntryToStore(
                 request = blobRequest,
                 response = HttpPathResponse(
                     path = tmpBlobPath,
@@ -88,15 +89,13 @@ class SaveLocalUrisAsBlobsUseCaseJvm(
 
         Napier.d { "$logPrefix Storing ${entriesToStore.size} local uris as blobs (${entriesToStore.joinToString { it.second.request.url }})" }
         cache.store(entriesToStore.map { it.second })
-        val uidToLocalUriMap = localUrisToSave.associate {
-            it.entityUid to it.localUri
-        }
-
 
         entriesToStore.map {
-            //Blob local uri must be in the map
-            val blobLocalUri = uidToLocalUriMap[it.first]!!
-            SaveLocalUrisAsBlobsUseCase.SavedBlob(it.first, blobLocalUri, it.second.request.url)
+            SaveLocalUrisAsBlobsUseCase.SavedBlob(
+                entityUid = it.first.entityUid,
+                localUri = it.first.localUri,
+                blobUrl = it.second.request.url
+            )
         }
     }
 

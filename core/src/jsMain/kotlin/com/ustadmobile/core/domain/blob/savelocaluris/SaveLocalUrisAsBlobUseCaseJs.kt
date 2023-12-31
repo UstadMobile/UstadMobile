@@ -18,6 +18,8 @@ class SaveLocalUrisAsBlobUseCaseJs(
     override suspend fun invoke(
         localUrisToSave: List<SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem>
     ): List<SaveLocalUrisAsBlobsUseCase.SavedBlob> {
+        //Could insert TransferJob(s) here
+
         return localUrisToSave.map { itemToSave ->
             Napier.d("SaveLocalUrisAsBlobUseCaseJs: uploading ${itemToSave.localUri}")
             val response = chunkedUploadClientLocalUriUseCase(
@@ -28,7 +30,7 @@ class SaveLocalUrisAsBlobUseCaseJs(
                     itemToSave.mimeType?.also { blobMimeType ->
                         put("${BLOB_RESPONSE_HEADER_PREFIX}Content-Type", listOf(blobMimeType))
                     }
-                }.asIStringValues()
+                }.asIStringValues(),
             )
 
             val responseJsonStr = response.body

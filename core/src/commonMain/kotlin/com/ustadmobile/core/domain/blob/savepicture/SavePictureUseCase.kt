@@ -3,6 +3,7 @@ package com.ustadmobile.core.domain.blob.savepicture
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
 import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCase
+import com.ustadmobile.core.domain.compress.CompressParams
 import com.ustadmobile.core.domain.compress.CompressUseCase
 import com.ustadmobile.core.util.uuid.randomUuidAsString
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -17,61 +18,92 @@ class SavePictureUseCase(
     private val enqueueBlobUploadClientUseCase: EnqueueBlobUploadClientUseCase?,
     private val db: UmAppDatabase,
     private val repo: UmAppDatabase,
-    private val compressImageUseCase: CompressUseCase? = null,
+    private val compressImageUseCase: CompressUseCase,
 ) {
 
     suspend operator fun invoke(
         entityUid: Long,
         tableId: Int,
         pictureUri: String?,
-        mimeType: String? = null,
     ) {
         if(pictureUri != null) {
-            val compressionResult = compressImageUseCase?.invoke(fromUri = pictureUri)
-            val uriToStore = compressionResult?.uri ?: pictureUri
-            val mimeTypeToStore = compressionResult?.mimeType ?: mimeType
+            val mainCompressionResult = compressImageUseCase(fromUri = pictureUri)
+            val thumbnailCompressionResult = compressImageUseCase(
+                fromUri = pictureUri,
+                params = CompressParams(
+                    maxWidth = THUMBNAIL_DIMENSION,
+                    maxHeight = THUMBNAIL_DIMENSION,
+                )
+            )
 
-            val savedBlob = saveLocalUrisAsBlobUseCase(
+            val savedBlobs = saveLocalUrisAsBlobUseCase(
                 localUrisToSave = listOf(
                     SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem(
-                        localUri = uriToStore,
+                        localUri = mainCompressionResult.uri,
                         entityUid = entityUid,
                         tableId = tableId,
-                        mimeType = mimeTypeToStore,
+                        mimeType = mainCompressionResult.mimeType,
+                    ),
+                    SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem(
+                        localUri = thumbnailCompressionResult.uri,
+                        entityUid = entityUid,
+                        tableId = tableId,
+                        mimeType = mainCompressionResult.mimeType,
                     )
                 ),
-            ).first()
+            )
+
+            val pictureBlob = savedBlobs.first {
+                it.localUri == mainCompressionResult.uri
+            }
+            val thumbnailBlob = savedBlobs.first {
+                it.localUri == thumbnailCompressionResult.uri
+            }
 
             if(enqueueBlobUploadClientUseCase != null) {
                 db.personPictureDao.updateUri(
                     uid = entityUid,
-                    uri = savedBlob.blobUrl,
+                    uri = pictureBlob.blobUrl,
+                    thumbnailUri = thumbnailBlob.blobUrl,
                     time = systemTimeInMillis()
                 )
+
                 enqueueBlobUploadClientUseCase.invoke(
-                    items = listOf(
+                    items = savedBlobs.map {
                         EnqueueBlobUploadClientUseCase.EnqueueBlobUploadItem(
-                            blobUrl = savedBlob.blobUrl,
+                            blobUrl = it.blobUrl,
                             tableId = tableId,
                             entityUid = entityUid,
                         )
-                    ),
+                    },
                     batchUuid = randomUuidAsString(),
                 )
             }else {
                 //No upload needed, directly update repo
                 repo.personPictureDao.updateUri(
                     uid = entityUid,
-                    uri = savedBlob.blobUrl,
+                    uri = pictureBlob.blobUrl,
+                    thumbnailUri = thumbnailBlob.blobUrl,
                     time = systemTimeInMillis()
                 )
             }
         }else {
             repo.personPictureDao.updateUri(
                 uid = entityUid,
-                uri = pictureUri,
+                uri = null,
+                thumbnailUri = null,
                 time = systemTimeInMillis(),
             )
         }
+    }
+
+
+    companion object {
+
+        //List avatar size is 40 pixels as per
+        // https://m3.material.io/components/lists/specs
+        // Highest pixel density is 4x as per https://developer.android.com/training/multiscreen/screendensities
+        const val THUMBNAIL_DIMENSION = 40 * 4
+
     }
 }

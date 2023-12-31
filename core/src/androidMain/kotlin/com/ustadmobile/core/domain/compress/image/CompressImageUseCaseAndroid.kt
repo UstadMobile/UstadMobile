@@ -13,6 +13,7 @@ import com.ustadmobile.core.ext.requireExtension
 import id.zelory.compressor.Compressor
 import id.zelory.compressor.constraint.default
 import id.zelory.compressor.constraint.destination
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -50,13 +51,16 @@ class CompressImageUseCaseAndroid(
                     tmpInputFile
                 }
 
+                val destFile = if(toUri != null) {
+                    Uri.parse(toUri).toFile().requireExtension("webp")
+                }else {
+                    File(applicationContext.cacheDir, UUID.randomUUID().toString() + ".webp")
+                }
+                Napier.d("CompressImageUseCaseAndroid: dest file = ${destFile.absolutePath}")
+
                 @Suppress("DEPRECATION") //Must use Deprecated CompressFormat.WEBP on SDK < 30
                 val resultFile = Compressor.compress(applicationContext, file) {
-                    if(toUri != null) {
-                        destination(Uri.parse(toUri).toFile().requireExtension("webp"))
-                    }else {
-                        destination(File(applicationContext.cacheDir, UUID.randomUUID().toString() + ".webp"))
-                    }
+                    destination(destFile)
 
                     default(
                         format = if(Build.VERSION.SDK_INT >= 30) {

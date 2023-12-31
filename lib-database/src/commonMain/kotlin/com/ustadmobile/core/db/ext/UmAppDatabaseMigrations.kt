@@ -1294,13 +1294,31 @@ val MIGRATION_126_127 = DoorMigrationStatementList(126, 127) { db ->
     }
 }
 
+/**
+ * Modify PersonPicture table - does not migrate previous (largely unused) data.
+ * Add tjiEntityEtag column to TransferJobItem so a transferjobitem can be related to a specific
+ * version of the entity
+ */
+val MIGRATION_127_128 = DoorMigrationStatementList(127, 128) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("DROP TABLE IF EXISTS PersonPicture")
+            add("CREATE TABLE IF NOT EXISTS PersonPicture (  personPictureLct  INTEGER  NOT NULL , personPictureUri  TEXT , personPictureThumbnailUri  TEXT , fileSize  INTEGER  NOT NULL , personPictureActive  INTEGER  NOT NULL , personPictureUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+            add("ALTER TABLE TransferJobItem ADD COLUMN tjiEntityEtag  INTEGER  NOT NULL  DEFAULT 0")
+        }else {
+            add("DROP TABLE IF EXISTS PersonPicture")
+            add("CREATE TABLE IF NOT EXISTS PersonPicture (  personPictureLct  BIGINT  NOT NULL , personPictureUri  TEXT , personPictureThumbnailUri  TEXT , fileSize  INTEGER  NOT NULL , personPictureActive  BOOL  NOT NULL , personPictureUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+            add("ALTER TABLE TransferJobItem ADD COLUMN tjiEntityEtag  BIGINT  NOT NULL  DEFAULT 0")
+        }
+    }
+}
 
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_102_103,
     MIGRATION_103_104, MIGRATION_104_105, MIGRATION_105_106, MIGRATION_106_107,
     MIGRATION_107_108, MIGRATION_108_109,
     MIGRATION_120_121, MIGRATION_121_122, MIGRATION_122_123, MIGRATION_123_124,
-    MIGRATION_124_125, MIGRATION_125_126, MIGRATION_126_127,
+    MIGRATION_124_125, MIGRATION_125_126, MIGRATION_126_127, MIGRATION_127_128,
 )
 
 
