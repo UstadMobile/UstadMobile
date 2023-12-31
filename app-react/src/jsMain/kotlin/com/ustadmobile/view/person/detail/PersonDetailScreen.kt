@@ -10,13 +10,16 @@ import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.locale.mapLookup
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
+import com.ustadmobile.lib.db.composites.TransferJobItemStatus
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.mui.components.UstadDetailField
 import com.ustadmobile.mui.components.UstadQuickActionButton
 import com.ustadmobile.mui.components.UstadStandardContainer
+import com.ustadmobile.mui.components.UstadTransferStatusIcon
 import com.ustadmobile.view.components.UstadFab
+import js.core.jso
 import mui.material.List
 //WARNING: DO NOT Replace with import mui.icons.material.[*] - Leads to severe IDE performance issues 10/Apr/23 https://youtrack.jetbrains.com/issue/KT-57897/Intellisense-and-code-analysis-is-extremely-slow-and-unusable-on-Kotlin-JS
 import mui.material.*
@@ -30,7 +33,6 @@ import mui.icons.material.AccountCircle as AccountCircleIcon
 import mui.icons.material.LocationOn as LocationOnIcon
 import mui.icons.material.Person as PersonIcon
 import mui.icons.material.People as PeopleIcon
-import mui.icons.material.Badge
 import mui.material.styles.TypographyVariant
 import mui.system.*
 import mui.system.Stack
@@ -114,6 +116,7 @@ val PersonDetailPreview = FC<Props> {
 val PersonDetailComponent2 = FC<PersonDetailProps> { props ->
 
     val strings = useStringProvider()
+    val pendingTransfer = props.uiState.person?.personPictureTransferJobItem
 
     UstadStandardContainer {
         Stack {
@@ -128,14 +131,32 @@ val PersonDetailComponent2 = FC<PersonDetailProps> { props ->
                         display = Display.flex
                     }
 
-                    Avatar {
-                        sx {
-                            width = 304.px
-                            height = 304.px
+                    Badge {
+                        overlap = BadgeOverlap.rectangular
+                        anchorOrigin = jso {
+                            vertical = BadgeOriginVertical.bottom
+                            horizontal = BadgeOriginHorizontal.right
+                        }
+                        invisible = pendingTransfer == null
+                        badgeContent = if(pendingTransfer != null) {
+                            UstadTransferStatusIcon.create {
+                                transferJobItemStatus = TransferJobItemStatus.valueOf(pendingTransfer.tjiStatus)
+                                fontSize = SvgIconSize.small
+                                color = SvgIconColor.action
+                            }
+                        }else {
+                            ReactNode("")
                         }
 
-                        src = imgSrc
-                        alt = "user image"
+                        Avatar {
+                            sx {
+                                width = 304.px
+                                height = 304.px
+                            }
+
+                            src = imgSrc
+                            alt = "user image"
+                        }
                     }
                 }
 
