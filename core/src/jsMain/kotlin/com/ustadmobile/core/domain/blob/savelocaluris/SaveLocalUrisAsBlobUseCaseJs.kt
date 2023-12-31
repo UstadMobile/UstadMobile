@@ -16,7 +16,9 @@ import com.ustadmobile.lib.db.entities.TransferJob
 import com.ustadmobile.lib.db.entities.TransferJobItem
 import io.github.aakira.napier.Napier
 import js.promise.await
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import web.http.fetchAsync
 
@@ -74,60 +76,77 @@ class SaveLocalUrisAsBlobUseCaseJs(
                 scope = this
             )
 
-            val savedBlobs = uriToSaveQueueItems.map { uriToSaveQueueItem ->
-                val uploadItem = BlobUploadClientUseCase.BlobTransferJobItem(
-                    blobUrl = "",
-                    transferJobItemUid = uriToSaveQueueItem.transferJobItem.tjiUid,
-                )
-                transferJobItemStatusUpdater.onStatusUpdate(
-                    BlobUploadClientUseCase.BlobUploadStatusUpdate(
-                        uploadItem, TransferJobItemStatus.IN_PROGRESS.value
+            try {
+                val savedBlobs = uriToSaveQueueItems.map { uriToSaveQueueItem ->
+                    val uploadItem = BlobUploadClientUseCase.BlobTransferJobItem(
+                        blobUrl = "",
+                        transferJobItemUid = uriToSaveQueueItem.transferJobItem.tjiUid,
                     )
-                )
+                    transferJobItemStatusUpdater.onStatusUpdate(
+                        BlobUploadClientUseCase.BlobUploadStatusUpdate(
+                            uploadItem, TransferJobItemStatus.IN_PROGRESS.value
+                        )
+                    )
 
-                val response = chunkedUploadClientLocalUriUseCase(
-                    uploadUuid = randomUuidAsString(),
-                    localUri = DoorUri.parse(uriToSaveQueueItem.uriToSaveItem.localUri),
-                    remoteUrl = "${endpoint.url}api/blob/upload-item",
-                    lastChunkHeaders = buildMap {
-                        uriToSaveQueueItem.uriToSaveItem.mimeType?.also { blobMimeType ->
-                            put("${BLOB_RESPONSE_HEADER_PREFIX}Content-Type", listOf(blobMimeType))
-                        }
-                    }.asIStringValues(),
-                    onProgress = {
-                        transferJobItemStatusUpdater.onProgressUpdate(
-                            BlobUploadClientUseCase.BlobUploadProgressUpdate(
-                                uploadItem = uploadItem,
-                                bytesTransferred = it,
+                    val response = chunkedUploadClientLocalUriUseCase(
+                        uploadUuid = randomUuidAsString(),
+                        localUri = DoorUri.parse(uriToSaveQueueItem.uriToSaveItem.localUri),
+                        remoteUrl = "${endpoint.url}api/blob/upload-item",
+                        lastChunkHeaders = buildMap {
+                            uriToSaveQueueItem.uriToSaveItem.mimeType?.also { blobMimeType ->
+                                put("${BLOB_RESPONSE_HEADER_PREFIX}Content-Type", listOf(blobMimeType))
+                            }
+                        }.asIStringValues(),
+                        onProgress = {
+                            transferJobItemStatusUpdater.onProgressUpdate(
+                                BlobUploadClientUseCase.BlobUploadProgressUpdate(
+                                    uploadItem = uploadItem,
+                                    bytesTransferred = it,
+                                )
                             )
+                        }
+                    )
+
+                    val responseJsonStr = response.body
+                        ?: throw IllegalStateException("SaveLocalUrisAsBlobUseCaseJs: no response body!")
+                    transferJobItemStatusUpdater.onStatusUpdate(
+                        BlobUploadClientUseCase.BlobUploadStatusUpdate(
+                            uploadItem, TransferJobItemStatus.COMPLETE.value
+                        )
+                    )
+
+                    val serverSavedBlob = json.decodeFromString(
+                        SaveLocalUrisAsBlobsUseCase.ServerSavedBlob.serializer(), responseJsonStr
+                    )
+                    Napier.d("SaveLocalUrisAsBlobUseCaseJs: upload complete: " +
+                            "${uriToSaveQueueItem.uriToSaveItem.localUri} stored as ${serverSavedBlob.blobUrl}")
+
+                    SaveLocalUrisAsBlobsUseCase.SavedBlob(
+                        entityUid = uriToSaveQueueItem.uriToSaveItem.entityUid,
+                        localUri = uriToSaveQueueItem.uriToSaveItem.localUri,
+                        blobUrl = serverSavedBlob.blobUrl,
+                    )
+                }
+
+                transferJobItemStatusUpdater.onFinished()
+
+                savedBlobs
+            }catch(e: Throwable) {
+                Napier.e("SaveLocalUriAsBlobUseCaseJs: exception uploading", e)
+                //Currently no retry on web version: upload has failed.
+                withContext(NonCancellable) {
+                    db.withDoorTransactionAsync {
+                        transferJobItemStatusUpdater.onFinished()
+                        db.transferJobItemDao.updateStatusIfNotCompleteForAllInJob(
+                            jobUid = uriToSaveQueueItems.firstOrNull()?.transferJobItem?.tjiTjUid ?: 0,
+                            status = TransferJobItemStatus.FAILED.value
                         )
                     }
-                )
+                }
 
-                val responseJsonStr = response.body
-                    ?: throw IllegalStateException("SaveLocalUrisAsBlobUseCaseJs: no response body!")
-                transferJobItemStatusUpdater.onStatusUpdate(
-                    BlobUploadClientUseCase.BlobUploadStatusUpdate(
-                        uploadItem, TransferJobItemStatus.COMPLETE.value
-                    )
-                )
-
-                val serverSavedBlob = json.decodeFromString(
-                    SaveLocalUrisAsBlobsUseCase.ServerSavedBlob.serializer(), responseJsonStr
-                )
-                Napier.d("SaveLocalUrisAsBlobUseCaseJs: upload complete: " +
-                        "${uriToSaveQueueItem.uriToSaveItem.localUri} stored as ${serverSavedBlob.blobUrl}")
-
-                SaveLocalUrisAsBlobsUseCase.SavedBlob(
-                    entityUid = uriToSaveQueueItem.uriToSaveItem.entityUid,
-                    localUri = uriToSaveQueueItem.uriToSaveItem.localUri,
-                    blobUrl = serverSavedBlob.blobUrl,
-                )
+                throw e
             }
 
-            transferJobItemStatusUpdater.onFinished()
-
-            savedBlobs
         }
     }
 }

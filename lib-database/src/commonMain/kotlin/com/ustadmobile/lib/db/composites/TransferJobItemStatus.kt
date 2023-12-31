@@ -6,6 +6,8 @@ enum class TransferJobItemStatus(val value: Int) {
 
     companion object {
 
+        const val STATUS_COMPLETE_INT = 21
+
         fun valueOf(value: Int): TransferJobItemStatus {
             return entries.firstOrNull { it.value == value } ?: QUEUED
         }

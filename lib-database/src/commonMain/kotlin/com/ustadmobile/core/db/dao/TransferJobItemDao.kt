@@ -3,6 +3,7 @@ package com.ustadmobile.core.db.dao
 import androidx.room.Insert
 import androidx.room.Query
 import com.ustadmobile.door.annotation.DoorDao
+import com.ustadmobile.lib.db.composites.TransferJobItemStatus.Companion.STATUS_COMPLETE_INT
 import com.ustadmobile.lib.db.entities.TransferJobItem
 
 @DoorDao
@@ -57,6 +58,17 @@ expect abstract class TransferJobItemDao {
     abstract suspend fun insertOutgoingReplicationForTransferJobItemIfDone(
         destNodeId: Long,
         transferJobItemUid: Int,
+    )
+
+    @Query("""
+        UPDATE TransferJobItem
+           SET tjiStatus = :status
+         WHERE tjiTjUid = :jobUid
+           AND tjiStatus != $STATUS_COMPLETE_INT 
+    """)
+    abstract suspend fun updateStatusIfNotCompleteForAllInJob(
+        jobUid: Int,
+        status: Int
     )
 
 }
