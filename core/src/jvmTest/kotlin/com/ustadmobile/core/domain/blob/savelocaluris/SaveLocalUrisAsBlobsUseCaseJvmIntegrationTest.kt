@@ -194,7 +194,7 @@ class SaveLocalUrisAsBlobsUseCaseJvmIntegrationTest {
 
             blobUploadClientUseCase(
                 blobUrls = savedBlobs.map {
-                    BlobUploadClientUseCase.BlobToUpload(it.blobUrl, transferJobItemUid = 0)
+                    BlobUploadClientUseCase.BlobTransferJobItem(it.blobUrl, transferJobItemUid = 0)
                 },
                 batchUuid = UUID.randomUUID().toString(),
                 endpoint = endpoint,

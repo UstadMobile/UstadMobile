@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.upload
 
-import com.ustadmobile.core.domain.blob.TransferJobItemStatus
+import com.ustadmobile.lib.db.composites.TransferJobItemStatus
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.uri.UriHelperJvm
 import com.ustadmobile.door.ext.toDoorUri
@@ -132,9 +132,11 @@ class ChunkedUploadClientUseCaseTest  {
         val allBytesReceived = byteArrayOutput.toByteArray()
         assertTrue(testFile.readBytes().contentEquals(allBytesReceived),
             "Concatenation of bytes upload equals the original bytes")
-        assertTrue(TransferJobItemStatus.IN_PROGRESS in statusUpdatesReceived,
+        assertTrue(
+            TransferJobItemStatus.IN_PROGRESS in statusUpdatesReceived,
             "Received started status update")
-        assertTrue(TransferJobItemStatus.COMPLETE in statusUpdatesReceived,
+        assertTrue(
+            TransferJobItemStatus.COMPLETE in statusUpdatesReceived,
             "Received completion status update")
     }
 

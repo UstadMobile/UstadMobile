@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.upload
 
-import com.ustadmobile.core.domain.blob.TransferJobItemStatus
+import com.ustadmobile.lib.db.composites.TransferJobItemStatus
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.util.ext.toMap
 import com.ustadmobile.core.util.stringvalues.IStringValues

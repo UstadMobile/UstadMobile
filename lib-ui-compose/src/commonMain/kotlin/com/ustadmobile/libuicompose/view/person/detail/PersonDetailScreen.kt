@@ -4,6 +4,7 @@ package com.ustadmobile.libuicompose.view.person.detail
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -37,6 +38,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
@@ -45,10 +47,12 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.controller.PersonConstants
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailUiState
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
+import com.ustadmobile.lib.db.composites.TransferJobItemStatus
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
 import com.ustadmobile.libuicompose.components.UstadAsyncImage
 import com.ustadmobile.libuicompose.components.UstadEditHeader
 import com.ustadmobile.libuicompose.components.UstadQuickActionButton
+import com.ustadmobile.libuicompose.components.UstadTransferStatusIcon
 import com.ustadmobile.libuicompose.util.compose.stringIdMapResource
 import com.ustadmobile.libuicompose.util.rememberFormattedDate
 import dev.icerock.moko.resources.compose.stringResource
@@ -95,12 +99,23 @@ fun PersonDetailScreen(
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                UstadAsyncImage(
-                    uri = personPictureUri,
-                    contentDescription = "",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.clip(CircleShape).width(256.dp).height(256.dp)
-                )
+                Box(
+                    contentAlignment = Alignment.BottomEnd,
+                    modifier = Modifier.width(256.dp).height(256.dp),
+                ) {
+                    UstadAsyncImage(
+                        uri = personPictureUri,
+                        contentDescription = "",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.clip(CircleShape).width(256.dp).height(256.dp)
+                    )
+
+                    uiState.person?.personPictureTransferJobItem?.also {
+                        UstadTransferStatusIcon(
+                            transferJobItemStatus = TransferJobItemStatus.valueOf(it.tjiStatus),
+                        )
+                    }
+                }
             }
             Spacer(Modifier.height(8.dp))
             Divider()

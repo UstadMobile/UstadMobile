@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.upload
 
-import com.ustadmobile.core.domain.blob.TransferJobItemStatus
+import com.ustadmobile.lib.db.composites.TransferJobItemStatus
 
 /**
  * Chunked upload client use case where chunk data is provided by a function that fills a buffer.

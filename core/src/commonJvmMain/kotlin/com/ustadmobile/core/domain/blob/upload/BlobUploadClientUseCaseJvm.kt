@@ -21,19 +21,10 @@ import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.coroutineScope
 import kotlinx.io.readTo
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.domain.blob.TransferJobItemStatus
+import com.ustadmobile.core.domain.blob.transferjobitem.TransferJobItemStatusUpdater
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientChunkGetterUseCase
-import com.ustadmobile.core.util.ext.lastDistinctBy
-import com.ustadmobile.door.DoorDatabaseRepository
-import com.ustadmobile.door.entities.OutgoingReplication
-import com.ustadmobile.door.ext.withDoorTransactionAsync
-import com.ustadmobile.lib.db.entities.TransferJobItem
 import com.ustadmobile.libcache.response.requireHeadersContentLength
 import io.github.aakira.napier.Napier
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
-import java.util.concurrent.atomic.AtomicReference
 
 /**
  * Blob upload client implementation that uses local http cache (UstadCache from lib-cache).
@@ -52,7 +43,7 @@ class BlobUploadClientUseCaseJvm(
      */
     data class UploadQueueItem(
         val blobUploadResponseItem: BlobUploadResponseItem,
-        val blobUploadItem: BlobUploadClientUseCase.BlobToUpload,
+        val blobUploadItem: BlobUploadClientUseCase.BlobTransferJobItem,
         val totalSize: Long,
         val chunkSize: Int,
     )
@@ -143,7 +134,7 @@ class BlobUploadClientUseCaseJvm(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override suspend fun invoke(
-        blobUrls: List<BlobUploadClientUseCase.BlobToUpload>,
+        blobUrls: List<BlobUploadClientUseCase.BlobTransferJobItem>,
         batchUuid: String,
         endpoint: Endpoint,
         onProgress: (BlobUploadClientUseCase.BlobUploadProgressUpdate) -> Unit,
@@ -217,102 +208,18 @@ class BlobUploadClientUseCaseJvm(
         }
     }
 
-    /**
-     * Commit the given progress updates to the database. This is done in batches to avoid running
-     * hundreds or thousands of updates individually when small files are being transferred.
-     */
-    private suspend fun commitStatus(
-        progressUpdates: List<BlobUploadClientUseCase.BlobUploadProgressUpdate>,
-        statusUpdates: List<BlobUploadClientUseCase.BlobUploadStatusUpdate>,
-        transferJobItemMap: Map<Int, TransferJobItem>,
-    ) {
-        val progressUpdatesToCommit = progressUpdates.lastDistinctBy {
-            it.uploadItem.transferJobItemUid
-        }
-        val statusUpdatesToCommit = statusUpdates.lastDistinctBy {
-            it.uploadItem.transferJobItemUid
-        }
-
-        val repoNodeId = (repo as? DoorDatabaseRepository)?.remoteNodeIdOrFake()
-
-        db.takeIf {
-            progressUpdatesToCommit.isNotEmpty() || statusUpdatesToCommit.isNotEmpty()
-        }?.withDoorTransactionAsync {
-            progressUpdatesToCommit.forEach {
-                db.transferJobItemDao.updateTransferredProgress(
-                    jobItemUid = it.uploadItem.transferJobItemUid,
-                    transferred = it.bytesTransferred,
-                )
-            }
-
-            val outgoingReplications = mutableListOf<OutgoingReplication>()
-            statusUpdatesToCommit.forEach {
-                db.transferJobItemDao.updateStatus(
-                    jobItemUid = it.uploadItem.transferJobItemUid,
-                    status = it.status
-                )
-
-                //If the blob upload is complete and associated with an entityUid, then put in an
-                // OutgoingReplication so that the new value is sent to the server.
-
-                //HERE: There could be more than one blob associated with the given entity e.g.
-                // thumbnail and main image. This should run a check for any remaining transferjobs
-                //before triggering
-                if(it.status == TransferJobItemStatus.COMPLETE.value && repoNodeId != null) {
-                    val transferJobItem = transferJobItemMap[it.uploadItem.transferJobItemUid]
-                    if(transferJobItem != null && transferJobItem.tjiTableId != 0) {
-                        outgoingReplications += OutgoingReplication(
-                            orTableId = transferJobItem.tjiTableId,
-                            orPk1 = transferJobItem.tjiEntityUid,
-                            destNodeId = repoNodeId
-                        )
-                    }
-                }
-            }
-
-            db.takeIf { outgoingReplications.isNotEmpty() }?.outgoingReplicationDao
-                ?.insert(outgoingReplications)
-        }
-    }
-
-
     override suspend fun invoke(transferJobUid: Int) {
         val transferJob = db.transferJobDao.findByUid(transferJobUid)
             ?: throw IllegalArgumentException("BlobUpload: TransferJob #$transferJobUid does not exist")
         val transferJobItems = db.transferJobItemDao.findByJobUid(transferJobUid)
-        val transferJobItemMap = transferJobItems.associateBy { it.tjiUid }
-
-        val progressUpdates = AtomicReference(
-            emptyList<BlobUploadClientUseCase.BlobUploadProgressUpdate>()
-        )
-        val statusUpdates = AtomicReference(
-            emptyList<BlobUploadClientUseCase.BlobUploadStatusUpdate>()
-        )
-
-        suspend fun invokeCommitUpdates() {
-            val progressUpdatesToCommit = progressUpdates.getAndUpdate {
-                emptyList()
-            }
-            val statusUpdatesToCommit = statusUpdates.getAndUpdate {
-                emptyList()
-            }
-
-            commitStatus(progressUpdatesToCommit, statusUpdatesToCommit, transferJobItemMap)
-        }
 
         coroutineScope {
-            val updateJob = launch {
-                while(isActive) {
-                    delay(1000)
-                    invokeCommitUpdates()
-                }
-            }
-
+            val transferJobItemStatusUpdater = TransferJobItemStatusUpdater(db, repo, this)
             try {
                 invoke(
                     blobUrls = transferJobItems.mapNotNull { jobItem ->
                         jobItem.tjiSrc?.let {
-                            BlobUploadClientUseCase.BlobToUpload(
+                            BlobUploadClientUseCase.BlobTransferJobItem(
                                 blobUrl = it,
                                 transferJobItemUid = jobItem.tjiUid,
                             )
@@ -320,23 +227,14 @@ class BlobUploadClientUseCaseJvm(
                     },
                     batchUuid = transferJob.tjUuid!!,
                     endpoint = endpoint,
-                    onProgress = { progressItem ->
-                        progressUpdates.updateAndGet {
-                            it + progressItem
-                        }
-                    },
-                    onStatusUpdate = { statusUpdate ->
-                        statusUpdates.updateAndGet {
-                            it + statusUpdate
-                        }
-                    }
+                    onProgress = transferJobItemStatusUpdater::onProgressUpdate,
+                    onStatusUpdate = transferJobItemStatusUpdater::onStatusUpdate,
                 )
             }catch(e: Exception) {
                 Napier.e("BlobUploadClientUseCase: Exception", e)
                 throw e
             }finally {
-                updateJob.cancel()
-                invokeCommitUpdates()
+                transferJobItemStatusUpdater.onFinished()
             }
         }
     }

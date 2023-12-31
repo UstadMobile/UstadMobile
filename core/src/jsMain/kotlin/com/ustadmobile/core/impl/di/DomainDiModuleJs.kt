@@ -100,6 +100,7 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
             chunkedUploadClientLocalUriUseCase = instance(),
             endpoint = context,
             json = instance(),
+            db = instance(tag = DoorTag.TAG_DB),
         )
     }
 

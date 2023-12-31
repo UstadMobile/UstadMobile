@@ -61,4 +61,18 @@ expect abstract class PersonPictureDao : BaseDao<PersonPicture> {
     abstract suspend fun updateUri(uid: Long, uri: String?, thumbnailUri: String?, time: Long)
 
 
+    @Query("""
+        UPDATE TransferJobItem
+           SET tjiEntityEtag = 
+               (SELECT personPictureLct
+                  FROM PersonPicture
+                 WHERE personPictureUid = :entityUid)
+         WHERE tjiUid = :transferJobItemUid      
+    """)
+    abstract suspend fun updateTransferJobItemEtag(
+        entityUid: Long,
+        transferJobItemUid: Int
+    )
+
+
 }

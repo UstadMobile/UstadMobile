@@ -196,7 +196,7 @@ class BlobUploadClientUseCaseJvmTest {
         runBlocking {
             useCase(
                 blobUrls = itemsToUpload.map {
-                    BlobUploadClientUseCase.BlobToUpload(it.blobUrl, 0)
+                    BlobUploadClientUseCase.BlobTransferJobItem(it.blobUrl, 0)
                 },
                 batchUuid = batchUuid.toString(),
                 endpoint = endpoint,

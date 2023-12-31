@@ -1,4 +1,4 @@
-package com.ustadmobile.core.domain.blob
+package com.ustadmobile.lib.db.composites
 
 @Suppress("unused") //some items reserved for future use.
 enum class TransferJobItemStatus(val value: Int) {
@@ -7,7 +7,7 @@ enum class TransferJobItemStatus(val value: Int) {
     companion object {
 
         fun valueOf(value: Int): TransferJobItemStatus {
-            return entries.first { it.value == value }
+            return entries.firstOrNull { it.value == value } ?: QUEUED
         }
 
     }

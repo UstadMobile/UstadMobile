@@ -13,4 +13,7 @@ data class PersonAndDisplayDetail(
 
     @Embedded
     var personPicture: PersonPicture? = null,
+
+    @Embedded
+    var personPictureTransferJobItem: TransferJobItem? = null
 )

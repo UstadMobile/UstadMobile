@@ -3,6 +3,7 @@ package com.ustadmobile.lib.db.entities
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import kotlinx.serialization.Serializable
 
 /**
  * @param tjiSrc: the source of the TransferJobItem - the value of the string depends on the type
@@ -12,8 +13,14 @@ import androidx.room.PrimaryKey
  *        are associated with entities in the database such as PersonPicture. This will update the
  *        uri on the server after the blob itself is successfully uploaded.
  * @param tjiEntityUid used with tjiTableId
+ * @param tjiEntityEtag the etag (e.g. field annotated @ReplicateEtag) of the entity for which this
+ *        transfer is being performed. This ensures that when TransferJobItem is queried in order to
+ *        display the status of an item for the user it only returns relevant status e.g.
+ *        if a previous version failed/succeeded, but it was since replaced, the status of the
+ *        transfer for the previous version is no longer relevant.
  */
 @Entity
+@Serializable
 data class TransferJobItem(
     @PrimaryKey(autoGenerate = true)
     var tjiUid: Int = 0,

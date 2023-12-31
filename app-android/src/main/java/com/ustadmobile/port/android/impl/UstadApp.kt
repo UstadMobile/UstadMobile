@@ -6,6 +6,8 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
+import coil.ImageLoader
+import coil.ImageLoaderFactory
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.russhwolf.settings.Settings
@@ -84,7 +86,7 @@ import org.acra.data.StringFormat
 import org.acra.ktx.initAcra
 import org.acra.sender.HttpSender
 
-class UstadApp : Application(), DIAware{
+class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
     private val Context.appMetaData: Bundle?
         get() = this.applicationContext.packageManager.getApplicationInfo(
@@ -386,6 +388,19 @@ class UstadApp : Application(), DIAware{
                 settings.putString(PREFKEY_ACTIONED_PRESET, true.toString())
             }
         }
+    }
+
+    /**
+     * COIL image loader singleton (connected to the OkHttpClient which uses UstadCache) as per
+     *  https://coil-kt.github.io/coil/image_loaders/
+     */
+    override fun newImageLoader(): ImageLoader {
+        val okHttpClient: OkHttpClient = di.direct.instance()
+        return ImageLoader.Builder(applicationContext)
+            .okHttpClient(
+                okHttpClient = okHttpClient
+            )
+            .build()
     }
 
     override fun attachBaseContext(base: Context) {

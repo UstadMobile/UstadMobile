@@ -11,6 +11,9 @@ expect abstract class TransferJobItemDao {
     @Insert
     abstract suspend fun insertList(items: List<TransferJobItem>)
 
+    @Insert
+    abstract suspend fun insert(item: TransferJobItem): Long
+
     @Query("""
         SELECT TransferJobItem.*
           FROM TransferJobItem
@@ -37,6 +40,23 @@ expect abstract class TransferJobItemDao {
     abstract suspend fun updateStatus(
         jobItemUid: Int,
         status: Int,
+    )
+
+
+    @Query("""
+        INSERT INTO OutgoingReplication(destNodeId, orTableId, orPk1, orPk2)
+        SELECT :destNodeId AS destNodeId, 
+              TransferJobItem.tjiTableId AS orTableId,
+              TransferJobItem.tjiEntityUid AS orPk1,
+              0 AS orPk2
+        FROM TransferJobItem
+       WHERE TransferJobItem.tjiUid = :transferJobItemUid
+         AND TransferJobItem.tjiTableId != 0
+         AND TransferJobItem.tjiStatus = 21
+    """)
+    abstract suspend fun insertOutgoingReplicationForTransferJobItemIfDone(
+        destNodeId: Long,
+        transferJobItemUid: Int,
     )
 
 }

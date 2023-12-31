@@ -24,22 +24,22 @@ interface BlobUploadClientUseCase {
     /**
      * Represents the item to be uploaded
      *
-     * @param blobUrl the blob URL
+     * @param blobUrl the blob URL.
      * @param transferJobItemUid The TransferJobItem.tjiUid if the upload is connected to a TransferJobItem,
      *        0 otherwise
      */
-    data class BlobToUpload(
+    data class BlobTransferJobItem(
         val blobUrl: String,
         val transferJobItemUid: Int,
     )
 
     data class BlobUploadProgressUpdate(
-        val uploadItem: BlobToUpload,
+        val uploadItem: BlobTransferJobItem,
         val bytesTransferred: Long,
     )
 
     data class BlobUploadStatusUpdate(
-        val uploadItem: BlobToUpload,
+        val uploadItem: BlobTransferJobItem,
         val status: Int,
     )
 
@@ -53,7 +53,7 @@ interface BlobUploadClientUseCase {
      * @param onProgress
      */
     suspend operator fun invoke(
-        blobUrls: List<BlobToUpload>,
+        blobUrls: List<BlobTransferJobItem>,
         batchUuid: String,
         endpoint: Endpoint,
         onProgress: (BlobUploadProgressUpdate) -> Unit = { },
