@@ -20,6 +20,7 @@ import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCase
 import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCaseJvm
 import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCase
 import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCaseJvm
+import com.ustadmobile.core.domain.blob.upload.UpdateFailedTransferJobUseCase
 import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseJvm
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseJvm
@@ -133,10 +134,9 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         )
     }
 
-
-
-
-
-
-
+    bind<UpdateFailedTransferJobUseCase>() with scoped(EndpointScope.Default).singleton {
+        UpdateFailedTransferJobUseCase(
+            db = instance(tag = DoorTag.TAG_DB)
+        )
+    }
 }

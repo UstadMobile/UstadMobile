@@ -274,6 +274,8 @@ class BlobUploadClientUseCaseJvm(
 
         const val MAX_ATTEMPTS_DEFAULT = 5
 
+        const val RETRY_WAIT_SECONDS = 10
+
 
     }
 
