@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.ustadmobile.core.account.Endpoint
+import io.github.aakira.napier.Napier
 import org.kodein.di.DI
 import org.kodein.di.android.closestDI
 import org.kodein.di.direct
@@ -21,10 +22,32 @@ class BlobUploadClientWorker(
         val endpointUrl = inputData.getString(AbstractEnqueueBlobUploadClientUseCase.DATA_ENDPOINT)
             ?: return Result.failure()
         val jobUid = inputData.getInt(AbstractEnqueueBlobUploadClientUseCase.DATA_JOB_UID, 0)
-        val blobUploadClientUseCase: BlobUploadClientUseCase = di.on(Endpoint(endpointUrl)).direct.instance()
-        blobUploadClientUseCase(
-            transferJobUid = jobUid
-        )
-        return Result.success()
+        val endpoint = Endpoint(endpointUrl)
+        val blobUploadClientUseCase: BlobUploadClientUseCase = di.on(endpoint).direct
+            .instance()
+        val updateFailedTransferJobUseCase: UpdateFailedTransferJobUseCase by di.on(endpoint).instance()
+
+        return try {
+            blobUploadClientUseCase(
+                transferJobUid = jobUid
+            )
+            Result.success()
+        }catch(e: Throwable) {
+            val canRetry = this.runAttemptCount < BlobUploadClientUseCaseJvm.MAX_ATTEMPTS_DEFAULT
+            if(canRetry) {
+                Napier.w("BlobUploadClientWorker ($jobUid): FAIL - attempt $runAttemptCount. Will retry")
+                return Result.retry()
+            }else {
+                try {
+                    Napier.e("BlobUploadClientWorker ($jobUid) FAIL - attempt $runAttemptCount . No more attempts")
+                    updateFailedTransferJobUseCase(jobUid)
+                    Napier.e("BlobUploadClientWorker ($jobUid) FAIL - attempt $runAttemptCount . Database updated")
+                }catch(e: Throwable) {
+                    e.printStackTrace()
+                }
+
+                return Result.failure()
+            }
+        }
     }
 }

@@ -7,6 +7,11 @@ import com.ustadmobile.core.domain.upload.ChunkedUploadClientChunkGetterUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
 import com.ustadmobile.core.io.ext.readSha256
 import com.ustadmobile.core.util.ext.encodeBase64
+import com.ustadmobile.core.util.uuid.randomUuidAsString
+import com.ustadmobile.door.DatabaseBuilder
+import com.ustadmobile.door.ext.withDoorTransactionAsync
+import com.ustadmobile.lib.db.entities.TransferJob
+import com.ustadmobile.lib.db.entities.TransferJobItem
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.io.range
 import com.ustadmobile.libcache.partial.ContentRange
@@ -36,6 +41,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class BlobUploadClientUseCaseJvmTest {
 
@@ -66,6 +72,10 @@ class BlobUploadClientUseCaseJvmTest {
     private val testChunkSize = 20 * 1024
 
     private lateinit var mockDatabase: UmAppDatabase
+
+    private lateinit var realDatabase: UmAppDatabase
+
+    private lateinit var serverUploadResponse: BlobUploadResponse
 
     @BeforeTest
     fun setup() {
@@ -126,12 +136,25 @@ class BlobUploadClientUseCaseJvmTest {
             }
         }
         mockDatabase = mock { }
+        serverUploadResponse = BlobUploadResponse(
+            itemsToUpload.map {
+                BlobUploadResponseItem(
+                    blobUrl = it.blobUrl,
+                    uploadUuid = UUID.randomUUID().toString(),
+                    fromByte = 0,
+                )
+            }
+        )
+        realDatabase = DatabaseBuilder.databaseBuilder(UmAppDatabase::class, "jdbc:sqlite::memory:", nodeId = 1L)
+            .build()
+
     }
 
     @AfterTest
     fun tearDown() {
         httpClient.close()
         mockWebServer.shutdown()
+        realDatabase.close()
     }
 
     private fun UstadCache.verifyRangeRequestReceived(
@@ -162,6 +185,45 @@ class BlobUploadClientUseCaseJvmTest {
         )
     }
 
+    class TestUploadException: Exception()
+
+    private fun ChunkedUploadClientUseCaseKtorImpl.stubToThrowException(
+        throwException: (uploadUuid: String) -> Boolean
+    ) {
+        this.stub {
+            onBlocking {
+                invoke(
+                    uploadUuid = any(),
+                    totalSize = any(),
+                    getChunk = any(),
+                    remoteUrl = eq("${endpoint.url}api/blob/upload-batch-data"),
+                    fromByte = any(),
+                    chunkSize = any(),
+                    onProgress = any(),
+                    onStatusChange = any()
+                )
+            }.thenAnswer { invocation ->
+                val uploadUuid = invocation.arguments.first() as String
+                if(throwException(uploadUuid)) {
+                    throw TestUploadException()
+                }
+
+                Unit
+            }
+        }
+    }
+
+    private fun assertMockWebServerRequestMatches(uploadRequest: BlobUploadRequest) {
+        val initRequest = mockWebServer.takeRequest()
+        val requestBody = initRequest.body.readUtf8()
+        val batchUploadRequestReceived: BlobUploadRequest = json.decodeFromString(
+            requestBody
+        )
+        assertEquals("POST", initRequest.method!!.toString().uppercase())
+        assertEquals(uploadRequest, batchUploadRequestReceived)
+    }
+
+
     @Test
     fun givenBatch_whenInvoked_thenWillRetrievePartialDataAndUpload() {
         val uploadRequest = BlobUploadRequest(
@@ -173,15 +235,7 @@ class BlobUploadClientUseCaseJvmTest {
             mockChunkedUploadUseCase, httpClient, mockCache, mockDatabase, mockDatabase, endpoint
         )
 
-        val serverUploadResponse = BlobUploadResponse(
-            itemsToUpload.map {
-                BlobUploadResponseItem(
-                    blobUrl = it.blobUrl,
-                    uploadUuid = UUID.randomUUID().toString(),
-                    fromByte = 0,
-                )
-            }
-        )
+
         val responseStr = json.encodeToString(
             BlobUploadResponse.serializer(),
             serverUploadResponse
@@ -205,13 +259,7 @@ class BlobUploadClientUseCaseJvmTest {
             )
         }
 
-        val initRequest = mockWebServer.takeRequest()
-        val requestBody = initRequest.body.readUtf8()
-        val batchUploadRequestReceived: BlobUploadRequest = json.decodeFromString(
-            requestBody
-        )
-        assertEquals("POST", initRequest.method!!.toString().uppercase())
-        assertEquals(uploadRequest, batchUploadRequestReceived)
+        assertMockWebServerRequestMatches(uploadRequest)
 
         itemsToUpload.forEach { item ->
             val blobResponseItem = serverUploadResponse.blobsToUpload.first {
@@ -251,7 +299,95 @@ class BlobUploadClientUseCaseJvmTest {
 
             }
         }
+    }
+
+    @Test
+    fun givenBatchDataRetrieved_whenOneUploadThrowsException_thenWillRethrow() {
+        val responseStr = json.encodeToString(
+            BlobUploadResponse.serializer(),
+            serverUploadResponse
+        )
+
+        mockWebServer.enqueue(
+            MockResponse()
+                .addHeader("content-type", "application/json")
+                .setBody(responseStr)
+        )
+
+        //Throw an exception on the upload of the last item
+        mockChunkedUploadUseCase.stubToThrowException { uploadUuid ->
+            uploadUuid == serverUploadResponse.blobsToUpload.last().uploadUuid
+        }
+
+        val useCase = BlobUploadClientUseCaseJvm(
+            mockChunkedUploadUseCase, httpClient, mockCache, mockDatabase, mockDatabase, endpoint
+        )
+        runBlocking {
+            try {
+                useCase(
+                    blobUrls = itemsToUpload.map {
+                        BlobUploadClientUseCase.BlobTransferJobItem(it.blobUrl, 0)
+                    },
+                    batchUuid = batchUuid.toString(),
+                    endpoint = endpoint,
+                    onProgress = { },
+                    chunkSize = testChunkSize,
+                )
+                throw IllegalStateException("Shouldnt make it here")
+            }catch(e: Throwable) {
+                assertTrue(e is TestUploadException)
+            }
+        }
 
     }
+
+    @Test
+    fun givenTransferJobInDatabase_whenErrorOccurs_thenAttemptCountIncrementAndExceptionThrown() {
+        val responseStr = json.encodeToString(
+            BlobUploadResponse.serializer(),
+            serverUploadResponse
+        )
+
+        mockWebServer.enqueue(
+            MockResponse()
+                .addHeader("content-type", "application/json")
+                .setBody(responseStr)
+        )
+
+        runBlocking {
+            val jobId = realDatabase.withDoorTransactionAsync {
+                val transferJobUid = realDatabase.transferJobDao.insert(
+                    TransferJob(
+                        tjUuid = randomUuidAsString(),
+                    )
+                ).toInt()
+                realDatabase.transferJobItemDao.insertList(
+                    itemsToUpload.map {
+                        TransferJobItem(
+                            tjiTjUid =  transferJobUid,
+                            tjiSrc = it.blobUrl,
+                            tjTotalSize = it.size,
+                        )
+                    }
+                )
+                transferJobUid
+            }
+
+            mockChunkedUploadUseCase.stubToThrowException { uploadUuid ->
+                uploadUuid == serverUploadResponse.blobsToUpload.last().uploadUuid
+            }
+
+            val useCase = BlobUploadClientUseCaseJvm(
+                mockChunkedUploadUseCase, httpClient, mockCache, realDatabase, realDatabase, endpoint
+            )
+
+            try {
+                useCase(jobId)
+            }catch(e: Throwable) {
+                assertTrue(e is TestUploadException)
+            }
+        }
+    }
+
 
 }

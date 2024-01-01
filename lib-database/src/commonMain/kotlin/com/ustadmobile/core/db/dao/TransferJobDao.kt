@@ -18,4 +18,11 @@ expect abstract class TransferJobDao {
     """)
     abstract suspend fun findByUid(jobUid: Int): TransferJob?
 
+    @Query("""
+        UPDATE TransferJob
+           SET tjStatus = :status
+         WHERE tjUid = :jobUid  
+    """)
+    abstract suspend fun updateStatus(jobUid: Int, status: Int)
+
 }

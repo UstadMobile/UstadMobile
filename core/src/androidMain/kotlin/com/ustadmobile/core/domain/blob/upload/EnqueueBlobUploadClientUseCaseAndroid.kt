@@ -1,6 +1,7 @@
 package com.ustadmobile.core.domain.blob.upload
 
 import android.content.Context
+import androidx.work.BackoffPolicy
 import androidx.work.Constraints
 import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
@@ -10,6 +11,7 @@ import androidx.work.WorkManager
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.libcache.UstadCache
+import java.util.concurrent.TimeUnit
 
 class EnqueueBlobUploadClientUseCaseAndroid(
     private val appContext: Context,
@@ -32,6 +34,7 @@ class EnqueueBlobUploadClientUseCaseAndroid(
 
         val workRequest = OneTimeWorkRequestBuilder<BlobUploadClientWorker>()
             .setInputData(jobData)
+            .setBackoffCriteria(BackoffPolicy.LINEAR, 10, TimeUnit.SECONDS)
             .setConstraints(Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .build()

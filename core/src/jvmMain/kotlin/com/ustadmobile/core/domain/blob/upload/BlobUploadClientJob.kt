@@ -8,14 +8,17 @@ import org.kodein.di.instance
 import org.kodein.di.on
 import org.quartz.Job
 import org.quartz.JobExecutionContext
+import org.quartz.JobExecutionException
 
 /**
  * Quartz Job to run a blob upload
  */
 class BlobUploadClientJob: Job {
 
+    //See https://stackoverflow.com/questions/10893559/refire-quartz-net-trigger-after-15-minutes-if-job-fails-with-exception
     override fun execute(context: JobExecutionContext?) {
         val di = context?.scheduler?.context?.get("di") as DI
+
         val jobDataMap = context.jobDetail.jobDataMap
         val endpoint = Endpoint(
             jobDataMap.getString(AbstractEnqueueBlobUploadClientUseCase.DATA_ENDPOINT))
@@ -23,7 +26,13 @@ class BlobUploadClientJob: Job {
         val blobUploadClientUseCase: BlobUploadClientUseCase = di.on(endpoint).direct.instance()
 
         runBlocking {
-            blobUploadClientUseCase(jobUid)
+            try {
+                blobUploadClientUseCase(jobUid)
+            }catch(e: Throwable) {
+                val jobException = JobExecutionException(e)
+                throw jobException
+            }
+
         }
     }
 }

@@ -26,7 +26,7 @@ class TransferJobItemStatusUpdater(
     scope: CoroutineScope,
 ) {
 
-
+    private val finished = atomic(false)
 
     private val progressUpdates = atomic(
         emptyList<BlobUploadClientUseCase.BlobUploadProgressUpdate>()
@@ -104,8 +104,10 @@ class TransferJobItemStatusUpdater(
     }
 
     suspend fun onFinished() {
-        updateJob.cancel()
-        commit()
+        if(!finished.getAndSet(true)) {
+            updateJob.cancel()
+            commit()
+        }
     }
 
 

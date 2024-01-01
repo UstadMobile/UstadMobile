@@ -23,8 +23,11 @@ import kotlinx.io.readTo
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.transferjobitem.TransferJobItemStatusUpdater
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientChunkGetterUseCase
+import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.libcache.response.requireHeadersContentLength
 import io.github.aakira.napier.Napier
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.withContext
 
 /**
  * Blob upload client implementation that uses local http cache (UstadCache from lib-cache).
@@ -47,6 +50,8 @@ class BlobUploadClientUseCaseJvm(
         val totalSize: Long,
         val chunkSize: Int,
     )
+
+    class UploadNotCompleteException(message: String): Exception(message)
 
     /**
      * Get a chunk for upload by making an http range request to the cache.
@@ -212,6 +217,8 @@ class BlobUploadClientUseCaseJvm(
         val transferJob = db.transferJobDao.findByUid(transferJobUid)
             ?: throw IllegalArgumentException("BlobUpload: TransferJob #$transferJobUid does not exist")
         val transferJobItems = db.transferJobItemDao.findByJobUid(transferJobUid)
+        val batchUuid = transferJob.tjUuid
+            ?: throw IllegalArgumentException("TransferJob has no uuid")
 
         coroutineScope {
             val transferJobItemStatusUpdater = TransferJobItemStatusUpdater(db, repo, this)
@@ -225,16 +232,29 @@ class BlobUploadClientUseCaseJvm(
                             )
                         }
                     },
-                    batchUuid = transferJob.tjUuid!!,
+                    batchUuid = batchUuid,
                     endpoint = endpoint,
                     onProgress = transferJobItemStatusUpdater::onProgressUpdate,
                     onStatusUpdate = transferJobItemStatusUpdater::onStatusUpdate,
                 )
-            }catch(e: Exception) {
-                Napier.e("BlobUploadClientUseCase: Exception", e)
+
+                val numIncompleteItems = db.withDoorTransactionAsync {
+                    transferJobItemStatusUpdater.onFinished()
+                    db.transferJobItemDao.findNumberJobItemsNotComplete(transferJobUid)
+                }
+
+                if(numIncompleteItems != 0) {
+                    throw UploadNotCompleteException("Upload #$transferJobUid not complete: " +
+                            "$numIncompleteItems TransferJobItem(s) pending")
+                }
+            }catch(e: Throwable) {
+                Napier.e("BlobUploadClientUseCase: Exception. Attempt has failed.", e)
+
+                withContext(NonCancellable) {
+                    transferJobItemStatusUpdater.onFinished()
+                }
+
                 throw e
-            }finally {
-                transferJobItemStatusUpdater.onFinished()
             }
         }
     }
@@ -251,6 +271,9 @@ class BlobUploadClientUseCaseJvm(
          *
          */
         private val DO_NOT_SEND_HEADERS = listOf("content-range", "content-length")
+
+        const val MAX_ATTEMPTS_DEFAULT = 5
+
 
     }
 

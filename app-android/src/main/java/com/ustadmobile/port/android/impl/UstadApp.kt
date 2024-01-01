@@ -41,6 +41,7 @@ import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCase
 import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCaseJvm
 import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCase
 import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCaseAndroid
+import com.ustadmobile.core.domain.blob.upload.UpdateFailedTransferJobUseCase
 import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseAndroid
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientChunkGetterUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
@@ -367,6 +368,12 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 repo = on(context).instance(tag = DoorTag.TAG_REPO),
                 enqueueBlobUploadClientUseCase = on(context).instance(),
                 compressImageUseCase = CompressImageUseCaseAndroid(applicationContext),
+            )
+        }
+
+        bind<UpdateFailedTransferJobUseCase>() with scoped(EndpointScope.Default).provider {
+            UpdateFailedTransferJobUseCase(
+                db = instance(tag = DoorTag.TAG_DB)
             )
         }
 

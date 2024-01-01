@@ -157,7 +157,8 @@ class ChunkedUploadClientUseCaseKtorImpl(
             throw IllegalStateException("Should have returned after lastChunk")
         }catch(e: Exception) {
             Napier.e("ChunkedUploadClientUseCase($uploadUuid): Exception uploading", e)
-            onStatusChange(TransferJobItemStatus.FAILED)
+            //Don't call onStatusChange fail because it might be retried. Let the caller decide
+            //how to handle the exception
             throw e
         }
     }
