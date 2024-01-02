@@ -17,7 +17,7 @@ dependencyResolutionManagement {
             version("version_androidx_core", "1.12.0")
             version("version_kotlin", "1.9.21")
             version("version_okhttp", "4.12.0")
-            version("version_door", "0.70b27")
+            version("version_door", "0.70b30")
             version("version_coroutines", "1.7.3")
             version("version_atomicfu", "0.23.1")
             version("version_kotlinx_io", "0.3.0")
@@ -52,6 +52,16 @@ dependencyResolutionManagement {
             version("version_autolink", "0.11.0")
             version("version_process_phoenix", "2.1.2")
             version("version_multiplatformsettings", "1.1.1")
+            version("version_coil", "2.5.0")
+            version("version_mpfilepicker", "3.1.0")
+            version("version_kamel", "0.9.0")
+            version("version_mockwebserver", "4.12.0")
+            version("version_mockito_kotlin", "5.1.0")
+            version("version_cache4k", "0.12.0")
+            version("version_compressor", "3.0.1") //Android image resizing
+            version("version_thumbnailator", "0.4.20") //JVM image resizing
+            version("version_webpimageio", "0.6.0")
+
 
             plugin("jetbrains-compose", "org.jetbrains.compose").versionRef("jetbrains-compose")
             plugin("moko-resources-plugin", "dev.icerock.mobile.multiplatform-resources").versionRef("version-moko-resources")
@@ -111,6 +121,7 @@ dependencyResolutionManagement {
             library("kotlinxio-core", "org.jetbrains.kotlinx", "kotlinx-io-core").versionRef("version_kotlinx_io")
             library("androidx-room-runtime", "androidx.room", "room-runtime").versionRef("version_android_room")
             library("androidx-room-compiler", "androidx.room", "room-compiler").versionRef("version_android_room")
+            library("androidx-room-ktx", "androidx.room", "room-ktx").versionRef("version_android_room")
             library("xmlutil-core", "io.github.pdvrieze.xmlutil", "core").versionRef("version_xmlutil")
             library("xmlutil-core-jvm", "io.github.pdvrieze.xmlutil", "core-jvm").versionRef("version_xmlutil")
             library("xmlutil-serialization", "io.github.pdvrieze.xmlutil", "serialization").versionRef("version_xmlutil")
@@ -124,6 +135,18 @@ dependencyResolutionManagement {
             library("autolink", "org.nibor.autolink", "autolink").versionRef("version_autolink")
             library("process-phoenix", "com.jakewharton", "process-phoenix").versionRef("version_process_phoenix")
             library("multiplatformsettings", "com.russhwolf", "multiplatform-settings").versionRef("version_multiplatformsettings")
+            library("coil", "io.coil-kt", "coil").versionRef("version_coil")
+            library("coil-compose", "io.coil-kt", "coil-compose").versionRef("version_coil")
+            library("mpfilepicker", "com.darkrockstudios", "mpfilepicker").versionRef("version_mpfilepicker")
+            library("kamel", "media.kamel", "kamel-image").versionRef("version_kamel")
+            library("mockwebserver", "com.squareup.okhttp3", "mockwebserver").versionRef("version_mockwebserver")
+            library("ktor-client-core", "io.ktor", "ktor-client-core").versionRef("version_ktor")
+            library("ktor-client-okhttp", "io.ktor", "ktor-client-okhttp").versionRef("version_ktor")
+            library("mockito-kotlin", "org.mockito.kotlin", "mockito-kotlin").versionRef("version_mockito_kotlin")
+            library("cache4k", "io.github.reactivecircus.cache4k", "cache4k").versionRef("version_cache4k")
+            library("compressor", "id.zelory", "compressor").versionRef("version_compressor")
+            library("thumbnailator", "net.coobird", "thumbnailator").versionRef("version_thumbnailator")
+            library("webpimageio", "com.github.usefulness", "webp-imageio").versionRef("version_webpimageio")
         }
     }
 }

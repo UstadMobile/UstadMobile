@@ -1,9 +1,9 @@
 package com.ustadmobile.lib.db.entities.ext
 
 import com.ustadmobile.door.annotation.ShallowCopy
-import com.ustadmobile.lib.db.entities.PersonWithPersonParentJoin
+import com.ustadmobile.lib.db.entities.PersonAndDisplayDetail
 
 @ShallowCopy
-expect fun PersonWithPersonParentJoin.shallowCopy(
-    block: PersonWithPersonParentJoin.() -> Unit,
-): PersonWithPersonParentJoin
+expect fun PersonAndDisplayDetail.shallowCopy(
+    block: PersonAndDisplayDetail.() -> Unit,
+): PersonAndDisplayDetail

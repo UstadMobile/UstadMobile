@@ -115,12 +115,12 @@ suspend fun ApplicationCall.respondReverseProxy(proxyToBaseUrl: String) {
 val ApplicationCall.callEndpoint: Endpoint
     get() {
         val config = this.application.environment.config
-        val dbMode = config.propertyOrNull("ktor.ustad.dbmode")?.getString() ?: CONF_DBMODE_SINGLETON
+        val dbMode = config.dbModeProperty()
 
         return if(dbMode == CONF_DBMODE_SINGLETON) {
             Endpoint(config.property(CONF_KEY_SITE_URL).getString())
         }else {
-            Endpoint(request.protocolAndHost())
+            Endpoint(request.clientProtocolAndHost())
         }
     }
 
@@ -133,7 +133,7 @@ fun ApplicationCall.urlMatchesConfig(): Boolean {
     if(dbMode == CONF_DBMODE_VIRTUALHOST)
         return true
 
-    val requestUrl = request.url()
+    val requestUrl = request.clientUrl()
     val siteUrl = application.environment.config.property(CONF_KEY_SITE_URL)
         .getString()
 
@@ -142,7 +142,7 @@ fun ApplicationCall.urlMatchesConfig(): Boolean {
 
 suspend fun ApplicationCall.respondRequestUrlNotMatchingSiteConfUrl() {
     val confUrl = application.environment.config.siteUrl()
-    val requestUrl = request.url()
+    val requestUrl = request.clientUrl()
     val message = """
                 <html>
                 <body>

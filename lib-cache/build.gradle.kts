@@ -22,6 +22,8 @@ kotlin {
                 implementation(libs.door.runtime)
                 implementation(libs.atomicfu)
                 implementation(libs.kotlinxio.core)
+                implementation(libs.ktor.client.core)
+                implementation(libs.napier)
                 compileOnly(libs.door.room.annotations)
             }
         }
@@ -43,16 +45,25 @@ kotlin {
 
         val jvmMain by getting {
             dependsOn(commonJvmMain)
+            dependencies {
+                implementation(libs.okhttp)
+            }
         }
 
         val jvmTest by getting {
             dependsOn(commonTest)
+            dependencies {
+                implementation(libs.mockwebserver)
+                implementation(libs.mockito.kotlin)
+                implementation(project(":lib-test-common"))
+            }
         }
 
         val androidMain by getting {
             dependsOn(commonJvmMain)
 
             dependencies {
+                implementation(libs.androidx.room.ktx)
                 implementation(libs.androidx.room.runtime)
             }
         }

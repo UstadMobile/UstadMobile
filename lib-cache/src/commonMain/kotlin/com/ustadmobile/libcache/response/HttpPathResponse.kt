@@ -30,7 +30,10 @@ class HttpPathResponse(
             header("Content-Length", metadata.size.toString())
             header("Content-Type", mimeType)
             header("Accept-Ranges", "bytes")
-            headersList += lastModifiedHeader()
+            if(extraHeaders == null || "last-modified" !in extraHeaders.names()) {
+                headersList += lastModifiedHeader()
+            }
+
             extraHeaders?.also { takeFrom(it) }
         }
 

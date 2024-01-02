@@ -17,7 +17,7 @@ shadowJar {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(":lib-util")
-    implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
+    implementation libs.mockwebserver
     implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
     implementation "org.json:json:$version_json"
     implementation "commons-cli:commons-cli:$version_apache_commons_cli"

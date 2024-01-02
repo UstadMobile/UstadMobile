@@ -8,7 +8,7 @@ import java.io.File
 import java.io.FileInputStream
 
 actual fun FileSystem.rangeSource(path: Path, fromByte: Long, toByte: Long): RawSource {
-    val  fileIn = FileInputStream(path.name)
+    val fileIn = FileInputStream(path.toString())
 
     return RangeInputStream(
         src = fileIn,

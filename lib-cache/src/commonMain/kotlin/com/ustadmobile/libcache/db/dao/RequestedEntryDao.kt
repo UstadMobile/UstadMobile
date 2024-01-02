@@ -28,6 +28,22 @@ expect abstract class RequestedEntryDao {
     )
     abstract fun findSha256sNotPresent(batchId: Int): List<String>
 
+    @Query(
+        """
+        SELECT RequestedEntry.requestedUrl
+          FROM RequestedEntry
+         WHERE RequestedEntry.batchId = :batchId 
+           AND NOT EXISTS(
+               SELECT CacheEntry.ceId
+                 FROM CacheEntry
+                WHERE CacheEntry.url = RequestedEntry.requestedUrl
+           )
+        """
+    )
+    abstract fun findUrlsNotPresent(
+        batchId: Int,
+    ): List<String>
+
     @Query("""
         DELETE FROM RequestedEntry
          WHERE RequestedEntry.batchId = :batchId    
