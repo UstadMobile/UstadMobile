@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
@@ -13,6 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.appstate.TabItem
@@ -74,6 +76,7 @@ fun UstadScreenTabs(
     onSetAppUiState: (AppUiState) -> Unit,
     navResultReturner: NavResultReturner,
     onShowSnackBar: SnackBarDispatcher,
+    scrollable: Boolean = false,
     content: @Composable TabScope.(TabItem) -> Unit,
 ) {
     val pagerState = rememberPagerState(
@@ -89,9 +92,7 @@ fun UstadScreenTabs(
 
     Column {
         if (tabs.isNotEmpty()) {
-            TabRow(
-                selectedTabIndex = pagerState.currentPage
-            ) {
+            val tabContent : @Composable () -> Unit = {
                 tabs.forEachIndexed { index, tabItem ->
                     Tab(
                         selected = index == pagerState.currentPage,
@@ -108,6 +109,22 @@ fun UstadScreenTabs(
                     )
                 }
             }
+
+            if(scrollable) {
+                ScrollableTabRow(
+                    selectedTabIndex = pagerState.currentPage,
+                    edgePadding = 0.dp,
+                ){
+                    tabContent()
+                }
+            }else {
+                TabRow(
+                    selectedTabIndex = pagerState.currentPage
+                ) {
+                    tabContent()
+                }
+            }
+
 
             HorizontalPager(
                 modifier = Modifier.fillMaxSize(),
