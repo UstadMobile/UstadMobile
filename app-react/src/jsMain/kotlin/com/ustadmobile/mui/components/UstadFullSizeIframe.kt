@@ -14,6 +14,8 @@ import web.cssom.Display
 
 external interface UstadFullSizeIframeProps: Props {
     var src: String
+
+    var id: String?
 }
 
 /**
@@ -32,6 +34,7 @@ val UstadFullSizeIframe = FC<UstadFullSizeIframeProps> { props ->
         }
 
         src = props.src
+        id = props.id
 
     }
 }
