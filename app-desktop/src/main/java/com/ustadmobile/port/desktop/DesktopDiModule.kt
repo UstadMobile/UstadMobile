@@ -6,6 +6,8 @@ import com.ustadmobile.core.account.AuthManager
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.connectivitymonitor.ConnectivityMonitorJvm
+import com.ustadmobile.core.connectivitymonitor.ConnectivityTriggerGroupController
 import com.ustadmobile.core.contentformats.epub.XhtmlFixer
 import com.ustadmobile.core.contentformats.epub.XhtmlFixerJsoup
 import com.ustadmobile.core.db.ContentJobItemTriggersCallback
@@ -25,6 +27,8 @@ import com.ustadmobile.core.impl.locale.StringProviderJvm
 import com.ustadmobile.core.schedule.ClazzLogCreatorManager
 import com.ustadmobile.core.schedule.ClazzLogCreatorManagerJvm
 import com.ustadmobile.core.schedule.initQuartzDb
+import com.ustadmobile.core.uri.UriHelper
+import com.ustadmobile.core.uri.UriHelperJvm
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 import com.ustadmobile.door.DatabaseBuilder
@@ -41,15 +45,29 @@ import org.kodein.di.singleton
 import java.io.File
 import java.util.Locale
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
+import com.ustadmobile.libcache.UstadCache
+import com.ustadmobile.libcache.UstadCacheBuilder
+import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
+import com.ustadmobile.libcache.logging.NapierLoggingAdapter
+import com.ustadmobile.libcache.okhttp.UstadCacheInterceptor
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.serialization.kotlinx.json.json
+import kotlinx.io.files.Path
 import kotlinx.serialization.json.Json
 import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
 import nl.adaptivity.xmlutil.serialization.XML
 import nl.adaptivity.xmlutil.serialization.XmlConfig
+import okhttp3.Dispatcher
+import okhttp3.OkHttpClient
 import org.kodein.di.on
 import org.quartz.Scheduler
 import org.quartz.impl.StdSchedulerFactory
 import java.io.FileReader
 import java.io.FileWriter
+import java.net.InetAddress
 import java.util.Properties
 import javax.naming.InitialContext
 
@@ -57,12 +75,93 @@ const val TAG_APP_HOME = "AppHome"
 
 const val TAG_DATA_DIR = "DataDir"
 
+const val TAG_CACHE_DIR = "CacheDir"
+
+const val CONNECTIVITY_CHECK_HOST = "google.com"
+
 fun ustadAppHomeDir(): File {
     return System.getProperty("app_home")?.let { File(it) } ?: File(System.getProperty("user.dir"))
 }
 
 fun ustadAppDataDir(): File {
     return File(ustadAppHomeDir(), "data")
+}
+
+val DesktopHttpModule = DI.Module("Desktop-HTTP") {
+    val cacheLogger = NapierLoggingAdapter()
+
+    bind<File>(tag = TAG_CACHE_DIR) with singleton {
+        val dataDir: File = instance(tag = TAG_DATA_DIR)
+        File(dataDir, "httpfiles").also {
+            if(!it.exists())
+                it.mkdirs()
+        }
+    }
+
+    bind<UriHelper>() with singleton {
+        UriHelperJvm(
+            mimeTypeHelperImpl = FileMimeTypeHelperImpl(),
+            httpClient = instance(),
+            okHttpClient = instance()
+        )
+    }
+
+    bind<UstadCache>() with singleton {
+        val dataDir: File = instance(tag = TAG_DATA_DIR)
+        dataDir.takeIf { !it.exists() }?.mkdirs()
+
+        val dbUrl = "jdbc:sqlite:(datadir)/ustadcache.db"
+            .replace("(datadir)", dataDir.absolutePath)
+        UstadCacheBuilder(
+            dbUrl = dbUrl,
+            storagePath = Path(
+                File(dataDir, "httpfiles").absolutePath.toString()
+            ),
+            logger = cacheLogger,
+
+        ).build()
+    }
+
+    bind<OkHttpClient>() with singleton {
+        val interceptorTmpDir = instance<File>(tag = TAG_CACHE_DIR)
+
+        OkHttpClient.Builder()
+            .dispatcher(
+                Dispatcher().also {
+                    it.maxRequests = 30
+                    it.maxRequestsPerHost = 10
+                }
+            )
+            .addInterceptor(
+                UstadCacheInterceptor(
+                    cache = instance(),
+                    cacheDir = interceptorTmpDir,
+                    logger = cacheLogger,
+                )
+            )
+            .build()
+    }
+
+
+    bind<HttpClient>() with singleton {
+        HttpClient(OkHttp) {
+
+            install(ContentNegotiation) {
+                json(json = instance())
+            }
+            install(HttpTimeout)
+
+            val dispatcher = Dispatcher()
+            dispatcher.maxRequests = 30
+            dispatcher.maxRequestsPerHost = 10
+
+            engine {
+                preconfigured = instance()
+            }
+
+        }
+    }
+
 }
 
 @OptIn(ExperimentalXmlUtilApi::class)
@@ -225,4 +324,36 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
     bind<GenderConfig>() with singleton {
         GenderConfig()
     }
+
+    bind<File>(tag = DiTag.TAG_TMP_DIR) with singleton {
+        File(ustadAppDataDir(), "tmp").also {
+            if(!it.exists())
+                it.mkdirs()
+        }
+    }
+
+    bind<ConnectivityMonitorJvm>() with singleton {
+        ConnectivityMonitorJvm(
+            checkInetAddr = { InetAddress.getByName(CONNECTIVITY_CHECK_HOST) },
+            checkPort = 80,
+        )
+    }
+
+    bind<ConnectivityTriggerGroupController>() with singleton {
+        ConnectivityTriggerGroupController(
+            scheduler = instance(),
+            connectivityMonitorJvm = instance(),
+        )
+    }
+
+    onReady {
+        instance<File>(tag = TAG_DATA_DIR).takeIf { !it.exists() }?.mkdirs()
+        instance<ConnectivityMonitorJvm>()
+        instance<ConnectivityTriggerGroupController>()
+        instance<Scheduler>().start()
+        Runtime.getRuntime().addShutdownHook(Thread{
+            instance<Scheduler>().shutdown()
+        })
+    }
+
 }

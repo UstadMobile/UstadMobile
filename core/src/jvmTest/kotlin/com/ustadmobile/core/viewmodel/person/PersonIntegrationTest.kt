@@ -67,8 +67,8 @@ class PersonIntegrationTest: AbstractMainDispatcherTest() {
                 )
             ).use { viewModel ->
                 viewModel.uiState.assertItemReceived(timeout = 5.seconds, name = "detail view model shows account created") {
-                    println("Person detail state username = ${it.person?.username} hasPasswordPermission=${it.hasChangePasswordPermission}")
-                    it.person?.username == "bart" && !it.showCreateAccountVisible && it.changePasswordVisible
+                    println("Person detail state username = ${it.person?.person?.username} hasPasswordPermission=${it.hasChangePasswordPermission}")
+                    it.person?.person?.username == "bart" && !it.showCreateAccountVisible && it.changePasswordVisible
                 }
             }
 

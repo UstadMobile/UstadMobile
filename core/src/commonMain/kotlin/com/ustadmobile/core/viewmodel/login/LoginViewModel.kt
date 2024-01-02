@@ -18,6 +18,7 @@ import com.ustadmobile.core.view.*
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
+import com.ustadmobile.core.viewmodel.person.registerageredirect.RegisterAgeRedirectViewModel
 import com.ustadmobile.lib.db.entities.Site
 import io.github.aakira.napier.Napier
 import io.ktor.client.*
@@ -231,7 +232,7 @@ class LoginViewModel(
 
         args.putFromSavedStateIfPresent(PersonEditViewModel.REGISTRATION_ARGS_TO_PASS)
 
-        navController.navigate(RegisterAgeRedirectView.VIEW_NAME, args)
+        navController.navigate(RegisterAgeRedirectViewModel.DEST_NAME, args)
     }
 
     fun onChangeLanguage(

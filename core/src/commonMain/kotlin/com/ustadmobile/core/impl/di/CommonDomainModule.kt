@@ -17,6 +17,9 @@ import org.kodein.di.scoped
 
 /**
  * Domain (UseCases) that are part of commonMain source.
+ *
+ * Includes items that require systemImpl, so cannot be used on Android for dependencies that are
+ * at the Application level di.
  */
 fun commonDomainDiModule(endpointScope: EndpointScope) = DI.Module("CommonDomain") {
     bind<IApproveOrDeclinePendingEnrolmentRequestUseCase>() with scoped(endpointScope).provider {
