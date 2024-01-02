@@ -20,6 +20,11 @@ interface HttpHeaders {
             )
         }
 
+        fun fromMap(map: Map<String, List<String>>): HttpHeaders {
+            return MapHttpHeadersAdapter(map)
+        }
+
+
         fun emptyHeaders() = EMPTY_HEADERS
 
     }

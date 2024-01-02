@@ -2,6 +2,7 @@ package com.ustadmobile.core.viewmodel.person.edit
 
 import com.ustadmobile.core.account.AccountRegisterOptions
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
 import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorUseCase
 import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
@@ -22,6 +23,7 @@ import com.ustadmobile.core.viewmodel.person.PersonViewModelConstants.ARG_GO_TO_
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel.Companion.REGISTER_MODE_ENABLED
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel.Companion.REGISTER_MODE_MINOR
+import com.ustadmobile.core.viewmodel.person.registerageredirect.RegisterAgeRedirectViewModel
 import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -41,6 +43,8 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import org.kodein.di.DI
 import org.kodein.di.instance
+import org.kodein.di.instanceOrNull
+import org.kodein.di.on
 
 data class PersonEditUiState(
 
@@ -148,6 +152,9 @@ class PersonEditViewModel(
 
     private val genderConfig : GenderConfig by instance()
 
+    private val enqueueSavePictureUseCase: EnqueueSavePictureUseCase? by
+        on(accountManager.activeEndpoint).instanceOrNull()
+
     init {
         loadingState = LoadingUiState.INDETERMINATE
 
@@ -210,7 +217,9 @@ class PersonEditViewModel(
                         uiUpdate = { personPicture ->
                             _uiState.update { it.copy(personPicture = personPicture) }
                         }
-                    )
+                    ).also {
+                        savedStateHandle.setIfNoValueSetYet(INIT_PIC_URI, it?.personPictureUri ?: "")
+                    }
                 }
             )
 
@@ -272,13 +281,11 @@ class PersonEditViewModel(
     }
 
     fun onPersonPictureChanged(pictureUri: String?) {
-        val personPicture: PersonPicture? = pictureUri?.let {
-            PersonPicture().apply {
-                personPictureUid = _uiState.value.personPicture?.personPictureUid ?: 0
-                personPictureUri = pictureUri
-                picTimestamp = systemTimeInMillis()
-            }
+        val personPicture: PersonPicture = PersonPicture().apply {
+            personPictureUid = _uiState.value.personPicture?.personPictureUid ?: 0
+            personPictureUri = pictureUri
         }
+
         _uiState.update { prev ->
             prev.copy(
                 personPicture = personPicture
@@ -286,11 +293,7 @@ class PersonEditViewModel(
         }
 
         viewModelScope.launch {
-            if(personPicture != null) {
-                savedStateHandle.setJson(STATE_KEY_PICTURE, PersonPicture.serializer(), personPicture)
-            }else {
-                savedStateHandle[STATE_KEY_PICTURE] = null
-            }
+            savedStateHandle.setJson(STATE_KEY_PICTURE, PersonPicture.serializer(), personPicture)
         }
     }
 
@@ -475,7 +478,7 @@ class PersonEditViewModel(
 
                     if(registrationModeFlags.hasFlag(REGISTER_MODE_MINOR)) {
                         val goOptions = UstadMobileSystemCommon.UstadGoOptions(
-                            RegisterAgeRedirectView.VIEW_NAME, true)
+                            RegisterAgeRedirectViewModel.DEST_NAME, true)
                         val args = mutableMapOf<String, String>().also {
                             it[RegisterMinorWaitForParentViewModel.ARG_USERNAME] = savePerson.username ?: ""
                             it[RegisterMinorWaitForParentViewModel.ARG_PARENT_CONTACT] =
@@ -547,13 +550,20 @@ class PersonEditViewModel(
                 }
 
                 val personPictureVal = _uiState.value.personPicture
-                if(personPictureVal != null) {
-                    personPictureVal.personPicturePersonUid = savePerson.personUid
 
-                    if(personPictureVal.personPictureUid == 0L) {
-                        activeRepo.personPictureDao.insertAsync(personPictureVal)
-                    }else {
-                        activeRepo.personPictureDao.updateAsync(personPictureVal)
+                if(personPictureVal != null) {
+                    personPictureVal.personPictureUid = savePerson.personUid
+                    personPictureVal.personPictureLct = systemTimeInMillis()
+                    val initPictureUri = savedStateHandle[INIT_PIC_URI] ?: ""
+                    val personPictureUriVal = personPictureVal.personPictureUri
+                    if(initPictureUri != personPictureUriVal) {
+                        //Save if changed
+                        activeDb.personPictureDao.upsert(personPictureVal)
+                        enqueueSavePictureUseCase?.invoke(
+                            entityUid = savePerson.personUid,
+                            tableId = PersonPicture.TABLE_ID,
+                            pictureUri = personPictureUriVal
+                        )
                     }
                 }
 
@@ -578,6 +588,7 @@ class PersonEditViewModel(
 
         const val STATE_KEY_PICTURE = "picState"
 
+        const val INIT_PIC_URI = "initPicUri"
 
         const val DEST_NAME = "PersonEditView"
 

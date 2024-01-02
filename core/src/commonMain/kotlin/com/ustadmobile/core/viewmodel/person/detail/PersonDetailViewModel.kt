@@ -31,7 +31,7 @@ import org.kodein.di.instanceOrNull
 
 data class PersonDetailUiState(
 
-    val person: PersonWithPersonParentJoin? = null,
+    val person: PersonAndDisplayDetail? = null,
 
     val displayPhoneNum: String? = null,
 
@@ -43,41 +43,41 @@ data class PersonDetailUiState(
 
     internal val hasChangePasswordPermission: Boolean = false,
 
-) {
+    ) {
 
     val dateOfBirthVisible: Boolean
-        get() = person?.dateOfBirth.isDateSet()
+        get() = person?.person?.dateOfBirth.isDateSet()
 
     val personGenderVisible: Boolean
-        get() = person?.gender  != null
-                && person.gender != 0
+        get() = person?.person?.gender  != null
+                && person.person?.gender != 0
 
     val changePasswordVisible: Boolean
-        get() = person?.username != null && hasChangePasswordPermission
+        get() = person?.person?.username != null && hasChangePasswordPermission
 
     val showCreateAccountVisible: Boolean
-        get() = person != null && person.username == null && hasChangePasswordPermission
+        get() = person != null && person.person?.username == null && hasChangePasswordPermission
 
     val personAddressVisible: Boolean
-        get() = !person?.personAddress.isNullOrBlank()
+        get() = !person?.person?.personAddress.isNullOrBlank()
 
     val phoneNumVisible: Boolean
-        get() = !person?.phoneNum.isNullOrBlank()
+        get() = !person?.person?.phoneNum.isNullOrBlank()
 
     val emailVisible: Boolean
-        get() = !person?.emailAddr.isNullOrBlank()
+        get() = !person?.person?.emailAddr.isNullOrBlank()
 
     val personOrgIdVisible: Boolean
-        get() = !person?.personOrgId.isNullOrBlank()
+        get() = !person?.person?.personOrgId.isNullOrBlank()
 
     val personUsernameVisible: Boolean
-        get() = !person?.username.isNullOrBlank()
+        get() = !person?.person?.username.isNullOrBlank()
 
     val manageParentalConsentVisible: Boolean
         get() = person?.parentJoin != null
 
     val sendSmsVisible: Boolean
-        get() = canSendSms && !person?.phoneNum.isNullOrBlank()
+        get() = canSendSms && !person?.person?.phoneNum.isNullOrBlank()
 
     val chatVisible: Boolean
         get() = !person?.username.isNullOrBlank()
@@ -139,14 +139,14 @@ class PersonDetailViewModel(
                         _uiState.update { prev ->
                             prev.copy(
                                 person = person,
-                                displayPhoneNum = person?.phoneNum?.let {
+                                displayPhoneNum = person?.person?.phoneNum?.let {
                                     phoneNumberUtil?.formatInternationalOrNull(it)
                                 }
                             )
                         }
                         _appUiState.update { prev ->
                             prev.copy(
-                                title = person?.personFullName() ?: "",
+                                title = person?.person?.personFullName() ?: "",
                                 loadingState = if(person != null) { NOT_LOADING } else { INDETERMINATE }
                             )
                         }
@@ -241,19 +241,19 @@ class PersonDetailViewModel(
     }
 
     fun onClickDial() {
-        _uiState.value.person?.phoneNum?.also {
+        _uiState.value.person?.person?.phoneNum?.also {
             onClickPhoneNumUseCase(it)
         }
     }
 
     fun onClickSms() {
-        _uiState.value.person?.phoneNum?.also {
+        _uiState.value.person?.person?.phoneNum?.also {
             onClickSendSmsUseCase?.onClickSendSms(it)
         }
     }
 
     fun onClickEmail() {
-        _uiState.value.person?.emailAddr?.also {
+        _uiState.value.person?.person?.emailAddr?.also {
             onClickEmailUseCase(it)
         }
     }

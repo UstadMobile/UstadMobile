@@ -9,9 +9,7 @@ import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.person.PersonViewModelConstants.ARG_GO_TO_ON_PERSON_SELECTED
-import com.ustadmobile.door.paging.*
 import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.coroutines.flow.*
@@ -26,9 +24,10 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.viewmodel.person.PersonViewModelConstants.ARG_POPUP_TO_ON_PERSON_SELECTED
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
+import com.ustadmobile.lib.db.composites.PersonAndListDisplayDetails
 
 data class PersonListUiState(
-    val personList: () -> PagingSource<Int, PersonWithDisplayDetails> = { EmptyPagingSource() },
+    val personList: () -> PagingSource<Int, PersonAndListDisplayDetails> = { EmptyPagingSource() },
     val sortOptions: List<SortOrderOption> = listOf(
         SortOrderOption(MR.strings.first_name, PersonDaoCommon.SORT_FIRST_NAME_ASC, true),
         SortOrderOption(MR.strings.first_name, PersonDaoCommon.SORT_FIRST_NAME_DESC, false),
@@ -76,7 +75,7 @@ class PersonListViewModel(
     private val filterByPermission = savedStateHandle[UstadView.ARG_FILTER_BY_PERMISSION]?.trim()?.toLong()
         ?: Role.PERMISSION_PERSON_SELECT
 
-    private val pagingSourceFactory: () -> PagingSource<Int, PersonWithDisplayDetails> = {
+    private val pagingSourceFactory: () -> PagingSource<Int, PersonAndListDisplayDetails> = {
         activeRepo.personDao.findPersonsWithPermissionAsPagingSource(
             getSystemTimeInMillis(), filterExcludeMembersOfClazz,
             filterExcludeMemberOfSchool, filterAlreadySelectedList,
@@ -87,7 +86,7 @@ class PersonListViewModel(
         }
     }
 
-    private var lastPagingSource: PagingSource<Int, PersonWithDisplayDetails>? = null
+    private var lastPagingSource: PagingSource<Int, PersonAndListDisplayDetails>? = null
 
     init {
         _appUiState.update { prev ->

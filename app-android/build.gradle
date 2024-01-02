@@ -313,17 +313,13 @@ dependencies {
 
     //KTOR
     implementation "io.ktor:ktor-serialization-gson:$version_ktor"
-    implementation "io.ktor:ktor-client-okhttp:$version_ktor"
+    implementation libs.ktor.client.okhttp
     implementation "io.ktor:ktor-client-content-negotiation:$version_ktor"
     implementation "io.ktor:ktor-client-cio:$version_ktor"
 
     //http server
     implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
     implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
-
-    //image compressor
-    implementation "id.zelory:compressor:$version_compressor"
-
 
     //Android play core for update support within the application
     implementation "com.google.android.play:core:$version_play_core"
@@ -348,8 +344,8 @@ dependencies {
     implementation "info.guardianproject.panic:panic:$version_android_panickit"
 
     //Image loading
-    implementation "io.coil-kt:coil:$version_android_coil"
-    implementation "io.coil-kt:coil-compose:$version_android_coil"
+    implementation libs.coil
+    implementation libs.coil.compose
 
     implementation "org.jetbrains.kotlinx:kotlinx-datetime:$version_kotlinx_datetime"
 
@@ -372,7 +368,7 @@ dependencies {
     testImplementation "org.robolectric:robolectric:$version_android_roboelectric"
     testImplementation "junit:junit:$version_junit"
     testImplementation "com.squareup.okhttp3:okhttp:$version_okhttp"
-    testImplementation "org.mockito.kotlin:mockito-kotlin:$version_kotlin_mockito"
+    testImplementation libs.mockito.kotlin
     testImplementation "androidx.test.espresso:espresso-core:$version_android_espresso"
     testImplementation "androidx.test.espresso:espresso-contrib:$version_android_espresso"
 
@@ -416,8 +412,8 @@ dependencies {
     androidTestImplementation "androidx.test.uiautomator:uiautomator:$version_android_uiautomator"
 
     androidTestImplementation "org.mockito:mockito-android:$version_android_mockito"
-    androidTestImplementation "org.mockito.kotlin:mockito-kotlin:$version_kotlin_mockito"
-    androidTestImplementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
+    androidTestImplementation libs.mockito.kotlin
+    androidTestImplementation libs.mockwebserver
     androidTestImplementation "commons-io:commons-io:$version_commons_io"
 
     kaptAndroidTest "androidx.databinding:databinding-compiler:$version_androidx_databinding"

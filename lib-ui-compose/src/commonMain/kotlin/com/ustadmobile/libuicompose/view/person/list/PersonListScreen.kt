@@ -18,12 +18,12 @@ import app.cash.paging.Pager
 import app.cash.paging.PagingConfig
 import com.ustadmobile.core.viewmodel.person.list.PersonListUiState
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
-import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
 import com.ustadmobile.libuicompose.components.UstadAddListItem
 import com.ustadmobile.libuicompose.components.UstadListSortHeader
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.util.SortOrderOption
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.libuicompose.components.UstadPersonAvatar
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
@@ -46,7 +46,7 @@ fun PersonListScreen(
 @Composable
 fun PersonListScreen(
     uiState: PersonListUiState,
-    onListItemClick: (PersonWithDisplayDetails) -> Unit = {},
+    onListItemClick: (Person) -> Unit = {},
     onSortOrderChanged: (SortOrderOption) -> Unit = { },
     onClickAddNew: () -> Unit = {},
 ){
@@ -93,16 +93,17 @@ fun PersonListScreen(
 
         ustadPagedItems(
             pagingItems = lazyPagingItems,
-            key = { it.personUid },
-        ) {  person ->
+            key = { it.person?.personUid ?: 0 },
+        ) {  personAndDetails ->
             ListItem(
                 modifier = Modifier.clickable {
-                    person?.also { onListItemClick(it) }
+                    personAndDetails?.person?.also { onListItemClick(it) }
                 },
-                headlineContent = { Text(text = "${person?.firstNames} ${person?.lastName}") },
+                headlineContent = { Text(text = personAndDetails?.person?.fullName() ?: "") },
                 leadingContent = {
                     UstadPersonAvatar(
-                        person?.personUid ?: 0,
+                        personUid = personAndDetails?.person?.personUid ?: 0,
+                        pictureUri = personAndDetails?.picture?.personPictureUri
                     )
                 },
             )

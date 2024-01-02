@@ -22,10 +22,10 @@ import com.ustadmobile.libcache.db.entities.ResponseBody
  *
  */
 @DoorDatabase(
-    version = 1,
+    version = 2,
     entities = arrayOf(CacheEntry::class, ResponseBody::class, RequestedEntry::class,),
 )
-abstract class UstadCacheDb : RoomDatabase() {
+expect abstract class UstadCacheDb : RoomDatabase {
 
     abstract val cacheEntryDao: CacheEntryDao
 

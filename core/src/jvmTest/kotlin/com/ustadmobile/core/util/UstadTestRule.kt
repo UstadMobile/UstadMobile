@@ -18,7 +18,6 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.nav.UstadNavController
-import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
@@ -31,7 +30,6 @@ import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.randomString
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
-import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.util.test.nav.TestUstadNavController
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
@@ -186,8 +184,6 @@ class UstadTestRule(): TestWatcher() {
                     ?: throw IllegalStateException("Could not open repo for endpoint ${context.url}")
                 ClientId(nodeId.toInt())
             }
-
-            bind<ContainerMounter>() with singleton { EmbeddedHTTPD(0, di).also { it.start() } }
 
             bind<Gson>() with singleton {
                 Gson()

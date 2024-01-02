@@ -13,10 +13,10 @@ import com.ustadmobile.core.contentjob.ContentJobManagerJvm
 import com.ustadmobile.core.contentjob.ContentImportersManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
+import com.ustadmobile.core.domain.blob.upload.BlobUploadServerUseCase
 import com.ustadmobile.core.impl.di.CommonJvmDiModule
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.DiTag.TAG_CONTEXT_DATA_ROOT
-import com.ustadmobile.door.*
 import com.ustadmobile.door.ext.*
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.io.UploadSessionManager
@@ -28,7 +28,6 @@ import io.github.aakira.napier.Napier
 import io.ktor.server.application.*
 import io.ktor.serialization.gson.*
 import io.ktor.http.*
-import io.ktor.http.content.*
 import io.ktor.server.request.*
 import io.ktor.server.routing.*
 import jakarta.mail.Authenticator
@@ -49,20 +48,20 @@ import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.uri.UriHelperJvm
 import com.ustadmobile.door.http.DoorHttpServerConfig
 import com.ustadmobile.lib.rest.dimodules.makeJvmBackendDiModule
+import com.ustadmobile.lib.rest.api.blob.BlobUploadServerRoute
+import com.ustadmobile.lib.rest.domain.contententry.getmetadatafromuri.ContentEntryGetMetadataServerUseCase
+import com.ustadmobile.lib.rest.api.contentupload.ContentUploadRoute
+import com.ustadmobile.lib.rest.api.contentupload.UPLOAD_TMP_SUBDIR
 import com.ustadmobile.lib.rest.ffmpeghelper.InvalidFffmpegException
 import com.ustadmobile.lib.rest.ffmpeghelper.NoFfmpegException
 import io.ktor.server.response.*
 import kotlinx.serialization.json.Json
 import com.ustadmobile.lib.util.SysPathUtil
-import io.ktor.client.*
-import io.ktor.client.plugins.websocket.*
 import io.ktor.server.http.content.*
-import io.ktor.server.plugins.callloging.*
 import io.ktor.server.plugins.conditionalheaders.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.cors.routing.*
 import io.ktor.server.plugins.statuspages.*
-import io.ktor.websocket.*
 import org.kodein.di.ktor.di
 import java.util.*
 import com.ustadmobile.lib.rest.logging.LogbackAntiLog
@@ -287,7 +286,7 @@ fun Application.umRestApplication(
                 dbUrl = dbUrl,
                 storagePath = Path(
                     File(appConfig.absoluteDataDir(), "httpfiles").absolutePath.toString()
-                )
+                ),
             ).build()
         }
 
@@ -387,6 +386,26 @@ fun Application.umRestApplication(
             }
         }
 
+        bind<ContentEntryGetMetadataServerUseCase>() with scoped(EndpointScope.Default).singleton {
+            val uploadDir: File = instance(DiTag.TAG_FILE_UPLOAD_TMP_DIR)
+            ContentEntryGetMetadataServerUseCase(
+                uploadDir = uploadDir,
+                importersManager = on(context).instance(),
+                json = instance()
+            )
+        }
+
+        bind<BlobUploadServerUseCase>() with scoped(EndpointScope.Default).singleton {
+            BlobUploadServerUseCase(
+                httpCache = instance(),
+                tmpDir = Path(
+                    File(appConfig.absoluteDataDir(), "blob-uploads-tmp").absolutePath.toString()
+                ),
+                json = instance(),
+                endpoint = context,
+            )
+        }
+
         try {
             appConfig.config("mail")
 
@@ -477,11 +496,7 @@ fun Application.umRestApplication(
      */
     install(Routing) {
         addHostCheckIntercept()
-
-        ContainerDownload()
         personAuthRegisterRoute()
-        ContainerMountRoute()
-        ContainerUploadRoute2()
         route("UmAppDatabase") {
             UmAppDatabase_KtorRoute(DoorHttpServerConfig(json = json)) { call ->
                 val di: DI by call.closestDI()
@@ -490,11 +505,11 @@ fun Application.umRestApplication(
         }
         SiteRoute()
 
-        ContentUploadRoute()
-
         GetAppRoute()
 
         route("api") {
+            val di: DI by closestDI()
+
             route("pbkdf2"){
                 Pbkdf2Route()
             }
@@ -507,8 +522,15 @@ fun Application.umRestApplication(
                 ContentEntryImportRoute()
             }
 
-            val di: DI by closestDI()
-            ContentEntryVersionRoute(
+            route("blob") {
+                BlobUploadServerRoute(
+                    useCase = { call ->
+                        di.on(call).direct.instance()
+                    }
+                )
+            }
+
+            CacheRoute(
                 cache = di.direct.instance()
             )
         }

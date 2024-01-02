@@ -6,6 +6,8 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
+import coil.ImageLoader
+import coil.ImageLoaderFactory
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.russhwolf.settings.Settings
@@ -23,7 +25,6 @@ import com.ustadmobile.core.contentjob.ContentJobManagerAndroid
 import com.ustadmobile.core.db.*
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.impl.*
-import com.ustadmobile.core.impl.di.CommonJvmDiModule
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.*
 import com.ustadmobile.door.entities.NodeIdAndAuth
@@ -31,6 +32,20 @@ import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.core.db.ext.migrationList
+import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
+import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCaseJvm
+import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
+import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCaseAndroid
+import com.ustadmobile.core.domain.blob.savepicture.SavePictureUseCase
+import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCase
+import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCaseJvm
+import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCase
+import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCaseAndroid
+import com.ustadmobile.core.domain.blob.upload.UpdateFailedTransferJobUseCase
+import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseAndroid
+import com.ustadmobile.core.domain.upload.ChunkedUploadClientChunkGetterUseCase
+import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
+import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
 import kotlinx.serialization.json.Json
@@ -53,16 +68,26 @@ import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
+import com.ustadmobile.libcache.logging.NapierLoggingAdapter
+import com.ustadmobile.libcache.okhttp.UstadCacheInterceptor
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.serialization.kotlinx.json.json
 import kotlinx.io.files.Path
+import kotlinx.io.files.SystemFileSystem
 import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
 import nl.adaptivity.xmlutil.serialization.XML
 import nl.adaptivity.xmlutil.serialization.XmlConfig
+import okhttp3.Dispatcher
+import okhttp3.OkHttpClient
 import org.acra.config.httpSender
 import org.acra.data.StringFormat
 import org.acra.ktx.initAcra
 import org.acra.sender.HttpSender
 
-class UstadApp : Application(), DIAware{
+class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
     private val Context.appMetaData: Bundle?
         get() = this.applicationContext.packageManager.getApplicationInfo(
@@ -72,7 +97,43 @@ class UstadApp : Application(), DIAware{
 
     @OptIn(ExperimentalXmlUtilApi::class)
     override val di: DI by DI.lazy {
-        import(CommonJvmDiModule)
+        bind<OkHttpClient>() with singleton {
+            OkHttpClient.Builder()
+                .dispatcher(
+                    Dispatcher().also {
+                        it.maxRequests = 30
+                        it.maxRequestsPerHost = 10
+                    }
+                )
+                .addInterceptor(
+                    UstadCacheInterceptor(
+                        cache = instance(),
+                        cacheDir = File(applicationContext.filesDir, "httpfiles"),
+                        logger = NapierLoggingAdapter(),
+                    )
+                )
+                .build()
+        }
+
+        bind<HttpClient>() with singleton {
+            HttpClient(OkHttp) {
+
+                install(ContentNegotiation) {
+                    json(json = instance())
+                }
+                install(HttpTimeout)
+
+                val dispatcher = Dispatcher()
+                dispatcher.maxRequests = 30
+                dispatcher.maxRequestsPerHost = 10
+
+                engine {
+                    preconfigured = instance()
+                }
+
+            }
+        }
+
 
         bind<AppConfig>() with singleton {
             BundleAppConfig(appMetaData)
@@ -188,7 +249,8 @@ class UstadApp : Application(), DIAware{
         bind<UstadCache>() with singleton {
             val httpCacheDir = File(applicationContext.filesDir, "httpfiles")
             val storagePath = Path(httpCacheDir.absolutePath)
-            UstadCacheBuilder(applicationContext, storagePath).build()
+            UstadCacheBuilder(applicationContext, storagePath, logger = NapierLoggingAdapter())
+                .build()
         }
 
         bind<ContentImportersManager>() with scoped(EndpointScope.Default).singleton {
@@ -247,17 +309,77 @@ class UstadApp : Application(), DIAware{
             )
         }
 
+        bind<ChunkedUploadClientUseCaseKtorImpl>() with singleton {
+            ChunkedUploadClientUseCaseKtorImpl(
+                httpClient = instance(),
+                uriHelper = instance(),
+            )
+        }
+
+        bind<ChunkedUploadClientLocalUriUseCase>() with singleton {
+            instance<ChunkedUploadClientUseCaseKtorImpl>()
+        }
+
+        bind<ChunkedUploadClientChunkGetterUseCase>() with singleton {
+            instance<ChunkedUploadClientUseCaseKtorImpl>()
+        }
+
+        bind<SaveLocalUrisAsBlobsUseCase>() with scoped(EndpointScope.Default).singleton {
+            SaveLocalUrisAsBlobsUseCaseJvm(
+                endpoint = context,
+                cache = instance(),
+                uriHelper = instance(),
+                tmpDir = Path(applicationContext.cacheDir.absolutePath, "savelocaluriaslblobtmp"),
+                fileSystem = SystemFileSystem
+            )
+        }
+
+        bind<EnqueueBlobUploadClientUseCase>() with scoped(EndpointScope.Default).singleton {
+            EnqueueBlobUploadClientUseCaseAndroid(
+                appContext = applicationContext,
+                endpoint = context,
+                db = on(context).instance(tag = DoorTag.TAG_DB),
+                cache = instance(),
+            )
+        }
+
+        bind<BlobUploadClientUseCase>() with scoped(EndpointScope.Default).singleton {
+            BlobUploadClientUseCaseJvm(
+                chunkedUploadUseCase = on(context).instance(),
+                httpClient = instance(),
+                httpCache = instance(),
+                db = on(context).instance(tag = DoorTag.TAG_DB),
+                repo = on(context).instance(tag = DoorTag.TAG_REPO),
+                endpoint = context,
+            )
+        }
+
+        bind<EnqueueSavePictureUseCase>() with scoped(EndpointScope.Default).singleton {
+            EnqueueSavePictureUseCaseAndroid(
+                appContext = applicationContext,
+                endpoint = context,
+            )
+        }
+
+        bind<SavePictureUseCase>() with scoped(EndpointScope.Default).singleton {
+            SavePictureUseCase(
+                saveLocalUrisAsBlobUseCase = on(context).instance(),
+                db = on(context).instance(tag = DoorTag.TAG_DB),
+                repo = on(context).instance(tag = DoorTag.TAG_REPO),
+                enqueueBlobUploadClientUseCase = on(context).instance(),
+                compressImageUseCase = CompressImageUseCaseAndroid(applicationContext),
+            )
+        }
+
+        bind<UpdateFailedTransferJobUseCase>() with scoped(EndpointScope.Default).provider {
+            UpdateFailedTransferJobUseCase(
+                db = instance(tag = DoorTag.TAG_DB)
+            )
+        }
+
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
     }
 
-
-    private fun LocaleListCompat.getFirstLang() : String? {
-        return try {
-            this.get(0)?.toString()
-        }catch(e: Exception) {
-            null
-        }
-    }
 
     override fun onCreate() {
         super.onCreate()
@@ -273,6 +395,19 @@ class UstadApp : Application(), DIAware{
                 settings.putString(PREFKEY_ACTIONED_PRESET, true.toString())
             }
         }
+    }
+
+    /**
+     * COIL image loader singleton (connected to the OkHttpClient which uses UstadCache) as per
+     *  https://coil-kt.github.io/coil/image_loaders/
+     */
+    override fun newImageLoader(): ImageLoader {
+        val okHttpClient: OkHttpClient = di.direct.instance()
+        return ImageLoader.Builder(applicationContext)
+            .okHttpClient(
+                okHttpClient = okHttpClient
+            )
+            .build()
     }
 
     override fun attachBaseContext(base: Context) {

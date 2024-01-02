@@ -1,6 +1,5 @@
 package com.ustadmobile.view.components
 
-import com.ustadmobile.hooks.useAttachmentUriSrc
 import com.ustadmobile.mui.components.ThemeContext
 import web.cssom.*
 import emotion.react.css
@@ -20,12 +19,12 @@ external interface UstadImageSelectButtonProps: Props {
 
     var onImageUriChanged: (String?) -> Unit
 
+    var id: String?
+
 }
 
 val UstadImageSelectButton = FC<UstadImageSelectButtonProps> { props ->
     val inputRef = useRef<HTMLInputElement>(null)
-
-    val imageHref = useAttachmentUriSrc(props.imageUri, false)?.toString()
 
     val theme by useRequiredContext(ThemeContext)
 
@@ -39,7 +38,14 @@ val UstadImageSelectButton = FC<UstadImageSelectButtonProps> { props ->
         input {
             type = InputType.file
             ref = inputRef
+            id = props.id
             accept = ".jpg,.webp,.png,image/jpg,image/webp,image/png"
+
+            //Note: if the value is not set then React doesn't recognize this as a controlled component
+            // Components should not change between controlled and uncontrolled. We are just using the
+            // input to get the file from the onChange event.
+            value = ""
+
             css {
                 asDynamic().display = "none"
             }
@@ -78,7 +84,7 @@ val UstadImageSelectButton = FC<UstadImageSelectButtonProps> { props ->
             }
 
             Avatar {
-                src = imageHref
+                src = props.imageUri
                 onClick = {
                     inputRef.current?.click()
                 }

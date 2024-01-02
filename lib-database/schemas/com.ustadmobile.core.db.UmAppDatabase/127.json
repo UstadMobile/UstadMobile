@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 127,
-    "identityHash": "62215d13a102982c816f3eb24c85d87f",
+    "identityHash": "04058d426c91746fa41e50d5149591ff",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -5964,7 +5964,7 @@
       },
       {
         "tableName": "Message",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`messageUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `messageSenderPersonUid` INTEGER NOT NULL, `messageToPersonUid` INTEGER NOT NULL, `messageText` TEXT, `messageTimestamp` INTEGER NOT NULL, `messageLct` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`messageUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `messageSenderPersonUid` INTEGER NOT NULL, `messageTableId` INTEGER NOT NULL, `messageEntityUid` INTEGER NOT NULL, `messageText` TEXT, `messageTimestamp` INTEGER NOT NULL, `messageClazzUid` INTEGER NOT NULL, `messageLct` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "messageUid",
@@ -5979,8 +5979,14 @@
             "notNull": true
           },
           {
-            "fieldPath": "messageToPersonUid",
-            "columnName": "messageToPersonUid",
+            "fieldPath": "messageTableId",
+            "columnName": "messageTableId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "messageEntityUid",
+            "columnName": "messageEntityUid",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -5993,6 +5999,12 @@
           {
             "fieldPath": "messageTimestamp",
             "columnName": "messageTimestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "messageClazzUid",
+            "columnName": "messageClazzUid",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -6263,6 +6275,130 @@
         "foreignKeys": []
       },
       {
+        "tableName": "TransferJob",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`tjUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `tjType` INTEGER NOT NULL, `tjStatus` INTEGER NOT NULL, `tjName` TEXT, `tjUuid` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "tjUid",
+            "columnName": "tjUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tjType",
+            "columnName": "tjType",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tjStatus",
+            "columnName": "tjStatus",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tjName",
+            "columnName": "tjName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "tjUuid",
+            "columnName": "tjUuid",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "tjUid"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "TransferJobItem",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`tjiUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `tjiTjUid` INTEGER NOT NULL, `tjTotalSize` INTEGER NOT NULL, `tjTransferred` INTEGER NOT NULL, `tjAttemptCount` INTEGER NOT NULL, `tjiSrc` TEXT, `tjiDest` TEXT, `tjiType` INTEGER NOT NULL, `tjiStatus` INTEGER NOT NULL, `tjiTableId` INTEGER NOT NULL, `tjiEntityUid` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "tjiUid",
+            "columnName": "tjiUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tjiTjUid",
+            "columnName": "tjiTjUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tjTotalSize",
+            "columnName": "tjTotalSize",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tjTransferred",
+            "columnName": "tjTransferred",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tjAttemptCount",
+            "columnName": "tjAttemptCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tjiSrc",
+            "columnName": "tjiSrc",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "tjiDest",
+            "columnName": "tjiDest",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "tjiType",
+            "columnName": "tjiType",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tjiStatus",
+            "columnName": "tjiStatus",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tjiTableId",
+            "columnName": "tjiTableId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tjiEntityUid",
+            "columnName": "tjiEntityUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "tjiUid"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
         "tableName": "OutgoingReplication",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`orUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `destNodeId` INTEGER NOT NULL, `orTableId` INTEGER NOT NULL, `orPk1` INTEGER NOT NULL, `orPk2` INTEGER NOT NULL)",
         "fields": [
@@ -6375,7 +6511,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '62215d13a102982c816f3eb24c85d87f')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '04058d426c91746fa41e50d5149591ff')"
     ]
   }
 }
