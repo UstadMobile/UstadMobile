@@ -158,7 +158,8 @@ class UstadAccountManager(
                                         UserSessionWithPersonAndEndpoint(
                                             userSession = it.userSession ?: UserSession(),
                                             person = it.person ?: Person(),
-                                            endpoint = endpoint
+                                            endpoint = endpoint,
+                                            personPicture = it.personPicture
                                         )
                                     }.sortedBy { it.displayName }
                                 }
@@ -296,6 +297,8 @@ class UstadAccountManager(
         val endpoint = Endpoint(endpointUrl)
         val endpointRepo: UmAppDatabase = di.on(endpoint).direct
             .instance(tag = DoorTag.TAG_REPO)
+        val endpointDb: UmAppDatabase = di.on(endpoint).direct
+            .instance(tag = DoorTag.TAG_DB)
 
         if(endpoint !in _endpointsWithActiveSessions.value) {
             addActiveEndpoint(endpoint, commit = false)
@@ -304,9 +307,9 @@ class UstadAccountManager(
 
         val authManager: AuthManager = di.on(endpoint).direct.instance()
 
-        val userSession = endpointRepo.withDoorTransactionAsync {
+        val (userSession, personPicture) = endpointRepo.withDoorTransactionAsync {
             val nodeId = di.on(endpoint).direct.instance<NodeIdAndAuth>().nodeId
-            UserSession().apply {
+            val userSession = UserSession().apply {
                 usClientNodeId = nodeId
                 usPersonUid = person.personUid
                 usStartTime = systemTimeInMillis()
@@ -315,9 +318,12 @@ class UstadAccountManager(
                 usAuth = password?.let { authManager.encryptPbkdf2(it).toHexString() }
                 usUid = endpointRepo.userSessionDao.insertSession(this)
             }
+            val personPicture = endpointDb.personPictureDao.findByPersonUidAsync(
+                person.personUid)
+            userSession to personPicture
         }
 
-        return UserSessionWithPersonAndEndpoint(userSession, person, endpoint)
+        return UserSessionWithPersonAndEndpoint(userSession, person, endpoint, personPicture)
     }
 
     @Suppress("RedundantSuspendModifier") // Reserved for use if required as per previous api
@@ -426,27 +432,14 @@ class UstadAccountManager(
         val responseAccount = loginResponse.body<UmAccount>()
         responseAccount.endpointUrl = endpointUrl
 
-        var personInDb = db.personDao.findByUidAsync(responseAccount.personUid)
-
-        if(personInDb == null){
-            val personOnServerResponse = httpClient.get {
-                url("${endpointUrl.removeSuffix("/")}/auth/person")
-                parameter("personUid", responseAccount.personUid)
-            }
-            if(personOnServerResponse.status.value == 200) {
-                val personObj = personOnServerResponse.body<Person>()
-                repo.personDao.insertAsync(personObj)
-                personInDb = personObj
-            }else {
-                throw IllegalStateException("Internal error: could not get person object")
-            }
-        }
+        //Make sure that we fetch the person and personpicture into the database.
+        val personAndPicture = repo.personDao.findByUidWithPicture(
+            responseAccount.personUid) ?: throw IllegalStateException("Cannot find person in repo/db")
+        val personInDb = personAndPicture.person!! //Cannot be null based on query
 
         getSiteFromDbOrLoadFromHttp(repo)
 
         val newSession = addSession(personInDb, endpointUrl, password)
-
-        //activeEndpoint = Endpoint(endpointUrl)
         currentUserSession = newSession
 
         //This should not be needed - as responseAccount can be smartcast, but will not otherwise compile

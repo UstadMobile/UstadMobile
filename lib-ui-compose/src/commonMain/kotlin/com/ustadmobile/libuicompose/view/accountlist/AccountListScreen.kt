@@ -167,7 +167,8 @@ fun AccountListItem(
         },
         leadingContent = {
             UstadPersonAvatar(
-                personUid = account?.person?.personUid ?: 0
+                personName = account?.person?.fullName(),
+                pictureUri = account?.personPicture?.personPictureThumbnailUri,
             )
         },
         headlineContent = {
