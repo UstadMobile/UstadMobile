@@ -6,6 +6,7 @@ import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.lib.rest.CONF_DBMODE_SINGLETON
 import com.ustadmobile.lib.rest.CONF_DBMODE_VIRTUALHOST
 import com.ustadmobile.lib.rest.CONF_KEY_SITE_URL
+import com.ustadmobile.libcache.request.HttpRequest
 import com.ustadmobile.libcache.response.HttpResponse
 import io.github.aakira.napier.Napier
 import io.ktor.server.application.*
@@ -168,7 +169,8 @@ private val ktorReservedHeaders = listOf(
  * Send a response using a response from UstadCache. Test via TestContentEntryVersionRoute
  */
 suspend fun ApplicationCall.respondCacheResponse(
-    cacheResponse: HttpResponse?
+    cacheResponse: HttpResponse?,
+    cacheRequest: HttpRequest? = null,
 ) {
     if(cacheResponse != null) {
         cacheResponse.headers.names().filter { headerName ->
@@ -204,7 +206,7 @@ suspend fun ApplicationCall.respondCacheResponse(
         }
     }else {
         respondText(
-            text = "Not found",
+            text = "Not found: ${cacheRequest?.url ?: ""}",
             status = HttpStatusCode.NotFound
         )
     }
