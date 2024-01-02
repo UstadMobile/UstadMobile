@@ -15,6 +15,7 @@ import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.PersonGroup.Companion.PERSONGROUP_FLAG_GUESTPERSON
 import com.ustadmobile.lib.db.entities.PersonGroup.Companion.PERSONGROUP_FLAG_PERSONGROUP
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.*
@@ -164,6 +165,45 @@ class UstadAccountManager(
                                     }.sortedBy { it.displayName }
                                 }
                             }
+                        }
+                    }
+                }
+            }
+        }
+
+        /**
+         * When the current user session flow is being collected, then collect a flow from the
+         * database of the picture and name. If these change, then update the flow.
+         *
+         * We can't just do this direct from the database because this flow is based on data stored
+         * in settings.
+         */
+        scope.launch {
+            _currentUserSession.whenSubscribed {
+                _currentUserSession.collectLatest { session ->
+                    val endpointDb: UmAppDatabase = di.on(session.endpoint).direct.instance(tag = DoorTag.TAG_DB)
+                    endpointDb.personDao.findByUidWithPictureAsFlow(
+                        session.userSession.usPersonUid
+                    ).collect { personAndPictureFromDb ->
+                        val nameChanged = personAndPictureFromDb?.person?.fullName() != session.person.fullName()
+                        val pictureUriChanged = personAndPictureFromDb?.picture?.personPictureThumbnailUri !=
+                                session.personPicture?.personPictureThumbnailUri
+                        if(nameChanged || pictureUriChanged) {
+                            currentUserSession = session.copy(
+                                person = if(nameChanged) {
+                                    session.person.shallowCopy {
+                                        firstNames = personAndPictureFromDb?.person?.firstNames
+                                        lastName = personAndPictureFromDb?.person?.lastName
+                                    }
+                                }else {
+                                    session.person
+                                },
+                                personPicture = if(pictureUriChanged) {
+                                    personAndPictureFromDb?.picture
+                                }else {
+                                    session.personPicture
+                                }
+                            )
                         }
                     }
                 }

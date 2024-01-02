@@ -154,6 +154,15 @@ expect abstract class PersonDao : BaseDao<Person> {
     """)
     abstract suspend fun findByUidWithPicture(uid: Long): PersonAndPicture?
 
+    @Query("""
+        SELECT Person.*, PersonPicture.*
+          FROM Person
+               LEFT JOIN PersonPicture
+                    ON PersonPicture.personPictureUid = Person.personUid
+         WHERE Person.personUid = :uid           
+    """)
+    abstract fun findByUidWithPictureAsFlow(uid: Long): Flow<PersonAndPicture?>
+
     @Query("SELECT * From Person WHERE personUid = :uid")
     abstract fun findByUidLive(uid: Long): Flow<Person?>
 

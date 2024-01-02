@@ -41,10 +41,6 @@ import moe.tlaster.precompose.navigation.Navigator
 import org.kodein.di.compose.localDI
 import org.kodein.di.direct
 import org.kodein.di.instance
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.door.ext.DoorTag
-import kotlinx.coroutines.flow.emptyFlow
-import org.kodein.di.on
 
 private val ROOT_LOCATIONS = UstadViewModel.ROOT_DESTINATIONS.map {
     "/$it"
@@ -62,18 +58,8 @@ fun UstadAppBar(
     val currentLocation by navigator.currentEntry.collectAsState(null)
     val di = localDI()
     val accountManager: UstadAccountManager = di.direct.instance()
-    val currentSession by accountManager.currentUserSessionFlow.collectAsState(null)
-    val repo: UmAppDatabase? = remember(currentSession?.endpoint) {
-        val endpointVal = currentSession?.endpoint
-        if(endpointVal != null)
-            di.direct.on(endpointVal).instance(tag = DoorTag.TAG_REPO)
-        else
-            null
-    }
-    val pictureFlow = remember(repo, currentSession?.person?.personUid) {
-        repo?.personPictureDao?.findByPersonUidLive(currentSession?.person?.personUid ?: 0) ?: emptyFlow()
-    }
-    val personPicture by pictureFlow.collectAsState(null)
+    val currentSession by accountManager.currentUserSessionFlow
+        .collectAsState(null)
 
     var searchActive by remember {
         mutableStateOf(false)
@@ -192,7 +178,7 @@ fun UstadAppBar(
                 ) {
                     UstadPersonAvatar(
                         personName = currentSession?.person?.fullName(),
-                        pictureUri = personPicture?.personPictureThumbnailUri,
+                        pictureUri = currentSession?.personPicture?.personPictureThumbnailUri,
                     )
                 }
             }
