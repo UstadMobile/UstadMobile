@@ -20,7 +20,7 @@ it('Admin user add content to the library', () => {
   The iframe reference is from the above link
  */
   cy.get('iframe')
-  cy.get('.css-1pc9cj7')
+  cy.get('#xapi_content_frame')
   .its('0.contentDocument')
   .its('body')
   .find('.h5p-iframe.h5p-initialized')
