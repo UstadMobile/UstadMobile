@@ -140,7 +140,6 @@ fun ChatItem(
         ) {
             UstadLinkifyText(
                 text = message?.messageText ?: "",
-                //color = MaterialTheme.colorScheme.onPrimaryContainer,
                 linkExtractor = linkExtractor,
             )
         }
