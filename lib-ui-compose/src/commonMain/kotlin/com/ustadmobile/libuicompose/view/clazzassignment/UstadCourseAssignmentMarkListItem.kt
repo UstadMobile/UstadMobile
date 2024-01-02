@@ -7,7 +7,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.EmojiEvents
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -23,6 +22,7 @@ import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
 import dev.icerock.moko.resources.compose.stringResource
 import java.util.TimeZone
 import com.ustadmobile.core.MR
+import com.ustadmobile.libuicompose.components.UstadPersonAvatar
 
 @Composable
 fun UstadCourseAssignmentMarkListItem(
@@ -45,10 +45,9 @@ fun UstadCourseAssignmentMarkListItem(
     ListItem(
         modifier = modifier,
         leadingContent = {
-            Icon(
-                Icons.Filled.Person,
-                contentDescription = "",
-                modifier = Modifier.size(40.dp)
+            UstadPersonAvatar(
+                personName = uiState.markerName,
+                pictureUri = uiState.mark.markerPictureUri,
             )
         },
         headlineContent = { Text(text) },

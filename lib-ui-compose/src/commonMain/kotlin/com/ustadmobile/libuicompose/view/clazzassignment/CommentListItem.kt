@@ -22,17 +22,20 @@ fun CommentListItem(
     val formattedDateTime = rememberFormattedDateTime(
         timeInMillis = commentAndName?.comment?.commentsDateTimeAdded ?: 0,
         timeZoneId = TimeZone.getDefault().id,
-        joinDateAndTime = {date, time -> "$date\n$time"}
+        joinDateAndTime = { date, time -> "$date\n$time"}
     )
+
+    val fullName = "${commentAndName?.firstNames ?: ""} ${commentAndName?.lastName ?: ""}"
 
     ListItem(
         modifier = modifier,
         leadingContent = {
             UstadPersonAvatar(
-                personUid = commentAndName?.comment?.commentsPersonUid ?: 0L,
+                personName = fullName,
+                pictureUri = commentAndName?.pictureUri,
             )
         },
-        headlineContent = { Text("${commentAndName?.firstNames} ${commentAndName?.lastName}") },
+        headlineContent = { Text(fullName) },
         supportingContent = {
             UstadLinkifyText(
                 text = commentAndName?.comment?.commentsText ?: "",

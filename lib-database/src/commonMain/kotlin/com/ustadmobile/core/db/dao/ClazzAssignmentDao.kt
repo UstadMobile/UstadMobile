@@ -22,6 +22,7 @@ import com.ustadmobile.lib.db.composites.AssignmentSubmitterUidAndName
 import com.ustadmobile.lib.db.composites.ClazzEnrolmentAndPerson
 import com.ustadmobile.lib.db.composites.ScopedGrantAndGroupMember
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission.Companion.MIN_SUBMITTER_UID_FOR_PERSON
 
 
 @DoorDao
@@ -159,6 +160,13 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
         SELECT SubmitterList.name AS name,
                SubmitterList.submitterId AS submitterUid,
                Comments.commentsText AS latestPrivateComment,
+               CASE 
+               WHEN SubmitterList.submitterId >= $MIN_SUBMITTER_UID_FOR_PERSON THEN
+                    (SELECT PersonPicture.personPictureThumbnailUri
+                       FROM PersonPicture
+                      WHERE PersonPicture.personPictureUid =  SubmitterList.submitterId)
+               ELSE NULL
+               END AS pictureUri,       
                -- Determine submission status - marked, submitted, or not yet submitted
                CASE 
                WHEN CourseAssignmentMark.camUid IS NOT NULL THEN ${CourseAssignmentSubmission.MARKED}
@@ -216,7 +224,7 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
     //Note: This does not cover the following edge scenario: where the assignment is peer-reviewed
     // and does not otherwise have permission to other members of their course.
     @Query("""
-        SELECT Person.*, ClazzEnrolment.*
+        SELECT Person.*, ClazzEnrolment.*, PersonPicture.*
           FROM PersonGroupMember
                ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1} 
                         ${Role.PERMISSION_PERSON_SELECT} 
@@ -227,6 +235,8 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
                            (SELECT ClazzAssignment.caClazzUid
                               FROM ClazzAssignment
                              WHERE ClazzAssignment.caUid = :assignmentUid)
+                    LEFT JOIN PersonPicture
+                              ON PersonPicture.personPictureUid =  Person.personUid
              WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid
                AND (    :enrolmentFilterPersonUid = 0 
                      OR ClazzEnrolment.clazzEnrolmentPersonUid = :enrolmentFilterPersonUid)                

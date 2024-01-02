@@ -98,6 +98,10 @@ data class ClazzAssignmentDetailOverviewUiState(
 
     val activeUserPersonUid: Long = 0,
 
+    val activeUserPersonName: String = "",
+
+    val activeUserPictureUri: String? = null,
+
     val courseTerminology: CourseTerminology? = null,
 ) {
 
@@ -267,8 +271,13 @@ class ClazzAssignmentDetailOverviewViewModel(
 
     init {
         _uiState.update { prev ->
-            prev.copy(activeUserPersonUid = activeUserPersonUid)
+            prev.copy(
+                activeUserPersonUid = activeUserPersonUid,
+                activeUserPersonName = accountManager.currentUserSession.person.fullName(),
+                activeUserPictureUri = accountManager.currentUserSession.personPicture?.personPictureUri,
+            )
         }
+
         viewModelScope.launch {
             _uiState.whenSubscribed {
                 launch {

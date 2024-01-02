@@ -93,6 +93,10 @@ data class ClazzAssignmentSubmitterDetailUiState(
      */
     internal val activeUserSubmitterId: Long = 0,
 
+    val activeUserPersonName: String = "",
+
+    val activeUserPictureUri: String? = null,
+
 ) {
 
     val submissionStatus: Int
@@ -183,6 +187,13 @@ class ClazzAssignmentSubmitterDetailViewModel(
         on(accountManager.activeEndpoint).instance()
 
     init {
+        _uiState.update { prev ->
+            prev.copy(
+                activeUserPersonName = accountManager.currentUserSession.person.fullName(),
+                activeUserPictureUri = accountManager.currentUserSession.personPicture?.personPictureThumbnailUri,
+            )
+        }
+
         viewModelScope.launch {
             _uiState.update { prev ->
                 prev.copy(

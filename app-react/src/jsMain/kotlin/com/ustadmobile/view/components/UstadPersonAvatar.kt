@@ -20,15 +20,18 @@ external interface UstadPersonAvatarProps: Props {
 
     var personName: String?
 
+    var colorName: String?
+
 }
 
 
 val UstadPersonAvatar = FC<UstadPersonAvatarProps> { props ->
     val pictureUriVal = props.pictureUri
     val personNameVal = props.personName
-    val bgColor = useMemo(personNameVal, pictureUriVal) {
-        if(pictureUriVal == null && personNameVal != null) {
-            avatarColorForName(personNameVal).rgbColorProperty()
+    val colorNameVal = props.colorName ?: props.personName
+    val bgColor = useMemo(pictureUriVal, colorNameVal) {
+        if(pictureUriVal == null && colorNameVal != null) {
+            avatarColorForName(colorNameVal).rgbColorProperty()
         }else {
             Color("#ffffff00")
         }
