@@ -206,7 +206,8 @@ class ClazzLogEditAttendanceViewModel(
                                 .nextIdAsync(ClazzLogAttendanceRecord.TABLE_ID)
                             clazzLogAttendanceRecordPersonUid = it.person?.personUid ?: 0
                             clazzLogAttendanceRecordClazzLogUid = clazzLog.clazzLogUid
-                        }
+                        },
+                        personPicture = it.personPicture,
                     )
                 }else {
                     it

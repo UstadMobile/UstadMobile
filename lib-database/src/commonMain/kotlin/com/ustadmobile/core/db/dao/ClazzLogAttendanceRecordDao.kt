@@ -63,7 +63,7 @@ expect abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRe
     @Query("""
         ${ClazzEnrolmentDaoCommon.WITH_CURRENTLY_ENROLED_STUDENTS_SQL}
                   
-        SELECT Person.*, ClazzLogAttendanceRecord.*
+        SELECT Person.*, ClazzLogAttendanceRecord.*, PersonPicture.*
           FROM Person
                LEFT JOIN ClazzLogAttendanceRecord 
                          ON ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid = 
@@ -74,6 +74,8 @@ expect abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRe
                            ORDER BY ClazzLogAttendanceRecordInner.clazzLogAttendanceRecordLastChangedTime DESC     
                               LIMIT 1  
                             )
+               LEFT JOIN PersonPicture
+                         ON PersonPicture.personPictureUid = Person.personUid
          WHERE Person.personUid IN 
                (SELECT CurrentlyEnrolledPersonUids.enroledPersonUid
                   FROM CurrentlyEnrolledPersonUids)                

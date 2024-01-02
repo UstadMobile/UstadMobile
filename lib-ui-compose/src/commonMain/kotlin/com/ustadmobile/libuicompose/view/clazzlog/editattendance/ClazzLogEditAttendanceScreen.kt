@@ -17,7 +17,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.CheckBox
 import androidx.compose.material.icons.outlined.LibraryAddCheck
 import androidx.compose.runtime.Composable
@@ -39,6 +38,7 @@ import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord
 import com.ustadmobile.core.MR
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.libuicompose.components.ClazzLogEditAttendanceToggleGroup
+import com.ustadmobile.libuicompose.components.UstadPersonAvatar
 import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.launch
@@ -215,9 +215,9 @@ private fun ClazzLogItemView(
             Text(text = clazzLog.person?.personFullName() ?: "")
         },
         leadingContent = {
-            Icon(
-                Icons.Default.Person,
-                contentDescription = ""
+            UstadPersonAvatar(
+                personName = clazzLog.person?.fullName(),
+                pictureUri = clazzLog.personPicture?.personPictureThumbnailUri,
             )
         },
         trailingContent = {
