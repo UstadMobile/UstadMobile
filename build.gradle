@@ -130,11 +130,8 @@ ext {
     version_apache_commons_compress = "1.25.0"
     version_mpandroidchart = "v3.1.0"
 
-    version_mockwebserver = "4.12.0"
     version_sqlite_jdbc = "3.42.0.0"
-    version_core_mockito = "5.7.0"
     version_kotlin_mockito = "5.1.0"
-    version_compressor = "3.0.1"
     version_apache_commons_pool2 = "2.12.0"
     version_jsoup = "1.17.1"
     version_selenium = "4.15.0"
@@ -215,9 +212,6 @@ ext {
 
     version_android_panickit = "1.0"
 
-    //Image loading library for Android
-    version_android_coil = "2.5.0"
-
     version_js_node = "10.15.1"
     version_js_yarn="1.13.0"
 
@@ -235,10 +229,6 @@ ext {
     version_npm_joda_timezone = "2.3.0"
 
     version_npm_timezones = "^1.6.1"
-    version_npm_buffer = "^6.0.3"
-    version_npm_asmcrypto = "2.3.2" //required for client side one-way password encryption
-    version_crypto_browserify = "3.12.0" //required by asmcrypto
-    version_stream_browserify = "3.0.0" //required by cipher-base
 
     version_npm_emotion = "11.10.5"
     version_npm_google_charts = "^3.0.15"
@@ -255,6 +245,9 @@ ext {
     version_pdfview_android = "1.1.0"
     version_pdfbox_apache = "3.0.0"
     version_pdfview_android = "1.1.0"
+
+    version_npm_uuid = "^9.0.1"
+    version_compressorjs = "^1.2.1"
 }
 
 /*

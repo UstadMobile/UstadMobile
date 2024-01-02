@@ -145,6 +145,22 @@
         </activity>
 
         <!--
+        Photopicker support for older versions as per
+        https://developer.android.com/training/data-storage/shared/photopicker
+        -->
+        <!-- Trigger Google Play services to install the backported photo picker module. -->
+        <service android:name="com.google.android.gms.metadata.ModuleDependencies"
+            android:enabled="false"
+            android:exported="false"
+            tools:ignore="MissingClass">
+            <intent-filter>
+                <action android:name="com.google.android.gms.metadata.MODULE_DEPENDENCIES" />
+            </intent-filter>
+            <meta-data android:name="photopicker_activity:0:required" android:value="" />
+        </service>
+
+
+        <!--
         Service to hold locale config as per
         https://developer.android.com/guide/topics/resources/app-languages#use-localeconfig
         -->

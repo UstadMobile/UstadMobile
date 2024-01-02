@@ -32,6 +32,8 @@ fun UstadAddCommentListItem(
     commentLabel: String,
     onCommentChanged: (String) -> Unit = { },
     currentUserPersonUid: Long,
+    currentUserPersonName: String,
+    currentUserPictureUri: String?,
     onSubmitComment: () -> Unit = {  },
     editCommentInBottomSheet: Boolean = !isDesktop(), //Will be true on Android, false on desktop
 ){
@@ -57,7 +59,11 @@ fun UstadAddCommentListItem(
         }
 
         Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            UstadPersonAvatar(personUid = currentUserPersonUid)
+            UstadPersonAvatar(
+                personUid = currentUserPersonUid,
+                personName = currentUserPersonName,
+                pictureUri = currentUserPictureUri,
+            )
 
             Spacer(Modifier.width(16.dp))
 
@@ -90,6 +96,8 @@ fun UstadAddCommentListItem(
         leadingContent = {
             UstadPersonAvatar(
                 personUid = currentUserPersonUid,
+                personName = currentUserPersonName,
+                pictureUri = currentUserPictureUri,
                 modifier = Modifier.size(40.dp)
             )
         },

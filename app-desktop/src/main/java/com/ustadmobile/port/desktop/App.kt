@@ -9,6 +9,7 @@ import androidx.compose.material.Text
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.PermanentDrawerSheet
 import androidx.compose.material3.PermanentNavigationDrawer
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -27,7 +28,6 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.PREFKEY_LOCAL
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
-import com.ustadmobile.core.impl.di.CommonJvmDiModule
 import com.ustadmobile.core.impl.di.commonDomainDiModule
 import com.ustadmobile.libuicompose.theme.AppTheme
 import com.ustadmobile.libuicompose.view.app.APP_TOP_LEVEL_NAV_ITEMS
@@ -35,12 +35,21 @@ import com.ustadmobile.libuicompose.view.app.SizeClass
 import dev.icerock.moko.resources.compose.stringResource
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
+import io.kamel.core.config.KamelConfig
+import io.kamel.core.config.httpFetcher
+import io.kamel.core.config.takeFrom
+import io.kamel.image.config.Default
+import io.kamel.image.config.LocalKamelConfig
+import io.ktor.client.HttpClient
 import moe.tlaster.precompose.PreComposeApp
 import moe.tlaster.precompose.navigation.NavOptions
 import moe.tlaster.precompose.navigation.PopUpTo
 import moe.tlaster.precompose.navigation.rememberNavigator
 import org.kodein.di.DI
+import org.kodein.di.compose.localDI
 import org.kodein.di.compose.withDI
+import org.kodein.di.direct
+import org.kodein.di.instance
 import java.io.File
 import java.util.Locale
 import java.util.Properties
@@ -90,72 +99,80 @@ fun main() {
         withDI(
             di = DI.from(listOf(
                 DesktopDiModule,
-                CommonJvmDiModule,
+                DesktopHttpModule,
                 DesktopDomainDiModule,
                 commonDomainDiModule(EndpointScope.Default),
             )),
         ) {
-            Window(
-                onCloseRequest = ::exitApplication,
-                title = appState.title ?: "",
-                state = rememberWindowState(width = 1024.dp, height = 768.dp)
-            ) {
-                PreComposeApp {
-                    val navigator = rememberNavigator()
-                    val currentDestination by navigator.currentEntry.collectAsState(null)
+            val di = localDI()
+            val desktopConfig = remember {
+                KamelConfig {
+                    takeFrom(KamelConfig.Default)
+                    val httpClient: HttpClient = di.direct.instance()
+                    httpFetcher(client = httpClient)
+                }
+            }
 
-                    /**
-                     * Set the selected item. Relying on onClick misses when the user switches accounts
-                     * and goes back to the start screen (courses).
-                     */
-                    LaunchedEffect(currentDestination?.path) {
-                        val pathVal = currentDestination?.path ?: return@LaunchedEffect
-                        val topLevelIndex = APP_TOP_LEVEL_NAV_ITEMS.indexOfFirst {
-                            "/${it.destRoute}" == pathVal
+            CompositionLocalProvider(LocalKamelConfig provides desktopConfig) {
+                Window(
+                    onCloseRequest = ::exitApplication,
+                    title = appState.title ?: "",
+                    state = rememberWindowState(width = 1024.dp, height = 768.dp)
+                ) {
+                    PreComposeApp {
+                        val navigator = rememberNavigator()
+                        val currentDestination by navigator.currentEntry.collectAsState(null)
+
+                        /**
+                         * Set the selected item. Relying on onClick misses when the user switches accounts
+                         * and goes back to the start screen (courses).
+                         */
+                        LaunchedEffect(currentDestination?.path) {
+                            val pathVal = currentDestination?.path ?: return@LaunchedEffect
+                            val topLevelIndex = APP_TOP_LEVEL_NAV_ITEMS.indexOfFirst {
+                                "/${it.destRoute}" == pathVal
+                            }
+
+                            if(topLevelIndex >= 0)
+                                selectedItem = topLevelIndex
                         }
 
-                        if(topLevelIndex >= 0)
-                            selectedItem = topLevelIndex
-                    }
-
-                    AppTheme {
-                        PermanentNavigationDrawer(
-                            drawerContent = {
-                                if(appState.navigationVisible) {
-                                    //Set the selected item. Just remembering is
-
-                                    PermanentDrawerSheet(Modifier.width(240.dp)) {
-                                        Spacer(Modifier.height(16.dp))
-                                        APP_TOP_LEVEL_NAV_ITEMS.forEachIndexed { index, item ->
-                                            NavigationDrawerItem(
-                                                icon = { Icon(item.icon, contentDescription = null) },
-                                                label = { Text(stringResource(item.label)) },
-                                                selected = index == selectedItem,
-                                                onClick = {
-                                                    //selectedItem = index
-                                                    navigator.navigate(
-                                                        route = "/${item.destRoute}",
-                                                        options = NavOptions(popUpTo = PopUpTo.First(inclusive = true))
-                                                    )
-                                                },
-                                                modifier = Modifier.padding(horizontal = 16.dp)
-                                            )
+                        AppTheme {
+                            PermanentNavigationDrawer(
+                                drawerContent = {
+                                    if(appState.navigationVisible) {
+                                        PermanentDrawerSheet(Modifier.width(240.dp)) {
+                                            Spacer(Modifier.height(16.dp))
+                                            APP_TOP_LEVEL_NAV_ITEMS.forEachIndexed { index, item ->
+                                                NavigationDrawerItem(
+                                                    icon = { Icon(item.icon, contentDescription = null) },
+                                                    label = { Text(stringResource(item.label)) },
+                                                    selected = index == selectedItem,
+                                                    onClick = {
+                                                        navigator.navigate(
+                                                            route = "/${item.destRoute}",
+                                                            options = NavOptions(popUpTo = PopUpTo.First(inclusive = true))
+                                                        )
+                                                    },
+                                                    modifier = Modifier.padding(horizontal = 16.dp)
+                                                )
+                                            }
                                         }
                                     }
+                                },
+                                content = {
+                                    UstadPrecomposeApp(
+                                        widthClass = SizeClass.EXPANDED,
+                                        navigator = navigator,
+                                        onAppStateChanged = {
+                                            appState = it
+                                        },
+                                        persistNavState = false,
+                                        useBottomBar = false,
+                                    )
                                 }
-                            },
-                            content = {
-                                UstadPrecomposeApp(
-                                    widthClass = SizeClass.EXPANDED,
-                                    navigator = navigator,
-                                    onAppStateChanged = {
-                                        appState = it
-                                    },
-                                    persistNavState = false,
-                                    useBottomBar = false,
-                                )
-                            }
-                        )
+                            )
+                        }
                     }
                 }
             }

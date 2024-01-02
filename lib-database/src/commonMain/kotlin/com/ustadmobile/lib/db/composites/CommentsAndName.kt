@@ -10,5 +10,5 @@ data class CommentsAndName(
     var comment: Comments = Comments(),
     var firstNames: String? = null,
     var lastName: String? = null,
-) {
-}
+    var pictureUri: String? = null,
+)

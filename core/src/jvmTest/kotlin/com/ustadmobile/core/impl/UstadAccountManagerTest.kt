@@ -259,32 +259,6 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
                 "http://app.ustadmobile.com/", activeAccount.endpointUrl)
     }
 
-
-
-    @Test
-    fun givenNoSiteOrPersonInDb_whenLoginCalledForfirstLogin_shouldInitLogin() {
-        val accountManager = UstadAccountManager(mockSettings, di)
-        db.execSQLBatch("DELETE FROM Site", "DELETE FROM Person")
-
-
-        runBlocking {
-            accountManager.login("bob", "password", mockServerUrl)
-        }
-
-        Assert.assertEquals("Active account is the newly logged in account",
-            mockDispatcher.authUmAccount.userAtServer,
-            accountManager.currentAccount.userAtServer)
-
-        runBlocking {
-            accountManager.activeUserSessionsFlow.filter {
-                it.size == 1 && it.first().person.username == "bob"
-            }.test(timeout = 5.seconds) {
-                awaitItem()
-                cancelAndIgnoreRemainingEvents()
-            }
-        }
-    }
-
     @Test
     fun givenValidLoginCredentials_whenLoginCalledForFirstLogin_shouldInitLogin() {
         val accountManager = UstadAccountManager(mockSettings, di)

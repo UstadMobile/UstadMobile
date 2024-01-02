@@ -1,16 +1,27 @@
 package com.ustadmobile.mui.components
 
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
+import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.components.DIContext
+import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.viewmodel.UstadViewModel
+import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
 import com.ustadmobile.core.viewmodel.settings.SettingsViewModel
+import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.UserSession
 import com.ustadmobile.mui.common.Area
+import com.ustadmobile.view.components.UstadPersonAvatar
 import js.core.jso
 import web.cssom.*
 import mui.system.sx
 import mui.material.*
 import mui.material.styles.TypographyVariant.Companion.h6
+import org.kodein.di.direct
+import org.kodein.di.instance
 import react.*
 import react.dom.aria.AriaHasPopup
 import react.dom.aria.ariaExpanded
@@ -49,6 +60,17 @@ val Header = FC<HeaderProps> { props ->
     val navigateFn = useNavigate()
     val location = useLocation()
 
+
+    val appDi = useRequiredContext(DIContext)
+    val accountManager: UstadAccountManager = appDi.di.direct.instance()
+    val currentSession: UserSessionWithPersonAndEndpoint by accountManager.currentUserSessionFlow
+        .collectAsState(
+            UserSessionWithPersonAndEndpoint(
+                userSession = UserSession(),
+                person = Person(),
+                endpoint = Endpoint("")
+            )
+        )
 
     var appBarTitle by useState {
         strings[MR.strings.app_name]
@@ -95,6 +117,7 @@ val Header = FC<HeaderProps> { props ->
 
             Typography{
                 sx { flexGrow = number(1.0) }
+                id = "appbar_title"
                 variant = h6
                 noWrap = true
                 component = div
@@ -197,7 +220,17 @@ val Header = FC<HeaderProps> { props ->
                 }
 
             }else if(props.appUiState.userAccountIconVisible) {
-                HeaderAvatar()
+                IconButton {
+                    id = "header_avatar"
+                    onClick = {
+                        navigateFn.invoke(AccountListViewModel.DEST_NAME)
+                    }
+
+                    UstadPersonAvatar {
+                        personName = currentSession.person.fullName()
+                        pictureUri = currentSession.personPicture?.personPictureThumbnailUri
+                    }
+                }
             }
         }
     }

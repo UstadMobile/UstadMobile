@@ -19,7 +19,6 @@ import com.ustadmobile.core.db.ext.preload
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
-import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
@@ -31,7 +30,6 @@ import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.randomString
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
-import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.HttpTimeout
@@ -162,8 +160,6 @@ class UstadTestRule: TestWatcher() {
                     })
                 }
             }
-
-            bind<ContainerMounter>() with singleton { EmbeddedHTTPD(0, di).also { it.start() } }
 
             bind<Pbkdf2Params>() with singleton {
                 Pbkdf2Params()

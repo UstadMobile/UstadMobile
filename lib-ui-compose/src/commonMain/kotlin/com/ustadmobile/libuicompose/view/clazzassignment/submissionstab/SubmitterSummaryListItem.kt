@@ -9,7 +9,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Comment
 import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,6 +17,9 @@ import com.ustadmobile.core.controller.SubmissionConstants
 import com.ustadmobile.core.viewmodel.clazzassignment.detail.submissionstab.listItemUiState
 import com.ustadmobile.lib.db.entities.AssignmentSubmitterSummary
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.viewmodel.clazzassignment.avatarColorName
+import com.ustadmobile.core.viewmodel.clazzassignment.avatarName
+import com.ustadmobile.libuicompose.components.UstadPersonAvatar
 import com.ustadmobile.libuicompose.view.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewConstants.ASSIGNMENT_STATUS_MAP
 import dev.icerock.moko.resources.compose.stringResource
 
@@ -34,10 +36,10 @@ fun SubmitterSummaryListItem (
             submitterSummary?.also {  onClick(it) }
         },
         leadingContent = {
-            Icon(
-                Icons.Filled.Person,
-                contentDescription = "",
-                modifier = Modifier.size(40.dp)
+            UstadPersonAvatar(
+                personName = submitterSummary?.avatarName(),
+                pictureUri = submitterSummary?.pictureUri,
+                colorName = submitterSummary?.avatarColorName(),
             )
         },
         headlineContent = { Text(submitterSummary?.name ?: "") },

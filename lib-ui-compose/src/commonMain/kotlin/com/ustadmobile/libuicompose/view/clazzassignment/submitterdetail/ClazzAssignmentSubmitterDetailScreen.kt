@@ -164,6 +164,8 @@ fun ClazzAssignmentSubmitterDetailScreen(
                 enabled = uiState.fieldsEnabled,
                 currentUserPersonUid = uiState.activeUserPersonUid,
                 onSubmitComment =  onClickSubmitPrivateComment,
+                currentUserPersonName = uiState.activeUserPersonName,
+                currentUserPictureUri = uiState.activeUserPictureUri,
                 onCommentChanged = onChangePrivateComment
             )
         }

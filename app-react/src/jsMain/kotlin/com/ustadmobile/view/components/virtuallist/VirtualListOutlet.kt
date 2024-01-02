@@ -9,6 +9,7 @@ import web.cssom.translatey
 import js.core.jso
 import react.*
 import react.dom.html.ReactHTML
+import web.cssom.TransformFunction
 import web.html.HTMLDivElement
 
 /**
@@ -39,7 +40,11 @@ val VirtualListOutlet = FC<Props> {
                     top = 0.px
                     left = 0.px
                     width = 100.pct
-                    transform = translatey(virtualRow.start.px)
+                    transform = if(virtualizerContext.reverseLayout) {
+                        "translatey(${virtualRow.start.px}) scaley(-1)".unsafeCast<TransformFunction>()
+                    }else {
+                        translatey(virtualRow.start.px)
+                    }
                 }
 
                 + virtualListElement.createNode()

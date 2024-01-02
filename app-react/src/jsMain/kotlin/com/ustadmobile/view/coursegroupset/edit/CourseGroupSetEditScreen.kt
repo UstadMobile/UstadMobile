@@ -13,9 +13,9 @@ import com.ustadmobile.mui.components.UstadNumberTextField
 import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.mui.components.UstadTextField
 import com.ustadmobile.util.ext.onTextChange
+import com.ustadmobile.view.components.UstadPersonAvatar
 import com.ustadmobile.view.components.UstadSelectField
 import web.cssom.px
-import mui.icons.material.AccountCircle
 import mui.material.*
 import mui.system.responsive
 import mui.system.sx
@@ -96,7 +96,10 @@ val CourseGroupSetEditComponent2 = FC<CourseGroupSetEditProps> { props ->
 
 
                         ListItemIcon {
-                            AccountCircle()
+                            UstadPersonAvatar {
+                                personName = member.name
+                                pictureUri = member.pictureUri
+                            }
                         }
 
                         ListItemText {

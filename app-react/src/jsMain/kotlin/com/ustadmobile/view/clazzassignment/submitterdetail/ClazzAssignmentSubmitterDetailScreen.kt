@@ -38,6 +38,7 @@ import react.create
 import mui.icons.material.EmojiEvents as EmojiEventsIcon
 import com.ustadmobile.view.clazzassignment.AssignmentCommentTextFieldListItem
 import com.ustadmobile.view.clazzassignment.UstadCommentListItem
+import kotlinx.coroutines.Dispatchers
 
 external interface ClazzAssignmentSubmitterDetailProps : Props {
 
@@ -182,6 +183,8 @@ val ClazzAssignmentSubmitterDetailComponent = FC<ClazzAssignmentSubmitterDetailP
                     label = ReactNode(strings[MR.strings.add_private_comment])
                     value = props.uiState.newPrivateCommentText
                     activeUserPersonUid = props.uiState.activeUserPersonUid
+                    activeUserPersonName = props.uiState.activeUserPersonName
+                    activeUserPictureUri = props.uiState.activeUserPictureUri
                     textFieldId = "private_comment_textfield"
                     onClickSubmit = props.onClickSubmitPrivateComment
                 }
@@ -210,7 +213,9 @@ val ClazzAssignmentSubmitterDetailScreen = FC<Props> {
         ClazzAssignmentSubmitterDetailViewModel(di, savedStateHandle)
     }
 
-    val uiStateVal by viewModel.uiState.collectAsState(ClazzAssignmentSubmitterDetailUiState())
+    val uiStateVal by viewModel.uiState.collectAsState(
+        ClazzAssignmentSubmitterDetailUiState(), Dispatchers.Main.immediate,
+    )
 
     ClazzAssignmentSubmitterDetailComponent {
         uiState = uiStateVal

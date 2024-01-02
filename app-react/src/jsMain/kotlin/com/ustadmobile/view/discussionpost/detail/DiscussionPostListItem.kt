@@ -28,13 +28,15 @@ val DiscussionPostListItem = FC<DiscussionPostListItemProps> { props ->
         timeInMillis = props.discussionPost?.discussionPost?.discussionPostStartDate ?: 0L,
         timezoneId = TimeZone.currentSystemDefault().id,
     )
+    val posterName = "${props.discussionPost?.firstNames ?: ""} ${props.discussionPost?.lastName ?: ""}"
 
     ListItem {
         alignItems = ListItemAlignItems.flexStart
 
         ListItemIcon {
             UstadPersonAvatar {
-                personUid = props.discussionPost?.discussionPost?.discussionPostStartedPersonUid ?: 0L
+                personName = posterName
+                pictureUri = props.discussionPost?.personPictureUri
             }
         }
 
@@ -53,7 +55,7 @@ val DiscussionPostListItem = FC<DiscussionPostListItemProps> { props ->
                 Typography {
                     variant = TypographyVariant.subtitle1
 
-                    + ((props.discussionPost?.firstNames ?: "") + " " + (props.discussionPost?.lastName))
+                    + posterName
                 }
 
                 Typography {

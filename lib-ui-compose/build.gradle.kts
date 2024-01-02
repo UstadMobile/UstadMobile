@@ -59,6 +59,7 @@ kotlin {
                 api(libs.androidx.navigation.compose)
                 api(libs.androidx.lifecycle.viewmodel.compose)
                 api(libs.htmltext.android)
+                api(libs.activity.compose)
 
                 implementation(libs.volley)
                 implementation(libs.aztec)
@@ -66,6 +67,8 @@ kotlin {
                 implementation(libs.android.material)
                 implementation(libs.libphonenumber.android)
                 implementation(libs.autolink)
+                implementation(libs.coil)
+                implementation(libs.coil.compose)
             }
         }
 
@@ -79,6 +82,8 @@ kotlin {
                 implementation(libs.richeditor.multiplatform.compose)
                 implementation(libs.libphonenumber.google)
                 implementation(libs.autolink)
+                implementation(libs.mpfilepicker)
+                implementation(libs.kamel)
             }
         }
     }

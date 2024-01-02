@@ -61,6 +61,7 @@ val RegisterAgeRedirectComponent2 = FC<RegisterAgeRedirectProps> { props ->
             }
 
             UstadDateField {
+                id = "age_date_of_birth"
                 timeInMillis = props.uiState.dateOfBirth
                 timeZoneId = UstadMobileConstants.UTC
                 label = ReactNode(strings[MR.strings.birthday] + "*")
@@ -70,6 +71,7 @@ val RegisterAgeRedirectComponent2 = FC<RegisterAgeRedirectProps> { props ->
             }
 
             Button {
+                id = "next_button"
                 variant = ButtonVariant.contained
                 onClick = { props.onClickNext() }
 

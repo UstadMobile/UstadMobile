@@ -1,46 +1,56 @@
 package com.ustadmobile.view.components
 
-import com.ustadmobile.hooks.URI_NOT_READY
-import com.ustadmobile.hooks.collectAttachmentUriSrc
-import com.ustadmobile.hooks.useActiveDatabase
+import com.ustadmobile.core.util.avatarColorForName
+import com.ustadmobile.core.util.ext.initial
+import com.ustadmobile.core.util.ext.rgbColorProperty
 import mui.material.Avatar
-import mui.material.Icon
+import mui.system.sx
 import react.FC
 import react.Props
+import react.ReactNode
 import react.useMemo
+import web.cssom.Color
+import web.cssom.Visibility
 
 external interface UstadPersonAvatarProps: Props {
 
     var personUid: Long
 
+    var pictureUri: String?
+
+    var personName: String?
+
+    var colorName: String?
+
 }
 
+
 val UstadPersonAvatar = FC<UstadPersonAvatarProps> { props ->
-    /* Disabled until update to MVVM. Query cancellation might cause issues
-    val db = useActiveDatabase()
-    val personFlow = useMemo(props.personUid) {
-        db.personPictureDao.findByPersonUidAsFlow(props.personUid)
-    }
-
-    val personPictureUri = personFlow.collectAttachmentUriSrc(
-        initialState = URI_NOT_READY,
-        revokeOnCleanup = true,
-    ) {
-        it?.personPictureUri
-    }
-
-    /**
-     * If there is an image already stored in the database, we want to avoid the flicker that would
-     * otherwise be caused by an initial null value in the flow. collectAttachmetnUriSrc will
-     * return URI_NOT_READY as a first value.
-     */
-    if(personPictureUri?.toString() != URI_NOT_READY.toString()) {
-        Avatar {
-            src = personPictureUri?.toString()
+    val pictureUriVal = props.pictureUri
+    val personNameVal = props.personName
+    val colorNameVal = props.colorName ?: props.personName
+    val bgColor = useMemo(pictureUriVal, colorNameVal) {
+        if(pictureUriVal == null && colorNameVal != null) {
+            avatarColorForName(colorNameVal).rgbColorProperty()
+        }else {
+            Color("#ffffff00")
         }
-    }*/
-    Avatar {
-
     }
 
+    Avatar {
+        sx {
+            if(pictureUriVal == null && personNameVal == null) {
+                visibility = Visibility.hidden
+            }
+        }
+        if(pictureUriVal != null) {
+            src = props.pictureUri
+        }else if(personNameVal != null) {
+            sx {
+                backgroundColor = bgColor
+            }
+
+            + ReactNode(personNameVal.initial())
+        }
+    }
 }

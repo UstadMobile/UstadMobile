@@ -1,6 +1,8 @@
 package com.ustadmobile.libcache
 
 import com.ustadmobile.door.ext.withDoorTransaction
+import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.libcache.UstadCache.Companion.HEADER_LAST_VALIDATED_TIMESTAMP
 import com.ustadmobile.libcache.base64.encodeBase64
 import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.db.entities.CacheEntry
@@ -12,8 +14,10 @@ import com.ustadmobile.libcache.headers.HttpHeaders
 import com.ustadmobile.libcache.headers.MimeTypeHelper
 import com.ustadmobile.libcache.headers.asString
 import com.ustadmobile.libcache.headers.headersBuilder
+import com.ustadmobile.libcache.io.sha256
 import com.ustadmobile.libcache.io.transferToAndGetSha256
 import com.ustadmobile.libcache.io.unzipTo
+import com.ustadmobile.libcache.logging.UstadCacheLogger
 import com.ustadmobile.libcache.request.HttpRequest
 import com.ustadmobile.libcache.request.requestBuilder
 import com.ustadmobile.libcache.response.CacheResponse
@@ -26,15 +30,19 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.io.Source
+import kotlinx.io.buffered
 import kotlinx.io.files.FileSystem
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
 
 class UstadCacheImpl(
     private val fileSystem: FileSystem = SystemFileSystem,
+    cacheName: String = "",
     storagePath: Path,
     private val db: UstadCacheDb,
     internal val mimeTypeHelper: MimeTypeHelper,
+    private val logger: UstadCacheLogger? = null,
+    private val listener: UstadCache.CacheListener? = null,
 ) : UstadCache {
 
     private val scope = CoroutineScope(Dispatchers.IO + Job())
@@ -47,6 +55,8 @@ class UstadCacheImpl(
 
     private val batchIdAtomic = atomic(0)
 
+    private val logPrefix = "UstadCache($cacheName):"
+
     data class CacheEntryAndTmpFile(
         val cacheEntry: CacheEntry,
         val tmpFile: Path,
@@ -56,83 +66,119 @@ class UstadCacheImpl(
         storeRequest: List<CacheEntryToStore>,
         progressListener: StoreProgressListener?
     ): List<StoreResult> {
-        fileSystem.takeIf { !fileSystem.exists(dataDir) }?.createDirectories(dataDir)
-        fileSystem.takeIf { !fileSystem.exists(tmpDir) }?.createDirectories(tmpDir)
+        try {
+            logger?.d(LOG_TAG) { "$logPrefix storerequest ${storeRequest.size} entries" }
+            fileSystem.takeIf { !fileSystem.exists(dataDir) }?.createDirectories(dataDir)
+            fileSystem.takeIf { !fileSystem.exists(tmpDir) }?.createDirectories(tmpDir)
 
-        val cacheEntries = storeRequest.map { entryToStore ->
-            val response = entryToStore.response
-            val tmpFile = Path(tmpDir, "${tmpCounter.incrementAndGet()}.tmp")
+            val cacheEntries = storeRequest.map { entryToStore ->
+                val response = entryToStore.response
+                val tmpFile = Path(tmpDir, "${tmpCounter.incrementAndGet()}.tmp")
+                val url = entryToStore.request.url
 
-            val bodySource = response.bodyAsSource()
-                ?: throw IllegalArgumentException("Response for ${entryToStore.request.url} has no body")
+                val sha256FromTransfer = if(entryToStore.responseBodyTmpLocalPath != null) {
+                    //If the entry to store is in a temporary path where it is acceptable to just
+                    //move the file into the cache, then we will move (instead of copying) the file
+                    fileSystem.atomicMove(entryToStore.responseBodyTmpLocalPath, tmpFile)
+                    null
+                }else {
+                    val bodySource = response.bodyAsSource()
 
-            val sha256 = bodySource.transferToAndGetSha256(tmpFile).sha256
-                .encodeBase64()
+                    if(bodySource == null) {
+                        val e = IllegalArgumentException("Response for $url has " +
+                                "no body. That should not have been stored in cache. Something badly wrong.")
+                        logger?.e(LOG_TAG, "$logPrefix BodySource for ${entryToStore.request.url} is null", e)
+                        throw e
+                    }
 
-            val headersStr = headersBuilder {
-                takeFrom(response.headers)
-                header(COUPON_ACTUAL_SHA_256, sha256)
-            }.asString()
+                    bodySource.transferToAndGetSha256(tmpFile).sha256.encodeBase64()
+                }
+                val sha256FromHeader = if(entryToStore.skipChecksumIfProvided)
+                    response.headers[COUPON_ACTUAL_SHA_256]
+                else
+                    null
 
-            val cacheFlags = if(response.headers[COUPON_STATIC]?.toBooleanStrictOrNull() == true) {
-                CacheEntry.CACHE_FLAG_STATIC
-            }else {
-                0
-            }
+                val sha256 = sha256FromTransfer ?: sha256FromHeader
+                    ?: fileSystem.source(tmpFile).buffered().sha256().encodeBase64()
 
-            CacheEntryAndTmpFile(
-                cacheEntry = CacheEntry(
-                    url = entryToStore.request.url,
-                    responseBodySha256 = sha256,
-                    responseHeaders = headersStr,
-                    cacheFlags = cacheFlags,
-                ),
-                tmpFile = tmpFile
-            )
-        }
+                val headersStr = headersBuilder {
+                    takeFrom(response.headers)
+                    header(COUPON_ACTUAL_SHA_256, sha256)
+                }.asString()
 
-        //find the sha256's we don't have. If we have it, discard tmpFile. If we don't move tmp file to data dir
-        val batchId = batchIdAtomic.incrementAndGet()
+                logger?.v(LOG_TAG, "$logPrefix copied request data for $url to $tmpFile (sha256=$sha256)")
 
-        db.withDoorTransaction { _ ->
-            db.requestedEntryDao.insertList(cacheEntries.map {
-                RequestedEntry(
-                    requestSha256 = it.cacheEntry.responseBodySha256 ?: "",
-                    requestedUrl = it.cacheEntry.url,
-                    batchId = batchId,
-                )
-            })
+                val cacheFlags = if(response.headers[COUPON_STATIC]?.toBooleanStrictOrNull() == true) {
+                    CacheEntry.CACHE_FLAG_STATIC
+                }else {
+                    0
+                }
 
-            val sha256sToStore = db.requestedEntryDao.findSha256sNotPresent(batchId).toSet()
-            val storedEntries = db.cacheEntryDao.findByRequestBatchId(batchId)
-            val storedUrls = storedEntries.map { it.url }.toSet()
-
-            val responseBodies = cacheEntries.filter { entryAndFile ->
-                entryAndFile.cacheEntry.responseBodySha256.let { it != null && it in sha256sToStore }
-            }.map {
-                val destFile = Path(dataDir, randomUuid())
-                fileSystem.atomicMove(it.tmpFile, destFile)
-
-                ResponseBody(
-                    sha256 = it.cacheEntry.responseBodySha256!!,
-                    storageUri = destFile.toString(),
+                CacheEntryAndTmpFile(
+                    cacheEntry = CacheEntry(
+                        url = entryToStore.request.url,
+                        responseBodySha256 = sha256,
+                        statusCode = entryToStore.response.responseCode,
+                        responseHeaders = headersStr,
+                        cacheFlags = cacheFlags,
+                        lastValidated = systemTimeInMillis(),
+                    ),
+                    tmpFile = tmpFile
                 )
             }
 
-            db.responseBodyDao.insertList(responseBodies)
+            logger?.v(LOG_TAG) { "$logPrefix cacheEntries created ${cacheEntries.size} entries" }
+            //find the sha256's we don't have. If we have it, discard tmpFile. If we don't move tmp file to data dir
+            val batchId = batchIdAtomic.incrementAndGet()
 
-            val newEntries = cacheEntries.filter {
-                it.cacheEntry.url !in storedUrls
-            }.map {
-                it.cacheEntry
+            db.withDoorTransaction { _ ->
+                db.requestedEntryDao.insertList(cacheEntries.map {
+                    RequestedEntry(
+                        requestSha256 = it.cacheEntry.responseBodySha256 ?: "",
+                        requestedUrl = it.cacheEntry.url,
+                        batchId = batchId,
+                    )
+                })
+
+                val sha256sToStore = db.requestedEntryDao.findSha256sNotPresent(batchId).toSet()
+                val storedEntries = db.cacheEntryDao.findByRequestBatchId(batchId)
+                val storedUrls = storedEntries.map { it.url }.toSet()
+                logger?.v(LOG_TAG) { "$logPrefix storing ${sha256sToStore.size} new sha256s" }
+
+                val responseBodies = cacheEntries.filter { entryAndFile ->
+                    entryAndFile.cacheEntry.responseBodySha256.let { it != null && it in sha256sToStore }
+                }.map {
+                    val destFile = Path(dataDir, randomUuid())
+                    fileSystem.atomicMove(it.tmpFile, destFile)
+                    logger?.v(LOG_TAG, "$logPrefix saved body data (SHA256=${it.cacheEntry.responseBodySha256!!}) to $destFile")
+
+                    ResponseBody(
+                        sha256 = it.cacheEntry.responseBodySha256!!,
+                        storageUri = destFile.toString(),
+                    )
+                }
+
+
+                db.responseBodyDao.insertList(responseBodies)
+
+                val newEntries = cacheEntries.filter {
+                    it.cacheEntry.url !in storedUrls
+                }.map {
+                    it.cacheEntry
+                }
+
+                db.cacheEntryDao.insertList(newEntries)
+                //TODO: Handle updating entries
+                db.requestedEntryDao.deleteBatch(batchId)
             }
+            logger?.d(LOG_TAG, "$logPrefix db transaction completed")
+            listener?.onEntriesStored(storeRequest)
 
-            db.cacheEntryDao.insertList(newEntries)
-            //TODO: Handle updating entries
-            db.requestedEntryDao.deleteBatch(batchId)
+            return emptyList()
+        }catch(e: Throwable) {
+            throw IllegalStateException("Could not cache", e)
         }
 
-        return emptyList()
     }
 
     override fun storeZip(
@@ -166,8 +212,7 @@ class UstadCacheImpl(
                             header(COUPON_STATIC, "true")
                     }
                 ),
-                skipChecksum = true,
-                retain = retain,
+                skipChecksumIfProvided = true,
             )
         }
 
@@ -184,6 +229,8 @@ class UstadCacheImpl(
      *
      */
     override fun retrieve(request: HttpRequest): HttpResponse? {
+        logger?.i(LOG_TAG, "$logPrefix Retrieve ${request.url}")
+
         /*
          * If a response was marked as static, then we will bust cache busting. See doc
          * on Coupon-Static header.
@@ -197,15 +244,40 @@ class UstadCacheImpl(
         val (entry, body) = db.cacheEntryDao.findEntryAndBodyByUrl(
             request.url, requestWithoutQuery) ?: return null
         if(entry != null && body != null) {
+            logger?.d(LOG_TAG, "$logPrefix FOUND ${request.url}")
             return CacheResponse(
                 fileSystem = fileSystem,
                 request = request,
-                headers = HttpHeaders.fromString(entry.responseHeaders),
-                responseBody = body
+                headers = headersBuilder {
+                    takeFrom(HttpHeaders.fromString(entry.responseHeaders))
+                    header(HEADER_LAST_VALIDATED_TIMESTAMP, entry.lastValidated.toString())
+                },
+                responseBody = body,
+                httpResponseCode = entry.statusCode
             )
         }
 
+        logger?.d(LOG_TAG, "$logPrefix MISS ${request.url}")
         return null
+    }
+
+
+    override fun hasEntries(urls: Set<String>): Map<String, Boolean> {
+        val batchId = batchIdAtomic.incrementAndGet()
+        val urlsNotPresent = db.withDoorTransaction {
+            db.requestedEntryDao.insertList(
+                urls.map {  url ->
+                    RequestedEntry(batchId = batchId, requestedUrl =  url)
+                }
+            )
+            db.requestedEntryDao.findUrlsNotPresent(batchId).also {
+                db.requestedEntryDao.deleteBatch(batchId)
+            }
+        }
+
+        return urls.associateWith { url ->
+            (url !in urlsNotPresent)
+        }
     }
 
     override fun addRetentionLocks(locks: List<CacheRetentionLock>): List<Int> {
@@ -216,16 +288,11 @@ class UstadCacheImpl(
         TODO("Not yet implemented")
     }
 
-    override suspend fun storeBlob(
-        localDataUri: String,
-        endpointUrl: String,
-        retentionJoin: CacheRetentionJoin
-    ): String {
-        TODO("Not yet implemented")
-    }
-
-
     override fun close() {
         scope.cancel()
+    }
+
+    companion object {
+        const val LOG_TAG = "UstadCache"
     }
 }

@@ -57,6 +57,8 @@ val CourseDiscussionDetailPostListItem = FC<CourseDiscussionDetailPostListItemPr
         timezoneId = TimeZone.currentSystemDefault().id,
     )
 
+    val authorName = "${props.discussionPost?.authorPersonFirstNames} ${props.discussionPost?.authorPersonLastName}"
+
     ListItem {
         alignItems = ListItemAlignItems.flexStart
 
@@ -68,7 +70,8 @@ val CourseDiscussionDetailPostListItem = FC<CourseDiscussionDetailPostListItemPr
 
             ListItemIcon {
                 UstadPersonAvatar {
-                    personUid = props.discussionPost?.discussionPostStartedPersonUid ?: 0L
+                    personName = authorName
+                    pictureUri = props.discussionPost?.authorPictureUri
                 }
             }
 
@@ -85,7 +88,7 @@ val CourseDiscussionDetailPostListItem = FC<CourseDiscussionDetailPostListItemPr
 
                     Typography {
                         variant = TypographyVariant.subtitle1
-                        + "${props.discussionPost?.authorPersonFirstNames} ${props.discussionPost?.authorPersonLastName}"
+                        + authorName
                     }
 
                     Typography {

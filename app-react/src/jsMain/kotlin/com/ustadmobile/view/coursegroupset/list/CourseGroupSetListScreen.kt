@@ -17,6 +17,7 @@ import com.ustadmobile.mui.components.UstadAddListItem
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
+import emotion.react.css
 import web.cssom.Contain
 import web.cssom.Height
 import web.cssom.Overflow
@@ -28,9 +29,12 @@ import mui.material.ListItemButton
 import mui.material.ListItemText
 import mui.material.List
 import react.FC
+import react.Fragment
 import react.Props
 import react.ReactNode
 import react.create
+import react.dom.html.ReactHTML.div
+import web.cssom.px
 
 external interface CourseGroupSetListComponentProps: Props {
 
@@ -72,14 +76,27 @@ val CourseGroupSetListComponent = FC<CourseGroupSetListComponentProps> { props -
                 }
             }
 
-            if(props.uiState.showAddItem) {
-                item(key = "new") {
-                    UstadAddListItem.create {
-                        text = strings[MR.strings.add_new_groups]
-                        onClickAdd = props.onClickAddItem
+            //Using the if statement around the items does not seem to get invalidated as expected
+            // This might require reconsideration of how virtualListcontent works. In the meantime
+            // always create a fragment, and put the showAdditem within it.
+            item(key = "new") {
+                Fragment.create {
+                    if(props.uiState.showAddItem) {
+                        UstadAddListItem {
+                            id = "add_new_groups"
+                            text = strings[MR.strings.add_new_groups]
+                            onClickAdd = props.onClickAddItem
+                        }
+                    }else {
+                        div {
+                            css {
+                                height = 1.px
+                            }
+                        }
                     }
                 }
             }
+
 
             infiniteQueryPagingItems(
                 items = infiniteQueryResult,

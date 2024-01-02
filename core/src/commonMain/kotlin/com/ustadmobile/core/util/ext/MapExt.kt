@@ -1,14 +1,9 @@
 package com.ustadmobile.core.util.ext
 
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
-import com.ustadmobile.core.impl.nav.UstadBackStackEntry
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMURLEncoder
-import com.ustadmobile.core.view.ListViewMode
-import com.ustadmobile.core.view.UstadView
-import kotlinx.serialization.SerializationStrategy
-import kotlinx.serialization.json.Json
 
 /**
  * Convert the given String - String map into a query String in the form of key1=value1-url-encoded
@@ -26,28 +21,6 @@ fun Map<String, String>.toDeepLink(endpointUrl: String, viewName: String): Strin
     return endpointAndDividerAndView.appendQueryArgs(toQueryString())
 }
 
-fun <T> MutableMap<String, String>.putEntityAsJson(
-    key: String,
-    json: Json,
-    serializer: SerializationStrategy<T>,
-    entity: T?
-){
-    val entityVal = entity ?: return
-    this[key] = json.encodeToString(serializer, entityVal)
-}
-
-/**
- * Puts a value in the receiver Map if it is present in the other map. This can be useful to
- * selectively copy keys from one map to another, whilst avoiding putting the string "null" in
- * by accident
- */
-fun <K, V> MutableMap<K, V>.putFromOtherMapIfPresent(otherMap: Map<K, V>, keyVal: K) {
-    val otherMapVal = otherMap[keyVal]
-    if(otherMapVal != null) {
-        put(keyVal, otherMapVal)
-    }
-}
-
 /**
  * Puts a value in the receiver Map if it is present in the saved state handle. This can be useful to
  * selectively copy keys from one map to another, whilst avoiding putting the string "null" in
@@ -62,5 +35,13 @@ fun MutableMap<String, String>.putFromSavedStateIfPresent(
     }
 }
 
+
+fun Map<String, List<String>>.firstCaseInsensitiveOrNull(key: String): String? {
+    return entries.firstOrNull { it.key.equals(key, true) }?.value?.firstOrNull()
+}
+
+fun Map<String, String>.getCaseInsensitiveOrNull(key: String) : String? {
+    return entries.firstOrNull { it.key.equals(key, true) }?.value
+}
 
 

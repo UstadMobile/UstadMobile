@@ -36,10 +36,13 @@ object CourseGroupMemberDaoCommon  {
         SELECT (Person.firstNames || ' ' || Person.lastName) AS name,
                Person.personUid,
                CourseGroupMember.*,
-               EnrolledStudentPersonUids.isActive AS enrolmentIsActive
+               EnrolledStudentPersonUids.isActive AS enrolmentIsActive,
+               PersonPicture.personPictureThumbnailUri AS pictureUri
           FROM EnrolledStudentPersonUids
                JOIN Person
                     ON Person.personUid = EnrolledStudentPersonUids.enrolledPersonUid 
+               LEFT JOIN PersonPicture
+                         ON PersonPicture.personPictureUid = Person.personUid  
                -- LEFT JOIN will use the most recent member in case of duplicate assignments eg if      
                LEFT JOIN CourseGroupMember
                          ON CourseGroupMember.cgmUid = 

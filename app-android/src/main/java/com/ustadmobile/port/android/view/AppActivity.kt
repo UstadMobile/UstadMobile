@@ -15,7 +15,6 @@ import androidx.compose.ui.Modifier
 import com.jakewharton.processphoenix.ProcessPhoenix
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
-import com.ustadmobile.core.db.UmAppDatabase_AddUriMapping
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseAndroid
 import com.ustadmobile.core.impl.ContainerStorageManager
@@ -38,8 +37,6 @@ import org.kodein.di.android.closestDI
 import org.kodein.di.compose.withDI
 import com.ustadmobile.libuicompose.view.app.App
 import com.ustadmobile.libuicompose.view.app.SizeClass
-import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
-import io.github.aakira.napier.Napier
 import moe.tlaster.precompose.PreComposeApp
 import org.kodein.di.bind
 import org.kodein.di.instance
@@ -111,14 +108,6 @@ class AppActivity: AppCompatActivity(), DIAware {
             containerFolder
         }
 
-        bind<EmbeddedHTTPD>() with singleton {
-            EmbeddedHTTPD(0, di).also {
-                it.UmAppDatabase_AddUriMapping(false, "/:endpoint/UmAppDatabase", di)
-                it.start()
-                Napier.i("EmbeddedHTTPD started on port ${it.listeningPort}")
-            }
-        }
-
         bind<ClazzLogCreatorManager>() with singleton {
             ClazzLogCreatorManagerAndroidImpl(applicationContext)
         }
@@ -129,11 +118,6 @@ class AppActivity: AppCompatActivity(), DIAware {
             ContentEntryOpener(di, context)
         }
 
-        bind<Int>(tag = UstadMobileSystemCommon.TAG_LOCAL_HTTP_PORT) with singleton {
-            instance<EmbeddedHTTPD>().listeningPort
-        }
-
-
         bind<ConnectionManager>() with singleton{
             ConnectionManager(applicationContext, di)
         }
@@ -141,7 +125,6 @@ class AppActivity: AppCompatActivity(), DIAware {
         registerContextTranslator { call: NanoHttpdCall -> Endpoint(call.urlParams["endpoint"] ?: "notfound") }
 
         onReady {
-            instance<EmbeddedHTTPD>()
             instance<ConnectionManager>().start()
         }
 

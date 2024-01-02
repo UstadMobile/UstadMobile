@@ -805,7 +805,7 @@
     <string name="edit_assignment">Таҳрири супориш</string>
     <string name="mark_penalty">Ҷаримаро қайд кунед</string>
     <string name="student_marks_content">Хонанда худро қайд мекунад</string>
-    <string name="late_penalty">(%1$s%% ҷазо барои ҷавоби дер)</string>
+    <string name="late_penalty">(%1$s ҷазо барои ҷавоби дер)</string>
     <string name="parental_consent">Розигии волидайн</string>
     <string name="parent_child_register_message">Падару модари азиз, фарзанди шумо (%1$s) дархост кардааст, ки бо %2$s сабти ном шавад. Лутфан дархостро бо истиноди дар поён тасдиқ ё рад кунед. %3$s Агар дархост дар давоми 30 рӯз қабул карда нашавад, он гоҳ дархост (ва ҳама гуна маълумоти шахсӣ) нест карда мешавад. Шумо метавонед тасдиқро ҳар вақт бо истифода аз ҳамон истинод бозпас гиред. Ташаккур, %2$s</string>
     <string name="parent_consent_explanation">Ман тасдиқ мекунам, ки ман волид ё васии қонунии фарзанди зерин ҳастам:

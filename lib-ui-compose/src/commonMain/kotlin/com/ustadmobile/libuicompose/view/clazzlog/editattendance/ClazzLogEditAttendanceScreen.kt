@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
@@ -17,7 +19,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.CheckBox
 import androidx.compose.material.icons.outlined.LibraryAddCheck
 import androidx.compose.runtime.Composable
@@ -30,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.util.ext.personFullName
 import com.ustadmobile.core.viewmodel.clazzlog.editattendance.ClazzLogEditAttendanceUiState
 import com.ustadmobile.core.viewmodel.clazzlog.editattendance.ClazzLogEditAttendanceViewModel
@@ -39,6 +41,7 @@ import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord
 import com.ustadmobile.core.MR
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.libuicompose.components.ClazzLogEditAttendanceToggleGroup
+import com.ustadmobile.libuicompose.components.UstadPersonAvatar
 import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.launch
@@ -85,7 +88,8 @@ fun ClazzLogEditAttendanceScreen(
                 headlineContent = { Text(stringResource(MR.strings.mark_all_present)) },
                 leadingContent = {
                     Icon(
-                        Icons.Outlined.LibraryAddCheck,
+                        modifier = Modifier.size(40.dp).padding(8.dp),
+                        imageVector = Icons.Outlined.LibraryAddCheck,
                         contentDescription = ""
                     )
                 }
@@ -100,7 +104,8 @@ fun ClazzLogEditAttendanceScreen(
                 headlineContent = { Text(stringResource(MR.strings.mark_all_absent)) },
                 leadingContent = {
                     Icon(
-                        Icons.Outlined.CheckBox,
+                        modifier = Modifier.size(40.dp).padding(8.dp),
+                        imageVector = Icons.Outlined.CheckBox,
                         contentDescription = ""
                     )
                 }
@@ -215,9 +220,9 @@ private fun ClazzLogItemView(
             Text(text = clazzLog.person?.personFullName() ?: "")
         },
         leadingContent = {
-            Icon(
-                Icons.Default.Person,
-                contentDescription = ""
+            UstadPersonAvatar(
+                personName = clazzLog.person?.fullName(),
+                pictureUri = clazzLog.personPicture?.personPictureThumbnailUri,
             )
         },
         trailingContent = {

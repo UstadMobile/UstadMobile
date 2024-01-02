@@ -18,10 +18,9 @@ class CacheResponse(
     override val request: HttpRequest,
     headers: HttpHeaders,
     private val responseBody: ResponseBody,
-): HttpResponse {
-
     @Volatile
-    private var httpResponseCode = 0
+    private var httpResponseCode: Int = 200
+): HttpResponse {
 
     override val responseCode: Int
         get() = httpResponseCode

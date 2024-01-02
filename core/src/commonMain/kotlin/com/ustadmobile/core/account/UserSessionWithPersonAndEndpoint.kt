@@ -2,6 +2,7 @@ package com.ustadmobile.core.account
 
 import com.ustadmobile.core.util.ext.toUmAccount
 import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.PersonPicture
 import com.ustadmobile.lib.db.entities.UserSession
 import kotlinx.serialization.Serializable
 
@@ -10,6 +11,7 @@ data class UserSessionWithPersonAndEndpoint (
     val userSession: UserSession,
     val person: Person,
     val endpoint: Endpoint,
+    val personPicture: PersonPicture? = null,
 ) {
 
     val displayName: String

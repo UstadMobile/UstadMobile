@@ -45,7 +45,7 @@ class TestContentEntryVersionRoute {
             }
             application {
                 routing {
-                    ContentEntryVersionRoute(ustadCache)
+                    CacheRoute(ustadCache)
                 }
             }
 

@@ -8,22 +8,20 @@ import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
 import com.ustadmobile.lib.db.entities.CourseAssignmentMark
+import com.ustadmobile.view.components.UstadPersonAvatar
 import web.cssom.Display
 import web.cssom.JustifyContent
 import web.cssom.pct
-import web.cssom.px
 import web.cssom.rgb
 import js.core.jso
 import kotlinx.datetime.TimeZone
-import mui.icons.material.EmojiEvents
-import mui.icons.material.Person2
+import mui.icons.material.EmojiEvents as EmojiEventsIcon
 import mui.material.*
 import mui.material.styles.TypographyVariant
 import mui.system.responsive
 import mui.system.sx
 import react.FC
 import react.Props
-import react.create
 import react.dom.html.ReactHTML.span
 import react.useRequiredContext
 
@@ -52,11 +50,9 @@ val UstadCourseAssignmentMarkListItem = FC<UstadCourseAssignmentMarkListItemProp
 
     ListItem{
         ListItemIcon {
-            + Person2.create {
-                sx {
-                    width = 40.px
-                    height = 40.px
-                }
+            UstadPersonAvatar {
+                personName = props.uiState.markerName
+                pictureUri = props.uiState.mark.markerPictureUri
             }
         }
 
@@ -92,7 +88,7 @@ val UstadCourseAssignmentMarkListItem = FC<UstadCourseAssignmentMarkListItemProp
                     color = IconColor.action
                     fontSize = IconSize.small
 
-                    + EmojiEvents.create()
+                    EmojiEventsIcon()
                 }
 
                 Typography {
@@ -109,7 +105,7 @@ val UstadCourseAssignmentMarkListItem = FC<UstadCourseAssignmentMarkListItemProp
                             }
 
                             + strings.format(MR.strings.late_penalty,
-                                props.uiState.mark.courseAssignmentMark?.penaltyPercentage().toString()
+                                props.uiState.mark.courseAssignmentMark?.penaltyPercentage().toString() + "%"
                             )
                         }
                     }

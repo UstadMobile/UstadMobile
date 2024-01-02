@@ -49,6 +49,7 @@ import com.ustadmobile.view.clazzassignment.AssignmentCommentTextFieldListItem
 import com.ustadmobile.view.clazzassignment.UstadCommentListItem
 import com.ustadmobile.view.components.UstadDetailHeader
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
+import kotlinx.coroutines.Dispatchers
 import mui.system.sx
 import react.useRequiredContext
 import web.cssom.Contain
@@ -361,7 +362,8 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                         onChange = props.onChangeCourseComment
                         label = ReactNode(strings[MR.strings.add_class_comment])
                         value = props.uiState.newCourseCommentText
-                        activeUserPersonUid = props.uiState.activeUserPersonUid
+                        activeUserPersonName = props.uiState.activeUserPersonName
+                        activeUserPictureUri = props.uiState.activeUserPictureUri
                         textFieldId = "course_comment_textfield"
                         onClickSubmit = props.onClickSubmitCourseComment
                     }
@@ -393,7 +395,8 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                         onChange = props.onChangePrivateComment
                         label = ReactNode(strings[MR.strings.add_private_comment])
                         value = props.uiState.newPrivateCommentText
-                        activeUserPersonUid = props.uiState.activeUserPersonUid
+                        activeUserPersonName = props.uiState.activeUserPersonName
+                        activeUserPictureUri = props.uiState.activeUserPictureUri
                         textFieldId = "private_comment_textfield"
                         onClickSubmit = props.onClickSubmitPrivateComment
                     }
@@ -423,7 +426,9 @@ val ClazzAssignmentDetailOverviewScreen = FC<Props> {
         ClazzAssignmentDetailOverviewViewModel(di, savedStateHandle)
     }
 
-    val uiStateVal by viewModel.uiState.collectAsState(ClazzAssignmentDetailOverviewUiState())
+    val uiStateVal by viewModel.uiState.collectAsState(
+        ClazzAssignmentDetailOverviewUiState(), Dispatchers.Main.immediate
+    )
 
     ClazzAssignmentDetailOverviewScreenComponent2 {
         uiState = uiStateVal

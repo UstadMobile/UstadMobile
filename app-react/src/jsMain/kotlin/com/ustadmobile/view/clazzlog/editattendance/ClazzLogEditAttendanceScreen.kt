@@ -15,6 +15,7 @@ import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.common.xs
 import com.ustadmobile.mui.components.UstadStandardContainer
+import com.ustadmobile.view.components.UstadPersonAvatar
 import dev.icerock.moko.resources.StringResource
 import web.cssom.TextAlign
 import web.cssom.px
@@ -49,6 +50,7 @@ external interface ClazzLogEditAttendanceScreenProps : Props {
 
 }
 
+@Suppress("unused")
 val ClazzLogEditAttendanceScreenPreview = FC<Props> {
     ClazzLogEditAttendanceScreenComponent {
         uiState = ClazzLogEditAttendanceUiState(
@@ -288,8 +290,9 @@ private val ClazzLogItemView = FC<ClazzLogItemViewProps> { props ->
             }
 
             ListItemIcon {
-                Icon {
-                    + mui.icons.material.Person.create()
+                UstadPersonAvatar {
+                    personName = props.personAndRecord.person?.fullName()
+                    pictureUri = props.personAndRecord.personPicture?.personPictureThumbnailUri
                 }
             }
 

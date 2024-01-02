@@ -93,7 +93,7 @@ kotlin {
                 implementation project(":lib-util")
                 implementation "io.ktor:ktor-client-core:$version_ktor"
 
-                implementation libs.door.runtime
+                api libs.door.runtime
                 implementation libs.napier
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"
                 compileOnly libs.door.room.annotations
@@ -110,11 +110,11 @@ kotlin {
             dependsOn commonJvmMain
 
             dependencies {
-                implementation "androidx.room:room-runtime:$version_android_room"
-                implementation "androidx.room:room-paging:$version_android_room"
-                implementation "androidx.room:room-ktx:$version_android_room"
-                implementation "androidx.lifecycle:lifecycle-livedata-ktx:$version_androidx_lifecycle"
-                implementation(libs.androidx.paging.runtime)
+                api "androidx.room:room-runtime:$version_android_room"
+                api "androidx.room:room-paging:$version_android_room"
+                api "androidx.room:room-ktx:$version_android_room"
+                api "androidx.lifecycle:lifecycle-livedata-ktx:$version_androidx_lifecycle"
+                api(libs.androidx.paging.runtime)
 
                 implementation "com.google.code.gson:gson:$version_gson"
                 implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"

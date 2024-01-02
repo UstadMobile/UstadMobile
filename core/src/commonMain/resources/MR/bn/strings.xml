@@ -11,7 +11,6 @@
     <string name="invite_link_desc">এই লিঙ্কটি সহ যে কেউ যোগ দিতে এবং %1$s এ যোগদানের জন্য আবেদন করতে পারেন। তারপরে আপনি যোগদানের অনুরোধটি অনুমোদিত বা বাতিল করতে পারেন।</string>
     <string name="permission_role_select">সমস্ত ভূমিকা দেখুন এবং নির্বাচন করুন</string>
     <string name="permission_school_insert">একটি নতুন স্কুল প্রবেশ করান</string>
-    <string name="over">শেষ</string>
     <string name="add_staff_to_school">স্কুলে কর্মী যুক্ত করুন</string>
     <string name="permission_password_reset">ব্যক্তির পাসওয়ার্ড পুনরায় সেট করুন এবং আপডেট করুন</string>
     <string name="female">মহিলা</string>
@@ -115,7 +114,6 @@
     <string name="device">যন্ত্র</string>
     <string name="register">নিবন্ধন</string>
     <string name="phone_number">ফোন নম্বর</string>
-    <string name="name">নাম</string>
     <string name="video">ভিডিও</string>
     <string name="download_continue_stacked_label">ডাউনলোড চালিয়ে যান</string>
     <string name="download_continue_btn_label">চালিয়ে যান</string>
@@ -190,8 +188,6 @@
     <string name="record_attendance">রেকর্ড উপস্থিতি</string>
     <string name="today">আজ</string>
     <string name="schedule">সময়সূচী</string>
-    <string name="first">প্রথম</string>
-    <string name="last">শেষ</string>
     <string name="last_week">গত সপ্তাহে</string>
     <string name="forgot_password">পাসওয়ার্ড ভুলে গেছেন</string>
     <string name="notifications">বিজ্ঞপ্তি</string>
@@ -210,12 +206,10 @@
     <string name="no_subtitle">উপউপাধি বিহীন</string>
     <string name="clazz">শ্রেণী</string>
     <string name="student_image">শিক্ষার্থীদের চিত্র</string>
-    <string name="question">প্রশ্ন</string>
     <string name="add_person">ব্যক্তি যুক্ত করুন</string>
     <string name="add_class">ক্লাস যুক্ত করুন</string>
     <string name="class_name">শ্রেণির নাম</string>
     <string name="class_description">শ্রেণীর বিবরণ</string>
-    <string name="to">প্রতি</string>
     <string name="holiday">ছুটি</string>
     <string name="holidays">ছুটি</string>
     <string name="features_enabled">বৈশিষ্ট্য সক্ষম করা হয়েছে</string>
@@ -244,8 +238,6 @@
     <string name="teacher">শিক্ষক</string>
     <string name="partial">আংশিক</string>
     <string name="teachers_literal">শিক্ষক</string>
-    <string name="up">উচ্চতর অংশে</string>
-    <string name="down">নিচে</string>
     <string name="activity_went_good">ক্রিয়াকলাপ ভাল হয়েছে</string>
     <string name="activity_went_bad">ক্রিয়াকলাপটি তেমন ভাল যায় নি</string>
     <string name="activity_enter_any_notes">এই ক্রিয়াকলাপ সম্পর্কে আপনার কাছে থাকা কোনও নোট প্রবেশ করুন</string>
@@ -295,9 +287,6 @@
     <string name="audit_log">হিসাবনিকাশের বিবরণ</string>
     <string name="audit_log_setting_desc">অডিট লগটি দেখুন এবং রফতানি করুন</string>
     <string name="onboarding_no_internet_subheadline">পরে ব্যবহারের জন্য শিক্ষামূলক ভিডিও, নিবন্ধ এবং ইন্টারেক্টিভ অনুশীলনগুলি ডাউনলোড করুন।</string>
-    <string name="entry">প্রবেশ</string>
-    <string name="permission">অনুমতি</string>
-    <string name="members">সদস্য</string>
     <string name="role_assignment">ভূমিকা অ্যাসাইনমেন্ট</string>
     <string name="scope_by">দ্বারা স্কোপ</string>
     <string name="assign_to">ধার্য</string>
@@ -348,7 +337,6 @@
     <string name="school">বিদ্যালয়</string>
     <string name="schools">বিদ্যালয়</string>
     <string name="assignments">অ্যাসাইনমেন্টস</string>
-    <string name="None">কিছুই না</string>
     <string name="instructions_for_students">শিক্ষার্থীদের জন্য নির্দেশাবলী</string>
     <string name="not_started">শুরু না</string>
     <string name="error_message_update_document">দস্তাবেজ আপডেট করতে ব্যর্থ</string>
@@ -440,8 +428,6 @@
     <string name="nothing_here">এখানে কিছু নেই</string>
     <string name="not_answered">উত্তরহীন</string>
     <string name="clazz_work">ক্লাস ওয়ার্ক</string>
-    <string name="marked">চিহ্নিত</string>
-    <string name="submitted">জমা দেওয়া</string>
     <string name="not_submitted">জমা না</string>
     <string name="visible_from_date">তারিখ থেকে দৃশ্যমান</string>
     <string name="submission_type">জমা দেওয়ার ধরণ</string>
@@ -475,7 +461,6 @@
     <string name="locations_setting_desc">অবস্থানগুলি পরিচালনা করুন</string>
     <string name="connect_as_guest">অতিথি হিসাবে সংযুক্ত হন</string>
     <string name="create_account">হিসাব তৈরি কর</string>
-    <string name="member">সদস্য</string>
     <string name="my">আমার %1$s</string>
     <string name="add_another">অন্য %1$s যোগ করুন</string>
     <string name="logged_in_as">%2$s তে %1$s হিসাবে লগ ইন হয়েছে</string>
@@ -580,7 +565,6 @@
     <string name="save_as_template">টেমপ্লেট হিসেবে সেভ করুন</string>
     <string name="passed">সম্পন্ন</string>
     <string name="compress">সংকুচিত করুন</string>
-    <string name="and">এবং</string>
     <string name="added">যোগ হয়েছে</string>
     <string name="fixed_date">নির্দিস্ট তারিখ</string>
     <string name="relative_date">আপেক্ষিক তারিখ</string>

@@ -8,7 +8,7 @@ import java.io.InputStream
  *
  * @param src the source InputStream
  * @param fromByte inclusive
- * @param toByte inclusive as per http range headers
+ * @param toByte **INCLUSIVE** as per http range headers
  */
 class RangeInputStream(
     private val src: InputStream,
@@ -20,7 +20,7 @@ class RangeInputStream(
     private var pos: Long = 0
 
     init {
-        skipNBytes(fromByte)
+        skipExactly(fromByte)
         pos = fromByte
     }
 
@@ -58,3 +58,13 @@ class RangeInputStream(
         return false
     }
 }
+
+/**
+ * Get a ranged input stream
+ * @param fromByte the start byte (inclusive)
+ * @param toByte end byte (**INCLUSIVE** as per HTTP range headers)
+ */
+fun InputStream.range(
+    fromByte: Long,
+    toByte: Long
+) : InputStream = RangeInputStream(this, fromByte, toByte)

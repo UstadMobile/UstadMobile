@@ -34,6 +34,18 @@ actual fun Source.transferToAndGetSha256(
     )
 }
 
+actual fun Source.sha256(): ByteArray {
+    val messageDigest = MessageDigest.getInstance("SHA-256")
+    asInputStream().use { inStream ->
+        val buffer = ByteArray(8192)
+        var bytesRead : Int
+        while(inStream.read(buffer).also { bytesRead = it} != -1) {
+            messageDigest.update(buffer, 0, bytesRead)
+        }
+    }
+    return messageDigest.digest()
+}
+
 actual fun Source.unzipTo(
     destPath: Path
 ): List<UnzippedEntry> {

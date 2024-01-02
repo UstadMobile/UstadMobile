@@ -77,7 +77,6 @@
     <string name="next">التالي</string>
     <string name="password">كلمة مرور</string>
     <string name="new_password">كلمة مرور جديدة</string>
-    <string name="name">الأسم</string>
     <string name="male">ذكر</string>
     <string name="other">آخر</string>
     <string name="unset">غير محدد</string>
@@ -205,8 +204,6 @@
     <string name="activity_enter_any_notes">أدخل أي ملاحظات لديك حول هذا النشاط</string>
     <string name="activity_went_bad">لم يجري النشاط بشكل جيد</string>
     <string name="activity_went_good">جرى النشاط بشكل جيد</string>
-    <string name="down">أسفل</string>
-    <string name="up">أعلى</string>
     <string name="teachers_literal">مدرسين</string>
     <string name="partial">جزئي</string>
     <string name="teacher">مدرس</string>
@@ -238,13 +235,11 @@
     <string name="class_setup">إعداد الفصل</string>
     <string name="features_enabled">الميزات المتاحة</string>
     <string name="holiday_calendar">تقويم الإجازات</string>
-    <string name="to">الى</string>
     <string name="class_description">وصف الفصل</string>
     <string name="class_name">أسم الفصل</string>
     <string name="add_class">أضف فصل</string>
     <string name="add_person">أضف شخص</string>
     <string name="questions">أسئلة</string>
-    <string name="question">سؤال</string>
     <string name="student_image">صورة الطالب</string>
     <string name="clazz">فصل</string>
     <string name="edit">تعديل</string>
@@ -262,8 +257,6 @@
     <string name="mark_all_present">ضع علامة على جميع الحاضرين</string>
     <string name="mark_all">ضع علامة على الجميع</string>
     <string name="last_week">الأسبوع الماضي</string>
-    <string name="last">الأخير</string>
-    <string name="first">الأول</string>
     <string name="schedule">جدول</string>
     <string name="log">سجل</string>
     <string name="sort_by">الفرز عن طريق</string>
@@ -294,7 +287,6 @@
     <string name="percentage_complete">%1$s%% اكتمل</string>
     <string name="not_started">لم يبدأ</string>
     <string name="instructions_for_students">تعليمات للطلاب</string>
-    <string name="None">لا شيء</string>
     <string name="new_assignment">أضف واجب</string>
     <string name="assignments">واجبات</string>
     <string name="schools">مدارس</string>
@@ -347,12 +339,8 @@
     <string name="role_assignment">تعيين دور</string>
     <string name="new_group">مجموعة جديدة</string>
     <string name="add_group">أضف مجموعة</string>
-    <string name="member">عضو</string>
-    <string name="members">أعضاء</string>
     <string name="role_name">اسم الدور</string>
-    <string name="permission">إذن</string>
     <string name="permissions">أذونات وصول</string>
-    <string name="entry">إدخال</string>
     <string name="audit_log_setting_desc">مشاهدة و تصدير سجل التدقيق</string>
     <string name="audit_log">سجل التدقيق</string>
     <string name="locations_setting_desc">إدارة المواقع</string>
@@ -365,7 +353,6 @@
     <string name="groups">مجموعات</string>
     <string name="not_recorded">غير مسجل</string>
     <string name="sync">مزامنة</string>
-    <string name="over">عبر</string>
     <string name="filter">تصفية</string>
     <string name="attendance_percentage">نسبة الحضور:</string>
     <string name="search">بحث</string>
@@ -442,8 +429,6 @@
     <string name="submission_type">نوع عمليات الارسال</string>
     <string name="visible_from_date">واضح من التاريخ</string>
     <string name="not_submitted">لم يتم ارساله</string>
-    <string name="submitted">تم ارساله</string>
-    <string name="marked">محدد</string>
     <string name="clazz_work">واجب</string>
     <string name="nothing_here">لا يوجد شيء</string>
     <string name="untitled">غير معنون</string>
@@ -767,7 +752,6 @@
     <string name="last_week_date_range">الاسبوع الماضى</string>
     <string name="last_two_week_date_range">الاسبوعين الماضيين</string>
     <string name="two_letter_code">رمز من حرفين (ISO 639–1)</string>
-    <string name="and">و</string>
     <string name="added">مضاف</string>
     <string name="add_file_description">أضف محتوى تعليميًا باستخدام التنسيقات المدعومة مثل PDF و xAPI و H5P و EPUB</string>
     <string name="count_session">استخدام المحتوى - عدد الجلسات</string>
@@ -816,7 +800,6 @@
     <string name="sorry_something_went_wrong">عذرا، هناك خطأ ما! لقد سجلناه ، وسنحاول إصلاحه. يرجى التأكد من مشاركة معرف الحادث إذا كنت بحاجة إلى الاتصال بمسؤول النظام حول هذا الأمر.</string>
     <string name="view_basic_profile_of_members">عرض الملف الشخصي الأساسي للأعضاء</string>
     <string name="add_new_clazz_to_school">أضف صفًا جديدًا إلى المدرسة</string>
-
     <string name="waiting_for_connection">في انتظار الاتصال</string>
     <string name="onboarding_stay_organized_headline">إبقى مرتب</string>
     <string name="edit_assignment">تعديل المهمة</string>
@@ -894,7 +877,7 @@
     <string name="late_submission">عمليات الإرسال المتأخرة</string>
     <string name="allow_class_comments">السماح بتعليقات الفصل من الطلاب</string>
     <string name="completion_criteria">معايير الإنجاز</string>
-    <string name="late_penalty">(%1$s%% غرامة متأخرة)</string>
+    <string name="late_penalty">(%1$s غرامة متأخرة)</string>
     <string name="add_folder">أضف الكل من المجلد</string>
     <string name="importing">استيراد %1$s</string>
     <string name="parent">الأبوين</string>

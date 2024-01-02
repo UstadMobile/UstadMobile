@@ -45,6 +45,7 @@ val SiteEditComponent2 = FC<SiteEditProps> { props ->
 
             UstadTextField {
                 value = props.uiState.site?.siteName ?: ""
+                id = "site_name"
                 label = ReactNode(strings[MR.strings.name_key] + "*")
                 error = props.uiState.siteNameError != null
                 disabled = !props.uiState.fieldsEnabled
@@ -61,6 +62,7 @@ val SiteEditComponent2 = FC<SiteEditProps> { props ->
             UstadSwitchField {
                 label = strings[MR.strings.guest_login_enabled]
                 checked = props.uiState.site?.guestLogin ?: false
+                id = "guest_login_enabled"
                 onChanged = {
                     props.onSiteChanged(
                         props.uiState.site?.shallowCopy{
@@ -73,6 +75,7 @@ val SiteEditComponent2 = FC<SiteEditProps> { props ->
             UstadSwitchField {
                 label = strings[MR.strings.registration_allowed]
                 checked = props.uiState.site?.registrationAllowed ?: false
+                id = "registration_allowed"
                 onChanged = {
                     props.onSiteChanged(
                         props.uiState.site?.shallowCopy {
