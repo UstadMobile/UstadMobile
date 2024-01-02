@@ -80,7 +80,7 @@ data class PersonDetailUiState(
         get() = canSendSms && !person?.person?.phoneNum.isNullOrBlank()
 
     val chatVisible: Boolean
-        get() = !person?.username.isNullOrBlank()
+        get() = !person?.person?.username.isNullOrBlank()
 
 }
 
