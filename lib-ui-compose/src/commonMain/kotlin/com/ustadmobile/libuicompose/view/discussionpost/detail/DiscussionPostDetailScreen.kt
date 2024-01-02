@@ -83,7 +83,8 @@ fun DiscussionPostDetailScreen(
                         },
                         leadingContent = {
                             UstadPersonAvatar(
-                                personUid = uiState.loggedInPersonUid
+                                personName = uiState.loggedInPersonName,
+                                pictureUri = uiState.loggedInPersonPictureUri,
                             )
                         }
                     )
