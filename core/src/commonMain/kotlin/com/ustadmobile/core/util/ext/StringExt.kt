@@ -112,6 +112,10 @@ fun String.initials(): String {
     }.joinToString(separator = " ")
 }
 
+fun String.initial(): String {
+    return firstOrNull()?.uppercase() ?: ""
+}
+
 /**
  * Remove excess (more than one) white space from the start and end of a string. Will leave up to
  * one white space character on either end.

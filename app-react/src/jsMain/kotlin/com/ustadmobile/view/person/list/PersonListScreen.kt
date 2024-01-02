@@ -92,8 +92,8 @@ val PersonListComponent2 = FC<PersonListProps> { props ->
 
                         ListItemIcon {
                             UstadPersonAvatar {
-                                personUid = personAndDetails?.person?.personUid ?: 0
                                 pictureUri = personAndDetails?.picture?.personPictureThumbnailUri
+                                personName = personAndDetails?.person?.fullName()
                             }
                         }
 

@@ -25,6 +25,7 @@ expect abstract class PersonPictureDao : BaseDao<PersonPicture> {
          """)
     abstract suspend fun findByPersonUidAsync(personUid: Long): PersonPicture?
 
+    @HttpAccessible
     @Query("""
          SELECT * 
            FROM PersonPicture 

@@ -102,8 +102,8 @@ fun PersonListScreen(
                 headlineContent = { Text(text = personAndDetails?.person?.fullName() ?: "") },
                 leadingContent = {
                     UstadPersonAvatar(
-                        personUid = personAndDetails?.person?.personUid ?: 0,
-                        pictureUri = personAndDetails?.picture?.personPictureUri
+                        personName = personAndDetails?.person?.fullName(),
+                        pictureUri = personAndDetails?.picture?.personPictureUri,
                     )
                 },
             )

@@ -21,6 +21,7 @@ import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_NO_DELETE
 import com.ustadmobile.lib.util.randomString
 import kotlinx.coroutines.delay
 import com.ustadmobile.core.db.dao.getResults
+import com.ustadmobile.lib.db.composites.PersonAndClazzMemberListDetails
 import io.ktor.client.*
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
@@ -227,12 +228,12 @@ suspend fun UmAppDatabase.enrolPersonIntoSchoolAtLocalTimezone(personToEnrol: Pe
     return schoolMember
 }
 
-suspend fun UmAppDatabase.approvePendingClazzEnrolment(enrolment: PersonWithClazzEnrolmentDetails, clazzUid: Long) {
+suspend fun UmAppDatabase.approvePendingClazzEnrolment(enrolment: PersonAndClazzMemberListDetails, clazzUid: Long) {
     val effectiveClazz = clazzDao.findByUidAsync(clazzUid)
         ?: throw IllegalStateException("Class does not exist")
 
     //find the group member and update that
-    val numGroupUpdates = personGroupMemberDao.moveGroupAsync(enrolment.personUid,
+    val numGroupUpdates = personGroupMemberDao.moveGroupAsync(enrolment.person?.personUid ?: 0,
         effectiveClazz.clazzStudentsPersonGroupUid,
         effectiveClazz.clazzPendingStudentsPersonGroupUid, systemTimeInMillis())
 
@@ -241,7 +242,7 @@ suspend fun UmAppDatabase.approvePendingClazzEnrolment(enrolment: PersonWithClaz
     }
 
     //change the role
-    val enrolmentUpdateCount = clazzEnrolmentDao.updateClazzEnrolmentRole(enrolment.personUid, clazzUid,
+    val enrolmentUpdateCount = clazzEnrolmentDao.updateClazzEnrolmentRole(enrolment.person?.personUid ?: 0, clazzUid,
         newRole = ClazzEnrolment.ROLE_STUDENT, oldRole = ClazzEnrolment.ROLE_STUDENT_PENDING,
         systemTimeInMillis())
     if(enrolmentUpdateCount != 1) {
@@ -249,14 +250,14 @@ suspend fun UmAppDatabase.approvePendingClazzEnrolment(enrolment: PersonWithClaz
     }
 }
 
-suspend fun UmAppDatabase.declinePendingClazzEnrolment(enrolment: PersonWithClazzEnrolmentDetails, clazzUid: Long){
+suspend fun UmAppDatabase.declinePendingClazzEnrolment(enrolment: PersonAndClazzMemberListDetails, clazzUid: Long){
     val effectiveClazz = clazzDao.findByUidAsync(clazzUid)
         ?: throw IllegalStateException("Class does not exist")
 
-        clazzEnrolmentDao.updateClazzEnrolmentActiveForPersonAndClazz(enrolment.personUid,
+        clazzEnrolmentDao.updateClazzEnrolmentActiveForPersonAndClazz(enrolment.person?.personUid ?: 0,
             clazzUid, ClazzEnrolment.ROLE_STUDENT_PENDING, false, systemTimeInMillis())
 
-        personGroupMemberDao.updateGroupMemberActive(false, enrolment.personUid,
+        personGroupMemberDao.updateGroupMemberActive(false, enrolment.person?.personUid ?: 0,
             effectiveClazz.clazzPendingStudentsPersonGroupUid, systemTimeInMillis())
 
 }
