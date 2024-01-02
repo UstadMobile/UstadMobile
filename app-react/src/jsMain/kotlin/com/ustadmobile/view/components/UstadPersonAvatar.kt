@@ -1,8 +1,16 @@
 package com.ustadmobile.view.components
 
+import com.ustadmobile.core.util.avatarColorForName
+import com.ustadmobile.core.util.ext.initial
+import com.ustadmobile.core.util.ext.rgbColorProperty
 import mui.material.Avatar
+import mui.system.sx
 import react.FC
 import react.Props
+import react.ReactNode
+import react.useMemo
+import web.cssom.Color
+import web.cssom.Visibility
 
 external interface UstadPersonAvatarProps: Props {
 
@@ -10,11 +18,36 @@ external interface UstadPersonAvatarProps: Props {
 
     var pictureUri: String?
 
+    var personName: String?
+
 }
 
+
 val UstadPersonAvatar = FC<UstadPersonAvatarProps> { props ->
-    Avatar {
-        src = props.pictureUri
+    val pictureUriVal = props.pictureUri
+    val personNameVal = props.personName
+    val bgColor = useMemo(personNameVal, pictureUriVal) {
+        if(pictureUriVal == null && personNameVal != null) {
+            avatarColorForName(personNameVal).rgbColorProperty()
+        }else {
+            Color("#ffffff00")
+        }
     }
 
+    Avatar {
+        sx {
+            if(pictureUriVal == null && personNameVal == null) {
+                visibility = Visibility.hidden
+            }
+        }
+        if(pictureUriVal != null) {
+            src = props.pictureUri
+        }else if(personNameVal != null) {
+            sx {
+                backgroundColor = bgColor
+            }
+
+            + ReactNode(personNameVal.initial())
+        }
+    }
 }

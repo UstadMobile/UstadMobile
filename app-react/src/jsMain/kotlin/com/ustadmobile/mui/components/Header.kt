@@ -1,16 +1,31 @@
 package com.ustadmobile.mui.components
 
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
+import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.components.DIContext
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.viewmodel.UstadViewModel
+import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
 import com.ustadmobile.core.viewmodel.settings.SettingsViewModel
+import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.UserSession
 import com.ustadmobile.mui.common.Area
+import com.ustadmobile.view.components.UstadPersonAvatar
 import js.core.jso
+import kotlinx.coroutines.flow.emptyFlow
 import web.cssom.*
 import mui.system.sx
 import mui.material.*
 import mui.material.styles.TypographyVariant.Companion.h6
+import org.kodein.di.direct
+import org.kodein.di.instance
+import org.kodein.di.on
 import react.*
 import react.dom.aria.AriaHasPopup
 import react.dom.aria.ariaExpanded
@@ -48,6 +63,26 @@ val Header = FC<HeaderProps> { props ->
     var overflowAnchor by useState<Element?> { null }
     val navigateFn = useNavigate()
     val location = useLocation()
+
+
+    val appDi = useRequiredContext(DIContext)
+    val accountManager: UstadAccountManager = appDi.di.direct.instance()
+    val currentSession: UserSessionWithPersonAndEndpoint by accountManager.currentUserSessionFlow
+        .collectAsState(
+            UserSessionWithPersonAndEndpoint(
+                userSession = UserSession(),
+                person = Person(),
+                endpoint = Endpoint("")
+            )
+        )
+
+    val repo: UmAppDatabase? = currentSession.takeIf { it.endpoint.url.isNotEmpty() }?.let {
+        appDi.on(it.endpoint).direct.instance(tag = DoorTag.TAG_REPO)
+    }
+    val personPictureFlow = useMemo(repo, currentSession.person.personUid) {
+        repo?.personPictureDao?.findByPersonUidLive(currentSession.person.personUid) ?: emptyFlow()
+    }
+    val personPicture by personPictureFlow.collectAsState(null)
 
 
     var appBarTitle by useState {
@@ -198,7 +233,17 @@ val Header = FC<HeaderProps> { props ->
                 }
 
             }else if(props.appUiState.userAccountIconVisible) {
-                HeaderAvatar()
+                IconButton {
+                    id = "header_avatar"
+                    onClick = {
+                        navigateFn.invoke(AccountListViewModel.DEST_NAME)
+                    }
+
+                    UstadPersonAvatar {
+                        personName = currentSession.person.fullName()
+                        pictureUri = personPicture?.personPictureThumbnailUri
+                    }
+                }
             }
         }
     }

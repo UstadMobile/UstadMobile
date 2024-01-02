@@ -12,10 +12,11 @@ import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useTabAndAppBarHeight
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
-import com.ustadmobile.lib.db.entities.PersonWithClazzEnrolmentDetails
+import com.ustadmobile.lib.db.composites.PersonAndClazzMemberListDetails
 import com.ustadmobile.mui.components.UstadAddListItem
 import com.ustadmobile.mui.components.UstadListFilterChipsHeader
 import com.ustadmobile.mui.components.UstadListSortHeader
+import com.ustadmobile.view.components.UstadPersonAvatar
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
@@ -39,9 +40,9 @@ external interface ClazzMemberListScreenProps : Props {
 
     var uiState: ClazzMemberListUiState
 
-    var onClickEntry: (PersonWithClazzEnrolmentDetails) -> Unit
+    var onClickEntry: (PersonAndClazzMemberListDetails) -> Unit
 
-    var onClickPendingRequest: (enrolment: PersonWithClazzEnrolmentDetails,
+    var onClickPendingRequest: (enrolment: PersonAndClazzMemberListDetails,
                                 approved: Boolean) -> Unit
 
     var onClickFilterChip: (MessageIdOption2) -> Unit
@@ -116,18 +117,21 @@ private val ClazzMemberListScreenComponent2 = FC<ClazzMemberListScreenProps> { p
 
             infiniteQueryPagingItems(
                 items = teachersInfiniteQueryResult,
-                key = { "t_${it.personUid}" }
-            ) { person ->
+                key = { "t_${it.person?.personUid}" }
+            ) { member ->
                 ListItem.create {
                     ListItemButton {
-                        onClick = { person?.also { props.onClickEntry(it) } }
+                        onClick = { member?.also { props.onClickEntry(it) } }
 
                         ListItemIcon {
-                            + AccountCircleIcon.create()
+                            UstadPersonAvatar {
+                                pictureUri = member?.personPicture?.personPictureThumbnailUri
+                                personName = member?.person?.fullName()
+                            }
                         }
 
                         ListItemText {
-                            primary = ReactNode("${person?.firstNames} ${person?.lastName}")
+                            primary = ReactNode(member?.person?.fullName() ?: "")
                         }
                     }
                 }
@@ -156,7 +160,7 @@ private val ClazzMemberListScreenComponent2 = FC<ClazzMemberListScreenProps> { p
 
             infiniteQueryPagingItems(
                 items = studentsInfiniteQueryResult,
-                key = { "s_${it.personUid}"}
+                key = { "s_${it.person?.personUid}"}
             ) { personItem ->
                 StudentListItem.create {
                     person = personItem
@@ -175,7 +179,7 @@ private val ClazzMemberListScreenComponent2 = FC<ClazzMemberListScreenProps> { p
 
                 infiniteQueryPagingItems(
                     items = pendingStudentsInfiniteQueryResult,
-                    key = { "p_${it.personUid} "}
+                    key = { "p_${it.person?.personUid} "}
                 ) { pendingStudent ->
                     PendingStudentListItem.create {
                         person = pendingStudent
@@ -213,9 +217,9 @@ val ClazzMemberListScreen = FC<Props> {
 
 external interface StudentListItemProps : Props {
 
-    var person: PersonWithClazzEnrolmentDetails?
+    var person: PersonAndClazzMemberListDetails?
 
-    var onClick: (PersonWithClazzEnrolmentDetails) -> Unit
+    var onClick: (PersonAndClazzMemberListDetails) -> Unit
 
 }
 
@@ -227,14 +231,14 @@ private val StudentListItem = FC<StudentListItemProps> { props ->
             }
 
             ListItemIcon {
-                + AccountCircleIcon.create()
+                UstadPersonAvatar {
+                    pictureUri = props.person?.personPicture?.personPictureThumbnailUri
+                    personName = props.person?.person?.fullName()
+                }
             }
 
             ListItemText {
-                primary = ReactNode(
-                    "${props.person?.firstNames}" +
-                            " ${props.person?.lastName}"
-                )
+                primary = ReactNode(props.person?.person?.fullName() ?: "")
             }
         }
     }
@@ -244,9 +248,9 @@ private val StudentListItem = FC<StudentListItemProps> { props ->
 
 external interface PendingStudentListItemProps : Props {
 
-    var person: PersonWithClazzEnrolmentDetails?
+    var person: PersonAndClazzMemberListDetails?
 
-    var onClick: (enrolment: PersonWithClazzEnrolmentDetails, approved: Boolean) -> Unit
+    var onClick: (enrolment: PersonAndClazzMemberListDetails, approved: Boolean) -> Unit
 
 }
 
@@ -257,12 +261,14 @@ private val PendingStudentListItem = FC<PendingStudentListItemProps> { props ->
             onClick = { props.onClick }
 
             ListItemIcon {
-                + AccountCircleIcon.create()
+                UstadPersonAvatar {
+                    pictureUri = props.person?.personPicture?.personPictureThumbnailUri
+                    personName = props.person?.person?.fullName()
+                }
             }
 
             ListItemText {
-                primary = ReactNode("${props.person?.firstNames} " +
-                        "${props.person?.lastName}")
+                primary = ReactNode(props.person?.person?.fullName())
             }
         }
 
@@ -291,46 +297,3 @@ private val PendingStudentListItem = FC<PendingStudentListItemProps> { props ->
     }
 }
 
-
-@Suppress("unused")
-val ClazzMemberListScreenPreview = FC<Props> {
-
-    ClazzMemberListScreenComponent2 {
-        uiState = ClazzMemberListUiState(
-            studentList = {
-                ListPagingSource(listOf(
-                    PersonWithClazzEnrolmentDetails().apply {
-                        personUid = 1
-                        firstNames = "Student 1"
-                        lastName = "Name"
-                    },
-                    PersonWithClazzEnrolmentDetails().apply {
-                        personUid = 3
-                        firstNames = "Student 3"
-                        lastName = "Name"
-                    }
-                ))
-            },
-            pendingStudentList = {
-                ListPagingSource(listOf(
-                    PersonWithClazzEnrolmentDetails().apply {
-                        personUid = 1
-                        firstNames = "Student 1"
-                        lastName = "Name"
-                    }
-                ))
-            },
-            teacherList = {
-                ListPagingSource(listOf(
-                    PersonWithClazzEnrolmentDetails().apply {
-                        personUid = 1
-                        firstNames = "Teacher 1"
-                        lastName = "Name"
-                    }
-                ))
-            },
-            addStudentVisible = true,
-            addTeacherVisible = true
-        )
-    }
-}
