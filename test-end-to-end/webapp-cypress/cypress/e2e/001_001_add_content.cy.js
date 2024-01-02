@@ -1,4 +1,4 @@
-describe('002_005_course_title_is_mandatory', () => {
+describe('001_001_add_content', () => {
  it('Start Ustad Test Server ', () => {
   // Start Test Server
     cy.ustadStartTestServer()

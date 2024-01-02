@@ -105,10 +105,10 @@ it('Group 1 - Student add private comment', () => {
   cy.contains("004_009").click()
   cy.contains('Assignment 1').click()
   cy.get('#private_comment_textfield').click()
-  cy.get('#private_comment_textfield').type("comment2",{timeout:2000})
+  cy.get('#private_comment_textfield').type("hi",{timeout:2000})
   cy.get('svg[data-testid="SendIcon"]').click()
   cy.contains("comment1").should('exist')
-  cy.contains("comment2").should('exist')
+  cy.contains("hi").should('exist')
 })
 
 it('Group 2 - Student make sure Group 1 private comment is not visible', () => {
@@ -119,7 +119,7 @@ it('Group 2 - Student make sure Group 1 private comment is not visible', () => {
   cy.contains('Assignment 1').click()
   cy.get('#private_comment_textfield').should('exist')
   cy.contains("comment1").should('not.exist')
-  cy.contains("comment2").should('not.exist')
+  cy.contains("hi").should('not.exist')
 })
 it('Group 1 - Student2 able to view Group 1 private comment', () => {
 
@@ -128,6 +128,6 @@ it('Group 1 - Student2 able to view Group 1 private comment', () => {
   cy.contains("004_009").click()
   cy.contains('Assignment 1').click()
   cy.contains("comment1").should('exist')
-  cy.contains("comment2").should('exist')
+  cy.contains("hi").should('exist')
 })
 })
