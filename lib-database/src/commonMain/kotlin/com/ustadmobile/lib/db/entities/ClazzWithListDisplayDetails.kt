@@ -20,26 +20,31 @@ class ClazzWithListDisplayDetails() : Clazz() {
     @Embedded
     var terminology: CourseTerminology? = null
 
+    @Embedded
+    var coursePicture: CoursePicture? = null
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other == null || this::class != other::class) return false
-
-        other as ClazzWithListDisplayDetails
+        if (other !is ClazzWithListDisplayDetails) return false
+        if (!super.equals(other)) return false
 
         if (numStudents != other.numStudents) return false
         if (numTeachers != other.numTeachers) return false
         if (teacherNames != other.teacherNames) return false
         if (lastRecorded != other.lastRecorded) return false
-        if (clazzName != other.clazzName) return false
-
-        return true
+        if (clazzActiveEnrolment != other.clazzActiveEnrolment) return false
+        if (terminology != other.terminology) return false
+        return coursePicture == other.coursePicture
     }
 
     override fun hashCode(): Int {
-        var result = numStudents
+        var result = super.hashCode()
+        result = 31 * result + numStudents
         result = 31 * result + numTeachers
         result = 31 * result + (teacherNames?.hashCode() ?: 0)
         result = 31 * result + lastRecorded.hashCode()
+        result = 31 * result + (clazzActiveEnrolment?.hashCode() ?: 0)
+        result = 31 * result + (terminology?.hashCode() ?: 0)
+        result = 31 * result + (coursePicture?.hashCode() ?: 0)
         return result
     }
 

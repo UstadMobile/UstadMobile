@@ -1,12 +1,15 @@
 package com.ustadmobile.core.domain.blob.savepicture
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.ImageDao
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
 import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCase
 import com.ustadmobile.core.domain.compress.CompressParams
 import com.ustadmobile.core.domain.compress.CompressUseCase
 import com.ustadmobile.core.util.uuid.randomUuidAsString
 import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.lib.db.entities.CoursePicture
+import com.ustadmobile.lib.db.entities.PersonPicture
 
 /**
  * @param enqueueBlobUploadClientUseCase on platforms where a separate upload is required (e.g.
@@ -20,6 +23,14 @@ class SavePictureUseCase(
     private val repo: UmAppDatabase,
     private val compressImageUseCase: CompressUseCase,
 ) {
+
+    private fun UmAppDatabase.imageDaoForTable(tableId: Int): ImageDao? {
+        return when(tableId) {
+            PersonPicture.TABLE_ID -> personPictureDao
+            CoursePicture.TABLE_ID -> coursePictureDao
+            else -> null
+        }
+    }
 
     suspend operator fun invoke(
         entityUid: Long,
@@ -61,7 +72,7 @@ class SavePictureUseCase(
             }
 
             if(enqueueBlobUploadClientUseCase != null) {
-                db.personPictureDao.updateUri(
+                db.imageDaoForTable(tableId)?.updateUri(
                     uid = entityUid,
                     uri = pictureBlob.blobUrl,
                     thumbnailUri = thumbnailBlob.blobUrl,
@@ -80,7 +91,7 @@ class SavePictureUseCase(
                 )
             }else {
                 //No upload needed, directly update repo
-                repo.personPictureDao.updateUri(
+                repo.imageDaoForTable(tableId)?.updateUri(
                     uid = entityUid,
                     uri = pictureBlob.blobUrl,
                     thumbnailUri = thumbnailBlob.blobUrl,
@@ -88,7 +99,7 @@ class SavePictureUseCase(
                 )
             }
         }else {
-            repo.personPictureDao.updateUri(
+            repo.imageDaoForTable(tableId)?.updateUri(
                 uid = entityUid,
                 uri = null,
                 thumbnailUri = null,

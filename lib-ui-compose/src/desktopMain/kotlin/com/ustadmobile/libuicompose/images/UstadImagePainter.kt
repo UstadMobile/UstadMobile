@@ -9,6 +9,7 @@ val nameMap = mapOf(
     UstadImage.ILLUSTRATION_OFFLINE_SHARING to "/img/illustration_offline_sharing.png",
     UstadImage.ILLUSTRATION_OFFLINE_USAGE to "/img/illustration_offline_usage.png",
     UstadImage.ILLUSTRATION_ORGANIZED to "/img/illustration_organized.png",
+    UstadImage.COURSE_BANNER_DEFAULT0 to "/img/course_banner_default0.webp",
 
 )
 @Composable

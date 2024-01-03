@@ -28,7 +28,6 @@ import com.ustadmobile.libuicompose.components.UstadEditHeader
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
 import com.ustadmobile.libuicompose.util.rememberFormattedTime
-import java.util.*
 import dev.icerock.moko.parcelize.Parcelable
 import dev.icerock.moko.parcelize.Parcelize
 import dev.icerock.moko.resources.compose.stringResource
@@ -37,6 +36,7 @@ import com.ustadmobile.lib.db.composites.CourseBlockAndEditEntities
 import com.ustadmobile.libuicompose.components.UstadBottomSheetOption
 import com.ustadmobile.libuicompose.components.UstadClickableTextField
 import com.ustadmobile.libuicompose.components.UstadDateField
+import com.ustadmobile.libuicompose.components.UstadImageSelectButton
 import com.ustadmobile.libuicompose.components.UstadRichTextEdit
 import com.ustadmobile.libuicompose.components.UstadSwitchField
 import com.ustadmobile.libuicompose.util.compose.stringIdMapResource
@@ -396,6 +396,26 @@ private fun ClazzEditBasicDetails(
     Column(
         modifier = Modifier.defaultScreenPadding()
     ) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            UstadImageSelectButton(
+                imageUri = uiState.entity?.coursePicture?.coursePictureUri,
+                onImageUriChanged = { imageUri ->
+                    println("onImageUriChanged: $imageUri")
+                    onClazzChanged(
+                        uiState.entity?.shallowCopy {
+                            coursePicture = coursePicture?.copy(
+                                coursePictureUri = imageUri,
+                            )
+                        }
+                    )
+                },
+                modifier = Modifier.size(60.dp).testTag("course_picture_button"),
+            )
+        }
+
         UstadEditHeader(text = stringResource(MR.strings.basic_details))
 
         OutlinedTextField(

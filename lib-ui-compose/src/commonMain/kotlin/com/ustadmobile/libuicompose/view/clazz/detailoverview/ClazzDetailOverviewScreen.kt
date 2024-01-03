@@ -25,6 +25,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
 import app.cash.paging.Pager
@@ -38,6 +39,7 @@ import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewUi
 import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewViewModel
 import com.ustadmobile.lib.db.composites.CourseBlockAndDisplayDetails
 import com.ustadmobile.lib.db.entities.CourseBlock
+import com.ustadmobile.libuicompose.components.UstadAsyncImage
 import com.ustadmobile.libuicompose.components.UstadHtmlText
 import com.ustadmobile.libuicompose.components.UstadDetailField2
 import com.ustadmobile.libuicompose.components.ustadPagedItems
@@ -83,10 +85,23 @@ fun ClazzDetailOverviewScreen(
         timeZoneId = uiState.clazz?.clazzTimeZone ?: "UTC",
     )
 
+    val courseBannerUri = uiState.clazz?.coursePicture?.coursePictureUri
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
     ){
+        if(courseBannerUri != null){
+            item(key = "banner") {
+                UstadAsyncImage(
+                    uri = courseBannerUri,
+                    contentDescription = "",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.height(156.dp).fillMaxWidth()
+                )
+            }
+        }
+
         item(key = "clazz_desc") {
             UstadHtmlText(
                 html = uiState.clazz?.clazzDesc ?: "",

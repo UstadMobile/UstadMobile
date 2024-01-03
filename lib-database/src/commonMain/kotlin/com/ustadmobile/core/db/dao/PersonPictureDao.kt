@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.Flow
 
 @DoorDao
 @Repository
-expect abstract class PersonPictureDao : BaseDao<PersonPicture> {
+expect abstract class PersonPictureDao : BaseDao<PersonPicture>, ImageDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun upsert(personPicture: PersonPicture)
@@ -59,7 +59,7 @@ expect abstract class PersonPictureDao : BaseDao<PersonPicture> {
                personPictureLct = :time
          WHERE personPictureUid = :uid      
     """)
-    abstract suspend fun updateUri(uid: Long, uri: String?, thumbnailUri: String?, time: Long)
+    abstract override suspend fun updateUri(uid: Long, uri: String?, thumbnailUri: String?, time: Long)
 
 
     @Query("""
