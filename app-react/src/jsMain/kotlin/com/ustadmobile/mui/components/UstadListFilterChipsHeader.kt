@@ -22,6 +22,9 @@ external interface UstadListFilterChipsHeaderProps: Props {
 
     var enabled: Boolean?
 
+    //Id which is applied to the box containing the chips
+    var id: String?
+
 }
 
 val UstadListFilterChipsHeader = FC<UstadListFilterChipsHeaderProps> { props ->
@@ -29,6 +32,7 @@ val UstadListFilterChipsHeader = FC<UstadListFilterChipsHeaderProps> { props ->
     val strings = useStringProvider()
 
     Box {
+        id = props.id
         props.filterOptions.forEach { filterOption ->
             Chip {
                 disabled = (props.enabled == false)

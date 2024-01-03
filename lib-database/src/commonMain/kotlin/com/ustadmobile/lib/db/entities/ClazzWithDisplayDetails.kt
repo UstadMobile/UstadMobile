@@ -15,6 +15,9 @@ class ClazzWithDisplayDetails() : Clazz(){
     @Embedded
     var terminology: CourseTerminology? = null
 
+    @Embedded
+    var coursePicture: CoursePicture? = null
+
     var numStudents: Int = 0
 
     var numTeachers: Int = 0
