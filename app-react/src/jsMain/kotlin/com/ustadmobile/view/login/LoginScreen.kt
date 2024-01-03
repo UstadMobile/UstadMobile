@@ -88,6 +88,11 @@ private val LoginComponent2 = FC<LoginProps> { props ->
                 error = props.uiState.passwordError != null
                 disabled = !props.uiState.fieldsEnabled
                 helperText = props.uiState.passwordError?.let { ReactNode(it) }
+                onKeyUp = {
+                    if(it.key == "Enter") {
+                        props.onClickLogin()
+                    }
+                }
             }
 
             Box{
