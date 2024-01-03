@@ -19,8 +19,9 @@ fun Route.CacheRoute(
     get("{...}") {
         try {
             val url = call.request.clientUrl()
-            val cacheResponse = cache.retrieve(requestBuilder(url))
-            call.respondCacheResponse(cacheResponse)
+            val request = requestBuilder(url)
+            val cacheResponse = cache.retrieve(request)
+            call.respondCacheResponse(cacheResponse, cacheRequest = request)
         }catch (e: Throwable) {
             Napier.e("CacheRoute: Exception serving ${call.request.clientUrl()}", e)
             call.respondText(

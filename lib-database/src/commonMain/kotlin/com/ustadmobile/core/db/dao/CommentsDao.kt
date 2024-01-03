@@ -6,6 +6,7 @@ import com.ustadmobile.core.db.dao.ClazzAssignmentDaoCommon.SELECT_SUBMITTER_UID
 import app.cash.paging.PagingSource
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.composites.CommentsAndName
+import com.ustadmobile.lib.db.composites.PersonAndPicture
 import com.ustadmobile.lib.db.entities.Comments
 import com.ustadmobile.lib.db.entities.CommentsWithPerson
 import com.ustadmobile.lib.db.entities.Person
@@ -137,10 +138,13 @@ expect abstract class CommentsDao : BaseDao<Comments>, OneToManyJoinDao<Comments
     @Query("""
         SELECT Comments.*,
                Person.firstNames AS firstNames, 
-               Person.lastName AS lastName
+               Person.lastName AS lastName,
+               PersonPicture.personPictureThumbnailUri AS pictureUri
           FROM Comments
                LEFT JOIN Person 
                     ON Person.personUid = Comments.commentsPersonUid
+               LEFT JOIN PersonPicture
+                    ON PersonPicture.personPictureUid = Comments.commentsPersonUid
          WHERE Comments.commentSubmitterUid = ($SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL)
            AND Comments.commentSubmitterUid != 0
            AND Comments.commentsEntityUid = :assignmentUid
@@ -153,8 +157,10 @@ expect abstract class CommentsDao : BaseDao<Comments>, OneToManyJoinDao<Comments
     ): PagingSource<Int, CommentsAndName>
 
     @Query("""
-        SELECT Person.*
+        SELECT Person.*, PersonPicture.*
           FROM Person
+               LEFT JOIN PersonPicture
+                         ON PersonPicture.personPictureUid = Person.personUid
          WHERE Person.personUid IN
                (SELECT DISTINCT Comments.commentsPersonUid
                   FROM Comments
@@ -166,7 +172,7 @@ expect abstract class CommentsDao : BaseDao<Comments>, OneToManyJoinDao<Comments
     abstract suspend fun findPrivateCommentsForUserByAssignmentUidPersons(
         accountPersonUid: Long,
         assignmentUid: Long
-    ): List<Person>
+    ): List<PersonAndPicture>
 
     @HttpAccessible(
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
@@ -179,10 +185,13 @@ expect abstract class CommentsDao : BaseDao<Comments>, OneToManyJoinDao<Comments
     @Query("""
         SELECT Comments.*,
                Person.firstNames AS firstNames, 
-               Person.lastName AS lastName
+               Person.lastName AS lastName,
+               PersonPicture.personPictureThumbnailUri AS pictureUri
           FROM Comments
                LEFT JOIN Person 
                     ON Person.personUid = Comments.commentsPersonUid
+               LEFT JOIN PersonPicture
+                    ON PersonPicture.personPictureUid = Comments.commentsPersonUid
          WHERE Comments.commentSubmitterUid = :submitterUid
            AND Comments.commentsEntityUid = :assignmentUid
            AND NOT Comments.commentsInActive
@@ -194,8 +203,10 @@ expect abstract class CommentsDao : BaseDao<Comments>, OneToManyJoinDao<Comments
     ): PagingSource<Int, CommentsAndName>
 
     @Query("""
-        SELECT Person.*
+        SELECT Person.*, PersonPicture.*
           FROM Person
+               LEFT JOIN PersonPicture
+                         ON PersonPicture.personPictureUid = Person.personUid 
          WHERE Person.personUid IN 
                (SELECT Comments.commentsPersonUid
                   FROM Comments
@@ -207,7 +218,7 @@ expect abstract class CommentsDao : BaseDao<Comments>, OneToManyJoinDao<Comments
     abstract fun findPrivateCommentsForSubmitterByAssignmentUidPersons(
         submitterUid: Long,
         assignmentUid: Long
-    ): List<Person>
+    ): List<PersonAndPicture>
 
     @HttpAccessible(
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
@@ -219,10 +230,13 @@ expect abstract class CommentsDao : BaseDao<Comments>, OneToManyJoinDao<Comments
     @Query("""
         SELECT Comments.*,
                Person.firstNames AS firstNames, 
-               Person.lastName AS lastName
+               Person.lastName AS lastName,
+               PersonPicture.personPictureThumbnailUri AS pictureUri
           FROM Comments
                LEFT JOIN Person 
                     ON Person.personUid = Comments.commentsPersonUid
+               LEFT JOIN PersonPicture
+                    ON PersonPicture.personPictureUid = Comments.commentsPersonUid
          WHERE Comments.commentsEntityUid = :assignmentUid
            AND Comments.commentSubmitterUid = 0
       ORDER BY Comments.commentsDateTimeAdded DESC     
@@ -232,8 +246,10 @@ expect abstract class CommentsDao : BaseDao<Comments>, OneToManyJoinDao<Comments
     ): PagingSource<Int, CommentsAndName>
 
     @Query("""
-        SELECT Person.*
+        SELECT Person.*, PersonPicture.*
           FROM Person
+               LEFT JOIN PersonPicture
+                         ON PersonPicture.personPictureUid = Person.personUid
          WHERE Person.personUid IN
                (SELECT DISTINCT Comments.commentsPersonUid
                   FROM Comments

@@ -9,6 +9,7 @@ import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
 import app.cash.paging.PagingSource
 import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
+import com.ustadmobile.lib.db.composites.PersonAndPicture
 
 @DoorDao
 @Repository
@@ -54,17 +55,20 @@ expect abstract class CourseAssignmentMarkDao : BaseDao<CourseAssignmentMark> {
     @Query("""
         SELECT CourseAssignmentMark.*,
                Person.firstNames AS markerFirstNames,
-               Person.lastName AS markerLastName
+               Person.lastName AS markerLastName,
+               PersonPicture.personPictureThumbnailUri AS markerPictureUri
           FROM CourseAssignmentMark
                LEFT JOIN Person
                          ON Person.personUid = CourseAssignmentMark.camMarkerPersonUid
+               LEFT JOIN PersonPicture
+                         ON PersonPicture.personPictureUid = CourseAssignmentMark.camMarkerPersonUid
          WHERE ($SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL) > 0
            AND CourseAssignmentMark.camAssignmentUid = :assignmentUid
            AND CourseAssignmentMark.camSubmitterUid = ($SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL)
       ORDER BY CourseAssignmentMark.camLct DESC    
     """)
     @QueryLiveTables(arrayOf("CourseAssignmentMark", "Person", "ClazzAssignment",
-        "CourseGroupMember", "ClazzEnrolment"))
+        "CourseGroupMember", "ClazzEnrolment", "PersonPicture"))
     abstract fun getAllMarksForUserAsFlow(
         accountPersonUid: Long,
         assignmentUid: Long
@@ -80,10 +84,13 @@ expect abstract class CourseAssignmentMarkDao : BaseDao<CourseAssignmentMark> {
     @Query("""
         SELECT CourseAssignmentMark.*,
                Person.firstNames AS markerFirstNames,
-               Person.lastName AS markerLastName
+               Person.lastName AS markerLastName,
+               PersonPicture.personPictureThumbnailUri AS markerPictureUri
           FROM CourseAssignmentMark
                LEFT JOIN Person
                          ON Person.personUid = CourseAssignmentMark.camMarkerPersonUid
+               LEFT JOIN PersonPicture
+                         ON PersonPicture.personPictureUid = CourseAssignmentMark.camMarkerPersonUid
          WHERE CourseAssignmentMark.camAssignmentUid = :assignmentUid
            AND CourseAssignmentMark.camSubmitterUid = :submitterUid
       ORDER BY CourseAssignmentMark.camLct DESC                             
@@ -96,6 +103,8 @@ expect abstract class CourseAssignmentMarkDao : BaseDao<CourseAssignmentMark> {
     @Query("""
         SELECT Person.*
           FROM Person
+               LEFT JOIN PersonPicture
+                         ON PersonPicture.personPictureUid = Person.personUid
          WHERE PersonUid IN
                (SELECT CourseAssignmentMark.camMarkerPersonUid
                   FROM CourseAssignmentMark
@@ -105,7 +114,7 @@ expect abstract class CourseAssignmentMarkDao : BaseDao<CourseAssignmentMark> {
     abstract suspend fun getAllMarksForSubmitterAsFlowMarkerPersons(
         submitterUid: Long,
         assignmentUid: Long,
-    ): List<Person>
+    ): List<PersonAndPicture>
 
     @Query("""
           WITH ScoreByMarker AS (

@@ -10,4 +10,5 @@ data class CourseAssignmentMarkAndMarkerName(
     var courseAssignmentMark: CourseAssignmentMark? = null,
     var markerFirstNames: String? = null,
     var markerLastName: String? = null,
+    var markerPictureUri: String? = null,
 )

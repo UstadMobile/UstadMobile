@@ -12,6 +12,7 @@ import com.ustadmobile.lib.db.entities.CourseGroupMember
 import com.ustadmobile.lib.db.entities.CourseGroupMemberAndName
 import com.ustadmobile.lib.db.entities.CourseGroupSet
 import com.ustadmobile.view.components.UstadFab
+import com.ustadmobile.view.components.UstadPersonAvatar
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
@@ -21,7 +22,6 @@ import web.cssom.Overflow
 import web.cssom.pct
 import web.cssom.px
 import js.core.jso
-import mui.icons.material.AccountCircle
 import mui.material.*
 import mui.material.styles.TypographyVariant
 import mui.system.sx
@@ -72,7 +72,10 @@ val CourseGroupSetDetailComponent = FC<CourseGroupSetDetailProps> { props ->
                     ) { member ->
                         ListItem.create {
                             ListItemIcon{
-                                AccountCircle()
+                                UstadPersonAvatar {
+                                    personName = member.name
+                                    pictureUri = member.pictureUri
+                                }
                             }
 
                             ListItemText{
@@ -110,6 +113,7 @@ val CourseGroupSetDetailScreen = FC<Props> {
     }
 }
 
+@Suppress("unused")
 val CourseGroupSetDetailScreenPreview = FC<Props> {
     CourseGroupSetDetailComponent{
         uiState = CourseGroupSetDetailUiState(

@@ -25,6 +25,8 @@ data class DiscussionPostDetailUiState2(
     },
     val replyText: String = "",
     val loggedInPersonUid: Long = 0L,
+    val loggedInPersonName: String = "",
+    val loggedInPersonPictureUri: String? = null,
     val fieldsEnabled: Boolean = true,
 ){
 
@@ -55,6 +57,8 @@ class DiscussionPostDetailViewModel(
             prev.copy(
                 discussionPosts = pagingSourceFactory,
                 loggedInPersonUid = activeUserPersonUid,
+                loggedInPersonName = accountManager.currentUserSession.person.fullName(),
+                loggedInPersonPictureUri = accountManager.currentUserSession.personPicture?.personPictureThumbnailUri,
                 replyText = savedStateHandle[STATE_KEY_REPLY_TEXT] ?: "",
             )
         }

@@ -20,21 +20,26 @@ import com.ustadmobile.libuicompose.util.ext.rgbaColor
 
 /**
  * This is a placeholder that will be filled in when attachments are re-enabled.
+ *
+ * @param colorName normally the color would be generated based on the name of the person (of which
+ *        this shows the first initial). If for some reason the consumer wants to use something else,
+ *        that can be set.
  */
 @Composable
 fun UstadPersonAvatar(
     @Suppress("UNUSED_PARAMETER") personUid: Long = 0,
     pictureUri: String? = null,
     personName: String? = null,
+    colorName: String? = personName,
     modifier: Modifier = Modifier.size(40.dp),
 ) {
     if(pictureUri == null) {
-       if(personName != null) {
+       if(personName != null && colorName != null) {
            Box(
                modifier = modifier,
                contentAlignment = Alignment.Center
            ) {
-               val bgColor = avatarColorForName(personName).rgbaColor()
+               val bgColor = avatarColorForName(colorName).rgbaColor()
                Canvas(modifier = Modifier.fillMaxSize()) {
                    drawCircle(SolidColor(bgColor))
                }

@@ -183,6 +183,8 @@ val ClazzAssignmentSubmitterDetailComponent = FC<ClazzAssignmentSubmitterDetailP
                     label = ReactNode(strings[MR.strings.add_private_comment])
                     value = props.uiState.newPrivateCommentText
                     activeUserPersonUid = props.uiState.activeUserPersonUid
+                    activeUserPersonName = props.uiState.activeUserPersonName
+                    activeUserPictureUri = props.uiState.activeUserPictureUri
                     textFieldId = "private_comment_textfield"
                     onClickSubmit = props.onClickSubmitPrivateComment
                 }

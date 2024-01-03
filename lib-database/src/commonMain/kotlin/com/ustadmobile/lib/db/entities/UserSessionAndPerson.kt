@@ -2,12 +2,14 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Embedded
 
-class UserSessionAndPerson {
+data class UserSessionAndPerson(
+    @Embedded
+    var person: Person? = null,
 
     @Embedded
-    var person: Person? = null
+    var personPicture: PersonPicture? = null,
 
     @Embedded
-    var userSession: UserSession? = null
+    var userSession: UserSession? = null,
 
-}
+)

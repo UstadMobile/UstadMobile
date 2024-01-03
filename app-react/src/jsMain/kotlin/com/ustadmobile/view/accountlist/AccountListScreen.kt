@@ -12,10 +12,10 @@ import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UserSession
 import com.ustadmobile.mui.components.UstadAddListItem
 import com.ustadmobile.mui.components.UstadStandardContainer
+import com.ustadmobile.view.components.UstadPersonAvatar
 import web.cssom.px
 //WARNING: DO NOT Replace with import mui.icons.material.[*] - Leads to severe IDE performance issues 10/Apr/23 https://youtrack.jetbrains.com/issue/KT-57897/Intellisense-and-code-analysis-is-extremely-slow-and-unusable-on-Kotlin-JS
 import mui.icons.material.Delete as DeleteIcon
-import mui.icons.material.AccountCircle as AccountCircleIcon
 import mui.icons.material.Person2 as Person2Icon
 import mui.icons.material.LinkOutlined as LinkOutlinedIcon
 import mui.material.*
@@ -50,19 +50,10 @@ external interface AccountListItemProps: Props {
 }
 
 private val AccountListItemContent = FC<AccountListItemContentProps> { props ->
-
-    ListItemIcon{
-        Icon{
-            sx{
-                width = 40.px
-                height = 40.px
-            }
-            AccountCircleIcon {
-                sx{
-                    width = 40.px
-                    height = 40.px
-                }
-            }
+    ListItemIcon {
+        UstadPersonAvatar {
+            personName = props.account.person.fullName()
+            pictureUri = props.account.personPicture?.personPictureThumbnailUri
         }
     }
 
@@ -162,7 +153,7 @@ val AccountListItem = FC<AccountListItemProps> { props ->
         }
     }else{
         ListItem{
-            AccountListItemContent{
+            AccountListItemContent {
                 account = props.account
                 showAccountEndpoint = props.showAccountEndpoint
             }
@@ -272,6 +263,7 @@ val AccountListScreen = FC<Props> {
     }
 }
 
+@Suppress("unused")
 val AccountListScreenPreview = FC<Props> {
     AccountListComponent2{
         uiState = AccountListUiState(

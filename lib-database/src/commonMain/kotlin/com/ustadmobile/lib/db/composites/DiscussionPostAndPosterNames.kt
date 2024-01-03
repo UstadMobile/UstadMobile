@@ -10,4 +10,5 @@ data class DiscussionPostAndPosterNames(
     var discussionPost: DiscussionPost? = null,
     var firstNames: String? = null,
     var lastName: String? = null,
+    var personPictureUri: String? = null,
 )

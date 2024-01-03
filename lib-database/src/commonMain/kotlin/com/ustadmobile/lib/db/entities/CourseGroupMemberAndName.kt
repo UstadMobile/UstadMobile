@@ -10,4 +10,5 @@ data class CourseGroupMemberAndName(
     var name: String? = null,
     var personUid: Long = 0L,
     var enrolmentIsActive: Boolean = false,
+    var pictureUri: String? = null,
 )
