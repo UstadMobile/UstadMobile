@@ -339,7 +339,8 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
         SELECT Clazz.*, 
                HolidayCalendar.*, 
                School.*,
-               CourseTerminology.*
+               CourseTerminology.*,
+               CoursePicture.*
          FROM Clazz 
               LEFT JOIN HolidayCalendar 
               ON ((clazz.clazzHolidayUMCalendarUid != 0 
@@ -353,6 +354,9 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
               
               LEFT JOIN CourseTerminology
               ON CourseTerminology.ctUid = Clazz.clazzTerminologyUid
+              
+              LEFT JOIN CoursePicture
+                        ON CoursePicture.coursePictureUid = 0
                 
         WHERE :filterUid = 0 
            OR Clazz.clazzUid = :filterUid
