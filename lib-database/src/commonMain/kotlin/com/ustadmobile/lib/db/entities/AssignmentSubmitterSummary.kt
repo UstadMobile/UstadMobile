@@ -8,6 +8,8 @@ data class AssignmentSubmitterSummary(
 
     var name: String? = null,
 
+    var pictureUri: String? = null,
+
     var latestPrivateComment: String? = null,
 
     var fileSubmissionStatus: Int = 0,

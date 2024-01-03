@@ -14,6 +14,8 @@ external interface AssignmentCommentTextFieldListItemProps: Props {
     var label: ReactNode
     var value: String
     var activeUserPersonUid: Long
+    var activeUserPersonName: String
+    var activeUserPictureUri: String?
     var onClickSubmit: () -> Unit
     var textFieldId: String
 }
@@ -22,7 +24,8 @@ val AssignmentCommentTextFieldListItem = FC<AssignmentCommentTextFieldListItemPr
     ListItem {
         ListItemIcon {
             UstadPersonAvatar {
-                personUid = props.activeUserPersonUid
+                personName = props.activeUserPersonName
+                pictureUri = props.activeUserPictureUri
             }
         }
 

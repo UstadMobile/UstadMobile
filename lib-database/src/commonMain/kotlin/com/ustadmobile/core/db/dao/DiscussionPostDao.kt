@@ -9,6 +9,7 @@ import app.cash.paging.PagingSource
 import kotlinx.coroutines.flow.Flow
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.composites.DiscussionPostAndPosterNames
+import com.ustadmobile.lib.db.composites.PersonAndPicture
 import com.ustadmobile.lib.db.entities.*
 
 @DoorDao
@@ -30,6 +31,7 @@ expect abstract class DiscussionPostDao: BaseDao<DiscussionPost>{
         SELECT DiscussionPost.*,
                Person.firstNames as authorPersonFirstNames,
                Person.lastName as authorPersonLastName,
+               PersonPicture.personPictureThumbnailUri AS authorPictureUri,
                MostRecentReply.discussionPostMessage AS postLatestMessage,
                COALESCE(MostRecentReply.discussionPostStartDate, 0) AS postLatestMessageTimestamp,
                (SELECT COUNT(*)
@@ -47,6 +49,8 @@ expect abstract class DiscussionPostDao: BaseDao<DiscussionPost>{
                             )
                LEFT JOIN Person 
                          ON Person.personUid = DiscussionPost.discussionPostStartedPersonUid
+               LEFT JOIN PersonPicture
+                         ON PersonPicture.personPictureUid = DiscussionPost.discussionPostStartedPersonUid
          WHERE DiscussionPost.discussionPostCourseBlockUid = :courseBlockUid
            AND DiscussionPost.discussionPostReplyToPostUid = 0         
       ORDER BY DiscussionPost.discussionPostStartDate DESC          
@@ -58,6 +62,8 @@ expect abstract class DiscussionPostDao: BaseDao<DiscussionPost>{
     @Query("""
         SELECT Person.*
           FROM Person
+               LEFT JOIN PersonPicture
+                         ON PersonPicture.personPictureUid = Person.personUid
          WHERE Person.personUid IN
                (SELECT DISTINCT DiscussionPost.discussionPostStartedPersonUid
                   FROM DiscussionPost
@@ -66,7 +72,7 @@ expect abstract class DiscussionPostDao: BaseDao<DiscussionPost>{
     """)
     abstract suspend fun getTopLevelPostsByCourseBlockUidPersons(
         courseBlockUid: Long
-    ): List<Person>
+    ): List<PersonAndPicture>
 
     @Query("""
         SELECT MostRecentReply.*
@@ -191,10 +197,13 @@ expect abstract class DiscussionPostDao: BaseDao<DiscussionPost>{
     @Query("""
         SELECT DiscussionPost.*,
                Person.firstNames,
-               Person.lastName
+               Person.lastName,
+               PersonPicture.personPictureThumbnailUri AS personPictureUri
           FROM DiscussionPost
                LEFT JOIN Person
                          ON Person.personUid = DiscussionPost.discussionPostStartedPersonUid
+               LEFT JOIN PersonPicture
+                         ON PersonPicture.personPictureUid = DiscussionPost.discussionPostStartedPersonUid
          WHERE DiscussionPost.discussionPostUid = :postUid
             OR DiscussionPost.discussionPostReplyToPostUid= :postUid
             -- Always get the starting post first, followed by replies
@@ -210,6 +219,8 @@ expect abstract class DiscussionPostDao: BaseDao<DiscussionPost>{
     @Query("""
         SELECT Person.*
           FROM Person
+               LEFT JOIN PersonPicture
+                         ON PersonPicture.personPictureUid = Person.personUid
          WHERE Person.personUid IN
                (SELECT DISTINCT DiscussionPost.discussionPostStartedPersonUid
                   FROM DiscussionPost
@@ -218,7 +229,7 @@ expect abstract class DiscussionPostDao: BaseDao<DiscussionPost>{
     """)
     abstract suspend fun findByPostIdWithAllRepliesPersons(
         postUid: Long
-    ): List<Person>
+    ): List<PersonAndPicture>
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

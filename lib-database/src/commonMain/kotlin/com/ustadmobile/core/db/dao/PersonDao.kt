@@ -6,6 +6,7 @@ import app.cash.paging.PagingSource
 import kotlinx.coroutines.flow.Flow
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.composites.PersonAndListDisplayDetails
+import com.ustadmobile.lib.db.composites.PersonAndPicture
 import com.ustadmobile.lib.db.composites.PersonNames
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.Person.Companion.FROM_PERSON_TO_SCOPEDGRANT_JOIN_ON_CLAUSE
@@ -140,6 +141,27 @@ expect abstract class PersonDao : BaseDao<Person> {
     @Query("SELECT Person.*, null as newPassword, null as currentPassword,null as confirmedPassword" +
             " FROM PERSON WHERE Person.personUid = :uid")
     abstract suspend fun findPersonAccountByUid(uid: Long): PersonWithAccount?
+
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
+    )
+    @Query("""
+        SELECT Person.*, PersonPicture.*
+          FROM Person
+               LEFT JOIN PersonPicture
+                    ON PersonPicture.personPictureUid = Person.personUid
+         WHERE Person.personUid = :uid           
+    """)
+    abstract suspend fun findByUidWithPicture(uid: Long): PersonAndPicture?
+
+    @Query("""
+        SELECT Person.*, PersonPicture.*
+          FROM Person
+               LEFT JOIN PersonPicture
+                    ON PersonPicture.personPictureUid = Person.personUid
+         WHERE Person.personUid = :uid           
+    """)
+    abstract fun findByUidWithPictureAsFlow(uid: Long): Flow<PersonAndPicture?>
 
     @Query("SELECT * From Person WHERE personUid = :uid")
     abstract fun findByUidLive(uid: Long): Flow<Person?>

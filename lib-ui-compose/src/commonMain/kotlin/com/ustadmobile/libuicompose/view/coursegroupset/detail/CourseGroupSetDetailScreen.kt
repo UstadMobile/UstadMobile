@@ -5,12 +5,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
 import androidx.compose.material.ListItem
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -20,6 +17,7 @@ import com.ustadmobile.core.viewmodel.coursegroupset.detail.CourseGroupSetDetail
 import com.ustadmobile.core.viewmodel.coursegroupset.detail.CourseGroupSetDetailViewModel
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
+import com.ustadmobile.libuicompose.components.UstadPersonAvatar
 
 @Composable
 fun CourseGroupSetDetailScreen(
@@ -64,9 +62,9 @@ fun CourseGroupSetDetailScreen(
                             Text(text = "${it.name}")
                         },
                         icon = {
-                            Icon(
-                                imageVector = Icons.Filled.AccountCircle,
-                                contentDescription = null
+                            UstadPersonAvatar(
+                                pictureUri = it.pictureUri,
+                                personName = it.name,
                             )
                         }
                     )

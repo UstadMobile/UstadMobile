@@ -74,7 +74,8 @@ fun ClazzDetailScreen(
         navController = navController,
         onSetAppUiState = onSetAppUiState,
         navResultReturner = navResultReturner,
-        onShowSnackBar = onShowSnackbar
+        onShowSnackBar = onShowSnackbar,
+        scrollable = true,
     ) { tabItem ->
         when(tabItem.viewName) {
             ClazzDetailOverviewViewModel.DEST_NAME -> {

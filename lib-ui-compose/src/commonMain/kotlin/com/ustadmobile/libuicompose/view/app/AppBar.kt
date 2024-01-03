@@ -1,8 +1,8 @@
 package com.ustadmobile.libuicompose.view.app
 
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
@@ -30,12 +30,17 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
 import com.ustadmobile.core.viewmodel.settings.SettingsViewModel
+import com.ustadmobile.libuicompose.components.UstadPersonAvatar
 import dev.icerock.moko.resources.compose.stringResource
 import moe.tlaster.precompose.navigation.Navigator
+import org.kodein.di.compose.localDI
+import org.kodein.di.direct
+import org.kodein.di.instance
 
 private val ROOT_LOCATIONS = UstadViewModel.ROOT_DESTINATIONS.map {
     "/$it"
@@ -51,6 +56,10 @@ fun UstadAppBar(
     val title = appUiState.title ?: stringResource(MR.strings.app_name)
     val canGoBack by navigator.canGoBack.collectAsState(false)
     val currentLocation by navigator.currentEntry.collectAsState(null)
+    val di = localDI()
+    val accountManager: UstadAccountManager = di.direct.instance()
+    val currentSession by accountManager.currentUserSessionFlow
+        .collectAsState(null)
 
     var searchActive by remember {
         mutableStateOf(false)
@@ -162,13 +171,14 @@ fun UstadAppBar(
                 }
             }else if(appUiState.userAccountIconVisible) {
                 IconButton(
+                    modifier = Modifier.padding(8.dp).testTag("header_avatar"),
                     onClick = {
                         navigator.navigate("/${AccountListViewModel.DEST_NAME}")
                     }
                 ) {
-                    Icon(
-                        imageVector = Icons.Filled.AccountCircle,
-                        contentDescription = stringResource(MR.strings.account)
+                    UstadPersonAvatar(
+                        personName = currentSession?.person?.fullName(),
+                        pictureUri = currentSession?.personPicture?.personPictureThumbnailUri,
                     )
                 }
             }

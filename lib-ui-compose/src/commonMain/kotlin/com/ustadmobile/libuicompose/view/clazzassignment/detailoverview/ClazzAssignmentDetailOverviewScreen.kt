@@ -358,6 +358,8 @@ fun ClazzAssignmentDetailOverviewScreen(
                     commentLabel = stringResource(MR.strings.add_class_comment),
                     enabled = uiState.fieldsEnabled,
                     currentUserPersonUid = uiState.activeUserPersonUid,
+                    currentUserPersonName = uiState.activeUserPersonName,
+                    currentUserPictureUri = uiState.activeUserPictureUri,
                     onSubmitComment = onClickSubmitCourseComment,
                     onCommentChanged = onChangeCourseComment,
                 )
@@ -389,6 +391,8 @@ fun ClazzAssignmentDetailOverviewScreen(
                     commentLabel = stringResource(MR.strings.add_private_comment),
                     enabled = uiState.fieldsEnabled,
                     currentUserPersonUid = uiState.activeUserPersonUid,
+                    currentUserPersonName = uiState.activeUserPersonName,
+                    currentUserPictureUri = uiState.activeUserPictureUri,
                     onSubmitComment = onClickSubmitPrivateComment,
                     onCommentChanged = onChangePrivateComment
                 )

@@ -2,17 +2,15 @@ package com.ustadmobile.view.clazzassignment
 
 import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.lib.db.composites.CommentsAndName
-import web.cssom.px
 import kotlinx.datetime.TimeZone
-import mui.icons.material.Person as PersonIcon
 import mui.material.*
-import mui.system.sx
 import react.FC
 import react.Props
 import react.ReactNode
 import react.create
 import com.ustadmobile.lib.db.entities.Comments
 import com.ustadmobile.mui.components.UstadLinkify
+import com.ustadmobile.view.components.UstadPersonAvatar
 
 
 external interface UstadCommentListItemProps : Props {
@@ -30,11 +28,9 @@ val UstadCommentListItem = FC<UstadCommentListItemProps> { props ->
 
     ListItem {
         ListItemIcon {
-            + PersonIcon.create {
-                sx {
-                    width = 40.px
-                    height = 40.px
-                }
+            UstadPersonAvatar {
+                personName = "${props.commentsAndName?.firstNames ?: ""} ${props.commentsAndName?.lastName ?: ""}"
+                pictureUri = props.commentsAndName?.pictureUri
             }
         }
 

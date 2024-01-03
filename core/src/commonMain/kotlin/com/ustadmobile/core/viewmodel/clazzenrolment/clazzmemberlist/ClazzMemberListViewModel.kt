@@ -25,7 +25,7 @@ import app.cash.paging.PagingSource
 import com.ustadmobile.core.viewmodel.clazz.parseAndUpdateTerminologyStringsIfNeeded
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
-import com.ustadmobile.lib.db.entities.PersonWithClazzEnrolmentDetails
+import com.ustadmobile.lib.db.composites.PersonAndClazzMemberListDetails
 import com.ustadmobile.lib.db.entities.Role
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -35,11 +35,11 @@ import org.kodein.di.on
 
 data class ClazzMemberListUiState(
 
-    val studentList: ListPagingSourceFactory<PersonWithClazzEnrolmentDetails> = { EmptyPagingSource() },
+    val studentList: ListPagingSourceFactory<PersonAndClazzMemberListDetails> = { EmptyPagingSource() },
 
-    val teacherList: ListPagingSourceFactory<PersonWithClazzEnrolmentDetails> = { EmptyPagingSource() },
+    val teacherList: ListPagingSourceFactory<PersonAndClazzMemberListDetails> = { EmptyPagingSource() },
 
-    val pendingStudentList: ListPagingSourceFactory<PersonWithClazzEnrolmentDetails> = {
+    val pendingStudentList: ListPagingSourceFactory<PersonAndClazzMemberListDetails> = {
         EmptyPagingSource()
     },
 
@@ -84,15 +84,15 @@ class ClazzMemberListViewModel(
     private val clazzUid = savedStateHandle[UstadView.ARG_CLAZZUID]?.toLong()
         ?: throw IllegalArgumentException("No clazzuid")
 
-    private var lastTeacherListPagingSource: PagingSource<Int, PersonWithClazzEnrolmentDetails>? = null
+    private var lastTeacherListPagingSource: PagingSource<Int, PersonAndClazzMemberListDetails>? = null
 
-    private var lastStudentListPagingsource: PagingSource<Int, PersonWithClazzEnrolmentDetails>? = null
+    private var lastStudentListPagingsource: PagingSource<Int, PersonAndClazzMemberListDetails>? = null
 
-    private var lastPendingStudentListPagingSource: PagingSource<Int, PersonWithClazzEnrolmentDetails>? = null
+    private var lastPendingStudentListPagingSource: PagingSource<Int, PersonAndClazzMemberListDetails>? = null
 
     private fun getMembersAsPagingSource(
         roleId: Int
-    ) : PagingSource<Int, PersonWithClazzEnrolmentDetails>  {
+    ) : PagingSource<Int, PersonAndClazzMemberListDetails>  {
         return activeRepo.clazzEnrolmentDao.findByClazzUidAndRole(
             clazzUid = clazzUid,
             roleId = roleId,
@@ -104,19 +104,19 @@ class ClazzMemberListViewModel(
         )
     }
 
-    private val teacherListPagingSource: ListPagingSourceFactory<PersonWithClazzEnrolmentDetails> = {
+    private val teacherListPagingSource: ListPagingSourceFactory<PersonAndClazzMemberListDetails> = {
         getMembersAsPagingSource(ClazzEnrolment.ROLE_TEACHER).also {
             lastTeacherListPagingSource = it
         }
     }
 
-    private val studentListPagingSource: ListPagingSourceFactory<PersonWithClazzEnrolmentDetails> = {
+    private val studentListPagingSource: ListPagingSourceFactory<PersonAndClazzMemberListDetails> = {
         getMembersAsPagingSource(ClazzEnrolment.ROLE_STUDENT).also {
             lastStudentListPagingsource = it
         }
     }
 
-    private val pendingStudentListPagingSource: ListPagingSourceFactory<PersonWithClazzEnrolmentDetails> = {
+    private val pendingStudentListPagingSource: ListPagingSourceFactory<PersonAndClazzMemberListDetails> = {
         getMembersAsPagingSource(ClazzEnrolment.ROLE_STUDENT_PENDING).also {
             lastPendingStudentListPagingSource = it
         }
@@ -207,12 +207,12 @@ class ClazzMemberListViewModel(
     }
 
     fun onClickRespondToPendingEnrolment(
-        enrolmentDetails: PersonWithClazzEnrolmentDetails,
+        enrolmentDetails: PersonAndClazzMemberListDetails,
         approved: Boolean
     ) {
         viewModelScope.launch {
             approveOrDeclinePendingEnrolmentUseCase(
-                personUid = enrolmentDetails.personUid,
+                personUid = enrolmentDetails.person?.personUid ?: 0,
                 clazzUid = clazzUid,
                 approved = approved
             )
@@ -240,12 +240,12 @@ class ClazzMemberListViewModel(
     }
 
     fun onClickEntry(
-        entry: PersonWithClazzEnrolmentDetails
+        entry: PersonAndClazzMemberListDetails
     ) {
         navController.navigate(
             viewName = ClazzEnrolmentListViewModel.DEST_NAME,
             args = mapOf(
-                UstadView.ARG_PERSON_UID to entry.personUid.toString(),
+                UstadView.ARG_PERSON_UID to (entry.person?.personUid ?: 0).toString(),
                 UstadView.ARG_CLAZZUID to clazzUid.toString(),
             )
         )
@@ -260,7 +260,7 @@ class ClazzMemberListViewModel(
 
     companion object {
 
-        val DEST_NAME = "CourseMembers"
+        const val DEST_NAME = "CourseMembers"
 
     }
 }

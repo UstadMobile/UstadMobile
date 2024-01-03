@@ -122,18 +122,21 @@ fun CourseDiscussionDetailDiscussionListItem(
         html.htmlToPlainText()
     }
 
+    val authorName = "${discussionPostItem?.authorPersonFirstNames} ${discussionPostItem?.authorPersonLastName}"
+
     ListItem(
         modifier = Modifier.clickable {
             discussionPostItem?.also(onClickPost)
         },
         leadingContent = {
             UstadPersonAvatar(
-                personUid = discussionPostItem?.discussionPostStartedPersonUid ?: 0L
+                personName = authorName,
+                pictureUri = discussionPostItem?.authorPictureUri
             )
         },
         headlineContent = {
             Text(
-                "${discussionPostItem?.authorPersonFirstNames} ${discussionPostItem?.authorPersonLastName}",
+                text = authorName,
                 maxLines = 1,
             )
         },

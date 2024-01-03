@@ -20,17 +20,19 @@ fun DiscussionPostListItem(
         timeZoneId = TimeZone.getDefault().id,
         joinDateAndTime = { date, time -> "$date\n$time" }
     )
+    val posterName = "${discussionPost?.firstNames ?: ""} ${discussionPost?.lastName ?: ""}"
 
     ListItem(
         modifier = modifier,
         leadingContent = {
             UstadPersonAvatar(
-                personUid = discussionPost?.discussionPost?.discussionPostStartedPersonUid ?: 0L
+                personName = posterName,
+                pictureUri = discussionPost?.personPictureUri
             )
         },
         headlineContent = {
             Text(
-                text = (discussionPost?.firstNames ?: "") + " " + (discussionPost?.lastName ?: "")
+                text = posterName
             )
         },
         supportingContent = {

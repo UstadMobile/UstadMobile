@@ -81,6 +81,7 @@ class CourseGroupSetEditViewModel(
                                         name = it.name
                                         enrolmentIsActive = it.enrolmentIsActive
                                         personUid = it.personUid
+                                        pictureUri = it.pictureUri
                                         cgm = CourseGroupMember().apply {
                                             cgmUid = activeDb.doorPrimaryKeyManager.nextIdAsync(CourseGroupMember.TABLE_ID)
                                             cgmSetUid = courseGroupSetUid

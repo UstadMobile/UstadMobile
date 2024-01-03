@@ -23,6 +23,7 @@ val XapiContentComponent = FC<XapiContentProps> { props ->
 
         UstadFullSizeIframe {
             src = iframeSrc
+            id = "xapi_content_frame"
         }
     }
 

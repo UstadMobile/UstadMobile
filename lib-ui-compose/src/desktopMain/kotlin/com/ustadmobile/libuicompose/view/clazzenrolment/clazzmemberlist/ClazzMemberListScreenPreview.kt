@@ -2,10 +2,8 @@ package com.ustadmobile.libuicompose.view.clazzenrolment.clazzmemberlist
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.runtime.Composable
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
 import com.ustadmobile.core.viewmodel.clazzenrolment.clazzmemberlist.ClazzMemberListUiState
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.composites.PersonAndClazzMemberListDetails
 
 @Composable
 @Preview
@@ -53,7 +51,7 @@ fun ClazzMemberListScreenPreview() {
     ClazzMemberListScreen(
         uiState = uiStateVal,
         onClickPendingRequest = {
-                enrolment: PersonWithClazzEnrolmentDetails,
+                enrolment: PersonAndClazzMemberListDetails,
                 approved: Boolean ->  {}
         }
     )

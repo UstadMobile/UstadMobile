@@ -362,7 +362,8 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                         onChange = props.onChangeCourseComment
                         label = ReactNode(strings[MR.strings.add_class_comment])
                         value = props.uiState.newCourseCommentText
-                        activeUserPersonUid = props.uiState.activeUserPersonUid
+                        activeUserPersonName = props.uiState.activeUserPersonName
+                        activeUserPictureUri = props.uiState.activeUserPictureUri
                         textFieldId = "course_comment_textfield"
                         onClickSubmit = props.onClickSubmitCourseComment
                     }
@@ -394,7 +395,8 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                         onChange = props.onChangePrivateComment
                         label = ReactNode(strings[MR.strings.add_private_comment])
                         value = props.uiState.newPrivateCommentText
-                        activeUserPersonUid = props.uiState.activeUserPersonUid
+                        activeUserPersonName = props.uiState.activeUserPersonName
+                        activeUserPictureUri = props.uiState.activeUserPictureUri
                         textFieldId = "private_comment_textfield"
                         onClickSubmit = props.onClickSubmitPrivateComment
                     }

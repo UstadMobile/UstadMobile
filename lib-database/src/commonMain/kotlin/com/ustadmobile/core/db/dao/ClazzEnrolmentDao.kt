@@ -16,6 +16,7 @@ import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_LAST_NAME_DESC
 import com.ustadmobile.door.annotation.*
 import app.cash.paging.PagingSource
 import com.ustadmobile.lib.db.composites.CourseNameAndPersonName
+import com.ustadmobile.lib.db.composites.PersonAndClazzMemberListDetails
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_ATTENDED
 import kotlinx.coroutines.flow.Flow
@@ -194,7 +195,7 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
      */
     @Query("""
         SELECT * 
-          FROM (SELECT Person.*, 
+          FROM (SELECT Person.*, PersonPicture.*,
                        (SELECT MIN(ClazzEnrolment.clazzEnrolmentDateJoined) 
                           FROM ClazzEnrolment 
                          WHERE Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid) AS earliestJoinDate, 
@@ -212,6 +213,8 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
                        ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1} 
                                 ${Role.PERMISSION_PERSON_SELECT} 
                                 ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2} 
+                       LEFT JOIN PersonPicture
+                                 ON PersonPicture.personPictureUid = Person.personUid 
         
                  WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid
                    AND PersonGroupMember.groupMemberActive 
@@ -248,7 +251,7 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
                 ELSE 0
             END DESC
     """)
-    @QueryLiveTables(value = ["Clazz", "Person", "ClazzEnrolment", "PersonGroupMember", "ScopedGrant"])
+    @QueryLiveTables(value = ["Clazz", "Person", "ClazzEnrolment", "PersonGroupMember", "ScopedGrant", "PersonPicture"])
     @HttpAccessible(
         pullQueriesToReplicate = arrayOf(
             HttpServerFunctionCall("findByClazzUidAndRole"),
@@ -269,7 +272,7 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         filter: Int,
         accountPersonUid: Long,
         currentTime: Long
-    ): PagingSource<Int, PersonWithClazzEnrolmentDetails>
+    ): PagingSource<Int, PersonAndClazzMemberListDetails>
 
     @Query("""
         SELECT ClazzEnrolment.*

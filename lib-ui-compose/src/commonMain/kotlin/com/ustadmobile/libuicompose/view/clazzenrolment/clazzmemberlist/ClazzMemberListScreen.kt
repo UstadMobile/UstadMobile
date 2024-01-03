@@ -23,9 +23,11 @@ import com.ustadmobile.core.viewmodel.clazzenrolment.clazzmemberlist.ClazzMember
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.util.SortOrderOption
+import com.ustadmobile.lib.db.composites.PersonAndClazzMemberListDetails
 import com.ustadmobile.libuicompose.components.UstadAddListItem
 import com.ustadmobile.libuicompose.components.UstadListFilterChipsHeader
 import com.ustadmobile.libuicompose.components.UstadListSortHeader
+import com.ustadmobile.libuicompose.components.UstadPersonAvatar
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import dev.icerock.moko.resources.compose.stringResource
@@ -50,10 +52,10 @@ fun ClazzMemberListScreen(
 @Composable
 fun ClazzMemberListScreen(
     uiState: ClazzMemberListUiState = ClazzMemberListUiState(),
-    onClickEntry: (PersonWithClazzEnrolmentDetails) -> Unit = {},
+    onClickEntry: (PersonAndClazzMemberListDetails) -> Unit = {},
     onClickAddNewMember: (role: Int) -> Unit = {},
     onClickPendingRequest: (
-        enrolment: PersonWithClazzEnrolmentDetails,
+        enrolment: PersonAndClazzMemberListDetails,
         approved: Boolean
     ) -> Unit = {_, _ -> },
     onSortOrderChanged: (SortOrderOption) -> Unit = { },
@@ -132,19 +134,19 @@ fun ClazzMemberListScreen(
 
         ustadPagedItems(
             pagingItems = teacherListItems,
-            key = { Pair(1, it.personUid) }
-        ){ person ->
+            key = { Pair(1, it.person?.personUid ?: -1) }
+        ){ memberDetails ->
             ListItem (
                 modifier = Modifier.clickable {
-                    person?.also(onClickEntry)
+                    memberDetails?.also(onClickEntry)
                 },
                 text = {
-                    Text(text = "${person?.firstNames} ${person?.lastName}")
+                    Text(text = memberDetails?.person?.fullName() ?: "")
                 },
                 icon = {
-                    Icon(
-                        imageVector = Icons.Filled.AccountCircle,
-                        contentDescription = null
+                    UstadPersonAvatar(
+                        pictureUri = memberDetails?.personPicture?.personPictureThumbnailUri,
+                        personName = memberDetails?.person?.fullName(),
                     )
                 }
             )
@@ -175,10 +177,10 @@ fun ClazzMemberListScreen(
 
         ustadPagedItems(
             pagingItems = studentListItems,
-            key = { Pair(2, it.personUid) }
+            key = { Pair(2, it.person?.personUid ?: -1) }
         ){ personItem ->
             StudentListItem(
-                person = personItem,
+                student = personItem,
                 onClick = onClickEntry
             )
         }
@@ -193,10 +195,10 @@ fun ClazzMemberListScreen(
         
         ustadPagedItems(
             pagingItems = pendingStudentListItems,
-            key = { Pair(3, it.personUid) }
+            key = { Pair(3, it.person?.personUid ?: -1) }
         ){ pendingStudent ->
             PendingStudentListItem(
-                person = pendingStudent,
+                member = pendingStudent,
                 onClick = onClickPendingRequest
             )
         }
@@ -206,20 +208,20 @@ fun ClazzMemberListScreen(
  @OptIn(ExperimentalMaterialApi::class)
  @Composable
  fun StudentListItem(
-     person: PersonWithClazzEnrolmentDetails?,
-     onClick: (PersonWithClazzEnrolmentDetails) -> Unit,
+     student: PersonAndClazzMemberListDetails?,
+     onClick: (PersonAndClazzMemberListDetails) -> Unit,
  ){
      ListItem (
          modifier = Modifier.clickable {
-             person?.also(onClick)
+             student?.also(onClick)
          },
          text = {
-             Text(text = "${person?.firstNames} ${person?.lastName}")
+             Text(text = student?.person?.fullName() ?: "")
          },
          icon = {
-             Icon(
-                 imageVector = Icons.Filled.AccountCircle,
-                 contentDescription = null
+             UstadPersonAvatar(
+                 pictureUri = student?.personPicture?.personPictureThumbnailUri,
+                 personName = student?.person?.fullName(),
              )
          }
      )
@@ -228,24 +230,24 @@ fun ClazzMemberListScreen(
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun PendingStudentListItem(
-    person: PersonWithClazzEnrolmentDetails?,
-    onClick: (enrolment: PersonWithClazzEnrolmentDetails, approved: Boolean) -> Unit
+    member: PersonAndClazzMemberListDetails?,
+    onClick: (enrolment: PersonAndClazzMemberListDetails, approved: Boolean) -> Unit
 ){
     ListItem (
         text = {
-            Text(text = "${person?.firstNames} ${person?.lastName}")
+            Text(text = member?.person?.fullName() ?: "")
         },
         icon = {
-            Icon(
-                imageVector = Icons.Filled.AccountCircle,
-                contentDescription = null
+            UstadPersonAvatar(
+                pictureUri = member?.personPicture?.personPictureThumbnailUri,
+                personName = member?.person?.fullName(),
             )
         },
         trailing = {
             Row {
                 IconButton(
                     onClick = {
-                        person?.also{ onClick(it, true) }
+                        member?.also{ onClick(it, true) }
                     }
                 ) {
                     Icon(
@@ -255,7 +257,7 @@ fun PendingStudentListItem(
                 }
                 IconButton(
                     onClick = {
-                        person?.also { onClick(it, false) }
+                        member?.also { onClick(it, false) }
                     }
                 ) {
                     Icon(

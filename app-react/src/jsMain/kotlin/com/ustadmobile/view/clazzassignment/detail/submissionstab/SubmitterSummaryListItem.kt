@@ -3,11 +3,13 @@ package com.ustadmobile.view.clazzassignment.detail.submissionstab
 import com.ustadmobile.core.controller.SubmissionConstants
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.useStringProvider
+import com.ustadmobile.core.viewmodel.clazzassignment.avatarColorName
+import com.ustadmobile.core.viewmodel.clazzassignment.avatarName
 import com.ustadmobile.core.viewmodel.clazzassignment.detail.submissionstab.listItemUiState
 import com.ustadmobile.lib.db.entities.AssignmentSubmitterSummary
 import com.ustadmobile.view.clazzassignment.detailoverview.ASSIGNMENT_STATUS_MAP
+import com.ustadmobile.view.components.UstadPersonAvatar
 import web.cssom.px
-import mui.icons.material.AccountCircle as AccountCircleIcon
 import mui.icons.material.Comment as CommentIcon
 import mui.icons.material.Done as DoneIcon
 import mui.material.ListItem
@@ -46,11 +48,10 @@ val SubmitterSummaryListItem = FC<SubmitterSummaryListItemProps> { props ->
             onClick = {   props.submitterSummary?.also(props.onClick) }
 
             ListItemIcon {
-                + AccountCircleIcon.create {
-                    sx {
-                        width = 40.px
-                        height = 40.px
-                    }
+                UstadPersonAvatar {
+                    personName = props.submitterSummary?.avatarName()
+                    pictureUri = props.submitterSummary?.pictureUri
+                    colorName = props.submitterSummary?.avatarColorName()
                 }
             }
 

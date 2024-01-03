@@ -7,6 +7,7 @@ import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.core.db.dao.CourseGroupMemberDaoCommon.FIND_BY_COURSEGROUPSET_AND_CLAZZ_SQL
 import com.ustadmobile.door.annotation.*
+import com.ustadmobile.lib.db.composites.PersonAndPicture
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.flow.Flow
 
@@ -126,6 +127,8 @@ expect abstract class CourseGroupMemberDao: BaseDao<CourseGroupMember> {
     @Query("""
         SELECT Person.*
           FROM Person
+               LEFT JOIN PersonPicture
+                         ON PersonPicture.personPictureUid = Person.personUid
          WHERE Person.personUid IN
                (SELECT DISTINCT ClazzEnrolment.clazzEnrolmentPersonUid
                   FROM ClazzEnrolment
@@ -133,7 +136,7 @@ expect abstract class CourseGroupMemberDao: BaseDao<CourseGroupMember> {
     """)
     abstract suspend fun findByCourseGroupSetAndClazzAsFlowPersons(
         clazzUid: Long
-    ): List<Person>
+    ): List<PersonAndPicture>
 
     @Query("""
         SELECT ClazzEnrolment.*
