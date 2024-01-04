@@ -4,11 +4,11 @@ import com.ustadmobile.door.ext.withDoorTransaction
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.libcache.UstadCache.Companion.HEADER_LAST_VALIDATED_TIMESTAMP
 import com.ustadmobile.libcache.base64.encodeBase64
+import com.ustadmobile.libcache.cachecontrol.ResponseValidityChecker
 import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.db.entities.CacheEntry
 import com.ustadmobile.libcache.db.entities.RetentionLock
 import com.ustadmobile.libcache.db.entities.RequestedEntry
-import com.ustadmobile.libcache.db.entities.ResponseBody
 import com.ustadmobile.libcache.headers.CouponHeader.Companion.COUPON_ACTUAL_SHA_256
 import com.ustadmobile.libcache.headers.CouponHeader.Companion.COUPON_STATIC
 import com.ustadmobile.libcache.headers.HttpHeaders
@@ -52,6 +52,7 @@ class UstadCacheImpl(
     private val logger: UstadCacheLogger? = null,
     private val listener: UstadCache.CacheListener? = null,
     private val lastAccessedCommitInterval: Int = 5_000,
+    private val responseValidityChecker: ResponseValidityChecker = ResponseValidityChecker(),
 ) : UstadCache {
 
     private val scope = CoroutineScope(Dispatchers.IO + Job())
@@ -70,6 +71,7 @@ class UstadCacheImpl(
 
     data class CacheEntryAndTmpFile(
         val cacheEntry: CacheEntry,
+        val entryToStore: CacheEntryToStore,
         val tmpFile: Path,
     )
 
@@ -85,6 +87,10 @@ class UstadCacheImpl(
                 delay(lastAccessedCommitInterval.toLong())
                 commitLastAccessedUpdates()
             }
+        }
+
+        scope.launch {
+
         }
     }
 
@@ -170,12 +176,12 @@ class UstadCacheImpl(
                         cacheFlags = cacheFlags,
                         lastValidated = systemTimeInMillis(),
                     ),
+                    entryToStore = entryToStore,
                     tmpFile = tmpFile
                 )
             }
 
             logger?.v(LOG_TAG) { "$logPrefix cacheEntries created ${storeRequestEntriesAndTmpFiles.size} entries" }
-            //find the sha256's we don't have. If we have it, discard tmpFile. If we don't move tmp file to data dir
             val batchId = batchIdAtomic.incrementAndGet()
 
             /*
@@ -191,52 +197,45 @@ class UstadCacheImpl(
                     )
                 })
 
-                val sha256sToStore = db.requestedEntryDao.findSha256sNotPresent(batchId).toSet()
                 val entriesInCache = db.cacheEntryDao.findByRequestBatchId(batchId)
-                val storedKeys = entriesInCache.map { it.key }.toSet()
-                val storedEntriesMap = entriesInCache.associateBy { it.key }
+                val entriesInCacheMap = entriesInCache.associateBy { it.key }
+                val tmpFilesToDelete = mutableListOf<Path>()
 
-                logger?.v(LOG_TAG) { "$logPrefix storing ${sha256sToStore.size} new sha256s" }
+                val entriesToSave = storeRequestEntriesAndTmpFiles.mapNotNull { storeRequest ->
+                    val storedEntry = entriesInCacheMap[storeRequest.cacheEntry.key]
+                    val storedEntryHeaders = storedEntry?.responseHeaders?.let {
+                        HttpHeaders.fromString(it)
+                    }
 
-                /*
-                 * Split the list into those requests where we are going to keep the body data
-                 * (because we don't have a copy of it) and those where we will discard the body
-                 * data from the storeRequest because we already have a copy of the body stored.
-                 */
-                val (storeRequestsToSaveBody, storeRequestsToDiscardBody) = storeRequestEntriesAndTmpFiles.partition { entryAndFile ->
-                    entryAndFile.cacheEntry.responseBodySha256.let { it != null && it in sha256sToStore }
+                    val etagOrLastModifiedMatches = if(storedEntryHeaders != null) {
+                        responseValidityChecker.isMatchingEtagOrLastModified(
+                            storedEntryHeaders, storeRequest.entryToStore.response.headers
+                        )
+                    }else {
+                        false
+                    }
+
+                    if(storedEntry != null && etagOrLastModifiedMatches) {
+                        //If the entry is already saved and still valid, there is nothing to do
+                        tmpFilesToDelete += storeRequest.tmpFile
+                        null
+                    }else {
+                        val destPath = Path(dataDir, randomUuid())
+                        fileSystem.atomicMove(storeRequest.tmpFile, destPath)
+
+                        //Where there is a stored entry that is invalid, file should be deleted
+                        storedEntry?.storageUri?.also { oldStorageUri ->
+                            fileSystem.delete(Path(oldStorageUri))
+                        }
+
+                        storeRequest.cacheEntry.copy(
+                            storageUri = destPath.toString(),
+                            storageSize = fileSystem.metadataOrNull(destPath)?.size ?: 0,
+                        )
+                    }
                 }
-                val responseBodiesToSaveInDb = storeRequestsToSaveBody.map {
-                    val destFile = Path(dataDir, randomUuid())
-                    fileSystem.atomicMove(it.tmpFile, destFile)
-                    logger?.v(LOG_TAG, "$logPrefix saved body data (SHA256=${it.cacheEntry.responseBodySha256!!}) to $destFile")
-                    val fileSize = fileSystem.metadataOrNull(destFile)?.size
-                        ?: throw IllegalArgumentException("Cannot get file size for $destFile")
 
-                    ResponseBody(
-                        sha256 = it.cacheEntry.responseBodySha256!!,
-                        storageUri = destFile.toString(),
-                        bodySize = fileSize,
-                    )
-                }
-
-                db.responseBodyDao.insertList(responseBodiesToSaveInDb)
-
-                val (newEntries, existingEntries) = storeRequestEntriesAndTmpFiles.partition {
-                    it.cacheEntry.key !in storedKeys
-                }
-
-                db.cacheEntryDao.insertList(newEntries.map { it.cacheEntry })
-                val updateEntries = existingEntries.mapNotNull { existingEntryToStore ->
-                    storedEntriesMap[existingEntryToStore.cacheEntry.key]?.copy(
-                        lastAccessed = systemTimeInMillis(),
-                        lastValidated = systemTimeInMillis(),
-                        responseHeaders = existingEntryToStore.cacheEntry.responseHeaders,
-                        responseBodySha256 = existingEntryToStore.cacheEntry.responseBodySha256,
-                        statusCode = existingEntryToStore.cacheEntry.statusCode,
-                    )
-                }
-                db.cacheEntryDao.updateList(updateEntries)
+                db.cacheEntryDao.upsertList(entriesToSave)
                 db.requestedEntryDao.deleteBatch(batchId)
 
                 val locks = insertRetentionLocks(
@@ -249,7 +248,7 @@ class UstadCacheImpl(
                 }
 
                 //End transaction block by providing a list of those tmp files that we don't need
-                storeRequestsToDiscardBody.map { it.tmpFile } to locks
+                tmpFilesToDelete to locks
             }
 
             logger?.d(LOG_TAG, "$logPrefix deleting ${tmpFilesToDelete.size} tmp files")
@@ -321,13 +320,13 @@ class UstadCacheImpl(
         logger?.i(LOG_TAG, "$logPrefix Retrieve ${request.url}")
 
         val key = Md5Digest().digest(request.url.encodeToByteArray()).encodeBase64()
-        val (entry, body) = db.cacheEntryDao.findEntryAndBodyByKey(key)
-            ?: return null
-        if(entry != null && body != null) {
+        val entry = db.cacheEntryDao.findEntryAndBodyByKey(key)
+        if(entry != null) {
             logger?.d(LOG_TAG, "$logPrefix FOUND ${request.url}")
             pendingLastAccessedUpdates.update { prev ->
                 prev + LastAccessedUpdate(key, systemTimeInMillis())
             }
+
             return CacheResponse(
                 fileSystem = fileSystem,
                 request = request,
@@ -335,7 +334,7 @@ class UstadCacheImpl(
                     takeFrom(HttpHeaders.fromString(entry.responseHeaders))
                     header(HEADER_LAST_VALIDATED_TIMESTAMP, entry.lastValidated.toString())
                 },
-                responseBody = body,
+                storageUri = entry.storageUri,
                 httpResponseCode = entry.statusCode
             )
         }
@@ -375,7 +374,7 @@ class UstadCacheImpl(
     }
 
     override fun removeRetentionLocks(lockIds: List<Int>) {
-        TODO("Not yet implemented")
+        db.retentionLockDao.delete(lockIds.map { RetentionLock(lockId = it) } )
     }
 
     private fun commitLastAccessedUpdates() {
@@ -397,7 +396,6 @@ class UstadCacheImpl(
             }
         }
     }
-
 
     override fun close() {
         commitLastAccessedUpdates()

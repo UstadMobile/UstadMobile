@@ -4,6 +4,8 @@ import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.headers.CouponHeader
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
+import com.ustadmobile.libcache.md5.Md5Digest
+import com.ustadmobile.libcache.md5.digestAndEncodeBase64
 import com.ustadmobile.libcache.request.requestBuilder
 import com.ustadmobile.libcache.response.HttpPathResponse
 import com.ustadmobile.libcache.response.StringResponse
@@ -82,6 +84,13 @@ class UstadCacheJvmTest {
         Assert.assertArrayEquals(dataSha256, headerSha256)
         assertEquals(testFile.length(), cacheResponse.headers["content-length"]?.toLong())
         assertEquals("image/png", cacheResponse.headers["content-type"])
+
+        //Body entity should have size set (to size the cache and find entries to evict).
+        val md5Digest = Md5Digest()
+        val cacheEntry = cacheDb.cacheEntryDao.findEntryAndBodyByKey(
+            md5Digest.digestAndEncodeBase64(request.url)
+        )
+        assertEquals(testFile.length(), cacheEntry?.storageSize ?: 0)
     }
 
     @Test

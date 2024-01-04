@@ -36,6 +36,13 @@ data class CacheEntry(
     var responseBodySha256: String? = null,
 
     var responseHeaders: String = "",
+
+    /**
+     * The path where the body of the request is stored as kotlinx.io.Path.toString
+     */
+    var storageUri: String = "",
+
+    var storageSize: Long = 0,
 ) {
     companion object {
 

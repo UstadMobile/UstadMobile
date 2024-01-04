@@ -1,6 +1,5 @@
 package com.ustadmobile.libcache.response
 
-import com.ustadmobile.libcache.db.entities.ResponseBody
 import com.ustadmobile.libcache.headers.HttpHeaders
 import com.ustadmobile.libcache.headers.headersBuilder
 import com.ustadmobile.libcache.io.asKotlinxIoSource
@@ -17,7 +16,7 @@ class CacheResponse(
     private val fileSystem: FileSystem,
     override val request: HttpRequest,
     headers: HttpHeaders,
-    private val responseBody: ResponseBody,
+    private val storageUri: String,
     @Volatile
     private var httpResponseCode: Int = 200
 ): HttpResponse {
@@ -25,7 +24,7 @@ class CacheResponse(
     override val responseCode: Int
         get() = httpResponseCode
 
-    private val bodyPath = Path(responseBody.storageUri)
+    private val bodyPath = Path(storageUri)
 
     private val rangeResponse: ContentRange?
 
@@ -73,7 +72,7 @@ class CacheResponse(
                 fileSystem.rangeSource(bodyPath, rangeResponse.fromByte, rangeResponse.toByte).buffered()
             }
             else -> {
-                fileSystem.source(Path(responseBody.storageUri)).buffered()
+                fileSystem.source(Path(storageUri)).buffered()
             }
         }
     }

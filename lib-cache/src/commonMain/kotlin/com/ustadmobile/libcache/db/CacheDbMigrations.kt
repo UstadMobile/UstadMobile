@@ -40,3 +40,19 @@ val MIGRATE_3_4 = DoorMigrationStatementList(3, 4) {
         add("ALTER TABLE RequestBody ADD COLUMN bodySize  INTEGER  NOT NULL  DEFAULT 0")
     }
 }
+
+
+/**
+ * Drop the one-many cache entry to request body concept. It isn't needed because where duplicate
+ * urls are likely the urls themselves are a function of the sha-256 sum.
+ *
+ * CacheEntry now has the storageUri and size on it directly. This is still not deployed on production,
+ * so migration is mostly destructive.
+ */
+val MIGRATE_4_5 = DoorMigrationStatementList(4, 5) {
+    buildList {
+        add("DROP TABLE IF EXISTS RequestBody")
+        add("DROP TABLE IF EXISTS CacheEntry")
+        add("CREATE TABLE IF NOT EXISTS CacheEntry (  key  TEXT  PRIMARY KEY  NOT NULL , url  TEXT  NOT NULL , message  TEXT  NOT NULL , statusCode  INTEGER  NOT NULL , cacheFlags  INTEGER  NOT NULL , method  INTEGER  NOT NULL , lastAccessed  INTEGER  NOT NULL , lastValidated  INTEGER  NOT NULL , responseBodySha256  TEXT , responseHeaders  TEXT  NOT NULL , storageUri  TEXT  NOT NULL , storageSize  INTEGER  NOT NULL )")
+    }
+}
