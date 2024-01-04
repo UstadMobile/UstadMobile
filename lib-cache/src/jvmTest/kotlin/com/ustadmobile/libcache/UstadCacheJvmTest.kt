@@ -214,4 +214,40 @@ class UstadCacheJvmTest {
         assertNull(response)
     }
 
+    @Test
+    fun givenResponseIsUpdated_whenRetrieved_thenLatestResponseWillBeReturned(){
+        val cacheDir = tempDir.newFolder()
+        val cacheDb = DatabaseBuilder.databaseBuilder(
+            UstadCacheDb::class, "jdbc:sqlite::memory:", 1L)
+            .build()
+        val ustadCache = UstadCacheImpl(
+            storagePath = Path(cacheDir.absolutePath),
+            db = cacheDb,
+            mimeTypeHelper = FileMimeTypeHelperImpl()
+        )
+
+        val url = "http://server.com/file.css"
+        val payloads = listOf("font-weight: bold", "font-weight: bold !important")
+        payloads.forEach { payload ->
+            ustadCache.store(listOf(
+                requestBuilder(url).let {
+                    CacheEntryToStore(
+                        request = it,
+                        response = StringResponse(
+                            request = it,
+                            mimeType = "text/css",
+                            body = payload
+                        )
+                    )
+                }
+            ))
+        }
+
+        val response = ustadCache.retrieve(requestBuilder(url))
+        val responseBytes = response?.bodyAsSource()?.asInputStream()?.readAllBytes()
+        val responseStr = responseBytes?.let { String(it) }
+        assertEquals(payloads.last(), responseStr)
+    }
+
+
 }

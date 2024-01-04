@@ -71,7 +71,13 @@ class UstadCacheImpl(
             fileSystem.takeIf { !fileSystem.exists(dataDir) }?.createDirectories(dataDir)
             fileSystem.takeIf { !fileSystem.exists(tmpDir) }?.createDirectories(tmpDir)
 
-            val cacheEntries = storeRequest.map { entryToStore ->
+            /**
+             * Go through everything that is requested to be stored: create a list of CacheEntryAndTmpFile
+             * which contains the CacheEntry entity (headers, request status, etc) and a tmp
+             * file containing the request body. Run checksums as needed to get a SHA256 checksum
+             * for every response body.
+             */
+            val storeRequestEntriesAndTmpFiles = storeRequest.map { entryToStore ->
                 val response = entryToStore.response
                 val tmpFile = Path(tmpDir, "${tmpCounter.incrementAndGet()}.tmp")
                 val url = entryToStore.request.url
@@ -127,12 +133,16 @@ class UstadCacheImpl(
                 )
             }
 
-            logger?.v(LOG_TAG) { "$logPrefix cacheEntries created ${cacheEntries.size} entries" }
+            logger?.v(LOG_TAG) { "$logPrefix cacheEntries created ${storeRequestEntriesAndTmpFiles.size} entries" }
             //find the sha256's we don't have. If we have it, discard tmpFile. If we don't move tmp file to data dir
             val batchId = batchIdAtomic.incrementAndGet()
 
-            db.withDoorTransaction { _ ->
-                db.requestedEntryDao.insertList(cacheEntries.map {
+            /*
+             * Find what entries are already stored in the database. Update entries that are
+             * already present, insert new entries.
+             */
+            val tmpFilesToDelete = db.withDoorTransaction { _ ->
+                db.requestedEntryDao.insertList(storeRequestEntriesAndTmpFiles.map {
                     RequestedEntry(
                         requestSha256 = it.cacheEntry.responseBodySha256 ?: "",
                         requestedUrl = it.cacheEntry.url,
@@ -141,13 +151,21 @@ class UstadCacheImpl(
                 })
 
                 val sha256sToStore = db.requestedEntryDao.findSha256sNotPresent(batchId).toSet()
-                val storedEntries = db.cacheEntryDao.findByRequestBatchId(batchId)
-                val storedUrls = storedEntries.map { it.url }.toSet()
+                val entriesInCache = db.cacheEntryDao.findByRequestBatchId(batchId)
+                val storedUrls = entriesInCache.map { it.url }.toSet()
+                val storedEntriesMap = entriesInCache.associateBy { it.url }
+
                 logger?.v(LOG_TAG) { "$logPrefix storing ${sha256sToStore.size} new sha256s" }
 
-                val responseBodies = cacheEntries.filter { entryAndFile ->
+                /*
+                 * Split the list into those requests where we are going to keep the body data
+                 * (because we don't have a copy of it) and those where we will discard the body
+                 * data from the storeRequest because we already have a copy of the body stored.
+                 */
+                val (storeRequestsToSaveBody, storeRequestsToDiscardBody) = storeRequestEntriesAndTmpFiles.partition { entryAndFile ->
                     entryAndFile.cacheEntry.responseBodySha256.let { it != null && it in sha256sToStore }
-                }.map {
+                }
+                val responseBodiesToSaveInDb = storeRequestsToSaveBody.map {
                     val destFile = Path(dataDir, randomUuid())
                     fileSystem.atomicMove(it.tmpFile, destFile)
                     logger?.v(LOG_TAG, "$logPrefix saved body data (SHA256=${it.cacheEntry.responseBodySha256!!}) to $destFile")
@@ -158,19 +176,34 @@ class UstadCacheImpl(
                     )
                 }
 
+                db.responseBodyDao.insertList(responseBodiesToSaveInDb)
 
-                db.responseBodyDao.insertList(responseBodies)
-
-                val newEntries = cacheEntries.filter {
+                val (newEntries, existingEntries) = storeRequestEntriesAndTmpFiles.partition {
                     it.cacheEntry.url !in storedUrls
-                }.map {
-                    it.cacheEntry
                 }
 
-                db.cacheEntryDao.insertList(newEntries)
-                //TODO: Handle updating entries
+                db.cacheEntryDao.insertList(newEntries.map { it.cacheEntry })
+                val updateEntries = existingEntries.mapNotNull { existingEntryToStore ->
+                    storedEntriesMap[existingEntryToStore.cacheEntry.url]?.copy(
+                        lastAccessed = systemTimeInMillis(),
+                        lastValidated = systemTimeInMillis(),
+                        responseHeaders = existingEntryToStore.cacheEntry.responseHeaders,
+                        responseBodySha256 = existingEntryToStore.cacheEntry.responseBodySha256,
+                        statusCode = existingEntryToStore.cacheEntry.statusCode,
+                    )
+                }
+                db.cacheEntryDao.updateList(updateEntries)
                 db.requestedEntryDao.deleteBatch(batchId)
+
+                //End transaction block by providing a list of those tmp files that we don't need
+                storeRequestsToDiscardBody.map { it.tmpFile }
             }
+
+            logger?.d(LOG_TAG, "$logPrefix deleting ${tmpFilesToDelete.size} tmp files")
+            tmpFilesToDelete.forEach {
+                fileSystem.delete(it)
+            }
+
             logger?.d(LOG_TAG, "$logPrefix db transaction completed")
             listener?.onEntriesStored(storeRequest)
 
@@ -178,7 +211,6 @@ class UstadCacheImpl(
         }catch(e: Throwable) {
             throw IllegalStateException("Could not cache", e)
         }
-
     }
 
     override fun storeZip(

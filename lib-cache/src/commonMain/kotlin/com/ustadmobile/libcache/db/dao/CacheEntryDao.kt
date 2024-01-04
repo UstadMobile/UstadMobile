@@ -2,6 +2,7 @@ package com.ustadmobile.libcache.db.dao
 
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 import com.ustadmobile.door.annotation.DoorDao
 import com.ustadmobile.libcache.db.entities.CacheEntry
 import com.ustadmobile.libcache.db.entities.CacheEntryAndBody
@@ -45,6 +46,9 @@ expect abstract class CacheEntryDao {
 
     @Insert
     abstract fun insertList(entry: List<CacheEntry>)
+
+    @Update
+    abstract fun updateList(entry: List<CacheEntry>)
 
     @Query("""
         SELECT CacheEntry.*

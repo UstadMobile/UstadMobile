@@ -14,11 +14,13 @@ import kotlinx.io.files.Path
  * @param skipChecksumIfProvided if true and the checksum is already provided on the response header, then
  *        running a checksum will be skipped. When responseBodyTmpLocalUri is set and skipChecksum
  *        is true, then reading the body can be avoided.
+ * @param createRetentionLock if true, then a retention lock will be created
  */
 data class CacheEntryToStore(
     val request: HttpRequest,
     val response: HttpResponse,
     val responseBodyTmpLocalPath: Path? = null,
     val skipChecksumIfProvided: Boolean = false,
+    val createRetentionLock: Boolean = false,
 )
 
