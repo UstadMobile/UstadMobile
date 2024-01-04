@@ -63,25 +63,32 @@ class ChunkedUploadClientUseCaseKtorImpl(
      * @param onStatusChange event handler that will be called when status changes e.g. on start,
      *        on successful completion, or on failure.
      */
-    @OptIn(ExperimentalStdlibApi::class)
     override suspend operator fun invoke(
         uploadUuid: String,
         localUri: DoorUri,
         remoteUrl: String,
         fromByte: Long,
         chunkSize: Int,
-        onProgress: (Long) -> Unit,
+        onProgress: (ChunkedUploadClientLocalUriUseCase.UploadProgress) -> Unit,
         onStatusChange: (TransferJobItemStatus) -> Unit,
         lastChunkHeaders: IStringValues?,
     ): ChunkedUploadClientLocalUriUseCase.LastChunkResponse {
+        val totalSize = uriHelper.getSize(localUri)
         return invoke(
             uploadUuid = uploadUuid,
-            totalSize = uriHelper.getSize(localUri),
+            totalSize = totalSize,
             getChunk = LocalUriChunkGetter(localUri, uriHelper),
             remoteUrl = remoteUrl,
             chunkSize = chunkSize,
             fromByte =  fromByte,
-            onProgress = onProgress,
+            onProgress = {
+                onProgress(
+                    ChunkedUploadClientLocalUriUseCase.UploadProgress(
+                        bytesTransferred = it,
+                        totalBytes = totalSize
+                    )
+                )
+            },
             onStatusChange = onStatusChange,
         )
     }

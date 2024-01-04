@@ -20,7 +20,7 @@ class ChunkedUploadClientLocalUriUseCaseJs: ChunkedUploadClientLocalUriUseCase {
         remoteUrl: String,
         fromByte: Long,
         chunkSize: Int,
-        onProgress: (Long) -> Unit,
+        onProgress: (ChunkedUploadClientLocalUriUseCase.UploadProgress) -> Unit,
         onStatusChange: (TransferJobItemStatus) -> Unit,
         lastChunkHeaders: IStringValues?,
     ): ChunkedUploadClientLocalUriUseCase.LastChunkResponse {
@@ -64,7 +64,12 @@ class ChunkedUploadClientLocalUriUseCaseJs: ChunkedUploadClientLocalUriUseCase {
                         headers = json(*headerPairs.toTypedArray())
                     }
                 ).await()
-                onProgress(chunk.end)
+                onProgress(
+                    ChunkedUploadClientLocalUriUseCase.UploadProgress(
+                        bytesTransferred = chunk.end,
+                        totalBytes = totalSize.toLong(),
+                    )
+                )
 
                 if(chunk.isLastChunk) {
                     onStatusChange(TransferJobItemStatus.COMPLETE)

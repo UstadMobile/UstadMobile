@@ -101,7 +101,7 @@ class SaveLocalUrisAsBlobUseCaseJs(
                             transferJobItemStatusUpdater.onProgressUpdate(
                                 BlobUploadClientUseCase.BlobUploadProgressUpdate(
                                     uploadItem = uploadItem,
-                                    bytesTransferred = it,
+                                    bytesTransferred = it.bytesTransferred,
                                 )
                             )
                         }
