@@ -11,18 +11,30 @@ import androidx.room.PrimaryKey
  */
 @Entity
 data class CacheEntry(
-    @PrimaryKey(autoGenerate = true)
-    var ceId: Int = 0,
-    @ColumnInfo(index = true)
+    /**
+     * The key is the md5 of the URL (base64 encoded). This creates a unique key based on the URL,
+     * and improves performance when searching/indexing because it is shorter than the url itself.
+     */
+    @PrimaryKey
+    var key: String = "",
+
     var url: String = "",
+
     var message: String = "",
+
     var statusCode: Int = 0,
+
     var cacheFlags: Int = 0,
+
     var method: Int = 0,
+
     var lastAccessed: Long = 0,
+
     var lastValidated: Long = -1,
+
     @ColumnInfo(index = true)
     var responseBodySha256: String? = null,
+
     var responseHeaders: String = "",
 ) {
     companion object {

@@ -2,6 +2,7 @@ package com.ustadmobile.libcache
 
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.libcache.db.MIGRATE_1_2
+import com.ustadmobile.libcache.db.MIGRATE_2_3
 import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.logging.UstadCacheLogger
@@ -25,6 +26,7 @@ class UstadCacheBuilder(
             storagePath = storagePath,
             db = DatabaseBuilder.databaseBuilder(UstadCacheDb::class, dbUrl, 1L)
                 .addMigrations(MIGRATE_1_2)
+                .addMigrations(MIGRATE_2_3)
                 .build(),
             mimeTypeHelper = FileMimeTypeHelperImpl(),
             logger = logger,

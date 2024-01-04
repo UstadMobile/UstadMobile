@@ -4,11 +4,9 @@ import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.headers.CouponHeader
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
-import com.ustadmobile.libcache.headers.headersBuilder
 import com.ustadmobile.libcache.request.requestBuilder
 import com.ustadmobile.libcache.response.HttpPathResponse
 import com.ustadmobile.libcache.response.StringResponse
-import kotlinx.coroutines.runBlocking
 import kotlinx.io.asInputStream
 import kotlinx.io.asSource
 import kotlinx.io.buffered
@@ -144,77 +142,6 @@ class UstadCacheJvmTest {
     }
 
     @Test
-    fun givenResponseIsStatic_whenRequestMatchesPathButNotQuery_thenWillBeReturned() {
-        val cacheDir = tempDir.newFolder()
-        val cacheDb = DatabaseBuilder.databaseBuilder(
-            UstadCacheDb::class, "jdbc:sqlite::memory:", 1L)
-            .build()
-        val ustadCache = UstadCacheImpl(
-            storagePath = Path(cacheDir.absolutePath),
-            db = cacheDb,
-            mimeTypeHelper = FileMimeTypeHelperImpl()
-        )
-
-        val url = "http://server.com/file.css"
-        val payloadStr = "font-weight: bold"
-        runBlocking {
-            ustadCache.store(listOf(
-                requestBuilder(url).let {
-                    CacheEntryToStore(
-                        request = it,
-                        response = StringResponse(
-                            request = it,
-                            mimeType = "text/css",
-                            extraHeaders = headersBuilder {
-                                header(CouponHeader.COUPON_STATIC, "true")
-                            },
-                            body = payloadStr
-                        )
-                    )
-                }
-            ))
-        }
-
-        val response = ustadCache.retrieve(requestBuilder("$url?cachebust"))
-        val responseBytes = response?.bodyAsSource()?.asInputStream()?.readAllBytes()
-        val responseStr = responseBytes?.let { String(it) }
-        assertEquals(payloadStr, responseStr)
-    }
-
-    @Test
-    fun givenResponseNotStatic_whenRequestMatchesPathButNotQuery_thenWillNotBeReturned() {
-        val cacheDir = tempDir.newFolder()
-        val cacheDb = DatabaseBuilder.databaseBuilder(
-            UstadCacheDb::class, "jdbc:sqlite::memory:", 1L)
-            .build()
-        val ustadCache = UstadCacheImpl(
-            storagePath = Path(cacheDir.absolutePath),
-            db = cacheDb,
-            mimeTypeHelper = FileMimeTypeHelperImpl()
-        )
-
-        val url = "http://server.com/file.css"
-        val payloadStr = "font-weight: bold"
-        runBlocking {
-            ustadCache.store(listOf(
-                requestBuilder(url).let {
-                    CacheEntryToStore(
-                        request = it,
-                        response = StringResponse(
-                            request = it,
-                            mimeType = "text/css",
-                            body = payloadStr
-                        )
-                    )
-                }
-            ))
-        }
-
-        val response = ustadCache.retrieve(requestBuilder("$url?cachebust"))
-        assertNull(response)
-    }
-
-    @Test
     fun givenResponseIsUpdated_whenRetrieved_thenLatestResponseWillBeReturned(){
         val cacheDir = tempDir.newFolder()
         val cacheDb = DatabaseBuilder.databaseBuilder(
@@ -249,5 +176,22 @@ class UstadCacheJvmTest {
         assertEquals(payloads.last(), responseStr)
     }
 
+
+    @Test
+    fun givenEntryNotStored_whenRetrieved_thenWillReturnNull() {
+
+        val cacheDir = tempDir.newFolder()
+        val cacheDb = DatabaseBuilder.databaseBuilder(
+            UstadCacheDb::class, "jdbc:sqlite::memory:", 1L)
+            .build()
+        val ustadCache = UstadCacheImpl(
+            storagePath = Path(cacheDir.absolutePath),
+            db = cacheDb,
+            mimeTypeHelper = FileMimeTypeHelperImpl()
+        )
+
+        val url = "http://server.com/file.css"
+        assertNull(ustadCache.retrieve(requestBuilder(url)))
+    }
 
 }

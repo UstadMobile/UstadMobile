@@ -26,19 +26,10 @@ expect abstract class CacheEntryDao {
                           FROM ResponseBody
                          WHERE ResponseBody.sha256 = CacheEntry.responseBodySha256
                          LIMIT 1)
-         WHERE CacheEntry.url = :url
-            OR ((:withoutSearchParams IS NOT NULL) 
-                AND CacheEntry.url = :withoutSearchParams
-                AND (CacheEntry.cacheFlags & ${CacheEntry.CACHE_FLAG_STATIC}) = ${CacheEntry.CACHE_FLAG_STATIC})
-      ORDER BY (CASE
-                WHEN CacheEntry.url = :url THEN 0
-                ELSE 1
-                END)
-         LIMIT 1
+         WHERE CacheEntry.key = :key
     """)
-    abstract fun findEntryAndBodyByUrl(
-        url: String,
-        withoutSearchParams: String?,
+    abstract fun findEntryAndBodyByKey(
+        key: String,
     ): CacheEntryAndBody?
 
     @Insert
@@ -50,14 +41,16 @@ expect abstract class CacheEntryDao {
     @Update
     abstract fun updateList(entry: List<CacheEntry>)
 
-    @Query("""
+    @Query(
+        """
         SELECT CacheEntry.*
           FROM CacheEntry
-         WHERE CacheEntry.url IN
-               (SELECT RequestedEntry.requestedUrl
+         WHERE CacheEntry.key IN
+               (SELECT RequestedEntry.requestedKey
                   FROM RequestedEntry
                  WHERE RequestedEntry.batchId = :batchId)
-    """)
+    """
+    )
     abstract fun findByRequestBatchId(batchId: Int): List<CacheEntry>
 
 

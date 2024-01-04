@@ -30,17 +30,17 @@ expect abstract class RequestedEntryDao {
 
     @Query(
         """
-        SELECT RequestedEntry.requestedUrl
+        SELECT RequestedEntry.requestedKey
           FROM RequestedEntry
          WHERE RequestedEntry.batchId = :batchId 
            AND NOT EXISTS(
-               SELECT CacheEntry.ceId
+               SELECT CacheEntry.key
                  FROM CacheEntry
-                WHERE CacheEntry.url = RequestedEntry.requestedUrl
+                WHERE CacheEntry.key = RequestedEntry.requestedKey
            )
         """
     )
-    abstract fun findUrlsNotPresent(
+    abstract fun findKeysNotPresent(
         batchId: Int,
     ): List<String>
 

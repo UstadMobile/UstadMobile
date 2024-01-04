@@ -22,7 +22,7 @@ import com.ustadmobile.libcache.db.entities.ResponseBody
  *
  */
 @DoorDatabase(
-    version = 2,
+    version = 3,
     entities = arrayOf(CacheEntry::class, ResponseBody::class, RequestedEntry::class,),
 )
 expect abstract class UstadCacheDb : RoomDatabase {

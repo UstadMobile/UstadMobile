@@ -18,6 +18,8 @@ import com.ustadmobile.libcache.io.sha256
 import com.ustadmobile.libcache.io.transferToAndGetSha256
 import com.ustadmobile.libcache.io.unzipTo
 import com.ustadmobile.libcache.logging.UstadCacheLogger
+import com.ustadmobile.libcache.md5.Md5Digest
+import com.ustadmobile.libcache.md5.digestAndEncodeBase64
 import com.ustadmobile.libcache.request.HttpRequest
 import com.ustadmobile.libcache.request.requestBuilder
 import com.ustadmobile.libcache.response.CacheResponse
@@ -66,6 +68,7 @@ class UstadCacheImpl(
         storeRequest: List<CacheEntryToStore>,
         progressListener: StoreProgressListener?
     ): List<StoreResult> {
+        val md5Digest = Md5Digest()
         try {
             logger?.d(LOG_TAG) { "$logPrefix storerequest ${storeRequest.size} entries" }
             fileSystem.takeIf { !fileSystem.exists(dataDir) }?.createDirectories(dataDir)
@@ -122,6 +125,7 @@ class UstadCacheImpl(
 
                 CacheEntryAndTmpFile(
                     cacheEntry = CacheEntry(
+                        key = md5Digest.digestAndEncodeBase64(entryToStore.request.url),
                         url = entryToStore.request.url,
                         responseBodySha256 = sha256,
                         statusCode = entryToStore.response.responseCode,
@@ -145,15 +149,15 @@ class UstadCacheImpl(
                 db.requestedEntryDao.insertList(storeRequestEntriesAndTmpFiles.map {
                     RequestedEntry(
                         requestSha256 = it.cacheEntry.responseBodySha256 ?: "",
-                        requestedUrl = it.cacheEntry.url,
+                        requestedKey = md5Digest.digestAndEncodeBase64(it.cacheEntry.url),
                         batchId = batchId,
                     )
                 })
 
                 val sha256sToStore = db.requestedEntryDao.findSha256sNotPresent(batchId).toSet()
                 val entriesInCache = db.cacheEntryDao.findByRequestBatchId(batchId)
-                val storedUrls = entriesInCache.map { it.url }.toSet()
-                val storedEntriesMap = entriesInCache.associateBy { it.url }
+                val storedKeys = entriesInCache.map { it.key }.toSet()
+                val storedEntriesMap = entriesInCache.associateBy { it.key }
 
                 logger?.v(LOG_TAG) { "$logPrefix storing ${sha256sToStore.size} new sha256s" }
 
@@ -179,12 +183,12 @@ class UstadCacheImpl(
                 db.responseBodyDao.insertList(responseBodiesToSaveInDb)
 
                 val (newEntries, existingEntries) = storeRequestEntriesAndTmpFiles.partition {
-                    it.cacheEntry.url !in storedUrls
+                    it.cacheEntry.key !in storedKeys
                 }
 
                 db.cacheEntryDao.insertList(newEntries.map { it.cacheEntry })
                 val updateEntries = existingEntries.mapNotNull { existingEntryToStore ->
-                    storedEntriesMap[existingEntryToStore.cacheEntry.url]?.copy(
+                    storedEntriesMap[existingEntryToStore.cacheEntry.key]?.copy(
                         lastAccessed = systemTimeInMillis(),
                         lastValidated = systemTimeInMillis(),
                         responseHeaders = existingEntryToStore.cacheEntry.responseHeaders,
@@ -254,8 +258,6 @@ class UstadCacheImpl(
     /**
      * Retrieve a response from the cache, if available. The response might be stale.
      *
-     * In future, this could be streamed gradually via a RandomAccessFile
-     *
      * NOTE: If we know in advance that a particular batch is going to be requested, we can run
      * a statusCheckCache to avoid running 100s-1000+ SQL queries for tiny jsons etc.
      *
@@ -263,18 +265,9 @@ class UstadCacheImpl(
     override fun retrieve(request: HttpRequest): HttpResponse? {
         logger?.i(LOG_TAG, "$logPrefix Retrieve ${request.url}")
 
-        /*
-         * If a response was marked as static, then we will bust cache busting. See doc
-         * on Coupon-Static header.
-         */
-        val queryParamIndex = request.url.indexOf("?")
-        val requestWithoutQuery = if(queryParamIndex != -1)
-            request.url.substring(0, queryParamIndex)
-        else
-            null
-
-        val (entry, body) = db.cacheEntryDao.findEntryAndBodyByUrl(
-            request.url, requestWithoutQuery) ?: return null
+        val key = Md5Digest().digest(request.url.encodeToByteArray()).encodeBase64()
+        val (entry, body) = db.cacheEntryDao.findEntryAndBodyByKey(key)
+            ?: return null
         if(entry != null && body != null) {
             logger?.d(LOG_TAG, "$logPrefix FOUND ${request.url}")
             return CacheResponse(
@@ -296,19 +289,23 @@ class UstadCacheImpl(
 
     override fun hasEntries(urls: Set<String>): Map<String, Boolean> {
         val batchId = batchIdAtomic.incrementAndGet()
-        val urlsNotPresent = db.withDoorTransaction {
+        val md5Digest = Md5Digest()
+        val keysNotPresent = db.withDoorTransaction {
             db.requestedEntryDao.insertList(
                 urls.map {  url ->
-                    RequestedEntry(batchId = batchId, requestedUrl =  url)
+                    RequestedEntry(
+                        batchId = batchId,
+                        requestedKey =  md5Digest.digestAndEncodeBase64(url)
+                    )
                 }
             )
-            db.requestedEntryDao.findUrlsNotPresent(batchId).also {
+            db.requestedEntryDao.findKeysNotPresent(batchId).also {
                 db.requestedEntryDao.deleteBatch(batchId)
             }
         }
 
         return urls.associateWith { url ->
-            (url !in urlsNotPresent)
+            (md5Digest.digestAndEncodeBase64(url) !in keysNotPresent)
         }
     }
 
