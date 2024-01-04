@@ -53,5 +53,12 @@ expect abstract class CacheEntryDao {
     )
     abstract fun findByRequestBatchId(batchId: Int): List<CacheEntry>
 
+    @Query("""
+        UPDATE CacheEntry
+           SET lastAccessed = :lastAccessTime
+         WHERE key = :key  
+    """)
+    abstract fun updateLastAccessedTime(key: String, lastAccessTime: Long)
+
 
 }

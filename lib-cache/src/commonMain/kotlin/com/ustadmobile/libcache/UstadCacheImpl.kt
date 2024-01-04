@@ -6,6 +6,7 @@ import com.ustadmobile.libcache.UstadCache.Companion.HEADER_LAST_VALIDATED_TIMES
 import com.ustadmobile.libcache.base64.encodeBase64
 import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.db.entities.CacheEntry
+import com.ustadmobile.libcache.db.entities.RetentionLock
 import com.ustadmobile.libcache.db.entities.RequestedEntry
 import com.ustadmobile.libcache.db.entities.ResponseBody
 import com.ustadmobile.libcache.headers.CouponHeader.Companion.COUPON_ACTUAL_SHA_256
@@ -27,10 +28,15 @@ import com.ustadmobile.libcache.response.HttpPathResponse
 import com.ustadmobile.libcache.response.HttpResponse
 import com.ustadmobile.libcache.uuid.randomUuid
 import kotlinx.atomicfu.atomic
+import kotlinx.atomicfu.getAndUpdate
+import kotlinx.atomicfu.update
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import kotlinx.io.Source
 import kotlinx.io.buffered
 import kotlinx.io.files.FileSystem
@@ -45,6 +51,7 @@ class UstadCacheImpl(
     internal val mimeTypeHelper: MimeTypeHelper,
     private val logger: UstadCacheLogger? = null,
     private val listener: UstadCache.CacheListener? = null,
+    private val lastAccessedCommitInterval: Int = 5_000,
 ) : UstadCache {
 
     private val scope = CoroutineScope(Dispatchers.IO + Job())
@@ -59,10 +66,40 @@ class UstadCacheImpl(
 
     private val logPrefix = "UstadCache($cacheName):"
 
+    private val pendingLastAccessedUpdates = atomic(emptyList<LastAccessedUpdate>())
+
     data class CacheEntryAndTmpFile(
         val cacheEntry: CacheEntry,
         val tmpFile: Path,
     )
+
+    data class LastAccessedUpdate(
+        val key: String,
+        val accessTime: Long,
+    )
+
+
+    init {
+        scope.launch {
+            while(isActive) {
+                delay(lastAccessedCommitInterval.toLong())
+                commitLastAccessedUpdates()
+            }
+        }
+    }
+
+    private fun insertRetentionLocks(
+        lockRequests: List<EntryLockRequest>,
+        md5Digest: Md5Digest,
+    ): List<Pair<EntryLockRequest, RetentionLock>> {
+        return lockRequests.map {
+            val lock = RetentionLock(
+                lockKey = md5Digest.digestAndEncodeBase64(it.url),
+            )
+            val lockId = db.retentionLockDao.insert(lock).toInt()
+            it to lock.copy(lockId = lockId)
+        }
+    }
 
     override fun store(
         storeRequest: List<CacheEntryToStore>,
@@ -145,7 +182,7 @@ class UstadCacheImpl(
              * Find what entries are already stored in the database. Update entries that are
              * already present, insert new entries.
              */
-            val tmpFilesToDelete = db.withDoorTransaction { _ ->
+            val (tmpFilesToDelete, locksCreated) = db.withDoorTransaction { _ ->
                 db.requestedEntryDao.insertList(storeRequestEntriesAndTmpFiles.map {
                     RequestedEntry(
                         requestSha256 = it.cacheEntry.responseBodySha256 ?: "",
@@ -173,10 +210,13 @@ class UstadCacheImpl(
                     val destFile = Path(dataDir, randomUuid())
                     fileSystem.atomicMove(it.tmpFile, destFile)
                     logger?.v(LOG_TAG, "$logPrefix saved body data (SHA256=${it.cacheEntry.responseBodySha256!!}) to $destFile")
+                    val fileSize = fileSystem.metadataOrNull(destFile)?.size
+                        ?: throw IllegalArgumentException("Cannot get file size for $destFile")
 
                     ResponseBody(
                         sha256 = it.cacheEntry.responseBodySha256!!,
                         storageUri = destFile.toString(),
+                        bodySize = fileSize,
                     )
                 }
 
@@ -199,8 +239,17 @@ class UstadCacheImpl(
                 db.cacheEntryDao.updateList(updateEntries)
                 db.requestedEntryDao.deleteBatch(batchId)
 
+                val locks = insertRetentionLocks(
+                    lockRequests = storeRequest.filter { it.createRetentionLock }.map {
+                        EntryLockRequest(it.request.url)
+                    },
+                    md5Digest = md5Digest,
+                ).associate {
+                    it.first.url to it.second
+                }
+
                 //End transaction block by providing a list of those tmp files that we don't need
-                storeRequestsToDiscardBody.map { it.tmpFile }
+                storeRequestsToDiscardBody.map { it.tmpFile } to locks
             }
 
             logger?.d(LOG_TAG, "$logPrefix deleting ${tmpFilesToDelete.size} tmp files")
@@ -211,7 +260,13 @@ class UstadCacheImpl(
             logger?.d(LOG_TAG, "$logPrefix db transaction completed")
             listener?.onEntriesStored(storeRequest)
 
-            return emptyList()
+            return storeRequest.map {
+                StoreResult(
+                    request = it.request,
+                    response = it.response,
+                    lockId = locksCreated[it.request.url]?.lockId ?: 0
+                )
+            }
         }catch(e: Throwable) {
             throw IllegalStateException("Could not cache", e)
         }
@@ -270,6 +325,9 @@ class UstadCacheImpl(
             ?: return null
         if(entry != null && body != null) {
             logger?.d(LOG_TAG, "$logPrefix FOUND ${request.url}")
+            pendingLastAccessedUpdates.update { prev ->
+                prev + LastAccessedUpdate(key, systemTimeInMillis())
+            }
             return CacheResponse(
                 fileSystem = fileSystem,
                 request = request,
@@ -309,15 +367,40 @@ class UstadCacheImpl(
         }
     }
 
-    override fun addRetentionLocks(locks: List<CacheRetentionLock>): List<Int> {
-        TODO("Not yet implemented")
+    override fun addRetentionLocks(locks: List<EntryLockRequest>): List<Pair<EntryLockRequest, RetentionLock>> {
+        val md5Digest = Md5Digest()
+        return db.withDoorTransaction {
+            insertRetentionLocks(locks, md5Digest)
+        }
     }
 
     override fun removeRetentionLocks(lockIds: List<Int>) {
         TODO("Not yet implemented")
     }
 
+    private fun commitLastAccessedUpdates() {
+        val updatesPending = pendingLastAccessedUpdates.getAndUpdate {
+            emptyList()
+        }
+
+        if(updatesPending.isEmpty())
+            return
+
+        val updatesMap = mutableMapOf<String, Long>()
+        updatesPending.forEach {
+            updatesMap[it.key] = it.accessTime
+        }
+
+        db.withDoorTransaction {
+            updatesMap.forEach {
+                db.cacheEntryDao.updateLastAccessedTime(it.key, it.value)
+            }
+        }
+    }
+
+
     override fun close() {
+        commitLastAccessedUpdates()
         scope.cancel()
     }
 

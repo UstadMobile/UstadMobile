@@ -29,3 +29,14 @@ val MIGRATE_2_3 = DoorMigrationStatementList(2,3) {
         add("CREATE TABLE IF NOT EXISTS RequestedEntry (  requestSha256  TEXT  NOT NULL , requestedKey  TEXT  NOT NULL , batchId  INTEGER  NOT NULL , id  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
     }
 }
+
+/**
+ * Add RetentionLock table
+ * Update body table to add size field
+ */
+val MIGRATE_3_4 = DoorMigrationStatementList(3, 4) {
+    buildList {
+        add("CREATE TABLE IF NOT EXISTS RetentionLock (  lockKey  TEXT  NOT NULL , lockRemark  TEXT  NOT NULL , lockId  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+        add("ALTER TABLE RequestBody ADD COLUMN bodySize  INTEGER  NOT NULL  DEFAULT 0")
+    }
+}
