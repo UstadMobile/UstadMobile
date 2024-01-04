@@ -129,5 +129,13 @@ abstract class UstadEditViewModel(
          * savedstate.
          */
         const val COMMIT_DELAY = 200L
+
+
+        /**
+         * Initial picture URI when the edit screen was loaded. This is used to detect if it has
+         * changed when the user clicks save. If a change is detected, then import/compression/upload
+         * is triggered
+         */
+        const val INIT_PIC_URI = "initPicUri"
     }
 }

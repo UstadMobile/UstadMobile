@@ -268,56 +268,92 @@ private val ClazzListItem = FC<ClazzListItemProps> { props ->
 
     val clazzDescription = useHtmlToPlainText(props.clazzItem?.clazzDesc ?: "")
 
-    Card {
-        key = props.clazzItem?.clazzUid?.toString()
+    val badgeContentRef = useRef<HTMLElement>(null)
+    var badgeWidth by useState(10)
+    useEffect(badgeContentRef.current?.clientWidth) {
+        badgeContentRef.current?.also {
+            badgeWidth = it.clientWidth
+        }
+    }
 
-        sx {
-            width = (props.width - 20).px
-            margin = theme.spacing(2)
+    Box {
+        if(role != null) {
+            Box {
+                ref = badgeContentRef
+                sx {
+                    position = Position.absolute
+                    zIndex = 50_000.unsafeCast<ZIndex>()
+                    marginLeft = (props.width - badgeWidth).px
+                    backgroundColor = theme.palette.primary.light
+                    color = theme.palette.primary.contrastText
+                    display = Display.inlineBlock
+                    borderRadius = 48.px
+                    padding = 4.px
+                    whiteSpace = WhiteSpace.nowrap
+                    verticalAlign = VerticalAlign.baseline
+                }
+
+
+                Typography {
+                    variant = TypographyVariant.caption
+
+                    BadgeIcon {
+                        sx {
+                            width = 16.px
+                            height = 16.px
+                        }
+                        color = SvgIconColor.inherit
+                    }
+
+                    + courseTerminologyResource(terminologyEntries, strings, role)
+                }
+            }
         }
 
-        CardActionArea {
+
+        Card {
+            key = props.clazzItem?.clazzUid?.toString()
+
+
             sx {
-                verticalAlign = VerticalAlign.top
+                width = (props.width - 20).px
+                margin = theme.spacing(2)
             }
 
-            onClick = {
-                props.clazzItem?.also { props.onClickClazz(it) }
-            }
-
-            CardContent {
-                Typography {
-                    variant = TypographyVariant.h5
-                    gutterBottom = true
-                    + (props.clazzItem?.clazzName ?: "")
+            CardActionArea {
+                sx {
+                    verticalAlign = VerticalAlign.top
                 }
-
-                Typography {
+                CardMedia {
                     sx {
-                        webKitLineClamp = 2
-                        display = DisplayWebkitBox
-                        webkitBoxOrient = "vertical"
-                        overflow = Overflow.hidden
-                        textOverflow = TextOverflow.ellipsis
+                        height = 96.px
                     }
-                    variant = TypographyVariant.body2
-                    color = "text.secondary"
-                    + clazzDescription
+                    image = props.clazzItem?.coursePicture?.coursePictureUri ?: "img/course_banner_default0.webp"
+
                 }
 
-                if(role != null) {
-                    Stack {
-                        direction = responsive(StackDirection.row)
+                onClick = {
+                    props.clazzItem?.also { props.onClickClazz(it) }
+                }
+
+                CardContent {
+                    Typography {
+                        variant = TypographyVariant.h5
+                        gutterBottom = true
+                        + (props.clazzItem?.clazzName ?: "")
+                    }
+
+                    Typography {
                         sx {
-                            marginTop = theme.spacing(1)
+                            webKitLineClamp = 2
+                            display = DisplayWebkitBox
+                            webkitBoxOrient = "vertical"
+                            overflow = Overflow.hidden
+                            textOverflow = TextOverflow.ellipsis
                         }
-
-                        BadgeIcon {
-                            fontSize = SvgIconSize.small
-                            color = SvgIconColor.action
-                        }
-
-                        + courseTerminologyResource(terminologyEntries, strings, role)
+                        variant = TypographyVariant.body2
+                        color = "text.secondary"
+                        + clazzDescription
                     }
                 }
             }

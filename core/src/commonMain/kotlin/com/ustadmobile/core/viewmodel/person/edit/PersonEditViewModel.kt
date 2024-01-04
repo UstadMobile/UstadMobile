@@ -588,8 +588,6 @@ class PersonEditViewModel(
 
         const val STATE_KEY_PICTURE = "picState"
 
-        const val INIT_PIC_URI = "initPicUri"
-
         const val DEST_NAME = "PersonEditView"
 
         /** This is a different view name that is mapped to a different NavController destination

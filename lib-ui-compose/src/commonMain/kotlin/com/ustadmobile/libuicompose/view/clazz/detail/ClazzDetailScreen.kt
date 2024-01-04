@@ -12,6 +12,7 @@ import com.ustadmobile.core.viewmodel.clazzenrolment.clazzmemberlist.ClazzMember
 import com.ustadmobile.core.viewmodel.clazzlog.attendancelist.ClazzLogListAttendanceViewModel
 import com.ustadmobile.core.viewmodel.coursegroupset.list.CourseGroupSetListViewModel
 import com.ustadmobile.libuicompose.components.UstadScreenTabs
+import com.ustadmobile.libuicompose.components.isDesktop
 import com.ustadmobile.libuicompose.nav.UstadNavControllerPreCompose
 import com.ustadmobile.libuicompose.view.clazz.detailoverview.ClazzDetailOverviewScreen
 import com.ustadmobile.libuicompose.view.clazzenrolment.clazzmemberlist.ClazzMemberListScreen
@@ -75,7 +76,7 @@ fun ClazzDetailScreen(
         onSetAppUiState = onSetAppUiState,
         navResultReturner = navResultReturner,
         onShowSnackBar = onShowSnackbar,
-        scrollable = true,
+        scrollable = !isDesktop(),
     ) { tabItem ->
         when(tabItem.viewName) {
             ClazzDetailOverviewViewModel.DEST_NAME -> {

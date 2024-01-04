@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.dao.deactivateByUids
 import com.ustadmobile.core.domain.courseblockupdate.AddOrUpdateCourseBlockUseCase
 import com.ustadmobile.core.domain.courseblockupdate.UpdateCourseBlocksOnReorderOrCommitUseCase
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.ImportContentUseCase
 import com.ustadmobile.core.domain.contententry.save.SaveContentEntryUseCase
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
@@ -115,7 +116,9 @@ class ClazzEditViewModel(
         repo = di.onActiveEndpoint().direct.instanceOrNull(tag = DoorTag.TAG_REPO),
     ),
     private val importContentUseCase: ImportContentUseCase = di.onActiveEndpoint().direct.instance(),
-    ): UstadEditViewModel(di, savedStateHandle, DEST_NAME) {
+    private val enqueueSavePictureUseCase: EnqueueSavePictureUseCase = di.onActiveEndpoint().direct
+        .instance(),
+): UstadEditViewModel(di, savedStateHandle, DEST_NAME) {
 
     private val _uiState = MutableStateFlow(ClazzEditUiState())
 
@@ -138,11 +141,24 @@ class ClazzEditViewModel(
                         serializer = ClazzWithHolidayCalendarAndSchoolAndTerminology.serializer(),
                         onLoadFromDb = {
                             it.clazzDao.takeIf { entityUidArg != 0L }
-                                ?.findByUidWithHolidayCalendarAsync(entityUidArg)
+                                ?.findByUidWithHolidayCalendarAsync(entityUidArg).let { dbResult ->
+                                    val hasPicture = dbResult?.coursePicture != null
+                                    //Add CoursePicture entity if not already present
+                                    if(dbResult == null || hasPicture){
+                                        dbResult
+                                    }else {
+                                        dbResult.shallowCopy {
+                                            coursePicture = CoursePicture(
+                                                coursePictureUid = entityUidArg
+                                            )
+                                        }
+                                    }
+                                }
                         },
                         makeDefault = {
+                            val newClazzUid = activeDb.doorPrimaryKeyManager.nextId(Clazz.TABLE_ID)
                             ClazzWithHolidayCalendarAndSchoolAndTerminology().apply {
-                                clazzUid = activeDb.doorPrimaryKeyManager.nextId(Clazz.TABLE_ID)
+                                clazzUid = newClazzUid
                                 clazzName = ""
                                 isClazzActive = true
                                 clazzStartTime = systemTimeInMillis()
@@ -153,6 +169,9 @@ class ClazzEditViewModel(
                                 terminology = activeRepo.courseTerminologyDao
                                     .takeIf { clazzTerminologyUid != 0L }
                                     ?.findByUidAsync(clazzTerminologyUid)
+                                coursePicture = CoursePicture(
+                                    coursePictureUid = newClazzUid
+                                )
                             }
                         },
                         uiUpdate = {
@@ -162,7 +181,10 @@ class ClazzEditViewModel(
                                 )
                             }
                         }
-                    )
+                    ).also {
+                        savedStateHandle.setIfNoValueSetYet(INIT_PIC_URI,
+                            it?.coursePicture?.coursePictureUri ?: "")
+                    }
                 },
                 async {
                     loadEntity(
@@ -541,6 +563,10 @@ class ClazzEditViewModel(
 
             Napier.d("onClickSave: start transaction")
             val courseBlockListVal = _uiState.value.courseBlockList
+            val coursePictureVal = entity.coursePicture
+            val updateImage = coursePictureVal != null &&
+                    savedStateHandle[INIT_PIC_URI] != (entity.coursePicture?.coursePictureUri ?: "")
+
             activeDb.withDoorTransactionAsync {
                 if(entityUidArg == 0L) {
                     val termMap = activeDb.courseTerminologyDao.findByUidAsync(initEntity.clazzTerminologyUid)
@@ -548,6 +574,11 @@ class ClazzEditViewModel(
                     activeRepo.createNewClazzAndGroups(initEntity, systemImpl, termMap)
                 }else {
                     activeRepo.clazzDao.updateAsync(initEntity)
+                }
+
+                if(updateImage && coursePictureVal != null) {
+                    coursePictureVal.coursePictureLct = systemTimeInMillis()
+                    activeDb.coursePictureDao.upsertAsync(coursePictureVal)
                 }
 
                 val clazzUid = entity.clazzUid
@@ -620,6 +651,12 @@ class ClazzEditViewModel(
                 Napier.d("onClickSave: transaction block done")
             }
             Napier.d("onClickSave: transaction done")
+
+            enqueueSavePictureUseCase.takeIf { updateImage }?.invoke(
+                entityUid = entity.clazzUid,
+                tableId = CoursePicture.TABLE_ID,
+                pictureUri = coursePictureVal?.coursePictureUri
+            )
 
             val entityTimeZone = TimeZone.of(entity.effectiveTimeZone)
             val fromLocalDate = Clock.System.now().toLocalDateTime(entityTimeZone)

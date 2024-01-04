@@ -10,6 +10,7 @@ private val nameMap = mapOf(
     UstadImage.ILLUSTRATION_OFFLINE_USAGE to R.drawable.illustration_offline_usage,
     UstadImage.ILLUSTRATION_OFFLINE_SHARING to R.drawable.illustration_offline_sharing,
     UstadImage.ILLUSTRATION_ORGANIZED to R.drawable.illustration_organized,
+    UstadImage.COURSE_BANNER_DEFAULT0 to R.drawable.course_banner_default0,
 )
 
 @Composable

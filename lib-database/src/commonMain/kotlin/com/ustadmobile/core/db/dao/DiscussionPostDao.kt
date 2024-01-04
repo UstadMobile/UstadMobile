@@ -60,7 +60,7 @@ expect abstract class DiscussionPostDao: BaseDao<DiscussionPost>{
     ): PagingSource<Int, DiscussionPostWithDetails>
 
     @Query("""
-        SELECT Person.*
+        SELECT Person.*, PersonPicture.*
           FROM Person
                LEFT JOIN PersonPicture
                          ON PersonPicture.personPictureUid = Person.personUid

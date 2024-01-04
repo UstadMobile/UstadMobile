@@ -3,6 +3,7 @@ package com.ustadmobile.libuicompose.components
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.ScrollableTabRow
@@ -114,6 +115,7 @@ fun UstadScreenTabs(
                 ScrollableTabRow(
                     selectedTabIndex = pagerState.currentPage,
                     edgePadding = 0.dp,
+                    modifier = Modifier.fillMaxWidth(),
                 ){
                     tabContent()
                 }

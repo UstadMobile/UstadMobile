@@ -1313,12 +1313,26 @@ val MIGRATION_127_128 = DoorMigrationStatementList(127, 128) { db ->
     }
 }
 
+val MIGRATION_128_129 = DoorMigrationStatementList(128, 129) { db ->
+    buildList {
+        add("DROP TABLE IF EXISTS CoursePicture")
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS CoursePicture (  coursePictureLct  INTEGER  NOT NULL , coursePictureUri  TEXT , coursePictureThumbnailUri  TEXT , coursePictureActive  INTEGER  NOT NULL , coursePictureUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS CoursePicture (  coursePictureLct  BIGINT  NOT NULL , coursePictureUri  TEXT , coursePictureThumbnailUri  TEXT , coursePictureActive  BOOL  NOT NULL , coursePictureUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+        }
+    }
+}
+
+
+
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_102_103,
     MIGRATION_103_104, MIGRATION_104_105, MIGRATION_105_106, MIGRATION_106_107,
     MIGRATION_107_108, MIGRATION_108_109,
     MIGRATION_120_121, MIGRATION_121_122, MIGRATION_122_123, MIGRATION_123_124,
     MIGRATION_124_125, MIGRATION_125_126, MIGRATION_126_127, MIGRATION_127_128,
+    MIGRATION_128_129,
 )
 
 

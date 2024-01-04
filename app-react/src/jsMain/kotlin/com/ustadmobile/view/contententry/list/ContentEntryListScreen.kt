@@ -225,6 +225,7 @@ private val ContentEntryListScreenComponent = FC<ContentEntryListScreenProps> { 
             if(props.uiState.showChips) {
                 item(key = "filter_chips") {
                     UstadListFilterChipsHeader.create {
+                        id = "content_entry_filter_chip_box"
                         filterOptions = props.uiState.filterOptions
                         selectedChipId = props.uiState.selectedChipId
                         onClickFilterChip = props.onClickFilterChip
