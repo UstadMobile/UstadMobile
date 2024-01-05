@@ -27,7 +27,7 @@ expect abstract class MessageDao {
     ): PagingSource<Int, Message>
 
     @Query("""
-        SELECT Person.*, LatestMessage.*
+        SELECT Person.*, LatestMessage.*, PersonPicture.*
           FROM Person
                JOIN Message LatestMessage
                     ON LatestMessage.messageUid = 
@@ -39,6 +39,9 @@ expect abstract class MessageDao {
                                 AND Message.messageToPersonUid = :accountPersonUid)
                        ORDER BY Message.messageTimestamp DESC
                           LIMIT 1)
+                          
+                          LEFT JOIN PersonPicture
+                                 ON PersonPicture.personPictureUid = Person.personUid
       ORDER BY LatestMessage.messageTimestamp DESC
     """)
     abstract fun conversationsForUserAsPagingSource(

@@ -86,6 +86,10 @@ fun ConversationItem(
             UstadPersonAvatar(
                 message?.otherPerson?.personUid ?: 0,
             )
+            UstadPersonAvatar(
+                pictureUri = message?.personPicture?.personPictureThumbnailUri,
+                personName = message?.otherPerson?.fullName(),
+            )
         },
         supportingContent = {
             Text(

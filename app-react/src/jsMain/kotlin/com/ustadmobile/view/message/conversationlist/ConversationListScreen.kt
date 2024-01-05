@@ -147,7 +147,8 @@ val ConversationItem = FC<ConversationItemProps> { props ->
 
             ListItemIcon {
                 UstadPersonAvatar {
-                    personUid = props.message?.otherPerson?.personUid ?: 0
+                    pictureUri = props.message?.personPicture?.personPictureThumbnailUri
+                    personName = props.message?.otherPerson?.fullName()
                 }
             }
 
