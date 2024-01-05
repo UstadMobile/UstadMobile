@@ -24,6 +24,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.transferjobitem.TransferJobItemStatusUpdater
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientChunkGetterUseCase
 import com.ustadmobile.door.ext.withDoorTransactionAsync
+import com.ustadmobile.lib.db.composites.TransferJobItemStatus
 import com.ustadmobile.libcache.response.requireHeadersContentLength
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.NonCancellable
@@ -229,13 +230,22 @@ class BlobUploadClientUseCaseJvm(
                             BlobUploadClientUseCase.BlobTransferJobItem(
                                 blobUrl = it,
                                 transferJobItemUid = jobItem.tjiUid,
+                                lockIdToRelease = jobItem.tjiLockIdToRelease,
                             )
                         }
                     },
                     batchUuid = batchUuid,
                     endpoint = endpoint,
                     onProgress = transferJobItemStatusUpdater::onProgressUpdate,
-                    onStatusUpdate = transferJobItemStatusUpdater::onStatusUpdate,
+                    onStatusUpdate = {
+                        transferJobItemStatusUpdater.onStatusUpdate(it)
+                        if(it.status == TransferJobItemStatus.STATUS_COMPLETE_INT &&
+                            it.uploadItem.lockIdToRelease != 0
+                        ) {
+                            Napier.d { "BlobUploadUseCaseJvm: release cache lock #(${it.uploadItem.lockIdToRelease}) for ${it.uploadItem.blobUrl}" }
+                            httpCache.removeRetentionLocks(listOf(it.uploadItem.lockIdToRelease))
+                        }
+                    },
                 )
 
                 val numIncompleteItems = db.withDoorTransactionAsync {

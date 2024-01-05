@@ -18,11 +18,14 @@ interface EnqueueBlobUploadClientUseCase{
      *                upload is complete if desired, otherwise zero. See TransferJobItem.tjiTableId
      * @param entityUid the entity uid of the entity that should be updated on the server when the
      *                 upload is complete if desired, otherwise zero. See TransferJobItem.tjiEntityUid
+     * @param retentionLockIdToRelease if a retention lock was created (which happens on Android/Desktop)
+     *        to ensure the item is retained until upload is complete, then this is the lock id.
      */
     data class EnqueueBlobUploadItem(
         val blobUrl: String,
         val tableId: Int = 0,
         val entityUid: Long = 0,
+        val retentionLockIdToRelease: Int = 0,
     )
 
     suspend operator fun invoke(

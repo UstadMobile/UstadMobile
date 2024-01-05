@@ -7,7 +7,8 @@ import kotlinx.serialization.Serializable
  * Save a list of local Uri(s) (e.g. Android Uri, JVM file URI, JS blob URI) as blobs.
  *
  * On Android/Desktop: Runs an SHA-256 checksum on the content and stores it into the local httpcache
- * under the blob url (e.g. https://endpoint.com/api/blob/sha256).
+ * under the blob url (e.g. https://endpoint.com/api/blob/sha256). The entry will be added with a
+ * retention lock to prevent its eviction (e.g. it should never be evicted until upload is completed).
  *
  * On Javascript: uploads each item to the server using the blob upload-item API endpoint (see
  * Module.md)
@@ -25,7 +26,6 @@ interface SaveLocalUrisAsBlobsUseCase {
      *        the TransferJobItem.tjiTableId. See its doc for details.
      * @param mimeType (optional), if not null, explicitly sets the content-type when it is stored
      *        as a blob. If not specified, the system UriHelper will be used to guess the mime type.
-     *
      */
     data class SaveLocalUriAsBlobItem(
         val localUri: String,
@@ -38,6 +38,7 @@ interface SaveLocalUrisAsBlobsUseCase {
         val entityUid: Long,
         val localUri: String,
         val blobUrl: String,
+        val retentionLockId: Int = 0,
     )
 
     /**

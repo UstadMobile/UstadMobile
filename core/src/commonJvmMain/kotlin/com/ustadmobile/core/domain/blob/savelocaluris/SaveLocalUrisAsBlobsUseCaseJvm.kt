@@ -4,6 +4,8 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.url.UrlKmp
 import com.ustadmobile.core.util.UMURLEncoder
+import com.ustadmobile.core.util.digest.Digester
+import com.ustadmobile.core.util.digest.urlKey
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.libcache.CacheEntryToStore
 import com.ustadmobile.libcache.UstadCache
@@ -53,6 +55,7 @@ class SaveLocalUrisAsBlobsUseCaseJvm(
         createTmpPathIfNeeded()
 
         val endpointUrl = UrlKmp(endpoint.url)
+        val digester = Digester("MD5")
 
         //List of Pair (SaveLocalUriAsBlobItem to CacheEntryToStore)
         val entriesToStore = localUrisToSave.map { saveItem ->
@@ -83,18 +86,22 @@ class SaveLocalUrisAsBlobsUseCaseJvm(
                     extraHeaders = headersBuilder {
                         header("cache-control", "immutable")
                     },
-                )
+                ),
+                createRetentionLock = true,
             )
         }
 
         Napier.d { "$logPrefix Storing ${entriesToStore.size} local uris as blobs (${entriesToStore.joinToString { it.second.request.url }})" }
-        cache.store(entriesToStore.map { it.second })
+        val storeResults = cache.store(entriesToStore.map { it.second }).associateBy {
+            it.urlKey
+        }
 
         entriesToStore.map {
             SaveLocalUrisAsBlobsUseCase.SavedBlob(
                 entityUid = it.first.entityUid,
                 localUri = it.first.localUri,
-                blobUrl = it.second.request.url
+                blobUrl = it.second.request.url,
+                retentionLockId = storeResults[digester.urlKey(it.second.request.url)]?.lockId ?: 0
             )
         }
     }

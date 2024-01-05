@@ -1324,6 +1324,11 @@ val MIGRATION_128_129 = DoorMigrationStatementList(128, 129) { db ->
     }
 }
 
+val MIGRATION_129_130 = DoorMigrationStatementList(129, 130) { db ->
+    buildList {
+        add("ALTER TABLE TransferJobItem ADD COLUMN tjiLockIdToRelease INTEGER NOT NULL DEFAULT 0")
+    }
+}
 
 
 fun migrationList() = listOf<DoorMigration>(
@@ -1332,7 +1337,7 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_107_108, MIGRATION_108_109,
     MIGRATION_120_121, MIGRATION_121_122, MIGRATION_122_123, MIGRATION_123_124,
     MIGRATION_124_125, MIGRATION_125_126, MIGRATION_126_127, MIGRATION_127_128,
-    MIGRATION_128_129,
+    MIGRATION_128_129, MIGRATION_129_130,
 )
 
 

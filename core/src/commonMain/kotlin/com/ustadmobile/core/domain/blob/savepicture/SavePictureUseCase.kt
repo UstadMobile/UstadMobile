@@ -85,6 +85,7 @@ class SavePictureUseCase(
                             blobUrl = it.blobUrl,
                             tableId = tableId,
                             entityUid = entityUid,
+                            retentionLockIdToRelease = it.retentionLockId,
                         )
                     },
                     batchUuid = randomUuidAsString(),

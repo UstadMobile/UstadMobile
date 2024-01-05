@@ -85,6 +85,8 @@ class UstadCacheImpl(
 
     private val pendingLastAccessedUpdates = atomic(emptyList<LastAccessedUpdate>())
 
+    private val pendingLockRemovals = atomic(emptyList<Int>())
+
     data class CacheEntryAndTmpFile(
         val cacheEntry: CacheEntry,
         val entryToStore: CacheEntryToStore,
@@ -280,6 +282,7 @@ class UstadCacheImpl(
 
             return storeRequest.map {
                 StoreResult(
+                    urlKey = md5Digest.urlKey(it.request.url),
                     request = it.request,
                     response = it.response,
                     lockId = locksCreated[it.request.url]?.lockId ?: 0
@@ -392,8 +395,14 @@ class UstadCacheImpl(
         }
     }
 
+    /**
+     * Lock removal is done by adding it to the pending list. This isn't urgent. This avoids a large
+     * number of database transactions running when lots of small files are being uploaded
+     */
     override fun removeRetentionLocks(lockIds: List<Int>) {
-        db.retentionLockDao.delete(lockIds.map { RetentionLock(lockId = it) } )
+        pendingLockRemovals.update { prev ->
+            prev + lockIds
+        }
     }
 
     private fun commitLastAccessedUpdates() {
@@ -401,7 +410,11 @@ class UstadCacheImpl(
             emptyList()
         }
 
-        if(updatesPending.isEmpty())
+        val lockRemovalsPending = pendingLockRemovals.getAndUpdate {
+            emptyList()
+        }
+
+        if(updatesPending.isEmpty() && lockRemovalsPending.isEmpty())
             return
 
         val updatesMap = mutableMapOf<String, Long>()
@@ -413,6 +426,8 @@ class UstadCacheImpl(
             updatesMap.forEach {
                 db.cacheEntryDao.updateLastAccessedTime(it.key, it.value)
             }
+
+            db.retentionLockDao.delete(lockRemovalsPending.map { RetentionLock(lockId = it) } )
         }
     }
 
