@@ -20,7 +20,7 @@ import com.ustadmobile.libcache.io.transferToAndGetSha256
 import com.ustadmobile.libcache.io.unzipTo
 import com.ustadmobile.libcache.logging.UstadCacheLogger
 import com.ustadmobile.libcache.md5.Md5Digest
-import com.ustadmobile.libcache.md5.digestAndEncodeBase64
+import com.ustadmobile.libcache.md5.urlKey
 import com.ustadmobile.libcache.request.HttpRequest
 import com.ustadmobile.libcache.request.requestBuilder
 import com.ustadmobile.libcache.response.CacheResponse
@@ -43,16 +43,32 @@ import kotlinx.io.files.FileSystem
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
 
+/**
+ *
+ * @param sizeLimit A function that returns the current size limit for the cache. This will be
+ *        invoked on the periodic trims that are run. The limit applies to evictable entries e.g.
+ *        entries which do not have any retentionlock.
+ * @param lastAccessedCommitInterval the interval period to commit (in batches) updates to entry
+ *        last accessed times.
+ */
 class UstadCacheImpl(
     private val fileSystem: FileSystem = SystemFileSystem,
     cacheName: String = "",
     storagePath: Path,
     private val db: UstadCacheDb,
     internal val mimeTypeHelper: MimeTypeHelper,
+    sizeLimit: () -> Long = { UstadCache.DEFAULT_SIZE_LIMIT },
     private val logger: UstadCacheLogger? = null,
     private val listener: UstadCache.CacheListener? = null,
     private val lastAccessedCommitInterval: Int = 5_000,
+    private val trimInterval: Int = 30_000,
     private val responseValidityChecker: ResponseValidityChecker = ResponseValidityChecker(),
+    private val trimmer: UstadCacheTrimmer = UstadCacheTrimmer(
+        db = db,
+        fileSystem = fileSystem,
+        logger = logger,
+        sizeLimit = sizeLimit,
+    )
 ) : UstadCache {
 
     private val scope = CoroutineScope(Dispatchers.IO + Job())
@@ -90,7 +106,10 @@ class UstadCacheImpl(
         }
 
         scope.launch {
-
+            while(isActive) {
+                delay(trimInterval.toLong())
+                trimmer.trim()
+            }
         }
     }
 
@@ -100,7 +119,7 @@ class UstadCacheImpl(
     ): List<Pair<EntryLockRequest, RetentionLock>> {
         return lockRequests.map {
             val lock = RetentionLock(
-                lockKey = md5Digest.digestAndEncodeBase64(it.url),
+                lockKey = md5Digest.urlKey(it.url),
             )
             val lockId = db.retentionLockDao.insert(lock).toInt()
             it to lock.copy(lockId = lockId)
@@ -168,7 +187,7 @@ class UstadCacheImpl(
 
                 CacheEntryAndTmpFile(
                     cacheEntry = CacheEntry(
-                        key = md5Digest.digestAndEncodeBase64(entryToStore.request.url),
+                        key = md5Digest.urlKey(entryToStore.request.url),
                         url = entryToStore.request.url,
                         responseBodySha256 = sha256,
                         statusCode = entryToStore.response.responseCode,
@@ -192,7 +211,7 @@ class UstadCacheImpl(
                 db.requestedEntryDao.insertList(storeRequestEntriesAndTmpFiles.map {
                     RequestedEntry(
                         requestSha256 = it.cacheEntry.responseBodySha256 ?: "",
-                        requestedKey = md5Digest.digestAndEncodeBase64(it.cacheEntry.url),
+                        requestedKey = md5Digest.urlKey(it.cacheEntry.url),
                         batchId = batchId,
                     )
                 })
@@ -352,7 +371,7 @@ class UstadCacheImpl(
                 urls.map {  url ->
                     RequestedEntry(
                         batchId = batchId,
-                        requestedKey =  md5Digest.digestAndEncodeBase64(url)
+                        requestedKey =  md5Digest.urlKey(url)
                     )
                 }
             )
@@ -362,7 +381,7 @@ class UstadCacheImpl(
         }
 
         return urls.associateWith { url ->
-            (md5Digest.digestAndEncodeBase64(url) !in keysNotPresent)
+            (md5Digest.urlKey(url) !in keysNotPresent)
         }
     }
 
@@ -398,8 +417,8 @@ class UstadCacheImpl(
     }
 
     override fun close() {
-        commitLastAccessedUpdates()
         scope.cancel()
+        commitLastAccessedUpdates()
     }
 
     companion object {

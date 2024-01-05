@@ -1,6 +1,7 @@
 package com.ustadmobile.libcache.db.entities
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 /**
@@ -11,7 +12,11 @@ import androidx.room.PrimaryKey
  * specifically requests a given item, the cache entry will be kept indefinitely, even when it
  * otherwise be evicted based on last access time).
  */
-@Entity
+@Entity(
+    indices = arrayOf(
+        Index("lockKey", name = "idx_lockKey")
+    )
+)
 data class RetentionLock(
     @PrimaryKey(autoGenerate = true)
     var lockId: Int = 0,

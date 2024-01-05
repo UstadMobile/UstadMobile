@@ -1,5 +1,6 @@
 package com.ustadmobile.libcache.db.dao
 
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -57,5 +58,35 @@ expect abstract class CacheEntryDao {
     """)
     abstract fun updateLastAccessedTime(key: String, lastAccessTime: Long)
 
+    /**
+     * Find entries that can be evicted e.g. entries for which there is no RetentionLock
+     */
+    @Query("""
+        SELECT CacheEntry.*
+          FROM CacheEntry
+         WHERE NOT EXISTS(
+               SELECT RetentionLock.lockId
+                 FROM RetentionLock
+                WHERE RetentionLock.lockKey = CacheEntry.key) 
+      ORDER BY lastAccessed ASC           
+         LIMIT :batchSize       
+      
+    """)
+    abstract fun findEvictableEntries(batchSize: Int): List<CacheEntry>
 
+    /**
+     * Get the total size of evictable entries.
+     */
+    @Query("""
+        SELECT SUM(CacheEntry.storageSize)
+          FROM CacheEntry
+         WHERE NOT EXISTS(
+               SELECT RetentionLock.lockId
+                 FROM RetentionLock
+                WHERE RetentionLock.lockKey = CacheEntry.key)  
+    """)
+    abstract fun totalEvictableSize(): Long
+
+    @Delete
+    abstract fun delete(entries: List<CacheEntry>)
 }

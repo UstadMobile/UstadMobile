@@ -56,3 +56,13 @@ val MIGRATE_4_5 = DoorMigrationStatementList(4, 5) {
         add("CREATE TABLE IF NOT EXISTS CacheEntry (  key  TEXT  PRIMARY KEY  NOT NULL , url  TEXT  NOT NULL , message  TEXT  NOT NULL , statusCode  INTEGER  NOT NULL , cacheFlags  INTEGER  NOT NULL , method  INTEGER  NOT NULL , lastAccessed  INTEGER  NOT NULL , lastValidated  INTEGER  NOT NULL , responseBodySha256  TEXT , responseHeaders  TEXT  NOT NULL , storageUri  TEXT  NOT NULL , storageSize  INTEGER  NOT NULL )")
     }
 }
+
+/**
+ * Add index for last accessed column (sort criteria) and lock key
+ */
+val MIGRATE_5_6 = DoorMigrationStatementList(5, 6) {
+    buildList {
+        add("CREATE INDEX idx_lastAccessed ON CacheEntry (lastAccessed)")
+        add("CREATE INDEX idx_lockKey ON RetentionLock (lockKey)")
+    }
+}

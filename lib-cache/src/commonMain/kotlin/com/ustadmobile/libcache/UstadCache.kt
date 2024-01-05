@@ -102,6 +102,8 @@ interface UstadCache {
 
         const val HEADER_LAST_VALIDATED_TIMESTAMP = "UCache-Last-Validated"
 
+        const val DEFAULT_SIZE_LIMIT = (100 * 1024 * 1024).toLong()
+
     }
 
 
