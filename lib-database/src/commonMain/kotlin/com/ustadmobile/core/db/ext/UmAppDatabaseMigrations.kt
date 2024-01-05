@@ -1330,6 +1330,17 @@ val MIGRATION_129_130 = DoorMigrationStatementList(129, 130) { db ->
     }
 }
 
+val MIGRATION_130_131 = DoorMigrationStatementList(130, 131) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS CacheLockJoin (  cljTableId  INTEGER  NOT NULL , cljEntityUid  INTEGER  NOT NULL , cljUrl  TEXT  NOT NULL , cljLockId  INTEGER  NOT NULL , cljStatus  INTEGER  NOT NULL , cljType  INTEGER  NOT NULL , cljId  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+            add("CREATE INDEX idx_clj_table_entity_url ON CacheLockJoin (cljTableId, cljEntityUid, cljUrl)")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS CacheLockJoin (  cljTableId  INTEGER  NOT NULL , cljEntityUid  BIGINT  NOT NULL , cljUrl  TEXT  NOT NULL , cljLockId  INTEGER  NOT NULL , cljStatus  INTEGER  NOT NULL , cljType  INTEGER  NOT NULL , cljId  SERIAL  PRIMARY KEY  NOT NULL )")
+            add("CREATE INDEX idx_clj_table_entity_url ON CacheLockJoin (cljTableId, cljEntityUid, cljUrl)")
+        }
+    }
+}
 
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_102_103,
@@ -1337,7 +1348,9 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_107_108, MIGRATION_108_109,
     MIGRATION_120_121, MIGRATION_121_122, MIGRATION_122_123, MIGRATION_123_124,
     MIGRATION_124_125, MIGRATION_125_126, MIGRATION_126_127, MIGRATION_127_128,
-    MIGRATION_128_129, MIGRATION_129_130,
+    MIGRATION_128_129, MIGRATION_129_130, MIGRATION_130_131,
+    //131 to 132 is a migration that applies only to the server side to add uri retention triggers
+
 )
 
 

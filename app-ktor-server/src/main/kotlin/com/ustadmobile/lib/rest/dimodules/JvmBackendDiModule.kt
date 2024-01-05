@@ -11,6 +11,9 @@ import com.ustadmobile.core.db.ContentJobItemTriggersCallback
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
+import com.ustadmobile.core.domain.cachelock.AddRetainAllActiveUriTriggersCallback
+import com.ustadmobile.core.domain.cachelock.Migrate131to132AddRetainActiveUriTriggers
+import com.ustadmobile.core.domain.cachelock.UpdateCacheLockJoinUseCase
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.DiTag
@@ -29,6 +32,7 @@ import org.kodein.di.*
 import java.io.File
 import com.ustadmobile.lib.rest.ext.absoluteDataDir
 import com.ustadmobile.lib.rest.ext.ktorInitDb
+import com.ustadmobile.libcache.UstadCache
 import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
 import nl.adaptivity.xmlutil.serialization.XML
 import nl.adaptivity.xmlutil.serialization.XmlConfig
@@ -36,6 +40,14 @@ import org.xmlpull.v1.XmlPullParserFactory
 import java.io.FileReader
 import java.io.FileWriter
 import java.util.Properties
+
+/**
+ * The database and use cases that need to start observing once the database is created
+ */
+data class DbAndObservers(
+    val db: UmAppDatabase,
+    val updateCacheLockJoinUseCase: UpdateCacheLockJoinUseCase,
+)
 
 /**
  * DI Module that provides dependencies which are used both by the server and command line tools
@@ -99,8 +111,7 @@ fun makeJvmBackendDiModule(
         Pbkdf2Params(numIterations, keyLength)
     }
 
-    bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(contextScope).singleton {
-        Napier.d("creating database for context: ${context.url}")
+    bind<DbAndObservers>() with scoped(contextScope).singleton {
         val dbHostName = context.identifier(dbMode, "UmAppDatabase")
         val nodeIdAndAuth: NodeIdAndAuth = instance()
         val dbUrl = config.property("ktor.database.url").getString()
@@ -108,20 +119,35 @@ fun makeJvmBackendDiModule(
             .replace("(datadir)", config.absoluteDataDir().absolutePath)
         if(dbUrl.startsWith("jdbc:postgresql"))
             Class.forName("org.postgresql.Driver")
-
-        DatabaseBuilder.databaseBuilder(UmAppDatabase::class,
-                dbUrl = dbUrl,
-                dbUsername = config.propertyOrNull("ktor.database.user")?.getString(),
-                dbPassword = config.propertyOrNull("ktor.database.password")?.getString(),
-                nodeId = nodeIdAndAuth.nodeId,
-            )
+        val db = DatabaseBuilder.databaseBuilder(UmAppDatabase::class,
+            dbUrl = dbUrl,
+            dbUsername = config.propertyOrNull("ktor.database.user")?.getString(),
+            dbPassword = config.propertyOrNull("ktor.database.password")?.getString(),
+            nodeId = nodeIdAndAuth.nodeId,
+        )
             .addSyncCallback(nodeIdAndAuth)
             .addCallback(ContentJobItemTriggersCallback())
             .addCallback(InsertDefaultSiteCallback())
+            .addCallback(AddRetainAllActiveUriTriggersCallback())
             .addMigrations(*migrationList().toTypedArray())
+            .addMigrations(Migrate131to132AddRetainActiveUriTriggers)
             .build().also {
                 it.ktorInitDb(di)
             }
+        val cache: UstadCache = instance()
+
+        DbAndObservers(
+            db = db,
+            updateCacheLockJoinUseCase = UpdateCacheLockJoinUseCase(
+                db = db,
+                cache = cache,
+            )
+        )
+    }
+
+    bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(contextScope).singleton {
+        Napier.d("creating database for context: ${context.url}")
+        instance<DbAndObservers>().db
     }
 
     bind<NodeIdAndAuth>() with scoped(EndpointScope.Default).singleton {
