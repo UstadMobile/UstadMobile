@@ -5,6 +5,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.SortOrderOption
+import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadListViewModel
@@ -32,7 +33,8 @@ class ConversationListViewModel(
 
     private val pagingSourceFactory: () -> PagingSource<Int, MessageAndOtherPerson> = {
         activeRepo.messageDao.conversationsForUserAsPagingSource(
-           activeUserPersonUid
+            searchQuery =  _appUiState.value.searchState.searchText.toQueryLikeParam(),
+            accountPersonUid = activeUserPersonUid,
         ).also {
             lastPagingSource = it
         }
@@ -63,7 +65,8 @@ class ConversationListViewModel(
     }
 
     override fun onUpdateSearchResult(searchText: String) {
-        TODO("Not yet implemented")
+        //will use the searchText as per the appUiState
+        lastPagingSource?.invalidate()
     }
 
     override fun onClickAdd() {

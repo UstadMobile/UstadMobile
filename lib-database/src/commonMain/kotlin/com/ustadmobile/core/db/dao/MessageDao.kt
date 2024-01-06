@@ -40,11 +40,14 @@ expect abstract class MessageDao {
                        ORDER BY Message.messageTimestamp DESC
                           LIMIT 1)
                           
-                          LEFT JOIN PersonPicture
-                                 ON PersonPicture.personPictureUid = Person.personUid
+                LEFT JOIN PersonPicture
+                          ON PersonPicture.personPictureUid = Person.personUid
+         WHERE :searchQuery = '%' 
+               OR (Person.firstNames || ' ' || Person.lastName) LIKE :searchQuery
       ORDER BY LatestMessage.messageTimestamp DESC
     """)
     abstract fun conversationsForUserAsPagingSource(
+        searchQuery: String,
         accountPersonUid: Long
     ): PagingSource<Int, MessageAndOtherPerson>
 
