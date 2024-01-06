@@ -12,8 +12,16 @@ data class ContentEntryGetMetadataStatus(
 
 interface IContentEntryGetMetaDataFromUriUseCase {
 
+    /**
+     * @param contentUri the URI from which meta data should be extracted
+     * @param fileName the original filename (this is often not possible to retrieve directly from
+     *        the Uri itself e.g. on JS when a blob URL is created or when using Android content uris
+     * @param endpoint endpoint
+     * @param onProgress
+     */
     suspend operator fun invoke(
         contentUri: DoorUri,
+        fileName: String?,
         endpoint: Endpoint,
         onProgress: (ContentEntryGetMetadataStatus) -> Unit,
     ): MetadataResult

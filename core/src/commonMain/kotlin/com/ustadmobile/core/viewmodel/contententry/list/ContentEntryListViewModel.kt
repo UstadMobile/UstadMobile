@@ -216,11 +216,12 @@ class ContentEntryListViewModel(
         )
     }
 
-    fun onImportFile(fileUri: String) {
+    fun onImportFile(fileUri: String, fileName: String) {
         navigateToCreateNew(
             editViewName = ContentEntryGetMetadataViewModel.DEST_NAME,
             extraArgs = buildMap {
                 put(ContentEntryGetMetadataViewModel.ARG_URI, fileUri)
+                put(ContentEntryGetMetadataViewModel.ARG_FILENAME, fileName)
                 put(ARG_PARENT_UID, parentEntryUid.toString())
                 putFromSavedStateIfPresent(ContentEntryEditViewModel.ARG_COURSEBLOCK)
             }
