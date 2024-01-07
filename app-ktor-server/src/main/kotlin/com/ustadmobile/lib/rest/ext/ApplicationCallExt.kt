@@ -1,7 +1,7 @@
 package com.ustadmobile.lib.rest.ext
 
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.contentjob.ContentImportersManager
+import com.ustadmobile.core.contentformats.ContentImportersManager
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.lib.rest.CONF_DBMODE_SINGLETON
 import com.ustadmobile.lib.rest.CONF_DBMODE_VIRTUALHOST

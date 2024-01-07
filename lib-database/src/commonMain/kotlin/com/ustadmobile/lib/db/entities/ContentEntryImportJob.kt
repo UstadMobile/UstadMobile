@@ -3,15 +3,11 @@ package com.ustadmobile.lib.db.entities
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.ustadmobile.door.annotation.ReplicateEntity
-import com.ustadmobile.door.annotation.ReplicateEtag
-import com.ustadmobile.door.annotation.ReplicateLastModified
-import com.ustadmobile.door.annotation.Trigger
-import com.ustadmobile.door.annotation.Triggers
 import kotlinx.serialization.Serializable
 
 /**
- * ContentJobItem represents one content item to process e.g. a URL, file, etc.
+ * ContentEntryImportJob represents a piece of Content to import. It can be observed for purposes
+ * of displaying progress to the user.
  */
 @Entity(
     indices = [
@@ -22,33 +18,11 @@ import kotlinx.serialization.Serializable
     ]
 )
 
-/* Normally the ContentJobItem is local on any given node. It will however need to be replicated
- * in order to allow clients to see progress of an import that takes time to process on the server
- * (e.g. video import etc)
- */
-@ReplicateEntity(
-    tableId = ContentJobItem.TABLE_ID,
-    remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW,
-)
-@Triggers(
-    arrayOf(
-        Trigger(
-            name = "contentjobitem_remote_insert",
-            order = Trigger.Order.INSTEAD_OF,
-            on = Trigger.On.RECEIVEVIEW,
-            events = [Trigger.Event.INSERT],
-            conditionSql = TRIGGER_CONDITION_WHERE_NEWER,
-            sqlStatements = [TRIGGER_UPSERT],
-        )
-    )
-)
 @Serializable
-data class ContentJobItem(
+data class ContentEntryImportJob(
 
     @PrimaryKey(autoGenerate = true)
     var cjiUid: Long = 0,
-
-    var cjiJobUid: Long = 0,
 
     /**
      * Where data is being taken from, this could be
@@ -69,8 +43,6 @@ data class ContentJobItem(
      */
     var cjiOriginalFilename: String? = null,
 
-    var cjiIsLeaf: Boolean = true,
-
     /**
      * Where the ContentEntryUid is set to 0, this indicates that the job must extract metadata
      * from the sourceUri and generate a new ContentEntry.
@@ -90,26 +62,14 @@ data class ContentJobItem(
     var cjiContentEntryVersion: Long = 0,
 
     /**
-     * Represents the progress on this item (itself) not including any child items
+     * Represents the progress on this item
      */
     var cjiItemProgress: Long = 0,
 
     /**
-     * Represents the total to process on this item (itself) not including any child items
+     * Represents the total to process on this item
      */
     var cjiItemTotal: Long = 0,
-
-    /**
-     * Represents the progress of this item and its child items (inclusive). This should not be set
-     * directly, it is managed by triggers and should NOT be updated directly.
-     */
-    var cjiRecursiveProgress: Long = 0,
-
-    /**
-     * Represents the total size of the job and its child items (inclusive). This should not be set
-     * directly, it is managed by triggers and should NOT be updated directly.
-     */
-    var cjiRecursiveTotal: Long = 0,
 
     /**
      * Represents the status to the process of this job item and not including any child items.
@@ -123,10 +83,6 @@ data class ContentJobItem(
      */
     var cjiRecursiveStatus:Int = 4,
 
-
-    var cjiConnectivityNeeded: Boolean = false,
-
-
     /**
      * The plugin id can be set if known. If not known, the runner will guess using the source
      * uri.
@@ -134,17 +90,9 @@ data class ContentJobItem(
     var cjiPluginId: Int = 0,
 
     /**
-     * The number of attempts made so far
-     */
-    var cjiAttemptCount: Int = 0,
-
-    /**
      *  The parent of this ContentJobItem in the content job itself.
      */
     var cjiParentCjiUid: Long = 0,
-
-
-    var cjiServerJobId: Long = 0,
 
     /**
      * time when the job runner started the job item
@@ -157,26 +105,12 @@ data class ContentJobItem(
     var cjiFinishTime: Long = 0,
 
     /**
-     * If this ContentJobItem is running an upload, this is the session uuid for the upload
-     */
-    var cjiUploadSessionUid: String? = null,
-
-    /**
      *  If true, if this ContentJobItem is cancelled, then any associated contentEntry should be set
      *  as inactive (e.g. if something is being imported as new content, but the job is canceled,
      *  the ContentEntry itself must be removed. If this is an update or something else, then we
      *  don't make the contententry inactive
      */
     var cjiContentDeletedOnCancellation:  Boolean = false,
-
-    /**
-     * Is used to check the status that the  container has finished processing in the job
-     */
-    var cjiContainerProcessed: Boolean = false,
-
-    @ReplicateEtag
-    @ReplicateLastModified
-    var cjiLastModified: Long = 0
 
 ) {
     companion object {

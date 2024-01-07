@@ -5,12 +5,10 @@ import com.ustadmobile.core.account.*
 import com.ustadmobile.core.contentformats.epub.EpubContentImporterCommonJvm
 import com.ustadmobile.core.contentformats.epub.XhtmlFixer
 import com.ustadmobile.core.contentformats.h5p.H5PContentImportPlugin
-import com.ustadmobile.core.contentformats.media.VideoContentImporterJvm
+import com.ustadmobile.core.contentformats.video.VideoContentImporterJvm
 import com.ustadmobile.core.contentformats.pdf.PdfContentImporterJvm
 import com.ustadmobile.core.contentformats.xapi.XapiZipContentImporter
-import com.ustadmobile.core.contentjob.ContentJobManager
-import com.ustadmobile.core.contentjob.ContentJobManagerJvm
-import com.ustadmobile.core.contentjob.ContentImportersManager
+import com.ustadmobile.core.contentformats.ContentImportersManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
 import com.ustadmobile.core.domain.blob.upload.BlobUploadServerUseCase
@@ -303,39 +301,40 @@ fun Application.umRestApplication(
             val uriHelper: UriHelper = instance()
             val xml: XML = instance()
             val xhtmlFixer: XhtmlFixer = instance()
+            val db: UmAppDatabase = instance(tag = DoorTag.TAG_DB)
 
             ContentImportersManager(
                 listOf(
                     EpubContentImporterCommonJvm(
                         endpoint = context,
-                        di = di,
                         cache = cache,
+                        db = db,
                         uriHelper = uriHelper,
                         xml = xml,
                         xhtmlFixer = xhtmlFixer,
                     ),
                     XapiZipContentImporter(
                         endpoint = context,
-                        di = di,
+                        db = db,
                         cache = cache,
                         uriHelper = uriHelper
                     ),
                     PdfContentImporterJvm(
                         endpoint = context,
-                        di = di,
+                        db = db,
                         cache= cache,
                         uriHelper = uriHelper,
                     ),
                     H5PContentImportPlugin(
                         endpoint = context,
-                        di = di,
+                        db = db,
                         cache = cache,
                         uriHelper = uriHelper,
                         json = instance(),
                     ),
                     VideoContentImporterJvm(
                         endpoint = context,
-                        di = di,
+                        db = db,
                         cache = cache,
                         uriHelper = uriHelper,
                         ffprobe = instance(),
@@ -361,10 +360,6 @@ fun Application.umRestApplication(
 
         bind<UploadSessionManager>() with scoped(EndpointScope.Default).singleton {
             UploadSessionManager(context, di)
-        }
-
-        bind<ContentJobManager>() with singleton {
-            ContentJobManagerJvm(di)
         }
 
         bind<Json>() with singleton {

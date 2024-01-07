@@ -4,6 +4,7 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentjob.InvalidContentException
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.contentformats.video.VideoContentImporterJvm
 import com.ustadmobile.core.test.assertCachedBodyMatchesFileContent
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.uri.UriHelperJvm
@@ -12,9 +13,7 @@ import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentJob
-import com.ustadmobile.lib.db.entities.ContentJobItem
-import com.ustadmobile.lib.db.entities.ContentJobItemAndContentJob
+import com.ustadmobile.lib.db.entities.ContentEntryImportJob
 import com.ustadmobile.lib.util.SysPathUtil
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.UstadCache
@@ -98,7 +97,7 @@ class VideoContentImporterJvmTest : AbstractMainDispatcherTest() {
 
         val importer = VideoContentImporterJvm(
             endpoint = activeEndpoint,
-            di = di,
+            db = db,
             cache = ustadCache,
             ffprobe = ffProbe,
             uriHelper = uriHelper,
@@ -117,7 +116,7 @@ class VideoContentImporterJvmTest : AbstractMainDispatcherTest() {
         invalidVideoFile.writeText("Hello World")
         val importer = VideoContentImporterJvm(
             endpoint = activeEndpoint,
-            di = di,
+            db = db,
             cache = ustadCache,
             ffprobe = ffProbe,
             uriHelper = uriHelper,
@@ -140,7 +139,7 @@ class VideoContentImporterJvmTest : AbstractMainDispatcherTest() {
 
         val importer = VideoContentImporterJvm(
             endpoint = activeEndpoint,
-            di = di,
+            db = db,
             cache = ustadCache,
             ffprobe = ffProbe,
             uriHelper = uriHelper,
@@ -158,24 +157,19 @@ class VideoContentImporterJvmTest : AbstractMainDispatcherTest() {
 
         val importer = VideoContentImporterJvm(
             endpoint = activeEndpoint,
-            di = di,
+            db = db,
             cache = ustadCache,
             ffprobe = ffProbe,
             uriHelper = uriHelper,
             json = json,
         )
 
-        val jobAndItem = ContentJobItemAndContentJob().apply {
-            contentJob = ContentJob()
-            contentJobItem = ContentJobItem(
-                sourceUri = videoFile.toDoorUri().toString(),
-                cjiOriginalFilename = "BigBuckBunny.mp4"
-            )
-        }
-
         val result = runBlocking {
-            importer.addToCache(
-                jobItem = jobAndItem,
+            importer.importContent(
+                jobItem = ContentEntryImportJob(
+                    sourceUri = videoFile.toDoorUri().toString(),
+                    cjiOriginalFilename = "BigBuckBunny.mp4"
+                ),
                 progressListener = { }
             )
         }

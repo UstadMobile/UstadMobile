@@ -1,17 +1,18 @@
 package com.ustadmobile.core.contentformats.epub
 
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.contentformats.ContentImportProgressListener
 import com.ustadmobile.core.contentformats.epub.ocf.Container
 import com.ustadmobile.core.contentformats.epub.opf.PackageDocument
 import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.contentformats.ContentImporter
 import com.ustadmobile.core.domain.epub.GetEpubTableOfContentsUseCase
 import com.ustadmobile.core.io.ext.*
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.door.DoorUri
-import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.libcache.CacheEntryToStore
@@ -22,7 +23,6 @@ import com.ustadmobile.libcache.io.unzipTo
 import com.ustadmobile.libcache.request.requestBuilder
 import com.ustadmobile.libcache.response.HttpPathResponse
 import io.github.aakira.napier.Napier
-import org.kodein.di.DI
 import java.util.zip.ZipInputStream
 import kotlinx.coroutines.*
 import kotlinx.io.asInputStream
@@ -34,25 +34,21 @@ import kotlinx.io.readString
 import kotlinx.io.writeString
 import kotlinx.serialization.decodeFromString
 import nl.adaptivity.xmlutil.serialization.XML
-import org.kodein.di.direct
-import org.kodein.di.instance
-import org.kodein.di.on
 import java.io.File
 import java.net.URLDecoder
 import java.util.zip.ZipEntry
 
 class EpubContentImporterCommonJvm(
     endpoint: Endpoint,
-    override val di: DI,
+    private val db: UmAppDatabase,
     private val cache: UstadCache,
-    uriHelper: UriHelper,
+    private val uriHelper: UriHelper,
     private val xml: XML,
     private val fileSystem: FileSystem = SystemFileSystem,
     private val xhtmlFixer: XhtmlFixer,
     private val getEpubTableOfContentsUseCase: GetEpubTableOfContentsUseCase =
         GetEpubTableOfContentsUseCase(xml),
-    uploader: ContentImporterUploader = DefaultContentPluginUploader(di)
-) : AbstractContentImportPlugin(endpoint, uploader, uriHelper) {
+) : ContentImporter(endpoint) {
 
     val viewName: String
         get() = EpubContentView.VIEW_NAME
@@ -178,13 +174,12 @@ class EpubContentImporterCommonJvm(
     }
 
 
-    override suspend fun addToCache(
-        jobItem: ContentJobItemAndContentJob,
-        progressListener: ContentJobProgressListener,
+    override suspend fun importContent(
+        jobItem: ContentEntryImportJob,
+        progressListener: ContentImportProgressListener,
     ): ContentEntryVersion = withContext(Dispatchers.IO) {
-        val jobUri = jobItem.contentJobItem?.sourceUri?.let { DoorUri.parse(it) }
+        val jobUri = jobItem.sourceUri?.let { DoorUri.parse(it) }
             ?: throw IllegalArgumentException("no sourceUri")
-        val db: UmAppDatabase = on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
 
         val contentEntryVersionUid = db.doorPrimaryKeyManager.nextId(ContentEntryVersion.TABLE_ID)
         val urlPrefix = createContentUrlPrefix(contentEntryVersionUid)
@@ -196,7 +191,7 @@ class EpubContentImporterCommonJvm(
         val contentEntryVersion = ContentEntryVersion(
             cevUid = contentEntryVersionUid,
             cevContentType = ContentEntryVersion.TYPE_EPUB,
-            cevContentEntryUid = jobItem.contentJobItem?.cjiContentEntryUid ?: 0L,
+            cevContentEntryUid = jobItem.cjiContentEntryUid,
             cevUrl = "$urlPrefix$opfPath",
         )
 

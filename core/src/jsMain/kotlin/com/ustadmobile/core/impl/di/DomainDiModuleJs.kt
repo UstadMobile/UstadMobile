@@ -8,9 +8,9 @@ import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCaseJs
 import com.ustadmobile.core.domain.blob.savepicture.SavePictureUseCase
 import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseJs
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCaseJs
-import com.ustadmobile.core.domain.contententry.getmetadatafromuri.IContentEntryGetMetaDataFromUriUseCase
-import com.ustadmobile.core.domain.contententry.importcontent.ImportContentUseCase
-import com.ustadmobile.core.domain.contententry.import.ImportContentUseCaseJs
+import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCase
+import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
+import com.ustadmobile.core.domain.contententry.import.EnqueueImportContentEntryUseCaseJs
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseJs
 import com.ustadmobile.core.domain.openlink.OnClickLinkUseCase
@@ -35,8 +35,8 @@ import org.kodein.di.scoped
 import org.kodein.di.singleton
 
 fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs") {
-    bind<ImportContentUseCase>() with scoped(endpointScope).provider {
-        ImportContentUseCaseJs(
+    bind<EnqueueContentEntryImportUseCase>() with scoped(endpointScope).provider {
+        EnqueueImportContentEntryUseCaseJs(
             endpoint = context,
             httpClient = instance(),
         )
@@ -107,9 +107,8 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
     }
 
 
-    bind<IContentEntryGetMetaDataFromUriUseCase>() with provider {
+    bind<ContentEntryGetMetaDataFromUriUseCase>() with provider {
         ContentEntryGetMetaDataFromUriUseCaseJs(
-            navResultReturner = instance(),
             json = instance(),
             chunkedUploadClientLocalUriUseCase = instance()
         )

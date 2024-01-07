@@ -1,5 +1,8 @@
-package com.ustadmobile.core.contentjob
+package com.ustadmobile.core.contentformats
 
+import com.ustadmobile.core.contentjob.FatalContentJobException
+import com.ustadmobile.core.contentjob.InvalidContentException
+import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.door.DoorUri
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.CancellationException

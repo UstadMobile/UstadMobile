@@ -19,9 +19,7 @@ import com.ustadmobile.core.contentformats.epub.XhtmlFixer
 import com.ustadmobile.core.contentformats.epub.XhtmlFixerJsoup
 import com.ustadmobile.core.contentformats.h5p.H5PContentImportPlugin
 import com.ustadmobile.core.contentformats.xapi.XapiZipContentImporter
-import com.ustadmobile.core.contentjob.ContentImportersManager
-import com.ustadmobile.core.contentjob.ContentJobManager
-import com.ustadmobile.core.contentjob.ContentJobManagerAndroid
+import com.ustadmobile.core.contentformats.ContentImportersManager
 import com.ustadmobile.core.db.*
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.impl.*
@@ -216,7 +214,6 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 dbName = dbName,
                 nodeId = nodeIdAndAuth.nodeId
             ).addSyncCallback(nodeIdAndAuth)
-                .addCallback(ContentJobItemTriggersCallback())
                 .addMigrations(*migrationList().toTypedArray())
                 .build()
 
@@ -249,8 +246,11 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
         bind<UstadCache>() with singleton {
             val httpCacheDir = File(applicationContext.filesDir, "httpfiles")
             val storagePath = Path(httpCacheDir.absolutePath)
-            UstadCacheBuilder(applicationContext, storagePath, logger = NapierLoggingAdapter())
-                .build()
+            UstadCacheBuilder(
+                applicationContext,
+                storagePath,
+                logger = NapierLoggingAdapter()
+            ).build()
         }
 
         bind<ContentImportersManager>() with scoped(EndpointScope.Default).singleton {
@@ -283,10 +283,6 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                     )
                 )
             )
-        }
-
-        bind<ContentJobManager>() with singleton {
-            ContentJobManagerAndroid(applicationContext)
         }
 
         bind<XmlPullParserFactory>(tag  = DiTag.XPP_FACTORY_NSAWARE) with singleton {

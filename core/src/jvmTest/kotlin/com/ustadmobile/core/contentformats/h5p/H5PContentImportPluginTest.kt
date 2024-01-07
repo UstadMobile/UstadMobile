@@ -15,9 +15,7 @@ import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentJob
-import com.ustadmobile.lib.db.entities.ContentJobItem
-import com.ustadmobile.lib.db.entities.ContentJobItemAndContentJob
+import com.ustadmobile.lib.db.entities.ContentEntryImportJob
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
@@ -90,7 +88,7 @@ class H5PContentImportPluginTest : AbstractMainDispatcherTest() {
 
         val h5pPlugin = H5PContentImportPlugin(
             endpoint = activeEndpoint,
-            di = di,
+            db = db,
             cache = ustadCache,
             uriHelper = uriHelper,
             json = di.direct.instance(),
@@ -112,7 +110,7 @@ class H5PContentImportPluginTest : AbstractMainDispatcherTest() {
 
         val h5pPlugin = H5PContentImportPlugin(
             endpoint = activeEndpoint,
-            di = di,
+            db = db,
             cache = ustadCache,
             uriHelper = uriHelper,
             json = di.direct.instance(),
@@ -134,7 +132,7 @@ class H5PContentImportPluginTest : AbstractMainDispatcherTest() {
 
         val h5pPlugin = H5PContentImportPlugin(
             endpoint = activeEndpoint,
-            di = di,
+            db = db,
             cache = ustadCache,
             uriHelper = uriHelper,
             json = di.direct.instance(),
@@ -152,22 +150,17 @@ class H5PContentImportPluginTest : AbstractMainDispatcherTest() {
 
         val h5pPlugin = H5PContentImportPlugin(
             endpoint = activeEndpoint,
-            di = di,
+            db = db,
             cache = ustadCache,
             uriHelper = uriHelper,
             json = di.direct.instance(),
         )
 
-        val contentJobAndItem = ContentJobItemAndContentJob().apply {
-            contentJobItem = ContentJobItem(
-                sourceUri = h5pFile.toDoorUri().toString(),
-            )
-            contentJob = ContentJob()
-        }
-
         val result = runBlocking {
-            h5pPlugin.addToCache(
-                jobItem = contentJobAndItem,
+            h5pPlugin.importContent(
+                jobItem = ContentEntryImportJob(
+                    sourceUri = h5pFile.toDoorUri().toString(),
+                ),
                 progressListener =  { }
             )
         }

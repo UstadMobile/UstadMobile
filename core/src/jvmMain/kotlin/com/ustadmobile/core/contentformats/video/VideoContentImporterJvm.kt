@@ -1,22 +1,22 @@
-package com.ustadmobile.core.contentformats.media
+package com.ustadmobile.core.contentformats.video
 
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.contentjob.AbstractContentImportPlugin
-import com.ustadmobile.core.contentjob.ContentJobProgressListener
-import com.ustadmobile.core.contentjob.ContentImporterUploader
-import com.ustadmobile.core.contentjob.DefaultContentPluginUploader
+import com.ustadmobile.core.contentformats.media.MediaContentInfo
+import com.ustadmobile.core.contentformats.media.MediaSource
+import com.ustadmobile.core.contentformats.media.VideoConstants
+import com.ustadmobile.core.contentformats.ContentImportProgressListener
 import com.ustadmobile.core.contentjob.InvalidContentException
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.contentformats.ContentImporter
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.util.ext.requireSourceAsDoorUri
 import com.ustadmobile.door.DoorUri
-import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.ContentEntryImportJob
 import com.ustadmobile.lib.db.entities.ContentEntryVersion
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
-import com.ustadmobile.lib.db.entities.ContentJobItemAndContentJob
 import com.ustadmobile.libcache.CacheEntryToStore
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.io.newTmpFile
@@ -29,28 +29,25 @@ import kotlinx.io.files.FileSystem
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
 import kotlinx.serialization.json.Json
-import org.kodein.di.DI
 import java.nio.file.Files
 import java.nio.file.Path as NioPath
 import kotlin.io.path.absolutePathString
 import net.bramp.ffmpeg.FFprobe
 import net.bramp.ffmpeg.probe.FFmpegStream
-import org.kodein.di.direct
-import org.kodein.di.instance
-import org.kodein.di.on
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.deleteRecursively
 
 class VideoContentImporterJvm(
     endpoint: Endpoint,
-    override val di: DI,
     private val cache: UstadCache,
-    uriHelper: UriHelper,
+    private val uriHelper: UriHelper,
     private val ffprobe: FFprobe,
     private val json: Json,
     private val fileSystem: FileSystem = SystemFileSystem,
-    uploader: ContentImporterUploader = DefaultContentPluginUploader(di),
-) : AbstractContentImportPlugin(endpoint, uploader, uriHelper){
+    private val db: UmAppDatabase,
+): ContentImporter(
+    endpoint = endpoint
+) {
 
     override val importerId: Int
         get() = 101
@@ -66,12 +63,11 @@ class VideoContentImporterJvm(
     /**
      * This is not responsible for
      */
-    override suspend fun addToCache(
-        jobItem: ContentJobItemAndContentJob,
-        progressListener: ContentJobProgressListener
+    override suspend fun importContent(
+        jobItem: ContentEntryImportJob,
+        progressListener: ContentImportProgressListener,
     ): ContentEntryVersion = withContext(Dispatchers.IO) {
-        val jobUri = jobItem.contentJobItem.requireSourceAsDoorUri()
-        val db: UmAppDatabase = on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
+        val jobUri = jobItem.requireSourceAsDoorUri()
 
         val contentEntryVersionUid = db.doorPrimaryKeyManager.nextId(ContentEntryVersion.TABLE_ID)
         val urlPrefix = createContentUrlPrefix(contentEntryVersionUid)
@@ -83,7 +79,7 @@ class VideoContentImporterJvm(
         // If not, try looking at the original filename (might be needed where using temp import
         // files etc.
         val mimeType = uriHelper.getMimeType(jobUri)
-            ?: jobItem.contentJobItem?.cjiOriginalFilename?.let {
+            ?: jobItem.cjiOriginalFilename?.let {
                 uriHelper.getMimeType(DoorUri.parse("file:///$it"))
             } ?: throw IllegalStateException("Cannot get mime type")
 
@@ -106,7 +102,7 @@ class VideoContentImporterJvm(
             val contentEntryVersion = ContentEntryVersion(
                 cevUid = contentEntryVersionUid,
                 cevContentType = ContentEntryVersion.TYPE_VIDEO,
-                cevContentEntryUid = jobItem.contentJobItem?.cjiContentEntryUid ?: 0L,
+                cevContentEntryUid = jobItem.cjiContentEntryUid,
                 cevUrl = mediaInfoUrl,
             )
 

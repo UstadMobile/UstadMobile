@@ -11,9 +11,7 @@ import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.toDoorUri
-import com.ustadmobile.lib.db.entities.ContentJob
-import com.ustadmobile.lib.db.entities.ContentJobItem
-import com.ustadmobile.lib.db.entities.ContentJobItemAndContentJob
+import com.ustadmobile.lib.db.entities.ContentEntryImportJob
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
@@ -83,7 +81,7 @@ class PdfContentImporterJvmTest : AbstractMainDispatcherTest() {
 
         val pdfPlugin = PdfContentImporterJvm(
             endpoint = activeEndpoint,
-            di = di,
+            db = db,
             cache = ustadCache,
             uriHelper = uriHelper
         )
@@ -104,7 +102,7 @@ class PdfContentImporterJvmTest : AbstractMainDispatcherTest() {
 
         val pdfPlugin = PdfContentImporterJvm(
             endpoint = activeEndpoint,
-            di = di,
+            db = db,
             cache = ustadCache,
             uriHelper = uriHelper
         )
@@ -124,7 +122,7 @@ class PdfContentImporterJvmTest : AbstractMainDispatcherTest() {
 
         val pdfPlugin = PdfContentImporterJvm(
             endpoint = activeEndpoint,
-            di = di,
+            db = db,
             cache = ustadCache,
             uriHelper = uriHelper
         )
@@ -146,22 +144,17 @@ class PdfContentImporterJvmTest : AbstractMainDispatcherTest() {
 
         val pdfPlugin = PdfContentImporterJvm(
             endpoint = activeEndpoint,
-            di = di,
+            db = db,
             cache = ustadCache,
             uriHelper = uriHelper
         )
 
-        val jobAndItem = ContentJobItemAndContentJob().apply{
-            this.contentJob = ContentJob()
-            this.contentJobItem = ContentJobItem(
-                sourceUri = testPdfFile.toDoorUri().toString(),
-                cjiOriginalFilename = "validPDFMetadata.pdf",
-            )
-        }
-
         val result = runBlocking {
-            pdfPlugin.addToCache(
-                jobItem = jobAndItem,
+            pdfPlugin.importContent(
+                jobItem = ContentEntryImportJob(
+                    sourceUri = testPdfFile.toDoorUri().toString(),
+                    cjiOriginalFilename = "validPDFMetadata.pdf",
+                ),
                 progressListener =  { }
             )
         }

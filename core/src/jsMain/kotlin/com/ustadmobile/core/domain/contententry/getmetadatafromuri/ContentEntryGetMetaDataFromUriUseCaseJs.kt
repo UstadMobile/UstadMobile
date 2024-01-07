@@ -6,7 +6,7 @@ import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.util.randomUuid
 import kotlinx.serialization.json.Json
 import web.url.URL
-import com.ustadmobile.core.domain.contententry.getmetadatafromuri.IContentEntryGetMetaDataFromUriUseCase.Companion.HEADER_ORIGINAL_FILENAME
+import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCase.Companion.HEADER_ORIGINAL_FILENAME
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
 import com.ustadmobile.core.util.stringvalues.asIStringValues
 
@@ -21,7 +21,7 @@ import com.ustadmobile.core.util.stringvalues.asIStringValues
 class ContentEntryGetMetaDataFromUriUseCaseJs(
     private val json: Json,
     private val chunkedUploadClientLocalUriUseCase: ChunkedUploadClientLocalUriUseCase,
-) : IContentEntryGetMetaDataFromUriUseCase{
+) : ContentEntryGetMetaDataFromUriUseCase{
     override suspend fun invoke(
         contentUri: DoorUri,
         fileName: String?,

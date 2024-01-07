@@ -1,6 +1,8 @@
 package com.ustadmobile.core.contentformats.xapi
 
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.contentformats.ContentImportProgressListener
+import com.ustadmobile.core.contentformats.ContentImporter
 import com.ustadmobile.core.tincan.TinCanXML
 import java.util.zip.ZipInputStream
 import com.ustadmobile.core.contentjob.*
@@ -10,25 +12,19 @@ import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.util.ext.requireSourceAsDoorUri
 import com.ustadmobile.core.view.XapiPackageContentView
 import com.ustadmobile.door.DoorUri
-import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.libcache.UstadCache
-import org.kodein.di.DI
 import org.xmlpull.v1.XmlPullParserFactory
 import kotlinx.coroutines.*
 import kotlinx.io.asInputStream
-import org.kodein.di.direct
-import org.kodein.di.instance
-import org.kodein.di.on
 
 class XapiZipContentImporter(
     endpoint: Endpoint,
-    override val di: DI,
+    private val db: UmAppDatabase,
     private val cache: UstadCache,
-    uriHelper: UriHelper,
-    uploader: ContentImporterUploader = DefaultContentPluginUploader(di),
-) : AbstractContentImportPlugin(endpoint, uploader, uriHelper) {
+    private val uriHelper: UriHelper,
+) : ContentImporter(endpoint) {
 
     val viewName: String
         get() = XapiPackageContentView.VIEW_NAME
@@ -100,13 +96,11 @@ class XapiZipContentImporter(
         }
     }
 
-    override suspend fun addToCache(
-        jobItem: ContentJobItemAndContentJob,
-        progressListener: ContentJobProgressListener
+    override suspend fun importContent(
+        jobItem: ContentEntryImportJob,
+        progressListener: ContentImportProgressListener
     ): ContentEntryVersion {
-        val jobUri = jobItem.contentJobItem.requireSourceAsDoorUri()
-        val db: UmAppDatabase = on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
-
+        val jobUri = jobItem.requireSourceAsDoorUri()
         val tinCanEntry = ZipInputStream(uriHelper.openSource(jobUri).asInputStream()).use {
             it.skipToEntry { it.name == TINCAN_FILENAME }
         } ?: throw FatalContentJobException("XapiImportPlugin: no tincan entry file")
@@ -119,7 +113,7 @@ class XapiZipContentImporter(
         val contentEntryVersion = ContentEntryVersion(
             cevUid = contentEntryVersionUid,
             cevContentType = ContentEntryVersion.TYPE_XAPI,
-            cevContentEntryUid = jobItem.contentJobItem?.cjiContentEntryUid ?: 0L,
+            cevContentEntryUid = jobItem.cjiContentEntryUid,
             cevUrl = "$urlPrefix${tinCanEntry.name}"
         )
 

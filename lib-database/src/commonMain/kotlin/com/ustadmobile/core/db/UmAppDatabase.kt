@@ -37,7 +37,7 @@ import com.ustadmobile.lib.db.entities.*
     PeerReviewerAllocation::class,
     PersonAuth2::class,
     UserSession::class,
-    ContentJob::class, ContentJobItem::class, CourseBlock::class, CourseTerminology::class,
+    ContentJob::class, ContentEntryImportJob::class, CourseBlock::class, CourseTerminology::class,
     CourseGroupSet::class, CourseGroupMember::class,
     Chat::class,
     ContentEntryPicture::class,
@@ -63,7 +63,7 @@ import com.ustadmobile.lib.db.entities.*
     ReplicationOperation::class,
     PendingRepositorySession::class,
 
-], version = 132)
+], version = 133)
 /*
  Replicate entities (e.g. trackers) to drop:
      ClazzLogReplicate
@@ -286,7 +286,7 @@ expect abstract class UmAppDatabase : RoomDatabase {
 
     abstract val userSessionDao: UserSessionDao
 
-    abstract val contentJobItemDao: ContentJobItemDao
+    abstract val contentEntryImportJobDao: ContentEntryImportJobDao
 
     abstract val contentJobDao: ContentJobDao
 

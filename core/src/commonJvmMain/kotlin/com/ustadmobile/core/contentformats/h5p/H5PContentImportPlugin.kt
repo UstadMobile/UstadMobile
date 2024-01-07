@@ -1,10 +1,8 @@
 package com.ustadmobile.core.contentformats.h5p
 
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.contentjob.AbstractContentImportPlugin
-import com.ustadmobile.core.contentjob.ContentJobProgressListener
-import com.ustadmobile.core.contentjob.ContentImporterUploader
-import com.ustadmobile.core.contentjob.DefaultContentPluginUploader
+import com.ustadmobile.core.contentformats.ContentImporter
+import com.ustadmobile.core.contentformats.ContentImportProgressListener
 import com.ustadmobile.core.contentjob.InvalidContentException
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.db.UmAppDatabase
@@ -13,12 +11,11 @@ import com.ustadmobile.core.io.ext.skipToEntry
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.util.ext.requireSourceAsDoorUri
 import com.ustadmobile.door.DoorUri
-import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.ContentEntryImportJob
 import com.ustadmobile.lib.db.entities.ContentEntryVersion
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
-import com.ustadmobile.lib.db.entities.ContentJobItemAndContentJob
 import com.ustadmobile.libcache.CacheEntryToStore
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.request.requestBuilder
@@ -35,10 +32,6 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import org.kodein.di.DI
-import org.kodein.di.direct
-import org.kodein.di.instance
-import org.kodein.di.on
 import java.util.zip.ZipInputStream
 
 /**
@@ -56,12 +49,11 @@ import java.util.zip.ZipInputStream
  */
 class H5PContentImportPlugin(
     endpoint: Endpoint,
-    override val di: DI,
+    private val db: UmAppDatabase,
     private val cache: UstadCache,
-    uriHelper: UriHelper,
+    private val uriHelper: UriHelper,
     private val json: Json,
-    uploader: ContentImporterUploader = DefaultContentPluginUploader(di),
-): AbstractContentImportPlugin(endpoint, uploader, uriHelper) {
+): ContentImporter(endpoint) {
 
     override val importerId: Int
         get() = PLUGIN_ID
@@ -130,14 +122,12 @@ class H5PContentImportPlugin(
     }
 
 
-    override suspend fun addToCache(
-        jobItem: ContentJobItemAndContentJob,
-        progressListener: ContentJobProgressListener
+    override suspend fun importContent(
+        jobItem: ContentEntryImportJob,
+        progressListener: ContentImportProgressListener
     ): ContentEntryVersion = withContext(Dispatchers.IO) {
-        val jobUri = jobItem.contentJobItem.requireSourceAsDoorUri()
-        val db: UmAppDatabase = on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
-        val entry = db.contentEntryDao.findByUid(
-            jobItem.contentJobItem?.cjiContentEntryUid ?: 0L)
+        val jobUri = jobItem.requireSourceAsDoorUri()
+        val entry = db.contentEntryDao.findByUid(jobItem.cjiContentEntryUid)
 
         val contentEntryVersionUid = db.doorPrimaryKeyManager.nextIdAsync(
             ContentEntryVersion.TABLE_ID)
@@ -163,7 +153,7 @@ class H5PContentImportPlugin(
             )
         } ?: throw IllegalStateException("Could not open h5p resource")
 
-        val entryId = "${endpoint.url}/ns/xapi/${jobItem.contentJobItem?.cjiContentEntryUid}"
+        val entryId = "${endpoint.url}/ns/xapi/${jobItem.cjiContentEntryUid}"
 
         val tinCanXml = """
             <?xml version="1.0" encoding="UTF-8"?>
@@ -235,7 +225,7 @@ class H5PContentImportPlugin(
         ContentEntryVersion(
             cevUid = contentEntryVersionUid,
             cevContentType = ContentEntryVersion.TYPE_XAPI,
-            cevContentEntryUid = jobItem.contentJobItem?.cjiContentEntryUid ?: 0L,
+            cevContentEntryUid = jobItem.cjiContentEntryUid,
             cevUrl = "${urlPrefix}tincan.xml"
         )
     }

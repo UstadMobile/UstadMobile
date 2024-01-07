@@ -7,7 +7,6 @@ import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.contentformats.epub.XhtmlFixer
 import com.ustadmobile.core.contentformats.epub.XhtmlFixerJsoup
-import com.ustadmobile.core.db.ContentJobItemTriggersCallback
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
@@ -126,7 +125,6 @@ fun makeJvmBackendDiModule(
             nodeId = nodeIdAndAuth.nodeId,
         )
             .addSyncCallback(nodeIdAndAuth)
-            .addCallback(ContentJobItemTriggersCallback())
             .addCallback(InsertDefaultSiteCallback())
             .addCallback(AddRetainAllActiveUriTriggersCallback())
             .addMigrations(*migrationList().toTypedArray())

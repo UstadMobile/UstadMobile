@@ -1,23 +1,20 @@
 package com.ustadmobile.core.contentformats.pdf
 
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.contentjob.AbstractContentImportPlugin
-import com.ustadmobile.core.contentjob.ContentJobProgressListener
-import com.ustadmobile.core.contentjob.ContentImporterUploader
-import com.ustadmobile.core.contentjob.DefaultContentPluginUploader
+import com.ustadmobile.core.contentformats.ContentImportProgressListener
 import com.ustadmobile.core.contentjob.InvalidContentException
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.contentjob.SupportedContent
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.contentformats.ContentImporter
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.util.ext.requireSourceAsDoorUri
 import com.ustadmobile.door.DoorUri
-import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.ContentEntryImportJob
 import com.ustadmobile.lib.db.entities.ContentEntryVersion
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
-import com.ustadmobile.lib.db.entities.ContentJobItemAndContentJob
 import com.ustadmobile.libcache.CacheEntryToStore
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.request.requestBuilder
@@ -30,28 +27,22 @@ import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
 import org.apache.pdfbox.Loader
 import org.apache.pdfbox.pdmodel.PDDocument
-import org.kodein.di.DI
-import org.kodein.di.direct
-import org.kodein.di.instance
-import org.kodein.di.on
 import java.io.File
 import java.util.UUID
 
 class PdfContentImporterJvm(
     endpoint: Endpoint,
-    override val di: DI,
     private val cache: UstadCache,
-    uriHelper: UriHelper,
+    private val uriHelper: UriHelper,
     private val fileSystem: FileSystem = SystemFileSystem,
-    uploader: ContentImporterUploader = DefaultContentPluginUploader(di),
-) : AbstractContentImportPlugin(endpoint, uploader, uriHelper){
+    private val db: UmAppDatabase,
+) : ContentImporter(endpoint){
 
-    override suspend fun addToCache(
-        jobItem: ContentJobItemAndContentJob,
-        progressListener: ContentJobProgressListener
+    override suspend fun importContent(
+        jobItem: ContentEntryImportJob,
+        progressListener: ContentImportProgressListener,
     ): ContentEntryVersion = withContext(Dispatchers.IO) {
-        val jobUri = jobItem.contentJobItem.requireSourceAsDoorUri()
-        val db: UmAppDatabase = on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
+        val jobUri = jobItem.requireSourceAsDoorUri()
 
         val contentEntryVersionUid = db.doorPrimaryKeyManager.nextId(ContentEntryVersion.TABLE_ID)
         val urlPrefix = createContentUrlPrefix(contentEntryVersionUid)
@@ -71,7 +62,7 @@ class PdfContentImporterJvm(
         val contentEntryVersion = ContentEntryVersion(
             cevUid = contentEntryVersionUid,
             cevContentType = ContentEntryVersion.TYPE_PDF,
-            cevContentEntryUid = jobItem.contentJobItem?.cjiContentEntryUid ?: 0L,
+            cevContentEntryUid = jobItem.cjiContentEntryUid,
             cevUrl = pdfUrl,
         )
 

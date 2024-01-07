@@ -10,12 +10,11 @@ import com.ustadmobile.core.connectivitymonitor.ConnectivityMonitorJvm
 import com.ustadmobile.core.connectivitymonitor.ConnectivityTriggerGroupController
 import com.ustadmobile.core.contentformats.epub.XhtmlFixer
 import com.ustadmobile.core.contentformats.epub.XhtmlFixerJsoup
-import com.ustadmobile.core.db.ContentJobItemTriggersCallback
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
-import com.ustadmobile.core.domain.contententry.importcontent.ImportContentUseCase
-import com.ustadmobile.core.domain.contententry.importcontent.ImportContentUseCaseJvm
+import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
+import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseJvm
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseJvm
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -243,7 +242,6 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
 
         DatabaseBuilder.databaseBuilder(UmAppDatabase::class, dbUrl, nodeIdAndAuth.nodeId)
             .addSyncCallback(nodeIdAndAuth)
-            .addCallback(ContentJobItemTriggersCallback())
             .addMigrations(*migrationList().toTypedArray())
             .build()
     }
@@ -289,8 +287,8 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         )
     }
 
-    bind<ImportContentUseCase>() with scoped(EndpointScope.Default).singleton {
-        ImportContentUseCaseJvm(
+    bind<EnqueueContentEntryImportUseCase>() with scoped(EndpointScope.Default).singleton {
+        EnqueueImportContentEntryUseCaseJvm(
             db = instance(tag = DoorTag.TAG_DB),
             scheduler = instance(),
             endpoint = context

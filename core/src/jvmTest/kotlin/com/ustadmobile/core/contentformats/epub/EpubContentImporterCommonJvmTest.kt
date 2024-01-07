@@ -105,7 +105,7 @@ class EpubContentImporterCommonJvmTest : AbstractMainDispatcherTest() {
 
         val epubPlugin = EpubContentImporterCommonJvm(
             endpoint = Endpoint("http://localhost/dummy"),
-            di = di,
+            db = db,
             cache = ustadCache,
             uriHelper = uriHelper,
             xml = xml,
@@ -130,7 +130,7 @@ class EpubContentImporterCommonJvmTest : AbstractMainDispatcherTest() {
 
         val epubPlugin = EpubContentImporterCommonJvm(
             endpoint = Endpoint("http://localhost/dummy"),
-            di = di,
+            db = db,
             cache = ustadCache,
             uriHelper = uriHelper,
             xml = xml,
@@ -156,7 +156,7 @@ class EpubContentImporterCommonJvmTest : AbstractMainDispatcherTest() {
 
         val epubPlugin = EpubContentImporterCommonJvm(
             endpoint = Endpoint("http://localhost/dummy"),
-            di = di,
+            db = db,
             cache = ustadCache,
             uriHelper = uriHelper,
             xml = xml,
@@ -183,7 +183,7 @@ class EpubContentImporterCommonJvmTest : AbstractMainDispatcherTest() {
 
         val epubPlugin = EpubContentImporterCommonJvm(
             endpoint = Endpoint("http://localhost/dummy"),
-            di = di,
+            db = db,
             cache = ustadCache,
             uriHelper = uriHelper,
             xml = xml,
@@ -210,7 +210,7 @@ class EpubContentImporterCommonJvmTest : AbstractMainDispatcherTest() {
 
         val epubPlugin = EpubContentImporterCommonJvm(
             endpoint = Endpoint("http://localhost/dummy/"),
-            di = di,
+            db = db,
             cache = ustadCache,
             uriHelper = uriHelper,
             xml = xml,
@@ -221,14 +221,11 @@ class EpubContentImporterCommonJvmTest : AbstractMainDispatcherTest() {
         runBlocking {
             val epubUri = DoorUri.parse(tempEpubFile.toURI().toString())
 
-            val result = epubPlugin.addToCache(
-                jobItem = ContentJobItemAndContentJob().apply {
-                    contentJobItem = ContentJobItem(
-                        sourceUri = epubUri.toString(),
-                        cjiContentEntryUid = contentEntryUid,
-                    )
-                    contentJob = ContentJob()
-                },
+            val result = epubPlugin.importContent(
+                jobItem = ContentEntryImportJob(
+                    sourceUri = epubUri.toString(),
+                    cjiContentEntryUid = contentEntryUid,
+                ),
                 progressListener = { },
             )
 
@@ -251,7 +248,7 @@ class EpubContentImporterCommonJvmTest : AbstractMainDispatcherTest() {
 
         val epubPlugin = EpubContentImporterCommonJvm(
             endpoint = Endpoint("http://localhost/dummy/"),
-            di = di,
+            db = db,
             cache = ustadCache,
             uriHelper = uriHelper,
             xml = xml,
@@ -270,19 +267,14 @@ class EpubContentImporterCommonJvmTest : AbstractMainDispatcherTest() {
             val contentEntryChildUid = 42L
 
             
-            val jobItem = ContentJobItem(
+            val jobItem = ContentEntryImportJob(
                 sourceUri = doorUri.uri.toString(),
                 cjiParentContentEntryUid = uid,
                 cjiContentEntryUid = contentEntryChildUid
             )
 
-            val job = ContentJob()
-            val jobAndItem = ContentJobItemAndContentJob().apply{
-                this.contentJob = job
-                this.contentJobItem = jobItem
-            }
-            val result = epubPlugin.addToCache(
-                jobItem = jobAndItem,
+            val result = epubPlugin.importContent(
+                jobItem = jobItem,
                 progressListener =  { }
             )
             assertEquals(contentEntryChildUid, result.cevContentEntryUid)

@@ -1,7 +1,7 @@
 package com.ustadmobile.core.viewmodel.contententry.edit
 
 import com.ustadmobile.core.contentjob.MetadataResult
-import com.ustadmobile.core.domain.contententry.importcontent.ImportContentUseCase
+import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
 import com.ustadmobile.core.domain.contententry.save.SaveContentEntryUseCase
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
@@ -15,7 +15,6 @@ import org.junit.Test
 import org.kodein.di.bind
 import org.kodein.di.scoped
 import org.kodein.di.singleton
-import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.argumentCaptor
@@ -41,14 +40,14 @@ class ContentEntryEditViewModelTest : AbstractMainDispatcherTest(){
         )
         testViewModel<ContentEntryEditViewModel> {
             val mockSaveContentEntryUseCase = mock<SaveContentEntryUseCase>()
-            val mockImportContentUseCase = mock<ImportContentUseCase>()
+            val mockImportContentUseCase = mock<EnqueueContentEntryImportUseCase>()
 
             extendDi {
                 bind<SaveContentEntryUseCase>() with scoped(endpointScope).singleton {
                     mockSaveContentEntryUseCase
                 }
 
-                bind<ImportContentUseCase>() with scoped(endpointScope).singleton {
+                bind<EnqueueContentEntryImportUseCase>() with scoped(endpointScope).singleton {
                     mockImportContentUseCase
                 }
             }
@@ -85,7 +84,6 @@ class ContentEntryEditViewModelTest : AbstractMainDispatcherTest(){
 
             verifyBlocking(mockImportContentUseCase, timeout(5000)) {
                 invoke(
-                    contentJob = any(),
                     contentJobItem = argWhere {
                         it.sourceUri == metadata.entry.sourceUrl &&
                                 it.cjiContentEntryUid == contentEntryUid

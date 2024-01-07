@@ -1,6 +1,5 @@
 package com.ustadmobile.lib.rest
 
-import com.ustadmobile.core.db.ContentJobItemTriggersCallback
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
@@ -19,7 +18,6 @@ class InsertDefaultSiteCallbackTest {
         val umAppDb = DatabaseBuilder.databaseBuilder(UmAppDatabase::class, dbUrl,
                 nodeId = nodeIdAndAuth.nodeId)
             .addSyncCallback(nodeIdAndAuth)
-            .addCallback(ContentJobItemTriggersCallback())
             .addCallback(InsertDefaultSiteCallback())
             .addMigrations(*migrationList().toTypedArray())
             .build()

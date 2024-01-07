@@ -16,9 +16,7 @@ import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
-import com.ustadmobile.lib.db.entities.ContentJob
-import com.ustadmobile.lib.db.entities.ContentJobItem
-import com.ustadmobile.lib.db.entities.ContentJobItemAndContentJob
+import com.ustadmobile.lib.db.entities.ContentEntryImportJob
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
@@ -101,7 +99,7 @@ class XapiZipContentImporterTest :AbstractMainDispatcherTest() {
 
         val xapiPlugin =  XapiZipContentImporter(
             endpoint = Endpoint("http://localhost/dummy/"),
-            di = di,
+            db = db,
             cache = ustadCache,
             uriHelper = uriHelper
         )
@@ -123,7 +121,7 @@ class XapiZipContentImporterTest :AbstractMainDispatcherTest() {
 
         val xapiPlugin =  XapiZipContentImporter(
             endpoint = Endpoint("http://localhost/dummy/"),
-            di = di,
+            db = db,
             cache = ustadCache,
             uriHelper = uriHelper
         )
@@ -144,7 +142,7 @@ class XapiZipContentImporterTest :AbstractMainDispatcherTest() {
         tempFile.writeText("Hello World")
         val xapiPlugin =  XapiZipContentImporter(
             endpoint = Endpoint("http://localhost/dummy/"),
-            di = di,
+            db = db,
             cache = ustadCache,
             uriHelper = uriHelper
         )
@@ -163,21 +161,16 @@ class XapiZipContentImporterTest :AbstractMainDispatcherTest() {
 
         val xapiPlugin =  XapiZipContentImporter(
             endpoint = endpoint,
-            di = di,
+            db = db,
             cache = ustadCache,
             uriHelper = uriHelper
         )
 
-        val contentJobAndItem = ContentJobItemAndContentJob().apply {
-            contentJobItem = ContentJobItem(
-                sourceUri = tempFile.toDoorUri().toString(),
-            )
-            contentJob = ContentJob()
-        }
-
         val result = runBlocking {
-            xapiPlugin.addToCache(
-                jobItem = contentJobAndItem,
+            xapiPlugin.importContent(
+                jobItem = ContentEntryImportJob(
+                    sourceUri = tempFile.toDoorUri().toString(),
+                ),
                 progressListener = { }
             )
         }

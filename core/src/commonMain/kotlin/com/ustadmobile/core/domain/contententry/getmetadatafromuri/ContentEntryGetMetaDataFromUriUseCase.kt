@@ -10,7 +10,7 @@ data class ContentEntryGetMetadataStatus(
     val error: String? = null,
 )
 
-interface IContentEntryGetMetaDataFromUriUseCase {
+interface ContentEntryGetMetaDataFromUriUseCase {
 
     /**
      * @param contentUri the URI from which meta data should be extracted
