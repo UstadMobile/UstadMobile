@@ -10,7 +10,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.*
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.util.ext.requireSourceAsDoorUri
-import com.ustadmobile.core.view.XapiPackageContentView
+import com.ustadmobile.core.viewmodel.xapicontent.XapiContentViewModel
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.lib.db.entities.*
@@ -27,7 +27,7 @@ class XapiZipContentImporter(
 ) : ContentImporter(endpoint) {
 
     val viewName: String
-        get() = XapiPackageContentView.VIEW_NAME
+        get() = XapiContentViewModel.DEST_NAME
 
     override val supportedMimeTypes: List<String>
         get() = SupportedContent.XAPI_MIME_TYPES

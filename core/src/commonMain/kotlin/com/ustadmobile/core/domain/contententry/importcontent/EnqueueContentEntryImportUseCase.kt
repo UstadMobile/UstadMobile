@@ -19,4 +19,12 @@ interface EnqueueContentEntryImportUseCase {
         contentJobItem: ContentEntryImportJob,
     )
 
+    companion object {
+
+        const val DATA_ENDPOINT = "endpoint"
+
+        const val DATA_JOB_UID = "jobUid"
+
+    }
+
 }

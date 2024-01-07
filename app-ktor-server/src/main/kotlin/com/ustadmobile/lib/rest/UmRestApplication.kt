@@ -12,6 +12,7 @@ import com.ustadmobile.core.contentformats.ContentImportersManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
 import com.ustadmobile.core.domain.blob.upload.BlobUploadServerUseCase
+import com.ustadmobile.core.domain.contententry.importcontent.ImportContentEntryUseCase
 import com.ustadmobile.core.impl.di.CommonJvmDiModule
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.DiTag.TAG_CONTEXT_DATA_ROOT
@@ -398,6 +399,13 @@ fun Application.umRestApplication(
                 ),
                 json = instance(),
                 endpoint = context,
+            )
+        }
+
+        bind<ImportContentEntryUseCase>() with scoped(EndpointScope.Default).singleton {
+            ImportContentEntryUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                importersManager = instance(),
             )
         }
 

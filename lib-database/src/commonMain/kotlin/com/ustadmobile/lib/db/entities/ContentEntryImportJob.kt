@@ -84,7 +84,7 @@ data class ContentEntryImportJob(
     var cjiRecursiveStatus:Int = 4,
 
     /**
-     * The plugin id can be set if known. If not known, the runner will guess using the source
+     * The importer id can be set if known. If not known, the runner will guess using the source
      * uri.
      */
     var cjiPluginId: Int = 0,
