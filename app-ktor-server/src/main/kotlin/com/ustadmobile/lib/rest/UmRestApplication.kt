@@ -11,9 +11,11 @@ import com.ustadmobile.core.contentformats.xapi.XapiZipContentImporter
 import com.ustadmobile.core.contentformats.ContentImportersManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
+import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
+import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCaseJvm
 import com.ustadmobile.core.domain.blob.upload.BlobUploadServerUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.ImportContentEntryUseCase
-import com.ustadmobile.core.impl.di.CommonJvmDiModule
+import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServerUseCase
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.DiTag.TAG_CONTEXT_DATA_ROOT
 import com.ustadmobile.door.ext.*
@@ -48,6 +50,7 @@ import com.ustadmobile.core.uri.UriHelperJvm
 import com.ustadmobile.door.http.DoorHttpServerConfig
 import com.ustadmobile.lib.rest.dimodules.makeJvmBackendDiModule
 import com.ustadmobile.lib.rest.api.blob.BlobUploadServerRoute
+import com.ustadmobile.lib.rest.api.content.ContentEntryVersionRoute
 import com.ustadmobile.lib.rest.domain.contententry.getmetadatafromuri.ContentEntryGetMetadataServerUseCase
 import com.ustadmobile.lib.rest.api.contentupload.ContentUploadRoute
 import com.ustadmobile.lib.rest.api.contentupload.UPLOAD_TMP_SUBDIR
@@ -67,10 +70,18 @@ import com.ustadmobile.lib.rest.logging.LogbackAntiLog
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
+import com.ustadmobile.libcache.logging.NapierLoggingAdapter
+import com.ustadmobile.libcache.okhttp.UstadCacheInterceptor
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.HttpTimeout
+import io.ktor.serialization.kotlinx.json.json
 import kotlinx.io.files.Path
 import net.bramp.ffmpeg.FFmpeg
 import net.bramp.ffmpeg.FFprobe
 import nl.adaptivity.xmlutil.serialization.XML
+import okhttp3.Dispatcher
+import okhttp3.OkHttpClient
 import org.kodein.di.ktor.closestDI
 import java.net.Inet6Address
 import java.net.NetworkInterface
@@ -229,9 +240,45 @@ fun Application.umRestApplication(
     val apiKey = environment.config.propertyOrNull("ktor.ustad.googleApiKey")?.getString() ?: CONF_GOOGLE_API
 
     di {
-        import(CommonJvmDiModule)
         import(DomainDiModuleJvm(EndpointScope.Default))
         import(makeJvmBackendDiModule(environment.config))
+
+        bind<OkHttpClient>() with singleton {
+            OkHttpClient.Builder()
+                .dispatcher(
+                    Dispatcher().also {
+                        it.maxRequests = 30
+                        it.maxRequestsPerHost = 10
+                    }
+                )
+                .addInterceptor(
+                    UstadCacheInterceptor(
+                        cache = instance(),
+                        cacheDir = File(appConfig.absoluteDataDir(), "httpfiles"),
+                        logger = NapierLoggingAdapter(),
+                    )
+                )
+                .build()
+        }
+
+        bind<HttpClient>() with singleton {
+            HttpClient(OkHttp) {
+
+                install(io.ktor.client.plugins.contentnegotiation.ContentNegotiation) {
+                    json(json = instance())
+                }
+                install(HttpTimeout)
+
+                val dispatcher = Dispatcher()
+                dispatcher.maxRequests = 30
+                dispatcher.maxRequestsPerHost = 10
+
+                engine {
+                    preconfigured = instance()
+                }
+
+            }
+        }
 
         bind<SupportedLanguagesConfig>() with singleton {
             SupportedLanguagesConfig(
@@ -303,6 +350,7 @@ fun Application.umRestApplication(
             val xml: XML = instance()
             val xhtmlFixer: XhtmlFixer = instance()
             val db: UmAppDatabase = instance(tag = DoorTag.TAG_DB)
+            val saveLocalUrisAsBlobsUseCase: SaveLocalUrisAsBlobsUseCase = instance()
 
             ContentImportersManager(
                 listOf(
@@ -325,6 +373,8 @@ fun Application.umRestApplication(
                         db = db,
                         cache= cache,
                         uriHelper = uriHelper,
+                        saveLocalUriAsBlobItemUseCase = saveLocalUrisAsBlobsUseCase,
+                        json = instance(),
                     ),
                     H5PContentImportPlugin(
                         endpoint = context,
@@ -406,6 +456,27 @@ fun Application.umRestApplication(
             ImportContentEntryUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
                 importersManager = instance(),
+            )
+        }
+
+        bind<SaveLocalUrisAsBlobsUseCase>() with scoped(EndpointScope.Default).singleton {
+            SaveLocalUrisAsBlobsUseCaseJvm(
+                endpoint = context,
+                cache = instance(),
+                uriHelper = instance(),
+                tmpDir = Path(
+                    File(appConfig.absoluteDataDir(), "save-local-uris").absolutePath.toString()
+                ),
+            )
+        }
+
+        bind<ContentEntryVersionServerUseCase>() with scoped(EndpointScope.Default).singleton {
+            ContentEntryVersionServerUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = null,
+                okHttpClient = instance(),
+                json = instance(),
+                onlyIfCached = true,
             )
         }
 
@@ -530,6 +601,16 @@ fun Application.umRestApplication(
                     useCase = { call ->
                         di.on(call).direct.instance()
                     }
+                )
+
+                CacheRoute(
+                    cache = di.direct.instance()
+                )
+            }
+
+            route("content") {
+                ContentEntryVersionRoute(
+                    useCase = { call -> di.on(call).direct.instance() }
                 )
             }
 

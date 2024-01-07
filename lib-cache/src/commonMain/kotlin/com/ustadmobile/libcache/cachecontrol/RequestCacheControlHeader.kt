@@ -18,6 +18,23 @@ class RequestCacheControlHeader(
     val staleIfError: Long?,
 ) {
 
+    /**
+     * The effective age at which this response is to be considered stale.
+     *
+     * If max-age and min-fresh are both specified, and min-fresh is larger than max-age, this
+     * will override
+     */
+    val staleAtAge: Long?
+        get() {
+            return if(maxAge != null && minFresh != null) {
+                maxOf(maxAge, minFresh)
+            }else {
+                maxAge ?: minFresh
+            }
+        }
+
+
+
     companion object {
 
         fun parse(header: String): RequestCacheControlHeader {

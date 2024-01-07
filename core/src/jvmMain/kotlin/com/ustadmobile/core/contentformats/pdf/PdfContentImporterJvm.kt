@@ -7,8 +7,14 @@ import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.contentjob.SupportedContent
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.contentformats.ContentImporter
+import com.ustadmobile.core.contentformats.manifest.ContentManifest
+import com.ustadmobile.core.contentformats.manifest.ContentManifestEntry
+import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
+import com.ustadmobile.core.domain.contententry.ContentConstants.MANIFEST_NAME
 import com.ustadmobile.core.uri.UriHelper
+import com.ustadmobile.core.util.ext.asIStringValues
 import com.ustadmobile.core.util.ext.requireSourceAsDoorUri
+import com.ustadmobile.core.util.stringvalues.emptyStringValues
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -17,14 +23,16 @@ import com.ustadmobile.lib.db.entities.ContentEntryVersion
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.libcache.CacheEntryToStore
 import com.ustadmobile.libcache.UstadCache
+import com.ustadmobile.libcache.headers.headersBuilder
 import com.ustadmobile.libcache.request.requestBuilder
-import com.ustadmobile.libcache.response.HttpPathResponse
+import com.ustadmobile.libcache.response.StringResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.io.asInputStream
 import kotlinx.io.files.FileSystem
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
+import kotlinx.serialization.json.Json
 import org.apache.pdfbox.Loader
 import org.apache.pdfbox.pdmodel.PDDocument
 import java.io.File
@@ -36,6 +44,8 @@ class PdfContentImporterJvm(
     private val uriHelper: UriHelper,
     private val fileSystem: FileSystem = SystemFileSystem,
     private val db: UmAppDatabase,
+    private val saveLocalUriAsBlobItemUseCase: SaveLocalUrisAsBlobsUseCase,
+    private val json: Json,
 ) : ContentImporter(endpoint){
 
     override suspend fun importContent(
@@ -47,6 +57,7 @@ class PdfContentImporterJvm(
         val contentEntryVersionUid = db.doorPrimaryKeyManager.nextId(ContentEntryVersion.TABLE_ID)
         val urlPrefix = createContentUrlPrefix(contentEntryVersionUid)
         val pdfUrl = "${urlPrefix}content.pdf"
+        val manifestUrl = "${urlPrefix}$MANIFEST_NAME"
 
         val tmpFile = File.createTempFile(
             UUID.randomUUID().toString(),
@@ -63,22 +74,53 @@ class PdfContentImporterJvm(
             cevUid = contentEntryVersionUid,
             cevContentType = ContentEntryVersion.TYPE_PDF,
             cevContentEntryUid = jobItem.cjiContentEntryUid,
+            cevSitemapUrl = manifestUrl,
             cevUrl = pdfUrl,
         )
 
-        val request = requestBuilder {
-            url = pdfUrl
+        val savedBlob = saveLocalUriAsBlobItemUseCase(
+            listOf(
+                SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem(
+                    localUri = tmpFile.toURI().toString(),
+                )
+            )
+        ).first()
+
+        val cacheResponse = cache.retrieve(requestBuilder(savedBlob.blobUrl))
+            ?: throw IllegalStateException("Cache did not store blob")
+
+        val manifest = ContentManifest(
+            version = 1,
+            metadata = emptyMap(),
+            entries = listOf(
+                ContentManifestEntry(
+                    uri = "content.pdf",
+                    ignoreQueryParams = true,
+                    status = 200,
+                    method = "GET",
+                    integrity = "",
+                    requestHeaders = emptyStringValues(),
+                    responseHeaders = cacheResponse.headers.asIStringValues(),
+                    bodyDataUrl = savedBlob.blobUrl
+                )
+            )
+        )
+
+        val manifestRequest = requestBuilder {
+            url = manifestUrl
         }
 
         cache.store(
             storeRequest = listOf(
                 CacheEntryToStore(
-                    request = request,
-                    response = HttpPathResponse(
-                        path = tmpFilePath,
-                        fileSystem = fileSystem,
-                        mimeType = "application/pdf",
-                        request = request,
+                    request = manifestRequest,
+                    response = StringResponse(
+                        request = manifestRequest,
+                        mimeType = "application/json",
+                        body = json.encodeToString(ContentManifest.serializer(), manifest),
+                        extraHeaders = headersBuilder {
+                            header("cache-control", "immutable")
+                        }
                     )
                 )
             )

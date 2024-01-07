@@ -219,6 +219,16 @@ class UstadCacheInterceptor(
                 newResponseFromCachedResponse(cacheResponse, call)
             }
 
+            /**
+             * The request header specified only-if-cached, but we don't have it.
+             */
+            requestCacheControlHeader?.onlyIfCached == true -> {
+                Response.Builder()
+                    .request(request)
+                    .code(504)
+                    .build()
+            }
+
             /*
              * When response is not fresh, but can be validated, then send a validation request
              * and use the cached response if the

@@ -22,6 +22,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
+import okhttp3.Response
 import okhttp3.internal.http.HttpMethod
 import okio.BufferedSink
 import org.kodein.di.DI
@@ -80,16 +81,25 @@ suspend fun ApplicationCall.respondReverseProxy(proxyToBaseUrl: String) {
     })
 
     val originResponse = httpClient.newCall(requestBuilder.build()).execute()
+    respondOkHttpResponse(originResponse)
+}
 
+/**
+ * Use a response from OKHttp as the response
+ */
+suspend fun ApplicationCall.respondOkHttpResponse(
+    response: Response
+) {
     //content-type is controlled by respondOutputStream, cannot be set as a header.
     val engineHeaders = listOf("content-type", "content-length", "transfer-encoding")
-    originResponse.headers.filter { it.first.lowercase() !in engineHeaders }.forEach {
-        response.header(it.first, it.second)
+    response.headers.filter { it.first.lowercase() !in engineHeaders }.forEach {
+        this.response.header(it.first, it.second)
     }
 
-    val responseInput = originResponse.body?.byteStream() ?: ByteArrayInputStream(byteArrayOf())
-    respondOutputStream(status = HttpStatusCode.fromValue(originResponse.code),
-        contentType = originResponse.header("content-type")?.let { ContentType.parse(it) }
+    val responseInput = response.body?.byteStream() ?: ByteArrayInputStream(byteArrayOf())
+    respondOutputStream(
+        status = HttpStatusCode.fromValue(response.code),
+        contentType = response.header("content-type")?.let { ContentType.parse(it) }
     ) {
         responseInput.use { responseIn ->
             responseIn.copyTo(this)

@@ -3,7 +3,9 @@ package com.ustadmobile.libcache.cachecontrol
 /**
  * Represents the status of a cached response.
  *
- * @param isFresh if the response is fresh or not
+ * @param isFresh if the response is fresh or not. This might be set to true, even if the response
+ *        is technically stale, when it is allowed to use a stale response because the only-if-cached
+ *        request directive was used or the max-stale directive was used to allow a stale response
  * @param ifNoneMatch if not fresh, and the original response had an etag, then this will provide the
  *        etag that can be used for if-none-match validation
  * @param ifNotModifiedSince if not fresh, and the original response had a last-modified header,
