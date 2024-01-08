@@ -12,7 +12,7 @@ data class RequestedEntry(
     @PrimaryKey(autoGenerate = true)
     var id: Int = 0,
     var requestSha256: String = "",
-    var requestedUrl: String = "",
+    var requestedKey: String = "",
     @ColumnInfo(index = true)
     var batchId: Int = 0,
 ) {

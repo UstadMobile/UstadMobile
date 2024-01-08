@@ -9,6 +9,7 @@ import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.util.MS_PER_HOUR
 import com.ustadmobile.core.util.MS_PER_MIN
 import com.ustadmobile.core.util.ext.capitalizeFirstLetter
+import com.ustadmobile.core.viewmodel.clazz.defaultCourseBannerImageIndex
 import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewUiState
 import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewViewModel
 import com.ustadmobile.hooks.useFormattedDateRange
@@ -85,15 +86,15 @@ val ClazzDetailOverviewComponent2 = FC<ClazzDetailOverviewProps> { props ->
                 Stack.create {
                     direction = responsive(StackDirection.column)
 
-                    props.uiState.clazz?.coursePicture?.coursePictureUri?.also { coursePicture ->
-                        img {
-                            css {
-                                height = 192.px
-                                width = 100.pct
-                                objectFit = ObjectFit.cover
-                            }
-                            src = coursePicture
+                    val coursePictureUri = props.uiState.clazz?.coursePicture?.coursePictureUri
+                        ?: "img/default_course_banners/${defaultCourseBannerImageIndex(props.uiState.clazz?.clazzName)}.webp"
+                    img {
+                        css {
+                            height = 192.px
+                            width = 100.pct
+                            objectFit = ObjectFit.cover
                         }
+                        src = coursePictureUri
                     }
 
                     Typography{

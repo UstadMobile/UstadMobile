@@ -44,6 +44,7 @@ import web.html.HTMLElement
 import web.window.RESIZE
 import web.window.window
 import mui.icons.material.Badge as BadgeIcon
+import com.ustadmobile.core.viewmodel.clazz.defaultCourseBannerImageIndex
 
 external interface ClazzListScreenProps : Props {
 
@@ -328,8 +329,8 @@ private val ClazzListItem = FC<ClazzListItemProps> { props ->
                     sx {
                         height = 96.px
                     }
-                    image = props.clazzItem?.coursePicture?.coursePictureUri ?: "img/course_banner_default0.webp"
-
+                    image = props.clazzItem?.coursePicture?.coursePictureUri
+                        ?: "img/default_course_banners/${defaultCourseBannerImageIndex(props.clazzItem?.clazzName)}.webp"
                 }
 
                 onClick = {

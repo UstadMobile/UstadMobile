@@ -1,22 +1,15 @@
 package com.ustadmobile.libcache
 
+import com.ustadmobile.libcache.db.entities.RetentionLock
 import com.ustadmobile.libcache.request.HttpRequest
 import com.ustadmobile.libcache.response.HttpResponse
 import kotlinx.io.Source
 
-data class CacheRetentionLock(
-    val lockId: Int,
-    val timeCreated: Long,
+data class EntryLockRequest(
     val url: String,
+    val remark: String = "",
 )
 
-data class CacheRetentionJoin(
-    val lockId: Int,
-    val tableId: Int,
-    val entityId: Long,
-    val url: String,
-    val status: Int, //Active, inactive, upload_pending
-)
 
 /**
  * ===Content===
@@ -94,7 +87,10 @@ interface UstadCache {
     ): Map<String, Boolean>
 
 
-    fun addRetentionLocks(locks: List<CacheRetentionLock>): List<Int>
+    /**
+     * Create retention locks.
+     */
+    fun addRetentionLocks(locks: List<EntryLockRequest>): List<Pair<EntryLockRequest, RetentionLock>>
 
     fun removeRetentionLocks(lockIds: List<Int>)
 
@@ -105,6 +101,8 @@ interface UstadCache {
         const val HEADER_FIRST_STORED_TIMESTAMP = "UCache-First-Stored"
 
         const val HEADER_LAST_VALIDATED_TIMESTAMP = "UCache-Last-Validated"
+
+        const val DEFAULT_SIZE_LIMIT = (100 * 1024 * 1024).toLong()
 
     }
 

@@ -7,6 +7,8 @@ import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCaseJs
 import com.ustadmobile.core.domain.blob.savepicture.SavePictureUseCase
 import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseJs
+import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCaseJs
+import com.ustadmobile.core.domain.contententry.getmetadatafromuri.IContentEntryGetMetaDataFromUriUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.ImportContentUseCase
 import com.ustadmobile.core.domain.contententry.import.ImportContentUseCaseJs
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
@@ -101,6 +103,14 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
             endpoint = context,
             json = instance(),
             db = instance(tag = DoorTag.TAG_DB),
+        )
+    }
+
+
+    bind<IContentEntryGetMetaDataFromUriUseCase>() with provider {
+        ContentEntryGetMetaDataFromUriUseCaseJs(
+            json = instance(),
+            chunkedUploadClientLocalUriUseCase = instance()
         )
     }
 

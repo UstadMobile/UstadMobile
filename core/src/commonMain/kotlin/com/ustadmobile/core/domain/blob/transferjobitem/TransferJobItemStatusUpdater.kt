@@ -89,10 +89,6 @@ class TransferJobItemStatusUpdater(
 
                 //If the blob upload is complete and associated with an entityUid, then put in an
                 // OutgoingReplication so that the new value is sent to the server.
-
-                //HERE: There could be more than one blob associated with the given entity e.g.
-                // thumbnail and main image. This should run a check for any remaining transferjobs
-                //before triggering
                 if(it.status == TransferJobItemStatus.COMPLETE.value && repoNodeId != null) {
                     db.transferJobItemDao.insertOutgoingReplicationForTransferJobItemIfDone(
                         destNodeId = repoNodeId,
