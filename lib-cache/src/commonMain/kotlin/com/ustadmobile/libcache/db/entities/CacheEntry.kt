@@ -39,7 +39,7 @@ data class CacheEntry(
     var lastValidated: Long = -1,
 
     @ColumnInfo(index = true)
-    var responseBodySha256: String? = null,
+    var integrity: String? = null,
 
     var responseHeaders: String = "",
 
@@ -49,11 +49,4 @@ data class CacheEntry(
     var storageUri: String = "",
 
     var storageSize: Long = 0,
-) {
-    companion object {
-
-        const val CACHE_FLAG_STATIC = 8
-
-
-    }
-}
+)

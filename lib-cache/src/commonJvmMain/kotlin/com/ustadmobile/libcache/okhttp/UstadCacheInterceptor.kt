@@ -6,13 +6,11 @@ import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCache.Companion.HEADER_FIRST_STORED_TIMESTAMP
 import com.ustadmobile.libcache.UstadCache.Companion.HEADER_LAST_VALIDATED_TIMESTAMP
 import com.ustadmobile.libcache.UstadCacheImpl.Companion.LOG_TAG
-import com.ustadmobile.libcache.base64.encodeBase64
 import com.ustadmobile.libcache.cachecontrol.CacheControlFreshnessChecker
 import com.ustadmobile.libcache.cachecontrol.CacheControlFreshnessCheckerImpl
 import com.ustadmobile.libcache.cachecontrol.RequestCacheControlHeader
 import com.ustadmobile.libcache.cachecontrol.ResponseCacheabilityChecker
 import com.ustadmobile.libcache.cachecontrol.ResponseCacheabilityCheckerImpl
-import com.ustadmobile.libcache.headers.CouponHeader
 import com.ustadmobile.libcache.headers.headersBuilder
 import com.ustadmobile.libcache.logging.UstadCacheLogger
 import com.ustadmobile.libcache.response.HttpPathResponse
@@ -100,7 +98,6 @@ class UstadCacheInterceptor(
                     fileOutStream.close()
 
                     val cacheRequest = call.request().asCacheHttpRequest()
-                    val sha256 = digest.digest()
 
                     if(!call.isCanceled()) {
                         cache.store(listOf(
@@ -113,7 +110,6 @@ class UstadCacheInterceptor(
                                     request = cacheRequest,
                                     extraHeaders = headersBuilder {
                                         takeFrom(response.headers.asCacheHttpHeaders())
-                                        header(CouponHeader.COUPON_ACTUAL_SHA_256, sha256.encodeBase64())
                                     }
                                 ),
                                 responseBodyTmpLocalPath = Path(file.absolutePath)

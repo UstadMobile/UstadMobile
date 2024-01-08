@@ -7,20 +7,15 @@ data class CouponHeader(
 ) {
 
 
-    @Suppress("unused")
     companion object {
 
-        const val COUPON_EXPECT_SHA_256_HEADER_NAME = "Coupon-Expect-Sha-256"
 
-        const val COUPON_EXPECT_CONTENT_TYPE_HEADER_NAME = "Coupon-Expect-Content-Type"
+        /**
+         * Header that we use to assert that the Etag is a valid subresource integrity string
+         */
+        const val HEADER_ETAG_IS_INTEGRITY = "X-Etag-Is-Integrity"
 
-        const val COUPON_EXPECT_SIZE = "Coupon-Expect-Size"
-
-        const val COUPON_ACTUAL_SHA_256 = "Coupon-Actual-Sha-256"
-
-        const val COUPON_HEADER_NAME = "Coupon"
-
-        const val COUPON_STATIC = "Coupon-Static"
+        const val HEADER_X_INTEGRITY = "X-Integrity"
 
 
     }

@@ -4,10 +4,10 @@ import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.libcache.logging.NapierLoggingAdapter
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheImpl
-import com.ustadmobile.libcache.base64.encodeBase64
 import com.ustadmobile.libcache.db.UstadCacheDb
-import com.ustadmobile.libcache.headers.CouponHeader
+import com.ustadmobile.libcache.headers.CouponHeader.Companion.HEADER_ETAG_IS_INTEGRITY
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
+import com.ustadmobile.libcache.integrity.sha256Integrity
 import com.ustadmobile.util.test.ResourcesDispatcher
 import com.ustadmobile.util.test.initNapierLog
 import kotlinx.io.files.Path
@@ -151,9 +151,10 @@ class UstadCacheInterceptorTest {
         //Should only have made one request
         assertEquals(1, mockWebServer.requestCount)
 
-        //The cached response should have a sha256 header
-        assertEquals(resourceBytes.sha256().encodeBase64(),
-            cachedResponse.header(CouponHeader.COUPON_ACTUAL_SHA_256))
+        assertEquals(
+            sha256Integrity(resourceBytes.sha256()), cachedResponse.headers["etag"],
+            message = "Cached response should have etag set to the sha256 integrity string")
+        assertEquals("true", cachedResponse.header(HEADER_ETAG_IS_INTEGRITY))
     }
 
     @Test

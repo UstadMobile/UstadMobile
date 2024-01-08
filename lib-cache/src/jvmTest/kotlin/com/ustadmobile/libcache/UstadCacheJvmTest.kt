@@ -2,8 +2,9 @@ package com.ustadmobile.libcache
 
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.libcache.db.UstadCacheDb
-import com.ustadmobile.libcache.headers.CouponHeader
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
+import com.ustadmobile.libcache.headers.requireIntegrity
+import com.ustadmobile.libcache.integrity.sha256Integrity
 import com.ustadmobile.libcache.md5.Md5Digest
 import com.ustadmobile.libcache.md5.urlKey
 import com.ustadmobile.libcache.request.requestBuilder
@@ -21,7 +22,6 @@ import org.junit.rules.TemporaryFolder
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.security.MessageDigest
-import java.util.Base64
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import kotlin.test.assertEquals
@@ -79,9 +79,8 @@ class UstadCacheJvmTest {
             it.update(testFile.readBytes())
         }.digest()
 
-        val sha256Header = cacheResponse.headers[CouponHeader.COUPON_ACTUAL_SHA_256]!!
-        val headerSha256 = Base64.getDecoder().decode(sha256Header)
-        Assert.assertArrayEquals(dataSha256, headerSha256)
+        val integrityHeaderVal = cacheResponse.headers.requireIntegrity()
+        Assert.assertEquals(sha256Integrity(dataSha256), integrityHeaderVal)
         assertEquals(testFile.length(), cacheResponse.headers["content-length"]?.toLong())
         assertEquals("image/png", cacheResponse.headers["content-type"])
 

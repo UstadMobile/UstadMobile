@@ -7,6 +7,6 @@ data class StoreResult(
     val urlKey: String,
     val request: HttpRequest,
     val response: HttpResponse,
+    val integrity: String,
     val lockId: Int = 0,
 )
-
