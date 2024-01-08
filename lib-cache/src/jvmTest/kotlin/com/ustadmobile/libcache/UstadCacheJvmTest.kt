@@ -4,11 +4,11 @@ import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.headers.CouponHeader
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
-import com.ustadmobile.libcache.headers.headersBuilder
+import com.ustadmobile.libcache.md5.Md5Digest
+import com.ustadmobile.libcache.md5.urlKey
 import com.ustadmobile.libcache.request.requestBuilder
 import com.ustadmobile.libcache.response.HttpPathResponse
 import com.ustadmobile.libcache.response.StringResponse
-import kotlinx.coroutines.runBlocking
 import kotlinx.io.asInputStream
 import kotlinx.io.asSource
 import kotlinx.io.buffered
@@ -84,6 +84,13 @@ class UstadCacheJvmTest {
         Assert.assertArrayEquals(dataSha256, headerSha256)
         assertEquals(testFile.length(), cacheResponse.headers["content-length"]?.toLong())
         assertEquals("image/png", cacheResponse.headers["content-type"])
+
+        //Body entity should have size set (to size the cache and find entries to evict).
+        val md5Digest = Md5Digest()
+        val cacheEntry = cacheDb.cacheEntryDao.findEntryAndBodyByKey(
+            md5Digest.urlKey(request.url)
+        )
+        assertEquals(testFile.length(), cacheEntry?.storageSize ?: 0)
     }
 
     @Test
@@ -144,7 +151,7 @@ class UstadCacheJvmTest {
     }
 
     @Test
-    fun givenResponseIsStatic_whenRequestMatchesPathButNotQuery_thenWillBeReturned() {
+    fun givenResponseIsUpdated_whenRetrieved_thenLatestResponseWillBeReturned(){
         val cacheDir = tempDir.newFolder()
         val cacheDb = DatabaseBuilder.databaseBuilder(
             UstadCacheDb::class, "jdbc:sqlite::memory:", 1L)
@@ -156,8 +163,8 @@ class UstadCacheJvmTest {
         )
 
         val url = "http://server.com/file.css"
-        val payloadStr = "font-weight: bold"
-        runBlocking {
+        val payloads = listOf("font-weight: bold", "font-weight: bold !important")
+        payloads.forEach { payload ->
             ustadCache.store(listOf(
                 requestBuilder(url).let {
                     CacheEntryToStore(
@@ -165,24 +172,23 @@ class UstadCacheJvmTest {
                         response = StringResponse(
                             request = it,
                             mimeType = "text/css",
-                            extraHeaders = headersBuilder {
-                                header(CouponHeader.COUPON_STATIC, "true")
-                            },
-                            body = payloadStr
+                            body = payload
                         )
                     )
                 }
             ))
         }
 
-        val response = ustadCache.retrieve(requestBuilder("$url?cachebust"))
+        val response = ustadCache.retrieve(requestBuilder(url))
         val responseBytes = response?.bodyAsSource()?.asInputStream()?.readAllBytes()
         val responseStr = responseBytes?.let { String(it) }
-        assertEquals(payloadStr, responseStr)
+        assertEquals(payloads.last(), responseStr)
     }
 
+
     @Test
-    fun givenResponseNotStatic_whenRequestMatchesPathButNotQuery_thenWillNotBeReturned() {
+    fun givenEntryNotStored_whenRetrieved_thenWillReturnNull() {
+
         val cacheDir = tempDir.newFolder()
         val cacheDb = DatabaseBuilder.databaseBuilder(
             UstadCacheDb::class, "jdbc:sqlite::memory:", 1L)
@@ -194,24 +200,7 @@ class UstadCacheJvmTest {
         )
 
         val url = "http://server.com/file.css"
-        val payloadStr = "font-weight: bold"
-        runBlocking {
-            ustadCache.store(listOf(
-                requestBuilder(url).let {
-                    CacheEntryToStore(
-                        request = it,
-                        response = StringResponse(
-                            request = it,
-                            mimeType = "text/css",
-                            body = payloadStr
-                        )
-                    )
-                }
-            ))
-        }
-
-        val response = ustadCache.retrieve(requestBuilder("$url?cachebust"))
-        assertNull(response)
+        assertNull(ustadCache.retrieve(requestBuilder(url)))
     }
 
 }

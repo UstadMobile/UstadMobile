@@ -39,12 +39,14 @@ class ContentEntryGetMetadataViewModel(
 
     init {
         val uriArg = savedStateHandle[ARG_URI] ?: throw IllegalArgumentException("No uri")
+        val fileName = savedStateHandle[ARG_FILENAME]
 
         viewModelScope.launch {
             try {
                 val metadataResult = contentEntryGetMetaDataFromUriUseCase(
                     contentUri = DoorUri.parse(uriArg),
                     endpoint = accountManager.activeEndpoint,
+                    fileName = fileName,
                     onProgress = {
                         _uiState.update { prev ->
                             prev.copy(status = it)
@@ -96,6 +98,8 @@ class ContentEntryGetMetadataViewModel(
     companion object {
 
         const val ARG_URI = "uri"
+
+        const val ARG_FILENAME = "filename"
 
         const val DEST_NAME = "ContentEntryGetMetadata"
 

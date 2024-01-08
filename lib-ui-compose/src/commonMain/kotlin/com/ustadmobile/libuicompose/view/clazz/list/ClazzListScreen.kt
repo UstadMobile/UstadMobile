@@ -60,8 +60,6 @@ import com.ustadmobile.libuicompose.components.UstadBottomSheetOption
 import com.ustadmobile.libuicompose.components.UstadListFilterChipsHeader
 import com.ustadmobile.libuicompose.components.UstadListSortHeader
 import com.ustadmobile.libuicompose.components.ustadPagedItems
-import com.ustadmobile.libuicompose.images.UstadImage
-import com.ustadmobile.libuicompose.images.ustadAppImagePainter
 import com.ustadmobile.libuicompose.nav.UstadNavControllerPreCompose
 import com.ustadmobile.libuicompose.util.compose.courseTerminologyEntryResource
 import com.ustadmobile.libuicompose.util.compose.rememberCourseTerminologyEntries
@@ -69,6 +67,7 @@ import com.ustadmobile.libuicompose.util.ext.copyWithNewFabOnClick
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.util.defaultSortListMode
 import com.ustadmobile.libuicompose.util.rememberHtmlToPlainText
+import com.ustadmobile.libuicompose.view.clazz.painterForDefaultCourseImage
 import com.ustadmobile.libuicompose.viewmodel.ustadViewModel
 import moe.tlaster.precompose.navigation.BackStackEntry
 
@@ -246,7 +245,7 @@ fun ClazzListItem(
                     )
                 }else {
                     Image(
-                        painter = ustadAppImagePainter(UstadImage.COURSE_BANNER_DEFAULT0),
+                        painter = painterForDefaultCourseImage(clazz?.clazzName),
                         contentDescription = "",
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.height(96.dp).fillMaxWidth()

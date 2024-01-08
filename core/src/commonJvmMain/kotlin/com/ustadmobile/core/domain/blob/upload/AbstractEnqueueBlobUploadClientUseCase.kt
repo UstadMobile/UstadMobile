@@ -38,6 +38,7 @@ abstract class AbstractEnqueueBlobUploadClientUseCase(
                             tjTotalSize = httpResponse.headers["content-length"]?.toLong() ?: 0,
                             tjiEntityUid =  enqueueUploadItem.entityUid,
                             tjiTableId = enqueueUploadItem.tableId,
+                            tjiLockIdToRelease = enqueueUploadItem.retentionLockIdToRelease,
                         )
                     ).toInt()
 

@@ -18,6 +18,8 @@ import kotlinx.serialization.Serializable
  *        display the status of an item for the user it only returns relevant status e.g.
  *        if a previous version failed/succeeded, but it was since replaced, the status of the
  *        transfer for the previous version is no longer relevant.
+ * @param tjiLockIdToRelease when an upload is finished, then the retention lock that was created to
+ *        prevent its eviction from the cache before upload is finished should be cleared.
  */
 @Entity
 @Serializable
@@ -48,4 +50,7 @@ data class TransferJobItem(
     //This should be set when the transferjobitem is created - by query.
     @ColumnInfo(defaultValue = "0")
     var tjiEntityEtag: Long = 0,
+
+    @ColumnInfo(defaultValue = "0")
+    var tjiLockIdToRelease: Int = 0,
 )
