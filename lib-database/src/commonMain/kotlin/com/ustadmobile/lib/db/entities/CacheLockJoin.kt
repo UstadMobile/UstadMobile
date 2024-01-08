@@ -17,7 +17,8 @@ data class CacheLockJoin(
     var cljId: Int = 0,
     var cljTableId: Int = 0,
     var cljEntityUid: Long = 0,
-    var cljUrl: String = "",
+    //This should not be nullable, but door doesn't support that at the moment. In reality it will never be null
+    var cljUrl: String? = "",
     var cljLockId: Int = 0,
     var cljStatus: Int = 0,
     var cljType: Int = 0,

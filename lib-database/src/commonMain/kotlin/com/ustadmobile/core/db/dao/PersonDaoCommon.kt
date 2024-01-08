@@ -42,7 +42,7 @@ object PersonDaoCommon {
            AND (Person.personUid NOT IN (:excludeSelected))
            AND (:searchText = '%' 
                OR Person.firstNames || ' ' || Person.lastName LIKE :searchText)
-      GROUP BY Person.personUid
+      GROUP BY Person.personUid, PersonPicture.personPictureUid
       ORDER BY CASE(:sortOrder)
                WHEN $SORT_FIRST_NAME_ASC THEN Person.firstNames
                WHEN $SORT_LAST_NAME_ASC THEN Person.lastName

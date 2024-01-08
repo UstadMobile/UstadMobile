@@ -90,11 +90,11 @@ class UpdateCacheLockJoinUseCase(
 
             if(createLockRequests.isNotEmpty()) {
                 val createdLocks = cache.addRetentionLocks(
-                    createLockRequests.map { EntryLockRequest(url = it.cljUrl) }
+                    createLockRequests.map { EntryLockRequest(url = it.cljUrl!!) }
                 ).associateBy { it.second.lockKey }
 
                 createLockRequests.forEach { createLockRequest ->
-                    val urlKey = md5Digest.urlKey(createLockRequest.cljUrl)
+                    val urlKey = md5Digest.urlKey(createLockRequest.cljUrl!!)
                     val lockId = createdLocks[urlKey]?.second?.lockId ?: 0
                     db.cacheLockJoinDao.updateLockIdAndStatus(
                         uid = createLockRequest.cljId,
