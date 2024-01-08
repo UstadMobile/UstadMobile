@@ -109,7 +109,6 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
 
     bind<IContentEntryGetMetaDataFromUriUseCase>() with provider {
         ContentEntryGetMetaDataFromUriUseCaseJs(
-            navResultReturner = instance(),
             json = instance(),
             chunkedUploadClientLocalUriUseCase = instance()
         )

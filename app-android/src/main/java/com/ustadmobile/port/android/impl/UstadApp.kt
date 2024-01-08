@@ -249,8 +249,12 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
         bind<UstadCache>() with singleton {
             val httpCacheDir = File(applicationContext.filesDir, "httpfiles")
             val storagePath = Path(httpCacheDir.absolutePath)
-            UstadCacheBuilder(applicationContext, storagePath, logger = NapierLoggingAdapter())
-                .build()
+            UstadCacheBuilder(
+                appContext = applicationContext,
+                storagePath = storagePath,
+                logger = NapierLoggingAdapter(),
+                sizeLimit = { 100_000_000L },
+            ).build()
         }
 
         bind<ContentImportersManager>() with scoped(EndpointScope.Default).singleton {
