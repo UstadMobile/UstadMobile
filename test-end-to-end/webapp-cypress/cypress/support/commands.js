@@ -57,6 +57,7 @@ Cypress.Commands.add('ustadAddContentToLibrary',(contentPath,contentName) => {
   cy.get('#new_content_from_file').click({force: true})
   cy.get('input[type="file"]')
     .selectFile(contentPath,{force:true})
+  cy.get('input[id="content_title"]').click()
   cy.get('input[id="content_title"]').clear().type(contentName,{timeout: 2000})
   cy.get('#actionBarButton').click()
 

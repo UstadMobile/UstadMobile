@@ -1,4 +1,3 @@
-
 describe('004_011_group_users_multiple_assignment_submission_allowed', () => {
 it('Start Ustad Test Server ', () => {
  // Start Test Server
@@ -68,7 +67,13 @@ it('Teacher add multiple submission assignment and group ', () => {
   cy.contains('Can make multiple submissions').click()
   cy.get('#group_submission_on').click()
   cy.get('#cgsName').click()
+  cy.contains('Add new groups', { timeout: 5000 }).then(($addNewGroupsBtn) => {
+      if (!$addNewGroupsBtn.is('not.visible')) {
+        cy.reload()
+      }
+    })
   cy.contains('Add new groups',{timeout: 5000}).click()
+
   cy.get('#cgs_name').type('Assignment Team')
   cy.get('#cgs_total_groups').clear().type('2')
   cy.contains('Unassigned').eq(0).click()  // s1
