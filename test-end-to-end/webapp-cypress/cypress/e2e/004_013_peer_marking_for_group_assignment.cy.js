@@ -1,4 +1,3 @@
-import setDate from '../support/setDate'; //https://github.com/cypress-io/cypress/issues/1366#issuecomment-437878862
 describe('004_013_peer_marking_for_group_assignment', () => {
 it('Start Ustad Test Server ', () => {
  // Start Test Server
@@ -114,13 +113,11 @@ it('Group 1- Student 1 submit assignment', () => {
   cy.ustadClearDbAndLogin('student1','test1234')
   cy.contains("Course").click()
   cy.contains("004_013").click()
- // cy.wait(5000)
   cy.contains('Assignment 1').click()
   cy.get('#assignment_text').get('div[contenteditable="true"]',{timeout:6000}).should('be.visible')
   cy.get('#assignment_text').click()
   cy.get('#assignment_text').type("Text 1")
   cy.contains('SUBMIT',{timeout:5000}).click()
-  //cy.wait(5000)
   cy.contains("Not submitted").should('not.exist')
   cy.go('back')
   cy.contains('Assignment 1',{timeout:1000}).click()

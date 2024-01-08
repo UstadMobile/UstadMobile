@@ -57,8 +57,6 @@ Cypress.Commands.add('ustadAddContentToLibrary',(contentPath,contentName) => {
   cy.get('#new_content_from_file').click({force: true})
   cy.get('input[type="file"]')
     .selectFile(contentPath,{force:true})
-  cy.get('input[id="content_title"]').click()
-  //cy.get('input[id="content_title"]').should('have.class', 'active')
   cy.get('input[id="content_title"]').clear().type(contentName,{timeout: 2000})
   cy.get('#actionBarButton').click()
 
@@ -133,6 +131,20 @@ Cypress.Commands.add('ustadAddDiscussionBoard',(discussionTitle) => {
     cy.get('input[id="title"]').type(discussionTitle)
     cy.get('div[data-placeholder="Description"]').type("a simple discussion description")
     cy.contains("button","Done").click()
+})
+
+  // Enable User Registration
+Cypress.Commands.add('ustadEnableUserRegistration' ,() => {
+    cy.get('#settings_button').click()
+    cy.contains('Site').click()
+    cy.contains('Edit').click()
+ //https://docs.cypress.io/api/commands/should#Assert-the-href-attribute-is-equal-to-users
+    cy.get('#terms_html_edit .ql-editor.ql-blank').should('have.attr', 'contenteditable').and('equal', 'true',{timeout:3000})
+    cy.get('#terms_html_edit .ql-editor.ql-blank').click().clear().type("New Terms",{delay: 5})
+    cy.get('#registration_allowed').click({force:true})
+    cy.get('#actionBarButton').should('be.visible')
+    cy.get('#actionBarButton').click()
+    cy.contains('Yes').should('exist')
 })
 
 /*

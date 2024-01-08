@@ -10,17 +10,18 @@ it('User registration date of birth field is mandatory', () => {
   cy.contains("People").click()
   cy.contains("button","Person").click()
   cy.contains("label", "First names").parent().find("input").clear().type("Student")
-  cy.contains("label", "Last name").parent().find("input").clear().type("A")
+  cy.contains("label", "Last name").parent().find("input").clear().type("1")
   cy.get('div[id="gender"]').click()
   cy.contains("li","Female").click()
-  cy.ustadBirthDate(cy.get("#person_date_of_birth"), new Date("2017-06-01"))
+  cy.ustadBirthDate(cy.get("#person_date_of_birth"),new Date(Date.now()-(365 * 24 * 60 * 60 * 1000 * 5)))
+  cy.wait(2000)
   cy.contains("button","Save",{timeout: 2000}).click()
-  cy.ustadCreateUserAccount('studenta','test1234')
+  cy.ustadCreateUserAccount('student1','test1234')
 })
 
 it('Student login successfully', () => {
  // Student user login
-  cy.ustadClearDbAndLogin('studenta','test1234',{timeout:8000})
+  cy.ustadClearDbAndLogin('student1','test1234',{timeout:8000})
   cy.contains("People").should('be.visible')
   })
 })

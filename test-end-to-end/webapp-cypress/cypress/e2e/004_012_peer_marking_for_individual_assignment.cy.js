@@ -1,4 +1,3 @@
-import setDate from '../support/setDate'; //https://github.com/cypress-io/cypress/issues/1366#issuecomment-437878862
 describe('004_012_peer_marking_for_individual_assignment', () => {
 it('Start Ustad Test Server ', () => {
  // Start Test Server

@@ -1,4 +1,3 @@
-import setDate from '../support/setDate'; //https://github.com/cypress-io/cypress/issues/1366#issuecomment-437878862
 describe('004_010_group_users_single_assignment_submission_allowed', () => {
 it('Start Ustad Test Server ', () => {
  // Start Test Server

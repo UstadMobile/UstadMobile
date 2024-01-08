@@ -5,7 +5,7 @@ describe('007_002_user_registration_above_age_13', () => {
 })
 
 it('Admin enable registration', () => {
-  // Admin user login
+ // Admin user login
   cy.ustadClearDbAndLogin('admin','testpass',{timeout:8000})
   cy.ustadEnableUserRegistration()
   cy.get('#header_avatar').click()
@@ -19,10 +19,20 @@ it('Admin enable registration', () => {
   cy.contains("label", "Last name").parent().find("input").clear().type('1')
   cy.get('div[id="gender"]').click()
   cy.contains("li","Female").click()
-  cy.contains("label", "Username*").parent().find("input").clear().type('student1')
+ // Email error  @ is mandatory for email
+  cy.get('#person_email_addr').click().type('tester')
+  cy.contains("label", "Username*").parent().find("input").clear().type('studentc')
   cy.contains("label", "Password").parent().find("input").clear().type('test1234')
   cy.contains('Register').click()
+  cy.get('.Mui-error').contains('Email').should('exist') //Email error
+  cy.contains('Invalid').should('be.visible')
+  // Email error  [white space, [, ],/ ] is prohibited for email
+  cy.get('#person_email_addr').click().clear().type('tester@gma il')
+  cy.contains('Register').click()
+  cy.get('.Mui-error').contains('Email').should('exist') //Email error
+  cy.contains('Invalid').should('be.visible')
+  cy.get('#person_email_addr').click().clear().type('tester@gmail.com')
+  cy.contains('Register').click()
   cy.contains('Courses').should('be.visible')
-
 })
 })

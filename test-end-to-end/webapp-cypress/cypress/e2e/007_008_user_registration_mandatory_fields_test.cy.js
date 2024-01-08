@@ -7,16 +7,7 @@ describe('007_006_admin_enable_or_disable_guest_login', () => {
 it('Admin enable registration', () => {
   // Admin user login
    cy.ustadClearDbAndLogin('admin','testpass',{timeout:8000})
-   cy.get('#settings_button').click()
-   cy.contains('Site').click()
-   cy.contains('Edit').click()
-  //https://docs.cypress.io/api/commands/should#Assert-the-href-attribute-is-equal-to-users
-   cy.get('.ql-editor.ql-blank').should('have.attr', 'contenteditable').and('equal', 'true',{timeout:3000})
-   cy.get('.ql-editor.ql-blank').clear().type("New Terms")
-   cy.get('#registration_allowed').click({force:true})
-   cy.get('#actionBarButton').should('be.visible')
-   cy.get('#actionBarButton').click()
-   cy.contains('Yes').should('exist')
+   cy.ustadEnableUserRegistration()
    cy.get('#header_avatar').click()
    cy.contains('Add another account').click()
    cy.get('#create_account_button').should('be.visible')

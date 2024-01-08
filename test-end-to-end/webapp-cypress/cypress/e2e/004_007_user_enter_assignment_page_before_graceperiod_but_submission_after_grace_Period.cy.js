@@ -1,4 +1,3 @@
-import setDate from '../support/setDate'; //https://github.com/cypress-io/cypress/issues/1366#issuecomment-437878862
 describe('004_007_user_enter_assignment_page_before_graceperiod_but_submission_after_grace_Period', () => {
 it('Start Ustad Test Server ', () => {
  // Start Test Server
