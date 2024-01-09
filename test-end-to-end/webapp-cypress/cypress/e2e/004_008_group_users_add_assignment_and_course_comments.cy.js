@@ -9,9 +9,6 @@ it('Admin add a course and Members', () => {
   cy.ustadClearDbAndLogin('admin','testpass')
  // Add a new course
   cy.ustadAddCourse('004_008')
- // Add module block
- // cy.contains('button','Edit').click()
- // cy.ustadAddModuleBlock('module 1')
  //Add a teacher
   cy.contains("button","Members").click()
   cy.contains("span","Add a teacher").click()
@@ -59,7 +56,6 @@ it('Teacher add assignment and course comment', () => {
  // Add Assignment block
   cy.contains("Courses").click()
   cy.contains("004_008").click()
-  cy.contains("button","Members").click()  // This is a temporary command to make sure member list is loaded
   cy.contains("button","Course").click()
   cy.contains("button","Edit").click()
   cy.contains("Add block").click()
@@ -74,7 +70,6 @@ it('Teacher add assignment and course comment', () => {
         }
       })
   cy.get('#add_new_groups').click()
-  //cy.contains('Add new groups',{timeout: 5000}).click()
   cy.get('#cgs_name').type('Assignment Team')
   cy.get('#cgs_total_groups').clear().type('2')
   cy.contains('Unassigned').eq(0).click()  // s1
@@ -88,7 +83,6 @@ it('Teacher add assignment and course comment', () => {
   cy.contains("button","Save").should('be.visible')
   cy.contains("button","Save").click()
   cy.get('input[id="title"]').type("Assignment 1")
- // cy.contains('Assignment Team').click()
   cy.contains("button","Done").should('be.visible')
   cy.contains("button","Done").click()
   cy.contains("button","Save").should('be.visible')
@@ -103,7 +97,6 @@ it('Teacher add assignment and course comment', () => {
 })
 
 it('Group 1- Student 1 submit assignment', () => {
-
   cy.ustadClearDbAndLogin('student1','test1234')
   cy.contains("Course").click()
   cy.contains("004_008").click()
@@ -132,17 +125,13 @@ it('Group 2 Student can view  Group 1 course comment ', () => {
 })
 
 it('Group 1 - Student2 able to view Group 1 assignment and course comments', () => {
-
-    cy.ustadClearDbAndLogin('student2','test1234')
-
-   //  Assignment block
-    cy.contains("Course").click()
-    cy.contains("004_008").click()
-    cy.contains("button","Members").click()  // This is a temporary command to make sure member list is loaded
-    cy.contains("button","Course").click()
-    cy.contains("Assignment 1").click()
-    cy.contains("Text 1").should('be.visible')
-    cy.contains("comment2").should('exist')
-    cy.contains("comment1").should('exist')
+  cy.ustadClearDbAndLogin('student2','test1234')
+  cy.contains("Course").click()
+  cy.contains("004_008").click()
+  cy.contains("button","Course").click()
+  cy.contains("Assignment 1").click()
+  cy.contains("Text 1").should('be.visible')
+  cy.contains("comment2").should('exist')
+  cy.contains("comment1").should('exist')
 })
 })

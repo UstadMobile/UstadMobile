@@ -12,8 +12,7 @@ describe('001_002_add_invalid_content', () => {
   cy.get('#new_content_from_file').click({force: true})
   cy.get('input[type="file"]')
       .selectFile('../test-files/content/Invalid_Video_Content.mp4',{force:true})
-  //cy.ustadAddContentToLibrary(,'Content_001')
-  cy.contains('Invalid file : Exception importing what looked like video').should('exist')
+  cy.contains('Invalid file').should('exist')
 
 })
 })

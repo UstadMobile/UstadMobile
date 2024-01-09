@@ -12,8 +12,9 @@ it('Admin enable registration', () => {
   cy.contains('Add another account').click()
   cy.get('#create_account_button').should('be.visible')
   cy.get('#create_account_button').click()
-  cy.ustadBirthDate(cy.get(".MuiInputBase-input.MuiOutlinedInput-input"), new Date("2010-06-01"));
+  cy.ustadBirthDate(cy.get("#age_date_of_birth"), new Date("2010-06-01"));
   cy.contains('button','Next').click()
+  cy.contains('New Terms').should('be.visible')
   cy.get('#accept_button').click()
   cy.contains("label", "First names").parent().find("input").clear().type('student')
   cy.contains("label", "Last name").parent().find("input").clear().type('1')

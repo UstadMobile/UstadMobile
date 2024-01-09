@@ -32,7 +32,6 @@ it('Teacher add assignment', () => {
   // Add Assignment block
   cy.contains("Course").click()
   cy.contains("004_007").click()
-  cy.contains("button","Members").click() // This is a temporary command to make sure member list is loaded
   cy.contains("button","Course").click()
   cy.contains("button","Edit").click()
   cy.contains("Add block").click()
@@ -81,7 +80,6 @@ it('Teacher add assignment mark and course comment', () => {
  //  Assignment block
   cy.contains("Course").click()
   cy.contains("004_007").click()
-  cy.contains("button","Members").click()  // This is a temporary command to make sure member list is loaded
   cy.contains("button","Course").click()
   cy.contains("Assignment 1").click()
   cy.contains('Submissions').click()

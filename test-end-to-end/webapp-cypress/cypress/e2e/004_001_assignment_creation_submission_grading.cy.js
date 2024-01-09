@@ -32,7 +32,6 @@ it('Teacher add assignment', () => {
   // Add Assignment block
   cy.contains("Course").click()
   cy.contains("004_001").click()
-  cy.contains("button","Members").click() // This is a temporary command to make sure member list is loaded
   cy.contains("button","Course").click()
   cy.contains("button","Edit").click()
   cy.contains("Add block").click()
@@ -78,7 +77,6 @@ it('Teacher add assignment mark and course comment', () => {
  //  Assignment block
   cy.contains("Course").click()
   cy.contains("004_001").click()
-  cy.contains("button","Members").click()  // This is a temporary command to make sure member list is loaded
   cy.contains("button","Course").click()
   cy.contains("Assignment 1").click()
   cy.contains('Submissions').click()
@@ -91,7 +89,7 @@ it('Teacher add assignment mark and course comment', () => {
   cy.contains('9/10 Points').should('exist')
 })
 
-it('Student view his grade', () => {
+it('Student can view their grade', () => {
   cy.ustadClearDbAndLogin('student1','test1234')
   cy.contains("Course").click()
   cy.contains("004_001").click()

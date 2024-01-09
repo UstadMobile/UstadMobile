@@ -56,22 +56,20 @@ it('Teacher add assignment', () => {
  // Add Assignment block
   cy.contains("Courses").click()
   cy.contains("004_010").click()
-  cy.contains("button","Members").click()  // This is a temporary command to make sure member list is loaded
   cy.contains("button","Course").click()
   cy.contains("button","Edit").click()
   cy.contains("Add block").click()
   cy.contains("Assignment").click()
   cy.get('input[id="title"]').clear().type("Assignment 1")
   cy.get('div[data-placeholder="Description"]').type("this is a simple assignment")
-  // cy.ustadSetDateTime(cy.get("#cbDeadlineDate"),  new Date(Date.now() + (1000*60*1000)))
   cy.contains('Must submit all at once').should('exist')
   cy.get('#group_submission_on').click()
   cy.get('#cgsName').click()
-    cy.contains('Add new groups', { timeout: 5000 }).then(($addNewGroupsBtn) => {
-        if (!$addNewGroupsBtn.is('not.visible')) {
-          cy.reload()
-        }
-      })
+  cy.contains('Add new groups', { timeout: 5000 }).then(($addNewGroupsBtn) => {
+     if (!$addNewGroupsBtn.is('not.visible')) {
+     cy.reload()
+     }
+     })
   cy.contains('Add new groups',{timeout: 5000}).click()
   cy.get('#cgs_name').type('Assignment Team')
   cy.get('#cgs_total_groups').clear().type('2')
@@ -92,11 +90,9 @@ it('Teacher add assignment', () => {
   cy.contains("button","Save").click()
   cy.wait(1000) // This command helps to view Assignment to user
   cy.contains("button","Members",{timeout:2000}).should('be.visible')
-
 })
 
 it('Group 1- Student 1 submit assignment', () => {
-
   cy.ustadClearDbAndLogin('student1','test1234')
   cy.contains("Course").click()
   cy.contains("004_010").click()
@@ -112,12 +108,9 @@ it('Group 1- Student 1 submit assignment', () => {
 })
 
 it('Group 1 - Student2 able to view Group 1 assignment and submit button not visible since it is single submission', () => {
-
   cy.ustadClearDbAndLogin('student2','test1234')
- //  Assignment block
   cy.contains("Course").click()
   cy.contains("004_010").click()
-  cy.contains("button","Members").click()  // This is a temporary command to make sure member list is loaded
   cy.contains("button","Course").click()
   cy.contains("Assignment 1").click()
   cy.contains("Text 1").should('be.visible')

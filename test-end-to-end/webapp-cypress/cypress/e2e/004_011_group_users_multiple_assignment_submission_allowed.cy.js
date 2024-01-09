@@ -56,7 +56,6 @@ it('Teacher add multiple submission assignment and group ', () => {
  // Add Assignment block
   cy.contains("Courses").click()
   cy.contains("004_011").click()
-  cy.contains("button","Members").click()  // This is a temporary command to make sure member list is loaded
   cy.contains("button","Course").click()
   cy.contains("button","Edit").click()
   cy.contains("Add block").click()
@@ -68,10 +67,10 @@ it('Teacher add multiple submission assignment and group ', () => {
   cy.get('#group_submission_on').click()
   cy.get('#cgsName').click()
   cy.contains('Add new groups', { timeout: 5000 }).then(($addNewGroupsBtn) => {
-      if (!$addNewGroupsBtn.is('not.visible')) {
-        cy.reload()
-      }
-    })
+     if (!$addNewGroupsBtn.is('not.visible')) {
+     cy.reload()
+     }
+     })
   cy.contains('Add new groups',{timeout: 5000}).click()
 
   cy.get('#cgs_name').type('Assignment Team')
@@ -117,7 +116,6 @@ it('Group 1 - Student2 able to view Group 1 assignment and submit button should 
  //  Assignment block
   cy.contains("Course").click()
   cy.contains("004_011").click()
-  cy.contains("button","Members").click()  // This is a temporary command to make sure member list is loaded
   cy.contains("button","Course").click()
   cy.contains("Assignment 1").click()
   cy.contains("Text 1").should('be.visible')

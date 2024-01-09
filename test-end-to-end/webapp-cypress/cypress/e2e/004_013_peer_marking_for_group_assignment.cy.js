@@ -56,7 +56,6 @@ it('Teacher add assignment', () => {
  // Add Assignment block
   cy.contains("Courses").click()
   cy.contains("004_013").click()
-  cy.contains("button","Members").click()  // This is a temporary command to make sure member list is loaded
   cy.contains("button","Course").click()
   cy.contains("button","Edit").click()
   cy.contains("Add block").click()
@@ -66,11 +65,11 @@ it('Teacher add assignment', () => {
   cy.contains('Must submit all at once').should('exist')
   cy.get('#group_submission_on').click()
   cy.get('#cgsName').click()
-    cy.contains('Add new groups', { timeout: 5000 }).then(($addNewGroupsBtn) => {
-        if (!$addNewGroupsBtn.is('not.visible')) {
-          cy.reload()
-        }
-      })
+  cy.contains('Add new groups', { timeout: 5000 }).then(($addNewGroupsBtn) => {
+     if (!$addNewGroupsBtn.is('not.visible')) {
+     cy.reload()
+     }
+     })
   cy.contains('Add new groups',{timeout: 5000}).click()
   cy.get('#cgs_name').type('Assignment Team')
   cy.get('#cgs_total_groups').clear().type('2')
@@ -114,7 +113,6 @@ it('Teacher add assignment', () => {
 })
 
 it('Group 1- Student 1 submit assignment', () => {
-
   cy.ustadClearDbAndLogin('student1','test1234')
   cy.contains("Course").click()
   cy.contains("004_013").click()
@@ -132,10 +130,8 @@ it('Group 1- Student 1 submit assignment', () => {
 
 it('Student3 add assignment mark for Group 1', () => {
   cy.ustadClearDbAndLogin('student3','test1234')
- //  Assignment block
   cy.contains("Course").click()
   cy.contains("004_013").click()
-  cy.contains("button","Members").click()  // This is a temporary command to make sure member list is loaded
   cy.contains("button","Course").click()
   cy.contains("Assignment 1").click()
   cy.contains('Peers to review').click()

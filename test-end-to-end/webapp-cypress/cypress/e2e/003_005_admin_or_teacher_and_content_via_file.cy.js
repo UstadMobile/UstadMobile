@@ -27,7 +27,7 @@ it('Admin able to add content block from library', () => {
   cy.contains('button','Edit').click()
   cy.contains("Add block").click()
   cy.contains("Content").click()
-  cy.get('.MuiChip-label.MuiChip-labelMedium').eq(2).click() //Library button
+  cy.get('#content_entry_filter_chip_box').contains('Library').click()
   cy.contains("Content_001").click()
   cy.contains("Done").click()
   cy.contains("Save").click()
@@ -39,7 +39,6 @@ it('Teacher able to add content block from file', () => {
  // Add Assignment block
   cy.contains("Course").click()
   cy.contains("003_005").click()
- // cy.contains("button","Members").click() // This is a temporary command to make sure member list is loaded
   cy.contains("button","Course").click()
   cy.contains("button","Edit").click()
   cy.contains("Add block").click()

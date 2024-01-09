@@ -4,7 +4,7 @@ describe('007_004_user_registration_dob_field_is_mandatory', () => {
     cy.ustadStartTestServer()
 })
 
-it('User registration date of birth field is mandatory', () => {
+it('Admin add a student aged below 13', () => {
  // Admin user login
   cy.ustadClearDbAndLogin('admin','testpass',{timeout:8000})
   cy.contains("People").click()
@@ -13,6 +13,7 @@ it('User registration date of birth field is mandatory', () => {
   cy.contains("label", "Last name").parent().find("input").clear().type("1")
   cy.get('div[id="gender"]').click()
   cy.contains("li","Female").click()
+ // Date now - 5 years --> student's age
   cy.ustadBirthDate(cy.get("#person_date_of_birth"),new Date(Date.now()-(365 * 24 * 60 * 60 * 1000 * 5)))
   cy.wait(2000)
   cy.contains("button","Save",{timeout: 2000}).click()

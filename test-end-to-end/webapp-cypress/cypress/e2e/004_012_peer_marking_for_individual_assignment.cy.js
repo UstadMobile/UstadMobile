@@ -40,7 +40,6 @@ it('Teacher add assignment', () => {
  // Add Assignment block
   cy.contains("Course").click()
   cy.contains("004_012").click()
-  cy.contains("button","Members").click() // This is a temporary command to make sure member list is loaded
   cy.contains("button","Course").click()
   cy.contains("button","Edit").click()
   cy.contains("Add block").click()
@@ -95,10 +94,8 @@ it('Student1 submit assignment', () => {
 
 it('Student2 add assignment mark and course comment', () => {
   cy.ustadClearDbAndLogin('student2','test1234')
- //  Assignment block
   cy.contains("Course").click()
   cy.contains("004_012").click()
-  cy.contains("button","Members").click()  // This is a temporary command to make sure member list is loaded
   cy.contains("button","Course").click()
   cy.contains("Assignment 1").click()
   cy.contains('Peers to review').click()

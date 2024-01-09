@@ -9,9 +9,6 @@ it('Admin add a course and Members', () => {
   cy.ustadClearDbAndLogin('admin','testpass')
  // Add a new course
   cy.ustadAddCourse('004_009')
- // Add module block
- // cy.contains('button','Edit').click()
- // cy.ustadAddModuleBlock('module 1')
  //Add a teacher
   cy.contains("button","Members").click()
   cy.contains("span","Add a teacher").click()
@@ -59,7 +56,6 @@ it('Teacher add assignment and course comment', () => {
  // Add Assignment block
   cy.contains("Courses").click()
   cy.contains("004_009").click()
- // cy.contains("button","Members").click()  // This is a temporary command to make sure member list is loaded
   cy.contains("button","Course").click()
   cy.contains("button","Edit").click()
   cy.contains("Add block").click()
@@ -68,11 +64,11 @@ it('Teacher add assignment and course comment', () => {
   cy.get('div[data-placeholder="Description"]').type("this is a simple assignment")
   cy.get('#group_submission_on').click()
   cy.get('#cgsName').click()
-    cy.contains('Add new groups', { timeout: 5000 }).then(($addNewGroupsBtn) => {
-        if (!$addNewGroupsBtn.is('not.visible')) {
-          cy.reload()
-        }
-      })
+  cy.contains('Add new groups', { timeout: 5000 }).then(($addNewGroupsBtn) => {
+     if (!$addNewGroupsBtn.is('not.visible')) {
+     cy.reload()
+     }
+     })
   cy.contains('Add new groups',{timeout: 5000}).click()
   cy.get('#cgs_name').type('Assignment Team')
   cy.get('#cgs_total_groups').clear().type('2')
@@ -116,7 +112,6 @@ it('Group 1 - Student add private comment', () => {
 })
 
 it('Group 2 - Student make sure Group 1 private comment is not visible', () => {
-
   cy.ustadClearDbAndLogin('student3','test1234')
   cy.contains("Course").click()
   cy.contains("004_009").click()
@@ -126,7 +121,6 @@ it('Group 2 - Student make sure Group 1 private comment is not visible', () => {
   cy.contains("hi").should('not.exist')
 })
 it('Group 1 - Student2 able to view Group 1 private comment', () => {
-
   cy.ustadClearDbAndLogin('student2','test1234')
   cy.contains("Course").click()
   cy.contains("004_009").click()

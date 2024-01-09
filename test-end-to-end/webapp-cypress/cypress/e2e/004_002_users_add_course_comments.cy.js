@@ -9,9 +9,6 @@ it('Admin add a course and Members', () => {
   cy.ustadClearDbAndLogin('admin','testpass')
  // Add a new course
   cy.ustadAddCourse('004_002')
- // Add module block
- // cy.contains('button','Edit').click()
- // cy.ustadAddModuleBlock('module 1')
  //Add a teacher
   cy.contains("button","Members").click()
   cy.contains("span","Add a teacher").click()
@@ -42,7 +39,6 @@ it('Teacher add assignment and course comment', () => {
   cy.ustadClearDbAndLogin('teacher1','test1234')
   cy.contains("Course").click()
   cy.contains("004_002").click()
-  cy.contains("button","Members").click()  // This is a temporary command to make sure member list is loaded
   cy.contains("button","Course").click()
  // Add Assignment block
   cy.contains("button","Edit").click()
@@ -70,7 +66,6 @@ it('Student add course comment', () => {
   cy.ustadClearDbAndLogin('student1','test1234')
   cy.contains("Course").click()
   cy.contains("004_002").click()
-  cy.contains("button","Members").click()  // This is a temporary command to make sure member list is loaded
   cy.contains("button","Course").click()
   cy.contains('Assignment 1').click()
   cy.get('#course_comment_textfield').click()

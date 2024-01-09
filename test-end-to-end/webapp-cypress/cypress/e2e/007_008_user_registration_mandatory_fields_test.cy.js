@@ -12,7 +12,7 @@ it('Admin enable registration', () => {
    cy.contains('Add another account').click()
    cy.get('#create_account_button').should('be.visible')
    cy.get('#create_account_button').click()
-   cy.ustadBirthDate(cy.get(".MuiInputBase-input.MuiOutlinedInput-input"), new Date("2010-06-01"));
+   cy.ustadBirthDate(cy.get("#age_date_of_birth"), new Date("2010-06-01"));
    cy.contains('button','Next').click()
    cy.get('#accept_button').click()
    cy.contains('Register').click()
