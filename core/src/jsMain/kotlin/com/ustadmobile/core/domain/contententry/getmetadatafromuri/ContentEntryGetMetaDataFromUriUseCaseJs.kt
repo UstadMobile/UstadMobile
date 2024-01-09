@@ -1,6 +1,7 @@
 package com.ustadmobile.core.domain.contententry.getmetadatafromuri
 
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.contentjob.InvalidContentException
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.util.randomUuid
@@ -49,6 +50,17 @@ class ContentEntryGetMetaDataFromUriUseCaseJs(
                     )
                 }
             )
+
+            when(finalResponse.statusCode) {
+                400 -> {
+                    //Invalid content
+                    throw InvalidContentException(message = finalResponse.body ?: "")
+                }
+                406 -> {
+                    //Unsupported content -
+                    throw UnsupportedContentException(message = finalResponse.body ?: "")
+                }
+            }
 
             return finalResponse.body?.let {
                 json.decodeFromString(
