@@ -267,6 +267,8 @@ class PersonEditViewModel(
                     entity?.phoneNum, prev.phoneNumError),
                 emailError = updateErrorMessageOnChange(prev.person?.emailAddr,
                     entity?.emailAddr, prev.emailError),
+                usernameError = updateErrorMessageOnChange(prev.person?.username,
+                    entity?.username, prev.usernameError),
             )
         }
 
@@ -276,7 +278,10 @@ class PersonEditViewModel(
 
     fun onPasswordChanged(password: String?) {
         _uiState.update { prev ->
-            prev.copy(password = password)
+            prev.copy(
+                password = password,
+                passwordError = null,
+            )
         }
     }
 
