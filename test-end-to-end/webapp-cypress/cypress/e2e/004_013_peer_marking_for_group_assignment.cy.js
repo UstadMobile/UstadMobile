@@ -56,6 +56,7 @@ it('Teacher add assignment', () => {
  // Add Assignment block
   cy.contains("Courses").click()
   cy.contains("004_013").click()
+  cy.contains("button","Members").click()  // This is a temporary command to make sure member list is loaded
   cy.contains("button","Course").click()
   cy.contains("button","Edit").click()
   cy.contains("Add block").click()
@@ -65,12 +66,14 @@ it('Teacher add assignment', () => {
   cy.contains('Must submit all at once').should('exist')
   cy.get('#group_submission_on').click()
   cy.get('#cgsName').click()
-  cy.contains('Add new groups', { timeout: 5000 }).then(($addNewGroupsBtn) => {
-     if (!$addNewGroupsBtn.is('not.visible')) {
-     cy.reload()
-     }
-     })
-  cy.contains('Add new groups',{timeout: 5000}).click()
+  cy.contains('Add new groups').then(($addNewGroupsBtn) => {
+    if (!$addNewGroupsBtn.is(':visible')) {
+    cy.reload()
+    }
+    else {
+    cy.get('#add_new_groups').click()
+    }
+    })
   cy.get('#cgs_name').type('Assignment Team')
   cy.get('#cgs_total_groups').clear().type('2')
   cy.contains('Unassigned').eq(0).click()  // s1
@@ -88,8 +91,9 @@ it('Teacher add assignment', () => {
   cy.contains("li","Peers").click()
   cy.get('#caPeerReviewerCount').should('exist')
   cy.get('#caPeerReviewerCount').type('1')
-  cy.wait(1000) // wait to load the group list
+  cy.wait(1000) // wait to load the group list -tests getting failed without this command
   cy.get('#buttonAssignReviewers').click()
+  cy.contains('Group 1').should('be.visible',{timeout:8000})
   cy.contains('Unassigned').eq(0).click()
   cy.get('li[role="option"]').eq(1).should('be.visible')
   cy.get('li[role="option"]').eq(1).click()

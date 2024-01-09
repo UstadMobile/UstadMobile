@@ -56,6 +56,7 @@ it('Teacher add assignment and course comment', () => {
  // Add Assignment block
   cy.contains("Courses").click()
   cy.contains("004_008").click()
+  cy.contains("button","Members").click()  // This is a temporary command to make sure member list is loaded
   cy.contains("button","Course").click()
   cy.contains("button","Edit").click()
   cy.contains("Add block").click()
@@ -64,12 +65,14 @@ it('Teacher add assignment and course comment', () => {
   cy.get('div[data-placeholder="Description"]').type("this is a simple assignment")
   cy.get('#group_submission_on').click()
   cy.get('#cgsName').click()
-    cy.contains('Add new groups', { timeout: 5000 }).then(($addNewGroupsBtn) => {
-        if (!$addNewGroupsBtn.is('not.visible')) {
-          cy.reload()
-        }
-      })
-  cy.get('#add_new_groups').click()
+  cy.contains('Add new groups').then(($addNewGroupsBtn) => {
+    if (!$addNewGroupsBtn.is(':visible')) {
+    cy.reload()
+    }
+    else {
+    cy.get('#add_new_groups').click()
+    }
+    })
   cy.get('#cgs_name').type('Assignment Team')
   cy.get('#cgs_total_groups').clear().type('2')
   cy.contains('Unassigned').eq(0).click()  // s1
@@ -82,7 +85,7 @@ it('Teacher add assignment and course comment', () => {
   cy.get('li[data-value="2"]').click()
   cy.contains("button","Save").should('be.visible')
   cy.contains("button","Save").click()
-  cy.get('input[id="title"]').type("Assignment 1")
+  cy.get('input[id="title"]').contains("Assignment 1").should('be.visible')
   cy.contains("button","Done").should('be.visible')
   cy.contains("button","Done").click()
   cy.contains("button","Save").should('be.visible')

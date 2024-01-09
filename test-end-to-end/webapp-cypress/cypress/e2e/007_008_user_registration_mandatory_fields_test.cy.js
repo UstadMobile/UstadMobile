@@ -50,5 +50,9 @@ it('Admin enable registration', () => {
    cy.contains("li","Unset").click()
    cy.contains('Register').click()
    cy.get('.Mui-error').contains('Gender').should('exist') //gender error
+   cy.get('div[id="gender"]').click()
+   cy.contains("li","Female").click()
+   cy.contains('Register').click()
+   cy.contains('Courses').should('be.visible')
 })
 })

@@ -56,6 +56,7 @@ it('Teacher add assignment', () => {
  // Add Assignment block
   cy.contains("Courses").click()
   cy.contains("004_010").click()
+  cy.contains("button","Members").click()  // This is a temporary command to make sure member list is loaded
   cy.contains("button","Course").click()
   cy.contains("button","Edit").click()
   cy.contains("Add block").click()

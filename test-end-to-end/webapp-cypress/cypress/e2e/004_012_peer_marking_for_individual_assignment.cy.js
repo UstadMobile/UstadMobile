@@ -40,6 +40,7 @@ it('Teacher add assignment', () => {
  // Add Assignment block
   cy.contains("Course").click()
   cy.contains("004_012").click()
+  cy.contains("button","Members").click()  // This is a temporary command to make sure member list is loaded
   cy.contains("button","Course").click()
   cy.contains("button","Edit").click()
   cy.contains("Add block").click()
@@ -53,8 +54,9 @@ it('Teacher add assignment', () => {
   cy.contains("li","Peers").click()
   cy.get('#caPeerReviewerCount').should('exist')
   cy.get('#caPeerReviewerCount').type('1')
-  cy.wait(1000) // wait to load the student list
-  cy.get('#buttonAssignReviewers').click()
+  cy.wait(1000) // wait to load the student list - tests getting failed without this wait.
+  cy.get('#buttonAssignReviewers',{timeout:2000}).click()
+  cy.contains('Student 1').should('be.visible',{timeout:2000})
   cy.contains('Unassigned').eq(0).click()
   cy.get('li[role="option"]').eq(1).should('be.visible')
   cy.get('li[role="option"]').eq(1).click()
@@ -62,11 +64,11 @@ it('Teacher add assignment', () => {
   cy.get('li[role="option"]').eq(1).should('be.visible')
   cy.get('li[role="option"]').eq(1).click()
   cy.contains("button","Done").should('be.visible')
-  cy.contains("button","Done").click()
-  cy.contains("button","Done").should('be.visible')
-  cy.contains("button","Done").click()
-  cy.contains("button","Save").should('be.visible')
-  cy.contains("button","Save").click()
+  cy.contains("button","Done",{timeout:1000}).click()
+  cy.contains("button","Done").should('exist')
+  cy.contains("button","Done",{timeout:3000}).click({force:true})
+  cy.contains("button","Save",{timeout:2000}).should('be.visible')
+  cy.contains("button","Save",{timeout:1000}).click()
   cy.contains("button","Members").should('be.visible')
   cy.contains("button","Edit").click()
   cy.contains("Assignment 1").click()

@@ -56,6 +56,7 @@ it('Teacher add assignment and course comment', () => {
  // Add Assignment block
   cy.contains("Courses").click()
   cy.contains("004_009").click()
+  cy.contains("button","Members").click()  // This is a temporary command to make sure member list is loaded
   cy.contains("button","Course").click()
   cy.contains("button","Edit").click()
   cy.contains("Add block").click()
@@ -65,7 +66,7 @@ it('Teacher add assignment and course comment', () => {
   cy.get('#group_submission_on').click()
   cy.get('#cgsName').click()
   cy.contains('Add new groups', { timeout: 5000 }).then(($addNewGroupsBtn) => {
-     if (!$addNewGroupsBtn.is('not.visible')) {
+     if (!$addNewGroupsBtn.is(':visible')) {
      cy.reload()
      }
      })
@@ -99,33 +100,33 @@ it('Teacher add assignment and course comment', () => {
 })
 
 it('Group 1 - Student add private comment', () => {
-
   cy.ustadClearDbAndLogin('student1','test1234')
   cy.contains("Course").click()
   cy.contains("004_009").click()
   cy.contains('Assignment 1').click()
   cy.get('#private_comment_textfield').click()
-  cy.get('#private_comment_textfield').type("hi",{timeout:2000})
+  cy.get('#private_comment_textfield').type("comment2",{timeout:2000})
   cy.get('svg[data-testid="SendIcon"]').click()
   cy.contains("comment1").should('exist')
-  cy.contains("hi").should('exist')
+  cy.contains("comment2").should('exist')
 })
 
-it('Group 2 - Student make sure Group 1 private comment is not visible', () => {
+it('Group 2 - Student3 not able to view Group 1 private comments', () => {
   cy.ustadClearDbAndLogin('student3','test1234')
   cy.contains("Course").click()
   cy.contains("004_009").click()
   cy.contains('Assignment 1').click()
   cy.get('#private_comment_textfield').should('exist')
   cy.contains("comment1").should('not.exist')
-  cy.contains("hi").should('not.exist')
+  cy.contains("comment2").should('not.exist')
 })
+
 it('Group 1 - Student2 able to view Group 1 private comment', () => {
   cy.ustadClearDbAndLogin('student2','test1234')
   cy.contains("Course").click()
   cy.contains("004_009").click()
   cy.contains('Assignment 1').click()
   cy.contains("comment1").should('exist')
-  cy.contains("hi").should('exist')
+  cy.contains("comment2").should('exist')
 })
 })
