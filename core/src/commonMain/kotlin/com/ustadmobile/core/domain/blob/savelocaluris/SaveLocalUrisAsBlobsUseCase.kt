@@ -32,13 +32,21 @@ interface SaveLocalUrisAsBlobsUseCase {
         val entityUid: Long = 0,
         val tableId: Int = 0,
         val mimeType: String? = null,
+        val deleteAfterSave: Boolean = false,
     )
 
+    /**
+     * @param mimeType the mime type as it was saved. If it was specified in SaveLocalUriAsBlobItem,
+     *        and this was the first time this checksum was saved, then it will have used the
+     *        suggested mime type. Otherwise it will use the auto-guessed type / previous mime type
+     */
     data class SavedBlob(
         val entityUid: Long,
         val localUri: String,
         val blobUrl: String,
         val retentionLockId: Int = 0,
+        val integrity: String,
+        val mimeType: String,
     )
 
     /**

@@ -47,7 +47,7 @@ import java.util.zip.ZipInputStream
  * from src/commonMain/resources/h5p/h5p-standalone-3.6.0.zip (unmodified).
  *
  */
-class H5PContentImportPlugin(
+class H5PContentImporter(
     endpoint: Endpoint,
     private val db: UmAppDatabase,
     private val cache: UstadCache,

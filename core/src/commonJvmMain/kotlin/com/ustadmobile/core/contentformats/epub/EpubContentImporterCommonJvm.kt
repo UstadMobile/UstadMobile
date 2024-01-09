@@ -17,8 +17,6 @@ import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.libcache.CacheEntryToStore
 import com.ustadmobile.libcache.UstadCache
-import com.ustadmobile.libcache.headers.CouponHeader
-import com.ustadmobile.libcache.headers.headersBuilder
 import com.ustadmobile.libcache.io.unzipTo
 import com.ustadmobile.libcache.request.requestBuilder
 import com.ustadmobile.libcache.response.HttpPathResponse
@@ -246,9 +244,6 @@ class EpubContentImporterCommonJvm(
                                 fileSystem = fileSystem,
                                 mimeType = it.mediaType,
                                 request = request,
-                                extraHeaders = headersBuilder {
-                                    header(CouponHeader.COUPON_STATIC, "true")
-                                }
                             )
                         )
                     } + listOf(

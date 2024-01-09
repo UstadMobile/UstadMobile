@@ -6,8 +6,6 @@ import com.ustadmobile.door.ext.hexStringToByteArray
 import kotlin.text.Typography.ellipsis
 
 
-fun String.inBrackets() = "($this)"
-
 /**
  * To ensure consistency between JVM and Android, Base64 encoding
  * **must** be done with NO_WRAP
@@ -130,5 +128,11 @@ fun String.trimExcessWhiteSpace() : String {
         substring(startPos, endPos)
     }else{
         this
+    }
+}
+
+fun String.fileExtensionOrNull(): String? {
+    return substringAfterLast(".", "").let {
+        if(it != "") it else null
     }
 }

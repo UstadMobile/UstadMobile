@@ -45,9 +45,7 @@ class SaveLocalUrisAsBlobsUseCaseJvm(
     }
 
     /**
-     * First store the blobs in the cache as https://endpoint/api/sha256, then upload them
-     *
-     * Note: this will be tied to the database for progress update / status tracking purposes.
+     * Store the blobs in the cache as https://endpoint/api/sha256
      */
     override suspend fun invoke(
         localUrisToSave: List<SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem>,
@@ -97,11 +95,16 @@ class SaveLocalUrisAsBlobsUseCaseJvm(
         }
 
         entriesToStore.map {
+            val urlKey = digester.urlKey(it.second.request.url)
+            val cacheStoreResult = storeResults[urlKey]
+                ?: throw IllegalStateException("Cache did not store ${it.second.request.url}")
             SaveLocalUrisAsBlobsUseCase.SavedBlob(
                 entityUid = it.first.entityUid,
                 localUri = it.first.localUri,
                 blobUrl = it.second.request.url,
-                retentionLockId = storeResults[digester.urlKey(it.second.request.url)]?.lockId ?: 0
+                retentionLockId = cacheStoreResult.lockId,
+                integrity = cacheStoreResult.integrity,
+                mimeType = it.second.response.headers["content-type"] ?: "application/octet-stream"
             )
         }
     }

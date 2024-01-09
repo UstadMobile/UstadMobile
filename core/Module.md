@@ -72,3 +72,9 @@ Each package contains support for a given format e.g. EPUB. H5P, xAPI, etc. This
 models (e.g. for use with Kotlinx Serialization) that are used by both the importer and view. There 
 is a ContentImporter implementation for each format on supported platforms.
 
+# Package com.ustadmobile.core.domain.blob.saveandmanifest
+
+These UseCases address a common requirement when importing content: an asset needs to be saved as a 
+blob and have a corresponding CacheEntryManifest (where the bodyDataUrl links to the blobUrl). 
+
+These include adding all assets from a directory, zip, string, etc

@@ -86,7 +86,7 @@ class H5PContentImportPluginTest : AbstractMainDispatcherTest() {
         val h5pFile = temporaryFolder.newFileFromResource(this::class.java,
             "/com/ustadmobile/core/contentformats/fill-in-the-blank-withmetadata.h5p")
 
-        val h5pPlugin = H5PContentImportPlugin(
+        val h5pPlugin = H5PContentImporter(
             endpoint = activeEndpoint,
             db = db,
             cache = ustadCache,
@@ -108,7 +108,7 @@ class H5PContentImportPluginTest : AbstractMainDispatcherTest() {
         val invalidH5pFile = temporaryFolder.newFile()
         invalidH5pFile.writeText("Hello world")
 
-        val h5pPlugin = H5PContentImportPlugin(
+        val h5pPlugin = H5PContentImporter(
             endpoint = activeEndpoint,
             db = db,
             cache = ustadCache,
@@ -130,7 +130,7 @@ class H5PContentImportPluginTest : AbstractMainDispatcherTest() {
     fun givenFileNotH5pFile_whenExtractMetadataCalled_thenShouldReturnNull() {
         val notH5p = temporaryFolder.newFile()
 
-        val h5pPlugin = H5PContentImportPlugin(
+        val h5pPlugin = H5PContentImporter(
             endpoint = activeEndpoint,
             db = db,
             cache = ustadCache,
@@ -148,7 +148,7 @@ class H5PContentImportPluginTest : AbstractMainDispatcherTest() {
         val h5pFile = temporaryFolder.newFileFromResource(this::class.java,
             "/com/ustadmobile/core/contentformats/fill-in-the-blank-withmetadata.h5p")
 
-        val h5pPlugin = H5PContentImportPlugin(
+        val h5pPlugin = H5PContentImporter(
             endpoint = activeEndpoint,
             db = db,
             cache = ustadCache,

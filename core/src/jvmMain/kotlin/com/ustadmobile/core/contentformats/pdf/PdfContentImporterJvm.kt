@@ -8,13 +8,11 @@ import com.ustadmobile.core.contentjob.SupportedContent
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.contentformats.ContentImporter
 import com.ustadmobile.core.contentformats.manifest.ContentManifest
-import com.ustadmobile.core.contentformats.manifest.ContentManifestEntry
+import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
 import com.ustadmobile.core.domain.contententry.ContentConstants.MANIFEST_NAME
 import com.ustadmobile.core.uri.UriHelper
-import com.ustadmobile.core.util.ext.asIStringValues
 import com.ustadmobile.core.util.ext.requireSourceAsDoorUri
-import com.ustadmobile.core.util.stringvalues.emptyStringValues
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -30,21 +28,17 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.io.asInputStream
 import kotlinx.io.files.FileSystem
-import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
 import kotlinx.serialization.json.Json
 import org.apache.pdfbox.Loader
 import org.apache.pdfbox.pdmodel.PDDocument
-import java.io.File
-import java.util.UUID
 
 class PdfContentImporterJvm(
     endpoint: Endpoint,
     private val cache: UstadCache,
     private val uriHelper: UriHelper,
-    private val fileSystem: FileSystem = SystemFileSystem,
     private val db: UmAppDatabase,
-    private val saveLocalUriAsBlobItemUseCase: SaveLocalUrisAsBlobsUseCase,
+    private val saveLocalUriAsBlobAndManifestUseCase: SaveLocalUriAsBlobAndManifestUseCase,
     private val json: Json,
 ) : ContentImporter(endpoint){
 
@@ -59,16 +53,19 @@ class PdfContentImporterJvm(
         val pdfUrl = "${urlPrefix}content.pdf"
         val manifestUrl = "${urlPrefix}$MANIFEST_NAME"
 
-        val tmpFile = File.createTempFile(
-            UUID.randomUUID().toString(),
-            ".pdf"
+        val manifestEntriesAndBlobs = saveLocalUriAsBlobAndManifestUseCase(
+            listOf(
+                SaveLocalUriAsBlobAndManifestUseCase.SaveLocalUriAsBlobAndManifestItem(
+                    blobItem = SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem(
+                        localUri = jobUri.toString(),
+                        entityUid = contentEntryVersionUid,
+                        tableId = ContentEntryVersion.TABLE_ID,
+                        mimeType = "application/pdf",
+                    ),
+                    manifestUri = "content.pdf",
+                )
+            )
         )
-
-        val tmpFilePath = Path(tmpFile.absolutePath)
-
-        fileSystem.sink(tmpFilePath).use { fileSink ->
-            uriHelper.openSource(jobUri).transferTo(fileSink)
-        }
 
         val contentEntryVersion = ContentEntryVersion(
             cevUid = contentEntryVersionUid,
@@ -78,32 +75,10 @@ class PdfContentImporterJvm(
             cevUrl = pdfUrl,
         )
 
-        val savedBlob = saveLocalUriAsBlobItemUseCase(
-            listOf(
-                SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem(
-                    localUri = tmpFile.toURI().toString(),
-                )
-            )
-        ).first()
-
-        val cacheResponse = cache.retrieve(requestBuilder(savedBlob.blobUrl))
-            ?: throw IllegalStateException("Cache did not store blob")
-
         val manifest = ContentManifest(
             version = 1,
             metadata = emptyMap(),
-            entries = listOf(
-                ContentManifestEntry(
-                    uri = "content.pdf",
-                    ignoreQueryParams = true,
-                    status = 200,
-                    method = "GET",
-                    integrity = "",
-                    requestHeaders = emptyStringValues(),
-                    responseHeaders = cacheResponse.headers.asIStringValues(),
-                    bodyDataUrl = savedBlob.blobUrl
-                )
-            )
+            entries = manifestEntriesAndBlobs.map { it.manifestEntry }
         )
 
         val manifestRequest = requestBuilder {

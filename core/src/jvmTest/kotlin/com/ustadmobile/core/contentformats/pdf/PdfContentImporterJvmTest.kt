@@ -5,6 +5,8 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.contentjob.InvalidContentException
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
+import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCaseJvm
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCaseJvm
 import com.ustadmobile.core.test.assertCachedBodyMatchesFileContent
@@ -58,7 +60,9 @@ class PdfContentImporterJvmTest : AbstractMainDispatcherTest() {
 
     private lateinit var activeEndpoint: Endpoint
 
-    private lateinit var saveLocalUrisAsBlobsUseCase: SaveLocalUrisAsBlobsUseCase
+    private lateinit var saveLocalUrisUseCase: SaveLocalUrisAsBlobsUseCase
+
+    private lateinit var saveAndManifestUseCase: SaveLocalUriAsBlobAndManifestUseCase
 
     private lateinit var json: Json
 
@@ -86,12 +90,14 @@ class PdfContentImporterJvmTest : AbstractMainDispatcherTest() {
         )
 
         //Strictly speaking should be mocked, in reality, it's easier to just use the real thing.
-        saveLocalUrisAsBlobsUseCase = SaveLocalUrisAsBlobsUseCaseJvm(
+        saveLocalUrisUseCase = SaveLocalUrisAsBlobsUseCaseJvm(
             endpoint = activeEndpoint,
             cache = ustadCache,
             uriHelper = uriHelper,
             tmpDir = Path(temporaryFolder.newFolder().absolutePath),
         )
+
+        saveAndManifestUseCase = SaveLocalUriAsBlobAndManifestUseCaseJvm(saveLocalUrisUseCase)
     }
 
     @Test
@@ -103,8 +109,7 @@ class PdfContentImporterJvmTest : AbstractMainDispatcherTest() {
             endpoint = activeEndpoint,
             db = db,
             cache = ustadCache,
-            uriHelper = uriHelper,
-            saveLocalUriAsBlobItemUseCase = saveLocalUrisAsBlobsUseCase,
+            saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
             json = json,
         )
 
@@ -126,8 +131,7 @@ class PdfContentImporterJvmTest : AbstractMainDispatcherTest() {
             endpoint = activeEndpoint,
             db = db,
             cache = ustadCache,
-            uriHelper = uriHelper,
-            saveLocalUriAsBlobItemUseCase = saveLocalUrisAsBlobsUseCase,
+            saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
             json = json,
         )
 
@@ -148,8 +152,7 @@ class PdfContentImporterJvmTest : AbstractMainDispatcherTest() {
             endpoint = activeEndpoint,
             db = db,
             cache = ustadCache,
-            uriHelper = uriHelper,
-            saveLocalUriAsBlobItemUseCase = saveLocalUrisAsBlobsUseCase,
+            saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
             json = json,
         )
 
@@ -172,8 +175,7 @@ class PdfContentImporterJvmTest : AbstractMainDispatcherTest() {
             endpoint = activeEndpoint,
             db = db,
             cache = ustadCache,
-            uriHelper = uriHelper,
-            saveLocalUriAsBlobItemUseCase = saveLocalUrisAsBlobsUseCase,
+            saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
             json = json,
         )
 

@@ -4,13 +4,15 @@ import com.google.gson.Gson
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.contentformats.epub.EpubContentImporterCommonJvm
 import com.ustadmobile.core.contentformats.epub.XhtmlFixer
-import com.ustadmobile.core.contentformats.h5p.H5PContentImportPlugin
+import com.ustadmobile.core.contentformats.h5p.H5PContentImporter
 import com.ustadmobile.core.contentformats.video.VideoContentImporterJvm
 import com.ustadmobile.core.contentformats.pdf.PdfContentImporterJvm
 import com.ustadmobile.core.contentformats.xapi.XapiZipContentImporter
 import com.ustadmobile.core.contentformats.ContentImportersManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
+import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
+import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCaseJvm
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCaseJvm
 import com.ustadmobile.core.domain.blob.upload.BlobUploadServerUseCase
@@ -351,6 +353,7 @@ fun Application.umRestApplication(
             val xhtmlFixer: XhtmlFixer = instance()
             val db: UmAppDatabase = instance(tag = DoorTag.TAG_DB)
             val saveLocalUrisAsBlobsUseCase: SaveLocalUrisAsBlobsUseCase = instance()
+            val saveAndManifestUseCase: SaveLocalUriAsBlobAndManifestUseCase = instance()
 
             ContentImportersManager(
                 listOf(
@@ -372,11 +375,10 @@ fun Application.umRestApplication(
                         endpoint = context,
                         db = db,
                         cache= cache,
-                        uriHelper = uriHelper,
-                        saveLocalUriAsBlobItemUseCase = saveLocalUrisAsBlobsUseCase,
+                        saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
                         json = instance(),
                     ),
-                    H5PContentImportPlugin(
+                    H5PContentImporter(
                         endpoint = context,
                         db = db,
                         cache = cache,
@@ -467,6 +469,12 @@ fun Application.umRestApplication(
                 tmpDir = Path(
                     File(appConfig.absoluteDataDir(), "save-local-uris").absolutePath.toString()
                 ),
+            )
+        }
+
+        bind<SaveLocalUriAsBlobAndManifestUseCase>() with scoped(EndpointScope.Default).singleton {
+            SaveLocalUriAsBlobAndManifestUseCaseJvm(
+                saveLocalUrisAsBlobsUseCase = instance()
             )
         }
 

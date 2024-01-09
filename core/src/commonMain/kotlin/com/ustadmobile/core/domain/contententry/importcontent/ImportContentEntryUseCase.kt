@@ -2,6 +2,7 @@ package com.ustadmobile.core.domain.contententry.importcontent
 
 import com.ustadmobile.core.contentformats.ContentImportersManager
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCase
 
 /**
  * Implementations will use the platform scheduler (e.g. WorkManager on Android, Quartz on JVM) to
@@ -15,6 +16,8 @@ import com.ustadmobile.core.db.UmAppDatabase
 class ImportContentEntryUseCase(
     private val db: UmAppDatabase,
     private val importersManager: ContentImportersManager,
+    @Suppress("unused") //will be used - design in progress
+    private val enqueueBlobUploadClientUseCase: EnqueueBlobUploadClientUseCase? = null,
 ) {
 
     suspend operator fun invoke(

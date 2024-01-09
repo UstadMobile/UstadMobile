@@ -17,7 +17,7 @@ import com.ustadmobile.core.account.*
 import com.ustadmobile.core.contentformats.epub.EpubContentImporterCommonJvm
 import com.ustadmobile.core.contentformats.epub.XhtmlFixer
 import com.ustadmobile.core.contentformats.epub.XhtmlFixerJsoup
-import com.ustadmobile.core.contentformats.h5p.H5PContentImportPlugin
+import com.ustadmobile.core.contentformats.h5p.H5PContentImporter
 import com.ustadmobile.core.contentformats.xapi.XapiZipContentImporter
 import com.ustadmobile.core.contentformats.ContentImportersManager
 import com.ustadmobile.core.db.*
@@ -274,7 +274,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                         cache = cache,
                         uriHelper = uriHelper
                     ),
-                    H5PContentImportPlugin(
+                    H5PContentImporter(
                         endpoint = context,
                         di = di,
                         cache = cache,

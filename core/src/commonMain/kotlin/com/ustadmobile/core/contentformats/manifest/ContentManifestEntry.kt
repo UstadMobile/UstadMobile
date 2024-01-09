@@ -1,6 +1,7 @@
 package com.ustadmobile.core.contentformats.manifest
 
 import com.ustadmobile.core.util.stringvalues.IStringValues
+import com.ustadmobile.core.util.stringvalues.emptyStringValues
 import kotlinx.serialization.Serializable
 
 /**
@@ -22,11 +23,11 @@ import kotlinx.serialization.Serializable
 @Serializable
 class ContentManifestEntry(
     val uri: String,
-    val ignoreQueryParams: Boolean,
-    val status: Int,
-    val method: String,
+    val ignoreQueryParams: Boolean = true,
+    val status: Int = 200,
+    val method: String = "GET",
     val integrity: String,
-    val requestHeaders: IStringValues,
+    val requestHeaders: IStringValues = emptyStringValues(),
     val responseHeaders: IStringValues,
     val bodyDataUrl: String,
 )
