@@ -229,7 +229,7 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
                                       BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined 
                                       AND ClazzEnrolment.clazzEnrolmentDateLeft))) 
                    AND Person.firstNames || ' ' || Person.lastName LIKE :searchText
-               GROUP BY Person.personUid) AS CourseMember
+               GROUP BY Person.personUid, PersonPicture.personPictureUid) AS CourseMember
       ORDER BY CASE(:sortOrder)
                 WHEN $SORT_FIRST_NAME_ASC THEN CourseMember.firstNames
                 WHEN $SORT_LAST_NAME_ASC THEN CourseMember.lastName
