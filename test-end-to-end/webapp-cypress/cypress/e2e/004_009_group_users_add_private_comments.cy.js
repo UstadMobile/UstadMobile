@@ -93,7 +93,7 @@ it('Teacher add assignment and course comment', () => {
   cy.contains('Submissions').click()
   cy.contains('Group 1').click()
   cy.get('#private_comment_textfield').click()
-  cy.get('#private_comment_textfield').type("comment1")
+  cy.get('#private_comment_textfield').type("comment1",{delay:10})
   cy.get('svg[data-testid="SendIcon"]').click()
   cy.contains("comment1").should('exist')
 
@@ -105,7 +105,7 @@ it('Group 1 - Student add private comment', () => {
   cy.contains("004_009").click()
   cy.contains('Assignment 1').click()
   cy.get('#private_comment_textfield').click()
-  cy.get('#private_comment_textfield').type("comment2",{timeout:2000})
+  cy.get('#private_comment_textfield').type("comment2",{delay:10})
   cy.get('svg[data-testid="SendIcon"]').click()
   cy.contains("comment1").should('exist')
   cy.contains("comment2").should('exist')

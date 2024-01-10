@@ -138,9 +138,10 @@ Cypress.Commands.add('ustadEnableUserRegistration' ,() => {
     cy.get('#settings_button').click()
     cy.contains('Site').click()
     cy.contains('Edit').click()
- //https://docs.cypress.io/api/commands/should#Assert-the-href-attribute-is-equal-to-users
-    cy.get('#terms_html_edit .ql-editor.ql-blank').should('have.attr', 'contenteditable').and('equal', 'true',{timeout:3000})
-    cy.get('#terms_html_edit .ql-editor.ql-blank').click().clear().type("New Terms",{delay: 5})
+  //https://docs.cypress.io/api/commands/should#Assert-the-href-attribute-is-equal-to-users
+    cy.get('#terms_html_edit .ql-editor.ql-blank').as('editor')
+    cy.get('@editor').should('have.attr', 'contenteditable').and('equal', 'true',{timeout:3000})
+    cy.get('@editor').click().clear().type("New Terms",{delay:10})
     cy.get('#registration_allowed').click({force:true})
     cy.get('#actionBarButton').should('be.visible')
     cy.get('#actionBarButton').click()

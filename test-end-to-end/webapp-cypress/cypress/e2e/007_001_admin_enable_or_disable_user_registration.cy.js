@@ -19,8 +19,9 @@ describe('007_001_admin_enable_or_disable_user_registration', () => {
   cy.contains('Site').click()
   cy.contains('Edit').click()
  //https://docs.cypress.io/api/commands/should#Assert-the-href-attribute-is-equal-to-users
-  cy.get('.ql-editor.ql-blank').should('have.attr', 'contenteditable').and('equal', 'true',{timeout:3000})
-  cy.get('.ql-editor.ql-blank').click().clear()
+  cy.get('#terms_html_edit .ql-editor.ql-blank').as('editor')
+  cy.get('@editor').should('have.attr', 'contenteditable').and('equal', 'true',{timeout:3000})
+  cy.get('@editor').click().clear()
   cy.get('#registration_allowed').click({force:true}) // disabling the registration button
   cy.get('#actionBarButton').click()
   cy.contains('No').should('exist')

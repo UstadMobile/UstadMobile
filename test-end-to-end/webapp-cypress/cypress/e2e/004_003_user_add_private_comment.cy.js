@@ -40,7 +40,6 @@ it('Admin add a course and Members', () => {
 
 it('Teacher add assignment and course comment', () => {
   cy.ustadClearDbAndLogin('teacher1','test1234')
-
  // Add Assignment block
   cy.contains("Courses").click()
   cy.contains("004_003").click()
@@ -56,10 +55,10 @@ it('Teacher add assignment and course comment', () => {
   cy.contains("button","Save").click()
   cy.contains("button","Members").should('be.visible')
   cy.contains("Assignment 1").click()
-   cy.contains('Submissions').click()
+  cy.contains('Submissions').click()
   cy.contains('Student 1').click()
   cy.get('#private_comment_textfield').click()
-  cy.get('#private_comment_textfield').type("comment1")
+  cy.get('#private_comment_textfield').type("comment1",{delay:10})
   cy.get('svg[data-testid="SendIcon"]').click()
   cy.contains("comment1").should('exist')
 })
@@ -71,7 +70,7 @@ it('Student add private comment', () => {
   cy.contains("004_003").click()
   cy.contains('Assignment 1').click()
   cy.get('#private_comment_textfield').click()
-  cy.get('#private_comment_textfield').type("comment2")
+  cy.get('#private_comment_textfield').type("comment2",{delay:10})
   cy.get('svg[data-testid="SendIcon"]').click()
   cy.contains("comment2").should('exist')
   cy.contains("comment1").should('exist')
