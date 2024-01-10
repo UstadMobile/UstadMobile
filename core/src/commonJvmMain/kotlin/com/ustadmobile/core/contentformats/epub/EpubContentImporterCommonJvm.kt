@@ -7,6 +7,11 @@ import com.ustadmobile.core.contentformats.epub.opf.PackageDocument
 import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.contentformats.ContentImporter
+import com.ustadmobile.core.contentformats.manifest.ContentManifest
+import com.ustadmobile.core.contentformats.storeText
+import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
+import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
+import com.ustadmobile.core.domain.contententry.ContentConstants
 import com.ustadmobile.core.domain.epub.GetEpubTableOfContentsUseCase
 import com.ustadmobile.core.io.ext.*
 import com.ustadmobile.core.uri.UriHelper
@@ -14,12 +19,10 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.libcache.CacheEntryToStore
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.io.unzipTo
-import com.ustadmobile.libcache.request.requestBuilder
-import com.ustadmobile.libcache.response.HttpPathResponse
 import io.github.aakira.napier.Napier
 import java.util.zip.ZipInputStream
 import kotlinx.coroutines.*
@@ -31,6 +34,7 @@ import kotlinx.io.files.SystemFileSystem
 import kotlinx.io.readString
 import kotlinx.io.writeString
 import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import nl.adaptivity.xmlutil.serialization.XML
 import java.io.File
 import java.net.URLDecoder
@@ -46,6 +50,9 @@ class EpubContentImporterCommonJvm(
     private val xhtmlFixer: XhtmlFixer,
     private val getEpubTableOfContentsUseCase: GetEpubTableOfContentsUseCase =
         GetEpubTableOfContentsUseCase(xml),
+    private val tmpPath: Path,
+    private val saveLocalUriAsBlobAndManifestUseCase: SaveLocalUriAsBlobAndManifestUseCase,
+    private val json: Json,
 ) : ContentImporter(endpoint) {
 
     val viewName: String
@@ -181,6 +188,7 @@ class EpubContentImporterCommonJvm(
 
         val contentEntryVersionUid = db.doorPrimaryKeyManager.nextId(ContentEntryVersion.TABLE_ID)
         val urlPrefix = createContentUrlPrefix(contentEntryVersionUid)
+        val manifestUrl = "$urlPrefix${ContentConstants.MANIFEST_NAME}"
 
         val opfPath = ZipInputStream(uriHelper.openSource(jobUri).asInputStream()).use {
             it.findFirstOpfPath()
@@ -190,33 +198,28 @@ class EpubContentImporterCommonJvm(
             cevUid = contentEntryVersionUid,
             cevContentType = ContentEntryVersion.TYPE_EPUB,
             cevContentEntryUid = jobItem.cjiContentEntryUid,
+            cevSitemapUrl = manifestUrl,
             cevUrl = "$urlPrefix$opfPath",
         )
 
-        val tmpDir = File.createTempFile("epubimport", "tmp").also {
-            it.delete()
-            it.mkdir()
-        }
-        val tmpPath = Path(tmpDir.absolutePath)
+        val workPath = Path(tmpPath, "epub-import-${systemTimeInMillis()}")
 
         uriHelper.openSource(jobUri).use { zipSource ->
-            val unzippedEntries = zipSource.unzipTo(tmpPath)
+            val unzippedEntries = zipSource.unzipTo(workPath)
             val opfEntry = unzippedEntries.first { it.name == opfPath }
             val opfStr = fileSystem.source(opfEntry.path).buffered().readString()
 
             val opfPackage = xml.decodeFromString(PackageDocument.serializer(), opfStr)
-            val opfUrl = UMFileUtil.resolveLink(urlPrefix, opfPath)
 
             try {
-                cache.store(
-                    opfPackage.manifest.items.map {
-                        val hrefDecoded = URLDecoder.decode(it.href, "UTF-8")
-                        val request = requestBuilder(UMFileUtil.resolveLink(opfUrl, it.href))
+                val manifestedItems = saveLocalUriAsBlobAndManifestUseCase(
+                    items = opfPackage.manifest.items.map { opfItem ->
+                        val hrefDecoded = URLDecoder.decode(opfItem.href, "UTF-8")
                         val pathInZip = Path(opfEntry.name).parent?.let { opfParent ->
                             Path(opfParent, hrefDecoded)
                         } ?: Path(hrefDecoded)
 
-                        val filePath = unzippedEntries.firstOrNull {
+                        val unzippedPath = unzippedEntries.firstOrNull {
                             it.name == pathInZip.toString()
                         }?.path ?: throw IllegalArgumentException("Cannot find ${pathInZip}")
 
@@ -224,48 +227,60 @@ class EpubContentImporterCommonJvm(
                          * content (some content e.g. Storyweaver includes br's without the trailing
                          * slash etc).
                          */
-                        if(it.mediaType == "application/xhtml+xml") {
-                            val xhtmlText = fileSystem.source(filePath).buffered().use {fileSource ->
-                                fileSource.readString()
-                            }
+                        if (opfItem.mediaType == "application/xhtml+xml") {
+                            val xhtmlText =
+                                fileSystem.source(unzippedPath).buffered().use { fileSource ->
+                                    fileSource.readString()
+                                }
 
                             val fixResult = xhtmlFixer.fixXhtml(xhtmlText)
-                            if(!fixResult.wasValid) {
-                                fileSystem.sink(filePath).buffered().use {
+                            if (!fixResult.wasValid) {
+                                fileSystem.sink(unzippedPath).buffered().use {
                                     it.writeString(fixResult.xhtml)
                                 }
                             }
                         }
 
-                        CacheEntryToStore(
-                            request = request,
-                            response = HttpPathResponse(
-                                path = filePath,
-                                fileSystem = fileSystem,
-                                mimeType = it.mediaType,
-                                request = request,
-                            )
+                        val manifestUri = Path(opfEntry.name).parent?.let { opfParent ->
+                            Path(opfParent, opfItem.href)
+                        } ?: Path(opfItem.href)
+
+                        SaveLocalUriAsBlobAndManifestUseCase.SaveLocalUriAsBlobAndManifestItem(
+                            blobItem = SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem(
+                                localUri = unzippedPath.toDoorUri().toString(),
+                                entityUid = contentEntryVersionUid,
+                                tableId = ContentEntryVersion.TABLE_ID,
+                                mimeType = opfItem.mediaType
+                            ),
+                            manifestUri = manifestUri.toString(),
                         )
-                    } + listOf(
-                        requestBuilder(opfUrl).let {
-                            CacheEntryToStore(
-                                request = it,
-                                response = HttpPathResponse(
-                                    path = opfEntry.path,
-                                    fileSystem = fileSystem,
-                                    mimeType = "application/oebps-package+xml",
-                                    request = it,
-                                )
-                            )
-                        }
+                    } + SaveLocalUriAsBlobAndManifestUseCase.SaveLocalUriAsBlobAndManifestItem(
+                        blobItem = SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem(
+                            localUri = opfEntry.path.toDoorUri().toString(),
+                            entityUid = contentEntryVersionUid,
+                            tableId = ContentEntryVersion.TABLE_ID,
+                            mimeType = "application/oebps-package+xml",
+                        ),
+                        manifestUri = opfPath
                     )
                 )
+
+                val manifest = ContentManifest(
+                    version = 1,
+                    metadata = emptyMap(),
+                    entries = manifestedItems.map { it.manifestEntry }
+                )
+
+                cache.storeText(
+                    url = manifestUrl,
+                    text = json.encodeToString(ContentManifest.serializer(), manifest),
+                    mimeType = "application/json"
+                )
             }catch(e: Exception) {
-                Napier.e("EpubTypePlugin: Exception caching epub", e)
+                Napier.e("EpubTypePlugin: Exception importing epub", e)
                 throw e
             }finally {
-                tmpDir.deleteRecursively()
-                tmpDir.takeIf { it.exists() }?.deleteOnExit()
+                File(workPath.toString()).deleteRecursively()
             }
         }
 

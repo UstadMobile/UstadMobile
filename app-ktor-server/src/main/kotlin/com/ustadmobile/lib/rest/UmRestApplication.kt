@@ -367,6 +367,9 @@ fun Application.umRestApplication(
                         uriHelper = uriHelper,
                         xml = xml,
                         xhtmlFixer = xhtmlFixer,
+                        tmpPath = contentImportTmpPath,
+                        saveLocalUriAsBlobAndManifestUseCase =  saveAndManifestUseCase,
+                        json = instance(),
                     ),
                     XapiZipContentImporter(
                         endpoint = context,
