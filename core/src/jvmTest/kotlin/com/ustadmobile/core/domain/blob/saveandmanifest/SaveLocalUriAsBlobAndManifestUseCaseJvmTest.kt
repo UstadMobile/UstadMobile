@@ -3,6 +3,10 @@ package com.ustadmobile.core.domain.blob.saveandmanifest
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCaseJvm
+import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
+import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseCommonJvm
+import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
+import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseJvm
 import com.ustadmobile.core.io.ext.readSha256
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.uri.UriHelperJvm
@@ -60,8 +64,15 @@ class SaveLocalUriAsBlobAndManifestUseCaseJvmTest {
 
     private lateinit var testFiles: List<File>
 
+    private lateinit var isTempFileUseCase: IsTempFileCheckerUseCase
+
+    private lateinit var deleteUrisUseCase: DeleteUrisUseCase
+
+    private lateinit var tmpRoot: File
+
     @BeforeTest
     fun setup() {
+        tmpRoot = temporaryFolder.newFolder("tmproot")
         cacheDir = temporaryFolder.newFolder()
         cache = UstadCacheBuilder(
             dbUrl = "jdbc:sqlite::memory:",
@@ -85,12 +96,15 @@ class SaveLocalUriAsBlobAndManifestUseCaseJvmTest {
             httpClient = httpClient,
             okHttpClient = okHttpClient,
         )
+        isTempFileUseCase = IsTempFileCheckerUseCaseJvm(tmpRoot)
+        deleteUrisUseCase = DeleteUrisUseCaseCommonJvm(isTempFileUseCase)
 
         saveLocalUrisAsBlobsUseCase = SaveLocalUrisAsBlobsUseCaseJvm(
             endpoint = endpoint,
             cache = cache,
             uriHelper = uriHelper,
             tmpDir = Path(temporaryFolder.newFolder().absolutePath),
+            deleteUrisUseCase = deleteUrisUseCase,
         )
 
         testFiles = (1..3).map {

@@ -5,6 +5,10 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCase
 import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCaseJvm
 import com.ustadmobile.core.domain.blob.upload.BlobUploadServerUseCase
+import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
+import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseCommonJvm
+import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
+import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseJvm
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
 import com.ustadmobile.core.io.ext.readSha256
 import com.ustadmobile.core.uri.UriHelper
@@ -85,11 +89,24 @@ class SaveLocalUrisAsBlobsUseCaseJvmIntegrationTest {
 
     private lateinit var serverSaveLocalUriAsBlobUseCase: SaveLocalUrisAsBlobsUseCase
 
+    private lateinit var serverRootTmpDir: File
+
+    private lateinit var serverDeleteUrisUseCase: DeleteUrisUseCase
+
+    private lateinit var serverIsTempFileUseCase: IsTempFileCheckerUseCase
+
+    private lateinit var clientRootTmpDir: File
+
+    private lateinit var clientDeleteUrisUseCase: DeleteUrisUseCase
+
+    private lateinit var clientIsTempFileUseCase: IsTempFileCheckerUseCase
+
     @BeforeTest
     fun setup() {
         initNapierLog()
         endpoint = Endpoint("http://localhost:8094/")
-        clientCacheDir = temporaryFolder.newFolder()
+        serverRootTmpDir = temporaryFolder.newFolder("tmproot-server")
+        clientCacheDir = temporaryFolder.newFolder("httpfiles-client")
         clientCache = UstadCacheBuilder(
             dbUrl = "jdbc:sqlite::memory:",
             storagePath = Path(clientCacheDir.absolutePath),
@@ -97,7 +114,7 @@ class SaveLocalUrisAsBlobsUseCaseJvmIntegrationTest {
             cacheName = "client",
         ).build()
 
-        serverCacheDir = temporaryFolder.newFolder("servercache")
+        serverCacheDir = temporaryFolder.newFolder("httpfiles-server")
         serverCache = UstadCacheBuilder(
             dbUrl = "jdbc:sqlite::memory:",
             storagePath = Path(serverCacheDir.absolutePath),
@@ -120,11 +137,15 @@ class SaveLocalUrisAsBlobsUseCaseJvmIntegrationTest {
             okHttpClient = okHttpClient,
         )
 
+        serverIsTempFileUseCase = IsTempFileCheckerUseCaseJvm(serverRootTmpDir)
+        serverDeleteUrisUseCase = DeleteUrisUseCaseCommonJvm(serverIsTempFileUseCase)
+
         serverSaveLocalUriAsBlobUseCase = SaveLocalUrisAsBlobsUseCaseJvm(
             endpoint = endpoint,
             cache = serverCache,
             uriHelper = uriHelper,
-            tmpDir = Path(temporaryFolder.newFolder().absolutePath),
+            tmpDir = Path(serverRootTmpDir.absolutePath),
+            deleteUrisUseCase =serverDeleteUrisUseCase
         )
 
         blobUploadServerUseCase = BlobUploadServerUseCase(
@@ -156,6 +177,10 @@ class SaveLocalUrisAsBlobsUseCaseJvmIntegrationTest {
 
         }
         ktorServer.start()
+
+        clientRootTmpDir = temporaryFolder.newFolder("tmproot-client")
+        clientIsTempFileUseCase = IsTempFileCheckerUseCaseJvm(clientRootTmpDir)
+        clientDeleteUrisUseCase = DeleteUrisUseCaseCommonJvm(clientIsTempFileUseCase)
     }
 
     @AfterTest
@@ -175,7 +200,8 @@ class SaveLocalUrisAsBlobsUseCaseJvmIntegrationTest {
             endpoint = endpoint,
             cache = clientCache,
             uriHelper = uriHelper,
-            tmpDir = Path(temporaryFolder.newFolder().absolutePath),
+            tmpDir = Path(clientRootTmpDir.absolutePath),
+            deleteUrisUseCase = clientDeleteUrisUseCase,
         )
 
         val blobUploadClientUseCase = BlobUploadClientUseCaseJvm(
@@ -191,7 +217,8 @@ class SaveLocalUrisAsBlobsUseCaseJvmIntegrationTest {
             SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem(
                 localUri = pdfFile.toDoorUri().toString(),
                 entityUid = 42,
-                tableId = 0,
+                tableId = 1,
+                deleteLocalUriAfterSave = true,
             )
         )
 
@@ -226,5 +253,9 @@ class SaveLocalUrisAsBlobsUseCaseJvmIntegrationTest {
         assertEquals(pdfFile.length(), blobHttpResponse.headersContentLength())
         val blobBodyBytes = blobHttpResponse.body!!.bytes()
         assertTrue(pdfFile.readBytes().contentEquals(blobBodyBytes))
+        assertEquals(0, clientRootTmpDir.list()!!.size,
+            "Client root temporary directory should be empty")
+        assertEquals(0, serverRootTmpDir.list()!!.size,
+            "Server root temporary directory should be empty")
     }
 }

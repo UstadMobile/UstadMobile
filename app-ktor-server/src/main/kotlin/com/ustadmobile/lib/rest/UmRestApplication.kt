@@ -43,7 +43,6 @@ import org.kodein.di.*
 import org.quartz.Scheduler
 import org.quartz.impl.StdSchedulerFactory
 import java.io.File
-import java.nio.file.Files
 import javax.naming.InitialContext
 import com.ustadmobile.door.util.NodeIdAuthCache
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
@@ -472,13 +471,15 @@ fun Application.umRestApplication(
         }
 
         bind<SaveLocalUrisAsBlobsUseCase>() with scoped(EndpointScope.Default).singleton {
+            val rootTmpDir: File = instance(tag = DiTag.TAG_TMP_DIR)
             SaveLocalUrisAsBlobsUseCaseJvm(
                 endpoint = context,
                 cache = instance(),
                 uriHelper = instance(),
                 tmpDir = Path(
-                    File(appConfig.absoluteDataDir(), "save-local-uris").absolutePath.toString()
+                    File(rootTmpDir, "save-local-uris").absolutePath.toString()
                 ),
+                deleteUrisUseCase = instance()
             )
         }
 

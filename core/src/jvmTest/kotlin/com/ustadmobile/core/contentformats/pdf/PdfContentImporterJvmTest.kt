@@ -32,6 +32,7 @@ import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
+import org.mockito.kotlin.mock
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -95,6 +96,7 @@ class PdfContentImporterJvmTest : AbstractMainDispatcherTest() {
             cache = ustadCache,
             uriHelper = uriHelper,
             tmpDir = Path(temporaryFolder.newFolder().absolutePath),
+            deleteUrisUseCase = mock { }
         )
 
         saveAndManifestUseCase = SaveLocalUriAsBlobAndManifestUseCaseJvm(saveLocalUrisUseCase)

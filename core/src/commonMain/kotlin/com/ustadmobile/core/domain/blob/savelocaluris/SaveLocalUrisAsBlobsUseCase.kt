@@ -26,7 +26,7 @@ interface SaveLocalUrisAsBlobsUseCase {
      *        the TransferJobItem.tjiTableId. See its doc for details.
      * @param mimeType (optional), if not null, explicitly sets the content-type when it is stored
      *        as a blob. If not specified, the system UriHelper will be used to guess the mime type.
-     * @param deleteAfterSave if true, then the localUri given will be deleted after it has been
+     * @param deleteLocalUriAfterSave if true, then the localUri given will be deleted after it has been
      *        successfully saved. On Android/JVM this means deleting the file. On JS this means
      *        revoking the blob URL.
      */
@@ -35,7 +35,7 @@ interface SaveLocalUrisAsBlobsUseCase {
         val entityUid: Long = 0,
         val tableId: Int = 0,
         val mimeType: String? = null,
-        val deleteAfterSave: Boolean = false,
+        val deleteLocalUriAfterSave: Boolean = false,
     )
 
     /**

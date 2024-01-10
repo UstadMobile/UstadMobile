@@ -100,7 +100,7 @@ class BlobUploadServerUseCase(
                     SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem(
                         localUri = completedChunkedUpload.path.toDoorUri().toString(),
                         entityUid = 0,
-                        deleteAfterSave = true,
+                        deleteLocalUriAfterSave = true,
                         mimeType = givenMimeType,
                     )
                 )

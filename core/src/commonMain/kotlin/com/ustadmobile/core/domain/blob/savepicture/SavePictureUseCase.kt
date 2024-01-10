@@ -56,14 +56,15 @@ class SavePictureUseCase(
                         entityUid = entityUid,
                         tableId = tableId,
                         mimeType = mainCompressionResult.mimeType,
-                        deleteAfterSave = true,
+                        deleteLocalUriAfterSave = true,
+
                     ),
                     SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem(
                         localUri = thumbnailCompressionResult.uri,
                         entityUid = entityUid,
                         tableId = tableId,
                         mimeType = mainCompressionResult.mimeType,
-                        deleteAfterSave = true,
+                        deleteLocalUriAfterSave = true,
                     )
                 ),
             )

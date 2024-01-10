@@ -1345,7 +1345,7 @@ val MIGRATION_130_131 = DoorMigrationStatementList(130, 131) { db ->
 // 131 to 132 is a migration that applies only to the server side to add uri retention triggers
 
 /*
- * Added 07/Jan/24 - drop the old contentjobitem table
+ * Added 07/Jan/24 - drop the old ContentJobItem table
  * Create ContentEntryImportJob
  */
 val MIGRATION_132_133 = DoorMigrationStatementList(132, 133) { db ->

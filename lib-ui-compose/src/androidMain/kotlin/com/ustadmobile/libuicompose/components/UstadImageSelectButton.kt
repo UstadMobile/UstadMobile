@@ -27,13 +27,21 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Text
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.FileProvider
 import coil.compose.AsyncImage
+import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.util.systemTimeInMillis
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.kodein.di.compose.localDI
+import org.kodein.di.direct
+import org.kodein.di.instance
 import java.io.File
 
 @Composable
@@ -42,6 +50,7 @@ actual fun UstadImageSelectButton(
     onImageUriChanged: (String?) -> Unit,
     modifier: Modifier
 ) {
+    val di = localDI()
     val galleryLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.PickVisualMedia()
     ) { uri ->
@@ -51,6 +60,7 @@ actual fun UstadImageSelectButton(
     }
 
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
 
     var cameraImgPath: String? by rememberSaveable {
         mutableStateOf(null)
@@ -117,12 +127,19 @@ actual fun UstadImageSelectButton(
 
                 ListItem(
                     modifier = Modifier.clickable {
-                        dialogVisible = false
-                        val cameraTmpFile = File(context.cacheDir, "${systemTimeInMillis()}.tmp")
-                        val cameraPathUri = FileProvider.getUriForFile(context, "${context.packageName}.provider",
-                            cameraTmpFile)
-                        cameraImgPath = cameraPathUri.toString()
-                        cameraLauncher.launch(cameraPathUri)
+                        coroutineScope.launch {
+                            val tmpDir: File = di.direct.instance(tag = DiTag.TAG_TMP_DIR)
+                            withContext(Dispatchers.IO) {
+                                tmpDir.takeIf { !it.exists() }?.mkdirs()
+                            }
+                            dialogVisible = false
+                            val cameraTmpFile = File(tmpDir, "camera-${systemTimeInMillis()}.tmp")
+                            val cameraPathUri = FileProvider.getUriForFile(context, "${context.packageName}.provider",
+                                cameraTmpFile)
+                            cameraImgPath = cameraPathUri.toString()
+                            cameraLauncher.launch(cameraPathUri)
+                        }
+
                     },
                     headlineContent = {
                         Text(stringResource(MR.strings.take_new_photo_from_camera))

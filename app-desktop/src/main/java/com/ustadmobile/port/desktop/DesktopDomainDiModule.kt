@@ -97,7 +97,9 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             cache = instance(),
             uriHelper = instance(),
             tmpDir = Path(tmpDir.absolutePath),
-            fileSystem = SystemFileSystem
+            fileSystem = SystemFileSystem,
+            deleteUrisUseCase = instance(),
+            createRetentionLock = true,
         )
     }
 

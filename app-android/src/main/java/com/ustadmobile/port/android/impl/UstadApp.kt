@@ -305,12 +305,15 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
         }
 
         bind<SaveLocalUrisAsBlobsUseCase>() with scoped(EndpointScope.Default).singleton {
+            val rootTmpDir: File = instance(tag = DiTag.TAG_TMP_DIR)
             SaveLocalUrisAsBlobsUseCaseJvm(
                 endpoint = context,
                 cache = instance(),
                 uriHelper = instance(),
-                tmpDir = Path(applicationContext.cacheDir.absolutePath, "savelocaluriaslblobtmp"),
-                fileSystem = SystemFileSystem
+                tmpDir = Path(rootTmpDir.absolutePath, "savelocaluriaslblobtmp"),
+                fileSystem = SystemFileSystem,
+                deleteUrisUseCase = instance(),
+                createRetentionLock = true,
             )
         }
 
