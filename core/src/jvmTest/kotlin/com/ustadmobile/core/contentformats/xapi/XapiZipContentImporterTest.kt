@@ -4,10 +4,20 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.ContentDispatcher
+import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.contentjob.InvalidContentException
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
+import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCaseJvm
+import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
+import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCaseJvm
+import com.ustadmobile.core.domain.contententry.ContentConstants
+import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
+import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseCommonJvm
+import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
+import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseJvm
 import com.ustadmobile.core.impl.ContainerStorageManager
-import com.ustadmobile.core.test.assertZipIsCached
+import com.ustadmobile.core.test.assertZipIsManifested
 import com.ustadmobile.util.test.ext.newFileFromResource
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.uri.UriHelperJvm
@@ -20,8 +30,11 @@ import com.ustadmobile.lib.db.entities.ContentEntryImportJob
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
+import com.ustadmobile.libcache.request.requestBuilder
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.files.Path
+import kotlinx.io.readString
+import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Assert
 import org.junit.Before
@@ -35,6 +48,7 @@ import org.kodein.di.instance
 import org.kodein.di.on
 import org.kodein.di.scoped
 import org.kodein.di.singleton
+import java.io.File
 import java.util.zip.ZipFile
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
@@ -61,9 +75,23 @@ class XapiZipContentImporterTest :AbstractMainDispatcherTest() {
 
     private lateinit var uriHelper: UriHelper
 
+    private lateinit var saveLocalUriAsBlobUseCase: SaveLocalUrisAsBlobsUseCase
+
+    private lateinit var saveAndManifestUseCase: SaveLocalUriAsBlobAndManifestUseCase
+
+    private lateinit var isTempFileCheckerUseCase: IsTempFileCheckerUseCase
+
+    private lateinit var deleteUrisUseCase: DeleteUrisUseCase
+
+    private lateinit var rootTmpPath: File
+
+    private lateinit var activeEndpoint: Endpoint
+
     @Before
     fun setup(){
         endpointScope = EndpointScope()
+        rootTmpPath = temporaryFolder.newFolder("xapi-import-tmp-root")
+
         di = DI {
             import(ustadTestRule.diModule)
             bind<ContainerStorageManager>() with scoped(endpointScope).singleton {
@@ -73,6 +101,7 @@ class XapiZipContentImporterTest :AbstractMainDispatcherTest() {
 
         val accountManager: UstadAccountManager by di.instance()
         db = di.on(accountManager.activeEndpoint).direct.instance(tag = DoorTag.TAG_DB)
+        activeEndpoint = accountManager.activeEndpoint
         val connectivityStatus = ConnectivityStatus(ConnectivityStatus.STATE_UNMETERED, true, "NetworkSSID")
         db.connectivityStatusDao.insert(connectivityStatus)
 
@@ -90,6 +119,18 @@ class XapiZipContentImporterTest :AbstractMainDispatcherTest() {
             httpClient = di.direct.instance(),
             okHttpClient = di.direct.instance(),
         )
+
+        isTempFileCheckerUseCase = IsTempFileCheckerUseCaseJvm(rootTmpPath)
+        deleteUrisUseCase = DeleteUrisUseCaseCommonJvm(isTempFileCheckerUseCase)
+
+        saveLocalUriAsBlobUseCase = SaveLocalUrisAsBlobsUseCaseJvm(
+            endpoint = activeEndpoint,
+            cache = ustadCache,
+            uriHelper = uriHelper,
+            tmpDir = Path(rootTmpPath.absolutePath),
+            deleteUrisUseCase = deleteUrisUseCase,
+        )
+        saveAndManifestUseCase = SaveLocalUriAsBlobAndManifestUseCaseJvm(saveLocalUriAsBlobUseCase)
     }
 
     @Test
@@ -101,7 +142,10 @@ class XapiZipContentImporterTest :AbstractMainDispatcherTest() {
             endpoint = Endpoint("http://localhost/dummy/"),
             db = db,
             cache = ustadCache,
-            uriHelper = uriHelper
+            uriHelper = uriHelper,
+            json = di.direct.instance(),
+            tmpPath = Path(rootTmpPath.absolutePath),
+            saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
         )
 
         val metadata = runBlocking {
@@ -123,7 +167,10 @@ class XapiZipContentImporterTest :AbstractMainDispatcherTest() {
             endpoint = Endpoint("http://localhost/dummy/"),
             db = db,
             cache = ustadCache,
-            uriHelper = uriHelper
+            uriHelper = uriHelper,
+            json = di.direct.instance(),
+            tmpPath = Path(rootTmpPath.absolutePath),
+            saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
         )
 
         runBlocking {
@@ -144,7 +191,10 @@ class XapiZipContentImporterTest :AbstractMainDispatcherTest() {
             endpoint = Endpoint("http://localhost/dummy/"),
             db = db,
             cache = ustadCache,
-            uriHelper = uriHelper
+            uriHelper = uriHelper,
+            json = di.direct.instance(),
+            tmpPath = Path(rootTmpPath.absolutePath),
+            saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
         )
         runBlocking {
             assertNull(xapiPlugin.extractMetadata(tempFile.toDoorUri(), "file.zip"))
@@ -163,7 +213,10 @@ class XapiZipContentImporterTest :AbstractMainDispatcherTest() {
             endpoint = endpoint,
             db = db,
             cache = ustadCache,
-            uriHelper = uriHelper
+            uriHelper = uriHelper,
+            json = di.direct.instance(),
+            tmpPath = Path(rootTmpPath.absolutePath),
+            saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
         )
 
         val result = runBlocking {
@@ -177,11 +230,16 @@ class XapiZipContentImporterTest :AbstractMainDispatcherTest() {
 
         val expectedUrlPrefix = "${endpoint.url}api/content/${result.cevUid}/"
 
+        val json : Json = di.direct.instance()
+        val manifestResponse = ustadCache.retrieve(
+            requestBuilder("$expectedUrlPrefix${ContentConstants.MANIFEST_NAME}")
+        )
+        val manifest = json.decodeFromString(
+            ContentManifest.serializer(), manifestResponse!!.bodyAsSource()!!.readString()
+        )
+
         ZipFile(tempFile).use { zipFile ->
-            ustadCache.assertZipIsCached(
-                urlPrefix = expectedUrlPrefix,
-                zip = zipFile,
-            )
+            ustadCache.assertZipIsManifested(manifest, zipFile)
         }
     }
 }

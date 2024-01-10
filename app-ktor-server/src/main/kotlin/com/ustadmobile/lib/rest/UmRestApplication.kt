@@ -372,7 +372,10 @@ fun Application.umRestApplication(
                         endpoint = context,
                         db = db,
                         cache = cache,
-                        uriHelper = uriHelper
+                        uriHelper = uriHelper,
+                        json = instance(),
+                        tmpPath = contentImportTmpPath,
+                        saveLocalUriAsBlobAndManifestUseCase =  saveAndManifestUseCase,
                     ),
                     PdfContentImporterJvm(
                         endpoint = context,

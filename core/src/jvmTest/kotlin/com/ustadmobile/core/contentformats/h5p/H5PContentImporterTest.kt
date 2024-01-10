@@ -212,7 +212,9 @@ class H5PContentImporterTest : AbstractMainDispatcherTest() {
         }
 
         val expectedUrlPrefix = "${activeEndpoint.url}api/content/${result.cevUid}/"
-        val manifestResponse = ustadCache.retrieve(requestBuilder("$expectedUrlPrefix$MANIFEST_NAME"))
+        val manifestResponse = ustadCache.retrieve(
+            requestBuilder("$expectedUrlPrefix$MANIFEST_NAME")
+        )
         val json: Json = di.direct.instance()
         val manifest = json.decodeFromString(
             ContentManifest.serializer(), manifestResponse!!.bodyAsSource()!!.readString()
