@@ -1,17 +1,26 @@
-package com.ustadmobile.core.domain.blob.savelocaluris
+package com.ustadmobile.core.domain.blob.saveandmanifest
 
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
+import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCaseJvm
+import com.ustadmobile.core.io.ext.readSha256
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.uri.UriHelperJvm
+import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
+import com.ustadmobile.libcache.integrity.sha256Integrity
 import com.ustadmobile.libcache.logging.NapierLoggingAdapter
+import com.ustadmobile.libcache.request.requestBuilder
+import com.ustadmobile.util.test.ext.newFileFromResource
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.runBlocking
 import kotlinx.io.files.Path
+import kotlinx.io.readByteArray
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import org.junit.Rule
@@ -19,13 +28,15 @@ import org.junit.rules.TemporaryFolder
 import java.io.File
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 /**
  * Test that saving and manifesting entries works as expected e.g. the entry is stored as a blob,
  * a CacheManifestEntry is generated linked to the URL of the blob, and the data retrieved from
  * the cache for that url matches the original blob itself.
  */
-class SaveAndManifestEntriesFromZipUseCaseIntegrationTest {
+class SaveLocalUriAsBlobAndManifestUseCaseJvmTest {
 
     @JvmField
     @Rule
@@ -46,6 +57,8 @@ class SaveAndManifestEntriesFromZipUseCaseIntegrationTest {
     private lateinit var okHttpClient: OkHttpClient
 
     private lateinit var json: Json
+
+    private lateinit var testFiles: List<File>
 
     @BeforeTest
     fun setup() {
@@ -79,10 +92,49 @@ class SaveAndManifestEntriesFromZipUseCaseIntegrationTest {
             uriHelper = uriHelper,
             tmpDir = Path(temporaryFolder.newFolder().absolutePath),
         )
+
+        testFiles = (1..3).map {
+            temporaryFolder.newFileFromResource(this::class.java,
+                "/com/ustadmobile/core/container/testfile${it}.png")
+        }
     }
 
     @Test
-    fun givenZipInput_whenInvoked_thenShouldReturnValidManifest() {
+    fun givenLocalUrisToManifest_whenInvoked_thenAreStoredInCacheAsPerManifestBodyDataUrl() {
+        val useCase = SaveLocalUriAsBlobAndManifestUseCaseJvm(
+            saveLocalUrisAsBlobsUseCase
+        )
+
+        runBlocking {
+            val result = useCase(
+                testFiles.map {  file ->
+                    SaveLocalUriAsBlobAndManifestUseCase.SaveLocalUriAsBlobAndManifestItem(
+                        blobItem = SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem(
+                            localUri = file.toDoorUri().toString(),
+                            mimeType = "image/png"
+                        ),
+                        manifestUri = file.name
+                    )
+                }
+            )
+
+            testFiles.forEach { testFile ->
+                val resultEntry = result.first {
+                    it.savedBlob.localUri == testFile.toDoorUri().toString()
+                }
+
+                val cacheResponse = cache.retrieve(
+                    request = requestBuilder(resultEntry.manifestEntry.bodyDataUrl)
+                )
+
+                assertEquals(200, cacheResponse!!.responseCode)
+                assertEquals("image/png", cacheResponse.headers["content-type"])
+                val sha256 = testFile.inputStream().use { it.readSha256() }
+                assertEquals(sha256Integrity(sha256), cacheResponse.headers["etag"])
+                assertEquals("true", cacheResponse.headers["X-Etag-Is-Integrity"])
+                assertTrue(testFile.readBytes().contentEquals(cacheResponse.bodyAsSource()!!.readByteArray()))
+            }
+        }
 
     }
 
