@@ -14,11 +14,8 @@ import com.russhwolf.settings.Settings
 import com.russhwolf.settings.SharedPreferencesSettings
 import com.toughra.ustadmobile.BuildConfig
 import com.ustadmobile.core.account.*
-import com.ustadmobile.core.contentformats.epub.EpubContentImporterCommonJvm
 import com.ustadmobile.core.contentformats.epub.XhtmlFixer
 import com.ustadmobile.core.contentformats.epub.XhtmlFixerJsoup
-import com.ustadmobile.core.contentformats.h5p.H5PContentImporter
-import com.ustadmobile.core.contentformats.xapi.XapiZipContentImporter
 import com.ustadmobile.core.contentformats.ContentImportersManager
 import com.ustadmobile.core.db.*
 import com.ustadmobile.core.db.ext.addSyncCallback
@@ -41,6 +38,10 @@ import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCase
 import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCaseAndroid
 import com.ustadmobile.core.domain.blob.upload.UpdateFailedTransferJobUseCase
 import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseAndroid
+import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
+import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseCommonJvm
+import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
+import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseAndroid
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientChunkGetterUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
@@ -132,6 +133,9 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             }
         }
 
+        bind<File>(tag = DiTag.TAG_TMP_DIR) with singleton {
+            File(applicationContext.filesDir, "tmp")
+        }
 
         bind<AppConfig>() with singleton {
             BundleAppConfig(appMetaData)
@@ -258,31 +262,10 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             val uriHelper: UriHelper = instance()
             val xml: XML = instance()
             val cache: UstadCache = instance()
+            val db : UmAppDatabase = instance(tag = DoorTag.TAG_DB)
 
             ContentImportersManager(
-                listOf(
-                    EpubContentImporterCommonJvm(
-                        endpoint = context,
-                        di = di,
-                        cache = cache,
-                        uriHelper = uriHelper,
-                        xml = xml,
-                        xhtmlFixer = instance()
-                    ),
-                    XapiZipContentImporter(
-                        endpoint = context,
-                        di = di,
-                        cache = cache,
-                        uriHelper = uriHelper
-                    ),
-                    H5PContentImporter(
-                        endpoint = context,
-                        di = di,
-                        cache = cache,
-                        uriHelper = uriHelper,
-                        json = instance(),
-                    )
-                )
+                listOf()
             )
         }
 
@@ -358,6 +341,18 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             )
         }
 
+        bind<IsTempFileCheckerUseCase>() with singleton {
+            IsTempFileCheckerUseCaseAndroid(
+                tmpDir = instance(tag = DiTag.TAG_TMP_DIR)
+            )
+        }
+
+        bind<DeleteUrisUseCase>() with singleton {
+            DeleteUrisUseCaseCommonJvm(
+                isTempFileCheckerUseCase = instance()
+            )
+        }
+
         bind<SavePictureUseCase>() with scoped(EndpointScope.Default).singleton {
             SavePictureUseCase(
                 saveLocalUrisAsBlobUseCase = on(context).instance(),
@@ -365,6 +360,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 repo = on(context).instance(tag = DoorTag.TAG_REPO),
                 enqueueBlobUploadClientUseCase = on(context).instance(),
                 compressImageUseCase = CompressImageUseCaseAndroid(applicationContext),
+                deleteUrisUseCase = instance(),
             )
         }
 

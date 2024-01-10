@@ -23,6 +23,9 @@ object DiTag {
 
     const val TAG_FILE_UPLOAD_TMP_DIR = 32
 
+    /**
+     * Used to bind the main temporary directory on JVM (Server/Desktop) and Android
+     */
     const val TAG_TMP_DIR = 42
 
 

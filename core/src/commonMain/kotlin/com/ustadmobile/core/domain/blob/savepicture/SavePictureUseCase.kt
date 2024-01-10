@@ -6,6 +6,7 @@ import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCas
 import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCase
 import com.ustadmobile.core.domain.compress.CompressParams
 import com.ustadmobile.core.domain.compress.CompressUseCase
+import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
 import com.ustadmobile.core.util.uuid.randomUuidAsString
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.CoursePicture
@@ -22,6 +23,7 @@ class SavePictureUseCase(
     private val db: UmAppDatabase,
     private val repo: UmAppDatabase,
     private val compressImageUseCase: CompressUseCase,
+    private val deleteUrisUseCase: DeleteUrisUseCase,
 ) {
 
     private fun UmAppDatabase.imageDaoForTable(tableId: Int): ImageDao? {
@@ -54,15 +56,19 @@ class SavePictureUseCase(
                         entityUid = entityUid,
                         tableId = tableId,
                         mimeType = mainCompressionResult.mimeType,
+                        deleteAfterSave = true,
                     ),
                     SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem(
                         localUri = thumbnailCompressionResult.uri,
                         entityUid = entityUid,
                         tableId = tableId,
                         mimeType = mainCompressionResult.mimeType,
+                        deleteAfterSave = true,
                     )
                 ),
             )
+
+            deleteUrisUseCase(listOf(pictureUri), onlyIfTemp = true)
 
             val pictureBlob = savedBlobs.first {
                 it.localUri == mainCompressionResult.uri

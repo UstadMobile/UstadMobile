@@ -28,6 +28,10 @@ import com.ustadmobile.core.domain.phonenumber.OnClickPhoneNumUseCase
 import com.ustadmobile.core.domain.phonenumber.OnClickPhoneNumUseCaseJvm
 import com.ustadmobile.core.domain.sendemail.OnClickEmailUseCase
 import com.ustadmobile.core.domain.sendemail.OnClickEmailUseCaseJvm
+import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
+import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseCommonJvm
+import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
+import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseJvm
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientChunkGetterUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
@@ -131,6 +135,19 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             repo = on(context).instance(tag = DoorTag.TAG_REPO),
             enqueueBlobUploadClientUseCase = on(context).instance(),
             compressImageUseCase = CompressImageUseCaseJvm(),
+            deleteUrisUseCase = instance()
+        )
+    }
+
+    bind<IsTempFileCheckerUseCase>() with singleton {
+        IsTempFileCheckerUseCaseJvm(
+            tmpRootDir = instance<File>(tag = DiTag.TAG_TMP_DIR)
+        )
+    }
+
+    bind<DeleteUrisUseCase>() with singleton {
+        DeleteUrisUseCaseCommonJvm(
+            isTempFileCheckerUseCase = instance()
         )
     }
 

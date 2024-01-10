@@ -16,7 +16,11 @@ class EnqueueSavePictureUseCaseAndroid(
     private val endpoint: Endpoint,
 ): EnqueueSavePictureUseCase {
 
-    override suspend fun invoke(entityUid: Long, tableId: Int, pictureUri: String?) {
+    override suspend fun invoke(
+        entityUid: Long,
+        tableId: Int,
+        pictureUri: String?,
+    ) {
         val workName = "${endpoint.url}-$tableId-$entityUid"
         val inputData = Data.Builder()
             .putString(DATA_ENDPOINT, endpoint.url)

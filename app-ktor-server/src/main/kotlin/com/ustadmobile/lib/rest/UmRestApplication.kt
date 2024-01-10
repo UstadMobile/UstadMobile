@@ -18,6 +18,10 @@ import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCas
 import com.ustadmobile.core.domain.blob.upload.BlobUploadServerUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.ImportContentEntryUseCase
 import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServerUseCase
+import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
+import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseCommonJvm
+import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
+import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseJvm
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.DiTag.TAG_CONTEXT_DATA_ROOT
 import com.ustadmobile.door.ext.*
@@ -226,8 +230,6 @@ fun Application.umRestApplication(
     //Avoid sending the body of content if it has not changed since the client last requested it.
     install(ConditionalHeaders)
 
-    val tmpRootDir = Files.createTempDirectory("upload").toFile()
-
     val dbMode = dbModeOverride ?:
         appConfig.propertyOrNull("ktor.ustad.dbmode")?.getString() ?: CONF_DBMODE_SINGLETON
 
@@ -292,7 +294,8 @@ fun Application.umRestApplication(
         bind<StringProvider>() with singleton { StringProviderJvm(Locale.getDefault()) }
 
         bind<File>(tag = TAG_UPLOAD_DIR) with scoped(EndpointScope.Default).singleton {
-            File(tmpRootDir, context.identifier(dbMode)).also {
+            val mainTmpDir = instance<File>(tag = DiTag.TAG_TMP_DIR)
+            File(mainTmpDir, context.identifier(dbMode)).also {
                 it.takeIf { !it.exists() }?.mkdirs()
             }
         }
@@ -428,8 +431,14 @@ fun Application.umRestApplication(
             FFprobe(ffprobeFile.absolutePath)
         }
 
+        bind<File>(tag = DiTag.TAG_TMP_DIR) with singleton {
+            File(dataDirPath, "tmp")
+        }
+
         bind<File>(tag = DiTag.TAG_FILE_UPLOAD_TMP_DIR) with scoped(EndpointScope.Default).singleton {
-            File(instance<File>(tag = TAG_CONTEXT_DATA_ROOT), UPLOAD_TMP_SUBDIR).also {
+            val mainTmpDir = instance<File>(tag = DiTag.TAG_TMP_DIR)
+
+            File(mainTmpDir, UPLOAD_TMP_SUBDIR).also {
                 if(!it.exists())
                     it.mkdirs()
             }
@@ -448,7 +457,7 @@ fun Application.umRestApplication(
             BlobUploadServerUseCase(
                 httpCache = instance(),
                 tmpDir = Path(
-                    File(appConfig.absoluteDataDir(), "blob-uploads-tmp").absolutePath.toString()
+                    File(instance<File>(tag = DiTag.TAG_TMP_DIR), "blob-uploads-tmp").absolutePath.toString()
                 ),
                 json = instance(),
                 saveLocalUrisAsBlobsUseCase = instance(),
@@ -486,6 +495,18 @@ fun Application.umRestApplication(
                 okHttpClient = instance(),
                 json = instance(),
                 onlyIfCached = true,
+            )
+        }
+
+        bind<IsTempFileCheckerUseCase>() with singleton {
+            IsTempFileCheckerUseCaseJvm(
+                tmpRootDir = instance<File>(tag = DiTag.TAG_TMP_DIR)
+            )
+        }
+
+        bind<DeleteUrisUseCase>() with singleton {
+            DeleteUrisUseCaseCommonJvm(
+                isTempFileCheckerUseCase = instance()
             )
         }
 

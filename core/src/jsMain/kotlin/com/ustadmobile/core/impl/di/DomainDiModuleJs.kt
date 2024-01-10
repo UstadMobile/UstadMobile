@@ -24,6 +24,10 @@ import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorUseCase
 import com.ustadmobile.core.domain.phonenumber.PhoneNumberUtilJs
 import com.ustadmobile.core.domain.sendemail.OnClickEmailUseCase
 import com.ustadmobile.core.domain.sendemail.OnClickSendEmailUseCaseJs
+import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
+import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseJs
+import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
+import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseJs
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCaseJs
 import com.ustadmobile.door.ext.DoorTag
@@ -87,6 +91,17 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
         )
     }
 
+
+    bind<IsTempFileCheckerUseCase>() with singleton {
+        IsTempFileCheckerUseCaseJs()
+    }
+
+    bind<DeleteUrisUseCase>() with singleton {
+        DeleteUrisUseCaseJs(
+            isTempFileCheckerUseCase = instance()
+        )
+    }
+
     bind<SavePictureUseCase>() with scoped(endpointScope).singleton {
         SavePictureUseCase(
             saveLocalUrisAsBlobUseCase = instance(),
@@ -94,6 +109,7 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
             db = instance(tag = DoorTag.TAG_DB),
             repo = instance(tag = DoorTag.TAG_REPO),
             compressImageUseCase = CompressImageUseCaseJs(),
+            deleteUrisUseCase = instance(),
         )
     }
 
