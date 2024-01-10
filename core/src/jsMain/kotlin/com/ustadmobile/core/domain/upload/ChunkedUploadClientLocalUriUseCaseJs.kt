@@ -75,8 +75,18 @@ class ChunkedUploadClientLocalUriUseCaseJs: ChunkedUploadClientLocalUriUseCase {
                     onStatusChange(TransferJobItemStatus.COMPLETE)
                     Napier.d("ChunkedUploadClientLocalUriUseCaseJs: Completed upload " +
                             "uuid=$uploadUuid to $remoteUrl")
+                    /*
+                     * As per
+                     * https://fetch.spec.whatwg.org/#ref-for-dom-body-text%E2%91%A0
+                     * If there is no body, then response body will be an empty byte array, e.g.
+                     * empty string.
+                     */
                     return ChunkedUploadClientLocalUriUseCase.LastChunkResponse(
-                        body = fetchResponse.text().await(),
+                        body = if(fetchResponse.status != 204) {
+                            fetchResponse.text().await()
+                        }else {
+                            null
+                        },
                         statusCode = fetchResponse.status,
                         headers = fetchResponse.headers.asIStringValues(),
                     )
