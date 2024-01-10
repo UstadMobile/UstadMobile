@@ -40,6 +40,7 @@ interface SaveLocalUrisAsBlobsUseCase {
      *        and this was the first time this checksum was saved, then it will have used the
      *        suggested mime type. Otherwise it will use the auto-guessed type / previous mime type
      */
+    @Serializable
     data class SavedBlob(
         val entityUid: Long,
         val localUri: String,
@@ -47,15 +48,6 @@ interface SaveLocalUrisAsBlobsUseCase {
         val retentionLockId: Int = 0,
         val integrity: String,
         val mimeType: String,
-    )
-
-    /**
-     * Represents a blob that was saved on the server side via the individual item upload endpoint.
-     * Returned as the body on the last response
-     */
-    @Serializable
-    data class ServerSavedBlob(
-        val blobUrl: String
     )
 
     /**

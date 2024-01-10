@@ -376,6 +376,7 @@ fun Application.umRestApplication(
                         db = db,
                         cache= cache,
                         saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
+                        uriHelper = uriHelper,
                         json = instance(),
                     ),
                     H5PContentImporter(
@@ -450,7 +451,7 @@ fun Application.umRestApplication(
                     File(appConfig.absoluteDataDir(), "blob-uploads-tmp").absolutePath.toString()
                 ),
                 json = instance(),
-                endpoint = context,
+                saveLocalUrisAsBlobsUseCase = instance(),
             )
         }
 

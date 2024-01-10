@@ -115,16 +115,15 @@ class SaveLocalUrisAsBlobUseCaseJs(
                         )
                     )
 
-                    val serverSavedBlob = json.decodeFromString(
-                        SaveLocalUrisAsBlobsUseCase.ServerSavedBlob.serializer(), responseJsonStr
+                    val savedBlob = json.decodeFromString(
+                        SaveLocalUrisAsBlobsUseCase.SavedBlob.serializer(), responseJsonStr
                     )
                     Napier.d("SaveLocalUrisAsBlobUseCaseJs: upload complete: " +
-                            "${uriToSaveQueueItem.uriToSaveItem.localUri} stored as ${serverSavedBlob.blobUrl}")
+                            "${uriToSaveQueueItem.uriToSaveItem.localUri} stored as ${savedBlob.blobUrl}")
 
-                    SaveLocalUrisAsBlobsUseCase.SavedBlob(
+                    savedBlob.copy(
                         entityUid = uriToSaveQueueItem.uriToSaveItem.entityUid,
                         localUri = uriToSaveQueueItem.uriToSaveItem.localUri,
-                        blobUrl = serverSavedBlob.blobUrl,
                     )
                 }
 

@@ -1,20 +1,16 @@
 package com.ustadmobile.core.domain.blob.upload
 
-import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
 import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCase.Companion.BLOB_RESPONSE_HEADER_PREFIX
 import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCase.Companion.BLOB_UPLOAD_HEADER_BATCH_UUID
 import com.ustadmobile.core.domain.upload.ChunkedUploadResponse
 import com.ustadmobile.core.domain.upload.ChunkedUploadServerUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadServerUseCaseJvm
-import com.ustadmobile.core.url.UrlKmp
-import com.ustadmobile.core.util.UMURLEncoder
-import com.ustadmobile.core.util.ext.encodeBase64
+import com.ustadmobile.core.io.ext.toDoorUri
 import com.ustadmobile.libcache.CacheEntryToStore
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.headers.HttpHeaders
 import com.ustadmobile.libcache.headers.headersBuilder
-import com.ustadmobile.libcache.io.sha256
 import com.ustadmobile.libcache.request.requestBuilder
 import com.ustadmobile.libcache.response.HttpPathResponse
 import io.github.aakira.napier.Napier
@@ -33,12 +29,18 @@ import java.util.UUID
  * any HTTP server as needed (e.g. Ktor, NanoHTTPD, etc).
  *
  * It should be retained as a SINGLETON
+ *
+ * The upload-item endpoint is used by the web client to upload items individually. The server then
+ * has to generate integrity headers etc. (via SaveLocalUriAsBlobUseCase).
+ *
+ * In the batch upload case, used by Android and desktop clients, the headers will
+ * have already been put together by the client, and only need validated.
  */
 class BlobUploadServerUseCase(
     private val httpCache: UstadCache,
     private val tmpDir: Path,
     private val json: Json,
-    private val endpoint: Endpoint,
+    private val saveLocalUrisAsBlobsUseCase: SaveLocalUrisAsBlobsUseCase,
     private val fileSystem: FileSystem = SystemFileSystem,
     responseCacheSize: Int = 100
 ) {
@@ -51,8 +53,8 @@ class BlobUploadServerUseCase(
             .build()
 
     /**
-     * ChunkedUploadServerUseCase that handles items being uploaded as part of a batch. See HTTP API
-     * for details.
+     * ChunkedUploadServerUseCase that handles items being uploaded as part of a batch by the desktop
+     * and Android clients. See HTTP API for details. In this case the
      */
     val batchChunkedUploadServerUseCase: ChunkedUploadServerUseCase = ChunkedUploadServerUseCaseJvm(
         uploadDir = File(tmpDir.toString()),
@@ -91,25 +93,26 @@ class BlobUploadServerUseCase(
     val individualItemUploadServerUseCase: ChunkedUploadServerUseCase = ChunkedUploadServerUseCaseJvm(
         uploadDir = File(tmpDir.toString()),
         onUploadComplete = { completedChunkedUpload ->
-            val sha256  = fileSystem.source(completedChunkedUpload.path).buffered().use {
-                it.sha256()
-            }
-            val blobUrl = UrlKmp(endpoint.url).resolve("/api/blob/" +
-                    UMURLEncoder.encodeUTF8(sha256.encodeBase64()))
-            val blobUrlStr = blobUrl.toString()
-            onStoreItem(
-                blobUrl = blobUrlStr,
-                bodyPath = completedChunkedUpload.path,
-                requestHeaders = HttpHeaders.fromMap(completedChunkedUpload.request.headers),
-            )
-            val serverSavedBlobItem = SaveLocalUrisAsBlobsUseCase.ServerSavedBlob(
-                blobUrl = blobUrlStr
-            )
+            val givenMimeType = completedChunkedUpload.request
+                .headers["${BLOB_RESPONSE_HEADER_PREFIX}Content-Type"]?.firstOrNull()
+            val savedBlob = saveLocalUrisAsBlobsUseCase(
+                listOf(
+                    SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem(
+                        localUri = completedChunkedUpload.path.toDoorUri().toString(),
+                        entityUid = 0,
+                        deleteAfterSave = true,
+                        mimeType = givenMimeType,
+                    )
+                )
+            ).first()
+
             ChunkedUploadResponse(
                 statusCode = 200,
                 body = json.encodeToString(
-                    SaveLocalUrisAsBlobsUseCase.ServerSavedBlob.serializer(),
-                    serverSavedBlobItem
+                    SaveLocalUrisAsBlobsUseCase.SavedBlob.serializer(),
+                    value = savedBlob.copy(
+                        localUri = "" //Do not reveal internal paths to client
+                    ),
                 ),
                 contentType = "application/json",
                 headers = mapOf()

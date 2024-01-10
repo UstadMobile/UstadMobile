@@ -83,6 +83,8 @@ class SaveLocalUrisAsBlobsUseCaseJvmIntegrationTest {
 
     private lateinit var mockUmAppDatabase: UmAppDatabase
 
+    private lateinit var serverSaveLocalUriAsBlobUseCase: SaveLocalUrisAsBlobsUseCase
+
     @BeforeTest
     fun setup() {
         initNapierLog()
@@ -112,12 +114,24 @@ class SaveLocalUrisAsBlobsUseCaseJvmIntegrationTest {
                 json(json = json)
             }
         }
+        uriHelper = UriHelperJvm(
+            mimeTypeHelperImpl = FileMimeTypeHelperImpl(),
+            httpClient = httpClient,
+            okHttpClient = okHttpClient,
+        )
+
+        serverSaveLocalUriAsBlobUseCase = SaveLocalUrisAsBlobsUseCaseJvm(
+            endpoint = endpoint,
+            cache = serverCache,
+            uriHelper = uriHelper,
+            tmpDir = Path(temporaryFolder.newFolder().absolutePath),
+        )
 
         blobUploadServerUseCase = BlobUploadServerUseCase(
             httpCache = serverCache,
             json = json,
             tmpDir = Path(serverCacheDir.absolutePath),
-            endpoint = endpoint,
+            saveLocalUrisAsBlobsUseCase = serverSaveLocalUriAsBlobUseCase,
         )
 
         ktorServer = embeddedServer(Netty, 8094) {
@@ -142,12 +156,6 @@ class SaveLocalUrisAsBlobsUseCaseJvmIntegrationTest {
 
         }
         ktorServer.start()
-
-        uriHelper = UriHelperJvm(
-            mimeTypeHelperImpl = FileMimeTypeHelperImpl(),
-            httpClient = httpClient,
-            okHttpClient = okHttpClient,
-        )
     }
 
     @AfterTest

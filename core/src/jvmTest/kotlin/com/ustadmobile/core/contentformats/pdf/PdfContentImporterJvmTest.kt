@@ -111,6 +111,7 @@ class PdfContentImporterJvmTest : AbstractMainDispatcherTest() {
             cache = ustadCache,
             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
             json = json,
+            uriHelper = uriHelper,
         )
 
         val metadata = runBlocking {
@@ -133,6 +134,7 @@ class PdfContentImporterJvmTest : AbstractMainDispatcherTest() {
             cache = ustadCache,
             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
             json = json,
+            uriHelper = uriHelper,
         )
 
         val metadata = runBlocking {
@@ -154,6 +156,7 @@ class PdfContentImporterJvmTest : AbstractMainDispatcherTest() {
             cache = ustadCache,
             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
             json = json,
+            uriHelper = uriHelper,
         )
 
         runBlocking {
@@ -177,6 +180,7 @@ class PdfContentImporterJvmTest : AbstractMainDispatcherTest() {
             cache = ustadCache,
             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
             json = json,
+            uriHelper = uriHelper,
         )
 
         val result = runBlocking {

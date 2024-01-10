@@ -8,6 +8,7 @@ import com.ustadmobile.core.contentjob.SupportedContent
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.contentformats.ContentImporter
 import com.ustadmobile.core.contentformats.manifest.ContentManifest
+import com.ustadmobile.core.contentformats.storeText
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
 import com.ustadmobile.core.domain.contententry.ContentConstants.MANIFEST_NAME
@@ -19,16 +20,10 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryImportJob
 import com.ustadmobile.lib.db.entities.ContentEntryVersion
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
-import com.ustadmobile.libcache.CacheEntryToStore
 import com.ustadmobile.libcache.UstadCache
-import com.ustadmobile.libcache.headers.headersBuilder
-import com.ustadmobile.libcache.request.requestBuilder
-import com.ustadmobile.libcache.response.StringResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.io.asInputStream
-import kotlinx.io.files.FileSystem
-import kotlinx.io.files.SystemFileSystem
 import kotlinx.serialization.json.Json
 import org.apache.pdfbox.Loader
 import org.apache.pdfbox.pdmodel.PDDocument
@@ -81,24 +76,10 @@ class PdfContentImporterJvm(
             entries = manifestEntriesAndBlobs.map { it.manifestEntry }
         )
 
-        val manifestRequest = requestBuilder {
-            url = manifestUrl
-        }
-
-        cache.store(
-            storeRequest = listOf(
-                CacheEntryToStore(
-                    request = manifestRequest,
-                    response = StringResponse(
-                        request = manifestRequest,
-                        mimeType = "application/json",
-                        body = json.encodeToString(ContentManifest.serializer(), manifest),
-                        extraHeaders = headersBuilder {
-                            header("cache-control", "immutable")
-                        }
-                    )
-                )
-            )
+        cache.storeText(
+            url = manifestUrl,
+            text = json.encodeToString(ContentManifest.serializer(), manifest),
+            mimeType = "application/json"
         )
 
         contentEntryVersion
