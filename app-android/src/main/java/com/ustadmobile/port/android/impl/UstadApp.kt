@@ -247,9 +247,10 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             val httpCacheDir = File(applicationContext.filesDir, "httpfiles")
             val storagePath = Path(httpCacheDir.absolutePath)
             UstadCacheBuilder(
-                applicationContext,
-                storagePath,
-                logger = NapierLoggingAdapter()
+                appContext = applicationContext,
+                storagePath = storagePath,
+                logger = NapierLoggingAdapter(),
+                sizeLimit = { 100_000_000L },
             ).build()
         }
 

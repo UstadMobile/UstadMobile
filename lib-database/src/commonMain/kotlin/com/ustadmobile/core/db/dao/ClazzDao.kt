@@ -141,7 +141,7 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
                                       ELSE :currentTime > Clazz.clazzEndTime 
                                       END))
            AND ( :selectedSchool = 0 OR Clazz.clazzSchoolUid = :selectedSchool)
-      GROUP BY Clazz.clazzUid, ClazzEnrolment.clazzEnrolmentUid, CourseTerminology.ctUid
+      GROUP BY Clazz.clazzUid, ClazzEnrolment.clazzEnrolmentUid, CourseTerminology.ctUid, CoursePicture.coursePictureUid
       ORDER BY CASE :sortOrder
                WHEN $SORT_ATTENDANCE_ASC THEN Clazz.attendanceAverage
                ELSE 0

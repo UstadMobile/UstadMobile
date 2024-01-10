@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import com.ustadmobile.core.db.dao.CourseGroupMemberDaoCommon.CASE_CLAZZ_UID_WHEN_NOT_ZERO_USEIT_ELSE_LOOKUP_CGS_UID_SQL
 import com.ustadmobile.core.db.dao.CourseGroupMemberDaoCommon.FIND_BY_COURSEGROUPSET_AND_CLAZZ_SQL
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.composites.PersonAndPicture
@@ -101,7 +102,6 @@ expect abstract class CourseGroupMemberDao: BaseDao<CourseGroupMember> {
         activeFilter: Int,
     ): List<CourseGroupMemberAndName>
 
-    //Needs Enrolments, Persons,
     @HttpAccessible(
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
         pullQueriesToReplicate = arrayOf(
@@ -125,26 +125,28 @@ expect abstract class CourseGroupMemberDao: BaseDao<CourseGroupMember> {
     ): Flow<List<CourseGroupMemberAndName>>
 
     @Query("""
-        SELECT Person.*
+        SELECT Person.*, PersonPicture.*
           FROM Person
                LEFT JOIN PersonPicture
                          ON PersonPicture.personPictureUid = Person.personUid
          WHERE Person.personUid IN
                (SELECT DISTINCT ClazzEnrolment.clazzEnrolmentPersonUid
                   FROM ClazzEnrolment
-                 WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid)
+                 WHERE ClazzEnrolment.clazzEnrolmentClazzUid = $CASE_CLAZZ_UID_WHEN_NOT_ZERO_USEIT_ELSE_LOOKUP_CGS_UID_SQL)
     """)
     abstract suspend fun findByCourseGroupSetAndClazzAsFlowPersons(
-        clazzUid: Long
+        clazzUid: Long,
+        cgsUid: Long,
     ): List<PersonAndPicture>
 
     @Query("""
         SELECT ClazzEnrolment.*
           FROM ClazzEnrolment
-         WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid 
+         WHERE ClazzEnrolment.clazzEnrolmentClazzUid = $CASE_CLAZZ_UID_WHEN_NOT_ZERO_USEIT_ELSE_LOOKUP_CGS_UID_SQL
     """)
     abstract suspend fun findByCourseGroupSetAndClazzAsFlowEnrolments(
-        clazzUid: Long
+        clazzUid: Long,
+        cgsUid: Long,
     ): List<ClazzEnrolment>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
