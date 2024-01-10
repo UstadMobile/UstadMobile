@@ -75,13 +75,8 @@ class ChunkedUploadClientLocalUriUseCaseJs: ChunkedUploadClientLocalUriUseCase {
                     onStatusChange(TransferJobItemStatus.COMPLETE)
                     Napier.d("ChunkedUploadClientLocalUriUseCaseJs: Completed upload " +
                             "uuid=$uploadUuid to $remoteUrl")
-                    val responseSize = fetchResponse.headers["content-length"]?.toLong() ?: 0
                     return ChunkedUploadClientLocalUriUseCase.LastChunkResponse(
-                        body = if(responseSize > 0) {
-                            fetchResponse.text().await()
-                        }else {
-                            null
-                        },
+                        body = fetchResponse.text().await(),
                         statusCode = fetchResponse.status,
                         headers = fetchResponse.headers.asIStringValues(),
                     )
