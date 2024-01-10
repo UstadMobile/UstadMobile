@@ -2,9 +2,18 @@ package com.ustadmobile.core.contentformats.media
 
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.contentjob.InvalidContentException
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.contentformats.video.VideoContentImporterJvm
+import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
+import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCaseJvm
+import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
+import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCaseJvm
+import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
+import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseCommonJvm
+import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
+import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseJvm
 import com.ustadmobile.core.test.assertCachedBodyMatchesFileContent
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.uri.UriHelperJvm
@@ -31,6 +40,7 @@ import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
+import java.io.File
 import kotlin.test.Test
 import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
@@ -62,11 +72,23 @@ class VideoContentImporterJvmTest : AbstractMainDispatcherTest() {
 
     private lateinit var json: Json
 
+    private lateinit var saveLocalUriAsBlobUseCase: SaveLocalUrisAsBlobsUseCase
+
+    private lateinit var saveAndManifestUseCase: SaveLocalUriAsBlobAndManifestUseCase
+
+    private lateinit var isTempFileCheckerUseCase: IsTempFileCheckerUseCase
+
+    private lateinit var deleteUrisUseCase: DeleteUrisUseCase
+
+    private lateinit var rootTmpPath: File
+
+
     @BeforeTest
     fun setup() {
         di = DI {
             import(ustadTestRule.diModule)
         }
+        rootTmpPath = temporaryFolder.newFolder("video-import-test")
 
         val accountManager: UstadAccountManager by di.instance()
         db = di.on(accountManager.activeEndpoint).direct.instance(tag = DoorTag.TAG_DB)
@@ -88,6 +110,19 @@ class VideoContentImporterJvmTest : AbstractMainDispatcherTest() {
         ffProbe = SysPathUtil.findCommandInPath("ffprobe")?.let {
             FFprobe(it.absolutePath)
         } ?: throw IllegalStateException("Cannot find ffmpeg in path. FFMPEG must be in path to run this test")
+
+        isTempFileCheckerUseCase = IsTempFileCheckerUseCaseJvm(rootTmpPath)
+        deleteUrisUseCase = DeleteUrisUseCaseCommonJvm(isTempFileCheckerUseCase)
+
+        saveLocalUriAsBlobUseCase = SaveLocalUrisAsBlobsUseCaseJvm(
+            endpoint = activeEndpoint,
+            cache = ustadCache,
+            uriHelper = uriHelper,
+            tmpDir = Path(rootTmpPath.absolutePath),
+            deleteUrisUseCase = deleteUrisUseCase,
+        )
+
+        saveAndManifestUseCase = SaveLocalUriAsBlobAndManifestUseCaseJvm(saveLocalUriAsBlobUseCase)
     }
 
     @Test
@@ -102,6 +137,8 @@ class VideoContentImporterJvmTest : AbstractMainDispatcherTest() {
             ffprobe = ffProbe,
             uriHelper = uriHelper,
             json = json,
+            tmpPath = Path(rootTmpPath.absolutePath),
+            saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
         )
         val metadataResult = runBlocking {
             importer.extractMetadata(videoFile.toDoorUri(), "BigBuckBunny.mp4")
@@ -121,6 +158,8 @@ class VideoContentImporterJvmTest : AbstractMainDispatcherTest() {
             ffprobe = ffProbe,
             uriHelper = uriHelper,
             json = json,
+            tmpPath = Path(rootTmpPath.absolutePath),
+            saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
         )
         runBlocking {
             try {
@@ -144,6 +183,8 @@ class VideoContentImporterJvmTest : AbstractMainDispatcherTest() {
             ffprobe = ffProbe,
             uriHelper = uriHelper,
             json = json,
+            tmpPath = Path(rootTmpPath.absolutePath),
+            saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
         )
         runBlocking {
             assertNull(importer.extractMetadata(txtFile.toDoorUri(), "file.txt"))
@@ -162,6 +203,8 @@ class VideoContentImporterJvmTest : AbstractMainDispatcherTest() {
             ffprobe = ffProbe,
             uriHelper = uriHelper,
             json = json,
+            tmpPath = Path(rootTmpPath.absolutePath),
+            saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
         )
 
         val result = runBlocking {
@@ -173,22 +216,32 @@ class VideoContentImporterJvmTest : AbstractMainDispatcherTest() {
                 progressListener = { }
             )
         }
+        val manifestResponse = ustadCache.retrieve(
+            requestBuilder(result.cevSitemapUrl!!)
+        )
+        val manifest = json.decodeFromString(
+            ContentManifest.serializer(), manifestResponse!!.bodyAsSource()!!.readString()
+        )
+        val videoManifestItem = manifest.entries.first {
+            it.uri == "video"
+        }
+        ustadCache.assertCachedBodyMatchesFileContent(
+            url = videoManifestItem.bodyDataUrl,
+            file = videoFile
+        )
+        assertEquals("video/mp4", videoManifestItem.responseHeaders["content-type"])
 
-        val mediaInfoResponse = ustadCache.retrieve(requestBuilder(result.cevUrl!!))
+        val mediaInfoResponse = ustadCache.retrieve(
+            requestBuilder(
+                url = manifest.entries.first {
+                    it.uri == "media.json"
+                }.bodyDataUrl
+            )
+        )
         val mediaInfoText = mediaInfoResponse?.bodyAsSource()?.readString()!!
         val mediaInfo: MediaContentInfo = json.decodeFromString(mediaInfoText)
-
         assertEquals("video/mp4", mediaInfo.sources.first().mimeType)
 
-        val videoUrl = mediaInfo.sources.first().url
-
-        ustadCache.assertCachedBodyMatchesFileContent(
-            url = videoUrl,
-            file = videoFile,
-        )
-
-        val response = ustadCache.retrieve(requestBuilder(videoUrl))
-        assertEquals("video/mp4", response?.headers?.get("content-type"))
     }
 
 }

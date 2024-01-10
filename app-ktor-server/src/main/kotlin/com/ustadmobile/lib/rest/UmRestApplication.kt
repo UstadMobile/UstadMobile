@@ -404,6 +404,8 @@ fun Application.umRestApplication(
                         uriHelper = uriHelper,
                         ffprobe = instance(),
                         json = instance(),
+                        tmpPath = contentImportTmpPath,
+                        saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
                     )
                 )
             )

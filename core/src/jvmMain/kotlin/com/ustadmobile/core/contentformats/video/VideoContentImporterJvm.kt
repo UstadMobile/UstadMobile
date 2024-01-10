@@ -9,31 +9,36 @@ import com.ustadmobile.core.contentjob.InvalidContentException
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.contentformats.ContentImporter
+import com.ustadmobile.core.contentformats.manifest.ContentManifest
+import com.ustadmobile.core.contentformats.storeText
+import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
+import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
+import com.ustadmobile.core.domain.contententry.ContentConstants
+import com.ustadmobile.core.io.ext.toDoorUri
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.util.ext.requireSourceAsDoorUri
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryImportJob
 import com.ustadmobile.lib.db.entities.ContentEntryVersion
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
-import com.ustadmobile.libcache.CacheEntryToStore
 import com.ustadmobile.libcache.UstadCache
-import com.ustadmobile.libcache.io.newTmpFile
-import com.ustadmobile.libcache.request.requestBuilder
-import com.ustadmobile.libcache.response.HttpPathResponse
-import com.ustadmobile.libcache.response.StringResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.io.buffered
 import kotlinx.io.files.FileSystem
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
+import kotlinx.io.writeString
 import kotlinx.serialization.json.Json
 import java.nio.file.Files
 import java.nio.file.Path as NioPath
 import kotlin.io.path.absolutePathString
 import net.bramp.ffmpeg.FFprobe
 import net.bramp.ffmpeg.probe.FFmpegStream
+import java.io.File
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.deleteRecursively
 
@@ -45,6 +50,8 @@ class VideoContentImporterJvm(
     private val json: Json,
     private val fileSystem: FileSystem = SystemFileSystem,
     private val db: UmAppDatabase,
+    private val tmpPath: Path,
+    private val saveLocalUriAsBlobAndManifestUseCase: SaveLocalUriAsBlobAndManifestUseCase,
 ): ContentImporter(
     endpoint = endpoint
 ) {
@@ -71,9 +78,13 @@ class VideoContentImporterJvm(
 
         val contentEntryVersionUid = db.doorPrimaryKeyManager.nextId(ContentEntryVersion.TABLE_ID)
         val urlPrefix = createContentUrlPrefix(contentEntryVersionUid)
+        val manifestUrl = "$urlPrefix${ContentConstants.MANIFEST_NAME}"
         val videoUrl = "${urlPrefix}video"
         val mediaInfoUrl = "${urlPrefix}media.json"
-        val tmpFile = fileSystem.newTmpFile("videoimport", "tmp")
+        val workDir = Path(tmpPath, "video-import-${systemTimeInMillis()}")
+        fileSystem.createDirectories(workDir)
+
+        val videoTmpFile = Path(workDir, "video")
 
         //Get the mime type from the uri to import if possible
         // If not, try looking at the original filename (might be needed where using temp import
@@ -92,49 +103,69 @@ class VideoContentImporterJvm(
             )
         )
 
+        val mediaInfoTmpFile = Path(workDir, "media.json")
+        fileSystem.sink(mediaInfoTmpFile).buffered().use {
+            it.writeString(
+                json.encodeToString(
+                    MediaContentInfo.serializer(), mediaContentInfo,
+                )
+            )
+        }
+
         try {
             uriHelper.openSource(jobUri).use { uriSource ->
-                fileSystem.sink(tmpFile).use { fileSink ->
+                fileSystem.sink(videoTmpFile).use { fileSink ->
                     uriSource.transferTo(fileSink)
                 }
             }
 
-            val contentEntryVersion = ContentEntryVersion(
-                cevUid = contentEntryVersionUid,
-                cevContentType = ContentEntryVersion.TYPE_VIDEO,
-                cevContentEntryUid = jobItem.cjiContentEntryUid,
-                cevUrl = mediaInfoUrl,
-            )
-
-            val videoRequest = requestBuilder(videoUrl)
-            val mediaInfoRequest = requestBuilder(mediaInfoUrl)
-            cache.store(
-                storeRequest = listOf(
-                    CacheEntryToStore(
-                        request = videoRequest,
-                        response = HttpPathResponse(
-                            path = tmpFile,
-                            fileSystem = fileSystem,
+            val savedManifestItems = saveLocalUriAsBlobAndManifestUseCase(
+                listOf(
+                    SaveLocalUriAsBlobAndManifestUseCase.SaveLocalUriAsBlobAndManifestItem(
+                        blobItem = SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem(
+                            localUri = videoTmpFile.toDoorUri().toString(),
+                            entityUid = contentEntryVersionUid,
+                            tableId = ContentEntryVersion.TABLE_ID,
                             mimeType = mimeType,
-                            request = videoRequest,
-                        )
+                            deleteLocalUriAfterSave = true,
+                        ),
+                        manifestUri = "video"
                     ),
-                    CacheEntryToStore(
-                        request = mediaInfoRequest,
-                        response = StringResponse(
-                            request = mediaInfoRequest,
+                    SaveLocalUriAsBlobAndManifestUseCase.SaveLocalUriAsBlobAndManifestItem(
+                        blobItem = SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem(
+                            localUri = mediaInfoTmpFile.toDoorUri().toString(),
+                            entityUid = contentEntryVersionUid,
+                            tableId = ContentEntryVersion.TABLE_ID,
                             mimeType = "application/json",
-                            body = json.encodeToString(
-                                MediaContentInfo.serializer(), mediaContentInfo,
-                            )
-                        )
+                            deleteLocalUriAfterSave = true,
+                        ),
+                        manifestUri = "media.json"
                     )
                 )
             )
 
-            contentEntryVersion
+            val manifest = ContentManifest(
+                version = 1,
+                metadata = emptyMap(),
+                entries = savedManifestItems.map { it.manifestEntry }
+            )
+
+            cache.storeText(
+                url = manifestUrl,
+                text = json.encodeToString(ContentManifest.serializer(), manifest),
+                mimeType = "application/json"
+            )
+
+
+            ContentEntryVersion(
+                cevUid = contentEntryVersionUid,
+                cevContentType = ContentEntryVersion.TYPE_VIDEO,
+                cevContentEntryUid = jobItem.cjiContentEntryUid,
+                cevSitemapUrl = manifestUrl,
+                cevUrl = mediaInfoUrl,
+            )
         }finally {
-            fileSystem.delete(tmpFile)
+            File(workDir.toString()).deleteRecursively()
         }
     }
 
