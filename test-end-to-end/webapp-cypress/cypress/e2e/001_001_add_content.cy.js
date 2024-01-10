@@ -5,10 +5,9 @@ describe('001_001_add_content', () => {
 })
 
 it('Admin user add content to the library', () => {
-
-  // Admin user login
+ // Admin user login
   cy.ustadClearDbAndLogin('admin','testpass',{timeout:8000})
-  // Add H5p File
+ // Add H5p File
   cy.ustadAddContentToLibrary('../test-files/content/H5p_Content.h5p','Content_001')
   cy.contains('Content_001').click()
   cy.contains('OPEN').click({force: true})

@@ -37,7 +37,7 @@ it('Teacher able to add a new discussion board and post to the discussion', () =
   cy.get('[data-testid="ForumIcon"]').eq(1).click()
   cy.contains('Post').click()
   cy.get('#discussion_post_title').type('Post Title')
-  cy.get('.ql-editor.ql-blank').type('Discusssion post')
+  cy.get('#discussion_post_message .ql-editor').type('Discusssion post')
   cy.get('#actionBarButton').click()
 })
 })

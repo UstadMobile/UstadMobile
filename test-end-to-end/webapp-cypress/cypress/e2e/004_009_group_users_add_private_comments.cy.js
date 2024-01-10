@@ -83,7 +83,7 @@ it('Teacher add assignment and course comment', () => {
   cy.get('li[data-value="2"]').click()
   cy.contains("button","Save").should('be.visible')
   cy.contains("button","Save").click()
-  cy.get('input[id="title"]').type("Assignment 1")
+  cy.get('input[id="title"]').clear().type("Assignment 1")
   cy.contains("button","Done").should('be.visible')
   cy.contains("button","Done").click()
   cy.contains("button","Save").should('be.visible')

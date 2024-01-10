@@ -65,7 +65,7 @@ it('Teacher add assignment and course comment', () => {
   cy.get('div[data-placeholder="Description"]').type("this is a simple assignment")
   cy.get('#group_submission_on').click()
   cy.get('#cgsName').click()
-  cy.contains('Add new groups').then(($addNewGroupsBtn) => {
+  cy.get('#add_new_groups').then(($addNewGroupsBtn) => {
     if (!$addNewGroupsBtn.is(':visible')) {
     cy.reload()
     }
@@ -85,7 +85,7 @@ it('Teacher add assignment and course comment', () => {
   cy.get('li[data-value="2"]').click()
   cy.contains("button","Save").should('be.visible')
   cy.contains("button","Save").click()
-  cy.get('input[id="title"]').contains("Assignment 1").should('be.visible')
+  cy.get('input[id="title"]').clear().type("Assignment 1")
   cy.contains("button","Done").should('be.visible')
   cy.contains("button","Done").click()
   cy.contains("button","Save").should('be.visible')

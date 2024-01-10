@@ -19,7 +19,7 @@ it('Admin add discussion board and a post', () => {
   cy.get('[data-testid="ForumIcon"]').click()
   cy.contains('Post').click()
   cy.get('#discussion_post_title').type('Post Title')
-  cy.get('.ql-editor.ql-blank').type('Discusssion post')
+  cy.get('#discussion_post_message .ql-editor').type('Discusssion post')
   cy.get('#actionBarButton').click()
   cy.go('back')
   cy.go('back')

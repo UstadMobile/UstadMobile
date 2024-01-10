@@ -85,7 +85,7 @@ it('Teacher add multiple submission assignment and group ', () => {
   cy.get('li[data-value="2"]').click()
   cy.contains("button","Save").should('be.visible')
   cy.contains("button","Save").click()
-  cy.get('input[id="title"]').type("Assignment 1")
+  cy.get('input[id="title"]').clear().type("Assignment 1")
   cy.contains("button","Done").should('be.visible')
   cy.contains("button","Done").click()
   cy.contains("button","Save").should('be.visible')
@@ -96,7 +96,6 @@ it('Teacher add multiple submission assignment and group ', () => {
 })
 
 it('Group 1- Student 1 submit assignment', () => {
-
   cy.ustadClearDbAndLogin('student1','test1234')
   cy.contains("Course").click()
   cy.contains("004_011").click()
