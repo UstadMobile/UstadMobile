@@ -13,7 +13,8 @@ fun Route.ContentEntryVersionRoute(
 ) {
     get("{contentEntryVersionUid}/{pathInContent...}") {
         val contentEntryVersionUid = call.parameters["contentEntryVersionUid"]?.toLong() ?: 0
-        val pathInContent = call.parameters["pathInContent"] ?: ""
+        val pathInContent = (call.parameters.getAll("pathInContent") ?: emptyList())
+            .joinToString(separator = "/")
         val useCaseForCall = useCase(call)
         val response = useCaseForCall(
             request = call.request.toCacheHttpRequest(),

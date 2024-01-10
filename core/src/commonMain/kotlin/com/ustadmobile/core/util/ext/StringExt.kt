@@ -136,3 +136,12 @@ fun String.fileExtensionOrNull(): String? {
         if(it != "") it else null
     }
 }
+
+fun String.removeQueryStringSuffix(): String {
+    val queryPosIndex = indexOf("?")
+    return if(queryPosIndex != -1) {
+        substring(0, queryPosIndex)
+    }else {
+        this
+    }
+}

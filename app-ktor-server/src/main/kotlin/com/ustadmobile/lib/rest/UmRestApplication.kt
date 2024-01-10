@@ -354,8 +354,9 @@ fun Application.umRestApplication(
             val xml: XML = instance()
             val xhtmlFixer: XhtmlFixer = instance()
             val db: UmAppDatabase = instance(tag = DoorTag.TAG_DB)
-            val saveLocalUrisAsBlobsUseCase: SaveLocalUrisAsBlobsUseCase = instance()
             val saveAndManifestUseCase: SaveLocalUriAsBlobAndManifestUseCase = instance()
+            val tmpRoot: File = instance(tag = DiTag.TAG_TMP_DIR)
+            val contentImportTmpPath = Path(tmpRoot.absolutePath, "contentimport")
 
             ContentImportersManager(
                 listOf(
@@ -386,6 +387,8 @@ fun Application.umRestApplication(
                         db = db,
                         cache = cache,
                         uriHelper = uriHelper,
+                        tmpPath = contentImportTmpPath,
+                        saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
                         json = instance(),
                     ),
                     VideoContentImporterJvm(

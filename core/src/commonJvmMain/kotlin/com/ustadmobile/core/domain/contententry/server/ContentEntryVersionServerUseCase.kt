@@ -4,6 +4,7 @@ import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.contentformats.manifest.ContentManifestEntry
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.contententry.ContentConstants
+import com.ustadmobile.core.util.ext.removeQueryStringSuffix
 import com.ustadmobile.core.util.stringvalues.asOkHttpHeaders
 import com.ustadmobile.core.util.stringvalues.filtered
 import com.ustadmobile.libcache.okhttp.asOkHttpHeaders
@@ -92,7 +93,9 @@ class ContentEntryVersionServerUseCase(
             }
 
             val entry = manifest.entryMap[pathInContentEntryVersion]
-                ?: throw IllegalArgumentException("$pathInContentEntryVersion not found in manifest for $contentEntryVersionUid")
+                ?: manifest.entryMap[pathInContentEntryVersion.removeQueryStringSuffix()]?.let {
+                    if(it.ignoreQueryParams) it else null
+                } ?: throw IllegalArgumentException("Could not find $pathInContentEntryVersion")
 
             val bodyDataUrlRequest = Request.Builder()
                 .url(entry.bodyDataUrl)

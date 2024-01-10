@@ -18,7 +18,7 @@ import com.ustadmobile.libcache.headers.headersBuilder
 import com.ustadmobile.libcache.headers.integrity
 import com.ustadmobile.libcache.headers.requireIntegrity
 import com.ustadmobile.libcache.integrity.sha256Integrity
-import com.ustadmobile.libcache.io.sha256
+import com.ustadmobile.libcache.io.useAndReadySha256
 import com.ustadmobile.libcache.io.transferToAndGetSha256
 import com.ustadmobile.libcache.io.unzipTo
 import com.ustadmobile.libcache.logging.UstadCacheLogger
@@ -199,7 +199,7 @@ class UstadCacheImpl(
                     null
 
                 val integrity = sha256IntegrityFromTransfer ?: integrityFromHeaders
-                    ?: sha256Integrity(fileSystem.source(tmpFile).buffered().sha256())
+                    ?: sha256Integrity(fileSystem.source(tmpFile).buffered().useAndReadySha256())
 
                 val responseHeaders  = headersBuilder {
                     takeFrom(response.headers)

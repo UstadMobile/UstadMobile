@@ -2,14 +2,23 @@ package com.ustadmobile.core.contentformats.h5p
 
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.contentjob.InvalidContentException
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
+import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCaseJvm
+import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
+import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCaseJvm
+import com.ustadmobile.core.domain.contententry.ContentConstants.MANIFEST_NAME
+import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
+import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseCommonJvm
+import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
+import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseJvm
 import com.ustadmobile.core.io.ext.readString
-import com.ustadmobile.core.test.assertZipIsCached
+import com.ustadmobile.core.test.assertZipIsManifested
 import com.ustadmobile.core.tincan.TinCanXML
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.uri.UriHelperJvm
-import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.door.ext.DoorTag
@@ -25,6 +34,8 @@ import com.ustadmobile.xmlpullparserkmp.setInputString
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.asInputStream
 import kotlinx.io.files.Path
+import kotlinx.io.readString
+import kotlinx.serialization.json.Json
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import org.kodein.di.DI
@@ -32,6 +43,7 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 import org.xmlpull.v1.XmlPullParserFactory
+import java.io.File
 import java.util.zip.ZipFile
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -39,7 +51,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
-class H5PContentImportPluginTest : AbstractMainDispatcherTest() {
+class H5PContentImporterTest : AbstractMainDispatcherTest() {
 
     @JvmField
     @Rule
@@ -59,11 +71,24 @@ class H5PContentImportPluginTest : AbstractMainDispatcherTest() {
 
     private lateinit var activeEndpoint: Endpoint
 
+    private lateinit var saveLocalUriAsBlobUseCase: SaveLocalUrisAsBlobsUseCase
+
+    private lateinit var saveAndManifestUseCase: SaveLocalUriAsBlobAndManifestUseCase
+
+    private lateinit var isTempFileCheckerUseCase: IsTempFileCheckerUseCase
+
+    private lateinit var deleteUrisUseCase: DeleteUrisUseCase
+
+    private lateinit var rootTmpPath: File
+
+    private lateinit var importerTmpPath: File
+
     @BeforeTest
     fun setup() {
         di = DI {
             import(ustadTestRule.diModule)
         }
+        rootTmpPath = temporaryFolder.newFolder("h5p-import-tmp-root")
 
         val accountManager: UstadAccountManager by di.instance()
         db = di.on(accountManager.activeEndpoint).direct.instance(tag = DoorTag.TAG_DB)
@@ -79,6 +104,19 @@ class H5PContentImportPluginTest : AbstractMainDispatcherTest() {
             httpClient = di.direct.instance(),
             okHttpClient = di.direct.instance(),
         )
+
+        isTempFileCheckerUseCase = IsTempFileCheckerUseCaseJvm(rootTmpPath)
+        deleteUrisUseCase = DeleteUrisUseCaseCommonJvm(isTempFileCheckerUseCase)
+
+        saveLocalUriAsBlobUseCase = SaveLocalUrisAsBlobsUseCaseJvm(
+            endpoint = activeEndpoint,
+            cache = ustadCache,
+            uriHelper = uriHelper,
+            tmpDir = Path(rootTmpPath.absolutePath),
+            deleteUrisUseCase = deleteUrisUseCase,
+        )
+        saveAndManifestUseCase = SaveLocalUriAsBlobAndManifestUseCaseJvm(saveLocalUriAsBlobUseCase)
+        importerTmpPath = File(rootTmpPath, "h5pimporter-tmp")
     }
 
     @Test
@@ -92,6 +130,8 @@ class H5PContentImportPluginTest : AbstractMainDispatcherTest() {
             cache = ustadCache,
             uriHelper = uriHelper,
             json = di.direct.instance(),
+            tmpPath = Path(importerTmpPath.absolutePath),
+            saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
         )
 
         val metadata = runBlocking {
@@ -114,6 +154,8 @@ class H5PContentImportPluginTest : AbstractMainDispatcherTest() {
             cache = ustadCache,
             uriHelper = uriHelper,
             json = di.direct.instance(),
+            tmpPath = Path(importerTmpPath.absolutePath),
+            saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
         )
 
         runBlocking {
@@ -136,6 +178,8 @@ class H5PContentImportPluginTest : AbstractMainDispatcherTest() {
             cache = ustadCache,
             uriHelper = uriHelper,
             json = di.direct.instance(),
+            tmpPath = Path(importerTmpPath.absolutePath),
+            saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
         )
 
         runBlocking {
@@ -154,6 +198,8 @@ class H5PContentImportPluginTest : AbstractMainDispatcherTest() {
             cache = ustadCache,
             uriHelper = uriHelper,
             json = di.direct.instance(),
+            tmpPath = Path(importerTmpPath.absolutePath),
+            saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
         )
 
         val result = runBlocking {
@@ -166,25 +212,27 @@ class H5PContentImportPluginTest : AbstractMainDispatcherTest() {
         }
 
         val expectedUrlPrefix = "${activeEndpoint.url}api/content/${result.cevUid}/"
+        val manifestResponse = ustadCache.retrieve(requestBuilder("$expectedUrlPrefix$MANIFEST_NAME"))
+        val json: Json = di.direct.instance()
+        val manifest = json.decodeFromString(
+            ContentManifest.serializer(), manifestResponse!!.bodyAsSource()!!.readString()
+        )
 
         ZipFile(h5pFile).use { zipFile ->
-            ustadCache.assertZipIsCached(
-                urlPrefix = "${expectedUrlPrefix}h5p-folder/",
-                zip = zipFile
-            )
+            ustadCache.assertZipIsManifested(manifest, zipFile, "h5p-folder/")
         }
 
         val h5pStandaloneAssets = temporaryFolder.newFileFromResource(this::class.java,
             "/h5p/h5p-standalone-3.6.0.zip")
+
         ZipFile(h5pStandaloneAssets).use { zipFile ->
-            ustadCache.assertZipIsCached(
-                urlPrefix = expectedUrlPrefix,
-                zip = zipFile
-            )
+            ustadCache.assertZipIsManifested(manifest, zipFile)
         }
 
         //Check we can parse the tincan xml
-        val tinCanXmlResponse = ustadCache.retrieve(requestBuilder(result.cevUrl!!))
+        val tinCanXmlResponse = ustadCache.retrieve(
+            requestBuilder(manifest.entries.first { it.uri == "tincan.xml" }.bodyDataUrl)
+        )
         val tinCanStr = tinCanXmlResponse?.bodyAsSource()?.asInputStream()?.readString()
         val xppFactory = XmlPullParserFactory.newInstance()
         val xpp = xppFactory.newPullParser()
@@ -194,7 +242,7 @@ class H5PContentImportPluginTest : AbstractMainDispatcherTest() {
         assertEquals("index.html", tinCanXml.launchActivity?.launchUrl)
 
         val htmlResponse = ustadCache.retrieve(
-            requestBuilder(UMFileUtil.resolveLink(result.cevUrl!!, "index.html"))
+            requestBuilder(manifest.entries.first { it.uri == "index.html"}.bodyDataUrl)
         )
         assertNotNull(htmlResponse)
     }
