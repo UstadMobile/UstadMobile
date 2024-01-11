@@ -26,6 +26,7 @@ import com.ustadmobile.core.domain.blob.upload.UpdateFailedTransferJobUseCase
 import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseJvm
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCase
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCaseCommonJvm
+import com.ustadmobile.core.domain.contententry.importcontent.ImportContentEntryUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseJvm
 import com.ustadmobile.core.domain.phonenumber.OnClickPhoneNumUseCase
@@ -172,6 +173,15 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
     bind<SaveLocalUriAsBlobAndManifestUseCase>() with scoped(EndpointScope.Default).singleton {
         SaveLocalUriAsBlobAndManifestUseCaseJvm(
             saveLocalUrisAsBlobsUseCase = instance()
+        )
+    }
+
+    bind<ImportContentEntryUseCase>() with scoped(EndpointScope.Default).singleton {
+        ImportContentEntryUseCase(
+            db = instance(tag = DoorTag.TAG_DB),
+            importersManager = instance(),
+            enqueueBlobUploadClientUseCase = instance(),
+            httpClient = instance()
         )
     }
 

@@ -1361,6 +1361,12 @@ val MIGRATION_132_133 = DoorMigrationStatementList(132, 133) { db ->
     }
 }
 
+val MIGRATION_133_134 = DoorMigrationStatementList(133, 134) { db ->
+    buildList {
+        add("CREATE INDEX tji_table_entity_etag ON TransferJobItem (tjiTableId, tjiEntityUid, tjiEntityEtag)")
+    }
+}
+
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_102_103,
     MIGRATION_103_104, MIGRATION_104_105, MIGRATION_105_106, MIGRATION_106_107,
@@ -1368,7 +1374,7 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_120_121, MIGRATION_121_122, MIGRATION_122_123, MIGRATION_123_124,
     MIGRATION_124_125, MIGRATION_125_126, MIGRATION_126_127, MIGRATION_127_128,
     MIGRATION_128_129, MIGRATION_129_130, MIGRATION_130_131, MIGRATION_132_133,
-
+    MIGRATION_133_134,
 
 )
 

@@ -35,4 +35,18 @@ expect abstract class ContentEntryVersionDao {
         contentEntryUid: Long
     ): ContentEntryVersion?
 
+
+    @Query("""
+        UPDATE TransferJobItem
+           SET tjiEntityEtag = 
+               (SELECT cevLct
+                  FROM ContentEntryVersion
+                 WHERE cevUid = :entityUid)
+         WHERE tjiUid = :transferJobItemUid
+    """)
+    abstract suspend fun updateTransferJobItemEtag(
+        entityUid: Long,
+        transferJobItemUid: Int
+    )
+
 }
