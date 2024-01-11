@@ -36,6 +36,7 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.quartz)
     implementation(libs.napier)
+    implementation(libs.javaffmpeg)
 
     api(libs.moko.resources)
     api(libs.moko.resources.compose)
@@ -51,6 +52,7 @@ compose.desktop {
         mainClass = "com.ustadmobile.port.desktop.AppKt"
 
         nativeDistributions {
+            // https://github.com/JetBrains/compose-multiplatform/blob/master/tutorials/Native_distributions_and_local_execution/README.md
             modules("java.sql")
             modules("java.base")
             modules("java.compiler")

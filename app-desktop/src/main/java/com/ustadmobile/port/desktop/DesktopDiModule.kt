@@ -30,12 +30,14 @@ import com.ustadmobile.core.schedule.initQuartzDb
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.uri.UriHelperJvm
 import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.core.util.ext.getCommandFile
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.RepositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.asRepository
+import com.ustadmobile.lib.util.SysPathUtil
 import com.ustadmobile.lib.util.ext.bindDataSourceIfNotExisting
 import org.kodein.di.DI
 import org.kodein.di.bind
@@ -57,12 +59,15 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.io.files.Path
 import kotlinx.serialization.json.Json
+import net.bramp.ffmpeg.FFmpeg
+import net.bramp.ffmpeg.FFprobe
 import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
 import nl.adaptivity.xmlutil.serialization.XML
 import nl.adaptivity.xmlutil.serialization.XmlConfig
 import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
 import org.kodein.di.on
+import org.kodein.di.provider
 import org.quartz.Scheduler
 import org.quartz.impl.StdSchedulerFactory
 import java.io.FileReader
@@ -167,6 +172,21 @@ val DesktopHttpModule = DI.Module("Desktop-HTTP") {
 
 @OptIn(ExperimentalXmlUtilApi::class)
 val DesktopDiModule = DI.Module("Desktop-Main") {
+    //Jetpack Compose resources directory as per
+    //https://github.com/JetBrains/compose-multiplatform/blob/master/tutorials/Native_distributions_and_local_execution/README.md#adding-files-to-packaged-application
+    val resourcesDir = File(System.getProperty("compose.application.resources.dir"))
+    val ffmpegResourcesDir = File(resourcesDir, "ffmpeg")
+
+    val ffmpegFile = SysPathUtil.findCommandInPath(
+        commandName = "ffmpeg",
+        manuallySpecifiedLocation = File(ffmpegResourcesDir, "ffmpeg").getCommandFile(),
+    ) ?: throw IllegalStateException("No FFMPEG")
+
+    val ffprobeFile = SysPathUtil.findCommandInPath(
+        commandName = "ffprobe",
+        manuallySpecifiedLocation = File(ffmpegResourcesDir, "ffprobe").getCommandFile(),
+    ) ?: throw IllegalStateException("No FFMPEG")
+
     bind<SupportedLanguagesConfig>() with singleton {
         SupportedLanguagesConfig(
             systemLocales = listOf(SetLanguageUseCaseJvm.REAL_SYSTEM_DEFAULT.language),
@@ -344,6 +364,14 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
             scheduler = instance(),
             connectivityMonitorJvm = instance(),
         )
+    }
+
+    bind<FFmpeg>() with provider {
+        FFmpeg(ffmpegFile.absolutePath)
+    }
+
+    bind<FFprobe>() with provider {
+        FFprobe(ffprobeFile.absolutePath)
     }
 
     onReady {
