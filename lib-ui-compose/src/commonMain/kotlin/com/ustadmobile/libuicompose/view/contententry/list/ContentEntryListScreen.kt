@@ -27,6 +27,8 @@ import com.ustadmobile.libuicompose.components.UstadBottomSheetOption
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.libuicompose.components.UstadFileDropZone
+import com.ustadmobile.libuicompose.components.UstadFilePickResult
 import com.ustadmobile.libuicompose.components.UstadPickFileOpts
 import com.ustadmobile.libuicompose.components.rememberUstadFilePickLauncher
 
@@ -43,7 +45,10 @@ fun ContentEntryListScreenForViewModel(
 
     ContentEntryListScreen(
         uiState = uiState,
-        onClickContentEntry = viewModel::onClickEntry
+        onClickContentEntry = viewModel::onClickEntry,
+        onFileDropped = {
+            viewModel.onImportFile(fileUri = it.uri, fileName = it.fileName)
+        }
     )
 
     if(uiState.createNewOptionsVisible) {
@@ -96,6 +101,7 @@ fun ContentEntryListScreenForViewModel(
 fun ContentEntryListScreen(
     uiState: ContentEntryListUiState = ContentEntryListUiState(),
     onClickContentEntry: (ContentEntry?) -> Unit = {},
+    onFileDropped: (UstadFilePickResult) -> Unit = { },
 ) {
     val pager = remember(uiState.contentEntryList) {
         Pager(
@@ -105,20 +111,24 @@ fun ContentEntryListScreen(
     }
     val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
 
-
-    LazyColumn(
-        modifier = Modifier.fillMaxSize()
-    )  {
-        ustadPagedItems(
-            pagingItems = lazyPagingItems,
-            key = { contentEntry -> contentEntry.contentEntryUid }
-        ){ contentEntry ->
-            UstadContentEntryListItem(
-                onClick = {
-                    onClickContentEntry(contentEntry)
-                },
-                contentEntry = contentEntry
-            )
+    UstadFileDropZone(
+        onFileDropped = onFileDropped,
+        modifier = Modifier.fillMaxSize(),
+    ) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize()
+        )  {
+            ustadPagedItems(
+                pagingItems = lazyPagingItems,
+                key = { contentEntry -> contentEntry.contentEntryUid }
+            ){ contentEntry ->
+                UstadContentEntryListItem(
+                    onClick = {
+                        onClickContentEntry(contentEntry)
+                    },
+                    contentEntry = contentEntry
+                )
+            }
         }
     }
 }
