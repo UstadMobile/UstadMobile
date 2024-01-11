@@ -2,7 +2,7 @@ package com.ustadmobile.libuicompose.view.contententry
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.Book
@@ -20,13 +20,11 @@ import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
 import com.ustadmobile.libuicompose.view.contententry.list.ClazzAssignmentConstants.CONTENT_ENTRY_TYPE_ICON_MAP
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun UstadContentEntryListItem(
     modifier: Modifier = Modifier,
     contentEntry: ContentEntry?,
     onClick: () -> Unit = { },
-    onClickDownload: () -> Unit = { },
 ) {
 
     val uiState = contentEntry?.listItemUiState
@@ -34,28 +32,21 @@ fun UstadContentEntryListItem(
         modifier = modifier
             .alpha((uiState?.containerAlpha ?: 0.0).toFloat())
             .clickable(onClick = onClick),
-        text = { Text(uiState?.contentEntry?.title ?: "") },
-        icon = {
+        headlineContent = {
+            Text(uiState?.contentEntry?.title ?: "")
+        },
+        leadingContent = {
             LeadingContent(
                 uiState = uiState,
                 contentEntry = uiState?.contentEntry
             )
         },
-        secondaryText = {
+        supportingContent = {
             SecondaryContent(
                 contentEntry = uiState?.contentEntry,
                 uiState = uiState
             )
         },
-        /*
-        To be enabled when reactive sync is enabled
-        trailing = {
-            SecondaryAction(
-                onClick = onClickDownload,
-                contentEntry = uiState?.contentEntry
-            )
-        }
-         */
     )
 
 }
@@ -65,21 +56,13 @@ private fun LeadingContent(
     uiState: ContentEntryListItemUiState?,
     contentEntry: ContentEntry?
 ){
-
     val thumbnail: ImageVector = if (contentEntry?.leaf == true)
         Icons.Outlined.Book
     else
         Icons.Default.Folder
 
-    var badgeColor = MaterialTheme.colors.error
-    var badge = Icons.Default.Cancel
-//    if (contentEntry?.scoreProgress?.progressBadge() == ProgressConstants.BADGE_CHECK) {
-//        badge = Icons.Default.CheckCircle
-//        badgeColor = colorResource(MR.colors.success)
-//    }
-
     Column(
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.End
     ){
         Icon(
@@ -87,7 +70,7 @@ private fun LeadingContent(
             contentDescription = "",
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
-                .size(45.dp)
+                .size(40.dp)
                 .padding(4.dp),
         )
     }
@@ -123,24 +106,3 @@ private fun SecondaryContent(
     }
 }
 
-@Composable
-private fun SecondaryAction(
-    onClick: () -> Unit,
-    contentEntry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer?
-){
-    IconButton(
-        onClick = onClick,
-    ) {
-
-        CircularProgressIndicator(
-            progress = ((contentEntry?.scoreProgress?.progress ?: 0) / 100.0)
-                .toFloat(),
-            color = MaterialTheme.colors.secondary
-        )
-
-        Icon(
-            Icons.Filled.FileDownload,
-            contentDescription = stringResource(MR.strings.download)
-        )
-    }
-}
