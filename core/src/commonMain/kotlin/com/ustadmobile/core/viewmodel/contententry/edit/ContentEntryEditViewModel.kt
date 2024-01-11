@@ -98,8 +98,10 @@ data class ContentEntryEditUiState(
 class ContentEntryEditViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
-    private val saveContentEntryUseCase: SaveContentEntryUseCase = di.onActiveEndpoint().direct.instance(),
-    private val importContentUseCase: EnqueueContentEntryImportUseCase = di.onActiveEndpoint().direct.instance(),
+    private val saveContentEntryUseCase: SaveContentEntryUseCase =
+        di.onActiveEndpoint().direct.instance(),
+    private val enqueueContentEntryImporseUseCase: EnqueueContentEntryImportUseCase =
+        di.onActiveEndpoint().direct.instance(),
 ) : UstadEditViewModel(di, savedStateHandle, DEST_NAME){
 
     private val _uiState = MutableStateFlow(
@@ -301,7 +303,7 @@ class ContentEntryEditViewModel(
 
                 val contentJobItemVal = entityVal.contentJobItem
                 if(contentJobItemVal != null) {
-                    importContentUseCase(
+                    enqueueContentEntryImporseUseCase(
                         contentJobItem = contentJobItemVal
                     )
                 }

@@ -36,7 +36,7 @@ import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
 import dev.icerock.moko.resources.compose.stringResource
 
 @Composable
-fun ContentEntryEditScreenForViewModel(
+fun ContentEntryEditScreen(
     viewModel: ContentEntryEditViewModel
 ){
     val uiState by viewModel.uiState.collectAsState(ContentEntryEditUiState())

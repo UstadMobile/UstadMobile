@@ -17,6 +17,9 @@ import com.ustadmobile.core.account.*
 import com.ustadmobile.core.contentformats.epub.XhtmlFixer
 import com.ustadmobile.core.contentformats.epub.XhtmlFixerJsoup
 import com.ustadmobile.core.contentformats.ContentImportersManager
+import com.ustadmobile.core.contentformats.epub.EpubContentImporterCommonJvm
+import com.ustadmobile.core.contentformats.h5p.H5PContentImporter
+import com.ustadmobile.core.contentformats.xapi.XapiZipContentImporter
 import com.ustadmobile.core.db.*
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.impl.*
@@ -27,6 +30,8 @@ import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.core.db.ext.migrationList
+import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
+import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCaseJvm
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCaseJvm
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
@@ -38,6 +43,10 @@ import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCase
 import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCaseAndroid
 import com.ustadmobile.core.domain.blob.upload.UpdateFailedTransferJobUseCase
 import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseAndroid
+import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCase
+import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCaseCommonJvm
+import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
+import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseAndroid
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseCommonJvm
 import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
@@ -259,13 +268,54 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
         }
 
         bind<ContentImportersManager>() with scoped(EndpointScope.Default).singleton {
+            val cache: UstadCache = instance()
             val uriHelper: UriHelper = instance()
             val xml: XML = instance()
-            val cache: UstadCache = instance()
-            val db : UmAppDatabase = instance(tag = DoorTag.TAG_DB)
+            val xhtmlFixer: XhtmlFixer = instance()
+            val db: UmAppDatabase = instance(tag = DoorTag.TAG_DB)
+            val saveAndManifestUseCase: SaveLocalUriAsBlobAndManifestUseCase = instance()
+            val tmpRoot: File = instance(tag = DiTag.TAG_TMP_DIR)
+            val contentImportTmpPath = Path(tmpRoot.absolutePath, "contentimport")
 
             ContentImportersManager(
-                listOf()
+                buildList {
+                    add(
+                        EpubContentImporterCommonJvm(
+                            endpoint = context,
+                            cache = cache,
+                            db = db,
+                            uriHelper = uriHelper,
+                            xml = xml,
+                            xhtmlFixer = xhtmlFixer,
+                            tmpPath = contentImportTmpPath,
+                            saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
+                            json = instance(),
+                        )
+                    )
+                    add(
+                        XapiZipContentImporter(
+                            endpoint = context,
+                            db = db,
+                            cache = cache,
+                            uriHelper = uriHelper,
+                            json = instance(),
+                            tmpPath = contentImportTmpPath,
+                            saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
+                        )
+                    )
+
+                    add(
+                        H5PContentImporter(
+                            endpoint = context,
+                            db = db,
+                            cache = cache,
+                            uriHelper = uriHelper,
+                            tmpPath = contentImportTmpPath,
+                            saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
+                            json = instance(),
+                        ),
+                    )
+                }
             )
         }
 
@@ -289,20 +339,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             )
         }
 
-        bind<ChunkedUploadClientUseCaseKtorImpl>() with singleton {
-            ChunkedUploadClientUseCaseKtorImpl(
-                httpClient = instance(),
-                uriHelper = instance(),
-            )
-        }
 
-        bind<ChunkedUploadClientLocalUriUseCase>() with singleton {
-            instance<ChunkedUploadClientUseCaseKtorImpl>()
-        }
-
-        bind<ChunkedUploadClientChunkGetterUseCase>() with singleton {
-            instance<ChunkedUploadClientUseCaseKtorImpl>()
-        }
 
         bind<SaveLocalUrisAsBlobsUseCase>() with scoped(EndpointScope.Default).singleton {
             val rootTmpDir: File = instance(tag = DiTag.TAG_TMP_DIR)
@@ -314,6 +351,12 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 fileSystem = SystemFileSystem,
                 deleteUrisUseCase = instance(),
                 createRetentionLock = true,
+            )
+        }
+
+        bind<SaveLocalUriAsBlobAndManifestUseCase>() with scoped(EndpointScope.Default).singleton {
+            SaveLocalUriAsBlobAndManifestUseCaseJvm(
+                saveLocalUrisAsBlobsUseCase = instance()
             )
         }
 
@@ -370,6 +413,36 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
         bind<UpdateFailedTransferJobUseCase>() with scoped(EndpointScope.Default).provider {
             UpdateFailedTransferJobUseCase(
                 db = instance(tag = DoorTag.TAG_DB)
+            )
+        }
+
+
+        bind<ChunkedUploadClientUseCaseKtorImpl>() with singleton {
+            ChunkedUploadClientUseCaseKtorImpl(
+                httpClient = instance(),
+                uriHelper = instance(),
+            )
+        }
+
+        bind<ChunkedUploadClientLocalUriUseCase>() with singleton {
+            instance<ChunkedUploadClientUseCaseKtorImpl>()
+        }
+
+        bind<ChunkedUploadClientChunkGetterUseCase>() with singleton {
+            instance<ChunkedUploadClientUseCaseKtorImpl>()
+        }
+
+        bind<ContentEntryGetMetaDataFromUriUseCase>() with scoped(EndpointScope.Default).provider {
+            ContentEntryGetMetaDataFromUriUseCaseCommonJvm(
+                importersManager = instance()
+            )
+        }
+
+        bind<EnqueueContentEntryImportUseCase>() with scoped(EndpointScope.Default).provider {
+            EnqueueImportContentEntryUseCaseAndroid(
+                db = instance(tag = DoorTag.TAG_DB),
+                appContext = applicationContext,
+                endpoint = context,
             )
         }
 

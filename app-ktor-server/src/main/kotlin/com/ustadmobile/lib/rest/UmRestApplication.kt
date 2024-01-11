@@ -2,13 +2,7 @@ package com.ustadmobile.lib.rest
 
 import com.google.gson.Gson
 import com.ustadmobile.core.account.*
-import com.ustadmobile.core.contentformats.epub.EpubContentImporterCommonJvm
-import com.ustadmobile.core.contentformats.epub.XhtmlFixer
-import com.ustadmobile.core.contentformats.h5p.H5PContentImporter
-import com.ustadmobile.core.contentformats.video.VideoContentImporterJvm
-import com.ustadmobile.core.contentformats.pdf.PdfContentImporterJvm
-import com.ustadmobile.core.contentformats.xapi.XapiZipContentImporter
-import com.ustadmobile.core.contentformats.ContentImportersManager
+import com.ustadmobile.core.contentformats.ContentImportersDiModuleJvm
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
@@ -245,6 +239,7 @@ fun Application.umRestApplication(
     di {
         import(DomainDiModuleJvm(EndpointScope.Default))
         import(makeJvmBackendDiModule(environment.config))
+        import(ContentImportersDiModuleJvm)
 
         bind<OkHttpClient>() with singleton {
             OkHttpClient.Builder()
@@ -348,68 +343,6 @@ fun Application.umRestApplication(
             )
         }
 
-        bind<ContentImportersManager>() with scoped(EndpointScope.Default).singleton {
-            val cache: UstadCache = instance()
-            val uriHelper: UriHelper = instance()
-            val xml: XML = instance()
-            val xhtmlFixer: XhtmlFixer = instance()
-            val db: UmAppDatabase = instance(tag = DoorTag.TAG_DB)
-            val saveAndManifestUseCase: SaveLocalUriAsBlobAndManifestUseCase = instance()
-            val tmpRoot: File = instance(tag = DiTag.TAG_TMP_DIR)
-            val contentImportTmpPath = Path(tmpRoot.absolutePath, "contentimport")
-
-            ContentImportersManager(
-                listOf(
-                    EpubContentImporterCommonJvm(
-                        endpoint = context,
-                        cache = cache,
-                        db = db,
-                        uriHelper = uriHelper,
-                        xml = xml,
-                        xhtmlFixer = xhtmlFixer,
-                        tmpPath = contentImportTmpPath,
-                        saveLocalUriAsBlobAndManifestUseCase =  saveAndManifestUseCase,
-                        json = instance(),
-                    ),
-                    XapiZipContentImporter(
-                        endpoint = context,
-                        db = db,
-                        cache = cache,
-                        uriHelper = uriHelper,
-                        json = instance(),
-                        tmpPath = contentImportTmpPath,
-                        saveLocalUriAsBlobAndManifestUseCase =  saveAndManifestUseCase,
-                    ),
-                    PdfContentImporterJvm(
-                        endpoint = context,
-                        db = db,
-                        cache= cache,
-                        saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
-                        uriHelper = uriHelper,
-                        json = instance(),
-                    ),
-                    H5PContentImporter(
-                        endpoint = context,
-                        db = db,
-                        cache = cache,
-                        uriHelper = uriHelper,
-                        tmpPath = contentImportTmpPath,
-                        saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
-                        json = instance(),
-                    ),
-                    VideoContentImporterJvm(
-                        endpoint = context,
-                        db = db,
-                        cache = cache,
-                        uriHelper = uriHelper,
-                        ffprobe = instance(),
-                        json = instance(),
-                        tmpPath = contentImportTmpPath,
-                        saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
-                    )
-                )
-            )
-        }
 
         bind<Scheduler>() with singleton {
             val dbProperties = environment.config.databasePropertiesFromSection("quartz",

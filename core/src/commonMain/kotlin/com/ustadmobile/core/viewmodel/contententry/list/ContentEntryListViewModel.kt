@@ -213,6 +213,7 @@ class ContentEntryListViewModel(
     }
 
     fun onClickNewFolder() {
+        onDismissCreateNewOptions()
         navigateToCreateNew(
             editViewName = ContentEntryEditViewModel.DEST_NAME,
             extraArgs = buildMap {
@@ -223,6 +224,7 @@ class ContentEntryListViewModel(
     }
 
     fun onClickImportFromLink() {
+        onDismissCreateNewOptions()
         navigateToCreateNew(
             editViewName = ContentEntryImportLinkViewModel.DEST_NAME,
             extraArgs = buildMap {
@@ -234,6 +236,7 @@ class ContentEntryListViewModel(
     }
 
     fun onImportFile(fileUri: String, fileName: String) {
+        onDismissCreateNewOptions()
         navigateToCreateNew(
             editViewName = ContentEntryGetMetadataViewModel.DEST_NAME,
             extraArgs = buildMap {

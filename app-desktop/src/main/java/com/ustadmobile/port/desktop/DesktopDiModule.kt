@@ -8,6 +8,7 @@ import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.connectivitymonitor.ConnectivityMonitorJvm
 import com.ustadmobile.core.connectivitymonitor.ConnectivityTriggerGroupController
+import com.ustadmobile.core.contentformats.ContentImportersDiModuleJvm
 import com.ustadmobile.core.contentformats.epub.XhtmlFixer
 import com.ustadmobile.core.contentformats.epub.XhtmlFixerJsoup
 import com.ustadmobile.core.db.UmAppDatabase
@@ -87,6 +88,7 @@ fun ustadAppDataDir(): File {
 }
 
 val DesktopHttpModule = DI.Module("Desktop-HTTP") {
+    import(ContentImportersDiModuleJvm)
     val cacheLogger = NapierLoggingAdapter()
 
     bind<File>(tag = TAG_CACHE_DIR) with singleton {
