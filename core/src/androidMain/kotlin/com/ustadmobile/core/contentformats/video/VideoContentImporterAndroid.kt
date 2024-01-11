@@ -1,8 +1,9 @@
 package com.ustadmobile.core.contentformats.video
 
+import android.content.Context
+import android.media.MediaMetadataRetriever
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentformats.media.VideoConstants
-import com.ustadmobile.core.contentjob.InvalidContentException
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
@@ -17,49 +18,40 @@ import kotlinx.io.files.FileSystem
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
 import kotlinx.serialization.json.Json
-import net.bramp.ffmpeg.FFprobe
-import net.bramp.ffmpeg.probe.FFmpegStream
-import java.nio.file.Files
-import kotlin.io.path.ExperimentalPathApi
-import kotlin.io.path.absolutePathString
-import kotlin.io.path.deleteRecursively
-import java.nio.file.Path as NioPath
 
-class VideoContentImporterJvm(
+/**
+ * Could consider using videocompressor based on telegram:
+ * https://github.com/AbedElazizShe/LightCompressor
+ */
+class VideoContentImporterAndroid(
     endpoint: Endpoint,
     cache: UstadCache,
+    private val appContext: Context,
     uriHelper: UriHelper,
-    private val ffprobe: FFprobe,
-    json: Json,
-    fileSystem: FileSystem = SystemFileSystem,
-    db: UmAppDatabase,
     tmpPath: Path,
+    db: UmAppDatabase,
+    fileSystem: FileSystem = SystemFileSystem,
     saveLocalUriAsBlobAndManifestUseCase: SaveLocalUriAsBlobAndManifestUseCase,
-): AbstractVideoContentImporterCommonJvm(
+    json: Json,
+) : AbstractVideoContentImporterCommonJvm(
     endpoint = endpoint,
-    cache = cache,
     uriHelper = uriHelper,
-    json = json,
-    fileSystem = fileSystem,
+    cache = cache,
     db = db,
     tmpPath = tmpPath,
+    fileSystem = fileSystem,
     saveLocalUriAsBlobAndManifestUseCase = saveLocalUriAsBlobAndManifestUseCase,
+    json = json,
 ) {
-
     override val importerId: Int
         get() = 101
     override val supportedMimeTypes: List<String>
         get() = listOf("video/mpeg")
 
     override val supportedFileExtensions: List<String>
-        get() = TODO("Not yet implemented")
-
+        get() = listOf("mp4", "m4v", "webm", "qt", "ogv", "avi", "mkv")
     override val formatName: String
         get() = "Video(MP4, M4V, Quicktime, WEBM, OGV, AVI)"
-
-
-    @OptIn(ExperimentalPathApi::class)
-    @Suppress("NewApi") //This is JVM only
     override suspend fun extractMetadata(
         uri: DoorUri,
         originalFilename: String?
@@ -73,24 +65,13 @@ class VideoContentImporterJvm(
             return@withContext null
         }
 
-        var tmpFile: NioPath? = null
-
+        val metaRetriever = MediaMetadataRetriever()
         try {
-            tmpFile = Files.createTempFile("ustad-video", "tmp")
-            val tmpFilePath = Path(tmpFile.absolutePathString())
-            uriHelper.openSource(uri).use { source ->
-                fileSystem.sink(tmpFilePath).use { sink ->
-                    source.transferTo(sink)
-                }
-            }
-
-            val probeResult = ffprobe.probe(tmpFilePath.toString())
-            val hasVideo = probeResult.getStreams().any {
-                it.codec_type == FFmpegStream.CodecType.VIDEO
-            }
-
-            if(hasVideo) {
-                return@withContext MetadataResult(
+            metaRetriever.setDataSource(appContext, uri.uri)
+            val videoHeight = metaRetriever.extractMetadata(
+                MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toIntOrNull() ?: 0
+            if(videoHeight > 0) {
+                MetadataResult(
                     entry = ContentEntryWithLanguage().apply {
                         title = originalFilename ?: uri.toString().substringAfterLast("/")
                             .substringBefore("?")
@@ -101,13 +82,12 @@ class VideoContentImporterJvm(
                     importerId = importerId,
                     originalFilename = originalFilename,
                 )
+            }else {
+                null
             }
-
-            throw InvalidContentException("No video stream")
-        }catch(e: Throwable) {
-            throw InvalidContentException("Exception importing what looked like video", e)
         }finally {
-            tmpFile?.deleteRecursively()
+            metaRetriever.release()
         }
     }
+
 }

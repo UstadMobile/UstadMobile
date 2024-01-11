@@ -19,6 +19,8 @@ import com.ustadmobile.core.contentformats.epub.XhtmlFixerJsoup
 import com.ustadmobile.core.contentformats.ContentImportersManager
 import com.ustadmobile.core.contentformats.epub.EpubContentImporterCommonJvm
 import com.ustadmobile.core.contentformats.h5p.H5PContentImporter
+import com.ustadmobile.core.contentformats.pdf.PdfContentImporterAndroid
+import com.ustadmobile.core.contentformats.video.VideoContentImporterAndroid
 import com.ustadmobile.core.contentformats.xapi.XapiZipContentImporter
 import com.ustadmobile.core.db.*
 import com.ustadmobile.core.db.ext.addSyncCallback
@@ -47,6 +49,7 @@ import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryG
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCaseCommonJvm
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseAndroid
+import com.ustadmobile.core.domain.contententry.importcontent.ImportContentEntryUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseCommonJvm
 import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
@@ -315,6 +318,32 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                             json = instance(),
                         ),
                     )
+
+                    add(
+                        VideoContentImporterAndroid(
+                            endpoint = context,
+                            appContext = applicationContext,
+                            uriHelper = uriHelper,
+                            cache = cache,
+                            tmpPath = contentImportTmpPath,
+                            db = db,
+                            saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
+                            json = instance(),
+                        )
+                    )
+
+                    add(
+                        PdfContentImporterAndroid(
+                            endpoint = context,
+                            cache = cache,
+                            uriHelper = uriHelper,
+                            db = db,
+                            saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
+                            json = instance(),
+                            appContext = applicationContext,
+                            tmpDir = File(contentImportTmpPath.toString()),
+                        )
+                    )
                 }
             )
         }
@@ -443,6 +472,15 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 db = instance(tag = DoorTag.TAG_DB),
                 appContext = applicationContext,
                 endpoint = context,
+            )
+        }
+
+        bind<ImportContentEntryUseCase>() with scoped(EndpointScope.Default).provider {
+            ImportContentEntryUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                importersManager = instance(),
+                enqueueBlobUploadClientUseCase = instance(),
+                httpClient = instance(),
             )
         }
 

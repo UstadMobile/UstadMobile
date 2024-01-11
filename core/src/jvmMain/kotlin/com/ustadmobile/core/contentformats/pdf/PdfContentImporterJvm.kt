@@ -1,24 +1,13 @@
 package com.ustadmobile.core.contentformats.pdf
 
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.contentformats.ContentImportProgressListener
 import com.ustadmobile.core.contentjob.InvalidContentException
 import com.ustadmobile.core.contentjob.MetadataResult
-import com.ustadmobile.core.contentjob.SupportedContent
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.contentformats.ContentImporter
-import com.ustadmobile.core.contentformats.manifest.ContentManifest
-import com.ustadmobile.core.contentformats.storeText
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
-import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
-import com.ustadmobile.core.domain.contententry.ContentConstants.MANIFEST_NAME
 import com.ustadmobile.core.uri.UriHelper
-import com.ustadmobile.core.util.ext.requireSourceAsDoorUri
 import com.ustadmobile.door.DoorUri
-import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryImportJob
-import com.ustadmobile.lib.db.entities.ContentEntryVersion
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.libcache.UstadCache
 import kotlinx.coroutines.Dispatchers
@@ -30,69 +19,19 @@ import org.apache.pdfbox.pdmodel.PDDocument
 
 class PdfContentImporterJvm(
     endpoint: Endpoint,
-    private val cache: UstadCache,
-    private val uriHelper: UriHelper,
-    private val db: UmAppDatabase,
-    private val saveLocalUriAsBlobAndManifestUseCase: SaveLocalUriAsBlobAndManifestUseCase,
-    private val json: Json,
-) : ContentImporter(endpoint){
-
-    override suspend fun importContent(
-        jobItem: ContentEntryImportJob,
-        progressListener: ContentImportProgressListener,
-    ): ContentEntryVersion = withContext(Dispatchers.IO) {
-        val jobUri = jobItem.requireSourceAsDoorUri()
-
-        val contentEntryVersionUid = db.doorPrimaryKeyManager.nextId(ContentEntryVersion.TABLE_ID)
-        val urlPrefix = createContentUrlPrefix(contentEntryVersionUid)
-        val pdfUrl = "${urlPrefix}content.pdf"
-        val manifestUrl = "${urlPrefix}$MANIFEST_NAME"
-
-        val manifestEntriesAndBlobs = saveLocalUriAsBlobAndManifestUseCase(
-            listOf(
-                SaveLocalUriAsBlobAndManifestUseCase.SaveLocalUriAsBlobAndManifestItem(
-                    blobItem = SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem(
-                        localUri = jobUri.toString(),
-                        entityUid = contentEntryVersionUid,
-                        tableId = ContentEntryVersion.TABLE_ID,
-                        mimeType = "application/pdf",
-                    ),
-                    manifestUri = "content.pdf",
-                )
-            )
-        )
-
-        val contentEntryVersion = ContentEntryVersion(
-            cevUid = contentEntryVersionUid,
-            cevContentType = ContentEntryVersion.TYPE_PDF,
-            cevContentEntryUid = jobItem.cjiContentEntryUid,
-            cevSitemapUrl = manifestUrl,
-            cevUrl = pdfUrl,
-        )
-
-        val manifest = ContentManifest(
-            version = 1,
-            metadata = emptyMap(),
-            entries = manifestEntriesAndBlobs.map { it.manifestEntry }
-        )
-
-        cache.storeText(
-            url = manifestUrl,
-            text = json.encodeToString(ContentManifest.serializer(), manifest),
-            mimeType = "application/json"
-        )
-
-        contentEntryVersion
-    }
-
-    override val importerId: Int = PLUGINID
-    override val supportedMimeTypes: List<String>
-        get() = listOf("application/pdf")
-    override val supportedFileExtensions: List<String>
-        get() = SupportedContent.PDF_EXTENSIONS
-
-    override val formatName: String
-        get() = "PDF"
+    cache: UstadCache,
+    uriHelper: UriHelper,
+    db: UmAppDatabase,
+    saveLocalUriAsBlobAndManifestUseCase: SaveLocalUriAsBlobAndManifestUseCase,
+    json: Json,
+) : AbstractPdfContentImportCommonJvm(
+    endpoint = endpoint,
+    cache = cache,
+    uriHelper = uriHelper,
+    db = db,
+    saveLocalUriAsBlobAndManifestUseCase = saveLocalUriAsBlobAndManifestUseCase,
+    json = json,
+) {
 
     @Suppress("NewApi") //This is JVM only, warning is wrong
     override suspend fun extractMetadata(
@@ -127,9 +66,4 @@ class PdfContentImporterJvm(
         }
     }
 
-    companion object {
-
-        const val PLUGINID = 111
-
-    }
 }

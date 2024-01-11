@@ -145,3 +145,7 @@ fun String.removeQueryStringSuffix(): String {
         this
     }
 }
+
+fun String.removeFileExtension() : String {
+    return substringBeforeLast(".")
+}
