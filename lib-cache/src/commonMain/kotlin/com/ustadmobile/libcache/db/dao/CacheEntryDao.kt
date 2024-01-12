@@ -89,4 +89,19 @@ expect abstract class CacheEntryDao {
 
     @Delete
     abstract fun delete(entries: List<CacheEntry>)
+
+    @Query("""
+        UPDATE CacheEntry
+           SET responseHeaders = :headers,
+               lastValidated = :lastValidated,
+               lastAccessed = :lastAccessed
+         WHERE key = :key      
+    """)
+    abstract fun updateValidation(
+        key: String,
+        headers: String,
+        lastValidated: Long,
+        lastAccessed: Long,
+    )
+
 }

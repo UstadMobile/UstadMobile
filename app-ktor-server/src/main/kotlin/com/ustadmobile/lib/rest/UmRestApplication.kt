@@ -78,7 +78,6 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.io.files.Path
 import net.bramp.ffmpeg.FFmpeg
 import net.bramp.ffmpeg.FFprobe
-import nl.adaptivity.xmlutil.serialization.XML
 import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
 import org.kodein.di.ktor.closestDI
@@ -252,7 +251,7 @@ fun Application.umRestApplication(
                 .addInterceptor(
                     UstadCacheInterceptor(
                         cache = instance(),
-                        cacheDir = File(appConfig.absoluteDataDir(), "httpfiles"),
+                        tmpDir = File(appConfig.absoluteDataDir(), "httpfiles"),
                         logger = NapierLoggingAdapter(),
                     )
                 )

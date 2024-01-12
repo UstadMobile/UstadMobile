@@ -368,6 +368,20 @@ class UstadCacheImpl(
         return null
     }
 
+    override fun updateLastValidated(validatedEntries: List<ValidatedEntry>) {
+        val md5 = Md5Digest()
+        val timeNow = systemTimeInMillis()
+        db.withDoorTransaction {
+            validatedEntries.forEach { entry ->
+                db.cacheEntryDao.updateValidation(
+                    key = md5.urlKey(entry.url),
+                    headers = entry.headers.asString(),
+                    lastValidated = timeNow,
+                    lastAccessed= timeNow,
+                )
+            }
+        }
+    }
 
     override fun hasEntries(urls: Set<String>): Map<String, Boolean> {
         val batchId = batchIdAtomic.incrementAndGet()

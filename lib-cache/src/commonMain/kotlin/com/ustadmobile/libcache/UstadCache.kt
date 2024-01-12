@@ -50,6 +50,15 @@ interface UstadCache {
     ): List<StoreResult>
 
     /**
+     * Update the last validated information for a given set of urls. This should be performed when
+     * another component (e.g. the OkHttp interceptor) has performed a successful validation e.g.
+     * received a Not-Modified response from the origin server.
+     */
+    fun updateLastValidated(
+        validatedEntries: List<ValidatedEntry>
+    )
+
+    /**
      * Retrieve if cached.
      *
      * Expect-SHA-256 is set, then we can search for the given sha-256.

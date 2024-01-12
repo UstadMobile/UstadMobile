@@ -6,6 +6,7 @@ import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCache.Companion.HEADER_FIRST_STORED_TIMESTAMP
 import com.ustadmobile.libcache.UstadCache.Companion.HEADER_LAST_VALIDATED_TIMESTAMP
 import com.ustadmobile.libcache.UstadCacheImpl.Companion.LOG_TAG
+import com.ustadmobile.libcache.ValidatedEntry
 import com.ustadmobile.libcache.cachecontrol.CacheControlFreshnessChecker
 import com.ustadmobile.libcache.cachecontrol.CacheControlFreshnessCheckerImpl
 import com.ustadmobile.libcache.cachecontrol.RequestCacheControlHeader
@@ -44,7 +45,7 @@ import java.util.concurrent.Executors
  */
 class UstadCacheInterceptor(
     private val cache: UstadCache,
-    private val cacheDir: File,
+    private val tmpDir: File,
     private val logger : UstadCacheLogger? = null,
     private val cacheControlFreshnessChecker: CacheControlFreshnessChecker =
         CacheControlFreshnessCheckerImpl(),
@@ -58,7 +59,7 @@ class UstadCacheInterceptor(
     private val logPrefix: String = "OKHttp-CacheInterceptor: "
 
     @Volatile
-    private var cacheDirChecked = false
+    private var tmpDirChecked = false
 
     /**
      * This runnable will simultaneously write.
@@ -72,6 +73,7 @@ class UstadCacheInterceptor(
             val buffer = ByteArray(8192)
             var bytesRead = 0
             val digest = MessageDigest.getInstance("SHA-256")
+            val tmpFile = File(tmpDir, UUID.randomUUID().toString())
 
             try {
                 val responseInStream = response.body?.byteStream()?.let {
@@ -79,13 +81,13 @@ class UstadCacheInterceptor(
                 } ?: throw IllegalStateException()
 
                 responseInStream.use { responseIn ->
-                    if(!cacheDirChecked) {
-                        cacheDir.takeIf { !it.exists() }?.mkdirs()
-                        cacheDirChecked = true
+                    if(!tmpDirChecked) {
+                        tmpDir.takeIf { !it.exists() }?.mkdirs()
+                        tmpDirChecked = true
                     }
 
-                    val file = File(cacheDir, UUID.randomUUID().toString())
-                    val fileOutStream = file.outputStream()
+
+                    val fileOutStream = tmpFile.outputStream()
                     while(!call.isCanceled() &&
                         responseIn.read(buffer).also { bytesRead = it } != -1
                     ) {
@@ -104,7 +106,7 @@ class UstadCacheInterceptor(
                             CacheEntryToStore(
                                 request = cacheRequest,
                                 response = HttpPathResponse(
-                                    path = Path(file.absolutePath),
+                                    path = Path(tmpFile.absolutePath),
                                     fileSystem = fileSystem,
                                     mimeType = response.header("content-type") ?: "application/octet-stream",
                                     request = cacheRequest,
@@ -112,7 +114,7 @@ class UstadCacheInterceptor(
                                         takeFrom(response.headers.asCacheHttpHeaders())
                                     }
                                 ),
-                                responseBodyTmpLocalPath = Path(file.absolutePath)
+                                responseBodyTmpLocalPath = Path(tmpFile.absolutePath)
                             )
                         ))
                     }
@@ -122,6 +124,7 @@ class UstadCacheInterceptor(
                 throw e
             }finally {
                 response.close()
+                tmpFile.takeIf { it.exists() }?.delete()
             }
         }
     }
@@ -241,7 +244,11 @@ class UstadCacheInterceptor(
                 if(validationResponse.code == 304) {
                     logger?.d(LOG_TAG, "$logPrefix HIT(validated) $url")
                     validationResponse.close()
-                    //TODO: update the cache so it knows it is fresh
+                    cache.updateLastValidated(
+                        listOf(
+                            ValidatedEntry(url, validationResponse.headers.asCacheHttpHeaders())
+                        )
+                    )
                     newResponseFromCachedResponse(cacheResponse, call)
                 }else {
                     logger?.d(LOG_TAG, "$logPrefix MISS(invalid) $url")
