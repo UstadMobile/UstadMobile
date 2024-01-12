@@ -3,7 +3,6 @@ package com.ustadmobile.libcache
 import com.ustadmobile.libcache.db.entities.RetentionLock
 import com.ustadmobile.libcache.request.HttpRequest
 import com.ustadmobile.libcache.response.HttpResponse
-import kotlinx.io.Source
 
 data class EntryLockRequest(
     val url: String,
@@ -49,22 +48,6 @@ interface UstadCache {
         storeRequest: List<CacheEntryToStore>,
         progressListener: StoreProgressListener? = null,
     ): List<StoreResult>
-
-    /**
-     * Store all entries from a given Zip as entries in the cache. This is useful to process zipped
-     * content e.g. epubs, xAPI/Scorm files, etc.
-     *
-     * @param zipSource Source for Zip data
-     * @param urlPrefix should end with /
-     * @param retain true if entries should be marked as to retain
-     * @param static true if entries will have the Coupon-Static: true header
-     */
-    fun storeZip(
-        zipSource: Source,
-        urlPrefix: String,
-        retain: Boolean = true,
-        static: Boolean = true,
-    )
 
     /**
      * Retrieve if cached.

@@ -6,7 +6,6 @@ import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheImpl
 import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.headers.CouponHeader.Companion.HEADER_ETAG_IS_INTEGRITY
-import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.integrity.sha256Integrity
 import com.ustadmobile.util.test.ResourcesDispatcher
 import com.ustadmobile.util.test.initNapierLog
@@ -69,7 +68,6 @@ class UstadCacheInterceptorTest {
             UstadCacheImpl(
                 storagePath = Path(cacheDir.absolutePath),
                 db = cacheDb,
-                mimeTypeHelper = FileMimeTypeHelperImpl(),
                 logger = logger,
                 listener = cacheListener,
             )

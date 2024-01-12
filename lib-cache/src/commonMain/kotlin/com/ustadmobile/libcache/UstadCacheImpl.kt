@@ -12,7 +12,6 @@ import com.ustadmobile.libcache.db.entities.RequestedEntry
 import com.ustadmobile.libcache.headers.CouponHeader.Companion.HEADER_ETAG_IS_INTEGRITY
 import com.ustadmobile.libcache.headers.CouponHeader.Companion.HEADER_X_INTEGRITY
 import com.ustadmobile.libcache.headers.HttpHeaders
-import com.ustadmobile.libcache.headers.MimeTypeHelper
 import com.ustadmobile.libcache.headers.asString
 import com.ustadmobile.libcache.headers.headersBuilder
 import com.ustadmobile.libcache.headers.integrity
@@ -20,14 +19,11 @@ import com.ustadmobile.libcache.headers.requireIntegrity
 import com.ustadmobile.libcache.integrity.sha256Integrity
 import com.ustadmobile.libcache.io.useAndReadySha256
 import com.ustadmobile.libcache.io.transferToAndGetSha256
-import com.ustadmobile.libcache.io.unzipTo
 import com.ustadmobile.libcache.logging.UstadCacheLogger
 import com.ustadmobile.libcache.md5.Md5Digest
 import com.ustadmobile.libcache.md5.urlKey
 import com.ustadmobile.libcache.request.HttpRequest
-import com.ustadmobile.libcache.request.requestBuilder
 import com.ustadmobile.libcache.response.CacheResponse
-import com.ustadmobile.libcache.response.HttpPathResponse
 import com.ustadmobile.libcache.response.HttpResponse
 import com.ustadmobile.libcache.response.withOverridenHeaders
 import com.ustadmobile.libcache.uuid.randomUuid
@@ -41,7 +37,6 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.io.Source
 import kotlinx.io.buffered
 import kotlinx.io.files.FileSystem
 import kotlinx.io.files.Path
@@ -60,7 +55,6 @@ class UstadCacheImpl(
     cacheName: String = "",
     storagePath: Path,
     private val db: UstadCacheDb,
-    internal val mimeTypeHelper: MimeTypeHelper,
     sizeLimit: () -> Long = { UstadCache.DEFAULT_SIZE_LIMIT },
     private val logger: UstadCacheLogger? = null,
     private val listener: UstadCache.CacheListener? = null,
@@ -102,8 +96,6 @@ class UstadCacheImpl(
      * @param tmpFileNeedsDeleted if true, then the tmpFile must be deleted before completing
      *        the store function. Can be false when responseBodyTmpLocalPath is provided, because
      *        then the responseBodyTmpLocalPath will be moved (not copied).
-     * @param storeInCache will be set to true during processing if it the CacheEntry is not stored
-     *        yet or needs updated.
      * @param previousStorageUriToDelete if it is determined that new data will be replacing old
      *        data, then the previous body data will be deleted.
      *
@@ -114,7 +106,6 @@ class UstadCacheImpl(
         val tmpFile: Path,
         val responseHeaders: HttpHeaders,
         val tmpFileNeedsDeleted: Boolean = false,
-        val storeInCache: Boolean = false,
         val lockId: Int = 0,
         val previousStorageUriToDelete: String? = null,
     )
@@ -264,12 +255,18 @@ class UstadCacheImpl(
                     }
 
                     if(storedEntry != null && etagOrLastModifiedMatches) {
-                        //If the entry is already saved and still valid, there is nothing to do
+                        //If the entry is already saved and still valid. We will not store the body,
+                        //but we will upsert the CacheEntry entity so that the last validated and
+                        // last accessed times are updated. We will
                         entryInProgress.copy(
                             tmpFileNeedsDeleted = true,
-                            storeInCache = false,
+                            cacheEntry = entryInProgress.cacheEntry.copy(
+                                storageUri = storedEntry.storageUri,
+                                storageSize = storedEntry.storageSize,
+                            )
                         )
                     }else {
+                        //The new entry does not validate, so we will need to store the new body.
                         val destPath = Path(dataDir, randomUuid())
                         fileSystem.atomicMove(entryInProgress.tmpFile, destPath)
 
@@ -278,7 +275,6 @@ class UstadCacheImpl(
                                 storageUri = destPath.toString(),
                                 storageSize = fileSystem.metadataOrNull(destPath)?.size ?: 0,
                             ),
-                            storeInCache = true,
                             tmpFileNeedsDeleted = false,
                             //Where there is a stored entry that is invalid, file should be deleted
                             previousStorageUriToDelete = storedEntry?.storageUri,
@@ -286,9 +282,7 @@ class UstadCacheImpl(
                     }
                 }
 
-                db.cacheEntryDao.upsertList(
-                    entriesToSave.filter { it.storeInCache }.map { it.cacheEntry }
-                )
+                db.cacheEntryDao.upsertList(entriesToSave.map { it.cacheEntry } )
                 db.requestedEntryDao.deleteBatch(batchId)
 
                 val locks = insertRetentionLocks(
@@ -314,8 +308,8 @@ class UstadCacheImpl(
                 it.tmpFile
             }
 
-            val oldVersionBodiesToDelete = dbProcessedEntries.mapNotNull {
-                it.previousStorageUriToDelete?.let { Path(it) }
+            val oldVersionBodiesToDelete = dbProcessedEntries.mapNotNull { entry ->
+                entry.previousStorageUriToDelete?.let { Path(it) }
             }
 
             logger?.d(LOG_TAG, "$logPrefix deleting ${tmpFilesToDelete.size} tmp files")
@@ -338,43 +332,6 @@ class UstadCacheImpl(
         }catch(e: Throwable) {
             throw IllegalStateException("Could not cache", e)
         }
-    }
-
-    override fun storeZip(
-        zipSource: Source,
-        urlPrefix: String,
-        retain: Boolean,
-        static: Boolean,
-    ) {
-        if(!urlPrefix.endsWith("/"))
-            throw IllegalArgumentException("Url prefix must end with / !")
-
-        fileSystem.takeIf { !it.exists(tmpDir) }?.createDirectories(tmpDir)
-        val unzippedEntries = zipSource.unzipTo(tmpDir)
-
-        val entriesToCache = unzippedEntries.map {
-            val request = requestBuilder {
-                url = "$urlPrefix${it.name}"
-            }
-
-            CacheEntryToStore(
-                request = request,
-                response = HttpPathResponse(
-                    path = it.path,
-                    fileSystem = fileSystem,
-                    mimeType = mimeTypeHelper.guessByExtension(it.name.substringAfterLast("."))
-                        ?: "application/octet-stream",
-                    request = request,
-                    extraHeaders = headersBuilder {
-                        header("etag", sha256Integrity(it.sha256))
-                        header(HEADER_ETAG_IS_INTEGRITY, "true")
-                    }
-                ),
-                skipChecksumIfProvided = true,
-            )
-        }
-
-        store(entriesToCache)
     }
 
     /**

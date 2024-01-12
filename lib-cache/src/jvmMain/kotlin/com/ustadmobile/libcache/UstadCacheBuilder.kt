@@ -9,7 +9,6 @@ import com.ustadmobile.libcache.db.MIGRATE_4_5
 import com.ustadmobile.libcache.db.MIGRATE_5_6
 import com.ustadmobile.libcache.db.MIGRATE_6_7
 import com.ustadmobile.libcache.db.UstadCacheDb
-import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.logging.UstadCacheLogger
 import kotlinx.io.files.Path
 
@@ -36,7 +35,6 @@ class UstadCacheBuilder(
                     MIGRATE_5_6, MIGRATE_6_7)
                 .build(),
             sizeLimit = sizeLimit,
-            mimeTypeHelper = FileMimeTypeHelperImpl(),
             logger = logger,
             cacheName = cacheName,
         )

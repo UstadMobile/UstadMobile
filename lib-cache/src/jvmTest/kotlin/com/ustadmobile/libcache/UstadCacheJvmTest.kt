@@ -2,14 +2,17 @@ package com.ustadmobile.libcache
 
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.libcache.db.UstadCacheDb
-import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
+import com.ustadmobile.libcache.headers.CouponHeader
+import com.ustadmobile.libcache.headers.headersBuilder
 import com.ustadmobile.libcache.headers.requireIntegrity
 import com.ustadmobile.libcache.integrity.sha256Integrity
+import com.ustadmobile.libcache.io.useAndReadySha256
 import com.ustadmobile.libcache.md5.Md5Digest
 import com.ustadmobile.libcache.md5.urlKey
 import com.ustadmobile.libcache.request.requestBuilder
 import com.ustadmobile.libcache.response.HttpPathResponse
 import com.ustadmobile.libcache.response.StringResponse
+import com.ustadmobile.util.test.ext.newFileFromResource
 import kotlinx.io.asInputStream
 import kotlinx.io.asSource
 import kotlinx.io.buffered
@@ -19,13 +22,11 @@ import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
-import java.io.FileInputStream
-import java.io.FileOutputStream
+import java.io.File
 import java.security.MessageDigest
-import java.util.zip.ZipEntry
-import java.util.zip.ZipInputStream
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 
 class UstadCacheJvmTest {
@@ -34,44 +35,43 @@ class UstadCacheJvmTest {
     @get:Rule
     val tempDir = TemporaryFolder()
 
-    @Test
-    fun givenFilesStored_whenRequestMade_thenWillBeRetrievedAsCacheHit() {
-        val cacheDir = tempDir.newFolder()
-        val cacheDb = DatabaseBuilder.databaseBuilder(
-            UstadCacheDb::class, "jdbc:sqlite::memory:", 1L)
-            .build()
-        val ustadCache = UstadCacheImpl(
-            storagePath = Path(cacheDir.absolutePath),
-            db = cacheDb,
-            mimeTypeHelper = FileMimeTypeHelperImpl()
-        )
-        val testFile = tempDir.newFile()
-        testFile.outputStream().use { outputStream ->
-            this::class.java.getResourceAsStream("/testfile1.png")!!.copyTo(outputStream)
-            outputStream.flush()
-        }
-
-
+    private fun UstadCache.assertCanStoreAndRetrieveFileAsCacheHit(
+        testFile: File,
+        testUrl: String,
+        mimeType: String,
+        cacheDb: UstadCacheDb,
+        addIntegrityHeaders: Boolean = false,
+    ) {
         val request = requestBuilder {
-            url = "http://server.com/file.png"
+            url = testUrl
         }
 
-        ustadCache.store(
+        store(
             listOf(
                 CacheEntryToStore(
                     request = request,
                     response = HttpPathResponse(
                         path = Path(testFile.absolutePath),
                         fileSystem = SystemFileSystem,
-                        mimeType = "image/png",
+                        mimeType = mimeType,
                         request = request,
+                        extraHeaders = if(addIntegrityHeaders) {
+                            val contentSha256 = testFile.inputStream().asSource()
+                                .buffered().useAndReadySha256()
+                            headersBuilder {
+                                header("etag", sha256Integrity(contentSha256))
+                                header(CouponHeader.HEADER_ETAG_IS_INTEGRITY, "true")
+                            }
+                        }else {
+                            null
+                        }
                     )
                 )
             ),
         )
 
         //Check response body content matches
-        val cacheResponse = ustadCache.retrieve(request)
+        val cacheResponse = retrieve(request)
         val bodyBytes = cacheResponse!!.bodyAsSource()!!.asInputStream().readAllBytes()
         Assert.assertArrayEquals(testFile.readBytes(), bodyBytes)
 
@@ -82,71 +82,53 @@ class UstadCacheJvmTest {
         val integrityHeaderVal = cacheResponse.headers.requireIntegrity()
         Assert.assertEquals(sha256Integrity(dataSha256), integrityHeaderVal)
         assertEquals(testFile.length(), cacheResponse.headers["content-length"]?.toLong())
-        assertEquals("image/png", cacheResponse.headers["content-type"])
+        assertEquals(mimeType, cacheResponse.headers["content-type"])
 
         //Body entity should have size set (to size the cache and find entries to evict).
         val md5Digest = Md5Digest()
         val cacheEntry = cacheDb.cacheEntryDao.findEntryAndBodyByKey(
             md5Digest.urlKey(request.url)
         )
-        assertEquals(testFile.length(), cacheEntry?.storageSize ?: 0)
+        assertEquals(testFile.length(), cacheEntry?.storageSize ?: -1)
     }
 
-    @Test
-    fun givenZipStored_whenRequestMade_thenAllEntriesCanBeRetrieved() {
+    private fun assertFileCanBeCachedAndRetrieved(
+        testFile: File,
+        testUrl: String,
+        mimeType: String,
+    ) {
         val cacheDir = tempDir.newFolder()
         val cacheDb = DatabaseBuilder.databaseBuilder(
             UstadCacheDb::class, "jdbc:sqlite::memory:", 1L)
             .build()
         val ustadCache = UstadCacheImpl(
             storagePath = Path(cacheDir.absolutePath),
-            db = cacheDb,
-            mimeTypeHelper = FileMimeTypeHelperImpl()
+            db = cacheDb
         )
-        val urlPrefix = "https://endpoint/content/ebook/"
-
-        val zipFile = tempDir.newFile().also { file ->
-            FileOutputStream(file).use { outStream ->
-                this::class.java.getResourceAsStream("/childrens-literature.epub")!!.copyTo(outStream)
-                outStream.flush()
-            }
-        }
-
-        ustadCache.storeZip(
-            zipSource = FileInputStream(zipFile).asSource().buffered(),
-            urlPrefix = urlPrefix,
+        ustadCache.assertCanStoreAndRetrieveFileAsCacheHit(
+            testFile =testFile,
+            testUrl = testUrl,
+            mimeType = mimeType,
+            cacheDb = cacheDb
         )
+    }
 
-        val mimeHelper = FileMimeTypeHelperImpl()
+    @Test
+    fun givenFileStored_whenRequestMade_thenWillBeRetrievedAsCacheHit() {
+        assertFileCanBeCachedAndRetrieved(
+            testFile = tempDir.newFileFromResource(this::class.java, "/testfile1.png"),
+            testUrl = "http://www.server.com/file.png",
+            mimeType = "image/png"
+        )
+    }
 
-        ZipInputStream(FileInputStream(zipFile)).use { zipIn ->
-            lateinit var zipEntry: ZipEntry
-            while(zipIn.nextEntry?.also { zipEntry = it } != null) {
-                if(zipEntry.isDirectory)
-                    continue
-
-                val entryBytes = zipIn.readAllBytes()
-                val cacheResponse = ustadCache.retrieve(requestBuilder {
-                    url = "$urlPrefix${zipEntry.name}"
-                })
-                val responseBytes = cacheResponse!!.bodyAsSource()!!.asInputStream().readAllBytes()
-                Assert.assertArrayEquals(entryBytes, responseBytes)
-
-                val expectedMimeType = mimeHelper.guessByExtension(zipEntry.name.substringAfterLast("."))
-                    ?: "application/octet-stream"
-                assertEquals(
-                    expected = expectedMimeType,
-                    actual = cacheResponse.headers["content-type"] ,
-                    message = "Cache response for ${zipEntry.name} has expected mime type ($expectedMimeType)"
-                )
-
-                assertEquals(
-                    expected = entryBytes.size,
-                    actual = cacheResponse.headers["content-length"]?.toInt(),
-                    message = "Cache response for ${zipEntry.name} has expected size"
-                )
-            }
-        }
+    @Test
+    fun givenEmptyFileStored_whenRequestMade_thenWillBeRetrievedAsCacheHit() {
+        assertFileCanBeCachedAndRetrieved(
+            testFile = tempDir.newFile(),
+            testUrl = "http://www.server.com/blank.txt",
+            mimeType = "text/plain"
+        )
     }
 
     @Test
@@ -157,8 +139,7 @@ class UstadCacheJvmTest {
             .build()
         val ustadCache = UstadCacheImpl(
             storagePath = Path(cacheDir.absolutePath),
-            db = cacheDb,
-            mimeTypeHelper = FileMimeTypeHelperImpl()
+            db = cacheDb
         )
 
         val url = "http://server.com/file.css"
@@ -187,19 +168,53 @@ class UstadCacheJvmTest {
 
     @Test
     fun givenEntryNotStored_whenRetrieved_thenWillReturnNull() {
-
         val cacheDir = tempDir.newFolder()
         val cacheDb = DatabaseBuilder.databaseBuilder(
             UstadCacheDb::class, "jdbc:sqlite::memory:", 1L)
             .build()
         val ustadCache = UstadCacheImpl(
             storagePath = Path(cacheDir.absolutePath),
-            db = cacheDb,
-            mimeTypeHelper = FileMimeTypeHelperImpl()
+            db = cacheDb
         )
 
         val url = "http://server.com/file.css"
         assertNull(ustadCache.retrieve(requestBuilder(url)))
+    }
+
+    @Test
+    fun givenResponseIsNotUpdated_whenStored_thenWillUpdateLastAccessAndValidationTime() {
+        val cacheDir = tempDir.newFolder()
+        val cacheDb = DatabaseBuilder.databaseBuilder(
+            UstadCacheDb::class, "jdbc:sqlite::memory:", 1L)
+            .build()
+        val ustadCache = UstadCacheImpl(
+            storagePath = Path(cacheDir.absolutePath),
+            db = cacheDb
+        )
+
+        val url = "http://server.com/file.css"
+        val tmpFile = tempDir.newFile().also {
+            it.writeText("font-weight: bold")
+        }
+
+        val md5Digest = Md5Digest()
+        val entryAfterStored = (1..2).map {
+            ustadCache.assertCanStoreAndRetrieveFileAsCacheHit(
+                testFile = tmpFile,
+                testUrl = url,
+                mimeType = "text/css",
+                cacheDb = cacheDb,
+                addIntegrityHeaders = true
+            )
+            cacheDb.cacheEntryDao.findEntryAndBodyByKey(md5Digest.urlKey(url))
+        }
+        assertTrue(entryAfterStored.last()!!.lastValidated > entryAfterStored.first()!!.lastValidated,
+            message = "Last validated time should be updated after ")
+
+        //Cache tmp directory should not have any leftover files.
+        val cacheTmpDir = File(cacheDir, "tmp")
+        assertTrue(cacheDir.exists())
+        assertEquals(0, cacheTmpDir.list()!!.size)
     }
 
 }
