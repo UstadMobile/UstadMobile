@@ -9,13 +9,10 @@ import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.db.entities.CacheEntry
 import com.ustadmobile.libcache.db.entities.RetentionLock
 import com.ustadmobile.libcache.db.entities.RequestedEntry
-import com.ustadmobile.libcache.headers.CouponHeader.Companion.HEADER_ETAG_IS_INTEGRITY
-import com.ustadmobile.libcache.headers.CouponHeader.Companion.HEADER_X_INTEGRITY
 import com.ustadmobile.libcache.headers.HttpHeaders
 import com.ustadmobile.libcache.headers.asString
 import com.ustadmobile.libcache.headers.headersBuilder
 import com.ustadmobile.libcache.headers.integrity
-import com.ustadmobile.libcache.headers.requireIntegrity
 import com.ustadmobile.libcache.integrity.sha256Integrity
 import com.ustadmobile.libcache.io.useAndReadySha256
 import com.ustadmobile.libcache.io.transferToAndGetSha256
@@ -25,7 +22,6 @@ import com.ustadmobile.libcache.md5.urlKey
 import com.ustadmobile.libcache.request.HttpRequest
 import com.ustadmobile.libcache.response.CacheResponse
 import com.ustadmobile.libcache.response.HttpResponse
-import com.ustadmobile.libcache.response.withOverridenHeaders
 import com.ustadmobile.libcache.uuid.randomUuid
 import kotlinx.atomicfu.atomic
 import kotlinx.atomicfu.getAndUpdate
@@ -150,6 +146,7 @@ class UstadCacheImpl(
         progressListener: StoreProgressListener?
     ): List<StoreResult> {
         val md5Digest = Md5Digest()
+        val timeNow = systemTimeInMillis()
         try {
             logger?.d(LOG_TAG) { "$logPrefix storerequest ${storeRequest.size} entries" }
             fileSystem.takeIf { !fileSystem.exists(dataDir) }?.createDirectories(dataDir)
@@ -192,16 +189,6 @@ class UstadCacheImpl(
                 val integrity = sha256IntegrityFromTransfer ?: integrityFromHeaders
                     ?: sha256Integrity(fileSystem.source(tmpFile).buffered().useAndReadySha256())
 
-                val responseHeaders  = headersBuilder {
-                    takeFrom(response.headers)
-                    if(response.headers["etag"] == null) {
-                        header("etag", integrity)
-                        header(HEADER_ETAG_IS_INTEGRITY, "true")
-                    }else {
-                        header(HEADER_X_INTEGRITY, integrity)
-                    }
-                }
-
                 logger?.v(LOG_TAG, "$logPrefix copied request data for $url to $tmpFile (integrity=$integrity)")
 
                 CacheEntryInProgress(
@@ -210,14 +197,13 @@ class UstadCacheImpl(
                         url = entryToStore.request.url,
                         integrity = integrity,
                         statusCode = entryToStore.response.responseCode,
-                        responseHeaders = responseHeaders.asString(),
-                        lastValidated = systemTimeInMillis(),
+                        responseHeaders = response.headers.asString(),
+                        lastValidated = timeNow,
+                        lastAccessed = timeNow,
                     ),
-                    entryToStore = entryToStore.copy(
-                        response = entryToStore.response.withOverridenHeaders(responseHeaders)
-                    ),
+                    entryToStore = entryToStore,
                     tmpFile = tmpFile,
-                    responseHeaders = responseHeaders,
+                    responseHeaders = entryToStore.response.headers,
                 )
             }
 
@@ -325,7 +311,7 @@ class UstadCacheImpl(
                     urlKey = it.cacheEntry.key,
                     request = it.entryToStore.request,
                     response = it.entryToStore.response,
-                    integrity = it.entryToStore.response.headers.requireIntegrity(),
+                    integrity = it.cacheEntry.integrity!!,
                     lockId = it.lockId
                 )
             }

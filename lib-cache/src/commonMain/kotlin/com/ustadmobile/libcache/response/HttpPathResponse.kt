@@ -1,8 +1,14 @@
 package com.ustadmobile.libcache.response
 
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.libcache.headers.HttpHeaders
+import com.ustadmobile.libcache.headers.addIntegrity
+import com.ustadmobile.libcache.headers.containsHeader
 import com.ustadmobile.libcache.headers.headersBuilder
-import com.ustadmobile.libcache.headers.lastModifiedHeader
+import com.ustadmobile.libcache.headers.integrity
+import com.ustadmobile.libcache.integrity.sha256Integrity
+import com.ustadmobile.libcache.io.lastModified
+import com.ustadmobile.libcache.io.useAndReadySha256
 import com.ustadmobile.libcache.request.HttpRequest
 import kotlinx.atomicfu.atomic
 import kotlinx.io.IOException
@@ -16,6 +22,7 @@ class HttpPathResponse(
     private val fileSystem: FileSystem,
     mimeType: String,
     override val request: HttpRequest,
+    integrity: String? = null,
     extraHeaders: HttpHeaders? = null,
 ): HttpResponse {
 
@@ -30,11 +37,16 @@ class HttpPathResponse(
             header("Content-Length", metadata.size.toString())
             header("Content-Type", mimeType)
             header("Accept-Ranges", "bytes")
-            if(extraHeaders == null || "last-modified" !in extraHeaders.names()) {
-                headersList += lastModifiedHeader()
+            if(extraHeaders?.containsHeader("age") != true) {
+                header("Age", (systemTimeInMillis() - fileSystem.lastModified(path)).toString())
             }
 
+            val effectiveIntegrity = integrity ?:
+                extraHeaders?.integrity() ?:
+                sha256Integrity(fileSystem.source(path).buffered().useAndReadySha256())
+
             extraHeaders?.also { takeFrom(it) }
+            addIntegrity(extraHeaders, effectiveIntegrity)
         }
 
     }

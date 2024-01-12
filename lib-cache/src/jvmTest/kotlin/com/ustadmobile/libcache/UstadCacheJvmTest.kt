@@ -2,11 +2,8 @@ package com.ustadmobile.libcache
 
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.libcache.db.UstadCacheDb
-import com.ustadmobile.libcache.headers.CouponHeader
-import com.ustadmobile.libcache.headers.headersBuilder
 import com.ustadmobile.libcache.headers.requireIntegrity
 import com.ustadmobile.libcache.integrity.sha256Integrity
-import com.ustadmobile.libcache.io.useAndReadySha256
 import com.ustadmobile.libcache.md5.Md5Digest
 import com.ustadmobile.libcache.md5.urlKey
 import com.ustadmobile.libcache.request.requestBuilder
@@ -14,8 +11,6 @@ import com.ustadmobile.libcache.response.HttpPathResponse
 import com.ustadmobile.libcache.response.StringResponse
 import com.ustadmobile.util.test.ext.newFileFromResource
 import kotlinx.io.asInputStream
-import kotlinx.io.asSource
-import kotlinx.io.buffered
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
 import org.junit.Assert
@@ -40,7 +35,6 @@ class UstadCacheJvmTest {
         testUrl: String,
         mimeType: String,
         cacheDb: UstadCacheDb,
-        addIntegrityHeaders: Boolean = false,
     ) {
         val request = requestBuilder {
             url = testUrl
@@ -55,16 +49,6 @@ class UstadCacheJvmTest {
                         fileSystem = SystemFileSystem,
                         mimeType = mimeType,
                         request = request,
-                        extraHeaders = if(addIntegrityHeaders) {
-                            val contentSha256 = testFile.inputStream().asSource()
-                                .buffered().useAndReadySha256()
-                            headersBuilder {
-                                header("etag", sha256Integrity(contentSha256))
-                                header(CouponHeader.HEADER_ETAG_IS_INTEGRITY, "true")
-                            }
-                        }else {
-                            null
-                        }
                     )
                 )
             ),
@@ -144,7 +128,7 @@ class UstadCacheJvmTest {
 
         val url = "http://server.com/file.css"
         val payloads = listOf("font-weight: bold", "font-weight: bold !important")
-        payloads.forEach { payload ->
+        payloads.forEachIndexed { index, payload ->
             ustadCache.store(listOf(
                 requestBuilder(url).let {
                     CacheEntryToStore(
@@ -152,7 +136,7 @@ class UstadCacheJvmTest {
                         response = StringResponse(
                             request = it,
                             mimeType = "text/css",
-                            body = payload
+                            body = payload,
                         )
                     )
                 }
@@ -203,8 +187,7 @@ class UstadCacheJvmTest {
                 testFile = tmpFile,
                 testUrl = url,
                 mimeType = "text/css",
-                cacheDb = cacheDb,
-                addIntegrityHeaders = true
+                cacheDb = cacheDb
             )
             cacheDb.cacheEntryDao.findEntryAndBodyByKey(md5Digest.urlKey(url))
         }

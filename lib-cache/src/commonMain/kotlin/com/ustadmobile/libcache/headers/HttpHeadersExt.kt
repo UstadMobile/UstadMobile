@@ -33,3 +33,8 @@ fun HttpHeaders.requireIntegrity(): String {
 }
 
 
+/**
+ * Shorthand to check if a header exists. Note that just checking names is not correct because header
+ * names are case insensitive
+ */
+fun HttpHeaders.containsHeader(headerName: String) = get(headerName) != null

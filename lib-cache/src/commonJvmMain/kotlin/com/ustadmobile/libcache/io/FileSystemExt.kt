@@ -17,7 +17,7 @@ actual fun FileSystem.rangeSource(path: Path, fromByte: Long, toByte: Long): Raw
     ).asSource()
 }
 
-actual fun FileSystem.newTmpFile(prefix: String, postfix: String): Path {
-    val tmpFile = File.createTempFile(prefix, postfix)
-    return Path(tmpFile.absolutePath)
+
+actual fun FileSystem.lastModified(path: Path): Long {
+    return File(path.toString()).lastModified()
 }
