@@ -42,6 +42,7 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import java.io.File
+import java.io.InputStream
 import java.util.zip.ZipInputStream
 
 /**
@@ -50,11 +51,14 @@ import java.util.zip.ZipInputStream
  * The H5P file will be converted into an xAPI file by bundling H5P-standalone and generating a
  * tincan.xml file.
  *
- * The entry will be cached as follows:
+ * The entry will be stored as follows:
  *
  * prefix/h5p-folder - content of the H5P file itself
  * prefix/dist - content of the H5P standalone distribution zip (as per the GitHub release download)
  * from src/commonMain/resources/h5p/h5p-standalone-3.6.0.zip (unmodified).
+ *
+ * @param h5pInStream input stream provider for the h5p-standalone-3.6.0.zip. On JVM this is done via
+ *        class resources. On Android this is done via assets.
  *
  */
 class H5PContentImporter(
@@ -66,6 +70,11 @@ class H5PContentImporter(
     private val tmpPath: Path,
     private val saveLocalUriAsBlobAndManifestUseCase: SaveLocalUriAsBlobAndManifestUseCase,
     private val fileSystem: FileSystem = SystemFileSystem,
+    private val h5pInStream: () -> InputStream = {
+        this::class.java.getResourceAsStream(
+            "/h5p/h5p-standalone-3.6.0.zip"
+        ) ?: throw IllegalStateException("Could not open h5p standalone zip")
+    },
 ): ContentImporter(endpoint) {
 
     override val importerId: Int
@@ -173,11 +182,9 @@ class H5PContentImporter(
 
 
             //Store the H5P-standalone resources. Within the zip there is a folder called dist.
-            val h5pStandAloneUnzippedEntries = this::class.java.getResourceAsStream(
-                "/h5p/h5p-standalone-3.6.0.zip"
-            )?.asSource()?.buffered()?.use { h5pIn ->
+            val h5pStandAloneUnzippedEntries = h5pInStream().asSource().buffered().use { h5pIn ->
                 h5pIn.unzipTo(h5pStandAloneUnzippedPath)
-            } ?: throw IllegalStateException("Could not open h5p resource")
+            }
 
             val h5pStandAloneManifestEntries = saveLocalUriAsBlobAndManifestUseCase(
                 items = h5pStandAloneUnzippedEntries.map { unzippedEntry ->

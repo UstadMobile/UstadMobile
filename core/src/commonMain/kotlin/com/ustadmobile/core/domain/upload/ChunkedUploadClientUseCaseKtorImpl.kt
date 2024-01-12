@@ -113,8 +113,8 @@ class ChunkedUploadClientUseCaseKtorImpl(
         onProgress: (Long) -> Unit,
         onStatusChange: (TransferJobItemStatus) -> Unit,
     ): ChunkedUploadClientLocalUriUseCase.LastChunkResponse {
-        if(totalSize <= 0)
-            throw IllegalArgumentException("Upload size <= 0")
+        if(totalSize < 0)
+            throw IllegalArgumentException("Upload size < 0")
 
         val chunkInfo = ChunkInfo(
             totalSize = totalSize,

@@ -3,6 +3,7 @@ package com.ustadmobile.port.android.impl
 import android.app.Application
 import android.content.Context
 import android.content.pm.PackageManager
+import android.content.res.AssetManager
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
@@ -109,6 +110,8 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
     @OptIn(ExperimentalXmlUtilApi::class)
     override val di: DI by DI.lazy {
         bind<OkHttpClient>() with singleton {
+            val rootTmpDir: File = instance(tag = DiTag.TAG_TMP_DIR)
+
             OkHttpClient.Builder()
                 .dispatcher(
                     Dispatcher().also {
@@ -119,7 +122,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 .addInterceptor(
                     UstadCacheInterceptor(
                         cache = instance(),
-                        cacheDir = File(applicationContext.filesDir, "httpfiles"),
+                        tmpDir = File(rootTmpDir, "okhttp-tmp"),
                         logger = NapierLoggingAdapter(),
                     )
                 )
@@ -316,6 +319,10 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                             tmpPath = contentImportTmpPath,
                             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
                             json = instance(),
+                            h5pInStream = {
+                                applicationContext.assets.open("h5p/h5p-standalone-3.6.0.zip",
+                                    AssetManager.ACCESS_STREAMING)
+                            }
                         ),
                     )
 

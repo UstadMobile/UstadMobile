@@ -1,4 +1,4 @@
-package com.ustadmobile.libuicompose.view.contententry.detail
+package com.ustadmobile.libuicompose.view.contententry.detailoverviewtab
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -16,13 +16,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Button
-import androidx.compose.material.Divider
+import androidx.compose.material3.Button
+import androidx.compose.material3.Divider
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.LinearProgressIndicator
-import androidx.compose.material.ListItem
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.CheckBox
@@ -30,16 +30,33 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.viewmodel.contententry.detailoverviewtab.ContentEntryDetailOverviewUiState
+import com.ustadmobile.core.viewmodel.contententry.detailoverviewtab.ContentEntryDetailOverviewViewModel
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 import com.ustadmobile.lib.db.entities.ContentJobItemProgress
 import com.ustadmobile.libuicompose.components.UstadQuickActionButton
 import dev.icerock.moko.resources.compose.stringResource
+
+@Composable
+fun ContentEntryDetailOverviewScreen(
+    viewModel: ContentEntryDetailOverviewViewModel
+) {
+    val uiState by viewModel.uiState.collectAsState(
+        ContentEntryDetailOverviewUiState()
+    )
+
+    ContentEntryDetailOverviewScreen(
+        uiState = uiState,
+        onClickOpen = viewModel::onClickOpen
+    )
+}
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -78,14 +95,13 @@ fun ContentEntryDetailOverviewScreen(
             }
         }
 
-        if (uiState.contentEntryButtons?.showOpenButton == true){
-            item {
+        if (uiState.openButtonVisible){
+            item(key = "open_button") {
                 Button(
                     onClick = onClickOpen,
-                    modifier = Modifier
-                        .fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Text(stringResource(MR.strings.open).uppercase())
+                    Text(stringResource(MR.strings.open))
                 }
             }
         }
@@ -184,7 +200,8 @@ fun ContentDetailRightColumn(
 
         Text(
             text = uiState.contentEntry?.title ?: "",
-            style = MaterialTheme.typography.headlineLarge
+            style = MaterialTheme.typography.headlineMedium,
+            maxLines = 2,
         )
 
         if (uiState.authorVisible){
@@ -219,7 +236,7 @@ fun ContentJobListItem(
         modifier = Modifier.clickable {
             onClickContentJobItem()
         },
-        text = {
+        headlineContent = {
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
@@ -227,7 +244,7 @@ fun ContentJobListItem(
                 Text(contentJob.progress.toString()+" %")
             }
         },
-        secondaryText = {
+        supportingContent = {
             LinearProgressIndicator(
                 progress = (contentJob.progress/100.0).toFloat(),
                 modifier = Modifier

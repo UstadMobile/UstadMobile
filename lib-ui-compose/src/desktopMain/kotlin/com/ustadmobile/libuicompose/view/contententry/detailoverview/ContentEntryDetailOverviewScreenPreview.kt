@@ -11,7 +11,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryWithMostRecentContainer
 import com.ustadmobile.lib.db.entities.ContentJobItemProgress
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.StatementEntity
-import com.ustadmobile.libuicompose.view.contententry.detail.ContentEntryDetailOverviewScreen
+import com.ustadmobile.libuicompose.view.contententry.detailoverviewtab.ContentEntryDetailOverviewScreen
 
 
 @Composable

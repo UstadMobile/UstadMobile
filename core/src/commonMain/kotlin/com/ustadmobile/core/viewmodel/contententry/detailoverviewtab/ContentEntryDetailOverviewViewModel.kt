@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
+import com.ustadmobile.core.MR
 
 data class ContentEntryDetailOverviewUiState(
 
@@ -97,7 +98,10 @@ class ContentEntryDetailOverviewViewModel(
                             if(prev.fabState.visible != hasPermission) {
                                 prev.copy(
                                     fabState = FabUiState(
-                                        visible =  hasPermission
+                                        visible =  hasPermission,
+                                        text = systemImpl.getString(MR.strings.edit),
+                                        icon = FabUiState.FabIcon.EDIT,
+                                        onClick = ::onClickEdit
                                     )
                                 )
                             }else {
