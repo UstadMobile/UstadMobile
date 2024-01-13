@@ -10,6 +10,8 @@ import androidx.room.PrimaryKey
  *  - The progress of the job can be displayed to the user.
  *
  * A TransferJob has one or more TransferJobItem(s).
+ *
+ * @param tjStatus Status int as per TransferJobItemStatus
  */
 @Entity
 data class TransferJob(

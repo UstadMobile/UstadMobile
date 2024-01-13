@@ -55,7 +55,14 @@ class TransferJobItemStatusUpdater(
         }
     }
 
-    suspend fun commit(){
+    /**
+     * @param updateTransferJobStatusUid a transferjobuid for which we should set TransferJob.tjStatus to
+     *        complete if all related TransferJobItem.tjiStatus(s) are complete
+     *
+     */
+    suspend fun commit(
+        updateTransferJobStatusUid: Int = 0
+    ){
         val progressUpdatesToQueue =
             progressUpdates.getAndSet(emptyList())
 
@@ -73,6 +80,7 @@ class TransferJobItemStatusUpdater(
 
         db.takeIf {
             progressUpdatesToCommit.isNotEmpty() || statusUpdatesToCommit.isNotEmpty()
+                    || updateTransferJobStatusUid != 0
         }?.withDoorTransactionAsync {
             progressUpdatesToCommit.forEach {
                 db.transferJobItemDao.updateTransferredProgress(
@@ -95,6 +103,12 @@ class TransferJobItemStatusUpdater(
                         transferJobItemUid = it.uploadItem.transferJobItemUid
                     )
                 }
+            }
+
+            if(updateTransferJobStatusUid != 0) {
+                db.transferJobDao.updateStatusIfComplete(
+                    jobUid = updateTransferJobStatusUid
+                )
             }
         }
     }

@@ -1,6 +1,7 @@
 package com.ustadmobile.core.domain.blob.upload
 
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
+import com.ustadmobile.lib.db.entities.TransferJob
 
 /**
  * Enqueue a blob upload. Running it is done by WorkManager on Android and by Quartz on JVM,
@@ -36,10 +37,14 @@ interface EnqueueBlobUploadClientUseCase{
         val retentionLockIdToRelease: Int = 0,
     )
 
+    /**
+     * Enqueue the upload and return the transferjob. The transferjob's uid can be used to track
+     * progress etc.
+     */
     suspend operator fun invoke(
         items: List<EnqueueBlobUploadItem>,
         batchUuid: String,
         chunkSize: Int = ChunkedUploadClientUseCaseKtorImpl.DEFAULT_CHUNK_SIZE,
-    )
+    ): TransferJob
 
 }

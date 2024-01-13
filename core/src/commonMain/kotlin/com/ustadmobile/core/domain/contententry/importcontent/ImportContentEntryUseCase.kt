@@ -29,7 +29,7 @@ class ImportContentEntryUseCase(
 
     suspend operator fun invoke(
         contentEntryImportJobId: Long,
-    ) {
+    ): ContentEntryVersion {
         val job = db.contentEntryImportJobDao
             .findByUidAsync(contentEntryImportJobId) ?: throw IllegalArgumentException(
                 "$contentEntryImportJobId not found in db")
@@ -71,6 +71,8 @@ class ImportContentEntryUseCase(
                 batchUuid = randomUuidAsString()
             )
         }
+
+        return contentEntryVersionEntity
     }
 
 }

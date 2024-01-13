@@ -215,11 +215,12 @@ class BlobUploadClientUseCaseJvm(
     }
 
     override suspend fun invoke(transferJobUid: Int) {
+        val logPrefix = "BlobUploadClientJvm (#$transferJobUid):"
         val transferJob = db.transferJobDao.findByUid(transferJobUid)
-            ?: throw IllegalArgumentException("BlobUpload: TransferJob #$transferJobUid does not exist")
+            ?: throw IllegalArgumentException("$logPrefix: TransferJob #$transferJobUid does not exist")
         val transferJobItems = db.transferJobItemDao.findByJobUid(transferJobUid)
         val batchUuid = transferJob.tjUuid
-            ?: throw IllegalArgumentException("TransferJob has no uuid")
+            ?: throw IllegalArgumentException("$logPrefix TransferJob has no uuid")
 
         coroutineScope {
             val transferJobItemStatusUpdater = TransferJobItemStatusUpdater(db, repo, this)
@@ -242,23 +243,29 @@ class BlobUploadClientUseCaseJvm(
                         if(it.status == TransferJobItemStatus.STATUS_COMPLETE_INT &&
                             it.uploadItem.lockIdToRelease != 0
                         ) {
-                            Napier.d { "BlobUploadUseCaseJvm: release cache lock #(${it.uploadItem.lockIdToRelease}) for ${it.uploadItem.blobUrl}" }
+                            Napier.d { "$logPrefix: release cache lock #(${it.uploadItem.lockIdToRelease}) for ${it.uploadItem.blobUrl}" }
                             httpCache.removeRetentionLocks(listOf(it.uploadItem.lockIdToRelease))
                         }
                     },
                 )
 
                 val numIncompleteItems = db.withDoorTransactionAsync {
+                    transferJobItemStatusUpdater.commit(transferJobUid)
                     transferJobItemStatusUpdater.onFinished()
-                    db.transferJobItemDao.findNumberJobItemsNotComplete(transferJobUid)
+                    val numIncompleteItems = db.transferJobItemDao
+                        .findNumberJobItemsNotComplete(transferJobUid)
+
+                    numIncompleteItems
                 }
 
                 if(numIncompleteItems != 0) {
-                    throw UploadNotCompleteException("Upload #$transferJobUid not complete: " +
+                    throw UploadNotCompleteException("$logPrefix : not complete: " +
                             "$numIncompleteItems TransferJobItem(s) pending")
                 }
+
+                Napier.i("$logPrefix Complete!")
             }catch(e: Throwable) {
-                Napier.e("BlobUploadClientUseCase: Exception. Attempt has failed.", e)
+                Napier.e("$logPrefix Exception. Attempt has failed.", e)
 
                 withContext(NonCancellable) {
                     transferJobItemStatusUpdater.onFinished()

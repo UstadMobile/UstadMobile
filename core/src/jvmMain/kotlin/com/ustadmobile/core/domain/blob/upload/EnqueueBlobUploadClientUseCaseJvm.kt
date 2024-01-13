@@ -3,6 +3,7 @@ package com.ustadmobile.core.domain.blob.upload
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.connectivitymonitor.ConnectivityTriggerGroupController
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.lib.db.entities.TransferJob
 import com.ustadmobile.libcache.UstadCache
 import org.quartz.JobBuilder
 import org.quartz.Scheduler
@@ -26,7 +27,7 @@ class EnqueueBlobUploadClientUseCaseJvm(
         items: List<EnqueueBlobUploadClientUseCase.EnqueueBlobUploadItem>,
         batchUuid: String,
         chunkSize: Int
-    ) {
+    ): TransferJob {
         val transferJob = createTransferJob(items, batchUuid)
         val quartzJob = JobBuilder.newJob(BlobUploadClientJob::class.java)
             .usingJobData(DATA_JOB_UID, transferJob.tjUid)
@@ -44,5 +45,7 @@ class EnqueueBlobUploadClientUseCaseJvm(
             .build()
 
         scheduler.scheduleJob(quartzJob, jobTrigger)
+
+        return transferJob
     }
 }
