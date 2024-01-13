@@ -3,6 +3,7 @@ package com.ustadmobile.core.domain.blob.xfertestnode
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.contentformats.epub.XhtmlFixer
 import com.ustadmobile.core.contentformats.epub.XhtmlFixerJsoup
+import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCaseJvm
@@ -18,12 +19,17 @@ import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
+import com.ustadmobile.libcache.integrity.sha256Integrity
+import com.ustadmobile.libcache.io.useAndReadySha256
 import com.ustadmobile.libcache.logging.NapierLoggingAdapter
 import com.ustadmobile.libcache.okhttp.UstadCacheInterceptor
+import com.ustadmobile.libcache.request.requestBuilder
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.io.buffered
 import kotlinx.io.files.Path
+import kotlinx.io.readString
 import kotlinx.serialization.json.Json
 import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
 import nl.adaptivity.xmlutil.serialization.XML
@@ -37,6 +43,8 @@ import org.kodein.di.instance
 import org.kodein.di.scoped
 import org.kodein.di.singleton
 import java.io.File
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 
 /**
  * Holds dependencies used by both BlobUploadTestNode
@@ -161,10 +169,34 @@ class XferTestNode(
             }
 
         }
-
-
     }
 
+    fun getManifest(url: String): ContentManifest {
+        return httpCache.retrieve(requestBuilder(url))?.bodyAsSource()?.readString()?.let {
+            json.decodeFromString(ContentManifest.serializer(), it)
+        } ?: throw IllegalArgumentException("$name Could not find manifest for $url")
+    }
+
+
+    fun assertManifestStoredOnNode(
+        manifest: ContentManifest,
+        url: String,
+    ) {
+        val manifestResponse = httpCache.retrieve(requestBuilder(url))
+        assertNotNull(manifestResponse, "Manifest response for $url should not be null")
+        val manifestStored: ContentManifest = json.decodeFromString(manifestResponse.bodyAsSource()!!.readString())
+
+        assertEquals(manifest.entries.size, manifestStored.entries.size,
+            "Manifest stored on node should have same number of entries")
+        manifest.entries.forEach { entry ->
+            val cacheResponse = httpCache.retrieve(requestBuilder(entry.bodyDataUrl))
+            assertNotNull(cacheResponse, "Cache response for ${entry.uri} must not be null")
+            val integrityStored = sha256Integrity(
+                cacheResponse.bodyAsSource()!!.buffered().useAndReadySha256())
+            assertEquals(entry.integrity, integrityStored, "Integrity for ${entry.uri} " +
+                    "should match integrity of actual body data")
+        }
+    }
 
     fun close() {
         httpClient.close()

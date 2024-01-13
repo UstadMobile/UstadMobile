@@ -33,7 +33,7 @@ import java.io.File
  * KTOR server and the required Route(s) to receive blob uploads.
  */
 class XferTestServer(
-    private val node: XferTestNode,
+    val node: XferTestNode,
     val port: Int = 8094,
 ) {
 

@@ -1,6 +1,9 @@
 package com.ustadmobile.core.domain.blob.xfertestnode
 
+import app.cash.turbine.test
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentformats.ContentImportersDiModuleJvm
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCaseJvm
 import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCase
@@ -11,15 +14,21 @@ import com.ustadmobile.core.domain.blob.upload.UpdateFailedTransferJobUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.ImportContentEntryUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.flow.doorFlow
+import com.ustadmobile.lib.db.composites.TransferJobItemStatus
+import com.ustadmobile.lib.db.entities.ContentEntryVersion
+import kotlinx.coroutines.flow.filter
 import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.direct
 import org.kodein.di.instance
+import org.kodein.di.on
 import org.kodein.di.scoped
 import org.kodein.di.singleton
 import org.quartz.Scheduler
 import org.quartz.impl.StdSchedulerFactory
 import java.io.Closeable
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Contains the dependencies required to act as a client for blob transfer test purposes e.g.
@@ -96,6 +105,27 @@ class XferTestClient(
         }
     }
 
+
+    suspend fun waitForContentUploadCompletion(
+        endpoint: Endpoint,
+        contentEntryVersionUid: Long,
+        timeout: Int = 15,
+    ) {
+        val db: UmAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
+        val transferJobFlow = db.doorFlow(arrayOf("TransferJob", "TransferJobItem")) {
+            db.transferJobDao.findJobByEntityAndTableUid(
+                tableId = ContentEntryVersion.TABLE_ID,
+                entityUid = contentEntryVersionUid,
+            )
+        }
+
+        transferJobFlow.filter {
+            it.size == 1 && it.first().tjStatus == TransferJobItemStatus.STATUS_COMPLETE_INT
+        }.test(timeout = timeout.seconds, name = "Transfer job for #$contentEntryVersionUid should complete") {
+            awaitItem()
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
 
     override fun close() {
         di.direct.instance<Scheduler>().shutdown()
