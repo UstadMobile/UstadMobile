@@ -201,11 +201,12 @@ class XferTestNode(
             "Manifest stored on node should have same number of entries")
         manifest.entries.forEach { entry ->
             val cacheResponse = httpCache.retrieve(requestBuilder(entry.bodyDataUrl))
-            assertNotNull(cacheResponse, "Cache response for ${entry.uri} must not be null")
+            assertNotNull(cacheResponse,
+                "Cache response for ${entry.uri} must not be null on node $name")
             val integrityStored = sha256Integrity(
                 cacheResponse.bodyAsSource()!!.buffered().useAndReadySha256())
             assertEquals(entry.integrity, integrityStored, "Integrity for ${entry.uri} " +
-                    "should match integrity of actual body data")
+                    "should match integrity of actual body data on node $name")
         }
     }
 

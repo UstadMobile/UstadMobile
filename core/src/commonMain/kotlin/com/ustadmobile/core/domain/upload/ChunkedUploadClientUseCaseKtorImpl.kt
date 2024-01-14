@@ -8,6 +8,7 @@ import com.ustadmobile.core.util.stringvalues.asIStringValues
 import com.ustadmobile.door.DoorUri
 import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.expectSuccess
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -140,6 +141,7 @@ class ChunkedUploadClientUseCaseKtorImpl(
                         }
                     }
 
+                    expectSuccess = true
                     setBody(ByteReadChannel(buffer, 0, chunk.size))
                 }
                 onProgress(chunk.start + chunk.size)

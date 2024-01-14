@@ -8,6 +8,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.xfertestnode.XferTestClient
 import com.ustadmobile.core.domain.blob.xfertestnode.XferTestNode
 import com.ustadmobile.core.domain.blob.xfertestnode.XferTestServer
+import com.ustadmobile.core.domain.blob.xfertestnode.XferTestServerInteceptor
 import com.ustadmobile.core.domain.contententry.importcontent.ImportContentEntryUseCase
 import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
 import com.ustadmobile.door.ext.DoorTag
@@ -16,12 +17,18 @@ import com.ustadmobile.door.flow.doorFlow
 import com.ustadmobile.lib.db.entities.ContentEntryImportJob
 import com.ustadmobile.util.test.ext.newFileFromResource
 import com.ustadmobile.util.test.initNapierLog
+import io.github.aakira.napier.Napier
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.call
+import io.ktor.server.request.uri
+import io.ktor.server.response.respondText
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.seconds
 
@@ -48,11 +55,11 @@ class SaveLocalUriAndManifestUploadIntegrationTest{
     private fun importAndVerifyManifest(
         contentEntryImportJob: ContentEntryImportJob,
         timeout: Int = 15,
-    ) {
-        val clientNode = XferTestClient(
+        serverNode: XferTestServer = XferTestServer(XferTestNode(temporaryFolder, "server")),
+        clientNode: XferTestClient = XferTestClient(
             XferTestNode(temporaryFolder, "client")
         )
-        val serverNode = XferTestServer(XferTestNode(temporaryFolder, "server"))
+    ) {
         try {
             val endpoint = Endpoint("http://localhost:${serverNode.port}/")
 
@@ -137,5 +144,36 @@ class SaveLocalUriAndManifestUploadIntegrationTest{
             )
         )
     }
+
+    @Test
+    fun givenValidXapiFile_whenUploadInterrupted_thenWillRetry() {
+        initNapierLog()
+        val uploadDataCount = AtomicInteger(0)
+        val interceptor: XferTestServerInteceptor = {
+            if(call.request.uri.endsWith("/upload-batch-data") &&
+                uploadDataCount.incrementAndGet() == 2
+            ) {
+                Napier.d("Interceptor Force Fail")
+                call.respondText("Interceptor Force Fail!", status = HttpStatusCode.InternalServerError)
+                finish()
+            }
+        }
+
+        val xapiFile = temporaryFolder.newFileFromResource(this::class.java,
+            "/com/ustadmobile/core/contenttype/ustad-tincan.zip")
+
+        importAndVerifyManifest(
+            contentEntryImportJob = ContentEntryImportJob(
+                sourceUri = xapiFile.toDoorUri().toString(),
+                cjiOriginalFilename = "ustad-tincan.zip",
+                cjiPluginId = H5PContentImporter.PLUGIN_ID,
+            ),
+            serverNode = XferTestServer(
+                node = XferTestNode(temporaryFolder, "server"),
+                ktorInterceptor = interceptor,
+            )
+        )
+    }
+
 
 }

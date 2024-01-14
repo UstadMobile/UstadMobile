@@ -11,6 +11,7 @@ import com.ustadmobile.lib.rest.api.blob.BlobUploadServerRoute
 import com.ustadmobile.lib.rest.ext.clientProtocolAndHost
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.ApplicationCall
+import io.ktor.server.application.ApplicationCallPipeline
 import io.ktor.server.application.install
 import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
@@ -19,6 +20,7 @@ import io.ktor.server.plugins.callloging.CallLogging
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
+import io.ktor.util.pipeline.PipelineContext
 import kotlinx.io.files.Path
 import org.kodein.di.DI
 import org.kodein.di.bind
@@ -32,13 +34,20 @@ import org.kodein.di.scoped
 import org.kodein.di.singleton
 import java.io.File
 
+
+typealias XferTestServerInteceptor = suspend PipelineContext<Unit, ApplicationCall>.(Unit) -> Unit
+
 /**
  * Contains the dependencies required to act as a server for blob transfer testing, including a
  * KTOR server and the required Route(s) to receive blob uploads.
+ *
+ * @param ktorInterceptor an optional interceptor. This can be used to fail requests for testing
+ *        purposes.
  */
 class XferTestServer(
     val node: XferTestNode,
     val port: Int = 8094,
+    val ktorInterceptor: XferTestServerInteceptor? = null,
 ) {
 
     private val ktorServer: ApplicationEngine
@@ -59,7 +68,7 @@ class XferTestServer(
                 )
             }
 
-            registerContextTranslator {call: ApplicationCall ->
+            registerContextTranslator { call: ApplicationCall ->
                 Endpoint(call.request.clientProtocolAndHost())
             }
         }
@@ -72,6 +81,11 @@ class XferTestServer(
 
             di {
                 extend(di)
+            }
+
+            val interceptorVal = ktorInterceptor
+            if(interceptorVal != null) {
+                intercept(ApplicationCallPipeline.Setup, interceptorVal)
             }
 
             routing {

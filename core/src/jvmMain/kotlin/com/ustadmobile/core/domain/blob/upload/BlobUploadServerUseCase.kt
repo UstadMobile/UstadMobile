@@ -155,6 +155,7 @@ class BlobUploadServerUseCase(
     suspend fun onStartUploadSession(
         request: BlobUploadRequest
     ) : BlobUploadResponse{
+        val logPrefix = "BlobUploadServerUseCase#onStartUploadSession(upload ${request.batchUuid}): "
         //Ensure that this is a validated UUID e.g. filter malicious or invalid paths
         UUID.fromString(request.batchUuid)
 
@@ -188,6 +189,20 @@ class BlobUploadServerUseCase(
                 }
             }
         )
+        val partialUploads = newResponse.blobsToUpload.filter {
+            it.fromByte > 0
+        }
+
+        Napier.d {
+            "$logPrefix batch upload init: " +
+            " Client list ${request.blobs.size} blobs. " +
+            "${newResponse.blobsToUpload.size} uploads pending ($partialUploads partial)"
+        }
+
+        Napier.takeIf { partialUploads.isNotEmpty() }?.v {
+            "$logPrefix Partial uploads pending = ${partialUploads.joinToString { it.blobUrl }}"
+        }
+
         responseCache.put(request.batchUuid, newResponse)
 
         return newResponse

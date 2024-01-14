@@ -1,8 +1,8 @@
 package com.ustadmobile.core.domain.blob.upload
 
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCaseJvm.Companion.RETRY_WAIT_SECONDS
 import com.ustadmobile.core.util.ext.getIntOrNull
+import com.ustadmobile.core.util.ext.retryWait
 import com.ustadmobile.door.util.systemTimeInMillis
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.runBlocking
@@ -46,7 +46,7 @@ class BlobUploadClientJob: Job {
                                 context.trigger.key.group
                             )
                         )
-                        .startAt(Date(systemTimeInMillis() + (RETRY_WAIT_SECONDS * 1000)))
+                        .startAt(Date(systemTimeInMillis() + context.scheduler.retryWait))
                         .build()
                     val jobDetail = JobBuilder.newJob(BlobUploadClientJob::class.java)
                         .usingJobData(context.mergedJobDataMap)

@@ -17,6 +17,7 @@ import com.ustadmobile.core.domain.blob.upload.UpdateFailedTransferJobUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.ImportContentEntryUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
+import com.ustadmobile.core.util.ext.retryWait
 import com.ustadmobile.door.RepositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
@@ -44,9 +45,13 @@ import kotlin.time.Duration.Companion.seconds
  * Contains the dependencies required to act as a client for blob transfer test purposes e.g.
  * UploadClient, EnqueueBlobUploadClient, ChunkedUploadClient, etc. These dependencies can then be
  * tested with XferTestServer.
+ *
+ * @param schedulerRetryWait The retry time. In production this is 10 seconds, for testing, this is
+ * 500ms by default.
  */
 class XferTestClient(
     val node: XferTestNode,
+    schedulerRetryWait: Long = 500,
 ) : Closeable {
 
     val di: DI
@@ -61,6 +66,7 @@ class XferTestClient(
                 val schedulerFactory = StdSchedulerFactory()
                 schedulerFactory.scheduler.also {
                     it.context.put("di", di)
+                    it.retryWait = schedulerRetryWait
                 }
             }
 
