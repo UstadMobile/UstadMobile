@@ -2,6 +2,7 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import kotlinx.serialization.Serializable
 
 /**
  * To be used by BlobUploadClient and content downloader. Provides database storage so that:
@@ -14,6 +15,7 @@ import androidx.room.PrimaryKey
  * @param tjStatus Status int as per TransferJobItemStatus
  */
 @Entity
+@Serializable
 data class TransferJob(
     @PrimaryKey(autoGenerate = true)
     var tjUid: Int = 0,

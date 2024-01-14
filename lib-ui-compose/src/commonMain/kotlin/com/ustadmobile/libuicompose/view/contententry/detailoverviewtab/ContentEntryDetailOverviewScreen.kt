@@ -43,6 +43,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 import com.ustadmobile.lib.db.entities.ContentJobItemProgress
 import com.ustadmobile.libuicompose.components.UstadQuickActionButton
 import dev.icerock.moko.resources.compose.stringResource
+import kotlin.math.max
 
 @Composable
 fun ContentEntryDetailOverviewScreen(
@@ -104,6 +105,23 @@ fun ContentEntryDetailOverviewScreen(
                     Text(stringResource(MR.strings.open))
                 }
             }
+        }
+
+        items(
+            items = uiState.activeTransferJobs,
+            key = { item -> item.transferJob?.tjUid ?: 0}
+        ) { item ->
+            ListItem(
+                headlineContent = {
+                    LinearProgressIndicator(
+                        modifier = Modifier.fillMaxWidth(),
+                        progress = (item.transferred.toFloat() / max(item.totalSize.toFloat(), 1f))
+                    )
+                },
+                supportingContent = {
+                    Text(stringResource(MR.strings.uploading))
+                }
+            )
         }
 
         items(

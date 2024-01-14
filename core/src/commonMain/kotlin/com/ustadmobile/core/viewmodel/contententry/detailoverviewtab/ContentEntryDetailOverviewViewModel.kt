@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import com.ustadmobile.core.MR
+import com.ustadmobile.lib.db.composites.TransferJobAndTotals
 
 data class ContentEntryDetailOverviewUiState(
 
@@ -33,12 +34,13 @@ data class ContentEntryDetailOverviewUiState(
 
     val availableTranslations: List<ContentEntryRelatedEntryJoinWithLanguage> = emptyList(),
 
-    val activeContentJobItems: List<ContentJobItemProgress> = emptyList()
+    val activeContentJobItems: List<ContentJobItemProgress> = emptyList(),
+
+    val activeTransferJobs: List<TransferJobAndTotals> = emptyList(),
 
 ) {
     val scoreProgressVisible: Boolean
-        get() = scoreProgress?.progress != null
-                && scoreProgress.progress > 0
+        get() = scoreProgress?.progress != null && scoreProgress.progress > 0
 
     val authorVisible: Boolean
         get() = !contentEntry?.author.isNullOrBlank()
@@ -107,6 +109,18 @@ class ContentEntryDetailOverviewViewModel(
                             }else {
                                 prev
                             }
+                        }
+                    }
+                }
+
+                launch {
+                    activeDb.transferJobDao.findByContentEntryUidWithTotalsAsFlow(
+                        contentEntryUid = entityUidArg,
+                    ).collect {
+                        _uiState.update { prev ->
+                            prev.copy(
+                                activeTransferJobs = it
+                            )
                         }
                     }
                 }
