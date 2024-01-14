@@ -1,5 +1,6 @@
 package com.ustadmobile.core.domain.blob.xfertestnode
 
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.contentformats.epub.XhtmlFixer
 import com.ustadmobile.core.contentformats.epub.XhtmlFixerJsoup
@@ -48,11 +49,13 @@ import kotlin.test.assertNotNull
 
 /**
  * Holds dependencies used by both BlobUploadTestNode
+ * @param dbUrl can be used to give a custom dbUrl e.g. if debugging something, save the database for autopsy
  */
 @OptIn(ExperimentalXmlUtilApi::class)
 class XferTestNode(
     val temporaryFolder: TemporaryFolder,
     val name: String,
+    val dbUrl: (Endpoint) -> String = { "jdbc:sqlite::memory:" }
 ) {
 
     val endpointScope = EndpointScope()
@@ -83,7 +86,7 @@ class XferTestNode(
         httpCache = UstadCacheBuilder(
             dbUrl = "jdbc:sqlite::memory:",
             storagePath = Path(cacheDir.absolutePath),
-            logger = NapierLoggingAdapter(),
+            logger = null,
             cacheName = "client",
         ).build()
 
@@ -123,6 +126,14 @@ class XferTestNode(
         deleteUrisUseCase = DeleteUrisUseCaseCommonJvm(isTempFileCheckerUseCase)
 
         di = DI {
+            bind<HttpClient>() with singleton {
+                httpClient
+            }
+
+            bind<OkHttpClient>() with singleton {
+                okHttpClient
+            }
+
             bind<SaveLocalUrisAsBlobsUseCase>() with scoped(endpointScope).singleton {
                 SaveLocalUrisAsBlobsUseCaseJvm(
                     endpoint = context,
@@ -146,7 +157,7 @@ class XferTestNode(
             }
 
             bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(endpointScope).singleton {
-                DatabaseBuilder.databaseBuilder(UmAppDatabase::class, "jdbc:sqlite::memory:", nodeId = 1L)
+                DatabaseBuilder.databaseBuilder(UmAppDatabase::class, dbUrl(context), nodeId = 1L)
                     .build().also {
                         dbsToClose.add(it)
                     }

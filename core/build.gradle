@@ -206,6 +206,8 @@ kotlin {
 
                 implementation "net.bytebuddy:byte-buddy:$version_byte_buddy"
                 implementation "app.cash.turbine:turbine:$version_turbine"
+
+                implementation "io.ktor:ktor-server-call-logging:$version_ktor"
             }
         }
 

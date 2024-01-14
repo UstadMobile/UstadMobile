@@ -9,8 +9,10 @@ import com.ustadmobile.core.domain.blob.xfertestnode.XferTestClient
 import com.ustadmobile.core.domain.blob.xfertestnode.XferTestNode
 import com.ustadmobile.core.domain.blob.xfertestnode.XferTestServer
 import com.ustadmobile.core.domain.contententry.importcontent.ImportContentEntryUseCase
+import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.toDoorUri
+import com.ustadmobile.door.flow.doorFlow
 import com.ustadmobile.lib.db.entities.ContentEntryImportJob
 import com.ustadmobile.util.test.ext.newFileFromResource
 import com.ustadmobile.util.test.initNapierLog
@@ -21,16 +23,20 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 import kotlin.test.Test
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * This is a high-fidelity integration test to test to verify that content added and manifested on
  * a client is correctly uploaded to the server. The server runs over http and no mocks are used.
  *
  * This tests the whole cycle of:
- *   1) Client manifests and stores content in its local cache
+ *   1) Client manifests and stores content in its own local cache correctly
  *   2) Client uploads everything in the manifest to the server
  *   3) The server can serve all the blobs (e.g. as per ContentManifestEntry.bodyDataUrl and
- *      /api/content/path/in/manifest correctly
+ *      /api/content/path/in/manifest correctly)
+ *   4) Client replicates the ContentEntryVersion entity to the server once the upload is finished
+ *      (if this is not in the server database, the server will not recognize that the
+ *      ContentEntryVersion is available to open, and opening it on any client will fail).
  */
 class SaveLocalUriAndManifestUploadIntegrationTest{
 
@@ -40,9 +46,12 @@ class SaveLocalUriAndManifestUploadIntegrationTest{
 
 
     private fun importAndVerifyManifest(
-        contentEntryImportJob: ContentEntryImportJob
+        contentEntryImportJob: ContentEntryImportJob,
+        timeout: Int = 15,
     ) {
-        val clientNode = XferTestClient(XferTestNode(temporaryFolder, "client"))
+        val clientNode = XferTestClient(
+            XferTestNode(temporaryFolder, "client")
+        )
         val serverNode = XferTestServer(XferTestNode(temporaryFolder, "server"))
         try {
             val endpoint = Endpoint("http://localhost:${serverNode.port}/")
@@ -55,11 +64,31 @@ class SaveLocalUriAndManifestUploadIntegrationTest{
                 val jobUid = clientDb.contentEntryImportJobDao.insertJobItem(contentEntryImportJob)
 
                 val entryVersion = importContentUseCase(jobUid)
-                clientNode.waitForContentUploadCompletion(endpoint, entryVersion.cevUid)
+                clientNode.waitForContentUploadCompletion(
+                    endpoint = endpoint,
+                    contentEntryVersionUid = entryVersion.cevUid,
+                    timeout = timeout
+                )
                 val manifestOnClient = clientNode.node.getManifest(entryVersion.cevSitemapUrl!!)
 
                 clientNode.node.assertManifestStoredOnNode(manifestOnClient, entryVersion.cevSitemapUrl!!)
                 serverNode.node.assertManifestStoredOnNode(manifestOnClient, entryVersion.cevSitemapUrl!!)
+
+                /*
+                 * Server MUST receive the ContentEntryVersion entity in its database via replication,
+                 * otherwise any clients will not know that the ContentEntryVersion exists and it will
+                 * not be possible to open
+                 */
+                val serverDb: UmAppDatabase = serverNode.di.direct.on(endpoint)
+                    .instance(tag = DoorTag.TAG_DB)
+                serverDb.doorFlow(arrayOf("ContentEntryVersion")) {
+                    serverDb.contentEntryVersionDao.findByUidAsync(entryVersion.cevUid)
+                }.assertItemReceived(
+                    timeout = timeout.seconds,
+                    name = "Server should have ContentEntryVersion entity id #${entryVersion.cevUid}"
+                ) {
+                    it != null && it.cevSitemapUrl == entryVersion.cevSitemapUrl
+                }
             }
         }finally {
             clientNode.close()
@@ -95,7 +124,7 @@ class SaveLocalUriAndManifestUploadIntegrationTest{
         )
     }
 
-    //Current timing: 6.9sec
+    //Current timing: 6-7sec
     @Test
     fun givenValidH5p_whenImportedOnClient_thenWillBeUploadedToServer() {
         val h5pFile = temporaryFolder.newFileFromResource(this::class.java,

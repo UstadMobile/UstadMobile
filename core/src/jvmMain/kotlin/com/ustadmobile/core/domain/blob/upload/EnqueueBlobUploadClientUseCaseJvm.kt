@@ -5,6 +5,7 @@ import com.ustadmobile.core.connectivitymonitor.ConnectivityTriggerGroupControll
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.db.entities.TransferJob
 import com.ustadmobile.libcache.UstadCache
+import io.github.aakira.napier.Napier
 import org.quartz.JobBuilder
 import org.quartz.Scheduler
 import org.quartz.TriggerBuilder
@@ -44,6 +45,8 @@ class EnqueueBlobUploadClientUseCaseJvm(
             .startNow()
             .build()
 
+        Napier.d("EnqueueBlobUploadClientUseCase($batchUuid): scheduled job " +
+                "#${transferJob.tjUid} via quartz")
         scheduler.scheduleJob(quartzJob, jobTrigger)
 
         return transferJob

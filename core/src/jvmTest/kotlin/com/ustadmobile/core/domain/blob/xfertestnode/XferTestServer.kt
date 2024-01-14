@@ -1,8 +1,11 @@
 package com.ustadmobile.core.domain.blob.xfertestnode
 
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
 import com.ustadmobile.core.domain.blob.upload.BlobUploadServerUseCase
 import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.http.DoorHttpServerConfig
 import com.ustadmobile.lib.rest.CacheRoute
 import com.ustadmobile.lib.rest.api.blob.BlobUploadServerRoute
 import com.ustadmobile.lib.rest.ext.clientProtocolAndHost
@@ -12,6 +15,7 @@ import io.ktor.server.application.install
 import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import io.ktor.server.plugins.callloging.CallLogging
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
@@ -39,28 +43,35 @@ class XferTestServer(
 
     private val ktorServer: ApplicationEngine
 
+    val di: DI
+
     init {
+        di = DI {
+            extend(node.di)
+
+            bind<BlobUploadServerUseCase>() with scoped(node.endpointScope).singleton {
+                val rootTmpDir = instance<File>(tag = DiTag.TAG_TMP_DIR)
+                BlobUploadServerUseCase(
+                    httpCache = instance(),
+                    tmpDir = Path(File(rootTmpDir, "blob-upload-server").absolutePath),
+                    json = instance(),
+                    saveLocalUrisAsBlobsUseCase = instance()
+                )
+            }
+
+            registerContextTranslator {call: ApplicationCall ->
+                Endpoint(call.request.clientProtocolAndHost())
+            }
+        }
+
         ktorServer = embeddedServer(Netty, port) {
             install(ContentNegotiation) {
                 json(json = node.di.direct.instance())
             }
+            install(CallLogging)
 
             di {
-                extend(node.di)
-
-                bind<BlobUploadServerUseCase>() with scoped(node.endpointScope).singleton {
-                    val rootTmpDir = instance<File>(tag = DiTag.TAG_TMP_DIR)
-                    BlobUploadServerUseCase(
-                        httpCache = instance(),
-                        tmpDir = Path(File(rootTmpDir, "blob-upload-server").absolutePath),
-                        json = instance(),
-                        saveLocalUrisAsBlobsUseCase = instance()
-                    )
-                }
-
-                registerContextTranslator {call: ApplicationCall ->
-                    Endpoint(call.request.clientProtocolAndHost())
-                }
+                extend(di)
             }
 
             routing {
@@ -77,6 +88,14 @@ class XferTestServer(
                         CacheRoute(
                             cache = node.httpCache
                         )
+                    }
+                }
+
+                route("UmAppDatabase") {
+                    UmAppDatabase_KtorRoute(
+                        DoorHttpServerConfig(json = di.direct.instance())
+                    ) { call ->
+                        di.on(call).direct.instance(tag = DoorTag.TAG_DB)
                     }
                 }
             }

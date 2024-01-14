@@ -242,12 +242,14 @@ class BlobUploadClientUseCaseJvm(
     }
 
     override suspend fun invoke(transferJobUid: Int) {
-        val logPrefix = "BlobUploadClientJvm (#$transferJobUid):"
+        val logPrefix = "BlobUploadClientUseCaseJvm (#$transferJobUid):"
         val transferJob = db.transferJobDao.findByUid(transferJobUid)
             ?: throw IllegalArgumentException("$logPrefix: TransferJob #$transferJobUid does not exist")
         val transferJobItems = db.transferJobItemDao.findByJobUid(transferJobUid)
         val batchUuid = transferJob.tjUuid
             ?: throw IllegalArgumentException("$logPrefix TransferJob has no uuid")
+
+        Napier.d("$logPrefix starting")
 
         coroutineScope {
             val transferJobItemStatusUpdater = TransferJobItemStatusUpdater(db, repo, this)
@@ -290,7 +292,7 @@ class BlobUploadClientUseCaseJvm(
                             "$numIncompleteItems TransferJobItem(s) pending")
                 }
 
-                Napier.i("$logPrefix Complete!")
+                Napier.i("$logPrefix Upload Complete!")
             }catch(e: Throwable) {
                 Napier.e("$logPrefix Exception. Attempt has failed.", e)
 
