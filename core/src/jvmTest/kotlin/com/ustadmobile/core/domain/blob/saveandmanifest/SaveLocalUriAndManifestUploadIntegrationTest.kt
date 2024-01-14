@@ -18,6 +18,7 @@ import com.ustadmobile.door.ext.concurrentSafeMapOf
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.flow.doorFlow
 import com.ustadmobile.lib.db.entities.ContentEntryImportJob
+import com.ustadmobile.lib.db.entities.ContentEntryVersion
 import com.ustadmobile.util.test.ext.newFileFromResource
 import com.ustadmobile.util.test.initNapierLog
 import io.github.aakira.napier.Napier
@@ -101,6 +102,24 @@ class SaveLocalUriAndManifestUploadIntegrationTest{
                     name = "Server should have ContentEntryVersion entity id #${entryVersion.cevUid}"
                 ) {
                     it != null && it.cevSitemapUrl == entryVersion.cevSitemapUrl
+                }
+
+                val allManifestUrls = manifestOnClient.entries.map {
+                    it.bodyDataUrl
+                }.distinct() +  entryVersion.cevSitemapUrl!!
+
+                /*
+                 * All urls referenced in the manifest should be retained within the cache
+                 */
+                serverDb.doorFlow(arrayOf("CacheLockJoin")) {
+                    serverDb.cacheLockJoinDao.findByTableIdAndEntityUid(
+                        tableId  = ContentEntryVersion.TABLE_ID,
+                        entityUid = entryVersion.cevUid
+                    )
+                }.assertItemReceived { cacheLocks ->
+                    val cacheLockUrlSet = cacheLocks.mapNotNull { it.cljUrl }.toSet()
+
+                    allManifestUrls.all { it in cacheLockUrlSet }
                 }
             }
         }finally {

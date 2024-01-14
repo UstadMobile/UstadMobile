@@ -151,6 +151,7 @@ class XferTestClient(
                     db = instance(tag = DoorTag.TAG_DB),
                     importersManager = instance(),
                     enqueueBlobUploadClientUseCase = instance<EnqueueBlobUploadClientUseCase>(),
+                    createRetentionLocksForManifestUseCase = instance(),
                     httpClient = node.httpClient,
                 )
             }

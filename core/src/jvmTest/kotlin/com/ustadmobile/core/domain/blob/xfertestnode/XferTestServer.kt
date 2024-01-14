@@ -3,6 +3,7 @@ package com.ustadmobile.core.domain.blob.xfertestnode
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
 import com.ustadmobile.core.domain.blob.upload.BlobUploadServerUseCase
+import com.ustadmobile.core.domain.cachelock.CreateCacheLocksForActiveContentEntryVersionUseCase
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.http.DoorHttpServerConfig
@@ -32,6 +33,7 @@ import org.kodein.di.on
 import org.kodein.di.registerContextTranslator
 import org.kodein.di.scoped
 import org.kodein.di.singleton
+import java.io.Closeable
 import java.io.File
 
 
@@ -54,6 +56,8 @@ class XferTestServer(
 
     val di: DI
 
+    private val diToClose = mutableListOf<Closeable>()
+
     init {
         di = DI {
             extend(node.di)
@@ -68,8 +72,24 @@ class XferTestServer(
                 )
             }
 
+            bind<CreateCacheLocksForActiveContentEntryVersionUseCase>() with scoped(node.endpointScope).singleton {
+                CreateCacheLocksForActiveContentEntryVersionUseCase(
+                    db = instance(tag = DoorTag.TAG_DB),
+                    httpClient = instance(),
+                    endpoint = context,
+                    createRetentionLocksForManifestUseCase = instance()
+                ).also {
+                    diToClose.add(it)
+                }
+            }
+
             registerContextTranslator { call: ApplicationCall ->
                 Endpoint(call.request.clientProtocolAndHost())
+            }
+
+            onReady {
+                val testEndpoint = Endpoint("http://localhost:$port/")
+                on(testEndpoint).instance<CreateCacheLocksForActiveContentEntryVersionUseCase>()
             }
         }
 
@@ -119,6 +139,7 @@ class XferTestServer(
     }
 
     fun close() {
+        diToClose.forEach { it.close() }
         ktorServer.stop()
         node.close()
     }

@@ -48,6 +48,8 @@ import com.ustadmobile.core.domain.blob.upload.UpdateFailedTransferJobUseCase
 import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseAndroid
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCase
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCaseCommonJvm
+import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCase
+import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCaseCommonJvm
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseAndroid
 import com.ustadmobile.core.domain.contententry.importcontent.ImportContentEntryUseCase
@@ -487,7 +489,14 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 db = instance(tag = DoorTag.TAG_DB),
                 importersManager = instance(),
                 enqueueBlobUploadClientUseCase = instance(),
+                createRetentionLocksForManifestUseCase = instance(),
                 httpClient = instance(),
+            )
+        }
+
+        bind<CreateRetentionLocksForManifestUseCase>() with scoped(EndpointScope.Default).singleton {
+            CreateRetentionLocksForManifestUseCaseCommonJvm(
+                cache = instance()
             )
         }
 

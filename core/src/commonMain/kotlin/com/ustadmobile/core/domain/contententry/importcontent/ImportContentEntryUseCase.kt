@@ -24,6 +24,7 @@ class ImportContentEntryUseCase(
     private val importersManager: ContentImportersManager,
     @Suppress("unused") //will be used - design in progress
     private val enqueueBlobUploadClientUseCase: EnqueueBlobUploadClientUseCase? = null,
+    private val createRetentionLocksForManifestUseCase: CreateRetentionLocksForManifestUseCase? = null,
     private val httpClient: HttpClient? = null,
 ) {
 
@@ -53,6 +54,11 @@ class ImportContentEntryUseCase(
             val manifestUrl = contentEntryVersionEntity.cevSitemapUrl
                 ?: throw IllegalStateException("imported entry has no manifest url")
             val manifest: ContentManifest = httpClient.get(manifestUrl).body()
+            val locksCreated = createRetentionLocksForManifestUseCase?.invoke(
+                contentEntryVersionUid = contentEntryVersionEntity.cevLct,
+                manifestUrl = manifestUrl,
+                manifest = manifest
+            )?.associate { it.url to it.lockId } ?: emptyMap()
 
             /*
              * It is possible that multiple entries in the same manifest can have the same SHA-256
@@ -64,13 +70,13 @@ class ImportContentEntryUseCase(
                     blobUrl = it.bodyDataUrl,
                     tableId = ContentEntryVersion.TABLE_ID,
                     entityUid = contentEntryVersionEntity.cevUid,
-                    retentionLockIdToRelease = 0,//Can create retention lock before
+                    retentionLockIdToRelease = locksCreated[it.bodyDataUrl] ?: 0,
                 )
             }.distinctBy { it.blobUrl } + EnqueueBlobUploadClientUseCase.EnqueueBlobUploadItem(
                 blobUrl = manifestUrl,
                 tableId = ContentEntryVersion.TABLE_ID,
                 entityUid = contentEntryVersionEntity.cevUid,
-                retentionLockIdToRelease = 0,
+                retentionLockIdToRelease = locksCreated[manifestUrl] ?: 0,
             )
 
             enqueueBlobUploadClientUseCaseVal(

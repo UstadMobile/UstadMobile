@@ -26,6 +26,8 @@ import com.ustadmobile.core.domain.blob.upload.UpdateFailedTransferJobUseCase
 import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseJvm
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCase
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCaseCommonJvm
+import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCase
+import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCaseCommonJvm
 import com.ustadmobile.core.domain.contententry.importcontent.ImportContentEntryUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseJvm
@@ -181,7 +183,14 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             db = instance(tag = DoorTag.TAG_DB),
             importersManager = instance(),
             enqueueBlobUploadClientUseCase = instance(),
+            createRetentionLocksForManifestUseCase = instance(),
             httpClient = instance()
+        )
+    }
+
+    bind<CreateRetentionLocksForManifestUseCase>() with scoped(EndpointScope.Default).singleton {
+        CreateRetentionLocksForManifestUseCaseCommonJvm(
+            cache = instance()
         )
     }
 

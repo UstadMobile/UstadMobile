@@ -8,6 +8,8 @@ import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCaseJvm
+import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCase
+import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCaseCommonJvm
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseCommonJvm
 import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
@@ -179,6 +181,11 @@ class XferTestNode(
                 rootTmpDir
             }
 
+            bind<CreateRetentionLocksForManifestUseCase>() with scoped(endpointScope).singleton {
+                CreateRetentionLocksForManifestUseCaseCommonJvm(
+                    cache = instance(),
+                )
+            }
         }
     }
 
