@@ -155,7 +155,7 @@ class BlobUploadClientUseCaseJvm(
             val contentLength = httpCache.retrieve(
                 requestBuilder(uploadItem.blobUrl)
             )?.requireHeadersContentLength() ?: throw IllegalArgumentException(
-                "${uploadItem.blobUrl} not available in cache!"
+                "${uploadItem.blobUrl} not available in cache or has no set content-length"
             )
             BlobUploadRequestItem(
                 blobUrl = uploadItem.blobUrl,
@@ -177,6 +177,33 @@ class BlobUploadClientUseCaseJvm(
                     )
                 )
             }.body()
+
+            val blobsToUploadUrls = response.blobsToUpload.map { it.blobUrl }.toSet()
+
+            /*
+             * When the server init response does not include a given item on the list of blob urls
+             * that need uploaded, this means the server already has it.
+             */
+            val serverAlreadyReceivedItems = blobUrls.filter {
+                it.blobUrl !in blobsToUploadUrls
+            }
+
+            serverAlreadyReceivedItems.forEach { uploadItem ->
+                val uploadRequestItem = urlToRequestItemMap[uploadItem.blobUrl]
+                    ?: throw IllegalStateException("Huh: ")
+                onProgress(
+                    BlobUploadClientUseCase.BlobUploadProgressUpdate(
+                        uploadItem = uploadItem,
+                        bytesTransferred = uploadRequestItem.size
+                    )
+                )
+                onStatusUpdate(
+                    BlobUploadClientUseCase.BlobUploadStatusUpdate(
+                        uploadItem = uploadItem,
+                        status = TransferJobItemStatus.STATUS_COMPLETE_INT,
+                    )
+                )
+            }
 
             val blobsAndResponses = response.blobsToUpload.map { blobItem ->
                 val blobUploadRequestItem = urlToRequestItemMap[blobItem.blobUrl]

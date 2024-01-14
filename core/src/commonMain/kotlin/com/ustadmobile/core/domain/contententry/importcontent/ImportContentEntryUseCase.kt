@@ -54,20 +54,27 @@ class ImportContentEntryUseCase(
                 ?: throw IllegalStateException("imported entry has no manifest url")
             val manifest: ContentManifest = httpClient.get(manifestUrl).body()
 
-            enqueueBlobUploadClientUseCaseVal(
-                items = manifest.entries.map {
-                    EnqueueBlobUploadClientUseCase.EnqueueBlobUploadItem(
-                        blobUrl = it.bodyDataUrl,
-                        tableId = ContentEntryVersion.TABLE_ID,
-                        entityUid = contentEntryVersionEntity.cevUid,
-                        retentionLockIdToRelease = 0,//Can create retention lock before
-                    )
-                } + EnqueueBlobUploadClientUseCase.EnqueueBlobUploadItem(
-                    blobUrl = manifestUrl,
+            /*
+             * It is possible that multiple entries in the same manifest can have the same SHA-256
+             * sum, and therefor, would have the same blob url. Duplicates need to be eliminated
+             * (using .distinctBy )
+             */
+            val entriesToUpload = manifest.entries.map {
+                EnqueueBlobUploadClientUseCase.EnqueueBlobUploadItem(
+                    blobUrl = it.bodyDataUrl,
                     tableId = ContentEntryVersion.TABLE_ID,
                     entityUid = contentEntryVersionEntity.cevUid,
-                    retentionLockIdToRelease = 0,
-                ),
+                    retentionLockIdToRelease = 0,//Can create retention lock before
+                )
+            }.distinctBy { it.blobUrl } + EnqueueBlobUploadClientUseCase.EnqueueBlobUploadItem(
+                blobUrl = manifestUrl,
+                tableId = ContentEntryVersion.TABLE_ID,
+                entityUid = contentEntryVersionEntity.cevUid,
+                retentionLockIdToRelease = 0,
+            )
+
+            enqueueBlobUploadClientUseCaseVal(
+                items = entriesToUpload,
                 batchUuid = randomUuidAsString()
             )
         }

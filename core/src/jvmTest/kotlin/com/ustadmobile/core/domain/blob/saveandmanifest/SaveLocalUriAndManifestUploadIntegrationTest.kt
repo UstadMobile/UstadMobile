@@ -1,6 +1,7 @@
 package com.ustadmobile.core.domain.blob.saveandmanifest
 
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.contentformats.h5p.H5PContentImporter
 import com.ustadmobile.core.contentformats.pdf.AbstractPdfContentImportCommonJvm
 import com.ustadmobile.core.contentformats.xapi.XapiZipContentImporter
 import com.ustadmobile.core.db.UmAppDatabase
@@ -92,7 +93,20 @@ class SaveLocalUriAndManifestUploadIntegrationTest{
                 cjiPluginId = XapiZipContentImporter.PLUGIN_ID,
             )
         )
+    }
 
+    //Current timing: 6.9sec
+    @Test
+    fun givenValidH5p_whenImportedOnClient_thenWillBeUploadedToServer() {
+        val h5pFile = temporaryFolder.newFileFromResource(this::class.java,
+            "/com/ustadmobile/core/contenttype/dialog-cards-620.h5p")
+        importAndVerifyManifest(
+            ContentEntryImportJob(
+                sourceUri = h5pFile.toDoorUri().toString(),
+                cjiOriginalFilename = "dialog-cards-620.h5p",
+                cjiPluginId = H5PContentImporter.PLUGIN_ID,
+            )
+        )
     }
 
 }
