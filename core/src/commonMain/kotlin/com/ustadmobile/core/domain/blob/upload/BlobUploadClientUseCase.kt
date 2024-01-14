@@ -1,7 +1,6 @@
 package com.ustadmobile.core.domain.blob.upload
 
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.domain.upload.DEFAULT_CHUNK_SIZE
 
 /**
  * Client to upload a batch of blobs to the given endpoint:
@@ -60,7 +59,6 @@ interface BlobUploadClientUseCase {
         endpoint: Endpoint,
         onProgress: (BlobUploadProgressUpdate) -> Unit = { },
         onStatusUpdate: (BlobUploadStatusUpdate) -> Unit = { },
-        chunkSize: Int = DEFAULT_CHUNK_SIZE,
     )
 
     /**

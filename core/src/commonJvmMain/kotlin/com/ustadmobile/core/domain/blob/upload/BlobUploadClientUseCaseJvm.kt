@@ -23,6 +23,7 @@ import kotlinx.io.readTo
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.transferjobitem.TransferJobItemStatusUpdater
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientChunkGetterUseCase
+import com.ustadmobile.core.domain.upload.DEFAULT_CHUNK_SIZE
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.composites.TransferJobItemStatus
 import com.ustadmobile.libcache.response.requireHeadersContentLength
@@ -40,6 +41,7 @@ class BlobUploadClientUseCaseJvm(
     private val db: UmAppDatabase,
     private val repo: UmAppDatabase,
     private val endpoint: Endpoint,
+    private val chunkSize: Int = DEFAULT_CHUNK_SIZE,
 ): BlobUploadClientUseCase {
 
     /*
@@ -145,7 +147,6 @@ class BlobUploadClientUseCaseJvm(
         endpoint: Endpoint,
         onProgress: (BlobUploadClientUseCase.BlobUploadProgressUpdate) -> Unit,
         onStatusUpdate: (BlobUploadClientUseCase.BlobUploadStatusUpdate) -> Unit,
-        chunkSize: Int,
     ) {
         val blobToUploadItemMap = blobUrls.associateBy {
             it.blobUrl
@@ -241,7 +242,9 @@ class BlobUploadClientUseCaseJvm(
         }
     }
 
-    override suspend fun invoke(transferJobUid: Int) {
+    override suspend fun invoke(
+        transferJobUid: Int,
+    ) {
         val logPrefix = "BlobUploadClientUseCaseJvm (#$transferJobUid):"
         val transferJob = db.transferJobDao.findByUid(transferJobUid)
             ?: throw IllegalArgumentException("$logPrefix: TransferJob #$transferJobUid does not exist")

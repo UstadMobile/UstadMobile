@@ -10,8 +10,11 @@ import com.ustadmobile.core.domain.blob.xfertestnode.XferTestNode
 import com.ustadmobile.core.domain.blob.xfertestnode.XferTestServer
 import com.ustadmobile.core.domain.blob.xfertestnode.XferTestServerInteceptor
 import com.ustadmobile.core.domain.contententry.importcontent.ImportContentEntryUseCase
+import com.ustadmobile.core.domain.upload.HEADER_UPLOAD_START_BYTE
+import com.ustadmobile.core.domain.upload.HEADER_UPLOAD_UUID
 import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.ext.concurrentSafeMapOf
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.flow.doorFlow
 import com.ustadmobile.lib.db.entities.ContentEntryImportJob
@@ -20,6 +23,7 @@ import com.ustadmobile.util.test.initNapierLog
 import io.github.aakira.napier.Napier
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
+import io.ktor.server.request.header
 import io.ktor.server.request.uri
 import io.ktor.server.response.respondText
 import kotlinx.coroutines.runBlocking
@@ -28,8 +32,10 @@ import org.junit.rules.TemporaryFolder
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
-import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicReference
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.time.Duration.Companion.seconds
 
 /**
@@ -145,17 +151,44 @@ class SaveLocalUriAndManifestUploadIntegrationTest{
         )
     }
 
+    /**
+     * This interrupted upload test uses an interceptor to fail one (mid-range) upload chunk and
+     * verifies that, after resuming, all verifications are passing as for any other request. It also
+     * verifies that the upload was in fact resumed by ensuring there are no duplicate requests for
+     * already-uploaded bytes
+     */
     @Test
     fun givenValidXapiFile_whenUploadInterrupted_thenWillRetry() {
         initNapierLog()
-        val uploadDataCount = AtomicInteger(0)
+        val failedUuid = AtomicReference<String?>(null)
+
+        //map of upload item uuid to a list of the starting byte for the given request
+        val uploadDataFromRequestMap = concurrentSafeMapOf<String, MutableList<Int>>()
+
         val interceptor: XferTestServerInteceptor = {
-            if(call.request.uri.endsWith("/upload-batch-data") &&
-                uploadDataCount.incrementAndGet() == 2
-            ) {
-                Napier.d("Interceptor Force Fail")
-                call.respondText("Interceptor Force Fail!", status = HttpStatusCode.InternalServerError)
-                finish()
+            if(call.request.uri.endsWith("/upload-batch-data")) {
+                val requestUuid = call.request.header(HEADER_UPLOAD_UUID)!!
+                val fromByte = call.request.header(HEADER_UPLOAD_START_BYTE)?.toInt() ?: 0
+
+                uploadDataFromRequestMap.getOrPut(requestUuid) {
+                    mutableListOf()
+                }.add(fromByte)
+
+                if(failedUuid.get() == null) {
+                    /*
+                     * Fail the first request where the fromByte is greater than zero e.g. force
+                     * resumption
+                     */
+                    val failThis = (fromByte > 0) && failedUuid.getAndUpdate { prev ->
+                        requestUuid
+                    } == null
+
+                    if(failThis) {
+                        Napier.d("Interceptor Force Fail: $requestUuid")
+                        call.respondText("Interceptor Force Fail!", status = HttpStatusCode.InternalServerError)
+                        finish()
+                    }
+                }
             }
         }
 
@@ -171,8 +204,22 @@ class SaveLocalUriAndManifestUploadIntegrationTest{
             serverNode = XferTestServer(
                 node = XferTestNode(temporaryFolder, "server"),
                 ktorInterceptor = interceptor,
+            ),
+            clientNode = XferTestClient(
+                node = XferTestNode(temporaryFolder, "client"),
+                uploadChunkSize = 10_000,
             )
         )
+
+        val failedUuidVal = failedUuid.get()
+        assertNotNull(failedUuidVal, "One UUID upload was failed by the test")
+
+        /*
+         * Verify that this did in fact resume: the initial upload chunk should not have been
+         * re-uploaded.
+         */
+        val startFromBytesForFailedUuid = uploadDataFromRequestMap[failedUuidVal]!!
+        assertEquals(1, startFromBytesForFailedUuid.count { it == 0 })
     }
 
 

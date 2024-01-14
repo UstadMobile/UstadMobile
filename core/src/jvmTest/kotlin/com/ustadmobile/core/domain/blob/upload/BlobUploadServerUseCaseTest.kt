@@ -174,7 +174,7 @@ class BlobUploadServerUseCaseTest {
 
             //now simulate partial upload of the second
             val secondFileUploadUuid = firstResponse.blobsToUpload.first().uploadUuid
-            val secondFilePath = Path(tmpPath, batchUuid.toString(), secondFileUploadUuid)
+            val secondFilePath = Path(tmpPath, secondFileUploadUuid)
             SystemFileSystem.createDirectories(Path(tmpPath, batchUuid.toString()))
             val numOfBytesPartiallyUploaded = 10000L
             testUploads[1].tmpFile.inputStream().range(0, numOfBytesPartiallyUploaded - 1).use { partialIn ->

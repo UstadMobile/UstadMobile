@@ -232,7 +232,7 @@ class BlobUploadClientUseCaseJvmTest {
         )
 
         val useCase = BlobUploadClientUseCaseJvm(
-            mockChunkedUploadUseCase, httpClient, mockCache, mockDatabase, mockDatabase, endpoint
+            mockChunkedUploadUseCase, httpClient, mockCache, mockDatabase, mockDatabase, endpoint, testChunkSize,
         )
 
 
@@ -255,7 +255,6 @@ class BlobUploadClientUseCaseJvmTest {
                 batchUuid = batchUuid.toString(),
                 endpoint = endpoint,
                 onProgress = { },
-                chunkSize = testChunkSize,
             )
         }
 
@@ -320,7 +319,7 @@ class BlobUploadClientUseCaseJvmTest {
         }
 
         val useCase = BlobUploadClientUseCaseJvm(
-            mockChunkedUploadUseCase, httpClient, mockCache, mockDatabase, mockDatabase, endpoint
+            mockChunkedUploadUseCase, httpClient, mockCache, mockDatabase, mockDatabase, endpoint, testChunkSize
         )
         runBlocking {
             try {
@@ -331,7 +330,6 @@ class BlobUploadClientUseCaseJvmTest {
                     batchUuid = batchUuid.toString(),
                     endpoint = endpoint,
                     onProgress = { },
-                    chunkSize = testChunkSize,
                 )
                 throw IllegalStateException("Shouldnt make it here")
             }catch(e: Throwable) {
@@ -378,7 +376,7 @@ class BlobUploadClientUseCaseJvmTest {
             }
 
             val useCase = BlobUploadClientUseCaseJvm(
-                mockChunkedUploadUseCase, httpClient, mockCache, realDatabase, realDatabase, endpoint
+                mockChunkedUploadUseCase, httpClient, mockCache, realDatabase, realDatabase, endpoint, testChunkSize,
             )
 
             try {

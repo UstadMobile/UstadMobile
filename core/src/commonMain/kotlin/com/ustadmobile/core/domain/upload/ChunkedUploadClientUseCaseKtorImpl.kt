@@ -135,6 +135,7 @@ class ChunkedUploadClientUseCaseKtorImpl(
                 val response = httpClient.post(remoteUrl) {
                     header(HEADER_UPLOAD_UUID, uploadUuid)
                     header(HEADER_IS_FINAL_CHUNK, chunk.isLastChunk.toString())
+                    header(HEADER_UPLOAD_START_BYTE, chunk.start.toString())
                     chunkResponseInfo?.extraHeaders?.forEach { extraHeader ->
                         extraHeader.value.forEach { headerVal ->
                             header(extraHeader.key, headerVal)

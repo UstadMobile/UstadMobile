@@ -126,8 +126,7 @@ class BlobUploadServerUseCase(
         return responseCache.get(
             key = batchUuid
         ) {
-            val batchPath = Path(tmpDir, batchUuid)
-            val existingResponsePath = Path(batchPath, RESPONSE_JSON_FILENAME)
+            val existingResponsePath = Path(tmpDir, batchUuid + RESPONSE_JSON_FILENAME_SUFFIX)
             if(fileSystem.exists(existingResponsePath)) {
                 json.decodeFromString(
                     deserializer = BlobUploadResponse.serializer(),
@@ -162,7 +161,6 @@ class BlobUploadServerUseCase(
         val urlsList = request.blobs.map {
             it.blobUrl
         }
-        val batchPath = Path(tmpDir, request.batchUuid)
         val urlsStatus = httpCache.hasEntries(urlsList.toSet())
         val existingResponse = loadResponse(request.batchUuid)
 
@@ -177,7 +175,7 @@ class BlobUploadServerUseCase(
                         existingResponseMap[blobToUploadRequest.blobUrl]
                     val uploadUuid = existingResponseItem?.uploadUuid
                         ?: UUID.randomUUID().toString()
-                    val existingResponseFilePath = Path(batchPath, uploadUuid)
+                    val existingResponseFilePath = Path(tmpDir, uploadUuid)
 
                     BlobUploadResponseItem(
                         blobUrl = blobToUploadRequest.blobUrl,
@@ -189,6 +187,7 @@ class BlobUploadServerUseCase(
                 }
             }
         )
+
         val partialUploads = newResponse.blobsToUpload.filter {
             it.fromByte > 0
         }
@@ -196,7 +195,7 @@ class BlobUploadServerUseCase(
         Napier.d {
             "$logPrefix batch upload init: " +
             " Client list ${request.blobs.size} blobs. " +
-            "${newResponse.blobsToUpload.size} uploads pending ($partialUploads partial)"
+            "${newResponse.blobsToUpload.size} uploads pending (${partialUploads.size} partial)"
         }
 
         Napier.takeIf { partialUploads.isNotEmpty() }?.v {
@@ -261,10 +260,9 @@ class BlobUploadServerUseCase(
     companion object {
 
         /**
-         * Each upload batch will have a directory. Inside that directory the endpoint will save a
-         * JSON to map the blob url to a unique upload uuid.
+         *
          */
-        const val RESPONSE_JSON_FILENAME = ".batch-blob-upload.json"
+        const val RESPONSE_JSON_FILENAME_SUFFIX = ".batch-blob-upload.json"
 
     }
 

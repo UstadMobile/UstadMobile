@@ -16,6 +16,7 @@ import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCaseJvm
 import com.ustadmobile.core.domain.blob.upload.UpdateFailedTransferJobUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.ImportContentEntryUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
+import com.ustadmobile.core.domain.upload.DEFAULT_CHUNK_SIZE
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 import com.ustadmobile.core.util.ext.retryWait
 import com.ustadmobile.door.RepositoryConfig
@@ -48,10 +49,13 @@ import kotlin.time.Duration.Companion.seconds
  *
  * @param schedulerRetryWait The retry time. In production this is 10 seconds, for testing, this is
  * 500ms by default.
+ * @param uploadChunkSize the chunk size for uploads. This can be reduced to allow testing of resumption
+ * with smaller uploads.
  */
 class XferTestClient(
     val node: XferTestNode,
     schedulerRetryWait: Long = 500,
+    uploadChunkSize: Int = DEFAULT_CHUNK_SIZE,
 ) : Closeable {
 
     val di: DI
@@ -117,6 +121,7 @@ class XferTestClient(
                     db = instance(tag = DoorTag.TAG_DB),
                     repo = instance(tag = DoorTag.TAG_REPO),
                     endpoint = context,
+                    chunkSize = uploadChunkSize,
                 )
             }
 
