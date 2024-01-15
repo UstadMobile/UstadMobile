@@ -1,7 +1,8 @@
 package com.ustadmobile.core.domain.blob.transferjobitem
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCase
+import com.ustadmobile.core.domain.blob.BlobTransferProgressUpdate
+import com.ustadmobile.core.domain.blob.BlobTransferStatusUpdate
 import com.ustadmobile.core.util.ext.lastDistinctBy
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.ext.withDoorTransactionAsync
@@ -29,10 +30,10 @@ class TransferJobItemStatusUpdater(
     private val finished = atomic(false)
 
     private val progressUpdates = atomic(
-        emptyList<BlobUploadClientUseCase.BlobUploadProgressUpdate>()
+        emptyList<BlobTransferProgressUpdate>()
     )
     private val statusUpdates = atomic(
-        emptyList<BlobUploadClientUseCase.BlobUploadStatusUpdate>()
+        emptyList<BlobTransferStatusUpdate>()
     )
 
     private val updateJob = scope.launch {
@@ -43,13 +44,13 @@ class TransferJobItemStatusUpdater(
     }
 
 
-    fun onProgressUpdate(update: BlobUploadClientUseCase.BlobUploadProgressUpdate) {
+    fun onProgressUpdate(update: BlobTransferProgressUpdate) {
         progressUpdates.update { prev ->
             prev + update
         }
     }
 
-    fun onStatusUpdate(update: BlobUploadClientUseCase.BlobUploadStatusUpdate) {
+    fun onStatusUpdate(update: BlobTransferStatusUpdate) {
         statusUpdates.update { prev ->
             prev + update
         }
@@ -70,10 +71,10 @@ class TransferJobItemStatusUpdater(
             statusUpdates.getAndSet(emptyList())
 
         val progressUpdatesToCommit = progressUpdatesToQueue.lastDistinctBy {
-            it.uploadItem.transferJobItemUid
+            it.transferItem.transferJobItemUid
         }
         val statusUpdatesToCommit = statusUpdatesToQueue.lastDistinctBy {
-            it.uploadItem.transferJobItemUid
+            it.transferItem.transferJobItemUid
         }
 
         val repoNodeId = (repo as? DoorDatabaseRepository)?.remoteNodeIdOrFake()
@@ -84,14 +85,14 @@ class TransferJobItemStatusUpdater(
         }?.withDoorTransactionAsync {
             progressUpdatesToCommit.forEach {
                 db.transferJobItemDao.updateTransferredProgress(
-                    jobItemUid = it.uploadItem.transferJobItemUid,
+                    jobItemUid = it.transferItem.transferJobItemUid,
                     transferred = it.bytesTransferred,
                 )
             }
 
             statusUpdatesToCommit.forEach {
                 db.transferJobItemDao.updateStatus(
-                    jobItemUid = it.uploadItem.transferJobItemUid,
+                    jobItemUid = it.transferItem.transferJobItemUid,
                     status = it.status
                 )
 
@@ -100,7 +101,7 @@ class TransferJobItemStatusUpdater(
                 if(it.status == TransferJobItemStatus.COMPLETE.value && repoNodeId != null) {
                     db.transferJobItemDao.insertOutgoingReplicationForTransferJobItemIfDone(
                         destNodeId = repoNodeId,
-                        transferJobItemUid = it.uploadItem.transferJobItemUid
+                        transferJobItemUid = it.transferItem.transferJobItemUid
                     )
                 }
             }

@@ -1,6 +1,9 @@
 package com.ustadmobile.core.domain.blob.upload
 
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.domain.blob.BlobTransferJobItem
+import com.ustadmobile.core.domain.blob.BlobTransferProgressUpdate
+import com.ustadmobile.core.domain.blob.BlobTransferStatusUpdate
 
 /**
  * Client to upload a batch of blobs to the given endpoint:
@@ -20,30 +23,6 @@ import com.ustadmobile.core.account.Endpoint
  */
 interface BlobUploadClientUseCase {
 
-    /**
-     * Represents the item to be uploaded
-     *
-     * @param blobUrl the blob URL.
-     * @param transferJobItemUid The TransferJobItem.tjiUid if the upload is connected to a TransferJobItem,
-     *        0 otherwise
-     * @param lockIdToRelease the id of the cache retention lock to release (if any)
-     */
-    data class BlobTransferJobItem(
-        val blobUrl: String,
-        val transferJobItemUid: Int,
-        val lockIdToRelease: Int = 0,
-    )
-
-    data class BlobUploadProgressUpdate(
-        val uploadItem: BlobTransferJobItem,
-        val bytesTransferred: Long,
-    )
-
-    data class BlobUploadStatusUpdate(
-        val uploadItem: BlobTransferJobItem,
-        val status: Int,
-    )
-
 
     /**
      * Run the blob upload itself.
@@ -57,8 +36,8 @@ interface BlobUploadClientUseCase {
         blobUrls: List<BlobTransferJobItem>,
         batchUuid: String,
         endpoint: Endpoint,
-        onProgress: (BlobUploadProgressUpdate) -> Unit = { },
-        onStatusUpdate: (BlobUploadStatusUpdate) -> Unit = { },
+        onProgress: (BlobTransferProgressUpdate) -> Unit = { },
+        onStatusUpdate: (BlobTransferStatusUpdate) -> Unit = { },
     )
 
     /**

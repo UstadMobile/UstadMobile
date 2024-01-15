@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.blob.savelocaluris
 
-import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCase
+import com.ustadmobile.core.domain.blob.BlobTransferJobItem
 import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCaseJvm
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
 import com.ustadmobile.core.io.ext.readSha256
@@ -75,7 +75,7 @@ class SaveLocalUrisAsBlobsUseCaseJvmIntegrationTest : AbstractSaveLocalUrisInteg
 
             blobUploadClientUseCase(
                 blobUrls = savedBlobs.map {
-                    BlobUploadClientUseCase.BlobTransferJobItem(it.blobUrl, transferJobItemUid = 0)
+                    BlobTransferJobItem(it.blobUrl, transferJobItemUid = 0)
                 },
                 batchUuid = UUID.randomUUID().toString(),
                 endpoint = endpoint,

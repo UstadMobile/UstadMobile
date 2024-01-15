@@ -2,6 +2,7 @@ package com.ustadmobile.core.domain.blob.upload
 
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.blob.BlobTransferJobItem
 import com.ustadmobile.core.domain.upload.ChunkInfo
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientChunkGetterUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
@@ -250,7 +251,7 @@ class BlobUploadClientUseCaseJvmTest {
         runBlocking {
             useCase(
                 blobUrls = itemsToUpload.map {
-                    BlobUploadClientUseCase.BlobTransferJobItem(it.blobUrl, 0)
+                    BlobTransferJobItem(it.blobUrl, 0)
                 },
                 batchUuid = batchUuid.toString(),
                 endpoint = endpoint,
@@ -325,7 +326,7 @@ class BlobUploadClientUseCaseJvmTest {
             try {
                 useCase(
                     blobUrls = itemsToUpload.map {
-                        BlobUploadClientUseCase.BlobTransferJobItem(it.blobUrl, 0)
+                        BlobTransferJobItem(it.blobUrl, 0)
                     },
                     batchUuid = batchUuid.toString(),
                     endpoint = endpoint,

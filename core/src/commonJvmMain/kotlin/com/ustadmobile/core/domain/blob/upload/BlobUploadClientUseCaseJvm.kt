@@ -21,6 +21,9 @@ import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.coroutineScope
 import kotlinx.io.readTo
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.blob.BlobTransferJobItem
+import com.ustadmobile.core.domain.blob.BlobTransferProgressUpdate
+import com.ustadmobile.core.domain.blob.BlobTransferStatusUpdate
 import com.ustadmobile.core.domain.blob.transferjobitem.TransferJobItemStatusUpdater
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientChunkGetterUseCase
 import com.ustadmobile.core.domain.upload.DEFAULT_CHUNK_SIZE
@@ -49,7 +52,7 @@ class BlobUploadClientUseCaseJvm(
      */
     data class UploadQueueItem(
         val blobUploadResponseItem: BlobUploadResponseItem,
-        val blobUploadItem: BlobUploadClientUseCase.BlobTransferJobItem,
+        val blobUploadItem: BlobTransferJobItem,
         val totalSize: Long,
         val chunkSize: Int,
     )
@@ -104,8 +107,8 @@ class BlobUploadClientUseCaseJvm(
         channel: ReceiveChannel<UploadQueueItem>,
         batchUuid: String,
         remoteUrl: String,
-        onProgress: (BlobUploadClientUseCase.BlobUploadProgressUpdate) -> Unit,
-        onStatusUpdate: (BlobUploadClientUseCase.BlobUploadStatusUpdate) -> Unit,
+        onProgress: (BlobTransferProgressUpdate) -> Unit,
+        onStatusUpdate: (BlobTransferStatusUpdate) -> Unit,
     ) = coroutineScope {
         async {
             for (queueItem in channel) {
@@ -121,16 +124,16 @@ class BlobUploadClientUseCaseJvm(
                     chunkSize = queueItem.chunkSize,
                     onProgress = { bytesUploaded ->
                         onProgress(
-                            BlobUploadClientUseCase.BlobUploadProgressUpdate(
-                                uploadItem = queueItem.blobUploadItem,
+                            BlobTransferProgressUpdate(
+                                transferItem = queueItem.blobUploadItem,
                                 bytesTransferred = bytesUploaded,
                             )
                         )
                     },
                     onStatusChange = { status ->
                         onStatusUpdate(
-                            BlobUploadClientUseCase.BlobUploadStatusUpdate(
-                                uploadItem = queueItem.blobUploadItem,
+                            BlobTransferStatusUpdate(
+                                transferItem = queueItem.blobUploadItem,
                                 status = status.value
                             )
                         )
@@ -142,11 +145,11 @@ class BlobUploadClientUseCaseJvm(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override suspend fun invoke(
-        blobUrls: List<BlobUploadClientUseCase.BlobTransferJobItem>,
+        blobUrls: List<BlobTransferJobItem>,
         batchUuid: String,
         endpoint: Endpoint,
-        onProgress: (BlobUploadClientUseCase.BlobUploadProgressUpdate) -> Unit,
-        onStatusUpdate: (BlobUploadClientUseCase.BlobUploadStatusUpdate) -> Unit,
+        onProgress: (BlobTransferProgressUpdate) -> Unit,
+        onStatusUpdate: (BlobTransferStatusUpdate) -> Unit,
     ) {
         val blobToUploadItemMap = blobUrls.associateBy {
             it.blobUrl
@@ -193,14 +196,14 @@ class BlobUploadClientUseCaseJvm(
                 val uploadRequestItem = urlToRequestItemMap[uploadItem.blobUrl]
                     ?: throw IllegalStateException("Huh: ")
                 onProgress(
-                    BlobUploadClientUseCase.BlobUploadProgressUpdate(
-                        uploadItem = uploadItem,
+                    BlobTransferProgressUpdate(
+                        transferItem = uploadItem,
                         bytesTransferred = uploadRequestItem.size
                     )
                 )
                 onStatusUpdate(
-                    BlobUploadClientUseCase.BlobUploadStatusUpdate(
-                        uploadItem = uploadItem,
+                    BlobTransferStatusUpdate(
+                        transferItem = uploadItem,
                         status = TransferJobItemStatus.STATUS_COMPLETE_INT,
                     )
                 )
@@ -260,7 +263,7 @@ class BlobUploadClientUseCaseJvm(
                 invoke(
                     blobUrls = transferJobItems.mapNotNull { jobItem ->
                         jobItem.tjiSrc?.let {
-                            BlobUploadClientUseCase.BlobTransferJobItem(
+                            BlobTransferJobItem(
                                 blobUrl = it,
                                 transferJobItemUid = jobItem.tjiUid,
                                 lockIdToRelease = jobItem.tjiLockIdToRelease,
@@ -273,10 +276,10 @@ class BlobUploadClientUseCaseJvm(
                     onStatusUpdate = {
                         transferJobItemStatusUpdater.onStatusUpdate(it)
                         if(it.status == TransferJobItemStatus.STATUS_COMPLETE_INT &&
-                            it.uploadItem.lockIdToRelease != 0
+                            it.transferItem.lockIdToRelease != 0
                         ) {
-                            Napier.d { "$logPrefix: release cache lock #(${it.uploadItem.lockIdToRelease}) for ${it.uploadItem.blobUrl}" }
-                            httpCache.removeRetentionLocks(listOf(it.uploadItem.lockIdToRelease))
+                            Napier.d { "$logPrefix: release cache lock #(${it.transferItem.lockIdToRelease}) for ${it.transferItem.blobUrl}" }
+                            httpCache.removeRetentionLocks(listOf(it.transferItem.lockIdToRelease))
                         }
                     },
                 )
