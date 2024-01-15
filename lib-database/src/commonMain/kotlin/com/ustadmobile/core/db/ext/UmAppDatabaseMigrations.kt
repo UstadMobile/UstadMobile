@@ -1367,6 +1367,18 @@ val MIGRATION_133_134 = DoorMigrationStatementList(133, 134) { db ->
     }
 }
 
+val MIGRATION_134_135 = DoorMigrationStatementList(134, 135) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS OfflineItem (  oiNodeId  INTEGER  NOT NULL , oiClazzUid  INTEGER  NOT NULL , oiCourseBlockUid  INTEGER  NOT NULL , oiContentEntryUid  INTEGER  NOT NULL , oiActive  INTEGER  NOT NULL , oiLct  INTEGER  NOT NULL , oiUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+            add("CREATE INDEX offline_item_node_content_entry ON OfflineItem (oiNodeId, oiContentEntryUid)")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS OfflineItem (  oiNodeId  BIGINT  NOT NULL , oiClazzUid  BIGINT  NOT NULL , oiCourseBlockUid  BIGINT  NOT NULL , oiContentEntryUid  BIGINT  NOT NULL , oiActive  BOOL  NOT NULL , oiLct  BIGINT  NOT NULL , oiUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+            add("CREATE INDEX offline_item_node_content_entry ON OfflineItem (oiNodeId, oiContentEntryUid)")
+        }
+    }
+}
+
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_102_103,
     MIGRATION_103_104, MIGRATION_104_105, MIGRATION_105_106, MIGRATION_106_107,
@@ -1374,7 +1386,7 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_120_121, MIGRATION_121_122, MIGRATION_122_123, MIGRATION_123_124,
     MIGRATION_124_125, MIGRATION_125_126, MIGRATION_126_127, MIGRATION_127_128,
     MIGRATION_128_129, MIGRATION_129_130, MIGRATION_130_131, MIGRATION_132_133,
-    MIGRATION_133_134,
+    MIGRATION_133_134, MIGRATION_134_135,
 
 )
 

@@ -57,13 +57,14 @@ import com.ustadmobile.lib.db.entities.*
     TransferJob::class,
     TransferJobItem::class,
     CacheLockJoin::class,
+    OfflineItem::class,
 
     //Door entities
     OutgoingReplication::class,
     ReplicationOperation::class,
     PendingRepositorySession::class,
 
-], version = 134)
+], version = 135)
 /*
  Replicate entities (e.g. trackers) to drop:
      ClazzLogReplicate
@@ -317,5 +318,7 @@ expect abstract class UmAppDatabase : RoomDatabase {
     abstract val transferJobItemDao: TransferJobItemDao
 
     abstract val cacheLockJoinDao: CacheLockJoinDao
+
+    abstract val offlineItemDao: OfflineItemDao
 
 }
