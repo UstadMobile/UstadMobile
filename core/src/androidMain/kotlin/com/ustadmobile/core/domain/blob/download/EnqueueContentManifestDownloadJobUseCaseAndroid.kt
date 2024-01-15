@@ -12,34 +12,32 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import java.util.concurrent.TimeUnit
 
-class EnqueueBlobDownloadClientUseCaseAndroid(
+class EnqueueContentManifestDownloadJobUseCaseAndroid(
     private val appContext: Context,
     private val endpoint: Endpoint,
-    db: UmAppDatabase,
-) : AbstractEnqueueBlobDownloadClientUseCase(db){
+    db: UmAppDatabase
+): AbstractEnqueueContentManifestDownloadUseCase(db) {
 
-    override suspend fun invoke(
-        items: List<EnqueueBlobDownloadClientUseCase.EnqueueBlobDownloadItem>,
-        existingTransferJobId: Int,
-    ) {
-        val transferJob = createTransferJob(items, existingTransferJobId)
+    override suspend fun invoke(contentEntryVersionUid: Long) {
+        val transferJob = createTransferJob(contentEntryVersionUid)
+
         val jobData = Data.Builder()
             .putString(DATA_ENDPOINT, endpoint.url)
             .putInt(DATA_JOB_UID, transferJob.tjUid)
+            .putLong(DATA_CONTENTENTRYVERSION_UID, contentEntryVersionUid)
             .build()
 
-        val workRequest = OneTimeWorkRequestBuilder<BlobDownloadClientWorker>()
+        val workRequest = OneTimeWorkRequestBuilder<ContentManifestDownloadWorker>()
             .setInputData(jobData)
             .setBackoffCriteria(BackoffPolicy.LINEAR, 10, TimeUnit.SECONDS)
             .setConstraints(
                 Constraints.Builder()
-                .setRequiredNetworkType(NetworkType.CONNECTED)
-                .build()
+                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                    .build()
             ).build()
 
-
         WorkManager.getInstance(appContext).enqueueUniqueWork(
-            "blob-download-${endpoint.url}-${transferJob.tjUid}",
+            "contentmanifest-download-${endpoint.url}-${transferJob.tjUid}",
             ExistingWorkPolicy.REPLACE, workRequest)
     }
 }

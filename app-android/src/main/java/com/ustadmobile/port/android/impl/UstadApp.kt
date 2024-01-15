@@ -33,6 +33,13 @@ import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.core.db.ext.migrationList
+import com.ustadmobile.core.domain.blob.download.BlobDownloadClientUseCase
+import com.ustadmobile.core.domain.blob.download.BlobDownloadClientUseCaseCommonJvm
+import com.ustadmobile.core.domain.blob.download.ContentManifestDownloadUseCase
+import com.ustadmobile.core.domain.blob.download.EnqueueBlobDownloadClientUseCase
+import com.ustadmobile.core.domain.blob.download.EnqueueBlobDownloadClientUseCaseAndroid
+import com.ustadmobile.core.domain.blob.download.EnqueueContentManifestDownloadJobUseCaseAndroid
+import com.ustadmobile.core.domain.blob.download.EnqueueContentManifestDownloadUseCase
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCaseJvm
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
@@ -497,6 +504,38 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
         bind<CreateRetentionLocksForManifestUseCase>() with scoped(EndpointScope.Default).singleton {
             CreateRetentionLocksForManifestUseCaseCommonJvm(
                 cache = instance()
+            )
+        }
+
+        bind<BlobDownloadClientUseCase>() with scoped(EndpointScope.Default).singleton {
+            BlobDownloadClientUseCaseCommonJvm(
+                okHttpClient = instance(),
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = instance(tag = DoorTag.TAG_REPO),
+            )
+        }
+
+        bind<EnqueueBlobDownloadClientUseCase>() with scoped(EndpointScope.Default).singleton {
+            EnqueueBlobDownloadClientUseCaseAndroid(
+                appContext = applicationContext,
+                endpoint = context,
+                db = instance(tag = DoorTag.TAG_DB)
+            )
+        }
+
+        bind<ContentManifestDownloadUseCase>() with scoped(EndpointScope.Default).singleton {
+            ContentManifestDownloadUseCase(
+                enqueueBlobDownloadClientUseCase = instance(),
+                db = instance(tag = DoorTag.TAG_DB),
+                httpClient = instance(),
+            )
+        }
+
+        bind<EnqueueContentManifestDownloadUseCase>() with scoped(EndpointScope.Default).singleton {
+            EnqueueContentManifestDownloadJobUseCaseAndroid(
+                appContext = applicationContext,
+                endpoint = context,
+                db = instance(tag = DoorTag.TAG_DB),
             )
         }
 

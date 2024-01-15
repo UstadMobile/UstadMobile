@@ -6,6 +6,7 @@ import io.github.aakira.napier.Napier
 import org.kodein.di.DI
 import org.quartz.Job
 import org.quartz.JobBuilder
+import org.quartz.JobDetail
 import org.quartz.JobExecutionContext
 import org.quartz.Scheduler
 import org.quartz.TriggerBuilder
@@ -62,3 +63,16 @@ fun JobExecutionContext.scheduleRetryOrThrow(
         throw IllegalStateException("Cannot reschedule: ${trigger.key.name}: attempts exceed $maxAttemptsAllowed")
     }
 }
+
+fun Scheduler.unscheduleAnyExistingAndStartNow(
+    job: JobDetail,
+    triggerKey: TriggerKey
+) {
+    unscheduleJob(triggerKey)
+    val jobTrigger = TriggerBuilder.newTrigger()
+        .withIdentity(triggerKey)
+        .startNow()
+        .build()
+    scheduleJob(job, jobTrigger)
+}
+

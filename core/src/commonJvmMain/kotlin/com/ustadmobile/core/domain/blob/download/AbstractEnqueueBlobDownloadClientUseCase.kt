@@ -1,4 +1,5 @@
 package com.ustadmobile.core.domain.blob.download
+
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.composites.TransferJobItemStatus
@@ -10,17 +11,23 @@ abstract class AbstractEnqueueBlobDownloadClientUseCase(
 ): EnqueueBlobDownloadClientUseCase {
 
     protected suspend fun createTransferJob(
-        items: List<EnqueueBlobDownloadClientUseCase.EnqueueBlobDownloadItem>
+        items: List<EnqueueBlobDownloadClientUseCase.EnqueueBlobDownloadItem>,
+        existingTransferJobId: Int = 0
     ): TransferJob {
         return db.withDoorTransactionAsync {
-            val transferJob = TransferJob(
-                tjStatus = TransferJobItemStatus.STATUS_QUEUED_INT,
-                tjType = TransferJob.TYPE_DOWNLOAD,
-            )
-            val jobUid = db.transferJobDao.insert(transferJob).toInt()
+            val transferJob = if(existingTransferJobId != 0) {
+                val newJob = TransferJob(
+                    tjStatus = TransferJobItemStatus.STATUS_QUEUED_INT,
+                    tjType = TransferJob.TYPE_DOWNLOAD,
+                )
+                newJob.copy(tjUid = db.transferJobDao.insert(newJob).toInt())
+            }else {
+                db.transferJobDao.findByUid(existingTransferJobId)
+                    ?: throw IllegalArgumentException("Transfer job does not exist")
+            }
             val transferJobItems = items.map { item ->
                 TransferJobItem(
-                    tjiTjUid = jobUid,
+                    tjiTjUid = transferJob.tjUid,
                     tjTotalSize = item.totalSize ?: 0L,
                     tjiSrc = item.url,
                     tjiType = TransferJob.TYPE_DOWNLOAD,
@@ -30,9 +37,7 @@ abstract class AbstractEnqueueBlobDownloadClientUseCase(
                 )
             }
             db.transferJobItemDao.insertList(transferJobItems)
-            transferJob.copy(
-                tjUid = jobUid
-            )
+            transferJob
         }
     }
 

@@ -11,6 +11,13 @@ import org.kodein.di.bind
 import org.kodein.di.provider
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.domain.blob.download.BlobDownloadClientUseCase
+import com.ustadmobile.core.domain.blob.download.BlobDownloadClientUseCaseCommonJvm
+import com.ustadmobile.core.domain.blob.download.ContentManifestDownloadUseCase
+import com.ustadmobile.core.domain.blob.download.EnqueueBlobDownloadClientUseCase
+import com.ustadmobile.core.domain.blob.download.EnqueueBlobDownloadClientUseCaseJvm
+import com.ustadmobile.core.domain.blob.download.EnqueueContentManifestDownloadUseCase
+import com.ustadmobile.core.domain.blob.download.EnqueueContentManifestDownloadUseCaseJvm
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCaseJvm
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
@@ -193,5 +200,38 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             cache = instance()
         )
     }
+
+    bind<BlobDownloadClientUseCase>() with scoped(EndpointScope.Default).singleton {
+        BlobDownloadClientUseCaseCommonJvm(
+            okHttpClient = instance(),
+            db = instance(tag = DoorTag.TAG_DB),
+            repo = instance(tag = DoorTag.TAG_REPO)
+        )
+    }
+
+    bind<EnqueueBlobDownloadClientUseCase>() with scoped(EndpointScope.Default).singleton {
+        EnqueueBlobDownloadClientUseCaseJvm(
+            scheduler = instance(),
+            endpoint = context,
+            db = instance(tag = DoorTag.TAG_DB)
+        )
+    }
+
+    bind<ContentManifestDownloadUseCase>() with scoped(EndpointScope.Default).singleton {
+        ContentManifestDownloadUseCase(
+            enqueueBlobDownloadClientUseCase = instance(),
+            db = instance(tag = DoorTag.TAG_DB),
+            httpClient = instance(),
+        )
+    }
+
+    bind<EnqueueContentManifestDownloadUseCase>() with scoped(EndpointScope.Default).singleton {
+        EnqueueContentManifestDownloadUseCaseJvm(
+            scheduler = instance(),
+            endpoint = context,
+            db = instance(tag = DoorTag.TAG_DB),
+        )
+    }
+
 
 }

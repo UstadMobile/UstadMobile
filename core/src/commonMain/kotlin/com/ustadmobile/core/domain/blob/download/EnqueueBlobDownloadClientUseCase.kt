@@ -10,7 +10,8 @@ interface EnqueueBlobDownloadClientUseCase {
     )
 
     suspend operator fun invoke(
-        items: List<EnqueueBlobDownloadItem>
+        items: List<EnqueueBlobDownloadItem>,
+        existingTransferJobId: Int = 0,
     )
 
 }
