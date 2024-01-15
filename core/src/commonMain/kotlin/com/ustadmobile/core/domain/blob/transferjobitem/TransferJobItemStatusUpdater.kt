@@ -18,8 +18,8 @@ import kotlinx.coroutines.launch
  * Manages updating TransferJobItem status and progress periodically, thus reducing the number of
  * database transactions that run.
  *
- * This is used by the BlobUploadClientUseCase on JVM and Android and the SaveLocalUriAsBlobUseCase
- * on Javascript.
+ * This is used by the BlobUploadClientUseCase and BlobDownloadClientUseCaseCommonJvm on JVM and
+ * Android and the SaveLocalUriAsBlobUseCase on Javascript.
  */
 class TransferJobItemStatusUpdater(
     private val db: UmAppDatabase,
