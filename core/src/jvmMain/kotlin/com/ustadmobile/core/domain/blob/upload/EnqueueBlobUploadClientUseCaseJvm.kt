@@ -23,13 +23,16 @@ class EnqueueBlobUploadClientUseCaseJvm(
     db = db, cache = cache
 ) {
 
+
     //See http://www.quartz-scheduler.org/documentation/quartz-2.3.0/cookbook/StoreJob.html
     override suspend fun invoke(
         items: List<EnqueueBlobUploadClientUseCase.EnqueueBlobUploadItem>,
         batchUuid: String,
-        chunkSize: Int
+        chunkSize: Int,
+        tableId: Int,
+        entityUid: Long,
     ): TransferJob {
-        val transferJob = createTransferJob(items, batchUuid)
+        val transferJob = createTransferJob(items, batchUuid, tableId, entityUid)
         val quartzJob = JobBuilder.newJob(BlobUploadClientJob::class.java)
             .usingJobData(DATA_JOB_UID, transferJob.tjUid)
             .usingJobData(DATA_ENDPOINT, endpoint.url)

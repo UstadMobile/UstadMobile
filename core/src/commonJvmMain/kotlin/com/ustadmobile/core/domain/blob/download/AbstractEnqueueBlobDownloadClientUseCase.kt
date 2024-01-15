@@ -2,6 +2,7 @@ package com.ustadmobile.core.domain.blob.download
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.ext.withDoorTransactionAsync
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.TransferJobItemStatus
 import com.ustadmobile.lib.db.entities.TransferJob
 import com.ustadmobile.lib.db.entities.TransferJobItem
@@ -16,19 +17,20 @@ abstract class AbstractEnqueueBlobDownloadClientUseCase(
     ): TransferJob {
         return db.withDoorTransactionAsync {
             val transferJob = if(existingTransferJobId != 0) {
+                db.transferJobDao.findByUid(existingTransferJobId)
+                    ?: throw IllegalArgumentException("Transfer job does not exist")
+            }else {
                 val newJob = TransferJob(
                     tjStatus = TransferJobItemStatus.STATUS_QUEUED_INT,
                     tjType = TransferJob.TYPE_DOWNLOAD,
+                    tjTimeCreated = systemTimeInMillis(),
                 )
                 newJob.copy(tjUid = db.transferJobDao.insert(newJob).toInt())
-            }else {
-                db.transferJobDao.findByUid(existingTransferJobId)
-                    ?: throw IllegalArgumentException("Transfer job does not exist")
             }
             val transferJobItems = items.map { item ->
                 TransferJobItem(
                     tjiTjUid = transferJob.tjUid,
-                    tjTotalSize = item.totalSize ?: 0L,
+                    tjTotalSize = item.expectedSize ?: 0L,
                     tjiSrc = item.url,
                     tjiType = TransferJob.TYPE_DOWNLOAD,
                     tjiEntityUid = item.entityUid,

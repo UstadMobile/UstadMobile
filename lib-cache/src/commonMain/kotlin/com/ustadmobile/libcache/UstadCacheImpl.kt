@@ -312,6 +312,7 @@ class UstadCacheImpl(
                     request = it.entryToStore.request,
                     response = it.entryToStore.response,
                     integrity = it.cacheEntry.integrity!!,
+                    storageSize = it.cacheEntry.storageSize,
                     lockId = it.lockId
                 )
             }

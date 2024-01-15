@@ -18,6 +18,7 @@ import io.github.aakira.napier.Napier
 import kotlinx.coroutines.isActive
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.transferjobitem.TransferJobItemStatusUpdater
+import com.ustadmobile.door.ext.withDoorTransactionAsync
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.withContext
 
@@ -134,6 +135,17 @@ class BlobDownloadClientUseCaseCommonJvm(
                     onProgress = transferJobItemStatusUpdater::onProgressUpdate,
                     onStatusUpdate = transferJobItemStatusUpdater::onStatusUpdate,
                 )
+
+                val numIncompleteItems = db.withDoorTransactionAsync {
+                    transferJobItemStatusUpdater.commit(transferJobUid)
+                    transferJobItemStatusUpdater.onFinished()
+                    db.transferJobItemDao.findNumberJobItemsNotComplete(transferJobUid)
+                }
+
+                if(numIncompleteItems != 0) {
+                    throw IllegalStateException("BlobDownloadClientUseCaseCommonJvm: not complete.")
+                }
+                Napier.d { "$logPrefix complete!"}
             }catch(e: Throwable) {
                 Napier.e("$logPrefix Exception. Attempt has failed", e)
                 withContext(NonCancellable) {

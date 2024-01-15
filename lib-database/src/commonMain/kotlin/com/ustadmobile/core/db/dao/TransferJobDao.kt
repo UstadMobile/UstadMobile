@@ -2,6 +2,8 @@ package com.ustadmobile.core.db.dao
 
 import androidx.room.Insert
 import androidx.room.Query
+import com.ustadmobile.core.db.dao.TransferJobDaoCommon.SELECT_CONTENT_ENTRY_VERSION_UIDS_FOR_CONTENT_ENTRY_UID_SQL
+import com.ustadmobile.core.db.dao.TransferJobDaoCommon.SELECT_TRANSFER_JOB_TOTALS_SQL
 import com.ustadmobile.door.annotation.DoorDao
 import com.ustadmobile.lib.db.composites.TransferJobAndTotals
 import com.ustadmobile.lib.db.composites.TransferJobItemStatus
@@ -65,27 +67,17 @@ expect abstract class TransferJobDao {
 
     @Query("""
         SELECT TransferJob.*,
-                (SELECT SUM(TransferJobItem.tjTotalSize)
-                   FROM TransferJobItem
-                  WHERE TransferJobItem.tjiTjUid =  TransferJob.tjUid) AS totalSize,
-                (SELECT SUM(TransferJobItem.tjTransferred)
-                   FROM TransferJobItem
-                  WHERE TransferJobItem.tjiTjUid =  TransferJob.tjUid) AS transferred  
+               $SELECT_TRANSFER_JOB_TOTALS_SQL  
           FROM TransferJob
-         WHERE EXISTS(
-               SELECT TransferJobItem.tjiUid
-                 FROM TransferJobItem
-                WHERE TransferJobItem.tjiTjUid = TransferJob.tjUid
-                  AND TransferJobItem.tjiTableId = ${ContentEntryVersion.TABLE_ID}
-                  AND TransferJobItem.tjiEntityUid IN
-                      (SELECT ContentEntryVersion.cevUid
-                         FROM ContentEntryVersion
-                        WHERE ContentEntryVersion.cevContentEntryUid = :contentEntryUid)
-                LIMIT 1)
-           AND TransferJob.tjStatus < ${TransferJobItemStatus.STATUS_COMPLETE_INT}     
+         WHERE TransferJob.tjTableId = ${ContentEntryVersion.TABLE_ID}
+           AND TransferJob.tjEntityUid IN 
+               $SELECT_CONTENT_ENTRY_VERSION_UIDS_FOR_CONTENT_ENTRY_UID_SQL 
+           AND TransferJob.tjStatus < ${TransferJobItemStatus.STATUS_COMPLETE_INT}  
+           AND TransferJob.tjType = :jobType   
     """)
     abstract fun findByContentEntryUidWithTotalsAsFlow(
-        contentEntryUid: Long
+        contentEntryUid: Long,
+        jobType: Int,
     ): Flow<List<TransferJobAndTotals>>
 
 }

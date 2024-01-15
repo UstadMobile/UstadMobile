@@ -1,6 +1,8 @@
 package com.ustadmobile.lib.db.entities
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 
@@ -13,8 +15,14 @@ import kotlinx.serialization.Serializable
  * A TransferJob has one or more TransferJobItem(s).
  *
  * @param tjStatus Status int as per TransferJobItemStatus
+ * @param tjTableId Where this transfer job is associated with one specific entity, the tableId (optional)
+ * @param tjEntityUid Where this transfer job is associated with one specific entity, the entity uid field (optional)
  */
-@Entity
+@Entity(
+    indices = arrayOf(
+        Index("tjTableId", "tjEntityUid", name = "TransferJob_idx_tjTableId_EntityUid")
+    )
+)
 @Serializable
 data class TransferJob(
     @PrimaryKey(autoGenerate = true)
@@ -23,15 +31,25 @@ data class TransferJob(
     var tjStatus: Int = 0,
     var tjName: String? = null,
     var tjUuid: String? = null,
+    @ColumnInfo(defaultValue = "0")
+    var tjTableId: Int = 0,
+    @ColumnInfo(defaultValue = "0")
+    var tjEntityUid: Long = 0,
+    @ColumnInfo(defaultValue = "0")
+    var tjTimeCreated: Long = 0,
+    @ColumnInfo(defaultValue = "0")
+    var tjCreationType: Int = 0,
 ) {
     companion object {
 
-        @Suppress("unused")
         const val TYPE_BLOB_UPLOAD = 1
 
-        @Suppress("unused")
         const val TYPE_DOWNLOAD = 2
 
+
+        const val CREATION_TYPE_USER = 1
+
+        const val CREATION_TYPE_UPDATE = 2
     }
 
 }

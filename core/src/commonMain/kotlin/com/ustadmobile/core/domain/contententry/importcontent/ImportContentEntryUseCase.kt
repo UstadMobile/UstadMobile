@@ -81,7 +81,9 @@ class ImportContentEntryUseCase(
 
             enqueueBlobUploadClientUseCaseVal(
                 items = entriesToUpload,
-                batchUuid = randomUuidAsString()
+                batchUuid = randomUuidAsString(),
+                tableId = ContentEntryVersion.TABLE_ID,
+                entityUid = contentEntryVersionEntity.cevUid
             )
         }
 

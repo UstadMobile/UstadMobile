@@ -129,13 +129,15 @@ class SaveLocalUrisAsBlobsUseCaseJvm(
             val urlKey = digester.urlKey(it.cacheEntry.request.url)
             val cacheStoreResult = storeResults[urlKey]
                 ?: throw IllegalStateException("Cache did not store ${it.cacheEntry.request.url}")
+
             SaveLocalUrisAsBlobsUseCase.SavedBlob(
                 entityUid = it.saveBlobItem.entityUid,
                 localUri = it.saveBlobItem.localUri,
                 blobUrl = it.cacheEntry.request.url,
                 retentionLockId = cacheStoreResult.lockId,
                 integrity = cacheStoreResult.integrity,
-                mimeType = it.cacheEntry.response.headers["content-type"] ?: "application/octet-stream"
+                mimeType = it.cacheEntry.response.headers["content-type"] ?: "application/octet-stream",
+                storageSize = cacheStoreResult.storageSize,
             )
         }
     }

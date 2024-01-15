@@ -2,6 +2,7 @@ package com.ustadmobile.core.domain.blob.download
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.ext.withDoorTransactionAsync
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.TransferJobItemStatus
 import com.ustadmobile.lib.db.entities.ContentEntryVersion
 import com.ustadmobile.lib.db.entities.TransferJob
@@ -20,11 +21,14 @@ abstract class AbstractEnqueueContentManifestDownloadUseCase(
         return db.withDoorTransactionAsync {
             val contentEntryVersion = db.contentEntryVersionDao.findByUidAsync(
                 contentEntryVersionUid) ?: throw IllegalArgumentException(
-                "Enqueue: Could not find ContentEntryVersion ${contentEntryVersionUid}")
+                "Enqueue: Could not find ContentEntryVersion $contentEntryVersionUid")
 
             val transferJob = TransferJob(
                 tjType = TransferJob.TYPE_DOWNLOAD,
                 tjStatus = TransferJobItemStatus.STATUS_QUEUED_INT,
+                tjTimeCreated = systemTimeInMillis(),
+                tjEntityUid = contentEntryVersionUid,
+                tjTableId = ContentEntryVersion.TABLE_ID,
             )
             val jobUid = db.transferJobDao.insert(transferJob).toInt()
             val manifestTransferJobItem = TransferJobItem(

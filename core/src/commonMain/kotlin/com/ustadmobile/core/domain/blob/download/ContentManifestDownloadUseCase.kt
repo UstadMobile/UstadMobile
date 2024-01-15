@@ -41,7 +41,7 @@ class ContentManifestDownloadUseCase(
             items = manifest.entries.map {
                 EnqueueBlobDownloadClientUseCase.EnqueueBlobDownloadItem(
                     url = it.bodyDataUrl,
-                    totalSize = it.responseHeaders.get("content-length")?.toLong(),
+                    expectedSize = it.storageSize,
                     entityUid = contentEntryVersion.cevUid,
                     tableId = ContentEntryVersion.TABLE_ID,
                 )

@@ -287,10 +287,7 @@ class BlobUploadClientUseCaseJvm(
                 val numIncompleteItems = db.withDoorTransactionAsync {
                     transferJobItemStatusUpdater.commit(transferJobUid)
                     transferJobItemStatusUpdater.onFinished()
-                    val numIncompleteItems = db.transferJobItemDao
-                        .findNumberJobItemsNotComplete(transferJobUid)
-
-                    numIncompleteItems
+                    db.transferJobItemDao.findNumberJobItemsNotComplete(transferJobUid)
                 }
 
                 if(numIncompleteItems != 0) {

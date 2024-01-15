@@ -24,7 +24,7 @@ class ContentEntryDetailOverviewViewModelTest : AbstractMainDispatcherTest() {
             }
 
             viewModel.uiState.assertItemReceived(timeout = 5.seconds) {
-                it.contentEntry?.title == "Test entry"
+                it.contentEntry?.entry?.title == "Test entry"
             }
         }
     }

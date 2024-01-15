@@ -40,11 +40,16 @@ interface EnqueueBlobUploadClientUseCase{
     /**
      * Enqueue the upload and return the transferjob. The transferjob's uid can be used to track
      * progress etc.
+     *
+     * @param tableId if the entire upload relates to a given table/entity, this can be set to the tableid
+     * @param entityUid if the entire upload relates to a given table/entity, this can be set to the entityUid
      */
     suspend operator fun invoke(
         items: List<EnqueueBlobUploadItem>,
         batchUuid: String,
         chunkSize: Int = ChunkedUploadClientUseCaseKtorImpl.DEFAULT_CHUNK_SIZE,
+        tableId: Int = 0,
+        entityUid: Long = 0,
     ): TransferJob
 
 }

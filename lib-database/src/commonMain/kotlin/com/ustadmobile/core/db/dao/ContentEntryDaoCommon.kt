@@ -80,11 +80,6 @@ object ContentEntryDaoCommon {
             WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = ContentEntry_recursive.contentEntryUid)
             SELECT * FROM ContentEntry_recursive"""
 
-    const val ENTRY_WITH_CONTAINER_QUERY = """
-            SELECT ContentEntry.*
-              FROM ContentEntry
-             WHERE ContentEntry.contentEntryUid = :entryUuid
-            """
 
 
 }

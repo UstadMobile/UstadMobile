@@ -14,6 +14,8 @@ import androidx.room.PrimaryKey
  *        them as an equality check has to go further through a non-matching string before it can
  *        return false).
  * @param cacheFlags flags from the cache-control header.
+ * @param storageSize the size of the entry as it is stored on the disk. If the entry stored gzipped,
+ *        this is the size after compression.
  */
 @Entity(
     indices = arrayOf(

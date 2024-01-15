@@ -2,11 +2,13 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.ustadmobile.door.SyncNode
 import com.ustadmobile.door.annotation.ReplicateEntity
 import com.ustadmobile.door.annotation.ReplicateEtag
 import com.ustadmobile.door.annotation.ReplicateLastModified
 import com.ustadmobile.door.annotation.Trigger
 import com.ustadmobile.door.annotation.Triggers
+import com.ustadmobile.lib.db.entities.ContentEntryVersion.Companion.SELECT_OFFLINE_ITEM_UID_FOR_NEW_CONTENT_ENTRY_VERSION_SQL
 import kotlinx.serialization.Serializable
 
 /**
@@ -29,6 +31,30 @@ import kotlinx.serialization.Serializable
             events = [Trigger.Event.INSERT],
             conditionSql = TRIGGER_CONDITION_WHERE_NEWER,
             sqlStatements = [TRIGGER_UPSERT]
+        ),
+        /*
+         * Create an OfflineItemPendingTransferJob where there is a new ContentEntryVersion for
+         * a ContentEntry with a corresponding active OfflineItem
+         */
+        Trigger(
+            name = "content_entry_version_offline_item",
+            order = Trigger.Order.AFTER,
+            on = Trigger.On.ENTITY,
+            events = [Trigger.Event.INSERT],
+            conditionSql = """
+                 SELECT EXISTS($SELECT_OFFLINE_ITEM_UID_FOR_NEW_CONTENT_ENTRY_VERSION_SQL)
+                    AND NOT EXISTS
+                        (SELECT TransferJob.tjUid
+                           FROM TransferJob
+                          WHERE TransferJob.tjTableId = ${ContentEntryVersion.TABLE_ID}
+                            AND TransferJob.tjEntityUid = NEW.cevUid)
+
+                 """,
+            sqlStatements = ["""
+                INSERT INTO OfflineItemPendingTransferJob(oiptjOiUid, oiptjTableId, oiptjEntityUid, oiptjType)
+                VALUES ((SELECT COALESCE(($SELECT_OFFLINE_ITEM_UID_FOR_NEW_CONTENT_ENTRY_VERSION_SQL), 0)),
+                        ${ContentEntryVersion.TABLE_ID}, NEW.cevUid, ${TransferJob.CREATION_TYPE_UPDATE})
+            """]
         )
     )
 )
@@ -96,6 +122,14 @@ data class ContentEntryVersion(
         const val PATH_POSTFIX = "api/content/"
 
         const val TABLE_ID = 738
+
+        const val SELECT_OFFLINE_ITEM_UID_FOR_NEW_CONTENT_ENTRY_VERSION_SQL = """
+                 SELECT OfflineItem.oiUid
+                   FROM OfflineItem
+                  WHERE OfflineItem.oiContentEntryUid = NEW.cevContentEntryUid
+                    AND CAST(OfflineItem.oiActive AS INTEGER) = 1
+                    AND OfflineItem.oiNodeId = ${SyncNode.SELECT_LOCAL_NODE_ID_SQL}
+        """
 
     }
 }

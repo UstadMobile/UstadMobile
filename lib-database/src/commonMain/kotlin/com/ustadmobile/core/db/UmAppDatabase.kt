@@ -58,13 +58,14 @@ import com.ustadmobile.lib.db.entities.*
     TransferJobItem::class,
     CacheLockJoin::class,
     OfflineItem::class,
+    OfflineItemPendingTransferJob::class,
 
     //Door entities
     OutgoingReplication::class,
     ReplicationOperation::class,
     PendingRepositorySession::class,
 
-], version = 135)
+], version = 137)
 /*
  Replicate entities (e.g. trackers) to drop:
      ClazzLogReplicate

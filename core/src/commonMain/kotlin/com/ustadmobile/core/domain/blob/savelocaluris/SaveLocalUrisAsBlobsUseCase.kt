@@ -42,6 +42,8 @@ interface SaveLocalUrisAsBlobsUseCase {
      * @param mimeType the mime type as it was saved. If it was specified in SaveLocalUriAsBlobItem,
      *        and this was the first time this checksum was saved, then it will have used the
      *        suggested mime type. Otherwise it will use the auto-guessed type / previous mime type
+     * @param storageSize the size of the blob as it would be stored/transferred. If the blob is
+     *        stored gzipped, then this is the size after gzip compression.
      */
     @Serializable
     data class SavedBlob(
@@ -51,6 +53,7 @@ interface SaveLocalUrisAsBlobsUseCase {
         val retentionLockId: Int = 0,
         val integrity: String,
         val mimeType: String,
+        val storageSize: Long,
     )
 
     /**

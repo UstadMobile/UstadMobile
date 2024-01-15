@@ -2,12 +2,12 @@ package com.ustadmobile.core.db.dao
 
 import androidx.room.*
 import com.ustadmobile.core.db.dao.ContentEntryDaoCommon.ALL_ENTRIES_RECURSIVE_SQL
-import com.ustadmobile.core.db.dao.ContentEntryDaoCommon.ENTRY_WITH_CONTAINER_QUERY
 import com.ustadmobile.core.db.dao.ContentEntryDaoCommon.SORT_TITLE_ASC
 import com.ustadmobile.core.db.dao.ContentEntryDaoCommon.SORT_TITLE_DESC
 import app.cash.paging.PagingSource
 import kotlinx.coroutines.flow.Flow
 import com.ustadmobile.door.annotation.*
+import com.ustadmobile.lib.db.composites.ContentEntryAndDetail
 import com.ustadmobile.lib.db.composites.ContentEntryAndLanguage
 import com.ustadmobile.lib.db.entities.*
 
@@ -49,7 +49,11 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
     """)
     abstract suspend fun findEntryWithBlockAndLanguageByUidAsync(entityUid: Long): ContentEntryWithBlockAndLanguage?
 
-    @Query(ENTRY_WITH_CONTAINER_QUERY)
+    @Query("""
+        SELECT ContentEntry.*
+          FROM ContentEntry
+         WHERE ContentEntry.contentEntryUid = :entryUuid 
+    """)
     abstract suspend fun findEntryWithContainerByEntryId(
         entryUuid: Long
     ): ContentEntry?
@@ -57,10 +61,22 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @HttpAccessible(
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
     )
-    @Query(ENTRY_WITH_CONTAINER_QUERY)
+    @Query("""
+            SELECT ContentEntry.*, ContentEntryVersion.*
+              FROM ContentEntry
+                   LEFT JOIN ContentEntryVersion
+                             ON ContentEntryVersion.cevUid = 
+                             (SELECT ContentEntryVersion.cevUid
+                                FROM ContentEntryVersion
+                               WHERE ContentEntryVersion.cevContentEntryUid = :entryUuid
+                                 AND CAST(cevInActive AS INTEGER) = 0
+                            ORDER BY ContentEntryVersion.cevLct DESC
+                              LIMIT 1)
+             WHERE ContentEntry.contentEntryUid = :entryUuid
+            """)
     abstract fun findEntryWithContainerByEntryIdLive(
         entryUuid: Long
-    ): Flow<ContentEntry?>
+    ): Flow<ContentEntryAndDetail?>
 
     @Query("SELECT * FROM ContentEntry WHERE sourceUrl = :sourceUrl LIMIT 1")
     abstract fun findBySourceUrl(sourceUrl: String): ContentEntry?

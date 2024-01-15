@@ -16,13 +16,21 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.blob.download.EnqueueContentManifestDownloadUseCase
+import com.ustadmobile.core.util.ext.onActiveEndpoint
+import com.ustadmobile.door.entities.NodeIdAndAuth
+import com.ustadmobile.door.ext.withDoorTransactionAsync
+import com.ustadmobile.lib.db.composites.ContentEntryAndDetail
+import com.ustadmobile.lib.db.composites.OfflineItemAndState
 import com.ustadmobile.lib.db.composites.TransferJobAndTotals
+import org.kodein.di.direct
+import org.kodein.di.instance
 
 data class ContentEntryDetailOverviewUiState(
 
     val scoreProgress: ContentEntryStatementScoreProgress? = null,
 
-    val contentEntry: ContentEntry? = null,
+    val contentEntry: ContentEntryAndDetail? = null,
 
     val contentEntryButtons: ContentEntryButtonModel? = null,
 
@@ -36,20 +44,21 @@ data class ContentEntryDetailOverviewUiState(
 
     val activeContentJobItems: List<ContentJobItemProgress> = emptyList(),
 
-    val activeTransferJobs: List<TransferJobAndTotals> = emptyList(),
+    val activeUploadJobs: List<TransferJobAndTotals> = emptyList(),
 
+    val offlineItemAndState: OfflineItemAndState? = null,
 ) {
     val scoreProgressVisible: Boolean
         get() = scoreProgress?.progress != null && scoreProgress.progress > 0
 
     val authorVisible: Boolean
-        get() = !contentEntry?.author.isNullOrBlank()
+        get() = !contentEntry?.entry?.author.isNullOrBlank()
 
     val publisherVisible: Boolean
-        get() = !contentEntry?.publisher.isNullOrBlank()
+        get() = !contentEntry?.entry?.publisher.isNullOrBlank()
 
     val licenseNameVisible: Boolean
-        get() = !contentEntry?.licenseName.isNullOrBlank()
+        get() = !contentEntry?.entry?.licenseName.isNullOrBlank()
 
     val fileSizeVisible: Boolean
         get() = false
@@ -67,7 +76,11 @@ class ContentEntryDetailOverviewViewModel(
     savedStateHandle: UstadSavedStateHandle,
 ) : DetailViewModel<ContentEntry> (di, savedStateHandle, DEST_NAME){
 
-    private val _uiState = MutableStateFlow(ContentEntryDetailOverviewUiState())
+    private val _uiState = MutableStateFlow(
+        ContentEntryDetailOverviewUiState())
+
+    private val enqueueContentManifestDownloadUseCase: EnqueueContentManifestDownloadUseCase by
+            di.onActiveEndpoint().instance()
 
     val uiState: Flow<ContentEntryDetailOverviewUiState> = _uiState.asStateFlow()
 
@@ -86,7 +99,7 @@ class ContentEntryDetailOverviewViewModel(
 
                         _appUiState.update { prev ->
                             prev.copy(
-                                title = it?.title ?: ""
+                                title = it?.entry?.title ?: ""
                             )
                         }
                     }
@@ -116,10 +129,21 @@ class ContentEntryDetailOverviewViewModel(
                 launch {
                     activeDb.transferJobDao.findByContentEntryUidWithTotalsAsFlow(
                         contentEntryUid = entityUidArg,
+                        jobType = TransferJob.TYPE_BLOB_UPLOAD,
                     ).collect {
                         _uiState.update { prev ->
                             prev.copy(
-                                activeTransferJobs = it
+                                activeUploadJobs = it
+                            )
+                        }
+                    }
+                }
+
+                launch {
+                    activeDb.offlineItemDao.findByContentEntryUid(entityUidArg).collect {
+                        _uiState.update { prev ->
+                            prev.copy(
+                                offlineItemAndState = it
                             )
                         }
                     }
@@ -130,6 +154,31 @@ class ContentEntryDetailOverviewViewModel(
 
     fun onClickEdit() {
 
+    }
+
+
+    fun onClickOffline() {
+        viewModelScope.launch {
+            val nodeIdAndAuth: NodeIdAndAuth = di.onActiveEndpoint().direct.instance()
+
+            if(_uiState.value.offlineItemAndState?.offlineItem == null) {
+                val latestContentEntryVersion = activeRepo.contentEntryVersionDao
+                    .findLatestVersionUidByContentEntryUidEntity(entityUidArg)
+
+                activeRepo.withDoorTransactionAsync {
+                    activeRepo.offlineItemDao.insertAsync(
+                        OfflineItem(
+                            oiNodeId = nodeIdAndAuth.nodeId,
+                            oiContentEntryUid = entityUidArg,
+                        )
+                    )
+
+                    if(latestContentEntryVersion != null) {
+                        enqueueContentManifestDownloadUseCase(latestContentEntryVersion.cevUid)
+                    }
+                }
+            }
+        }
     }
 
     fun onClickOpen() {

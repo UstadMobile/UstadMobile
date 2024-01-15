@@ -21,6 +21,7 @@ class SaveLocalUriAsBlobAndManifestUseCaseJvm(
 
             val manifestEntry = ContentManifestEntry(
                 uri = item.manifestUri,
+                storageSize = blobForUri.storageSize,
                 bodyDataUrl = blobForUri.blobUrl,
                 responseHeaders = stringValuesOf(
                     "content-type" to listOf(blobForUri.mimeType),

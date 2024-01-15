@@ -41,6 +41,7 @@ import com.ustadmobile.core.viewmodel.contententry.detailoverviewtab.ContentEntr
 import com.ustadmobile.core.viewmodel.contententry.detailoverviewtab.ContentEntryDetailOverviewViewModel
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 import com.ustadmobile.lib.db.entities.ContentJobItemProgress
+import com.ustadmobile.libuicompose.components.UstadOfflineItemStatusQuickActionButton
 import com.ustadmobile.libuicompose.components.UstadQuickActionButton
 import dev.icerock.moko.resources.compose.stringResource
 import kotlin.math.max
@@ -55,7 +56,8 @@ fun ContentEntryDetailOverviewScreen(
 
     ContentEntryDetailOverviewScreen(
         uiState = uiState,
-        onClickOpen = viewModel::onClickOpen
+        onClickOpen = viewModel::onClickOpen,
+        onClickOfflineButton = viewModel::onClickOffline,
     )
 }
 
@@ -63,7 +65,7 @@ fun ContentEntryDetailOverviewScreen(
 @Composable
 fun ContentEntryDetailOverviewScreen(
     uiState: ContentEntryDetailOverviewUiState = ContentEntryDetailOverviewUiState(),
-    onClickDownload: () -> Unit = {},
+    onClickOfflineButton: () -> Unit = {},
     onClickOpen: () -> Unit = {},
     onClickMarkComplete: () -> Unit = {},
     onClickDelete: () -> Unit = {},
@@ -78,22 +80,10 @@ fun ContentEntryDetailOverviewScreen(
             .padding(16.dp)
     )  {
 
-        item {
+        item("details") {
             ContentDetails(
                 uiState = uiState
             )
-        }
-
-        if (uiState.contentEntryButtons?.showDownloadButton == true){
-            item {
-                Button(
-                    onClick = onClickDownload,
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                ) {
-                    Text(stringResource(MR.strings.download).uppercase())
-                }
-            }
         }
 
         if (uiState.openButtonVisible){
@@ -107,9 +97,20 @@ fun ContentEntryDetailOverviewScreen(
             }
         }
 
+        item("quick_action_row") {
+            Row(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                UstadOfflineItemStatusQuickActionButton(
+                    state = uiState.offlineItemAndState,
+                    onClick = onClickOfflineButton,
+                )
+            }
+        }
+
         items(
-            items = uiState.activeTransferJobs,
-            key = { item -> item.transferJob?.tjUid ?: 0}
+            items = uiState.activeUploadJobs,
+            key = { item -> item.transferJob?.tjUid ?: 0 }
         ) { item ->
             ListItem(
                 headlineContent = {
@@ -150,7 +151,7 @@ fun ContentEntryDetailOverviewScreen(
         }
 
         item {
-            Text(text = uiState.contentEntry?.description ?: "")
+            Text(text = uiState.contentEntry?.entry?.description ?: "")
         }
 
         item {
@@ -217,17 +218,17 @@ fun ContentDetailRightColumn(
     ) {
 
         Text(
-            text = uiState.contentEntry?.title ?: "",
+            text = uiState.contentEntry?.entry?.title ?: "",
             style = MaterialTheme.typography.headlineMedium,
             maxLines = 2,
         )
 
         if (uiState.authorVisible){
-            Text(text = uiState.contentEntry?.author ?: "")
+            Text(text = uiState.contentEntry?.entry?.author ?: "")
         }
 
         if (uiState.publisherVisible){
-            Text(text = uiState.contentEntry?.publisher ?: "")
+            Text(text = uiState.contentEntry?.entry?.publisher ?: "")
         }
 
         if (uiState.licenseNameVisible){
@@ -237,7 +238,7 @@ fun ContentDetailRightColumn(
 
                 Spacer(modifier = Modifier.width(5.dp))
 
-                Text(text = uiState.contentEntry?.licenseName ?: "")
+                Text(text = uiState.contentEntry?.entry?.licenseName ?: "")
             }
         }
     }

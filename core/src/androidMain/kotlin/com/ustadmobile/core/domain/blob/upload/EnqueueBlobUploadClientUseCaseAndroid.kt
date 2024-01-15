@@ -25,9 +25,11 @@ class EnqueueBlobUploadClientUseCaseAndroid(
     override suspend fun invoke(
         items: List<EnqueueBlobUploadClientUseCase.EnqueueBlobUploadItem>,
         batchUuid: String,
-        chunkSize: Int
+        chunkSize: Int,
+        tableId: Int,
+        entityUid: Long,
     ) : TransferJob {
-        val transferJob = createTransferJob(items, batchUuid)
+        val transferJob = createTransferJob(items, batchUuid, tableId, entityUid)
         val jobData = Data.Builder()
             .putString(DATA_ENDPOINT, endpoint.url)
             .putInt(DATA_JOB_UID, transferJob.tjUid)

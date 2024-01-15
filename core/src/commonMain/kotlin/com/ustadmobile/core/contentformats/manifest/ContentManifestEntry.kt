@@ -7,6 +7,9 @@ import kotlinx.serialization.Serializable
 /**
  * @param uri The URI as it will be used within the ContentEntry - this can be relative or absolute.
  *            e.g. images/picture.png or https://server.com/image/picture.png
+ * @param storageSize the size as it will be transferred and stored. If the content is gzipped,
+ *        then this should be the size after gzip compression. This is ONLY to give an indication of
+ *        the likely size as inflating and compressing again might lead to minor variances in size.
  * @param ignoreQueryParams used to bust cache-busting. Required for H5P files where scripts add
  *        query parameters (eg. date) to static files.
  * @param status http status code e.g. 200
@@ -23,6 +26,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 class ContentManifestEntry(
     val uri: String,
+    val storageSize: Long,
     val ignoreQueryParams: Boolean = true,
     val status: Int = 200,
     val method: String = "GET",

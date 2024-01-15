@@ -17,6 +17,9 @@ import kotlinx.serialization.json.Json
 import org.apache.pdfbox.Loader
 import org.apache.pdfbox.pdmodel.PDDocument
 
+/**
+ * For PDF on JVM view: maybe: https://github.com/pcorless/icepdf
+ */
 class PdfContentImporterJvm(
     endpoint: Endpoint,
     cache: UstadCache,
