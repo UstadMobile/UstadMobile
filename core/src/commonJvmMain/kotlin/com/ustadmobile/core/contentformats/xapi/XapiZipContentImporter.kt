@@ -128,7 +128,7 @@ class XapiZipContentImporter(
             cevContentType = ContentEntryVersion.TYPE_XAPI,
             cevContentEntryUid = jobItem.cjiContentEntryUid,
             cevManifestUrl = manifestUrl,
-            cevUrl = "$urlPrefix${tinCanEntry.name}"
+            cevUrl = tinCanEntry.name,
         )
 
         val workTmpPath = Path(tmpPath, "xapi-import-${systemTimeInMillis()}")
@@ -160,7 +160,8 @@ class XapiZipContentImporter(
             cache.storeText(
                 url = manifestUrl,
                 text = json.encodeToString(ContentManifest.serializer(), manifest),
-                mimeType = "application/json"
+                mimeType = "application/json",
+                cacheControl = "immutable"
             )
 
             contentEntryVersion

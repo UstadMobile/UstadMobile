@@ -153,7 +153,6 @@ class H5PContentImporter(
 
         val contentEntryVersionUid = db.doorPrimaryKeyManager.nextIdAsync(
             ContentEntryVersion.TABLE_ID)
-        val urlPrefix = createContentUrlPrefix(contentEntryVersionUid)
 
         val workTmpPath = Path(tmpPath, "h5pimport-${systemTimeInMillis()}")
         fileSystem.createDirectories(workTmpPath)
@@ -299,7 +298,7 @@ class H5PContentImporter(
                 cevContentType = ContentEntryVersion.TYPE_XAPI,
                 cevManifestUrl = manifestUrl,
                 cevContentEntryUid = jobItem.cjiContentEntryUid,
-                cevUrl = "${urlPrefix}tincan.xml"
+                cevUrl = "tincan.xml"
             )
         }finally {
             File(workTmpPath.toString()).deleteRecursively()
