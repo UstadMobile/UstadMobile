@@ -41,7 +41,7 @@ class VideoContentViewModel(
                 .findByUidAsync(entityUidArg) ?: return@launch
 
             launch {
-                val cevUrl = contentEntryVersion.cevUrl ?: return@launch
+                val cevUrl = contentEntryVersion.cevOpenUri ?: return@launch
                 val mediaInfo: MediaContentInfo = httpClient.get(cevUrl).body()
                 _uiState.update { prev ->
                     prev.copy(mediaContentInfo = mediaInfo)

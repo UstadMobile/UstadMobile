@@ -47,7 +47,7 @@ class XapiContentViewModel(
                 val manifestUrl = contentEntryVersion.cevManifestUrl ?: return@launch
                 val manifest: ContentManifest = httpClient.get(manifestUrl).body()
                 val tinCanEntry = manifest.entries.firstOrNull {
-                    it.uri == contentEntryVersion.cevUrl
+                    it.uri == contentEntryVersion.cevOpenUri
                 } ?: return@launch
 
                 val tinCanXmlStr = httpClient.get(tinCanEntry.bodyDataUrl).bodyAsText()

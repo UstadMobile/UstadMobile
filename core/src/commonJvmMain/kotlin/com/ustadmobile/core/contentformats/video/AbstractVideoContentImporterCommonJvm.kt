@@ -137,7 +137,7 @@ abstract class AbstractVideoContentImporterCommonJvm(
                 cevContentType = ContentEntryVersion.TYPE_VIDEO,
                 cevContentEntryUid = jobItem.cjiContentEntryUid,
                 cevManifestUrl = manifestUrl,
-                cevUrl = mediaInfoUrl,
+                cevOpenUri = mediaInfoUrl,
             )
         }finally {
             File(workDir.toString()).deleteRecursively()

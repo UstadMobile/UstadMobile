@@ -128,7 +128,7 @@ class XapiZipContentImporter(
             cevContentType = ContentEntryVersion.TYPE_XAPI,
             cevContentEntryUid = jobItem.cjiContentEntryUid,
             cevManifestUrl = manifestUrl,
-            cevUrl = tinCanEntry.name,
+            cevOpenUri = tinCanEntry.name,
         )
 
         val workTmpPath = Path(tmpPath, "xapi-import-${systemTimeInMillis()}")

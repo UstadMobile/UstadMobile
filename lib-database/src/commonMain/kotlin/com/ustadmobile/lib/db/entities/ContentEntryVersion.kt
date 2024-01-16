@@ -70,12 +70,16 @@ data class ContentEntryVersion(
     var cevContentEntryUid: Long = 0,
 
     /**
-     * The URL to content item e.g.
-     * https://endpoint.com/api/content/cevUid/tincan.xml file for xAPI content
-     * https://endpoint.com/api/content/cevUid/tincan.xml for epubs
-     * direct url for pdfs
+     * The Uri of the item that should be opened e.g.
+     *
+     *  The tincan.xml file for xapi content
+     *  The PDF file for PDF content
+     *  Media JSON info for video files
+     *  OPF for epub content
+     *
+     *  The Uri should match ContentManifestEntry.uri for the entry to open
      */
-    var cevUrl: String? = "",
+    var cevOpenUri: String? = "",
 
     /**
      * The content type that will be used to determine what screen will be used to display the

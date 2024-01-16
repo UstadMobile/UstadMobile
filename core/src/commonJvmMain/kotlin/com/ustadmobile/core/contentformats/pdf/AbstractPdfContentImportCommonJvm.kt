@@ -71,7 +71,7 @@ abstract class AbstractPdfContentImportCommonJvm(
             cevContentType = ContentEntryVersion.TYPE_PDF,
             cevContentEntryUid = jobItem.cjiContentEntryUid,
             cevManifestUrl = manifestUrl,
-            cevUrl = pdfUrl,
+            cevOpenUri = pdfUrl,
         )
 
         val manifest = ContentManifest(

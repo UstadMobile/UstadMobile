@@ -298,7 +298,7 @@ class H5PContentImporter(
                 cevContentType = ContentEntryVersion.TYPE_XAPI,
                 cevManifestUrl = manifestUrl,
                 cevContentEntryUid = jobItem.cjiContentEntryUid,
-                cevUrl = "tincan.xml"
+                cevOpenUri = "tincan.xml"
             )
         }finally {
             File(workTmpPath.toString()).deleteRecursively()

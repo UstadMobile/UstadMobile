@@ -314,7 +314,7 @@ class EpubContentImporterCommonJvmTest : AbstractMainDispatcherTest() {
 
                 ZipFile(tempEpubFile).use { zipFile ->
                     //verifies that we have the OPF
-                    val opfPathInZip = result.cevUrl!!.substringAfterLast("api/content/${result.cevUid}/")
+                    val opfPathInZip = result.cevOpenUri!!.substringAfterLast("api/content/${result.cevUid}/")
                     val manifestOpfEntry = manifest.entries.first {
                         it.uri == opfPathInZip
                     }
