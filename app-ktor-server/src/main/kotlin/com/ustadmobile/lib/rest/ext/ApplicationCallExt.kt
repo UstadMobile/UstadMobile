@@ -201,7 +201,7 @@ suspend fun ApplicationCall.respondCacheResponse(
             responseSource.use { source ->
                 respondOutputStream(
                     contentType = contentType?.let { ContentType.parse(it) },
-                    status = HttpStatusCode.OK,
+                    status = HttpStatusCode.fromValue(cacheResponse.responseCode),
                     contentLength = contentLength
                 ) {
                     withContext(Dispatchers.IO) {
