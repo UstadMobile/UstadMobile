@@ -5,7 +5,7 @@ import androidx.compose.runtime.Composable
 import com.ustadmobile.core.viewmodel.videocontent.VideoContentViewModel
 
 /**
- * See https://github.com/dsa28s/compose-video
+ * See https://github.com/caprica/vlcj
  */
 @Composable
 actual fun VideoContentScreen(

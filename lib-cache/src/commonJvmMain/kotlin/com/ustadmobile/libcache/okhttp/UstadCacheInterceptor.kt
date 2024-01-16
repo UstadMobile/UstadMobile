@@ -173,9 +173,15 @@ class UstadCacheInterceptor(
             .headers(cacheResponse.headers.asOkHttpHeaders())
             .request(call.request())
             .body(responseBody)
-            .code(200)
+            .code(cacheResponse.responseCode)
             .protocol(Protocol.HTTP_1_1)
-            .message("OK")
+            .message(
+                when(cacheResponse.responseCode) {
+                    206 -> "Partial Content"
+                    204 -> "No Content"
+                    else -> "OK"
+                }
+            )
             .build()
     }
 

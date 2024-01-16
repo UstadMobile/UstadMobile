@@ -5,8 +5,10 @@ import com.ustadmobile.core.contentformats.manifest.ContentManifestEntry
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.contententry.ContentConstants
 import com.ustadmobile.core.util.ext.removeQueryStringSuffix
+import com.ustadmobile.core.util.stringvalues.asIStringValues
 import com.ustadmobile.core.util.stringvalues.asOkHttpHeaders
 import com.ustadmobile.core.util.stringvalues.filtered
+import com.ustadmobile.core.util.stringvalues.withOverrides
 import com.ustadmobile.libcache.okhttp.asOkHttpHeaders
 import com.ustadmobile.libcache.okhttp.asOkHttpRequest
 import com.ustadmobile.libcache.request.HttpRequest
@@ -113,6 +115,8 @@ class ContentEntryVersionServerUseCase(
              * providing the response for bodyDataUrl e.g. EPUB mime types are specified in the OPF
              * manifest).
              *
+             * The Content-Length and Content-Range header are taken from the data url response
+             *
              * Note: closing an OKHttp Response is actually closing the body, because we are
              * returning the body from the bodyDataUrlResponse, bodyDataUrlResponse itself does not
              * need to be closed.
@@ -126,15 +130,17 @@ class ContentEntryVersionServerUseCase(
                 .headers(
                     entryHeaders.filtered { headerName ->
                         !BODY_DATA_URL_RESERVED_HEADER_NAMES.any { it.equals(headerName, true) }
-                    }.asOkHttpHeaders()
+                    }.withOverrides(
+                        buildMap {
+                            BODY_DATA_URL_RESERVED_HEADER_NAMES.forEach { reservedHeaderName ->
+                                bodyDataUrlResponse.headers[reservedHeaderName]?.also { reserverHeaderVal ->
+                                    put(reservedHeaderName, listOf(reserverHeaderVal))
+                                }
+                            }
+                            put("Accept-Ranges", listOf("bytes"))
+                        }.asIStringValues()
+                    ).asOkHttpHeaders()
                 )
-                .apply {
-                    BODY_DATA_URL_RESERVED_HEADER_NAMES.forEach { reservedHeaderName ->
-                        bodyDataUrlRequest.headers[reservedHeaderName]?.also { reservedHeaderValue ->
-                            header(reservedHeaderName, reservedHeaderValue)
-                        }
-                    }
-                }
                 .build()
         }
     }

@@ -61,6 +61,8 @@ dependencyResolutionManagement {
             version("version_compressor", "3.0.1") //Android image resizing
             version("version_thumbnailator", "0.4.20") //JVM image resizing
             version("version_webpimageio", "0.6.0")
+            version("version_compose_video", "1.2.0")
+            version("version_androidx_media3", "1.1.0")
 
 
             plugin("jetbrains-compose", "org.jetbrains.compose").versionRef("jetbrains-compose")
@@ -147,6 +149,10 @@ dependencyResolutionManagement {
             library("compressor", "id.zelory", "compressor").versionRef("version_compressor")
             library("thumbnailator", "net.coobird", "thumbnailator").versionRef("version_thumbnailator")
             library("webpimageio", "com.github.usefulness", "webp-imageio").versionRef("version_webpimageio")
+            library("compose-video", "io.sanghun", "compose-video").versionRef("version_compose_video")
+            library("androidx-media3-exoplayer", "androidx.media3", "media3-exoplayer").versionRef("version_androidx_media3")
+            library("androidx-media3-session", "androidx.media3", "media3-session").versionRef("version_androidx_media3")
+            library("androidx-media3-ui", "androidx.media3", "media3-ui").versionRef("version_androidx_media3")
         }
     }
 }

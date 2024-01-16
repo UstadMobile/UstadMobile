@@ -59,6 +59,8 @@ suspend fun ApplicationCall.respondReverseProxy(proxyToBaseUrl: String) {
             requestBuilder.addHeader(headerName, headerValue)
         }
     }
+    requestBuilder.removeHeader("cache-control")
+    requestBuilder.addHeader("cache-control", "no-store")
 
     val bodyBytes = if(HttpMethod.requiresRequestBody(request.httpMethod.value)) {
         withContext(Dispatchers.IO) {
@@ -99,7 +101,8 @@ suspend fun ApplicationCall.respondOkHttpResponse(
     val responseInput = response.body?.byteStream() ?: ByteArrayInputStream(byteArrayOf())
     respondOutputStream(
         status = HttpStatusCode.fromValue(response.code),
-        contentType = response.header("content-type")?.let { ContentType.parse(it) }
+        contentType = response.header("content-type")?.let { ContentType.parse(it) },
+        contentLength = response.headers["content-length"]?.toLong(),
     ) {
         responseInput.use { responseIn ->
             responseIn.copyTo(this)
