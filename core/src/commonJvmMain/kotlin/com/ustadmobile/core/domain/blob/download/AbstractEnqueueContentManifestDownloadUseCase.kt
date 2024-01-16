@@ -33,7 +33,7 @@ abstract class AbstractEnqueueContentManifestDownloadUseCase(
             val jobUid = db.transferJobDao.insert(transferJob).toInt()
             val manifestTransferJobItem = TransferJobItem(
                 tjiTjUid = jobUid,
-                tjiSrc = contentEntryVersion.cevSitemapUrl,
+                tjiSrc = contentEntryVersion.cevManifestUrl,
                 tjiEntityUid = contentEntryVersion.cevUid,
                 tjiTableId = ContentEntryVersion.TABLE_ID,
             )

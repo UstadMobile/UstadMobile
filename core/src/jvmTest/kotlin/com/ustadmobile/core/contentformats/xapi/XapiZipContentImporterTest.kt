@@ -130,7 +130,8 @@ class XapiZipContentImporterTest :AbstractMainDispatcherTest() {
             tmpDir = Path(rootTmpPath.absolutePath),
             deleteUrisUseCase = deleteUrisUseCase,
         )
-        saveAndManifestUseCase = SaveLocalUriAsBlobAndManifestUseCaseJvm(saveLocalUriAsBlobUseCase)
+        saveAndManifestUseCase = SaveLocalUriAsBlobAndManifestUseCaseJvm(saveLocalUriAsBlobUseCase,
+            FileMimeTypeHelperImpl())
     }
 
     @Test

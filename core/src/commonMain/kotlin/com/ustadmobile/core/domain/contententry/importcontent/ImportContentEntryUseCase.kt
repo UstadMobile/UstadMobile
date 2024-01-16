@@ -51,7 +51,7 @@ class ImportContentEntryUseCase(
         if(enqueueBlobUploadClientUseCaseVal != null && httpClient != null) {
             //Because the entry was imported just now, it will be in the cache. This will still
             //work offline.
-            val manifestUrl = contentEntryVersionEntity.cevSitemapUrl
+            val manifestUrl = contentEntryVersionEntity.cevManifestUrl
                 ?: throw IllegalStateException("imported entry has no manifest url")
             val manifest: ContentManifest = httpClient.get(manifestUrl).body()
             val locksCreated = createRetentionLocksForManifestUseCase?.invoke(

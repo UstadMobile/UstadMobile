@@ -35,7 +35,7 @@ class ContentManifestDownloadUseCase(
             .findByUidAsync(contentEntryVersionUid)
                 ?: throw IllegalArgumentException("ContentEntryVersion $contentEntryVersionUid not in db")
 
-        val manifestUrl = contentEntryVersion.cevSitemapUrl!!
+        val manifestUrl = contentEntryVersion.cevManifestUrl!!
         val manifest: ContentManifest = httpClient.get(manifestUrl).body()
         enqueueBlobDownloadClientUseCase(
             items = manifest.entries.map {

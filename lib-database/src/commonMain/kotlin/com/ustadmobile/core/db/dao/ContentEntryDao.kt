@@ -1,7 +1,6 @@
 package com.ustadmobile.core.db.dao
 
 import androidx.room.*
-import com.ustadmobile.core.db.dao.ContentEntryDaoCommon.ALL_ENTRIES_RECURSIVE_SQL
 import com.ustadmobile.core.db.dao.ContentEntryDaoCommon.SORT_TITLE_ASC
 import com.ustadmobile.core.db.dao.ContentEntryDaoCommon.SORT_TITLE_DESC
 import app.cash.paging.PagingSource
@@ -303,12 +302,6 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
                SUM(containerSize) AS totalSize 
           FROM ContentEntry_recursive""")
     abstract suspend fun getRecursiveDownloadTotals(contentEntryUid: Long): DownloadJobSizeInfo?
-
-    @Query(ALL_ENTRIES_RECURSIVE_SQL)
-    abstract fun getAllEntriesRecursively(contentEntryUid: Long): PagingSource<Int, ContentEntryWithParentChildJoinAndMostRecentContainer>
-
-    @Query(ALL_ENTRIES_RECURSIVE_SQL)
-    abstract fun getAllEntriesRecursivelyAsList(contentEntryUid: Long): List<ContentEntryWithParentChildJoinAndMostRecentContainer>
 
     @Query("""
             UPDATE ContentEntry 

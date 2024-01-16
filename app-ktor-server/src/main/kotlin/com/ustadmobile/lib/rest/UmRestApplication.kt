@@ -428,7 +428,8 @@ fun Application.umRestApplication(
 
         bind<SaveLocalUriAsBlobAndManifestUseCase>() with scoped(EndpointScope.Default).singleton {
             SaveLocalUriAsBlobAndManifestUseCaseJvm(
-                saveLocalUrisAsBlobsUseCase = instance()
+                saveLocalUrisAsBlobsUseCase = instance(),
+                mimeTypeHelper = FileMimeTypeHelperImpl(),
             )
         }
 

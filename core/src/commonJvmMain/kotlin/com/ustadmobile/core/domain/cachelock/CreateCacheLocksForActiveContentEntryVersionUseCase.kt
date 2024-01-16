@@ -68,7 +68,7 @@ class CreateCacheLocksForActiveContentEntryVersionUseCase(
             .findContentEntryVersionsWithoutCacheLock()
 
         val cacheLockJoins = versionsWithoutLocks.flatMap { contentEntryVersion ->
-            val manifestUrl = contentEntryVersion.cevSitemapUrl
+            val manifestUrl = contentEntryVersion.cevManifestUrl
             if(manifestUrl != null && manifestUrl.startsWith(endpoint.url)) {
                 val manifest: ContentManifest = httpClient.get(manifestUrl).body()
                 val locksCreated = createRetentionLocksForManifestUseCase(

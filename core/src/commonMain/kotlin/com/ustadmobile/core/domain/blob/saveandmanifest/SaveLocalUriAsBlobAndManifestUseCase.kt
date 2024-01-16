@@ -10,9 +10,14 @@ import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCas
  */
 interface SaveLocalUriAsBlobAndManifestUseCase {
 
+    /**
+     * @param manifestMimeType The mime-type that will be used for this item in the ContentManifestEntry
+     *
+     */
     data class SaveLocalUriAsBlobAndManifestItem(
         val blobItem: SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem,
         val manifestUri: String,
+        val manifestMimeType: String? = null,
     )
 
     data class BlobAndContentManifestEntry(

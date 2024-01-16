@@ -99,7 +99,8 @@ class PdfContentImporterJvmTest : AbstractMainDispatcherTest() {
             deleteUrisUseCase = mock { }
         )
 
-        saveAndManifestUseCase = SaveLocalUriAsBlobAndManifestUseCaseJvm(saveLocalUrisUseCase)
+        saveAndManifestUseCase = SaveLocalUriAsBlobAndManifestUseCaseJvm(saveLocalUrisUseCase,
+            FileMimeTypeHelperImpl())
     }
 
     @Test
@@ -195,7 +196,7 @@ class PdfContentImporterJvmTest : AbstractMainDispatcherTest() {
             )
         }
 
-        val manifestUrl = result.cevSitemapUrl
+        val manifestUrl = result.cevManifestUrl
         val manifestResponse = ustadCache.retrieve(requestBuilder(manifestUrl!!))
         val manifest = json.decodeFromString(
             ContentManifest.serializer(),

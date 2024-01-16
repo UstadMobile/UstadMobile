@@ -70,7 +70,7 @@ abstract class AbstractPdfContentImportCommonJvm(
             cevUid = contentEntryVersionUid,
             cevContentType = ContentEntryVersion.TYPE_PDF,
             cevContentEntryUid = jobItem.cjiContentEntryUid,
-            cevSitemapUrl = manifestUrl,
+            cevManifestUrl = manifestUrl,
             cevUrl = pdfUrl,
         )
 

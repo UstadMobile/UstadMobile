@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.content.res.AssetManager
 import android.os.Bundle
+import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import coil.ImageLoader
@@ -89,8 +90,10 @@ import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
+import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.logging.NapierLoggingAdapter
 import com.ustadmobile.libcache.okhttp.UstadCacheInterceptor
+import com.ustadmobile.libuicompose.components.webview.OkHttpWebViewClient
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.HttpTimeout
@@ -401,7 +404,8 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
         bind<SaveLocalUriAsBlobAndManifestUseCase>() with scoped(EndpointScope.Default).singleton {
             SaveLocalUriAsBlobAndManifestUseCaseJvm(
-                saveLocalUrisAsBlobsUseCase = instance()
+                saveLocalUrisAsBlobsUseCase = instance(),
+                mimeTypeHelper = FileMimeTypeHelperImpl(),
             )
         }
 
@@ -537,6 +541,10 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 endpoint = context,
                 db = instance(tag = DoorTag.TAG_DB),
             )
+        }
+
+        bind<WebViewClient>() with singleton {
+            OkHttpWebViewClient(okHttpClient = instance())
         }
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }

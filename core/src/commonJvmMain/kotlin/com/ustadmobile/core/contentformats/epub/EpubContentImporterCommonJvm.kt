@@ -15,7 +15,6 @@ import com.ustadmobile.core.domain.contententry.ContentConstants
 import com.ustadmobile.core.domain.epub.GetEpubTableOfContentsUseCase
 import com.ustadmobile.core.io.ext.*
 import com.ustadmobile.core.uri.UriHelper
-import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
@@ -198,7 +197,7 @@ class EpubContentImporterCommonJvm(
             cevUid = contentEntryVersionUid,
             cevContentType = ContentEntryVersion.TYPE_EPUB,
             cevContentEntryUid = jobItem.cjiContentEntryUid,
-            cevSitemapUrl = manifestUrl,
+            cevManifestUrl = manifestUrl,
             cevUrl = "$urlPrefix$opfPath",
         )
 

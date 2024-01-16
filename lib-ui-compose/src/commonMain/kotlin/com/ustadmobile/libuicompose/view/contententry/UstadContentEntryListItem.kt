@@ -11,13 +11,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.impl.locale.entityconstants.ContentEntryTypeLabelConstants
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListItemUiState
 import com.ustadmobile.core.viewmodel.contententry.list.listItemUiState
 import com.ustadmobile.lib.db.entities.*
 import dev.icerock.moko.resources.compose.stringResource
-import com.ustadmobile.core.MR
 import com.ustadmobile.libuicompose.view.contententry.list.ClazzAssignmentConstants.CONTENT_ENTRY_TYPE_ICON_MAP
 
 @Composable
@@ -33,7 +33,11 @@ fun UstadContentEntryListItem(
             .alpha((uiState?.containerAlpha ?: 0.0).toFloat())
             .clickable(onClick = onClick),
         headlineContent = {
-            Text(uiState?.contentEntry?.title ?: "")
+            Text(
+                text = uiState?.contentEntry?.title ?: "",
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         },
         leadingContent = {
             LeadingContent(
@@ -85,7 +89,7 @@ private fun SecondaryContent(
         verticalArrangement = Arrangement.spacedBy(5.dp)
     ) {
         if (uiState?.descriptionVisible == true){
-            Text((contentEntry?.description ?: ""))
+            Text((contentEntry?.description ?: ""), maxLines = 2)
         }
 
         Row {

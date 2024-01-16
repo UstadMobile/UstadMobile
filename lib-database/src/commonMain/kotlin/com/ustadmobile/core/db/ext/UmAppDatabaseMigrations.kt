@@ -1404,6 +1404,19 @@ val MIGRATION_136_137 = DoorMigrationStatementList(136, 137) { db ->
     }
 }
 
+val MIGRATION_137_138 = DoorMigrationStatementList(137, 138) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("ALTER TABLE ContentEntryVersion RENAME to ContentEntryVersion_OLD")
+            add("CREATE TABLE IF NOT EXISTS ContentEntryVersion (  cevContentEntryUid  INTEGER  NOT NULL , cevUrl  TEXT , cevContentType  TEXT , cevManifestUrl  TEXT , cevSize  INTEGER  NOT NULL , cevInActive  INTEGER  NOT NULL , cevLastModified  INTEGER  NOT NULL , cevLct  INTEGER  NOT NULL , cevUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+            add("INSERT INTO ContentEntryVersion (cevContentEntryUid, cevUrl, cevContentType, cevManifestUrl, cevSize, cevInActive, cevLastModified, cevLct, cevUid) SELECT cevContentEntryUid, cevUrl, cevContentType, cevSitemapUrl, cevSize, cevInActive, cevLastModified, cevLct, cevUid FROM ContentEntryVersion_OLD")
+            add("DROP TABLE ContentEntryVersion_OLD")
+        }else {
+            add("ALTER TABLE ContentEntryVersion RENAME COLUMN cevSitemapUrl TO cevManifestUrl")
+        }
+    }
+}
+
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_102_103,
     MIGRATION_103_104, MIGRATION_104_105, MIGRATION_105_106, MIGRATION_106_107,
@@ -1412,6 +1425,7 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_124_125, MIGRATION_125_126, MIGRATION_126_127, MIGRATION_127_128,
     MIGRATION_128_129, MIGRATION_129_130, MIGRATION_130_131, MIGRATION_132_133,
     MIGRATION_133_134, MIGRATION_134_135, MIGRATION_135_136, MIGRATION_136_137,
+    MIGRATION_137_138,
 )
 
 

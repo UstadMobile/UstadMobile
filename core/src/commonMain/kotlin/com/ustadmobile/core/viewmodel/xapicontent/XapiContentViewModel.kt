@@ -58,7 +58,8 @@ class XapiContentViewModel(
                 }
                 _appUiState.update { prev ->
                     prev.copy(
-                        title = tinCanXml.launchActivity?.name
+                        title = tinCanXml.launchActivity?.name,
+                        hideBottomNavigation = true,
                     )
                 }
             }catch(e: Throwable) {

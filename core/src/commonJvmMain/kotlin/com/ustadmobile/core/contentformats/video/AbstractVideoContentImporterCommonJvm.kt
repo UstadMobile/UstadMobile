@@ -136,7 +136,7 @@ abstract class AbstractVideoContentImporterCommonJvm(
                 cevUid = contentEntryVersionUid,
                 cevContentType = ContentEntryVersion.TYPE_VIDEO,
                 cevContentEntryUid = jobItem.cjiContentEntryUid,
-                cevSitemapUrl = manifestUrl,
+                cevManifestUrl = manifestUrl,
                 cevUrl = mediaInfoUrl,
             )
         }finally {

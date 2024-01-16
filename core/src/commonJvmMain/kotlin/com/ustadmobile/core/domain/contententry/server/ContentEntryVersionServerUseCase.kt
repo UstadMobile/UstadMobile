@@ -78,7 +78,7 @@ class ContentEntryVersionServerUseCase(
                 manifestCache.get(contentEntryVersionUid) {
                     val contentEntryVersionEntity = (repo ?: db).contentEntryVersionDao
                         .findByUidAsync(contentEntryVersionUid) ?: throw IllegalArgumentException("No such contententryversion")
-                    val contentManifestUrl = contentEntryVersionEntity.cevSitemapUrl!!
+                    val contentManifestUrl = contentEntryVersionEntity.cevManifestUrl!!
                     val manifestStr = okHttpClient.newCall(
                         Request.Builder()
                             .applyCacheControl()

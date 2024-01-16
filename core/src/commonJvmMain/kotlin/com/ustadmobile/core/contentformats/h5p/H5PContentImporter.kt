@@ -297,7 +297,7 @@ class H5PContentImporter(
             ContentEntryVersion(
                 cevUid = contentEntryVersionUid,
                 cevContentType = ContentEntryVersion.TYPE_XAPI,
-                cevSitemapUrl = manifestUrl,
+                cevManifestUrl = manifestUrl,
                 cevContentEntryUid = jobItem.cjiContentEntryUid,
                 cevUrl = "${urlPrefix}tincan.xml"
             )

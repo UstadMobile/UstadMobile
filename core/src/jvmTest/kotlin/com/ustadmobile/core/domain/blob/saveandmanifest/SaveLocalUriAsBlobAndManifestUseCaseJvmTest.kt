@@ -116,7 +116,7 @@ class SaveLocalUriAsBlobAndManifestUseCaseJvmTest {
     @Test
     fun givenLocalUrisToManifest_whenInvoked_thenAreStoredInCacheAsPerManifestBodyDataUrl() {
         val useCase = SaveLocalUriAsBlobAndManifestUseCaseJvm(
-            saveLocalUrisAsBlobsUseCase
+            saveLocalUrisAsBlobsUseCase, FileMimeTypeHelperImpl()
         )
 
         runBlocking {

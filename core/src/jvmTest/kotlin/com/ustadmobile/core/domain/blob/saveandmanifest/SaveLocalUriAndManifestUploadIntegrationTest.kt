@@ -83,10 +83,10 @@ class SaveLocalUriAndManifestUploadIntegrationTest{
                     contentEntryVersionUid = entryVersion.cevUid,
                     timeout = timeout
                 )
-                val manifestOnClient = clientNode.node.getManifest(entryVersion.cevSitemapUrl!!)
+                val manifestOnClient = clientNode.node.getManifest(entryVersion.cevManifestUrl!!)
 
-                clientNode.node.assertManifestStoredOnNode(manifestOnClient, entryVersion.cevSitemapUrl!!)
-                serverNode.node.assertManifestStoredOnNode(manifestOnClient, entryVersion.cevSitemapUrl!!)
+                clientNode.node.assertManifestStoredOnNode(manifestOnClient, entryVersion.cevManifestUrl!!)
+                serverNode.node.assertManifestStoredOnNode(manifestOnClient, entryVersion.cevManifestUrl!!)
 
                 /*
                  * Server MUST receive the ContentEntryVersion entity in its database via replication,
@@ -101,12 +101,12 @@ class SaveLocalUriAndManifestUploadIntegrationTest{
                     timeout = timeout.seconds,
                     name = "Server should have ContentEntryVersion entity id #${entryVersion.cevUid}"
                 ) {
-                    it != null && it.cevSitemapUrl == entryVersion.cevSitemapUrl
+                    it != null && it.cevManifestUrl == entryVersion.cevManifestUrl
                 }
 
                 val allManifestUrls = manifestOnClient.entries.map {
                     it.bodyDataUrl
-                }.distinct() +  entryVersion.cevSitemapUrl!!
+                }.distinct() +  entryVersion.cevManifestUrl!!
 
                 /*
                  * All urls referenced in the manifest should be retained within the cache

@@ -133,7 +133,8 @@ class EpubContentImporterCommonJvmTest : AbstractMainDispatcherTest() {
             tmpDir = Path(rootTmpPath.absolutePath),
             deleteUrisUseCase = deleteUrisUseCase,
         )
-        saveAndManifestUseCase = SaveLocalUriAsBlobAndManifestUseCaseJvm(saveLocalUriAsBlobUseCase)
+        saveAndManifestUseCase = SaveLocalUriAsBlobAndManifestUseCaseJvm(saveLocalUriAsBlobUseCase,
+            FileMimeTypeHelperImpl())
     }
 
 

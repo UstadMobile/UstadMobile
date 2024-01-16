@@ -27,6 +27,7 @@ import com.ustadmobile.door.flow.doorFlow
 import com.ustadmobile.lib.db.composites.TransferJobItemStatus
 import com.ustadmobile.lib.db.entities.ContentEntryVersion
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
+import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.filter
 import org.kodein.di.DI
@@ -131,7 +132,8 @@ class XferTestClient(
 
             bind<SaveLocalUriAsBlobAndManifestUseCase>() with scoped(node.endpointScope).singleton {
                 SaveLocalUriAsBlobAndManifestUseCaseJvm(
-                    saveLocalUrisAsBlobsUseCase = instance()
+                    saveLocalUrisAsBlobsUseCase = instance(),
+                    mimeTypeHelper = FileMimeTypeHelperImpl(),
                 )
             }
 

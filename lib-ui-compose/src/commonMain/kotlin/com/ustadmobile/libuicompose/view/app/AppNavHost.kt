@@ -116,6 +116,7 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import kotlin.reflect.KClass
 import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel
+import com.ustadmobile.core.viewmodel.xapicontent.XapiContentViewModel
 import com.ustadmobile.libuicompose.view.contententry.detail.ContentEntryDetailScreen
 import com.ustadmobile.libuicompose.view.contententry.edit.ContentEntryEditScreen
 import com.ustadmobile.libuicompose.view.contententry.getmetadata.ContentEntryGetMetadataScreen
@@ -123,6 +124,7 @@ import com.ustadmobile.libuicompose.view.courseterminology.edit.CourseTerminolog
 import com.ustadmobile.libuicompose.view.courseterminology.list.CourseTerminologyListScreen
 import com.ustadmobile.libuicompose.view.parentalconsentmanagement.ParentalConsentManagementScreen
 import com.ustadmobile.libuicompose.view.person.registerminorwaitforparent.RegisterMinorWaitForParentScreen
+import com.ustadmobile.libuicompose.view.xapicontent.XapiContentScreen
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -585,6 +587,13 @@ fun AppNavHost(
             contentScene("/${ContentEntryDetailViewModel.DEST_NAME}") {backStackEntry ->
                 ContentEntryDetailScreen(
                     backStackEntry, ustadNavController, onSetAppUiState, onShowSnackBar, navResultReturner,
+                )
+            }
+
+            contentScene("/${XapiContentViewModel.DEST_NAME}") { backStackEntry ->
+                XapiContentScreen(
+                    appViewModel(backStackEntry, XapiContentViewModel::class,
+                        ::XapiContentViewModel)
                 )
             }
         }

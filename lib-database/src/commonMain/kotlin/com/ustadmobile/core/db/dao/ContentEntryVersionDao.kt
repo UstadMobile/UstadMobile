@@ -58,7 +58,7 @@ expect abstract class ContentEntryVersionDao {
                  FROM CacheLockJoin
                 WHERE CacheLockJoin.cljTableId = ${ContentEntryVersion.TABLE_ID}
                   AND CacheLockJoin.cljEntityUid = ContentEntryVersion.cevUid
-                  AND CacheLockJoin.cljUrl = ContentEntryVersion.cevSitemapUrl) 
+                  AND CacheLockJoin.cljUrl = ContentEntryVersion.cevManifestUrl) 
     """)
     abstract suspend fun findContentEntryVersionsWithoutCacheLock(): List<ContentEntryVersion>
 

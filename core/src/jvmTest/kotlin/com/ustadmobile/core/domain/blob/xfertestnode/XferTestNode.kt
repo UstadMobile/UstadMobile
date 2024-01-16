@@ -17,6 +17,7 @@ import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseJvm
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.uri.UriHelperJvm
 import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.core.util.ext.fileExtensionOrNull
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.libcache.UstadCache
@@ -199,6 +200,7 @@ class XferTestNode(
     fun assertManifestStoredOnNode(
         manifest: ContentManifest,
         url: String,
+        expectedDefaultContentType: Boolean = true,
     ) {
         val manifestResponse = httpCache.retrieve(requestBuilder(url))
         assertNotNull(manifestResponse, "Manifest response for $url should not be null")
@@ -206,6 +208,7 @@ class XferTestNode(
 
         assertEquals(manifest.entries.size, manifestStored.entries.size,
             "Manifest stored on node should have same number of entries")
+        val mimeTypeHelper = FileMimeTypeHelperImpl()
         manifest.entries.forEach { entry ->
             val cacheResponse = httpCache.retrieve(requestBuilder(entry.bodyDataUrl))
             assertNotNull(cacheResponse,
@@ -214,6 +217,14 @@ class XferTestNode(
                 cacheResponse.bodyAsSource()!!.buffered().useAndReadySha256())
             assertEquals(entry.integrity, integrityStored, "Integrity for ${entry.uri} " +
                     "should match integrity of actual body data on node $name")
+            if(expectedDefaultContentType) {
+                val expectedMimeType = entry.uri.fileExtensionOrNull()?.let {
+                    mimeTypeHelper.guessByExtension(it)
+                }
+                if(expectedMimeType != null) {
+                    assertEquals(expectedMimeType, entry.responseHeaders["content-type"])
+                }
+            }
         }
     }
 

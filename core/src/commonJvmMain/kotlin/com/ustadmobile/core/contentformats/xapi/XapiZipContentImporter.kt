@@ -127,7 +127,7 @@ class XapiZipContentImporter(
             cevUid = contentEntryVersionUid,
             cevContentType = ContentEntryVersion.TYPE_XAPI,
             cevContentEntryUid = jobItem.cjiContentEntryUid,
-            cevSitemapUrl = manifestUrl,
+            cevManifestUrl = manifestUrl,
             cevUrl = "$urlPrefix${tinCanEntry.name}"
         )
 

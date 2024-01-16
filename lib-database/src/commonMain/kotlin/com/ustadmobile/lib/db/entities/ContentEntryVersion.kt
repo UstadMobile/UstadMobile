@@ -34,7 +34,9 @@ import kotlinx.serialization.Serializable
         ),
         /*
          * Create an OfflineItemPendingTransferJob where there is a new ContentEntryVersion for
-         * a ContentEntry with a corresponding active OfflineItem
+         * a ContentEntry with a corresponding active OfflineItem, e.g. the user has indicated that
+         * they want the given content item to be accessible offline and there is now a new version
+         * of it available.
          */
         Trigger(
             name = "content_entry_version_offline_item",
@@ -48,7 +50,6 @@ import kotlinx.serialization.Serializable
                            FROM TransferJob
                           WHERE TransferJob.tjTableId = ${ContentEntryVersion.TABLE_ID}
                             AND TransferJob.tjEntityUid = NEW.cevUid)
-
                  """,
             sqlStatements = ["""
                 INSERT INTO OfflineItemPendingTransferJob(oiptjOiUid, oiptjTableId, oiptjEntityUid, oiptjType)
@@ -83,11 +84,14 @@ data class ContentEntryVersion(
     var cevContentType: String? = "",
 
     /**
-     * The URL for the sitemap that would be used to download this for offline usage if available.
+     * The URL for the ContentManifest (as per com.ustadmobile.core.contentformats.manifest.ContentManifest).
      *
-     * e.g. https://endpoint.com/api/content/cevUid/sitemap.xml
+     * It may be stored on the same server as the one holding this database entity, or a different
+     * server. See ARCHITECTURE.md for more info on the offline content architecture.
+     *
+     * e.g. https://endpoint.com/api/content/cevUid/_ustadmanifest.json
      */
-    var cevSitemapUrl: String? = null,
+    var cevManifestUrl: String? = null,
 
     /**
      * The estimated total size (in bytes)

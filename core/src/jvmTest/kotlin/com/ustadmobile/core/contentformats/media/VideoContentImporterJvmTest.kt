@@ -122,7 +122,8 @@ class VideoContentImporterJvmTest : AbstractMainDispatcherTest() {
             deleteUrisUseCase = deleteUrisUseCase,
         )
 
-        saveAndManifestUseCase = SaveLocalUriAsBlobAndManifestUseCaseJvm(saveLocalUriAsBlobUseCase)
+        saveAndManifestUseCase = SaveLocalUriAsBlobAndManifestUseCaseJvm(saveLocalUriAsBlobUseCase,
+            FileMimeTypeHelperImpl())
     }
 
     @Test
@@ -217,7 +218,7 @@ class VideoContentImporterJvmTest : AbstractMainDispatcherTest() {
             )
         }
         val manifestResponse = ustadCache.retrieve(
-            requestBuilder(result.cevSitemapUrl!!)
+            requestBuilder(result.cevManifestUrl!!)
         )
         val manifest = json.decodeFromString(
             ContentManifest.serializer(), manifestResponse!!.bodyAsSource()!!.readString()
