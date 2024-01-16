@@ -54,8 +54,8 @@ abstract class AbstractVideoContentImporterCommonJvm(
         val contentEntryVersionUid = db.doorPrimaryKeyManager.nextId(ContentEntryVersion.TABLE_ID)
         val urlPrefix = createContentUrlPrefix(contentEntryVersionUid)
         val manifestUrl = "$urlPrefix${ContentConstants.MANIFEST_NAME}"
-        val videoUrl = "${urlPrefix}video"
-        val mediaInfoUrl = "${urlPrefix}media.json"
+        val videoEntryUri = "video"
+        val mediaInfoEntryUri = "media.json"
         val workDir = Path(tmpPath, "video-import-${systemTimeInMillis()}")
         fileSystem.createDirectories(workDir)
 
@@ -72,7 +72,7 @@ abstract class AbstractVideoContentImporterCommonJvm(
         val mediaContentInfo = MediaContentInfo(
             sources = listOf(
                 MediaSource(
-                    url = videoUrl,
+                    uri = videoEntryUri,
                     mimeType = mimeType
                 )
             )
@@ -104,7 +104,7 @@ abstract class AbstractVideoContentImporterCommonJvm(
                             mimeType = mimeType,
                             deleteLocalUriAfterSave = true,
                         ),
-                        manifestUri = "video"
+                        manifestUri = videoEntryUri
                     ),
                     SaveLocalUriAsBlobAndManifestUseCase.SaveLocalUriAsBlobAndManifestItem(
                         blobItem = SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem(
@@ -114,7 +114,7 @@ abstract class AbstractVideoContentImporterCommonJvm(
                             mimeType = "application/json",
                             deleteLocalUriAfterSave = true,
                         ),
-                        manifestUri = "media.json"
+                        manifestUri = mediaInfoEntryUri,
                     )
                 )
             )
@@ -128,7 +128,8 @@ abstract class AbstractVideoContentImporterCommonJvm(
             cache.storeText(
                 url = manifestUrl,
                 text = json.encodeToString(ContentManifest.serializer(), manifest),
-                mimeType = "application/json"
+                mimeType = "application/json",
+                cacheControl = "immutable"
             )
 
 
@@ -137,7 +138,7 @@ abstract class AbstractVideoContentImporterCommonJvm(
                 cevContentType = ContentEntryVersion.TYPE_VIDEO,
                 cevContentEntryUid = jobItem.cjiContentEntryUid,
                 cevManifestUrl = manifestUrl,
-                cevOpenUri = mediaInfoUrl,
+                cevOpenUri = mediaInfoEntryUri,
             )
         }finally {
             File(workDir.toString()).deleteRecursively()

@@ -5,6 +5,7 @@ import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.tincan.TinCanXML
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.requireEntryByUri
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
@@ -46,9 +47,8 @@ class XapiContentViewModel(
                     .findByUidAsync(entityUidArg) ?: return@launch
                 val manifestUrl = contentEntryVersion.cevManifestUrl ?: return@launch
                 val manifest: ContentManifest = httpClient.get(manifestUrl).body()
-                val tinCanEntry = manifest.entries.firstOrNull {
-                    it.uri == contentEntryVersion.cevOpenUri
-                } ?: return@launch
+                val tinCanEntry = manifest.requireEntryByUri(
+                    contentEntryVersion.cevOpenUri!!)
 
                 val tinCanXmlStr = httpClient.get(tinCanEntry.bodyDataUrl).bodyAsText()
 

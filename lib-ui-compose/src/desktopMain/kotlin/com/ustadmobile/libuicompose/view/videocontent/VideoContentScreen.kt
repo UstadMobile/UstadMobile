@@ -1,7 +1,7 @@
 package com.ustadmobile.libuicompose.view.videocontent
 
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import com.ustadmobile.core.viewmodel.videocontent.VideoContentUiState
 import com.ustadmobile.core.viewmodel.videocontent.VideoContentViewModel
 
 /**
@@ -11,14 +11,5 @@ import com.ustadmobile.core.viewmodel.videocontent.VideoContentViewModel
 actual fun VideoContentScreen(
     viewModel: VideoContentViewModel,
 ) {
-
+    Text("Video Content - Desktop - Coming Soon")
 }
-
-@Composable
-fun VideoContentScreen(
-    uiState: VideoContentUiState
-) {
-
-}
-
-

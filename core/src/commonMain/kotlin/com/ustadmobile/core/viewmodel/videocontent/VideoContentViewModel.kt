@@ -1,7 +1,10 @@
 package com.ustadmobile.core.viewmodel.videocontent
 
+import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.contentformats.media.MediaContentInfo
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.url.UrlKmp
+import com.ustadmobile.core.util.requireBodyUrlForUri
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -18,6 +21,10 @@ import org.kodein.di.instance
 
 data class VideoContentUiState(
     val mediaContentInfo: MediaContentInfo? = null,
+
+    val mediaSrc: String? = null,
+
+    val mediaMimeType: String? = null,
 
     val contentEntry: ContentEntry? = null,
 )
@@ -41,10 +48,22 @@ class VideoContentViewModel(
                 .findByUidAsync(entityUidArg) ?: return@launch
 
             launch {
-                val cevUrl = contentEntryVersion.cevOpenUri ?: return@launch
-                val mediaInfo: MediaContentInfo = httpClient.get(cevUrl).body()
+                val manifest: ContentManifest = httpClient.get(contentEntryVersion.cevManifestUrl!!)
+                    .body()
+
+                val mediaInfoUrl = manifest.requireBodyUrlForUri(contentEntryVersion.cevOpenUri!!)
+
+                val mediaInfo: MediaContentInfo = httpClient.get(mediaInfoUrl).body()
+                val mediaSrc = UrlKmp(contentEntryVersion.cevManifestUrl!!).resolve(
+                    mediaInfo.sources.first().uri).toString()
+                val mediaMimeType = mediaInfo.sources.first().mimeType
+
                 _uiState.update { prev ->
-                    prev.copy(mediaContentInfo = mediaInfo)
+                    prev.copy(
+                        mediaContentInfo = mediaInfo,
+                        mediaSrc = mediaSrc,
+                        mediaMimeType = mediaMimeType,
+                    )
                 }
             }
 
