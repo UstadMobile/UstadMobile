@@ -19,23 +19,23 @@ it('Admin add discussion board and a post', () => {
   cy.get('[data-testid="ForumIcon"]').click()
   cy.contains('Post').click()
   cy.get('#discussion_post_title').type('Post Title')
-  cy.get('.ql-editor.ql-blank').type('Discusssion post')
+  cy.get('#discussion_post_message .ql-editor').type('Discusssion post')
   cy.get('#actionBarButton').click()
   cy.go('back')
   cy.go('back')
   //Add a teacher
   cy.contains("button","Members").click()
   cy.contains("span","Add a teacher").click()
-  cy.ustadAddNewPerson('Teacher','A','Female')
+  cy.ustadAddNewPerson('Teacher','1','Female')
   // Add account for teacher
-  cy.contains("Teacher A").click()
+  cy.contains("Teacher 1").click()
   cy.contains('View profile').click()
-  cy.ustadCreateUserAccount('teacherA','test1234')
+  cy.ustadCreateUserAccount('teacher1','test1234')
 })
 
 it('Teacher able to edit discussion board ', () => {
   // Teacher Login
-  cy.ustadClearDbAndLogin('teacherA','test1234')
+  cy.ustadClearDbAndLogin('teacher1','test1234')
   cy.contains("Courses").should('be.visible')
   cy.contains('005_002').click()
   // Add discussion board
