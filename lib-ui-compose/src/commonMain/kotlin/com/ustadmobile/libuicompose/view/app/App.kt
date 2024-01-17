@@ -29,6 +29,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.FabUiState
@@ -160,6 +161,7 @@ fun App(
         floatingActionButton = {
             if(appUiStateVal.fabState.visible) {
                 ExtendedFloatingActionButton(
+                    modifier = Modifier.testTag("floating_action_button"),
                     onClick = appUiStateVal.fabState.onClick,
                     text = {
                         Text(appUiStateVal.fabState.text ?: "")
