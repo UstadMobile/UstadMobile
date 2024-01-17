@@ -1,15 +1,21 @@
 package com.ustadmobile.core.viewmodel.pdfcontent
 
+import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.url.UrlKmp
+import com.ustadmobile.core.util.bodyDataUrlForUri
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadViewModel
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.request.get
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
+import org.kodein.di.instance
 
 /**
  * @param pdfUrl The URL to the PDF using the content endpoint e.g. /api/content/versionUid/content.pdf
@@ -35,6 +41,8 @@ class PdfContentViewModel(
 
     val uiState: Flow<PdfContentUiState> = _uiState.asStateFlow()
 
+    private val httpClient: HttpClient by di.instance()
+
     init {
         _appUiState.update { prev ->
             prev.copy(
@@ -46,12 +54,17 @@ class PdfContentViewModel(
             val contentEntryVersion = activeRepo.contentEntryVersionDao
                 .findByUidAsync(entityUidArg) ?: return@launch
             val manifestUrl = contentEntryVersion.cevManifestUrl!!
+            val manifest: ContentManifest = httpClient.get(manifestUrl).body()
 
             val pdfEntryUri = contentEntryVersion.cevOpenUri ?: return@launch
             val pdfUrl = UrlKmp(manifestUrl).resolve(pdfEntryUri).toString()
+            val dataUrl = manifest.bodyDataUrlForUri(pdfEntryUri)
 
             _uiState.update { prev ->
-                prev.copy(pdfUrl = pdfUrl)
+                prev.copy(
+                    pdfUrl = pdfUrl,
+                    dataUrl = dataUrl,
+                )
             }
 
             val contentEntry = activeRepo.contentEntryDao.findByUidAsync(

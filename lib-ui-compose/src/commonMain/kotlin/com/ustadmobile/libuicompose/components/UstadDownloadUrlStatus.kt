@@ -7,6 +7,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.ustadmobile.libuicompose.util.downloadurl.DownloadUrlState
 import dev.icerock.moko.resources.compose.stringResource
@@ -20,7 +21,10 @@ fun UstadDownloadUrlStatus(
     state: DownloadUrlState,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
         when(state.status) {
             DownloadUrlState.Status.IN_PROGRESS -> {
                 if(state.totalBytes > 0) {

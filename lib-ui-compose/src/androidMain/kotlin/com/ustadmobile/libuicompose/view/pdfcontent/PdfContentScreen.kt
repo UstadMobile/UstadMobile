@@ -3,6 +3,7 @@ package com.ustadmobile.libuicompose.view.pdfcontent
 import android.net.Uri
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -49,8 +50,8 @@ fun PdfContentScreen(
         mutableStateOf(DownloadUrlState())
     }
 
-    LaunchedEffect(uiState.pdfUrl) {
-        val url = uiState.pdfUrl ?: return@LaunchedEffect
+    LaunchedEffect(uiState.dataUrl) {
+        val url = uiState.dataUrl ?: return@LaunchedEffect
         downloadUrlViaCacheAndGetLocalUri(
             url = url,
             httpClient = httpClient,
@@ -77,7 +78,8 @@ fun PdfContentScreen(
                 contentAlignment = Alignment.Center,
             ) {
                 UstadDownloadUrlStatus(
-                    state  = cacheDownloadState
+                    modifier = Modifier.fillMaxWidth(),
+                    state  = cacheDownloadState,
                 )
             }
         }
