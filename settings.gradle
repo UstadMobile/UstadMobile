@@ -61,7 +61,7 @@ dependencyResolutionManagement {
             version("version_compressor", "3.0.1") //Android image resizing
             version("version_thumbnailator", "0.4.20") //JVM image resizing
             version("version_webpimageio", "0.6.0")
-            version("version_compose_video", "1.2.0")
+            version("version_compose_video", "1.2.0a")
             version("version_androidx_media3", "1.1.0")
 
 

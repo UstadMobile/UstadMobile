@@ -23,7 +23,6 @@ import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.composites.ContentEntryAndDetail
 import com.ustadmobile.lib.db.composites.OfflineItemAndState
 import com.ustadmobile.lib.db.composites.TransferJobAndTotals
-import org.kodein.di.direct
 import org.kodein.di.instance
 
 data class ContentEntryDetailOverviewUiState(
@@ -81,6 +80,8 @@ class ContentEntryDetailOverviewViewModel(
 
     private val enqueueContentManifestDownloadUseCase: EnqueueContentManifestDownloadUseCase by
             di.onActiveEndpoint().instance()
+
+    val nodeIdAndAuth: NodeIdAndAuth by di.onActiveEndpoint().instance()
 
     val uiState: Flow<ContentEntryDetailOverviewUiState> = _uiState.asStateFlow()
 
@@ -140,7 +141,10 @@ class ContentEntryDetailOverviewViewModel(
                 }
 
                 launch {
-                    activeDb.offlineItemDao.findByContentEntryUid(entityUidArg).collect {
+                    activeDb.offlineItemDao.findByContentEntryUid(
+                        contentEntryUid = entityUidArg,
+                        nodeId = nodeIdAndAuth.nodeId
+                    ).collect {
                         _uiState.update { prev ->
                             prev.copy(
                                 offlineItemAndState = it
@@ -159,9 +163,9 @@ class ContentEntryDetailOverviewViewModel(
 
     fun onClickOffline() {
         viewModelScope.launch {
-            val nodeIdAndAuth: NodeIdAndAuth = di.onActiveEndpoint().direct.instance()
-
-            if(_uiState.value.offlineItemAndState?.offlineItem == null) {
+            val offlineItemAndStateVal = _uiState.value.offlineItemAndState
+            val offlineItemVal = offlineItemAndStateVal?.offlineItem
+            if(offlineItemVal == null || !offlineItemVal.oiActive) {
                 val latestContentEntryVersion = activeRepo.contentEntryVersionDao
                     .findLatestVersionUidByContentEntryUidEntity(entityUidArg)
 
@@ -170,6 +174,7 @@ class ContentEntryDetailOverviewViewModel(
                         OfflineItem(
                             oiNodeId = nodeIdAndAuth.nodeId,
                             oiContentEntryUid = entityUidArg,
+                            oiActive = true,
                         )
                     )
 
@@ -177,6 +182,9 @@ class ContentEntryDetailOverviewViewModel(
                         enqueueContentManifestDownloadUseCase(latestContentEntryVersion.cevUid)
                     }
                 }
+            }else if(offlineItemAndStateVal.readyForOffline) {
+                //There is an offline item, transfer was completed, we can set the offline item inactive
+                activeRepo.offlineItemDao.updateActiveByOfflineItemUid(offlineItemVal.oiUid, false)
             }
         }
     }
