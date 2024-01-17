@@ -51,6 +51,7 @@ import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
 import org.kodein.di.instance
@@ -181,7 +182,8 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
 
     bind<SaveLocalUriAsBlobAndManifestUseCase>() with scoped(EndpointScope.Default).singleton {
         SaveLocalUriAsBlobAndManifestUseCaseJvm(
-            saveLocalUrisAsBlobsUseCase = instance()
+            saveLocalUrisAsBlobsUseCase = instance(),
+            mimeTypeHelper = FileMimeTypeHelperImpl(),
         )
     }
 

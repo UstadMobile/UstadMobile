@@ -1417,11 +1417,13 @@ val MIGRATION_137_138 = DoorMigrationStatementList(137, 138) { db ->
     }
 }
 
-val MIGRATION_138_139 = DoorMigrationStatementList(137, 138) { db ->
+val MIGRATION_138_139 = DoorMigrationStatementList(138, 139) { db ->
     buildList {
         if (db.dbType() == DoorDbType.SQLITE) {
             add("ALTER TABLE ContentEntryVersion RENAME to ContentEntryVersion_OLD")
-
+            add("CREATE TABLE IF NOT EXISTS ContentEntryVersion (  cevContentEntryUid  INTEGER  NOT NULL , cevOpenUri  TEXT , cevContentType  TEXT , cevManifestUrl  TEXT , cevSize  INTEGER  NOT NULL , cevInActive  INTEGER  NOT NULL , cevLastModified  INTEGER  NOT NULL , cevLct  INTEGER  NOT NULL , cevUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+            add("INSERT INTO ContentEntryVersion (cevContentEntryUid, cevOpenUri, cevContentType, cevManifestUrl, cevSize, cevInActive, cevLastModified, cevLct, cevUid) SELECT cevContentEntryUid, cevUrl, cevContentType, cevManifestUrl, cevSize, cevInActive, cevLastModified, cevLct, cevUid FROM ContentEntryVersion_OLD")
+            add("DROP TABLE ContentEntryVersion_OLD")
         }else {
             add("ALTER TABLE ContentEntryVersion RENAME COLUMN cevUrl to cevOpenUri")
         }
