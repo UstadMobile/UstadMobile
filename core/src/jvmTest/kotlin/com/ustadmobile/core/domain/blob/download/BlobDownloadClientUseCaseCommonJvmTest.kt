@@ -2,7 +2,10 @@ package com.ustadmobile.core.domain.blob.download
 
 import com.ustadmobile.core.domain.blob.BlobTransferJobItem
 import com.ustadmobile.util.test.ResourcesDispatcher
+import com.ustadmobile.util.test.initNapierLog
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.runBlocking
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
@@ -20,6 +23,7 @@ class BlobDownloadClientUseCaseCommonJvmTest {
 
     @BeforeTest
     fun setup() {
+        initNapierLog()
         mockWebServer = MockWebServer()
         mockWebServer.dispatcher = ResourcesDispatcher(this::class.java)
         mockWebServer.start()
@@ -68,9 +72,13 @@ class BlobDownloadClientUseCaseCommonJvmTest {
         }
 
         val allRequests = mockWebServer.takeAllRequests()
+        Napier.d { "BlobDownloadClientUseCaseCommonJvmTest: Recorded requests for ${allRequests.joinToString{it.requestUrl.toString() }}" }
         itemsToDownload.forEach { downloadItem ->
             assertEquals(
-                1, allRequests.count { it.requestUrl?.toString() == downloadItem.blobUrl },
+                1, allRequests.count {
+                    //MockWebServer might consider the host domain as part of the url, so look only at the path
+                    downloadItem.blobUrl.toHttpUrl().encodedPath ==  it.requestUrl?.encodedPath
+                },
                 message = "should be exactly one request for ${downloadItem.blobUrl}"
             )
         }

@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,15 +23,20 @@ import app.cash.paging.Pager
 import app.cash.paging.PagingConfig
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.ustadmobile.libuicompose.components.UstadBottomSheetOption
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.libuicompose.components.UstadFileDropZone
 import com.ustadmobile.libuicompose.components.UstadFilePickResult
+import com.ustadmobile.libuicompose.components.UstadListFilterChipsHeader
 import com.ustadmobile.libuicompose.components.UstadPickFileOpts
 import com.ustadmobile.libuicompose.components.rememberUstadFilePickLauncher
+import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,7 +54,12 @@ fun ContentEntryListScreenForViewModel(
         onClickContentEntry = viewModel::onClickEntry,
         onFileDropped = {
             viewModel.onImportFile(fileUri = it.uri, fileName = it.fileName)
-        }
+        },
+        onClickFilterChip = viewModel::onClickFilterChip,
+        onClickImportFile = {
+            filePickLauncher(UstadPickFileOpts())
+        },
+        onClickImportFromLink = viewModel::onClickImportFromLink,
     )
 
     if(uiState.createNewOptionsVisible) {
@@ -100,8 +111,11 @@ fun ContentEntryListScreenForViewModel(
 @Composable
 fun ContentEntryListScreen(
     uiState: ContentEntryListUiState = ContentEntryListUiState(),
-    onClickContentEntry: (ContentEntry?) -> Unit = {},
+    onClickContentEntry: (ContentEntry?) -> Unit = { },
     onFileDropped: (UstadFilePickResult) -> Unit = { },
+    onClickFilterChip: (MessageIdOption2) -> Unit = { },
+    onClickImportFile: () -> Unit = { },
+    onClickImportFromLink: () -> Unit = { },
 ) {
     val pager = remember(uiState.contentEntryList) {
         Pager(
@@ -118,6 +132,56 @@ fun ContentEntryListScreen(
         LazyColumn(
             modifier = Modifier.fillMaxSize()
         )  {
+            if(uiState.showChips) {
+                item(key = "filterchips") {
+                    UstadListFilterChipsHeader(
+                        modifier = Modifier.defaultItemPadding(),
+                        filterOptions = uiState.filterOptions,
+                        selectedChipId = uiState.selectedChipId,
+                        onClickFilterChip = onClickFilterChip,
+                    )
+                }
+            }
+
+            if(uiState.importFromFileItemVisible) {
+                item(key = "import_from_file_item") {
+                    ListItem(
+                        modifier = Modifier.clickable { onClickImportFile() },
+                        headlineContent = {
+                            Text(stringResource(MR.strings.import_from_file))
+                        },
+                        leadingContent = {
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier.size(40.dp),
+                            ) {
+                                Icon(Icons.Default.FileUpload, contentDescription = null)
+                            }
+                        }
+                    )
+                }
+            }
+
+            if(uiState.importFromLinkItemVisible) {
+                item(key = "import_from_link") {
+                    ListItem(
+                        modifier = Modifier.clickable { onClickImportFromLink() },
+                        headlineContent = {
+                            Text(stringResource(MR.strings.import_from_link))
+                        },
+                        leadingContent = {
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier.size(40.dp),
+                            ) {
+                                Icon(Icons.Default.Link, contentDescription = null)
+                            }
+                        }
+                    )
+                }
+            }
+
+
             ustadPagedItems(
                 pagingItems = lazyPagingItems,
                 key = { contentEntry -> contentEntry.contentEntryUid }

@@ -14,6 +14,7 @@ import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewMode
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import app.cash.paging.PagingSource
 import com.ustadmobile.core.util.MessageIdOption2
+import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
 import com.ustadmobile.core.viewmodel.contententry.detail.ContentEntryDetailViewModel
 import com.ustadmobile.core.viewmodel.contententry.getmetadata.ContentEntryGetMetadataViewModel
@@ -146,7 +147,8 @@ class ContentEntryListViewModel(
                             )
                         }
                     }
-                )
+                ),
+                hideBottomNavigation = listMode == ListViewMode.PICKER,
             )
         }
 

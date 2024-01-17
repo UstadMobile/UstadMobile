@@ -53,6 +53,12 @@ class VideoContentViewModel(
     private val httpClient: HttpClient by instance()
 
     init {
+        _appUiState.update { prev ->
+            prev.copy(
+                hideBottomNavigation = true
+            )
+        }
+
         viewModelScope.launch {
             val contentEntryVersion = activeRepo.contentEntryVersionDao
                 .findByUidAsync(entityUidArg) ?: return@launch
@@ -92,7 +98,7 @@ class VideoContentViewModel(
 
                 _appUiState.update { prev ->
                     prev.copy(
-                        title = contentEntry?.title ?: ""
+                        title = contentEntry?.title ?: "",
                     )
                 }
             }

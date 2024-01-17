@@ -47,6 +47,11 @@ val ContentEntryImportLinkComponent2 = FC<ContentEntryImportLinkProps> { props -
                 onTextChange = {
                     props.onUrlChange(it)
                 }
+                onKeyUp = {
+                    if(it.key == "Enter") {
+                        props.onClickNext()
+                    }
+                }
             }
 
             Typography {
