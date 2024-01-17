@@ -7,6 +7,7 @@ import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryG
 import com.ustadmobile.core.domain.upload.ChunkedUploadResponse
 import com.ustadmobile.core.domain.upload.ChunkedUploadServerUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadServerUseCaseJvm
+import com.ustadmobile.core.util.UMURLEncoder
 import com.ustadmobile.core.util.ext.firstCaseInsensitiveOrNull
 import com.ustadmobile.door.ext.toDoorUri
 import io.ktor.http.HttpStatusCode
@@ -31,6 +32,7 @@ class ContentEntryGetMetadataServerUseCase(
         onUploadComplete = { completedUpload ->
             val originalFilenameParam: String? = completedUpload.request.headers
                 .firstCaseInsensitiveOrNull(ContentEntryGetMetaDataFromUriUseCase.HEADER_ORIGINAL_FILENAME)
+                ?.let { UMURLEncoder.decodeUTF8(it) }
 
             val completedUploadFile = File(completedUpload.path.toString())
 
