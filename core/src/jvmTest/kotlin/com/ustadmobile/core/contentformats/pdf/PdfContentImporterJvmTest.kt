@@ -2,8 +2,13 @@ package com.ustadmobile.core.contentformats.pdf
 
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.contentjob.InvalidContentException
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
+import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCaseJvm
+import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
+import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCaseJvm
 import com.ustadmobile.core.test.assertCachedBodyMatchesFileContent
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.uri.UriHelperJvm
@@ -11,21 +16,23 @@ import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.toDoorUri
-import com.ustadmobile.lib.db.entities.ContentJob
-import com.ustadmobile.lib.db.entities.ContentJobItem
-import com.ustadmobile.lib.db.entities.ContentJobItemAndContentJob
+import com.ustadmobile.lib.db.entities.ContentEntryImportJob
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
+import com.ustadmobile.libcache.request.requestBuilder
 import com.ustadmobile.util.test.ext.newFileFromResource
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.files.Path
+import kotlinx.io.readString
+import kotlinx.serialization.json.Json
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
+import org.mockito.kotlin.mock
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -54,6 +61,13 @@ class PdfContentImporterJvmTest : AbstractMainDispatcherTest() {
 
     private lateinit var activeEndpoint: Endpoint
 
+    private lateinit var saveLocalUrisUseCase: SaveLocalUrisAsBlobsUseCase
+
+    private lateinit var saveAndManifestUseCase: SaveLocalUriAsBlobAndManifestUseCase
+
+    private lateinit var json: Json
+
+
     @BeforeTest
     fun setup() {
         di = DI {
@@ -62,6 +76,7 @@ class PdfContentImporterJvmTest : AbstractMainDispatcherTest() {
 
         val accountManager: UstadAccountManager by di.instance()
         db = di.on(accountManager.activeEndpoint).direct.instance(tag = DoorTag.TAG_DB)
+        json = di.direct.instance()
         activeEndpoint = accountManager.activeEndpoint
 
         ustadCache = UstadCacheBuilder(
@@ -74,6 +89,18 @@ class PdfContentImporterJvmTest : AbstractMainDispatcherTest() {
             httpClient = di.direct.instance(),
             okHttpClient = di.direct.instance(),
         )
+
+        //Strictly speaking should be mocked, in reality, it's easier to just use the real thing.
+        saveLocalUrisUseCase = SaveLocalUrisAsBlobsUseCaseJvm(
+            endpoint = activeEndpoint,
+            cache = ustadCache,
+            uriHelper = uriHelper,
+            tmpDir = Path(temporaryFolder.newFolder().absolutePath),
+            deleteUrisUseCase = mock { }
+        )
+
+        saveAndManifestUseCase = SaveLocalUriAsBlobAndManifestUseCaseJvm(saveLocalUrisUseCase,
+            FileMimeTypeHelperImpl())
     }
 
     @Test
@@ -83,9 +110,11 @@ class PdfContentImporterJvmTest : AbstractMainDispatcherTest() {
 
         val pdfPlugin = PdfContentImporterJvm(
             endpoint = activeEndpoint,
-            di = di,
+            db = db,
             cache = ustadCache,
-            uriHelper = uriHelper
+            saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
+            json = json,
+            uriHelper = uriHelper,
         )
 
         val metadata = runBlocking {
@@ -104,9 +133,11 @@ class PdfContentImporterJvmTest : AbstractMainDispatcherTest() {
 
         val pdfPlugin = PdfContentImporterJvm(
             endpoint = activeEndpoint,
-            di = di,
+            db = db,
             cache = ustadCache,
-            uriHelper = uriHelper
+            saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
+            json = json,
+            uriHelper = uriHelper,
         )
 
         val metadata = runBlocking {
@@ -124,9 +155,11 @@ class PdfContentImporterJvmTest : AbstractMainDispatcherTest() {
 
         val pdfPlugin = PdfContentImporterJvm(
             endpoint = activeEndpoint,
-            di = di,
+            db = db,
             cache = ustadCache,
-            uriHelper = uriHelper
+            saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
+            json = json,
+            uriHelper = uriHelper,
         )
 
         runBlocking {
@@ -146,28 +179,34 @@ class PdfContentImporterJvmTest : AbstractMainDispatcherTest() {
 
         val pdfPlugin = PdfContentImporterJvm(
             endpoint = activeEndpoint,
-            di = di,
+            db = db,
             cache = ustadCache,
-            uriHelper = uriHelper
+            saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
+            json = json,
+            uriHelper = uriHelper,
         )
 
-        val jobAndItem = ContentJobItemAndContentJob().apply{
-            this.contentJob = ContentJob()
-            this.contentJobItem = ContentJobItem(
-                sourceUri = testPdfFile.toDoorUri().toString(),
-                cjiOriginalFilename = "validPDFMetadata.pdf",
-            )
-        }
-
         val result = runBlocking {
-            pdfPlugin.addToCache(
-                jobItem = jobAndItem,
+            pdfPlugin.importContent(
+                jobItem = ContentEntryImportJob(
+                    sourceUri = testPdfFile.toDoorUri().toString(),
+                    cjiOriginalFilename = "validPDFMetadata.pdf",
+                ),
                 progressListener =  { }
             )
         }
 
+        val manifestUrl = result.cevManifestUrl
+        val manifestResponse = ustadCache.retrieve(requestBuilder(manifestUrl!!))
+        val manifest = json.decodeFromString(
+            ContentManifest.serializer(),
+            manifestResponse!!.bodyAsSource()!!.readString()
+        )
+
+        val pdfBlobUrl = manifest.entries.first().bodyDataUrl
+
         ustadCache.assertCachedBodyMatchesFileContent(
-            url = result.cevUrl!!,
+            url = pdfBlobUrl,
             file = testPdfFile,
         )
     }

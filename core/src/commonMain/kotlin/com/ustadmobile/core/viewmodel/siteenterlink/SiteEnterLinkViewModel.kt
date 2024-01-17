@@ -11,6 +11,7 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SITE
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
+import io.github.aakira.napier.Napier
 import io.ktor.client.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -60,10 +61,10 @@ class SiteEnterLinkViewModel(
 
         loadingState = LoadingUiState.INDETERMINATE
 
+        val endpointUrl = _uiState.value.siteLink.requireHttpPrefix()
+            .requirePostfix("/")
         viewModelScope.launch {
             try {
-                val endpointUrl = _uiState.value.siteLink.requireHttpPrefix()
-                    .requirePostfix("/")
                 val site = httpClient.verifySite(endpointUrl)
                 val args = mutableMapOf(
                     UstadView.ARG_API_URL to endpointUrl,
@@ -82,6 +83,7 @@ class SiteEnterLinkViewModel(
 
                 navController.navigate(LoginViewModel.DEST_NAME, args)
             }catch(e: Throwable) {
+                Napier.d(throwable = e) { "SiteEnterLink: not working: $endpointUrl" }
                 _uiState.update { previous ->
                     loadingState = LoadingUiState.NOT_LOADING
                     previous.copy(

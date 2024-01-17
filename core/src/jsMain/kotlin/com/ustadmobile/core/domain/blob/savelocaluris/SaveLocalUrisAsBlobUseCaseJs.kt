@@ -2,9 +2,11 @@ package com.ustadmobile.core.domain.blob.savelocaluris
 
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.blob.BlobTransferJobItem
+import com.ustadmobile.core.domain.blob.BlobTransferProgressUpdate
+import com.ustadmobile.core.domain.blob.BlobTransferStatusUpdate
 import com.ustadmobile.core.domain.blob.transferjobitem.TransferJobItemStatusUpdater
 import com.ustadmobile.core.domain.blob.transferjobitem.UpdateTransferJobItemEtagUseCase
-import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCase
 import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCase.Companion.BLOB_RESPONSE_HEADER_PREFIX
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
 import com.ustadmobile.core.util.stringvalues.asIStringValues
@@ -78,12 +80,12 @@ class SaveLocalUrisAsBlobUseCaseJs(
 
             try {
                 val savedBlobs = uriToSaveQueueItems.map { uriToSaveQueueItem ->
-                    val uploadItem = BlobUploadClientUseCase.BlobTransferJobItem(
+                    val uploadItem = BlobTransferJobItem(
                         blobUrl = "",
                         transferJobItemUid = uriToSaveQueueItem.transferJobItem.tjiUid,
                     )
                     transferJobItemStatusUpdater.onStatusUpdate(
-                        BlobUploadClientUseCase.BlobUploadStatusUpdate(
+                        BlobTransferStatusUpdate(
                             uploadItem, TransferJobItemStatus.IN_PROGRESS.value
                         )
                     )
@@ -99,8 +101,8 @@ class SaveLocalUrisAsBlobUseCaseJs(
                         }.asIStringValues(),
                         onProgress = {
                             transferJobItemStatusUpdater.onProgressUpdate(
-                                BlobUploadClientUseCase.BlobUploadProgressUpdate(
-                                    uploadItem = uploadItem,
+                                BlobTransferProgressUpdate(
+                                    transferItem = uploadItem,
                                     bytesTransferred = it.bytesTransferred,
                                 )
                             )
@@ -110,21 +112,20 @@ class SaveLocalUrisAsBlobUseCaseJs(
                     val responseJsonStr = response.body
                         ?: throw IllegalStateException("SaveLocalUrisAsBlobUseCaseJs: no response body!")
                     transferJobItemStatusUpdater.onStatusUpdate(
-                        BlobUploadClientUseCase.BlobUploadStatusUpdate(
+                        BlobTransferStatusUpdate(
                             uploadItem, TransferJobItemStatus.COMPLETE.value
                         )
                     )
 
-                    val serverSavedBlob = json.decodeFromString(
-                        SaveLocalUrisAsBlobsUseCase.ServerSavedBlob.serializer(), responseJsonStr
+                    val savedBlob = json.decodeFromString(
+                        SaveLocalUrisAsBlobsUseCase.SavedBlob.serializer(), responseJsonStr
                     )
                     Napier.d("SaveLocalUrisAsBlobUseCaseJs: upload complete: " +
-                            "${uriToSaveQueueItem.uriToSaveItem.localUri} stored as ${serverSavedBlob.blobUrl}")
+                            "${uriToSaveQueueItem.uriToSaveItem.localUri} stored as ${savedBlob.blobUrl}")
 
-                    SaveLocalUrisAsBlobsUseCase.SavedBlob(
+                    savedBlob.copy(
                         entityUid = uriToSaveQueueItem.uriToSaveItem.entityUid,
                         localUri = uriToSaveQueueItem.uriToSaveItem.localUri,
-                        blobUrl = serverSavedBlob.blobUrl,
                     )
                 }
 

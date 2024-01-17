@@ -24,9 +24,9 @@ class ChunkedUploadClientLocalUriUseCaseJs: ChunkedUploadClientLocalUriUseCase {
         onStatusChange: (TransferJobItemStatus) -> Unit,
         lastChunkHeaders: IStringValues?,
     ): ChunkedUploadClientLocalUriUseCase.LastChunkResponse {
+        val logPrefix = "ChunkedUploadClientLocalUriUseCaseJs ($uploadUuid) : $localUri -> $remoteUrl:"
         try {
-            Napier.d("ChunkedUploadClientLocalUriUseCaseJs: Starting upload " +
-                    "uuid=$uploadUuid localUri=$localUri to $remoteUrl")
+            Napier.d("$logPrefix : starting")
             val blob = fetch(localUri.uri.toString()).blob().await()
             val totalSize = blob.size
             if(totalSize <= 0)
@@ -39,14 +39,17 @@ class ChunkedUploadClientLocalUriUseCaseJs: ChunkedUploadClientLocalUriUseCase {
             )
 
             if(totalSize >= Int.MAX_VALUE)
-                throw IllegalArgumentException("JS: upload size > $totalSize not supported")
+                throw IllegalArgumentException("JS: upload size(${totalSize.toLong()}) > ${Int.MAX_VALUE} not supported")
 
             onStatusChange(TransferJobItemStatus.IN_PROGRESS)
-            chunkInfo.forEach { chunk ->
+            chunkInfo.forEachIndexed { index, chunk ->
+                Napier.v { "$logPrefix : upload chunk #${index+1}/${chunkInfo.numChunks}" }
                 val uploadChunkBlob = blob.slice(chunk.start.toInt(), chunk.end.toInt())
                 val headerPairs = buildList {
                     add(HEADER_UPLOAD_UUID to uploadUuid)
                     add(HEADER_IS_FINAL_CHUNK to chunk.isLastChunk.toString())
+                    add(HEADER_UPLOAD_START_BYTE to chunk.start.toString())
+
                     if(chunk.isLastChunk && lastChunkHeaders != null) {
                         lastChunkHeaders.names().forEach { headerName ->
                             lastChunkHeaders.getAll(headerName).forEach { headerVal ->
@@ -64,6 +67,7 @@ class ChunkedUploadClientLocalUriUseCaseJs: ChunkedUploadClientLocalUriUseCase {
                         headers = json(*headerPairs.toTypedArray())
                     }
                 ).await()
+                Napier.v { "$logPrefix : upload chunk #${index+1}/${chunkInfo.numChunks} complete " }
                 onProgress(
                     ChunkedUploadClientLocalUriUseCase.UploadProgress(
                         bytesTransferred = chunk.end,
@@ -73,10 +77,15 @@ class ChunkedUploadClientLocalUriUseCaseJs: ChunkedUploadClientLocalUriUseCase {
 
                 if(chunk.isLastChunk) {
                     onStatusChange(TransferJobItemStatus.COMPLETE)
-                    Napier.d("ChunkedUploadClientLocalUriUseCaseJs: Completed upload " +
-                            "uuid=$uploadUuid to $remoteUrl")
+                    Napier.d("$logPrefix: Complete!")
+                    /*
+                     * As per
+                     * https://fetch.spec.whatwg.org/#ref-for-dom-body-text%E2%91%A0
+                     * If there is no body, then response body will be an empty byte array, e.g.
+                     * empty string.
+                     */
                     return ChunkedUploadClientLocalUriUseCase.LastChunkResponse(
-                        body = if(fetchResponse.status == 200) {
+                        body = if(fetchResponse.status != 204) {
                             fetchResponse.text().await()
                         }else {
                             null
@@ -87,9 +96,9 @@ class ChunkedUploadClientLocalUriUseCaseJs: ChunkedUploadClientLocalUriUseCase {
                 }
             }
 
-            throw IllegalStateException("Should have returned after lastChunk")
+            throw IllegalStateException("$logPrefix should have returned with last chunk")
         }catch(e: Throwable) {
-            Napier.e("ChunkedUploadClientLocalUriUseCaseJs: Exception", e)
+            Napier.e("$logPrefix, ChunkedUploadClientLocalUriUseCaseJs: Exception", e)
             onStatusChange(TransferJobItemStatus.FAILED)
             throw e
         }

@@ -4,6 +4,11 @@ interface MimeTypeHelper {
 
     fun mimeTypeByUri(uri: String): String?
 
+    /**
+     * Guess the mime type by extension. The extension should be without the dot
+     *
+     * @param extension extension without the dot
+     */
     fun guessByExtension(extension: String): String?
 
     companion object {
@@ -16,7 +21,10 @@ interface MimeTypeHelper {
             "asc" to "text/plain",
             "xhtml" to "application/xhtml+xml",
             "txt" to "text/plain",
+            "json" to "application/json",
 
+
+            //Image formats as per https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types
             "webp" to "image/webp",
             "webm" to "image/webm",
             "gif" to "image/gif",
@@ -24,6 +32,7 @@ interface MimeTypeHelper {
             "jpeg" to "image/jpeg",
             "png" to "image/png",
             "svg" to "image/svg+xml",
+            "apng" to "image/apng",
 
             "mp3" to "audio/mpeg",
             "m3u" to "audio/mpeg-url",
@@ -38,11 +47,17 @@ interface MimeTypeHelper {
             "mov" to "video/quicktime",
             "swf" to "application/x-shockwave-flash",
 
-            "js" to "application/javascript",
+            "js" to "text/javascript",
             "pdf" to "application/pdf",
             "zip" to "application/zip",
             "epub" to "application/epub+zip",
             "gz" to "application/gzip",
+
+            "otf" to "font/otf",
+            "ttf" to "font/ttf",
+            "eot" to "application/vnd.ms-fontobject",
+            "woff" to "font/woff",
+            "woff2" to "font/woff2",
         )
 
     }

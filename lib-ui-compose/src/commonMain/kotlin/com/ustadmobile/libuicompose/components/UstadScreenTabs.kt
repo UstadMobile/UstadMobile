@@ -78,6 +78,7 @@ fun UstadScreenTabs(
     navResultReturner: NavResultReturner,
     onShowSnackBar: SnackBarDispatcher,
     scrollable: Boolean = false,
+    autoHideIfOneTab: Boolean = false,
     content: @Composable TabScope.(TabItem) -> Unit,
 ) {
     val pagerState = rememberPagerState(
@@ -90,6 +91,8 @@ fun UstadScreenTabs(
     val savedStateKeys: MutableMap<String, UstadSavedStateHandlePreCompose.SavedEntry> = remember {
         mutableMapOf()
     }
+
+    val tabsHidden = autoHideIfOneTab && tabs.size <= 1
 
     Column {
         if (tabs.isNotEmpty()) {
@@ -111,7 +114,7 @@ fun UstadScreenTabs(
                 }
             }
 
-            if(scrollable) {
+            if(scrollable && !tabsHidden) {
                 ScrollableTabRow(
                     selectedTabIndex = pagerState.currentPage,
                     edgePadding = 0.dp,
@@ -119,7 +122,7 @@ fun UstadScreenTabs(
                 ){
                     tabContent()
                 }
-            }else {
+            }else if(!tabsHidden) {
                 TabRow(
                     selectedTabIndex = pagerState.currentPage
                 ) {

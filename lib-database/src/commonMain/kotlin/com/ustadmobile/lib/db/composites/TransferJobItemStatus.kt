@@ -6,6 +6,10 @@ enum class TransferJobItemStatus(val value: Int) {
 
     companion object {
 
+        const val STATUS_QUEUED_INT = 1
+
+        const val STATUS_IN_PROGRESS_INT = 11
+
         const val STATUS_COMPLETE_INT = 21
 
         fun valueOf(value: Int): TransferJobItemStatus {

@@ -3,6 +3,7 @@ package com.ustadmobile.port.android.impl
 import android.app.Application
 import android.content.Context
 import android.content.pm.PackageManager
+import android.content.res.AssetManager
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
@@ -14,14 +15,14 @@ import com.russhwolf.settings.Settings
 import com.russhwolf.settings.SharedPreferencesSettings
 import com.toughra.ustadmobile.BuildConfig
 import com.ustadmobile.core.account.*
-import com.ustadmobile.core.contentformats.epub.EpubContentImporterCommonJvm
 import com.ustadmobile.core.contentformats.epub.XhtmlFixer
 import com.ustadmobile.core.contentformats.epub.XhtmlFixerJsoup
-import com.ustadmobile.core.contentformats.h5p.H5PContentImportPlugin
+import com.ustadmobile.core.contentformats.ContentImportersManager
+import com.ustadmobile.core.contentformats.epub.EpubContentImporterCommonJvm
+import com.ustadmobile.core.contentformats.h5p.H5PContentImporter
+import com.ustadmobile.core.contentformats.pdf.PdfContentImporterAndroid
+import com.ustadmobile.core.contentformats.video.VideoContentImporterAndroid
 import com.ustadmobile.core.contentformats.xapi.XapiZipContentImporter
-import com.ustadmobile.core.contentjob.ContentImportersManager
-import com.ustadmobile.core.contentjob.ContentJobManager
-import com.ustadmobile.core.contentjob.ContentJobManagerAndroid
 import com.ustadmobile.core.db.*
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.impl.*
@@ -32,6 +33,15 @@ import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.core.db.ext.migrationList
+import com.ustadmobile.core.domain.blob.download.BlobDownloadClientUseCase
+import com.ustadmobile.core.domain.blob.download.BlobDownloadClientUseCaseCommonJvm
+import com.ustadmobile.core.domain.blob.download.ContentManifestDownloadUseCase
+import com.ustadmobile.core.domain.blob.download.EnqueueBlobDownloadClientUseCase
+import com.ustadmobile.core.domain.blob.download.EnqueueBlobDownloadClientUseCaseAndroid
+import com.ustadmobile.core.domain.blob.download.EnqueueContentManifestDownloadJobUseCaseAndroid
+import com.ustadmobile.core.domain.blob.download.EnqueueContentManifestDownloadUseCase
+import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
+import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCaseJvm
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCaseJvm
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
@@ -43,6 +53,19 @@ import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCase
 import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCaseAndroid
 import com.ustadmobile.core.domain.blob.upload.UpdateFailedTransferJobUseCase
 import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseAndroid
+import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCase
+import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCaseCommonJvm
+import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCase
+import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCaseCommonJvm
+import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
+import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseAndroid
+import com.ustadmobile.core.domain.contententry.importcontent.ImportContentEntryUseCase
+import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServerUseCase
+import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServerWebClient
+import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
+import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseCommonJvm
+import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
+import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseAndroid
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientChunkGetterUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
@@ -68,6 +91,7 @@ import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
+import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.logging.NapierLoggingAdapter
 import com.ustadmobile.libcache.okhttp.UstadCacheInterceptor
 import io.ktor.client.HttpClient
@@ -98,6 +122,8 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
     @OptIn(ExperimentalXmlUtilApi::class)
     override val di: DI by DI.lazy {
         bind<OkHttpClient>() with singleton {
+            val rootTmpDir: File = instance(tag = DiTag.TAG_TMP_DIR)
+
             OkHttpClient.Builder()
                 .dispatcher(
                     Dispatcher().also {
@@ -108,7 +134,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 .addInterceptor(
                     UstadCacheInterceptor(
                         cache = instance(),
-                        cacheDir = File(applicationContext.filesDir, "httpfiles"),
+                        tmpDir = File(rootTmpDir, "okhttp-tmp"),
                         logger = NapierLoggingAdapter(),
                     )
                 )
@@ -134,6 +160,9 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             }
         }
 
+        bind<File>(tag = DiTag.TAG_TMP_DIR) with singleton {
+            File(applicationContext.filesDir, "tmp")
+        }
 
         bind<AppConfig>() with singleton {
             BundleAppConfig(appMetaData)
@@ -216,7 +245,6 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 dbName = dbName,
                 nodeId = nodeIdAndAuth.nodeId
             ).addSyncCallback(nodeIdAndAuth)
-                .addCallback(ContentJobItemTriggersCallback())
                 .addMigrations(*migrationList().toTypedArray())
                 .build()
 
@@ -258,39 +286,85 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
         }
 
         bind<ContentImportersManager>() with scoped(EndpointScope.Default).singleton {
+            val cache: UstadCache = instance()
             val uriHelper: UriHelper = instance()
             val xml: XML = instance()
-            val cache: UstadCache = instance()
+            val xhtmlFixer: XhtmlFixer = instance()
+            val db: UmAppDatabase = instance(tag = DoorTag.TAG_DB)
+            val saveAndManifestUseCase: SaveLocalUriAsBlobAndManifestUseCase = instance()
+            val tmpRoot: File = instance(tag = DiTag.TAG_TMP_DIR)
+            val contentImportTmpPath = Path(tmpRoot.absolutePath, "contentimport")
 
             ContentImportersManager(
-                listOf(
-                    EpubContentImporterCommonJvm(
-                        endpoint = context,
-                        di = di,
-                        cache = cache,
-                        uriHelper = uriHelper,
-                        xml = xml,
-                        xhtmlFixer = instance()
-                    ),
-                    XapiZipContentImporter(
-                        endpoint = context,
-                        di = di,
-                        cache = cache,
-                        uriHelper = uriHelper
-                    ),
-                    H5PContentImportPlugin(
-                        endpoint = context,
-                        di = di,
-                        cache = cache,
-                        uriHelper = uriHelper,
-                        json = instance(),
+                buildList {
+                    add(
+                        EpubContentImporterCommonJvm(
+                            endpoint = context,
+                            cache = cache,
+                            db = db,
+                            uriHelper = uriHelper,
+                            xml = xml,
+                            xhtmlFixer = xhtmlFixer,
+                            tmpPath = contentImportTmpPath,
+                            saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
+                            json = instance(),
+                        )
                     )
-                )
-            )
-        }
+                    add(
+                        XapiZipContentImporter(
+                            endpoint = context,
+                            db = db,
+                            cache = cache,
+                            uriHelper = uriHelper,
+                            json = instance(),
+                            tmpPath = contentImportTmpPath,
+                            saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
+                        )
+                    )
 
-        bind<ContentJobManager>() with singleton {
-            ContentJobManagerAndroid(applicationContext)
+                    add(
+                        H5PContentImporter(
+                            endpoint = context,
+                            db = db,
+                            cache = cache,
+                            uriHelper = uriHelper,
+                            tmpPath = contentImportTmpPath,
+                            saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
+                            json = instance(),
+                            h5pInStream = {
+                                applicationContext.assets.open("h5p/h5p-standalone-3.6.0.zip",
+                                    AssetManager.ACCESS_STREAMING)
+                            }
+                        ),
+                    )
+
+                    add(
+                        VideoContentImporterAndroid(
+                            endpoint = context,
+                            appContext = applicationContext,
+                            uriHelper = uriHelper,
+                            cache = cache,
+                            tmpPath = contentImportTmpPath,
+                            db = db,
+                            saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
+                            json = instance(),
+                        )
+                    )
+
+                    add(
+                        PdfContentImporterAndroid(
+                            endpoint = context,
+                            cache = cache,
+                            uriHelper = uriHelper,
+                            db = db,
+                            saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
+                            json = instance(),
+                            appContext = applicationContext,
+                            tmpDir = File(contentImportTmpPath.toString()),
+                        )
+                    )
+                }
+            )
         }
 
         bind<XmlPullParserFactory>(tag  = DiTag.XPP_FACTORY_NSAWARE) with singleton {
@@ -313,28 +387,25 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             )
         }
 
-        bind<ChunkedUploadClientUseCaseKtorImpl>() with singleton {
-            ChunkedUploadClientUseCaseKtorImpl(
-                httpClient = instance(),
-                uriHelper = instance(),
-            )
-        }
 
-        bind<ChunkedUploadClientLocalUriUseCase>() with singleton {
-            instance<ChunkedUploadClientUseCaseKtorImpl>()
-        }
-
-        bind<ChunkedUploadClientChunkGetterUseCase>() with singleton {
-            instance<ChunkedUploadClientUseCaseKtorImpl>()
-        }
 
         bind<SaveLocalUrisAsBlobsUseCase>() with scoped(EndpointScope.Default).singleton {
+            val rootTmpDir: File = instance(tag = DiTag.TAG_TMP_DIR)
             SaveLocalUrisAsBlobsUseCaseJvm(
                 endpoint = context,
                 cache = instance(),
                 uriHelper = instance(),
-                tmpDir = Path(applicationContext.cacheDir.absolutePath, "savelocaluriaslblobtmp"),
-                fileSystem = SystemFileSystem
+                tmpDir = Path(rootTmpDir.absolutePath, "savelocaluriaslblobtmp"),
+                fileSystem = SystemFileSystem,
+                deleteUrisUseCase = instance(),
+                createRetentionLock = true,
+            )
+        }
+
+        bind<SaveLocalUriAsBlobAndManifestUseCase>() with scoped(EndpointScope.Default).singleton {
+            SaveLocalUriAsBlobAndManifestUseCaseJvm(
+                saveLocalUrisAsBlobsUseCase = instance(),
+                mimeTypeHelper = FileMimeTypeHelperImpl(),
             )
         }
 
@@ -365,6 +436,18 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             )
         }
 
+        bind<IsTempFileCheckerUseCase>() with singleton {
+            IsTempFileCheckerUseCaseAndroid(
+                tmpDir = instance(tag = DiTag.TAG_TMP_DIR)
+            )
+        }
+
+        bind<DeleteUrisUseCase>() with singleton {
+            DeleteUrisUseCaseCommonJvm(
+                isTempFileCheckerUseCase = instance()
+            )
+        }
+
         bind<SavePictureUseCase>() with scoped(EndpointScope.Default).singleton {
             SavePictureUseCase(
                 saveLocalUrisAsBlobUseCase = on(context).instance(),
@@ -372,6 +455,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 repo = on(context).instance(tag = DoorTag.TAG_REPO),
                 enqueueBlobUploadClientUseCase = on(context).instance(),
                 compressImageUseCase = CompressImageUseCaseAndroid(applicationContext),
+                deleteUrisUseCase = instance(),
             )
         }
 
@@ -380,6 +464,99 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 db = instance(tag = DoorTag.TAG_DB)
             )
         }
+
+
+        bind<ChunkedUploadClientUseCaseKtorImpl>() with singleton {
+            ChunkedUploadClientUseCaseKtorImpl(
+                httpClient = instance(),
+                uriHelper = instance(),
+            )
+        }
+
+        bind<ChunkedUploadClientLocalUriUseCase>() with singleton {
+            instance<ChunkedUploadClientUseCaseKtorImpl>()
+        }
+
+        bind<ChunkedUploadClientChunkGetterUseCase>() with singleton {
+            instance<ChunkedUploadClientUseCaseKtorImpl>()
+        }
+
+        bind<ContentEntryGetMetaDataFromUriUseCase>() with scoped(EndpointScope.Default).provider {
+            ContentEntryGetMetaDataFromUriUseCaseCommonJvm(
+                importersManager = instance()
+            )
+        }
+
+        bind<EnqueueContentEntryImportUseCase>() with scoped(EndpointScope.Default).provider {
+            EnqueueImportContentEntryUseCaseAndroid(
+                db = instance(tag = DoorTag.TAG_DB),
+                appContext = applicationContext,
+                endpoint = context,
+            )
+        }
+
+        bind<ImportContentEntryUseCase>() with scoped(EndpointScope.Default).provider {
+            ImportContentEntryUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                importersManager = instance(),
+                enqueueBlobUploadClientUseCase = instance(),
+                createRetentionLocksForManifestUseCase = instance(),
+                httpClient = instance(),
+            )
+        }
+
+        bind<CreateRetentionLocksForManifestUseCase>() with scoped(EndpointScope.Default).singleton {
+            CreateRetentionLocksForManifestUseCaseCommonJvm(
+                cache = instance()
+            )
+        }
+
+        bind<BlobDownloadClientUseCase>() with scoped(EndpointScope.Default).singleton {
+            BlobDownloadClientUseCaseCommonJvm(
+                okHttpClient = instance(),
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = instance(tag = DoorTag.TAG_REPO),
+            )
+        }
+
+        bind<EnqueueBlobDownloadClientUseCase>() with scoped(EndpointScope.Default).singleton {
+            EnqueueBlobDownloadClientUseCaseAndroid(
+                appContext = applicationContext,
+                endpoint = context,
+                db = instance(tag = DoorTag.TAG_DB)
+            )
+        }
+
+        bind<ContentManifestDownloadUseCase>() with scoped(EndpointScope.Default).singleton {
+            ContentManifestDownloadUseCase(
+                enqueueBlobDownloadClientUseCase = instance(),
+                db = instance(tag = DoorTag.TAG_DB),
+                httpClient = instance(),
+            )
+        }
+
+        bind<EnqueueContentManifestDownloadUseCase>() with scoped(EndpointScope.Default).singleton {
+            EnqueueContentManifestDownloadJobUseCaseAndroid(
+                appContext = applicationContext,
+                endpoint = context,
+                db = instance(tag = DoorTag.TAG_DB),
+            )
+        }
+
+        bind<ContentEntryVersionServerUseCase>() with scoped(EndpointScope.Default).singleton {
+            ContentEntryVersionServerUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = instance(tag = DoorTag.TAG_REPO),
+                okHttpClient = instance(),
+                json = instance(),
+                onlyIfCached = false,
+            )
+        }
+
+        bind<ContentEntryVersionServerWebClient>() with scoped(EndpointScope.Default).singleton {
+            ContentEntryVersionServerWebClient(useCase = instance())
+        }
+
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
     }

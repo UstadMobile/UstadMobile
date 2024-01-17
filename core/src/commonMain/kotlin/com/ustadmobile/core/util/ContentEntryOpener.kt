@@ -14,6 +14,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNER_GROUP_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NO_IFRAMES
 import com.ustadmobile.core.viewmodel.pdfcontent.PdfContentViewModel
 import com.ustadmobile.core.viewmodel.videocontent.VideoContentViewModel
+import com.ustadmobile.core.viewmodel.xapicontent.XapiContentViewModel
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
 import io.github.aakira.napier.Napier
@@ -23,11 +24,10 @@ import org.kodein.di.instance
 import org.kodein.di.on
 
 private val mimeTypeToViewNameMap = mapOf(
-        "application/tincan+zip" to XapiPackageContentView.VIEW_NAME,
+        "application/tincan+zip" to XapiContentViewModel.DEST_NAME,
         "application/khan-video+zip" to VideoContentViewModel.DEST_NAME,
-        "application/webchunk+zip" to WebChunkView.VIEW_NAME,
         "application/epub+zip" to EpubContentView.VIEW_NAME,
-        "application/h5p-tincan+zip" to XapiPackageContentView.VIEW_NAME,
+        "application/h5p-tincan+zip" to XapiContentViewModel.DEST_NAME,
         "application/pdf" to PdfContentViewModel.DEST_NAME,
 ) + VideoContentPresenterCommon.VIDEO_MIME_MAP.keys.map { it to VideoContentViewModel.DEST_NAME }.toMap()
 

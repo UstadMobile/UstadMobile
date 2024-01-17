@@ -14,11 +14,10 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun UstadQuickActionButton(
-    imageVector: ImageVector? = null,
+    iconContent: (@Composable () -> Unit)? = null,
     labelText: String,
-    onClick: (() -> Unit) = {  },
-){
-
+    onClick: () -> Unit
+) {
     val interactionSource =  remember { MutableInteractionSource() }
 
     TextButton(
@@ -33,9 +32,7 @@ fun UstadQuickActionButton(
                 onClick = onClick,
                 interactionSource = interactionSource,
             ) {
-                if (imageVector != null) {
-                    Icon(imageVector = imageVector, contentDescription = null)
-                }
+                iconContent?.invoke()
             }
 
             Text(
@@ -46,4 +43,21 @@ fun UstadQuickActionButton(
             )
         }
     }
+}
+
+@Composable
+fun UstadQuickActionButton(
+    imageVector: ImageVector? = null,
+    labelText: String,
+    onClick: (() -> Unit) = {  },
+){
+    UstadQuickActionButton(
+        iconContent = {
+            if (imageVector != null) {
+                Icon(imageVector = imageVector, contentDescription = null)
+            }
+        },
+        labelText = labelText,
+        onClick = onClick
+    )
 }

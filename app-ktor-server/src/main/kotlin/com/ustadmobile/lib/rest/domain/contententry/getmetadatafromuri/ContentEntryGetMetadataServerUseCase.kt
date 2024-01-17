@@ -1,9 +1,9 @@
 package com.ustadmobile.lib.rest.domain.contententry.getmetadatafromuri
 
-import com.ustadmobile.core.contentjob.ContentImportersManager
+import com.ustadmobile.core.contentformats.ContentImportersManager
 import com.ustadmobile.core.contentjob.InvalidContentException
 import com.ustadmobile.core.contentjob.MetadataResult
-import com.ustadmobile.core.domain.contententry.getmetadatafromuri.IContentEntryGetMetaDataFromUriUseCase
+import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadResponse
 import com.ustadmobile.core.domain.upload.ChunkedUploadServerUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadServerUseCaseJvm
@@ -30,7 +30,7 @@ class ContentEntryGetMetadataServerUseCase(
         uploadDir = uploadDir,
         onUploadComplete = { completedUpload ->
             val originalFilenameParam: String? = completedUpload.request.headers
-                .firstCaseInsensitiveOrNull(IContentEntryGetMetaDataFromUriUseCase.HEADER_ORIGINAL_FILENAME)
+                .firstCaseInsensitiveOrNull(ContentEntryGetMetaDataFromUriUseCase.HEADER_ORIGINAL_FILENAME)
 
             val completedUploadFile = File(completedUpload.path.toString())
 

@@ -297,8 +297,6 @@ dependencies {
 
     implementation "de.hdodenhof:circleimageview:$version_android_circleimageview"
 
-    implementation "com.google.android.exoplayer:exoplayer:$version_exo_player"
-
     //used for learner progress view - needs removed because this clashes with material dependency.
     //implementation 'com.txusballesteros:FitChart:1.0'
 

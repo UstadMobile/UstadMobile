@@ -4,6 +4,22 @@ import com.ustadmobile.lib.db.entities.ClazzEnrolment
 
 object CourseGroupMemberDaoCommon  {
 
+    /**
+     * If the courseGroupSet does not exist yet (e.g. edit screen with new entity) then we rely on
+     * the clazzUid param to find students
+     * If the courseGroupSet does exist then the screen will probably not receive the clazzuid
+     * parameter and the query must rely on the entity of the coursegroupset itself.
+     */
+    const val CASE_CLAZZ_UID_WHEN_NOT_ZERO_USEIT_ELSE_LOOKUP_CGS_UID_SQL = """
+        CASE(:clazzUid)
+                         WHEN 0 THEN 
+                                (SELECT CourseGroupSet.cgsClazzUid
+                                   FROM CourseGroupSet
+                                  WHERE CourseGroupSet.cgsUid = :cgsUid)
+                         ELSE :clazzUid
+                     END
+    """
+
     //language=RoomSql
     const val FIND_BY_COURSEGROUPSET_AND_CLAZZ_SQL = """
         --First get a list of all enrolments - this may contains duplicates for students who leave and re-enrol
@@ -11,16 +27,7 @@ object CourseGroupMemberDaoCommon  {
              (SELECT ClazzEnrolment.clazzEnrolmentPersonUid AS enrolledPersonUid,
                      (:time BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined AND ClazzEnrolment.clazzEnrolmentDateLeft) AS isActive
                 FROM ClazzEnrolment
-               WHERE ClazzEnrolment.clazzEnrolmentClazzUid = 
-                     -- If the courseGroupSet does not exist yet then we rely on the clazzUid param to find students
-                     -- If the courseGroupSet does exist then we dont need the clazzUid
-                     CASE(:clazzUid)
-                         WHEN 0 THEN 
-                                (SELECT CourseGroupSet.cgsClazzUid
-                                   FROM CourseGroupSet
-                                  WHERE CourseGroupSet.cgsUid = :cgsUid)
-                         ELSE :clazzUid
-                     END             
+               WHERE ClazzEnrolment.clazzEnrolmentClazzUid = $CASE_CLAZZ_UID_WHEN_NOT_ZERO_USEIT_ELSE_LOOKUP_CGS_UID_SQL
                  AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}),
         --Consolidate and removes any duplicates
              EnrolledStudentPersonUids(enrolledPersonUid, isActive) AS
@@ -36,6 +43,7 @@ object CourseGroupMemberDaoCommon  {
         SELECT (Person.firstNames || ' ' || Person.lastName) AS name,
                Person.personUid,
                CourseGroupMember.*,
+               PersonPicture.*,
                EnrolledStudentPersonUids.isActive AS enrolmentIsActive,
                PersonPicture.personPictureThumbnailUri AS pictureUri
           FROM EnrolledStudentPersonUids

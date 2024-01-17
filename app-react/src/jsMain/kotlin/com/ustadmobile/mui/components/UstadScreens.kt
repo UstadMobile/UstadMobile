@@ -2,7 +2,6 @@ package com.ustadmobile.mui.components
 
 import com.ustadmobile.MuiAppState
 import com.ustadmobile.core.components.DIModule
-import com.ustadmobile.core.db.ContentJobItemTriggersCallback
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabaseJsImplementations
 import com.ustadmobile.core.db.ext.addSyncCallback
@@ -234,7 +233,6 @@ val ustadScreensLoader: LoaderFunction<*> = {
         webWorkerPath = "./worker.sql-wasm.js")
 
     val dbBuilder =  DatabaseBuilder.databaseBuilder(builderOptions)
-        .addCallback(ContentJobItemTriggersCallback())
         .addSyncCallback(dbNodeIdAndAuth)
         .addMigrations(*migrationList().toTypedArray())
 

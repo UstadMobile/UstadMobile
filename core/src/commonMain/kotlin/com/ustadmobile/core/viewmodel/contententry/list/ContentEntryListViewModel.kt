@@ -51,7 +51,9 @@ data class ContentEntryListUiState(
 
     val importFromFileItemVisible: Boolean = false,
 
-) {
+    val createNewOptionsVisible: Boolean = false,
+
+    ) {
 
     val showChips: Boolean
         get() =filterOptions.isNotEmpty()
@@ -137,6 +139,13 @@ class ContentEntryListViewModel(
                     visible = false,
                     text = systemImpl.getString(MR.strings.content),
                     icon = FabUiState.FabIcon.ADD,
+                    onClick = {
+                        _uiState.update { prev ->
+                            prev.copy(
+                                createNewOptionsVisible = true,
+                            )
+                        }
+                    }
                 )
             )
         }
@@ -195,7 +204,16 @@ class ContentEntryListViewModel(
         //do nothing
     }
 
+    fun onDismissCreateNewOptions() {
+        _uiState.update { prev ->
+            prev.copy(
+                createNewOptionsVisible = false,
+            )
+        }
+    }
+
     fun onClickNewFolder() {
+        onDismissCreateNewOptions()
         navigateToCreateNew(
             editViewName = ContentEntryEditViewModel.DEST_NAME,
             extraArgs = buildMap {
@@ -206,6 +224,7 @@ class ContentEntryListViewModel(
     }
 
     fun onClickImportFromLink() {
+        onDismissCreateNewOptions()
         navigateToCreateNew(
             editViewName = ContentEntryImportLinkViewModel.DEST_NAME,
             extraArgs = buildMap {
@@ -217,6 +236,7 @@ class ContentEntryListViewModel(
     }
 
     fun onImportFile(fileUri: String, fileName: String) {
+        onDismissCreateNewOptions()
         navigateToCreateNew(
             editViewName = ContentEntryGetMetadataViewModel.DEST_NAME,
             extraArgs = buildMap {

@@ -10,7 +10,6 @@ import java.io.File
 import java.io.FileOutputStream
 import java.security.DigestOutputStream
 import java.security.MessageDigest
-import java.util.UUID
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 
@@ -34,7 +33,7 @@ actual fun Source.transferToAndGetSha256(
     )
 }
 
-actual fun Source.sha256(): ByteArray {
+actual fun Source.useAndReadySha256(): ByteArray {
     val messageDigest = MessageDigest.getInstance("SHA-256")
     asInputStream().use { inStream ->
         val buffer = ByteArray(8192)
@@ -58,15 +57,16 @@ actual fun Source.unzipTo(
             if(zipEntry.isDirectory)
                 continue
 
-            val tmpFile = File(destPath.toString(), UUID.randomUUID().toString())
-            DigestOutputStream(FileOutputStream(tmpFile), messageDigest).use { outStream ->
+            val destFile = File(destPath.toString(), zipEntry.name)
+            destFile.parentFile.takeIf { !it.exists() }?.mkdirs()
+            DigestOutputStream(FileOutputStream(destFile), messageDigest).use { outStream ->
                 zipInput.copyTo(outStream)
                 outStream.flush()
             }
 
             unzippedEntries.add(
                 UnzippedEntry(
-                    path = Path(tmpFile.toString()),
+                    path = Path(destFile.toString()),
                     name = zipEntry.name,
                     sha256 = messageDigest.digest()
                 )

@@ -1,4 +1,3 @@
-
 const { defineConfig } = require("cypress");
 module.exports = defineConfig({
   video: true,
@@ -14,7 +13,20 @@ module.exports = defineConfig({
               suiteTitleSeparatedBy: '.',   // suites separator, default is space (' '), or period ('.') in jenkins mode
               jenkinsMode: true,
               toConsole: false
-          }
+          },
+   setupNodeEvents(on, config) {
+     // ...
+     const options = {
+       outputRoot: config.projectRoot + '/logs/',
+       outputTarget: {
+         'out.txt': 'txt',
+         'out.json': 'json',
+       }
+     };
+
+     require('cypress-terminal-report/src/installLogsPrinter')(on, options);
+     // ...
+   }
   },
   });
 

@@ -1,5 +1,6 @@
 package com.ustadmobile.core.db.dao
 
+import androidx.room.Insert
 import androidx.room.Query
 import com.ustadmobile.door.annotation.DoorDao
 import com.ustadmobile.lib.db.entities.CacheLockJoin
@@ -28,5 +29,19 @@ expect abstract class CacheLockJoinDao {
         lockId: Int,
         status: Int
     )
+
+    @Insert
+    abstract suspend fun insertListAsync(list: List<CacheLockJoin>)
+
+    @Query("""
+        SELECT CacheLockJoin.*
+          FROM CacheLockJoin
+         WHERE CacheLockJoin.cljTableId = :tableId
+           AND CacheLockJoin.cljEntityUid = :entityUid
+    """)
+    abstract suspend fun findByTableIdAndEntityUid(
+        tableId: Int,
+        entityUid: Long,
+    ): List<CacheLockJoin>
 
 }

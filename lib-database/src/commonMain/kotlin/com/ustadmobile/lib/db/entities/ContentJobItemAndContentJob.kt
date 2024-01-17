@@ -5,7 +5,7 @@ import androidx.room.Embedded
 class ContentJobItemAndContentJob {
 
     @Embedded
-    var contentJobItem: ContentJobItem? = null
+    var contentJobItem: ContentEntryImportJob? = null
 
     @Embedded
     var contentJob: ContentJob? = null
