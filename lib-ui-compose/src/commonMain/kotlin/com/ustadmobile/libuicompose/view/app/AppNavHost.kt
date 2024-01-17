@@ -130,6 +130,7 @@ import com.ustadmobile.libuicompose.view.contententry.importlink.ContentEntryImp
 import com.ustadmobile.libuicompose.view.courseterminology.edit.CourseTerminologyEditScreen
 import com.ustadmobile.libuicompose.view.courseterminology.list.CourseTerminologyListScreen
 import com.ustadmobile.libuicompose.view.parentalconsentmanagement.ParentalConsentManagementScreen
+import com.ustadmobile.libuicompose.view.pdfcontent.PdfContentScreen
 import com.ustadmobile.libuicompose.view.person.registerminorwaitforparent.RegisterMinorWaitForParentScreen
 import com.ustadmobile.libuicompose.view.videocontent.VideoContentScreen
 import com.ustadmobile.libuicompose.view.xapicontent.XapiContentScreen
@@ -620,7 +621,10 @@ fun AppNavHost(
             }
 
             contentScene("/${PdfContentViewModel.DEST_NAME}") { backStackEntry ->
-                Text("PDF: Android/Desktop: coming soon")
+                PdfContentScreen(
+                    appViewModel(backStackEntry, PdfContentViewModel::class,
+                        ::PdfContentViewModel)
+                )
             }
 
             contentScene("/${EpubContentViewModel.DEST_NAME}") { backStackEntry ->

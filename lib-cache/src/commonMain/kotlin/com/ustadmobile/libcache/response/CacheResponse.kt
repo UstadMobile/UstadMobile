@@ -67,6 +67,9 @@ class CacheResponse(
 
     override fun bodyAsSource(): Source {
         return when {
+            request.method == HttpRequest.Companion.Method.HEAD -> {
+                ByteArray(0).asKotlinxIoSource().buffered()
+            }
             errorBody != null -> errorBody.asKotlinxIoSource().buffered()
             rangeResponse != null -> {
                 fileSystem.rangeSource(bodyPath, rangeResponse.fromByte, rangeResponse.toByte).buffered()

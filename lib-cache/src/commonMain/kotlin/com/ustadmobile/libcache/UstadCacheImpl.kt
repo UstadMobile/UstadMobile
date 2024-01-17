@@ -9,6 +9,8 @@ import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.db.entities.CacheEntry
 import com.ustadmobile.libcache.db.entities.RetentionLock
 import com.ustadmobile.libcache.db.entities.RequestedEntry
+import com.ustadmobile.libcache.headers.CouponHeader.Companion.HEADER_X_REQUEST_STORAGE_PATH
+import com.ustadmobile.libcache.headers.CouponHeader.Companion.HEADER_X_RESPONSE_STORAGE_PATH
 import com.ustadmobile.libcache.headers.HttpHeaders
 import com.ustadmobile.libcache.headers.asString
 import com.ustadmobile.libcache.headers.headersBuilder
@@ -345,6 +347,9 @@ class UstadCacheImpl(
                 headers = headersBuilder {
                     takeFrom(HttpHeaders.fromString(entry.responseHeaders))
                     header(HEADER_LAST_VALIDATED_TIMESTAMP, entry.lastValidated.toString())
+                    if(request.headers.get(HEADER_X_REQUEST_STORAGE_PATH) != null) {
+                        header(HEADER_X_RESPONSE_STORAGE_PATH, entry.storageUri)
+                    }
                 },
                 storageUri = entry.storageUri,
                 httpResponseCode = entry.statusCode

@@ -16,6 +16,7 @@ import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.libcache.UstadCache
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.io.asInputStream
@@ -53,6 +54,8 @@ class PdfContentImporterAndroid(
 
 
         val tmpFile = File(tmpDir, "${systemTimeInMillis()}-tmp.pdf")
+        tmpDir.takeIf { !it.exists() }?.mkdirs()
+
         val localUri = if(uri.uri.scheme == "file") {
             uri
         }else {
@@ -91,6 +94,9 @@ class PdfContentImporterAndroid(
             }else {
                 null
             }
+        }catch(e: Throwable){
+            Napier.d(throwable = e) { "Exception: could not check for pdf" }
+            throw e
         }finally {
             tmpFile.takeIf { it.exists() }?.delete()
             fileDescriptor?.close()
