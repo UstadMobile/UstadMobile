@@ -49,7 +49,7 @@ abstract class AbstractPdfContentImportCommonJvm(
 
         val contentEntryVersionUid = db.doorPrimaryKeyManager.nextId(ContentEntryVersion.TABLE_ID)
         val urlPrefix = createContentUrlPrefix(contentEntryVersionUid)
-        val pdfUrl = "${urlPrefix}content.pdf"
+        val pdfManifestUri = "content.pdf"
         val manifestUrl = "${urlPrefix}${ContentConstants.MANIFEST_NAME}"
 
         val manifestEntriesAndBlobs = saveLocalUriAsBlobAndManifestUseCase(
@@ -71,7 +71,7 @@ abstract class AbstractPdfContentImportCommonJvm(
             cevContentType = ContentEntryVersion.TYPE_PDF,
             cevContentEntryUid = jobItem.cjiContentEntryUid,
             cevManifestUrl = manifestUrl,
-            cevOpenUri = pdfUrl,
+            cevOpenUri = pdfManifestUri,
         )
 
         val manifest = ContentManifest(

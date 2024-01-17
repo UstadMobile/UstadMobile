@@ -43,7 +43,7 @@ class ContentImportersManager(
             }catch(e: InvalidContentException) {
                 throw e
             }catch(e: Throwable) {
-                Napier.w("ExtractMetadata: Exception checking $uri using importer #${it.importerId}")
+                Napier.w("ExtractMetadata: Exception checking $uri using importer #${it.importerId}: $e")
             }
         }
 

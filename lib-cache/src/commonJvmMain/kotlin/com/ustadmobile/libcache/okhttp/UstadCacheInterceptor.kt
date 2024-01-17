@@ -94,8 +94,6 @@ class UstadCacheInterceptor(
                         fileOutStream.write(buffer, 0, bytesRead)
                         pipeOut.write(buffer, 0, bytesRead)
                     }
-                    pipeOut.flush()
-                    pipeOut.close()
                     fileOutStream.flush()
                     fileOutStream.close()
 
@@ -108,7 +106,8 @@ class UstadCacheInterceptor(
                                 response = HttpPathResponse(
                                     path = Path(tmpFile.absolutePath),
                                     fileSystem = fileSystem,
-                                    mimeType = response.header("content-type") ?: "application/octet-stream",
+                                    mimeType = response.header("content-type")
+                                        ?: "application/octet-stream",
                                     request = cacheRequest,
                                     extraHeaders = headersBuilder {
                                         takeFrom(response.headers.asCacheHttpHeaders())
@@ -118,6 +117,13 @@ class UstadCacheInterceptor(
                             )
                         ))
                     }
+
+                    /**
+                     * Close the pipes last so that it is certain that the cache entry is stored
+                     * if making any call after reading the OKHttp response.
+                     */
+                    pipeOut.flush()
+                    pipeOut.close()
                 }
             }catch(e: Throwable){
                 logger?.e(LOG_TAG, "$logPrefix ReadAndCacheRunnable: exception handling ${call.request().url}", e)
