@@ -3,7 +3,9 @@ package com.ustadmobile.core.domain.blob.upload
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.connectivitymonitor.ConnectivityTriggerGroupController
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.lib.db.entities.TransferJob
 import com.ustadmobile.libcache.UstadCache
+import io.github.aakira.napier.Napier
 import org.quartz.JobBuilder
 import org.quartz.Scheduler
 import org.quartz.TriggerBuilder
@@ -21,13 +23,16 @@ class EnqueueBlobUploadClientUseCaseJvm(
     db = db, cache = cache
 ) {
 
+
     //See http://www.quartz-scheduler.org/documentation/quartz-2.3.0/cookbook/StoreJob.html
     override suspend fun invoke(
         items: List<EnqueueBlobUploadClientUseCase.EnqueueBlobUploadItem>,
         batchUuid: String,
-        chunkSize: Int
-    ) {
-        val transferJob = createTransferJob(items, batchUuid)
+        chunkSize: Int,
+        tableId: Int,
+        entityUid: Long,
+    ): TransferJob {
+        val transferJob = createTransferJob(items, batchUuid, tableId, entityUid)
         val quartzJob = JobBuilder.newJob(BlobUploadClientJob::class.java)
             .usingJobData(DATA_JOB_UID, transferJob.tjUid)
             .usingJobData(DATA_ENDPOINT, endpoint.url)
@@ -43,6 +48,10 @@ class EnqueueBlobUploadClientUseCaseJvm(
             .startNow()
             .build()
 
+        Napier.d("EnqueueBlobUploadClientUseCase($batchUuid): scheduled job " +
+                "#${transferJob.tjUid} via quartz")
         scheduler.scheduleJob(quartzJob, jobTrigger)
+
+        return transferJob
     }
 }

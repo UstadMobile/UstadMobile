@@ -66,3 +66,14 @@ val MIGRATE_5_6 = DoorMigrationStatementList(5, 6) {
         add("CREATE INDEX idx_lockKey ON RetentionLock (lockKey)")
     }
 }
+
+/**
+ * Rename responsebody field to integrity field on CacheEntry
+ */
+val MIGRATE_6_7 = DoorMigrationStatementList(6, 7) {
+    buildList {
+        add("DROP TABLE IF EXISTS CacheEntry")
+        add("CREATE TABLE IF NOT EXISTS CacheEntry (  key  TEXT  PRIMARY KEY  NOT NULL , url  TEXT  NOT NULL , message  TEXT  NOT NULL , statusCode  INTEGER  NOT NULL , cacheFlags  INTEGER  NOT NULL , method  INTEGER  NOT NULL , lastAccessed  INTEGER  NOT NULL , lastValidated  INTEGER  NOT NULL , integrity  TEXT , responseHeaders  TEXT  NOT NULL , storageUri  TEXT  NOT NULL , storageSize  INTEGER  NOT NULL )")
+        add("CREATE INDEX idx_lastAccessed ON CacheEntry (lastAccessed)")
+    }
+}

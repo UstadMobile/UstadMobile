@@ -29,7 +29,7 @@ class PdfContentViewModel(
         viewModelScope.launch {
             val contentEntryVersion = activeRepo.contentEntryVersionDao
                 .findByUidAsync(entityUidArg) ?: return@launch
-            val cevUrl = contentEntryVersion.cevUrl ?: return@launch
+            val cevUrl = contentEntryVersion.cevOpenUri ?: return@launch
             _uiState.update { prev ->
                 prev.copy(pdfUrl = cevUrl)
             }

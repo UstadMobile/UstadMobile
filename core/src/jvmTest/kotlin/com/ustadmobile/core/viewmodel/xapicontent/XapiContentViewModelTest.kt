@@ -1,8 +1,12 @@
 package com.ustadmobile.core.viewmodel.xapicontent
 
 import app.cash.turbine.test
+import com.ustadmobile.core.contentformats.manifest.ContentManifest
+import com.ustadmobile.core.contentformats.manifest.ContentManifestEntry
+import com.ustadmobile.core.domain.contententry.ContentConstants
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.core.util.stringvalues.emptyStringValues
 import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
@@ -42,20 +46,50 @@ class XapiContentViewModelTest : AbstractMainDispatcherTest() {
                 }
             }
 
-            mockWebServer.dispatcher = object: Dispatcher() {
-                override fun dispatch(request: RecordedRequest): MockResponse {
-                    return MockResponse()
-                        .addHeader("content-type", "application/xml")
-                        .setBody(xapiXmlStr)
-                }
-            }
-
             val cevUid = activeDb.doorPrimaryKeyManager.nextId(ContentEntryVersion.TABLE_ID)
             val contentEntryVersion = ContentEntryVersion(
                 cevUid = cevUid,
-                cevUrl = mockWebServer.url("/$cevUid/tincan.xml").toString(),
+                cevManifestUrl = mockWebServer.url("/$cevUid/${ContentConstants.MANIFEST_NAME}").toString(),
+                cevOpenUri = "tincan.xml",
             )
             activeDb.contentEntryVersionDao.insertAsync(contentEntryVersion)
+            val contentManifest = ContentManifest(
+                version = 1,
+                metadata = emptyMap(),
+                entries = listOf(
+                    ContentManifestEntry(
+                        uri = "tincan.xml",
+                        integrity = "foo",
+                        responseHeaders = emptyStringValues(),
+                        bodyDataUrl = mockWebServer.url("/tincan.xml").toString(),
+                        storageSize = 1_000,
+                    )
+                )
+            )
+
+
+            mockWebServer.dispatcher = object: Dispatcher() {
+                override fun dispatch(request: RecordedRequest): MockResponse {
+                    val requestUrl = request.requestUrl?.toString()
+                    return when {
+                        requestUrl?.endsWith("tincan.xml") == true -> {
+                            MockResponse()
+                                .addHeader("content-type", "application/xml")
+                                .setBody(xapiXmlStr)
+                        }
+                        requestUrl?.endsWith(ContentConstants.MANIFEST_NAME) == true -> {
+                            MockResponse()
+                                .addHeader("content-type", "application/json")
+                                .setBody(
+                                    json.encodeToString(ContentManifest.serializer(), contentManifest)
+                                )
+                        }
+                        else -> MockResponse().setResponseCode(404).setBody("")
+                    }
+                }
+            }
+
+
 
             viewModelFactory {
                 savedStateHandle[UstadViewModel.ARG_ENTITY_UID] = cevUid.toString()

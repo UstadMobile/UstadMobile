@@ -7,7 +7,6 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.db.ContentJobItemTriggersCallback
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
@@ -176,7 +175,6 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
                 DatabaseBuilder.databaseBuilder(UmAppDatabase::class, dbUrl,
                     nodeId = nodeIdAndAuth.nodeId)
                 .addSyncCallback(nodeIdAndAuth)
-                .addCallback(ContentJobItemTriggersCallback())
                 .addMigrations(*migrationList().toTypedArray())
                 .build()
                 .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId).also {

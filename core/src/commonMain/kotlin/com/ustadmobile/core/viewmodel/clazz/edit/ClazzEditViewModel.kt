@@ -5,7 +5,7 @@ import com.ustadmobile.core.domain.courseblockupdate.AddOrUpdateCourseBlockUseCa
 import com.ustadmobile.core.domain.courseblockupdate.UpdateCourseBlocksOnReorderOrCommitUseCase
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
-import com.ustadmobile.core.domain.contententry.importcontent.ImportContentUseCase
+import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
 import com.ustadmobile.core.domain.contententry.save.SaveContentEntryUseCase
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -115,7 +115,7 @@ class ClazzEditViewModel(
         db = di.onActiveEndpoint().direct.instance(tag = DoorTag.TAG_DB),
         repo = di.onActiveEndpoint().direct.instanceOrNull(tag = DoorTag.TAG_REPO),
     ),
-    private val importContentUseCase: ImportContentUseCase = di.onActiveEndpoint().direct.instance(),
+    private val importContentUseCase: EnqueueContentEntryImportUseCase = di.onActiveEndpoint().direct.instance(),
     private val enqueueSavePictureUseCase: EnqueueSavePictureUseCase = di.onActiveEndpoint().direct
         .instance(),
 ): UstadEditViewModel(di, savedStateHandle, DEST_NAME) {
@@ -635,16 +635,10 @@ class ClazzEditViewModel(
 
                 //Run the ContentImport for any jobs where this is required.
                 courseBlockListVal.mapNotNull {
-                    val contentJob = it.contentJob
-                    val contentJobItem = it.contentJobItem
-                    if(contentJob != null && contentJobItem != null)
-                        Pair(contentJob, contentJobItem)
-                    else
-                        null
+                    it.contentJobItem
                 }.forEach {
                     importContentUseCase.invoke(
-                        contentJob = it.first,
-                        contentJobItem = it.second
+                        contentJobItem = it
                     )
                 }
 

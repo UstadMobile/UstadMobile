@@ -90,8 +90,6 @@ val ContentEntryListScreen = FC<Props> {
         ContentEntryListViewModel(di, savedStateHandle, location.ustadViewName)
     }
 
-    var addDialogVisible by useState { false }
-
     val uiStateVal by viewModel.uiState.collectAsState(ContentEntryListUiState())
     val appState by viewModel.appUiState.collectAsState(AppUiState())
     val fileInputRef = useRef<HTMLInputElement>(null)
@@ -121,17 +119,13 @@ val ContentEntryListScreen = FC<Props> {
     }
 
     UstadFab {
-        fabState = appState.fabState.copy(
-            onClick = {
-                addDialogVisible = true
-            }
-        )
+        fabState = appState.fabState
     }
 
     Dialog {
-        open = addDialogVisible
+        open = uiStateVal.createNewOptionsVisible
         onClose = { _, _ ->
-            addDialogVisible = false
+            viewModel.onDismissCreateNewOptions()
         }
 
         List {

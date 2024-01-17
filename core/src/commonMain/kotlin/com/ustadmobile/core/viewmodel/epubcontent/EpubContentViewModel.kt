@@ -122,7 +122,7 @@ class EpubContentViewModel(
         viewModelScope.launch {
             val contentEntryVersion = activeRepo.contentEntryVersionDao
                 .findByUidAsync(entityUidArg) ?: return@launch
-            val cevUrl = contentEntryVersion.cevUrl ?: return@launch
+            val cevUrl = contentEntryVersion.cevOpenUri ?: return@launch
 
             withContext(Dispatchers.Default) {
                 try {

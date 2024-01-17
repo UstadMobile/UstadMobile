@@ -1342,15 +1342,101 @@ val MIGRATION_130_131 = DoorMigrationStatementList(130, 131) { db ->
     }
 }
 
+// 131 to 132 is a migration that applies only to the server side to add uri retention triggers
+
+/*
+ * Added 07/Jan/24 - drop the old ContentJobItem table
+ * Create ContentEntryImportJob
+ */
+val MIGRATION_132_133 = DoorMigrationStatementList(132, 133) { db ->
+    buildList {
+        add("DROP TABLE ContentJobItem")
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS ContentEntryImportJob (  sourceUri  TEXT , cjiOriginalFilename  TEXT , cjiContentEntryUid  INTEGER  NOT NULL , cjiParentContentEntryUid  INTEGER  NOT NULL , cjiContentEntryVersion  INTEGER  NOT NULL , cjiItemProgress  INTEGER  NOT NULL , cjiItemTotal  INTEGER  NOT NULL , cjiStatus  INTEGER  NOT NULL , cjiRecursiveStatus  INTEGER  NOT NULL , cjiPluginId  INTEGER  NOT NULL , cjiParentCjiUid  INTEGER  NOT NULL , cjiStartTime  INTEGER  NOT NULL , cjiFinishTime  INTEGER  NOT NULL , cjiContentDeletedOnCancellation  INTEGER  NOT NULL , cjiUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+            add("CREATE INDEX index_ContentEntryImportJob_cjiContentEntryUid_cjiFinishTime ON ContentEntryImportJob (cjiContentEntryUid, cjiFinishTime)")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS ContentEntryImportJob (  sourceUri  TEXT , cjiOriginalFilename  TEXT , cjiContentEntryUid  BIGINT  NOT NULL , cjiParentContentEntryUid  BIGINT  NOT NULL , cjiContentEntryVersion  BIGINT  NOT NULL , cjiItemProgress  BIGINT  NOT NULL , cjiItemTotal  BIGINT  NOT NULL , cjiStatus  INTEGER  NOT NULL , cjiRecursiveStatus  INTEGER  NOT NULL , cjiPluginId  INTEGER  NOT NULL , cjiParentCjiUid  BIGINT  NOT NULL , cjiStartTime  BIGINT  NOT NULL , cjiFinishTime  BIGINT  NOT NULL , cjiContentDeletedOnCancellation  BOOL  NOT NULL , cjiUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+            add("CREATE INDEX index_ContentEntryImportJob_cjiContentEntryUid_cjiFinishTime ON ContentEntryImportJob (cjiContentEntryUid, cjiFinishTime)")
+        }
+    }
+}
+
+val MIGRATION_133_134 = DoorMigrationStatementList(133, 134) { db ->
+    buildList {
+        add("CREATE INDEX tji_table_entity_etag ON TransferJobItem (tjiTableId, tjiEntityUid, tjiEntityEtag)")
+    }
+}
+
+val MIGRATION_134_135 = DoorMigrationStatementList(134, 135) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS OfflineItem (  oiNodeId  INTEGER  NOT NULL , oiClazzUid  INTEGER  NOT NULL , oiCourseBlockUid  INTEGER  NOT NULL , oiContentEntryUid  INTEGER  NOT NULL , oiActive  INTEGER  NOT NULL , oiLct  INTEGER  NOT NULL , oiUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+            add("CREATE INDEX offline_item_node_content_entry ON OfflineItem (oiNodeId, oiContentEntryUid)")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS OfflineItem (  oiNodeId  BIGINT  NOT NULL , oiClazzUid  BIGINT  NOT NULL , oiCourseBlockUid  BIGINT  NOT NULL , oiContentEntryUid  BIGINT  NOT NULL , oiActive  BOOL  NOT NULL , oiLct  BIGINT  NOT NULL , oiUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+            add("CREATE INDEX offline_item_node_content_entry ON OfflineItem (oiNodeId, oiContentEntryUid)")
+        }
+    }
+}
+
+val MIGRATION_135_136 = DoorMigrationStatementList(135, 136) { db ->
+    buildList {
+        add("ALTER TABLE TransferJob ADD COLUMN tjTableId INTEGER NOT NULL DEFAULT 0")
+        add("ALTER TABLE TransferJob ADD COLUMN tjCreationType INTEGER NOT NULL DEFAULT 0")
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("ALTER TABLE TransferJob ADD COLUMN tjEntityUid INTEGER NOT NULL DEFAULT 0")
+            add("ALTER TABLE TransferJob ADD COLUMN tjTimeCreated INTEGER NOT NULL DEFAULT 0")
+        }else {
+            add("ALTER TABLE TransferJob ADD COLUMN tjEntityUid BIGINT NOT NULL DEFAULT 0")
+            add("ALTER TABLE TransferJob ADD COLUMN tjTimeCreated BIGINT NOT NULL DEFAULT 0")
+        }
+        add("CREATE INDEX TransferJob_idx_tjTableId_EntityUid ON TransferJob (tjTableId, tjEntityUid)")
+    }
+}
+
+val MIGRATION_136_137 = DoorMigrationStatementList(136, 137) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS OfflineItemPendingTransferJob (  oiptjOiUid  INTEGER  NOT NULL , oiptjTableId  INTEGER  NOT NULL , oiptjEntityUid  INTEGER  NOT NULL , oiptjUrl  TEXT , oiptjType  INTEGER  NOT NULL , oiptjId  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS OfflineItemPendingTransferJob (  oiptjOiUid  BIGINT  NOT NULL , oiptjTableId  INTEGER  NOT NULL , oiptjEntityUid  BIGINT  NOT NULL , oiptjUrl  TEXT , oiptjType  INTEGER  NOT NULL , oiptjId  SERIAL  PRIMARY KEY  NOT NULL )")
+        }
+    }
+}
+
+val MIGRATION_137_138 = DoorMigrationStatementList(137, 138) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("ALTER TABLE ContentEntryVersion RENAME to ContentEntryVersion_OLD")
+            add("CREATE TABLE IF NOT EXISTS ContentEntryVersion (  cevContentEntryUid  INTEGER  NOT NULL , cevUrl  TEXT , cevContentType  TEXT , cevManifestUrl  TEXT , cevSize  INTEGER  NOT NULL , cevInActive  INTEGER  NOT NULL , cevLastModified  INTEGER  NOT NULL , cevLct  INTEGER  NOT NULL , cevUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+            add("INSERT INTO ContentEntryVersion (cevContentEntryUid, cevUrl, cevContentType, cevManifestUrl, cevSize, cevInActive, cevLastModified, cevLct, cevUid) SELECT cevContentEntryUid, cevUrl, cevContentType, cevSitemapUrl, cevSize, cevInActive, cevLastModified, cevLct, cevUid FROM ContentEntryVersion_OLD")
+            add("DROP TABLE ContentEntryVersion_OLD")
+        }else {
+            add("ALTER TABLE ContentEntryVersion RENAME COLUMN cevSitemapUrl TO cevManifestUrl")
+        }
+    }
+}
+
+val MIGRATION_138_139 = DoorMigrationStatementList(137, 138) { db ->
+    buildList {
+        if (db.dbType() == DoorDbType.SQLITE) {
+            add("ALTER TABLE ContentEntryVersion RENAME to ContentEntryVersion_OLD")
+
+        }else {
+            add("ALTER TABLE ContentEntryVersion RENAME COLUMN cevUrl to cevOpenUri")
+        }
+    }
+}
+
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_102_103,
     MIGRATION_103_104, MIGRATION_104_105, MIGRATION_105_106, MIGRATION_106_107,
     MIGRATION_107_108, MIGRATION_108_109,
     MIGRATION_120_121, MIGRATION_121_122, MIGRATION_122_123, MIGRATION_123_124,
     MIGRATION_124_125, MIGRATION_125_126, MIGRATION_126_127, MIGRATION_127_128,
-    MIGRATION_128_129, MIGRATION_129_130, MIGRATION_130_131,
-    //131 to 132 is a migration that applies only to the server side to add uri retention triggers
-
+    MIGRATION_128_129, MIGRATION_129_130, MIGRATION_130_131, MIGRATION_132_133,
+    MIGRATION_133_134, MIGRATION_134_135, MIGRATION_135_136, MIGRATION_136_137,
+    MIGRATION_137_138, MIGRATION_138_139,
 )
 
 

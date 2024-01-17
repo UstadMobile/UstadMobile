@@ -139,7 +139,6 @@ ext {
     version_web_driver = "5.6.2"
     version_postgres_jdbc = "42.6.0"
     version_log4j = "2.21.1"
-    version_exo_player = "2.14.0"
     version_browser_proxy = "2.1.5"
     version_logback = "1.4.13"
     version_kodein_di = "7.21.0"

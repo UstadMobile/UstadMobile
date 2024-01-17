@@ -5,6 +5,7 @@ import com.ustadmobile.lib.db.entities.TransferJob
 import com.ustadmobile.lib.db.entities.TransferJobItem
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.transferjobitem.UpdateTransferJobItemEtagUseCase
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.request.requestBuilder
 
@@ -15,15 +16,20 @@ abstract class AbstractEnqueueBlobUploadClientUseCase(
         UpdateTransferJobItemEtagUseCase(),
 ) : EnqueueBlobUploadClientUseCase {
 
-    //Create transferjob and transferjob items in the database.
     protected suspend fun createTransferJob(
         blobUrls: List<EnqueueBlobUploadClientUseCase.EnqueueBlobUploadItem>,
         batchUuid: String,
+        tableId: Int,
+        entityUid: Long,
     ): TransferJob {
         return db.withDoorTransactionAsync {
             val transferJob = TransferJob(
                 tjUuid = batchUuid,
-                tjName = ""
+                tjType = TransferJob.TYPE_BLOB_UPLOAD,
+                tjName = "",
+                tjTimeCreated = systemTimeInMillis(),
+                tjTableId = tableId,
+                tjEntityUid = entityUid,
             )
             val jobUid = db.transferJobDao.insert(transferJob).toInt()
 

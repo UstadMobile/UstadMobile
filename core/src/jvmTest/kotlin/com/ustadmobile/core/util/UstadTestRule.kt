@@ -9,7 +9,6 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.db.ContentJobItemTriggersCallback
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
@@ -153,7 +152,6 @@ class UstadTestRule(): TestWatcher() {
                         "jdbc:sqlite:build/tmp/$dbName.sqlite", nodeId = nodeIdAndAuth.nodeId)
                     .addMigrations(*migrationList().toTypedArray())
                     .addSyncCallback(nodeIdAndAuth)
-                    .addCallback(ContentJobItemTriggersCallback())
                     .build()
                     .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)).also {
                         dbsToClose.add(it)

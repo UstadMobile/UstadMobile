@@ -1,6 +1,7 @@
 package com.ustadmobile.core.domain.blob.transferjobitem
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.lib.db.entities.ContentEntryVersion
 import com.ustadmobile.lib.db.entities.PersonPicture
 
 /**
@@ -25,6 +26,12 @@ class UpdateTransferJobItemEtagUseCase {
         when(tableId) {
             PersonPicture.TABLE_ID -> {
                 db.personPictureDao.updateTransferJobItemEtag(
+                    entityUid = entityUid,
+                    transferJobItemUid = transferJobItemUid,
+                )
+            }
+            ContentEntryVersion.TABLE_ID -> {
+                db.contentEntryVersionDao.updateTransferJobItemEtag(
                     entityUid = entityUid,
                     transferJobItemUid = transferJobItemUid,
                 )

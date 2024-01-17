@@ -9,22 +9,18 @@ import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.db.entities.CacheEntry
 import com.ustadmobile.libcache.db.entities.RetentionLock
 import com.ustadmobile.libcache.db.entities.RequestedEntry
-import com.ustadmobile.libcache.headers.CouponHeader.Companion.COUPON_ACTUAL_SHA_256
-import com.ustadmobile.libcache.headers.CouponHeader.Companion.COUPON_STATIC
 import com.ustadmobile.libcache.headers.HttpHeaders
-import com.ustadmobile.libcache.headers.MimeTypeHelper
 import com.ustadmobile.libcache.headers.asString
 import com.ustadmobile.libcache.headers.headersBuilder
-import com.ustadmobile.libcache.io.sha256
+import com.ustadmobile.libcache.headers.integrity
+import com.ustadmobile.libcache.integrity.sha256Integrity
+import com.ustadmobile.libcache.io.useAndReadySha256
 import com.ustadmobile.libcache.io.transferToAndGetSha256
-import com.ustadmobile.libcache.io.unzipTo
 import com.ustadmobile.libcache.logging.UstadCacheLogger
 import com.ustadmobile.libcache.md5.Md5Digest
 import com.ustadmobile.libcache.md5.urlKey
 import com.ustadmobile.libcache.request.HttpRequest
-import com.ustadmobile.libcache.request.requestBuilder
 import com.ustadmobile.libcache.response.CacheResponse
-import com.ustadmobile.libcache.response.HttpPathResponse
 import com.ustadmobile.libcache.response.HttpResponse
 import com.ustadmobile.libcache.uuid.randomUuid
 import kotlinx.atomicfu.atomic
@@ -37,7 +33,6 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.io.Source
 import kotlinx.io.buffered
 import kotlinx.io.files.FileSystem
 import kotlinx.io.files.Path
@@ -56,7 +51,6 @@ class UstadCacheImpl(
     cacheName: String = "",
     storagePath: Path,
     private val db: UstadCacheDb,
-    internal val mimeTypeHelper: MimeTypeHelper,
     sizeLimit: () -> Long = { UstadCache.DEFAULT_SIZE_LIMIT },
     private val logger: UstadCacheLogger? = null,
     private val listener: UstadCache.CacheListener? = null,
@@ -87,10 +81,29 @@ class UstadCacheImpl(
 
     private val pendingLockRemovals = atomic(emptyList<Int>())
 
-    data class CacheEntryAndTmpFile(
+    /**
+     * Data class that is used to track the status of a CacheEntryToStore as it is processed.
+     *
+     * @param cacheEntry the CacheEntry entity as it will be saved into the database
+     * @param entryToStore the entryToStore request that provided as an argument to the store function
+     * @param tmpFile the temporary file where data is being kept
+     * @param responseHeaders the response headers (canonical) as they will be stored including the
+     *        etag integrity values etc. that get added by default
+     * @param tmpFileNeedsDeleted if true, then the tmpFile must be deleted before completing
+     *        the store function. Can be false when responseBodyTmpLocalPath is provided, because
+     *        then the responseBodyTmpLocalPath will be moved (not copied).
+     * @param previousStorageUriToDelete if it is determined that new data will be replacing old
+     *        data, then the previous body data will be deleted.
+     *
+     */
+    private data class CacheEntryInProgress(
         val cacheEntry: CacheEntry,
         val entryToStore: CacheEntryToStore,
         val tmpFile: Path,
+        val responseHeaders: HttpHeaders,
+        val tmpFileNeedsDeleted: Boolean = false,
+        val lockId: Int = 0,
+        val previousStorageUriToDelete: String? = null,
     )
 
     data class LastAccessedUpdate(
@@ -133,23 +146,24 @@ class UstadCacheImpl(
         progressListener: StoreProgressListener?
     ): List<StoreResult> {
         val md5Digest = Md5Digest()
+        val timeNow = systemTimeInMillis()
         try {
             logger?.d(LOG_TAG) { "$logPrefix storerequest ${storeRequest.size} entries" }
             fileSystem.takeIf { !fileSystem.exists(dataDir) }?.createDirectories(dataDir)
             fileSystem.takeIf { !fileSystem.exists(tmpDir) }?.createDirectories(tmpDir)
 
             /**
-             * Go through everything that is requested to be stored: create a list of CacheEntryAndTmpFile
+             * Go through everything that is requested to be stored: create a list of CacheEntryInProgress
              * which contains the CacheEntry entity (headers, request status, etc) and a tmp
              * file containing the request body. Run checksums as needed to get a SHA256 checksum
              * for every response body.
              */
-            val storeRequestEntriesAndTmpFiles = storeRequest.map { entryToStore ->
+            val entriesWithTmpFileAndIntegrityInfo = storeRequest.map { entryToStore ->
                 val response = entryToStore.response
                 val tmpFile = Path(tmpDir, "${tmpCounter.incrementAndGet()}.tmp")
                 val url = entryToStore.request.url
 
-                val sha256FromTransfer = if(entryToStore.responseBodyTmpLocalPath != null) {
+                val sha256IntegrityFromTransfer = if(entryToStore.responseBodyTmpLocalPath != null) {
                     //If the entry to store is in a temporary path where it is acceptable to just
                     //move the file into the cache, then we will move (instead of copying) the file
                     fileSystem.atomicMove(entryToStore.responseBodyTmpLocalPath, tmpFile)
@@ -164,55 +178,46 @@ class UstadCacheImpl(
                         throw e
                     }
 
-                    bodySource.transferToAndGetSha256(tmpFile).sha256.encodeBase64()
+                    sha256Integrity(bodySource.transferToAndGetSha256(tmpFile).sha256)
                 }
-                val sha256FromHeader = if(entryToStore.skipChecksumIfProvided)
-                    response.headers[COUPON_ACTUAL_SHA_256]
+
+                val integrityFromHeaders = if(entryToStore.skipChecksumIfProvided)
+                    response.headers.integrity()
                 else
                     null
 
-                val sha256 = sha256FromTransfer ?: sha256FromHeader
-                    ?: fileSystem.source(tmpFile).buffered().sha256().encodeBase64()
+                val integrity = sha256IntegrityFromTransfer ?: integrityFromHeaders
+                    ?: sha256Integrity(fileSystem.source(tmpFile).buffered().useAndReadySha256())
 
-                val headersStr = headersBuilder {
-                    takeFrom(response.headers)
-                    header(COUPON_ACTUAL_SHA_256, sha256)
-                }.asString()
+                logger?.v(LOG_TAG, "$logPrefix copied request data for $url to $tmpFile (integrity=$integrity)")
 
-                logger?.v(LOG_TAG, "$logPrefix copied request data for $url to $tmpFile (sha256=$sha256)")
-
-                val cacheFlags = if(response.headers[COUPON_STATIC]?.toBooleanStrictOrNull() == true) {
-                    CacheEntry.CACHE_FLAG_STATIC
-                }else {
-                    0
-                }
-
-                CacheEntryAndTmpFile(
+                CacheEntryInProgress(
                     cacheEntry = CacheEntry(
                         key = md5Digest.urlKey(entryToStore.request.url),
                         url = entryToStore.request.url,
-                        responseBodySha256 = sha256,
+                        integrity = integrity,
                         statusCode = entryToStore.response.responseCode,
-                        responseHeaders = headersStr,
-                        cacheFlags = cacheFlags,
-                        lastValidated = systemTimeInMillis(),
+                        responseHeaders = response.headers.asString(),
+                        lastValidated = timeNow,
+                        lastAccessed = timeNow,
                     ),
                     entryToStore = entryToStore,
-                    tmpFile = tmpFile
+                    tmpFile = tmpFile,
+                    responseHeaders = entryToStore.response.headers,
                 )
             }
 
-            logger?.v(LOG_TAG) { "$logPrefix cacheEntries created ${storeRequestEntriesAndTmpFiles.size} entries" }
+            logger?.v(LOG_TAG) { "$logPrefix cacheEntries created ${entriesWithTmpFileAndIntegrityInfo.size} entries" }
             val batchId = batchIdAtomic.incrementAndGet()
 
             /*
              * Find what entries are already stored in the database. Update entries that are
              * already present, insert new entries.
              */
-            val (tmpFilesToDelete, locksCreated) = db.withDoorTransaction { _ ->
-                db.requestedEntryDao.insertList(storeRequestEntriesAndTmpFiles.map {
+            val dbProcessedEntries = db.withDoorTransaction { _ ->
+                db.requestedEntryDao.insertList(entriesWithTmpFileAndIntegrityInfo.map {
                     RequestedEntry(
-                        requestSha256 = it.cacheEntry.responseBodySha256 ?: "",
+                        requestSha256 = it.cacheEntry.integrity ?: "",
                         requestedKey = md5Digest.urlKey(it.cacheEntry.url),
                         batchId = batchId,
                     )
@@ -220,43 +225,50 @@ class UstadCacheImpl(
 
                 val entriesInCache = db.cacheEntryDao.findByRequestBatchId(batchId)
                 val entriesInCacheMap = entriesInCache.associateBy { it.key }
-                val tmpFilesToDelete = mutableListOf<Path>()
 
-                val entriesToSave = storeRequestEntriesAndTmpFiles.mapNotNull { storeRequest ->
-                    val storedEntry = entriesInCacheMap[storeRequest.cacheEntry.key]
+                val entriesToSave = entriesWithTmpFileAndIntegrityInfo.map { entryInProgress ->
+                    val storedEntry = entriesInCacheMap[entryInProgress.cacheEntry.key]
                     val storedEntryHeaders = storedEntry?.responseHeaders?.let {
                         HttpHeaders.fromString(it)
                     }
 
                     val etagOrLastModifiedMatches = if(storedEntryHeaders != null) {
                         responseValidityChecker.isMatchingEtagOrLastModified(
-                            storedEntryHeaders, storeRequest.entryToStore.response.headers
+                            storedEntryHeaders, entryInProgress.entryToStore.response.headers
                         )
                     }else {
                         false
                     }
 
                     if(storedEntry != null && etagOrLastModifiedMatches) {
-                        //If the entry is already saved and still valid, there is nothing to do
-                        tmpFilesToDelete += storeRequest.tmpFile
-                        null
+                        //If the entry is already saved and still valid. We will not store the body,
+                        //but we will upsert the CacheEntry entity so that the last validated and
+                        // last accessed times are updated. We will
+                        entryInProgress.copy(
+                            tmpFileNeedsDeleted = true,
+                            cacheEntry = entryInProgress.cacheEntry.copy(
+                                storageUri = storedEntry.storageUri,
+                                storageSize = storedEntry.storageSize,
+                            )
+                        )
                     }else {
+                        //The new entry does not validate, so we will need to store the new body.
                         val destPath = Path(dataDir, randomUuid())
-                        fileSystem.atomicMove(storeRequest.tmpFile, destPath)
+                        fileSystem.atomicMove(entryInProgress.tmpFile, destPath)
 
-                        //Where there is a stored entry that is invalid, file should be deleted
-                        storedEntry?.storageUri?.also { oldStorageUri ->
-                            fileSystem.delete(Path(oldStorageUri))
-                        }
-
-                        storeRequest.cacheEntry.copy(
-                            storageUri = destPath.toString(),
-                            storageSize = fileSystem.metadataOrNull(destPath)?.size ?: 0,
+                        entryInProgress.copy(
+                            cacheEntry = entryInProgress.cacheEntry.copy(
+                                storageUri = destPath.toString(),
+                                storageSize = fileSystem.metadataOrNull(destPath)?.size ?: 0,
+                            ),
+                            tmpFileNeedsDeleted = false,
+                            //Where there is a stored entry that is invalid, file should be deleted
+                            previousStorageUriToDelete = storedEntry?.storageUri,
                         )
                     }
                 }
 
-                db.cacheEntryDao.upsertList(entriesToSave)
+                db.cacheEntryDao.upsertList(entriesToSave.map { it.cacheEntry } )
                 db.requestedEntryDao.deleteBatch(batchId)
 
                 val locks = insertRetentionLocks(
@@ -265,70 +277,48 @@ class UstadCacheImpl(
                     },
                     md5Digest = md5Digest,
                 ).associate {
-                    it.first.url to it.second
+                    it.second.lockKey to it.second.lockId
                 }
 
-                //End transaction block by providing a list of those tmp files that we don't need
-                tmpFilesToDelete to locks
+                //ideally - map by key not url
+                entriesToSave.map { entry ->
+                    entry.copy(
+                        lockId = locks[entry.cacheEntry.key] ?: 0
+                    )
+                }
+            }
+
+            val tmpFilesToDelete = dbProcessedEntries.filter {
+                it.tmpFileNeedsDeleted
+            }.map {
+                it.tmpFile
+            }
+
+            val oldVersionBodiesToDelete = dbProcessedEntries.mapNotNull { entry ->
+                entry.previousStorageUriToDelete?.let { Path(it) }
             }
 
             logger?.d(LOG_TAG, "$logPrefix deleting ${tmpFilesToDelete.size} tmp files")
-            tmpFilesToDelete.forEach {
+            (tmpFilesToDelete + oldVersionBodiesToDelete).forEach {
                 fileSystem.delete(it)
             }
 
             logger?.d(LOG_TAG, "$logPrefix db transaction completed")
             listener?.onEntriesStored(storeRequest)
 
-            return storeRequest.map {
+            return dbProcessedEntries.map {
                 StoreResult(
-                    urlKey = md5Digest.urlKey(it.request.url),
-                    request = it.request,
-                    response = it.response,
-                    lockId = locksCreated[it.request.url]?.lockId ?: 0
+                    urlKey = it.cacheEntry.key,
+                    request = it.entryToStore.request,
+                    response = it.entryToStore.response,
+                    integrity = it.cacheEntry.integrity!!,
+                    storageSize = it.cacheEntry.storageSize,
+                    lockId = it.lockId
                 )
             }
         }catch(e: Throwable) {
             throw IllegalStateException("Could not cache", e)
         }
-    }
-
-    override fun storeZip(
-        zipSource: Source,
-        urlPrefix: String,
-        retain: Boolean,
-        static: Boolean,
-    ) {
-        if(!urlPrefix.endsWith("/"))
-            throw IllegalArgumentException("Url prefix must end with / !")
-
-        fileSystem.takeIf { !it.exists(tmpDir) }?.createDirectories(tmpDir)
-        val unzippedEntries = zipSource.unzipTo(tmpDir)
-
-        val entriesToCache = unzippedEntries.map {
-            val request = requestBuilder {
-                url = "$urlPrefix${it.name}"
-            }
-
-            CacheEntryToStore(
-                request = request,
-                response = HttpPathResponse(
-                    path = it.path,
-                    fileSystem = fileSystem,
-                    mimeType = mimeTypeHelper.guessByExtension(it.name.substringAfterLast("."))
-                        ?: "application/octet-stream",
-                    request = request,
-                    extraHeaders = headersBuilder {
-                        header(COUPON_ACTUAL_SHA_256, it.sha256.encodeBase64())
-                        if(static)
-                            header(COUPON_STATIC, "true")
-                    }
-                ),
-                skipChecksumIfProvided = true,
-            )
-        }
-
-        store(entriesToCache)
     }
 
     /**
@@ -365,6 +355,20 @@ class UstadCacheImpl(
         return null
     }
 
+    override fun updateLastValidated(validatedEntries: List<ValidatedEntry>) {
+        val md5 = Md5Digest()
+        val timeNow = systemTimeInMillis()
+        db.withDoorTransaction {
+            validatedEntries.forEach { entry ->
+                db.cacheEntryDao.updateValidation(
+                    key = md5.urlKey(entry.url),
+                    headers = entry.headers.asString(),
+                    lastValidated = timeNow,
+                    lastAccessed= timeNow,
+                )
+            }
+        }
+    }
 
     override fun hasEntries(urls: Set<String>): Map<String, Boolean> {
         val batchId = batchIdAtomic.incrementAndGet()

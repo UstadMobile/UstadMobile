@@ -4,10 +4,12 @@ import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.libcache.logging.NapierLoggingAdapter
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheImpl
-import com.ustadmobile.libcache.base64.encodeBase64
+import com.ustadmobile.libcache.assertTempDirectoryIsEmptied
 import com.ustadmobile.libcache.db.UstadCacheDb
-import com.ustadmobile.libcache.headers.CouponHeader
-import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
+import com.ustadmobile.libcache.headers.CouponHeader.Companion.HEADER_ETAG_IS_INTEGRITY
+import com.ustadmobile.libcache.integrity.sha256Integrity
+import com.ustadmobile.libcache.md5.Md5Digest
+import com.ustadmobile.libcache.md5.urlKey
 import com.ustadmobile.util.test.ResourcesDispatcher
 import com.ustadmobile.util.test.initNapierLog
 import kotlinx.io.files.Path
@@ -33,6 +35,8 @@ import java.security.MessageDigest
 import java.time.Duration
 import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 class UstadCacheInterceptorTest {
 
@@ -43,6 +47,8 @@ class UstadCacheInterceptorTest {
     private lateinit var okHttpClient: OkHttpClient
 
     private lateinit var cacheDir: File
+
+    private lateinit var interceptorTmpDir: File
 
     private lateinit var cacheDb: UstadCacheDb
 
@@ -61,7 +67,8 @@ class UstadCacheInterceptorTest {
         initNapierLog()
         val logger = NapierLoggingAdapter()
         cacheListener = mock { }
-        cacheDir = tempDir.newFolder()
+        cacheDir = tempDir.newFolder("cachedir")
+        interceptorTmpDir = tempDir.newFolder("interceptor-tmp")
         cacheDb = DatabaseBuilder.databaseBuilder(
             UstadCacheDb::class, "jdbc:sqlite::memory:", 1L)
             .build()
@@ -69,7 +76,6 @@ class UstadCacheInterceptorTest {
             UstadCacheImpl(
                 storagePath = Path(cacheDir.absolutePath),
                 db = cacheDb,
-                mimeTypeHelper = FileMimeTypeHelperImpl(),
                 logger = logger,
                 listener = cacheListener,
             )
@@ -77,7 +83,7 @@ class UstadCacheInterceptorTest {
         okHttpClient = OkHttpClient.Builder()
             .addInterceptor(
                 UstadCacheInterceptor(
-                    ustadCache, cacheDir, logger = logger,
+                    ustadCache, interceptorTmpDir, logger = logger,
                 ))
             .callTimeout(Duration.ofSeconds(500))
             .connectTimeout(Duration.ofSeconds(500))
@@ -114,6 +120,7 @@ class UstadCacheInterceptorTest {
             .readAllBytes()
         Assert.assertArrayEquals(resourceBytes, responseBytes)
         ustadCache.verifyUrlStored(requestUrl)
+        interceptorTmpDir.assertTempDirectoryIsEmptied()
     }
 
     @Test
@@ -151,9 +158,11 @@ class UstadCacheInterceptorTest {
         //Should only have made one request
         assertEquals(1, mockWebServer.requestCount)
 
-        //The cached response should have a sha256 header
-        assertEquals(resourceBytes.sha256().encodeBase64(),
-            cachedResponse.header(CouponHeader.COUPON_ACTUAL_SHA_256))
+        assertEquals(
+            sha256Integrity(resourceBytes.sha256()), cachedResponse.headers["etag"],
+            message = "Cached response should have etag set to the sha256 integrity string")
+        assertEquals("true", cachedResponse.header(HEADER_ETAG_IS_INTEGRITY))
+        interceptorTmpDir.assertTempDirectoryIsEmptied()
     }
 
     @Test
@@ -190,6 +199,9 @@ class UstadCacheInterceptorTest {
             argWhere { entries -> entries.any { it.request.url == requestUrl } }
         )
 
+        val storedEntryAfterRequest = cacheDb.cacheEntryDao.findEntryAndBodyByKey(
+            Md5Digest().urlKey(requestUrl))
+
         val cachedResponse = okHttpClient.newCall(request).execute()
         val cachedResponseBytes = cachedResponse.use {
             it.body!!.bytes()
@@ -205,6 +217,15 @@ class UstadCacheInterceptorTest {
         mockWebServer.takeRequest()
         val validationRequest = mockWebServer.takeRequest()
         assertEquals(etagVal, validationRequest.getHeader("if-none-match"))
+
+        val storedEntryAfterValidation = cacheDb.cacheEntryDao.findEntryAndBodyByKey(
+            Md5Digest().urlKey(requestUrl))
+
+        assertNotNull(storedEntryAfterValidation)
+        assertNotNull(storedEntryAfterRequest)
+        assertTrue(storedEntryAfterValidation.lastValidated > storedEntryAfterRequest.lastValidated,
+            "Last validated time in cache db should be updated")
+        interceptorTmpDir.assertTempDirectoryIsEmptied()
     }
 
     @Test
@@ -231,6 +252,7 @@ class UstadCacheInterceptorTest {
             javaClass.getResourceAsStream("/testfile1.png")!!.readAllBytes(),
             responseBytes
         )
+        interceptorTmpDir.assertTempDirectoryIsEmptied()
     }
 
     @Test
@@ -256,6 +278,7 @@ class UstadCacheInterceptorTest {
             javaClass.getResourceAsStream("/testfile1.png")!!.readAllBytes(),
             responseBytes
         )
+        interceptorTmpDir.assertTempDirectoryIsEmptied()
     }
 
 

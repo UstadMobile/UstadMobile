@@ -21,8 +21,12 @@ import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.coroutineScope
 import kotlinx.io.readTo
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.blob.BlobTransferJobItem
+import com.ustadmobile.core.domain.blob.BlobTransferProgressUpdate
+import com.ustadmobile.core.domain.blob.BlobTransferStatusUpdate
 import com.ustadmobile.core.domain.blob.transferjobitem.TransferJobItemStatusUpdater
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientChunkGetterUseCase
+import com.ustadmobile.core.domain.upload.DEFAULT_CHUNK_SIZE
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.composites.TransferJobItemStatus
 import com.ustadmobile.libcache.response.requireHeadersContentLength
@@ -40,6 +44,7 @@ class BlobUploadClientUseCaseJvm(
     private val db: UmAppDatabase,
     private val repo: UmAppDatabase,
     private val endpoint: Endpoint,
+    private val chunkSize: Int = DEFAULT_CHUNK_SIZE,
 ): BlobUploadClientUseCase {
 
     /*
@@ -47,7 +52,7 @@ class BlobUploadClientUseCaseJvm(
      */
     data class UploadQueueItem(
         val blobUploadResponseItem: BlobUploadResponseItem,
-        val blobUploadItem: BlobUploadClientUseCase.BlobTransferJobItem,
+        val blobUploadItem: BlobTransferJobItem,
         val totalSize: Long,
         val chunkSize: Int,
     )
@@ -102,8 +107,8 @@ class BlobUploadClientUseCaseJvm(
         channel: ReceiveChannel<UploadQueueItem>,
         batchUuid: String,
         remoteUrl: String,
-        onProgress: (BlobUploadClientUseCase.BlobUploadProgressUpdate) -> Unit,
-        onStatusUpdate: (BlobUploadClientUseCase.BlobUploadStatusUpdate) -> Unit,
+        onProgress: (BlobTransferProgressUpdate) -> Unit,
+        onStatusUpdate: (BlobTransferStatusUpdate) -> Unit,
     ) = coroutineScope {
         async {
             for (queueItem in channel) {
@@ -119,16 +124,16 @@ class BlobUploadClientUseCaseJvm(
                     chunkSize = queueItem.chunkSize,
                     onProgress = { bytesUploaded ->
                         onProgress(
-                            BlobUploadClientUseCase.BlobUploadProgressUpdate(
-                                uploadItem = queueItem.blobUploadItem,
+                            BlobTransferProgressUpdate(
+                                transferItem = queueItem.blobUploadItem,
                                 bytesTransferred = bytesUploaded,
                             )
                         )
                     },
                     onStatusChange = { status ->
                         onStatusUpdate(
-                            BlobUploadClientUseCase.BlobUploadStatusUpdate(
-                                uploadItem = queueItem.blobUploadItem,
+                            BlobTransferStatusUpdate(
+                                transferItem = queueItem.blobUploadItem,
                                 status = status.value
                             )
                         )
@@ -140,12 +145,11 @@ class BlobUploadClientUseCaseJvm(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override suspend fun invoke(
-        blobUrls: List<BlobUploadClientUseCase.BlobTransferJobItem>,
+        blobUrls: List<BlobTransferJobItem>,
         batchUuid: String,
         endpoint: Endpoint,
-        onProgress: (BlobUploadClientUseCase.BlobUploadProgressUpdate) -> Unit,
-        onStatusUpdate: (BlobUploadClientUseCase.BlobUploadStatusUpdate) -> Unit,
-        chunkSize: Int,
+        onProgress: (BlobTransferProgressUpdate) -> Unit,
+        onStatusUpdate: (BlobTransferStatusUpdate) -> Unit,
     ) {
         val blobToUploadItemMap = blobUrls.associateBy {
             it.blobUrl
@@ -155,7 +159,7 @@ class BlobUploadClientUseCaseJvm(
             val contentLength = httpCache.retrieve(
                 requestBuilder(uploadItem.blobUrl)
             )?.requireHeadersContentLength() ?: throw IllegalArgumentException(
-                "${uploadItem.blobUrl} not available in cache!"
+                "${uploadItem.blobUrl} not available in cache or has no set content-length"
             )
             BlobUploadRequestItem(
                 blobUrl = uploadItem.blobUrl,
@@ -177,6 +181,33 @@ class BlobUploadClientUseCaseJvm(
                     )
                 )
             }.body()
+
+            val blobsToUploadUrls = response.blobsToUpload.map { it.blobUrl }.toSet()
+
+            /*
+             * When the server init response does not include a given item on the list of blob urls
+             * that need uploaded, this means the server already has it.
+             */
+            val serverAlreadyReceivedItems = blobUrls.filter {
+                it.blobUrl !in blobsToUploadUrls
+            }
+
+            serverAlreadyReceivedItems.forEach { uploadItem ->
+                val uploadRequestItem = urlToRequestItemMap[uploadItem.blobUrl]
+                    ?: throw IllegalStateException("Huh: ")
+                onProgress(
+                    BlobTransferProgressUpdate(
+                        transferItem = uploadItem,
+                        bytesTransferred = uploadRequestItem.size
+                    )
+                )
+                onStatusUpdate(
+                    BlobTransferStatusUpdate(
+                        transferItem = uploadItem,
+                        status = TransferJobItemStatus.STATUS_COMPLETE_INT,
+                    )
+                )
+            }
 
             val blobsAndResponses = response.blobsToUpload.map { blobItem ->
                 val blobUploadRequestItem = urlToRequestItemMap[blobItem.blobUrl]
@@ -214,12 +245,17 @@ class BlobUploadClientUseCaseJvm(
         }
     }
 
-    override suspend fun invoke(transferJobUid: Int) {
+    override suspend fun invoke(
+        transferJobUid: Int,
+    ) {
+        val logPrefix = "BlobUploadClientUseCaseJvm (#$transferJobUid):"
         val transferJob = db.transferJobDao.findByUid(transferJobUid)
-            ?: throw IllegalArgumentException("BlobUpload: TransferJob #$transferJobUid does not exist")
+            ?: throw IllegalArgumentException("$logPrefix: TransferJob #$transferJobUid does not exist")
         val transferJobItems = db.transferJobItemDao.findByJobUid(transferJobUid)
         val batchUuid = transferJob.tjUuid
-            ?: throw IllegalArgumentException("TransferJob has no uuid")
+            ?: throw IllegalArgumentException("$logPrefix TransferJob has no uuid")
+
+        Napier.d("$logPrefix starting")
 
         coroutineScope {
             val transferJobItemStatusUpdater = TransferJobItemStatusUpdater(db, repo, this)
@@ -227,7 +263,7 @@ class BlobUploadClientUseCaseJvm(
                 invoke(
                     blobUrls = transferJobItems.mapNotNull { jobItem ->
                         jobItem.tjiSrc?.let {
-                            BlobUploadClientUseCase.BlobTransferJobItem(
+                            BlobTransferJobItem(
                                 blobUrl = it,
                                 transferJobItemUid = jobItem.tjiUid,
                                 lockIdToRelease = jobItem.tjiLockIdToRelease,
@@ -240,25 +276,28 @@ class BlobUploadClientUseCaseJvm(
                     onStatusUpdate = {
                         transferJobItemStatusUpdater.onStatusUpdate(it)
                         if(it.status == TransferJobItemStatus.STATUS_COMPLETE_INT &&
-                            it.uploadItem.lockIdToRelease != 0
+                            it.transferItem.lockIdToRelease != 0
                         ) {
-                            Napier.d { "BlobUploadUseCaseJvm: release cache lock #(${it.uploadItem.lockIdToRelease}) for ${it.uploadItem.blobUrl}" }
-                            httpCache.removeRetentionLocks(listOf(it.uploadItem.lockIdToRelease))
+                            Napier.d { "$logPrefix: release cache lock #(${it.transferItem.lockIdToRelease}) for ${it.transferItem.blobUrl}" }
+                            httpCache.removeRetentionLocks(listOf(it.transferItem.lockIdToRelease))
                         }
                     },
                 )
 
                 val numIncompleteItems = db.withDoorTransactionAsync {
+                    transferJobItemStatusUpdater.commit(transferJobUid)
                     transferJobItemStatusUpdater.onFinished()
                     db.transferJobItemDao.findNumberJobItemsNotComplete(transferJobUid)
                 }
 
                 if(numIncompleteItems != 0) {
-                    throw UploadNotCompleteException("Upload #$transferJobUid not complete: " +
+                    throw UploadNotCompleteException("$logPrefix : not complete: " +
                             "$numIncompleteItems TransferJobItem(s) pending")
                 }
+
+                Napier.i("$logPrefix Upload Complete!")
             }catch(e: Throwable) {
-                Napier.e("BlobUploadClientUseCase: Exception. Attempt has failed.", e)
+                Napier.e("$logPrefix Exception. Attempt has failed.", e)
 
                 withContext(NonCancellable) {
                     transferJobItemStatusUpdater.onFinished()
@@ -283,8 +322,6 @@ class BlobUploadClientUseCaseJvm(
         private val DO_NOT_SEND_HEADERS = listOf("content-range", "content-length")
 
         const val MAX_ATTEMPTS_DEFAULT = 5
-
-        const val RETRY_WAIT_SECONDS = 10
 
 
     }

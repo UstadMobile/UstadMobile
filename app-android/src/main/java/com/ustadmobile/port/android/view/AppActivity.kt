@@ -69,7 +69,7 @@ class AppActivity: AppCompatActivity(), DIAware {
         extend(appContextDi)
 
         import(commonDomainDiModule(EndpointScope.Default))
-        import(AndroidDomainDiModule(applicationContext, EndpointScope.Default))
+        import(AndroidDomainDiModule(applicationContext))
 
         bind<UstadMobileSystemImpl>() with singleton {
             /**

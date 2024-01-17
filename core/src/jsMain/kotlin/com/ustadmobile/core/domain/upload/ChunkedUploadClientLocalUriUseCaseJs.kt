@@ -48,6 +48,8 @@ class ChunkedUploadClientLocalUriUseCaseJs: ChunkedUploadClientLocalUriUseCase {
                 val headerPairs = buildList {
                     add(HEADER_UPLOAD_UUID to uploadUuid)
                     add(HEADER_IS_FINAL_CHUNK to chunk.isLastChunk.toString())
+                    add(HEADER_UPLOAD_START_BYTE to chunk.start.toString())
+
                     if(chunk.isLastChunk && lastChunkHeaders != null) {
                         lastChunkHeaders.names().forEach { headerName ->
                             lastChunkHeaders.getAll(headerName).forEach { headerVal ->

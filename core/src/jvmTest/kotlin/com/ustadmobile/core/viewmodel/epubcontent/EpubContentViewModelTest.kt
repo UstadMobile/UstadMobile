@@ -52,7 +52,7 @@ class EpubContentViewModelTest : AbstractMainDispatcherTest(){
             val cevUid = activeDb.doorPrimaryKeyManager.nextId(ContentEntryVersion.TABLE_ID)
             val contentEntryVersion = ContentEntryVersion(
                 cevUid = cevUid,
-                cevUrl = mockWebServer.url("/$cevUid/book.opf").toString()
+                cevOpenUri = mockWebServer.url("/$cevUid/book.opf").toString()
             )
             activeDb.contentEntryVersionDao.insertAsync(contentEntryVersion)
 
@@ -67,7 +67,7 @@ class EpubContentViewModelTest : AbstractMainDispatcherTest(){
                 val uiState = awaitItem()
                 assertEquals(7, uiState.spineUrls.size)
                 val opfPackage = xml.decodeFromString(PackageDocument.serializer(), opfText)
-                val opfUrl = UrlKmp(contentEntryVersion.cevUrl!!)
+                val opfUrl = UrlKmp(contentEntryVersion.cevOpenUri!!)
                 opfPackage.spine.itemRefs.forEachIndexed { index, itemRef ->
                     val item = opfPackage.manifest.items.first { it.id == itemRef.idRef }
                     assertEquals(opfUrl.resolve(item.href).toString(), uiState.spineUrls[index])
