@@ -109,6 +109,10 @@ fun AztecEditor(
         }
     }
 
+
+    //Could use pointer interop
+    // see https://stackoverflow.com/questions/69869068/can-jetpack-compose-input-modifiers-be-prevented-from-consuming-input-events
+    // To draw a placeholder over the top
     AndroidView(
         modifier = modifier,
         factory = { context ->

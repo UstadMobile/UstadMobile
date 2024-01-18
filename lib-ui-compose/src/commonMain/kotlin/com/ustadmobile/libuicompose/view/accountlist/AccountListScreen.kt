@@ -1,6 +1,5 @@
 package com.ustadmobile.libuicompose.view.accountlist
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -179,7 +178,7 @@ fun AccountListItem(
         },
         supportingContent = {
             Row {
-                Image(
+                Icon(
                     imageVector = Icons.Default.Person,
                     contentDescription = null,
                     Modifier.size(16.dp)
@@ -190,7 +189,7 @@ fun AccountListItem(
                     modifier = Modifier
                         .padding(start = 8.dp, end = 8.dp)
                 )
-                Image(
+                Icon(
                     imageVector = Icons.Default.Link,
                     contentDescription = null,
                     Modifier.size(16.dp)

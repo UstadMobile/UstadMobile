@@ -44,7 +44,7 @@ dependencyResolutionManagement {
             version("version_quartz_scheduler", "2.3.2")
             version("version_simplejndi", "0.23.0")
             version("version_htmltext_android", "2.0.0-beta01")
-            version("version_aztec", "v1.6.3")
+            version("version_aztec", "v1.9.0")
             version("version_volley", "1.2.1")
             version("version_androidx_constraintlayout", "2.1.4")
             version("version_libphonenumber_google", "8.13.26")

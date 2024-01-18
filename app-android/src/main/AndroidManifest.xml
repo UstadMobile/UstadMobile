@@ -49,7 +49,7 @@
 
     Compose Video Player requires SDK 23. The VideoPlayer uses an if check for SDK version.
     -->
-    <uses-sdk tools:overrideLibrary="org.wordpress.aztec,com.multiplatform.webview,io.sanghun.compose.video"/>
+    <uses-sdk tools:overrideLibrary="org.wordpress.aztec,org.wordpress.android.util,com.multiplatform.webview,io.sanghun.compose.video"/>
 
     <!--
     Required to find PanicKit responders.

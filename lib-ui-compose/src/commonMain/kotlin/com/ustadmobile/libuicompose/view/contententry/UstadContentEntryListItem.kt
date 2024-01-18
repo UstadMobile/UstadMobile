@@ -95,7 +95,7 @@ private fun SecondaryContent(
         Row {
             val contentTypeFlagVal = contentEntry?.contentTypeFlag
             if (uiState?.mimetypeVisible == true && contentTypeFlagVal != null){
-                Image(CONTENT_ENTRY_TYPE_ICON_MAP[contentTypeFlagVal] ?: Icons.Filled.Book,
+                Icon(CONTENT_ENTRY_TYPE_ICON_MAP[contentTypeFlagVal] ?: Icons.Filled.Book,
                     contentDescription = "",
                     modifier = Modifier.size(20.dp)
                 )

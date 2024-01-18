@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.ui.platform.ComposeView
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.ustadmobile.libuicompose.theme.UstadAppTheme
 
 
 /**
@@ -27,10 +28,11 @@ class CommentBottomSheetFragment(
     ) : View {
         return ComposeView(requireContext()).apply {
             setContent {
-                content?.invoke { dismiss() }
+                UstadAppTheme {
+                    content?.invoke { dismiss() }
+                }
             }
         }
-
     }
 
     override fun onDestroyView() {

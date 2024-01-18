@@ -30,7 +30,6 @@ import com.ustadmobile.core.schedule.ClazzLogCreatorManagerAndroidImpl
 import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.NanoHttpdCall
-import com.ustadmobile.libuicompose.theme.AppTheme
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.android.closestDI
@@ -56,6 +55,7 @@ import com.ustadmobile.core.util.ext.navigateToLink
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.redirect.RedirectViewModel
+import com.ustadmobile.libuicompose.theme.UstadAppTheme
 import com.ustadmobile.port.android.util.ext.getUstadDeepLink
 import org.kodein.di.direct
 
@@ -165,7 +165,7 @@ class AppActivity: AppCompatActivity(), DIAware {
 
         setContent {
             val windowSizeClass = calculateWindowSizeClass(this)
-            AppTheme {
+            UstadAppTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
