@@ -13,9 +13,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.rizzi.bouquet.ResourceType
-import com.rizzi.bouquet.VerticalPDFReader
-import com.rizzi.bouquet.VerticalPdfReaderState
+import androidx.core.net.toFile
+import com.rajat.pdfviewer.compose.PdfRendererViewCompose
+import com.ustadmobile.core.domain.cachestoragepath.GetCacheStoragePathUseCase
 import com.ustadmobile.core.viewmodel.pdfcontent.PdfContentUiState
 import com.ustadmobile.core.viewmodel.pdfcontent.PdfContentViewModel
 import com.ustadmobile.libuicompose.components.UstadDownloadUrlStatus
@@ -45,6 +45,9 @@ fun PdfContentScreen(
     val httpClient: HttpClient = remember {
         di.direct.instance()
     }
+    val getStoragePath: GetCacheStoragePathUseCase = remember {
+        di.direct.instance()
+    }
 
     var cacheDownloadState: DownloadUrlState by remember {
         mutableStateOf(DownloadUrlState())
@@ -55,21 +58,22 @@ fun PdfContentScreen(
         downloadUrlViaCacheAndGetLocalUri(
             url = url,
             httpClient = httpClient,
+            getCacheStoragePathUseCase = getStoragePath,
             onStateChange = {
                 cacheDownloadState = it
             }
         )
     }
     val fileUri = cacheDownloadState.fileUri
+    val file = remember(fileUri) {
+        fileUri?.let { Uri.parse(it) }?.toFile()
+    }
 
     when {
-        fileUri != null -> {
-            VerticalPDFReader(
-                state = VerticalPdfReaderState(
-                    resource = ResourceType.Local(Uri.parse(fileUri)),
-                    isZoomEnable = true,
-                ),
-                modifier = Modifier.fillMaxSize()
+        file != null -> {
+            PdfRendererViewCompose(
+                modifier = Modifier.fillMaxSize(),
+                file = file
             )
         }
         else -> {

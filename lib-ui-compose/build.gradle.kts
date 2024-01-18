@@ -72,7 +72,7 @@ kotlin {
                 implementation(libs.compose.video)
                 implementation(libs.androidx.media3.exoplayer)
                 implementation(libs.androidx.media3.datasource.okhttp)
-                implementation(libs.bouquet)
+                implementation(libs.pdfviewer)
             }
         }
 

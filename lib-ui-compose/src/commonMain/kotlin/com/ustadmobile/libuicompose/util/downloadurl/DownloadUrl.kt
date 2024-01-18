@@ -1,10 +1,10 @@
 package com.ustadmobile.libuicompose.util.downloadurl
 
+import com.ustadmobile.core.domain.cachestoragepath.GetCacheStoragePathUseCase
 import com.ustadmobile.door.ext.toDoorUri
 import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
-import io.ktor.client.request.head
 import io.ktor.client.request.header
 import io.ktor.client.statement.bodyAsChannel
 import io.ktor.utils.io.jvm.javaio.toInputStream
@@ -41,6 +41,7 @@ data class DownloadUrlState(
 suspend fun downloadUrlViaCacheAndGetLocalUri(
     url: String,
     httpClient: HttpClient,
+    getCacheStoragePathUseCase: GetCacheStoragePathUseCase,
     progressInterval: Int = 500,
     onStateChange: (DownloadUrlState) -> Unit,
 ) {
@@ -78,20 +79,29 @@ suspend fun downloadUrlViaCacheAndGetLocalUri(
             }
             progressUpdateJob.cancel()
 
+            val filePath = getCacheStoragePathUseCase(url)
+                ?: throw IllegalStateException("no filepath for $url")
+
+            val expectedFileSize = totalBytes.get()
+
             /*
-             * There won't be a storage path if it was the first time the url was retrieved, so we
-             * need to go and ask again using the head method
+             * Wait for file to settle if required. If the request just completed, the file might not
+             * be ready.
              */
-            val filePath = response.headers["X-Storage-Path"]
-                ?: httpClient.head(url) {
-                    header("X-Request-Storage-Path", "true")
-                    header("cache-control", "only-if-cached")
-                }.headers["X-Storage-Path"]
-                ?: throw IllegalStateException("DownloadUrl: No x-storage-path for $url")
+            for(i in 0 until 10 ) {
+                val currentSize = File(filePath).length()
+                if(currentSize == expectedFileSize)
+                    break
+
+                delay(200)
+            }
+
+            val fileUri = File(filePath).toDoorUri().toString()
+            Napier.v { "DownloadUrl: $url is now accessible on $fileUri" }
 
             onStateChange(
                 DownloadUrlState(
-                    fileUri = File(filePath).toDoorUri().toString(),
+                    fileUri = fileUri,
                     bytesTransferred = bytesTransferred.get(),
                     totalBytes = totalBytes.get(),
                     status = DownloadUrlState.Status.COMPLETED,

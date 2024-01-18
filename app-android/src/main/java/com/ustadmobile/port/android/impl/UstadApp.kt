@@ -52,6 +52,8 @@ import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCaseJvm
 import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCase
 import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCaseAndroid
 import com.ustadmobile.core.domain.blob.upload.UpdateFailedTransferJobUseCase
+import com.ustadmobile.core.domain.cachestoragepath.GetCacheStoragePathUseCase
+import com.ustadmobile.core.domain.cachestoragepath.GetCacheStoragePathUseCaseCommonJvm
 import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseAndroid
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCase
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCaseCommonJvm
@@ -555,6 +557,10 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
         bind<ContentEntryVersionServerWebClient>() with scoped(EndpointScope.Default).singleton {
             ContentEntryVersionServerWebClient(useCase = instance())
+        }
+
+        bind<GetCacheStoragePathUseCase>() with singleton {
+            GetCacheStoragePathUseCaseCommonJvm(cache = instance())
         }
 
 
