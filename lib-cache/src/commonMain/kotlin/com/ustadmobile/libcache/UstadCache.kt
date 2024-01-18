@@ -1,5 +1,6 @@
 package com.ustadmobile.libcache
 
+import com.ustadmobile.libcache.db.entities.CacheEntry
 import com.ustadmobile.libcache.db.entities.RetentionLock
 import com.ustadmobile.libcache.request.HttpRequest
 import com.ustadmobile.libcache.response.HttpResponse
@@ -66,6 +67,8 @@ interface UstadCache {
     fun retrieve(
         request: HttpRequest,
     ): HttpResponse?
+
+    fun getCacheEntry(url: String): CacheEntry?
 
 
     /**

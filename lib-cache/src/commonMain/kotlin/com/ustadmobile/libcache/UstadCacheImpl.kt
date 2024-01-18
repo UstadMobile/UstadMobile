@@ -3,14 +3,11 @@ package com.ustadmobile.libcache
 import com.ustadmobile.door.ext.withDoorTransaction
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.libcache.UstadCache.Companion.HEADER_LAST_VALIDATED_TIMESTAMP
-import com.ustadmobile.libcache.base64.encodeBase64
 import com.ustadmobile.libcache.cachecontrol.ResponseValidityChecker
 import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.db.entities.CacheEntry
 import com.ustadmobile.libcache.db.entities.RetentionLock
 import com.ustadmobile.libcache.db.entities.RequestedEntry
-import com.ustadmobile.libcache.headers.CouponHeader.Companion.HEADER_X_REQUEST_STORAGE_PATH
-import com.ustadmobile.libcache.headers.CouponHeader.Companion.HEADER_X_RESPONSE_STORAGE_PATH
 import com.ustadmobile.libcache.headers.HttpHeaders
 import com.ustadmobile.libcache.headers.asString
 import com.ustadmobile.libcache.headers.headersBuilder
@@ -333,7 +330,7 @@ class UstadCacheImpl(
     override fun retrieve(request: HttpRequest): HttpResponse? {
         logger?.i(LOG_TAG, "$logPrefix Retrieve ${request.url}")
 
-        val key = Md5Digest().digest(request.url.encodeToByteArray()).encodeBase64()
+        val key = Md5Digest().urlKey(request.url)
         val entry = db.cacheEntryDao.findEntryAndBodyByKey(key)
         if(entry != null) {
             logger?.d(LOG_TAG, "$logPrefix FOUND ${request.url}")
@@ -347,9 +344,6 @@ class UstadCacheImpl(
                 headers = headersBuilder {
                     takeFrom(HttpHeaders.fromString(entry.responseHeaders))
                     header(HEADER_LAST_VALIDATED_TIMESTAMP, entry.lastValidated.toString())
-                    if(request.headers.get(HEADER_X_REQUEST_STORAGE_PATH) != null) {
-                        header(HEADER_X_RESPONSE_STORAGE_PATH, entry.storageUri)
-                    }
                 },
                 storageUri = entry.storageUri,
                 httpResponseCode = entry.statusCode
@@ -373,6 +367,10 @@ class UstadCacheImpl(
                 )
             }
         }
+    }
+
+    override fun getCacheEntry(url: String): CacheEntry? {
+        return db.cacheEntryDao.findEntryAndBodyByKey(Md5Digest().urlKey(url))
     }
 
     override fun hasEntries(urls: Set<String>): Map<String, Boolean> {

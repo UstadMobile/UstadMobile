@@ -4,10 +4,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ListItem
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -27,7 +26,6 @@ fun CourseGroupSetDetailScreen(
     CourseGroupSetDetailScreen(uiState = uiState)
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun CourseGroupSetDetailScreen(
     uiState: CourseGroupSetDetailUiState
@@ -49,7 +47,7 @@ fun CourseGroupSetDetailScreen(
                         modifier = Modifier
                             .padding(horizontal = 16.dp),
                         text = "${stringResource(MR.strings.group)} $groupNum",
-                        style = MaterialTheme.typography.body1
+                        style = MaterialTheme.typography.headlineSmall
                     )
                 }
 
@@ -58,10 +56,10 @@ fun CourseGroupSetDetailScreen(
                     key = { it.personUid }
                 ){
                     ListItem(
-                        text = {
+                        headlineContent = {
                             Text(text = "${it.name}")
                         },
-                        icon = {
+                        leadingContent = {
                             UstadPersonAvatar(
                                 pictureUri = it.pictureUri,
                                 personName = it.name,

@@ -1,7 +1,7 @@
 package com.ustadmobile.libuicompose.components
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.material.Text
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import java.util.TimeZone
 

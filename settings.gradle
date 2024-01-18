@@ -63,7 +63,8 @@ dependencyResolutionManagement {
             version("version_webpimageio", "0.6.0")
             version("version_compose_video", "1.2.0a")
             version("version_androidx_media3", "1.1.0")
-            version("version_bouquet", "1.1.2")
+            version("version_jetpdfvue", "1.0.5")
+            version("version_pdfviewer", "2.0.5") //https://github.com/afreakyelf/Pdf-Viewer
 
 
             plugin("jetbrains-compose", "org.jetbrains.compose").versionRef("jetbrains-compose")
@@ -155,7 +156,7 @@ dependencyResolutionManagement {
             library("androidx-media3-session", "androidx.media3", "media3-session").versionRef("version_androidx_media3")
             library("androidx-media3-ui", "androidx.media3", "media3-ui").versionRef("version_androidx_media3")
             library("androidx-media3-datasource-okhttp", "androidx.media3", "media3-datasource-okhttp").versionRef("version_androidx_media3")
-            library("bouquet", "io.github.grizzi91", "bouquet").versionRef("version_bouquet")
+            library("pdfviewer", "com.github.afreakyelf", "Pdf-Viewer").versionRef("version_pdfviewer")
         }
     }
 }
