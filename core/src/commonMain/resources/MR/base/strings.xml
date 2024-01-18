@@ -1690,4 +1690,6 @@
 
     <string name="drop_files_to_import">Drop file(s) to import</string>
 
+    <string name="compose_post">Compose post</string>
+
 </resources>

@@ -448,9 +448,7 @@ private fun ClazzEditBasicDetails(
             html = uiState.entity?.clazzDesc ?: "",
             onClickToEditInNewScreen = onClickEditDescription,
             editInNewScreenLabel = stringResource(MR.strings.description),
-            placeholder = {
-                Text(stringResource(MR.strings.description))
-            },
+            placeholderText = stringResource(MR.strings.description),
             onHtmlChange = {
                 uiState.entity?.also { entity ->
                     onClazzChanged(

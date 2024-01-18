@@ -239,7 +239,7 @@ fun ClazzAssignmentDetailOverviewScreen(
                                 .fillMaxWidth(),
                             html = uiState.latestSubmission?.casText ?: "",
                             editInNewScreenLabel = stringResource(MR.strings.text),
-                            placeholder = { Text(stringResource(MR.strings.text)) },
+                            placeholderText = stringResource(MR.strings.text),
                             onHtmlChange = {
                                 onChangeSubmissionText(it)
                             },

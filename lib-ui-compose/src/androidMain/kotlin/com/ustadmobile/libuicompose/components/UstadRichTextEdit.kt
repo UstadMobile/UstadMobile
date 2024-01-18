@@ -14,7 +14,7 @@ actual fun UstadRichTextEdit(
     modifier: Modifier,
     editInNewScreen: Boolean,
     editInNewScreenLabel: String?,
-    placeholder: (@Composable () -> Unit)?
+    placeholderText: String?,
 ) {
     if(editInNewScreen) {
         HtmlClickableTextField(
@@ -32,6 +32,7 @@ actual fun UstadRichTextEdit(
                 modifier = modifier,
                 html = html,
                 onChange = onHtmlChange,
+                placeholderText = placeholderText,
             )
         }
 
