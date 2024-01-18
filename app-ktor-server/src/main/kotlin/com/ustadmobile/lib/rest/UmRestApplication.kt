@@ -5,6 +5,9 @@ import com.ustadmobile.core.account.*
 import com.ustadmobile.core.contentformats.ContentImportersDiModuleJvm
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
+import com.ustadmobile.core.domain.account.SetPasswordServerUseCase
+import com.ustadmobile.core.domain.account.SetPasswordUseCase
+import com.ustadmobile.core.domain.account.SetPasswordUseCaseCommonJvm
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCaseJvm
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
@@ -53,6 +56,7 @@ import com.ustadmobile.lib.rest.api.content.ContentEntryVersionRoute
 import com.ustadmobile.lib.rest.domain.contententry.getmetadatafromuri.ContentEntryGetMetadataServerUseCase
 import com.ustadmobile.lib.rest.api.contentupload.ContentUploadRoute
 import com.ustadmobile.lib.rest.api.contentupload.UPLOAD_TMP_SUBDIR
+import com.ustadmobile.lib.rest.domain.account.SetPasswordRoute
 import com.ustadmobile.lib.rest.ffmpeghelper.InvalidFffmpegException
 import com.ustadmobile.lib.rest.ffmpeghelper.NoFfmpegException
 import io.ktor.server.response.*
@@ -455,6 +459,19 @@ fun Application.umRestApplication(
             )
         }
 
+        bind<SetPasswordUseCase>() with scoped(EndpointScope.Default).singleton {
+            SetPasswordUseCaseCommonJvm(
+                authManager = instance()
+            )
+        }
+
+        bind<SetPasswordServerUseCase>() with scoped(EndpointScope.Default).singleton {
+            SetPasswordServerUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                setPasswordUseCase = instance()
+            )
+        }
+
         try {
             appConfig.config("mail")
 
@@ -558,6 +575,14 @@ fun Application.umRestApplication(
 
         route("api") {
             val di: DI by closestDI()
+
+            route("account"){
+                SetPasswordRoute(
+                    useCase = { call ->
+                        di.on(call).direct.instance()
+                    }
+                )
+            }
 
             route("pbkdf2"){
                 Pbkdf2Route()

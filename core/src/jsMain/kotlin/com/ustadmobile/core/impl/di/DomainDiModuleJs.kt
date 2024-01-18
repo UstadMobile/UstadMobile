@@ -1,6 +1,8 @@
 package com.ustadmobile.core.impl.di
 
 import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.domain.account.SetPasswordUseCase
+import com.ustadmobile.core.domain.account.SetPasswordUseCaseJs
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobUseCaseJs
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
@@ -127,6 +129,14 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
         ContentEntryGetMetaDataFromUriUseCaseJs(
             json = instance(),
             chunkedUploadClientLocalUriUseCase = instance()
+        )
+    }
+
+    bind<SetPasswordUseCase>() with scoped(endpointScope).provider {
+        SetPasswordUseCaseJs(
+            endpoint = context,
+            repo = instance(tag = DoorTag.TAG_REPO),
+            httpClient = instance()
         )
     }
 

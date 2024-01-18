@@ -1,5 +1,7 @@
 package com.ustadmobile.core.db.dao
 
+import com.ustadmobile.lib.db.entities.ScopedGrant
+
 object ScopedGrantDaoCommon {
 
     const val SQL_FIND_BY_TABLE_AND_ENTITY = """
@@ -18,4 +20,16 @@ object ScopedGrantDaoCommon {
     """
 
 
+    const val SQL_USER_HAS_SYSTEM_LEVEL_PERMISSION = """
+        SELECT EXISTS(
+                SELECT PersonGroupMember.groupMemberGroupUid
+                  FROM PersonGroupMember 
+                       JOIN ScopedGrant
+                           ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
+                 WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid
+                   AND (ScopedGrant.sgEntityUid = 0 OR ScopedGrant.sgEntityUid = ${ScopedGrant.ALL_ENTITIES})
+                   AND (ScopedGrant.sgTableId = 0 OR ScopedGrant.sgTableId = ${ScopedGrant.ALL_TABLES})
+                   AND (ScopedGrant.sgPermissions & :permission) > 0    
+               )
+    """
 }

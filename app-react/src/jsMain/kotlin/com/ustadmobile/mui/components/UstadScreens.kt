@@ -42,7 +42,6 @@ import kotlinx.browser.window
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
 import mui.material.Snackbar
-import mui.material.Typography
 import react.*
 import react.router.useLoaderData
 import ustadJsDi
@@ -191,10 +190,9 @@ val UstadScreens = FC<Props> {
                             onClose = { _, _ ->
                                 snack = null
                             }
+                            autoHideDuration = 8000
 
-                            Typography {
-                                + (snack?.message ?: "")
-                            }
+                            message = ReactNode(snack?.message ?: "")
                         }
                     }
                 }
