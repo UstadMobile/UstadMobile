@@ -63,6 +63,7 @@ fun ClazzAssignmentDetailScreen(
         onSetAppUiState = onSetAppUiState,
         onShowSnackBar = onShowSnackBar,
         navResultReturner = navResultReturner,
+        autoHideIfOneTab = true,
     ) { currentTab ->
         when(currentTab.viewName) {
             ClazzAssignmentDetailOverviewViewModel.DEST_NAME -> {

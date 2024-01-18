@@ -64,6 +64,8 @@ import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportConte
 import com.ustadmobile.core.domain.contententry.importcontent.ImportContentEntryUseCase
 import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServerUseCase
 import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServerWebClient
+import com.ustadmobile.core.domain.getversion.GetVersionUseCase
+import com.ustadmobile.core.domain.getversion.GetVersionUseCaseAndroid
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseCommonJvm
 import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
@@ -561,6 +563,10 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
         bind<GetCacheStoragePathUseCase>() with singleton {
             GetCacheStoragePathUseCaseCommonJvm(cache = instance())
+        }
+
+        bind<GetVersionUseCase>() with singleton {
+            GetVersionUseCaseAndroid(applicationContext)
         }
 
 

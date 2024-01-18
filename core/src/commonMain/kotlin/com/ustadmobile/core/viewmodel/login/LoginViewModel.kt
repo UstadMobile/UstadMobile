@@ -4,6 +4,7 @@ import com.ustadmobile.core.account.AdultAccountRequiredException
 import com.ustadmobile.core.account.ConsentNotGrantedException
 import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -30,6 +31,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
+import org.kodein.di.instanceOrNull
 
 data class LoginUiState(
     val username: String = "",
@@ -73,6 +75,8 @@ class LoginViewModel(
 
     private val languagesConfig: SupportedLanguagesConfig by instance()
 
+    private val getVersionUseCase: GetVersionUseCase? by instanceOrNull()
+
     init {
         nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?: ClazzListViewModel.DEST_NAME_HOME
 
@@ -81,7 +85,7 @@ class LoginViewModel(
 
         _uiState.update { prev ->
             prev.copy(
-                versionInfo = "",
+                versionInfo = getVersionUseCase?.invoke()?.versionString ?: "",
                 loginIntentMessage = savedStateHandle[UstadView.ARG_INTENT_MESSAGE],
                 currentLanguage = languagesConfig.getCurrentLanguage(systemImpl),
                 languageList = languagesConfig.supportedUiLanguagesAndSysDefault(systemImpl)

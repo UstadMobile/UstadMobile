@@ -11,6 +11,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -149,7 +150,6 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(10.dp))
         }
 
-
-        Text(uiState.versionInfo)
+        Text(text = uiState.versionInfo, style = MaterialTheme.typography.labelSmall)
     }
 }
