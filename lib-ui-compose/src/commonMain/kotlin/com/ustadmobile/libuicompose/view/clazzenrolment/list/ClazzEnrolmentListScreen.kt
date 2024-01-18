@@ -5,11 +5,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Divider
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
-import androidx.compose.material.Text
+import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Person
@@ -100,7 +99,6 @@ fun ClazzEnrolmentListScreen(
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun ClazzEnrolmentListItem(
     uiState: ClazzEnrolmentListItemUiState,
@@ -131,9 +129,6 @@ private fun ClazzEnrolmentListItem(
             append(")")
         }
     }
-
-
-
 
     ListItem(
         headlineContent = { Text(text = itemPrimaryText) },

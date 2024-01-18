@@ -1,8 +1,6 @@
 package com.ustadmobile.libuicompose.view.discussionpost.detail
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
 import androidx.compose.runtime.*
 import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailUiState2
 

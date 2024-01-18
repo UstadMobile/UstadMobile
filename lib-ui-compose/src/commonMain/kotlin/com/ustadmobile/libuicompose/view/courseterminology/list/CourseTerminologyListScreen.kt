@@ -7,9 +7,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.ListItem
-import androidx.compose.material.Text
+import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
@@ -22,7 +22,6 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
-import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.viewmodel.courseterminology.list.CourseTerminologyListUiState
 import com.ustadmobile.core.viewmodel.courseterminology.list.CourseTerminologyListViewModel
 import com.ustadmobile.lib.db.entities.CourseTerminology
@@ -56,8 +55,8 @@ fun CourseTerminologyListScreen(
                     modifier = Modifier.clickable {
                         onClickAddNewItem()
                     },
-                    text = { Text(stringResource(MR.strings.add_new_terminology)) },
-                    icon = {
+                    headlineContent = { Text(stringResource(MR.strings.add_new_terminology)) },
+                    leadingContent = {
                         Icon(imageVector = Icons.Filled.Add, contentDescription = null)
                     }
                 )
@@ -73,8 +72,8 @@ fun CourseTerminologyListScreen(
                 modifier = Modifier.clickable {
                     terminology?.also { onClickItem(it) }
                 },
-                text = { Text(terminology?.ctTitle ?: "") },
-                icon = {
+                headlineContent = { Text(terminology?.ctTitle ?: "") },
+                leadingContent = {
                     Spacer(modifier = Modifier.size(24.dp))
                 }
             )

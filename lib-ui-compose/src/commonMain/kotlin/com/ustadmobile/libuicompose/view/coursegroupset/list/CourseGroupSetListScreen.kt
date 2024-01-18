@@ -1,13 +1,12 @@
 package com.ustadmobile.libuicompose.view.coursegroupset.list
 
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.Text
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
-import app.cash.paging.compose.*
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ListItem
