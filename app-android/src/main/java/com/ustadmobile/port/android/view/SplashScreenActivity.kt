@@ -25,7 +25,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.viewmodel.UstadViewModel
-import com.ustadmobile.libuicompose.theme.AppTheme
+import com.ustadmobile.libuicompose.theme.UstadAppTheme
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
 import com.ustadmobile.port.android.util.ext.getUstadDeepLink
 import kotlinx.coroutines.delay
@@ -49,7 +49,7 @@ class SplashScreenActivity : ComponentActivity() {
         }
 
         setContent {
-            AppTheme {
+            UstadAppTheme {
                 SplashScreen()
             }
         }
