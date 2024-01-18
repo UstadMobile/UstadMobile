@@ -2,7 +2,7 @@
 
 #Parse command line arguments as per
 # /usr/share/doc/util-linux/examples/getopt-example.bash
-TEMP=$(getopt -o 's:u:p:e:t:a:cr' --long 'serial1:,username:,password:,endpoint:,test:,apk:,console-output,result:' -n 'run-maestro-tests.sh' -- "$@")
+TEMP=$(getopt -o 's:u:p:e:t:a:c:r' --long 'serial1:,username:,password:,endpoint:,test:,apk:,console-output,result:' -n 'run-maestro-tests.sh' -- "$@")
 
 
 eval set -- "$TEMP"
@@ -13,8 +13,7 @@ TESTPASS="testpass"
 WORKDIR=$(pwd)
 TEST=""
 SCRIPTDIR=$(realpath $(dirname $0))
-TESTAPK=/home/ustadmobile/Testfolder/app-android/build/outputs/apk/release/app-android-release.apk
-# $SCRIPTDIR/../../app-android-/build/outputs/apk/release/app-android-release.apk
+TESTAPK=$SCRIPTDIR/../../app-android/build/outputs/apk/release/app-android-release.apk
 TESTRESULTSDIR=""
 CONTROLSERVER=""
 USECONSOLEOUTPUT=0
@@ -123,6 +122,7 @@ if [ "$(adb shell pm list packages com.toughra.ustadmobile2)" != "" ]; then
   adb shell pm uninstall com.toughra.ustadmobile2
 fi
 
+echo $SCRIPTDIR/../../app-android/build/outputs/apk/release/app-android-release.apk
 adb install $TESTAPK
 
 TESTARG=$TEST
@@ -139,13 +139,13 @@ fi
 
 maestro  --device=$TESTSERIAL  test -e ENDPOINT=$ENDPOINT -e USERNAME=$TESTUSER \
          -e PASSWORD=$TESTPASS -e CONTROLSERVER=$CONTROLSERVER \
-         -e TESTSERIAL=$TESTSERIAL $OUTPUTARGS\
+         -e TESTSERIAL=$TESTSERIAL \
          $TESTARG -e TEST=$TEST -e TESTRESULTSDIR=$TESTRESULTSDIR \
-          #--include-tags=checklist1
+          #--include-tags=checklist1  $OUTPUTARGS\
 
 TESTSTATUS=$?
 
-$SCRIPTDIR/../../testserver-controller/stop.sh
+#$SCRIPTDIR/../../testserver-controller/stop.sh
 
 #Uninstall when finished
 adb shell pm uninstall com.toughra.ustadmobile
