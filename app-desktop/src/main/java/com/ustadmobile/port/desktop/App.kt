@@ -29,7 +29,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.di.commonDomainDiModule
-import com.ustadmobile.libuicompose.theme.AppTheme
+import com.ustadmobile.libuicompose.theme.UstadAppTheme
 import com.ustadmobile.libuicompose.view.app.APP_TOP_LEVEL_NAV_ITEMS
 import com.ustadmobile.libuicompose.view.app.SizeClass
 import dev.icerock.moko.resources.compose.stringResource
@@ -137,7 +137,7 @@ fun main() {
                                 selectedItem = topLevelIndex
                         }
 
-                        AppTheme {
+                        UstadAppTheme {
                             PermanentNavigationDrawer(
                                 drawerContent = {
                                     if(appState.navigationVisible) {
