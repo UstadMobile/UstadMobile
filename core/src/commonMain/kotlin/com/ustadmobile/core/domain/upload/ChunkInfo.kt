@@ -45,9 +45,13 @@ class ChunkInfo(
     //The total size that will be transferred in chunks
     private val chunksTotalSize = (totalSize - fromByte)
 
-    val numChunks = ((chunksTotalSize / chunkSize).let {
-        if(chunksTotalSize.mod(chunkSize) != 0) it + 1 else it
-    }).toInt()
+    //Even when the length is zero (edge case), it still needs to run one chunk upload
+    val numChunks = maxOf(
+        ((chunksTotalSize / chunkSize).let {
+            if(chunksTotalSize.mod(chunkSize) != 0) it + 1 else it
+        }).toInt(),
+        1,
+    )
 
     override fun iterator(): Iterator<Chunk> {
         return ChunkIterator(this)

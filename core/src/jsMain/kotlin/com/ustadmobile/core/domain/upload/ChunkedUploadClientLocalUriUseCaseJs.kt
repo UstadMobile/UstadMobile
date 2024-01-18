@@ -27,7 +27,13 @@ class ChunkedUploadClientLocalUriUseCaseJs: ChunkedUploadClientLocalUriUseCase {
         val logPrefix = "ChunkedUploadClientLocalUriUseCaseJs ($uploadUuid) : $localUri -> $remoteUrl:"
         try {
             Napier.d("$logPrefix : starting")
-            val blob = fetch(localUri.uri.toString()).blob().await()
+            val blob = try {
+                fetch(localUri.uri.toString()).blob().await()
+            }catch(e: Throwable) {
+                Napier.e("$logPrefix exception fetching local uri $localUri", e)
+                throw IllegalStateException("$logPrefix: failed to fetch blob for local uri ${localUri.uri}", e)
+            }
+
             val totalSize = blob.size
             if(totalSize <= 0)
                 throw IllegalArgumentException("Upload size <= 0")
@@ -48,6 +54,8 @@ class ChunkedUploadClientLocalUriUseCaseJs: ChunkedUploadClientLocalUriUseCase {
                 val headerPairs = buildList {
                     add(HEADER_UPLOAD_UUID to uploadUuid)
                     add(HEADER_IS_FINAL_CHUNK to chunk.isLastChunk.toString())
+                    add(HEADER_UPLOAD_START_BYTE to chunk.start.toString())
+
                     if(chunk.isLastChunk && lastChunkHeaders != null) {
                         lastChunkHeaders.names().forEach { headerName ->
                             lastChunkHeaders.getAll(headerName).forEach { headerVal ->
@@ -57,14 +65,23 @@ class ChunkedUploadClientLocalUriUseCaseJs: ChunkedUploadClientLocalUriUseCase {
                     }
                 }
 
-                val fetchResponse = fetchAsync(
-                    input = remoteUrl,
-                    init = jso {
-                        body = uploadChunkBlob
-                        method = "POST"
-                        headers = json(*headerPairs.toTypedArray())
-                    }
-                ).await()
+
+                val fetchResponse = try {
+                    fetchAsync(
+                        input = remoteUrl,
+                        init = jso {
+                            body = uploadChunkBlob
+                            method = "POST"
+                            headers = json(*headerPairs.toTypedArray())
+                        }
+                    ).await()
+                }catch(e: Throwable) {
+                    Napier.e("$logPrefix exception fetching response for blob upload " +
+                            "fromByte=${chunkInfo.fromByte}", e)
+                    throw IllegalStateException("$logPrefix exception fetching response for blob upload ",
+                        e)
+                }
+
                 Napier.v { "$logPrefix : upload chunk #${index+1}/${chunkInfo.numChunks} complete " }
                 onProgress(
                     ChunkedUploadClientLocalUriUseCase.UploadProgress(

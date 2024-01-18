@@ -65,3 +65,16 @@ Server:
 
 * BlobUploadServerUseCase: manages an http server endpoint to receive blob uploads. This should be
   used (retained) on the server side as a singleton.
+
+# Package com.ustadmobile.core.contentformats
+
+Each package contains support for a given format e.g. EPUB. H5P, xAPI, etc. This often includes 
+models (e.g. for use with Kotlinx Serialization) that are used by both the importer and view. There 
+is a ContentImporter implementation for each format on supported platforms.
+
+# Package com.ustadmobile.core.domain.blob.saveandmanifest
+
+These UseCases address a common requirement when importing content: an asset needs to be saved as a 
+blob and have a corresponding CacheEntryManifest (where the bodyDataUrl links to the blobUrl). 
+
+These include adding all assets from a directory, zip, string, etc

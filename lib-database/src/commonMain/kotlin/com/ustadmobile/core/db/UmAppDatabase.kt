@@ -37,7 +37,7 @@ import com.ustadmobile.lib.db.entities.*
     PeerReviewerAllocation::class,
     PersonAuth2::class,
     UserSession::class,
-    ContentJob::class, ContentJobItem::class, CourseBlock::class, CourseTerminology::class,
+    ContentJob::class, ContentEntryImportJob::class, CourseBlock::class, CourseTerminology::class,
     CourseGroupSet::class, CourseGroupMember::class,
     Chat::class,
     ContentEntryPicture::class,
@@ -57,13 +57,15 @@ import com.ustadmobile.lib.db.entities.*
     TransferJob::class,
     TransferJobItem::class,
     CacheLockJoin::class,
+    OfflineItem::class,
+    OfflineItemPendingTransferJob::class,
 
     //Door entities
     OutgoingReplication::class,
     ReplicationOperation::class,
     PendingRepositorySession::class,
 
-], version = 132)
+], version = 139)
 /*
  Replicate entities (e.g. trackers) to drop:
      ClazzLogReplicate
@@ -286,7 +288,7 @@ expect abstract class UmAppDatabase : RoomDatabase {
 
     abstract val userSessionDao: UserSessionDao
 
-    abstract val contentJobItemDao: ContentJobItemDao
+    abstract val contentEntryImportJobDao: ContentEntryImportJobDao
 
     abstract val contentJobDao: ContentJobDao
 
@@ -317,5 +319,7 @@ expect abstract class UmAppDatabase : RoomDatabase {
     abstract val transferJobItemDao: TransferJobItemDao
 
     abstract val cacheLockJoinDao: CacheLockJoinDao
+
+    abstract val offlineItemDao: OfflineItemDao
 
 }

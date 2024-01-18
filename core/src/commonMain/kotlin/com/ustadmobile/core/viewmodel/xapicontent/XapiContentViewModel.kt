@@ -1,14 +1,17 @@
 package com.ustadmobile.core.viewmodel.xapicontent
 
+import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.tincan.TinCanXML
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.requireEntryByUri
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
 import com.ustadmobile.xmlpullparserkmp.setInputString
 import io.ktor.client.HttpClient
+import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import kotlinx.coroutines.flow.Flow
@@ -42,23 +45,27 @@ class XapiContentViewModel(
             try {
                 val contentEntryVersion = activeRepo.contentEntryVersionDao
                     .findByUidAsync(entityUidArg) ?: return@launch
-                val cevUrl = contentEntryVersion.cevUrl ?: return@launch
+                val manifestUrl = contentEntryVersion.cevManifestUrl ?: return@launch
+                val manifest: ContentManifest = httpClient.get(manifestUrl).body()
+                val tinCanEntry = manifest.requireEntryByUri(
+                    contentEntryVersion.cevOpenUri!!)
 
-                val tinCanXmlStr = httpClient.get(cevUrl)
-                    .bodyAsText()
+                val tinCanXmlStr = httpClient.get(tinCanEntry.bodyDataUrl).bodyAsText()
 
                 val xppFactory: XmlPullParserFactory = di.direct.instance(tag = DiTag.XPP_FACTORY_NSAWARE)
                 val xpp = xppFactory.newPullParser()
                 xpp.setInputString(tinCanXmlStr)
                 val tinCanXml = TinCanXML.loadFromXML(xpp)
                 val launchHref = tinCanXml.launchActivity?.launchUrl ?: return@launch
-                val href = UMFileUtil.resolveLink(cevUrl, launchHref)
+                val href = UMFileUtil.resolveLink(manifestUrl, launchHref)
                 _uiState.update { prev ->
                     prev.copy(url = href)
                 }
+
                 _appUiState.update { prev ->
                     prev.copy(
-                        title = tinCanXml.launchActivity?.name
+                        title = tinCanXml.launchActivity?.name,
+                        hideBottomNavigation = true
                     )
                 }
             }catch(e: Throwable) {

@@ -14,6 +14,7 @@ import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewMode
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import app.cash.paging.PagingSource
 import com.ustadmobile.core.util.MessageIdOption2
+import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
 import com.ustadmobile.core.viewmodel.contententry.detail.ContentEntryDetailViewModel
 import com.ustadmobile.core.viewmodel.contententry.getmetadata.ContentEntryGetMetadataViewModel
@@ -51,7 +52,9 @@ data class ContentEntryListUiState(
 
     val importFromFileItemVisible: Boolean = false,
 
-) {
+    val createNewOptionsVisible: Boolean = false,
+
+    ) {
 
     val showChips: Boolean
         get() =filterOptions.isNotEmpty()
@@ -137,7 +140,15 @@ class ContentEntryListViewModel(
                     visible = false,
                     text = systemImpl.getString(MR.strings.content),
                     icon = FabUiState.FabIcon.ADD,
-                )
+                    onClick = {
+                        _uiState.update { prev ->
+                            prev.copy(
+                                createNewOptionsVisible = true,
+                            )
+                        }
+                    }
+                ),
+                hideBottomNavigation = listMode == ListViewMode.PICKER,
             )
         }
 
@@ -195,7 +206,16 @@ class ContentEntryListViewModel(
         //do nothing
     }
 
+    fun onDismissCreateNewOptions() {
+        _uiState.update { prev ->
+            prev.copy(
+                createNewOptionsVisible = false,
+            )
+        }
+    }
+
     fun onClickNewFolder() {
+        onDismissCreateNewOptions()
         navigateToCreateNew(
             editViewName = ContentEntryEditViewModel.DEST_NAME,
             extraArgs = buildMap {
@@ -206,6 +226,7 @@ class ContentEntryListViewModel(
     }
 
     fun onClickImportFromLink() {
+        onDismissCreateNewOptions()
         navigateToCreateNew(
             editViewName = ContentEntryImportLinkViewModel.DEST_NAME,
             extraArgs = buildMap {
@@ -217,6 +238,7 @@ class ContentEntryListViewModel(
     }
 
     fun onImportFile(fileUri: String, fileName: String) {
+        onDismissCreateNewOptions()
         navigateToCreateNew(
             editViewName = ContentEntryGetMetadataViewModel.DEST_NAME,
             extraArgs = buildMap {

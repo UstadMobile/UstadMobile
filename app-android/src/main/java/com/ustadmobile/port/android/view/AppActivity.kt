@@ -55,6 +55,7 @@ import com.ustadmobile.core.util.ext.navigateToLink
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.redirect.RedirectViewModel
+import com.ustadmobile.libuicompose.theme.UstadAppTheme
 import com.ustadmobile.port.android.util.ext.getUstadDeepLink
 import org.kodein.di.direct
 
@@ -69,7 +70,7 @@ class AppActivity: AppCompatActivity(), DIAware {
         extend(appContextDi)
 
         import(commonDomainDiModule(EndpointScope.Default))
-        import(AndroidDomainDiModule(applicationContext, EndpointScope.Default))
+        import(AndroidDomainDiModule(applicationContext))
 
         bind<UstadMobileSystemImpl>() with singleton {
             /**
@@ -164,7 +165,7 @@ class AppActivity: AppCompatActivity(), DIAware {
 
         setContent {
             val windowSizeClass = calculateWindowSizeClass(this)
-            MaterialTheme {
+            UstadAppTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,

@@ -1,7 +1,6 @@
 package com.ustadmobile.core.domain.contententry.importcontent
 
-import com.ustadmobile.lib.db.entities.ContentJob
-import com.ustadmobile.lib.db.entities.ContentJobItem
+import com.ustadmobile.lib.db.entities.ContentEntryImportJob
 import kotlinx.serialization.Serializable
 
 /**
@@ -10,6 +9,5 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class ImportRequest(
-    val contentJob: ContentJob,
-    val contentJobItem: ContentJobItem,
+    val contentJobItem: ContentEntryImportJob,
 )

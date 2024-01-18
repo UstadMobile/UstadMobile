@@ -56,17 +56,6 @@ expect abstract class ContentJobDao {
          LIMIT 1), FALSE)
     """)
     abstract fun findMeteredAllowedLiveData(contentJobId: Long): Flow<Boolean>
-
-    @Query("""
-        UPDATE ContentJob 
-           SET cjIsMeteredAllowed = :meteredAllowed
-         WHERE cjUid IN (SELECT cjiJobUid 
-                           FROM ContentJobItem
-                          WHERE cjiContentEntryUid = :contentEntryUid
-                             OR cjiParentContentEntryUid = :contentEntryUid)
-    """)
-    abstract suspend fun updateMeteredAllowedForEntry(contentEntryUid: Long, meteredAllowed: Boolean)
-
     /**
      *  This query is only called when connectivity IS needed, so there is no need for the job item id.
      *  It's only purpose is to check if the connectivity is acceptable for the job

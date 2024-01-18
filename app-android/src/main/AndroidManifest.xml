@@ -46,8 +46,10 @@
     disabled for earlier Android versions.
 
     Multiplatform WebView requires SDK24+. We will need an expect/actual to handle this
+
+    Compose Video Player requires SDK 23. The VideoPlayer uses an if check for SDK version.
     -->
-    <uses-sdk tools:overrideLibrary="org.wordpress.aztec,com.multiplatform.webview"/>
+    <uses-sdk tools:overrideLibrary="org.wordpress.aztec,com.multiplatform.webview,io.sanghun.compose.video"/>
 
     <!--
     Required to find PanicKit responders.

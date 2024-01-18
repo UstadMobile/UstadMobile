@@ -1,12 +1,12 @@
 package com.ustadmobile.core.util.ext
 
-import com.ustadmobile.core.contentjob.ContentJobProgressListener
+import com.ustadmobile.core.contentformats.ContentImportProgressListener
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.door.DoorUri
-import com.ustadmobile.lib.db.entities.ContentJobItem
+import com.ustadmobile.lib.db.entities.ContentEntryImportJob
 
 
 /**
@@ -30,7 +30,7 @@ private fun Int.downloadJobStatusStr(systemImpl: UstadMobileSystemImpl, context:
     }
 }
 
-fun ContentJobItem?.toStatusString(systemImpl: UstadMobileSystemImpl, context: Any)
+fun ContentEntryImportJob?.toStatusString(systemImpl: UstadMobileSystemImpl, context: Any)
         = this?.cjiRecursiveStatus?.downloadJobStatusStr(systemImpl, context) ?: ""
 
 /**
@@ -38,10 +38,10 @@ fun ContentJobItem?.toStatusString(systemImpl: UstadMobileSystemImpl, context: A
  * will set the size using the size of the original file. This updates it according to the size
  * of the container.
  */
-suspend fun ContentJobItem.updateTotalFromContainerSize(
+suspend fun ContentEntryImportJob.updateTotalFromContainerSize(
     uploadNeeded: Boolean,
     db: UmAppDatabase,
-    progressListener: ContentJobProgressListener
+    progressListener: ContentImportProgressListener
 ) {
     val containerSize = db.containerDao.findSizeByUid(cjiContentEntryVersion)
     cjiItemTotal = if(uploadNeeded) {
@@ -55,7 +55,7 @@ suspend fun ContentJobItem.updateTotalFromContainerSize(
     progressListener.onProgress(this)
 }
 
-fun ContentJobItem?.requireSourceAsDoorUri(): DoorUri {
+fun ContentEntryImportJob?.requireSourceAsDoorUri(): DoorUri {
     return this?.sourceUri?.let { DoorUri.parse(it) }
         ?: throw IllegalArgumentException("requireSourceAsDoorUri: SourceUri is null!")
 }

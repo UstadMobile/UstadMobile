@@ -3,14 +3,16 @@ package com.ustadmobile.libuicompose.components
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.util.MessageIdOption2
 import dev.icerock.moko.resources.compose.stringResource
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UstadListFilterChipsHeader(
     modifier: Modifier = Modifier,
@@ -35,9 +37,10 @@ fun UstadListFilterChipsHeader(
                         start = if(index == 0) 16.dp else 8.dp,
                         end = if(index == filterOptions.size - 1) 16.dp else 8.dp
                     ),
-            ) {
-                Text(stringResource(resource = filterOption.stringResource))
-            }
+                label = {
+                    Text(stringResource(resource = filterOption.stringResource))
+                }
+            )
         }
     }
 }

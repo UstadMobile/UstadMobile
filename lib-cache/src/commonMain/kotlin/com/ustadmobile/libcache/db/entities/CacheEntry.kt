@@ -14,6 +14,8 @@ import androidx.room.PrimaryKey
  *        them as an equality check has to go further through a non-matching string before it can
  *        return false).
  * @param cacheFlags flags from the cache-control header.
+ * @param storageSize the size of the entry as it is stored on the disk. If the entry stored gzipped,
+ *        this is the size after compression.
  */
 @Entity(
     indices = arrayOf(
@@ -39,7 +41,7 @@ data class CacheEntry(
     var lastValidated: Long = -1,
 
     @ColumnInfo(index = true)
-    var responseBodySha256: String? = null,
+    var integrity: String? = null,
 
     var responseHeaders: String = "",
 
@@ -49,11 +51,4 @@ data class CacheEntry(
     var storageUri: String = "",
 
     var storageSize: Long = 0,
-) {
-    companion object {
-
-        const val CACHE_FLAG_STATIC = 8
-
-
-    }
-}
+)

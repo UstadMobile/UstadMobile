@@ -11,6 +11,8 @@ import java.util.UUID
 /**
  * @param uploadDir The directory that will be used for temporary storage of uploads. If the
  *        directory does not exist yet, it will be created.
+ *        Partial uploads will always be stored as uploadDir/(upload-uuid).
+ *
  * @param onUploadComplete function that will be invoked when all chunks have been received
  *        (e.g. to complete processing of an upload) .
  */

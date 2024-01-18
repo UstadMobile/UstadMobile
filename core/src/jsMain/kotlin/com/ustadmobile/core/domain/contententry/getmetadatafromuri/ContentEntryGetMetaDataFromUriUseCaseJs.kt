@@ -7,9 +7,10 @@ import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.util.randomUuid
 import kotlinx.serialization.json.Json
 import web.url.URL
-import com.ustadmobile.core.domain.contententry.getmetadatafromuri.IContentEntryGetMetaDataFromUriUseCase.Companion.HEADER_ORIGINAL_FILENAME
+import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCase.Companion.HEADER_ORIGINAL_FILENAME
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
 import com.ustadmobile.core.util.stringvalues.asIStringValues
+import com.ustadmobile.door.util.encodeURIComponent
 
 /**
  * Javascript implementation of IContentEntryGetMetaDataFromUriUseCase . This will upload to the s
@@ -22,7 +23,7 @@ import com.ustadmobile.core.util.stringvalues.asIStringValues
 class ContentEntryGetMetaDataFromUriUseCaseJs(
     private val json: Json,
     private val chunkedUploadClientLocalUriUseCase: ChunkedUploadClientLocalUriUseCase,
-) : IContentEntryGetMetaDataFromUriUseCase{
+) : ContentEntryGetMetaDataFromUriUseCase{
     override suspend fun invoke(
         contentUri: DoorUri,
         fileName: String?,
@@ -39,7 +40,7 @@ class ContentEntryGetMetaDataFromUriUseCaseJs(
                 fromByte = 0,
                 lastChunkHeaders = buildMap {
                     if(fileName != null)
-                        put(HEADER_ORIGINAL_FILENAME, listOf(fileName))
+                        put(HEADER_ORIGINAL_FILENAME, listOf(encodeURIComponent(fileName)))
                 }.asIStringValues(),
                 onProgress = {
                     onProgress(

@@ -38,9 +38,16 @@ class ReverseProxyDispatcher(private val serverUrl: HttpUrl) : Dispatcher() {
                 .port(serverUrl.port)
                 .build()
 
+        val forwardedHost = if(serverUrl.port == HttpUrl.defaultPort(serverUrl.scheme)) {
+            serverUrl.host
+        }else {
+            "${serverUrl.host}:${serverUrl.port}"
+        }
+
         val requestBuilder = Request.Builder()
-                .url(proxiedUri)
-                .headers(request.headers)
+            .url(proxiedUri)
+            .headers(request.headers)
+            .addHeader("Forwarded", "host=$forwardedHost;proto=${serverUrl.scheme}")
 
         val method = request.method ?: throw IllegalArgumentException("request has no method!")
         if (request.bodySize != 0L) {

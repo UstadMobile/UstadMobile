@@ -23,23 +23,27 @@ class CacheControlFreshnessCheckerImpl: CacheControlFreshnessChecker {
          * if the request contains a "no-cache" directive, it can still be validated.
          *
          * In case of conflicting directives, the response will be considered stale.
+         *
+         * Max-Stale is not used by browsers, but is used by OkHttp when using FORCE_CACHE.
          */
+        val requestMaxStale = requestDirectives?.maxStale ?: 0
         val isExplicitlyStale = requestDirectives?.noCache == true ||
                 responseDirectives?.let { it.noCache || it.mustRevalidate } == true ||
-                requestDirectives?.maxAge?.let { age > it } == true ||
-                responseDirectives?.maxAge?.let {  maxAge ->
-                    age > maxAge && !(requestDirectives?.minFresh?.let { it > age } == true)
+                requestDirectives?.let { requestDir ->
+                    requestDir.staleAtAge?.let { age > (it + requestMaxStale)  }
                 } == true
 
         val isExplicitlyFresh = !isExplicitlyStale && (
-                requestDirectives?.minFresh?.let { it > age } == true ||
+                requestDirectives?.minFresh?.let { it > (age + requestMaxStale) } == true ||
                         responseDirectives?.immutable == true ||
-                        requestDirectives?.maxAge?.let { it > age } == true ||
-                        responseDirectives?.maxAge?.let { it > age } == true
-
+                        requestDirectives?.maxAge?.let { it > (age + requestMaxStale) } == true ||
+                        responseDirectives?.maxAge?.let { it > (age + requestMaxStale) } == true
                 )
 
-        val isFresh = if(isExplicitlyStale) {
+        val isFresh = if(requestDirectives?.onlyIfCached == true) {
+            //Only-if-cached means return the cached response, even if stale, without further validation
+            true
+        }else if(isExplicitlyStale) {
             false
         }else if(isExplicitlyFresh) {
             true

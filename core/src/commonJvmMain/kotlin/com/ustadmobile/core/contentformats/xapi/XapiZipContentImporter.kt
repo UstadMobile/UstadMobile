@@ -1,37 +1,46 @@
 package com.ustadmobile.core.contentformats.xapi
 
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.contentformats.ContentImportProgressListener
+import com.ustadmobile.core.contentformats.ContentImporter
+import com.ustadmobile.core.contentformats.manifest.ContentManifest
+import com.ustadmobile.core.contentformats.storeText
 import com.ustadmobile.core.tincan.TinCanXML
 import java.util.zip.ZipInputStream
 import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
+import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
+import com.ustadmobile.core.domain.contententry.ContentConstants
 import com.ustadmobile.core.io.ext.*
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.util.ext.requireSourceAsDoorUri
-import com.ustadmobile.core.view.XapiPackageContentView
+import com.ustadmobile.core.viewmodel.xapicontent.XapiContentViewModel
 import com.ustadmobile.door.DoorUri
-import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.libcache.UstadCache
-import org.kodein.di.DI
+import com.ustadmobile.libcache.io.unzipTo
 import org.xmlpull.v1.XmlPullParserFactory
 import kotlinx.coroutines.*
 import kotlinx.io.asInputStream
-import org.kodein.di.direct
-import org.kodein.di.instance
-import org.kodein.di.on
+import kotlinx.io.files.Path
+import kotlinx.serialization.json.Json
+import java.io.File
 
 class XapiZipContentImporter(
     endpoint: Endpoint,
-    override val di: DI,
+    private val db: UmAppDatabase,
     private val cache: UstadCache,
-    uriHelper: UriHelper,
-    uploader: ContentImporterUploader = DefaultContentPluginUploader(di),
-) : AbstractContentImportPlugin(endpoint, uploader, uriHelper) {
+    private val uriHelper: UriHelper,
+    private val json: Json,
+    private val tmpPath: Path,
+    private val saveLocalUriAsBlobAndManifestUseCase: SaveLocalUriAsBlobAndManifestUseCase,
+) : ContentImporter(endpoint) {
 
     val viewName: String
-        get() = XapiPackageContentView.VIEW_NAME
+        get() = XapiContentViewModel.DEST_NAME
 
     override val supportedMimeTypes: List<String>
         get() = SupportedContent.XAPI_MIME_TYPES
@@ -44,9 +53,6 @@ class XapiZipContentImporter(
 
     override val importerId: Int
         get() = PLUGIN_ID
-
-    private val MAX_SIZE_LIMIT: Long = 100 * 1024 * 1024 //100MB
-
 
     override suspend fun extractMetadata(
         uri: DoorUri,
@@ -64,13 +70,13 @@ class XapiZipContentImporter(
         return withContext(Dispatchers.IO) {
             var isTinCan = false
             try {
-                return@withContext ZipInputStream(uriHelper.openSource(uri).asInputStream()).use {
-                    it.skipToEntry { it.name == TINCAN_FILENAME } ?: return@withContext null
+                return@withContext ZipInputStream(uriHelper.openSource(uri).asInputStream()).use { zipIn ->
+                    zipIn.skipToEntry { it.name == TINCAN_FILENAME } ?: return@withContext null
                     isTinCan = true
 
                     val xppFactory = XmlPullParserFactory.newInstance()
                     val xpp = xppFactory.newPullParser()
-                    xpp.setInput(it, "UTF-8")
+                    xpp.setInput(zipIn, "UTF-8")
                     val activity = TinCanXML.loadFromXML(xpp).launchActivity
                         ?: throw IllegalArgumentException("Could not load launch activity")
 
@@ -100,36 +106,68 @@ class XapiZipContentImporter(
         }
     }
 
-    override suspend fun addToCache(
-        jobItem: ContentJobItemAndContentJob,
-        progressListener: ContentJobProgressListener
+    override suspend fun importContent(
+        jobItem: ContentEntryImportJob,
+        progressListener: ContentImportProgressListener
     ): ContentEntryVersion {
-        val jobUri = jobItem.contentJobItem.requireSourceAsDoorUri()
-        val db: UmAppDatabase = on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
-
-        val tinCanEntry = ZipInputStream(uriHelper.openSource(jobUri).asInputStream()).use {
-            it.skipToEntry { it.name == TINCAN_FILENAME }
+        val jobUri = jobItem.requireSourceAsDoorUri()
+        val tinCanEntry = ZipInputStream(
+            uriHelper.openSource(jobUri).asInputStream()
+        ).use { zipIn ->
+            zipIn.skipToEntry { it.name == TINCAN_FILENAME }
         } ?: throw FatalContentJobException("XapiImportPlugin: no tincan entry file")
 
         val contentEntryVersionUid = db.doorPrimaryKeyManager.nextIdAsync(
             ContentEntryVersion.TABLE_ID)
 
         val urlPrefix = createContentUrlPrefix(contentEntryVersionUid)
+        val manifestUrl = "$urlPrefix${ContentConstants.MANIFEST_NAME}"
 
         val contentEntryVersion = ContentEntryVersion(
             cevUid = contentEntryVersionUid,
             cevContentType = ContentEntryVersion.TYPE_XAPI,
-            cevContentEntryUid = jobItem.contentJobItem?.cjiContentEntryUid ?: 0L,
-            cevUrl = "$urlPrefix${tinCanEntry.name}"
+            cevContentEntryUid = jobItem.cjiContentEntryUid,
+            cevManifestUrl = manifestUrl,
+            cevOpenUri = tinCanEntry.name,
         )
 
-        cache.storeZip(
-            zipSource = uriHelper.openSource(jobUri),
-            urlPrefix = urlPrefix,
-            retain = true,
-        )
+        val workTmpPath = Path(tmpPath, "xapi-import-${systemTimeInMillis()}")
+        val xapiZipEntries = uriHelper.openSource(jobUri).use { zipSource ->
+            zipSource.unzipTo(workTmpPath)
+        }
 
-        return contentEntryVersion
+        return try {
+            val xapiManifestEntries = saveLocalUriAsBlobAndManifestUseCase(
+                items = xapiZipEntries.map { unzippedEntry ->
+                    SaveLocalUriAsBlobAndManifestUseCase.SaveLocalUriAsBlobAndManifestItem(
+                        blobItem = SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem(
+                            localUri = unzippedEntry.path.toDoorUri().toString(),
+                            entityUid = contentEntryVersionUid,
+                            tableId = ContentEntryVersion.TABLE_ID,
+                        ),
+                        manifestUri = unzippedEntry.name,
+                    )
+                }
+            )
+
+
+            val manifest = ContentManifest(
+                version = 1,
+                metadata = emptyMap(),
+                entries = xapiManifestEntries.map { it.manifestEntry }
+            )
+
+            cache.storeText(
+                url = manifestUrl,
+                text = json.encodeToString(ContentManifest.serializer(), manifest),
+                mimeType = "application/json",
+                cacheControl = "immutable"
+            )
+
+            contentEntryVersion
+        }finally {
+            File(workTmpPath.toString()).deleteRecursively()
+        }
     }
 
     companion object {
@@ -137,6 +175,8 @@ class XapiZipContentImporter(
         const val TINCAN_FILENAME = "tincan.xml"
 
         const val PLUGIN_ID = 8
+
+        private const val MAX_SIZE_LIMIT: Long = 100 * 1024 * 1024 //100MB
 
     }
 }

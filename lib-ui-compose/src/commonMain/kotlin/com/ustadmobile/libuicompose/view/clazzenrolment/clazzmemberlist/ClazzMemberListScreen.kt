@@ -3,9 +3,8 @@ package com.ustadmobile.libuicompose.view.clazzenrolment.clazzmemberlist
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.*
+import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.PersonAdd
@@ -48,7 +47,6 @@ fun ClazzMemberListScreen(
     )
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ClazzMemberListScreen(
     uiState: ClazzMemberListUiState = ClazzMemberListUiState(),
@@ -111,7 +109,7 @@ fun ClazzMemberListScreen(
 
         item {
             ListItem(
-                text = {
+                headlineContent = {
                     Text(text = uiState.terminologyStrings?.get(MR.strings.teachers_literal)
                         ?: stringResource(MR.strings.teachers_literal))
                 }
@@ -140,10 +138,10 @@ fun ClazzMemberListScreen(
                 modifier = Modifier.clickable {
                     memberDetails?.also(onClickEntry)
                 },
-                text = {
+                headlineContent = {
                     Text(text = memberDetails?.person?.fullName() ?: "")
                 },
-                icon = {
+                leadingContent = {
                     UstadPersonAvatar(
                         pictureUri = memberDetails?.personPicture?.personPictureThumbnailUri,
                         personName = memberDetails?.person?.fullName(),
@@ -154,7 +152,7 @@ fun ClazzMemberListScreen(
 
         item {
             ListItem(
-                text = {
+                headlineContent = {
                     Text(text = uiState.terminologyStrings?.get(MR.strings.students)
                         ?: stringResource(MR.strings.students))
                 }
@@ -188,7 +186,7 @@ fun ClazzMemberListScreen(
         if(pendingStudentListItems.itemCount > 0) {
             item {
                 ListItem(
-                    text = { Text(text = stringResource(MR.strings.pending_requests)) }
+                    headlineContent = { Text(text = stringResource(MR.strings.pending_requests)) }
                 )
             }
         }
@@ -205,7 +203,6 @@ fun ClazzMemberListScreen(
     }
 }
 
- @OptIn(ExperimentalMaterialApi::class)
  @Composable
  fun StudentListItem(
      student: PersonAndClazzMemberListDetails?,
@@ -215,10 +212,10 @@ fun ClazzMemberListScreen(
          modifier = Modifier.clickable {
              student?.also(onClick)
          },
-         text = {
+         headlineContent = {
              Text(text = student?.person?.fullName() ?: "")
          },
-         icon = {
+         leadingContent = {
              UstadPersonAvatar(
                  pictureUri = student?.personPicture?.personPictureThumbnailUri,
                  personName = student?.person?.fullName(),
@@ -227,23 +224,22 @@ fun ClazzMemberListScreen(
      )
  }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun PendingStudentListItem(
     member: PersonAndClazzMemberListDetails?,
     onClick: (enrolment: PersonAndClazzMemberListDetails, approved: Boolean) -> Unit
 ){
     ListItem (
-        text = {
+        headlineContent = {
             Text(text = member?.person?.fullName() ?: "")
         },
-        icon = {
+        leadingContent = {
             UstadPersonAvatar(
                 pictureUri = member?.personPicture?.personPictureThumbnailUri,
                 personName = member?.person?.fullName(),
             )
         },
-        trailing = {
+        trailingContent = {
             Row {
                 IconButton(
                     onClick = {

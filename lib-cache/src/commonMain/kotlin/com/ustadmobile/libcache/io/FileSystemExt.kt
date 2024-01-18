@@ -15,6 +15,9 @@ import kotlinx.io.files.Path
  */
 expect fun FileSystem.rangeSource(path: Path, fromByte: Long, toByte: Long): RawSource
 
+/**
+ * Get the last modified time on a file. Not currently included in metadata
+ */
+expect fun FileSystem.lastModified(path: Path): Long
 
-expect fun FileSystem.newTmpFile(prefix: String, postfix: String): Path
 

@@ -2,7 +2,7 @@ package com.ustadmobile.core.viewmodel.contententry.getmetadata
 
 import app.cash.turbine.test
 import com.ustadmobile.core.contentjob.MetadataResult
-import com.ustadmobile.core.domain.contententry.getmetadatafromuri.IContentEntryGetMetaDataFromUriUseCase
+import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCase
 import com.ustadmobile.core.impl.nav.NavigateNavCommand
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
@@ -28,7 +28,7 @@ class ContentEntryGetMetadataViewModelTest: AbstractMainDispatcherTest() {
 
     @Test
     fun givenMetadataExtractedSuccessfully_whenInitialized_thenShouldNavigateToContentEntryEdit() {
-        val mockContentEntryGetMetaDataFromUriUseCase = mock<IContentEntryGetMetaDataFromUriUseCase> {
+        val mockContentEntryGetMetaDataFromUriUseCase = mock<ContentEntryGetMetaDataFromUriUseCase> {
             onBlocking { invoke(any(), anyOrNull(), any(), any()) }
                 .thenReturn(
                     MetadataResult(
@@ -43,7 +43,7 @@ class ContentEntryGetMetadataViewModelTest: AbstractMainDispatcherTest() {
 
         testViewModel<ContentEntryGetMetadataViewModel> {
             extendDi {
-                bind<IContentEntryGetMetaDataFromUriUseCase>() with scoped(endpointScope).provider {
+                bind<ContentEntryGetMetaDataFromUriUseCase>() with scoped(endpointScope).provider {
                     mockContentEntryGetMetaDataFromUriUseCase
                 }
             }
@@ -69,7 +69,7 @@ class ContentEntryGetMetadataViewModelTest: AbstractMainDispatcherTest() {
     @Test
     fun givenMetadataExtractionFails_whenInitialized_thenShouldShowErrorMessage() {
         val errorMessage = "snafu"
-        val mockContentEntryGetMetaDataFromUriUseCase = mock<IContentEntryGetMetaDataFromUriUseCase> {
+        val mockContentEntryGetMetaDataFromUriUseCase = mock<ContentEntryGetMetaDataFromUriUseCase> {
             onBlocking { invoke(any(), anyOrNull(), any(), any()) }.thenAnswer {
                 throw Exception(errorMessage)
             }
@@ -79,7 +79,7 @@ class ContentEntryGetMetadataViewModelTest: AbstractMainDispatcherTest() {
 
         testViewModel<ContentEntryGetMetadataViewModel> {
             extendDi {
-                bind<IContentEntryGetMetaDataFromUriUseCase>() with scoped(endpointScope).provider {
+                bind<ContentEntryGetMetaDataFromUriUseCase>() with scoped(endpointScope).provider {
                     mockContentEntryGetMetaDataFromUriUseCase
                 }
             }

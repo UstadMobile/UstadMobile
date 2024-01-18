@@ -1,10 +1,10 @@
 package com.ustadmobile.lib.rest
 
 import io.github.aakira.napier.Napier
-import com.ustadmobile.core.contentjob.ContentImportersManager
+import com.ustadmobile.core.contentformats.ContentImportersManager
 import com.ustadmobile.core.contentjob.InvalidContentException
 import com.ustadmobile.core.contentjob.MetadataResult
-import com.ustadmobile.core.domain.contententry.importcontent.ImportContentUseCase
+import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.ImportRequest
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.DoorUri
@@ -85,9 +85,8 @@ fun Route.ContentEntryImportRoute() {
             }
         }
 
-        val importUseCase: ImportContentUseCase = di.direct.on(call).instance()
-        importUseCase(
-            contentJob = jobRequest.contentJob,
+        val enqueueUseCase: EnqueueContentEntryImportUseCase = di.direct.on(call).instance()
+        enqueueUseCase(
             contentJobItem = jobRequest.contentJobItem,
         )
 

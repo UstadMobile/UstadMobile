@@ -2,11 +2,13 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.ustadmobile.door.SyncNode
 import com.ustadmobile.door.annotation.ReplicateEntity
 import com.ustadmobile.door.annotation.ReplicateEtag
 import com.ustadmobile.door.annotation.ReplicateLastModified
 import com.ustadmobile.door.annotation.Trigger
 import com.ustadmobile.door.annotation.Triggers
+import com.ustadmobile.lib.db.entities.ContentEntryVersion.Companion.SELECT_OFFLINE_ITEM_UID_FOR_NEW_CONTENT_ENTRY_VERSION_SQL
 import kotlinx.serialization.Serializable
 
 /**
@@ -29,6 +31,31 @@ import kotlinx.serialization.Serializable
             events = [Trigger.Event.INSERT],
             conditionSql = TRIGGER_CONDITION_WHERE_NEWER,
             sqlStatements = [TRIGGER_UPSERT]
+        ),
+        /*
+         * Create an OfflineItemPendingTransferJob where there is a new ContentEntryVersion for
+         * a ContentEntry with a corresponding active OfflineItem, e.g. the user has indicated that
+         * they want the given content item to be accessible offline and there is now a new version
+         * of it available.
+         */
+        Trigger(
+            name = "content_entry_version_offline_item",
+            order = Trigger.Order.AFTER,
+            on = Trigger.On.ENTITY,
+            events = [Trigger.Event.INSERT],
+            conditionSql = """
+                 SELECT EXISTS($SELECT_OFFLINE_ITEM_UID_FOR_NEW_CONTENT_ENTRY_VERSION_SQL)
+                    AND NOT EXISTS
+                        (SELECT TransferJob.tjUid
+                           FROM TransferJob
+                          WHERE TransferJob.tjTableId = ${ContentEntryVersion.TABLE_ID}
+                            AND TransferJob.tjEntityUid = NEW.cevUid)
+                 """,
+            sqlStatements = ["""
+                INSERT INTO OfflineItemPendingTransferJob(oiptjOiUid, oiptjTableId, oiptjEntityUid, oiptjType)
+                VALUES ((SELECT COALESCE(($SELECT_OFFLINE_ITEM_UID_FOR_NEW_CONTENT_ENTRY_VERSION_SQL), 0)),
+                        ${ContentEntryVersion.TABLE_ID}, NEW.cevUid, ${TransferJob.CREATION_TYPE_UPDATE})
+            """]
         )
     )
 )
@@ -43,12 +70,16 @@ data class ContentEntryVersion(
     var cevContentEntryUid: Long = 0,
 
     /**
-     * The URL to content item e.g.
-     * https://endpoint.com/api/content/cevUid/tincan.xml file for xAPI content
-     * https://endpoint.com/api/content/cevUid/tincan.xml for epubs
-     * direct url for pdfs
+     * The Uri of the item that should be opened e.g.
+     *
+     *  The tincan.xml file for xapi content
+     *  The PDF file for PDF content
+     *  Media JSON info for video files
+     *  OPF for epub content
+     *
+     *  The Uri should match ContentManifestEntry.uri for the entry to open
      */
-    var cevUrl: String? = "",
+    var cevOpenUri: String? = "",
 
     /**
      * The content type that will be used to determine what screen will be used to display the
@@ -57,11 +88,14 @@ data class ContentEntryVersion(
     var cevContentType: String? = "",
 
     /**
-     * The URL for the sitemap that would be used to download this for offline usage if available.
+     * The URL for the ContentManifest (as per com.ustadmobile.core.contentformats.manifest.ContentManifest).
      *
-     * e.g. https://endpoint.com/api/content/cevUid/sitemap.xml
+     * It may be stored on the same server as the one holding this database entity, or a different
+     * server. See ARCHITECTURE.md for more info on the offline content architecture.
+     *
+     * e.g. https://endpoint.com/api/content/cevUid/_ustadmanifest.json
      */
-    var cevSitemapUrl: String? = null,
+    var cevManifestUrl: String? = null,
 
     /**
      * The estimated total size (in bytes)
@@ -96,6 +130,14 @@ data class ContentEntryVersion(
         const val PATH_POSTFIX = "api/content/"
 
         const val TABLE_ID = 738
+
+        const val SELECT_OFFLINE_ITEM_UID_FOR_NEW_CONTENT_ENTRY_VERSION_SQL = """
+                 SELECT OfflineItem.oiUid
+                   FROM OfflineItem
+                  WHERE OfflineItem.oiContentEntryUid = NEW.cevContentEntryUid
+                    AND CAST(OfflineItem.oiActive AS INTEGER) = 1
+                    AND OfflineItem.oiNodeId = ${SyncNode.SELECT_LOCAL_NODE_ID_SQL}
+        """
 
     }
 }
