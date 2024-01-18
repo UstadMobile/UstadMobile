@@ -50,7 +50,6 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.substring
@@ -71,7 +70,7 @@ actual fun UstadRichTextEdit(
     modifier: Modifier,
     editInNewScreen: Boolean,
     editInNewScreenLabel: String?,
-    placeholder: (@Composable () -> Unit)?
+    placeholderText: String?,
 ) {
     var htmlStr by remember {
         mutableStateOf(html)
@@ -118,7 +117,9 @@ actual fun UstadRichTextEdit(
                 },
             state = richTextState,
             readOnly = editInNewScreen,
-            placeholder = placeholder
+            placeholder = placeholderText?.let {
+                { Text(it) }
+            }
         )
     }
 

@@ -61,9 +61,7 @@ fun UstadCourseBlockEdit(
             },
             onClickToEditInNewScreen = onClickEditDescription,
             editInNewScreenLabel = stringResource(MR.strings.description),
-            placeholder = {
-                Text(stringResource(MR.strings.description))
-            }
+            placeholderText = stringResource(MR.strings.description),
         )
 
         UstadInputFieldLayout(

@@ -115,10 +115,7 @@ fun SiteEditScreen(
             html = uiState.currentSiteTermsHtml ?: "",
             onHtmlChange = onChangeTermsHtml,
             onClickToEditInNewScreen = onClickEditTermsInNewScreen,
-            placeholder = {
-                Text(stringResource(MR.strings.terms_and_policies) +
-                        " (${uiState.currentSiteTermsLang.langDisplay})")
-            },
+            placeholderText = stringResource(MR.strings.terms_and_policies),
             modifier = Modifier.defaultItemPadding().fillMaxWidth(),
             editInNewScreenLabel = stringResource(MR.strings.terms_and_policies) +
                     " (${uiState.currentSiteTermsLang.langDisplay})",
