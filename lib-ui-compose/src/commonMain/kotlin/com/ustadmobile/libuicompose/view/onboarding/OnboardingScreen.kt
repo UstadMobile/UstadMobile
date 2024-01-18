@@ -2,7 +2,6 @@ package com.ustadmobile.libuicompose.view.onboarding
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,7 +28,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
@@ -85,7 +83,6 @@ fun OnboardingScreen(
         modifier = Modifier
             .fillMaxHeight()
             .padding(16.dp)
-            .background(Color.White)
     ) {
         Box {
             TopRow(
@@ -94,7 +91,7 @@ fun OnboardingScreen(
             )
         }
 
-        Spacer(modifier = Modifier.height(15.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
 
         Row(
