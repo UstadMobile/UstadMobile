@@ -1,8 +1,7 @@
 package com.ustadmobile.view.contententry
 
 import com.ustadmobile.core.hooks.useStringProvider
-import com.ustadmobile.core.impl.locale.entityconstants.ContentEntryTypeLabelConstants
-import com.ustadmobile.core.impl.locale.messageIdOptionLookup
+import com.ustadmobile.core.viewmodel.contententry.contentTypeStringResource
 import com.ustadmobile.core.viewmodel.contententry.list.listItemUiState
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.mui.common.justifyContent
@@ -123,13 +122,8 @@ private val SecondaryContent = FC<SecondaryContentProps> { props ->
                         ?.contentTypeFlag]?.create() ?: TextSnippetIcon.create())
                 }
 
-                val contentType = props.contentEntryItem?.contentTypeFlag
-                    ?: ContentEntry.TYPE_DOCUMENT
                 Typography {
-                    + strings.messageIdOptionLookup(
-                        key = contentType,
-                        messageIdList = ContentEntryTypeLabelConstants.TYPE_LABEL_MESSAGE_IDS
-                    )
+                    + (props.contentEntryItem?.contentTypeStringResource?.let { strings[it] } ?: "")
                 }
 
                 Box {
