@@ -33,6 +33,8 @@ import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.core.db.ext.migrationList
+import com.ustadmobile.core.domain.account.SetPasswordUseCase
+import com.ustadmobile.core.domain.account.SetPasswordUseCaseCommonJvm
 import com.ustadmobile.core.domain.blob.download.BlobDownloadClientUseCase
 import com.ustadmobile.core.domain.blob.download.BlobDownloadClientUseCaseCommonJvm
 import com.ustadmobile.core.domain.blob.download.ContentManifestDownloadUseCase
@@ -569,6 +571,11 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             GetVersionUseCaseAndroid(applicationContext)
         }
 
+        bind<SetPasswordUseCase>() with scoped(EndpointScope.Default).singleton {
+            SetPasswordUseCaseCommonJvm(
+                authManager = instance()
+            )
+        }
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
     }

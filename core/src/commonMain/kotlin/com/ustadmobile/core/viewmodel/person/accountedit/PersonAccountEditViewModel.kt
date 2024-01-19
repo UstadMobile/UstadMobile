@@ -14,6 +14,7 @@ import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditViewMo
 import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditViewModel.Companion.MODE_CREATE_ACCOUNT
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.lib.db.entities.Role.Companion.PERMISSION_RESET_PASSWORD
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -89,7 +90,8 @@ class PersonAccountEditViewModel(
                 onLoadFromDb = { db ->
                     val person = db.personDao.findByUidAsync(entityUidArg)
                     val hasResetPermission = db.scopedGrantDao.userHasSystemLevelPermission(
-                        accountPersonUid = activeUserPersonUid, permission = entityUidArg,
+                        accountPersonUid = activeUserPersonUid,
+                        permission = PERMISSION_RESET_PASSWORD,
                     )
 
 
@@ -213,7 +215,8 @@ class PersonAccountEditViewModel(
                             val numChanges = activeRepo.personDao.updateUsername(
                                 personUid = entityUidArg,
                                 username = entity.username,
-                                currentTime = systemTimeInMillis())
+                                currentTime = systemTimeInMillis()
+                            )
 
                             Napier.e("Updated username: $numChanges changes")
                         }
@@ -241,6 +244,7 @@ class PersonAccountEditViewModel(
             }else {
                 try {
                     setPasswordUseCase(
+                        activeUserPersonUid = activeUserPersonUid,
                         personUid = entity.personUid,
                         username = entity.username,
                         newPassword = entity.newPassword,

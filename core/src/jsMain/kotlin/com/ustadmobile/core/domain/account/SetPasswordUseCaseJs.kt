@@ -20,6 +20,7 @@ class SetPasswordUseCaseJs(
 ) : SetPasswordUseCase{
 
     override suspend fun invoke(
+        activeUserPersonUid: Long,
         personUid: Long,
         username: String,
         newPassword: String,
@@ -29,6 +30,7 @@ class SetPasswordUseCaseJs(
         try {
             val result = httpClient.post("${endpoint.url}api/account/setpassword") {
                 doorNodeIdHeader(repo)
+                parameter("nodeActiveUserUid", activeUserPersonUid)
                 parameter("personUid", personUid.toString())
                 parameter("username", username)
                 parameter("newPassword", newPassword)

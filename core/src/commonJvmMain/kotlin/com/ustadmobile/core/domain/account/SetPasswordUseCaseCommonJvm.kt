@@ -11,6 +11,7 @@ class SetPasswordUseCaseCommonJvm(
 ) : SetPasswordUseCase {
 
     override suspend operator fun invoke(
+        activeUserPersonUid: Long,
         personUid: Long,
         username: String,
         newPassword: String,

@@ -468,7 +468,8 @@ fun Application.umRestApplication(
         bind<SetPasswordServerUseCase>() with scoped(EndpointScope.Default).singleton {
             SetPasswordServerUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
-                setPasswordUseCase = instance()
+                setPasswordUseCase = instance(),
+                nodeIdAndAuthCache = instance(),
             )
         }
 
