@@ -5,14 +5,18 @@ import com.ustadmobile.core.contentjob.InvalidContentException
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
+import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
+import com.ustadmobile.core.io.ext.isRemote
 import com.ustadmobile.core.uri.UriHelper
+import com.ustadmobile.core.util.ext.displayFilename
 import com.ustadmobile.door.DoorUri
+import com.ustadmobile.door.ext.toFile
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.libcache.UstadCache
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.io.asInputStream
 import kotlinx.serialization.json.Json
 import org.apache.pdfbox.Loader
 import org.apache.pdfbox.pdmodel.PDDocument
@@ -26,6 +30,7 @@ class PdfContentImporterJvm(
     uriHelper: UriHelper,
     db: UmAppDatabase,
     saveLocalUriAsBlobAndManifestUseCase: SaveLocalUriAsBlobAndManifestUseCase,
+    getStoragePathForUrlUseCase: GetStoragePathForUrlUseCase,
     json: Json,
 ) : AbstractPdfContentImportCommonJvm(
     endpoint = endpoint,
@@ -33,6 +38,7 @@ class PdfContentImporterJvm(
     uriHelper = uriHelper,
     db = db,
     saveLocalUriAsBlobAndManifestUseCase = saveLocalUriAsBlobAndManifestUseCase,
+    getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
     json = json,
 ) {
 
@@ -47,12 +53,23 @@ class PdfContentImporterJvm(
             return@withContext null
 
         try {
-            val pdfPDDocument: PDDocument = uriHelper.openSource(uri).asInputStream().use { inStream ->
-                Loader.loadPDF(inStream.readAllBytes())
+            val localUri = if(uri.isRemote()) {
+                DoorUri.parse(getStoragePathForUrlUseCase(url = uri.toString()))
+            }else {
+                uri
             }
+            val pdfFile = localUri.toFile()
 
+            val pdfPDDocument: PDDocument = Loader.loadPDF(pdfFile)
+
+            val metadataTitle = pdfPDDocument.documentInformation.title
             val entry = ContentEntryWithLanguage().apply {
-                title = pdfPDDocument.documentInformation.title ?: originalFilename
+                title = if(!metadataTitle.isNullOrBlank()) {
+                    metadataTitle
+                }else {
+                    originalFilename?.displayFilename() ?: uri.toString().displayFilename()
+                }
+
                 author = pdfPDDocument.documentInformation.author
                 leaf = true
                 sourceUrl = uri.toString()
@@ -65,6 +82,7 @@ class PdfContentImporterJvm(
                 originalFilename = originalFilename,
             )
         }catch(e: Throwable) {
+            Napier.w(throwable = e) { "PdfContentImporterJvm: error importing $uri" }
             throw InvalidContentException("Invalid PDF: ${e.message}", e)
         }
     }

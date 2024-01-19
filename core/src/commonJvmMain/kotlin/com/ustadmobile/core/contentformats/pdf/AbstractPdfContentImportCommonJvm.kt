@@ -9,6 +9,7 @@ import com.ustadmobile.core.contentjob.SupportedContent
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
+import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
 import com.ustadmobile.core.domain.contententry.ContentConstants
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.util.ext.requireSourceAsDoorUri
@@ -30,6 +31,7 @@ abstract class AbstractPdfContentImportCommonJvm(
     protected val fileSystem: FileSystem = SystemFileSystem,
     protected val db: UmAppDatabase,
     protected val saveLocalUriAsBlobAndManifestUseCase: SaveLocalUriAsBlobAndManifestUseCase,
+    protected val getStoragePathForUrlUseCase: GetStoragePathForUrlUseCase,
 ) : ContentImporter(endpoint){
 
     override val importerId: Int = PLUGINID

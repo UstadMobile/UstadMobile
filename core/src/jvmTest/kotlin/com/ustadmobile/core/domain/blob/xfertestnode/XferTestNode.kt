@@ -8,6 +8,8 @@ import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCaseJvm
+import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
+import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCaseCommonJvm
 import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCaseCommonJvm
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
@@ -18,6 +20,7 @@ import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.uri.UriHelperJvm
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.fileExtensionOrNull
+import com.ustadmobile.core.util.newTestHttpClient
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.libcache.UstadCache
@@ -29,8 +32,6 @@ import com.ustadmobile.libcache.logging.NapierLoggingAdapter
 import com.ustadmobile.libcache.okhttp.UstadCacheInterceptor
 import com.ustadmobile.libcache.request.requestBuilder
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.okhttp.OkHttp
-import io.ktor.serialization.kotlinx.json.json
 import kotlinx.io.buffered
 import kotlinx.io.files.Path
 import kotlinx.io.readString
@@ -109,15 +110,7 @@ class XferTestNode(
             )
             .build()
 
-        httpClient = HttpClient(OkHttp) {
-            install(io.ktor.client.plugins.contentnegotiation.ContentNegotiation) {
-                json(json = json)
-            }
-
-            engine {
-                preconfigured = okHttpClient
-            }
-        }
+        httpClient =  okHttpClient.newTestHttpClient(json)
 
         uriHelper = UriHelperJvm(
             mimeTypeHelperImpl = FileMimeTypeHelperImpl(),
@@ -180,6 +173,13 @@ class XferTestNode(
 
             bind<File>(tag = DiTag.TAG_TMP_DIR) with singleton {
                 rootTmpDir
+            }
+
+            bind<GetStoragePathForUrlUseCase>() with singleton {
+                GetStoragePathForUrlUseCaseCommonJvm(
+                    httpClient = httpClient,
+                    cache = httpCache,
+                )
             }
 
             bind<CreateRetentionLocksForManifestUseCase>() with scoped(endpointScope).singleton {

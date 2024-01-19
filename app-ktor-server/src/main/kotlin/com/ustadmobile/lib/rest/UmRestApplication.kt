@@ -13,6 +13,8 @@ import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndMan
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCaseJvm
 import com.ustadmobile.core.domain.blob.upload.BlobUploadServerUseCase
+import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
+import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCaseCommonJvm
 import com.ustadmobile.core.domain.contententry.importcontent.ImportContentEntryUseCase
 import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServerUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
@@ -470,6 +472,13 @@ fun Application.umRestApplication(
                 db = instance(tag = DoorTag.TAG_DB),
                 setPasswordUseCase = instance(),
                 nodeIdAndAuthCache = instance(),
+            )
+        }
+
+        bind<GetStoragePathForUrlUseCase>() with scoped(EndpointScope.Default).singleton {
+            GetStoragePathForUrlUseCaseCommonJvm(
+                httpClient = instance(),
+                cache = instance()
             )
         }
 

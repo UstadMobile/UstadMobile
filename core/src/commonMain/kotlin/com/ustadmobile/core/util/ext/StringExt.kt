@@ -149,3 +149,10 @@ fun String.removeQueryStringSuffix(): String {
 fun String.removeFileExtension() : String {
     return substringBeforeLast(".")
 }
+
+fun String.displayFilename(): String {
+    return substringAfterLast("/")
+        .substringAfterLast("\\")
+        .substringBefore("?")
+        .removeFileExtension()
+}

@@ -54,8 +54,8 @@ import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCaseJvm
 import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCase
 import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCaseAndroid
 import com.ustadmobile.core.domain.blob.upload.UpdateFailedTransferJobUseCase
-import com.ustadmobile.core.domain.cachestoragepath.GetCacheStoragePathUseCase
-import com.ustadmobile.core.domain.cachestoragepath.GetCacheStoragePathUseCaseCommonJvm
+import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
+import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCaseCommonJvm
 import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseAndroid
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCase
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCaseCommonJvm
@@ -364,6 +364,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                             uriHelper = uriHelper,
                             db = db,
                             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
+                            getStoragePathForUrlUseCase = instance(),
                             json = instance(),
                             appContext = applicationContext,
                             tmpDir = File(contentImportTmpPath.toString()),
@@ -563,8 +564,11 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             ContentEntryVersionServerWebClient(useCase = instance())
         }
 
-        bind<GetCacheStoragePathUseCase>() with singleton {
-            GetCacheStoragePathUseCaseCommonJvm(cache = instance())
+        bind<GetStoragePathForUrlUseCase>() with singleton {
+            GetStoragePathForUrlUseCaseCommonJvm(
+                httpClient = instance(),
+                cache = instance(),
+            )
         }
 
         bind<GetVersionUseCase>() with singleton {

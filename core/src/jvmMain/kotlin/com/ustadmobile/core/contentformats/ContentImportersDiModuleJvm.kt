@@ -73,6 +73,7 @@ val ContentImportersDiModuleJvm = DI.Module("ContentImporters-Jvm"){
                         saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
                         uriHelper = uriHelper,
                         json = instance(),
+                        getStoragePathForUrlUseCase = instance(),
                     ),
                 )
                 add(

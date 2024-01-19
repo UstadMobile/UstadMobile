@@ -32,6 +32,8 @@ import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCaseJvm
 import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCase
 import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCaseJvm
 import com.ustadmobile.core.domain.blob.upload.UpdateFailedTransferJobUseCase
+import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
+import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCaseCommonJvm
 import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseJvm
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCase
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCaseCommonJvm
@@ -242,4 +244,11 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
     }
 
 
+
+    bind<GetStoragePathForUrlUseCase>() with scoped(EndpointScope.Default).singleton {
+        GetStoragePathForUrlUseCaseCommonJvm(
+            httpClient = instance(),
+            cache = instance(),
+        )
+    }
 }
