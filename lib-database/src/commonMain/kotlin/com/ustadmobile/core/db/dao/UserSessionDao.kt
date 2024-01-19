@@ -7,6 +7,7 @@ import com.ustadmobile.core.db.dao.UserSessionDaoCommon.FIND_LOCAL_SESSIONS_SQL
 import kotlinx.coroutines.flow.Flow
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.UserSession.Companion.STATUS_ACTIVE
 
 @DoorDao
 @Repository
@@ -151,5 +152,18 @@ expect abstract class UserSessionDao {
            AND ScopedGrant.sgEntityUid IN (:schoolUids) 
     """)
     abstract suspend fun findAllActiveNodeIdsWithSchoolBasedPermission(schoolUids: List<Long>): List<Long>
+
+
+    @Query("""
+        SELECT COUNT(*)
+          FROM UserSession
+         WHERE UserSession.usPersonUid = :personUid
+           AND UserSession.usStatus = $STATUS_ACTIVE
+           AND UserSession.usClientNodeId = :nodeId
+    """)
+    abstract suspend fun countActiveSessionsForUserAndNode(
+        personUid: Long,
+        nodeId: Long,
+    ): Int
 
 }

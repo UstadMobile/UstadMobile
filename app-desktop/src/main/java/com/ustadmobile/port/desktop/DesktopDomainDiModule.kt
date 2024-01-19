@@ -11,6 +11,8 @@ import org.kodein.di.bind
 import org.kodein.di.provider
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.domain.account.SetPasswordUseCase
+import com.ustadmobile.core.domain.account.SetPasswordUseCaseCommonJvm
 import com.ustadmobile.core.domain.blob.download.BlobDownloadClientUseCase
 import com.ustadmobile.core.domain.blob.download.BlobDownloadClientUseCaseCommonJvm
 import com.ustadmobile.core.domain.blob.download.ContentManifestDownloadUseCase
@@ -233,6 +235,10 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             endpoint = context,
             db = instance(tag = DoorTag.TAG_DB),
         )
+    }
+
+    bind<SetPasswordUseCase>() with scoped(EndpointScope.Default).singleton {
+        SetPasswordUseCaseCommonJvm(authManager = instance())
     }
 
 

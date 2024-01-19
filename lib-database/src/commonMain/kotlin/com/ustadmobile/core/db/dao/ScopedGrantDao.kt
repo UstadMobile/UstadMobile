@@ -6,6 +6,7 @@ import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.core.db.dao.ScopedGrantDaoCommon.SQL_FIND_BY_TABLE_AND_ENTITY
 import app.cash.paging.PagingSource
+import com.ustadmobile.core.db.dao.ScopedGrantDaoCommon.SQL_USER_HAS_SYSTEM_LEVEL_PERMISSION
 import kotlinx.coroutines.flow.Flow
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.composites.ScopedGrantAndGroupMember
@@ -76,24 +77,12 @@ expect abstract class ScopedGrantDao {
             ),
         )
     )
-    @Query(
-        """
-        SELECT EXISTS(
-                SELECT PersonGroupMember.groupMemberGroupUid
-                  FROM PersonGroupMember 
-                       JOIN ScopedGrant
-                           ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
-                 WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid
-                   AND (ScopedGrant.sgEntityUid = 0 OR ScopedGrant.sgEntityUid = ${ScopedGrant.ALL_ENTITIES})
-                   AND (ScopedGrant.sgTableId = 0 OR ScopedGrant.sgTableId = ${ScopedGrant.ALL_TABLES})
-                   AND (ScopedGrant.sgPermissions & :permission) > 0    
-               )
-        """
-    )
+    @Query(SQL_USER_HAS_SYSTEM_LEVEL_PERMISSION)
     abstract fun userHasSystemLevelPermissionAsFlow(
         accountPersonUid: Long,
         permission: Long,
     ): Flow<Boolean>
+
 
     @Query("""
         SELECT EXISTS(
@@ -143,20 +132,18 @@ expect abstract class ScopedGrantDao {
     ): List<ScopedGrantAndGroupMember>
 
 
-    @Query(
-        """
-        SELECT EXISTS(
-                SELECT PersonGroupMember.groupMemberGroupUid
-                  FROM PersonGroupMember 
-                       JOIN ScopedGrant
-                           ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
-                 WHERE PersonGroupMember.groupMemberPersonUid = :personUid
-                   AND (ScopedGrant.sgPermissions & :permission) > 0    
-               )
-        """
+
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall(
+                functionName = "findScopedGrantAndPersonGroupByPersonUidAndPermission",
+            ),
+        )
     )
+    @Query(SQL_USER_HAS_SYSTEM_LEVEL_PERMISSION)
     abstract suspend fun userHasSystemLevelPermission(
-        personUid: Long,
+        accountPersonUid: Long,
         permission: Long
     ): Boolean
 
