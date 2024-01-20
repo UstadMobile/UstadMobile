@@ -1037,4 +1037,8 @@
     <string name="already_submitted">Аллакай пешниҳод шуд</string>
     <string name="too_high">Аз ҳад зиёд!</string>
     <string name="num_holidays">%1$s рузхои истироҳат</string>
+    <string name="password_updated">Рамз нав карда шуд</string>
+    <string name="drop_files_to_import">Файл(ҳо)ро барои воридот кашед ва гузоред</string>
+    <string name="select_file">Файлро интихоб кунед</string>
+    <string name="compose_post">Эҷоди нашрия</string>
 </resources>
