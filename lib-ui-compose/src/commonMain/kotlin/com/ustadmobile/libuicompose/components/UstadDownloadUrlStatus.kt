@@ -9,16 +9,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.ustadmobile.libuicompose.util.downloadurl.DownloadUrlState
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
 
 /**
  * Show the downloading status in a circular (determinative) progress indicator or show error (if any)
  */
 @Composable
 fun UstadDownloadUrlStatus(
-    state: DownloadUrlState,
+    state: GetStoragePathForUrlUseCase.GetStoragePathForUrlState,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -26,7 +26,7 @@ fun UstadDownloadUrlStatus(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         when(state.status) {
-            DownloadUrlState.Status.IN_PROGRESS -> {
+            GetStoragePathForUrlUseCase.GetStoragePathForUrlState.Status.IN_PROGRESS -> {
                 if(state.totalBytes > 0) {
                     CircularProgressIndicator(
                         progress = state.bytesTransferred.toFloat()/state.totalBytes.toFloat()
@@ -36,10 +36,12 @@ fun UstadDownloadUrlStatus(
                 }
                 Text(stringResource(MR.strings.downloading))
             }
-            DownloadUrlState.Status.FAILED -> {
+
+            GetStoragePathForUrlUseCase.GetStoragePathForUrlState.Status.FAILED -> {
                 Icon(Icons.Default.Error, contentDescription = null)
                 Text(state.error ?: "")
             }
+
             else -> {
                 //nothing
             }

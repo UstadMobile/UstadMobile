@@ -15,6 +15,8 @@ import com.ustadmobile.core.io.ext.readString
 import com.ustadmobile.core.io.ext.skipToEntry
 import com.ustadmobile.core.io.ext.toDoorUri
 import com.ustadmobile.core.uri.UriHelper
+import com.ustadmobile.core.util.ext.displayFilename
+import com.ustadmobile.core.util.ext.fileExtensionOrNull
 import com.ustadmobile.core.util.ext.requireSourceAsDoorUri
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
@@ -91,9 +93,8 @@ class H5PContentImporter(
         uri: DoorUri,
         originalFilename: String?
     ): MetadataResult? = withContext(Dispatchers.IO) {
-        val shouldBeH5p = originalFilename?.substringAfterLast(".")?.lowercase()
-            ?.endsWith("h5p") == true
-
+        val shouldBeH5p = originalFilename?.fileExtensionOrNull() == "h5p" ||
+                uri.toString().displayFilename(removeFileName = false).fileExtensionOrNull()?.lowercase() == "h5p"
         try {
             val h5pJsonText = ZipInputStream(uriHelper.openSource(uri).asInputStream()).use { zipIn ->
                 zipIn.skipToEntry { it.name == "h5p.json" }

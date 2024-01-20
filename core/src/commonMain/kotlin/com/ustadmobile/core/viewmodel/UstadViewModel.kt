@@ -402,6 +402,17 @@ abstract class UstadViewModel(
          */
         const val ARG_ACCOUNT_NAME = "account"
 
+        /**
+         * Tasks that involve multiple destinations (e.g. Login - AcceptTerms - PersonEditRegister )
+         * might need to pop off multiple destinations from the stack when they are done.
+         *
+         * The final destination in the stack might be reachable via different routes (e.g. it might
+         * have started from the login screen, or the account list screen) . The POPUPTO_ON_FINISH
+         * arg is intended to be used in such situations. It can be supplied by the initiator and
+         * passed through until it is used by the final destination.
+         */
+        const val ARG_POPUPTO_ON_FINISH = "popUpToOnFinish"
+
     }
 
 }

@@ -126,7 +126,7 @@ class UstadCacheInterceptor(
                     pipeOut.close()
                 }
             }catch(e: Throwable){
-                logger?.e(LOG_TAG, "$logPrefix ReadAndCacheRunnable: exception handling ${call.request().url}", e)
+                logger?.e(LOG_TAG, "$logPrefix ReadAndCacheRunnable: exception handling ${call.request().method} ${call.request().url}", e)
                 throw e
             }finally {
                 response.close()
@@ -257,9 +257,7 @@ class UstadCacheInterceptor(
                     logger?.d(LOG_TAG, "$logPrefix HIT(validated) $url")
                     validationResponse.close()
                     cache.updateLastValidated(
-                        listOf(
-                            ValidatedEntry(url, validationResponse.headers.asCacheHttpHeaders())
-                        )
+                        ValidatedEntry(url, validationResponse.headers.asCacheHttpHeaders())
                     )
                     newResponseFromCachedResponse(cacheResponse, call)
                 }else {

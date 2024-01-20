@@ -11,6 +11,8 @@ import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.contentformats.storeText
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
+import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
+import com.ustadmobile.core.domain.cachestoragepath.getLocalUriIfRemote
 import com.ustadmobile.core.domain.contententry.ContentConstants
 import com.ustadmobile.core.domain.epub.GetEpubTableOfContentsUseCase
 import com.ustadmobile.core.io.ext.*
@@ -52,6 +54,7 @@ class EpubContentImporterCommonJvm(
     private val tmpPath: Path,
     private val saveLocalUriAsBlobAndManifestUseCase: SaveLocalUriAsBlobAndManifestUseCase,
     private val json: Json,
+    private val getStoragePathForUrlUseCase: GetStoragePathForUrlUseCase,
 ) : ContentImporter(endpoint) {
 
     val viewName: String
@@ -92,16 +95,20 @@ class EpubContentImporterCommonJvm(
             return null
         }
 
+        val localUri = getStoragePathForUrlUseCase.getLocalUriIfRemote(uri)
+
         return withContext(Dispatchers.IO) {
             try {
-                val opfPath = ZipInputStream(uriHelper.openSource(uri).asInputStream()).use {
+                val opfPath = ZipInputStream(
+                    uriHelper.openSource(localUri).asInputStream()
+                ).use {
                     it.findFirstOpfPath()
                 } ?: throw IllegalStateException("Container.xml not found in EPUB / cant find path for opf")
 
                 val entryNames = mutableListOf<String>()
                 var opfPackage: PackageDocument? = null
 
-                ZipInputStream(uriHelper.openSource(uri).asInputStream()).use { zipIn ->
+                ZipInputStream(uriHelper.openSource(localUri).asInputStream()).use { zipIn ->
                     lateinit var zipEntry: ZipEntry
                     while(zipIn.nextEntry?.also { zipEntry = it } != null) {
                         entryNames += zipEntry.name
@@ -131,7 +138,7 @@ class EpubContentImporterCommonJvm(
                     opfPackage = opfPackageVal,
                     readItemText = {
                         val pathInZip = itemPathInZip(it.href)
-                        ZipInputStream(uriHelper.openSource(uri).asInputStream()).use { zipIn ->
+                        ZipInputStream(uriHelper.openSource(localUri).asInputStream()).use { zipIn ->
                             if(zipIn.skipToEntry { it.name == pathInZip } != null)
                                 zipIn.bufferedReader().readText()
                             else
@@ -184,12 +191,13 @@ class EpubContentImporterCommonJvm(
     ): ContentEntryVersion = withContext(Dispatchers.IO) {
         val jobUri = jobItem.sourceUri?.let { DoorUri.parse(it) }
             ?: throw IllegalArgumentException("no sourceUri")
+        val localUri = DoorUri.parse(getStoragePathForUrlUseCase(jobUri.toString()))
 
         val contentEntryVersionUid = db.doorPrimaryKeyManager.nextId(ContentEntryVersion.TABLE_ID)
         val urlPrefix = createContentUrlPrefix(contentEntryVersionUid)
         val manifestUrl = "$urlPrefix${ContentConstants.MANIFEST_NAME}"
 
-        val opfPath = ZipInputStream(uriHelper.openSource(jobUri).asInputStream()).use {
+        val opfPath = ZipInputStream(uriHelper.openSource(localUri).asInputStream()).use {
             it.findFirstOpfPath()
         } ?: throw IllegalArgumentException("No OPF found")
 
@@ -203,7 +211,7 @@ class EpubContentImporterCommonJvm(
 
         val workPath = Path(tmpPath, "epub-import-${systemTimeInMillis()}")
 
-        uriHelper.openSource(jobUri).use { zipSource ->
+        uriHelper.openSource(localUri).use { zipSource ->
             val unzippedEntries = zipSource.unzipTo(workPath)
             val opfEntry = unzippedEntries.first { it.name == opfPath }
             val opfStr = fileSystem.source(opfEntry.path).buffered().readString()
@@ -220,7 +228,7 @@ class EpubContentImporterCommonJvm(
 
                         val unzippedPath = unzippedEntries.firstOrNull {
                             it.name == pathInZip.toString()
-                        }?.path ?: throw IllegalArgumentException("Cannot find ${pathInZip}")
+                        }?.path ?: throw IllegalArgumentException("Cannot find $pathInZip")
 
                         /* If this is XHTML, then use the xhtmlFixer to check for invalid XHTML
                          * content (some content e.g. Storyweaver includes br's without the trailing

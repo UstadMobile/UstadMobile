@@ -57,9 +57,6 @@ data class ContentEntryEditUiState(
     val contentCompressVisible: Boolean
         get() = metadataResult != null
 
-    val containerStorageOptionVisible: Boolean
-        get() = false
-
     val courseBlockVisible: Boolean
         get() = entity?.block != null
 
@@ -308,14 +305,20 @@ class ContentEntryEditViewModel(
                     )
                 }
 
-                //if a new folder was created, don't go to the "detail view"
-                if(entityUidArg == 0L && parentUidArg != null && !contentEntryVal.leaf) {
-                    navController.popBackStack(
-                        viewName = destinationName,
-                        inclusive = true
-                    )
-                }else {
-                    finishWithResult(contentEntryVal)
+                val popUpToOnFinish = savedStateHandle[ARG_POPUPTO_ON_FINISH]
+                when {
+                    expectedResultDest != null -> {
+                        finishWithResult(contentEntryVal)
+                    }
+
+                    //Here, we don't go to the detail view. We go back to where the user came from
+                    // That is correct for folders. For leaf nodes, maybe should change
+                    else -> {
+                        navController.popBackStack(
+                            viewName = popUpToOnFinish ?: destinationName,
+                            inclusive = true
+                        )
+                    }
                 }
 
                 if (_uiState.value.hasErrors()) {

@@ -1,140 +1,62 @@
 package com.ustadmobile.core.contentformats.epub
 
-import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.account.EndpointScope
-import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.contentformats.AbstractContentImporterTest
 import com.ustadmobile.core.contentformats.ContentDispatcher
 import com.ustadmobile.core.contentformats.epub.opf.PackageDocument
 import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.contentjob.InvalidContentException
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
-import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCaseJvm
-import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
-import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCaseJvm
 import com.ustadmobile.core.domain.contententry.ContentConstants
-import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
-import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseCommonJvm
-import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
-import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseJvm
 import com.ustadmobile.core.test.assertCachedBodyMatchesZipEntry
-import com.ustadmobile.util.test.ext.newFileFromResource
-import com.ustadmobile.core.uri.UriHelper
-import com.ustadmobile.core.uri.UriHelperJvm
-import com.ustadmobile.core.util.UstadTestRule
-import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.door.DoorUri
-import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.toDoorUri
-import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
-import com.ustadmobile.libcache.UstadCache
-import com.ustadmobile.libcache.UstadCacheBuilder
+import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.ContentEntryImportJob
 import com.ustadmobile.libcache.request.requestBuilder
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe.copyInputStreamToFile
+import com.ustadmobile.util.test.ext.newFileFromResource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlinx.io.files.Path
 import kotlinx.io.readString
-import kotlinx.serialization.json.Json
+import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
 import nl.adaptivity.xmlutil.serialization.XML
+import nl.adaptivity.xmlutil.serialization.XmlConfig
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Assert
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
-import org.junit.rules.TemporaryFolder
-import org.kodein.di.*
-import java.io.File
 import java.util.zip.ZipFile
+import kotlin.test.AfterTest
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class EpubContentImporterCommonJvmTest : AbstractMainDispatcherTest() {
-
-    @JvmField
-    @Rule
-    val tmpFolder = TemporaryFolder()
-
-    @JvmField
-    @Rule
-    var ustadTestRule = UstadTestRule()
-
-    private lateinit var di: DI
-    private lateinit var endpointScope: EndpointScope
+class EpubContentImporterCommonJvmTest : AbstractContentImporterTest() {
 
     private lateinit var mockWebServer: MockWebServer
-
-    private lateinit var db: UmAppDatabase
-
-    private lateinit var ustadCache: UstadCache
-
-    private lateinit var uriHelper: UriHelper
 
     private lateinit var xml: XML
 
     private lateinit var xhtmlFixer: XhtmlFixer
 
-    private lateinit var saveLocalUriAsBlobUseCase: SaveLocalUrisAsBlobsUseCase
-
-    private lateinit var saveAndManifestUseCase: SaveLocalUriAsBlobAndManifestUseCase
-
-    private lateinit var isTempFileCheckerUseCase: IsTempFileCheckerUseCase
-
-    private lateinit var deleteUrisUseCase: DeleteUrisUseCase
-
-    private lateinit var rootTmpPath: File
-
-    private lateinit var activeEndpoint: Endpoint
-
-    private lateinit var json: Json
-
+    @OptIn(ExperimentalXmlUtilApi::class)
     @Before
-    fun setup(){
-        endpointScope = EndpointScope()
-        rootTmpPath = tmpFolder.newFolder("epub-import-tmp")
-        di = DI {
-            import(ustadTestRule.diModule)
-        }
-        json = di.direct.instance()
-
-        val accountManager: UstadAccountManager by di.instance()
-        activeEndpoint = accountManager.activeEndpoint
-
-        db = di.on(accountManager.activeEndpoint).direct.instance(tag = DoorTag.TAG_DB)
-        val connectivityStatus = ConnectivityStatus(ConnectivityStatus.STATE_UNMETERED, true, "NetworkSSID")
-        db.connectivityStatusDao.insert(connectivityStatus)
-
+    fun epubSetup(){
         mockWebServer = MockWebServer()
         mockWebServer.dispatcher = ContentDispatcher()
         mockWebServer.start()
-        uriHelper = UriHelperJvm(
-            mimeTypeHelperImpl = FileMimeTypeHelperImpl(),
-            httpClient = di.direct.instance(),
-            okHttpClient = di.direct.instance(),
-        )
 
-
-        ustadCache = UstadCacheBuilder(
-            dbUrl = "jdbc:sqlite::memory:",
-            storagePath = Path(tmpFolder.newFolder().absolutePath),
-        ).build()
-        xml = di.direct.instance()
+        xml = XML {
+            defaultPolicy {
+                unknownChildHandler  = XmlConfig.IGNORING_UNKNOWN_CHILD_HANDLER
+            }
+        }
         xhtmlFixer = XhtmlFixerJsoup(xml)
+    }
 
-        isTempFileCheckerUseCase = IsTempFileCheckerUseCaseJvm(rootTmpPath)
-        deleteUrisUseCase = DeleteUrisUseCaseCommonJvm(isTempFileCheckerUseCase)
-
-        saveLocalUriAsBlobUseCase = SaveLocalUrisAsBlobsUseCaseJvm(
-            endpoint = activeEndpoint,
-            cache = ustadCache,
-            uriHelper = uriHelper,
-            tmpDir = Path(rootTmpPath.absolutePath),
-            deleteUrisUseCase = deleteUrisUseCase,
-        )
-        saveAndManifestUseCase = SaveLocalUriAsBlobAndManifestUseCaseJvm(saveLocalUriAsBlobUseCase,
-            FileMimeTypeHelperImpl())
+    @AfterTest
+    fun epubTearDown() {
+        mockWebServer.shutdown()
     }
 
 
@@ -143,7 +65,7 @@ class EpubContentImporterCommonJvmTest : AbstractMainDispatcherTest() {
     fun givenValidEpubFormatFile_whenExtractEntryMetaDataFromFile_thenDataShouldMatch() {
         val inputStream = this::class.java.getResourceAsStream(
                 "/com/ustadmobile/core/contenttype/childrens-literature.epub")!!
-        val tempEpubFile = tmpFolder.newFile()
+        val tempEpubFile = temporaryFolder.newFile()
         tempEpubFile.copyInputStreamToFile(inputStream)
 
         val epubPlugin = EpubContentImporterCommonJvm(
@@ -153,9 +75,10 @@ class EpubContentImporterCommonJvmTest : AbstractMainDispatcherTest() {
             uriHelper = uriHelper,
             xml = xml,
             xhtmlFixer = xhtmlFixer,
-            tmpPath = Path(rootTmpPath.absolutePath),
+            tmpPath = Path(rootTmpFolder.absolutePath),
             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
-            json = json
+            json = json,
+            getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
         )
 
         runBlocking {
@@ -171,7 +94,7 @@ class EpubContentImporterCommonJvmTest : AbstractMainDispatcherTest() {
 
     @Test
     fun givenEpubWithoutOpf_whenExtractMetadataCalled_thenShouldThrowInvalidContentException() {
-        val tmpEpubFile = tmpFolder.newFileFromResource(this::class.java,
+        val tmpEpubFile = temporaryFolder.newFileFromResource(this::class.java,
             "/com/ustadmobile/core/contenttype/epub-with-no-opf.epub")
 
         val epubPlugin = EpubContentImporterCommonJvm(
@@ -181,9 +104,10 @@ class EpubContentImporterCommonJvmTest : AbstractMainDispatcherTest() {
             uriHelper = uriHelper,
             xml = xml,
             xhtmlFixer = xhtmlFixer,
-            tmpPath = Path(rootTmpPath.absolutePath),
+            tmpPath = Path(rootTmpFolder.absolutePath),
             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
-            json = json
+            json = json,
+            getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
         )
 
         runBlocking {
@@ -200,7 +124,7 @@ class EpubContentImporterCommonJvmTest : AbstractMainDispatcherTest() {
 
     @Test
     fun givenEpubWithoutNav_whenExtractMetadataCalled_thenShouldThrowInvalidContentException() {
-        val tmpEpubFile = tmpFolder.newFileFromResource(this::class.java,
+        val tmpEpubFile = temporaryFolder.newFileFromResource(this::class.java,
             "/com/ustadmobile/core/contenttype/epub-with-no-nav.epub")
 
         val epubPlugin = EpubContentImporterCommonJvm(
@@ -210,9 +134,10 @@ class EpubContentImporterCommonJvmTest : AbstractMainDispatcherTest() {
             uriHelper = uriHelper,
             xml = xml,
             xhtmlFixer = xhtmlFixer,
-            tmpPath = Path(rootTmpPath.absolutePath),
+            tmpPath = Path(rootTmpFolder.absolutePath),
             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
-            json = json
+            json = json,
+            getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
         )
 
         runBlocking {
@@ -230,7 +155,7 @@ class EpubContentImporterCommonJvmTest : AbstractMainDispatcherTest() {
     @Test
     fun givenEpubWithManifestItemsMissing_whenExtractMetadataCalled_thenShouldThrowInvalidContentException() {
         //Resource is missing epub.css
-        val tmpEpubFile = tmpFolder.newFileFromResource(this::class.java,
+        val tmpEpubFile = temporaryFolder.newFileFromResource(this::class.java,
             "/com/ustadmobile/core/contenttype/epub-with-missing-item.epub")
 
         val epubPlugin = EpubContentImporterCommonJvm(
@@ -240,9 +165,10 @@ class EpubContentImporterCommonJvmTest : AbstractMainDispatcherTest() {
             uriHelper = uriHelper,
             xml = xml,
             xhtmlFixer = xhtmlFixer,
-            tmpPath = Path(rootTmpPath.absolutePath),
+            tmpPath = Path(rootTmpFolder.absolutePath),
             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
-            json = json
+            json = json,
+            getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
         )
 
         runBlocking {
@@ -260,8 +186,6 @@ class EpubContentImporterCommonJvmTest : AbstractMainDispatcherTest() {
 
     @Test
     fun givenValidEpubLink_whenExtractMetadataAndProcessJobComplete_thenDataShouldBeDownloaded(){
-        val accountManager: UstadAccountManager by di.instance()
-
         val epubPlugin = EpubContentImporterCommonJvm(
             endpoint = activeEndpoint,
             db = db,
@@ -269,9 +193,10 @@ class EpubContentImporterCommonJvmTest : AbstractMainDispatcherTest() {
             uriHelper = uriHelper,
             xml = xml,
             xhtmlFixer = xhtmlFixer,
-            tmpPath = Path(rootTmpPath.absolutePath),
+            tmpPath = Path(rootTmpFolder.absolutePath),
             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
-            json = json
+            json = json,
+            getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
         )
 
         runBlocking{
@@ -299,7 +224,7 @@ class EpubContentImporterCommonJvmTest : AbstractMainDispatcherTest() {
             assertEquals(contentEntryChildUid, result.cevContentEntryUid)
 
             withContext(Dispatchers.IO) {
-                val tempEpubFile = tmpFolder.newFileFromResource(this::class.java,
+                val tempEpubFile = temporaryFolder.newFileFromResource(this::class.java,
                     "/com/ustadmobile/core/contenttype/childrens-literature.epub")
 
 
