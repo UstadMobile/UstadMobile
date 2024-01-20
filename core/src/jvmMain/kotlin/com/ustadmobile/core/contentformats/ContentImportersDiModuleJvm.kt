@@ -9,6 +9,7 @@ import com.ustadmobile.core.contentformats.video.VideoContentImporterJvm
 import com.ustadmobile.core.contentformats.xapi.XapiZipContentImporter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
+import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.ext.DoorTag
@@ -38,6 +39,7 @@ val ContentImportersDiModuleJvm = DI.Module("ContentImporters-Jvm"){
         val tmpRoot: File = instance(tag = DiTag.TAG_TMP_DIR)
         val contentImportTmpPath = Path(tmpRoot.absolutePath, "contentimport")
         val ffProbe: FFprobe? = instanceOrNull()
+        val getStoragePathForUrlUseCase: GetStoragePathForUrlUseCase = instance()
 
         ContentImportersManager(
             buildList {
@@ -73,7 +75,7 @@ val ContentImportersDiModuleJvm = DI.Module("ContentImporters-Jvm"){
                         saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
                         uriHelper = uriHelper,
                         json = instance(),
-                        getStoragePathForUrlUseCase = instance(),
+                        getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
                     ),
                 )
                 add(
@@ -99,6 +101,7 @@ val ContentImportersDiModuleJvm = DI.Module("ContentImporters-Jvm"){
                             json = instance(),
                             tmpPath = contentImportTmpPath,
                             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
+                            getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
                         )
                     )
                 }

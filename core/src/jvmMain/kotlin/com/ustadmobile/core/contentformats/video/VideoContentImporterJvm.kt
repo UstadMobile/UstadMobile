@@ -6,11 +6,15 @@ import com.ustadmobile.core.contentjob.InvalidContentException
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
+import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
+import com.ustadmobile.core.domain.cachestoragepath.getLocalUriIfRemote
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.door.DoorUri
+import com.ustadmobile.door.ext.toFile
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.libcache.UstadCache
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.io.files.FileSystem
@@ -19,11 +23,7 @@ import kotlinx.io.files.SystemFileSystem
 import kotlinx.serialization.json.Json
 import net.bramp.ffmpeg.FFprobe
 import net.bramp.ffmpeg.probe.FFmpegStream
-import java.nio.file.Files
 import kotlin.io.path.ExperimentalPathApi
-import kotlin.io.path.absolutePathString
-import kotlin.io.path.deleteRecursively
-import java.nio.file.Path as NioPath
 
 class VideoContentImporterJvm(
     endpoint: Endpoint,
@@ -35,6 +35,7 @@ class VideoContentImporterJvm(
     db: UmAppDatabase,
     tmpPath: Path,
     saveLocalUriAsBlobAndManifestUseCase: SaveLocalUriAsBlobAndManifestUseCase,
+    getStoragePathForUrlUseCase: GetStoragePathForUrlUseCase,
 ): AbstractVideoContentImporterCommonJvm(
     endpoint = endpoint,
     cache = cache,
@@ -44,6 +45,7 @@ class VideoContentImporterJvm(
     db = db,
     tmpPath = tmpPath,
     saveLocalUriAsBlobAndManifestUseCase = saveLocalUriAsBlobAndManifestUseCase,
+    getStoragePathForUrlUseCase =  getStoragePathForUrlUseCase,
 ) {
 
     override val importerId: Int
@@ -73,18 +75,10 @@ class VideoContentImporterJvm(
             return@withContext null
         }
 
-        var tmpFile: NioPath? = null
-
         try {
-            tmpFile = Files.createTempFile("ustad-video", "tmp")
-            val tmpFilePath = Path(tmpFile.absolutePathString())
-            uriHelper.openSource(uri).use { source ->
-                fileSystem.sink(tmpFilePath).use { sink ->
-                    source.transferTo(sink)
-                }
-            }
-
-            val probeResult = ffprobe.probe(tmpFilePath.toString())
+            val localUri = getStoragePathForUrlUseCase.getLocalUriIfRemote(uri)
+            val filePath = localUri.toFile().toString()
+            val probeResult = ffprobe.probe(filePath)
             val hasVideo = probeResult.getStreams().any {
                 it.codec_type == FFmpegStream.CodecType.VIDEO
             }
@@ -105,9 +99,8 @@ class VideoContentImporterJvm(
 
             throw InvalidContentException("No video stream")
         }catch(e: Throwable) {
+            Napier.w(throwable = e) { "Exception importing what looked like video: $e" }
             throw InvalidContentException("Exception importing what looked like video", e)
-        }finally {
-            tmpFile?.deleteRecursively()
         }
     }
 }
