@@ -13,6 +13,7 @@ import io.ktor.client.request.*
 suspend fun HttpClient.verifySite(endpointUrl: String, timeout: Long = 30000): Site {
     val siteVerifyUrl = UMFileUtil.joinPaths(endpointUrl, "Site","verify")
     return get(siteVerifyUrl) {
+        header("cache-control", "must-revalidate")
         timeout {
             requestTimeoutMillis = timeout
         }
