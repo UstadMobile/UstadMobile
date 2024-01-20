@@ -257,9 +257,7 @@ class UstadCacheInterceptor(
                     logger?.d(LOG_TAG, "$logPrefix HIT(validated) $url")
                     validationResponse.close()
                     cache.updateLastValidated(
-                        listOf(
-                            ValidatedEntry(url, validationResponse.headers.asCacheHttpHeaders())
-                        )
+                        ValidatedEntry(url, validationResponse.headers.asCacheHttpHeaders())
                     )
                     newResponseFromCachedResponse(cacheResponse, call)
                 }else {

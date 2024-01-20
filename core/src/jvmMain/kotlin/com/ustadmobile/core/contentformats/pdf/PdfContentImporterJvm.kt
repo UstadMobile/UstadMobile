@@ -6,7 +6,7 @@ import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
-import com.ustadmobile.core.io.ext.isRemote
+import com.ustadmobile.core.domain.cachestoragepath.getLocalUriIfRemote
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.util.ext.displayFilename
 import com.ustadmobile.door.DoorUri
@@ -53,11 +53,7 @@ class PdfContentImporterJvm(
             return@withContext null
 
         try {
-            val localUri = if(uri.isRemote()) {
-                DoorUri.parse(getStoragePathForUrlUseCase(url = uri.toString()))
-            }else {
-                uri
-            }
+            val localUri = getStoragePathForUrlUseCase.getLocalUriIfRemote(uri)
             val pdfFile = localUri.toFile()
 
             val pdfPDDocument: PDDocument = Loader.loadPDF(pdfFile)

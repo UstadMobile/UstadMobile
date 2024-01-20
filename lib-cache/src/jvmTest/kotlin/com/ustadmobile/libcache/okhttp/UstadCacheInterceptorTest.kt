@@ -7,6 +7,7 @@ import com.ustadmobile.libcache.UstadCacheImpl
 import com.ustadmobile.libcache.assertTempDirectoryIsEmptied
 import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.headers.CouponHeader.Companion.HEADER_ETAG_IS_INTEGRITY
+import com.ustadmobile.libcache.headers.HttpHeaders
 import com.ustadmobile.libcache.integrity.sha256Integrity
 import com.ustadmobile.libcache.md5.Md5Digest
 import com.ustadmobile.libcache.md5.urlKey
@@ -174,14 +175,13 @@ class UstadCacheInterceptorTest {
             it.dispatcher = object: ResourcesDispatcher(javaClass) {
                 override fun dispatch(request: RecordedRequest): MockResponse {
                     val response = super.dispatch(request)
-                        .setHeader("content-type", "image/png")
                         .setHeader("etag", etagVal)
-                        //.setHeader("content-length", resourceBytes.toString())
-
                     return if(request.headers["if-none-match"] == etagVal) {
+                        //Validation response will not normally contain content-length and content-type headers
                         response.setBody("").setResponseCode(304)
                     }else {
-                        response
+                        response.setHeader("content-type", "image/png")
+                            .setHeader("content-length", resourceBytes.size.toString())
                     }
                 }
             }
@@ -225,6 +225,11 @@ class UstadCacheInterceptorTest {
         assertNotNull(storedEntryAfterRequest)
         assertTrue(storedEntryAfterValidation.lastValidated > storedEntryAfterRequest.lastValidated,
             "Last validated time in cache db should be updated")
+        val headersAfterValidation = HttpHeaders.fromString(
+            storedEntryAfterValidation.responseHeaders)
+        assertEquals("image/png", headersAfterValidation["content-type"])
+        assertEquals(resourceBytes.size.toString(), headersAfterValidation["content-length"])
+
         interceptorTmpDir.assertTempDirectoryIsEmptied()
     }
 

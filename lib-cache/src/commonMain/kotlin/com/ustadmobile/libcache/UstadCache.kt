@@ -54,10 +54,22 @@ interface UstadCache {
      * Update the last validated information for a given set of urls. This should be performed when
      * another component (e.g. the OkHttp interceptor) has performed a successful validation e.g.
      * received a Not-Modified response from the origin server.
+     *
+     * The not-modified response from the origin server will likely not have all the original
+     * headers (e.g. content-length, content-type, etc). This is valid. The not-modified
+     * response can likely contain validation / cache related headers like Age, Last-Modified,
+     * etc. Generally, any headers from the validation response will override the previous
+     * headers.
+     *
+     * An exception is content-length: some servers e.g. KTOR (incorrectly) specify a
+     * content-length of zero on 304 responses. This is not valid. The content-length
+     * header will be filtered out. By definition: 304 means NOT MODIFIED, and if it was
+     * not modified, the content-length should NOT have changed.
+     *
+     * The headers stored in the cache will be updated from the validated entry, with any invalid
+     * headers (as outlined above) filtered out.
      */
-    fun updateLastValidated(
-        validatedEntries: List<ValidatedEntry>
-    )
+    fun updateLastValidated(validatedEntry: ValidatedEntry)
 
     /**
      * Retrieve if cached.
