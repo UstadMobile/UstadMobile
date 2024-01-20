@@ -10,8 +10,13 @@ import com.ustadmobile.mui.common.Sizes
 import dev.icerock.moko.resources.StringResource
 import mui.icons.material.Chat
 import web.cssom.Display
-import mui.material.*
-import mui.icons.material.School
+import mui.material.Box
+import mui.material.Drawer
+import mui.material.DrawerVariant
+import mui.material.DrawerAnchor
+import mui.material.Toolbar
+import mui.material.List
+import mui.icons.material.School as SchoolIcon
 import mui.icons.material.LibraryBooks
 import mui.icons.material.Person
 import mui.system.sx
@@ -31,7 +36,7 @@ data class RootScreen(
 )
 
 val ROOT_SCREENS = listOf(
-    RootScreen(ClazzListViewModel.DEST_NAME_HOME, MR.strings.courses, School),
+    RootScreen(ClazzListViewModel.DEST_NAME_HOME, MR.strings.courses, SchoolIcon),
     RootScreen(ContentEntryListViewModel.DEST_NAME_HOME, MR.strings.library, LibraryBooks),
     RootScreen(ConversationListViewModel.DEST_NAME_HOME, MR.strings.messages, Chat),
     RootScreen(PersonListViewModel.DEST_NAME_HOME, MR.strings.people, Person)
