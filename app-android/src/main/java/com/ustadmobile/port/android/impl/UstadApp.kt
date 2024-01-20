@@ -63,6 +63,7 @@ import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLoc
 import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCaseCommonJvm
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseAndroid
+import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseRemote
 import com.ustadmobile.core.domain.contententry.importcontent.ImportContentEntryUseCase
 import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServerUseCase
 import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServerWebClient
@@ -300,6 +301,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             val saveAndManifestUseCase: SaveLocalUriAsBlobAndManifestUseCase = instance()
             val tmpRoot: File = instance(tag = DiTag.TAG_TMP_DIR)
             val contentImportTmpPath = Path(tmpRoot.absolutePath, "contentimport")
+            val getStoragePathForUrlUseCase: GetStoragePathForUrlUseCase= instance()
 
             ContentImportersManager(
                 buildList {
@@ -314,6 +316,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                             tmpPath = contentImportTmpPath,
                             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
                             json = instance(),
+                            getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
                         )
                     )
                     add(
@@ -354,6 +357,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                             db = db,
                             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
                             json = instance(),
+                            getStoragePathForUrlUseCase  = getStoragePathForUrlUseCase,
                         )
                     )
 
@@ -364,7 +368,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                             uriHelper = uriHelper,
                             db = db,
                             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
-                            getStoragePathForUrlUseCase = instance(),
+                            getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
                             json = instance(),
                             appContext = applicationContext,
                             tmpDir = File(contentImportTmpPath.toString()),
@@ -499,6 +503,10 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 db = instance(tag = DoorTag.TAG_DB),
                 appContext = applicationContext,
                 endpoint = context,
+                enqueueRemoteImport = EnqueueImportContentEntryUseCaseRemote(
+                    endpoint = context,
+                    httpClient = instance()
+                )
             )
         }
 
