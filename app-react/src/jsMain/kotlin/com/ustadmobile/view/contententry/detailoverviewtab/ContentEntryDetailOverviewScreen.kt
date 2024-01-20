@@ -10,6 +10,7 @@ import com.ustadmobile.core.util.ext.progressBadge
 import com.ustadmobile.core.viewmodel.contententry.detailoverviewtab.ContentEntryDetailOverviewUiState
 import com.ustadmobile.core.viewmodel.contententry.detailoverviewtab.ContentEntryDetailOverviewViewModel
 import com.ustadmobile.hooks.useUstadViewModel
+import com.ustadmobile.lib.db.composites.ContentEntryAndDetail
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.common.justifyContent
 import com.ustadmobile.mui.common.md
@@ -122,7 +123,7 @@ val ContentEntryDetailOverviewComponent2 = FC<ContentEntryDetailOverviewScreenPr
             }
 
             Typography{
-                + (props.uiState.contentEntry?.description ?: "")
+                + (props.uiState.contentEntry?.entry?.description ?: "")
             }
 
             Divider { orientation = Orientation.horizontal }
@@ -231,19 +232,19 @@ private val ContentDetailRightColumn = FC <ContentEntryDetailOverviewScreenProps
 
         Typography{
             variant = TypographyVariant.h4
-            + (props.uiState.contentEntry?.title ?: "")
+            + (props.uiState.contentEntry?.entry?.title ?: "")
         }
 
 
         if (props.uiState.authorVisible){
             Typography{
-                + (props.uiState.contentEntry?.author ?: "")
+                + (props.uiState.contentEntry?.entry?.author ?: "")
             }
         }
 
         if (props.uiState.publisherVisible){
             Typography{
-                + (props.uiState.contentEntry?.publisher ?: "")
+                + (props.uiState.contentEntry?.entry?.publisher ?: "")
             }
         }
 
@@ -261,7 +262,7 @@ private val ContentDetailRightColumn = FC <ContentEntryDetailOverviewScreenProps
 
                 Typography {
                     variant = TypographyVariant.h6
-                    + (props.uiState.contentEntry?.licenseName ?: "")
+                    + (props.uiState.contentEntry?.entry?.licenseName ?: "")
                 }
             }
         }
@@ -398,20 +399,23 @@ val ContentEntryDetailOverviewScreen = FC<Props> {
     }
 }
 
+@Suppress("unused")
 val ContentEntryDetailOverviewScreenPreview = FC<Props> {
 
     val uiStateVar by useState {
         ContentEntryDetailOverviewUiState(
-            contentEntry = ContentEntryWithMostRecentContainer().apply {
-                title = "Content Title"
-                author = "Author"
-                publisher = "Publisher"
-                licenseName = "BY_SA"
-                container = com.ustadmobile.lib.db.entities.Container().apply {
-                    fileSize = 50
+            contentEntry = ContentEntryAndDetail(
+                entry = ContentEntryWithMostRecentContainer().apply {
+                    title = "Content Title"
+                    author = "Author"
+                    publisher = "Publisher"
+                    licenseName = "BY_SA"
+                    container = com.ustadmobile.lib.db.entities.Container().apply {
+                        fileSize = 50
+                    }
+                    description = "Content Description"
                 }
-                description = "Content Description"
-            },
+            ),
             scoreProgress = ContentEntryStatementScoreProgress().apply {
                 /*@FloatRange(from = 0.0, to = 1.0)*/
                 progress = 4

@@ -1,5 +1,7 @@
 package com.ustadmobile.core.contentformats.epub
 
+import com.ustadmobile.core.contentformats.epub.XhtmlFixResult
+import com.ustadmobile.core.contentformats.epub.XhtmlFixer
 import com.ustadmobile.core.contentformats.epub.minxhtml.MinXhtmlDocument
 import nl.adaptivity.xmlutil.serialization.XML
 import org.jsoup.Jsoup

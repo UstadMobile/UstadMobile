@@ -24,8 +24,8 @@ buildscript {
 }
 
 plugins {
-    id 'com.android.application' version '8.2.0' apply false
-    id 'com.android.library' version '8.2.0' apply false
+    id 'com.android.application' version '8.2.1' apply false
+    id 'com.android.library' version '8.2.1' apply false
     id 'org.jetbrains.kotlin.android' version "$version_kotlin" apply false
     id 'org.jetbrains.kotlin.plugin.serialization' version "$version_kotlin" apply false
     id 'org.jetbrains.kotlin.plugin.atomicfu' version "$version_kotlin" apply false
@@ -83,7 +83,7 @@ allprojects {
 }
 
 //Major.minor.database version
-version = "0.4.5"
+version = "0.4.10"
 group = "com.ustadmobile.app"
 
 /**
@@ -93,7 +93,7 @@ group = "com.ustadmobile.app"
  */
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 232
+    ustadVersionCode = 237
 
     version_retriever = "0.0.1e"
     version_xmlpullparserkmp = '0.0.26'
@@ -139,7 +139,6 @@ ext {
     version_web_driver = "5.6.2"
     version_postgres_jdbc = "42.6.0"
     version_log4j = "2.21.1"
-    version_exo_player = "2.14.0"
     version_browser_proxy = "2.1.5"
     version_logback = "1.4.13"
     version_kodein_di = "7.21.0"

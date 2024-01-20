@@ -13,7 +13,8 @@ TESTPASS="testpass"
 WORKDIR=$(pwd)
 TEST=""
 SCRIPTDIR=$(realpath $(dirname $0))
-TESTAPK=$SCRIPTDIR/../../app-android-launcher/build/outputs/apk/release/app-android-launcher-release.apk
+TESTAPK=/home/ustadmobile/Testfolder/app-android/build/outputs/apk/release/app-android-release.apk
+# $SCRIPTDIR/../../app-android-/build/outputs/apk/release/app-android-release.apk
 TESTRESULTSDIR=""
 CONTROLSERVER=""
 USECONSOLEOUTPUT=0

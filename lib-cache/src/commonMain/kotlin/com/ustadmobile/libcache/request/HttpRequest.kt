@@ -13,7 +13,13 @@ interface HttpRequest {
     companion object {
 
         enum class Method {
-            GET, PUT, POST,
+            GET, PUT, POST, HEAD, OPTIONS, DELETE;
+
+            companion object {
+                fun forName(methodName: String): Method {
+                    return entries.first { it.name.equals(methodName, true) }
+                }
+            }
         }
 
     }

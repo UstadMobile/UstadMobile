@@ -10,6 +10,11 @@ import com.ustadmobile.door.DoorUri
  */
 interface ChunkedUploadClientLocalUriUseCase {
 
+    data class UploadProgress(
+        val bytesTransferred: Long,
+        val totalBytes: Long,
+    )
+
     /**
      * Response from the last chunk that was uploaded (e.g. when the upload was completed)
      */
@@ -29,7 +34,7 @@ interface ChunkedUploadClientLocalUriUseCase {
         remoteUrl: String,
         fromByte: Long = 0,
         chunkSize: Int = DEFAULT_CHUNK_SIZE,
-        onProgress: (Long) -> Unit = { },
+        onProgress: (UploadProgress) -> Unit = { },
         onStatusChange: (TransferJobItemStatus) -> Unit = { },
         lastChunkHeaders: IStringValues? = null,
     ): LastChunkResponse

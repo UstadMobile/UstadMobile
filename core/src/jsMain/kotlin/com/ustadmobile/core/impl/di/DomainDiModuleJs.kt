@@ -1,14 +1,18 @@
 package com.ustadmobile.core.impl.di
 
 import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.domain.account.SetPasswordUseCase
+import com.ustadmobile.core.domain.account.SetPasswordUseCaseJs
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobUseCaseJs
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCaseJs
 import com.ustadmobile.core.domain.blob.savepicture.SavePictureUseCase
 import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseJs
-import com.ustadmobile.core.domain.contententry.importcontent.ImportContentUseCase
-import com.ustadmobile.core.domain.contententry.import.ImportContentUseCaseJs
+import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCaseJs
+import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCase
+import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
+import com.ustadmobile.core.domain.contententry.import.EnqueueImportContentEntryUseCaseJs
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseJs
 import com.ustadmobile.core.domain.openlink.OnClickLinkUseCase
@@ -22,6 +26,10 @@ import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorUseCase
 import com.ustadmobile.core.domain.phonenumber.PhoneNumberUtilJs
 import com.ustadmobile.core.domain.sendemail.OnClickEmailUseCase
 import com.ustadmobile.core.domain.sendemail.OnClickSendEmailUseCaseJs
+import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
+import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseJs
+import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
+import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseJs
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCaseJs
 import com.ustadmobile.door.ext.DoorTag
@@ -33,8 +41,8 @@ import org.kodein.di.scoped
 import org.kodein.di.singleton
 
 fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs") {
-    bind<ImportContentUseCase>() with scoped(endpointScope).provider {
-        ImportContentUseCaseJs(
+    bind<EnqueueContentEntryImportUseCase>() with scoped(endpointScope).provider {
+        EnqueueImportContentEntryUseCaseJs(
             endpoint = context,
             httpClient = instance(),
         )
@@ -85,6 +93,17 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
         )
     }
 
+
+    bind<IsTempFileCheckerUseCase>() with singleton {
+        IsTempFileCheckerUseCaseJs()
+    }
+
+    bind<DeleteUrisUseCase>() with singleton {
+        DeleteUrisUseCaseJs(
+            isTempFileCheckerUseCase = instance()
+        )
+    }
+
     bind<SavePictureUseCase>() with scoped(endpointScope).singleton {
         SavePictureUseCase(
             saveLocalUrisAsBlobUseCase = instance(),
@@ -92,6 +111,7 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
             db = instance(tag = DoorTag.TAG_DB),
             repo = instance(tag = DoorTag.TAG_REPO),
             compressImageUseCase = CompressImageUseCaseJs(),
+            deleteUrisUseCase = instance(),
         )
     }
 
@@ -101,6 +121,22 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
             endpoint = context,
             json = instance(),
             db = instance(tag = DoorTag.TAG_DB),
+        )
+    }
+
+
+    bind<ContentEntryGetMetaDataFromUriUseCase>() with provider {
+        ContentEntryGetMetaDataFromUriUseCaseJs(
+            json = instance(),
+            chunkedUploadClientLocalUriUseCase = instance()
+        )
+    }
+
+    bind<SetPasswordUseCase>() with scoped(endpointScope).provider {
+        SetPasswordUseCaseJs(
+            endpoint = context,
+            repo = instance(tag = DoorTag.TAG_REPO),
+            httpClient = instance()
         )
     }
 

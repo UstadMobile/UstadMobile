@@ -1,22 +1,15 @@
 package com.ustadmobile.libcache
 
+import com.ustadmobile.libcache.db.entities.CacheEntry
+import com.ustadmobile.libcache.db.entities.RetentionLock
 import com.ustadmobile.libcache.request.HttpRequest
 import com.ustadmobile.libcache.response.HttpResponse
-import kotlinx.io.Source
 
-data class CacheRetentionLock(
-    val lockId: Int,
-    val timeCreated: Long,
+data class EntryLockRequest(
     val url: String,
+    val remark: String = "",
 )
 
-data class CacheRetentionJoin(
-    val lockId: Int,
-    val tableId: Int,
-    val entityId: Long,
-    val url: String,
-    val status: Int, //Active, inactive, upload_pending
-)
 
 /**
  * ===Content===
@@ -58,19 +51,12 @@ interface UstadCache {
     ): List<StoreResult>
 
     /**
-     * Store all entries from a given Zip as entries in the cache. This is useful to process zipped
-     * content e.g. epubs, xAPI/Scorm files, etc.
-     *
-     * @param zipSource Source for Zip data
-     * @param urlPrefix should end with /
-     * @param retain true if entries should be marked as to retain
-     * @param static true if entries will have the Coupon-Static: true header
+     * Update the last validated information for a given set of urls. This should be performed when
+     * another component (e.g. the OkHttp interceptor) has performed a successful validation e.g.
+     * received a Not-Modified response from the origin server.
      */
-    fun storeZip(
-        zipSource: Source,
-        urlPrefix: String,
-        retain: Boolean = true,
-        static: Boolean = true,
+    fun updateLastValidated(
+        validatedEntries: List<ValidatedEntry>
     )
 
     /**
@@ -81,6 +67,8 @@ interface UstadCache {
     fun retrieve(
         request: HttpRequest,
     ): HttpResponse?
+
+    fun getCacheEntry(url: String): CacheEntry?
 
 
     /**
@@ -94,7 +82,10 @@ interface UstadCache {
     ): Map<String, Boolean>
 
 
-    fun addRetentionLocks(locks: List<CacheRetentionLock>): List<Int>
+    /**
+     * Create retention locks.
+     */
+    fun addRetentionLocks(locks: List<EntryLockRequest>): List<Pair<EntryLockRequest, RetentionLock>>
 
     fun removeRetentionLocks(lockIds: List<Int>)
 
@@ -105,6 +96,8 @@ interface UstadCache {
         const val HEADER_FIRST_STORED_TIMESTAMP = "UCache-First-Stored"
 
         const val HEADER_LAST_VALIDATED_TIMESTAMP = "UCache-Last-Validated"
+
+        const val DEFAULT_SIZE_LIMIT = (100 * 1024 * 1024).toLong()
 
     }
 

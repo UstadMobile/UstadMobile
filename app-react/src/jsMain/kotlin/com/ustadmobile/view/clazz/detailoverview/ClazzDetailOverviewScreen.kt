@@ -9,6 +9,7 @@ import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.util.MS_PER_HOUR
 import com.ustadmobile.core.util.MS_PER_MIN
 import com.ustadmobile.core.util.ext.capitalizeFirstLetter
+import com.ustadmobile.core.viewmodel.clazz.defaultCourseBannerImageIndex
 import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewUiState
 import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewViewModel
 import com.ustadmobile.hooks.useFormattedDateRange
@@ -23,6 +24,7 @@ import com.ustadmobile.view.components.UstadFab
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
+import emotion.react.css
 import web.cssom.*
 import js.core.jso
 import mui.material.*
@@ -35,6 +37,7 @@ import react.*
 import mui.icons.material.Group
 import mui.icons.material.Event
 import mui.icons.material.Login
+import react.dom.html.ReactHTML.img
 import react.router.useLocation
 
 
@@ -82,8 +85,17 @@ val ClazzDetailOverviewComponent2 = FC<ClazzDetailOverviewProps> { props ->
             item {
                 Stack.create {
                     direction = responsive(StackDirection.column)
-                    spacing = responsive(10.px)
 
+                    val coursePictureUri = props.uiState.clazz?.coursePicture?.coursePictureUri
+                        ?: "img/default_course_banners/${defaultCourseBannerImageIndex(props.uiState.clazz?.clazzName)}.webp"
+                    img {
+                        css {
+                            height = 192.px
+                            width = 100.pct
+                            objectFit = ObjectFit.cover
+                        }
+                        src = coursePictureUri
+                    }
 
                     Typography{
                         UstadRawHtml {

@@ -10,6 +10,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.lib.db.entities.TransferJob
 import com.ustadmobile.libcache.UstadCache
 import java.util.concurrent.TimeUnit
 
@@ -24,9 +25,11 @@ class EnqueueBlobUploadClientUseCaseAndroid(
     override suspend fun invoke(
         items: List<EnqueueBlobUploadClientUseCase.EnqueueBlobUploadItem>,
         batchUuid: String,
-        chunkSize: Int
-    ) {
-        val transferJob = createTransferJob(items, batchUuid)
+        chunkSize: Int,
+        tableId: Int,
+        entityUid: Long,
+    ) : TransferJob {
+        val transferJob = createTransferJob(items, batchUuid, tableId, entityUid)
         val jobData = Data.Builder()
             .putString(DATA_ENDPOINT, endpoint.url)
             .putInt(DATA_JOB_UID, transferJob.tjUid)
@@ -43,5 +46,7 @@ class EnqueueBlobUploadClientUseCaseAndroid(
         WorkManager.getInstance(appContext).enqueueUniqueWork(
             "blob-upload-${endpoint.url}-${transferJob.tjUid}",
             ExistingWorkPolicy.REPLACE, workRequest)
+
+        return transferJob
     }
 }

@@ -1,7 +1,11 @@
 package com.ustadmobile.core.viewmodel.videocontent
 
+import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.contentformats.media.MediaContentInfo
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.url.UrlKmp
+import com.ustadmobile.core.util.requireBodyUrlForUri
+import com.ustadmobile.core.util.requireEntryByUri
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -16,8 +20,21 @@ import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
 
+/**
+ * @param mediaSrc the uri within the ContentEntry as per ContentManifestEntry.uri . This will be
+ *        served with the expected mime type by the content endpoint api.
+ * @param mediaDataUrl the url for the media as per ContentEntryManifest.bodyDataUrl . This might
+ *        not have headers exactly as per the ContentEntryManifest. This seems to be fine for
+ *        ExoPlayer.
+ */
 data class VideoContentUiState(
     val mediaContentInfo: MediaContentInfo? = null,
+
+    val mediaSrc: String? = null,
+
+    val mediaDataUrl: String? = null,
+
+    val mediaMimeType: String? = null,
 
     val contentEntry: ContentEntry? = null,
 )
@@ -36,15 +53,39 @@ class VideoContentViewModel(
     private val httpClient: HttpClient by instance()
 
     init {
+        _appUiState.update { prev ->
+            prev.copy(
+                hideBottomNavigation = true
+            )
+        }
+
         viewModelScope.launch {
             val contentEntryVersion = activeRepo.contentEntryVersionDao
                 .findByUidAsync(entityUidArg) ?: return@launch
 
             launch {
-                val cevUrl = contentEntryVersion.cevUrl ?: return@launch
-                val mediaInfo: MediaContentInfo = httpClient.get(cevUrl).body()
+                val manifest: ContentManifest = httpClient.get(contentEntryVersion.cevManifestUrl!!)
+                    .body()
+
+                val mediaInfoUrl = manifest.requireBodyUrlForUri(contentEntryVersion.cevOpenUri!!)
+
+                val mediaInfo: MediaContentInfo = httpClient.get(mediaInfoUrl).body()
+
+                val videoEntry = manifest.requireEntryByUri(
+                    mediaInfo.sources.first().uri)
+
+                val mediaSrc = UrlKmp(contentEntryVersion.cevManifestUrl!!).resolve(
+                    mediaInfo.sources.first().uri).toString()
+                val dataUrl = videoEntry.bodyDataUrl
+                val mediaMimeType = mediaInfo.sources.first().mimeType
+
                 _uiState.update { prev ->
-                    prev.copy(mediaContentInfo = mediaInfo)
+                    prev.copy(
+                        mediaContentInfo = mediaInfo,
+                        mediaDataUrl = dataUrl,
+                        mediaSrc = mediaSrc,
+                        mediaMimeType = mediaMimeType,
+                    )
                 }
             }
 
@@ -57,7 +98,7 @@ class VideoContentViewModel(
 
                 _appUiState.update { prev ->
                     prev.copy(
-                        title = contentEntry?.title ?: ""
+                        title = contentEntry?.title ?: "",
                     )
                 }
             }

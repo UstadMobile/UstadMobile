@@ -6,8 +6,6 @@ import com.ustadmobile.door.ext.hexStringToByteArray
 import kotlin.text.Typography.ellipsis
 
 
-fun String.inBrackets() = "($this)"
-
 /**
  * To ensure consistency between JVM and Android, Base64 encoding
  * **must** be done with NO_WRAP
@@ -131,4 +129,30 @@ fun String.trimExcessWhiteSpace() : String {
     }else{
         this
     }
+}
+
+fun String.fileExtensionOrNull(): String? {
+    return substringAfterLast(".", "").let {
+        if(it != "") it else null
+    }
+}
+
+fun String.removeQueryStringSuffix(): String {
+    val queryPosIndex = indexOf("?")
+    return if(queryPosIndex != -1) {
+        substring(0, queryPosIndex)
+    }else {
+        this
+    }
+}
+
+fun String.removeFileExtension() : String {
+    return substringBeforeLast(".")
+}
+
+fun String.displayFilename(): String {
+    return substringAfterLast("/")
+        .substringAfterLast("\\")
+        .substringBefore("?")
+        .removeFileExtension()
 }

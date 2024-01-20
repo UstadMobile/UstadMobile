@@ -1,22 +1,18 @@
 package com.ustadmobile.view.contententry.list
 
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCaseJs
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.hooks.ustadViewName
 import com.ustadmobile.core.impl.appstate.AppUiState
-import com.ustadmobile.core.impl.nav.NavResult
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListUiState
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
-import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.mui.components.NavResultReturnerContext
 import com.ustadmobile.mui.components.UstadListFilterChipsHeader
 import com.ustadmobile.view.contententry.UstadContentEntryListItem
 import com.ustadmobile.view.components.UstadFab
@@ -35,7 +31,6 @@ import react.create
 import react.dom.html.ReactHTML.input
 import react.router.useLocation
 import react.useRef
-import react.useRequiredContext
 import react.useState
 import web.html.HTMLInputElement
 import web.html.InputType
@@ -95,13 +90,9 @@ val ContentEntryListScreen = FC<Props> {
         ContentEntryListViewModel(di, savedStateHandle, location.ustadViewName)
     }
 
-    var addDialogVisible by useState { false }
-
     val uiStateVal by viewModel.uiState.collectAsState(ContentEntryListUiState())
     val appState by viewModel.appUiState.collectAsState(AppUiState())
     val fileInputRef = useRef<HTMLInputElement>(null)
-    val navResultReturner = useRequiredContext(NavResultReturnerContext)
-
 
     input {
         ref = fileInputRef
@@ -112,12 +103,7 @@ val ContentEntryListScreen = FC<Props> {
         }
         onChange = {
             it.target.files?.item(0)?.also { file ->
-                navResultReturner.sendResult(NavResult(
-                    key = ContentEntryGetMetaDataFromUriUseCaseJs.RESULT_KEY_FILE,
-                    timestamp = systemTimeInMillis(),
-                    result = file,
-                ))
-                viewModel.onImportFile(URL.createObjectURL(file))
+                viewModel.onImportFile(URL.createObjectURL(file), file.name)
             }
         }
     }
@@ -133,17 +119,13 @@ val ContentEntryListScreen = FC<Props> {
     }
 
     UstadFab {
-        fabState = appState.fabState.copy(
-            onClick = {
-                addDialogVisible = true
-            }
-        )
+        fabState = appState.fabState
     }
 
     Dialog {
-        open = addDialogVisible
+        open = uiStateVal.createNewOptionsVisible
         onClose = { _, _ ->
-            addDialogVisible = false
+            viewModel.onDismissCreateNewOptions()
         }
 
         List {
@@ -225,6 +207,7 @@ private val ContentEntryListScreenComponent = FC<ContentEntryListScreenProps> { 
             if(props.uiState.showChips) {
                 item(key = "filter_chips") {
                     UstadListFilterChipsHeader.create {
+                        id = "content_entry_filter_chip_box"
                         filterOptions = props.uiState.filterOptions
                         selectedChipId = props.uiState.selectedChipId
                         onClickFilterChip = props.onClickFilterChip

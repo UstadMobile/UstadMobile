@@ -8,7 +8,6 @@ import androidx.compose.material.icons.filled.Collections
 import androidx.compose.material.icons.filled.SmartDisplay
 import androidx.compose.material.icons.filled.TextSnippet
 import androidx.compose.material.icons.filled.TouchApp
-import com.ustadmobile.core.MR
 import com.ustadmobile.lib.db.entities.ContentEntry
 
 object ClazzAssignmentConstants {
@@ -22,17 +21,6 @@ object ClazzAssignmentConstants {
         ContentEntry.TYPE_COLLECTION to Icons.Filled.Collections,
         ContentEntry.TYPE_INTERACTIVE_EXERCISE to Icons.Filled.TouchApp,
         ContentEntry.TYPE_AUDIO to Icons.Filled.Audiotrack
-    )
-
-    @JvmField
-    val CONTENT_ENTRY_TYPE_LABEL_MAP = mapOf(
-        ContentEntry.TYPE_EBOOK to MR.strings.ebook,
-        ContentEntry.TYPE_VIDEO to MR.strings.video,
-        ContentEntry.TYPE_DOCUMENT to MR.strings.document,
-        ContentEntry.TYPE_ARTICLE to MR.strings.article,
-        ContentEntry.TYPE_COLLECTION to MR.strings.collection,
-        ContentEntry.TYPE_INTERACTIVE_EXERCISE to MR.strings.interactive,
-        ContentEntry.TYPE_AUDIO to MR.strings.audio
     )
 
 }

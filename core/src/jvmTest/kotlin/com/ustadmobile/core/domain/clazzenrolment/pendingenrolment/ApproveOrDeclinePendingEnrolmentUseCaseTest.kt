@@ -1,6 +1,5 @@
 package com.ustadmobile.core.domain.clazzenrolment.pendingenrolment
 
-import com.ustadmobile.core.db.ContentJobItemTriggersCallback
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
@@ -10,7 +9,6 @@ import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.entities.NodeIdAndAuth
-import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Clazz
@@ -44,7 +42,6 @@ class ApproveOrDeclinePendingEnrolmentUseCaseTest {
             "jdbc:sqlite:build/tmp/approveordeclineusecase_${systemTimeInMillis()}.sqlite",
                 nodeId = nodeIdAndAuth.nodeId)
             .addSyncCallback(nodeIdAndAuth)
-            .addCallback(ContentJobItemTriggersCallback())
             .addMigrations(*migrationList().toTypedArray())
             .build()
 

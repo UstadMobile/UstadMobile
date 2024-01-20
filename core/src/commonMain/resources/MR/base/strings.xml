@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <string name="app_name">Ustad Mobile</string>
+    <!--suppress CheckTagEmptyBody -->
+    <string name="blank" translatable="false"></string>
     <string name="login">Login</string>
     <string name="error">Error</string>
     <string name="err_registering_new_user">Error registering new user:</string>
@@ -1686,4 +1688,10 @@
 
     <string name="terms_required_if_registration_enabled">If self-registration is enabled, you must set terms and policies in at least one language for users to accept when they register.</string>
 
+    <string name="drop_files_to_import">Drop file(s) to import</string>
+
+    <!-- Placeholder text used to show the user where to type their post for a discussion forum -->
+    <string name="compose_post">Compose post</string>
+
+    <string name="password_updated">Password updated</string>
 </resources>

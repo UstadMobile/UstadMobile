@@ -5,4 +5,6 @@
 
     <item name="tag_textfield_html" type="id"/>
 
+    <item name="tag_webview_url" type="id"/>
+
 </resources>

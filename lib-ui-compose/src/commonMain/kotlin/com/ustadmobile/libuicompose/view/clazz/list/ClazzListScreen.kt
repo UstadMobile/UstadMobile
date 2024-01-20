@@ -1,27 +1,31 @@
 package com.ustadmobile.libuicompose.view.clazz.list
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.material.Card
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Badge
 import androidx.compose.material.icons.filled.Login
-import androidx.compose.material.icons.filled.People
+import androidx.compose.material3.Badge
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -30,6 +34,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
 import app.cash.paging.Pager
@@ -46,16 +53,21 @@ import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.nav.NavResultReturner
 import com.ustadmobile.core.util.SortOrderOption
+import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.libuicompose.components.SortListMode
+import com.ustadmobile.libuicompose.components.UstadAsyncImage
 import com.ustadmobile.libuicompose.components.UstadBottomSheetOption
 import com.ustadmobile.libuicompose.components.UstadListFilterChipsHeader
 import com.ustadmobile.libuicompose.components.UstadListSortHeader
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.nav.UstadNavControllerPreCompose
+import com.ustadmobile.libuicompose.util.compose.courseTerminologyEntryResource
+import com.ustadmobile.libuicompose.util.compose.rememberCourseTerminologyEntries
 import com.ustadmobile.libuicompose.util.ext.copyWithNewFabOnClick
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.util.defaultSortListMode
 import com.ustadmobile.libuicompose.util.rememberHtmlToPlainText
+import com.ustadmobile.libuicompose.view.clazz.painterForDefaultCourseImage
 import com.ustadmobile.libuicompose.viewmodel.ustadViewModel
 import moe.tlaster.precompose.navigation.BackStackEntry
 
@@ -177,9 +189,6 @@ fun ClazzListScreen(
             )
         }
 
-        /**
-         * Note: Currently there is no direct support for LazyGrid with pagingsource.
-         */
         ustadPagedItems(
             pagingItems = lazyPagingItems,
             key = { it.clazzUid }
@@ -197,6 +206,7 @@ fun ClazzListScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ClazzListItem(
     clazz: ClazzWithListDisplayDetails?,
@@ -209,65 +219,79 @@ fun ClazzListItem(
         it.value == clazz?.clazzActiveEnrolment?.clazzEnrolmentRole
     }?.stringResource
 
-    Card(
-        modifier = Modifier
-            .defaultItemPadding()
-            .clickable {
+    Box(
+        contentAlignment = Alignment.TopEnd,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        OutlinedCard(
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+            ),
+            border = BorderStroke(1.dp, Color.Black),
+            onClick = {
                 clazz?.also { onClickClazz(it) }
             },
-        elevation = 8.dp,
-    ) {
-        Column(
-            modifier = Modifier.padding(8.dp)
-        ){
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Column {
-                    Text(
-                        text = clazz?.clazzName ?: "",
-                        style = MaterialTheme.typography.h6,
-                        maxLines = 1,
+            modifier = Modifier.defaultItemPadding()
+        ) {
+            Column {
+                val imageUri = clazz?.coursePicture?.coursePictureUri
+                if(imageUri != null) {
+                    UstadAsyncImage(
+                        uri = imageUri,
+                        contentDescription = "",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.height(96.dp).fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp))
                     )
-                    Text(
-                        text = rememberHtmlToPlainText(clazz?.clazzDesc ?: ""),
-                        maxLines = 2
+                }else {
+                    Image(
+                        painter = painterForDefaultCourseImage(clazz?.clazzName),
+                        contentDescription = "",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.height(96.dp).fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp))
                     )
                 }
 
-//                if(role != null) {
-//                    Row(
-//                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-//                        verticalAlignment = Alignment.CenterVertically
-//                    ) {
-//                        Icon(
-//                            imageVector = Icons.Filled.Badge,
-//                            contentDescription = "",
-//                        )
-//                        Text(messageIdResource(id = role))
-//                    }
-//                }
-            }
-
-            /*
-             * Disabled until aggregated entities are implemented for this
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-
-                Icon(
-                    imageVector = Icons.Filled.People,
-                    contentDescription = "",
-                )
                 Text(
-                    text = stringResource(
-                        MR.strings.x_teachers_y_students,
-                        clazz?.numTeachers ?: 0, clazz?.numStudents ?: 0,
-                    )
+                    text = clazz?.clazzName ?: "",
+                    maxLines = 1,
+                    modifier = Modifier.defaultItemPadding(bottom = 0.dp),
+                )
+
+                Text(
+                    text = rememberHtmlToPlainText(clazz?.clazzDesc ?: ""),
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 2,
+                    modifier = Modifier.defaultItemPadding(top = 0.dp),
                 )
             }
-             */
+        }
+
+        val enrolment = clazz?.clazzActiveEnrolment
+        if(enrolment != null) {
+            val terminologyEntries = rememberCourseTerminologyEntries(
+                clazz.terminology
+            )
+            val stringResource = when(enrolment.clazzEnrolmentRole) {
+                ClazzEnrolment.ROLE_STUDENT -> MR.strings.student
+                ClazzEnrolment.ROLE_TEACHER -> MR.strings.teacher
+                else -> null
+            }
+            if(stringResource != null) {
+                Badge(
+                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Badge,
+                        contentDescription = null,
+                        modifier = Modifier.size(12.dp),
+                    )
+
+                    Text(courseTerminologyEntryResource(terminologyEntries, stringResource))
+                }
+            }
         }
     }
 }

@@ -3,31 +3,30 @@ package com.ustadmobile.libuicompose.view.contententry.detailoverview
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.runtime.Composable
 import com.ustadmobile.core.viewmodel.contententry.detailoverviewtab.ContentEntryDetailOverviewUiState
-import com.ustadmobile.lib.db.entities.Container
+import com.ustadmobile.lib.db.composites.ContentEntryAndDetail
+import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryButtonModel
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 import com.ustadmobile.lib.db.entities.ContentEntryStatementScoreProgress
-import com.ustadmobile.lib.db.entities.ContentEntryWithMostRecentContainer
 import com.ustadmobile.lib.db.entities.ContentJobItemProgress
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.StatementEntity
-import com.ustadmobile.libuicompose.view.contententry.detail.ContentEntryDetailOverviewScreen
+import com.ustadmobile.libuicompose.view.contententry.detailoverviewtab.ContentEntryDetailOverviewScreen
 
 
 @Composable
 @Preview
 fun ContentEntryDetailOverviewScreenPreview() {
     val uiStateVal = ContentEntryDetailOverviewUiState(
-        contentEntry = ContentEntryWithMostRecentContainer().apply {
-            title = "Content Title"
-            author = "Author"
-            publisher = "Publisher"
-            licenseName = "BY_SA"
-            container = Container().apply {
-                fileSize = 50
+        contentEntry = ContentEntryAndDetail(
+            entry = ContentEntry().apply {
+                title = "Content Title"
+                author = "Author"
+                publisher = "Publisher"
+                licenseName = "BY_SA"
+                description = "Content Description"
             }
-            description = "Content Description"
-        },
+        ),
         scoreProgress = ContentEntryStatementScoreProgress().apply {
             /*@FloatRange(from = 0.0, to = 1.0)*/
             progress = 4

@@ -22,7 +22,7 @@ interface EnqueueSavePictureUseCase {
     suspend fun invoke(
         entityUid: Long,
         tableId: Int,
-        pictureUri: String?
+        pictureUri: String?,
     )
 
     companion object {

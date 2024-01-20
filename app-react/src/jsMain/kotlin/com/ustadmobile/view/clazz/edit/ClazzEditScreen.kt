@@ -30,6 +30,7 @@ import js.core.jso
 import com.ustadmobile.mui.common.inputCursor
 import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.mui.components.UstadTextField
+import com.ustadmobile.view.components.UstadImageSelectButton
 import com.ustadmobile.wrappers.quill.ReactQuill
 
 const val COURSE_BLOCK_DRAG_CLASS = "dragging_course_block"
@@ -79,6 +80,19 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
     UstadStandardContainer {
         Stack {
             spacing = responsive(2)
+
+            UstadImageSelectButton {
+                imageUri = props.uiState.entity?.coursePicture?.coursePictureUri
+                onImageUriChanged = { imageUri ->
+                    props.onClazzChanged(
+                        props.uiState.entity?.shallowCopy {
+                            coursePicture = props.uiState.entity?.coursePicture?.copy(
+                                coursePictureUri = imageUri
+                            )
+                        }
+                    )
+                }
+            }
 
             UstadEditHeader {
                 + strings[MR.strings.basic_details]

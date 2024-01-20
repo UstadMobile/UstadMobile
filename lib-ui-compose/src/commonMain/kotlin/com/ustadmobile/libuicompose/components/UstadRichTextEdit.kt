@@ -24,7 +24,7 @@ import androidx.compose.ui.Modifier
  *        UstadViewModel.navigateToEditHtml
  * @param editInNewScreenLabel where editInNewScreen is true and this is a platform where editing is
  *        done on a new screen, then this is the label that will be added to the outlined text box.
- * @param placeholder On platforms where editing is not done in a new screen (Desktop), this is the
+ * @param placeholderText On platforms where editing is not done in a new screen (Desktop), this is the
  *        placeholder text.
  */
 @Composable
@@ -35,5 +35,5 @@ expect fun UstadRichTextEdit(
     modifier: Modifier = Modifier,
     editInNewScreen: Boolean = !isDesktop(),
     editInNewScreenLabel: String? = null,
-    placeholder: (@Composable () -> Unit)? = null,
+    placeholderText: String? = null,
 )

@@ -1,12 +1,16 @@
 package com.ustadmobile.core.domain.blob.savepicture
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.ImageDao
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
 import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCase
 import com.ustadmobile.core.domain.compress.CompressParams
 import com.ustadmobile.core.domain.compress.CompressUseCase
+import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
 import com.ustadmobile.core.util.uuid.randomUuidAsString
 import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.lib.db.entities.CoursePicture
+import com.ustadmobile.lib.db.entities.PersonPicture
 
 /**
  * @param enqueueBlobUploadClientUseCase on platforms where a separate upload is required (e.g.
@@ -19,7 +23,16 @@ class SavePictureUseCase(
     private val db: UmAppDatabase,
     private val repo: UmAppDatabase,
     private val compressImageUseCase: CompressUseCase,
+    private val deleteUrisUseCase: DeleteUrisUseCase,
 ) {
+
+    private fun UmAppDatabase.imageDaoForTable(tableId: Int): ImageDao? {
+        return when(tableId) {
+            PersonPicture.TABLE_ID -> personPictureDao
+            CoursePicture.TABLE_ID -> coursePictureDao
+            else -> null
+        }
+    }
 
     suspend operator fun invoke(
         entityUid: Long,
@@ -43,15 +56,20 @@ class SavePictureUseCase(
                         entityUid = entityUid,
                         tableId = tableId,
                         mimeType = mainCompressionResult.mimeType,
+                        deleteLocalUriAfterSave = true,
+
                     ),
                     SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem(
                         localUri = thumbnailCompressionResult.uri,
                         entityUid = entityUid,
                         tableId = tableId,
                         mimeType = mainCompressionResult.mimeType,
+                        deleteLocalUriAfterSave = true,
                     )
                 ),
             )
+
+            deleteUrisUseCase(listOf(pictureUri), onlyIfTemp = true)
 
             val pictureBlob = savedBlobs.first {
                 it.localUri == mainCompressionResult.uri
@@ -61,7 +79,7 @@ class SavePictureUseCase(
             }
 
             if(enqueueBlobUploadClientUseCase != null) {
-                db.personPictureDao.updateUri(
+                db.imageDaoForTable(tableId)?.updateUri(
                     uid = entityUid,
                     uri = pictureBlob.blobUrl,
                     thumbnailUri = thumbnailBlob.blobUrl,
@@ -74,13 +92,14 @@ class SavePictureUseCase(
                             blobUrl = it.blobUrl,
                             tableId = tableId,
                             entityUid = entityUid,
+                            retentionLockIdToRelease = it.retentionLockId,
                         )
                     },
                     batchUuid = randomUuidAsString(),
                 )
             }else {
                 //No upload needed, directly update repo
-                repo.personPictureDao.updateUri(
+                repo.imageDaoForTable(tableId)?.updateUri(
                     uid = entityUid,
                     uri = pictureBlob.blobUrl,
                     thumbnailUri = thumbnailBlob.blobUrl,
@@ -88,7 +107,7 @@ class SavePictureUseCase(
                 )
             }
         }else {
-            repo.personPictureDao.updateUri(
+            repo.imageDaoForTable(tableId)?.updateUri(
                 uid = entityUid,
                 uri = null,
                 thumbnailUri = null,

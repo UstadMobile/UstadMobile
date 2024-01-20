@@ -1,10 +1,12 @@
 package com.ustadmobile.libcache.db.dao
 
+import androidx.room.Delete
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import com.ustadmobile.door.annotation.DoorDao
 import com.ustadmobile.libcache.db.entities.CacheEntry
-import com.ustadmobile.libcache.db.entities.CacheEntryAndBody
 
 @DoorDao
 expect abstract class CacheEntryDao {
@@ -17,28 +19,13 @@ expect abstract class CacheEntryDao {
     abstract suspend fun findByUrlAsync(url: String): CacheEntry?
 
     @Query("""
-        SELECT CacheEntry.*, ResponseBody.*
+        SELECT CacheEntry.*
           FROM CacheEntry
-               LEFT JOIN ResponseBody
-                    ON ResponseBody.responseId = 
-                       (SELECT ResponseBody.responseId
-                          FROM ResponseBody
-                         WHERE ResponseBody.sha256 = CacheEntry.responseBodySha256
-                         LIMIT 1)
-         WHERE CacheEntry.url = :url
-            OR ((:withoutSearchParams IS NOT NULL) 
-                AND CacheEntry.url = :withoutSearchParams
-                AND (CacheEntry.cacheFlags & ${CacheEntry.CACHE_FLAG_STATIC}) = ${CacheEntry.CACHE_FLAG_STATIC})
-      ORDER BY (CASE
-                WHEN CacheEntry.url = :url THEN 0
-                ELSE 1
-                END)
-         LIMIT 1
+         WHERE CacheEntry.key = :key
     """)
-    abstract fun findEntryAndBodyByUrl(
-        url: String,
-        withoutSearchParams: String?,
-    ): CacheEntryAndBody?
+    abstract fun findEntryAndBodyByKey(
+        key: String,
+    ): CacheEntry?
 
     @Insert
     abstract suspend fun insertAsync(entry: CacheEntry): Long
@@ -46,15 +33,75 @@ expect abstract class CacheEntryDao {
     @Insert
     abstract fun insertList(entry: List<CacheEntry>)
 
+    @Update
+    abstract fun updateList(entry: List<CacheEntry>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract fun upsertList(entry: List<CacheEntry>)
+
+    @Query(
+        """
+        SELECT CacheEntry.*
+          FROM CacheEntry
+         WHERE CacheEntry.key IN
+               (SELECT RequestedEntry.requestedKey
+                  FROM RequestedEntry
+                 WHERE RequestedEntry.batchId = :batchId)
+    """
+    )
+    abstract fun findByRequestBatchId(batchId: Int): List<CacheEntry>
+
+    @Query("""
+        UPDATE CacheEntry
+           SET lastAccessed = :lastAccessTime
+         WHERE key = :key  
+    """)
+    abstract fun updateLastAccessedTime(key: String, lastAccessTime: Long)
+
+    /**
+     * Find entries that can be evicted e.g. entries for which there is no RetentionLock
+     */
     @Query("""
         SELECT CacheEntry.*
           FROM CacheEntry
-         WHERE CacheEntry.url IN
-               (SELECT RequestedEntry.requestedUrl
-                  FROM RequestedEntry
-                 WHERE RequestedEntry.batchId = :batchId)
+         WHERE NOT EXISTS(
+               SELECT RetentionLock.lockId
+                 FROM RetentionLock
+                WHERE RetentionLock.lockKey = CacheEntry.key) 
+      ORDER BY lastAccessed ASC           
+         LIMIT :batchSize       
+      
     """)
-    abstract fun findByRequestBatchId(batchId: Int): List<CacheEntry>
+    abstract fun findEvictableEntries(batchSize: Int): List<CacheEntry>
 
+    /**
+     * Get the total size of evictable entries.
+     */
+    @Query("""
+        SELECT SUM(CacheEntry.storageSize)
+          FROM CacheEntry
+         WHERE NOT EXISTS(
+               SELECT RetentionLock.lockId
+                 FROM RetentionLock
+                WHERE RetentionLock.lockKey = CacheEntry.key)  
+    """)
+    abstract fun totalEvictableSize(): Long
+
+    @Delete
+    abstract fun delete(entries: List<CacheEntry>)
+
+    @Query("""
+        UPDATE CacheEntry
+           SET responseHeaders = :headers,
+               lastValidated = :lastValidated,
+               lastAccessed = :lastAccessed
+         WHERE key = :key      
+    """)
+    abstract fun updateValidation(
+        key: String,
+        headers: String,
+        lastValidated: Long,
+        lastAccessed: Long,
+    )
 
 }

@@ -94,7 +94,7 @@ class ChunkedUploadClientUseCaseTest  {
                 chunkSize = chunkSize,
                 fromByte = fromByte,
                 onProgress = {
-                    progressUpdatesReceived.add(it)
+                    progressUpdatesReceived.add(it.bytesTransferred)
                 },
                 onStatusChange = {
                     statusUpdatesReceived.add(it)

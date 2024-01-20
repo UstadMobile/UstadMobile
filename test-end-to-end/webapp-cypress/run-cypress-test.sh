@@ -51,7 +51,8 @@ if [ -d "$SCRIPTDIR/results" ]; then
   # Check if there are files to delete
   if [ "$(ls -A $SCRIPTDIR/results)" ]; then
     rm -rf "$SCRIPTDIR/results"/*
-  fi
+fi
+
 fi
 
 

@@ -8,6 +8,7 @@ import com.ustadmobile.core.util.stringvalues.asIStringValues
 import com.ustadmobile.door.DoorUri
 import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.expectSuccess
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -63,25 +64,32 @@ class ChunkedUploadClientUseCaseKtorImpl(
      * @param onStatusChange event handler that will be called when status changes e.g. on start,
      *        on successful completion, or on failure.
      */
-    @OptIn(ExperimentalStdlibApi::class)
     override suspend operator fun invoke(
         uploadUuid: String,
         localUri: DoorUri,
         remoteUrl: String,
         fromByte: Long,
         chunkSize: Int,
-        onProgress: (Long) -> Unit,
+        onProgress: (ChunkedUploadClientLocalUriUseCase.UploadProgress) -> Unit,
         onStatusChange: (TransferJobItemStatus) -> Unit,
         lastChunkHeaders: IStringValues?,
     ): ChunkedUploadClientLocalUriUseCase.LastChunkResponse {
+        val totalSize = uriHelper.getSize(localUri)
         return invoke(
             uploadUuid = uploadUuid,
-            totalSize = uriHelper.getSize(localUri),
+            totalSize = totalSize,
             getChunk = LocalUriChunkGetter(localUri, uriHelper),
             remoteUrl = remoteUrl,
             chunkSize = chunkSize,
             fromByte =  fromByte,
-            onProgress = onProgress,
+            onProgress = {
+                onProgress(
+                    ChunkedUploadClientLocalUriUseCase.UploadProgress(
+                        bytesTransferred = it,
+                        totalBytes = totalSize
+                    )
+                )
+            },
             onStatusChange = onStatusChange,
         )
     }
@@ -106,8 +114,8 @@ class ChunkedUploadClientUseCaseKtorImpl(
         onProgress: (Long) -> Unit,
         onStatusChange: (TransferJobItemStatus) -> Unit,
     ): ChunkedUploadClientLocalUriUseCase.LastChunkResponse {
-        if(totalSize <= 0)
-            throw IllegalArgumentException("Upload size <= 0")
+        if(totalSize < 0)
+            throw IllegalArgumentException("Upload size < 0")
 
         val chunkInfo = ChunkInfo(
             totalSize = totalSize,
@@ -127,12 +135,14 @@ class ChunkedUploadClientUseCaseKtorImpl(
                 val response = httpClient.post(remoteUrl) {
                     header(HEADER_UPLOAD_UUID, uploadUuid)
                     header(HEADER_IS_FINAL_CHUNK, chunk.isLastChunk.toString())
+                    header(HEADER_UPLOAD_START_BYTE, chunk.start.toString())
                     chunkResponseInfo?.extraHeaders?.forEach { extraHeader ->
                         extraHeader.value.forEach { headerVal ->
                             header(extraHeader.key, headerVal)
                         }
                     }
 
+                    expectSuccess = true
                     setBody(ByteReadChannel(buffer, 0, chunk.size))
                 }
                 onProgress(chunk.start + chunk.size)

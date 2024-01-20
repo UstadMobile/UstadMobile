@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 class MediaSource(
-    val url: String,
+    val uri: String,
     val mimeType: String,
 )
 

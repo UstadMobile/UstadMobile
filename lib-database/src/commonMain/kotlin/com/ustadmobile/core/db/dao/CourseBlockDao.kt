@@ -10,6 +10,7 @@ import com.ustadmobile.door.annotation.DoorDao
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.door.annotation.QueryLiveTables
 import app.cash.paging.PagingSource
+import com.ustadmobile.core.db.UNSET_DISTANT_FUTURE
 import com.ustadmobile.door.annotation.HttpAccessible
 import com.ustadmobile.door.annotation.HttpServerFunctionCall
 import com.ustadmobile.door.annotation.HttpServerFunctionParam
@@ -314,7 +315,7 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
                     HttpServerFunctionParam(
                         name = "hideUntilFilterTime",
                         argType = HttpServerFunctionParam.ArgType.LITERAL,
-                        literalValue = "0L",
+                        literalValue = "${UNSET_DISTANT_FUTURE}L",
                     )
                 )
             )

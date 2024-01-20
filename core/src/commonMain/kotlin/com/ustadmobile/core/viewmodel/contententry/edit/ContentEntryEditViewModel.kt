@@ -2,7 +2,7 @@ package com.ustadmobile.core.viewmodel.contententry.edit
 
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.domain.contententry.importcontent.ImportContentUseCase
+import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
 import com.ustadmobile.core.domain.contententry.save.SaveContentEntryUseCase
 import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
@@ -16,7 +16,7 @@ import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.lib.db.composites.ContentEntryBlockLanguageAndContentJob
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentJob
-import com.ustadmobile.lib.db.entities.ContentJobItem
+import com.ustadmobile.lib.db.entities.ContentEntryImportJob
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import kotlinx.coroutines.flow.Flow
@@ -98,8 +98,10 @@ data class ContentEntryEditUiState(
 class ContentEntryEditViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
-    private val saveContentEntryUseCase: SaveContentEntryUseCase = di.onActiveEndpoint().direct.instance(),
-    private val importContentUseCase: ImportContentUseCase = di.onActiveEndpoint().direct.instance(),
+    private val saveContentEntryUseCase: SaveContentEntryUseCase =
+        di.onActiveEndpoint().direct.instance(),
+    private val enqueueContentEntryImporseUseCase: EnqueueContentEntryImportUseCase =
+        di.onActiveEndpoint().direct.instance(),
 ) : UstadEditViewModel(di, savedStateHandle, DEST_NAME){
 
     private val _uiState = MutableStateFlow(
@@ -151,7 +153,7 @@ class ContentEntryEditViewModel(
                                 cbTitle = importedMetaData.entry.title
                                 cbDescription = importedMetaData.entry.description
                             },
-                            contentJobItem = ContentJobItem(
+                            contentJobItem = ContentEntryImportJob(
                                 cjiPluginId = importedMetaData.importerId,
                                 cjiContentEntryUid = newContentEntryUid,
                                 sourceUri = importedMetaData.entry.sourceUrl,
@@ -300,10 +302,8 @@ class ContentEntryEditViewModel(
                 )
 
                 val contentJobItemVal = entityVal.contentJobItem
-                val contentJobVal = entityVal.contentJob
-                if(contentJobVal != null && contentJobItemVal != null) {
-                    importContentUseCase(
-                        contentJob = contentJobVal,
+                if(contentJobItemVal != null) {
+                    enqueueContentEntryImporseUseCase(
                         contentJobItem = contentJobItemVal
                     )
                 }

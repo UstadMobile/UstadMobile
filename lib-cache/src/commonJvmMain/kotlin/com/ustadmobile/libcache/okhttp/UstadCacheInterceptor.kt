@@ -6,13 +6,12 @@ import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCache.Companion.HEADER_FIRST_STORED_TIMESTAMP
 import com.ustadmobile.libcache.UstadCache.Companion.HEADER_LAST_VALIDATED_TIMESTAMP
 import com.ustadmobile.libcache.UstadCacheImpl.Companion.LOG_TAG
-import com.ustadmobile.libcache.base64.encodeBase64
+import com.ustadmobile.libcache.ValidatedEntry
 import com.ustadmobile.libcache.cachecontrol.CacheControlFreshnessChecker
 import com.ustadmobile.libcache.cachecontrol.CacheControlFreshnessCheckerImpl
 import com.ustadmobile.libcache.cachecontrol.RequestCacheControlHeader
 import com.ustadmobile.libcache.cachecontrol.ResponseCacheabilityChecker
 import com.ustadmobile.libcache.cachecontrol.ResponseCacheabilityCheckerImpl
-import com.ustadmobile.libcache.headers.CouponHeader
 import com.ustadmobile.libcache.headers.headersBuilder
 import com.ustadmobile.libcache.logging.UstadCacheLogger
 import com.ustadmobile.libcache.response.HttpPathResponse
@@ -46,7 +45,7 @@ import java.util.concurrent.Executors
  */
 class UstadCacheInterceptor(
     private val cache: UstadCache,
-    private val cacheDir: File,
+    private val tmpDir: File,
     private val logger : UstadCacheLogger? = null,
     private val cacheControlFreshnessChecker: CacheControlFreshnessChecker =
         CacheControlFreshnessCheckerImpl(),
@@ -60,7 +59,7 @@ class UstadCacheInterceptor(
     private val logPrefix: String = "OKHttp-CacheInterceptor: "
 
     @Volatile
-    private var cacheDirChecked = false
+    private var tmpDirChecked = false
 
     /**
      * This runnable will simultaneously write.
@@ -74,6 +73,7 @@ class UstadCacheInterceptor(
             val buffer = ByteArray(8192)
             var bytesRead = 0
             val digest = MessageDigest.getInstance("SHA-256")
+            val tmpFile = File(tmpDir, UUID.randomUUID().toString())
 
             try {
                 val responseInStream = response.body?.byteStream()?.let {
@@ -81,51 +81,56 @@ class UstadCacheInterceptor(
                 } ?: throw IllegalStateException()
 
                 responseInStream.use { responseIn ->
-                    if(!cacheDirChecked) {
-                        cacheDir.takeIf { !it.exists() }?.mkdirs()
-                        cacheDirChecked = true
+                    if(!tmpDirChecked) {
+                        tmpDir.takeIf { !it.exists() }?.mkdirs()
+                        tmpDirChecked = true
                     }
 
-                    val file = File(cacheDir, UUID.randomUUID().toString())
-                    val fileOutStream = file.outputStream()
+
+                    val fileOutStream = tmpFile.outputStream()
                     while(!call.isCanceled() &&
                         responseIn.read(buffer).also { bytesRead = it } != -1
                     ) {
                         fileOutStream.write(buffer, 0, bytesRead)
                         pipeOut.write(buffer, 0, bytesRead)
                     }
-                    pipeOut.flush()
-                    pipeOut.close()
                     fileOutStream.flush()
                     fileOutStream.close()
 
                     val cacheRequest = call.request().asCacheHttpRequest()
-                    val sha256 = digest.digest()
 
                     if(!call.isCanceled()) {
                         cache.store(listOf(
                             CacheEntryToStore(
                                 request = cacheRequest,
                                 response = HttpPathResponse(
-                                    path = Path(file.absolutePath),
+                                    path = Path(tmpFile.absolutePath),
                                     fileSystem = fileSystem,
-                                    mimeType = response.header("content-type") ?: "application/octet-stream",
+                                    mimeType = response.header("content-type")
+                                        ?: "application/octet-stream",
                                     request = cacheRequest,
                                     extraHeaders = headersBuilder {
                                         takeFrom(response.headers.asCacheHttpHeaders())
-                                        header(CouponHeader.COUPON_ACTUAL_SHA_256, sha256.encodeBase64())
                                     }
                                 ),
-                                responseBodyTmpLocalPath = Path(file.absolutePath)
+                                responseBodyTmpLocalPath = Path(tmpFile.absolutePath)
                             )
                         ))
                     }
+
+                    /**
+                     * Close the pipes last so that it is certain that the cache entry is stored
+                     * if making any call after reading the OKHttp response.
+                     */
+                    pipeOut.flush()
+                    pipeOut.close()
                 }
             }catch(e: Throwable){
-                logger?.e(LOG_TAG, "$logPrefix ReadAndCacheRunnable: exception handling ${call.request().url}", e)
+                logger?.e(LOG_TAG, "$logPrefix ReadAndCacheRunnable: exception handling ${call.request().method} ${call.request().url}", e)
                 throw e
             }finally {
                 response.close()
+                tmpFile.takeIf { it.exists() }?.delete()
             }
         }
     }
@@ -174,9 +179,15 @@ class UstadCacheInterceptor(
             .headers(cacheResponse.headers.asOkHttpHeaders())
             .request(call.request())
             .body(responseBody)
-            .code(200)
+            .code(cacheResponse.responseCode)
             .protocol(Protocol.HTTP_1_1)
-            .message("OK")
+            .message(
+                when(cacheResponse.responseCode) {
+                    206 -> "Partial Content"
+                    204 -> "No Content"
+                    else -> "OK"
+                }
+            )
             .build()
     }
 
@@ -219,6 +230,16 @@ class UstadCacheInterceptor(
                 newResponseFromCachedResponse(cacheResponse, call)
             }
 
+            /**
+             * The request header specified only-if-cached, but we don't have it.
+             */
+            requestCacheControlHeader?.onlyIfCached == true -> {
+                Response.Builder()
+                    .request(request)
+                    .code(504)
+                    .build()
+            }
+
             /*
              * When response is not fresh, but can be validated, then send a validation request
              * and use the cached response if the
@@ -235,7 +256,11 @@ class UstadCacheInterceptor(
                 if(validationResponse.code == 304) {
                     logger?.d(LOG_TAG, "$logPrefix HIT(validated) $url")
                     validationResponse.close()
-                    //TODO: update the cache so it knows it is fresh
+                    cache.updateLastValidated(
+                        listOf(
+                            ValidatedEntry(url, validationResponse.headers.asCacheHttpHeaders())
+                        )
+                    )
                     newResponseFromCachedResponse(cacheResponse, call)
                 }else {
                     logger?.d(LOG_TAG, "$logPrefix MISS(invalid) $url")

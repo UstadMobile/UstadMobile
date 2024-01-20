@@ -32,9 +32,9 @@ val VideoContentComponent = FC<VideoContentProps> { props ->
             spacing = responsive(2)
             direction = responsive(StackDirection.column)
 
-            props.uiState.mediaContentInfo?.also {
+            props.uiState.mediaSrc?.also { mediaSrc ->
                 video {
-                    src = it.sources.first().url
+                    src = mediaSrc
                     controls = true
                     css {
                         maxHeight = 80.vh

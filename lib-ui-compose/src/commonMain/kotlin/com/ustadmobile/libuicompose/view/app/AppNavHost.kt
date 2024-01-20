@@ -1,5 +1,6 @@
 package com.ustadmobile.libuicompose.view.app
 
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -16,6 +17,7 @@ import com.ustadmobile.core.impl.nav.NavResultReturner
 import com.ustadmobile.core.impl.nav.NavResultReturnerImpl
 import com.ustadmobile.core.impl.nav.PopNavCommand
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.view.JoinWithCodeView
 import com.ustadmobile.core.viewmodel.HtmlEditViewModel
 import com.ustadmobile.core.viewmodel.OnBoardingViewModel
 import com.ustadmobile.core.viewmodel.person.registerageredirect.RegisterAgeRedirectViewModel
@@ -35,6 +37,10 @@ import com.ustadmobile.core.viewmodel.clazzenrolment.list.ClazzEnrolmentListView
 import com.ustadmobile.core.viewmodel.clazzlog.attendancelist.ClazzLogListAttendanceViewModel
 import com.ustadmobile.core.viewmodel.clazzlog.edit.ClazzLogEditViewModel
 import com.ustadmobile.core.viewmodel.clazzlog.editattendance.ClazzLogEditAttendanceViewModel
+import com.ustadmobile.core.viewmodel.contententry.detail.ContentEntryDetailViewModel
+import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewModel
+import com.ustadmobile.core.viewmodel.contententry.getmetadata.ContentEntryGetMetadataViewModel
+import com.ustadmobile.core.viewmodel.contententry.importlink.ContentEntryImportLinkViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
 import com.ustadmobile.core.viewmodel.coursegroupset.detail.CourseGroupSetDetailViewModel
@@ -46,10 +52,12 @@ import com.ustadmobile.core.viewmodel.courseterminology.list.CourseTerminologyLi
 import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.CourseDiscussionDetailViewModel
 import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailViewModel
 import com.ustadmobile.core.viewmodel.discussionpost.edit.DiscussionPostEditViewModel
+import com.ustadmobile.core.viewmodel.epubcontent.EpubContentViewModel
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import com.ustadmobile.core.viewmodel.message.conversationlist.ConversationListViewModel
 import com.ustadmobile.core.viewmodel.message.messagelist.MessageListViewModel
 import com.ustadmobile.core.viewmodel.parentalconsentmanagement.ParentalConsentManagementViewModel
+import com.ustadmobile.core.viewmodel.pdfcontent.PdfContentViewModel
 import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditViewModel
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
@@ -114,13 +122,22 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import kotlin.reflect.KClass
 import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel
+import com.ustadmobile.core.viewmodel.videocontent.VideoContentViewModel
+import com.ustadmobile.core.viewmodel.xapicontent.XapiContentViewModel
+import com.ustadmobile.libuicompose.view.contententry.detail.ContentEntryDetailScreen
+import com.ustadmobile.libuicompose.view.contententry.edit.ContentEntryEditScreen
+import com.ustadmobile.libuicompose.view.contententry.getmetadata.ContentEntryGetMetadataScreen
+import com.ustadmobile.libuicompose.view.contententry.importlink.ContentEntryImportLinkScreen
 import com.ustadmobile.libuicompose.view.courseterminology.edit.CourseTerminologyEditScreen
 import com.ustadmobile.libuicompose.view.courseterminology.list.CourseTerminologyListScreen
 import com.ustadmobile.libuicompose.view.clazzlog.edit.ClazzLogEditScreen
 import com.ustadmobile.libuicompose.view.message.conversationlist.ConversationListScreen
 import com.ustadmobile.libuicompose.view.message.messagelist.MessageListScreen
 import com.ustadmobile.libuicompose.view.parentalconsentmanagement.ParentalConsentManagementScreen
+import com.ustadmobile.libuicompose.view.pdfcontent.PdfContentScreen
 import com.ustadmobile.libuicompose.view.person.registerminorwaitforparent.RegisterMinorWaitForParentScreen
+import com.ustadmobile.libuicompose.view.videocontent.VideoContentScreen
+import com.ustadmobile.libuicompose.view.xapicontent.XapiContentScreen
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -582,6 +599,62 @@ fun AppNavHost(
                     appViewModel(backStackEntry, CourseTerminologyEditViewModel::class,
                         ::CourseTerminologyEditViewModel)
                 )
+            }
+
+            contentScene("/${ContentEntryGetMetadataViewModel.DEST_NAME}") { backStackEntry ->
+                ContentEntryGetMetadataScreen(
+                    appViewModel(backStackEntry, ContentEntryGetMetadataViewModel::class,
+                        ::ContentEntryGetMetadataViewModel)
+                )
+            }
+
+            contentScene("/${ContentEntryEditViewModel.DEST_NAME}") { backStackEntry ->
+                ContentEntryEditScreen(
+                    appViewModel(backStackEntry, ContentEntryEditViewModel::class,
+                        ::ContentEntryEditViewModel)
+                )
+            }
+
+            contentScene("/${ContentEntryDetailViewModel.DEST_NAME}") {backStackEntry ->
+                ContentEntryDetailScreen(
+                    backStackEntry, ustadNavController, onSetAppUiState, onShowSnackBar, navResultReturner,
+                )
+            }
+
+            contentScene("/${XapiContentViewModel.DEST_NAME}") { backStackEntry ->
+                XapiContentScreen(
+                    appViewModel(backStackEntry, XapiContentViewModel::class,
+                        ::XapiContentViewModel)
+                )
+            }
+
+            contentScene("/${VideoContentViewModel.DEST_NAME}") { backStackEntry ->
+                VideoContentScreen(
+                    appViewModel(backStackEntry, VideoContentViewModel::class,
+                        ::VideoContentViewModel)
+                )
+            }
+
+            contentScene("/${ContentEntryImportLinkViewModel.DEST_NAME}") { backStackEntry ->
+                ContentEntryImportLinkScreen(
+                    appViewModel(backStackEntry, ContentEntryImportLinkViewModel::class,
+                        ::ContentEntryImportLinkViewModel)
+                )
+            }
+
+            contentScene("/${PdfContentViewModel.DEST_NAME}") { backStackEntry ->
+                PdfContentScreen(
+                    appViewModel(backStackEntry, PdfContentViewModel::class,
+                        ::PdfContentViewModel)
+                )
+            }
+
+            contentScene("/${EpubContentViewModel.DEST_NAME}") { backStackEntry ->
+                Text("Epub - Android/Desktop: coming soon")
+            }
+
+            contentScene("/${JoinWithCodeView.VIEW_NAME}") { backStackEntry ->
+                Text("Join via code: coming soon")
             }
         }
     }

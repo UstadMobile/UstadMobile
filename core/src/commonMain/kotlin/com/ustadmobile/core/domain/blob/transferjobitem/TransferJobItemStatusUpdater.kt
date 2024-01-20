@@ -1,7 +1,8 @@
 package com.ustadmobile.core.domain.blob.transferjobitem
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCase
+import com.ustadmobile.core.domain.blob.BlobTransferProgressUpdate
+import com.ustadmobile.core.domain.blob.BlobTransferStatusUpdate
 import com.ustadmobile.core.util.ext.lastDistinctBy
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.ext.withDoorTransactionAsync
@@ -17,8 +18,8 @@ import kotlinx.coroutines.launch
  * Manages updating TransferJobItem status and progress periodically, thus reducing the number of
  * database transactions that run.
  *
- * This is used by the BlobUploadClientUseCase on JVM and Android and the SaveLocalUriAsBlobUseCase
- * on Javascript.
+ * This is used by the BlobUploadClientUseCase and BlobDownloadClientUseCaseCommonJvm on JVM and
+ * Android and the SaveLocalUriAsBlobUseCase on Javascript.
  */
 class TransferJobItemStatusUpdater(
     private val db: UmAppDatabase,
@@ -29,10 +30,10 @@ class TransferJobItemStatusUpdater(
     private val finished = atomic(false)
 
     private val progressUpdates = atomic(
-        emptyList<BlobUploadClientUseCase.BlobUploadProgressUpdate>()
+        emptyList<BlobTransferProgressUpdate>()
     )
     private val statusUpdates = atomic(
-        emptyList<BlobUploadClientUseCase.BlobUploadStatusUpdate>()
+        emptyList<BlobTransferStatusUpdate>()
     )
 
     private val updateJob = scope.launch {
@@ -43,19 +44,26 @@ class TransferJobItemStatusUpdater(
     }
 
 
-    fun onProgressUpdate(update: BlobUploadClientUseCase.BlobUploadProgressUpdate) {
+    fun onProgressUpdate(update: BlobTransferProgressUpdate) {
         progressUpdates.update { prev ->
             prev + update
         }
     }
 
-    fun onStatusUpdate(update: BlobUploadClientUseCase.BlobUploadStatusUpdate) {
+    fun onStatusUpdate(update: BlobTransferStatusUpdate) {
         statusUpdates.update { prev ->
             prev + update
         }
     }
 
-    suspend fun commit(){
+    /**
+     * @param updateTransferJobStatusUid a transferjobuid for which we should set TransferJob.tjStatus to
+     *        complete if all related TransferJobItem.tjiStatus(s) are complete
+     *
+     */
+    suspend fun commit(
+        updateTransferJobStatusUid: Int = 0
+    ){
         val progressUpdatesToQueue =
             progressUpdates.getAndSet(emptyList())
 
@@ -63,42 +71,45 @@ class TransferJobItemStatusUpdater(
             statusUpdates.getAndSet(emptyList())
 
         val progressUpdatesToCommit = progressUpdatesToQueue.lastDistinctBy {
-            it.uploadItem.transferJobItemUid
+            it.transferItem.transferJobItemUid
         }
         val statusUpdatesToCommit = statusUpdatesToQueue.lastDistinctBy {
-            it.uploadItem.transferJobItemUid
+            it.transferItem.transferJobItemUid
         }
 
         val repoNodeId = (repo as? DoorDatabaseRepository)?.remoteNodeIdOrFake()
 
         db.takeIf {
             progressUpdatesToCommit.isNotEmpty() || statusUpdatesToCommit.isNotEmpty()
+                    || updateTransferJobStatusUid != 0
         }?.withDoorTransactionAsync {
             progressUpdatesToCommit.forEach {
                 db.transferJobItemDao.updateTransferredProgress(
-                    jobItemUid = it.uploadItem.transferJobItemUid,
+                    jobItemUid = it.transferItem.transferJobItemUid,
                     transferred = it.bytesTransferred,
                 )
             }
 
             statusUpdatesToCommit.forEach {
                 db.transferJobItemDao.updateStatus(
-                    jobItemUid = it.uploadItem.transferJobItemUid,
+                    jobItemUid = it.transferItem.transferJobItemUid,
                     status = it.status
                 )
 
                 //If the blob upload is complete and associated with an entityUid, then put in an
                 // OutgoingReplication so that the new value is sent to the server.
-
-                //HERE: There could be more than one blob associated with the given entity e.g.
-                // thumbnail and main image. This should run a check for any remaining transferjobs
-                //before triggering
                 if(it.status == TransferJobItemStatus.COMPLETE.value && repoNodeId != null) {
                     db.transferJobItemDao.insertOutgoingReplicationForTransferJobItemIfDone(
                         destNodeId = repoNodeId,
-                        transferJobItemUid = it.uploadItem.transferJobItemUid
+                        transferJobItemUid = it.transferItem.transferJobItemUid
                     )
                 }
+            }
+
+            if(updateTransferJobStatusUid != 0) {
+                db.transferJobDao.updateStatusIfComplete(
+                    jobUid = updateTransferJobStatusUid
+                )
             }
         }
     }

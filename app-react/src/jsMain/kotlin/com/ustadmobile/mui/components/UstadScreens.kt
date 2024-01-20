@@ -2,7 +2,6 @@ package com.ustadmobile.mui.components
 
 import com.ustadmobile.MuiAppState
 import com.ustadmobile.core.components.DIModule
-import com.ustadmobile.core.db.ContentJobItemTriggersCallback
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabaseJsImplementations
 import com.ustadmobile.core.db.ext.addSyncCallback
@@ -43,7 +42,6 @@ import kotlinx.browser.window
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
 import mui.material.Snackbar
-import mui.material.Typography
 import react.*
 import react.router.useLoaderData
 import ustadJsDi
@@ -192,10 +190,9 @@ val UstadScreens = FC<Props> {
                             onClose = { _, _ ->
                                 snack = null
                             }
+                            autoHideDuration = 8000
 
-                            Typography {
-                                + (snack?.message ?: "")
-                            }
+                            message = ReactNode(snack?.message ?: "")
                         }
                     }
                 }
@@ -234,7 +231,6 @@ val ustadScreensLoader: LoaderFunction<*> = {
         webWorkerPath = "./worker.sql-wasm.js")
 
     val dbBuilder =  DatabaseBuilder.databaseBuilder(builderOptions)
-        .addCallback(ContentJobItemTriggersCallback())
         .addSyncCallback(dbNodeIdAndAuth)
         .addMigrations(*migrationList().toTypedArray())
 

@@ -58,6 +58,7 @@ val PersonAccountEditComponent2 = FC<PersonAccountEditScreenProps> { props ->
                     value = props.uiState.personAccount?.currentPassword ?: ""
                     label = ReactNode(strings[MR.strings.current_password] + "*")
                     helperText = ReactNode(props.uiState.currentPasswordError ?: strings[MR.strings.required])
+                    error = props.uiState.currentPasswordError != null
                     disabled = !props.uiState.fieldsEnabled
                     onTextChange = {
                         props.onAccountChanged(
@@ -95,7 +96,7 @@ val PersonAccountEditPreview = FC<Props> {
         PersonAccountEditUiState(
             personAccount = PersonUsernameAndPasswordModel(
                 username = "",
-                currentPassword = null,
+                currentPassword = "",
             )
         )
     }

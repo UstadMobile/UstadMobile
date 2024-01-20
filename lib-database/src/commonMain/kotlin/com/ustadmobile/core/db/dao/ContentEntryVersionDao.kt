@@ -35,4 +35,31 @@ expect abstract class ContentEntryVersionDao {
         contentEntryUid: Long
     ): ContentEntryVersion?
 
+
+    @Query("""
+        UPDATE TransferJobItem
+           SET tjiEntityEtag = 
+               (SELECT cevLct
+                  FROM ContentEntryVersion
+                 WHERE cevUid = :entityUid)
+         WHERE tjiUid = :transferJobItemUid
+    """)
+    abstract suspend fun updateTransferJobItemEtag(
+        entityUid: Long,
+        transferJobItemUid: Int
+    )
+
+
+    @Query("""
+        SELECT ContentEntryVersion.*
+          FROM ContentEntryVersion
+         WHERE NOT EXISTS(
+               SELECT CacheLockJoin.cljId
+                 FROM CacheLockJoin
+                WHERE CacheLockJoin.cljTableId = ${ContentEntryVersion.TABLE_ID}
+                  AND CacheLockJoin.cljEntityUid = ContentEntryVersion.cevUid
+                  AND CacheLockJoin.cljUrl = ContentEntryVersion.cevManifestUrl) 
+    """)
+    abstract suspend fun findContentEntryVersionsWithoutCacheLock(): List<ContentEntryVersion>
+
 }

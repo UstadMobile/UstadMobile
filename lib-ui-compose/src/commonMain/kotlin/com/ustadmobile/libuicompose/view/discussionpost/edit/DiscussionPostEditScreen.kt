@@ -72,6 +72,7 @@ fun DiscussionPostEditScreen(
             onHtmlChange = onDiscussionPostBodyChanged,
             editInNewScreen = false,
             onClickToEditInNewScreen = { },
+            placeholderText = stringResource(MR.strings.compose_post),
         )
         HideSoftInputEffect()
     }

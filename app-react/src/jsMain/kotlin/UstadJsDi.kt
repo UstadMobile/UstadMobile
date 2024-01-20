@@ -4,8 +4,6 @@ import com.russhwolf.settings.StorageSettings
 import com.russhwolf.settings.set
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCaseJs
-import com.ustadmobile.core.domain.contententry.getmetadatafromuri.IContentEntryGetMetaDataFromUriUseCase
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.config.AppConfig
@@ -208,11 +206,5 @@ internal fun ustadJsDi(
         }
     }
 
-    bind<IContentEntryGetMetaDataFromUriUseCase>() with provider {
-        ContentEntryGetMetaDataFromUriUseCaseJs(
-            navResultReturner = instance(),
-            json = instance(),
-        )
-    }
 
 }

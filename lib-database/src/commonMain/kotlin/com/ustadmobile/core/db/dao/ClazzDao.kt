@@ -52,20 +52,27 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
     @Query("SELECT * FROM Clazz WHERE clazzUid = :uid")
     abstract fun findByUidAsFlow(uid: Long): Flow<Clazz?>
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
+    )
     @Query("""
         SELECT Clazz.*, 
+               CoursePicture.*,
                HolidayCalendar.*, 
                School.*,
                CourseTerminology.*
           FROM Clazz 
                LEFT JOIN HolidayCalendar 
-               ON Clazz.clazzHolidayUMCalendarUid = HolidayCalendar.umCalendarUid
+                         ON Clazz.clazzHolidayUMCalendarUid = HolidayCalendar.umCalendarUid
                
                LEFT JOIN School 
-               ON School.schoolUid = Clazz.clazzSchoolUid
+                         ON School.schoolUid = Clazz.clazzSchoolUid
                
                LEFT JOIN CourseTerminology
-               ON CourseTerminology.ctUid = Clazz.clazzTerminologyUid
+                         ON CourseTerminology.ctUid = Clazz.clazzTerminologyUid
+                      
+               LEFT JOIN CoursePicture
+                         ON CoursePicture.coursePictureUid = :uid
          WHERE Clazz.clazzUid = :uid""")
     abstract suspend fun findByUidWithHolidayCalendarAsync(uid: Long): ClazzWithHolidayCalendarAndSchoolAndTerminology?
 
@@ -89,7 +96,7 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
         )
     )
     @Query("""
-        SELECT Clazz.*, ClazzEnrolment.*,
+        SELECT Clazz.*, ClazzEnrolment.*, CoursePicture.*,
                (SELECT COUNT(DISTINCT ClazzEnrolment.clazzEnrolmentPersonUid) 
                   FROM ClazzEnrolment 
                  WHERE ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid 
@@ -118,7 +125,9 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
                            AND ClazzEnrolment.clazzEnrolmentActive
                            AND ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid LIMIT 1), 0)
                 LEFT JOIN CourseTerminology   
-                ON CourseTerminology.ctUid = Clazz.clazzTerminologyUid           
+                          ON CourseTerminology.ctUid = Clazz.clazzTerminologyUid
+                LEFT JOIN CoursePicture
+                          ON CoursePicture.coursePictureUid = Clazz.clazzUid           
 
          WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid
            AND PersonGroupMember.groupMemberActive 
@@ -132,7 +141,7 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
                                       ELSE :currentTime > Clazz.clazzEndTime 
                                       END))
            AND ( :selectedSchool = 0 OR Clazz.clazzSchoolUid = :selectedSchool)
-      GROUP BY Clazz.clazzUid, ClazzEnrolment.clazzEnrolmentUid, CourseTerminology.ctUid
+      GROUP BY Clazz.clazzUid, ClazzEnrolment.clazzEnrolmentUid, CourseTerminology.ctUid, CoursePicture.coursePictureUid
       ORDER BY CASE :sortOrder
                WHEN $SORT_ATTENDANCE_ASC THEN Clazz.attendanceAverage
                ELSE 0
@@ -287,10 +296,14 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
         clazzUid: Long
     ): List<Long>
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
+    )
     @Query("""
         SELECT Clazz.*, 
                HolidayCalendar.*, 
                School.*,
+               CoursePicture.*,
                (SELECT COUNT(DISTINCT ClazzEnrolment.clazzEnrolmentPersonUid) 
                   FROM ClazzEnrolment 
                  WHERE ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid 
@@ -306,11 +319,13 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
                 CourseTerminology.*      
          FROM Clazz 
               LEFT JOIN HolidayCalendar 
-              ON Clazz.clazzHolidayUMCalendarUid = HolidayCalendar.umCalendarUid
+                        ON Clazz.clazzHolidayUMCalendarUid = HolidayCalendar.umCalendarUid
               LEFT JOIN School 
-              ON School.schoolUid = Clazz.clazzSchoolUid
+                        ON School.schoolUid = Clazz.clazzSchoolUid
               LEFT JOIN CourseTerminology
-              ON CourseTerminology.ctUid = Clazz.clazzTerminologyUid
+                        ON CourseTerminology.ctUid = Clazz.clazzTerminologyUid
+              LEFT JOIN CoursePicture
+                        ON CoursePicture.coursePictureUid = :clazzUid
         WHERE Clazz.clazzUid = :clazzUid""")
     abstract fun getClazzWithDisplayDetails(clazzUid: Long, currentTime: Long): Flow<ClazzWithDisplayDetails?>
 
@@ -324,7 +339,8 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
         SELECT Clazz.*, 
                HolidayCalendar.*, 
                School.*,
-               CourseTerminology.*
+               CourseTerminology.*,
+               CoursePicture.*
          FROM Clazz 
               LEFT JOIN HolidayCalendar 
               ON ((clazz.clazzHolidayUMCalendarUid != 0 
@@ -338,6 +354,9 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
               
               LEFT JOIN CourseTerminology
               ON CourseTerminology.ctUid = Clazz.clazzTerminologyUid
+              
+              LEFT JOIN CoursePicture
+                        ON CoursePicture.coursePictureUid = 0
                 
         WHERE :filterUid = 0 
            OR Clazz.clazzUid = :filterUid

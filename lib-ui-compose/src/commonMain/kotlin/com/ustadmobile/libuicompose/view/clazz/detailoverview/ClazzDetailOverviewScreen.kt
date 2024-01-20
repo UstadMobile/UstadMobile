@@ -1,5 +1,6 @@
 package com.ustadmobile.libuicompose.view.clazz.detailoverview
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,6 +26,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
 import app.cash.paging.Pager
@@ -38,6 +40,7 @@ import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewUi
 import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewViewModel
 import com.ustadmobile.lib.db.composites.CourseBlockAndDisplayDetails
 import com.ustadmobile.lib.db.entities.CourseBlock
+import com.ustadmobile.libuicompose.components.UstadAsyncImage
 import com.ustadmobile.libuicompose.components.UstadHtmlText
 import com.ustadmobile.libuicompose.components.UstadDetailField2
 import com.ustadmobile.libuicompose.components.ustadPagedItems
@@ -48,6 +51,7 @@ import com.ustadmobile.libuicompose.util.rememberFormattedTime
 import com.ustadmobile.libuicompose.view.clazz.paddingCourseBlockIndent
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.libuicompose.view.clazz.iconContent
+import com.ustadmobile.libuicompose.view.clazz.painterForDefaultCourseImage
 
 @Composable
 fun ClazzDetailOverviewScreen(viewModel: ClazzDetailOverviewViewModel) {
@@ -83,10 +87,30 @@ fun ClazzDetailOverviewScreen(
         timeZoneId = uiState.clazz?.clazzTimeZone ?: "UTC",
     )
 
+    val courseBannerUri = uiState.clazz?.coursePicture?.coursePictureUri
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
     ){
+        item(key = "banner") {
+            if(courseBannerUri != null){
+                UstadAsyncImage(
+                    uri = courseBannerUri,
+                    contentDescription = "",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.height(156.dp).fillMaxWidth()
+                )
+            }else {
+                Image(
+                    painter = painterForDefaultCourseImage(uiState.clazz?.clazzName),
+                    contentDescription = "",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.height(156.dp).fillMaxWidth(),
+                )
+            }
+        }
+
         item(key = "clazz_desc") {
             UstadHtmlText(
                 html = uiState.clazz?.clazzDesc ?: "",

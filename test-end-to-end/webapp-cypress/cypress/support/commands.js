@@ -1,3 +1,4 @@
+
 // ***********************************************
 // This example commands.js shows you how to
 // create various custom commands and overwrite
@@ -19,7 +20,7 @@ import '@this-dot/cypress-indexeddb';
 // Start Test Server
 Cypress.Commands.add('ustadStartTestServer', () => {
   cy.visit('http://localhost:8075/start'); // Use cy.visit to navigate to the start page
-  cy.wait(5000); // Wait for 5 seconds after visiting the start page
+  cy.wait(6000); // Wait for 6 seconds after visiting the start page
 });
 
 
@@ -47,6 +48,18 @@ Cypress.Commands.add('ustadClearDbAndLogin', (username, password) => {
 Cypress.Commands.add('ustadLogout', () => {
    cy.get('#header_avatar').click()
    cy.contains('LOG OUT').click()
+})
+
+// Add a content to Library
+Cypress.Commands.add('ustadAddContentToLibrary',(contentPath,contentName) => {
+  cy.contains("Library").click()
+  cy.contains("button","Content").click()
+  cy.get('#new_content_from_file').click({force: true})
+  cy.get('input[type="file"]').selectFile(contentPath,{force:true})
+  cy.get('input[id="content_title"]').click()
+  cy.get('input[id="content_title"]').clear().type(contentName,{timeout: 2000})
+  cy.get('#actionBarButton').click()
+
 })
 
 // Create a new course
@@ -120,22 +133,50 @@ Cypress.Commands.add('ustadAddDiscussionBoard',(discussionTitle) => {
     cy.contains("button","Done").click()
 })
 
+  // Enable User Registration
+Cypress.Commands.add('ustadEnableUserRegistration' ,() => {
+    cy.get('#settings_button').click()
+    cy.contains('Site').click()
+    cy.contains('Edit').click()
+  //https://docs.cypress.io/api/commands/should#Assert-the-href-attribute-is-equal-to-users
+    cy.get('#terms_html_edit .ql-editor').as('editor')
+    cy.get('@editor').should('have.attr', 'contenteditable').and('equal', 'true',{timeout:3000})
+    cy.get('@editor').click().clear().type("New Terms",{delay:10})
+    cy.get('#registration_allowed').click({force:true})
+    cy.get('#actionBarButton').should('be.visible')
+    cy.get('#actionBarButton').click()
+    cy.contains('Yes').should('exist')
+})
+
 /*
  * Set a DateTime field: Takes two arguments:
  * Element, Date object (Javascript Date object)
  *
  * e.g.
  * Set a fixed date/time:
- * cy.ustadSetDate(cy.get("input#id"), new Date("2017-06-01T08:30"));
+ * cy.ustadSetDateTime(cy.get("input#id"), new Date("2017-06-01T08:30"));
  *
  * Set the time to two minutes from now e.g. now plus (2 x 60 x 1000)ms:
- * cy.ustadSetDate(cy.get("input#id"), new Date(Date.now() + (2*60*1000))
+ * cy.ustadSetDateTime(cy.get("input#id"), new Date(Date.now() + (2*60*1000))
  */
 Cypress.Commands.add("ustadSetDateTime", (element, date) => {
     element.type(date.getFullYear() + "-" + String(date.getMonth()+1).padStart(2, '0') + "-" +
-        String(date.getDate()).padStart(2, '0') + "T" + String(date.getHours()).padStart(2, '0') +
-        ":" + String(date.getMinutes()).padStart(2,'0')
-    );
+    String(date.getDate()).padStart(2, '0') + "T" + String(date.getHours()).padStart(2, '0') +
+    ":" + String(date.getMinutes()).padStart(2,'0')
+  );
+});
+
+
+/*
+ * e.g.
+ * cy.ustadBirthDate(cy.get("input#id"), new Date("2017-06-01"));
+ *
+*/
+
+Cypress.Commands.add("ustadBirthDate", (element, date) => {
+     element.type(date.getFullYear() + "-" + String(date.getMonth()+1).padStart(2, '0') + "-" +
+     String(date.getDate()).padStart(2, '0')
+     );
 });
 
 //commands.js

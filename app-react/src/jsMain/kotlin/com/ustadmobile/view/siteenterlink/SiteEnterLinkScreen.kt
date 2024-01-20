@@ -12,7 +12,6 @@ import com.ustadmobile.mui.components.UstadTextField
 import react.dom.html.ReactHTML.img
 import com.ustadmobile.util.ext.onTextChange
 import web.cssom.px
-import mui.icons.material.Add
 import mui.material.*
 import mui.system.Stack
 import mui.system.responsive
@@ -89,21 +88,6 @@ val SiteEnterLinkComponent2 = FC <SiteEnterLinkProps> { props ->
                 disabled = !props.uiState.fieldsEnabled
 
                 + strings[MR.strings.next]
-            }
-
-            Typography {
-                align = TypographyAlign.center
-                + strings[MR.strings.or].uppercase()
-            }
-
-            Button {
-                id = "new_env_button"
-                onClick = { props.onClickNewLearningEnvironment() }
-                variant = ButtonVariant.text
-
-                startIcon = Add.create()
-
-                + strings[MR.strings.create_a_new_learning_env].uppercase()
             }
         }
     }
