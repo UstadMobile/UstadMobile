@@ -10,4 +10,7 @@ object PersonViewModelConstants {
      */
     const val ARG_GO_TO_ON_PERSON_SELECTED = "goToOnPersonSelected"
 
+    const val ARG_POPUP_TO_ON_PERSON_SELECTED = "popUpToOnPersonSelected"
+
+
 }

@@ -20,6 +20,8 @@ import app.cash.paging.PagingSourceLoadParams
 import app.cash.paging.PagingSourceLoadResult
 import app.cash.paging.PagingSourceLoadResultPage
 import app.cash.paging.PagingState
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
+import com.ustadmobile.core.viewmodel.person.PersonViewModelConstants.ARG_POPUP_TO_ON_PERSON_SELECTED
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.lib.db.composites.PersonAndListDisplayDetails
@@ -144,7 +146,13 @@ class PersonListViewModel(
             val args = UMFileUtil.parseURLQueryString(goToOnPersonSelected) +
                 mapOf(UstadView.ARG_PERSON_UID to entry.personUid.toString())
             val goToDestName = goToOnPersonSelected.substringBefore("?")
-            navController.navigate(goToDestName, args)
+            val popUpTo = savedStateHandle[ARG_POPUP_TO_ON_PERSON_SELECTED]
+            navController.navigate(
+                goToDestName, args, UstadMobileSystemCommon.UstadGoOptions(
+                    popUpToViewName = popUpTo,
+                    popUpToInclusive = true,
+                )
+            )
         }else {
             navigateOnItemClicked(PersonDetailViewModel.DEST_NAME, entry.personUid, entry)
         }
