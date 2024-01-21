@@ -206,7 +206,7 @@ class EpubContentImporterCommonJvm(
             cevContentType = ContentEntryVersion.TYPE_EPUB,
             cevContentEntryUid = jobItem.cjiContentEntryUid,
             cevManifestUrl = manifestUrl,
-            cevOpenUri = "$urlPrefix$opfPath",
+            cevOpenUri = opfPath,
         )
 
         val workPath = Path(tmpPath, "epub-import-${systemTimeInMillis()}")
