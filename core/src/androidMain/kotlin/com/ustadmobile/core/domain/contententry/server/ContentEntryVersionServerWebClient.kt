@@ -15,8 +15,9 @@ import io.github.aakira.napier.Napier
  * ContentEntryVersionServerUseCase itself uses OkHttpClient, which uses the cache, so if the item
  * was downloaded for offline use, it will work.
  */
-class ContentEntryVersionServerWebClient(
-    private val useCase: ContentEntryVersionServerUseCase
+open class ContentEntryVersionServerWebClient(
+    private val useCase: ContentEntryVersionServerUseCase,
+    private val contentEntryVersionUid: Long,
 ): WebViewClient() {
 
     override fun shouldInterceptRequest(
@@ -25,10 +26,8 @@ class ContentEntryVersionServerWebClient(
     ): WebResourceResponse {
         val url = request.url.toString()
         return try {
-            val contentEntryVersionUid = url.substringAfter("/api/content/")
-                .substringBefore("/").toLong()
             val pathInContentEntryVersion = url.substringAfter(
-                "/api/content/${contentEntryVersionUid}/")
+                "/api/content/$contentEntryVersionUid/")
             val okHttpResponse = useCase(
                 request = request.toCacheRequest(),
                 contentEntryVersionUid = contentEntryVersionUid,
@@ -37,7 +36,7 @@ class ContentEntryVersionServerWebClient(
 
             okHttpResponse.asWebResourceResponse()
         }catch(e: Throwable) {
-            Napier.w("ContentEntryVersionServerWebClient: could not serve ${url}", e)
+            Napier.w("ContentEntryVersionServerWebClient: could not serve $url", e)
             newUnavailableWebResponse(e)
         }
     }

@@ -218,7 +218,7 @@ fun ContentDetailRightColumn(
 
         Text(
             text = uiState.contentEntry?.entry?.title ?: "",
-            style = MaterialTheme.typography.headlineMedium,
+            style = MaterialTheme.typography.headlineSmall,
             maxLines = 2,
         )
 

@@ -66,7 +66,6 @@ import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportConte
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseRemote
 import com.ustadmobile.core.domain.contententry.importcontent.ImportContentEntryUseCase
 import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServerUseCase
-import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServerWebClient
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.getversion.GetVersionUseCaseAndroid
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
@@ -566,10 +565,6 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 json = instance(),
                 onlyIfCached = false,
             )
-        }
-
-        bind<ContentEntryVersionServerWebClient>() with scoped(EndpointScope.Default).singleton {
-            ContentEntryVersionServerWebClient(useCase = instance())
         }
 
         bind<GetStoragePathForUrlUseCase>() with singleton {

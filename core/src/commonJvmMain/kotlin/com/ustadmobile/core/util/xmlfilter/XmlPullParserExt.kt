@@ -1,45 +1,10 @@
-package com.ustadmobile.lib.util.ext
+package com.ustadmobile.core.util.xmlfilter
 
-import com.ustadmobile.xmlpullparserkmp.XmlPullParser
 import com.ustadmobile.xmlpullparserkmp.XmlPullParserConstants
-import com.ustadmobile.xmlpullparserkmp.XmlPullParserConstants.PROPERTY_STANDALONE
-import com.ustadmobile.xmlpullparserkmp.XmlSerializer
+import org.xmlpull.v1.XmlPullParser
+import org.xmlpull.v1.XmlSerializer
 
-/**
- * These are elements that must always have a separate start and end tag (even when they have
- * no content). Using a single trailing slash to end the tag will confuse browsers.
- */
-private val SEPARATE_END_TAG_REQUIRED_ELEMENTS = arrayOf("script", "style", "title")
-
-/**
- * Implement this interface to control some of the passXmlThrough methods .  This can be used
- * to add extra output to be serialized or to stop processing.
- */
-interface XmlSerializerFilter {
-
-    /**
-     * Called before the given event is passed through to the XmlSerializer.
-     *
-     * @param evtType The event type from the parser
-     * @param parser The XmlPullParser being used
-     * @param serializer The XmlSerializer being used
-     *
-     * @return true to continue processing, false to end processing
-     */
-    fun beforePassthrough(evtType: Int, parser: XmlPullParser, serializer: XmlSerializer): Boolean
-
-    /**
-     * Called after the given event was passed through to the XmlSerializer.
-     *
-     * @param evtType The event type from the parser
-     * @param parser The XmlPullParser being used
-     * @param serializer The XmlSerializer being used
-     *
-     * @return true to continue processing, false to end processing
-     */
-    fun afterPassthrough(evtType: Int, parser: XmlPullParser, serializer: XmlSerializer): Boolean
-
-}
+val SEPARATE_END_TAG_REQUIRED_ELEMENTS = arrayOf("script", "style", "title")
 
 /**
  * Serialize events from this XmlPullParser to an XmlSerializer. This can Serialize a whole document
@@ -48,7 +13,7 @@ interface XmlSerializerFilter {
  *
  * Where the XmlPullParser is currently on a START_TAG event, serialization will automatically stop
  * at the corresponding END_TAG event (which may be inclusive or exclusive as per the argument given).
- * 
+ *
  * @param xmlSerializer serializer that events are written to
  * @param inclusive if true, and the pull parser is starting on a START_TAG event, then the START_TAG
  * and END_TAG for the given tag are passed to the serializer. Otherwise they are not passed (e.g.
@@ -95,7 +60,7 @@ fun XmlPullParser.serializeTo(
 
             XmlPullParserConstants.START_DOCUMENT -> {
                 xmlSerializer.startDocument(getInputEncoding(),
-                    getProperty(PROPERTY_STANDALONE) as? Boolean ?: false)
+                    getProperty(XmlPullParserConstants.PROPERTY_STANDALONE) as? Boolean ?: false)
             }
 
             XmlPullParserConstants.START_TAG -> {

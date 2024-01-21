@@ -4,6 +4,7 @@ import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.contentformats.manifest.ContentManifestEntry
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.contententry.ContentConstants
+import com.ustadmobile.core.util.ext.removeHashSuffix
 import com.ustadmobile.core.util.ext.removeQueryStringSuffix
 import com.ustadmobile.core.util.stringvalues.asIStringValues
 import com.ustadmobile.core.util.stringvalues.asOkHttpHeaders
@@ -13,7 +14,9 @@ import com.ustadmobile.libcache.okhttp.asOkHttpHeaders
 import com.ustadmobile.libcache.okhttp.asOkHttpRequest
 import com.ustadmobile.libcache.request.HttpRequest
 import io.github.reactivecircus.cache4k.Cache
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import okhttp3.CacheControl
 import okhttp3.OkHttpClient
@@ -60,6 +63,35 @@ class ContentEntryVersionServerUseCase(
             this
     }
 
+    suspend fun getManifestEntry(
+        contentEntryVersionUid: Long,
+        pathInContentEntryVersion: String,
+    ) : ContentManifestEntry? = withContext(Dispatchers.IO) {
+        val manifest = manifestCache.get(contentEntryVersionUid) {
+            val contentEntryVersionEntity = (repo ?: db).contentEntryVersionDao
+                .findByUidAsync(contentEntryVersionUid)
+                ?: throw IllegalArgumentException("No such contententryversion : $contentEntryVersionUid")
+            val contentManifestUrl = contentEntryVersionEntity.cevManifestUrl!!
+            val manifestStr = okHttpClient.newCall(
+                Request.Builder()
+                    .applyCacheControl()
+                    .url(contentManifestUrl)
+                    .build()
+            ).execute().body?.string() ?: throw IllegalStateException("Could not fetch manifest: $contentManifestUrl")
+            val manifest = json.decodeFromString(
+                ContentManifest.serializer(), manifestStr
+            )
+            ManifestAndMap(manifest)
+        }
+
+        val pathToLookup = pathInContentEntryVersion.removeQueryStringSuffix()
+            .removeHashSuffix()
+
+        manifest.entryMap[pathInContentEntryVersion]
+            ?: manifest.entryMap[pathToLookup]?.let {
+                if(it.ignoreQueryParams) it else null
+            }
+    }
 
     operator fun invoke(
         request: HttpRequest,
@@ -76,28 +108,9 @@ class ContentEntryVersionServerUseCase(
                     .build()
             ).execute()
         }else {
-            val manifest = runBlocking {
-                manifestCache.get(contentEntryVersionUid) {
-                    val contentEntryVersionEntity = (repo ?: db).contentEntryVersionDao
-                        .findByUidAsync(contentEntryVersionUid) ?: throw IllegalArgumentException("No such contententryversion")
-                    val contentManifestUrl = contentEntryVersionEntity.cevManifestUrl!!
-                    val manifestStr = okHttpClient.newCall(
-                        Request.Builder()
-                            .applyCacheControl()
-                            .url(contentManifestUrl)
-                            .build()
-                    ).execute().body?.string() ?: throw IllegalStateException("Could not fetch manifest: $contentManifestUrl")
-                    val manifest = json.decodeFromString(
-                        ContentManifest.serializer(), manifestStr
-                    )
-                    ManifestAndMap(manifest)
-                }
-            }
-
-            val entry = manifest.entryMap[pathInContentEntryVersion]
-                ?: manifest.entryMap[pathInContentEntryVersion.removeQueryStringSuffix()]?.let {
-                    if(it.ignoreQueryParams) it else null
-                } ?: throw IllegalArgumentException("Could not find $pathInContentEntryVersion")
+            val entry = runBlocking {
+                getManifestEntry(contentEntryVersionUid, pathInContentEntryVersion)
+            } ?: throw IllegalArgumentException("Could not find $pathInContentEntryVersion")
 
             val bodyDataUrlRequest = Request.Builder()
                 .url(entry.bodyDataUrl)

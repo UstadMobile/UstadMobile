@@ -25,11 +25,16 @@ import nl.adaptivity.xmlutil.serialization.XML
 import org.kodein.di.DI
 import org.kodein.di.instance
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.contentformats.epub.opf.Item
+import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.domain.epub.GetEpubTableOfContentsUseCase
+import com.ustadmobile.core.util.requireEntryByUri
+import io.ktor.client.call.body
 import org.kodein.di.direct
 import kotlin.concurrent.Volatile
 
 data class EpubContentUiState(
+    val contentEntryVersionUid: Long = 0,
     val spineUrls: List<String> = emptyList(),
     val tableOfContents: List<EpubTocItem> = emptyList(),
     val tableOfContentsOpen: Boolean = false,
@@ -94,7 +99,11 @@ class EpubContentViewModel(
 
     private val xml: XML by instance()
 
-    private val _uiState = MutableStateFlow(EpubContentUiState())
+    private val _uiState = MutableStateFlow(
+        EpubContentUiState(
+            contentEntryVersionUid = entityUidArg
+        )
+    )
 
     val uiState: Flow<EpubContentUiState> = _uiState.asStateFlow()
 
@@ -119,28 +128,37 @@ class EpubContentViewModel(
     private var navUrl: String? =null
 
     init {
+        _appUiState.update { prev ->
+            prev.copy(
+                hideBottomNavigation = true,
+            )
+        }
         viewModelScope.launch {
             val contentEntryVersion = activeRepo.contentEntryVersionDao
                 .findByUidAsync(entityUidArg) ?: return@launch
-            val cevUrl = contentEntryVersion.cevOpenUri ?: return@launch
+            val cevOpenUri = contentEntryVersion.cevOpenUri ?: return@launch
+            val cevManifestUrl = contentEntryVersion.cevManifestUrl ?: return@launch
+            val cevManifestUrlObj = UrlKmp(cevManifestUrl)
+            val opfBaseUrl = cevManifestUrlObj.resolve(cevOpenUri)
+            val manifest: ContentManifest = httpClient.get(cevManifestUrl).body()
 
             withContext(Dispatchers.Default) {
                 try {
-                    val opfStr = httpClient.get(cevUrl).bodyAsText()
+                    val opfEntry = manifest.requireEntryByUri(cevOpenUri)
+                    val opfStr = httpClient.get(opfEntry.bodyDataUrl).bodyAsText()
                     val opfPackage = xml.decodeFromString(
                         deserializer = PackageDocument.serializer(),
                         string = opfStr
                     )
-                    val cevUrlObj = UrlKmp(cevUrl)
 
                     val manifestItemsMap = opfPackage.manifest.items.associateBy { it.id }
                     val spineUrls = opfPackage.spine.itemRefs.mapNotNull { itemRef ->
                         manifestItemsMap[itemRef.idRef]?.let {
-                            cevUrlObj.resolve(it.href)
+                            opfBaseUrl.resolve(it.href)
                         }?.toString()
                     }
                     val coverImageUrl = opfPackage.coverItem()?.let {
-                        cevUrlObj.resolve(it.href)
+                        opfBaseUrl.resolve(it.href)
                     }?.toString()
 
                     _uiState.update { prev ->
@@ -169,13 +187,24 @@ class EpubContentViewModel(
                     }
 
                     navUrl = opfPackage.tableOfContentItem()?.let {
-                        cevUrlObj.resolve(it.href).toString()
+                        opfBaseUrl.resolve(it.href).toString()
+                    }
+
+                    fun Item.bodyDataUrl(): String {
+                        val prefix = cevOpenUri.substringBeforeLast("/", missingDelimiterValue = "")
+                        val pathInManifest = if(prefix.isNotEmpty()) {
+                            "$prefix/${href}"
+                        }else {
+                            href
+                        }
+
+                        return manifest.requireEntryByUri(pathInManifest).bodyDataUrl
                     }
 
                     val tocItems = getEpubTableOfContentsUseCase(
                         opfPackage = opfPackage,
                         readItemText = {
-                            httpClient.get(cevUrlObj.resolve(it.href).toString()).bodyAsText()
+                            httpClient.get(it.bodyDataUrl()).bodyAsText()
                         }
                     ) ?: emptyList()
 

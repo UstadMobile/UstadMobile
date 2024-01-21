@@ -25,6 +25,7 @@ import org.kodein.di.instance
 
 data class XapiContentUiState(
     val url: String? = null,
+    val contentEntryVersionUid: Long = 0,
 )
 
 class XapiContentViewModel(
@@ -32,12 +33,14 @@ class XapiContentViewModel(
     savedStateHandle: UstadSavedStateHandle,
 ) : UstadViewModel(di, savedStateHandle, DEST_NAME){
 
-    private val _uiState = MutableStateFlow(XapiContentUiState())
-
-    val uiState: Flow<XapiContentUiState> = _uiState.asStateFlow()
-
     private val entityUidArg: Long = savedStateHandle[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0
 
+    private val _uiState = MutableStateFlow(
+        XapiContentUiState(contentEntryVersionUid = entityUidArg)
+    )
+
+    val uiState: Flow<XapiContentUiState> = _uiState.asStateFlow()
+    
     private val httpClient: HttpClient by instance()
 
     init {
