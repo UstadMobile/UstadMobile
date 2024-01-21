@@ -23,16 +23,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import coil.compose.AsyncImage
 import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServerUseCase
 import com.ustadmobile.core.util.ext.onActiveEndpoint
 import com.ustadmobile.core.viewmodel.epubcontent.EpubContentUiState
 import com.ustadmobile.core.viewmodel.epubcontent.EpubContentViewModel
+import com.ustadmobile.core.viewmodel.epubcontent.EpubScrollCommand
 import com.ustadmobile.core.viewmodel.epubcontent.EpubTocItem
+import com.ustadmobile.libuicompose.util.ext.getActivityContext
+import kotlinx.coroutines.flow.Flow
 import org.kodein.di.compose.localDI
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -46,6 +51,7 @@ actual fun EpubContentScreen(
         uiState = uiState,
         onDismissTableOfContents = viewModel::onDismissTableOfContentsDrawer,
         onClickTocItem = viewModel::onClickTocItem,
+        scrollCommandFlow = viewModel.epubScrollCommands,
     )
 }
 
@@ -62,21 +68,34 @@ fun EpubContentScreen(
     uiState: EpubContentUiState,
     onDismissTableOfContents: () -> Unit,
     onClickTocItem: (EpubTocItem) -> Unit,
+    scrollCommandFlow: Flow<EpubScrollCommand>,
 ) {
     val di = localDI()
     val contentEntryVersionServer: ContentEntryVersionServerUseCase = remember {
         di.onActiveEndpoint().direct.instance()
     }
+    val context = LocalContext.current
 
     val recyclerViewAdapter = remember(uiState.contentEntryVersionUid) {
         EpubContentRecyclerViewAdapter(
             contentEntryVersionServer = contentEntryVersionServer,
             contentEntryVersionUid = uiState.contentEntryVersionUid,
+            getDecorHeight = {
+                context.getActivityContext().window.decorView.height
+            }
         )
     }
 
+    var recyclerViewRef: RecyclerView? by remember {
+        mutableStateOf(null)
+    }
+
+    var recyclerViewLayoutRef: LinearLayoutManager? by remember {
+        mutableStateOf(null)
+    }
+
     val drawerState = rememberDrawerState(
-        initialValue = DrawerValue.Closed
+        initialValue = DrawerValue.Closed,
     )
 
     LaunchedEffect(uiState.tableOfContentsOpen) {
@@ -114,8 +133,16 @@ fun EpubContentScreen(
         }
     }
 
+    LaunchedEffect(scrollCommandFlow) {
+        scrollCommandFlow.collect {
+            recyclerViewLayoutRef?.scrollToPositionWithOffset(it.spineIndex, 0)
+            recyclerViewAdapter.focusChildPosition(it.spineIndex)
+        }
+    }
+
     ModalNavigationDrawer(
         drawerState = drawerState,
+        gesturesEnabled = false,
         drawerContent = {
             ModalDrawerSheet {
                 LazyColumn(
@@ -160,10 +187,13 @@ fun EpubContentScreen(
             modifier = Modifier.fillMaxSize(),
             factory = { context ->
                 RecyclerView(context).apply {
-                    layoutManager = NoFocusScrollLinearLayoutManager(context)
+                    layoutManager = NoFocusScrollLinearLayoutManager(context).also {
+                        recyclerViewLayoutRef = it
+                    }
                     setItemViewCacheSize(2)
                     addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
                     adapter = recyclerViewAdapter
+                    recyclerViewRef = this
                 }
             },
             update = {

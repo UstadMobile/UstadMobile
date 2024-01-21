@@ -5,6 +5,10 @@ import androidx.recyclerview.widget.RecyclerView
 
 class EpubContentViewHolder(
     val webView: WebView,
-) : RecyclerView.ViewHolder(webView)
+) : RecyclerView.ViewHolder(webView) {
+
+    internal var pageIndex: Int = 0
+
+}
 
 
