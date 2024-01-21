@@ -260,6 +260,7 @@ class EpubContentImporterCommonJvm(
                                 mimeType = opfItem.mediaType
                             ),
                             manifestUri = manifestUri.toString(),
+                            manifestMimeType = opfItem.mediaType,
                         )
                     } + SaveLocalUriAsBlobAndManifestUseCase.SaveLocalUriAsBlobAndManifestItem(
                         blobItem = SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem(

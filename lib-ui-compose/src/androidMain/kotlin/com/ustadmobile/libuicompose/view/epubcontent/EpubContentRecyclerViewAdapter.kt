@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import org.xmlpull.v1.XmlPullParserFactory
 
 /**
  * @param scrollCommandFlow The flow of scroll commands. This will be observed by each ViewHolder
@@ -33,6 +34,7 @@ import kotlinx.coroutines.launch
  */
 class EpubContentRecyclerViewAdapter(
     private val contentEntryVersionServer: ContentEntryVersionServerUseCase,
+    private val xmlPullParserFactory: XmlPullParserFactory,
     private val contentEntryVersionUid: Long,
     private val scrollCommandFlow: Flow<EpubScrollCommand>,
 ): ListAdapter<String, EpubContentRecyclerViewAdapter.EpubContentViewHolder>(URL_DIFFUTIL) {
@@ -137,6 +139,7 @@ class EpubContentRecyclerViewAdapter(
         val pageIndexFlow = MutableStateFlow(-1)
         val webViewClient = EpubWebViewClient(
             useCase = contentEntryVersionServer,
+            xmlPullParserFactory = xmlPullParserFactory,
             contentEntryVersionUid = contentEntryVersionUid,
         )
         webView.webViewClient = webViewClient
