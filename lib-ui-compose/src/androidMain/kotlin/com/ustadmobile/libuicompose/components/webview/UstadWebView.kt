@@ -23,9 +23,6 @@ data class WebViewCommand(
     val time: Long,
 )
 
-/**
- * See https://github.com/UstadMobile/UstadMobile/blob/primary/core/src/androidMain/kotlin/com/ustadmobile/core/impl/HarWebViewClient.kt
- */
 class UstadWebViewNavigatorAndroid(
     val webViewClient: WebViewClient
 ): UstadWebViewNavigator {

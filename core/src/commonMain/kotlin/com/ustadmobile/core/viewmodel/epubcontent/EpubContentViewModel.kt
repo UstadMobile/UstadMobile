@@ -25,7 +25,9 @@ import nl.adaptivity.xmlutil.serialization.XML
 import org.kodein.di.DI
 import org.kodein.di.instance
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.domain.epub.GetEpubTableOfContentsUseCase
+import io.ktor.client.call.body
 import org.kodein.di.direct
 import kotlin.concurrent.Volatile
 
@@ -133,6 +135,9 @@ class EpubContentViewModel(
             val contentEntryVersion = activeRepo.contentEntryVersionDao
                 .findByUidAsync(entityUidArg) ?: return@launch
             val cevUrl = contentEntryVersion.cevOpenUri ?: return@launch
+            val cevManifestUrl = contentEntryVersion.cevManifestUrl ?: return@launch
+            val manifest: ContentManifest = httpClient.get(cevManifestUrl).body()
+            println(manifest)
 
             withContext(Dispatchers.Default) {
                 try {

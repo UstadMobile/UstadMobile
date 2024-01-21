@@ -1,13 +1,18 @@
 package com.ustadmobile.libuicompose.view.app
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -169,6 +174,41 @@ fun UstadAppBar(
                     modifier = Modifier.testTag("action_bar_button"),
                 ) {
                     Text(appUiState.actionBarButtonState.text ?: "")
+                }
+            }else if(appUiState.overflowItems.isNotEmpty()) {
+                var popupMenuExpanded by remember {
+                    mutableStateOf(false)
+                }
+
+                //As per
+                // https://developer.android.com/reference/kotlin/androidx/compose/material3/package-summary#DropdownMenu(kotlin.Boolean,kotlin.Function0,androidx.compose.ui.Modifier,androidx.compose.ui.unit.DpOffset,androidx.compose.ui.window.PopupProperties,kotlin.Function1)
+                Box(
+                    modifier = Modifier.wrapContentSize()
+                ) {
+                    IconButton(
+                        onClick = {
+                            popupMenuExpanded = true
+                        }
+                    ) {
+                        Icon(Icons.Default.MoreVert, contentDescription = stringResource(MR.strings.more_options))
+                    }
+
+                    DropdownMenu(
+                        expanded = popupMenuExpanded,
+                        onDismissRequest = {
+                            popupMenuExpanded = false
+                        }
+                    ) {
+                        appUiState.overflowItems.forEach { item ->
+                            DropdownMenuItem(
+                                text = { Text(item.label) },
+                                onClick = {
+                                    popupMenuExpanded = false
+                                    item.onClick()
+                                }
+                            )
+                        }
+                    }
                 }
             }else if(appUiState.userAccountIconVisible) {
                 IconButton(
