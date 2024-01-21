@@ -17,7 +17,7 @@ import com.ustadmobile.core.domain.contententry.ContentConstants
 import com.ustadmobile.core.domain.epub.GetEpubTableOfContentsUseCase
 import com.ustadmobile.core.io.ext.*
 import com.ustadmobile.core.uri.UriHelper
-import com.ustadmobile.core.view.EpubContentView
+import com.ustadmobile.core.viewmodel.epubcontent.EpubContentViewModel
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -58,7 +58,7 @@ class EpubContentImporterCommonJvm(
 ) : ContentImporter(endpoint) {
 
     val viewName: String
-        get() = EpubContentView.VIEW_NAME
+        get() = EpubContentViewModel.DEST_NAME
 
     override val supportedMimeTypes: List<String>
         get() = SupportedContent.EPUB_MIME_TYPES
@@ -191,7 +191,7 @@ class EpubContentImporterCommonJvm(
     ): ContentEntryVersion = withContext(Dispatchers.IO) {
         val jobUri = jobItem.sourceUri?.let { DoorUri.parse(it) }
             ?: throw IllegalArgumentException("no sourceUri")
-        val localUri = DoorUri.parse(getStoragePathForUrlUseCase(jobUri.toString()))
+        val localUri =  getStoragePathForUrlUseCase.getLocalUriIfRemote(jobUri)
 
         val contentEntryVersionUid = db.doorPrimaryKeyManager.nextId(ContentEntryVersion.TABLE_ID)
         val urlPrefix = createContentUrlPrefix(contentEntryVersionUid)

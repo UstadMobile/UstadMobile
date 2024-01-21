@@ -30,6 +30,7 @@ import org.kodein.di.direct
 import kotlin.concurrent.Volatile
 
 data class EpubContentUiState(
+    val contentEntryVersionUid: Long = 0,
     val spineUrls: List<String> = emptyList(),
     val tableOfContents: List<EpubTocItem> = emptyList(),
     val tableOfContentsOpen: Boolean = false,
@@ -119,6 +120,11 @@ class EpubContentViewModel(
     private var navUrl: String? =null
 
     init {
+        _appUiState.update { prev ->
+            prev.copy(
+                hideBottomNavigation = true,
+            )
+        }
         viewModelScope.launch {
             val contentEntryVersion = activeRepo.contentEntryVersionDao
                 .findByUidAsync(entityUidArg) ?: return@launch

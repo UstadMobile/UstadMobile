@@ -1,9 +1,8 @@
-package com.ustadmobile.libuicompose.components
+package com.ustadmobile.libuicompose.components.webview
 
 import android.annotation.SuppressLint
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -26,27 +25,31 @@ data class WebViewCommand(
 /**
  * See https://github.com/UstadMobile/UstadMobile/blob/primary/core/src/androidMain/kotlin/com/ustadmobile/core/impl/HarWebViewClient.kt
  */
-class UstadWebViewNavigator(val webViewClient: WebViewClient) {
+class UstadWebViewNavigatorAndroid(
+    val webViewClient: WebViewClient
+): UstadWebViewNavigator {
 
     private val _commandFlow = MutableStateFlow(WebViewCommand("", 0))
 
     internal val commandFlow: Flow<WebViewCommand> = _commandFlow
 
-    fun loadUrl(url: String) {
+    override fun loadUrl(url: String) {
         _commandFlow.value = WebViewCommand(url, systemTimeInMillis())
     }
 }
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
-fun UstadWebView(
+actual fun UstadWebView(
     navigator: UstadWebViewNavigator,
+    modifier: Modifier,
 ) {
+    val navigatorAndroid = (navigator as UstadWebViewNavigatorAndroid)
     val currentCommand by
-        navigator.commandFlow.collectAsState(WebViewCommand("", 0))
+        navigatorAndroid.commandFlow.collectAsState(WebViewCommand("", 0))
 
     AndroidView(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier,
         factory = { context ->
             WebView(context).also {
                 it.settings.javaScriptEnabled = true
