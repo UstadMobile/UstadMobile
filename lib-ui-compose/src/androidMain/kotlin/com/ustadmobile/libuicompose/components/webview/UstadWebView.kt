@@ -1,6 +1,7 @@
 package com.ustadmobile.libuicompose.components.webview
 
 import android.annotation.SuppressLint
+import android.os.Build
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.runtime.Composable
@@ -38,6 +39,28 @@ class UstadWebViewNavigatorAndroid(
     }
 }
 
+/**
+ * Android has its own WebViewCompat, but this requires feature support, so its safer just to use
+ * the tag.
+ */
+@SuppressLint("WebViewApiAvailability")
+private fun WebView.getWebViewClientCompat() : WebViewClient {
+    return if(Build.VERSION.SDK_INT >= 26) {
+        webViewClient
+    }else {
+        getTag(R.id.tag_webview_client) as WebViewClient
+    }
+}
+
+private fun WebView.setWebViewClientCompat(
+    webViewClientValue: WebViewClient
+) {
+    webViewClient = webViewClientValue
+    if(Build.VERSION.SDK_INT < 26) {
+        setTag(R.id.tag_webview_client, webViewClientValue)
+    }
+}
+
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
 actual fun UstadWebView(
@@ -56,7 +79,7 @@ actual fun UstadWebView(
                 it.settings.domStorageEnabled = true
                 it.settings.mediaPlaybackRequiresUserGesture = false
 
-                it.webViewClient = navigator.webViewClient
+                it.setWebViewClientCompat(navigator.webViewClient)
             }
         },
         update = {
@@ -65,6 +88,10 @@ actual fun UstadWebView(
                 it.setTag(R.id.tag_webview_url, currentCommand)
                 if(currentCommand.time != 0L)
                     it.loadUrl(currentCommand.url)
+            }
+
+            if(it.getWebViewClientCompat() !== navigator.webViewClient) {
+                it.setWebViewClientCompat(navigator.webViewClient)
             }
         }
     )

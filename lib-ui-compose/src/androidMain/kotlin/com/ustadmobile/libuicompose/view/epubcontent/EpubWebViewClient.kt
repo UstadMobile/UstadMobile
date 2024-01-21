@@ -2,9 +2,21 @@ package com.ustadmobile.libuicompose.view.epubcontent
 
 import android.graphics.Bitmap
 import android.webkit.WebView
-import android.webkit.WebViewClient
+import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServerUseCase
+import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServerWebClient
 
-class EpubWebViewClient: WebViewClient() {
+/**
+ * WebViewClient used to handle epubs.
+ *
+ * When page loading finishes, the height will be updated to match the real content height
+ */
+class EpubWebViewClient(
+    useCase: ContentEntryVersionServerUseCase,
+    contentEntryVersionUid: Long,
+): ContentEntryVersionServerWebClient(
+    useCase = useCase,
+    contentEntryVersionUid = contentEntryVersionUid,
+) {
 
     var loaded: Boolean = false
 

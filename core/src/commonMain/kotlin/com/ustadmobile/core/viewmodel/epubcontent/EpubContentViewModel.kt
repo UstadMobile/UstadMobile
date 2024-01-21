@@ -95,7 +95,11 @@ class EpubContentViewModel(
 
     private val xml: XML by instance()
 
-    private val _uiState = MutableStateFlow(EpubContentUiState())
+    private val _uiState = MutableStateFlow(
+        EpubContentUiState(
+            contentEntryVersionUid = entityUidArg
+        )
+    )
 
     val uiState: Flow<EpubContentUiState> = _uiState.asStateFlow()
 

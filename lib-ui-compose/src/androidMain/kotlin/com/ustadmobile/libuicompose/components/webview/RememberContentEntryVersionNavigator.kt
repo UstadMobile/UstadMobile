@@ -15,7 +15,10 @@ actual fun rememberContentEntryVersionNavigator(
     val di = localDI()
     return remember(contentEntryVersionUid) {
         UstadWebViewNavigatorAndroid(
-            webViewClient = di.onActiveEndpoint().direct.instance<ContentEntryVersionServerWebClient>()
+            webViewClient = ContentEntryVersionServerWebClient(
+                useCase = di.onActiveEndpoint().direct.instance(),
+                contentEntryVersionUid = contentEntryVersionUid,
+            ),
         )
     }
 }

@@ -27,5 +27,4 @@ actual fun XapiContentScreen(
             webViewNavigator.loadUrl(it)
         }
     }
-
 }

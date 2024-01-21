@@ -79,7 +79,8 @@ class ContentEntryVersionServerUseCase(
             val manifest = runBlocking {
                 manifestCache.get(contentEntryVersionUid) {
                     val contentEntryVersionEntity = (repo ?: db).contentEntryVersionDao
-                        .findByUidAsync(contentEntryVersionUid) ?: throw IllegalArgumentException("No such contententryversion")
+                        .findByUidAsync(contentEntryVersionUid)
+                        ?: throw IllegalArgumentException("No such contententryversion : $contentEntryVersionUid")
                     val contentManifestUrl = contentEntryVersionEntity.cevManifestUrl!!
                     val manifestStr = okHttpClient.newCall(
                         Request.Builder()

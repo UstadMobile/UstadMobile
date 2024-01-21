@@ -10,8 +10,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
+import com.ustadmobile.core.util.ext.onActiveEndpoint
 import com.ustadmobile.core.viewmodel.epubcontent.EpubContentUiState
 import com.ustadmobile.core.viewmodel.epubcontent.EpubContentViewModel
+import org.kodein.di.compose.localDI
+import org.kodein.di.direct
+import org.kodein.di.instance
 
 @Composable
 actual fun EpubContentScreen(
@@ -33,8 +37,13 @@ actual fun EpubContentScreen(
 fun EpubContentScreen(
     uiState: EpubContentUiState
 ) {
-    val recyclerViewAdapter = remember {
-        EpubContentRecyclerViewAdapter()
+    val di = localDI()
+
+    val recyclerViewAdapter = remember(uiState.contentEntryVersionUid) {
+        EpubContentRecyclerViewAdapter(
+            contentEntryVersionServer = di.onActiveEndpoint().direct.instance(),
+            contentEntryVersionUid = uiState.contentEntryVersionUid,
+        )
     }
 
     AndroidView(
@@ -46,13 +55,16 @@ fun EpubContentScreen(
                 addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
                 adapter = recyclerViewAdapter
             }
+        },
+        update = {
+            if(it.adapter !== recyclerViewAdapter)
+                it.adapter = recyclerViewAdapter
         }
     )
 
     LaunchedEffect(uiState.spineUrls) {
         recyclerViewAdapter.submitList(uiState.spineUrls)
     }
-
 }
 
 
