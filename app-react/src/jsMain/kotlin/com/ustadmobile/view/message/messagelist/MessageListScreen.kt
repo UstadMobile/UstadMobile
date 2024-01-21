@@ -173,7 +173,7 @@ val ChatItem = FC<ChatItemProps> { props ->
                 borderBottomLeftRadius = if (isFromMe) 48.px else 0.px
                 borderBottomRightRadius = if (isFromMe) 0.px else 48.px
             }
-            + UstadLinkify.create {
+            UstadLinkify {
                 + (props.message?.messageText ?: "")
             }
         }
