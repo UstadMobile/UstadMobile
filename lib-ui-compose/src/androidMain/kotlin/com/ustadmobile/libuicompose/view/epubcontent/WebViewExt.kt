@@ -26,3 +26,38 @@ fun WebView.adjustHeightToWrapContent() {
         it.height = ViewGroup.LayoutParams.WRAP_CONTENT
     }
 }
+
+
+
+/**
+ * Used by the EpubActivity to scroll to an anchor (e.g. hash link). It will determine the position
+ * of the given anchor and then call UstadEpub.scrollDown so that the recyclerview can scroll to
+ * the given position.
+ *
+ * This is necessary because WebViews in EPUBs have their height set to wrap_content - so there is
+ * no 'internal' scrolling within the webview itself.
+ */
+fun WebView.scrollToAnchor(anchorName: String) {
+    loadUrl("""javascript:(function(anchorId) {
+                        console.log("UstadEpub - scroll to " + anchorId);
+                        var scrollFn = function() {
+                            var anchorEl = document.getElementById(anchorId);
+                            if(anchorEl != null) {
+                                var boundingRect = anchorEl.getBoundingClientRect();
+                                UstadEpub.scrollDown(Math.round(boundingRect.top));                            
+                            }else {
+                                console.error("UstadEpub: cannot find anchor: #" + anchorId);
+                            }
+                        };
+                        
+                        if(document.readyState == "complete") {
+                            scrollFn();
+                        }else {
+                            document.addEventListener("readystatechange", function() {
+                                if(document.readyState == "complete") {
+                                    scrollFn();
+                                }
+                            });
+                        }
+                    })('$anchorName')""")
+}

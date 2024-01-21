@@ -136,7 +136,7 @@ fun EpubContentScreen(
     LaunchedEffect(scrollCommandFlow) {
         scrollCommandFlow.collect {
             recyclerViewLayoutRef?.scrollToPositionWithOffset(it.spineIndex, 0)
-            recyclerViewAdapter.focusChildPosition(it.spineIndex)
+            recyclerViewAdapter.onScrollCommand(it)
         }
     }
 
