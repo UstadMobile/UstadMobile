@@ -23,7 +23,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -36,7 +35,6 @@ import com.ustadmobile.core.viewmodel.epubcontent.EpubContentUiState
 import com.ustadmobile.core.viewmodel.epubcontent.EpubContentViewModel
 import com.ustadmobile.core.viewmodel.epubcontent.EpubScrollCommand
 import com.ustadmobile.core.viewmodel.epubcontent.EpubTocItem
-import com.ustadmobile.libuicompose.util.ext.getActivityContext
 import kotlinx.coroutines.flow.Flow
 import org.kodein.di.compose.localDI
 import org.kodein.di.direct
@@ -74,15 +72,12 @@ fun EpubContentScreen(
     val contentEntryVersionServer: ContentEntryVersionServerUseCase = remember {
         di.onActiveEndpoint().direct.instance()
     }
-    val context = LocalContext.current
 
     val recyclerViewAdapter = remember(uiState.contentEntryVersionUid) {
         EpubContentRecyclerViewAdapter(
             contentEntryVersionServer = contentEntryVersionServer,
             contentEntryVersionUid = uiState.contentEntryVersionUid,
-            getDecorHeight = {
-                context.getActivityContext().window.decorView.height
-            }
+            scrollCommandFlow = scrollCommandFlow
         )
     }
 
@@ -136,7 +131,6 @@ fun EpubContentScreen(
     LaunchedEffect(scrollCommandFlow) {
         scrollCommandFlow.collect {
             recyclerViewLayoutRef?.scrollToPositionWithOffset(it.spineIndex, 0)
-            recyclerViewAdapter.onScrollCommand(it)
         }
     }
 

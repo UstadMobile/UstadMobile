@@ -3,12 +3,15 @@ package com.ustadmobile.libuicompose.view.epubcontent
 import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.webkit.JavascriptInterface
 import android.webkit.WebSettings
 import android.webkit.WebView
+import androidx.annotation.Keep
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServerUseCase
+import com.ustadmobile.core.util.ext.dpAsPx
 import com.ustadmobile.core.viewmodel.epubcontent.EpubScrollCommand
 import com.ustadmobile.libuicompose.R
 import io.github.aakira.napier.Napier
@@ -23,16 +26,41 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
+/**
+ * @param scrollCommandFlow The flow of scroll commands. This will be observed by each ViewHolder
+ *        so that it can action scroll commands as required a) requesting focus - see note and b)
+ *        scrolling to a hash link within the content.
+ */
 class EpubContentRecyclerViewAdapter(
     private val contentEntryVersionServer: ContentEntryVersionServerUseCase,
     private val contentEntryVersionUid: Long,
-    private val getDecorHeight: () -> Int,
+    private val scrollCommandFlow: Flow<EpubScrollCommand>,
 ): ListAdapter<String, EpubContentRecyclerViewAdapter.EpubContentViewHolder>(URL_DIFFUTIL) {
 
 
     private val coroutineScope = CoroutineScope(Dispatchers.Main + Job())
 
-    private val currentScrollCommand = MutableStateFlow<EpubScrollCommand?>(null)
+    private var mRecyclerView: RecyclerView? = null
+
+    /**
+     * Javascript interface that is used as part of the system to manage scrolling to a hash link
+     * e.g. #anchor
+     */
+    inner class ScrollDownJavascriptInterface {
+
+        @Suppress("unused")
+        @JavascriptInterface
+        @Keep
+        fun scrollDown(amount: Float) {
+            Napier.d { "EpubContent: scrollDown callback: $amount dp"}
+            mRecyclerView?.post {
+                mRecyclerView?.scrollBy(0, amount.dpAsPx)
+            }
+        }
+
+    }
+
+    private val mScrollDownInterface = ScrollDownJavascriptInterface()
 
     inner class EpubContentViewHolder(
         val webView: WebView,
@@ -48,13 +76,24 @@ class EpubContentRecyclerViewAdapter(
 
         init {
             coroutineScope.launch {
-                currentScrollCommand.combine(_pageIndex) { scrollCmd, pageIndex ->
+                /**
+                 * Move the focus to the given child. This will ensure that the primary page (e.g. the
+                 * first visible item that takes up at least half the screen) will stay in place when other
+                 * views move around as WebViews load and heights are changed.
+                 *
+                 * Otherwise the first (even slightly) visible item will be given focus. When scrolling up,
+                 * the previous page would load, get taller, and then suddenly what the user was reading
+                 * would no longer be visible.
+                 */
+                scrollCommandFlow.combine(_pageIndex) { scrollCmd, pageIndex ->
                     scrollCmd to pageIndex
                 }.collectLatest { commandAndIndex ->
                     val (scrollCmd, pageIndex) = commandAndIndex
-                    if(scrollCmd?.spineIndex == pageIndex) {
+                    Napier.d { "EpubContent: cmd index=${scrollCmd.spineIndex} this index=${pageIndex}" }
+
+                    if(scrollCmd.spineIndex == pageIndex) {
                         //pick this up, its for us
-                        Napier.d { "Requesting focus on index $pageIndex" }
+                        Napier.d { "EpubContent: Requesting focus on index $pageIndex" }
                         webView.requestFocus()
 
                         /*
@@ -62,16 +101,26 @@ class EpubContentRecyclerViewAdapter(
                          */
                         val scrollToHash = scrollCmd.hash
                         if(scrollToHash != null) {
+                            Napier.d { "EpubContent: scroll to hash $scrollToHash" }
                             _loadedState.filter { it }.first()
-                            webView.scrollToAnchor(scrollToHash)
+                            webView.scrollToAnchor(scrollToHash.removePrefix("#"))
                         }
                     }
                 }
             }
         }
-
     }
 
+
+    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        super.onAttachedToRecyclerView(recyclerView)
+        mRecyclerView = recyclerView
+    }
+
+    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView)
+        mRecyclerView = null
+    }
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EpubContentViewHolder {
@@ -83,6 +132,7 @@ class EpubContentRecyclerViewAdapter(
         webView.settings.javaScriptEnabled = true
         webView.settings.domStorageEnabled = true
         webView.settings.cacheMode = WebSettings.LOAD_DEFAULT
+        webView.addJavascriptInterface(mScrollDownInterface, SCROLL_DOWN_JAVASCRIPT_INTERFACE_NAME)
 
         val pageIndexFlow = MutableStateFlow(-1)
         val webViewClient = EpubWebViewClient(
@@ -106,24 +156,10 @@ class EpubContentRecyclerViewAdapter(
         holder.webView.loadUrl("about:blank")
     }
 
-
-    /**
-     * Move the focus to the given child. This will ensure that the primary page (e.g. the
-     * first visible item that takes up at least half the screen) will stay in place when other
-     * views move around as WebViews load and heights are changed.
-     *
-     * Otherwise the first (even slightly) visible item will be given focus. When scrolling up,
-     * the previous page would load, get taller, and then suddenly what the user was reading
-     * would no longer be visible.
-     */
-    fun onScrollCommand(
-        scrollCommand: EpubScrollCommand
-    ) {
-        currentScrollCommand.value = scrollCommand
-    }
-
-
     companion object {
+
+        const val SCROLL_DOWN_JAVASCRIPT_INTERFACE_NAME = "UstadEpub"
+
 
         private val URL_DIFFUTIL = object:  DiffUtil.ItemCallback<String>() {
             override fun areItemsTheSame(oldItem: String, newItem: String): Boolean {
