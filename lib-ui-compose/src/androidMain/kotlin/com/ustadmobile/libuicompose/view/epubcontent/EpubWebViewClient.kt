@@ -8,6 +8,7 @@ import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServer
 import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServerWebClient
 import com.ustadmobile.core.util.xmlfilter.EpubXmlSerializerFilter
 import com.ustadmobile.core.util.xmlfilter.serializeTo
+import com.ustadmobile.libuicompose.R
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,6 +32,7 @@ class EpubWebViewClient(
     useCase: ContentEntryVersionServerUseCase,
     contentEntryVersionUid: Long,
     private val xmlPullParserFactory: XmlPullParserFactory,
+    private val onClickLink: (String) -> Unit,
 ): ContentEntryVersionServerWebClient(
     useCase = useCase,
     contentEntryVersionUid = contentEntryVersionUid,
@@ -39,6 +41,25 @@ class EpubWebViewClient(
     private val _loaded = MutableStateFlow<Boolean>(false)
 
     val loaded: Flow<Boolean> = _loaded.asStateFlow()
+
+    /**
+     * Note: there is a niche case that is not caught here: if the hash link is within the same
+     * spine XHTML item, nothing happens because this is not actually url loading (its the same page).
+     * However, because the scroll is not really controlled by the WebView, nothing happens. This
+     * case needs to be intercepted.
+     */
+    override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+        val webviewEpubUrl = view?.getTag(R.id.tag_epub_webview_url) as? String
+        val requestUrl = request?.url?.toString()
+        val isLinkClick = requestUrl != null && webviewEpubUrl != null && requestUrl != webviewEpubUrl
+        return if(isLinkClick && requestUrl != null) {
+            Napier.d { "Click link in epub: $requestUrl" }
+            onClickLink(requestUrl)
+            true
+        }else {
+            false
+        }
+    }
 
     override fun shouldInterceptRequest(
         view: WebView?,

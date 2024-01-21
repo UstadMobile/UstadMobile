@@ -4,6 +4,7 @@ import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.contentformats.manifest.ContentManifestEntry
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.contententry.ContentConstants
+import com.ustadmobile.core.util.ext.removeHashSuffix
 import com.ustadmobile.core.util.ext.removeQueryStringSuffix
 import com.ustadmobile.core.util.stringvalues.asIStringValues
 import com.ustadmobile.core.util.stringvalues.asOkHttpHeaders
@@ -83,8 +84,11 @@ class ContentEntryVersionServerUseCase(
             ManifestAndMap(manifest)
         }
 
+        val pathToLookup = pathInContentEntryVersion.removeQueryStringSuffix()
+            .removeHashSuffix()
+
         manifest.entryMap[pathInContentEntryVersion]
-            ?: manifest.entryMap[pathInContentEntryVersion.removeQueryStringSuffix()]?.let {
+            ?: manifest.entryMap[pathToLookup]?.let {
                 if(it.ignoreQueryParams) it else null
             }
     }

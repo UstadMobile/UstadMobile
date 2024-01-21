@@ -37,6 +37,7 @@ class EpubContentRecyclerViewAdapter(
     private val xmlPullParserFactory: XmlPullParserFactory,
     private val contentEntryVersionUid: Long,
     private val scrollCommandFlow: Flow<EpubScrollCommand>,
+    private val onClickLink: (String) -> Unit = { },
 ): ListAdapter<String, EpubContentRecyclerViewAdapter.EpubContentViewHolder>(URL_DIFFUTIL) {
 
 
@@ -141,6 +142,7 @@ class EpubContentRecyclerViewAdapter(
             useCase = contentEntryVersionServer,
             xmlPullParserFactory = xmlPullParserFactory,
             contentEntryVersionUid = contentEntryVersionUid,
+            onClickLink = onClickLink,
         )
         webView.webViewClient = webViewClient
 
@@ -148,7 +150,9 @@ class EpubContentRecyclerViewAdapter(
     }
 
     override fun onBindViewHolder(holder: EpubContentViewHolder, position: Int) {
-        holder.webView.loadUrl(getItem(position))
+        val url = getItem(position)
+        holder.webView.setTag(R.id.tag_epub_webview_url, url)
+        holder.webView.loadUrl(url)
         holder.pageIndex = position
     }
 

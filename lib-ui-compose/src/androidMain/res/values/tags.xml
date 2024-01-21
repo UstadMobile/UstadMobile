@@ -9,4 +9,6 @@
 
     <item name="tag_webview_client" type="id"/>
 
+    <item name="tag_epub_webview_url" type="id"/>
+
 </resources>

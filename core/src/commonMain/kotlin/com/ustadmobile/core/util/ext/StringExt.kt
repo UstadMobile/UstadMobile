@@ -146,6 +146,10 @@ fun String.removeQueryStringSuffix(): String {
     }
 }
 
+fun String.removeHashSuffix() : String {
+    return substringBefore("#")
+}
+
 fun String.removeFileExtension() : String {
     return substringBeforeLast(".")
 }

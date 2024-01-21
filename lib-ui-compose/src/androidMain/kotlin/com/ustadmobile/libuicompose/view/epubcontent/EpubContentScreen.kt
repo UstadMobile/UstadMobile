@@ -51,6 +51,9 @@ actual fun EpubContentScreen(
         onDismissTableOfContents = viewModel::onDismissTableOfContentsDrawer,
         onClickTocItem = viewModel::onClickTocItem,
         scrollCommandFlow = viewModel.epubScrollCommands,
+        onClickLink = {
+            viewModel.onClickLink(it, it) //On Android it is already absolute
+        }
     )
 }
 
@@ -67,6 +70,7 @@ fun EpubContentScreen(
     uiState: EpubContentUiState,
     onDismissTableOfContents: () -> Unit,
     onClickTocItem: (EpubTocItem) -> Unit,
+    onClickLink: (String) -> Unit,
     scrollCommandFlow: Flow<EpubScrollCommand>,
 ) {
     val di = localDI()
@@ -79,7 +83,8 @@ fun EpubContentScreen(
             contentEntryVersionServer = contentEntryVersionServer,
             xmlPullParserFactory = di.direct.instance(tag = DiTag.XPP_FACTORY_NSAWARE),
             contentEntryVersionUid = uiState.contentEntryVersionUid,
-            scrollCommandFlow = scrollCommandFlow
+            scrollCommandFlow = scrollCommandFlow,
+            onClickLink = onClickLink,
         )
     }
 
