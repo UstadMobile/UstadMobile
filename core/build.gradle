@@ -125,6 +125,7 @@ kotlin {
                 api libs.precompose.viewmodel
                 api libs.multiplatformsettings
                 api libs.cache4k
+                implementation libs.urlencoder
             }
         }
 

@@ -5,6 +5,7 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import io.github.aakira.napier.Napier
+import net.thauvin.erik.urlencoder.UrlEncoderUtil
 
 /**
  * Implements an Android WebViewClient to intercept resource requests for a content item. It will
@@ -20,6 +21,12 @@ open class ContentEntryVersionServerWebClient(
     private val contentEntryVersionUid: Long,
 ): WebViewClient() {
 
+    /**
+     * Seems like this does not work for video as per:
+     *  https://github.com/ionic-team/capacitor/issues/6021
+     *
+     *  Seems that preloading causes the problem. Thank you, Google.
+     */
     override fun shouldInterceptRequest(
         view: WebView?,
         request: WebResourceRequest
@@ -31,8 +38,10 @@ open class ContentEntryVersionServerWebClient(
             val okHttpResponse = useCase(
                 request = request.toCacheRequest(),
                 contentEntryVersionUid = contentEntryVersionUid,
-                pathInContentEntryVersion = pathInContentEntryVersion,
+                pathInContentEntryVersion = UrlEncoderUtil.decode(pathInContentEntryVersion),
             )
+            Napier.d { "ContentEntryVersionServerWebClient: ${okHttpResponse.code} " +
+                    "${okHttpResponse.message} $url " }
 
             okHttpResponse.asWebResourceResponse()
         }catch(e: Throwable) {

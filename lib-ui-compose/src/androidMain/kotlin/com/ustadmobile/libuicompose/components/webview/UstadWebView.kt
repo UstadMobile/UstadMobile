@@ -2,6 +2,7 @@ package com.ustadmobile.libuicompose.components.webview
 
 import android.annotation.SuppressLint
 import android.os.Build
+import android.view.ViewGroup
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.runtime.Composable
@@ -68,13 +69,23 @@ actual fun UstadWebView(
     val currentCommand by
         navigatorAndroid.commandFlow.collectAsState(WebViewCommand("", 0))
 
+    //Might need: https://engineering.telefonica.com/nested-scrolling-with-android-webviews-54e0d67e1c23
     AndroidView(
         modifier = modifier,
         factory = { context ->
             WebView(context).also {
+                /*
+                 * Setting layoutParams is REQUIRED to make webview understand viewport height,
+                 * without which css vh units won't work
+                 */
+                it.layoutParams = ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
                 it.settings.javaScriptEnabled = true
                 it.settings.domStorageEnabled = true
                 it.settings.mediaPlaybackRequiresUserGesture = false
+                it.isVerticalScrollBarEnabled = true
 
                 it.setWebViewClientCompat(navigator.webViewClient)
             }

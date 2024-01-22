@@ -19,10 +19,12 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import okhttp3.CacheControl
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
 import okhttp3.Request
 import okhttp3.Response
+import okhttp3.ResponseBody.Companion.toResponseBody
 
 /**
  * ContentEntryVersionServerUseCase is used to serve content as per the ContentManifest.
@@ -100,7 +102,15 @@ class ContentEntryVersionServerUseCase(
     ) : Response {
         //if request is for the manifest, then directly forward the request, otherwise, use the
         //memory cache to get the manifest,
-        if(request.url.endsWith(ContentConstants.MANIFEST_NAME)) {
+        if(request.url == "about:blank") {
+            return Response.Builder()
+                .header("content-type", "text/plain")
+                .request(request.asOkHttpRequest())
+                .protocol(Protocol.HTTP_1_1)
+                .message("OK")
+                .code(200)
+                .build()
+        }else if(request.url.endsWith(ContentConstants.MANIFEST_NAME)) {
             return okHttpClient.newCall(
                 Request.Builder()
                     .url(request.url)
@@ -110,7 +120,15 @@ class ContentEntryVersionServerUseCase(
         }else {
             val entry = runBlocking {
                 getManifestEntry(contentEntryVersionUid, pathInContentEntryVersion)
-            } ?: throw IllegalArgumentException("Could not find $pathInContentEntryVersion")
+            } ?: return Response.Builder()
+                    .header("content-type", "text/html")
+                    .request(request.asOkHttpRequest())
+                    .protocol(Protocol.HTTP_1_1)
+                    .body("Not found in version $contentEntryVersionUid: $pathInContentEntryVersion"
+                        .toResponseBody("text/plain".toMediaType()))
+                    .message("NOT FOUND")
+                    .code(404)
+                    .build()
 
             val bodyDataUrlRequest = Request.Builder()
                 .url(entry.bodyDataUrl)
@@ -137,7 +155,7 @@ class ContentEntryVersionServerUseCase(
             return Response.Builder()
                 .request(request.asOkHttpRequest())
                 .protocol(Protocol.HTTP_1_1)
-                .message("OK")
+                .message(bodyDataUrlResponse.message)
                 .body(bodyDataUrlResponse.body)
                 .code(bodyDataUrlResponse.code)
                 .headers(
