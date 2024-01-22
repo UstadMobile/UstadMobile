@@ -11,14 +11,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -48,7 +43,6 @@ fun SiteEnterLinkScreen(
     SiteEnterLinkScreen(
         uiState = uiState,
         onClickNext = viewModel::onClickNext,
-        onClickNewLearningEnvironment = {},
         onEditTextValueChange = viewModel::onSiteLinkUpdated,
     )
 }
@@ -57,7 +51,6 @@ fun SiteEnterLinkScreen(
 fun SiteEnterLinkScreen(
     uiState: SiteEnterLinkUiState,
     onClickNext: () -> Unit = {},
-    onClickNewLearningEnvironment: () -> Unit = {},
     onEditTextValueChange: (String) -> Unit = {},
 ) {
 
@@ -125,28 +118,6 @@ fun SiteEnterLinkScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(stringResource(MR.strings.or).uppercase())
-
-        OutlinedButton(
-            onClick = onClickNewLearningEnvironment ,
-            modifier = Modifier
-                .testTag("create_new_button")
-                .defaultItemPadding()
-                .fillMaxWidth(),
-            elevation = null,
-            enabled = uiState.fieldsEnabled,
-        ) {
-
-            Icon(
-                Icons.Filled.Add,
-                contentDescription = "",
-                modifier = Modifier.size(ButtonDefaults.IconSize)
-            )
-
-            Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-
-            Text(stringResource(MR.strings.create_a_new_learning_env))
-        }
     }
 
 }

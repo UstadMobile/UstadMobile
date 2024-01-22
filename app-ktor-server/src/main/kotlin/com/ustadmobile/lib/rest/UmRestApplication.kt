@@ -5,11 +5,19 @@ import com.ustadmobile.core.account.*
 import com.ustadmobile.core.contentformats.ContentImportersDiModuleJvm
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
+import com.ustadmobile.core.domain.account.SetPasswordServerUseCase
+import com.ustadmobile.core.domain.account.SetPasswordUseCase
+import com.ustadmobile.core.domain.account.SetPasswordUseCaseCommonJvm
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCaseJvm
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCaseJvm
 import com.ustadmobile.core.domain.blob.upload.BlobUploadServerUseCase
+import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
+import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCaseCommonJvm
+import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
+import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseJvm
+import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseRemote
 import com.ustadmobile.core.domain.contententry.importcontent.ImportContentEntryUseCase
 import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServerUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
@@ -40,7 +48,6 @@ import java.io.File
 import javax.naming.InitialContext
 import com.ustadmobile.door.util.NodeIdAuthCache
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
-import com.ustadmobile.core.impl.di.DomainDiModuleJvm
 import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.impl.locale.StringProviderJvm
 import com.ustadmobile.core.schedule.initQuartzDb
@@ -53,6 +60,7 @@ import com.ustadmobile.lib.rest.api.content.ContentEntryVersionRoute
 import com.ustadmobile.lib.rest.domain.contententry.getmetadatafromuri.ContentEntryGetMetadataServerUseCase
 import com.ustadmobile.lib.rest.api.contentupload.ContentUploadRoute
 import com.ustadmobile.lib.rest.api.contentupload.UPLOAD_TMP_SUBDIR
+import com.ustadmobile.lib.rest.domain.account.SetPasswordRoute
 import com.ustadmobile.lib.rest.ffmpeghelper.InvalidFffmpegException
 import com.ustadmobile.lib.rest.ffmpeghelper.NoFfmpegException
 import io.ktor.server.response.*
@@ -236,7 +244,6 @@ fun Application.umRestApplication(
     val apiKey = environment.config.propertyOrNull("ktor.ustad.googleApiKey")?.getString() ?: CONF_GOOGLE_API
 
     di {
-        import(DomainDiModuleJvm(EndpointScope.Default))
         import(makeJvmBackendDiModule(environment.config))
         import(ContentImportersDiModuleJvm)
 
@@ -455,6 +462,36 @@ fun Application.umRestApplication(
             )
         }
 
+        bind<SetPasswordUseCase>() with scoped(EndpointScope.Default).singleton {
+            SetPasswordUseCaseCommonJvm(
+                authManager = instance()
+            )
+        }
+
+        bind<SetPasswordServerUseCase>() with scoped(EndpointScope.Default).singleton {
+            SetPasswordServerUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                setPasswordUseCase = instance(),
+                nodeIdAndAuthCache = instance(),
+            )
+        }
+
+        bind<GetStoragePathForUrlUseCase>() with scoped(EndpointScope.Default).singleton {
+            GetStoragePathForUrlUseCaseCommonJvm(
+                httpClient = instance(),
+                cache = instance()
+            )
+        }
+
+        bind<EnqueueContentEntryImportUseCase>() with scoped(EndpointScope.Default).provider {
+            EnqueueImportContentEntryUseCaseJvm(
+                db = instance(tag = DoorTag.TAG_DB),
+                scheduler = instance(),
+                endpoint = context,
+                enqueueRemoteImport = null
+            )
+        }
+
         try {
             appConfig.config("mail")
 
@@ -558,6 +595,14 @@ fun Application.umRestApplication(
 
         route("api") {
             val di: DI by closestDI()
+
+            route("account"){
+                SetPasswordRoute(
+                    useCase = { call ->
+                        di.on(call).direct.instance()
+                    }
+                )
+            }
 
             route("pbkdf2"){
                 Pbkdf2Route()

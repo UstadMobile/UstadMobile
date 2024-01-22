@@ -2,14 +2,19 @@ package com.ustadmobile.core.viewmodel.person.accountedit
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.AuthManager
+import com.ustadmobile.core.account.UnauthorizedException
+import com.ustadmobile.core.domain.account.SetPasswordUseCase
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
+import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
+import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditViewModel.Companion.MODE_CHANGE_PASS
+import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditViewModel.Companion.MODE_CREATE_ACCOUNT
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
-import com.ustadmobile.lib.db.entities.Role
+import com.ustadmobile.lib.db.entities.Role.Companion.PERMISSION_RESET_PASSWORD
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,11 +29,15 @@ import org.kodein.di.on
 @Serializable
 data class PersonUsernameAndPasswordModel(
 
-    val username: String? = "",
+    val mode: Int = MODE_CREATE_ACCOUNT,
 
-    val currentPassword: String? = "",
+    val personUid: Long = 0,
 
-    val newPassword: String? = "",
+    val username: String = "",
+
+    val currentPassword: String = "",
+
+    val newPassword: String = "",
 
 )
 
@@ -47,11 +56,11 @@ data class PersonAccountEditUiState(
     val fieldsEnabled: Boolean = false,
 ) {
     val usernameVisible: Boolean
-        get() = personAccount?.username != null
+        get() =  personAccount?.mode == MODE_CREATE_ACCOUNT
 
     val currentPasswordVisible: Boolean
 
-        get() = personAccount?.currentPassword != null
+        get() = personAccount?.mode == MODE_CHANGE_PASS
 
     val hasErrors: Boolean
         get() = usernameError != null || currentPasswordError != null || newPasswordError != null
@@ -68,6 +77,8 @@ class PersonAccountEditViewModel(
 
     private val authManager: AuthManager by on(accountManager.activeEndpoint).instance()
 
+    private val setPasswordUseCase: SetPasswordUseCase by on(accountManager.activeEndpoint).instance()
+
     init {
         _appUiState.value = AppUiState(
             loadingState = LoadingUiState.INDETERMINATE,
@@ -78,16 +89,24 @@ class PersonAccountEditViewModel(
                 serializer = PersonUsernameAndPasswordModel.serializer(),
                 onLoadFromDb = { db ->
                     val person = db.personDao.findByUidAsync(entityUidArg)
-                    val hasResetPermission = db.personDao.personHasPermissionAsync(
-                        activeUserPersonUid, entityUidArg, Role.PERMISSION_RESET_PASSWORD
+                    val hasResetPermission = db.scopedGrantDao.userHasSystemLevelPermission(
+                        accountPersonUid = activeUserPersonUid,
+                        permission = PERMISSION_RESET_PASSWORD,
                     )
+
 
                     if(person == null) {
                         null
                     }else {
                         PersonUsernameAndPasswordModel(
-                            username = if(person.username == null) "" else null,
-                            currentPassword = if(hasResetPermission) null else "",
+                            mode = when {
+                                person.username == null -> MODE_CREATE_ACCOUNT
+                                hasResetPermission -> MODE_RESET
+                                else -> MODE_CHANGE_PASS
+                            },
+                            personUid = person.personUid,
+                            username = person.username ?: "",
+                            currentPassword = "",
                             newPassword = "",
                         )
                     }
@@ -162,17 +181,19 @@ class PersonAccountEditViewModel(
             )
         }
         viewModelScope.launch {
-            if(entity.username != null && entity.username.isBlank()) {
+            if(entity.mode == MODE_CREATE_ACCOUNT && entity.username.isBlank()) {
                 _uiState.update { prev ->
                     prev.copy(usernameError = systemImpl.getString(MR.strings.field_required_prompt))
                 }
             }
 
-            if(entity.newPassword != null && entity.newPassword.isBlank()) {
+            if(entity.newPassword.isBlank()) {
                 _uiState.update { prev ->
                     prev.copy(newPasswordError = systemImpl.getString(MR.strings.field_required_prompt))
                 }
             }
+
+            if(entity.mode == MODE_CHANGE_PASS && entity.currentPassword.isBlank())
 
             if(_uiState.value.hasErrors) {
                 loadingState = LoadingUiState.NOT_LOADING
@@ -184,7 +205,7 @@ class PersonAccountEditViewModel(
                 return@launch
             }
 
-            if(entity.username != null && entity.newPassword != null) {
+            if(entity.mode == MODE_CREATE_ACCOUNT) {
                 //This is a registration
                 try {
                     val usernameCount = activeRepo.personDao.countUsername(entity.username)
@@ -194,7 +215,8 @@ class PersonAccountEditViewModel(
                             val numChanges = activeRepo.personDao.updateUsername(
                                 personUid = entityUidArg,
                                 username = entity.username,
-                                currentTime = systemTimeInMillis())
+                                currentTime = systemTimeInMillis()
+                            )
 
                             Napier.e("Updated username: $numChanges changes")
                         }
@@ -219,12 +241,50 @@ class PersonAccountEditViewModel(
                         prev.copy(fieldsEnabled = true)
                     }
                 }
-            }
+            }else {
+                try {
+                    setPasswordUseCase(
+                        activeUserPersonUid = activeUserPersonUid,
+                        personUid = entity.personUid,
+                        username = entity.username,
+                        newPassword = entity.newPassword,
+                        currentPassword = if(entity.mode == MODE_CHANGE_PASS)
+                            entity.currentPassword
+                        else
+                            null
+                    )
 
+                    snackDispatcher.showSnackBar(Snack(systemImpl.getString(MR.strings.password_updated)))
+                    finishWithResult(null)
+                }catch(e: Exception) {
+                    if(e is UnauthorizedException) {
+                        _uiState.update { prev ->
+                            prev.copy(
+                                currentPasswordError = systemImpl.getString(MR.strings.wrong_user_pass_combo),
+                            )
+                        }
+                    }else {
+                        _uiState.update { prev ->
+                            prev.copy(
+                                errorMessage = e.message
+                            )
+                        }
+                    }
+                }finally {
+                    loadingState = LoadingUiState.NOT_LOADING
+                    _uiState.update { prev -> prev.copy(fieldsEnabled = true) }
+                }
+            }
         }
     }
 
     companion object {
         const val DEST_NAME = "AccountEdit"
+
+        const val MODE_CREATE_ACCOUNT = 1
+
+        const val MODE_RESET = 2
+
+        const val MODE_CHANGE_PASS = 3
     }
 }

@@ -16,6 +16,7 @@ import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseJvm
+import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseRemote
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseJvm
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -313,7 +314,11 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         EnqueueImportContentEntryUseCaseJvm(
             db = instance(tag = DoorTag.TAG_DB),
             scheduler = instance(),
-            endpoint = context
+            endpoint = context,
+            enqueueRemoteImport = EnqueueImportContentEntryUseCaseRemote(
+                endpoint = context,
+                httpClient = instance(),
+            )
         )
     }
 

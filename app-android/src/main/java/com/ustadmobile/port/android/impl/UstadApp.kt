@@ -33,6 +33,8 @@ import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.core.db.ext.migrationList
+import com.ustadmobile.core.domain.account.SetPasswordUseCase
+import com.ustadmobile.core.domain.account.SetPasswordUseCaseCommonJvm
 import com.ustadmobile.core.domain.blob.download.BlobDownloadClientUseCase
 import com.ustadmobile.core.domain.blob.download.BlobDownloadClientUseCaseCommonJvm
 import com.ustadmobile.core.domain.blob.download.ContentManifestDownloadUseCase
@@ -52,8 +54,8 @@ import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCaseJvm
 import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCase
 import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCaseAndroid
 import com.ustadmobile.core.domain.blob.upload.UpdateFailedTransferJobUseCase
-import com.ustadmobile.core.domain.cachestoragepath.GetCacheStoragePathUseCase
-import com.ustadmobile.core.domain.cachestoragepath.GetCacheStoragePathUseCaseCommonJvm
+import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
+import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCaseCommonJvm
 import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseAndroid
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCase
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCaseCommonJvm
@@ -61,9 +63,11 @@ import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLoc
 import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCaseCommonJvm
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseAndroid
+import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseRemote
 import com.ustadmobile.core.domain.contententry.importcontent.ImportContentEntryUseCase
 import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServerUseCase
-import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServerWebClient
+import com.ustadmobile.core.domain.getversion.GetVersionUseCase
+import com.ustadmobile.core.domain.getversion.GetVersionUseCaseAndroid
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseCommonJvm
 import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
@@ -296,6 +300,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             val saveAndManifestUseCase: SaveLocalUriAsBlobAndManifestUseCase = instance()
             val tmpRoot: File = instance(tag = DiTag.TAG_TMP_DIR)
             val contentImportTmpPath = Path(tmpRoot.absolutePath, "contentimport")
+            val getStoragePathForUrlUseCase: GetStoragePathForUrlUseCase= instance()
 
             ContentImportersManager(
                 buildList {
@@ -310,6 +315,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                             tmpPath = contentImportTmpPath,
                             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
                             json = instance(),
+                            getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
                         )
                     )
                     add(
@@ -350,6 +356,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                             db = db,
                             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
                             json = instance(),
+                            getStoragePathForUrlUseCase  = getStoragePathForUrlUseCase,
                         )
                     )
 
@@ -360,6 +367,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                             uriHelper = uriHelper,
                             db = db,
                             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
+                            getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
                             json = instance(),
                             appContext = applicationContext,
                             tmpDir = File(contentImportTmpPath.toString()),
@@ -494,6 +502,10 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 db = instance(tag = DoorTag.TAG_DB),
                 appContext = applicationContext,
                 endpoint = context,
+                enqueueRemoteImport = EnqueueImportContentEntryUseCaseRemote(
+                    endpoint = context,
+                    httpClient = instance()
+                )
             )
         }
 
@@ -555,14 +567,22 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             )
         }
 
-        bind<ContentEntryVersionServerWebClient>() with scoped(EndpointScope.Default).singleton {
-            ContentEntryVersionServerWebClient(useCase = instance())
+        bind<GetStoragePathForUrlUseCase>() with singleton {
+            GetStoragePathForUrlUseCaseCommonJvm(
+                httpClient = instance(),
+                cache = instance(),
+            )
         }
 
-        bind<GetCacheStoragePathUseCase>() with singleton {
-            GetCacheStoragePathUseCaseCommonJvm(cache = instance())
+        bind<GetVersionUseCase>() with singleton {
+            GetVersionUseCaseAndroid(applicationContext)
         }
 
+        bind<SetPasswordUseCase>() with scoped(EndpointScope.Default).singleton {
+            SetPasswordUseCaseCommonJvm(
+                authManager = instance()
+            )
+        }
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
     }

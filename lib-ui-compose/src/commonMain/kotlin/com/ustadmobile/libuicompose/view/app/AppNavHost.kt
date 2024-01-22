@@ -129,6 +129,7 @@ import com.ustadmobile.libuicompose.view.contententry.getmetadata.ContentEntryGe
 import com.ustadmobile.libuicompose.view.contententry.importlink.ContentEntryImportLinkScreen
 import com.ustadmobile.libuicompose.view.courseterminology.edit.CourseTerminologyEditScreen
 import com.ustadmobile.libuicompose.view.courseterminology.list.CourseTerminologyListScreen
+import com.ustadmobile.libuicompose.view.epubcontent.EpubContentScreen
 import com.ustadmobile.libuicompose.view.parentalconsentmanagement.ParentalConsentManagementScreen
 import com.ustadmobile.libuicompose.view.pdfcontent.PdfContentScreen
 import com.ustadmobile.libuicompose.view.person.registerminorwaitforparent.RegisterMinorWaitForParentScreen
@@ -628,7 +629,10 @@ fun AppNavHost(
             }
 
             contentScene("/${EpubContentViewModel.DEST_NAME}") { backStackEntry ->
-                Text("Epub - Android/Desktop: coming soon")
+                EpubContentScreen(
+                    appViewModel(backStackEntry, EpubContentViewModel::class,
+                        ::EpubContentViewModel)
+                )
             }
 
             contentScene("/${JoinWithCodeView.VIEW_NAME}") { backStackEntry ->

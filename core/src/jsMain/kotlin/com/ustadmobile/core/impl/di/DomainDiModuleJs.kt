@@ -1,6 +1,8 @@
 package com.ustadmobile.core.impl.di
 
 import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.domain.account.SetPasswordUseCase
+import com.ustadmobile.core.domain.account.SetPasswordUseCaseJs
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobUseCaseJs
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
@@ -10,7 +12,7 @@ import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseJs
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCaseJs
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
-import com.ustadmobile.core.domain.contententry.import.EnqueueImportContentEntryUseCaseJs
+import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseRemote
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseJs
 import com.ustadmobile.core.domain.openlink.OnClickLinkUseCase
@@ -40,7 +42,7 @@ import org.kodein.di.singleton
 
 fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs") {
     bind<EnqueueContentEntryImportUseCase>() with scoped(endpointScope).provider {
-        EnqueueImportContentEntryUseCaseJs(
+        EnqueueImportContentEntryUseCaseRemote(
             endpoint = context,
             httpClient = instance(),
         )
@@ -127,6 +129,14 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
         ContentEntryGetMetaDataFromUriUseCaseJs(
             json = instance(),
             chunkedUploadClientLocalUriUseCase = instance()
+        )
+    }
+
+    bind<SetPasswordUseCase>() with scoped(endpointScope).provider {
+        SetPasswordUseCaseJs(
+            endpoint = context,
+            repo = instance(tag = DoorTag.TAG_REPO),
+            httpClient = instance()
         )
     }
 

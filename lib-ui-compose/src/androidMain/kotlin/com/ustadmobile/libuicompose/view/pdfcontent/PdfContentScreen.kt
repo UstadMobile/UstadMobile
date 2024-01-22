@@ -15,13 +15,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.core.net.toFile
 import com.rajat.pdfviewer.compose.PdfRendererViewCompose
-import com.ustadmobile.core.domain.cachestoragepath.GetCacheStoragePathUseCase
+import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
 import com.ustadmobile.core.viewmodel.pdfcontent.PdfContentUiState
 import com.ustadmobile.core.viewmodel.pdfcontent.PdfContentViewModel
 import com.ustadmobile.libuicompose.components.UstadDownloadUrlStatus
-import com.ustadmobile.libuicompose.util.downloadurl.DownloadUrlState
-import com.ustadmobile.libuicompose.util.downloadurl.downloadUrlViaCacheAndGetLocalUri
-import io.ktor.client.HttpClient
 import org.kodein.di.compose.localDI
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -42,26 +39,22 @@ fun PdfContentScreen(
     uiState: PdfContentUiState
 ) {
     val di = localDI()
-    val httpClient: HttpClient = remember {
-        di.direct.instance()
-    }
-    val getStoragePath: GetCacheStoragePathUseCase = remember {
+
+    val getStoragePath: GetStoragePathForUrlUseCase = remember {
         di.direct.instance()
     }
 
-    var cacheDownloadState: DownloadUrlState by remember {
-        mutableStateOf(DownloadUrlState())
+    var cacheDownloadState: GetStoragePathForUrlUseCase.GetStoragePathForUrlState by remember {
+        mutableStateOf(GetStoragePathForUrlUseCase.GetStoragePathForUrlState())
     }
 
     LaunchedEffect(uiState.dataUrl) {
         val url = uiState.dataUrl ?: return@LaunchedEffect
-        downloadUrlViaCacheAndGetLocalUri(
+        getStoragePath(
             url = url,
-            httpClient = httpClient,
-            getCacheStoragePathUseCase = getStoragePath,
             onStateChange = {
                 cacheDownloadState = it
-            }
+            },
         )
     }
     val fileUri = cacheDownloadState.fileUri

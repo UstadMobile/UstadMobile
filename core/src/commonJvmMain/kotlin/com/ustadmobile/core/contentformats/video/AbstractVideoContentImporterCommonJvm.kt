@@ -10,6 +10,8 @@ import com.ustadmobile.core.contentformats.storeText
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
+import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
+import com.ustadmobile.core.domain.cachestoragepath.getLocalUriIfRemote
 import com.ustadmobile.core.domain.contententry.ContentConstants
 import com.ustadmobile.core.io.ext.toDoorUri
 import com.ustadmobile.core.uri.UriHelper
@@ -39,6 +41,7 @@ abstract class AbstractVideoContentImporterCommonJvm(
     protected val db: UmAppDatabase,
     protected val tmpPath: Path,
     protected val saveLocalUriAsBlobAndManifestUseCase: SaveLocalUriAsBlobAndManifestUseCase,
+    protected val getStoragePathForUrlUseCase: GetStoragePathForUrlUseCase,
 ) : ContentImporter(endpoint) {
 
     /**
@@ -50,6 +53,7 @@ abstract class AbstractVideoContentImporterCommonJvm(
         progressListener: ContentImportProgressListener,
     ): ContentEntryVersion = withContext(Dispatchers.IO) {
         val jobUri = jobItem.requireSourceAsDoorUri()
+        val localUri = getStoragePathForUrlUseCase.getLocalUriIfRemote(jobUri)
 
         val contentEntryVersionUid = db.doorPrimaryKeyManager.nextId(ContentEntryVersion.TABLE_ID)
         val urlPrefix = createContentUrlPrefix(contentEntryVersionUid)
@@ -58,8 +62,6 @@ abstract class AbstractVideoContentImporterCommonJvm(
         val mediaInfoEntryUri = "media.json"
         val workDir = Path(tmpPath, "video-import-${systemTimeInMillis()}")
         fileSystem.createDirectories(workDir)
-
-        val videoTmpFile = Path(workDir, "video")
 
         //Get the mime type from the uri to import if possible
         // If not, try looking at the original filename (might be needed where using temp import
@@ -88,21 +90,15 @@ abstract class AbstractVideoContentImporterCommonJvm(
         }
 
         try {
-            uriHelper.openSource(jobUri).use { uriSource ->
-                fileSystem.sink(videoTmpFile).use { fileSink ->
-                    uriSource.transferTo(fileSink)
-                }
-            }
-
             val savedManifestItems = saveLocalUriAsBlobAndManifestUseCase(
                 listOf(
                     SaveLocalUriAsBlobAndManifestUseCase.SaveLocalUriAsBlobAndManifestItem(
                         blobItem = SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem(
-                            localUri = videoTmpFile.toDoorUri().toString(),
+                            localUri = localUri.toString(),
                             entityUid = contentEntryVersionUid,
                             tableId = ContentEntryVersion.TABLE_ID,
                             mimeType = mimeType,
-                            deleteLocalUriAfterSave = true,
+                            deleteLocalUriAfterSave = false,
                         ),
                         manifestUri = videoEntryUri
                     ),

@@ -146,6 +146,22 @@ fun String.removeQueryStringSuffix(): String {
     }
 }
 
+fun String.removeHashSuffix() : String {
+    return substringBefore("#")
+}
+
 fun String.removeFileExtension() : String {
     return substringBeforeLast(".")
+}
+
+fun String.displayFilename(
+    removeFileName: Boolean = true
+): String {
+    val base = substringAfterLast("/")
+        .substringAfterLast("\\")
+        .substringBefore("?")
+    return if(removeFileName)
+        base.removeFileExtension()
+    else
+        base
 }

@@ -2,6 +2,7 @@ package com.ustadmobile.core.viewmodel.accountlist
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
+import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.usersession.StartUserSessionUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -27,6 +28,7 @@ import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
+import org.kodein.di.instanceOrNull
 
 /**
  *
@@ -43,7 +45,7 @@ data class AccountListUiState(
     val headerAccount: UserSessionWithPersonAndEndpoint? = null,
     val accountsList: List<UserSessionWithPersonAndEndpoint> = emptyList(),
     val showAccountEndpoint: Boolean = false,
-    val version: String = "Version 0.2.1 'KittyHawk'",
+    val version: String = "",
 ) {
 
     val activeAccountButtonsEnabled: Boolean
@@ -76,6 +78,8 @@ class AccountListViewModel(
 
     val uiState: Flow<AccountListUiState> = _uiState.asStateFlow()
 
+    val getVersionUseCase: GetVersionUseCase? by instanceOrNull()
+
     init {
         _appUiState.value = AppUiState(
             userAccountIconVisible = false,
@@ -86,6 +90,11 @@ class AccountListViewModel(
                 systemImpl.getString(MR.strings.accounts)
             }
         )
+        _uiState.update { prev ->
+            prev.copy(
+                version = getVersionUseCase?.invoke()?.versionString ?: "",
+            )
+        }
 
         viewModelScope.takeIf { activeAccountMode == ACTIVE_ACCOUNT_MODE_HEADER }?.launch {
             accountManager.currentUserSessionFlow.collect {

@@ -7,6 +7,7 @@ import com.ustadmobile.core.contentformats.media.VideoConstants
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
+import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -33,6 +34,7 @@ class VideoContentImporterAndroid(
     fileSystem: FileSystem = SystemFileSystem,
     saveLocalUriAsBlobAndManifestUseCase: SaveLocalUriAsBlobAndManifestUseCase,
     json: Json,
+    getStoragePathForUrlUseCase: GetStoragePathForUrlUseCase,
 ) : AbstractVideoContentImporterCommonJvm(
     endpoint = endpoint,
     uriHelper = uriHelper,
@@ -42,6 +44,7 @@ class VideoContentImporterAndroid(
     fileSystem = fileSystem,
     saveLocalUriAsBlobAndManifestUseCase = saveLocalUriAsBlobAndManifestUseCase,
     json = json,
+    getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
 ) {
     override val importerId: Int
         get() = 101

@@ -13,7 +13,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.ustadmobile.core.impl.locale.entityconstants.ContentEntryTypeLabelConstants
+import com.ustadmobile.core.viewmodel.contententry.contentTypeStringResource
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListItemUiState
 import com.ustadmobile.core.viewmodel.contententry.list.listItemUiState
 import com.ustadmobile.lib.db.entities.*
@@ -95,16 +95,14 @@ private fun SecondaryContent(
         Row {
             val contentTypeFlagVal = contentEntry?.contentTypeFlag
             if (uiState?.mimetypeVisible == true && contentTypeFlagVal != null){
-                Image(CONTENT_ENTRY_TYPE_ICON_MAP[contentTypeFlagVal] ?: Icons.Filled.Book,
+                Icon(CONTENT_ENTRY_TYPE_ICON_MAP[contentTypeFlagVal] ?: Icons.Filled.Book,
                     contentDescription = "",
                     modifier = Modifier.size(20.dp)
                 )
 
-                Text(
-                    stringResource(resource = ContentEntryTypeLabelConstants
-                        .TYPE_LABEL_MESSAGE_IDS[contentTypeFlagVal]
-                        .stringResource)
-                )
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Text(stringResource(contentEntry.contentTypeStringResource))
             }
         }
     }

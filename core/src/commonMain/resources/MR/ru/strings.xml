@@ -1045,4 +1045,8 @@
     <string name="already_submitted">Уже было отправлено</string>
     <string name="too_high">Слишком высокий!</string>
     <string name="num_holidays">%1$s выходные/праздники</string>
+    <string name="password_updated">Пароль обновился</string>
+    <string name="select_file">Выберите файл</string>
+    <string name="drop_files_to_import">Перетащите файл(ы) для импорта</string>
+    <string name="compose_post">Создать публикацию</string>
 </resources>

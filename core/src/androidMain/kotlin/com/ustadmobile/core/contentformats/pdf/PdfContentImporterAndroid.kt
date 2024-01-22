@@ -7,6 +7,7 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
+import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.util.ext.fileExtensionOrNull
 import com.ustadmobile.core.util.ext.removeFileExtension
@@ -29,6 +30,7 @@ class PdfContentImporterAndroid(
     uriHelper: UriHelper,
     db: UmAppDatabase,
     saveLocalUriAsBlobAndManifestUseCase: SaveLocalUriAsBlobAndManifestUseCase,
+    getStoragePathForUrlUseCase: GetStoragePathForUrlUseCase,
     json: Json,
     private val appContext: Context,
     private val tmpDir: File,
@@ -38,6 +40,7 @@ class PdfContentImporterAndroid(
     uriHelper = uriHelper,
     db = db,
     saveLocalUriAsBlobAndManifestUseCase = saveLocalUriAsBlobAndManifestUseCase,
+    getStoragePathForUrlUseCase =  getStoragePathForUrlUseCase,
     json = json,
 ) {
 

@@ -41,7 +41,7 @@ class AuthManager(
         password: String
     ): AuthResult {
         val passwordDoubleHashed = doublePbkdf2Hash(password)
-        val personAuth2 = db.personAuth2Dao.findByUsername(username)
+        val personAuth2 = (repo ?: db).personAuth2Dao.findByUsername(username)
         val authMatch = personAuth2?.pauthAuth?.base64StringToByteArray()
             .contentEquals(passwordDoubleHashed)
 

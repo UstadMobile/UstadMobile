@@ -1,11 +1,10 @@
-package com.ustadmobile.libuicompose.util.downloadurl
+package com.ustadmobile.core.domain.cachestoragepath
 
-import com.ustadmobile.core.domain.cachestoragepath.GetCacheStoragePathUseCase
 import com.ustadmobile.door.ext.toDoorUri
+import com.ustadmobile.libcache.UstadCache
 import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
-import io.ktor.client.request.header
 import io.ktor.client.statement.bodyAsChannel
 import io.ktor.utils.io.jvm.javaio.toInputStream
 import kotlinx.coroutines.Dispatchers
@@ -17,45 +16,26 @@ import java.io.File
 import java.util.concurrent.atomic.AtomicLong
 
 
-data class DownloadUrlState(
-    val fileUri: String? = null,
-    val error: String? = null,
-    val totalBytes: Long = 0,
-    val bytesTransferred: Long = 0,
-    val status: Status = Status.IN_PROGRESS,
-) {
+class GetStoragePathForUrlUseCaseCommonJvm (
+    private val httpClient: HttpClient,
+    private val cache: UstadCache,
+): GetStoragePathForUrlUseCase{
 
-    enum class Status {
-        IN_PROGRESS, COMPLETED, FAILED
-    }
-
-}
-
-/**
- * This is a simple function that can be used within an LaunchedEffect to access a remote url as a
- * file. Because lib-cache will store any cacheable content as a file, we can simply request the
- * file using the X-Request-Storage-Path header.
- *
- * It provides determinative progress during the download for progress indicators.
- */
-suspend fun downloadUrlViaCacheAndGetLocalUri(
-    url: String,
-    httpClient: HttpClient,
-    getCacheStoragePathUseCase: GetCacheStoragePathUseCase,
-    progressInterval: Int = 500,
-    onStateChange: (DownloadUrlState) -> Unit,
-) {
-    withContext(Dispatchers.IO) {
+    override suspend fun invoke(
+        url: String,
+        progressInterval: Int,
+        onStateChange: (GetStoragePathForUrlUseCase.GetStoragePathForUrlState) -> Unit
+    ): String = withContext(Dispatchers.IO) {
         val totalBytes = AtomicLong(1)
         val bytesTransferred = AtomicLong(0)
         val progressUpdateJob = launch {
             onStateChange(
-                DownloadUrlState(
+                GetStoragePathForUrlUseCase.GetStoragePathForUrlState(
                     fileUri = null,
                     error = null,
-                    totalBytes= totalBytes.get(),
+                    totalBytes = totalBytes.get(),
                     bytesTransferred = bytesTransferred.get(),
-                    status = DownloadUrlState.Status.IN_PROGRESS,
+                    status = GetStoragePathForUrlUseCase.GetStoragePathForUrlState.Status.IN_PROGRESS,
                 )
             )
 
@@ -63,9 +43,7 @@ suspend fun downloadUrlViaCacheAndGetLocalUri(
         }
 
         try {
-            val response = httpClient.get(url) {
-                header("X-Request-Storage-Path", "true")
-            }
+            val response = httpClient.get(url)
 
             totalBytes.set(response.headers["content-length"]?.toLong() ?: 1)
 
@@ -79,7 +57,7 @@ suspend fun downloadUrlViaCacheAndGetLocalUri(
             }
             progressUpdateJob.cancel()
 
-            val filePath = getCacheStoragePathUseCase(url)
+            val filePath = cache.getCacheEntry(url)?.storageUri
                 ?: throw IllegalStateException("no filepath for $url")
 
             val expectedFileSize = totalBytes.get()
@@ -100,26 +78,28 @@ suspend fun downloadUrlViaCacheAndGetLocalUri(
             Napier.v { "DownloadUrl: $url is now accessible on $fileUri" }
 
             onStateChange(
-                DownloadUrlState(
+                GetStoragePathForUrlUseCase.GetStoragePathForUrlState(
                     fileUri = fileUri,
                     bytesTransferred = bytesTransferred.get(),
                     totalBytes = totalBytes.get(),
-                    status = DownloadUrlState.Status.COMPLETED,
+                    status = GetStoragePathForUrlUseCase.GetStoragePathForUrlState.Status.COMPLETED,
                 )
             )
+
+            fileUri
         }catch(e: Throwable) {
             Napier.w(throwable = e) { "DownloadUrl: $url Fail" }
             onStateChange(
-                DownloadUrlState(
+                GetStoragePathForUrlUseCase.GetStoragePathForUrlState(
                     error = e.message ?: "Other error",
                     bytesTransferred = bytesTransferred.get(),
                     totalBytes = totalBytes.get(),
-                    status = DownloadUrlState.Status.COMPLETED,
+                    status = GetStoragePathForUrlUseCase.GetStoragePathForUrlState.Status.FAILED,
                 )
             )
+            throw e
         }finally {
             progressUpdateJob.cancel()
         }
     }
-
 }

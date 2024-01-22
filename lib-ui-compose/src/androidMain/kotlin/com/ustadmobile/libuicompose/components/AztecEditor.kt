@@ -4,7 +4,11 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
+import android.widget.TextView
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import kotlinx.coroutines.delay
@@ -58,6 +62,7 @@ fun AztecEditor(
     html: String,
     onChange: (String) -> Unit,
     modifier: Modifier = Modifier,
+    placeholderText: String? = null,
 ) {
 
     var aztec: Aztec? by remember {
@@ -109,39 +114,68 @@ fun AztecEditor(
         }
     }
 
-    AndroidView(
+
+    //Could use pointer interop
+    // see https://stackoverflow.com/questions/69869068/can-jetpack-compose-input-modifiers-be-prevented-from-consuming-input-events
+    // To draw a placeholder over the top
+    Box(
         modifier = modifier,
-        factory = { context ->
-            val rootView = LayoutInflater.from(context).inflate(R.layout.aztec_editor, null, false)
-            val visualEditor: AztecText = rootView.findViewById(R.id.editor)
-            val aztecEditor = Aztec.with(
-                visualEditor = visualEditor,
-                toolbar = rootView.findViewById(R.id.formatting_toolbar),
-                toolbarClickListener = DefaultToolbarListener(
-                    onInvalidate = {
-                        coroutineScope.launch {
-                            delay(200)
-                            val newHtml = visualEditor.toFormattedHtml()
-                            htmlState = newHtml
-                            onChange(newHtml)
+        contentAlignment = Alignment.TopStart,
+    ) {
+        AndroidView(
+            modifier = modifier,
+            factory = { context ->
+                val rootView = LayoutInflater.from(context).inflate(R.layout.aztec_editor, null, false)
+                val placeholderTextView: TextView = rootView.findViewById(R.id.aztec_placeholder)
+                if(placeholderText != null) {
+                    placeholderTextView.text = placeholderText
+                }else {
+                    placeholderTextView.visibility = View.GONE
+                }
+
+                val visualEditor: AztecText = rootView.findViewById(R.id.editor)
+                val aztecEditor = Aztec.with(
+                    visualEditor = visualEditor,
+                    toolbar = rootView.findViewById(R.id.formatting_toolbar),
+                    toolbarClickListener = DefaultToolbarListener(
+                        onInvalidate = {
+                            coroutineScope.launch {
+                                delay(200)
+                                val newHtml = visualEditor.toFormattedHtml()
+                                htmlState = newHtml
+                                onChange(newHtml)
+                            }
                         }
+                    )
+                ).also {
+                    it.visualEditor.setCalypsoMode(false)
+                    it.addPlugin(CssUnderlinePlugin())
+                    it.initSourceEditorHistory()
+                }
+
+                visualEditor.takeIf {
+                    placeholderText != null
+                }?.setOnFocusChangeListener { _, isFocused ->
+                    placeholderTextView.visibility = if(
+                        !isFocused && visualEditor.text.isBlank()
+                    ) {
+                        View.VISIBLE
+                    }else {
+                        View.GONE
                     }
-                )
-            ).also {
-                it.visualEditor.setCalypsoMode(false)
-                it.addPlugin(CssUnderlinePlugin())
-                it.initSourceEditorHistory()
+                }
+
+                rootView.setTag(R.id.tag_aztec, aztecEditor)
+                visualEditor.fromHtml(html)
+                aztec = aztecEditor
+
+                rootView
+            },
+            update = {
+
             }
-            rootView.setTag(R.id.tag_aztec, aztecEditor)
-            visualEditor.fromHtml(html)
+        )
+    }
 
-            aztec = aztecEditor
-
-            rootView
-        },
-        update = {
-
-        }
-    )
     
 }
