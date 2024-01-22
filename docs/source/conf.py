@@ -14,13 +14,14 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
-
 # -- Project information -----------------------------------------------------
 
 project = 'Ustad Mobile'
-copyright = '2023, Poojalakshmi'
-author = 'Poojalakshmi'
-version = '1'
+copyright = '2023, Ustad Mobile'
+author = 'Ustad Mobile'
+
+
+#version = '1'
 
 # -- General configuration ---------------------------------------------------
 
@@ -47,6 +48,13 @@ exclude_patterns = []
 #html_theme = 'furo'
 html_theme = "sphinx_rtd_theme"
 #'alabaster'
+
+
+templates_path = ['_templates']
+
+#html_css_files = ['_static/custom.css']
+
+#html_js_files = ['_static/custom.js']
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
