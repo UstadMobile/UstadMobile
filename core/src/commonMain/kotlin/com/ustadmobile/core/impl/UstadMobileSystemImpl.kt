@@ -30,8 +30,6 @@
  */
 
 package com.ustadmobile.core.impl
-import com.ustadmobile.door.DoorUri
-import kotlin.jvm.JvmStatic
 
 
 /**
@@ -54,30 +52,9 @@ expect open class UstadMobileSystemImpl: UstadMobileSystemCommon {
      * @param args (Optional) Hahstable of arguments for the new view (e.g. catalog/container url etc)
      * @param context System context object
      */
+    @Deprecated("This is replaced with using the navigation controller")
     override fun go(viewName: String, args: Map<String, String?>, context: Any, flags: Int,
                     ustadGoOptions: UstadGoOptions)
-
-    fun popBack(popUpToViewName: String, popUpInclusive: Boolean, context: Any)
-
-    /**
-     * Get a string for use in the UI
-     */
-    override fun getString(messageCode: Int, context: Any): String
-
-    /**
-     * Must provide the system's default locale (e.g. en_US.UTF-8)
-     *
-     * @return System locale
-     */
-    override fun getSystemLocale(context: Any): String
-
-    /**
-     * Get a preference for the app
-     *
-     * @param key preference key as a string
-     * @return value of that preference
-     */
-    override fun getAppPref(key: String, context: Any): String?
 
     /**
      * Return absolute path of the application setup file. Asynchronous.
@@ -86,14 +63,6 @@ expect open class UstadMobileSystemImpl: UstadMobileSystemCommon {
      * @param zip if true, the app setup file should be delivered within a zip.
      */
     override suspend fun getAppSetupFile(context: Any, zip: Boolean): String
-
-
-    /**
-     * Set a preference for the app
-     * @param key preference that is being set
-     * @param value value to be set
-     */
-    override fun setAppPref(key: String, value: String?, context: Any)
 
 
     /**
@@ -111,25 +80,6 @@ expect open class UstadMobileSystemImpl: UstadMobileSystemCommon {
      * @return Build timestamp in ms since epoch
      */
     fun getBuildTimestamp(context: Any): Long
-
-
-    /**
-     * Lookup a value from the app runtime configuration. These come from a properties file loaded
-     * from the assets folder, the path of which is set by the manifest preference
-     * com.sutadmobile.core.appconfig .
-     *
-     * @param key The config key to lookup
-     * @param defaultVal The default value to return if the key is not found
-     * @param context Systme context object
-     *
-     * @return The value of the key if found, if not, the default value provided
-     */
-    override fun getAppConfigString(key: String, defaultVal: String?, context: Any): String?
-
-    /**
-     * Open the given link in a browser and/or tab depending on the platform
-     */
-    override fun openLinkInBrowser(url: String, context: Any)
 
 
     companion object {

@@ -4,98 +4,14 @@ import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Insert
 import androidx.room.Query
 import com.ustadmobile.core.db.dao.UserSessionDaoCommon.FIND_LOCAL_SESSIONS_SQL
-import com.ustadmobile.door.lifecycle.LiveData
+import kotlinx.coroutines.flow.Flow
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.UserSession.Companion.STATUS_ACTIVE
 
 @DoorDao
 @Repository
 expect abstract class UserSessionDao {
-
-    /*
-     * Here UserSessionSubject represents the UserSession for which we are checking access permissions
-     * to decide whether or not to replicate. UserSession represents the UserSessions being used to
-     * determine if permission is granted.
-     */
-    @Query("""
-        REPLACE INTO UserSessionReplicate(usPk, usDestination)
-         SELECT DISTINCT UserSessionSubject.usUid AS usPk,
-                UserSession.usClientNodeId AS usDestination
-           FROM ChangeLog
-                JOIN UserSession UserSessionSubject
-                     ON ChangeLog.chTableId = ${UserSession.TABLE_ID}
-                        AND ChangeLog.chEntityPk = UserSessionSubject.usUid
-                        AND UserSessionSubject.usSessionType = ${UserSession.TYPE_STANDARD}
-                JOIN Person
-                     ON UserSessionSubject.usPersonUid = Person.personUid
-                ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
-                    ${Role.PERMISSION_PERSON_SELECT}
-                    /* Modify second part of query - remove requirement for session to be active.
-                     * This ensures that deactivations are distributed
-                     */
-                    ) > 0
-                     JOIN PersonGroupMember AS PrsGrpMbr
-                          ON ScopedGrant.sgGroupUid = PrsGrpMbr.groupMemberGroupUid
-                     JOIN UserSession
-                          ON UserSession.usPersonUid = PrsGrpMbr.groupMemberPersonUid
-          WHERE UserSessionSubject.usClientNodeId = UserSessionSubject.usClientNodeId                
-          --notpsql              
-            AND UserSessionSubject.usLct != COALESCE(
-                (SELECT usVersionId
-                   FROM UserSessionReplicate
-                  WHERE UserSessionReplicate.usPk = UserSessionSubject.usUid
-                    AND UserSessionReplicate.usDestination = UserSession.usClientNodeId), 0)
-          --endnotpsql                       
-        /*psql ON CONFLICT(usPk, usDestination) 
-                DO UPDATE SET usPending = 
-                   (SELECT UserSession.usLct
-                      FROM UserSession
-                     WHERE UserSession.usUid = EXCLUDED.usPk ) 
-                        != UserSessionReplicate.usVersionId
-         */         
-    """)
-    @ReplicationRunOnChange(value = [UserSession::class])
-    @ReplicationCheckPendingNotificationsFor([UserSession::class])
-    abstract suspend fun updateReplicationTrackers()
-
-    /*
-     * Here UserSessionSubject represents the UserSession for which we are checking access permissions
-     * to decide whether or not to replicate. UserSession represents the UserSessions being used to
-     * determine if permission is granted.
-     */
-    @Query("""
-        REPLACE INTO UserSessionReplicate(usPk, usDestination)
-         SELECT DISTINCT UserSessionSubject.usUid AS usPk,
-                UserSession.usClientNodeId AS usDestination
-           FROM UserSession 
-                JOIN PersonGroupMember
-                    ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
-                ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1}
-                    ${Role.PERMISSION_PERSON_SELECT}
-                    ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2}
-                JOIN UserSession UserSessionSubject
-                     ON UserSessionSubject.usPersonUid = Person.personUid
-                        AND UserSessionSubject.usSessionType = ${UserSession.TYPE_STANDARD}
-                        AND UserSessionSubject.usClientNodeId = :newNodeId
-          WHERE UserSession.usClientNodeId = :newNodeId
-          --notpsql
-            AND UserSessionSubject.usLct != COALESCE(
-                (SELECT usVersionId
-                   FROM UserSessionReplicate
-                  WHERE UserSessionReplicate.usPk = UserSessionSubject.usUid
-                    AND UserSessionReplicate.usDestination = UserSession.usClientNodeId), 0)
-          --endnotpsql          
-         /*psql ON CONFLICT(usPk, usDestination) 
-                DO UPDATE SET usPending = 
-                   (SELECT UserSession.usLct
-                      FROM UserSession
-                     WHERE UserSession.usUid = EXCLUDED.usPk ) 
-                        != UserSessionReplicate.usVersionId
-         */
-    """)
-    @ReplicationRunOnNewNode
-    @ReplicationCheckPendingNotificationsFor([UserSession::class])
-    abstract suspend fun updateReplicationTrackersOnNewNode(@NewNodeIdParam newNodeId: Long)
 
     @Insert
     abstract suspend fun insertSession(session: UserSession): Long
@@ -108,7 +24,7 @@ expect abstract class UserSessionDao {
     abstract suspend fun findSessionsByPerson(personUid: Long): List<UserSession>
 
     @Query(FIND_LOCAL_SESSIONS_SQL)
-    abstract fun findAllLocalSessionsLive(): LiveData<List<UserSessionAndPerson>>
+    abstract fun findAllLocalSessionsLive(): Flow<List<UserSessionAndPerson>>
 
     @Query(FIND_LOCAL_SESSIONS_SQL)
     abstract suspend fun findAllLocalSessionsAsync(): List<UserSessionAndPerson>
@@ -131,6 +47,8 @@ expect abstract class UserSessionDao {
      * Count sessions on this device. If maxDateOfBirth is non-zero, then this can be used to
      * provide a cut-off (e.g. to find only sessions for adults where their date of birth must be
      * before a cut-off)
+     *
+     * This will not include any temporary local sessions
      */
     @Query("""
         SELECT COUNT(*)
@@ -143,7 +61,8 @@ expect abstract class UserSessionDao {
                             FROM SyncNode
                            LIMIT 1), 0))
            AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}                
-           AND (:maxDateOfBirth = 0 OR Person.dateOfBirth < :maxDateOfBirth)                 
+           AND (:maxDateOfBirth = 0 OR Person.dateOfBirth < :maxDateOfBirth)
+           AND (UserSession.usSessionType & ${UserSession.TYPE_TEMP_LOCAL}) != ${UserSession.TYPE_TEMP_LOCAL}            
     """)
     abstract suspend fun countAllLocalSessionsAsync(maxDateOfBirth: Long): Int
 
@@ -152,14 +71,11 @@ expect abstract class UserSessionDao {
            SET usAuth = null,
                usStatus = :newStatus,
                usReason = :reason,
-               usLcb = COALESCE(
-                               (SELECT nodeClientId
-                                  FROM SyncNode
-                                 LIMIT 1), 0)
-         WHERE UserSession.usUid = :sessionUid                        
-               
+               usEndTime = :endTime,
+               usLct = :endTime
+         WHERE UserSession.usUid = :sessionUid
     """)
-    abstract suspend fun endSession(sessionUid: Long, newStatus: Int, reason: Int)
+    abstract suspend fun endSession(sessionUid: Long, newStatus: Int, reason: Int, endTime: Long)
 
     @Query("""
         SELECT UserSession.*
@@ -167,7 +83,7 @@ expect abstract class UserSessionDao {
          WHERE UserSession.usUid = :sessionUid
          LIMIT 1
     """)
-    abstract fun findByUidLive(sessionUid: Long): LiveData<UserSession?>
+    abstract fun findByUidLive(sessionUid: Long): Flow<UserSession?>
 
 
     @Query("""
@@ -236,5 +152,18 @@ expect abstract class UserSessionDao {
            AND ScopedGrant.sgEntityUid IN (:schoolUids) 
     """)
     abstract suspend fun findAllActiveNodeIdsWithSchoolBasedPermission(schoolUids: List<Long>): List<Long>
+
+
+    @Query("""
+        SELECT COUNT(*)
+          FROM UserSession
+         WHERE UserSession.usPersonUid = :personUid
+           AND UserSession.usStatus = $STATUS_ACTIVE
+           AND UserSession.usClientNodeId = :nodeId
+    """)
+    abstract suspend fun countActiveSessionsForUserAndNode(
+        personUid: Long,
+        nodeId: Long,
+    ): Int
 
 }

@@ -1,14 +1,19 @@
 package com.ustadmobile.core.util.ext
 
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.impl.BrowserLinkOpener
+import com.ustadmobile.core.account.UstadAccountManager.Companion.GUEST_PERSON
+import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase.Companion.LinkTarget
+import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCaseJvm
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMURLEncoder
-import com.ustadmobile.core.view.AccountListView
-import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
+import com.ustadmobile.core.viewmodel.login.LoginViewModel
+import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.UserSession
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Test
@@ -20,11 +25,11 @@ class NavControllerExtTest {
 
     private lateinit var mockAccountManager: UstadAccountManager
 
-    private lateinit var mockBrowserLinkOpener: BrowserLinkOpener
+    private lateinit var mockOpenLinkUseCase: OpenExternalLinkUseCaseJvm
 
     @Before
     fun setup(){
-        mockBrowserLinkOpener = mock { }
+        mockOpenLinkUseCase = mock { }
         mockNavController = mock { }
         mockAccountManager = mock { }
     }
@@ -33,18 +38,27 @@ class NavControllerExtTest {
     fun givenNonUstadLink_whenNavigateToLinkIsCalled_thenShouldCallOpenInBrowser() {
         runBlocking {
             mockNavController.navigateToLink("https://www.google.com/",
-                mockAccountManager, mockBrowserLinkOpener)
-            verify(mockBrowserLinkOpener).onOpenLink("https://www.google.com/")
+                mockAccountManager, mockOpenLinkUseCase)
+            verify(mockOpenLinkUseCase).invoke("https://www.google.com/", LinkTarget.DEFAULT)
         }
     }
 
     @Test
     fun givenPlainViewUri_whenNavigateToLinkIsCalledWithoutForceAccountSelect_thenShouldNavigateToLinkDirectly() {
         val link = "ContentEntryList?parentUid=1234"
-        runBlocking {
-            mockNavController.navigateToLink(link, mockAccountManager, mockBrowserLinkOpener)
+        mockAccountManager.stub {
+            on { currentUserSession }.thenReturn(UserSessionWithPersonAndEndpoint(
+                userSession = UserSession(),
+                endpoint = Endpoint("http://localhost:8087/"),
+                person = Person()
+            ))
         }
-        verify(mockNavController).navigate(eq("ContentEntryList"), argWhere {
+        runBlocking {
+            mockNavController.navigateToLink(link, mockAccountManager, mockOpenLinkUseCase)
+        }
+
+
+        verify(mockNavController, timeout(5000)).navigate(eq("ContentEntryList"), argWhere {
             it["parentUid"] == "1234"
         }, any())
     }
@@ -56,10 +70,10 @@ class NavControllerExtTest {
             onBlocking { activeSessionCount(any(), any()) }.thenAnswer { 1 }
         }
         runBlocking {
-            mockNavController.navigateToLink(link, mockAccountManager, mockBrowserLinkOpener,
+            mockNavController.navigateToLink(link, mockAccountManager, mockOpenLinkUseCase,
                 forceAccountSelection = true)
         }
-        verify(mockNavController).navigate(eq(AccountListView.VIEW_NAME), argWhere { args ->
+        verify(mockNavController, timeout(5000)).navigate(eq(AccountListViewModel.DEST_NAME), argWhere { args ->
             val nextArg = UMURLEncoder.decodeUTF8(args[UstadView.ARG_NEXT]!!)
             nextArg.substringBefore('?') == "ContentEntryList" &&
                 UMFileUtil.parseURLQueryString(nextArg)["parentUid"] == "1234"
@@ -72,13 +86,18 @@ class NavControllerExtTest {
         val link = "${endpointUrl}umapp/#/ContentEntryList?parentUid=1234"
         mockAccountManager.stub {
             on { activeEndpoint }.thenReturn(Endpoint(endpointUrl))
+            on { currentUserSession }.thenReturn(UserSessionWithPersonAndEndpoint(
+                userSession = UserSession(),
+                endpoint = Endpoint(endpointUrl),
+                person = Person()
+            ))
         }
 
         runBlocking {
-            mockNavController.navigateToLink(link, mockAccountManager, mockBrowserLinkOpener)
+            mockNavController.navigateToLink(link, mockAccountManager, mockOpenLinkUseCase)
         }
 
-        verify(mockNavController).navigate(eq("ContentEntryList"), argWhere {
+        verify(mockNavController, timeout(5000)).navigate(eq("ContentEntryList"), argWhere {
             it["parentUid"] == "1234"
         }, any())
     }
@@ -89,18 +108,23 @@ class NavControllerExtTest {
         val link = "${endpointUrl}umapp/#/ContentEntryList?parentUid=1234"
         mockAccountManager.stub {
             on { activeEndpoint }.thenReturn(Endpoint(endpointUrl))
+            on { currentUserSession }.thenReturn(UserSessionWithPersonAndEndpoint(
+                userSession = UserSession(),
+                endpoint = Endpoint(endpointUrl),
+                person = Person()
+            ))
             onBlocking { activeSessionCount(any(), any()) }.thenReturn(1)
         }
 
         runBlocking {
-            mockNavController.navigateToLink(link, mockAccountManager, mockBrowserLinkOpener,
+            mockNavController.navigateToLink(link, mockAccountManager, mockOpenLinkUseCase,
                 forceAccountSelection = true)
         }
-        verify(mockNavController).navigate(eq(AccountListView.VIEW_NAME), argWhere { args ->
+        verify(mockNavController, timeout(5000)).navigate(eq(AccountListViewModel.DEST_NAME), argWhere { args ->
             UMURLEncoder.decodeUTF8(args[UstadView.ARG_NEXT]!!).let {
                 it.substringBefore("?") == "ContentEntryList" &&
                     UMFileUtil.parseURLQueryString(it)["parentUid"] == "1234"
-            } && UMURLEncoder.decodeUTF8(args[AccountListView.ARG_FILTER_BY_ENDPOINT]!!) == endpointUrl
+            } && UMURLEncoder.decodeUTF8(args[AccountListViewModel.ARG_FILTER_BY_ENDPOINT]!!) == endpointUrl
         }, any())
     }
 
@@ -113,20 +137,29 @@ class NavControllerExtTest {
         mockAccountManager.stub {
             on { activeEndpoint }.thenReturn(Endpoint(activeEndpointUrl))
             onBlocking { activeSessionCount(any(), any()) }.thenAnswer {
-                val filter = it.arguments[1] as UstadAccountManager.EndpointFilter
-                listOf(activeEndpointUrl, linkEndpointUrl).count { filter.filterEndpoint(it) }
+                1
             }
+            on { currentUserSession }.thenReturn(
+                UserSessionWithPersonAndEndpoint(
+                    userSession = UserSession().apply {
+                        usSessionType= UserSession.TYPE_STANDARD
+                        usStatus = UserSession.STATUS_ACTIVE
+                    },
+                    person = GUEST_PERSON,
+                    endpoint = Endpoint(activeEndpointUrl),
+                )
+            )
         }
 
         runBlocking {
-            mockNavController.navigateToLink(link, mockAccountManager, mockBrowserLinkOpener)
+            mockNavController.navigateToLink(link, mockAccountManager, mockOpenLinkUseCase)
         }
 
-        verify(mockNavController).navigate(eq(AccountListView.VIEW_NAME), argWhere { args ->
+        verify(mockNavController, timeout(5000)).navigate(eq(AccountListViewModel.DEST_NAME), argWhere { args ->
             UMURLEncoder.decodeUTF8(args[UstadView.ARG_NEXT]!!).let {
                 it.substringBefore("?") == "ContentEntryList" &&
                     UMFileUtil.parseURLQueryString(it)["parentUid"] == "1234"
-            } && UMURLEncoder.decodeUTF8(args[AccountListView.ARG_FILTER_BY_ENDPOINT]!!) == linkEndpointUrl
+            } && UMURLEncoder.decodeUTF8(args[AccountListViewModel.ARG_FILTER_BY_ENDPOINT]!!) == linkEndpointUrl
         }, any())
     }
 
@@ -138,21 +171,29 @@ class NavControllerExtTest {
 
         mockAccountManager.stub {
             on { activeEndpoint }.thenReturn(Endpoint(activeEndpointUrl))
+            on { currentUserSession }.thenReturn(
+                UserSessionWithPersonAndEndpoint(
+                    userSession = UserSession().apply {
+                        usSessionType = UserSession.TYPE_TEMP_LOCAL or UserSession.TYPE_GUEST
+                    },
+                    person = GUEST_PERSON,
+                    endpoint = Endpoint(activeEndpointUrl)
+                )
+            )
             onBlocking { activeSessionCount(any(), any()) }.thenAnswer {
-                val filter = it.arguments[1] as UstadAccountManager.EndpointFilter
-                listOf(activeEndpointUrl).count { filter.filterEndpoint(it) }
+                0L
             }
         }
 
         runBlocking {
-            mockNavController.navigateToLink(link, mockAccountManager, mockBrowserLinkOpener)
+            mockNavController.navigateToLink(link, mockAccountManager, mockOpenLinkUseCase)
         }
 
-        verify(mockNavController).navigate(eq(Login2View.VIEW_NAME), argWhere { args ->
+        verify(mockNavController, timeout(5000)).navigate(eq(LoginViewModel.DEST_NAME), argWhere { args ->
             UMURLEncoder.decodeUTF8(args[UstadView.ARG_NEXT]!!).let {
                 it.substringBefore("?") == "ContentEntryList" &&
                     UMFileUtil.parseURLQueryString(it)["parentUid"] == "1234"
-            } && UMURLEncoder.decodeUTF8(args[UstadView.ARG_SERVER_URL]!!) == linkEndpointUrl
+            } && UMURLEncoder.decodeUTF8(args[UstadView.ARG_API_URL]!!) == linkEndpointUrl
         }, any())
     }
 
@@ -166,23 +207,16 @@ class NavControllerExtTest {
         }
 
         runBlocking {
-            mockNavController.navigateToLink(link, mockAccountManager, mockBrowserLinkOpener,
+            mockNavController.navigateToLink(link, mockAccountManager, mockOpenLinkUseCase,
                 userCanSelectServer = false, forceAccountSelection = true)
         }
 
-        verify(mockNavController).navigate(eq(Login2View.VIEW_NAME), argWhere { args->
+        verify(mockNavController, timeout(5000)).navigate(eq(LoginViewModel.DEST_NAME), argWhere { args->
             UMURLEncoder.decodeUTF8(args[UstadView.ARG_NEXT]!!).let {
                 it.substringBefore("?") == "ContentEntryList" &&
                     UMFileUtil.parseURLQueryString(it)["parentUid"] == "1234"
             }
         }, any())
-    }
-
-    /**
-     *
-     */
-    fun givenViewUri_whenUserCanSelectServer_thenShouldNavigateToEnterSiteLink() {
-
     }
 
 }

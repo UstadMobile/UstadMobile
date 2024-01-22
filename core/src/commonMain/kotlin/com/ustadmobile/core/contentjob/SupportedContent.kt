@@ -2,7 +2,7 @@ package com.ustadmobile.core.contentjob
 
 object SupportedContent {
 
-    val EPUB_MIME_TYPES = listOf("application/epub+zip", "application/octet-stream")
+    val EPUB_MIME_TYPES = listOf("application/epub+zip")
 
     val XAPI_MIME_TYPES = listOf("application/tincan+zip", "application/zip", "application/octet-stream")
 

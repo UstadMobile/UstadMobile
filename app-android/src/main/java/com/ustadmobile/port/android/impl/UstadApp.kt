@@ -2,232 +2,379 @@ package com.ustadmobile.port.android.impl
 
 import android.app.Application
 import android.content.Context
+import android.content.pm.PackageManager
+import android.content.res.AssetManager
+import android.os.Bundle
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
+import coil.ImageLoader
+import coil.ImageLoaderFactory
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import com.squareup.picasso.OkHttp3Downloader
-import com.squareup.picasso.Picasso
+import com.russhwolf.settings.Settings
+import com.russhwolf.settings.SharedPreferencesSettings
+import com.toughra.ustadmobile.BuildConfig
 import com.ustadmobile.core.account.*
-import com.ustadmobile.core.assignment.ClazzAssignmentIncomingReplicationListener
-import com.ustadmobile.core.catalog.contenttype.*
-import com.ustadmobile.core.contentformats.xapi.ContextActivity
-import com.ustadmobile.core.contentformats.xapi.Statement
-import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStateEndpoint
-import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
-import com.ustadmobile.core.contentjob.ContentJobManager
-import com.ustadmobile.core.contentjob.ContentJobManagerAndroid
-import com.ustadmobile.core.contentjob.ContentPluginManager
+import com.ustadmobile.core.contentformats.epub.XhtmlFixer
+import com.ustadmobile.core.contentformats.epub.XhtmlFixerJsoup
+import com.ustadmobile.core.contentformats.ContentImportersManager
+import com.ustadmobile.core.contentformats.epub.EpubContentImporterCommonJvm
+import com.ustadmobile.core.contentformats.h5p.H5PContentImporter
+import com.ustadmobile.core.contentformats.pdf.PdfContentImporterAndroid
+import com.ustadmobile.core.contentformats.video.VideoContentImporterAndroid
+import com.ustadmobile.core.contentformats.xapi.XapiZipContentImporter
 import com.ustadmobile.core.db.*
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.impl.*
-import com.ustadmobile.core.impl.AppConfig.KEY_PBKDF2_ITERATIONS
-import com.ustadmobile.core.impl.AppConfig.KEY_PBKDF2_KEYLENGTH
-import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_DOWNLOAD_ENABLED
-import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_LOCAL_HTTP_PORT
-import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_MAIN_COROUTINE_CONTEXT
-import com.ustadmobile.core.impl.di.commonJvmDiModule
-import com.ustadmobile.core.io.ext.siteDataSubDir
-import com.ustadmobile.core.networkmanager.*
-import com.ustadmobile.core.schedule.ClazzLogCreatorManager
-import com.ustadmobile.core.schedule.ClazzLogCreatorManagerAndroidImpl
-import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.util.DiTag
-import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
-import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.door.*
-import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.door.ext.addIncomingReplicationListener
 import com.ustadmobile.door.ext.asRepository
-import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
-import com.ustadmobile.port.android.generated.MessageIDMap
-import com.ustadmobile.port.android.util.ImageResizeAttachmentFilter
-import com.ustadmobile.core.contentformats.xapi.ContextDeserializer
-import com.ustadmobile.core.contentformats.xapi.StatementDeserializer
-import com.ustadmobile.core.contentformats.xapi.StatementSerializer
 import com.ustadmobile.core.db.ext.migrationList
-import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStateEndpointImpl
-import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStatementEndpointImpl
-import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
-import com.ustadmobile.sharedse.network.*
+import com.ustadmobile.core.domain.account.SetPasswordUseCase
+import com.ustadmobile.core.domain.account.SetPasswordUseCaseCommonJvm
+import com.ustadmobile.core.domain.blob.download.BlobDownloadClientUseCase
+import com.ustadmobile.core.domain.blob.download.BlobDownloadClientUseCaseCommonJvm
+import com.ustadmobile.core.domain.blob.download.ContentManifestDownloadUseCase
+import com.ustadmobile.core.domain.blob.download.EnqueueBlobDownloadClientUseCase
+import com.ustadmobile.core.domain.blob.download.EnqueueBlobDownloadClientUseCaseAndroid
+import com.ustadmobile.core.domain.blob.download.EnqueueContentManifestDownloadJobUseCaseAndroid
+import com.ustadmobile.core.domain.blob.download.EnqueueContentManifestDownloadUseCase
+import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
+import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCaseJvm
+import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
+import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCaseJvm
+import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
+import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCaseAndroid
+import com.ustadmobile.core.domain.blob.savepicture.SavePictureUseCase
+import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCase
+import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCaseJvm
+import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCase
+import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCaseAndroid
+import com.ustadmobile.core.domain.blob.upload.UpdateFailedTransferJobUseCase
+import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
+import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCaseCommonJvm
+import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseAndroid
+import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCase
+import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCaseCommonJvm
+import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCase
+import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCaseCommonJvm
+import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
+import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseAndroid
+import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseRemote
+import com.ustadmobile.core.domain.contententry.importcontent.ImportContentEntryUseCase
+import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServerUseCase
+import com.ustadmobile.core.domain.getversion.GetVersionUseCase
+import com.ustadmobile.core.domain.getversion.GetVersionUseCaseAndroid
+import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
+import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseCommonJvm
+import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
+import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseAndroid
+import com.ustadmobile.core.domain.upload.ChunkedUploadClientChunkGetterUseCase
+import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
+import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
-import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
-import okhttp3.OkHttpClient
 import org.kodein.di.*
 import org.xmlpull.v1.XmlPullParserFactory
 import org.xmlpull.v1.XmlSerializer
 import java.io.File
-import java.net.URI
-import java.util.concurrent.Executors
-import com.ustadmobile.core.db.dao.commitLiveConnectivityStatus
+import com.ustadmobile.core.impl.config.ApiUrlConfig
+import com.ustadmobile.core.impl.config.AppConfig
+import com.ustadmobile.core.impl.config.BundleAppConfig
+import com.ustadmobile.core.impl.config.GenderConfig
+import com.ustadmobile.core.impl.config.LocaleSettingDelegateAndroid
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.METADATA_KEY_PRESET_LANG
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.PREFKEY_ACTIONED_PRESET
+import com.ustadmobile.core.impl.nav.NavCommandExecutionTracker
+import com.ustadmobile.core.uri.UriHelper
+import com.ustadmobile.core.uri.UriHelperAndroid
+import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
+import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.libcache.UstadCache
+import com.ustadmobile.libcache.UstadCacheBuilder
+import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
+import com.ustadmobile.libcache.logging.NapierLoggingAdapter
+import com.ustadmobile.libcache.okhttp.UstadCacheInterceptor
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.serialization.kotlinx.json.json
+import kotlinx.io.files.Path
+import kotlinx.io.files.SystemFileSystem
+import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
+import nl.adaptivity.xmlutil.serialization.XML
+import nl.adaptivity.xmlutil.serialization.XmlConfig
+import okhttp3.Dispatcher
+import okhttp3.OkHttpClient
+import org.acra.config.httpSender
+import org.acra.data.StringFormat
+import org.acra.ktx.initAcra
+import org.acra.sender.HttpSender
 
-open class UstadApp : Application(), DIAware {
+class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
-    val diModule = DI.Module("UstadApp-Android") {
-        import(commonJvmDiModule)
+    private val Context.appMetaData: Bundle?
+        get() = this.applicationContext.packageManager.getApplicationInfo(
+            applicationContext.packageName, PackageManager.GET_META_DATA
+        ).metaData
 
-        bind<UstadMobileSystemImpl>() with singleton {
-            UstadMobileSystemImpl()
+
+    @OptIn(ExperimentalXmlUtilApi::class)
+    override val di: DI by DI.lazy {
+        bind<OkHttpClient>() with singleton {
+            val rootTmpDir: File = instance(tag = DiTag.TAG_TMP_DIR)
+
+            OkHttpClient.Builder()
+                .dispatcher(
+                    Dispatcher().also {
+                        it.maxRequests = 30
+                        it.maxRequestsPerHost = 10
+                    }
+                )
+                .addInterceptor(
+                    UstadCacheInterceptor(
+                        cache = instance(),
+                        tmpDir = File(rootTmpDir, "okhttp-tmp"),
+                        logger = NapierLoggingAdapter(),
+                    )
+                )
+                .build()
         }
 
-        bind<UstadAccountManager>() with singleton {
-            UstadAccountManager(instance(), applicationContext, di)
+        bind<HttpClient>() with singleton {
+            HttpClient(OkHttp) {
+
+                install(ContentNegotiation) {
+                    json(json = instance())
+                }
+                install(HttpTimeout)
+
+                val dispatcher = Dispatcher()
+                dispatcher.maxRequests = 30
+                dispatcher.maxRequestsPerHost = 10
+
+                engine {
+                    preconfigured = instance()
+                }
+
+            }
+        }
+
+        bind<File>(tag = DiTag.TAG_TMP_DIR) with singleton {
+            File(applicationContext.filesDir, "tmp")
+        }
+
+        bind<AppConfig>() with singleton {
+            BundleAppConfig(appMetaData)
+        }
+
+        bind<Settings>() with singleton {
+            SharedPreferencesSettings(
+                getSharedPreferences(UstadMobileSystemImpl.APP_PREFERENCES_NAME, Context.MODE_PRIVATE)
+            )
         }
 
         bind<NodeIdAndAuth>() with scoped(EndpointScope.Default).singleton {
-            val systemImpl: UstadMobileSystemImpl = instance()
+            val settings: Settings = instance()
             val contextIdentifier: String = sanitizeDbNameFromUrl(context.url)
-            systemImpl.getOrGenerateNodeIdAndAuth(contextPrefix = contextIdentifier, applicationContext)
+            settings.getOrGenerateNodeIdAndAuth(contextIdentifier)
+        }
+
+        bind<SupportedLanguagesConfig>() with singleton {
+            SupportedLanguagesConfig(
+                systemLocales = LocaleListCompat.getAdjustedDefault().let { localeList ->
+                    (0 .. localeList.size()).mapNotNull { localeList[it]?.language }
+                },
+                localeSettingDelegate = LocaleSettingDelegateAndroid(),
+                availableLanguagesConfig = applicationContext.appMetaData?.getString(
+                    METADATA_KEY_SUPPORTED_LANGS
+                ) ?: SupportedLanguagesConfig.DEFAULT_SUPPORTED_LANGUAGES
+            )
+        }
+
+        bind<ApiUrlConfig>() with singleton {
+            ApiUrlConfig(
+                presetApiUrl = applicationContext.appMetaData?.getString(METADATA_KEY_API_URL)
+            )
+        }
+
+        bind<Json>() with singleton {
+            Json {
+                encodeDefaults = true
+            }
+        }
+
+        bind<XML>() with singleton {
+            XML {
+                defaultPolicy {
+                    unknownChildHandler  = XmlConfig.IGNORING_UNKNOWN_CHILD_HANDLER
+                }
+            }
+        }
+
+        bind<Gson>() with singleton {
+            val builder = GsonBuilder()
+            builder.create()
+        }
+
+        bind<XmlPullParserFactory>(tag = DiTag.XPP_FACTORY_NSUNAWARE) with singleton {
+            XmlPullParserFactory.newInstance()
+        }
+
+        bind<XmlSerializer>() with provider {
+            instance<XmlPullParserFactory>().newSerializer()
+        }
+
+        bind<Pbkdf2Params>() with singleton {
+            val numIterations = UstadMobileConstants.PBKDF2_ITERATIONS
+            val keyLength = UstadMobileConstants.PBKDF2_KEYLENGTH
+
+            Pbkdf2Params(numIterations, keyLength)
+        }
+
+        bind<UstadAccountManager>() with singleton {
+            UstadAccountManager(settings = instance(), di = di)
         }
 
         bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(EndpointScope.Default).singleton {
             val dbName = sanitizeDbNameFromUrl(context.url)
             val nodeIdAndAuth: NodeIdAndAuth = instance()
-            val attachmentsDir = File(applicationContext.filesDir.siteDataSubDir(this@singleton.context),
-                UstadMobileSystemCommon.SUBDIR_ATTACHMENTS_NAME)
-            val attachmentFilters = listOf(ImageResizeAttachmentFilter("PersonPicture", 1280, 1280))
-            DatabaseBuilder.databaseBuilder(applicationContext, UmAppDatabase::class, dbName,
-                attachmentsDir, attachmentFilters)
-                .addSyncCallback(nodeIdAndAuth)
-                .addCallback(ContentJobItemTriggersCallback())
+            DatabaseBuilder.databaseBuilder(
+                context = applicationContext,
+                dbClass = UmAppDatabase::class,
+                dbName = dbName,
+                nodeId = nodeIdAndAuth.nodeId
+            ).addSyncCallback(nodeIdAndAuth)
                 .addMigrations(*migrationList().toTypedArray())
                 .build()
-                .also {
-                    val networkManager: NetworkManagerBle = di.direct.instance()
-                    it.connectivityStatusDao.commitLiveConnectivityStatus(networkManager.connectivityStatus)
-                }
+
         }
 
         bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(EndpointScope.Default).singleton {
             val nodeIdAndAuth: NodeIdAndAuth = instance()
             val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
-            db.asRepository(repositoryConfig(applicationContext,
-                "${context.url}UmAppDatabase/", nodeIdAndAuth.nodeId, nodeIdAndAuth.auth,
-                    instance(), instance()
-            ) {
-                useReplicationSubscription = true
-                replicationSubscriptionInitListener = RepSubscriptionInitListener()
-            }).also {
-                (it as? DoorDatabaseRepository)?.setupWithNetworkManager(instance())
-                it.addIncomingReplicationListener(
-                    ClazzAssignmentIncomingReplicationListener(context, di))
-            }
+            db.asRepository(
+                RepositoryConfig.repositoryConfig(
+                    context = applicationContext,
+                    endpoint = "${context.url}UmAppDatabase/",
+                    nodeId = nodeIdAndAuth.nodeId,
+                    auth = nodeIdAndAuth.auth,
+                    httpClient = instance(),
+                    okHttpClient = instance(),
+                    json = instance()
+                )
+            )
         }
 
-        bind<ContainerStorageManager> () with scoped(EndpointScope.Default).singleton{
-            ContainerStorageManager(applicationContext, context, di)
+        bind<UriHelper>() with singleton {
+            UriHelperAndroid(applicationContext)
         }
 
-        bind<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR) with scoped(EndpointScope.Default).singleton{
-            val containerStorage: ContainerStorageManager by di.on(context).instance()
-            val uri = containerStorage.storageList.firstOrNull()?.dirUri ?: throw IllegalStateException("internal storage missing?")
-            val containerFolder = File(URI(uri))
-            containerFolder.mkdirs()
-            containerFolder
+        bind<XhtmlFixer>() with singleton {
+            XhtmlFixerJsoup(xml = instance())
         }
 
-        bind<ConnectivityLiveData>() with scoped(EndpointScope.Default).singleton {
-            val db: UmAppDatabase = on(context).instance(tag = DoorTag.TAG_DB)
-            ConnectivityLiveData(db.connectivityStatusDao.statusLive())
+        bind<UstadCache>() with singleton {
+            val httpCacheDir = File(applicationContext.filesDir, "httpfiles")
+            val storagePath = Path(httpCacheDir.absolutePath)
+            UstadCacheBuilder(
+                appContext = applicationContext,
+                storagePath = storagePath,
+                logger = NapierLoggingAdapter(),
+                sizeLimit = { 100_000_000L },
+            ).build()
         }
 
-        bind<EmbeddedHTTPD>() with singleton {
-            EmbeddedHTTPD(0, di).also {
-                it.UmAppDatabase_AddUriMapping(false, "/:endpoint/UmAppDatabase", di)
-                it.start()
-                Napier.i("EmbeddedHTTPD started on port ${it.listeningPort}")
-            }
-        }
+        bind<ContentImportersManager>() with scoped(EndpointScope.Default).singleton {
+            val cache: UstadCache = instance()
+            val uriHelper: UriHelper = instance()
+            val xml: XML = instance()
+            val xhtmlFixer: XhtmlFixer = instance()
+            val db: UmAppDatabase = instance(tag = DoorTag.TAG_DB)
+            val saveAndManifestUseCase: SaveLocalUriAsBlobAndManifestUseCase = instance()
+            val tmpRoot: File = instance(tag = DiTag.TAG_TMP_DIR)
+            val contentImportTmpPath = Path(tmpRoot.absolutePath, "contentimport")
+            val getStoragePathForUrlUseCase: GetStoragePathForUrlUseCase= instance()
 
-        bind<NetworkManagerBle>() with singleton {
-            val coroutineDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
-            NetworkManagerBle(applicationContext, di, coroutineDispatcher).also {
-                it.onCreate()
-            }
-        }
+            ContentImportersManager(
+                buildList {
+                    add(
+                        EpubContentImporterCommonJvm(
+                            endpoint = context,
+                            cache = cache,
+                            db = db,
+                            uriHelper = uriHelper,
+                            xml = xml,
+                            xhtmlFixer = xhtmlFixer,
+                            tmpPath = contentImportTmpPath,
+                            saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
+                            json = instance(),
+                            getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
+                        )
+                    )
+                    add(
+                        XapiZipContentImporter(
+                            endpoint = context,
+                            db = db,
+                            cache = cache,
+                            uriHelper = uriHelper,
+                            json = instance(),
+                            tmpPath = contentImportTmpPath,
+                            saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
+                        )
+                    )
 
-        bind<ContainerMounter>() with singleton { instance<EmbeddedHTTPD>() }
+                    add(
+                        H5PContentImporter(
+                            endpoint = context,
+                            db = db,
+                            cache = cache,
+                            uriHelper = uriHelper,
+                            tmpPath = contentImportTmpPath,
+                            saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
+                            json = instance(),
+                            h5pInStream = {
+                                applicationContext.assets.open("h5p/h5p-standalone-3.6.0.zip",
+                                    AssetManager.ACCESS_STREAMING)
+                            }
+                        ),
+                    )
 
-        bind<ClazzLogCreatorManager>() with singleton { ClazzLogCreatorManagerAndroidImpl(applicationContext) }
+                    add(
+                        VideoContentImporterAndroid(
+                            endpoint = context,
+                            appContext = applicationContext,
+                            uriHelper = uriHelper,
+                            cache = cache,
+                            tmpPath = contentImportTmpPath,
+                            db = db,
+                            saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
+                            json = instance(),
+                            getStoragePathForUrlUseCase  = getStoragePathForUrlUseCase,
+                        )
+                    )
 
-        constant(TAG_DOWNLOAD_ENABLED) with true
-
-        bind<CoroutineDispatcher>(tag = TAG_MAIN_COROUTINE_CONTEXT) with singleton { Dispatchers.Main }
-
-        bind<ContentEntryOpener>() with scoped(EndpointScope.Default).singleton {
-            ContentEntryOpener(di, context)
-        }
-
-
-        bind<EpubTypePluginCommonJvm>() with scoped(EndpointScope.Default).singleton{
-            EpubTypePluginCommonJvm(applicationContext, context, di)
-        }
-
-        bind<XapiTypePluginCommonJvm>() with scoped(EndpointScope.Default).singleton{
-            XapiTypePluginCommonJvm(applicationContext, context, di)
-        }
-
-        bind<H5PTypePluginCommonJvm>() with scoped(EndpointScope.Default).singleton{
-            H5PTypePluginCommonJvm(applicationContext, context, di)
-        }
-
-        bind<VideoTypePluginAndroid>() with scoped(EndpointScope.Default).singleton{
-            VideoTypePluginAndroid(applicationContext, context, di)
-        }
-
-        bind<PDFTypePlugin>() with scoped(EndpointScope.Default).singleton{
-            PDFPluginAndroid(applicationContext, context, di)
-        }
-
-        bind<ContainerDownloadPlugin>() with scoped(EndpointScope.Default).singleton{
-            ContainerDownloadPlugin(applicationContext, context, di)
-        }
-
-        bind<DeleteContentEntryPlugin>() with scoped(EndpointScope.Default).singleton{
-            DeleteContentEntryPlugin(applicationContext, context, di)
-        }
-
-        bind<FolderIndexerPlugin>() with scoped(EndpointScope.Default).singleton{
-            FolderIndexerPlugin(applicationContext, context, di)
-        }
-
-        bind<ContentPluginManager>() with scoped(EndpointScope.Default).singleton {
-            ContentPluginManager(listOf(
-                    di.on(context).direct.instance<EpubTypePluginCommonJvm>(),
-                    di.on(context).direct.instance<XapiTypePluginCommonJvm>(),
-                    di.on(context).direct.instance<H5PTypePluginCommonJvm>(),
-                    di.on(context).direct.instance<VideoTypePluginAndroid>(),
-                    di.on(context).direct.instance<PDFTypePlugin>(),
-                    di.on(context).direct.instance<FolderIndexerPlugin>(),
-                    di.on(context).direct.instance<ContainerDownloadPlugin>(),
-                    di.on(context).direct.instance<DeleteContentEntryPlugin>(),
-                    ContentEntryBranchDownloadPlugin(applicationContext, context, di)))
-        }
-
-        bind<ContentJobManager>() with singleton {
-            ContentJobManagerAndroid(applicationContext)
-        }
-
-        bind<Gson>() with singleton {
-            val builder = GsonBuilder()
-            builder.registerTypeAdapter(Statement::class.java, StatementSerializer())
-            builder.registerTypeAdapter(Statement::class.java, StatementDeserializer())
-            builder.registerTypeAdapter(ContextActivity::class.java, ContextDeserializer())
-            builder.create()
-        }
-
-        bind<XapiStatementEndpoint>() with scoped(EndpointScope.Default).singleton {
-            XapiStatementEndpointImpl(endpoint = context, di = di)
-        }
-        bind<XapiStateEndpoint>() with scoped(EndpointScope.Default).singleton {
-            XapiStateEndpointImpl(endpoint = context, di = di)
-        }
-
-        bind<Int>(tag = TAG_LOCAL_HTTP_PORT) with singleton {
-            instance<EmbeddedHTTPD>().listeningPort
+                    add(
+                        PdfContentImporterAndroid(
+                            endpoint = context,
+                            cache = cache,
+                            uriHelper = uriHelper,
+                            db = db,
+                            saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
+                            getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
+                            json = instance(),
+                            appContext = applicationContext,
+                            tmpDir = File(contentImportTmpPath.toString()),
+                        )
+                    )
+                }
+            )
         }
 
         bind<XmlPullParserFactory>(tag  = DiTag.XPP_FACTORY_NSAWARE) with singleton {
@@ -236,76 +383,260 @@ open class UstadApp : Application(), DIAware {
             }
         }
 
-        bind<XmlPullParserFactory>(tag = DiTag.XPP_FACTORY_NSUNAWARE) with singleton {
-            XmlPullParserFactory.newInstance()
-        }
-
-        bind<ConnectionManager>() with singleton{
-            ConnectionManager(applicationContext, di)
-        }
-
-        bind<XmlSerializer>() with provider {
-            instance<XmlPullParserFactory>().newSerializer()
-        }
-
-        bind<DestinationProvider>() with singleton {
-            ViewNameToDestMap()
-        }
-
-
-        bind<Pbkdf2Params>() with singleton {
-            val systemImpl: UstadMobileSystemImpl = instance()
-            val numIterations = systemImpl.getAppConfigInt(KEY_PBKDF2_ITERATIONS,
-                UstadMobileConstants.PBKDF2_ITERATIONS, applicationContext)
-            val keyLength = systemImpl.getAppConfigInt(KEY_PBKDF2_KEYLENGTH,
-                UstadMobileConstants.PBKDF2_KEYLENGTH, applicationContext)
-
-            Pbkdf2Params(numIterations, keyLength)
-        }
-
         bind<AuthManager>() with scoped(EndpointScope.Default).singleton {
             AuthManager(context, di)
         }
 
-        registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
-
-        registerContextTranslator { call: NanoHttpdCall -> Endpoint(call.urlParams["endpoint"] ?: "notfound")}
-
-        onReady {
-            instance<NetworkManagerBle>()
-            instance<EmbeddedHTTPD>()
-            instance<ConnectionManager>().start()
-
-            Picasso.setSingletonInstance(Picasso.Builder(applicationContext)
-                    .downloader(OkHttp3Downloader(instance<OkHttpClient>()))
-                    .build())
+        bind<NavCommandExecutionTracker>() with singleton {
+            NavCommandExecutionTracker()
         }
 
-        bind<Json>() with singleton {
-            Json {
-                encodeDefaults = true
+        bind<GenderConfig>() with singleton {
+            GenderConfig(
+                appConfig = instance()
+            )
+        }
+
+
+
+        bind<SaveLocalUrisAsBlobsUseCase>() with scoped(EndpointScope.Default).singleton {
+            val rootTmpDir: File = instance(tag = DiTag.TAG_TMP_DIR)
+            SaveLocalUrisAsBlobsUseCaseJvm(
+                endpoint = context,
+                cache = instance(),
+                uriHelper = instance(),
+                tmpDir = Path(rootTmpDir.absolutePath, "savelocaluriaslblobtmp"),
+                fileSystem = SystemFileSystem,
+                deleteUrisUseCase = instance(),
+                createRetentionLock = true,
+            )
+        }
+
+        bind<SaveLocalUriAsBlobAndManifestUseCase>() with scoped(EndpointScope.Default).singleton {
+            SaveLocalUriAsBlobAndManifestUseCaseJvm(
+                saveLocalUrisAsBlobsUseCase = instance(),
+                mimeTypeHelper = FileMimeTypeHelperImpl(),
+            )
+        }
+
+        bind<EnqueueBlobUploadClientUseCase>() with scoped(EndpointScope.Default).singleton {
+            EnqueueBlobUploadClientUseCaseAndroid(
+                appContext = applicationContext,
+                endpoint = context,
+                db = on(context).instance(tag = DoorTag.TAG_DB),
+                cache = instance(),
+            )
+        }
+
+        bind<BlobUploadClientUseCase>() with scoped(EndpointScope.Default).singleton {
+            BlobUploadClientUseCaseJvm(
+                chunkedUploadUseCase = on(context).instance(),
+                httpClient = instance(),
+                httpCache = instance(),
+                db = on(context).instance(tag = DoorTag.TAG_DB),
+                repo = on(context).instance(tag = DoorTag.TAG_REPO),
+                endpoint = context,
+            )
+        }
+
+        bind<EnqueueSavePictureUseCase>() with scoped(EndpointScope.Default).singleton {
+            EnqueueSavePictureUseCaseAndroid(
+                appContext = applicationContext,
+                endpoint = context,
+            )
+        }
+
+        bind<IsTempFileCheckerUseCase>() with singleton {
+            IsTempFileCheckerUseCaseAndroid(
+                tmpDir = instance(tag = DiTag.TAG_TMP_DIR)
+            )
+        }
+
+        bind<DeleteUrisUseCase>() with singleton {
+            DeleteUrisUseCaseCommonJvm(
+                isTempFileCheckerUseCase = instance()
+            )
+        }
+
+        bind<SavePictureUseCase>() with scoped(EndpointScope.Default).singleton {
+            SavePictureUseCase(
+                saveLocalUrisAsBlobUseCase = on(context).instance(),
+                db = on(context).instance(tag = DoorTag.TAG_DB),
+                repo = on(context).instance(tag = DoorTag.TAG_REPO),
+                enqueueBlobUploadClientUseCase = on(context).instance(),
+                compressImageUseCase = CompressImageUseCaseAndroid(applicationContext),
+                deleteUrisUseCase = instance(),
+            )
+        }
+
+        bind<UpdateFailedTransferJobUseCase>() with scoped(EndpointScope.Default).provider {
+            UpdateFailedTransferJobUseCase(
+                db = instance(tag = DoorTag.TAG_DB)
+            )
+        }
+
+
+        bind<ChunkedUploadClientUseCaseKtorImpl>() with singleton {
+            ChunkedUploadClientUseCaseKtorImpl(
+                httpClient = instance(),
+                uriHelper = instance(),
+            )
+        }
+
+        bind<ChunkedUploadClientLocalUriUseCase>() with singleton {
+            instance<ChunkedUploadClientUseCaseKtorImpl>()
+        }
+
+        bind<ChunkedUploadClientChunkGetterUseCase>() with singleton {
+            instance<ChunkedUploadClientUseCaseKtorImpl>()
+        }
+
+        bind<ContentEntryGetMetaDataFromUriUseCase>() with scoped(EndpointScope.Default).provider {
+            ContentEntryGetMetaDataFromUriUseCaseCommonJvm(
+                importersManager = instance()
+            )
+        }
+
+        bind<EnqueueContentEntryImportUseCase>() with scoped(EndpointScope.Default).provider {
+            EnqueueImportContentEntryUseCaseAndroid(
+                db = instance(tag = DoorTag.TAG_DB),
+                appContext = applicationContext,
+                endpoint = context,
+                enqueueRemoteImport = EnqueueImportContentEntryUseCaseRemote(
+                    endpoint = context,
+                    httpClient = instance()
+                )
+            )
+        }
+
+        bind<ImportContentEntryUseCase>() with scoped(EndpointScope.Default).provider {
+            ImportContentEntryUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                importersManager = instance(),
+                enqueueBlobUploadClientUseCase = instance(),
+                createRetentionLocksForManifestUseCase = instance(),
+                httpClient = instance(),
+            )
+        }
+
+        bind<CreateRetentionLocksForManifestUseCase>() with scoped(EndpointScope.Default).singleton {
+            CreateRetentionLocksForManifestUseCaseCommonJvm(
+                cache = instance()
+            )
+        }
+
+        bind<BlobDownloadClientUseCase>() with scoped(EndpointScope.Default).singleton {
+            BlobDownloadClientUseCaseCommonJvm(
+                okHttpClient = instance(),
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = instance(tag = DoorTag.TAG_REPO),
+            )
+        }
+
+        bind<EnqueueBlobDownloadClientUseCase>() with scoped(EndpointScope.Default).singleton {
+            EnqueueBlobDownloadClientUseCaseAndroid(
+                appContext = applicationContext,
+                endpoint = context,
+                db = instance(tag = DoorTag.TAG_DB)
+            )
+        }
+
+        bind<ContentManifestDownloadUseCase>() with scoped(EndpointScope.Default).singleton {
+            ContentManifestDownloadUseCase(
+                enqueueBlobDownloadClientUseCase = instance(),
+                db = instance(tag = DoorTag.TAG_DB),
+                httpClient = instance(),
+            )
+        }
+
+        bind<EnqueueContentManifestDownloadUseCase>() with scoped(EndpointScope.Default).singleton {
+            EnqueueContentManifestDownloadJobUseCaseAndroid(
+                appContext = applicationContext,
+                endpoint = context,
+                db = instance(tag = DoorTag.TAG_DB),
+            )
+        }
+
+        bind<ContentEntryVersionServerUseCase>() with scoped(EndpointScope.Default).singleton {
+            ContentEntryVersionServerUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = instance(tag = DoorTag.TAG_REPO),
+                okHttpClient = instance(),
+                json = instance(),
+                onlyIfCached = false,
+            )
+        }
+
+        bind<GetStoragePathForUrlUseCase>() with singleton {
+            GetStoragePathForUrlUseCaseCommonJvm(
+                httpClient = instance(),
+                cache = instance(),
+            )
+        }
+
+        bind<GetVersionUseCase>() with singleton {
+            GetVersionUseCaseAndroid(applicationContext)
+        }
+
+        bind<SetPasswordUseCase>() with scoped(EndpointScope.Default).singleton {
+            SetPasswordUseCaseCommonJvm(
+                authManager = instance()
+            )
+        }
+
+        registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
+    }
+
+
+    override fun onCreate() {
+        super.onCreate()
+        Napier.base(DebugAntilog())
+
+        val metadataPresetLang = appMetaData?.getString(METADATA_KEY_PRESET_LANG)
+
+        if(!metadataPresetLang.isNullOrEmpty()) {
+            val settings: Settings = di.direct.instance()
+            val presetActioned = settings.getStringOrNull(PREFKEY_ACTIONED_PRESET)
+            if(presetActioned != true.toString()) {
+                AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(metadataPresetLang))
+                settings.putString(PREFKEY_ACTIONED_PRESET, true.toString())
             }
         }
     }
 
-    override val di: DI by DI.lazy {
-        import(diModule)
-    }
-
-    override fun onCreate() {
-        super.onCreate()
-        val systemImpl: UstadMobileSystemImpl = di.direct.instance()
-        systemImpl.messageIdMap = MessageIDMap.ID_MAP
-        Napier.base(DebugAntilog())
-    }
-
-    override fun onTerminate() {
-        super.onTerminate()
-        di.direct.instance<ConnectionManager>().stop()
+    /**
+     * COIL image loader singleton (connected to the OkHttpClient which uses UstadCache) as per
+     *  https://coil-kt.github.io/coil/image_loaders/
+     */
+    override fun newImageLoader(): ImageLoader {
+        val okHttpClient: OkHttpClient = di.direct.instance()
+        return ImageLoader.Builder(applicationContext)
+            .okHttpClient(
+                okHttpClient = okHttpClient
+            )
+            .build()
     }
 
     override fun attachBaseContext(base: Context) {
         super.attachBaseContext(base)
+        if(BuildConfig.ACRA_HTTP_URI.isNotBlank()) {
+            initAcra {
+                reportFormat = StringFormat.JSON
+                httpSender {
+                    uri = BuildConfig.ACRA_HTTP_URI
+                    basicAuthLogin = BuildConfig.ACRA_BASIC_LOGIN
+                    basicAuthPassword = BuildConfig.ACRA_BASIC_PASS
+                    httpMethod = HttpSender.Method.POST
+                }
+            }
+        }
+    }
+
+    companion object {
+
+        const val METADATA_KEY_SUPPORTED_LANGS = "com.ustadmobile.uilanguages"
+
+        const val METADATA_KEY_API_URL = "com.ustadmobile.apiurl"
     }
 
 }

@@ -1,0 +1,297 @@
+package com.ustadmobile.libuicompose.view.clazz.list
+
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Badge
+import androidx.compose.material.icons.filled.Login
+import androidx.compose.material3.Badge
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedCard
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.dp
+import androidx.paging.compose.collectAsLazyPagingItems
+import app.cash.paging.Pager
+import app.cash.paging.PagingConfig
+import com.ustadmobile.core.impl.locale.entityconstants.RoleConstants
+import com.ustadmobile.core.util.MessageIdOption2
+import com.ustadmobile.core.viewmodel.clazz.list.ClazzListUiState
+import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
+import com.ustadmobile.lib.db.entities.Clazz
+import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
+import dev.icerock.moko.resources.compose.stringResource
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.impl.appstate.AppUiState
+import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
+import com.ustadmobile.core.impl.nav.NavResultReturner
+import com.ustadmobile.core.util.SortOrderOption
+import com.ustadmobile.lib.db.entities.ClazzEnrolment
+import com.ustadmobile.libuicompose.components.SortListMode
+import com.ustadmobile.libuicompose.components.UstadAsyncImage
+import com.ustadmobile.libuicompose.components.UstadBottomSheetOption
+import com.ustadmobile.libuicompose.components.UstadListFilterChipsHeader
+import com.ustadmobile.libuicompose.components.UstadListSortHeader
+import com.ustadmobile.libuicompose.components.ustadPagedItems
+import com.ustadmobile.libuicompose.nav.UstadNavControllerPreCompose
+import com.ustadmobile.libuicompose.util.compose.courseTerminologyEntryResource
+import com.ustadmobile.libuicompose.util.compose.rememberCourseTerminologyEntries
+import com.ustadmobile.libuicompose.util.ext.copyWithNewFabOnClick
+import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
+import com.ustadmobile.libuicompose.util.defaultSortListMode
+import com.ustadmobile.libuicompose.util.rememberHtmlToPlainText
+import com.ustadmobile.libuicompose.view.clazz.painterForDefaultCourseImage
+import com.ustadmobile.libuicompose.viewmodel.ustadViewModel
+import moe.tlaster.precompose.navigation.BackStackEntry
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ClazzListScreen(
+    backStackEntry: BackStackEntry,
+    navController: UstadNavControllerPreCompose,
+    onSetAppUiState: (AppUiState) -> Unit,
+    navResultReturner: NavResultReturner,
+    onShowSnackBar: SnackBarDispatcher,
+    destName: String,
+) {
+    var createNewOptionsVisible by remember {
+        mutableStateOf(false)
+    }
+
+
+    val viewModel = ustadViewModel(
+        modelClass = ClazzListViewModel::class,
+        backStackEntry = backStackEntry,
+        onSetAppUiState = onSetAppUiState,
+        navController = navController,
+        navResultReturner = navResultReturner,
+        onShowSnackBar = onShowSnackBar,
+        appUiStateMap = {
+            it.copyWithNewFabOnClick {
+                createNewOptionsVisible = true
+            }
+        }
+    ) { di, savedStateHandle ->
+        ClazzListViewModel(di, savedStateHandle, destName)
+    }
+
+    val uiState: ClazzListUiState by viewModel.uiState.collectAsState(initial = ClazzListUiState())
+
+    if(createNewOptionsVisible) {
+        ModalBottomSheet(
+            onDismissRequest = {
+                createNewOptionsVisible = false
+            }
+        ) {
+            UstadBottomSheetOption(
+                modifier = Modifier.clickable {
+                    createNewOptionsVisible = false
+                    viewModel.onClickJoinExistingClazz()
+                },
+                headlineContent = { Text(stringResource(MR.strings.join_existing_course)) },
+                leadingContent = { Icon(Icons.Default.Login, contentDescription = null) },
+            )
+
+            if(uiState.canAddNewCourse) {
+                UstadBottomSheetOption(
+                    modifier = Modifier.clickable {
+                        createNewOptionsVisible = false
+                        viewModel.onClickAdd()
+                    },
+                    headlineContent = { Text(stringResource(MR.strings.add_a_new_course)) },
+                    leadingContent = { Icon(Icons.Default.Add, contentDescription = null) },
+                )
+            }
+        }
+    }
+
+    ClazzListScreen(
+        uiState = uiState,
+        onClickClazz = viewModel::onClickEntry,
+        onClickFilterChip = viewModel::onClickFilterChip,
+        onClickSortOption = viewModel::onSortOrderChanged,
+    )
+}
+
+@Composable
+fun ClazzListScreen(
+    uiState: ClazzListUiState = ClazzListUiState(),
+    onClickClazz: (Clazz) -> Unit = {},
+    onClickFilterChip: (MessageIdOption2) -> Unit = {},
+    onClickSortOption: (SortOrderOption) -> Unit = { },
+    sortListMode: SortListMode = defaultSortListMode(),
+) {
+
+    val pager = remember(uiState.clazzList){
+        Pager(
+            config = PagingConfig(pageSize = 20, enablePlaceholders = true, maxSize = 200),
+            pagingSourceFactory = uiState.clazzList
+        )
+    }
+
+    val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
+
+    LazyVerticalGrid(
+        modifier = Modifier.fillMaxSize(),
+
+        // 600 width of the smallest iPad,
+        // subtracted 16 = horizontal padding & space between cards,
+        // half of 584 is 292
+        // card width = 292dp.
+        columns = GridCells.Adaptive(292.dp)
+    ) {
+
+        item(span = { GridItemSpan(maxLineSpan) }) {
+            UstadListSortHeader(
+                modifier = Modifier.defaultItemPadding(),
+                activeSortOrderOption = uiState.activeSortOrderOption,
+                enabled = uiState.fieldsEnabled,
+                sortOptions = uiState.sortOptions,
+                onClickSortOption = onClickSortOption,
+                mode = sortListMode,
+            )
+        }
+
+        item(span = { GridItemSpan(maxLineSpan) }) {
+            UstadListFilterChipsHeader(
+                modifier = Modifier.defaultItemPadding(),
+                filterOptions = uiState.filterOptions,
+                selectedChipId = uiState.selectedChipId,
+                enabled = uiState.fieldsEnabled,
+                onClickFilterChip = onClickFilterChip,
+            )
+        }
+
+        ustadPagedItems(
+            pagingItems = lazyPagingItems,
+            key = { it.clazzUid }
+        ){
+            ClazzListItem(
+                clazz = it,
+                onClickClazz = onClickClazz
+            )
+        }
+
+        //Host fragment thinks scroll bar behavior increases available height - need to compensate
+        item(span = { GridItemSpan(maxLineSpan) }) {
+            Spacer(modifier = Modifier.height(176.dp))
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ClazzListItem(
+    clazz: ClazzWithListDisplayDetails?,
+    onClickClazz: (Clazz) -> Unit
+){
+
+
+    @Suppress("UNUSED_VARIABLE") //Reserved for future use
+    val role = RoleConstants.ROLE_MESSAGE_IDS.find {
+        it.value == clazz?.clazzActiveEnrolment?.clazzEnrolmentRole
+    }?.stringResource
+
+    Box(
+        contentAlignment = Alignment.TopEnd,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        OutlinedCard(
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+            ),
+            border = BorderStroke(1.dp, Color.Black),
+            onClick = {
+                clazz?.also { onClickClazz(it) }
+            },
+            modifier = Modifier.defaultItemPadding()
+        ) {
+            Column {
+                val imageUri = clazz?.coursePicture?.coursePictureUri
+                if(imageUri != null) {
+                    UstadAsyncImage(
+                        uri = imageUri,
+                        contentDescription = "",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.height(96.dp).fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp))
+                    )
+                }else {
+                    Image(
+                        painter = painterForDefaultCourseImage(clazz?.clazzName),
+                        contentDescription = "",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.height(96.dp).fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp))
+                    )
+                }
+
+                Text(
+                    text = clazz?.clazzName ?: "",
+                    maxLines = 1,
+                    modifier = Modifier.defaultItemPadding(bottom = 0.dp),
+                )
+
+                Text(
+                    text = rememberHtmlToPlainText(clazz?.clazzDesc ?: ""),
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 2,
+                    modifier = Modifier.defaultItemPadding(top = 0.dp),
+                )
+            }
+        }
+
+        val enrolment = clazz?.clazzActiveEnrolment
+        if(enrolment != null) {
+            val terminologyEntries = rememberCourseTerminologyEntries(
+                clazz.terminology
+            )
+            val stringResource = when(enrolment.clazzEnrolmentRole) {
+                ClazzEnrolment.ROLE_STUDENT -> MR.strings.student
+                ClazzEnrolment.ROLE_TEACHER -> MR.strings.teacher
+                else -> null
+            }
+            if(stringResource != null) {
+                Badge(
+                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Badge,
+                        contentDescription = null,
+                        modifier = Modifier.size(12.dp),
+                    )
+
+                    Text(courseTerminologyEntryResource(terminologyEntries, stringResource))
+                }
+            }
+        }
+    }
+}

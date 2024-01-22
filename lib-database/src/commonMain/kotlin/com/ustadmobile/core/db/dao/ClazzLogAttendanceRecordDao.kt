@@ -2,75 +2,16 @@ package com.ustadmobile.core.db.dao
 
 import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.door.SyncNode
 import com.ustadmobile.door.annotation.*
+import com.ustadmobile.lib.db.composites.PersonAndClazzLogAttendanceRecord
 import com.ustadmobile.lib.db.entities.*
 
 @DoorDao
 @Repository
 expect abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
-
-
-    @Query("""
-     REPLACE INTO ClazzLogAttendanceRecordReplicate(clarPk, clarDestination)
-      SELECT DISTINCT ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid AS clarUid,
-             :newNodeId AS clarDestination
-        FROM UserSession
-             JOIN PersonGroupMember 
-                  ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
-             ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1}
-                  ${Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT} 
-                  ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT2}
-             JOIN ClazzLog
-                  ON ClazzLog.clazzLogClazzUid = Clazz.clazzUid
-             JOIN ClazzLogAttendanceRecord 
-                  ON ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid
-       WHERE ClazzLogAttendanceRecord.clazzLogAttendanceRecordLastChangedTime != COALESCE(
-             (SELECT clarVersionId
-                FROM ClazzLogAttendanceRecordReplicate
-               WHERE clarPk = ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid
-                 AND clarDestination = :newNodeId), 0) 
-      /*psql ON CONFLICT(clarPk, clarDestination) DO UPDATE
-             SET clarPending = true
-      */       
-    """)
-    @ReplicationRunOnNewNode
-    @ReplicationCheckPendingNotificationsFor([ClazzLogAttendanceRecord::class])
-    abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
-
-    @Query("""
- REPLACE INTO ClazzLogAttendanceRecordReplicate(clarPk, clarDestination)
-  SELECT DISTINCT ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid AS clarUid,
-         UserSession.usClientNodeId AS clarDestination
-    FROM ChangeLog
-         JOIN ClazzLogAttendanceRecord 
-              ON ChangeLog.chTableId = ${ClazzLogAttendanceRecord.TABLE_ID} 
-             AND ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid = ChangeLog.chEntityPk
-         JOIN ClazzLog
-              ON ClazzLog.clazzLogUid = ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid
-         JOIN Clazz 
-              ON Clazz.clazzUid = ClazzLog.clazzLogClazzUid 
-         ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
-              ${Role.PERMISSION_CLAZZ_SELECT}
-              ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}
-   WHERE UserSession.usClientNodeId != (
-         SELECT nodeClientId 
-           FROM SyncNode
-          LIMIT 1)
-     AND ClazzLogAttendanceRecord.clazzLogAttendanceRecordLastChangedTime != COALESCE(
-             (SELECT clarVersionId
-                FROM ClazzLogAttendanceRecordReplicate
-               WHERE clarPk = ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid
-                 AND clarDestination = UserSession.usClientNodeId), 0) 
- /*psql ON CONFLICT(clarPk, clarDestination) DO UPDATE
-     SET clarPending = true
-  */               
-    """)
-    @ReplicationRunOnChange([ClazzLogAttendanceRecord::class])
-    @ReplicationCheckPendingNotificationsFor([ClazzLogAttendanceRecord::class])
-    abstract suspend fun replicateOnChange()
 
     @Insert
     abstract suspend fun insertListAsync(entities: List<ClazzLogAttendanceRecord>)
@@ -99,5 +40,54 @@ expect abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRe
         newClazzLogUid: Long,
         changedTime: Long
     )
+
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall(
+                functionName = "findByClazzAndTime"
+            ),
+            HttpServerFunctionCall(
+                functionDao = ClazzEnrolmentDao::class,
+                functionName = "findAllEnrolmentsByClazzUidAndRole",
+                functionArgs = arrayOf(
+                    HttpServerFunctionParam(
+                        name = "roleId",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "${ClazzEnrolment.ROLE_STUDENT}",
+                    )
+                )
+            )
+        )
+    )
+    @Query("""
+        ${ClazzEnrolmentDaoCommon.WITH_CURRENTLY_ENROLED_STUDENTS_SQL}
+                  
+        SELECT Person.*, ClazzLogAttendanceRecord.*, PersonPicture.*
+          FROM Person
+               LEFT JOIN ClazzLogAttendanceRecord 
+                         ON ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid = 
+                            (SELECT ClazzLogAttendanceRecordInner.clazzLogAttendanceRecordUid  
+                               FROM ClazzLogAttendanceRecord ClazzLogAttendanceRecordInner
+                              WHERE ClazzLogAttendanceRecordInner.clazzLogAttendanceRecordClazzLogUid = :clazzLogUid
+                                AND ClazzLogAttendanceRecordInner.clazzLogAttendanceRecordPersonUid = Person.personUid
+                           ORDER BY ClazzLogAttendanceRecordInner.clazzLogAttendanceRecordLastChangedTime DESC     
+                              LIMIT 1  
+                            )
+               LEFT JOIN PersonPicture
+                         ON PersonPicture.personPictureUid = Person.personUid
+         WHERE Person.personUid IN 
+               (SELECT CurrentlyEnrolledPersonUids.enroledPersonUid
+                  FROM CurrentlyEnrolledPersonUids)                
+    """)
+    abstract suspend fun findByClazzAndTime(
+        clazzUid: Long,
+        clazzLogUid: Long,
+        time: Long
+    ): List<PersonAndClazzLogAttendanceRecord>
+
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract suspend fun upsertListAsync(entityList: List<ClazzLogAttendanceRecord>)
 
 }

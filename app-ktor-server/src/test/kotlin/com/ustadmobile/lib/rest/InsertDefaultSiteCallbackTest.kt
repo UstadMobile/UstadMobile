@@ -1,6 +1,5 @@
 package com.ustadmobile.lib.rest
 
-import com.ustadmobile.core.db.ContentJobItemTriggersCallback
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
@@ -16,9 +15,9 @@ class InsertDefaultSiteCallbackTest {
     fun givenDatabaseCreated_thenWhenOpened_itShouldBloodyWellBeThereFfs() {
         val dbUrl = "jdbc:sqlite::memory:"
         val nodeIdAndAuth = NodeIdAndAuth(42, "secret")
-        val umAppDb = DatabaseBuilder.databaseBuilder(UmAppDatabase::class, dbUrl)
+        val umAppDb = DatabaseBuilder.databaseBuilder(UmAppDatabase::class, dbUrl,
+                nodeId = nodeIdAndAuth.nodeId)
             .addSyncCallback(nodeIdAndAuth)
-            .addCallback(ContentJobItemTriggersCallback())
             .addCallback(InsertDefaultSiteCallback())
             .addMigrations(*migrationList().toTypedArray())
             .build()

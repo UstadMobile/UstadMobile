@@ -1,249 +1,9 @@
 package com.ustadmobile.core.db.ext
 
-import com.ustadmobile.core.db.UmAppDatabaseReplicationMigration91_92
 import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.door.migration.DoorMigrationStatementList
-import com.ustadmobile.lib.util.ext.fixTincan
 import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.door.migration.DoorMigration
-
-val MIGRATION_92_93 = DoorMigrationStatementList(92, 93) { db ->
-    if(db.dbType() == DoorDbType.SQLITE) {
-        listOf("ALTER TABLE SyncNode RENAME to SyncNode_OLD",
-            "CREATE TABLE IF NOT EXISTS SyncNode (  nodeClientId  INTEGER  PRIMARY KEY NOT NULL)",
-            "INSERT INTO SyncNode (nodeClientId) SELECT nodeClientId FROM SyncNode_OLD",
-            "DROP TABLE SyncNode_OLD")
-    }else {
-        listOf("ALTER TABLE SyncNode DROP COLUMN master")
-    }
-}
-
-val MIGRATION_93_94 = DoorMigrationStatementList(93, 94) { db ->
-    if(db.dbType() == DoorDbType.SQLITE) {
-        listOf(
-            "CREATE VIEW IF NOT EXISTS ClazzLogAttendanceRecord_ReceiveView AS  SELECT ClazzLogAttendanceRecord.*, ClazzLogAttendanceRecordReplicate.* FROM ClazzLogAttendanceRecord LEFT JOIN ClazzLogAttendanceRecordReplicate ON ClazzLogAttendanceRecordReplicate.clarPk = ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid ",
-            "DROP TRIGGER IF EXISTS clazzlogattendancerecord_remote_insert_ins",
-            "CREATE TRIGGER clazzlogattendancerecord_remote_insert_ins INSTEAD OF INSERT ON ClazzLogAttendanceRecord_ReceiveView FOR EACH ROW BEGIN REPLACE INTO ClazzLogAttendanceRecord(clazzLogAttendanceRecordUid, clazzLogAttendanceRecordClazzLogUid, clazzLogAttendanceRecordPersonUid, attendanceStatus, clazzLogAttendanceRecordMasterChangeSeqNum, clazzLogAttendanceRecordLocalChangeSeqNum, clazzLogAttendanceRecordLastChangedBy, clazzLogAttendanceRecordLastChangedTime) VALUES (NEW.clazzLogAttendanceRecordUid, NEW.clazzLogAttendanceRecordClazzLogUid, NEW.clazzLogAttendanceRecordPersonUid, NEW.attendanceStatus, NEW.clazzLogAttendanceRecordMasterChangeSeqNum, NEW.clazzLogAttendanceRecordLocalChangeSeqNum, NEW.clazzLogAttendanceRecordLastChangedBy, NEW.clazzLogAttendanceRecordLastChangedTime) /*psql ON CONFLICT (clazzLogAttendanceRecordUid) DO UPDATE SET clazzLogAttendanceRecordClazzLogUid = EXCLUDED.clazzLogAttendanceRecordClazzLogUid, clazzLogAttendanceRecordPersonUid = EXCLUDED.clazzLogAttendanceRecordPersonUid, attendanceStatus = EXCLUDED.attendanceStatus, clazzLogAttendanceRecordMasterChangeSeqNum = EXCLUDED.clazzLogAttendanceRecordMasterChangeSeqNum, clazzLogAttendanceRecordLocalChangeSeqNum = EXCLUDED.clazzLogAttendanceRecordLocalChangeSeqNum, clazzLogAttendanceRecordLastChangedBy = EXCLUDED.clazzLogAttendanceRecordLastChangedBy, clazzLogAttendanceRecordLastChangedTime = EXCLUDED.clazzLogAttendanceRecordLastChangedTime */; END")
-    }else {
-        listOf("CREATE OR REPLACE FUNCTION clazzlogattendancerecord_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ClazzLogAttendanceRecord(clazzLogAttendanceRecordUid, clazzLogAttendanceRecordClazzLogUid, clazzLogAttendanceRecordPersonUid, attendanceStatus, clazzLogAttendanceRecordMasterChangeSeqNum, clazzLogAttendanceRecordLocalChangeSeqNum, clazzLogAttendanceRecordLastChangedBy, clazzLogAttendanceRecordLastChangedTime) VALUES (NEW.clazzLogAttendanceRecordUid, NEW.clazzLogAttendanceRecordClazzLogUid, NEW.clazzLogAttendanceRecordPersonUid, NEW.attendanceStatus, NEW.clazzLogAttendanceRecordMasterChangeSeqNum, NEW.clazzLogAttendanceRecordLocalChangeSeqNum, NEW.clazzLogAttendanceRecordLastChangedBy, NEW.clazzLogAttendanceRecordLastChangedTime) ON CONFLICT (clazzLogAttendanceRecordUid) DO UPDATE SET clazzLogAttendanceRecordClazzLogUid = EXCLUDED.clazzLogAttendanceRecordClazzLogUid, clazzLogAttendanceRecordPersonUid = EXCLUDED.clazzLogAttendanceRecordPersonUid, attendanceStatus = EXCLUDED.attendanceStatus, clazzLogAttendanceRecordMasterChangeSeqNum = EXCLUDED.clazzLogAttendanceRecordMasterChangeSeqNum, clazzLogAttendanceRecordLocalChangeSeqNum = EXCLUDED.clazzLogAttendanceRecordLocalChangeSeqNum, clazzLogAttendanceRecordLastChangedBy = EXCLUDED.clazzLogAttendanceRecordLastChangedBy, clazzLogAttendanceRecordLastChangedTime = EXCLUDED.clazzLogAttendanceRecordLastChangedTime ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql",
-            "DROP TRIGGER IF EXISTS clazzlogattendancerecord_remote_insert_trig ON ClazzLogAttendanceRecord_ReceiveView",
-            " CREATE TRIGGER clazzlogattendancerecord_remote_insert_trig INSTEAD OF INSERT ON ClazzLogAttendanceRecord_ReceiveView FOR EACH ROW EXECUTE PROCEDURE clazzlogattendancerecord_remote_insert_fn() ")
-    }
-}
-
-val MIGRATION_94_95 = DoorMigrationStatementList(94, 95) { db ->
-    if(db.dbType() == DoorDbType.SQLITE) {
-        listOf(
-            "DROP TRIGGER IF EXISTS ATTUPD_PersonPicture",
-            "DROP TABLE IF EXISTS ZombieAttachmentData",
-            "CREATE TABLE IF NOT EXISTS ZombieAttachmentData (  zaTableId  INTEGER  NOT NULL , zaPrimaryKey  INTEGER  NOT NULL , zaMd5  TEXT , zaUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )",
-            """
-        |
-        |        CREATE TRIGGER ATTUPD_PersonPicture
-        |        AFTER UPDATE ON PersonPicture FOR EACH ROW WHEN
-        |        OLD.personPictureMd5 IS NOT NULL
-        |        BEGIN
-        |        
-        |        INSERT INTO ZombieAttachmentData(zaTableId, zaPrimaryKey, zaMd5) 
-        |        SELECT 50 AS zaTableId, OLD.personPictureUid AS zaPrimaryKey, OLD.personPictureMd5 AS zaMd5
-        |          FROM PersonPicture   
-        |         WHERE PersonPicture.personPictureUid = OLD.personPictureUid
-        |           AND (SELECT COUNT(*) 
-        |                  FROM PersonPicture
-        |                 WHERE personPictureMd5 = OLD.personPictureMd5) = 0
-        |    ; 
-        |        END
-        |    
-        """.trimMargin()
-        )
-    }else {
-        listOf(
-            "DROP TRIGGER IF EXISTS attach_PersonPicture_trig ON PersonPicture",
-            "DROP TABLE IF EXISTS ZombieAttachmentData",
-            "CREATE TABLE IF NOT EXISTS ZombieAttachmentData (  zaTableId  INTEGER  NOT NULL , zaPrimaryKey  BIGINT  NOT NULL , zaMd5  TEXT , zaUid  BIGSERIAL  PRIMARY KEY  NOT NULL )",
-            """
-        |    CREATE OR REPLACE FUNCTION attach_PersonPicture_fn() RETURNS trigger AS ${'$'}${'$'}
-        |    BEGIN
-        |    
-        |    INSERT INTO ZombieAttachmentData(zaTableId, zaPrimaryKey, zaMd5) 
-        |    SELECT 50 AS zaTableId, OLD.personPictureUid AS zaPrimaryKey, OLD.personPictureMd5 AS zaMd5
-        |      FROM PersonPicture   
-        |     WHERE PersonPicture.personPictureUid = OLD.personPictureUid
-        |       AND (SELECT COUNT(*) 
-        |              FROM PersonPicture
-        |             WHERE personPictureMd5 = OLD.personPictureMd5) = 0
-        |;
-        |    RETURN NEW;
-        |    END ${'$'}${'$'}
-        |    LANGUAGE plpgsql
-        """.trimMargin(),
-
-            """
-        |CREATE TRIGGER attach_PersonPicture_trig
-        |AFTER UPDATE ON PersonPicture
-        |FOR EACH ROW WHEN (OLD.personPictureMd5 IS NOT NULL)
-        |EXECUTE PROCEDURE attach_PersonPicture_fn();
-        """.trimMargin())
-    }
-}
-
-val MIGRATION_95_96 = DoorMigrationStatementList(95, 96) { db ->
-    if(db.dbType() == DoorDbType.POSTGRES) {
-        listOf(
-            "DROP VIEW PersonAuth2_receiveview",
-            "ALTER TABLE PersonAuth2 ALTER COLUMN pauthLcb TYPE BIGINT",
-            "CREATE VIEW PersonAuth2_ReceiveView AS  SELECT PersonAuth2.*, PersonAuth2Replicate.* FROM PersonAuth2 LEFT JOIN PersonAuth2Replicate ON PersonAuth2Replicate.paPk = PersonAuth2.pauthUid",
-            "CREATE OR REPLACE FUNCTION personauth2_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO PersonAuth2(pauthUid, pauthMechanism, pauthAuth, pauthLcsn, pauthPcsn, pauthLcb, pauthLct) VALUES (NEW.pauthUid, NEW.pauthMechanism, NEW.pauthAuth, NEW.pauthLcsn, NEW.pauthPcsn, NEW.pauthLcb, NEW.pauthLct) ON CONFLICT (pauthUid) DO UPDATE SET pauthMechanism = EXCLUDED.pauthMechanism, pauthAuth = EXCLUDED.pauthAuth, pauthLcsn = EXCLUDED.pauthLcsn, pauthPcsn = EXCLUDED.pauthPcsn, pauthLcb = EXCLUDED.pauthLcb, pauthLct = EXCLUDED.pauthLct ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql",                    "CREATE TRIGGER personauth2_remote_insert_trig INSTEAD OF INSERT ON PersonAuth2_ReceiveView FOR EACH ROW EXECUTE PROCEDURE personauth2_remote_insert_fn()")
-    }else {
-        listOf()
-    }
-}
-
-val MIGRATION_96_97 = DoorMigrationStatementList(96, 97) { db ->
-    if(db.dbType() == DoorDbType.SQLITE) {
-        listOf("DROP TABLE ZombieAttachmentData",
-            "CREATE TABLE ZombieAttachmentData (  zaUri  TEXT , zaUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )",
-            "DROP TRIGGER IF EXISTS ATTUPD_PersonPicture",
-            """
-                    |
-                    |        CREATE TRIGGER ATTUPD_PersonPicture
-                    |        AFTER UPDATE ON PersonPicture FOR EACH ROW WHEN
-                    |        OLD.personPictureMd5 IS NOT NULL
-                    |        BEGIN
-                    |        
-                    |        INSERT INTO ZombieAttachmentData(zaUri) 
-                    |        SELECT OLD.personPictureUri AS zaUri
-                    |          FROM PersonPicture   
-                    |         WHERE PersonPicture.personPictureUid = OLD.personPictureUid
-                    |           AND (SELECT COUNT(*) 
-                    |                  FROM PersonPicture
-                    |                 WHERE personPictureMd5 = OLD.personPictureMd5) = 0
-                    |    ; 
-                    |        END
-                    |    
-                    """.trimMargin(),
-        )
-    }else {
-        listOf("DROP TABLE IF EXISTS ZombieAttachmentData",
-            "CREATE TABLE IF NOT EXISTS ZombieAttachmentData (  zaUri  TEXT , zaUid  SERIAL  PRIMARY KEY  NOT NULL )",
-            """
-                    |    CREATE OR REPLACE FUNCTION attach_PersonPicture_fn() RETURNS trigger AS ${'$'}${'$'}
-                    |    BEGIN
-                    |    
-                    |    INSERT INTO ZombieAttachmentData(zaUri) 
-                    |    SELECT OLD.personPictureUri AS zaUri
-                    |      FROM PersonPicture   
-                    |     WHERE PersonPicture.personPictureUid = OLD.personPictureUid
-                    |       AND (SELECT COUNT(*) 
-                    |              FROM PersonPicture
-                    |             WHERE personPictureMd5 = OLD.personPictureMd5) = 0
-                    |;
-                    |    RETURN NEW;
-                    |    END ${'$'}${'$'}
-                    |    LANGUAGE plpgsql
-                    """.trimMargin()
-        )
-    }
-}
-
-/***
- *  added 16/Feb/2022 to remove special html characters from text - & > <
- */
-val MIGRATION_97_98 = DoorMigrationStatementList(97, 98) { db ->
-    if(db.dbType() == DoorDbType.POSTGRES) {
-        db.fixTincan()
-        listOf()
-    }else {
-        listOf()
-    }
-}
-
-val MIGRATION_98_99 = DoorMigrationStatementList(98, 99) {db ->
-    if(db.dbType() == DoorDbType.POSTGRES) {
-        listOf("ALTER TABLE ContentJobItem ALTER COLUMN cjiFinishTime TYPE BIGINT")
-    }else {
-        listOf()
-    }
-}
-
-/**
- * 27/Feb/2022 - Fixes an issue where there could be multiple ContainerEntryFile entities
- * for the same file (particularly if downloading was done simultaneously). This could lead
- * to problems identifying actual Zombie files, and then deleting real data.
- */
-val MIGRATION_99_100 = DoorMigrationStatementList(99, 100) {db ->
-    listOf("""
-  UPDATE ContainerEntry
-     SET ceCefUid = 
-         (SELECT CefOuter.cefUid
-            FROM ContainerEntryFile CefOuter
-           WHERE CefOuter.cefMd5 = 
-		         (SELECT CefInner.cefMd5
-				    FROM ContainerEntryFile CefInner
-				   WHERE CefInner.cefUid = ContainerEntry.ceCefUid)
-		ORDER BY CefOuter.cefUid
-           LIMIT 1)
-            """,
-        """
-DELETE FROM ContainerEntryFile 
-      WHERE ContainerEntryFile.cefUid != 
-            (SELECT CefInner.cefUid 
-               FROM ContainerEntryFile CefInner
-              WHERE CefInner.cefMd5 = ContainerEntryFile.cefMd5
-           ORDER BY CefInner.cefUid
-              LIMIT 1)
-            """)
-}
-
-val MIGRATION_100_101 = DoorMigrationStatementList(100, 101) { db ->
-    if(db.dbType() == DoorDbType.SQLITE) {
-        listOf(
-            "CREATE VIEW IF NOT EXISTS Container_ReceiveView AS  SELECT Container.*, ContainerReplicate.* FROM Container LEFT JOIN ContainerReplicate ON ContainerReplicate.containerPk = Container.containerUid ",
-            "DROP TRIGGER IF EXISTS container_remote_insert_ins",
-            "CREATE TRIGGER container_remote_insert_ins INSTEAD OF INSERT ON Container_ReceiveView FOR EACH ROW BEGIN REPLACE INTO Container(containerUid, cntLocalCsn, cntMasterCsn, cntLastModBy, cntLct, fileSize, containerContentEntryUid, cntLastModified, mimeType, remarks, mobileOptimized, cntNumEntries) SELECT NEW.containerUid, NEW.cntLocalCsn, NEW.cntMasterCsn, NEW.cntLastModBy, NEW.cntLct, NEW.fileSize, NEW.containerContentEntryUid, NEW.cntLastModified, NEW.mimeType, NEW.remarks, NEW.mobileOptimized, NEW.cntNumEntries WHERE NEW.cntLct > (SELECT COALESCE( (SELECT ContainerInt.cntLct FROM Container ContainerInt WHERE ContainerInt.containerUid = NEW.containerUid), 0)) /*psql ON CONFLICT (containerUid) DO UPDATE SET cntLocalCsn = EXCLUDED.cntLocalCsn, cntMasterCsn = EXCLUDED.cntMasterCsn, cntLastModBy = EXCLUDED.cntLastModBy, cntLct = EXCLUDED.cntLct, fileSize = EXCLUDED.fileSize, containerContentEntryUid = EXCLUDED.containerContentEntryUid, cntLastModified = EXCLUDED.cntLastModified, mimeType = EXCLUDED.mimeType, remarks = EXCLUDED.remarks, mobileOptimized = EXCLUDED.mobileOptimized, cntNumEntries = EXCLUDED.cntNumEntries */; END "
-        )
-    }else {
-        listOf(
-            "CREATE OR REPLACE FUNCTION container_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO Container(containerUid, cntLocalCsn, cntMasterCsn, cntLastModBy, cntLct, fileSize, containerContentEntryUid, cntLastModified, mimeType, remarks, mobileOptimized, cntNumEntries) SELECT NEW.containerUid, NEW.cntLocalCsn, NEW.cntMasterCsn, NEW.cntLastModBy, NEW.cntLct, NEW.fileSize, NEW.containerContentEntryUid, NEW.cntLastModified, NEW.mimeType, NEW.remarks, NEW.mobileOptimized, NEW.cntNumEntries WHERE NEW.cntLct > (SELECT COALESCE( (SELECT ContainerInt.cntLct FROM Container ContainerInt WHERE ContainerInt.containerUid = NEW.containerUid), 0)) ON CONFLICT (containerUid) DO UPDATE SET cntLocalCsn = EXCLUDED.cntLocalCsn, cntMasterCsn = EXCLUDED.cntMasterCsn, cntLastModBy = EXCLUDED.cntLastModBy, cntLct = EXCLUDED.cntLct, fileSize = EXCLUDED.fileSize, containerContentEntryUid = EXCLUDED.containerContentEntryUid, cntLastModified = EXCLUDED.cntLastModified, mimeType = EXCLUDED.mimeType, remarks = EXCLUDED.remarks, mobileOptimized = EXCLUDED.mobileOptimized, cntNumEntries = EXCLUDED.cntNumEntries ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
-        )
-    }
-}
-
-/**
- * 07/March/2022: Fix ContentJobItem triggers to handle canceled status
- */
-val MIGRATION_101_102 = DoorMigrationStatementList(101, 102) { db ->
-    if(db.dbType() == DoorDbType.SQLITE) {
-        val triggerNames = listOf("ContentJobItem_InsertTrigger",
-            "ContentJobItem_UpdateRecursiveTotals",
-            "ContentJobItem_UpdateRecursiveStatus",
-            "ContentJobItem_UpdateParents",
-            "ContentJobItem_UpdateStatusParent")
-        triggerNames.map { "DROP TRIGGER IF EXISTS $it" } + listOf(
-            " CREATE TRIGGER ContentJobItem_InsertTrigger AFTER INSERT ON ContentJobItem BEGIN UPDATE ContentJobItem SET cjiRecursiveProgress = NEW.cjiItemProgress, cjiRecursiveTotal = NEW.cjiItemTotal WHERE ContentJobItem.cjiUid = NEW.cjiUid; END; ",
-            " CREATE TRIGGER ContentJobItem_UpdateRecursiveTotals AFTER UPDATE ON ContentJobItem FOR EACH ROW WHEN ( NEW.cjiItemProgress != OLD.cjiItemProgress OR NEW.cjiItemTotal != OLD.cjiItemTotal) BEGIN UPDATE ContentJobItem SET cjiRecursiveProgress = (cjiRecursiveProgress + (NEW.cjiItemProgress - OLD.cjiItemProgress)), cjiRecursiveTotal = (cjiRecursiveTotal + (NEW.cjiItemTotal - OLD.cjiItemTotal)) WHERE ContentJobItem.cjiUid = NEW.cjiUid; END; ",
-            " CREATE TRIGGER ContentJobItem_UpdateRecursiveStatus AFTER UPDATE ON ContentJobItem FOR EACH ROW WHEN (NEW.cjiStatus != OLD.cjiStatus) BEGIN UPDATE ContentJobItem SET cjiRecursiveStatus = (CASE WHEN (SELECT Count(*) FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiUid) AS JobStatus ) = (SELECT Count(*) FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiUid) AS JobStatus WHERE status = 24) THEN 24 WHEN (SELECT Count(*) FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiUid) AS JobStatus ) = (SELECT Count(*) FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiUid) AS JobStatus WHERE status = 25) THEN 25 WHEN(SELECT COUNT(*) FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiUid) AS JobStatus ) = (SELECT COUNT(*) FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiUid) AS JobStatus WHERE status = 28) THEN 28 WHEN EXISTS (SELECT status FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiUid) AS JobStatus WHERE status = 12) THEN 12 WHEN EXISTS (SELECT status FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiUid) AS JobStatus WHERE (status = 25 OR status = 23)) THEN 23 WHEN EXISTS (SELECT status FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiUid) AS JobStatus WHERE status = 5) THEN 5 ELSE 4 END) WHERE contentJobItem.cjiUid = NEW.cjiUid; END; ",
-            " CREATE TRIGGER ContentJobItem_UpdateParents AFTER UPDATE ON ContentJobItem FOR EACH ROW WHEN ( NEW.cjiParentCjiUid != 0 AND (NEW.cjiRecursiveProgress != OLD.cjiRecursiveProgress OR NEW.cjiRecursiveTotal != OLD.cjiRecursiveTotal)) BEGIN UPDATE ContentJobItem SET cjiRecursiveProgress = (cjiRecursiveProgress + (NEW.cjiRecursiveProgress - OLD.cjiRecursiveProgress)), cjiRecursiveTotal = (cjiRecursiveTotal + (NEW.cjiRecursiveTotal - OLD.cjiRecursiveTotal)) WHERE ContentJobItem.cjiUid = NEW.cjiParentCjiUid; END; ",
-            " CREATE TRIGGER ContentJobItem_UpdateStatusParent AFTER UPDATE ON ContentJobItem FOR EACH ROW WHEN ( NEW.cjiParentCjiUid != 0 AND (New.cjiRecursiveStatus != OLD.cjiRecursiveStatus)) BEGIN UPDATE ContentJobItem SET cjiRecursiveStatus = (CASE WHEN (SELECT Count(*) FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiParentCjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiParentCjiUid) AS JobStatus ) = (SELECT Count(*) FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiParentCjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiParentCjiUid) AS JobStatus WHERE status = 24) THEN 24 WHEN (SELECT Count(*) FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiParentCjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiParentCjiUid) AS JobStatus ) = (SELECT Count(*) FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiParentCjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiParentCjiUid) AS JobStatus WHERE status = 25) THEN 25 WHEN(SELECT COUNT(*) FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiParentCjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiParentCjiUid) AS JobStatus ) = (SELECT COUNT(*) FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiParentCjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiParentCjiUid) AS JobStatus WHERE status = 28) THEN 28 WHEN EXISTS (SELECT status FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiParentCjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiParentCjiUid) AS JobStatus WHERE status = 12) THEN 12 WHEN EXISTS (SELECT status FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiParentCjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiParentCjiUid) AS JobStatus WHERE (status = 25 OR status = 23)) THEN 23 WHEN EXISTS (SELECT status FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiParentCjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiParentCjiUid) AS JobStatus WHERE status = 5) THEN 5 ELSE 4 END) WHERE ContentJobItem.cjiUid = NEW.cjiParentCjiUid; END; "
-        )
-    }else {
-        val triggerNames = listOf("contentjobiteminsert_trig",
-            "contentjobitem_updaterecursivetotals_trig", "contentjobitem_updateparents_trig",
-            "contentjobitem_updatestatus_trig", "contentjobitem_updatestatusparents_trig")
-        triggerNames.map { "DROP TRIGGER IF EXISTS $it ON ContentJobItem" } +  listOf(
-            " CREATE OR REPLACE FUNCTION contentjobiteminsert_fn() RETURNS TRIGGER AS $$ BEGIN UPDATE ContentJobItem SET cjiRecursiveProgress = NEW.cjiItemProgress, cjiRecursiveTotal = NEW.cjiItemTotal WHERE ContentJobItem.cjiUid = NEW.cjiUid; RETURN NEW; END $$ LANGUAGE plpgsql ",
-            " CREATE TRIGGER contentjobiteminsert_trig AFTER INSERT ON ContentJobItem FOR EACH ROW EXECUTE PROCEDURE contentjobiteminsert_fn() ",
-            " CREATE OR REPLACE FUNCTION contentjobitem_updaterecursivetotals_fn() RETURNS TRIGGER AS $$ BEGIN UPDATE ContentJobItem SET cjiRecursiveProgress = (cjiRecursiveProgress + (NEW.cjiItemProgress - OLD.cjiItemProgress)), cjiRecursiveTotal = (cjiRecursiveTotal + (NEW.cjiItemTotal - OLD.cjiItemTotal)) WHERE (NEW.cjiItemProgress != OLD.cjiItemProgress OR NEW.cjiItemTotal != OLD.cjiItemTotal) AND ContentJobItem.cjiUid = NEW.cjiUid; RETURN NEW; END $$ LANGUAGE plpgsql ",
-            " CREATE TRIGGER contentjobitem_updaterecursivetotals_trig AFTER UPDATE ON ContentJobItem FOR EACH ROW EXECUTE PROCEDURE contentjobitem_updaterecursivetotals_fn(); ",
-            " CREATE OR REPLACE FUNCTION contentjobitem_updateparents_fn() RETURNS TRIGGER AS $$ BEGIN UPDATE ContentJobItem SET cjiRecursiveProgress = (cjiRecursiveProgress + (NEW.cjiRecursiveProgress - OLD.cjiRecursiveProgress)), cjiRecursiveTotal = (cjiRecursiveTotal + (NEW.cjiRecursiveTotal - OLD.cjiRecursiveTotal)) WHERE (NEW.cjiRecursiveProgress != OLD.cjiRecursiveProgress OR NEW.cjiRecursiveTotal != OLD.cjiRecursiveTotal) AND ContentJobItem.cjiUid = NEW.cjiParentCjiUid AND NEW.cjiParentCjiUid != 0; RETURN NEW; END $$ LANGUAGE plpgsql ",
-            " CREATE TRIGGER contentjobitem_updateparents_trig AFTER UPDATE ON ContentJobItem FOR EACH ROW EXECUTE PROCEDURE contentjobitem_updateparents_fn(); ",
-            " CREATE OR REPLACE FUNCTION contentjobitem_updatestatus_fn() RETURNS TRIGGER AS $$ BEGIN UPDATE ContentJobItem SET cjiRecursiveStatus = (CASE WHEN (SELECT Count(*) FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiUid) AS JobStatus ) = (SELECT Count(*) FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiUid) AS JobStatus WHERE status = 24) THEN 24 WHEN (SELECT Count(*) FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiUid) AS JobStatus ) = (SELECT Count(*) FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiUid) AS JobStatus WHERE status = 25) THEN 25 WHEN(SELECT COUNT(*) FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiUid) AS JobStatus ) = (SELECT COUNT(*) FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiUid) AS JobStatus WHERE status = 28) THEN 28 WHEN EXISTS (SELECT status FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiUid) AS JobStatus WHERE status = 12) THEN 12 WHEN EXISTS (SELECT status FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiUid) AS JobStatus WHERE (status = 25 OR status = 23)) THEN 23 WHEN EXISTS (SELECT status FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiUid) AS JobStatus WHERE status = 5) THEN 5 ELSE 4 END) WHERE contentJobItem.cjiUid = NEW.cjiUid AND NEW.cjiStatus != OLD.cjiStatus; RETURN NEW; END $$ LANGUAGE plpgsql ",
-            " CREATE TRIGGER contentjobitem_updatestatus_trig AFTER UPDATE ON ContentJobItem FOR EACH ROW EXECUTE PROCEDURE contentjobitem_updatestatus_fn(); ",
-            " CREATE OR REPLACE FUNCTION contentjobitem_updatestatusparents_fn() RETURNS TRIGGER AS $$ BEGIN UPDATE ContentJobItem SET cjiRecursiveStatus = (CASE WHEN (SELECT Count(*) FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiParentCjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiParentCjiUid) AS JobStatus ) = (SELECT Count(*) FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiParentCjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiParentCjiUid) AS JobStatus WHERE status = 24) THEN 24 WHEN (SELECT Count(*) FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiParentCjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiParentCjiUid) AS JobStatus ) = (SELECT Count(*) FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiParentCjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiParentCjiUid) AS JobStatus WHERE status = 25) THEN 25 WHEN(SELECT COUNT(*) FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiParentCjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiParentCjiUid) AS JobStatus ) = (SELECT COUNT(*) FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiParentCjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiParentCjiUid) AS JobStatus WHERE status = 28) THEN 28 WHEN EXISTS (SELECT status FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiParentCjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiParentCjiUid) AS JobStatus WHERE status = 12) THEN 12 WHEN EXISTS (SELECT status FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiParentCjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiParentCjiUid) AS JobStatus WHERE (status = 25 OR status = 23)) THEN 23 WHEN EXISTS (SELECT status FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiParentCjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiParentCjiUid) AS JobStatus WHERE status = 5) THEN 5 ELSE 4 END) WHERE NEW.cjiParentCjiUid != 0 AND NEW.cjiRecursiveStatus != OLD.cjiRecursiveStatus AND ContentJobItem.cjiUid = NEW.cjiParentCjiUid; RETURN NEW; END $$ LANGUAGE plpgsql ",
-            " CREATE TRIGGER contentjobitem_updatestatusparents_trig AFTER UPDATE ON ContentJobItem FOR EACH ROW EXECUTE PROCEDURE contentjobitem_updatestatusparents_fn(); "
-        )
-    }
-}
 
 val MIGRATION_102_103 = DoorMigrationStatementList(102, 103) { db ->
     val stmtList = mutableListOf<String>()
@@ -1396,12 +1156,289 @@ val MIGRATION_108_109 = DoorMigrationStatementList(108, 109) { db ->
     stmtList
 }
 
+/**
+ * Work In Progress:
+ * Rename DiscussionPost.discussionPostDiscussionTopicUid to discussionPostDiscussionBlockUid
+ * Remove DiscussionTopic
+ *
+ */
+val MIGRATION_109_110 = DoorMigrationStatementList(109, 110) {db ->
+    val stmtList = mutableListOf<String>()
+    if (db.dbType() == DoorDbType.SQLITE) {
+
+    } else {
+
+    }
+
+    stmtList
+}
+
+/**
+ * Add StudentResult table
+ */
+val MIGRATION_120_121 = DoorMigrationStatementList(120, 121) { db ->
+    buildList {
+        when(db.dbType()) {
+            DoorDbType.SQLITE -> {
+                add(
+                    "CREATE TABLE IF NOT EXISTS StudentResult (  srSourcedId  TEXT , srCourseBlockUid  INTEGER  NOT NULL , srClazzUid  INTEGER  NOT NULL , srAssignmentUid  INTEGER  NOT NULL , srLineItemSourcedId  TEXT , srStatus  INTEGER  NOT NULL , srMetaData  TEXT , srStudentPersonUid  INTEGER  NOT NULL , srStudentGroupId  INTEGER  NOT NULL , srMarkerPersonUid  INTEGER  NOT NULL , srMarkerGroupId  INTEGER  NOT NULL , srScoreStatus  INTEGER  NOT NULL , srScore  REAl  NOT NULL , srScoreDate  INTEGER  NOT NULL , srLastModified  INTEGER  NOT NULL , srComment  TEXT , srAppId  TEXT , srActive  INTEGER  NOT NULL , srUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )"
+                )
+            }
+            DoorDbType.POSTGRES -> {
+                add(
+                    "CREATE TABLE IF NOT EXISTS StudentResult (  srSourcedId  TEXT , srCourseBlockUid  BIGINT  NOT NULL , srClazzUid  BIGINT  NOT NULL , srAssignmentUid  BIGINT  NOT NULL , srLineItemSourcedId  TEXT , srStatus  INTEGER  NOT NULL , srMetaData  TEXT , srStudentPersonUid  BIGINT  NOT NULL , srStudentGroupId  INTEGER  NOT NULL , srMarkerPersonUid  BIGINT  NOT NULL , srMarkerGroupId  INTEGER  NOT NULL , srScoreStatus  INTEGER  NOT NULL , srScore  FLOAT  NOT NULL , srScoreDate  BIGINT  NOT NULL , srLastModified  BIGINT  NOT NULL , srComment  TEXT , srAppId  TEXT , srActive  BOOL  NOT NULL , srUid  BIGSERIAL  PRIMARY KEY  NOT NULL )"
+                )
+            }
+        }
+    }
+}
+
+//Add new door tables: OutgoingReplication, ReplicationOperation, PendingRepositorySession
+val MIGRATION_121_122 = DoorMigrationStatementList(121, 122) { db ->
+    buildList {
+        when(db.dbType()) {
+            DoorDbType.SQLITE -> {
+                add(
+                    "CREATE TABLE IF NOT EXISTS OutgoingReplication (  destNodeId  INTEGER  NOT NULL , orPk1  INTEGER  NOT NULL , orPk2  INTEGER  NOT NULL , orTableId  INTEGER  NOT NULL , orUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )"
+                )
+                add(
+                    "CREATE TABLE IF NOT EXISTS ReplicationOperation (  repOpRemoteNodeId  INTEGER  NOT NULL , repOpStatus  INTEGER  NOT NULL , repOpTableId  INTEGER  NOT NULL , PRIMARY KEY (repOpRemoteNodeId, repOpTableId) )"
+                )
+                add(
+                    "CREATE TABLE IF NOT EXISTS PendingRepositorySession (  endpointUrl  TEXT , remoteNodeId  INTEGER  NOT NULL , rsUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )"
+                )
+            }
+            DoorDbType.POSTGRES -> {
+                add(
+                    "CREATE TABLE IF NOT EXISTS OutgoingReplication (  destNodeId  BIGINT  NOT NULL , orPk1  BIGINT  NOT NULL , orPk2  BIGINT  NOT NULL , orTableId  INTEGER  NOT NULL , orUid  BIGSERIAL  PRIMARY KEY  NOT NULL )"
+                )
+                add(
+                    "CREATE TABLE IF NOT EXISTS ReplicationOperation (  repOpRemoteNodeId  BIGINT  NOT NULL , repOpStatus  INTEGER  NOT NULL , repOpTableId  INTEGER  NOT NULL , PRIMARY KEY (repOpRemoteNodeId, repOpTableId) )"
+                )
+                add(
+                    "CREATE TABLE IF NOT EXISTS PendingRepositorySession (  endpointUrl  TEXT , remoteNodeId  BIGINT  NOT NULL , rsUid  BIGSERIAL  PRIMARY KEY  NOT NULL )"
+                )
+            }
+        }
+    }
+}
+
+val MIGRATION_122_123 = DoorMigrationStatementList(122, 123) { db ->
+    listOf("DROP TABLE IF EXISTS CourseDiscussion")
+}
+
+/**
+ * ContentJobItem is modified to use ReplicateEntity (adds a last modified time).
+ */
+val MIGRATION_123_124 = DoorMigrationStatementList(123, 124) { db ->
+    buildList {
+        add("DROP TABLE IF EXISTS ContentJobItem")
+        add("DROP TABLE IF EXISTS ContentJob")
+
+        when(db.dbType()) {
+            DoorDbType.SQLITE -> {
+                add("CREATE TABLE IF NOT EXISTS ContentJob (  toUri  TEXT , cjProgress  INTEGER  NOT NULL , cjTotal  INTEGER  NOT NULL , cjNotificationTitle  TEXT , cjIsMeteredAllowed  INTEGER  NOT NULL , params  TEXT , cjLct  INTEGER  NOT NULL , cjUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                add("CREATE TABLE IF NOT EXISTS ContentJobItem (  cjiJobUid  INTEGER  NOT NULL , sourceUri  TEXT , cjiIsLeaf  INTEGER  NOT NULL , cjiContentEntryUid  INTEGER  NOT NULL , cjiParentContentEntryUid  INTEGER  NOT NULL , cjiContainerUid  INTEGER  NOT NULL , cjiItemProgress  INTEGER  NOT NULL , cjiItemTotal  INTEGER  NOT NULL , cjiRecursiveProgress  INTEGER  NOT NULL , cjiRecursiveTotal  INTEGER  NOT NULL , cjiStatus  INTEGER  NOT NULL , cjiRecursiveStatus  INTEGER  NOT NULL , cjiConnectivityNeeded  INTEGER  NOT NULL , cjiPluginId  INTEGER  NOT NULL , cjiAttemptCount  INTEGER  NOT NULL , cjiParentCjiUid  INTEGER  NOT NULL , cjiServerJobId  INTEGER  NOT NULL , cjiStartTime  INTEGER  NOT NULL , cjiFinishTime  INTEGER  NOT NULL , cjiUploadSessionUid  TEXT , cjiContentDeletedOnCancellation  INTEGER  NOT NULL , cjiContainerProcessed  INTEGER  NOT NULL , cjiLastModified  INTEGER  NOT NULL , cjiUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                add("CREATE INDEX index_ContentJobItem_cjiContentEntryUid_cjiFinishTime ON ContentJobItem (cjiContentEntryUid, cjiFinishTime)")
+            }
+            DoorDbType.POSTGRES -> {
+                add("CREATE TABLE IF NOT EXISTS ContentJob (  toUri  TEXT , cjProgress  BIGINT  NOT NULL , cjTotal  BIGINT  NOT NULL , cjNotificationTitle  TEXT , cjIsMeteredAllowed  BOOL  NOT NULL , params  TEXT , cjLct  BIGINT  NOT NULL , cjUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                add("CREATE TABLE IF NOT EXISTS ContentJobItem (  cjiJobUid  BIGINT  NOT NULL , sourceUri  TEXT , cjiIsLeaf  BOOL  NOT NULL , cjiContentEntryUid  BIGINT  NOT NULL , cjiParentContentEntryUid  BIGINT  NOT NULL , cjiContainerUid  BIGINT  NOT NULL , cjiItemProgress  BIGINT  NOT NULL , cjiItemTotal  BIGINT  NOT NULL , cjiRecursiveProgress  BIGINT  NOT NULL , cjiRecursiveTotal  BIGINT  NOT NULL , cjiStatus  INTEGER  NOT NULL , cjiRecursiveStatus  INTEGER  NOT NULL , cjiConnectivityNeeded  BOOL  NOT NULL , cjiPluginId  INTEGER  NOT NULL , cjiAttemptCount  INTEGER  NOT NULL , cjiParentCjiUid  BIGINT  NOT NULL , cjiServerJobId  BIGINT  NOT NULL , cjiStartTime  BIGINT  NOT NULL , cjiFinishTime  BIGINT  NOT NULL , cjiUploadSessionUid  TEXT , cjiContentDeletedOnCancellation  BOOL  NOT NULL , cjiContainerProcessed  BOOL  NOT NULL , cjiLastModified  BIGINT  NOT NULL , cjiUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                add("CREATE INDEX index_ContentJobItem_cjiContentEntryUid_cjiFinishTime ON ContentJobItem (cjiContentEntryUid, cjiFinishTime)")
+            }
+        }
+    }
+}
+
+/**
+ * Rename field on ContentJobItem, add new ContentEntryVersion table
+ */
+val MIGRATION_124_125 = DoorMigrationStatementList(124, 125) { db ->
+    buildList {
+        add("DROP TABLE IF EXISTS ContentJobItem")
+        when(db.dbType()) {
+            DoorDbType.SQLITE -> {
+                add("CREATE TABLE IF NOT EXISTS ContentJobItem (  cjiJobUid  INTEGER  NOT NULL , sourceUri  TEXT , cjiOriginalFilename  TEXT , cjiIsLeaf  INTEGER  NOT NULL , cjiContentEntryUid  INTEGER  NOT NULL , cjiParentContentEntryUid  INTEGER  NOT NULL , cjiContentEntryVersion  INTEGER  NOT NULL , cjiItemProgress  INTEGER  NOT NULL , cjiItemTotal  INTEGER  NOT NULL , cjiRecursiveProgress  INTEGER  NOT NULL , cjiRecursiveTotal  INTEGER  NOT NULL , cjiStatus  INTEGER  NOT NULL , cjiRecursiveStatus  INTEGER  NOT NULL , cjiConnectivityNeeded  INTEGER  NOT NULL , cjiPluginId  INTEGER  NOT NULL , cjiAttemptCount  INTEGER  NOT NULL , cjiParentCjiUid  INTEGER  NOT NULL , cjiServerJobId  INTEGER  NOT NULL , cjiStartTime  INTEGER  NOT NULL , cjiFinishTime  INTEGER  NOT NULL , cjiUploadSessionUid  TEXT , cjiContentDeletedOnCancellation  INTEGER  NOT NULL , cjiContainerProcessed  INTEGER  NOT NULL , cjiLastModified  INTEGER  NOT NULL , cjiUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                add("CREATE INDEX index_ContentJobItem_cjiContentEntryUid_cjiFinishTime ON ContentJobItem (cjiContentEntryUid, cjiFinishTime)")
+                add("CREATE TABLE IF NOT EXISTS ContentEntryVersion (  cevContentEntryUid  INTEGER  NOT NULL , cevUrl  TEXT , cevContentType  TEXT , cevSitemapUrl  TEXT , cevSize  INTEGER  NOT NULL , cevInActive  INTEGER  NOT NULL , cevLastModified  INTEGER  NOT NULL , cevLct  INTEGER  NOT NULL , cevUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+            }
+            DoorDbType.POSTGRES -> {
+                add("CREATE TABLE IF NOT EXISTS ContentJobItem (  cjiJobUid  BIGINT  NOT NULL , sourceUri  TEXT , cjiOriginalFilename  TEXT , cjiIsLeaf  BOOL  NOT NULL , cjiContentEntryUid  BIGINT  NOT NULL , cjiParentContentEntryUid  BIGINT  NOT NULL , cjiContentEntryVersion  BIGINT  NOT NULL , cjiItemProgress  BIGINT  NOT NULL , cjiItemTotal  BIGINT  NOT NULL , cjiRecursiveProgress  BIGINT  NOT NULL , cjiRecursiveTotal  BIGINT  NOT NULL , cjiStatus  INTEGER  NOT NULL , cjiRecursiveStatus  INTEGER  NOT NULL , cjiConnectivityNeeded  BOOL  NOT NULL , cjiPluginId  INTEGER  NOT NULL , cjiAttemptCount  INTEGER  NOT NULL , cjiParentCjiUid  BIGINT  NOT NULL , cjiServerJobId  BIGINT  NOT NULL , cjiStartTime  BIGINT  NOT NULL , cjiFinishTime  BIGINT  NOT NULL , cjiUploadSessionUid  TEXT , cjiContentDeletedOnCancellation  BOOL  NOT NULL , cjiContainerProcessed  BOOL  NOT NULL , cjiLastModified  BIGINT  NOT NULL , cjiUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                add("CREATE INDEX index_ContentJobItem_cjiContentEntryUid_cjiFinishTime ON ContentJobItem (cjiContentEntryUid, cjiFinishTime)")
+                add("CREATE TABLE IF NOT EXISTS ContentEntryVersion (  cevContentEntryUid  BIGINT  NOT NULL , cevUrl  TEXT , cevContentType  TEXT , cevSitemapUrl  TEXT , cevSize  BIGINT  NOT NULL , cevInActive  BOOL  NOT NULL , cevLastModified  BIGINT  NOT NULL , cevLct  BIGINT  NOT NULL , cevUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+            }
+        }
+    }
+}
+
+/**
+ * This migration is only here to force the regeneration of triggers. The trigger condition for Site
+ * was changed to add TRIGGER_CONDITION_WHERE_NEWER
+ */
+val MIGRATION_125_126 = DoorMigrationStatementList(125, 126) { db ->
+    emptyList()
+}
+
+/**
+ * Add TransferJob and TransferJobItem
+ */
+val MIGRATION_126_127 = DoorMigrationStatementList(126, 127) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS TransferJob (  tjType  INTEGER  NOT NULL , tjStatus  INTEGER  NOT NULL , tjName  TEXT , tjUuid  TEXT , tjUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+            add("CREATE TABLE IF NOT EXISTS TransferJobItem (  tjiTjUid  INTEGER  NOT NULL , tjTotalSize  INTEGER  NOT NULL , tjTransferred  INTEGER  NOT NULL , tjAttemptCount  INTEGER  NOT NULL , tjiSrc  TEXT , tjiDest  TEXT , tjiType  INTEGER  NOT NULL , tjiStatus  INTEGER  NOT NULL , tjiTableId  INTEGER  NOT NULL , tjiEntityUid  INTEGER  NOT NULL , tjiUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS TransferJob (  tjType  INTEGER  NOT NULL , tjStatus  INTEGER  NOT NULL , tjName  TEXT , tjUuid  TEXT , tjUid  SERIAL  PRIMARY KEY  NOT NULL )")
+            add("CREATE TABLE IF NOT EXISTS TransferJobItem (  tjiTjUid  INTEGER  NOT NULL , tjTotalSize  BIGINT  NOT NULL , tjTransferred  BIGINT  NOT NULL , tjAttemptCount  INTEGER  NOT NULL , tjiSrc  TEXT , tjiDest  TEXT , tjiType  INTEGER  NOT NULL , tjiStatus  INTEGER  NOT NULL , tjiTableId  INTEGER  NOT NULL , tjiEntityUid  BIGINT  NOT NULL , tjiUid  SERIAL  PRIMARY KEY  NOT NULL )")
+        }
+    }
+}
+
+/**
+ * Modify PersonPicture table - does not migrate previous (largely unused) data.
+ * Add tjiEntityEtag column to TransferJobItem so a transferjobitem can be related to a specific
+ * version of the entity
+ */
+val MIGRATION_127_128 = DoorMigrationStatementList(127, 128) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("DROP TABLE IF EXISTS PersonPicture")
+            add("CREATE TABLE IF NOT EXISTS PersonPicture (  personPictureLct  INTEGER  NOT NULL , personPictureUri  TEXT , personPictureThumbnailUri  TEXT , fileSize  INTEGER  NOT NULL , personPictureActive  INTEGER  NOT NULL , personPictureUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+            add("ALTER TABLE TransferJobItem ADD COLUMN tjiEntityEtag  INTEGER  NOT NULL  DEFAULT 0")
+        }else {
+            add("DROP TABLE IF EXISTS PersonPicture")
+            add("CREATE TABLE IF NOT EXISTS PersonPicture (  personPictureLct  BIGINT  NOT NULL , personPictureUri  TEXT , personPictureThumbnailUri  TEXT , fileSize  INTEGER  NOT NULL , personPictureActive  BOOL  NOT NULL , personPictureUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+            add("ALTER TABLE TransferJobItem ADD COLUMN tjiEntityEtag  BIGINT  NOT NULL  DEFAULT 0")
+        }
+    }
+}
+
+val MIGRATION_128_129 = DoorMigrationStatementList(128, 129) { db ->
+    buildList {
+        add("DROP TABLE IF EXISTS CoursePicture")
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS CoursePicture (  coursePictureLct  INTEGER  NOT NULL , coursePictureUri  TEXT , coursePictureThumbnailUri  TEXT , coursePictureActive  INTEGER  NOT NULL , coursePictureUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS CoursePicture (  coursePictureLct  BIGINT  NOT NULL , coursePictureUri  TEXT , coursePictureThumbnailUri  TEXT , coursePictureActive  BOOL  NOT NULL , coursePictureUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+        }
+    }
+}
+
+val MIGRATION_129_130 = DoorMigrationStatementList(129, 130) { db ->
+    buildList {
+        add("ALTER TABLE TransferJobItem ADD COLUMN tjiLockIdToRelease INTEGER NOT NULL DEFAULT 0")
+    }
+}
+
+val MIGRATION_130_131 = DoorMigrationStatementList(130, 131) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS CacheLockJoin (  cljTableId  INTEGER  NOT NULL , cljEntityUid  INTEGER  NOT NULL , cljUrl  TEXT  NOT NULL , cljLockId  INTEGER  NOT NULL , cljStatus  INTEGER  NOT NULL , cljType  INTEGER  NOT NULL , cljId  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+            add("CREATE INDEX idx_clj_table_entity_url ON CacheLockJoin (cljTableId, cljEntityUid, cljUrl)")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS CacheLockJoin (  cljTableId  INTEGER  NOT NULL , cljEntityUid  BIGINT  NOT NULL , cljUrl  TEXT  NOT NULL , cljLockId  INTEGER  NOT NULL , cljStatus  INTEGER  NOT NULL , cljType  INTEGER  NOT NULL , cljId  SERIAL  PRIMARY KEY  NOT NULL )")
+            add("CREATE INDEX idx_clj_table_entity_url ON CacheLockJoin (cljTableId, cljEntityUid, cljUrl)")
+        }
+    }
+}
+
+// 131 to 132 is a migration that applies only to the server side to add uri retention triggers
+
+/*
+ * Added 07/Jan/24 - drop the old ContentJobItem table
+ * Create ContentEntryImportJob
+ */
+val MIGRATION_132_133 = DoorMigrationStatementList(132, 133) { db ->
+    buildList {
+        add("DROP TABLE ContentJobItem")
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS ContentEntryImportJob (  sourceUri  TEXT , cjiOriginalFilename  TEXT , cjiContentEntryUid  INTEGER  NOT NULL , cjiParentContentEntryUid  INTEGER  NOT NULL , cjiContentEntryVersion  INTEGER  NOT NULL , cjiItemProgress  INTEGER  NOT NULL , cjiItemTotal  INTEGER  NOT NULL , cjiStatus  INTEGER  NOT NULL , cjiRecursiveStatus  INTEGER  NOT NULL , cjiPluginId  INTEGER  NOT NULL , cjiParentCjiUid  INTEGER  NOT NULL , cjiStartTime  INTEGER  NOT NULL , cjiFinishTime  INTEGER  NOT NULL , cjiContentDeletedOnCancellation  INTEGER  NOT NULL , cjiUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+            add("CREATE INDEX index_ContentEntryImportJob_cjiContentEntryUid_cjiFinishTime ON ContentEntryImportJob (cjiContentEntryUid, cjiFinishTime)")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS ContentEntryImportJob (  sourceUri  TEXT , cjiOriginalFilename  TEXT , cjiContentEntryUid  BIGINT  NOT NULL , cjiParentContentEntryUid  BIGINT  NOT NULL , cjiContentEntryVersion  BIGINT  NOT NULL , cjiItemProgress  BIGINT  NOT NULL , cjiItemTotal  BIGINT  NOT NULL , cjiStatus  INTEGER  NOT NULL , cjiRecursiveStatus  INTEGER  NOT NULL , cjiPluginId  INTEGER  NOT NULL , cjiParentCjiUid  BIGINT  NOT NULL , cjiStartTime  BIGINT  NOT NULL , cjiFinishTime  BIGINT  NOT NULL , cjiContentDeletedOnCancellation  BOOL  NOT NULL , cjiUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+            add("CREATE INDEX index_ContentEntryImportJob_cjiContentEntryUid_cjiFinishTime ON ContentEntryImportJob (cjiContentEntryUid, cjiFinishTime)")
+        }
+    }
+}
+
+val MIGRATION_133_134 = DoorMigrationStatementList(133, 134) { db ->
+    buildList {
+        add("CREATE INDEX tji_table_entity_etag ON TransferJobItem (tjiTableId, tjiEntityUid, tjiEntityEtag)")
+    }
+}
+
+val MIGRATION_134_135 = DoorMigrationStatementList(134, 135) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS OfflineItem (  oiNodeId  INTEGER  NOT NULL , oiClazzUid  INTEGER  NOT NULL , oiCourseBlockUid  INTEGER  NOT NULL , oiContentEntryUid  INTEGER  NOT NULL , oiActive  INTEGER  NOT NULL , oiLct  INTEGER  NOT NULL , oiUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+            add("CREATE INDEX offline_item_node_content_entry ON OfflineItem (oiNodeId, oiContentEntryUid)")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS OfflineItem (  oiNodeId  BIGINT  NOT NULL , oiClazzUid  BIGINT  NOT NULL , oiCourseBlockUid  BIGINT  NOT NULL , oiContentEntryUid  BIGINT  NOT NULL , oiActive  BOOL  NOT NULL , oiLct  BIGINT  NOT NULL , oiUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+            add("CREATE INDEX offline_item_node_content_entry ON OfflineItem (oiNodeId, oiContentEntryUid)")
+        }
+    }
+}
+
+val MIGRATION_135_136 = DoorMigrationStatementList(135, 136) { db ->
+    buildList {
+        add("ALTER TABLE TransferJob ADD COLUMN tjTableId INTEGER NOT NULL DEFAULT 0")
+        add("ALTER TABLE TransferJob ADD COLUMN tjCreationType INTEGER NOT NULL DEFAULT 0")
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("ALTER TABLE TransferJob ADD COLUMN tjEntityUid INTEGER NOT NULL DEFAULT 0")
+            add("ALTER TABLE TransferJob ADD COLUMN tjTimeCreated INTEGER NOT NULL DEFAULT 0")
+        }else {
+            add("ALTER TABLE TransferJob ADD COLUMN tjEntityUid BIGINT NOT NULL DEFAULT 0")
+            add("ALTER TABLE TransferJob ADD COLUMN tjTimeCreated BIGINT NOT NULL DEFAULT 0")
+        }
+        add("CREATE INDEX TransferJob_idx_tjTableId_EntityUid ON TransferJob (tjTableId, tjEntityUid)")
+    }
+}
+
+val MIGRATION_136_137 = DoorMigrationStatementList(136, 137) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS OfflineItemPendingTransferJob (  oiptjOiUid  INTEGER  NOT NULL , oiptjTableId  INTEGER  NOT NULL , oiptjEntityUid  INTEGER  NOT NULL , oiptjUrl  TEXT , oiptjType  INTEGER  NOT NULL , oiptjId  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS OfflineItemPendingTransferJob (  oiptjOiUid  BIGINT  NOT NULL , oiptjTableId  INTEGER  NOT NULL , oiptjEntityUid  BIGINT  NOT NULL , oiptjUrl  TEXT , oiptjType  INTEGER  NOT NULL , oiptjId  SERIAL  PRIMARY KEY  NOT NULL )")
+        }
+    }
+}
+
+val MIGRATION_137_138 = DoorMigrationStatementList(137, 138) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("ALTER TABLE ContentEntryVersion RENAME to ContentEntryVersion_OLD")
+            add("CREATE TABLE IF NOT EXISTS ContentEntryVersion (  cevContentEntryUid  INTEGER  NOT NULL , cevUrl  TEXT , cevContentType  TEXT , cevManifestUrl  TEXT , cevSize  INTEGER  NOT NULL , cevInActive  INTEGER  NOT NULL , cevLastModified  INTEGER  NOT NULL , cevLct  INTEGER  NOT NULL , cevUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+            add("INSERT INTO ContentEntryVersion (cevContentEntryUid, cevUrl, cevContentType, cevManifestUrl, cevSize, cevInActive, cevLastModified, cevLct, cevUid) SELECT cevContentEntryUid, cevUrl, cevContentType, cevSitemapUrl, cevSize, cevInActive, cevLastModified, cevLct, cevUid FROM ContentEntryVersion_OLD")
+            add("DROP TABLE ContentEntryVersion_OLD")
+        }else {
+            add("ALTER TABLE ContentEntryVersion RENAME COLUMN cevSitemapUrl TO cevManifestUrl")
+        }
+    }
+}
+
+val MIGRATION_138_139 = DoorMigrationStatementList(138, 139) { db ->
+    buildList {
+        if (db.dbType() == DoorDbType.SQLITE) {
+            add("ALTER TABLE ContentEntryVersion RENAME to ContentEntryVersion_OLD")
+            add("CREATE TABLE IF NOT EXISTS ContentEntryVersion (  cevContentEntryUid  INTEGER  NOT NULL , cevOpenUri  TEXT , cevContentType  TEXT , cevManifestUrl  TEXT , cevSize  INTEGER  NOT NULL , cevInActive  INTEGER  NOT NULL , cevLastModified  INTEGER  NOT NULL , cevLct  INTEGER  NOT NULL , cevUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+            add("INSERT INTO ContentEntryVersion (cevContentEntryUid, cevOpenUri, cevContentType, cevManifestUrl, cevSize, cevInActive, cevLastModified, cevLct, cevUid) SELECT cevContentEntryUid, cevUrl, cevContentType, cevManifestUrl, cevSize, cevInActive, cevLastModified, cevLct, cevUid FROM ContentEntryVersion_OLD")
+            add("DROP TABLE ContentEntryVersion_OLD")
+        }else {
+            add("ALTER TABLE ContentEntryVersion RENAME COLUMN cevUrl to cevOpenUri")
+        }
+    }
+}
+
 fun migrationList() = listOf<DoorMigration>(
-    UmAppDatabaseReplicationMigration91_92, MIGRATION_92_93, MIGRATION_93_94, MIGRATION_94_95,
-    MIGRATION_95_96, MIGRATION_96_97, MIGRATION_97_98, MIGRATION_98_99,
-    MIGRATION_99_100, MIGRATION_100_101, MIGRATION_101_102, MIGRATION_102_103,
+    MIGRATION_102_103,
     MIGRATION_103_104, MIGRATION_104_105, MIGRATION_105_106, MIGRATION_106_107,
     MIGRATION_107_108, MIGRATION_108_109,
+    MIGRATION_120_121, MIGRATION_121_122, MIGRATION_122_123, MIGRATION_123_124,
+    MIGRATION_124_125, MIGRATION_125_126, MIGRATION_126_127, MIGRATION_127_128,
+    MIGRATION_128_129, MIGRATION_129_130, MIGRATION_130_131, MIGRATION_132_133,
+    MIGRATION_133_134, MIGRATION_134_135, MIGRATION_135_136, MIGRATION_136_137,
+    MIGRATION_137_138, MIGRATION_138_139,
 )
 
 

@@ -8,32 +8,48 @@ import com.ustadmobile.lib.db.entities.ClazzAssignment.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
 @Entity
-@ReplicateEntity(tableId = TABLE_ID, tracker = ClazzAssignmentReplicate::class)
+@ReplicateEntity(
+    tableId = TABLE_ID,
+    remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW
+)
 @Triggers(arrayOf(
  Trigger(
      name = "clazzassignment_remote_insert",
      order = Trigger.Order.INSTEAD_OF,
      on = Trigger.On.RECEIVEVIEW,
      events = [Trigger.Event.INSERT],
-     sqlStatements = [
-         """REPLACE INTO ClazzAssignment(caUid, caTitle, caDescription, caGroupUid, caActive, caClassCommentEnabled, caPrivateCommentsEnabled, caRequireFileSubmission, caFileType, caSizeLimit, caNumberOfFiles, caSubmissionPolicy, caMarkingType, caRequireTextSubmission, caTextLimitType, caTextLimit, caXObjectUid, caClazzUid, caPeerReviewerCount, caLocalChangeSeqNum, caMasterChangeSeqNum, caLastChangedBy, caLct) 
-         VALUES (NEW.caUid, NEW.caTitle, NEW.caDescription, NEW.caGroupUid, NEW.caActive, NEW.caClassCommentEnabled, NEW.caPrivateCommentsEnabled, NEW.caRequireFileSubmission, NEW.caFileType, NEW.caSizeLimit, NEW.caNumberOfFiles, NEW.caSubmissionPolicy, NEW.caMarkingType,NEW.caRequireTextSubmission, NEW.caTextLimitType, NEW.caTextLimit, NEW.caXObjectUid, NEW.caClazzUid, NEW.caPeerReviewerCount, NEW.caLocalChangeSeqNum, NEW.caMasterChangeSeqNum, NEW.caLastChangedBy, NEW.caLct) 
-         /*psql ON CONFLICT (caUid) DO UPDATE 
-         SET caTitle = EXCLUDED.caTitle, caDescription = EXCLUDED.caDescription, caGroupUid = EXCLUDED.caGroupUid, caActive = EXCLUDED.caActive, caClassCommentEnabled = EXCLUDED.caClassCommentEnabled, caPrivateCommentsEnabled = EXCLUDED.caPrivateCommentsEnabled, caRequireFileSubmission = EXCLUDED.caRequireFileSubmission, caFileType = EXCLUDED.caFileType, caSizeLimit = EXCLUDED.caSizeLimit, caNumberOfFiles = EXCLUDED.caNumberOfFiles, caSubmissionPolicy = EXCLUDED.caSubmissionPolicy, caMarkingType = EXCLUDED.caMarkingType, caRequireTextSubmission = EXCLUDED.caRequireTextSubmission, caTextLimitType = EXCLUDED.caTextLimitType, caTextLimit = EXCLUDED.caTextLimit, caXObjectUid = EXCLUDED.caXObjectUid, caClazzUid = EXCLUDED.caClazzUid, caPeerReviewerCount = EXCLUDED.caPeerReviewerCount, caLocalChangeSeqNum = EXCLUDED.caLocalChangeSeqNum, caMasterChangeSeqNum = EXCLUDED.caMasterChangeSeqNum, caLastChangedBy = EXCLUDED.caLastChangedBy, caLct = EXCLUDED.caLct
-         */"""
-     ]
+     conditionSql = TRIGGER_CONDITION_WHERE_NEWER,
+     sqlStatements = [TRIGGER_UPSERT],
  )
 ))
+
+/**
+ * Represents an Assignment for those with a student role in a given course.
+ *
+ * Assignments can be submitted by individuals (caGroupUid = 0) or groups (caGroupUid = the
+ * CourseGroupSet uid).
+ *
+ * Submitter Uids will be the group number if submitting by group, or the personuid if submitting
+ * individually. See CourseAssignmentSubmission.casSubmitterUid
+ *
+ */
 @Serializable
 open class ClazzAssignment {
 
     @PrimaryKey(autoGenerate = true)
     var caUid: Long = 0
 
+    @Deprecated("Use title on courseblock")
     var caTitle: String? = null
 
+    @Deprecated("Use description on courseblock")
     var caDescription: String? = null
 
+    /**
+     * Assignments can be for individuals or groups. If the assignment should be submitted by each,
+     * individual student, then caGroupUid = 0 (the default). If in groups, then caGroupUid is the
+     * cgsUid of the CourseGroupSet
+     */
     @ColumnInfo(defaultValue = "0")
     var caGroupUid: Long = 0
 
@@ -41,6 +57,10 @@ open class ClazzAssignment {
 
     var caClassCommentEnabled: Boolean = true
 
+    /**
+     * True if submitters can submit a private comment (e.g. from student to teacher, or peer to peer).
+     * Those with create learner record permission can always make a private comment.
+     */
     @ColumnInfo(defaultValue = "1")
     var caPrivateCommentsEnabled: Boolean = true
 
@@ -60,16 +80,16 @@ open class ClazzAssignment {
     @ColumnInfo(defaultValue = "1")
     var caNumberOfFiles: Int = 1
 
-    @ColumnInfo(defaultValue = "1")
+    @ColumnInfo(defaultValue = "$SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE")
     var caSubmissionPolicy: Int = SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE
 
-    @ColumnInfo(defaultValue = "1")
+    @ColumnInfo(defaultValue = "$MARKED_BY_COURSE_LEADER")
     var caMarkingType: Int = MARKED_BY_COURSE_LEADER
 
     @ColumnInfo(defaultValue = "1")
     var caRequireTextSubmission: Boolean = true
 
-    @ColumnInfo(defaultValue = "1")
+    @ColumnInfo(defaultValue = "$TEXT_WORD_LIMIT")
     var caTextLimitType: Int = TEXT_WORD_LIMIT
 
     @ColumnInfo(defaultValue = "500")
@@ -93,8 +113,8 @@ open class ClazzAssignment {
     @LastChangedBy
     var caLastChangedBy: Int = 0
 
-    @LastChangedTime
-    @ReplicationVersionId
+    @ReplicateLastModified
+    @ReplicateEtag
     var caLct: Long = 0
 
     companion object {

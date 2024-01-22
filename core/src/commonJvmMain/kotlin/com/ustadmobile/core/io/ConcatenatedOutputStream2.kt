@@ -1,7 +1,6 @@
 package com.ustadmobile.core.io
 
 import com.ustadmobile.core.io.ext.toBytes
-import com.ustadmobile.door.ext.toHexString
 import java.io.FilterOutputStream
 import java.io.IOException
 import java.io.OutputStream
@@ -22,6 +21,7 @@ import java.security.MessageDigest
  * call close.
  *
  */
+@OptIn(ExperimentalStdlibApi::class)
 class ConcatenatedOutputStream2(outputStream: OutputStream,
                                 messageDigest: MessageDigest = MessageDigest.getInstance("MD5"),
                                 internal val verifyMd5: Boolean = true) : FilterOutputStream(outputStream) {

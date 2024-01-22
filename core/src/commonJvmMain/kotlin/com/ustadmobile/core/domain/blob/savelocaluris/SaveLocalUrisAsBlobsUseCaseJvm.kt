@@ -1,0 +1,145 @@
+package com.ustadmobile.core.domain.blob.savelocaluris
+
+import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
+import com.ustadmobile.core.io.ext.toDoorUri
+import com.ustadmobile.core.uri.UriHelper
+import com.ustadmobile.core.url.UrlKmp
+import com.ustadmobile.core.util.UMURLEncoder
+import com.ustadmobile.core.util.digest.Digester
+import com.ustadmobile.core.util.digest.urlKey
+import com.ustadmobile.door.DoorUri
+import com.ustadmobile.libcache.CacheEntryToStore
+import com.ustadmobile.libcache.UstadCache
+import com.ustadmobile.libcache.io.transferToAndGetSha256
+import kotlinx.io.files.Path
+import java.util.UUID
+import com.ustadmobile.core.util.ext.encodeBase64
+import com.ustadmobile.libcache.headers.headersBuilder
+import com.ustadmobile.libcache.request.requestBuilder
+import com.ustadmobile.libcache.response.HttpPathResponse
+import io.github.aakira.napier.Napier
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlinx.io.files.FileSystem
+import kotlinx.io.files.SystemFileSystem
+
+/**
+ * @param createRetentionLock if true, then when items are stored in the http cache, a
+ *        retention lock will be created. This should be true on clients where newly created blobs
+ *        need to be retained at least until they have been uploaded. On the server all urls related to
+ *        currently active entities (e.g. PersonPicture, ContentEntryVersion, etc) must be retained,
+ *        which is managed via triggers on the database (see UpdateCacheLockJoinUseCase).
+ *
+ */
+class SaveLocalUrisAsBlobsUseCaseJvm(
+    private val endpoint: Endpoint,
+    private val cache: UstadCache,
+    private val uriHelper: UriHelper,
+    private val tmpDir: Path,
+    private val deleteUrisUseCase: DeleteUrisUseCase,
+    private val fileSystem: FileSystem = SystemFileSystem,
+    private val createRetentionLock: Boolean = false,
+) : SaveLocalUrisAsBlobsUseCase {
+
+    private val logPrefix = "SaveLocalUrisAsBlobsUseCaseJvm"
+
+    @Volatile
+    private var tmpDirPathChecked: Boolean = false
+
+    private fun createTmpPathIfNeeded() {
+        if(!tmpDirPathChecked) {
+            if(!fileSystem.exists(tmpDir)) {
+                fileSystem.createDirectories(tmpDir)
+            }
+            tmpDirPathChecked = true
+        }
+    }
+
+    private data class ProcessedEntry(
+        val saveBlobItem: SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem,
+        val cacheEntry: CacheEntryToStore,
+        val cacheEntryTmpPath: Path,
+    )
+
+    /**
+     * Store the blobs in the cache as https://endpoint/api/sha256
+     */
+    override suspend fun invoke(
+        localUrisToSave: List<SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem>,
+    ): List<SaveLocalUrisAsBlobsUseCase.SavedBlob> = withContext(Dispatchers.Default) {
+        createTmpPathIfNeeded()
+
+        val endpointUrl = UrlKmp(endpoint.url)
+        val digester = Digester("MD5")
+
+        //List of Pair (SaveLocalUriAsBlobItem to CacheEntryToStore)
+        val entriesToStore = localUrisToSave.map { saveItem ->
+            val tmpBlobPath = Path(tmpDir, UUID.randomUUID().toString())
+
+            val blobDoorUri = DoorUri.parse(saveItem.localUri)
+
+            val transferResult = uriHelper.openSource(blobDoorUri)
+                .transferToAndGetSha256(tmpBlobPath)
+
+            val sha256Base64 = transferResult.sha256.encodeBase64()
+
+            val blobUrl = endpointUrl.resolve("/api/blob/" +
+                    UMURLEncoder.encodeUTF8(sha256Base64))
+
+            val blobUrlStr = blobUrl.toString()
+            val blobRequest = requestBuilder(blobUrlStr) {  }
+            val mimeType = saveItem.mimeType ?: uriHelper.getMimeType(blobDoorUri)
+                ?: "application/octet-stream"
+
+            ProcessedEntry(
+                saveBlobItem = saveItem,
+                cacheEntry = CacheEntryToStore(
+                    request = blobRequest,
+                    response = HttpPathResponse(
+                        path = tmpBlobPath,
+                        fileSystem = fileSystem,
+                        mimeType = mimeType,
+                        request = blobRequest,
+                        extraHeaders = headersBuilder {
+                            header("cache-control", "immutable")
+                        },
+                    ),
+                    createRetentionLock = createRetentionLock,
+                ),
+                cacheEntryTmpPath = tmpBlobPath,
+            )
+        }
+
+        Napier.d { "$logPrefix Storing ${entriesToStore.size} local uris as blobs " +
+                "(${entriesToStore.joinToString { it.cacheEntry.request.url }})" }
+        val storeResults = cache.store(
+            entriesToStore.map { it.cacheEntry }
+        ).associateBy {
+            it.urlKey
+        }
+
+        val urisToDelete = entriesToStore.mapNotNull {
+            if(it.saveBlobItem.deleteLocalUriAfterSave) it.saveBlobItem.localUri else null
+        } + entriesToStore.map { it.cacheEntryTmpPath.toDoorUri().toString() }
+
+        deleteUrisUseCase(urisToDelete)
+
+        entriesToStore.map {
+            val urlKey = digester.urlKey(it.cacheEntry.request.url)
+            val cacheStoreResult = storeResults[urlKey]
+                ?: throw IllegalStateException("Cache did not store ${it.cacheEntry.request.url}")
+
+            SaveLocalUrisAsBlobsUseCase.SavedBlob(
+                entityUid = it.saveBlobItem.entityUid,
+                localUri = it.saveBlobItem.localUri,
+                blobUrl = it.cacheEntry.request.url,
+                retentionLockId = cacheStoreResult.lockId,
+                integrity = cacheStoreResult.integrity,
+                mimeType = it.cacheEntry.response.headers["content-type"] ?: "application/octet-stream",
+                storageSize = cacheStoreResult.storageSize,
+            )
+        }
+    }
+
+}

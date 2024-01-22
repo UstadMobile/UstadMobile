@@ -1,6 +1,6 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import kotlin.jvm.JvmStatic
 
 object TerminologyKeys {
@@ -15,12 +15,12 @@ object TerminologyKeys {
 
     @JvmStatic
     val TERMINOLOGY_ENTRY_MESSAGE_ID = mapOf(
-        TEACHER_KEY to MessageID.teacher,
-        STUDENT_KEY to MessageID.student,
-        TEACHERS_KEY to MessageID.teachers_literal,
-        STUDENTS_KEY to MessageID.students,
-        ADD_TEACHER_KEY to MessageID.add_a_teacher,
-        ADD_STUDENT_KEY to MessageID.add_a_student
+        TEACHER_KEY to MR.strings.teacher,
+        STUDENT_KEY to MR.strings.student,
+        TEACHERS_KEY to MR.strings.teachers_literal,
+        STUDENTS_KEY to MR.strings.students,
+        ADD_TEACHER_KEY to MR.strings.add_a_teacher,
+        ADD_STUDENT_KEY to MR.strings.add_a_student
     )
 
 

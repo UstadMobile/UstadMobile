@@ -17,18 +17,16 @@ object DiTag {
 
     const val TAG_GOOGLE_API = 12
 
-    const val TAG_PRESENTER_COROUTINE_SCOPE = 14
-
     const val XPP_FACTORY_NSAWARE = 1
 
     const val XPP_FACTORY_NSUNAWARE = 0
 
-    const val TAG_FILE_FFMPEG = 30
-
-    const val TAG_FILE_FFPROBE = 31
-
     const val TAG_FILE_UPLOAD_TMP_DIR = 32
 
+    /**
+     * Used to bind the main temporary directory on JVM (Server/Desktop) and Android
+     */
+    const val TAG_TMP_DIR = 42
 
 
 }

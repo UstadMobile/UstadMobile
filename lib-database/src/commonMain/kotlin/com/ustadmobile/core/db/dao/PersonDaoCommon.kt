@@ -16,11 +16,13 @@ object PersonDaoCommon {
     const val SORT_LAST_NAME_DESC = 4
 
     const val SQL_SELECT_LIST_WITH_PERMISSION = """
-         SELECT Person.* 
+         SELECT Person.*, PersonPicture.*
            FROM PersonGroupMember 
                 ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1}
                     ${Role.PERMISSION_PERSON_SELECT}
                     ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2}
+                LEFT JOIN PersonPicture
+                     ON PersonPicture.personPictureUid = Person.personUid
          WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid
            AND PersonGroupMember.groupMemberActive 
            AND (:excludeClazz = 0 OR :excludeClazz NOT IN
@@ -40,7 +42,7 @@ object PersonDaoCommon {
            AND (Person.personUid NOT IN (:excludeSelected))
            AND (:searchText = '%' 
                OR Person.firstNames || ' ' || Person.lastName LIKE :searchText)
-      GROUP BY Person.personUid
+      GROUP BY Person.personUid, PersonPicture.personPictureUid
       ORDER BY CASE(:sortOrder)
                WHEN $SORT_FIRST_NAME_ASC THEN Person.firstNames
                WHEN $SORT_LAST_NAME_ASC THEN Person.lastName

@@ -30,8 +30,7 @@
  */
 package com.ustadmobile.core.view
 
-import kotlinx.coroutines.Runnable
-import kotlin.js.JsName
+import dev.icerock.moko.resources.StringResource
 
 enum class GetResultMode {
     EDITORNEW, FROMLIST
@@ -51,7 +50,7 @@ interface UstadView {
      *
      * @param message message to show
      */
-    fun showSnackBar(message: String, action: () -> Unit = {}, actionMessageId: Int = 0)
+    fun showSnackBar(message: String, action: () -> Unit = {}, actionMessageId: StringResource? = null)
 
     companion object {
 
@@ -107,7 +106,10 @@ interface UstadView {
 
         const val ARG_SITE = "site"
 
-        const val ARG_SERVER_URL = "serverUrl"
+        /**
+         * The argument is the Api Url (e.g. the endpoint).
+         */
+        const val ARG_API_URL = "serverUrl"
 
         /**
          * Can be used with any Android intent to provide a link to open within the app.
@@ -215,7 +217,6 @@ interface UstadView {
          */
         const val ARG_MAX_DATE_OF_BIRTH = "maxDob"
 
-        @JsName("MASTER_SERVER_ROOT_ENTRY_UID")
         const val MASTER_SERVER_ROOT_ENTRY_UID = -4103245208651563007L
 
     }

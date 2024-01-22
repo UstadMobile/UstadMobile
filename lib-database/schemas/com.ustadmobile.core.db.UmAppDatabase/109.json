@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 109,
-    "identityHash": "9229c1fbc78fb1fae68f9ba75dec4350",
+    "identityHash": "288706adbda003605bdb8c8662c3d2df",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -88,10 +88,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "nodeId"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [
           {
@@ -217,10 +217,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "clazzLogUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -279,10 +279,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "clazzLogAttendanceRecordUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -371,10 +371,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "scheduleUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -451,10 +451,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "dateRangeUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -513,10 +513,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "umCalendarUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -587,10 +587,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "holUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -661,10 +661,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "scheduledCheckUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -735,10 +735,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "auditLogUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -845,10 +845,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "customFieldUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -913,10 +913,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "customFieldValueUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -987,10 +987,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "customFieldValueOptionUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -1146,10 +1146,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "personUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -1306,10 +1306,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "clazzUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -1404,10 +1404,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "clazzEnrolmentUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [
           {
@@ -1503,10 +1503,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "leavingReasonUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -1673,10 +1673,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "contentEntryUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [
           {
@@ -1739,10 +1739,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "ceccjUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [
           {
@@ -1811,10 +1811,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "cepcjUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [
           {
@@ -1914,10 +1914,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "cerejUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -1970,10 +1970,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "contentCategorySchemaUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -2026,10 +2026,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "contentCategoryUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -2106,10 +2106,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "langUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -2168,10 +2168,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "langVariantUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -2200,10 +2200,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "token"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -2232,10 +2232,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "personAuthUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -2294,10 +2294,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "roleUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [
           {
@@ -2378,10 +2378,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "erUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [
           {
@@ -2488,10 +2488,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "groupUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -2550,10 +2550,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "groupMemberUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [
           {
@@ -2655,10 +2655,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "personPictureUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -2759,10 +2759,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "sqiUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [
           {
@@ -2808,10 +2808,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "scrapeRunUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -2846,10 +2846,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "csUid"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -2932,10 +2932,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "containerUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [
           {
@@ -2990,10 +2990,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "ceUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [
           {
@@ -3056,10 +3056,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "cefUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [
           {
@@ -3122,10 +3122,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "verbUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -3209,10 +3209,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "xObjectUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -3433,10 +3433,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "statementUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [
           {
@@ -3518,10 +3518,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "contextXObjectStatementJoinUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -3598,10 +3598,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "agentUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -3678,10 +3678,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "stateUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -3746,10 +3746,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "stateContentUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -3820,10 +3820,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "statementLangMapUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [
           {
@@ -3850,10 +3850,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "nodeClientId"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -3870,10 +3870,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "laContainerUid"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -3896,10 +3896,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "ceContainerUid"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -4036,10 +4036,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "schoolUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -4116,10 +4116,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "schoolMemberUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [
           {
@@ -4262,10 +4262,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "commentsUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -4420,10 +4420,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "reportUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -4488,10 +4488,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "siteUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -4586,10 +4586,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "cijUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -4648,10 +4648,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "learnerGroupUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -4716,10 +4716,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "learnerGroupMemberUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -4778,10 +4778,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "groupLearningSessionUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -4846,10 +4846,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "sTermsUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -4908,10 +4908,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "ccjUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [
           {
@@ -5016,10 +5016,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "ppjUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -5096,10 +5096,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "sgUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [
           {
@@ -5225,10 +5225,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "errUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -5397,10 +5397,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "caUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [
           {
@@ -5476,10 +5476,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "cacjUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -5532,10 +5532,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "casUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -5594,17 +5594,17 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "casaUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
       },
       {
         "tableName": "CourseAssignmentMark",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`camUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `camAssignmentUid` INTEGER NOT NULL, `camSubmitterUid` INTEGER NOT NULL, `camMarkerSubmitterUid` INTEGER NOT NULL DEFAULT 0, `camMarkerPersonUid` INTEGER NOT NULL DEFAULT 0, `camMarkerComment` TEXT, `camMark` REAL NOT NULL, `camPenalty` INTEGER NOT NULL, `camLct` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`camUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `camAssignmentUid` INTEGER NOT NULL, `camSubmitterUid` INTEGER NOT NULL, `camMarkerSubmitterUid` INTEGER NOT NULL DEFAULT 0, `camMarkerPersonUid` INTEGER NOT NULL DEFAULT 0, `camMarkerComment` TEXT, `camMark` REAL NOT NULL, `camMaxMark` REAL NOT NULL DEFAULT 1, `camPenalty` REAL NOT NULL, `camLct` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "camUid",
@@ -5651,9 +5651,16 @@
             "notNull": true
           },
           {
+            "fieldPath": "camMaxMark",
+            "columnName": "camMaxMark",
+            "affinity": "REAL",
+            "notNull": true,
+            "defaultValue": "1"
+          },
+          {
             "fieldPath": "camPenalty",
             "columnName": "camPenalty",
-            "affinity": "INTEGER",
+            "affinity": "REAL",
             "notNull": true
           },
           {
@@ -5664,10 +5671,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "camUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -5714,10 +5721,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "praUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -5808,10 +5815,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "cacheUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [
           {
@@ -5876,10 +5883,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "pauthUid"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -5968,10 +5975,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "usUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [
           {
@@ -6047,10 +6054,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "cjUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -6199,10 +6206,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "cjiUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [
           {
@@ -6338,10 +6345,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "cbUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [
           {
@@ -6386,10 +6393,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "ctUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -6436,10 +6443,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "cgsUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [
           {
@@ -6490,10 +6497,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "cgmUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -6522,11 +6529,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "chTableId",
             "chEntityPk"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -6549,10 +6556,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "zaUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -6582,10 +6589,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "nodeId"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -6644,10 +6651,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "repStatusId"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [
           {
@@ -6695,11 +6702,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "clPk",
             "clDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -6758,11 +6765,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "clarPk",
             "clarDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -6821,11 +6828,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "casPk",
             "casDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -6884,11 +6891,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "casaPk",
             "casaDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -6947,11 +6954,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "camPk",
             "camDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -7010,11 +7017,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "cbPk",
             "cbDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -7073,11 +7080,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "ctPk",
             "ctDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -7136,11 +7143,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "cgsPk",
             "cgsDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -7199,11 +7206,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "cgmPk",
             "cgmDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -7262,11 +7269,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "schedulePk",
             "scheduleDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -7325,11 +7332,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "hcPk",
             "hcDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -7388,11 +7395,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "holidayPk",
             "holidayDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -7451,11 +7458,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "personPk",
             "personDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -7514,11 +7521,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "clazzPk",
             "clazzDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -7577,11 +7584,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "cePk",
             "ceDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -7640,11 +7647,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "lrPk",
             "lrDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -7703,11 +7710,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "cePk",
             "ceDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -7766,11 +7773,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "ceccjPk",
             "ceccjDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -7829,11 +7836,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "cepcjPk",
             "cepcjDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -7892,11 +7899,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "cerejPk",
             "cerejDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -7955,11 +7962,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "ccsPk",
             "ccsDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -8018,11 +8025,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "ccPk",
             "ccDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -8081,11 +8088,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "languagePk",
             "languageDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -8144,11 +8151,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "lvPk",
             "lvDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -8207,11 +8214,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "pgPk",
             "pgDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -8270,11 +8277,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "pgmPk",
             "pgmDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -8333,11 +8340,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "ppPk",
             "ppDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -8396,11 +8403,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "containerPk",
             "containerDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -8459,11 +8466,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "vePk",
             "veDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -8522,11 +8529,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "xoePk",
             "xoeDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -8585,11 +8592,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "sePk",
             "seDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -8648,11 +8655,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "cxosjPk",
             "cxosjDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -8711,11 +8718,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "aePk",
             "aeDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -8774,11 +8781,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "sePk",
             "seDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -8837,11 +8844,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "scePk",
             "sceDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -8900,11 +8907,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "xlmePk",
             "xlmeDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -8963,11 +8970,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "schoolPk",
             "schoolDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -9026,11 +9033,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "smPk",
             "smDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -9089,11 +9096,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "commentsPk",
             "commentsDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -9152,11 +9159,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "reportPk",
             "reportDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -9215,11 +9222,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "sitePk",
             "siteDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -9278,11 +9285,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "lgPk",
             "lgDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -9341,11 +9348,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "lgmPk",
             "lgmDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -9404,11 +9411,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "glsPk",
             "glsDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -9467,11 +9474,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "stPk",
             "stDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -9530,11 +9537,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "ccjPk",
             "ccjDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -9593,11 +9600,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "ppjPk",
             "ppjDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -9656,11 +9663,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "sgPk",
             "sgDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -9719,11 +9726,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "erPk",
             "erDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -9782,11 +9789,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "caPk",
             "caDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -9845,11 +9852,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "cacjPk",
             "cacjDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -9908,11 +9915,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "paPk",
             "paDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -9971,11 +9978,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "usPk",
             "usDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -10080,10 +10087,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "coursePictureUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -10120,11 +10127,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "cpPk",
             "cpDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -10205,10 +10212,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "cepUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -10245,11 +10252,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "cepPk",
             "cepDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -10308,11 +10315,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "prarPk",
             "prarDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -10375,10 +10382,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "chatUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -10425,10 +10432,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "chatMemberUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -10487,10 +10494,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "messageUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -10527,11 +10534,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "messagePk",
             "messageDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -10590,11 +10597,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "chatPk",
             "chatDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -10653,11 +10660,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "chatMemberPk",
             "chatMemberDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -10720,10 +10727,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "messageReadUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -10760,11 +10767,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "messageReadPk",
             "messageReadDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -10833,10 +10840,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "courseDiscussionUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -10873,11 +10880,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "courseDiscussionPk",
             "courseDiscussionDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -10970,10 +10977,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "discussionTopicUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -11010,11 +11017,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "discussionTopicPk",
             "discussionTopicDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -11043,11 +11050,17 @@
       },
       {
         "tableName": "DiscussionPost",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`discussionPostUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `discussionPostTitle` TEXT, `discussionPostMessage` TEXT, `discussionPostStartDate` INTEGER NOT NULL, `discussionPostDiscussionTopicUid` INTEGER NOT NULL, `discussionPostVisible` INTEGER NOT NULL, `discussionPostArchive` INTEGER NOT NULL, `discussionPostStartedPersonUid` INTEGER NOT NULL, `discussionPostClazzUid` INTEGER NOT NULL, `discussionPostLct` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`discussionPostUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `discussionPostReplyToPostUid` INTEGER NOT NULL, `discussionPostTitle` TEXT, `discussionPostMessage` TEXT, `discussionPostStartDate` INTEGER NOT NULL, `discussionPostCourseBlockUid` INTEGER NOT NULL, `discussionPostVisible` INTEGER NOT NULL, `discussionPostArchive` INTEGER NOT NULL, `discussionPostStartedPersonUid` INTEGER NOT NULL, `discussionPostClazzUid` INTEGER NOT NULL, `discussionPostLct` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "discussionPostUid",
             "columnName": "discussionPostUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "discussionPostReplyToPostUid",
+            "columnName": "discussionPostReplyToPostUid",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -11070,8 +11083,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "discussionPostDiscussionTopicUid",
-            "columnName": "discussionPostDiscussionTopicUid",
+            "fieldPath": "discussionPostCourseBlockUid",
+            "columnName": "discussionPostCourseBlockUid",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -11107,10 +11120,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "discussionPostUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -11147,11 +11160,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "discussionPostPk",
             "discussionPostDestination"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -11226,10 +11239,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": true,
           "columnNames": [
             "eapUid"
-          ],
-          "autoGenerate": true
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -11238,7 +11251,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9229c1fbc78fb1fae68f9ba75dec4350')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '288706adbda003605bdb8c8662c3d2df')"
     ]
   }
 }

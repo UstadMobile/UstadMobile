@@ -3,7 +3,6 @@ plugins {
     id 'org.jetbrains.kotlin.multiplatform'
     id 'org.jetbrains.kotlin.plugin.serialization'
     id 'com.android.library'
-    id 'maven-publish'
     id "com.google.devtools.ksp" version "$version_kotlin-$version_ksp"
 }
 
@@ -11,14 +10,14 @@ plugins {
 group rootProject.group
 version rootProject.version
 
-sourceCompatibility = '1.8'
-targetCompatibility = '1.8'
+sourceCompatibility = '17'
+targetCompatibility = '17'
 
 group rootProject.group
 version rootProject.version
 
 android {
-    compileSdkVersion rootProject.ext.version_android_compile_sdk
+    compileSdk rootProject.ext.version_android_compile_sdk
     sourceSets.main.manifest.srcFile('src/androidMain/AndroidManifest.xml')
     defaultConfig {
         minSdkVersion 21
@@ -28,16 +27,22 @@ android {
 
     sourceSets {
         androidTest.assets.srcDirs += files("$projectDir/schemas".toString())
+        debug {
+            java.srcDirs += ["build/generated/ksp/android/androidDebug/kotlin"]
+        }
+        release {
+            java.srcDirs += ["build/generated/ksp/android/androidRelease/kotlin"]
+        }
     }
 
     compileOptions {
-        sourceCompatibility = '1.8'
-        targetCompatibility = '1.8'
+        sourceCompatibility = '17'
+        targetCompatibility = '17'
     }
 
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
         kotlinOptions {
-            jvmTarget = "1.8"
+            jvmTarget = "17"
         }
     }
 
@@ -51,8 +56,8 @@ android {
 
 
 kotlin {
-    android {
-
+    androidTarget {
+        publishLibraryVariants("release", "debug")
     }
 
     jvm {
@@ -67,12 +72,11 @@ kotlin {
         }
     }
 
-    js(LEGACY) {
+    js(IR) {
         browser {
             testTask {
                 useKarma {
                     useChromeHeadless() //change to useChrome to run the actual browser
-                    webpackConfig.cssSupport.enabled = true
                 }
             }
         }
@@ -80,6 +84,8 @@ kotlin {
 
     sourceSets {
         commonMain {
+            kotlin.srcDir("build/generated/ksp/metadata/commonMain/kotlin")
+
             dependencies {
                 implementation kotlin('stdlib-common')
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
@@ -87,10 +93,10 @@ kotlin {
                 implementation project(":lib-util")
                 implementation "io.ktor:ktor-client-core:$version_ktor"
 
-                implementation "com.github.UstadMobile.door:door-runtime:$version_door"
-                implementation "io.github.aakira:napier:$version_napier"
+                api libs.door.runtime
+                implementation libs.napier
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"
-                compileOnly "com.github.UstadMobile.door:door-annotations:$version_door"
+                compileOnly libs.door.room.annotations
  
             }
         }
@@ -104,10 +110,11 @@ kotlin {
             dependsOn commonJvmMain
 
             dependencies {
-                implementation "androidx.room:room-runtime:$version_android_room"
-                implementation "androidx.room:room-ktx:$version_android_room"
-                implementation "androidx.lifecycle:lifecycle-livedata-ktx:$version_androidx_lifecycle"
-                implementation "androidx.paging:paging-runtime:$version_androidx_paging"
+                api "androidx.room:room-runtime:$version_android_room"
+                api "androidx.room:room-paging:$version_android_room"
+                api "androidx.room:room-ktx:$version_android_room"
+                api "androidx.lifecycle:lifecycle-livedata-ktx:$version_androidx_lifecycle"
+                api(libs.androidx.paging.runtime)
 
                 implementation "com.google.code.gson:gson:$version_gson"
                 implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
@@ -155,24 +162,11 @@ ksp {
 }
 
 dependencies {
-    kspJvm "com.github.UstadMobile.door:door-compiler:$version_door"
-    kspJs "com.github.UstadMobile.door:door-compiler:$version_door"
-    kspAndroid "com.github.UstadMobile.door:door-compiler:$version_door"
+    kspJvm libs.door.compiler
+    kspJvm libs.door.shallowcopy
+    kspJs libs.door.compiler
+    kspJs libs.door.shallowcopy
+    kspAndroid libs.door.compiler
     kspAndroid "androidx.room:room-compiler:$version_android_room"
-}
-
-publishing {
-    publications {
-        maven(MavenPublication) {
-            groupId rootProject.group
-            artifactId project.name
-            version rootProject.version
-        }
-    }
-
-    repositories {
-        maven {
-            url rootProject.ext.buildConfigProperties['repo.dir']
-        }
-    }
+    kspAndroid libs.door.shallowcopy
 }

@@ -7,20 +7,18 @@ import kotlinx.serialization.Serializable
 
 @Entity
 @Serializable
-@ReplicateEntity(tableId = Schedule.TABLE_ID, tracker = ScheduleReplicate::class)
+@ReplicateEntity(
+    tableId = Schedule.TABLE_ID,
+    remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW
+)
 @Triggers(arrayOf(
  Trigger(
      name = "schedule_remote_insert",
      order = Trigger.Order.INSTEAD_OF,
      on = Trigger.On.RECEIVEVIEW,
      events = [Trigger.Event.INSERT],
-     sqlStatements = [
-         """REPLACE INTO Schedule(scheduleUid, sceduleStartTime, scheduleEndTime, scheduleDay, scheduleMonth, scheduleFrequency, umCalendarUid, scheduleClazzUid, scheduleMasterChangeSeqNum, scheduleLocalChangeSeqNum, scheduleLastChangedBy, scheduleLastChangedTime, scheduleActive) 
-         VALUES (NEW.scheduleUid, NEW.sceduleStartTime, NEW.scheduleEndTime, NEW.scheduleDay, NEW.scheduleMonth, NEW.scheduleFrequency, NEW.umCalendarUid, NEW.scheduleClazzUid, NEW.scheduleMasterChangeSeqNum, NEW.scheduleLocalChangeSeqNum, NEW.scheduleLastChangedBy, NEW.scheduleLastChangedTime, NEW.scheduleActive) 
-         /*psql ON CONFLICT (scheduleUid) DO UPDATE 
-         SET sceduleStartTime = EXCLUDED.sceduleStartTime, scheduleEndTime = EXCLUDED.scheduleEndTime, scheduleDay = EXCLUDED.scheduleDay, scheduleMonth = EXCLUDED.scheduleMonth, scheduleFrequency = EXCLUDED.scheduleFrequency, umCalendarUid = EXCLUDED.umCalendarUid, scheduleClazzUid = EXCLUDED.scheduleClazzUid, scheduleMasterChangeSeqNum = EXCLUDED.scheduleMasterChangeSeqNum, scheduleLocalChangeSeqNum = EXCLUDED.scheduleLocalChangeSeqNum, scheduleLastChangedBy = EXCLUDED.scheduleLastChangedBy, scheduleLastChangedTime = EXCLUDED.scheduleLastChangedTime, scheduleActive = EXCLUDED.scheduleActive
-         */"""
-     ]
+     conditionSql = TRIGGER_CONDITION_WHERE_NEWER,
+     sqlStatements = [TRIGGER_UPSERT],
  )
 ))
 class Schedule {
@@ -51,13 +49,13 @@ class Schedule {
     var scheduleEndTime: Long = 0
 
     //What day for this frequency
-    var scheduleDay: Int = 0
+    var scheduleDay: Int = Schedule.DAY_MONDAY
 
     //What month for this frequency
     var scheduleMonth: Int = 0
 
     // Frequency - Once, Daily, Every Week, Every Month, Every Year
-    var scheduleFrequency: Int = 0
+    var scheduleFrequency: Int = Schedule.SCHEDULE_FREQUENCY_WEEKLY
 
     //The Calendar this will be set to.
     var umCalendarUid: Long = 0
@@ -74,8 +72,8 @@ class Schedule {
     @LastChangedBy
     var scheduleLastChangedBy: Int = 0
 
-    @LastChangedTime
-    @ReplicationVersionId
+    @ReplicateLastModified
+    @ReplicateEtag
     var scheduleLastChangedTime: Long = 0
 
     //active or removed
@@ -130,14 +128,14 @@ class Schedule {
         val SCHEDULE_FREQUENCY_MONTHLY = 4
         val SCHEDULE_FREQUENCY_YEARLY = 5
 
-        // Constants as per Klock
-        val DAY_SUNDAY = 0
+        // As per ISO day of week
         val DAY_MONDAY = 1
         val DAY_TUESDAY = 2
         val DAY_WEDNESDAY = 3
         val DAY_THURSDAY = 4
         val DAY_FRIDAY = 5
         val DAY_SATURDAY = 6
+        val DAY_SUNDAY = 7
 
 
         val MONTH_JANUARY = 1

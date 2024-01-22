@@ -40,5 +40,13 @@
 
     <item name="tag_dateadapter_dateformatter" type="id"/>
 
+    <item name="tag_webview_html" type="id"/>
+
+
+    <item name="tag_fab_uistate_icon" type="id"/>
+
+    <item name="tag_fab_uistate_listener" type="id"/>
+
+
 
 </resources>

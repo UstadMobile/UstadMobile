@@ -2,7 +2,6 @@ plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.multiplatform'
     id 'org.jetbrains.kotlin.plugin.serialization'
-    id 'maven-publish'
 }
 
 android {
@@ -15,8 +14,8 @@ android {
 
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     defaultConfig {
@@ -26,8 +25,8 @@ android {
     namespace 'com.ustadmobile.lib.test'
 }
 
-sourceCompatibility = '1.8'
-targetCompatibility = '1.8'
+sourceCompatibility = '17'
+targetCompatibility = '17'
 
 group rootProject.group
 version rootProject.version
@@ -71,21 +70,21 @@ kotlin {
                 implementation "io.ktor:ktor-client-core:$version_ktor"
                 implementation "io.ktor:ktor-client-json:$version_ktor"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
-                implementation "io.github.aakira:napier:$version_napier"
+                implementation libs.napier
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"
                 implementation project(":lib-database")
-                compileOnly "com.github.UstadMobile.door:door-runtime:$version_door"
+                compileOnly libs.door.runtime
                 compileOnly project(":lib-util")
             }
         }
 
         commonJvmMain {
             dependencies {
-                implementation "io.ktor:ktor-client-okhttp:$version_ktor"
+                implementation libs.ktor.client.okhttp
                 implementation "io.ktor:ktor-client-cio:$version_ktor"
                 implementation "io.ktor:ktor-serialization-gson:$version_ktor"
 
-                compileOnly "com.github.UstadMobile.door:door-runtime:$version_door"
+                compileOnly libs.door.runtime
                 compileOnly project(":lib-util")
             }
         }
@@ -99,9 +98,9 @@ kotlin {
 
                 implementation "com.soywiz.korlibs.klock:klock-jvm:$version_klock"
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
-                implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
+                implementation libs.mockwebserver
                 implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
-                implementation "org.mockito.kotlin:mockito-kotlin:$version_kotlin_mockito"
+                implementation libs.mockito.kotlin
             }
         }
 
@@ -122,21 +121,4 @@ kotlin {
 // workaround for https://youtrack.jetbrains.com/issue/KT-27170
 configurations {
     compileClasspath
-}
-
-
-publishing {
-    publications {
-        maven(MavenPublication) {
-            groupId rootProject.group
-            artifactId project.name
-            version rootProject.version
-        }
-    }
-
-    repositories {
-        maven {
-            url rootProject.ext.buildConfigProperties['repo.dir']
-        }
-    }
 }

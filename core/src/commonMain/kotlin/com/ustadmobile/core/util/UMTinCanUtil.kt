@@ -30,8 +30,7 @@
  */
 package com.ustadmobile.core.util
 
-import com.soywiz.klock.ISO8601
-import kotlin.math.floor
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * This class holds static utility functions to use with TinCan logic.
@@ -39,14 +38,6 @@ import kotlin.math.floor
  * @author mike
  */
 object UMTinCanUtil {
-
-    const val ADL_PREFIX_VERB = "http://adlnet.gov/expapi/verbs/"
-
-    const val VERB_PASSED = ADL_PREFIX_VERB + "passed"
-
-    const val VERB_FAILED = ADL_PREFIX_VERB + "failed"
-
-    const val VERB_ANSWERED = ADL_PREFIX_VERB + "answered"
 
     /**
      * Format an ISO 8601 Duration from the number of milliseconds
@@ -56,31 +47,7 @@ object UMTinCanUtil {
      * @return A string formatted according to ISO8601 Duration e.g. P2H1M15S
      */
     fun format8601Duration(duration: Long): String {
-        val msPerHour = 1000 * 60 * 60
-        val hours = floor((duration / msPerHour).toDouble()).toInt()
-        var durationRemaining = duration % msPerHour
-
-        val msPerMin = 60 * 1000
-        val mins = floor((durationRemaining / msPerMin).toDouble()).toInt()
-        durationRemaining %= msPerMin
-
-        val msPerS = 1000
-        val secs = floor((durationRemaining / msPerS).toDouble()).toInt()
-
-        return "PT" + hours + "H" + mins + "M" + secs + "S"
-    }
-
-    fun parse8601Duration(duration: String): Long {
-        val time = ISO8601.IsoIntervalFormat("PTnnHnnMnnS").tryParse(duration, doThrow = false)
-        return time?.totalMilliseconds?.toLong() ?: 0L
-    }
-
-    fun parse8601DurationOrDefault(duration: String?, defaultDuration: Long = 0L): Long {
-        return if(duration != null) {
-            parse8601Duration(duration)
-        }else {
-            defaultDuration
-        }
+        return duration.milliseconds.toIsoString()
     }
 
 }

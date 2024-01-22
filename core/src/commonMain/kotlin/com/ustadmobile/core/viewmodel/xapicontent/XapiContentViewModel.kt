@@ -1,0 +1,86 @@
+package com.ustadmobile.core.viewmodel.xapicontent
+
+import com.ustadmobile.core.contentformats.manifest.ContentManifest
+import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.tincan.TinCanXML
+import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.requireEntryByUri
+import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.viewmodel.UstadViewModel
+import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
+import com.ustadmobile.xmlpullparserkmp.setInputString
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.request.get
+import io.ktor.client.statement.bodyAsText
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import org.kodein.di.DI
+import org.kodein.di.direct
+import org.kodein.di.instance
+
+data class XapiContentUiState(
+    val url: String? = null,
+    val contentEntryVersionUid: Long = 0,
+)
+
+class XapiContentViewModel(
+    di: DI,
+    savedStateHandle: UstadSavedStateHandle,
+) : UstadViewModel(di, savedStateHandle, DEST_NAME){
+
+    private val entityUidArg: Long = savedStateHandle[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0
+
+    private val _uiState = MutableStateFlow(
+        XapiContentUiState(contentEntryVersionUid = entityUidArg)
+    )
+
+    val uiState: Flow<XapiContentUiState> = _uiState.asStateFlow()
+    
+    private val httpClient: HttpClient by instance()
+
+    init {
+        viewModelScope.launch {
+            try {
+                val contentEntryVersion = activeRepo.contentEntryVersionDao
+                    .findByUidAsync(entityUidArg) ?: return@launch
+                val manifestUrl = contentEntryVersion.cevManifestUrl ?: return@launch
+                val manifest: ContentManifest = httpClient.get(manifestUrl).body()
+                val tinCanEntry = manifest.requireEntryByUri(
+                    contentEntryVersion.cevOpenUri!!)
+
+                val tinCanXmlStr = httpClient.get(tinCanEntry.bodyDataUrl).bodyAsText()
+
+                val xppFactory: XmlPullParserFactory = di.direct.instance(tag = DiTag.XPP_FACTORY_NSAWARE)
+                val xpp = xppFactory.newPullParser()
+                xpp.setInputString(tinCanXmlStr)
+                val tinCanXml = TinCanXML.loadFromXML(xpp)
+                val launchHref = tinCanXml.launchActivity?.launchUrl ?: return@launch
+                val href = UMFileUtil.resolveLink(manifestUrl, launchHref)
+                _uiState.update { prev ->
+                    prev.copy(url = href)
+                }
+
+                _appUiState.update { prev ->
+                    prev.copy(
+                        title = tinCanXml.launchActivity?.name,
+                        hideBottomNavigation = true
+                    )
+                }
+            }catch(e: Throwable) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    companion object {
+
+        const val DEST_NAME = "XapiContent"
+
+    }
+
+}

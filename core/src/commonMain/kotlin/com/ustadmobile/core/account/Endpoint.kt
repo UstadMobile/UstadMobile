@@ -2,6 +2,9 @@ package com.ustadmobile.core.account
 
 import kotlinx.serialization.Serializable
 
+/**
+ * Represents an Endpoint. The Ustad app support multiple users on multiple endpoints.
+ */
 @Serializable
 data class Endpoint(
     /**
@@ -9,8 +12,5 @@ data class Endpoint(
      */
     val url: String
 ) {
-    init {
-//        if(!url.endsWith("/"))
-//            throw IllegalArgumentException("Endpoint url must end with / !")
-    }
+
 }

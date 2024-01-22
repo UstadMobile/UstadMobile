@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <item name="tag_aztec" type="id"/>
+
+    <item name="tag_textfield_html" type="id"/>
+
+    <item name="tag_webview_url" type="id"/>
+
+    <item name="tag_webview_client" type="id"/>
+
+    <item name="tag_epub_webview_url" type="id"/>
+
+</resources>

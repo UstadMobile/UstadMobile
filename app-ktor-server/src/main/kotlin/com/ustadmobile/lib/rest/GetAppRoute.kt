@@ -1,6 +1,5 @@
 package com.ustadmobile.lib.rest
 
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import io.ktor.server.application.*
 import io.ktor.server.html.*
@@ -10,6 +9,7 @@ import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
+import com.ustadmobile.core.MR
 
 fun Route.GetAppRoute() {
     get("/getapp/") {
@@ -30,7 +30,7 @@ fun Route.GetAppRoute() {
                 }
 
                 p {
-                    + "Please get the ${systemImpl.getString(MessageID.app_name, Any())} app to open this link."
+                    + "Please get the ${systemImpl.getString(MR.strings.app_name)} app to open this link."
                     br {  }
                     a(href = config.propertyOrNull("ktor.ustad.androidDownloadHref")?.getString() ?: "#") {
                         + "Download now"

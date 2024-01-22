@@ -2,19 +2,30 @@ package com.ustadmobile.lib.rest
 
 import com.google.gson.Gson
 import com.ustadmobile.core.account.*
-import com.ustadmobile.core.catalog.contenttype.*
-import com.ustadmobile.core.contentjob.ContentJobManager
-import com.ustadmobile.core.contentjob.ContentJobManagerJvm
-import com.ustadmobile.core.contentjob.ContentPluginManager
+import com.ustadmobile.core.contentformats.ContentImportersDiModuleJvm
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
-import com.ustadmobile.core.impl.di.commonJvmDiModule
-import com.ustadmobile.core.networkmanager.ConnectivityLiveData
+import com.ustadmobile.core.domain.account.SetPasswordServerUseCase
+import com.ustadmobile.core.domain.account.SetPasswordUseCase
+import com.ustadmobile.core.domain.account.SetPasswordUseCaseCommonJvm
+import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
+import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCaseJvm
+import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
+import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCaseJvm
+import com.ustadmobile.core.domain.blob.upload.BlobUploadServerUseCase
+import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
+import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCaseCommonJvm
+import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
+import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseJvm
+import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseRemote
+import com.ustadmobile.core.domain.contententry.importcontent.ImportContentEntryUseCase
+import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServerUseCase
+import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
+import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseCommonJvm
+import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
+import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseJvm
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.DiTag.TAG_CONTEXT_DATA_ROOT
-import com.ustadmobile.door.*
-import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
-import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.*
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.io.UploadSessionManager
@@ -26,37 +37,60 @@ import io.github.aakira.napier.Napier
 import io.ktor.server.application.*
 import io.ktor.serialization.gson.*
 import io.ktor.http.*
-import io.ktor.http.content.*
 import io.ktor.server.request.*
 import io.ktor.server.routing.*
 import jakarta.mail.Authenticator
 import jakarta.mail.PasswordAuthentication
-import kotlinx.coroutines.runBlocking
 import org.kodein.di.*
 import org.quartz.Scheduler
 import org.quartz.impl.StdSchedulerFactory
 import java.io.File
-import java.nio.file.Files
 import javax.naming.InitialContext
 import com.ustadmobile.door.util.NodeIdAuthCache
-import com.ustadmobile.core.contentjob.DummyContentPluginUploader
-import com.ustadmobile.core.db.ext.preload
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
+import com.ustadmobile.core.impl.locale.StringProvider
+import com.ustadmobile.core.impl.locale.StringProviderJvm
+import com.ustadmobile.core.schedule.initQuartzDb
+import com.ustadmobile.core.uri.UriHelper
+import com.ustadmobile.core.uri.UriHelperJvm
+import com.ustadmobile.door.http.DoorHttpServerConfig
 import com.ustadmobile.lib.rest.dimodules.makeJvmBackendDiModule
+import com.ustadmobile.lib.rest.api.blob.BlobUploadServerRoute
+import com.ustadmobile.lib.rest.api.content.ContentEntryVersionRoute
+import com.ustadmobile.lib.rest.domain.contententry.getmetadatafromuri.ContentEntryGetMetadataServerUseCase
+import com.ustadmobile.lib.rest.api.contentupload.ContentUploadRoute
+import com.ustadmobile.lib.rest.api.contentupload.UPLOAD_TMP_SUBDIR
+import com.ustadmobile.lib.rest.domain.account.SetPasswordRoute
+import com.ustadmobile.lib.rest.ffmpeghelper.InvalidFffmpegException
+import com.ustadmobile.lib.rest.ffmpeghelper.NoFfmpegException
 import io.ktor.server.response.*
 import kotlinx.serialization.json.Json
 import com.ustadmobile.lib.util.SysPathUtil
-import io.ktor.client.*
-import io.ktor.client.plugins.websocket.*
 import io.ktor.server.http.content.*
-import io.ktor.server.plugins.callloging.*
 import io.ktor.server.plugins.conditionalheaders.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.cors.routing.*
 import io.ktor.server.plugins.statuspages.*
-import io.ktor.websocket.*
 import org.kodein.di.ktor.di
 import java.util.*
 import com.ustadmobile.lib.rest.logging.LogbackAntiLog
+import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
+import com.ustadmobile.libcache.UstadCache
+import com.ustadmobile.libcache.UstadCacheBuilder
+import com.ustadmobile.libcache.logging.NapierLoggingAdapter
+import com.ustadmobile.libcache.okhttp.UstadCacheInterceptor
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.HttpTimeout
+import io.ktor.serialization.kotlinx.json.json
+import kotlinx.io.files.Path
+import net.bramp.ffmpeg.FFmpeg
+import net.bramp.ffmpeg.FFprobe
+import okhttp3.Dispatcher
+import okhttp3.OkHttpClient
+import org.kodein.di.ktor.closestDI
+import java.net.Inet6Address
+import java.net.NetworkInterface
 
 const val TAG_UPLOAD_DIR = 10
 
@@ -67,18 +101,23 @@ const val CONF_DBMODE_SINGLETON = "singleton"
 
 const val CONF_GOOGLE_API = "secret"
 
+const val CONF_KEY_SITE_URL = "ktor.ustad.siteUrl"
+
 /**
  * List of external commands (e.g. media converters) that must be found or have locations specified
  */
-val REQUIRED_EXTERNAL_COMMANDS = listOf("ffmpeg", "ffprobe")
+val REQUIRED_EXTERNAL_COMMANDS = emptyList<String>()
 
 /**
  * List of prefixes which are always answered by the KTOR server. When using JsDev proxy mode, any
  * other url will be sent to the JS dev proxy
  */
-val KTOR_SERVER_ROUTES = listOf("/UmAppDatabase", "/ConcatenatedContainerFiles2",
+val KTOR_SERVER_ROUTES = listOf(
+    "/UmAppDatabase", "/ConcatenatedContainerFiles2",
     "/ContainerEntryList", "/ContainerEntryFile", "/auth", "/ContainerMount",
-    "/ContainerUpload2", "/Site", "/import", "/contentupload", "/websocket", "/pdf")
+    "/ContainerUpload2", "/Site", "/import", "/contentupload", "/websocket", "/pdf",
+    "/api"
+)
 
 
 /**
@@ -100,7 +139,52 @@ fun Application.umRestApplication(
 ) {
     val appConfig = environment.config
 
+    val siteUrl = environment.config.propertyOrNull(CONF_KEY_SITE_URL)?.getString()
+
+    if(siteUrl.isNullOrBlank()) {
+        val likelyAddr = NetworkInterface.getNetworkInterfaces().toList().filter {
+            !it.isLoopback
+        }.flatMap { netInterface ->
+            netInterface.inetAddresses.toList().filter { it !is Inet6Address }
+        }.firstOrNull()?.let { "http://${it.hostAddress}:${appConfig.port}/"} ?: ""
+
+        throw SiteConfigException("ERROR: Site URL is not set. You MUST specify the site url e.g. $likelyAddr \n" +
+                "Please specify using the url parameter in command line e.g. add " +
+                "--siteUrl $likelyAddr \n" +
+                "to the command you are running or \n" +
+                "set this in the config file e.g. uncomment siteUrl and set as siteUrl = \"$likelyAddr\"")
+    }
+
+    val appFfmpegDir = ktorAppHomeFfmpegDir()
+    val ffmpegFile = SysPathUtil.findCommandInPath(
+        commandName = "ffmpeg",
+        manuallySpecifiedLocation = appConfig.commandFileProperty("ffmpeg"),
+        extraSearchPaths = appFfmpegDir.absolutePath,
+    )
+    val ffprobeFile = SysPathUtil.findCommandInPath(
+        commandName = "ffprobe",
+        manuallySpecifiedLocation = appConfig.commandFileProperty("ffprobe"),
+        extraSearchPaths = appFfmpegDir.absolutePath
+    )
+
+    if(ffmpegFile == null || ffprobeFile == null) {
+        throw NoFfmpegException()
+    }
+
+    try {
+        if(!FFmpeg(ffmpegFile.absolutePath).isFFmpeg || !FFprobe(ffprobeFile.absolutePath).isFFprobe) {
+            throw InvalidFffmpegException(ffmpegFile, ffprobeFile)
+        }
+    }catch(e: Exception) {
+        //If an exception occurs running them, it is also invalid
+        throw InvalidFffmpegException(ffmpegFile, ffprobeFile)
+    }
+
     val devMode = environment.config.propertyOrNull("ktor.ustad.devmode")?.getString().toBoolean()
+
+    val json = Json {
+        encodeDefaults = true
+    }
 
     //Check for required external commands
     REQUIRED_EXTERNAL_COMMANDS.forEach { command ->
@@ -130,7 +214,8 @@ fun Application.umRestApplication(
         }
     }
 
-    install(CallLogging)
+    //Uncomment if needed -generates a lot of output
+    //install(CallLogging)
 
     Napier.takeLogarithm()
     Napier.base(LogbackAntiLog())
@@ -145,18 +230,72 @@ fun Application.umRestApplication(
     //Avoid sending the body of content if it has not changed since the client last requested it.
     install(ConditionalHeaders)
 
-    val tmpRootDir = Files.createTempDirectory("upload").toFile()
+    val dbMode = dbModeOverride ?:
+        appConfig.propertyOrNull("ktor.ustad.dbmode")?.getString() ?: CONF_DBMODE_SINGLETON
 
-    val dbMode = dbModeOverride ?: environment.config.dbModeProperty()
+    val dataDirPath = environment.config.absoluteDataDir()
+
+    fun String.replaceDbUrlVars(): String {
+        return replace("(datadir)", dataDirPath.absolutePath)
+    }
+
+    dataDirPath.takeIf { !it.exists() }?.mkdirs()
 
     val apiKey = environment.config.propertyOrNull("ktor.ustad.googleApiKey")?.getString() ?: CONF_GOOGLE_API
 
     di {
-        import(commonJvmDiModule)
         import(makeJvmBackendDiModule(environment.config))
+        import(ContentImportersDiModuleJvm)
+
+        bind<OkHttpClient>() with singleton {
+            OkHttpClient.Builder()
+                .dispatcher(
+                    Dispatcher().also {
+                        it.maxRequests = 30
+                        it.maxRequestsPerHost = 10
+                    }
+                )
+                .addInterceptor(
+                    UstadCacheInterceptor(
+                        cache = instance(),
+                        tmpDir = File(appConfig.absoluteDataDir(), "httpfiles"),
+                        logger = NapierLoggingAdapter(),
+                    )
+                )
+                .build()
+        }
+
+        bind<HttpClient>() with singleton {
+            HttpClient(OkHttp) {
+
+                install(io.ktor.client.plugins.contentnegotiation.ContentNegotiation) {
+                    json(json = instance())
+                }
+                install(HttpTimeout)
+
+                val dispatcher = Dispatcher()
+                dispatcher.maxRequests = 30
+                dispatcher.maxRequestsPerHost = 10
+
+                engine {
+                    preconfigured = instance()
+                }
+
+            }
+        }
+
+        bind<SupportedLanguagesConfig>() with singleton {
+            SupportedLanguagesConfig(
+                systemLocales = listOf(Locale.getDefault().language),
+                settings = instance(),
+
+            )
+        }
+        bind<StringProvider>() with singleton { StringProviderJvm(Locale.getDefault()) }
 
         bind<File>(tag = TAG_UPLOAD_DIR) with scoped(EndpointScope.Default).singleton {
-            File(tmpRootDir, context.identifier(dbMode)).also {
+            val mainTmpDir = instance<File>(tag = DiTag.TAG_TMP_DIR)
+            File(mainTmpDir, context.identifier(dbMode)).also {
                 it.takeIf { !it.exists() }?.mkdirs()
             }
         }
@@ -191,52 +330,31 @@ fun Application.umRestApplication(
 
         bind<Gson>() with singleton { Gson() }
 
-        bind<EpubTypePluginCommonJvm>() with scoped(EndpointScope.Default).singleton{
-            EpubTypePluginCommonJvm(Any(), context, di, DummyContentPluginUploader())
+        bind<UstadCache>() with singleton {
+            val dbUrl = "jdbc:sqlite:(datadir)/ustadcache.db"
+                .replace("(datadir)", appConfig.absoluteDataDir().absolutePath)
+            UstadCacheBuilder(
+                dbUrl = dbUrl,
+                storagePath = Path(
+                    File(appConfig.absoluteDataDir(), "httpfiles").absolutePath.toString()
+                ),
+            ).build()
         }
 
-        bind<XapiTypePluginCommonJvm>() with scoped(EndpointScope.Default).singleton{
-            XapiTypePluginCommonJvm(Any(), context, di, DummyContentPluginUploader())
+        bind<UriHelper>() with singleton {
+            UriHelperJvm(
+                mimeTypeHelperImpl = FileMimeTypeHelperImpl(),
+                httpClient = instance(),
+                okHttpClient = instance(),
+            )
         }
 
-        bind<H5PTypePluginCommonJvm>() with scoped(EndpointScope.Default).singleton{
-            H5PTypePluginCommonJvm(Any(), context, di, DummyContentPluginUploader())
-        }
-        bind<VideoTypePluginJvm>() with scoped(EndpointScope.Default).singleton{
-            VideoTypePluginJvm(Any(), context, di, DummyContentPluginUploader())
-        }
-        bind<PDFTypePlugin>() with scoped(EndpointScope.Default).singleton{
-            PDFTypePluginJvm(Any(), context, di, DummyContentPluginUploader())
-        }
-        bind<ApacheIndexerPlugin>() with scoped(EndpointScope.Default).singleton{
-            ApacheIndexerPlugin(Any(), context, di)
-        }
-
-        bind<ContentPluginManager>() with scoped(EndpointScope.Default).singleton {
-            ContentPluginManager(listOf(
-                    di.on(context).direct.instance<EpubTypePluginCommonJvm>(),
-                    di.on(context).direct.instance<XapiTypePluginCommonJvm>(),
-                    di.on(context).direct.instance<H5PTypePluginCommonJvm>(),
-                    di.on(context).direct.instance<VideoTypePluginJvm>(),
-                    di.on(context).direct.instance<PDFTypePlugin>(),
-                    di.on(context).direct.instance<ApacheIndexerPlugin>()))
-        }
-
-        bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(EndpointScope.Default).singleton {
-            val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
-            val doorNode = instance<NodeIdAndAuth>()
-            db.asRepository(repositoryConfig(Any(), "http://localhost/",
-                doorNode.nodeId, doorNode.auth, instance(), instance()) {
-                useReplicationSubscription = false
-            }).also { repo ->
-                runBlocking { repo.preload() }
-                repo.ktorInitRepo(di)
-            }
-        }
 
         bind<Scheduler>() with singleton {
             val dbProperties = environment.config.databasePropertiesFromSection("quartz",
-                "jdbc:sqlite:data/quartz.sqlite?journal_mode=WAL&synchronous=OFF&busy_timeout=30000")
+                "jdbc:sqlite:(datadir)/quartz.sqlite?journal_mode=WAL&synchronous=OFF&busy_timeout=30000")
+            dbProperties.setProperty("url", dbProperties.getProperty("url").replaceDbUrlVars())
+
             InitialContext().apply {
                 bindDataSourceIfNotExisting("quartzds", dbProperties)
                 initQuartzDb("java:/comp/env/jdbc/quartzds")
@@ -246,42 +364,132 @@ fun Application.umRestApplication(
             }
         }
 
-        bind<ConnectivityLiveData>() with scoped(EndpointScope.Default).singleton {
-            val db: UmAppDatabase = on(context).instance(tag = DoorTag.TAG_DB)
-            ConnectivityLiveData(db.connectivityStatusDao.statusLive())
-        }
-
-
-
         bind<UploadSessionManager>() with scoped(EndpointScope.Default).singleton {
             UploadSessionManager(context, di)
         }
 
-        bind<ContentJobManager>() with singleton {
-            ContentJobManagerJvm(di)
-        }
-
         bind<Json>() with singleton {
-            Json { encodeDefaults = true }
+            json
         }
 
-        bind<File>(tag = DiTag.TAG_FILE_FFMPEG) with singleton {
-            //The availability of ffmpeg is checked on startup
-            SysPathUtil.findCommandInPath("ffmpeg",
-                manuallySpecifiedLocation = appConfig.commandFileProperty("ffmpeg"))!!
+        bind<FFmpeg>() with provider {
+            FFmpeg(ffmpegFile.absolutePath)
         }
 
-        bind<File>(tag = DiTag.TAG_FILE_FFPROBE) with singleton {
-            //The availability of ffmpeg is checked on startup
-            SysPathUtil.findCommandInPath("ffprobe",
-                manuallySpecifiedLocation = appConfig.commandFileProperty("ffprobe"))!!
+        bind<FFprobe>() with provider {
+            FFprobe(ffprobeFile.absolutePath)
+        }
+
+        bind<File>(tag = DiTag.TAG_TMP_DIR) with singleton {
+            File(dataDirPath, "tmp")
         }
 
         bind<File>(tag = DiTag.TAG_FILE_UPLOAD_TMP_DIR) with scoped(EndpointScope.Default).singleton {
-            File(instance<File>(tag = TAG_CONTEXT_DATA_ROOT), UPLOAD_TMP_SUBDIR).also {
+            val mainTmpDir = instance<File>(tag = DiTag.TAG_TMP_DIR)
+
+            File(mainTmpDir, UPLOAD_TMP_SUBDIR).also {
                 if(!it.exists())
                     it.mkdirs()
             }
+        }
+
+        bind<ContentEntryGetMetadataServerUseCase>() with scoped(EndpointScope.Default).singleton {
+            val uploadDir: File = instance(DiTag.TAG_FILE_UPLOAD_TMP_DIR)
+            ContentEntryGetMetadataServerUseCase(
+                uploadDir = uploadDir,
+                importersManager = on(context).instance(),
+                json = instance()
+            )
+        }
+
+        bind<BlobUploadServerUseCase>() with scoped(EndpointScope.Default).singleton {
+            BlobUploadServerUseCase(
+                httpCache = instance(),
+                tmpDir = Path(
+                    File(instance<File>(tag = DiTag.TAG_TMP_DIR), "blob-uploads-tmp").absolutePath.toString()
+                ),
+                json = instance(),
+                saveLocalUrisAsBlobsUseCase = instance(),
+            )
+        }
+
+        bind<ImportContentEntryUseCase>() with scoped(EndpointScope.Default).singleton {
+            ImportContentEntryUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                importersManager = instance(),
+            )
+        }
+
+        bind<SaveLocalUrisAsBlobsUseCase>() with scoped(EndpointScope.Default).singleton {
+            val rootTmpDir: File = instance(tag = DiTag.TAG_TMP_DIR)
+            SaveLocalUrisAsBlobsUseCaseJvm(
+                endpoint = context,
+                cache = instance(),
+                uriHelper = instance(),
+                tmpDir = Path(
+                    File(rootTmpDir, "save-local-uris").absolutePath.toString()
+                ),
+                deleteUrisUseCase = instance()
+            )
+        }
+
+        bind<SaveLocalUriAsBlobAndManifestUseCase>() with scoped(EndpointScope.Default).singleton {
+            SaveLocalUriAsBlobAndManifestUseCaseJvm(
+                saveLocalUrisAsBlobsUseCase = instance(),
+                mimeTypeHelper = FileMimeTypeHelperImpl(),
+            )
+        }
+
+        bind<ContentEntryVersionServerUseCase>() with scoped(EndpointScope.Default).singleton {
+            ContentEntryVersionServerUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = null,
+                okHttpClient = instance(),
+                json = instance(),
+                onlyIfCached = true,
+            )
+        }
+
+        bind<IsTempFileCheckerUseCase>() with singleton {
+            IsTempFileCheckerUseCaseJvm(
+                tmpRootDir = instance<File>(tag = DiTag.TAG_TMP_DIR)
+            )
+        }
+
+        bind<DeleteUrisUseCase>() with singleton {
+            DeleteUrisUseCaseCommonJvm(
+                isTempFileCheckerUseCase = instance()
+            )
+        }
+
+        bind<SetPasswordUseCase>() with scoped(EndpointScope.Default).singleton {
+            SetPasswordUseCaseCommonJvm(
+                authManager = instance()
+            )
+        }
+
+        bind<SetPasswordServerUseCase>() with scoped(EndpointScope.Default).singleton {
+            SetPasswordServerUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                setPasswordUseCase = instance(),
+                nodeIdAndAuthCache = instance(),
+            )
+        }
+
+        bind<GetStoragePathForUrlUseCase>() with scoped(EndpointScope.Default).singleton {
+            GetStoragePathForUrlUseCaseCommonJvm(
+                httpClient = instance(),
+                cache = instance()
+            )
+        }
+
+        bind<EnqueueContentEntryImportUseCase>() with scoped(EndpointScope.Default).provider {
+            EnqueueImportContentEntryUseCaseJvm(
+                db = instance(tag = DoorTag.TAG_DB),
+                scheduler = instance(),
+                endpoint = context,
+                enqueueRemoteImport = null
+            )
         }
 
         try {
@@ -301,7 +509,8 @@ fun Application.umRestApplication(
                     override fun getPasswordAuthentication(): PasswordAuthentication {
                         return PasswordAuthentication(
                             appConfig.property("mail.user").getString(),
-                            appConfig.property("mail.auth").getString())
+                            appConfig.property("mail.auth").getString()
+                        )
                     }
                 }
             }
@@ -310,7 +519,7 @@ fun Application.umRestApplication(
         }
 
         registerContextTranslator { call: ApplicationCall ->
-            appConfig.dbModeToEndpoint(call, dbMode)
+            call.callEndpoint
         }
 
         onReady {
@@ -352,6 +561,14 @@ fun Application.umRestApplication(
                 }
             }
 
+            //If the request is not using the correct url as per system config, reject it and finish
+            if(!context.urlMatchesConfig()) {
+                call.respondRequestUrlNotMatchingSiteConfUrl()
+                return@intercept finish()
+            }
+
+            //If the request is not matching any API route, then use the reverse proxy to send the
+            // request to the javascript development server.
             if(!KTOR_SERVER_ROUTES.any { requestUri.startsWith(it) }) {
                 call.respondReverseProxy(jsDevServer)
                 return@intercept finish()
@@ -364,18 +581,63 @@ fun Application.umRestApplication(
      * in UstadAppReactProxy
      */
     install(Routing) {
-        ContainerDownload()
+        addHostCheckIntercept()
         personAuthRegisterRoute()
-        ContainerMountRoute()
-        ContainerUploadRoute2()
         route("UmAppDatabase") {
-            UmAppDatabase_KtorRoute()
+            UmAppDatabase_KtorRoute(DoorHttpServerConfig(json = json)) { call ->
+                val di: DI by call.closestDI()
+                di.on(call).direct.instance(tag = DoorTag.TAG_DB)
+            }
         }
         SiteRoute()
-        ContentEntryLinkImporter()
-        ContentUploadRoute()
 
         GetAppRoute()
+
+        route("api") {
+            val di: DI by closestDI()
+
+            route("account"){
+                SetPasswordRoute(
+                    useCase = { call ->
+                        di.on(call).direct.instance()
+                    }
+                )
+            }
+
+            route("pbkdf2"){
+                Pbkdf2Route()
+            }
+
+            route("contentupload") {
+                ContentUploadRoute()
+            }
+
+            route("import") {
+                ContentEntryImportRoute()
+            }
+
+            route("blob") {
+                BlobUploadServerRoute(
+                    useCase = { call ->
+                        di.on(call).direct.instance()
+                    }
+                )
+
+                CacheRoute(
+                    cache = di.direct.instance()
+                )
+            }
+
+            route("content") {
+                ContentEntryVersionRoute(
+                    useCase = { call -> di.on(call).direct.instance() }
+                )
+            }
+
+            CacheRoute(
+                cache = di.direct.instance()
+            )
+        }
 
         static("umapp") {
             resources("umapp")
@@ -395,5 +657,31 @@ fun Application.umRestApplication(
             }
         }
     }
+
+    //Tell anyone looking that the server is up/running and where to find logs
+    // As per logback.xml
+    val logDir = System.getProperty("logs_dir") ?: "./log/"
+    val printableServerUrl = if(dbMode == CONF_DBMODE_VIRTUALHOST) {
+        "*:${appConfig.port}"
+    }else {
+        appConfig.siteUrl()
+    }
+
+    println("Ustad server is running on $printableServerUrl . Logging to $logDir .")
+    println()
+    println("You can connect the Android client to this address as per README.md .")
+    println()
+    if(jsDevServer != null) {
+        println("Javascript development mode is enabled. If you want to use the web client in a browser, you must run: ")
+        println("./gradlew app-react:jsRun")
+        println("Then open $printableServerUrl in your browser. See app-react/README.md for more details.")
+    }else if(this::class.java.getResource("/umapp/index.html") != null) {
+        println(" This build includes the web client, you can access it by opening $printableServerUrl in your browser.")
+    }else {
+        println(" This build does not include the web client and Javascript dev mode is not enabled.")
+        println(" If you want to use the web client in a browser, please see app-react/README.md .")
+    }
+    println()
+    println("Use [Ctrl+C] to stop.")
 }
 

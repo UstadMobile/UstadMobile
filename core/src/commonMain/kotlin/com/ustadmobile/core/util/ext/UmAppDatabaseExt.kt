@@ -1,22 +1,15 @@
 package com.ustadmobile.core.util.ext
 
-import com.soywiz.klock.DateTime
-import com.ustadmobile.core.account.Pbkdf2Params
-import com.ustadmobile.core.controller.ReportFilterEditPresenter.Companion.genderMap
+import app.cash.paging.PagingSource
 import com.ustadmobile.core.controller.TerminologyKeys
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.findEntriesByMd5SumsSafeAsync
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.schedule.localEndOfDay
-import com.ustadmobile.core.schedule.localMidnight
-import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.util.graph.LabelValueFormatter
 import com.ustadmobile.core.util.graph.MessageIdFormatter
 import com.ustadmobile.core.util.graph.TimeFormatter
 import com.ustadmobile.core.util.graph.UidAndLabelFormatter
-import com.ustadmobile.door.paging.DataSourceFactory
-import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.door.SimpleDoorQuery
 import com.ustadmobile.door.ext.dbType
@@ -28,6 +21,10 @@ import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_NO_DELETE
 import com.ustadmobile.lib.util.randomString
 import kotlinx.coroutines.delay
 import com.ustadmobile.core.db.dao.getResults
+import com.ustadmobile.lib.db.composites.PersonAndClazzMemberListDetails
+import io.ktor.client.*
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 
 /**
  * Insert a new class and
@@ -37,7 +34,6 @@ suspend fun UmAppDatabase.createNewClazzAndGroups(
     clazz: Clazz,
     impl: UstadMobileSystemImpl,
     termMap: Map<String, String>,
-    context: Any
 ) {
     clazz.clazzTeachersPersonGroupUid = personGroupDao.insertAsync(
             PersonGroup("${clazz.clazzName} - " + termMap[TerminologyKeys.TEACHER_KEY]))
@@ -46,13 +42,16 @@ suspend fun UmAppDatabase.createNewClazzAndGroups(
             termMap[TerminologyKeys.STUDENTS_KEY]))
 
     clazz.clazzPendingStudentsPersonGroupUid = personGroupDao.insertAsync(PersonGroup("${clazz.clazzName} - " +
-            impl.getString(MessageID.pending_requests, context)))
+            impl.getString(MR.strings.pending_requests)))
 
     clazz.clazzParentsPersonGroupUid = personGroupDao.insertAsync(PersonGroup("${clazz.clazzName} - " +
-            impl.getString(MessageID.parent, context)))
+            impl.getString(MR.strings.parent)))
 
     clazz.takeIf { it.clazzCode == null }?.clazzCode = randomString(Clazz.CLAZZ_CODE_DEFAULT_LENGTH)
 
+    val generatedUid = clazzDao.insertAsync(clazz)
+    if(clazz.clazzUid != 0L)
+        clazz.clazzUid = generatedUid
 
     //Make the default ScopedGrants
     scopedGrantDao.insertListAsync(listOf(ScopedGrant().apply {
@@ -76,7 +75,6 @@ suspend fun UmAppDatabase.createNewClazzAndGroups(
     }))
 
 
-    clazz.clazzUid = clazzDao.insertAsync(clazz)
 }
 
 
@@ -88,9 +86,12 @@ suspend fun UmAppDatabase.createNewClazzAndGroups(
  * @throws IllegalStateException when the person is already in the class
  */
 @Throws(AlreadyEnroledInClassException::class)
-suspend fun UmAppDatabase.enrolPersonIntoClazzAtLocalTimezone(personToEnrol: Person, clazzUid: Long,
-                                                              role: Int,
-                                                              clazzWithSchool: ClazzWithSchool? = null): ClazzEnrolment {
+suspend fun UmAppDatabase.enrolPersonIntoClazzAtLocalTimezone(
+    personToEnrol: Person,
+    clazzUid: Long,
+    role: Int,
+    clazzWithSchool: ClazzWithSchool? = null
+): ClazzEnrolment {
     val clazzWithSchoolVal = clazzWithSchool ?: clazzDao.getClazzWithSchool(clazzUid)
         ?: throw IllegalArgumentException("Class does not exist")
 
@@ -102,7 +103,8 @@ suspend fun UmAppDatabase.enrolPersonIntoClazzAtLocalTimezone(personToEnrol: Per
     }
 
     val clazzTimeZone = clazzWithSchoolVal.effectiveTimeZone()
-    val joinTime = DateTime.now().toOffsetByTimezone(clazzTimeZone).localMidnight.utc.unixMillisLong
+    val joinTime = Clock.System.now().toLocalMidnight(clazzTimeZone).toEpochMilliseconds()
+
     val clazzEnrolment = ClazzEnrolment().apply {
         clazzEnrolmentPersonUid = personToEnrol.personUid
         clazzEnrolmentClazzUid = clazzUid
@@ -128,11 +130,12 @@ suspend fun UmAppDatabase.processEnrolmentIntoClass(
         ?: throw IllegalArgumentException("processEnrolmentIntoClass: Class does not exist")
     val clazzTimeZone = clazzWithSchoolVal.effectiveTimeZone()
 
-    enrolment.clazzEnrolmentDateJoined = DateTime(enrolment.clazzEnrolmentDateJoined)
-        .toOffsetByTimezone(clazzTimeZone).localMidnight.utc.unixMillisLong
+    enrolment.clazzEnrolmentDateJoined = Instant.fromEpochMilliseconds(enrolment.clazzEnrolmentDateJoined)
+        .toLocalMidnight(clazzTimeZone).toEpochMilliseconds()
+
     if(enrolment.clazzEnrolmentDateLeft != Long.MAX_VALUE){
-        enrolment.clazzEnrolmentDateLeft = DateTime(enrolment.clazzEnrolmentDateLeft)
-            .toOffsetByTimezone(clazzTimeZone).localEndOfDay.utc.unixMillisLong
+        enrolment.clazzEnrolmentDateLeft = Instant.fromEpochMilliseconds(enrolment.clazzEnrolmentDateLeft)
+            .toLocalEndOfDay(clazzTimeZone).toEpochMilliseconds()
     }
 
     enrolment.clazzEnrolmentUid = clazzEnrolmentDao.insertAsync(enrolment)
@@ -197,7 +200,7 @@ suspend fun UmAppDatabase.enrolPersonIntoSchoolAtLocalTimezone(personToEnrol: Pe
         throw AlreadyEnroledInSchoolException(existingEnrolment.first())
 
     val schoolTimeZone = schoolVal.schoolTimeZone?: "UTC"
-    val joinTime = DateTime.now().toOffsetByTimezone(schoolTimeZone).localMidnight.utc.unixMillisLong
+    val joinTime = Clock.System.now().toLocalMidnight(schoolTimeZone).toEpochMilliseconds()
     val schoolMember = SchoolMemberWithPerson().apply {
         schoolMemberPersonUid = personToEnrol.personUid
         schoolMemberSchoolUid = schoolUid
@@ -225,12 +228,12 @@ suspend fun UmAppDatabase.enrolPersonIntoSchoolAtLocalTimezone(personToEnrol: Pe
     return schoolMember
 }
 
-suspend fun UmAppDatabase.approvePendingClazzEnrolment(enrolment: PersonWithClazzEnrolmentDetails, clazzUid: Long) {
+suspend fun UmAppDatabase.approvePendingClazzEnrolment(enrolment: PersonAndClazzMemberListDetails, clazzUid: Long) {
     val effectiveClazz = clazzDao.findByUidAsync(clazzUid)
         ?: throw IllegalStateException("Class does not exist")
 
     //find the group member and update that
-    val numGroupUpdates = personGroupMemberDao.moveGroupAsync(enrolment.personUid,
+    val numGroupUpdates = personGroupMemberDao.moveGroupAsync(enrolment.person?.personUid ?: 0,
         effectiveClazz.clazzStudentsPersonGroupUid,
         effectiveClazz.clazzPendingStudentsPersonGroupUid, systemTimeInMillis())
 
@@ -239,7 +242,7 @@ suspend fun UmAppDatabase.approvePendingClazzEnrolment(enrolment: PersonWithClaz
     }
 
     //change the role
-    val enrolmentUpdateCount = clazzEnrolmentDao.updateClazzEnrolmentRole(enrolment.personUid, clazzUid,
+    val enrolmentUpdateCount = clazzEnrolmentDao.updateClazzEnrolmentRole(enrolment.person?.personUid ?: 0, clazzUid,
         newRole = ClazzEnrolment.ROLE_STUDENT, oldRole = ClazzEnrolment.ROLE_STUDENT_PENDING,
         systemTimeInMillis())
     if(enrolmentUpdateCount != 1) {
@@ -247,14 +250,14 @@ suspend fun UmAppDatabase.approvePendingClazzEnrolment(enrolment: PersonWithClaz
     }
 }
 
-suspend fun UmAppDatabase.declinePendingClazzEnrolment(enrolment: PersonWithClazzEnrolmentDetails, clazzUid: Long){
+suspend fun UmAppDatabase.declinePendingClazzEnrolment(enrolment: PersonAndClazzMemberListDetails, clazzUid: Long){
     val effectiveClazz = clazzDao.findByUidAsync(clazzUid)
         ?: throw IllegalStateException("Class does not exist")
 
-        clazzEnrolmentDao.updateClazzEnrolmentActiveForPersonAndClazz(enrolment.personUid,
+        clazzEnrolmentDao.updateClazzEnrolmentActiveForPersonAndClazz(enrolment.person?.personUid ?: 0,
             clazzUid, ClazzEnrolment.ROLE_STUDENT_PENDING, false, systemTimeInMillis())
 
-        personGroupMemberDao.updateGroupMemberActive(false, enrolment.personUid,
+        personGroupMemberDao.updateGroupMemberActive(false, enrolment.person?.personUid ?: 0,
             effectiveClazz.clazzPendingStudentsPersonGroupUid, systemTimeInMillis())
 
 }
@@ -330,8 +333,12 @@ fun UmAppDatabase.insertPersonOnlyAndGroup(entity: Person): Person{
 
 }
 
-suspend fun UmAppDatabase.generateChartData(report: ReportWithSeriesWithFilters,
-                                            context: Any, impl: UstadMobileSystemImpl, loggedInPersonUid: Long): ChartData{
+suspend fun UmAppDatabase.generateChartData(
+    report: ReportWithSeriesWithFilters,
+    context: Any,
+    impl: UstadMobileSystemImpl,
+    loggedInPersonUid: Long
+): ChartData{
 
     val queries = report.generateSql(loggedInPersonUid, dbType())
     val seriesDataList = mutableListOf<SeriesData>()
@@ -357,11 +364,12 @@ suspend fun UmAppDatabase.generateChartData(report: ReportWithSeriesWithFilters,
                         .map { it.uid to it.labelName }.toMap()
                 UidAndLabelFormatter(clazzLabelList)
             }
-            Report.GENDER -> {
-                MessageIdFormatter(
-                        genderMap.mapKeys { it.key.toString() },
-                        impl, context)
-            }
+//must be handled when reports are brought back
+//            Report.GENDER -> {
+//                MessageIdFormatter(
+//                        genderMap.mapKeys { it.key.toString() },
+//                        impl, context)
+//            }
             Report.CONTENT_ENTRY ->{
                 val listOfUids = reportList.mapNotNull { it.subgroup?.toLong() }.toSet().toList()
                 val entryLabelList = contentEntryDao.getContentEntryFromUids(listOfUids)
@@ -392,11 +400,12 @@ suspend fun UmAppDatabase.generateChartData(report: ReportWithSeriesWithFilters,
                     .map { it.toLong() }).map { it.uid to it.labelName }.toMap()
             UidAndLabelFormatter(clazzLabelList)
         }
-        Report.GENDER -> {
-            MessageIdFormatter(
-                    genderMap.mapKeys { it.key.toString() },
-                    impl, context)
-        }
+//Must be handled when reporting is brought back
+//        Report.GENDER -> {
+//            MessageIdFormatter(
+//                    genderMap.mapKeys { it.key.toString() },
+//                    impl, context)
+//        }
         Report.CONTENT_ENTRY ->{
             val entryLabelList = contentEntryDao.getContentEntryFromUids(xAxisList
                     .map { it.toLong() }).map { it.uid to it.labelName }.toMap()
@@ -409,7 +418,7 @@ suspend fun UmAppDatabase.generateChartData(report: ReportWithSeriesWithFilters,
         Report.ENROLMENT_LEAVING_REASON -> {
             val reasonLabelList = leavingReasonDao.getReasonsFromUids(xAxisList
                     .map { it.toLong() }).map { it.uid to it.labelName }.toMap()
-                    .plus(0L to impl.getString(MessageID.unset, context))
+                    .plus(0L to impl.getString(MR.strings.unset))
             UidAndLabelFormatter(reasonLabelList)
         }
         else ->{
@@ -421,10 +430,10 @@ suspend fun UmAppDatabase.generateChartData(report: ReportWithSeriesWithFilters,
 }
 
 fun UmAppDatabase.generateStatementList(report: ReportWithSeriesWithFilters, loggedInPersonUid: Long):
-        List<DataSourceFactory<Int, StatementEntityWithDisplayDetails>> {
+        List<PagingSource<Int, StatementEntityWithDisplayDetails>> {
 
     val queries = report.generateSql(loggedInPersonUid, dbType())
-    val statementDataSourceList = mutableListOf<DataSourceFactory<Int, StatementEntityWithDisplayDetails>>()
+    val statementDataSourceList = mutableListOf<PagingSource<Int, StatementEntityWithDisplayDetails>>()
     queries.forEach {
         statementDataSourceList.add(statementDao.getListResults(SimpleDoorQuery(it.value.sqlListStr, it.value.queryParams)))
     }
@@ -452,15 +461,15 @@ suspend fun UmAppDatabase.createNewSchoolAndGroups(
 ) :Long {
     school.schoolTeachersPersonGroupUid = personGroupDao.insertAsync(
             PersonGroup("${school.schoolName} - " +
-                    impl.getString(MessageID.teachers_literal, context)))
+                    impl.getString(MR.strings.teachers_literal)))
 
     school.schoolStudentsPersonGroupUid = personGroupDao.insertAsync(PersonGroup(
             "${school.schoolName} - " +
-            impl.getString(MessageID.students, context)))
+            impl.getString(MR.strings.students)))
 
     school.schoolPendingStudentsPersonGroupUid = personGroupDao.insertAsync(PersonGroup(
             "${school.schoolName} - " +
-            impl.getString(MessageID.pending_requests, context)))
+            impl.getString(MR.strings.pending_requests)))
 
 
     school.takeIf { it.schoolCode == null }?.schoolCode = randomString(Clazz.CLAZZ_CODE_DEFAULT_LENGTH)
@@ -605,27 +614,6 @@ suspend fun UmAppDatabase.grantScopedPermission(toGroupUid: Long, permissions: L
 suspend fun UmAppDatabase.grantScopedPermission(toPerson: Person, permissions: Long,
                                                 scopeTableId: Int, scopeEntityUid: Long): ScopedGrantResult {
     return grantScopedPermission(toPerson.personGroupUid, permissions, scopeTableId, scopeEntityUid)
-}
-
-/**
- * Insert authentication credentials for the given person uid with the given password. This is fine
- * to use in tests etc, but for performance it is better to use AuthManager.setAuth
- */
-suspend fun UmAppDatabase.insertPersonAuthCredentials2(
-    personUid: Long,
-    password: String,
-    pbkdf2Params: Pbkdf2Params
-) {
-    val db = (this as? DoorDatabaseRepository)?.db as? UmAppDatabase ?: this
-    db.withDoorTransactionAsync {
-        val authSalt = db.siteDao.getSiteAuthSaltAsync()
-            ?: throw IllegalStateException("insertAuthCredentials: No auth salt!")
-        db.personAuth2Dao.insertAsync(PersonAuth2().apply {
-            pauthUid = personUid
-            pauthMechanism = PersonAuth2.AUTH_MECH_PBKDF2_DOUBLE
-            pauthAuth = password.doublePbkdf2Hash(authSalt, pbkdf2Params).encodeBase64()
-        })
-    }
 }
 
 /**

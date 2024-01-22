@@ -9,8 +9,10 @@ import kotlinx.serialization.Serializable
 
 @Entity
 @Serializable
-@ReplicateEntity(tableId = TABLE_ID , tracker = ChatMemberReplicate::class,
-    priority = ReplicateEntity.HIGHEST_PRIORITY )
+@ReplicateEntity(
+    tableId = TABLE_ID,
+    remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW
+)
 @Triggers(arrayOf(
     Trigger(
         name = "chatmember_remote_insert",
@@ -18,20 +20,7 @@ import kotlinx.serialization.Serializable
         on = Trigger.On.RECEIVEVIEW,
         events = [Trigger.Event.INSERT],
         sqlStatements = [
-            """
-                REPLACE INTO ChatMember(chatMemberUid, chatMemberChatUid, chatMemberPersonUid, 
-                chatMemberJoinedDate, chatMemberLeftDate, chatMemberLct)
-                VALUES(NEW.chatMemberUid, NEW.chatMemberChatUid, NEW.chatMemberPersonUid, 
-                NEW.chatMemberJoinedDate, NEW.chatMemberLeftDate, NEW.chatMemberLct)
-                /*psql ON CONFLICT (chatMemberUid) DO UPDATE 
-                SET chatMemberChatUid = EXCLUDED.chatMemberChatUid, 
-                chatMemberPersonUid = EXCLUDED.chatMemberPersonUid,
-                chatMemberJoinedDate = EXCLUDED.chatMemberJoinedDate, 
-                chatMemberLeftDate = EXCLUDED.chatMemberLeftDate, 
-                chatMemberLct = EXCLUDED.chatMemberLct
-                
-                */
-            """
+            TRIGGER_UPSERT_WHERE_NEWER
         ]
     )
 ))
@@ -48,8 +37,8 @@ class ChatMember() {
 
     var chatMemberLeftDate: Long = Long.MAX_VALUE
 
-    @LastChangedTime
-    @ReplicationVersionId
+    @ReplicateLastModified
+    @ReplicateEtag
     var chatMemberLct: Long = 0
 
 

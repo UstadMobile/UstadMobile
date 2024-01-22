@@ -1,14 +1,11 @@
 package com.ustadmobile.core.impl
 
-import com.ustadmobile.core.generated.locale.MessageIdMap
-import com.ustadmobile.core.impl.locale.StringsXml
-import com.ustadmobile.core.impl.nav.UstadNavController
-import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
-import com.ustadmobile.xmlpullparserkmp.setInputString
-import kotlinx.browser.localStorage
-import kotlinx.browser.window
+import com.russhwolf.settings.Settings
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import kotlin.js.Date
 import com.ustadmobile.door.DoorUri
+import dev.icerock.moko.resources.StringResource
+import dev.icerock.moko.resources.provider.JsStringProvider
 import kotlinx.browser.document
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -20,67 +17,27 @@ import org.w3c.dom.HTMLAnchorElement
  *
  *
  * @author mike, kileha3
- * @param defaultStringsXmlStr The string of the strings_ui.xml file for English (must be loaded
- *        (asynchronously in advance)
- * @param displayLocaleStringsXmlStr The String of the strings_ui.xml file for the display locale
- *        if the display locale is not English.
+ * @param jsStringProvider Moko resources JsStringProvider
  */
 actual open class UstadMobileSystemImpl(
-    private val xppFactory: XmlPullParserFactory,
-    private val navController: UstadNavController,
-    defaultStringsXmlStr: String,
-    displayLocaleStringsXmlStr: String?
-): UstadMobileSystemCommon() {
+    settings: Settings,
+    langConfig: SupportedLanguagesConfig,
+    private val jsStringProvider: JsStringProvider,
+): UstadMobileSystemCommon(settings, langConfig) {
 
-    private val messageIdMapFlipped: Map<String, Int> by lazy {
-        MessageIdMap.idMap.entries.associate { (k, v) -> v to k }
+    override fun getString(stringResource: StringResource): String {
+        return stringResource.localized(
+            provider = jsStringProvider,
+            locale = langConfig.displayedLocale
+        )
     }
 
-    private val defaultStringsXml: StringsXml
-
-    private val displayLocaleStringsXml: StringsXml?
-
-    init {
-        val defaultXpp = xppFactory.newPullParser()
-        defaultXpp.setInputString(defaultStringsXmlStr)
-        defaultStringsXml = StringsXml(defaultXpp, xppFactory, messageIdMapFlipped, "en")
-
-        displayLocaleStringsXml = if(displayLocaleStringsXmlStr != null) {
-            val foreignXpp = xppFactory.newPullParser()
-            foreignXpp.setInputString(displayLocaleStringsXmlStr)
-            StringsXml(foreignXpp, xppFactory, messageIdMapFlipped,
-                displayedLocale, defaultStringsXml)
-        }else {
-            null
-        }
-    }
-
-    /**
-     * Get a string for use in the UI
-     */
-    actual override fun getString(messageCode: Int, context: Any): String {
-        return (displayLocaleStringsXml ?: defaultStringsXml)[messageCode]
-    }
-
-
-    /**
-     * Must provide the system's default locale (e.g. en_US.UTF-8)
-     *
-     * @return System locale
-     */
-    actual override fun getSystemLocale(context: Any): String {
-        return systemLocale
-    }
-
-    /**
-     * Get a preference for the app
-     *
-     * @param key preference key as a string
-     * @return value of that preference
-     */
-
-    actual override fun getAppPref(key: String, context: Any): String? {
-        return localStorage.getItem(key)
+    override fun formatString(stringResource: StringResource, vararg args: Any): String {
+        return stringResource.localized(
+            provider = jsStringProvider,
+            locale = langConfig.displayedLocale,
+            args = args
+        )
     }
 
     /**
@@ -91,19 +48,6 @@ actual open class UstadMobileSystemImpl(
      */
     actual override suspend fun getAppSetupFile(context: Any, zip: Boolean): String {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    /**
-     * Set a preference for the app
-     * @param key preference that is being set
-     * @param value value to be set
-     */
-    actual override fun setAppPref(key: String, value: String?, context: Any) {
-        if(value == null){
-            localStorage.removeItem(key)
-        }else{
-            localStorage.setItem(key, value)
-        }
     }
 
     /**
@@ -123,22 +67,6 @@ actual open class UstadMobileSystemImpl(
      * @return Build timestamp in ms since epoch
      */
     actual fun getBuildTimestamp(context: Any): Long = Date().getTime().toLong()
-
-    /**
-     * Lookup a value from the app runtime configuration. These come from a properties file loaded
-     * from the assets folder, the path of which is set by the manifest preference
-     * com.sutadmobile.core.appconfig .
-     *
-     * @param key The config key to lookup
-     * @param defaultVal The default value to return if the key is not found
-     * @param context Systme context object
-     *
-     * @return The value of the key if found, if not, the default value provided
-     */
-    actual override fun getAppConfigString(key: String, defaultVal: String?, context: Any): String? {
-        val value =  localStorage.getItem(key)
-        return  value ?: defaultVal
-    }
 
 
     override fun openFileInDefaultViewer(
@@ -170,47 +98,11 @@ actual open class UstadMobileSystemImpl(
     actual override fun go(viewName: String, args: Map<String, String?>, context: Any,
                            flags: Int,
                            ustadGoOptions: UstadGoOptions) {
-        navController.navigate(viewName,args as Map<String, String>,ustadGoOptions)
+        throw IllegalStateException("Not supported on JS anymore!")
     }
 
-    actual fun popBack(popUpToViewName: String, popUpInclusive: Boolean, context: Any) {
-        navController.popBackStack(popUpToViewName,popUpInclusive)
-    }
-
-    /**
-     * Open the given link in a browser and/or tab depending on the platform
-     */
-    actual override fun openLinkInBrowser(url: String, context: Any) {
-        window.open(url, "_blank")
-    }
-
-
-
-    /**
-     * Provide language UI directionality
-     * @return TRUE if the UI direction is RTL otherwise it's FALSE
-     */
-    fun isRtlActive(): Boolean {
-        return displayedLocale in UstadMobileConstants.RTL_LANGUAGES
-    }
 
     actual companion object {
 
-        /**
-         * Locale functions are provided here because Javascript needs to load resource XML files
-         * asynchronously before SystemImpl is instantiated.
-         */
-        private val systemLocale: String
-            get() = "${window.navigator.language}.UTF-8"
-
-        val displayedLocale: String
-            get() {
-                val localePref = localStorage.getItem(PREFKEY_LOCALE) ?: LOCALE_USE_SYSTEM
-                return if(localePref == LOCALE_USE_SYSTEM) {
-                    systemLocale.substring(0, 2)
-                }else {
-                    localePref
-                }
-            }
     }
 }

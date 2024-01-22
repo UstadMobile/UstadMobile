@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<com.google.android.material.button.MaterialButtonToggleGroup
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/toggleButton"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <Button
+        android:id="@+id/present_button"
+        android:contentDescription="@string/present"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:icon="@drawable/ic_done_white_24dp"
+        style="@style/Widget.App.Button.OutlinedButton.IconOnly" />
+
+    <Button
+        android:id="@+id/absent_button"
+        android:contentDescription="@string/absent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:icon="@drawable/ic_close_black_24dp"
+        style="@style/Widget.App.Button.OutlinedButton.IconOnly" />
+
+    <Button
+        android:id="@+id/late_button"
+        android:contentDescription="@string/partial"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:icon="@drawable/ic_delay"
+        style="@style/Widget.App.Button.OutlinedButton.IconOnly" />
+</com.google.android.material.button.MaterialButtonToggleGroup>

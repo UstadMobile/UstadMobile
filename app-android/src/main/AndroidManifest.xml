@@ -15,7 +15,6 @@
     Temporarily disabled until we introduce syncable attachments
     <uses-permission android:name="android.permission.CAMERA" />
     -->
-
     <!-- Required for peer-to-peer connecting using WiFi direct -->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
@@ -43,6 +42,16 @@
         android:required="false" />
 
     <!--
+    Aztec is used for HTML WYSIWYG editing. This is only be available on SDK24+. Html editing is
+    disabled for earlier Android versions.
+
+    Multiplatform WebView requires SDK24+. We will need an expect/actual to handle this
+
+    Compose Video Player requires SDK 23. The VideoPlayer uses an if check for SDK version.
+    -->
+    <uses-sdk tools:overrideLibrary="org.wordpress.aztec,org.wordpress.android.util,com.multiplatform.webview,io.sanghun.compose.video"/>
+
+    <!--
     Required to find PanicKit responders.
     -->
     <queries>
@@ -57,11 +66,66 @@
     </queries>
 
     <application
-        android:supportsRtl="true"
+        android:name="com.ustadmobile.port.android.impl.UstadApp"
+        android:allowBackup="false"
+        android:icon="@drawable/ic_launcher_icon"
+        android:roundIcon="@drawable/ic_launcher_icon"
+        android:label="@string/app_name"
+        android:usesCleartextTraffic="true"
         android:theme="@style/UmTheme.App"
-        android:usesCleartextTraffic="true">
-        <activity android:name="com.ustadmobile.port.android.view.MainActivity"
+        android:supportsRtl="true"
+        tools:ignore="GoogleAppIndexingWarning"
+        android:fullBackupContent="@xml/backup_rules"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:localeConfig="@xml/locales_config"
+        >
+
+        <!--
+        The list of available UI languages as a comma separated list. See
+        com.ustadmobile.core.impl.config.SupportedLanguagesConfig
+
+        Uncomment if you to reduce the number of languages displayed.
+
+        <meta-data android:name="com.ustadmobile.uilanguages"
+            android:value="en,fa,ps,ar,tg,bn,ne,my"/>
+
+        -->
+
+        <!--
+        Preset locale setting: if present, this locale will be automatically set as the app locale
+        (regardless of the device default). This can be useful where a particular build is intended
+        for an area with one language, especially if that language is not supported as a locale by
+        most operating systems.
+
+        <meta-data android:name="com.ustadmobile.presetlocale" android:value="tg"/>
+        -->
+
+        <!--
+        The API url endpoint can be explicitly specified by uncommenting the metadata key here. If
+        it is not specified, the user will be prompted to enter the link.
+
+        <meta-data android:name="com.ustadmobile.apiurl"
+            android:value="https://myserver.domain.com/"/>
+        -->
+
+        <!--
+        When the app APK itself is shared locally (eg. using the share app menu which
+        triggers nearby share), then we can set the filename of the APK as the user sees it.
+        The name will be basename-version.apk.
+
+        If not set, then the basename will be "ustad"
+        <meta-data android:name="com.ustadmobile.shareappbasename"
+            android:value="ustad"/>
+
+        -->
+
+        <!--
+        The MainActivity containing Jetpack Compose UI
+        -->
+        <activity
+            android:name="com.ustadmobile.port.android.view.AppActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
+            android:windowSoftInputMode="adjustResize"
             android:exported="true"
             android:launchMode="singleTask">
 
@@ -78,18 +142,50 @@
                     android:scheme="https" />
                 <data android:host="*" android:pathPattern="/.*/umapp/.*"
                     android:scheme="https" />
-
             </intent-filter>
-
-
         </activity>
 
-        <!-- previously used: android:theme="@style/UmTheme.App.OnBoarding"  -->
+        <!--
+        Photopicker support for older versions as per
+        https://developer.android.com/training/data-storage/shared/photopicker
+        -->
+        <!-- Trigger Google Play services to install the backported photo picker module. -->
+        <service android:name="com.google.android.gms.metadata.ModuleDependencies"
+            android:enabled="false"
+            android:exported="false"
+            tools:ignore="MissingClass">
+            <intent-filter>
+                <action android:name="com.google.android.gms.metadata.MODULE_DEPENDENCIES" />
+            </intent-filter>
+            <meta-data android:name="photopicker_activity:0:required" android:value="" />
+        </service>
+
+
+        <!--
+        Service to hold locale config as per
+        https://developer.android.com/guide/topics/resources/app-languages#use-localeconfig
+        -->
+        <service
+            android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"
+            android:enabled="false"
+            android:exported="false">
+            <meta-data
+                android:name="autoStoreLocales"
+                android:value="true" />
+        </service>
+
+
         <activity
-            android:name="com.ustadmobile.port.android.view.OnBoardingActivity"
-            android:noHistory="true"
+            android:name="com.ustadmobile.port.android.view.SplashScreenActivity"
             android:exported="true"
-            />
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
+            android:noHistory="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -100,31 +196,6 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_provider_path" />
         </provider>
-
-        <activity
-            android:exported="false"
-            android:name="com.ustadmobile.port.android.view.EpubContentActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
-            android:label="" />
-
-        <activity
-            android:exported="true"
-            android:name="com.ustadmobile.port.android.view.AboutActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-
-        <activity
-            android:name="com.ustadmobile.port.android.view.SplashScreenActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
-            android:label="@string/app_name"
-            android:exported="true"
-            android:noHistory="true">
-
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-
-        </activity>
 
         <activity
             android:name="com.ustadmobile.port.android.authenticator.AuthenticatorActivity"

@@ -1,5 +1,6 @@
 package com.ustadmobile.core.util.ext
 
+import com.ustadmobile.core.entityconstants.ProgressConstants
 import com.ustadmobile.lib.db.entities.ContentEntryStatementScoreProgress
 import com.ustadmobile.lib.db.entities.StatementEntity.Companion.CONTENT_COMPLETE
 import com.ustadmobile.lib.db.entities.StatementEntity.Companion.CONTENT_FAILED
@@ -38,4 +39,19 @@ fun ContentEntryStatementScoreProgress.calculateScoreWithPenalty(): Int{
 
 fun ContentEntryStatementScoreProgress.calculateScoreWithWeight(): Int{
     return ((resultScaled / resultWeight) * (totalCompletedContent / totalContent.toFloat())).toInt()
+}
+
+fun ContentEntryStatementScoreProgress.progressBadge(): Int {
+
+    return if(success == RESULT_SUCCESS)
+        ProgressConstants.BADGE_CHECK
+
+    else if(success == RESULT_FAILURE)
+        ProgressConstants.BADGE_CROSS
+
+    else if(success == RESULT_UNSET && contentComplete)
+        ProgressConstants.BADGE_CHECK
+
+    else
+        ProgressConstants.BADGE_NONE
 }
