@@ -2,39 +2,13 @@
 
 package com.ustadmobile.lib.rest
 
-import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.ext.addSyncCallback
-import com.ustadmobile.core.io.ext.addEntriesToContainerFromZipResource
-import com.ustadmobile.door.DatabaseBuilder
-import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
-import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.door.entities.NodeIdAndAuth
-import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
-import com.ustadmobile.door.ext.toDoorUri
-import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.Container
-import io.ktor.server.application.install
 import io.ktor.client.HttpClient
-import io.ktor.serialization.gson.GsonConverter
-import io.ktor.serialization.gson.gson
-import io.ktor.http.ContentType
-import io.ktor.server.routing.Routing
 import io.ktor.server.engine.ApplicationEngine
-import io.ktor.server.engine.embeddedServer
-import io.ktor.server.netty.Netty
 import java.io.File
-import com.ustadmobile.port.sharedse.util.UmFileUtilSe
-import io.ktor.client.engine.okhttp.*
-import io.ktor.client.request.get
-import io.ktor.client.request.head
-import io.ktor.client.statement.HttpStatement
-import io.ktor.http.HttpHeaders
-import io.netty.handler.codec.http.HttpResponseStatus
-import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
-import org.junit.Assert
-import kotlin.random.Random
 
 /**
  * This test is BROKEN 16/Dec/2020
