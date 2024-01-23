@@ -4,12 +4,14 @@ env:
   TESTRESULTSDIR: "${TESTRESULTSDIR}/001_001_admin_can_add_content_001-h5p"
 ---
 - clearState: com.toughra.ustadmobile
-- runFlow:
-    file: "../common/startserver.yaml"
-    env:
-      CONTROLSERVER: ${CONTROLSERVER}
-      TESTSERIAL: ${TESTSERIAL}
-      TESTNAME: ${TESTNAME}
+#- runFlow:
+ #   file: "../common/startserver.yaml"
+  #  env:
+   #   CONTROLSERVER: ${CONTROLSERVER}
+    #  TESTSERIAL: ${TESTSERIAL}
+     # TESTNAME: ${TESTNAME}
+#- runFlow:
+ #   file: "../common/manual_server_run.yaml"
 - runFlow:
     file: "../common/add_content.yaml"
     env:

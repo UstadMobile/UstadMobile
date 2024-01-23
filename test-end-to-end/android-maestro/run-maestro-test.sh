@@ -122,7 +122,6 @@ if [ "$(adb shell pm list packages com.toughra.ustadmobile2)" != "" ]; then
   adb shell pm uninstall com.toughra.ustadmobile2
 fi
 
-echo $SCRIPTDIR/../../app-android/build/outputs/apk/release/app-android-release.apk
 adb install $TESTAPK
 
 TESTARG=$TEST
@@ -145,7 +144,7 @@ maestro  --device=$TESTSERIAL  test -e ENDPOINT=$ENDPOINT -e USERNAME=$TESTUSER 
 
 TESTSTATUS=$?
 
-#$SCRIPTDIR/../../testserver-controller/stop.sh
+$SCRIPTDIR/../../testserver-controller/stop.sh
 
 #Uninstall when finished
 adb shell pm uninstall com.toughra.ustadmobile
