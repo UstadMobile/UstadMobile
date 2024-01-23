@@ -45,12 +45,11 @@ The combined report (with videos for each test) HTML will be saved to build/resu
 $ ./gradlew app-ktor-server:shadowJar -Pktorbundleproductionjs=true
 ```
 
-2. **Build APK and Install the Release APK to the Emulator:**
+2. **Build APK Release APK to the Emulator:**
    
 ```
 $ ./gradlew app-android:assembleRelease
 ```
-
 3. **Clear Data Folder in app-ktor-server:**
    Navigate to the `app-ktor-server` directory and clear the data folder.
     
@@ -68,9 +67,10 @@ java -jar build/libs/ustad-server-all.jar r -P:ktor.ustad.adminpass=testpass --s
 
 5. **Run Maestro Command:**
    Navigate to the `/test-end-to-end/android-maestro` directory and execute the Maestro test command.
+
 ```
 cd /test-end-to-end/android-maestro
-maestro test e2e-tests/<test name>.yaml -e USERNAME=admin -e PASSWORD=testpass -e TESTSERIAL=emulator-5554 -e ENDPOINT=http://192.168.46.180:8087/
+maestro test e2e-tests/<test name>.yaml -e USERNAME=admin -e PASSWORD=testpass -e TESTSERIAL=emulator-5554 -e ENDPOINT=http://<ip address>:8087/
 ```
 
-Make sure to replace parameters like `USERNAME`, `PASSWORD`, `TESTSERIAL`, and `ENDPOINT` with your actual values. 
+Make sure to replace parameters like `TESTSERIAL`, and `ENDPOINT` with your actual values. 
