@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 /**
  * WebViewClient that provides observable flows for info we want to show in the UI
  */
-abstract class UstadAbstractWebViewClient: WebViewClient() {
+open class UstadAbstractWebViewClient: WebViewClient() {
 
     private val _canGoBack = MutableStateFlow(false)
 

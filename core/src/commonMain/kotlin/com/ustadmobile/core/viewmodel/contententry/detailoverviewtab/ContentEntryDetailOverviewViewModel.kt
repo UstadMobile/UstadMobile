@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.blob.download.EnqueueContentManifestDownloadUseCase
+import com.ustadmobile.core.domain.launchxapi.LaunchXapiUseCase
 import com.ustadmobile.core.util.ext.onActiveEndpoint
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.withDoorTransactionAsync
@@ -24,6 +25,7 @@ import com.ustadmobile.lib.db.composites.ContentEntryAndDetail
 import com.ustadmobile.lib.db.composites.OfflineItemAndState
 import com.ustadmobile.lib.db.composites.TransferJobAndTotals
 import org.kodein.di.instance
+import org.kodein.di.instanceOrNull
 
 data class ContentEntryDetailOverviewUiState(
 
@@ -84,6 +86,9 @@ class ContentEntryDetailOverviewViewModel(
     val nodeIdAndAuth: NodeIdAndAuth by di.onActiveEndpoint().instance()
 
     val uiState: Flow<ContentEntryDetailOverviewUiState> = _uiState.asStateFlow()
+
+    private val launchXapiUseCase: LaunchXapiUseCase? by di.onActiveEndpoint().instanceOrNull()
+
 
     init {
         viewModelScope.launch {
@@ -194,6 +199,11 @@ class ContentEntryDetailOverviewViewModel(
             val latestContentEntryVersion = activeRepo.contentEntryVersionDao
                 .findLatestVersionUidByContentEntryUidEntity(entityUidArg)
             if(latestContentEntryVersion != null) {
+                if(latestContentEntryVersion.cevContentType == ContentEntryVersion.TYPE_XAPI) {
+                    launchXapiUseCase?.invoke(latestContentEntryVersion.cevUid)
+                    return@launch
+                }
+
                 val destName = when(latestContentEntryVersion.cevContentType) {
                     ContentEntryVersion.TYPE_XAPI -> XapiContentViewModel.DEST_NAME
                     ContentEntryVersion.TYPE_PDF -> PdfContentViewModel.DEST_NAME

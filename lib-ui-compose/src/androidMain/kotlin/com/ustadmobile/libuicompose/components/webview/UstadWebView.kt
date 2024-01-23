@@ -2,6 +2,7 @@ package com.ustadmobile.libuicompose.components.webview
 
 import android.annotation.SuppressLint
 import android.os.Build
+import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -89,23 +90,19 @@ actual fun UstadWebView(
     AndroidView(
         modifier = modifier,
         factory = { context ->
-            NestedScrollWebView(context).also {
-                /*
-                 * Setting layoutParams is REQUIRED to make webview understand viewport height,
-                 * without which css vh units won't work
-                 */
-                it.layoutParams = ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT
-                )
-                it.settings.javaScriptEnabled = true
-                it.settings.domStorageEnabled = true
-                it.settings.mediaPlaybackRequiresUserGesture = false
+              LayoutInflater.from(context).inflate(
+                  R.layout.screen_xapi, null, false
+              ).also {
+                  val webView = it.findViewById<WebView>(R.id.xapi_screen_webview)
+                  webView.settings.javaScriptEnabled = true
+                  webView.settings.domStorageEnabled = true
+                  webView.settings.mediaPlaybackRequiresUserGesture = false
+                  webView.setWebViewClientCompat(navigator.webViewClient)
+              }
 
-                it.setWebViewClientCompat(navigator.webViewClient)
-            }
         },
-        update = { webView ->
+        update = { view ->
+            val webView = view.findViewById<WebView>(R.id.xapi_screen_webview)
             val lastCommand = webView.getTag(R.id.tag_webview_url) as? WebViewCommand
             val currentCommandVal = currentCommand
             if(lastCommand !== currentCommandVal) {

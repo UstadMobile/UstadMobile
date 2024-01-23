@@ -258,6 +258,7 @@ kotlin {
                 implementation libs.process.phoenix
                 implementation libs.compressor
                 implementation libs.coil
+                implementation libs.androidx.browser
             }
         }
 

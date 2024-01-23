@@ -67,6 +67,8 @@ dependencyResolutionManagement {
             version("version_pdfviewer", "2.0.5") //https://github.com/afreakyelf/Pdf-Viewer
             version("version_urlencoder", "1.4.0") //https://github.com/ethauvin/urlencoder/tree/master
             version("nestedscroll_webview", "0.1.6") //https://github.com/Telefonica/android-nested-scroll-webview
+            version("androidx_webkit", "1.9.0")
+            version("androidx_browser", "1.8.0-beta01")
 
 
             plugin("jetbrains-compose", "org.jetbrains.compose").versionRef("jetbrains-compose")
@@ -161,6 +163,8 @@ dependencyResolutionManagement {
             library("pdfviewer", "com.github.afreakyelf", "Pdf-Viewer").versionRef("version_pdfviewer")
             library("urlencoder", "net.thauvin.erik.urlencoder", "urlencoder-lib").versionRef("version_urlencoder")
             library("nestedscroll-webview", "com.telefonica", "nestedscrollwebview").versionRef("nestedscroll_webview")
+            library("androidx-webkit", "androidx.webkit", "webkit").versionRef("androidx_webkit")
+            library("androidx-browser", "androidx.browser", "browser").versionRef("androidx_browser")
         }
     }
 }

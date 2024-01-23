@@ -68,6 +68,7 @@ import com.ustadmobile.core.domain.contententry.importcontent.ImportContentEntry
 import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServerUseCase
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.getversion.GetVersionUseCaseAndroid
+import com.ustadmobile.core.domain.launchxapi.ResolveXapiLaunchHrefUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseCommonJvm
 import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
@@ -581,6 +582,14 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
         bind<SetPasswordUseCase>() with scoped(EndpointScope.Default).singleton {
             SetPasswordUseCaseCommonJvm(
                 authManager = instance()
+            )
+        }
+
+        bind<ResolveXapiLaunchHrefUseCase>() with scoped(EndpointScope.Default).singleton {
+            ResolveXapiLaunchHrefUseCase(
+                activeRepo = instance(tag = DoorTag.TAG_REPO),
+                httpClient = instance(),
+                xppFactory = instance(tag = DiTag.XPP_FACTORY_NSAWARE),
             )
         }
 
