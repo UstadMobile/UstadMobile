@@ -1,6 +1,8 @@
 package com.ustadmobile.libuicompose.view.xapicontent
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
@@ -19,7 +21,9 @@ actual fun XapiContentScreen(
 
     UstadWebView(
         navigator = webViewNavigator,
-        modifier = Modifier.fillMaxSize().testTag("xapi_webview")
+        modifier = Modifier.fillMaxSize()
+            .verticalScroll(state = rememberScrollState())
+            .testTag("xapi_webview")
     )
 
     LaunchedEffect(uiState.url) {

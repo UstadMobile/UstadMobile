@@ -3,7 +3,7 @@ package com.ustadmobile.core.domain.contententry.server
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
-import android.webkit.WebViewClient
+import com.ustadmobile.core.webview.UstadAbstractWebViewClient
 import io.github.aakira.napier.Napier
 import net.thauvin.erik.urlencoder.UrlEncoderUtil
 
@@ -19,7 +19,8 @@ import net.thauvin.erik.urlencoder.UrlEncoderUtil
 open class ContentEntryVersionServerWebClient(
     private val useCase: ContentEntryVersionServerUseCase,
     private val contentEntryVersionUid: Long,
-): WebViewClient() {
+): UstadAbstractWebViewClient() {
+
 
     /**
      * Seems like this does not work for video as per:

@@ -10,30 +10,43 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
+import com.telefonica.nestedscrollwebview.NestedScrollWebView
+import com.ustadmobile.core.webview.UstadAbstractWebViewClient
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.libuicompose.R
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import moe.tlaster.precompose.navigation.BackHandler
 
 /**
  * The primary purpose of this webview is to push requests through the cache
  */
+sealed class WebViewCommand(val time: Long)
 
-data class WebViewCommand(
+class WebViewNavigateCommand(
     val url: String,
-    val time: Long,
-)
+    time: Long,
+): WebViewCommand(time)
+
+class WebViewGoBackCommand(time: Long): WebViewCommand(time)
 
 class UstadWebViewNavigatorAndroid(
-    val webViewClient: WebViewClient
+    val webViewClient: UstadAbstractWebViewClient
 ): UstadWebViewNavigator {
 
-    private val _commandFlow = MutableStateFlow(WebViewCommand("", 0))
+    private val _commandFlow = MutableStateFlow<WebViewCommand>(
+        WebViewNavigateCommand("", 0)
+    )
 
     internal val commandFlow: Flow<WebViewCommand> = _commandFlow
 
     override fun loadUrl(url: String) {
-        _commandFlow.value = WebViewCommand(url, systemTimeInMillis())
+        _commandFlow.value = WebViewNavigateCommand(url, systemTimeInMillis())
+    }
+
+    override fun goBack() {
+        _commandFlow.value = WebViewGoBackCommand(systemTimeInMillis())
     }
 }
 
@@ -67,13 +80,16 @@ actual fun UstadWebView(
 ) {
     val navigatorAndroid = (navigator as UstadWebViewNavigatorAndroid)
     val currentCommand by
-        navigatorAndroid.commandFlow.collectAsState(WebViewCommand("", 0))
+        navigatorAndroid.commandFlow.collectAsState(WebViewNavigateCommand("", 0))
+
+    val webViewCanGoBack by navigatorAndroid.webViewClient.canGoBack.collectAsState(false)
+    Napier.d { "WebViewCanGoBack: $webViewCanGoBack" }
 
     //Might need: https://engineering.telefonica.com/nested-scrolling-with-android-webviews-54e0d67e1c23
     AndroidView(
         modifier = modifier,
         factory = { context ->
-            WebView(context).also {
+            NestedScrollWebView(context).also {
                 /*
                  * Setting layoutParams is REQUIRED to make webview understand viewport height,
                  * without which css vh units won't work
@@ -85,23 +101,33 @@ actual fun UstadWebView(
                 it.settings.javaScriptEnabled = true
                 it.settings.domStorageEnabled = true
                 it.settings.mediaPlaybackRequiresUserGesture = false
-                it.isVerticalScrollBarEnabled = true
 
                 it.setWebViewClientCompat(navigator.webViewClient)
             }
         },
-        update = {
-            val lastCommand = it.getTag(R.id.tag_webview_url) as? WebViewCommand
-            if(lastCommand != currentCommand) {
-                it.setTag(R.id.tag_webview_url, currentCommand)
-                if(currentCommand.time != 0L)
-                    it.loadUrl(currentCommand.url)
+        update = { webView ->
+            val lastCommand = webView.getTag(R.id.tag_webview_url) as? WebViewCommand
+            val currentCommandVal = currentCommand
+            if(lastCommand !== currentCommandVal) {
+                webView.setTag(R.id.tag_webview_url, currentCommandVal)
+                if(currentCommandVal.time != 0L) {
+                    when(currentCommandVal) {
+                        is WebViewNavigateCommand -> webView.loadUrl(currentCommandVal.url)
+                        is WebViewGoBackCommand -> webView.goBack()
+                    }
+                }
             }
 
-            if(it.getWebViewClientCompat() !== navigator.webViewClient) {
-                it.setWebViewClientCompat(navigator.webViewClient)
+            if(webView.getWebViewClientCompat() !== navigator.webViewClient) {
+                webView.setWebViewClientCompat(navigator.webViewClient)
             }
         }
     )
+
+    BackHandler(
+        enabled = webViewCanGoBack
+    ) {
+        navigator.goBack()
+    }
 
 }

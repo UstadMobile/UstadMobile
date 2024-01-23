@@ -1,15 +1,17 @@
 ## Maestro end-to-end testing for Android
 
 The end-to-end tests for the Android app are built using [Maestro](https://maestro.mobile.dev/) and
-generate reports.
+generate reports. The scripts have been written and tested on Linux. They may work on other systems,
+but that has not been thoroughly tested.
 
 ### Prerequisites:
 
 * Install Maestro as per the [official instructions](https://maestro.mobile.dev/getting-started/installing-maestro).
-* Build the android release apk from the [app-android-launcher](../app-android-launcher/) module and the
+* Build the android release apk from the [app-android](../app-android/) module and the
   HTTP server from the [app-ktor-server](../app-ktor-server/) module. This would be done by the normal
   **gradlew build** command.
 * Start an Android emulator or connect a physical device and get the serial of the device (e.g. using the **adb devices** command)
+* MacOS only: install the realpath command.
 
 ### Running:
 
