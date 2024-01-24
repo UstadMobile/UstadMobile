@@ -69,12 +69,14 @@ dependencyResolutionManagement {
             version("nestedscroll_webview", "0.1.6") //https://github.com/Telefonica/android-nested-scroll-webview
             version("androidx_webkit", "1.9.0")
             version("androidx_browser", "1.8.0-beta01")
+            version("plugin_conveyor", "1.5")
 
 
             plugin("jetbrains-compose", "org.jetbrains.compose").versionRef("jetbrains-compose")
             plugin("moko-resources-plugin", "dev.icerock.mobile.multiplatform-resources").versionRef("version-moko-resources")
             plugin("ksp", "com.google.devtools.ksp").version("1.9.20-1.0.13")
             plugin("atomicfu", "org.jetbrains.kotlin.plugin.atomicfu").versionRef("version_kotlin")
+            plugin("conveyor", "dev.hydraulic.conveyor").versionRef("plugin_conveyor")
 
             library("kodein-di", "org.kodein.di", "kodein-di").versionRef("version_kodein_di")
             library("kodein-di-compose", "org.kodein.di", "kodein-di-framework-compose").versionRef("version_kodein_di")

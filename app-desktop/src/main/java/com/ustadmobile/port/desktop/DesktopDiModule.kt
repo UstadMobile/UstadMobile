@@ -175,18 +175,20 @@ val DesktopHttpModule = DI.Module("Desktop-HTTP") {
 val DesktopDiModule = DI.Module("Desktop-Main") {
     //Jetpack Compose resources directory as per
     //https://github.com/JetBrains/compose-multiplatform/blob/master/tutorials/Native_distributions_and_local_execution/README.md#adding-files-to-packaged-application
-    val resourcesDir = File(System.getProperty("compose.application.resources.dir"))
-    val ffmpegResourcesDir = File(resourcesDir, "ffmpeg")
+//    val resourcesDir = File(System.getProperty("compose.application.resources.dir"))
+//    val ffmpegResourcesDir = File(resourcesDir, "ffmpeg")
 
-    val ffmpegFile = SysPathUtil.findCommandInPath(
-        commandName = "ffmpeg",
-        manuallySpecifiedLocation = File(ffmpegResourcesDir, "ffmpeg").getCommandFile(),
-    ) ?: throw IllegalStateException("No FFMPEG")
+    val ffmpegFile = File("dummy")
+//    val ffmpegFile = SysPathUtil.findCommandInPath(
+//        commandName = "ffmpeg",
+//        manuallySpecifiedLocation = File(ffmpegResourcesDir, "ffmpeg").getCommandFile(),
+//    ) ?: throw IllegalStateException("No FFMPEG")
 
-    val ffprobeFile = SysPathUtil.findCommandInPath(
-        commandName = "ffprobe",
-        manuallySpecifiedLocation = File(ffmpegResourcesDir, "ffprobe").getCommandFile(),
-    ) ?: throw IllegalStateException("No FFMPEG")
+    val ffprobeFile = File("dummy")
+//    val ffprobeFile = SysPathUtil.findCommandInPath(
+//        commandName = "ffprobe",
+//        manuallySpecifiedLocation = File(ffmpegResourcesDir, "ffprobe").getCommandFile(),
+//    ) ?: throw IllegalStateException("No FFMPEG")
 
     bind<SupportedLanguagesConfig>() with singleton {
         SupportedLanguagesConfig(

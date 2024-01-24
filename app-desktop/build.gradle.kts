@@ -10,6 +10,7 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 plugins {
     kotlin("jvm")
     alias(libs.plugins.jetbrains.compose)
+    alias(libs.plugins.conveyor)
 }
 
 kotlin {
@@ -45,6 +46,19 @@ dependencies {
     implementation(libs.libphonenumber.google)
     implementation(libs.kamel)
     implementation(libs.ktor.client.okhttp)
+
+    //as per https://conveyor.hydraulic.dev/13.0/tutorial/tortoise/2-gradle/#adapting-a-compose-desktop-app
+    linuxAmd64(compose.desktop.linux_x64)
+    macAmd64(compose.desktop.macos_x64)
+    macAarch64(compose.desktop.macos_arm64)
+    windowsAmd64(compose.desktop.windows_x64)
+}
+
+//As per https://conveyor.hydraulic.dev/13.0/tutorial/tortoise/2-gradle/#adapting-a-compose-desktop-app
+configurations.all {
+    attributes {
+        attribute(Attribute.of("ui", String::class.java), "awt")
+    }
 }
 
 compose.desktop {
