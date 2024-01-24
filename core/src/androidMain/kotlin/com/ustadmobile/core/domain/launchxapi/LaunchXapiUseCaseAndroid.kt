@@ -6,6 +6,8 @@ import android.net.Uri
 import androidx.browser.customtabs.CustomTabColorSchemeParams
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.browser.customtabs.CustomTabsSession
+import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.embeddedhttp.EmbeddedHttpServer
 
 
 /**
@@ -24,10 +26,12 @@ import androidx.browser.customtabs.CustomTabsSession
  */
 class LaunchXapiUseCaseAndroid(
     private val androidContext: Context,
+    private val endpoint: Endpoint,
     private val resolveXapiLaunchHrefUseCase: ResolveXapiLaunchHrefUseCase,
     private val lightToolbarColor: Int, //Can use jetpack compose color .toArgb()
     private val darkToolbarColor: Int,
     private val session: () -> CustomTabsSession?,
+    private val embeddedHttpServer: EmbeddedHttpServer,
 ): LaunchXapiUseCase {
 
     override suspend fun invoke(contentEntryVersionUid: Long) {
@@ -35,14 +39,28 @@ class LaunchXapiUseCaseAndroid(
             contentEntryVersionUid,
         )
 
+        val url = embeddedHttpServer.endpointUrl(
+            endpoint = endpoint,
+            path = "api/content/${contentEntryVersionUid}/${resolveResult.launchUriInContent}"
+        )
+
         /**
-         * https://chromium.googlesource.com/external/github.com/GoogleChrome/custom-tabs-client/+/380a1c31040671699f8ccb81830b5c75c80327ec/README.md#lifecycle
+         * The Custom Tab Session is a nice-to-have that will almost always be available, so we can
+         * use warm up etc. The docs mention that the service might disconnect for short periods.
          */
+        val customTabSession = session()
+
         val customTabIntent = CustomTabsIntent.Builder()
             .setUrlBarHidingEnabled(false)
+            .setShareState(CustomTabsIntent.SHARE_STATE_OFF)
             .setBookmarksButtonEnabled(false)
             .setDownloadButtonEnabled(false)
-            .setSession(session()!!)
+            .let {
+                if(customTabSession != null)
+                    it.setSession(customTabSession)
+                else
+                    it
+            }
             .setDefaultColorSchemeParams(
                 CustomTabColorSchemeParams.Builder()
                     .setToolbarColor(lightToolbarColor)
@@ -60,7 +78,6 @@ class LaunchXapiUseCaseAndroid(
             .setShowTitle(true)
             .build()
 
-        customTabIntent.launchUrl(androidContext, Uri.parse(resolveResult.url))
-
+        customTabIntent.launchUrl(androidContext, Uri.parse(url))
     }
 }

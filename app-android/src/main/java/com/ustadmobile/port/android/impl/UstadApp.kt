@@ -76,6 +76,7 @@ import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseAndroid
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientChunkGetterUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
+import com.ustadmobile.core.embeddedhttp.EmbeddedHttpServer
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
 import kotlinx.serialization.json.Json
@@ -106,6 +107,10 @@ import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
 import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
@@ -593,10 +598,20 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             )
         }
 
+        bind<EmbeddedHttpServer>() with singleton {
+            EmbeddedHttpServer(
+                port = 0,
+                contentEntryVersionServerUseCase = {
+                    di.on(it).direct.instance()
+                }
+            )
+        }
+
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
     }
 
 
+    @OptIn(DelicateCoroutinesApi::class)
     override fun onCreate() {
         super.onCreate()
         Napier.base(DebugAntilog())
@@ -610,6 +625,10 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(metadataPresetLang))
                 settings.putString(PREFKEY_ACTIONED_PRESET, true.toString())
             }
+        }
+
+        GlobalScope.launch(Dispatchers.IO) {
+            di.direct.instance<EmbeddedHttpServer>().start()
         }
     }
 

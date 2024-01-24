@@ -147,10 +147,12 @@ class AppActivity: AppCompatActivity(), DIAware {
         bind<LaunchXapiUseCase>() with scoped(EndpointScope.Default).provider {
             LaunchXapiUseCaseAndroid(
                 androidContext = this@AppActivity,
+                endpoint = context,
                 resolveXapiLaunchHrefUseCase = instance(),
                 lightToolbarColor = md_theme_light_primaryContainer.toArgb(),
                 darkToolbarColor = md_theme_dark_primaryContainer.toArgb(),
                 session = { mCustomTabsSession },
+                embeddedHttpServer = instance(),
             )
         }
 
@@ -164,6 +166,10 @@ class AppActivity: AppCompatActivity(), DIAware {
 
     /*
      * Custom tabs setup as per https://developer.chrome.com/docs/android/custom-tabs/guide-warmup-prefetch
+     *
+     * As per:
+     * https://developer.chrome.com/docs/android/custom-tabs#when_should_i_use_custom_tabs
+     * "Lifecycle management: Apps launching a Custom Tab won't be evicted by the system during the Tabs use - its importance is raised to the "foreground" level."
      *
      * The objective here isn't so much about tracking engagement, it is just to ensure that the
      * app itself is kept alive when the user is in the custom tab (which will rely on loading

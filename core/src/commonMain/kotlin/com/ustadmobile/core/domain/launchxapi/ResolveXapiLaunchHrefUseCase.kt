@@ -2,6 +2,7 @@ package com.ustadmobile.core.domain.launchxapi
 
 import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.tincan.Activity
 import com.ustadmobile.core.tincan.TinCanXML
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.requireEntryByUri
@@ -18,8 +19,16 @@ class ResolveXapiLaunchHrefUseCase(
     private val xppFactory: XmlPullParserFactory,
 ) {
 
+    /**
+     * @param url the absolute, based on the manifest url of the ContentEntryVersion
+     * @param launchUriInContent the path to the HTML as specified by the launch URL relative to the
+     *        content base. In reality, the tincan.xml file is almost always
+     */
     class XapiLaunchHrefResult(
         val url: String,
+        val launchUriInContent: String,
+        val launchActivity: Activity,
+        val manifestUrl: String,
     )
 
     suspend operator fun invoke(
@@ -42,7 +51,16 @@ class ResolveXapiLaunchHrefUseCase(
         val launchHref = tinCanXml.launchActivity?.launchUrl ?:
             throw IllegalStateException("ContentEntryVersion $contentEntryVersionUid manifesturl is null")
         val url = UMFileUtil.resolveLink(manifestUrl, launchHref)
-        return XapiLaunchHrefResult(url)
+
+        val tinCanXmlPathPrefix = contentEntryVersion.cevOpenUri!!
+            .substringBeforeLast("/", "")
+
+        return XapiLaunchHrefResult(
+            url = url,
+            launchUriInContent = "$tinCanXmlPathPrefix${launchHref}",
+            launchActivity = tinCanXml.launchActivity!!,
+            manifestUrl = manifestUrl,
+        )
     }
 
 

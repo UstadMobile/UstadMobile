@@ -146,6 +146,8 @@ kotlin {
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
                 api "io.ktor:ktor-serialization-kotlinx-json:$version_ktor"
                 compileOnly "net.sf.kxml:kxml2:$version_kxml"
+                implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
+                implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
             }
         }
 

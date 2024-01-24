@@ -13,6 +13,7 @@ import com.ustadmobile.core.util.stringvalues.withOverrides
 import com.ustadmobile.libcache.okhttp.asOkHttpHeaders
 import com.ustadmobile.libcache.okhttp.asOkHttpRequest
 import com.ustadmobile.libcache.request.HttpRequest
+import io.github.aakira.napier.Napier
 import io.github.reactivecircus.cache4k.Cache
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -100,6 +101,13 @@ class ContentEntryVersionServerUseCase(
         contentEntryVersionUid: Long,
         pathInContentEntryVersion: String,
     ) : Response {
+        fun logResponse(response: Response) {
+            Napier.v {
+                "ContentEntryVersionServerUseCase: ${request.method} contentEntryVersion=$contentEntryVersionUid " +
+                        "pathInContent=$pathInContentEntryVersion : ${response.code} ${response.message} "
+            }
+        }
+
         //if request is for the manifest, then directly forward the request, otherwise, use the
         //memory cache to get the manifest,
         if(request.url == "about:blank") {
@@ -109,7 +117,7 @@ class ContentEntryVersionServerUseCase(
                 .protocol(Protocol.HTTP_1_1)
                 .message("OK")
                 .code(200)
-                .build()
+                .build().also { logResponse(it) }
         }else if(request.url.endsWith(ContentConstants.MANIFEST_NAME)) {
             return okHttpClient.newCall(
                 Request.Builder()
@@ -128,7 +136,7 @@ class ContentEntryVersionServerUseCase(
                         .toResponseBody("text/plain".toMediaType()))
                     .message("NOT FOUND")
                     .code(404)
-                    .build()
+                    .build().also { logResponse(it) }
 
             val bodyDataUrlRequest = Request.Builder()
                 .url(entry.bodyDataUrl)
@@ -173,6 +181,7 @@ class ContentEntryVersionServerUseCase(
                     ).asOkHttpHeaders()
                 )
                 .build()
+                .also { logResponse(it) }
         }
     }
 
