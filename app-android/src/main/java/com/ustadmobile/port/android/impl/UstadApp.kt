@@ -68,6 +68,10 @@ import com.ustadmobile.core.domain.contententry.importcontent.ImportContentEntry
 import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServerUseCase
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.getversion.GetVersionUseCaseAndroid
+import com.ustadmobile.core.domain.htmlcontentdisplayengine.GetHtmlContentDisplayEngineOptionsUseCase
+import com.ustadmobile.core.domain.htmlcontentdisplayengine.GetHtmlContentDisplayEngineUseCase
+import com.ustadmobile.core.domain.htmlcontentdisplayengine.HTML_CONTENT_OPTIONS_ANDROID
+import com.ustadmobile.core.domain.htmlcontentdisplayengine.SetHtmlContentDisplayEngineUseCase
 import com.ustadmobile.core.domain.launchxapi.ResolveXapiLaunchHrefUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseCommonJvm
@@ -605,6 +609,21 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                     di.on(it).direct.instance()
                 }
             )
+        }
+
+        bind<GetHtmlContentDisplayEngineOptionsUseCase>() with singleton {
+            GetHtmlContentDisplayEngineOptionsUseCase(HTML_CONTENT_OPTIONS_ANDROID)
+        }
+
+        bind<GetHtmlContentDisplayEngineUseCase>() with singleton {
+            GetHtmlContentDisplayEngineUseCase(
+                settings = instance(),
+                getOptionsUseCase = instance(),
+            )
+        }
+
+        bind<SetHtmlContentDisplayEngineUseCase>() with singleton {
+            SetHtmlContentDisplayEngineUseCase(settings = instance())
         }
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }

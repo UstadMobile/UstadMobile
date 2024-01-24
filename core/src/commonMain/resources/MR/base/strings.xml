@@ -1694,4 +1694,20 @@
     <string name="compose_post">Compose post</string>
 
     <string name="password_updated">Password updated</string>
+
+    <!--
+    Advanced setting - allows the user to choose between using Chrome Engine to display html5
+    content and using an internal webview (in case Chrome access is blocked on system
+    -->
+    <string name="html5_content_display_engine">HTML5 Display Engine</string>
+
+    <string name="chrome_recommended">Chrome (Recommended)</string>
+
+    <string name="chrome_recommended_info">Uses the system default browser (normally Chrome).</string>
+
+    <string name="internal_webview">Internal Webview</string>
+
+    <string name="internal_webview_info">This is recommended only if access to the browser is not allowed on device</string>
+
+
 </resources>
