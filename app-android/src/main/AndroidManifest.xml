@@ -63,6 +63,10 @@
             <action android:name="info.guardianproject.panic.action.TRIGGER"/>
         </intent>
 
+        <intent>
+            <action android:name="android.support.customtabs.action.CustomTabsService" />
+        </intent>
+
     </queries>
 
     <application

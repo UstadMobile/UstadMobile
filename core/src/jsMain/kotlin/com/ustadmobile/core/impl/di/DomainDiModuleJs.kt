@@ -15,6 +15,9 @@ import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntr
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseRemote
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseJs
+import com.ustadmobile.core.domain.launchxapi.LaunchXapiUseCase
+import com.ustadmobile.core.domain.launchxapi.LaunchXapiUseCaseJs
+import com.ustadmobile.core.domain.launchxapi.ResolveXapiLaunchHrefUseCase
 import com.ustadmobile.core.domain.openlink.OnClickLinkUseCase
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCaseJs
@@ -32,6 +35,7 @@ import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
 import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseJs
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCaseJs
+import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.ext.DoorTag
 import org.kodein.di.DI
 import org.kodein.di.bind
@@ -140,4 +144,15 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
         )
     }
 
+    bind<LaunchXapiUseCase>() with scoped(endpointScope).provider {
+        LaunchXapiUseCaseJs()
+    }
+
+    bind<ResolveXapiLaunchHrefUseCase>() with scoped(endpointScope).provider {
+        ResolveXapiLaunchHrefUseCase(
+            activeRepo = instance(tag = DoorTag.TAG_REPO),
+            httpClient = instance(),
+            xppFactory = instance(tag = DiTag.XPP_FACTORY_NSAWARE)
+        )
+    }
 }

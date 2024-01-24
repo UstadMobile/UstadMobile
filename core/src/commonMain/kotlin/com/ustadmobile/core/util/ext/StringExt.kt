@@ -155,12 +155,12 @@ fun String.removeFileExtension() : String {
 }
 
 fun String.displayFilename(
-    removeFileName: Boolean = true
+    removeExtension: Boolean = true
 ): String {
     val base = substringAfterLast("/")
         .substringAfterLast("\\")
         .substringBefore("?")
-    return if(removeFileName)
+    return if(removeExtension)
         base.removeFileExtension()
     else
         base
