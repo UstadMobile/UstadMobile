@@ -1709,5 +1709,10 @@
 
     <string name="internal_webview_info">This is recommended only if access to the browser is not allowed on device</string>
 
+    <!--
+    Error message that may be dislpayed when content is still processing and not ready to be
+    opened yet
+    -->
+    <string name="content_not_ready_try_later">Content not ready yet, try again later.</string>
 
 </resources>

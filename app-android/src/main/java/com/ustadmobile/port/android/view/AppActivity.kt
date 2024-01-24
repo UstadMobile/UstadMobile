@@ -152,6 +152,7 @@ class AppActivity: AppCompatActivity(), DIAware {
                 lightToolbarColor = md_theme_light_primaryContainer.toArgb(),
                 darkToolbarColor = md_theme_dark_primaryContainer.toArgb(),
                 session = { mCustomTabsSession },
+                getHtmlContentDisplayEngineUseCase = instance(),
                 embeddedHttpServer = instance(),
             )
         }

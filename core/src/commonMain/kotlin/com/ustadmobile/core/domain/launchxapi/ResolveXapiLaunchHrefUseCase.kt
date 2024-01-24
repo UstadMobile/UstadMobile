@@ -13,6 +13,11 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 
+/**
+ * Shared logic that will open the TinCan XML for a given ContentEntryVersionUid and work out
+ * the launch Url, title, etc. This is used by LaunchXapiUseCase to determine the URL when launching
+ * Xapi content in external systems (e.g. ChromeTabs) and XapiContentViewModel.
+ */
 class ResolveXapiLaunchHrefUseCase(
     private val activeRepo: UmAppDatabase,
     private val httpClient: HttpClient,

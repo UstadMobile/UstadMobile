@@ -78,3 +78,25 @@ These UseCases address a common requirement when importing content: an asset nee
 blob and have a corresponding CacheEntryManifest (where the bodyDataUrl links to the blobUrl). 
 
 These include adding all assets from a directory, zip, string, etc
+
+# Package com.ustadmobile.core.domain.htmlcontentdisplayengine
+
+On Android the user can select between different systems to display HTML content. This does not
+apply to EPUBs (which do not typically contain complex styling and scripting). On Android the 
+Chrome Tab method is preferrable because:
+
+1) Using a custom resource loader for WebView doesn't work with video that may preload:
+    https://github.com/ionic-team/capacitor/issues/6021
+2) WebViews don't provide all the features provided by the browser as per 
+   https://developer.chrome.com/docs/android/custom-tabs .
+
+   Xapi exports are tested by vendors to work in browsers, not WebView. This can make the results
+   slightly unreliable when using different style units, etc. 
+
+Xapi can still run offline because we will use an embedded local http server. As per the ChromeTab 
+spec the app itself keeps the foreground priority, so it will not be killed when the user is 
+viewing content in the Chrome Tab. 
+
+The main reason to keep the WebView option is because access to Chrome may be restricted on some 
+devices. If users are not allowed to open Chrome themselves, then using the Chrome Tab method will
+fail.
