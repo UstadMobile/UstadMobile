@@ -68,6 +68,11 @@ import com.ustadmobile.core.domain.contententry.importcontent.ImportContentEntry
 import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServerUseCase
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.getversion.GetVersionUseCaseAndroid
+import com.ustadmobile.core.domain.htmlcontentdisplayengine.GetHtmlContentDisplayEngineOptionsUseCase
+import com.ustadmobile.core.domain.htmlcontentdisplayengine.GetHtmlContentDisplayEngineUseCase
+import com.ustadmobile.core.domain.htmlcontentdisplayengine.HTML_CONTENT_OPTIONS_ANDROID
+import com.ustadmobile.core.domain.htmlcontentdisplayengine.SetHtmlContentDisplayEngineUseCase
+import com.ustadmobile.core.domain.launchxapi.ResolveXapiLaunchHrefUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseCommonJvm
 import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
@@ -75,6 +80,7 @@ import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseAndroid
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientChunkGetterUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
+import com.ustadmobile.core.embeddedhttp.EmbeddedHttpServer
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
 import kotlinx.serialization.json.Json
@@ -105,6 +111,10 @@ import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
 import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
@@ -584,10 +594,43 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             )
         }
 
+        bind<ResolveXapiLaunchHrefUseCase>() with scoped(EndpointScope.Default).singleton {
+            ResolveXapiLaunchHrefUseCase(
+                activeRepo = instance(tag = DoorTag.TAG_REPO),
+                httpClient = instance(),
+                xppFactory = instance(tag = DiTag.XPP_FACTORY_NSAWARE),
+            )
+        }
+
+        bind<EmbeddedHttpServer>() with singleton {
+            EmbeddedHttpServer(
+                port = 0,
+                contentEntryVersionServerUseCase = {
+                    di.on(it).direct.instance()
+                }
+            )
+        }
+
+        bind<GetHtmlContentDisplayEngineOptionsUseCase>() with singleton {
+            GetHtmlContentDisplayEngineOptionsUseCase(HTML_CONTENT_OPTIONS_ANDROID)
+        }
+
+        bind<GetHtmlContentDisplayEngineUseCase>() with singleton {
+            GetHtmlContentDisplayEngineUseCase(
+                settings = instance(),
+                getOptionsUseCase = instance(),
+            )
+        }
+
+        bind<SetHtmlContentDisplayEngineUseCase>() with singleton {
+            SetHtmlContentDisplayEngineUseCase(settings = instance())
+        }
+
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
     }
 
 
+    @OptIn(DelicateCoroutinesApi::class)
     override fun onCreate() {
         super.onCreate()
         Napier.base(DebugAntilog())
@@ -601,6 +644,10 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(metadataPresetLang))
                 settings.putString(PREFKEY_ACTIONED_PRESET, true.toString())
             }
+        }
+
+        GlobalScope.launch(Dispatchers.IO) {
+            di.direct.instance<EmbeddedHttpServer>().start()
         }
     }
 

@@ -17,7 +17,6 @@ import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCaseCommonJvm
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseJvm
-import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseRemote
 import com.ustadmobile.core.domain.contententry.importcontent.ImportContentEntryUseCase
 import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServerUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
@@ -28,7 +27,6 @@ import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.DiTag.TAG_CONTEXT_DATA_ROOT
 import com.ustadmobile.door.ext.*
 import com.ustadmobile.core.impl.*
-import com.ustadmobile.core.io.UploadSessionManager
 import com.ustadmobile.lib.rest.ext.*
 import com.ustadmobile.lib.rest.messaging.MailProperties
 import com.ustadmobile.lib.util.ext.bindDataSourceIfNotExisting
@@ -362,10 +360,6 @@ fun Application.umRestApplication(
             StdSchedulerFactory.getDefaultScheduler().also {
                 it.context.put("di", di)
             }
-        }
-
-        bind<UploadSessionManager>() with scoped(EndpointScope.Default).singleton {
-            UploadSessionManager(context, di)
         }
 
         bind<Json>() with singleton {

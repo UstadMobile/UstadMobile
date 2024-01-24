@@ -241,6 +241,7 @@ test-end-to-end/webapp-cypress/node_modules
 test-end-to-end/webapp-cypress/cypress/videos
 test-end-to-end/webapp-cypress/cypress/screenshots
 test-end-to-end/webapp-cypress/results
+test-end-to-end/webapp-cypress/logs
 js/*.js
 
 

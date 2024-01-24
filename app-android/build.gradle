@@ -355,6 +355,8 @@ dependencies {
 
     implementation libs.process.phoenix
 
+    implementation libs.androidx.browser
+
     testImplementation project(":lib-test-common")
     testImplementation "org.mockito:mockito-core:$version_android_mockito"
     testImplementation "androidx.test:core:$version_androidx_test_core"

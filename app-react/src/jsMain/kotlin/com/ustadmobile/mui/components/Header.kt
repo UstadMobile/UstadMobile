@@ -8,12 +8,14 @@ import com.ustadmobile.core.components.DIContext
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.appstate.AppUiState
+import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
 import com.ustadmobile.core.viewmodel.settings.SettingsViewModel
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UserSession
 import com.ustadmobile.mui.common.Area
+import com.ustadmobile.mui.common.Sizes
 import com.ustadmobile.view.components.UstadPersonAvatar
 import js.core.jso
 import web.cssom.*
@@ -97,6 +99,22 @@ val Header = FC<HeaderProps> { props ->
             gridArea = Area.Header
             zIndex = integer(1_500)
         }
+
+        if(props.appUiState.loadingState.loadingState == LoadingUiState.State.INDETERMINATE) {
+            LinearProgress {
+                sx {
+                    position = Position.absolute
+                    width = 100.pct
+                    height = 4.px
+                    marginTop = (Sizes.Header.HeightInPx - 2).px
+                }
+                color = LinearProgressColor.secondary
+                id = "header_progress_bar"
+
+                variant =  LinearProgressVariant.indeterminate
+            }
+        }
+
 
         Toolbar {
             if(props.showMenuIcon && props.appUiState.navigationVisible) {
