@@ -82,7 +82,6 @@ compose.desktop {
             version = rootProject.version
             description = "Ustad Mobile"
             copyright = "© UstadMobile FZ-LLC."
-            vendor = "UstadMobile FZ-LLC"
             licenseFile.set(rootProject.file("LICENSE"))
             windows {
                 packageVersion = "1.0.0"
