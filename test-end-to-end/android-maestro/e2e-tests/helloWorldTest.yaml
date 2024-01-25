@@ -1,6 +1,12 @@
 appId: com.toughra.ustadmobile
 
 ---
+- runFlow:
+   file: "../common/startserver.yaml"
+   env:
+     CONTROLSERVER: ${CONTROLSERVER}
+     TESTSERIAL: ${TESTSERIAL}
+     TESTNAME: ${TESTNAME}
 - launchApp
 - tapOn: "GET STARTED"
 - tapOn: Site link
