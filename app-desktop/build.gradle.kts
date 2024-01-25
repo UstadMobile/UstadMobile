@@ -109,6 +109,13 @@ compose.desktop {
         //might check https://conveyor.hydraulic.dev/13.0/troubleshooting/troubleshooting-jvm/#localization-doesnt-work-when-packaged
         mainClass = "com.ustadmobile.port.desktop.AppKt"
 
+        //https://blog.jetbrains.com/kotlin/2022/10/compose-multiplatform-1-2-is-out/#proguard
+        // https://conveyor.hydraulic.dev/13.0/configs/jvm/#proguard-obfuscation
+
+//        buildTypes.release.proguard {
+//            configurationFiles.from("rules.pro")
+//        }
+
         nativeDistributions {
             //As per https://github.com/JetBrains/compose-multiplatform/blob/master/tutorials/Native_distributions_and_local_execution/README.md#adding-files-to-packaged-application
             appResourcesRootDir.set(project.layout.projectDirectory.dir("app-resources"))
