@@ -17,8 +17,6 @@ buildscript {
         maven {
             url "https://maven.pkg.jetbrains.space/public/p/compose/dev"
         }
-
-
     }
 
 }
@@ -83,7 +81,7 @@ allprojects {
 }
 
 //Major.minor.database version
-version = "0.4.18"
+version = "0.4.19"
 group = "com.ustadmobile.app"
 
 /**
@@ -93,7 +91,7 @@ group = "com.ustadmobile.app"
  */
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 245
+    ustadVersionCode = 246
 
     version_retriever = "0.0.1e"
     version_xmlpullparserkmp = '0.0.26'

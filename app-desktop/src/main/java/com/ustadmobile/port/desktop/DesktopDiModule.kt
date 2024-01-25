@@ -33,6 +33,7 @@ import com.ustadmobile.core.uri.UriHelperJvm
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.getCommandFile
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
+import com.ustadmobile.core.util.ext.isWindowsOs
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.RepositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
@@ -77,7 +78,6 @@ import java.net.InetAddress
 import java.util.Properties
 import javax.naming.InitialContext
 
-const val TAG_APP_HOME = "AppHome"
 
 const val TAG_DATA_DIR = "DataDir"
 
@@ -85,11 +85,16 @@ const val TAG_CACHE_DIR = "CacheDir"
 
 const val CONNECTIVITY_CHECK_HOST = "google.com"
 
+/**
+ * The resources directory is where files required by the app can be stored. This is mainly used
+ * for ffmpeg on Windows.
+ */
 fun ustadAppResourcesDir(): File {
     //Jetpack Compose resources directory as per
     //https://github.com/JetBrains/compose-multiplatform/blob/master/tutorials/Native_distributions_and_local_execution/README.md#adding-files-to-packaged-application
 
-    //When running conveyor build, this uses app.dir
+    //When running conveyor build, this uses app.dir as per
+    // https://conveyor.hydraulic.dev/13.0/configs/jvm/#appjvmsystem-properties
     return System.getProperty("compose.application.resources.dir")?.let {
         File(it)
     } ?: System.getProperty("app.dir")?.let { File(it) }
@@ -100,8 +105,29 @@ fun ustadAppHomeDir(): File {
     return System.getProperty("app_home")?.let { File(it) } ?: File(System.getProperty("user.dir"))
 }
 
+/**
+ * Get the Operating System user data directory. This is used when the conveyor built package is
+ * running.
+ *
+ * On Windows: Use Application Data folder
+ * On Linux/MacOS: Use user home directory/.app-name
+ *
+ */
+private fun osUserDataDir(): File? {
+    val appFsName: String? = System.getProperty("app.fsname")
+    return when {
+        appFsName == null -> null
+        isWindowsOs() -> File(System.getenv("APPDATA"), appFsName)
+        else -> File(System.getProperty("user.home"), ".$appFsName")
+    }
+}
+
+/**
+ *
+ */
 fun ustadAppDataDir(): File {
-    return File(ustadAppHomeDir(), "data")
+    return System.getProperty("ustad.datadir")?.let { File(it) }
+        ?: osUserDataDir() ?: File(ustadAppHomeDir(), "data")
 }
 
 val DesktopHttpModule = DI.Module("Desktop-HTTP") {
@@ -185,21 +211,17 @@ val DesktopHttpModule = DI.Module("Desktop-HTTP") {
 @OptIn(ExperimentalXmlUtilApi::class)
 val DesktopDiModule = DI.Module("Desktop-Main") {
     val resourcesDir = ustadAppResourcesDir()
+    val ffmpegResourcesDir = File(resourcesDir, "ffmpeg")
 
-    println(System.getProperty("app.dir"))
-//    val ffmpegResourcesDir = File(resourcesDir, "ffmpeg")
+    val ffmpegFile = SysPathUtil.findCommandInPath(
+        commandName = "ffmpeg",
+        manuallySpecifiedLocation = File(ffmpegResourcesDir, "ffmpeg").getCommandFile(),
+    ) ?: throw IllegalStateException("No FFMPEG")
 
-    val ffmpegFile = File("dummy")
-//    val ffmpegFile = SysPathUtil.findCommandInPath(
-//        commandName = "ffmpeg",
-//        manuallySpecifiedLocation = File(ffmpegResourcesDir, "ffmpeg").getCommandFile(),
-//    ) ?: throw IllegalStateException("No FFMPEG")
-
-    val ffprobeFile = File("dummy")
-//    val ffprobeFile = SysPathUtil.findCommandInPath(
-//        commandName = "ffprobe",
-//        manuallySpecifiedLocation = File(ffmpegResourcesDir, "ffprobe").getCommandFile(),
-//    ) ?: throw IllegalStateException("No FFMPEG")
+    val ffprobeFile = SysPathUtil.findCommandInPath(
+        commandName = "ffprobe",
+        manuallySpecifiedLocation = File(ffmpegResourcesDir, "ffprobe").getCommandFile(),
+    ) ?: throw IllegalStateException("No FFMPEG")
 
     bind<SupportedLanguagesConfig>() with singleton {
         SupportedLanguagesConfig(
@@ -218,12 +240,8 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         ApiUrlConfig(presetApiUrl = null)
     }
 
-    bind<File>(tag = TAG_APP_HOME) with singleton {
-        ustadAppHomeDir()
-    }
-
     bind<File>(tag = TAG_DATA_DIR) with singleton {
-        File(instance<File>(tag = TAG_APP_HOME), "data")
+        ustadAppDataDir().also { it.takeIf { !it.exists() }?.mkdirs() }
     }
 
     bind<File>(tag = DiTag.TAG_CONTEXT_DATA_ROOT) with scoped(EndpointScope.Default).singleton {

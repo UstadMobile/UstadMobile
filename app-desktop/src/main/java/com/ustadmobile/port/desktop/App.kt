@@ -74,6 +74,8 @@ import com.ustadmobile.libuicompose.view.app.App as UstadPrecomposeApp
 fun main() {
     //Apply the language setting before startup
     val dataRoot = ustadAppDataDir()
+    println("AppDataDir=${ustadAppDataDir()} ResourcesDir=${ustadAppResourcesDir()}")
+
     SetLanguageUseCaseJvm.init()
 
     val prefsProperties = File(dataRoot, UstadMobileSystemImpl.PREFS_FILENAME)

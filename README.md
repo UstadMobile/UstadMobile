@@ -34,7 +34,8 @@ available on all platforms (including JVM and Javascript).
 
 If adding a new language it should be added to the constant in in 
 [SupportedLanguagesConfig.kt](core/src/commonMain/kotlin/com/ustadmobile/core/impl/config/SupportedLanguagesConfig.kt)
- and app-android/build.gradle resConfigs should be updated.
+ and app-android/build.gradle resConfigs should be updated. Add the language name to 
+[UstadMobileConstants.kt](core/src/commonMain/kotlin/com/ustadmobile/core/impl/UstadMobileConstants.kt).
 
 ## Contributing
 
@@ -148,7 +149,7 @@ Additional information on coding structure is available as follows:
 Code is contained (mostly) in the following modules:
 
 * [app-android](app-android/): Contains the Android app
-* [app-desktop](app-desktop/): Work in progress: contains Desktop app based on [Compose Multiplatform](https://www.jetbrains.com/lp/compose-multiplatform/).
+* [app-desktop](app-desktop/): Contains Desktop app based on [Compose Multiplatform](https://www.jetbrains.com/lp/compose-multiplatform/).
 * [app-react](app-react/): Contains the web app (written in Kotlin, using React via kotlin-wrappers)
 * [app-ktor-server](app-ktor-server/): Contains the HTTP rest server (implemented using KTOR)
 * [core](core/) : Contains view models, ui state, core business logic.

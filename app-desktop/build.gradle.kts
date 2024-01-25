@@ -1,5 +1,7 @@
+import com.android.build.gradle.internal.tasks.factory.dependsOn
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.jetbrains.kotlin.de.undercouch.gradle.tasks.download.Download
 
 //Roughly as per
 // https://github.com/JetBrains/compose-multiplatform-desktop-template#readme
@@ -11,6 +13,7 @@ plugins {
     kotlin("jvm")
     alias(libs.plugins.jetbrains.compose)
     alias(libs.plugins.conveyor)
+    alias(libs.plugins.download.task)
 }
 
 kotlin {
@@ -24,6 +27,41 @@ tasks.withType<KotlinCompile> {
     compilerOptions.jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
     compilerOptions.freeCompilerArgs.add("-Xexpect-actual-classes")
 }
+
+/*
+ * For Windows: we must downlaod and include FFMPEG. See ustadAppResourcesDir() for details on
+ * paths used.
+ */
+val downloadDestDir = File(project.layout.buildDirectory.asFile.get(), "download")
+val winFfmpegDownloadFile = File(downloadDestDir, "ffmpeg-2023-11-05-git-44a0148fad-full_build.zip")
+tasks.register("downloadFfmpeg", Download::class) {
+    src("https://github.com/GyanD/codexffmpeg/releases/download/2023-11-05-git-44a0148fad/ffmpeg-2023-11-05-git-44a0148fad-full_build.zip")
+    onlyIfModified(true)
+    useETag(true)
+
+    downloadDestDir.takeIf { !it.exists() }?.mkdirs()
+    dest(winFfmpegDownloadFile)
+}
+
+val unzipTask = tasks.register("unzipFfmpegWindows", Copy::class) {
+    dependsOn("downloadFfmpeg")
+    copy {
+        from(
+            zipTree(winFfmpegDownloadFile).matching {
+                include("**/ffmpeg.exe")
+            }.singleFile
+        )
+        from(
+            zipTree(winFfmpegDownloadFile).matching {
+                include("**/ffprobe.exe")
+            }.singleFile
+        )
+
+        into(project.layout.projectDirectory.file("app-resources/windows/ffmpeg"))
+    }
+}
+
+tasks.named("build").dependsOn("unzipFfmpegWindows")
 
 dependencies {
     implementation(compose.desktop.currentOs)
@@ -63,9 +101,13 @@ configurations.all {
 
 compose.desktop {
     application {
+        //might check https://conveyor.hydraulic.dev/13.0/troubleshooting/troubleshooting-jvm/#localization-doesnt-work-when-packaged
         mainClass = "com.ustadmobile.port.desktop.AppKt"
 
         nativeDistributions {
+            //As per https://github.com/JetBrains/compose-multiplatform/blob/master/tutorials/Native_distributions_and_local_execution/README.md#adding-files-to-packaged-application
+            appResourcesRootDir.set(project.layout.projectDirectory.dir("app-resources"))
+
             // https://github.com/JetBrains/compose-multiplatform/blob/master/tutorials/Native_distributions_and_local_execution/README.md
             modules("java.sql")
             modules("java.base")

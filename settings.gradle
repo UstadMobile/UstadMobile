@@ -70,6 +70,7 @@ dependencyResolutionManagement {
             version("androidx_webkit", "1.9.0")
             version("androidx_browser", "1.8.0-beta01")
             version("plugin_conveyor", "1.5")
+            version("version_plugin_download_task", "5.5.0")
 
 
             plugin("jetbrains-compose", "org.jetbrains.compose").versionRef("jetbrains-compose")
@@ -77,6 +78,7 @@ dependencyResolutionManagement {
             plugin("ksp", "com.google.devtools.ksp").version("1.9.20-1.0.13")
             plugin("atomicfu", "org.jetbrains.kotlin.plugin.atomicfu").versionRef("version_kotlin")
             plugin("conveyor", "dev.hydraulic.conveyor").versionRef("plugin_conveyor")
+            plugin("download-task", "de.undercouch.download").versionRef("version_plugin_download_task")
 
             library("kodein-di", "org.kodein.di", "kodein-di").versionRef("version_kodein_di")
             library("kodein-di-compose", "org.kodein.di", "kodein-di-framework-compose").versionRef("version_kodein_di")
