@@ -1041,4 +1041,10 @@
     <string name="drop_files_to_import">Файл(ҳо)ро барои воридот кашед ва гузоред</string>
     <string name="select_file">Файлро интихоб кунед</string>
     <string name="compose_post">Эҷоди нашрия</string>
+    <string name="chrome_recommended">Chrome (тавсия дода мешавад)</string>
+    <string name="chrome_recommended_info">Браузери пешфарзи системаро истифода мебарад (одатан Chrome).</string>
+    <string name="internal_webview">Намоиши дохилӣ (Internal Webview)</string>
+    <string name="html5_content_display_engine">Муҳаррики намоишии HTML5</string>
+    <string name="internal_webview_info">Ин танҳо дар ҳолате тавсия дода мешавад, ки дастрасӣ ба браузер дар дастгоҳ иҷозат дода нашудааст</string>
+    <string name="content_not_ready_try_later">Мундариҷа ҳанӯз омода нест, баъдтар такрор кунед.</string>
 </resources>
