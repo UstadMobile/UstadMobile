@@ -32,6 +32,13 @@ Make installer for local use:
 conveyor make site
 ```
 
+Server the download site:
+
+```
+cd output
+npx serve
+```
+
 Deploy to Github pages:
 
 ```

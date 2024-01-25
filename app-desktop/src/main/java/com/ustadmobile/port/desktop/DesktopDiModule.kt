@@ -85,6 +85,17 @@ const val TAG_CACHE_DIR = "CacheDir"
 
 const val CONNECTIVITY_CHECK_HOST = "google.com"
 
+fun ustadAppResourcesDir(): File {
+    //Jetpack Compose resources directory as per
+    //https://github.com/JetBrains/compose-multiplatform/blob/master/tutorials/Native_distributions_and_local_execution/README.md#adding-files-to-packaged-application
+
+    //When running conveyor build, this uses app.dir
+    return System.getProperty("compose.application.resources.dir")?.let {
+        File(it)
+    } ?: System.getProperty("app.dir")?.let { File(it) }
+        ?: throw IllegalStateException("Cannot find resource dir")
+}
+
 fun ustadAppHomeDir(): File {
     return System.getProperty("app_home")?.let { File(it) } ?: File(System.getProperty("user.dir"))
 }
@@ -173,9 +184,9 @@ val DesktopHttpModule = DI.Module("Desktop-HTTP") {
 
 @OptIn(ExperimentalXmlUtilApi::class)
 val DesktopDiModule = DI.Module("Desktop-Main") {
-    //Jetpack Compose resources directory as per
-    //https://github.com/JetBrains/compose-multiplatform/blob/master/tutorials/Native_distributions_and_local_execution/README.md#adding-files-to-packaged-application
-//    val resourcesDir = File(System.getProperty("compose.application.resources.dir"))
+    val resourcesDir = ustadAppResourcesDir()
+
+    println(System.getProperty("app.dir"))
 //    val ffmpegResourcesDir = File(resourcesDir, "ffmpeg")
 
     val ffmpegFile = File("dummy")
