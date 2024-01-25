@@ -44,8 +44,10 @@ tasks.register("downloadFfmpeg", Download::class) {
     dest(winFfmpegDownloadFile)
 }
 
-val unzipTask = tasks.register("unzipFfmpegWindows", Copy::class) {
+tasks.register("unzipFfmpegWindows") {
     dependsOn("downloadFfmpeg")
+    inputs.file(winFfmpegDownloadFile)
+
     doLast {
         copy {
             from(
