@@ -1049,4 +1049,10 @@
     <string name="select_file">Выберите файл</string>
     <string name="drop_files_to_import">Перетащите файл(ы) для импорта</string>
     <string name="compose_post">Создать публикацию</string>
+    <string name="chrome_recommended">Chrome (рекомендуется)</string>
+    <string name="chrome_recommended_info">Использует системный браузер по умолчанию (обычно Chrome).</string>
+    <string name="internal_webview">Внутренний веб-просмотр (Webview)</string>
+    <string name="content_not_ready_try_later">Содержимое еще не готово. Повторите попытку позже.</string>
+    <string name="html5_content_display_engine">Механизм отображения HTML5</string>
+    <string name="internal_webview_info">Это рекомендуется в случае если на устройстве запрещен доступ к браузеру.</string>
 </resources>
