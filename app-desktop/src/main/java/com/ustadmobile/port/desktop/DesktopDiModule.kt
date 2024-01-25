@@ -88,6 +88,9 @@ const val CONNECTIVITY_CHECK_HOST = "google.com"
 /**
  * The resources directory is where files required by the app can be stored. This is mainly used
  * for ffmpeg on Windows.
+ *
+ * See:
+ * https://conveyor.hydraulic.dev/11.1/troubleshooting/troubleshooting-windows/#where-to-store-files
  */
 fun ustadAppResourcesDir(): File {
     //Jetpack Compose resources directory as per
