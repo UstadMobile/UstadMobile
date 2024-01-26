@@ -81,7 +81,7 @@ allprojects {
 }
 
 //Major.minor.database version
-version = "0.4.21"
+version = "0.4.24"
 group = "com.ustadmobile.app"
 
 /**
@@ -91,7 +91,7 @@ group = "com.ustadmobile.app"
  */
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 247
+    ustadVersionCode = 250
 
     version_retriever = "0.0.1e"
     version_xmlpullparserkmp = '0.0.26'
@@ -125,7 +125,6 @@ ext {
     version_apache_commons_lang = "3.14.0"
     version_apache_commons_text = "1.8"
     version_apache_commons_dbcp2 = "2.11.0"
-    version_apache_commons_compress = "1.25.0"
     version_mpandroidchart = "v3.1.0"
 
     version_sqlite_jdbc = "3.42.0.0"

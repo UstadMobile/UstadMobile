@@ -15,12 +15,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import com.multiplatform.webview.web.WebView
-import com.multiplatform.webview.web.rememberWebViewNavigator
-import com.multiplatform.webview.web.rememberWebViewStateWithHTMLData
 import com.ustadmobile.core.viewmodel.site.termsdetail.SiteTermsDetailUiState
 import com.ustadmobile.core.viewmodel.site.termsdetail.SiteTermsDetailViewModel
-import com.ustadmobile.libuicompose.util.ext.loadHtmlWorkaround
 import dev.icerock.moko.resources.compose.stringResource
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 import com.ustadmobile.core.MR
@@ -44,12 +40,12 @@ fun SiteTermsDetailScreen(
     uiState: SiteTermsDetailUiState = SiteTermsDetailUiState(),
     onClickAccept: () -> Unit = { },
 ) {
-    val state = rememberWebViewStateWithHTMLData("")
-
-    val navigator = rememberWebViewNavigator()
+//    val state = rememberWebViewStateWithHTMLData("")
+//
+//    val navigator = rememberWebViewNavigator()
 
     LaunchedEffect(uiState.siteTerms?.termsHtml) {
-        navigator.loadHtmlWorkaround(uiState.siteTerms?.termsHtml ?: "")
+        //navigator.loadHtmlWorkaround(uiState.siteTerms?.termsHtml ?: "")
     }
 
     Column(
@@ -57,11 +53,11 @@ fun SiteTermsDetailScreen(
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
     )  {
-        WebView(
-            state = state,
-            navigator = navigator,
-            modifier = Modifier.fillMaxSize().weight(1f)
-        )
+//        WebView(
+//            state = state,
+//            navigator = navigator,
+//            modifier = Modifier.fillMaxSize().weight(1f)
+//        )
 
         Spacer(Modifier.height(8.dp))
 

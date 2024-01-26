@@ -191,6 +191,7 @@ val DesktopHttpModule = DI.Module("Desktop-HTTP") {
 
 
     bind<HttpClient>() with singleton {
+
         HttpClient(OkHttp) {
 
             install(ContentNegotiation) {

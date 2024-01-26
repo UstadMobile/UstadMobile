@@ -82,13 +82,20 @@ dependencies {
     implementation(libs.napier)
     implementation(libs.javaffmpeg)
 
-    api(libs.moko.resources)
-    api(libs.moko.resources.compose)
-    api(libs.precompose)
-    api(libs.precompose.viewmodel)
+    implementation(libs.moko.resources)
+    implementation(libs.moko.resources.compose)
+    implementation(libs.precompose)
+    implementation(libs.precompose.viewmodel)
     implementation(libs.libphonenumber.google)
     implementation(libs.kamel)
     implementation(libs.ktor.client.okhttp)
+
+    //Not really being used directly, but lack of this class seems to confuse proguard
+    implementation(libs.jspecify)
+    implementation(libs.apache.commons.pool)
+    implementation(libs.apache.commons.dbcp)
+    implementation(libs.kodein.di)
+    implementation(libs.kodein.kaverit)
 
     //as per https://conveyor.hydraulic.dev/13.0/tutorial/tortoise/2-gradle/#adapting-a-compose-desktop-app
     linuxAmd64(compose.desktop.linux_x64)
@@ -111,25 +118,32 @@ compose.desktop {
 
         //https://blog.jetbrains.com/kotlin/2022/10/compose-multiplatform-1-2-is-out/#proguard
         // https://conveyor.hydraulic.dev/13.0/configs/jvm/#proguard-obfuscation
+        // https://github.com/JetBrains/compose-multiplatform/tree/master/tutorials/Native_distributions_and_local_execution#minification--obfuscation
+        buildTypes.release.proguard {
+            obfuscate.set(true)
+            //optimize.set(true)
+            configurationFiles.from(project.file("compose-desktop.pro"))
+        }
 
-//        buildTypes.release.proguard {
-//            configurationFiles.from("rules.pro")
-//        }
 
         nativeDistributions {
             //As per https://github.com/JetBrains/compose-multiplatform/blob/master/tutorials/Native_distributions_and_local_execution/README.md#adding-files-to-packaged-application
             appResourcesRootDir.set(project.layout.projectDirectory.dir("app-resources"))
 
             // https://github.com/JetBrains/compose-multiplatform/blob/master/tutorials/Native_distributions_and_local_execution/README.md
-            modules("java.sql")
             modules("java.base")
+            modules("java.sql")
+            modules("java.naming")
+
+            /*
+             * Suggested module jdk.xml.dom not needed and adds 6MB to output size. Others have no
+             * size impact.
+             */
             modules("java.compiler")
             modules("java.instrument")
             modules("java.management")
-            modules("java.naming")
             modules("java.rmi")
             modules("jdk.unsupported")
-            modules("jdk.xml.dom")
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi)
             packageVersion = "1.0.0"
             packageName = "UstadMobile"

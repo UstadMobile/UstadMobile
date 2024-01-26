@@ -109,7 +109,6 @@ dependencies {
     implementation "io.netty:netty-tcnative-boringssl-static:$version_netty_tcnative"
 
     implementation "com.sun.mail:jakarta.mail:$version_jakartamail"
-    implementation "org.apache.commons:commons-compress:$version_apache_commons_compress"
 
     implementation "net.sourceforge.argparse4j:argparse4j:$version_argparse4j"
     implementation "org.jetbrains.kotlinx:kotlinx-datetime:$version_kotlinx_datetime"
