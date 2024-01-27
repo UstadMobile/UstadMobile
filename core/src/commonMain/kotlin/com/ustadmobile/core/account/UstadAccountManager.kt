@@ -20,6 +20,7 @@ import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.*
 import io.ktor.client.request.*
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.*
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineScope
@@ -35,6 +36,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.*
 import org.kodein.di.DI
@@ -292,7 +294,7 @@ class UstadAccountManager(
 
         val (registeredPerson: Person?, status: Int) = httpStmt.execute { response ->
             if(response.status.value == 200) {
-                Pair(response.body<PersonWithAccount>(), 200)
+                Pair(json.decodeFromString<PersonWithAccount>(response.bodyAsText()), 200)
             }else {
                 Pair(null, response.status.value)
             }
@@ -469,7 +471,7 @@ class UstadAccountManager(
             throw IllegalStateException("Server error - response ${loginResponse.status.value}")
         }
 
-        val responseAccount = loginResponse.body<UmAccount>()
+        val responseAccount: UmAccount = json.decodeFromString(loginResponse.bodyAsText())
         responseAccount.endpointUrl = endpointUrl
 
         //Make sure that we fetch the person and personpicture into the database.

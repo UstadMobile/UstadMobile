@@ -32,41 +32,41 @@ tasks.withType<KotlinCompile> {
  * For Windows: we must downlaod and include FFMPEG. See ustadAppResourcesDir() for details on
  * paths used.
  */
-val downloadDestDir = File(project.layout.buildDirectory.asFile.get(), "download")
-val winFfmpegDownloadFile = File(downloadDestDir, "ffmpeg-2023-11-05-git-44a0148fad-full_build.zip")
-tasks.register("downloadFfmpeg", Download::class) {
-    downloadDestDir.takeIf { !it.exists() }?.mkdirs()
-
-    src("https://github.com/GyanD/codexffmpeg/releases/download/2023-11-05-git-44a0148fad/ffmpeg-2023-11-05-git-44a0148fad-full_build.zip")
-    onlyIfModified(true)
-    useETag(true)
-
-    dest(winFfmpegDownloadFile)
-}
-
-tasks.register("unzipFfmpegWindows") {
-    dependsOn("downloadFfmpeg")
-    inputs.file(winFfmpegDownloadFile)
-
-    doLast {
-        copy {
-            from(
-                zipTree(winFfmpegDownloadFile).matching {
-                    include("**/ffmpeg.exe")
-                }.singleFile
-            )
-            from(
-                zipTree(winFfmpegDownloadFile).matching {
-                    include("**/ffprobe.exe")
-                }.singleFile
-            )
-
-            into(project.layout.projectDirectory.file("app-resources/windows/ffmpeg"))
-        }
-    }
-}
-
-tasks.named("build").dependsOn("unzipFfmpegWindows")
+//val downloadDestDir = File(project.layout.buildDirectory.asFile.get(), "download")
+//val winFfmpegDownloadFile = File(downloadDestDir, "ffmpeg-2023-11-05-git-44a0148fad-full_build.zip")
+//tasks.register("downloadFfmpeg", Download::class) {
+//    downloadDestDir.takeIf { !it.exists() }?.mkdirs()
+//
+//    src("https://github.com/GyanD/codexffmpeg/releases/download/2023-11-05-git-44a0148fad/ffmpeg-2023-11-05-git-44a0148fad-full_build.zip")
+//    onlyIfModified(true)
+//    useETag(true)
+//
+//    dest(winFfmpegDownloadFile)
+//}
+//
+//tasks.register("unzipFfmpegWindows") {
+//    dependsOn("downloadFfmpeg")
+//    inputs.file(winFfmpegDownloadFile)
+//
+//    doLast {
+//        copy {
+//            from(
+//                zipTree(winFfmpegDownloadFile).matching {
+//                    include("**/ffmpeg.exe")
+//                }.singleFile
+//            )
+//            from(
+//                zipTree(winFfmpegDownloadFile).matching {
+//                    include("**/ffprobe.exe")
+//                }.singleFile
+//            )
+//
+//            into(project.layout.projectDirectory.file("app-resources/windows/ffmpeg"))
+//        }
+//    }
+//}
+//
+//tasks.named("build").dependsOn("unzipFfmpegWindows")
 
 dependencies {
     implementation(compose.desktop.currentOs)

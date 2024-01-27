@@ -53,6 +53,7 @@ class XapiContentViewModelTest : AbstractMainDispatcherTest() {
                     ResolveXapiLaunchHrefUseCase(
                         activeRepo = instance(tag = DoorTag.TAG_REPO),
                         httpClient = instance(),
+                        json = instance(),
                         xppFactory = instance(tag = DiTag.XPP_FACTORY_NSAWARE)
                     )
                 }

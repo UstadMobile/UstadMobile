@@ -116,7 +116,7 @@ class LoginViewModel(
             viewModelScope.launch {
                 while(verifiedSite == null) {
                     try {
-                        val site = httpClient.verifySite(serverUrl, 10000)
+                        val site = httpClient.verifySite(serverUrl, 10000, json)
                         onSiteVerified(site) // onSiteVerified will set the workspace var, and exit the loop
                     }catch(e: Exception) {
                         Napier.w("Could not load site object for $serverUrl", e)

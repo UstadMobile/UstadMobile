@@ -53,6 +53,7 @@ class SaveLocalUrisAsBlobsUseCaseJvmIntegrationTest : AbstractSaveLocalUrisInteg
         val blobUploadClientUseCase = BlobUploadClientUseCaseJvm(
             chunkedUploadUseCase = ChunkedUploadClientUseCaseKtorImpl(httpClient, uriHelper),
             httpClient = httpClient,
+            json = json,
             httpCache = clientCache,
             db = mockUmAppDatabase,
             repo = mockUmAppDatabase,

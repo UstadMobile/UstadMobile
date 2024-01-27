@@ -411,6 +411,7 @@ fun Application.umRestApplication(
             ImportContentEntryUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
                 importersManager = instance(),
+                json = instance(),
             )
         }
 

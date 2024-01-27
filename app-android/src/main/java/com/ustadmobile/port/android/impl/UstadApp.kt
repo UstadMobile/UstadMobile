@@ -443,6 +443,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 chunkedUploadUseCase = on(context).instance(),
                 httpClient = instance(),
                 httpCache = instance(),
+                json = instance(),
                 db = on(context).instance(tag = DoorTag.TAG_DB),
                 repo = on(context).instance(tag = DoorTag.TAG_REPO),
                 endpoint = context,
@@ -526,6 +527,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 enqueueBlobUploadClientUseCase = instance(),
                 createRetentionLocksForManifestUseCase = instance(),
                 httpClient = instance(),
+                json = instance(),
             )
         }
 
@@ -556,6 +558,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 enqueueBlobDownloadClientUseCase = instance(),
                 db = instance(tag = DoorTag.TAG_DB),
                 httpClient = instance(),
+                json = instance(),
             )
         }
 
@@ -598,6 +601,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             ResolveXapiLaunchHrefUseCase(
                 activeRepo = instance(tag = DoorTag.TAG_REPO),
                 httpClient = instance(),
+                json = instance(),
                 xppFactory = instance(tag = DiTag.XPP_FACTORY_NSAWARE),
             )
         }

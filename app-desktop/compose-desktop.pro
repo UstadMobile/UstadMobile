@@ -49,6 +49,11 @@
 -dontwarn org.jboss.naming.**
 -dontwarn org.quartz.jobs.FileScanJob
 
+#Quartz will create jobs via reflection on the class name
+-keep class * extends org.quartz.Job {
+    public <init>(...);
+ }
+
 #Hikari (not used directly, dependency comes in via Quartz)
 #We are not using Hibernate
 -dontwarn org.hibernate.**
@@ -134,8 +139,11 @@
 -keep, allowobfuscation, allowoptimization class * extends org.kodein.type.TypeReference
 -keep, allowobfuscation, allowoptimization class * extends org.kodein.type.JVMAbstractTypeToken$Companion$WrappingTest
 
-# Required for TypeReference to keep type parameters
+# Required for TypeReference to keep type generic type parameters
 -keepattributes Signature
+
+#Note: Above parameter (unfortunately) applies to all classes, but only increases total shrunk jar
+#size by 1MB (from 75MB to 76MB).
 
 #Simple JNDI does not cooperate with obfuscation. It will also be looked up by name as per the
 # jndi.properties, not worth obfuscating
@@ -171,7 +179,7 @@
 
 #-keep class io.ktor.** { * ; }
 
-# KTOR Client users service provision to load - so these classes must not be obfuscated
+## KTOR Client users service provision to load - so these classes must not be obfuscated
 -keep class io.ktor.client.engine.okhttp.OkHttp { * ; }
 -keep class io.ktor.client.engine.okhttp.OkHttpEngineContainer { * ; }
 -keep interface io.ktor.client.HttpClientEngineContainer { * ; }
@@ -241,39 +249,20 @@
 
 ### END Kotlinx serialization rules from site
 
-### More for entities
+### https://github.com/Kotlin/kotlinx.serialization/blob/master/rules/r8.pro
 
-
-#Keep anything with the Serializable annotation. We are using Gson to avoid kotlinx serialization
-# errors, but GSON requires classes to be exempted from obfuscation
--keep @kotlinx.serialization.Serializable class * {
-    *;
-}
-
-# umDatabase entities
--keep public class com.ustadmobile.lib.db.entities.**{
-       *;
-}
--keep public class com.ustadmobile.core.db.**{
-    public <init>(...);
-}
-
-
-# Entities from Door
-
+# Rule to save runtime annotations on serializable class.
+# If the R8 full mode is used, annotations are removed from classes-files.
 #
-# Note: It seems like with Proguard on JVM, we need to keep the whole package for the Serializer
-# to work.
+# For the annotation serializer, it is necessary to read the `Serializable` annotation inside the serializer<T>() function - if it is present,
+# then `SealedClassSerializer` is used, if absent, then `PolymorphicSerializer'.
 #
--keep public class com.ustadmobile.door.message.** {
-    * ;
-}
+# When using R8 full mode, all interfaces will be serialized using `PolymorphicSerializer`.
+#
+# see https://github.com/Kotlin/kotlinx.serialization/issues/2050
 
--keep public class com.ustadmobile.door.entities.** {
-    * ;
-}
+-if @kotlinx.serialization.Serializable class **
+ -keep, allowshrinking, allowoptimization, allowobfuscation class <1>
 
--keep public class com.ustadmobile.door.SyncNode {
-    * ;
-}
+### END
 

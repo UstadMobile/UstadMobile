@@ -135,6 +135,7 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         BlobUploadClientUseCaseJvm(
             chunkedUploadUseCase = on(context).instance(),
             httpClient = instance(),
+            json = instance(),
             httpCache = instance(),
             db = on(context).instance(tag = DoorTag.TAG_DB),
             repo = on(context).instance(tag = DoorTag.TAG_REPO),
@@ -197,7 +198,8 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             importersManager = instance(),
             enqueueBlobUploadClientUseCase = instance(),
             createRetentionLocksForManifestUseCase = instance(),
-            httpClient = instance()
+            httpClient = instance(),
+            json = instance(),
         )
     }
 
@@ -228,6 +230,7 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             enqueueBlobDownloadClientUseCase = instance(),
             db = instance(tag = DoorTag.TAG_DB),
             httpClient = instance(),
+            json = instance(),
         )
     }
 

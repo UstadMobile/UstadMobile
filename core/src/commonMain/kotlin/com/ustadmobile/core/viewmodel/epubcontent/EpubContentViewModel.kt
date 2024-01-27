@@ -29,7 +29,6 @@ import com.ustadmobile.core.contentformats.epub.opf.Item
 import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.domain.epub.GetEpubTableOfContentsUseCase
 import com.ustadmobile.core.util.requireEntryByUri
-import io.ktor.client.call.body
 import org.kodein.di.direct
 import kotlin.concurrent.Volatile
 
@@ -140,7 +139,8 @@ class EpubContentViewModel(
             val cevManifestUrl = contentEntryVersion.cevManifestUrl ?: return@launch
             val cevManifestUrlObj = UrlKmp(cevManifestUrl)
             val opfBaseUrl = cevManifestUrlObj.resolve(cevOpenUri)
-            val manifest: ContentManifest = httpClient.get(cevManifestUrl).body()
+            val manifest: ContentManifest = json.decodeFromString(
+                httpClient.get(cevManifestUrl).bodyAsText())
 
             withContext(Dispatchers.Default) {
                 try {

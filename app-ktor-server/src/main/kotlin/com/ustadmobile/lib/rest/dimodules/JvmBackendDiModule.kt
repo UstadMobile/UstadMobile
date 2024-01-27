@@ -147,6 +147,7 @@ fun makeJvmBackendDiModule(
             createCacheLocksForActiveContentEntryVersionUseCase = CreateCacheLocksForActiveContentEntryVersionUseCase(
                 db = db,
                 httpClient = instance(),
+                json = instance(),
                 endpoint = context,
                 createRetentionLocksForManifestUseCase = CreateRetentionLocksForManifestUseCaseCommonJvm(
                     cache = cache,

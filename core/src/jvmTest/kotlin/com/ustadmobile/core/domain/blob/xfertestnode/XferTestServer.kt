@@ -75,6 +75,7 @@ class XferTestServer(
             bind<CreateCacheLocksForActiveContentEntryVersionUseCase>() with scoped(node.endpointScope).singleton {
                 CreateCacheLocksForActiveContentEntryVersionUseCase(
                     db = instance(tag = DoorTag.TAG_DB),
+                    json = instance(),
                     httpClient = instance(),
                     endpoint = context,
                     createRetentionLocksForManifestUseCase = instance()

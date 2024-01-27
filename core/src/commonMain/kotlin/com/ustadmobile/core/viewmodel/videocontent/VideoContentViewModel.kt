@@ -10,8 +10,8 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.lib.db.entities.ContentEntry
 import io.ktor.client.HttpClient
-import io.ktor.client.call.body
 import io.ktor.client.request.get
+import io.ktor.client.statement.bodyAsText
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -64,12 +64,13 @@ class VideoContentViewModel(
                 .findByUidAsync(entityUidArg) ?: return@launch
 
             launch {
-                val manifest: ContentManifest = httpClient.get(contentEntryVersion.cevManifestUrl!!)
-                    .body()
+                val manifest: ContentManifest = json.decodeFromString(
+                    httpClient.get(contentEntryVersion.cevManifestUrl!!).bodyAsText())
 
                 val mediaInfoUrl = manifest.requireBodyUrlForUri(contentEntryVersion.cevOpenUri!!)
 
-                val mediaInfo: MediaContentInfo = httpClient.get(mediaInfoUrl).body()
+                val mediaInfo: MediaContentInfo = json.decodeFromString(
+                    httpClient.get(mediaInfoUrl).bodyAsText())
 
                 val videoEntry = manifest.requireEntryByUri(
                     mediaInfo.sources.first().uri)

@@ -7,7 +7,6 @@ import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.request.requestBuilder
 import io.ktor.client.HttpClient
-import io.ktor.client.call.body
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -31,8 +30,10 @@ import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.composites.TransferJobItemStatus
 import com.ustadmobile.libcache.response.requireHeadersContentLength
 import io.github.aakira.napier.Napier
+import io.ktor.client.statement.bodyAsText
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
 
 /**
  * Blob upload client implementation that uses local http cache (UstadCache from lib-cache).
@@ -41,6 +42,7 @@ class BlobUploadClientUseCaseJvm(
     private val chunkedUploadUseCase: ChunkedUploadClientChunkGetterUseCase,
     private val httpClient: HttpClient,
     private val httpCache: UstadCache,
+    private val json: Json,
     private val db: UmAppDatabase,
     private val repo: UmAppDatabase,
     private val endpoint: Endpoint,
@@ -172,15 +174,17 @@ class BlobUploadClientUseCaseJvm(
         }
 
         coroutineScope {
-            val response: BlobUploadResponse = httpClient.post("${endpoint.url}api/blob/upload-init-batch") {
-                contentType(ContentType.Application.Json)
-                setBody(
-                    BlobUploadRequest(
-                        blobs = uploadRequestItems,
-                        batchUuid = batchUuid,
+            val response: BlobUploadResponse = json.decodeFromString(
+                httpClient.post("${endpoint.url}api/blob/upload-init-batch") {
+                    contentType(ContentType.Application.Json)
+                    setBody(
+                        BlobUploadRequest(
+                            blobs = uploadRequestItems,
+                            batchUuid = batchUuid,
+                        )
                     )
-                )
-            }.body()
+                }.bodyAsText()
+            )
 
             val blobsToUploadUrls = response.blobsToUpload.map { it.blobUrl }.toSet()
 

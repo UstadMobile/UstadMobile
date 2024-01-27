@@ -15,11 +15,11 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewModel
 import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
-import io.ktor.client.call.body
 import io.ktor.client.plugins.expectSuccess
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.url
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -130,7 +130,7 @@ class ContentEntryImportLinkViewModel(
                     return@launch
                 }
 
-                val metadataResult: MetadataResult = response.body()
+                val metadataResult: MetadataResult = json.decodeFromString(response.bodyAsText())
 
                 when (nextDest) {
                     ContentEntryEditViewModel.DEST_NAME -> {
