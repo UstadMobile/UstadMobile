@@ -1,7 +1,5 @@
-#-keep public class com.ustadmobile.port.desktop.AppKt {
-#    public static void main(java.lang.String[]);
-#}
-#-dontnote *
+
+-printmapping build/release-mapping.txt
 
 -dontnote *
 
@@ -285,3 +283,12 @@
 -keep class com.luciad.imageio.webp.WebPImageWriterSpi { *; }
 -keep class javax.imageio.spi.ImageReaderSpi { *; }
 -keep class com.luciad.imageio.webp.WebPImageReaderSpi { *; }
+
+
+#Fix ClassCastException: not an enum exception. Just using the "official" snippet is not enough.
+#see https://stackoverflow.com/questions/33189249/how-to-tell-proguard-to-keep-enum-constants-and-fields
+-keepclassmembers class * extends java.lang.Enum {
+    <fields>;
+    public static **[] values();
+    public static ** valueOf(java.lang.String);
+}
