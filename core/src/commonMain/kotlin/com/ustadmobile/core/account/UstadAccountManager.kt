@@ -17,7 +17,6 @@ import com.ustadmobile.lib.db.entities.PersonGroup.Companion.PERSONGROUP_FLAG_GU
 import com.ustadmobile.lib.db.entities.PersonGroup.Companion.PERSONGROUP_FLAG_PERSONGROUP
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import io.ktor.client.*
-import io.ktor.client.call.*
 import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.bodyAsText
@@ -36,7 +35,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.*
 import org.kodein.di.DI
@@ -289,7 +287,11 @@ class UstadAccountManager(
         val httpStmt = httpClient.preparePost {
             url("${endpointUrl.removeSuffix("/")}/auth/register")
             contentType(ContentType.Application.Json)
-            setBody(RegisterRequest(person, parentVal, endpointUrl))
+            setBodyJson(
+                json = json,
+                serializer = RegisterRequest.serializer(),
+                value = RegisterRequest(person, parentVal, endpointUrl)
+            )
         }
 
         val (registeredPerson: Person?, status: Int) = httpStmt.execute { response ->

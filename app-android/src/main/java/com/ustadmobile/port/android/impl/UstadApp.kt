@@ -515,7 +515,8 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 endpoint = context,
                 enqueueRemoteImport = EnqueueImportContentEntryUseCaseRemote(
                     endpoint = context,
-                    httpClient = instance()
+                    httpClient = instance(),
+                    json = instance(),
                 )
             )
         }

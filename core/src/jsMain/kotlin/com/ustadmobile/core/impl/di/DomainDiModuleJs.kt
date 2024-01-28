@@ -49,6 +49,7 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
         EnqueueImportContentEntryUseCaseRemote(
             endpoint = context,
             httpClient = instance(),
+            json = instance(),
         )
     }
 

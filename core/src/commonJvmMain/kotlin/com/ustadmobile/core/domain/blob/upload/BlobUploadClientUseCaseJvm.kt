@@ -8,7 +8,6 @@ import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.request.requestBuilder
 import io.ktor.client.HttpClient
 import io.ktor.client.request.post
-import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -26,6 +25,7 @@ import com.ustadmobile.core.domain.blob.BlobTransferStatusUpdate
 import com.ustadmobile.core.domain.blob.transferjobitem.TransferJobItemStatusUpdater
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientChunkGetterUseCase
 import com.ustadmobile.core.domain.upload.DEFAULT_CHUNK_SIZE
+import com.ustadmobile.door.ext.setBodyJson
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.composites.TransferJobItemStatus
 import com.ustadmobile.libcache.response.requireHeadersContentLength
@@ -177,8 +177,10 @@ class BlobUploadClientUseCaseJvm(
             val response: BlobUploadResponse = json.decodeFromString(
                 httpClient.post("${endpoint.url}api/blob/upload-init-batch") {
                     contentType(ContentType.Application.Json)
-                    setBody(
-                        BlobUploadRequest(
+                    setBodyJson(
+                        json = json,
+                        serializer = BlobUploadRequest.serializer(),
+                        value = BlobUploadRequest(
                             blobs = uploadRequestItems,
                             batchUuid = batchUuid,
                         )

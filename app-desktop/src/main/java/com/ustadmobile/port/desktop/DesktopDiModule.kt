@@ -353,6 +353,7 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
             enqueueRemoteImport = EnqueueImportContentEntryUseCaseRemote(
                 endpoint = context,
                 httpClient = instance(),
+                json = instance(),
             )
         )
     }
