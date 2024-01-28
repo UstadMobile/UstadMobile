@@ -26,6 +26,7 @@ import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseJvm
+import com.ustadmobile.core.embeddedhttp.EmbeddedHttpServer
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.PREFKEY_LOCALE
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -129,6 +130,10 @@ fun main() {
                     val httpClient: HttpClient = di.direct.instance()
                     httpFetcher(client = httpClient)
                 }
+            }
+
+            LaunchedEffect(Unit) {
+                di.direct.instance<EmbeddedHttpServer>().start()
             }
 
             CompositionLocalProvider(LocalKamelConfig provides desktopConfig) {

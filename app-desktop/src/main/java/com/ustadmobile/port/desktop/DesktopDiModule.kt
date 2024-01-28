@@ -18,6 +18,7 @@ import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntr
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseJvm
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseRemote
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseJvm
+import com.ustadmobile.core.embeddedhttp.EmbeddedHttpServer
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.config.ApiUrlConfig
@@ -31,7 +32,6 @@ import com.ustadmobile.core.schedule.initQuartzDb
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.uri.UriHelperJvm
 import com.ustadmobile.core.util.DiTag
-import com.ustadmobile.core.util.ext.getCommandFile
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 import com.ustadmobile.core.util.ext.isWindowsOs
 import com.ustadmobile.door.DatabaseBuilder
@@ -39,7 +39,6 @@ import com.ustadmobile.door.RepositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.asRepository
-import com.ustadmobile.lib.util.SysPathUtil
 import com.ustadmobile.lib.util.ext.bindDataSourceIfNotExisting
 import org.kodein.di.DI
 import org.kodein.di.bind
@@ -68,10 +67,12 @@ import nl.adaptivity.xmlutil.serialization.XML
 import nl.adaptivity.xmlutil.serialization.XmlConfig
 import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
+import org.kodein.di.direct
 import org.kodein.di.on
 import org.kodein.di.provider
 import org.quartz.Scheduler
 import org.quartz.impl.StdSchedulerFactory
+import org.xmlpull.v1.XmlPullParserFactory
 import java.io.FileReader
 import java.io.FileWriter
 import java.net.InetAddress
@@ -217,15 +218,14 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
     val resourcesDir = ustadAppResourcesDir()
     val ffmpegResourcesDir = File(resourcesDir, "ffmpeg")
 
-    val ffmpegFile = SysPathUtil.findCommandInPath(
-        commandName = "ffmpeg",
-        manuallySpecifiedLocation = File(ffmpegResourcesDir, "ffmpeg").getCommandFile(),
-    ) ?: throw IllegalStateException("No FFMPEG")
+    //Will be replaced with VLC
+    val ffmpegFile = File("ffmpeg-dummy")
 
-    val ffprobeFile = SysPathUtil.findCommandInPath(
-        commandName = "ffprobe",
-        manuallySpecifiedLocation = File(ffmpegResourcesDir, "ffprobe").getCommandFile(),
-    ) ?: throw IllegalStateException("No FFMPEG")
+//    val ffprobeFile = SysPathUtil.findCommandInPath(
+//        commandName = "ffprobe",
+//        manuallySpecifiedLocation = File(ffmpegResourcesDir, "ffprobe").getCommandFile(),
+//    ) ?: throw IllegalStateException("No FFMPEG")
+    val ffprobeFile = File("ffprobe-dummy")
 
     bind<SupportedLanguagesConfig>() with singleton {
         SupportedLanguagesConfig(
@@ -414,6 +414,22 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
     bind<FFprobe>() with provider {
         FFprobe(ffprobeFile.absolutePath)
     }
+
+    bind<XmlPullParserFactory>(tag  = DiTag.XPP_FACTORY_NSAWARE) with singleton {
+        XmlPullParserFactory.newInstance().also {
+            it.isNamespaceAware = true
+        }
+    }
+
+    bind<EmbeddedHttpServer>() with singleton {
+        EmbeddedHttpServer(
+            port = 0,
+            contentEntryVersionServerUseCase = {
+                di.on(it).direct.instance()
+            }
+        )
+    }
+
 
     onReady {
         instance<File>(tag = TAG_DATA_DIR).takeIf { !it.exists() }?.mkdirs()

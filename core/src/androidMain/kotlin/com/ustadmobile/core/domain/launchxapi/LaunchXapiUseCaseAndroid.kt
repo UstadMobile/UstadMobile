@@ -30,7 +30,7 @@ class LaunchXapiUseCaseAndroid(
     override suspend fun invoke(
         contentEntryVersionUid: Long,
         navController: UstadNavController,
-    ) {
+    ): LaunchXapiUseCase.LaunchResult {
         val htmlContentEngine = getHtmlContentDisplayEngineUseCase()
         when(htmlContentEngine.code) {
             HTML_ENGINE_USE_CHROMETAB -> {
@@ -88,6 +88,7 @@ class LaunchXapiUseCaseAndroid(
             }
         }
 
+        return LaunchXapiUseCase.LaunchResult(null)
 
     }
 }

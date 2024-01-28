@@ -40,8 +40,14 @@ import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryG
 import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCaseCommonJvm
 import com.ustadmobile.core.domain.contententry.importcontent.ImportContentEntryUseCase
+import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServerUseCase
+import com.ustadmobile.core.domain.htmlcontentdisplayengine.GetChromePathUseCase
+import com.ustadmobile.core.domain.htmlcontentdisplayengine.GetChromePathUseCaseJvm
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseJvm
+import com.ustadmobile.core.domain.launchxapi.LaunchXapiUseCase
+import com.ustadmobile.core.domain.launchxapi.LaunchXapiUseCaseJvm
+import com.ustadmobile.core.domain.launchxapi.ResolveXapiLaunchHrefUseCase
 import com.ustadmobile.core.domain.phonenumber.OnClickPhoneNumUseCase
 import com.ustadmobile.core.domain.phonenumber.OnClickPhoneNumUseCaseJvm
 import com.ustadmobile.core.domain.sendemail.OnClickEmailUseCase
@@ -252,6 +258,39 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         GetStoragePathForUrlUseCaseCommonJvm(
             httpClient = instance(),
             cache = instance(),
+        )
+    }
+
+    bind<ResolveXapiLaunchHrefUseCase>() with scoped(EndpointScope.Default).singleton {
+        ResolveXapiLaunchHrefUseCase(
+            activeRepo = instance(tag = DoorTag.TAG_REPO),
+            httpClient = instance(),
+            json = instance(),
+            xppFactory = instance(tag = DiTag.XPP_FACTORY_NSAWARE),
+        )
+    }
+
+    bind<GetChromePathUseCase>() with singleton {
+        GetChromePathUseCaseJvm(workingDir = ustadAppDataDir())
+    }
+
+    bind<LaunchXapiUseCase>() with scoped(EndpointScope.Default).singleton {
+        LaunchXapiUseCaseJvm(
+            endpoint = context,
+            resolveXapiLaunchHrefUseCase = instance(),
+            embeddedHttpServer = instance(),
+            getChromePathUseCase = instance(),
+            dataDir = ustadAppDataDir(),
+        )
+    }
+
+    bind<ContentEntryVersionServerUseCase>() with scoped(EndpointScope.Default).singleton {
+        ContentEntryVersionServerUseCase(
+            db = instance(tag = DoorTag.TAG_DB),
+            repo = instance(tag = DoorTag.TAG_REPO),
+            okHttpClient = instance(),
+            json = instance(),
+            onlyIfCached = false,
         )
     }
 }

@@ -76,7 +76,9 @@ dependencyResolutionManagement {
             version("version_apache_commons_pool2", "2.12.0")
             version("version_apache_commons_pool1", "1.6")
             version("version_apache_commons_dbcp1", "1.4")
-
+            version("version_nanohttpd", "2.3.1")
+            version("version_xmlpullparserkmp", "0.0.26")
+            version("version_kxml2", "2.3.0")
 
 
             plugin("jetbrains-compose", "org.jetbrains.compose").versionRef("jetbrains-compose")
@@ -108,6 +110,7 @@ dependencyResolutionManagement {
             library("htmltext-android", "de.charlex.compose.material3", "material3-html-text").versionRef("version_htmltext_android")
             library("aztec", "org.wordpress", "aztec").versionRef("version_aztec")
             library("androidx-constraintlayout", "androidx.constraintlayout", "constraintlayout").versionRef("version_androidx_constraintlayout")
+            library("xmlpullparsekmp", "com.github.UstadMobile", "xmlpullparserkmp").versionRef("version_xmlpullparserkmp")
 
             // Dependencies of Aztec: Versions must be fixed to ensure that they point to versions available
             // on mavenCentral after jcenter shutdown.
@@ -179,6 +182,8 @@ dependencyResolutionManagement {
             library("apache-commons-pool2", "org.apache.commons", "commons-pool2").versionRef("version_apache_commons_pool2")
             library("apache-commons-pool", "commons-pool", "commons-pool").versionRef("version_apache_commons_pool1")
             library("apache-commons-dbcp", "commons-dbcp", "commons-dbcp").versionRef("version_apache_commons_dbcp1")
+            library("nanohttpd", "org.nanohttpd", "nanohttpd").versionRef("version_nanohttpd")
+            library("kxml2", "net.sf.kxml", "kxml2").versionRef("version_kxml2")
         }
     }
 }

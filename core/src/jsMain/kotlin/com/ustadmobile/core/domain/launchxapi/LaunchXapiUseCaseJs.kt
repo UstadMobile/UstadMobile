@@ -6,11 +6,15 @@ import com.ustadmobile.core.viewmodel.xapicontent.XapiContentViewModel
 
 class LaunchXapiUseCaseJs: LaunchXapiUseCase {
 
-    override suspend fun invoke(contentEntryVersionUid: Long, navController: UstadNavController) {
+    override suspend fun invoke(
+        contentEntryVersionUid: Long,
+        navController: UstadNavController
+    ) : LaunchXapiUseCase.LaunchResult{
         navController.navigate(
             viewName = XapiContentViewModel.DEST_NAME,
             args = mapOf(UstadViewModel.ARG_ENTITY_UID to contentEntryVersionUid.toString())
         )
+        return LaunchXapiUseCase.LaunchResult(null)
     }
 
 }

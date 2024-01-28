@@ -292,3 +292,8 @@
     public static **[] values();
     public static ** valueOf(java.lang.String);
 }
+
+
+#Xml pull parser services
+-keep class org.kxml2.io.KXmlParser { *; }
+-keep class org.kxml2.io.KXmlSerializer { *; }
