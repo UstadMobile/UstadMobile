@@ -121,7 +121,6 @@ compose.desktop {
         // https://github.com/JetBrains/compose-multiplatform/tree/master/tutorials/Native_distributions_and_local_execution#minification--obfuscation
         buildTypes.release.proguard {
             obfuscate.set(true)
-            //optimize.set(true)
             configurationFiles.from(project.file("compose-desktop.pro"))
         }
 

@@ -279,3 +279,9 @@
     public static **[] values();
     public static ** valueOf(java.lang.String);
 }
+
+#ImageIO: Service Provider Interface (including webp image writer spi)
+-keep class javax.imageio.spi.ImageReaderSpi { *; }
+-keep class com.luciad.imageio.webp.WebPImageWriterSpi { *; }
+-keep class javax.imageio.spi.ImageReaderSpi { *; }
+-keep class com.luciad.imageio.webp.WebPImageReaderSpi { *; }
