@@ -266,3 +266,16 @@
 
 ### END
 
+## BEGIN : Relevant rules from default Android proguard settings
+# https://android.googlesource.com/platform/sdk/+/master/files/proguard-android-optimize.txt
+
+# For native methods, see http://proguard.sourceforge.net/manual/examples.html#native
+-keepclasseswithmembernames class * {
+    native <methods>;
+}
+
+# For enumeration classes, see http://proguard.sourceforge.net/manual/examples.html#enumerations
+-keepclassmembers,allowoptimization enum * {
+    public static **[] values();
+    public static ** valueOf(java.lang.String);
+}
