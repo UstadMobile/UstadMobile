@@ -23,6 +23,8 @@ import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseCommonJvm
 import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
 import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseJvm
+import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
+import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCaseFfprobe
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.DiTag.TAG_CONTEXT_DATA_ROOT
 import com.ustadmobile.door.ext.*
@@ -182,6 +184,7 @@ fun Application.umRestApplication(
 
     val json = Json {
         encodeDefaults = true
+        ignoreUnknownKeys = true
     }
 
     //Check for required external commands
@@ -484,6 +487,12 @@ fun Application.umRestApplication(
                 scheduler = instance(),
                 endpoint = context,
                 enqueueRemoteImport = null
+            )
+        }
+
+        bind<ValidateVideoFileUseCase>() with provider {
+            ValidateVideoFileUseCaseFfprobe(
+                ffprobe = instance()
             )
         }
 

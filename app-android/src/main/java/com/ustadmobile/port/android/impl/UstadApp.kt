@@ -21,7 +21,7 @@ import com.ustadmobile.core.contentformats.ContentImportersManager
 import com.ustadmobile.core.contentformats.epub.EpubContentImporterCommonJvm
 import com.ustadmobile.core.contentformats.h5p.H5PContentImporter
 import com.ustadmobile.core.contentformats.pdf.PdfContentImporterAndroid
-import com.ustadmobile.core.contentformats.video.VideoContentImporterAndroid
+import com.ustadmobile.core.contentformats.video.VideoContentImporterCommonJvm
 import com.ustadmobile.core.contentformats.xapi.XapiZipContentImporter
 import com.ustadmobile.core.db.*
 import com.ustadmobile.core.db.ext.addSyncCallback
@@ -80,6 +80,8 @@ import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseAndroid
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientChunkGetterUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
+import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
+import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCaseAndroid
 import com.ustadmobile.core.embeddedhttp.EmbeddedHttpServer
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
@@ -357,9 +359,9 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                     )
 
                     add(
-                        VideoContentImporterAndroid(
+                        VideoContentImporterCommonJvm(
                             endpoint = context,
-                            appContext = applicationContext,
+                            validateVideoFileUseCase = instance(),
                             uriHelper = uriHelper,
                             cache = cache,
                             tmpPath = contentImportTmpPath,
@@ -629,6 +631,10 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
         bind<SetHtmlContentDisplayEngineUseCase>() with singleton {
             SetHtmlContentDisplayEngineUseCase(settings = instance())
+        }
+
+        bind<ValidateVideoFileUseCase>() with singleton {
+            ValidateVideoFileUseCaseAndroid(appContext = applicationContext)
         }
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }

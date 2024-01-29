@@ -18,6 +18,8 @@ import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntr
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseJvm
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseRemote
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseJvm
+import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
+import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCaseMediaInfo
 import com.ustadmobile.core.embeddedhttp.EmbeddedHttpServer
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -32,6 +34,7 @@ import com.ustadmobile.core.schedule.initQuartzDb
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.uri.UriHelperJvm
 import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.core.util.ext.getCommandFile
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 import com.ustadmobile.core.util.ext.isWindowsOs
 import com.ustadmobile.door.DatabaseBuilder
@@ -39,6 +42,7 @@ import com.ustadmobile.door.RepositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.asRepository
+import com.ustadmobile.lib.util.SysPathUtil
 import com.ustadmobile.lib.util.ext.bindDataSourceIfNotExisting
 import org.kodein.di.DI
 import org.kodein.di.bind
@@ -60,8 +64,6 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.io.files.Path
 import kotlinx.serialization.json.Json
-import net.bramp.ffmpeg.FFmpeg
-import net.bramp.ffmpeg.FFprobe
 import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
 import nl.adaptivity.xmlutil.serialization.XML
 import nl.adaptivity.xmlutil.serialization.XmlConfig
@@ -69,7 +71,6 @@ import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
 import org.kodein.di.direct
 import org.kodein.di.on
-import org.kodein.di.provider
 import org.quartz.Scheduler
 import org.quartz.impl.StdSchedulerFactory
 import org.xmlpull.v1.XmlPullParserFactory
@@ -216,16 +217,13 @@ val DesktopHttpModule = DI.Module("Desktop-HTTP") {
 @OptIn(ExperimentalXmlUtilApi::class)
 val DesktopDiModule = DI.Module("Desktop-Main") {
     val resourcesDir = ustadAppResourcesDir()
-    val ffmpegResourcesDir = File(resourcesDir, "ffmpeg")
+    val mediaInfoResourcesDir = File(resourcesDir, "mediainfo")
 
     //Will be replaced with VLC
-    val ffmpegFile = File("ffmpeg-dummy")
-
-//    val ffprobeFile = SysPathUtil.findCommandInPath(
-//        commandName = "ffprobe",
-//        manuallySpecifiedLocation = File(ffmpegResourcesDir, "ffprobe").getCommandFile(),
-//    ) ?: throw IllegalStateException("No FFMPEG")
-    val ffprobeFile = File("ffprobe-dummy")
+    val mediaInfoFile = SysPathUtil.findCommandInPath(
+        commandName = "mediainfo",
+        manuallySpecifiedLocation = File(mediaInfoResourcesDir, "mediainfo").getCommandFile(),
+    ) ?: throw IllegalStateException("No MediaInfo found")
 
     bind<SupportedLanguagesConfig>() with singleton {
         SupportedLanguagesConfig(
@@ -313,6 +311,7 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
     bind<Json>() with singleton {
         Json {
             encodeDefaults = true
+            ignoreUnknownKeys = true
         }
     }
 
@@ -407,12 +406,12 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         )
     }
 
-    bind<FFmpeg>() with provider {
-        FFmpeg(ffmpegFile.absolutePath)
-    }
-
-    bind<FFprobe>() with provider {
-        FFprobe(ffprobeFile.absolutePath)
+    bind<ValidateVideoFileUseCase>() with singleton {
+        ValidateVideoFileUseCaseMediaInfo(
+            mediaInfoPath = mediaInfoFile.absolutePath,
+            workingDir = ustadAppDataDir(),
+            json = instance(),
+        )
     }
 
     bind<XmlPullParserFactory>(tag  = DiTag.XPP_FACTORY_NSAWARE) with singleton {

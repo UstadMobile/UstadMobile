@@ -6,22 +6,29 @@ import com.ustadmobile.core.contentformats.ContentImporter
 import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.contentformats.media.MediaContentInfo
 import com.ustadmobile.core.contentformats.media.MediaSource
+import com.ustadmobile.core.contentformats.media.VideoConstants
 import com.ustadmobile.core.contentformats.storeText
+import com.ustadmobile.core.contentjob.InvalidContentException
+import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
 import com.ustadmobile.core.domain.cachestoragepath.getLocalUriIfRemote
 import com.ustadmobile.core.domain.contententry.ContentConstants
+import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
 import com.ustadmobile.core.io.ext.toDoorUri
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.util.ext.requireSourceAsDoorUri
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryImportJob
 import com.ustadmobile.lib.db.entities.ContentEntryVersion
+import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.libcache.UstadCache
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.io.buffered
@@ -32,17 +39,30 @@ import kotlinx.io.writeString
 import kotlinx.serialization.json.Json
 import java.io.File
 
-abstract class AbstractVideoContentImporterCommonJvm(
+class VideoContentImporterCommonJvm(
     endpoint: Endpoint,
-    protected val cache: UstadCache,
-    protected val uriHelper: UriHelper,
-    protected val json: Json,
-    protected val fileSystem: FileSystem = SystemFileSystem,
-    protected val db: UmAppDatabase,
-    protected val tmpPath: Path,
-    protected val saveLocalUriAsBlobAndManifestUseCase: SaveLocalUriAsBlobAndManifestUseCase,
-    protected val getStoragePathForUrlUseCase: GetStoragePathForUrlUseCase,
+    private val cache: UstadCache,
+    private val uriHelper: UriHelper,
+    private val json: Json,
+    private val fileSystem: FileSystem = SystemFileSystem,
+    private val db: UmAppDatabase,
+    private val tmpPath: Path,
+    private val saveLocalUriAsBlobAndManifestUseCase: SaveLocalUriAsBlobAndManifestUseCase,
+    private val getStoragePathForUrlUseCase: GetStoragePathForUrlUseCase,
+    private val validateVideoFileUseCase: ValidateVideoFileUseCase,
 ) : ContentImporter(endpoint) {
+
+
+    override val importerId: Int
+        get() = 101
+    override val supportedMimeTypes: List<String>
+        get() = listOf("video/mpeg")
+
+    override val supportedFileExtensions: List<String>
+        get() = TODO("Not yet implemented")
+
+    override val formatName: String
+        get() = "Video(MP4, M4V, Quicktime, WEBM, OGV, AVI)"
 
     /**
      * This is not responsible for checking that this is actually a video file, that is done by
@@ -138,6 +158,44 @@ abstract class AbstractVideoContentImporterCommonJvm(
             )
         }finally {
             File(workDir.toString()).deleteRecursively()
+        }
+    }
+
+    override suspend fun extractMetadata(
+        uri: DoorUri,
+        originalFilename: String?
+    ): MetadataResult? = withContext(Dispatchers.IO) {
+        val hasVideoExtension = originalFilename?.substringAfterLast(".")?.lowercase()?.let {
+            it in VideoConstants.VIDEO_EXT_LIST
+        } ?: false
+
+        //Check if this looks like it should be a video file
+        if(!hasVideoExtension && uriHelper.getMimeType(uri)?.startsWith("video/") != true) {
+            return@withContext null
+        }
+
+        try {
+            val localUri = getStoragePathForUrlUseCase.getLocalUriIfRemote(uri)
+            val hasVideo = validateVideoFileUseCase(localUri)
+
+            if(hasVideo) {
+                return@withContext MetadataResult(
+                    entry = ContentEntryWithLanguage().apply {
+                        title = originalFilename ?: uri.toString().substringAfterLast("/")
+                            .substringBefore("?")
+                        leaf = true
+                        sourceUrl = uri.toString()
+                        contentTypeFlag = ContentEntry.TYPE_VIDEO
+                    },
+                    importerId = importerId,
+                    originalFilename = originalFilename,
+                )
+            }
+
+            throw InvalidContentException("No video stream")
+        }catch(e: Throwable) {
+            Napier.w(throwable = e) { "Exception importing what looked like video: $e" }
+            throw InvalidContentException("Exception importing what looked like video", e)
         }
     }
 }
