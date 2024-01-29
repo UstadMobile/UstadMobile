@@ -109,7 +109,8 @@ for COMMONFLOWFILE in $(ls $SCRIPTDIR/common); do
 done
 
 # Start control server
-$SCRIPTDIR/../../testserver-controller/start.sh $TESTRESULTSDIR
+#$SCRIPTDIR/../../testserver-controller/start.sh $TESTRESULTSDIR
+$SCRIPTDIR/../../testserver-controller/start.sh --siteUrl $ENDPOINT --resultsDir $TESTRESULTSDIR
 
 export ANDROID_SERIAL=$TESTSERIAL
 adb reverse tcp:8075 tcp:8075
