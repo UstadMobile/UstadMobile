@@ -68,6 +68,9 @@ tasks.withType<KotlinCompile> {
 //
 //tasks.named("build").dependsOn("unzipFfmpegWindows")
 
+//Required to build proguard release jars for conveyor build.
+tasks.named("build").dependsOn("proguardReleaseJars")
+
 dependencies {
     implementation(compose.desktop.currentOs)
     implementation(project(":core"))
