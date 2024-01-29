@@ -1,7 +1,6 @@
 import com.android.build.gradle.internal.tasks.factory.dependsOn
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-import org.jetbrains.kotlin.de.undercouch.gradle.tasks.download.Download
 
 //Roughly as per
 // https://github.com/JetBrains/compose-multiplatform-desktop-template#readme
@@ -13,7 +12,6 @@ plugins {
     kotlin("jvm")
     alias(libs.plugins.jetbrains.compose)
     alias(libs.plugins.conveyor)
-    alias(libs.plugins.download.task)
 }
 
 kotlin {
@@ -28,45 +26,6 @@ tasks.withType<KotlinCompile> {
     compilerOptions.freeCompilerArgs.add("-Xexpect-actual-classes")
 }
 
-/*
- * For Windows: we must downlaod and include FFMPEG. See ustadAppResourcesDir() for details on
- * paths used.
- */
-//val downloadDestDir = File(project.layout.buildDirectory.asFile.get(), "download")
-//val winFfmpegDownloadFile = File(downloadDestDir, "ffmpeg-2023-11-05-git-44a0148fad-full_build.zip")
-//tasks.register("downloadFfmpeg", Download::class) {
-//    downloadDestDir.takeIf { !it.exists() }?.mkdirs()
-//
-//    src("https://github.com/GyanD/codexffmpeg/releases/download/2023-11-05-git-44a0148fad/ffmpeg-2023-11-05-git-44a0148fad-full_build.zip")
-//    onlyIfModified(true)
-//    useETag(true)
-//
-//    dest(winFfmpegDownloadFile)
-//}
-//
-//tasks.register("unzipFfmpegWindows") {
-//    dependsOn("downloadFfmpeg")
-//    inputs.file(winFfmpegDownloadFile)
-//
-//    doLast {
-//        copy {
-//            from(
-//                zipTree(winFfmpegDownloadFile).matching {
-//                    include("**/ffmpeg.exe")
-//                }.singleFile
-//            )
-//            from(
-//                zipTree(winFfmpegDownloadFile).matching {
-//                    include("**/ffprobe.exe")
-//                }.singleFile
-//            )
-//
-//            into(project.layout.projectDirectory.file("app-resources/windows/ffmpeg"))
-//        }
-//    }
-//}
-//
-//tasks.named("build").dependsOn("unzipFfmpegWindows")
 
 //Required to build proguard release jars for conveyor build.
 tasks.named("build").dependsOn("proguardReleaseJars")

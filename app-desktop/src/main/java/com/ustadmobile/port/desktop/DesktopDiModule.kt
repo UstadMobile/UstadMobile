@@ -219,7 +219,6 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
     val resourcesDir = ustadAppResourcesDir()
     val mediaInfoResourcesDir = File(resourcesDir, "mediainfo")
 
-    //Will be replaced with VLC
     val mediaInfoFile = SysPathUtil.findCommandInPath(
         commandName = "mediainfo",
         manuallySpecifiedLocation = File(mediaInfoResourcesDir, "mediainfo").getCommandFile(),
