@@ -197,7 +197,8 @@ include ':app-android',
         ':sharedse',
         ':lib-util',
         ':testserver-controller',
-        ':lib-database'
+        ':lib-database',
+        ':lib-ui-compose-videoplayer'
 
 rootProject.name = "UstadMobile"
 

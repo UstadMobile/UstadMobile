@@ -88,6 +88,7 @@ kotlin {
                 implementation(libs.autolink)
                 implementation(libs.mpfilepicker)
                 implementation(libs.kamel)
+                implementation(project(":lib-ui-compose-videoplayer"))
             }
         }
     }

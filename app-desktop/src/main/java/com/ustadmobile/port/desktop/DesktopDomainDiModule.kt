@@ -35,6 +35,8 @@ import com.ustadmobile.core.domain.blob.upload.UpdateFailedTransferJobUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCaseCommonJvm
 import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseJvm
+import com.ustadmobile.core.domain.contententry.getlocalurlforcontent.GetLocalUrlForContentUseCase
+import com.ustadmobile.core.domain.contententry.getlocalurlforcontent.GetLocalUrlForContentUseCaseCommonJvm
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCase
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCaseCommonJvm
 import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCase
@@ -291,6 +293,13 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             okHttpClient = instance(),
             json = instance(),
             onlyIfCached = false,
+        )
+    }
+
+    bind<GetLocalUrlForContentUseCase>() with scoped(EndpointScope.Default).provider {
+        GetLocalUrlForContentUseCaseCommonJvm(
+            endpoint = context,
+            embeddedHttpServer = instance(),
         )
     }
 }

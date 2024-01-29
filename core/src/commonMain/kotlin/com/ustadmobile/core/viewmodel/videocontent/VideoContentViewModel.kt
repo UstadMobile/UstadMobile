@@ -1,5 +1,6 @@
 package com.ustadmobile.core.viewmodel.videocontent
 
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.contentformats.media.MediaContentInfo
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
@@ -21,14 +22,20 @@ import org.kodein.di.DI
 import org.kodein.di.instance
 
 /**
- * @param mediaSrc the uri within the ContentEntry as per ContentManifestEntry.uri . This will be
- *        served with the expected mime type by the content endpoint api.
+ * @param mediaSrc the url to the endpoint using the content api e.g.
+ *        http://endpoint-server.com/api/content/contentEntryVersionUid/video . This is guaranteed
+ *        to serve the request with the expected mime type.
+ *
  * @param mediaDataUrl the url for the media as per ContentEntryManifest.bodyDataUrl . This might
  *        not have headers exactly as per the ContentEntryManifest. This seems to be fine for
  *        ExoPlayer.
  */
 data class VideoContentUiState(
     val mediaContentInfo: MediaContentInfo? = null,
+
+    val contentEntryVersionUid: Long = 0,
+
+    val endpoint: Endpoint? = null,
 
     val mediaSrc: String? = null,
 
@@ -37,7 +44,13 @@ data class VideoContentUiState(
     val mediaMimeType: String? = null,
 
     val contentEntry: ContentEntry? = null,
-)
+) {
+    /**
+     * The path of the media item within the content
+     */
+    val firstMediaUri: String?
+        get() = mediaContentInfo?.sources?.firstOrNull()?.uri
+}
 
 class VideoContentViewModel(
     di: DI,
@@ -82,6 +95,8 @@ class VideoContentViewModel(
 
                 _uiState.update { prev ->
                     prev.copy(
+                        contentEntryVersionUid = entityUidArg,
+                        endpoint = accountManager.activeEndpoint,
                         mediaContentInfo = mediaInfo,
                         mediaDataUrl = dataUrl,
                         mediaSrc = mediaSrc,

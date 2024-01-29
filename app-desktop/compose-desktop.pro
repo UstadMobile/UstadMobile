@@ -297,3 +297,10 @@
 #Xml pull parser services
 -keep class org.kxml2.io.KXmlParser { *; }
 -keep class org.kxml2.io.KXmlSerializer { *; }
+
+#VLC4J - not using MacOS
+-dontwarn com.apple.eawt.**
+
+# As per https://github.com/java-native-access/jna/issues/1187
+-keep class com.sun.jna.** { *; }
+-keep class * implements com.sun.jna.** { *; }

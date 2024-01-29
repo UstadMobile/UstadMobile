@@ -1,8 +1,29 @@
 package com.ustadmobile.libuicompose.view.videocontent
 
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PauseCircleOutline
+import androidx.compose.material.icons.filled.PlayCircleOutline
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Slider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import com.ustadmobile.core.domain.contententry.getlocalurlforcontent.GetLocalUrlForContentUseCase
+import com.ustadmobile.core.util.ext.onActiveEndpoint
+import com.ustadmobile.core.viewmodel.videocontent.VideoContentUiState
 import com.ustadmobile.core.viewmodel.videocontent.VideoContentViewModel
+import org.jetbrains.compose.videoplayer.VideoPlayer
+import org.jetbrains.compose.videoplayer.rememberVideoPlayerState
+import org.kodein.di.compose.localDI
+import org.kodein.di.direct
+import org.kodein.di.instance
 
 /**
  * See https://github.com/caprica/vlcj
@@ -11,5 +32,57 @@ import com.ustadmobile.core.viewmodel.videocontent.VideoContentViewModel
 actual fun VideoContentScreen(
     viewModel: VideoContentViewModel,
 ) {
-    Text("Video Content - Desktop - Coming Soon")
+
+    val uiState by viewModel.uiState.collectAsState(VideoContentUiState())
+    VideoContentScreen(uiState)
 }
+
+@Composable
+fun VideoContentScreen(
+    uiState: VideoContentUiState
+) {
+    val mediaSrc = uiState.firstMediaUri
+    val endpoint = uiState.endpoint
+    if(mediaSrc != null && endpoint != null) {
+        val di = localDI()
+        val getLocalUrlForContentUseCase: GetLocalUrlForContentUseCase = remember {
+            di.onActiveEndpoint().direct.instance()
+        }
+
+        val url = remember(uiState.contentEntryVersionUid, mediaSrc) {
+            getLocalUrlForContentUseCase(uiState.contentEntryVersionUid, mediaSrc)
+        }
+
+        val state = rememberVideoPlayerState()
+
+        Column {
+            VideoPlayer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(fraction = 0.8f),
+                url = url,
+                state = state,
+                onFinish = state::stopPlayback
+            )
+            Row(modifier = Modifier.fillMaxWidth()) {
+                IconButton(
+                    onClick = state::toggleResume
+                ) {
+                    Icon(
+                        if(state.isResumed) Icons.Default.PauseCircleOutline else Icons.Default.PlayCircleOutline,
+                        contentDescription = "play/pause - localize me"
+                    )
+                }
+
+                Slider(
+                    value = state.progress.value.fraction,
+                    onValueChange = { state.seek = it },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+
+    }
+}
+
+
