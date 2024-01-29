@@ -10,7 +10,8 @@ data class Progress(
     val fraction: Float,
     // TODO: Use kotlin.time.Duration when Kotlin version is updated.
     //  See https://github.com/Kotlin/api-guidelines/issues/6
-    val timeMillis: Long
+    val timeMillis: Long,
+    val length: Long,
 )
 
 @Composable
@@ -58,7 +59,7 @@ fun rememberVideoPlayerState(
         volume,
         isResumed,
         isFullscreen,
-        Progress(0f, 0)
+        Progress(0f, 0, -1)
     )
 }
 

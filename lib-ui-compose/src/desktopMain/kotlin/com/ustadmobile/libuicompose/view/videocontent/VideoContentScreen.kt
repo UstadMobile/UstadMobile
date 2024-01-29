@@ -9,11 +9,14 @@ import androidx.compose.material.icons.filled.PauseCircleOutline
 import androidx.compose.material.icons.filled.PlayCircleOutline
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.ustadmobile.core.domain.contententry.getlocalurlforcontent.GetLocalUrlForContentUseCase
 import com.ustadmobile.core.util.ext.onActiveEndpoint
@@ -24,6 +27,7 @@ import org.jetbrains.compose.videoplayer.rememberVideoPlayerState
 import org.kodein.di.compose.localDI
 import org.kodein.di.direct
 import org.kodein.di.instance
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * See https://github.com/caprica/vlcj
@@ -54,6 +58,21 @@ fun VideoContentScreen(
         }
 
         val state = rememberVideoPlayerState()
+        val progressVal = state.progress.value
+        val totalTime = remember(progressVal.length) {
+            if(progressVal.length > 0) {
+                (progressVal.length / 1000).seconds.toString()
+            }else {
+                null
+            }
+        }
+        val currentTime = remember(progressVal.timeMillis) {
+            if(progressVal.timeMillis >= 0){
+                (progressVal.timeMillis / 1000).seconds.toString()
+            }else {
+                null
+            }
+        }
 
         Column {
             VideoPlayer(
@@ -64,7 +83,10 @@ fun VideoContentScreen(
                 state = state,
                 onFinish = state::stopPlayback
             )
-            Row(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 IconButton(
                     onClick = state::toggleResume
                 ) {
@@ -79,6 +101,14 @@ fun VideoContentScreen(
                     onValueChange = { state.seek = it },
                     modifier = Modifier.weight(1f)
                 )
+
+                if(totalTime != null && currentTime != null) {
+                    Text(
+                        "$currentTime / $totalTime",
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                }
+
             }
         }
 

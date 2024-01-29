@@ -114,7 +114,8 @@ private fun MediaPlayer.emitProgressTo(state: MutableState<Progress>) {
         while (isActive) {
             val fraction = status().position()
             val time = status().time()
-            state.value = Progress(fraction, time)
+            val length = status().length()
+            state.value = Progress(fraction, time, length)
             delay(50)
         }
     }
