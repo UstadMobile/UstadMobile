@@ -81,7 +81,7 @@ allprojects {
 }
 
 //Major.minor.database version
-version = "0.4.36"
+version = "0.4.37"
 group = "com.ustadmobile.app"
 
 /**
@@ -91,7 +91,7 @@ group = "com.ustadmobile.app"
  */
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 261
+    ustadVersionCode = 262
 
     version_retriever = "0.0.1e"
     version_xmlpullparserkmp = '0.0.26'
