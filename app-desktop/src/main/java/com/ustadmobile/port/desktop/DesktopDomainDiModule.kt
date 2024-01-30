@@ -256,7 +256,7 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
 
 
 
-    bind<GetStoragePathForUrlUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<GetStoragePathForUrlUseCase>() with singleton {
         GetStoragePathForUrlUseCaseCommonJvm(
             httpClient = instance(),
             cache = instance(),

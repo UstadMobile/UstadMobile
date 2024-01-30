@@ -89,6 +89,7 @@ kotlin {
                 implementation(libs.mpfilepicker)
                 implementation(libs.kamel)
                 implementation(project(":lib-ui-compose-videoplayer"))
+                implementation(libs.pdfbox)
             }
         }
     }

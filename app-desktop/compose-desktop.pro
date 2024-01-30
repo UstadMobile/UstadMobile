@@ -304,3 +304,13 @@
 # As per https://github.com/java-native-access/jna/issues/1187
 -keep class com.sun.jna.** { *; }
 -keep class * implements com.sun.jna.** { *; }
+
+# PDFBox
+-dontwarn org.apiguardian.api.**
+
+#-keep class org.apache.commons.logging.impl.LogFactoryImpl {
+#    public <init>(...);
+#}
+
+-keep class org.apache.commons.logging.** { *; }
+-keep class org.apache.fontbox.** { *; }

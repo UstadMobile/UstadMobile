@@ -79,7 +79,7 @@ dependencyResolutionManagement {
             version("version_nanohttpd", "2.3.1")
             version("version_xmlpullparserkmp", "0.0.26")
             version("version_kxml2", "2.3.0")
-
+            version("version_pdfbox", "3.0.1")
 
             plugin("jetbrains-compose", "org.jetbrains.compose").versionRef("jetbrains-compose")
             plugin("moko-resources-plugin", "dev.icerock.mobile.multiplatform-resources").versionRef("version-moko-resources")
@@ -184,6 +184,7 @@ dependencyResolutionManagement {
             library("apache-commons-dbcp", "commons-dbcp", "commons-dbcp").versionRef("version_apache_commons_dbcp1")
             library("nanohttpd", "org.nanohttpd", "nanohttpd").versionRef("version_nanohttpd")
             library("kxml2", "net.sf.kxml", "kxml2").versionRef("version_kxml2")
+            library("pdfbox", "org.apache.pdfbox", "pdfbox").versionRef("version_pdfbox")
         }
     }
 }

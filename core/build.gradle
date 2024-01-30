@@ -165,7 +165,7 @@ kotlin {
             resources.srcDirs += ["src/main/assets"]
 
             dependencies {
-                implementation "org.apache.pdfbox:pdfbox:$version_pdfbox_apache"
+                implementation libs.pdfbox
                 implementation "org.jsoup:jsoup:$version_jsoup"
                 implementation "com.google.code.gson:gson:$version_gson"
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
