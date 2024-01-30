@@ -24,14 +24,14 @@ class ValidateVideoFileUseCaseMediaInfo(
     @Suppress("unused")
     @Serializable
     class MediaInfoResult(
-        val creatingLibrary: MediaInfoCreatingLibrary,
+        val creatingLibrary: MediaInfoCreatingLibrary? = null,
         val media: MediaInfoMediaElement? = null,
     )
 
     @Suppress("unused")
     @Serializable
     class MediaInfoCreatingLibrary(
-        val name: String,
+        val name: String? = null,
         val version: String? = null,
         val url: String? = null,
     )
