@@ -298,8 +298,12 @@
 -keep class org.kxml2.io.KXmlParser { *; }
 -keep class org.kxml2.io.KXmlSerializer { *; }
 
-#VLC4J - not using MacOS
+#VLC4J - should not warn if not sure we are using MacOS
 -dontwarn com.apple.eawt.**
+
+#Service loader for VLC4J
+-keep class * implements uk.co.caprica.vlcj.factory.discovery.provider.DiscoveryDirectoryProvider { *; }
+-keep interface uk.co.caprica.vlcj.factory.discovery.provider.DiscoveryDirectoryProvider { *; }
 
 # As per https://github.com/java-native-access/jna/issues/1187
 -keep class com.sun.jna.** { *; }
