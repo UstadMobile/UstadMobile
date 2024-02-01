@@ -133,7 +133,10 @@ fun main() {
             }
 
             LaunchedEffect(Unit) {
-                di.direct.instance<EmbeddedHttpServer>().start()
+                di.direct.instance<EmbeddedHttpServer>().also {
+                    it.start()
+                    Napier.i("Embedded Server running on port ${it.listeningPort}")
+                }
             }
 
             CompositionLocalProvider(LocalKamelConfig provides desktopConfig) {

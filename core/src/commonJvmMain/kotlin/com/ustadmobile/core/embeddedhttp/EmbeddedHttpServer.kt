@@ -2,18 +2,30 @@ package com.ustadmobile.core.embeddedhttp
 
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServerUseCase
+import com.ustadmobile.libcache.headers.MimeTypeHelper
 import com.ustadmobile.libcache.request.HttpRequest
 import com.ustadmobile.libcache.request.requestBuilder
 import fi.iki.elonen.NanoHTTPD
 import io.github.aakira.napier.Napier
 import net.thauvin.erik.urlencoder.UrlEncoderUtil
-import java.io.ByteArrayInputStream
-import okhttp3.Response as OkHttpResponse
+import java.io.File
 
+/**
+ * Embedded server used on Android and JVM/Desktop
+ */
 class EmbeddedHttpServer(
     port: Int,
+    private val staticUmAppFilesDir: File,
     private val contentEntryVersionServerUseCase: (Endpoint) -> ContentEntryVersionServerUseCase,
+    private val mimeTypeHelper: MimeTypeHelper,
 ) : NanoHTTPD(port) {
+
+    fun List<String>.joinPathSegments(
+        start: Int,
+        end: Int = this.size
+    ): String{
+        return subList(start, end).joinToString(separator = "/")
+    }
 
     /**
      *
@@ -42,25 +54,7 @@ class EmbeddedHttpServer(
         }
     }
 
-    private fun OkHttpResponse.toHttpdResponse() : Response{
-        val contentLength = header("content-length")?.toLong()
-        val inStream = body?.byteStream() ?: ByteArrayInputStream(ByteArray(0))
-        val status = Response.Status.lookup(code)
-        val contentType = header("content-type") ?: "application/octet-stream"
-        val response = if(contentLength != null) {
-            newFixedLengthResponse(
-                status, contentType, inStream, contentLength
-            )
-        }else {
-            newChunkedResponse(status, contentType, inStream)
-        }
 
-        headers.names().forEach { headerName ->
-            response.addHeader(headerName, headers[headerName] ?: "")
-        }
-
-        return response
-    }
 
     /**
      * When serving /e/(endpointUrl)/ - the endpoint MUST be double encoded. NanoHTTPD will
@@ -108,6 +102,13 @@ class EmbeddedHttpServer(
 
                     else -> newNotFoundResponse(session)
                 }
+            }
+            "umapp" -> {
+                val responseFile = File(staticUmAppFilesDir, pathSegments.joinPathSegments(3))
+                return responseFile.toHttpdResponse(
+                    session = session,
+                    contentType = mimeTypeHelper.guessByExtension(responseFile.extension) ?: "application/octet-stream"
+                )
             }
 
             else -> newNotFoundResponse(session)

@@ -67,21 +67,23 @@ entire project.
 *  __Step 1: Download and install Android Studio__: If you don't already have the latest version, download 
 from [https://developer.android.com/studio](https://developer.android.com/studio).
 
-* __Step 2: Make sure that java is on your system path__: If you already have OpenJDK17+, you can 
+* __Step 2: Make sure that java is on your system path__: If you already have OpenJDK21, you can 
   use that, otherwise you need to download from the Java website or install using your system package
   manager.
 
+Supported JDK Version: JDK17 (only). JDK21 not supported yet due to [Compose Multiplatform issue](https://github.com/JetBrains/compose-multiplatform/issues/4216).
+
 Linux:
 
-Install OpenJDK17+ and ffmpeg using the system package manager e.g.
+Install OpenJDK17, ffmpeg, and mediainfo using the system package manager e.g.
 
 ```
-sudo apt-get install openjdk-18-jdk ffmpeg
+sudo apt-get install openjdk-17-jdk ffmpeg mediainfo
 ```
 
 Windows: 
 
-Download and install Java (JDK17+) if not already installed from the Java site
+Download and install Java (JDK17) if not already installed from the Java site
 [https://www.oracle.com/java/technologies/downloads/#jdk17-windows](https://www.oracle.com/java/technologies/downloads/#jdk17-windows)
 
 The installer should automatically put the java command into the system PATH environment variable.

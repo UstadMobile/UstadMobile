@@ -55,6 +55,7 @@ import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
+import com.ustadmobile.libcache.headers.MimeTypeHelper
 import com.ustadmobile.libcache.logging.NapierLoggingAdapter
 import com.ustadmobile.libcache.okhttp.UstadCacheInterceptor
 import io.ktor.client.HttpClient
@@ -145,6 +146,10 @@ val DesktopHttpModule = DI.Module("Desktop-HTTP") {
             if(!it.exists())
                 it.mkdirs()
         }
+    }
+
+    bind<MimeTypeHelper>() with singleton {
+        FileMimeTypeHelperImpl()
     }
 
     bind<UriHelper>() with singleton {
@@ -424,7 +429,9 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
             port = 0,
             contentEntryVersionServerUseCase = {
                 di.on(it).direct.instance()
-            }
+            },
+            staticUmAppFilesDir = File(resourcesDir, "umapp"),
+            mimeTypeHelper = instance()
         )
     }
 

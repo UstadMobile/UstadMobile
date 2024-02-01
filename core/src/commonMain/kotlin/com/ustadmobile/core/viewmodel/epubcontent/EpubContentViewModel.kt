@@ -29,6 +29,7 @@ import com.ustadmobile.core.contentformats.epub.opf.Item
 import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.domain.epub.GetEpubTableOfContentsUseCase
 import com.ustadmobile.core.util.requireEntryByUri
+import net.thauvin.erik.urlencoder.UrlEncoderUtil
 import org.kodein.di.direct
 import kotlin.concurrent.Volatile
 
@@ -127,16 +128,27 @@ class EpubContentViewModel(
     private var navUrl: String? =null
 
     init {
+        val argManifestUrl = savedStateHandle[ARG_MANIFEST_URL]
+        val argCevOpenUri = savedStateHandle[ARG_CEV_URI]
+
         _appUiState.update { prev ->
             prev.copy(
                 hideBottomNavigation = true,
             )
         }
         viewModelScope.launch {
-            val contentEntryVersion = activeRepo.contentEntryVersionDao
-                .findByUidAsync(entityUidArg) ?: return@launch
-            val cevOpenUri = contentEntryVersion.cevOpenUri ?: return@launch
-            val cevManifestUrl = contentEntryVersion.cevManifestUrl ?: return@launch
+            val (cevManifestUrl, cevOpenUri) = if(argManifestUrl != null && argCevOpenUri != null) {
+                argManifestUrl to argCevOpenUri
+            }else {
+                val contentEntryVersion = activeRepo.contentEntryVersionDao
+                    .findByUidAsync(entityUidArg) ?: return@launch
+                val entityCevManifestUrl = contentEntryVersion.cevManifestUrl ?: return@launch
+                val entityCevOpenUri = contentEntryVersion.cevOpenUri ?: return@launch
+                entityCevManifestUrl to entityCevOpenUri
+            }
+            println("EpubContentViewModel manifest=$cevManifestUrl cevOpenUri=$cevOpenUri")
+            println("EpubContent?$ARG_MANIFEST_URL=${UrlEncoderUtil.encode(cevManifestUrl)}&$ARG_CEV_URI=${UrlEncoderUtil.encode(cevOpenUri)}")
+
             val cevManifestUrlObj = UrlKmp(cevManifestUrl)
             val opfBaseUrl = cevManifestUrlObj.resolve(cevOpenUri)
             val manifest: ContentManifest = json.decodeFromString(
@@ -279,6 +291,10 @@ class EpubContentViewModel(
     }
 
     companion object {
+
+        const val ARG_MANIFEST_URL = "manifestUrl"
+
+        const val ARG_CEV_URI = "cevUri"
 
         const val DEST_NAME = "EpubContent"
 
