@@ -6,6 +6,11 @@ if [ ! -e $BASEDIR/build/server.pid ]; then
     echo "No build/server.pid file. Nothing to stop."
 fi
 
+if [ "$1" == "--generatereport" ]; then
+   java -classpath $BASEDIR/build/libs/testserver-controller-all.jar \
+  com.ustadmobile.test.http.AdbVideoReportMakerKt $BASEDIR/../
+fi
+
 wget -qO- http://localhost:8075/stop
 
 PID=$(cat $BASEDIR/build/server.pid)
