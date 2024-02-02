@@ -103,7 +103,7 @@ fun main() {
         // https://conveyor.hydraulic.dev/13.0/tutorial/tortoise/2-gradle/#setting-icons
         val appIcon = remember {
             ustadAppResourcesDir().let {
-                Paths.get(it.absolutePath, "icon-512.png")
+                Paths.get(it.absolutePath, "icon/icon-512.png")
             }.takeIf { it.exists() }
                 ?.inputStream()
                 ?.buffered()
