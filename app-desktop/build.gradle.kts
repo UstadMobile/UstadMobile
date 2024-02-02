@@ -138,10 +138,17 @@ compose.desktop {
             description = "Ustad Mobile"
             copyright = "© UstadMobile FZ-LLC."
             licenseFile.set(rootProject.file("LICENSE"))
+
+
             windows {
                 packageVersion = "1.0.0"
                 msiPackageVersion = "1.0.0"
                 exePackageVersion = "1.0.0"
+                iconFile.set(project.file("icon.ico"))
+            }
+
+            linux {
+                iconFile.set(project.file("icon.png"))
             }
         }
     }
