@@ -1,13 +1,10 @@
 package com.ustadmobile.libuicompose.view.schedule.edit
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -25,6 +22,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
 import com.ustadmobile.libuicompose.components.UstadMessageIdOptionExposedDropDownMenuField
 import com.ustadmobile.libuicompose.components.UstadTimeField
+import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 
 @Composable
@@ -44,10 +42,8 @@ fun ScheduleEditScreen(
     uiState: ScheduleEditUiState = ScheduleEditUiState(),
     onScheduleChanged: (Schedule?) -> Unit = {},
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState()),
+    UstadVerticalScrollColumn(
+        modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     )  {
         UstadMessageIdOptionExposedDropDownMenuField(

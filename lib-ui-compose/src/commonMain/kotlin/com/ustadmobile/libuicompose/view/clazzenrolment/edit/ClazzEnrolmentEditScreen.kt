@@ -1,6 +1,5 @@
 package com.ustadmobile.libuicompose.view.clazzenrolment.edit
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,6 +21,7 @@ import com.ustadmobile.libuicompose.components.UstadDateField
 import com.ustadmobile.libuicompose.components.UstadExposedDropDownMenuField
 import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
 import com.ustadmobile.libuicompose.components.UstadMessageIdOptionExposedDropDownMenuField
+import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.Dispatchers
@@ -46,7 +46,7 @@ fun ClazzEnrolmentEditScreen(
     onClazzEnrolmentChanged: (ClazzEnrolmentWithLeavingReason?) -> Unit = {},
 ) {
 
-    Column(
+    UstadVerticalScrollColumn(
         modifier = Modifier
     )  {
 

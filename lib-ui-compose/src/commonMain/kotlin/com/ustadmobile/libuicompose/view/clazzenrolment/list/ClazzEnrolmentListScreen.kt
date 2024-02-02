@@ -2,7 +2,6 @@ package com.ustadmobile.libuicompose.view.clazzenrolment.list
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
@@ -26,6 +25,7 @@ import com.ustadmobile.core.viewmodel.clazzenrolment.list.ClazzEnrolmentListItem
 import com.ustadmobile.core.viewmodel.clazzenrolment.list.ClazzEnrolmentListUiState
 import com.ustadmobile.core.viewmodel.clazzenrolment.list.ClazzEnrolmentListViewModel
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
+import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadQuickActionButton
 import com.ustadmobile.libuicompose.util.compose.courseTerminologyEntryResource
 import com.ustadmobile.libuicompose.util.compose.rememberCourseTerminologyEntries
@@ -52,7 +52,7 @@ fun ClazzEnrolmentListScreen(
 ){
     val courseTerminologyEntries = rememberCourseTerminologyEntries(uiState.courseTerminology)
 
-    LazyColumn(
+    UstadLazyColumn(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxWidth()

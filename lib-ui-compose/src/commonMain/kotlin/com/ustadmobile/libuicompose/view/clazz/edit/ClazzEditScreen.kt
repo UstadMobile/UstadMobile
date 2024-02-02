@@ -2,7 +2,6 @@ package com.ustadmobile.libuicompose.view.clazz.edit
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -37,6 +36,7 @@ import com.ustadmobile.libuicompose.components.UstadBottomSheetOption
 import com.ustadmobile.libuicompose.components.UstadClickableTextField
 import com.ustadmobile.libuicompose.components.UstadDateField
 import com.ustadmobile.libuicompose.components.UstadImageSelectButton
+import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadRichTextEdit
 import com.ustadmobile.libuicompose.components.UstadSwitchField
 import com.ustadmobile.libuicompose.util.compose.stringIdMapResource
@@ -195,7 +195,7 @@ fun ClazzEditScreen(
         }
     )
 
-    LazyColumn(
+    UstadLazyColumn(
         state = reorderLazyListState.listState,
         modifier = Modifier
             .reorderable(reorderLazyListState)

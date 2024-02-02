@@ -1,6 +1,5 @@
 package com.ustadmobile.libuicompose.view.parentalconsentmanagement
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,6 +26,7 @@ import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.libuicompose.components.UstadDetailHeader
 import com.ustadmobile.libuicompose.components.UstadHtmlText
 import com.ustadmobile.libuicompose.components.UstadMessageIdOptionExposedDropDownMenuField
+import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
 import kotlinx.datetime.TimeZone
@@ -56,7 +56,7 @@ fun ParentalConsentManagementScreen(
     onClickChangeConsent: () -> Unit = {},
     onChangeRelation: (PersonParentJoin?) -> Unit = {}
 ) {
-    Column(
+    UstadVerticalScrollColumn(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
     )  {
         val minorDateOfBirth = rememberFormattedDate(

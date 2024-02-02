@@ -1,3 +1,4 @@
+import com.android.build.gradle.internal.tasks.factory.dependsOn
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
@@ -10,6 +11,7 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 plugins {
     kotlin("jvm")
     alias(libs.plugins.jetbrains.compose)
+    alias(libs.plugins.conveyor)
 }
 
 kotlin {
@@ -22,6 +24,31 @@ java.targetCompatibility = JavaVersion.VERSION_17
 tasks.withType<KotlinCompile> {
     compilerOptions.jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
     compilerOptions.freeCompilerArgs.add("-Xexpect-actual-classes")
+}
+
+/*
+ * Displaying Epubs on Desktop is done by serving the Web Version using the embeddedd server -
+ * see LaunchEpubUseCaseJvm for details/rationale.
+ */
+val bundleWebTask by tasks.register("bundleWeb", Copy::class) {
+    dependsOn(":app-react:build")
+    from(rootProject.file("app-react/build/dist-web/"))
+    into(project.file("app-resources/common/"))
+}
+
+val cleanWebBundleTask by tasks.register("cleanWebBundle", Delete::class) {
+    delete(project.file("app-resources/common/umapp"))
+}
+
+//Required to build proguard release jars for conveyor build.
+tasks.named("build").dependsOn("proguardReleaseJars")
+tasks.named("clean").dependsOn("cleanWebBundle")
+tasks.named("build").dependsOn("bundleWeb")
+
+tasks.whenObjectAdded {
+    if(name == "prepareAppResources" || name.startsWith("package")) {
+        dependsOn(bundleWebTask)
+    }
 }
 
 dependencies {
@@ -38,37 +65,78 @@ dependencies {
     implementation(libs.napier)
     implementation(libs.javaffmpeg)
 
-    api(libs.moko.resources)
-    api(libs.moko.resources.compose)
-    api(libs.precompose)
-    api(libs.precompose.viewmodel)
+    implementation(libs.moko.resources)
+    implementation(libs.moko.resources.compose)
+    implementation(libs.precompose)
+    implementation(libs.precompose.viewmodel)
     implementation(libs.libphonenumber.google)
     implementation(libs.kamel)
     implementation(libs.ktor.client.okhttp)
+
+    //Not really being used directly, but lack of this class seems to confuse proguard
+    implementation(libs.jspecify)
+    implementation(libs.apache.commons.pool)
+    implementation(libs.apache.commons.dbcp)
+    implementation(libs.kodein.di)
+    implementation(libs.kodein.kaverit)
+
+
+    implementation(libs.nanohttpd)
+    implementation(libs.xmlpullparsekmp)
+    implementation(libs.kxml2)
+
+    //as per https://conveyor.hydraulic.dev/13.0/tutorial/tortoise/2-gradle/#adapting-a-compose-desktop-app
+    linuxAmd64(compose.desktop.linux_x64)
+    macAmd64(compose.desktop.macos_x64)
+    macAarch64(compose.desktop.macos_arm64)
+    windowsAmd64(compose.desktop.windows_x64)
+}
+
+//As per https://conveyor.hydraulic.dev/13.0/tutorial/tortoise/2-gradle/#adapting-a-compose-desktop-app
+configurations.all {
+    attributes {
+        attribute(Attribute.of("ui", String::class.java), "awt")
+    }
 }
 
 compose.desktop {
     application {
+        //might check https://conveyor.hydraulic.dev/13.0/troubleshooting/troubleshooting-jvm/#localization-doesnt-work-when-packaged
         mainClass = "com.ustadmobile.port.desktop.AppKt"
 
+        //https://blog.jetbrains.com/kotlin/2022/10/compose-multiplatform-1-2-is-out/#proguard
+        // https://conveyor.hydraulic.dev/13.0/configs/jvm/#proguard-obfuscation
+        // https://github.com/JetBrains/compose-multiplatform/tree/master/tutorials/Native_distributions_and_local_execution#minification--obfuscation
+        buildTypes.release.proguard {
+            obfuscate.set(true)
+            configurationFiles.from(project.file("compose-desktop.pro"))
+        }
+
+
         nativeDistributions {
+            //As per https://github.com/JetBrains/compose-multiplatform/blob/master/tutorials/Native_distributions_and_local_execution/README.md#adding-files-to-packaged-application
+            appResourcesRootDir.set(project.layout.projectDirectory.dir("app-resources"))
+
             // https://github.com/JetBrains/compose-multiplatform/blob/master/tutorials/Native_distributions_and_local_execution/README.md
-            modules("java.sql")
             modules("java.base")
+            modules("java.sql")
+            modules("java.naming")
+
+            /*
+             * Suggested module jdk.xml.dom not needed and adds 6MB to output size. Others have no
+             * size impact.
+             */
             modules("java.compiler")
             modules("java.instrument")
             modules("java.management")
-            modules("java.naming")
             modules("java.rmi")
             modules("jdk.unsupported")
-            modules("jdk.xml.dom")
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi)
             packageVersion = "1.0.0"
             packageName = "UstadMobile"
             version = rootProject.version
             description = "Ustad Mobile"
             copyright = "© UstadMobile FZ-LLC."
-            vendor = "UstadMobile FZ-LLC"
             licenseFile.set(rootProject.file("LICENSE"))
             windows {
                 packageVersion = "1.0.0"

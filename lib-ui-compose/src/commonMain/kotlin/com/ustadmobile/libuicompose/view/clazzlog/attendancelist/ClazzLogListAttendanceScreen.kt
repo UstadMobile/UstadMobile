@@ -3,7 +3,6 @@ package com.ustadmobile.libuicompose.view.clazzlog.attendancelist
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Text
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
@@ -35,6 +34,7 @@ import com.ustadmobile.libuicompose.components.ustadPagedItems
 import androidx.compose.runtime.remember
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.ustadmobile.libuicompose.components.UstadBottomSheetOption
+import com.ustadmobile.libuicompose.components.UstadLazyColumn
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -83,7 +83,7 @@ fun ClazzLogListAttendanceScreen(
 
     val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
 
-    LazyColumn(
+    UstadLazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
 

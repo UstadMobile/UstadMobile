@@ -3,7 +3,6 @@ package com.ustadmobile.libuicompose.view.person.list
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,6 +23,7 @@ import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadPersonAvatar
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
@@ -64,7 +64,7 @@ fun PersonListScreen(
 
     val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
 
-    LazyColumn(
+    UstadLazyColumn(
         modifier = Modifier
             .padding(vertical = 8.dp)
             .fillMaxWidth()

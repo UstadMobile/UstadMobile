@@ -1,9 +1,7 @@
 package com.ustadmobile.libuicompose.view.site.detail
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DriveFileRenameOutline
 import androidx.compose.material.icons.filled.HowToReg
@@ -21,6 +19,7 @@ import com.ustadmobile.core.viewmodel.site.detail.SiteDetailViewModel
 import com.ustadmobile.lib.db.composites.SiteTermsAndLangName
 import com.ustadmobile.libuicompose.components.UstadDetailField2
 import com.ustadmobile.libuicompose.components.UstadDetailHeader
+import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 import com.ustadmobile.libuicompose.util.compose.yesNoStringResource
 import dev.icerock.moko.resources.compose.stringResource
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
@@ -43,8 +42,8 @@ fun SiteDetailScreen(
     onClickTerms: (SiteTermsAndLangName) -> Unit = {},
 ){
 
-    Column(
-        modifier = Modifier.verticalScroll(rememberScrollState())
+    UstadVerticalScrollColumn(
+        modifier = Modifier.fillMaxSize(),
     ) {
         UstadDetailField2(
             valueText = uiState.site?.siteName ?: "",

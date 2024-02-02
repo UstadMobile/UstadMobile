@@ -27,8 +27,8 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseAndroid
-import com.ustadmobile.core.domain.launchxapi.LaunchXapiUseCase
-import com.ustadmobile.core.domain.launchxapi.LaunchXapiUseCaseAndroid
+import com.ustadmobile.core.domain.contententry.launchcontent.xapi.LaunchXapiUseCase
+import com.ustadmobile.core.domain.contententry.launchcontent.xapi.LaunchXapiUseCaseAndroid
 import com.ustadmobile.core.impl.ContainerStorageManager
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl

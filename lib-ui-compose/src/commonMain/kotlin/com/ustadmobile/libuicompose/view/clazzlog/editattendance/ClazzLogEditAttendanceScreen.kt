@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -41,6 +40,7 @@ import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord
 import com.ustadmobile.core.MR
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.libuicompose.components.ClazzLogEditAttendanceToggleGroup
+import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadPersonAvatar
 import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
 import dev.icerock.moko.resources.compose.stringResource
@@ -66,7 +66,7 @@ fun ClazzLogEditAttendanceScreen(
     onChangeClazzLog: (ClazzLog) -> Unit = {},
     onClazzLogAttendanceChanged: (PersonAndClazzLogAttendanceRecord) -> Unit = {}
 ) {
-    LazyColumn(
+    UstadLazyColumn(
         modifier = Modifier
             .fillMaxSize()
     )  {

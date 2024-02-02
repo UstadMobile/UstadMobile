@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -57,6 +56,7 @@ import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.libuicompose.components.SortListMode
 import com.ustadmobile.libuicompose.components.UstadAsyncImage
 import com.ustadmobile.libuicompose.components.UstadBottomSheetOption
+import com.ustadmobile.libuicompose.components.UstadLazyVerticalGrid
 import com.ustadmobile.libuicompose.components.UstadListFilterChipsHeader
 import com.ustadmobile.libuicompose.components.UstadListSortHeader
 import com.ustadmobile.libuicompose.components.ustadPagedItems
@@ -158,7 +158,7 @@ fun ClazzListScreen(
 
     val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
 
-    LazyVerticalGrid(
+    UstadLazyVerticalGrid(
         modifier = Modifier.fillMaxSize(),
 
         // 600 width of the smallest iPad,

@@ -35,13 +35,22 @@ import com.ustadmobile.core.domain.blob.upload.UpdateFailedTransferJobUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCaseCommonJvm
 import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseJvm
+import com.ustadmobile.core.domain.contententry.getlocalurlforcontent.GetLocalUrlForContentUseCase
+import com.ustadmobile.core.domain.contententry.getlocalurlforcontent.GetLocalUrlForContentUseCaseCommonJvm
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCase
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCaseCommonJvm
 import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCaseCommonJvm
 import com.ustadmobile.core.domain.contententry.importcontent.ImportContentEntryUseCase
+import com.ustadmobile.core.domain.contententry.launchcontent.epub.LaunchEpubUseCase
+import com.ustadmobile.core.domain.contententry.launchcontent.epub.LaunchEpubUseCaseJvm
+import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServerUseCase
+import com.ustadmobile.core.domain.htmlcontentdisplayengine.LaunchChromeUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseJvm
+import com.ustadmobile.core.domain.contententry.launchcontent.xapi.LaunchXapiUseCase
+import com.ustadmobile.core.domain.contententry.launchcontent.xapi.LaunchXapiUseCaseJvm
+import com.ustadmobile.core.domain.contententry.launchcontent.xapi.ResolveXapiLaunchHrefUseCase
 import com.ustadmobile.core.domain.phonenumber.OnClickPhoneNumUseCase
 import com.ustadmobile.core.domain.phonenumber.OnClickPhoneNumUseCaseJvm
 import com.ustadmobile.core.domain.sendemail.OnClickEmailUseCase
@@ -135,6 +144,7 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         BlobUploadClientUseCaseJvm(
             chunkedUploadUseCase = on(context).instance(),
             httpClient = instance(),
+            json = instance(),
             httpCache = instance(),
             db = on(context).instance(tag = DoorTag.TAG_DB),
             repo = on(context).instance(tag = DoorTag.TAG_REPO),
@@ -197,7 +207,8 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             importersManager = instance(),
             enqueueBlobUploadClientUseCase = instance(),
             createRetentionLocksForManifestUseCase = instance(),
-            httpClient = instance()
+            httpClient = instance(),
+            json = instance(),
         )
     }
 
@@ -228,6 +239,7 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             enqueueBlobDownloadClientUseCase = instance(),
             db = instance(tag = DoorTag.TAG_DB),
             httpClient = instance(),
+            json = instance(),
         )
     }
 
@@ -245,10 +257,58 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
 
 
 
-    bind<GetStoragePathForUrlUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<GetStoragePathForUrlUseCase>() with singleton {
         GetStoragePathForUrlUseCaseCommonJvm(
             httpClient = instance(),
             cache = instance(),
+        )
+    }
+
+    bind<ResolveXapiLaunchHrefUseCase>() with scoped(EndpointScope.Default).singleton {
+        ResolveXapiLaunchHrefUseCase(
+            activeRepo = instance(tag = DoorTag.TAG_REPO),
+            httpClient = instance(),
+            json = instance(),
+            xppFactory = instance(tag = DiTag.XPP_FACTORY_NSAWARE),
+        )
+    }
+
+    bind<LaunchChromeUseCase>() with singleton {
+        LaunchChromeUseCase(workingDir = ustadAppDataDir())
+    }
+
+    bind<LaunchXapiUseCase>() with scoped(EndpointScope.Default).singleton {
+        LaunchXapiUseCaseJvm(
+            endpoint = context,
+            resolveXapiLaunchHrefUseCase = instance(),
+            embeddedHttpServer = instance(),
+            launchChromeUseCase = instance(),
+        )
+    }
+
+    bind<LaunchEpubUseCase>() with scoped(EndpointScope.Default).singleton {
+        LaunchEpubUseCaseJvm(
+            launchChromeUseCase = instance(),
+            embeddedHttpServer = instance(),
+            endpoint = context,
+            systemImpl = instance(),
+        )
+    }
+
+    bind<ContentEntryVersionServerUseCase>() with scoped(EndpointScope.Default).singleton {
+        ContentEntryVersionServerUseCase(
+            db = instance(tag = DoorTag.TAG_DB),
+            repo = instance(tag = DoorTag.TAG_REPO),
+            okHttpClient = instance(),
+            json = instance(),
+            onlyIfCached = false,
+        )
+    }
+
+    bind<GetLocalUrlForContentUseCase>() with scoped(EndpointScope.Default).provider {
+        GetLocalUrlForContentUseCaseCommonJvm(
+            endpoint = context,
+            embeddedHttpServer = instance(),
         )
     }
 }

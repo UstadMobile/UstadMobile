@@ -630,8 +630,9 @@ fun AppNavHost(
 
             contentScene("/${EpubContentViewModel.DEST_NAME}") { backStackEntry ->
                 EpubContentScreen(
-                    appViewModel(backStackEntry, EpubContentViewModel::class,
-                        ::EpubContentViewModel)
+                    appViewModel(backStackEntry, EpubContentViewModel::class) { di, savedStateHandle ->
+                        EpubContentViewModel(di, savedStateHandle, useBodyDataUrls = true)
+                    }
                 )
             }
 

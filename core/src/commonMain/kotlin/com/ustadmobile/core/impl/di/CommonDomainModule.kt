@@ -4,6 +4,8 @@ import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.domain.assignment.submittername.GetAssignmentSubmitterNameUseCase
 import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.ApproveOrDeclinePendingEnrolmentUseCase
 import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.IApproveOrDeclinePendingEnrolmentRequestUseCase
+import com.ustadmobile.core.domain.contententry.launchcontent.DefaultLaunchContentEntryVersionUseCase
+import com.ustadmobile.core.domain.contententry.launchcontent.LaunchContentEntryVersionUseCase
 import com.ustadmobile.core.domain.contententry.save.SaveContentEntryUseCase
 import com.ustadmobile.core.domain.siteterms.GetLocaleForSiteTermsUseCase
 import com.ustadmobile.door.ext.DoorTag
@@ -45,6 +47,10 @@ fun commonDomainDiModule(endpointScope: EndpointScope) = DI.Module("CommonDomain
             supportedLangConfig = instance(),
             repo = on(context).instance(tag = DoorTag.TAG_REPO)
         )
+    }
+
+    bind<LaunchContentEntryVersionUseCase>() with scoped(endpointScope).provider {
+        DefaultLaunchContentEntryVersionUseCase()
     }
 
 }
