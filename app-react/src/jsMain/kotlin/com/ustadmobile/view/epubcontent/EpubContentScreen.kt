@@ -2,7 +2,6 @@ package com.ustadmobile.view.epubcontent
 
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useLaunchedEffect
-import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.util.ext.forEach
 import com.ustadmobile.core.viewmodel.epubcontent.EpubContentUiState
 import com.ustadmobile.core.viewmodel.epubcontent.EpubContentViewModel
@@ -10,7 +9,6 @@ import com.ustadmobile.core.viewmodel.epubcontent.EpubScrollCommand
 import com.ustadmobile.core.viewmodel.epubcontent.EpubTocItem
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.useUstadViewModel
-import com.ustadmobile.mui.components.ThemeContext
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListContext
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
@@ -27,16 +25,9 @@ import kotlinx.coroutines.flow.update
 import mui.material.Box
 import mui.material.Drawer
 import mui.material.DrawerAnchor
-import mui.material.IconButton
-import mui.material.ListItem
-import mui.material.ListItemButton
-import mui.material.ListItemSecondaryAction
-import mui.material.ListItemText
-import mui.material.Tooltip
 import mui.system.sx
 import react.FC
 import react.Props
-import react.ReactNode
 import react.create
 import react.dom.html.ReactHTML.iframe
 import react.useEffect
@@ -52,18 +43,19 @@ import web.cssom.None
 import web.cssom.Overflow
 import web.cssom.pct
 import web.cssom.px
-import web.cssom.vw
 import web.dom.getComputedStyle
 import web.html.HTMLIFrameElement
 import web.scroll.ScrollBehavior
 import kotlin.math.roundToInt
-import mui.material.List as MuiList
-import mui.icons.material.KeyboardArrowUp as KeyboardArrowUpIcon
-import mui.icons.material.KeyboardArrowDown as KeyboardArrowDownIcon
-import com.ustadmobile.core.MR
-import react.dom.aria.ariaLabel
-import react.dom.html.ReactHTML.img
-import web.cssom.TextAlign
+import com.ustadmobile.hooks.useWindowSize
+import kotlinx.coroutines.delay
+import mui.material.Container
+import mui.material.DrawerVariant
+import mui.material.useMediaQuery
+import web.cssom.Auto
+import web.cssom.GridTemplateAreas
+import web.cssom.array
+import web.cssom.ident
 
 external interface EpubContentProps : Props{
     var uiState: EpubContentUiState
@@ -78,6 +70,14 @@ external interface EpubContentProps : Props{
 
     var onClickToggleTogItem: (EpubTocItem) -> Unit
 }
+
+object EpubArea{
+    val NavAreaWidth = 250.px
+
+    val NavArea = ident("nav_area")
+    val EpubContentArea = ident("epub_content_area")
+}
+
 
 /**
  * The EpubContentComponent uses a Virtual List where each element uses an Iframe. the Iframe
@@ -99,9 +99,7 @@ external interface EpubContentProps : Props{
  */
 val EpubContentComponent = FC<EpubContentProps> { props ->
     val muiAppState = useMuiAppState()
-    val theme by useRequiredContext(ThemeContext)
-    val strings = useStringProvider()
-
+    val mobileMode = useMediaQuery("(max-width:960px)")
 
     val defaultHeightMap = useMemo(dependencies = emptyArray()) {
         MutableStateFlow(mapOf<Int, String>())
@@ -121,120 +119,96 @@ val EpubContentComponent = FC<EpubContentProps> { props ->
         scrollByCommandFlow.tryEmit(amount)
     }
 
-    Drawer {
-        anchor = DrawerAnchor.right
-        open = props.uiState.tableOfContentsOpen
-        onClose = { _, _ ->
-            props.onDismissTableOfContents()
+    Box {
+        sx {
+            display = Display.grid
+            gridTemplateRows = array(Auto.auto)
+            gridTemplateColumns = if(mobileMode){
+                array(Auto.auto)
+            }else {
+                array(Auto.auto, EpubArea.NavAreaWidth)
+            }
+
+            gridTemplateAreas = GridTemplateAreas(
+                if(mobileMode) {
+                    arrayOf(EpubArea.EpubContentArea)
+                }else {
+                    arrayOf(EpubArea.EpubContentArea, EpubArea.NavArea)
+                }
+            )
         }
 
-        MuiList {
-            sx {
-                maxWidth = 90.vw
+        VirtualList {
+            key = "epub_spine_virtual_list"
+            style = jso {
+                height = "calc(100vh - ${muiAppState.appBarHeight}px)".unsafeCast<Height>()
+                width = 100.pct
+                contain = Contain.strict
+                overflowY = Overflow.scroll
+                gridArea = EpubArea.EpubContentArea
             }
 
-            Box {
-                sx {
-                    paddingTop = muiAppState.appBarHeight.px
-                    textAlign = TextAlign.center
-                }
-
-                props.uiState.coverImageUrl?.also { coverUrl ->
-                    img {
-                        src = coverUrl
-                        css {
-                            maxWidth = 300.px
-                            maxHeight = 300.px
-                            paddingTop = theme.spacing(2)
-                        }
-                    }
-                }
-
-            }
-
-            props.uiState.tableOfContentToDisplay.forEach { tocItem ->
-                ListItem {
-                    key = "toc_${tocItem.uid}"
-
-                    ListItemButton {
-                        sx {
-                            paddingLeft = theme.spacing(2 + (tocItem.indentLevel * 2))
-                        }
-                        onClick = {
-                            props.onClickTocItem(tocItem)
-                        }
-
-                        ListItemText {
-                            primary = ReactNode(tocItem.label)
-                        }
-                    }
-
-                    if(tocItem.hasChildren) {
-                        ListItemSecondaryAction {
-                            val collapsed = tocItem.uid in props.uiState.collapsedTocUids
-                            val text = strings[if(collapsed) MR.strings.expand else MR.strings.collapse]
-                            Tooltip {
-                                title = ReactNode(text)
-
-                                IconButton {
-                                    onClick = {
-                                        props.onClickToggleTogItem(tocItem)
-                                    }
-                                    ariaLabel = text
-
-                                    if(collapsed) {
-                                        KeyboardArrowDownIcon()
-                                    }else {
-                                        KeyboardArrowUpIcon()
-                                    }
+            content = virtualListContent {
+                itemsIndexed(
+                    list = props.uiState.spineUrls,
+                    key = { _, index -> "spine_$index" }
+                ) { item, index ->
+                    EpubSpineItem.create {
+                        url = item
+                        itemIndex = index
+                        defaultHeight = defaultHeights[index]?.unsafeCast<Height>() ?: 600.px
+                        onHeightChanged = { newHeight ->
+                            defaultHeightMap.update { prev ->
+                                buildMap {
+                                    putAll(prev)
+                                    put(index, newHeight.toString())
                                 }
                             }
                         }
-                    }
-                }
-            }
-        }
-    }
-
-    VirtualList {
-        style = jso {
-            height = "calc(100vh - ${muiAppState.appBarHeight}px)".unsafeCast<Height>()
-            width = 100.pct
-            contain = Contain.strict
-            overflowY = Overflow.scroll
-        }
-
-        content = virtualListContent {
-            itemsIndexed(
-                list = props.uiState.spineUrls,
-                key = { _, index -> "spine_$index" }
-            ) { item, index ->
-                EpubSpineItem.create {
-                    url = item
-                    itemIndex = index
-                    defaultHeight = defaultHeights[index]?.unsafeCast<Height>() ?: 600.px
-                    onHeightChanged = { newHeight ->
-                        defaultHeightMap.update { prev ->
-                            buildMap {
-                                putAll(prev)
-                                put(index, newHeight.toString())
-                            }
+                        scrollByFunction = ::onScrollBy
+                        onClickLink = { href ->
+                            props.onClickLink(item, href)
                         }
+                        scrollCommands = props.scrollToCommands
                     }
-                    scrollByFunction = ::onScrollBy
-                    onClickLink = { href ->
-                        props.onClickLink(item, href)
-                    }
-                    scrollCommands = props.scrollToCommands
                 }
+            }
+
+            Container {
+                VirtualListOutlet()
+            }
+
+            EpubScrollComponent {
+                scrollToCommands = props.scrollToCommands
+                scrollByCommands = scrollByCommandFlow
             }
         }
 
-        VirtualListOutlet()
+        Drawer {
+            key = "epub_drawer"
+            sx {
+                if(mobileMode)
+                    gridArea = EpubArea.NavArea
 
-        EpubScrollComponent {
-            scrollToCommands = props.scrollToCommands
-            scrollByCommands = scrollByCommandFlow
+                width = EpubArea.NavAreaWidth
+            }
+
+            anchor = DrawerAnchor.right
+            variant = DrawerVariant.temporary
+            variant = if(mobileMode) {
+                DrawerVariant.temporary
+            }else {
+                DrawerVariant.permanent
+            }
+
+            open = props.uiState.tableOfContentsOpen
+            onClose = { _, _ ->
+                props.onDismissTableOfContents()
+            }
+
+            EpubTocListComponent {
+                +props
+            }
         }
     }
 }
@@ -336,6 +310,24 @@ val EpubSpineItem = FC<EpubSpineItemProps> { props ->
         CompletableDeferred<Unit>()
     }
 
+    /* Update the height of the iframe element to match the height of the content. Scrolling is
+     * handled by the virtual list, we want to avoid scrollbars showing within the iframe e.g.
+     * the iframe height should match the body height of its contents plus margins. 16px added to
+     * allow some space between pages. This needs to be set once the content has loaded and again
+     * if the window size changes.
+     */
+    fun updateIframeHeight() {
+        val bodyEl = iframeRef.current?.contentDocument?.body ?: return
+        val loadedHeight = bodyEl.offsetHeight
+        val computedStyle = getComputedStyle(bodyEl)
+        val calculatedHeight = "calc(${loadedHeight}px + ${computedStyle.marginTop} + ${computedStyle.marginBottom} + 16px)"
+            .unsafeCast<Height>()
+
+        iframeHeight = calculatedHeight
+        props.onHeightChanged(calculatedHeight)
+    }
+
+
     useLaunchedEffect(props.scrollCommands, props.itemIndex) {
         props.scrollCommands.filter { it.spineIndex == props.itemIndex }.collect {
             val hash = it.hash ?: return@collect
@@ -353,19 +345,28 @@ val EpubSpineItem = FC<EpubSpineItemProps> { props ->
         }
     }
 
+    /*
+     * If the width of the window changes, this will very likely change the height of the contents
+     * (e.g. if width narrows it gets taller). If the window height changes this may affect height
+     * inside iframes sometimes (e.g. where they use vh measurement units).
+     */
+    val windowSize = useWindowSize()
+
+    useLaunchedEffect(windowSize.width, windowSize.height) {
+        //Needed to allow content within the frame to settle. Not ideal, but works for now.
+        delay(300)
+        if(loadedCompletable.isCompleted) {
+            updateIframeHeight()
+        }
+    }
+
     iframe {
         src = props.url
         ref = iframeRef
 
         onLoad = { _ ->
             iframeRef.current?.contentDocument?.body?.also { bodyEl ->
-                val loadedHeight = bodyEl.offsetHeight
-                val computedStyle = getComputedStyle(bodyEl)
-                val calculatedHeight = "calc(${loadedHeight}px + ${computedStyle.marginTop} + ${computedStyle.marginBottom} + 16px)"
-                    .unsafeCast<Height>()
-
-                iframeHeight = calculatedHeight
-                props.onHeightChanged(calculatedHeight)
+                updateIframeHeight()
 
                 bodyEl.getElementsByTagName("a").forEach { element ->
                     element.addEventListener(

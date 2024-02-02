@@ -2,12 +2,20 @@ package com.ustadmobile.core.domain.htmlcontentdisplayengine
 
 import com.ustadmobile.core.util.ext.isWindowsOs
 import com.ustadmobile.lib.util.SysPathUtil
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.concurrent.TimeUnit
 
-class GetChromePathUseCaseJvm(
+class LaunchChromeUseCase(
     private val workingDir: File,
-): GetChromePathUseCase {
+) {
+
+    private val scope = CoroutineScope(Dispatchers.Default + Job())
 
     private fun getChromePathNix(): String? {
         return SysPathUtil.findCommandInPath("google-chrome")?.absolutePath
@@ -25,11 +33,30 @@ class GetChromePathUseCaseJvm(
             ?.substringAfter("REG_SZ")?.trim()
     }
 
-    override suspend fun invoke() : String? {
-        return if(isWindowsOs()) {
+    private val chromePath: String? by lazy {
+        if(isWindowsOs()) {
             getChromePathWindows()
         }else {
             getChromePathNix()
         }
+    }
+
+    suspend operator fun invoke(
+        url: String
+    ) {
+        val chromePathVal = withContext(Dispatchers.IO) {
+            chromePath ?: throw IllegalArgumentException("Could not find chrome")
+        }
+
+        scope.launch {
+            ProcessBuilder(chromePathVal, "--app=$url")
+                .directory(workingDir)
+                .start()
+                .waitFor()
+        }
+    }
+
+    fun close() {
+        scope.cancel()
     }
 }

@@ -1,4 +1,4 @@
-package com.ustadmobile.core.domain.launchxapi
+package com.ustadmobile.core.domain.contententry.launchcontent.xapi
 
 import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.db.UmAppDatabase

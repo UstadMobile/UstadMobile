@@ -72,7 +72,7 @@ import com.ustadmobile.core.domain.htmlcontentdisplayengine.GetHtmlContentDispla
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.GetHtmlContentDisplayEngineUseCase
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.HTML_CONTENT_OPTIONS_ANDROID
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.SetHtmlContentDisplayEngineUseCase
-import com.ustadmobile.core.domain.launchxapi.ResolveXapiLaunchHrefUseCase
+import com.ustadmobile.core.domain.contententry.launchcontent.xapi.ResolveXapiLaunchHrefUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseCommonJvm
 import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
@@ -614,7 +614,9 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 port = 0,
                 contentEntryVersionServerUseCase = {
                     di.on(it).direct.instance()
-                }
+                },
+                staticUmAppFilesDir = null,
+                mimeTypeHelper = FileMimeTypeHelperImpl(),
             )
         }
 

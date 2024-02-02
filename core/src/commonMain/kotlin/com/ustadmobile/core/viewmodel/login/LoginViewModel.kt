@@ -183,6 +183,7 @@ class LoginViewModel(
         val password = _uiState.value.password
 
         if(username.isNotEmpty() && password.isNotEmpty()){
+            loadingState = LoadingUiState.INDETERMINATE
             viewModelScope.launch {
                 var errorMessage: String? = null
                 try {

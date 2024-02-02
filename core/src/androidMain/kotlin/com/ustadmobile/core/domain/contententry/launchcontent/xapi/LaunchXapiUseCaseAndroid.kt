@@ -1,4 +1,4 @@
-package com.ustadmobile.core.domain.launchxapi
+package com.ustadmobile.core.domain.contententry.launchcontent.xapi
 
 import android.content.Context
 
@@ -7,6 +7,7 @@ import androidx.browser.customtabs.CustomTabColorSchemeParams
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.browser.customtabs.CustomTabsSession
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.domain.contententry.launchcontent.LaunchContentEntryVersionUseCase
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.GetHtmlContentDisplayEngineUseCase
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.HTML_ENGINE_USE_CHROMETAB
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.HTML_ENGINE_USE_WEBVIEW
@@ -14,6 +15,7 @@ import com.ustadmobile.core.embeddedhttp.EmbeddedHttpServer
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.xapicontent.XapiContentViewModel
+import com.ustadmobile.lib.db.entities.ContentEntryVersion
 
 
 class LaunchXapiUseCaseAndroid(
@@ -28,19 +30,19 @@ class LaunchXapiUseCaseAndroid(
 ): LaunchXapiUseCase {
 
     override suspend fun invoke(
-        contentEntryVersionUid: Long,
+        contentEntryVersion: ContentEntryVersion,
         navController: UstadNavController,
-    ): LaunchXapiUseCase.LaunchResult {
+    ): LaunchContentEntryVersionUseCase.LaunchResult {
         val htmlContentEngine = getHtmlContentDisplayEngineUseCase()
         when(htmlContentEngine.code) {
             HTML_ENGINE_USE_CHROMETAB -> {
                 val resolveResult = resolveXapiLaunchHrefUseCase(
-                    contentEntryVersionUid,
+                    contentEntryVersion.cevUid,
                 )
 
                 val url = embeddedHttpServer.endpointUrl(
                     endpoint = endpoint,
-                    path = "api/content/${contentEntryVersionUid}/${resolveResult.launchUriInContent}"
+                    path = "api/content/${contentEntryVersion.cevUid}/${resolveResult.launchUriInContent}"
                 )
 
                 /**
@@ -83,12 +85,12 @@ class LaunchXapiUseCaseAndroid(
             HTML_ENGINE_USE_WEBVIEW -> {
                 navController.navigate(
                     viewName = XapiContentViewModel.DEST_NAME,
-                    args = mapOf(UstadViewModel.ARG_ENTITY_UID to contentEntryVersionUid.toString())
+                    args = mapOf(UstadViewModel.ARG_ENTITY_UID to contentEntryVersion.cevUid.toString())
                 )
             }
         }
 
-        return LaunchXapiUseCase.LaunchResult(null)
+        return LaunchContentEntryVersionUseCase.LaunchResult(null)
 
     }
 }

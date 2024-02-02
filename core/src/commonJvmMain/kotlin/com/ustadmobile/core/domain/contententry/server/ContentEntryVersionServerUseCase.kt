@@ -19,6 +19,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
+import net.thauvin.erik.urlencoder.UrlEncoderUtil
 import okhttp3.CacheControl
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -49,9 +50,16 @@ class ContentEntryVersionServerUseCase(
     private val onlyIfCached: Boolean,
 ) {
 
+    /**
+     * @param entryMap Map of the path of a given ContentManifestEntry to the entry itself. Matching
+     *        uris which might be encoded won't work because there can be different valid ways e.g.
+     *        it is valid (if unusual) to encode plain ASCII etc.
+     */
     data class ManifestAndMap(
         val manifest: ContentManifest,
-        val entryMap: Map<String, ContentManifestEntry> = manifest.entries.associateBy { it.uri }
+        val entryMap: Map<String, ContentManifestEntry> = manifest.entries.associateBy {
+            UrlEncoderUtil.decode(it.uri)
+        }
     )
 
     private val manifestCache = Cache.Builder<Long, ManifestAndMap>()
@@ -96,6 +104,10 @@ class ContentEntryVersionServerUseCase(
             }
     }
 
+    /**
+     * @param pathInContentEntryVersion the path as per ContentManifestEntry. This MUST be decoded
+     *        (which is done by both NanoHTTPD and KTOR)
+     */
     operator fun invoke(
         request: HttpRequest,
         contentEntryVersionUid: Long,

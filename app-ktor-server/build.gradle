@@ -46,7 +46,6 @@ ktor {
 }
 
 sourceSets.main {
-    java.srcDirs("$buildDir/generated/source/door")
     if(findProperty("ktorbundleproductionjs") == "true") {
         resources.srcDir(rootProject.file("app-react/build/dist-web/"))
     }

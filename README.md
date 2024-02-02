@@ -67,11 +67,11 @@ entire project.
 *  __Step 1: Download and install Android Studio__: If you don't already have the latest version, download 
 from [https://developer.android.com/studio](https://developer.android.com/studio).
 
-* __Step 2: Make sure that java is on your system path__: If you already have OpenJDK21, you can 
+* __Step 2: Make sure that java is on your system path__: If you already have OpenJDK17, you can 
   use that, otherwise you need to download from the Java website or install using your system package
   manager.
 
-Supported JDK Version: JDK17 (only). JDK21 not supported yet due to [Compose Multiplatform issue](https://github.com/JetBrains/compose-multiplatform/issues/4216).
+Supported JDK Version: JDK17 (only). JDK21 not supported yet due to Proguard issues on app-desktop.
 
 Linux:
 

@@ -27,9 +27,9 @@ import org.kodein.di.instance
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.contentformats.epub.opf.Item
 import com.ustadmobile.core.contentformats.manifest.ContentManifest
+import com.ustadmobile.core.contentformats.manifest.ContentManifestEntry
 import com.ustadmobile.core.domain.epub.GetEpubTableOfContentsUseCase
 import com.ustadmobile.core.util.requireEntryByUri
-import net.thauvin.erik.urlencoder.UrlEncoderUtil
 import org.kodein.di.direct
 import kotlin.concurrent.Volatile
 
@@ -74,7 +74,10 @@ data class EpubTocItem(
 }
 
 /**
- * ScrollCommand - see epubScrollCommands
+ * ScrollCommand - see epubScrollCommands .The EpubContentViewModel can is used 'normally' within
+ * the Android and Kotlin/JS version. The Desktop version uses the Kotlin/JS version 'embedded'
+ * via the local server - see. LaunchEpubUseCaseJvm . In this case the main app navigation is hidden
+ * and the manifest url and opf spine are provided as arguments to avoid the need to use the database.
  *
  * @param spineIndex the index of to scroll to in the spine
  * @param hash if not null, the hash within the item to scroll to after loading
@@ -84,13 +87,35 @@ data class EpubScrollCommand(
     val hash: String? = null
 )
 
+/**
+ * @param useBodyDataUrls  Loading the OPFs, navigation documents, etc can be done one of two ways:
+ * Loading the OPFs, navigation documents, etc can be done one of two ways:
+ *
+ * 1) HttpRequest direct to the bodyDataUrl as specified by the ContentManifestEntry.
+ *    This is the right approach on Android so we can directly fetch it directly from
+ *    the cache. The cache does not understand the url
+ *    mapping. If a user has downloaded items for offline use, they will be accessible
+ *    through the cache using the bodyDataUrl. This approach will be used if useBodyDataUrls
+ *    is explicitly set to true.
+ *
+ * 2) HttpRequest using the Content API url - resolves relative to the manifest e.g.
+ *    Where the manifest url is http://endpoint.com/api/content/(versionUid)/_ustadmanifest.json
+ *    and an ContentManifestEntry has a uri of OEPBS/content.opf, then the http request url
+ *    will be http://endpoint.com/api/content/(versionUid)/OEPBS/content.opf
+ *
+ *    This is the right approach to use on JS and is required to avoid cross origin
+ *    issues when serving an epub 'embedded' within the desktop version of the app.
+ *
+ *    This approach will be used if useBodyDataUrls is set to false or not specified.
+ */
 class EpubContentViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
     private val getEpubTableOfContentsUseCase: GetEpubTableOfContentsUseCase =
         GetEpubTableOfContentsUseCase(
             xml = di.direct.instance()
-        )
+        ),
+    private val useBodyDataUrls: Boolean = false,
 ) : UstadViewModel(di, savedStateHandle, DEST_NAME){
 
     private val entityUidArg: Long = savedStateHandle[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0
@@ -130,12 +155,16 @@ class EpubContentViewModel(
     init {
         val argManifestUrl = savedStateHandle[ARG_MANIFEST_URL]
         val argCevOpenUri = savedStateHandle[ARG_CEV_URI]
+        val argNavigationVisible = savedStateHandle[ARG_NAVIGATION_VISIBLE]?.toBoolean() ?: true
+        val argTocString = savedStateHandle[ARG_TOC_OPTIONS_STRING]
 
         _appUiState.update { prev ->
             prev.copy(
                 hideBottomNavigation = true,
+                navigationVisible = argNavigationVisible,
             )
         }
+
         viewModelScope.launch {
             val (cevManifestUrl, cevOpenUri) = if(argManifestUrl != null && argCevOpenUri != null) {
                 argManifestUrl to argCevOpenUri
@@ -146,29 +175,39 @@ class EpubContentViewModel(
                 val entityCevOpenUri = contentEntryVersion.cevOpenUri ?: return@launch
                 entityCevManifestUrl to entityCevOpenUri
             }
-            println("EpubContentViewModel manifest=$cevManifestUrl cevOpenUri=$cevOpenUri")
-            println("EpubContent?$ARG_MANIFEST_URL=${UrlEncoderUtil.encode(cevManifestUrl)}&$ARG_CEV_URI=${UrlEncoderUtil.encode(cevOpenUri)}")
 
             val cevManifestUrlObj = UrlKmp(cevManifestUrl)
             val opfBaseUrl = cevManifestUrlObj.resolve(cevOpenUri)
             val manifest: ContentManifest = json.decodeFromString(
                 httpClient.get(cevManifestUrl).bodyAsText())
 
+            fun ContentManifestEntry.urlToLoad(): String {
+                return if(useBodyDataUrls) {
+                    bodyDataUrl
+                }else {
+                    cevManifestUrlObj.resolve(uri).toString()
+                }
+            }
+
             withContext(Dispatchers.Default) {
                 try {
                     val opfEntry = manifest.requireEntryByUri(cevOpenUri)
-                    val opfStr = httpClient.get(opfEntry.bodyDataUrl).bodyAsText()
+                    val opfStr = httpClient.get(opfEntry.urlToLoad()).bodyAsText()
                     val opfPackage = xml.decodeFromString(
                         deserializer = PackageDocument.serializer(),
                         string = opfStr
                     )
 
-                    val manifestItemsMap = opfPackage.manifest.items.associateBy { it.id }
+                    val manifestItemsMap = opfPackage.manifest.items.associateBy {
+                        it.id
+                    }
+
                     val spineUrls = opfPackage.spine.itemRefs.mapNotNull { itemRef ->
                         manifestItemsMap[itemRef.idRef]?.let {
                             opfBaseUrl.resolve(it.href)
                         }?.toString()
                     }
+
                     val coverImageUrl = opfPackage.coverItem()?.let {
                         opfBaseUrl.resolve(it.href)
                     }?.toString()
@@ -185,7 +224,7 @@ class EpubContentViewModel(
                             title = opfPackage.metadata.titles.firstOrNull()?.content ?: "",
                             overflowItems = listOf(
                                 OverflowItem(
-                                    label = systemImpl.getString(MR.strings.table_of_contents),
+                                    label = argTocString ?: systemImpl.getString(MR.strings.table_of_contents),
                                     onClick = {
                                         _uiState.update { prev ->
                                             prev.copy(
@@ -202,7 +241,7 @@ class EpubContentViewModel(
                         opfBaseUrl.resolve(it.href).toString()
                     }
 
-                    fun Item.bodyDataUrl(): String {
+                    fun Item.urlToLoad(): String {
                         val prefix = cevOpenUri.substringBeforeLast("/", missingDelimiterValue = "")
                         val pathInManifest = if(prefix.isNotEmpty()) {
                             "$prefix/${href}"
@@ -210,13 +249,13 @@ class EpubContentViewModel(
                             href
                         }
 
-                        return manifest.requireEntryByUri(pathInManifest).bodyDataUrl
+                        return manifest.requireEntryByUri(pathInManifest).urlToLoad()
                     }
 
                     val tocItems = getEpubTableOfContentsUseCase(
                         opfPackage = opfPackage,
                         readItemText = {
-                            httpClient.get(it.bodyDataUrl()).bodyAsText()
+                            httpClient.get(it.urlToLoad()).bodyAsText()
                         }
                     ) ?: emptyList()
 
@@ -296,8 +335,20 @@ class EpubContentViewModel(
 
         const val ARG_CEV_URI = "cevUri"
 
-        const val DEST_NAME = "EpubContent"
+        /**
+         * Argument that can be used to control the visibility of the main navigation options. When
+         * this is being used in JS embedded within the desktop app, this will be set to false so
+         * the main navigation options (e.g. courses etc) is not displayed
+         */
+        const val ARG_NAVIGATION_VISIBLE = "navigationVisible"
 
+        /**
+         * Argument that can be used to specify the string for the table of contents option. This is
+         * used when embedded via the desktop.
+         */
+        const val ARG_TOC_OPTIONS_STRING = "tocString"
+
+        const val DEST_NAME = "EpubContent"
     }
 
 }

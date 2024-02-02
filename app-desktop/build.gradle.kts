@@ -26,9 +26,30 @@ tasks.withType<KotlinCompile> {
     compilerOptions.freeCompilerArgs.add("-Xexpect-actual-classes")
 }
 
+/*
+ * Displaying Epubs on Desktop is done by serving the Web Version using the embeddedd server -
+ * see LaunchEpubUseCaseJvm for details/rationale.
+ */
+val bundleWebTask by tasks.register("bundleWeb", Copy::class) {
+    dependsOn(":app-react:build")
+    from(rootProject.file("app-react/build/dist-web/"))
+    into(project.file("app-resources/common/"))
+}
+
+val cleanWebBundleTask by tasks.register("cleanWebBundle", Delete::class) {
+    delete(project.file("app-resources/common/umapp"))
+}
 
 //Required to build proguard release jars for conveyor build.
 tasks.named("build").dependsOn("proguardReleaseJars")
+tasks.named("clean").dependsOn("cleanWebBundle")
+tasks.named("build").dependsOn("bundleWeb")
+
+tasks.whenObjectAdded {
+    if(name == "prepareAppResources" || name.startsWith("package")) {
+        dependsOn(bundleWebTask)
+    }
+}
 
 dependencies {
     implementation(compose.desktop.currentOs)

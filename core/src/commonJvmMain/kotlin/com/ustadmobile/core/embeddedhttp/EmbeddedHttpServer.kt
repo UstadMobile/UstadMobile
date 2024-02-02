@@ -15,8 +15,8 @@ import java.io.File
  */
 class EmbeddedHttpServer(
     port: Int,
-    private val staticUmAppFilesDir: File,
     private val contentEntryVersionServerUseCase: (Endpoint) -> ContentEntryVersionServerUseCase,
+    private val staticUmAppFilesDir: File?,
     private val mimeTypeHelper: MimeTypeHelper,
 ) : NanoHTTPD(port) {
 
@@ -103,8 +103,22 @@ class EmbeddedHttpServer(
                     else -> newNotFoundResponse(session)
                 }
             }
+            /*
+             * Serve the Kotlin/JS version of the app. Used to display epubs. See
+             * LaunchEpubUseCaseJvm.
+             */
             "umapp" -> {
-                val responseFile = File(staticUmAppFilesDir, pathSegments.joinPathSegments(3))
+                if(staticUmAppFilesDir == null)
+                    return newNotFoundResponse("Static umapp files not enabled")
+
+                val responseFile = File(staticUmAppFilesDir, pathSegments.joinPathSegments(3)).let {
+                    if(pathSegments.last().isEmpty()) {
+                        File(it, "index.html")
+                    }else {
+                        it
+                    }
+                }
+
                 return responseFile.toHttpdResponse(
                     session = session,
                     contentType = mimeTypeHelper.guessByExtension(responseFile.extension) ?: "application/octet-stream"

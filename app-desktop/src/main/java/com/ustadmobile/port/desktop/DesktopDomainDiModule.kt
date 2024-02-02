@@ -42,14 +42,15 @@ import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryG
 import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCaseCommonJvm
 import com.ustadmobile.core.domain.contententry.importcontent.ImportContentEntryUseCase
+import com.ustadmobile.core.domain.contententry.launchcontent.epub.LaunchEpubUseCase
+import com.ustadmobile.core.domain.contententry.launchcontent.epub.LaunchEpubUseCaseJvm
 import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServerUseCase
-import com.ustadmobile.core.domain.htmlcontentdisplayengine.GetChromePathUseCase
-import com.ustadmobile.core.domain.htmlcontentdisplayengine.GetChromePathUseCaseJvm
+import com.ustadmobile.core.domain.htmlcontentdisplayengine.LaunchChromeUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseJvm
-import com.ustadmobile.core.domain.launchxapi.LaunchXapiUseCase
-import com.ustadmobile.core.domain.launchxapi.LaunchXapiUseCaseJvm
-import com.ustadmobile.core.domain.launchxapi.ResolveXapiLaunchHrefUseCase
+import com.ustadmobile.core.domain.contententry.launchcontent.xapi.LaunchXapiUseCase
+import com.ustadmobile.core.domain.contententry.launchcontent.xapi.LaunchXapiUseCaseJvm
+import com.ustadmobile.core.domain.contententry.launchcontent.xapi.ResolveXapiLaunchHrefUseCase
 import com.ustadmobile.core.domain.phonenumber.OnClickPhoneNumUseCase
 import com.ustadmobile.core.domain.phonenumber.OnClickPhoneNumUseCaseJvm
 import com.ustadmobile.core.domain.sendemail.OnClickEmailUseCase
@@ -272,8 +273,8 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         )
     }
 
-    bind<GetChromePathUseCase>() with singleton {
-        GetChromePathUseCaseJvm(workingDir = ustadAppDataDir())
+    bind<LaunchChromeUseCase>() with singleton {
+        LaunchChromeUseCase(workingDir = ustadAppDataDir())
     }
 
     bind<LaunchXapiUseCase>() with scoped(EndpointScope.Default).singleton {
@@ -281,8 +282,16 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             endpoint = context,
             resolveXapiLaunchHrefUseCase = instance(),
             embeddedHttpServer = instance(),
-            getChromePathUseCase = instance(),
-            dataDir = ustadAppDataDir(),
+            launchChromeUseCase = instance(),
+        )
+    }
+
+    bind<LaunchEpubUseCase>() with scoped(EndpointScope.Default).singleton {
+        LaunchEpubUseCaseJvm(
+            launchChromeUseCase = instance(),
+            embeddedHttpServer = instance(),
+            endpoint = context,
+            systemImpl = instance(),
         )
     }
 

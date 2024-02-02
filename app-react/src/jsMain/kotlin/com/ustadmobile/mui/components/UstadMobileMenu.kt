@@ -17,13 +17,18 @@ external interface UstadMobileMenuProps: Props {
     var isOpen: Boolean
     var onSetOpen: (Boolean) -> Unit
     var selectedRootItemIndex: Int
+    var visible: Boolean
 }
 
 val UstadMobileMenu = FC<UstadMobileMenuProps> { props ->
     Box {
         component = nav
         sx {
-            display = Display.block
+            display = if(props.visible) {
+                Display.block
+            }else {
+                "none".unsafeCast<Display>()
+            }
         }
 
         SwipeableDrawer {

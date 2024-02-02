@@ -1,3 +1,5 @@
 /build
 /data
-/app-resources/windows/ffmpeg
+/app-resources/windows/mediainfo
+/app-resources/common/umapp
+
