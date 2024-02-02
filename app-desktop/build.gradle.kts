@@ -133,9 +133,9 @@ compose.desktop {
             modules("jdk.unsupported")
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi)
             packageVersion = "1.0.0"
-            packageName = "UstadMobile"
+            packageName = "Maktab Mobile"
             version = rootProject.version
-            description = "Ustad Mobile"
+            description = "Maktab Mobile"
             copyright = "© UstadMobile FZ-LLC."
             licenseFile.set(rootProject.file("LICENSE"))
             windows {
