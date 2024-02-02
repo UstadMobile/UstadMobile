@@ -29,19 +29,19 @@ Install conveyor as per [Conveyor - Getting Started](https://conveyor.hydraulic.
 Make installer for local use:
 
 ```
+export CONVEYOR_SITE_URL=https://server.com/to/conveyor/
 conveyor make site
 ```
 
-Server the download site:
+Serve the download site locally:
 
 ```
 cd output
 npx serve
 ```
 
-Deploy to Github pages:
+Deploy to server:
 
-```
-export GITHUB_TOKEN=(token)
-conveyor make copied-site
-```
+The output directory from conveyor should be copied to be accessible on the URL specified via the
+CONVEYOR_SITE_URL environment variable.
+
