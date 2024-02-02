@@ -15,6 +15,7 @@ import com.ustadmobile.libuicompose.components.UstadErrorText
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
 import com.ustadmobile.libuicompose.components.UstadRichTextEdit
+import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 import com.ustadmobile.libuicompose.util.HideSoftInputEffect
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import kotlinx.coroutines.Dispatchers
@@ -39,7 +40,7 @@ fun DiscussionPostEditScreen(
     onContentChanged: (DiscussionPost?) -> Unit = {},
     onDiscussionPostBodyChanged: (String) -> Unit = { },
 ){
-    Column(
+    UstadVerticalScrollColumn(
         modifier = Modifier.fillMaxSize(),
     )  {
 

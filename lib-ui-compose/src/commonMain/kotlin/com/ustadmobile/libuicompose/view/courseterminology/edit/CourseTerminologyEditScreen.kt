@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -22,6 +21,7 @@ import com.ustadmobile.libuicompose.components.UstadErrorText
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
+import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import kotlinx.coroutines.Dispatchers
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 
@@ -31,7 +31,7 @@ fun CourseTerminologyEditScreen(
     onTerminologyTermChanged: (TerminologyEntry) -> Unit = {},
     onTerminologyChanged: (CourseTerminology?) -> Unit = {}
 ) {
-    LazyColumn(
+    UstadLazyColumn(
         modifier = Modifier
             .fillMaxSize()
     )  {

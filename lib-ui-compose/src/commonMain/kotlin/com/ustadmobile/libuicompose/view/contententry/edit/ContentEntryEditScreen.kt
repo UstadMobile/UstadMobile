@@ -1,6 +1,5 @@
 package com.ustadmobile.libuicompose.view.contententry.edit
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.rememberScrollState
@@ -22,6 +21,7 @@ import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.libuicompose.components.UstadCourseBlockEdit
 import com.ustadmobile.libuicompose.components.UstadMessageIdOptionExposedDropDownMenuField
+import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import dev.icerock.moko.resources.compose.stringResource
 
@@ -44,7 +44,7 @@ fun ContentEntryEditScreen(
     onClickUpdateContent: () -> Unit = {},
     onContentEntryChanged: (ContentEntry?) -> Unit = {},
 ) {
-    Column(
+    UstadVerticalScrollColumn(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),

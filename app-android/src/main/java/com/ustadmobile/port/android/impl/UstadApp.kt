@@ -21,7 +21,7 @@ import com.ustadmobile.core.contentformats.ContentImportersManager
 import com.ustadmobile.core.contentformats.epub.EpubContentImporterCommonJvm
 import com.ustadmobile.core.contentformats.h5p.H5PContentImporter
 import com.ustadmobile.core.contentformats.pdf.PdfContentImporterAndroid
-import com.ustadmobile.core.contentformats.video.VideoContentImporterAndroid
+import com.ustadmobile.core.contentformats.video.VideoContentImporterCommonJvm
 import com.ustadmobile.core.contentformats.xapi.XapiZipContentImporter
 import com.ustadmobile.core.db.*
 import com.ustadmobile.core.db.ext.addSyncCallback
@@ -72,7 +72,7 @@ import com.ustadmobile.core.domain.htmlcontentdisplayengine.GetHtmlContentDispla
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.GetHtmlContentDisplayEngineUseCase
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.HTML_CONTENT_OPTIONS_ANDROID
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.SetHtmlContentDisplayEngineUseCase
-import com.ustadmobile.core.domain.launchxapi.ResolveXapiLaunchHrefUseCase
+import com.ustadmobile.core.domain.contententry.launchcontent.xapi.ResolveXapiLaunchHrefUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseCommonJvm
 import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
@@ -80,6 +80,8 @@ import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseAndroid
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientChunkGetterUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
+import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
+import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCaseAndroid
 import com.ustadmobile.core.embeddedhttp.EmbeddedHttpServer
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
@@ -357,9 +359,9 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                     )
 
                     add(
-                        VideoContentImporterAndroid(
+                        VideoContentImporterCommonJvm(
                             endpoint = context,
-                            appContext = applicationContext,
+                            validateVideoFileUseCase = instance(),
                             uriHelper = uriHelper,
                             cache = cache,
                             tmpPath = contentImportTmpPath,
@@ -443,6 +445,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 chunkedUploadUseCase = on(context).instance(),
                 httpClient = instance(),
                 httpCache = instance(),
+                json = instance(),
                 db = on(context).instance(tag = DoorTag.TAG_DB),
                 repo = on(context).instance(tag = DoorTag.TAG_REPO),
                 endpoint = context,
@@ -514,7 +517,8 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 endpoint = context,
                 enqueueRemoteImport = EnqueueImportContentEntryUseCaseRemote(
                     endpoint = context,
-                    httpClient = instance()
+                    httpClient = instance(),
+                    json = instance(),
                 )
             )
         }
@@ -526,6 +530,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 enqueueBlobUploadClientUseCase = instance(),
                 createRetentionLocksForManifestUseCase = instance(),
                 httpClient = instance(),
+                json = instance(),
             )
         }
 
@@ -556,6 +561,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 enqueueBlobDownloadClientUseCase = instance(),
                 db = instance(tag = DoorTag.TAG_DB),
                 httpClient = instance(),
+                json = instance(),
             )
         }
 
@@ -598,6 +604,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             ResolveXapiLaunchHrefUseCase(
                 activeRepo = instance(tag = DoorTag.TAG_REPO),
                 httpClient = instance(),
+                json = instance(),
                 xppFactory = instance(tag = DiTag.XPP_FACTORY_NSAWARE),
             )
         }
@@ -607,7 +614,9 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 port = 0,
                 contentEntryVersionServerUseCase = {
                     di.on(it).direct.instance()
-                }
+                },
+                staticUmAppFilesDir = null,
+                mimeTypeHelper = FileMimeTypeHelperImpl(),
             )
         }
 
@@ -624,6 +633,10 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
         bind<SetHtmlContentDisplayEngineUseCase>() with singleton {
             SetHtmlContentDisplayEngineUseCase(settings = instance())
+        }
+
+        bind<ValidateVideoFileUseCase>() with singleton {
+            ValidateVideoFileUseCaseAndroid(appContext = applicationContext)
         }
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }

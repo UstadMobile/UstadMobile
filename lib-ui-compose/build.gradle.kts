@@ -36,8 +36,6 @@ kotlin {
                 api(libs.paging.multiplatform.common)
                 api(libs.paging.multiplatform.compose)
 
-                implementation(libs.compose.webview.multiplatform)
-
                 implementation(libs.kotlinx.datetime)
                 implementation(libs.reorderable.compose)
                 api(libs.door.runtime)
@@ -90,6 +88,8 @@ kotlin {
                 implementation(libs.autolink)
                 implementation(libs.mpfilepicker)
                 implementation(libs.kamel)
+                implementation(project(":lib-ui-compose-videoplayer"))
+                implementation(libs.pdfbox)
             }
         }
     }

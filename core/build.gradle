@@ -165,7 +165,7 @@ kotlin {
             resources.srcDirs += ["src/main/assets"]
 
             dependencies {
-                implementation "org.apache.pdfbox:pdfbox:$version_pdfbox_apache"
+                implementation libs.pdfbox
                 implementation "org.jsoup:jsoup:$version_jsoup"
                 implementation "com.google.code.gson:gson:$version_gson"
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
@@ -197,8 +197,8 @@ kotlin {
                 implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
                 implementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
 
-                implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
-                implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
+                api "org.nanohttpd:nanohttpd:$version_nanohttpd"
+                api "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
 
                 implementation libs.mockwebserver
                 implementation "io.ktor:ktor-server-netty:$version_ktor"

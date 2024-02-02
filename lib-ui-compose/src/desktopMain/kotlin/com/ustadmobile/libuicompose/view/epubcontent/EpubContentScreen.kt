@@ -1,6 +1,5 @@
 package com.ustadmobile.libuicompose.view.epubcontent
 
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import com.ustadmobile.core.viewmodel.epubcontent.EpubContentViewModel
 
@@ -8,5 +7,6 @@ import com.ustadmobile.core.viewmodel.epubcontent.EpubContentViewModel
 actual fun EpubContentScreen(
     viewModel: EpubContentViewModel
 ) {
-    Text("Epub Desktop - Coming Soon")
+    //Do nothing - this is not used - will launch in new window because there is no acceptable
+    //webview Compose/Desktop solution
 }

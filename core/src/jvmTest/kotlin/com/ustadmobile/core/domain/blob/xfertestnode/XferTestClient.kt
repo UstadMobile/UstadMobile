@@ -119,6 +119,7 @@ class XferTestClient(
                     chunkedUploadUseCase = instance<ChunkedUploadClientUseCaseKtorImpl>(),
                     httpClient = node.httpClient,
                     httpCache = node.httpCache,
+                    json = instance(),
                     db = instance(tag = DoorTag.TAG_DB),
                     repo = instance(tag = DoorTag.TAG_REPO),
                     endpoint = context,
@@ -155,6 +156,7 @@ class XferTestClient(
                     enqueueBlobUploadClientUseCase = instance<EnqueueBlobUploadClientUseCase>(),
                     createRetentionLocksForManifestUseCase = instance(),
                     httpClient = node.httpClient,
+                    json = instance(),
                 )
             }
 

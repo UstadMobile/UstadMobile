@@ -1,6 +1,6 @@
 package com.ustadmobile.core.viewmodel.xapicontent
 
-import com.ustadmobile.core.domain.launchxapi.ResolveXapiLaunchHrefUseCase
+import com.ustadmobile.core.domain.contententry.launchcontent.xapi.ResolveXapiLaunchHrefUseCase
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.onActiveEndpoint
 import com.ustadmobile.core.view.UstadView

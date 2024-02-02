@@ -4,8 +4,9 @@ import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.db.entities.ContentEntryVersion
 import io.ktor.client.HttpClient
-import io.ktor.client.call.body
 import io.ktor.client.request.get
+import io.ktor.client.statement.bodyAsText
+import kotlinx.serialization.json.Json
 
 /**
  * ContentManifestDownload will
@@ -19,6 +20,7 @@ class ContentManifestDownloadUseCase(
     private val enqueueBlobDownloadClientUseCase: EnqueueBlobDownloadClientUseCase,
     private val db: UmAppDatabase,
     private val httpClient: HttpClient,
+    private val json: Json,
 ) {
 
     /**
@@ -36,7 +38,7 @@ class ContentManifestDownloadUseCase(
                 ?: throw IllegalArgumentException("ContentEntryVersion $contentEntryVersionUid not in db")
 
         val manifestUrl = contentEntryVersion.cevManifestUrl!!
-        val manifest: ContentManifest = httpClient.get(manifestUrl).body()
+        val manifest: ContentManifest = json.decodeFromString(httpClient.get(manifestUrl).bodyAsText())
         enqueueBlobDownloadClientUseCase(
             items = manifest.entries.map {
                 EnqueueBlobDownloadClientUseCase.EnqueueBlobDownloadItem(

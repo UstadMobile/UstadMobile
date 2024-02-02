@@ -18,12 +18,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.res.loadImageBitmap
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseJvm
+import com.ustadmobile.core.embeddedhttp.EmbeddedHttpServer
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.PREFKEY_LOCALE
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -51,8 +54,11 @@ import org.kodein.di.compose.withDI
 import org.kodein.di.direct
 import org.kodein.di.instance
 import java.io.File
+import java.nio.file.Paths
 import java.util.Locale
 import java.util.Properties
+import kotlin.io.path.exists
+import kotlin.io.path.inputStream
 import com.ustadmobile.libuicompose.view.app.App as UstadPrecomposeApp
 
 //Roughly as per https://github.com/JetBrains/compose-multiplatform-desktop-template#readme
@@ -69,6 +75,8 @@ import com.ustadmobile.libuicompose.view.app.App as UstadPrecomposeApp
 fun main() {
     //Apply the language setting before startup
     val dataRoot = ustadAppDataDir()
+    println("AppDataDir=${ustadAppDataDir()} ResourcesDir=${ustadAppResourcesDir()}")
+
     SetLanguageUseCaseJvm.init()
 
     val prefsProperties = File(dataRoot, UstadMobileSystemImpl.PREFS_FILENAME)
@@ -90,6 +98,17 @@ fun main() {
 
     application {
         Napier.base(DebugAntilog())
+
+        //App icon setting as per
+        // https://conveyor.hydraulic.dev/13.0/tutorial/tortoise/2-gradle/#setting-icons
+        val appIcon = remember {
+            ustadAppResourcesDir().let {
+                Paths.get(it.absolutePath, "icon-512.png")
+            }.takeIf { it.exists() }
+                ?.inputStream()
+                ?.buffered()
+                ?.use { BitmapPainter(loadImageBitmap(it)) }
+        }
 
         var selectedItem by remember { mutableIntStateOf(0) }
         var appState by remember  {
@@ -113,11 +132,19 @@ fun main() {
                 }
             }
 
+            LaunchedEffect(Unit) {
+                di.direct.instance<EmbeddedHttpServer>().also {
+                    it.start()
+                    Napier.i("Embedded Server running on port ${it.listeningPort}")
+                }
+            }
+
             CompositionLocalProvider(LocalKamelConfig provides desktopConfig) {
                 Window(
                     onCloseRequest = ::exitApplication,
                     title = appState.title ?: "",
-                    state = rememberWindowState(width = 1024.dp, height = 768.dp)
+                    icon = appIcon,
+                    state = rememberWindowState(width = 1024.dp, height = 768.dp),
                 ) {
                     PreComposeApp {
                         val navigator = rememberNavigator()

@@ -1,12 +1,9 @@
 package com.ustadmobile.libuicompose.view.settings
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DisplaySettings
 import androidx.compose.material.icons.filled.Language
@@ -24,6 +21,7 @@ import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.viewmodel.settings.SettingsViewModel
 import com.ustadmobile.libuicompose.components.UstadDetailHeader
+import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 import com.ustadmobile.libuicompose.components.UstadWaitForRestartDialog
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 
@@ -87,10 +85,8 @@ fun SettingsScreen(
     onClickWorkspace: () -> Unit = {},
     onClickLeavingReason: () -> Unit = {},
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+    UstadVerticalScrollColumn(
+        modifier = Modifier.fillMaxSize()
     )  {
 
         UstadDetailField2(

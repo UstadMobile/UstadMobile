@@ -1,6 +1,5 @@
 package com.ustadmobile.libuicompose.view.coursegroupset.list
 
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -23,6 +22,7 @@ import com.ustadmobile.libuicompose.components.ustadPagedItems
 import androidx.compose.runtime.remember
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.ustadmobile.core.util.SortOrderOption
+import com.ustadmobile.libuicompose.components.UstadLazyColumn
 
 @Suppress("unused") // Pending
 @Composable
@@ -56,7 +56,7 @@ fun CourseGroupSetListScreen(
 
     val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
 
-    LazyColumn(
+    UstadLazyColumn(
         modifier = Modifier.fillMaxSize()
     ){
         item(key = "sortheader") {
