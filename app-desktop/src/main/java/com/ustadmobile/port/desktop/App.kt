@@ -76,7 +76,7 @@ fun main() {
     //Apply the language setting before startup
     val dataRoot = ustadAppDataDir()
     println("AppDataDir=${ustadAppDataDir()} ResourcesDir=${ustadAppResourcesDir()}")
-    val splashScreen = SplashScreen()
+    var splashScreen: SplashScreen? = SplashScreen()
 
     SetLanguageUseCaseJvm.init()
 
@@ -148,7 +148,8 @@ fun main() {
                     state = rememberWindowState(width = 1024.dp, height = 768.dp),
                 ) {
                     LaunchedEffect(Unit) {
-                        splashScreen.close()
+                        splashScreen?.close()
+                        splashScreen = null
                     }
                     PreComposeApp {
                         val navigator = rememberNavigator()
