@@ -41,15 +41,15 @@ val cleanWebBundleTask by tasks.register("cleanWebBundle", Delete::class) {
 }
 
 //Required to build proguard release jars for conveyor build.
-tasks.named("build").dependsOn("proguardReleaseJars")
-tasks.named("clean").dependsOn("cleanWebBundle")
-tasks.named("build").dependsOn("bundleWeb")
-
-tasks.whenObjectAdded {
-    if(name == "prepareAppResources" || name.startsWith("package")) {
-        dependsOn(bundleWebTask)
-    }
-}
+//tasks.named("build").dependsOn("proguardReleaseJars")
+//tasks.named("clean").dependsOn("cleanWebBundle")
+//tasks.named("build").dependsOn("bundleWeb")
+//
+//tasks.whenObjectAdded {
+//    if(name == "prepareAppResources" || name.startsWith("package")) {
+//        dependsOn(bundleWebTask)
+//    }
+//}
 
 dependencies {
     implementation(compose.desktop.currentOs)

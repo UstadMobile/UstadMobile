@@ -3,7 +3,6 @@ package com.ustadmobile.libuicompose.view.timezone
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
@@ -16,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.util.ext.formattedString
 import com.ustadmobile.core.viewmodel.timezone.TimeZoneListViewModel
 import com.ustadmobile.core.viewmodel.timezone.TimezoneListUiState
+import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone as TimeZoneKt
 
@@ -37,7 +37,7 @@ fun TimeZoneListScreen(
 
     val timeNow = Clock.System.now()
 
-    LazyColumn(
+    UstadLazyColumn(
         modifier = Modifier
             .padding(vertical = 8.dp)
             .fillMaxWidth()

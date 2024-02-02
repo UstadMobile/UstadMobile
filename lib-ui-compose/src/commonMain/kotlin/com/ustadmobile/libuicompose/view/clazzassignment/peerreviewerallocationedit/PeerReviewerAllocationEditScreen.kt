@@ -2,7 +2,6 @@ package com.ustadmobile.libuicompose.view.clazzassignment.peerreviewerallocation
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -25,6 +24,7 @@ import com.ustadmobile.lib.db.entities.AssignmentSubmitterAndAllocations
 import com.ustadmobile.lib.db.entities.AssignmentSubmitterSummary
 import com.ustadmobile.lib.db.entities.PeerReviewerAllocation
 import com.ustadmobile.libuicompose.components.UstadEditHeader
+import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import kotlinx.coroutines.Dispatchers
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
@@ -60,7 +60,7 @@ fun PeerReviewerAllocationEditScreen(
         allocations = emptyList(),
     )
 
-    LazyColumn(
+    UstadLazyColumn(
         modifier = Modifier.fillMaxSize()
     ){
         item {

@@ -5,12 +5,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -21,6 +18,8 @@ import dev.icerock.moko.resources.compose.stringResource
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 import com.ustadmobile.core.MR
 import com.ustadmobile.libuicompose.components.UstadErrorText
+import com.ustadmobile.libuicompose.components.UstadHtmlText
+import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 
 @Composable
@@ -40,24 +39,16 @@ fun SiteTermsDetailScreen(
     uiState: SiteTermsDetailUiState = SiteTermsDetailUiState(),
     onClickAccept: () -> Unit = { },
 ) {
-//    val state = rememberWebViewStateWithHTMLData("")
-//
-//    val navigator = rememberWebViewNavigator()
-
-    LaunchedEffect(uiState.siteTerms?.termsHtml) {
-        //navigator.loadHtmlWorkaround(uiState.siteTerms?.termsHtml ?: "")
-    }
-
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState()),
+        modifier = Modifier.fillMaxSize()
     )  {
-//        WebView(
-//            state = state,
-//            navigator = navigator,
-//            modifier = Modifier.fillMaxSize().weight(1f)
-//        )
+        UstadVerticalScrollColumn(
+            modifier = Modifier.weight(1f).fillMaxSize()
+        ) {
+            UstadHtmlText(
+                html = uiState.siteTerms?.termsHtml ?: ""
+            )
+        }
 
         Spacer(Modifier.height(8.dp))
 
