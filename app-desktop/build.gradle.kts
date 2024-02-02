@@ -147,6 +147,9 @@ compose.desktop {
                 iconFile.set(project.file("icon.ico"))
             }
 
+            /**
+             * NOTE: On Ubuntu, the icon will update ONLY if the class name of the app is changed.
+             */
             linux {
                 iconFile.set(project.file("icon.png"))
             }
