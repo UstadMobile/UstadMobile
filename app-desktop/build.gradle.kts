@@ -30,6 +30,18 @@ tasks.withType<KotlinCompile> {
 tasks.withType<Jar> {
     manifest {
         attributes["Ustad-Version"] = rootProject.version
+
+        /*
+         * Note manifest keys must replace "." with "-" because "." is not valid to include in as
+         * per the JAR Manifest specification.
+         *
+         * These keys can be uncommented and set if desired
+         */
+
+        /*Begin desktop lang manifest prefs
+        attributes["com-ustadmobile-uilanguages"] = "en,tg,ru"
+        attributes["com-ustadmobile-presetlocale"] = "tg"
+        end desktop lang manifest prefs*/
     }
 }
 
@@ -86,6 +98,10 @@ dependencies {
     implementation(libs.apache.commons.dbcp)
     implementation(libs.kodein.di)
     implementation(libs.kodein.kaverit)
+    implementation(libs.jcabi.manifests) {
+        exclude(group = "org.mockito")
+        exclude(group = "org.mockito.kotlin")
+    }
 
 
     implementation(libs.nanohttpd)

@@ -10,7 +10,7 @@ import com.ustadmobile.core.impl.config.AppConfig
 import com.ustadmobile.core.impl.config.AppConfigMap
 import com.ustadmobile.core.impl.config.GenderConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
-import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.METADATA_KEY_PRESET_LANG
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.APPCONFIG_KEY_PRESET_LANG
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.PREFKEY_ACTIONED_PRESET
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.PREFKEY_LOCALE
 import com.ustadmobile.core.impl.di.DomainDiModuleJs
@@ -79,7 +79,7 @@ internal fun ustadJsDi(
             /*
              * Check if there is a preset default language, and apply if not already actioned
              */
-            val presetLang = configMap[METADATA_KEY_PRESET_LANG]
+            val presetLang = configMap[APPCONFIG_KEY_PRESET_LANG]
             if(!presetLang.isNullOrEmpty() && it.getStringOrNull(PREFKEY_ACTIONED_PRESET) != "true") {
                 it[PREFKEY_LOCALE] = presetLang
                 it[PREFKEY_ACTIONED_PRESET] = "true"

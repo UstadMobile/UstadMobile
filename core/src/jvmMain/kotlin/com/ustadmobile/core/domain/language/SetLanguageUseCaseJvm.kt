@@ -48,7 +48,7 @@ class SetLanguageUseCaseJvm(
         val REAL_SYSTEM_DEFAULT = Locale.getDefault()
 
         fun init() {
-            println("real default = $REAL_SYSTEM_DEFAULT")
+            println("LanguageUseCaseJvm: Set real default = $REAL_SYSTEM_DEFAULT")
         }
 
     }

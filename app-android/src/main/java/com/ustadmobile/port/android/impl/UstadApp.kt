@@ -96,7 +96,7 @@ import com.ustadmobile.core.impl.config.BundleAppConfig
 import com.ustadmobile.core.impl.config.GenderConfig
 import com.ustadmobile.core.impl.config.LocaleSettingDelegateAndroid
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
-import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.METADATA_KEY_PRESET_LANG
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.APPCONFIG_KEY_PRESET_LANG
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.PREFKEY_ACTIONED_PRESET
 import com.ustadmobile.core.impl.nav.NavCommandExecutionTracker
 import com.ustadmobile.core.uri.UriHelper
@@ -648,7 +648,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
         super.onCreate()
         Napier.base(DebugAntilog())
 
-        val metadataPresetLang = appMetaData?.getString(METADATA_KEY_PRESET_LANG)
+        val metadataPresetLang = appMetaData?.getString(APPCONFIG_KEY_PRESET_LANG)
 
         if(!metadataPresetLang.isNullOrEmpty()) {
             val settings: Settings = di.direct.instance()

@@ -24,7 +24,9 @@ import com.ustadmobile.core.embeddedhttp.EmbeddedHttpServer
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.config.ApiUrlConfig
+import com.ustadmobile.core.impl.config.AppConfig
 import com.ustadmobile.core.impl.config.GenderConfig
+import com.ustadmobile.core.impl.config.ManifestAppConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.impl.locale.StringProviderJvm
@@ -229,10 +231,17 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         manuallySpecifiedLocation = File(mediaInfoResourcesDir, "mediainfo").getCommandFile(),
     ) ?: throw IllegalStateException("No MediaInfo found")
 
+    bind<AppConfig>() with singleton {
+        ManifestAppConfig()
+    }
+
     bind<SupportedLanguagesConfig>() with singleton {
+        val appConfig = instance<AppConfig>()
         SupportedLanguagesConfig(
             systemLocales = listOf(SetLanguageUseCaseJvm.REAL_SYSTEM_DEFAULT.language),
             settings = instance(),
+            availableLanguagesConfig = appConfig["com.ustadmobile.uilanguages"] ?:
+                SupportedLanguagesConfig.DEFAULT_SUPPORTED_LANGUAGES
         )
     }
 
