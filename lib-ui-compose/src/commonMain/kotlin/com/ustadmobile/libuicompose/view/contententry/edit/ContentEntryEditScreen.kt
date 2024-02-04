@@ -45,9 +45,7 @@ fun ContentEntryEditScreen(
     onContentEntryChanged: (ContentEntry?) -> Unit = {},
 ) {
     UstadVerticalScrollColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState()),
+        modifier = Modifier.fillMaxSize()
     )  {
 
         val updateContentText =
