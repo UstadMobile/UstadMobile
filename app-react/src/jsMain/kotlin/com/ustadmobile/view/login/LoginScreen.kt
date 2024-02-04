@@ -148,6 +148,7 @@ private val LoginComponent2 = FC<LoginProps> { props ->
 
             Typography {
                 align = TypographyAlign.center
+                variant = TypographyVariant.caption
                 + props.uiState.versionInfo
             }
 

@@ -1,7 +1,6 @@
-package com.ustadmobile.core.domain
+package com.ustadmobile.core.domain.getversion
 
 import com.jcabi.manifests.Manifests
-import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 
 class GetVersionUseCaseJvm: GetVersionUseCase {
 

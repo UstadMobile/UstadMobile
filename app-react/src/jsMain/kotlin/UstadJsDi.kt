@@ -4,6 +4,7 @@ import com.russhwolf.settings.StorageSettings
 import com.russhwolf.settings.set
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.config.AppConfig
@@ -33,6 +34,7 @@ import kotlinx.serialization.json.Json
 import org.kodein.di.*
 import com.ustadmobile.core.impl.locale.StringProviderJs
 import com.ustadmobile.core.viewmodel.OnBoardingViewModel
+import com.ustadmobile.domain.getversion.GetVersionUseCaseJs
 import com.ustadmobile.util.resolveEndpoint
 import dev.icerock.moko.resources.provider.JsStringProvider
 import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
@@ -206,5 +208,8 @@ internal fun ustadJsDi(
         }
     }
 
+    bind<GetVersionUseCase>() with singleton {
+        GetVersionUseCaseJs()
+    }
 
 }

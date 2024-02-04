@@ -3,6 +3,7 @@ plugins {
 
     id 'org.jetbrains.kotlin.plugin.serialization'
     id 'dev.icerock.mobile.multiplatform-resources'
+    id 'com.github.gmazzo.buildconfig'
 }
 
 group = rootProject.group
@@ -109,6 +110,12 @@ kotlin {
             }
         }
     }
+}
+
+buildConfig {
+    packageName("com.ustadmobile")
+    className("BuildConfigJs")
+    buildConfigField("String", "APP_VERSION", "\"${rootProject.version}\"")
 }
 
 

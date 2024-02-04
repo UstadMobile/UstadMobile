@@ -1715,4 +1715,7 @@
     -->
     <string name="content_not_ready_try_later">Content not ready yet, try again later.</string>
 
+
+    <string name="version">Version</string>
+
 </resources>
