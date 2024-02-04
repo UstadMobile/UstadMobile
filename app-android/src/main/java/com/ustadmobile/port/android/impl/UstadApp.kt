@@ -101,6 +101,7 @@ import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.PREFK
 import com.ustadmobile.core.impl.nav.NavCommandExecutionTracker
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.uri.UriHelperAndroid
+import com.ustadmobile.core.util.ext.appMetaData
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.libcache.UstadCache
@@ -130,11 +131,6 @@ import org.acra.ktx.initAcra
 import org.acra.sender.HttpSender
 
 class UstadApp : Application(), DIAware, ImageLoaderFactory{
-
-    private val Context.appMetaData: Bundle?
-        get() = this.applicationContext.packageManager.getApplicationInfo(
-            applicationContext.packageName, PackageManager.GET_META_DATA
-        ).metaData
 
 
     @OptIn(ExperimentalXmlUtilApi::class)

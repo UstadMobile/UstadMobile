@@ -20,6 +20,8 @@ interface AppConfig {
 
         const val KEY_GENDER_CONFIG = "com.ustadmobile.gopts"
 
+        const val KEY_CONFIG_SHOW_POWERED_BY = "com.ustadmobile.showpoweredbymsg"
+
     }
 
 }

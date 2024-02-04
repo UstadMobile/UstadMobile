@@ -167,17 +167,17 @@ val onboardingItems: List<OnboardingItem> = listOf(
     OnboardingItem(
         MR.strings.onboarding_no_internet_headline,
         MR.strings.onboarding_no_internet_subheadline,
-        UstadImage.ILLUSTRATION_OFFLINE_USAGE
+        UstadImage.ILLUSTRATION_ONBOARDING1
     ),
     OnboardingItem(
         MR.strings.onboarding_offline_sharing,
         MR.strings.onboarding_offline_sharing_subheading,
-        UstadImage.ILLUSTRATION_OFFLINE_SHARING,
+        UstadImage.ILLUSTRATION_ONBOARDING2,
     ),
     OnboardingItem(
         MR.strings.onboarding_stay_organized_headline,
         MR.strings.onboarding_stay_organized_subheading,
-        UstadImage.ILLUSTRATION_ORGANIZED,
+        UstadImage.ILLUSTRATION_ONBOARDING3,
     )
 )
 

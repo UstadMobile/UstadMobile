@@ -2,7 +2,9 @@ package com.ustadmobile.core.util.ext
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
+import android.os.Bundle
 
 
 /**
@@ -16,3 +18,8 @@ fun Context.startForegroundServiceAsSupported(intent: Intent) {
         startService(intent)
     }
 }
+
+val Context.appMetaData: Bundle?
+    get() = this.applicationContext.packageManager.getApplicationInfo(
+        applicationContext.packageName, PackageManager.GET_META_DATA
+    ).metaData

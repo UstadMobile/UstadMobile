@@ -6,9 +6,9 @@ import androidx.compose.ui.res.painterResource
 
 val nameMap = mapOf(
     UstadImage.ILLUSTRATION_CONNECT to "/img/illustration_connect.png",
-    UstadImage.ILLUSTRATION_OFFLINE_SHARING to "/img/illustration_offline_sharing.png",
-    UstadImage.ILLUSTRATION_OFFLINE_USAGE to "/img/illustration_offline_usage.png",
-    UstadImage.ILLUSTRATION_ORGANIZED to "/img/illustration_organized.png",
+    UstadImage.ILLUSTRATION_ONBOARDING1 to "/img/illustration_onboarding1.png",
+    UstadImage.ILLUSTRATION_ONBOARDING2 to "/img/illustration_onboarding2.png",
+    UstadImage.ILLUSTRATION_ONBOARDING3 to "/img/illustration_onboarding3.png",
     UstadImage.COURSE_BANNER_DEFAULT0 to "/img/course_banner_default0.webp",
     UstadImage.COURSE_BANNER_DEFAULT1 to "/img/course_banner_default1.webp",
     UstadImage.COURSE_BANNER_DEFAULT2 to "/img/course_banner_default2.webp",
