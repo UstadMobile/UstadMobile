@@ -4,6 +4,7 @@ plugins {
     id 'kotlin'
     id "io.ktor.plugin" version "$version_ktor"
     id 'kotlinx-serialization'
+    alias(libs.plugins.license)
 }
 
 distributions {
@@ -51,6 +52,22 @@ sourceSets.main {
     }
 }
 
+licenseReport {
+    generateHtmlReport = false
+    generateTextReport = true
+}
+
+tasks.register("copyLicenseReport", Copy) {
+    from(project.file("build/reports/licenses/licenseReport.txt"))
+    into(project.file("src/dist/licenses"))
+    rename { "packages-licenses.txt" }
+}
+
+tasks.configureEach {
+    if(it.name == "licenseReport") {
+        tasks.getByName("copyLicenseReport").dependsOn(it)
+    }
+}
 
 dependencies {
     implementation "io.ktor:ktor-client-core:$version_ktor"

@@ -45,6 +45,7 @@ fun AccountListScreen(
         onAddItem = viewModel::onClickAddAccount,
         onLogoutClick = viewModel::onClickLogout,
         onMyProfileClick = viewModel::onClickProfile,
+        onClickOpenLicenses = viewModel::onClickOpenLicenses,
     )
 }
 
@@ -53,7 +54,7 @@ fun AccountListScreen(
     uiState: AccountListUiState,
     onAccountListItemClick: (UserSessionWithPersonAndEndpoint) -> Unit = {},
     onDeleteListItemClick: (UserSessionWithPersonAndEndpoint) -> Unit = {},
-    onAboutClick: () -> Unit = {},
+    onClickOpenLicenses: () -> Unit = {},
     onAddItem: () -> Unit = {},
     onMyProfileClick: () -> Unit = {},
     onLogoutClick: () -> Unit = {}
@@ -138,12 +139,19 @@ fun AccountListScreen(
 
         item(key = "about") {
             ListItem(
-                modifier = Modifier
-                    .clickable {
-                        onAboutClick()
-                    },
-                headlineContent = { Text(stringResource(MR.strings.about)) },
+                headlineContent = { Text(stringResource(MR.strings.version)) },
                 supportingContent = { Text(text = uiState.version) }
+            )
+        }
+
+        item(key = "open_licenses") {
+            ListItem(
+                modifier = Modifier.clickable {
+                    onClickOpenLicenses()
+                },
+                headlineContent = {
+                    Text("Open Source Licenses")
+                },
             )
         }
 

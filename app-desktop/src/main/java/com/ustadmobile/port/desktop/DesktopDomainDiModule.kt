@@ -53,6 +53,7 @@ import com.ustadmobile.core.domain.contententry.launchcontent.xapi.LaunchXapiUse
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.LaunchXapiUseCaseJvm
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.ResolveXapiLaunchHrefUseCase
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
+import com.ustadmobile.core.domain.launchopenlicenses.LaunchOpenLicensesUseCase
 import com.ustadmobile.core.domain.phonenumber.OnClickPhoneNumUseCase
 import com.ustadmobile.core.domain.phonenumber.OnClickPhoneNumUseCaseJvm
 import com.ustadmobile.core.domain.sendemail.OnClickEmailUseCase
@@ -64,6 +65,7 @@ import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseJvm
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientChunkGetterUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
+import com.ustadmobile.core.launchopenlicenses.LaunchOpenLicensesUseCaseJvm
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
@@ -316,5 +318,12 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
 
     bind<GetVersionUseCase>() with singleton {
         GetVersionUseCaseJvm()
+    }
+
+    bind<LaunchOpenLicensesUseCase>() with singleton {
+        LaunchOpenLicensesUseCaseJvm(
+            launchChromeUseCase = instance(),
+            licenseFile = File(ustadAppResourcesDir(), "open_source_licenses.html")
+        )
     }
 }

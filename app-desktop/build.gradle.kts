@@ -12,6 +12,7 @@ plugins {
     kotlin("jvm")
     alias(libs.plugins.jetbrains.compose)
     alias(libs.plugins.conveyor)
+    alias(libs.plugins.license)
 }
 
 kotlin {
@@ -64,9 +65,15 @@ tasks.named("build").dependsOn("proguardReleaseJars")
 tasks.named("clean").dependsOn("cleanWebBundle")
 tasks.named("build").dependsOn("bundleWeb")
 
+val copyLicenseReport by tasks.register("copyLicenseReport", Copy::class) {
+    from(project.file("build/reports/licenses/licenseReport.html"))
+    into(project.file("app-resources/common"))
+    rename { "open_source_licenses.html" }
+}
+
 tasks.whenObjectAdded {
-    if(name == "prepareAppResources" || name.startsWith("package")) {
-        dependsOn(bundleWebTask)
+    if(name == "licenseReport") {
+        copyLicenseReport.dependsOn(this)
     }
 }
 
@@ -179,3 +186,8 @@ compose.desktop {
         }
     }
 }
+
+licenseReport {
+    generateHtmlReport = true
+}
+

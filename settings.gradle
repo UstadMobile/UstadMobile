@@ -82,6 +82,7 @@ dependencyResolutionManagement {
             version("version_pdfbox", "3.0.1")
             version("version_vlcj", "4.8.2")
             version("version_jcabi_manifests", "2.1.0")
+            version("version_plugin_license", "0.9.7")
 
             plugin("jetbrains-compose", "org.jetbrains.compose").versionRef("jetbrains-compose")
             plugin("moko-resources-plugin", "dev.icerock.mobile.multiplatform-resources").versionRef("version-moko-resources")
@@ -89,6 +90,7 @@ dependencyResolutionManagement {
             plugin("atomicfu", "org.jetbrains.kotlin.plugin.atomicfu").versionRef("version_kotlin")
             plugin("conveyor", "dev.hydraulic.conveyor").versionRef("plugin_conveyor")
             plugin("download-task", "de.undercouch.download").versionRef("version_plugin_download_task")
+            plugin("license", "com.jaredsburrows.license").versionRef("version_plugin_license")
 
             library("kodein-di", "org.kodein.di", "kodein-di").versionRef("version_kodein_di")
             library("kodein-di-compose", "org.kodein.di", "kodein-di-framework-compose").versionRef("version_kodein_di")

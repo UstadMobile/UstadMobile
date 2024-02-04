@@ -6,6 +6,7 @@ plugins {
     id 'org.jetbrains.kotlin.kapt'
     id 'kotlin-parcelize'
     alias(libs.plugins.jetbrains.compose)
+    alias(libs.plugins.license)
 }
 
 //As Per https://developer.android.com/studio/publish/app-signing.html#release-mode
@@ -419,3 +420,7 @@ dependencies {
     kaptAndroidTest "androidx.databinding:databinding-compiler:$version_androidx_databinding"
 }
 
+licenseReport {
+    generateHtmlReport = true
+    copyHtmlReportToAssets = true
+}

@@ -30,7 +30,7 @@ external interface AccountListProps: Props {
     var uiState: AccountListUiState
     var onAccountListItemClick: (UserSessionWithPersonAndEndpoint) -> Unit
     var onDeleteListItemClick: (UserSessionWithPersonAndEndpoint) -> Unit
-    var onAboutClick: () -> Unit
+    var onClickOpenLicenses: () -> Unit
     var onAddItem: () -> Unit
     var onMyProfileClick: () -> Unit
     var onLogoutClick: () -> Unit
@@ -233,11 +233,21 @@ val AccountListComponent2 = FC<AccountListProps> { props ->
             Divider { }
 
             ListItem {
-                ListItemButton{
+                ListItemText{
+                    primary = ReactNode(strings[MR.strings.version])
+                    secondary = ReactNode(props.uiState.version)
+                }
+            }
 
-                    ListItemText{
-                        primary = ReactNode(strings[MR.strings.account])
-                        secondary = ReactNode(props.uiState.version)
+            ListItem {
+                disableGutters = true
+                ListItemButton {
+                    onClick = {
+                        props.onClickOpenLicenses()
+                    }
+
+                    ListItemText {
+                        primary = ReactNode(strings[MR.strings.open_source_licenses])
                     }
                 }
             }
@@ -260,6 +270,7 @@ val AccountListScreen = FC<Props> {
         onAddItem = viewModel::onClickAddAccount
         onAccountListItemClick = viewModel::onClickAccount
         onDeleteListItemClick = viewModel::onClickDeleteAccount
+        onClickOpenLicenses = viewModel::onClickOpenLicenses
     }
 }
 
