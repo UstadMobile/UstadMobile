@@ -26,6 +26,13 @@ tasks.withType<KotlinCompile> {
     compilerOptions.freeCompilerArgs.add("-Xexpect-actual-classes")
 }
 
+//Set version and AppConfig properties as Manifest properties.
+tasks.withType<Jar> {
+    manifest {
+        attributes["Ustad-Version"] = rootProject.version
+    }
+}
+
 /*
  * Displaying Epubs on Desktop is done by serving the Web Version using the embeddedd server -
  * see LaunchEpubUseCaseJvm for details/rationale.

@@ -216,6 +216,9 @@ ext {
     version_persian_date_picker_aliab="1.7.1"
     version_better_link_movement="2.2.0"
 
+    version_jcabi_manifests = "2.1.0"
+
+
     /*Kotlin react web app*/
     kotlinWrappersVersion = "1.0.0-pre.651"
 

@@ -176,6 +176,10 @@ kotlin {
                 implementation libs.libphonenumber.google
                 implementation libs.thumbnailator
                 implementation libs.webpimageio
+                implementation("com.jcabi:jcabi-manifests:$version_jcabi_manifests") {
+                    exclude group: "org.mockito"
+                    exclude group: "org.mockito.kotlin"
+                }
             }
         }
 
