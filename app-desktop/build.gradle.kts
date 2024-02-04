@@ -1,6 +1,7 @@
 import com.android.build.gradle.internal.tasks.factory.dependsOn
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import java.util.Properties
 
 //Roughly as per
 // https://github.com/JetBrains/compose-multiplatform-desktop-template#readme
@@ -38,11 +39,14 @@ tasks.withType<Jar> {
          *
          * These keys can be uncommented and set if desired
          */
+        val buildConfigProps = rootProject.ext["buildConfigProperties"] as? Properties
+        if(!buildConfigProps?.getProperty("com.ustadmobile.uilanguages").isNullOrEmpty()) {
+            attributes["com-ustadmobile-uilanguages"] = buildConfigProps?.getProperty("com.ustadmobile.uilanguages")
+        }
 
-        /*Begin desktop lang manifest prefs
-        attributes["com-ustadmobile-uilanguages"] = "en,tg,ru"
-        attributes["com-ustadmobile-presetlocale"] = "tg"
-        end desktop lang manifest prefs*/
+        if(!buildConfigProps?.getProperty("com.ustadmobile.presetlocale").isNullOrEmpty()) {
+            attributes["com-ustadmobile-presetlocale"] = buildConfigProps?.getProperty("com.ustadmobile.presetlocale")
+        }
     }
 }
 
@@ -132,7 +136,7 @@ configurations.all {
 compose.desktop {
     application {
         //might check https://conveyor.hydraulic.dev/13.0/troubleshooting/troubleshooting-jvm/#localization-doesnt-work-when-packaged
-        mainClass = "com.ustadmobile.port.desktop.AppKt"
+        mainClass = "com.ustadmobile.port.desktop.apprun.AppRunKt"
 
         //https://blog.jetbrains.com/kotlin/2022/10/compose-multiplatform-1-2-is-out/#proguard
         // https://conveyor.hydraulic.dev/13.0/configs/jvm/#proguard-obfuscation

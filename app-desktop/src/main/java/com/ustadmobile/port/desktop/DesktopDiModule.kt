@@ -39,6 +39,7 @@ import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.getCommandFile
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 import com.ustadmobile.core.util.ext.isWindowsOs
+import com.ustadmobile.core.util.ext.toNullIfBlank
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.RepositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
@@ -240,7 +241,7 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         SupportedLanguagesConfig(
             systemLocales = listOf(SetLanguageUseCaseJvm.REAL_SYSTEM_DEFAULT.language),
             settings = instance(),
-            availableLanguagesConfig = appConfig["com.ustadmobile.uilanguages"] ?:
+            availableLanguagesConfig = appConfig["com.ustadmobile.uilanguages"]?.toNullIfBlank() ?:
                 SupportedLanguagesConfig.DEFAULT_SUPPORTED_LANGUAGES
         )
     }

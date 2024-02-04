@@ -2,9 +2,7 @@ package com.ustadmobile.port.android.impl
 
 import android.app.Application
 import android.content.Context
-import android.content.pm.PackageManager
 import android.content.res.AssetManager
-import android.os.Bundle
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import coil.ImageLoader
@@ -103,6 +101,7 @@ import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.uri.UriHelperAndroid
 import com.ustadmobile.core.util.ext.appMetaData
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
+import com.ustadmobile.core.util.ext.toNullIfBlank
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
@@ -202,7 +201,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 localeSettingDelegate = LocaleSettingDelegateAndroid(),
                 availableLanguagesConfig = applicationContext.appMetaData?.getString(
                     METADATA_KEY_SUPPORTED_LANGS
-                ) ?: SupportedLanguagesConfig.DEFAULT_SUPPORTED_LANGUAGES
+                )?.toNullIfBlank() ?: SupportedLanguagesConfig.DEFAULT_SUPPORTED_LANGUAGES
             )
         }
 
