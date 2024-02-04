@@ -247,7 +247,7 @@ val AccountListComponent2 = FC<AccountListProps> { props ->
                     }
 
                     ListItemText {
-                        primary = ReactNode(strings[MR.strings.open_source_licenses])
+                        primary = ReactNode(strings[MR.strings.licenses])
                     }
                 }
             }

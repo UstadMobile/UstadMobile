@@ -16,7 +16,7 @@ class OpenLicensesViewModel(
     init {
         _appUiState.update { prev ->
             prev.copy(
-                title = systemImpl.getString(MR.strings.open_source_licenses),
+                title = systemImpl.getString(MR.strings.licenses),
                 hideBottomNavigation = true,
                 navigationVisible = false,
                 userAccountIconVisible = false,

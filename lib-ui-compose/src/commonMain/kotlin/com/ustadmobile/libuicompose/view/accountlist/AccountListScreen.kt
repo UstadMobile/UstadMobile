@@ -150,7 +150,7 @@ fun AccountListScreen(
                     onClickOpenLicenses()
                 },
                 headlineContent = {
-                    Text("Open Source Licenses")
+                    Text(stringResource(MR.strings.licenses))
                 },
             )
         }
