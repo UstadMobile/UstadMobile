@@ -250,8 +250,8 @@ val AccountListComponent2 = FC<AccountListProps> { props ->
                     }
 
                     ListItemText{
-                        primary = ReactNode(versionStr)
-                        secondary = ReactNode(props.uiState.version)
+                        primary = ReactNode(strings[MR.strings.version])
+                        secondary = ReactNode(versionStr)
                     }
                 }
 
