@@ -85,7 +85,8 @@ class LoginViewModel(
 
         _uiState.update { prev ->
             prev.copy(
-                versionInfo = getVersionUseCase?.invoke()?.versionString ?: "",
+                versionInfo = "${systemImpl.getString(MR.strings.version)}: " +
+                        getVersionUseCase?.invoke()?.versionString,
                 loginIntentMessage = savedStateHandle[UstadView.ARG_INTENT_MESSAGE],
                 currentLanguage = languagesConfig.getCurrentLanguage(systemImpl),
                 languageList = languagesConfig.supportedUiLanguagesAndSysDefault(systemImpl)

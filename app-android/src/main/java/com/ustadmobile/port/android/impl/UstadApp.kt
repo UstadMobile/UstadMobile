@@ -2,9 +2,7 @@ package com.ustadmobile.port.android.impl
 
 import android.app.Application
 import android.content.Context
-import android.content.pm.PackageManager
 import android.content.res.AssetManager
-import android.os.Bundle
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import coil.ImageLoader
@@ -96,12 +94,14 @@ import com.ustadmobile.core.impl.config.BundleAppConfig
 import com.ustadmobile.core.impl.config.GenderConfig
 import com.ustadmobile.core.impl.config.LocaleSettingDelegateAndroid
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
-import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.METADATA_KEY_PRESET_LANG
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.APPCONFIG_KEY_PRESET_LANG
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.PREFKEY_ACTIONED_PRESET
 import com.ustadmobile.core.impl.nav.NavCommandExecutionTracker
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.uri.UriHelperAndroid
+import com.ustadmobile.core.util.ext.appMetaData
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
+import com.ustadmobile.core.util.ext.toNullIfBlank
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
@@ -130,11 +130,6 @@ import org.acra.ktx.initAcra
 import org.acra.sender.HttpSender
 
 class UstadApp : Application(), DIAware, ImageLoaderFactory{
-
-    private val Context.appMetaData: Bundle?
-        get() = this.applicationContext.packageManager.getApplicationInfo(
-            applicationContext.packageName, PackageManager.GET_META_DATA
-        ).metaData
 
 
     @OptIn(ExperimentalXmlUtilApi::class)
@@ -206,7 +201,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 localeSettingDelegate = LocaleSettingDelegateAndroid(),
                 availableLanguagesConfig = applicationContext.appMetaData?.getString(
                     METADATA_KEY_SUPPORTED_LANGS
-                ) ?: SupportedLanguagesConfig.DEFAULT_SUPPORTED_LANGUAGES
+                )?.toNullIfBlank() ?: SupportedLanguagesConfig.DEFAULT_SUPPORTED_LANGUAGES
             )
         }
 
@@ -648,7 +643,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
         super.onCreate()
         Napier.base(DebugAntilog())
 
-        val metadataPresetLang = appMetaData?.getString(METADATA_KEY_PRESET_LANG)
+        val metadataPresetLang = appMetaData?.getString(APPCONFIG_KEY_PRESET_LANG)
 
         if(!metadataPresetLang.isNullOrEmpty()) {
             val settings: Settings = di.direct.instance()

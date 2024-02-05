@@ -1,6 +1,7 @@
 import com.android.build.gradle.internal.tasks.factory.dependsOn
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import java.util.Properties
 
 //Roughly as per
 // https://github.com/JetBrains/compose-multiplatform-desktop-template#readme
@@ -12,6 +13,7 @@ plugins {
     kotlin("jvm")
     alias(libs.plugins.jetbrains.compose)
     alias(libs.plugins.conveyor)
+    alias(libs.plugins.license)
 }
 
 kotlin {
@@ -24,6 +26,28 @@ java.targetCompatibility = JavaVersion.VERSION_17
 tasks.withType<KotlinCompile> {
     compilerOptions.jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
     compilerOptions.freeCompilerArgs.add("-Xexpect-actual-classes")
+}
+
+//Set version and AppConfig properties as Manifest properties.
+tasks.withType<Jar> {
+    manifest {
+        attributes["Ustad-Version"] = rootProject.version
+
+        /*
+         * Note manifest keys must replace "." with "-" because "." is not valid to include in as
+         * per the JAR Manifest specification.
+         *
+         * These keys can be uncommented and set if desired
+         */
+        val buildConfigProps = rootProject.ext["buildConfigProperties"] as? Properties
+        if(!buildConfigProps?.getProperty("com.ustadmobile.uilanguages").isNullOrEmpty()) {
+            attributes["com-ustadmobile-uilanguages"] = buildConfigProps?.getProperty("com.ustadmobile.uilanguages")
+        }
+
+        if(!buildConfigProps?.getProperty("com.ustadmobile.presetlocale").isNullOrEmpty()) {
+            attributes["com-ustadmobile-presetlocale"] = buildConfigProps?.getProperty("com.ustadmobile.presetlocale")
+        }
+    }
 }
 
 /*
@@ -45,9 +69,15 @@ tasks.named("build").dependsOn("proguardReleaseJars")
 tasks.named("clean").dependsOn("cleanWebBundle")
 tasks.named("build").dependsOn("bundleWeb")
 
+val copyLicenseReport by tasks.register("copyLicenseReport", Copy::class) {
+    from(project.file("build/reports/licenses/licenseReport.html"))
+    into(project.file("app-resources/common"))
+    rename { "open_source_licenses.html" }
+}
+
 tasks.whenObjectAdded {
-    if(name == "prepareAppResources" || name.startsWith("package")) {
-        dependsOn(bundleWebTask)
+    if(name == "licenseReport") {
+        copyLicenseReport.dependsOn(this)
     }
 }
 
@@ -79,6 +109,10 @@ dependencies {
     implementation(libs.apache.commons.dbcp)
     implementation(libs.kodein.di)
     implementation(libs.kodein.kaverit)
+    implementation(libs.jcabi.manifests) {
+        exclude(group = "org.mockito")
+        exclude(group = "org.mockito.kotlin")
+    }
 
 
     implementation(libs.nanohttpd)
@@ -102,7 +136,7 @@ configurations.all {
 compose.desktop {
     application {
         //might check https://conveyor.hydraulic.dev/13.0/troubleshooting/troubleshooting-jvm/#localization-doesnt-work-when-packaged
-        mainClass = "com.ustadmobile.port.desktop.AppKt"
+        mainClass = "com.ustadmobile.port.desktop.apprun.AppRunKt"
 
         //https://blog.jetbrains.com/kotlin/2022/10/compose-multiplatform-1-2-is-out/#proguard
         // https://conveyor.hydraulic.dev/13.0/configs/jvm/#proguard-obfuscation
@@ -138,11 +172,26 @@ compose.desktop {
             description = "Maktab Mobile"
             copyright = "© UstadMobile FZ-LLC."
             licenseFile.set(rootProject.file("LICENSE"))
+
+
             windows {
                 packageVersion = "1.0.0"
                 msiPackageVersion = "1.0.0"
                 exePackageVersion = "1.0.0"
+                iconFile.set(project.file("icon.ico"))
+            }
+
+            /**
+             * NOTE: On Ubuntu, the icon will update ONLY if the class name of the app is changed.
+             */
+            linux {
+                iconFile.set(project.file("icon.png"))
             }
         }
     }
 }
+
+licenseReport {
+    generateHtmlReport = true
+}
+

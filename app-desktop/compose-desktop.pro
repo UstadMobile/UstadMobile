@@ -312,9 +312,9 @@
 # PDFBox
 -dontwarn org.apiguardian.api.**
 
-#-keep class org.apache.commons.logging.impl.LogFactoryImpl {
-#    public <init>(...);
-#}
-
 -keep class org.apache.commons.logging.** { *; }
 -keep class org.apache.fontbox.** { *; }
+
+#JCABI Manifests - we are not using Servlets
+-dontwarn jakarta.servlet.ServletContext
+

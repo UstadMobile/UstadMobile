@@ -1,0 +1,703 @@
+Notice for packages
+
+
+${project.artifactId} (2.4.0) - The Apache Software License, Version 2.0
+Jansi is a java library for generating and interpreting ANSI escape sequences.
+http://fusesource.github.io/jansi
+
+${project.groupId}:${project.artifactId} (1.16) - The Apache Software License, Version 2.0
+Batik SVG Rasterizer Library
+
+${project.groupId}:${project.artifactId} (1.16) - The Apache Software License, Version 2.0
+Batik constants library
+
+${project.groupId}:${project.artifactId} (1.16) - The Apache Software License, Version 2.0
+Batik SVG DOM implementation
+
+${project.groupId}:${project.artifactId} (1.16) - The Apache Software License, Version 2.0
+Batik Graphics Vector Tree (GVT)
+
+${project.groupId}:${project.artifactId} (1.16) - The Apache Software License, Version 2.0
+Batik bridge
+
+${project.groupId}:${project.artifactId} (1.16) - The Apache Software License, Version 2.0
+Batik script language support
+
+${project.groupId}:${project.artifactId} (1.16) - The Apache Software License, Version 2.0
+Batik SVG transcoder
+
+${project.groupId}:${project.artifactId} (1.16) - The Apache Software License, Version 2.0
+Batik animation engine
+
+${project.groupId}:${project.artifactId} (1.16) - The Apache Software License, Version 2.0
+Batik DOM implementation
+
+${project.groupId}:${project.artifactId} (1.16) - The Apache Software License, Version 2.0
+Batik Java2D SVG generator
+
+${project.groupId}:${project.artifactId} (1.16) - The Apache Software License, Version 2.0
+Batik CSS engine
+
+${project.groupId}:${project.artifactId} (1.16) - The Apache Software License, Version 2.0
+Batik XML utilities
+
+${project.groupId}:${project.artifactId} (1.16) - The Apache Software License, Version 2.0
+Batik image codecs
+
+${project.groupId}:${project.artifactId} (1.16) - The Apache Software License, Version 2.0
+Batik SVG Rasterizer Application
+
+${project.groupId}:${project.artifactId} (1.16) - The Apache Software License, Version 2.0
+Batik utility library
+
+${project.groupId}:${project.artifactId} (1.16) - The Apache Software License, Version 2.0
+Batik i18n library
+
+${project.groupId}:${project.artifactId} (1.16) - The Apache Software License, Version 2.0
+Batik AWT utilities
+
+${project.groupId}:${project.artifactId} (1.16) - The Apache Software License, Version 2.0
+Batik Shared Resources
+
+${project.groupId}:${project.artifactId} (1.16) - The Apache Software License, Version 2.0
+Batik SVG microsyntax parser
+
+${project.groupId}:${project.artifactId} (1.16) - The Apache Software License, Version 2.0
+Batik external code
+
+        ${project.groupId}:${project.artifactId} (0.23.0) - 
+        An in-memory implementation of JNDI, so no server instances are started.
+A java.util.Properties object, the structure of a root directory or a list
+of .property files serves as a model for the contexts structure.
+The contexts get populated with objects defined programmatically or declarative
+in .properties, .xml or .ini files.
+        https://github.com/h-thurow/Simple-JNDI
+
+Android Arch-Common (2.2.0) - The Apache Software License, Version 2.0
+Android Arch-Common
+https://developer.android.com/jetpack/androidx/releases/arch-core#2.2.0
+
+Annotation (1.7.0) - The Apache Software License, Version 2.0
+Provides source annotations for tooling and readability.
+https://developer.android.com/jetpack/androidx/releases/annotation#1.7.0
+
+          Apache Commons IO (2.15.0) - Apache-2.0
+          The Apache Commons IO library contains utility classes, stream implementations, file filters,
+file comparators, endian transformation classes, and much more.
+          https://commons.apache.org/proper/commons-io/
+
+        Apache Commons Lang (3.14.0) - Apache-2.0
+        Apache Commons Lang, a package of Java utility classes for the
+classes that are in java.lang's hierarchy, or are considered to be so
+standard as to justify existence in java.lang.
+        https://commons.apache.org/proper/commons-lang/
+
+      Apache Commons Logging (1.2) - The Apache Software License, Version 2.0
+      Apache Commons Logging is a thin adapter allowing configurable bridging to other,
+well known logging systems.
+      http://commons.apache.org/proper/commons-logging/
+
+Apache Commons Pool (2.12.0) - Apache-2.0
+The Apache Commons Object Pooling Library.
+https://commons.apache.org/proper/commons-pool/
+
+      Apache FontBox (3.0.1) - Apache-2.0
+      The Apache FontBox library is an open source Java tool to obtain low level information
+from font files. FontBox is a subproject of Apache PDFBox.
+      http://pdfbox.apache.org/
+
+Apache PDFBox (3.0.1) - Apache-2.0
+The Apache PDFBox library is an open source Java tool for working with PDF documents.
+
+  Apache PDFBox io (3.0.1) - Apache-2.0
+  The Apache PDFBox library is an open source Java tool for working with PDF documents. 
+This artefact contains IO related classes.
+
+      Apache XML Graphics Commons (2.7) - The Apache Software License, Version 2.0
+      Apache XML Graphics Commons is a library that consists of several reusable 
+components used by Apache Batik and Apache FOP. Many of these components 
+can easily be used separately outside the domains of SVG and XSL-FO.
+      http://xmlgraphics.apache.org/commons/
+
+argparse4j (0.9.0) - MIT
+The command-line parser library based on Python's argparse
+https://argparse4j.github.io
+
+atomicfu (0.23.1) - The Apache Software License, Version 2.0
+AtomicFU utilities
+https://github.com/Kotlin/kotlinx.atomicfu
+
+c3p0 (0.9.5.4) - GNU Lesser General Public License, Version 2.1,Eclipse Public License, Version 1.0
+a JDBC Connection pooling / Statement caching library
+https://github.com/swaldman/c3p0
+
+cache4k (0.12.0) - The Apache Software License, Version 2.0
+In-memory Cache for Kotlin Multiplatform
+https://github.com/reactivecircus/cache4k
+
+          Checker Qual (3.37.0) - The MIT License
+          checker-qual contains annotations (type qualifiers) that a programmer
+writes to specify Java code for type-checking by the Checker Framework.
+          https://checkerframework.org/
+
+com.github.usefulness:webp-imageio (0.6.0) - Apache-2.0
+Java ImageIO WebP support
+https://github.com/usefulness/webp-imageio
+
+  Commons Lang (2.6) - The Apache Software License, Version 2.0
+  Commons Lang, a package of Java utility classes for the
+classes that are in java.lang's hierarchy, or are considered to be so
+standard as to justify existence in java.lang.
+  http://commons.apache.org/lang/
+
+Compose Animation (1.5.10) - The Apache Software License, Version 2.0
+Compose animation library
+https://github.com/JetBrains/compose-jb
+
+Compose Animation Core (1.5.10) - The Apache Software License, Version 2.0
+Animation engine and animation primitives that are the building blocks of the Compose animation library
+https://github.com/JetBrains/compose-jb
+
+Compose Foundation (1.5.10) - The Apache Software License, Version 2.0
+Higher level abstractions of the Compose UI primitives. This library is design system agnostic, providing the high-level building blocks for both application and design-system developers
+https://github.com/JetBrains/compose-jb
+
+Compose Geometry (1.5.10) - The Apache Software License, Version 2.0
+Compose classes related to dimensions without units
+https://github.com/JetBrains/compose-jb
+
+Compose Graphics (1.5.10) - The Apache Software License, Version 2.0
+Compose graphics
+https://github.com/JetBrains/compose-jb
+
+Compose Layouts (1.5.10) - The Apache Software License, Version 2.0
+Compose layout implementations
+https://github.com/JetBrains/compose-jb
+
+Compose Material Components (1.5.10) - The Apache Software License, Version 2.0
+Compose Material Design Components library
+https://github.com/JetBrains/compose-jb
+
+Compose Material Icons Core (1.5.10) - The Apache Software License, Version 2.0
+Compose Material Design core icons. This module contains the most commonly used set of Material icons.
+https://github.com/JetBrains/compose-jb
+
+Compose Material Ripple (1.5.10) - The Apache Software License, Version 2.0
+Material ripple used to build interactive components
+https://github.com/JetBrains/compose-jb
+
+Compose Runtime (1.5.10) - The Apache Software License, Version 2.0
+Tree composition support for code generated by the Compose compiler plugin and corresponding public API
+https://github.com/JetBrains/compose-jb
+
+Compose Saveable (1.5.10) - The Apache Software License, Version 2.0
+Compose components that allow saving and restoring the local ui state
+https://github.com/JetBrains/compose-jb
+
+Compose UI primitives (1.5.10) - The Apache Software License, Version 2.0
+Compose UI primitives. This library contains the primitives that form the Compose UI Toolkit, such as drawing, measurement and layout.
+https://github.com/JetBrains/compose-jb
+
+Compose UI Text (1.5.10) - The Apache Software License, Version 2.0
+Compose Text primitives and utilities
+https://github.com/JetBrains/compose-jb
+
+Compose Unit (1.5.10) - The Apache Software License, Version 2.0
+Compose classes for simple units
+https://github.com/JetBrains/compose-jb
+
+Compose Util (1.5.10) - The Apache Software License, Version 2.0
+Internal Compose utilities used by other modules
+https://github.com/JetBrains/compose-jb
+
+config (1.4.2) - Apache-2.0
+configuration library for JVM languages using HOCON files
+https://github.com/lightbend/config
+
+core (0.4.49)
+
+core (0.86.2) - The Apache License, Version 2.0
+Component of the XMLUtil library
+https://github.com/pdvrieze/xmlutil
+
+door-runtime-jvm (0.70b34)
+
+error-prone annotations (2.21.1) - Apache 2.0
+
+FFmpeg Wrapper (0.8.0) - The BSD 2-Clause License
+Simple Java wrapper around FFmpeg command-line interface
+https://github.com/bramp/ffmpeg-cli-wrapper
+
+FindBugs-jsr305 (3.0.2) - The Apache Software License, Version 2.0
+JSR305 Annotations for Findbugs
+http://findbugs.sourceforge.net/
+
+Gson (2.10.1) - Apache-2.0
+
+      Guava InternalFutureFailureAccess and InternalFutures (1.0.1) - The Apache Software License, Version 2.0
+      Contains
+com.google.common.util.concurrent.internal.InternalFutureFailureAccess and
+InternalFutures. Most users will never need to use this artifact. Its
+classes is conceptually a part of Guava, but they're in this separate
+artifact so that Android libraries can use them without pulling in all of
+Guava (just as they can use ListenableFuture by depending on the
+listenablefuture artifact).
+
+      Guava ListenableFuture only (9999.0-empty-to-avoid-conflict-with-guava) - The Apache Software License, Version 2.0
+      An empty artifact that Guava depends on to signal that it is providing
+ListenableFuture -- but is also available in a second "version" that
+contains com.google.common.util.concurrent.ListenableFuture class, without
+any other Guava classes. The idea is:
+
+- If users want only ListenableFuture, they depend on listenablefuture-1.0.
+
+- If users want all of Guava, they depend on guava, which, as of Guava
+27.0, depends on
+listenablefuture-9999.0-empty-to-avoid-conflict-with-guava. The 9999.0-...
+version number is enough for some build systems (notably, Gradle) to select
+that empty artifact over the "real" listenablefuture-1.0 -- avoiding a
+conflict with the copy of ListenableFuture in guava itself. If users are
+using an older version of Guava or a build system other than Gradle, they
+may see class conflicts. If so, they can solve them by manually excluding
+the listenablefuture artifact or manually forcing their build systems to
+use 9999.0-....
+
+      Guava: Google Core Libraries for Java (32.1.3-jre) - Apache License, Version 2.0
+      Guava is a suite of core and expanded libraries that include
+utility classes, Google's collections, I/O classes, and
+much more.
+      https://github.com/google/guava
+
+HikariCP (5.1.0) - The Apache Software License, Version 2.0
+Ultimate JDBC Connection Pool
+https://github.com/brettwooldridge/HikariCP
+
+HikariCP (2.4.13) - The Apache Software License, Version 2.0
+Ultimate JDBC Connection Pool
+https://github.com/brettwooldridge/HikariCP
+
+      ICU4J (73.1) - Unicode/ICU License
+      International Component for Unicode for Java (ICU4J) is a mature, widely used Java library
+providing Unicode and Globalization support
+      https://icu.unicode.org/
+
+Jakarta Activation (2.0.1) - EDL 1.0
+
+Jakarta Mail API (2.0.1) - EPL 2.0,GPL2 w/ CPE,EDL 1.0
+
+jcabi-log (0.22.0) - BSD
+Wrapper of SLF4J and a few supplementary logging classes
+
+jcabi-manifests (2.1.0) - 3-Clause BSD License
+Manager of MANIFEST.MF files
+
+JetBrains Java Annotations (23.0.0) - The Apache Software License, Version 2.0
+A set of annotations used for code inspection support and code documentation.
+https://github.com/JetBrains/java-annotations
+
+Jetty :: ALPN :: API (1.1.3.v20160715) - Apache Software License - Version 2.0,Eclipse Public License - Version 1.0
+
+jsoup Java HTML Parser (1.17.1) - The MIT License
+jsoup is a Java library that simplifies working with real-world HTML and XML. It offers an easy-to-use API for URL fetching, data parsing, extraction, and manipulation using DOM API methods, CSS, and xpath selectors. jsoup implements the WHATWG HTML5 specification, and parses HTML to the same DOM as modern browsers.
+https://jsoup.org/
+
+JUnit Jupiter (Aggregator) (5.10.1) - Eclipse Public License v2.0
+Module "junit-jupiter" of JUnit 5.
+https://junit.org/junit5/
+
+JUnit Jupiter API (5.10.1) - Eclipse Public License v2.0
+Module "junit-jupiter-api" of JUnit 5.
+https://junit.org/junit5/
+
+JUnit Jupiter Engine (5.10.1) - Eclipse Public License v2.0
+Module "junit-jupiter-engine" of JUnit 5.
+https://junit.org/junit5/
+
+JUnit Jupiter Params (5.10.1) - Eclipse Public License v2.0
+Module "junit-jupiter-params" of JUnit 5.
+https://junit.org/junit5/
+
+JUnit Platform Commons (1.10.1) - Eclipse Public License v2.0
+Module "junit-platform-commons" of JUnit 5.
+https://junit.org/junit5/
+
+JUnit Platform Engine API (1.10.1) - Eclipse Public License v2.0
+Module "junit-platform-engine" of JUnit 5.
+https://junit.org/junit5/
+
+Kaverit (2.8.0) - MIT
+Kodein Type System
+http://kodein.org
+
+Kodein (7.21.0) - MIT
+Kodein Core
+http://kodein.org
+
+Kodein-Framework-Ktor (7.21.0) - MIT
+Kodein classes & extensions for Ktor.
+http://kodein.org
+
+Kotlin Reflect (1.9.21) - The Apache License, Version 2.0
+Kotlin Full Reflection Library
+https://kotlinlang.org/
+
+Kotlin Stdlib (1.9.21) - The Apache License, Version 2.0
+Kotlin Standard Library
+https://kotlinlang.org/
+
+Kotlin Stdlib Common (1.8.20) - The Apache License, Version 2.0
+Kotlin Common Standard Library
+https://kotlinlang.org/
+
+Kotlin Stdlib Jdk7 (1.8.20) - The Apache License, Version 2.0
+Kotlin Standard Library JDK 7 extension
+https://kotlinlang.org/
+
+Kotlin Stdlib Jdk8 (1.8.20) - The Apache License, Version 2.0
+Kotlin Standard Library JDK 8 extension
+https://kotlinlang.org/
+
+kotlinx-coroutines-core (1.7.3) - The Apache Software License, Version 2.0
+Coroutines support libraries for Kotlin
+https://github.com/Kotlin/kotlinx.coroutines
+
+kotlinx-coroutines-jdk8 (1.7.3) - The Apache Software License, Version 2.0
+Coroutines support libraries for Kotlin
+https://github.com/Kotlin/kotlinx.coroutines
+
+kotlinx-coroutines-slf4j (1.7.3) - The Apache Software License, Version 2.0
+Coroutines support libraries for Kotlin
+https://github.com/Kotlin/kotlinx.coroutines
+
+kotlinx-coroutines-swing (1.7.3) - The Apache Software License, Version 2.0
+Coroutines support libraries for Kotlin
+https://github.com/Kotlin/kotlinx.coroutines
+
+kotlinx-datetime (0.4.1) - The Apache License, Version 2.0
+Kotlin Datetime Library
+https://github.com/Kotlin/kotlinx-datetime
+
+kotlinx-io-bytestring (0.3.0) - The Apache Software License, Version 2.0
+IO support for Kotlin
+https://github.com/Kotlin/kotlinx-io
+
+kotlinx-io-core (0.3.0) - The Apache Software License, Version 2.0
+IO support for Kotlin
+https://github.com/Kotlin/kotlinx-io
+
+kotlinx-serialization-core (1.6.1) - The Apache Software License, Version 2.0
+Kotlin multiplatform serialization runtime library
+https://github.com/Kotlin/kotlinx.serialization
+
+kotlinx-serialization-json (1.6.1) - The Apache Software License, Version 2.0
+Kotlin multiplatform serialization runtime library
+https://github.com/Kotlin/kotlinx.serialization
+
+kotlinx.html (0.9.1) - The Apache License, Version 2.0
+A kotlinx.html library provides DSL to build HTML to Writer/Appendable or DOM at JVM and browser (or other JavaScript engine) for better Kotlin programming for Web.
+https://github.com/Kotlin/kotlinx.html
+
+ktor-client-cio (2.3.6) - The Apache Software License, Version 2.0
+Ktor is a framework for quickly creating web applications in Kotlin with minimal effort.
+https://github.com/ktorio/ktor
+
+ktor-client-content-negotiation (2.3.6) - The Apache Software License, Version 2.0
+Ktor is a framework for quickly creating web applications in Kotlin with minimal effort.
+https://github.com/ktorio/ktor
+
+ktor-client-core (2.3.6) - The Apache Software License, Version 2.0
+Ktor is a framework for quickly creating web applications in Kotlin with minimal effort.
+https://github.com/ktorio/ktor
+
+ktor-client-json (2.3.6) - The Apache Software License, Version 2.0
+Ktor is a framework for quickly creating web applications in Kotlin with minimal effort.
+https://github.com/ktorio/ktor
+
+ktor-client-okhttp (2.3.6) - The Apache Software License, Version 2.0
+Ktor is a framework for quickly creating web applications in Kotlin with minimal effort.
+https://github.com/ktorio/ktor
+
+ktor-events (2.3.6) - The Apache Software License, Version 2.0
+Ktor is a framework for quickly creating web applications in Kotlin with minimal effort.
+https://github.com/ktorio/ktor
+
+ktor-http (2.3.6) - The Apache Software License, Version 2.0
+Ktor is a framework for quickly creating web applications in Kotlin with minimal effort.
+https://github.com/ktorio/ktor
+
+ktor-http-cio (2.3.6) - The Apache Software License, Version 2.0
+Ktor is a framework for quickly creating web applications in Kotlin with minimal effort.
+https://github.com/ktorio/ktor
+
+ktor-io (2.3.6) - The Apache Software License, Version 2.0
+Ktor is a framework for quickly creating web applications in Kotlin with minimal effort.
+https://github.com/ktorio/ktor
+
+ktor-network (2.3.6) - The Apache Software License, Version 2.0
+Ktor is a framework for quickly creating web applications in Kotlin with minimal effort.
+https://github.com/ktorio/ktor
+
+ktor-network-tls (2.3.6) - The Apache Software License, Version 2.0
+Ktor is a framework for quickly creating web applications in Kotlin with minimal effort.
+https://github.com/ktorio/ktor
+
+ktor-serialization (2.3.6) - The Apache Software License, Version 2.0
+Ktor is a framework for quickly creating web applications in Kotlin with minimal effort.
+https://github.com/ktorio/ktor
+
+ktor-serialization-gson (2.3.6) - The Apache Software License, Version 2.0
+Ktor is a framework for quickly creating web applications in Kotlin with minimal effort.
+https://github.com/ktorio/ktor
+
+ktor-serialization-kotlinx (2.3.6) - The Apache Software License, Version 2.0
+Ktor is a framework for quickly creating web applications in Kotlin with minimal effort.
+https://github.com/ktorio/ktor
+
+ktor-serialization-kotlinx-json (2.3.6) - The Apache Software License, Version 2.0
+Ktor is a framework for quickly creating web applications in Kotlin with minimal effort.
+https://github.com/ktorio/ktor
+
+ktor-server-call-logging (2.3.6) - The Apache Software License, Version 2.0
+Ktor is a framework for quickly creating web applications in Kotlin with minimal effort.
+https://github.com/ktorio/ktor
+
+ktor-server-conditional-headers (2.3.6) - The Apache Software License, Version 2.0
+Ktor is a framework for quickly creating web applications in Kotlin with minimal effort.
+https://github.com/ktorio/ktor
+
+ktor-server-content-negotiation (2.3.6) - The Apache Software License, Version 2.0
+Ktor is a framework for quickly creating web applications in Kotlin with minimal effort.
+https://github.com/ktorio/ktor
+
+ktor-server-core (2.3.6) - The Apache Software License, Version 2.0
+Ktor is a framework for quickly creating web applications in Kotlin with minimal effort.
+https://github.com/ktorio/ktor
+
+ktor-server-cors (2.3.6) - The Apache Software License, Version 2.0
+Ktor is a framework for quickly creating web applications in Kotlin with minimal effort.
+https://github.com/ktorio/ktor
+
+ktor-server-host-common (2.3.6) - The Apache Software License, Version 2.0
+Ktor is a framework for quickly creating web applications in Kotlin with minimal effort.
+https://github.com/ktorio/ktor
+
+ktor-server-html-builder (2.3.6) - The Apache Software License, Version 2.0
+Ktor is a framework for quickly creating web applications in Kotlin with minimal effort.
+https://github.com/ktorio/ktor
+
+ktor-server-netty (2.3.6) - The Apache Software License, Version 2.0
+Ktor is a framework for quickly creating web applications in Kotlin with minimal effort.
+https://github.com/ktorio/ktor
+
+ktor-server-sessions (2.3.6) - The Apache Software License, Version 2.0
+Ktor is a framework for quickly creating web applications in Kotlin with minimal effort.
+https://github.com/ktorio/ktor
+
+ktor-server-status-pages (2.3.6) - The Apache Software License, Version 2.0
+Ktor is a framework for quickly creating web applications in Kotlin with minimal effort.
+https://github.com/ktorio/ktor
+
+ktor-server-websockets (2.3.6) - The Apache Software License, Version 2.0
+Ktor is a framework for quickly creating web applications in Kotlin with minimal effort.
+https://github.com/ktorio/ktor
+
+ktor-utils (2.3.6) - The Apache Software License, Version 2.0
+Ktor is a framework for quickly creating web applications in Kotlin with minimal effort.
+https://github.com/ktorio/ktor
+
+ktor-websocket-serialization (2.3.6) - The Apache Software License, Version 2.0
+Ktor is a framework for quickly creating web applications in Kotlin with minimal effort.
+https://github.com/ktorio/ktor
+
+ktor-websockets (2.3.6) - The Apache Software License, Version 2.0
+Ktor is a framework for quickly creating web applications in Kotlin with minimal effort.
+https://github.com/ktorio/ktor
+
+kXML 2 is a small XML pull parser based on the common XML pull API (2.3.0) - BSD style,Public Domain
+kXML is a small XML pull parser, specially designed for constrained environments such as Applets, Personal Java or MIDP devices. In contrast to kXML 1, kXML 2 is based on the common XML pull API.
+http://kxml.sourceforge.net/
+
+libphonenumber (8.13.26) - The Apache Software License, Version 2.0
+https://github.com/google/libphonenumber/
+
+Logback Classic Module (1.4.13) - Eclipse Public License - v 1.0,GNU Lesser General Public License
+logback-classic module
+
+Logback Core Module (1.4.13) - Eclipse Public License - v 1.0,GNU Lesser General Public License
+logback-core module
+
+mchange-commons-java (0.2.15) - GNU Lesser General Public License, Version 2.1,Eclipse Public License, Version 1.0
+mchange-commons-java
+https://github.com/swaldman/mchange-commons-java
+
+ModelMapper (3.2.0) - Apache License, Version 2.0
+
+MOKO graphics (0.9.0) - Apache-2.0
+Graphics primitives for mobile (android & ios) Kotlin Multiplatform development
+https://github.com/icerockdev/moko-graphics
+
+MOKO parcelize (0.8.0) - Apache-2.0
+@Parcelize support for android from common code in Kotlin Multiplatform
+https://github.com/icerockdev/moko-parcelize
+
+MOKO resources (0.23.0) - Apache-2.0
+Resources access for Kotlin Multiplatform development (mobile first)
+https://github.com/icerockdev/moko-resources
+
+Multiplatform Settings (1.1.1) - The Apache Software License, Version 2.0
+A Kotlin Multiplatform library for saving simple key-value data
+https://github.com/russhwolf/multiplatform-settings
+
+NanoHttpd-Core (2.3.1) - The BSD 3-Clause License
+
+NanoHttpd-nano application server (2.3.1) - The BSD 3-Clause License
+nanohttpd-nanolets add a very easy to use version of servlets into nanohttpd.
+
+napier (2.6.1) - The Apache Software License, Version 2.0
+Kotlin Multiplatform libraries that show logs in common module.
+https://github.com/aakira/Napier
+
+Neo Visionaries Internationalization Package (1.29) - The Apache Software License, Version 2.0
+Package to support internationalization
+https://github.com/TakahikoKawasaki/nv-i18n
+
+Netty/Buffer (4.1.97.Final) - Apache License, Version 2.0
+
+Netty/Codec (4.1.97.Final) - Apache License, Version 2.0
+
+Netty/Codec/HTTP (4.1.97.Final) - Apache License, Version 2.0
+
+Netty/Codec/HTTP2 (4.1.97.Final) - Apache License, Version 2.0
+
+Netty/Common (4.1.97.Final) - Apache License, Version 2.0
+
+Netty/Handler (4.1.97.Final) - Apache License, Version 2.0
+
+Netty/Resolver (4.1.97.Final) - Apache License, Version 2.0
+
+      Netty/TomcatNative [BoringSSL - Static] (2.0.62.Final) - The Apache Software License, Version 2.0
+      A Mavenized fork of Tomcat Native which incorporates various patches. This artifact is statically linked
+to BoringSSL and Apache APR.
+      https://github.com/netty/netty-tcnative/netty-tcnative-boringssl-static/
+
+      Netty/TomcatNative [OpenSSL - Classes] (2.0.62.Final) - The Apache Software License, Version 2.0
+      A Mavenized fork of Tomcat Native which incorporates various patches. This artifact is dynamically linked
+to OpenSSL and Apache APR.
+
+Netty/Transport (4.1.97.Final) - Apache License, Version 2.0
+
+Netty/Transport/Classes/Epoll (4.1.97.Final) - Apache License, Version 2.0
+
+Netty/Transport/Classes/KQueue (4.1.97.Final) - Apache License, Version 2.0
+
+Netty/Transport/Native/Epoll (4.1.97.Final) - Apache License, Version 2.0
+
+Netty/Transport/Native/KQueue (4.1.97.Final) - Apache License, Version 2.0
+
+Netty/Transport/Native/Unix/Common (4.1.97.Final) - Apache License, Version 2.0
+Static library which contains common unix utilities.
+
+okhttp (4.12.0) - The Apache Software License, Version 2.0
+Square’s meticulous HTTP client for Java and Kotlin.
+https://square.github.io/okhttp/
+
+okhttp-sse (4.12.0) - The Apache Software License, Version 2.0
+Square’s meticulous HTTP client for Java and Kotlin.
+https://square.github.io/okhttp/
+
+okio (3.6.0) - The Apache Software License, Version 2.0
+A modern I/O library for Android, Java, and Kotlin Multiplatform.
+https://github.com/square/okio/
+
+org.opentest4j:opentest4j (1.3.0) - The Apache License, Version 2.0
+Open Test Alliance for the JVM
+https://github.com/ota4j-team/opentest4j
+
+paging-common (3.3.0-alpha02-0.4.0) - The Apache Software License, Version 2.0
+Packages AndroidX's Paging library for Kotlin/Multiplatform.
+https://github.com/cashapp/multiplatform-paging/
+
+Paging-Common (3.3.0-alpha02) - The Apache Software License, Version 2.0
+Android Paging-Common
+https://developer.android.com/jetpack/androidx/releases/paging#3.3.0-alpha02
+
+PostgreSQL JDBC Driver (42.6.0) - BSD-2-Clause
+PostgreSQL JDBC Driver Postgresql
+https://jdbc.postgresql.org
+
+PreCompose (1.5.7) - MIT
+A third-party Jetbrains Compose library with ViewModel, LiveData and Navigation support.
+https://github.com/Tlaster/PreCompose
+
+PreCompose-ViewModel (1.5.7) - MIT
+PreCompose ViewModel intergration
+https://github.com/Tlaster/PreCompose
+
+quartz (2.3.2) - The Apache Software License, Version 2.0
+Enterprise Job Scheduler
+
+room-annotations-jvm (0.70b34)
+
+serialization (0.86.2) - The Apache License, Version 2.0
+Component of the XMLUtil library
+https://github.com/pdvrieze/xmlutil
+
+SLF4J API Module (2.0.9) - MIT License
+The slf4j API
+http://www.slf4j.org
+
+SQLite JDBC (3.42.0.0) - The Apache Software License, Version 2.0
+SQLite JDBC library
+https://github.com/xerial/sqlite-jdbc
+
+Stately (2.0.5) - The Apache Software License, Version 2.0
+Multithreaded Kotlin Multiplatform Utilities
+https://github.com/touchlab/Stately
+
+Stately (2.0.5) - The Apache Software License, Version 2.0
+Multithreaded Kotlin Multiplatform Utilities
+https://github.com/touchlab/Stately
+
+Stately (2.0.5) - The Apache Software License, Version 2.0
+Multithreaded Kotlin Multiplatform Utilities
+https://github.com/touchlab/Stately
+
+Stately (2.0.5) - The Apache Software License, Version 2.0
+Multithreaded Kotlin Multiplatform Utilities
+https://github.com/touchlab/Stately
+
+Stately (2.0.5) - The Apache Software License, Version 2.0
+Multithreaded Kotlin Multiplatform Utilities
+https://github.com/touchlab/Stately
+
+thumbnailator (0.4.20) - MIT License
+Thumbnailator - a thumbnail generation library for Java
+https://github.com/coobird/thumbnailator
+
+UrlEncoder for Kotlin Multiplatform (1.4.0) - The Apache License, Version 2.0
+A simple defensive library to encode/decode URL components
+https://github.com/ethauvin/urlencoder
+
+      XML Commons External Components XML APIs (1.4.01) - The Apache Software License, Version 2.0,The SAX License,The W3C License
+      xml-commons provides an Apache-hosted set of DOM, SAX, and 
+JAXP interfaces for use in other xml-based projects. Our hope is that we 
+can standardize on both a common version and packaging scheme for these 
+critical XML standards interfaces to make the lives of both our developers 
+and users easier. The External Components portion of xml-commons contains 
+interfaces that are defined by external standards organizations. For DOM, 
+that's the W3C; for SAX it's David Megginson and sax.sourceforge.net; for 
+JAXP it's Sun.
+      http://xml.apache.org/commons/components/external/
+
+      XML Commons External Components XML APIs Extensions (1.3.04) - The Apache Software License, Version 2.0
+      xml-commons provides an Apache-hosted set of DOM, SAX, and 
+JAXP interfaces for use in other xml-based projects. Our hope is that we 
+can standardize on both a common version and packaging scheme for these 
+critical XML standards interfaces to make the lives of both our developers 
+and users easier. The External Components portion of xml-commons contains 
+interfaces that are defined by external standards organizations. For DOM, 
+that's the W3C; for SAX it's David Megginson and sax.sourceforge.net; for 
+JAXP it's Sun.
+      http://xml.apache.org/commons/components/external/
+
+xmlpullparserkmp-jvm (0.0.26)

@@ -72,8 +72,8 @@
     <application
         android:name="com.ustadmobile.port.android.impl.UstadApp"
         android:allowBackup="false"
-        android:icon="@drawable/ic_launcher_maktab2"
-        android:roundIcon="@drawable/ic_launcher_maktab2"
+        android:icon="@drawable/ic_launcher_icon"
+        android:roundIcon="@drawable/ic_launcher_icon"
         android:label="@string/app_name"
         android:usesCleartextTraffic="true"
         android:theme="@style/UmTheme.App"
@@ -87,12 +87,8 @@
         <!--
         The list of available UI languages as a comma separated list. See
         com.ustadmobile.core.impl.config.SupportedLanguagesConfig
-
-        Uncomment if you to reduce the number of languages displayed.
         -->
-        <meta-data android:name="com.ustadmobile.uilanguages"
-            android:value="en,tg,ru"/>
-
+        <meta-data android:name="com.ustadmobile.uilanguages" android:value="${uiLanguages}"/>
 
         <!--
         Preset locale setting: if present, this locale will be automatically set as the app locale
@@ -100,9 +96,12 @@
         for an area with one language, especially if that language is not supported as a locale by
         most operating systems.
         -->
-        <meta-data android:name="com.ustadmobile.presetlocale" android:value="tg"/>
+        <meta-data android:name="com.ustadmobile.presetlocale" android:value="${presetLocale}"/>
 
-        <meta-data android:name="com.ustadmobile.gopts" android:value="1,2"/>
+        <!--
+        If true, add a small Powered by Ustad Mobile message on splash screen / login screen etc.
+        -->
+        <meta-data android:name="com.ustadmobile.showpoweredbymsg" android:value="${showPoweredByMsg}"/>
 
 
         <!--
@@ -121,8 +120,9 @@
         If not set, then the basename will be "ustad"
         <meta-data android:name="com.ustadmobile.shareappbasename"
             android:value="ustad"/>
-
         -->
+
+        <!-- End Metadata Settings -->
 
         <!--
         The MainActivity containing Jetpack Compose UI

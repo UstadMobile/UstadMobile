@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
+import com.jcabi.manifests.Manifests
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseJvm
 import com.ustadmobile.core.embeddedhttp.EmbeddedHttpServer
@@ -31,6 +32,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.PREFKEY_LOCAL
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.PREFKEY_ACTIONED_PRESET
 import com.ustadmobile.core.impl.di.commonDomainDiModule
 import com.ustadmobile.libuicompose.theme.UstadAppTheme
 import com.ustadmobile.libuicompose.view.app.APP_TOP_LEVEL_NAV_ITEMS
@@ -76,24 +78,45 @@ fun main() {
     //Apply the language setting before startup
     val dataRoot = ustadAppDataDir()
     println("AppDataDir=${ustadAppDataDir()} ResourcesDir=${ustadAppResourcesDir()}")
+    var splashScreen: SplashScreen? = SplashScreen()
 
     SetLanguageUseCaseJvm.init()
 
-    val prefsProperties = File(dataRoot, UstadMobileSystemImpl.PREFS_FILENAME)
-    if(prefsProperties.exists()) {
-        try {
-            prefsProperties.inputStream().reader().use { inReader ->
-                val props = Properties().also { it.load(inReader) }
-                val langSetting: String? = props.getProperty(PREFKEY_LOCALE)
-                if(!langSetting.isNullOrBlank() &&
-                    langSetting in SupportedLanguagesConfig.DEFAULT_SUPPORTED_LANGUAGES
-                ) {
-                    Locale.setDefault(Locale(langSetting))
-                }
-            }
-        }catch(e: Exception) {
-            System.err.println("failed to read language setting")
+    val prefsPropertiesFiles = File(dataRoot, UstadMobileSystemImpl.PREFS_FILENAME)
+
+    try {
+        val props = prefsPropertiesFiles.takeIf {
+            it.exists()
+        }?.inputStream()?.reader()?.use { inReader ->
+            Properties().also { it.load(inReader) }
+        } ?: Properties()
+
+        val presetLocaleToAction = if(props.getProperty(PREFKEY_ACTIONED_PRESET) == null) {
+            Manifests.read("com-ustadmobile-presetlocale")
+        }else {
+            null
         }
+
+        if(!presetLocaleToAction.isNullOrBlank()) {
+            props.setProperty(PREFKEY_LOCALE, presetLocaleToAction)
+            props.setProperty(PREFKEY_ACTIONED_PRESET, "true")
+            prefsPropertiesFiles.parentFile?.takeIf { !it.exists() }?.mkdirs()
+
+            prefsPropertiesFiles.writer().use { propFileWriter ->
+                props.store(propFileWriter, "")
+            }
+        }
+
+        val langSetting: String? = props.getProperty(PREFKEY_LOCALE)
+
+        if(!langSetting.isNullOrBlank() &&
+            langSetting in SupportedLanguagesConfig.DEFAULT_SUPPORTED_LANGUAGES
+        ) {
+            Locale.setDefault(Locale(langSetting))
+        }
+    }catch(e: Throwable) {
+        Napier.e("Exception handling locales on startup", e)
+        System.err.println("failed to read language setting")
     }
 
     application {
@@ -146,6 +169,10 @@ fun main() {
                     icon = appIcon,
                     state = rememberWindowState(width = 1024.dp, height = 768.dp),
                 ) {
+                    LaunchedEffect(Unit) {
+                        splashScreen?.close()
+                        splashScreen = null
+                    }
                     PreComposeApp {
                         val navigator = rememberNavigator()
                         val currentDestination by navigator.currentEntry.collectAsState(null)

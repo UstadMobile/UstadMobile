@@ -31,6 +31,7 @@ plugins {
     id "com.github.ben-manes.versions" version "0.49.0"
     id 'org.jetbrains.kotlin.jvm' version "$version_kotlin" apply false
     alias(libs.plugins.jetbrains.compose) apply false
+    id 'com.github.gmazzo.buildconfig' version '5.3.5' apply false
 }
 
 
@@ -81,7 +82,7 @@ allprojects {
 }
 
 //Major.minor.database version
-version = "0.4.47"
+version = "0.4.50"
 group = "com.ustadmobile.app"
 
 /**
@@ -91,7 +92,7 @@ group = "com.ustadmobile.app"
  */
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 271
+    ustadVersionCode = 274
 
     version_retriever = "0.0.1e"
     version_xmlpullparserkmp = '0.0.26'
@@ -215,6 +216,9 @@ ext {
 
     version_persian_date_picker_aliab="1.7.1"
     version_better_link_movement="2.2.0"
+
+    version_jcabi_manifests = "2.1.0"
+
 
     /*Kotlin react web app*/
     kotlinWrappersVersion = "1.0.0-pre.651"

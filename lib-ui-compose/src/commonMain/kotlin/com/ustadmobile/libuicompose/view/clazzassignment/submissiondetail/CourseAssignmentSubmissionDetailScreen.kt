@@ -1,9 +1,6 @@
 package com.ustadmobile.libuicompose.view.clazzassignment.submissiondetail
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.Icon
@@ -13,15 +10,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.viewmodel.clazzassignment.submissiondetail.CourseAssignmentSubmissionDetailUiState
 import com.ustadmobile.core.viewmodel.clazzassignment.submissiondetail.CourseAssignmentSubmissionDetailViewModel
 import com.ustadmobile.libuicompose.components.UstadHtmlText
+import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
+import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.datetime.TimeZone
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
-import com.ustadmobile.core.MR
-import dev.icerock.moko.resources.compose.stringResource
 
 @Composable
 fun CourseAssignmentSubmissionDetailScreen(
@@ -41,8 +39,8 @@ fun CourseAssignmentSubmissionDetailScreen(
     val timeZone = remember {
         TimeZone.currentSystemDefault().id
     }
-    Column(
-        modifier = Modifier.verticalScroll(rememberScrollState()).fillMaxSize()
+    UstadVerticalScrollColumn(
+        modifier = Modifier.fillMaxSize()
     ) {
         val receivedTimeFormatted = rememberFormattedDateTime(
             uiState.submission?.casTimestamp ?: 0,
