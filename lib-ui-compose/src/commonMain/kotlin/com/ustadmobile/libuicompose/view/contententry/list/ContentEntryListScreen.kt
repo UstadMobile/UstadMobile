@@ -2,7 +2,6 @@ package com.ustadmobile.libuicompose.view.contententry.list
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.Folder
@@ -33,6 +32,7 @@ import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.libuicompose.components.UstadFileDropZone
 import com.ustadmobile.libuicompose.components.UstadFilePickResult
+import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadListFilterChipsHeader
 import com.ustadmobile.libuicompose.components.UstadPickFileOpts
 import com.ustadmobile.libuicompose.components.rememberUstadFilePickLauncher
@@ -129,7 +129,7 @@ fun ContentEntryListScreen(
         onFileDropped = onFileDropped,
         modifier = Modifier.fillMaxSize(),
     ) {
-        LazyColumn(
+        UstadLazyColumn(
             modifier = Modifier.fillMaxSize()
         )  {
             if(uiState.showChips) {

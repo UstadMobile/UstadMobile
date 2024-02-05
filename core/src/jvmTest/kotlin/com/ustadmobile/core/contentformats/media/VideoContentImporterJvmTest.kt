@@ -2,8 +2,9 @@ package com.ustadmobile.core.contentformats.media
 
 import com.ustadmobile.core.contentformats.AbstractContentImporterTest
 import com.ustadmobile.core.contentformats.manifest.ContentManifest
-import com.ustadmobile.core.contentformats.video.VideoContentImporterJvm
+import com.ustadmobile.core.contentformats.video.VideoContentImporterCommonJvm
 import com.ustadmobile.core.contentjob.InvalidContentException
+import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCaseFfprobe
 import com.ustadmobile.core.test.assertCachedBodyMatchesFileContent
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -39,11 +40,11 @@ class VideoContentImporterJvmTest : AbstractContentImporterTest() {
         val videoFile = temporaryFolder.newFileFromResource(this::class.java,
             "/com/ustadmobile/core/container/BigBuckBunny.mp4")
 
-        val importer = VideoContentImporterJvm(
+        val importer = VideoContentImporterCommonJvm(
             endpoint = activeEndpoint,
             db = db,
             cache = ustadCache,
-            ffprobe = ffProbe,
+            validateVideoFileUseCase = ValidateVideoFileUseCaseFfprobe(ffProbe),
             uriHelper = uriHelper,
             json = json,
             tmpPath = Path(rootTmpFolder.absolutePath),
@@ -61,11 +62,11 @@ class VideoContentImporterJvmTest : AbstractContentImporterTest() {
     fun givenInvalidFileWithRecognizedExtension_whenExtractMetadataCalled_thenWillThrowInvalidContentException() {
         val invalidVideoFile = temporaryFolder.newFile()
         invalidVideoFile.writeText("Hello World")
-        val importer = VideoContentImporterJvm(
+        val importer = VideoContentImporterCommonJvm(
             endpoint = activeEndpoint,
             db = db,
             cache = ustadCache,
-            ffprobe = ffProbe,
+            validateVideoFileUseCase = ValidateVideoFileUseCaseFfprobe(ffProbe),
             uriHelper = uriHelper,
             json = json,
             tmpPath = Path(rootTmpFolder.absolutePath),
@@ -87,11 +88,11 @@ class VideoContentImporterJvmTest : AbstractContentImporterTest() {
         val txtFile = temporaryFolder.newFile()
         txtFile.writeText("Hello World")
 
-        val importer = VideoContentImporterJvm(
+        val importer = VideoContentImporterCommonJvm(
             endpoint = activeEndpoint,
             db = db,
             cache = ustadCache,
-            ffprobe = ffProbe,
+            validateVideoFileUseCase = ValidateVideoFileUseCaseFfprobe(ffProbe),
             uriHelper = uriHelper,
             json = json,
             tmpPath = Path(rootTmpFolder.absolutePath),
@@ -108,11 +109,11 @@ class VideoContentImporterJvmTest : AbstractContentImporterTest() {
         val videoFile = temporaryFolder.newFileFromResource(this::class.java,
             "/com/ustadmobile/core/container/BigBuckBunny.mp4")
 
-        val importer = VideoContentImporterJvm(
+        val importer = VideoContentImporterCommonJvm(
             endpoint = activeEndpoint,
             db = db,
             cache = ustadCache,
-            ffprobe = ffProbe,
+            validateVideoFileUseCase = ValidateVideoFileUseCaseFfprobe(ffProbe),
             uriHelper = uriHelper,
             json = json,
             tmpPath = Path(rootTmpFolder.absolutePath),

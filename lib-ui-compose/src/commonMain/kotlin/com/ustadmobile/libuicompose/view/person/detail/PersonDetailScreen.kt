@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Badge
@@ -53,6 +52,7 @@ import com.ustadmobile.libuicompose.components.UstadAsyncImage
 import com.ustadmobile.libuicompose.components.UstadEditHeader
 import com.ustadmobile.libuicompose.components.UstadQuickActionButton
 import com.ustadmobile.libuicompose.components.UstadTransferStatusIcon
+import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 import com.ustadmobile.libuicompose.util.compose.stringIdMapResource
 import com.ustadmobile.libuicompose.util.rememberFormattedDate
 import dev.icerock.moko.resources.compose.stringResource
@@ -88,10 +88,8 @@ fun PersonDetailScreen(
     onClickChat: () -> Unit = {},
     onClickClazz: (ClazzEnrolmentWithClazzAndAttendance) -> Unit = {}
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+    UstadVerticalScrollColumn(
+        modifier = Modifier.fillMaxSize()
     )  {
         uiState.person?.personPicture?.personPictureUri?.also {personPictureUri ->
             Spacer(Modifier.height(16.dp))

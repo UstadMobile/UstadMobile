@@ -1,11 +1,9 @@
 package com.ustadmobile.libuicompose.view.contententry.importlink
 
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -17,6 +15,7 @@ import androidx.compose.ui.text.input.ImeAction
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.viewmodel.contententry.importlink.ContentEntryImportLinkUiState
 import com.ustadmobile.core.viewmodel.contententry.importlink.ContentEntryImportLinkViewModel
+import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.Dispatchers
@@ -41,9 +40,8 @@ fun ContentEntryImportLinkScreen(
     onUrlChange: (String) -> Unit = {},
     onNext: () -> Unit = { },
 ){
-    Column (
-        modifier = Modifier
-            .verticalScroll(rememberScrollState()),
+    UstadVerticalScrollColumn (
+        modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ){
         OutlinedTextField(

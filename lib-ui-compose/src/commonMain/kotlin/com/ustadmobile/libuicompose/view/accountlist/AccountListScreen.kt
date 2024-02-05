@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Divider
 import androidx.compose.material3.Icon
@@ -28,6 +27,7 @@ import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
 import com.ustadmobile.libuicompose.components.UstadAddListItem
+import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadPersonAvatar
 import kotlinx.coroutines.Dispatchers
 
@@ -45,6 +45,7 @@ fun AccountListScreen(
         onAddItem = viewModel::onClickAddAccount,
         onLogoutClick = viewModel::onClickLogout,
         onMyProfileClick = viewModel::onClickProfile,
+        onClickOpenLicenses = viewModel::onClickOpenLicenses,
     )
 }
 
@@ -53,12 +54,12 @@ fun AccountListScreen(
     uiState: AccountListUiState,
     onAccountListItemClick: (UserSessionWithPersonAndEndpoint) -> Unit = {},
     onDeleteListItemClick: (UserSessionWithPersonAndEndpoint) -> Unit = {},
-    onAboutClick: () -> Unit = {},
+    onClickOpenLicenses: () -> Unit = {},
     onAddItem: () -> Unit = {},
     onMyProfileClick: () -> Unit = {},
     onLogoutClick: () -> Unit = {}
 ){
-    LazyColumn(
+    UstadLazyColumn(
         modifier = Modifier
             .fillMaxWidth()
     ){
@@ -138,12 +139,19 @@ fun AccountListScreen(
 
         item(key = "about") {
             ListItem(
-                modifier = Modifier
-                    .clickable {
-                        onAboutClick()
-                    },
-                headlineContent = { Text(stringResource(MR.strings.about)) },
+                headlineContent = { Text(stringResource(MR.strings.version)) },
                 supportingContent = { Text(text = uiState.version) }
+            )
+        }
+
+        item(key = "open_licenses") {
+            ListItem(
+                modifier = Modifier.clickable {
+                    onClickOpenLicenses()
+                },
+                headlineContent = {
+                    Text(stringResource(MR.strings.licenses))
+                },
             )
         }
 

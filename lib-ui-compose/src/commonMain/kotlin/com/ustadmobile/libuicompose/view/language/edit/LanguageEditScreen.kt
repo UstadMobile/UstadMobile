@@ -1,10 +1,7 @@
 package com.ustadmobile.libuicompose.view.language.edit
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,18 +15,17 @@ import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
+import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 
 @Composable
 fun LanguageEditScreen(
     uiState: LanguageEditUiState,
     onLanguageChanged: (Language?) -> Unit = {}
 ){
-    Column (
-        modifier = Modifier
-            .padding(8.dp)
-            .verticalScroll(rememberScrollState()),
+    UstadVerticalScrollColumn (
+        modifier = Modifier.padding(8.dp),
         horizontalAlignment = Alignment.Start
-    ){
+    ) {
 
         UstadInputFieldLayout(
             modifier = Modifier.fillMaxWidth(),

@@ -4,7 +4,7 @@ import app.cash.turbine.test
 import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.contentformats.manifest.ContentManifestEntry
 import com.ustadmobile.core.domain.contententry.ContentConstants
-import com.ustadmobile.core.domain.launchxapi.ResolveXapiLaunchHrefUseCase
+import com.ustadmobile.core.domain.contententry.launchcontent.xapi.ResolveXapiLaunchHrefUseCase
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.stringvalues.emptyStringValues
@@ -53,6 +53,7 @@ class XapiContentViewModelTest : AbstractMainDispatcherTest() {
                     ResolveXapiLaunchHrefUseCase(
                         activeRepo = instance(tag = DoorTag.TAG_REPO),
                         httpClient = instance(),
+                        json = instance(),
                         xppFactory = instance(tag = DiTag.XPP_FACTORY_NSAWARE)
                     )
                 }

@@ -12,9 +12,8 @@ import com.ustadmobile.lib.db.entities.ContentEntryVersion.Companion.SELECT_OFFL
 import kotlinx.serialization.Serializable
 
 /**
- * Represents an available version of a ContentEntry. This may be stored on the same endpoint as
- * the database, or it could be stored on any other http server.
- *
+ * Represents an available version of a ContentEntry. This actual (binary) content assets may be
+ * stored on the same endpoint as the database, or it could be stored on any other http server.
  *
  */
 @Entity

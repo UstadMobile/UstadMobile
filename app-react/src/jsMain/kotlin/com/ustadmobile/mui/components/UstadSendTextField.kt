@@ -52,6 +52,9 @@ val UstadSendTextField = FC<UstadSendTextFieldProps> { props ->
                         onClick = {
                             props.onClickSend()
                         }
+                        props.id?.also {
+                            id = "${it}_send_button"
+                        }
                         ariaLabel = strings[MR.strings.send]
                         SendIcon()
                     }

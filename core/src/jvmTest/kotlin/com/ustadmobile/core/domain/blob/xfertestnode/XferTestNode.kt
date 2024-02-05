@@ -16,6 +16,8 @@ import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseCommonJvm
 import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
 import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseJvm
+import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
+import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCaseFfprobe
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.uri.UriHelperJvm
 import com.ustadmobile.core.util.DiTag
@@ -23,6 +25,7 @@ import com.ustadmobile.core.util.ext.fileExtensionOrNull
 import com.ustadmobile.core.util.newTestHttpClient
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.lib.util.SysPathUtil
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
@@ -36,6 +39,7 @@ import kotlinx.io.buffered
 import kotlinx.io.files.Path
 import kotlinx.io.readString
 import kotlinx.serialization.json.Json
+import net.bramp.ffmpeg.FFprobe
 import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
 import nl.adaptivity.xmlutil.serialization.XML
 import nl.adaptivity.xmlutil.serialization.XmlConfig
@@ -185,6 +189,15 @@ class XferTestNode(
             bind<CreateRetentionLocksForManifestUseCase>() with scoped(endpointScope).singleton {
                 CreateRetentionLocksForManifestUseCaseCommonJvm(
                     cache = instance(),
+                )
+            }
+
+            bind<ValidateVideoFileUseCase>() with singleton {
+                ValidateVideoFileUseCaseFfprobe(
+                    ffprobe = FFprobe(
+                        SysPathUtil.findCommandInPath("ffprobe")?.absolutePath
+                            ?: throw IllegalStateException("Could not find ffprobe")
+                    )
                 )
             }
         }

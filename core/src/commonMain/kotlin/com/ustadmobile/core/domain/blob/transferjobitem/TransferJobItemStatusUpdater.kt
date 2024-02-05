@@ -25,6 +25,7 @@ class TransferJobItemStatusUpdater(
     private val db: UmAppDatabase,
     private val repo: UmAppDatabase?,
     scope: CoroutineScope,
+    private val commitInterval: Long = 500,
 ) {
 
     private val finished = atomic(false)
@@ -38,7 +39,7 @@ class TransferJobItemStatusUpdater(
 
     private val updateJob = scope.launch {
         while(isActive) {
-            delay(1000)
+            delay(commitInterval)
             commit()
         }
     }

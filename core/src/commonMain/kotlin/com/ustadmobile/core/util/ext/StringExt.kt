@@ -165,3 +165,7 @@ fun String.displayFilename(
     else
         base
 }
+
+
+fun String.toNullIfBlank(): String? = if(isBlank()) { null } else { this }
+

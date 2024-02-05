@@ -154,19 +154,20 @@ class SupportedLanguagesConfig (
         const val PREFKEY_LOCALE = "locale"
 
         /**
-         * Preset locale setting (metadata key): if present, this locale will be automatically set
-         * as the app locale (regardless of the device default). This can be useful where a particular
-         * build is intended for an area with one language, especially if that language is not
-         * supported as a locale by most operating systems.
+         * Preset locale setting (appconfig key): if present, this locale will be automatically set
+         * as the app locale (regardless of the device default) when the app first runs.
+         *
+         * This can be useful where a particular build is intended for an area with one language,
+         * especially if that language is not supported as a locale by most operating systems.
          */
-        const val METADATA_KEY_PRESET_LANG = "com.ustadmobile.presetlocale"
+        const val APPCONFIG_KEY_PRESET_LANG = "com.ustadmobile.presetlocale"
 
         /**
          * Key for setting that is used to track if the preset was applied
          */
         const val PREFKEY_ACTIONED_PRESET = "localePresetDone"
 
-        const val DEFAULT_SUPPORTED_LANGUAGES = "en,fa,ps,ar,tg,bn,ne,my,ru"
+        const val DEFAULT_SUPPORTED_LANGUAGES = "en,fa,ps,ar,tg,bn,ne,my,rw,ru"
 
         const val LOCALE_USE_SYSTEM = ""
     }

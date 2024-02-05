@@ -4,6 +4,7 @@ plugins {
     id 'kotlin'
     id "io.ktor.plugin" version "$version_ktor"
     id 'kotlinx-serialization'
+    alias(libs.plugins.license)
 }
 
 distributions {
@@ -46,12 +47,27 @@ ktor {
 }
 
 sourceSets.main {
-    java.srcDirs("$buildDir/generated/source/door")
     if(findProperty("ktorbundleproductionjs") == "true") {
         resources.srcDir(rootProject.file("app-react/build/dist-web/"))
     }
 }
 
+licenseReport {
+    generateHtmlReport = false
+    generateTextReport = true
+}
+
+tasks.register("copyLicenseReport", Copy) {
+    from(project.file("build/reports/licenses/licenseReport.txt"))
+    into(project.file("src/dist/licenses"))
+    rename { "packages-licenses.txt" }
+}
+
+tasks.configureEach {
+    if(it.name == "licenseReport") {
+        tasks.getByName("copyLicenseReport").dependsOn(it)
+    }
+}
 
 dependencies {
     implementation "io.ktor:ktor-client-core:$version_ktor"
@@ -109,7 +125,6 @@ dependencies {
     implementation "io.netty:netty-tcnative-boringssl-static:$version_netty_tcnative"
 
     implementation "com.sun.mail:jakarta.mail:$version_jakartamail"
-    implementation "org.apache.commons:commons-compress:$version_apache_commons_compress"
 
     implementation "net.sourceforge.argparse4j:argparse4j:$version_argparse4j"
     implementation "org.jetbrains.kotlinx:kotlinx-datetime:$version_kotlinx_datetime"

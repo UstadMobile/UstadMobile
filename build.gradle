@@ -17,8 +17,6 @@ buildscript {
         maven {
             url "https://maven.pkg.jetbrains.space/public/p/compose/dev"
         }
-
-
     }
 
 }
@@ -33,6 +31,7 @@ plugins {
     id "com.github.ben-manes.versions" version "0.49.0"
     id 'org.jetbrains.kotlin.jvm' version "$version_kotlin" apply false
     alias(libs.plugins.jetbrains.compose) apply false
+    id 'com.github.gmazzo.buildconfig' version '5.3.5' apply false
 }
 
 
@@ -83,7 +82,7 @@ allprojects {
 }
 
 //Major.minor.database version
-version = "0.4.15"
+version = "0.4.51"
 group = "com.ustadmobile.app"
 
 /**
@@ -93,7 +92,7 @@ group = "com.ustadmobile.app"
  */
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 242
+    ustadVersionCode = 275
 
     version_retriever = "0.0.1e"
     version_xmlpullparserkmp = '0.0.26'
@@ -127,7 +126,6 @@ ext {
     version_apache_commons_lang = "3.14.0"
     version_apache_commons_text = "1.8"
     version_apache_commons_dbcp2 = "2.11.0"
-    version_apache_commons_compress = "1.25.0"
     version_mpandroidchart = "v3.1.0"
 
     version_sqlite_jdbc = "3.42.0.0"
@@ -219,6 +217,9 @@ ext {
     version_persian_date_picker_aliab="1.7.1"
     version_better_link_movement="2.2.0"
 
+    version_jcabi_manifests = "2.1.0"
+
+
     /*Kotlin react web app*/
     kotlinWrappersVersion = "1.0.0-pre.651"
 
@@ -242,7 +243,6 @@ ext {
     version_npm_libphonenumber_js = "^1.10.47"
     version_npm_linkify = "^4.1.3"
     version_pdfview_android = "1.1.0"
-    version_pdfbox_apache = "3.0.0"
     version_pdfview_android = "1.1.0"
 
     version_npm_uuid = "^9.0.1"

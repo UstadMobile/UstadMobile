@@ -85,7 +85,8 @@ class LoginViewModel(
 
         _uiState.update { prev ->
             prev.copy(
-                versionInfo = getVersionUseCase?.invoke()?.versionString ?: "",
+                versionInfo = "${systemImpl.getString(MR.strings.version)}: " +
+                        getVersionUseCase?.invoke()?.versionString,
                 loginIntentMessage = savedStateHandle[UstadView.ARG_INTENT_MESSAGE],
                 currentLanguage = languagesConfig.getCurrentLanguage(systemImpl),
                 languageList = languagesConfig.supportedUiLanguagesAndSysDefault(systemImpl)
@@ -116,7 +117,7 @@ class LoginViewModel(
             viewModelScope.launch {
                 while(verifiedSite == null) {
                     try {
-                        val site = httpClient.verifySite(serverUrl, 10000)
+                        val site = httpClient.verifySite(serverUrl, 10000, json)
                         onSiteVerified(site) // onSiteVerified will set the workspace var, and exit the loop
                     }catch(e: Exception) {
                         Napier.w("Could not load site object for $serverUrl", e)
@@ -183,6 +184,7 @@ class LoginViewModel(
         val password = _uiState.value.password
 
         if(username.isNotEmpty() && password.isNotEmpty()){
+            loadingState = LoadingUiState.INDETERMINATE
             viewModelScope.launch {
                 var errorMessage: String? = null
                 try {

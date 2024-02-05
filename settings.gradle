@@ -17,7 +17,7 @@ dependencyResolutionManagement {
             version("version_androidx_core", "1.12.0")
             version("version_kotlin", "1.9.21")
             version("version_okhttp", "4.12.0")
-            version("version_door", "0.70b32")
+            version("version_door", "0.70b34")
             version("version_coroutines", "1.7.3")
             version("version_atomicfu", "0.23.1")
             version("version_kotlinx_io", "0.3.0")
@@ -26,7 +26,8 @@ dependencyResolutionManagement {
             version("version_paging_androidx", "3.3.0-alpha02")
             version("version_android_navigation", "2.7.5")
             version("version_androidx_lifecycle", "2.6.2")
-            version("version_kodein_di", "7.21.0")
+            version("version_kodein_di", "7.21.2")
+            version("version_kodein_kaverit", "2.8.0")
             version("version_precompose", "1.5.7")
             version("version_dragdropswiperecyclerview", "1.2.0")
             version("version_napier", "2.6.1")
@@ -39,7 +40,7 @@ dependencyResolutionManagement {
             version("version_kotlinx_datetime", "0.4.0")
             version("version_richeditor_multiplatform", "1.0.0-beta04")
             version("version_reorderable_compose", "0.9.6")
-            version("version_compose_webview_multiplatform", "1.7.6")
+
             version("version_androidx_window", "1.2.0-rc01")
             version("version_quartz_scheduler", "2.3.2")
             version("version_simplejndi", "0.23.0")
@@ -69,15 +70,31 @@ dependencyResolutionManagement {
             version("nestedscroll_webview", "0.1.6") //https://github.com/Telefonica/android-nested-scroll-webview
             version("androidx_webkit", "1.9.0")
             version("androidx_browser", "1.8.0-beta01")
-
+            version("plugin_conveyor", "1.5")
+            version("version_plugin_download_task", "5.5.0")
+            version("version_jspecify", "0.3.0")
+            version("version_apache_commons_pool2", "2.12.0")
+            version("version_apache_commons_pool1", "1.6")
+            version("version_apache_commons_dbcp1", "1.4")
+            version("version_nanohttpd", "2.3.1")
+            version("version_xmlpullparserkmp", "0.0.26")
+            version("version_kxml2", "2.3.0")
+            version("version_pdfbox", "3.0.1")
+            version("version_vlcj", "4.8.2")
+            version("version_jcabi_manifests", "2.1.0")
+            version("version_plugin_license", "0.9.7")
 
             plugin("jetbrains-compose", "org.jetbrains.compose").versionRef("jetbrains-compose")
             plugin("moko-resources-plugin", "dev.icerock.mobile.multiplatform-resources").versionRef("version-moko-resources")
             plugin("ksp", "com.google.devtools.ksp").version("1.9.20-1.0.13")
             plugin("atomicfu", "org.jetbrains.kotlin.plugin.atomicfu").versionRef("version_kotlin")
+            plugin("conveyor", "dev.hydraulic.conveyor").versionRef("plugin_conveyor")
+            plugin("download-task", "de.undercouch.download").versionRef("version_plugin_download_task")
+            plugin("license", "com.jaredsburrows.license").versionRef("version_plugin_license")
 
             library("kodein-di", "org.kodein.di", "kodein-di").versionRef("version_kodein_di")
             library("kodein-di-compose", "org.kodein.di", "kodein-di-framework-compose").versionRef("version_kodein_di")
+            library("kodein-kaverit", "org.kodein.type", "kaverit").versionRef("version_kodein_kaverit")
             library("moko-resources", "dev.icerock.moko", "resources").versionRef("version-moko-resources")
             library("moko-resources-compose", "dev.icerock.moko", "resources-compose").versionRef("version-moko-resources")
             library("activity-compose", "androidx.activity", "activity-compose").versionRef("version_activity_compose")
@@ -97,6 +114,7 @@ dependencyResolutionManagement {
             library("htmltext-android", "de.charlex.compose.material3", "material3-html-text").versionRef("version_htmltext_android")
             library("aztec", "org.wordpress", "aztec").versionRef("version_aztec")
             library("androidx-constraintlayout", "androidx.constraintlayout", "constraintlayout").versionRef("version_androidx_constraintlayout")
+            library("xmlpullparsekmp", "com.github.UstadMobile", "xmlpullparserkmp").versionRef("version_xmlpullparserkmp")
 
             // Dependencies of Aztec: Versions must be fixed to ensure that they point to versions available
             // on mavenCentral after jcenter shutdown.
@@ -135,7 +153,6 @@ dependencyResolutionManagement {
             library("xmlutil-serialization", "io.github.pdvrieze.xmlutil", "serialization").versionRef("version_xmlutil")
             library("xmlutil-serialization-jvm", "io.github.pdvrieze.xmlutil", "serialization-jvm").versionRef("version_xmlutil")
             library("javaffmpeg", "net.bramp.ffmpeg", "ffmpeg").versionRef("version_javaffmpeg")
-            library("compose-webview-multiplatform", "io.github.kevinnzou", "compose-webview-multiplatform").versionRef("version_compose_webview_multiplatform")
             library("quartz", "org.quartz-scheduler", "quartz").versionRef("version_quartz_scheduler")
             library("simplejndi", "com.github.h-thurow", "simple-jndi").versionRef("version_simplejndi")
             library("libphonenumber-google", "com.googlecode.libphonenumber", "libphonenumber").versionRef("version_libphonenumber_google")
@@ -165,6 +182,15 @@ dependencyResolutionManagement {
             library("nestedscroll-webview", "com.telefonica", "nestedscrollwebview").versionRef("nestedscroll_webview")
             library("androidx-webkit", "androidx.webkit", "webkit").versionRef("androidx_webkit")
             library("androidx-browser", "androidx.browser", "browser").versionRef("androidx_browser")
+            library("jspecify", "org.jspecify", "jspecify").versionRef("version_jspecify")
+            library("apache-commons-pool2", "org.apache.commons", "commons-pool2").versionRef("version_apache_commons_pool2")
+            library("apache-commons-pool", "commons-pool", "commons-pool").versionRef("version_apache_commons_pool1")
+            library("apache-commons-dbcp", "commons-dbcp", "commons-dbcp").versionRef("version_apache_commons_dbcp1")
+            library("nanohttpd", "org.nanohttpd", "nanohttpd").versionRef("version_nanohttpd")
+            library("kxml2", "net.sf.kxml", "kxml2").versionRef("version_kxml2")
+            library("pdfbox", "org.apache.pdfbox", "pdfbox").versionRef("version_pdfbox")
+            library("vlcj", "uk.co.caprica", "vlcj").versionRef("version_vlcj")
+            library("jcabi-manifests", "com.jcabi", "jcabi-manifests").versionRef("version_jcabi_manifests")
         }
     }
 }
@@ -178,7 +204,8 @@ include ':app-android',
         ':sharedse',
         ':lib-util',
         ':testserver-controller',
-        ':lib-database'
+        ':lib-database',
+        ':lib-ui-compose-videoplayer'
 
 rootProject.name = "UstadMobile"
 

@@ -2,7 +2,6 @@ package com.ustadmobile.libuicompose.view.discussionpost.coursediscussiondetail
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.*
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
@@ -27,6 +26,7 @@ import com.ustadmobile.core.util.ext.htmlToPlainText
 import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.CourseDiscussionDetailUiState
 import com.ustadmobile.lib.db.entities.DiscussionPostWithDetails
 import com.ustadmobile.libuicompose.components.UstadDetailHeader
+import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadListSpacerItem
 import com.ustadmobile.libuicompose.components.UstadPersonAvatar
 import com.ustadmobile.libuicompose.components.ustadPagedItems
@@ -69,7 +69,7 @@ fun CourseDiscussionDetailScreen(
         TimeZone.getDefault().id
     }
 
-    LazyColumn{
+    UstadLazyColumn{
         item(key = "description"){
             UstadHtmlText(
                 uiState.courseBlock?.cbDescription?:"",

@@ -7,8 +7,9 @@ import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCase
 import com.ustadmobile.core.util.uuid.randomUuidAsString
 import com.ustadmobile.lib.db.entities.ContentEntryVersion
 import io.ktor.client.HttpClient
-import io.ktor.client.call.body
 import io.ktor.client.request.get
+import io.ktor.client.statement.bodyAsText
+import kotlinx.serialization.json.Json
 
 /**
  * Implementations will use the platform scheduler (e.g. WorkManager on Android, Quartz on JVM) to
@@ -22,7 +23,7 @@ import io.ktor.client.request.get
 class ImportContentEntryUseCase(
     private val db: UmAppDatabase,
     private val importersManager: ContentImportersManager,
-    @Suppress("unused") //will be used - design in progress
+    private val json: Json,
     private val enqueueBlobUploadClientUseCase: EnqueueBlobUploadClientUseCase? = null,
     private val createRetentionLocksForManifestUseCase: CreateRetentionLocksForManifestUseCase? = null,
     private val httpClient: HttpClient? = null,
@@ -53,7 +54,7 @@ class ImportContentEntryUseCase(
             //work offline.
             val manifestUrl = contentEntryVersionEntity.cevManifestUrl
                 ?: throw IllegalStateException("imported entry has no manifest url")
-            val manifest: ContentManifest = httpClient.get(manifestUrl).body()
+            val manifest: ContentManifest = json.decodeFromString(httpClient.get(manifestUrl).bodyAsText())
             val locksCreated = createRetentionLocksForManifestUseCase?.invoke(
                 contentEntryVersionUid = contentEntryVersionEntity.cevLct,
                 manifestUrl = manifestUrl,

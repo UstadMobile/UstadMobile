@@ -5,7 +5,7 @@ import com.ustadmobile.core.contentformats.epub.EpubContentImporterCommonJvm
 import com.ustadmobile.core.contentformats.epub.XhtmlFixer
 import com.ustadmobile.core.contentformats.h5p.H5PContentImporter
 import com.ustadmobile.core.contentformats.pdf.PdfContentImporterJvm
-import com.ustadmobile.core.contentformats.video.VideoContentImporterJvm
+import com.ustadmobile.core.contentformats.video.VideoContentImporterCommonJvm
 import com.ustadmobile.core.contentformats.xapi.XapiZipContentImporter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
@@ -15,12 +15,10 @@ import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.libcache.UstadCache
 import kotlinx.io.files.Path
-import net.bramp.ffmpeg.FFprobe
 import nl.adaptivity.xmlutil.serialization.XML
 import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.instance
-import org.kodein.di.instanceOrNull
 import org.kodein.di.scoped
 import org.kodein.di.singleton
 import java.io.File
@@ -38,7 +36,6 @@ val ContentImportersDiModuleJvm = DI.Module("ContentImporters-Jvm"){
         val saveAndManifestUseCase: SaveLocalUriAsBlobAndManifestUseCase = instance()
         val tmpRoot: File = instance(tag = DiTag.TAG_TMP_DIR)
         val contentImportTmpPath = Path(tmpRoot.absolutePath, "contentimport")
-        val ffProbe: FFprobe? = instanceOrNull()
         val getStoragePathForUrlUseCase: GetStoragePathForUrlUseCase = instance()
 
         ContentImportersManager(
@@ -91,21 +88,19 @@ val ContentImportersDiModuleJvm = DI.Module("ContentImporters-Jvm"){
                     ),
                 )
 
-                if(ffProbe != null) {
-                    add(
-                        VideoContentImporterJvm(
-                            endpoint = context,
-                            db = db,
-                            cache = cache,
-                            uriHelper = uriHelper,
-                            ffprobe = ffProbe,
-                            json = instance(),
-                            tmpPath = contentImportTmpPath,
-                            saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
-                            getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
-                        )
+                add(
+                    VideoContentImporterCommonJvm(
+                        endpoint = context,
+                        db = db,
+                        cache = cache,
+                        uriHelper = uriHelper,
+                        validateVideoFileUseCase = instance(),
+                        json = instance(),
+                        tmpPath = contentImportTmpPath,
+                        saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
+                        getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
                     )
-                }
+                )
             }
         )
     }
