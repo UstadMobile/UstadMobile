@@ -8,7 +8,7 @@
     <string name="wrong_user_pass_combo">အသုံးပြုသူအမည်/လျှို့ဝှက်နံပါတ်မမှန်ပါ.</string>
     <string name="login_network_error">ကွန်ယက်အမှား - ကျေးဇူးပြု၍ အွန်လိုင်းတွင်စစ်ဆေးပါ.</string>
     <string name="cancel">ပယ်ဖျက်ပါ</string>
-    <string name="app_name">ဆရာ မိုဘိုင်</string>
+    <string name="app_name">VSOSCHOOL</string>
     <string name="register_incorrect_email">မှားအီးမေးလ်လိပ်စာ</string>
     <string name="group_activity">အုပ်စု
 \nလှုပ်ရှားမှု</string>
