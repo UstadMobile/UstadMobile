@@ -47,6 +47,8 @@ tasks.withType<Jar> {
         if(!buildConfigProps?.getProperty("com.ustadmobile.presetlocale").isNullOrEmpty()) {
             attributes["com-ustadmobile-presetlocale"] = buildConfigProps?.getProperty("com.ustadmobile.presetlocale")
         }
+
+        attributes["com-ustadmobile-gopts"] = buildConfigProps?.getProperty("com.ustadmobile.gopts") ?: ""
     }
 }
 

@@ -70,8 +70,7 @@ internal fun ustadJsDi(
     }
 
     bind<GenderConfig>() with singleton {
-        val config: AppConfig = instance()
-        GenderConfig(appConfig = config)
+        GenderConfig(genderConfigStr = BuildConfigJs.APP_UI_GOPTS)
     }
 
     bind<Settings>() with singleton {
