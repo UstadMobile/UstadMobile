@@ -70,7 +70,9 @@ internal fun ustadJsDi(
     }
 
     bind<GenderConfig>() with singleton {
-        GenderConfig(genderConfigStr = BuildConfigJs.APP_UI_GOPTS)
+        GenderConfig(
+            genderConfigStr = BuildConfigJs.APP_UI_GOPTS.toNullIfBlank() ?: GenderConfig.DEFAULT_GENDER_OPTIONS
+        )
     }
 
     bind<Settings>() with singleton {
