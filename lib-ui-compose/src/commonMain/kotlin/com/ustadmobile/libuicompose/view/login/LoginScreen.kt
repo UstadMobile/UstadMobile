@@ -1,15 +1,12 @@
 package com.ustadmobile.libuicompose.view.login
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -22,11 +19,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.viewmodel.login.LoginUiState
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
 import com.ustadmobile.libuicompose.components.UstadPasswordField
-import com.ustadmobile.core.MR
+import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
+import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.Dispatchers
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
@@ -57,59 +56,52 @@ fun LoginScreen(
     onUsernameValueChange: (String) -> Unit = {},
     onPasswordValueChange: (String) -> Unit = {},
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState()),
+    UstadVerticalScrollColumn(
+        modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     )  {
 
         Text(text = uiState.loginIntentMessage ?: "")
 
-        UstadInputFieldLayout(
-            modifier = Modifier.padding(vertical = 8.dp)
+        OutlinedTextField(
+            modifier = Modifier
+                .testTag("username")
+                .defaultItemPadding()
                 .fillMaxWidth(),
-            errorText = uiState.usernameError
-        ) {
-            OutlinedTextField(
-                modifier = Modifier
-                    .testTag("username")
-                    .fillMaxWidth()
-                    ,
-                value = uiState.username,
-                singleLine = true,
-                label = {
-                    Text(stringResource(MR.strings.username))
-                },
-                onValueChange = onUsernameValueChange,
-                enabled = uiState.fieldsEnabled,
-                isError = uiState.usernameError != null,
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
-            )
-        }
+            value = uiState.username,
+            singleLine = true,
+            label = {
+                Text(stringResource(MR.strings.username))
+            },
+            onValueChange = onUsernameValueChange,
+            enabled = uiState.fieldsEnabled,
+            isError = uiState.usernameError != null,
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+            supportingText = uiState.usernameError?.let {
+                { Text(it) }
+            }
+        )
 
-        UstadInputFieldLayout(
-            modifier = Modifier.padding(vertical = 8.dp).fillMaxWidth(),
-            errorText = uiState.passwordError
-        ) {
-            UstadPasswordField(
-                modifier = Modifier
-                    .testTag("password")
-                    .fillMaxWidth()
-                    ,
-                value = uiState.password,
-                onValueChange = onPasswordValueChange,
-                isError = uiState.passwordError != null,
-                label = {
-                    Text(stringResource(MR.strings.password))
-                },
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                keyboardActions = KeyboardActions(
-                    onDone = { onClickLogin() }
-                )
-            )
-        }
+        UstadPasswordField(
+            modifier = Modifier
+                .testTag("password")
+                .defaultItemPadding()
+                .fillMaxWidth()
+            ,
+            value = uiState.password,
+            onValueChange = onPasswordValueChange,
+            isError = uiState.passwordError != null,
+            label = {
+                Text(stringResource(MR.strings.password))
+            },
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+            keyboardActions = KeyboardActions(
+                onDone = { onClickLogin() }
+            ),
+            supportingText = uiState.passwordError?.let {
+                { Text(it) }
+            }
+        )
 
         Spacer(modifier = Modifier.height(10.dp))
 
@@ -118,7 +110,7 @@ fun LoginScreen(
         Button(
             onClick = onClickLogin,
             enabled = uiState.fieldsEnabled,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.testTag("login_button").fillMaxWidth().defaultItemPadding(),
         ) {
             Text(stringResource(MR.strings.login))
         }
@@ -129,7 +121,8 @@ fun LoginScreen(
             OutlinedButton(
                 onClick = onClickCreateAccount,
                 modifier = Modifier
-                    .fillMaxWidth(),
+                    .testTag("create_account_button")
+                    .fillMaxWidth().defaultItemPadding(),
                 enabled = uiState.fieldsEnabled,
             ) {
                 Text(stringResource(MR.strings.create_account))
@@ -142,6 +135,8 @@ fun LoginScreen(
             OutlinedButton(
                 onClick = onClickConnectAsGuest,
                 modifier = Modifier
+                    .testTag("connect_as_guest_button")
+                    .defaultItemPadding()
                     .fillMaxWidth(),
                 enabled = uiState.fieldsEnabled,
             ) {
@@ -150,6 +145,10 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(10.dp))
         }
 
-        Text(text = uiState.versionInfo, style = MaterialTheme.typography.labelSmall)
+        Text(
+            text = uiState.versionInfo,
+            style = MaterialTheme.typography.labelSmall,
+            modifier = Modifier.defaultItemPadding(),
+        )
     }
 }

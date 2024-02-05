@@ -4,8 +4,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.OutlinedButton
@@ -14,21 +12,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.ustadmobile.core.impl.UstadMobileConstants
-import com.ustadmobile.core.viewmodel.parentalconsentmanagement.ParentalConsentManagementUiState
-import com.ustadmobile.lib.db.entities.PersonParentJoin
-import com.ustadmobile.libuicompose.util.rememberFormattedDate
-import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.locale.entityconstants.PersonParentJoinConstants
+import com.ustadmobile.core.viewmodel.parentalconsentmanagement.ParentalConsentManagementUiState
 import com.ustadmobile.core.viewmodel.parentalconsentmanagement.ParentalConsentManagementViewModel
+import com.ustadmobile.lib.db.entities.PersonParentJoin
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.libuicompose.components.UstadDetailHeader
 import com.ustadmobile.libuicompose.components.UstadHtmlText
 import com.ustadmobile.libuicompose.components.UstadMessageIdOptionExposedDropDownMenuField
 import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
+import com.ustadmobile.libuicompose.util.rememberFormattedDate
 import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
+import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.datetime.TimeZone
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 
@@ -57,7 +55,7 @@ fun ParentalConsentManagementScreen(
     onChangeRelation: (PersonParentJoin?) -> Unit = {}
 ) {
     UstadVerticalScrollColumn(
-        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
+        modifier = Modifier.fillMaxSize(),
     )  {
         val minorDateOfBirth = rememberFormattedDate(
             timeInMillis = uiState.parentJoinAndMinor?.minorPerson?.dateOfBirth ?: 0,
