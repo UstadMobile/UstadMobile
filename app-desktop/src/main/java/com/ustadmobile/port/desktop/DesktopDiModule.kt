@@ -396,7 +396,7 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
     }
 
     bind<GenderConfig>() with singleton {
-        GenderConfig()
+        GenderConfig(appConfig = instance())
     }
 
     bind<File>(tag = DiTag.TAG_TMP_DIR) with singleton {

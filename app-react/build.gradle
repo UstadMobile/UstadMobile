@@ -118,6 +118,7 @@ buildConfig {
     buildConfigField("String", "APP_VERSION", "\"${rootProject.version}\"")
     buildConfigField("String", "APP_PRESET_LOCALE", "\"${rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.presetlocale")}\"")
     buildConfigField("String", "APP_UI_LANGUAGES", "\"${rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.uilanguages")}\"")
+    buildConfigField("String", "APP_UI_GOPTS", "\"${rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.gopts")}\"")
 }
 
 
