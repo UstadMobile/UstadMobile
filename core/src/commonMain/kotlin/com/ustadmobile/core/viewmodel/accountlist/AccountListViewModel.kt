@@ -4,6 +4,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.launchopenlicenses.LaunchOpenLicensesUseCase
+import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
 import com.ustadmobile.core.domain.usersession.StartUserSessionUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -48,6 +49,7 @@ data class AccountListUiState(
     val accountsList: List<UserSessionWithPersonAndEndpoint> = emptyList(),
     val showAccountEndpoint: Boolean = false,
     val version: String = "",
+    val showPoweredBy: Boolean = false,
 ) {
 
     val activeAccountButtonsEnabled: Boolean
@@ -84,6 +86,8 @@ class AccountListViewModel(
 
     private val launchOpenLicensesUseCase: LaunchOpenLicensesUseCase? by instanceOrNull()
 
+    private val getShowPoweredByUseCase: GetShowPoweredByUseCase? by instanceOrNull()
+
     init {
         _appUiState.value = AppUiState(
             userAccountIconVisible = false,
@@ -97,6 +101,7 @@ class AccountListViewModel(
         _uiState.update { prev ->
             prev.copy(
                 version = getVersionUseCase?.invoke()?.versionString ?: "",
+                showPoweredBy = getShowPoweredByUseCase?.invoke() ?: false,
             )
         }
 

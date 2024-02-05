@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
 import com.ustadmobile.core.viewmodel.accountlist.AccountListUiState
@@ -59,6 +60,8 @@ fun AccountListScreen(
     onMyProfileClick: () -> Unit = {},
     onLogoutClick: () -> Unit = {}
 ){
+    val uriHandler = LocalUriHandler.current
+
     UstadLazyColumn(
         modifier = Modifier
             .fillMaxWidth()
@@ -139,8 +142,23 @@ fun AccountListScreen(
 
         item(key = "about") {
             ListItem(
+                modifier = if(uiState.showPoweredBy) {
+                    Modifier.clickable {
+                        uriHandler.openUri("https://www.ustadmobile.com/")
+                    }
+                }else {
+                    Modifier
+                },
                 headlineContent = { Text(stringResource(MR.strings.version)) },
-                supportingContent = { Text(text = uiState.version) }
+                supportingContent = {
+                    val versionStr = if(uiState.showPoweredBy) {
+                        "${uiState.version} ${stringResource(MR.strings.powered_by)}"
+                    }else {
+                        uiState.version
+                    }
+
+                    Text(text = versionStr)
+                }
             )
         }
 

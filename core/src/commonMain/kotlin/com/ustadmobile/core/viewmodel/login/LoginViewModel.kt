@@ -6,6 +6,7 @@ import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
+import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -48,6 +49,7 @@ data class LoginUiState(
         UstadMobileSystemCommon.UiLanguage("en", "English"),
     val languageList: List<UstadMobileSystemCommon.UiLanguage> = listOf(currentLanguage),
     val showWaitForRestart: Boolean = false,
+    val showPoweredBy: Boolean = false,
 )
 
 class LoginViewModel(
@@ -77,6 +79,8 @@ class LoginViewModel(
 
     private val getVersionUseCase: GetVersionUseCase? by instanceOrNull()
 
+    private val getShowPoweredByUseCase: GetShowPoweredByUseCase? by instanceOrNull()
+
     init {
         nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?: ClazzListViewModel.DEST_NAME_HOME
 
@@ -89,7 +93,8 @@ class LoginViewModel(
                         getVersionUseCase?.invoke()?.versionString,
                 loginIntentMessage = savedStateHandle[UstadView.ARG_INTENT_MESSAGE],
                 currentLanguage = languagesConfig.getCurrentLanguage(systemImpl),
-                languageList = languagesConfig.supportedUiLanguagesAndSysDefault(systemImpl)
+                languageList = languagesConfig.supportedUiLanguagesAndSysDefault(systemImpl),
+                showPoweredBy = getShowPoweredByUseCase?.invoke() ?: false
             )
         }
 

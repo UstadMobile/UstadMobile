@@ -71,6 +71,7 @@ import com.ustadmobile.core.domain.htmlcontentdisplayengine.GetHtmlContentDispla
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.HTML_CONTENT_OPTIONS_ANDROID
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.SetHtmlContentDisplayEngineUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.ResolveXapiLaunchHrefUseCase
+import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseCommonJvm
 import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
@@ -633,6 +634,13 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
         bind<ValidateVideoFileUseCase>() with singleton {
             ValidateVideoFileUseCaseAndroid(appContext = applicationContext)
         }
+
+        bind<GetShowPoweredByUseCase>() with singleton {
+            GetShowPoweredByUseCase(
+                applicationContext.appMetaData?.getBoolean(AppConfig.KEY_CONFIG_SHOW_POWERED_BY) ?: false,
+            )
+        }
+
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
     }

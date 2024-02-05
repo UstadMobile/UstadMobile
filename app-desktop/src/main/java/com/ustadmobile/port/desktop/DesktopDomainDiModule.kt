@@ -58,6 +58,7 @@ import com.ustadmobile.core.domain.phonenumber.OnClickPhoneNumUseCase
 import com.ustadmobile.core.domain.phonenumber.OnClickPhoneNumUseCaseJvm
 import com.ustadmobile.core.domain.sendemail.OnClickEmailUseCase
 import com.ustadmobile.core.domain.sendemail.OnClickEmailUseCaseJvm
+import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseCommonJvm
 import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
@@ -65,6 +66,8 @@ import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseJvm
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientChunkGetterUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
+import com.ustadmobile.core.impl.config.AppConfig
+import com.ustadmobile.core.impl.config.AppConfig.Companion.KEY_CONFIG_SHOW_POWERED_BY
 import com.ustadmobile.core.launchopenlicenses.LaunchOpenLicensesUseCaseJvm
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.ext.DoorTag
@@ -324,6 +327,12 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         LaunchOpenLicensesUseCaseJvm(
             launchChromeUseCase = instance(),
             licenseFile = File(ustadAppResourcesDir(), "open_source_licenses.html")
+        )
+    }
+
+    bind<GetShowPoweredByUseCase>() with singleton {
+        GetShowPoweredByUseCase(
+            instance<AppConfig>().get(KEY_CONFIG_SHOW_POWERED_BY)?.toBoolean() ?: false
         )
     }
 }
