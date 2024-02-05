@@ -62,7 +62,7 @@ actual fun PdfFileComponent(
     val lazyListState = rememberLazyListState()
 
     UstadLazyColumn(
-        modifier = Modifier.fillMaxSize().padding(end = 12.dp),
+        modifier = Modifier.fillMaxSize(),
         state = lazyListState,
     ) {
         items(
