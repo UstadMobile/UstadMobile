@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.ustadmobile.libuicompose.theme
 import androidx.compose.ui.graphics.Color
 
@@ -74,3 +76,4 @@ val dark_UstadTeal = Color(0xFF75DAA3)
 val dark_onUstadTeal = Color(0xFF003921)
 val dark_UstadTealContainer = Color(0xFF005232)
 val dark_onUstadTealContainer = Color(0xFF91F7BD)
+
