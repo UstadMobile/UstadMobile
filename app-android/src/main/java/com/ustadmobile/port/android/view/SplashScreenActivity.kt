@@ -65,7 +65,7 @@ class SplashScreenActivity : ComponentActivity() {
 private fun SplashScreen(){
     val context = LocalContext.current
     val showPoweredBy = remember {
-        context.appMetaData?.getString(AppConfig.KEY_CONFIG_SHOW_POWERED_BY) == "true"
+        context.appMetaData?.getBoolean(AppConfig.KEY_CONFIG_SHOW_POWERED_BY) ?: false
     }
 
 
