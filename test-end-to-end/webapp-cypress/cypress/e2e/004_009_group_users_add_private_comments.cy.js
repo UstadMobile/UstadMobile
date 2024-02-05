@@ -93,8 +93,8 @@ it('Teacher add assignment and course comment', () => {
   cy.contains('Submissions').click()
   cy.contains('Group 1').click()
   cy.get('#private_comment_textfield').click()
-  cy.get('#private_comment_textfield').type("comment1",{delay:10})
-  cy.get('svg[data-testid="SendIcon"]').click()
+  cy.get('#private_comment_textfield').type("comment1",{delay:15})
+  cy.get('#private_comment_textfield_send_button').click()
   cy.contains("comment1").should('exist')
 
 })
