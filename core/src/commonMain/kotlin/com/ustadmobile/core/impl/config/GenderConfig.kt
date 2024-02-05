@@ -11,7 +11,8 @@ class GenderConfig(
 
     constructor(appConfig: AppConfig): this(appConfig[AppConfig.KEY_GENDER_CONFIG] ?: DEFAULT_GENDER_OPTIONS)
 
-    private val genderOptions = genderConfigStr.split(",").map { it.toInt() }
+    private val genderOptions = genderConfigStr.split(",")
+        .filter { it.isNotBlank() }.map { it.toInt() }
 
     val genderMessageIds = GENDER_MESSAGE_IDS.filter {
         it.value in genderOptions
