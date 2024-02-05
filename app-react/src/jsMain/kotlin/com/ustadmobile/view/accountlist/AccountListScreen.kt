@@ -25,6 +25,8 @@ import react.FC
 import react.Props
 import react.ReactNode
 import react.dom.aria.ariaLabel
+import web.window.WindowTarget
+import web.window.window
 
 external interface AccountListProps: Props {
     var uiState: AccountListUiState
@@ -165,6 +167,12 @@ val AccountListComponent2 = FC<AccountListProps> { props ->
 
     val strings = useStringProvider()
 
+    val versionStr = if(props.uiState.showPoweredBy) {
+        "${props.uiState.version} ${strings[MR.strings.powered_by]}"
+    }else {
+        props.uiState.version
+    }
+
     UstadStandardContainer {
         Stack{
             direction = responsive(StackDirection.column)
@@ -233,10 +241,20 @@ val AccountListComponent2 = FC<AccountListProps> { props ->
             Divider { }
 
             ListItem {
-                ListItemText{
-                    primary = ReactNode(strings[MR.strings.version])
-                    secondary = ReactNode(props.uiState.version)
+                disableGutters = true
+                ListItemButton {
+                    if(props.uiState.showPoweredBy) {
+                        onClick = {
+                            window.open("https://www.ustadmobile.com/", WindowTarget._blank)
+                        }
+                    }
+
+                    ListItemText{
+                        primary = ReactNode(strings[MR.strings.version])
+                        secondary = ReactNode(versionStr)
+                    }
                 }
+
             }
 
             ListItem {
