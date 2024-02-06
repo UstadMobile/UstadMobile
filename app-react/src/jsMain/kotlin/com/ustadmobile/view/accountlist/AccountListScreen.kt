@@ -25,12 +25,14 @@ import react.FC
 import react.Props
 import react.ReactNode
 import react.dom.aria.ariaLabel
+import web.window.WindowTarget
+import web.window.window
 
 external interface AccountListProps: Props {
     var uiState: AccountListUiState
     var onAccountListItemClick: (UserSessionWithPersonAndEndpoint) -> Unit
     var onDeleteListItemClick: (UserSessionWithPersonAndEndpoint) -> Unit
-    var onAboutClick: () -> Unit
+    var onClickOpenLicenses: () -> Unit
     var onAddItem: () -> Unit
     var onMyProfileClick: () -> Unit
     var onLogoutClick: () -> Unit
@@ -165,6 +167,12 @@ val AccountListComponent2 = FC<AccountListProps> { props ->
 
     val strings = useStringProvider()
 
+    val versionStr = if(props.uiState.showPoweredBy) {
+        "${props.uiState.version} ${strings[MR.strings.powered_by]}"
+    }else {
+        props.uiState.version
+    }
+
     UstadStandardContainer {
         Stack{
             direction = responsive(StackDirection.column)
@@ -233,11 +241,31 @@ val AccountListComponent2 = FC<AccountListProps> { props ->
             Divider { }
 
             ListItem {
-                ListItemButton{
+                disableGutters = true
+                ListItemButton {
+                    if(props.uiState.showPoweredBy) {
+                        onClick = {
+                            window.open("https://www.ustadmobile.com/", WindowTarget._blank)
+                        }
+                    }
 
                     ListItemText{
-                        primary = ReactNode(strings[MR.strings.account])
-                        secondary = ReactNode(props.uiState.version)
+                        primary = ReactNode(strings[MR.strings.version])
+                        secondary = ReactNode(versionStr)
+                    }
+                }
+
+            }
+
+            ListItem {
+                disableGutters = true
+                ListItemButton {
+                    onClick = {
+                        props.onClickOpenLicenses()
+                    }
+
+                    ListItemText {
+                        primary = ReactNode(strings[MR.strings.licenses])
                     }
                 }
             }
@@ -260,6 +288,7 @@ val AccountListScreen = FC<Props> {
         onAddItem = viewModel::onClickAddAccount
         onAccountListItemClick = viewModel::onClickAccount
         onDeleteListItemClick = viewModel::onClickDeleteAccount
+        onClickOpenLicenses = viewModel::onClickOpenLicenses
     }
 }
 

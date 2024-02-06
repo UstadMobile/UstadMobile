@@ -1,10 +1,7 @@
 package com.ustadmobile.libuicompose.view.site.edit
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,6 +21,7 @@ import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
 import com.ustadmobile.libuicompose.components.UstadRichTextEdit
 import com.ustadmobile.libuicompose.components.UstadSetLanguageDropDown
 import com.ustadmobile.libuicompose.components.UstadSwitchField
+import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import kotlinx.coroutines.Dispatchers
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
@@ -54,8 +52,8 @@ fun SiteEditScreen(
     onChangeTermsHtml: (String) -> Unit =  { },
     onClickEditTermsInNewScreen: () -> Unit = { },
 ){
-    Column (
-        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
+    UstadVerticalScrollColumn (
+        modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.Start
     ){
         OutlinedTextField(

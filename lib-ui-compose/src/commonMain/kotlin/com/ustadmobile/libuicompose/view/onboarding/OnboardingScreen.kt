@@ -165,19 +165,19 @@ private fun TopRow(
 
 val onboardingItems: List<OnboardingItem> = listOf(
     OnboardingItem(
-        MR.strings.onboarding_no_internet_headline,
-        MR.strings.onboarding_no_internet_subheadline,
-        UstadImage.ILLUSTRATION_OFFLINE_USAGE
+        MR.strings.onboarding_headline1,
+        MR.strings.onboarding_subheadline1,
+        UstadImage.ILLUSTRATION_ONBOARDING1
     ),
     OnboardingItem(
-        MR.strings.onboarding_offline_sharing,
-        MR.strings.onboarding_offline_sharing_subheading,
-        UstadImage.ILLUSTRATION_OFFLINE_SHARING,
+        MR.strings.onboarding_headline2,
+        MR.strings.onboarding_subheadline2,
+        UstadImage.ILLUSTRATION_ONBOARDING2,
     ),
     OnboardingItem(
-        MR.strings.onboarding_stay_organized_headline,
-        MR.strings.onboarding_stay_organized_subheading,
-        UstadImage.ILLUSTRATION_ORGANIZED,
+        MR.strings.onboarding_headline2,
+        MR.strings.onboarding_subheadline3,
+        UstadImage.ILLUSTRATION_ONBOARDING3,
     )
 )
 

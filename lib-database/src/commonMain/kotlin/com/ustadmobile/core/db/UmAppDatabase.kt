@@ -65,7 +65,7 @@ import com.ustadmobile.lib.db.entities.*
     ReplicationOperation::class,
     PendingRepositorySession::class,
 
-], version = 139)
+], version = 141)
 /*
  Replicate entities (e.g. trackers) to drop:
      ClazzLogReplicate

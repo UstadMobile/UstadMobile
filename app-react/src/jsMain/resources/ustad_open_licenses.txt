@@ -1,0 +1,6 @@
+This package contains the Ustad Mobile Platform, Copyright UstadMobile FZ-LLC.
+
+Licensed under the GNU Affero General Public License as per the following URL:
+
+https://github.com/UstadMobile/UstadMobile/blob/primary/LICENSE
+

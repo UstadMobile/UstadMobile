@@ -6,8 +6,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
@@ -23,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.viewmodel.ErrorReportUiState
+import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 import dev.icerock.moko.resources.compose.stringResource
 
 @Composable
@@ -32,11 +31,9 @@ fun ErrorReportScreen(
     onCopyIconClick: () -> Unit = {},
     onShareIconClick: () -> Unit = {}
 ){
-    Column (
+    UstadVerticalScrollColumn (
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .verticalScroll(rememberScrollState())
-            .fillMaxSize()
+        modifier = Modifier.fillMaxSize()
     ){
 
         //To be restore if/when this screen is brought back

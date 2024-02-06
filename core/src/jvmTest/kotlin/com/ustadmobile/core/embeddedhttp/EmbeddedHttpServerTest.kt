@@ -3,6 +3,7 @@ package com.ustadmobile.core.embeddedhttp
 import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServerUseCase
 import com.ustadmobile.core.io.ext.readString
 import com.ustadmobile.core.util.newTestOkHttpClient
+import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.okhttp.asOkHttpRequest
 import com.ustadmobile.libcache.request.HttpRequest
 import net.thauvin.erik.urlencoder.UrlEncoderUtil
@@ -63,7 +64,9 @@ class EmbeddedHttpServerTest {
         mockUseCase.stubTextResponse(responseStr)
         val httpServer = EmbeddedHttpServer(
             port  = 0,
-            contentEntryVersionServerUseCase =  { mockUseCase }
+            contentEntryVersionServerUseCase =  { mockUseCase },
+            staticUmAppFilesDir = temporaryFolder.newFolder(),
+            mimeTypeHelper = FileMimeTypeHelperImpl(),
         )
         httpServer.start()
         val contentEntryVersionUid = 1234L

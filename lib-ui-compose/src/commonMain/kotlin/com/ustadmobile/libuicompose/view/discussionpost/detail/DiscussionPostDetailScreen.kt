@@ -1,7 +1,6 @@
 package com.ustadmobile.libuicompose.view.discussionpost.detail
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ListItem
@@ -23,6 +22,7 @@ import com.ustadmobile.libuicompose.components.ustadPagedItems
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
 import com.ustadmobile.libuicompose.components.UstadHtmlEditPlaceholder
+import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import kotlinx.coroutines.Dispatchers
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
@@ -59,7 +59,7 @@ fun DiscussionPostDetailScreen(
 
     val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
 
-    LazyColumn(
+    UstadLazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
         ustadPagedItems(

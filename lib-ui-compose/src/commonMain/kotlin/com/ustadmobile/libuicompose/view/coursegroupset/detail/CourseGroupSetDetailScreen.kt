@@ -2,7 +2,6 @@ package com.ustadmobile.libuicompose.view.coursegroupset.detail
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
@@ -16,6 +15,7 @@ import com.ustadmobile.core.viewmodel.coursegroupset.detail.CourseGroupSetDetail
 import com.ustadmobile.core.viewmodel.coursegroupset.detail.CourseGroupSetDetailViewModel
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
+import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadPersonAvatar
 
 @Composable
@@ -31,7 +31,7 @@ fun CourseGroupSetDetailScreen(
     uiState: CourseGroupSetDetailUiState
 ){
 
-    LazyColumn(
+    UstadLazyColumn(
         modifier = Modifier
             .padding(vertical = 8.dp)
             .fillMaxWidth()

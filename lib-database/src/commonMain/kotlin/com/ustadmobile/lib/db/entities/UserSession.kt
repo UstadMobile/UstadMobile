@@ -36,7 +36,7 @@ class UserSession {
     var usLcsn: Long = 0
 
     @LastChangedBy
-    var usLcb: Int = 0
+    var usLcb: Long = 0
 
     @ReplicateEtag
     @ReplicateLastModified

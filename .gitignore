@@ -244,4 +244,5 @@ test-end-to-end/webapp-cypress/results
 test-end-to-end/webapp-cypress/logs
 js/*.js
 
-
+#Conveyor output directory
+output

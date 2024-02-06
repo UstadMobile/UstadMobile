@@ -11,7 +11,7 @@ class OkHttpRequestAdapter(
 
     override val url: String = request.url.toString()
 
-    override val method: HttpRequest.Companion.Method = HttpRequest.Companion.Method.valueOf(request.method)
+    override val method: HttpRequest.Companion.Method = HttpRequest.Companion.Method.forName(request.method)
 }
 
 fun Request.asCacheHttpRequest(): HttpRequest = OkHttpRequestAdapter(this)
