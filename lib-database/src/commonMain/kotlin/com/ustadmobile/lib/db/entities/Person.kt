@@ -39,9 +39,7 @@ import kotlinx.serialization.Serializable
                                     WHERE Person.personUid = CAST(NEW.personUid AS BIGINT)), 0))   
                             
          """,
-         sqlStatements = [
-             TRIGGER_UPSERT_WHERE_NEWER
-         ]
+         sqlStatements = [ TRIGGER_UPSERT ]
      )
  ))
 @Serializable

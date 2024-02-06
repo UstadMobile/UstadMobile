@@ -15,9 +15,8 @@ import com.ustadmobile.door.annotation.*
      order = Trigger.Order.INSTEAD_OF,
      on = Trigger.On.RECEIVEVIEW,
      events = [Trigger.Event.INSERT],
-     sqlStatements = [
-         TRIGGER_UPSERT_WHERE_NEWER
-     ]
+     conditionSql = TRIGGER_CONDITION_WHERE_NEWER,
+     sqlStatements = [TRIGGER_UPSERT]
  )
 ))
 class ErrorReport {
@@ -58,17 +57,4 @@ class ErrorReport {
 
     var message: String? = null
 
-    companion object {
-
-
-        //Warning
-        const val SEVERITY_WARNING = 1
-
-        //Error
-        const val SEVERITY_ERROR = 2
-
-        //What a terrible failure
-        const val SEVERITY_WTF = 3
-
-    }
 }
