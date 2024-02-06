@@ -20,10 +20,19 @@ object Themes {
             palette = jso {
                 mode = light
                 primary = json(
-                    "main" to Color("#95077d")
+                    "main" to Color("#ad0075")
                 )
                 secondary = json(
-                    "main" to Color("#299cd9")
+                    "main" to Color("#d5d5d5")
+                )
+                background = jso {
+                    default = "#ffffff"
+                }
+                success = json(
+                    "main" to Color("#e6650a")
+                )
+                error = json(
+                    "main" to Color("e6650a")
                 )
             }
         }
