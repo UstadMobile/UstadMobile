@@ -141,7 +141,9 @@ fun Application.umRestApplication(
 
     val siteUrl = environment.config.propertyOrNull(CONF_KEY_SITE_URL)?.getString()
 
-    if(siteUrl.isNullOrBlank()) {
+    val dbMode = dbModeOverride ?:  appConfig.propertyOrNull("ktor.ustad.dbmode")?.getString() ?: CONF_DBMODE_SINGLETON
+
+    if(dbMode != CONF_DBMODE_VIRTUALHOST && siteUrl.isNullOrBlank()) {
         val likelyAddr = NetworkInterface.getNetworkInterfaces().toList().filter {
             !it.isLoopback
         }.flatMap { netInterface ->
@@ -230,9 +232,6 @@ fun Application.umRestApplication(
 
     //Avoid sending the body of content if it has not changed since the client last requested it.
     install(ConditionalHeaders)
-
-    val dbMode = dbModeOverride ?:
-        appConfig.propertyOrNull("ktor.ustad.dbmode")?.getString() ?: CONF_DBMODE_SINGLETON
 
     val dataDirPath = environment.config.absoluteDataDir()
 
