@@ -108,7 +108,7 @@ fun PersonEditScreen(
                 .defaultItemPadding()
                 .fillMaxWidth(),
             label = stringResource(MR.strings.gender_literal) + "*",
-            options = uiState.genderOptions,
+            options = uiState.genderOptions.filter { it.stringResource != MR.strings.blank },
             onOptionSelected = {
                 onPersonChanged(uiState.person?.shallowCopy{
                     gender = it.value
