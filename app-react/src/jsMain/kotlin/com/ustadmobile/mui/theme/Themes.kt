@@ -28,11 +28,8 @@ object Themes {
                 background = jso {
                     default = "#ffffff"
                 }
-                success = json(
-                    "main" to Color("#e6650a")
-                )
                 error = json(
-                    "main" to Color("e6650a")
+                    "main" to Color("#e6650a")
                 )
             }
         }
