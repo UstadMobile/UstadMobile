@@ -27,7 +27,6 @@ import com.ustadmobile.libuicompose.components.UstadDetailHeader
 import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 import com.ustadmobile.libuicompose.components.UstadWaitForRestartDialog
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
-import javax.swing.Icon
 
 @Composable
 fun SettingsScreen(
