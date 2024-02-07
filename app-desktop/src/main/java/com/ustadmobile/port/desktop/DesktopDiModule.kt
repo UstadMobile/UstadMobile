@@ -17,10 +17,12 @@ import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseJvm
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseRemote
+import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseJvm
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCaseMediaInfo
 import com.ustadmobile.core.embeddedhttp.EmbeddedHttpServer
+import com.ustadmobile.core.getdeveloperinfo.GetDeveloperInfoUseCaseJvm
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.config.ApiUrlConfig
@@ -442,6 +444,13 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
             },
             staticUmAppFilesDir = File(resourcesDir, "umapp"),
             mimeTypeHelper = instance()
+        )
+    }
+
+    bind<GetDeveloperInfoUseCase>() with singleton {
+        GetDeveloperInfoUseCaseJvm(
+            appResourcesDir = ustadAppResourcesDir(),
+            dataDir = ustadAppDataDir(),
         )
     }
 

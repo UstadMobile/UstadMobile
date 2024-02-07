@@ -1,5 +1,6 @@
 package com.ustadmobile.libuicompose.view.login
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,8 +16,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.viewmodel.login.LoginUiState
@@ -148,5 +154,20 @@ fun LoginScreen(
             style = MaterialTheme.typography.labelSmall,
             modifier = Modifier.defaultItemPadding(),
         )
+
+        val uriHandler = LocalUriHandler.current
+        if(uiState.showPoweredBy) {
+            Text(
+                modifier = Modifier.defaultItemPadding().pointerHoverIcon(PointerIcon.Hand)
+                    .clickable {
+                        uriHandler.openUri("https://www.ustadmobile.com/")
+                    },
+                text = stringResource(MR.strings.powered_by),
+                style = MaterialTheme.typography.labelSmall,
+                color = Color.Blue,
+                textDecoration = TextDecoration.Underline,
+            )
+
+        }
     }
 }

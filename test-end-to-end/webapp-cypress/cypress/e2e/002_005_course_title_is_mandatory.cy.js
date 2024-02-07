@@ -17,6 +17,7 @@ describe('002_005_course_title_is_mandatory', () => {
   cy.get('.MuiInputBase-colorPrimary.Mui-error').should('exist')
   cy.get('input[id="clazz_name"]').type('courseName')
   cy.contains("button","Save").click()
+  cy.contains("button","Edit").should('be.visible')
   cy.get('#appbar_title').should('be.visible').invoke('text').should('eq','courseName')
 })
 })

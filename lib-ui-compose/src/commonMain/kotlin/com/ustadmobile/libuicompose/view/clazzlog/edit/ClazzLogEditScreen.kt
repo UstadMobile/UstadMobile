@@ -37,6 +37,7 @@ fun ClazzLogEditScreen(
             .fillMaxWidth()
             .testTag("log_datetime"),
         value = uiState.clazzLog?.logDate ?: 0L,
+        isError = uiState.dateError != null,
         dateLabel = { Text(stringResource(MR.strings.date) + "*") },
         timeLabel = { Text(stringResource(MR.strings.time) + "*") },
         timeZoneId = uiState.timeZone,

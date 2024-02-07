@@ -6,6 +6,7 @@ import com.ustadmobile.BuildConfigJs
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
+import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.config.AppConfig
@@ -70,7 +71,9 @@ internal fun ustadJsDi(
     }
 
     bind<GenderConfig>() with singleton {
-        GenderConfig(genderConfigStr = BuildConfigJs.APP_UI_GOPTS)
+        GenderConfig(
+            genderConfigStr = BuildConfigJs.APP_UI_GOPTS.toNullIfBlank() ?: GenderConfig.DEFAULT_GENDER_OPTIONS
+        )
     }
 
     bind<Settings>() with singleton {
@@ -210,6 +213,10 @@ internal fun ustadJsDi(
 
     bind<GetVersionUseCase>() with singleton {
         GetVersionUseCaseJs()
+    }
+
+    bind<GetShowPoweredByUseCase>() with singleton {
+        GetShowPoweredByUseCase(BuildConfigJs.APP_UI_SHOW_POWERED_BY.toBoolean())
     }
 
 }

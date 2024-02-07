@@ -2,13 +2,19 @@
 
 #Parse command line arguments as per
 # /usr/share/doc/util-linux/examples/getopt-example.bash
-TEMP=$(getopt -o 'r:s:h' --long 'resultsDir:,siteUrl:,help' -n 'start.sh' -- "$@")
+TEMP=$(getopt -o 'r:s:c:h' --long 'resultsDir:,siteUrl:,config:,help' -n 'start.sh' -- "$@")
 eval set -- "$TEMP"
 unset TEMP
 
 BASEDIR="$(realpath $(dirname $0))"
 
 SITEURL=""
+
+CONFIGARG=""
+
+if [ -e $BASEDIR/testserver-controller.conf ]; then
+  CONFIGARG=" -config=$BASEDIR/testserver-controller.conf "
+fi
 
 while true; do
   echo $1 $2
@@ -27,6 +33,11 @@ while true; do
       ;;
     '-u'|'--siteUrl')
       SITEURL=$2
+      shift 2
+      continue
+      ;;
+    '-c'|'--config')
+      CONFIGARG=" -config=$2 "
       shift 2
       continue
       ;;
@@ -62,8 +73,12 @@ if [ "$NCRESULT" == "0" ]; then
 fi
 
 # Make the project root directory the working directory
+echo config=$CONFIGARG
 cd $BASEDIR/..
-java -jar $BASEDIR/build/libs/testserver-controller-all.jar -P:resultDir=$TESTRESULTSDIR -P:siteUrl=$SITEURL &
+java -jar $BASEDIR/build/libs/testserver-controller-all.jar $CONFIGARG \
+  -P:resultDir=$TESTRESULTSDIR \
+  -P:siteUrl=$SITEURL &
+
 TESTSERVERPID=$!
 echo $TESTSERVERPID > $BASEDIR/build/server.pid
 echo "Started testserver-controller and saved PID [ $TESTSERVERPID ]. Site URL is $SITEURL. See ../log/testserver-controller.log for output."

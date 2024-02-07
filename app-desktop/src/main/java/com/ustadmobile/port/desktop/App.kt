@@ -78,9 +78,10 @@ fun main() {
     //Apply the language setting before startup
     val dataRoot = ustadAppDataDir()
     println("AppDataDir=${ustadAppDataDir()} ResourcesDir=${ustadAppResourcesDir()}")
-    var splashScreen: SplashScreen? = SplashScreen()
 
     SetLanguageUseCaseJvm.init()
+
+    var splashScreen: SplashScreen? = SplashScreen()
 
     val prefsPropertiesFiles = File(dataRoot, UstadMobileSystemImpl.PREFS_FILENAME)
 
@@ -92,7 +93,11 @@ fun main() {
         } ?: Properties()
 
         val presetLocaleToAction = if(props.getProperty(PREFKEY_ACTIONED_PRESET) == null) {
-            Manifests.read("com-ustadmobile-presetlocale")
+            try {
+                Manifests.read("com-ustadmobile-presetlocale")
+            }catch(e: Throwable) {
+                null
+            }
         }else {
             null
         }

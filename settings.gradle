@@ -17,7 +17,7 @@ dependencyResolutionManagement {
             version("version_androidx_core", "1.12.0")
             version("version_kotlin", "1.9.21")
             version("version_okhttp", "4.12.0")
-            version("version_door", "0.70b34")
+            version("version_door", "0.70b40")
             version("version_coroutines", "1.7.3")
             version("version_atomicfu", "0.23.1")
             version("version_kotlinx_io", "0.3.0")
