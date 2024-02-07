@@ -2,7 +2,7 @@
 <resources>
     <string name="downloaded" value="81">डाउनलोड भयो</string>
     <string name="recycled">रिसाइकल गरियो</string>
-    <string name="libraries">लाइब्रेरीहरू</string>
+    <string name="libraries">पुस्तकालयहरु</string>
     <string name="add_content">विषयसामग्री थपौं</string>
     <string name="deleted">डिलिट भयो</string>
     <string name="loading">लोड हुँदै</string>
@@ -24,8 +24,8 @@
     <string name="answer">उत्तर</string>
     <string name="of_content">विषयसामग्रीको</string>
     <string name="wrong_user_pass_combo">गलत प्रयोगकर्ता नाम/पासवर्ड : फेरि कोसिस गर्नुहोस् ।</string>
-    <string name="confirm">कन्फर्म गरौं</string>
-    <string name="cancel">रद्द गरौं</string>
+    <string name="confirm">सुनिश्र्चित गर्नुहोस्</string>
+    <string name="cancel">रद्द गर्नुहोस्</string>
     <string name="nothing_here">यहाँ केही छैन</string>
     <string name="not_answered">उत्तर नदिइएको</string>
     <string name="app_name">उस्ताद मोबाइल</string>
@@ -646,4 +646,8 @@
     <string name="add_student_to_school">विद्यालयमा विद्यार्थी थपौं</string>
     <string name="invite_link_desc">यो लिंकको मद्दतले जोकोहीले %1$s मा आवद्ध वा आवद्ध हुनको लागि आवेदन गर्न सक्छन्। तपाईंले त्यसपछि आवद्ध हुन उनीहरूले गरेको अनुरोधलाई स्वीकृत वा अस्वीकृत गर्न सक्नुहुनेछ।</string>
     <string name="add_staff_to_school">विद्यालयमा स्टाफ थपौं</string>
+    <string name="add_new_language">नयॅा भाषा थप्नूहोस्</string>
+    <string name="languages">भाषाहरु</string>
+    <string name="name_key">नाम</string>
+    <string name="edit_language">भाषा सम्पादन गर्नुहोस्</string>
 </resources>
