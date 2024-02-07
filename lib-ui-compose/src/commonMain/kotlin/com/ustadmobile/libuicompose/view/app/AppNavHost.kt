@@ -122,6 +122,7 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import kotlin.reflect.KClass
 import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel
+import com.ustadmobile.core.viewmodel.settings.DeveloperSettingsViewModel
 import com.ustadmobile.core.viewmodel.videocontent.VideoContentViewModel
 import com.ustadmobile.core.viewmodel.xapicontent.XapiContentViewModel
 import com.ustadmobile.libuicompose.view.about.OpenLicensesScreen
@@ -135,6 +136,7 @@ import com.ustadmobile.libuicompose.view.epubcontent.EpubContentScreen
 import com.ustadmobile.libuicompose.view.parentalconsentmanagement.ParentalConsentManagementScreen
 import com.ustadmobile.libuicompose.view.pdfcontent.PdfContentScreen
 import com.ustadmobile.libuicompose.view.person.registerminorwaitforparent.RegisterMinorWaitForParentScreen
+import com.ustadmobile.libuicompose.view.settings.DeveloperSettingsScreen
 import com.ustadmobile.libuicompose.view.videocontent.VideoContentScreen
 import com.ustadmobile.libuicompose.view.xapicontent.XapiContentScreen
 import kotlinx.coroutines.flow.Flow
@@ -645,6 +647,13 @@ fun AppNavHost(
             contentScene("/${OpenLicensesViewModel.DEST_NAME}") { backStackEntry ->
                 OpenLicensesScreen(appViewModel(backStackEntry, OpenLicensesViewModel::class,
                     ::OpenLicensesViewModel)
+                )
+            }
+
+            contentScene("/${DeveloperSettingsViewModel.DEST_NAME}") { backStackEntry ->
+                DeveloperSettingsScreen(
+                    appViewModel(backStackEntry, DeveloperSettingsViewModel::class,
+                        ::DeveloperSettingsViewModel)
                 )
             }
         }

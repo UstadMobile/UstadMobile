@@ -35,6 +35,8 @@ import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCaseJvm
 import com.ustadmobile.core.domain.blob.upload.UpdateFailedTransferJobUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCaseCommonJvm
+import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCase
+import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCaseJvm
 import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseJvm
 import com.ustadmobile.core.domain.contententry.getlocalurlforcontent.GetLocalUrlForContentUseCase
 import com.ustadmobile.core.domain.contententry.getlocalurlforcontent.GetLocalUrlForContentUseCaseCommonJvm
@@ -330,9 +332,13 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         )
     }
 
-    bind<GetShowPoweredByUseCase>() with singleton {
+    bind<GetShowPoweredByUseCase>() with provider {
         GetShowPoweredByUseCase(
             instance<AppConfig>().get(KEY_CONFIG_SHOW_POWERED_BY)?.toBoolean() ?: false
         )
+    }
+
+    bind<SetClipboardStringUseCase>() with provider {
+        SetClipboardStringUseCaseJvm()
     }
 }

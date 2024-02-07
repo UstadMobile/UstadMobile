@@ -5,15 +5,18 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DeveloperMode
 import androidx.compose.material.icons.filled.DisplaySettings
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Workspaces
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.viewmodel.settings.SettingsUiState
 import com.ustadmobile.libuicompose.components.UstadDetailField2
@@ -24,6 +27,7 @@ import com.ustadmobile.libuicompose.components.UstadDetailHeader
 import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 import com.ustadmobile.libuicompose.components.UstadWaitForRestartDialog
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
+import javax.swing.Icon
 
 @Composable
 fun SettingsScreen(
@@ -35,7 +39,9 @@ fun SettingsScreen(
         uiState = uiState,
         onClickAppLanguage = viewModel::onClickLanguage,
         onClickWorkspace = viewModel::onClickSiteSettings,
-        onClickHtmlContentDisplayEngine = viewModel::onClickHtmlContentDisplayEngine
+        onClickHtmlContentDisplayEngine = viewModel::onClickHtmlContentDisplayEngine,
+        onClickVersion = viewModel::onClickVersion,
+        onClickDeveloperOptions = viewModel::onClickDeveloperOptions,
     )
 
     if(uiState.langDialogVisible) {
@@ -84,6 +90,8 @@ fun SettingsScreen(
     onClickGoToHolidayCalendarList: () -> Unit = {},
     onClickWorkspace: () -> Unit = {},
     onClickLeavingReason: () -> Unit = {},
+    onClickVersion: () -> Unit = { },
+    onClickDeveloperOptions: () -> Unit = { },
 ) {
     UstadVerticalScrollColumn(
         modifier = Modifier.fillMaxSize()
@@ -115,7 +123,6 @@ fun SettingsScreen(
             )
         }
 
-        Spacer(modifier = Modifier.height(10.dp))
 
         if (uiState.reasonLeavingVisible){
             UstadDetailField2(
@@ -126,11 +133,7 @@ fun SettingsScreen(
             )
         }
 
-        Spacer(modifier = Modifier.height(10.dp))
-
         if(uiState.advancedSectionVisible) {
-            Spacer(modifier = Modifier.height(8.dp))
-
             UstadDetailHeader { Text(stringResource(MR.strings.advanced)) }
 
             if(uiState.htmlContentDisplayEngineVisible) {
@@ -144,8 +147,22 @@ fun SettingsScreen(
             }
         }
 
+        if(uiState.showDeveloperOptions) {
+            //Developer settings are not translated
+            UstadDetailField2(
+                modifier = Modifier.clickable { onClickDeveloperOptions() },
+                icon = Icons.Default.DeveloperMode,
+                valueText = "Developer Settings",
+                labelText = "File paths, logging options, etc.",
+            )
+        }
 
+        Divider(modifier = Modifier.height(1.dp))
 
-
+        ListItem(
+            modifier = Modifier.testTag("settings_version").clickable { onClickVersion() },
+            headlineContent = { Text(uiState.version) },
+            supportingContent = { Text(stringResource(MR.strings.version)) }
+        )
     }
 }
