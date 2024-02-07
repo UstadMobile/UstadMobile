@@ -199,9 +199,6 @@
     <string name="profile">प्रोफाइल</string>
     <string name="dialog_download_from_playstore_message">शैक्षिक विषयसामग्रीमा अफलाइन पहुँच र सेयर गरौं</string>
     <string name="onboarding_get_started_label">सुरू गरौं</string>
-    <string name="onboarding_no_internet_headline">इन्टरनेट छैन\? समस्या छैन।</string>
-    <string name="onboarding_no_internet_subheadline">पछि प्रयोगको लागि शैक्षिक भिडियो, लेख र अन्तरक्रियात्मक अभ्यासहरू डाउनलोड गरौं।</string>
-    <string name="onboarding_offline_sharing">अफलाइन सेयर गरौं</string>
     <string name="download_cloud_availability">क्लाउडमा उपलब्ध छ</string>
     <string name="select_group_members">समूह सदस्यहरू छनौट गर्नुहोस्</string>
     <string name="download_wifi_only">वाईफाई मात्र</string>
@@ -474,7 +471,6 @@
     <string name="dialog_download_from_playstore_ok">अहिले डाउनलोड गरौं (नि:शुल्क)</string>
     <string name="create_a_new_report">नयाँ रिपोर्ट बनाऔं</string>
     <string name="class_enrolment_leaving">छोड्नुको कक्षा भर्ना कारण</string>
-    <string name="onboarding_offline_sharing_subheading">नजिकैका अन्य कुनै प्रयोगकर्तासँग उच्च गतिमा विषयसामग्री सेयर गरौं।</string>
     <string name="error_start_date_before_clazz_date">कक्षा सुरू मितिभन्दा पहिले भर्ना सुरू हुन सक्दैन</string>
     <string name="add_a_new_language">नयाँ भाषा थपौं</string>
     <string name="add_a_student">एउटा विद्यार्थी थपौं</string>

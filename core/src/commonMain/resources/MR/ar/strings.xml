@@ -102,10 +102,6 @@
     <string name="dialog_download_from_playstore_cancel">البقاء على الموقع</string>
     <string name="accept">القبول</string>
     <string name="also_available_in">متوفر ايضا في</string>
-    <string name="onboarding_no_internet_headline">لا يوجد انترنت؟ لا يوجد مشكلة.</string>
-    <string name="onboarding_no_internet_subheadline">كل شيء يعمل دون اتصال.</string>
-    <string name="onboarding_offline_sharing">شارك دون اتصال</string>
-    <string name="onboarding_offline_sharing_subheading">وفر الوقت والبيانات مع مشاركة فائقة السرعة دون اتصال بالإنترنت</string>
     <string name="download_summary_title">%1$s تنزيل نشط</string>
     <string name="update">تحديث</string>
     <string name="download_continue_stacked_label">استمر بالتنزيل</string>
@@ -801,7 +797,6 @@
     <string name="view_basic_profile_of_members">عرض الملف الشخصي الأساسي للأعضاء</string>
     <string name="add_new_clazz_to_school">أضف صفًا جديدًا إلى المدرسة</string>
     <string name="waiting_for_connection">في انتظار الاتصال</string>
-    <string name="onboarding_stay_organized_headline">إبقى مرتب</string>
     <string name="edit_assignment">تعديل المهمة</string>
     <string name="mark_penalty">علامة جزاء</string>
     <string name="late_submission_penalty">غرامة التقديم المتأخر</string>
@@ -892,7 +887,6 @@
     <string name="add_new_terminology">أضف مصطلحات جديدة</string>
     <string name="course_code">كود الدورة</string>
     <string name="blank_report">تقرير فارغ</string>
-    <string name="onboarding_stay_organized_subheading">محتوى التعليم والواجبات والفصول الدراسية والحضور كلها في مكان واحد</string>
     <string name="your_account_needs_approved">يجب أن يوافق والديك على حسابك باستخدام الرابط الذي تم إرساله. إذا كنت أحد الوالدين ، فأنت بحاجة إلى تسجيل الدخول إلى حسابك الحالي أو إنشاء حساب جديد.</string>
     <string name="percentage_of_students_attending_over_time">النسبة المئوية للطلاب الذين يحضرون بمرور الوقت</string>
     <string name="content_completion">إكمال المحتوى</string>

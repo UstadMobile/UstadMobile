@@ -52,7 +52,6 @@
     <string name="also_available_in">Также доступно в</string>
     <string name="created_partnership">Создано в партнерстве с:</string>
     <string name="onboarding_get_started_label">Начать</string>
-    <string name="onboarding_offline_sharing">Поделиться оффлайн</string>
     <string name="download_continue_stacked_label">Продолжить скачивание</string>
     <string name="download_wifi_only">Только через Wi-Fi</string>
     <string name="download_state_downloading"><b>Скачивание</b> всего %1$s элементов. Всего на вашем устройстве будет использовано %2$s.</string>
@@ -163,14 +162,11 @@
     <string name="choose_template">Выбрать шаблон</string>
     <string name="add_gallery_description">Добавить видео или аудио из галереи устройства</string>
     <string name="lets_get_started_label">Давайте начнем</string>
-    <string name="onboarding_no_internet_headline">Нет интернета\? Без проблем.</string>
-    <string name="onboarding_no_internet_subheadline">Всё работает офлайн</string>
     <string name="last_three_months_date_range">Последние три месяца</string>
     <string name="new_custom_date_range">Новый произвольный диапазон дат…</string>
     <string name="year">Год</string>
     <string name="exams">Экзамены</string>
     <string name="reports">Отчеты</string>
-    <string name="onboarding_offline_sharing_subheading">Экономьте время и данные благодаря сверхбыстрому обмену данными в оффлайн режиме.</string>
     <string name="xapi_options_report_title">Заголовок отчета</string>
     <string name="xapi_options_visual_type">Тип визуализации</string>
     <string name="xapi_options_data_set">Набор данных</string>
@@ -794,7 +790,6 @@
     <string name="add_activity_literal">Добавить активность</string>
     <string name="frequency">Частота</string>
     <string name="reject">Отклонять</string>
-    <string name="onboarding_stay_organized_subheading">Образовательный контент, задания, классы и посещаемость — все в одном месте</string>
     <string name="store_description_full">Ustad Mobile — это приложение с открытым исходным кодом, которое позволяет пользователям получать доступ к широкому спектру открытых образовательных ресурсов онлайн или офлайн. Приложением и контентом можно обмениваться между устройствами в автономном режиме.
 \n
 \nUstad Mobile предлагает контент с открытой лицензией с некоторых ведущих сайтов Интернета с открытыми образовательными ресурсами (ООР):
@@ -873,7 +868,6 @@
     <string name="type_here">Введите здесь…</string>
     <string name="update_grade">Обновить оценку</string>
     <string name="waiting_for_connection">Ожидаение соединения</string>
-    <string name="onboarding_stay_organized_headline">Будьте в курсе событий</string>
     <string name="new_assignment">Новое задание</string>
     <string name="late_submission">Отправлено поздно</string>
     <string name="late_submission_penalty">Штраф за позднюю подачу</string>

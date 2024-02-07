@@ -85,9 +85,6 @@
     <string name="accept">Қабул кунед</string>
     <string name="also_available_in">Инчунин дастрас аст дар</string>
     <string name="onboarding_get_started_label">Оғоз намоед</string>
-    <string name="onboarding_no_internet_headline">Интернет нест\? Ҳеч мушкилӣ надорад.</string>
-    <string name="onboarding_offline_sharing">Офлайн мубодила кунед</string>
-    <string name="onboarding_offline_sharing_subheading">Бо мубодилаи фаврии офлайн вақт ва маълумотро сарфа кунед</string>
     <string name="download_continue_stacked_label">Ба боргирӣ идома диҳед</string>
     <string name="download_continue_btn_label">Идома диҳед</string>
     <string name="download_wifi_only">Танҳо Wi-Fi</string>
@@ -326,7 +323,6 @@
 \n1. Танзимот &gt; Танзимоти Bluetooth -ро кушоед. 
 \n2. Боварӣ ҳосил кунед, ки дастгоҳ намоён аст.</string>
     <string name="dialog_download_from_playstore_cancel">Дар сомона бимонед</string>
-    <string name="onboarding_no_internet_subheadline">Ҳама чиз офлайн кор мекунад</string>
     <string name="xapi_custom_date" value="303">Санаи фармоишӣ</string>
     <string name="xapi_options_visual_type">Намуди визуализатсия</string>
     <string name="xapi_options_filters">Филтрҳо</string>
@@ -824,7 +820,6 @@
     <string name="attendance_over_time_by_class">Давомот бо гузашти вақт аз рӯи синф</string>
     <string name="percentage_of_students_attending_over_time">Фоизи иштирокчиён, ки дар тӯли вақт иштирок мекунанд</string>
     <string name="content_usage_by_class">Истифодаи мундариҷа аз рӯи синф</string>
-    <string name="onboarding_stay_organized_subheading">Мазмуни таълим, супоришҳо, дарсҳо ва давомот ҳама дар як ҷо</string>
     <string name="downloading_content">Боргирӣ %1$s</string>
     <string name="deleting_content">Нобудкунӣ %1$s</string>
     <string name="add_folder_description">Ҳама мундариҷаи таълимии дастгиршударо аз папка илова кунед</string>
@@ -914,7 +909,6 @@
     <string name="hidden_enrolment_via_links_code_or_invitation">Пинҳонӣ (бақайдгирӣ тавассути истинодҳо, рамз ё даъватнома)</string>
     <string name="library">Китобхона</string>
     <string name="course_comments">Шарҳҳои курс</string>
-    <string name="onboarding_stay_organized_headline">Муташаккил бимонед</string>
     <string name="connect">пайваст кунед</string>
     <string name="upload">Бор кардан</string>
     <string name="selected_file_summary">Интихобшуда %1$s (%2$s)</string>

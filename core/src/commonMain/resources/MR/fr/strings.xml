@@ -126,9 +126,6 @@
     <string name="accept">Accepter</string>
     <string name="created_partnership">Créé en partenariat avec :</string>
     <string name="onboarding_get_started_label">Commencer</string>
-    <string name="onboarding_no_internet_headline">Pas de connexion Internet \? Aucun problème.</string>
-    <string name="onboarding_no_internet_subheadline">Tout fonctionne hors-ligne</string>
-    <string name="onboarding_stay_organized_headline">Restez organisé</string>
     <string name="download_continue_stacked_label">Continuer le téléchargement</string>
     <string name="download_continue_btn_label">Continuer</string>
     <string name="download_wifi_only">Wi-Fi uniquement</string>
