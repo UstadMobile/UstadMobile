@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -26,6 +25,7 @@ import com.ustadmobile.core.viewmodel.courseterminology.list.CourseTerminologyLi
 import com.ustadmobile.core.viewmodel.courseterminology.list.CourseTerminologyListViewModel
 import com.ustadmobile.lib.db.entities.CourseTerminology
 import com.ustadmobile.core.MR
+import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import dev.icerock.moko.resources.compose.stringResource
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -44,7 +44,7 @@ fun CourseTerminologyListScreen(
 
     val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
 
-    LazyColumn(
+    UstadLazyColumn(
         modifier = Modifier
             .padding(vertical = 8.dp)
             .fillMaxWidth()

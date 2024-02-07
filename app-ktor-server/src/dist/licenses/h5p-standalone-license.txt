@@ -1,0 +1,6 @@
+H5P Standalone Player 3.x
+
+The MIT License (MIT)
+
+https://github.com/tunapanda/h5p-standalone/blob/master/LICENSE
+

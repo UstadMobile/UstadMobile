@@ -23,6 +23,7 @@ import com.ustadmobile.core.viewmodel.OnBoardingViewModel
 import com.ustadmobile.core.viewmodel.person.registerageredirect.RegisterAgeRedirectViewModel
 import com.ustadmobile.core.viewmodel.site.termsdetail.SiteTermsDetailViewModel
 import com.ustadmobile.core.viewmodel.UstadViewModel
+import com.ustadmobile.core.viewmodel.about.OpenLicensesViewModel
 import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
@@ -121,8 +122,10 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import kotlin.reflect.KClass
 import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel
+import com.ustadmobile.core.viewmodel.settings.DeveloperSettingsViewModel
 import com.ustadmobile.core.viewmodel.videocontent.VideoContentViewModel
 import com.ustadmobile.core.viewmodel.xapicontent.XapiContentViewModel
+import com.ustadmobile.libuicompose.view.about.OpenLicensesScreen
 import com.ustadmobile.libuicompose.view.contententry.detail.ContentEntryDetailScreen
 import com.ustadmobile.libuicompose.view.contententry.edit.ContentEntryEditScreen
 import com.ustadmobile.libuicompose.view.contententry.getmetadata.ContentEntryGetMetadataScreen
@@ -133,6 +136,7 @@ import com.ustadmobile.libuicompose.view.epubcontent.EpubContentScreen
 import com.ustadmobile.libuicompose.view.parentalconsentmanagement.ParentalConsentManagementScreen
 import com.ustadmobile.libuicompose.view.pdfcontent.PdfContentScreen
 import com.ustadmobile.libuicompose.view.person.registerminorwaitforparent.RegisterMinorWaitForParentScreen
+import com.ustadmobile.libuicompose.view.settings.DeveloperSettingsScreen
 import com.ustadmobile.libuicompose.view.videocontent.VideoContentScreen
 import com.ustadmobile.libuicompose.view.xapicontent.XapiContentScreen
 import kotlinx.coroutines.flow.Flow
@@ -630,13 +634,27 @@ fun AppNavHost(
 
             contentScene("/${EpubContentViewModel.DEST_NAME}") { backStackEntry ->
                 EpubContentScreen(
-                    appViewModel(backStackEntry, EpubContentViewModel::class,
-                        ::EpubContentViewModel)
+                    appViewModel(backStackEntry, EpubContentViewModel::class) { di, savedStateHandle ->
+                        EpubContentViewModel(di, savedStateHandle, useBodyDataUrls = true)
+                    }
                 )
             }
 
             contentScene("/${JoinWithCodeView.VIEW_NAME}") { backStackEntry ->
                 Text("Join via code: coming soon")
+            }
+
+            contentScene("/${OpenLicensesViewModel.DEST_NAME}") { backStackEntry ->
+                OpenLicensesScreen(appViewModel(backStackEntry, OpenLicensesViewModel::class,
+                    ::OpenLicensesViewModel)
+                )
+            }
+
+            contentScene("/${DeveloperSettingsViewModel.DEST_NAME}") { backStackEntry ->
+                DeveloperSettingsScreen(
+                    appViewModel(backStackEntry, DeveloperSettingsViewModel::class,
+                        ::DeveloperSettingsViewModel)
+                )
             }
         }
     }

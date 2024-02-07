@@ -23,6 +23,8 @@ import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseCommonJvm
 import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
 import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseJvm
+import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
+import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCaseFfprobe
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.DiTag.TAG_CONTEXT_DATA_ROOT
 import com.ustadmobile.door.ext.*
@@ -139,7 +141,9 @@ fun Application.umRestApplication(
 
     val siteUrl = environment.config.propertyOrNull(CONF_KEY_SITE_URL)?.getString()
 
-    if(siteUrl.isNullOrBlank()) {
+    val dbMode = dbModeOverride ?:  appConfig.propertyOrNull("ktor.ustad.dbmode")?.getString() ?: CONF_DBMODE_SINGLETON
+
+    if(dbMode != CONF_DBMODE_VIRTUALHOST && siteUrl.isNullOrBlank()) {
         val likelyAddr = NetworkInterface.getNetworkInterfaces().toList().filter {
             !it.isLoopback
         }.flatMap { netInterface ->
@@ -182,6 +186,7 @@ fun Application.umRestApplication(
 
     val json = Json {
         encodeDefaults = true
+        ignoreUnknownKeys = true
     }
 
     //Check for required external commands
@@ -227,9 +232,6 @@ fun Application.umRestApplication(
 
     //Avoid sending the body of content if it has not changed since the client last requested it.
     install(ConditionalHeaders)
-
-    val dbMode = dbModeOverride ?:
-        appConfig.propertyOrNull("ktor.ustad.dbmode")?.getString() ?: CONF_DBMODE_SINGLETON
 
     val dataDirPath = environment.config.absoluteDataDir()
 
@@ -411,6 +413,7 @@ fun Application.umRestApplication(
             ImportContentEntryUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
                 importersManager = instance(),
+                json = instance(),
             )
         }
 
@@ -483,6 +486,12 @@ fun Application.umRestApplication(
                 scheduler = instance(),
                 endpoint = context,
                 enqueueRemoteImport = null
+            )
+        }
+
+        bind<ValidateVideoFileUseCase>() with provider {
+            ValidateVideoFileUseCaseFfprobe(
+                ffprobe = instance()
             )
         }
 

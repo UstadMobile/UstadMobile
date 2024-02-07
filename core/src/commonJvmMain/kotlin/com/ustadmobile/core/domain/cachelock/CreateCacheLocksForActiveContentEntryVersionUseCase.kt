@@ -8,8 +8,8 @@ import com.ustadmobile.door.room.InvalidationTrackerObserver
 import com.ustadmobile.lib.db.entities.CacheLockJoin
 import com.ustadmobile.lib.db.entities.ContentEntryVersion
 import io.ktor.client.HttpClient
-import io.ktor.client.call.body
 import io.ktor.client.request.get
+import io.ktor.client.statement.bodyAsText
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -17,6 +17,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import java.io.Closeable
 
 /**
@@ -36,6 +37,7 @@ import java.io.Closeable
 class CreateCacheLocksForActiveContentEntryVersionUseCase(
     private val db: UmAppDatabase,
     private val httpClient: HttpClient,
+    private val json: Json,
     private val endpoint: Endpoint,
     private val createRetentionLocksForManifestUseCase: CreateRetentionLocksForManifestUseCase,
 ): Closeable {
@@ -70,7 +72,8 @@ class CreateCacheLocksForActiveContentEntryVersionUseCase(
         val cacheLockJoins = versionsWithoutLocks.flatMap { contentEntryVersion ->
             val manifestUrl = contentEntryVersion.cevManifestUrl
             if(manifestUrl != null && manifestUrl.startsWith(endpoint.url)) {
-                val manifest: ContentManifest = httpClient.get(manifestUrl).body()
+                val manifest: ContentManifest = json.decodeFromString(
+                    httpClient.get(manifestUrl).bodyAsText())
                 val locksCreated = createRetentionLocksForManifestUseCase(
                     contentEntryVersionUid = contentEntryVersion.cevUid,
                     manifestUrl = manifestUrl,

@@ -69,3 +69,14 @@ Windows:
 ```
 $ gradlew app-ktor-server:distZip -Pktorbundleproductionjs=true
 ```
+
+### Updating license information
+
+1. Install npm generate-license-file globally e.g.
+```
+npm install -g generate-license-file
+```
+2. Run script:
+```
+./generate-license-file.sh
+```

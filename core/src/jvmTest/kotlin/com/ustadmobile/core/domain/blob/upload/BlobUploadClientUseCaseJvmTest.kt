@@ -233,7 +233,7 @@ class BlobUploadClientUseCaseJvmTest {
         )
 
         val useCase = BlobUploadClientUseCaseJvm(
-            mockChunkedUploadUseCase, httpClient, mockCache, mockDatabase, mockDatabase, endpoint, testChunkSize,
+            mockChunkedUploadUseCase, httpClient, mockCache, json, mockDatabase, mockDatabase, endpoint, testChunkSize,
         )
 
 
@@ -320,7 +320,7 @@ class BlobUploadClientUseCaseJvmTest {
         }
 
         val useCase = BlobUploadClientUseCaseJvm(
-            mockChunkedUploadUseCase, httpClient, mockCache, mockDatabase, mockDatabase, endpoint, testChunkSize
+            mockChunkedUploadUseCase, httpClient, mockCache, json, mockDatabase, mockDatabase, endpoint, testChunkSize,
         )
         runBlocking {
             try {
@@ -377,12 +377,13 @@ class BlobUploadClientUseCaseJvmTest {
             }
 
             val useCase = BlobUploadClientUseCaseJvm(
-                mockChunkedUploadUseCase, httpClient, mockCache, realDatabase, realDatabase, endpoint, testChunkSize,
+                mockChunkedUploadUseCase, httpClient, mockCache, json, realDatabase, mockDatabase, endpoint, testChunkSize,
             )
 
             try {
                 useCase(jobId)
             }catch(e: Throwable) {
+                e.printStackTrace()
                 assertTrue(e is TestUploadException)
             }
         }

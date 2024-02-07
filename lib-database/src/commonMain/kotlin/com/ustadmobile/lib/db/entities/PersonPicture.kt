@@ -19,9 +19,7 @@ import kotlinx.serialization.Serializable
      on = Trigger.On.RECEIVEVIEW,
      events = [Trigger.Event.INSERT],
      conditionSql = TRIGGER_CONDITION_WHERE_NEWER,
-     sqlStatements = [
-         TRIGGER_UPSERT_WHERE_NEWER
-     ]
+     sqlStatements = [ TRIGGER_UPSERT ]
  )
 ))
 data class PersonPicture(

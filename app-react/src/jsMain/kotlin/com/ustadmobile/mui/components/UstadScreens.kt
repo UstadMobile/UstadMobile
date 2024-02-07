@@ -173,14 +173,13 @@ val UstadScreens = FC<Props> {
                             selectedRootItemIndex = currentRootItemIndex
                         }
 
-                        if(mobileMode) {
-                            UstadMobileMenu {
-                                isOpen = (mobileMenuOpen && appUiState.navigationVisible)
-                                onSetOpen = {
-                                    mobileMenuOpen = it
-                                }
-                                selectedRootItemIndex = currentRootItemIndex
+                        UstadMobileMenu {
+                            isOpen = (mobileMenuOpen && appUiState.navigationVisible)
+                            visible = (mobileMode && appUiState.navigationVisible)
+                            onSetOpen = {
+                                mobileMenuOpen = it
                             }
+                            selectedRootItemIndex = currentRootItemIndex
                         }
 
                         Content()

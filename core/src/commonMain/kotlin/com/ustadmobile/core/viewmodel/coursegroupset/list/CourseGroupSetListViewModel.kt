@@ -16,6 +16,7 @@ import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import app.cash.paging.PagingSource
 import com.ustadmobile.lib.db.entities.CourseGroupSet
 import com.ustadmobile.lib.db.entities.Role
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -92,7 +93,10 @@ class CourseGroupSetListViewModel(
                         },
                         fabStringResource = MR.strings.groups,
                         onSetAddListItemVisibility = { visible ->
-                            _uiState.update { prev -> prev.copy(showAddItem = visible) }
+                            _uiState.update { prev ->
+                                Napier.v { "CourseGroupSetList: set showAddItem visible = $visible" }
+                                prev.copy(showAddItem = visible)
+                            }
                         }
                     )
                 }

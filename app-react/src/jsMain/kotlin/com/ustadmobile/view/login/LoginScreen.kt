@@ -20,6 +20,8 @@ import com.ustadmobile.mui.components.UstadLanguageSelect
 import com.ustadmobile.mui.components.UstadPasswordTextField
 import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.mui.components.UstadTextField
+import web.cssom.TextAlign
+import web.window.WindowTarget
 
 
 external interface LoginProps : Props {
@@ -148,7 +150,22 @@ private val LoginComponent2 = FC<LoginProps> { props ->
 
             Typography {
                 align = TypographyAlign.center
+                variant = TypographyVariant.caption
                 + props.uiState.versionInfo
+            }
+
+            if(props.uiState.showPoweredBy) {
+                Link {
+                    sx {
+                        textAlign = TextAlign.center
+                    }
+
+                    href = "https://www.ustadmobile.com/"
+                    variant = TypographyVariant.caption
+                    target = WindowTarget._blank
+
+                    + strings[MR.strings.powered_by]
+                }
             }
 
         }

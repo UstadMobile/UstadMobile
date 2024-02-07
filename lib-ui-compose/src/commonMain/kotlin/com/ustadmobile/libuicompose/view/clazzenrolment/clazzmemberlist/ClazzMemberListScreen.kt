@@ -2,7 +2,6 @@ package com.ustadmobile.libuicompose.view.clazzenrolment.clazzmemberlist
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -24,6 +23,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.lib.db.composites.PersonAndClazzMemberListDetails
 import com.ustadmobile.libuicompose.components.UstadAddListItem
+import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadListFilterChipsHeader
 import com.ustadmobile.libuicompose.components.UstadListSortHeader
 import com.ustadmobile.libuicompose.components.UstadPersonAvatar
@@ -84,7 +84,7 @@ fun ClazzMemberListScreen(
     }
     val pendingStudentListItems = pendingStudentListPager.flow.collectAsLazyPagingItems()
 
-    LazyColumn(
+    UstadLazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
 

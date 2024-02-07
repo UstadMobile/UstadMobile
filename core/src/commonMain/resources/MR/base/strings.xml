@@ -153,12 +153,12 @@
     <string name="created_partnership">Created in partnership with:</string>
     <string name="onboarding_get_started_label">Get Started</string>
     <string name="lets_get_started_label">Let\'s get started</string>
-    <string name="onboarding_no_internet_headline">No Internet? No problem.</string>
-    <string name="onboarding_no_internet_subheadline">Everything works offline</string>
-    <string name="onboarding_offline_sharing">Share offline</string>
-    <string name="onboarding_offline_sharing_subheading">Save time and data with superfast offline sharing</string>
-    <string name="onboarding_stay_organized_headline">Stay organized</string>
-    <string name="onboarding_stay_organized_subheading">Education content, assignments, classes, and attendance all in one place</string>
+    <string name="onboarding_headline1">No Internet? No problem.</string>
+    <string name="onboarding_subheadline1">Everything works offline</string>
+    <string name="onboarding_headline2">Share offline</string>
+    <string name="onboarding_subheadline2">Save time and data with superfast offline sharing</string>
+    <string name="onboarding_headline3">Stay organized</string>
+    <string name="onboarding_subheadline3">Education content, assignments, classes, and attendance all in one place</string>
     <string name="download_continue_stacked_label">Continue download</string>
     <string name="download_continue_btn_label">Continue</string>
     <string name="download_wifi_only">Wi-Fi only</string>
@@ -868,7 +868,7 @@
     Powered by credit is used on rebranded copies of the app to credit Ustad Mobile e.g.
     "School Name app powered by Ustad Mobile"
     -->
-    <string name="powered_by">Powered by</string>
+    <string name="powered_by">Powered by Ustad Mobile</string>
     <string name="invalid_email">Please enter a valid email</string>
     <!--
     Shown to users when we ask them to choose an account
@@ -1715,4 +1715,10 @@
     -->
     <string name="content_not_ready_try_later">Content not ready yet, try again later.</string>
 
+
+    <string name="version">Version</string>
+
+    <string name="licenses">Licenses</string>
+
+    <string name="cannot_record_attendance_for_future_date_time">Cannot record attendance for future date/time</string>
 </resources>

@@ -61,6 +61,7 @@ fun makeJvmBackendDiModule(
     contextScope: EndpointScope = EndpointScope.Default,
 ) = DI.Module("JvmBackendDiModule") {
     val dataDirPath = config.absoluteDataDir()
+    dataDirPath.takeIf { !it.exists() }?.mkdirs()
 
     val dbMode = config.dbModeProperty()
 
@@ -147,6 +148,7 @@ fun makeJvmBackendDiModule(
             createCacheLocksForActiveContentEntryVersionUseCase = CreateCacheLocksForActiveContentEntryVersionUseCase(
                 db = db,
                 httpClient = instance(),
+                json = instance(),
                 endpoint = context,
                 createRetentionLocksForManifestUseCase = CreateRetentionLocksForManifestUseCaseCommonJvm(
                     cache = cache,

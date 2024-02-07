@@ -31,9 +31,7 @@ import kotlinx.serialization.Serializable
                           LIMIT 1))
                  AND ($TRIGGER_CONDITION_WHERE_NEWER)          
          """,
-         sqlStatements = [
-             TRIGGER_UPSERT_WHERE_NEWER
-         ]
+         sqlStatements = [ TRIGGER_UPSERT ]
      )
 ))
 open class Site {

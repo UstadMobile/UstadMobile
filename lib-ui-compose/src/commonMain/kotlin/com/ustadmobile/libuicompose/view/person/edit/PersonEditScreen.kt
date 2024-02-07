@@ -1,12 +1,9 @@
 package com.ustadmobile.libuicompose.view.person.edit
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,6 +24,7 @@ import com.ustadmobile.libuicompose.components.UstadImageSelectButton
 import com.ustadmobile.libuicompose.components.UstadMessageIdOptionExposedDropDownMenuField
 import com.ustadmobile.libuicompose.components.UstadPasswordField
 import com.ustadmobile.libuicompose.components.UstadPhoneNumberTextField
+import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.Dispatchers
@@ -56,11 +54,9 @@ fun PersonEditScreen(
     onPersonPictureUriChanged: (String?) -> Unit = { },
     onNationalNumberSetChanged: (Boolean) -> Unit = { },
 ){
-    Column(
-        modifier = Modifier.verticalScroll(rememberScrollState()),
+    UstadVerticalScrollColumn(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
         Spacer(Modifier.height(16.dp))
 
         UstadImageSelectButton(
@@ -112,7 +108,7 @@ fun PersonEditScreen(
                 .defaultItemPadding()
                 .fillMaxWidth(),
             label = stringResource(MR.strings.gender_literal) + "*",
-            options = uiState.genderOptions,
+            options = uiState.genderOptions.filter { it.stringResource != MR.strings.blank },
             onOptionSelected = {
                 onPersonChanged(uiState.person?.shallowCopy{
                     gender = it.value

@@ -26,9 +26,8 @@ class VerbDisplay {
      order = Trigger.Order.INSTEAD_OF,
      on = Trigger.On.RECEIVEVIEW,
      events = [Trigger.Event.INSERT],
-     sqlStatements = [
-         TRIGGER_UPSERT_WHERE_NEWER
-     ]
+     conditionSql = TRIGGER_CONDITION_WHERE_NEWER,
+     sqlStatements = [ TRIGGER_UPSERT ]
  )
 ))
 class VerbEntity() {

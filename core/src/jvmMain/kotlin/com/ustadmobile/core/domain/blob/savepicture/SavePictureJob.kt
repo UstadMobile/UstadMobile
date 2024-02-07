@@ -8,6 +8,7 @@ import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase.Co
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase.Companion.DATA_TABLE_ID
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase.Companion.DATA_ENTITY_UID
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase.Companion.DATA_LOCAL_URI
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.runBlocking
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -28,11 +29,16 @@ class SavePictureJob: Job {
         val savePictureUseCase: SavePictureUseCase = di.on(endpoint)
             .direct.instance()
         runBlocking {
-            savePictureUseCase(
-                entityUid = entityUid,
-                tableId = tableId,
-                pictureUri = pictureUri,
-            )
+            try {
+                savePictureUseCase(
+                    entityUid = entityUid,
+                    tableId = tableId,
+                    pictureUri = pictureUri,
+                )
+            }catch(e: Throwable) {
+                Napier.e("SavePictureJob: exception running savepicture", e)
+                throw e
+            }
         }
     }
 }

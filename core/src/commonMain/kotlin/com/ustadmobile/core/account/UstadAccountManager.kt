@@ -17,9 +17,9 @@ import com.ustadmobile.lib.db.entities.PersonGroup.Companion.PERSONGROUP_FLAG_GU
 import com.ustadmobile.lib.db.entities.PersonGroup.Companion.PERSONGROUP_FLAG_PERSONGROUP
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import io.ktor.client.*
-import io.ktor.client.call.*
 import io.ktor.client.plugins.*
 import io.ktor.client.request.*
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.*
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineScope
@@ -287,12 +287,16 @@ class UstadAccountManager(
         val httpStmt = httpClient.preparePost {
             url("${endpointUrl.removeSuffix("/")}/auth/register")
             contentType(ContentType.Application.Json)
-            setBody(RegisterRequest(person, parentVal, endpointUrl))
+            setBodyJson(
+                json = json,
+                serializer = RegisterRequest.serializer(),
+                value = RegisterRequest(person, parentVal, endpointUrl)
+            )
         }
 
         val (registeredPerson: Person?, status: Int) = httpStmt.execute { response ->
             if(response.status.value == 200) {
-                Pair(response.body<PersonWithAccount>(), 200)
+                Pair(json.decodeFromString<PersonWithAccount>(response.bodyAsText()), 200)
             }else {
                 Pair(null, response.status.value)
             }
@@ -469,7 +473,7 @@ class UstadAccountManager(
             throw IllegalStateException("Server error - response ${loginResponse.status.value}")
         }
 
-        val responseAccount = loginResponse.body<UmAccount>()
+        val responseAccount: UmAccount = json.decodeFromString(loginResponse.bodyAsText())
         responseAccount.endpointUrl = endpointUrl
 
         //Make sure that we fetch the person and personpicture into the database.

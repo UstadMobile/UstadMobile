@@ -116,7 +116,7 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
                 }
 
                 Select {
-                    value = props.uiState.person?.gender?.toString()
+                    value = props.uiState.person?.gender?.toString() ?: "0"
                     id = "gender"
                     labelId = "gender_label"
                     disabled = !props.uiState.fieldsEnabled
@@ -130,7 +130,9 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
                         )
                     }
 
-                    props.uiState.genderOptions.forEach { option ->
+                    props.uiState.genderOptions.filter {
+                        it.stringResource != MR.strings.blank || props.uiState.person?.gender == 0
+                    }.forEach { option ->
                         MenuItem {
                             value = option.value.toString()
                             + ReactNode(strings[option.stringResource])

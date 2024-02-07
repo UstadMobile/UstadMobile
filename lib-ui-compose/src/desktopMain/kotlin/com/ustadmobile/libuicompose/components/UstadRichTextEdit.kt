@@ -3,6 +3,7 @@ package com.ustadmobile.libuicompose.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
@@ -53,6 +54,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.substring
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mohamedrejeb.richeditor.model.RichTextState
 import com.mohamedrejeb.richeditor.model.rememberRichTextState
@@ -99,6 +101,7 @@ actual fun UstadRichTextEdit(
         OutlinedRichTextEditor(
             modifier = Modifier
                 .fillMaxWidth()
+                .defaultMinSize(minHeight = 128.dp)
                 .let {
                     if(editInNewScreen) {
                         it.clickable {

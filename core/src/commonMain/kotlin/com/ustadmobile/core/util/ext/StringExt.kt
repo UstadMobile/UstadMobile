@@ -165,3 +165,18 @@ fun String.displayFilename(
     else
         base
 }
+
+
+fun String.toNullIfBlank(): String? = if(isBlank()) { null } else { this }
+
+fun String.substringUntilLastIndexOfInclusive(
+    delimiter: String,
+    missingDelimiterValue: String = this
+) : String {
+    val index = lastIndexOf(delimiter)
+    return if(index != -1) {
+        substring(0, index + delimiter.length)
+    }else {
+        missingDelimiterValue
+    }
+}
