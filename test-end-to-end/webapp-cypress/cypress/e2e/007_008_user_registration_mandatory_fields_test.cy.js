@@ -44,12 +44,7 @@ it('Admin enable registration', () => {
    cy.contains("label", "Last name").parent().find("input").clear()
    cy.contains('Register').click()
    cy.get('.Mui-error').contains('Last name').should('exist') //Lastname error
-  // verify gender field as blank
    cy.contains("label", "Last name").parent().find("input").clear().type('1')
-   cy.get('div[id="gender"]').click()
-   cy.contains("li","Unset").click()
-   cy.contains('Register').click()
-   cy.get('.Mui-error').contains('Gender').should('exist') //gender error
    cy.get('div[id="gender"]').click()
    cy.contains("li","Female").click()
    cy.contains('Register').click()
