@@ -54,6 +54,8 @@ import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCaseAnd
 import com.ustadmobile.core.domain.blob.upload.UpdateFailedTransferJobUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCaseCommonJvm
+import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCase
+import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCaseAndroid
 import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseAndroid
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCase
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCaseCommonJvm
@@ -71,6 +73,8 @@ import com.ustadmobile.core.domain.htmlcontentdisplayengine.GetHtmlContentDispla
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.HTML_CONTENT_OPTIONS_ANDROID
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.SetHtmlContentDisplayEngineUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.ResolveXapiLaunchHrefUseCase
+import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCase
+import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCaseAndroid
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseCommonJvm
@@ -639,6 +643,14 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             GetShowPoweredByUseCase(
                 applicationContext.appMetaData?.getBoolean(AppConfig.KEY_CONFIG_SHOW_POWERED_BY) ?: false,
             )
+        }
+
+        bind<SetClipboardStringUseCase>() with provider {
+            SetClipboardStringUseCaseAndroid(applicationContext)
+        }
+
+        bind<GetDeveloperInfoUseCase>() with provider {
+            GetDeveloperInfoUseCaseAndroid(applicationContext)
         }
 
 

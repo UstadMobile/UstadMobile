@@ -57,11 +57,8 @@
     <string name="add_gallery_description">Shyiraho amashusho cg amajwi ukuye mu bubiko bw\'amafoto kuri iki gikoresho</string>
     <string name="lets_get_started_label">Reka dutangire</string>
     <string name="add_file_description">Shyiraho ibikubiye mu nyigisho z\'uburezi ukoresheje igenamiterere zihuje imikorere e.g. PDF, xAPI, H5P, EPUB</string>
-    <string name="onboarding_no_internet_headline">Nta murandasi ufite\? Ntakibazo.</string>
     <string name="exams">Ibizamini</string>
-    <string name="onboarding_no_internet_subheadline">Buri kintu gikora nta interineti</string>
     <string name="reports">Raporo</string>
-    <string name="onboarding_offline_sharing_subheading">Bika igihe n\'amakuru ukoresheje uburyo bwihuta budasaba murandasi</string>
     <string name="xapi_options_report_title">Umutwe wa raporo</string>
     <string name="xapi_options_data_set">Amakuru akenewe</string>
     <string name="xapi_options_series">Uruhererekane</string>
@@ -93,7 +90,6 @@
     <string name="content_creation_folder_new_message">Ububiko bushya bwongeweho neza</string>
     <string name="content_creation_folder_update_message">Ububiko bwavuguruwe neza</string>
     <string name="error_message_load_page">Gutunganya paji byanze</string>
-    <string name="onboarding_offline_sharing">Sangiza abandi udafite murandasi</string>
     <string name="supported_files">Idosiye zikorana :<b>amashusho,amajwi,EPUB,Xapi Zip,H5P</b></string>
     <string name="content_editor_save_error">Habayeho kwibeshya mukubika,Ongera ugerageze</string>
     <string name="content_entry_export_inprogress">Iri koherezwa hanze</string>
@@ -897,7 +893,6 @@
     <string name="course_comments">Ibiganirwa ku isomo rusange</string>
     <string name="saved">Byabitswe</string>
     <string name="waiting_for_connection">Itegereje ihuzanzira</string>
-    <string name="onboarding_stay_organized_subheading">Ibikubiye mu munyigisho y\'uburezi, imikoro, amashuri n\'ubwitabire byose mu mwanya umwe</string>
     <string name="add_folder">Byongerero byose ubikuye mu cyumba cy\'amakuru/ifoda</string>
     <string name="importing">Iyinjizamakuru%1$s</string>
     <string name="deleting_content">Irigusibwa%1$s</string>
@@ -909,5 +904,4 @@
     <string name="enrolment_requests_must_be_approved">Ubusabe bwo kwiyandikisha bugomba kwemererwa</string>
     <string name="add_new_terminology">Ongeramo ijambo rikoreshwa</string>
     <string name="add_course_block_content_desc">Shyiraho amajwi, amashusho,ibitambo bisomerwa kuri murandasi, Ibikubiyemo biganirwaho( H5P, XAPI, etc) ubikuye ku madsiye cg ihuza/ilinki</string>
-    <string name="onboarding_stay_organized_headline">Guma ufite gahunda</string>
 </resources>

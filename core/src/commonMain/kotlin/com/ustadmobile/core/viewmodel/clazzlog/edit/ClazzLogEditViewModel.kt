@@ -37,7 +37,9 @@ class ClazzLogEditViewModel(
 
     private val timeZone = savedStateHandle[ARG_TIME_ZONE] ?: "UTC"
 
-    private val _uiState = MutableStateFlow(ClazzLogEditUiState(timeZone = timeZone))
+    private val _uiState = MutableStateFlow(
+        ClazzLogEditUiState(timeZone = timeZone)
+    )
 
     val uiState: Flow<ClazzLogEditUiState> = _uiState.asStateFlow()
 
@@ -103,10 +105,16 @@ class ClazzLogEditViewModel(
     fun onClickSave() {
         val clazzLog = _uiState.value.clazzLog ?: return
 
-        if(!clazzLog.logDate.isDateSet()) {
+        val errorMsg = when {
+            !clazzLog.logDate.isDateSet() ->  MR.strings.field_required_prompt
+            clazzLog.logDate > systemTimeInMillis() -> MR.strings.cannot_record_attendance_for_future_date_time
+            else -> null
+        }
+
+        if(errorMsg != null) {
             _uiState.update { prev ->
                 prev.copy(
-                    dateError = systemImpl.getString(MR.strings.field_required_prompt)
+                    dateError = systemImpl.getString(errorMsg)
                 )
             }
 

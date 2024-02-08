@@ -17,6 +17,7 @@ import com.ustadmobile.core.domain.contententry.ContentConstants
 import com.ustadmobile.core.domain.epub.GetEpubTableOfContentsUseCase
 import com.ustadmobile.core.io.ext.*
 import com.ustadmobile.core.uri.UriHelper
+import com.ustadmobile.core.util.ext.substringUntilLastIndexOfInclusive
 import com.ustadmobile.core.viewmodel.epubcontent.EpubContentViewModel
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
@@ -123,10 +124,7 @@ class EpubContentImporterCommonJvm(
 
                 fun itemPathInZip(href: String): String {
                     val hrefDecoded = URLDecoder.decode(href, "UTF-8")
-                    val pathInZip = Path(opfPath).parent?.let { opfParent ->
-                        Path(opfParent, hrefDecoded)
-                    } ?: Path(hrefDecoded)
-                    return pathInZip.toString()
+                    return opfPath.substringUntilLastIndexOfInclusive("/", "") + hrefDecoded
                 }
 
                 /*
@@ -222,12 +220,11 @@ class EpubContentImporterCommonJvm(
                 val manifestedItems = saveLocalUriAsBlobAndManifestUseCase(
                     items = opfPackage.manifest.items.map { opfItem ->
                         val hrefDecoded = URLDecoder.decode(opfItem.href, "UTF-8")
-                        val pathInZip = Path(opfEntry.name).parent?.let { opfParent ->
-                            Path(opfParent, hrefDecoded)
-                        } ?: Path(hrefDecoded)
+                        val opfBasePath = opfEntry.name.substringUntilLastIndexOfInclusive("/", "")
+                        val pathInZip = opfBasePath + hrefDecoded
 
                         val unzippedPath = unzippedEntries.firstOrNull {
-                            it.name == pathInZip.toString()
+                            it.name == pathInZip
                         }?.path ?: throw IllegalArgumentException("Cannot find $pathInZip")
 
                         /* If this is XHTML, then use the xhtmlFixer to check for invalid XHTML
@@ -248,9 +245,7 @@ class EpubContentImporterCommonJvm(
                             }
                         }
 
-                        val manifestUri = Path(opfEntry.name).parent?.let { opfParent ->
-                            Path(opfParent, opfItem.href)
-                        } ?: Path(opfItem.href)
+                        val uriInManifest = opfBasePath + opfItem.href
 
                         SaveLocalUriAsBlobAndManifestUseCase.SaveLocalUriAsBlobAndManifestItem(
                             blobItem = SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem(
@@ -259,7 +254,7 @@ class EpubContentImporterCommonJvm(
                                 tableId = ContentEntryVersion.TABLE_ID,
                                 mimeType = opfItem.mediaType
                             ),
-                            manifestUri = manifestUri.toString(),
+                            manifestUri = uriInManifest,
                             manifestMimeType = opfItem.mediaType,
                         )
                     } + SaveLocalUriAsBlobAndManifestUseCase.SaveLocalUriAsBlobAndManifestItem(
