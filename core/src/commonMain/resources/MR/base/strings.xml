@@ -1721,4 +1721,7 @@
     <string name="licenses">Licenses</string>
 
     <string name="cannot_record_attendance_for_future_date_time">Cannot record attendance for future date/time</string>
+
+    <string name="could_not_load_vlc">Could not load VLC. Video playback requires a 64bit version of VLC to be installed. Please download and install a 64bit version from https://www.videolan.org/ , then restart this app.</string>
+
 </resources>
