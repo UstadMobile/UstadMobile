@@ -130,6 +130,7 @@ fun ClazzEditScreen(viewModel: ClazzEditViewModel) {
         onClickEditCourseBlock = viewModel::onClickEditCourseBlock,
         onClickHideBlockPopupMenu = viewModel::onClickHideBlockPopupMenu,
         onClickUnHideBlockPopupMenu = viewModel::onClickUnHideBlockPopupMenu,
+        onClickIndentBlockPopupMenu = viewModel::onClickIndentBlockPopupMenu,
         onClickUnIndentBlockPopupMenu = viewModel::onClickUnIndentBlockPopupMenu,
         onClickIndentBlockPopupMenu = viewModel::onClickIndentBlockPopupMenu,
         onClickDeleteBlockPopupMenu = viewModel::onClickDeleteCourseBlock,
@@ -577,7 +578,10 @@ private fun PopUpMenu(
             }
 
             DropdownMenuItem(
-                onClick = { onClickDeleteBlockPopupMenu(uiState.block) },
+                onClick = {
+                    expanded = false
+                    onClickDeleteBlockPopupMenu(uiState.block)
+                },
                 text = {  Text(stringResource(MR.strings.delete)) }
             )
         }

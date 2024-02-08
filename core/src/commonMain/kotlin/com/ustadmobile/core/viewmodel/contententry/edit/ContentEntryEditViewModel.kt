@@ -91,6 +91,11 @@ data class ContentEntryEditUiState(
  *    Only the CourseBlock part of the screen will be displayed. ContentEntry specific fields (e.g.
  *    license, author, etc) will not be displayed. This would probably be the case if a teacher
  *    selects a content item from the library.
+ *
+ * Only a user with permission to edit the ContentEntry can update the file associated with the
+ * ContentEntry. This ensures that the ContentEntryVersionUid when used for usage data tracking
+ * will be accurate and include usage from all courses.
+
  */
 class ContentEntryEditViewModel(
     di: DI,
