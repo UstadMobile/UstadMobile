@@ -47,71 +47,74 @@ fun VideoContentScreen(
 ) {
     val mediaSrc = uiState.firstMediaUri
     val endpoint = uiState.endpoint
-    if(mediaSrc != null && endpoint != null) {
-        val di = localDI()
-        val getLocalUrlForContentUseCase: GetLocalUrlForContentUseCase = remember {
-            di.onActiveEndpoint().direct.instance()
-        }
 
-        val url = remember(uiState.contentEntryVersionUid, mediaSrc) {
-            getLocalUrlForContentUseCase(uiState.contentEntryVersionUid, mediaSrc)
-        }
-
-        val state = rememberVideoPlayerState()
-        val progressVal = state.progress.value
-        val totalTime = remember(progressVal.length) {
-            if(progressVal.length > 0) {
-                (progressVal.length / 1000).seconds.toString()
-            }else {
-                null
+    VlcCheck {
+        if(mediaSrc != null && endpoint != null) {
+            val di = localDI()
+            val getLocalUrlForContentUseCase: GetLocalUrlForContentUseCase = remember {
+                di.onActiveEndpoint().direct.instance()
             }
-        }
-        val currentTime = remember(progressVal.timeMillis) {
-            if(progressVal.timeMillis >= 0){
-                (progressVal.timeMillis / 1000).seconds.toString()
-            }else {
-                null
-            }
-        }
 
-        Column {
-            VideoPlayer(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(fraction = 0.8f),
-                url = url,
-                state = state,
-                onFinish = state::stopPlayback
-            )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(
-                    onClick = state::toggleResume
-                ) {
-                    Icon(
-                        if(state.isResumed) Icons.Default.PauseCircleOutline else Icons.Default.PlayCircleOutline,
-                        contentDescription = "play/pause - localize me"
-                    )
+            val url = remember(uiState.contentEntryVersionUid, mediaSrc) {
+                getLocalUrlForContentUseCase(uiState.contentEntryVersionUid, mediaSrc)
+            }
+
+            val state = rememberVideoPlayerState()
+            val progressVal = state.progress.value
+            val totalTime = remember(progressVal.length) {
+                if(progressVal.length > 0) {
+                    (progressVal.length / 1000).seconds.toString()
+                }else {
+                    null
                 }
+            }
+            val currentTime = remember(progressVal.timeMillis) {
+                if(progressVal.timeMillis >= 0){
+                    (progressVal.timeMillis / 1000).seconds.toString()
+                }else {
+                    null
+                }
+            }
 
-                Slider(
-                    value = state.progress.value.fraction,
-                    onValueChange = { state.seek = it },
-                    modifier = Modifier.weight(1f)
+            Column {
+                VideoPlayer(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight(fraction = 0.8f),
+                    url = url,
+                    state = state,
+                    onFinish = state::stopPlayback
                 )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(
+                        onClick = state::toggleResume
+                    ) {
+                        Icon(
+                            if(state.isResumed) Icons.Default.PauseCircleOutline else Icons.Default.PlayCircleOutline,
+                            contentDescription = "play/pause - localize me"
+                        )
+                    }
 
-                if(totalTime != null && currentTime != null) {
-                    Text(
-                        "$currentTime / $totalTime",
-                        style = MaterialTheme.typography.labelSmall
+                    Slider(
+                        value = state.progress.value.fraction,
+                        onValueChange = { state.seek = it },
+                        modifier = Modifier.weight(1f)
                     )
+
+                    if(totalTime != null && currentTime != null) {
+                        Text(
+                            "$currentTime / $totalTime",
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                    }
+
                 }
-
             }
-        }
 
+        }
     }
 }
 

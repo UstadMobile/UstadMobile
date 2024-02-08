@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -24,8 +23,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import java.io.File
@@ -84,58 +81,37 @@ fun PdfPage(
     page: Int,
     scale: Float,
 ){
-
-    val density = LocalDensity.current.density
-
-    var imageBitmap: ImageBitmap? by remember {
-        mutableStateOf(null)
+    var imageBitmap: ImageBitmap by remember {
+        //get from cache
+        mutableStateOf(helper.getCachedPage(page, scale)
+            ?: helper.getPlaceholderImage(page, scale))
     }
 
     var pageHeightPx by remember {
         mutableIntStateOf(600)
     }
 
-    var displayedHeightPx: Int? by remember {
-        mutableStateOf(null)
-    }
-
-
     LaunchedEffect(helper, page, scale) {
         //For render size calculations: see PDFRenderer#renderImage (line 260)
-        pageHeightPx = helper.getSize(page)?.height?.toInt()?.let { it * scale }?.toInt() ?: 600
-
-        imageBitmap = helper.loadPage(page, scale)
+        imageBitmap = helper.loadPage(page, scale) ?: throw IllegalArgumentException("could not load page $page")
+        pageHeightPx = helper.getPageSize(page)?.height?.toInt()?.let { it * scale }?.toInt() ?: 600
     }
 
     val imageVal = imageBitmap
-
-    /*
-     * If the screen width is smaller than the expected width of the page, then the Image will be
-     * scaled, and the height will also be reduced. This is caught using the displayedHeightPx. Once
-     * the page has loaded and this is known, it will override
-     */
-    val effectiveHeightDp = (displayedHeightPx ?: pageHeightPx) / density
 
     Column(
         modifier = Modifier.fillMaxWidth()
     ) {
         Spacer(Modifier.height(8.dp))
         Box(
-            modifier = Modifier.fillMaxWidth().height((effectiveHeightDp + 16).dp),
+            modifier = Modifier.fillMaxWidth(),
             contentAlignment = Alignment.TopCenter,
         ) {
-            if(imageVal != null) {
-                Image(
-                    painter = BitmapPainter(imageVal),
-                    modifier = Modifier.border(1.dp, MaterialTheme.colors.onBackground)
-                        .onGloballyPositioned {
-                            displayedHeightPx = (it.size.height / density).toInt()
-                        },
-                    contentDescription = null
-                )
-            }else {
-                displayedHeightPx = null
-            }
+            Image(
+                painter = BitmapPainter(imageVal),
+                modifier = Modifier.border(1.dp, MaterialTheme.colors.onBackground),
+                contentDescription = null
+            )
         }
         Spacer(Modifier.height(8.dp))
     }
