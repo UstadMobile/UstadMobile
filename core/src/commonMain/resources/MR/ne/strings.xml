@@ -1011,5 +1011,43 @@
     <string name="hide_app">एप लुकाउनुहोस्</string>
     <string name="panic_button_explanation">%1$s स्वचालित रूपमा बाहिर निस्कन सक्छ, यो यन्त्रमा भण्डारण गरिएको डेटा खाली गर्न सक्छ, र प्यानिककिट मानक (जस्तै रिपल) समर्थन (support) गर्ने कुनै पनि प्यानिक बटन एपमा ट्रिगर गर्दा आफैलाई लुकाउन सक्छ । रिपल डाउनलोड गर्न ट्याप गर्नुहोस्।</string>
     <string name="hide_app_explanation">लुकाउने:% 2$s
-\nयदि लुकाउन एपमा सक्रिय पारिएको छ भने, %1$s लुकाइनेछ र प्यानिक बटन ट्रिगर हुँदा नक्कली नोटप्याड एप प्रतिस्थापन गरिनेछ । तपाईँले% 1$s लुकाउन नक्कली नोटप्याड एपमा माथि (% 2$s) अनहोल्ड कोड टाइप गर्नु पर्दछ ।</string>
+\nयदि लुकाउन एपमा सक्रिय पारिएको छ भने, %1$s लुकाइनेछ र प्यानिक बटन ट्रिगर हुँदा नक्कली नोटप्याड एप प्रतिस्थापन गरिनेछ । तपाईँले%1$s लुकाउन नक्कली नोटप्याड एपमा माथि (%2$s) अनहोल्ड कोड टाइप गर्नु पर्दछ ।</string>
+    <string name="comment">टिप्पणी गर्नुहोस्</string>
+    <string name="required">अनिवार्य</string>
+    <string name="expand">विस्तार गर्नुहोस्</string>
+    <string name="select_date">मिती छान्नुहोस्</string>
+    <string name="link">लिन्क</string>
+    <string name="time_submitted">पेश गर्ने बेलाको समय</string>
+    <string name="group_assignment">सामूहिक कार्य</string>
+    <string name="menu">मेनु</string>
+    <string name="drop_files_to_import">आयात गर्न (import) फाइल(हरू) ड्रप गर्नुहोस्</string>
+    <string name="compose_post">पोस्ट रचना गर्नुहोस्</string>
+    <string name="password_updated">पासवर्ड अपडेट गरियो</string>
+    <string name="most_recent">सबैभन्दा भर्खरको</string>
+    <string name="this_app_will_receive">यो एपले तपाईको प्रोफाइल सूचना र तपाईको कोर्सको बारे जानकारी प्राप्त गर्नेछ</string>
+    <string name="my_profile">मेरो प्रोफाइल</string>
+    <string name="add_another_account">अर्को खाता (Account)थप्नुहोस्</string>
+    <string name="add_new_post">नयाँ पोस्ट थप्नुहोस्</string>
+    <string name="grades_scoring">ग्रेडहरू</string>
+    <string name="mark_comment">टिप्पणीहरु परिक्षण गर्नुहोस्</string>
+    <string name="mark">परिक्षण गर्नुहोस</string>
+    <string name="too_high">एकदम धेरै!</string>
+    <string name="end_is_before_start">सुरु हुनु अघि अन्त्य हुन्छ</string>
+    <string name="select_person">व्यक्ति चयन गर्नुहोस्</string>
+    <string name="your_submission">तपाईको पेश गर्नुभएको काम (सबमिसन)</string>
+    <string name="edit_content">सामाग्री सम्पादन गर्नुहोस्</string>
+    <string name="edit_folder">फोल्डर सम्पादन गर्नुहोस्</string>
+    <string name="collapse">पतन (collapse) गर्नुहोस्</string>
+    <string name="remove">हटाउनुहोस्</string>
+    <string name="restarting">पुन:शुरुवात गर्दैछ</string>
+    <string name="version">संस्करण</string>
+    <string name="chrome_recommended_info">प्रणाली को पूर्वनिर्धारित ब्राउजर (सामान्य रूपमा क्रोम) प्रयोग गर्दछ।</string>
+    <string name="grant_app_permission">%1$s लाई अनुमति दिनुहोस्</string>
+    <string name="table_of_contents">बिषय सूची</string>
+    <string name="terms_required_if_registration_enabled">यदि स्व-दर्ता सक्षम गरिएको ( enabled) छ भने, तपाईंले कम्तिमा एउटा भाषामा सर्तहरू र नीतिहरू तय गर्नुपर्छ जसले प्रयोगकर्ताहरूले दर्ता गर्दा स्वीकार गर्न सक्छन्।</string>
+    <string name="html5_content_display_engine">HTML5 प्रदर्शन इन्जिन</string>
+    <string name="internal_webview">आन्तरिक वेबदृश्य</string>
+    <string name="chrome_recommended">क्रोम (सिफारिस गरिएको)</string>
+    <string name="internal_webview_info">यन्त्रमा ब्राउजरमा पहुँच अनुमति छैन भने मात्र यो सिफारिस गरिन्छ</string>
+    <string name="content_not_ready_try_later">सामग्री अझै तयार छैन, पछि पुन: प्रयास गर्नुहोस्।</string>
 </resources>
