@@ -40,6 +40,11 @@ cd output
 npx serve
 ```
 
+Commits in Android Studio
+
+Commits will miss changes to app-desktop/app-resources/common , even though they are not covered by
+gitignore. These must be added via the command line.
+
 Deploy to server:
 
 The output directory from conveyor should be copied to be accessible on the URL specified via the
