@@ -132,7 +132,6 @@ fun ClazzEditScreen(viewModel: ClazzEditViewModel) {
         onClickUnHideBlockPopupMenu = viewModel::onClickUnHideBlockPopupMenu,
         onClickIndentBlockPopupMenu = viewModel::onClickIndentBlockPopupMenu,
         onClickUnIndentBlockPopupMenu = viewModel::onClickUnIndentBlockPopupMenu,
-        onClickIndentBlockPopupMenu = viewModel::onClickIndentBlockPopupMenu,
         onClickDeleteBlockPopupMenu = viewModel::onClickDeleteCourseBlock,
         onMoveCourseBlock = { from: ItemPosition, to: ItemPosition ->
             viewModel.onCourseBlockMoved(from.index, to.index)
