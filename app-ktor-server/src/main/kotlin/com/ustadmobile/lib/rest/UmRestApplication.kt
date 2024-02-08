@@ -73,7 +73,7 @@ import io.ktor.server.plugins.cors.routing.*
 import io.ktor.server.plugins.statuspages.*
 import org.kodein.di.ktor.di
 import java.util.*
-import com.ustadmobile.lib.rest.logging.LogbackAntiLog
+import com.ustadmobile.core.logging.LogbackAntiLog
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder

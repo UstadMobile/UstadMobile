@@ -318,3 +318,17 @@
 #JCABI Manifests - we are not using Servlets
 -dontwarn jakarta.servlet.ServletContext
 
+# Logback
+#not using servlet API
+-dontwarn jakarta.servlet.**
+#not using mail API
+-dontwarn jakarta.mail.**
+#not using evaluator
+-dontwarn org.codehaus.janino.**
+-dontwarn org.codehaus.commons.compiler.CompileException
+
+# Keep classes referenced in logback.xml
+# Although these are quite wide keep rules, the difference in final size is only 528KB.
+-keep class ch.qos.** { *; }
+-keep class org.slf4j.** { *; }
+
