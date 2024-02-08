@@ -162,6 +162,7 @@ val UstadScreens = FC<Props> {
                             onClickMenuIcon = {
                                 mobileMenuOpen = !mobileMenuOpen
                             }
+                            sidebarVisible = !mobileMode && appUiState.navigationVisible
                         }
 
                         //if (mobileMode) Menu() else Sidebar()

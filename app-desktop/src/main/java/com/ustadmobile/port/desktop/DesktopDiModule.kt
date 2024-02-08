@@ -118,7 +118,7 @@ fun ustadAppHomeDir(): File {
 
 /**
  * Get the Operating System user data directory. This is used when the conveyor built package is
- * running.
+ * running. If we are running the conveyor distributable, then app.fsname will be set.
  *
  * On Windows: Use Application Data folder
  * On Linux/MacOS: Use user home directory/.app-name
@@ -134,7 +134,7 @@ private fun osUserDataDir(): File? {
 }
 
 /**
- *
+ * The directory for user data storage including SQLite databases, files, etc.
  */
 fun ustadAppDataDir(): File {
     return System.getProperty("ustad.datadir")?.let { File(it) }
