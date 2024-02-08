@@ -90,6 +90,7 @@ kotlin {
                 implementation(libs.kamel)
                 implementation(project(":lib-ui-compose-videoplayer"))
                 implementation(libs.pdfbox)
+                implementation(libs.vlcj)
             }
         }
     }

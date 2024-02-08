@@ -38,6 +38,7 @@ fun UstadLinkifyText(
         color = Color.Blue,
         textDecoration = TextDecoration.Underline,
     ),
+    modifier: Modifier = Modifier,
 ) {
     val uriHandler = LocalUriHandler.current
     val defaultSpanStyle = SpanStyle(
@@ -68,7 +69,7 @@ fun UstadLinkifyText(
     }
 
     ClickableText(
-        modifier = Modifier.pointerHoverIcon(pointerIcon),
+        modifier = modifier.pointerHoverIcon(pointerIcon),
         text = links,
         onClick = { position ->
             links.getStringAnnotations(TAG_LINK, position, position).firstOrNull()?.also { annotation ->
