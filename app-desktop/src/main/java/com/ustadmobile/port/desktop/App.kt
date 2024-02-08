@@ -47,6 +47,7 @@ import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.PREFKEY_ACTIONED_PRESET
 import com.ustadmobile.core.impl.di.commonDomainDiModule
+import com.ustadmobile.core.logging.LogbackAntiLog
 import com.ustadmobile.libuicompose.theme.UstadAppTheme
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.view.app.APP_TOP_LEVEL_NAV_ITEMS
@@ -77,24 +78,26 @@ import java.util.Properties
 import com.ustadmobile.libuicompose.view.app.App as UstadPrecomposeApp
 
 //Roughly as per https://github.com/JetBrains/compose-multiplatform-desktop-template#readme
-/*
- * Clicking on the run button in the IDE directly **WILL NOT WORK** - it will not find the resource
- * bundles required (probably due to the joys of Modular Java).
- *
- * Use ./gradlew app-desktop:run to run it. To debug, run the Gradle app-desktop:run task in debug
- * mode in the IDE (this can be done by selecting the Gradle task from the Gradle pane on the right
- * of Android Studio - select app-desktop -> tasks -> compose desktop -> run, then right click on run
- * and select debug.
- */
-
 fun main() {
     //Apply the language setting before startup
     val dataRoot = ustadAppDataDir()
-    println("AppDataDir=${ustadAppDataDir()} ResourcesDir=${ustadAppResourcesDir()}")
+
 
     SetLanguageUseCaseJvm.init()
 
     var splashScreen: SplashScreen? = SplashScreen()
+
+    //Set the logging directory to use the directory log within the data directory
+    val logDir = File(ustadAppDataDir(), "log")
+    logDir.takeIf { !it.exists() }?.mkdirs()
+    System.setProperty("logs_dir", logDir.absolutePath)
+    println("UstadMobile Desktop App" +
+            "AppDataDir=${ustadAppDataDir()} \n" +
+            "ResourcesDir=${ustadAppResourcesDir()} \n" +
+            "Logging to ${logDir.absolutePath}"
+    )
+
+    Napier.base(LogbackAntiLog())
 
     val prefsPropertiesFiles = File(dataRoot, UstadMobileSystemImpl.PREFS_FILENAME)
 
