@@ -9,7 +9,7 @@
     <string name="login_network_error">Interineti yanze: genzura ko ufite interineti.</string>
     <string name="downloaded" value="81">Byavanwe kuri murandasi</string>
     <string name="libraries">Amasomero</string>
-    <string name="ok">Ok</string>
+    <string name="ok">Nibyo</string>
     <string name="confirm">Emeza</string>
     <string name="cancel">Hagarika</string>
     <string name="canceled">Yahagaritswe</string>
@@ -19,7 +19,7 @@
     <string name="register_incorrect_email">Imeyili itariyo</string>
     <string name="confirm_delete_message">Urashaka gusiba aya makuru mu gikoresho cyawe\?</string>
     <string name="download">Vana kuri murandasi</string>
-    <string name="pause_download">Hagarika Kuvana kuri murandasi</string>
+    <string name="pause_download">Hagarika kumanura</string>
     <string name="processing">Birimo gutunganywa</string>
     <string name="app_name">Urubuga rwa Ustad Mobile</string>
     <string name="download_locally_availability">Ibigaragara hafi aho</string>
@@ -32,7 +32,7 @@
     <string name="wrong_user_pass_combo">Izina rikoreshwa/ijambobanga siryo: Ongera ugerageze.</string>
     <string name="last_month_date_range">Ukwezi gushize</string>
     <string name="last_three_months_date_range">Amezi atatu ashize</string>
-    <string name="recycled">byabitswe by\'agahe gato</string>
+    <string name="recycled">Byanaguwe</string>
     <string name="new_tab">Kugaragaza ku kadirishya gashya</string>
     <string name="loading">Birimo gukorwa</string>
     <string name="deleting">Birimo gusibwa</string>
@@ -1050,4 +1050,5 @@
     <string name="hide_app_explanation">Hishura Cod: %2$s
 \nIyo wakanze kuri hisha Urubuga, %1$s uzaba uyihishe maze isimburwe n\'urundi rubuga rutari urwanyayo igihe Panic batoon yakozweho. Icyogihe uzakenera gukanda kuri Hishura code iri hejuru (%2$s)muri app itari iyanyayo ukanjya kuri hishura%1$s</string>
     <string name="panic_button_explanation">Usata Mobile ishobora kwikuramo, gusiba amakuru byabitswe muri iki gikoresho no gwihisha ubwayo iyo uhinduye ahantu nka Ripple cyangwa Manura</string>
+    <string name="could_not_load_vlc">"Gufungura iyi VLC ntibishobotse. Kongera gukina amashusho bisaba VLC ifite ubushobozi bwa 64 bit. Manura kandi ushyire muri mudasobwa yawe ubwoko bwa VLC ifite ubushobozi bwa 64 bite uyikure kuri https//www.vediolan.org/  , hanyuma wongere utangize urubuga rwawe."</string>
 </resources>
