@@ -1,4 +1,4 @@
-package com.ustadmobile.lib.rest.logging
+package com.ustadmobile.core.logging
 
 import com.ustadmobile.door.ext.DoorTag
 import io.github.aakira.napier.Antilog

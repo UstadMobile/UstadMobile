@@ -52,6 +52,8 @@ external interface HeaderProps: Props {
     var showMenuIcon: Boolean
 
     var onClickMenuIcon: () -> Unit
+
+    var sidebarVisible: Boolean
 }
 
 val Header = FC<HeaderProps> { props ->
@@ -98,6 +100,19 @@ val Header = FC<HeaderProps> { props ->
         sx {
             gridArea = Area.Header
             zIndex = integer(1_500)
+
+            //If the sidebar is visible, then we need to use margin to make space for the logo in
+            //the top left.
+            marginLeft = if(props.sidebarVisible) {
+                Sizes.Sidebar.Width
+            }else {
+                0.px
+            }
+            width = if(props.sidebarVisible) {
+                "calc(100% - ${Sizes.Sidebar.Width})".unsafeCast<Width>()
+            }else {
+                100.pct
+            }
         }
 
         if(props.appUiState.loadingState.loadingState == LoadingUiState.State.INDETERMINATE) {

@@ -1,6 +1,7 @@
 package com.ustadmobile.mui.components
 
 import com.ustadmobile.mui.common.Sizes
+import js.core.jso
 import mui.material.Box
 import mui.material.DrawerAnchor
 import mui.material.List
@@ -9,8 +10,11 @@ import mui.material.Toolbar
 import mui.system.sx
 import react.FC
 import react.Props
+import react.dom.html.ReactHTML.img
 import react.dom.html.ReactHTML.nav
+import web.cssom.Auto
 import web.cssom.Display
+import web.cssom.px
 import web.cssom.vh
 
 external interface UstadMobileMenuProps: Props {
@@ -53,6 +57,23 @@ val UstadMobileMenu = FC<UstadMobileMenuProps> { props ->
                         width = Sizes.Sidebar.Width
                     }
 
+                    img {
+                        id = "top_center_brand_img"
+                        src = "assets/top-start.svg"
+                        alt = ""
+                        style = jso {
+                            display = Display.block
+                            paddingTop = 8.px
+                            paddingBottom = 8.px
+                            paddingLeft = 16.px
+                            paddingRight = 16.px
+                            marginLeft = Auto.auto
+                            marginRight = Auto.auto
+                            maxWidth = Sizes.Sidebar.Width
+                            maxHeight = Sizes.Header.Height
+                        }
+                    }
+
                     UstadRootScreenNavLinks {
                         selectedItem = props.selectedRootItemIndex
                         onClick = {
@@ -61,6 +82,8 @@ val UstadMobileMenu = FC<UstadMobileMenuProps> { props ->
                     }
                 }
             }
+
+            UstadSidebarBottomBox()
         }
 
     }
