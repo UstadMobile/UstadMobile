@@ -963,4 +963,6 @@
     <string name="enabled">فعال شده</string>
     <string name="disabled">غیرفعال شده</string>
     <string name="from_my_courses">از دوره‌های درسی من</string>
+    <string name="name_key">نام</string>
+    <string name="and_key">و</string>
 </resources>
