@@ -1041,4 +1041,10 @@
     <string name="html5_content_display_engine">Муҳаррики намоишии HTML5</string>
     <string name="internal_webview_info">Ин танҳо дар ҳолате тавсия дода мешавад, ки дастрасӣ ба браузер дар дастгоҳ иҷозат дода нашудааст</string>
     <string name="content_not_ready_try_later">Мундариҷа ҳанӯз омода нест, баъдтар такрор кунед.</string>
+    <string name="onboarding_headline1">Интернет нест? Ҳеч мушкилӣ надорад.</string>
+    <string name="onboarding_subheadline1">Ҳама чиз офлайн кор мекунад</string>
+    <string name="onboarding_subheadline3">Мазмуни таълим, супоришҳо, дарсҳо ва давомот ҳама дар як ҷо</string>
+    <string name="onboarding_headline2">Офлайн мубодила кунед</string>
+    <string name="onboarding_headline3">Муташаккил бимонед</string>
+    <string name="onboarding_subheadline2">Бо мубодилаи фаврии офлайн вақт ва маълумотро сарфа кунед</string>
 </resources>
