@@ -13,6 +13,9 @@ import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewMode
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel.Companion.FILTER_BY_PARENT_UID
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import app.cash.paging.PagingSource
+import com.ustadmobile.core.impl.appstate.AppActionButton
+import com.ustadmobile.core.impl.appstate.AppBarColors
+import com.ustadmobile.core.impl.appstate.AppStateIcon
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
@@ -54,7 +57,9 @@ data class ContentEntryListUiState(
 
     val createNewOptionsVisible: Boolean = false,
 
-    ) {
+    val selectedUids: Set<Long> = emptySet(),
+
+) {
 
     val showChips: Boolean
         get() =filterOptions.isNotEmpty()
@@ -120,6 +125,8 @@ class ContentEntryListViewModel(
 
     private var lastPagingSource: PagingSource<Int, ContentEntry>? = null
 
+    private var defaultTitle: String = ""
+
     init {
         _uiState.update { prev ->
             prev.copy(
@@ -127,15 +134,8 @@ class ContentEntryListViewModel(
             )
         }
 
-        val titleOnStart = when {
-            expectedResultDest != null -> systemImpl.getString(MR.strings.select_content)
-            parentEntryUid == LIBRARY_ROOT_CONTENT_ENTRY_UID -> systemImpl.getString(MR.strings.library)
-            else -> null
-        }
-
         _appUiState.update { prev ->
             prev.copy(
-                title = titleOnStart,
                 fabState = FabUiState(
                     visible = false,
                     text = systemImpl.getString(MR.strings.content),
@@ -171,6 +171,20 @@ class ContentEntryListViewModel(
         }
 
         viewModelScope.launch {
+            defaultTitle = when {
+                expectedResultDest != null -> systemImpl.getString(MR.strings.select_content)
+                parentEntryUid == LIBRARY_ROOT_CONTENT_ENTRY_UID -> systemImpl.getString(MR.strings.library)
+                else -> activeRepo.contentEntryDao.findTitleByUidAsync(parentEntryUid) ?: ""
+            }
+
+            _appUiState.update { prev ->
+                prev.copy(
+                    title = defaultTitle
+                )
+            }
+        }
+
+        viewModelScope.launch {
             _uiState.whenSubscribed {
                 if(!hasCourseBlockArg) {
                     activeRepo.scopedGrantDao.userHasSystemLevelPermissionAsFlow(
@@ -184,15 +198,6 @@ class ContentEntryListViewModel(
                             )
                         }
                     }
-                }
-            }
-        }
-
-        viewModelScope.launch {
-            if(titleOnStart == null) {
-                val title = activeRepo.contentEntryDao.findTitleByUidAsync(parentEntryUid)
-                _appUiState.update { prev ->
-                    prev.copy(title = title)
                 }
             }
         }
@@ -300,6 +305,72 @@ class ContentEntryListViewModel(
             )
         }
     }
+
+    fun onSetSelected(uid: Long, selected: Boolean) {
+        val currentSelection = _uiState.value.selectedUids
+        setSelectedItems(
+            if(selected) {
+                (currentSelection + uid).toSet()
+            }else {
+                currentSelection.filter { it != uid }.toSet()
+            }
+        )
+    }
+
+    private fun setSelectedItems(selectedUids: Set<Long>) {
+        _uiState.update { prev ->
+            prev.copy(
+                selectedUids = selectedUids
+            )
+        }
+
+        val numItemsSelected = _uiState.value.selectedUids.size
+        val hasSelectedItems = numItemsSelected > 0
+
+        _appUiState.update { prev ->
+            prev.copy(
+                actionButtons = if(hasSelectedItems){
+                    listOf(
+                        AppActionButton(
+                            icon = AppStateIcon.MOVE,
+                            contentDescription = systemImpl.getString(MR.strings.move),
+                            onClick = this@ContentEntryListViewModel::onClickMoveAction
+                        )
+                    )
+                }else {
+                    emptyList()
+                },
+                userAccountIconVisible = !hasSelectedItems,
+                hideSettingsIcon = hasSelectedItems,
+                title = if(hasSelectedItems) {
+                    systemImpl.formatPlural(MR.plurals.items_selected, numItemsSelected)
+                }else {
+                    defaultTitle
+                },
+                leadingActionButton = if(hasSelectedItems) {
+                    AppActionButton(
+                        icon = AppStateIcon.CLOSE,
+                        contentDescription = systemImpl.getString(MR.strings.clear_selection),
+                        onClick = {
+                            setSelectedItems(emptySet())
+                        }
+                    )
+                }else {
+                    null
+                },
+                appBarColors = if(hasSelectedItems)
+                    AppBarColors.SELECTION_MODE
+                else
+                    AppBarColors.STANDARD
+            )
+        }
+
+    }
+
+    private fun onClickMoveAction() {
+
+    }
+
 
     fun onClickFilterChip(filterOption: MessageIdOption2) {
         _uiState.takeIf { it.value.selectedChipId != filterOption.value }?.update { prev ->

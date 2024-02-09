@@ -60,6 +60,7 @@ fun ContentEntryListScreenForViewModel(
             filePickLauncher(UstadPickFileOpts())
         },
         onClickImportFromLink = viewModel::onClickImportFromLink,
+        onSetSelected = viewModel::onSetSelected,
     )
 
     if(uiState.createNewOptionsVisible) {
@@ -116,6 +117,7 @@ fun ContentEntryListScreen(
     onClickFilterChip: (MessageIdOption2) -> Unit = { },
     onClickImportFile: () -> Unit = { },
     onClickImportFromLink: () -> Unit = { },
+    onSetSelected: (contentEntryUid: Long, selected: Boolean) -> Unit = { _, _ -> },
 ) {
     val pager = remember(uiState.contentEntryList) {
         Pager(
@@ -186,11 +188,14 @@ fun ContentEntryListScreen(
                 pagingItems = lazyPagingItems,
                 key = { contentEntry -> contentEntry.contentEntryUid }
             ){ contentEntry ->
+                val contentEntryUid = contentEntry?.contentEntryUid ?: 0
                 UstadContentEntryListItem(
                     onClick = {
                         onClickContentEntry(contentEntry)
                     },
-                    contentEntry = contentEntry
+                    contentEntry = contentEntry,
+                    onSetSelected = onSetSelected,
+                    isSelected = (contentEntryUid in uiState.selectedUids)
                 )
             }
         }

@@ -4,6 +4,7 @@ import com.russhwolf.settings.Settings
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import kotlin.js.Date
 import com.ustadmobile.door.DoorUri
+import dev.icerock.moko.resources.PluralsResource
 import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.provider.JsStringProvider
 import kotlinx.browser.document
@@ -37,6 +38,14 @@ actual open class UstadMobileSystemImpl(
             provider = jsStringProvider,
             locale = langConfig.displayedLocale,
             args = args
+        )
+    }
+
+    override fun formatPlural(pluralsResource: PluralsResource, number: Int): String {
+        return pluralsResource.localized(
+            provider = jsStringProvider,
+            locale = langConfig.displayedLocale,
+            quantity = number,
         )
     }
 

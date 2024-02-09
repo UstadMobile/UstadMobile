@@ -1724,4 +1724,8 @@
 
     <string name="could_not_load_vlc">Could not load VLC. Video playback requires a 64bit version of VLC to be installed. Please download and install a 64bit version from https://www.videolan.org/ , then restart this app.</string>
 
+    <string name="selected">Selected</string>
+
+    <string name="clear_selection">Clear selection</string>
+
 </resources>

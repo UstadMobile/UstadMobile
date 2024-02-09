@@ -1,37 +1,49 @@
 package com.ustadmobile.libuicompose.view.contententry
 
-import androidx.compose.foundation.*
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Book
+import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.outlined.Book
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.viewmodel.contententry.contentTypeStringResource
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListItemUiState
 import com.ustadmobile.core.viewmodel.contententry.list.listItemUiState
-import com.ustadmobile.lib.db.entities.*
-import dev.icerock.moko.resources.compose.stringResource
+import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.libuicompose.components.UstadSelectableListItem
+import com.ustadmobile.libuicompose.components.UstadSelectedIcon
 import com.ustadmobile.libuicompose.view.contententry.list.ClazzAssignmentConstants.CONTENT_ENTRY_TYPE_ICON_MAP
+import dev.icerock.moko.resources.compose.stringResource
 
 @Composable
 fun UstadContentEntryListItem(
     modifier: Modifier = Modifier,
     contentEntry: ContentEntry?,
     onClick: () -> Unit = { },
+    isSelected: Boolean = false,
+    onSetSelected: (contentEntryUid: Long, selected: Boolean) -> Unit = { _, _ -> },
 ) {
-
     val uiState = contentEntry?.listItemUiState
-    ListItem(
-        modifier = modifier
-            .alpha((uiState?.containerAlpha ?: 0.0).toFloat())
-            .clickable(onClick = onClick),
+
+    UstadSelectableListItem(
+        modifier = modifier,
+        isSelected = isSelected,
+        onClick = onClick,
+        onSetSelected = {
+            onSetSelected(contentEntry?.contentEntryUid ?: 0, it)
+        },
         headlineContent = {
             Text(
                 text = uiState?.contentEntry?.title ?: "",
@@ -40,10 +52,20 @@ fun UstadContentEntryListItem(
             )
         },
         leadingContent = {
-            LeadingContent(
-                uiState = uiState,
-                contentEntry = uiState?.contentEntry
-            )
+            if(isSelected) {
+                UstadSelectedIcon()
+            }else {
+                val thumbnail: ImageVector = if (contentEntry?.leaf == true)
+                    Icons.Outlined.Book
+                else
+                    Icons.Default.Folder
+                Icon(
+                    thumbnail,
+                    contentDescription = "",
+                    modifier = Modifier.size(40.dp).padding(4.dp),
+                )
+            }
+
         },
         supportingContent = {
             SecondaryContent(
@@ -52,32 +74,6 @@ fun UstadContentEntryListItem(
             )
         },
     )
-
-}
-
-@Composable
-private fun LeadingContent(
-    uiState: ContentEntryListItemUiState?,
-    contentEntry: ContentEntry?
-){
-    val thumbnail: ImageVector = if (contentEntry?.leaf == true)
-        Icons.Outlined.Book
-    else
-        Icons.Default.Folder
-
-    Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        horizontalAlignment = Alignment.End
-    ){
-        Icon(
-            thumbnail,
-            contentDescription = "",
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .size(40.dp)
-                .padding(4.dp),
-        )
-    }
 }
 
 @Composable
