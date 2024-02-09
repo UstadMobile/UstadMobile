@@ -16,12 +16,15 @@ import app.cash.paging.PagingSource
 import com.ustadmobile.core.impl.appstate.AppActionButton
 import com.ustadmobile.core.impl.appstate.AppBarColors
 import com.ustadmobile.core.impl.appstate.AppStateIcon
+import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
 import com.ustadmobile.core.viewmodel.contententry.detail.ContentEntryDetailViewModel
 import com.ustadmobile.core.viewmodel.contententry.getmetadata.ContentEntryGetMetadataViewModel
 import com.ustadmobile.core.viewmodel.contententry.importlink.ContentEntryImportLinkViewModel
+import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.lib.db.composites.ContentEntryAndListDetail
 import com.ustadmobile.lib.db.composites.ContentEntryBlockLanguageAndContentJob
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.CourseBlock
@@ -29,13 +32,14 @@ import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import org.kodein.di.DI
 
 data class ContentEntryListUiState(
 
     val filterMode: Int = FILTER_BY_PARENT_UID,
 
-    val contentEntryList: ListPagingSourceFactory<ContentEntry> = { EmptyPagingSource() },
+    val contentEntryList: ListPagingSourceFactory<ContentEntryAndListDetail> = { EmptyPagingSource() },
 
     val selectedChipId: Int = FILTER_BY_PARENT_UID,
 
@@ -57,12 +61,18 @@ data class ContentEntryListUiState(
 
     val createNewOptionsVisible: Boolean = false,
 
-    val selectedUids: Set<Long> = emptySet(),
+    val selectedEntries: Set<ContentEntryListSelectedItem> = emptySet(),
+
+    val showSelectFolderButton: Boolean = false,
 
 ) {
 
     val showChips: Boolean
         get() =filterOptions.isNotEmpty()
+
+    val selectedEntryUids: Set<Long> = selectedEntries.map {
+        it.contentEntryUid
+    }.toSet()
 
     companion object {
 
@@ -74,7 +84,32 @@ data class ContentEntryListUiState(
     }
 }
 
+@Serializable
+data class ContentEntryListSelectedItem(
+    val contentEntryUid: Long,
+    val contentEntryParentChildJoinUid: Long,
+)
 
+fun ContentEntryAndListDetail.asSelectedItem() = ContentEntryListSelectedItem(
+    contentEntry?.contentEntryUid ?: 0, contentEntryParentChildJoin?.cepcjUid ?: 0
+)
+
+/**
+ * Shows a list of ContentEntry entities. This is used to show a list of items in library folders
+ * and to allow users to pick a ContentEntry to add to a course.
+ *
+ * Moving content entries flow:
+ *  1) On ContentEntryList, the user can select one or more items to be moved. This is handled
+ *     by onSetSelected.
+ *  2) When the user clicks the action bar button to move the selection, we navigate to this same
+ *     screen using an alias destination name ( DEST_NAME_PICKER ) to avoid problems returning the
+ *     result (if we didn't change the destination name, then if the user was going through folders,
+ *     navigation would not popup to the actual destination). This sets the ARG_SELECT_FOLDER_MODE
+ *     to true.
+ *  3) When the user selects a folder onClickSelectThisFolder returns the current folder
+ *  4) The destination that initiated the navigation runs the repository update query to move
+ *     entries.
+ */
 class ContentEntryListViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
@@ -91,7 +126,9 @@ class ContentEntryListViewModel(
      */
     private val hasCourseBlockArg: Boolean = savedStateHandle[ContentEntryEditViewModel.ARG_COURSEBLOCK] != null
 
-    private val pagingSourceFactory: ListPagingSourceFactory<ContentEntry> = {
+    private val selectFolderMode: Boolean = savedStateHandle[ARG_SELECT_FOLDER_MODE]?.toBoolean() ?: false
+
+    private val pagingSourceFactory: ListPagingSourceFactory<ContentEntryAndListDetail> = {
         when(_uiState.value.selectedChipId) {
             FILTER_MY_CONTENT -> activeRepo.contentEntryDao.getContentByOwner(
                 activeUserPersonUid
@@ -103,16 +140,20 @@ class ContentEntryListViewModel(
 
             FILTER_FROM_LIBRARY -> {
                 activeRepo.contentEntryDao.getChildrenByParentUidWithCategoryFilterOrderByName(
-                    parentEntryUid, 0, 0, activeUserPersonUid, false,
-                    false,
-                    _uiState.value.activeSortOption.flag
+                    parentUid = parentEntryUid,
+                    langParam = 0,
+                    categoryParam0 = 0,
+                    personUid = activeUserPersonUid,
+                    showHidden = false,
+                    onlyFolder = false,
+                    sortOrder = _uiState.value.activeSortOption.flag
                 )
             }
 
             FILTER_BY_PARENT_UID -> {
                 activeRepo.contentEntryDao.getChildrenByParentUidWithCategoryFilterOrderByName(
                     parentEntryUid, 0, 0, activeUserPersonUid,
-                    _uiState.value.showHiddenEntries, _uiState.value.onlyFolderFilter,
+                    _uiState.value.showHiddenEntries, false,
                     _uiState.value.activeSortOption.flag
                 )
             }
@@ -123,14 +164,21 @@ class ContentEntryListViewModel(
         }
     }
 
-    private var lastPagingSource: PagingSource<Int, ContentEntry>? = null
+    private var lastPagingSource: PagingSource<Int, ContentEntryAndListDetail>? = null
 
     private var defaultTitle: String = ""
+
+    /**
+     * This is used to handle moving entries in the library. The user can select multiple entries.
+     * This will then trigger navigateForResult to DEST_NAME_PICKER with the
+     */
+    private val showSelectFolderButton = selectFolderMode && listMode == ListViewMode.PICKER
 
     init {
         _uiState.update { prev ->
             prev.copy(
-                contentEntryList = pagingSourceFactory
+                contentEntryList = pagingSourceFactory,
+                showSelectFolderButton = showSelectFolderButton
             )
         }
 
@@ -172,14 +220,14 @@ class ContentEntryListViewModel(
 
         viewModelScope.launch {
             defaultTitle = when {
-                expectedResultDest != null -> systemImpl.getString(MR.strings.select_content)
+                (expectedResultDest != null && !selectFolderMode) -> systemImpl.getString(MR.strings.select_content)
                 parentEntryUid == LIBRARY_ROOT_CONTENT_ENTRY_UID -> systemImpl.getString(MR.strings.library)
                 else -> activeRepo.contentEntryDao.findTitleByUidAsync(parentEntryUid) ?: ""
             }
 
             _appUiState.update { prev ->
                 prev.copy(
-                    title = defaultTitle
+                    title = defaultTitle,
                 )
             }
         }
@@ -193,12 +241,40 @@ class ContentEntryListViewModel(
                         _appUiState.update { prev ->
                             prev.copy(
                                 fabState = prev.fabState.copy(
-                                    visible = hasNewContentPermission
+                                    visible = hasNewContentPermission && !showSelectFolderButton
                                 )
                             )
                         }
                     }
                 }
+            }
+        }
+
+        viewModelScope.launch {
+            resultReturner.filteredResultFlowForKey(KEY_RESULT_MOVE_TO_FOLDER).collect { result ->
+                val destContentEntry = result.result as? ContentEntry ?: return@collect
+
+                val uidsToMove = _uiState.value.selectedEntries.map {
+                    it.contentEntryParentChildJoinUid
+                }
+
+                if(uidsToMove.isEmpty())
+                    return@collect
+
+                activeRepo.contentEntryParentChildJoinDao.moveListOfEntriesToNewParent(
+                    contentEntryUid = destContentEntry.contentEntryUid,
+                    selectedItems = uidsToMove,
+                    updateTime = systemTimeInMillis()
+                )
+                snackDispatcher.showSnackBar(
+                    Snack(
+                        message = systemImpl.formatString(
+                            MR.strings.moved_x_entries, uidsToMove.size.toString()
+                        )
+                    )
+                )
+
+                setSelectedItems(emptySet())
             }
         }
     }
@@ -262,69 +338,88 @@ class ContentEntryListViewModel(
 
         //When the user is selecting content from ClazzEdit
         val courseBlockArg = savedStateHandle[ContentEntryEditViewModel.ARG_COURSEBLOCK]
-        if(entry.leaf && courseBlockArg != null) {
-            val courseBlock = json.decodeFromString(
-                deserializer = CourseBlock.serializer(),
-                string = courseBlockArg,
-            ).shallowCopy {
-                cbTitle = entry.title
-                cbDescription = entry.description
+
+        when {
+            //If user is selecting a folder, and they have clicked on something that is not a folder, do nothing
+            entry.leaf && showSelectFolderButton -> return
+
+            entry.leaf && courseBlockArg != null -> {
+                val courseBlock = json.decodeFromString(
+                    deserializer = CourseBlock.serializer(),
+                    string = courseBlockArg,
+                ).shallowCopy {
+                    cbTitle = entry.title
+                    cbDescription = entry.description
+                }
+
+                navigateForResult(
+                    nextViewName = ContentEntryEditViewModel.DEST_NAME,
+                    key = ClazzEditViewModel.RESULT_KEY_CONTENTENTRY,
+                    currentValue = ContentEntryBlockLanguageAndContentJob(
+                        entry = entry,
+                        block = courseBlock,
+                        contentJob = null,
+                        contentJobItem = null,
+                    ),
+                    serializer = ContentEntryBlockLanguageAndContentJob.serializer(),
+                    overwriteDestination = false
+                )
+                return
             }
 
-            navigateForResult(
-                nextViewName = ContentEntryEditViewModel.DEST_NAME,
-                key = ClazzEditViewModel.RESULT_KEY_CONTENTENTRY,
-                currentValue = ContentEntryBlockLanguageAndContentJob(
-                    entry = entry,
-                    block = courseBlock,
-                    contentJob = null,
-                    contentJobItem = null,
-                ),
-                serializer = ContentEntryBlockLanguageAndContentJob.serializer(),
-                overwriteDestination = false
-            )
-            return
-        }
+            entry.leaf -> {
+                navController.navigate(
+                    viewName = ContentEntryDetailViewModel.DEST_NAME,
+                    args = mapOf(UstadView.ARG_ENTITY_UID to entry.contentEntryUid.toString())
+                )
+            }
 
-
-        if(entry.leaf) {
-            navController.navigate(
-                viewName = ContentEntryDetailViewModel.DEST_NAME,
-                args = mapOf(UstadView.ARG_ENTITY_UID to entry.contentEntryUid.toString())
-            )
-        }else {
-            navController.navigate(
-                viewName = DEST_NAME,
-                args = buildMap {
-                    put(ARG_FILTER, FILTER_BY_PARENT_UID.toString())
-                    put(ARG_PARENT_UID, entry.contentEntryUid.toString())
-                    putFromSavedStateIfPresent(ContentEntryEditViewModel.ARG_COURSEBLOCK)
-                    putFromSavedStateIfPresent(UstadView.ARG_RESULT_DEST_KEY)
-                    putFromSavedStateIfPresent(UstadView.ARG_RESULT_DEST_VIEWNAME)
-                }
-            )
+            else -> {
+                navController.navigate(
+                    viewName = destinationName,
+                    args = buildMap {
+                        put(ARG_FILTER, FILTER_BY_PARENT_UID.toString())
+                        put(ARG_PARENT_UID, entry.contentEntryUid.toString())
+                        putFromSavedStateIfPresent(ContentEntryEditViewModel.ARG_COURSEBLOCK)
+                        putFromSavedStateIfPresent(UstadView.ARG_RESULT_DEST_KEY)
+                        putFromSavedStateIfPresent(UstadView.ARG_RESULT_DEST_VIEWNAME)
+                        putFromSavedStateIfPresent(ARG_SELECT_FOLDER_MODE)
+                    }
+                )
+            }
         }
     }
 
-    fun onSetSelected(uid: Long, selected: Boolean) {
-        val currentSelection = _uiState.value.selectedUids
+    fun onClickSelectThisFolder() {
+        finishWithResult(ContentEntry().apply {
+            contentEntryUid = parentEntryUid
+        })
+    }
+
+    fun onSetSelected(entry: ContentEntryAndListDetail, selected: Boolean) {
+        //**MUST** commit to savedStateHandle
+
+        val currentSelection = _uiState.value.selectedEntries
         setSelectedItems(
             if(selected) {
-                (currentSelection + uid).toSet()
+                (currentSelection + entry.asSelectedItem()).toSet()
             }else {
-                currentSelection.filter { it != uid }.toSet()
+                currentSelection.filter {
+                    it.contentEntryUid != (entry.contentEntry?.contentEntryUid ?: 0)
+                }.toSet()
             }
         )
     }
 
-    private fun setSelectedItems(selectedUids: Set<Long>) {
+    private fun setSelectedItems(selectedEntries: Set<ContentEntryListSelectedItem>) {
+        //TODO: needs to commit to savedState
         _uiState.update { prev ->
             prev.copy(
-                selectedUids = selectedUids
+                selectedEntries = selectedEntries
             )
         }
 
-        val numItemsSelected = _uiState.value.selectedUids.size
+        val numItemsSelected = _uiState.value.selectedEntries.size
         val hasSelectedItems = numItemsSelected > 0
 
         _appUiState.update { prev ->
@@ -368,7 +463,16 @@ class ContentEntryListViewModel(
     }
 
     private fun onClickMoveAction() {
-
+        navigateForResult(
+            nextViewName = DEST_NAME_PICKER,
+            key = KEY_RESULT_MOVE_TO_FOLDER,
+            currentValue = null,
+            serializer = ContentEntry.serializer(),
+            args = mapOf(
+                ARG_LISTMODE to ListViewMode.PICKER.mode,
+                ARG_SELECT_FOLDER_MODE to true.toString(),
+            )
+        )
     }
 
 
@@ -410,6 +514,10 @@ class ContentEntryListViewModel(
         const val LIBRARY_ROOT_CONTENT_ENTRY_UID = 1L
 
         private const val KEY_FILTER_CHIP_ID = "chipId"
+
+        const val KEY_RESULT_MOVE_TO_FOLDER = "moveToResult"
+
+        const val ARG_SELECT_FOLDER_MODE = "selectFolder"
 
 
     }

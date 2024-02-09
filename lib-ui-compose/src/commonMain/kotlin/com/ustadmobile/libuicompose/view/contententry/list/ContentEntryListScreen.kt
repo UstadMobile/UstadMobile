@@ -6,6 +6,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Link
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -23,12 +24,14 @@ import app.cash.paging.PagingConfig
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.ustadmobile.libuicompose.components.UstadBottomSheetOption
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.util.MessageIdOption2
+import com.ustadmobile.lib.db.composites.ContentEntryAndListDetail
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.libuicompose.components.UstadFileDropZone
 import com.ustadmobile.libuicompose.components.UstadFilePickResult
@@ -61,6 +64,7 @@ fun ContentEntryListScreenForViewModel(
         },
         onClickImportFromLink = viewModel::onClickImportFromLink,
         onSetSelected = viewModel::onSetSelected,
+        onClickSelectThisFolder = viewModel::onClickSelectThisFolder,
     )
 
     if(uiState.createNewOptionsVisible) {
@@ -117,7 +121,8 @@ fun ContentEntryListScreen(
     onClickFilterChip: (MessageIdOption2) -> Unit = { },
     onClickImportFile: () -> Unit = { },
     onClickImportFromLink: () -> Unit = { },
-    onSetSelected: (contentEntryUid: Long, selected: Boolean) -> Unit = { _, _ -> },
+    onSetSelected: (entry: ContentEntryAndListDetail, selected: Boolean) -> Unit = { _, _ -> },
+    onClickSelectThisFolder: () -> Unit = { },
 ) {
     val pager = remember(uiState.contentEntryList) {
         Pager(
@@ -127,77 +132,95 @@ fun ContentEntryListScreen(
     }
     val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
 
-    UstadFileDropZone(
-        onFileDropped = onFileDropped,
-        modifier = Modifier.fillMaxSize(),
+    Column(
+        modifier = Modifier.fillMaxSize()
     ) {
-        UstadLazyColumn(
-            modifier = Modifier.fillMaxSize()
-        )  {
-            if(uiState.showChips) {
-                item(key = "filterchips") {
-                    UstadListFilterChipsHeader(
-                        modifier = Modifier.defaultItemPadding(),
-                        filterOptions = uiState.filterOptions,
-                        selectedChipId = uiState.selectedChipId,
-                        onClickFilterChip = onClickFilterChip,
-                    )
+        UstadFileDropZone(
+            onFileDropped = onFileDropped,
+            modifier = Modifier.weight(1f),
+        ) {
+            UstadLazyColumn(
+                modifier = Modifier.fillMaxSize()
+            )  {
+                if(uiState.showChips) {
+                    item(key = "filterchips") {
+                        UstadListFilterChipsHeader(
+                            modifier = Modifier.defaultItemPadding(),
+                            filterOptions = uiState.filterOptions,
+                            selectedChipId = uiState.selectedChipId,
+                            onClickFilterChip = onClickFilterChip,
+                        )
+                    }
                 }
-            }
 
-            if(uiState.importFromFileItemVisible) {
-                item(key = "import_from_file_item") {
-                    ListItem(
-                        modifier = Modifier.clickable { onClickImportFile() },
-                        headlineContent = {
-                            Text(stringResource(MR.strings.import_from_file))
-                        },
-                        leadingContent = {
-                            Box(
-                                contentAlignment = Alignment.Center,
-                                modifier = Modifier.size(40.dp),
-                            ) {
-                                Icon(Icons.Default.FileUpload, contentDescription = null)
+                if(uiState.importFromFileItemVisible) {
+                    item(key = "import_from_file_item") {
+                        ListItem(
+                            modifier = Modifier.clickable { onClickImportFile() },
+                            headlineContent = {
+                                Text(stringResource(MR.strings.import_from_file))
+                            },
+                            leadingContent = {
+                                Box(
+                                    contentAlignment = Alignment.Center,
+                                    modifier = Modifier.size(40.dp),
+                                ) {
+                                    Icon(Icons.Default.FileUpload, contentDescription = null)
+                                }
                             }
-                        }
-                    )
+                        )
+                    }
                 }
-            }
 
-            if(uiState.importFromLinkItemVisible) {
-                item(key = "import_from_link") {
-                    ListItem(
-                        modifier = Modifier.clickable { onClickImportFromLink() },
-                        headlineContent = {
-                            Text(stringResource(MR.strings.import_from_link))
-                        },
-                        leadingContent = {
-                            Box(
-                                contentAlignment = Alignment.Center,
-                                modifier = Modifier.size(40.dp),
-                            ) {
-                                Icon(Icons.Default.Link, contentDescription = null)
+                if(uiState.importFromLinkItemVisible) {
+                    item(key = "import_from_link") {
+                        ListItem(
+                            modifier = Modifier.clickable { onClickImportFromLink() },
+                            headlineContent = {
+                                Text(stringResource(MR.strings.import_from_link))
+                            },
+                            leadingContent = {
+                                Box(
+                                    contentAlignment = Alignment.Center,
+                                    modifier = Modifier.size(40.dp),
+                                ) {
+                                    Icon(Icons.Default.Link, contentDescription = null)
+                                }
                             }
-                        }
+                        )
+                    }
+                }
+
+
+                ustadPagedItems(
+                    pagingItems = lazyPagingItems,
+                    key = { contentEntry ->
+                        Pair(contentEntry.contentEntry?.contentEntryUid ?: 0L, contentEntry.contentEntryParentChildJoin?.cepcjUid)
+                    }
+                ){ entry ->
+                    val contentEntryUid = entry?.contentEntry?.contentEntryUid ?: 0
+                    UstadContentEntryListItem(
+                        onClick = {
+                            onClickContentEntry(entry?.contentEntry)
+                        },
+                        entry = entry,
+                        onSetSelected = onSetSelected,
+                        isSelected = (contentEntryUid in uiState.selectedEntryUids)
                     )
                 }
             }
+        }
 
-
-            ustadPagedItems(
-                pagingItems = lazyPagingItems,
-                key = { contentEntry -> contentEntry.contentEntryUid }
-            ){ contentEntry ->
-                val contentEntryUid = contentEntry?.contentEntryUid ?: 0
-                UstadContentEntryListItem(
-                    onClick = {
-                        onClickContentEntry(contentEntry)
-                    },
-                    contentEntry = contentEntry,
-                    onSetSelected = onSetSelected,
-                    isSelected = (contentEntryUid in uiState.selectedUids)
-                )
+        if(uiState.showSelectFolderButton) {
+            Button(
+                modifier = Modifier.testTag("select_folder_button")
+                    .fillMaxWidth()
+                    .defaultItemPadding(),
+                onClick = onClickSelectThisFolder,
+            ) {
+                Text(stringResource(MR.strings.move_entries_to_this_folder))
             }
         }
     }
+
 }

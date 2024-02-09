@@ -1728,4 +1728,10 @@
 
     <string name="clear_selection">Clear selection</string>
 
+    <!--
+    After the user selects to move entries, this is the text that will be shown on the button at the
+    bottom to allow the user to select the current folder as the destination.
+    -->
+    <string name="move_entries_to_this_folder">Move entries to this folder</string>
+
 </resources>
