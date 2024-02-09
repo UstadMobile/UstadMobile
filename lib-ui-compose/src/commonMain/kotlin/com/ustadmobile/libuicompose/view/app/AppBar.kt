@@ -1,5 +1,6 @@
 package com.ustadmobile.libuicompose.view.app
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -47,10 +48,11 @@ import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
 import com.ustadmobile.core.viewmodel.settings.SettingsViewModel
+import com.ustadmobile.libuicompose.components.UstadActionButtonIcon
 import com.ustadmobile.libuicompose.components.UstadPersonAvatar
+import com.ustadmobile.libuicompose.components.UstadTooltipBox
 import com.ustadmobile.libuicompose.theme.appBarSelectionModeBackgroundColor
 import com.ustadmobile.libuicompose.theme.appBarSelectionModeContentColor
-import com.ustadmobile.libuicompose.util.ext.imageVector
 import dev.icerock.moko.resources.compose.stringResource
 import moe.tlaster.precompose.navigation.Navigator
 import org.kodein.di.compose.localDI
@@ -61,7 +63,7 @@ private val ROOT_LOCATIONS = UstadViewModel.ROOT_DESTINATIONS.map {
     "/$it"
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun UstadAppBar(
     compactHeader: Boolean,
@@ -118,13 +120,7 @@ fun UstadAppBar(
                 val leadingActionButton = appUiState.leadingActionButton
                 when {
                     leadingActionButton != null -> {
-                        IconButton(
-                            onClick = leadingActionButton.onClick,
-                        ) {
-                            Icon(leadingActionButton.icon.imageVector,
-                                contentDescription = leadingActionButton.contentDescription
-                            )
-                        }
+                        UstadActionButtonIcon(leadingActionButton)
                     }
                     canGoBack -> {
                         IconButton(
@@ -143,26 +139,23 @@ fun UstadAppBar(
             },
             actions = {
                 appUiState.actionButtons.forEach {
-                    IconButton(
-                        onClick = it.onClick
-                    ) {
-                        Icon(
-                            imageVector = it.icon.imageVector,
-                            contentDescription = it.contentDescription,
-                        )
-                    }
+                    UstadActionButtonIcon(it)
                 }
 
                 currentLocation?.path?.takeIf { path ->
                     !appUiState.hideSettingsIcon && ROOT_LOCATIONS.any { it.startsWith(path) }
                 }?.also {
-                    IconButton(
-                        modifier = Modifier.testTag("settings_button"),
-                        onClick = {
-                            navigator.navigate("/${SettingsViewModel.DEST_NAME}")
-                        }
+                    UstadTooltipBox(
+                        tooltipText = stringResource(MR.strings.settings)
                     ) {
-                        Icon(Icons.Default.Settings, contentDescription = stringResource(MR.strings.settings))
+                        IconButton(
+                            modifier = Modifier.testTag("settings_button"),
+                            onClick = {
+                                navigator.navigate("/${SettingsViewModel.DEST_NAME}")
+                            }
+                        ) {
+                            Icon(Icons.Default.Settings, contentDescription = stringResource(MR.strings.settings))
+                        }
                     }
                 }
 
