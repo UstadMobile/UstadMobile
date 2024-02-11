@@ -1724,4 +1724,27 @@
 
     <string name="could_not_load_vlc">Could not load VLC. Video playback requires a 64bit version of VLC to be installed. Please download and install a 64bit version from https://www.videolan.org/ , then restart this app.</string>
 
+    <string name="selected">Selected</string>
+
+    <string name="clear_selection">Clear selection</string>
+
+    <!--
+    After the user selects to move entries, this is the text that will be shown on the button at the
+    bottom to allow the user to select the current folder as the destination.
+    -->
+    <string name="move_entries_to_this_folder">Move entries to this folder</string>
+
+    <!--
+    Error message if a user selects to move a folder to a destination which is a subfolder of itself
+    -->
+    <string name="cannot_move_to_subfolder_of_self">Cannot move a folder to a subfolder of itself</string>
+
+    <!--
+    Error message if a user selects to move library content to another folder, but then picks the same
+    folder that the content is already in
+    -->
+    <string name="cannot_move_already_in_same_folder">Cannot move: items are already in this folder</string>
+
+    <string name="move_to">Move to...</string>
+
 </resources>

@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.Flow
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.composites.ContentEntryAndDetail
 import com.ustadmobile.lib.db.composites.ContentEntryAndLanguage
+import com.ustadmobile.lib.db.composites.ContentEntryAndListDetail
 import com.ustadmobile.lib.db.entities.*
 
 @DoorDao
@@ -185,7 +186,7 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
         )
     )
     @Query("""
-            SELECT ContentEntry.*
+            SELECT ContentEntry.*, ContentEntryParentChildJoin.*
               FROM ContentEntry 
                     LEFT JOIN ContentEntryParentChildJoin 
                          ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid 
@@ -219,15 +220,17 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
         showHidden: Boolean,
         onlyFolder: Boolean,
         sortOrder: Int
-    ): PagingSource<Int, ContentEntry>
+    ): PagingSource<Int, ContentEntryAndListDetail>
 
     @Query("""
-        SELECT ContentEntry.*
+        SELECT ContentEntry.*, ContentEntryParentChildJoin.*
           FROM CourseBlock
                JOIN ContentEntry 
                     ON CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
                        AND ContentEntry.contentEntryUid = CourseBlock.cbEntityUid
                        AND CAST(CourseBlock.cbActive AS INTEGER) = 1
+               LEFT JOIN ContentEntryParentChildJoin
+                         ON ContentEntryParentChildJoin.cepcjParentContentEntryUid = 0
          WHERE CourseBlock.cbClazzUid IN
                (SELECT ClazzEnrolment.clazzEnrolmentClazzUid
                   FROM ClazzEnrolment
@@ -235,17 +238,19 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
     """)
     abstract fun getContentFromMyCourses(
         personUid: Long
-    ): PagingSource<Int, ContentEntry>
+    ): PagingSource<Int, ContentEntryAndListDetail>
 
 
     @Query("""
-        SELECT ContentEntry.*
+        SELECT ContentEntry.*, ContentEntryParentChildJoin.*
           FROM ContentEntry
+               LEFT JOIN ContentEntryParentChildJoin
+                         ON ContentEntryParentChildJoin.cepcjParentContentEntryUid = 0
          WHERE ContentEntry.contentOwner = :personUid
     """)
     abstract fun getContentByOwner(
         personUid: Long
-    ): PagingSource<Int, ContentEntry>
+    ): PagingSource<Int, ContentEntryAndListDetail>
 
 
     @Update

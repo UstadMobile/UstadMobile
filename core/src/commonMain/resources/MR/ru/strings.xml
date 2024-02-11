@@ -1049,4 +1049,10 @@
     <string name="content_not_ready_try_later">Содержимое еще не готово. Повторите попытку позже.</string>
     <string name="html5_content_display_engine">Механизм отображения HTML5</string>
     <string name="internal_webview_info">Это рекомендуется в случае если на устройстве запрещен доступ к браузеру.</string>
+    <string name="onboarding_headline1">Нет интернета? Без проблем.</string>
+    <string name="onboarding_subheadline1">Всё работает офлайн</string>
+    <string name="onboarding_headline2">Поделиться оффлайн</string>
+    <string name="onboarding_headline3">Будьте в курсе событий</string>
+    <string name="onboarding_subheadline3">Образовательный контент, задания, классы и посещаемость — все в одном месте</string>
+    <string name="onboarding_subheadline2">Делитесь контентом на высокой скорости с любым другим пользователем поблизости</string>
 </resources>

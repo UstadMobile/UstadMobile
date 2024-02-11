@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+    <!--
+    This is a copy created that weblate can recognize. For some reason, Moko resources uses plural
+    NOT plural(s) like normal strings xml. It can be copied over to plurals using a sed script.
+    -->
+
+    <plurals name="number_of_attempts">
+        <item quantity="one">%d attempt</item>
+        <item quantity="other">%d attempts</item>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="one">%d hour</item>
+        <item quantity="other">%d hours</item>
+    </plurals>
+    <plurals name="duration_minutes">
+        <item quantity="one">%d min</item>
+        <item quantity="other">%d mins</item>
+    </plurals>
+    <plurals name="duration_seconds">
+        <item quantity="one">%d sec</item>
+        <item quantity="other">%d secs</item>
+    </plurals>
+    <plurals name="items_selected">
+        <item quantity="zero">%d items selected</item>
+        <item quantity="one">%d item selected</item>
+        <item quantity="two">%d item selected</item>
+        <item quantity="few">%d items selected</item>
+        <item quantity="many">%d items selected</item>
+        <item quantity="other">%d items selected</item>
+    </plurals>
+</resources>

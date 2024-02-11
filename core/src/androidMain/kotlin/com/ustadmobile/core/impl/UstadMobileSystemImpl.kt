@@ -36,13 +36,12 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import androidx.core.content.FileProvider
-import androidx.navigation.*
 import com.russhwolf.settings.Settings
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.io.ext.isGzipped
-import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.toFile
+import dev.icerock.moko.resources.PluralsResource
 import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.format
 import org.kodein.di.DI
@@ -50,7 +49,6 @@ import org.kodein.di.android.closestDI
 import org.kodein.di.direct
 import org.kodein.di.instance
 import java.io.*
-import java.util.*
 import java.util.zip.GZIPInputStream
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
@@ -156,6 +154,10 @@ actual open class UstadMobileSystemImpl(
         return stringResource.format(args).stringRes.getString(applicationContext)
     }
 
+    override fun formatPlural(pluralsResource: PluralsResource, number: Int): String {
+        return pluralsResource.getQuantityString(applicationContext, number).format(number)
+    }
+
     /**
      * Gives a string with the version number
      *
@@ -254,14 +256,7 @@ actual open class UstadMobileSystemImpl(
 
     actual companion object {
 
-        const val TAG = "UstadMobileImplAndroid"
-
-        private const val PACKAGE_NAME = "com.ustadmobile.port.android.view."
-
         const val APP_PREFERENCES_NAME = "UMAPP-PREFERENCES"
-
-        const val TAG_DIALOG_FRAGMENT = "UMDialogFrag"
-
 
     }
 

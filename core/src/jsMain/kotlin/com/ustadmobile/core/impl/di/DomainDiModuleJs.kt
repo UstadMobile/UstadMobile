@@ -16,6 +16,7 @@ import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportConte
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseJs
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.ResolveXapiLaunchHrefUseCase
+import com.ustadmobile.core.domain.contententry.move.MoveContentEntriesUseCase
 import com.ustadmobile.core.domain.openlink.OnClickLinkUseCase
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCaseJs
@@ -149,6 +150,13 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
             httpClient = instance(),
             json = instance(),
             xppFactory = instance(tag = DiTag.XPP_FACTORY_NSAWARE)
+        )
+    }
+
+    bind<MoveContentEntriesUseCase>() with scoped(EndpointScope.Default).provider {
+        MoveContentEntriesUseCase(
+            repo = instance(tag = DoorTag.TAG_REPO),
+            systemImpl = instance()
         )
     }
 }

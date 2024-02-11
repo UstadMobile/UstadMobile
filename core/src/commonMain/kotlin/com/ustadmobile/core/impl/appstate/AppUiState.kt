@@ -14,6 +14,10 @@ package com.ustadmobile.core.impl.appstate
  *        because the navigation will be hidden.
  * @param title - the main title for the appbar. If null, then the title will not be changed. This avoids
  * flicker when switching between screens, tabs, etc.
+ * @param hideSettingsIcon normally the settings icon is shown when the user is on a top level screen.
+ *        This might need to be hidden when a selection is in progress etc.
+ * @param leadingActionButton if not null, then this will replace the navigation icon on Desktop/Android,
+ *        and will replace the shelf menu if shown on the mobile web.
  */
 data class AppUiState(
     val fabState: FabUiState = FabUiState(),
@@ -21,9 +25,13 @@ data class AppUiState(
     val title: String? = null,
     val navigationVisible: Boolean = true,
     val hideBottomNavigation: Boolean = false,
+    val hideSettingsIcon: Boolean = false,
     val userAccountIconVisible: Boolean = true,
     val searchState: AppBarSearchUiState = AppBarSearchUiState(),
     val actionBarButtonState: ActionBarButtonUiState = ActionBarButtonUiState(),
     val overflowItems: List<OverflowItem> = emptyList(),
     val hideAppBar: Boolean = false,
+    val actionButtons: List<AppActionButton> = emptyList(),
+    val leadingActionButton: AppActionButton? = null,
+    val appBarColors: AppBarColors = AppBarColors.STANDARD,
 )
