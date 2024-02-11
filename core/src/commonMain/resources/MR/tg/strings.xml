@@ -415,7 +415,6 @@
     <string name="take_new_photo_from_camera">Акси навро аз камера гиред</string>
     <string name="remove_photo">Тоза кардани акс</string>
     <string name="change_photo">Ивази акс</string>
-    <string name="items_selected">%1$d интихоб шуд</string>
     <string name="remove_from">Аз %1$s тоза намоед</string>
     <string name="add_to">Ба %1$s илова намоед</string>
     <string name="num_items_with_name_with_comma">%1$d %2$s, %3$d %4$s</string>

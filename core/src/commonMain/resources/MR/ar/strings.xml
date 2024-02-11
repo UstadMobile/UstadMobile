@@ -386,7 +386,6 @@
     <string name="x_percent_attended">%1.0f%% حضور</string>
     <string name="present_late_absent">%1$d حضور، %2$d متأخر، %3$d غياب</string>
     <string name="x_teachers_y_students">%1$d معلمين، %2$d طلاب</string>
-    <string name="items_selected">%1$d مختار</string>
     <string name="remove_from">ازالة من %1$s</string>
     <string name="add_to">اضف الى %1$s</string>
     <string name="num_items_with_name_with_comma">%1$d %2$s, %3$d %4$s</string>

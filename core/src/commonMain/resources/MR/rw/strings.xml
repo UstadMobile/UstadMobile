@@ -588,7 +588,6 @@
     <string name="num_items_with_name_with_comma">%1$d %2$s, %3$d %4$s</string>
     <string name="add_to">Ongeraho %1$s</string>
     <string name="remove_from">Kuraho kuva kuri%1$s</string>
-    <string name="items_selected">%1$d byatoranyijwe</string>
     <string name="select_new_photo_from_gallery">Hitamo ifoto nshya mububiko bw\'amafoto</string>
     <string name="permission_clazz_asignment_edit">Hanga unahindure imikoro y\'ishuri</string>
     <string name="add_new">Ongeraho igishya</string>

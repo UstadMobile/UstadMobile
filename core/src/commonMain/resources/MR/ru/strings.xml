@@ -540,7 +540,6 @@
     <string name="num_items_with_name_with_comma">%1$d %2$s, %3$d %4$s</string>
     <string name="add_to">Добавить в %1$s</string>
     <string name="remove_from">Удалить из %1$s</string>
-    <string name="items_selected">Выбрано %1$d</string>
     <string name="change_photo">Измени фотографию</string>
     <string name="remove_photo">Удалить фото</string>
     <string name="take_new_photo_from_camera">Сделать новое фото с камеры</string>
