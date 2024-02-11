@@ -30,9 +30,13 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
 data class ContentEntryListUiState(
@@ -175,10 +179,15 @@ class ContentEntryListViewModel(
     private val showSelectFolderButton = selectFolderMode && listMode == ListViewMode.PICKER
 
     init {
+        val savedStateSelectedEntries = savedStateHandle[KEY_SAVED_STATE_SELECTED_ENTRIES]?.let {
+            json.decodeFromString(ListSerializer(ContentEntryListSelectedItem.serializer()), it)
+        }?.toSet() ?: emptySet()
+
         _uiState.update { prev ->
             prev.copy(
                 contentEntryList = pagingSourceFactory,
-                showSelectFolderButton = showSelectFolderButton
+                showSelectFolderButton = showSelectFolderButton,
+                selectedEntries = savedStateSelectedEntries,
             )
         }
 
@@ -218,6 +227,10 @@ class ContentEntryListViewModel(
             }
         }
 
+        val hasPermissionFlow = activeRepo.scopedGrantDao.userHasSystemLevelPermissionAsFlow(
+            accountManager.currentAccount.personUid, Role.PERMISSION_CONTENT_INSERT
+        ).shareIn(viewModelScope, SharingStarted.WhileSubscribed())
+
         viewModelScope.launch {
             defaultTitle = when {
                 (expectedResultDest != null && !selectFolderMode) -> systemImpl.getString(MR.strings.select_content)
@@ -235,9 +248,7 @@ class ContentEntryListViewModel(
         viewModelScope.launch {
             _uiState.whenSubscribed {
                 if(!hasCourseBlockArg) {
-                    activeRepo.scopedGrantDao.userHasSystemLevelPermissionAsFlow(
-                        accountManager.currentAccount.personUid, Role.PERMISSION_CONTENT_INSERT
-                    ).collect { hasNewContentPermission ->
+                    hasPermissionFlow.collect { hasNewContentPermission ->
                         _appUiState.update { prev ->
                             prev.copy(
                                 fabState = prev.fabState.copy(
@@ -275,6 +286,34 @@ class ContentEntryListViewModel(
                 )
 
                 setSelectedItems(emptySet())
+            }
+        }
+
+        /*
+         * Show move / delete icons when there is a selection AND the user has permission
+         */
+        viewModelScope.launch {
+            _uiState.combine(hasPermissionFlow) { uiState, hasPermission ->
+                Pair(uiState, hasPermission)
+            }.collect {
+                val showMoveIcon = it.first.selectedEntries.isNotEmpty() && it.second
+                if(showMoveIcon != _appUiState.value.actionButtons.isNotEmpty()) {
+                    _appUiState.update { prev ->
+                        prev.copy(
+                            actionButtons = if(showMoveIcon){
+                                listOf(
+                                    AppActionButton(
+                                        icon = AppStateIcon.MOVE,
+                                        contentDescription = systemImpl.getString(MR.strings.move),
+                                        onClick = this@ContentEntryListViewModel::onClickMoveAction
+                                    )
+                                )
+                            }else {
+                                emptyList()
+                            }
+                        )
+                    }
+                }
             }
         }
     }
@@ -412,7 +451,10 @@ class ContentEntryListViewModel(
     }
 
     private fun setSelectedItems(selectedEntries: Set<ContentEntryListSelectedItem>) {
-        //TODO: needs to commit to savedState
+        savedStateHandle[KEY_SAVED_STATE_SELECTED_ENTRIES] = json.encodeToString(
+            ListSerializer(ContentEntryListSelectedItem.serializer()), selectedEntries.toList()
+        )
+
         _uiState.update { prev ->
             prev.copy(
                 selectedEntries = selectedEntries
@@ -422,19 +464,12 @@ class ContentEntryListViewModel(
         val numItemsSelected = _uiState.value.selectedEntries.size
         val hasSelectedItems = numItemsSelected > 0
 
+        /*
+         * Showing icons in appUiState (e.g. move etc) is done by a flow collector (started in init)
+         * that checks for permission AND selection.
+         */
         _appUiState.update { prev ->
             prev.copy(
-                actionButtons = if(hasSelectedItems){
-                    listOf(
-                        AppActionButton(
-                            icon = AppStateIcon.MOVE,
-                            contentDescription = systemImpl.getString(MR.strings.move),
-                            onClick = this@ContentEntryListViewModel::onClickMoveAction
-                        )
-                    )
-                }else {
-                    emptyList()
-                },
                 userAccountIconVisible = !hasSelectedItems,
                 hideSettingsIcon = hasSelectedItems,
                 title = if(hasSelectedItems) {
@@ -518,6 +553,8 @@ class ContentEntryListViewModel(
         const val KEY_RESULT_MOVE_TO_FOLDER = "moveToResult"
 
         const val ARG_SELECT_FOLDER_MODE = "selectFolder"
+
+        const val KEY_SAVED_STATE_SELECTED_ENTRIES = "selectedEntries"
 
 
     }
