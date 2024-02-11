@@ -1745,6 +1745,6 @@
     -->
     <string name="cannot_move_already_in_same_folder">Cannot move: items are already in this folder</string>
 
-    <string name="move_to">Move to...</string>
+    <string name="move_to">Move to…</string>
 
 </resources>
