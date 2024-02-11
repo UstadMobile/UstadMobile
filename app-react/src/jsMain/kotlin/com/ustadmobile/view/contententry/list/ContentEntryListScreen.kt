@@ -296,6 +296,7 @@ private val ContentEntryListScreenComponent = FC<ContentEntryListScreenProps> { 
                         it in props.uiState.selectedEntryUids
                     } ?: false
                     contentEntry = entry
+                    contextMenuItems =  props.uiState.contextMenuItems
                 }
             }
         }

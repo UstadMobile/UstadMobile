@@ -1734,4 +1734,17 @@
     -->
     <string name="move_entries_to_this_folder">Move entries to this folder</string>
 
+    <!--
+    Error message if a user selects to move a folder to a destination which is a subfolder of itself
+    -->
+    <string name="cannot_move_to_subfolder_of_self">Cannot move a folder to a subfolder of itself</string>
+
+    <!--
+    Error message if a user selects to move library content to another folder, but then picks the same
+    folder that the content is already in
+    -->
+    <string name="cannot_move_already_in_same_folder">Cannot move: items are already in this folder</string>
+
+    <string name="move_to">Move to...</string>
+
 </resources>

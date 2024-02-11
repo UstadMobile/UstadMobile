@@ -1,6 +1,7 @@
 package com.ustadmobile.view.contententry
 
 import com.ustadmobile.core.hooks.useStringProvider
+import com.ustadmobile.core.impl.appstate.UstadContextMenuItem
 import com.ustadmobile.core.viewmodel.contententry.contentTypeStringResource
 import com.ustadmobile.core.viewmodel.contententry.list.listItemUiState
 import com.ustadmobile.lib.db.composites.ContentEntryAndListDetail
@@ -8,6 +9,7 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.mui.common.justifyContent
 import com.ustadmobile.mui.ext.paddingCourseBlockIndent
 import com.ustadmobile.view.contententry.detailoverviewtab.CONTENT_ENTRY_TYPE_ICON_MAP
+import js.core.jso
 import web.cssom.*
 //WARNING: DO NOT Replace with import mui.icons.material.[*] - Leads to severe IDE performance issues 10/Apr/23 https://youtrack.jetbrains.com/issue/KT-57897/Intellisense-and-code-analysis-is-extremely-slow-and-unusable-on-Kotlin-JS
 import mui.icons.material.BookOutlined as BookOutlinedIcon
@@ -20,6 +22,7 @@ import react.FC
 import react.Props
 import react.ReactNode
 import react.create
+import react.useState
 
 external interface UstadContentEntryListItemProps : Props {
 
@@ -33,26 +36,52 @@ external interface UstadContentEntryListItemProps : Props {
 
     var selected: Boolean
 
+    var contextMenuItems: (ContentEntryAndListDetail) -> List<UstadContextMenuItem>
+
 }
 
 val UstadContentEntryListItem = FC<UstadContentEntryListItemProps> { props ->
+    var contextMenuPos: Pair<Double, Double>? by useState { null }
+    val contextMenuPosVal = contextMenuPos
+
     ListItem {
         ListItemButton {
+            //As per https://mui.com/material-ui/react-menu/#context-menu
+            onContextMenu = { evt ->
+                evt.preventDefault()
+                val hasContextMenuItems = props.contentEntry?.let {
+                    props.contextMenuItems(it)
+                }?.isNotEmpty() ?: false
+
+                contextMenuPos = if(hasContextMenuItems && contextMenuPos == null) {
+                    (evt.clientX + 2) to (evt.clientY + 6)
+                }else {
+                    null
+                }
+            }
+
             sx {
                 padding = props.padding
             }
 
-            onClick = {
-                if(it.shiftKey || it.ctrlKey) {
-                    props.contentEntry?.also {
-                        props.onSetSelected(it, !props.selected)
+            onClick = { evt ->
+                when {
+                    contextMenuPosVal != null -> {
+                        //Do nothing - we don't want to intercept the that click
                     }
-                }else {
-                    props.contentEntry?.contentEntry?.also {
-                        props.onClickContentEntry(it)
+
+                    evt.shiftKey || evt.ctrlKey -> {
+                        props.contentEntry?.also {
+                            props.onSetSelected(it, !props.selected)
+                        }
+                    }
+
+                    else -> {
+                        props.contentEntry?.contentEntry?.also {
+                            props.onClickContentEntry(it)
+                        }
                     }
                 }
-
             }
             selected = props.selected
 
@@ -70,6 +99,34 @@ val UstadContentEntryListItem = FC<UstadContentEntryListItemProps> { props ->
                 primary = ReactNode(props.contentEntry?.contentEntry?.title ?: "")
                 secondary = SecondaryContent.create {
                     contentEntryItem = props.contentEntry?.contentEntry
+                }
+            }
+
+            Menu {
+                open = contextMenuPos != null
+                onClose = {
+                    contextMenuPos = null
+                }
+                anchorReference = PopoverReference.anchorPosition
+                anchorPosition = if(contextMenuPosVal != null) {
+                    jso {
+                        left = contextMenuPosVal.first
+                        top = contextMenuPosVal.second
+                    }
+                }else {
+                    null
+                }
+
+                if(contextMenuPosVal != null) {
+                    props.contentEntry?.let { props.contextMenuItems(it) }?.forEach {
+                        MenuItem {
+                            onClick = { _ ->
+                                contextMenuPos = null
+                                it.onClick()
+                            }
+                            + it.label
+                        }
+                    }
                 }
             }
         }

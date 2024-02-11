@@ -13,24 +13,26 @@ import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewMode
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel.Companion.FILTER_BY_PARENT_UID
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import app.cash.paging.PagingSource
+import com.ustadmobile.core.domain.contententry.move.MoveContentEntriesUseCase
 import com.ustadmobile.core.impl.appstate.AppActionButton
 import com.ustadmobile.core.impl.appstate.AppBarColors
 import com.ustadmobile.core.impl.appstate.AppStateIcon
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.appstate.UstadContextMenuItem
 import com.ustadmobile.core.util.MessageIdOption2
+import com.ustadmobile.core.util.ext.onActiveEndpoint
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
 import com.ustadmobile.core.viewmodel.contententry.detail.ContentEntryDetailViewModel
 import com.ustadmobile.core.viewmodel.contententry.getmetadata.ContentEntryGetMetadataViewModel
 import com.ustadmobile.core.viewmodel.contententry.importlink.ContentEntryImportLinkViewModel
-import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.ContentEntryAndListDetail
 import com.ustadmobile.lib.db.composites.ContentEntryBlockLanguageAndContentJob
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.shareIn
@@ -39,6 +41,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
+import org.kodein.di.instance
 
 data class ContentEntryListUiState(
 
@@ -97,10 +100,13 @@ data class ContentEntryListUiState(
 data class ContentEntryListSelectedItem(
     val contentEntryUid: Long,
     val contentEntryParentChildJoinUid: Long,
+    val parentContentEntryUid: Long,
 )
 
 fun ContentEntryAndListDetail.asSelectedItem() = ContentEntryListSelectedItem(
-    contentEntry?.contentEntryUid ?: 0, contentEntryParentChildJoin?.cepcjUid ?: 0
+    contentEntryUid = contentEntry?.contentEntryUid ?: 0,
+    contentEntryParentChildJoinUid = contentEntryParentChildJoin?.cepcjUid ?: 0,
+    parentContentEntryUid = contentEntryParentChildJoin?.cepcjParentContentEntryUid ?: 0,
 )
 
 /**
@@ -182,6 +188,8 @@ class ContentEntryListViewModel(
      * This will then trigger navigateForResult to DEST_NAME_PICKER with the
      */
     private val showSelectFolderButton = selectFolderMode && listMode == ListViewMode.PICKER
+
+    private val moveContentEntriesUseCase: MoveContentEntriesUseCase by di.onActiveEndpoint().instance()
 
     init {
         val savedStateSelectedEntries = savedStateHandle[KEY_SAVED_STATE_SELECTED_ENTRIES]?.let {
@@ -282,25 +290,25 @@ class ContentEntryListViewModel(
             resultReturner.filteredResultFlowForKey(KEY_RESULT_MOVE_TO_DESTINATION_FOLDER).collect { result ->
                 val destContentEntry = result.result as? ContentEntry ?: return@collect
 
-                val uidsToMove = savedStateHandle[KEY_SAVED_STATE_ENTRIES_TO_MOVE]?.let {
+                val selectedEntriesToMove = savedStateHandle[KEY_SAVED_STATE_ENTRIES_TO_MOVE]?.let {
                     json.decodeFromString(ListSerializer(ContentEntryListSelectedItem.serializer()), it)
-                }?.map { it.contentEntryParentChildJoinUid } ?: emptyList()
+                } ?: return@collect
 
-                if(uidsToMove.isEmpty())
-                    return@collect
-
-                activeRepo.contentEntryParentChildJoinDao.moveListOfEntriesToNewParent(
-                    contentEntryUid = destContentEntry.contentEntryUid,
-                    selectedItems = uidsToMove,
-                    updateTime = systemTimeInMillis()
-                )
-                snackDispatcher.showSnackBar(
-                    Snack(
-                        message = systemImpl.formatString(
-                            MR.strings.moved_x_entries, uidsToMove.size.toString()
+                try {
+                    moveContentEntriesUseCase(destContentEntry, selectedEntriesToMove.toSet())
+                    snackDispatcher.showSnackBar(
+                        Snack(
+                            message = systemImpl.formatString(
+                                MR.strings.moved_x_entries, selectedEntriesToMove.size.toString()
+                            )
                         )
                     )
-                )
+                }catch(e: Throwable) {
+                    Napier.w("Could not move entries", throwable = e)
+                    snackDispatcher.showSnackBar(
+                        Snack(e.message ?: "")
+                    )
+                }
 
                 setSelectedItems(emptySet())
             }
@@ -344,12 +352,38 @@ class ContentEntryListViewModel(
     fun createContextMenuItemsForEntry(
         entry: ContentEntryAndListDetail
     ): List<UstadContextMenuItem> {
-        return if(_uiState.value.hasWritePermission && listMode == ListViewMode.BROWSER) {
+        val uiStateVal = _uiState.value
+        return if(uiStateVal.hasWritePermission && listMode == ListViewMode.BROWSER) {
+            //if the item that has been right clicked is not part of the current selection, then
+            // clear the selection. Roughly the same behavior as file browsers.
+            val rightClickedItem = entry.asSelectedItem()
+            if(rightClickedItem !in uiStateVal.selectedEntries) {
+                setSelectedItems(emptySet())
+            }
+
             listOf(
                 UstadContextMenuItem(
-                    label = systemImpl.getString(MR.strings.move),
+                    label = systemImpl.getString(MR.strings.move_to),
                     onClick = {
-                        selectDestinationToMoveEntries(setOf(entry.asSelectedItem()))
+                        val selectedEntries = _uiState.value.selectedEntries
+                        /**
+                         * If other items are selected, then add the item that was right clicked to
+                         * the selection and move all items. If already in the selection, use
+                         * selected entries without the need to update.
+                         *
+                         * If nothing else selected, leave the selection alone
+                         */
+                        val entriesToMove = when {
+                            selectedEntries.isNotEmpty() && rightClickedItem !in selectedEntries -> {
+                                (selectedEntries + rightClickedItem).toSet().also {
+                                    setSelectedItems(it)
+                                }
+                            }
+                            selectedEntries.isEmpty() -> {  setOf(rightClickedItem) }
+                            else -> selectedEntries
+                        }
+
+                        selectDestinationToMoveEntries(entriesToMove)
                     }
                 )
             )

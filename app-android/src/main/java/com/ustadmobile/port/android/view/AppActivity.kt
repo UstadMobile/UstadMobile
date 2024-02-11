@@ -29,6 +29,7 @@ import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseAndroid
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.LaunchXapiUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.LaunchXapiUseCaseAndroid
+import com.ustadmobile.core.domain.contententry.move.MoveContentEntriesUseCase
 import com.ustadmobile.core.impl.ContainerStorageManager
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -49,6 +50,7 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.redirect.RedirectViewModel
 import com.ustadmobile.door.NanoHttpdCall
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.libuicompose.theme.UstadAppTheme
 import com.ustadmobile.libuicompose.theme.md_theme_dark_primaryContainer
 import com.ustadmobile.libuicompose.theme.md_theme_light_primaryContainer
@@ -154,6 +156,13 @@ class AppActivity: AppCompatActivity(), DIAware {
                 session = { mCustomTabsSession },
                 getHtmlContentDisplayEngineUseCase = instance(),
                 embeddedHttpServer = instance(),
+            )
+        }
+
+        bind<MoveContentEntriesUseCase>() with scoped(EndpointScope.Default).provider {
+            MoveContentEntriesUseCase(
+                repo = instance(tag = DoorTag.TAG_REPO),
+                systemImpl = instance()
             )
         }
 
