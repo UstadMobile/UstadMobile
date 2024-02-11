@@ -2,12 +2,12 @@ package com.ustadmobile.core.impl
 
 import com.russhwolf.settings.Settings
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
-import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorUri
 import dev.icerock.moko.resources.StringResource
 import kotlinx.serialization.KSerializer
 import kotlin.js.JsName
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
+import dev.icerock.moko.resources.PluralsResource
 
 /**
  * Class has all the shared function across all supported platforms
@@ -109,6 +109,8 @@ abstract class UstadMobileSystemCommon(
         stringResource: StringResource,
         vararg args: Any
     ): String
+
+    abstract fun formatPlural(pluralsResource: PluralsResource, number: Int): String
 
     /**
      * Return the mime type for the given extension

@@ -36,7 +36,9 @@ import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import java.util.*
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.concurrentSafeMapOf
+import dev.icerock.moko.resources.PluralsResource
 import dev.icerock.moko.resources.StringResource
+import dev.icerock.moko.resources.format
 
 
 /**
@@ -84,6 +86,10 @@ actual open class UstadMobileSystemImpl(
             },
             args = args,
         )
+    }
+
+    override fun formatPlural(pluralsResource: PluralsResource, number: Int): String {
+        return pluralsResource.format(number, number).localized()
     }
 
     fun getString(stringResource: StringResource, localeCode: String ) : String{

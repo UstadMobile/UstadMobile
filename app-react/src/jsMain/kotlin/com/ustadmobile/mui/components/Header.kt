@@ -7,6 +7,7 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.components.DIContext
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
+import com.ustadmobile.core.impl.appstate.AppBarColors
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.viewmodel.UstadViewModel
@@ -63,7 +64,13 @@ val Header = FC<HeaderProps> { props ->
     var overflowAnchor by useState<Element?> { null }
     val navigateFn = useNavigate()
     val location = useLocation()
-
+    val leadingActionButtonVal = props.appUiState.leadingActionButton
+    val isSelectionColors = props.appUiState.appBarColors == AppBarColors.SELECTION_MODE
+    val contentColor = if(!isSelectionColors) {
+        theme.palette.primary.contrastText
+    }else {
+        theme.palette.secondary.contrastText
+    }
 
     val appDi = useRequiredContext(DIContext)
     val accountManager: UstadAccountManager = appDi.di.direct.instance()
@@ -97,6 +104,12 @@ val Header = FC<HeaderProps> { props ->
     AppBar {
         position = AppBarPosition.fixed
         ref = appBarRef
+        color = if(props.appUiState.appBarColors == AppBarColors.STANDARD) {
+            AppBarColor.primary
+        }else {
+            AppBarColor.secondary
+        }
+
         sx {
             gridArea = Area.Header
             zIndex = integer(1_500)
@@ -132,21 +145,32 @@ val Header = FC<HeaderProps> { props ->
 
 
         Toolbar {
-            if(props.showMenuIcon && props.appUiState.navigationVisible) {
-                IconButton {
-                    ariaLabel = strings[MR.strings.menu]
-                    onClick = {
-                        props.onClickMenuIcon()
+            /* If there is a leading action button (e.g. close selection), then show that.
+             * If not, and we are in responsive mode, show the shelf menu to open drawer.
+             */
+            when {
+                leadingActionButtonVal != null -> {
+                    UstadActionButtonIcon {
+                        actionButton = leadingActionButtonVal
+                        color = contentColor
                     }
+                }
 
-                    MenuIcon {
-                        sx {
-                            color = theme.palette.primary.contrastText
+                props.showMenuIcon && props.appUiState.navigationVisible -> {
+                    IconButton {
+                        ariaLabel = strings[MR.strings.menu]
+                        onClick = {
+                            props.onClickMenuIcon()
+                        }
+
+                        MenuIcon {
+                            sx {
+                                color = contentColor
+                            }
                         }
                     }
                 }
             }
-
 
             Typography{
                 sx { flexGrow = number(1.0) }
@@ -158,7 +182,7 @@ val Header = FC<HeaderProps> { props ->
                 + appBarTitle
             }
 
-            if(location.pathname in ROOT_LOCATIONS) {
+            if(location.pathname in ROOT_LOCATIONS && !props.appUiState.hideSettingsIcon) {
                 IconButton {
                     id = "settings_button"
                     onClick = {
@@ -168,9 +192,16 @@ val Header = FC<HeaderProps> { props ->
 
                     SettingsIcon {
                         sx {
-                            color = theme.palette.primary.contrastText
+                            color = contentColor
                         }
                     }
+                }
+            }
+
+            props.appUiState.actionButtons.forEach {
+                UstadActionButtonIcon {
+                    actionButton = it
+                    color = contentColor
                 }
             }
 

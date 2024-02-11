@@ -25,4 +25,12 @@
         <item quantity="one">%d sec</item>
         <item quantity="other">%d secs</item>
     </plural>
+    <plural name="items_selected">
+        <item quantity="zero">%d items selected</item>
+        <item quantity="one">%d item selected</item>
+        <item quantity="two">%d item selected</item>
+        <item quantity="few">%d items selected</item>
+        <item quantity="many">%d items selected</item>
+        <item quantity="other">%d items selected</item>
+    </plural>
 </resources>

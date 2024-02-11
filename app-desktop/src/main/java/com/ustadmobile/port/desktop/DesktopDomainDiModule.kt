@@ -54,6 +54,7 @@ import com.ustadmobile.core.domain.language.SetLanguageUseCaseJvm
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.LaunchXapiUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.LaunchXapiUseCaseJvm
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.ResolveXapiLaunchHrefUseCase
+import com.ustadmobile.core.domain.contententry.move.MoveContentEntriesUseCase
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.launchopenlicenses.LaunchOpenLicensesUseCase
 import com.ustadmobile.core.domain.phonenumber.OnClickPhoneNumUseCase
@@ -340,5 +341,12 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
 
     bind<SetClipboardStringUseCase>() with provider {
         SetClipboardStringUseCaseJvm()
+    }
+
+    bind<MoveContentEntriesUseCase>() with scoped(EndpointScope.Default).provider {
+        MoveContentEntriesUseCase(
+            repo = instance(tag = DoorTag.TAG_REPO),
+            systemImpl = instance()
+        )
     }
 }
