@@ -30,6 +30,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import com.ustadmobile.libuicompose.components.UstadBottomSheetOption
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.impl.appstate.UstadContextMenuItem
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.lib.db.composites.ContentEntryAndListDetail
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -65,6 +66,7 @@ fun ContentEntryListScreenForViewModel(
         onClickImportFromLink = viewModel::onClickImportFromLink,
         onSetSelected = viewModel::onSetSelected,
         onClickSelectThisFolder = viewModel::onClickSelectThisFolder,
+        contextMenuItems = viewModel::createContextMenuItemsForEntry,
     )
 
     if(uiState.createNewOptionsVisible) {
@@ -123,6 +125,7 @@ fun ContentEntryListScreen(
     onClickImportFromLink: () -> Unit = { },
     onSetSelected: (entry: ContentEntryAndListDetail, selected: Boolean) -> Unit = { _, _ -> },
     onClickSelectThisFolder: () -> Unit = { },
+    contextMenuItems: (ContentEntryAndListDetail) -> List<UstadContextMenuItem> = { emptyList() },
 ) {
     val pager = remember(uiState.contentEntryList) {
         Pager(
@@ -205,7 +208,8 @@ fun ContentEntryListScreen(
                         },
                         entry = entry,
                         onSetSelected = onSetSelected,
-                        isSelected = (contentEntryUid in uiState.selectedEntryUids)
+                        isSelected = (contentEntryUid in uiState.selectedEntryUids),
+                        contextMenuItems = contextMenuItems,
                     )
                 }
             }
