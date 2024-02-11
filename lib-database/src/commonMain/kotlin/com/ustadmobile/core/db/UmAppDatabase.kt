@@ -323,4 +323,6 @@ expect abstract class UmAppDatabase : RoomDatabase {
 
     abstract val offlineItemDao: OfflineItemDao
 
+    abstract val deletedItemDao: DeletedItemDao
+
 }

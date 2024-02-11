@@ -13,6 +13,7 @@ import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewMode
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel.Companion.FILTER_BY_PARENT_UID
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import app.cash.paging.PagingSource
+import com.ustadmobile.core.domain.contententry.delete.DeleteContentEntryParentChildJoinUseCase
 import com.ustadmobile.core.domain.contententry.move.MoveContentEntriesUseCase
 import com.ustadmobile.core.impl.appstate.AppActionButton
 import com.ustadmobile.core.impl.appstate.AppBarColors
@@ -159,17 +160,19 @@ class ContentEntryListViewModel(
                     langParam = 0,
                     categoryParam0 = 0,
                     personUid = activeUserPersonUid,
-                    showHidden = false,
-                    onlyFolder = false,
-                    sortOrder = _uiState.value.activeSortOption.flag
+                    sortOrder = _uiState.value.activeSortOption.flag,
+                    includeDeleted = false,
                 )
             }
 
             FILTER_BY_PARENT_UID -> {
                 activeRepo.contentEntryDao.getChildrenByParentUidWithCategoryFilterOrderByName(
-                    parentEntryUid, 0, 0, activeUserPersonUid,
-                    _uiState.value.showHiddenEntries, false,
-                    _uiState.value.activeSortOption.flag
+                    parentUid = parentEntryUid,
+                    langParam = 0,
+                    categoryParam0 = 0,
+                    personUid = activeUserPersonUid,
+                    sortOrder = _uiState.value.activeSortOption.flag,
+                    includeDeleted = false,
                 )
             }
 
@@ -190,6 +193,8 @@ class ContentEntryListViewModel(
     private val showSelectFolderButton = selectFolderMode && listMode == ListViewMode.PICKER
 
     private val moveContentEntriesUseCase: MoveContentEntriesUseCase by di.onActiveEndpoint().instance()
+
+    private val deleteEntriesUseCase: DeleteContentEntryParentChildJoinUseCase by di.onActiveEndpoint().instance()
 
     init {
         val savedStateSelectedEntries = savedStateHandle[KEY_SAVED_STATE_SELECTED_ENTRIES]?.let {
@@ -332,6 +337,12 @@ class ContentEntryListViewModel(
                                         contentDescription = systemImpl.getString(MR.strings.move),
                                         onClick = this@ContentEntryListViewModel::onClickMoveAction,
                                         id = "action_move"
+                                    ),
+                                    AppActionButton(
+                                        icon = AppStateIcon.DELETE,
+                                        contentDescription = systemImpl.getString(MR.strings.delete),
+                                        onClick = this@ContentEntryListViewModel::onClickDeleteAction,
+                                        id = "action_delete"
                                     )
                                 )
                             }else {
@@ -361,29 +372,37 @@ class ContentEntryListViewModel(
                 setSelectedItems(emptySet())
             }
 
+            /**
+             * If other items are selected, then add the item that was right clicked to
+             * the selection and move/delete all items. If entry is already in the selection, use
+             * selected entries without the need to update.
+             *
+             * If nothing was selected, leave the selection alone
+             */
+            fun entriesToAction(): Set<ContentEntryListSelectedItem> {
+                val selectedEntries = _uiState.value.selectedEntries
+                return when {
+                    selectedEntries.isNotEmpty() && rightClickedItem !in selectedEntries -> {
+                        (selectedEntries + rightClickedItem).toSet().also {
+                            setSelectedItems(it)
+                        }
+                    }
+                    selectedEntries.isEmpty() -> {  setOf(rightClickedItem) }
+                    else -> selectedEntries
+                }
+            }
+
             listOf(
                 UstadContextMenuItem(
                     label = systemImpl.getString(MR.strings.move_to),
                     onClick = {
-                        val selectedEntries = _uiState.value.selectedEntries
-                        /**
-                         * If other items are selected, then add the item that was right clicked to
-                         * the selection and move all items. If already in the selection, use
-                         * selected entries without the need to update.
-                         *
-                         * If nothing else selected, leave the selection alone
-                         */
-                        val entriesToMove = when {
-                            selectedEntries.isNotEmpty() && rightClickedItem !in selectedEntries -> {
-                                (selectedEntries + rightClickedItem).toSet().also {
-                                    setSelectedItems(it)
-                                }
-                            }
-                            selectedEntries.isEmpty() -> {  setOf(rightClickedItem) }
-                            else -> selectedEntries
-                        }
-
-                        selectDestinationToMoveEntries(entriesToMove)
+                        selectDestinationToMoveEntries(entriesToAction())
+                    },
+                ),
+                UstadContextMenuItem(
+                    label = systemImpl.getString(MR.strings.delete),
+                    onClick = {
+                        launchDeleteEntries(entriesToAction())
                     }
                 )
             )
@@ -600,6 +619,25 @@ class ContentEntryListViewModel(
 
     private fun onClickMoveAction() {
         selectDestinationToMoveEntries(_uiState.value.selectedEntries)
+    }
+
+    private fun launchDeleteEntries(entries: Set<ContentEntryListSelectedItem>) {
+        viewModelScope.launch {
+            deleteEntriesUseCase(
+                entries = entries,
+                activeUserPersonUid = activeUserPersonUid
+            )
+
+            setSelectedItems(emptySet())
+
+            snackDispatcher.showSnackBar(
+                Snack(systemImpl.formatPlural(MR.plurals.items_deleted, entries.size))
+            )
+        }
+    }
+
+    private fun onClickDeleteAction() {
+        launchDeleteEntries(_uiState.value.selectedEntries)
     }
 
 

@@ -57,6 +57,7 @@ import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCaseC
 import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCase
 import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCaseAndroid
 import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseAndroid
+import com.ustadmobile.core.domain.contententry.delete.DeleteContentEntryParentChildJoinUseCase
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCase
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCaseCommonJvm
 import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCase
@@ -653,6 +654,11 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             GetDeveloperInfoUseCaseAndroid(applicationContext)
         }
 
+        bind<DeleteContentEntryParentChildJoinUseCase>() with scoped(EndpointScope.Default).provider {
+            DeleteContentEntryParentChildJoinUseCase(
+                repoOrDb = instance(tag = DoorTag.TAG_REPO),
+            )
+        }
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
     }

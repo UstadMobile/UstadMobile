@@ -38,6 +38,7 @@ import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCaseC
 import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCase
 import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCaseJvm
 import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseJvm
+import com.ustadmobile.core.domain.contententry.delete.DeleteContentEntryParentChildJoinUseCase
 import com.ustadmobile.core.domain.contententry.getlocalurlforcontent.GetLocalUrlForContentUseCase
 import com.ustadmobile.core.domain.contententry.getlocalurlforcontent.GetLocalUrlForContentUseCaseCommonJvm
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCase
@@ -347,6 +348,12 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         MoveContentEntriesUseCase(
             repo = instance(tag = DoorTag.TAG_REPO),
             systemImpl = instance()
+        )
+    }
+
+    bind<DeleteContentEntryParentChildJoinUseCase>() with scoped(EndpointScope.Default).provider {
+        DeleteContentEntryParentChildJoinUseCase(
+            repoOrDb = instance(tag = DoorTag.TAG_REPO),
         )
     }
 }
