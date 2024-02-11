@@ -276,6 +276,8 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     ),
     UstadScreen(ContentEntryListViewModel.DEST_NAME_HOME, "ContentEntryListHome",
         ContentEntryListScreen),
+    UstadScreen(ContentEntryListViewModel.DEST_NAME_PICKER, "ContentEntryListPicker",
+        ContentEntryListScreen),
     UstadScreen(AccountListViewModel.DEST_NAME, "AccountList", AccountListScreen),
     UstadScreen(
         ClazzMemberListViewModel.DEST_NAME, "ClazzMemberList Preview", ClazzMemberListScreen

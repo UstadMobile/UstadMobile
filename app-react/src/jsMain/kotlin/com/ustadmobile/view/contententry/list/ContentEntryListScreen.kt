@@ -12,6 +12,7 @@ import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewMode
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useUstadViewModel
+import com.ustadmobile.lib.db.composites.ContentEntryAndListDetail
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.mui.components.UstadListFilterChipsHeader
 import com.ustadmobile.view.contententry.UstadContentEntryListItem
@@ -24,14 +25,17 @@ import web.cssom.*
 import js.core.jso
 import mui.material.*
 import mui.material.List
+import mui.system.sx
 import react.FC
 import react.Props
 import react.ReactNode
 import react.create
 import react.dom.html.ReactHTML.input
 import react.router.useLocation
+import react.useEffect
 import react.useRef
 import react.useState
+import web.html.HTMLElement
 import web.html.HTMLInputElement
 import web.html.InputType
 import web.url.URL
@@ -51,6 +55,10 @@ external interface ContentEntryListScreenProps : Props {
 
     var onClickFilterChip: (MessageIdOption2) -> Unit
 
+    var onSetSelected: (entry: ContentEntryAndListDetail, selected: Boolean) -> Unit
+
+    var onClickSelectThisFolder: () -> Unit
+
 }
 
 @Suppress("unused") //For development purposes - will be removed by DCE in production anyway
@@ -60,22 +68,28 @@ val ContentEntryListScreenPreview = FC<Props> {
         uiState = ContentEntryListUiState(
             contentEntryList = {
                 ListPagingSource(listOf(
-                    ContentEntry().apply {
-                        contentEntryUid = 1
-                        leaf = false
-                        ceInactive = true
-                        contentTypeFlag = ContentEntry.TYPE_INTERACTIVE_EXERCISE
-                        title = "Content Title 1"
-                        description = "Content Description 1"
-                    },
-                    ContentEntry().apply {
-                        contentEntryUid = 2
-                        leaf = true
-                        ceInactive = false
-                        contentTypeFlag = ContentEntry.TYPE_DOCUMENT
-                        title = "Content Title 2"
-                        description = "Content Description 2"
-                    }
+                    ContentEntryAndListDetail(
+                        contentEntry  = ContentEntry().apply {
+
+                            contentEntryUid = 1
+                            leaf = false
+                            ceInactive = true
+                            contentTypeFlag = ContentEntry.TYPE_INTERACTIVE_EXERCISE
+                            title = "Content Title 1"
+                            description = "Content Description 1"
+
+                        }
+                    ),
+                    ContentEntryAndListDetail(
+                        contentEntry = ContentEntry().apply {
+                            contentEntryUid = 2
+                            leaf = true
+                            ceInactive = false
+                            contentTypeFlag = ContentEntry.TYPE_DOCUMENT
+                            title = "Content Title 2"
+                            description = "Content Description 2"
+                        }
+                    )
                 ))
             },
         )
@@ -116,6 +130,8 @@ val ContentEntryListScreen = FC<Props> {
             fileInputRef.current?.click()
         }
         onClickFilterChip = viewModel::onClickFilterChip
+        onSetSelected = viewModel::onSetSelected
+        onClickSelectThisFolder = viewModel::onClickSelectThisFolder
     }
 
     UstadFab {
@@ -195,9 +211,22 @@ private val ContentEntryListScreenComponent = FC<ContentEntryListScreenProps> { 
 
     val strings = useStringProvider()
 
+    val buttonRef = useRef<HTMLElement>(null)
+    var selectFolderButtonHeight: Int by useState(0)
+    val buttonPaddingPx = 8
+
+    useEffect(buttonRef.current?.clientHeight, props.uiState.showSelectFolderButton) {
+        console.log("button height = ${buttonRef.current?.clientHeight}")
+        selectFolderButtonHeight = if(props.uiState.showSelectFolderButton) {
+            (buttonRef.current?.clientHeight ?: 0) + (buttonPaddingPx * 2)
+        }else {
+            0
+        }
+    }
+
     VirtualList {
         style = jso {
-            height = "calc(100vh - ${muiAppState.appBarHeight}px)".unsafeCast<Height>()
+            height = "calc(100vh - ${muiAppState.appBarHeight + selectFolderButtonHeight}px)".unsafeCast<Height>()
             width = 100.pct
             contain = Contain.strict
             overflowY = Overflow.scroll
@@ -258,10 +287,14 @@ private val ContentEntryListScreenComponent = FC<ContentEntryListScreenProps> { 
 
             infiniteQueryPagingItems(
                 items = infiniteQueryResult,
-                key = { it.contentEntryUid.toString() }
+                key = { "${it.contentEntry?.contentEntryUid}_${it.contentEntryParentChildJoin?.cepcjUid}" }
             ) { entry ->
                 UstadContentEntryListItem.create {
                     onClickContentEntry = props.onClickContentEntry
+                    onSetSelected = props.onSetSelected
+                    selected = entry?.contentEntry?.contentEntryUid?.let {
+                        it in props.uiState.selectedEntryUids
+                    } ?: false
                     contentEntry = entry
                 }
             }
@@ -272,5 +305,26 @@ private val ContentEntryListScreenComponent = FC<ContentEntryListScreenProps> { 
                 VirtualListOutlet()
             }
         }
+    }
+
+    Button {
+        sx {
+            display = if(props.uiState.showSelectFolderButton) {
+                Display.block
+            }else {
+                "none".unsafeCast<Display>()
+            }
+            margin = buttonPaddingPx.px
+            width = "calc(100% - ${buttonPaddingPx* 2}px)".unsafeCast<Width>()
+        }
+        id = "select_folder_button"
+        ref = buttonRef
+        variant = ButtonVariant.contained
+
+        onClick = {
+            props.onClickSelectThisFolder()
+        }
+
+        + strings[MR.strings.move_entries_to_this_folder]
     }
 }

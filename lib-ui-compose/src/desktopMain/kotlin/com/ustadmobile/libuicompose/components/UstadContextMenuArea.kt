@@ -1,9 +1,9 @@
 package com.ustadmobile.libuicompose.components
 
 import androidx.compose.foundation.ContextMenuArea
+import androidx.compose.foundation.ContextMenuItem
 import androidx.compose.runtime.Composable
 import com.ustadmobile.core.impl.appstate.UstadContextMenuItem
-import com.ustadmobile.libuicompose.util.ext.asContextMenuItems
 
 @Composable
 actual fun UstadContextMenuArea(
@@ -11,7 +11,11 @@ actual fun UstadContextMenuArea(
     content: @Composable () -> Unit,
 ) {
     ContextMenuArea(
-        items = { items().asContextMenuItems() },
+        items = {
+            items().map {
+                ContextMenuItem(it.label, it.onClick)
+            }
+        },
         content = content,
     )
 }

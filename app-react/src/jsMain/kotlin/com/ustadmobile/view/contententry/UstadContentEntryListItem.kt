@@ -3,6 +3,7 @@ package com.ustadmobile.view.contententry
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.viewmodel.contententry.contentTypeStringResource
 import com.ustadmobile.core.viewmodel.contententry.list.listItemUiState
+import com.ustadmobile.lib.db.composites.ContentEntryAndListDetail
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.mui.common.justifyContent
 import com.ustadmobile.mui.ext.paddingCourseBlockIndent
@@ -22,30 +23,42 @@ import react.create
 
 external interface UstadContentEntryListItemProps : Props {
 
-    var contentEntry: ContentEntry?
+    var contentEntry: ContentEntryAndListDetail?
 
     var onClickContentEntry: (ContentEntry?) -> Unit
 
+    var onSetSelected: (entry: ContentEntryAndListDetail, selected: Boolean) -> Unit
+
     var padding: Padding
+
+    var selected: Boolean
 
 }
 
 val UstadContentEntryListItem = FC<UstadContentEntryListItemProps> { props ->
-
-    val uiState = props.contentEntry?.listItemUiState
-
-    ListItem{
+    ListItem {
         ListItemButton {
-            onClick = { props.onClickContentEntry(props.contentEntry) }
-
             sx {
                 padding = props.padding
-                opacity = number(uiState?.containerAlpha ?: 1.0)
             }
+
+            onClick = {
+                if(it.shiftKey || it.ctrlKey) {
+                    props.contentEntry?.also {
+                        props.onSetSelected(it, !props.selected)
+                    }
+                }else {
+                    props.contentEntry?.contentEntry?.also {
+                        props.onClickContentEntry(it)
+                    }
+                }
+
+            }
+            selected = props.selected
 
             ListItemIcon {
                 LeadingContent {
-                    contentEntryItem = uiState?.contentEntry
+                    contentEntryItem = props.contentEntry?.contentEntry
                 }
             }
 
@@ -54,9 +67,9 @@ val UstadContentEntryListItem = FC<UstadContentEntryListItemProps> { props ->
             }
 
             ListItemText {
-                primary = ReactNode(props.contentEntry?.title ?: "")
+                primary = ReactNode(props.contentEntry?.contentEntry?.title ?: "")
                 secondary = SecondaryContent.create {
-                    contentEntryItem = props.contentEntry
+                    contentEntryItem = props.contentEntry?.contentEntry
                 }
             }
         }
@@ -139,14 +152,16 @@ private val SecondaryContent = FC<SecondaryContentProps> { props ->
 val UstadContentEntryListItemPreview = FC<Props> {
 
     UstadContentEntryListItem {
-        contentEntry = ContentEntry().apply {
-            contentEntryUid = 1
-            leaf = true
-            ceInactive = true
-            contentTypeFlag = ContentEntry.TYPE_INTERACTIVE_EXERCISE
-            title = "Content Title"
-            description = "Content Description"
-        }
+        contentEntry = ContentEntryAndListDetail(
+            contentEntry = ContentEntry().apply {
+                contentEntryUid = 1
+                leaf = true
+                ceInactive = true
+                contentTypeFlag = ContentEntry.TYPE_INTERACTIVE_EXERCISE
+                title = "Content Title"
+                description = "Content Description"
+            }
+        )
         padding = paddingCourseBlockIndent(6)
     }
 }

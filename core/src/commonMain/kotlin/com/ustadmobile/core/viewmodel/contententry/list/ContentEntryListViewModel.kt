@@ -322,7 +322,8 @@ class ContentEntryListViewModel(
                                     AppActionButton(
                                         icon = AppStateIcon.MOVE,
                                         contentDescription = systemImpl.getString(MR.strings.move),
-                                        onClick = this@ContentEntryListViewModel::onClickMoveAction
+                                        onClick = this@ContentEntryListViewModel::onClickMoveAction,
+                                        id = "action_move"
                                     )
                                 )
                             }else {
@@ -454,7 +455,11 @@ class ContentEntryListViewModel(
 
             else -> {
                 navController.navigate(
-                    viewName = destinationName,
+                    viewName = if(destinationName == DEST_NAME_HOME) {
+                        DEST_NAME
+                    }else {
+                        destinationName
+                    },
                     args = buildMap {
                         put(ARG_FILTER, FILTER_BY_PARENT_UID.toString())
                         put(ARG_PARENT_UID, entry.contentEntryUid.toString())
@@ -522,7 +527,8 @@ class ContentEntryListViewModel(
                         contentDescription = systemImpl.getString(MR.strings.clear_selection),
                         onClick = {
                             setSelectedItems(emptySet())
-                        }
+                        },
+                        id = "clear_selection"
                     )
                 }else {
                     null
