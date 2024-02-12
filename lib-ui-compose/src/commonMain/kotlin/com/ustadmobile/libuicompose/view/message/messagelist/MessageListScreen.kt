@@ -41,6 +41,7 @@ import androidx.compose.ui.input.key.isShiftPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.text.style.TextAlign
 import androidx.paging.compose.itemKey
 import com.ustadmobile.lib.db.entities.Message
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
@@ -49,9 +50,12 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.libuicompose.components.UstadLinkifyText
 import com.ustadmobile.libuicompose.util.linkify.ILinkExtractor
 import com.ustadmobile.libuicompose.util.linkify.rememberLinkExtractor
+import com.ustadmobile.libuicompose.util.rememberTimeFormatter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
+import java.text.DateFormat
+import java.util.Date
 
 @Composable
 fun MessageListScreen(
@@ -86,6 +90,7 @@ fun MessageListScreen(
     val coroutineScope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState()
     val itemCount = lazyPagingItems.itemCount
+    val timeFormatter = rememberTimeFormatter()
 
     Column(
         modifier = Modifier.fillMaxSize()
@@ -117,6 +122,7 @@ fun MessageListScreen(
                     message = message,
                     activeUserUid = uiState.activePersonUid,
                     linkExtractor = linkExtractor,
+                    timeFormatter = timeFormatter,
                     modifier = Modifier.fillMaxSize().defaultItemPadding(),
                 )
             }
@@ -136,6 +142,7 @@ fun ChatItem(
     message: Message?,
     activeUserUid: Long,
     linkExtractor: ILinkExtractor,
+    timeFormatter: DateFormat,
     modifier: Modifier = Modifier,
 ) {
     val isFromMe = message?.messageSenderPersonUid == activeUserUid
@@ -154,13 +161,30 @@ fun ChatItem(
                         bottomEnd = if (isFromMe) 0f else 16f
                     )
                 )
-                .background(MaterialTheme.colorScheme.primaryContainer)
+                .background(
+                    if(isFromMe) {
+                        MaterialTheme.colorScheme.primaryContainer
+                    }else {
+                        MaterialTheme.colorScheme.tertiaryContainer
+                    }
+                )
                 .padding(8.dp)
         ) {
-            UstadLinkifyText(
-                text = message?.messageText ?: "",
-                linkExtractor = linkExtractor,
-            )
+            Column {
+                UstadLinkifyText(
+                    text = message?.messageText ?: "",
+                    linkExtractor = linkExtractor,
+                )
+                Text(
+                    modifier = Modifier,
+                    style = MaterialTheme.typography.labelSmall,
+                    text = remember(message?.messageTimestamp ?: 0L) {
+                        timeFormatter.format(Date(message?.messageTimestamp ?: 0L))
+                    },
+                    textAlign = TextAlign.End,
+                )
+            }
+
         }
     }
 }

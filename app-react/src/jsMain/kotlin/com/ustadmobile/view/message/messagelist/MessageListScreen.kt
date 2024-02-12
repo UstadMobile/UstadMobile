@@ -5,8 +5,10 @@ import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.core.viewmodel.message.messagelist.MessageListUiState
 import com.ustadmobile.core.viewmodel.message.messagelist.MessageListViewModel
+import com.ustadmobile.hooks.useFormattedTimeForDate
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
+import com.ustadmobile.hooks.useTimeFormatter
 import com.ustadmobile.lib.db.entities.Message
 import com.ustadmobile.mui.components.ThemeContext
 import com.ustadmobile.mui.components.UstadLinkify
@@ -15,6 +17,7 @@ import com.ustadmobile.util.ext.onTextChange
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.virtualListContent
+import com.ustadmobile.wrappers.intl.Intl
 import web.cssom.Contain
 import web.cssom.Height
 import web.cssom.Overflow
@@ -24,10 +27,12 @@ import web.cssom.JustifyContent
 import mui.material.Container
 import mui.material.Box
 import mui.material.Typography
+import mui.material.styles.TypographyVariant
 import mui.system.sx
 import react.FC
 import react.Props
 import react.create
+import react.dom.html.ReactHTML.br
 import react.useEffect
 import react.useRef
 import react.useRequiredContext
@@ -59,6 +64,7 @@ private val MessageListScreenComponent2 = FC<MessageListScreenProps> { props ->
     val newMessageBoxRef = useRef<HTMLElement>(null)
     var newMessageBoxHeight: Int by useState(0)
     val newMessageBoxPaddingPx = 8
+    val timeFormatterVal = useTimeFormatter()
 
     useEffect(newMessageBoxRef.current?.clientHeight) {
         newMessageBoxHeight =
@@ -83,6 +89,7 @@ private val MessageListScreenComponent2 = FC<MessageListScreenProps> { props ->
                 ChatItem.create {
                     message = messageItem
                     activeUserUid = props.uiState.activePersonUid
+                    timeFormatter = timeFormatterVal
                 }
             }
         }
@@ -149,12 +156,15 @@ external interface ChatItemProps: Props {
 
     var activeUserUid: Long
 
+    var timeFormatter: Intl.Companion.DateTimeFormat
+
 }
 
 val ChatItem = FC<ChatItemProps> { props ->
 
     val theme by useRequiredContext(ThemeContext)
     val isFromMe = props.message?.messageSenderPersonUid == props.activeUserUid
+    val messageTime = useFormattedTimeForDate(props.message?.messageTimestamp ?: 0, props.timeFormatter)
 
     Box {
         sx {
@@ -163,20 +173,35 @@ val ChatItem = FC<ChatItemProps> { props ->
             justifyContent = if (isFromMe) JustifyContent.end else JustifyContent.start
         }
 
-        Typography {
+        Box {
             sx {
-                backgroundColor = theme.palette.primary.light
+                backgroundColor = if(isFromMe) {
+                    theme.palette.primary.light
+                }else {
+                    theme.palette.primary.dark
+                }
                 color = theme.palette.primary.contrastText
                 padding = 10.px
                 margin = 5.px
-                borderTopLeftRadius = 48.px
-                borderTopRightRadius = 48.px
-                borderBottomLeftRadius = if (isFromMe) 48.px else 0.px
-                borderBottomRightRadius = if (isFromMe) 0.px else 48.px
+                borderTopLeftRadius = 24.px
+                borderTopRightRadius = 24.px
+                borderBottomLeftRadius = if (isFromMe) 24.px else 0.px
+                borderBottomRightRadius = if (isFromMe) 0.px else 24.px
             }
+
             UstadLinkify {
                 + (props.message?.messageText ?: "")
             }
+
+            br()
+
+            Typography {
+                variant = TypographyVariant.caption
+
+                + messageTime
+            }
         }
+
+
     }
 }

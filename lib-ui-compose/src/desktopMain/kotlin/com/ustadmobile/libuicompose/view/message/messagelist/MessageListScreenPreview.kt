@@ -6,13 +6,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.ustadmobile.lib.db.entities.Message
 import com.ustadmobile.libuicompose.util.linkify.rememberLinkExtractor
+import com.ustadmobile.libuicompose.util.rememberTimeFormatter
 
 @Preview
 @Composable
 fun MessageListScreenPreview() {
     val linkExtractor = rememberLinkExtractor()
     Column{
-
+        val timeFormatter = rememberTimeFormatter()
         Column(
             modifier = Modifier.weight(1f)
         ) {
@@ -22,6 +23,7 @@ fun MessageListScreenPreview() {
                     messageSenderPersonUid = 1
                 ),
                 activeUserUid = 1,
+                timeFormatter = timeFormatter,
                 linkExtractor = linkExtractor,
             )
             ChatItem(
@@ -30,6 +32,7 @@ fun MessageListScreenPreview() {
                     messageSenderPersonUid = 2,
                 ),
                 activeUserUid = 1,
+                timeFormatter = timeFormatter,
                 linkExtractor = linkExtractor,
             )
         }

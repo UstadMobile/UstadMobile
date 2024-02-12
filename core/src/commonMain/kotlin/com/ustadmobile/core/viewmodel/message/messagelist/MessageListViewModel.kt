@@ -43,6 +43,7 @@ class MessageListViewModel(
         _appUiState.update { prev ->
             prev.copy(
                 navigationVisible = true,
+                userAccountIconVisible = false,
             )
         }
 
@@ -65,10 +66,6 @@ class MessageListViewModel(
             }
 
         }
-
-
-
-
     }
 
 
