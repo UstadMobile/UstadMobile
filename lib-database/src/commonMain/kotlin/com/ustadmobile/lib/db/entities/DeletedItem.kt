@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.db.entities
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
@@ -8,6 +9,7 @@ import com.ustadmobile.door.annotation.ReplicateEtag
 import com.ustadmobile.door.annotation.ReplicateLastModified
 import com.ustadmobile.door.annotation.Trigger
 import com.ustadmobile.door.annotation.Triggers
+import kotlinx.serialization.Serializable
 
 /**
  * Represents an item that has been deleted. When an item is deleted:
@@ -40,6 +42,7 @@ import com.ustadmobile.door.annotation.Triggers
         )
     )
 )
+@Serializable
 data class DeletedItem(
     @PrimaryKey(autoGenerate = true)
     var delItemUid: Long = 0,
@@ -61,6 +64,9 @@ data class DeletedItem(
     var delItemDeletedByPersonUid: Long = 0,
 
     var delItemStatus: Int = STATUS_PENDING,
+
+    @ColumnInfo(defaultValue = "0")
+    var delItemIsFolder: Boolean = false,
 ) {
 
     companion object {

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 143,
-    "identityHash": "73fed42caaf3b22d0b4ae35c572f2af6",
+    "identityHash": "5b31d9617ac765ff3fc91bec11078e07",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -6459,7 +6459,7 @@
       },
       {
         "tableName": "DeletedItem",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`delItemUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `delItemName` TEXT, `delItemIconUri` TEXT, `delItemLastModTime` INTEGER NOT NULL, `delItemTimeDeleted` INTEGER NOT NULL, `delItemEntityTable` INTEGER NOT NULL, `delItemEntityUid` INTEGER NOT NULL, `delItemDeletedByPersonUid` INTEGER NOT NULL, `delItemStatus` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`delItemUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `delItemName` TEXT, `delItemIconUri` TEXT, `delItemLastModTime` INTEGER NOT NULL, `delItemTimeDeleted` INTEGER NOT NULL, `delItemEntityTable` INTEGER NOT NULL, `delItemEntityUid` INTEGER NOT NULL, `delItemDeletedByPersonUid` INTEGER NOT NULL, `delItemStatus` INTEGER NOT NULL, `delItemIsFolder` INTEGER NOT NULL DEFAULT 0)",
         "fields": [
           {
             "fieldPath": "delItemUid",
@@ -6514,6 +6514,13 @@
             "columnName": "delItemStatus",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "delItemIsFolder",
+            "columnName": "delItemIsFolder",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
           }
         ],
         "primaryKey": {
@@ -6649,7 +6656,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '73fed42caaf3b22d0b4ae35c572f2af6')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '5b31d9617ac765ff3fc91bec11078e07')"
     ]
   }
 }

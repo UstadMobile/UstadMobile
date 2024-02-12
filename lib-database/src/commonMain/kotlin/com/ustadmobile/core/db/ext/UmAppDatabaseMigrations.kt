@@ -1448,15 +1448,15 @@ val MIGRATION_141_142 = DoorMigrationStatementList(141, 142) { db ->
     listOf("DROP TABLE IF EXISTS ClazzAssignmentContentJoin")
 }
 
-val MIGRATION_142_143 = DoorMigrationStatementList(141, 142) { db ->
+val MIGRATION_142_143 = DoorMigrationStatementList(142, 143) { db ->
     buildList {
         if(db.dbType() == DoorDbType.SQLITE) {
             add("ALTER TABLE ContentEntryParentChildJoin ADD COLUMN cepcjDeleted INTEGER NOT NULL DEFAULT 0")
-            add("CREATE TABLE IF NOT EXISTS DeletedItem (  delItemName  TEXT , delItemIconUri  TEXT , delItemLastModTime  INTEGER  NOT NULL , delItemTimeDeleted  INTEGER  NOT NULL , delItemEntityTable  INTEGER  NOT NULL , delItemEntityUid  INTEGER  NOT NULL , delItemDeletedByPersonUid  INTEGER  NOT NULL , delItemStatus  INTEGER  NOT NULL , delItemUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+            add("CREATE TABLE IF NOT EXISTS DeletedItem (  delItemName  TEXT , delItemIconUri  TEXT , delItemLastModTime  INTEGER  NOT NULL , delItemTimeDeleted  INTEGER  NOT NULL , delItemEntityTable  INTEGER  NOT NULL , delItemEntityUid  INTEGER  NOT NULL , delItemDeletedByPersonUid  INTEGER  NOT NULL , delItemStatus  INTEGER  NOT NULL , delItemIsFolder  INTEGER  NOT NULL  DEFAULT 0 , delItemUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
             add("CREATE INDEX delitem_idx_status_time ON DeletedItem (delItemStatus, delItemTimeDeleted)")
         }else {
             add("ALTER TABLE ContentEntryParentChildJoin ADD COLUMN cepcjDeleted BOOL NOT NULL DEFAULT false")
-            add("CREATE TABLE IF NOT EXISTS DeletedItem (  delItemName  TEXT , delItemIconUri  TEXT , delItemLastModTime  BIGINT  NOT NULL , delItemTimeDeleted  BIGINT  NOT NULL , delItemEntityTable  INTEGER  NOT NULL , delItemEntityUid  BIGINT  NOT NULL , delItemDeletedByPersonUid  BIGINT  NOT NULL , delItemStatus  INTEGER  NOT NULL , delItemUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+            add("CREATE TABLE IF NOT EXISTS DeletedItem (  delItemName  TEXT , delItemIconUri  TEXT , delItemLastModTime  BIGINT  NOT NULL , delItemTimeDeleted  BIGINT  NOT NULL , delItemEntityTable  INTEGER  NOT NULL , delItemEntityUid  BIGINT  NOT NULL , delItemDeletedByPersonUid  BIGINT  NOT NULL , delItemStatus  INTEGER  NOT NULL , delItemIsFolder  BOOL  NOT NULL  DEFAULT false, delItemUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
             add("CREATE INDEX delitem_idx_status_time ON DeletedItem (delItemStatus, delItemTimeDeleted)")
         }
     }

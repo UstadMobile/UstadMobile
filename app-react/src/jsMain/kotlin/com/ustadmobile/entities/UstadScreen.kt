@@ -144,6 +144,8 @@ import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.Register
 import com.ustadmobile.view.person.registerminorwaitforparent.RegisterMinorWaitForParentScreen
 import com.ustadmobile.core.viewmodel.about.OpenLicensesViewModel
 import com.ustadmobile.view.about.OpenLicensesScreen
+import com.ustadmobile.core.viewmodel.deleteditem.DeletedItemListViewModel
+import com.ustadmobile.view.deleteditem.list.DeletedItemListScreen
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -380,6 +382,7 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(RegisterAgeRedirectViewModel.DEST_NAME, "AgeRedirect", RegisterAgeRedirectScreen),
     UstadScreen(SiteTermsDetailViewModel.DEST_NAME, "Terms", SiteTermsDetailScreen),
     UstadScreen(OpenLicensesViewModel.DEST_NAME, "OpenLicenses", OpenLicensesScreen),
+    UstadScreen(DeletedItemListViewModel.DEST_NAME, "DeletedItems", DeletedItemListScreen),
 )
 
 //Here as per the MUI showcase template

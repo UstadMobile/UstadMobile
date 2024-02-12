@@ -183,16 +183,20 @@ val Header = FC<HeaderProps> { props ->
             }
 
             if(location.pathname in ROOT_LOCATIONS && !props.appUiState.hideSettingsIcon) {
-                IconButton {
-                    id = "settings_button"
-                    onClick = {
-                        navigateFn("/${SettingsViewModel.DEST_NAME}")
-                    }
-                    ariaLabel = strings[MR.strings.settings]
+                Tooltip {
+                    title = ReactNode(strings[MR.strings.settings])
 
-                    SettingsIcon {
-                        sx {
-                            color = contentColor
+                    IconButton {
+                        id = "settings_button"
+                        onClick = {
+                            navigateFn("/${SettingsViewModel.DEST_NAME}")
+                        }
+                        ariaLabel = strings[MR.strings.settings]
+
+                        SettingsIcon {
+                            sx {
+                                color = contentColor
+                            }
                         }
                     }
                 }
