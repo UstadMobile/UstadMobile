@@ -7,9 +7,9 @@ import com.ustadmobile.libuicompose.R
 
 private val nameMap = mapOf(
     UstadImage.ILLUSTRATION_CONNECT to R.drawable.illustration_connect,
-    UstadImage.ILLUSTRATION_OFFLINE_USAGE to R.drawable.illustration_offline_usage,
-    UstadImage.ILLUSTRATION_OFFLINE_SHARING to R.drawable.illustration_offline_sharing,
-    UstadImage.ILLUSTRATION_ORGANIZED to R.drawable.illustration_organized,
+    UstadImage.ILLUSTRATION_ONBOARDING1 to R.drawable.illustration_onboarding1,
+    UstadImage.ILLUSTRATION_ONBOARDING2 to R.drawable.illustration_onboarding2,
+    UstadImage.ILLUSTRATION_ONBOARDING3 to R.drawable.illustration_onboarding3,
     UstadImage.COURSE_BANNER_DEFAULT0 to R.drawable.course_banner_default0,
     UstadImage.COURSE_BANNER_DEFAULT1 to R.drawable.course_banner_default1,
     UstadImage.COURSE_BANNER_DEFAULT2 to R.drawable.course_banner_default2,

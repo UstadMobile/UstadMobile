@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Divider
 import androidx.compose.material3.Icon
@@ -21,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
 import com.ustadmobile.core.viewmodel.accountlist.AccountListUiState
@@ -28,6 +28,7 @@ import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
 import com.ustadmobile.libuicompose.components.UstadAddListItem
+import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadPersonAvatar
 import kotlinx.coroutines.Dispatchers
 
@@ -45,6 +46,7 @@ fun AccountListScreen(
         onAddItem = viewModel::onClickAddAccount,
         onLogoutClick = viewModel::onClickLogout,
         onMyProfileClick = viewModel::onClickProfile,
+        onClickOpenLicenses = viewModel::onClickOpenLicenses,
     )
 }
 
@@ -53,12 +55,14 @@ fun AccountListScreen(
     uiState: AccountListUiState,
     onAccountListItemClick: (UserSessionWithPersonAndEndpoint) -> Unit = {},
     onDeleteListItemClick: (UserSessionWithPersonAndEndpoint) -> Unit = {},
-    onAboutClick: () -> Unit = {},
+    onClickOpenLicenses: () -> Unit = {},
     onAddItem: () -> Unit = {},
     onMyProfileClick: () -> Unit = {},
     onLogoutClick: () -> Unit = {}
 ){
-    LazyColumn(
+    val uriHandler = LocalUriHandler.current
+
+    UstadLazyColumn(
         modifier = Modifier
             .fillMaxWidth()
     ){
@@ -138,12 +142,34 @@ fun AccountListScreen(
 
         item(key = "about") {
             ListItem(
-                modifier = Modifier
-                    .clickable {
-                        onAboutClick()
-                    },
-                headlineContent = { Text(stringResource(MR.strings.about)) },
-                supportingContent = { Text(text = uiState.version) }
+                modifier = if(uiState.showPoweredBy) {
+                    Modifier.clickable {
+                        uriHandler.openUri("https://www.ustadmobile.com/")
+                    }
+                }else {
+                    Modifier
+                },
+                headlineContent = { Text(stringResource(MR.strings.version)) },
+                supportingContent = {
+                    val versionStr = if(uiState.showPoweredBy) {
+                        "${uiState.version} ${stringResource(MR.strings.powered_by)}"
+                    }else {
+                        uiState.version
+                    }
+
+                    Text(text = versionStr)
+                }
+            )
+        }
+
+        item(key = "open_licenses") {
+            ListItem(
+                modifier = Modifier.clickable {
+                    onClickOpenLicenses()
+                },
+                headlineContent = {
+                    Text(stringResource(MR.strings.licenses))
+                },
             )
         }
 

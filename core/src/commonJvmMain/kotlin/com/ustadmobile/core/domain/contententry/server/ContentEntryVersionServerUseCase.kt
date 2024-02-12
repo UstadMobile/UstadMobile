@@ -4,6 +4,7 @@ import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.contentformats.manifest.ContentManifestEntry
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.contententry.ContentConstants
+import com.ustadmobile.core.util.ext.removeHashSuffix
 import com.ustadmobile.core.util.ext.removeQueryStringSuffix
 import com.ustadmobile.core.util.stringvalues.asIStringValues
 import com.ustadmobile.core.util.stringvalues.asOkHttpHeaders
@@ -12,14 +13,20 @@ import com.ustadmobile.core.util.stringvalues.withOverrides
 import com.ustadmobile.libcache.okhttp.asOkHttpHeaders
 import com.ustadmobile.libcache.okhttp.asOkHttpRequest
 import com.ustadmobile.libcache.request.HttpRequest
+import io.github.aakira.napier.Napier
 import io.github.reactivecircus.cache4k.Cache
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
+import net.thauvin.erik.urlencoder.UrlEncoderUtil
 import okhttp3.CacheControl
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
 import okhttp3.Request
 import okhttp3.Response
+import okhttp3.ResponseBody.Companion.toResponseBody
 
 /**
  * ContentEntryVersionServerUseCase is used to serve content as per the ContentManifest.
@@ -43,9 +50,16 @@ class ContentEntryVersionServerUseCase(
     private val onlyIfCached: Boolean,
 ) {
 
+    /**
+     * @param entryMap Map of the path of a given ContentManifestEntry to the entry itself. Matching
+     *        uris which might be encoded won't work because there can be different valid ways e.g.
+     *        it is valid (if unusual) to encode plain ASCII etc.
+     */
     data class ManifestAndMap(
         val manifest: ContentManifest,
-        val entryMap: Map<String, ContentManifestEntry> = manifest.entries.associateBy { it.uri }
+        val entryMap: Map<String, ContentManifestEntry> = manifest.entries.associateBy {
+            UrlEncoderUtil.decode(it.uri)
+        }
     )
 
     private val manifestCache = Cache.Builder<Long, ManifestAndMap>()
@@ -60,15 +74,63 @@ class ContentEntryVersionServerUseCase(
             this
     }
 
+    suspend fun getManifestEntry(
+        contentEntryVersionUid: Long,
+        pathInContentEntryVersion: String,
+    ) : ContentManifestEntry? = withContext(Dispatchers.IO) {
+        val manifest = manifestCache.get(contentEntryVersionUid) {
+            val contentEntryVersionEntity = (repo ?: db).contentEntryVersionDao
+                .findByUidAsync(contentEntryVersionUid)
+                ?: throw IllegalArgumentException("No such contententryversion : $contentEntryVersionUid")
+            val contentManifestUrl = contentEntryVersionEntity.cevManifestUrl!!
+            val manifestStr = okHttpClient.newCall(
+                Request.Builder()
+                    .applyCacheControl()
+                    .url(contentManifestUrl)
+                    .build()
+            ).execute().body?.string() ?: throw IllegalStateException("Could not fetch manifest: $contentManifestUrl")
+            val manifest = json.decodeFromString(
+                ContentManifest.serializer(), manifestStr
+            )
+            ManifestAndMap(manifest)
+        }
 
+        val pathToLookup = pathInContentEntryVersion.removeQueryStringSuffix()
+            .removeHashSuffix()
+
+        manifest.entryMap[pathInContentEntryVersion]
+            ?: manifest.entryMap[pathToLookup]?.let {
+                if(it.ignoreQueryParams) it else null
+            }
+    }
+
+    /**
+     * @param pathInContentEntryVersion the path as per ContentManifestEntry. This MUST be decoded
+     *        (which is done by both NanoHTTPD and KTOR)
+     */
     operator fun invoke(
         request: HttpRequest,
         contentEntryVersionUid: Long,
         pathInContentEntryVersion: String,
     ) : Response {
+        fun logResponse(response: Response) {
+            Napier.v {
+                "ContentEntryVersionServerUseCase: ${request.method} contentEntryVersion=$contentEntryVersionUid " +
+                        "pathInContent=$pathInContentEntryVersion : ${response.code} ${response.message} "
+            }
+        }
+
         //if request is for the manifest, then directly forward the request, otherwise, use the
         //memory cache to get the manifest,
-        if(request.url.endsWith(ContentConstants.MANIFEST_NAME)) {
+        if(request.url == "about:blank") {
+            return Response.Builder()
+                .header("content-type", "text/plain")
+                .request(request.asOkHttpRequest())
+                .protocol(Protocol.HTTP_1_1)
+                .message("OK")
+                .code(200)
+                .build().also { logResponse(it) }
+        }else if(request.url.endsWith(ContentConstants.MANIFEST_NAME)) {
             return okHttpClient.newCall(
                 Request.Builder()
                     .url(request.url)
@@ -76,28 +138,17 @@ class ContentEntryVersionServerUseCase(
                     .build()
             ).execute()
         }else {
-            val manifest = runBlocking {
-                manifestCache.get(contentEntryVersionUid) {
-                    val contentEntryVersionEntity = (repo ?: db).contentEntryVersionDao
-                        .findByUidAsync(contentEntryVersionUid) ?: throw IllegalArgumentException("No such contententryversion")
-                    val contentManifestUrl = contentEntryVersionEntity.cevManifestUrl!!
-                    val manifestStr = okHttpClient.newCall(
-                        Request.Builder()
-                            .applyCacheControl()
-                            .url(contentManifestUrl)
-                            .build()
-                    ).execute().body?.string() ?: throw IllegalStateException("Could not fetch manifest: $contentManifestUrl")
-                    val manifest = json.decodeFromString(
-                        ContentManifest.serializer(), manifestStr
-                    )
-                    ManifestAndMap(manifest)
-                }
-            }
-
-            val entry = manifest.entryMap[pathInContentEntryVersion]
-                ?: manifest.entryMap[pathInContentEntryVersion.removeQueryStringSuffix()]?.let {
-                    if(it.ignoreQueryParams) it else null
-                } ?: throw IllegalArgumentException("Could not find $pathInContentEntryVersion")
+            val entry = runBlocking {
+                getManifestEntry(contentEntryVersionUid, pathInContentEntryVersion)
+            } ?: return Response.Builder()
+                    .header("content-type", "text/html")
+                    .request(request.asOkHttpRequest())
+                    .protocol(Protocol.HTTP_1_1)
+                    .body("Not found in version $contentEntryVersionUid: $pathInContentEntryVersion"
+                        .toResponseBody("text/plain".toMediaType()))
+                    .message("NOT FOUND")
+                    .code(404)
+                    .build().also { logResponse(it) }
 
             val bodyDataUrlRequest = Request.Builder()
                 .url(entry.bodyDataUrl)
@@ -124,7 +175,7 @@ class ContentEntryVersionServerUseCase(
             return Response.Builder()
                 .request(request.asOkHttpRequest())
                 .protocol(Protocol.HTTP_1_1)
-                .message("OK")
+                .message(bodyDataUrlResponse.message)
                 .body(bodyDataUrlResponse.body)
                 .code(bodyDataUrlResponse.code)
                 .headers(
@@ -142,6 +193,7 @@ class ContentEntryVersionServerUseCase(
                     ).asOkHttpHeaders()
                 )
                 .build()
+                .also { logResponse(it) }
         }
     }
 

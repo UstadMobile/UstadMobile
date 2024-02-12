@@ -18,13 +18,8 @@ import kotlinx.serialization.Serializable
      order = Trigger.Order.INSTEAD_OF,
      on = Trigger.On.RECEIVEVIEW,
      events = [Trigger.Event.INSERT],
-     sqlStatements = [
-         """REPLACE INTO XObjectEntity(xObjectUid, objectType, objectId, definitionType, interactionType, correctResponsePattern, objectContentEntryUid, objectStatementRefUid, xObjectMasterChangeSeqNum, xObjectocalChangeSeqNum, xObjectLastChangedBy, xObjectLct) 
-         VALUES (NEW.xObjectUid, NEW.objectType, NEW.objectId, NEW.definitionType, NEW.interactionType, NEW.correctResponsePattern, NEW.objectContentEntryUid, NEW.objectStatementRefUid, NEW.xObjectMasterChangeSeqNum, NEW.xObjectocalChangeSeqNum, NEW.xObjectLastChangedBy, NEW.xObjectLct) 
-         /*psql ON CONFLICT (xObjectUid) DO UPDATE 
-         SET objectType = EXCLUDED.objectType, objectId = EXCLUDED.objectId, definitionType = EXCLUDED.definitionType, interactionType = EXCLUDED.interactionType, correctResponsePattern = EXCLUDED.correctResponsePattern, objectContentEntryUid = EXCLUDED.objectContentEntryUid,objectStatementRefUid =  EXCLUDED.objectStatementRefUid, xObjectMasterChangeSeqNum = EXCLUDED.xObjectMasterChangeSeqNum, xObjectocalChangeSeqNum = EXCLUDED.xObjectocalChangeSeqNum, xObjectLastChangedBy = EXCLUDED.xObjectLastChangedBy, xObjectLct = EXCLUDED.xObjectLct
-         */"""
-     ]
+     conditionSql = TRIGGER_CONDITION_WHERE_NEWER,
+     sqlStatements = [ TRIGGER_UPSERT ]
  )
 ))
 class XObjectEntity {

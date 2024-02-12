@@ -125,6 +125,7 @@ kotlin {
                 api libs.precompose.viewmodel
                 api libs.multiplatformsettings
                 api libs.cache4k
+                implementation libs.urlencoder
             }
         }
 
@@ -145,6 +146,8 @@ kotlin {
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
                 api "io.ktor:ktor-serialization-kotlinx-json:$version_ktor"
                 compileOnly "net.sf.kxml:kxml2:$version_kxml"
+                implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
+                implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
             }
         }
 
@@ -162,7 +165,7 @@ kotlin {
             resources.srcDirs += ["src/main/assets"]
 
             dependencies {
-                implementation "org.apache.pdfbox:pdfbox:$version_pdfbox_apache"
+                implementation libs.pdfbox
                 implementation "org.jsoup:jsoup:$version_jsoup"
                 implementation "com.google.code.gson:gson:$version_gson"
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
@@ -173,6 +176,10 @@ kotlin {
                 implementation libs.libphonenumber.google
                 implementation libs.thumbnailator
                 implementation libs.webpimageio
+                implementation("com.jcabi:jcabi-manifests:$version_jcabi_manifests") {
+                    exclude group: "org.mockito"
+                    exclude group: "org.mockito.kotlin"
+                }
             }
         }
 
@@ -194,8 +201,8 @@ kotlin {
                 implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
                 implementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
 
-                implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
-                implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
+                api "org.nanohttpd:nanohttpd:$version_nanohttpd"
+                api "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
 
                 implementation libs.mockwebserver
                 implementation "io.ktor:ktor-server-netty:$version_ktor"
@@ -256,6 +263,8 @@ kotlin {
 
                 implementation libs.process.phoenix
                 implementation libs.compressor
+                implementation libs.coil
+                implementation libs.androidx.browser
             }
         }
 

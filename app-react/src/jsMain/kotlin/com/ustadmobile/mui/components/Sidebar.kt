@@ -8,6 +8,7 @@ import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import com.ustadmobile.mui.common.Area
 import com.ustadmobile.mui.common.Sizes
 import dev.icerock.moko.resources.StringResource
+import js.core.jso
 import mui.icons.material.Chat
 import web.cssom.Display
 import mui.material.Box
@@ -22,7 +23,11 @@ import mui.icons.material.Person
 import mui.system.sx
 import react.FC
 import react.Props
+import react.dom.html.ReactHTML.img
 import react.dom.html.ReactHTML.nav
+import web.cssom.Auto
+import web.cssom.Position
+import web.cssom.px
 
 external interface SidebarProps: Props {
     var visible: Boolean
@@ -59,7 +64,27 @@ val Sidebar = FC<SidebarProps> { props ->
             anchor = DrawerAnchor.left
 
             Box {
-                Toolbar()
+                Toolbar {
+                    disableGutters = true
+
+                    img {
+                        id = "top_center_brand_img"
+                        src = "assets/top-start.svg"
+                        alt = ""
+                        style = jso {
+                            display = Display.block
+                            paddingTop = 8.px
+                            paddingBottom = 8.px
+                            paddingLeft = 16.px
+                            paddingRight = 16.px
+                            marginLeft = Auto.auto
+                            marginRight = Auto.auto
+                            maxWidth = Sizes.Sidebar.Width
+                            maxHeight = Sizes.Header.Height
+                            position = Position.absolute
+                        }
+                    }
+                }
 
                 List {
                     sx { width = Sizes.Sidebar.Width }
@@ -68,6 +93,8 @@ val Sidebar = FC<SidebarProps> { props ->
                         selectedItem = props.selectedRootItemIndex
                     }
                 }
+
+                UstadSidebarBottomBox()
             }
         }
     }

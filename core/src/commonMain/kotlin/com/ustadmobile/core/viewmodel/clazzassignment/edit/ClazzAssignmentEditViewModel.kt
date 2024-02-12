@@ -178,6 +178,7 @@ class ClazzAssignmentEditViewModel(
 
             _appUiState.update { prev ->
                 prev.copy(
+                    loadingState = LoadingUiState.NOT_LOADING,
                     actionBarButtonState = ActionBarButtonUiState(
                         visible = true,
                         text = systemImpl.getString(MR.strings.done),

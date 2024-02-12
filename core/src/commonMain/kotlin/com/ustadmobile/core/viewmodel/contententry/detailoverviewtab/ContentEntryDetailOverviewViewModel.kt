@@ -4,10 +4,6 @@ import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.viewmodel.DetailViewModel
-import com.ustadmobile.core.viewmodel.epubcontent.EpubContentViewModel
-import com.ustadmobile.core.viewmodel.pdfcontent.PdfContentViewModel
-import com.ustadmobile.core.viewmodel.videocontent.VideoContentViewModel
-import com.ustadmobile.core.viewmodel.xapicontent.XapiContentViewModel
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,13 +13,20 @@ import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.blob.download.EnqueueContentManifestDownloadUseCase
+import com.ustadmobile.core.domain.contententry.launchcontent.LaunchContentEntryVersionUseCase
+import com.ustadmobile.core.domain.contententry.launchcontent.epub.LaunchEpubUseCase
+import com.ustadmobile.core.domain.contententry.launchcontent.xapi.LaunchXapiUseCase
+import com.ustadmobile.core.impl.appstate.LoadingUiState
+import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.util.ext.onActiveEndpoint
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.composites.ContentEntryAndDetail
 import com.ustadmobile.lib.db.composites.OfflineItemAndState
 import com.ustadmobile.lib.db.composites.TransferJobAndTotals
+import io.github.aakira.napier.Napier
 import org.kodein.di.instance
+import org.kodein.di.instanceOrNull
 
 data class ContentEntryDetailOverviewUiState(
 
@@ -46,6 +49,8 @@ data class ContentEntryDetailOverviewUiState(
     val activeUploadJobs: List<TransferJobAndTotals> = emptyList(),
 
     val offlineItemAndState: OfflineItemAndState? = null,
+
+    val openButtonEnabled: Boolean = true,
 ) {
     val scoreProgressVisible: Boolean
         get() = scoreProgress?.progress != null && scoreProgress.progress > 0
@@ -84,6 +89,14 @@ class ContentEntryDetailOverviewViewModel(
     val nodeIdAndAuth: NodeIdAndAuth by di.onActiveEndpoint().instance()
 
     val uiState: Flow<ContentEntryDetailOverviewUiState> = _uiState.asStateFlow()
+
+    private val defaultLaunchContentEntryUseCase: LaunchContentEntryVersionUseCase by di
+        .onActiveEndpoint().instance()
+
+    private val launchXapiUseCase: LaunchXapiUseCase? by di.onActiveEndpoint().instanceOrNull()
+
+    private val launchEpubUseCase: LaunchEpubUseCase? by di.onActiveEndpoint().instanceOrNull()
+
 
     init {
         viewModelScope.launch {
@@ -191,25 +204,30 @@ class ContentEntryDetailOverviewViewModel(
 
     fun onClickOpen() {
         viewModelScope.launch {
-            val latestContentEntryVersion = activeRepo.contentEntryVersionDao
-                .findLatestVersionUidByContentEntryUidEntity(entityUidArg)
-            if(latestContentEntryVersion != null) {
-                val destName = when(latestContentEntryVersion.cevContentType) {
-                    ContentEntryVersion.TYPE_XAPI -> XapiContentViewModel.DEST_NAME
-                    ContentEntryVersion.TYPE_PDF -> PdfContentViewModel.DEST_NAME
-                    ContentEntryVersion.TYPE_EPUB -> EpubContentViewModel.DEST_NAME
-                    ContentEntryVersion.TYPE_VIDEO -> VideoContentViewModel.DEST_NAME
-                    else -> null
-                }
+            try {
+                loadingState = LoadingUiState.INDETERMINATE
+                _uiState.update { it.copy(openButtonEnabled = false) }
+                val latestContentEntryVersion = activeRepo.contentEntryVersionDao
+                    .findLatestVersionUidByContentEntryUidEntity(entityUidArg)
 
-                if(destName != null) {
-                    navController.navigate(
-                        destName,
-                        args = mapOf(
-                            ARG_ENTITY_UID to latestContentEntryVersion.cevUid.toString()
-                        )
-                    )
+                if(latestContentEntryVersion != null) {
+                    val contentSpecificLauncher = when(latestContentEntryVersion.cevContentType) {
+                        ContentEntryVersion.TYPE_XAPI -> launchXapiUseCase
+                        ContentEntryVersion.TYPE_EPUB -> launchEpubUseCase
+                        else -> null
+                    }
+
+                    val launcher = (contentSpecificLauncher ?: defaultLaunchContentEntryUseCase)
+                    launcher(latestContentEntryVersion, navController)
+                }else {
+                    snackDispatcher.showSnackBar(Snack(systemImpl.getString(MR.strings.content_not_ready_try_later)))
                 }
+            }catch(e: Throwable) {
+                snackDispatcher.showSnackBar(Snack(systemImpl.getString(MR.strings.error) + ":${e.message}"))
+                Napier.w("ContentEntryDetailOverview: Exception opening content", e)
+            }finally {
+                loadingState = LoadingUiState.NOT_LOADING
+                _uiState.update { it.copy(openButtonEnabled = true) }
             }
         }
     }

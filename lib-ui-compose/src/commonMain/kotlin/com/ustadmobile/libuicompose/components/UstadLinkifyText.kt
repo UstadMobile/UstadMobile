@@ -2,6 +2,7 @@ package com.ustadmobile.libuicompose.components
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,8 +38,12 @@ fun UstadLinkifyText(
         color = Color.Blue,
         textDecoration = TextDecoration.Underline,
     ),
+    modifier: Modifier = Modifier,
 ) {
     val uriHandler = LocalUriHandler.current
+    val defaultSpanStyle = SpanStyle(
+        color = MaterialTheme.colorScheme.onBackground
+    )
 
     val links = remember(text){
         buildAnnotatedString {
@@ -51,7 +56,9 @@ fun UstadLinkifyText(
                         }
                     }
                 }else {
-                    append(spanText)
+                    withStyle(defaultSpanStyle) {
+                        append(spanText)
+                    }
                 }
             }
         }
@@ -62,7 +69,7 @@ fun UstadLinkifyText(
     }
 
     ClickableText(
-        modifier = Modifier.pointerHoverIcon(pointerIcon),
+        modifier = modifier.pointerHoverIcon(pointerIcon),
         text = links,
         onClick = { position ->
             links.getStringAnnotations(TAG_LINK, position, position).firstOrNull()?.also { annotation ->

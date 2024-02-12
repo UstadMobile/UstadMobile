@@ -7,8 +7,8 @@ import com.ustadmobile.core.util.bodyDataUrlForUri
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import io.ktor.client.HttpClient
-import io.ktor.client.call.body
 import io.ktor.client.request.get
+import io.ktor.client.statement.bodyAsText
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -54,7 +54,9 @@ class PdfContentViewModel(
             val contentEntryVersion = activeRepo.contentEntryVersionDao
                 .findByUidAsync(entityUidArg) ?: return@launch
             val manifestUrl = contentEntryVersion.cevManifestUrl!!
-            val manifest: ContentManifest = httpClient.get(manifestUrl).body()
+            val manifest: ContentManifest = json.decodeFromString(
+                httpClient.get(manifestUrl).bodyAsText()
+            )
 
             val pdfEntryUri = contentEntryVersion.cevOpenUri ?: return@launch
             val pdfUrl = UrlKmp(manifestUrl).resolve(pdfEntryUri).toString()

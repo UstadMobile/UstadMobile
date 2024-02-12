@@ -10,6 +10,7 @@ import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.viewmodel.UstadViewModel.Companion.ARG_NEXT
 import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewModel
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import kotlinx.serialization.json.Json
@@ -42,6 +43,7 @@ class ContentEntryImportLinkViewModelTest: AbstractMainDispatcherTest() {
     fun givenNoExpectedResultArgs_whenUserEntersValidLinkAndClicksNext_thenWillGoToContentEntryEdit() {
         testViewModel<ContentEntryImportLinkViewModel> {
             viewModelFactory {
+                savedStateHandle[ARG_NEXT] = ContentEntryEditViewModel.DEST_NAME
                 ContentEntryImportLinkViewModel(di, savedStateHandle)
             }
 

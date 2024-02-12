@@ -9,12 +9,17 @@ import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCaseJs
 import com.ustadmobile.core.domain.blob.savepicture.SavePictureUseCase
 import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseJs
+import com.ustadmobile.core.domain.contententry.delete.DeleteContentEntryParentChildJoinUseCase
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCaseJs
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
-import com.ustadmobile.core.domain.contententry.import.EnqueueImportContentEntryUseCaseJs
+import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseRemote
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseJs
+import com.ustadmobile.core.domain.contententry.launchcontent.xapi.ResolveXapiLaunchHrefUseCase
+import com.ustadmobile.core.domain.contententry.move.MoveContentEntriesUseCase
+import com.ustadmobile.core.domain.deleteditem.DeletePermanentlyUseCase
+import com.ustadmobile.core.domain.deleteditem.RestoreDeletedItemUseCase
 import com.ustadmobile.core.domain.openlink.OnClickLinkUseCase
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCaseJs
@@ -32,6 +37,7 @@ import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
 import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseJs
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCaseJs
+import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.ext.DoorTag
 import org.kodein.di.DI
 import org.kodein.di.bind
@@ -42,9 +48,10 @@ import org.kodein.di.singleton
 
 fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs") {
     bind<EnqueueContentEntryImportUseCase>() with scoped(endpointScope).provider {
-        EnqueueImportContentEntryUseCaseJs(
+        EnqueueImportContentEntryUseCaseRemote(
             endpoint = context,
             httpClient = instance(),
+            json = instance(),
         )
     }
 
@@ -140,4 +147,37 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
         )
     }
 
+    bind<ResolveXapiLaunchHrefUseCase>() with scoped(endpointScope).provider {
+        ResolveXapiLaunchHrefUseCase(
+            activeRepo = instance(tag = DoorTag.TAG_REPO),
+            httpClient = instance(),
+            json = instance(),
+            xppFactory = instance(tag = DiTag.XPP_FACTORY_NSAWARE)
+        )
+    }
+
+    bind<MoveContentEntriesUseCase>() with scoped(EndpointScope.Default).provider {
+        MoveContentEntriesUseCase(
+            repo = instance(tag = DoorTag.TAG_REPO),
+            systemImpl = instance()
+        )
+    }
+
+    bind<DeleteContentEntryParentChildJoinUseCase>() with scoped(EndpointScope.Default).provider {
+        DeleteContentEntryParentChildJoinUseCase(
+            repoOrDb = instance(tag = DoorTag.TAG_REPO),
+        )
+    }
+
+    bind<RestoreDeletedItemUseCase>() with scoped(EndpointScope.Default).provider {
+        RestoreDeletedItemUseCase(
+            repoOrDb = instance(tag = DoorTag.TAG_REPO),
+        )
+    }
+
+    bind<DeletePermanentlyUseCase>() with scoped(EndpointScope.Default).provider {
+        DeletePermanentlyUseCase(
+            repoOrDb = instance(tag = DoorTag.TAG_REPO),
+        )
+    }
 }

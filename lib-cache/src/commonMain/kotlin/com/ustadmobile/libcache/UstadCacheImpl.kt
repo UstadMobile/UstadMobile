@@ -8,10 +8,12 @@ import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.db.entities.CacheEntry
 import com.ustadmobile.libcache.db.entities.RetentionLock
 import com.ustadmobile.libcache.db.entities.RequestedEntry
+import com.ustadmobile.libcache.headers.MergedHeaders
 import com.ustadmobile.libcache.headers.HttpHeaders
 import com.ustadmobile.libcache.headers.asString
 import com.ustadmobile.libcache.headers.headersBuilder
 import com.ustadmobile.libcache.headers.integrity
+import com.ustadmobile.libcache.headers.mapHeaders
 import com.ustadmobile.libcache.integrity.sha256Integrity
 import com.ustadmobile.libcache.io.useAndReadySha256
 import com.ustadmobile.libcache.io.transferToAndGetSha256
@@ -354,18 +356,32 @@ class UstadCacheImpl(
         return null
     }
 
-    override fun updateLastValidated(validatedEntries: List<ValidatedEntry>) {
+    override fun updateLastValidated(validatedEntry: ValidatedEntry) {
         val md5 = Md5Digest()
         val timeNow = systemTimeInMillis()
+        val urlKey = md5.urlKey(validatedEntry.url)
+
         db.withDoorTransaction {
-            validatedEntries.forEach { entry ->
-                db.cacheEntryDao.updateValidation(
-                    key = md5.urlKey(entry.url),
-                    headers = entry.headers.asString(),
-                    lastValidated = timeNow,
-                    lastAccessed= timeNow,
-                )
+            val existingEntry = db.cacheEntryDao.findEntryAndBodyByKey(
+                key = urlKey,
+            ) ?: return@withDoorTransaction
+
+            val existingHeaders = HttpHeaders.fromString(existingEntry.responseHeaders)
+
+            val newHeadersCorrected = validatedEntry.headers.mapHeaders { headerName, headerValue ->
+                when {
+                    headerName.equals("content-length", true) -> null
+                    else -> headerValue
+                }
             }
+            val newHeaders = MergedHeaders(newHeadersCorrected, existingHeaders)
+
+            db.cacheEntryDao.updateValidation(
+                key = urlKey,
+                headers = newHeaders.asString(),
+                lastValidated = timeNow,
+                lastAccessed = timeNow,
+            )
         }
     }
 

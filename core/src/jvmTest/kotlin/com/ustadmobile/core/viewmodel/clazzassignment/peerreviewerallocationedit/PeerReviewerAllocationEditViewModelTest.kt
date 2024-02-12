@@ -109,6 +109,7 @@ class PeerReviewerAllocationEditViewModelTest : AbstractMainDispatcherTest() {
                                             it.praUid != 0L
                                 }
                     })
+                    cancelAndIgnoreRemainingEvents()
                 }
         }
     }
@@ -165,6 +166,7 @@ class PeerReviewerAllocationEditViewModelTest : AbstractMainDispatcherTest() {
                         firstStudentAllocations.allocations[0].praMarkerSubmitterUid)
                     assertEquals(testContext.studentPersons[2].personUid,
                         firstStudentAllocations.allocations[1].praMarkerSubmitterUid)
+                    cancelAndIgnoreRemainingEvents()
                 }
         }
     }

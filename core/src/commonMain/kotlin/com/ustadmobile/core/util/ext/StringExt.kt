@@ -146,13 +146,37 @@ fun String.removeQueryStringSuffix(): String {
     }
 }
 
+fun String.removeHashSuffix() : String {
+    return substringBefore("#")
+}
+
 fun String.removeFileExtension() : String {
     return substringBeforeLast(".")
 }
 
-fun String.displayFilename(): String {
-    return substringAfterLast("/")
+fun String.displayFilename(
+    removeExtension: Boolean = true
+): String {
+    val base = substringAfterLast("/")
         .substringAfterLast("\\")
         .substringBefore("?")
-        .removeFileExtension()
+    return if(removeExtension)
+        base.removeFileExtension()
+    else
+        base
+}
+
+
+fun String.toNullIfBlank(): String? = if(isBlank()) { null } else { this }
+
+fun String.substringUntilLastIndexOfInclusive(
+    delimiter: String,
+    missingDelimiterValue: String = this
+) : String {
+    val index = lastIndexOf(delimiter)
+    return if(index != -1) {
+        substring(0, index + delimiter.length)
+    }else {
+        missingDelimiterValue
+    }
 }

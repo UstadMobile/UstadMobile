@@ -1,0 +1,16 @@
+appId: com.toughra.ustadmobile
+
+---
+- launchApp
+- tapOn: "GET STARTED"
+- tapOn: Site link
+- inputText: ${ENDPOINT}
+- hideKeyboard
+- tapOn: "NEXT"
+- tapOn: "Username"
+- inputText: ${USERNAME}
+- tapOn: "Password"
+- inputText: ${PASSWORD}
+- hideKeyboard
+- tapOn: "LOGIN"
+- tapOn: "Library"

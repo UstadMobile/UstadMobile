@@ -2,15 +2,17 @@
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.StorageSettings
 import com.russhwolf.settings.set
+import com.ustadmobile.BuildConfigJs
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.getversion.GetVersionUseCase
+import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.config.AppConfig
 import com.ustadmobile.core.impl.config.AppConfigMap
 import com.ustadmobile.core.impl.config.GenderConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
-import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.METADATA_KEY_PRESET_LANG
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.PREFKEY_ACTIONED_PRESET
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.PREFKEY_LOCALE
 import com.ustadmobile.core.impl.di.DomainDiModuleJs
@@ -32,7 +34,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.json.Json
 import org.kodein.di.*
 import com.ustadmobile.core.impl.locale.StringProviderJs
+import com.ustadmobile.core.util.ext.toNullIfBlank
 import com.ustadmobile.core.viewmodel.OnBoardingViewModel
+import com.ustadmobile.domain.getversion.GetVersionUseCaseJs
 import com.ustadmobile.util.resolveEndpoint
 import dev.icerock.moko.resources.provider.JsStringProvider
 import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
@@ -67,8 +71,9 @@ internal fun ustadJsDi(
     }
 
     bind<GenderConfig>() with singleton {
-        val config: AppConfig = instance()
-        GenderConfig(appConfig = config)
+        GenderConfig(
+            genderConfigStr = BuildConfigJs.APP_UI_GOPTS.toNullIfBlank() ?: GenderConfig.DEFAULT_GENDER_OPTIONS
+        )
     }
 
     bind<Settings>() with singleton {
@@ -79,8 +84,8 @@ internal fun ustadJsDi(
             /*
              * Check if there is a preset default language, and apply if not already actioned
              */
-            val presetLang = configMap[METADATA_KEY_PRESET_LANG]
-            if(!presetLang.isNullOrEmpty() && it.getStringOrNull(PREFKEY_ACTIONED_PRESET) != "true") {
+            val presetLang = BuildConfigJs.APP_PRESET_LOCALE
+            if(!presetLang.isEmpty() && it.getStringOrNull(PREFKEY_ACTIONED_PRESET) != "true") {
                 it[PREFKEY_LOCALE] = presetLang
                 it[PREFKEY_ACTIONED_PRESET] = "true"
             }
@@ -99,7 +104,7 @@ internal fun ustadJsDi(
 
     bind<SupportedLanguagesConfig>() with singleton {
         SupportedLanguagesConfig(
-            availableLanguagesConfig = configMap["com.ustadmobile.uilanguages"] ?:
+            availableLanguagesConfig = BuildConfigJs.APP_UI_LANGUAGES.toNullIfBlank() ?:
                 SupportedLanguagesConfig.DEFAULT_SUPPORTED_LANGUAGES,
             systemLocales = navigator.languages.toList(),
             settings = instance(),
@@ -206,5 +211,12 @@ internal fun ustadJsDi(
         }
     }
 
+    bind<GetVersionUseCase>() with singleton {
+        GetVersionUseCaseJs()
+    }
+
+    bind<GetShowPoweredByUseCase>() with singleton {
+        GetShowPoweredByUseCase(BuildConfigJs.APP_UI_SHOW_POWERED_BY.toBoolean())
+    }
 
 }

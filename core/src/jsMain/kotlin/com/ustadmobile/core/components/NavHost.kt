@@ -151,6 +151,7 @@ class NavHostFunction(
                     Napier.d("NavHostFunction: pop, then go /${cmd.viewName}?${cmd.args.toUrlQueryString()}")
                     sessionStorage.clearNavHostCommands()
                     sessionStorage.removeItem(KEY_NAV_CONTROLLER_STACK_CLEARED)
+                    sessionStorage.removeItem(KEY_NAVCONTROLLER_HIT_POPUP_TO_TARGET)
 
                     if(popUpToView != null) {
                         sessionStorage[KEY_NAV_CONTROLLER_POPUPTO_PAGE] = popUpToView
@@ -172,6 +173,7 @@ class NavHostFunction(
                     navigateFn(-1)
                 }else if(popUpTo != location.ustadViewName) {
                     Napier.d("NavHostFunction: pop to $popUpTo inclusive = ${cmd.inclusive}")
+                    sessionStorage.removeItem(KEY_NAVCONTROLLER_HIT_POPUP_TO_TARGET)
                     sessionStorage[KEY_NAV_CONTROLLER_POPUPTO_PAGE] = cmd.viewName
                     sessionStorage[KEY_NAV_CONTROLLER_POPUPTO_INCLUSIVE] = cmd.inclusive.toString()
                     onHideChildren()

@@ -25,4 +25,28 @@
         <item quantity="one">%d sec</item>
         <item quantity="other">%d secs</item>
     </plural>
+    <plural name="items_selected">
+        <item quantity="zero">%d items selected</item>
+        <item quantity="one">%d item selected</item>
+        <item quantity="two">%d item selected</item>
+        <item quantity="few">%d items selected</item>
+        <item quantity="many">%d items selected</item>
+        <item quantity="other">%d items selected</item>
+    </plural>
+
+    <plural name="items_deleted">
+        <item quantity="one">%d item deleted</item>
+        <item quantity="other">%d items deleted</item>
+    </plural>
+
+    <plural name="items_restored">
+        <item quantity="one">%d item restored</item>
+        <item quantity="other">%d items restored</item>
+    </plural>
+
+    <plural name="are_you_sure_you_want_to_permanently_delete">
+        <item quantity="one">Are you sure you want to permanently delete %d item?</item>
+        <item quantity="other">Are you sure you want to permanently delete %d items?</item>
+    </plural>
+
 </resources>

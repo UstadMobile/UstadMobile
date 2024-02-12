@@ -218,7 +218,7 @@ class SaveLocalUriAndManifestUploadIntegrationTest{
             contentEntryImportJob = ContentEntryImportJob(
                 sourceUri = xapiFile.toDoorUri().toString(),
                 cjiOriginalFilename = "ustad-tincan.zip",
-                cjiPluginId = H5PContentImporter.PLUGIN_ID,
+                cjiPluginId = XapiZipContentImporter.PLUGIN_ID,
             ),
             serverNode = XferTestServer(
                 node = XferTestNode(temporaryFolder, "server"),

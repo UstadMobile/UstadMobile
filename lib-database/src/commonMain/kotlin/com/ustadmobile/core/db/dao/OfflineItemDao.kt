@@ -54,7 +54,7 @@ expect abstract class OfflineItemDao {
       ORDER BY OfflineItem.oiLct DESC
          LIMIT 1     
     """)
-    @QueryLiveTables(arrayOf("OfflineItem", "TransferJob"))
+    @QueryLiveTables(arrayOf("OfflineItem", "TransferJob", "TransferJobItem"))
     abstract fun findByContentEntryUid(
         contentEntryUid: Long,
         nodeId: Long

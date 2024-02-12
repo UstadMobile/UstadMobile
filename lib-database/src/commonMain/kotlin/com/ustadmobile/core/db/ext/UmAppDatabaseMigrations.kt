@@ -1430,6 +1430,38 @@ val MIGRATION_138_139 = DoorMigrationStatementList(138, 139) { db ->
     }
 }
 
+val MIGRATION_139_140 = DoorMigrationStatementList(139, 140) { db ->
+    buildList {
+        add("CREATE INDEX transferjob_tjuid ON TransferJobItem (tjiTjUid)")
+    }
+}
+
+val MIGRATION_140_141 = DoorMigrationStatementList(140, 141) {db ->
+    buildList {
+        if(db.dbType() == DoorDbType.POSTGRES) {
+            add("ALTER TABLE UserSession ALTER COLUMN usLcb TYPE BIGINT")
+        }
+    }
+}
+
+val MIGRATION_141_142 = DoorMigrationStatementList(141, 142) { db ->
+    listOf("DROP TABLE IF EXISTS ClazzAssignmentContentJoin")
+}
+
+val MIGRATION_142_143 = DoorMigrationStatementList(142, 143) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("ALTER TABLE ContentEntryParentChildJoin ADD COLUMN cepcjDeleted INTEGER NOT NULL DEFAULT 0")
+            add("CREATE TABLE IF NOT EXISTS DeletedItem (  delItemName  TEXT , delItemIconUri  TEXT , delItemLastModTime  INTEGER  NOT NULL , delItemTimeDeleted  INTEGER  NOT NULL , delItemEntityTable  INTEGER  NOT NULL , delItemEntityUid  INTEGER  NOT NULL , delItemDeletedByPersonUid  INTEGER  NOT NULL , delItemStatus  INTEGER  NOT NULL , delItemIsFolder  INTEGER  NOT NULL  DEFAULT 0 , delItemUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+            add("CREATE INDEX delitem_idx_status_time ON DeletedItem (delItemStatus, delItemTimeDeleted)")
+        }else {
+            add("ALTER TABLE ContentEntryParentChildJoin ADD COLUMN cepcjDeleted BOOL NOT NULL DEFAULT false")
+            add("CREATE TABLE IF NOT EXISTS DeletedItem (  delItemName  TEXT , delItemIconUri  TEXT , delItemLastModTime  BIGINT  NOT NULL , delItemTimeDeleted  BIGINT  NOT NULL , delItemEntityTable  INTEGER  NOT NULL , delItemEntityUid  BIGINT  NOT NULL , delItemDeletedByPersonUid  BIGINT  NOT NULL , delItemStatus  INTEGER  NOT NULL , delItemIsFolder  BOOL  NOT NULL  DEFAULT false, delItemUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+            add("CREATE INDEX delitem_idx_status_time ON DeletedItem (delItemStatus, delItemTimeDeleted)")
+        }
+    }
+}
+
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_102_103,
     MIGRATION_103_104, MIGRATION_104_105, MIGRATION_105_106, MIGRATION_106_107,
@@ -1438,7 +1470,8 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_124_125, MIGRATION_125_126, MIGRATION_126_127, MIGRATION_127_128,
     MIGRATION_128_129, MIGRATION_129_130, MIGRATION_130_131, MIGRATION_132_133,
     MIGRATION_133_134, MIGRATION_134_135, MIGRATION_135_136, MIGRATION_136_137,
-    MIGRATION_137_138, MIGRATION_138_139,
+    MIGRATION_137_138, MIGRATION_138_139, MIGRATION_139_140, MIGRATION_140_141,
+    MIGRATION_141_142, MIGRATION_142_143,
 )
 
 

@@ -15,6 +15,8 @@ import com.ustadmobile.core.io.ext.readString
 import com.ustadmobile.core.io.ext.skipToEntry
 import com.ustadmobile.core.io.ext.toDoorUri
 import com.ustadmobile.core.uri.UriHelper
+import com.ustadmobile.core.util.ext.displayFilename
+import com.ustadmobile.core.util.ext.fileExtensionOrNull
 import com.ustadmobile.core.util.ext.requireSourceAsDoorUri
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
@@ -35,6 +37,7 @@ import kotlinx.io.buffered
 import kotlinx.io.files.FileSystem
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
+import kotlinx.io.readString
 import kotlinx.io.writeString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.contentOrNull
@@ -91,9 +94,8 @@ class H5PContentImporter(
         uri: DoorUri,
         originalFilename: String?
     ): MetadataResult? = withContext(Dispatchers.IO) {
-        val shouldBeH5p = originalFilename?.substringAfterLast(".")?.lowercase()
-            ?.endsWith("h5p") == true
-
+        val shouldBeH5p = originalFilename?.fileExtensionOrNull() == "h5p" ||
+                uri.toString().displayFilename(removeExtension = false).fileExtensionOrNull()?.lowercase() == "h5p"
         try {
             val h5pJsonText = ZipInputStream(uriHelper.openSource(uri).asInputStream()).use { zipIn ->
                 zipIn.skipToEntry { it.name == "h5p.json" }
@@ -220,11 +222,21 @@ class H5PContentImporter(
 
             //As per https://github.com/tunapanda/h5p-standalone
             val indexHtmlPath = Path(workTmpPath, "index.html")
+
+            val h5pJsonUnzippedEntry = h5pZipEntries.first { it.name == "h5p.json" }
+            val h5pJsonObj = json.parseToJsonElement(
+                fileSystem.source(h5pJsonUnzippedEntry.path).buffered().readString()
+            ).jsonObject
+            val h5pTitle = h5pJsonObj["title"]?.jsonPrimitive?.contentOrNull
+                ?: jobItem.cjiOriginalFilename?.displayFilename() ?: ""
+
+            //As per https://github.com/tunapanda/h5p-standalone
             fileSystem.sink(indexHtmlPath).buffered().use {
                 it.writeString(
                     """
                 <html>
                 <head>
+                <title>${h5pTitle.escapeHTML()}</title>
                 <script src="dist/main.bundle.js" type="text/javascript">
                 </script>
                 </head>

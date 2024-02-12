@@ -1,10 +1,17 @@
 package com.ustadmobile.port.android.view
 
+import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.browser.customtabs.CustomTabsCallback
+import androidx.browser.customtabs.CustomTabsClient
+import androidx.browser.customtabs.CustomTabsServiceConnection
+import androidx.browser.customtabs.CustomTabsSession
+import androidx.browser.customtabs.EngagementSignalsCallback
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Surface
 import androidx.compose.material3.MaterialTheme
@@ -12,32 +19,54 @@ import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSiz
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
+import androidx.core.os.LocaleListCompat
+import androidx.lifecycle.lifecycleScope
 import com.jakewharton.processphoenix.ProcessPhoenix
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseAndroid
+import com.ustadmobile.core.domain.contententry.launchcontent.xapi.LaunchXapiUseCase
+import com.ustadmobile.core.domain.contententry.launchcontent.xapi.LaunchXapiUseCaseAndroid
+import com.ustadmobile.core.domain.contententry.move.MoveContentEntriesUseCase
 import com.ustadmobile.core.impl.ContainerStorageManager
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.di.AndroidDomainDiModule
 import com.ustadmobile.core.impl.di.commonDomainDiModule
 import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.impl.locale.StringProviderAndroid
+import com.ustadmobile.core.impl.nav.CommandFlowUstadNavController
 import com.ustadmobile.core.networkmanager.ConnectionManager
 import com.ustadmobile.core.schedule.ClazzLogCreatorManager
 import com.ustadmobile.core.schedule.ClazzLogCreatorManagerAndroidImpl
 import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.core.util.ext.appendQueryArgs
+import com.ustadmobile.core.util.ext.navigateToLink
+import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.viewmodel.UstadViewModel
+import com.ustadmobile.core.viewmodel.redirect.RedirectViewModel
 import com.ustadmobile.door.NanoHttpdCall
+import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.libuicompose.theme.UstadAppTheme
+import com.ustadmobile.libuicompose.theme.md_theme_dark_primaryContainer
+import com.ustadmobile.libuicompose.theme.md_theme_light_primaryContainer
+import com.ustadmobile.libuicompose.view.app.App
+import com.ustadmobile.libuicompose.view.app.SizeClass
+import com.ustadmobile.port.android.util.ext.getUstadDeepLink
+import io.github.aakira.napier.Napier
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import moe.tlaster.precompose.PreComposeApp
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.android.closestDI
-import org.kodein.di.compose.withDI
-import com.ustadmobile.libuicompose.view.app.App
-import com.ustadmobile.libuicompose.view.app.SizeClass
-import moe.tlaster.precompose.PreComposeApp
 import org.kodein.di.bind
+import org.kodein.di.compose.withDI
+import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 import org.kodein.di.provider
@@ -47,17 +76,7 @@ import org.kodein.di.singleton
 import org.kodein.di.with
 import java.io.File
 import java.net.URI
-import androidx.core.os.LocaleListCompat
-import com.ustadmobile.core.impl.config.ApiUrlConfig
-import com.ustadmobile.core.impl.nav.CommandFlowUstadNavController
-import com.ustadmobile.core.util.ext.appendQueryArgs
-import com.ustadmobile.core.util.ext.navigateToLink
-import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.core.viewmodel.UstadViewModel
-import com.ustadmobile.core.viewmodel.redirect.RedirectViewModel
-import com.ustadmobile.libuicompose.theme.UstadAppTheme
-import com.ustadmobile.port.android.util.ext.getUstadDeepLink
-import org.kodein.di.direct
+
 
 class AppActivity: AppCompatActivity(), DIAware {
 
@@ -65,6 +84,11 @@ class AppActivity: AppCompatActivity(), DIAware {
 
     //Used to execute navigation when a link is received via OnNewIntent
     private val commandFlowNavigator = CommandFlowUstadNavController()
+
+    //As per https://developer.chrome.com/docs/android/custom-tabs/guide-warmup-prefetch/
+    private var mCustomTabsClient: CustomTabsClient? = null
+
+    private var mCustomTabsSession: CustomTabsSession? = null
 
     override val di by  DI.lazy {
         extend(appContextDi)
@@ -122,6 +146,26 @@ class AppActivity: AppCompatActivity(), DIAware {
             ConnectionManager(applicationContext, di)
         }
 
+        bind<LaunchXapiUseCase>() with scoped(EndpointScope.Default).provider {
+            LaunchXapiUseCaseAndroid(
+                androidContext = this@AppActivity,
+                endpoint = context,
+                resolveXapiLaunchHrefUseCase = instance(),
+                lightToolbarColor = md_theme_light_primaryContainer.toArgb(),
+                darkToolbarColor = md_theme_dark_primaryContainer.toArgb(),
+                session = { mCustomTabsSession },
+                getHtmlContentDisplayEngineUseCase = instance(),
+                embeddedHttpServer = instance(),
+            )
+        }
+
+        bind<MoveContentEntriesUseCase>() with scoped(EndpointScope.Default).provider {
+            MoveContentEntriesUseCase(
+                repo = instance(tag = DoorTag.TAG_REPO),
+                systemImpl = instance()
+            )
+        }
+
         registerContextTranslator { call: NanoHttpdCall -> Endpoint(call.urlParams["endpoint"] ?: "notfound") }
 
         onReady {
@@ -129,6 +173,82 @@ class AppActivity: AppCompatActivity(), DIAware {
         }
 
     }
+
+    /*
+     * Custom tabs setup as per https://developer.chrome.com/docs/android/custom-tabs/guide-warmup-prefetch
+     *
+     * As per:
+     * https://developer.chrome.com/docs/android/custom-tabs#when_should_i_use_custom_tabs
+     * "Lifecycle management: Apps launching a Custom Tab won't be evicted by the system during the Tabs use - its importance is raised to the "foreground" level."
+     *
+     * The objective here isn't so much about tracking engagement, it is just to ensure that the
+     * app itself is kept alive when the user is in the custom tab (which will rely on loading
+     * content from the embedded server).
+     */
+    private val customTabCallback = object: CustomTabsCallback() {
+        override fun onNavigationEvent(navigationEvent: Int, extras: Bundle?) {
+            super.onNavigationEvent(navigationEvent, extras)
+            Napier.d { "CustomTab: NavigationEvent: $navigationEvent" }
+        }
+    }
+
+    private val engagementServiceCallback = object: EngagementSignalsCallback {
+        override fun onVerticalScrollEvent(isDirectionUp: Boolean, extras: Bundle) {
+            Log.d("CustomTabs", "onVerticalScrollEvent (isDirectionUp=$isDirectionUp)")
+        }
+
+        override fun onGreatestScrollPercentageIncreased(scrollPercentage: Int, extras: Bundle) {
+            Log.d("CustomTabs", "scroll percentage: $scrollPercentage%")
+        }
+
+        override fun onSessionEnded(didUserInteract: Boolean, extras: Bundle) {
+            Log.d("CustomTabs", "onSessionEnded (didUserInteract=$didUserInteract)")
+        }
+
+    }
+
+    private val mCustomTabsServiceConnection = object: CustomTabsServiceConnection() {
+
+        override fun onCustomTabsServiceConnected(name: ComponentName, client: CustomTabsClient) {
+            Napier.d { "CustomTab: Service connected" }
+            mCustomTabsClient = client
+            mCustomTabsSession = client.newSession(customTabCallback)
+            val enagagementSignalsAvailable = mCustomTabsSession?.isEngagementSignalsApiAvailable(Bundle.EMPTY) ?: false
+            if(!enagagementSignalsAvailable) {
+                Napier.d { "CustomTabs: engagement signals not available"}
+                return
+            }
+            mCustomTabsSession?.setEngagementSignalsCallback(engagementServiceCallback, Bundle.EMPTY)
+        }
+
+        override fun onServiceDisconnected(name: ComponentName) {
+            Napier.d { "CustomTabs: Service disconnected" }
+            mCustomTabsClient = null
+            mCustomTabsSession = null
+
+            /*
+             * As per
+             * https://developer.chrome.com/docs/android/custom-tabs/guide-warmup-prefetch
+             * The custom tab connection might fail, so we need to reconnect if/when that happens.
+             */
+            lifecycleScope.launch {
+                Napier.d { "CustomTab: disconnected, launching reconnection after 500ms" }
+                delay(500)
+                bindCustomTabsService()
+            }
+        }
+    }
+
+    private fun bindCustomTabsService() {
+        if(mCustomTabsClient != null) {
+            //do nothing
+            return
+        }
+
+        val packageName = CustomTabsClient.getPackageName(this, null)
+        CustomTabsClient.bindCustomTabsService(this, packageName, mCustomTabsServiceConnection)
+    }
+
 
     val WindowWidthSizeClass.multiplatformSizeClass : SizeClass
         get() = when(this) {
@@ -182,6 +302,15 @@ class AppActivity: AppCompatActivity(), DIAware {
                 }
             }
         }
+
+        //Official docs make no mention of disconnecting, does not seem to be required
+        // https://developer.chrome.com/docs/android/custom-tabs/guide-warmup-prefetch
+        bindCustomTabsService()
+    }
+
+    override fun onDestroy() {
+        Napier.d { "AppActivity#onDestroy" }
+        super.onDestroy()
     }
 
     override fun onNewIntent(intent: Intent?) {

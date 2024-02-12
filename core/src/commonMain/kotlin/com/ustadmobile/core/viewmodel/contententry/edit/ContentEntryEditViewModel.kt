@@ -57,9 +57,6 @@ data class ContentEntryEditUiState(
     val contentCompressVisible: Boolean
         get() = metadataResult != null
 
-    val containerStorageOptionVisible: Boolean
-        get() = false
-
     val courseBlockVisible: Boolean
         get() = entity?.block != null
 
@@ -94,6 +91,11 @@ data class ContentEntryEditUiState(
  *    Only the CourseBlock part of the screen will be displayed. ContentEntry specific fields (e.g.
  *    license, author, etc) will not be displayed. This would probably be the case if a teacher
  *    selects a content item from the library.
+ *
+ * Only a user with permission to edit the ContentEntry can update the file associated with the
+ * ContentEntry. This ensures that the ContentEntryVersionUid when used for usage data tracking
+ * will be accurate and include usage from all courses.
+
  */
 class ContentEntryEditViewModel(
     di: DI,
@@ -308,14 +310,20 @@ class ContentEntryEditViewModel(
                     )
                 }
 
-                //if a new folder was created, don't go to the "detail view"
-                if(entityUidArg == 0L && parentUidArg != null && !contentEntryVal.leaf) {
-                    navController.popBackStack(
-                        viewName = destinationName,
-                        inclusive = true
-                    )
-                }else {
-                    finishWithResult(contentEntryVal)
+                val popUpToOnFinish = savedStateHandle[ARG_POPUPTO_ON_FINISH]
+                when {
+                    expectedResultDest != null -> {
+                        finishWithResult(contentEntryVal)
+                    }
+
+                    //Here, we don't go to the detail view. We go back to where the user came from
+                    // That is correct for folders. For leaf nodes, maybe should change
+                    else -> {
+                        navController.popBackStack(
+                            viewName = popUpToOnFinish ?: destinationName,
+                            inclusive = true
+                        )
+                    }
                 }
 
                 if (_uiState.value.hasErrors()) {

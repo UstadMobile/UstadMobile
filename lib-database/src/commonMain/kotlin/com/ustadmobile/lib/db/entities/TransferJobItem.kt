@@ -25,7 +25,9 @@ import kotlinx.serialization.Serializable
 @Entity(
     indices = arrayOf(
         //This table is commonly searched by tableid/entityuid/etag
-        Index("tjiTableId", "tjiEntityUid", "tjiEntityEtag", name = "tji_table_entity_etag")
+        Index("tjiTableId", "tjiEntityUid", "tjiEntityEtag", name = "tji_table_entity_etag"),
+        //Index when searched by TransferJobUid
+        Index("tjiTjUid", name="transferjob_tjuid")
     )
 )
 @Serializable

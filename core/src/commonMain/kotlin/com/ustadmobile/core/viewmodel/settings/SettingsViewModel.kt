@@ -1,5 +1,7 @@
 package com.ustadmobile.core.viewmodel.settings
 
+import com.russhwolf.settings.Settings
+import com.russhwolf.settings.set
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import kotlinx.coroutines.flow.Flow
@@ -9,13 +11,27 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.getversion.GetVersionUseCase
+import com.ustadmobile.core.domain.htmlcontentdisplayengine.GetHtmlContentDisplayEngineOptionsUseCase
+import com.ustadmobile.core.domain.htmlcontentdisplayengine.GetHtmlContentDisplayEngineUseCase
+import com.ustadmobile.core.domain.htmlcontentdisplayengine.HtmlContentDisplayEngineOption
+import com.ustadmobile.core.domain.htmlcontentdisplayengine.SetHtmlContentDisplayEngineUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
+import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
+import com.ustadmobile.core.viewmodel.deleteditem.DeletedItemListViewModel
+import com.ustadmobile.core.viewmodel.settings.DeveloperSettingsViewModel.Companion.PREFKEY_DEVSETTINGS_ENABLED
 import com.ustadmobile.core.viewmodel.site.detail.SiteDetailViewModel
+import kotlinx.atomicfu.atomic
 import org.kodein.di.instance
+import org.kodein.di.instanceOrNull
 
 data class SettingsUiState(
+
+    val htmlContentDisplayOptions: List<HtmlContentDisplayEngineOption> = emptyList(),
+
+    val currentHtmlContentDisplayOption: HtmlContentDisplayEngineOption? = null,
 
     val holidayCalendarVisible: Boolean = false,
 
@@ -25,13 +41,26 @@ data class SettingsUiState(
 
     val langDialogVisible: Boolean = false,
 
+    val htmlContentDisplayDialogVisible: Boolean = false,
+
     val currentLanguage: String = "",
 
     val availableLanguages: List<UstadMobileSystemCommon.UiLanguage> = emptyList(),
 
     val waitForRestartDialogVisible: Boolean = false,
 
-)
+    val showDeveloperOptions: Boolean = false,
+
+    val version: String = "",
+
+) {
+    val htmlContentDisplayEngineVisible: Boolean
+        get() = htmlContentDisplayOptions.isNotEmpty()
+
+    val advancedSectionVisible: Boolean
+        get() = htmlContentDisplayEngineVisible
+
+}
 
 class SettingsViewModel(
     di: DI,
@@ -48,9 +77,24 @@ class SettingsViewModel(
 
     private val availableLangs = supportedLangConfig.supportedUiLanguagesAndSysDefault(systemImpl)
 
+    private val getHtmlContentDisplayOptsUseCase: GetHtmlContentDisplayEngineOptionsUseCase? by instanceOrNull()
+
+    private val getHtmlContentDisplaySettingUseCase: GetHtmlContentDisplayEngineUseCase? by instanceOrNull()
+
+    private val setHtmlContentDisplaySettingUseCase: SetHtmlContentDisplayEngineUseCase? by instanceOrNull()
+
+    private val getVersionUseCase: GetVersionUseCase by instance()
+
+    private val versionClickCount = atomic(0)
+
+    private val settings: Settings by instance()
+
     init {
         _appUiState.update { prev ->
-            prev.copy(title = systemImpl.getString(MR.strings.settings))
+            prev.copy(
+                title = systemImpl.getString(MR.strings.settings),
+                hideBottomNavigation = true,
+            )
         }
 
         val langSetting = supportedLangConfig.localeSetting ?: UstadMobileSystemCommon.LOCALE_USE_SYSTEM
@@ -62,7 +106,11 @@ class SettingsViewModel(
         _uiState.update { prev ->
             prev.copy(
                 currentLanguage = currentLang.langDisplay,
-                availableLanguages = availableLangs
+                availableLanguages = availableLangs,
+                htmlContentDisplayOptions = getHtmlContentDisplayOptsUseCase?.invoke() ?: emptyList(),
+                currentHtmlContentDisplayOption = getHtmlContentDisplaySettingUseCase?.invoke(),
+                version = getVersionUseCase().versionString,
+                showDeveloperOptions = settings.getBoolean(PREFKEY_DEVSETTINGS_ENABLED, false)
             )
         }
 
@@ -82,6 +130,33 @@ class SettingsViewModel(
                 langDialogVisible = true
             )
         }
+    }
+
+    fun onClickHtmlContentDisplayEngine() {
+        _uiState.update { prev ->
+            prev.copy(
+                htmlContentDisplayDialogVisible = true,
+            )
+        }
+    }
+
+    fun onDismissHtmlContentDisplayEngineDialog() {
+        _uiState.update { prev ->
+            prev.copy(
+                htmlContentDisplayDialogVisible = false,
+            )
+        }
+    }
+
+    fun onClickHtmlContentDisplayEngineOption(option: HtmlContentDisplayEngineOption) {
+        setHtmlContentDisplaySettingUseCase?.invoke(option)
+        _uiState.update { prev ->
+            prev.copy(
+                currentHtmlContentDisplayOption = option,
+                htmlContentDisplayDialogVisible = false,
+            )
+        }
+
     }
 
     fun onClickLang(lang: UstadMobileSystemCommon.UiLanguage) {
@@ -118,6 +193,28 @@ class SettingsViewModel(
 
     fun onClickSiteSettings() {
         navController.navigate(SiteDetailViewModel.DEST_NAME, emptyMap())
+    }
+
+    fun onClickDeveloperOptions() {
+        navController.navigate(DeveloperSettingsViewModel.DEST_NAME, emptyMap())
+    }
+
+    fun onClickDeletedItems() {
+        navController.navigate(DeletedItemListViewModel.DEST_NAME, emptyMap())
+    }
+
+    fun onClickVersion() {
+        if(_uiState.value.showDeveloperOptions)
+            return
+
+        val newClickCount = versionClickCount.incrementAndGet()
+        if(newClickCount >= 7){
+            settings[PREFKEY_DEVSETTINGS_ENABLED] = true
+            _uiState.update { prev ->
+                prev.copy(showDeveloperOptions = true)
+            }
+            snackDispatcher.showSnackBar(Snack("Developer options enabled"))
+        }
     }
 
 

@@ -66,7 +66,6 @@
     <string name="field_password_error_min">Passordet må være minst fem tegn</string>
     <string name="dialog_download_from_playstore_cancel">Forbli på nettsiden</string>
     <string name="created_partnership">Opprettet i samarbeid med:</string>
-    <string name="onboarding_no_internet_subheadline">Alt fungerer frakoblet</string>
     <string name="download_continue_stacked_label">Fortsett nedlasting</string>
     <string name="filed_password_no_match">Passordene samsvarer ikke. Prøv igjen.</string>
     <string name="entry_details_license">Lisens:</string>
@@ -105,8 +104,6 @@
     <string name="phone_number">Telefonnummer</string>
     <string name="contents">Innhold</string>
     <string name="new_password">Nytt passord</string>
-    <string name="onboarding_offline_sharing_subheading">Spar tid og data med superrask frakoblet deling</string>
-    <string name="onboarding_stay_organized_headline">Hold deg organisert</string>
     <string name="email">E-post</string>
     <string name="attendance">Oppmøte</string>
     <string name="save_as_template">Lagre som mal</string>
@@ -132,7 +129,6 @@
     <string name="import_content">Importer innhold</string>
     <string name="document">Dokument</string>
     <string name="field_required_prompt">Dette feltet er påkrevd</string>
-    <string name="onboarding_offline_sharing">Del frakoblet</string>
     <string name="download_downloading_placeholder">Laster ned %1$s av %2$s</string>
     <string name="download_cancel_label">Avbryt nedlasting</string>
     <string name="download_storage_option_device">Bruk %1$s - %2$s ledig</string>

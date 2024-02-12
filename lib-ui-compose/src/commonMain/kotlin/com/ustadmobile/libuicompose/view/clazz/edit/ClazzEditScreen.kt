@@ -2,7 +2,6 @@ package com.ustadmobile.libuicompose.view.clazz.edit
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -37,6 +36,7 @@ import com.ustadmobile.libuicompose.components.UstadBottomSheetOption
 import com.ustadmobile.libuicompose.components.UstadClickableTextField
 import com.ustadmobile.libuicompose.components.UstadDateField
 import com.ustadmobile.libuicompose.components.UstadImageSelectButton
+import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadRichTextEdit
 import com.ustadmobile.libuicompose.components.UstadSwitchField
 import com.ustadmobile.libuicompose.util.compose.stringIdMapResource
@@ -130,6 +130,7 @@ fun ClazzEditScreen(viewModel: ClazzEditViewModel) {
         onClickEditCourseBlock = viewModel::onClickEditCourseBlock,
         onClickHideBlockPopupMenu = viewModel::onClickHideBlockPopupMenu,
         onClickUnHideBlockPopupMenu = viewModel::onClickUnHideBlockPopupMenu,
+        onClickIndentBlockPopupMenu = viewModel::onClickIndentBlockPopupMenu,
         onClickUnIndentBlockPopupMenu = viewModel::onClickUnIndentBlockPopupMenu,
         onClickDeleteBlockPopupMenu = viewModel::onClickDeleteCourseBlock,
         onMoveCourseBlock = { from: ItemPosition, to: ItemPosition ->
@@ -194,7 +195,7 @@ fun ClazzEditScreen(
         }
     )
 
-    LazyColumn(
+    UstadLazyColumn(
         state = reorderLazyListState.listState,
         modifier = Modifier
             .reorderable(reorderLazyListState)
@@ -535,21 +536,30 @@ private fun PopUpMenu(
         ) {
             if(uiState.showHide) {
                 DropdownMenuItem(
-                    onClick = { onClickHideBlockPopupMenu(uiState.block) },
+                    onClick = {
+                        expanded = false
+                        onClickHideBlockPopupMenu(uiState.block)
+                    },
                     text = {Text(stringResource(MR.strings.hide)) }
                 )
             }
 
             if(uiState.showUnhide) {
                 DropdownMenuItem(
-                    onClick = { onClickUnHideBlockPopupMenu(uiState.block) },
+                    onClick = {
+                        expanded = false
+                        onClickUnHideBlockPopupMenu(uiState.block)
+                    },
                     text = { Text(stringResource(MR.strings.unhide)) }
                 )
             }
 
             if(uiState.showIndent) {
                 DropdownMenuItem(
-                    onClick = { onClickIndentBlockPopupMenu(uiState.block) },
+                    onClick = {
+                        expanded = false
+                        onClickIndentBlockPopupMenu(uiState.block)
+                    },
                     text = { Text(stringResource(MR.strings.indent)) }
                 )
             }
@@ -557,14 +567,20 @@ private fun PopUpMenu(
             if(uiState.showUnindent) {
                 if (uiState.showUnindent) {
                     DropdownMenuItem(
-                        onClick = { onClickUnIndentBlockPopupMenu(uiState.block) },
+                        onClick = {
+                            expanded = false
+                            onClickUnIndentBlockPopupMenu(uiState.block)
+                        },
                         text = { Text(stringResource(MR.strings.unindent)) }
                     )
                 }
             }
 
             DropdownMenuItem(
-                onClick = { onClickDeleteBlockPopupMenu(uiState.block) },
+                onClick = {
+                    expanded = false
+                    onClickDeleteBlockPopupMenu(uiState.block)
+                },
                 text = {  Text(stringResource(MR.strings.delete)) }
             )
         }

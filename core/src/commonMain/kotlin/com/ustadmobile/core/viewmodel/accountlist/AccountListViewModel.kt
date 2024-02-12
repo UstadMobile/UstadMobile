@@ -3,6 +3,8 @@ package com.ustadmobile.core.viewmodel.accountlist
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
+import com.ustadmobile.core.domain.launchopenlicenses.LaunchOpenLicensesUseCase
+import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
 import com.ustadmobile.core.domain.usersession.StartUserSessionUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -16,6 +18,7 @@ import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.UstadViewModel
+import com.ustadmobile.core.viewmodel.about.OpenLicensesViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
@@ -46,6 +49,7 @@ data class AccountListUiState(
     val accountsList: List<UserSessionWithPersonAndEndpoint> = emptyList(),
     val showAccountEndpoint: Boolean = false,
     val version: String = "",
+    val showPoweredBy: Boolean = false,
 ) {
 
     val activeAccountButtonsEnabled: Boolean
@@ -78,7 +82,11 @@ class AccountListViewModel(
 
     val uiState: Flow<AccountListUiState> = _uiState.asStateFlow()
 
-    val getVersionUseCase: GetVersionUseCase? by instanceOrNull()
+    private val getVersionUseCase: GetVersionUseCase? by instanceOrNull()
+
+    private val launchOpenLicensesUseCase: LaunchOpenLicensesUseCase? by instanceOrNull()
+
+    private val getShowPoweredByUseCase: GetShowPoweredByUseCase? by instanceOrNull()
 
     init {
         _appUiState.value = AppUiState(
@@ -93,6 +101,7 @@ class AccountListViewModel(
         _uiState.update { prev ->
             prev.copy(
                 version = getVersionUseCase?.invoke()?.versionString ?: "",
+                showPoweredBy = getShowPoweredByUseCase?.invoke() ?: false,
             )
         }
 
@@ -195,6 +204,17 @@ class AccountListViewModel(
             accountManager.endSession(session)
         }
 
+    }
+
+    fun onClickOpenLicenses() {
+        val launchUseCaseVal = launchOpenLicensesUseCase
+        if(launchUseCaseVal != null) {
+            viewModelScope.launch {
+                launchUseCaseVal()
+            }
+        }else {
+            navController.navigate(OpenLicensesViewModel.DEST_NAME, emptyMap())
+        }
     }
 
     companion object {

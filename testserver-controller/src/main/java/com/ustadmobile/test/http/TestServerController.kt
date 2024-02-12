@@ -176,6 +176,12 @@ fun Application.testServerController() {
         get("/start") {
             val requestDeviceSerial = call.request.queryParameters[DEVICE_SERIAL_PARAM] ?: ""
             val adbRecordEnabled = call.request.queryParameters[ADB_RECORD_PARAM]?.toBoolean() ?: false
+            val config = call.application.environment.config
+            val clearPgJdbcUrl = config.propertyOrNull("ktor.testServer.clearPgUrl")?.getString()
+            val clearPgUser = config.propertyOrNull("ktor.testServer.clearPgUser")?.getString()
+            val clearPgPass = config.propertyOrNull("ktor.testServer.clearPgPass")?.getString()
+
+
 
             var response = SimpleDateFormat.getDateTimeInstance().format(Date()) + "<br/>"
             serverProcess?.also {
@@ -188,6 +194,10 @@ fun Application.testServerController() {
             adbRecordProcess?.also {
                 stopRecording()
                 adbRecordProcess = null
+            }
+
+            if(clearPgJdbcUrl != null && clearPgUser != null && clearPgPass != null) {
+                clearPostgresDb(clearPgJdbcUrl, clearPgUser, clearPgPass)
             }
 
             currentSerial = requestDeviceSerial

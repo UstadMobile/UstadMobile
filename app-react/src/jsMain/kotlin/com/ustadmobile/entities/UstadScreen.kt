@@ -148,7 +148,10 @@ import com.ustadmobile.view.message.conversationlist.ConversationListScreenPrevi
 import com.ustadmobile.view.message.messagelist.MessageListScreen
 import com.ustadmobile.view.message.messagelist.MessageListScreenPreview
 import com.ustadmobile.view.person.registerminorwaitforparent.RegisterMinorWaitForParentScreen
-
+import com.ustadmobile.core.viewmodel.about.OpenLicensesViewModel
+import com.ustadmobile.view.about.OpenLicensesScreen
+import com.ustadmobile.core.viewmodel.deleteditem.DeletedItemListViewModel
+import com.ustadmobile.view.deleteditem.list.DeletedItemListScreen
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -281,6 +284,8 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     ),
     UstadScreen(ContentEntryListViewModel.DEST_NAME_HOME, "ContentEntryListHome",
         ContentEntryListScreen),
+    UstadScreen(ContentEntryListViewModel.DEST_NAME_PICKER, "ContentEntryListPicker",
+        ContentEntryListScreen),
     UstadScreen(AccountListViewModel.DEST_NAME, "AccountList", AccountListScreen),
     UstadScreen(
         ClazzMemberListViewModel.DEST_NAME, "ClazzMemberList Preview", ClazzMemberListScreen
@@ -382,6 +387,8 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen("LinkifyPreview", "Linkify", LinkifyPreview),
     UstadScreen(RegisterAgeRedirectViewModel.DEST_NAME, "AgeRedirect", RegisterAgeRedirectScreen),
     UstadScreen(SiteTermsDetailViewModel.DEST_NAME, "Terms", SiteTermsDetailScreen),
+    UstadScreen(OpenLicensesViewModel.DEST_NAME, "OpenLicenses", OpenLicensesScreen),
+    UstadScreen(DeletedItemListViewModel.DEST_NAME, "DeletedItems", DeletedItemListScreen),
     UstadScreen(ConversationListViewModel.DEST_NAME, "ConversationList", ConversationListScreen),
     UstadScreen(ConversationListViewModel.DEST_NAME_HOME, "ConversationListHome", ConversationListScreen),
     UstadScreen("ConversationListPreview", "ConversationListPreview", ConversationListScreenPreview),

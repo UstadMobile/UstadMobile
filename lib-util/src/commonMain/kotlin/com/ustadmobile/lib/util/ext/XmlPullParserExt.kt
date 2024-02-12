@@ -25,8 +25,6 @@ interface XmlSerializerFilter {
      * @param serializer The XmlSerializer being used
      *
      * @return true to continue processing, false to end processing
-     * @throws IOException
-     * @throws XmlPullParserException
      */
     fun beforePassthrough(evtType: Int, parser: XmlPullParser, serializer: XmlSerializer): Boolean
 
@@ -38,8 +36,6 @@ interface XmlSerializerFilter {
      * @param serializer The XmlSerializer being used
      *
      * @return true to continue processing, false to end processing
-     * @throws IOException
-     * @throws XmlPullParserException
      */
     fun afterPassthrough(evtType: Int, parser: XmlPullParser, serializer: XmlSerializer): Boolean
 
@@ -61,9 +57,12 @@ interface XmlSerializerFilter {
  * @param separateEndTagRequiredElements a list of tag names which must have separate start and end
  * tags even when they are empty
  */
-fun XmlPullParser.serializeTo(xmlSerializer: XmlSerializer, inclusive: Boolean = true,
-                              filter: XmlSerializerFilter? = null,
-                              separateEndTagRequiredElements: Array<String> = SEPARATE_END_TAG_REQUIRED_ELEMENTS) {
+fun XmlPullParser.serializeTo(
+    xmlSerializer: XmlSerializer,
+    inclusive: Boolean = true,
+    filter: XmlSerializerFilter? = null,
+    separateEndTagRequiredElements: Array<String> = SEPARATE_END_TAG_REQUIRED_ELEMENTS
+) {
 
     var evtType = getEventType()
     var lastEvent = -1

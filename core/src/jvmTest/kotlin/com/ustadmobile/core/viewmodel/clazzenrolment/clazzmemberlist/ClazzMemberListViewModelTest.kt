@@ -113,7 +113,8 @@ class ClazzMemberListViewModelTest : AbstractMainDispatcherTest() {
         }
     }
 
-    @Test
+    //Disabled 24/Jan - this will be re-enabled in next 1-2 days this functionality is back in the UI
+    //@Test
     fun givenClazzWithPendingRequest_whenClickApprove_thenShouldCallApproveOrDeclineUseCase() {
         testClazzMemberViewModel(
             activeUserRole = ClazzEnrolment.ROLE_TEACHER

@@ -10,6 +10,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
+import com.ustadmobile.core.domain.cachestoragepath.getLocalUriIfRemote
 import com.ustadmobile.core.domain.contententry.ContentConstants
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.util.ext.requireSourceAsDoorUri
@@ -47,7 +48,8 @@ abstract class AbstractPdfContentImportCommonJvm(
         jobItem: ContentEntryImportJob,
         progressListener: ContentImportProgressListener,
     ): ContentEntryVersion = withContext(Dispatchers.IO) {
-        val jobUri = jobItem.requireSourceAsDoorUri()
+        val jobUri =  getStoragePathForUrlUseCase.getLocalUriIfRemote(
+            jobItem.requireSourceAsDoorUri())
 
         val contentEntryVersionUid = db.doorPrimaryKeyManager.nextId(ContentEntryVersion.TABLE_ID)
         val urlPrefix = createContentUrlPrefix(contentEntryVersionUid)

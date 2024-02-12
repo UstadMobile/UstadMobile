@@ -15,17 +15,20 @@ import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCas
 import com.ustadmobile.core.domain.blob.upload.BlobUploadServerUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCaseCommonJvm
+import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
+import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseJvm
 import com.ustadmobile.core.domain.contententry.importcontent.ImportContentEntryUseCase
 import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServerUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseCommonJvm
 import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
 import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseJvm
+import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
+import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCaseFfprobe
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.DiTag.TAG_CONTEXT_DATA_ROOT
 import com.ustadmobile.door.ext.*
 import com.ustadmobile.core.impl.*
-import com.ustadmobile.core.io.UploadSessionManager
 import com.ustadmobile.lib.rest.ext.*
 import com.ustadmobile.lib.rest.messaging.MailProperties
 import com.ustadmobile.lib.util.ext.bindDataSourceIfNotExisting
@@ -45,7 +48,6 @@ import java.io.File
 import javax.naming.InitialContext
 import com.ustadmobile.door.util.NodeIdAuthCache
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
-import com.ustadmobile.core.impl.di.DomainDiModuleJvm
 import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.impl.locale.StringProviderJvm
 import com.ustadmobile.core.schedule.initQuartzDb
@@ -71,7 +73,7 @@ import io.ktor.server.plugins.cors.routing.*
 import io.ktor.server.plugins.statuspages.*
 import org.kodein.di.ktor.di
 import java.util.*
-import com.ustadmobile.lib.rest.logging.LogbackAntiLog
+import com.ustadmobile.core.logging.LogbackAntiLog
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
@@ -139,7 +141,9 @@ fun Application.umRestApplication(
 
     val siteUrl = environment.config.propertyOrNull(CONF_KEY_SITE_URL)?.getString()
 
-    if(siteUrl.isNullOrBlank()) {
+    val dbMode = dbModeOverride ?:  appConfig.propertyOrNull("ktor.ustad.dbmode")?.getString() ?: CONF_DBMODE_SINGLETON
+
+    if(dbMode != CONF_DBMODE_VIRTUALHOST && siteUrl.isNullOrBlank()) {
         val likelyAddr = NetworkInterface.getNetworkInterfaces().toList().filter {
             !it.isLoopback
         }.flatMap { netInterface ->
@@ -182,6 +186,7 @@ fun Application.umRestApplication(
 
     val json = Json {
         encodeDefaults = true
+        ignoreUnknownKeys = true
     }
 
     //Check for required external commands
@@ -228,9 +233,6 @@ fun Application.umRestApplication(
     //Avoid sending the body of content if it has not changed since the client last requested it.
     install(ConditionalHeaders)
 
-    val dbMode = dbModeOverride ?:
-        appConfig.propertyOrNull("ktor.ustad.dbmode")?.getString() ?: CONF_DBMODE_SINGLETON
-
     val dataDirPath = environment.config.absoluteDataDir()
 
     fun String.replaceDbUrlVars(): String {
@@ -242,7 +244,6 @@ fun Application.umRestApplication(
     val apiKey = environment.config.propertyOrNull("ktor.ustad.googleApiKey")?.getString() ?: CONF_GOOGLE_API
 
     di {
-        import(DomainDiModuleJvm(EndpointScope.Default))
         import(makeJvmBackendDiModule(environment.config))
         import(ContentImportersDiModuleJvm)
 
@@ -363,10 +364,6 @@ fun Application.umRestApplication(
             }
         }
 
-        bind<UploadSessionManager>() with scoped(EndpointScope.Default).singleton {
-            UploadSessionManager(context, di)
-        }
-
         bind<Json>() with singleton {
             json
         }
@@ -416,6 +413,7 @@ fun Application.umRestApplication(
             ImportContentEntryUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
                 importersManager = instance(),
+                json = instance(),
             )
         }
 
@@ -479,6 +477,21 @@ fun Application.umRestApplication(
             GetStoragePathForUrlUseCaseCommonJvm(
                 httpClient = instance(),
                 cache = instance()
+            )
+        }
+
+        bind<EnqueueContentEntryImportUseCase>() with scoped(EndpointScope.Default).provider {
+            EnqueueImportContentEntryUseCaseJvm(
+                db = instance(tag = DoorTag.TAG_DB),
+                scheduler = instance(),
+                endpoint = context,
+                enqueueRemoteImport = null
+            )
+        }
+
+        bind<ValidateVideoFileUseCase>() with provider {
+            ValidateVideoFileUseCaseFfprobe(
+                ffprobe = instance()
             )
         }
 

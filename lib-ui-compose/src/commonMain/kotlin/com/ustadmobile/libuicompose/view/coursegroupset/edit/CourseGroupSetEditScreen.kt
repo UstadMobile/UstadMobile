@@ -3,7 +3,6 @@ package com.ustadmobile.libuicompose.view.coursegroupset.edit
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -19,6 +18,7 @@ import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
 import com.ustadmobile.libuicompose.components.UstadExposedDropDownMenuField
+import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadNumberTextField
 import com.ustadmobile.libuicompose.components.UstadPersonAvatar
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
@@ -48,7 +48,7 @@ fun CourseGroupSetEditScreen(
     onClickAssignRandomly: () -> Unit = {},
     onChangeGroupAssignment: (personUid: Long, groupNumber: Int) -> Unit = { _, _ ->},
 ){
-    LazyColumn(
+    UstadLazyColumn(
         modifier = Modifier
             .padding(vertical = 8.dp)
     ) {

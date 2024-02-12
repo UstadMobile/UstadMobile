@@ -18,6 +18,7 @@ import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.mui.components.UstadLanguageSelect
 import com.ustadmobile.mui.components.UstadPasswordTextField
+import com.ustadmobile.mui.components.UstadPoweredByLink
 import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.mui.components.UstadTextField
 
@@ -148,7 +149,12 @@ private val LoginComponent2 = FC<LoginProps> { props ->
 
             Typography {
                 align = TypographyAlign.center
+                variant = TypographyVariant.caption
                 + props.uiState.versionInfo
+            }
+
+            if(props.uiState.showPoweredBy) {
+                UstadPoweredByLink()
             }
 
         }

@@ -153,12 +153,12 @@
     <string name="created_partnership">Created in partnership with:</string>
     <string name="onboarding_get_started_label">Get Started</string>
     <string name="lets_get_started_label">Let\'s get started</string>
-    <string name="onboarding_no_internet_headline">No Internet? No problem.</string>
-    <string name="onboarding_no_internet_subheadline">Everything works offline</string>
-    <string name="onboarding_offline_sharing">Share offline</string>
-    <string name="onboarding_offline_sharing_subheading">Save time and data with superfast offline sharing</string>
-    <string name="onboarding_stay_organized_headline">Stay organized</string>
-    <string name="onboarding_stay_organized_subheading">Education content, assignments, classes, and attendance all in one place</string>
+    <string name="onboarding_headline1">No Internet? No problem.</string>
+    <string name="onboarding_subheadline1">Everything works offline</string>
+    <string name="onboarding_headline2">Share offline</string>
+    <string name="onboarding_subheadline2">Save time and data with superfast offline sharing</string>
+    <string name="onboarding_headline3">Stay organized</string>
+    <string name="onboarding_subheadline3">Education content, assignments, classes, and attendance all in one place</string>
     <string name="download_continue_stacked_label">Continue download</string>
     <string name="download_continue_btn_label">Continue</string>
     <string name="download_wifi_only">Wi-Fi only</string>
@@ -868,7 +868,7 @@
     Powered by credit is used on rebranded copies of the app to credit Ustad Mobile e.g.
     "School Name app powered by Ustad Mobile"
     -->
-    <string name="powered_by">Powered by</string>
+    <string name="powered_by">Powered by Ustad Mobile</string>
     <string name="invalid_email">Please enter a valid email</string>
     <!--
     Shown to users when we ask them to choose an account
@@ -1694,4 +1694,66 @@
     <string name="compose_post">Compose post</string>
 
     <string name="password_updated">Password updated</string>
+
+    <!--
+    Advanced setting - allows the user to choose between using Chrome Engine to display html5
+    content and using an internal webview (in case Chrome access is blocked on system
+    -->
+    <string name="html5_content_display_engine">HTML5 Display Engine</string>
+
+    <string name="chrome_recommended">Chrome (Recommended)</string>
+
+    <string name="chrome_recommended_info">Uses the system default browser (normally Chrome).</string>
+
+    <string name="internal_webview">Internal Webview</string>
+
+    <string name="internal_webview_info">This is recommended only if access to the browser is not allowed on device</string>
+
+    <!--
+    Error message that may be dislpayed when content is still processing and not ready to be
+    opened yet
+    -->
+    <string name="content_not_ready_try_later">Content not ready yet, try again later.</string>
+
+
+    <string name="version">Version</string>
+
+    <string name="licenses">Licenses</string>
+
+    <string name="cannot_record_attendance_for_future_date_time">Cannot record attendance for future date/time</string>
+
+    <string name="could_not_load_vlc">Could not load VLC. Video playback requires a 64bit version of VLC to be installed. Please download and install a 64bit version from https://www.videolan.org/ , then restart this app.</string>
+
+    <string name="selected">Selected</string>
+
+    <string name="clear_selection">Clear selection</string>
+
+    <!--
+    After the user selects to move entries, this is the text that will be shown on the button at the
+    bottom to allow the user to select the current folder as the destination.
+    -->
+    <string name="move_entries_to_this_folder">Move entries to this folder</string>
+
+    <!--
+    Error message if a user selects to move a folder to a destination which is a subfolder of itself
+    -->
+    <string name="cannot_move_to_subfolder_of_self">Cannot move a folder to a subfolder of itself</string>
+
+    <!--
+    Error message if a user selects to move library content to another folder, but then picks the same
+    folder that the content is already in
+    -->
+    <string name="cannot_move_already_in_same_folder">Cannot move: items are already in this folder</string>
+
+    <string name="move_to">Move to…</string>
+
+
+    <string name="restore">Restore</string>
+
+    <string name="delete_permanently">Delete permanently</string>
+
+    <string name="deleted_items">Deleted items</string>
+
+    <string name="delete_or_restore_items">Delete or restore items</string>
+
 </resources>

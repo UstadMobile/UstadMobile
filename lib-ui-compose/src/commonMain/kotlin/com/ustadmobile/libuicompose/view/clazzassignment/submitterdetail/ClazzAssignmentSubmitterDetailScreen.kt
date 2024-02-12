@@ -1,7 +1,6 @@
 package com.ustadmobile.libuicompose.view.clazzassignment.submitterdetail
 
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,6 +22,7 @@ import com.ustadmobile.lib.db.entities.CourseAssignmentMark
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
 import com.ustadmobile.libuicompose.components.UstadAddCommentListItem
 import com.ustadmobile.libuicompose.components.UstadDetailHeader
+import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadListFilterChipsHeader
 import com.ustadmobile.libuicompose.components.UstadListSpacerItem
 import com.ustadmobile.libuicompose.components.ustadPagedItems
@@ -79,7 +79,7 @@ fun ClazzAssignmentSubmitterDetailScreen(
 
     val linkExtractor = rememberLinkExtractor()
 
-    LazyColumn (
+    UstadLazyColumn (
         modifier = Modifier
             .defaultScreenPadding()
             .fillMaxSize()

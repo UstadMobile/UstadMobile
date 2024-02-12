@@ -2,9 +2,7 @@ package com.ustadmobile.port.android.impl
 
 import android.app.Application
 import android.content.Context
-import android.content.pm.PackageManager
 import android.content.res.AssetManager
-import android.os.Bundle
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import coil.ImageLoader
@@ -21,7 +19,7 @@ import com.ustadmobile.core.contentformats.ContentImportersManager
 import com.ustadmobile.core.contentformats.epub.EpubContentImporterCommonJvm
 import com.ustadmobile.core.contentformats.h5p.H5PContentImporter
 import com.ustadmobile.core.contentformats.pdf.PdfContentImporterAndroid
-import com.ustadmobile.core.contentformats.video.VideoContentImporterAndroid
+import com.ustadmobile.core.contentformats.video.VideoContentImporterCommonJvm
 import com.ustadmobile.core.contentformats.xapi.XapiZipContentImporter
 import com.ustadmobile.core.db.*
 import com.ustadmobile.core.db.ext.addSyncCallback
@@ -56,18 +54,31 @@ import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCaseAnd
 import com.ustadmobile.core.domain.blob.upload.UpdateFailedTransferJobUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCaseCommonJvm
+import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCase
+import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCaseAndroid
 import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseAndroid
+import com.ustadmobile.core.domain.contententry.delete.DeleteContentEntryParentChildJoinUseCase
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCase
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCaseCommonJvm
 import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCaseCommonJvm
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseAndroid
+import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseRemote
 import com.ustadmobile.core.domain.contententry.importcontent.ImportContentEntryUseCase
 import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServerUseCase
-import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServerWebClient
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.getversion.GetVersionUseCaseAndroid
+import com.ustadmobile.core.domain.htmlcontentdisplayengine.GetHtmlContentDisplayEngineOptionsUseCase
+import com.ustadmobile.core.domain.htmlcontentdisplayengine.GetHtmlContentDisplayEngineUseCase
+import com.ustadmobile.core.domain.htmlcontentdisplayengine.HTML_CONTENT_OPTIONS_ANDROID
+import com.ustadmobile.core.domain.htmlcontentdisplayengine.SetHtmlContentDisplayEngineUseCase
+import com.ustadmobile.core.domain.contententry.launchcontent.xapi.ResolveXapiLaunchHrefUseCase
+import com.ustadmobile.core.domain.deleteditem.DeletePermanentlyUseCase
+import com.ustadmobile.core.domain.deleteditem.RestoreDeletedItemUseCase
+import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCase
+import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCaseAndroid
+import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseCommonJvm
 import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
@@ -75,6 +86,9 @@ import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseAndroid
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientChunkGetterUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
+import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
+import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCaseAndroid
+import com.ustadmobile.core.embeddedhttp.EmbeddedHttpServer
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
 import kotlinx.serialization.json.Json
@@ -88,12 +102,14 @@ import com.ustadmobile.core.impl.config.BundleAppConfig
 import com.ustadmobile.core.impl.config.GenderConfig
 import com.ustadmobile.core.impl.config.LocaleSettingDelegateAndroid
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
-import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.METADATA_KEY_PRESET_LANG
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.APPCONFIG_KEY_PRESET_LANG
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.PREFKEY_ACTIONED_PRESET
 import com.ustadmobile.core.impl.nav.NavCommandExecutionTracker
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.uri.UriHelperAndroid
+import com.ustadmobile.core.util.ext.appMetaData
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
+import com.ustadmobile.core.util.ext.toNullIfBlank
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
@@ -105,6 +121,10 @@ import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
 import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
@@ -118,11 +138,6 @@ import org.acra.ktx.initAcra
 import org.acra.sender.HttpSender
 
 class UstadApp : Application(), DIAware, ImageLoaderFactory{
-
-    private val Context.appMetaData: Bundle?
-        get() = this.applicationContext.packageManager.getApplicationInfo(
-            applicationContext.packageName, PackageManager.GET_META_DATA
-        ).metaData
 
 
     @OptIn(ExperimentalXmlUtilApi::class)
@@ -194,7 +209,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 localeSettingDelegate = LocaleSettingDelegateAndroid(),
                 availableLanguagesConfig = applicationContext.appMetaData?.getString(
                     METADATA_KEY_SUPPORTED_LANGS
-                ) ?: SupportedLanguagesConfig.DEFAULT_SUPPORTED_LANGUAGES
+                )?.toNullIfBlank() ?: SupportedLanguagesConfig.DEFAULT_SUPPORTED_LANGUAGES
             )
         }
 
@@ -300,6 +315,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             val saveAndManifestUseCase: SaveLocalUriAsBlobAndManifestUseCase = instance()
             val tmpRoot: File = instance(tag = DiTag.TAG_TMP_DIR)
             val contentImportTmpPath = Path(tmpRoot.absolutePath, "contentimport")
+            val getStoragePathForUrlUseCase: GetStoragePathForUrlUseCase= instance()
 
             ContentImportersManager(
                 buildList {
@@ -314,6 +330,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                             tmpPath = contentImportTmpPath,
                             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
                             json = instance(),
+                            getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
                         )
                     )
                     add(
@@ -345,15 +362,16 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                     )
 
                     add(
-                        VideoContentImporterAndroid(
+                        VideoContentImporterCommonJvm(
                             endpoint = context,
-                            appContext = applicationContext,
+                            validateVideoFileUseCase = instance(),
                             uriHelper = uriHelper,
                             cache = cache,
                             tmpPath = contentImportTmpPath,
                             db = db,
                             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
                             json = instance(),
+                            getStoragePathForUrlUseCase  = getStoragePathForUrlUseCase,
                         )
                     )
 
@@ -364,7 +382,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                             uriHelper = uriHelper,
                             db = db,
                             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
-                            getStoragePathForUrlUseCase = instance(),
+                            getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
                             json = instance(),
                             appContext = applicationContext,
                             tmpDir = File(contentImportTmpPath.toString()),
@@ -430,6 +448,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 chunkedUploadUseCase = on(context).instance(),
                 httpClient = instance(),
                 httpCache = instance(),
+                json = instance(),
                 db = on(context).instance(tag = DoorTag.TAG_DB),
                 repo = on(context).instance(tag = DoorTag.TAG_REPO),
                 endpoint = context,
@@ -499,6 +518,11 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 db = instance(tag = DoorTag.TAG_DB),
                 appContext = applicationContext,
                 endpoint = context,
+                enqueueRemoteImport = EnqueueImportContentEntryUseCaseRemote(
+                    endpoint = context,
+                    httpClient = instance(),
+                    json = instance(),
+                )
             )
         }
 
@@ -509,6 +533,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 enqueueBlobUploadClientUseCase = instance(),
                 createRetentionLocksForManifestUseCase = instance(),
                 httpClient = instance(),
+                json = instance(),
             )
         }
 
@@ -539,6 +564,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 enqueueBlobDownloadClientUseCase = instance(),
                 db = instance(tag = DoorTag.TAG_DB),
                 httpClient = instance(),
+                json = instance(),
             )
         }
 
@@ -560,10 +586,6 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             )
         }
 
-        bind<ContentEntryVersionServerWebClient>() with scoped(EndpointScope.Default).singleton {
-            ContentEntryVersionServerWebClient(useCase = instance())
-        }
-
         bind<GetStoragePathForUrlUseCase>() with singleton {
             GetStoragePathForUrlUseCaseCommonJvm(
                 httpClient = instance(),
@@ -581,15 +603,87 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             )
         }
 
+        bind<ResolveXapiLaunchHrefUseCase>() with scoped(EndpointScope.Default).singleton {
+            ResolveXapiLaunchHrefUseCase(
+                activeRepo = instance(tag = DoorTag.TAG_REPO),
+                httpClient = instance(),
+                json = instance(),
+                xppFactory = instance(tag = DiTag.XPP_FACTORY_NSAWARE),
+            )
+        }
+
+        bind<EmbeddedHttpServer>() with singleton {
+            EmbeddedHttpServer(
+                port = 0,
+                contentEntryVersionServerUseCase = {
+                    di.on(it).direct.instance()
+                },
+                staticUmAppFilesDir = null,
+                mimeTypeHelper = FileMimeTypeHelperImpl(),
+            )
+        }
+
+        bind<GetHtmlContentDisplayEngineOptionsUseCase>() with singleton {
+            GetHtmlContentDisplayEngineOptionsUseCase(HTML_CONTENT_OPTIONS_ANDROID)
+        }
+
+        bind<GetHtmlContentDisplayEngineUseCase>() with singleton {
+            GetHtmlContentDisplayEngineUseCase(
+                settings = instance(),
+                getOptionsUseCase = instance(),
+            )
+        }
+
+        bind<SetHtmlContentDisplayEngineUseCase>() with singleton {
+            SetHtmlContentDisplayEngineUseCase(settings = instance())
+        }
+
+        bind<ValidateVideoFileUseCase>() with singleton {
+            ValidateVideoFileUseCaseAndroid(appContext = applicationContext)
+        }
+
+        bind<GetShowPoweredByUseCase>() with singleton {
+            GetShowPoweredByUseCase(
+                applicationContext.appMetaData?.getBoolean(AppConfig.KEY_CONFIG_SHOW_POWERED_BY) ?: false,
+            )
+        }
+
+        bind<SetClipboardStringUseCase>() with provider {
+            SetClipboardStringUseCaseAndroid(applicationContext)
+        }
+
+        bind<GetDeveloperInfoUseCase>() with provider {
+            GetDeveloperInfoUseCaseAndroid(applicationContext)
+        }
+
+        bind<DeleteContentEntryParentChildJoinUseCase>() with scoped(EndpointScope.Default).provider {
+            DeleteContentEntryParentChildJoinUseCase(
+                repoOrDb = instance(tag = DoorTag.TAG_REPO),
+            )
+        }
+
+        bind<RestoreDeletedItemUseCase>() with scoped(EndpointScope.Default).provider {
+            RestoreDeletedItemUseCase(
+                repoOrDb = instance(tag = DoorTag.TAG_REPO),
+            )
+        }
+
+        bind<DeletePermanentlyUseCase>() with scoped(EndpointScope.Default).provider {
+            DeletePermanentlyUseCase(
+                repoOrDb = instance(tag = DoorTag.TAG_REPO),
+            )
+        }
+
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
     }
 
 
+    @OptIn(DelicateCoroutinesApi::class)
     override fun onCreate() {
         super.onCreate()
         Napier.base(DebugAntilog())
 
-        val metadataPresetLang = appMetaData?.getString(METADATA_KEY_PRESET_LANG)
+        val metadataPresetLang = appMetaData?.getString(APPCONFIG_KEY_PRESET_LANG)
 
         if(!metadataPresetLang.isNullOrEmpty()) {
             val settings: Settings = di.direct.instance()
@@ -598,6 +692,10 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(metadataPresetLang))
                 settings.putString(PREFKEY_ACTIONED_PRESET, true.toString())
             }
+        }
+
+        GlobalScope.launch(Dispatchers.IO) {
+            di.direct.instance<EmbeddedHttpServer>().start()
         }
     }
 

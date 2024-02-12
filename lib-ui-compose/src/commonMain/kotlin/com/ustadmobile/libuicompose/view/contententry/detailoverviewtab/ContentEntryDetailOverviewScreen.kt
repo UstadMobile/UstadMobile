@@ -14,11 +14,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
@@ -41,8 +39,10 @@ import com.ustadmobile.core.viewmodel.contententry.detailoverviewtab.ContentEntr
 import com.ustadmobile.core.viewmodel.contententry.detailoverviewtab.ContentEntryDetailOverviewViewModel
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 import com.ustadmobile.lib.db.entities.ContentJobItemProgress
+import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadOfflineItemStatusQuickActionButton
 import com.ustadmobile.libuicompose.components.UstadQuickActionButton
+import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import dev.icerock.moko.resources.compose.stringResource
 import kotlin.math.max
 
@@ -73,11 +73,10 @@ fun ContentEntryDetailOverviewScreen(
     onClickTranslation: (ContentEntryRelatedEntryJoinWithLanguage) -> Unit = {},
     onClickContentJobItem: () -> Unit = {},
 ) {
-    LazyColumn(
+    UstadLazyColumn(
         verticalArrangement = Arrangement.spacedBy(5.dp),
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
     )  {
 
         item("details") {
@@ -90,7 +89,7 @@ fun ContentEntryDetailOverviewScreen(
             item(key = "open_button") {
                 Button(
                     onClick = onClickOpen,
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().defaultItemPadding(),
                 ) {
                     Text(stringResource(MR.strings.open))
                 }
@@ -99,7 +98,7 @@ fun ContentEntryDetailOverviewScreen(
 
         item("quick_action_row") {
             Row(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().defaultItemPadding()
             ) {
                 UstadOfflineItemStatusQuickActionButton(
                     state = uiState.offlineItemAndState,
@@ -151,11 +150,14 @@ fun ContentEntryDetailOverviewScreen(
         }
 
         item {
-            Text(text = uiState.contentEntry?.entry?.description ?: "")
+            Text(
+                text = uiState.contentEntry?.entry?.description ?: "",
+                modifier = Modifier.defaultItemPadding()
+            )
         }
 
         item {
-            Divider(thickness = 1.dp)
+            Divider(thickness = 1.dp, modifier = Modifier.defaultItemPadding())
         }
 
         if (uiState.translationVisibile){
@@ -218,7 +220,7 @@ fun ContentDetailRightColumn(
 
         Text(
             text = uiState.contentEntry?.entry?.title ?: "",
-            style = MaterialTheme.typography.headlineMedium,
+            style = MaterialTheme.typography.headlineSmall,
             maxLines = 2,
         )
 
@@ -243,7 +245,6 @@ fun ContentDetailRightColumn(
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ContentJobListItem(
     uiState: ContentEntryDetailOverviewUiState,

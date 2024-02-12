@@ -3,8 +3,9 @@ package com.ustadmobile.core.domain.contententry.server
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
-import android.webkit.WebViewClient
+import com.ustadmobile.core.webview.UstadAbstractWebViewClient
 import io.github.aakira.napier.Napier
+import net.thauvin.erik.urlencoder.UrlEncoderUtil
 
 /**
  * Implements an Android WebViewClient to intercept resource requests for a content item. It will
@@ -15,29 +16,37 @@ import io.github.aakira.napier.Napier
  * ContentEntryVersionServerUseCase itself uses OkHttpClient, which uses the cache, so if the item
  * was downloaded for offline use, it will work.
  */
-class ContentEntryVersionServerWebClient(
-    private val useCase: ContentEntryVersionServerUseCase
-): WebViewClient() {
+open class ContentEntryVersionServerWebClient(
+    private val useCase: ContentEntryVersionServerUseCase,
+    private val contentEntryVersionUid: Long,
+): UstadAbstractWebViewClient() {
 
+
+    /**
+     * Seems like this does not work for video as per:
+     *  https://github.com/ionic-team/capacitor/issues/6021
+     *
+     *  Seems that preloading causes the problem. Thank you, Google.
+     */
     override fun shouldInterceptRequest(
         view: WebView?,
         request: WebResourceRequest
     ): WebResourceResponse {
         val url = request.url.toString()
         return try {
-            val contentEntryVersionUid = url.substringAfter("/api/content/")
-                .substringBefore("/").toLong()
             val pathInContentEntryVersion = url.substringAfter(
-                "/api/content/${contentEntryVersionUid}/")
+                "/api/content/$contentEntryVersionUid/")
             val okHttpResponse = useCase(
                 request = request.toCacheRequest(),
                 contentEntryVersionUid = contentEntryVersionUid,
-                pathInContentEntryVersion = pathInContentEntryVersion,
+                pathInContentEntryVersion = UrlEncoderUtil.decode(pathInContentEntryVersion),
             )
+            Napier.d { "ContentEntryVersionServerWebClient: ${okHttpResponse.code} " +
+                    "${okHttpResponse.message} $url " }
 
             okHttpResponse.asWebResourceResponse()
         }catch(e: Throwable) {
-            Napier.w("ContentEntryVersionServerWebClient: could not serve ${url}", e)
+            Napier.w("ContentEntryVersionServerWebClient: could not serve $url", e)
             newUnavailableWebResponse(e)
         }
     }

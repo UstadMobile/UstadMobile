@@ -1,32 +1,34 @@
 package com.ustadmobile.libuicompose.view.xapicontent
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServerWebClient
-import com.ustadmobile.core.util.ext.onActiveEndpoint
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import com.ustadmobile.core.viewmodel.xapicontent.XapiContentUiState
-import com.ustadmobile.libuicompose.components.UstadWebView
-import com.ustadmobile.libuicompose.components.UstadWebViewNavigator
-import org.kodein.di.compose.localDI
-import org.kodein.di.direct
-import org.kodein.di.instance
+import com.ustadmobile.core.webview.UstadAbstractWebViewClient
+import com.ustadmobile.libuicompose.components.webview.UstadWebView
+import com.ustadmobile.libuicompose.components.webview.UstadWebViewNavigatorAndroid
 
 @Composable
 actual fun XapiContentScreen(
     uiState: XapiContentUiState
 ) {
-    val di = localDI()
     val webViewNavigator = remember {
-        UstadWebViewNavigator(webViewClient = di.onActiveEndpoint().direct.instance<ContentEntryVersionServerWebClient>())
+        UstadWebViewNavigatorAndroid(UstadAbstractWebViewClient())
     }
 
-    UstadWebView(webViewNavigator)
+
+    UstadWebView(
+        navigator = webViewNavigator,
+        modifier = Modifier.fillMaxSize()
+            .testTag("xapi_webview")
+    )
 
     LaunchedEffect(uiState.url) {
         uiState.url?.also {
             webViewNavigator.loadUrl(it)
         }
     }
-
 }

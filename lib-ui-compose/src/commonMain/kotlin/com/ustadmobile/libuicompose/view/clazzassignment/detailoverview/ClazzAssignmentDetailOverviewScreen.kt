@@ -2,7 +2,6 @@ package com.ustadmobile.libuicompose.view.clazzassignment.detailoverview
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Icon
@@ -46,6 +45,7 @@ import androidx.compose.runtime.remember
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.ustadmobile.core.viewmodel.clazzassignment.averageMark
 import com.ustadmobile.core.viewmodel.clazzassignment.submissionStatusFor
+import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadRichTextEdit
 import com.ustadmobile.libuicompose.util.linkify.rememberLinkExtractor
 import com.ustadmobile.libuicompose.view.clazzassignment.CommentListItem
@@ -126,7 +126,7 @@ fun ClazzAssignmentDetailOverviewScreen(
 
     val linkExtractor = rememberLinkExtractor()
 
-    LazyColumn(
+    UstadLazyColumn(
         modifier = Modifier
             .fillMaxSize()
     ) {

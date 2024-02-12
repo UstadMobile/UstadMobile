@@ -1,16 +1,13 @@
 package com.ustadmobile.libuicompose.view.siteenterlink
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -25,6 +22,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkUiState
 import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
 import com.ustadmobile.libuicompose.components.UstadErrorText
+import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 import com.ustadmobile.libuicompose.images.UstadImage
 import com.ustadmobile.libuicompose.images.ustadAppImagePainter
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
@@ -55,10 +53,8 @@ fun SiteEnterLinkScreen(
 ) {
 
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState()),
+    UstadVerticalScrollColumn(
+        modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     )  {
         Spacer(Modifier.height(16.dp))
