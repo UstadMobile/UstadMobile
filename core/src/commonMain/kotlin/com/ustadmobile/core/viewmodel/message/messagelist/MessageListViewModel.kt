@@ -93,7 +93,7 @@ class MessageListViewModel(
             activeRepo.messageDao.insert(
                 Message(
                     messageSenderPersonUid = activeUserPersonUid,
-                    messageText = _uiState.value.newMessageText,
+                    messageText = _uiState.value.newMessageText.trim(),
                     messageToPersonUid = otherPersonUid,
                     messageTimestamp = systemTimeInMillis(),
                 )

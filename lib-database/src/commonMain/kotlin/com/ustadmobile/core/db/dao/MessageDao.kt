@@ -12,6 +12,9 @@ import com.ustadmobile.lib.db.entities.*
 @Repository
 expect abstract class MessageDao {
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
+    )
     @Query("""
         SELECT Message.*
           FROM Message
@@ -26,6 +29,9 @@ expect abstract class MessageDao {
         otherPersonUid: Long,
     ): PagingSource<Int, Message>
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
+    )
     @Query("""
         SELECT Person.*, LatestMessage.*, PersonPicture.*
           FROM Person

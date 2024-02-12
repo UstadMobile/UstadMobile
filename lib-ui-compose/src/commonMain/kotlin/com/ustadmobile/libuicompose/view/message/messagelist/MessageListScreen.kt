@@ -1,7 +1,6 @@
 package com.ustadmobile.libuicompose.view.message.messagelist
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
@@ -18,6 +17,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -28,6 +28,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.key
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -38,16 +41,16 @@ import androidx.compose.ui.input.key.isShiftPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.paging.compose.itemKey
 import com.ustadmobile.lib.db.entities.Message
-import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
-import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
 import com.ustadmobile.libuicompose.components.UstadLinkifyText
 import com.ustadmobile.libuicompose.util.linkify.ILinkExtractor
 import com.ustadmobile.libuicompose.util.linkify.rememberLinkExtractor
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 
 @Composable
@@ -79,32 +82,49 @@ fun MessageListScreen(
     }
 
     val linkExtractor = rememberLinkExtractor()
-
     val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
+    val coroutineScope = rememberCoroutineScope()
+    val lazyListState = rememberLazyListState()
+    val itemCount = lazyPagingItems.itemCount
 
     Column(
-        modifier = Modifier.fillMaxSize().defaultScreenPadding()
+        modifier = Modifier.fillMaxSize()
     ) {
         LazyColumn(
             reverseLayout = true,
+            state = lazyListState,
             modifier = Modifier
-                .defaultItemPadding()
                 .weight(1f)
-        ){
-            ustadPagedItems(
-                pagingItems = lazyPagingItems,
-                key = { it.messageUid },
-            ) {  message ->
+        ) {
+            items(
+                count = lazyPagingItems.itemCount,
+                key = lazyPagingItems.itemKey { it.messageUid  },
+            ) {  index ->
+                /*
+                 * When there is a new message, if the user is at the bottom of the list go to the
+                 * latest item automatically.
+                 */
+                val message = lazyPagingItems[index]
+                LaunchedEffect(itemCount) {
+                    if(index == 1) {
+                        coroutineScope.launch {
+                            lazyListState.scrollToItem(0)
+                        }
+                    }
+                }
+
                 ChatItem(
                     message = message,
                     activeUserUid = uiState.activePersonUid,
                     linkExtractor = linkExtractor,
+                    modifier = Modifier.fillMaxSize().defaultItemPadding(),
                 )
             }
         }
 
         NewMessageBox(
             text = uiState.newMessageText,
+            modifier = Modifier.defaultItemPadding(),
             onChangeNewMessageText = onChangeNewMessageText,
             onClickSend = onClickSend,
         )
@@ -116,23 +136,22 @@ fun ChatItem(
     message: Message?,
     activeUserUid: Long,
     linkExtractor: ILinkExtractor,
+    modifier: Modifier = Modifier,
 ) {
     val isFromMe = message?.messageSenderPersonUid == activeUserUid
 
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(4.dp)
+        modifier = modifier,
     ) {
         Box(
             modifier = Modifier
                 .align(if (isFromMe) Alignment.End else Alignment.Start)
                 .clip(
                     RoundedCornerShape(
-                        topStart = 48f,
-                        topEnd = 48f,
-                        bottomStart = if (isFromMe) 48f else 0f,
-                        bottomEnd = if (isFromMe) 0f else 48f
+                        topStart = 24f,
+                        topEnd = 24f,
+                        bottomStart = if (isFromMe) 24f else 0f,
+                        bottomEnd = if (isFromMe) 0f else 24f
                     )
                 )
                 .background(MaterialTheme.colorScheme.primaryContainer)
@@ -153,51 +172,52 @@ fun NewMessageBox(
     onClickSend: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-
-    Row(modifier = modifier.padding(16.dp)) {
-        TextField(
-            modifier = Modifier
-                .weight(1f)
-                .padding(4.dp)
-                .onPreviewKeyEvent {
-                    if(it.type == KeyEventType.KeyUp
-                        && it.key == Key.Enter
-                        && text.isNotBlank()
-                        && !it.isAltPressed
-                        && !it.isShiftPressed
-                    ) {
-                        onClickSend()
-                        true
-                    }else {
-                        false
-                    }
-                },
-            value = text,
-            onValueChange = onChangeNewMessageText,
-            shape = RoundedCornerShape(24.dp),
-            colors = TextFieldDefaults.colors(
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                disabledIndicatorColor = Color.Transparent
-            ),
-            placeholder = {
-                Text(text = stringResource(MR.strings.message))
-            }
-        )
-
-        if(text.isNotBlank()) {
-            IconButton(
-                onClick = onClickSend,
+    key("send_message_box") {
+        Row(modifier = modifier) {
+            TextField(
                 modifier = Modifier
-                    .clip(CircleShape)
-                    .background(color = MaterialTheme.colorScheme.primaryContainer)
-                    .align(Alignment.CenterVertically)
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Send,
-                    contentDescription = stringResource(MR.strings.send),
-                    modifier = Modifier.fillMaxSize().padding(8.dp)
-                )
+                    .weight(1f)
+                    .padding(4.dp)
+                    .onPreviewKeyEvent {
+                        if(it.type == KeyEventType.KeyUp
+                            && it.key == Key.Enter
+                            && text.isNotBlank()
+                            && !it.isAltPressed
+                            && !it.isShiftPressed
+                        ) {
+                            onClickSend()
+                            true
+                        }else {
+                            false
+                        }
+                    },
+                value = text,
+                onValueChange = onChangeNewMessageText,
+                shape = RoundedCornerShape(24.dp),
+                colors = TextFieldDefaults.colors(
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    disabledIndicatorColor = Color.Transparent
+                ),
+                placeholder = {
+                    Text(text = stringResource(MR.strings.message))
+                }
+            )
+
+            if(text.isNotBlank()) {
+                IconButton(
+                    onClick = onClickSend,
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(color = MaterialTheme.colorScheme.primaryContainer)
+                        .align(Alignment.CenterVertically)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Send,
+                        contentDescription = stringResource(MR.strings.send),
+                        modifier = Modifier.fillMaxSize().padding(8.dp)
+                    )
+                }
             }
         }
     }

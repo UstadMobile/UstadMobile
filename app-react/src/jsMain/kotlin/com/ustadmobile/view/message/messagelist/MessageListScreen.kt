@@ -76,10 +76,10 @@ private val MessageListScreenComponent2 = FC<MessageListScreenProps> { props ->
 
         content = virtualListContent {
 
-            infiniteQueryPagingItems(
+            infiniteQueryPagingItemsIndexed(
                 items = infiniteQueryResult,
-                key = { it.messageUid.toString() }
-            ) { messageItem ->
+                key = { item, _ -> item.messageUid.toString() }
+            ) { messageItem, _ ->
                 ChatItem.create {
                     message = messageItem
                     activeUserUid = props.uiState.activePersonUid
@@ -146,6 +146,7 @@ val MessageListScreen = FC<Props> {
 external interface ChatItemProps: Props {
 
     var message: Message?
+
     var activeUserUid: Long
 
 }

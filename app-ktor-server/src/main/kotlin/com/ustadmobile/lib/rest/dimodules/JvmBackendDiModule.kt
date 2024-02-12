@@ -15,6 +15,7 @@ import com.ustadmobile.core.domain.cachelock.CreateCacheLocksForActiveContentEnt
 import com.ustadmobile.core.domain.cachelock.Migrate131to132AddRetainActiveUriTriggers
 import com.ustadmobile.core.domain.cachelock.UpdateCacheLockJoinUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCaseCommonJvm
+import com.ustadmobile.core.domain.message.AddOutgoingReplicationForMessageTriggerCallback
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.DiTag
@@ -131,6 +132,7 @@ fun makeJvmBackendDiModule(
             .addSyncCallback(nodeIdAndAuth)
             .addCallback(InsertDefaultSiteCallback())
             .addCallback(AddRetainAllActiveUriTriggersCallback())
+            .addCallback(AddOutgoingReplicationForMessageTriggerCallback())
             .addMigrations(*migrationList().toTypedArray())
             .addMigrations(Migrate131to132AddRetainActiveUriTriggers)
             .build().also {
