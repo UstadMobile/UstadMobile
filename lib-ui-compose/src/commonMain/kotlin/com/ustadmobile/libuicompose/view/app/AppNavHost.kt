@@ -50,6 +50,7 @@ import com.ustadmobile.core.viewmodel.courseblock.textblockdetail.TextBlockDetai
 import com.ustadmobile.core.viewmodel.coursegroupset.list.CourseGroupSetListViewModel
 import com.ustadmobile.core.viewmodel.courseterminology.edit.CourseTerminologyEditViewModel
 import com.ustadmobile.core.viewmodel.courseterminology.list.CourseTerminologyListViewModel
+import com.ustadmobile.core.viewmodel.deleteditem.DeletedItemListViewModel
 import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.CourseDiscussionDetailViewModel
 import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailViewModel
 import com.ustadmobile.core.viewmodel.discussionpost.edit.DiscussionPostEditViewModel
@@ -132,6 +133,7 @@ import com.ustadmobile.libuicompose.view.contententry.getmetadata.ContentEntryGe
 import com.ustadmobile.libuicompose.view.contententry.importlink.ContentEntryImportLinkScreen
 import com.ustadmobile.libuicompose.view.courseterminology.edit.CourseTerminologyEditScreen
 import com.ustadmobile.libuicompose.view.courseterminology.list.CourseTerminologyListScreen
+import com.ustadmobile.libuicompose.view.deleteditem.list.DeletedItemListScreen
 import com.ustadmobile.libuicompose.view.epubcontent.EpubContentScreen
 import com.ustadmobile.libuicompose.view.parentalconsentmanagement.ParentalConsentManagementScreen
 import com.ustadmobile.libuicompose.view.pdfcontent.PdfContentScreen
@@ -654,6 +656,13 @@ fun AppNavHost(
                 DeveloperSettingsScreen(
                     appViewModel(backStackEntry, DeveloperSettingsViewModel::class,
                         ::DeveloperSettingsViewModel)
+                )
+            }
+
+            contentScene("/${DeletedItemListViewModel.DEST_NAME}") { backStackEntry ->
+                DeletedItemListScreen(
+                    appViewModel(backStackEntry, DeletedItemListViewModel::class,
+                        ::DeletedItemListViewModel)
                 )
             }
         }

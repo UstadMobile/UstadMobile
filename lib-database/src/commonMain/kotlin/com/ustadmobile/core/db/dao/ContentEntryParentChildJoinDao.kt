@@ -63,4 +63,25 @@ expect abstract class ContentEntryParentChildJoinDao : BaseDao<ContentEntryParen
         selectedItems: List<Long>,
         updateTime: Long,
     )
+
+    @Query("""
+        UPDATE ContentEntryParentChildJoin
+           SET cepcjDeleted = :isDeleted,
+               cepcjLct = :updateTime
+         WHERE cepcjUid IN (:selectedUids) 
+    """)
+    abstract suspend fun setEntriesDeleted(
+        selectedUids: List<Long>,
+        isDeleted: Boolean,
+        updateTime: Long
+    )
+
+
+    @Query("""
+        SELECT ContentEntryParentChildJoin.*
+          FROM ContentEntryParentChildJoin
+         WHERE  ContentEntryParentChildJoin.cepcjUid = :uid
+    """)
+    abstract suspend fun findByUid(uid: Long): ContentEntryParentChildJoin?
+
 }

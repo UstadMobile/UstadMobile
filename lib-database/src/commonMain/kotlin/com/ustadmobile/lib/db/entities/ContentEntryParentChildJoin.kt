@@ -36,7 +36,8 @@ class ContentEntryParentChildJoin(
     @ColumnInfo(index = true)
     var cepcjChildContentEntryUid: Long = 0,
 
-    var childIndex: Int = 0) {
+    var childIndex: Int = 0
+) {
 
     @PrimaryKey(autoGenerate = true)
     var cepcjUid: Long = 0
@@ -53,6 +54,11 @@ class ContentEntryParentChildJoin(
     @ReplicateLastModified
     @ReplicateEtag
     var cepcjLct: Long = 0
+
+
+    @ColumnInfo(defaultValue = "0")
+    var cepcjDeleted: Boolean = false
+
 
     constructor(parentEntry: ContentEntry, childEntry: ContentEntry, index: Int) : this(){
         cepcjParentContentEntryUid = parentEntry.contentEntryUid
