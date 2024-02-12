@@ -56,6 +56,8 @@ import com.ustadmobile.core.domain.contententry.launchcontent.xapi.LaunchXapiUse
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.LaunchXapiUseCaseJvm
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.ResolveXapiLaunchHrefUseCase
 import com.ustadmobile.core.domain.contententry.move.MoveContentEntriesUseCase
+import com.ustadmobile.core.domain.deleteditem.DeletePermanentlyUseCase
+import com.ustadmobile.core.domain.deleteditem.RestoreDeletedItemUseCase
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.launchopenlicenses.LaunchOpenLicensesUseCase
 import com.ustadmobile.core.domain.phonenumber.OnClickPhoneNumUseCase
@@ -353,6 +355,18 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
 
     bind<DeleteContentEntryParentChildJoinUseCase>() with scoped(EndpointScope.Default).provider {
         DeleteContentEntryParentChildJoinUseCase(
+            repoOrDb = instance(tag = DoorTag.TAG_REPO),
+        )
+    }
+
+    bind<RestoreDeletedItemUseCase>() with scoped(EndpointScope.Default).provider {
+        RestoreDeletedItemUseCase(
+            repoOrDb = instance(tag = DoorTag.TAG_REPO),
+        )
+    }
+
+    bind<DeletePermanentlyUseCase>() with scoped(EndpointScope.Default).provider {
+        DeletePermanentlyUseCase(
             repoOrDb = instance(tag = DoorTag.TAG_REPO),
         )
     }

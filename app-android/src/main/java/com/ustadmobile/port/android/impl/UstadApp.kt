@@ -74,6 +74,8 @@ import com.ustadmobile.core.domain.htmlcontentdisplayengine.GetHtmlContentDispla
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.HTML_CONTENT_OPTIONS_ANDROID
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.SetHtmlContentDisplayEngineUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.ResolveXapiLaunchHrefUseCase
+import com.ustadmobile.core.domain.deleteditem.DeletePermanentlyUseCase
+import com.ustadmobile.core.domain.deleteditem.RestoreDeletedItemUseCase
 import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCase
 import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCaseAndroid
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
@@ -656,6 +658,18 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
         bind<DeleteContentEntryParentChildJoinUseCase>() with scoped(EndpointScope.Default).provider {
             DeleteContentEntryParentChildJoinUseCase(
+                repoOrDb = instance(tag = DoorTag.TAG_REPO),
+            )
+        }
+
+        bind<RestoreDeletedItemUseCase>() with scoped(EndpointScope.Default).provider {
+            RestoreDeletedItemUseCase(
+                repoOrDb = instance(tag = DoorTag.TAG_REPO),
+            )
+        }
+
+        bind<DeletePermanentlyUseCase>() with scoped(EndpointScope.Default).provider {
+            DeletePermanentlyUseCase(
                 repoOrDb = instance(tag = DoorTag.TAG_REPO),
             )
         }

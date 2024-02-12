@@ -39,4 +39,14 @@
         <item quantity="other">%d items deleted</item>
     </plural>
 
+    <plural name="items_restored">
+        <item quantity="one">%d item restored</item>
+        <item quantity="other">%d items restored</item>
+    </plural>
+
+    <plural name="are_you_sure_you_want_to_permanently_delete">
+        <item quantity="one">Are you sure you want to permanently delete %d item?</item>
+        <item quantity="other">Are you sure you want to permanently delete %d items?</item>
+    </plural>
+
 </resources>

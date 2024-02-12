@@ -83,4 +83,16 @@ expect abstract class DeletedItemDao {
         includeActionedItems: Boolean,
     ): PagingSource<Int, DeletedItem>
 
+    @Query("""
+        UPDATE DeletedItem
+           SET delItemStatus = :newStatus,
+               delItemLastModTime = :updateTime
+         WHERE delItemUid IN (:uidList)
+    """)
+    abstract suspend fun updateStatusByUids(
+        uidList: List<Long>,
+        newStatus: Int,
+        updateTime: Long,
+    )
+
 }
