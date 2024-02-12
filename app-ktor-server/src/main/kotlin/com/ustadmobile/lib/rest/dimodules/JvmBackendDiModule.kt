@@ -8,6 +8,7 @@ import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.contentformats.epub.XhtmlFixer
 import com.ustadmobile.core.contentformats.epub.XhtmlFixerJsoup
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.ext.MIGRATION_144_145_SERVER
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.core.domain.cachelock.AddRetainAllActiveUriTriggersCallback
@@ -135,6 +136,7 @@ fun makeJvmBackendDiModule(
             .addCallback(AddOutgoingReplicationForMessageTriggerCallback())
             .addMigrations(*migrationList().toTypedArray())
             .addMigrations(Migrate131to132AddRetainActiveUriTriggers)
+            .addMigrations(MIGRATION_144_145_SERVER)
             .build().also {
                 it.ktorInitDb(di)
             }

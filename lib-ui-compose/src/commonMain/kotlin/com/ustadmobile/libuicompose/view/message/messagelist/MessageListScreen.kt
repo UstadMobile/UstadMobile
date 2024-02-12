@@ -148,14 +148,14 @@ fun ChatItem(
                 .align(if (isFromMe) Alignment.End else Alignment.Start)
                 .clip(
                     RoundedCornerShape(
-                        topStart = 24f,
-                        topEnd = 24f,
-                        bottomStart = if (isFromMe) 24f else 0f,
-                        bottomEnd = if (isFromMe) 0f else 24f
+                        topStart = 16f,
+                        topEnd = 16f,
+                        bottomStart = if (isFromMe) 16f else 0f,
+                        bottomEnd = if (isFromMe) 0f else 16f
                     )
                 )
                 .background(MaterialTheme.colorScheme.primaryContainer)
-                .padding(16.dp)
+                .padding(8.dp)
         ) {
             UstadLinkifyText(
                 text = message?.messageText ?: "",

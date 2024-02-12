@@ -4,6 +4,8 @@ import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.door.migration.DoorMigrationStatementList
 import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.door.migration.DoorMigration
+import com.ustadmobile.lib.db.entities.Message
+import com.ustadmobile.lib.db.entities.UserSession
 
 val MIGRATION_102_103 = DoorMigrationStatementList(102, 103) { db ->
     val stmtList = mutableListOf<String>()
@@ -1462,6 +1464,9 @@ val MIGRATION_142_143 = DoorMigrationStatementList(142, 143) { db ->
     }
 }
 
+/*
+ * Update message table structure and create triggers that will
+ */
 val MIGRATION_143_144 = DoorMigrationStatementList(143, 144) { db ->
     buildList {
         add("DROP TABLE IF EXISTS Message")
@@ -1471,6 +1476,58 @@ val MIGRATION_143_144 = DoorMigrationStatementList(143, 144) { db ->
             add("CREATE TABLE IF NOT EXISTS Message (  messageSenderPersonUid  BIGINT  NOT NULL , messageToPersonUid  BIGINT  NOT NULL , messageText  TEXT , messageTimestamp  BIGINT  NOT NULL , messageLct  BIGINT  NOT NULL , messageUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
         }
     }
+}
+
+//This migration adds triggers which will put any received Message into the outgoing replication for
+// recipients (and other devices of senders)
+val MIGRATION_144_145_SERVER = DoorMigrationStatementList(144, 145){ db ->
+    val insertOutgoingReplicationSql ="""
+           INSERT INTO OutgoingReplication(destNodeId, orTableId, orPk1, orPk2)
+                SELECT UserSession.usClientNodeId AS destNodeId,
+                       ${Message.TABLE_ID} AS orTableId,
+                       NEW.messageUid AS orPk1,
+                       0 as orPk2
+                 FROM UserSession
+                WHERE (   UserSession.usPersonUid = NEW.messageSenderPersonUid 
+                       OR UserSession.usPersonUid = NEW.messageToPersonUid)
+                  AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}     
+                  AND UserSession.usClientNodeId NOT IN 
+                      (SELECT ReplicationOperation.repOpRemoteNodeId
+                         FROM ReplicationOperation
+                        WHERE ReplicationOperation.repOpTableId = ${Message.TABLE_ID});
+        """
+
+
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("""
+                    CREATE TRIGGER IF NOT EXISTS message_send_trigger
+                    AFTER INSERT ON Message
+                    FOR EACH ROW
+                    BEGIN
+                    $insertOutgoingReplicationSql
+                    END    
+                """)
+        }else {
+            add("""
+                    CREATE OR REPLACE FUNCTION message_send_fn() RETURNS TRIGGER AS $$
+                    BEGIN
+                    $insertOutgoingReplicationSql
+                    RETURN NEW;
+                    END $$ LANGUAGE plpgsql
+                """)
+            add("""
+                    CREATE TRIGGER message_send_trig AFTER INSERT 
+                    ON Message
+                    FOR EACH ROW EXECUTE PROCEDURE message_send_fn()
+                """)
+        }
+    }
+}
+
+//144-145 migration - empty - does nothing
+val MIGRATION_144_145_CLIENT = DoorMigrationStatementList(144, 145) { db ->
+    emptyList()
 }
 
 
