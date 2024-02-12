@@ -7,7 +7,7 @@
 \n mumatsinda</string>
     <string name="select_group_members">Hitamo abagize itsinda</string>
     <string name="login_network_error">Interineti yanze: genzura ko ufite interineti.</string>
-    <string name="downloaded" value="81">Byavanwe kuri murandasi</string>
+    <string name="downloaded" value="81">Byamanuwe</string>
     <string name="libraries">Amasomero</string>
     <string name="ok">Nibyo</string>
     <string name="confirm">Emeza</string>
@@ -18,7 +18,7 @@
     <string name="err_registering_new_user">Hari ikosa mu kwandika ukoresha sisiteme mushya:</string>
     <string name="register_incorrect_email">Imeyili itariyo</string>
     <string name="confirm_delete_message">Urashaka gusiba aya makuru mu gikoresho cyawe\?</string>
-    <string name="download">Vana kuri murandasi</string>
+    <string name="download">Manura</string>
     <string name="pause_download">Hagarika kumanura</string>
     <string name="processing">Birimo gutunganywa</string>
     <string name="app_name">Urubuga rwa Ustad Mobile</string>
@@ -659,7 +659,7 @@
     <string name="sel_question_set">Ibibazoshingiro byo ku myigire y\'imibanire n\'abandi n\'imbamutima</string>
     <string name="users">Abakoresha porogaramu</string>
     <string name="ask_your_teacher_for_code">Saba mwarimu wawe ikode y\'ishuri, Noneho uyinjizemo hepfo:</string>
-    <string name="download_all">Bikure kuri murandasi byose</string>
+    <string name="download_all">Bimanure byose</string>
     <string name="next">Igikurikira</string>
     <string name="previous">Icyabanje</string>
     <string name="back">Gusubira inyuma</string>
