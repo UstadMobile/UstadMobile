@@ -9,6 +9,7 @@ import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCaseJs
 import com.ustadmobile.core.domain.blob.savepicture.SavePictureUseCase
 import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseJs
+import com.ustadmobile.core.domain.contententry.delete.DeleteContentEntryParentChildJoinUseCase
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCaseJs
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
@@ -17,6 +18,8 @@ import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseJs
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.ResolveXapiLaunchHrefUseCase
 import com.ustadmobile.core.domain.contententry.move.MoveContentEntriesUseCase
+import com.ustadmobile.core.domain.deleteditem.DeletePermanentlyUseCase
+import com.ustadmobile.core.domain.deleteditem.RestoreDeletedItemUseCase
 import com.ustadmobile.core.domain.openlink.OnClickLinkUseCase
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCaseJs
@@ -157,6 +160,24 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
         MoveContentEntriesUseCase(
             repo = instance(tag = DoorTag.TAG_REPO),
             systemImpl = instance()
+        )
+    }
+
+    bind<DeleteContentEntryParentChildJoinUseCase>() with scoped(EndpointScope.Default).provider {
+        DeleteContentEntryParentChildJoinUseCase(
+            repoOrDb = instance(tag = DoorTag.TAG_REPO),
+        )
+    }
+
+    bind<RestoreDeletedItemUseCase>() with scoped(EndpointScope.Default).provider {
+        RestoreDeletedItemUseCase(
+            repoOrDb = instance(tag = DoorTag.TAG_REPO),
+        )
+    }
+
+    bind<DeletePermanentlyUseCase>() with scoped(EndpointScope.Default).provider {
+        DeletePermanentlyUseCase(
+            repoOrDb = instance(tag = DoorTag.TAG_REPO),
         )
     }
 }
