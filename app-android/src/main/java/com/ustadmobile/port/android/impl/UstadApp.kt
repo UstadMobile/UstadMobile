@@ -22,6 +22,7 @@ import com.ustadmobile.core.contentformats.pdf.PdfContentImporterAndroid
 import com.ustadmobile.core.contentformats.video.VideoContentImporterCommonJvm
 import com.ustadmobile.core.contentformats.xapi.XapiZipContentImporter
 import com.ustadmobile.core.db.*
+import com.ustadmobile.core.db.ext.MIGRATION_144_145_CLIENT
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.util.DiTag
@@ -267,6 +268,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 nodeId = nodeIdAndAuth.nodeId
             ).addSyncCallback(nodeIdAndAuth)
                 .addMigrations(*migrationList().toTypedArray())
+                .addMigrations(MIGRATION_144_145_CLIENT)
                 .build()
 
         }

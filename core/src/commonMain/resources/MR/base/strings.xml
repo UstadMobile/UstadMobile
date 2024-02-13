@@ -678,7 +678,6 @@
     <string name="num_items_with_name_with_comma">%1$d %2$s, %3$d %4$s</string>
     <string name="add_to">Add to %1$s</string>
     <string name="remove_from">Remove from %1$s</string>
-    <string name="items_selected">%1$d selected</string>
     <string name="change_photo">Change photo</string>
     <string name="remove_photo">Remove photo</string>
     <string name="take_new_photo_from_camera">Take new photo from camera</string>
@@ -1755,5 +1754,7 @@
     <string name="deleted_items">Deleted items</string>
 
     <string name="delete_or_restore_items">Delete or restore items</string>
+
+    <string name="yesterday">Yesterday</string>
 
 </resources>

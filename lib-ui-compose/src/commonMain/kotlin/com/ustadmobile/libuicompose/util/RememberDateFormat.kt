@@ -1,6 +1,12 @@
 package com.ustadmobile.libuicompose.util
 
 import androidx.compose.runtime.Composable
+import java.text.DateFormat
+
+@Composable
+expect fun rememberDateFormat(
+    timeZoneId: String,
+): DateFormat
 
 /**
  * Format the given date. Use the remember function for performance enhancement. Date formatting can

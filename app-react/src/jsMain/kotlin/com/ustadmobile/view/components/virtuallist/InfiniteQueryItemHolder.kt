@@ -18,6 +18,11 @@ external interface InfiniteQueryHolderProps : PropsWithChildren {
     var loadedItems: List<*>
 
     /**
+     * The index of the item within loadedItems
+     */
+    var itemIndex: Int
+
+    /**
      * The item represented by this item
      */
     var item: Any?

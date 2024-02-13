@@ -396,7 +396,6 @@
     <string name="school">مکتب</string>
     <string name="assignments">کار خانگی</string>
     <string name="remove_from">حذف نمودن از %1$s</string>
-    <string name="items_selected">%1$d انتخاب گردید</string>
     <string name="remove_photo">حذف تصویر</string>
     <string name="select_new_photo_from_gallery">انتخاب تصویر جدید از گالری</string>
     <string name="toC">به</string>
