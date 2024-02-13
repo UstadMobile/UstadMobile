@@ -1,12 +1,17 @@
 package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.Message.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
-@Entity
+@Entity(
+    indices = arrayOf(
+        Index("messageSenderPersonUid", "messageToPersonUid", "messageTimestamp", name = "message_idx_send_to_time")
+    )
+)
 @Serializable
 @ReplicateEntity(
     tableId = TABLE_ID ,

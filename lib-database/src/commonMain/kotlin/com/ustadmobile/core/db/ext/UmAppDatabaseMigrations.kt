@@ -1530,6 +1530,9 @@ val MIGRATION_144_145_CLIENT = DoorMigrationStatementList(144, 145) { db ->
     emptyList()
 }
 
+val MIGRATION_145_146 = DoorMigrationStatementList(145, 146) { db ->
+    listOf("CREATE INDEX message_idx_send_to_time ON Message (messageSenderPersonUid, messageToPersonUid, messageTimestamp)")
+}
 
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_102_103,
@@ -1540,7 +1543,7 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_128_129, MIGRATION_129_130, MIGRATION_130_131, MIGRATION_132_133,
     MIGRATION_133_134, MIGRATION_134_135, MIGRATION_135_136, MIGRATION_136_137,
     MIGRATION_137_138, MIGRATION_138_139, MIGRATION_139_140, MIGRATION_140_141,
-    MIGRATION_141_142, MIGRATION_142_143, MIGRATION_143_144,
+    MIGRATION_141_142, MIGRATION_142_143, MIGRATION_143_144, MIGRATION_145_146,
 )
 
 

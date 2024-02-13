@@ -5,6 +5,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.SortOrderOption
+import com.ustadmobile.core.util.ext.dayStringResource
 import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadView
@@ -15,12 +16,19 @@ import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import com.ustadmobile.lib.db.composites.MessageAndOtherPerson
 import kotlinx.coroutines.flow.update
+import kotlinx.datetime.Clock
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.kodein.di.DI
 
 data class ConversationListUiState(
     val conversations: () -> PagingSource<Int, MessageAndOtherPerson> = { EmptyPagingSource() },
     val sortOptions: List<SortOrderOption> = emptyList(), //Should be by name (ascending/descending), time (ascending/descending)
     val showAddItem: Boolean = false,
+    val localDateTimeNow: LocalDateTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
+    val dayOfWeekStrings: Map<DayOfWeek, String> = emptyMap(),
 )
 
 class ConversationListViewModel(
@@ -45,6 +53,9 @@ class ConversationListViewModel(
     init {
         _uiState.update { prev ->
             prev.copy(
+                dayOfWeekStrings = DayOfWeek.values().associateWith {
+                    systemImpl.getString(it.dayStringResource)
+                },
                 conversations = pagingSourceFactory
             )
         }

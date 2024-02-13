@@ -2,50 +2,31 @@ package com.ustadmobile.view.message.messagelist
 
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.paging.ListPagingSource
-import com.ustadmobile.core.viewmodel.message.daysUntil
-import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.core.viewmodel.message.messagelist.MessageListUiState
 import com.ustadmobile.core.viewmodel.message.messagelist.MessageListViewModel
 import com.ustadmobile.hooks.useDateFormatter
-import com.ustadmobile.hooks.useDayOrDate
-import com.ustadmobile.hooks.useFormattedTimeForDate
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useTimeFormatter
+import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.Message
-import com.ustadmobile.mui.components.ThemeContext
-import com.ustadmobile.mui.components.UstadLinkify
 import com.ustadmobile.mui.components.UstadSendTextField
 import com.ustadmobile.util.ext.onTextChange
-import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.VirtualList
+import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
-import com.ustadmobile.wrappers.intl.Intl
+import js.core.jso
+import mui.material.Container
+import react.FC
+import react.Props
+import react.create
+import react.useEffect
+import react.useRef
+import react.useState
 import web.cssom.Contain
 import web.cssom.Height
 import web.cssom.Overflow
 import web.cssom.pct
-import js.core.jso
-import kotlinx.datetime.TimeZone
-import web.cssom.JustifyContent
-import mui.material.Container
-import mui.material.Box
-import mui.material.Typography
-import mui.material.styles.TypographyVariant
-import mui.system.sx
-import react.FC
-import react.Props
-import react.create
-import react.dom.html.ReactHTML.br
-import react.useEffect
-import react.useMemo
-import react.useRef
-import react.useRequiredContext
-import react.useState
-import web.cssom.Display
-import web.cssom.Flex
-import web.cssom.TextAlign
-import web.cssom.px
 import web.html.HTMLElement
 
 
@@ -92,7 +73,7 @@ private val MessageListScreenComponent2 = FC<MessageListScreenProps> { props ->
                 items = infiniteQueryResult,
                 key = { items, index -> items[index]?.messageUid?.toString() ?: "${items}_$index" }
             ) { list, index ->
-                ChatItem.create {
+                MessageListItem.create {
                     message = list[index]
                     previousMessage = list.getOrNull(index + 1)
                     activeUserUid = props.uiState.activePersonUid
@@ -156,95 +137,5 @@ val MessageListScreen = FC<Props> {
         uiState = uiStateVal
         onChangeNewMessageText = viewModel::onChangeNewMessageText
         onClickSend = viewModel::onClickSend
-    }
-}
-
-external interface ChatItemProps: Props {
-
-    var message: Message?
-
-    var previousMessage: Message?
-
-    var activeUserUid: Long
-
-    var timeFormatter: Intl.Companion.DateTimeFormat
-
-    var listUiState: MessageListUiState
-
-    var dateFormatter: Intl.Companion.DateTimeFormat
-
-}
-
-val ChatItem = FC<ChatItemProps> { props ->
-
-    val theme by useRequiredContext(ThemeContext)
-    val isFromMe = props.message?.messageSenderPersonUid == props.activeUserUid
-    val messageTime = useFormattedTimeForDate(props.message?.messageTimestamp ?: 0, props.timeFormatter)
-
-    val daysSincePrevMessage = useMemo(
-        arrayOf(props.message?.messageTimestamp, props.previousMessage?.messageTimestamp)
-    ) {
-        props.message?.let { props.previousMessage?.daysUntil(it) }
-    }
-
-    val dayOrDateHeader = useDayOrDate(
-        enabled = daysSincePrevMessage != 0,
-        localDateTimeNow = props.listUiState.localDateTimeNow,
-        timestamp = props.message?.messageTimestamp ?: 0,
-        timeZone = TimeZone.currentSystemDefault(),
-        dateFormatter = props.dateFormatter,
-        showTimeIfToday = false,
-        timeFormatter = props.timeFormatter,
-        dayOfWeekStringMap = props.listUiState.dayOfWeekStrings,
-    )
-
-    dayOrDateHeader?.also {
-        Typography {
-            sx {
-                display = Display.block
-                textAlign = TextAlign.center
-            }
-
-            + it
-        }
-    }
-
-    Box {
-        sx {
-            display = Display.flex
-            flex = Flex.minContent
-            justifyContent = if (isFromMe) JustifyContent.end else JustifyContent.start
-        }
-
-        Box {
-            sx {
-                backgroundColor = if(isFromMe) {
-                    theme.palette.primary.light
-                }else {
-                    theme.palette.primary.dark
-                }
-                color = theme.palette.primary.contrastText
-                padding = 10.px
-                margin = 5.px
-                borderTopLeftRadius = 24.px
-                borderTopRightRadius = 24.px
-                borderBottomLeftRadius = if (isFromMe) 24.px else 0.px
-                borderBottomRightRadius = if (isFromMe) 0.px else 24.px
-            }
-
-            UstadLinkify {
-                + (props.message?.messageText ?: "")
-            }
-
-            br()
-
-            Typography {
-                variant = TypographyVariant.caption
-
-                + messageTime
-            }
-        }
-
-
     }
 }
