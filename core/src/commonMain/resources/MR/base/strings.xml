@@ -1746,4 +1746,15 @@
 
     <string name="move_to">Move to…</string>
 
+
+    <string name="restore">Restore</string>
+
+    <string name="delete_permanently">Delete permanently</string>
+
+    <string name="deleted_items">Deleted items</string>
+
+    <string name="delete_or_restore_items">Delete or restore items</string>
+
+    <string name="yesterday">Yesterday</string>
+
 </resources>

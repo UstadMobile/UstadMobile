@@ -4,6 +4,8 @@ import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.door.migration.DoorMigrationStatementList
 import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.door.migration.DoorMigration
+import com.ustadmobile.lib.db.entities.Message
+import com.ustadmobile.lib.db.entities.UserSession
 
 val MIGRATION_102_103 = DoorMigrationStatementList(102, 103) { db ->
     val stmtList = mutableListOf<String>()
@@ -1448,6 +1450,89 @@ val MIGRATION_141_142 = DoorMigrationStatementList(141, 142) { db ->
     listOf("DROP TABLE IF EXISTS ClazzAssignmentContentJoin")
 }
 
+val MIGRATION_142_143 = DoorMigrationStatementList(142, 143) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("ALTER TABLE ContentEntryParentChildJoin ADD COLUMN cepcjDeleted INTEGER NOT NULL DEFAULT 0")
+            add("CREATE TABLE IF NOT EXISTS DeletedItem (  delItemName  TEXT , delItemIconUri  TEXT , delItemLastModTime  INTEGER  NOT NULL , delItemTimeDeleted  INTEGER  NOT NULL , delItemEntityTable  INTEGER  NOT NULL , delItemEntityUid  INTEGER  NOT NULL , delItemDeletedByPersonUid  INTEGER  NOT NULL , delItemStatus  INTEGER  NOT NULL , delItemIsFolder  INTEGER  NOT NULL  DEFAULT 0 , delItemUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+            add("CREATE INDEX delitem_idx_status_time ON DeletedItem (delItemStatus, delItemTimeDeleted)")
+        }else {
+            add("ALTER TABLE ContentEntryParentChildJoin ADD COLUMN cepcjDeleted BOOL NOT NULL DEFAULT false")
+            add("CREATE TABLE IF NOT EXISTS DeletedItem (  delItemName  TEXT , delItemIconUri  TEXT , delItemLastModTime  BIGINT  NOT NULL , delItemTimeDeleted  BIGINT  NOT NULL , delItemEntityTable  INTEGER  NOT NULL , delItemEntityUid  BIGINT  NOT NULL , delItemDeletedByPersonUid  BIGINT  NOT NULL , delItemStatus  INTEGER  NOT NULL , delItemIsFolder  BOOL  NOT NULL  DEFAULT false, delItemUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+            add("CREATE INDEX delitem_idx_status_time ON DeletedItem (delItemStatus, delItemTimeDeleted)")
+        }
+    }
+}
+
+/*
+ * Update message table structure and create triggers that will
+ */
+val MIGRATION_143_144 = DoorMigrationStatementList(143, 144) { db ->
+    buildList {
+        add("DROP TABLE IF EXISTS Message")
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS Message (  messageSenderPersonUid  INTEGER  NOT NULL , messageToPersonUid  INTEGER  NOT NULL , messageText  TEXT , messageTimestamp  INTEGER  NOT NULL , messageLct  INTEGER  NOT NULL , messageUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS Message (  messageSenderPersonUid  BIGINT  NOT NULL , messageToPersonUid  BIGINT  NOT NULL , messageText  TEXT , messageTimestamp  BIGINT  NOT NULL , messageLct  BIGINT  NOT NULL , messageUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+        }
+    }
+}
+
+//This migration adds triggers which will put any received Message into the outgoing replication for
+// recipients (and other devices of senders)
+val MIGRATION_144_145_SERVER = DoorMigrationStatementList(144, 145){ db ->
+    val insertOutgoingReplicationSql ="""
+           INSERT INTO OutgoingReplication(destNodeId, orTableId, orPk1, orPk2)
+                SELECT UserSession.usClientNodeId AS destNodeId,
+                       ${Message.TABLE_ID} AS orTableId,
+                       NEW.messageUid AS orPk1,
+                       0 as orPk2
+                 FROM UserSession
+                WHERE (   UserSession.usPersonUid = NEW.messageSenderPersonUid 
+                       OR UserSession.usPersonUid = NEW.messageToPersonUid)
+                  AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}     
+                  AND UserSession.usClientNodeId NOT IN 
+                      (SELECT ReplicationOperation.repOpRemoteNodeId
+                         FROM ReplicationOperation
+                        WHERE ReplicationOperation.repOpTableId = ${Message.TABLE_ID});
+        """
+
+
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("""
+                    CREATE TRIGGER IF NOT EXISTS message_send_trigger
+                    AFTER INSERT ON Message
+                    FOR EACH ROW
+                    BEGIN
+                    $insertOutgoingReplicationSql
+                    END    
+                """)
+        }else {
+            add("""
+                    CREATE OR REPLACE FUNCTION message_send_fn() RETURNS TRIGGER AS $$
+                    BEGIN
+                    $insertOutgoingReplicationSql
+                    RETURN NEW;
+                    END $$ LANGUAGE plpgsql
+                """)
+            add("""
+                    CREATE TRIGGER message_send_trig AFTER INSERT 
+                    ON Message
+                    FOR EACH ROW EXECUTE PROCEDURE message_send_fn()
+                """)
+        }
+    }
+}
+
+//144-145 migration - empty - does nothing
+val MIGRATION_144_145_CLIENT = DoorMigrationStatementList(144, 145) { db ->
+    emptyList()
+}
+
+val MIGRATION_145_146 = DoorMigrationStatementList(145, 146) { db ->
+    listOf("CREATE INDEX message_idx_send_to_time ON Message (messageSenderPersonUid, messageToPersonUid, messageTimestamp)")
+}
 
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_102_103,
@@ -1458,7 +1543,7 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_128_129, MIGRATION_129_130, MIGRATION_130_131, MIGRATION_132_133,
     MIGRATION_133_134, MIGRATION_134_135, MIGRATION_135_136, MIGRATION_136_137,
     MIGRATION_137_138, MIGRATION_138_139, MIGRATION_139_140, MIGRATION_140_141,
-    MIGRATION_141_142,
+    MIGRATION_141_142, MIGRATION_142_143, MIGRATION_143_144, MIGRATION_145_146,
 )
 
 

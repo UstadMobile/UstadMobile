@@ -6,6 +6,15 @@ import com.ustadmobile.util.ext.toJsDateFromOtherTimeZoneToSystemTimeZone
 import react.useContext
 import react.useMemo
 
+
+fun useDateFormatter(vararg dependencies: Any?): Intl.Companion.DateTimeFormat {
+    val langConfig = useContext(UstadLanguageConfigContext)
+
+    return useMemo(*dependencies) {
+        Intl.Companion.DateTimeFormat(langConfig?.displayedLocale ?: "en")
+    }
+}
+
 /**
  * Format and display the date for a given time in millis using the display locale. This will try
  * to use Intl (available in most modern browsers), but will then fallback to using the standard

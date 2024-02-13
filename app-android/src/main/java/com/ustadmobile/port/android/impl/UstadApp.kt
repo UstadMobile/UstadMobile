@@ -22,6 +22,7 @@ import com.ustadmobile.core.contentformats.pdf.PdfContentImporterAndroid
 import com.ustadmobile.core.contentformats.video.VideoContentImporterCommonJvm
 import com.ustadmobile.core.contentformats.xapi.XapiZipContentImporter
 import com.ustadmobile.core.db.*
+import com.ustadmobile.core.db.ext.MIGRATION_144_145_CLIENT
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.util.DiTag
@@ -57,6 +58,7 @@ import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCaseC
 import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCase
 import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCaseAndroid
 import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseAndroid
+import com.ustadmobile.core.domain.contententry.delete.DeleteContentEntryParentChildJoinUseCase
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCase
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCaseCommonJvm
 import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCase
@@ -73,6 +75,8 @@ import com.ustadmobile.core.domain.htmlcontentdisplayengine.GetHtmlContentDispla
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.HTML_CONTENT_OPTIONS_ANDROID
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.SetHtmlContentDisplayEngineUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.ResolveXapiLaunchHrefUseCase
+import com.ustadmobile.core.domain.deleteditem.DeletePermanentlyUseCase
+import com.ustadmobile.core.domain.deleteditem.RestoreDeletedItemUseCase
 import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCase
 import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCaseAndroid
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
@@ -264,6 +268,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 nodeId = nodeIdAndAuth.nodeId
             ).addSyncCallback(nodeIdAndAuth)
                 .addMigrations(*migrationList().toTypedArray())
+                .addMigrations(MIGRATION_144_145_CLIENT)
                 .build()
 
         }
@@ -653,6 +658,23 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             GetDeveloperInfoUseCaseAndroid(applicationContext)
         }
 
+        bind<DeleteContentEntryParentChildJoinUseCase>() with scoped(EndpointScope.Default).provider {
+            DeleteContentEntryParentChildJoinUseCase(
+                repoOrDb = instance(tag = DoorTag.TAG_REPO),
+            )
+        }
+
+        bind<RestoreDeletedItemUseCase>() with scoped(EndpointScope.Default).provider {
+            RestoreDeletedItemUseCase(
+                repoOrDb = instance(tag = DoorTag.TAG_REPO),
+            )
+        }
+
+        bind<DeletePermanentlyUseCase>() with scoped(EndpointScope.Default).provider {
+            DeletePermanentlyUseCase(
+                repoOrDb = instance(tag = DoorTag.TAG_REPO),
+            )
+        }
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
     }
