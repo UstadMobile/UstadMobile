@@ -59,7 +59,15 @@ Cypress.Commands.add('ustadAddContentToLibrary',(contentPath,contentName) => {
   cy.get('input[id="content_title"]').click()
   cy.get('input[id="content_title"]').clear().type(contentName,{timeout: 2000})
   cy.get('#actionBarButton').click()
+})
 
+// Add a Folder to Library
+Cypress.Commands.add('ustadAddFolderToLibrary',(folderName) => {
+  cy.contains("Library").click()
+  cy.contains("button","Content").click()
+  cy.contains('New folder').click({force: true})
+  cy.get('input[id="content_title"]').type(folderName)
+  cy.get('#actionBarButton').click()
 })
 
 // Create a new course
