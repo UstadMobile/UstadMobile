@@ -9,6 +9,18 @@ import java.util.Date
 import java.util.TimeZone
 
 @Composable
+actual fun rememberDateFormat(
+    timeZoneId: String,
+): java.text.DateFormat {
+    val context = LocalContext.current
+    return remember(timeZoneId) {
+        DateFormat
+            .getDateFormat(context)
+            .also { it.timeZone = TimeZone.getTimeZone(timeZoneId) }
+    }
+}
+
+@Composable
 actual fun rememberFormattedDate(
     timeInMillis: Long,
     timeZoneId: String,

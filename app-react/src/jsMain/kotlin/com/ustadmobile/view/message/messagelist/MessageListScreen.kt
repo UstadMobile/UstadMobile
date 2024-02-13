@@ -2,9 +2,12 @@ package com.ustadmobile.view.message.messagelist
 
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.paging.ListPagingSource
+import com.ustadmobile.core.viewmodel.message.daysUntil
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.core.viewmodel.message.messagelist.MessageListUiState
 import com.ustadmobile.core.viewmodel.message.messagelist.MessageListViewModel
+import com.ustadmobile.hooks.useDateFormatter
+import com.ustadmobile.hooks.useDayOrDate
 import com.ustadmobile.hooks.useFormattedTimeForDate
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
@@ -23,6 +26,7 @@ import web.cssom.Height
 import web.cssom.Overflow
 import web.cssom.pct
 import js.core.jso
+import kotlinx.datetime.TimeZone
 import web.cssom.JustifyContent
 import mui.material.Container
 import mui.material.Box
@@ -34,11 +38,13 @@ import react.Props
 import react.create
 import react.dom.html.ReactHTML.br
 import react.useEffect
+import react.useMemo
 import react.useRef
 import react.useRequiredContext
 import react.useState
 import web.cssom.Display
 import web.cssom.Flex
+import web.cssom.TextAlign
 import web.cssom.px
 import web.html.HTMLElement
 
@@ -65,6 +71,7 @@ private val MessageListScreenComponent2 = FC<MessageListScreenProps> { props ->
     var newMessageBoxHeight: Int by useState(0)
     val newMessageBoxPaddingPx = 8
     val timeFormatterVal = useTimeFormatter()
+    val dateFormatterVal = useDateFormatter()
 
     useEffect(newMessageBoxRef.current?.clientHeight) {
         newMessageBoxHeight =
@@ -81,15 +88,17 @@ private val MessageListScreenComponent2 = FC<MessageListScreenProps> { props ->
         }
 
         content = virtualListContent {
-
-            infiniteQueryPagingItemsIndexed(
+            infiniteQueryPagingItemsList(
                 items = infiniteQueryResult,
-                key = { item, _ -> item.messageUid.toString() }
-            ) { messageItem, _ ->
+                key = { items, index -> items[index]?.messageUid?.toString() ?: "${items}_$index" }
+            ) { list, index ->
                 ChatItem.create {
-                    message = messageItem
+                    message = list[index]
+                    previousMessage = list.getOrNull(index + 1)
                     activeUserUid = props.uiState.activePersonUid
                     timeFormatter = timeFormatterVal
+                    dateFormatter = dateFormatterVal
+                    listUiState = props.uiState
                 }
             }
         }
@@ -154,9 +163,15 @@ external interface ChatItemProps: Props {
 
     var message: Message?
 
+    var previousMessage: Message?
+
     var activeUserUid: Long
 
     var timeFormatter: Intl.Companion.DateTimeFormat
+
+    var listUiState: MessageListUiState
+
+    var dateFormatter: Intl.Companion.DateTimeFormat
 
 }
 
@@ -165,6 +180,34 @@ val ChatItem = FC<ChatItemProps> { props ->
     val theme by useRequiredContext(ThemeContext)
     val isFromMe = props.message?.messageSenderPersonUid == props.activeUserUid
     val messageTime = useFormattedTimeForDate(props.message?.messageTimestamp ?: 0, props.timeFormatter)
+
+    val daysSincePrevMessage = useMemo(
+        arrayOf(props.message?.messageTimestamp, props.previousMessage?.messageTimestamp)
+    ) {
+        props.message?.let { props.previousMessage?.daysUntil(it) }
+    }
+
+    val dayOrDateHeader = useDayOrDate(
+        enabled = daysSincePrevMessage != 0,
+        localDateTimeNow = props.listUiState.localDateTimeNow,
+        timestamp = props.message?.messageTimestamp ?: 0,
+        timeZone = TimeZone.currentSystemDefault(),
+        dateFormatter = props.dateFormatter,
+        showTimeIfToday = false,
+        timeFormatter = props.timeFormatter,
+        dayOfWeekStringMap = props.listUiState.dayOfWeekStrings,
+    )
+
+    dayOrDateHeader?.also {
+        Typography {
+            sx {
+                display = Display.block
+                textAlign = TextAlign.center
+            }
+
+            + it
+        }
+    }
 
     Box {
         sx {

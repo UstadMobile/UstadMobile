@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -47,15 +48,19 @@ import com.ustadmobile.lib.db.entities.Message
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.viewmodel.message.daysUntil
 import com.ustadmobile.libuicompose.components.UstadLinkifyText
 import com.ustadmobile.libuicompose.util.linkify.ILinkExtractor
 import com.ustadmobile.libuicompose.util.linkify.rememberLinkExtractor
+import com.ustadmobile.libuicompose.util.rememberDateFormat
+import com.ustadmobile.libuicompose.util.rememberDayOrDate
 import com.ustadmobile.libuicompose.util.rememberTimeFormatter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 import java.text.DateFormat
 import java.util.Date
+import java.util.TimeZone
 
 @Composable
 fun MessageListScreen(
@@ -91,6 +96,8 @@ fun MessageListScreen(
     val lazyListState = rememberLazyListState()
     val itemCount = lazyPagingItems.itemCount
     val timeFormatter = rememberTimeFormatter()
+    val dateFormatter = rememberDateFormat(TimeZone.getDefault().id)
+
 
     Column(
         modifier = Modifier.fillMaxSize()
@@ -110,6 +117,12 @@ fun MessageListScreen(
                  * latest item automatically.
                  */
                 val message = lazyPagingItems[index]
+                val previousMessage = if(lazyPagingItems.itemCount > index + 1) {
+                    lazyPagingItems[index + 1]
+                }else {
+                    null
+                }
+
                 LaunchedEffect(itemCount) {
                     if(index == 1) {
                         coroutineScope.launch {
@@ -120,9 +133,12 @@ fun MessageListScreen(
 
                 ChatItem(
                     message = message,
+                    previousMessage = previousMessage,
                     activeUserUid = uiState.activePersonUid,
                     linkExtractor = linkExtractor,
                     timeFormatter = timeFormatter,
+                    dateFormatter = dateFormatter,
+                    uiState = uiState,
                     modifier = Modifier.fillMaxSize().defaultItemPadding(),
                 )
             }
@@ -140,16 +156,40 @@ fun MessageListScreen(
 @Composable
 fun ChatItem(
     message: Message?,
+    previousMessage: Message? = null,
     activeUserUid: Long,
     linkExtractor: ILinkExtractor,
+    uiState: MessageListUiState,
     timeFormatter: DateFormat,
+    dateFormatter: DateFormat,
     modifier: Modifier = Modifier,
 ) {
     val isFromMe = message?.messageSenderPersonUid == activeUserUid
+    val daysSincePrevMessage = remember(message?.messageTimestamp, previousMessage?.messageTimestamp) {
+        message?.let { previousMessage?.daysUntil(it) }
+    }
 
     Column(
         modifier = modifier,
     ) {
+        if(daysSincePrevMessage != 0) {
+            val header = rememberDayOrDate(
+                localDateTimeNow = uiState.localDateTimeNow,
+                timestamp = message?.messageTimestamp ?: 0,
+                timeZone = kotlinx.datetime.TimeZone.currentSystemDefault(),
+                showTimeIfToday = false,
+                timeFormatter = timeFormatter,
+                dayOfWeekStringMap = uiState.dayOfWeekStrings,
+                dateFormatter = dateFormatter,
+            )
+
+            Text(
+                text = header,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+            )
+        }
+
         Box(
             modifier = Modifier
                 .align(if (isFromMe) Alignment.End else Alignment.Start)

@@ -163,8 +163,12 @@ class VirtualListContentScope internal constructor() {
             infiniteQueryResult = infiniteQueryResult,
             infiniteSectionIndex = sections.count { it is InfiniteQueryResultSection<*, *, *> },
             dataPagesToItems = dataPagesToItems,
-            itemToKey = itemToKey,
-            createNode = itemToNode,
+            itemToKey = { items, index ->
+                items[index]?.let { itemToKey(it, index) } ?: "$index"
+            },
+            createNode = { items, index ->
+                itemToNode(items[index], index)
+            },
         )
     }
 
@@ -195,8 +199,12 @@ class VirtualListContentScope internal constructor() {
                     it.data
                 }
             },
-            itemToKey = key,
-            createNode = itemToNode
+            itemToKey = { allItems, index ->
+                allItems[index]?.let { key(it, index) } ?: "$index"
+            },
+            createNode = { allItems, index ->
+                itemToNode(allItems[index], index)
+            }
         )
     }
 
@@ -209,6 +217,24 @@ class VirtualListContentScope internal constructor() {
             items = items,
             key = { item, _ -> key(item) },
             itemToNode = { item, _ -> itemToNode(item) }
+        )
+    }
+
+    fun <T: Any> infiniteQueryPagingItemsList(
+        items: UseInfiniteQueryResult<PagingSourceLoadResult<Int, T>, Throwable>,
+        key: (list: List<T?>, index: Int) -> String,
+        node: (list: List<T?>, index: Int) -> ReactNode
+    ) {
+        sections += InfiniteQueryResultSection(
+            infiniteQueryResult = items,
+            infiniteSectionIndex = sections.count { it is InfiniteQueryResultSection<*, *, *> },
+            dataPagesToItems = { pages ->
+                pages.mapNotNull { it as? PagingSourceLoadResultPage<Int, T> }.flatMap {
+                    it.data
+                }
+            },
+            itemToKey = key,
+            createNode = node,
         )
     }
 
