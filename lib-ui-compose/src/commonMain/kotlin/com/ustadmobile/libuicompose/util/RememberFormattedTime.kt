@@ -1,6 +1,10 @@
 package com.ustadmobile.libuicompose.util
 
 import androidx.compose.runtime.Composable
+import java.text.DateFormat
+
+@Composable
+expect fun rememberTimeFormatter(): DateFormat
 
 /**
  * timeInMs should be the hours, minutes, and seconds multiplied out into milliseconds.
@@ -10,4 +14,7 @@ import androidx.compose.runtime.Composable
  *
  */
 @Composable
-expect fun rememberFormattedTime(timeInMs: Int): String
+expect fun rememberFormattedTime(
+    timeInMs: Int,
+    formatter: DateFormat = rememberTimeFormatter()
+): String

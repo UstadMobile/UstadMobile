@@ -1756,4 +1756,6 @@
 
     <string name="delete_or_restore_items">Delete or restore items</string>
 
+    <string name="yesterday">Yesterday</string>
+
 </resources>

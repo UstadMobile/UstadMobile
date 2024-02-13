@@ -49,6 +49,7 @@ import web.location.location
 import web.url.URL
 import kotlin.random.Random
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.db.ext.MIGRATION_144_145_CLIENT
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.util.ext.deleteDatabaseAsync
 import mui.material.useMediaQuery
@@ -233,6 +234,7 @@ val ustadScreensLoader: LoaderFunction<*> = {
     val dbBuilder =  DatabaseBuilder.databaseBuilder(builderOptions)
         .addSyncCallback(dbNodeIdAndAuth)
         .addMigrations(*migrationList().toTypedArray())
+        .addMigrations(MIGRATION_144_145_CLIENT)
 
     @OptIn(DelicateCoroutinesApi::class)
     GlobalScope.promise {
