@@ -54,10 +54,11 @@ it('Teacher add assignment and course comment', () => {
   cy.contains("button","Save").click()
   cy.contains("button","Members").should('be.visible')
   cy.contains("Assignment 1").click()
-  cy.get('#course_comment_textfield').click()
+  cy.ustadAssignmentComments('#course_comment_textfield','#course_comment_textfield_send_button','comment1')
+ /* cy.get('#course_comment_textfield').click()
   cy.get('#course_comment_textfield').type("comment1",{timeout:5000})
   cy.get('svg[data-testid="SendIcon"]',{timeout:5000}).click()
-  cy.contains("comment1").should('exist')
+  cy.contains("comment1").should('exist')*/
 
 })
 
@@ -68,10 +69,12 @@ it('Student add course comment', () => {
   cy.contains("004_002").click()
   cy.contains("button","Course").click()
   cy.contains('Assignment 1').click()
-  cy.get('#course_comment_textfield').click()
+  cy.ustadAssignmentComments('#course_comment_textfield','#course_comment_textfield_send_button','comment2')
+ /* cy.get('#course_comment_textfield').click()
   cy.get('#course_comment_textfield').type("comment2",{timeout:2000})
+  cy.get("#course_comment_textfield").should('have.value','comment2')
   cy.get('svg[data-testid="SendIcon"]').click()
-  cy.contains("comment2").should('exist')
+  cy.contains("comment2").should('exist')*/
   cy.contains("comment1").should('exist')
 })
 })

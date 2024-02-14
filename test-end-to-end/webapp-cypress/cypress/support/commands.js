@@ -124,13 +124,21 @@ Cypress.Commands.add('ustadAddAssignmentBlock',(assignmentTitle) => {
     cy.contains("button","Done").click()
 })
 
-   // Add a Discussion Board
+  // Add a Discussion Board
 Cypress.Commands.add('ustadAddDiscussionBoard',(discussionTitle) => {
     cy.contains("Add block").click()
     cy.contains("Discussion board").click()
     cy.get('input[id="title"]').type(discussionTitle)
     cy.get('div[data-placeholder="Description"]').type("a simple discussion description")
     cy.contains("button","Done").click()
+})
+   // Add comments in assignments
+Cypress.Commands.add('ustadAssignmentComments',(commentid,sendid,comment) => {
+  cy.get(commentid).click()
+  cy.get(commentid).type(comment,{timeout:2000})
+  cy.get(commentid).should('have.value',comment)
+  cy.get(sendid).click()
+  cy.contains(comment).should('exist')
 })
 
   // Enable User Registration
