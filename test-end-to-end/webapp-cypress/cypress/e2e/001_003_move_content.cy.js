@@ -4,7 +4,7 @@ describe('001_003_move_content', () => {
     cy.ustadStartTestServer()
 })
 
-it('Admin user add content to the library', () => {
+it('Admin user move content to folder', () => {
  // Admin user login
   cy.ustadClearDbAndLogin('admin','testpass',{timeout:8000})
  // Add H5p File
