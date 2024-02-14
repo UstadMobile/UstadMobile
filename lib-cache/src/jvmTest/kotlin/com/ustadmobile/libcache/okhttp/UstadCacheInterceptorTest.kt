@@ -1,6 +1,7 @@
 package com.ustadmobile.libcache.okhttp
 
 import com.ustadmobile.door.DatabaseBuilder
+import com.ustadmobile.libcache.CompressionType
 import com.ustadmobile.libcache.logging.NapierLoggingAdapter
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheImpl
@@ -11,9 +12,12 @@ import com.ustadmobile.libcache.headers.HttpHeaders
 import com.ustadmobile.libcache.integrity.sha256Integrity
 import com.ustadmobile.libcache.md5.Md5Digest
 import com.ustadmobile.libcache.md5.urlKey
+import com.ustadmobile.libcache.request.requestBuilder
+import com.ustadmobile.libcache.response.bodyAsUncompressedSourceIfContentEncoded
 import com.ustadmobile.util.test.ResourcesDispatcher
 import com.ustadmobile.util.test.initNapierLog
 import kotlinx.io.files.Path
+import kotlinx.io.readByteArray
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.mockwebserver.MockResponse
@@ -36,6 +40,7 @@ import java.security.MessageDigest
 import java.time.Duration
 import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
@@ -121,7 +126,71 @@ class UstadCacheInterceptorTest {
             .readAllBytes()
         Assert.assertArrayEquals(resourceBytes, responseBytes)
         ustadCache.verifyUrlStored(requestUrl)
+
+        val cacheResponse = ustadCache.retrieve(requestBuilder(requestUrl))
+        assertEquals(CompressionType.NONE,
+            CompressionType.byHeaderVal(cacheResponse!!.headers["content-encoding"]),
+            "Non-compressable mime type should not be encoded"
+        )
+
         interceptorTmpDir.assertTempDirectoryIsEmptied()
+    }
+
+    @Test
+    fun givenCompressableEntryNotYetCachedNotEncoded_whenRequested_thenWillRespondAndCacheIt() {
+        val mockWebServer = MockWebServer().also {
+            it.dispatcher = ResourcesDispatcher(javaClass) {
+                it.addHeader("content-type", "application/javascript")
+            }
+
+            it.start()
+        }
+
+        val requestUrl = "${mockWebServer.url("/ustadmobile-epub.js")}"
+        val response = okHttpClient.newCall(
+            Request.Builder().url(requestUrl).build()
+        ).execute()
+        val responseBytes = response.body!!.bytes()
+        val resourceBytes = javaClass.getResourceAsStream("/ustadmobile-epub.js")!!
+            .readAllBytes()
+        Assert.assertArrayEquals(resourceBytes, responseBytes)
+
+        //Now check the cached response is compressed
+        val cacheResponse = ustadCache.retrieve(requestBuilder(requestUrl))
+        assertNotEquals(CompressionType.NONE, CompressionType.byHeaderVal(
+            cacheResponse!!.headers["content-encoding"]),
+            "compression type should not be none - e.g. should be compressed")
+        val cacheResponseBytes = cacheResponse.bodyAsUncompressedSourceIfContentEncoded()!!.readByteArray()
+        Assert.assertArrayEquals(resourceBytes, cacheResponseBytes)
+    }
+
+
+    @Test
+    fun givenCompressableEntryNotYetCachedAlreadyEncoded_whenRequested_thenWillRespondAndCacheIt() {
+        val mockWebServer = MockWebServer().also {
+            it.dispatcher = ResourcesDispatcher(javaClass, contentEncoding = "gzip") {
+                it.addHeader("content-type", "application/javascript")
+            }
+
+            it.start()
+        }
+
+        val requestUrl = "${mockWebServer.url("/ustadmobile-epub.js")}"
+        val response = okHttpClient.newCall(
+            Request.Builder().url(requestUrl).build()
+        ).execute()
+        val responseBytes = response.body!!.bytes()
+        val resourceBytes = javaClass.getResourceAsStream("/ustadmobile-epub.js")!!
+            .readAllBytes()
+        Assert.assertArrayEquals(resourceBytes, responseBytes)
+
+        //Now check the cached response is compressed
+        val cacheResponse = ustadCache.retrieve(requestBuilder(requestUrl))
+        assertNotEquals(CompressionType.NONE, CompressionType.byHeaderVal(
+            cacheResponse!!.headers["content-encoding"]),
+            "compression type should not be none - e.g. should be compressed")
+        val cacheResponseBytes = cacheResponse.bodyAsUncompressedSourceIfContentEncoded()!!.readByteArray()
+        Assert.assertArrayEquals(resourceBytes, cacheResponseBytes)
     }
 
     @Test

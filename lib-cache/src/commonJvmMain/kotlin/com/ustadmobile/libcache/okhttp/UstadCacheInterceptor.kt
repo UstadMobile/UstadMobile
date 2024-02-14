@@ -2,6 +2,7 @@ package com.ustadmobile.libcache.okhttp
 
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.libcache.CacheEntryToStore
+import com.ustadmobile.libcache.CompressionType
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCache.Companion.HEADER_FIRST_STORED_TIMESTAMP
 import com.ustadmobile.libcache.UstadCache.Companion.HEADER_LAST_VALIDATED_TIMESTAMP
@@ -13,6 +14,8 @@ import com.ustadmobile.libcache.cachecontrol.RequestCacheControlHeader
 import com.ustadmobile.libcache.cachecontrol.ResponseCacheabilityChecker
 import com.ustadmobile.libcache.cachecontrol.ResponseCacheabilityCheckerImpl
 import com.ustadmobile.libcache.headers.headersBuilder
+import com.ustadmobile.libcache.io.compressIfRequired
+import com.ustadmobile.libcache.io.uncompress
 import com.ustadmobile.libcache.logging.UstadCacheLogger
 import com.ustadmobile.libcache.response.HttpPathResponse
 import com.ustadmobile.libcache.response.HttpResponse
@@ -76,9 +79,15 @@ class UstadCacheInterceptor(
             val tmpFile = File(tmpDir, UUID.randomUUID().toString())
 
             try {
+                val responseCompression = CompressionType.byHeaderVal(
+                    response.header("content-encoding"))
                 val responseInStream = response.body?.byteStream()?.let {
-                    DigestInputStream(it, digest)
+                    DigestInputStream(it.uncompress(responseCompression), digest)
                 } ?: throw IllegalStateException()
+
+                val fileCompressionType = cache.storageCompressionFilter(
+                    call.request().url.toString(), response.headers.asCacheHttpHeaders()
+                )
 
                 responseInStream.use { responseIn ->
                     if(!tmpDirChecked) {
@@ -86,8 +95,8 @@ class UstadCacheInterceptor(
                         tmpDirChecked = true
                     }
 
-
-                    val fileOutStream = tmpFile.outputStream()
+                    val fileOutStream = tmpFile.outputStream().compressIfRequired(
+                        fileCompressionType)
                     while(!call.isCanceled() &&
                         responseIn.read(buffer).also { bytesRead = it } != -1
                     ) {
@@ -111,6 +120,7 @@ class UstadCacheInterceptor(
                                     request = cacheRequest,
                                     extraHeaders = headersBuilder {
                                         takeFrom(response.headers.asCacheHttpHeaders())
+                                        header("content-encoding", fileCompressionType.headerVal)
                                     }
                                 ),
                                 responseBodyTmpLocalPath = Path(tmpFile.absolutePath)

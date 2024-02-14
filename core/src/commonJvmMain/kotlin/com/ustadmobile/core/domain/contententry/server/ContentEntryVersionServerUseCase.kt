@@ -202,9 +202,12 @@ class ContentEntryVersionServerUseCase(
         /**
          * In order to support content ranges (required for embedded audio/video), we must use the
          * content-range and content-length specified on the bodyDataUrl response.
+         *
+         * Content-encoding will be as set by the bodyDataUrl. See lib-cache
+         * CacheStorageCompressionFilter kdoc.
          */
         val BODY_DATA_URL_RESERVED_HEADER_NAMES = listOf("content-length",
-            "content-range")
+            "content-range", "content-encoding")
 
     }
 

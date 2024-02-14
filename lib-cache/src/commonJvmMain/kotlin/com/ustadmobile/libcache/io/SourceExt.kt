@@ -1,13 +1,16 @@
 package com.ustadmobile.libcache.io
 
+import com.ustadmobile.libcache.CompressionType
 import kotlinx.io.Source
 import kotlinx.io.asInputStream
 import kotlinx.io.asOutputStream
+import kotlinx.io.asSource
 import kotlinx.io.buffered
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
 import java.io.File
 import java.io.FileOutputStream
+import java.security.DigestInputStream
 import java.security.DigestOutputStream
 import java.security.MessageDigest
 import java.util.zip.ZipEntry
@@ -15,14 +18,19 @@ import java.util.zip.ZipInputStream
 
 actual fun Source.transferToAndGetSha256(
     path: Path,
+    sourceCompression: CompressionType,
+    destCompressionType: CompressionType,
 ) : TransferResult {
     val messageDigest = MessageDigest.getInstance("SHA-256")
 
-    val bytesTransferred = DigestOutputStream(
-        SystemFileSystem.sink(path).buffered().asOutputStream(),
-        messageDigest
-    ).use { outStream ->
-        asInputStream().copyTo(outStream).also {
+    val bytesTransferred = SystemFileSystem.sink(
+        path
+    ).buffered().asOutputStream().compressIfRequired(destCompressionType).use { outStream ->
+        DigestInputStream(
+            asInputStream(), messageDigest
+        ).uncompress(
+            sourceCompression
+        ).copyTo(outStream).also {
             outStream.flush()
         }
     }
@@ -76,4 +84,15 @@ actual fun Source.unzipTo(
     }
 
     return unzippedEntries
+}
+
+
+actual fun Source.uncompress(
+    compressionType: CompressionType
+): Source {
+    return if(compressionType != CompressionType.NONE) {
+        asInputStream().uncompress(compressionType).asSource().buffered()
+    }else {
+        this
+    }
 }

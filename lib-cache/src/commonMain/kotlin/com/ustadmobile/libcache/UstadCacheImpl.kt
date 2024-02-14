@@ -15,6 +15,7 @@ import com.ustadmobile.libcache.headers.headersBuilder
 import com.ustadmobile.libcache.headers.integrity
 import com.ustadmobile.libcache.headers.mapHeaders
 import com.ustadmobile.libcache.integrity.sha256Integrity
+import com.ustadmobile.libcache.io.requireMetadata
 import com.ustadmobile.libcache.io.useAndReadySha256
 import com.ustadmobile.libcache.io.transferToAndGetSha256
 import com.ustadmobile.libcache.logging.UstadCacheLogger
@@ -63,7 +64,8 @@ class UstadCacheImpl(
         fileSystem = fileSystem,
         logger = logger,
         sizeLimit = sizeLimit,
-    )
+    ),
+    override val storageCompressionFilter: CacheStorageCompressionFilter = DefaultCacheGzipFilter(),
 ) : UstadCache {
 
     private val scope = CoroutineScope(Dispatchers.IO + Job())
@@ -163,6 +165,13 @@ class UstadCacheImpl(
                 val response = entryToStore.response
                 val tmpFile = Path(tmpDir, "${tmpCounter.incrementAndGet()}.tmp")
                 val url = entryToStore.request.url
+                val storeCompressionType = storageCompressionFilter.invoke(
+                    entryToStore.request.url, entryToStore.response.headers
+                )
+                val responseCompression = CompressionType.byHeaderVal(
+                    entryToStore.response.headers["content-encoding"]
+                )
+                val overrideHeaders = mutableMapOf<String, List<String>>()
 
                 val sha256IntegrityFromTransfer = if(entryToStore.responseBodyTmpLocalPath != null) {
                     //If the entry to store is in a temporary path where it is acceptable to just
@@ -179,7 +188,12 @@ class UstadCacheImpl(
                         throw e
                     }
 
-                    sha256Integrity(bodySource.transferToAndGetSha256(tmpFile).sha256)
+                    val transferResult = bodySource.transferToAndGetSha256(tmpFile,
+                        responseCompression, storeCompressionType).sha256
+                    overrideHeaders["content-encoding"] = listOf(storeCompressionType.headerVal)
+                    overrideHeaders["content-length"] = listOf(fileSystem.requireMetadata(tmpFile).size.toString())
+
+                    sha256Integrity(transferResult)
                 }
 
                 val integrityFromHeaders = if(entryToStore.skipChecksumIfProvided)
@@ -190,6 +204,12 @@ class UstadCacheImpl(
                 val integrity = sha256IntegrityFromTransfer ?: integrityFromHeaders
                     ?: sha256Integrity(fileSystem.source(tmpFile).buffered().useAndReadySha256())
 
+                val effectiveHeaders = if(overrideHeaders.isNotEmpty()) {
+                    MergedHeaders(HttpHeaders.fromMap(overrideHeaders), response.headers)
+                }else {
+                    response.headers
+                }
+
                 logger?.v(LOG_TAG, "$logPrefix copied request data for $url to $tmpFile (integrity=$integrity)")
 
                 CacheEntryInProgress(
@@ -198,7 +218,7 @@ class UstadCacheImpl(
                         url = entryToStore.request.url,
                         integrity = integrity,
                         statusCode = entryToStore.response.responseCode,
-                        responseHeaders = response.headers.asString(),
+                        responseHeaders = effectiveHeaders.asString(),
                         lastValidated = timeNow,
                         lastAccessed = timeNow,
                     ),

@@ -1,5 +1,6 @@
 package com.ustadmobile.libcache.io
 
+import com.ustadmobile.libcache.CompressionType
 import kotlinx.io.Source
 import kotlinx.io.files.Path
 
@@ -24,6 +25,8 @@ data class TransferResult(
 
 expect fun Source.transferToAndGetSha256(
     path: Path,
+    sourceCompression: CompressionType = CompressionType.NONE,
+    destCompressionType: CompressionType = CompressionType.NONE,
 ) : TransferResult
 
 expect fun Source.useAndReadySha256(): ByteArray
@@ -38,4 +41,7 @@ expect fun Source.unzipTo(
     destPath: Path
 ): List<UnzippedEntry>
 
+expect fun Source.uncompress(
+    compressionType: CompressionType
+): Source
 
