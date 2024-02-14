@@ -41,7 +41,7 @@ actual fun Source.transferToAndGetSha256(
     )
 }
 
-actual fun Source.useAndReadySha256(): ByteArray {
+actual fun Source.useAndReadSha256(): ByteArray {
     val messageDigest = MessageDigest.getInstance("SHA-256")
     asInputStream().use { inStream ->
         val buffer = ByteArray(8192)

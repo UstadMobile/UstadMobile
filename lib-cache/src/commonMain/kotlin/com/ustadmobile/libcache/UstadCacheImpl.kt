@@ -16,7 +16,7 @@ import com.ustadmobile.libcache.headers.integrity
 import com.ustadmobile.libcache.headers.mapHeaders
 import com.ustadmobile.libcache.integrity.sha256Integrity
 import com.ustadmobile.libcache.io.requireMetadata
-import com.ustadmobile.libcache.io.useAndReadySha256
+import com.ustadmobile.libcache.io.useAndReadSha256
 import com.ustadmobile.libcache.io.transferToAndGetSha256
 import com.ustadmobile.libcache.logging.UstadCacheLogger
 import com.ustadmobile.libcache.md5.Md5Digest
@@ -202,7 +202,7 @@ class UstadCacheImpl(
                     null
 
                 val integrity = sha256IntegrityFromTransfer ?: integrityFromHeaders
-                    ?: sha256Integrity(fileSystem.source(tmpFile).buffered().useAndReadySha256())
+                    ?: sha256Integrity(fileSystem.source(tmpFile).buffered().useAndReadSha256())
 
                 val effectiveHeaders = if(overrideHeaders.isNotEmpty()) {
                     MergedHeaders(HttpHeaders.fromMap(overrideHeaders), response.headers)

@@ -109,7 +109,7 @@ class SaveLocalUriAndManifestUploadIntegrationTest{
                 }.distinct() +  entryVersion.cevManifestUrl!!
 
                 /*
-                 * All urls referenced in the manifest should be retained within the cache
+                 * All urls referenced in the manifest should marked on the server to be retained
                  */
                 serverDb.doorFlow(arrayOf("CacheLockJoin")) {
                     serverDb.cacheLockJoinDao.findByTableIdAndEntityUid(

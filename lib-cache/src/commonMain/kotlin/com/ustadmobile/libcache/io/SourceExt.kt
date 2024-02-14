@@ -29,7 +29,7 @@ expect fun Source.transferToAndGetSha256(
     destCompressionType: CompressionType = CompressionType.NONE,
 ) : TransferResult
 
-expect fun Source.useAndReadySha256(): ByteArray
+expect fun Source.useAndReadSha256(): ByteArray
 
 data class UnzippedEntry(
     val path: Path,
