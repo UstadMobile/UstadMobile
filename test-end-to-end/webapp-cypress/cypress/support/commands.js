@@ -134,11 +134,11 @@ Cypress.Commands.add('ustadAddDiscussionBoard',(discussionTitle) => {
 })
    // Add comments in assignments
 Cypress.Commands.add('ustadAssignmentComments',(commentid,sendid,comment) => {
-  cy.get(commentid).click()
-  cy.get(commentid).type(comment,{timeout:2000})
-  cy.get(commentid).should('have.value',comment)
-  cy.get(sendid).click()
-  cy.contains(comment).should('exist')
+    cy.get(commentid).click()
+    cy.get(commentid).type(comment,{timeout:2000})
+    cy.get(commentid).should('have.value',comment)
+    cy.get(sendid).click()
+    cy.contains(comment).should('exist')
 })
 
   // Enable User Registration

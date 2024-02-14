@@ -93,11 +93,6 @@ it('Teacher add assignment and course comment', () => {
   cy.contains("button","Members").should('be.visible')
   cy.get('svg[data-testid="AssignmentTurnedInIcon"]').click()
   cy.ustadAssignmentComments('#course_comment_textfield','#course_comment_textfield_send_button','comment1')
- /* cy.get('#course_comment_textfield').click()
-  cy.get('#course_comment_textfield').type("comment1")
-  cy.get('svg[data-testid="SendIcon"]',{timeout:2000}).click()
-  cy.contains("comment1").should('exist')*/
-
 })
 
 it('Group 1- Student 1 submit assignment', () => {
@@ -110,10 +105,6 @@ it('Group 1- Student 1 submit assignment', () => {
   cy.get('#assignment_text').type("Text 1")
   cy.contains('SUBMIT',{timeout:5000}).click()
   cy.ustadAssignmentComments('#course_comment_textfield','#course_comment_textfield_send_button','comment2')
- /* cy.get('#course_comment_textfield').click()
-  cy.get('#course_comment_textfield').type("comment2")
-  cy.get('svg[data-testid="SendIcon"]',{timeout:2000}).click()
-  cy.contains("comment2").should('exist')*/
   cy.contains("comment1").should('exist')
   cy.go('back')
   cy.contains('Assignment 1',{timeout:1000}).click()
