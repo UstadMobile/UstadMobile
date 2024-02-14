@@ -147,6 +147,8 @@ class UstadCacheInterceptor(
         response: Response,
         call: Call,
     ): Response {
+        logger?.d(LOG_TAG, "$logPrefix newCacheAndStoreResponse: ${response.request.method} " +
+                "${response.request.url} ${response.code} (${response.message})")
         val pipeInStream = PipedInputStream()
         val pipeOutStream = PipedOutputStream(pipeInStream)
         try {
@@ -226,8 +228,9 @@ class UstadCacheInterceptor(
              * When response isFresh - can immediately return the cached response
              */
             cacheResponse != null && cachedResponseStatus?.isFresh == true -> {
-                logger?.d(LOG_TAG, "$logPrefix HIT(valid) $url")
-                newResponseFromCachedResponse(cacheResponse, call)
+                newResponseFromCachedResponse(cacheResponse, call).also {
+                    logger?.d(LOG_TAG, "$logPrefix HIT(valid) ${it.code} ${it.message} $url")
+                }
             }
 
             /**
@@ -274,12 +277,15 @@ class UstadCacheInterceptor(
 
             else -> {
                 //Nothing in cache matches request, send to the network and cache if possible
-                logger?.d(LOG_TAG, "$logPrefix MISS $url")
                 val response =  chain.proceed(request)
                 if(responseCacheabilityChecker.canStore(response)) {
-                    newCacheAndStoreResponse(response, call)
+                    newCacheAndStoreResponse(response, call).also {
+                        logger?.d(LOG_TAG, "$logPrefix MISS ${it.code} ${it.message} $url")
+                    }
                 }else {
-                    response
+                    response.also {
+                        logger?.d(LOG_TAG, "$logPrefix NOSTORE ${it.code} ${it.message} $url")
+                    }
                 }
             }
         }

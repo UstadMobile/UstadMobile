@@ -13,4 +13,5 @@ val DayOfWeek.dayStringResource: StringResource
         DayOfWeek.FRIDAY -> MR.strings.friday
         DayOfWeek.SATURDAY -> MR.strings.saturday
         DayOfWeek.SUNDAY -> MR.strings.sunday
+        else -> MR.strings.blank
     }
