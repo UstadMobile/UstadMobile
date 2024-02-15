@@ -54,7 +54,7 @@ it('Teacher add assignment and course comment', () => {
   cy.contains("button","Save").click()
   cy.contains("button","Members").should('be.visible')
   cy.contains("Assignment 1").click()
-  cy.ustadAssignmentComments('#course_comment_textfield','#course_comment_textfield_send_button','comment1')
+  cy.ustadTypeAndSubmitAssignmentComment('#course_comment_textfield','#course_comment_textfield_send_button','comment1')
 })
 
 it('Student add course comment', () => {
@@ -64,7 +64,7 @@ it('Student add course comment', () => {
   cy.contains("004_002").click()
   cy.contains("button","Course").click()
   cy.contains('Assignment 1').click()
-  cy.ustadAssignmentComments('#course_comment_textfield','#course_comment_textfield_send_button','comment2')
+  cy.ustadTypeAndSubmitAssignmentComment('#course_comment_textfield','#course_comment_textfield_send_button','comment2')
   cy.contains("comment1").should('exist')
 })
 })
