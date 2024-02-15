@@ -131,7 +131,7 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
 
         content = virtualListContent {
             //Header section - description, deadline, etc
-            item {
+            item("header_section_item") {
                 Stack.create {
                     UstadRawHtml {
                         html = props.uiState.courseBlock?.cbDescription ?: ""
@@ -205,7 +205,7 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
 
             //submission section
             if(props.uiState.activeUserIsSubmitter) {
-                item {
+                item("submission_header_item") {
                     UstadDetailHeader.create {
                         val suffix = if(props.uiState.isGroupSubmission) {
                             "(${strings.format(MR.strings.group_number, props.uiState.submitterUid.toString())})"
@@ -217,7 +217,7 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                 }
 
                 if(props.uiState.submissionTextFieldVisible) {
-                    item {
+                    item(key = "assignment_text_item") {
                         Stack.create {
                             direction = responsive(StackDirection.column)
 
@@ -243,7 +243,7 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                 }
 
                 if(props.uiState.addFileVisible) {
-                    item {
+                    item(key = "add_file_button") {
                         ListItem.create {
                             ListItemButton {
                                 id = "add_file"
@@ -318,13 +318,13 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                 }
 
                 //List of grades awarded
-                item {
+                item(key = "grades_scoring_header") {
                     UstadDetailHeader.create {
                         header = ReactNode(strings[MR.strings.grades_scoring])
                     }
                 }
 
-                item {
+                item(key = "grade_filter_chips") {
                     ListItem.create {
                         UstadListFilterChipsHeader {
                             filterOptions = props.uiState.gradeFilterChips
@@ -349,7 +349,7 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
 
             if(props.uiState.showClassComments) {
                 //Course comments
-                item {
+                item(key = "course_comments_header_item") {
                     ListItem.create {
                         ListItemText {
                             primary = ReactNode(strings[MR.strings.class_comments])
@@ -357,7 +357,7 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                     }
                 }
 
-                item {
+                item(key = "course_comment_textfield_item") {
                     AssignmentCommentTextFieldListItem.create {
                         onChange = props.onChangeCourseComment
                         label = ReactNode(strings[MR.strings.add_class_comment])
@@ -382,7 +382,7 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
 
             //Private comments
             if(props.uiState.showPrivateComments) {
-                item {
+                item(key = "private_comments_header_item") {
                     ListItem.create {
                         ListItemText {
                             primary = ReactNode(strings[MR.strings.private_comments])
@@ -390,7 +390,7 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                     }
                 }
 
-                item {
+                item(key = "private_comment_textfield_item") {
                     AssignmentCommentTextFieldListItem.create {
                         onChange = props.onChangePrivateComment
                         label = ReactNode(strings[MR.strings.add_private_comment])

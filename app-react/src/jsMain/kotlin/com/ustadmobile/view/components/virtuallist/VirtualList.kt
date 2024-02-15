@@ -82,6 +82,40 @@ val VirtualList = FC<VirtualListProps> {props ->
         }
     }
 
+    val allRows = useMemo(props.content) {
+        props.content.flatMap { section ->
+            section.elements
+        }
+    }
+
+
+    @Suppress("SpellCheckingInspection")
+    val virtualizer = useVirtualizer<HTMLElement, HTMLElement>(jso {
+        count =  allRows.size
+        getScrollElement= { parentRef.current }
+        estimateSize = { 45 }
+        overscan = 5
+        getItemKey = { index -> allRows[index].key() }
+    })
+
+    val virtualizerStateInstance: StateInstance<VirtualListContextData> = useState {
+        VirtualListContextData(
+            virtualizer = virtualizer,
+            allRows = allRows,
+            reverseLayout = props.reverseLayout ?: false
+        )
+    }
+
+    var virtualizerStateVar by virtualizerStateInstance
+
+    useEffect(virtualizer, allRows, props.reverseLayout) {
+        virtualizerStateVar = VirtualListContextData(
+            virtualizer = virtualizer,
+            allRows = allRows,
+            reverseLayout = props.reverseLayout ?: false
+        )
+    }
+
     div {
         ref = parentRef
         style = if(props.reverseLayout == true) {
@@ -96,28 +130,7 @@ val VirtualList = FC<VirtualListProps> {props ->
             props.style
         }
 
-        val allRows = useMemo(props.content) {
-            props.content.flatMap { section ->
-                section.elements
-            }
-        }
-
-        @Suppress("SpellCheckingInspection")
-        val virtualizer = useVirtualizer<HTMLElement, HTMLElement>(jso {
-            count =  allRows.size
-            getScrollElement= { parentRef.current }
-            estimateSize = { 45 }
-            overscan = 5
-            getItemKey = { index -> allRows[index].key() }
-        })
-
-        VirtualListContext(
-            VirtualListContextData(
-                virtualizer = virtualizer,
-                allRows = allRows,
-                reverseLayout = props.reverseLayout ?: false
-            )
-        ) {
+        VirtualListContext(virtualizerStateInstance) {
             + props.children
         }
     }

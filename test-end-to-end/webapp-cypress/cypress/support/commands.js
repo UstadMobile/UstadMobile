@@ -135,6 +135,7 @@ Cypress.Commands.add('ustadAddDiscussionBoard',(discussionTitle) => {
    // Add course and private comments in Assignment
 Cypress.Commands.add('ustadTypeAndSubmitAssignmentComment', (commentid, sendid, comment, delay = 25) => {
     cy.get(commentid).click().type(comment, { delay });
+    cy.get('input' + commentid + '[value=\"' + comment + '\"]')
     cy.get(commentid).should('have.value', comment);
     cy.get(sendid).click();
     cy.contains(comment).should('exist');

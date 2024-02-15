@@ -20,7 +20,7 @@ import web.html.HTMLDivElement
  */
 val VirtualListOutlet = FC<Props> {
     @Suppress("SpellCheckingInspection")
-    val virtualizerContext = useRequiredContext(VirtualListContext)
+    val virtualizerContext by useRequiredContext(VirtualListContext)
 
     ReactHTML.div {
         style = jso {
@@ -29,25 +29,29 @@ val VirtualListOutlet = FC<Props> {
             position = Position.relative
         }
 
-        virtualizerContext.virtualizer.getVirtualItems().forEach { virtualRow ->
-            val virtualListElement = virtualizerContext.allRows[virtualRow.index]
-            ReactHTML.div {
-                key = virtualListElement.key()
-                ref = virtualizerContext.virtualizer.measureElement.unsafeCast<Ref<HTMLDivElement>>()
-                asDynamic()["data-index"] = virtualRow.index
-                style = jso {
-                    position = Position.absolute
-                    top = 0.px
-                    left = 0.px
-                    width = 100.pct
-                    transform = if(virtualizerContext.reverseLayout) {
-                        "translatey(${virtualRow.start.px}) scaley(-1)".unsafeCast<TransformFunction>()
-                    }else {
-                        translatey(virtualRow.start.px)
-                    }
-                }
+        virtualizerContext.virtualizer.getVirtualItems().forEachIndexed { _, virtualRow ->
+            val virtualListElement = virtualizerContext.allRows
+                .getOrNull(virtualRow.index)
 
-                + virtualListElement.createNode()
+            virtualListElement?.also { virtualListEl ->
+                ReactHTML.div {
+                    key = virtualListEl.key()
+                    ref = virtualizerContext.virtualizer.measureElement.unsafeCast<Ref<HTMLDivElement>>()
+                    asDynamic()["data-index"] = virtualRow.index
+                    style = jso {
+                        position = Position.absolute
+                        top = 0.px
+                        left = 0.px
+                        width = 100.pct
+                        transform = if(virtualizerContext.reverseLayout) {
+                            "translatey(${virtualRow.start.px}) scaley(-1)".unsafeCast<TransformFunction>()
+                        }else {
+                            translatey(virtualRow.start.px)
+                        }
+                    }
+
+                    + virtualListEl.createNode()
+                }
             }
         }
     }

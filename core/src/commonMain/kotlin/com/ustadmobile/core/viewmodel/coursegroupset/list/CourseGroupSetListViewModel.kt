@@ -79,26 +79,26 @@ class CourseGroupSetListViewModel(
         }
 
         viewModelScope.launch {
+            collectHasPermissionFlowAndSetAddNewItemUiState(
+                hasPermissionFlow = {
+                    activeRepo.clazzDao.personHasPermissionWithClazzAsFlow(
+                        activeUserPersonUid, clazzUid, Role.PERMISSION_CLAZZ_UPDATE
+                    )
+                },
+                fabStringResource = MR.strings.groups,
+                onSetAddListItemVisibility = { visible ->
+                    _uiState.update { prev ->
+                        Napier.v { "CourseGroupSetList: set showAddItem visible = $visible" }
+                        prev.copy(showAddItem = visible)
+                    }
+                }
+            )
+        }
+
+        viewModelScope.launch {
             _uiState.whenSubscribed {
                 launch {
                     collectClazzNameAndUpdateTitle(clazzUid, activeDb, _appUiState)
-                }
-
-                launch {
-                    collectHasPermissionFlowAndSetAddNewItemUiState(
-                        hasPermissionFlow = {
-                            activeRepo.clazzDao.personHasPermissionWithClazzAsFlow(
-                                activeUserPersonUid, clazzUid, Role.PERMISSION_CLAZZ_UPDATE
-                            )
-                        },
-                        fabStringResource = MR.strings.groups,
-                        onSetAddListItemVisibility = { visible ->
-                            _uiState.update { prev ->
-                                Napier.v { "CourseGroupSetList: set showAddItem visible = $visible" }
-                                prev.copy(showAddItem = visible)
-                            }
-                        }
-                    )
                 }
             }
         }
