@@ -30,12 +30,12 @@ import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.integrity.sha256Integrity
-import com.ustadmobile.libcache.io.useAndReadySha256
+import com.ustadmobile.libcache.io.useAndReadSha256
 import com.ustadmobile.libcache.logging.NapierLoggingAdapter
 import com.ustadmobile.libcache.okhttp.UstadCacheInterceptor
 import com.ustadmobile.libcache.request.requestBuilder
+import com.ustadmobile.libcache.response.bodyAsUncompressedSourceIfContentEncoded
 import io.ktor.client.HttpClient
-import kotlinx.io.buffered
 import kotlinx.io.files.Path
 import kotlinx.io.readString
 import kotlinx.serialization.json.Json
@@ -63,7 +63,8 @@ import kotlin.test.assertNotNull
 class XferTestNode(
     val temporaryFolder: TemporaryFolder,
     val name: String,
-    val dbUrl: (Endpoint) -> String = { "jdbc:sqlite::memory:" }
+    val dbUrl: (Endpoint) -> String = { "jdbc:sqlite::memory:" },
+    cacheDbUrl: String = "jdbc:sqlite::memory:",
 ) {
 
     val endpointScope = EndpointScope()
@@ -92,7 +93,7 @@ class XferTestNode(
 
     init {
         httpCache = UstadCacheBuilder(
-            dbUrl = "jdbc:sqlite::memory:",
+            dbUrl = cacheDbUrl,
             storagePath = Path(cacheDir.absolutePath),
             logger = null,
             cacheName = "client",
@@ -204,9 +205,11 @@ class XferTestNode(
     }
 
     fun getManifest(url: String): ContentManifest {
-        return httpCache.retrieve(requestBuilder(url))?.bodyAsSource()?.readString()?.let {
-            json.decodeFromString(ContentManifest.serializer(), it)
-        } ?: throw IllegalArgumentException("$name Could not find manifest for $url")
+        return httpCache.retrieve(requestBuilder(url))
+            ?.bodyAsUncompressedSourceIfContentEncoded()
+            ?.readString()?.let {
+                json.decodeFromString(ContentManifest.serializer(), it)
+            } ?: throw IllegalArgumentException("$name Could not find manifest for $url")
     }
 
 
@@ -217,7 +220,8 @@ class XferTestNode(
     ) {
         val manifestResponse = httpCache.retrieve(requestBuilder(url))
         assertNotNull(manifestResponse, "Manifest response for $url should not be null")
-        val manifestStored: ContentManifest = json.decodeFromString(manifestResponse.bodyAsSource()!!.readString())
+        val manifestStored: ContentManifest = json.decodeFromString(
+            manifestResponse.bodyAsUncompressedSourceIfContentEncoded()!!.readString())
 
         assertEquals(manifest.entries.size, manifestStored.entries.size,
             "Manifest stored on node should have same number of entries")
@@ -227,7 +231,7 @@ class XferTestNode(
             assertNotNull(cacheResponse,
                 "Cache response for ${entry.uri} must not be null on node $name")
             val integrityStored = sha256Integrity(
-                cacheResponse.bodyAsSource()!!.buffered().useAndReadySha256())
+                cacheResponse.bodyAsUncompressedSourceIfContentEncoded()!!.useAndReadSha256())
             assertEquals(entry.integrity, integrityStored, "Integrity for ${entry.uri} " +
                     "should match integrity of actual body data on node $name")
             if(expectedDefaultContentType) {

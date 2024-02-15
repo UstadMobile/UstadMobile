@@ -77,3 +77,13 @@ val MIGRATE_6_7 = DoorMigrationStatementList(6, 7) {
         add("CREATE INDEX idx_lastAccessed ON CacheEntry (lastAccessed)")
     }
 }
+
+/**
+ * Add uncompressedSize field
+ */
+val MIGRATE_7_8 = DoorMigrationStatementList(7, 8) {
+    buildList {
+        add("ALTER TABLE CacheEntry ADD COLUMN uncompressedSize INTEGER NOT NULL DEFAULT 0")
+        add("UPDATE CacheEntry SET uncompressedSize = storageSize")
+    }
+}

@@ -4,6 +4,7 @@ import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.contentformats.manifest.ContentManifestEntry
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.contententry.ContentConstants
+import com.ustadmobile.core.io.ext.bodyAsDecodedByteStream
 import com.ustadmobile.core.util.ext.removeHashSuffix
 import com.ustadmobile.core.util.ext.removeQueryStringSuffix
 import com.ustadmobile.core.util.stringvalues.asIStringValues
@@ -81,14 +82,18 @@ class ContentEntryVersionServerUseCase(
         val manifest = manifestCache.get(contentEntryVersionUid) {
             val contentEntryVersionEntity = (repo ?: db).contentEntryVersionDao
                 .findByUidAsync(contentEntryVersionUid)
-                ?: throw IllegalArgumentException("No such contententryversion : $contentEntryVersionUid")
+                ?: throw IllegalArgumentException("No such ContentEntryVersion : $contentEntryVersionUid")
             val contentManifestUrl = contentEntryVersionEntity.cevManifestUrl!!
+
             val manifestStr = okHttpClient.newCall(
                 Request.Builder()
                     .applyCacheControl()
+                    .header("accept-encoding", "gzip")
                     .url(contentManifestUrl)
                     .build()
-            ).execute().body?.string() ?: throw IllegalStateException("Could not fetch manifest: $contentManifestUrl")
+            ).execute().bodyAsDecodedByteStream()?.reader()?.use { it.readText() }
+                ?: throw IllegalArgumentException("No manifest body found")
+
             val manifest = json.decodeFromString(
                 ContentManifest.serializer(), manifestStr
             )
@@ -134,6 +139,7 @@ class ContentEntryVersionServerUseCase(
             return okHttpClient.newCall(
                 Request.Builder()
                     .url(request.url)
+                    .headers(request.headers.asOkHttpHeaders())
                     .applyCacheControl()
                     .build()
             ).execute()
@@ -202,9 +208,12 @@ class ContentEntryVersionServerUseCase(
         /**
          * In order to support content ranges (required for embedded audio/video), we must use the
          * content-range and content-length specified on the bodyDataUrl response.
+         *
+         * Content-encoding will be as set by the bodyDataUrl. See lib-cache
+         * CacheStorageCompressionFilter kdoc.
          */
         val BODY_DATA_URL_RESERVED_HEADER_NAMES = listOf("content-length",
-            "content-range")
+            "content-range", "content-encoding")
 
     }
 

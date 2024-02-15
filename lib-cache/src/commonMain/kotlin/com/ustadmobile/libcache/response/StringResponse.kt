@@ -6,7 +6,7 @@ import com.ustadmobile.libcache.headers.containsHeader
 import com.ustadmobile.libcache.headers.headersBuilder
 import com.ustadmobile.libcache.integrity.sha256Integrity
 import com.ustadmobile.libcache.io.asKotlinxIoSource
-import com.ustadmobile.libcache.io.useAndReadySha256
+import com.ustadmobile.libcache.io.useAndReadSha256
 import com.ustadmobile.libcache.request.HttpRequest
 import kotlinx.io.Source
 import kotlinx.io.asSource
@@ -27,7 +27,7 @@ class StringResponse(
     override val headers: HttpHeaders=  headersBuilder {
         takeFrom(extraHeaders)
         val integrity = sha256Integrity(
-            bodyBytes.asKotlinxIoSource().buffered().useAndReadySha256())
+            bodyBytes.asKotlinxIoSource().buffered().useAndReadSha256())
         header("content-length", bodyBytes.size.toString())
         header("content-type", mimeType)
         addIntegrity(extraHeaders, integrity)

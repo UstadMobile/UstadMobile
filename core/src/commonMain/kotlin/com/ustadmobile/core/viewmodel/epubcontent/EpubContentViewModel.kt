@@ -10,7 +10,6 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
-import io.ktor.client.statement.bodyAsText
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
@@ -29,6 +28,7 @@ import com.ustadmobile.core.contentformats.epub.opf.Item
 import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.contentformats.manifest.ContentManifestEntry
 import com.ustadmobile.core.domain.epub.GetEpubTableOfContentsUseCase
+import com.ustadmobile.core.util.ext.bodyAsDecodedText
 import com.ustadmobile.core.util.requireEntryByUri
 import org.kodein.di.direct
 import kotlin.concurrent.Volatile
@@ -179,7 +179,8 @@ class EpubContentViewModel(
             val cevManifestUrlObj = UrlKmp(cevManifestUrl)
             val opfBaseUrl = cevManifestUrlObj.resolve(cevOpenUri)
             val manifest: ContentManifest = json.decodeFromString(
-                httpClient.get(cevManifestUrl).bodyAsText())
+                httpClient.get(cevManifestUrl).bodyAsDecodedText()
+            )
 
             fun ContentManifestEntry.urlToLoad(): String {
                 return if(useBodyDataUrls) {
@@ -192,7 +193,7 @@ class EpubContentViewModel(
             withContext(Dispatchers.Default) {
                 try {
                     val opfEntry = manifest.requireEntryByUri(cevOpenUri)
-                    val opfStr = httpClient.get(opfEntry.urlToLoad()).bodyAsText()
+                    val opfStr = httpClient.get(opfEntry.urlToLoad()).bodyAsDecodedText()
                     val opfPackage = xml.decodeFromString(
                         deserializer = PackageDocument.serializer(),
                         string = opfStr
@@ -255,7 +256,7 @@ class EpubContentViewModel(
                     val tocItems = getEpubTableOfContentsUseCase(
                         opfPackage = opfPackage,
                         readItemText = {
-                            httpClient.get(it.urlToLoad()).bodyAsText()
+                            httpClient.get(it.urlToLoad()).bodyAsDecodedText()
                         }
                     ) ?: emptyList()
 

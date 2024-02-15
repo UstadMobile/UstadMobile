@@ -5,6 +5,7 @@ import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.contentformats.media.MediaContentInfo
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.url.UrlKmp
+import com.ustadmobile.core.util.ext.bodyAsDecodedText
 import com.ustadmobile.core.util.requireBodyUrlForUri
 import com.ustadmobile.core.util.requireEntryByUri
 import com.ustadmobile.core.view.UstadView
@@ -78,12 +79,13 @@ class VideoContentViewModel(
 
             launch {
                 val manifest: ContentManifest = json.decodeFromString(
-                    httpClient.get(contentEntryVersion.cevManifestUrl!!).bodyAsText())
+                    httpClient.get(contentEntryVersion.cevManifestUrl!!).bodyAsDecodedText()
+                )
 
                 val mediaInfoUrl = manifest.requireBodyUrlForUri(contentEntryVersion.cevOpenUri!!)
 
                 val mediaInfo: MediaContentInfo = json.decodeFromString(
-                    httpClient.get(mediaInfoUrl).bodyAsText())
+                    httpClient.get(mediaInfoUrl).bodyAsDecodedText())
 
                 val videoEntry = manifest.requireEntryByUri(
                     mediaInfo.sources.first().uri)

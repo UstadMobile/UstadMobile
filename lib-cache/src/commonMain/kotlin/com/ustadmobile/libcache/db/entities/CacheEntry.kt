@@ -51,4 +51,11 @@ data class CacheEntry(
     var storageUri: String = "",
 
     var storageSize: Long = 0,
+
+    /**
+     * The size of the entry, uncompressed. This might be different to storageSize if the entry is
+     * stored using content-encoding Gzip etc.
+     */
+    @ColumnInfo(defaultValue = "0")
+    var uncompressedSize: Long = 0,
 )

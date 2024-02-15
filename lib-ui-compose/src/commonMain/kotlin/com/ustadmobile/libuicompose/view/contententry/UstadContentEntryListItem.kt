@@ -74,7 +74,9 @@ fun UstadContentEntryListItem(
                     verticalArrangement = Arrangement.spacedBy(5.dp)
                 ) {
                     if(!entry?.contentEntry?.description.isNullOrBlank()) {
-                        Text((entry?.contentEntry?.description ?: ""), maxLines = 2)
+                        Text((entry?.contentEntry?.description ?: ""),
+                            maxLines = 2, overflow = TextOverflow.Ellipsis,
+                        )
                     }
 
                     Row {

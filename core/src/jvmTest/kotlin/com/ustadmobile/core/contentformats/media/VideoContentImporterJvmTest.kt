@@ -11,10 +11,10 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryImportJob
 import com.ustadmobile.lib.util.SysPathUtil
 import com.ustadmobile.libcache.request.requestBuilder
+import com.ustadmobile.libcache.response.bodyAsString
 import com.ustadmobile.util.test.ext.newFileFromResource
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.files.Path
-import kotlinx.io.readString
 import net.bramp.ffmpeg.FFprobe
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -134,7 +134,7 @@ class VideoContentImporterJvmTest : AbstractContentImporterTest() {
             requestBuilder(result.cevManifestUrl!!)
         )
         val manifest = json.decodeFromString(
-            ContentManifest.serializer(), manifestResponse!!.bodyAsSource()!!.readString()
+            ContentManifest.serializer(), manifestResponse!!.bodyAsString()!!
         )
         val videoManifestItem = manifest.entries.first {
             it.uri == "video"
@@ -152,7 +152,7 @@ class VideoContentImporterJvmTest : AbstractContentImporterTest() {
                 }.bodyDataUrl
             )
         )
-        val mediaInfoText = mediaInfoResponse?.bodyAsSource()?.readString()!!
+        val mediaInfoText = mediaInfoResponse?.bodyAsString()!!
         val mediaInfo: MediaContentInfo = json.decodeFromString(mediaInfoText)
         assertEquals("video/mp4", mediaInfo.sources.first().mimeType)
     }

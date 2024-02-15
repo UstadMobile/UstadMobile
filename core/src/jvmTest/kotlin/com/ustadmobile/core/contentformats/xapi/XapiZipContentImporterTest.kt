@@ -31,9 +31,9 @@ import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
 import com.ustadmobile.libcache.request.requestBuilder
+import com.ustadmobile.libcache.response.bodyAsString
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.files.Path
-import kotlinx.io.readString
 import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Assert
@@ -236,7 +236,7 @@ class XapiZipContentImporterTest :AbstractMainDispatcherTest() {
             requestBuilder("$expectedUrlPrefix${ContentConstants.MANIFEST_NAME}")
         )
         val manifest = json.decodeFromString(
-            ContentManifest.serializer(), manifestResponse!!.bodyAsSource()!!.readString()
+            ContentManifest.serializer(), manifestResponse!!.bodyAsString()!!
         )
 
         ZipFile(tempFile).use { zipFile ->
