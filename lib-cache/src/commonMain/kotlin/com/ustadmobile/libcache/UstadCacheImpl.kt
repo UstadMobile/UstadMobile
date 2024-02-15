@@ -1,6 +1,7 @@
 package com.ustadmobile.libcache
 
 import com.ustadmobile.door.ext.withDoorTransaction
+import com.ustadmobile.door.util.NullOutputStream
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.libcache.UstadCache.Companion.HEADER_LAST_VALIDATED_TIMESTAMP
 import com.ustadmobile.libcache.cachecontrol.ResponseValidityChecker
@@ -18,6 +19,7 @@ import com.ustadmobile.libcache.integrity.sha256Integrity
 import com.ustadmobile.libcache.io.requireMetadata
 import com.ustadmobile.libcache.io.useAndReadSha256
 import com.ustadmobile.libcache.io.transferToAndGetSha256
+import com.ustadmobile.libcache.io.uncompress
 import com.ustadmobile.libcache.logging.UstadCacheLogger
 import com.ustadmobile.libcache.md5.Md5Digest
 import com.ustadmobile.libcache.md5.urlKey
@@ -35,6 +37,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.io.asSink
 import kotlinx.io.buffered
 import kotlinx.io.files.FileSystem
 import kotlinx.io.files.Path
@@ -65,7 +68,7 @@ class UstadCacheImpl(
         logger = logger,
         sizeLimit = sizeLimit,
     ),
-    override val storageCompressionFilter: CacheStorageCompressionFilter = DefaultCacheGzipFilter(),
+    override val storageCompressionFilter: CacheStorageCompressionFilter = DefaultCacheCompressionFilter(),
 ) : UstadCache {
 
     private val scope = CoroutineScope(Dispatchers.IO + Job())
@@ -166,18 +169,34 @@ class UstadCacheImpl(
                 val tmpFile = Path(tmpDir, "${tmpCounter.incrementAndGet()}.tmp")
                 val url = entryToStore.request.url
                 val storeCompressionType = storageCompressionFilter.invoke(
-                    entryToStore.request.url, entryToStore.response.headers
+                    url = entryToStore.request.url,
+                    requestHeaders = entryToStore.request.headers,
+                    responseHeaders = entryToStore.response.headers
                 )
                 val responseCompression = CompressionType.byHeaderVal(
                     entryToStore.response.headers["content-encoding"]
                 )
                 val overrideHeaders = mutableMapOf<String, List<String>>()
 
-                val sha256IntegrityFromTransfer = if(entryToStore.responseBodyTmpLocalPath != null) {
+                @Suppress("ArrayInDataClass")
+                data class Sha256AndInflateSize(val sha256: ByteArray?, val inflatedSize: Long)
+
+                val (sha256IntegrityFromTransfer, uncompressedSize) = if(
+                    entryToStore.responseBodyTmpLocalPath != null && storeCompressionType == responseCompression
+                ) {
                     //If the entry to store is in a temporary path where it is acceptable to just
-                    //move the file into the cache, then we will move (instead of copying) the file
+                    //move the file into the cache, and it is already compressed with the desired
+                    // compression type for storage, then we will move (instead of copying) the file
                     fileSystem.atomicMove(entryToStore.responseBodyTmpLocalPath, tmpFile)
-                    null
+                    val inflatedSize = if(storeCompressionType == CompressionType.NONE) {
+                        fileSystem.requireMetadata(tmpFile).size
+                    }else {
+                        //"transfer" to a nulloutputstream sink to count uncompressed size
+                        fileSystem.source(tmpFile).buffered()
+                            .uncompress(storeCompressionType).transferTo(NullOutputStream().asSink())
+                    }
+
+                    Sha256AndInflateSize(null, inflatedSize)
                 }else {
                     val bodySource = response.bodyAsSource()
 
@@ -189,11 +208,11 @@ class UstadCacheImpl(
                     }
 
                     val transferResult = bodySource.transferToAndGetSha256(tmpFile,
-                        responseCompression, storeCompressionType).sha256
+                        responseCompression, storeCompressionType)
                     overrideHeaders["content-encoding"] = listOf(storeCompressionType.headerVal)
                     overrideHeaders["content-length"] = listOf(fileSystem.requireMetadata(tmpFile).size.toString())
 
-                    sha256Integrity(transferResult)
+                    Sha256AndInflateSize(transferResult.sha256, transferResult.transferred)
                 }
 
                 val integrityFromHeaders = if(entryToStore.skipChecksumIfProvided)
@@ -201,7 +220,8 @@ class UstadCacheImpl(
                 else
                     null
 
-                val integrity = sha256IntegrityFromTransfer ?: integrityFromHeaders
+                val integrity = sha256IntegrityFromTransfer?.let { sha256Integrity(it) }
+                    ?: integrityFromHeaders
                     ?: sha256Integrity(fileSystem.source(tmpFile).buffered().useAndReadSha256())
 
                 val effectiveHeaders = if(overrideHeaders.isNotEmpty()) {
@@ -221,6 +241,7 @@ class UstadCacheImpl(
                         responseHeaders = effectiveHeaders.asString(),
                         lastValidated = timeNow,
                         lastAccessed = timeNow,
+                        uncompressedSize = uncompressedSize
                     ),
                     entryToStore = entryToStore,
                     tmpFile = tmpFile,
@@ -368,7 +389,8 @@ class UstadCacheImpl(
                     header(HEADER_LAST_VALIDATED_TIMESTAMP, entry.lastValidated.toString())
                 },
                 storageUri = entry.storageUri,
-                httpResponseCode = entry.statusCode
+                httpResponseCode = entry.statusCode,
+                uncompressedSize = entry.uncompressedSize,
             )
         }
 

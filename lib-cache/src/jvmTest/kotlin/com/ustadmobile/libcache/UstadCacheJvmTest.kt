@@ -2,6 +2,7 @@ package com.ustadmobile.libcache
 
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.libcache.db.UstadCacheDb
+import com.ustadmobile.libcache.headers.HttpHeader
 import com.ustadmobile.libcache.headers.requireIntegrity
 import com.ustadmobile.libcache.integrity.sha256Integrity
 import com.ustadmobile.libcache.io.uncompress
@@ -40,9 +41,13 @@ class UstadCacheJvmTest {
         testUrl: String,
         mimeType: String,
         expectedContentEncoding: String? = null,
+        requestHeaders: List<HttpHeader> = emptyList()
     ) {
         val request = requestBuilder {
             url = testUrl
+            requestHeaders.forEach {
+                header(it.name, it.value)
+            }
         }
 
         store(
@@ -82,12 +87,15 @@ class UstadCacheJvmTest {
         assertEquals(mimeType, cacheResponse.headers["content-type"])
 
         if(expectedContentEncoding != null) {
+            val numEncodingHeaders = cacheResponse.headers.getAllByName("content-encoding").size
             if(expectedContentEncoding == "identity") {
                 assertTrue(cacheResponse.headers["content-encoding"].let { it == null || it == "identity" },
                     "Content-encoding for $testUrl should be identity - can have no header, or can be set to identity")
+                assertTrue(numEncodingHeaders == 1 || numEncodingHeaders == 0)
             }else {
                 assertEquals(expectedContentEncoding, cacheResponse.headers["content-encoding"],
                     "Content-encoding for $testUrl should be $expectedContentEncoding")
+                assertEquals(1, numEncodingHeaders)
             }
         }
     }
@@ -97,6 +105,7 @@ class UstadCacheJvmTest {
         testUrl: String,
         mimeType: String,
         expectContentEncoding: String? = null,
+        requestHeaders: List<HttpHeader> = emptyList(),
     ) {
         val cacheDir = tempDir.newFolder()
         val cacheDb = DatabaseBuilder.databaseBuilder(
@@ -111,6 +120,7 @@ class UstadCacheJvmTest {
             testUrl = testUrl,
             mimeType = mimeType,
             expectedContentEncoding = expectContentEncoding,
+            requestHeaders = requestHeaders,
         )
     }
 
@@ -130,7 +140,18 @@ class UstadCacheJvmTest {
             testFile = tempDir.newFileFromResource(this::class.java, "/ustadmobile-epub.js"),
             testUrl = "http://www.server.com/ustadmobile-epub.js",
             mimeType = "application/javascript",
-            expectContentEncoding = "gzip"
+            expectContentEncoding = "gzip",
+            requestHeaders = listOf(HttpHeader("accept-encoding", "gzip, br, deflate"))
+        )
+    }
+
+    @Test
+    fun givenCompressableFileStored_whenRequestMadeWithoutAcceptEncoding_thenWillBeRetrievedAsCacheHitAndBeCompressed() {
+        assertFileCanBeCachedAndRetrieved(
+            testFile = tempDir.newFileFromResource(this::class.java, "/ustadmobile-epub.js"),
+            testUrl = "http://www.server.com/ustadmobile-epub.js",
+            mimeType = "application/javascript",
+            expectContentEncoding = "identity",
         )
     }
 

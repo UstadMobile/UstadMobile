@@ -21,6 +21,6 @@ class MergedHeaders(
     }
 
     override fun names(): Set<String> {
-        return sources.flatMap { it.names() }.toSet()
+        return sources.flatMap { it.names() }.map { it.lowercase() }.toSet()
     }
 }

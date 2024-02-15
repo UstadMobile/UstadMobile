@@ -8,6 +8,7 @@ import com.ustadmobile.libcache.db.MIGRATE_3_4
 import com.ustadmobile.libcache.db.MIGRATE_4_5
 import com.ustadmobile.libcache.db.MIGRATE_5_6
 import com.ustadmobile.libcache.db.MIGRATE_6_7
+import com.ustadmobile.libcache.db.MIGRATE_7_8
 import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.logging.UstadCacheLogger
 import kotlinx.io.files.Path
@@ -32,7 +33,7 @@ class UstadCacheBuilder(
             storagePath = storagePath,
             db = DatabaseBuilder.databaseBuilder(UstadCacheDb::class, dbUrl, 1L)
                 .addMigrations(MIGRATE_1_2, MIGRATE_2_3, MIGRATE_3_4, MIGRATE_4_5,
-                    MIGRATE_5_6, MIGRATE_6_7)
+                    MIGRATE_5_6, MIGRATE_6_7, MIGRATE_7_8)
                 .build(),
             sizeLimit = sizeLimit,
             logger = logger,

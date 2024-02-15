@@ -156,7 +156,11 @@ class UstadCacheInterceptorTest {
         Assert.assertArrayEquals(resourceBytes, responseBytes)
 
         //Now check the cached response is compressed
-        val cacheResponse = ustadCache.retrieve(requestBuilder(requestUrl))
+        val cacheResponse = ustadCache.retrieve(
+            requestBuilder(requestUrl) {
+                header("accept-encoding", "gzip, br, deflate")
+            }
+        )
         assertNotEquals(CompressionType.NONE, CompressionType.byHeaderVal(
             cacheResponse!!.headers["content-encoding"]),
             "compression type should not be none - e.g. should be compressed")
@@ -185,7 +189,11 @@ class UstadCacheInterceptorTest {
         Assert.assertArrayEquals(resourceBytes, responseBytes)
 
         //Now check the cached response is compressed
-        val cacheResponse = ustadCache.retrieve(requestBuilder(requestUrl))
+        val cacheResponse = ustadCache.retrieve(
+            requestBuilder(requestUrl) {
+                header("accept-encoding", "gzip, deflate, br")
+            }
+        )
         assertNotEquals(CompressionType.NONE, CompressionType.byHeaderVal(
             cacheResponse!!.headers["content-encoding"]),
             "compression type should not be none - e.g. should be compressed")

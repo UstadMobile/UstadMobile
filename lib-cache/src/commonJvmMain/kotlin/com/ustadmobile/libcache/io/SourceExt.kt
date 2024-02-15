@@ -1,6 +1,7 @@
 package com.ustadmobile.libcache.io
 
 import com.ustadmobile.libcache.CompressionType
+import kotlinx.io.RawSource
 import kotlinx.io.Source
 import kotlinx.io.asInputStream
 import kotlinx.io.asOutputStream
@@ -95,4 +96,8 @@ actual fun Source.uncompress(
     }else {
         this
     }
+}
+
+actual fun Source.range(fromByte: Long, toByte: Long): RawSource {
+    return RangeInputStream(asInputStream(), fromByte, toByte).asSource()
 }
