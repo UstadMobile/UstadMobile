@@ -33,45 +33,55 @@ class ContentEntryGetMetaDataFromUriUseCaseJs(
         val uploadUuid = randomUuid().toString()
 
         try {
-            val finalResponse = chunkedUploadClientLocalUriUseCase(
-                uploadUuid = uploadUuid,
-                localUri = contentUri,
-                remoteUrl = "${endpoint.url}api/contentupload/upload",
-                fromByte = 0,
-                lastChunkHeaders = buildMap {
-                    if(fileName != null)
-                        put(HEADER_ORIGINAL_FILENAME, listOf(encodeURIComponent(fileName)))
-                }.asIStringValues(),
-                onProgress = {
-                    onProgress(
-                        ContentEntryGetMetadataStatus(
-                            indeterminate = false,
-                            progress = ((it.bytesTransferred * 100) / it.totalBytes).toInt()
+            for(i in 0 until MAX_ATTEMPTS) {
+                val finalResponse = chunkedUploadClientLocalUriUseCase(
+                    uploadUuid = uploadUuid,
+                    localUri = contentUri,
+                    remoteUrl = "${endpoint.url}api/contentupload/upload",
+                    fromByte = 0,
+                    lastChunkHeaders = buildMap {
+                        if(fileName != null)
+                            put(HEADER_ORIGINAL_FILENAME, listOf(encodeURIComponent(fileName)))
+                    }.asIStringValues(),
+                    onProgress = {
+                        onProgress(
+                            ContentEntryGetMetadataStatus(
+                                indeterminate = false,
+                                progress = ((it.bytesTransferred * 100) / it.totalBytes).toInt()
+                            )
                         )
-                    )
-                }
-            )
-
-            when(finalResponse.statusCode) {
-                400 -> {
-                    //Invalid content
-                    throw InvalidContentException(message = finalResponse.body ?: "")
-                }
-                406 -> {
-                    //Unsupported content -
-                    throw UnsupportedContentException(message = finalResponse.body ?: "")
-                }
-            }
-
-            return finalResponse.body?.let {
-                json.decodeFromString(
-                    deserializer = MetadataResult.serializer(),
-                    string = it
+                    }
                 )
-            } ?: throw IllegalStateException("Final response had no body")
+
+                when(finalResponse.statusCode) {
+                    400 -> {
+                        //Invalid content
+                        throw InvalidContentException(message = finalResponse.body ?: "")
+                    }
+                    406 -> {
+                        //Unsupported content -
+                        throw UnsupportedContentException(message = finalResponse.body ?: "")
+                    }
+                }
+
+                return finalResponse.body?.let {
+                    json.decodeFromString(
+                        deserializer = MetadataResult.serializer(),
+                        string = it
+                    )
+                } ?: throw IllegalStateException("Final response had no body")
+            }
+            throw IllegalStateException("Retried upload $MAX_ATTEMPTS times... failed.")
         }finally {
             URL.revokeObjectURL(contentUri.toString())
         }
+
+    }
+
+    companion object {
+
+        const val MAX_ATTEMPTS = 3
+
     }
 
 }
