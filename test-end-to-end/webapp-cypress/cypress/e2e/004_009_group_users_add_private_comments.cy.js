@@ -65,12 +65,7 @@ it('Teacher add assignment and course comment', () => {
   cy.get('div[data-placeholder="Description"]').type("this is a simple assignment")
   cy.get('#group_submission_on').click()
   cy.get('#cgsName').click()
-  cy.contains('Add new groups', { timeout: 5000 }).then(($addNewGroupsBtn) => {
-     if (!$addNewGroupsBtn.is(':visible')) {
-     cy.reload()
-     }
-     })
-  cy.contains('Add new groups',{timeout: 5000}).click()
+  cy.get('#add_new_groups',{timeout: 5000}).click()
   cy.get('#cgs_name').type('Assignment Team')
   cy.get('#cgs_total_groups').clear().type('2')
   cy.contains('Unassigned').eq(0).click()  // s1
@@ -92,7 +87,7 @@ it('Teacher add assignment and course comment', () => {
   cy.get('svg[data-testid="AssignmentTurnedInIcon"]').click()
   cy.contains('Submissions').click()
   cy.contains('Group 1').click()
-  cy.ustadAssignmentComments('#private_comment_textfield','#private_comment_textfield_send_button','comment1')
+  cy.ustadTypeAndSubmitAssignmentComment('#private_comment_textfield','#private_comment_textfield_send_button','comment1')
 })
 
 it('Group 1 - Student add private comment', () => {

@@ -272,6 +272,11 @@ class ClazzAssignmentEditViewModel(
         _uiState.update { prev ->
             prev.copy(
                 groupSubmissionOn = groupSubmissionOn,
+                groupSetError = if(prev.groupSetError != null && groupSubmissionOn) {
+                    prev.groupSetError
+                }else {
+                    null
+                }
             )
         }
     }
@@ -301,7 +306,7 @@ class ClazzAssignmentEditViewModel(
                     prev.reviewerCountError
                 }else {
                     null
-                }
+                },
             )
         }
 
