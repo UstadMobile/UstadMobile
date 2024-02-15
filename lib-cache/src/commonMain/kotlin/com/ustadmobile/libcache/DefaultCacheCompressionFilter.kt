@@ -40,7 +40,9 @@ class DefaultCacheCompressionFilter: CacheStorageCompressionFilter {
     companion object {
 
         val GZIP_APPLICATION_TYPES = listOf(
-            "application/xhtml+xml", "application/json", "application/javascript"
+            "application/xhtml+xml", "application/json", "application/javascript",
+            "application/oebps-package+xml",//OPF package
+            "image/svg+xml",//SVG - XML
         )
     }
 }
