@@ -2,6 +2,7 @@ package com.ustadmobile.libcache.okhttp
 
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.libcache.CacheEntryToStore
+import com.ustadmobile.libcache.CompressionType
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCache.Companion.HEADER_FIRST_STORED_TIMESTAMP
 import com.ustadmobile.libcache.UstadCache.Companion.HEADER_LAST_VALIDATED_TIMESTAMP
@@ -12,7 +13,10 @@ import com.ustadmobile.libcache.cachecontrol.CacheControlFreshnessCheckerImpl
 import com.ustadmobile.libcache.cachecontrol.RequestCacheControlHeader
 import com.ustadmobile.libcache.cachecontrol.ResponseCacheabilityChecker
 import com.ustadmobile.libcache.cachecontrol.ResponseCacheabilityCheckerImpl
+import com.ustadmobile.libcache.headers.CouponHeader.Companion.HEADER_ETAG_IS_INTEGRITY
+import com.ustadmobile.libcache.headers.CouponHeader.Companion.HEADER_X_INTEGRITY
 import com.ustadmobile.libcache.headers.headersBuilder
+import com.ustadmobile.libcache.integrity.sha256Integrity
 import com.ustadmobile.libcache.logging.UstadCacheLogger
 import com.ustadmobile.libcache.response.HttpPathResponse
 import com.ustadmobile.libcache.response.HttpResponse
@@ -61,6 +65,11 @@ class UstadCacheInterceptor(
     @Volatile
     private var tmpDirChecked = false
 
+    private fun Response.logSummary(): String {
+        return "$code $message (contentType=${headers["content-type"]}, " +
+                "content-encoding=${headers["content-encoding"]} content-length=${headersContentLength()})"
+    }
+
     /**
      * This runnable will simultaneously write.
      */
@@ -72,20 +81,24 @@ class UstadCacheInterceptor(
         override fun run() {
             val buffer = ByteArray(8192)
             var bytesRead = 0
+
+            //Note: the digest is only used if the response is uncompressed
             val digest = MessageDigest.getInstance("SHA-256")
             val tmpFile = File(tmpDir, UUID.randomUUID().toString())
 
             try {
-                val responseInStream = response.body?.byteStream()?.let {
-                    DigestInputStream(it, digest)
-                } ?: throw IllegalStateException()
+                val responseCompression = CompressionType.byHeaderVal(
+                    response.header("content-encoding"))
+                val responseInStream = response.body?.byteStream()
+                    ?.let {
+                        DigestInputStream(it, digest)
+                    } ?: throw IllegalStateException()
 
                 responseInStream.use { responseIn ->
                     if(!tmpDirChecked) {
                         tmpDir.takeIf { !it.exists() }?.mkdirs()
                         tmpDirChecked = true
                     }
-
 
                     val fileOutStream = tmpFile.outputStream()
                     while(!call.isCanceled() &&
@@ -111,9 +124,37 @@ class UstadCacheInterceptor(
                                     request = cacheRequest,
                                     extraHeaders = headersBuilder {
                                         takeFrom(response.headers.asCacheHttpHeaders())
+
+                                        val etagIsIntegrity = response
+                                            .header(HEADER_ETAG_IS_INTEGRITY)?.toBooleanStrictOrNull()
+                                            ?: false
+                                        when {
+                                            responseCompression == CompressionType.NONE && etagIsIntegrity -> {
+                                                //Set the etag with the integrity that we know
+                                                header("etag", sha256Integrity(digest.digest()))
+                                            }
+                                            etagIsIntegrity -> {
+                                                //The etag should be integrity, but because the response was compressed,
+                                                // we don't have the SHA-256 sum for the data ne, so remove it and let the
+                                                // cache check the real integrity
+                                                removeHeader("etag")
+                                                removeHeader(HEADER_ETAG_IS_INTEGRITY)
+                                            }
+                                            responseCompression == CompressionType.NONE -> {
+                                                //The etag is not the integrity header, so set X-Integrity
+                                                header(HEADER_X_INTEGRITY, sha256Integrity(digest.digest()))
+                                            }
+                                            else -> {
+                                                //The etag is not the integrity header, but because
+                                                //the response was compressed, we don't have the SHA-256
+                                                //sum for the data, so remove X-Integrity if present
+                                                removeHeader(HEADER_X_INTEGRITY)
+                                            }
+                                        }
                                     }
                                 ),
-                                responseBodyTmpLocalPath = Path(tmpFile.absolutePath)
+                                responseBodyTmpLocalPath = Path(tmpFile.absolutePath),
+                                skipChecksumIfProvided = true,
                             )
                         ))
                     }
@@ -153,11 +194,12 @@ class UstadCacheInterceptor(
         val pipeOutStream = PipedOutputStream(pipeInStream)
         try {
             val returnResponse = response.newBuilder().body(
-                pipeInStream.source().buffer().asResponseBody(
-                    (response.header("content-type") ?: "application/octet-stream").toMediaType(),
-                    response.headersContentLength(),
+                    pipeInStream.source().buffer().asResponseBody(
+                        (response.header("content-type") ?: "application/octet-stream").toMediaType(),
+                        response.headersContentLength(),
+                    )
                 )
-            ).build()
+                .build()
             executor.submit(ReadAndCacheRunnable(call, response, pipeOutStream))
             return returnResponse
         }catch(e: Throwable) {
@@ -229,7 +271,7 @@ class UstadCacheInterceptor(
              */
             cacheResponse != null && cachedResponseStatus?.isFresh == true -> {
                 newResponseFromCachedResponse(cacheResponse, call).also {
-                    logger?.d(LOG_TAG, "$logPrefix HIT(valid) ${it.code} ${it.message} $url")
+                    logger?.d(LOG_TAG, "$logPrefix HIT(valid) $url ${it.logSummary()}")
                 }
             }
 
@@ -257,20 +299,24 @@ class UstadCacheInterceptor(
                 }
                 val validationResponse = chain.proceed(validateRequestBuilder.build())
                 if(validationResponse.code == 304) {
-                    logger?.d(LOG_TAG, "$logPrefix HIT(validated) $url")
                     validationResponse.close()
                     cache.updateLastValidated(
                         ValidatedEntry(url, validationResponse.headers.asCacheHttpHeaders())
                     )
-                    newResponseFromCachedResponse(cacheResponse, call)
+                    newResponseFromCachedResponse(cacheResponse, call).also {
+                        logger?.d(LOG_TAG, "$logPrefix HIT(validated) $url ${it.logSummary()}")
+                    }
                 }else {
                     logger?.d(LOG_TAG, "$logPrefix MISS(invalid) $url")
                     if(responseCacheabilityChecker.canStore(validationResponse)) {
-                        logger?.v(LOG_TAG, "$logPrefix $url can store - creating newCacheAndStore response")
-                        newCacheAndStoreResponse(validationResponse, call)
+                        newCacheAndStoreResponse(validationResponse, call).also {
+                            logger?.v(LOG_TAG, "$logPrefix $url MISS(invalid) can store/update ${it.logSummary()}")
+                        }
                     }else {
-                        logger?.v(LOG_TAG, "$logPrefix $url cannot store - returning response as-is")
-                        validationResponse
+                        validationResponse.also {
+                            logger?.v(LOG_TAG, "$logPrefix $url cannot store - " +
+                                    "returning response as-is ${it.logSummary()}")
+                        }
                     }
                 }
             }
@@ -280,11 +326,11 @@ class UstadCacheInterceptor(
                 val response =  chain.proceed(request)
                 if(responseCacheabilityChecker.canStore(response)) {
                     newCacheAndStoreResponse(response, call).also {
-                        logger?.d(LOG_TAG, "$logPrefix MISS ${it.code} ${it.message} $url")
+                        logger?.d(LOG_TAG, "$logPrefix MISS $url ${it.logSummary()}")
                     }
                 }else {
                     response.also {
-                        logger?.d(LOG_TAG, "$logPrefix NOSTORE ${it.code} ${it.message} $url")
+                        logger?.d(LOG_TAG, "$logPrefix NOSTORE $url ${it.logSummary()}")
                     }
                 }
             }

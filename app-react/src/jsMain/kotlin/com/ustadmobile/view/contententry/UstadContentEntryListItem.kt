@@ -8,6 +8,7 @@ import com.ustadmobile.lib.db.composites.ContentEntryAndListDetail
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.mui.common.justifyContent
 import com.ustadmobile.mui.ext.paddingCourseBlockIndent
+import com.ustadmobile.util.ext.useLineClamp
 import com.ustadmobile.view.contententry.detailoverviewtab.CONTENT_ENTRY_TYPE_ICON_MAP
 import js.core.jso
 import web.cssom.*
@@ -23,6 +24,7 @@ import react.Props
 import react.ReactNode
 import react.create
 import react.useState
+import react.dom.html.ReactHTML.div
 
 external interface UstadContentEntryListItemProps : Props {
 
@@ -99,6 +101,10 @@ val UstadContentEntryListItem = FC<UstadContentEntryListItemProps> { props ->
                 primary = ReactNode(props.contentEntry?.contentEntry?.title ?: "")
                 secondary = SecondaryContent.create {
                     contentEntryItem = props.contentEntry?.contentEntry
+                }
+
+                secondaryTypographyProps = jso {
+                    component = div
                 }
             }
 
@@ -179,6 +185,10 @@ private val SecondaryContent = FC<SecondaryContentProps> { props ->
 
         if (uiState?.descriptionVisible == true){
             Typography {
+                sx {
+                    useLineClamp(2)
+                }
+
                 + (props.contentEntryItem?.description ?: "")
             }
         }
