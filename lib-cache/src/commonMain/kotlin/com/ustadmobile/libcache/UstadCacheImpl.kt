@@ -282,15 +282,32 @@ class UstadCacheImpl(
                         false
                     }
 
-                    if(storedEntry != null && etagOrLastModifiedMatches) {
-                        //If the entry is already saved and still valid. We will not store the body,
-                        //but we will upsert the CacheEntry entity so that the last validated and
-                        // last accessed times are updated. We will
+                    if(storedEntry != null && etagOrLastModifiedMatches && storedEntryHeaders != null) {
+                        /* If the entry is already saved and still valid. We will not store the body,
+                         * but we will upsert the CacheEntry entity so that the last validated and
+                         * last accessed times are updated.
+                         *
+                         * Because the body data will not be modified, the content-length and
+                         * content-encoding MUST NOT be changed.
+                         */
+                        val overrideHeaders = buildMap {
+                            NOT_MODIFIED_IGNORE_HEADERS.forEach { headerName ->
+                                storedEntryHeaders[headerName]?.also { storedEntryHeaderVal ->
+                                    put(headerName, listOf(storedEntryHeaderVal))
+                                }
+                            }
+                        }
+
                         entryInProgress.copy(
                             tmpFileNeedsDeleted = true,
                             cacheEntry = entryInProgress.cacheEntry.copy(
                                 storageUri = storedEntry.storageUri,
                                 storageSize = storedEntry.storageSize,
+                                responseHeaders = MergedHeaders(
+                                    HttpHeaders.fromMap(overrideHeaders),
+                                    entryInProgress.responseHeaders,
+                                    storedEntryHeaders,
+                                ).asString()
                             )
                         )
                     }else {
@@ -412,7 +429,7 @@ class UstadCacheImpl(
 
             val newHeadersCorrected = validatedEntry.headers.mapHeaders { headerName, headerValue ->
                 when {
-                    headerName.equals("content-length", true) -> null
+                    NOT_MODIFIED_IGNORE_HEADERS.any { headerName.equals(it, true) } -> null
                     else -> headerValue
                 }
             }
@@ -503,5 +520,19 @@ class UstadCacheImpl(
 
     companion object {
         const val LOG_TAG = "UstadCache"
+
+        /**
+         * When an entry is validated, most headers will be updated with those found on the 304
+         * not modified response e.g. Age, Cache-Control, Last-Modified etc.
+         *
+         * All values on the 304 not-modified SHOULD be the same as would otherwise be returned, however:
+         *  1) KTOR, and other servers, use content-length: 0 (a 304 not-modified response has no
+         *     body, so that response has a length of zero, but strictly speaking, this is wrong)
+         *  2) content-encoding : this could be changed internally (e.g. by updating what mime types
+         *     are or are not compressed). When a 304 response is received, the response body stored
+         *     on disk is not changed, so the content-encoding must NEVER change.
+         */
+        private val NOT_MODIFIED_IGNORE_HEADERS = listOf("content-length", "content-encoding")
+
     }
 }
