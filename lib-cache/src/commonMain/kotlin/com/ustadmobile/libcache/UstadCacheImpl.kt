@@ -54,7 +54,7 @@ import kotlinx.io.files.SystemFileSystem
 class UstadCacheImpl(
     private val fileSystem: FileSystem = SystemFileSystem,
     cacheName: String = "",
-    storagePath: Path,
+    private val pathsProvider: CachePathsProvider,
     private val db: UstadCacheDb,
     sizeLimit: () -> Long = { UstadCache.DEFAULT_SIZE_LIMIT },
     private val logger: UstadCacheLogger? = null,
@@ -72,10 +72,6 @@ class UstadCacheImpl(
 ) : UstadCache {
 
     private val scope = CoroutineScope(Dispatchers.IO + Job())
-
-    private val tmpDir = Path(storagePath, "tmp")
-
-    private val dataDir = Path(storagePath, "data")
 
     private val tmpCounter = atomic(0)
 
@@ -155,8 +151,6 @@ class UstadCacheImpl(
         val timeNow = systemTimeInMillis()
         try {
             logger?.d(LOG_TAG) { "$logPrefix storerequest ${storeRequest.size} entries" }
-            fileSystem.takeIf { !fileSystem.exists(dataDir) }?.createDirectories(dataDir)
-            fileSystem.takeIf { !fileSystem.exists(tmpDir) }?.createDirectories(tmpDir)
 
             /**
              * Go through everything that is requested to be stored: create a list of CacheEntryInProgress
@@ -166,7 +160,10 @@ class UstadCacheImpl(
              */
             val entriesWithTmpFileAndIntegrityInfo = storeRequest.map { entryToStore ->
                 val response = entryToStore.response
-                val tmpFile = Path(tmpDir, "${tmpCounter.incrementAndGet()}.tmp")
+                val entryPaths = pathsProvider(entryToStore)
+                fileSystem.createDirectories(entryPaths.tmpWorkPath)
+                val tmpFile = Path(entryPaths.tmpWorkPath,
+                    "${tmpCounter.incrementAndGet()}.tmp")
                 val url = entryToStore.request.url
                 val storeCompressionType = storageCompressionFilter.invoke(
                     url = entryToStore.request.url,
@@ -266,7 +263,10 @@ class UstadCacheImpl(
                 })
 
                 val entriesInCache = db.cacheEntryDao.findByRequestBatchId(batchId)
-                val entriesInCacheMap = entriesInCache.associateBy { it.key }
+                val entriesWithLock = db.cacheEntryDao.findEntriesWithLock(batchId).toSet()
+                val entriesInCacheMap = entriesInCache.associateBy {
+                    it.key
+                }
 
                 val entriesToSave = entriesWithTmpFileAndIntegrityInfo.map { entryInProgress ->
                     val storedEntry = entriesInCacheMap[entryInProgress.cacheEntry.key]
@@ -312,7 +312,17 @@ class UstadCacheImpl(
                         )
                     }else {
                         //The new entry does not validate, so we will need to store the new body.
-                        val destPath = Path(dataDir, randomUuid())
+                        val destPaths = pathsProvider(entryInProgress.entryToStore)
+                        val destPathParent = if(
+                            entryInProgress.cacheEntry.key in entriesWithLock ||
+                            entryInProgress.entryToStore.createRetentionLock
+                        ) {
+                            destPaths.persistentPath
+                        }else {
+                            destPaths.cachePath
+                        }
+                        fileSystem.createDirectories(destPathParent)
+                        val destPath = Path(destPathParent.toString(), randomUuid())
                         fileSystem.atomicMove(entryInProgress.tmpFile, destPath)
 
                         entryInProgress.copy(

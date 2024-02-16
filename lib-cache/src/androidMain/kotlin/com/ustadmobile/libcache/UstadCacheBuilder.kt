@@ -15,12 +15,19 @@ class UstadCacheBuilder(
     var dbName: String = "UstadCache",
     var logger: UstadCacheLogger? = null,
     var sizeLimit: () -> Long,
+    var cachePathsProvider: CachePathsProvider = CachePathsProvider {
+        CachePaths(
+            tmpWorkPath = Path(storagePath, "tmpwork"),
+            persistentPath = Path(storagePath, "persistent"),
+            cachePath = Path(appContext.cacheDir.absolutePath, "ustad-cache"),
+        )
+    }
 ) {
 
     fun build(): UstadCache {
         return UstadCacheImpl(
             fileSystem = SystemFileSystem,
-            storagePath = storagePath,
+            pathsProvider = cachePathsProvider,
             logger =  logger,
             sizeLimit = sizeLimit,
             db = DatabaseBuilder.databaseBuilder(

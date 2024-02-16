@@ -1,6 +1,8 @@
 package com.ustadmobile.libcache.okhttp
 
 import com.ustadmobile.door.DatabaseBuilder
+import com.ustadmobile.libcache.CachePaths
+import com.ustadmobile.libcache.CachePathsProvider
 import com.ustadmobile.libcache.CompressionType
 import com.ustadmobile.libcache.logging.NapierLoggingAdapter
 import com.ustadmobile.libcache.UstadCache
@@ -52,7 +54,9 @@ class UstadCacheInterceptorTest {
 
     private lateinit var okHttpClient: OkHttpClient
 
-    private lateinit var cacheDir: File
+    private lateinit var cacheRootDir: File
+
+    private lateinit var cachePathsProvider: CachePathsProvider
 
     private lateinit var interceptorTmpDir: File
 
@@ -73,14 +77,23 @@ class UstadCacheInterceptorTest {
         initNapierLog()
         val logger = NapierLoggingAdapter()
         cacheListener = mock { }
-        cacheDir = tempDir.newFolder("cachedir")
+        cacheRootDir = tempDir.newFolder("cachedir")
+        cachePathsProvider = CachePathsProvider { _ ->
+            Path(cacheRootDir.absolutePath).let {
+                CachePaths(
+                    tmpWorkPath = Path(it, "tmpWork"),
+                    persistentPath = Path(it, "persistent"),
+                    cachePath = Path(it, "cache"),
+                )
+            }
+        }
         interceptorTmpDir = tempDir.newFolder("interceptor-tmp")
         cacheDb = DatabaseBuilder.databaseBuilder(
             UstadCacheDb::class, "jdbc:sqlite::memory:", 1L)
             .build()
         ustadCache = spy(
             UstadCacheImpl(
-                storagePath = Path(cacheDir.absolutePath),
+                pathsProvider = cachePathsProvider,
                 db = cacheDb,
                 logger = logger,
                 listener = cacheListener,

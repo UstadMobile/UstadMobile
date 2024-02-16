@@ -24,6 +24,7 @@ import org.junit.rules.TemporaryFolder
 import java.io.ByteArrayInputStream
 import java.io.File
 import java.security.MessageDigest
+import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
@@ -36,12 +37,32 @@ class UstadCacheJvmTest {
     @get:Rule
     val tempDir = TemporaryFolder()
 
+    private lateinit var rootDir: File
+
+    private lateinit var temporaryFolderPathsProvider: CachePathsProvider
+
+    private lateinit var cachePaths: CachePaths
+
+    @BeforeTest
+    fun setup(){
+        rootDir = tempDir.newFolder()
+        val rootPath = Path(rootDir.absolutePath)
+        cachePaths = CachePaths(
+            tmpWorkPath = Path(rootPath, "tmpWork"),
+            persistentPath = Path(rootPath, "persistent"),
+            cachePath = Path(rootPath, "cache")
+        )
+        temporaryFolderPathsProvider = CachePathsProvider {
+            cachePaths
+        }
+    }
+
     private fun UstadCache.assertCanStoreAndRetrieveFileAsCacheHit(
         testFile: File,
         testUrl: String,
         mimeType: String,
         expectedContentEncoding: String? = null,
-        requestHeaders: List<HttpHeader> = emptyList()
+        requestHeaders: List<HttpHeader> = emptyList(),
     ) {
         val request = requestBuilder {
             url = testUrl
@@ -98,6 +119,7 @@ class UstadCacheJvmTest {
                 assertEquals(1, numEncodingHeaders)
             }
         }
+
     }
 
     private fun assertFileCanBeCachedAndRetrieved(
@@ -106,15 +128,20 @@ class UstadCacheJvmTest {
         mimeType: String,
         expectContentEncoding: String? = null,
         requestHeaders: List<HttpHeader> = emptyList(),
+        createLock: Boolean = false
     ) {
-        val cacheDir = tempDir.newFolder()
         val cacheDb = DatabaseBuilder.databaseBuilder(
             UstadCacheDb::class, "jdbc:sqlite::memory:", 1L)
             .build()
         val ustadCache = UstadCacheImpl(
-            storagePath = Path(cacheDir.absolutePath),
+            pathsProvider = temporaryFolderPathsProvider,
             db = cacheDb
         )
+
+        if(createLock) {
+            ustadCache.addRetentionLocks(listOf(EntryLockRequest(testUrl)))
+        }
+
         ustadCache.assertCanStoreAndRetrieveFileAsCacheHit(
             testFile =testFile,
             testUrl = testUrl,
@@ -122,6 +149,20 @@ class UstadCacheJvmTest {
             expectedContentEncoding = expectContentEncoding,
             requestHeaders = requestHeaders,
         )
+
+
+        val cacheEntryInDb = cacheDb.cacheEntryDao.findEntryAndBodyByKey(Md5Digest()
+            .urlKey(testUrl))
+        assertNotNull(cacheEntryInDb)
+        val expectedPath = if(createLock) {
+            cachePaths.persistentPath
+        }else {
+            cachePaths.cachePath
+        }
+
+        assertTrue(cacheEntryInDb.storageUri.startsWith(expectedPath.toString()),
+            "Cache entry is stored in expected directory (createLock=$createLock, " +
+                    "expected path = $expectedPath, actual dir = ${cacheEntryInDb.storageUri}")
     }
 
     @Test
@@ -131,6 +172,17 @@ class UstadCacheJvmTest {
             testUrl = "http://www.server.com/file.png",
             mimeType = "image/png",
             expectContentEncoding = "identity"
+        )
+    }
+
+    @Test
+    fun givenLockedEntryStored_whenRequestMade_thenWillBeRetrievedAsCacheHitAndSavedInPersistentPath() {
+        assertFileCanBeCachedAndRetrieved(
+            testFile = tempDir.newFileFromResource(this::class.java, "/testfile1.png"),
+            testUrl = "http://www.server.com/file.png",
+            mimeType = "image/png",
+            expectContentEncoding = "identity",
+            createLock = true,
         )
     }
 
@@ -166,12 +218,11 @@ class UstadCacheJvmTest {
 
     @Test
     fun givenResponseIsUpdated_whenRetrieved_thenLatestResponseWillBeReturned(){
-        val cacheDir = tempDir.newFolder()
         val cacheDb = DatabaseBuilder.databaseBuilder(
             UstadCacheDb::class, "jdbc:sqlite::memory:", 1L)
             .build()
         val ustadCache = UstadCacheImpl(
-            storagePath = Path(cacheDir.absolutePath),
+            pathsProvider = temporaryFolderPathsProvider,
             db = cacheDb
         )
 
@@ -202,12 +253,11 @@ class UstadCacheJvmTest {
 
     @Test
     fun givenEntryNotStored_whenRetrieved_thenWillReturnNull() {
-        val cacheDir = tempDir.newFolder()
         val cacheDb = DatabaseBuilder.databaseBuilder(
             UstadCacheDb::class, "jdbc:sqlite::memory:", 1L)
             .build()
         val ustadCache = UstadCacheImpl(
-            storagePath = Path(cacheDir.absolutePath),
+            pathsProvider = temporaryFolderPathsProvider,
             db = cacheDb
         )
 
@@ -217,12 +267,11 @@ class UstadCacheJvmTest {
 
     @Test
     fun givenResponseIsNotUpdated_whenStored_thenWillUpdateLastAccessAndValidationTime() {
-        val cacheDir = tempDir.newFolder()
         val cacheDb = DatabaseBuilder.databaseBuilder(
             UstadCacheDb::class, "jdbc:sqlite::memory:", 1L)
             .build()
         val ustadCache = UstadCacheImpl(
-            storagePath = Path(cacheDir.absolutePath),
+            pathsProvider = temporaryFolderPathsProvider,
             db = cacheDb
         )
 
@@ -244,9 +293,11 @@ class UstadCacheJvmTest {
             message = "Last validated time should be updated after ")
 
         //Cache tmp directory should not have any leftover files.
-        val cacheTmpDir = File(cacheDir, "tmp")
-        assertTrue(cacheDir.exists())
+        val cacheTmpDir = File(rootDir, "tmpWork")
+
+        assertTrue(cacheTmpDir.exists())
         assertEquals(0, cacheTmpDir.list()!!.size)
     }
+
 
 }

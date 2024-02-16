@@ -19,12 +19,20 @@ class UstadCacheBuilder(
     var storagePath: Path,
     var logger: UstadCacheLogger? = null,
     var cacheName: String = "",
-    var sizeLimit: () -> Long = { DEFAULT_SIZE_LIMIT }
+    var sizeLimit: () -> Long = { DEFAULT_SIZE_LIMIT },
+    var pathsProvider: CachePathsProvider = CachePathsProvider {
+        CachePaths(
+            tmpWorkPath = Path(storagePath, "tmpWork"),
+            persistentPath = Path(storagePath, "persistent"),
+            cachePath = Path(storagePath, "cache")
+        )
+    }
+
 ){
 
     fun build(): UstadCache {
         return UstadCacheImpl(
-            storagePath = storagePath,
+            pathsProvider = pathsProvider,
             db = DatabaseBuilder.databaseBuilder(UstadCacheDb::class, dbUrl, 1L)
                 .addCacheDbMigrations()
                 .build(),
