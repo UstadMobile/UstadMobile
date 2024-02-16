@@ -53,6 +53,10 @@ external interface VirtualListProps: PropsWithChildren {
  * As per:
  *  As per https://tanstack.com/virtual/v3/docs/examples/react/dynamic
  *
+ * The VirtualList uses a combination of state and context to pass the content property
+ * to the outlet. This means that changes are delivered ASYNCHRONOUSLY. If the content includes
+ * textfields (which require synchronous updates), they must have their own state.
+ *
  * See VirtualListPreview for an example of this.
  */
 val VirtualList = FC<VirtualListProps> {props ->

@@ -27,7 +27,6 @@ import react.ReactNode
 import react.create
 import com.ustadmobile.core.viewmodel.clazzassignment.UstadCourseAssignmentMarkListItemUiState as UstadCourseAssignmentMarkListItemUiState
 import com.ustadmobile.mui.components.UstadCourseAssignmentMarkListItem
-import com.ustadmobile.wrappers.quill.ReactQuill
 import web.cssom.Height
 import web.cssom.pct
 import js.core.jso
@@ -221,7 +220,7 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                         Stack.create {
                             direction = responsive(StackDirection.column)
 
-                            ReactQuill {
+                            StatefulReactQuill {
                                 id = "assignment_text"
                                 value = props.uiState.latestSubmission?.casText ?: ""
                                 onChange = props.onChangeSubmissionText
@@ -390,6 +389,12 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                     }
                 }
 
+                /*
+                 * Note: React element Key for textfield MUST be set: otherwise the course comment
+                 * textfield and the private comment textfield DOM elements can be switched over
+                 * (e.g. when the key is the list index, React will see it as being the same element,
+                 * regardless of the DOM ID value)
+                 */
                 item(key = "private_comment_textfield_item") {
                     AssignmentCommentTextFieldListItem.create {
                         onChange = props.onChangePrivateComment
