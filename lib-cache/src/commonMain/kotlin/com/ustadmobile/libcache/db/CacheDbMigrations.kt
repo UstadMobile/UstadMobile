@@ -1,5 +1,6 @@
 package com.ustadmobile.libcache.db
 
+import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.migration.DoorMigrationStatementList
 import com.ustadmobile.door.util.systemTimeInMillis
 
@@ -86,4 +87,9 @@ val MIGRATE_7_8 = DoorMigrationStatementList(7, 8) {
         add("ALTER TABLE CacheEntry ADD COLUMN uncompressedSize INTEGER NOT NULL DEFAULT 0")
         add("UPDATE CacheEntry SET uncompressedSize = storageSize")
     }
+}
+
+fun DatabaseBuilder<UstadCacheDb>.addCacheDbMigrations(): DatabaseBuilder<UstadCacheDb> {
+    return addMigrations(MIGRATE_1_2, MIGRATE_2_3, MIGRATE_3_4, MIGRATE_4_5,
+        MIGRATE_5_6, MIGRATE_6_7, MIGRATE_7_8)
 }
