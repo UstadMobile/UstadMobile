@@ -69,11 +69,15 @@
 
     </queries>
 
+    <!--
+    Note import from SVG to Android drawable XML changes blue parts of the logo to white. Therefor
+    the path has been changed.
+    -->
     <application
         android:name="com.ustadmobile.port.android.impl.UstadApp"
         android:allowBackup="false"
-        android:icon="@drawable/ic_launcher_icon"
-        android:roundIcon="@drawable/ic_launcher_icon"
+        android:icon="@drawable/ic_launcher_maktab2"
+        android:roundIcon="@drawable/ic_launcher_maktab2"
         android:label="@string/app_name"
         android:usesCleartextTraffic="true"
         android:theme="@style/UmTheme.App"
