@@ -5,20 +5,15 @@ import web.cssom.JustifyContent
 import csstype.PropertiesBuilder
 import js.core.jso
 import mui.material.*
-import mui.system.BoxProps
-import muix.pickers.*
-import react.ReactNode
-import kotlin.js.Date
 import web.cssom.Display
 
 //As per MissedWrappers on MUI-Showcase
-// TODO: Remove when it will be implemented in MUI wrappers
 inline var GridProps.xs: Int
     get() = TODO("Prop is write-only!")
     set(value) {
         asDynamic().xs = value
     }
-
+@Suppress("unused")
 inline var GridProps.sm: Int
     get() = TODO("Prop is write only!")
     set(value) {
@@ -42,18 +37,6 @@ inline var TypographyProps.color: String
     get() = TODO("Prop is write-only!")
     set(value) {
         asDynamic().color = value
-    }
-
-inline var BoxProps.noValidate: Boolean
-    get() = TODO("Prop is write-only!")
-    set(value) {
-        asDynamic().noValidate = value
-    }
-
-inline var BoxProps.autoComplete: String
-    get() = TODO("Prop is write-only!")
-    set(value) {
-        asDynamic().autoComplete = value
     }
 
 inline var TabsProps.ariaLabel: String
@@ -96,7 +79,7 @@ inline var PropertiesBuilder.inputCursor: Cursor?
 inline var PropertiesBuilder.webKitLineClamp: Int
     get() = asDynamic()["-webkit-line-clamp"]
     set(value) {
-        asDynamic()["-webkit-line-clamp"] = value
+        asDynamic()["-webkit-line-clamp"] = value.toString()
     }
 
 val DisplayWebkitBox = "-webkit-box".unsafeCast<Display>()

@@ -26,6 +26,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
 import app.cash.paging.Pager
@@ -250,7 +251,7 @@ fun CourseBlockListItem(
             Text(courseBlock?.courseBlock?.cbTitle ?: "")
         },
         supportingContent = {
-            Text(descriptionPlainText)
+            Text(descriptionPlainText, maxLines = 2, overflow = TextOverflow.Ellipsis)
         },
         leadingContent = {
             courseBlock?.courseBlock?.iconContent()

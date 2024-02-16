@@ -221,7 +221,7 @@ external interface EpubScrollProps : Props {
 
 val EpubScrollComponent = FC<EpubScrollProps> { props ->
     //EpubScrollComponent has to be a child component of VirtualList in order to use  VirtualListContext
-    val virtualizerContext = useRequiredContext(VirtualListContext)
+    val virtualizerContext by useRequiredContext(VirtualListContext)
 
     /**
      * The scroll offset that the virtualizer needs to hit in order to reach the spine index as per

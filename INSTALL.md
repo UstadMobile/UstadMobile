@@ -109,13 +109,24 @@ Apache example:
 # AllowEncodedSlashes must be enabled, otherwise blob paths will not work
 AllowEncodedSlashes On
 
-#Nocanon is required to ensure that encoding 
+#Nocanon is required to ensure that encoding in paths is not altered
 ProxyPass / http://localhost:8087/ nocanon
 ProxyPassReverse / http://localhost:8087/
 SSLProxyEngine On
 ProxyPreserveHost On
 RequestHeader set X-Forwarded-Proto https
 ```
+
+Enable required Apache modules:
+```
+a2enmod proxy headers
+```
+Recommended:
+```
+a2enmod deflate
+```
+Apache mod deflate will compress the web version itself e.g. its own javascript, stylesheets, etc. 
+Content assets will be compressed by the server itself.
 
 * Setup a Postgres database and use this instead of the default (embedded) SQLite.
 

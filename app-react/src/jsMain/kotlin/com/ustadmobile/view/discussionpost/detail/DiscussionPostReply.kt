@@ -2,7 +2,7 @@ package com.ustadmobile.view.discussionpost.detail
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.useStringProvider
-import com.ustadmobile.wrappers.quill.ReactQuill
+import com.ustadmobile.mui.components.StatefulReactQuill
 import web.cssom.px
 import mui.material.Button
 import mui.material.ButtonVariant
@@ -25,7 +25,7 @@ external interface DiscussionPostReplyProps: Props {
 val DiscussionPostReply = FC<DiscussionPostReplyProps> { props ->
     val strings = useStringProvider()
 
-    ReactQuill {
+    StatefulReactQuill {
         id = "discussion_reply"
         onChange = props.onReplyChanged
         value = props.reply

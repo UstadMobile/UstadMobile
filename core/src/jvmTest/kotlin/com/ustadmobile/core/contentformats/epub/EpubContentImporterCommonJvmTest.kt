@@ -12,6 +12,7 @@ import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryImportJob
 import com.ustadmobile.libcache.request.requestBuilder
+import com.ustadmobile.libcache.response.bodyAsUncompressedSourceIfContentEncoded
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe.copyInputStreamToFile
 import com.ustadmobile.util.test.ext.newFileFromResource
 import kotlinx.coroutines.Dispatchers
@@ -233,7 +234,7 @@ class EpubContentImporterCommonJvmTest : AbstractContentImporterTest() {
                     requestBuilder("$expectedUrlPrefix${ContentConstants.MANIFEST_NAME}")
                 )
                 val manifest = json.decodeFromString(
-                    ContentManifest.serializer(), manifestResponse!!.bodyAsSource()!!.readString()
+                    ContentManifest.serializer(), manifestResponse!!.bodyAsUncompressedSourceIfContentEncoded()!!.readString()
                 )
 
 

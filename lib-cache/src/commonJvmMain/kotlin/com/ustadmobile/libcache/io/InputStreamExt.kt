@@ -1,8 +1,10 @@
 package com.ustadmobile.libcache.io
 
+import com.ustadmobile.libcache.CompressionType
 import java.io.EOFException
 import java.io.IOException
 import java.io.InputStream
+import java.util.zip.GZIPInputStream
 
 /**
  * Exactly the same as skipNBytes on "newer" JDK, backported for Android. Should work with
@@ -34,3 +36,13 @@ fun InputStream.skipExactly(bytesToSkip: Long) {
         return
     }
 }
+
+fun InputStream.uncompress(
+    compressionType: CompressionType
+): InputStream {
+    return when(compressionType) {
+        CompressionType.NONE -> this
+        CompressionType.GZIP -> GZIPInputStream(this)
+    }
+}
+

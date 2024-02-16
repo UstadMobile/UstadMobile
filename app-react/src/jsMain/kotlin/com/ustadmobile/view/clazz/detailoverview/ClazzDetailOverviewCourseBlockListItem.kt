@@ -21,6 +21,9 @@ import mui.icons.material.Book as BookIcon
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.hooks.useHtmlToPlainText
+import com.ustadmobile.util.ext.useLineClamp
+import js.core.jso
+import react.dom.html.ReactHTML.div
 
 external interface ClazzDetailOverviewCourseBlockListItemProps : Props {
 
@@ -77,6 +80,12 @@ val ClazzDetailOverviewCourseBlockListItem = FC<ClazzDetailOverviewCourseBlockLi
             ListItemText {
                 primary = ReactNode(courseBlockVal?.cbTitle ?: "")
                 secondary = ReactNode(blockDescription)
+                secondaryTypographyProps = jso {
+                    component = div
+                    sx {
+                        useLineClamp(2)
+                    }
+                }
             }
         }
 
