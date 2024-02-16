@@ -23,6 +23,7 @@ import com.ustadmobile.door.util.systemTimeInMillis
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.KSerializer
@@ -343,6 +344,44 @@ abstract class UstadViewModel(
     fun MutableMap<String, String>.putFromSavedStateIfPresent(keys: List<String>) {
         keys.forEach {
             putFromSavedStateIfPresent(it)
+        }
+    }
+
+
+    /**
+     * Run an asynchronous block of code e.g. when saving an item. Whilst the item is being saved,
+     * show progress indicator on the app bar and disable the app bar button (to avoid any possibility
+     * of accidental/anger clicks)
+     *
+     * @param onSetFieldsEnabled
+     */
+    fun launchWithLoadingIndicator(
+        onSetFieldsEnabled: (Boolean) -> Unit,
+        block: suspend () -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                onSetFieldsEnabled(false)
+                _appUiState.update { prev ->
+                    prev.copy(
+                        loadingState = LoadingUiState.INDETERMINATE,
+                        actionBarButtonState = prev.actionBarButtonState.copy(
+                            enabled = false,
+                        )
+                    )
+                }
+                block()
+            }finally {
+                onSetFieldsEnabled(true)
+                _appUiState.update { prev ->
+                    prev.copy(
+                        loadingState = LoadingUiState.NOT_LOADING,
+                        actionBarButtonState = prev.actionBarButtonState.copy(
+                            enabled = true,
+                        )
+                    )
+                }
+            }
         }
     }
 

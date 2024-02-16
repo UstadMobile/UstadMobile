@@ -35,13 +35,10 @@ class CourseAssignmentSubmissionAttachment {
 
     var casaFileName: String? = null
 
-    @AttachmentUri
     var casaUri: String? = null
 
-    @AttachmentMd5
     var casaMd5: String? = null
 
-    @AttachmentSize
     var casaSize: Int = 0
 
     @ReplicateLastModified

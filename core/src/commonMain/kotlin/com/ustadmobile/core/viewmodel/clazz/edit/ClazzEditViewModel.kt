@@ -548,8 +548,6 @@ class ClazzEditViewModel(
             return
         }
 
-        loadingState = LoadingUiState.INDETERMINATE
-
         //Entity to save
         val entity = initEntity.shallowCopy {
             this.clazzName = clazzName?.trim()
@@ -562,11 +560,12 @@ class ClazzEditViewModel(
             }
         }
 
-        _uiState.update { prev -> prev.copy(fieldsEnabled = false, entity = entity) }
-
-        viewModelScope.launch {
+        _uiState.update { prev -> prev.copy(entity = entity) }
+        launchWithLoadingIndicator(
+            onSetFieldsEnabled = { _uiState.update { prev -> prev.copy(fieldsEnabled = it) } }
+        ) {
             val initState = savedStateHandle.getJson(KEY_INIT_STATE, ClazzEditUiState.serializer())
-                ?: return@launch
+                ?: return@launchWithLoadingIndicator
 
             Napier.d("onClickSave: start transaction")
             val courseBlockListVal = _uiState.value.courseBlockList
@@ -669,10 +668,6 @@ class ClazzEditViewModel(
                 fromLocalDate.toInstant(entityTimeZone).toEpochMilliseconds(),
                 fromLocalDate.toLocalEndOfDay().toInstant(entityTimeZone).toEpochMilliseconds()
             )
-            _uiState.update { prev ->
-                prev.copy(fieldsEnabled = true)
-            }
-            loadingState = LoadingUiState.NOT_LOADING
             Napier.d("onClickSave: done")
 
             finishWithResult(ClazzDetailViewModel.DEST_NAME, entity.clazzUid, entity)
