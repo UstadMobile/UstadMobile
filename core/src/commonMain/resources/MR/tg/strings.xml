@@ -1046,4 +1046,19 @@
     <string name="onboarding_headline2">Офлайн мубодила кунед</string>
     <string name="onboarding_headline3">Муташаккил бимонед</string>
     <string name="onboarding_subheadline2">Бо мубодилаи фаврии офлайн вақт ва маълумотро сарфа кунед</string>
+    <string name="delete_or_restore_items">Объектҳоро нест кунед ё барқарор кунед</string>
+    <string name="version">Версия</string>
+    <string name="licenses">Литсензияҳо</string>
+    <string name="selected">Интихобшуда</string>
+    <string name="clear_selection">Интихобро бекор кунед</string>
+    <string name="cannot_record_attendance_for_future_date_time">Иштирокро барои сана/вақти оянда сабт карда намешавад</string>
+    <string name="could_not_load_vlc">VLC-ро бор карда натавонист. Барои навозиш видео версияи 64-битии видео-плейери VLC талаб мекунад. Лутфан версияи 64-битро аз https://www.videolan.org/ зеркашӣ ва насб кунед, пас ин барномаро бозоғоз намоед.</string>
+    <string name="move_entries_to_this_folder">Воридотҳоро ба ин ҷузвдон/папка кӯчонед</string>
+    <string name="cannot_move_to_subfolder_of_self">Папкаро ба зерпапкаи худ интиқол додан мумкин нест</string>
+    <string name="cannot_move_already_in_same_folder">Ҷойгир кардан ғайриимкон аст: ҷузъҳо аллакай дар ин ҷузвдон ҳастанд</string>
+    <string name="move_to">Гузариш ба…</string>
+    <string name="restore">Барқарор кардан</string>
+    <string name="delete_permanently">Ба таври доимӣ нест кардан</string>
+    <string name="deleted_items">Элементҳои нестшуда</string>
+    <string name="yesterday">Дируз</string>
 </resources>
