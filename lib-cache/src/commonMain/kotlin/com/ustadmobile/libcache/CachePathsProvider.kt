@@ -5,6 +5,6 @@ package com.ustadmobile.libcache
  */
 fun interface CachePathsProvider {
 
-    operator fun invoke(entryToStore: CacheEntryToStore): CachePaths
+    operator fun invoke(): CachePaths
 
 }

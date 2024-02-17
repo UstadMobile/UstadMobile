@@ -95,7 +95,7 @@ class XferTestNode(
         httpCache = UstadCacheBuilder(
             dbUrl = cacheDbUrl,
             storagePath = Path(cacheDir.absolutePath),
-            logger = null,
+            logger = NapierLoggingAdapter(),
             cacheName = "client",
         ).build()
 

@@ -151,14 +151,12 @@ class UstadCacheImpl(
         }
 
         scope.launch {
-            while(isActive) {
-                trimmer.evictedEntriesFlow.collect { evictedEntries ->
-                    evictedEntries.forEach { evictedKey ->
-                        lruMap.computeIfPresent(evictedKey) { key, entry ->
-                            entry.copy(
-                                entry = null
-                            )
-                        }
+            trimmer.evictedEntriesFlow.collect { evictedEntries ->
+                evictedEntries.forEach { evictedKey ->
+                    lruMap.computeIfPresent(evictedKey) { _, entry ->
+                        entry.copy(
+                            entry = null
+                        )
                     }
                 }
             }
@@ -276,6 +274,8 @@ class UstadCacheImpl(
     ): List<StoreResult> {
         val md5Digest = Md5Digest()
         val timeNow = systemTimeInMillis()
+        val entryPaths = pathsProvider()
+
         try {
             logger?.d(LOG_TAG) { "$logPrefix storerequest ${storeRequest.size} entries" }
 
@@ -287,7 +287,7 @@ class UstadCacheImpl(
              */
             val entriesWithTmpFileAndIntegrityInfo = storeRequest.map { entryToStore ->
                 val response = entryToStore.response
-                val entryPaths = pathsProvider(entryToStore)
+
                 fileSystem.createDirectories(entryPaths.tmpWorkPath)
                 val tmpFile = Path(entryPaths.tmpWorkPath,
                     "${tmpCounter.incrementAndGet()}.tmp")
@@ -453,7 +453,7 @@ class UstadCacheImpl(
                         )
                     }else {
                         //The new entry does not validate, so we will need to store the new body.
-                        val destPaths = pathsProvider(entryInProgress.entryToStore)
+                        val destPaths = pathsProvider()
                         val destPathParent = if(
                             entryInProgress.cacheEntry.key in entriesWithLock ||
                             entryInProgress.entryToStore.createRetentionLock
@@ -648,11 +648,40 @@ class UstadCacheImpl(
         return urls.associateWith { url -> (entries[md5Digest.urlKey(url)]?.entry != null) }
     }
 
+    /**
+     * Used when an existing cache entry is locked or unlocked
+     */
+    private fun CacheEntry.moveToNewPath(destParent: Path): CacheEntry? {
+        val currentPath = Path(storageUri)
+        if(!fileSystem.exists(currentPath))
+            return null //file with body no longer exists. Might have been deleted by OS.
+
+        if(!fileSystem.exists(destParent)) {
+            fileSystem.createDirectories(destParent)
+        }
+
+        return if(!currentPath.toString().startsWith(destParent.toString())) {
+            val newDestPath = Path(destParent, currentPath.name)
+            logger?.d(LOG_TAG, "$logPrefix moveToNewPath (${this.url}) $currentPath -> $newDestPath")
+            fileSystem.atomicMove(currentPath, newDestPath)
+            copy(storageUri = newDestPath.toString())
+        }else {
+            this
+        }
+    }
+
     private fun addLockToLruMap(retentionLock: RetentionLock) {
         lruMap.compute(retentionLock.lockKey) { urlKey, entryAndLocks ->
             entryAndLocks?.let {
+                val isNewlyLocked = it.locks.isEmpty()
+
                 it.copy(
                     locks = it.locks + retentionLock,
+                    entry = if(isNewlyLocked) {
+                        it.entry?.moveToNewPath(pathsProvider().persistentPath)
+                    }else {
+                        it.entry
+                    }
                 )
             } ?: CacheEntryAndLocks(
                 urlKey = urlKey,
@@ -691,9 +720,27 @@ class UstadCacheImpl(
      * Lock removal is done by adding it to the pending list. This isn't urgent. This avoids a large
      * number of database transactions running when lots of small files are being uploaded
      */
-    override fun removeRetentionLocks(lockIds: List<Long>) {
+    override fun removeRetentionLocks(locksToRemove: List<RemoveLockRequest>) {
         pendingLockRemovals.update { prev ->
-            prev + lockIds
+            prev + locksToRemove.map { it.lockId }
+        }
+        val md5Digest = Md5Digest()
+
+        locksToRemove.forEach { removeRequest ->
+            lruMap.computeIfPresent(md5Digest.urlKey(removeRequest.url)) { key, prev ->
+                val newLockList = prev.locks.filter { it.lockId != removeRequest.lockId }
+                val isNewlyUnlocked = prev.locks.isNotEmpty() && newLockList.isEmpty()
+
+                prev.copy(
+                    locks = prev.locks.filter { it.lockId != removeRequest.lockId },
+
+                    entry = if(isNewlyUnlocked) {
+                        prev.entry?.moveToNewPath(pathsProvider().cachePath)
+                    }else {
+                        prev.entry
+                    }
+                )
+            }
         }
     }
 

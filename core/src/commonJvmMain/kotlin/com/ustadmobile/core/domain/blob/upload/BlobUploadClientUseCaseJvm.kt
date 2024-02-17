@@ -28,6 +28,7 @@ import com.ustadmobile.core.domain.upload.DEFAULT_CHUNK_SIZE
 import com.ustadmobile.door.ext.setBodyJson
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.composites.TransferJobItemStatus
+import com.ustadmobile.libcache.RemoveLockRequest
 import com.ustadmobile.libcache.response.requireHeadersContentLength
 import io.github.aakira.napier.Napier
 import io.ktor.client.statement.bodyAsText
@@ -285,7 +286,9 @@ class BlobUploadClientUseCaseJvm(
                             it.transferItem.lockIdToRelease != 0L
                         ) {
                             Napier.d { "$logPrefix: release cache lock #(${it.transferItem.lockIdToRelease}) for ${it.transferItem.blobUrl}" }
-                            httpCache.removeRetentionLocks(listOf(it.transferItem.lockIdToRelease))
+                            httpCache.removeRetentionLocks(
+                                listOf(RemoveLockRequest(it.transferItem.blobUrl, it.transferItem.lockIdToRelease))
+                            )
                         }
                     },
                 )

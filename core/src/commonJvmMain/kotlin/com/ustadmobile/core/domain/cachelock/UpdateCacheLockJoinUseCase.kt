@@ -5,6 +5,7 @@ import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.room.InvalidationTrackerObserver
 import com.ustadmobile.lib.db.entities.CacheLockJoin
 import com.ustadmobile.libcache.EntryLockRequest
+import com.ustadmobile.libcache.RemoveLockRequest
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.md5.Md5Digest
 import com.ustadmobile.libcache.md5.urlKey
@@ -82,7 +83,13 @@ class UpdateCacheLockJoinUseCase(
                 it.cljStatus == CacheLockJoin.STATUS_PENDING_DELETE
             }
             cache.takeIf { locksToDelete.isNotEmpty() }
-                ?.removeRetentionLocks(locksToDelete.map { it.cljLockId })
+                ?.removeRetentionLocks(
+                    locksToDelete.mapNotNull {  cacheLockJoin ->
+                        cacheLockJoin.cljUrl?.let { cacheLockJoinUrl ->
+                            RemoveLockRequest(cacheLockJoinUrl, cacheLockJoin.cljLockId)
+                        }
+                    }
+                )
 
             val createLockRequests = pendingLocks.filter {
                 it.cljStatus == CacheLockJoin.STATUS_PENDING_CREATION

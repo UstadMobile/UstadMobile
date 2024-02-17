@@ -78,7 +78,7 @@ class UstadCacheInterceptorTest {
         val logger = NapierLoggingAdapter()
         cacheListener = mock { }
         cacheRootDir = tempDir.newFolder("cachedir")
-        cachePathsProvider = CachePathsProvider { _ ->
+        cachePathsProvider = CachePathsProvider {
             Path(cacheRootDir.absolutePath).let {
                 CachePaths(
                     tmpWorkPath = Path(it, "tmpWork"),

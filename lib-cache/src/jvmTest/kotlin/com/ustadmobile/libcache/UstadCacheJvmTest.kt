@@ -2,6 +2,7 @@ package com.ustadmobile.libcache
 
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.libcache.db.UstadCacheDb
+import com.ustadmobile.libcache.db.entities.RetentionLock
 import com.ustadmobile.libcache.headers.HttpHeader
 import com.ustadmobile.libcache.headers.requireIntegrity
 import com.ustadmobile.libcache.integrity.sha256Integrity
@@ -122,13 +123,20 @@ class UstadCacheJvmTest {
 
     }
 
+    data class FileCanBeCachedAndRetrievedContext(
+        val cacheDb: UstadCacheDb,
+        val cache: UstadCacheImpl,
+        val createdLocks: List<Pair<EntryLockRequest, RetentionLock>>,
+    )
+
     private fun assertFileCanBeCachedAndRetrieved(
         testFile: File,
         testUrl: String,
         mimeType: String,
         expectContentEncoding: String? = null,
         requestHeaders: List<HttpHeader> = emptyList(),
-        createLock: Boolean = false
+        createLock: Boolean = false,
+        block: FileCanBeCachedAndRetrievedContext.() -> Unit = { },
     ) {
         val cacheDb = DatabaseBuilder.databaseBuilder(
             UstadCacheDb::class, "jdbc:sqlite::memory:", 1L)
@@ -138,8 +146,10 @@ class UstadCacheJvmTest {
             db = cacheDb
         )
 
-        if(createLock) {
+        val createdLocks = if(createLock) {
             ustadCache.addRetentionLocks(listOf(EntryLockRequest(testUrl)))
+        }else {
+            emptyList()
         }
 
         ustadCache.assertCanStoreAndRetrieveFileAsCacheHit(
@@ -165,6 +175,8 @@ class UstadCacheJvmTest {
         assertTrue(cacheEntryInDb.storageUri.startsWith(expectedPath.toString()),
             "Cache entry is stored in expected directory (createLock=$createLock, " +
                     "expected path = $expectedPath, actual dir = ${cacheEntryInDb.storageUri}")
+
+        block(FileCanBeCachedAndRetrievedContext(cacheDb, ustadCache, createdLocks))
     }
 
     @Test
@@ -186,6 +198,44 @@ class UstadCacheJvmTest {
             expectContentEncoding = "identity",
             createLock = true,
         )
+    }
+
+    @Test
+    fun givenEntryNotLocked_whenLockAdded_thenWillBeMovedToPersistentDir() {
+        val url = "http://www.server.com/file.png"
+        assertFileCanBeCachedAndRetrieved(
+            testFile = tempDir.newFileFromResource(this::class.java, "/testfile1.png"),
+            testUrl = "http://www.server.com/file.png",
+            mimeType = "image/png",
+            expectContentEncoding = "identity"
+        ) {
+            cache.addRetentionLocks(listOf(EntryLockRequest(url)))
+            val entry = cache.getCacheEntry(url)
+            assertTrue(entry?.storageUri?.startsWith(cachePaths.persistentPath.toString()) == true,
+                "After adding lock, entry should be in persistent path")
+        }
+    }
+
+    @Test
+    fun givenEntryLocked_whenLockRemoved_thenWillBeMovedToCacheDir() {
+        val url = "http://www.server.com/file.png"
+        assertFileCanBeCachedAndRetrieved(
+            testFile = tempDir.newFileFromResource(this::class.java, "/testfile1.png"),
+            testUrl = "http://www.server.com/file.png",
+            mimeType = "image/png",
+            expectContentEncoding = "identity",
+            createLock = true,
+        ) {
+            cache.removeRetentionLocks(
+                createdLocks.map {
+                    RemoveLockRequest(url, it.second.lockId)
+                }
+            )
+
+            val entry = cache.getCacheEntry(url)
+            assertTrue(entry?.storageUri?.startsWith(cachePaths.cachePath.toString()) == true,
+                "After adding lock, entry should be in persistent path")
+        }
     }
 
     @Test
