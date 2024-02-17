@@ -111,7 +111,6 @@ ext {
     version_moko_resources = "0.23.0"
 
 
-    version_turbine = "1.0.0"
     version_junit = "4.13.2"
     version_nanohttpd = "2.3.1"
     version_kxml = "2.3.0"

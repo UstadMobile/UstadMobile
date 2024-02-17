@@ -4,6 +4,10 @@ import com.ustadmobile.door.ext.withDoorTransaction
 import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.db.entities.CacheEntry
 import com.ustadmobile.libcache.logging.UstadCacheLogger
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.io.files.FileSystem
 import kotlinx.io.files.Path
 
@@ -13,6 +17,18 @@ class UstadCacheTrimmer(
     private val logger: UstadCacheLogger? = null,
     private val sizeLimit: () -> Long,
 ) {
+
+    private val _evictedEntriesFlow = MutableSharedFlow<List<String>>(
+        replay = 1,
+        extraBufferCapacity = 0,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
+    /**
+     * A flow of entries that have been evicted. This can be observed by the cache to update the
+     * in memory map as required.
+     */
+    val evictedEntriesFlow: Flow<List<String>> = _evictedEntriesFlow.asSharedFlow()
 
     /**
      *
@@ -38,7 +54,7 @@ class UstadCacheTrimmer(
                     if(entriesToEvictSize >= deleteTarget)
                         break
                 }
-
+                _evictedEntriesFlow.tryEmit(evictableEntries.map { it.key })
                 db.cacheEntryDao.delete(entriesToEvict)
                 pathsToDelete += entriesToEvict.map { it.storageUri }
             }

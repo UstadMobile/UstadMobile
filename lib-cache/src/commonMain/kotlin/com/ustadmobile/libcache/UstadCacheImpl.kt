@@ -145,7 +145,22 @@ class UstadCacheImpl(
         scope.launch {
             while(isActive) {
                 delay(trimInterval.toLong())
+                commit()
                 trimmer.trim()
+            }
+        }
+
+        scope.launch {
+            while(isActive) {
+                trimmer.evictedEntriesFlow.collect { evictedEntries ->
+                    evictedEntries.forEach { evictedKey ->
+                        lruMap.computeIfPresent(evictedKey) { key, entry ->
+                            entry.copy(
+                                entry = null
+                            )
+                        }
+                    }
+                }
             }
         }
     }
