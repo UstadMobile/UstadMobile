@@ -150,6 +150,8 @@ class UstadCacheJvmTest {
             requestHeaders = requestHeaders,
         )
 
+        ustadCache.commit()
+
 
         val cacheEntryInDb = cacheDb.cacheEntryDao.findEntryAndBodyByKey(Md5Digest()
             .urlKey(testUrl))
@@ -287,8 +289,11 @@ class UstadCacheJvmTest {
                 testUrl = url,
                 mimeType = "text/css"
             )
+            ustadCache.commit()
             cacheDb.cacheEntryDao.findEntryAndBodyByKey(md5Digest.urlKey(url))
         }
+
+
         assertTrue(entryAfterStored.last()!!.lastValidated > entryAfterStored.first()!!.lastValidated,
             message = "Last validated time should be updated after ")
 

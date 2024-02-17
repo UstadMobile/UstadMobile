@@ -1,5 +1,6 @@
 package com.ustadmobile.libcache
 
+import com.ustadmobile.door.ext.concurrentSafeMapOf
 import com.ustadmobile.door.ext.withDoorTransaction
 import com.ustadmobile.door.util.NullOutputStream
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -7,6 +8,7 @@ import com.ustadmobile.libcache.UstadCache.Companion.HEADER_LAST_VALIDATED_TIMES
 import com.ustadmobile.libcache.cachecontrol.ResponseValidityChecker
 import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.db.entities.CacheEntry
+import com.ustadmobile.libcache.db.entities.CacheEntryAndLocks
 import com.ustadmobile.libcache.db.entities.RetentionLock
 import com.ustadmobile.libcache.db.entities.RequestedEntry
 import com.ustadmobile.libcache.headers.MergedHeaders
@@ -26,6 +28,7 @@ import com.ustadmobile.libcache.md5.urlKey
 import com.ustadmobile.libcache.request.HttpRequest
 import com.ustadmobile.libcache.response.CacheResponse
 import com.ustadmobile.libcache.response.HttpResponse
+import com.ustadmobile.libcache.util.LruMap
 import com.ustadmobile.libcache.uuid.randomUuid
 import kotlinx.atomicfu.atomic
 import kotlinx.atomicfu.getAndUpdate
@@ -48,8 +51,7 @@ import kotlinx.io.files.SystemFileSystem
  * @param sizeLimit A function that returns the current size limit for the cache. This will be
  *        invoked on the periodic trims that are run. The limit applies to evictable entries e.g.
  *        entries which do not have any retentionlock.
- * @param lastAccessedCommitInterval the interval period to commit (in batches) updates to entry
- *        last accessed times.
+ * @param databaseCommitInterval the interval period to commit updates to the database. When entries
  */
 class UstadCacheImpl(
     private val fileSystem: FileSystem = SystemFileSystem,
@@ -59,7 +61,7 @@ class UstadCacheImpl(
     sizeLimit: () -> Long = { UstadCache.DEFAULT_SIZE_LIMIT },
     private val logger: UstadCacheLogger? = null,
     private val listener: UstadCache.CacheListener? = null,
-    private val lastAccessedCommitInterval: Int = 5_000,
+    private val databaseCommitInterval: Int = 2_000,
     private val trimInterval: Int = 30_000,
     private val responseValidityChecker: ResponseValidityChecker = ResponseValidityChecker(),
     private val trimmer: UstadCacheTrimmer = UstadCacheTrimmer(
@@ -77,11 +79,29 @@ class UstadCacheImpl(
 
     private val batchIdAtomic = atomic(0)
 
+    private val lockIdAtomic = atomic(systemTimeInMillis())
+
     private val logPrefix = "UstadCache($cacheName):"
 
     private val pendingLastAccessedUpdates = atomic(emptyList<LastAccessedUpdate>())
 
-    private val pendingLockRemovals = atomic(emptyList<Int>())
+    private val pendingLockRemovals = atomic(emptyList<Long>())
+
+    private val pendingLockUpserts = atomic(emptyList<RetentionLock>())
+
+    private val pendingCacheEntryUpdates = atomic(emptyList<CacheEntry>())
+
+    /**
+     * The LruMap is the in-memory cache of entries. It does not include the actual response data.
+     * This can reduce both the number of database queries and significantly reduce the number of
+     * database transactions that need to be performed.
+     *
+     * When modifications happen (when an item is stored, updated, removed, etc) the updates are done
+     * in the LRU map and any pending database changes are added to the relevant pending atomic list.
+     * Database updates are then performed in batches, significantly improving performance. This is
+     * especially helpful when many small items are being loaded.
+     */
+    private val lruMap = LruMap<String, CacheEntryAndLocks>(concurrentSafeMapOf())
 
     /**
      * Data class that is used to track the status of a CacheEntryToStore as it is processed.
@@ -104,7 +124,7 @@ class UstadCacheImpl(
         val tmpFile: Path,
         val responseHeaders: HttpHeaders,
         val tmpFileNeedsDeleted: Boolean = false,
-        val lockId: Int = 0,
+        val lockId: Long = 0,
         val previousStorageUriToDelete: String? = null,
     )
 
@@ -117,8 +137,8 @@ class UstadCacheImpl(
     init {
         scope.launch {
             while(isActive) {
-                delay(lastAccessedCommitInterval.toLong())
-                commitLastAccessedUpdates()
+                delay(databaseCommitInterval.toLong())
+                commit()
             }
         }
 
@@ -130,18 +150,110 @@ class UstadCacheImpl(
         }
     }
 
-    private fun insertRetentionLocks(
-        lockRequests: List<EntryLockRequest>,
-        md5Digest: Md5Digest,
-    ): List<Pair<EntryLockRequest, RetentionLock>> {
-        return lockRequests.map {
-            val lock = RetentionLock(
-                lockKey = md5Digest.urlKey(it.url),
+    /**
+     * @param entries The entries loaded (including CacheEntry entity and any associated locks
+     * @param pending if loadEntries was called with loadFromDb=false, then this is a list of the
+     *        entries that were not loaded because the status is not in the Lru in memory cache
+     * @param loadedFromDb true if anything was loaded from db, false otherwise.
+     */
+    private data class LoadEntriesResult(
+        val entries: List<CacheEntryAndLocks>,
+        val pending: List<RequestedEntry>,
+        val loadedFromDb: Boolean,
+    )
+
+    /*
+     * Load entries from the LruCache. When loadFromDb is enabled, then any entries not found in the
+     * in memory lru cache will be loaded from the database. When loadFromDb is not enabled, entries
+     * not found in the cache will be returned in the pending list of the LoadEntriesResult
+     */
+    private fun loadEntries(
+        requestEntries: List<RequestedEntry>,
+        loadFromDb: Boolean = true,
+    ): LoadEntriesResult {
+        val (entriesInLru, entriesNotInLru) = requestEntries.partition {
+            lruMap.containsKey(it.requestedKey)
+        }
+
+        val entriesFromLruList = entriesInLru.mapNotNull {
+            lruMap[it.requestedKey]
+        }
+
+        if(!loadFromDb || entriesNotInLru.isEmpty()) {
+            return LoadEntriesResult(entriesFromLruList, entriesNotInLru, loadedFromDb = false)
+        }
+
+        return db.withDoorTransaction {
+            val batchId = batchIdAtomic.incrementAndGet()
+            val entriesFromLruMap = entriesFromLruList.associateBy { it.urlKey }
+
+            val entriesToQueryDb = requestEntries.filter {
+                !entriesFromLruMap.containsKey(it.requestedKey)
+            }
+
+            db.requestedEntryDao.insertList(entriesToQueryDb)
+
+            val entriesInDb = db.cacheEntryDao.findByRequestBatchId(batchId)
+                .associateBy { it.key }
+            val locksInDb = db.retentionLockDao.findByBatchId(batchId)
+                .groupBy { it.lockKey }
+
+            db.requestedEntryDao.deleteBatch(batchId)
+
+            LoadEntriesResult(
+                entries = buildList {
+                    addAll(entriesFromLruMap.values)
+                    entriesToQueryDb.map {
+                        CacheEntryAndLocks(
+                            urlKey = it.requestedKey,
+                            entry = entriesInDb[it.requestedKey],
+                            locks = locksInDb[it.requestedKey] ?: emptyList()
+                        )
+                    }
+                },
+                pending = emptyList(),
+                loadedFromDb = false,
             )
-            val lockId = db.retentionLockDao.insert(lock).toInt()
-            it to lock.copy(lockId = lockId)
         }
     }
+
+
+    private fun loadEntry(urlKey: String): CacheEntry? {
+        return lruMap.compute(urlKey) { key, currentEntry ->
+            if (currentEntry != null) {
+                currentEntry
+            }else {
+                val entryInDb = db.cacheEntryDao.findEntryAndBodyByKey(urlKey)
+                val entryLocks = db.retentionLockDao.findByKey(urlKey)
+                CacheEntryAndLocks(
+                    urlKey = key,
+                    entry = entryInDb,
+                    locks = entryLocks
+                )
+            }
+        }?.entry
+    }
+
+    private fun upsertEntries(
+        entries: List<CacheEntry>
+    ) {
+        entries.forEach {
+            lruMap.compute(it.key) { key, prev ->
+                prev?.copy(
+                    entry = it
+                ) ?: CacheEntryAndLocks(
+                    urlKey = key,
+                    entry = it,
+                    locks = emptyList()
+                )
+            }
+        }
+
+        pendingCacheEntryUpdates.update { prev ->
+            prev + entries
+        }
+    }
+
 
     override fun store(
         storeRequest: List<CacheEntryToStore>,
@@ -253,17 +365,31 @@ class UstadCacheImpl(
              * Find what entries are already stored in the database. Update entries that are
              * already present, insert new entries.
              */
-            val dbProcessedEntries = db.withDoorTransaction { _ ->
-                db.requestedEntryDao.insertList(entriesWithTmpFileAndIntegrityInfo.map {
-                    RequestedEntry(
-                        requestSha256 = it.cacheEntry.integrity ?: "",
-                        requestedKey = md5Digest.urlKey(it.cacheEntry.url),
-                        batchId = batchId,
-                    )
-                })
+            val requestEntries = entriesWithTmpFileAndIntegrityInfo.map {
+                RequestedEntry(
+                    requestSha256 = it.cacheEntry.integrity ?: "",
+                    requestedKey = md5Digest.urlKey(it.cacheEntry.url),
+                    batchId = batchId,
+                )
+            }
 
-                val entriesInCache = db.cacheEntryDao.findByRequestBatchId(batchId)
-                val entriesWithLock = db.cacheEntryDao.findEntriesWithLock(batchId).toSet()
+            val loadedEntriesLruResult = loadEntries(requestEntries,
+                loadFromDb = false)
+            val processEntriesFn: () -> List<CacheEntryInProgress> = {
+                val loadedEntries = loadEntries(
+                    requestEntries = entriesWithTmpFileAndIntegrityInfo.map {
+                        RequestedEntry(
+                            requestSha256 = it.cacheEntry.integrity ?: "",
+                            requestedKey = md5Digest.urlKey(it.cacheEntry.url),
+                            batchId = batchId,
+                        )
+                    },
+                )
+
+                val entriesInCache = loadedEntries.entries.mapNotNull { it.entry }
+                val entriesWithLock = loadedEntries.entries.filter {
+                    it.locks.isNotEmpty()
+                }.map { it.urlKey }
                 val entriesInCacheMap = entriesInCache.associateBy {
                     it.key
                 }
@@ -337,24 +463,45 @@ class UstadCacheImpl(
                     }
                 }
 
-                db.cacheEntryDao.upsertList(entriesToSave.map { it.cacheEntry } )
-                db.requestedEntryDao.deleteBatch(batchId)
+                upsertEntries(entriesToSave.map { it.cacheEntry } )
 
-                val locks = insertRetentionLocks(
-                    lockRequests = storeRequest.filter { it.createRetentionLock }.map {
-                        EntryLockRequest(it.request.url)
-                    },
-                    md5Digest = md5Digest,
-                ).associate {
+                /* For all StoreRequests where a lock has been requested, create the lock, put it in
+                 * the Lru memory cache, and add it to the
+                 *
+                 */
+                val locks = storeRequest.filter {
+                    it.createRetentionLock
+                }.map { entryToStore ->
+                    val urlKey = md5Digest.urlKey(entryToStore.request.url)
+
+                    urlKey to RetentionLock(
+                        lockId = lockIdAtomic.incrementAndGet(),
+                        lockKey = urlKey
+                    ).also {
+                        addLockToLruMap(it)
+                    }
+                }.also { keyAndLock ->
+                    val newLocks = keyAndLock.map { it.second }
+                    pendingLockUpserts.update { prev ->
+                        prev + newLocks
+                    }
+                }.associate {
                     it.second.lockKey to it.second.lockId
                 }
 
-                //ideally - map by key not url
                 entriesToSave.map { entry ->
                     entry.copy(
-                        lockId = locks[entry.cacheEntry.key] ?: 0
+                        lockId = locks[entry.cacheEntry.key] ?: 0L
                     )
                 }
+            }
+
+            val dbProcessedEntries = if(
+                loadedEntriesLruResult.pending.isNotEmpty()
+            ) {
+                db.withDoorTransaction { processEntriesFn() }
+            }else {
+                processEntriesFn()
             }
 
             val tmpFilesToDelete = dbProcessedEntries.filter {
@@ -401,7 +548,7 @@ class UstadCacheImpl(
         logger?.i(LOG_TAG, "$logPrefix Retrieve ${request.url}")
 
         val key = Md5Digest().urlKey(request.url)
-        val entry = db.cacheEntryDao.findEntryAndBodyByKey(key)
+        val entry = loadEntry(key)
         if(entry != null) {
             logger?.d(LOG_TAG, "$logPrefix FOUND ${request.url}")
             pendingLastAccessedUpdates.update { prev ->
@@ -430,60 +577,98 @@ class UstadCacheImpl(
         val timeNow = systemTimeInMillis()
         val urlKey = md5.urlKey(validatedEntry.url)
 
-        db.withDoorTransaction {
-            val existingEntry = db.cacheEntryDao.findEntryAndBodyByKey(
-                key = urlKey,
-            ) ?: return@withDoorTransaction
+        loadEntry(urlKey)
+        lruMap.compute(urlKey) { _, prevEntry ->
+            val existingEntry = prevEntry?.entry
+            if(existingEntry != null) {
+                val existingHeaders = HttpHeaders.fromString(existingEntry.responseHeaders)
 
-            val existingHeaders = HttpHeaders.fromString(existingEntry.responseHeaders)
-
-            val newHeadersCorrected = validatedEntry.headers.mapHeaders { headerName, headerValue ->
-                when {
-                    NOT_MODIFIED_IGNORE_HEADERS.any { headerName.equals(it, true) } -> null
-                    else -> headerValue
+                val newHeadersCorrected = validatedEntry.headers.mapHeaders { headerName, headerValue ->
+                    when {
+                        NOT_MODIFIED_IGNORE_HEADERS.any { headerName.equals(it, true) } -> null
+                        else -> headerValue
+                    }
                 }
-            }
-            val newHeaders = MergedHeaders(newHeadersCorrected, existingHeaders)
+                val newHeaders = MergedHeaders(newHeadersCorrected, existingHeaders)
+                val cacheEntryUpdated = existingEntry.copy(
+                    responseHeaders = newHeaders.asString(),
+                    lastValidated = timeNow,
+                    lastAccessed = timeNow,
+                )
 
-            db.cacheEntryDao.updateValidation(
-                key = urlKey,
-                headers = newHeaders.asString(),
-                lastValidated = timeNow,
-                lastAccessed = timeNow,
-            )
+                pendingCacheEntryUpdates.update { prev ->
+                    prev + cacheEntryUpdated
+                }
+
+                prevEntry.copy(
+                    entry = cacheEntryUpdated
+                )
+            }else {
+                prevEntry
+            }
         }
     }
 
     override fun getCacheEntry(url: String): CacheEntry? {
-        return db.cacheEntryDao.findEntryAndBodyByKey(Md5Digest().urlKey(url))
+        return loadEntry(Md5Digest().urlKey(url))?.copy()
     }
 
     override fun hasEntries(urls: Set<String>): Map<String, Boolean> {
         val batchId = batchIdAtomic.incrementAndGet()
         val md5Digest = Md5Digest()
-        val keysNotPresent = db.withDoorTransaction {
-            db.requestedEntryDao.insertList(
-                urls.map {  url ->
-                    RequestedEntry(
-                        batchId = batchId,
-                        requestedKey =  md5Digest.urlKey(url)
-                    )
-                }
-            )
-            db.requestedEntryDao.findKeysNotPresent(batchId).also {
-                db.requestedEntryDao.deleteBatch(batchId)
-            }
+
+        val entryLoadResult = loadEntries(
+            requestEntries = urls.map {  url ->
+                RequestedEntry(
+                    batchId = batchId,
+                    requestedKey =  md5Digest.urlKey(url)
+                )
+            },
+        )
+
+        val entries = entryLoadResult.entries.associateBy {
+            it.urlKey
         }
 
-        return urls.associateWith { url ->
-            (md5Digest.urlKey(url) !in keysNotPresent)
+        return urls.associateWith { url -> (entries[md5Digest.urlKey(url)]?.entry != null) }
+    }
+
+    private fun addLockToLruMap(retentionLock: RetentionLock) {
+        lruMap.compute(retentionLock.lockKey) { urlKey, entryAndLocks ->
+            entryAndLocks?.let {
+                it.copy(
+                    locks = it.locks + retentionLock,
+                )
+            } ?: CacheEntryAndLocks(
+                urlKey = urlKey,
+                entry = null,
+                locks = listOf(retentionLock)
+            )
         }
     }
 
     override fun addRetentionLocks(locks: List<EntryLockRequest>): List<Pair<EntryLockRequest, RetentionLock>> {
         val md5Digest = Md5Digest()
-        return db.withDoorTransaction {
-            insertRetentionLocks(locks, md5Digest)
+        loadEntries(
+            requestEntries = locks.map { RequestedEntry(requestedKey = md5Digest.urlKey(it.url)) },
+        )
+
+        return locks.map { lockRequest ->
+            val key = md5Digest.urlKey(lockRequest.url)
+            val lock = RetentionLock(
+                lockId = lockIdAtomic.incrementAndGet(),
+                lockKey = key,
+                lockRemark = lockRequest.remark,
+            )
+
+            addLockToLruMap(lock)
+
+            Pair(lockRequest, lock)
+        }.also { requestsAndLocks ->
+            val newLockUpserts = requestsAndLocks.map { it.second }
+            pendingLockUpserts.update { prev ->
+                prev + newLockUpserts
+            }
         }
     }
 
@@ -491,41 +676,53 @@ class UstadCacheImpl(
      * Lock removal is done by adding it to the pending list. This isn't urgent. This avoids a large
      * number of database transactions running when lots of small files are being uploaded
      */
-    override fun removeRetentionLocks(lockIds: List<Int>) {
+    override fun removeRetentionLocks(lockIds: List<Long>) {
         pendingLockRemovals.update { prev ->
             prev + lockIds
         }
     }
 
-    private fun commitLastAccessedUpdates() {
-        val updatesPending = pendingLastAccessedUpdates.getAndUpdate {
+    fun commit() {
+        val lastAccessUpdates = pendingLastAccessedUpdates.getAndUpdate {
             emptyList()
         }
+
+        val lockUpsertsPending = pendingLockUpserts.getAndUpdate { emptyList() }
 
         val lockRemovalsPending = pendingLockRemovals.getAndUpdate {
             emptyList()
         }
 
-        if(updatesPending.isEmpty() && lockRemovalsPending.isEmpty())
+        val cacheEntryUpserts = pendingCacheEntryUpdates.getAndUpdate {
+            emptyList()
+        }
+
+        if(lastAccessUpdates.isEmpty() && lockRemovalsPending.isEmpty()
+            && cacheEntryUpserts.isEmpty() && lockUpsertsPending.isEmpty()
+        )
             return
 
         val updatesMap = mutableMapOf<String, Long>()
-        updatesPending.forEach {
+        lastAccessUpdates.forEach {
             updatesMap[it.key] = it.accessTime
         }
 
         db.withDoorTransaction {
+            db.cacheEntryDao.takeIf { cacheEntryUpserts.isNotEmpty() }
+                ?.upsertList(cacheEntryUpserts)
+
             updatesMap.forEach {
                 db.cacheEntryDao.updateLastAccessedTime(it.key, it.value)
             }
 
+            db.retentionLockDao.upsertList(lockUpsertsPending)
             db.retentionLockDao.delete(lockRemovalsPending.map { RetentionLock(lockId = it) } )
         }
     }
 
     override fun close() {
         scope.cancel()
-        commitLastAccessedUpdates()
+        commit()
     }
 
     companion object {

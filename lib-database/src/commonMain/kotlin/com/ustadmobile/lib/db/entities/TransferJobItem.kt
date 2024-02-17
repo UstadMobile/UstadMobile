@@ -60,5 +60,5 @@ data class TransferJobItem(
     var tjiEntityEtag: Long = 0,
 
     @ColumnInfo(defaultValue = "0")
-    var tjiLockIdToRelease: Int = 0,
+    var tjiLockIdToRelease: Long = 0,
 )

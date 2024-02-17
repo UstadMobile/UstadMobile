@@ -111,7 +111,7 @@ interface UstadCache {
      */
     fun addRetentionLocks(locks: List<EntryLockRequest>): List<Pair<EntryLockRequest, RetentionLock>>
 
-    fun removeRetentionLocks(lockIds: List<Int>)
+    fun removeRetentionLocks(lockIds: List<Long>)
 
     fun close()
 

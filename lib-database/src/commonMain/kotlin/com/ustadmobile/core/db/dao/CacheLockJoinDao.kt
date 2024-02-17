@@ -26,7 +26,7 @@ expect abstract class CacheLockJoinDao {
     """)
     abstract suspend fun updateLockIdAndStatus(
         uid: Int,
-        lockId: Int,
+        lockId: Long,
         status: Int
     )
 

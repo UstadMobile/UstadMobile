@@ -99,7 +99,7 @@ class UpdateCacheLockJoinUseCase(
                     db.cacheLockJoinDao.updateLockIdAndStatus(
                         uid = createLockRequest.cljId,
                         lockId = lockId,
-                        status = if(lockId != 0)
+                        status = if(lockId != 0L)
                             CacheLockJoin.STATUS_CREATED
                         else
                             CacheLockJoin.STATUS_ERROR

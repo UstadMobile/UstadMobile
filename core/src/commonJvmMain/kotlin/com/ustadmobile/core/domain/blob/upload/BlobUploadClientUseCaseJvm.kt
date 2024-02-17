@@ -282,7 +282,7 @@ class BlobUploadClientUseCaseJvm(
                     onStatusUpdate = {
                         transferJobItemStatusUpdater.onStatusUpdate(it)
                         if(it.status == TransferJobItemStatus.STATUS_COMPLETE_INT &&
-                            it.transferItem.lockIdToRelease != 0
+                            it.transferItem.lockIdToRelease != 0L
                         ) {
                             Napier.d { "$logPrefix: release cache lock #(${it.transferItem.lockIdToRelease}) for ${it.transferItem.blobUrl}" }
                             httpCache.removeRetentionLocks(listOf(it.transferItem.lockIdToRelease))

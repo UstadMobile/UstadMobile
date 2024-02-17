@@ -50,7 +50,7 @@ interface SaveLocalUrisAsBlobsUseCase {
         val entityUid: Long,
         val localUri: String,
         val blobUrl: String,
-        val retentionLockId: Int = 0,
+        val retentionLockId: Long = 0,
         val integrity: String,
         val mimeType: String,
         val storageSize: Long,
