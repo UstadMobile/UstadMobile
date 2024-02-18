@@ -64,7 +64,6 @@ expect abstract class CacheEntryDao {
 
 
 
-
     @Query("""
         UPDATE CacheEntry
            SET lastAccessed = :lastAccessTime

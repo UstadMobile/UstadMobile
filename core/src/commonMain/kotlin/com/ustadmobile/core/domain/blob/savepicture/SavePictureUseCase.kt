@@ -57,6 +57,7 @@ class SavePictureUseCase(
                         tableId = tableId,
                         mimeType = mainCompressionResult.mimeType,
                         deleteLocalUriAfterSave = true,
+                        createRetentionLock = true,
 
                     ),
                     SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem(
@@ -65,6 +66,7 @@ class SavePictureUseCase(
                         tableId = tableId,
                         mimeType = mainCompressionResult.mimeType,
                         deleteLocalUriAfterSave = true,
+                        createRetentionLock = true,
                     )
                 ),
             )

@@ -5,6 +5,7 @@ import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.room.InvalidationTrackerObserver
 import com.ustadmobile.lib.db.entities.CacheLockJoin
 import com.ustadmobile.libcache.EntryLockRequest
+import com.ustadmobile.libcache.RemoveLockRequest
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.md5.Md5Digest
 import com.ustadmobile.libcache.md5.urlKey
@@ -81,8 +82,17 @@ class UpdateCacheLockJoinUseCase(
             val locksToDelete = pendingLocks.filter {
                 it.cljStatus == CacheLockJoin.STATUS_PENDING_DELETE
             }
-            cache.takeIf { locksToDelete.isNotEmpty() }
-                ?.removeRetentionLocks(locksToDelete.map { it.cljLockId })
+
+            if(locksToDelete.isNotEmpty()) {
+                cache.removeRetentionLocks(
+                    locksToDelete.mapNotNull {  cacheLockJoin ->
+                        cacheLockJoin.cljUrl?.let { cacheLockJoinUrl ->
+                            RemoveLockRequest(cacheLockJoinUrl, cacheLockJoin.cljLockId)
+                        }
+                    }
+                )
+                db.cacheLockJoinDao.deleteListAsync(locksToDelete)
+            }
 
             val createLockRequests = pendingLocks.filter {
                 it.cljStatus == CacheLockJoin.STATUS_PENDING_CREATION
@@ -99,7 +109,7 @@ class UpdateCacheLockJoinUseCase(
                     db.cacheLockJoinDao.updateLockIdAndStatus(
                         uid = createLockRequest.cljId,
                         lockId = lockId,
-                        status = if(lockId != 0)
+                        status = if(lockId != 0L)
                             CacheLockJoin.STATUS_CREATED
                         else
                             CacheLockJoin.STATUS_ERROR
@@ -111,6 +121,7 @@ class UpdateCacheLockJoinUseCase(
     }
 
     fun close() {
+        db.invalidationTracker.removeObserver(observer)
         signalChannel.close()
         scope.cancel()
     }

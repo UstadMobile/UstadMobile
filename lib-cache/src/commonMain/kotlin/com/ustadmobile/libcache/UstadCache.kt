@@ -10,24 +10,13 @@ data class EntryLockRequest(
     val remark: String = "",
 )
 
+data class RemoveLockRequest(
+    val url: String,
+    val lockId: Long,
+)
 
 /**
- * ===Content===
  *
- * Done within ContentJob:
- *
- * Uploaded on server:
- *
- * a) go through files: generate sitemap, cache it as http(s)://endpoint/contententry/version/sitemap.xml
- * b) cache all files as http(s)://endpoint/api/contententry/version/file/path
- * c) add a retention lock for all cached entries (linked to ContentEntryVersion)
- * d) Create ContentEntryVersion entity
- * e) ktor endpoint will serve by using the cache.
- *
- * Uploaded on Android:
- *
- * Follow a-d above.
- * e) upload data to server, replicate ContentEntryVersion to server, release lock
  */
 @Suppress("unused")
 interface UstadCache {
@@ -84,9 +73,10 @@ interface UstadCache {
     fun updateLastValidated(validatedEntry: ValidatedEntry)
 
     /**
-     * Retrieve if cached.
+     * Retrieve a response for the given entry.
      *
-     * Expect-SHA-256 is set, then we can search for the given sha-256.
+     * @param request HttpRequest
+     * @return HttpResponse if the entry is in the cache, null otherwise
      */
     fun retrieve(
         request: HttpRequest,
@@ -94,6 +84,10 @@ interface UstadCache {
 
     fun getCacheEntry(url: String): CacheEntry?
 
+    /**
+     * Get a list of the locks that exist for a given entry
+     */
+    fun getLocks(url: String): List<RetentionLock>
 
     /**
      * Run a bulk query to check if the given urls are available in the cache.
@@ -107,11 +101,24 @@ interface UstadCache {
 
 
     /**
-     * Create retention locks.
+     * Create retention locks for the given urls. Retention locks are used to prevent a given url
+     * from being evicted from the cache. When a user has selected an particular item as something
+     * that they want to have available offline, it should not be removed until they decide otherwise,
+     * even if it would normally be evicted due to not being recently accessed.
+     *
+     * Entries that have a retention lock will be stored in the PersistentPath (see CachePaths) to
+     * ensure the OS does not delete them.
      */
     fun addRetentionLocks(locks: List<EntryLockRequest>): List<Pair<EntryLockRequest, RetentionLock>>
 
-    fun removeRetentionLocks(lockIds: List<Int>)
+    /**
+     * Remove the given retention locks. If all locks are removed, then the entry becomes eligible
+     * for eviction (it is not immediately removed).
+     *
+     * When an entry has no remaining locks, then it will be moved into the cachePath (see CachePaths)
+     * to allow the OS to delete it if desired.
+     */
+    fun removeRetentionLocks(locksToRemove: List<RemoveLockRequest>)
 
     fun close()
 

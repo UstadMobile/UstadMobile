@@ -1,17 +1,20 @@
 package com.ustadmobile.libcache
 
+import app.cash.turbine.test
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.db.entities.CacheEntry
 import com.ustadmobile.libcache.db.entities.RetentionLock
 import com.ustadmobile.libcache.md5.Md5Digest
 import com.ustadmobile.libcache.md5.urlKey
+import kotlinx.coroutines.runBlocking
 import kotlinx.io.files.SystemFileSystem
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class UstadCacheTrimmerTest {
 
@@ -45,7 +48,9 @@ class UstadCacheTrimmerTest {
         }
 
         val trimmer = UstadCacheTrimmer(
-            db = cacheDb, fileSystem = SystemFileSystem, sizeLimit = { 500_000 }
+            db = cacheDb,
+            fileSystem = SystemFileSystem,
+            sizeLimit = { 500_000 },
         )
         trimmer.trim()
 
@@ -62,6 +67,16 @@ class UstadCacheTrimmerTest {
                 assertNotNull(entry, "Index $it should have remained in cache")
             }else {
                 assertNull(entry, "Index $it should not be in cache")
+                runBlocking {
+                    trimmer.evictedEntriesFlow.test(
+                        name = "$urlPrefix$it was removed from cache and callback was invoked"
+                    ) {
+                        val removedKeys = awaitItem()
+                        assertTrue(md5Digest.urlKey("$urlPrefix$it") in removedKeys,
+                            "$urlPrefix$it was removed from cache and callback was invoked")
+                    }
+                }
+
             }
         }
     }

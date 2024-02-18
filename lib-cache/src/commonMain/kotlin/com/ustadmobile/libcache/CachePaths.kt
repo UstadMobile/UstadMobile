@@ -3,7 +3,10 @@ package com.ustadmobile.libcache
 import kotlinx.io.files.Path
 
 /**
- * Paths under which files will be stored
+ * Paths under which response body data will be stored
+ *
+ * Note: All paths provided should be on the same medium e.g. it should be possible to move a file
+ *       from tmpWorkPath to persistentPath or cachePath without needing to copy the data.
  *
  * @param tmpWorkPath a directory where temporary  work will be performed if needed e.g. copying to
  *        read the SHA-256 sum, compressing, etc. This is a transitory location but should be persistent.

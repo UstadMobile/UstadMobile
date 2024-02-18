@@ -62,7 +62,7 @@ class UstadCacheInterceptorTest {
 
     private lateinit var cacheDb: UstadCacheDb
 
-    private lateinit var ustadCache: UstadCache
+    private lateinit var ustadCache: UstadCacheImpl
 
     private lateinit var cacheListener: UstadCache.CacheListener
 
@@ -78,7 +78,7 @@ class UstadCacheInterceptorTest {
         val logger = NapierLoggingAdapter()
         cacheListener = mock { }
         cacheRootDir = tempDir.newFolder("cachedir")
-        cachePathsProvider = CachePathsProvider { _ ->
+        cachePathsProvider = CachePathsProvider {
             Path(cacheRootDir.absolutePath).let {
                 CachePaths(
                     tmpWorkPath = Path(it, "tmpWork"),
@@ -289,6 +289,7 @@ class UstadCacheInterceptorTest {
             argWhere { entries -> entries.any { it.request.url == requestUrl } }
         )
 
+        ustadCache.commit()
         val storedEntryAfterRequest = cacheDb.cacheEntryDao.findEntryAndBodyByKey(
             Md5Digest().urlKey(requestUrl))
 
@@ -308,6 +309,7 @@ class UstadCacheInterceptorTest {
         val validationRequest = mockWebServer.takeRequest()
         assertEquals(etagVal, validationRequest.getHeader("if-none-match"))
 
+        ustadCache.commit()
         val storedEntryAfterValidation = cacheDb.cacheEntryDao.findEntryAndBodyByKey(
             Md5Digest().urlKey(requestUrl))
 

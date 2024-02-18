@@ -80,4 +80,14 @@ expect abstract class TransferJobDao {
         jobType: Int,
     ): Flow<List<TransferJobAndTotals>>
 
+
+    @Query("""
+        SELECT COALESCE(
+               (SELECT TransferJob.tjOiUid
+                  FROM TransferJob
+                 WHERE TransferJob.tjUid = :jobUid), 0)
+    """)
+    abstract suspend fun findOfflineItemUidForTransferJobUid(
+        jobUid: Int
+    ): Long
 }
