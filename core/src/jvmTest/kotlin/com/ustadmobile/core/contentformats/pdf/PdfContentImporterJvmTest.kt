@@ -7,10 +7,10 @@ import com.ustadmobile.core.test.assertCachedBodyMatchesFileContent
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.ContentEntryImportJob
 import com.ustadmobile.libcache.request.requestBuilder
+import com.ustadmobile.libcache.response.bodyAsString
 import com.ustadmobile.util.test.ResourcesDispatcher
 import com.ustadmobile.util.test.ext.newFileFromResource
 import kotlinx.coroutines.runBlocking
-import kotlinx.io.readString
 import okhttp3.mockwebserver.MockWebServer
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -120,7 +120,7 @@ class PdfContentImporterJvmTest : AbstractContentImporterTest() {
         val manifestResponse = ustadCache.retrieve(requestBuilder(manifestUrl!!))
         val manifest = json.decodeFromString(
             ContentManifest.serializer(),
-            manifestResponse!!.bodyAsSource()!!.readString()
+            manifestResponse!!.bodyAsString()!!
         )
 
         val pdfBlobUrl = manifest.entries.first().bodyDataUrl
@@ -162,7 +162,7 @@ class PdfContentImporterJvmTest : AbstractContentImporterTest() {
             val manifestResponse = ustadCache.retrieve(requestBuilder(manifestUrl!!))
             val manifest = json.decodeFromString(
                 ContentManifest.serializer(),
-                manifestResponse!!.bodyAsSource()!!.readString()
+                manifestResponse!!.bodyAsString()!!
             )
 
             val pdfBlobUrl = manifest.entries.first().bodyDataUrl

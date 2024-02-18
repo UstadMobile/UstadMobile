@@ -23,6 +23,7 @@ import com.ustadmobile.core.contentformats.video.VideoContentImporterCommonJvm
 import com.ustadmobile.core.contentformats.xapi.XapiZipContentImporter
 import com.ustadmobile.core.db.*
 import com.ustadmobile.core.db.ext.MIGRATION_144_145_CLIENT
+import com.ustadmobile.core.db.ext.MIGRATION_148_149_CLIENT_WITH_OFFLINE_ITEMS
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.util.DiTag
@@ -40,7 +41,7 @@ import com.ustadmobile.core.domain.blob.download.ContentManifestDownloadUseCase
 import com.ustadmobile.core.domain.blob.download.EnqueueBlobDownloadClientUseCase
 import com.ustadmobile.core.domain.blob.download.EnqueueBlobDownloadClientUseCaseAndroid
 import com.ustadmobile.core.domain.blob.download.EnqueueContentManifestDownloadJobUseCaseAndroid
-import com.ustadmobile.core.domain.blob.download.EnqueueContentManifestDownloadUseCase
+import com.ustadmobile.core.domain.blob.download.MakeContentEntryAvailableOfflineUseCase
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCaseJvm
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
@@ -53,6 +54,8 @@ import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCaseJvm
 import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCase
 import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCaseAndroid
 import com.ustadmobile.core.domain.blob.upload.UpdateFailedTransferJobUseCase
+import com.ustadmobile.core.domain.cachelock.AddOfflineItemInactiveTriggersCallback
+import com.ustadmobile.core.domain.cachelock.UpdateCacheLockJoinUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCaseCommonJvm
 import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCase
@@ -140,6 +143,11 @@ import org.acra.sender.HttpSender
 
 class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
+
+    data class DbAndObservers(
+        val db: UmAppDatabase,
+        val updateCacheLockJoinUseCase: UpdateCacheLockJoinUseCase,
+    )
 
     @OptIn(ExperimentalXmlUtilApi::class)
     override val di: DI by DI.lazy {
@@ -258,19 +266,34 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             UstadAccountManager(settings = instance(), di = di)
         }
 
-        bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(EndpointScope.Default).singleton {
+        bind<DbAndObservers>() with scoped(EndpointScope.Default).singleton {
             val dbName = sanitizeDbNameFromUrl(context.url)
             val nodeIdAndAuth: NodeIdAndAuth = instance()
-            DatabaseBuilder.databaseBuilder(
+            val db = DatabaseBuilder.databaseBuilder(
                 context = applicationContext,
                 dbClass = UmAppDatabase::class,
                 dbName = dbName,
                 nodeId = nodeIdAndAuth.nodeId
             ).addSyncCallback(nodeIdAndAuth)
+                .addCallback(AddOfflineItemInactiveTriggersCallback())
                 .addMigrations(*migrationList().toTypedArray())
                 .addMigrations(MIGRATION_144_145_CLIENT)
+                .addMigrations(MIGRATION_148_149_CLIENT_WITH_OFFLINE_ITEMS)
                 .build()
 
+            val cache: UstadCache = instance()
+
+            DbAndObservers(
+                db = db,
+                updateCacheLockJoinUseCase = UpdateCacheLockJoinUseCase(
+                    db = db,
+                    cache = cache,
+                )
+            )
+        }
+
+        bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(EndpointScope.Default).singleton {
+            instance<DbAndObservers>().db
         }
 
         bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(EndpointScope.Default).singleton {
@@ -425,7 +448,6 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 tmpDir = Path(rootTmpDir.absolutePath, "savelocaluriaslblobtmp"),
                 fileSystem = SystemFileSystem,
                 deleteUrisUseCase = instance(),
-                createRetentionLock = true,
             )
         }
 
@@ -570,7 +592,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             )
         }
 
-        bind<EnqueueContentManifestDownloadUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<EnqueueContentManifestDownloadJobUseCaseAndroid>() with scoped(EndpointScope.Default).singleton {
             EnqueueContentManifestDownloadJobUseCaseAndroid(
                 appContext = applicationContext,
                 endpoint = context,
@@ -673,6 +695,14 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
         bind<DeletePermanentlyUseCase>() with scoped(EndpointScope.Default).provider {
             DeletePermanentlyUseCase(
                 repoOrDb = instance(tag = DoorTag.TAG_REPO),
+            )
+        }
+
+        bind<MakeContentEntryAvailableOfflineUseCase>() with scoped(EndpointScope.Default).singleton {
+            MakeContentEntryAvailableOfflineUseCase(
+                repo = instance(tag = DoorTag.TAG_REPO),
+                nodeIdAndAuth = instance(),
+                enqueueContentManifestDownloadUseCase = instance(),
             )
         }
 

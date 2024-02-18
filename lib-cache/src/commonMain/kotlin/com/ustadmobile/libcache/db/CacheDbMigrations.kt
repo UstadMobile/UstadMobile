@@ -1,5 +1,6 @@
 package com.ustadmobile.libcache.db
 
+import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.migration.DoorMigrationStatementList
 import com.ustadmobile.door.util.systemTimeInMillis
 
@@ -76,4 +77,19 @@ val MIGRATE_6_7 = DoorMigrationStatementList(6, 7) {
         add("CREATE TABLE IF NOT EXISTS CacheEntry (  key  TEXT  PRIMARY KEY  NOT NULL , url  TEXT  NOT NULL , message  TEXT  NOT NULL , statusCode  INTEGER  NOT NULL , cacheFlags  INTEGER  NOT NULL , method  INTEGER  NOT NULL , lastAccessed  INTEGER  NOT NULL , lastValidated  INTEGER  NOT NULL , integrity  TEXT , responseHeaders  TEXT  NOT NULL , storageUri  TEXT  NOT NULL , storageSize  INTEGER  NOT NULL )")
         add("CREATE INDEX idx_lastAccessed ON CacheEntry (lastAccessed)")
     }
+}
+
+/**
+ * Add uncompressedSize field
+ */
+val MIGRATE_7_8 = DoorMigrationStatementList(7, 8) {
+    buildList {
+        add("ALTER TABLE CacheEntry ADD COLUMN uncompressedSize INTEGER NOT NULL DEFAULT 0")
+        add("UPDATE CacheEntry SET uncompressedSize = storageSize")
+    }
+}
+
+fun DatabaseBuilder<UstadCacheDb>.addCacheDbMigrations(): DatabaseBuilder<UstadCacheDb> {
+    return addMigrations(MIGRATE_1_2, MIGRATE_2_3, MIGRATE_3_4, MIGRATE_4_5,
+        MIGRATE_5_6, MIGRATE_6_7, MIGRATE_7_8)
 }

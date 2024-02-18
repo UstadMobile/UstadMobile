@@ -228,6 +228,8 @@ val Header = FC<HeaderProps> { props ->
                         color = theme.palette.common.white
                     }
                     id = "actionBarButton"
+                    disabled = !props.appUiState.actionBarButtonState.enabled
+
                     onClick = {
                         props.appUiState.actionBarButtonState.onClick()
                     }

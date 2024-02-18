@@ -12,7 +12,9 @@ class CreateRetentionLocksForManifestUseCaseCommonJvm(
         manifestUrl: String,
         manifest: ContentManifest,
     ): List<CreateRetentionLocksForManifestUseCase.ManifestRetentionLock> {
-        val lockRequests = (manifest.entries.map { it.bodyDataUrl } + manifestUrl).map {
+        val lockRequests = (
+            manifest.entries.map { it.bodyDataUrl }.distinct() + manifestUrl
+        ).map {
             EntryLockRequest(url = it)
         }
 

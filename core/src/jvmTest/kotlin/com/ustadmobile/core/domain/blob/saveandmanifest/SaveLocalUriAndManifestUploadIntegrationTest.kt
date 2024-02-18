@@ -109,7 +109,7 @@ class SaveLocalUriAndManifestUploadIntegrationTest{
                 }.distinct() +  entryVersion.cevManifestUrl!!
 
                 /*
-                 * All urls referenced in the manifest should be retained within the cache
+                 * All urls referenced in the manifest should marked on the server to be retained
                  */
                 serverDb.doorFlow(arrayOf("CacheLockJoin")) {
                     serverDb.cacheLockJoinDao.findByTableIdAndEntityUid(
@@ -120,6 +120,15 @@ class SaveLocalUriAndManifestUploadIntegrationTest{
                     val cacheLockUrlSet = cacheLocks.mapNotNull { it.cljUrl }.toSet()
 
                     allManifestUrls.all { it in cacheLockUrlSet }
+                }
+
+                /*
+                 * All urls referenced in the manifest should not be locked on the client after the
+                 * upload is finished
+                 */
+                allManifestUrls.forEach {
+                    assertEquals(0, clientNode.node.httpCache.getLocks(it).size,
+                        "Client should not have any cache retention locks for $it")
                 }
             }
         }finally {

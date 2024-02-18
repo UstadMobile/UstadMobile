@@ -81,7 +81,7 @@ allprojects {
 }
 
 //Major.minor.database version
-version = "0.4.67"
+version = "0.4.74"
 group = "com.ustadmobile.app"
 
 /**
@@ -91,7 +91,7 @@ group = "com.ustadmobile.app"
  */
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 291
+    ustadVersionCode = 298
 
     version_retriever = "0.0.1e"
     version_xmlpullparserkmp = '0.0.26'
@@ -111,7 +111,6 @@ ext {
     version_moko_resources = "0.23.0"
 
 
-    version_turbine = "1.0.0"
     version_junit = "4.13.2"
     version_nanohttpd = "2.3.1"
     version_kxml = "2.3.0"

@@ -23,6 +23,9 @@ import kotlinx.serialization.Serializable
         Index("tjTableId", "tjEntityUid", name = "TransferJob_idx_tjTableId_EntityUid")
     )
 )
+/**
+ * @param tjOiUid Id of the related OfflineItem (if any)
+ */
 @Serializable
 data class TransferJob(
     @PrimaryKey(autoGenerate = true)
@@ -39,6 +42,9 @@ data class TransferJob(
     var tjTimeCreated: Long = 0,
     @ColumnInfo(defaultValue = "0")
     var tjCreationType: Int = 0,
+
+    @ColumnInfo(defaultValue = "0")
+    var tjOiUid: Long = 0,
 ) {
     companion object {
 

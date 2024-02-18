@@ -50,6 +50,7 @@ import web.url.URL
 import kotlin.random.Random
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.db.ext.MIGRATION_144_145_CLIENT
+import com.ustadmobile.core.db.ext.MIGRATION_148_149_NO_OFFLINE_ITEMS
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.util.ext.deleteDatabaseAsync
 import mui.material.useMediaQuery
@@ -235,6 +236,8 @@ val ustadScreensLoader: LoaderFunction<*> = {
         .addSyncCallback(dbNodeIdAndAuth)
         .addMigrations(*migrationList().toTypedArray())
         .addMigrations(MIGRATION_144_145_CLIENT)
+        .addMigrations(MIGRATION_148_149_NO_OFFLINE_ITEMS)
+        .addMigrations()
 
     @OptIn(DelicateCoroutinesApi::class)
     GlobalScope.promise {

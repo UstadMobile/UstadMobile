@@ -52,6 +52,19 @@ expect abstract class CacheEntryDao {
     abstract fun findByRequestBatchId(batchId: Int): List<CacheEntry>
 
     @Query("""
+        SELECT RequestedEntry.requestedKey
+          FROM RequestedEntry
+         WHERE RequestedEntry.batchId = :batchId
+           AND EXISTS(
+               SELECT RetentionLock.lockId
+                 FROM RetentionLock
+                WHERE RetentionLock.lockKey = RequestedEntry.requestedKey)
+    """)
+    abstract fun findEntriesWithLock(batchId: Int): List<String>
+
+
+
+    @Query("""
         UPDATE CacheEntry
            SET lastAccessed = :lastAccessTime
          WHERE key = :key  

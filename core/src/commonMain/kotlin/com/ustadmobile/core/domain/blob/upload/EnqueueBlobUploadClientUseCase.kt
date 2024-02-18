@@ -34,7 +34,7 @@ interface EnqueueBlobUploadClientUseCase{
         val blobUrl: String,
         val tableId: Int = 0,
         val entityUid: Long = 0,
-        val retentionLockIdToRelease: Int = 0,
+        val retentionLockIdToRelease: Long = 0,
     )
 
     /**

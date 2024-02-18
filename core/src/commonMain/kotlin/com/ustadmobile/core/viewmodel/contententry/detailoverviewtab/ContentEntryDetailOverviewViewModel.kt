@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.domain.blob.download.EnqueueContentManifestDownloadUseCase
+import com.ustadmobile.core.domain.blob.download.MakeContentEntryAvailableOfflineUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.LaunchContentEntryVersionUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.epub.LaunchEpubUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.LaunchXapiUseCase
@@ -20,7 +20,6 @@ import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.util.ext.onActiveEndpoint
 import com.ustadmobile.door.entities.NodeIdAndAuth
-import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.composites.ContentEntryAndDetail
 import com.ustadmobile.lib.db.composites.OfflineItemAndState
 import com.ustadmobile.lib.db.composites.TransferJobAndTotals
@@ -83,7 +82,10 @@ class ContentEntryDetailOverviewViewModel(
     private val _uiState = MutableStateFlow(
         ContentEntryDetailOverviewUiState())
 
-    private val enqueueContentManifestDownloadUseCase: EnqueueContentManifestDownloadUseCase by
+    /*
+     * Make Content Entry Available Offline Use Case will create the offline item in the database.
+     */
+    private val makeContentEntryAvailableOfflineUseCase: MakeContentEntryAvailableOfflineUseCase by
             di.onActiveEndpoint().instance()
 
     val nodeIdAndAuth: NodeIdAndAuth by di.onActiveEndpoint().instance()
@@ -179,24 +181,12 @@ class ContentEntryDetailOverviewViewModel(
             val offlineItemAndStateVal = _uiState.value.offlineItemAndState
             val offlineItemVal = offlineItemAndStateVal?.offlineItem
             if(offlineItemVal == null || !offlineItemVal.oiActive) {
-                val latestContentEntryVersion = activeRepo.contentEntryVersionDao
-                    .findLatestVersionUidByContentEntryUidEntity(entityUidArg)
-
-                activeRepo.withDoorTransactionAsync {
-                    activeRepo.offlineItemDao.insertAsync(
-                        OfflineItem(
-                            oiNodeId = nodeIdAndAuth.nodeId,
-                            oiContentEntryUid = entityUidArg,
-                            oiActive = true,
-                        )
-                    )
-
-                    if(latestContentEntryVersion != null) {
-                        enqueueContentManifestDownloadUseCase(latestContentEntryVersion.cevUid)
-                    }
-                }
+                makeContentEntryAvailableOfflineUseCase(contentEntryUid = entityUidArg)
             }else if(offlineItemAndStateVal.readyForOffline) {
                 //There is an offline item, transfer was completed, we can set the offline item inactive
+                //The trigger created by AddOfflineItemInactiveTriggersCallback will set the
+                //remove CacheLockJoin(s) status to pending deletion so cache content becomes
+                // eligible for eviction as required.
                 activeRepo.offlineItemDao.updateActiveByOfflineItemUid(offlineItemVal.oiUid, false)
             }
         }

@@ -5,12 +5,12 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.tincan.Activity
 import com.ustadmobile.core.tincan.TinCanXML
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.ext.bodyAsDecodedText
 import com.ustadmobile.core.util.requireEntryByUri
 import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
 import com.ustadmobile.xmlpullparserkmp.setInputString
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
-import io.ktor.client.statement.bodyAsText
 import kotlinx.serialization.json.Json
 
 /**
@@ -45,11 +45,11 @@ class ResolveXapiLaunchHrefUseCase(
                 throw IllegalArgumentException("could not load contententryversion $contentEntryVersionUid")
         val manifestUrl = contentEntryVersion.cevManifestUrl ?:
             throw IllegalStateException("ContentEntryVersion $contentEntryVersionUid manifesturl is null")
-        val manifest: ContentManifest = json.decodeFromString(httpClient.get(manifestUrl).bodyAsText())
+        val manifest: ContentManifest = json.decodeFromString(httpClient.get(manifestUrl).bodyAsDecodedText())
         val tinCanEntry = manifest.requireEntryByUri(
             contentEntryVersion.cevOpenUri!!)
 
-        val tinCanXmlStr = httpClient.get(tinCanEntry.bodyDataUrl).bodyAsText()
+        val tinCanXmlStr = httpClient.get(tinCanEntry.bodyDataUrl).bodyAsDecodedText()
 
         val xpp = xppFactory.newPullParser()
         xpp.setInputString(tinCanXmlStr)

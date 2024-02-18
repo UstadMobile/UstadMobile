@@ -124,6 +124,14 @@ class ClazzEditViewModel(
 
     val uiState: Flow<ClazzEditUiState> = _uiState.asStateFlow()
 
+    /**
+     * The clazz uid (whether it is an existing UID or new UID needs to be passed to other screens
+     * e.g. ClazzAssignmentEdit etc. This needs to be available immediately to avoid issues with
+     * automated testing.
+     */
+    private val effectiveClazzUid = savedStateHandle[ARG_ENTITY_UID]?.toLong()
+        ?: activeDb.doorPrimaryKeyManager.nextId(Clazz.TABLE_ID)
+
     init {
         val title = createEditTitle(MR.strings.add_a_new_course, MR.strings.edit_course)
         _appUiState.update {
@@ -156,9 +164,8 @@ class ClazzEditViewModel(
                                 }
                         },
                         makeDefault = {
-                            val newClazzUid = activeDb.doorPrimaryKeyManager.nextId(Clazz.TABLE_ID)
                             ClazzWithHolidayCalendarAndSchoolAndTerminology().apply {
-                                clazzUid = newClazzUid
+                                clazzUid = effectiveClazzUid
                                 clazzName = ""
                                 isClazzActive = true
                                 clazzStartTime = systemTimeInMillis()
@@ -170,7 +177,7 @@ class ClazzEditViewModel(
                                     .takeIf { clazzTerminologyUid != 0L }
                                     ?.findByUidAsync(clazzTerminologyUid)
                                 coursePicture = CoursePicture(
-                                    coursePictureUid = newClazzUid
+                                    coursePictureUid = effectiveClazzUid
                                 )
                             }
                         },
@@ -486,7 +493,7 @@ class ClazzEditViewModel(
             currentValue = null,
             args = buildMap {
                 put(CourseBlockEditViewModel.ARG_BLOCK_TYPE, blockType.toString())
-                put(UstadView.ARG_CLAZZUID, (_uiState.value.entity?.clazzUid?.toString() ?: "0"))
+                put(UstadView.ARG_CLAZZUID, effectiveClazzUid.toString())
                 if(blockType == CourseBlock.BLOCK_ASSIGNMENT_TYPE) {
                     //Terminology is required by AssignmentEdit (for marking type)
                     _uiState.value.entity?.terminology?.also { terminology ->
@@ -541,8 +548,6 @@ class ClazzEditViewModel(
             return
         }
 
-        loadingState = LoadingUiState.INDETERMINATE
-
         //Entity to save
         val entity = initEntity.shallowCopy {
             this.clazzName = clazzName?.trim()
@@ -555,11 +560,12 @@ class ClazzEditViewModel(
             }
         }
 
-        _uiState.update { prev -> prev.copy(fieldsEnabled = false, entity = entity) }
-
-        viewModelScope.launch {
+        _uiState.update { prev -> prev.copy(entity = entity) }
+        launchWithLoadingIndicator(
+            onSetFieldsEnabled = { _uiState.update { prev -> prev.copy(fieldsEnabled = it) } }
+        ) {
             val initState = savedStateHandle.getJson(KEY_INIT_STATE, ClazzEditUiState.serializer())
-                ?: return@launch
+                ?: return@launchWithLoadingIndicator
 
             Napier.d("onClickSave: start transaction")
             val courseBlockListVal = _uiState.value.courseBlockList
@@ -662,10 +668,6 @@ class ClazzEditViewModel(
                 fromLocalDate.toInstant(entityTimeZone).toEpochMilliseconds(),
                 fromLocalDate.toLocalEndOfDay().toInstant(entityTimeZone).toEpochMilliseconds()
             )
-            _uiState.update { prev ->
-                prev.copy(fieldsEnabled = true)
-            }
-            loadingState = LoadingUiState.NOT_LOADING
             Napier.d("onClickSave: done")
 
             finishWithResult(ClazzDetailViewModel.DEST_NAME, entity.clazzUid, entity)
@@ -798,6 +800,7 @@ class ClazzEditViewModel(
                     serializer = CourseBlockAndEditEntities.serializer(),
                     currentValue = block,
                     args = buildMap {
+                        put(UstadView.ARG_CLAZZUID, effectiveClazzUid.toString())
                         _uiState.value.entity?.terminology?.also { terminology ->
                             put(ARG_TERMINOLOGY,
                                 json.encodeToString(CourseTerminology.serializer(), terminology)
