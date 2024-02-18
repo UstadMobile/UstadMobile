@@ -82,14 +82,17 @@ class UpdateCacheLockJoinUseCase(
             val locksToDelete = pendingLocks.filter {
                 it.cljStatus == CacheLockJoin.STATUS_PENDING_DELETE
             }
-            cache.takeIf { locksToDelete.isNotEmpty() }
-                ?.removeRetentionLocks(
+
+            if(locksToDelete.isNotEmpty()) {
+                cache.removeRetentionLocks(
                     locksToDelete.mapNotNull {  cacheLockJoin ->
                         cacheLockJoin.cljUrl?.let { cacheLockJoinUrl ->
                             RemoveLockRequest(cacheLockJoinUrl, cacheLockJoin.cljLockId)
                         }
                     }
                 )
+                db.cacheLockJoinDao.deleteListAsync(locksToDelete)
+            }
 
             val createLockRequests = pendingLocks.filter {
                 it.cljStatus == CacheLockJoin.STATUS_PENDING_CREATION
@@ -118,6 +121,7 @@ class UpdateCacheLockJoinUseCase(
     }
 
     fun close() {
+        db.invalidationTracker.removeObserver(observer)
         signalChannel.close()
         scope.cancel()
     }

@@ -7,11 +7,14 @@ package com.ustadmobile.core.domain.blob.download
  * The flow for downloading content is as follows:
  *
  * 1) This use case will create a TransferJob and TransferJobItem for the Manifest, and use the
- *    underlying platform scheduling mechanism (quartz/workmanager) to run DownloadContentManifestUseCase
+ *    underlying platform scheduling mechanism (quartz/workmanager) to run
+ *    ContentManifestDownloadUseCase
  *
- * 2) DownloadContentManifestUseCase will fetch the ContentManifest itself, and then add TransferJobItem(s)
- *    for all items referenced in the manifest. It will then use EnqueueBlobDownloadClientUseCase to
- *    enqueue the download of all required items.
+ * 2) ContentManifestDownloadUseCase will fetch the ContentManifest itself, and then add TransferJobItem(s)
+ *    for all items referenced in the manifest. It will also create CacheLockJoin entities for all
+ *    items in the manifest to ensure that downloaded items are stored in a the persistent directory
+ *    and retained. It will then use EnqueueBlobDownloadClientUseCase to enqueue the download of all
+ *    required items.
  *
  * 3) BlobDownloadClientUseCase will fetch all items, pulling them into the cache (via the lib-cache
  *    okhttp interceptor).
@@ -25,7 +28,8 @@ interface EnqueueContentManifestDownloadUseCase {
      * OfflineItemsDownloadEnqueuer to spot what needs enqueued and what has already been enqueued)
      */
     suspend operator fun invoke(
-        contentEntryVersionUid: Long
+        contentEntryVersionUid: Long,
+        offlineItemUid: Long,
     )
 
 }

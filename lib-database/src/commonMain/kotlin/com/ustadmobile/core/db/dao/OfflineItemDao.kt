@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.Flow
 expect abstract class OfflineItemDao {
 
     @Insert
-    abstract suspend fun insertAsync(item: OfflineItem)
+    abstract suspend fun insertAsync(item: OfflineItem) : Long
 
     /**
      * Get the OfflineItemAndState for a given ContentEntry

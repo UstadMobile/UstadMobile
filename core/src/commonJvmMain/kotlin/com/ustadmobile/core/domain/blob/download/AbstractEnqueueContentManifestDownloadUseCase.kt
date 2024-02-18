@@ -16,7 +16,8 @@ abstract class AbstractEnqueueContentManifestDownloadUseCase(
      *
      */
     protected suspend fun createTransferJob(
-        contentEntryVersionUid: Long
+        contentEntryVersionUid: Long,
+        offlineItemUid: Long,
     ): TransferJob {
         return db.withDoorTransactionAsync {
             val contentEntryVersion = db.contentEntryVersionDao.findByUidAsync(
@@ -29,6 +30,7 @@ abstract class AbstractEnqueueContentManifestDownloadUseCase(
                 tjTimeCreated = systemTimeInMillis(),
                 tjEntityUid = contentEntryVersionUid,
                 tjTableId = ContentEntryVersion.TABLE_ID,
+                tjOiUid = offlineItemUid,
             )
             val jobUid = db.transferJobDao.insert(transferJob).toInt()
             val manifestTransferJobItem = TransferJobItem(

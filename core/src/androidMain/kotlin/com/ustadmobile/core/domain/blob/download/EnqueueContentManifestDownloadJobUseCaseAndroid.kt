@@ -18,8 +18,14 @@ class EnqueueContentManifestDownloadJobUseCaseAndroid(
     db: UmAppDatabase
 ): AbstractEnqueueContentManifestDownloadUseCase(db) {
 
-    override suspend fun invoke(contentEntryVersionUid: Long) {
-        val transferJob = createTransferJob(contentEntryVersionUid)
+    override suspend fun invoke(
+        contentEntryVersionUid: Long,
+        offlineItemUid: Long,
+    ) {
+        val transferJob = createTransferJob(
+            contentEntryVersionUid = contentEntryVersionUid,
+            offlineItemUid = offlineItemUid
+        )
 
         val jobData = Data.Builder()
             .putString(DATA_ENDPOINT, endpoint.url)
