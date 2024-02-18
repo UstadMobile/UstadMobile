@@ -37,6 +37,8 @@ import com.ustadmobile.core.domain.account.SetPasswordUseCase
 import com.ustadmobile.core.domain.account.SetPasswordUseCaseCommonJvm
 import com.ustadmobile.core.domain.blob.download.BlobDownloadClientUseCase
 import com.ustadmobile.core.domain.blob.download.BlobDownloadClientUseCaseCommonJvm
+import com.ustadmobile.core.domain.blob.download.CancelDownloadUseCase
+import com.ustadmobile.core.domain.blob.download.CancelDownloadUseCaseAndroid
 import com.ustadmobile.core.domain.blob.download.ContentManifestDownloadUseCase
 import com.ustadmobile.core.domain.blob.download.EnqueueBlobDownloadClientUseCase
 import com.ustadmobile.core.domain.blob.download.EnqueueBlobDownloadClientUseCaseAndroid
@@ -703,6 +705,14 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 repo = instance(tag = DoorTag.TAG_REPO),
                 nodeIdAndAuth = instance(),
                 enqueueContentManifestDownloadUseCase = instance(),
+            )
+        }
+
+        bind<CancelDownloadUseCase>() with scoped(EndpointScope.Default).provider {
+            CancelDownloadUseCaseAndroid(
+                appContext = applicationContext,
+                endpoint = context,
+                db = instance(tag = DoorTag.TAG_DB)
             )
         }
 

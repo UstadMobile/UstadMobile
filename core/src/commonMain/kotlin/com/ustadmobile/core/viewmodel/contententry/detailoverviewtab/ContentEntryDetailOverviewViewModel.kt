@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.blob.download.CancelDownloadUseCase
 import com.ustadmobile.core.domain.blob.download.MakeContentEntryAvailableOfflineUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.LaunchContentEntryVersionUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.epub.LaunchEpubUseCase
@@ -87,6 +88,8 @@ class ContentEntryDetailOverviewViewModel(
      */
     private val makeContentEntryAvailableOfflineUseCase: MakeContentEntryAvailableOfflineUseCase by
             di.onActiveEndpoint().instance()
+
+    private val cancelDownloadUseCase: CancelDownloadUseCase by di.onActiveEndpoint().instance()
 
     val nodeIdAndAuth: NodeIdAndAuth by di.onActiveEndpoint().instance()
 
@@ -180,14 +183,29 @@ class ContentEntryDetailOverviewViewModel(
         viewModelScope.launch {
             val offlineItemAndStateVal = _uiState.value.offlineItemAndState
             val offlineItemVal = offlineItemAndStateVal?.offlineItem
-            if(offlineItemVal == null || !offlineItemVal.oiActive) {
-                makeContentEntryAvailableOfflineUseCase(contentEntryUid = entityUidArg)
-            }else if(offlineItemAndStateVal.readyForOffline) {
+            val activeDownload = offlineItemAndStateVal?.activeDownload
+
+            when {
+                //Not available for offline use yet, mark as selected for offline and start download
+                offlineItemVal == null || !offlineItemVal.oiActive -> {
+                    makeContentEntryAvailableOfflineUseCase(contentEntryUid = entityUidArg)
+                }
+
+                //Currently in progress, if clicked, cancel
+                activeDownload != null -> {
+                    cancelDownloadUseCase(
+                        transferJobId = activeDownload.transferJob?.tjUid ?: 0,
+                        offlineItemUid = offlineItemVal.oiUid
+                    )
+                }
+
                 //There is an offline item, transfer was completed, we can set the offline item inactive
                 //The trigger created by AddOfflineItemInactiveTriggersCallback will set the
                 //remove CacheLockJoin(s) status to pending deletion so cache content becomes
                 // eligible for eviction as required.
-                activeRepo.offlineItemDao.updateActiveByOfflineItemUid(offlineItemVal.oiUid, false)
+                offlineItemAndStateVal.readyForOffline -> {
+                    activeRepo.offlineItemDao.updateActiveByOfflineItemUid(offlineItemVal.oiUid, false)
+                }
             }
         }
     }

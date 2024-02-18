@@ -31,6 +31,7 @@ class EnqueueBlobDownloadClientUseCaseAndroid(
         val workRequest = OneTimeWorkRequestBuilder<BlobDownloadClientWorker>()
             .setInputData(jobData)
             .setBackoffCriteria(BackoffPolicy.LINEAR, 10, TimeUnit.SECONDS)
+            .addTag("offlineitem-${endpoint.url}-${transferJob.tjOiUid}")
             .setConstraints(
                 Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)

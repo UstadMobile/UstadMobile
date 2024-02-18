@@ -35,6 +35,7 @@ class EnqueueContentManifestDownloadJobUseCaseAndroid(
 
         val workRequest = OneTimeWorkRequestBuilder<ContentManifestDownloadWorker>()
             .setInputData(jobData)
+            .addTag("offlineitem-${endpoint.url}-$offlineItemUid")
             .setBackoffCriteria(BackoffPolicy.LINEAR, 10, TimeUnit.SECONDS)
             .setConstraints(
                 Constraints.Builder()

@@ -7,6 +7,7 @@ import com.ustadmobile.core.util.ext.lastDistinctBy
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.composites.TransferJobItemStatus
+import io.github.aakira.napier.Napier
 import kotlinx.atomicfu.atomic
 import kotlinx.atomicfu.update
 import kotlinx.coroutines.CoroutineScope
@@ -108,17 +109,21 @@ class TransferJobItemStatusUpdater(
             }
 
             if(updateTransferJobStatusUid != 0) {
-                db.transferJobDao.updateStatusIfComplete(
+                val numUpdates = db.transferJobDao.updateStatusIfComplete(
                     jobUid = updateTransferJobStatusUid
                 )
+                Napier.d { "TransferJobItemStatusUpdater: update status complete for " +
+                        "$updateTransferJobStatusUid updates=$numUpdates" }
             }
         }
     }
 
-    suspend fun onFinished() {
+    suspend fun onFinished(
+        updateTransferJobStatusUid: Int = 0
+    ) {
         if(!finished.getAndSet(true)) {
             updateJob.cancel()
-            commit()
+            commit(updateTransferJobStatusUid)
         }
     }
 

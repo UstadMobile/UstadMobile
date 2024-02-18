@@ -45,9 +45,10 @@ expect abstract class TransferJobDao {
           AND NOT EXISTS(
               SELECT TransferJobItem.tjiUid
                 FROM TransferJobItem
-               WHERE TransferJobItem.tjiStatus != ${TransferJobItemStatus.STATUS_COMPLETE_INT}) 
+               WHERE TransferJobItem.tjiTjUid = :jobUid
+                 AND TransferJobItem.tjiStatus != ${TransferJobItemStatus.STATUS_COMPLETE_INT}) 
     """)
-    abstract suspend fun updateStatusIfComplete(jobUid: Int)
+    abstract suspend fun updateStatusIfComplete(jobUid: Int): Int
 
     @Query("""
         SELECT TransferJob.*
