@@ -29,6 +29,9 @@ interface SaveLocalUrisAsBlobsUseCase {
      * @param deleteLocalUriAfterSave if true, then the localUri given will be deleted after it has been
      *        successfully saved. On Android/JVM this means deleting the file. On JS this means
      *        revoking the blob URL.
+     * @param createRetentionLock if true, then create a retention lock in the cache when storing if\
+     *        running on a platform which using the local cache (e.g. lib-cache). On JS, this will be
+     *        ignored.
      */
     data class SaveLocalUriAsBlobItem(
         val localUri: String,
@@ -36,6 +39,7 @@ interface SaveLocalUrisAsBlobsUseCase {
         val tableId: Int = 0,
         val mimeType: String? = null,
         val deleteLocalUriAfterSave: Boolean = false,
+        val createRetentionLock: Boolean = false,
     )
 
     /**

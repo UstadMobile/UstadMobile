@@ -84,6 +84,10 @@ interface UstadCache {
 
     fun getCacheEntry(url: String): CacheEntry?
 
+    /**
+     * Get a list of the locks that exist for a given entry
+     */
+    fun getLocks(url: String): List<RetentionLock>
 
     /**
      * Run a bulk query to check if the given urls are available in the cache.

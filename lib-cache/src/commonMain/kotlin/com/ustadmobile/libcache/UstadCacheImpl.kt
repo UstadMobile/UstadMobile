@@ -91,6 +91,8 @@ class UstadCacheImpl(
 
     private val pendingCacheEntryUpdates = atomic(emptyList<CacheEntry>())
 
+    private val pendingCacheEntryDeletes = atomic(emptyList<CacheEntry>())
+
     /**
      * The LruMap is the in-memory cache of entries. It does not include the actual response data.
      * This can reduce both the number of database queries and significantly reduce the number of
@@ -565,22 +567,40 @@ class UstadCacheImpl(
         val key = Md5Digest().urlKey(request.url)
         val entry = loadEntry(key)
         if(entry != null) {
-            logger?.d(LOG_TAG, "$logPrefix FOUND ${request.url}")
-            pendingLastAccessedUpdates.update { prev ->
-                prev + LastAccessedUpdate(key, systemTimeInMillis())
-            }
+            val bodyDataExists = fileSystem.exists(Path(entry.storageUri))
+            if(bodyDataExists) {
+                logger?.d(LOG_TAG, "$logPrefix FOUND ${request.url}")
+                pendingLastAccessedUpdates.update { prev ->
+                    prev + LastAccessedUpdate(key, systemTimeInMillis())
+                }
 
-            return CacheResponse(
-                fileSystem = fileSystem,
-                request = request,
-                headers = headersBuilder {
-                    takeFrom(HttpHeaders.fromString(entry.responseHeaders))
-                    header(HEADER_LAST_VALIDATED_TIMESTAMP, entry.lastValidated.toString())
-                },
-                storageUri = entry.storageUri,
-                httpResponseCode = entry.statusCode,
-                uncompressedSize = entry.uncompressedSize,
-            )
+                return CacheResponse(
+                    fileSystem = fileSystem,
+                    request = request,
+                    headers = headersBuilder {
+                        takeFrom(HttpHeaders.fromString(entry.responseHeaders))
+                        header(HEADER_LAST_VALIDATED_TIMESTAMP, entry.lastValidated.toString())
+                    },
+                    storageUri = entry.storageUri,
+                    httpResponseCode = entry.statusCode,
+                    uncompressedSize = entry.uncompressedSize,
+                )
+            }else {
+                logger?.d(LOG_TAG, "$logPrefix Entry deleted externally:  ${request.url}")
+                //Body data was probably deleted by the OS
+                lruMap.computeIfPresent(key) { urlKey, entryAndLocks ->
+                    entryAndLocks.copy(
+                        entry = null
+                    )
+                }
+                pendingCacheEntryUpdates.update { prev ->
+                    prev.filter { it.key != key }
+                }
+
+                pendingCacheEntryDeletes.update { prev ->
+                    prev + entry
+                }
+            }
         }
 
         logger?.d(LOG_TAG, "$logPrefix MISS ${request.url}")
@@ -626,6 +646,12 @@ class UstadCacheImpl(
 
     override fun getCacheEntry(url: String): CacheEntry? {
         return loadEntry(Md5Digest().urlKey(url))?.copy()
+    }
+
+    override fun getLocks(url: String): List<RetentionLock> {
+        val urlKey = Md5Digest().urlKey(url)
+        loadEntry(urlKey)
+        return lruMap[urlKey]?.locks ?: emptyList()
     }
 
     override fun hasEntries(urls: Set<String>): Map<String, Boolean> {
@@ -759,8 +785,13 @@ class UstadCacheImpl(
             emptyList()
         }
 
-        if(lastAccessUpdates.isEmpty() && lockRemovalsPending.isEmpty()
-            && cacheEntryUpserts.isEmpty() && lockUpsertsPending.isEmpty()
+        val cacheEntryDeletes = pendingCacheEntryDeletes.getAndUpdate {
+            emptyList()
+        }
+
+        if(lastAccessUpdates.isEmpty() && lockRemovalsPending.isEmpty() &&
+            cacheEntryUpserts.isEmpty() && lockUpsertsPending.isEmpty() &&
+            cacheEntryDeletes.isEmpty()
         )
             return
 
@@ -770,6 +801,7 @@ class UstadCacheImpl(
         }
 
         db.withDoorTransaction {
+            db.cacheEntryDao.delete(cacheEntryDeletes)
             db.cacheEntryDao.takeIf { cacheEntryUpserts.isNotEmpty() }
                 ?.upsertList(cacheEntryUpserts)
 

@@ -448,7 +448,6 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 tmpDir = Path(rootTmpDir.absolutePath, "savelocaluriaslblobtmp"),
                 fileSystem = SystemFileSystem,
                 deleteUrisUseCase = instance(),
-                createRetentionLock = true,
             )
         }
 
