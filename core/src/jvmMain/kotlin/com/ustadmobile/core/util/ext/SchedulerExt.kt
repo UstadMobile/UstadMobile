@@ -57,7 +57,7 @@ fun JobExecutionContext.scheduleRetryOrThrow(
             .usingJobData(mergedJobDataMap)
             .usingJobData(BlobUploadClientJob.KEY_ATTEMPTS_COUNT, attemptCount + 1)
             .build()
-        Napier.d("BlobUploadClientJob: attempt $attemptCount failed, rescheduling")
+        Napier.d("scheduleRetryOrThrow: attempt $attemptCount failed, rescheduling")
         scheduler.scheduleJob(jobDetail, trigger)
     }else {
         throw IllegalStateException("Cannot reschedule: ${trigger.key.name}: attempts exceed $maxAttemptsAllowed")
@@ -68,11 +68,13 @@ fun Scheduler.unscheduleAnyExistingAndStartNow(
     job: JobDetail,
     triggerKey: TriggerKey
 ) {
-    unscheduleJob(triggerKey)
     val jobTrigger = TriggerBuilder.newTrigger()
         .withIdentity(triggerKey)
         .startNow()
         .build()
-    scheduleJob(job, jobTrigger)
+
+    Napier.d { "SchedulerExt: scheduleJob with replace $triggerKey" }
+    scheduleJob(job, setOf(jobTrigger), true)
+    Napier.d { "SchedulerExt: scheduleJob with replace $triggerKey : completed" }
 }
 

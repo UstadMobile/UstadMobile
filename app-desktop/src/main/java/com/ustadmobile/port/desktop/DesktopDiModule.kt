@@ -67,6 +67,7 @@ import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.headers.MimeTypeHelper
 import com.ustadmobile.libcache.logging.NapierLoggingAdapter
 import com.ustadmobile.libcache.okhttp.UstadCacheInterceptor
+import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.HttpTimeout
@@ -487,6 +488,7 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         instance<ConnectivityTriggerGroupController>()
         instance<Scheduler>().start()
         Runtime.getRuntime().addShutdownHook(Thread{
+            Napier.i("Shutdown: shutting down scheduler")
             instance<Scheduler>().shutdown()
         })
     }

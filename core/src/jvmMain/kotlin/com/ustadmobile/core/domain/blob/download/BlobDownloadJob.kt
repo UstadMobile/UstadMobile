@@ -9,6 +9,7 @@ import com.ustadmobile.core.util.ext.di
 import com.ustadmobile.core.util.ext.isNotCancelled
 import com.ustadmobile.core.util.ext.scheduleRetryOrThrow
 import com.ustadmobile.door.ext.DoorTag
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -31,6 +32,7 @@ class BlobDownloadJob : InterruptableJob{
         val jobDataMap = context.jobDetail.jobDataMap
         val endpoint = Endpoint(jobDataMap.getString(DATA_ENDPOINT))
         val jobUid = jobDataMap.getInt(DATA_JOB_UID)
+        val logPrefix = "BlobDownloadJob: #$jobUid:"
 
         val blobDownloadUseCase: BlobDownloadClientUseCase = di.on(endpoint).direct.instance()
         val updateFailedTransferJobUseCase: UpdateFailedTransferJobUseCase by di.on(endpoint)
@@ -40,8 +42,10 @@ class BlobDownloadJob : InterruptableJob{
         runBlocking {
             withContext(scope.coroutineContext) {
                 try {
+                    Napier.d("$logPrefix : starting: invoke use case")
                     blobDownloadUseCase(jobUid)
                 }catch(e: Throwable){
+                    Napier.w("$logPrefix : attempt exception", e)
                     withContext(NonCancellable) {
                         if(db.transferJobDao.isNotCancelled(jobUid)) {
                             try {
