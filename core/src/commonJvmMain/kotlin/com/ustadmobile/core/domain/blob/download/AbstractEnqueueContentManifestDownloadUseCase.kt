@@ -1,5 +1,6 @@
 package com.ustadmobile.core.domain.blob.download
 
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -54,6 +55,12 @@ abstract class AbstractEnqueueContentManifestDownloadUseCase(
         const val DATA_JOB_UID = "jobUid"
 
         const val DATA_CONTENTENTRYVERSION_UID = "cevUid"
+
+        const val UNIQUE_NAME_PREFIX = "contentmanifest-download-"
+
+        fun uniqueNameFor(endpoint: Endpoint, transferJobId: Int) : String {
+            return "$UNIQUE_NAME_PREFIX${endpoint.url}-$transferJobId"
+        }
 
     }
 

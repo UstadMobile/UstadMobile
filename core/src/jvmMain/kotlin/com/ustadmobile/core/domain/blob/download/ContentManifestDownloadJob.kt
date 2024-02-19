@@ -1,13 +1,18 @@
 package com.ustadmobile.core.domain.blob.download
 
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.download.AbstractEnqueueContentManifestDownloadUseCase.Companion.DATA_CONTENTENTRYVERSION_UID
 import com.ustadmobile.core.domain.blob.download.AbstractEnqueueContentManifestDownloadUseCase.Companion.DATA_ENDPOINT
 import com.ustadmobile.core.domain.blob.download.AbstractEnqueueContentManifestDownloadUseCase.Companion.DATA_JOB_UID
 import com.ustadmobile.core.domain.blob.upload.UpdateFailedTransferJobUseCase
 import com.ustadmobile.core.util.ext.di
+import com.ustadmobile.core.util.ext.isNotCancelled
 import com.ustadmobile.core.util.ext.scheduleRetryOrThrow
+import com.ustadmobile.door.ext.DoorTag
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
@@ -23,6 +28,7 @@ class ContentManifestDownloadJob: Job {
         val jobUid = jobDataMap.getInt(DATA_JOB_UID)
         val contentEntryVersionUid = jobDataMap.getLong(DATA_CONTENTENTRYVERSION_UID)
 
+        val db: UmAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
         val contentManifestDownloadUseCase: ContentManifestDownloadUseCase = di.on(endpoint).
                 direct.instance()
         val updateFailedTransferJobUseCase: UpdateFailedTransferJobUseCase by di.on(endpoint)
@@ -34,11 +40,15 @@ class ContentManifestDownloadJob: Job {
                     transferJobUid = jobUid
                 )
             }catch(e: Throwable) {
-                try {
-                    context.scheduleRetryOrThrow(this@ContentManifestDownloadJob::class.java,
-                        ContentManifestDownloadUseCase.DEFAULT_MAX_ATTEMPTS)
-                }catch(e2: Throwable) {
-                    updateFailedTransferJobUseCase(jobUid)
+                withContext(NonCancellable) {
+                    if(db.transferJobDao.isNotCancelled(jobUid)) {
+                        try {
+                            context.scheduleRetryOrThrow(this@ContentManifestDownloadJob::class.java,
+                                ContentManifestDownloadUseCase.DEFAULT_MAX_ATTEMPTS)
+                        }catch(e2: Throwable) {
+                            updateFailedTransferJobUseCase(jobUid)
+                        }
+                    }
                 }
             }
         }
