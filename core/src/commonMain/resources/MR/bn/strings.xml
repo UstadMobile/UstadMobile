@@ -392,7 +392,6 @@
     <string name="num_items_with_name_with_comma">%1$d %2$s ,%3$d %4$s</string>
     <string name="add_to">%1$s এ যুক্ত করুন</string>
     <string name="remove_from">%1$s থেকে সরান</string>
-    <string name="items_selected">%1$d নির্বাচিত</string>
     <string name="change_photo">ছবি পরিবর্তন</string>
     <string name="holiday_calendar">ছুটির পঞ্জিকা</string>
     <string name="remove_photo">ফটো সরান</string>

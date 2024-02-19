@@ -14,7 +14,6 @@
     <string name="num_items_with_name_with_comma">%1$d %2$s, %3$d %4$s</string>
     <string name="add_to">%1$s मा थपौं</string>
     <string name="remove_from">%1$s बाट हटाऔं</string>
-    <string name="items_selected">%1$d छनौट गरियो</string>
     <string name="ok">ओके</string>
     <string name="change_photo">फोटो बदलौं</string>
     <string name="overview">संक्षिप्त जानकारी</string>

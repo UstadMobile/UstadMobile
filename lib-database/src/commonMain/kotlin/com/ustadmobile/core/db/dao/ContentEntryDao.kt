@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.Flow
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.composites.ContentEntryAndDetail
 import com.ustadmobile.lib.db.composites.ContentEntryAndLanguage
+import com.ustadmobile.lib.db.composites.ContentEntryAndListDetail
 import com.ustadmobile.lib.db.entities.*
 
 @DoorDao
@@ -176,23 +177,28 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
         pullQueriesToReplicate = arrayOf(
             HttpServerFunctionCall(
-                functionName = "getChildrenByParentUidWithCategoryFilterOrderByName"
+                functionName = "getChildrenByParentUidWithCategoryFilterOrderByName",
+                functionArgs = arrayOf(
+                    HttpServerFunctionParam(
+                        name = "includeDeleted",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "true",
+                    )
+                )
             ),
             HttpServerFunctionCall(
                 functionName = "findListOfChildsByParentUuid",
                 functionDao = ContentEntryParentChildJoinDao::class,
-            )
+            ),
         )
     )
     @Query("""
-            SELECT ContentEntry.*
+            SELECT ContentEntry.*, ContentEntryParentChildJoin.*
               FROM ContentEntry 
                     LEFT JOIN ContentEntryParentChildJoin 
                          ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid 
              WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid 
-               AND (:langParam = 0 OR ContentEntry.primaryLanguageUid = :langParam) 
-               AND (NOT ContentEntry.ceInactive OR ContentEntry.ceInactive = :showHidden) 
-               AND (NOT ContentEntry.leaf OR NOT ContentEntry.leaf = :onlyFolder) 
+               AND (:langParam = 0 OR ContentEntry.primaryLanguageUid = :langParam)
                AND (ContentEntry.publik 
                     OR (SELECT username
                           FROM Person
@@ -201,6 +207,7 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
                     IN (SELECT ceccjContentCategoryUid 
                           FROM ContentEntryContentCategoryJoin 
                          WHERE ceccjContentEntryUid = ContentEntry.contentEntryUid)) 
+               AND (:includeDeleted = 1 OR CAST(ContentEntryParentChildJoin.cepcjDeleted AS INTEGER) = 0)          
             ORDER BY ContentEntryParentChildJoin.childIndex,
                      CASE(:sortOrder)
                      WHEN $SORT_TITLE_ASC THEN ContentEntry.title
@@ -216,18 +223,19 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
         langParam: Long,
         categoryParam0: Long,
         personUid: Long,
-        showHidden: Boolean,
-        onlyFolder: Boolean,
-        sortOrder: Int
-    ): PagingSource<Int, ContentEntry>
+        sortOrder: Int,
+        includeDeleted: Boolean,
+    ): PagingSource<Int, ContentEntryAndListDetail>
 
     @Query("""
-        SELECT ContentEntry.*
+        SELECT ContentEntry.*, ContentEntryParentChildJoin.*
           FROM CourseBlock
                JOIN ContentEntry 
                     ON CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
                        AND ContentEntry.contentEntryUid = CourseBlock.cbEntityUid
                        AND CAST(CourseBlock.cbActive AS INTEGER) = 1
+               LEFT JOIN ContentEntryParentChildJoin
+                         ON ContentEntryParentChildJoin.cepcjParentContentEntryUid = 0
          WHERE CourseBlock.cbClazzUid IN
                (SELECT ClazzEnrolment.clazzEnrolmentClazzUid
                   FROM ClazzEnrolment
@@ -235,17 +243,19 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
     """)
     abstract fun getContentFromMyCourses(
         personUid: Long
-    ): PagingSource<Int, ContentEntry>
+    ): PagingSource<Int, ContentEntryAndListDetail>
 
 
     @Query("""
-        SELECT ContentEntry.*
+        SELECT ContentEntry.*, ContentEntryParentChildJoin.*
           FROM ContentEntry
+               LEFT JOIN ContentEntryParentChildJoin
+                         ON ContentEntryParentChildJoin.cepcjParentContentEntryUid = 0
          WHERE ContentEntry.contentOwner = :personUid
     """)
     abstract fun getContentByOwner(
         personUid: Long
-    ): PagingSource<Int, ContentEntry>
+    ): PagingSource<Int, ContentEntryAndListDetail>
 
 
     @Update

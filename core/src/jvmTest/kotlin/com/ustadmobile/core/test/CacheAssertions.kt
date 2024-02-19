@@ -4,8 +4,9 @@ import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.io.ext.readSha256
 import com.ustadmobile.door.util.NullOutputStream
 import com.ustadmobile.libcache.UstadCache
-import com.ustadmobile.libcache.io.useAndReadySha256
+import com.ustadmobile.libcache.io.useAndReadSha256
 import com.ustadmobile.libcache.request.requestBuilder
+import com.ustadmobile.libcache.response.bodyAsUncompressedSourceIfContentEncoded
 import kotlinx.io.asInputStream
 import org.junit.Assert
 import java.io.File
@@ -56,30 +57,6 @@ fun UstadCache.assertCachedBodyMatchesFileContent(
         fileSha256, responseSha256)
 }
 
-/**
- * Assert that the cache has a corresponding entry for each entry in the given zip
- * in the form of urlPrefix/entryPath for all entries in the zip.
- *
- * @param urlPrefix the url prefix to lookup
- * @param zip the ZipFile to check against
- */
-fun UstadCache.assertZipIsCached(
-    urlPrefix: String,
-    zip: ZipFile,
-) {
-    if(!urlPrefix.endsWith("/"))
-        throw IllegalArgumentException("URL prefix must end with /")
-
-    val entries = zip.entries().toList()
-    entries.filter { !it.isDirectory }.forEach {
-        assertCachedBodyMatchesZipEntry(
-            url = "$urlPrefix${it.name}",
-            zipFile = zip,
-            pathInZip = it.name
-        )
-    }
-}
-
 fun UstadCache.assertManifestEntryIsStored(
     manifest: ContentManifest,
     uriInManifest: String,
@@ -90,7 +67,7 @@ fun UstadCache.assertManifestEntryIsStored(
     }
     val cacheResponse = retrieve(requestBuilder(manifestEntry.bodyDataUrl))
     assertNotNull(cacheResponse)
-    val responseSha256 = cacheResponse.bodyAsSource()!!.useAndReadySha256()
+    val responseSha256 = cacheResponse.bodyAsUncompressedSourceIfContentEncoded()!!.useAndReadSha256()
     val originalDataSha256 = originalData().use { it.readSha256() }
     assertTrue(originalDataSha256.contentEquals(responseSha256),
         message = "SHA-256 of original data and data returned for $uriInManifest " +

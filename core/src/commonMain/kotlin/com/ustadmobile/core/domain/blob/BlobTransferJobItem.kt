@@ -12,6 +12,6 @@ package com.ustadmobile.core.domain.blob
 data class BlobTransferJobItem(
     val blobUrl: String,
     val transferJobItemUid: Int,
-    val lockIdToRelease: Int = 0,
+    val lockIdToRelease: Long = 0,
     val estimatedSize: Long? = null,
 )

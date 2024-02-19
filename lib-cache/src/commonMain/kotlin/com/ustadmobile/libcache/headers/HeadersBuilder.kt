@@ -18,6 +18,10 @@ class HeadersBuilder internal constructor(
         headersList.add(HttpHeader(name, value))
     }
 
+    fun removeHeader(name: String) {
+        headersList.removeAll { it.name.equals(name, true) }
+    }
+
     fun build(): HttpHeaders = HttpHeadersImpl(headersList.toList())
 
 }

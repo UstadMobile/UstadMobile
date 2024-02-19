@@ -11,12 +11,12 @@ import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryImportJob
 import com.ustadmobile.libcache.request.requestBuilder
+import com.ustadmobile.libcache.response.bodyAsString
 import com.ustadmobile.util.test.ext.newFileFromResource
 import com.ustadmobile.xmlpullparserkmp.setInputString
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.asInputStream
 import kotlinx.io.files.Path
-import kotlinx.io.readString
 import org.xmlpull.v1.XmlPullParserFactory
 import java.util.zip.ZipFile
 import kotlin.test.Test
@@ -123,7 +123,7 @@ class H5PContentImporterTest : AbstractContentImporterTest() {
             requestBuilder("$expectedUrlPrefix$MANIFEST_NAME")
         )
         val manifest = json.decodeFromString(
-            ContentManifest.serializer(), manifestResponse!!.bodyAsSource()!!.readString()
+            ContentManifest.serializer(), manifestResponse!!.bodyAsString()!!
         )
 
         ZipFile(h5pFile).use { zipFile ->

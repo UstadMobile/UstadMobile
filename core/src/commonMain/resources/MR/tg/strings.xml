@@ -415,7 +415,6 @@
     <string name="take_new_photo_from_camera">Акси навро аз камера гиред</string>
     <string name="remove_photo">Тоза кардани акс</string>
     <string name="change_photo">Ивази акс</string>
-    <string name="items_selected">%1$d интихоб шуд</string>
     <string name="remove_from">Аз %1$s тоза намоед</string>
     <string name="add_to">Ба %1$s илова намоед</string>
     <string name="num_items_with_name_with_comma">%1$d %2$s, %3$d %4$s</string>
@@ -1041,4 +1040,25 @@
     <string name="html5_content_display_engine">Муҳаррики намоишии HTML5</string>
     <string name="internal_webview_info">Ин танҳо дар ҳолате тавсия дода мешавад, ки дастрасӣ ба браузер дар дастгоҳ иҷозат дода нашудааст</string>
     <string name="content_not_ready_try_later">Мундариҷа ҳанӯз омода нест, баъдтар такрор кунед.</string>
+    <string name="onboarding_headline1">Интернет нест? Ҳеч мушкилӣ надорад.</string>
+    <string name="onboarding_subheadline1">Ҳама чиз офлайн кор мекунад</string>
+    <string name="onboarding_subheadline3">Мазмуни таълим, супоришҳо, дарсҳо ва давомот ҳама дар як ҷо</string>
+    <string name="onboarding_headline2">Офлайн мубодила кунед</string>
+    <string name="onboarding_headline3">Муташаккил бимонед</string>
+    <string name="onboarding_subheadline2">Бо мубодилаи фаврии офлайн вақт ва маълумотро сарфа кунед</string>
+    <string name="delete_or_restore_items">Объектҳоро нест кунед ё барқарор кунед</string>
+    <string name="version">Версия</string>
+    <string name="licenses">Литсензияҳо</string>
+    <string name="selected">Интихобшуда</string>
+    <string name="clear_selection">Интихобро бекор кунед</string>
+    <string name="cannot_record_attendance_for_future_date_time">Иштирокро барои сана/вақти оянда сабт карда намешавад</string>
+    <string name="could_not_load_vlc">VLC-ро бор карда натавонист. Барои навозиш видео версияи 64-битии видео-плейери VLC талаб мекунад. Лутфан версияи 64-битро аз https://www.videolan.org/ зеркашӣ ва насб кунед, пас ин барномаро бозоғоз намоед.</string>
+    <string name="move_entries_to_this_folder">Воридотҳоро ба ин ҷузвдон/папка кӯчонед</string>
+    <string name="cannot_move_to_subfolder_of_self">Папкаро ба зерпапкаи худ интиқол додан мумкин нест</string>
+    <string name="cannot_move_already_in_same_folder">Ҷойгир кардан ғайриимкон аст: ҷузъҳо аллакай дар ин ҷузвдон ҳастанд</string>
+    <string name="move_to">Гузариш ба…</string>
+    <string name="restore">Барқарор кардан</string>
+    <string name="delete_permanently">Ба таври доимӣ нест кардан</string>
+    <string name="deleted_items">Элементҳои нестшуда</string>
+    <string name="yesterday">Дируз</string>
 </resources>

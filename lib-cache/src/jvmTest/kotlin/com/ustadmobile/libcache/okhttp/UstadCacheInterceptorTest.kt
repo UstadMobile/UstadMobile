@@ -1,6 +1,9 @@
 package com.ustadmobile.libcache.okhttp
 
 import com.ustadmobile.door.DatabaseBuilder
+import com.ustadmobile.libcache.CachePaths
+import com.ustadmobile.libcache.CachePathsProvider
+import com.ustadmobile.libcache.CompressionType
 import com.ustadmobile.libcache.logging.NapierLoggingAdapter
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheImpl
@@ -11,9 +14,12 @@ import com.ustadmobile.libcache.headers.HttpHeaders
 import com.ustadmobile.libcache.integrity.sha256Integrity
 import com.ustadmobile.libcache.md5.Md5Digest
 import com.ustadmobile.libcache.md5.urlKey
+import com.ustadmobile.libcache.request.requestBuilder
+import com.ustadmobile.libcache.response.bodyAsUncompressedSourceIfContentEncoded
 import com.ustadmobile.util.test.ResourcesDispatcher
 import com.ustadmobile.util.test.initNapierLog
 import kotlinx.io.files.Path
+import kotlinx.io.readByteArray
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.mockwebserver.MockResponse
@@ -36,6 +42,7 @@ import java.security.MessageDigest
 import java.time.Duration
 import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
@@ -47,13 +54,15 @@ class UstadCacheInterceptorTest {
 
     private lateinit var okHttpClient: OkHttpClient
 
-    private lateinit var cacheDir: File
+    private lateinit var cacheRootDir: File
+
+    private lateinit var cachePathsProvider: CachePathsProvider
 
     private lateinit var interceptorTmpDir: File
 
     private lateinit var cacheDb: UstadCacheDb
 
-    private lateinit var ustadCache: UstadCache
+    private lateinit var ustadCache: UstadCacheImpl
 
     private lateinit var cacheListener: UstadCache.CacheListener
 
@@ -68,14 +77,23 @@ class UstadCacheInterceptorTest {
         initNapierLog()
         val logger = NapierLoggingAdapter()
         cacheListener = mock { }
-        cacheDir = tempDir.newFolder("cachedir")
+        cacheRootDir = tempDir.newFolder("cachedir")
+        cachePathsProvider = CachePathsProvider {
+            Path(cacheRootDir.absolutePath).let {
+                CachePaths(
+                    tmpWorkPath = Path(it, "tmpWork"),
+                    persistentPath = Path(it, "persistent"),
+                    cachePath = Path(it, "cache"),
+                )
+            }
+        }
         interceptorTmpDir = tempDir.newFolder("interceptor-tmp")
         cacheDb = DatabaseBuilder.databaseBuilder(
             UstadCacheDb::class, "jdbc:sqlite::memory:", 1L)
             .build()
         ustadCache = spy(
             UstadCacheImpl(
-                storagePath = Path(cacheDir.absolutePath),
+                pathsProvider = cachePathsProvider,
                 db = cacheDb,
                 logger = logger,
                 listener = cacheListener,
@@ -121,7 +139,79 @@ class UstadCacheInterceptorTest {
             .readAllBytes()
         Assert.assertArrayEquals(resourceBytes, responseBytes)
         ustadCache.verifyUrlStored(requestUrl)
+
+        val cacheResponse = ustadCache.retrieve(requestBuilder(requestUrl))
+        assertEquals(CompressionType.NONE,
+            CompressionType.byHeaderVal(cacheResponse!!.headers["content-encoding"]),
+            "Non-compressable mime type should not be encoded"
+        )
+
         interceptorTmpDir.assertTempDirectoryIsEmptied()
+    }
+
+    @Test
+    fun givenCompressableEntryNotYetCachedNotEncoded_whenRequested_thenWillRespondAndCacheIt() {
+        val mockWebServer = MockWebServer().also {
+            it.dispatcher = ResourcesDispatcher(javaClass) {
+                it.addHeader("content-type", "application/javascript")
+            }
+
+            it.start()
+        }
+
+        val requestUrl = "${mockWebServer.url("/ustadmobile-epub.js")}"
+        val response = okHttpClient.newCall(
+            Request.Builder().url(requestUrl).build()
+        ).execute()
+        val responseBytes = response.body!!.bytes()
+        val resourceBytes = javaClass.getResourceAsStream("/ustadmobile-epub.js")!!
+            .readAllBytes()
+        Assert.assertArrayEquals(resourceBytes, responseBytes)
+
+        //Now check the cached response is compressed
+        val cacheResponse = ustadCache.retrieve(
+            requestBuilder(requestUrl) {
+                header("accept-encoding", "gzip, br, deflate")
+            }
+        )
+        assertNotEquals(CompressionType.NONE, CompressionType.byHeaderVal(
+            cacheResponse!!.headers["content-encoding"]),
+            "compression type should not be none - e.g. should be compressed")
+        val cacheResponseBytes = cacheResponse.bodyAsUncompressedSourceIfContentEncoded()!!.readByteArray()
+        Assert.assertArrayEquals(resourceBytes, cacheResponseBytes)
+    }
+
+
+    @Test
+    fun givenCompressableEntryNotYetCachedAlreadyEncoded_whenRequested_thenWillRespondAndCacheIt() {
+        val mockWebServer = MockWebServer().also {
+            it.dispatcher = ResourcesDispatcher(javaClass, contentEncoding = "gzip") {
+                it.addHeader("content-type", "application/javascript")
+            }
+
+            it.start()
+        }
+
+        val requestUrl = "${mockWebServer.url("/ustadmobile-epub.js")}"
+        val response = okHttpClient.newCall(
+            Request.Builder().url(requestUrl).build()
+        ).execute()
+        val responseBytes = response.body!!.bytes()
+        val resourceBytes = javaClass.getResourceAsStream("/ustadmobile-epub.js")!!
+            .readAllBytes()
+        Assert.assertArrayEquals(resourceBytes, responseBytes)
+
+        //Now check the cached response is compressed
+        val cacheResponse = ustadCache.retrieve(
+            requestBuilder(requestUrl) {
+                header("accept-encoding", "gzip, deflate, br")
+            }
+        )
+        assertNotEquals(CompressionType.NONE, CompressionType.byHeaderVal(
+            cacheResponse!!.headers["content-encoding"]),
+            "compression type should not be none - e.g. should be compressed")
+        val cacheResponseBytes = cacheResponse.bodyAsUncompressedSourceIfContentEncoded()!!.readByteArray()
+        Assert.assertArrayEquals(resourceBytes, cacheResponseBytes)
     }
 
     @Test
@@ -199,6 +289,7 @@ class UstadCacheInterceptorTest {
             argWhere { entries -> entries.any { it.request.url == requestUrl } }
         )
 
+        ustadCache.commit()
         val storedEntryAfterRequest = cacheDb.cacheEntryDao.findEntryAndBodyByKey(
             Md5Digest().urlKey(requestUrl))
 
@@ -218,6 +309,7 @@ class UstadCacheInterceptorTest {
         val validationRequest = mockWebServer.takeRequest()
         assertEquals(etagVal, validationRequest.getHeader("if-none-match"))
 
+        ustadCache.commit()
         val storedEntryAfterValidation = cacheDb.cacheEntryDao.findEntryAndBodyByKey(
             Md5Digest().urlKey(requestUrl))
 

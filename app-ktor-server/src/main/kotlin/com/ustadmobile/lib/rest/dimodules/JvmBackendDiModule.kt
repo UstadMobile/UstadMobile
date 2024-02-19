@@ -8,6 +8,8 @@ import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.contentformats.epub.XhtmlFixer
 import com.ustadmobile.core.contentformats.epub.XhtmlFixerJsoup
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.ext.MIGRATION_144_145_SERVER
+import com.ustadmobile.core.db.ext.MIGRATION_148_149_NO_OFFLINE_ITEMS
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.core.domain.cachelock.AddRetainAllActiveUriTriggersCallback
@@ -15,6 +17,7 @@ import com.ustadmobile.core.domain.cachelock.CreateCacheLocksForActiveContentEnt
 import com.ustadmobile.core.domain.cachelock.Migrate131to132AddRetainActiveUriTriggers
 import com.ustadmobile.core.domain.cachelock.UpdateCacheLockJoinUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCaseCommonJvm
+import com.ustadmobile.core.domain.message.AddOutgoingReplicationForMessageTriggerCallback
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.DiTag
@@ -131,8 +134,11 @@ fun makeJvmBackendDiModule(
             .addSyncCallback(nodeIdAndAuth)
             .addCallback(InsertDefaultSiteCallback())
             .addCallback(AddRetainAllActiveUriTriggersCallback())
+            .addCallback(AddOutgoingReplicationForMessageTriggerCallback())
             .addMigrations(*migrationList().toTypedArray())
             .addMigrations(Migrate131to132AddRetainActiveUriTriggers)
+            .addMigrations(MIGRATION_144_145_SERVER)
+            .addMigrations(MIGRATION_148_149_NO_OFFLINE_ITEMS)
             .build().also {
                 it.ktorInitDb(di)
             }

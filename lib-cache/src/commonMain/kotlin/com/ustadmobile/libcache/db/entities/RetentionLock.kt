@@ -19,7 +19,7 @@ import androidx.room.PrimaryKey
 )
 data class RetentionLock(
     @PrimaryKey(autoGenerate = true)
-    var lockId: Int = 0,
+    var lockId: Long = 0,
 
     /**
      * The key as per CacheEntry.key

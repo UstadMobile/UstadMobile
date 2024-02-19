@@ -678,7 +678,6 @@
     <string name="num_items_with_name_with_comma">%1$d %2$s, %3$d %4$s</string>
     <string name="add_to">Add to %1$s</string>
     <string name="remove_from">Remove from %1$s</string>
-    <string name="items_selected">%1$d selected</string>
     <string name="change_photo">Change photo</string>
     <string name="remove_photo">Remove photo</string>
     <string name="take_new_photo_from_camera">Take new photo from camera</string>
@@ -1723,5 +1722,39 @@
     <string name="cannot_record_attendance_for_future_date_time">Cannot record attendance for future date/time</string>
 
     <string name="could_not_load_vlc">Could not load VLC. Video playback requires a 64bit version of VLC to be installed. Please download and install a 64bit version from https://www.videolan.org/ , then restart this app.</string>
+
+    <string name="selected">Selected</string>
+
+    <string name="clear_selection">Clear selection</string>
+
+    <!--
+    After the user selects to move entries, this is the text that will be shown on the button at the
+    bottom to allow the user to select the current folder as the destination.
+    -->
+    <string name="move_entries_to_this_folder">Move entries to this folder</string>
+
+    <!--
+    Error message if a user selects to move a folder to a destination which is a subfolder of itself
+    -->
+    <string name="cannot_move_to_subfolder_of_self">Cannot move a folder to a subfolder of itself</string>
+
+    <!--
+    Error message if a user selects to move library content to another folder, but then picks the same
+    folder that the content is already in
+    -->
+    <string name="cannot_move_already_in_same_folder">Cannot move: items are already in this folder</string>
+
+    <string name="move_to">Move to…</string>
+
+
+    <string name="restore">Restore</string>
+
+    <string name="delete_permanently">Delete permanently</string>
+
+    <string name="deleted_items">Deleted items</string>
+
+    <string name="delete_or_restore_items">Delete or restore items</string>
+
+    <string name="yesterday">Yesterday</string>
 
 </resources>

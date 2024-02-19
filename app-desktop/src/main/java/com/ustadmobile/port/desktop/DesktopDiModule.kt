@@ -12,8 +12,12 @@ import com.ustadmobile.core.contentformats.ContentImportersDiModuleJvm
 import com.ustadmobile.core.contentformats.epub.XhtmlFixer
 import com.ustadmobile.core.contentformats.epub.XhtmlFixerJsoup
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.ext.MIGRATION_144_145_CLIENT
+import com.ustadmobile.core.db.ext.MIGRATION_148_149_CLIENT_WITH_OFFLINE_ITEMS
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
+import com.ustadmobile.core.domain.cachelock.AddOfflineItemInactiveTriggersCallback
+import com.ustadmobile.core.domain.cachelock.UpdateCacheLockJoinUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseJvm
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseRemote
@@ -63,6 +67,7 @@ import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.headers.MimeTypeHelper
 import com.ustadmobile.libcache.logging.NapierLoggingAdapter
 import com.ustadmobile.libcache.okhttp.UstadCacheInterceptor
+import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.HttpTimeout
@@ -224,6 +229,12 @@ val DesktopHttpModule = DI.Module("Desktop-HTTP") {
 
 }
 
+data class DbAndObservers(
+    val db: UmAppDatabase,
+    val updateCacheLockJoinUseCase: UpdateCacheLockJoinUseCase,
+)
+
+
 @OptIn(ExperimentalXmlUtilApi::class)
 val DesktopDiModule = DI.Module("Desktop-Main") {
     val resourcesDir = ustadAppResourcesDir()
@@ -308,14 +319,30 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
     }
 
     bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(EndpointScope.Default).singleton {
+        instance<DbAndObservers>().db
+    }
+
+    bind<DbAndObservers>() with scoped(EndpointScope.Default).singleton {
         val contextDataDir: File = on(context).instance(tag = DiTag.TAG_CONTEXT_DATA_ROOT)
         val dbUrl = "jdbc:sqlite:${contextDataDir.absolutePath}/UmAppDatabase.db"
         val nodeIdAndAuth: NodeIdAndAuth = instance()
 
-        DatabaseBuilder.databaseBuilder(UmAppDatabase::class, dbUrl, nodeIdAndAuth.nodeId)
+        val db = DatabaseBuilder.databaseBuilder(UmAppDatabase::class, dbUrl, nodeIdAndAuth.nodeId)
             .addSyncCallback(nodeIdAndAuth)
             .addMigrations(*migrationList().toTypedArray())
+            .addMigrations(MIGRATION_144_145_CLIENT)
+            .addMigrations(MIGRATION_148_149_CLIENT_WITH_OFFLINE_ITEMS)
+            .addCallback(AddOfflineItemInactiveTriggersCallback())
             .build()
+
+        val cache: UstadCache = instance()
+        DbAndObservers(
+            db = db,
+            updateCacheLockJoinUseCase = UpdateCacheLockJoinUseCase(
+                db = db,
+                cache = cache,
+            )
+        )
     }
 
     bind<NodeIdAndAuth>() with scoped(EndpointScope.Default).singleton {
@@ -461,6 +488,7 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         instance<ConnectivityTriggerGroupController>()
         instance<Scheduler>().start()
         Runtime.getRuntime().addShutdownHook(Thread{
+            Napier.i("Shutdown: shutting down scheduler")
             instance<Scheduler>().shutdown()
         })
     }

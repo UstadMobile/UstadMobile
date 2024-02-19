@@ -33,7 +33,7 @@ val UstadSendTextField = FC<UstadSendTextFieldProps> { props ->
         (props.value as? String).isNullOrBlank()
     }
 
-    TextField {
+    UstadTextField {
         props.assignPropsTo(
             receiver = this,
             filter = { it != "InputProps" }

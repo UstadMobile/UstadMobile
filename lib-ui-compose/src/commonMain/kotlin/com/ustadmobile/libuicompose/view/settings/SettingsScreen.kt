@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeveloperMode
 import androidx.compose.material.icons.filled.DisplaySettings
 import androidx.compose.material.icons.filled.Language
@@ -41,6 +42,7 @@ fun SettingsScreen(
         onClickHtmlContentDisplayEngine = viewModel::onClickHtmlContentDisplayEngine,
         onClickVersion = viewModel::onClickVersion,
         onClickDeveloperOptions = viewModel::onClickDeveloperOptions,
+        onClickDeletedItems = viewModel::onClickDeletedItems,
     )
 
     if(uiState.langDialogVisible) {
@@ -91,6 +93,7 @@ fun SettingsScreen(
     onClickLeavingReason: () -> Unit = {},
     onClickVersion: () -> Unit = { },
     onClickDeveloperOptions: () -> Unit = { },
+    onClickDeletedItems: () -> Unit = { },
 ) {
     UstadVerticalScrollColumn(
         modifier = Modifier.fillMaxSize()
@@ -101,6 +104,13 @@ fun SettingsScreen(
             icon= Icons.Default.Language,
             valueText = uiState.currentLanguage,
             labelText = stringResource(MR.strings.app_language),
+        )
+
+        UstadDetailField2(
+            valueText = stringResource(MR.strings.deleted_items),
+            labelText = stringResource(MR.strings.delete_or_restore_items),
+            icon = Icons.Default.Delete,
+            modifier = Modifier.clickable { onClickDeletedItems() }
         )
 
         if (uiState.holidayCalendarVisible){

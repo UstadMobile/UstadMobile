@@ -11,9 +11,10 @@ import com.ustadmobile.mui.components.UstadDetailField2
 import com.ustadmobile.mui.components.UstadStandardContainer
 import web.cssom.px
 //WARNING: DO NOT Replace with import mui.icons.material.[*] - Leads to severe IDE performance issues 10/Apr/23 https://youtrack.jetbrains.com/issue/KT-57897/Intellisense-and-code-analysis-is-extremely-slow-and-unusable-on-Kotlin-JS
-import mui.icons.material.Language
-import mui.icons.material.AccountBalance
-import mui.icons.material.ExitToApp
+import mui.icons.material.Language as LanguageIcon
+import mui.icons.material.AccountBalance as AccountBalanceIcon
+import mui.icons.material.ExitToApp as ExitToAppIcon
+import mui.icons.material.Delete as DeleteIcon
 import mui.material.Dialog
 import mui.material.List
 import mui.material.ListItem
@@ -37,6 +38,8 @@ external interface SettingsProps : Props {
     var onClickLeavingReason: () -> Unit
 
     var onClickLangList: () -> Unit
+
+    var onClickDeletedItems: () -> Unit
 }
 
 val SettingsScreen = FC<Props> {
@@ -73,6 +76,7 @@ val SettingsScreen = FC<Props> {
         uiState = uiStateVal
         onClickWorkspace = viewModel::onClickSiteSettings
         onClickAppLanguage = viewModel::onClickLanguage
+        onClickDeletedItems = viewModel::onClickDeletedItems
     }
 
 }
@@ -109,15 +113,22 @@ val SettingsComponent2 = FC<SettingsProps> { props ->
             spacing = responsive(10.px)
 
             UstadDetailField2 {
-                leadingContent = Language.create()
+                leadingContent = LanguageIcon.create()
                 labelContent = ReactNode(props.uiState.currentLanguage)
                 valueContent = ReactNode(strings[MR.strings.app_language])
                 onClick = props.onClickAppLanguage
             }
 
+            UstadDetailField2 {
+                leadingContent = DeleteIcon.create()
+                valueContent = ReactNode(strings[MR.strings.deleted_items])
+                labelContent = ReactNode(strings[MR.strings.delete_or_restore_items])
+                onClick = props.onClickDeletedItems
+            }
+
             if (props.uiState.workspaceSettingsVisible){
                 UstadDetailField2 {
-                    leadingContent = AccountBalance.create()
+                    leadingContent = AccountBalanceIcon.create()
                     labelContent = ReactNode(strings[MR.strings.manage_site_settings])
                     valueContent = ReactNode(strings[MR.strings.site])
                     onClick = props.onClickWorkspace
@@ -126,7 +137,7 @@ val SettingsComponent2 = FC<SettingsProps> { props ->
 
             if (props.uiState.reasonLeavingVisible){
                 UstadDetailField {
-                    icon = ExitToApp.create()
+                    icon = ExitToAppIcon.create()
                     labelText = strings[MR.strings.leaving_reason_manage]
                     valueText = ReactNode(strings[MR.strings.leaving_reason])
                     onClick = props.onClickLeavingReason

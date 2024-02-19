@@ -13,5 +13,5 @@ data class StoreResult(
     val response: HttpResponse,
     val integrity: String,
     val storageSize: Long,
-    val lockId: Int = 0,
+    val lockId: Long = 0,
 )
