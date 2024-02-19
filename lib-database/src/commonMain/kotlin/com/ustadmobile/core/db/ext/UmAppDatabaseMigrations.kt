@@ -1579,6 +1579,15 @@ val MIGRATION_148_149_NO_OFFLINE_ITEMS = DoorMigrationStatementList(148, 149) {
     emptyList()
 }
 
+val MIGRATION_149_150 = DoorMigrationStatementList(149, 150) { db ->
+    buildList {
+        val fieldType = if(db.dbType() == DoorDbType.SQLITE) "INTEGER" else "BIGINT"
+
+        add("ALTER TABLE ContentEntryVersion ADD COLUMN cevStorageSize $fieldType NOT NULL DEFAULT 0")
+        add("ALTER TABLE ContentEntryVersion ADD COLUMN cevOriginalSize $fieldType NOT NULL DEFAULT 0")
+    }
+}
+
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_102_103,
     MIGRATION_103_104, MIGRATION_104_105, MIGRATION_105_106, MIGRATION_106_107,
@@ -1589,7 +1598,7 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_133_134, MIGRATION_134_135, MIGRATION_135_136, MIGRATION_136_137,
     MIGRATION_137_138, MIGRATION_138_139, MIGRATION_139_140, MIGRATION_140_141,
     MIGRATION_141_142, MIGRATION_142_143, MIGRATION_143_144, MIGRATION_145_146,
-    MIGRATION_146_147, MIGRATION_147_148,
+    MIGRATION_146_147, MIGRATION_147_148, MIGRATION_149_150,
 )
 
 
