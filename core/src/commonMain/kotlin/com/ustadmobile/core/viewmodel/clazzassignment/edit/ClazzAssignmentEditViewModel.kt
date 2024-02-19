@@ -427,19 +427,17 @@ class ClazzAssignmentEditViewModel(
         if(!_uiState.value.fieldsEnabled)
             return
 
-        _uiState.update { prev ->
-            prev.copyWithFieldsEnabledSet(fieldsEnabled = false)
-        }
-
-        viewModelScope.launch {
+        launchWithLoadingIndicator(
+            onSetFieldsEnabled = { _uiState.update { prev -> prev.copyWithFieldsEnabledSet(fieldsEnabled = true) } }
+        ) {
             val initState = savedStateHandle[KEY_INIT_STATE]?.let { initStateJson ->
                 withContext(Dispatchers.Default) {
                     json.decodeFromString(ClazzAssignmentEditUiState.serializer(), initStateJson)
                 }
-            } ?: return@launch
+            } ?: return@launchWithLoadingIndicator
 
-            val assignment = _uiState.value.entity?.assignment ?: return@launch
-            val courseBlock = _uiState.value.courseBlockEditUiState.courseBlock ?: return@launch
+            val assignment = _uiState.value.entity?.assignment ?: return@launchWithLoadingIndicator
+            val courseBlock = _uiState.value.courseBlockEditUiState.courseBlock ?: return@launchWithLoadingIndicator
 
             if(!assignment.caRequireFileSubmission && !assignment.caRequireTextSubmission) {
                 _uiState.update { prev ->
@@ -532,11 +530,7 @@ class ClazzAssignmentEditViewModel(
                     snackDisaptcher.showSnackBar(Snack(it))
                 }
 
-                loadingState = LoadingUiState.NOT_LOADING
-                _uiState.update { prev ->
-                    prev.copyWithFieldsEnabledSet(fieldsEnabled = true)
-                }
-                return@launch
+                return@launchWithLoadingIndicator
             }
 
             if(assignment.caMarkingType == ClazzAssignment.MARKED_BY_PEERS &&

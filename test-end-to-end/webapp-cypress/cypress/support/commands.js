@@ -17,6 +17,22 @@
 //below command added as per : https://github.com/thisdot/open-source/blob/main/libs/cypress-indexeddb/README.md
 import '@this-dot/cypress-indexeddb';
 
+
+/*
+ * Error: ResizeObserver loop limit exceeded is a benign error - it just means that things
+ * were moving quickly and a resize update for a frame might have been missed.
+ *
+ * See: https://github.com/cypress-io/cypress/issues/8418
+ */
+Cypress.on('uncaught:exception', (err) => {
+  if (err.message.includes('ResizeObserver')) {
+    // returning false here prevents Cypress from
+    // failing the test
+    return false;
+  }
+  return true;
+});
+
 // Start Test Server
 Cypress.Commands.add('ustadStartTestServer', () => {
   cy.visit('http://localhost:8075/start'); // Use cy.visit to navigate to the start page

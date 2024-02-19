@@ -16,11 +16,14 @@ import com.ustadmobile.core.domain.account.SetPasswordUseCase
 import com.ustadmobile.core.domain.account.SetPasswordUseCaseCommonJvm
 import com.ustadmobile.core.domain.blob.download.BlobDownloadClientUseCase
 import com.ustadmobile.core.domain.blob.download.BlobDownloadClientUseCaseCommonJvm
+import com.ustadmobile.core.domain.blob.download.CancelDownloadUseCase
+import com.ustadmobile.core.domain.blob.download.CancelDownloadUseCaseJvm
 import com.ustadmobile.core.domain.blob.download.ContentManifestDownloadUseCase
 import com.ustadmobile.core.domain.blob.download.EnqueueBlobDownloadClientUseCase
 import com.ustadmobile.core.domain.blob.download.EnqueueBlobDownloadClientUseCaseJvm
 import com.ustadmobile.core.domain.blob.download.EnqueueContentManifestDownloadUseCase
 import com.ustadmobile.core.domain.blob.download.EnqueueContentManifestDownloadUseCaseJvm
+import com.ustadmobile.core.domain.blob.download.MakeContentEntryAvailableOfflineUseCase
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCaseJvm
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
@@ -140,7 +143,6 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             tmpDir = Path(tmpDir.absolutePath),
             fileSystem = SystemFileSystem,
             deleteUrisUseCase = instance(),
-            createRetentionLock = true,
         )
     }
 
@@ -338,7 +340,7 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
 
     bind<GetShowPoweredByUseCase>() with provider {
         GetShowPoweredByUseCase(
-            instance<AppConfig>().get(KEY_CONFIG_SHOW_POWERED_BY)?.toBoolean() ?: false
+            instance<AppConfig>()[KEY_CONFIG_SHOW_POWERED_BY]?.toBoolean() ?: false
         )
     }
 
@@ -368,6 +370,22 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
     bind<DeletePermanentlyUseCase>() with scoped(EndpointScope.Default).provider {
         DeletePermanentlyUseCase(
             repoOrDb = instance(tag = DoorTag.TAG_REPO),
+        )
+    }
+
+    bind<MakeContentEntryAvailableOfflineUseCase>() with scoped(EndpointScope.Default).provider {
+        MakeContentEntryAvailableOfflineUseCase(
+            repo = instance(tag = DoorTag.TAG_REPO),
+            nodeIdAndAuth = instance(),
+            enqueueContentManifestDownloadUseCase = instance(),
+        )
+    }
+
+    bind<CancelDownloadUseCase>() with scoped(EndpointScope.Default).provider {
+        CancelDownloadUseCaseJvm(
+            scheduler = instance(),
+            endpoint = context,
+            db = instance(tag = DoorTag.TAG_DB),
         )
     }
 }

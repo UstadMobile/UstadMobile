@@ -4,6 +4,7 @@ import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.door.migration.DoorMigrationStatementList
 import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.door.migration.DoorMigration
+import com.ustadmobile.lib.db.entities.CacheLockJoin
 import com.ustadmobile.lib.db.entities.Message
 import com.ustadmobile.lib.db.entities.UserSession
 
@@ -1534,6 +1535,59 @@ val MIGRATION_145_146 = DoorMigrationStatementList(145, 146) { db ->
     listOf("CREATE INDEX message_idx_send_to_time ON Message (messageSenderPersonUid, messageToPersonUid, messageTimestamp)")
 }
 
+val MIGRATION_146_147 = DoorMigrationStatementList(146, 147) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.POSTGRES) {
+            add("ALTER TABLE CacheLockJoin ALTER COLUMN cljLockId TYPE BIGINT")
+        }
+    }
+}
+
+val MIGRATION_147_148 = DoorMigrationStatementList(147, 148) { db ->
+    buildList {
+        if(db.dbType()  == DoorDbType.POSTGRES) {
+            add("ALTER TABLE TransferJob ADD COLUMN tjOiUid BIGINT NOT NULL DEFAULT 0")
+            add("ALTER TABLE CacheLockJoin ADD COLUMN cljOiUid BIGINT NOT NULL DEFAULT 0")
+        }else {
+            add("ALTER TABLE TransferJob ADD COLUMN tjOiUid INTEGER NOT NULL DEFAULT 0")
+            add("ALTER TABLE CacheLockJoin ADD COLUMN cljOiUid INTEGER NOT NULL DEFAULT 0")
+        }
+        add("CREATE INDEX idx_clj_offline_item_uid ON CacheLockJoin (cljOiUid)")
+    }
+}
+
+/**
+ * For clients with OfflineItem support (Android and Desktop),  add a trigger that will remove the
+ * CacheLockJoin when an OfflineItem is made inactive. See AddOfflineItemInactiveTriggersCallback.
+ */
+val MIGRATION_148_149_CLIENT_WITH_OFFLINE_ITEMS = DoorMigrationStatementList(148, 149) {
+    listOf(
+        """
+        CREATE TRIGGER IF NOT EXISTS offline_item_inactive_trig 
+                AFTER UPDATE ON OfflineItem
+                FOR EACH ROW WHEN NEW.oiActive = 0 AND OLD.oiActive = 1
+                BEGIN 
+                UPDATE CacheLockJoin
+                   SET cljStatus = ${CacheLockJoin.STATUS_PENDING_DELETE}
+                 WHERE cljOiUid = NEW.oiUid;  
+                END
+        """
+    )
+}
+
+val MIGRATION_148_149_NO_OFFLINE_ITEMS = DoorMigrationStatementList(148, 149) {
+    emptyList()
+}
+
+val MIGRATION_149_150 = DoorMigrationStatementList(149, 150) { db ->
+    buildList {
+        val fieldType = if(db.dbType() == DoorDbType.SQLITE) "INTEGER" else "BIGINT"
+
+        add("ALTER TABLE ContentEntryVersion ADD COLUMN cevStorageSize $fieldType NOT NULL DEFAULT 0")
+        add("ALTER TABLE ContentEntryVersion ADD COLUMN cevOriginalSize $fieldType NOT NULL DEFAULT 0")
+    }
+}
+
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_102_103,
     MIGRATION_103_104, MIGRATION_104_105, MIGRATION_105_106, MIGRATION_106_107,
@@ -1544,6 +1598,7 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_133_134, MIGRATION_134_135, MIGRATION_135_136, MIGRATION_136_137,
     MIGRATION_137_138, MIGRATION_138_139, MIGRATION_139_140, MIGRATION_140_141,
     MIGRATION_141_142, MIGRATION_142_143, MIGRATION_143_144, MIGRATION_145_146,
+    MIGRATION_146_147, MIGRATION_147_148, MIGRATION_149_150,
 )
 
 

@@ -1,5 +1,6 @@
 package com.ustadmobile.core.db.dao
 
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import com.ustadmobile.door.annotation.DoorDao
@@ -26,7 +27,7 @@ expect abstract class CacheLockJoinDao {
     """)
     abstract suspend fun updateLockIdAndStatus(
         uid: Int,
-        lockId: Int,
+        lockId: Long,
         status: Int
     )
 
@@ -43,5 +44,8 @@ expect abstract class CacheLockJoinDao {
         tableId: Int,
         entityUid: Long,
     ): List<CacheLockJoin>
+
+    @Delete
+    abstract suspend fun deleteListAsync(list: List<CacheLockJoin>)
 
 }

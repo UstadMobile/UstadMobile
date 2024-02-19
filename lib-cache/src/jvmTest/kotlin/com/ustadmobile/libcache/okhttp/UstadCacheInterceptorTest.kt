@@ -1,6 +1,8 @@
 package com.ustadmobile.libcache.okhttp
 
 import com.ustadmobile.door.DatabaseBuilder
+import com.ustadmobile.libcache.CachePaths
+import com.ustadmobile.libcache.CachePathsProvider
 import com.ustadmobile.libcache.CompressionType
 import com.ustadmobile.libcache.logging.NapierLoggingAdapter
 import com.ustadmobile.libcache.UstadCache
@@ -52,13 +54,15 @@ class UstadCacheInterceptorTest {
 
     private lateinit var okHttpClient: OkHttpClient
 
-    private lateinit var cacheDir: File
+    private lateinit var cacheRootDir: File
+
+    private lateinit var cachePathsProvider: CachePathsProvider
 
     private lateinit var interceptorTmpDir: File
 
     private lateinit var cacheDb: UstadCacheDb
 
-    private lateinit var ustadCache: UstadCache
+    private lateinit var ustadCache: UstadCacheImpl
 
     private lateinit var cacheListener: UstadCache.CacheListener
 
@@ -73,14 +77,23 @@ class UstadCacheInterceptorTest {
         initNapierLog()
         val logger = NapierLoggingAdapter()
         cacheListener = mock { }
-        cacheDir = tempDir.newFolder("cachedir")
+        cacheRootDir = tempDir.newFolder("cachedir")
+        cachePathsProvider = CachePathsProvider {
+            Path(cacheRootDir.absolutePath).let {
+                CachePaths(
+                    tmpWorkPath = Path(it, "tmpWork"),
+                    persistentPath = Path(it, "persistent"),
+                    cachePath = Path(it, "cache"),
+                )
+            }
+        }
         interceptorTmpDir = tempDir.newFolder("interceptor-tmp")
         cacheDb = DatabaseBuilder.databaseBuilder(
             UstadCacheDb::class, "jdbc:sqlite::memory:", 1L)
             .build()
         ustadCache = spy(
             UstadCacheImpl(
-                storagePath = Path(cacheDir.absolutePath),
+                pathsProvider = cachePathsProvider,
                 db = cacheDb,
                 logger = logger,
                 listener = cacheListener,
@@ -276,6 +289,7 @@ class UstadCacheInterceptorTest {
             argWhere { entries -> entries.any { it.request.url == requestUrl } }
         )
 
+        ustadCache.commit()
         val storedEntryAfterRequest = cacheDb.cacheEntryDao.findEntryAndBodyByKey(
             Md5Digest().urlKey(requestUrl))
 
@@ -295,6 +309,7 @@ class UstadCacheInterceptorTest {
         val validationRequest = mockWebServer.takeRequest()
         assertEquals(etagVal, validationRequest.getHeader("if-none-match"))
 
+        ustadCache.commit()
         val storedEntryAfterValidation = cacheDb.cacheEntryDao.findEntryAndBodyByKey(
             Md5Digest().urlKey(requestUrl))
 

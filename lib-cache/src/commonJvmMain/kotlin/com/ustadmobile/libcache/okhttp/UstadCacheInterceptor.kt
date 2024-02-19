@@ -281,6 +281,8 @@ class UstadCacheInterceptor(
             requestCacheControlHeader?.onlyIfCached == true -> {
                 Response.Builder()
                     .request(request)
+                    .protocol(Protocol.HTTP_1_1)
+                    .message("Gateway Timeout")
                     .code(504)
                     .build()
             }

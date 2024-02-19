@@ -121,6 +121,15 @@ class SaveLocalUriAndManifestUploadIntegrationTest{
 
                     allManifestUrls.all { it in cacheLockUrlSet }
                 }
+
+                /*
+                 * All urls referenced in the manifest should not be locked on the client after the
+                 * upload is finished
+                 */
+                allManifestUrls.forEach {
+                    assertEquals(0, clientNode.node.httpCache.getLocks(it).size,
+                        "Client should not have any cache retention locks for $it")
+                }
             }
         }finally {
             clientNode.close()
