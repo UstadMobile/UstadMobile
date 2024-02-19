@@ -373,7 +373,7 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         )
     }
 
-    bind<MakeContentEntryAvailableOfflineUseCase>() with scoped(EndpointScope.Default).provider {
+    bind<MakeContentEntryAvailableOfflineUseCase>() with scoped(EndpointScope.Default).singleton {
         MakeContentEntryAvailableOfflineUseCase(
             repo = instance(tag = DoorTag.TAG_REPO),
             nodeIdAndAuth = instance(),
@@ -381,7 +381,7 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         )
     }
 
-    bind<CancelDownloadUseCase>() with scoped(EndpointScope.Default).provider {
+    bind<CancelDownloadUseCase>() with scoped(EndpointScope.Default).singleton {
         CancelDownloadUseCaseJvm(
             scheduler = instance(),
             endpoint = context,
