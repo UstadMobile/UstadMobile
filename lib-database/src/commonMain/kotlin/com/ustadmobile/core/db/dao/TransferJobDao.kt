@@ -39,6 +39,14 @@ expect abstract class TransferJobDao {
     abstract suspend fun updateStatus(jobUid: Int, status: Int)
 
     @Query("""
+        SELECT COALESCE(
+            (SELECT TransferJob.tjStatus
+               FROM TransferJob
+              WHERE tjUid = :jobUid), 0)
+    """)
+    abstract suspend fun getJobStatus(jobUid: Int): Int
+
+    @Query("""
         UPDATE TransferJob
            SET tjStatus = ${TransferJobItemStatus.STATUS_COMPLETE_INT}
          WHERE tjUid = :jobUid

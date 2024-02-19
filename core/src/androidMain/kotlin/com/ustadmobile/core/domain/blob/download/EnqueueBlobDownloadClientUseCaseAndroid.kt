@@ -40,7 +40,7 @@ class EnqueueBlobDownloadClientUseCaseAndroid(
 
 
         WorkManager.getInstance(appContext).enqueueUniqueWork(
-            "blob-download-${endpoint.url}-${transferJob.tjUid}",
+            uniqueNameFor(endpoint, transferJob.tjUid),
             ExistingWorkPolicy.REPLACE, workRequest)
     }
 }

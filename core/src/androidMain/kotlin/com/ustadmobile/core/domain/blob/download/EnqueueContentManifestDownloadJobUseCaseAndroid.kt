@@ -44,7 +44,7 @@ class EnqueueContentManifestDownloadJobUseCaseAndroid(
             ).build()
 
         WorkManager.getInstance(appContext).enqueueUniqueWork(
-            "contentmanifest-download-${endpoint.url}-${transferJob.tjUid}",
+            uniqueNameFor(endpoint, transferJob.tjUid),
             ExistingWorkPolicy.REPLACE, workRequest)
     }
 }

@@ -29,7 +29,7 @@ class EnqueueContentManifestDownloadUseCaseJvm(
             .build()
 
         val triggerKey = TriggerKey(
-            "contentmanifest-download-${endpoint.url}-${transferJob.tjUid}",
+            uniqueNameFor(endpoint, transferJob.tjUid),
             ConnectivityTriggerGroupController.TRIGGERKEY_CONNECTIVITY_REQUIRED_GROUP)
 
         scheduler.unscheduleAnyExistingAndStartNow(quartzJob, triggerKey)

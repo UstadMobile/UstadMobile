@@ -19,12 +19,15 @@ class EnqueueBlobDownloadClientUseCaseJvm(
         existingTransferJobId: Int
     ) {
         val transferJob = createTransferJob(items, existingTransferJobId)
+        val uniqueName = uniqueNameFor(endpoint, transferJob.tjUid)
         val quartzJob = JobBuilder.newJob(BlobDownloadJob::class.java)
             .usingJobData(DATA_ENDPOINT, endpoint.url)
             .usingJobData(DATA_JOB_UID, transferJob.tjUid)
             .build()
-        val triggerKey = TriggerKey("blob-download-${endpoint.url}-${transferJob.tjUid}",
-            ConnectivityTriggerGroupController.TRIGGERKEY_CONNECTIVITY_REQUIRED_GROUP)
+        val triggerKey = TriggerKey(
+            uniqueName,
+            ConnectivityTriggerGroupController.TRIGGERKEY_CONNECTIVITY_REQUIRED_GROUP
+        )
 
         Napier.d { "EnqueueBlobDownloadClientUseCaseJvm: scheduled job via quartz. JobId=${transferJob.tjUid} " }
         scheduler.unscheduleAnyExistingAndStartNow(quartzJob, triggerKey)
