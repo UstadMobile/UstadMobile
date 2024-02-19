@@ -40,9 +40,11 @@ class BlobDownloadClientUseCaseCommonJvm(
         val buffer = ByteArray(8192)
         async {
             for(queueItem in channel) {
-                val logPrefix = "BlobDownloadClientUseCaseCommonJvm: ${queueItem.transferJobItem.blobUrl}"
+                val logPrefix = "BlobDownloadClientUseCaseCommonJvm: " +
+                        "#${queueItem.transferJobItem.transferJobItemUid} " +
+                        "${queueItem.transferJobItem.blobUrl} "
                 //Pull the item through OkHttp. This will pull it through the lib-cache interceptor.
-                Napier.v { "$logPrefix : start download"}
+                Napier.v { "$logPrefix : channel: start"}
                 try {
                     onStatusUpdate(
                         BlobTransferStatusUpdate(
@@ -72,7 +74,7 @@ class BlobDownloadClientUseCaseCommonJvm(
                         }
                     }
 
-                    Napier.v { "$logPrefix : completed"}
+                    Napier.v { "$logPrefix channel: completed"}
                     onStatusUpdate(
                         BlobTransferStatusUpdate(
                             transferItem = queueItem.transferJobItem,
@@ -80,7 +82,7 @@ class BlobDownloadClientUseCaseCommonJvm(
                         )
                     )
                 }catch(e: Throwable) {
-                    Napier.i("$logPrefix : Exception downloading", e)
+                    Napier.i("$logPrefix : channel: Exception downloading", e)
                 }
             }
         }
@@ -137,13 +139,13 @@ class BlobDownloadClientUseCaseCommonJvm(
                 )
 
                 val numIncompleteItems = db.withDoorTransactionAsync {
-                    transferJobItemStatusUpdater.commit(transferJobUid)
                     transferJobItemStatusUpdater.onFinished()
+                    transferJobItemStatusUpdater.commit(transferJobUid)
                     db.transferJobItemDao.findNumberJobItemsNotComplete(transferJobUid)
                 }
 
                 if(numIncompleteItems != 0) {
-                    throw IllegalStateException("BlobDownloadClientUseCaseCommonJvm: not complete.")
+                    throw IllegalStateException("$logPrefix: not complete.")
                 }
                 Napier.d { "$logPrefix complete!"}
             }catch(e: Throwable) {

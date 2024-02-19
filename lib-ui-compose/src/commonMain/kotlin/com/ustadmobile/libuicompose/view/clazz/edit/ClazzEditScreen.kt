@@ -130,6 +130,7 @@ fun ClazzEditScreen(viewModel: ClazzEditViewModel) {
         onClickEditCourseBlock = viewModel::onClickEditCourseBlock,
         onClickHideBlockPopupMenu = viewModel::onClickHideBlockPopupMenu,
         onClickUnHideBlockPopupMenu = viewModel::onClickUnHideBlockPopupMenu,
+        onClickIndentBlockPopupMenu = viewModel::onClickIndentBlockPopupMenu,
         onClickUnIndentBlockPopupMenu = viewModel::onClickUnIndentBlockPopupMenu,
         onClickDeleteBlockPopupMenu = viewModel::onClickDeleteCourseBlock,
         onMoveCourseBlock = { from: ItemPosition, to: ItemPosition ->
@@ -535,21 +536,30 @@ private fun PopUpMenu(
         ) {
             if(uiState.showHide) {
                 DropdownMenuItem(
-                    onClick = { onClickHideBlockPopupMenu(uiState.block) },
+                    onClick = {
+                        expanded = false
+                        onClickHideBlockPopupMenu(uiState.block)
+                    },
                     text = {Text(stringResource(MR.strings.hide)) }
                 )
             }
 
             if(uiState.showUnhide) {
                 DropdownMenuItem(
-                    onClick = { onClickUnHideBlockPopupMenu(uiState.block) },
+                    onClick = {
+                        expanded = false
+                        onClickUnHideBlockPopupMenu(uiState.block)
+                    },
                     text = { Text(stringResource(MR.strings.unhide)) }
                 )
             }
 
             if(uiState.showIndent) {
                 DropdownMenuItem(
-                    onClick = { onClickIndentBlockPopupMenu(uiState.block) },
+                    onClick = {
+                        expanded = false
+                        onClickIndentBlockPopupMenu(uiState.block)
+                    },
                     text = { Text(stringResource(MR.strings.indent)) }
                 )
             }
@@ -557,14 +567,20 @@ private fun PopUpMenu(
             if(uiState.showUnindent) {
                 if (uiState.showUnindent) {
                     DropdownMenuItem(
-                        onClick = { onClickUnIndentBlockPopupMenu(uiState.block) },
+                        onClick = {
+                            expanded = false
+                            onClickUnIndentBlockPopupMenu(uiState.block)
+                        },
                         text = { Text(stringResource(MR.strings.unindent)) }
                     )
                 }
             }
 
             DropdownMenuItem(
-                onClick = { onClickDeleteBlockPopupMenu(uiState.block) },
+                onClick = {
+                    expanded = false
+                    onClickDeleteBlockPopupMenu(uiState.block)
+                },
                 text = {  Text(stringResource(MR.strings.delete)) }
             )
         }

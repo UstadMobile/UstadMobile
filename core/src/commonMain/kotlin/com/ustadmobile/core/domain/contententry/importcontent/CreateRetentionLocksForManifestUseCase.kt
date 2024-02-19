@@ -14,7 +14,7 @@ interface CreateRetentionLocksForManifestUseCase {
 
     data class ManifestRetentionLock(
         val url: String,
-        val lockId: Int,
+        val lockId: Long,
     )
 
     suspend operator fun invoke(

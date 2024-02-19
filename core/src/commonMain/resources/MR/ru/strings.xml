@@ -52,7 +52,6 @@
     <string name="also_available_in">Также доступно в</string>
     <string name="created_partnership">Создано в партнерстве с:</string>
     <string name="onboarding_get_started_label">Начать</string>
-    <string name="onboarding_offline_sharing">Поделиться оффлайн</string>
     <string name="download_continue_stacked_label">Продолжить скачивание</string>
     <string name="download_wifi_only">Только через Wi-Fi</string>
     <string name="download_state_downloading"><b>Скачивание</b> всего %1$s элементов. Всего на вашем устройстве будет использовано %2$s.</string>
@@ -163,14 +162,11 @@
     <string name="choose_template">Выбрать шаблон</string>
     <string name="add_gallery_description">Добавить видео или аудио из галереи устройства</string>
     <string name="lets_get_started_label">Давайте начнем</string>
-    <string name="onboarding_no_internet_headline">Нет интернета\? Без проблем.</string>
-    <string name="onboarding_no_internet_subheadline">Всё работает офлайн</string>
     <string name="last_three_months_date_range">Последние три месяца</string>
     <string name="new_custom_date_range">Новый произвольный диапазон дат…</string>
     <string name="year">Год</string>
     <string name="exams">Экзамены</string>
     <string name="reports">Отчеты</string>
-    <string name="onboarding_offline_sharing_subheading">Экономьте время и данные благодаря сверхбыстрому обмену данными в оффлайн режиме.</string>
     <string name="xapi_options_report_title">Заголовок отчета</string>
     <string name="xapi_options_visual_type">Тип визуализации</string>
     <string name="xapi_options_data_set">Набор данных</string>
@@ -544,7 +540,6 @@
     <string name="num_items_with_name_with_comma">%1$d %2$s, %3$d %4$s</string>
     <string name="add_to">Добавить в %1$s</string>
     <string name="remove_from">Удалить из %1$s</string>
-    <string name="items_selected">Выбрано %1$d</string>
     <string name="change_photo">Измени фотографию</string>
     <string name="remove_photo">Удалить фото</string>
     <string name="take_new_photo_from_camera">Сделать новое фото с камеры</string>
@@ -794,7 +789,6 @@
     <string name="add_activity_literal">Добавить активность</string>
     <string name="frequency">Частота</string>
     <string name="reject">Отклонять</string>
-    <string name="onboarding_stay_organized_subheading">Образовательный контент, задания, классы и посещаемость — все в одном месте</string>
     <string name="store_description_full">Ustad Mobile — это приложение с открытым исходным кодом, которое позволяет пользователям получать доступ к широкому спектру открытых образовательных ресурсов онлайн или офлайн. Приложением и контентом можно обмениваться между устройствами в автономном режиме.
 \n
 \nUstad Mobile предлагает контент с открытой лицензией с некоторых ведущих сайтов Интернета с открытыми образовательными ресурсами (ООР):
@@ -873,7 +867,6 @@
     <string name="type_here">Введите здесь…</string>
     <string name="update_grade">Обновить оценку</string>
     <string name="waiting_for_connection">Ожидаение соединения</string>
-    <string name="onboarding_stay_organized_headline">Будьте в курсе событий</string>
     <string name="new_assignment">Новое задание</string>
     <string name="late_submission">Отправлено поздно</string>
     <string name="late_submission_penalty">Штраф за позднюю подачу</string>
@@ -1049,4 +1042,31 @@
     <string name="select_file">Выберите файл</string>
     <string name="drop_files_to_import">Перетащите файл(ы) для импорта</string>
     <string name="compose_post">Создать публикацию</string>
+    <string name="chrome_recommended">Chrome (рекомендуется)</string>
+    <string name="chrome_recommended_info">Использует системный браузер по умолчанию (обычно Chrome).</string>
+    <string name="internal_webview">Внутренний веб-просмотр (Webview)</string>
+    <string name="content_not_ready_try_later">Содержимое еще не готово. Повторите попытку позже.</string>
+    <string name="html5_content_display_engine">Механизм отображения HTML5</string>
+    <string name="internal_webview_info">Это рекомендуется в случае если на устройстве запрещен доступ к браузеру.</string>
+    <string name="onboarding_headline1">Нет интернета? Без проблем.</string>
+    <string name="onboarding_subheadline1">Всё работает офлайн</string>
+    <string name="onboarding_headline2">Поделиться оффлайн</string>
+    <string name="onboarding_headline3">Будьте в курсе событий</string>
+    <string name="onboarding_subheadline3">Образовательный контент, задания, классы и посещаемость — все в одном месте</string>
+    <string name="onboarding_subheadline2">Делитесь контентом на высокой скорости с любым другим пользователем поблизости</string>
+    <string name="could_not_load_vlc">Не удалось загрузить VLC. Для воспроизведения видео требуется установка 64-битной версии VLC. Загрузите и установите 64-битную версию с https://www.videolan.org/, затем перезапустите это приложение.</string>
+    <string name="move_entries_to_this_folder">Переместить записи в эту папку</string>
+    <string name="version">Версия</string>
+    <string name="licenses">Лицензии</string>
+    <string name="cannot_record_attendance_for_future_date_time">Невозможно записать посещаемость на будущую дату/время</string>
+    <string name="selected">Выбрано</string>
+    <string name="clear_selection">Очистить выбор</string>
+    <string name="cannot_move_to_subfolder_of_self">Невозможно переместить папку в свою подпапку</string>
+    <string name="cannot_move_already_in_same_folder">Невозможно переместить: элементы уже находятся в этой папке</string>
+    <string name="move_to">Переместить в…</string>
+    <string name="restore">Восстановить</string>
+    <string name="delete_permanently">Удалить навсегда</string>
+    <string name="deleted_items">Удаленные элементы</string>
+    <string name="delete_or_restore_items">Удаление или восстановление элементов</string>
+    <string name="yesterday">Вчера</string>
 </resources>

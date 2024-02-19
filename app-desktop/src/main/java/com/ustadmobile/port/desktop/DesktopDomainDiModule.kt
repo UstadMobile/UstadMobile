@@ -16,11 +16,14 @@ import com.ustadmobile.core.domain.account.SetPasswordUseCase
 import com.ustadmobile.core.domain.account.SetPasswordUseCaseCommonJvm
 import com.ustadmobile.core.domain.blob.download.BlobDownloadClientUseCase
 import com.ustadmobile.core.domain.blob.download.BlobDownloadClientUseCaseCommonJvm
+import com.ustadmobile.core.domain.blob.download.CancelDownloadUseCase
+import com.ustadmobile.core.domain.blob.download.CancelDownloadUseCaseJvm
 import com.ustadmobile.core.domain.blob.download.ContentManifestDownloadUseCase
 import com.ustadmobile.core.domain.blob.download.EnqueueBlobDownloadClientUseCase
 import com.ustadmobile.core.domain.blob.download.EnqueueBlobDownloadClientUseCaseJvm
 import com.ustadmobile.core.domain.blob.download.EnqueueContentManifestDownloadUseCase
 import com.ustadmobile.core.domain.blob.download.EnqueueContentManifestDownloadUseCaseJvm
+import com.ustadmobile.core.domain.blob.download.MakeContentEntryAvailableOfflineUseCase
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCaseJvm
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
@@ -35,7 +38,10 @@ import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCaseJvm
 import com.ustadmobile.core.domain.blob.upload.UpdateFailedTransferJobUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCaseCommonJvm
+import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCase
+import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCaseJvm
 import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseJvm
+import com.ustadmobile.core.domain.contententry.delete.DeleteContentEntryParentChildJoinUseCase
 import com.ustadmobile.core.domain.contententry.getlocalurlforcontent.GetLocalUrlForContentUseCase
 import com.ustadmobile.core.domain.contententry.getlocalurlforcontent.GetLocalUrlForContentUseCaseCommonJvm
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCase
@@ -52,6 +58,9 @@ import com.ustadmobile.core.domain.language.SetLanguageUseCaseJvm
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.LaunchXapiUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.LaunchXapiUseCaseJvm
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.ResolveXapiLaunchHrefUseCase
+import com.ustadmobile.core.domain.contententry.move.MoveContentEntriesUseCase
+import com.ustadmobile.core.domain.deleteditem.DeletePermanentlyUseCase
+import com.ustadmobile.core.domain.deleteditem.RestoreDeletedItemUseCase
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.launchopenlicenses.LaunchOpenLicensesUseCase
 import com.ustadmobile.core.domain.phonenumber.OnClickPhoneNumUseCase
@@ -134,7 +143,6 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             tmpDir = Path(tmpDir.absolutePath),
             fileSystem = SystemFileSystem,
             deleteUrisUseCase = instance(),
-            createRetentionLock = true,
         )
     }
 
@@ -330,9 +338,54 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         )
     }
 
-    bind<GetShowPoweredByUseCase>() with singleton {
+    bind<GetShowPoweredByUseCase>() with provider {
         GetShowPoweredByUseCase(
-            instance<AppConfig>().get(KEY_CONFIG_SHOW_POWERED_BY)?.toBoolean() ?: false
+            instance<AppConfig>()[KEY_CONFIG_SHOW_POWERED_BY]?.toBoolean() ?: false
+        )
+    }
+
+    bind<SetClipboardStringUseCase>() with provider {
+        SetClipboardStringUseCaseJvm()
+    }
+
+    bind<MoveContentEntriesUseCase>() with scoped(EndpointScope.Default).provider {
+        MoveContentEntriesUseCase(
+            repo = instance(tag = DoorTag.TAG_REPO),
+            systemImpl = instance()
+        )
+    }
+
+    bind<DeleteContentEntryParentChildJoinUseCase>() with scoped(EndpointScope.Default).provider {
+        DeleteContentEntryParentChildJoinUseCase(
+            repoOrDb = instance(tag = DoorTag.TAG_REPO),
+        )
+    }
+
+    bind<RestoreDeletedItemUseCase>() with scoped(EndpointScope.Default).provider {
+        RestoreDeletedItemUseCase(
+            repoOrDb = instance(tag = DoorTag.TAG_REPO),
+        )
+    }
+
+    bind<DeletePermanentlyUseCase>() with scoped(EndpointScope.Default).provider {
+        DeletePermanentlyUseCase(
+            repoOrDb = instance(tag = DoorTag.TAG_REPO),
+        )
+    }
+
+    bind<MakeContentEntryAvailableOfflineUseCase>() with scoped(EndpointScope.Default).singleton {
+        MakeContentEntryAvailableOfflineUseCase(
+            repo = instance(tag = DoorTag.TAG_REPO),
+            nodeIdAndAuth = instance(),
+            enqueueContentManifestDownloadUseCase = instance(),
+        )
+    }
+
+    bind<CancelDownloadUseCase>() with scoped(EndpointScope.Default).singleton {
+        CancelDownloadUseCaseJvm(
+            scheduler = instance(),
+            endpoint = context,
+            db = instance(tag = DoorTag.TAG_DB),
         )
     }
 }

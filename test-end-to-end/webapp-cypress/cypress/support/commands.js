@@ -17,6 +17,22 @@
 //below command added as per : https://github.com/thisdot/open-source/blob/main/libs/cypress-indexeddb/README.md
 import '@this-dot/cypress-indexeddb';
 
+
+/*
+ * Error: ResizeObserver loop limit exceeded is a benign error - it just means that things
+ * were moving quickly and a resize update for a frame might have been missed.
+ *
+ * See: https://github.com/cypress-io/cypress/issues/8418
+ */
+Cypress.on('uncaught:exception', (err) => {
+  if (err.message.includes('ResizeObserver')) {
+    // returning false here prevents Cypress from
+    // failing the test
+    return false;
+  }
+  return true;
+});
+
 // Start Test Server
 Cypress.Commands.add('ustadStartTestServer', () => {
   cy.visit('http://localhost:8075/start'); // Use cy.visit to navigate to the start page
@@ -124,7 +140,7 @@ Cypress.Commands.add('ustadAddAssignmentBlock',(assignmentTitle) => {
     cy.contains("button","Done").click()
 })
 
-   // Add a Discussion Board
+  // Add a Discussion Board
 Cypress.Commands.add('ustadAddDiscussionBoard',(discussionTitle) => {
     cy.contains("Add block").click()
     cy.contains("Discussion board").click()
@@ -132,6 +148,15 @@ Cypress.Commands.add('ustadAddDiscussionBoard',(discussionTitle) => {
     cy.get('div[data-placeholder="Description"]').type("a simple discussion description")
     cy.contains("button","Done").click()
 })
+   // Add course and private comments in Assignment
+Cypress.Commands.add('ustadTypeAndSubmitAssignmentComment', (commentid, sendid, comment, delay = 25) => {
+    cy.get(commentid).click().type(comment, { delay });
+    cy.get('input' + commentid + '[value=\"' + comment + '\"]')
+    cy.get(commentid).should('have.value', comment);
+    cy.get(sendid).click();
+    cy.contains(comment).should('exist');
+});
+
 
   // Enable User Registration
 Cypress.Commands.add('ustadEnableUserRegistration' ,() => {

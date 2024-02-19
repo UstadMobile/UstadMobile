@@ -63,12 +63,18 @@ it('Teacher add assignment', () => {
   cy.contains('Unassigned').eq(0).click()
   cy.get('li[role="option"]').eq(1).should('be.visible')
   cy.get('li[role="option"]').eq(1).click()
+
+  //Click done on role assignment
   cy.contains("button","Done").should('be.visible')
   cy.contains("button","Done",{timeout:1000}).click()
-  cy.contains("button","Done").should('exist')
-  cy.contains("button","Done",{timeout:3000}).click({force:true})
+
+  //Click done on assignment edit
+  cy.url().should('include', "CourseAssignmentEdit") //Ensure that navigation to assignment edit done
+  cy.contains("button","Done",{timeout:3000}).click()
+
   cy.contains("button","Save",{timeout:2000}).should('be.visible')
   cy.contains("button","Save",{timeout:1000}).click()
+
   cy.contains("button","Members").should('be.visible')
   cy.contains("button","Edit").click()
   cy.contains("Assignment 1").click()

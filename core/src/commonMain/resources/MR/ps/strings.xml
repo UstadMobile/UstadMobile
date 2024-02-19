@@ -88,10 +88,6 @@
     <string name="completed">مکمل شو</string>
     <string name="no_video_file_found">کومه ویډیو پیدا نشوه</string>
     <string name="onboarding_get_started_label">پیل یې کړئ</string>
-    <string name="onboarding_no_internet_headline">انټرنټ نشته؟ هیڅ ستونزه نده.</string>
-    <string name="onboarding_no_internet_subheadline">تعلیمی ویډیو، مقالې، او محاوره یی تمرینونه کښته کړئ ترڅو وروسته ورڅخه کار واخلئ.</string>
-    <string name="onboarding_offline_sharing">نالیکی شریکول</string>
-    <string name="onboarding_offline_sharing_subheading">محتویات په لوړ سرعت سره له نورو نږدی کاروونکو سره شریک کړئ.</string>
     <string name="download_continue_stacked_label">کښته کولو ته ادامه ورکول</string>
     <string name="download_continue_btn_label">ادامه ورکول</string>
     <string name="download_wifi_only">یوازی وایفای</string>
@@ -618,7 +614,6 @@
     <string name="use_device_language">د وزلې ژبه څخه ګټه اخیستل</string>
     <string name="select_item">غوره کول %1$s</string>
     <string name="from_to_date">%1$s - %2$s</string>
-    <string name="items_selected">%1$d غوره شو</string>
     <string name="remove_photo">د انځور لیری کول</string>
     <string name="staff">مامور</string>
     <string name="contact_details">د اړیکی نیولو تفصیل</string>

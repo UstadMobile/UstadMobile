@@ -25,12 +25,8 @@ import kotlinx.io.files.FileSystem
 import kotlinx.io.files.SystemFileSystem
 
 /**
- * @param createRetentionLock if true, then when items are stored in the http cache, a
- *        retention lock will be created. This should be true on clients where newly created blobs
- *        need to be retained at least until they have been uploaded. On the server all urls related to
- *        currently active entities (e.g. PersonPicture, ContentEntryVersion, etc) must be retained,
- *        which is managed via triggers on the database (see UpdateCacheLockJoinUseCase).
- *
+ * Note: When a local uri is saved as a blob, it will not be retained because we don't know if this
+ * is just a temporary uri (e.g. a user previewing a picture) or something to keep.
  */
 class SaveLocalUrisAsBlobsUseCaseJvm(
     private val endpoint: Endpoint,
@@ -39,7 +35,6 @@ class SaveLocalUrisAsBlobsUseCaseJvm(
     private val tmpDir: Path,
     private val deleteUrisUseCase: DeleteUrisUseCase,
     private val fileSystem: FileSystem = SystemFileSystem,
-    private val createRetentionLock: Boolean = false,
 ) : SaveLocalUrisAsBlobsUseCase {
 
     private val logPrefix = "SaveLocalUrisAsBlobsUseCaseJvm"
@@ -105,7 +100,7 @@ class SaveLocalUrisAsBlobsUseCaseJvm(
                             header("cache-control", "immutable")
                         },
                     ),
-                    createRetentionLock = createRetentionLock,
+                    createRetentionLock = saveItem.createRetentionLock,
                 ),
                 cacheEntryTmpPath = tmpBlobPath,
             )

@@ -126,9 +126,6 @@
     <string name="accept">Accepter</string>
     <string name="created_partnership">Créé en partenariat avec :</string>
     <string name="onboarding_get_started_label">Commencer</string>
-    <string name="onboarding_no_internet_headline">Pas de connexion Internet \? Aucun problème.</string>
-    <string name="onboarding_no_internet_subheadline">Tout fonctionne hors-ligne</string>
-    <string name="onboarding_stay_organized_headline">Restez organisé</string>
     <string name="download_continue_stacked_label">Continuer le téléchargement</string>
     <string name="download_continue_btn_label">Continuer</string>
     <string name="download_wifi_only">Wi-Fi uniquement</string>
@@ -473,7 +470,6 @@
     <string name="num_items_with_name_with_comma">%1$d %2$s, %3$d %4$s</string>
     <string name="add_to">Ajouter à %1$s</string>
     <string name="remove_from">Retirer de %1$s</string>
-    <string name="items_selected">%1$d séléctionné</string>
     <string name="change_photo">Modifier la photo</string>
     <string name="take_new_photo_from_camera">Prendre une nouvelle photo</string>
     <string name="select_new_photo_from_gallery">Sélectionner une photo depuis la galerie</string>

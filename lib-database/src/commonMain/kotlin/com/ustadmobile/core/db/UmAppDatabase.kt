@@ -32,7 +32,7 @@ import com.ustadmobile.lib.db.entities.*
     PersonParentJoin::class,
     ScopedGrant::class,
     ErrorReport::class,
-    ClazzAssignment::class, ClazzAssignmentContentJoin::class, CourseAssignmentSubmission::class,
+    ClazzAssignment::class,  CourseAssignmentSubmission::class,
     CourseAssignmentSubmissionAttachment::class, CourseAssignmentMark::class,
     PeerReviewerAllocation::class,
     PersonAuth2::class,
@@ -59,13 +59,14 @@ import com.ustadmobile.lib.db.entities.*
     CacheLockJoin::class,
     OfflineItem::class,
     OfflineItemPendingTransferJob::class,
+    DeletedItem::class,
 
     //Door entities
     OutgoingReplication::class,
     ReplicationOperation::class,
     PendingRepositorySession::class,
 
-], version = 141)
+], version = 150)
 /*
  Replicate entities (e.g. trackers) to drop:
      ClazzLogReplicate
@@ -321,5 +322,7 @@ expect abstract class UmAppDatabase : RoomDatabase {
     abstract val cacheLockJoinDao: CacheLockJoinDao
 
     abstract val offlineItemDao: OfflineItemDao
+
+    abstract val deletedItemDao: DeletedItemDao
 
 }

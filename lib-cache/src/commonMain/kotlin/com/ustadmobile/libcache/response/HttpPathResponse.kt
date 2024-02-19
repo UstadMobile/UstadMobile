@@ -8,7 +8,7 @@ import com.ustadmobile.libcache.headers.headersBuilder
 import com.ustadmobile.libcache.headers.integrity
 import com.ustadmobile.libcache.integrity.sha256Integrity
 import com.ustadmobile.libcache.io.lastModified
-import com.ustadmobile.libcache.io.useAndReadySha256
+import com.ustadmobile.libcache.io.useAndReadSha256
 import com.ustadmobile.libcache.request.HttpRequest
 import kotlinx.atomicfu.atomic
 import kotlinx.io.IOException
@@ -43,7 +43,7 @@ class HttpPathResponse(
 
             val effectiveIntegrity = integrity ?:
                 extraHeaders?.integrity() ?:
-                sha256Integrity(fileSystem.source(path).buffered().useAndReadySha256())
+                sha256Integrity(fileSystem.source(path).buffered().useAndReadSha256())
 
             extraHeaders?.also { takeFrom(it) }
             addIntegrity(extraHeaders, effectiveIntegrity)

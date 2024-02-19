@@ -86,10 +86,6 @@
     <string name="dialog_download_from_playstore_ok">همین حالا دانلود نمائید (رایگان)</string>
     <string name="dialog_download_from_playstore_cancel">در ویبسایت باشید</string>
     <string name="onboarding_get_started_label">آغاز نمائید</string>
-    <string name="onboarding_no_internet_headline">انترنت ندارید؟ مشکلی نیست.</string>
-    <string name="onboarding_no_internet_subheadline">همه چیز بشکل آفلاین کار می‌دهد</string>
-    <string name="onboarding_offline_sharing">آفلاین شریک سازید</string>
-    <string name="onboarding_offline_sharing_subheading">با استفاده از اشتراک‌گذاری آفلاین سریع‌السیر در زمان و مصرف داده‌هایتان صرفه‌جویی کنید</string>
     <string name="pause_download">مکث دانلود</string>
     <string name="canceled">لغو شده</string>
     <string name="deleted">حذف شده</string>
@@ -400,7 +396,6 @@
     <string name="school">مکتب</string>
     <string name="assignments">کار خانگی</string>
     <string name="remove_from">حذف نمودن از %1$s</string>
-    <string name="items_selected">%1$d انتخاب گردید</string>
     <string name="remove_photo">حذف تصویر</string>
     <string name="select_new_photo_from_gallery">انتخاب تصویر جدید از گالری</string>
     <string name="toC">به</string>
@@ -742,8 +737,6 @@
     <string name="incomplete">ناتکمیل</string>
     <string name="attempts">تلاش‌ها</string>
     <string name="waiting_for_connection">در حال انتظار برای اتصال</string>
-    <string name="onboarding_stay_organized_headline">منظم بمانید</string>
-    <string name="onboarding_stay_organized_subheading">محتوای آموزشی، کارهای خانگی، صنوف، و حاضری همه در یک جا</string>
     <string name="home_internet_access">دسترسی خانگی انترنت</string>
     <string name="clazz_assignment">کارخانگی</string>
     <string name="new_assignment">کارخانگی جدید</string>
@@ -969,4 +962,6 @@
     <string name="enabled">فعال شده</string>
     <string name="disabled">غیرفعال شده</string>
     <string name="from_my_courses">از دوره‌های درسی من</string>
+    <string name="name_key">نام</string>
+    <string name="and_key">و</string>
 </resources>

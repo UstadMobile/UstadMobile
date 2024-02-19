@@ -4,11 +4,11 @@ import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.url.UrlKmp
 import com.ustadmobile.core.util.bodyDataUrlForUri
+import com.ustadmobile.core.util.ext.bodyAsDecodedText
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
-import io.ktor.client.statement.bodyAsText
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -55,7 +55,7 @@ class PdfContentViewModel(
                 .findByUidAsync(entityUidArg) ?: return@launch
             val manifestUrl = contentEntryVersion.cevManifestUrl!!
             val manifest: ContentManifest = json.decodeFromString(
-                httpClient.get(manifestUrl).bodyAsText()
+                httpClient.get(manifestUrl).bodyAsDecodedText()
             )
 
             val pdfEntryUri = contentEntryVersion.cevOpenUri ?: return@launch

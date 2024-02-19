@@ -14,7 +14,11 @@ import web.html.HTMLInputElement
 
 /**
  * React requires the update to a textfield to be done synchronously. Changes made by the ViewModel
- * are delivered via an async flow
+ * are delivered via an async flow.
+ *
+ * Normally this should be done by using Dispatchers.Main.immediate to deliver events. However, when
+ * a textfield is inside a VirtualList, that can't be done because of the use of state and effect
+ * by the virtuallist.
  */
 val UstadTextField = FC<TextFieldProps> { props ->
     val propsTextVal = props.value?.toString() ?: ""

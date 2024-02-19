@@ -1,11 +1,18 @@
 package com.ustadmobile.port.desktop
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.PermanentDrawerSheet
 import androidx.compose.material3.PermanentNavigationDrawer
@@ -17,16 +24,22 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.painter.BitmapPainter
-import androidx.compose.ui.res.loadImageBitmap
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import com.jcabi.manifests.Manifests
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseJvm
+import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
 import com.ustadmobile.core.embeddedhttp.EmbeddedHttpServer
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.PREFKEY_LOCALE
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -34,7 +47,9 @@ import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.PREFKEY_ACTIONED_PRESET
 import com.ustadmobile.core.impl.di.commonDomainDiModule
+import com.ustadmobile.core.logging.LogbackAntiLog
 import com.ustadmobile.libuicompose.theme.UstadAppTheme
+import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.view.app.APP_TOP_LEVEL_NAV_ITEMS
 import com.ustadmobile.libuicompose.view.app.SizeClass
 import dev.icerock.moko.resources.compose.stringResource
@@ -55,32 +70,34 @@ import org.kodein.di.compose.localDI
 import org.kodein.di.compose.withDI
 import org.kodein.di.direct
 import org.kodein.di.instance
+import java.awt.Desktop
 import java.io.File
-import java.nio.file.Paths
+import java.net.URI
 import java.util.Locale
 import java.util.Properties
-import kotlin.io.path.exists
-import kotlin.io.path.inputStream
 import com.ustadmobile.libuicompose.view.app.App as UstadPrecomposeApp
 
 //Roughly as per https://github.com/JetBrains/compose-multiplatform-desktop-template#readme
-/*
- * Clicking on the run button in the IDE directly **WILL NOT WORK** - it will not find the resource
- * bundles required (probably due to the joys of Modular Java).
- *
- * Use ./gradlew app-desktop:run to run it. To debug, run the Gradle app-desktop:run task in debug
- * mode in the IDE (this can be done by selecting the Gradle task from the Gradle pane on the right
- * of Android Studio - select app-desktop -> tasks -> compose desktop -> run, then right click on run
- * and select debug.
- */
-
 fun main() {
     //Apply the language setting before startup
     val dataRoot = ustadAppDataDir()
-    println("AppDataDir=${ustadAppDataDir()} ResourcesDir=${ustadAppResourcesDir()}")
-    var splashScreen: SplashScreen? = SplashScreen()
+
 
     SetLanguageUseCaseJvm.init()
+
+    var splashScreen: SplashScreen? = SplashScreen()
+
+    //Set the logging directory to use the directory log within the data directory
+    val logDir = File(ustadAppDataDir(), "log")
+    logDir.takeIf { !it.exists() }?.mkdirs()
+    System.setProperty("logs_dir", logDir.absolutePath)
+    println("UstadMobile Desktop App" +
+            "AppDataDir=${ustadAppDataDir()} \n" +
+            "ResourcesDir=${ustadAppResourcesDir()} \n" +
+            "Logging to ${logDir.absolutePath}"
+    )
+
+    Napier.base(LogbackAntiLog())
 
     val prefsPropertiesFiles = File(dataRoot, UstadMobileSystemImpl.PREFS_FILENAME)
 
@@ -92,7 +109,11 @@ fun main() {
         } ?: Properties()
 
         val presetLocaleToAction = if(props.getProperty(PREFKEY_ACTIONED_PRESET) == null) {
-            Manifests.read("com-ustadmobile-presetlocale")
+            try {
+                Manifests.read("com-ustadmobile-presetlocale")
+            }catch(e: Throwable) {
+                null
+            }
         }else {
             null
         }
@@ -124,14 +145,8 @@ fun main() {
 
         //App icon setting as per
         // https://conveyor.hydraulic.dev/13.0/tutorial/tortoise/2-gradle/#setting-icons
-        val appIcon = remember {
-            ustadAppResourcesDir().let {
-                Paths.get(it.absolutePath, "icon/icon-512.png")
-            }.takeIf { it.exists() }
-                ?.inputStream()
-                ?.buffered()
-                ?.use { BitmapPainter(loadImageBitmap(it)) }
-        }
+        val appIcon = rememberAppResourcePainter("icon/icon-512.png")
+        val topStartImg = rememberAppResourcePainter("topstart/top-start.png")
 
         var selectedItem by remember { mutableIntStateOf(0) }
         var appState by remember  {
@@ -147,6 +162,14 @@ fun main() {
             )),
         ) {
             val di = localDI()
+            val appVersion = remember {
+                di.direct.instance<GetVersionUseCase>().invoke().versionString
+            }
+            val showPoweredBy = remember {
+                di.direct.instance<GetShowPoweredByUseCase>().invoke()
+            }
+
+
             val desktopConfig = remember {
                 KamelConfig {
                     takeFrom(KamelConfig.Default)
@@ -195,7 +218,22 @@ fun main() {
                             PermanentNavigationDrawer(
                                 drawerContent = {
                                     if(appState.navigationVisible) {
-                                        PermanentDrawerSheet(Modifier.width(240.dp)) {
+                                        PermanentDrawerSheet(
+                                            Modifier.width(240.dp).fillMaxHeight()
+                                        ) {
+                                            topStartImg?.also {
+                                                Box(
+                                                    modifier = Modifier.height(64.dp).fillMaxWidth(),
+                                                    contentAlignment = Alignment.Center,
+                                                ) {
+                                                    Image(
+                                                        modifier = Modifier.defaultItemPadding(),
+                                                        painter = it,
+                                                        contentDescription = null
+                                                    )
+                                                }
+                                            }
+
                                             Spacer(Modifier.height(16.dp))
                                             APP_TOP_LEVEL_NAV_ITEMS.forEachIndexed { index, item ->
                                                 NavigationDrawerItem(
@@ -210,6 +248,36 @@ fun main() {
                                                     },
                                                     modifier = Modifier.padding(horizontal = 16.dp)
                                                 )
+                                            }
+                                            Box(
+                                                contentAlignment = Alignment.BottomCenter,
+                                                modifier = Modifier.weight(1f)
+                                            ) {
+                                                Column(
+                                                    horizontalAlignment = Alignment.Start
+                                                ) {
+                                                    Text(
+                                                        text = "${stringResource(MR.strings.version)} $appVersion",
+                                                        style = MaterialTheme.typography.labelSmall,
+                                                        modifier = Modifier.defaultItemPadding(bottom = 4.dp),
+                                                    )
+
+                                                    if(showPoweredBy) {
+                                                        Text(
+                                                            modifier = Modifier.defaultItemPadding(top = 4.dp)
+                                                                .pointerHoverIcon(PointerIcon.Hand)
+                                                                .clickable {
+                                                                    Desktop.getDesktop().browse(
+                                                                        URI("https://www.ustadmobile.com/")
+                                                                    )
+                                                                },
+                                                            text = stringResource(MR.strings.powered_by),
+                                                            style = MaterialTheme.typography.labelSmall,
+                                                            color = Color.Blue,
+                                                            textDecoration = TextDecoration.Underline,
+                                                        )
+                                                    }
+                                                }
                                             }
                                         }
                                     }

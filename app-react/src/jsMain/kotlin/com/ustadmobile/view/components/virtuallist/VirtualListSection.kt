@@ -43,10 +43,10 @@ class SingleItemSection(
  */
 fun <TData, TError> UseInfiniteQueryResult<TData, TError>.pages() : Array<TData> {
     val pages = data?.asDynamic()?.pages
-    if(pages != null) {
-        return pages as Array<TData>
+    return if(pages != null) {
+        pages as Array<TData>
     }else {
-        return emptyArray()
+        emptyArray()
     }
 }
 
@@ -54,8 +54,8 @@ class InfiniteQueryResultSection<TItem, TData, TError>(
     private val infiniteQueryResult: UseInfiniteQueryResult<TData, TError>,
     private val infiniteSectionIndex: Int,
     private val dataPagesToItems: (Array<out TData>) -> List<TItem?>,
-    private val itemToKey: (item: TItem, index: Int) -> String,
-    private val createNode: (item: TItem?, index: Int) -> ReactNode,
+    private val itemToKey: (items: List<TItem?>, index: Int) -> String,
+    private val createNode: (items: List<TItem?>, index: Int) -> ReactNode,
 ): VirtualListSection() {
 
     override val elements: List<VirtualListElement>
@@ -64,7 +64,7 @@ class InfiniteQueryResultSection<TItem, TData, TError>(
 
             val queryResult = infiniteQueryResult
             val itemToKeyFn = { keyItem: TItem?, keyIndex: Int ->
-                keyItem?.let { itemToKey(it, keyIndex) } ?: "placeholder_${infiniteSectionIndex}_$keyIndex"
+                keyItem?.let { itemToKey(resultRows, keyIndex) } ?: "placeholder_${infiniteSectionIndex}_$keyIndex"
             }
 
             return resultRows.mapIndexed { index, item ->
@@ -77,8 +77,9 @@ class InfiniteQueryResultSection<TItem, TData, TError>(
                         this.infiniteQueryResult = queryResult
                         this.loadedItems = resultRows
                         this.item = nodeItem
+                        this.itemIndex = index
 
-                        + createNode(nodeItem, index)
+                        + createNode(resultRows, index)
                     }
                 }
             }

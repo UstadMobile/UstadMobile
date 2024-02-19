@@ -53,6 +53,10 @@ external interface VirtualListProps: PropsWithChildren {
  * As per:
  *  As per https://tanstack.com/virtual/v3/docs/examples/react/dynamic
  *
+ * The VirtualList uses a combination of state and context to pass the content property
+ * to the outlet. This means that changes are delivered ASYNCHRONOUSLY. If the content includes
+ * textfields (which require synchronous updates), they must have their own state.
+ *
  * See VirtualListPreview for an example of this.
  */
 val VirtualList = FC<VirtualListProps> {props ->
@@ -82,6 +86,40 @@ val VirtualList = FC<VirtualListProps> {props ->
         }
     }
 
+    val allRows = useMemo(props.content) {
+        props.content.flatMap { section ->
+            section.elements
+        }
+    }
+
+
+    @Suppress("SpellCheckingInspection")
+    val virtualizer = useVirtualizer<HTMLElement, HTMLElement>(jso {
+        count =  allRows.size
+        getScrollElement= { parentRef.current }
+        estimateSize = { 45 }
+        overscan = 5
+        getItemKey = { index -> allRows[index].key() }
+    })
+
+    val virtualizerStateInstance: StateInstance<VirtualListContextData> = useState {
+        VirtualListContextData(
+            virtualizer = virtualizer,
+            allRows = allRows,
+            reverseLayout = props.reverseLayout ?: false
+        )
+    }
+
+    var virtualizerStateVar by virtualizerStateInstance
+
+    useEffect(virtualizer, allRows, props.reverseLayout) {
+        virtualizerStateVar = VirtualListContextData(
+            virtualizer = virtualizer,
+            allRows = allRows,
+            reverseLayout = props.reverseLayout ?: false
+        )
+    }
+
     div {
         ref = parentRef
         style = if(props.reverseLayout == true) {
@@ -96,28 +134,7 @@ val VirtualList = FC<VirtualListProps> {props ->
             props.style
         }
 
-        val allRows = useMemo(props.content) {
-            props.content.flatMap { section ->
-                section.elements
-            }
-        }
-
-        @Suppress("SpellCheckingInspection")
-        val virtualizer = useVirtualizer<HTMLElement, HTMLElement>(jso {
-            count =  allRows.size
-            getScrollElement= { parentRef.current }
-            estimateSize = { 45 }
-            overscan = 5
-            getItemKey = { index -> allRows[index].key() }
-        })
-
-        VirtualListContext(
-            VirtualListContextData(
-                virtualizer = virtualizer,
-                allRows = allRows,
-                reverseLayout = props.reverseLayout ?: false
-            )
-        ) {
+        VirtualListContext(virtualizerStateInstance) {
             + props.children
         }
     }
@@ -163,8 +180,12 @@ class VirtualListContentScope internal constructor() {
             infiniteQueryResult = infiniteQueryResult,
             infiniteSectionIndex = sections.count { it is InfiniteQueryResultSection<*, *, *> },
             dataPagesToItems = dataPagesToItems,
-            itemToKey = itemToKey,
-            createNode = itemToNode,
+            itemToKey = { items, index ->
+                items[index]?.let { itemToKey(it, index) } ?: "$index"
+            },
+            createNode = { items, index ->
+                itemToNode(items[index], index)
+            },
         )
     }
 
@@ -195,8 +216,12 @@ class VirtualListContentScope internal constructor() {
                     it.data
                 }
             },
-            itemToKey = key,
-            createNode = itemToNode
+            itemToKey = { allItems, index ->
+                allItems[index]?.let { key(it, index) } ?: "$index"
+            },
+            createNode = { allItems, index ->
+                itemToNode(allItems[index], index)
+            }
         )
     }
 
@@ -209,6 +234,24 @@ class VirtualListContentScope internal constructor() {
             items = items,
             key = { item, _ -> key(item) },
             itemToNode = { item, _ -> itemToNode(item) }
+        )
+    }
+
+    fun <T: Any> infiniteQueryPagingItemsList(
+        items: UseInfiniteQueryResult<PagingSourceLoadResult<Int, T>, Throwable>,
+        key: (list: List<T?>, index: Int) -> String,
+        node: (list: List<T?>, index: Int) -> ReactNode
+    ) {
+        sections += InfiniteQueryResultSection(
+            infiniteQueryResult = items,
+            infiniteSectionIndex = sections.count { it is InfiniteQueryResultSection<*, *, *> },
+            dataPagesToItems = { pages ->
+                pages.mapNotNull { it as? PagingSourceLoadResultPage<Int, T> }.flatMap {
+                    it.data
+                }
+            },
+            itemToKey = key,
+            createNode = node,
         )
     }
 

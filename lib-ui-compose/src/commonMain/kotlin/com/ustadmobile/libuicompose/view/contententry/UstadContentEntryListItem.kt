@@ -1,110 +1,102 @@
 package com.ustadmobile.libuicompose.view.contententry
 
-import androidx.compose.foundation.*
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.outlined.Book
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.ustadmobile.core.impl.appstate.UstadContextMenuItem
 import com.ustadmobile.core.viewmodel.contententry.contentTypeStringResource
-import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListItemUiState
-import com.ustadmobile.core.viewmodel.contententry.list.listItemUiState
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.composites.ContentEntryAndListDetail
+import com.ustadmobile.libuicompose.components.UstadContextMenuArea
+import com.ustadmobile.libuicompose.components.UstadSelectableListItem
+import com.ustadmobile.libuicompose.components.UstadSelectedIcon
 import dev.icerock.moko.resources.compose.stringResource
-import com.ustadmobile.libuicompose.view.contententry.list.ClazzAssignmentConstants.CONTENT_ENTRY_TYPE_ICON_MAP
 
 @Composable
 fun UstadContentEntryListItem(
     modifier: Modifier = Modifier,
-    contentEntry: ContentEntry?,
+    entry: ContentEntryAndListDetail?,
     onClick: () -> Unit = { },
+    isSelected: Boolean = false,
+    contextMenuItems: (ContentEntryAndListDetail) -> List<UstadContextMenuItem> = { emptyList() },
+    onSetSelected: (contentEntry: ContentEntryAndListDetail, selected: Boolean) -> Unit = { _, _ -> },
 ) {
+    UstadContextMenuArea(
+        items = {
+            entry?.let { contextMenuItems(it) } ?: emptyList()
+        }
+    ) {
+        UstadSelectableListItem(
+            modifier = modifier,
+            isSelected = isSelected,
+            onClick = onClick,
+            onSetSelected = {
+                entry?.also { onSetSelected(it, !isSelected) }
+            },
+            headlineContent = {
+                Text(
+                    text = entry?.contentEntry?.title ?: "",
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            },
+            leadingContent = {
+                if(isSelected) {
+                    UstadSelectedIcon()
+                }else {
+                    val thumbnail: ImageVector = if (entry?.contentEntry?.leaf == true)
+                        Icons.Outlined.Book
+                    else
+                        Icons.Default.Folder
+                    Icon(
+                        thumbnail,
+                        contentDescription = "",
+                        modifier = Modifier.size(40.dp).padding(4.dp),
+                    )
+                }
 
-    val uiState = contentEntry?.listItemUiState
-    ListItem(
-        modifier = modifier
-            .alpha((uiState?.containerAlpha ?: 0.0).toFloat())
-            .clickable(onClick = onClick),
-        headlineContent = {
-            Text(
-                text = uiState?.contentEntry?.title ?: "",
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        },
-        leadingContent = {
-            LeadingContent(
-                uiState = uiState,
-                contentEntry = uiState?.contentEntry
-            )
-        },
-        supportingContent = {
-            SecondaryContent(
-                contentEntry = uiState?.contentEntry,
-                uiState = uiState
-            )
-        },
-    )
+            },
+            supportingContent = {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(5.dp)
+                ) {
+                    if(!entry?.contentEntry?.description.isNullOrBlank()) {
+                        Text((entry?.contentEntry?.description ?: ""),
+                            maxLines = 2, overflow = TextOverflow.Ellipsis,
+                        )
+                    }
 
-}
+                    Row {
+                        entry?.contentEntry?.also { contentEntry ->
+                            Icon(contentEntry.contentTypeImageVector,
+                                contentDescription = "",
+                                modifier = Modifier.size(20.dp)
+                            )
 
-@Composable
-private fun LeadingContent(
-    uiState: ContentEntryListItemUiState?,
-    contentEntry: ContentEntry?
-){
-    val thumbnail: ImageVector = if (contentEntry?.leaf == true)
-        Icons.Outlined.Book
-    else
-        Icons.Default.Folder
+                            Spacer(modifier = Modifier.width(8.dp))
 
-    Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        horizontalAlignment = Alignment.End
-    ){
-        Icon(
-            thumbnail,
-            contentDescription = "",
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .size(40.dp)
-                .padding(4.dp),
+                            entry.contentEntry?.contentTypeStringResource?.also {
+                                Text(stringResource(it))
+                            }
+                        }
+                    }
+                }
+            },
         )
     }
-}
 
-@Composable
-private fun SecondaryContent(
-    contentEntry: ContentEntry?,
-    uiState: ContentEntryListItemUiState?
-){
-    Column(
-        verticalArrangement = Arrangement.spacedBy(5.dp)
-    ) {
-        if (uiState?.descriptionVisible == true){
-            Text((contentEntry?.description ?: ""), maxLines = 2)
-        }
-
-        Row {
-            val contentTypeFlagVal = contentEntry?.contentTypeFlag
-            if (uiState?.mimetypeVisible == true && contentTypeFlagVal != null){
-                Icon(CONTENT_ENTRY_TYPE_ICON_MAP[contentTypeFlagVal] ?: Icons.Filled.Book,
-                    contentDescription = "",
-                    modifier = Modifier.size(20.dp)
-                )
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                Text(stringResource(contentEntry.contentTypeStringResource))
-            }
-        }
-    }
 }
 

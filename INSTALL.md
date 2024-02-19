@@ -98,7 +98,31 @@ server data is stored, and other options.
   should be used to provide https support e.g. as per [Apache Reverse Proxy Guide](https://httpd.apache.org/docs/2.4/howto/reverse_proxy.html).
   The [Forwarded](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Forwarded) header must
   include the protocol (e.g. http or https) or the [X-Forwarded-Proto](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-Proto)
-  header must be set. This can be done in Apache using ```RequestHeader set X-Forwarded-Proto https```
+  header must be set. 
+
+Apache example:
+```
+# AllowEncodedSlashes must be enabled, otherwise blob paths will not work
+AllowEncodedSlashes On
+
+#Nocanon is required to ensure that encoding in paths is not altered
+ProxyPass / http://localhost:8087/ nocanon
+ProxyPassReverse / http://localhost:8087/
+SSLProxyEngine On
+ProxyPreserveHost On
+RequestHeader set X-Forwarded-Proto https
+```
+
+Enable required Apache modules:
+```
+a2enmod proxy headers
+```
+Recommended:
+```
+a2enmod deflate
+```
+Apache mod deflate will compress the web version itself e.g. its own javascript, stylesheets, etc. 
+Content assets will be compressed by the server itself.
 
 * Setup a Postgres database and use this instead of the default (embedded) SQLite.
 

@@ -1,5 +1,6 @@
 package com.ustadmobile.libuicompose.view.app
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -41,12 +42,17 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.impl.appstate.AppBarColors
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
 import com.ustadmobile.core.viewmodel.settings.SettingsViewModel
+import com.ustadmobile.libuicompose.components.UstadActionButtonIcon
 import com.ustadmobile.libuicompose.components.UstadPersonAvatar
+import com.ustadmobile.libuicompose.components.UstadTooltipBox
+import com.ustadmobile.libuicompose.theme.appBarSelectionModeBackgroundColor
+import com.ustadmobile.libuicompose.theme.appBarSelectionModeContentColor
 import dev.icerock.moko.resources.compose.stringResource
 import moe.tlaster.precompose.navigation.Navigator
 import org.kodein.di.compose.localDI
@@ -57,7 +63,7 @@ private val ROOT_LOCATIONS = UstadViewModel.ROOT_DESTINATIONS.map {
     "/$it"
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun UstadAppBar(
     compactHeader: Boolean,
@@ -93,37 +99,63 @@ fun UstadAppBar(
         contentAlignment = Alignment.BottomCenter
     ) {
         TopAppBar(
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                titleContentColor = MaterialTheme.colorScheme.primary
-            ),
+            colors = if(appUiState.appBarColors == AppBarColors.STANDARD) {
+                TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.primary
+                )
+            }else {
+                val contentColor = MaterialTheme.colorScheme.appBarSelectionModeContentColor
+                TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.appBarSelectionModeBackgroundColor,
+                    titleContentColor = contentColor,
+                    navigationIconContentColor = contentColor,
+                    actionIconContentColor = contentColor,
+                )
+            },
             title = {
                 Text(text = title, maxLines = 1, overflow = TextOverflow.Ellipsis)
             },
             navigationIcon = {
-                if(canGoBack) {
-                    IconButton(
-                        modifier = Modifier.testTag("back_button"),
-                        onClick = {
-                            navigator.goBack()
+                val leadingActionButton = appUiState.leadingActionButton
+                when {
+                    leadingActionButton != null -> {
+                        UstadActionButtonIcon(leadingActionButton)
+                    }
+                    canGoBack -> {
+                        IconButton(
+                            modifier = Modifier.testTag("back_button"),
+                            onClick = {
+                                navigator.goBack()
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.ArrowBack,
+                                contentDescription = stringResource(MR.strings.back)
+                            )
                         }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.ArrowBack,
-                            contentDescription = stringResource(MR.strings.back)
-                        )
                     }
                 }
             },
             actions = {
-                currentLocation?.path?.takeIf { path -> ROOT_LOCATIONS.any { it.startsWith(path) } }?.also {
-                    IconButton(
-                        modifier = Modifier.testTag("settings_button"),
-                        onClick = {
-                            navigator.navigate("/${SettingsViewModel.DEST_NAME}")
-                        }
+                appUiState.actionButtons.forEach {
+                    UstadActionButtonIcon(it)
+                }
+
+                currentLocation?.path?.takeIf { path ->
+                    !appUiState.hideSettingsIcon && ROOT_LOCATIONS.any { it.startsWith(path) }
+                }?.also {
+                    UstadTooltipBox(
+                        tooltipText = stringResource(MR.strings.settings)
                     ) {
-                        Icon(Icons.Default.Settings, contentDescription = stringResource(MR.strings.settings))
+                        IconButton(
+                            modifier = Modifier.testTag("settings_button"),
+                            onClick = {
+                                navigator.navigate("/${SettingsViewModel.DEST_NAME}")
+                            }
+                        ) {
+                            Icon(Icons.Default.Settings, contentDescription = stringResource(MR.strings.settings))
+                        }
                     }
                 }
 

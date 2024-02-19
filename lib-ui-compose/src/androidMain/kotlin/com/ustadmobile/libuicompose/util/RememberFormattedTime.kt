@@ -10,16 +10,23 @@ import java.util.Calendar
 import java.util.Date
 
 @Composable
-actual fun rememberFormattedTime(timeInMs: Int): String {
+actual fun rememberTimeFormatter(): java.text.DateFormat {
     val context = LocalContext.current
+    return remember {
+        DateFormat.getTimeFormat(context)
+    }
+}
 
+@Composable
+actual fun rememberFormattedTime(
+    timeInMs: Int,
+    formatter: java.text.DateFormat
+): String {
     return remember(timeInMs) {
         val calendar = Calendar.getInstance()
         calendar[Calendar.HOUR_OF_DAY] = (timeInMs / MS_PER_HOUR)
         calendar[Calendar.MINUTE] = timeInMs.mod(MS_PER_HOUR) / MS_PER_MIN
 
-        DateFormat
-            .getTimeFormat(context)
-            .format(Date(calendar.timeInMillis))
+        formatter.format(Date(calendar.timeInMillis))
     }
 }

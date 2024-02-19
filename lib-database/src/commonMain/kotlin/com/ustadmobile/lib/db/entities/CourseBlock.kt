@@ -17,10 +17,8 @@ import kotlinx.serialization.Serializable
                 order = Trigger.Order.INSTEAD_OF,
                 on = Trigger.On.RECEIVEVIEW,
                 events = [Trigger.Event.INSERT],
-                conditionSql = "SELECT %NEW_LAST_MODIFIED_GREATER_THAN_EXISTING%",
-                sqlStatements = [
-                    TRIGGER_UPSERT
-                ]
+                conditionSql = TRIGGER_CONDITION_WHERE_NEWER,
+                sqlStatements = [TRIGGER_UPSERT]
         )
 ))
 @Serializable

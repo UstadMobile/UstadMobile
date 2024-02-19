@@ -58,9 +58,6 @@
     <string name="accept">গ্রহণ করুন</string>
     <string name="also_available_in">এছাড়াও উপলব্ধ</string>
     <string name="onboarding_get_started_label">এবার শুরু করা যাক</string>
-    <string name="onboarding_no_internet_headline">কোন ইন্টারনেট নেই\? সমস্যা নেই.</string>
-    <string name="onboarding_offline_sharing">অফলাইনে ভাগ করুন</string>
-    <string name="onboarding_offline_sharing_subheading">কাছের অন্যান্য যে কোনও ব্যবহারকারীর সাথে উচ্চ গতিতে সামগ্রী ভাগ করুন।</string>
     <string name="age">গড়</string>
     <string name="role_name">নামভূমিকা</string>
     <string name="download_downloading_placeholder">%2$s এর %1$s ডাউনলোড হচ্ছে</string>
@@ -286,7 +283,6 @@
     <string name="locations">অবস্থানগুলি</string>
     <string name="audit_log">হিসাবনিকাশের বিবরণ</string>
     <string name="audit_log_setting_desc">অডিট লগটি দেখুন এবং রফতানি করুন</string>
-    <string name="onboarding_no_internet_subheadline">পরে ব্যবহারের জন্য শিক্ষামূলক ভিডিও, নিবন্ধ এবং ইন্টারেক্টিভ অনুশীলনগুলি ডাউনলোড করুন।</string>
     <string name="role_assignment">ভূমিকা অ্যাসাইনমেন্ট</string>
     <string name="scope_by">দ্বারা স্কোপ</string>
     <string name="assign_to">ধার্য</string>
@@ -396,7 +392,6 @@
     <string name="num_items_with_name_with_comma">%1$d %2$s ,%3$d %4$s</string>
     <string name="add_to">%1$s এ যুক্ত করুন</string>
     <string name="remove_from">%1$s থেকে সরান</string>
-    <string name="items_selected">%1$d নির্বাচিত</string>
     <string name="change_photo">ছবি পরিবর্তন</string>
     <string name="holiday_calendar">ছুটির পঞ্জিকা</string>
     <string name="remove_photo">ফটো সরান</string>

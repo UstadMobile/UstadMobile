@@ -1,5 +1,6 @@
 package com.ustadmobile.core.domain.blob.download
 
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -16,7 +17,8 @@ abstract class AbstractEnqueueContentManifestDownloadUseCase(
      *
      */
     protected suspend fun createTransferJob(
-        contentEntryVersionUid: Long
+        contentEntryVersionUid: Long,
+        offlineItemUid: Long,
     ): TransferJob {
         return db.withDoorTransactionAsync {
             val contentEntryVersion = db.contentEntryVersionDao.findByUidAsync(
@@ -29,6 +31,7 @@ abstract class AbstractEnqueueContentManifestDownloadUseCase(
                 tjTimeCreated = systemTimeInMillis(),
                 tjEntityUid = contentEntryVersionUid,
                 tjTableId = ContentEntryVersion.TABLE_ID,
+                tjOiUid = offlineItemUid,
             )
             val jobUid = db.transferJobDao.insert(transferJob).toInt()
             val manifestTransferJobItem = TransferJobItem(
@@ -52,6 +55,12 @@ abstract class AbstractEnqueueContentManifestDownloadUseCase(
         const val DATA_JOB_UID = "jobUid"
 
         const val DATA_CONTENTENTRYVERSION_UID = "cevUid"
+
+        const val UNIQUE_NAME_PREFIX = "contentmanifest-download-"
+
+        fun uniqueNameFor(endpoint: Endpoint, transferJobId: Int) : String {
+            return "$UNIQUE_NAME_PREFIX${endpoint.url}-$transferJobId"
+        }
 
     }
 

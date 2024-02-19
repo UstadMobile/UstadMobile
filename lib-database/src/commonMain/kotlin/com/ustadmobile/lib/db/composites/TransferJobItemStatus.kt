@@ -12,6 +12,8 @@ enum class TransferJobItemStatus(val value: Int) {
 
         const val STATUS_COMPLETE_INT = 21
 
+        const val STATUS_CANCELLED = 22
+
         fun valueOf(value: Int): TransferJobItemStatus {
             return entries.firstOrNull { it.value == value } ?: QUEUED
         }

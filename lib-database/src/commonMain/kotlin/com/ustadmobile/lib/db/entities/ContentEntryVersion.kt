@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.db.entities
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.SyncNode
@@ -111,6 +112,19 @@ data class ContentEntryVersion(
     @ReplicateEtag
     @ReplicateLastModified
     var cevLct: Long = 0,
+
+    /**
+     * The indicative storage size (e.g. size of all entries) - e.g. the sum of all included
+     * ContentManifestEntry.storageSize
+     */
+    @ColumnInfo(defaultValue = "0")
+    var cevStorageSize: Long = 0,
+
+    /**
+     * The size of the original file e.g. when it was imported before any extra compression.
+     */
+    @ColumnInfo(defaultValue = "0")
+    var cevOriginalSize: Long = 0,
 ) {
 
     companion object {

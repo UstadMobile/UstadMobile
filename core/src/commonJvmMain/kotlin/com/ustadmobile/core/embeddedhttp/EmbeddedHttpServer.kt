@@ -83,6 +83,10 @@ class EmbeddedHttpServer(
                                 header(it.key, it.value)
                                 method = HttpRequest.Companion.Method.valueOf(session.method.name)
                             }
+
+                            if(!session.headers.any { it.key.equals("accept-encoding") }) {
+                                header("accept-encoding", "gzip")
+                            }
                         }
                         Napier.v {
                             "EmbeddedHttpServer: content: endpoint=${endpointUrl} " +

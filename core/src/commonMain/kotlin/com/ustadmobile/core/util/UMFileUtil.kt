@@ -30,7 +30,6 @@
  */
 package com.ustadmobile.core.util
 
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import io.ktor.http.ContentType
 import kotlin.js.JsName
 import kotlin.jvm.JvmStatic
@@ -69,23 +68,22 @@ object UMFileUtil {
      */
     @JvmStatic
     fun joinPaths(vararg paths: String): String {
-        val result = StringBuilder()
-        for (i in paths.indices) {
-            var pathComp = paths[i]
+        return buildString {
+            paths.forEachIndexed { index, component ->
+                append(
+                    if (index > 0) {
+                        component.removePrefix("/")
+                    } else {
+                        component
+                    }
+                )
 
-            //If not the first component in the path - remove leading slash
-            if (i > 0 && pathComp.isNotEmpty() && pathComp[0] == FILE_SEP) {
-                pathComp = pathComp.substring(1)
-            }
-            result.append(pathComp)
-
-            //If not the final component - make sure it ends with a slash
-            if (i < paths.size - 1 && pathComp[pathComp.length - 1] != FILE_SEP) {
-                result.append(FILE_SEP)
+                //If not the final component - make sure it ends with a slash
+                if (index < paths.size - 1 && !component.endsWith("/")) {
+                    append(FILE_SEP)
+                }
             }
         }
-
-        return result.toString()
     }
 
     /**

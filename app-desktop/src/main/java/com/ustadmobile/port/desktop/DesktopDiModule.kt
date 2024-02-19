@@ -12,15 +12,21 @@ import com.ustadmobile.core.contentformats.ContentImportersDiModuleJvm
 import com.ustadmobile.core.contentformats.epub.XhtmlFixer
 import com.ustadmobile.core.contentformats.epub.XhtmlFixerJsoup
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.ext.MIGRATION_144_145_CLIENT
+import com.ustadmobile.core.db.ext.MIGRATION_148_149_CLIENT_WITH_OFFLINE_ITEMS
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
+import com.ustadmobile.core.domain.cachelock.AddOfflineItemInactiveTriggersCallback
+import com.ustadmobile.core.domain.cachelock.UpdateCacheLockJoinUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseJvm
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseRemote
+import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseJvm
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCaseMediaInfo
 import com.ustadmobile.core.embeddedhttp.EmbeddedHttpServer
+import com.ustadmobile.core.getdeveloperinfo.GetDeveloperInfoUseCaseJvm
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.config.ApiUrlConfig
@@ -61,6 +67,7 @@ import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.headers.MimeTypeHelper
 import com.ustadmobile.libcache.logging.NapierLoggingAdapter
 import com.ustadmobile.libcache.okhttp.UstadCacheInterceptor
+import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.HttpTimeout
@@ -116,7 +123,7 @@ fun ustadAppHomeDir(): File {
 
 /**
  * Get the Operating System user data directory. This is used when the conveyor built package is
- * running.
+ * running. If we are running the conveyor distributable, then app.fsname will be set.
  *
  * On Windows: Use Application Data folder
  * On Linux/MacOS: Use user home directory/.app-name
@@ -132,7 +139,7 @@ private fun osUserDataDir(): File? {
 }
 
 /**
- *
+ * The directory for user data storage including SQLite databases, files, etc.
  */
 fun ustadAppDataDir(): File {
     return System.getProperty("ustad.datadir")?.let { File(it) }
@@ -222,6 +229,12 @@ val DesktopHttpModule = DI.Module("Desktop-HTTP") {
 
 }
 
+data class DbAndObservers(
+    val db: UmAppDatabase,
+    val updateCacheLockJoinUseCase: UpdateCacheLockJoinUseCase,
+)
+
+
 @OptIn(ExperimentalXmlUtilApi::class)
 val DesktopDiModule = DI.Module("Desktop-Main") {
     val resourcesDir = ustadAppResourcesDir()
@@ -306,14 +319,30 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
     }
 
     bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(EndpointScope.Default).singleton {
+        instance<DbAndObservers>().db
+    }
+
+    bind<DbAndObservers>() with scoped(EndpointScope.Default).singleton {
         val contextDataDir: File = on(context).instance(tag = DiTag.TAG_CONTEXT_DATA_ROOT)
         val dbUrl = "jdbc:sqlite:${contextDataDir.absolutePath}/UmAppDatabase.db"
         val nodeIdAndAuth: NodeIdAndAuth = instance()
 
-        DatabaseBuilder.databaseBuilder(UmAppDatabase::class, dbUrl, nodeIdAndAuth.nodeId)
+        val db = DatabaseBuilder.databaseBuilder(UmAppDatabase::class, dbUrl, nodeIdAndAuth.nodeId)
             .addSyncCallback(nodeIdAndAuth)
             .addMigrations(*migrationList().toTypedArray())
+            .addMigrations(MIGRATION_144_145_CLIENT)
+            .addMigrations(MIGRATION_148_149_CLIENT_WITH_OFFLINE_ITEMS)
+            .addCallback(AddOfflineItemInactiveTriggersCallback())
             .build()
+
+        val cache: UstadCache = instance()
+        DbAndObservers(
+            db = db,
+            updateCacheLockJoinUseCase = UpdateCacheLockJoinUseCase(
+                db = db,
+                cache = cache,
+            )
+        )
     }
 
     bind<NodeIdAndAuth>() with scoped(EndpointScope.Default).singleton {
@@ -445,6 +474,13 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         )
     }
 
+    bind<GetDeveloperInfoUseCase>() with singleton {
+        GetDeveloperInfoUseCaseJvm(
+            appResourcesDir = ustadAppResourcesDir(),
+            dataDir = ustadAppDataDir(),
+        )
+    }
+
 
     onReady {
         instance<File>(tag = TAG_DATA_DIR).takeIf { !it.exists() }?.mkdirs()
@@ -452,6 +488,7 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         instance<ConnectivityTriggerGroupController>()
         instance<Scheduler>().start()
         Runtime.getRuntime().addShutdownHook(Thread{
+            Napier.i("Shutdown: shutting down scheduler")
             instance<Scheduler>().shutdown()
         })
     }

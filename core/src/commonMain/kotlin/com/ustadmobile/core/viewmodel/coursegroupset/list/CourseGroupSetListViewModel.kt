@@ -16,6 +16,7 @@ import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import app.cash.paging.PagingSource
 import com.ustadmobile.lib.db.entities.CourseGroupSet
 import com.ustadmobile.lib.db.entities.Role
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -78,23 +79,26 @@ class CourseGroupSetListViewModel(
         }
 
         viewModelScope.launch {
+            collectHasPermissionFlowAndSetAddNewItemUiState(
+                hasPermissionFlow = {
+                    activeRepo.clazzDao.personHasPermissionWithClazzAsFlow(
+                        activeUserPersonUid, clazzUid, Role.PERMISSION_CLAZZ_UPDATE
+                    )
+                },
+                fabStringResource = MR.strings.groups,
+                onSetAddListItemVisibility = { visible ->
+                    _uiState.update { prev ->
+                        Napier.v { "CourseGroupSetList: set showAddItem visible = $visible" }
+                        prev.copy(showAddItem = visible)
+                    }
+                }
+            )
+        }
+
+        viewModelScope.launch {
             _uiState.whenSubscribed {
                 launch {
                     collectClazzNameAndUpdateTitle(clazzUid, activeDb, _appUiState)
-                }
-
-                launch {
-                    collectHasPermissionFlowAndSetAddNewItemUiState(
-                        hasPermissionFlow = {
-                            activeRepo.clazzDao.personHasPermissionWithClazzAsFlow(
-                                activeUserPersonUid, clazzUid, Role.PERMISSION_CLAZZ_UPDATE
-                            )
-                        },
-                        fabStringResource = MR.strings.groups,
-                        onSetAddListItemVisibility = { visible ->
-                            _uiState.update { prev -> prev.copy(showAddItem = visible) }
-                        }
-                    )
                 }
             }
         }

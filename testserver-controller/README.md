@@ -33,3 +33,19 @@ Stop the control server:
 ```
 ./stop.sh
 ```
+
+Clearing Postgres data:
+
+It is recommended to use Postgres for end-to-end testing to ensure that the test matches the 
+production environment. This will require the database to be cleared before each test. This
+will drop all triggers, functions, and tables on the database set (so be careful).
+
+1. Copy the configuration template:
+```
+cp testserver-controller/src/main/resources/application.conf testserver-controller/testserver-controller.conf
+```
+
+2. Uncomment and set the clearPgUrl, clearPgUser, clearPgPass properties
+
+The file testserver-controller.conf is covered by .gitignore to avoid Postgres usernames and 
+passwords being committed to git.

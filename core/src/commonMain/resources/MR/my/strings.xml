@@ -23,8 +23,6 @@
     <string name="canceled">ဖျက်သိမ်းခဲ့သည်</string>
     <string name="delete">ဖျက်ပါ</string>
     <string name="deleted">ဖျက်လိုက်သည်</string>
-    <string name="onboarding_no_internet_headline">အဘယ်သူမျှမကအင်တာနက်\? အဘယ်သူမျှမပြဿနာ။.</string>
-    <string name="onboarding_no_internet_subheadline">ပညာရေးဆိုင်ရာဗီဒီယိုများ, ဆောင်းပါးများနှင့်အပြန်အလှန်စစ်ရေးလေ့ကျင့်ခန်းနောက်ပိုင်းတွင်အသုံးပြုမှုအတွက်ဒေါင်းလုဒ်လုပ်ပါ။.</string>
     <string name="new_tab">ပြတင်းပေါက်အသစ်တစ်ခုတွင်ပြသခြင်း</string>
     <string name="save_as_template">တင်းပလိတ်အဖြစ်သိမ်းဆည်းပါ</string>
     <string name="download_wifi_only">ဝိုင်ဖိုင်သာ</string>
@@ -162,8 +160,6 @@
     <string name="created_partnership">နှင့်မိတ်ဖက်လုပ်သည်။:</string>
     <string name="onboarding_get_started_label">စတင်ပါ</string>
     <string name="lets_get_started_label">စလိုက်ကြစို့</string>
-    <string name="onboarding_offline_sharing">အော့ဖ်လိုင်းကိုမျှဝေမည်</string>
-    <string name="onboarding_offline_sharing_subheading">အနီးအနားမှာမဆိုအခြားအသုံးပြုသူနှင့်အတူမြင့်မားသောအမြန်နှုန်းမှာဝေမျှမယ်အကြောင်းအရာ။.</string>
     <string name="download_continue_stacked_label">ဒေါင်းလုပ် ကိုဆက်လုပ်ပါ</string>
     <string name="download_continue_btn_label">ဆက်လက်</string>
     <string name="download_downloading_placeholder">ဒေါင်းလုပ်လက်ရှိလုပ်ဆောင်နေသေ %1$s ၏ %2$s</string>
@@ -564,7 +560,6 @@
     <string name="num_items_with_name">%1$d %2$s</string>
     <string name="add_to">%1$s သို့ထည့်ပါ</string>
     <string name="remove_from">%1$s မှဖယ်ရှား</string>
-    <string name="items_selected">%1$d ရွေးချယ်ထားသည်</string>
     <string name="change_photo">ဓာတ်ပုံပြောင်းပါ</string>
     <string name="remove_photo">ဓာတ်ပုံဖယ်ရှားပါ</string>
     <string name="select_new_photo_from_gallery">ပြခန်းမှဓာတ်ပုံအသစ်ကိုရွေးချယ်ပါ</string>

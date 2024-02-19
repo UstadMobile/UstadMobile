@@ -17,7 +17,7 @@ dependencyResolutionManagement {
             version("version_androidx_core", "1.12.0")
             version("version_kotlin", "1.9.21")
             version("version_okhttp", "4.12.0")
-            version("version_door", "0.70b35")
+            version("version_door", "0.70b41")
             version("version_coroutines", "1.7.3")
             version("version_atomicfu", "0.23.1")
             version("version_kotlinx_io", "0.3.0")
@@ -83,6 +83,8 @@ dependencyResolutionManagement {
             version("version_vlcj", "4.8.2")
             version("version_jcabi_manifests", "2.1.0")
             version("version_plugin_license", "0.9.7")
+            version("version_logback", "1.4.13")
+            version("version_turbine", "1.0.0")
 
             plugin("jetbrains-compose", "org.jetbrains.compose").versionRef("jetbrains-compose")
             plugin("moko-resources-plugin", "dev.icerock.mobile.multiplatform-resources").versionRef("version-moko-resources")
@@ -191,6 +193,8 @@ dependencyResolutionManagement {
             library("pdfbox", "org.apache.pdfbox", "pdfbox").versionRef("version_pdfbox")
             library("vlcj", "uk.co.caprica", "vlcj").versionRef("version_vlcj")
             library("jcabi-manifests", "com.jcabi", "jcabi-manifests").versionRef("version_jcabi_manifests")
+            library("logback-classic", "ch.qos.logback", "logback-classic").versionRef("version_logback")
+            library("turbine", "app.cash.turbine", "turbine").versionRef("version_turbine")
         }
     }
 }

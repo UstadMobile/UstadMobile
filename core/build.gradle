@@ -212,7 +212,7 @@ kotlin {
                 implementation "org.kodein.di:kodein-di-framework-ktor-server-jvm:$version_kodein_di"
 
                 implementation "net.bytebuddy:byte-buddy:$version_byte_buddy"
-                implementation "app.cash.turbine:turbine:$version_turbine"
+                implementation libs.turbine
 
                 implementation "io.ktor:ktor-server-call-logging:$version_ktor"
             }

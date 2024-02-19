@@ -50,11 +50,14 @@ import com.ustadmobile.core.viewmodel.courseblock.textblockdetail.TextBlockDetai
 import com.ustadmobile.core.viewmodel.coursegroupset.list.CourseGroupSetListViewModel
 import com.ustadmobile.core.viewmodel.courseterminology.edit.CourseTerminologyEditViewModel
 import com.ustadmobile.core.viewmodel.courseterminology.list.CourseTerminologyListViewModel
+import com.ustadmobile.core.viewmodel.deleteditem.DeletedItemListViewModel
 import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.CourseDiscussionDetailViewModel
 import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailViewModel
 import com.ustadmobile.core.viewmodel.discussionpost.edit.DiscussionPostEditViewModel
 import com.ustadmobile.core.viewmodel.epubcontent.EpubContentViewModel
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
+import com.ustadmobile.core.viewmodel.message.conversationlist.ConversationListViewModel
+import com.ustadmobile.core.viewmodel.message.messagelist.MessageListViewModel
 import com.ustadmobile.core.viewmodel.parentalconsentmanagement.ParentalConsentManagementViewModel
 import com.ustadmobile.core.viewmodel.pdfcontent.PdfContentViewModel
 import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditViewModel
@@ -84,7 +87,6 @@ import com.ustadmobile.libuicompose.view.clazzassignment.submitterdetail.ClazzAs
 import com.ustadmobile.libuicompose.view.clazzenrolment.edit.ClazzEnrolmentEditScreen
 import com.ustadmobile.libuicompose.view.clazzenrolment.list.ClazzEnrolmentListScreen
 import com.ustadmobile.libuicompose.view.clazzlog.attendancelist.ClazzLogListAttendanceScreen
-import com.ustadmobile.libuicompose.view.clazzlog.edit.ClazzLogEditScreen
 import com.ustadmobile.libuicompose.view.clazzlog.editattendance.ClazzLogEditAttendanceScreen
 import com.ustadmobile.libuicompose.view.contententry.list.ContentEntryListScreenForViewModel
 import com.ustadmobile.libuicompose.view.courseblock.textblockdetail.TextBlockDetailScreen
@@ -122,6 +124,7 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import kotlin.reflect.KClass
 import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel
+import com.ustadmobile.core.viewmodel.settings.DeveloperSettingsViewModel
 import com.ustadmobile.core.viewmodel.videocontent.VideoContentViewModel
 import com.ustadmobile.core.viewmodel.xapicontent.XapiContentViewModel
 import com.ustadmobile.libuicompose.view.about.OpenLicensesScreen
@@ -131,10 +134,15 @@ import com.ustadmobile.libuicompose.view.contententry.getmetadata.ContentEntryGe
 import com.ustadmobile.libuicompose.view.contententry.importlink.ContentEntryImportLinkScreen
 import com.ustadmobile.libuicompose.view.courseterminology.edit.CourseTerminologyEditScreen
 import com.ustadmobile.libuicompose.view.courseterminology.list.CourseTerminologyListScreen
+import com.ustadmobile.libuicompose.view.deleteditem.list.DeletedItemListScreen
 import com.ustadmobile.libuicompose.view.epubcontent.EpubContentScreen
+import com.ustadmobile.libuicompose.view.clazzlog.edit.ClazzLogEditScreen
+import com.ustadmobile.libuicompose.view.message.conversationlist.ConversationListScreen
+import com.ustadmobile.libuicompose.view.message.messagelist.MessageListScreen
 import com.ustadmobile.libuicompose.view.parentalconsentmanagement.ParentalConsentManagementScreen
 import com.ustadmobile.libuicompose.view.pdfcontent.PdfContentScreen
 import com.ustadmobile.libuicompose.view.person.registerminorwaitforparent.RegisterMinorWaitForParentScreen
+import com.ustadmobile.libuicompose.view.settings.DeveloperSettingsScreen
 import com.ustadmobile.libuicompose.view.videocontent.VideoContentScreen
 import com.ustadmobile.libuicompose.view.xapicontent.XapiContentScreen
 import kotlinx.coroutines.flow.Flow
@@ -567,6 +575,24 @@ fun AppNavHost(
                         ::ClazzLogEditViewModel)
                 )
             }
+            ConversationListViewModel.ALL_DEST_NAMES.forEach { destName ->
+                contentScene("/$destName") { backStackEntry ->
+                    ConversationListScreen(
+                        appViewModel(
+                            backStackEntry, ConversationListViewModel::class
+                        ) { di, savedStateHandle ->
+                            ConversationListViewModel(di, savedStateHandle, destName)
+                        }
+                    )
+                }
+            }
+
+            contentScene("/${MessageListViewModel.DEST_NAME}") { backStackEntry ->
+                MessageListScreen(
+                    appViewModel(backStackEntry, MessageListViewModel::class,
+                        ::MessageListViewModel)
+                )
+            }
 
             contentScene("/${CourseTerminologyListViewModel.DEST_NAME}") { backStackEntry ->
                 CourseTerminologyListScreen(
@@ -645,6 +671,20 @@ fun AppNavHost(
             contentScene("/${OpenLicensesViewModel.DEST_NAME}") { backStackEntry ->
                 OpenLicensesScreen(appViewModel(backStackEntry, OpenLicensesViewModel::class,
                     ::OpenLicensesViewModel)
+                )
+            }
+
+            contentScene("/${DeveloperSettingsViewModel.DEST_NAME}") { backStackEntry ->
+                DeveloperSettingsScreen(
+                    appViewModel(backStackEntry, DeveloperSettingsViewModel::class,
+                        ::DeveloperSettingsViewModel)
+                )
+            }
+
+            contentScene("/${DeletedItemListViewModel.DEST_NAME}") { backStackEntry ->
+                DeletedItemListScreen(
+                    appViewModel(backStackEntry, DeletedItemListViewModel::class,
+                        ::DeletedItemListViewModel)
                 )
             }
         }
