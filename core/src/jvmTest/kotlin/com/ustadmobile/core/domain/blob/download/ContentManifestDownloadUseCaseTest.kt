@@ -47,7 +47,7 @@ class ContentManifestDownloadUseCaseTest {
 
     @BeforeTest
     fun setup() {
-        val okHttpClient = newTestOkHttpClient(temporaryFolder)
+        val okHttpClient = newTestOkHttpClient(temporaryFolder, json = json)
         httpClient = okHttpClient.newTestHttpClient(json)
         db = DatabaseBuilder.databaseBuilder(
             dbClass = UmAppDatabase::class,

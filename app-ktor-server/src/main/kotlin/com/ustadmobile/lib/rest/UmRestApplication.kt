@@ -260,6 +260,7 @@ fun Application.umRestApplication(
                         cache = instance(),
                         tmpDir = File(appConfig.absoluteDataDir(), "httpfiles"),
                         logger = NapierLoggingAdapter(),
+                        json = json,
                     )
                 )
                 .build()

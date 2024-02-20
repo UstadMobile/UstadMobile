@@ -17,6 +17,7 @@ data class CouponHeader(
 
         const val HEADER_X_INTEGRITY = "X-Integrity"
 
+        const val HEADER_X_INTERCEPTOR_PARTIAL_FILE = "X-Interceptor-Partial-File"
 
     }
 

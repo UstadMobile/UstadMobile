@@ -85,6 +85,7 @@ dependencyResolutionManagement {
             version("version_plugin_license", "0.9.7")
             version("version_logback", "1.4.13")
             version("version_turbine", "1.0.0")
+            version("version_kotlinx_serialization", "1.6.1")
 
             plugin("jetbrains-compose", "org.jetbrains.compose").versionRef("jetbrains-compose")
             plugin("moko-resources-plugin", "dev.icerock.mobile.multiplatform-resources").versionRef("version-moko-resources")
@@ -93,6 +94,7 @@ dependencyResolutionManagement {
             plugin("conveyor", "dev.hydraulic.conveyor").versionRef("plugin_conveyor")
             plugin("download-task", "de.undercouch.download").versionRef("version_plugin_download_task")
             plugin("license", "com.jaredsburrows.license").versionRef("version_plugin_license")
+            plugin("serialization", "org.jetbrains.kotlin.plugin.serialization").versionRef("version_kotlin")
 
             library("kodein-di", "org.kodein.di", "kodein-di").versionRef("version_kodein_di")
             library("kodein-di-compose", "org.kodein.di", "kodein-di-framework-compose").versionRef("version_kodein_di")
@@ -195,6 +197,7 @@ dependencyResolutionManagement {
             library("jcabi-manifests", "com.jcabi", "jcabi-manifests").versionRef("version_jcabi_manifests")
             library("logback-classic", "ch.qos.logback", "logback-classic").versionRef("version_logback")
             library("turbine", "app.cash.turbine", "turbine").versionRef("version_turbine")
+            library("kotlinx-serialization", "org.jetbrains.kotlinx", "kotlinx-serialization-json").versionRef("version_kotlinx_serialization")
         }
     }
 }

@@ -168,6 +168,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                         cache = instance(),
                         tmpDir = File(rootTmpDir, "okhttp-tmp"),
                         logger = NapierLoggingAdapter(),
+                        json = instance(),
                     )
                 )
                 .build()
@@ -233,6 +234,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
         bind<Json>() with singleton {
             Json {
                 encodeDefaults = true
+                ignoreUnknownKeys = true
             }
         }
 

@@ -6,6 +6,7 @@ import com.ustadmobile.libcache.db.entities.RetentionLock
 import com.ustadmobile.libcache.headers.HttpHeader
 import com.ustadmobile.libcache.headers.requireIntegrity
 import com.ustadmobile.libcache.integrity.sha256Integrity
+import com.ustadmobile.libcache.io.RangeInputStream
 import com.ustadmobile.libcache.io.uncompress
 import com.ustadmobile.libcache.md5.Md5Digest
 import com.ustadmobile.libcache.md5.urlKey
@@ -24,6 +25,7 @@ import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import java.io.ByteArrayInputStream
 import java.io.File
+import java.io.SequenceInputStream
 import java.security.MessageDigest
 import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
@@ -352,6 +354,64 @@ class UstadCacheJvmTest {
 
         assertTrue(cacheTmpDir.exists())
         assertEquals(0, cacheTmpDir.list()!!.size)
+    }
+
+    @Test
+    fun givenFileCachedAndStored_whenPartialRequestMade_thenWillReceivePartialData() {
+        val testUrl = "http://www.server.com/file.png"
+        assertFileCanBeCachedAndRetrieved(
+            testFile = tempDir.newFileFromResource(this::class.java, "/testfile1.png"),
+            testUrl = testUrl,
+            mimeType = "image/png",
+            expectContentEncoding = "identity"
+        ) {
+            val resourceBytes = this::class.java.getResourceAsStream(
+                "/testfile1.png")!!.readAllBytes()
+            val etag = cache.retrieve(requestBuilder(testUrl))?.headers?.get("etag")
+            assertNotNull(etag)
+
+            val partialResponse = cache.retrieve(requestBuilder(testUrl) {
+                header("Range", "bytes=1000-")
+                header("If-Range", etag)
+            })
+            assertNotNull(partialResponse)
+            assertEquals(206, partialResponse.responseCode)
+
+            val partialResponseInput = partialResponse.bodyAsSource()!!.asInputStream()
+
+            val combinedBytes = SequenceInputStream(
+                RangeInputStream(ByteArrayInputStream(resourceBytes), 0, 999),
+                partialResponseInput
+            ).readAllBytes()
+
+            assertTrue(resourceBytes.contentEquals(combinedBytes),
+                "Combined partial response data should match original resource data")
+        }
+    }
+
+    @Test
+    fun givenFileCachedAndStored_whenPartialRequestMadeIfRangeNotMatched_thenWillReceiveFullResponse() {
+        val testUrl = "http://www.server.com/file.png"
+        assertFileCanBeCachedAndRetrieved(
+            testFile = tempDir.newFileFromResource(this::class.java, "/testfile1.png"),
+            testUrl = testUrl,
+            mimeType = "image/png",
+            expectContentEncoding = "identity"
+        ) {
+            val resourceBytes = this::class.java.getResourceAsStream(
+                "/testfile1.png")!!.readAllBytes()
+            val fullResponse = cache.retrieve(requestBuilder(testUrl) {
+                header("Range", "bytes=1000-")
+                header("If-Range", "something-else")
+            })
+            assertNotNull(fullResponse)
+            assertEquals(200, fullResponse.responseCode,
+                "When if-range did not match etag, full response should be returned")
+
+            val responseBytes = fullResponse.bodyAsSource()!!.asInputStream().readAllBytes()
+            assertTrue(resourceBytes.contentEquals(responseBytes),
+                "When if-range did not match actual etag, returned full response")
+        }
     }
 
 
