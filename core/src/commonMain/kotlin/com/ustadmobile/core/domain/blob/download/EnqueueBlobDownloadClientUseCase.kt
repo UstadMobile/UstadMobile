@@ -12,6 +12,7 @@ interface EnqueueBlobDownloadClientUseCase {
         val expectedSize: Long? = null,
         val entityUid: Long = 0,
         val tableId: Int = 0,
+        val partialTmpFile: String? = null,
     )
 
     suspend operator fun invoke(

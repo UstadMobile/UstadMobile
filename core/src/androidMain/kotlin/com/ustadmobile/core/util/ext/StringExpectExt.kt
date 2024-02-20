@@ -6,3 +6,6 @@ actual fun String.htmlToPlainText(): String {
     return htmlTextToSpanned().toString()
 }
 
+actual fun String.requireFileSeparatorSuffix(): String {
+    return requirePostfix("/")
+}

@@ -161,7 +161,7 @@ class BlobUploadServerUseCase(
         val urlsList = request.blobs.map {
             it.blobUrl
         }
-        val urlsStatus = httpCache.hasEntries(urlsList.toSet())
+        val urlsStatus = httpCache.getEntries(urlsList.toSet())
         val existingResponse = loadResponse(request.batchUuid)
 
         val existingResponseMap = existingResponse
@@ -170,7 +170,7 @@ class BlobUploadServerUseCase(
         val newResponse = BlobUploadResponse(
             request.blobs.mapNotNull { blobToUploadRequest ->
                 //Response will only include those items that not yet cached
-                if(urlsStatus[blobToUploadRequest.blobUrl] != true) {
+                if(!urlsStatus.containsKey(blobToUploadRequest.blobUrl)) {
                     val existingResponseItem =
                         existingResponseMap[blobToUploadRequest.blobUrl]
                     val uploadUuid = existingResponseItem?.uploadUuid

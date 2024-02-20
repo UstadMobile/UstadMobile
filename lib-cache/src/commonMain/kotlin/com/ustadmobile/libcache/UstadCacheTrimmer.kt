@@ -18,6 +18,8 @@ class UstadCacheTrimmer(
     private val sizeLimit: () -> Long,
 ) {
 
+    private val logPrefix = "CacheTrimmer: "
+
     private val _evictedEntriesFlow = MutableSharedFlow<List<String>>(
         replay = 1,
         extraBufferCapacity = 0,
@@ -38,7 +40,7 @@ class UstadCacheTrimmer(
         if(currentLimit <= 0)
             throw IllegalArgumentException("Size limit must be greater than 0")
 
-        logger?.d(UstadCacheImpl.LOG_TAG, "Trim cache run: max (evictable) size = $currentLimit bytes")
+        logger?.d(UstadCacheImpl.LOG_TAG, "$logPrefix Trim cache run: max (evictable) size = $currentLimit bytes")
         val pathsToDelete = mutableListOf<String>()
         db.withDoorTransaction {
             var currentSize: Long
@@ -56,10 +58,12 @@ class UstadCacheTrimmer(
                 }
                 _evictedEntriesFlow.tryEmit(evictableEntries.map { it.key })
                 db.cacheEntryDao.delete(entriesToEvict)
+                logger?.v(UstadCacheImpl.LOG_TAG, "$logPrefix evicting ${entriesToEvict.map { it.url }}")
                 pathsToDelete += entriesToEvict.map { it.storageUri }
             }
         }
 
+        logger?.v(UstadCacheImpl.LOG_TAG, "$logPrefix deleting ${pathsToDelete.joinToString()}")
         pathsToDelete.forEach { pathToDelete ->
             val path = Path(pathToDelete)
             fileSystem.takeIf { it.exists(path) }?.delete(path)

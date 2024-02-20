@@ -111,6 +111,7 @@ class XferTestNode(
                     cache = httpCache,
                     tmpDir = File(rootTmpDir, "okhttp-tmp"),
                     logger = NapierLoggingAdapter(),
+                    json = json,
                 )
             )
             .build()

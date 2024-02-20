@@ -15,7 +15,8 @@ interface ResponseCacheabilityChecker {
         responseHeaders: HttpHeaders,
         responseCacheDirectives: ResponseCacheControlHeader? = responseHeaders["cache-control"]?.let {
             ResponseCacheControlHeader.parse(it)
-        }
+        },
+        acceptPartialContent: Boolean = false,
     ): Boolean
 
 }

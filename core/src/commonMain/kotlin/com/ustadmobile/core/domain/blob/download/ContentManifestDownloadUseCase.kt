@@ -3,6 +3,7 @@ package com.ustadmobile.core.domain.blob.download
 import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ext.bodyAsDecodedText
+import com.ustadmobile.core.util.uuid.randomUuidAsString
 import com.ustadmobile.lib.db.entities.CacheLockJoin
 import com.ustadmobile.lib.db.entities.ContentEntryVersion
 import io.ktor.client.HttpClient
@@ -17,13 +18,24 @@ import kotlinx.serialization.json.Json
  * 2) Enqueue the download of everything in the manifest
  *
  * This will throw an exception if it is not possible to actually fetch the manifest.
+ *
+ * @param cacheTmpPath the temporary path for the cache interceptor. This will be used as the
+ *        storage path for partial responses (to support resumption of interrupted downloads).
+ *        It MUST end with the correct path separator character for the operating system.
  */
 class ContentManifestDownloadUseCase(
     private val enqueueBlobDownloadClientUseCase: EnqueueBlobDownloadClientUseCase,
     private val db: UmAppDatabase,
     private val httpClient: HttpClient,
     private val json: Json,
+    private val cacheTmpPath: String,
 ) {
+
+    init {
+        if(!cacheTmpPath.let { it.endsWith("/") || it.endsWith("\\") }) {
+            throw IllegalArgumentException("Cache tmp path must end with separator character")
+        }
+    }
 
     /**
      *
@@ -78,6 +90,7 @@ class ContentManifestDownloadUseCase(
                     expectedSize = it.second,
                     entityUid = contentEntryVersion.cevUid,
                     tableId = ContentEntryVersion.TABLE_ID,
+                    partialTmpFile = "${cacheTmpPath}${randomUuidAsString()}"
                 )
             },
             existingTransferJobId = transferJobUid,

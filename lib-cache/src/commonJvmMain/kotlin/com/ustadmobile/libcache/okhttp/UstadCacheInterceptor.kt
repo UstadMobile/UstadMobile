@@ -15,6 +15,7 @@ import com.ustadmobile.libcache.cachecontrol.ResponseCacheabilityChecker
 import com.ustadmobile.libcache.cachecontrol.ResponseCacheabilityCheckerImpl
 import com.ustadmobile.libcache.headers.CouponHeader.Companion.HEADER_ETAG_IS_INTEGRITY
 import com.ustadmobile.libcache.headers.CouponHeader.Companion.HEADER_X_INTEGRITY
+import com.ustadmobile.libcache.headers.CouponHeader.Companion.HEADER_X_INTERCEPTOR_PARTIAL_FILE
 import com.ustadmobile.libcache.headers.headersBuilder
 import com.ustadmobile.libcache.integrity.sha256Integrity
 import com.ustadmobile.libcache.logging.UstadCacheLogger
@@ -24,17 +25,21 @@ import kotlinx.io.asInputStream
 import kotlinx.io.files.FileSystem
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import okhttp3.Call
 import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.Protocol
+import okhttp3.Request
 import okhttp3.Response
 import okhttp3.ResponseBody.Companion.asResponseBody
 import okhttp3.internal.headersContentLength
 import okio.buffer
 import okio.source
 import java.io.File
+import java.io.FileOutputStream
 import java.io.PipedInputStream
 import java.io.PipedOutputStream
 import java.security.DigestInputStream
@@ -56,19 +61,23 @@ class UstadCacheInterceptor(
     private val responseCacheabilityChecker: ResponseCacheabilityChecker =
         ResponseCacheabilityCheckerImpl(),
     private val fileSystem: FileSystem = SystemFileSystem,
+    private val json: Json,
 ): Interceptor {
 
     private val executor = Executors.newCachedThreadPool()
 
     private val logPrefix: String = "OKHttp-CacheInterceptor: "
 
-    @Volatile
-    private var tmpDirChecked = false
-
     private fun Response.logSummary(): String {
         return "$code $message (contentType=${headers["content-type"]}, " +
                 "content-encoding=${headers["content-encoding"]} content-length=${headersContentLength()})"
     }
+
+    @Serializable
+    data class PartialFileMetadata(
+        val etag: String?,
+        val lastModified: String?,
+    )
 
     /**
      * This runnable will simultaneously write.
@@ -84,23 +93,39 @@ class UstadCacheInterceptor(
 
             //Note: the digest is only used if the response is uncompressed
             val digest = MessageDigest.getInstance("SHA-256")
-            val tmpFile = File(tmpDir, UUID.randomUUID().toString())
+            val partialFile = call.request().headers[HEADER_X_INTERCEPTOR_PARTIAL_FILE]
+
+            val responseBodyFile = partialFile?.let { File(it) }
+                ?: File(tmpDir, UUID.randomUUID().toString())
+            val partialFileMetadataFile = if(partialFile != null) {
+                File(responseBodyFile.parentFile, "${responseBodyFile.name}.json")
+            }else {
+                null
+            }
 
             try {
                 val responseCompression = CompressionType.byHeaderVal(
                     response.header("content-encoding"))
+
+                partialFileMetadataFile?.writeText(
+                    json.encodeToString(
+                        serializer = PartialFileMetadata.serializer(),
+                        value = PartialFileMetadata(
+                            etag = response.header("etag"),
+                            lastModified = response.header("last-modified"),
+                        )
+                    )
+                )
+
                 val responseInStream = response.body?.byteStream()
                     ?.let {
                         DigestInputStream(it, digest)
                     } ?: throw IllegalStateException()
 
                 responseInStream.use { responseIn ->
-                    if(!tmpDirChecked) {
-                        tmpDir.takeIf { !it.exists() }?.mkdirs()
-                        tmpDirChecked = true
-                    }
+                    responseBodyFile.parentFile?.takeIf { !it.exists() }?.mkdirs()
 
-                    val fileOutStream = tmpFile.outputStream()
+                    val fileOutStream =  FileOutputStream(responseBodyFile, response.code == 206)
                     while(!call.isCanceled() &&
                         responseIn.read(buffer).also { bytesRead = it } != -1
                     ) {
@@ -117,13 +142,16 @@ class UstadCacheInterceptor(
                             CacheEntryToStore(
                                 request = cacheRequest,
                                 response = HttpPathResponse(
-                                    path = Path(tmpFile.absolutePath),
+                                    path = Path(responseBodyFile.absolutePath),
                                     fileSystem = fileSystem,
                                     mimeType = response.header("content-type")
                                         ?: "application/octet-stream",
                                     request = cacheRequest,
                                     extraHeaders = headersBuilder {
-                                        takeFrom(response.headers.asCacheHttpHeaders())
+                                        takeFrom(response.headers.newBuilder()
+                                            .removeAll("range")
+                                            .build()
+                                            .asCacheHttpHeaders())
 
                                         val etagIsIntegrity = response
                                             .header(HEADER_ETAG_IS_INTEGRITY)?.toBooleanStrictOrNull()
@@ -153,10 +181,11 @@ class UstadCacheInterceptor(
                                         }
                                     }
                                 ),
-                                responseBodyTmpLocalPath = Path(tmpFile.absolutePath),
+                                responseBodyTmpLocalPath = Path(responseBodyFile.absolutePath),
                                 skipChecksumIfProvided = true,
                             )
                         ))
+                        partialFileMetadataFile?.takeIf { it.exists() }?.delete()
                     }
 
                     /**
@@ -171,7 +200,7 @@ class UstadCacheInterceptor(
                 throw e
             }finally {
                 response.close()
-                tmpFile.takeIf { it.exists() }?.delete()
+                responseBodyFile.takeIf { it.exists() }?.delete()
             }
         }
     }
@@ -235,6 +264,20 @@ class UstadCacheInterceptor(
             .build()
     }
 
+    private fun Request.removeXInterceptHeaders(): Request {
+        return if(header(HEADER_X_INTERCEPTOR_PARTIAL_FILE) != null) {
+            this
+        }else {
+            this.newBuilder()
+                .removeXInterceptHeaders()
+                .build()
+        }
+    }
+
+    private fun Request.Builder.removeXInterceptHeaders(): Request.Builder {
+        return removeHeader(HEADER_X_INTERCEPTOR_PARTIAL_FILE)
+    }
+
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()
         val url = request.url.toString()
@@ -247,7 +290,11 @@ class UstadCacheInterceptor(
 
         //If there is no chance of being able to cache (not http get or using no-store in request)
         if(!request.mightBeCacheable(requestCacheControlHeader)) {
-            return chain.proceed(request)
+            return chain.proceed(request.removeXInterceptHeaders())
+        }
+
+        val partialFile = request.headers[HEADER_X_INTERCEPTOR_PARTIAL_FILE]?.let {
+            File(it)
         }
 
         val cacheRequest = request.asCacheHttpRequest()
@@ -293,6 +340,7 @@ class UstadCacheInterceptor(
              */
             cachedResponseStatus != null && cachedResponseStatus.canBeValidated -> {
                 val validateRequestBuilder = request.newBuilder()
+                    .removeXInterceptHeaders()
                 cachedResponseStatus.ifNoneMatch?.also {
                     validateRequestBuilder.addHeader("if-none-match", it)
                 }
@@ -325,8 +373,33 @@ class UstadCacheInterceptor(
 
             else -> {
                 //Nothing in cache matches request, send to the network and cache if possible
-                val response =  chain.proceed(request)
-                if(responseCacheabilityChecker.canStore(response)) {
+                val partialFileMetaDataFile = partialFile?.let {
+                    File(it.parentFile, "${it.name}.json")
+                }
+
+                val partialFileMetadata = partialFileMetaDataFile?.takeIf {
+                    it.exists() && partialFile.exists()
+                }?.let {
+                    json.decodeFromString(PartialFileMetadata.serializer(), it.readText())
+                }
+                val partialEtag = partialFileMetadata?.etag
+
+                val response =  if(partialEtag != null) {
+                    chain.proceed(request.newBuilder()
+                        .removeXInterceptHeaders()
+                        .addHeader("If-Range", partialEtag)
+                        .addHeader("Range", "bytes=${partialFile.length()}-")
+                        .build())
+                }else {
+                    chain.proceed(request.removeXInterceptHeaders())
+                }
+
+                if(
+                    responseCacheabilityChecker.canStore(
+                        response = response,
+                        acceptPartialResponse = partialEtag != null
+                    )
+                ) {
                     newCacheAndStoreResponse(response, call).also {
                         logger?.d(LOG_TAG, "$logPrefix MISS $url ${it.logSummary()}")
                     }

@@ -6,6 +6,7 @@ import com.ustadmobile.core.tincan.Activity
 import com.ustadmobile.core.tincan.TinCanXML
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.bodyAsDecodedText
+import com.ustadmobile.core.util.ext.localFirstThenRepoIfNull
 import com.ustadmobile.core.util.requireEntryByUri
 import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
 import com.ustadmobile.xmlpullparserkmp.setInputString
@@ -40,9 +41,12 @@ class ResolveXapiLaunchHrefUseCase(
     suspend operator fun invoke(
         contentEntryVersionUid: Long
     ) : XapiLaunchHrefResult {
-        val contentEntryVersion = activeRepo.contentEntryVersionDao
-            .findByUidAsync(contentEntryVersionUid) ?:
-                throw IllegalArgumentException("could not load contententryversion $contentEntryVersionUid")
+        //ContentEntryVersion is immutable, so if available in db, no need to go to repo which would
+        //make an http request
+        val contentEntryVersion = activeRepo.localFirstThenRepoIfNull {
+            it.contentEntryVersionDao.findByUidAsync(contentEntryVersionUid)
+        } ?: throw IllegalArgumentException("could not load contententryversion $contentEntryVersionUid")
+
         val manifestUrl = contentEntryVersion.cevManifestUrl ?:
             throw IllegalStateException("ContentEntryVersion $contentEntryVersionUid manifesturl is null")
         val manifest: ContentManifest = json.decodeFromString(httpClient.get(manifestUrl).bodyAsDecodedText())

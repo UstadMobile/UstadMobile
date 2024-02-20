@@ -77,7 +77,7 @@ abstract class AbstractContentImporterTest: AbstractMainDispatcherTest() {
         }
 
         ustadCache = newTestUstadCache(temporaryFolder)
-        okHttpClient = newTestOkHttpClient(temporaryFolder, cache = ustadCache)
+        okHttpClient = newTestOkHttpClient(temporaryFolder, cache = ustadCache, json = json)
         httpClient = okHttpClient.newTestHttpClient(json)
 
         activeEndpoint = Endpoint("http://localhost:8097/")

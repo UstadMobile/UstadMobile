@@ -79,6 +79,7 @@ import com.ustadmobile.core.impl.config.AppConfig
 import com.ustadmobile.core.impl.config.AppConfig.Companion.KEY_CONFIG_SHOW_POWERED_BY
 import com.ustadmobile.core.launchopenlicenses.LaunchOpenLicensesUseCaseJvm
 import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.core.util.ext.requireFileSeparatorSuffix
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import kotlinx.io.files.Path
@@ -237,7 +238,8 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         BlobDownloadClientUseCaseCommonJvm(
             okHttpClient = instance(),
             db = instance(tag = DoorTag.TAG_DB),
-            repo = instance(tag = DoorTag.TAG_REPO)
+            repo = instance(tag = DoorTag.TAG_REPO),
+            httpCache = instance(),
         )
     }
 
@@ -255,6 +257,7 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             db = instance(tag = DoorTag.TAG_DB),
             httpClient = instance(),
             json = instance(),
+            cacheTmpPath = instance<File>(tag = TAG_CACHE_DIR).absolutePath.requireFileSeparatorSuffix()
         )
     }
 
