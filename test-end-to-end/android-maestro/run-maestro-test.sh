@@ -88,7 +88,7 @@ if [ "$CONTROLSERVER" = "" ]; then
 fi
 
 if [ "$TESTRESULTSDIR" == "" ]; then
-  TESTRESULTSDIR="$SCRIPTDIR/build/results"
+  TESTRESULTSDIR="$SCRIPTDIR/build/results/$TESTSERIAL"
 fi
 
 if [ ! -e $TESTRESULTSDIR ]; then
