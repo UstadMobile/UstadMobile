@@ -18,8 +18,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.lifecycleScope
 import com.jakewharton.processphoenix.ProcessPhoenix
@@ -265,7 +268,7 @@ class AppActivity: AppCompatActivity(), DIAware {
         ProcessPhoenix.triggerRebirth(this@AppActivity)
     }
 
-    @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
+    @OptIn(ExperimentalMaterial3WindowSizeClassApi::class, ExperimentalComposeUiApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -287,7 +290,9 @@ class AppActivity: AppCompatActivity(), DIAware {
             val windowSizeClass = calculateWindowSizeClass(this)
             UstadAppTheme {
                 Surface(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.fillMaxSize().semantics {
+                        testTagsAsResourceId = true
+                    },
                     color = MaterialTheme.colorScheme.background,
                 ) {
                     withDI(di) {
