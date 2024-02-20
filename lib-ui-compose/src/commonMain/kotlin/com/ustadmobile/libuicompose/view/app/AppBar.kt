@@ -114,7 +114,12 @@ fun UstadAppBar(
                 )
             },
             title = {
-                Text(text = title, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(
+                    text = title,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.testTag("app_title"),
+                )
             },
             navigationIcon = {
                 val leadingActionButton = appUiState.leadingActionButton
