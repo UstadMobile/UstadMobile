@@ -21,8 +21,8 @@ import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_NO_DELETE
 import com.ustadmobile.lib.util.randomString
 import kotlinx.coroutines.delay
 import com.ustadmobile.core.db.dao.getResults
+import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.lib.db.composites.PersonAndClazzMemberListDetails
-import io.ktor.client.*
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 
@@ -527,76 +527,6 @@ internal val UmAppDatabase.maxQueryParamListSize: Int
     get() = if(this.dbType() == DoorDbType.SQLITE) 99 else -1
 
 
-data class ContainerEntryWithMd5Partition(val entriesWithMatchingFile: List<ContainerEntryWithContainerEntryFile>,
-                                          val entriesWithoutMatchingFile: List<ContainerEntryWithMd5>)
-
-data class ContainerEntryPartition(
-    val entriesWithMatchingFile: List<ContainerEntryWithMd5>,
-    val entriesWithoutMatchingFile: List<ContainerEntryWithMd5>,
-    val existingFiles: List<ContainerEntryFile>
-)
-
-/**
- * Partition a list of containerentrywithmd5 into a list of those md5s that we already have
- * and those that we don't have yet.
- */
-suspend fun UmAppDatabase.partitionContainerEntriesWithMd5(
-    containerEntryFiles: List<ContainerEntryWithMd5>
-): ContainerEntryPartition = withDoorTransactionAsync {
-    val existingFiles = containerEntryFileDao.findEntriesByMd5SumsSafeAsync(containerEntryFiles
-        .mapNotNull { it.cefMd5 }, maxQueryParamListSize)
-    val existingMd5s = existingFiles.mapNotNull { it.cefMd5 }.toSet()
-
-    val (entriesWithFile, entriesNeedDownloaded) = containerEntryFiles
-        .partition { it.cefMd5 in existingMd5s }
-
-    ContainerEntryPartition(entriesWithFile, entriesNeedDownloaded, existingFiles)
-}
-
-/**
- * Given a list of ContainerEntryWithMd5 (e.g. the container entries that are required for a
- * container and the md5 sum of the contents that each should be linked with), link each
- * ContainerEntry in the list with the ContainerEntryFile where the ContainerEntryFile is already
- * present locally. Returns a list of those not present locally (e.g. those that need downloaded).
- *
- * @param containerUid The container uid for which we are linking entries.
- * @param containerEntryFiles The ContainerEntryFile list to check.
- * throwing an exception)
- *
- * @return a pair of
- */
-suspend fun UmAppDatabase.linkExistingContainerEntries(
-    containerUid: Long,
-    containerEntryFiles: List<ContainerEntryWithMd5>
-): ContainerEntryWithMd5Partition {
-
-    val (entriesWithFile, entriesNeedDownloaded, existingFiles) = partitionContainerEntriesWithMd5(
-            containerEntryFiles)
-
-    val alreadyLinkedEntries = containerEntryDao.findByContainerAsync(containerUid)
-    val entriesToLink = entriesWithFile
-            .filter { entryWithFile ->! alreadyLinkedEntries.any { it.cePath ==  entryWithFile.cePath } }
-            .onEach { entryWithFile ->
-                entryWithFile.ceUid = 0L
-                entryWithFile.ceCefUid = existingFiles.first { it.cefMd5 == entryWithFile.cefMd5 }.cefUid
-            }
-
-    containerEntryDao.insertListAsync(entriesToLink)
-
-    val entriesWithValRetList = entriesWithFile.map { entryWithFile ->
-        ContainerEntryWithContainerEntryFile().apply {
-            this.containerEntryFile = existingFiles.firstOrNull { it.cefMd5 ==  entryWithFile.cefMd5 }
-            ceUid = entryWithFile.ceUid
-            ceContainerUid = containerUid
-            ceCefUid = containerEntryFile?.cefUid ?: 0L
-            cePath = entryWithFile.cePath
-        }
-    }
-
-    return ContainerEntryWithMd5Partition(entriesWithValRetList,
-            entriesNeedDownloaded)
-}
-
 data class ScopedGrantResult(val sgUid: Long)
 
 suspend fun UmAppDatabase.grantScopedPermission(toGroupUid: Long, permissions: Long,
@@ -616,35 +546,14 @@ suspend fun UmAppDatabase.grantScopedPermission(toPerson: Person, permissions: L
     return grantScopedPermission(toPerson.personGroupUid, permissions, scopeTableId, scopeEntityUid)
 }
 
-/**
- * 25/Feb/2022
- *
- * This should NOT be needed, but content imports (maybe 4% of the time) have been observed that end
- * with the container size not being updated in spite of the fact that the process completed. This
- * happens for no apparent reason. All container entries were present. The fileSize on the container
- * should be 0 until the container is ready (to avoid any possibility of a client downloading a
- * container that is not ready).
- */
-suspend fun UmAppDatabase.validateAndUpdateContainerSize(
-    containerUid: Long,
-    attempts: Int = 3,
-    waitInterval: Long = 200
-) : Long{
-    var containerSize: Long = 0
-    for(i in 0 until attempts) {
-        containerSize = withDoorTransactionAsync {
-            val currentSize = containerDao.getContainerSizeByUid(containerUid)
-            if(currentSize != 0L)
-                return@withDoorTransactionAsync currentSize
+suspend fun <R> UmAppDatabase.localFirstThenRepoIfNull(
+    block: suspend (UmAppDatabase) -> R
+): R {
+    val localDb = (this as? DoorDatabaseRepository)?.db as? UmAppDatabase
+    val localResult: R? = localDb?.let { block(it) }
+    if(localResult != null)
+        return localResult
 
-            containerDao.updateContainerSizeAndNumEntriesAsync(containerUid, systemTimeInMillis())
-            containerDao.getContainerSizeByUid(containerUid)
-        }
-        if(containerSize != 0L)
-            return containerSize
-
-        delay(waitInterval)
-    }
-
-    return containerSize
+    return block(this)
 }
+

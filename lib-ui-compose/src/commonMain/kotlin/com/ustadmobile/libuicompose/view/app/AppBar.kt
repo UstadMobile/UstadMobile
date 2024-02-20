@@ -186,6 +186,7 @@ fun UstadAppBar(
                             trailingIcon = {
                                 if(searchActive) {
                                     IconButton(
+                                        modifier = Modifier.testTag("close_search_button"),
                                         onClick = {
                                             appUiState.searchState.onSearchTextChanged("")
                                             searchActive = false
@@ -203,6 +204,7 @@ fun UstadAppBar(
                         )
                     }else {
                         IconButton(
+                            modifier = Modifier.testTag("expand_search_icon_button"),
                             onClick = {
                                 searchActive = true
                             }

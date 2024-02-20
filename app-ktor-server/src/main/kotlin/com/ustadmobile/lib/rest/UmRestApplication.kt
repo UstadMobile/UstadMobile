@@ -336,6 +336,7 @@ fun Application.umRestApplication(
                 .replace("(datadir)", appConfig.absoluteDataDir().absolutePath)
             UstadCacheBuilder(
                 dbUrl = dbUrl,
+                logger = NapierLoggingAdapter(),
                 storagePath = Path(
                     File(appConfig.absoluteDataDir(), "httpfiles").absolutePath.toString()
                 ),

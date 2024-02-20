@@ -68,9 +68,6 @@ class UstadCacheInterceptor(
 
     private val logPrefix: String = "OKHttp-CacheInterceptor: "
 
-    @Volatile
-    private var tmpDirChecked = false
-
     private fun Response.logSummary(): String {
         return "$code $message (contentType=${headers["content-type"]}, " +
                 "content-encoding=${headers["content-encoding"]} content-length=${headersContentLength()})"
@@ -126,10 +123,7 @@ class UstadCacheInterceptor(
                     } ?: throw IllegalStateException()
 
                 responseInStream.use { responseIn ->
-                    if(!tmpDirChecked) {
-                        tmpDir.takeIf { !it.exists() }?.mkdirs()
-                        tmpDirChecked = true
-                    }
+                    responseBodyFile.parentFile?.takeIf { !it.exists() }?.mkdirs()
 
                     val fileOutStream =  FileOutputStream(responseBodyFile, response.code == 206)
                     while(!call.isCanceled() &&
@@ -346,7 +340,7 @@ class UstadCacheInterceptor(
              */
             cachedResponseStatus != null && cachedResponseStatus.canBeValidated -> {
                 val validateRequestBuilder = request.newBuilder()
-                    .removeHeader(HEADER_X_INTERCEPTOR_PARTIAL_FILE)
+                    .removeXInterceptHeaders()
                 cachedResponseStatus.ifNoneMatch?.also {
                     validateRequestBuilder.addHeader("if-none-match", it)
                 }

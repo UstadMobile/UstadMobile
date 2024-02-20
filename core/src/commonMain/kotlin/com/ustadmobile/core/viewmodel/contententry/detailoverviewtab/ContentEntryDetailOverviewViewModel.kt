@@ -19,6 +19,7 @@ import com.ustadmobile.core.domain.contententry.launchcontent.epub.LaunchEpubUse
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.LaunchXapiUseCase
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.Snack
+import com.ustadmobile.core.util.ext.localFirstThenRepoIfNull
 import com.ustadmobile.core.util.ext.onActiveEndpoint
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.lib.db.composites.ContentEntryAndDetail
@@ -215,8 +216,9 @@ class ContentEntryDetailOverviewViewModel(
             try {
                 loadingState = LoadingUiState.INDETERMINATE
                 _uiState.update { it.copy(openButtonEnabled = false) }
-                val latestContentEntryVersion = activeRepo.contentEntryVersionDao
-                    .findLatestVersionUidByContentEntryUidEntity(entityUidArg)
+                val latestContentEntryVersion = activeRepo.localFirstThenRepoIfNull {
+                    it.contentEntryVersionDao.findLatestVersionUidByContentEntryUidEntity(entityUidArg)
+                }
 
                 if(latestContentEntryVersion != null) {
                     val contentSpecificLauncher = when(latestContentEntryVersion.cevContentType) {

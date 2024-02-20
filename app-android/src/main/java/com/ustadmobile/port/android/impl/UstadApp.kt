@@ -115,6 +115,7 @@ import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.uri.UriHelperAndroid
 import com.ustadmobile.core.util.ext.appMetaData
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
+import com.ustadmobile.core.util.ext.requireFileSeparatorSuffix
 import com.ustadmobile.core.util.ext.toNullIfBlank
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.libcache.UstadCache
@@ -150,6 +151,10 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
         val db: UmAppDatabase,
         val updateCacheLockJoinUseCase: UpdateCacheLockJoinUseCase,
     )
+
+    private val Context.httpPersistentFilesDir: File
+        get() = File(filesDir, "httpfiles")
+
 
     @OptIn(ExperimentalXmlUtilApi::class)
     override val di: DI by DI.lazy {
@@ -325,7 +330,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
         }
 
         bind<UstadCache>() with singleton {
-            val httpCacheDir = File(applicationContext.filesDir, "httpfiles")
+            val httpCacheDir =  applicationContext.httpPersistentFilesDir
             val storagePath = Path(httpCacheDir.absolutePath)
             UstadCacheBuilder(
                 appContext = applicationContext,
@@ -576,6 +581,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 okHttpClient = instance(),
                 db = instance(tag = DoorTag.TAG_DB),
                 repo = instance(tag = DoorTag.TAG_REPO),
+                httpCache = instance(),
             )
         }
 
@@ -593,6 +599,10 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 db = instance(tag = DoorTag.TAG_DB),
                 httpClient = instance(),
                 json = instance(),
+                cacheTmpPath = File(
+                    applicationContext.httpPersistentFilesDir,
+                    UstadCacheBuilder.DEFAULT_SUBPATH_WORK
+                ).absolutePath.requireFileSeparatorSuffix(),
             )
         }
 

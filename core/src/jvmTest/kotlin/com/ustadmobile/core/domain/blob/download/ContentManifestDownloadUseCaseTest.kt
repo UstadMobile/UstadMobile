@@ -3,6 +3,7 @@ package com.ustadmobile.core.domain.blob.download
 import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.contentformats.manifest.ContentManifestEntry
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.util.ext.requireFileSeparatorSuffix
 import com.ustadmobile.core.util.newTestHttpClient
 import com.ustadmobile.core.util.newTestOkHttpClient
 import com.ustadmobile.core.util.stringvalues.asIStringValues
@@ -110,7 +111,9 @@ class ContentManifestDownloadUseCaseTest {
             enqueueBlobDownloadClientUseCase = mockEnqueueBlobDownloadUseCase,
             db = db,
             httpClient = httpClient,
-            json = json
+            json = json,
+            cacheTmpPath = temporaryFolder.newFolder("cache-tmp-partial-responses")
+                .absolutePath.requireFileSeparatorSuffix()
         )
 
         runBlocking {
