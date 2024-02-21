@@ -60,7 +60,7 @@ fun SiteEditScreen(
             value = uiState.site?.siteName ?: "",
             modifier = Modifier.fillMaxWidth()
                 .defaultItemPadding()
-                .testTag("site_name"),
+                .testTag("name"),
             onValueChange = {
                 onSiteChanged(uiState.site?.shallowCopy{
                     siteName = it
@@ -75,7 +75,7 @@ fun SiteEditScreen(
         )
 
         UstadSwitchField(
-            modifier = Modifier.defaultItemPadding().testTag("guest_login"),
+            modifier = Modifier.defaultItemPadding().testTag("guest_login_enabled"),
             checked = uiState.site?.guestLogin ?: false,
             label = stringResource(MR.strings.guest_login_enabled),
             onChange = {
@@ -89,7 +89,7 @@ fun SiteEditScreen(
             errorText = uiState.registrationEnabledError
         ) {
             UstadSwitchField(
-                modifier = Modifier.defaultItemPadding().testTag("reg_allowed"),
+                modifier = Modifier.defaultItemPadding().testTag("registration_allowed"),
                 checked = uiState.site?.registrationAllowed ?: false,
                 label = stringResource(MR.strings.registration_allowed),
                 onChange = {
@@ -106,7 +106,7 @@ fun SiteEditScreen(
             langList = uiState.uiLangs,
             currentLanguage = uiState.currentSiteTermsLang,
             onItemSelected = onChangeTermsLanguage,
-            modifier = Modifier.defaultItemPadding(),
+            modifier = Modifier.defaultItemPadding().testTag("language"),
         )
 
         UstadRichTextEdit(

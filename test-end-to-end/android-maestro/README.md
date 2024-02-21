@@ -53,3 +53,25 @@ maestro test e2e-tests/<test name>.yaml -e USERNAME=admin -e PASSWORD=testpass -
 ```
 
 Replace the values for`PASSWORD` with the server admin password, `TESTSERIAL` with the emulator or device serial (as per adb devices command), `ENDPOINT` with the server url as per the --siteUrl parameter used with runserver.
+
+### Resource IDs (testtags)
+
+Editable fields: testTag should be the label, in snake_case
+Date/time combined fields: two test tags - one for date, one for time e.g.  dont_show_before_date, 
+dont_show_before_time
+Rich text (click to move to edit): com.toughra.ustadmobile:id/text_input_edit_text
+Rich text in editing screen: com.toughra.ustadmobile:id/editor
+
+Buttons: testTag should be label_button
+Floating action button: floating_action_button
+Action bar button (e.g. save/done): action_bar_button
+Title text: app_title
+
+Exceptions:
+Next/prev buttons on attendance edit: prev_day_button and next_day_button
+Message list (chat) screen: textfield: message_text
+PersonEdit: phone number is split into country code dropdown ( country_code ) and the in country
+number (phone_number_text)
+
+
+

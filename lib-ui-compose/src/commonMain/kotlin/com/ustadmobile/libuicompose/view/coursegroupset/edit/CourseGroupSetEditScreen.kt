@@ -56,7 +56,7 @@ fun CourseGroupSetEditScreen(
             OutlinedTextField(
                 value = uiState.courseGroupSet?.cgsName ?: "",
                 modifier = Modifier
-                    .testTag("cgs_name")
+                    .testTag("title")
                     .defaultItemPadding()
                     .fillMaxWidth(),
                 enabled = uiState.fieldsEnabled,
@@ -77,7 +77,7 @@ fun CourseGroupSetEditScreen(
         item(key = "num_groups_item") {
             UstadNumberTextField(
                 modifier = Modifier
-                    .testTag("num_groups")
+                    .testTag("number_of_groups")
                     .defaultItemPadding()
                     .fillMaxWidth(),
                 enabled = uiState.fieldsEnabled,
@@ -100,7 +100,7 @@ fun CourseGroupSetEditScreen(
                 onClick = onClickAssignRandomly,
                 enabled = uiState.fieldsEnabled,
                 modifier = Modifier
-                    .testTag("assign_random_button")
+                    .testTag("assign_to_random_groups_button")
                     .fillMaxWidth()
                     .defaultItemPadding(8.dp),
 

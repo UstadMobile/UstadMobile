@@ -66,7 +66,7 @@ fun PersonEditScreen(
         )
 
         OutlinedTextField(
-            modifier = Modifier.testTag("firstNames").fillMaxWidth()
+            modifier = Modifier.testTag("first_names").fillMaxWidth()
                 .defaultItemPadding(),
             value = uiState.person?.firstNames ?: "",
             label = { Text(stringResource(MR.strings.first_names)+"*") },
@@ -84,7 +84,7 @@ fun PersonEditScreen(
         )
 
         OutlinedTextField(
-            modifier = Modifier.testTag("lastName").fillMaxWidth()
+            modifier = Modifier.testTag("last_name").fillMaxWidth()
                 .defaultItemPadding(),
             value = uiState.person?.lastName ?: "",
             label = { Text(stringResource(MR.strings.last_name) +"*") },
@@ -123,7 +123,7 @@ fun PersonEditScreen(
 
         if (uiState.parentalEmailVisible){
             OutlinedTextField(
-                modifier = Modifier.testTag("ppjEmail").fillMaxWidth().defaultItemPadding(),
+                modifier = Modifier.testTag("parents_email_address").fillMaxWidth().defaultItemPadding(),
                 value = uiState.approvalPersonParentJoin?.ppjEmail ?: "",
                 label = { Text(stringResource(MR.strings.parents_email_address)) },
                 isError = uiState.parentContactError != null,
@@ -144,7 +144,7 @@ fun PersonEditScreen(
 
         if(uiState.dateOfBirthVisible) {
             UstadDateField(
-                modifier = Modifier.testTag("dateOfBirth").fillMaxWidth().defaultItemPadding(),
+                modifier = Modifier.testTag("birthday").fillMaxWidth().defaultItemPadding(),
                 value = uiState.person?.dateOfBirth ?: 0,
                 label = { Text(stringResource(MR.strings.birthday)) },
                 isError = uiState.dateOfBirthError != null,
@@ -164,7 +164,7 @@ fun PersonEditScreen(
         if(uiState.phoneNumVisible) {
             UstadPhoneNumberTextField(
                 value = uiState.person?.phoneNum ?: "",
-                modifier = Modifier.testTag("phoneNum").fillMaxWidth().defaultItemPadding(),
+                modifier = Modifier.testTag("phone_number").fillMaxWidth().defaultItemPadding(),
                 label = { Text(stringResource(MR.strings.phone_number)) },
                 onValueChange = {
                     onPersonChanged(
@@ -177,14 +177,16 @@ fun PersonEditScreen(
                 isError = uiState.phoneNumError != null,
                 supportingText = uiState.phoneNumError?.let {
                     { Text(it) }
-                }
+                },
+                countryCodeTestTag = "country_code",
+                numberTextFieldTestTag = "phone_number_text"
             )
         }
 
 
         if(uiState.emailVisible) {
             OutlinedTextField(
-                modifier = Modifier.testTag("emailAddr").fillMaxWidth().defaultItemPadding(),
+                modifier = Modifier.testTag("email").fillMaxWidth().defaultItemPadding(),
                 value = uiState.person?.emailAddr ?: "",
                 label = { Text(stringResource(MR.strings.email)) },
                 isError = uiState.emailError != null,
@@ -203,7 +205,7 @@ fun PersonEditScreen(
 
         if(uiState.personAddressVisible) {
             OutlinedTextField(
-                modifier = Modifier.testTag("personAddress").fillMaxWidth().defaultItemPadding(),
+                modifier = Modifier.testTag("address").fillMaxWidth().defaultItemPadding(),
                 value = uiState.person?.personAddress ?: "",
                 label = { Text(stringResource(MR.strings.address)) },
                 enabled = uiState.fieldsEnabled,
@@ -238,7 +240,7 @@ fun PersonEditScreen(
 
         if (uiState.passwordVisible){
             UstadPasswordField(
-                modifier = Modifier.testTag("newPassword").fillMaxWidth().defaultItemPadding(),
+                modifier = Modifier.testTag("password").fillMaxWidth().defaultItemPadding(),
                 value = uiState.password ?: "",
                 label = { Text(stringResource(MR.strings.password)) },
                 enabled = uiState.fieldsEnabled,
