@@ -109,7 +109,6 @@ for COMMONFLOWFILE in $(ls $SCRIPTDIR/common); do
 done
 
 # Start control server
-#$SCRIPTDIR/../../testserver-controller/start.sh $TESTRESULTSDIR
 $SCRIPTDIR/../../testserver-controller/start.sh --siteUrl $ENDPOINT --resultsDir $TESTRESULTSDIR
 
 export ANDROID_SERIAL=$TESTSERIAL
@@ -141,7 +140,7 @@ maestro  --device=$TESTSERIAL  test -e ENDPOINT=$ENDPOINT -e USERNAME=$TESTUSER 
          -e PASSWORD=$TESTPASS -e CONTROLSERVER=$CONTROLSERVER \
          -e TESTSERIAL=$TESTSERIAL \
          $TESTARG -e TEST=$TEST -e TESTRESULTSDIR=$TESTRESULTSDIR  $OUTPUTARGS\
-          #--include-tags=checklist1
+
 
 TESTSTATUS=$?
 
