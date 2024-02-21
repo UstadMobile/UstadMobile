@@ -57,12 +57,12 @@ Replace the values for`PASSWORD` with the server admin password, `TESTSERIAL` wi
 ### Resource IDs (testtags)
 
 Editable fields: testTag should be the label, in snake_case e.g. if a field label is "First names",
-then the id will be first_names .
+then the id will be first_names . This applies to text fields, switches, drop downs.
+
+Date/time combined fields: two test tags - one for date, one for time e.g.  dont_show_before_date,
+dont_show_before_time
 
 Buttons: testTag should be label_button
-
-Date/time combined fields: two test tags - one for date, one for time e.g.  dont_show_before_date, 
-dont_show_before_time
 
 Rich text (click to move to edit): Most screens where the user can enter rich text, they will click
 on the text and then be taken to another screen to actually edit the text (due to screen size
