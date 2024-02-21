@@ -10,9 +10,8 @@ it('Admin user move content to folder', () => {
  // Add H5p File
   cy.ustadAddContentToLibrary('../test-files/content/H5p_Content.h5p','Content_001')
   cy.contains('Content_001').click()
-  cy.contains('OPEN').click({force: true})
-  cy.get('#appbar_title').should('be.visible').invoke('text').should('eq', 'Content_001');
-
+  cy.contains('OPEN').click()
+  cy.contains("#appbar_title", "Content_001").should("be.visible")
  // Verify H5p Content
  /*
   https://www.lambdatest.com/blog/how-to-handle-iframes-in-cypress/
@@ -28,11 +27,12 @@ it('Admin user move content to folder', () => {
   .find(".h5p-question-check-answer.h5p-joubelui-button").click()
   cy.go('back')
  // Add new folder in library
+  cy.contains("Library").click()
   cy.ustadAddFolderToLibrary('Test folder')
  // Move content to new folder
   cy.contains("Library").click()
   cy.contains('Content_001').rightclick()
-  cy.contains("Move to",{timeout:3000}).click()
+  cy.contains("Move to").click()
   cy.contains("Test folder").click()
   cy.get('#select_folder_button').click()
   cy.contains("Test folder").click()

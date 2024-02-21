@@ -63,7 +63,6 @@ Cypress.Commands.add('ustadAddContentToLibrary',(contentPath,contentName) => {
 
 // Add a Folder to Library
 Cypress.Commands.add('ustadAddFolderToLibrary',(folderName) => {
-  cy.contains("Library").click()
   cy.contains("button","Content").click()
   cy.contains('New folder').click({force: true})
   cy.get('input[id="content_title"]').type(folderName)
