@@ -45,7 +45,7 @@ import kotlinx.io.buffered
 import kotlinx.io.files.FileSystem
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
-
+import kotlin.concurrent.withLock
 /**
  *
  * @param sizeLimit A function that returns the current size limit for the cache. This will be
@@ -234,19 +234,19 @@ class UstadCacheImpl(
 
 
     private fun loadEntry(urlKey: String): CacheEntry? {
-        return lruMap.compute(urlKey) { key, currentEntry ->
-            if (currentEntry != null) {
-                currentEntry
-            }else {
-                val entryInDb = db.cacheEntryDao.findEntryAndBodyByKey(urlKey)
-                val entryLocks = db.retentionLockDao.findByKey(urlKey)
-                CacheEntryAndLocks(
-                    urlKey = key,
-                    entry = entryInDb,
-                    locks = entryLocks
-                )
-            }
-        }?.entry
+        return loadEntryAndLocks(urlKey).entry
+    }
+
+    private fun loadEntryAndLocks(urlKey: String): CacheEntryAndLocks {
+        return lruMap.computeIfAbsent(urlKey) { key ->
+            val entryInDb = db.cacheEntryDao.findEntryAndBodyByKey(urlKey)
+            val entryLocks = db.retentionLockDao.findByKey(urlKey)
+            CacheEntryAndLocks(
+                urlKey = key,
+                entry = entryInDb,
+                locks = entryLocks
+            )
+        }
     }
 
     private fun upsertEntries(
@@ -565,10 +565,10 @@ class UstadCacheImpl(
         logger?.i(LOG_TAG, "$logPrefix Retrieve ${request.url}")
 
         val key = Md5Digest().urlKey(request.url)
-        val entry = loadEntry(key)
+        val entryAndLocks = loadEntryAndLocks(key)
+        val entry = entryAndLocks.entry
         if(entry != null) {
-            val bodyDataExists = fileSystem.exists(Path(entry.storageUri))
-            if(bodyDataExists) {
+            if(fileSystem.exists(Path(entry.storageUri))) {
                 logger?.d(LOG_TAG, "$logPrefix FOUND ${request.url}")
                 pendingLastAccessedUpdates.update { prev ->
                     prev + LastAccessedUpdate(key, systemTimeInMillis())
@@ -587,18 +587,26 @@ class UstadCacheImpl(
                 )
             }else {
                 logger?.d(LOG_TAG, "$logPrefix Entry deleted externally:  ${request.url}")
-                //Body data was probably deleted by the OS
-                lruMap.computeIfPresent(key) { urlKey, entryAndLocks ->
-                    entryAndLocks.copy(
-                        entry = null
-                    )
-                }
-                pendingCacheEntryUpdates.update { prev ->
-                    prev.filter { it.key != key }
-                }
+                if(entryAndLocks.locks.isEmpty()) {
+                    logger?.d(LOG_TAG, "$logPrefix Entry deleted externally: " +
+                            "${request.url} - has no locks, so removing from cache")
 
-                pendingCacheEntryDeletes.update { prev ->
-                    prev + entry
+                    lruMap.computeIfPresent(key) { urlKey, prev ->
+                        prev.copy(
+                            entry = null
+                        )
+                    }
+
+                    pendingCacheEntryUpdates.update { prev ->
+                        prev.filter { it.key != key }
+                    }
+
+                    pendingCacheEntryDeletes.update { prev ->
+                        prev + entry
+                    }
+                }else {
+                    logger?.w(LOG_TAG, "$logPrefix Entry deleted externally: " +
+                            "${request.url} - BUT IT HAD LOCKS!!! Not good!")
                 }
             }
         }
@@ -654,7 +662,7 @@ class UstadCacheImpl(
         return lruMap[urlKey]?.locks ?: emptyList()
     }
 
-    override fun hasEntries(urls: Set<String>): Map<String, Boolean> {
+    override fun getEntries(urls: Set<String>): Map<String, CacheEntry> {
         val batchId = batchIdAtomic.incrementAndGet()
         val md5Digest = Md5Digest()
 
@@ -667,11 +675,11 @@ class UstadCacheImpl(
             },
         )
 
-        val entries = entryLoadResult.entries.associateBy {
-            it.urlKey
-        }
-
-        return urls.associateWith { url -> (entries[md5Digest.urlKey(url)]?.entry != null) }
+        return entryLoadResult.entries.mapNotNull { entryAndLocks ->
+            entryAndLocks.entry?.let {
+                entryAndLocks.urlKey to it
+            }
+        }.toMap()
     }
 
     /**
@@ -696,15 +704,17 @@ class UstadCacheImpl(
         }
     }
 
-    private fun addLockToLruMap(retentionLock: RetentionLock) {
-        lruMap.compute(retentionLock.lockKey) { urlKey, entryAndLocks ->
+    private fun addLockToLruMap(retentionLock: RetentionLock): CacheEntryAndLocks {
+        return lruMap.compute(retentionLock.lockKey) { urlKey, entryAndLocks ->
             entryAndLocks?.let {
                 val isNewlyLocked = it.locks.isEmpty()
 
                 it.copy(
                     locks = it.locks + retentionLock,
                     entry = if(isNewlyLocked) {
-                        it.entry?.moveToNewPath(pathsProvider().persistentPath)
+                        it.moveLock.withLock {
+                            it.entry?.moveToNewPath(pathsProvider().persistentPath)
+                        }
                     }else {
                         it.entry
                     }
@@ -714,10 +724,11 @@ class UstadCacheImpl(
                 entry = null,
                 locks = listOf(retentionLock)
             )
-        }
+        } ?: throw IllegalStateException("Can't happen")
     }
 
     override fun addRetentionLocks(locks: List<EntryLockRequest>): List<Pair<EntryLockRequest, RetentionLock>> {
+
         val md5Digest = Md5Digest()
         loadEntries(
             requestEntries = locks.map { RequestedEntry(requestedKey = md5Digest.urlKey(it.url)) },
@@ -731,14 +742,21 @@ class UstadCacheImpl(
                 lockRemark = lockRequest.remark,
             )
 
-            addLockToLruMap(lock)
-
-            Pair(lockRequest, lock)
+            Triple(lockRequest, lock, addLockToLruMap(lock))
         }.also { requestsAndLocks ->
             val newLockUpserts = requestsAndLocks.map { it.second }
             pendingLockUpserts.update { prev ->
                 prev + newLockUpserts
             }
+
+            val cacheEntriesToUpsert = requestsAndLocks.mapNotNull {
+                it.third.entry
+            }
+            pendingCacheEntryUpdates.update { prev ->
+                prev + cacheEntriesToUpsert
+            }
+        }.map {
+            it.first to it.second
         }
     }
 
@@ -761,7 +779,9 @@ class UstadCacheImpl(
                     locks = prev.locks.filter { it.lockId != removeRequest.lockId },
 
                     entry = if(isNewlyUnlocked) {
-                        prev.entry?.moveToNewPath(pathsProvider().cachePath)
+                        prev.moveLock.withLock {
+                            prev.entry?.moveToNewPath(pathsProvider().cachePath)
+                        }
                     }else {
                         prev.entry
                     }

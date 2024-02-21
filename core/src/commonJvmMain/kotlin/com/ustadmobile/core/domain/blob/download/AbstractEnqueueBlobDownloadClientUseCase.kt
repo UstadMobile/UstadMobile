@@ -37,6 +37,7 @@ abstract class AbstractEnqueueBlobDownloadClientUseCase(
                     tjiEntityUid = item.entityUid,
                     tjiTableId = item.tableId,
                     tjiStatus = TransferJobItemStatus.STATUS_QUEUED_INT,
+                    tjiPartialTmpFile = item.partialTmpFile,
                 )
             }
             db.transferJobItemDao.insertList(transferJobItems)

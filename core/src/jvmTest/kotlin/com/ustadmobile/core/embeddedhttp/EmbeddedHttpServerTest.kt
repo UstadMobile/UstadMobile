@@ -6,6 +6,7 @@ import com.ustadmobile.core.util.newTestOkHttpClient
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.okhttp.asOkHttpRequest
 import com.ustadmobile.libcache.request.HttpRequest
+import kotlinx.serialization.json.Json
 import net.thauvin.erik.urlencoder.UrlEncoderUtil
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -34,11 +35,16 @@ class EmbeddedHttpServerTest {
 
     private lateinit var mockUseCase: ContentEntryVersionServerUseCase
 
-    val endpointUrl = "http://endpoint.com/"
+    private val endpointUrl = "http://endpoint.com/"
+
+    private val json = Json {
+        encodeDefaults = true
+        ignoreUnknownKeys = true
+    }
 
     @BeforeTest
     fun setup() {
-        okHttpClient = newTestOkHttpClient(temporaryFolder)
+        okHttpClient = newTestOkHttpClient(temporaryFolder, json = json)
         mockUseCase = mock { }
     }
 

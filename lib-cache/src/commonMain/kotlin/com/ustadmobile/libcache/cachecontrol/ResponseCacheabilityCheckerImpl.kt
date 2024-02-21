@@ -6,16 +6,15 @@ class ResponseCacheabilityCheckerImpl: ResponseCacheabilityChecker {
     override fun invoke(
         statusCode: Int,
         responseHeaders: HttpHeaders,
-        responseCacheDirectives: ResponseCacheControlHeader?
+        responseCacheDirectives: ResponseCacheControlHeader?,
+        acceptPartialContent: Boolean
     ): Boolean {
-        //Partial status, no content, etc is not cacheable
-        if(statusCode != 200)
+        //Do not store error responses. Only store partial content responses when explicitly expected
+        // in response to our own directives
+        if(!(statusCode == 200 || (statusCode == 206 && acceptPartialContent)))
             return false
 
-        //Cannot
-        if(responseCacheDirectives?.noStore == true)
-            return false
-
-        return true
+        //do not store a response if the cache directives expressly tell us no
+        return responseCacheDirectives?.noStore != true
     }
 }

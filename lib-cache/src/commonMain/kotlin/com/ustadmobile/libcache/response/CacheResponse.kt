@@ -27,8 +27,6 @@ class CacheResponse(
     override val responseCode: Int
         get() = httpResponseCode
 
-    private val bodyPath = Path(storageUri)
-
     private val rangeResponse: ContentRange?
 
     override val headers: HttpHeaders
@@ -41,6 +39,7 @@ class CacheResponse(
 
     init {
         val rangeRequestHeader = request.headers["range"]
+        val ifRangeRequestHeader = request.headers["if-range"]
         val overrideHeadersMap = mutableMapOf<String, List<String>>()
 
         var rangeResponse: ContentRange? = null
@@ -61,7 +60,9 @@ class CacheResponse(
         }
 
 
-        if(rangeRequestHeader != null) {
+        if(rangeRequestHeader != null &&
+            (ifRangeRequestHeader == null || ifRangeRequestHeader == headers["etag"])
+        ) {
             val effectiveContentLength = (overrideHeadersMap["content-length"]?.firstOrNull()
                 ?: headers["content-length"])
                 ?: throw IllegalStateException("CacheResponse headers missing content-length")

@@ -16,12 +16,13 @@ import androidx.compose.ui.unit.dp
 fun UstadQuickActionButton(
     iconContent: (@Composable () -> Unit)? = null,
     labelText: String,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
     val interactionSource =  remember { MutableInteractionSource() }
 
     TextButton(
-        modifier = Modifier.width(110.dp),
+        modifier = modifier.width(112.dp),
         onClick = onClick,
         interactionSource = interactionSource,
     ) {

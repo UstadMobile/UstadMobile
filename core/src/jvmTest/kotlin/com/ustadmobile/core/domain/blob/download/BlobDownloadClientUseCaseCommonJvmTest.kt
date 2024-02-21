@@ -1,6 +1,7 @@
 package com.ustadmobile.core.domain.blob.download
 
 import com.ustadmobile.core.domain.blob.BlobTransferJobItem
+import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.util.test.ResourcesDispatcher
 import com.ustadmobile.util.test.initNapierLog
 import io.github.aakira.napier.Napier
@@ -9,6 +10,7 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
+import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -21,12 +23,17 @@ class BlobDownloadClientUseCaseCommonJvmTest {
 
     lateinit var okHttpClient: OkHttpClient
 
+    lateinit var mockCache: UstadCache
+
     @BeforeTest
     fun setup() {
         initNapierLog()
         mockWebServer = MockWebServer()
         mockWebServer.dispatcher = ResourcesDispatcher(this::class.java)
         mockWebServer.start()
+        mockCache = mock {
+            on { getEntries(any()) }.thenReturn(emptyMap())
+        }
     }
 
     @AfterTest
@@ -65,6 +72,7 @@ class BlobDownloadClientUseCaseCommonJvmTest {
             okHttpClient = okHttpClient,
             db = mock { },
             repo = null,
+            httpCache = mockCache,
         )
 
         runBlocking {

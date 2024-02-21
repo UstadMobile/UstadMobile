@@ -5,6 +5,7 @@ import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCas
 import com.ustadmobile.core.io.ext.readSha256
 import com.ustadmobile.core.util.ext.encodeBase64
 import com.ustadmobile.libcache.UstadCache
+import com.ustadmobile.libcache.db.entities.CacheEntry
 import com.ustadmobile.libcache.headers.headersBuilder
 import com.ustadmobile.libcache.io.range
 import com.ustadmobile.util.test.ext.newFileFromResource
@@ -109,10 +110,8 @@ class BlobUploadServerUseCaseTest {
         )
 
         cache.stub {
-            on { hasEntries(any()) }.thenAnswer { invocation ->
-                @Suppress("UNCHECKED_CAST")
-                val urls = invocation.arguments.first() as Set<String>
-                urls.map { it to false }.toMap()
+            on { getEntries(any()) }.thenAnswer { invocation ->
+                emptyMap<String, CacheEntry>()
             }
         }
 
@@ -159,10 +158,13 @@ class BlobUploadServerUseCaseTest {
         //Mark first url as completed - it should not appear in response.
         val firstUrl = testUploads.first().url
         cache.stub {
-            on { hasEntries(any()) }.thenAnswer { invocation ->
-                @Suppress("UNCHECKED_CAST")
-                val urls = invocation.arguments.first() as Set<String>
-                urls.map { it to  (it == firstUrl) }.toMap()
+            on { getEntries(any()) }.thenAnswer { invocation ->
+                mapOf(
+                    firstUrl to CacheEntry(
+                        key = firstUrl,
+                        url = firstUrl,
+                    )
+                )
             }
         }
 

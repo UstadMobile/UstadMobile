@@ -260,6 +260,7 @@ fun Application.umRestApplication(
                         cache = instance(),
                         tmpDir = File(appConfig.absoluteDataDir(), "httpfiles"),
                         logger = NapierLoggingAdapter(),
+                        json = json,
                     )
                 )
                 .build()
@@ -335,6 +336,7 @@ fun Application.umRestApplication(
                 .replace("(datadir)", appConfig.absoluteDataDir().absolutePath)
             UstadCacheBuilder(
                 dbUrl = dbUrl,
+                logger = NapierLoggingAdapter(),
                 storagePath = Path(
                     File(appConfig.absoluteDataDir(), "httpfiles").absolutePath.toString()
                 ),
