@@ -10,8 +10,8 @@ it('Admin user add content to the library', () => {
  // Add H5p File
   cy.ustadAddContentToLibrary('../test-files/content/H5p_Content.h5p','Content_001')
   cy.contains('Content_001').click()
-  cy.contains('OPEN').click({force: true})
-  cy.get('#appbar_title').should('be.visible').invoke('text').should('eq', 'Content_001');
+  cy.contains('OPEN').click()
+  cy.contains("#appbar_title", "Content_001").should("be.visible")
 
  // Verify H5p Content
  /*
@@ -35,7 +35,7 @@ it('Admin user add content to the library', () => {
   cy.ustadAddContentToLibrary('../test-files/content/Video_Content.mp4','Content_003')
   cy.contains('Content_003').click()
   cy.contains("button","OPEN").click()
-  cy.get('#appbar_title').should('be.visible').invoke('text').should('eq', 'Content_003');
+  cy.contains("#appbar_title", "Content_003").should("be.visible")
  // Verify video content (duration > 0)
   cy.get('video').should(($video) => {
       expect($video[0].duration).to.be.gt(0)
@@ -44,7 +44,7 @@ it('Admin user add content to the library', () => {
   cy.go('back')
   cy.go('back')
   cy.contains('Content_002').click()
-  cy.get('#appbar_title').should('be.visible').invoke('text').should('eq','Content_002')
+  cy.contains("#appbar_title", "Content_002").should("be.visible")
   cy.contains("button","OPEN").click()
   cy.get('#header_overflow_menu_expand_button').click()
   cy.contains('Table of contents').click()

@@ -29,7 +29,7 @@ class GetStoragePathForUrlUseCaseCommonJvmTest {
     fun setup() {
         val json = Json { encodeDefaults = true }
         cache = newTestUstadCache(temporaryFolder)
-        okHttpClient = newTestOkHttpClient(temporaryFolder, cache)
+        okHttpClient = newTestOkHttpClient(temporaryFolder, cache, json)
         httpClient = okHttpClient.newTestHttpClient(json)
 
     }

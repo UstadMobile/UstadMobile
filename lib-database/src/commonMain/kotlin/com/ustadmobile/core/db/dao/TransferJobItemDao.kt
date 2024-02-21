@@ -25,6 +25,14 @@ expect abstract class TransferJobItemDao {
 
 
     @Query("""
+        SELECT TransferJobItem.*
+          FROM TransferJobItem
+         WHERE TransferJobItem.tjiTjUid = :jobUid
+           AND TransferJobItem.tjiStatus < ${TransferJobItemStatus.STATUS_COMPLETE_INT}
+    """)
+    abstract suspend fun findPendingByJobUid(jobUid: Int): List<TransferJobItem>
+
+    @Query("""
         UPDATE TransferJobItem
            SET tjTransferred = :transferred
          WHERE tjiUid = :jobItemUid

@@ -33,6 +33,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.viewmodel.contententry.detailoverviewtab.ContentEntryDetailOverviewUiState
@@ -89,11 +90,15 @@ fun ContentEntryDetailOverviewScreen(
             item(key = "open_button") {
                 Button(
                     onClick = onClickOpen,
-                    modifier = Modifier.fillMaxWidth().defaultItemPadding(),
+                    modifier = Modifier.fillMaxWidth().defaultItemPadding().testTag("open_content_button"),
                 ) {
                     Text(stringResource(MR.strings.open))
                 }
             }
+        }
+
+        item(key = "upper_divider") {
+            Divider(thickness = 1.dp)
         }
 
         item("quick_action_row") {
@@ -103,6 +108,7 @@ fun ContentEntryDetailOverviewScreen(
                 UstadOfflineItemStatusQuickActionButton(
                     state = uiState.offlineItemAndState,
                     onClick = onClickOfflineButton,
+                    modifier = Modifier.testTag("offline_status_button")
                 )
             }
         }
@@ -154,10 +160,6 @@ fun ContentEntryDetailOverviewScreen(
                 text = uiState.contentEntry?.entry?.description ?: "",
                 modifier = Modifier.defaultItemPadding()
             )
-        }
-
-        item {
-            Divider(thickness = 1.dp, modifier = Modifier.defaultItemPadding())
         }
 
         if (uiState.translationVisibile){

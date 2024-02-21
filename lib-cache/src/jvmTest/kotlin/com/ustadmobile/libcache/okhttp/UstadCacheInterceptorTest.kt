@@ -10,16 +10,21 @@ import com.ustadmobile.libcache.UstadCacheImpl
 import com.ustadmobile.libcache.assertTempDirectoryIsEmptied
 import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.headers.CouponHeader.Companion.HEADER_ETAG_IS_INTEGRITY
+import com.ustadmobile.libcache.headers.CouponHeader.Companion.HEADER_X_INTERCEPTOR_PARTIAL_FILE
 import com.ustadmobile.libcache.headers.HttpHeaders
 import com.ustadmobile.libcache.integrity.sha256Integrity
+import com.ustadmobile.libcache.io.RangeInputStream
 import com.ustadmobile.libcache.md5.Md5Digest
 import com.ustadmobile.libcache.md5.urlKey
+import com.ustadmobile.libcache.partial.ContentRange.Companion.parseRangeHeader
 import com.ustadmobile.libcache.request.requestBuilder
 import com.ustadmobile.libcache.response.bodyAsUncompressedSourceIfContentEncoded
 import com.ustadmobile.util.test.ResourcesDispatcher
 import com.ustadmobile.util.test.initNapierLog
 import kotlinx.io.files.Path
 import kotlinx.io.readByteArray
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.mockwebserver.MockResponse
@@ -66,6 +71,11 @@ class UstadCacheInterceptorTest {
 
     private lateinit var cacheListener: UstadCache.CacheListener
 
+    private val json = Json {
+        encodeDefaults = true
+        ignoreUnknownKeys = true
+    }
+
     private fun ByteArray.sha256(): ByteArray {
         val digest = MessageDigest.getInstance("SHA-256")
         digest.update(this)
@@ -102,7 +112,9 @@ class UstadCacheInterceptorTest {
         okHttpClient = OkHttpClient.Builder()
             .addInterceptor(
                 UstadCacheInterceptor(
-                    ustadCache, interceptorTmpDir, logger = logger,
+                    ustadCache, interceptorTmpDir,
+                    logger = logger,
+                    json = json,
                 ))
             .callTimeout(Duration.ofSeconds(500))
             .connectTimeout(Duration.ofSeconds(500))
@@ -376,6 +388,67 @@ class UstadCacheInterceptorTest {
             responseBytes
         )
         interceptorTmpDir.assertTempDirectoryIsEmptied()
+    }
+
+
+    @Test
+    fun givenResponsePartiallyStored_whenRequestedWithResumeUuid_thenWillResume() {
+        val resourcePath = "/testfile1.png"
+        val resumeDir = tempDir.newFolder()
+        val resumeFile = File(resumeDir, "partial")
+        val resumeFileMetadata = File(resumeDir, "partial.json")
+        val etag = "aa11"
+        resumeFileMetadata.writeText(
+            json.encodeToString(UstadCacheInterceptor.PartialFileMetadata(
+                etag = etag,
+                lastModified = null
+            ))
+        )
+        resumeFile.outputStream().use { resumeFileOut ->
+            RangeInputStream(
+                this::class.java.getResourceAsStream(resourcePath)!!, 0, 999
+            ).copyTo(resumeFileOut)
+            resumeFileOut.flush()
+        }
+
+        val mockWebServer = MockWebServer().also {
+            it.dispatcher = ResourcesDispatcher(javaClass) {
+                it.addHeader("content-type", "image/png")
+                it.addHeader("etag", etag)
+            }
+
+            it.start()
+        }
+
+        val requestUrl = "${mockWebServer.url(resourcePath)}"
+        val response = okHttpClient.newCall(
+            Request.Builder().url(requestUrl)
+                .addHeader(HEADER_X_INTERCEPTOR_PARTIAL_FILE, resumeFile.toString())
+                .build()
+        ).execute()
+        response.body?.bytes() //Read body
+
+
+        val cacheResponse = ustadCache.retrieve(
+            requestBuilder(requestUrl) {
+                header("accept-encoding", "gzip, br, deflate")
+            }
+        )
+        assertNotNull(cacheResponse)
+
+        val cacheResponseBytes = cacheResponse
+            .bodyAsUncompressedSourceIfContentEncoded()!!.readByteArray()
+        val resourceBytes = this::class.java.getResourceAsStream(resourcePath)!!.readAllBytes()
+        Assert.assertArrayEquals(
+            resourceBytes,
+            cacheResponseBytes)
+
+        val request = mockWebServer.takeRequest()
+        assertEquals(etag, request.headers["if-range"])
+
+        val rangeHeader =  parseRangeHeader(request.headers["range"]!!,
+            resourceBytes.size.toLong())
+        assertEquals(1000L, rangeHeader.fromByte)
     }
 
 
