@@ -57,20 +57,35 @@ Replace the values for`PASSWORD` with the server admin password, `TESTSERIAL` wi
 ### Resource IDs (testtags)
 
 Editable fields: testTag should be the label, in snake_case
+
 Date/time combined fields: two test tags - one for date, one for time e.g.  dont_show_before_date, 
 dont_show_before_time
+
 Rich text (click to move to edit): com.toughra.ustadmobile:id/text_input_edit_text
+
 Rich text in editing screen: com.toughra.ustadmobile:id/editor
 
 Buttons: testTag should be label_button
+
+**Other Ids**
+
 Floating action button: floating_action_button
+
 Action bar button (e.g. save/done): action_bar_button
+
+Settings (action bar): settings_button
+
+Accounts (top right): header_avatar
+
 Title text: app_title
 
 Exceptions:
 Next/prev buttons on attendance edit: prev_day_button and next_day_button
+
 Message list (chat) screen: textfield: message_text
+
 PersonEdit: phone number is split into country code dropdown ( country_code ) and the in country
+
 number (phone_number_text)
 
 
