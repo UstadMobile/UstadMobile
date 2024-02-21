@@ -56,20 +56,28 @@ Replace the values for`PASSWORD` with the server admin password, `TESTSERIAL` wi
 
 ### Resource IDs (testtags)
 
-Editable fields: testTag should be the label, in snake_case
+Editable fields: testTag should be the label, in snake_case e.g. if a field label is "First names",
+then the id will be first_names .
+
+Buttons: testTag should be label_button
 
 Date/time combined fields: two test tags - one for date, one for time e.g.  dont_show_before_date, 
 dont_show_before_time
 
-Rich text (click to move to edit): com.toughra.ustadmobile:id/text_input_edit_text
+Rich text (click to move to edit): Most screens where the user can enter rich text, they will click
+on the text and then be taken to another screen to actually edit the text (due to screen size
+limitations).
 
-Rich text in editing screen: com.toughra.ustadmobile:id/editor
+ID to click on to move to next edit screen: com.toughra.ustadmobile:id/text_input_edit_text
 
-Buttons: testTag should be label_button
+ID to click on to actually edit rich text: com.toughra.ustadmobile:id/editor
+
+
 
 **Other Ids**
 
-Floating action button: floating_action_button
+Floating action button: floating_action_button (note: selecting this by the text in the button
+does not work).
 
 Action bar button (e.g. save/done): action_bar_button
 
@@ -82,11 +90,10 @@ Title text: app_title
 Exceptions:
 Next/prev buttons on attendance edit: prev_day_button and next_day_button
 
-Message list (chat) screen: textfield: message_text
+Message list (chat) screen (no label): textfield: message_text
 
-PersonEdit: phone number is split into country code dropdown ( country_code ) and the in country
-
-number (phone_number_text)
+PersonEdit: phone number is split into country code dropdown ( tag: country_code ) and the in country
+number ( tag: phone_number_text )
 
 
 
