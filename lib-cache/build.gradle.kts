@@ -3,6 +3,7 @@ plugins {
     id("com.android.library")
     alias(libs.plugins.ksp)
     alias(libs.plugins.atomicfu)
+    alias(libs.plugins.serialization)
 }
 
 kotlin {
@@ -24,6 +25,7 @@ kotlin {
                 implementation(libs.kotlinxio.core)
                 implementation(libs.ktor.client.core)
                 implementation(libs.napier)
+                implementation(libs.kotlinx.serialization)
                 compileOnly(libs.door.room.annotations)
             }
         }

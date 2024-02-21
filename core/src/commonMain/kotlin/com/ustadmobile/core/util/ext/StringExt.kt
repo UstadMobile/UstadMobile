@@ -30,9 +30,17 @@ fun String.hexStringToBase64Encoded(): String = hexStringToByteArray().encodeBas
 @OptIn(ExperimentalStdlibApi::class)
 fun String.base64EncodedToHexString(): String = base64StringToByteArray().toHexString()
 
-fun String.truncate(maxLength: Int = 24): String{
+fun String.truncate(
+    maxLength: Int = 24,
+    appendIfTruncated: Char? = ellipsis,
+): String{
     return if(this.length > maxLength) {
-        this.substring(0, maxLength).plus(ellipsis)
+        this.substring(0, maxLength).let {
+            if(appendIfTruncated != null)
+                it.plus(appendIfTruncated)
+            else
+                it
+        }
     } else{
         this
     }

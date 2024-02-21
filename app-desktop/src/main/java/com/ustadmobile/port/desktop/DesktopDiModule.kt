@@ -201,6 +201,7 @@ val DesktopHttpModule = DI.Module("Desktop-HTTP") {
                     cache = instance(),
                     tmpDir = interceptorTmpDir,
                     logger = cacheLogger,
+                    json = instance(),
                 )
             )
             .build()

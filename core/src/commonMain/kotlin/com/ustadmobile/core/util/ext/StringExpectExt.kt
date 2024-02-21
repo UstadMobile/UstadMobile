@@ -8,3 +8,8 @@ package com.ustadmobile.core.util.ext
  */
 expect fun String.htmlToPlainText(): String
 
+/**
+ * Require that the string ends with a file separator character (e.g. / on Linux, Mac, Android, JS,
+ * \ when run on Windows on JVM)
+ */
+expect fun String.requireFileSeparatorSuffix(): String

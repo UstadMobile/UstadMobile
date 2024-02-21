@@ -95,9 +95,9 @@ interface UstadCache {
      * @param urls a set of URLs to check to see if they are available in the cache
      * @return A map of the which URLs are cached (url to boolean)
      */
-    fun hasEntries(
+    fun getEntries(
         urls: Set<String>
-    ): Map<String, Boolean>
+    ): Map<String, CacheEntry?>
 
 
     /**
