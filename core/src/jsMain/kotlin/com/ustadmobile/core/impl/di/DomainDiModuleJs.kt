@@ -8,6 +8,8 @@ import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCas
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCaseJs
 import com.ustadmobile.core.domain.blob.savepicture.SavePictureUseCase
+import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCase
+import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCaseJs
 import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseJs
 import com.ustadmobile.core.domain.contententry.delete.DeleteContentEntryParentChildJoinUseCase
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCaseJs
@@ -179,5 +181,9 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
         DeletePermanentlyUseCase(
             repoOrDb = instance(tag = DoorTag.TAG_REPO),
         )
+    }
+
+    bind<SetClipboardStringUseCase>() with singleton {
+        SetClipboardStringUseCaseJs()
     }
 }

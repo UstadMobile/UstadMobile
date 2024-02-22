@@ -816,8 +816,9 @@
     <string name="permission_password_reset">Reset and update persons password</string>
     <string name="school_code">School code</string>
     <string name="course_code">Course code</string>
+    <string name="invite_code">Invite code</string>
     <string name="entity_code">%1$s code</string>
-    <string name="join_code_instructions">Ask your teacher/admin for the code, then enter it below. The course teacher/admin can then approve or deny your request to join.</string>
+    <string name="join_code_instructions">Ask your teacher/admin for the invite code, then enter it below. The course teacher/admin can then approve or deny your request to join.</string>
     <!-- This is a button that shows when teachers are viewing a student's work that allows them to
     enter the answers on behalf of a student e.g. when the student is not using the phone/tablet
     directly -->

@@ -2,12 +2,14 @@ package com.ustadmobile.core.db.dao
 
 import androidx.room.Insert
 import androidx.room.Query
+import app.cash.paging.PagingSource
 import com.ustadmobile.door.annotation.DoorDao
 import com.ustadmobile.door.annotation.HttpAccessible
 import com.ustadmobile.door.annotation.HttpServerFunctionCall
 import com.ustadmobile.door.annotation.HttpServerFunctionParam
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.composites.EnrolmentRequestAndCoursePic
+import com.ustadmobile.lib.db.composites.EnrolmentRequestAndPersonPicture
 import com.ustadmobile.lib.db.entities.EnrolmentRequest
 import kotlinx.coroutines.flow.Flow
 
@@ -86,5 +88,43 @@ expect abstract class EnrolmentRequestDao {
         updateTime: Long,
     )
 
+
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
+    )
+    @Query("""
+        SELECT EnrolmentRequest.*, PersonPicture.*
+          FROM EnrolmentRequest
+               LEFT JOIN PersonPicture
+                         ON PersonPicture.personPictureUid = EnrolmentRequest.erPersonUid
+         WHERE EnrolmentRequest.erClazzUid = :clazzUid
+           AND EnrolmentRequest.erStatus = ${EnrolmentRequest.STATUS_PENDING}
+           AND (CAST(:includeDeleted AS INTEGER) = 1 OR NOT EnrolmentRequest.erDeleted)
+           AND (:searchText = '%' OR EnrolmentRequest.erPersonFullname LIKE :searchText)
+      ORDER BY CASE(:sortOrder)
+                WHEN ${ClazzEnrolmentDaoCommon.SORT_FIRST_NAME_ASC} THEN EnrolmentRequest.erPersonFullname
+                WHEN ${ClazzEnrolmentDaoCommon.SORT_LAST_NAME_ASC} THEN EnrolmentRequest.erPersonFullname
+                ELSE ''
+                END ASC,
+                CASE(:sortOrder)
+                WHEN ${ClazzEnrolmentDaoCommon.SORT_FIRST_NAME_DESC} THEN EnrolmentRequest.erPersonFullname
+                WHEN ${ClazzEnrolmentDaoCommon.SORT_LAST_NAME_DESC} THEN EnrolmentRequest.erPersonFullname
+                ELSE ''
+            END DESC,
+            CASE(:sortOrder)
+                WHEN ${ClazzEnrolmentDaoCommon.SORT_DATE_REGISTERED_ASC} THEN EnrolmentRequest.erRequestTime
+                ELSE 0
+            END ASC,
+            CASE(:sortOrder)
+                WHEN ${ClazzEnrolmentDaoCommon.SORT_DATE_REGISTERED_DESC} THEN EnrolmentRequest.erRequestTime
+                ELSE 0
+            END DESC     
+    """)
+    abstract fun findPendingEnrolmentsForCourse(
+        clazzUid: Long,
+        includeDeleted: Boolean,
+        searchText: String,
+        sortOrder: Int,
+    ): PagingSource<Int, EnrolmentRequestAndPersonPicture>
 
 }
