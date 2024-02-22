@@ -10,21 +10,8 @@ it('Admin user move content to folder', () => {
  // Add H5p File
   cy.ustadAddContentToLibrary('../test-files/content/H5p_Content.h5p','Content_001')
   cy.contains('Content_001').click()
-  cy.contains('OPEN').click()
-  cy.contains("#appbar_title", "Content_001").should("be.visible")
- // Verify H5p Content
- /*
-  https://www.lambdatest.com/blog/how-to-handle-iframes-in-cypress/
-  The iframe reference is from the above link
- */
-  cy.get('iframe')
-  cy.get('#xapi_content_frame')
-  .its('0.contentDocument')
-  .its('body')
-  .find('.h5p-iframe.h5p-initialized')
-  .its('0.contentDocument')
-  .its('body')
-  .find(".h5p-question-check-answer.h5p-joubelui-button").click()
+  cy.ustadOpenH5pEpub('Content_001')
+  cy.ustadVerifyH5p()
   cy.go('back')
  // Add new folder in library
   cy.contains("Library").click()

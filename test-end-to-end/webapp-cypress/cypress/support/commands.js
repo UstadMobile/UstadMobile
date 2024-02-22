@@ -85,6 +85,53 @@ Cypress.Commands.add('ustadAddFolderToLibrary',(folderName) => {
   cy.get('#actionBarButton').click()
 })
 
+/***
+  Open H5p/Epub content
+  Cypress doesn't work with popups/new windows,
+   so take the URL in cypress, then add "&target=_top" to the url, and navigate to that url.
+   Once you are on that URL, then click the open button. It will then open content in the same window
+***/
+
+Cypress.Commands.add('ustadOpenH5pEpub', (ContentName) => {
+  cy.url().then((url) => {
+ // Modify the URL by appending the target parameter
+  const modifiedUrl = url + '&target=_top';
+ // Visit the modified URL
+  cy.visit(modifiedUrl)
+  cy.contains("#appbar_title", ContentName).should("be.visible")
+  cy.contains('OPEN').click()
+})
+})
+
+/*****
+    Verify H5p Content
+    -------------------
+    https://www.lambdatest.com/blog/how-to-handle-iframes-in-cypress/
+    The iframe reference is from the above link
+*****/
+Cypress.Commands.add('ustadVerifyH5p', () => {
+  cy.get('iframe')
+  cy.get('.h5p-iframe-wrapper')
+    .find('.h5p-iframe.h5p-initialized')
+    .its('0.contentDocument')
+    .its('body')
+    .find(".h5p-question-check-answer.h5p-joubelui-button","Check").should("be.visible")
+})
+
+// Verify Epub content
+Cypress.Commands.add('ustadVerifyEpub', () => {
+  cy.get('#header_overflow_menu_expand_button').click()
+  cy.contains('Table of contents').click()
+  cy.contains('THE ADOPTING OF ROSA MARIE').should('exist')
+})
+
+// Verify video content (duration > 0)
+Cypress.Commands.add('ustadVerifyVideo', () => {
+   cy.get('video').should(($video) => {
+    expect($video[0].duration).to.be.gt(0)
+  })
+})
+
 // Create a new course
 Cypress.Commands.add('ustadAddCourse',(courseName) => {
     cy.contains("Courses").click()
