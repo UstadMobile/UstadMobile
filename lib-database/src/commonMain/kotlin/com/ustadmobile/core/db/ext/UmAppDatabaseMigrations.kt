@@ -1767,6 +1767,18 @@ val MIGRATION_151_152 = DoorMigrationStatementList(151, 152) { db ->
     }
 }
 
+val MIGRATION_152_153 = DoorMigrationStatementList(152, 153) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS EnrolmentRequest (  erClazzUid  INTEGER  NOT NULL , erClazzName  TEXT , erPersonUid  INTEGER  NOT NULL , erPersonFullname  TEXT , erPersonPictureUri  TEXT , erPersonUsername  TEXT , erRole  INTEGER  NOT NULL , erRequestTime  INTEGER  NOT NULL , erStatus  INTEGER  NOT NULL , erStatusSetByPersonUid  INTEGER  NOT NULL , erDeleted  INTEGER  NOT NULL , erStatusSetAuth  TEXT , erLastModified  INTEGER  NOT NULL , erUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS EnrolmentRequest (  erClazzUid  BIGINT  NOT NULL , erClazzName  TEXT , erPersonUid  BIGINT  NOT NULL , erPersonFullname  TEXT , erPersonPictureUri  TEXT , erPersonUsername  TEXT , erRole  INTEGER  NOT NULL , erRequestTime  BIGINT  NOT NULL , erStatus  INTEGER  NOT NULL , erStatusSetByPersonUid  BIGINT  NOT NULL , erDeleted  BOOL  NOT NULL , erStatusSetAuth  TEXT , erLastModified  BIGINT  NOT NULL , erUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+        }
+        add("CREATE INDEX idx_enrolmentrequest_by_clazz ON EnrolmentRequest (erClazzUid, erStatus)")
+        add("CREATE INDEX idx_enrolmentrequest_by_person ON EnrolmentRequest (erPersonUid, erStatus)")
+    }
+}
+
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_102_103,
     MIGRATION_103_104, MIGRATION_104_105, MIGRATION_105_106, MIGRATION_106_107,
@@ -1778,7 +1790,7 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_137_138, MIGRATION_138_139, MIGRATION_139_140, MIGRATION_140_141,
     MIGRATION_141_142, MIGRATION_142_143, MIGRATION_143_144, MIGRATION_145_146,
     MIGRATION_146_147, MIGRATION_147_148, MIGRATION_149_150, MIGRATION_150_151,
-    MIGRATION_151_152,
+    MIGRATION_151_152, MIGRATION_152_153,
 )
 
 
