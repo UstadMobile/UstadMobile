@@ -109,20 +109,16 @@ Cypress.Commands.add('ustadOpenH5pEpub', (ContentName) => {
     https://www.lambdatest.com/blog/how-to-handle-iframes-in-cypress/
     The iframe reference is from the above link
 *****/
-Cypress.Commands.add('ustadVerifyH5p', () => {
-  cy.get('iframe')
+Cypress.Commands.add('ustadGetH5pBody', () => {
   cy.get('.h5p-iframe-wrapper')
     .find('.h5p-iframe.h5p-initialized')
     .its('0.contentDocument')
     .its('body')
-    .find(".h5p-question-check-answer.h5p-joubelui-button","Check").should("be.visible")
 })
 
 // Verify Epub content
-Cypress.Commands.add('ustadVerifyEpub', () => {
-  cy.get('#header_overflow_menu_expand_button').click()
-  cy.contains('Table of contents').click()
-  cy.contains('THE ADOPTING OF ROSA MARIE').should('exist')
+Cypress.Commands.add('ustadVerifyEpub', (epubText) => {
+ cy.contains(epubText).should('be.visible')
 })
 
 // Verify video content (duration > 0)
@@ -220,7 +216,7 @@ Cypress.Commands.add('ustadEnableUserRegistration' ,() => {
   //https://docs.cypress.io/api/commands/should#Assert-the-href-attribute-is-equal-to-users
     cy.get('#terms_html_edit .ql-editor').as('editor')
     cy.get('@editor').should('have.attr', 'contenteditable').and('equal', 'true',{timeout:3000})
-    cy.get('@editor').click().clear().type("New Terms",{delay:10})
+    cy.get('@editor').click().clear().type("New Terms",{delay:25})
     cy.get('#registration_allowed').click({force:true})
     cy.get('#actionBarButton').should('be.visible')
     cy.get('#actionBarButton').click()

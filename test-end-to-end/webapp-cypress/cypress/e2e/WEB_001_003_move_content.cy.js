@@ -11,7 +11,7 @@ it('Admin user move content to folder', () => {
   cy.ustadAddContentToLibrary('../test-files/content/H5p_Content.h5p','Content_001')
   cy.contains('Content_001').click()
   cy.ustadOpenH5pEpub('Content_001')
-  cy.ustadVerifyH5p()
+  cy.ustadGetH5pBody().find(".h5p-question-check-answer.h5p-joubelui-button","Check").should("be.visible")
   cy.go('back')
  // Add new folder in library
   cy.contains("Library").click()

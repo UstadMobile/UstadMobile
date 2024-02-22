@@ -11,7 +11,7 @@ it('Admin user add content to the library', () => {
   cy.ustadAddContentToLibrary('../test-files/content/H5p_Content.h5p','Content_001')
   cy.contains('Content_001').click()
   cy.ustadOpenH5pEpub('Content_001')
-  cy.ustadVerifyH5p()
+  cy.ustadGetH5pBody().find(".h5p-question-check-answer.h5p-joubelui-button","Check").should("be.visible")
   cy.go('back')
  //Add Epub content
   cy.ustadAddContentToLibrary('../test-files/content/Epub_Content1.epub','Content_002')
@@ -27,6 +27,6 @@ it('Admin user add content to the library', () => {
   cy.go('back')
   cy.contains('Content_002').click()
   cy.ustadOpenH5pEpub('Content_002')
-  cy.ustadVerifyEpub()
+  cy.ustadVerifyEpub('THE ADOPTING OF ROSA MARIE')
 })
 })
