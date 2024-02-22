@@ -9,7 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import com.ustadmobile.core.viewmodel.JoinWithCodeUiState
+import com.ustadmobile.core.viewmodel.clazz.joinwithcode.JoinWithCodeUiState
 import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
 
 import com.ustadmobile.core.MR

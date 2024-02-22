@@ -8,6 +8,7 @@ import com.ustadmobile.door.annotation.ReplicateEtag
 import com.ustadmobile.door.annotation.ReplicateLastModified
 import com.ustadmobile.door.annotation.Trigger
 import com.ustadmobile.door.annotation.Triggers
+import kotlinx.serialization.Serializable
 
 @Entity(
     indices = arrayOf(
@@ -29,6 +30,7 @@ import com.ustadmobile.door.annotation.Triggers
         sqlStatements = [TRIGGER_UPSERT]
     )
 ))
+@Serializable
 data class EnrolmentRequest(
     @PrimaryKey(autoGenerate = true)
     var erUid: Long = 0,

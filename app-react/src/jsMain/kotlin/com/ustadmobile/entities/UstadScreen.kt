@@ -149,9 +149,11 @@ import com.ustadmobile.view.message.messagelist.MessageListScreen
 import com.ustadmobile.view.message.messagelist.MessageListScreenPreview
 import com.ustadmobile.view.person.registerminorwaitforparent.RegisterMinorWaitForParentScreen
 import com.ustadmobile.core.viewmodel.about.OpenLicensesViewModel
+import com.ustadmobile.core.viewmodel.clazz.joinwithcode.JoinWithCodeViewModel
 import com.ustadmobile.view.about.OpenLicensesScreen
 import com.ustadmobile.core.viewmodel.deleteditem.DeletedItemListViewModel
 import com.ustadmobile.view.deleteditem.list.DeletedItemListScreen
+import com.ustadmobile.view.clazz.joinwithcode.JoinWithCodeScreen
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -274,8 +276,6 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
         ClazzLogEditAttendanceViewModel.DEST_NAME, name = "ClazzLogEditAttendance Preview",
         ClazzLogEditAttendanceScreen
     ),
-    UstadScreen(JoinWithCodeView.VIEW_NAME, "JoinWithCode Preview",
-        JoinWithCodeScreenPreview),
     UstadScreen(ClazzLogListAttendanceViewModel.DEST_NAME, "ClazzLogListAttendance Preview",
         ClazzLogListAttendanceScreen
     ),
@@ -394,6 +394,7 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen("ConversationListPreview", "ConversationListPreview", ConversationListScreenPreview),
     UstadScreen(MessageListViewModel.DEST_NAME, "MessageList", MessageListScreen),
     UstadScreen("MessageListScreenPreview", "MessageListPreview", MessageListScreenPreview),
+    UstadScreen(JoinWithCodeViewModel.DEST_NAME, "JoinWithCode", JoinWithCodeScreen),
 )
 
 //Here as per the MUI showcase template
