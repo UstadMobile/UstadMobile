@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
 import com.ustadmobile.core.MR
@@ -42,15 +41,20 @@ class JoinWithCodeViewModel(
     private val requestEnrolmentUseCase: RequestEnrolmentUseCase by di.onActiveEndpoint().instance()
 
     init {
-        viewModelScope.launch {
-
+        _appUiState.update { prev ->
+            prev.copy(
+                title = systemImpl.getString(MR.strings.join_existing_course)
+            )
         }
     }
 
 
     fun onCodeValueChange(codeVal: String) {
         _uiState.update { prev ->
-            prev.copy(code = codeVal)
+            prev.copy(
+                code = codeVal,
+                codeError = null,
+            )
         }
     }
 

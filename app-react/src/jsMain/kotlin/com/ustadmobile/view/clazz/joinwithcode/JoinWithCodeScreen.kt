@@ -62,6 +62,7 @@ private val JoinWithCodeScreenComponent2 = FC<JoinWithCodeScreenProps> { props -
             TextField {
                 value = props.uiState.code
                 label = ReactNode(strings[MR.strings.course_code] + "*")
+                id = "course_code"
                 error = props.uiState.codeError != null
                 disabled = !props.uiState.fieldsEnabled
                 onTextChange = {
@@ -73,6 +74,7 @@ private val JoinWithCodeScreenComponent2 = FC<JoinWithCodeScreenProps> { props -
             }
 
             Button {
+                id = "submit_button"
                 onClick = { props.onClickDone() }
                 variant = ButtonVariant.contained
                 disabled = !props.uiState.fieldsEnabled
