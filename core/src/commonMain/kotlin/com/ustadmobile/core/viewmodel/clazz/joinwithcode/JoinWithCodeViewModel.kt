@@ -88,8 +88,8 @@ class JoinWithCodeViewModel(
                 }
             }catch(e: Throwable) {
                 val errorMessage = when(e) {
-                    is IllegalArgumentException -> MR.strings.invalid_register_code
-                    is AlreadyHasPendingRequestException -> MR.strings.request_already_pending
+                    is IllegalArgumentException -> MR.strings.invalid_course_code
+                    is AlreadyHasPendingRequestException -> MR.strings.request_to_enrol_already_pending
                     is AlreadyEnroledInClassException -> MR.strings.you_are_already_in_class
                     else -> MR.strings.error
                 }

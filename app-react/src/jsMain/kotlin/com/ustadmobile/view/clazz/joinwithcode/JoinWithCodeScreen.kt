@@ -71,6 +71,11 @@ private val JoinWithCodeScreenComponent2 = FC<JoinWithCodeScreenProps> { props -
                 helperText = ReactNode(
                     props.uiState.codeError ?: strings[MR.strings.required]
                 )
+                onKeyUp = {
+                    if(it.key == "Enter") {
+                        props.onClickDone()
+                    }
+                }
             }
 
             Button {

@@ -11,6 +11,7 @@ import mui.icons.material.Close as CloseIcon
 import com.ustadmobile.core.MR
 import com.ustadmobile.hooks.useDayOrDate
 import com.ustadmobile.lib.db.composites.EnrolmentRequestAndCoursePic
+import com.ustadmobile.lib.db.entities.EnrolmentRequest
 import com.ustadmobile.mui.components.ThemeContext
 import com.ustadmobile.view.clazz.uriOrDefaultBanner
 import com.ustadmobile.wrappers.intl.Intl
@@ -35,7 +36,7 @@ import mui.icons.material.Schedule as ScheduleIcon
 external interface PendingEnrolmentListItemProps: Props {
     var request: EnrolmentRequestAndCoursePic
 
-    var onClickCancel: () -> Unit
+    var onClickCancel: (EnrolmentRequest) -> Unit
 
     var timeNow: LocalDateTime
 
@@ -99,7 +100,7 @@ val PendingEnrolmentListItem = FC<PendingEnrolmentListItemProps> { props ->
         secondaryAction = Tooltip.create {
             title = ReactNode(strings[MR.strings.cancel])
             IconButton {
-                onClick = {  props.onClickCancel()  }
+                onClick = {  props.request.enrolmentRequest?.also(props.onClickCancel)  }
                 ariaLabel = strings[MR.strings.cancel]
                 CloseIcon()
             }

@@ -26,12 +26,13 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import java.text.DateFormat
 import com.ustadmobile.core.MR
+import com.ustadmobile.lib.db.entities.EnrolmentRequest
 import com.ustadmobile.libuicompose.view.clazz.CourseImage
 
 @Composable
 fun PendingEnrolmentListItem(
     request: EnrolmentRequestAndCoursePic,
-    onClickCancel: () -> Unit,
+    onClickCancel: (EnrolmentRequest) -> Unit,
     timeNow: LocalDateTime,
     timeFormatter: DateFormat,
     dateFormatter: DateFormat,
@@ -75,7 +76,9 @@ fun PendingEnrolmentListItem(
                 tooltipText = stringResource(MR.strings.cancel)
             ) {
                 IconButton(
-                    onClick = onClickCancel
+                    onClick = {
+                        request.enrolmentRequest?.also(onClickCancel)
+                    }
                 ) {
                     Icon(Icons.Default.Close, contentDescription = stringResource(MR.strings.cancel))
                 }

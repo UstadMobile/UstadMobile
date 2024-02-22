@@ -196,7 +196,7 @@
     <string name="show_hidden_items">Show hidden items</string>
     <string name="open_folder">Open Folder</string>
     <string name="action_hidden">Hidden</string>
-    <string name="invalid_register_code">Invalid Registration Code</string>
+    <string name="invalid_course_code">Invalid course code</string>
     <string name="invalid">Invalid</string>
     <string name="enter_register_code">Enter Registration Code</string>
     <string name="bar_chart">Bar Chart</string>
@@ -1747,7 +1747,6 @@
 
     <string name="move_to">Move to…</string>
 
-
     <string name="restore">Restore</string>
 
     <string name="delete_permanently">Delete permanently</string>
@@ -1758,10 +1757,10 @@
 
     <string name="yesterday">Yesterday</string>
 
-    <string name="request_approval_to_join">Request approval</string>
-
-    <string name="request_already_pending">Request to enrol already pending</string>
+    <string name="request_to_enrol_already_pending">Request to enrol already pending</string>
 
     <string name="request_submitted">Request submitted</string>
+
+    <string name="canceled_enrolment_request">Canceled enrolment request</string>
 
 </resources>

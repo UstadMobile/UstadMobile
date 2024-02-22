@@ -46,6 +46,7 @@ import web.window.window
 import mui.icons.material.Badge as BadgeIcon
 import com.ustadmobile.hooks.useDateFormatter
 import com.ustadmobile.hooks.useTimeFormatter
+import com.ustadmobile.lib.db.entities.EnrolmentRequest
 import com.ustadmobile.view.clazz.uriOrDefaultBanner
 import com.ustadmobile.view.components.UstadDetailHeader
 
@@ -58,6 +59,8 @@ external interface ClazzListScreenProps : Props {
     var onClickSort: (SortOrderOption) -> Unit
 
     var onClickFilterChip: (MessageIdOption2) -> Unit
+
+    var onClickCancelEnrolmentRequest: (EnrolmentRequest) -> Unit
 
 }
 
@@ -138,6 +141,7 @@ private val ClazzListScreenComponent2 = FC<ClazzListScreenProps> { props ->
                         timeFormatter = timeFormatterVal
                         dateFormatter = dateFormatterVal
                         dayOfWeekStrings = props.uiState.dayOfWeekStrings
+                        onClickCancel = props.onClickCancelEnrolmentRequest
                     }
                 }
 
@@ -217,6 +221,7 @@ val ClazzListScreen = FC<Props> { props ->
         onClickClazz = viewModel::onClickEntry
         onClickSort = viewModel::onSortOrderChanged
         onClickFilterChip = viewModel::onClickFilterChip
+        onClickCancelEnrolmentRequest = viewModel::onClickCancelEnrolmentRequest
     }
 
     UstadFab {

@@ -74,5 +74,17 @@ expect abstract class EnrolmentRequestDao {
         accountPersonUid: Long
     ): Flow<List<EnrolmentRequestAndCoursePic>>
 
+    @Query("""
+        UPDATE EnrolmentRequest
+           SET erStatus = :status,
+               erLastModified = :updateTime
+         WHERE erUid = :uid      
+    """)
+    abstract suspend fun updateStatus(
+        uid: Long,
+        status: Int,
+        updateTime: Long,
+    )
+
 
 }

@@ -53,6 +53,7 @@ import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.nav.NavResultReturner
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
+import com.ustadmobile.lib.db.entities.EnrolmentRequest
 import com.ustadmobile.libuicompose.components.SortListMode
 import com.ustadmobile.libuicompose.components.UstadBottomSheetOption
 import com.ustadmobile.libuicompose.components.UstadDetailHeader
@@ -140,6 +141,7 @@ fun ClazzListScreen(
         onClickClazz = viewModel::onClickEntry,
         onClickFilterChip = viewModel::onClickFilterChip,
         onClickSortOption = viewModel::onSortOrderChanged,
+        onClickCancelEnrolmentRequest = viewModel::onClickCancelEnrolmentRequest,
     )
 }
 
@@ -149,6 +151,7 @@ fun ClazzListScreen(
     onClickClazz: (Clazz) -> Unit = {},
     onClickFilterChip: (MessageIdOption2) -> Unit = {},
     onClickSortOption: (SortOrderOption) -> Unit = { },
+    onClickCancelEnrolmentRequest: (EnrolmentRequest) -> Unit = { },
     sortListMode: SortListMode = defaultSortListMode(),
 ) {
 
@@ -189,7 +192,7 @@ fun ClazzListScreen(
             ) {
                 PendingEnrolmentListItem(
                     request = it,
-                    onClickCancel = { },
+                    onClickCancel = onClickCancelEnrolmentRequest,
                     timeNow = uiState.localDateTimeNow,
                     timeFormatter = timeFormatter,
                     dateFormatter = dateFormatter,

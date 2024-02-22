@@ -3,6 +3,8 @@ package com.ustadmobile.libuicompose.view.clazz.joinwithcode
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -11,6 +13,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.input.ImeAction
 import com.ustadmobile.core.viewmodel.clazz.joinwithcode.JoinWithCodeUiState
 import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
 import com.ustadmobile.core.MR
@@ -66,7 +69,12 @@ fun JoinWithCodeScreen(
             },
             supportingText = {
                 Text(uiState.codeError ?: stringResource(MR.strings.required))
-            }
+            },
+            maxLines = 1,
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+            keyboardActions = KeyboardActions(
+                onDone = { onClickDone() }
+            ),
         )
 
         Button(
