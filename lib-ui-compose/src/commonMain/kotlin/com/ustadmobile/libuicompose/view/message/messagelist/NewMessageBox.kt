@@ -27,6 +27,7 @@ import androidx.compose.ui.input.key.isShiftPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
 import dev.icerock.moko.resources.compose.stringResource
@@ -45,6 +46,7 @@ fun NewMessageBox(
                 modifier = Modifier
                     .weight(1f)
                     .padding(4.dp)
+                    .testTag("message_text")
                     .onPreviewKeyEvent {
                         if(it.type == KeyEventType.KeyUp
                             && it.key == Key.Enter

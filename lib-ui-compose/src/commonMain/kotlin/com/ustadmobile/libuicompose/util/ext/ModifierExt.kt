@@ -3,6 +3,7 @@ package com.ustadmobile.libuicompose.util.ext
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
@@ -26,3 +27,9 @@ fun Modifier.defaultScreenPadding() = padding(horizontal = 0.dp, vertical = 8.dp
 
 fun Modifier.defaultAvatarSize() = size(40.dp)
 
+fun Modifier.testTagIfNotNull(tag: String?): Modifier = this.let {
+    if(tag != null)
+        it.testTag(tag)
+    else
+        it
+}

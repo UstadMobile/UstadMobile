@@ -12,7 +12,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:icon="@drawable/ic_done_white_24dp"
-        app:iconTint="?colorOnIconTint"
         style="@style/Widget.App.Button.OutlinedButton.IconOnly" />
 
     <Button
@@ -20,7 +19,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:icon="@drawable/ic_close_black_24dp"
-        app:iconTint="?colorOnIconTint"
         style="@style/Widget.App.Button.OutlinedButton.IconOnly" />
 
     <Button
@@ -28,7 +26,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:icon="@drawable/ic_delay"
-        app:iconTint="?colorOnIconTint"
         style="@style/Widget.App.Button.OutlinedButton.IconOnly" />
 
 </com.google.android.material.button.MaterialButtonToggleGroup>
