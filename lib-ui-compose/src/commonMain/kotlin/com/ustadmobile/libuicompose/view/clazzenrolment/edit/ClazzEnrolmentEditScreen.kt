@@ -52,7 +52,7 @@ fun ClazzEnrolmentEditScreen(
 
         UstadExposedDropDownMenuField(
             value = uiState.clazzEnrolment?.clazzEnrolmentRole ?: ClazzEnrolment.ROLE_STUDENT,
-            modifier = Modifier.testTag("enrolment_role").defaultItemPadding().fillMaxWidth(),
+            modifier = Modifier.testTag("role").defaultItemPadding().fillMaxWidth(),
             label = stringResource(MR.strings.role) + "*",
             itemText = {
                 val messageId = if(it == ClazzEnrolment.ROLE_STUDENT) {
@@ -119,7 +119,7 @@ fun ClazzEnrolmentEditScreen(
 
         if(uiState.outcomeVisible) {
             UstadMessageIdOptionExposedDropDownMenuField(
-                modifier = Modifier.testTag("clazzEnrolmentOutcome").fillMaxWidth().defaultItemPadding(),
+                modifier = Modifier.testTag("outcome").fillMaxWidth().defaultItemPadding(),
                 value = uiState.clazzEnrolment?.clazzEnrolmentOutcome ?: ClazzEnrolment.OUTCOME_IN_PROGRESS,
                 label = stringResource(MR.strings.outcome),
                 options = OutcomeConstants.OUTCOME_MESSAGE_IDS,

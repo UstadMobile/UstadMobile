@@ -7,9 +7,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.util.ext.isDateSet
+import com.ustadmobile.libuicompose.util.ext.testTagIfNotNull
 import com.ustadmobile.libuicompose.util.ext.timeOfDayInMs
 import java.util.*
 
+/**
+ * @param baseTestTag
+ */
 @Composable
 fun UstadDateTimeField(
     value: Long,
@@ -24,6 +28,7 @@ fun UstadDateTimeField(
     onValueChange: (Long) -> Unit = {},
     dateSupportingText: (@Composable () -> Unit)? = null,
     timeSupportingText: (@Composable () -> Unit)? = null,
+    baseTestTag: String? = null,
 ) {
 
     val calendar = remember(value, timeZoneId) {
@@ -47,7 +52,9 @@ fun UstadDateTimeField(
 
     Row(modifier = modifier) {
         UstadDateField(
-            modifier = Modifier.weight(dateFieldWeight, true)
+            modifier = Modifier
+                .weight(dateFieldWeight, true)
+                .testTagIfNotNull(baseTestTag?.plus("_date"))
                 .padding(end = 8.dp),
             value = dateInMs,
             label = dateLabel,
@@ -62,6 +69,7 @@ fun UstadDateTimeField(
 
         UstadTimeField(
             modifier = Modifier.weight(1 - dateFieldWeight, true)
+                .testTagIfNotNull(baseTestTag?.plus("_time"))
                 .padding(start= 8.dp),
             value = timeOfDayInMs,
             label = timeLabel,
