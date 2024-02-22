@@ -11,16 +11,23 @@ import com.ustadmobile.core.view.*
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import app.cash.paging.PagingSource
+import com.ustadmobile.core.util.ext.dayStringResource
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.lib.db.composites.EnrolmentRequestAndCoursePic
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
 import com.ustadmobile.lib.db.entities.Role
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.kodein.di.DI
 
 
@@ -40,13 +47,21 @@ data class ClazzListUiState(
 
     val canAddNewCourse: Boolean = false,
 
+    val pendingEnrolments: List<EnrolmentRequestAndCoursePic> = emptyList(),
+
     val filterOptions: List<MessageIdOption2> = listOf(
         MessageIdOption2(MR.strings.currently_enrolled, ClazzDaoCommon.FILTER_CURRENTLY_ENROLLED),
         MessageIdOption2(MR.strings.past_enrollments, ClazzDaoCommon.FILTER_PAST_ENROLLMENTS),
         MessageIdOption2(MR.strings.all, 0)
     ),
 
-    ) {
+    val dayOfWeekStrings: Map<DayOfWeek, String> = emptyMap(),
+
+    val localDateTimeNow: LocalDateTime = Clock.System.now().toLocalDateTime(
+        TimeZone.currentSystemDefault()
+    )
+
+) {
     companion object {
 
         val DEFAULT_SORT_OTIONS = listOf(
@@ -108,6 +123,9 @@ class ClazzListViewModel(
 
         _uiState.update { prev ->
             prev.copy(
+                dayOfWeekStrings = DayOfWeek.values().associateWith {
+                    systemImpl.getString(it.dayStringResource)
+                },
                 clazzList = pagingSourceFactory
             )
         }
@@ -127,7 +145,15 @@ class ClazzListViewModel(
             }
         }
 
-
+        viewModelScope.launch {
+            _uiState.whenSubscribed {
+                activeRepo.enrolmentRequestDao.findPendingRequestsForUserAsFlow(activeUserPersonUid).collect {
+                    _uiState.update { prev ->
+                        prev.copy(pendingEnrolments = it)
+                    }
+                }
+            }
+        }
     }
 
     override fun onUpdateSearchResult(searchText: String) {

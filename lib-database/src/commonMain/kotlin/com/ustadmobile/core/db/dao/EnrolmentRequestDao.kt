@@ -7,7 +7,9 @@ import com.ustadmobile.door.annotation.HttpAccessible
 import com.ustadmobile.door.annotation.HttpServerFunctionCall
 import com.ustadmobile.door.annotation.HttpServerFunctionParam
 import com.ustadmobile.door.annotation.Repository
+import com.ustadmobile.lib.db.composites.EnrolmentRequestAndCoursePic
 import com.ustadmobile.lib.db.entities.EnrolmentRequest
+import kotlinx.coroutines.flow.Flow
 
 @DoorDao
 @Repository
@@ -56,5 +58,21 @@ expect abstract class EnrolmentRequestDao {
         personUid: Long,
         clazzUid: Long,
     ): Boolean
+
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
+    )
+    @Query("""
+        SELECT EnrolmentRequest.*, CoursePicture.*
+          FROM EnrolmentRequest
+               LEFT JOIN CoursePicture
+                         ON CoursePicture.coursePictureUid = EnrolmentRequest.erClazzUid
+         WHERE EnrolmentRequest.erPersonUid = :accountPersonUid 
+           AND EnrolmentRequest.erStatus = ${EnrolmentRequest.STATUS_PENDING}
+    """)
+    abstract fun findPendingRequestsForUserAsFlow(
+        accountPersonUid: Long
+    ): Flow<List<EnrolmentRequestAndCoursePic>>
+
 
 }

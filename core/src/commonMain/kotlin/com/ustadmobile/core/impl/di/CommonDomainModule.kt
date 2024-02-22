@@ -4,6 +4,7 @@ import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.domain.assignment.submittername.GetAssignmentSubmitterNameUseCase
 import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.ApproveOrDeclinePendingEnrolmentUseCase
 import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.IApproveOrDeclinePendingEnrolmentRequestUseCase
+import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.RequestEnrolmentUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.DefaultLaunchContentEntryVersionUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.LaunchContentEntryVersionUseCase
 import com.ustadmobile.core.domain.contententry.save.SaveContentEntryUseCase
@@ -51,6 +52,10 @@ fun commonDomainDiModule(endpointScope: EndpointScope) = DI.Module("CommonDomain
 
     bind<LaunchContentEntryVersionUseCase>() with scoped(endpointScope).provider {
         DefaultLaunchContentEntryVersionUseCase()
+    }
+
+    bind<RequestEnrolmentUseCase>() with scoped(endpointScope).provider {
+        RequestEnrolmentUseCase(activeRepo = instance(tag = DoorTag.TAG_REPO))
     }
 
 }

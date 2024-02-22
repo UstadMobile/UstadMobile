@@ -886,7 +886,7 @@
     the teacher/admin), the user will be shown this error message if they are already enroled in
     the class.
     -->
-    <string name="you_are_already_in_class">Error: you are already enroled in the class: %1$s</string>
+    <string name="you_are_already_in_class">Error: you are already enroled in this course</string>
     <!--
     When the user selects to join a school (e.g. using a link or using the school code shared by
     the teacher/admin), the user will be shown this error message if they are already enroled in
@@ -1759,5 +1759,9 @@
     <string name="yesterday">Yesterday</string>
 
     <string name="request_approval_to_join">Request approval</string>
+
+    <string name="request_already_pending">Request to enrol already pending</string>
+
+    <string name="request_submitted">Request submitted</string>
 
 </resources>

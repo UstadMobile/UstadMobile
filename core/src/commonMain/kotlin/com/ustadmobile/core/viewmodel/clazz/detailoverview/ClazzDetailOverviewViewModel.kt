@@ -35,7 +35,7 @@ data class ClazzDetailOverviewUiState(
 
     val courseBlockList: () -> PagingSource<Int, CourseBlockAndDisplayDetails> = { EmptyPagingSource() },
 
-    val clazzCodeVisible: Boolean = false,
+    val clazzCodeVisible: Boolean = true,
 
     val collapsedBlockUids: Set<Long> = emptySet(),
 

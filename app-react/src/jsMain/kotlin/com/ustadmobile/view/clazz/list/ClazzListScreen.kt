@@ -44,7 +44,10 @@ import web.html.HTMLElement
 import web.window.RESIZE
 import web.window.window
 import mui.icons.material.Badge as BadgeIcon
-import com.ustadmobile.core.viewmodel.clazz.defaultCourseBannerImageIndex
+import com.ustadmobile.hooks.useDateFormatter
+import com.ustadmobile.hooks.useTimeFormatter
+import com.ustadmobile.view.clazz.uriOrDefaultBanner
+import com.ustadmobile.view.components.UstadDetailHeader
 
 external interface ClazzListScreenProps : Props {
 
@@ -59,6 +62,7 @@ external interface ClazzListScreenProps : Props {
 }
 
 private val ClazzListScreenComponent2 = FC<ClazzListScreenProps> { props ->
+    val strings = useStringProvider()
 
     val infiniteQueryResult = usePagingSource(
         props.uiState.clazzList, true, 50
@@ -103,6 +107,11 @@ private val ClazzListScreenComponent2 = FC<ClazzListScreenProps> { props ->
 
     val muiAppState = useMuiAppState()
 
+    val hasPendingEnrolments = props.uiState.pendingEnrolments.isNotEmpty()
+
+    val timeFormatterVal = useTimeFormatter()
+    val dateFormatterVal = useDateFormatter()
+
     VirtualList {
         style = jso {
             height = "calc(100vh - ${muiAppState.appBarHeight}px)".unsafeCast<Height>()
@@ -112,6 +121,31 @@ private val ClazzListScreenComponent2 = FC<ClazzListScreenProps> { props ->
         }
 
         content = virtualListContent {
+            if(hasPendingEnrolments) {
+                item(key = "pending_enrolment_header") {
+                    UstadDetailHeader.create {
+                        header = ReactNode(strings[MR.strings.pending_requests])
+                    }
+                }
+
+                items(
+                    list = props.uiState.pendingEnrolments,
+                    key = { it.enrolmentRequest?.erUid.toString() }
+                ) {
+                    PendingEnrolmentListItem.create {
+                        request = it
+                        timeNow = props.uiState.localDateTimeNow
+                        timeFormatter = timeFormatterVal
+                        dateFormatter = dateFormatterVal
+                        dayOfWeekStrings = props.uiState.dayOfWeekStrings
+                    }
+                }
+
+                item(key = "pending_enrolment_divider") {
+                    Divider.create()
+                }
+            }
+
             item {
                 UstadListSortHeader.create {
                     activeSortOrderOption = props.uiState.activeSortOrderOption
@@ -329,8 +363,9 @@ private val ClazzListItem = FC<ClazzListItemProps> { props ->
                     sx {
                         height = 96.px
                     }
-                    image = props.clazzItem?.coursePicture?.coursePictureUri
-                        ?: "img/default_course_banners/${defaultCourseBannerImageIndex(props.clazzItem?.clazzName)}.webp"
+                    image = props.clazzItem?.coursePicture.uriOrDefaultBanner(
+                        props.clazzItem?.clazzName ?: ""
+                    )
                 }
 
                 onClick = {
