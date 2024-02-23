@@ -24,6 +24,5 @@ it('Admin enable registration', () => {
   cy.contains("label", "Password").parent().find("input").clear().type('test1234')
   cy.contains('Register').click()
   cy.contains('Courses').should('be.visible')
-
 })
 })
