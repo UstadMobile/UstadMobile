@@ -17,6 +17,7 @@ import com.ustadmobile.core.domain.blob.download.MakeContentEntryAvailableOfflin
 import com.ustadmobile.core.domain.contententry.launchcontent.LaunchContentEntryVersionUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.epub.LaunchEpubUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.LaunchXapiUseCase
+import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.util.ext.localFirstThenRepoIfNull
@@ -102,6 +103,8 @@ class ContentEntryDetailOverviewViewModel(
     private val launchXapiUseCase: LaunchXapiUseCase? by di.onActiveEndpoint().instanceOrNull()
 
     private val launchEpubUseCase: LaunchEpubUseCase? by di.onActiveEndpoint().instanceOrNull()
+
+    private val target = savedStateHandle[ARG_TARGET]
 
 
     init {
@@ -220,6 +223,10 @@ class ContentEntryDetailOverviewViewModel(
                     it.contentEntryVersionDao.findLatestVersionUidByContentEntryUidEntity(entityUidArg)
                 }
 
+                val openTarget = target?.let {
+                    OpenExternalLinkUseCase.Companion.LinkTarget.of(it)
+                } ?: OpenExternalLinkUseCase.Companion.LinkTarget.DEFAULT
+
                 if(latestContentEntryVersion != null) {
                     val contentSpecificLauncher = when(latestContentEntryVersion.cevContentType) {
                         ContentEntryVersion.TYPE_XAPI -> launchXapiUseCase
@@ -228,7 +235,7 @@ class ContentEntryDetailOverviewViewModel(
                     }
 
                     val launcher = (contentSpecificLauncher ?: defaultLaunchContentEntryUseCase)
-                    launcher(latestContentEntryVersion, navController)
+                    launcher(latestContentEntryVersion, navController, openTarget)
                 }else {
                     snackDispatcher.showSnackBar(Snack(systemImpl.getString(MR.strings.content_not_ready_try_later)))
                 }
@@ -245,6 +252,8 @@ class ContentEntryDetailOverviewViewModel(
     companion object {
 
         const val DEST_NAME = "ContentEntryDetailOverviewView"
+
+        const val ARG_TARGET = "target"
 
     }
 

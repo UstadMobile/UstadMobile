@@ -1,5 +1,6 @@
 package com.ustadmobile.core.domain.contententry.launchcontent
 
+import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.lib.db.entities.ContentEntryVersion
 
@@ -24,9 +25,15 @@ interface LaunchContentEntryVersionUseCase {
         val message: String? = null
     )
 
+    /**
+     * @param target this is optional, and will normally be ignored. Its primary purpose is to
+     *        make xAPI content that would normally open in a new tab in the browser open in the same
+     *        window during end-to-end tests (as Cypress cannot work with popups).
+     */
     suspend operator fun invoke(
         contentEntryVersion: ContentEntryVersion,
         navController: UstadNavController,
+        target: OpenExternalLinkUseCase.Companion.LinkTarget = OpenExternalLinkUseCase.Companion.LinkTarget.DEFAULT
     ): LaunchResult?
 
 
