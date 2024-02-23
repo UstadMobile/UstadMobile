@@ -12,7 +12,10 @@ import kotlinx.datetime.Instant
  * Handle enrolling a person into a course. This will insert the Enrolment entity and, if required,
  * the PersonGroupMember required for them to get the permissions they should receive
  */
-class EnrolIntoCourseUseCase {
+class EnrolIntoCourseUseCase(
+    private val db: UmAppDatabase,
+    private val repo: UmAppDatabase?,
+) {
 
     /**
      * Process the given enrolment.
@@ -23,8 +26,6 @@ class EnrolIntoCourseUseCase {
     suspend operator fun invoke(
         enrolment: ClazzEnrolment,
         timeZoneId: String,
-        db: UmAppDatabase,
-        repo: UmAppDatabase?,
     ) {
         enrolment.clazzEnrolmentDateJoined = Instant
             .fromEpochMilliseconds(enrolment.clazzEnrolmentDateJoined)

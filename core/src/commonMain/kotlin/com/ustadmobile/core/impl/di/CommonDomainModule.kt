@@ -3,10 +3,13 @@ package com.ustadmobile.core.impl.di
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.domain.assignment.submittername.GetAssignmentSubmitterNameUseCase
 import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.ApproveOrDeclinePendingEnrolmentUseCase
+import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.EnrolIntoCourseUseCase
 import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.IApproveOrDeclinePendingEnrolmentRequestUseCase
+import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.RequestEnrolmentUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.DefaultLaunchContentEntryVersionUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.LaunchContentEntryVersionUseCase
 import com.ustadmobile.core.domain.contententry.save.SaveContentEntryUseCase
+import com.ustadmobile.core.domain.makelink.MakeLinkUseCase
 import com.ustadmobile.core.domain.siteterms.GetLocaleForSiteTermsUseCase
 import com.ustadmobile.door.ext.DoorTag
 import org.kodein.di.DI
@@ -16,6 +19,7 @@ import org.kodein.di.instanceOrNull
 import org.kodein.di.on
 import org.kodein.di.provider
 import org.kodein.di.scoped
+import org.kodein.di.singleton
 
 /**
  * Domain (UseCases) that are part of commonMain source.
@@ -24,8 +28,19 @@ import org.kodein.di.scoped
  * at the Application level di.
  */
 fun commonDomainDiModule(endpointScope: EndpointScope) = DI.Module("CommonDomain") {
+    bind<EnrolIntoCourseUseCase>() with scoped(endpointScope).provider {
+        EnrolIntoCourseUseCase(
+            db = instance(tag = DoorTag.TAG_DB),
+            repo = instance(tag = DoorTag.TAG_REPO),
+        )
+    }
+
     bind<IApproveOrDeclinePendingEnrolmentRequestUseCase>() with scoped(endpointScope).provider {
-        ApproveOrDeclinePendingEnrolmentUseCase(db = instance())
+        ApproveOrDeclinePendingEnrolmentUseCase(
+            repo = instance(tag = DoorTag.TAG_REPO),
+            db = instance(tag = DoorTag.TAG_DB),
+            enrolIntoCourseUseCase = instance(),
+        )
     }
 
     bind<SaveContentEntryUseCase>() with scoped(endpointScope).provider {
@@ -53,4 +68,11 @@ fun commonDomainDiModule(endpointScope: EndpointScope) = DI.Module("CommonDomain
         DefaultLaunchContentEntryVersionUseCase()
     }
 
+    bind<RequestEnrolmentUseCase>() with scoped(endpointScope).provider {
+        RequestEnrolmentUseCase(activeRepo = instance(tag = DoorTag.TAG_REPO))
+    }
+
+    bind<MakeLinkUseCase>() with scoped(endpointScope).singleton {
+        MakeLinkUseCase(context)
+    }
 }

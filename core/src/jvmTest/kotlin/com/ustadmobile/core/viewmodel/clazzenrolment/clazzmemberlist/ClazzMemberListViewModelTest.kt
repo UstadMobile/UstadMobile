@@ -2,15 +2,12 @@ package com.ustadmobile.core.viewmodel.clazzenrolment.clazzmemberlist
 
 import app.cash.turbine.test
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.IApproveOrDeclinePendingEnrolmentRequestUseCase
 import com.ustadmobile.core.test.viewmodeltest.ViewModelTestBuilder
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.ext.awaitItemWhere
 import com.ustadmobile.core.util.ext.createNewClazzAndGroups
 import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
 import com.ustadmobile.core.util.ext.grantScopedPermission
-import com.ustadmobile.core.util.ext.insertPersonAndGroup
-import com.ustadmobile.core.util.ext.loadFirstList
 import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
@@ -20,10 +17,6 @@ import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.Role
-import org.kodein.di.bind
-import org.kodein.di.singleton
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.verifyBlocking
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -108,51 +101,6 @@ class ClazzMemberListViewModelTest : AbstractMainDispatcherTest() {
 
                 assertTrue(readyState.addStudentVisible)
                 assertTrue(readyState.addTeacherVisible)
-                cancelAndIgnoreRemainingEvents()
-            }
-        }
-    }
-
-    //Disabled 24/Jan - this will be re-enabled in next 1-2 days this functionality is back in the UI
-    //@Test
-    fun givenClazzWithPendingRequest_whenClickApprove_thenShouldCallApproveOrDeclineUseCase() {
-        testClazzMemberViewModel(
-            activeUserRole = ClazzEnrolment.ROLE_TEACHER
-        ) { testContext ->
-            val pendingStudentPerson = activeDb.insertPersonAndGroup(Person().apply {
-                firstNames = "Pending"
-                lastName = "Person"
-            })
-            val mockApproveOrDeclineUseCase = mock<IApproveOrDeclinePendingEnrolmentRequestUseCase>()
-
-            activeDb.enrolPersonIntoClazzAtLocalTimezone(
-                personToEnrol = pendingStudentPerson,
-                clazzUid = testContext.clazz.clazzUid,
-                role = ClazzEnrolment.ROLE_STUDENT_PENDING,
-            )
-
-            extendDi {
-                bind<IApproveOrDeclinePendingEnrolmentRequestUseCase>() with singleton {
-                    mockApproveOrDeclineUseCase
-                }
-            }
-
-            viewModelFactory {
-                savedStateHandle[UstadView.ARG_CLAZZUID] = testContext.clazz.clazzUid.toString()
-                ClazzMemberListViewModel(di, savedStateHandle)
-            }
-
-            viewModel.uiState.test(timeout = 5.seconds) {
-                val readyState = awaitItemWhere {
-                    it.pendingStudentList() !is EmptyPagingSource
-                }
-
-                val pendingStudents = readyState.pendingStudentList().loadFirstList()
-                viewModel.onClickRespondToPendingEnrolment(pendingStudents.first(), true)
-                verifyBlocking(mockApproveOrDeclineUseCase) {
-                    invoke(pendingStudentPerson.personUid, testContext.clazz.clazzUid, true)
-                }
-
                 cancelAndIgnoreRemainingEvents()
             }
         }

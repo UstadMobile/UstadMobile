@@ -1,8 +1,11 @@
 package com.ustadmobile.libuicompose.view.person.list
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Link
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -11,7 +14,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
 import app.cash.paging.Pager
 import app.cash.paging.PagingConfig
@@ -39,7 +41,8 @@ fun PersonListScreen(
         uiState = uiState,
         onListItemClick = viewModel::onClickEntry,
         onClickAddNew = viewModel::onClickAdd,
-        onSortOrderChanged = viewModel::onSortOrderChanged
+        onSortOrderChanged = viewModel::onSortOrderChanged,
+        onClickInviteWithLink = viewModel::onClickInviteWithLink,
     )
 }
 
@@ -49,6 +52,7 @@ fun PersonListScreen(
     onListItemClick: (Person) -> Unit = {},
     onSortOrderChanged: (SortOrderOption) -> Unit = { },
     onClickAddNew: () -> Unit = {},
+    onClickInviteWithLink: () -> Unit = {},
 ){
 
     // As per
@@ -65,12 +69,9 @@ fun PersonListScreen(
     val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
 
     UstadLazyColumn(
-        modifier = Modifier
-            .padding(vertical = 8.dp)
-            .fillMaxWidth()
+        modifier = Modifier.fillMaxSize()
     ){
-
-        item {
+        item("sort_options") {
             UstadListSortHeader(
                 modifier = Modifier
                     .defaultItemPadding()
@@ -81,8 +82,20 @@ fun PersonListScreen(
             )
         }
 
+        if(uiState.showInviteViaLink) {
+            item("invite_with_link") {
+                ListItem(
+                    modifier = Modifier
+                        .testTag("invite_with_link")
+                        .clickable { onClickInviteWithLink() },
+                    headlineContent = { Text(stringResource(MR.strings.invite_with_link)) },
+                    leadingContent = { Icon(Icons.Default.Link, contentDescription = null) },
+                )
+            }
+        }
+
         if(uiState.showAddItem) {
-            item {
+            item("add_new_person") {
                 UstadAddListItem(
                     modifier = Modifier.testTag("add_new_person"),
                     text = stringResource(MR.strings.add_a_new_person),
