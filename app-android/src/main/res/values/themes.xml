@@ -1,4 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="UmTheme.App" parent="Theme.Material3.DayNight.NoActionBar"/>
+
+    <!--
+    as per : https://developer.android.com/develop/ui/views/launch/splash-screen/migrate
+    -->
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_inset</item>
+
+        <item name="postSplashScreenTheme">@style/UmTheme.App</item>
+    </style>
+
 </resources>

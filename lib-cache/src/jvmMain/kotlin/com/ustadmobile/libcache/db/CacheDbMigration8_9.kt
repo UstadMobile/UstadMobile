@@ -12,7 +12,7 @@ import java.sql.Connection
  */
 val MIGRATE_8_9 = DoorMigrationStatementList(8, 9) { db: DoorSqlDatabase ->
     buildList {
-        db.connection.use { connection: Connection ->
+        db.connection.also { connection: Connection ->
             connection.createStatement().use { stmt ->
                 stmt.executeQuery("""
                     SELECT CacheEntry.key AS key, 
@@ -26,9 +26,10 @@ val MIGRATE_8_9 = DoorMigrationStatementList(8, 9) { db: DoorSqlDatabase ->
                         val persistentPathStr = storageUri
                             .replace("${sepChar}cache${sepChar}", "${sepChar}persistent${sepChar}")
                         val persistentFile = File(persistentPathStr)
+                        val key = results.getString("key")
                         if(!storageFile.exists() && persistentFile.exists()) {
                             println("Repairing: $storageUri was moved to $persistentPathStr")
-                            add("UPDATE CacheEntry SET storageUri = '$persistentPathStr'")
+                            add("UPDATE CacheEntry SET storageUri = '$persistentPathStr' WHERE key = '$key'")
                         }
                     }
                 }
