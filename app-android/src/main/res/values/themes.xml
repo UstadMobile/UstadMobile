@@ -6,9 +6,20 @@
     as per : https://developer.android.com/develop/ui/views/launch/splash-screen/migrate
     -->
     <style name="Theme.App.Starting" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_inset</item>
 
         <item name="postSplashScreenTheme">@style/UmTheme.App</item>
+
+        <!--
+        Use this version for icon only
+        -->
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_inset</item>
+
+
+        <!--
+        Use this version to provide a powered by (branded image) credit on pre-SDK31 devices
+        <item name="android:windowBackground">@drawable/splash_background</item>
+        -->
+
     </style>
 
 </resources>
