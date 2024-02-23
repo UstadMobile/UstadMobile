@@ -19,6 +19,8 @@ external interface UstadAddListItemProps: Props {
 
     var id: String?
 
+    var disableGutters: Boolean?
+
 }
 
 val UstadAddListItem = FC<UstadAddListItemProps> { props ->
@@ -27,6 +29,10 @@ val UstadAddListItem = FC<UstadAddListItemProps> { props ->
         ListItemButton{
             props.id?.also {
                 id = it
+            }
+
+            props.disableGutters?.also {
+                disableGutters = it
             }
 
             disabled = !(props.enabled ?: true)

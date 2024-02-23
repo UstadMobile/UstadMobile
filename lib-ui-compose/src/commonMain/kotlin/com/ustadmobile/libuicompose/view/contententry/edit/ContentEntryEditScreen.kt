@@ -140,7 +140,7 @@ fun ContentEntryEditScreen(
         )
 
         UstadMessageIdOptionExposedDropDownMenuField(
-            modifier = Modifier.testTag("licenseType").defaultItemPadding(),
+            modifier = Modifier.testTag("license").defaultItemPadding(),
             value = uiState.entity?.entry?.licenseType ?: 0,
             options = LicenceConstants.LICENSE_MESSAGE_IDS,
             label = stringResource(MR.strings.licence),

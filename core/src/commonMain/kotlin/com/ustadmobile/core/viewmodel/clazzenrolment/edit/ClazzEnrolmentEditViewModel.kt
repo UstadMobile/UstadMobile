@@ -8,6 +8,7 @@ import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.locale.CourseTerminologyStrings
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.MS_PER_HOUR
+import com.ustadmobile.core.util.ext.onActiveEndpoint
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -21,6 +22,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
+import org.kodein.di.instance
 
 data class ClazzEnrolmentEditUiState(
 
@@ -51,12 +53,13 @@ data class ClazzEnrolmentEditUiState(
 class ClazzEnrolmentEditViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
-    private val enrolIntoCourseUseCase: EnrolIntoCourseUseCase = EnrolIntoCourseUseCase(),
 ): UstadEditViewModel(di, savedStateHandle, DEST_NAME) {
 
     private val _uiState = MutableStateFlow(ClazzEnrolmentEditUiState(fieldsEnabled = false))
 
     val uiState: Flow<ClazzEnrolmentEditUiState> = _uiState.asStateFlow()
+
+    private val enrolIntoCourseUseCase: EnrolIntoCourseUseCase by di.onActiveEndpoint().instance()
 
     init {
         _appUiState.update { prev ->
@@ -235,8 +238,6 @@ class ClazzEnrolmentEditViewModel(
             if(entityUidArg == 0L) {
                 enrolIntoCourseUseCase(
                     enrolment = entity,
-                    db = activeDb,
-                    repo = activeRepo,
                     timeZoneId = timeZoneVal
                 )
             }else {

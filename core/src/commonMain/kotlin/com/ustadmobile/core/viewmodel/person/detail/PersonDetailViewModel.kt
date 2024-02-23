@@ -43,7 +43,9 @@ data class PersonDetailUiState(
 
     internal val hasChangePasswordPermission: Boolean = false,
 
-    ) {
+    val isActiveUser: Boolean = false,
+
+) {
 
     val dateOfBirthVisible: Boolean
         get() = person?.person?.dateOfBirth.isDateSet()
@@ -80,7 +82,7 @@ data class PersonDetailUiState(
         get() = canSendSms && !person?.person?.phoneNum.isNullOrBlank()
 
     val chatVisible: Boolean
-        get() = !person?.person?.username.isNullOrBlank()
+        get() = !person?.person?.username.isNullOrBlank() && !isActiveUser
 
 }
 
@@ -125,6 +127,7 @@ class PersonDetailViewModel(
 
         _uiState.update { prev ->
             prev.copy(
+                isActiveUser = entityUidArg == activeUserPersonUid,
                 canSendSms = onClickSendSmsUseCase != null
             )
         }

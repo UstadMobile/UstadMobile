@@ -59,7 +59,7 @@ val MessageListItem = FC<MessageListItemProps> { props ->
         timestamp = props.message?.messageTimestamp ?: 0,
         timeZone = TimeZone.currentSystemDefault(),
         dateFormatter = props.dateFormatter,
-        showTimeIfToday = false,
+        showTimeIfToday = true,
         timeFormatter = props.timeFormatter,
         dayOfWeekStringMap = props.listUiState.dayOfWeekStrings,
     )

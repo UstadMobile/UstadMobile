@@ -196,7 +196,7 @@
     <string name="show_hidden_items">Show hidden items</string>
     <string name="open_folder">Open Folder</string>
     <string name="action_hidden">Hidden</string>
-    <string name="invalid_register_code">Invalid Registration Code</string>
+    <string name="invalid_course_code">Invalid course code</string>
     <string name="invalid">Invalid</string>
     <string name="enter_register_code">Enter Registration Code</string>
     <string name="bar_chart">Bar Chart</string>
@@ -798,7 +798,7 @@
     <string name="reject">Reject</string>
     <string name="ask_your_teacher_for_code">Ask your teacher for the code, then enter it below:</string>
     <string name="copied_to_clipboard">Copied to clipboard</string>
-    <string name="invite_link_desc">Anyone with this link can join and apply to join %1$s. You can then approve or reject their request to join.</string>
+    <string name="invite_link_desc">Anyone with this link can join and apply to join. You can then approve or reject their request to join.</string>
     <string name="copy_link">Copy link</string>
     <string name="copy_code">Copy code</string>
     <string name="share_link">Share link</string>
@@ -815,8 +815,10 @@
     <string name="add_staff_to_school">Add staff to school</string>
     <string name="permission_password_reset">Reset and update persons password</string>
     <string name="school_code">School code</string>
+    <string name="course_code">Course code</string>
+    <string name="invite_code">Invite code</string>
     <string name="entity_code">%1$s code</string>
-    <string name="join_code_instructions">Ask your teacher for the code, then enter it below:</string>
+    <string name="join_code_instructions">Ask your teacher/admin for the invite code, then enter it below. The course teacher/admin can then approve or deny your request to join.</string>
     <!-- This is a button that shows when teachers are viewing a student's work that allows them to
     enter the answers on behalf of a student e.g. when the student is not using the phone/tablet
     directly -->
@@ -885,7 +887,7 @@
     the teacher/admin), the user will be shown this error message if they are already enroled in
     the class.
     -->
-    <string name="you_are_already_in_class">Error: you are already enroled in the class: %1$s</string>
+    <string name="you_are_already_in_class">Error: you are already enroled in this course</string>
     <!--
     When the user selects to join a school (e.g. using a link or using the school code shared by
     the teacher/admin), the user will be shown this error message if they are already enroled in
@@ -1746,7 +1748,6 @@
 
     <string name="move_to">Move to…</string>
 
-
     <string name="restore">Restore</string>
 
     <string name="delete_permanently">Delete permanently</string>
@@ -1756,5 +1757,24 @@
     <string name="delete_or_restore_items">Delete or restore items</string>
 
     <string name="yesterday">Yesterday</string>
+
+    <string name="request_to_enrol_already_pending">Request to enrol already pending</string>
+
+    <string name="request_submitted">Request submitted</string>
+
+    <string name="canceled_enrolment_request">Canceled enrolment request</string>
+
+    <!--
+    Popup message that will be shown to confirm when a user is enroled into a course
+    %1$s will be replaced with the name of the person enroled.
+    -->
+    <string name="enroled_into_name">Enroled %1$s</string>
+
+    <!--
+    Popup message that will be shown to confirm when a user request to enrol into
+    a course is declined. %1$s will be replaced with the name of the person who requested to
+    enrol.
+    -->
+    <string name="declined_request_from_name">Declined request from %1$s</string>
 
 </resources>

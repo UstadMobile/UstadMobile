@@ -64,15 +64,13 @@ class ClazzAssignmentIntegrationTest: AbstractMainDispatcherTest() {
             val teacherPerson = teacherClient.createUserAndLogin()
 
             suspend fun enrolIntoCourse(personUid: Long, role: Int) {
-                EnrolIntoCourseUseCase().invoke(
+                EnrolIntoCourseUseCase(db = serverDb, repo = null).invoke(
                     enrolment = ClazzEnrolment(
                         clazzUid = testCourse.clazzUid,
                         personUid = personUid,
                         role = role,
                     ),
                     timeZoneId = testCourse.clazzTimeZone ?: "UTC",
-                    db = serverDb,
-                    repo = null
                 )
             }
 

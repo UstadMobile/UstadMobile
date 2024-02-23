@@ -11,6 +11,8 @@ import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.CourseDiscussionDetailViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import app.cash.paging.PagingSource
+import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCase
+import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.locale.CourseTerminologyStrings
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.parseAndUpdateTerminologyStringsIfNeeded
@@ -26,6 +28,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
+import org.kodein.di.instance
 
 data class ClazzDetailOverviewUiState(
 
@@ -75,6 +78,8 @@ class ClazzDetailOverviewViewModel(
     val uiState: Flow<ClazzDetailOverviewUiState> = _uiState.asStateFlow()
 
     private var lastCourseBlockPagingSource: PagingSource<Int, CourseBlockAndDisplayDetails>? = null
+
+    private val setClipboardStringUseCase: SetClipboardStringUseCase by instance()
 
     private val pagingSourceFactory: () -> PagingSource<Int, CourseBlockAndDisplayDetails> = {
         activeRepo.courseBlockDao.findAllCourseBlockByClazzUidAsPagingSource(
@@ -141,8 +146,27 @@ class ClazzDetailOverviewViewModel(
                         }
                     }
                 }
+
+                launch {
+                    activeDb.clazzDao.personHasPermissionWithClazzAsFlow(
+                        accountPersonUid = activeUserPersonUid,
+                        clazzUid = entityUidArg,
+                        permission = Role.PERMISSION_CLAZZ_ADD_STUDENT
+                    ).collect { canAddStudent ->
+                        _uiState.update { prev ->
+                            prev.copy(
+                                clazzCodeVisible = canAddStudent,
+                            )
+                        }
+                    }
+                }
             }
         }
+    }
+
+    fun onClickClazzCode(code: String) {
+        setClipboardStringUseCase(code)
+        snackDispatcher.showSnackBar(Snack(systemImpl.getString(MR.strings.copied_to_clipboard)))
     }
 
     fun onClickCourseBlock(courseBlock: CourseBlock) {

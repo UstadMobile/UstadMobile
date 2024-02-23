@@ -10,6 +10,7 @@ import com.ustadmobile.core.viewmodel.epubcontent.EpubContentViewModel
 import com.ustadmobile.lib.db.entities.ContentEntryVersion
 import net.thauvin.erik.urlencoder.UrlEncoderUtil
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
 
 /*
  * Launching EPUB on Compose/Desktop(JVM) is done by launching Chrome and using the app-react
@@ -29,7 +30,8 @@ class LaunchEpubUseCaseJvm(
 
     override suspend fun invoke(
         contentEntryVersion: ContentEntryVersion,
-        navController: UstadNavController
+        navController: UstadNavController,
+        target: OpenExternalLinkUseCase.Companion.LinkTarget,
     ): LaunchContentEntryVersionUseCase.LaunchResult {
         val manifestUrl = contentEntryVersion.cevManifestUrl ?:
             throw IllegalStateException("ContentEntryVersion $contentEntryVersion manifesturl is null")

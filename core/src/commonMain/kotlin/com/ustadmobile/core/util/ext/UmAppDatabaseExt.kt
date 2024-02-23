@@ -3,7 +3,6 @@ package com.ustadmobile.core.util.ext
 import app.cash.paging.PagingSource
 import com.ustadmobile.core.controller.TerminologyKeys
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.findEntriesByMd5SumsSafeAsync
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.graph.LabelValueFormatter
@@ -14,13 +13,12 @@ import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.door.SimpleDoorQuery
 import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
-import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_NO_DELETE
 import com.ustadmobile.lib.util.randomString
-import kotlinx.coroutines.delay
 import com.ustadmobile.core.db.dao.getResults
+import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.AlreadyEnroledInClassException
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.lib.db.composites.PersonAndClazzMemberListDetails
 import kotlinx.datetime.Clock
@@ -99,7 +97,7 @@ suspend fun UmAppDatabase.enrolPersonIntoClazzAtLocalTimezone(
         systemTimeInMillis(), 0, personToEnrol.personUid)
 
     if(existingEnrolments.isNotEmpty()) {
-        throw AlreadyEnroledInClassException(existingEnrolments.first())
+        throw AlreadyEnroledInClassException()
     }
 
     val clazzTimeZone = clazzWithSchoolVal.effectiveTimeZone()

@@ -30,6 +30,7 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
     @Query("SELECT * From Clazz WHERE clazzUid = :uid")
     abstract fun findByUidLive(uid: Long): Flow<Clazz?>
 
+    @HttpAccessible(clientStrategy = HttpAccessible.ClientStrategy.HTTP_WITH_FALLBACK)
     @Query("SELECT * FROM Clazz WHERE clazzCode = :code")
     abstract suspend fun findByClazzCode(code: String): Clazz?
 
