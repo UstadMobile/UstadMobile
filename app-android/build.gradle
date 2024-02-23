@@ -364,6 +364,7 @@ dependencies {
     implementation libs.process.phoenix
 
     implementation libs.androidx.browser
+    implementation libs.androidx.core.splashscreen
 
     testImplementation project(":lib-test-common")
     testImplementation "org.mockito:mockito-core:$version_android_mockito"
