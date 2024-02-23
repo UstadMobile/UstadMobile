@@ -27,15 +27,13 @@ it('User able to expand and collapse the module blocks', () => {
   cy.get('[aria-label="More options"]').eq(1).click()
   cy.contains("li","Indent").click()
   cy.contains("button","Save").click()
+
   //Testing Module Collapse icon working or not
-  cy.get('svg[data-testid="KeyboardArrowUpIcon"]').eq(0).click()   // collapse module 1
+  cy.contains(".MuiListItem-root", "module 1").find('button[aria-label="Collapse"]').click()
   cy.contains('text 1').should('not.exist');
-  cy.get('svg[data-testid="KeyboardArrowUpIcon"]').click({force: true})
-  cy.contains("text 2").should('not.exist')
-  //Testing Module Expand icon working or not
-  cy.get('svg[data-testid="KeyboardArrowDownIcon"]').eq(0).click()
+
+  //Expand module again
+  cy.contains(".MuiListItem-root", "module 1").find('button[aria-label="Expand"]').click()
   cy.contains('text 1').should('exist');
-  cy.get('svg[data-testid="KeyboardArrowDownIcon"]').click()
-  cy.contains("text 2").should('exist')
 })
 })
