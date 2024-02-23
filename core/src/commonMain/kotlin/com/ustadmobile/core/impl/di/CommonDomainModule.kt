@@ -9,6 +9,7 @@ import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.RequestEnrolm
 import com.ustadmobile.core.domain.contententry.launchcontent.DefaultLaunchContentEntryVersionUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.LaunchContentEntryVersionUseCase
 import com.ustadmobile.core.domain.contententry.save.SaveContentEntryUseCase
+import com.ustadmobile.core.domain.makelink.MakeLinkUseCase
 import com.ustadmobile.core.domain.siteterms.GetLocaleForSiteTermsUseCase
 import com.ustadmobile.door.ext.DoorTag
 import org.kodein.di.DI
@@ -18,6 +19,7 @@ import org.kodein.di.instanceOrNull
 import org.kodein.di.on
 import org.kodein.di.provider
 import org.kodein.di.scoped
+import org.kodein.di.singleton
 
 /**
  * Domain (UseCases) that are part of commonMain source.
@@ -70,4 +72,7 @@ fun commonDomainDiModule(endpointScope: EndpointScope) = DI.Module("CommonDomain
         RequestEnrolmentUseCase(activeRepo = instance(tag = DoorTag.TAG_REPO))
     }
 
+    bind<MakeLinkUseCase>() with scoped(endpointScope).singleton {
+        MakeLinkUseCase(context)
+    }
 }

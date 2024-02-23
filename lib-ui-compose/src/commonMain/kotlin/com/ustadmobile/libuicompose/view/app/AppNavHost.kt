@@ -17,6 +17,7 @@ import com.ustadmobile.core.impl.nav.NavResultReturnerImpl
 import com.ustadmobile.core.impl.nav.PopNavCommand
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.viewmodel.HtmlEditViewModel
+import com.ustadmobile.core.viewmodel.clazz.invitevialink.InviteViaLinkViewModel
 import com.ustadmobile.core.viewmodel.OnBoardingViewModel
 import com.ustadmobile.core.viewmodel.person.registerageredirect.RegisterAgeRedirectViewModel
 import com.ustadmobile.core.viewmodel.site.termsdetail.SiteTermsDetailViewModel
@@ -127,6 +128,7 @@ import com.ustadmobile.core.viewmodel.settings.DeveloperSettingsViewModel
 import com.ustadmobile.core.viewmodel.videocontent.VideoContentViewModel
 import com.ustadmobile.core.viewmodel.xapicontent.XapiContentViewModel
 import com.ustadmobile.libuicompose.view.about.OpenLicensesScreen
+import com.ustadmobile.libuicompose.view.clazz.invitevialink.InviteViaLinkScreen
 import com.ustadmobile.libuicompose.view.clazz.joinwithcode.JoinWithCodeScreen
 import com.ustadmobile.libuicompose.view.contententry.detail.ContentEntryDetailScreen
 import com.ustadmobile.libuicompose.view.contententry.edit.ContentEntryEditScreen
@@ -687,6 +689,13 @@ fun AppNavHost(
                 DeletedItemListScreen(
                     appViewModel(backStackEntry, DeletedItemListViewModel::class,
                         ::DeletedItemListViewModel)
+                )
+            }
+
+            contentScene("/${InviteViaLinkViewModel.DEST_NAME}") { backStackEntry ->
+                InviteViaLinkScreen(
+                    appViewModel(backStackEntry, InviteViaLinkViewModel::class,
+                        ::InviteViaLinkViewModel)
                 )
             }
         }

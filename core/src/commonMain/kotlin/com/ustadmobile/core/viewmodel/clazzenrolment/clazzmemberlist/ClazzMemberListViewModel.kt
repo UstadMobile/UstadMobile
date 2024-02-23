@@ -24,6 +24,7 @@ import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import app.cash.paging.PagingSource
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.util.ext.dayStringResource
+import com.ustadmobile.core.util.ext.localFirstThenRepoIfNull
 import com.ustadmobile.core.viewmodel.clazz.parseAndUpdateTerminologyStringsIfNeeded
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.EnrolmentRequestAndPersonPicture
@@ -255,23 +256,37 @@ class ClazzMemberListViewModel(
     }
 
     fun onClickAddNewMember(role: Int) {
-        val goToOnPersonSelectedArg = ClazzEnrolmentEditViewModel.DEST_NAME
-            .appendQueryArgs(mapOf(
-                UstadView.ARG_CLAZZUID to clazzUid.toString(),
-                UstadView.ARG_POPUPTO_ON_FINISH to destinationName,
-                ClazzEnrolmentEditViewModel.ARG_ROLE to role.toString(),
-            ))
+        viewModelScope.launch {
+            val clazzCode = activeRepo
+                .takeIf { role == ClazzEnrolment.ROLE_STUDENT }
+                ?.localFirstThenRepoIfNull {
+                    it.clazzDao.findByUidAsync(clazzUid)?.clazzCode
+                }
 
-        val args = mutableMapOf(
-            PersonListViewModel.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ to clazzUid.toString(),
-            UstadView.ARG_LISTMODE to ListViewMode.PICKER.mode,
-            PersonViewModelConstants.ARG_GO_TO_ON_PERSON_SELECTED to goToOnPersonSelectedArg,
-        )
+            val goToOnPersonSelectedArg = ClazzEnrolmentEditViewModel.DEST_NAME
+                .appendQueryArgs(
+                    mapOf(
+                        UstadView.ARG_CLAZZUID to clazzUid.toString(),
+                        UstadView.ARG_POPUPTO_ON_FINISH to destinationName,
+                        ClazzEnrolmentEditViewModel.ARG_ROLE to role.toString(),
+                    )
+                )
 
-        navController.navigate(
-            viewName = PersonListViewModel.DEST_NAME,
-            args = args
-        )
+            val args = buildMap {
+                put(PersonListViewModel.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ, clazzUid.toString())
+                put(UstadView.ARG_LISTMODE, ListViewMode.PICKER.mode)
+                put(PersonViewModelConstants.ARG_GO_TO_ON_PERSON_SELECTED, goToOnPersonSelectedArg)
+
+                if(clazzCode != null)
+                    put(PersonListViewModel.ARG_SHOW_ADD_VIA_INVITE_LINK_CODE, clazzCode)
+            }
+
+            navController.navigate(
+                viewName = PersonListViewModel.DEST_NAME,
+                args = args
+            )
+        }
+
     }
 
     fun onClickEntry(

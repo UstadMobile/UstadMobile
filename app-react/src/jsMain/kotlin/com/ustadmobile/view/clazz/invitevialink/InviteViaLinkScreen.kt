@@ -1,13 +1,15 @@
-package com.ustadmobile.view
+package com.ustadmobile.view.clazz.invitevialink
 
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
-import com.ustadmobile.core.viewmodel.InviteViaLinkUiState
-import com.ustadmobile.util.ext.format
+import com.ustadmobile.core.viewmodel.clazz.invitevialink.InviteViaLinkUiState
+import com.ustadmobile.core.viewmodel.clazz.invitevialink.InviteViaLinkViewModel
+import com.ustadmobile.hooks.useUstadViewModel
+import com.ustadmobile.mui.components.UstadStandardContainer
 import web.cssom.px
-//WARNING: DO NOT Replace with import mui.icons.material.[*] - Leads to severe IDE performance issues 10/Apr/23 https://youtrack.jetbrains.com/issue/KT-57897/Intellisense-and-code-analysis-is-extremely-slow-and-unusable-on-Kotlin-JS
-import mui.icons.material.Attachment
-import mui.icons.material.ContentCopy
+import mui.icons.material.Attachment as AttachmentIcon
+import mui.icons.material.ContentCopy as ContentCopyIcon
 import mui.material.*
 import mui.system.Stack
 import mui.system.StackDirection
@@ -20,16 +22,26 @@ import react.create
 external interface InviteViaLinkProps : Props {
     var uiState: InviteViaLinkUiState
     var onClickCopyLink: () -> Unit
-    var onClickShareLink: () -> Unit
 }
 
 val InviteViaLinkPreview = FC<Props> {
-    val strings = useStringProvider()
     InviteViaLinkComponent2 {
         uiState = InviteViaLinkUiState(
-            entityName = strings[MR.strings.invite_link_desc],
             inviteLink = "http://wwww.ustadmobile.com/ClazzJoin?code=12ASDncd",
         )
+    }
+}
+
+val InviteViaLinkScreen = FC<Props> {
+    val viewModel = useUstadViewModel { di, savedStateHandle ->
+        InviteViaLinkViewModel(di, savedStateHandle)
+    }
+
+    val uiStateVal by viewModel.uiState.collectAsState(InviteViaLinkUiState())
+
+    InviteViaLinkComponent2 {
+        uiState = uiStateVal
+        onClickCopyLink = viewModel::onClickCopy
     }
 }
 
@@ -37,13 +49,12 @@ private val InviteViaLinkComponent2 = FC<InviteViaLinkProps> { props ->
 
     val strings = useStringProvider()
 
-    Container {
+    UstadStandardContainer {
         maxWidth = "lg"
 
         Stack {
             Typography {
-                + (strings[MR.strings.invite_link_desc])
-                    .format(props.uiState.entityName)
+                + strings[MR.strings.invite_link_desc]
             }
 
             Box{
@@ -56,7 +67,7 @@ private val InviteViaLinkComponent2 = FC<InviteViaLinkProps> { props ->
                 direction = responsive(StackDirection.row)
                 spacing = responsive(16.px)
 
-                + Attachment.create()
+                AttachmentIcon()
 
                 Typography {
                     + (props.uiState.inviteLink ?: "")
@@ -73,10 +84,10 @@ private val InviteViaLinkComponent2 = FC<InviteViaLinkProps> { props ->
 
 
             Button {
-                onClick = { props.onClickCopyLink }
+                onClick = { props.onClickCopyLink() }
                 variant = ButtonVariant.outlined
 
-                startIcon = ContentCopy.create()
+                startIcon = ContentCopyIcon.create()
 
                 + strings[MR.strings.copy_link].uppercase()
             }

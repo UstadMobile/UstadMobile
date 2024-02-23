@@ -105,6 +105,8 @@ class JoinWithCodeViewModel(
 
     companion object {
 
+        const val ARG_INVITE_CODE = "inviteCode"
+
         const val DEST_NAME = "JoinWithCode"
 
     }

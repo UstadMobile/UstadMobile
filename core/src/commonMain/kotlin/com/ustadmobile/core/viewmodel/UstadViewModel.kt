@@ -452,6 +452,10 @@ abstract class UstadViewModel(
          */
         const val ARG_POPUPTO_ON_FINISH = "popUpToOnFinish"
 
+
+        const val ARG_INVITE_CODE = "inviteCode"
+
+
     }
 
 }
