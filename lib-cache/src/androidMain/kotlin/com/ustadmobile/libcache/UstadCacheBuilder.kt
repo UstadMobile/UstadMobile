@@ -2,6 +2,7 @@ package com.ustadmobile.libcache
 
 import android.content.Context
 import com.ustadmobile.door.DatabaseBuilder
+import com.ustadmobile.libcache.db.MIGRATE_8_9
 import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.db.addCacheDbMigrations
 import com.ustadmobile.libcache.logging.UstadCacheLogger
@@ -35,7 +36,10 @@ class UstadCacheBuilder(
                 dbClass = UstadCacheDb::class,
                 dbName = dbName,
                 nodeId = 1L
-            ).addCacheDbMigrations().build()
+            )
+            .addCacheDbMigrations()
+            .addMigrations(MIGRATE_8_9)
+            .build()
         )
     }
 

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+ Avoid icon being trimmed off
+ Sizes as per :
+ https://developer.android.com/develop/ui/views/launch/splash-screen#elements
+-->
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/ic_launcher_icon"
+    android:width="288dp"
+    android:height="288dp"
+    android:insetLeft="56dp"
+    android:insetRight="56dp"
+    android:insetTop="56dp"
+    android:insetBottom="56dp"/>
