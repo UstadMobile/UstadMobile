@@ -18,7 +18,7 @@ import com.ustadmobile.view.components.UstadSwitchField
 import com.ustadmobile.wrappers.reacteasysort.LockAxis
 import com.ustadmobile.wrappers.reacteasysort.SortableList
 import web.cssom.pct
-import mui.icons.material.Add
+import mui.icons.material.Add as AddIcon
 import mui.material.*
 import mui.material.List
 import mui.system.responsive
@@ -186,9 +186,12 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                     ListItemButton {
                         onClick =  { props.onClickAddCourseBlock() }
                         id = "add_course_block"
+                        disabled = !props.uiState.fieldsEnabled
+
                         ListItemIcon {
-                            + Add.create()
+                            AddIcon()
                         }
+
                         ListItemText {
                             primary = ReactNode(strings[MR.strings.add_block])
                         }
@@ -229,12 +232,13 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                     key = "0"
                     ListItemButton {
                         id = "add_schedule_button"
+                        disabled = !props.uiState.fieldsEnabled
                         onClick = {
                             props.onClickAddSchedule()
                         }
 
                         ListItemIcon {
-                            + Add.create()
+                            AddIcon()
                         }
 
                         ListItemText {
