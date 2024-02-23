@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.Icons
@@ -63,10 +62,10 @@ fun ClazzDetailOverviewScreen(viewModel: ClazzDetailOverviewViewModel) {
     ClazzDetailOverviewScreen(
         uiState = uiState,
         onClickCourseBlock = viewModel::onClickCourseBlock,
+        onClickClassCode = viewModel::onClickClazzCode,
     )
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ClazzDetailOverviewScreen(
     uiState: ClazzDetailOverviewUiState = ClazzDetailOverviewUiState(),
@@ -131,9 +130,12 @@ fun ClazzDetailOverviewScreen(
         if (uiState.clazzCodeVisible) {
             item(key = "clazzcode") {
                 UstadDetailField2(
-                    valueText = uiState.clazz?.clazzCode ?: "",
-                    labelText = stringResource(MR.strings.class_code),
-                    icon = Icons.Filled.Login
+                    modifier = Modifier.clickable { onClickClassCode(uiState.clazz?.clazzCode ?: "") },
+                    valueContent = { Text(uiState.clazz?.clazzCode ?: "") },
+                    labelContent = { Text(stringResource(MR.strings.invite_code)) },
+                    leadingContent = {
+                        Icon(Icons.Filled.Login, contentDescription = null)
+                    },
                 )
             }
         }

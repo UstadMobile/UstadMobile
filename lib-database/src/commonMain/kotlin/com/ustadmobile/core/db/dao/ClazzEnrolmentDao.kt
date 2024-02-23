@@ -161,6 +161,25 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         personUidFilter: Long = 0
     ): List<ClazzEnrolmentWithPerson>
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
+    )
+    @Query("""
+        SELECT ClazzEnrolment.*
+          FROM ClazzEnrolment
+         WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid
+           AND ClazzEnrolment.clazzEnrolmentPersonUid = :accountPersonUid
+           AND :time BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined 
+                         AND ClazzEnrolment.clazzEnrolmentDateLeft
+           AND ClazzEnrolment.clazzEnrolmentActive              
+    """)
+    abstract suspend fun getAllEnrolmentsAtTimeByClazzAndPerson(
+        clazzUid: Long,
+        accountPersonUid: Long,
+        time: Long,
+    ): List<ClazzEnrolment>
+
+
     @Query("SELECT * FROM ClazzEnrolment WHERE clazzEnrolmentUid = :uid")
     abstract suspend fun findByUid(uid: Long): ClazzEnrolment?
 

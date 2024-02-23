@@ -6,12 +6,16 @@ import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PersonAdd
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
 import app.cash.paging.Pager
 import app.cash.paging.PagingConfig
@@ -21,15 +25,24 @@ import com.ustadmobile.core.viewmodel.clazzenrolment.clazzmemberlist.ClazzMember
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.util.SortOrderOption
+import com.ustadmobile.lib.db.composites.EnrolmentRequestAndPersonPicture
 import com.ustadmobile.lib.db.composites.PersonAndClazzMemberListDetails
 import com.ustadmobile.libuicompose.components.UstadAddListItem
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadListFilterChipsHeader
 import com.ustadmobile.libuicompose.components.UstadListSortHeader
 import com.ustadmobile.libuicompose.components.UstadPersonAvatar
+import com.ustadmobile.libuicompose.components.UstadTooltipBox
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
+import com.ustadmobile.libuicompose.util.rememberDateFormat
+import com.ustadmobile.libuicompose.util.rememberDayOrDate
+import com.ustadmobile.libuicompose.util.rememberTimeFormatter
 import dev.icerock.moko.resources.compose.stringResource
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDateTime
+import java.text.DateFormat
+import java.util.TimeZone
 
 @Composable
 fun ClazzMemberListScreen(
@@ -53,7 +66,7 @@ fun ClazzMemberListScreen(
     onClickEntry: (PersonAndClazzMemberListDetails) -> Unit = {},
     onClickAddNewMember: (role: Int) -> Unit = {},
     onClickPendingRequest: (
-        enrolment: PersonAndClazzMemberListDetails,
+        enrolment: EnrolmentRequest,
         approved: Boolean
     ) -> Unit = {_, _ -> },
     onSortOrderChanged: (SortOrderOption) -> Unit = { },
@@ -83,6 +96,9 @@ fun ClazzMemberListScreen(
         )
     }
     val pendingStudentListItems = pendingStudentListPager.flow.collectAsLazyPagingItems()
+
+    val timeFormatter = rememberTimeFormatter()
+    val dateFormatter = rememberDateFormat(TimeZone.getDefault().id)
 
     UstadLazyColumn(
         modifier = Modifier.fillMaxSize()
@@ -193,11 +209,15 @@ fun ClazzMemberListScreen(
         
         ustadPagedItems(
             pagingItems = pendingStudentListItems,
-            key = { Pair(3, it.person?.personUid ?: -1) }
-        ){ pendingStudent ->
+            key = { Pair(3, it.enrolmentRequest?.erUid ?: -1) }
+        ){ request ->
             PendingStudentListItem(
-                member = pendingStudent,
-                onClick = onClickPendingRequest
+                request = request,
+                onClick = onClickPendingRequest,
+                localDateTimeNow = uiState.localDateTimeNow,
+                timeFormatter = timeFormatter,
+                dateFormatter = dateFormatter,
+                dayOfWeekStringMap = uiState.dayOfWeekStrings,
             )
         }
     }
@@ -226,40 +246,88 @@ fun ClazzMemberListScreen(
 
 @Composable
 fun PendingStudentListItem(
-    member: PersonAndClazzMemberListDetails?,
-    onClick: (enrolment: PersonAndClazzMemberListDetails, approved: Boolean) -> Unit
+    request: EnrolmentRequestAndPersonPicture?,
+    onClick: (enrolment: EnrolmentRequest, approved: Boolean) -> Unit,
+    localDateTimeNow: LocalDateTime,
+    timeFormatter: DateFormat,
+    dateFormatter: DateFormat,
+    dayOfWeekStringMap: Map<DayOfWeek, String>,
 ){
+    val timeStr = rememberDayOrDate(
+        localDateTimeNow = localDateTimeNow,
+        timestamp = request?.enrolmentRequest?.erRequestTime ?: 0,
+        timeZone = kotlinx.datetime.TimeZone.currentSystemDefault(),
+        showTimeIfToday = true,
+        timeFormatter = timeFormatter,
+        dateFormatter = dateFormatter,
+        dayOfWeekStringMap = dayOfWeekStringMap,
+    )
+
     ListItem (
         headlineContent = {
-            Text(text = member?.person?.fullName() ?: "")
+            Text(text = request?.enrolmentRequest?.erPersonFullname ?: "")
         },
         leadingContent = {
             UstadPersonAvatar(
-                pictureUri = member?.personPicture?.personPictureThumbnailUri,
-                personName = member?.person?.fullName(),
+                pictureUri = request?.personPicture?.personPictureThumbnailUri,
+                personName = request?.enrolmentRequest?.erPersonFullname,
             )
+        },
+        supportingContent = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(Icons.Default.Person,
+                    contentDescription = stringResource(MR.strings.username),
+                    modifier = Modifier.size(16.dp),
+                )
+
+                Spacer(Modifier.width(8.dp))
+
+                Text(request?.enrolmentRequest?.erPersonUsername ?: "")
+
+                Spacer(Modifier.width(8.dp))
+
+                Icon(Icons.Default.Schedule,
+                    contentDescription = stringResource(MR.strings.time),
+                    modifier = Modifier.size(16.dp)
+                )
+
+                Spacer(Modifier.width(8.dp))
+
+                Text(timeStr)
+            }
         },
         trailingContent = {
             Row {
-                IconButton(
-                    onClick = {
-                        member?.also{ onClick(it, true) }
-                    }
+                UstadTooltipBox(
+                    tooltipText = stringResource(MR.strings.accept)
                 ) {
-                    Icon(
-                        Icons.Default.Done,
-                        contentDescription = stringResource(MR.strings.accept)
-                    )
+                    IconButton(
+                        onClick = {
+                            request?.enrolmentRequest?.also{ onClick(it, true) }
+                        }
+                    ) {
+                        Icon(
+                            Icons.Default.Done,
+                            contentDescription = stringResource(MR.strings.accept)
+                        )
+                    }
                 }
-                IconButton(
-                    onClick = {
-                        member?.also { onClick(it, false) }
-                    }
+
+                UstadTooltipBox(
+                    tooltipText = stringResource(MR.strings.reject)
                 ) {
-                    Icon(
-                        Icons.Default.Close,
-                        contentDescription = stringResource(MR.strings.reject)
-                    )
+                    IconButton(
+                        onClick = {
+                            request?.enrolmentRequest?.also { onClick(it, false) }
+                        }
+                    ) {
+                        Icon(
+                            Icons.Default.Close,
+                            contentDescription = stringResource(MR.strings.reject)
+                        )
+                    }
                 }
             }
         }

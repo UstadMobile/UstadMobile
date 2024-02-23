@@ -51,7 +51,8 @@ fun UstadCourseBlockEdit(
 
         UstadRichTextEdit(
             html = uiState.courseBlock?.cbDescription ?: "",
-            modifier = Modifier.fillMaxWidth().defaultItemPadding(),
+            modifier = Modifier.fillMaxWidth().defaultItemPadding()
+                .testTag("description"),
             onHtmlChange = {
                 uiState.courseBlock?.also { courseBlock ->
                     onCourseBlockChange(courseBlock.shallowCopy {
@@ -71,7 +72,7 @@ fun UstadCourseBlockEdit(
             UstadDateTimeField(
                 value = uiState.courseBlock?.cbHideUntilDate ?: 0,
                 modifier = Modifier
-                    .testTag("hide_until_date"),
+                    .testTag("dont_show_before"),
                 dateLabel = { Text(stringResource(MR.strings.dont_show_before)) },
                 timeLabel = { Text(stringResource(MR.strings.time)) },
                 timeZoneId = uiState.timeZone,
@@ -79,7 +80,8 @@ fun UstadCourseBlockEdit(
                     onCourseBlockChange(uiState.courseBlock?.shallowCopy {
                         cbHideUntilDate = it
                     })
-                }
+                },
+                baseTestTag = "dont_show_before",
             )
         }
 
@@ -87,7 +89,7 @@ fun UstadCourseBlockEdit(
             if(uiState.completionCriteriaVisible) {
                 UstadExposedDropDownMenuField<CompletionCriteria>(
                     modifier = Modifier
-                        .testTag("cbCompletionCriteria")
+                        .testTag("completion_criteria")
                         .fillMaxWidth()
                         .weight(0.5F)
                         .defaultItemPadding(end = if (uiState.minScoreVisible) 8.dp else 16.dp),
@@ -111,7 +113,7 @@ fun UstadCourseBlockEdit(
 
                 UstadNumberTextField(
                     modifier = Modifier
-                        .testTag("maxPoints")
+                        .testTag("points")
                         .weight(0.5F)
                         .defaultItemPadding(start = 0.dp),
                     value = (uiState.courseBlock?.cbMinPoints?.toFloat() ?: 0f),
@@ -140,7 +142,7 @@ fun UstadCourseBlockEdit(
             ) {
                 UstadNumberTextField(
                     modifier = Modifier
-                        .testTag("cbMaxPoints")
+                        .testTag("maximum_points")
                         .fillMaxWidth(),
                     value = (uiState.courseBlock?.cbMaxPoints?.toFloat() ?: 0f),
                     label = { Text(stringResource(MR.strings.maximum_points)) },
@@ -168,7 +170,7 @@ fun UstadCourseBlockEdit(
                 errorText = uiState.caDeadlineError
             ) {
                 UstadDateTimeField(
-                    modifier = Modifier.testTag("cbDeadlineDate"),
+                    modifier = Modifier.testTag("deadline"),
                     value = uiState.courseBlock?.cbDeadlineDate ?: 0,
                     isError = uiState.caDeadlineError != null,
                     unsetDefault = UNSET_DISTANT_FUTURE,
@@ -179,7 +181,8 @@ fun UstadCourseBlockEdit(
                         onCourseBlockChange(uiState.courseBlock?.shallowCopy {
                             cbDeadlineDate = it
                         })
-                    }
+                    },
+                    baseTestTag = "deadline"
                 )
             }
         }
@@ -191,12 +194,13 @@ fun UstadCourseBlockEdit(
                 errorText = uiState.caGracePeriodError,
             ) {
                 UstadDateTimeField(
-                    modifier = Modifier.testTag("cbGracePeriodDate"),
+                    modifier = Modifier.testTag("end_of_grace_period"),
                     value = uiState.courseBlock?.cbGracePeriodDate ?: 0,
                     unsetDefault = UNSET_DISTANT_FUTURE,
                     dateLabel = { Text(stringResource(MR.strings.end_of_grace_period)) },
                     timeLabel = { stringResource(MR.strings.time) },
                     timeZoneId = uiState.timeZone,
+                    baseTestTag = "end_of_grace_period",
                     onValueChange = {
                         onCourseBlockChange(uiState.courseBlock?.shallowCopy {
                             cbGracePeriodDate = it
@@ -211,7 +215,7 @@ fun UstadCourseBlockEdit(
                 modifier = Modifier
                     .defaultItemPadding(bottom = 0.dp)
                     .fillMaxWidth()
-                    .testTag("cbLateSubmissionPenalty"),
+                    .testTag("late_submission_penalty"),
                 value = (uiState.courseBlock?.cbLateSubmissionPenalty?.toFloat() ?: 0f),
                 label = { Text(stringResource(MR.strings.late_submission_penalty)) },
                 enabled = uiState.fieldsEnabled,

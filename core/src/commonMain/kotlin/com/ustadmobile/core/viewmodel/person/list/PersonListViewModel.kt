@@ -21,6 +21,7 @@ import app.cash.paging.PagingSourceLoadResult
 import app.cash.paging.PagingSourceLoadResultPage
 import app.cash.paging.PagingState
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
+import com.ustadmobile.core.viewmodel.clazz.invitevialink.InviteViaLinkViewModel
 import com.ustadmobile.core.viewmodel.person.PersonViewModelConstants.ARG_POPUP_TO_ON_PERSON_SELECTED
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
@@ -36,6 +37,7 @@ data class PersonListUiState(
     ),
     val sortOption: SortOrderOption = sortOptions.first(),
     val showAddItem: Boolean = false,
+    val showInviteViaLink: Boolean = false,
 )
 
 class EmptyPagingSource<Key: Any, Value: Any>(): PagingSource<Key, Value>() {
@@ -88,6 +90,8 @@ class PersonListViewModel(
 
     private var lastPagingSource: PagingSource<Int, PersonAndListDisplayDetails>? = null
 
+    private val inviteCode = savedStateHandle[ARG_SHOW_ADD_VIA_INVITE_LINK_CODE]
+
     init {
         _appUiState.update { prev ->
             prev.copy(
@@ -99,7 +103,8 @@ class PersonListViewModel(
 
         _uiState.update { prev ->
             prev.copy(
-                personList = pagingSourceFactory
+                personList = pagingSourceFactory,
+                showInviteViaLink = inviteCode != null,
             )
         }
 
@@ -131,6 +136,18 @@ class PersonListViewModel(
             )
         }
         lastPagingSource?.invalidate()
+    }
+
+    fun onClickInviteWithLink() {
+        if(inviteCode == null)
+            return //could never happen - button would not show if this was null
+
+        navController.navigate(
+            InviteViaLinkViewModel.DEST_NAME,
+            args = mapOf(
+                ARG_INVITE_CODE to inviteCode
+            )
+        )
     }
 
     override fun onClickAdd() {
@@ -180,6 +197,8 @@ class PersonListViewModel(
         const val ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL = "excludeFromSchool"
 
         const val ARG_EXCLUDE_PERSONUIDS_LIST = "excludeAlreadySelectedList"
+
+        const val ARG_SHOW_ADD_VIA_INVITE_LINK_CODE = "showAddViaInviteLink"
 
 
     }

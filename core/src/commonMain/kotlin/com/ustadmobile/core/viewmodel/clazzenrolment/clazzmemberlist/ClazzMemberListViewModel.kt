@@ -22,13 +22,23 @@ import com.ustadmobile.core.viewmodel.person.PersonViewModelConstants
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import app.cash.paging.PagingSource
+import com.ustadmobile.core.impl.appstate.Snack
+import com.ustadmobile.core.util.ext.dayStringResource
+import com.ustadmobile.core.util.ext.localFirstThenRepoIfNull
 import com.ustadmobile.core.viewmodel.clazz.parseAndUpdateTerminologyStringsIfNeeded
 import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.lib.db.composites.EnrolmentRequestAndPersonPicture
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.composites.PersonAndClazzMemberListDetails
+import com.ustadmobile.lib.db.entities.EnrolmentRequest
 import com.ustadmobile.lib.db.entities.Role
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.on
@@ -39,7 +49,7 @@ data class ClazzMemberListUiState(
 
     val teacherList: ListPagingSourceFactory<PersonAndClazzMemberListDetails> = { EmptyPagingSource() },
 
-    val pendingStudentList: ListPagingSourceFactory<PersonAndClazzMemberListDetails> = {
+    val pendingStudentList: ListPagingSourceFactory<EnrolmentRequestAndPersonPicture> = {
         EmptyPagingSource()
     },
 
@@ -69,7 +79,14 @@ data class ClazzMemberListUiState(
         MessageIdOption2(MR.strings.all, 0)
     ),
 
-    val terminologyStrings: CourseTerminologyStrings? = null
+    val terminologyStrings: CourseTerminologyStrings? = null,
+
+    val localDateTimeNow: LocalDateTime = Clock.System.now().toLocalDateTime(
+        TimeZone.currentSystemDefault()
+    ),
+
+    val dayOfWeekStrings: Map<DayOfWeek, String> = emptyMap(),
+
 )
 
 class ClazzMemberListViewModel(
@@ -88,7 +105,7 @@ class ClazzMemberListViewModel(
 
     private var lastStudentListPagingsource: PagingSource<Int, PersonAndClazzMemberListDetails>? = null
 
-    private var lastPendingStudentListPagingSource: PagingSource<Int, PersonAndClazzMemberListDetails>? = null
+    private var lastPendingEnrolmentRequestsPagingSource: PagingSource<Int, EnrolmentRequestAndPersonPicture>? = null
 
     private fun getMembersAsPagingSource(
         roleId: Int
@@ -116,9 +133,15 @@ class ClazzMemberListViewModel(
         }
     }
 
-    private val pendingStudentListPagingSource: ListPagingSourceFactory<PersonAndClazzMemberListDetails> = {
-        getMembersAsPagingSource(ClazzEnrolment.ROLE_STUDENT_PENDING).also {
-            lastPendingStudentListPagingSource = it
+    private val pendingStudentListPagingSource: ListPagingSourceFactory<EnrolmentRequestAndPersonPicture> = {
+        activeRepo.enrolmentRequestDao.findPendingEnrolmentsForCourse(
+            clazzUid = clazzUid,
+            includeDeleted = false,
+            searchText = _appUiState.value.searchState.searchText.toQueryLikeParam(),
+            statusFilter = EnrolmentRequest.STATUS_PENDING,
+            sortOrder = _uiState.value.activeSortOrderOption.flag,
+        ).also {
+            lastPendingEnrolmentRequestsPagingSource = it
         }
     }
 
@@ -129,6 +152,9 @@ class ClazzMemberListViewModel(
                 studentList = studentListPagingSource,
                 teacherList = teacherListPagingSource,
                 pendingStudentList = pendingStudentListPagingSource,
+                dayOfWeekStrings = DayOfWeek.values().associateWith {
+                    systemImpl.getString(it.dayStringResource)
+                },
             )
         }
 
@@ -187,7 +213,7 @@ class ClazzMemberListViewModel(
     private fun invalidatePagingSources(){
         lastTeacherListPagingSource?.invalidate()
         lastStudentListPagingsource?.invalidate()
-        lastPendingStudentListPagingSource?.invalidate()
+        lastPendingEnrolmentRequestsPagingSource?.invalidate()
     }
 
     override fun onUpdateSearchResult(searchText: String) {
@@ -207,36 +233,60 @@ class ClazzMemberListViewModel(
     }
 
     fun onClickRespondToPendingEnrolment(
-        enrolmentDetails: PersonAndClazzMemberListDetails,
+        enrolmentDetails: EnrolmentRequest,
         approved: Boolean
     ) {
         viewModelScope.launch {
-            approveOrDeclinePendingEnrolmentUseCase(
-                personUid = enrolmentDetails.person?.personUid ?: 0,
-                clazzUid = clazzUid,
-                approved = approved
-            )
+            try {
+                approveOrDeclinePendingEnrolmentUseCase(enrolmentDetails, approved)
+                snackDispatcher.showSnackBar(
+                    Snack(
+                        systemImpl.formatString(
+                            if(approved) MR.strings.enroled_into_name else MR.strings.declined_request_from_name,
+                            (enrolmentDetails.erPersonFullname ?: "")
+                        )
+                    )
+                )
+            }catch (e: Throwable) {
+                snackDispatcher.showSnackBar(
+                    Snack(systemImpl.getString(MR.strings.error) + (e.message ?: ""))
+                )
+            }
         }
     }
 
     fun onClickAddNewMember(role: Int) {
-        val goToOnPersonSelectedArg = ClazzEnrolmentEditViewModel.DEST_NAME
-            .appendQueryArgs(mapOf(
-                UstadView.ARG_CLAZZUID to clazzUid.toString(),
-                UstadView.ARG_POPUPTO_ON_FINISH to destinationName,
-                ClazzEnrolmentEditViewModel.ARG_ROLE to role.toString(),
-            ))
+        viewModelScope.launch {
+            val clazzCode = activeRepo
+                .takeIf { role == ClazzEnrolment.ROLE_STUDENT }
+                ?.localFirstThenRepoIfNull {
+                    it.clazzDao.findByUidAsync(clazzUid)?.clazzCode
+                }
 
-        val args = mutableMapOf(
-            PersonListViewModel.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ to clazzUid.toString(),
-            UstadView.ARG_LISTMODE to ListViewMode.PICKER.mode,
-            PersonViewModelConstants.ARG_GO_TO_ON_PERSON_SELECTED to goToOnPersonSelectedArg,
-        )
+            val goToOnPersonSelectedArg = ClazzEnrolmentEditViewModel.DEST_NAME
+                .appendQueryArgs(
+                    mapOf(
+                        UstadView.ARG_CLAZZUID to clazzUid.toString(),
+                        UstadView.ARG_POPUPTO_ON_FINISH to destinationName,
+                        ClazzEnrolmentEditViewModel.ARG_ROLE to role.toString(),
+                    )
+                )
 
-        navController.navigate(
-            viewName = PersonListViewModel.DEST_NAME,
-            args = args
-        )
+            val args = buildMap {
+                put(PersonListViewModel.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ, clazzUid.toString())
+                put(UstadView.ARG_LISTMODE, ListViewMode.PICKER.mode)
+                put(PersonViewModelConstants.ARG_GO_TO_ON_PERSON_SELECTED, goToOnPersonSelectedArg)
+
+                if(clazzCode != null)
+                    put(PersonListViewModel.ARG_SHOW_ADD_VIA_INVITE_LINK_CODE, clazzCode)
+            }
+
+            navController.navigate(
+                viewName = PersonListViewModel.DEST_NAME,
+                args = args
+            )
+        }
+
     }
 
     fun onClickEntry(

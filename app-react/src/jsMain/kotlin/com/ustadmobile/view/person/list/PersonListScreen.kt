@@ -34,6 +34,7 @@ import react.ReactNode
 import react.create
 import react.router.useLocation
 import tanstack.react.query.UseInfiniteQueryResult
+import mui.icons.material.Link as LinkIcon
 
 
 external interface PersonListProps: Props {
@@ -41,6 +42,7 @@ external interface PersonListProps: Props {
     var onSortOrderChanged: (SortOrderOption) -> Unit
     var onListItemClick: (Person) -> Unit
     var onClickAddItem: () -> Unit
+    var onClickInviteWithLink: () -> Unit
 }
 
 val PersonListComponent2 = FC<PersonListProps> { props ->
@@ -60,7 +62,7 @@ val PersonListComponent2 = FC<PersonListProps> { props ->
         }
 
         content = virtualListContent {
-            item {
+            item("sort_list_opts") {
                 UstadListSortHeader.create {
                     activeSortOrderOption = props.uiState.sortOption
                     sortOptions = props.uiState.sortOptions
@@ -72,10 +74,30 @@ val PersonListComponent2 = FC<PersonListProps> { props ->
             }
 
             if(props.uiState.showAddItem) {
-                item {
+                item("add_new_person") {
                     UstadAddListItem.create {
                         text = strings[MR.strings.add_a_new_person]
                         onClickAdd = props.onClickAddItem
+                    }
+                }
+            }
+
+            if(props.uiState.showInviteViaLink) {
+                item("invite_with_link") {
+                    ListItem.create {
+                        ListItemButton {
+                            onClick = {
+                                props.onClickInviteWithLink()
+                            }
+
+                            ListItemIcon {
+                                LinkIcon()
+                            }
+
+                            ListItemText {
+                                primary = ReactNode(strings[MR.strings.invite_with_link])
+                            }
+                        }
                     }
                 }
             }
@@ -148,6 +170,7 @@ val PersonListScreen = FC<Props> {
         onListItemClick = viewModel::onClickEntry
         onSortOrderChanged = viewModel::onSortOrderChanged
         onClickAddItem = viewModel::onClickAdd
+        onClickInviteWithLink = viewModel::onClickInviteWithLink
     }
 
 

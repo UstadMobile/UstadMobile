@@ -38,7 +38,7 @@ fun CourseAssignmentMarkEdit(
     ){
         OutlinedTextField(
             modifier = Modifier
-                .testTag("marker_comment")
+                .testTag("mark_comment")
                 .padding(vertical = 8.dp, horizontal = 16.dp)
                 .fillMaxWidth(),
             label = { Text(mrStringResource(MR.strings.mark_comment)) },
@@ -59,7 +59,7 @@ fun CourseAssignmentMarkEdit(
                 label = { Text(mrStringResource(MR.strings.mark) + "*") },
                 modifier = Modifier
                     .weight(1f)
-                    .testTag("marker_mark")
+                    .testTag("mark")
                     .padding(end = 8.dp),
                 isError = scoreError != null,
                 onValueChange = {
@@ -81,7 +81,7 @@ fun CourseAssignmentMarkEdit(
 
             OutlinedButton(
                 modifier = Modifier
-                    .testTag("submit_mark_button")
+                    .testTag("submit_grade")
                     .weight(1f)
                     .height(64.dp) //Height set to match the textfield - 48dp as per material design spec
                     .padding(top = 8.dp, start = 8.dp),

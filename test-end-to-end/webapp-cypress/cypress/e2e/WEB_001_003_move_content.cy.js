@@ -9,7 +9,6 @@ it('Admin user move content to folder', () => {
   cy.ustadClearDbAndLogin('admin','testpass',{timeout:8000})
  // Add H5p File
   cy.ustadAddContentToLibrary('../test-files/content/H5p_Content.h5p','Content_001')
-
   cy.ustadAddFolderToLibrary('Test folder')
  // Move content to new folder
   cy.contains("Library").click()
