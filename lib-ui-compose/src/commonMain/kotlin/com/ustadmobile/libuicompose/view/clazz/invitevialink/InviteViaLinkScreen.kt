@@ -30,6 +30,7 @@ fun InviteViaLinkScreen(
     InviteViaLinkScreen(
         uiState = uiState,
         onClickCopyLink = viewModel::onClickCopy,
+        onClickShareLink = viewModel::onClickShare,
     )
 }
 

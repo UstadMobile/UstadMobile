@@ -6,6 +6,7 @@ import org.kodein.di.DI
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCase
 import com.ustadmobile.core.domain.makelink.MakeLinkUseCase
+import com.ustadmobile.core.domain.share.ShareTextUseCase
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.util.ext.onActiveEndpoint
 import com.ustadmobile.core.viewmodel.UstadViewModel
@@ -14,6 +15,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.kodein.di.instance
+import org.kodein.di.instanceOrNull
 
 data class InviteViaLinkUiState(
 
@@ -39,10 +41,12 @@ class InviteViaLinkViewModel (
 
     private val setClipboardStringUseCase: SetClipboardStringUseCase by instance()
 
+    private val shareTextUseCase: ShareTextUseCase? by instanceOrNull()
+
     private val inviteLink: String = makeLinkUseCase(
         destName = JoinWithCodeViewModel.DEST_NAME,
         args = mapOf(
-            JoinWithCodeViewModel.ARG_INVITE_CODE to argInviteCode
+            ARG_INVITE_CODE to argInviteCode
         )
     )
 
@@ -56,7 +60,8 @@ class InviteViaLinkViewModel (
 
         _uiState.update { prev ->
             prev.copy(
-                inviteLink = inviteLink
+                inviteLink = inviteLink,
+                showShareLinkButton = shareTextUseCase != null,
             )
         }
     }
@@ -64,6 +69,10 @@ class InviteViaLinkViewModel (
     fun onClickCopy() {
         setClipboardStringUseCase(inviteLink)
         snackDispatcher.showSnackBar(Snack(systemImpl.getString(MR.strings.copied_to_clipboard)))
+    }
+
+    fun onClickShare(){
+        shareTextUseCase?.invoke(inviteLink)
     }
 
     companion object {

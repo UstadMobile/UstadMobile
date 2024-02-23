@@ -8,9 +8,14 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
+import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.nav.*
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.ext.isDateOfBirthAnAdult
+import com.ustadmobile.core.util.ext.isGuestUser
+import com.ustadmobile.core.util.ext.navigateToLink
 import com.ustadmobile.core.util.ext.putFromSavedStateIfPresent
+import com.ustadmobile.core.util.ext.toQueryString
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_KEY
@@ -25,6 +30,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.Instant
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerializationStrategy
@@ -385,6 +391,37 @@ abstract class UstadViewModel(
         }
     }
 
+    /**
+     * If the user is logged in with an acceptable account, then run the given block. Else, take
+     * them to the login screen with the next destination parameters set (e.g. so they can come back
+     * once they have logged in).
+     */
+    protected fun ifLoggedInElseNavigateToLoginWithNextDestSet(
+        requireAdultAccount: Boolean = false,
+        args: Map<String, String>,
+        block: () -> Unit
+    ) {
+        val apiUrlConfig: ApiUrlConfig by instance()
+
+        if(
+            accountManager.currentUserSession.person.let {
+                it.isGuestUser() ||
+                (requireAdultAccount && !Instant.fromEpochMilliseconds(it.dateOfBirth).isDateOfBirthAnAdult())
+            }
+        ) {
+            navController.navigateToLink(
+                link = "$destinationName?${args.toQueryString()}",
+                accountManager = accountManager,
+                openExternalLinkUseCase = { _, _ -> Unit },
+                goOptions = UstadMobileSystemCommon.UstadGoOptions(
+                    popUpToViewName = destinationName, popUpToInclusive = true
+                ),
+                userCanSelectServer = apiUrlConfig.canSelectServer,
+            )
+        }else {
+            block()
+        }
+    }
 
     companion object {
         /**

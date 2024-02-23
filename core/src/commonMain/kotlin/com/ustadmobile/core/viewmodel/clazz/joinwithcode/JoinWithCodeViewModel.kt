@@ -34,17 +34,27 @@ class JoinWithCodeViewModel(
 ): UstadViewModel(di, savedStateHandle, DEST_NAME) {
 
 
-    private val _uiState = MutableStateFlow(JoinWithCodeUiState())
+    private val _uiState = MutableStateFlow(
+        JoinWithCodeUiState(
+            code = savedStateHandle[ARG_INVITE_CODE] ?: ""
+        )
+    )
 
     val uiState: Flow<JoinWithCodeUiState> = _uiState.asStateFlow()
 
     private val requestEnrolmentUseCase: RequestEnrolmentUseCase by di.onActiveEndpoint().instance()
 
     init {
-        _appUiState.update { prev ->
-            prev.copy(
-                title = systemImpl.getString(MR.strings.join_existing_course)
-            )
+        ifLoggedInElseNavigateToLoginWithNextDestSet(
+            args = buildMap {
+                putFromSavedStateIfPresent(ARG_INVITE_CODE)
+            }
+        ) {
+            _appUiState.update { prev ->
+                prev.copy(
+                    title = systemImpl.getString(MR.strings.join_existing_course)
+                )
+            }
         }
     }
 
@@ -104,8 +114,6 @@ class JoinWithCodeViewModel(
     }
 
     companion object {
-
-        const val ARG_INVITE_CODE = "inviteCode"
 
         const val DEST_NAME = "JoinWithCode"
 
