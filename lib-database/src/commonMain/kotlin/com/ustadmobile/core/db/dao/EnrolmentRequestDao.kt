@@ -62,7 +62,19 @@ expect abstract class EnrolmentRequestDao {
     ): Boolean
 
     @HttpAccessible(
-        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall(
+                functionName = "findRequestsForUserAsFlow",
+                functionArgs = arrayOf(
+                    HttpServerFunctionParam(
+                        name = "statusFilter",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "0",
+                    )
+                )
+            )
+        )
     )
     @Query("""
         SELECT EnrolmentRequest.*, CoursePicture.*
@@ -70,10 +82,11 @@ expect abstract class EnrolmentRequestDao {
                LEFT JOIN CoursePicture
                          ON CoursePicture.coursePictureUid = EnrolmentRequest.erClazzUid
          WHERE EnrolmentRequest.erPersonUid = :accountPersonUid 
-           AND EnrolmentRequest.erStatus = ${EnrolmentRequest.STATUS_PENDING}
+           AND (:statusFilter = 0 OR EnrolmentRequest.erStatus = :statusFilter)
     """)
-    abstract fun findPendingRequestsForUserAsFlow(
-        accountPersonUid: Long
+    abstract fun findRequestsForUserAsFlow(
+        accountPersonUid: Long,
+        statusFilter: Int,
     ): Flow<List<EnrolmentRequestAndCoursePic>>
 
     @Query("""
@@ -90,7 +103,24 @@ expect abstract class EnrolmentRequestDao {
 
 
     @HttpAccessible(
-        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall(
+                functionName = "findPendingEnrolmentsForCourse",
+                functionArgs = arrayOf(
+                    HttpServerFunctionParam(
+                        name = "includeDeleted",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "true"
+                    ),
+                    HttpServerFunctionParam(
+                        name = "statusFilter",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "0",
+                    )
+                )
+            )
+        )
     )
     @Query("""
         SELECT EnrolmentRequest.*, PersonPicture.*
@@ -98,7 +128,7 @@ expect abstract class EnrolmentRequestDao {
                LEFT JOIN PersonPicture
                          ON PersonPicture.personPictureUid = EnrolmentRequest.erPersonUid
          WHERE EnrolmentRequest.erClazzUid = :clazzUid
-           AND EnrolmentRequest.erStatus = ${EnrolmentRequest.STATUS_PENDING}
+           AND (:statusFilter = 0 OR EnrolmentRequest.erStatus = :statusFilter)
            AND (CAST(:includeDeleted AS INTEGER) = 1 OR NOT EnrolmentRequest.erDeleted)
            AND (:searchText = '%' OR EnrolmentRequest.erPersonFullname LIKE :searchText)
       ORDER BY CASE(:sortOrder)
@@ -123,6 +153,7 @@ expect abstract class EnrolmentRequestDao {
     abstract fun findPendingEnrolmentsForCourse(
         clazzUid: Long,
         includeDeleted: Boolean,
+        statusFilter: Int,
         searchText: String,
         sortOrder: Int,
     ): PagingSource<Int, EnrolmentRequestAndPersonPicture>

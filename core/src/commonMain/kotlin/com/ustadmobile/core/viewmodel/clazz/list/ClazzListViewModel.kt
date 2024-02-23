@@ -149,7 +149,10 @@ class ClazzListViewModel(
 
         viewModelScope.launch {
             _uiState.whenSubscribed {
-                activeRepo.enrolmentRequestDao.findPendingRequestsForUserAsFlow(activeUserPersonUid).collect {
+                activeRepo.enrolmentRequestDao.findRequestsForUserAsFlow(
+                    accountPersonUid = activeUserPersonUid,
+                    statusFilter = EnrolmentRequest.STATUS_PENDING,
+                ).collect {
                     _uiState.update { prev ->
                         prev.copy(pendingEnrolments = it)
                     }

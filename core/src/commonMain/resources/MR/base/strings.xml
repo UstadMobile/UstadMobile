@@ -1764,4 +1764,17 @@
 
     <string name="canceled_enrolment_request">Canceled enrolment request</string>
 
+    <!--
+    Popup message that will be shown to confirm when a user is enroled into a course
+    %1$s will be replaced with the name of the person enroled.
+    -->
+    <string name="enroled_into_name">Enroled %1$s</string>
+
+    <!--
+    Popup message that will be shown to confirm when a user request to enrol into
+    a course is declined. %1$s will be replaced with the name of the person who requested to
+    enrol.
+    -->
+    <string name="declined_request_from_name">Declined request from %1$s</string>
+
 </resources>

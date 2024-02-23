@@ -54,7 +54,7 @@ class PeerReviewerAllocationEditViewModelTest : AbstractMainDispatcherTest() {
                 activeDb.grantScopedPermission(activeUserPerson,
                     Role.ROLE_CLAZZ_TEACHER_PERMISSIONS_DEFAULT, Clazz.TABLE_ID, clazz.clazzUid)
 
-                val enrolUseCase = EnrolIntoCourseUseCase()
+                val enrolUseCase = EnrolIntoCourseUseCase(db = activeDb, repo = null)
                 val studentPersons = (0 until numStudentsToAdd).map { index ->
                     activeDb.insertPersonAndGroup(Person().apply {
                         firstNames = "test"
@@ -67,8 +67,6 @@ class PeerReviewerAllocationEditViewModelTest : AbstractMainDispatcherTest() {
                                 role = ClazzEnrolment.ROLE_STUDENT
                             ),
                             timeZoneId = TimeZone.currentSystemDefault().id,
-                            db = activeDb,
-                            repo = null,
                         )
                     }
                 }

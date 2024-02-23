@@ -22,6 +22,7 @@ import com.ustadmobile.core.viewmodel.person.PersonViewModelConstants
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import app.cash.paging.PagingSource
+import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.util.ext.dayStringResource
 import com.ustadmobile.core.viewmodel.clazz.parseAndUpdateTerminologyStringsIfNeeded
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -136,6 +137,7 @@ class ClazzMemberListViewModel(
             clazzUid = clazzUid,
             includeDeleted = false,
             searchText = _appUiState.value.searchState.searchText.toQueryLikeParam(),
+            statusFilter = EnrolmentRequest.STATUS_PENDING,
             sortOrder = _uiState.value.activeSortOrderOption.flag,
         ).also {
             lastPendingEnrolmentRequestsPagingSource = it
@@ -233,7 +235,23 @@ class ClazzMemberListViewModel(
         enrolmentDetails: EnrolmentRequest,
         approved: Boolean
     ) {
-
+        viewModelScope.launch {
+            try {
+                approveOrDeclinePendingEnrolmentUseCase(enrolmentDetails, approved)
+                snackDispatcher.showSnackBar(
+                    Snack(
+                        systemImpl.formatString(
+                            if(approved) MR.strings.enroled_into_name else MR.strings.declined_request_from_name,
+                            (enrolmentDetails.erPersonFullname ?: "")
+                        )
+                    )
+                )
+            }catch (e: Throwable) {
+                snackDispatcher.showSnackBar(
+                    Snack(systemImpl.getString(MR.strings.error) + (e.message ?: ""))
+                )
+            }
+        }
     }
 
     fun onClickAddNewMember(role: Int) {
