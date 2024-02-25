@@ -72,5 +72,15 @@ data class CoursePermission(
 
         const val PERMISSION_MANAGE_TEACHER_ENROLMENT = 16L //2^4
 
+        const val TEACHER_DEFAULT_PERMISSIONS = PERMISSION_VIEW or
+                PERMISSION_EDIT or
+                PERMISSION_MODERATE or
+                PERMISSION_MANAGE_STUDENT_ENROLMENT or
+                PERMISSION_MANAGE_TEACHER_ENROLMENT
+
+
+        const val STUDENT_DEFAULT_PERMISSIONS = PERMISSION_VIEW
+
+
     }
 }

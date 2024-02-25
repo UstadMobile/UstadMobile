@@ -143,8 +143,8 @@ class ClazzDetailOverviewViewModel(
                 }
 
                 launch {
-                    activeRepo.clazzDao.personHasPermissionWithClazzAsFlow(
-                        accountManager.currentAccount.personUid, entityUidArg, Role.PERMISSION_CLAZZ_UPDATE
+                    activeRepo.clazzDao.personHasPermissionWithClazzAsFlow2(
+                        accountManager.currentAccount.personUid, entityUidArg, CoursePermission.PERMISSION_EDIT
                     ).collect { hasEditPermission ->
                         _appUiState.update { prev ->
                             prev.copy(

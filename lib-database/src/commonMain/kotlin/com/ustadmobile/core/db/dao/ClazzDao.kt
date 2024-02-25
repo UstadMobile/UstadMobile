@@ -80,17 +80,6 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
     @Update
     abstract suspend fun updateAsync(entity: Clazz): Int
 
-
-    @Query("SELECT * FROM Clazz WHERE clazzSchoolUid = :schoolUid " +
-            "AND CAST(isClazzActive AS INTEGER) = 1 ")
-    abstract suspend fun findAllClazzesBySchool(schoolUid: Long): List<Clazz>
-
-    @Query("SELECT * FROM Clazz WHERE clazzSchoolUid = :schoolUid " +
-            "AND CAST(isClazzActive AS INTEGER) = 1 ")
-    abstract fun findAllClazzesBySchoolLive(schoolUid: Long)
-            : PagingSource<Int,Clazz>
-
-
     @HttpAccessible(
         pullQueriesToReplicate = arrayOf(
             HttpServerFunctionCall(functionName = "findClazzesWithPermission"),
@@ -113,10 +102,7 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
                '' AS teacherNames,
                0 AS lastRecorded,
                CourseTerminology.*
-          FROM PersonGroupMember
-               ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1}
-                    :permission
-                    ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT2}          
+          FROM Clazz
                LEFT JOIN ClazzEnrolment 
                     ON ClazzEnrolment.clazzEnrolmentUid =
                        COALESCE(
@@ -130,8 +116,22 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
                 LEFT JOIN CoursePicture
                           ON CoursePicture.coursePictureUid = Clazz.clazzUid           
 
-         WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid
-           AND PersonGroupMember.groupMemberActive 
+         WHERE /* Begin permission check clause */
+                (
+                    Clazz.clazzOwnerPersonUid = :accountPersonUid
+                 OR EXISTS(SELECT CoursePermission.cpUid
+                             FROM CoursePermission
+                            WHERE CoursePermission.cpClazzUid = Clazz.clazzUid
+                              AND (CoursePermission.cpToPersonUid = :accountPersonUid 
+                                   OR CoursePermission.cpToEnrolmentRole IN 
+                                   (SELECT DISTINCT ClazzEnrolment.clazzEnrolmentRole
+                                      FROM ClazzEnrolment
+                                     WHERE ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid
+                                       AND ClazzEnrolment.clazzEnrolmentPersonUid = :accountPersonUid
+                                       AND ClazzEnrolment.clazzEnrolmentActive))
+                              AND (CoursePermission.cpPermissionsFlag & ${CoursePermission.PERMISSION_VIEW}) > 0)    
+                )
+                /* End permission check clause */ 
            AND CAST(Clazz.isClazzActive AS INTEGER) = 1
            AND Clazz.clazzName like :searchQuery
            AND (Clazz.clazzUid NOT IN (:excludeSelectedClazzList))
@@ -257,6 +257,36 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
                    AND PrsGrpMbr.groupMemberPersonUid = :accountPersonUid)
     """)
     abstract fun personHasPermissionWithClazzAsFlow(
+        accountPersonUid: Long,
+        clazzUid: Long,
+        permission: Long
+    ): Flow<Boolean>
+
+
+    /**
+     * Determine if a person as per accountPersonUid has a particular permission on the given
+     * clazz as per clazzUid
+     */
+    @Query("""
+        SELECT (COALESCE(
+                        (SELECT Clazz.clazzOwnerPersonUid 
+                          FROM Clazz 
+                         WHERE Clazz.clazzUid = :clazzUid), 0) = :accountPersonUid)
+            OR EXISTS(
+               SELECT CoursePermission.cpUid
+                 FROM CoursePermission
+                WHERE CoursePermission.cpClazzUid = :clazzUid
+                  AND (CoursePermission.cpToPersonUid = :accountPersonUid 
+                       OR CoursePermission.cpToEnrolmentRole IN 
+                       (SELECT DISTINCT ClazzEnrolment.clazzEnrolmentRole
+                          FROM ClazzEnrolment
+                         WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid
+                           AND ClazzEnrolment.clazzEnrolmentPersonUid = :accountPersonUid
+                           AND ClazzEnrolment.clazzEnrolmentActive))
+                  AND (CoursePermission.cpPermissionsFlag & :permission) > 0)
+    """)
+    @QueryLiveTables(arrayOf("Clazz", "CoursePermission", "ClazzEnrolment"))
+    abstract fun personHasPermissionWithClazzAsFlow2(
         accountPersonUid: Long,
         clazzUid: Long,
         permission: Long
