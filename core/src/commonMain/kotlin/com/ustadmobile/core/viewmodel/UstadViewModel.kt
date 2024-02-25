@@ -73,21 +73,21 @@ abstract class UstadViewModel(
     protected val activeUserPersonUid: Long
         get() = accountManager.currentUserSession.person.personUid
 
-    protected val activeDb: UmAppDatabase by on(accountManager.activeEndpoint)
+    internal val activeDb: UmAppDatabase by on(accountManager.activeEndpoint)
         .instance(tag = DoorTag.TAG_DB)
 
-    protected val activeRepo: UmAppDatabase by on(accountManager.activeEndpoint)
+    internal val activeRepo: UmAppDatabase by on(accountManager.activeEndpoint)
         .instance(tag = DoorTag.TAG_REPO)
 
     protected val navResultReturner: NavResultReturner by instance()
 
-    protected val json: Json by instance()
+    internal val json: Json by instance()
 
     protected val snackDispatcher: SnackBarDispatcher by instance()
 
     protected val resultReturner: NavResultReturner by instance()
 
-    protected val systemImpl: UstadMobileSystemImpl by instance()
+    internal val systemImpl: UstadMobileSystemImpl by instance()
 
     protected val onClickLinkUseCase: OnClickLinkUseCase by lazy {
         OnClickLinkUseCase(

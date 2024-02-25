@@ -152,6 +152,7 @@ val CoursePermissionListComponent = FC<CoursePermissionListProps> { props ->
                     coursePermission = item
                     permissionLabels = props.uiState.permissionLabels
                     courseTerminologyEntries = props.courseTerminologyEntries
+                    onClickEntry = props.onClickEntry
                 }
             }
         }

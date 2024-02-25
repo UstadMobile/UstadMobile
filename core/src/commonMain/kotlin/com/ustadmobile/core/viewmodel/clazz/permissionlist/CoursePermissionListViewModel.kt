@@ -7,7 +7,8 @@ import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.UstadListViewModel
-import com.ustadmobile.core.viewmodel.clazz.PermissionConstants
+import com.ustadmobile.core.viewmodel.clazz.CoursePermissionConstants
+import com.ustadmobile.core.viewmodel.clazz.permissiondetail.CoursePermissionDetailViewModel
 import com.ustadmobile.core.viewmodel.clazz.permissionedit.CoursePermissionEditViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.lib.db.composites.CoursePermissionAndListDetail
@@ -45,7 +46,7 @@ class CoursePermissionListViewModel(
     init {
         _uiState.update { prev ->
             prev.copy(
-                permissionLabels = PermissionConstants.COURSE_PERMISSIONS_LABELS,
+                permissionLabels = CoursePermissionConstants.COURSE_PERMISSIONS_LABELS,
                 permissionsList = pagingSource
             )
         }
@@ -109,7 +110,10 @@ class CoursePermissionListViewModel(
     }
 
     fun onClickEntry(coursePermission: CoursePermission) {
-
+        navController.navigate(
+            CoursePermissionDetailViewModel.DEST_NAME,
+            mapOf(ARG_ENTITY_UID to coursePermission.cpUid.toString())
+        )
     }
 
 

@@ -3,12 +3,8 @@ package com.ustadmobile.core.viewmodel.clazz.permissionedit
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.hasFlag
-import com.ustadmobile.core.util.ext.localFirstThenRepoIfNull
-import com.ustadmobile.core.util.ext.personFullName
-import com.ustadmobile.core.util.ext.toTerminologyEntries
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
-import com.ustadmobile.core.viewmodel.clazz.PermissionConstants
-import com.ustadmobile.core.viewmodel.clazz.titleStringResource
+import com.ustadmobile.core.viewmodel.clazz.CoursePermissionConstants
 import com.ustadmobile.lib.db.entities.CoursePermission
 import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.flow.Flow
@@ -17,6 +13,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import org.kodein.di.DI
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.viewmodel.clazz.getTitleForCoursePermission
 import com.ustadmobile.core.viewmodel.clazz.permissiondetail.CoursePermissionDetailViewModel
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.ext.withDoorTransactionAsync
@@ -38,7 +35,7 @@ class CoursePermissionEditViewModel(
     init {
         _uiState.update { prev ->
             prev.copy(
-                permissionLabels = PermissionConstants.COURSE_PERMISSIONS_LABELS,
+                permissionLabels = CoursePermissionConstants.COURSE_PERMISSIONS_LABELS,
             )
         }
 
@@ -69,24 +66,7 @@ class CoursePermissionEditViewModel(
                 }
             )
 
-            val roleStringResource = entity?.titleStringResource()
-            val title = if(roleStringResource != null) {
-                val terminology = activeRepo.localFirstThenRepoIfNull {
-                    it.courseTerminologyDao.findByUidAsync(entity.cpClazzUid)
-                }
-
-                val terminologyEntries = terminology?.toTerminologyEntries(
-                    json = json,
-                    systemImpl = systemImpl
-                ) ?: emptyList()
-
-                terminologyEntries.firstOrNull { it.stringResource == roleStringResource }
-                    ?.term ?: systemImpl.getString(roleStringResource)
-            }else {
-                activeRepo.localFirstThenRepoIfNull {
-                    it.personDao.findByUidAsync(entity?.cpToPersonUid ?: 0)?.personFullName()
-                } ?: ""
-            }
+            val title = getTitleForCoursePermission(entity)
 
             _appUiState.update { prev ->
                 prev.copy(

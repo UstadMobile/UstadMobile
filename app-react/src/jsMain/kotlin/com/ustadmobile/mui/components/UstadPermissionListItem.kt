@@ -27,6 +27,8 @@ external interface UstadPermissionListItemProps: Props {
 
     var toPersonPicture: PersonPicture?
 
+    var onClick: () -> Unit
+
 }
 
 val UstadPermissionListItem = FC<UstadPermissionListItemProps> { props ->
@@ -41,6 +43,10 @@ val UstadPermissionListItem = FC<UstadPermissionListItemProps> { props ->
 
     ListItem {
         ListItemButton {
+            onClick = {
+                props.onClick()
+            }
+
             ListItemIcon {
                 if(toPersonVal != null) {
                     UstadPersonAvatar {

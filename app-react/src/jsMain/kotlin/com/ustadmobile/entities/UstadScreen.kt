@@ -161,6 +161,8 @@ import com.ustadmobile.core.viewmodel.clazz.permissionlist.CoursePermissionListV
 import com.ustadmobile.view.clazz.permissionlist.CoursePermissionListScreen
 import com.ustadmobile.view.clazz.permissionedit.CoursePermissionEditScreen
 import com.ustadmobile.core.viewmodel.clazz.permissionedit.CoursePermissionEditViewModel
+import com.ustadmobile.view.clazz.permissiondetail.CoursePermissionDetailScreen
+import com.ustadmobile.core.viewmodel.clazz.permissiondetail.CoursePermissionDetailViewModel
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -406,6 +408,7 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(InviteViaLinkViewModel.DEST_NAME, "InviteviaLink", InviteViaLinkScreen),
     UstadScreen(CoursePermissionListViewModel.DEST_NAME, "CoursePermissionList", CoursePermissionListScreen),
     UstadScreen(CoursePermissionEditViewModel.DEST_NAME, "CoursePermissionEdit", CoursePermissionEditScreen),
+    UstadScreen(CoursePermissionDetailViewModel.DEST_NAME, "CoursePermissionDetail", CoursePermissionDetailScreen),
 )
 
 //Here as per the MUI showcase template

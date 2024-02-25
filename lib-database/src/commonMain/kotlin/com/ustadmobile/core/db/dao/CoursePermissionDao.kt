@@ -9,6 +9,7 @@ import com.ustadmobile.door.annotation.HttpAccessible
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.composites.CoursePermissionAndListDetail
 import com.ustadmobile.lib.db.entities.CoursePermission
+import kotlinx.coroutines.flow.Flow
 
 @DoorDao
 @Repository
@@ -43,6 +44,17 @@ expect abstract class CoursePermissionDao {
          WHERE CoursePermission.cpUid = :uid
     """)
     abstract suspend fun findByUid(uid: Long): CoursePermission?
+
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+    )
+    @Query("""
+        SELECT CoursePermission.*
+          FROM CoursePermission
+         WHERE CoursePermission.cpUid = :uid
+    """)
+    abstract fun findByUidAsFlow(uid: Long): Flow<CoursePermission?>
+
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
