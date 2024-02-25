@@ -31,6 +31,8 @@ import react.ReactNode
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
+import com.ustadmobile.mui.components.UstadStandardContainer
+import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import mui.material.DialogTitle
 
 val CoursePermissionListScreen = FC<Props> {
@@ -151,6 +153,12 @@ val CoursePermissionListComponent = FC<CoursePermissionListProps> { props ->
                     permissionLabels = props.uiState.permissionLabels
                     courseTerminologyEntries = props.courseTerminologyEntries
                 }
+            }
+        }
+
+        UstadStandardContainer {
+            List {
+                VirtualListOutlet()
             }
         }
     }

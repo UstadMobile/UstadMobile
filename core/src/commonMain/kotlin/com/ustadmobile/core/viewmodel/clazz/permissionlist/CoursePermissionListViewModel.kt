@@ -37,7 +37,7 @@ class CoursePermissionListViewModel(
         ?: throw IllegalArgumentException("No clazzuid")
 
     private val pagingSource: () -> PagingSource<Int, CoursePermissionAndListDetail> = {
-        activeRepo.coursePermissionDao.findByClazzUid(
+        activeRepo.coursePermissionDao.findByClazzUidAsPagingSource(
             clazzUid = clazzUid, includeDeleted = false,
         )
     }
@@ -103,6 +103,7 @@ class CoursePermissionListViewModel(
             serializer = CoursePermission.serializer(),
             args = mapOf(
                 CoursePermissionEditViewModel.ARG_GRANT_TO_ROLE to role.toString(),
+                ARG_CLAZZUID to clazzUid.toString(),
             ),
         )
     }

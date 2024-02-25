@@ -7,6 +7,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import com.ustadmobile.core.util.ext.filterByFlags
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonPicture
@@ -22,15 +23,22 @@ fun UstadPermissionListItem(
     toPerson: Person? = null,
     toPersonPicture: PersonPicture? = null,
 ) {
-    val permissionsStr = permissionLabels.filterByFlags(value).fold("") { acc, next ->
-        "$acc,${stringResource(next.first)}"
+    val filteredList = permissionLabels.filterByFlags(value)
+    val permissionStr = buildString {
+        filteredList.forEachIndexed {  index, it ->
+            append(stringResource(it.first))
+            if(index < filteredList.size - 1)
+                append(", ")
+        }
     }
 
     ListItem(
         modifier = modifier,
         headlineContent = headlineContent,
         supportingContent = {
-            Text(permissionsStr)
+            Text(
+                text = permissionStr, maxLines = 2, overflow = TextOverflow.Ellipsis
+            )
         },
         leadingContent = {
             if(toPerson != null) {

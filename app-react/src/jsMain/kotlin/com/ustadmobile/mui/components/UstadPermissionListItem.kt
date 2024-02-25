@@ -40,18 +40,18 @@ val UstadPermissionListItem = FC<UstadPermissionListItemProps> { props ->
     }
 
     ListItem {
-        ListItemIcon {
-            if(toPersonVal != null) {
-                UstadPersonAvatar {
-                    personName = toPersonVal.fullName()
-                    pictureUri = props.toPersonPicture?.personPictureThumbnailUri
-                }
-            }else {
-                GroupIcon()
-            }
-        }
-
         ListItemButton {
+            ListItemIcon {
+                if(toPersonVal != null) {
+                    UstadPersonAvatar {
+                        personName = toPersonVal.fullName()
+                        pictureUri = props.toPersonPicture?.personPictureThumbnailUri
+                    }
+                }else {
+                    GroupIcon()
+                }
+            }
+
             ListItemText {
                 primary = props.primary
                 secondary = ReactNode(permissionStr)

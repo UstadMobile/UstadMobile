@@ -492,6 +492,8 @@ abstract class UstadViewModel(
 
         const val ARG_INVITE_CODE = "inviteCode"
 
+        const val ARG_CLAZZUID = "clazzUid"
+
 
     }
 

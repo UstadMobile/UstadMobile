@@ -90,6 +90,6 @@ inline fun <T, K> List<T>.lastDistinctBy(
 
 
 fun List<Pair<StringResource, Long>>.filterByFlags(value: Long) : List<Pair<StringResource, Long>> {
-    return filter { it.second.hasFlag(value) }
+    return filter { value.hasFlag(it.second) }
 }
 

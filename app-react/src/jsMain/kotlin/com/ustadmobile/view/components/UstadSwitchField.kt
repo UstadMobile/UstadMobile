@@ -3,8 +3,9 @@ package com.ustadmobile.view.components
 import web.cssom.*
 import js.core.jso
 import mui.material.*
+import mui.system.PropsWithSx
+import mui.system.sx
 import react.FC
-import react.Props
 import react.ReactNode
 import react.create
 import emotion.css.ClassName as EmotionCssClassName
@@ -16,7 +17,7 @@ private val labelClassName : ClassName by lazy {
 }
 
 
-external interface UstadSwitchFieldProps: Props {
+external interface UstadSwitchFieldProps: PropsWithSx {
 
     /**
      * True if the switch is on, false otherwise
@@ -57,6 +58,10 @@ external interface UstadSwitchFieldProps: Props {
 val UstadSwitchField = FC<UstadSwitchFieldProps> { props ->
     FormControl {
         error = props.error != null
+        sx {
+            + props.sx
+        }
+
         FormControlLabel {
             classes = jso {
                 label = labelClassName
