@@ -93,6 +93,9 @@ open class Clazz() {
      */
     var clazzCode: String? = null
 
+    @ColumnInfo(defaultValue = "0")
+    var clazzOwnerPersonUid: Long = 0
+
     constructor(clazzName: String) : this() {
         this.clazzName = clazzName
         this.clazzFeatures = CLAZZ_FEATURE_ATTENDANCE or CLAZZ_FEATURE_ACTIVITY  or CLAZZ_FEATURE_CLAZZ_ASSIGNMENT
