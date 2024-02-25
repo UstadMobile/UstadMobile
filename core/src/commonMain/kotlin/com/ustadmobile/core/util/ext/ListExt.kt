@@ -1,5 +1,7 @@
 package com.ustadmobile.core.util.ext
 
+import dev.icerock.moko.resources.StringResource
+
 /**
  * "Upsert" for a list, commonly required for edit scenarios where an element has been returned
  * that might be updating something already in the list, or it might be a new item.
@@ -85,3 +87,9 @@ inline fun <T, K> List<T>.lastDistinctBy(
     }
     return map.values.toList()
 }
+
+
+fun List<Pair<StringResource, Long>>.filterByFlags(value: Long) : List<Pair<StringResource, Long>> {
+    return filter { it.second.hasFlag(value) }
+}
+

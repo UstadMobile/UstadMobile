@@ -1777,4 +1777,10 @@
     -->
     <string name="declined_request_from_name">Declined request from %1$s</string>
 
+    <string name="view_course">View course</string>
+
+    <string name="edit_course">Edit course</string>
+
+    <string name="grant_permission_to">Grant permission to…</string>
+
 </resources>

@@ -28,6 +28,7 @@ import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.joinwithcode.JoinWithCodeViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
+import com.ustadmobile.core.viewmodel.clazz.permissionlist.CoursePermissionListViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.detail.ClazzAssignmentDetailViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.edit.ClazzAssignmentEditViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.peerreviewerallocationedit.PeerReviewerAllocationEditViewModel
@@ -130,6 +131,7 @@ import com.ustadmobile.core.viewmodel.xapicontent.XapiContentViewModel
 import com.ustadmobile.libuicompose.view.about.OpenLicensesScreen
 import com.ustadmobile.libuicompose.view.clazz.invitevialink.InviteViaLinkScreen
 import com.ustadmobile.libuicompose.view.clazz.joinwithcode.JoinWithCodeScreen
+import com.ustadmobile.libuicompose.view.clazz.permissionlist.CoursePermissionListScreen
 import com.ustadmobile.libuicompose.view.contententry.detail.ContentEntryDetailScreen
 import com.ustadmobile.libuicompose.view.contententry.edit.ContentEntryEditScreen
 import com.ustadmobile.libuicompose.view.contententry.getmetadata.ContentEntryGetMetadataScreen
@@ -696,6 +698,13 @@ fun AppNavHost(
                 InviteViaLinkScreen(
                     appViewModel(backStackEntry, InviteViaLinkViewModel::class,
                         ::InviteViaLinkViewModel)
+                )
+            }
+
+            contentScene("/${CoursePermissionListViewModel.DEST_NAME}") { backStackEntry ->
+                CoursePermissionListScreen(
+                    appViewModel(backStackEntry, CoursePermissionListViewModel::class,
+                        ::CoursePermissionListViewModel)
                 )
             }
         }

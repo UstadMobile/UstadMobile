@@ -157,7 +157,8 @@ import com.ustadmobile.view.deleteditem.list.DeletedItemListScreen
 import com.ustadmobile.view.clazz.joinwithcode.JoinWithCodeScreen
 import com.ustadmobile.core.viewmodel.clazz.invitevialink.InviteViaLinkViewModel
 import com.ustadmobile.view.clazz.invitevialink.InviteViaLinkScreen
-
+import com.ustadmobile.core.viewmodel.clazz.permissionlist.CoursePermissionListViewModel
+import com.ustadmobile.view.clazz.permissionlist.CoursePermissionListScreen
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -401,6 +402,7 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen("MessageListScreenPreview", "MessageListPreview", MessageListScreenPreview),
     UstadScreen(JoinWithCodeViewModel.DEST_NAME, "JoinWithCode", JoinWithCodeScreen),
     UstadScreen(InviteViaLinkViewModel.DEST_NAME, "InviteviaLink", InviteViaLinkScreen),
+    UstadScreen(CoursePermissionListViewModel.DEST_NAME, "CoursePermissionList", CoursePermissionListScreen)
 )
 
 //Here as per the MUI showcase template

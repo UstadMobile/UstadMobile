@@ -14,8 +14,10 @@ import app.cash.paging.PagingSource
 import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCase
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.locale.CourseTerminologyStrings
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.parseAndUpdateTerminologyStringsIfNeeded
+import com.ustadmobile.core.viewmodel.clazz.permissionlist.CoursePermissionListViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.detail.ClazzAssignmentDetailViewModel
 import com.ustadmobile.core.viewmodel.contententry.detail.ContentEntryDetailViewModel
 import com.ustadmobile.core.viewmodel.courseblock.textblockdetail.TextBlockDetailViewModel
@@ -44,6 +46,8 @@ data class ClazzDetailOverviewUiState(
 
     val terminologyStrings: CourseTerminologyStrings? = null,
 
+    val managePermissionVisible: Boolean = false,
+
 ) {
     val clazzSchoolUidVisible: Boolean
         get() = clazz?.clazzSchoolUid != null && clazz.clazzSchoolUid != 0L
@@ -64,6 +68,9 @@ data class ClazzDetailOverviewUiState(
     val membersString: String
         get() = "${terminologyStrings?.get(MR.strings.teachers_literal) ?: ""}: $numTeachers, " +
                 "${terminologyStrings?.get(MR.strings.students) ?: ""}: $numStudents"
+
+    val quickActionBarVisible: Boolean
+        get() = managePermissionVisible
 
 }
 
@@ -144,6 +151,12 @@ class ClazzDetailOverviewViewModel(
                                 fabState = prev.fabState.copy(visible = hasEditPermission)
                             )
                         }
+
+                        _uiState.update { prev ->
+                            prev.copy(
+                                managePermissionVisible = hasEditPermission
+                            )
+                        }
                     }
                 }
 
@@ -205,6 +218,13 @@ class ClazzDetailOverviewViewModel(
     private fun onClickEdit() {
         navController.navigate(ClazzEditViewModel.DEST_NAME,
             mapOf(UstadView.ARG_ENTITY_UID to entityUidArg.toString()))
+    }
+
+    fun onClickPermissions() {
+        navController.navigate(
+            CoursePermissionListViewModel.DEST_NAME,
+            mapOf(ARG_CLAZZUID to entityUidArg.toString())
+        )
     }
 
     companion object {
