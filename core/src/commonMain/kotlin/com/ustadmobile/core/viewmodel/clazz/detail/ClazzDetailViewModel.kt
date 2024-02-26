@@ -13,7 +13,7 @@ import com.ustadmobile.core.viewmodel.clazzenrolment.clazzmemberlist.ClazzMember
 import com.ustadmobile.core.viewmodel.clazzlog.attendancelist.ClazzLogListAttendanceViewModel
 import com.ustadmobile.core.viewmodel.coursegroupset.list.CourseGroupSetListViewModel
 import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.Role.Companion.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT
+import com.ustadmobile.lib.db.entities.CoursePermission
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -66,27 +66,38 @@ class ClazzDetailViewModel(
     }
 
     init {
-        val accountPersonUid = accountManager.currentAccount.personUid
-        _uiState.update { prev ->
-            prev.copy(tabs = createTabList(false))
-        }
+        val viewPermissionFlow = activeRepo.clazzDao.personHasPermissionWithClazzAsFlow2(
+            accountPersonUid = activeUserPersonUid,
+            clazzUid = entityUidArg,
+            permission = CoursePermission.PERMISSION_VIEW
+        )
+
+        val attendancePermissionFlow = activeRepo.clazzDao.personHasPermissionWithClazzAsFlow2(
+            accountPersonUid = activeUserPersonUid,
+            clazzUid = entityUidArg,
+            permission = CoursePermission.PERMISSION_ATTENDANCE_VIEW
+        )
 
         viewModelScope.launch {
             _uiState.whenSubscribed {
                 launch {
                     activeDb.clazzDao.findByUidAsFlow(entityUidArg)
-                        .combine(activeDb.clazzDao.personHasPermissionWithClazzAsFlow(
-                            accountPersonUid, entityUidArg, PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT
-                        )) { clazz: Clazz?, permission: Boolean ->
-                            clazz to permission
+                        .combine(viewPermissionFlow) { clazz, hasViewPermission ->
+                            clazz?.takeIf { hasViewPermission }
+                        }
+                        .combine(attendancePermissionFlow) { clazz, hasAttendancePermission ->
+                            clazz to hasAttendancePermission
                         }.collect {
                             val (clazz, hasAttendancePermission) = it
-                            val showAttendance =
-                                clazz?.clazzFeatures?.hasFlag(Clazz.CLAZZ_FEATURE_ATTENDANCE) == true &&
-                                hasAttendancePermission
+                            val tabList = when (clazz) {
+                                null -> emptyList()
+                                else -> createTabList(
+                                    showAttendance = clazz.clazzFeatures.hasFlag(Clazz.CLAZZ_FEATURE_ATTENDANCE) && hasAttendancePermission
+                                )
+                            }
 
                             _uiState.update { prev ->
-                                prev.copy(tabs = createTabList(showAttendance))
+                                prev.copy(tabs = tabList)
                             }
                         }
                 }

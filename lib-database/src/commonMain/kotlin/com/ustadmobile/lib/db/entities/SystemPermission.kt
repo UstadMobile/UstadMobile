@@ -8,6 +8,7 @@ import com.ustadmobile.door.annotation.ReplicateEtag
 import com.ustadmobile.door.annotation.ReplicateLastModified
 import com.ustadmobile.door.annotation.Trigger
 import com.ustadmobile.door.annotation.Triggers
+import kotlinx.serialization.Serializable
 
 @Entity(
     indices = arrayOf(
@@ -28,6 +29,7 @@ import com.ustadmobile.door.annotation.Triggers
         sqlStatements = [TRIGGER_UPSERT],
     )
 ))
+@Serializable
 data class SystemPermission(
     @PrimaryKey(autoGenerate = true)
     var spUid: Long = 0,
@@ -46,6 +48,8 @@ data class SystemPermission(
 ) {
 
     companion object {
+
+        const val PERMISSION_ADD_COURSE: Long = 128L
 
         const val TABLE_ID = 10011
     }

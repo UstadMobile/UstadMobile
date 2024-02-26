@@ -13,6 +13,7 @@ import com.ustadmobile.core.impl.nav.*
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.isDateOfBirthAnAdult
 import com.ustadmobile.core.util.ext.isGuestUser
+import com.ustadmobile.core.util.ext.localFirstThenRepoIfFalse
 import com.ustadmobile.core.util.ext.navigateToLink
 import com.ustadmobile.core.util.ext.putFromSavedStateIfPresent
 import com.ustadmobile.core.util.ext.toQueryString
@@ -22,6 +23,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_KEY
 import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_VIEWNAME
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
+import com.ustadmobile.core.viewmodel.errors.ErrorViewModel
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -338,6 +340,29 @@ abstract class UstadViewModel(
             dbVal ?: makeDefault().also(uiUpdate)
         }
     }
+
+    /**
+     * Launch a given codeblock if the permission check passes. Otherwise navigate to an error screen
+     */
+    protected fun launchIfHasPermission(
+        permissionCheck: suspend (UmAppDatabase) -> Boolean,
+        block: suspend CoroutineScope.() -> Unit
+    ) {
+        viewModelScope.launch {
+            if(!activeRepo.localFirstThenRepoIfFalse(permissionCheck)) {
+                navController.navigate(
+                    ErrorViewModel.DEST_NAME,
+                    emptyMap(),
+                    goOptions = UstadMobileSystemCommon.UstadGoOptions(
+                        popUpToViewName = destinationName, popUpToInclusive = true
+                    )
+                )
+            }else {
+                block()
+            }
+        }
+    }
+
 
     /**
      * If the given key is present in the savedStateHandle for this ViewModel, then put it into

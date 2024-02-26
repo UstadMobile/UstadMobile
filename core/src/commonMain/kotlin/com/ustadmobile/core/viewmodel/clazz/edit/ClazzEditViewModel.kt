@@ -145,7 +145,19 @@ class ClazzEditViewModel(
             )
         }
 
-        viewModelScope.launch {
+        launchIfHasPermission(
+            permissionCheck = {
+                if(entityUidArg != 0L) {
+                    it.clazzDao.personHasPermissionWithClazzAsync2(
+                        activeUserPersonUid, entityUidArg, CoursePermission.PERMISSION_EDIT
+                    )
+                }else {
+                    it.systemPermissionDao.personHasSystemPermission(
+                        activeUserPersonUid, SystemPermission.PERMISSION_ADD_COURSE
+                    )
+                }
+            }
+        ) {
             awaitAll(
                 async {
                     loadEntity(
@@ -375,7 +387,6 @@ class ClazzEditViewModel(
                 )
             }
         }
-
     }
 
     private suspend fun updateCourseBlockList(

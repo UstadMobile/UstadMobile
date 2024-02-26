@@ -91,6 +91,14 @@ suspend fun UmAppDatabase.initAdminUser(
         grantScopedPermission(adminPerson, Role.ALL_PERMISSIONS, ScopedGrant.ALL_TABLES,
                 ScopedGrant.ALL_ENTITIES)
 
+        systemPermissionDao.upsertAsync(
+            SystemPermission(
+                spToPersonUid = adminPerson.personUid,
+                spPermissionsFlag = Long.MAX_VALUE,
+            )
+        )
+
+
         adminPassFile.writeText(adminPass)
         Napier.i("Saved admin password to ${adminPassFile.absolutePath}")
     }

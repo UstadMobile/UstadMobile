@@ -157,28 +157,4 @@ class UmAppDatabaseExtTest {
     }
 
 
-    @Test
-    fun givenExistingSchool_whenEnrolMemberCalled_thenSchoolMemberIsCreatedAndPersonGroupMemberCreated() = runBlocking {
-        val testSchool = School("School A")
-        testSchool.schoolActive =true
-        val testPerson = Person("teacher", "Teacher", "Test")
-
-        testSchool.schoolUid = repo.createNewSchoolAndGroups(testSchool, mockSystemImpl, context)
-        testPerson.personUid = repo.personDao.insert(testPerson)
-
-        repo.enrollPersonToSchool(testSchool.schoolUid, testPerson.personUid,
-                Role.ROLE_SCHOOL_STAFF_UID)
-
-        val schoolMembers = db.schoolMemberDao.findBySchoolAndPersonAndRole(
-                testSchool.schoolUid,
-                testPerson.personUid, Role.ROLE_SCHOOL_STAFF_UID)
-
-        Assert.assertTrue("PersonMember was created", schoolMembers.any {
-            it.schoolMemberSchoolUid == testSchool.schoolUid })
-
-        val personGroups = db.personGroupMemberDao.findAllGroupWherePersonIsIn(testPerson.personUid)
-        Assert.assertEquals("Person is now teacher group",
-                testSchool.schoolTeachersPersonGroupUid,
-                personGroups.first().groupMemberGroupUid)
-    }
 }

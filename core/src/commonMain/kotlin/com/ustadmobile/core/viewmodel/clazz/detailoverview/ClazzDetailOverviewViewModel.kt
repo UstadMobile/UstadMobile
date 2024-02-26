@@ -14,7 +14,6 @@ import app.cash.paging.PagingSource
 import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCase
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.locale.CourseTerminologyStrings
-import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.parseAndUpdateTerminologyStringsIfNeeded
 import com.ustadmobile.core.viewmodel.clazz.permissionlist.CoursePermissionListViewModel
@@ -26,7 +25,10 @@ import com.ustadmobile.lib.db.composites.CourseBlockAndDisplayDetails
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -117,12 +119,20 @@ class ClazzDetailOverviewViewModel(
             )
         }
 
+        val permissionFlow = activeRepo.clazzDao.personHasPermissionWithClazzAsFlow2(
+            accountPersonUid = activeUserPersonUid,
+            clazzUid = entityUidArg,
+            permission = CoursePermission.PERMISSION_VIEW
+        ).shareIn(viewModelScope, SharingStarted.WhileSubscribed())
+
         viewModelScope.launch {
             _uiState.whenSubscribed {
                 launch {
                     activeRepo.clazzDao.getClazzWithDisplayDetails(
                         entityUidArg, systemTimeInMillis()
-                    ).collect {
+                    ).combine(permissionFlow) { clazzWithDisplayDetails, hasViewPermission ->
+                        if(hasViewPermission) clazzWithDisplayDetails else null
+                    }.collect {
                         _uiState.update { prev ->
                             prev.copy(clazz = it)
                         }

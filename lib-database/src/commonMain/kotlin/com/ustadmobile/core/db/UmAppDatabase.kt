@@ -332,4 +332,6 @@ expect abstract class UmAppDatabase : RoomDatabase {
 
     abstract val coursePermissionDao: CoursePermissionDao
 
+    abstract val systemPermissionDao: SystemPermissionDao
+
 }

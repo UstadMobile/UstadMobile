@@ -5,12 +5,11 @@ import com.ustadmobile.core.impl.nav.NavigateNavCommand
 import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.ext.awaitItemWhere
-import com.ustadmobile.core.util.ext.grantScopedPermission
 import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
 import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.Role
+import com.ustadmobile.lib.db.entities.CoursePermission
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.seconds
 
@@ -45,15 +44,20 @@ class ClazzDetailOverviewViewModelTest : AbstractMainDispatcherTest() {
                 clazzUid = activeDb.clazzDao.insert(this)
             }
 
-            activeDb.grantScopedPermission(user, Role.ROLE_CLAZZ_TEACHER_PERMISSIONS_DEFAULT,
-                Clazz.TABLE_ID, testClazz.clazzUid)
+            activeDb.coursePermissionDao.upsertAsync(
+                CoursePermission(
+                    cpToPersonUid = user.personUid,
+                    cpPermissionsFlag = CoursePermission.TEACHER_DEFAULT_PERMISSIONS,
+                    cpClazzUid = testClazz.clazzUid
+                )
+            )
 
             viewModelFactory {
                 savedStateHandle[UstadView.ARG_ENTITY_UID] = testClazz.clazzUid.toString()
                 ClazzDetailOverviewViewModel(di, savedStateHandle, "Course")
             }
 
-            viewModel.uiState.test(timeout = 30.seconds) {
+            viewModel.uiState.test(timeout = 5.seconds) {
                 viewModel.appUiState.test(timeout = 5000.seconds) {
                     val editButtonClickableState = awaitItemWhere { it.fabState.visible }
                     editButtonClickableState.fabState.onClick()

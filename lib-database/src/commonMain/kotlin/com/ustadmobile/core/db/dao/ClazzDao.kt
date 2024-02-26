@@ -12,7 +12,10 @@ import com.ustadmobile.core.db.dao.ClazzDaoCommon.SORT_CLAZZNAME_DESC
 import kotlinx.coroutines.flow.Flow
 import com.ustadmobile.door.annotation.*
 import app.cash.paging.PagingSource
+import com.ustadmobile.core.db.dao.ClazzDaoCommon.PERSON_HAS_PERMISSION_WITH_CLAZZ_SQL
+import com.ustadmobile.core.db.dao.CoursePermissionDaoCommon.LEFT_JOIN_ENROLMENT_FROM_COURSEPERMISSION_WITH_ACCOUNT_UID_PARAM
 import com.ustadmobile.lib.db.composites.ClazzNameAndTerminology
+import com.ustadmobile.lib.db.composites.CoursePermissionAndEnrolment
 import com.ustadmobile.lib.db.composites.ScopedGrantAndGroupMember
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.ROLE_STUDENT
@@ -82,7 +85,19 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
 
     @HttpAccessible(
         pullQueriesToReplicate = arrayOf(
-            HttpServerFunctionCall(functionName = "findClazzesWithPermission"),
+            HttpServerFunctionCall(
+                functionName = "findClazzesWithPermission"
+            ),
+            HttpServerFunctionCall(
+                functionName = "personHasPermissionWithClazzEntities2",
+                functionArgs = arrayOf(
+                    HttpServerFunctionParam(
+                        name = "clazzUid",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "0",
+                    )
+                )
+            ),
         )
     )
     @Query("""
@@ -110,38 +125,34 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
                           FROM ClazzEnrolment
                          WHERE ClazzEnrolment.clazzEnrolmentPersonUid = :accountPersonUid
                            AND ClazzEnrolment.clazzEnrolmentActive
-                           AND ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid LIMIT 1), 0)
+                           AND ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid 
+                      ORDER BY ClazzEnrolment.clazzEnrolmentDateLeft DESC   
+                         LIMIT 1), 0)
                 LEFT JOIN CourseTerminology   
                           ON CourseTerminology.ctUid = Clazz.clazzTerminologyUid
                 LEFT JOIN CoursePicture
                           ON CoursePicture.coursePictureUid = Clazz.clazzUid           
 
          WHERE /* Begin permission check clause */
-                (
+               :accountPersonUid != 0
+           AND (
                     Clazz.clazzOwnerPersonUid = :accountPersonUid
                  OR EXISTS(SELECT CoursePermission.cpUid
                              FROM CoursePermission
                             WHERE CoursePermission.cpClazzUid = Clazz.clazzUid
-                              AND (CoursePermission.cpToPersonUid = :accountPersonUid 
-                                   OR CoursePermission.cpToEnrolmentRole IN 
-                                   (SELECT DISTINCT ClazzEnrolment.clazzEnrolmentRole
-                                      FROM ClazzEnrolment
-                                     WHERE ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid
-                                       AND ClazzEnrolment.clazzEnrolmentPersonUid = :accountPersonUid
-                                       AND ClazzEnrolment.clazzEnrolmentActive))
-                              AND (CoursePermission.cpPermissionsFlag & ${CoursePermission.PERMISSION_VIEW}) > 0)    
+                              AND (   CoursePermission.cpToPersonUid = :accountPersonUid 
+                                   OR CoursePermission.cpToEnrolmentRole = ClazzEnrolment.clazzEnrolmentRole )
+                              AND (CoursePermission.cpPermissionsFlag & ${CoursePermission.PERMISSION_VIEW}) > 0 
+                              AND NOT CoursePermission.cpIsDeleted)   
                 )
                 /* End permission check clause */ 
            AND CAST(Clazz.isClazzActive AS INTEGER) = 1
            AND Clazz.clazzName like :searchQuery
            AND (Clazz.clazzUid NOT IN (:excludeSelectedClazzList))
-           AND ( :excludeSchoolUid = 0 OR Clazz.clazzUid NOT IN (SELECT cl.clazzUid FROM Clazz AS cl WHERE cl.clazzSchoolUid = :excludeSchoolUid) ) 
-           AND ( :excludeSchoolUid = 0 OR Clazz.clazzSchoolUid = 0 )
            AND ( :filter = 0 OR (CASE WHEN :filter = $FILTER_CURRENTLY_ENROLLED 
                                       THEN :currentTime BETWEEN Clazz.clazzStartTime AND Clazz.clazzEndTime
                                       ELSE :currentTime > Clazz.clazzEndTime 
                                       END))
-           AND ( :selectedSchool = 0 OR Clazz.clazzSchoolUid = :selectedSchool)
       GROUP BY Clazz.clazzUid, ClazzEnrolment.clazzEnrolmentUid, CourseTerminology.ctUid, CoursePicture.coursePictureUid
       ORDER BY CASE :sortOrder
                WHEN $SORT_ATTENDANCE_ASC THEN Clazz.attendanceAverage
@@ -165,10 +176,10 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
         searchQuery: String,
         accountPersonUid: Long,
         excludeSelectedClazzList: List<Long>,
-        excludeSchoolUid: Long, sortOrder: Int, filter: Int,
+        sortOrder: Int,
+        filter: Int,
         currentTime: Long,
         permission: Long,
-        selectedSchool: Long
     ) : PagingSource<Int, ClazzWithListDisplayDetails>
 
 
@@ -263,34 +274,82 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
     ): Flow<Boolean>
 
 
+
+    @Query("""
+       SELECT CoursePermission.*, ClazzEnrolment.*
+         FROM CoursePermission
+              $LEFT_JOIN_ENROLMENT_FROM_COURSEPERMISSION_WITH_ACCOUNT_UID_PARAM
+        WHERE (:clazzUid = 0 OR CoursePermission.cpClazzUid = :clazzUid)
+          AND (CoursePermission.cpToPersonUid = :accountPersonUid 
+               OR CoursePermission.cpToEnrolmentRole = ClazzEnrolment.clazzEnrolmentRole)
+    """)
+    abstract suspend fun personHasPermissionWithClazzEntities2(
+        accountPersonUid: Long,
+        clazzUid: Long,
+    ): List<CoursePermissionAndEnrolment>
+
     /**
      * Determine if a person as per accountPersonUid has a particular permission on the given
      * clazz as per clazzUid
+     *those
+     * Note: when joining the coursepermission applicable for an enrolment role, there is only going
+     * to be one CoursePermission entity per clazz and role combination. The join therefor does not
+     * need to filter based on the permission.
      */
-    @Query("""
-        SELECT (COALESCE(
-                        (SELECT Clazz.clazzOwnerPersonUid 
-                          FROM Clazz 
-                         WHERE Clazz.clazzUid = :clazzUid), 0) = :accountPersonUid)
-            OR EXISTS(
-               SELECT CoursePermission.cpUid
-                 FROM CoursePermission
-                WHERE CoursePermission.cpClazzUid = :clazzUid
-                  AND (CoursePermission.cpToPersonUid = :accountPersonUid 
-                       OR CoursePermission.cpToEnrolmentRole IN 
-                       (SELECT DISTINCT ClazzEnrolment.clazzEnrolmentRole
-                          FROM ClazzEnrolment
-                         WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid
-                           AND ClazzEnrolment.clazzEnrolmentPersonUid = :accountPersonUid
-                           AND ClazzEnrolment.clazzEnrolmentActive))
-                  AND (CoursePermission.cpPermissionsFlag & :permission) > 0)
-    """)
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall(
+                functionName = "personHasPermissionWithClazzEntities2"
+            ),
+            HttpServerFunctionCall(
+                functionName = "findAllByPersonUid",
+                functionDao = SystemPermissionDao::class,
+                functionArgs = arrayOf(
+                    HttpServerFunctionParam(
+                        name = "includeDeleted",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "true",
+                    )
+                )
+            )
+        )
+    )
+    @Query(PERSON_HAS_PERMISSION_WITH_CLAZZ_SQL)
     @QueryLiveTables(arrayOf("Clazz", "CoursePermission", "ClazzEnrolment"))
     abstract fun personHasPermissionWithClazzAsFlow2(
         accountPersonUid: Long,
         clazzUid: Long,
-        permission: Long
+        permission: Long,
     ): Flow<Boolean>
+
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall(
+                functionName = "personHasPermissionWithClazzEntities2"
+            ),
+            HttpServerFunctionCall(
+                functionName = "findAllByPersonUid",
+                functionDao = SystemPermissionDao::class,
+                functionArgs = arrayOf(
+                    HttpServerFunctionParam(
+                        name = "includeDeleted",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "true",
+                    )
+                )
+            )
+        )
+    )
+    @Query(PERSON_HAS_PERMISSION_WITH_CLAZZ_SQL)
+    @QueryLiveTables(arrayOf("Clazz", "CoursePermission", "ClazzEnrolment"))
+    abstract suspend fun personHasPermissionWithClazzAsync2(
+        accountPersonUid: Long,
+        clazzUid: Long,
+        permission: Long,
+    ): Boolean
+
 
     @Query("""
         SELECT PrsGrpMbr.*, ScopedGrant.*, PersonGroup.*
