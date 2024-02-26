@@ -3,5 +3,4 @@ appId: com.toughra.ustadmobile
 # this test clear app data and start app
 - clearState: com.toughra.ustadmobile
 - launchApp
-- hideKeyboard
 - tapOn: "GET STARTED"
