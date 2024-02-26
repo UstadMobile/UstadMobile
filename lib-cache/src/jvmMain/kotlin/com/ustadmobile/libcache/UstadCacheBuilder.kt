@@ -2,6 +2,7 @@ package com.ustadmobile.libcache
 
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.libcache.UstadCache.Companion.DEFAULT_SIZE_LIMIT
+import com.ustadmobile.libcache.db.MIGRATE_8_9
 import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.db.addCacheDbMigrations
 import com.ustadmobile.libcache.logging.UstadCacheLogger
@@ -35,6 +36,7 @@ class UstadCacheBuilder(
             pathsProvider = pathsProvider,
             db = DatabaseBuilder.databaseBuilder(UstadCacheDb::class, dbUrl, 1L)
                 .addCacheDbMigrations()
+                .addMigrations(MIGRATE_8_9)
                 .build(),
             sizeLimit = sizeLimit,
             logger = logger,

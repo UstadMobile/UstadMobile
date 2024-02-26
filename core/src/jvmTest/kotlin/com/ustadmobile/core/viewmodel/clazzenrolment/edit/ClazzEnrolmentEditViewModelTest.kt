@@ -3,6 +3,7 @@ package com.ustadmobile.core.viewmodel.clazzenrolment.edit
 import app.cash.turbine.test
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.MAX_VALID_DATE
+import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.EnrolIntoCourseUseCase
 import com.ustadmobile.core.test.viewmodeltest.ViewModelTestBuilder
 import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
@@ -13,6 +14,7 @@ import com.ustadmobile.core.util.ext.grantScopedPermission
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.entities.Clazz
@@ -25,6 +27,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeout
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
+import org.kodein.di.bind
+import org.kodein.di.instance
+import org.kodein.di.scoped
+import org.kodein.di.singleton
 import kotlin.test.Test
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.days
@@ -51,6 +57,15 @@ class ClazzEnrolmentEditViewModelTest : AbstractMainDispatcherTest()  {
         block: suspend ViewModelTestBuilder<ClazzEnrolmentEditViewModel>.(ClazzEnrolmentEditTestContext) -> Unit
     ) {
         testViewModel {
+            extendDi {
+                bind<EnrolIntoCourseUseCase>() with scoped(endpointScope).singleton {
+                    EnrolIntoCourseUseCase(
+                        db = instance(tag = DoorTag.TAG_DB),
+                        repo = instance(tag = DoorTag.TAG_REPO),
+                    )
+                }
+            }
+
             val activeUserPerson = setActiveUser(endpoint)
 
             val context = activeDb.withDoorTransactionAsync {

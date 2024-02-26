@@ -1594,6 +1594,191 @@ val MIGRATION_150_151 = DoorMigrationStatementList(150, 151) { db ->
     )
 }
 
+/**
+ * Add triggers to be used on Postgres to retain all active URIs for PersonPicture and CoursePicture
+ * by creating locks. See AddRetainAllActiveUriTriggersUseCase
+ *
+ * Note: this was already added on SQLite,
+ */
+val MIGRATION_151_152 = DoorMigrationStatementList(151, 152) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.POSTGRES) {
+            add("""
+                            CREATE OR REPLACE FUNCTION retain_c_clj_50_personPictureUri() RETURNS TRIGGER AS $$
+                            BEGIN
+                            INSERT INTO CacheLockJoin(cljTableId, cljEntityUid, cljUrl, cljLockId, cljStatus, cljType)
+                            VALUES(50, NEW.personPictureUid, NEW.personPictureUri, 0, 1, 1);
+                            RETURN NEW;
+                            END $$ LANGUAGE plpgsql
+                        """)
+            add("""
+                            CREATE OR REPLACE FUNCTION retain_d_clj_50_personPictureUri() RETURNS TRIGGER AS $$
+                            BEGIN
+                            UPDATE CacheLockJoin 
+                               SET cljStatus = 3
+                             WHERE cljTableId = 50
+                               AND cljEntityUid = OLD.personPictureUid
+                               AND cljUrl = OLD.personPictureUri;
+                            RETURN OLD;
+                            END $$ LANGUAGE plpgsql   
+                        """)
+            add("""
+                            CREATE TRIGGER retain_c_clj_50_personPictureUri_ins_t
+                            AFTER INSERT ON PersonPicture
+                            FOR EACH ROW
+                            WHEN (NEW.personPictureUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_c_clj_50_personPictureUri();
+                        """)
+            add("""
+                            CREATE TRIGGER retain_c_clj_50_personPictureUri_upd_t
+                            AFTER UPDATE ON PersonPicture
+                            FOR EACH ROW
+                            WHEN (NEW.personPictureUri IS DISTINCT FROM OLD.personPictureUri AND OLD.personPictureUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_c_clj_50_personPictureUri();
+                        """)
+            add("""
+                            CREATE TRIGGER retain_d_clj_50_personPictureUri_upd_t
+                            AFTER UPDATE ON PersonPicture
+                            FOR EACH ROW
+                            WHEN (NEW.personPictureUri IS DISTINCT FROM OLD.personPictureUri AND NEW.personPictureUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_d_clj_50_personPictureUri();
+                        """)
+            add("""
+                            CREATE OR REPLACE FUNCTION retain_c_clj_50_personPictureThumbnailUr() RETURNS TRIGGER AS $$
+                            BEGIN
+                            INSERT INTO CacheLockJoin(cljTableId, cljEntityUid, cljUrl, cljLockId, cljStatus, cljType)
+                            VALUES(50, NEW.personPictureUid, NEW.personPictureThumbnailUri, 0, 1, 1);
+                            RETURN NEW;
+                            END $$ LANGUAGE plpgsql
+                        """)
+            add("""
+                            CREATE OR REPLACE FUNCTION retain_d_clj_50_personPictureThumbnailUr() RETURNS TRIGGER AS $$
+                            BEGIN
+                            UPDATE CacheLockJoin 
+                               SET cljStatus = 3
+                             WHERE cljTableId = 50
+                               AND cljEntityUid = OLD.personPictureUid
+                               AND cljUrl = OLD.personPictureThumbnailUri;
+                            RETURN OLD;
+                            END $$ LANGUAGE plpgsql   
+                        """)
+            add("""
+                            CREATE TRIGGER retain_c_clj_50_personPictureThumbnailUr_ins_t
+                            AFTER INSERT ON PersonPicture
+                            FOR EACH ROW
+                            WHEN (NEW.personPictureThumbnailUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_c_clj_50_personPictureThumbnailUr();
+                        """)
+            add("""
+                            CREATE TRIGGER retain_c_clj_50_personPictureThumbnailUr_upd_t
+                            AFTER UPDATE ON PersonPicture
+                            FOR EACH ROW
+                            WHEN (NEW.personPictureThumbnailUri IS DISTINCT FROM OLD.personPictureThumbnailUri AND OLD.personPictureThumbnailUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_c_clj_50_personPictureThumbnailUr();
+                        """)
+            add("""
+                            CREATE TRIGGER retain_d_clj_50_personPictureThumbnailUr_upd_t
+                            AFTER UPDATE ON PersonPicture
+                            FOR EACH ROW
+                            WHEN (NEW.personPictureThumbnailUri IS DISTINCT FROM OLD.personPictureThumbnailUri AND NEW.personPictureThumbnailUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_d_clj_50_personPictureThumbnailUr();
+                        """)
+                    add("""
+                            CREATE OR REPLACE FUNCTION retain_c_clj_125_coursePictureUri() RETURNS TRIGGER AS $$
+                            BEGIN
+                            INSERT INTO CacheLockJoin(cljTableId, cljEntityUid, cljUrl, cljLockId, cljStatus, cljType)
+                            VALUES(125, NEW.coursePictureUid, NEW.coursePictureUri, 0, 1, 1);
+                            RETURN NEW;
+                            END $$ LANGUAGE plpgsql
+                        """)
+                    add("""
+                            CREATE OR REPLACE FUNCTION retain_d_clj_125_coursePictureUri() RETURNS TRIGGER AS $$
+                            BEGIN
+                            UPDATE CacheLockJoin 
+                               SET cljStatus = 3
+                             WHERE cljTableId = 125
+                               AND cljEntityUid = OLD.coursePictureUid
+                               AND cljUrl = OLD.coursePictureUri;
+                            RETURN OLD;
+                            END $$ LANGUAGE plpgsql   
+                        """)
+                    add("""
+                            CREATE TRIGGER retain_c_clj_125_coursePictureUri_ins_t
+                            AFTER INSERT ON CoursePicture
+                            FOR EACH ROW
+                            WHEN (NEW.coursePictureUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_c_clj_125_coursePictureUri();
+                        """)
+                    add("""
+                            CREATE TRIGGER retain_c_clj_125_coursePictureUri_upd_t
+                            AFTER UPDATE ON CoursePicture
+                            FOR EACH ROW
+                            WHEN (NEW.coursePictureUri IS DISTINCT FROM OLD.coursePictureUri AND OLD.coursePictureUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_c_clj_125_coursePictureUri();
+                        """)
+                    add("""
+                            CREATE TRIGGER retain_d_clj_125_coursePictureUri_upd_t
+                            AFTER UPDATE ON CoursePicture
+                            FOR EACH ROW
+                            WHEN (NEW.coursePictureUri IS DISTINCT FROM OLD.coursePictureUri AND NEW.coursePictureUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_d_clj_125_coursePictureUri();
+                        """)
+                    add("""
+                            CREATE OR REPLACE FUNCTION retain_c_clj_125_coursePictureThumbnailUr() RETURNS TRIGGER AS $$
+                            BEGIN
+                            INSERT INTO CacheLockJoin(cljTableId, cljEntityUid, cljUrl, cljLockId, cljStatus, cljType)
+                            VALUES(125, NEW.coursePictureUid, NEW.coursePictureThumbnailUri, 0, 1, 1);
+                            RETURN NEW;
+                            END $$ LANGUAGE plpgsql
+                        """)
+                    add("""
+                            CREATE OR REPLACE FUNCTION retain_d_clj_125_coursePictureThumbnailUr() RETURNS TRIGGER AS $$
+                            BEGIN
+                            UPDATE CacheLockJoin 
+                               SET cljStatus = 3
+                             WHERE cljTableId = 125
+                               AND cljEntityUid = OLD.coursePictureUid
+                               AND cljUrl = OLD.coursePictureThumbnailUri;
+                            RETURN OLD;
+                            END $$ LANGUAGE plpgsql   
+                        """)
+                    add("""
+                            CREATE TRIGGER retain_c_clj_125_coursePictureThumbnailUr_ins_t
+                            AFTER INSERT ON CoursePicture
+                            FOR EACH ROW
+                            WHEN (NEW.coursePictureThumbnailUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_c_clj_125_coursePictureThumbnailUr();
+                        """)
+                    add("""
+                            CREATE TRIGGER retain_c_clj_125_coursePictureThumbnailUr_upd_t
+                            AFTER UPDATE ON CoursePicture
+                            FOR EACH ROW
+                            WHEN (NEW.coursePictureThumbnailUri IS DISTINCT FROM OLD.coursePictureThumbnailUri AND OLD.coursePictureThumbnailUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_c_clj_125_coursePictureThumbnailUr();
+                        """)
+                    add("""
+                            CREATE TRIGGER retain_d_clj_125_coursePictureThumbnailUr_upd_t
+                            AFTER UPDATE ON CoursePicture
+                            FOR EACH ROW
+                            WHEN (NEW.coursePictureThumbnailUri IS DISTINCT FROM OLD.coursePictureThumbnailUri AND NEW.coursePictureThumbnailUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_d_clj_125_coursePictureThumbnailUr();
+                        """)
+        }
+    }
+}
+
+val MIGRATION_152_153 = DoorMigrationStatementList(152, 153) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS EnrolmentRequest (  erClazzUid  INTEGER  NOT NULL , erClazzName  TEXT , erPersonUid  INTEGER  NOT NULL , erPersonFullname  TEXT , erPersonPictureUri  TEXT , erPersonUsername  TEXT , erRole  INTEGER  NOT NULL , erRequestTime  INTEGER  NOT NULL , erStatus  INTEGER  NOT NULL , erStatusSetByPersonUid  INTEGER  NOT NULL , erDeleted  INTEGER  NOT NULL , erStatusSetAuth  TEXT , erLastModified  INTEGER  NOT NULL , erUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS EnrolmentRequest (  erClazzUid  BIGINT  NOT NULL , erClazzName  TEXT , erPersonUid  BIGINT  NOT NULL , erPersonFullname  TEXT , erPersonPictureUri  TEXT , erPersonUsername  TEXT , erRole  INTEGER  NOT NULL , erRequestTime  BIGINT  NOT NULL , erStatus  INTEGER  NOT NULL , erStatusSetByPersonUid  BIGINT  NOT NULL , erDeleted  BOOL  NOT NULL , erStatusSetAuth  TEXT , erLastModified  BIGINT  NOT NULL , erUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+        }
+        add("CREATE INDEX idx_enrolmentrequest_by_clazz ON EnrolmentRequest (erClazzUid, erStatus)")
+        add("CREATE INDEX idx_enrolmentrequest_by_person ON EnrolmentRequest (erPersonUid, erStatus)")
+    }
+}
+
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_102_103,
     MIGRATION_103_104, MIGRATION_104_105, MIGRATION_105_106, MIGRATION_106_107,
@@ -1605,6 +1790,7 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_137_138, MIGRATION_138_139, MIGRATION_139_140, MIGRATION_140_141,
     MIGRATION_141_142, MIGRATION_142_143, MIGRATION_143_144, MIGRATION_145_146,
     MIGRATION_146_147, MIGRATION_147_148, MIGRATION_149_150, MIGRATION_150_151,
+    MIGRATION_151_152, MIGRATION_152_153,
 )
 
 

@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileConstants
@@ -89,7 +90,7 @@ fun ParentalConsentManagementScreen(
 
         if (uiState.relationshipVisible){
             UstadMessageIdOptionExposedDropDownMenuField(
-                modifier = Modifier.fillMaxWidth().defaultItemPadding(),
+                modifier = Modifier.fillMaxWidth().defaultItemPadding().testTag("relationship"),
                 value = uiState.parentJoinAndMinor?.personParentJoin?.ppjRelationship ?: 0,
                 label = stringResource(MR.strings.relationship) + "*",
                 options = PersonParentJoinConstants.RELATIONSHIP_MESSAGE_IDS,

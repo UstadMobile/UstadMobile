@@ -39,7 +39,7 @@ fun CourseTerminologyEditScreen(
         item(key = "terms_title") {
             Column {
                 OutlinedTextField(
-                    modifier = Modifier.testTag("terms_title")
+                    modifier = Modifier.testTag("name")
                         .defaultItemPadding()
                         .fillMaxWidth(),
                     singleLine = true,

@@ -1,5 +1,6 @@
 package com.ustadmobile.core.domain.contententry.launchcontent
 
+import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.epubcontent.EpubContentViewModel
@@ -16,7 +17,8 @@ class DefaultLaunchContentEntryVersionUseCase: LaunchContentEntryVersionUseCase 
 
     override suspend fun invoke(
         contentEntryVersion: ContentEntryVersion,
-        navController: UstadNavController
+        navController: UstadNavController,
+        target: OpenExternalLinkUseCase.Companion.LinkTarget
     ): LaunchContentEntryVersionUseCase.LaunchResult {
         val destName = when(contentEntryVersion.cevContentType) {
             ContentEntryVersion.TYPE_XAPI -> XapiContentViewModel.DEST_NAME

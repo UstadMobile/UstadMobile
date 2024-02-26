@@ -95,7 +95,12 @@ fun App(
     initialRoute: String = "/${RedirectViewModel.DEST_NAME}",
 ) {
     val appUiState = remember {
-        mutableStateOf(AppUiState())
+        mutableStateOf(
+            AppUiState(
+                navigationVisible = false,
+                hideAppBar = true,
+            )
+        )
     }
 
     var appUiStateVal by appUiState

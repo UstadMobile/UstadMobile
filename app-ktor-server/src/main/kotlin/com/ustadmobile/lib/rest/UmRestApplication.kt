@@ -528,11 +528,11 @@ fun Application.umRestApplication(
         }
 
         onReady {
-            if(dbMode == CONF_DBMODE_SINGLETON) {
+            if(dbMode == CONF_DBMODE_SINGLETON && siteUrl != null) {
                 //Get the container dir so that any old directories (build/storage etc) are moved if required
-                di.on(Endpoint("localhost")).direct.instance<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
+                di.on(Endpoint(siteUrl)).direct.instance<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
                 //Generate the admin username/password etc.
-                di.on(Endpoint("localhost")).direct.instance<AuthManager>()
+                di.on(Endpoint(siteUrl)).direct.instance<AuthManager>()
             }
 
             instance<Scheduler>().start()

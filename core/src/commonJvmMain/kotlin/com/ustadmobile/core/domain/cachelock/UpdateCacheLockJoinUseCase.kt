@@ -1,6 +1,7 @@
 package com.ustadmobile.core.domain.cachelock
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.door.ext.doorIdentityHashCode
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.room.InvalidationTrackerObserver
 import com.ustadmobile.lib.db.entities.CacheLockJoin
@@ -9,6 +10,7 @@ import com.ustadmobile.libcache.RemoveLockRequest
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.md5.Md5Digest
 import com.ustadmobile.libcache.md5.urlKey
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -47,6 +49,8 @@ class UpdateCacheLockJoinUseCase(
     private val cache: UstadCache
 ) {
 
+    private val logPrefix = "UpdateCacheLockJoinUseCase(${this.doorIdentityHashCode}):"
+
     private val signalChannel = Channel<Unit>(
         capacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
@@ -72,6 +76,7 @@ class UpdateCacheLockJoinUseCase(
 
     suspend operator fun invoke() {
         val md5Digest = Md5Digest()
+        Napier.v { "$logPrefix checking for pending lock changes" }
 
         db.withDoorTransactionAsync {
             val pendingLocks = db.cacheLockJoinDao.findPendingLocks()
@@ -84,6 +89,7 @@ class UpdateCacheLockJoinUseCase(
             }
 
             if(locksToDelete.isNotEmpty()) {
+                Napier.v { "$logPrefix creating locks for ${locksToDelete.joinToString { it.cljUrl ?: "" } }" }
                 cache.removeRetentionLocks(
                     locksToDelete.mapNotNull {  cacheLockJoin ->
                         cacheLockJoin.cljUrl?.let { cacheLockJoinUrl ->
@@ -99,6 +105,7 @@ class UpdateCacheLockJoinUseCase(
             }
 
             if(createLockRequests.isNotEmpty()) {
+                Napier.v { "$logPrefix creating locks for ${createLockRequests.joinToString { it.cljUrl ?: ""} } " }
                 val createdLocks = cache.addRetentionLocks(
                     createLockRequests.map { EntryLockRequest(url = it.cljUrl!!) }
                 ).associateBy { it.second.lockKey }
@@ -116,8 +123,9 @@ class UpdateCacheLockJoinUseCase(
                     )
                 }
             }
-
         }
+
+        Napier.v { "$logPrefix checking for pending lock changes: done" }
     }
 
     fun close() {

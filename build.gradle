@@ -31,6 +31,8 @@ plugins {
     id 'org.jetbrains.kotlin.jvm' version "$version_kotlin" apply false
     alias(libs.plugins.jetbrains.compose) apply false
     id 'com.github.gmazzo.buildconfig' version '5.3.5' apply false
+    id 'com.android.test' version '8.2.2' apply false
+    id 'androidx.baselineprofile' version '1.2.2' apply false
 }
 
 
@@ -81,7 +83,7 @@ allprojects {
 }
 
 //Major.minor.database version
-version = "0.4.77"
+version = "0.4.84"
 group = "com.ustadmobile.app"
 
 /**
@@ -91,7 +93,7 @@ group = "com.ustadmobile.app"
  */
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 301
+    ustadVersionCode = 308
 
     version_retriever = "0.0.1e"
     version_xmlpullparserkmp = '0.0.26'

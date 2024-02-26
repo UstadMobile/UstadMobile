@@ -48,8 +48,8 @@ that would happen if the rest API is on a different server or port to the server
 web client (e.g. the webpack development server).
 
 ### Known Issues:
-
-1. Do not import mui.icons.material.* - this will make autocomplete/intellisense unusably slow in the 
+1. Click to copy will not work when used in a non-secure context (e.g. not localhost or using https).
+2. Do not import mui.icons.material.* - this will make autocomplete/intellisense unusably slow in the 
    IDE. Use a named import to ensure the wildcard is not put there by the IDE later e.g. 
    import mui.icons.material.Folder as FolderIcon
 

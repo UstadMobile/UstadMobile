@@ -85,6 +85,49 @@ Cypress.Commands.add('ustadAddFolderToLibrary',(folderName) => {
   cy.get('#actionBarButton').click()
 })
 
+/***
+  Open H5p/Epub content
+  Cypress doesn't work with popups/new windows,
+   so take the URL in cypress, then add "&target=_top" to the url, and navigate to that url.
+   Once you are on that URL, then click the open button. It will then open content in the same window
+***/
+
+Cypress.Commands.add('ustadOpenH5pEpub', (ContentName) => {
+  cy.url().then((url) => {
+ // Modify the URL by appending the target parameter
+  const modifiedUrl = url + '&target=_top';
+ // Visit the modified URL
+  cy.visit(modifiedUrl)
+  cy.contains("#appbar_title", ContentName).should("be.visible")
+  cy.contains('OPEN').click()
+})
+})
+
+/*****
+    Verify H5p Content
+    -------------------
+    https://www.lambdatest.com/blog/how-to-handle-iframes-in-cypress/
+    The iframe reference is from the above link
+*****/
+Cypress.Commands.add('ustadGetH5pBody', () => {
+  cy.get('.h5p-iframe-wrapper')
+    .find('.h5p-iframe.h5p-initialized')
+    .its('0.contentDocument')
+    .its('body')
+})
+
+// Verify Epub content
+Cypress.Commands.add('ustadVerifyEpub', (epubText) => {
+ cy.contains(epubText).should('be.visible')
+})
+
+// Verify video content (duration > 0)
+Cypress.Commands.add('ustadVerifyVideo', () => {
+   cy.get('video').should(($video) => {
+    expect($video[0].duration).to.be.gt(0)
+  })
+})
+
 // Create a new course
 Cypress.Commands.add('ustadAddCourse',(courseName) => {
     cy.contains("Courses").click()
@@ -173,7 +216,7 @@ Cypress.Commands.add('ustadEnableUserRegistration' ,() => {
   //https://docs.cypress.io/api/commands/should#Assert-the-href-attribute-is-equal-to-users
     cy.get('#terms_html_edit .ql-editor').as('editor')
     cy.get('@editor').should('have.attr', 'contenteditable').and('equal', 'true',{timeout:3000})
-    cy.get('@editor').click().clear().type("New Terms",{delay:10})
+    cy.get('@editor').click().clear().type("New Terms",{delay:25})
     cy.get('#registration_allowed').click({force:true})
     cy.get('#actionBarButton').should('be.visible')
     cy.get('#actionBarButton').click()

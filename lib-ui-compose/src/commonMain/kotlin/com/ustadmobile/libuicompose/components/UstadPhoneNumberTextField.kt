@@ -27,6 +27,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.domain.phonenumber.IPhoneNumberUtil
+import com.ustadmobile.libuicompose.util.ext.testTagIfNotNull
 import com.ustadmobile.libuicompose.util.phonenum.CountryCodeTransformation
 import com.ustadmobile.libuicompose.util.phonenum.CountryCodeTransformation.Companion.COUNTRY_CODE_MAX_LEN
 import com.ustadmobile.libuicompose.util.phonenum.PhoneNumberTransformation
@@ -49,6 +50,8 @@ fun UstadPhoneNumberTextField(
     modifier: Modifier = Modifier,
     isError: Boolean = false,
     supportingText: (@Composable () -> Unit)? = null,
+    countryCodeTestTag: String? = null,
+    numberTextFieldTestTag: String? = null,
 ) {
 
     //As per https://developermemos.com/posts/checking-composable-render-preview
@@ -131,7 +134,7 @@ fun UstadPhoneNumberTextField(
 
         OutlinedTextField(
             value = countryCode,
-            modifier = Modifier.width(112.dp),
+            modifier = Modifier.width(112.dp).testTagIfNotNull(countryCodeTestTag),
             label = {
                 Text("")
             },
@@ -202,7 +205,7 @@ fun UstadPhoneNumberTextField(
             visualTransformation = visualTransformation,
             singleLine = true,
             isError = isError,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f).testTagIfNotNull(numberTextFieldTestTag),
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number
             ),

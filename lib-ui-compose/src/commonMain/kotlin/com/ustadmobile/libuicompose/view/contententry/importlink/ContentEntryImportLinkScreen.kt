@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.ImeAction
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.viewmodel.contententry.importlink.ContentEntryImportLinkUiState
@@ -46,6 +47,7 @@ fun ContentEntryImportLinkScreen(
     ){
         OutlinedTextField(
             modifier = Modifier
+                .testTag("enter_url")
                 .defaultItemPadding()
                 .fillMaxWidth(),
             value = uiState.url,

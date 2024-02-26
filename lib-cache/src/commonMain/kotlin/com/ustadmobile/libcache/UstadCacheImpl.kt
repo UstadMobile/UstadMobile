@@ -727,8 +727,12 @@ class UstadCacheImpl(
         } ?: throw IllegalStateException("Can't happen")
     }
 
-    override fun addRetentionLocks(locks: List<EntryLockRequest>): List<Pair<EntryLockRequest, RetentionLock>> {
-
+    override fun addRetentionLocks(
+        locks: List<EntryLockRequest>
+    ): List<Pair<EntryLockRequest, RetentionLock>> {
+        logger?.v(LOG_TAG) {
+            "$logPrefix add retention locks for ${locks.joinToString { it.url } }"
+        }
         val md5Digest = Md5Digest()
         loadEntries(
             requestEntries = locks.map { RequestedEntry(requestedKey = md5Digest.urlKey(it.url)) },
@@ -765,6 +769,9 @@ class UstadCacheImpl(
      * number of database transactions running when lots of small files are being uploaded
      */
     override fun removeRetentionLocks(locksToRemove: List<RemoveLockRequest>) {
+        logger?.v(LOG_TAG) {
+            "$logPrefix remove retention locks for ${locksToRemove.joinToString { "#${it.lockId}${it.url}" } }"
+        }
         pendingLockRemovals.update { prev ->
             prev + locksToRemove.map { it.lockId }
         }
