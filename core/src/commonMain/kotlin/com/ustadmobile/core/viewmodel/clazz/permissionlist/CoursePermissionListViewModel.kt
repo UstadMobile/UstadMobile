@@ -5,14 +5,18 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.util.ext.appendQueryArgs
 import com.ustadmobile.core.util.ext.whenSubscribed
+import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.clazz.CoursePermissionConstants
 import com.ustadmobile.core.viewmodel.clazz.permissiondetail.CoursePermissionDetailViewModel
 import com.ustadmobile.core.viewmodel.clazz.permissionedit.CoursePermissionEditViewModel
+import com.ustadmobile.core.viewmodel.person.PersonViewModelConstants
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
+import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import com.ustadmobile.lib.db.composites.CoursePermissionAndListDetail
 import com.ustadmobile.lib.db.entities.CoursePermission
 import com.ustadmobile.lib.db.entities.CourseTerminology
@@ -25,7 +29,6 @@ import org.kodein.di.DI
 data class CoursePermissionListUiState(
     val permissionsList: ListPagingSourceFactory<CoursePermissionAndListDetail> = { EmptyPagingSource() },
     val permissionLabels: List<Pair<StringResource, Long>> = emptyList(),
-    val addOptionsVisible: Boolean = false,
     val courseTerminology: CourseTerminology? = null,
 )
 
@@ -100,27 +103,23 @@ class CoursePermissionListViewModel(
     }
 
     override fun onClickAdd() {
-        _uiState.update { prev -> prev.copy(addOptionsVisible = true) }
-    }
+        val goToOnPersonSelectedArg = CoursePermissionEditViewModel.DEST_NAME
+            .appendQueryArgs(
+                mapOf(
+                    UstadView.ARG_CLAZZUID to clazzUid.toString(),
+                    UstadView.ARG_POPUPTO_ON_FINISH to destinationName,
+                )
+            )
 
-    fun onDismissAddOptions() {
-        _uiState.update { prev -> prev.copy(addOptionsVisible = false) }
-    }
-
-    fun onClickAddNewForPerson() {
-
-    }
-
-    fun onClickAddNewForRole(role: Int) {
         navigateForResult(
-            nextViewName = CoursePermissionEditViewModel.DEST_NAME,
+            nextViewName = PersonListViewModel.DEST_NAME,
             key = RESULT_KEY_PERMISSION,
             currentValue = null,
             serializer = CoursePermission.serializer(),
-            args = mapOf(
-                CoursePermissionEditViewModel.ARG_GRANT_TO_ROLE to role.toString(),
-                ARG_CLAZZUID to clazzUid.toString(),
-            ),
+            args = buildMap {
+                put(UstadView.ARG_LISTMODE, ListViewMode.PICKER.mode)
+                put(PersonViewModelConstants.ARG_GO_TO_ON_PERSON_SELECTED, goToOnPersonSelectedArg)
+            },
         )
     }
 

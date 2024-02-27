@@ -531,6 +531,7 @@ abstract class UstadViewModel(
 
         const val ARG_CLAZZUID = "clazzUid"
 
+        const val ARG_PERSON_UID = "personUid"
 
     }
 

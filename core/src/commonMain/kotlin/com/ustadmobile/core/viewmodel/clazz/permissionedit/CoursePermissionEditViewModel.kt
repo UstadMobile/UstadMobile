@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.update
 import org.kodein.di.DI
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.db.PermissionFlags
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.clazz.getTitleForCoursePermission
 import com.ustadmobile.core.viewmodel.clazz.permissiondetail.CoursePermissionDetailViewModel
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
@@ -62,7 +63,7 @@ class CoursePermissionEditViewModel(
                         cpUid = activeDb.doorPrimaryKeyManager.nextIdAsync(CoursePermission.TABLE_ID),
                         cpClazzUid = savedStateHandle[ARG_CLAZZUID]?.toLong() ?: 0,
                         cpToEnrolmentRole = savedStateHandle[ARG_GRANT_TO_ROLE]?.toInt() ?: 0,
-                        cpToPersonUid = savedStateHandle[ARG_RANT_TO_PERSONUID]?.toLong() ?: 0L
+                        cpToPersonUid = savedStateHandle[ARG_PERSON_UID]?.toLong() ?: 0L
                     )
                 },
                 uiUpdate = {
@@ -122,7 +123,12 @@ class CoursePermissionEditViewModel(
                 activeRepo.coursePermissionDao.upsertAsync(entity)
             }
 
-            finishWithResult(CoursePermissionDetailViewModel.DEST_NAME, entity.cpUid, entity)
+            val popUpToOnFinish = savedStateHandle[UstadView.ARG_POPUPTO_ON_FINISH]
+            if(popUpToOnFinish != null){
+                navController.popBackStack(popUpToOnFinish, inclusive = false)
+            }else {
+                finishWithResult(CoursePermissionDetailViewModel.DEST_NAME, entity.cpUid, entity)
+            }
         }
     }
 
@@ -131,9 +137,6 @@ class CoursePermissionEditViewModel(
         const val DEST_NAME = "CoursePermissionEdit"
 
         const val ARG_GRANT_TO_ROLE = "grantToRole"
-
-        const val ARG_RANT_TO_PERSONUID = "grantToPersonUid"
-
 
     }
 }

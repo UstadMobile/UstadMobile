@@ -16,7 +16,9 @@ import org.kodein.di.DI
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.viewmodel.clazz.CoursePermissionConstants
+import com.ustadmobile.core.viewmodel.clazz.getTitleForCoursePermission
 import dev.icerock.moko.resources.StringResource
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 
@@ -62,7 +64,7 @@ class CoursePermissionDetailViewModel(
                 launch {
                     entityFlow.combine(viewPermissionFlow) { entity, hasViewPermission ->
                         entity.takeIf { hasViewPermission }
-                    }.collect {
+                    }.collectLatest {
                         _uiState.update { prev ->
                             prev.copy(
                                 coursePermission = it,
@@ -72,6 +74,13 @@ class CoursePermissionDetailViewModel(
                                     emptyList()
                                 }
                             )
+                        }
+
+                        if(it != null) {
+                            val title = getTitleForCoursePermission(it)
+                            _appUiState.update { prev ->
+                                prev.copy(title = title)
+                            }
                         }
                     }
                 }
