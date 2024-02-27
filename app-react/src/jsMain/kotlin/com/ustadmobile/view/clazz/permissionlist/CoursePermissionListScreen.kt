@@ -39,6 +39,7 @@ val CoursePermissionListScreen = FC<Props> {
     CoursePermissionListComponent {
         uiState = uiStateVal
         onClickEntry = viewModel::onClickEntry
+        onClickDeleteEntry = viewModel::onClickDeleteEntry
         courseTerminologyEntries = terminologyEntries
     }
 
@@ -53,6 +54,8 @@ external interface CoursePermissionListProps: Props {
     var uiState: CoursePermissionListUiState
 
     var onClickEntry: (CoursePermission) -> Unit
+
+    var onClickDeleteEntry: (CoursePermission) -> Unit
 
     var courseTerminologyEntries: List<TerminologyEntry>
 
@@ -78,11 +81,15 @@ val CoursePermissionListComponent = FC<CoursePermissionListProps> { props ->
                 items = infiniteQueryResult,
                 key = { "${it.coursePermission?.cpUid}" }
             ) { item ->
+                val delete = props.uiState.showDeleteOption && item?.coursePermission?.cpToEnrolmentRole == 0
+                console.log("content show delete: $delete")
                 CoursePermissionListItem.create {
                     coursePermission = item
                     permissionLabels = props.uiState.permissionLabels
                     courseTerminologyEntries = props.courseTerminologyEntries
                     onClickEntry = props.onClickEntry
+                    showDelete = props.uiState.showDeleteOption && item?.coursePermission?.cpToEnrolmentRole == 0
+                    onClickDeleteEntry = props.onClickDeleteEntry
                 }
             }
         }

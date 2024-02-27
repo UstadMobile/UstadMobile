@@ -9,6 +9,7 @@ import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.libuicompose.components.UstadPermissionListItem
 import dev.icerock.moko.resources.StringResource
 import com.ustadmobile.core.MR
+import com.ustadmobile.lib.db.entities.CoursePermission
 import com.ustadmobile.libuicompose.util.compose.courseTerminologyEntryResource
 
 @Composable
@@ -17,6 +18,7 @@ fun CoursePermissionListItem(
     permissionLabels: List<Pair<StringResource, Long>>,
     modifier: Modifier = Modifier,
     courseTerminologyEntries: List<TerminologyEntry>,
+    onClickDelete: ((CoursePermission) -> Unit)? = null,
 ) {
     UstadPermissionListItem(
         modifier = modifier,
@@ -39,6 +41,11 @@ fun CoursePermissionListItem(
                     coursePermission?.person?.fullName() ?: ""
                 }
             )
+        },
+        onClickDelete = onClickDelete?.let { onClickDeleteFn ->
+            {
+                coursePermission?.coursePermission?.also(onClickDeleteFn)
+            }
         }
     )
 }

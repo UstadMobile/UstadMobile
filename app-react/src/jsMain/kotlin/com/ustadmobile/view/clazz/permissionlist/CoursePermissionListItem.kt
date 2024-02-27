@@ -18,6 +18,8 @@ external interface CoursePermissionListItemProps : Props{
     var permissionLabels: List<Pair<StringResource, Long>>
     var courseTerminologyEntries: List<TerminologyEntry>
     var onClickEntry: (CoursePermission) -> Unit
+    var showDelete: Boolean
+    var onClickDeleteEntry: (CoursePermission) -> Unit
 }
 
 
@@ -44,8 +46,12 @@ val CoursePermissionListItem = FC<CoursePermissionListItemProps> { props ->
         value = props.coursePermission?.coursePermission?.cpPermissionsFlag ?: 0
         toPerson = props.coursePermission?.person
         toPersonPicture = props.coursePermission?.personPicture
+        showDelete = props.showDelete
         onClick = {
             props.coursePermission?.coursePermission?.also(props.onClickEntry)
+        }
+        onClickDelete = {
+            props.coursePermission?.coursePermission?.also(props.onClickDeleteEntry)
         }
     }
 }

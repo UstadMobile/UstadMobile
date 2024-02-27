@@ -1777,10 +1777,39 @@
     -->
     <string name="declined_request_from_name">Declined request from %1$s</string>
 
+    <!--
+    Used in the context of permission management
+    -->
     <string name="view_course">View course</string>
 
+    <!--
+    Used in the context of permission management
+    -->
     <string name="edit_course">Edit course</string>
 
-    <string name="grant_permission_to">Grant permission to…</string>
+    <!--
+    Used in the context of permission management
+    -->
+    <string name="moderate">Moderate</string>
+
+    <!--
+    Used in the context of permission management
+    -->
+    <string name="manage_student_enrolments">Manage student enrolments</string>
+
+    <!--
+    Used in the context of permission management
+    -->
+    <string name="manage_teacher_enrolments">Manage teacher enrolments</string>
+
+    <!--
+    Used in the context of permission management
+    -->
+    <string name="view_learning_records">View learning records</string>
+
+    <!--
+    Used in the context of permission management
+    -->
+    <string name="edit_learning_records">Edit learning records</string>
 
 </resources>

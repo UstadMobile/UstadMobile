@@ -6,6 +6,8 @@ import androidx.room.Query
 import app.cash.paging.PagingSource
 import com.ustadmobile.door.annotation.DoorDao
 import com.ustadmobile.door.annotation.HttpAccessible
+import com.ustadmobile.door.annotation.HttpServerFunctionCall
+import com.ustadmobile.door.annotation.HttpServerFunctionParam
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.composites.CoursePermissionAndListDetail
 import com.ustadmobile.lib.db.entities.CoursePermission
@@ -18,6 +20,18 @@ expect abstract class CoursePermissionDao {
 
     @HttpAccessible(
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall(
+                functionName = "findByClazzUidAsPagingSource",
+                functionArgs = arrayOf(
+                    HttpServerFunctionParam(
+                        name = "includeDeleted",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "true",
+                    )
+                )
+            )
+        )
     )
     @Query("""
         SELECT CoursePermission.*, Person.*, PersonPicture.*
@@ -65,5 +79,13 @@ expect abstract class CoursePermissionDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun upsertAsync(coursePermission: CoursePermission)
 
+
+    @Query("""
+        UPDATE CoursePermission
+           SET cpIsDeleted = :isDeleted,
+               cpLastModified = :updateTime
+         WHERE cpUid = :cpUid  
+    """)
+    abstract suspend fun setDeleted(cpUid: Long, isDeleted: Boolean, updateTime: Long)
 
 }

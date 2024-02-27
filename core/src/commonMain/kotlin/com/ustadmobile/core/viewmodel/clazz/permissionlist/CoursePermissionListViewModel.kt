@@ -17,6 +17,7 @@ import com.ustadmobile.core.viewmodel.clazz.permissionedit.CoursePermissionEditV
 import com.ustadmobile.core.viewmodel.person.PersonViewModelConstants
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.CoursePermissionAndListDetail
 import com.ustadmobile.lib.db.entities.CoursePermission
 import com.ustadmobile.lib.db.entities.CourseTerminology
@@ -30,6 +31,7 @@ data class CoursePermissionListUiState(
     val permissionsList: ListPagingSourceFactory<CoursePermissionAndListDetail> = { EmptyPagingSource() },
     val permissionLabels: List<Pair<StringResource, Long>> = emptyList(),
     val courseTerminology: CourseTerminology? = null,
+    val showDeleteOption: Boolean = false,
 )
 
 class CoursePermissionListViewModel(
@@ -84,14 +86,15 @@ class CoursePermissionListViewModel(
                         accountPersonUid = activeUserPersonUid,
                         clazzUid = clazzUid,
                         permission = PermissionFlags.COURSE_EDIT,
-                    ).collect { hasPermission ->
+                    ).collect { hasEditPermission ->
                         _appUiState.update { prev ->
                             prev.copy(
                                 fabState = prev.fabState.copy(
-                                    visible = hasPermission
+                                    visible = hasEditPermission
                                 )
                             )
                         }
+                        _uiState.update { prev -> prev.copy(showDeleteOption = hasEditPermission) }
                     }
                 }
             }
@@ -131,6 +134,14 @@ class CoursePermissionListViewModel(
                 putFromSavedStateIfPresent(ARG_CLAZZUID)
             }
         )
+    }
+
+    fun onClickDeleteEntry(coursePermission: CoursePermission) {
+        viewModelScope.launch {
+            activeRepo.coursePermissionDao.setDeleted(
+                coursePermission.cpUid, true, systemTimeInMillis(),
+            )
+        }
     }
 
 

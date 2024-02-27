@@ -10,11 +10,22 @@ import mui.material.ListItem
 import mui.material.ListItemButton
 import mui.material.ListItemIcon
 import mui.material.ListItemText
+import mui.material.Tooltip
 import react.FC
 import react.Props
 import react.ReactNode
 import react.useMemo
 import mui.icons.material.Group as GroupIcon
+import com.ustadmobile.core.MR
+import com.ustadmobile.util.ext.useLineClamp
+import emotion.react.css
+import js.core.jso
+import mui.material.IconButton
+import react.create
+import react.dom.aria.ariaLabel
+import react.dom.html.ReactHTML.div
+import mui.icons.material.Delete as DeleteIcon
+
 external interface UstadPermissionListItemProps: Props {
 
     var value: Long
@@ -29,6 +40,10 @@ external interface UstadPermissionListItemProps: Props {
 
     var onClick: () -> Unit
 
+    var showDelete: Boolean
+
+    var onClickDelete: () -> Unit
+
 }
 
 val UstadPermissionListItem = FC<UstadPermissionListItemProps> { props ->
@@ -42,6 +57,21 @@ val UstadPermissionListItem = FC<UstadPermissionListItemProps> { props ->
     }
 
     ListItem {
+        if(props.showDelete) {
+            secondaryAction = Tooltip.create {
+                title = ReactNode(strings[MR.strings.delete])
+
+                IconButton {
+                    ariaLabel = strings[MR.strings.delete]
+                    onClick = {
+                        props.onClickDelete()
+                    }
+
+                    DeleteIcon()
+                }
+            }
+        }
+
         ListItemButton {
             onClick = {
                 props.onClick()
@@ -60,7 +90,17 @@ val UstadPermissionListItem = FC<UstadPermissionListItemProps> { props ->
 
             ListItemText {
                 primary = props.primary
-                secondary = ReactNode(permissionStr)
+                secondary = div.create {
+                    css {
+                       useLineClamp(2)
+                    }
+
+                    + permissionStr
+                }
+
+                secondaryTypographyProps = jso {
+                    component = div
+                }
             }
         }
     }

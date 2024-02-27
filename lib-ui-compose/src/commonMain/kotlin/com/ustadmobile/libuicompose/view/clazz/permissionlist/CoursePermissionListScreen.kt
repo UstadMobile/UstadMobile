@@ -32,6 +32,7 @@ fun CoursePermissionListScreen(
     CoursePermissionListScreen(
         uiState = uiState,
         onClickEntry = viewModel::onClickEntry,
+        onClickDeleteEntry = viewModel::onClickDeleteEntry,
         courseTerminologyEntries = courseTerminologyEntries,
     )
 }
@@ -41,6 +42,7 @@ fun CoursePermissionListScreen(
     uiState: CoursePermissionListUiState,
     courseTerminologyEntries: List<TerminologyEntry>,
     onClickEntry: (CoursePermission) -> Unit = { },
+    onClickDeleteEntry: (CoursePermission) -> Unit = { },
 ) {
     val pager = remember(uiState.permissionsList) {
         Pager(
@@ -63,6 +65,11 @@ fun CoursePermissionListScreen(
                 permissionLabels = uiState.permissionLabels,
                 modifier = Modifier.clickable {
                     item?.coursePermission?.also(onClickEntry)
+                },
+                onClickDelete = if(uiState.showDeleteOption && item?.coursePermission?.cpToEnrolmentRole == 0) {
+                    onClickDeleteEntry
+                }else {
+                    null
                 },
                 courseTerminologyEntries = courseTerminologyEntries,
             )
