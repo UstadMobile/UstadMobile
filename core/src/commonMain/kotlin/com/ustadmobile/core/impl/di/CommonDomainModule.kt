@@ -11,6 +11,7 @@ import com.ustadmobile.core.domain.contententry.launchcontent.DefaultLaunchConte
 import com.ustadmobile.core.domain.contententry.launchcontent.LaunchContentEntryVersionUseCase
 import com.ustadmobile.core.domain.contententry.save.SaveContentEntryUseCase
 import com.ustadmobile.core.domain.makelink.MakeLinkUseCase
+import com.ustadmobile.core.domain.person.CreateNewPersonUseCase
 import com.ustadmobile.core.domain.siteterms.GetLocaleForSiteTermsUseCase
 import com.ustadmobile.door.ext.DoorTag
 import org.kodein.di.DI
@@ -80,6 +81,13 @@ fun commonDomainDiModule(endpointScope: EndpointScope) = DI.Module("CommonDomain
     bind<CreateNewClazzUseCase>() with scoped(endpointScope).singleton {
         CreateNewClazzUseCase(
             repoOrDb = instance(tag = DoorTag.TAG_REPO)
+        )
+    }
+
+    bind<CreateNewPersonUseCase>() with scoped(endpointScope).singleton {
+        CreateNewPersonUseCase(
+            db = instance(tag = DoorTag.TAG_DB),
+            repo = instance(tag = DoorTag.TAG_REPO),
         )
     }
 

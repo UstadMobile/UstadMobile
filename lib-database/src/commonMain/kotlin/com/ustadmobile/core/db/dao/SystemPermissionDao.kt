@@ -28,6 +28,28 @@ expect abstract class SystemPermissionDao {
     ): List<SystemPermission>
 
 
+    @Query("""
+        SELECT SystemPermission.*
+          FROM SystemPermission
+         WHERE SystemPermission.spToPersonUid = :accountPersonUid
+         LIMIT 1
+    """)
+    abstract fun findByPersonUidAsFlow(
+        accountPersonUid: Long,
+    ): Flow<SystemPermission?>
+
+
+    @Query("""
+        SELECT SystemPermission.*
+          FROM SystemPermission
+         WHERE SystemPermission.spToPersonUid = :accountPersonUid
+         LIMIT 1
+    """)
+    abstract suspend fun findByPersonUid(
+        accountPersonUid: Long,
+    ): SystemPermission
+
+
     @HttpAccessible(
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
         pullQueriesToReplicate = arrayOf(
@@ -83,7 +105,7 @@ expect abstract class SystemPermissionDao {
                   AND NOT SystemPermission.spIsDeleted 
         )
     """)
-    abstract suspend fun personHasSystemPermissionAsFlow(
+    abstract fun personHasSystemPermissionAsFlow(
         accountPersonUid: Long,
         permission: Long,
     ): Flow<Boolean>

@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Sms
 import androidx.compose.material.icons.filled.SupervisedUserCircle
 import androidx.compose.material3.Divider
@@ -73,6 +74,7 @@ fun PersonDetailScreen(viewModel: PersonDetailViewModel) {
         onClickDial = viewModel::onClickDial,
         onClickSms = viewModel::onClickSms,
         onClickEmail = viewModel::onClickEmail,
+        onClickPermissions = viewModel::onClickPermissions,
     )
 }
 
@@ -86,7 +88,8 @@ fun PersonDetailScreen(
     onClickChangePassword: () -> Unit = {},
     onClickManageParentalConsent: () -> Unit = {},
     onClickChat: () -> Unit = {},
-    onClickClazz: (ClazzEnrolmentWithClazzAndAttendance) -> Unit = {}
+    onClickClazz: (ClazzEnrolmentWithClazzAndAttendance) -> Unit = {},
+    onClickPermissions: () -> Unit = { },
 ) {
     UstadVerticalScrollColumn(
         modifier = Modifier.fillMaxSize()
@@ -127,7 +130,9 @@ fun PersonDetailScreen(
             onClickCreateAccount,
             onClickChangePassword,
             onClickManageParentalConsent,
-            onClickChat)
+            onClickChat,
+            onClickPermissions = onClickPermissions,
+        )
 
         Divider(thickness = 1.dp)
 
@@ -168,6 +173,7 @@ private fun QuickActionBar(
     onClickChangePassword: () -> Unit = {},
     onClickManageParentalConsent: () -> Unit = {},
     onClickChat: () -> Unit = {},
+    onClickPermissions: () -> Unit = { },
 ) {
     Row(
         modifier = Modifier.horizontalScroll(rememberScrollState())
@@ -210,6 +216,14 @@ private fun QuickActionBar(
                 labelText = stringResource(MR.strings.change_password),
                 imageVector = Icons.Default.Key,
                 onClick = onClickChangePassword
+            )
+        }
+
+        if(uiState.showPermissionButton) {
+            UstadQuickActionButton(
+                labelText = stringResource(MR.strings.permissions),
+                imageVector = Icons.Default.Shield,
+                onClick = onClickPermissions
             )
         }
 

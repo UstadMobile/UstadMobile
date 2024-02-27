@@ -27,6 +27,8 @@ import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.message.messagelist.MessageListViewModel
 import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
+import com.ustadmobile.core.viewmodel.systempermission.detail.SystemPermissionDetailViewModel
+import com.ustadmobile.core.viewmodel.systempermission.personHasSystemPermissionAsFlowForUser
 import org.kodein.di.instanceOrNull
 
 data class PersonDetailUiState(
@@ -42,6 +44,8 @@ data class PersonDetailUiState(
     val clazzes: List<ClazzEnrolmentWithClazzAndAttendance> = emptyList(),
 
     internal val hasChangePasswordPermission: Boolean = false,
+
+    val showPermissionButton: Boolean = false,
 
     val isActiveUser: Boolean = false,
 
@@ -165,6 +169,14 @@ class PersonDetailViewModel(
                 }
 
                 launch {
+                    activeRepo.systemPermissionDao.personHasSystemPermissionAsFlowForUser(
+                        activeUserPersonUid, entityUidArg
+                    ).collect {
+                        _uiState.update { prev -> prev.copy(showPermissionButton = it) }
+                    }
+                }
+
+                launch {
                     activeRepo.personDao.personHasPermissionFlow(currentUserUid,
                         entityUid, Role.PERMISSION_RESET_PASSWORD
                     ).collect {
@@ -259,6 +271,15 @@ class PersonDetailViewModel(
         _uiState.value.person?.person?.emailAddr?.also {
             onClickEmailUseCase(it)
         }
+    }
+
+    fun onClickPermissions() {
+        navController.navigate(
+            SystemPermissionDetailViewModel.DEST_NAME,
+            mapOf(
+                ARG_PERSON_UID to entityUidArg.toString()
+            )
+        )
     }
 
     fun onClickManageParentalConsent() {

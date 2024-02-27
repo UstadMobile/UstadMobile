@@ -12,7 +12,6 @@ import com.ustadmobile.core.db.dao.ClazzDaoCommon.SORT_CLAZZNAME_DESC
 import kotlinx.coroutines.flow.Flow
 import com.ustadmobile.door.annotation.*
 import app.cash.paging.PagingSource
-import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.db.dao.ClazzDaoCommon.PERSON_HAS_PERMISSION_WITH_CLAZZ_SQL
 import com.ustadmobile.core.db.dao.CoursePermissionDaoCommon.LEFT_JOIN_ENROLMENT_FROM_COURSEPERMISSION_WITH_ACCOUNT_UID_PARAM
 import com.ustadmobile.lib.db.composites.ClazzNameAndTerminology
@@ -139,7 +138,7 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
                             WHERE CoursePermission.cpClazzUid = Clazz.clazzUid
                               AND (   CoursePermission.cpToPersonUid = :accountPersonUid 
                                    OR CoursePermission.cpToEnrolmentRole = ClazzEnrolment.clazzEnrolmentRole )
-                              AND (CoursePermission.cpPermissionsFlag & ${PermissionFlags.COURSE_VIEW}) > 0 
+                              AND (CoursePermission.cpPermissionsFlag & :permission) > 0 
                               AND NOT CoursePermission.cpIsDeleted)   
                 )
                 /* End permission check clause */ 

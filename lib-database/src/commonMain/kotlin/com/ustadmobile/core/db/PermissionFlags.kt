@@ -30,4 +30,8 @@ object PermissionFlags {
 
     const val DIRECT_ENROL = 2048L // 2^11
 
+    const val MANAGE_USER_PERMISSIONS = 4096L // 2^12
+
+    const val ALL = Long.MAX_VALUE
+
 }

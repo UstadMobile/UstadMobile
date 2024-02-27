@@ -2,7 +2,6 @@ package com.ustadmobile.core.viewmodel.clazz.permissionedit
 
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.core.util.ext.hasFlag
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.CoursePermissionConstants
 import com.ustadmobile.lib.db.entities.CoursePermission
@@ -14,6 +13,7 @@ import kotlinx.coroutines.flow.update
 import org.kodein.di.DI
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.db.PermissionFlags
+import com.ustadmobile.core.util.ext.toggleFlag
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.clazz.getTitleForCoursePermission
 import com.ustadmobile.core.viewmodel.clazz.permissiondetail.CoursePermissionDetailViewModel
@@ -100,11 +100,7 @@ class CoursePermissionEditViewModel(
             if(entityVal != null) {
                 prev.copy(
                     entity = entityVal.copy(
-                        cpPermissionsFlag = if(entityVal.cpPermissionsFlag.hasFlag(flag)) {
-                            entityVal.cpPermissionsFlag.and(flag.inv())
-                        }else {
-                            entityVal.cpPermissionsFlag.or(flag)
-                        }
+                        cpPermissionsFlag = entityVal.cpPermissionsFlag.toggleFlag(flag)
                     )
                 )
             }else {

@@ -21,7 +21,6 @@ import com.ustadmobile.lib.db.composites.EnrolmentRequestAndCoursePic
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
 import com.ustadmobile.lib.db.entities.EnrolmentRequest
-import com.ustadmobile.lib.db.entities.Role
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -91,7 +90,7 @@ class ClazzListViewModel(
 
 
     private val filterByPermission = savedStateHandle[UstadView.ARG_FILTER_BY_PERMISSION]?.toLong()
-        ?: Role.PERMISSION_CLAZZ_SELECT
+        ?: PermissionFlags.COURSE_VIEW
 
     private var lastPagingSource: PagingSource<Int, ClazzWithListDisplayDetails>? = null
 

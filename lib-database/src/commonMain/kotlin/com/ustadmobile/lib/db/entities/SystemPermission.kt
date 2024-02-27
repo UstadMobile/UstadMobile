@@ -49,6 +49,7 @@ data class SystemPermission(
 
     companion object {
 
+        const val PERSON_DEFAULT_PERMISSIONS = 0L
 
         const val TABLE_ID = 10011
     }

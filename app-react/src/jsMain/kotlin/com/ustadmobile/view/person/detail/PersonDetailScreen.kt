@@ -42,6 +42,7 @@ import web.cssom.Display
 import kotlin.js.Date
 import web.cssom.px
 import web.cssom.JustifyContent
+import mui.icons.material.Shield as ShieldIcon
 
 val PersonDetailScreen = FC<Props> {
     val viewModel = useUstadViewModel { di, savedStateHandle ->
@@ -65,6 +66,7 @@ val PersonDetailScreen = FC<Props> {
         onClickManageParentalConsent = viewModel::onClickManageParentalConsent
         onClickDial = viewModel::onClickDial
         onClickEmail = viewModel::onClickEmail
+        onClickPermissions = viewModel::onClickPermissions
     }
 
 }
@@ -78,6 +80,7 @@ external interface PersonDetailProps : Props {
     var onClickChangePassword: () -> Unit
     var onClickManageParentalConsent: () -> Unit
     var onClickChat: () -> Unit
+    var onClickPermissions: () -> Unit
 }
 
 val PersonDetailPreview = FC<Props> {
@@ -247,6 +250,14 @@ private val QuickActionBar = FC<PersonDetailProps> { props ->
                 icon = KeyIcon.create()
                 text = strings[MR.strings.change_password]
                 onClick = { props.onClickChangePassword() }
+            }
+        }
+
+        if(props.uiState.showPermissionButton) {
+            UstadQuickActionButton {
+                icon = ShieldIcon.create()
+                text = strings[MR.strings.permissions]
+                onClick = { props.onClickPermissions() }
             }
         }
 
