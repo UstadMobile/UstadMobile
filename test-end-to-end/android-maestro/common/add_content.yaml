@@ -34,35 +34,13 @@ appId: com.toughra.ustadmobile
     file: redirect_to_downloads.yaml
 - tapOn: ${TESTFILENAME}
   # id is  used for content title , text is not used because it keeps on changing
-- tapOn:
-     id: "title"
 #- tapOn:
-  #  point: 50%,22%
-- longPressOn:
-       id: "title"
-#- runFlow:
-#    when:
-#      visible: "Select all"
-#    file: redirect_to_select.yaml
-#- runFlow:
-#    when:
-#      visible:
-#        text: "More options"
-#    file: moreOptions.yaml
-- eraseText
-- inputText: ${TESTCONTENTNAME}
-- hideKeyboard
+    # id: "title"
+#- longPressOn:
+     # id: "title"
+#- tapOn: 'Select All'
+#- eraseText: 100
+#- inputText: ${TESTCONTENTNAME}
+#- hideKeyboard
 - tapOn: "SAVE"
-- runFlow:
-    when:
-      visible: "Allow Ustad Mobile to send you notifications?"
-    file: dismiss_notification.yaml
-- tapOn:
-    text: ${TESTCONTENTNAME}
-- tapOn: Open
-- runFlow:
-    when:
-      visible: "Accept & continue"
-    file: google_permission.yaml
-
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_add_to_library"

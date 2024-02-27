@@ -14,14 +14,20 @@ env:
     file: "../common/add_content.yaml"
     env:
       TESTFILENAME: Video_Content.mp4
-      TESTCONTENTNAME: AddContentVideoTest
       CONTROLSERVER: ${CONTROLSERVER}
       TESTSERIAL: ${TESTSERIAL}
+- tapOn: "Video"
+- tapOn: Open
 - runFlow:
     file: "../common/login_download_and_open_content.yaml"
-    env:
-       TESTCONTENTNAME: AddContentVideoTest
+- tapOn: "Library"
+- extendedWaitUntil:
+    visible: "Video"
+    timeout: 60000
+- tapOn: "Video"
+- tapOn: Download
+- tapOn: Open
+- tapOn:
+    id: "com.toughra.ustadmobile:id/exo_ad_overlay"
+- assertVisible: "Pause"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_download_and_open"
-- back
-- tapOn: "ATTEMPTS"
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/video_attempts_page"

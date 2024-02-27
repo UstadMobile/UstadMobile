@@ -12,12 +12,6 @@ appId: com.toughra.ustadmobile
     file: "../common/user_login.yaml"
 #Download and open content
 - tapOn: "Library"
-- extendedWaitUntil:
-    visible: ${TESTCONTENTNAME}
-    timeout: 60000
-- tapOn: ${TESTCONTENTNAME}
-- tapOn: Download
-- tapOn: Open
 - runFlow:
       when:
           visible:

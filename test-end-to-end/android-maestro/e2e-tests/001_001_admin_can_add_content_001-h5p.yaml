@@ -14,15 +14,26 @@ env:
     file: "../common/add_content.yaml"
     env:
       TESTFILENAME: "H5p_Content.h5p"
-      TESTCONTENTNAME: "AddContentH5pTest"
       CONTROLSERVER: ${CONTROLSERVER}
       TESTSERIAL: ${TESTSERIAL}
+- tapOn: "True/False Question"
+- tapOn: Open
+- runFlow:
+    when:
+      visible: "Accept & continue"
+    file: "../common/google_permission.yaml"
 - assertVisible: "Check"
 - tapOn: "Close tab"
 - runFlow:
     file: "../common/login_download_and_open_content.yaml"
-    env:
-      TESTCONTENTNAME: "AddContentH5pTest"
+- tapOn: "Library"
+- extendedWaitUntil:
+    visible: "True/False Question"
+    timeout: 60000
+- tapOn: "True/False Question"
+- tapOn: Download
+- tapOn: Open
 - assertVisible: "Check"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_download_and_open"
 - tapOn: "Close tab"
-#- takeScreenshot: "${TESTRESULTSDIR}/screenshots/h5p_attempts_page"
+- tapOn: "Back"
