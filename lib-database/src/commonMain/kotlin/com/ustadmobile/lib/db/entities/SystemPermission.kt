@@ -49,7 +49,6 @@ data class SystemPermission(
 
     companion object {
 
-        const val PERMISSION_ADD_COURSE: Long = 128L
 
         const val TABLE_ID = 10011
     }

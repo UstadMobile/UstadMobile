@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import org.kodein.di.DI
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.viewmodel.clazz.getTitleForCoursePermission
 import com.ustadmobile.core.viewmodel.clazz.permissiondetail.CoursePermissionDetailViewModel
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
@@ -32,6 +33,8 @@ class CoursePermissionEditViewModel(
 
     val uiState: Flow<CoursePermissionEditUiState> = _uiState.asStateFlow()
 
+    private val clazzUid: Long = savedStateHandle[ARG_CLAZZUID]?.toLong() ?: 0L
+
     init {
         _uiState.update { prev ->
             prev.copy(
@@ -39,15 +42,20 @@ class CoursePermissionEditViewModel(
             )
         }
 
-        launchWithLoadingIndicator(
+
+        launchIfHasPermission(
+            permissionCheck = {
+                it.clazzDao.personHasPermissionWithClazzAsync2(activeUserPersonUid, clazzUid,
+                    PermissionFlags.COURSE_EDIT)
+            },
             onSetFieldsEnabled = {
                 _uiState.update { prev -> prev.copy(fieldsEnabled = it) }
-            }
+            },
         ) {
             val entity = loadEntity(
                 serializer = CoursePermission.serializer(),
                 onLoadFromDb = { db ->
-                    db.coursePermissionDao.findByUid(entityUidArg)
+                    db.coursePermissionDao.findByUidAndClazzUid(entityUidArg, clazzUid)
                 },
                 makeDefault = {
                     CoursePermission(

@@ -346,19 +346,31 @@ abstract class UstadViewModel(
      */
     protected fun launchIfHasPermission(
         permissionCheck: suspend (UmAppDatabase) -> Boolean,
-        block: suspend CoroutineScope.() -> Unit
+        setLoadingState: Boolean = false,
+        onSetFieldsEnabled: ((Boolean) -> Unit)? = null,
+        block: suspend CoroutineScope.() -> Unit,
     ) {
+        if(setLoadingState) {
+            _appUiState.update { prev -> prev.copy(loadingState = LoadingUiState.INDETERMINATE) }
+        }
+        onSetFieldsEnabled?.invoke(false)
+
         viewModelScope.launch {
-            if(!activeRepo.localFirstThenRepoIfFalse(permissionCheck)) {
-                navController.navigate(
-                    ErrorViewModel.DEST_NAME,
-                    emptyMap(),
-                    goOptions = UstadMobileSystemCommon.UstadGoOptions(
-                        popUpToViewName = destinationName, popUpToInclusive = true
+            try {
+                if(!activeRepo.localFirstThenRepoIfFalse(permissionCheck)) {
+                    navController.navigate(
+                        ErrorViewModel.DEST_NAME,
+                        emptyMap(),
+                        goOptions = UstadMobileSystemCommon.UstadGoOptions(
+                            popUpToViewName = destinationName, popUpToInclusive = true
+                        )
                     )
-                )
-            }else {
-                block()
+                }else {
+                    block()
+                }
+            }finally {
+                _appUiState.update { prev -> prev.copy(loadingState = LoadingUiState.NOT_LOADING) }
+                onSetFieldsEnabled?.invoke(true)
             }
         }
     }

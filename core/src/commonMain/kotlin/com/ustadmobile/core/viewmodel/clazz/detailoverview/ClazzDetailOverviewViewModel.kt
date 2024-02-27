@@ -11,6 +11,7 @@ import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.CourseDiscussionDetailViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import app.cash.paging.PagingSource
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCase
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.locale.CourseTerminologyStrings
@@ -122,7 +123,7 @@ class ClazzDetailOverviewViewModel(
         val permissionFlow = activeRepo.clazzDao.personHasPermissionWithClazzAsFlow2(
             accountPersonUid = activeUserPersonUid,
             clazzUid = entityUidArg,
-            permission = CoursePermission.PERMISSION_VIEW
+            permission = PermissionFlags.COURSE_VIEW
         ).shareIn(viewModelScope, SharingStarted.WhileSubscribed())
 
         viewModelScope.launch {
@@ -154,7 +155,7 @@ class ClazzDetailOverviewViewModel(
 
                 launch {
                     activeRepo.clazzDao.personHasPermissionWithClazzAsFlow2(
-                        accountManager.currentAccount.personUid, entityUidArg, CoursePermission.PERMISSION_EDIT
+                        accountManager.currentAccount.personUid, entityUidArg, PermissionFlags.COURSE_VIEW
                     ).collect { hasEditPermission ->
                         _appUiState.update { prev ->
                             prev.copy(

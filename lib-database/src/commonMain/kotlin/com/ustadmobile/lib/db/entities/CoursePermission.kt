@@ -3,6 +3,12 @@ package com.ustadmobile.lib.db.entities
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.ustadmobile.core.db.PermissionFlags.COURSE_ATTENDANCE_VIEW
+import com.ustadmobile.core.db.PermissionFlags.COURSE_EDIT
+import com.ustadmobile.core.db.PermissionFlags.COURSE_MANAGE_STUDENT_ENROLMENT
+import com.ustadmobile.core.db.PermissionFlags.COURSE_MANAGE_TEACHER_ENROLMENT
+import com.ustadmobile.core.db.PermissionFlags.COURSE_MODERATE
+import com.ustadmobile.core.db.PermissionFlags.COURSE_VIEW
 import com.ustadmobile.door.annotation.ReplicateEntity
 import com.ustadmobile.door.annotation.ReplicateEtag
 import com.ustadmobile.door.annotation.ReplicateLastModified
@@ -62,27 +68,16 @@ data class CoursePermission(
 
         const val TABLE_ID = 10012
 
-        const val PERMISSION_VIEW = 1L //2^0
 
-        const val PERMISSION_EDIT = 2L //2^1
-
-        const val PERMISSION_MODERATE = 4L //2^2
-
-        const val PERMISSION_MANAGE_STUDENT_ENROLMENT = 8L //2^3
-
-        const val PERMISSION_MANAGE_TEACHER_ENROLMENT = 16L //2^4
-
-        const val PERMISSION_ATTENDANCE_VIEW = 32L //2^5
-
-        const val TEACHER_DEFAULT_PERMISSIONS = PERMISSION_VIEW or
-                PERMISSION_EDIT or
-                PERMISSION_MODERATE or
-                PERMISSION_MANAGE_STUDENT_ENROLMENT or
-                PERMISSION_MANAGE_TEACHER_ENROLMENT or
-                PERMISSION_ATTENDANCE_VIEW
+        const val TEACHER_DEFAULT_PERMISSIONS = COURSE_VIEW or
+                COURSE_EDIT or
+                COURSE_MODERATE or
+                COURSE_MANAGE_STUDENT_ENROLMENT or
+                COURSE_MANAGE_TEACHER_ENROLMENT or
+                COURSE_ATTENDANCE_VIEW
 
 
-        const val STUDENT_DEFAULT_PERMISSIONS = PERMISSION_VIEW
+        const val STUDENT_DEFAULT_PERMISSIONS = COURSE_VIEW
 
 
     }

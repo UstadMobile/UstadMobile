@@ -4,20 +4,21 @@ import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.viewmodel.DetailViewModel
-import com.ustadmobile.core.viewmodel.clazz.getTitleForCoursePermission
 import com.ustadmobile.core.viewmodel.clazz.permissionedit.CoursePermissionEditViewModel
 import com.ustadmobile.lib.db.entities.CoursePermission
 import com.ustadmobile.lib.db.entities.Role
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.viewmodel.clazz.CoursePermissionConstants
 import dev.icerock.moko.resources.StringResource
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 data class CoursePermissionDetailUiState(
     val coursePermission: CoursePermission? = null,
@@ -29,16 +30,22 @@ class CoursePermissionDetailViewModel(
 ) : DetailViewModel<CoursePermission>(di, savedStateHandle, DEST_NAME){
 
     private val _uiState = MutableStateFlow(
-        CoursePermissionDetailUiState(
-            permissionLabels = CoursePermissionConstants.COURSE_PERMISSIONS_LABELS,
-        )
+        CoursePermissionDetailUiState()
     )
 
     val uiState: Flow<CoursePermissionDetailUiState> = _uiState.asStateFlow()
 
+    private val clazzUid = savedStateHandle[ARG_CLAZZUID]?.toLong() ?: 0L
+
     init {
-        val coursePermissionFlow = activeRepo.coursePermissionDao.findByUidAsFlow(
-            entityUidArg)
+        val entityFlow = activeRepo.coursePermissionDao.findByUidAndClazzUidAsFlow(
+            entityUidArg, clazzUid)
+
+        val viewPermissionFlow = activeRepo.clazzDao.personHasPermissionWithClazzAsFlow(
+            accountPersonUid = activeUserPersonUid,
+            clazzUid = clazzUid,
+            permission = PermissionFlags.COURSE_VIEW
+        ).distinctUntilChanged()
 
         _appUiState.update { prev ->
             prev.copy(
@@ -53,29 +60,34 @@ class CoursePermissionDetailViewModel(
         viewModelScope.launch {
             _uiState.whenSubscribed {
                 launch {
-                    coursePermissionFlow.collectLatest { coursePermission ->
+                    entityFlow.combine(viewPermissionFlow) { entity, hasViewPermission ->
+                        entity.takeIf { hasViewPermission }
+                    }.collect {
                         _uiState.update { prev ->
-                            prev.copy(coursePermission = coursePermission)
+                            prev.copy(
+                                coursePermission = it,
+                                permissionLabels = if(it != null){
+                                    CoursePermissionConstants.COURSE_PERMISSIONS_LABELS
+                                }else {
+                                    emptyList()
+                                }
+                            )
                         }
+                    }
+                }
 
-                        launch {
-                            val title = getTitleForCoursePermission(coursePermission)
-
-                            _appUiState.update { prev -> prev.copy(title = title) }
-                        }
-
-                        activeRepo.clazzDao.personHasPermissionWithClazzAsFlow(
-                            accountPersonUid = accountManager.currentAccount.personUid,
-                            clazzUid = coursePermission?.cpClazzUid ?: 0L,
-                            permission = Role.PERMISSION_CLAZZ_UPDATE
-                        ).collect { hasEditPermission ->
-                            _appUiState.update { prev ->
-                                prev.copy(
-                                    fabState = prev.fabState.copy(
-                                        visible = coursePermission != null && hasEditPermission
-                                    )
+                launch {
+                    activeRepo.clazzDao.personHasPermissionWithClazzAsFlow(
+                        accountPersonUid = accountManager.currentAccount.personUid,
+                        clazzUid = clazzUid,
+                        permission = Role.PERMISSION_CLAZZ_UPDATE
+                    ).distinctUntilChanged().collect { hasEditPermission ->
+                        _appUiState.update { prev ->
+                            prev.copy(
+                                fabState = prev.fabState.copy(
+                                    visible = hasEditPermission
                                 )
-                            }
+                            )
                         }
                     }
                 }
@@ -86,7 +98,10 @@ class CoursePermissionDetailViewModel(
     private fun onClickEdit() {
         navController.navigate(
             CoursePermissionEditViewModel.DEST_NAME,
-            mapOf(ARG_ENTITY_UID to (_uiState.value.coursePermission?.cpUid?.toString() ?: "0"))
+            buildMap {
+                put(ARG_ENTITY_UID, (_uiState.value.coursePermission?.cpUid?.toString() ?: "0"))
+                putFromSavedStateIfPresent(ARG_CLAZZUID)
+            }
         )
     }
 

@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.dao.deactivateByUids
 import com.ustadmobile.core.domain.courseblockupdate.AddOrUpdateCourseBlockUseCase
 import com.ustadmobile.core.domain.courseblockupdate.UpdateCourseBlocksOnReorderOrCommitUseCase
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
 import com.ustadmobile.core.domain.clazz.CreateNewClazzUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
@@ -149,11 +150,11 @@ class ClazzEditViewModel(
             permissionCheck = {
                 if(entityUidArg != 0L) {
                     it.clazzDao.personHasPermissionWithClazzAsync2(
-                        activeUserPersonUid, entityUidArg, CoursePermission.PERMISSION_EDIT
+                        activeUserPersonUid, entityUidArg, PermissionFlags.COURSE_EDIT
                     )
                 }else {
                     it.systemPermissionDao.personHasSystemPermission(
-                        activeUserPersonUid, SystemPermission.PERMISSION_ADD_COURSE
+                        activeUserPersonUid, PermissionFlags.ADD_COURSE
                     )
                 }
             }
@@ -186,8 +187,6 @@ class ClazzEditViewModel(
                                 clazzStartTime = systemTimeInMillis()
                                 clazzTimeZone = getDefaultTimeZoneId()
                                 clazzSchoolUid = savedStateHandle[UstadView.ARG_SCHOOL_UID]?.toLong() ?: 0L
-                                school = activeRepo.schoolDao.takeIf { clazzSchoolUid != 0L }
-                                    ?.findByUidAsync(clazzSchoolUid)
                                 terminology = activeRepo.courseTerminologyDao
                                     .takeIf { clazzTerminologyUid != 0L }
                                     ?.findByUidAsync(clazzTerminologyUid)

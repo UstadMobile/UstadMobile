@@ -11,6 +11,7 @@ import com.ustadmobile.core.view.*
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import app.cash.paging.PagingSource
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.util.ext.dayStringResource
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
@@ -21,7 +22,6 @@ import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
 import com.ustadmobile.lib.db.entities.EnrolmentRequest
 import com.ustadmobile.lib.db.entities.Role
-import com.ustadmobile.lib.db.entities.SystemPermission
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -134,7 +134,7 @@ class ClazzListViewModel(
         viewModelScope.launch {
             _uiState.whenSubscribed {
                 activeRepo.systemPermissionDao.personHasSystemPermissionAsFlow(
-                    accountManager.currentAccount.personUid, SystemPermission.PERMISSION_ADD_COURSE
+                    accountManager.currentAccount.personUid, PermissionFlags.ADD_COURSE
                 ).distinctUntilChanged().collect { hasPermission ->
                     _uiState.update { prev ->
                         prev.copy(

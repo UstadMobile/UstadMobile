@@ -1,6 +1,7 @@
 package com.ustadmobile.core.viewmodel.clazz.detail
 
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.impl.appstate.TabItem
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.capitalizeFirstLetter
@@ -13,7 +14,6 @@ import com.ustadmobile.core.viewmodel.clazzenrolment.clazzmemberlist.ClazzMember
 import com.ustadmobile.core.viewmodel.clazzlog.attendancelist.ClazzLogListAttendanceViewModel
 import com.ustadmobile.core.viewmodel.coursegroupset.list.CourseGroupSetListViewModel
 import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.CoursePermission
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -69,13 +69,13 @@ class ClazzDetailViewModel(
         val viewPermissionFlow = activeRepo.clazzDao.personHasPermissionWithClazzAsFlow2(
             accountPersonUid = activeUserPersonUid,
             clazzUid = entityUidArg,
-            permission = CoursePermission.PERMISSION_VIEW
+            permission = PermissionFlags.COURSE_VIEW
         )
 
         val attendancePermissionFlow = activeRepo.clazzDao.personHasPermissionWithClazzAsFlow2(
             accountPersonUid = activeUserPersonUid,
             clazzUid = entityUidArg,
-            permission = CoursePermission.PERMISSION_ATTENDANCE_VIEW
+            permission = PermissionFlags.COURSE_ATTENDANCE_VIEW
         )
 
         viewModelScope.launch {

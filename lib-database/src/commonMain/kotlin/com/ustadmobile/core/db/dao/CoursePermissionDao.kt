@@ -35,6 +35,9 @@ expect abstract class CoursePermissionDao {
     ): PagingSource<Int, CoursePermissionAndListDetail>
 
 
+    /**
+     * ClazzUid parameter is added because ViewModel will check permission on the same clazzuid
+     */
     @HttpAccessible(
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
     )
@@ -42,8 +45,9 @@ expect abstract class CoursePermissionDao {
         SELECT CoursePermission.*
           FROM CoursePermission
          WHERE CoursePermission.cpUid = :uid
+           AND CoursePermission.cpClazzUid = :clazzUid
     """)
-    abstract suspend fun findByUid(uid: Long): CoursePermission?
+    abstract suspend fun findByUidAndClazzUid(uid: Long, clazzUid: Long): CoursePermission?
 
     @HttpAccessible(
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
@@ -52,8 +56,9 @@ expect abstract class CoursePermissionDao {
         SELECT CoursePermission.*
           FROM CoursePermission
          WHERE CoursePermission.cpUid = :uid
+           AND CoursePermission.cpClazzUid = :clazzUid 
     """)
-    abstract fun findByUidAsFlow(uid: Long): Flow<CoursePermission?>
+    abstract fun findByUidAndClazzUidAsFlow(uid: Long, clazzUid: Long): Flow<CoursePermission?>
 
 
 

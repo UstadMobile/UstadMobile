@@ -2,8 +2,10 @@ package com.ustadmobile.core.viewmodel.clazz.permissionlist
 
 import app.cash.paging.PagingSource
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.UstadListViewModel
@@ -14,8 +16,8 @@ import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.lib.db.composites.CoursePermissionAndListDetail
 import com.ustadmobile.lib.db.entities.CoursePermission
 import com.ustadmobile.lib.db.entities.CourseTerminology
-import com.ustadmobile.lib.db.entities.Role
 import dev.icerock.moko.resources.StringResource
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -44,13 +46,6 @@ class CoursePermissionListViewModel(
     }
 
     init {
-        _uiState.update { prev ->
-            prev.copy(
-                permissionLabels = CoursePermissionConstants.COURSE_PERMISSIONS_LABELS,
-                permissionsList = pagingSource
-            )
-        }
-
         _appUiState.update { prev ->
             prev.copy(
                 title = systemImpl.getString(MR.strings.permissions),
@@ -64,17 +59,37 @@ class CoursePermissionListViewModel(
         }
 
         viewModelScope.launch {
-            activeRepo.clazzDao.personHasPermissionWithClazzAsFlow(
-                accountPersonUid = activeUserPersonUid,
-                clazzUid = clazzUid,
-                permission = Role.PERMISSION_CLAZZ_UPDATE,
-            ).collect { hasPermission ->
-                _appUiState.update { prev ->
-                    prev.copy(
-                        fabState = prev.fabState.copy(
-                            visible = hasPermission
-                        )
-                    )
+            _uiState.whenSubscribed {
+                launch {
+                    activeRepo.clazzDao.personHasPermissionWithClazzAsFlow2(
+                        accountPersonUid = activeUserPersonUid,
+                        clazzUid = clazzUid,
+                        permission = PermissionFlags.COURSE_VIEW,
+                    ).distinctUntilChanged().collect { hasViewPermission ->
+                        _uiState.update { prev ->
+                            prev.copy(
+                                permissionLabels = CoursePermissionConstants.COURSE_PERMISSIONS_LABELS,
+                                permissionsList = pagingSource.takeIf { hasViewPermission }
+                                    ?: { EmptyPagingSource() }
+                            )
+                        }
+                    }
+                }
+
+                launch {
+                    activeRepo.clazzDao.personHasPermissionWithClazzAsFlow2(
+                        accountPersonUid = activeUserPersonUid,
+                        clazzUid = clazzUid,
+                        permission = PermissionFlags.COURSE_EDIT,
+                    ).collect { hasPermission ->
+                        _appUiState.update { prev ->
+                            prev.copy(
+                                fabState = prev.fabState.copy(
+                                    visible = hasPermission
+                                )
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -112,7 +127,10 @@ class CoursePermissionListViewModel(
     fun onClickEntry(coursePermission: CoursePermission) {
         navController.navigate(
             CoursePermissionDetailViewModel.DEST_NAME,
-            mapOf(ARG_ENTITY_UID to coursePermission.cpUid.toString())
+            buildMap {
+                put(ARG_ENTITY_UID, coursePermission.cpUid.toString())
+                putFromSavedStateIfPresent(ARG_CLAZZUID)
+            }
         )
     }
 
