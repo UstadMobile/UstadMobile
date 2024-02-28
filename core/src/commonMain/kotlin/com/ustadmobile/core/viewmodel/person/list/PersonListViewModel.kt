@@ -20,12 +20,16 @@ import app.cash.paging.PagingSourceLoadParams
 import app.cash.paging.PagingSourceLoadResult
 import app.cash.paging.PagingSourceLoadResultPage
 import app.cash.paging.PagingState
+import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
+import com.ustadmobile.core.impl.appstate.Snack
+import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.viewmodel.clazz.invitevialink.InviteViaLinkViewModel
 import com.ustadmobile.core.viewmodel.person.PersonViewModelConstants.ARG_POPUP_TO_ON_PERSON_SELECTED
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.lib.db.composites.PersonAndListDisplayDetails
+import org.kodein.di.instance
 
 data class PersonListUiState(
     val personList: () -> PagingSource<Int, PersonAndListDisplayDetails> = { EmptyPagingSource() },
@@ -38,6 +42,8 @@ data class PersonListUiState(
     val sortOption: SortOrderOption = sortOptions.first(),
     val showAddItem: Boolean = false,
     val showInviteViaLink: Boolean = false,
+    val inviteCode: String? = null,
+    val showSortOptions: Boolean = true,
 )
 
 class EmptyPagingSource<Key: Any, Value: Any>(): PagingSource<Key, Value>() {
@@ -74,8 +80,8 @@ class PersonListViewModel(
         ?.split(",")?.filter { it.isNotEmpty() }?.map { it.trim().toLong() }
         ?: listOf()
 
-    private val filterByPermission = savedStateHandle[UstadView.ARG_FILTER_BY_PERMISSION]?.trim()?.toLong()
-        ?: Role.PERMISSION_PERSON_SELECT
+    private val permissionRequiredToShowList =
+        savedStateHandle[ARG_REQUIRE_PERMISSION_TO_SHOW_LIST]?.toLong() ?: 0
 
     private val pagingSourceFactory: () -> PagingSource<Int, PersonAndListDisplayDetails> = {
         activeRepo.personDao.findPersonsWithPermissionAsPagingSource(
@@ -92,21 +98,52 @@ class PersonListViewModel(
 
     private val inviteCode = savedStateHandle[ARG_SHOW_ADD_VIA_INVITE_LINK_CODE]
 
+    private val setClipboardStringUseCase: SetClipboardStringUseCase by instance()
+
     init {
         _appUiState.update { prev ->
             prev.copy(
                 navigationVisible = true,
-                searchState = createSearchEnabledState(),
-                title = listTitle(MR.strings.people, MR.strings.select_person)
+                searchState = createSearchEnabledState(visible = false),
+                title = savedStateHandle[ARG_TITLE] ?: listTitle(MR.strings.people, MR.strings.select_person)
             )
         }
 
-        _uiState.update { prev ->
-            prev.copy(
-                personList = pagingSourceFactory,
-                showInviteViaLink = inviteCode != null,
+        val hasPermissionToListFlow = if(permissionRequiredToShowList == 0L) {
+            flowOf(true)
+        }else {
+            activeRepo.systemPermissionDao.personHasSystemPermissionAsFlow(
+                accountPersonUid = activeUserPersonUid,
+                permission = permissionRequiredToShowList,
             )
         }
+
+        viewModelScope.launch {
+            _uiState.whenSubscribed {
+                hasPermissionToListFlow.distinctUntilChanged().collect { hasPermissionToList ->
+                    _uiState.update { prev ->
+                        prev.copy(
+                            personList = if(hasPermissionToList) {
+                                pagingSourceFactory
+                            }else {
+                                { EmptyPagingSource() }
+                            },
+                            showInviteViaLink = inviteCode != null,
+                            inviteCode = inviteCode,
+                            showSortOptions = hasPermissionToList,
+                        )
+                    }
+                    _appUiState.update { prev ->
+                        prev.copy(
+                            searchState = prev.searchState.copy(
+                                visible = hasPermissionToList,
+                            )
+                        )
+                    }
+                }
+            }
+        }
+
 
         viewModelScope.launch {
             collectHasPermissionFlowAndSetAddNewItemUiState(
@@ -148,6 +185,13 @@ class PersonListViewModel(
                 ARG_INVITE_CODE to inviteCode
             )
         )
+    }
+
+    fun onClickCopyInviteCode() {
+        _uiState.value.inviteCode?.also { inviteCode ->
+            setClipboardStringUseCase(inviteCode)
+            snackDispatcher.showSnackBar(Snack(systemImpl.getString(MR.strings.copied_to_clipboard)))
+        }
     }
 
     override fun onClickAdd() {
@@ -199,6 +243,15 @@ class PersonListViewModel(
         const val ARG_EXCLUDE_PERSONUIDS_LIST = "excludeAlreadySelectedList"
 
         const val ARG_SHOW_ADD_VIA_INVITE_LINK_CODE = "showAddViaInviteLink"
+
+        /**
+         * Require a specific system permission to show the list. This has no security implication,
+         * because it will be enforced on navigating to the next screen.
+         *
+         * When this is used as part of the enrol student/teacher flow, this avoids showing a list
+         * of people when the user does not have permission to actually enrol them.
+         */
+        const val ARG_REQUIRE_PERMISSION_TO_SHOW_LIST = "rptsl"
 
 
     }

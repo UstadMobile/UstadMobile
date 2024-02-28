@@ -18,6 +18,7 @@ import org.kodein.di.DI
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.viewmodel.systempermission.edit.SystemPermissionEditViewModel
+import kotlinx.coroutines.flow.collectLatest
 
 data class SystemPermissionDetailUiState(
     val systemPermission: SystemPermission? = null,
@@ -54,7 +55,6 @@ class SystemPermissionDetailViewModel(
 
         _appUiState.update {
             prev -> prev.copy(
-                title = systemImpl.getString(MR.strings.permissions),
                 fabState = FabUiState(
                     text = systemImpl.getString(MR.strings.edit),
                     onClick = this@SystemPermissionDetailViewModel::onClickEdit,
@@ -68,7 +68,7 @@ class SystemPermissionDetailViewModel(
                 launch {
                     entityFlow.combine(viewPermissionFlow) { entity, hasViewPermission ->
                         entity.takeIf { hasViewPermission }
-                    }.collect {
+                    }.collectLatest {
                         _uiState.update { prev ->
                             prev.copy(
                                 systemPermission = it,
@@ -78,6 +78,12 @@ class SystemPermissionDetailViewModel(
                                     emptyList()
                                 }
                             )
+                        }
+
+                        if(it != null) {
+                            val title = activeRepo.personDao.getNamesByUidAsync(argPersonUid)
+
+                            _appUiState.update { prev -> prev.copy(title = title?.toString() ?: "") }
                         }
                     }
                 }
@@ -93,7 +99,6 @@ class SystemPermissionDetailViewModel(
                         }
                     }
                 }
-
             }
         }
     }

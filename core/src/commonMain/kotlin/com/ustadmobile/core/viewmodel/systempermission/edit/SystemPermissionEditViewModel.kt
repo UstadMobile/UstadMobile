@@ -74,6 +74,12 @@ class SystemPermissionEditViewModel(
                     )
                 )
             }
+
+
+            val title = activeRepo.personDao.getNamesByUidAsync(argPersonUid)
+
+            _appUiState.update { prev -> prev.copy(title = title?.toString() ?: "") }
+
         }
     }
 

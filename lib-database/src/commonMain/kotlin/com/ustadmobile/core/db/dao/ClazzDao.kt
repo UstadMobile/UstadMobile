@@ -12,8 +12,13 @@ import com.ustadmobile.core.db.dao.ClazzDaoCommon.SORT_CLAZZNAME_DESC
 import kotlinx.coroutines.flow.Flow
 import com.ustadmobile.door.annotation.*
 import app.cash.paging.PagingSource
+import com.ustadmobile.core.db.PermissionFlags
+import com.ustadmobile.core.db.dao.ClazzDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT1
+import com.ustadmobile.core.db.dao.ClazzDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT2
+import com.ustadmobile.core.db.dao.ClazzDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT3
 import com.ustadmobile.core.db.dao.ClazzDaoCommon.PERSON_HAS_PERMISSION_WITH_CLAZZ_SQL
 import com.ustadmobile.core.db.dao.CoursePermissionDaoCommon.LEFT_JOIN_ENROLMENT_FROM_COURSEPERMISSION_WITH_ACCOUNT_UID_PARAM
+import com.ustadmobile.lib.db.composites.ClazzAndDetailPermissions
 import com.ustadmobile.lib.db.composites.ClazzNameAndTerminology
 import com.ustadmobile.lib.db.composites.CoursePermissionAndEnrolment
 import com.ustadmobile.lib.db.composites.ScopedGrantAndGroupMember
@@ -318,6 +323,43 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
         clazzUid: Long,
         permission: Long,
     ): Flow<Boolean>
+
+
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall("personHasPermissionWithClazzEntities2"),
+            HttpServerFunctionCall("clazzAndDetailPermissionsAsFlow"),
+        )
+    )
+    @Query("""
+        SELECT Clazz.*,
+               (  $PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT1 
+                  ${PermissionFlags.COURSE_ATTENDANCE_VIEW}
+                  $PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT2
+                  ${PermissionFlags.COURSE_ATTENDANCE_VIEW}
+                  $PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT3
+               ) AS hasAttendancePermission,
+               (  $PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT1 
+                  ${PermissionFlags.COURSE_VIEW_MEMBERS}
+                  $PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT2
+                  ${PermissionFlags.COURSE_VIEW_MEMBERS}
+                  $PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT3
+               ) AS hasViewMembersPermission
+          FROM Clazz
+         WHERE Clazz.clazzUid = :clazzUid
+           AND (  $PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT1 
+                  ${PermissionFlags.COURSE_VIEW}
+                  $PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT2
+                  ${PermissionFlags.COURSE_VIEW}
+                  $PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT3
+               )
+    """)
+    @QueryLiveTables(arrayOf("Clazz", "CoursePermission", "ClazzEnrolment", "SystemPermission"))
+    abstract fun clazzAndDetailPermissionsAsFlow(
+        accountPersonUid: Long,
+        clazzUid: Long,
+    ): Flow<ClazzAndDetailPermissions?>
 
     @HttpAccessible(
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,

@@ -172,10 +172,10 @@ class ClazzDetailOverviewViewModel(
                 }
 
                 launch {
-                    activeDb.clazzDao.personHasPermissionWithClazzAsFlow(
+                    activeDb.clazzDao.personHasPermissionWithClazzAsFlow2(
                         accountPersonUid = activeUserPersonUid,
                         clazzUid = entityUidArg,
-                        permission = Role.PERMISSION_CLAZZ_ADD_STUDENT
+                        permission = PermissionFlags.COURSE_MANAGE_STUDENT_ENROLMENT
                     ).collect { canAddStudent ->
                         _uiState.update { prev ->
                             prev.copy(

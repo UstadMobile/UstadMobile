@@ -1812,4 +1812,14 @@
     -->
     <string name="edit_learning_records">Edit learning records</string>
 
+    <!--
+    Used in the context of permission management
+    -->
+    <string name="view_members">View members</string>
+
+
+    <string name="copy_invite_code">Copy invite code</string>
+
+    <string name="direct_enrol_users_onto_courses">Directly enrol users onto courses</string>
+
 </resources>

@@ -22,6 +22,7 @@ import com.ustadmobile.core.viewmodel.person.PersonViewModelConstants
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import app.cash.paging.PagingSource
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.util.ext.dayStringResource
 import com.ustadmobile.core.util.ext.localFirstThenRepoIfNull
@@ -31,7 +32,6 @@ import com.ustadmobile.lib.db.composites.EnrolmentRequestAndPersonPicture
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.composites.PersonAndClazzMemberListDetails
 import com.ustadmobile.lib.db.entities.EnrolmentRequest
-import com.ustadmobile.lib.db.entities.Role
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
@@ -118,6 +118,7 @@ class ClazzMemberListViewModel(
             searchText = _appUiState.value.searchState.searchText.toQueryLikeParam(),
             accountPersonUid = activeUserPersonUid,
             currentTime = systemTimeInMillis(),
+            permission = PermissionFlags.COURSE_VIEW_MEMBERS,
         )
     }
 
@@ -186,9 +187,10 @@ class ClazzMemberListViewModel(
 
             _uiState.whenSubscribed {
                 launch {
-                    activeDb.clazzDao.personHasPermissionWithClazzAsFlow(
-                        accountPersonUid = activeUserPersonUid, clazzUid = clazzUid,
-                        permission = Role.PERMISSION_CLAZZ_ADD_TEACHER
+                    activeDb.clazzDao.personHasPermissionWithClazzAsFlow2(
+                        accountPersonUid = activeUserPersonUid,
+                        clazzUid = clazzUid,
+                        permission = PermissionFlags.COURSE_MANAGE_TEACHER_ENROLMENT
                     ).collect { canAddTeacher ->
                         _uiState.takeIf { it.value.addTeacherVisible != canAddTeacher }?.update { prev ->
                             prev.copy(addTeacherVisible = canAddTeacher)
@@ -197,9 +199,10 @@ class ClazzMemberListViewModel(
                 }
 
                 launch {
-                    activeDb.clazzDao.personHasPermissionWithClazzAsFlow(
-                        accountPersonUid = activeUserPersonUid, clazzUid = clazzUid,
-                        permission = Role.PERMISSION_CLAZZ_ADD_STUDENT
+                    activeDb.clazzDao.personHasPermissionWithClazzAsFlow2(
+                        accountPersonUid = activeUserPersonUid,
+                        clazzUid = clazzUid,
+                        permission = PermissionFlags.COURSE_MANAGE_STUDENT_ENROLMENT,
                     ).collect { canAddStudent ->
                         _uiState.takeIf { it.value.addStudentVisible != canAddStudent }?.update { prev ->
                             prev.copy(addStudentVisible = canAddStudent)
@@ -263,6 +266,14 @@ class ClazzMemberListViewModel(
                     it.clazzDao.findByUidAsync(clazzUid)?.clazzCode
                 }
 
+            val titleStringResource = if(role == ClazzEnrolment.ROLE_STUDENT) {
+                MR.strings.add_a_student
+            }else {
+                MR.strings.add_a_teacher
+            }
+            val title = _uiState.value.terminologyStrings?.get(titleStringResource)
+                ?: systemImpl.getString(titleStringResource)
+
             val goToOnPersonSelectedArg = ClazzEnrolmentEditViewModel.DEST_NAME
                 .appendQueryArgs(
                     mapOf(
@@ -276,6 +287,9 @@ class ClazzMemberListViewModel(
                 put(PersonListViewModel.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ, clazzUid.toString())
                 put(UstadView.ARG_LISTMODE, ListViewMode.PICKER.mode)
                 put(PersonViewModelConstants.ARG_GO_TO_ON_PERSON_SELECTED, goToOnPersonSelectedArg)
+                put(ARG_TITLE, title)
+                put(PersonListViewModel.ARG_REQUIRE_PERMISSION_TO_SHOW_LIST,
+                    PermissionFlags.DIRECT_ENROL.toString())
 
                 if(clazzCode != null)
                     put(PersonListViewModel.ARG_SHOW_ADD_VIA_INVITE_LINK_CODE, clazzCode)

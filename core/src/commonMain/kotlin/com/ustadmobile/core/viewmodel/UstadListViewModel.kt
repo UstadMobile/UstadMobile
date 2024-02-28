@@ -71,9 +71,9 @@ abstract class UstadListViewModel<S>(
      * Shorthand to create a SearchUiState that will display the search and collate events. The
      * PagingSource can then be updated in onUpdateSearchResult
      */
-    protected fun createSearchEnabledState(): AppBarSearchUiState {
+    protected fun createSearchEnabledState(visible: Boolean = true): AppBarSearchUiState {
         return AppBarSearchUiState(
-            visible = true,
+            visible = visible,
             onSearchTextChanged = { searchText ->
                 _appUiState.update { prev ->
                     prev.copy(

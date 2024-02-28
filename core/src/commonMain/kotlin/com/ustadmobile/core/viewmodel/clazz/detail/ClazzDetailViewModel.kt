@@ -1,7 +1,6 @@
 package com.ustadmobile.core.viewmodel.clazz.detail
 
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.impl.appstate.TabItem
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.capitalizeFirstLetter
@@ -31,19 +30,26 @@ class ClazzDetailViewModel(
 
     val uiState: Flow<ClazzDetailUiState> = _uiState.asStateFlow()
 
-    private fun createTabList(showAttendance: Boolean): List<TabItem> {
+    private fun createTabList(
+        showAttendance: Boolean,
+        showMembers: Boolean,
+    ): List<TabItem> {
         val tabs = mutableListOf(
             TabItem(
                 viewName = ClazzDetailOverviewViewModel.DEST_NAME,
                 args = mapOf(UstadView.ARG_ENTITY_UID to entityUidArg.toString()),
                 label = systemImpl.getString(MR.strings.course),
             ),
-            TabItem(
-                viewName = ClazzMemberListViewModel.DEST_NAME,
-                args = mapOf(UstadView.ARG_CLAZZUID to entityUidArg.toString()),
-                label = systemImpl.getString(MR.strings.members_key).capitalizeFirstLetter(),
-            )
         )
+        if(showMembers) {
+            tabs.add(
+                TabItem(
+                    viewName = ClazzMemberListViewModel.DEST_NAME,
+                    args = mapOf(UstadView.ARG_CLAZZUID to entityUidArg.toString()),
+                    label = systemImpl.getString(MR.strings.members_key).capitalizeFirstLetter(),
+                )
+            )
+        }
 
         if(showAttendance) {
             tabs.add(
@@ -66,40 +72,27 @@ class ClazzDetailViewModel(
     }
 
     init {
-        val viewPermissionFlow = activeRepo.clazzDao.personHasPermissionWithClazzAsFlow2(
-            accountPersonUid = activeUserPersonUid,
-            clazzUid = entityUidArg,
-            permission = PermissionFlags.COURSE_VIEW
-        )
-
-        val attendancePermissionFlow = activeRepo.clazzDao.personHasPermissionWithClazzAsFlow2(
-            accountPersonUid = activeUserPersonUid,
-            clazzUid = entityUidArg,
-            permission = PermissionFlags.COURSE_ATTENDANCE_VIEW
-        )
-
         viewModelScope.launch {
             _uiState.whenSubscribed {
                 launch {
-                    activeDb.clazzDao.findByUidAsFlow(entityUidArg)
-                        .combine(viewPermissionFlow) { clazz, hasViewPermission ->
-                            clazz?.takeIf { hasViewPermission }
+                    activeDb.clazzDao.clazzAndDetailPermissionsAsFlow(
+                        accountPersonUid = activeUserPersonUid,
+                        clazzUid = entityUidArg
+                    ).collect {
+                        val clazz = it?.clazz
+                        val tabList = when (clazz) {
+                            null -> emptyList()
+                            else -> createTabList(
+                                showAttendance = clazz.clazzFeatures.hasFlag(Clazz.CLAZZ_FEATURE_ATTENDANCE) &&
+                                    it.hasAttendancePermission,
+                                showMembers = it.hasViewMembersPermission,
+                            )
                         }
-                        .combine(attendancePermissionFlow) { clazz, hasAttendancePermission ->
-                            clazz to hasAttendancePermission
-                        }.collect {
-                            val (clazz, hasAttendancePermission) = it
-                            val tabList = when (clazz) {
-                                null -> emptyList()
-                                else -> createTabList(
-                                    showAttendance = clazz.clazzFeatures.hasFlag(Clazz.CLAZZ_FEATURE_ATTENDANCE) && hasAttendancePermission
-                                )
-                            }
 
-                            _uiState.update { prev ->
-                                prev.copy(tabs = tabList)
-                            }
+                        _uiState.update { prev ->
+                            prev.copy(tabs = tabList)
                         }
+                    }
                 }
             }
         }

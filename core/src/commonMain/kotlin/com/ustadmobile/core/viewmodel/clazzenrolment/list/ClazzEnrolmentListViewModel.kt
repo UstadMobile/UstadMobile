@@ -1,5 +1,6 @@
 package com.ustadmobile.core.viewmodel.clazzenrolment.list
 
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.UstadView
@@ -9,7 +10,6 @@ import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
 import com.ustadmobile.lib.db.entities.CourseTerminology
-import com.ustadmobile.lib.db.entities.Role
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -75,10 +75,10 @@ class ClazzEnrolmentListViewModel(
                 }
 
                 launch {
-                    activeRepo.clazzDao.personHasPermissionWithClazzAsFlow(
+                    activeRepo.clazzDao.personHasPermissionWithClazzAsFlow2(
                         accountPersonUid = activeUserPersonUid,
                         clazzUid = argClazzUid,
-                        permission = Role.PERMISSION_CLAZZ_ADD_STUDENT
+                        permission = PermissionFlags.COURSE_MANAGE_STUDENT_ENROLMENT
                     ).collect {
                         _uiState.update { prev ->
                             prev.copy(
@@ -89,10 +89,10 @@ class ClazzEnrolmentListViewModel(
                 }
 
                 launch {
-                    activeRepo.clazzDao.personHasPermissionWithClazzAsFlow(
+                    activeRepo.clazzDao.personHasPermissionWithClazzAsFlow2(
                         accountPersonUid = activeUserPersonUid,
                         clazzUid = argClazzUid,
-                        permission = Role.PERMISSION_CLAZZ_ADD_TEACHER
+                        permission = PermissionFlags.COURSE_MANAGE_TEACHER_ENROLMENT
                     ).collect {
                         _uiState.update { prev ->
                             prev.copy(

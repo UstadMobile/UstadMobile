@@ -15,6 +15,7 @@ import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_LAST_NAME_ASC
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_LAST_NAME_DESC
 import com.ustadmobile.door.annotation.*
 import app.cash.paging.PagingSource
+import com.ustadmobile.core.db.dao.ClazzDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL
 import com.ustadmobile.lib.db.composites.CourseNameAndPersonName
 import com.ustadmobile.lib.db.composites.PersonAndClazzMemberListDetails
 import com.ustadmobile.lib.db.entities.*
@@ -224,20 +225,14 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
                          WHERE Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid) AS latestDateLeft, 
         
                        (SELECT clazzEnrolmentRole 
-                          FROM clazzEnrolment 
+                          FROM ClazzEnrolment 
                          WHERE Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid 
                            AND ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid 
                            AND ClazzEnrolment.clazzEnrolmentActive) AS enrolmentRole
-                  FROM PersonGroupMember
-                       ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1} 
-                                ${Role.PERMISSION_PERSON_SELECT} 
-                                ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2} 
+                  FROM Person
                        LEFT JOIN PersonPicture
-                                 ON PersonPicture.personPictureUid = Person.personUid 
-        
-                 WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid
-                   AND PersonGroupMember.groupMemberActive 
-                   AND Person.personUid IN 
+                                 ON PersonPicture.personPictureUid = Person.personUid
+                 WHERE Person.personUid IN 
                        (SELECT clazzEnrolmentPersonUid 
                           FROM ClazzEnrolment 
                          WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid 
@@ -247,6 +242,12 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
                                  OR (:currentTime 
                                       BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined 
                                       AND ClazzEnrolment.clazzEnrolmentDateLeft))) 
+                   /* Begin permission check */
+                   AND (
+                           ($PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL)
+                        OR Person.personUid = :accountPersonUid
+                       )  
+                   /* End permission check */                   
                    AND Person.firstNames || ' ' || Person.lastName LIKE :searchText
                GROUP BY Person.personUid, PersonPicture.personPictureUid) AS CourseMember
       ORDER BY CASE(:sortOrder)
@@ -290,7 +291,8 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         searchText: String? = "%",
         filter: Int,
         accountPersonUid: Long,
-        currentTime: Long
+        currentTime: Long,
+        permission: Long,
     ): PagingSource<Int, PersonAndClazzMemberListDetails>
 
     @Query("""

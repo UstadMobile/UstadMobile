@@ -16,25 +16,49 @@ object ClazzDaoCommon {
 
     const val SELECT_ACTIVE_CLAZZES = "SELECT * FROM Clazz WHERE CAST(isClazzActive AS INTEGER) = 1"
 
-    const val PERSON_HAS_PERMISSION_WITH_CLAZZ_SQL = """
-        SELECT (:clazzUid != 0 AND :accountPersonUid != 0)
-          AND  (
-                 (COALESCE(
-                          (SELECT Clazz.clazzOwnerPersonUid 
-                             FROM Clazz 
-                            WHERE Clazz.clazzUid = :clazzUid), 0) = :accountPersonUid)
+    const val PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT1 =
+        """(
+             (COALESCE(
+                          (SELECT _Clazz_Permission.clazzOwnerPersonUid 
+                             FROM Clazz _Clazz_Permission
+                            WHERE _Clazz_Permission.clazzUid = :clazzUid), 0) = :accountPersonUid)
               OR EXISTS(SELECT CoursePermission.cpUid
                           FROM CoursePermission
                                ${CoursePermissionDaoCommon.LEFT_JOIN_ENROLMENT_FROM_COURSEPERMISSION_WITH_ACCOUNT_UID_PARAM}
                          WHERE CoursePermission.cpClazzUid = :clazzUid
                            AND (CoursePermission.cpToPersonUid = :accountPersonUid 
                                 OR CoursePermission.cpToEnrolmentRole = ClazzEnrolment.clazzEnrolmentRole)
-                           AND (CoursePermission.cpPermissionsFlag & :permission) > 0)
+                           AND (CoursePermission.cpPermissionsFlag & 
+        """
+
+    const val PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT2 = """
+        ) > 0)
               OR EXISTS(SELECT SystemPermission.spUid
                           FROM SystemPermission
                          WHERE SystemPermission.spToPersonUid = :accountPersonUid
-                           AND (SystemPermission.spPermissionsFlag & :permission) > 0)
-               )            
+                           AND (SystemPermission.spPermissionsFlag & 
     """
+    const val PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT3 = """
+        ) > 0)
+               )
+    """
+
+
+
+    const val PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL = """
+         $PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT1 :permission
+         $PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT2 :permission
+         $PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT3
+    """
+
+
+
+
+    const val PERSON_HAS_PERMISSION_WITH_CLAZZ_SQL = """
+        SELECT (:clazzUid != 0 AND :accountPersonUid != 0)
+          AND  ($PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL)            
+    """
+
+
 
 }

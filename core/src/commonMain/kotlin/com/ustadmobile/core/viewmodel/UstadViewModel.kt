@@ -533,6 +533,8 @@ abstract class UstadViewModel(
 
         const val ARG_PERSON_UID = "personUid"
 
+        const val ARG_TITLE = "t"
+
     }
 
 }

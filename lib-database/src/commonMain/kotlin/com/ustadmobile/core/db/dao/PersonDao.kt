@@ -284,6 +284,20 @@ expect abstract class PersonDao : BaseDao<Person> {
     """)
     abstract fun getNamesByUid(uid: Long): Flow<PersonNames?>
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall(functionName = "findByUidAsync")
+        )
+    )
+    @Query("""
+        SELECT Person.firstNames, Person.lastName
+          FROM Person
+         WHERE Person.personUid = :uid  
+    """)
+    abstract suspend fun getNamesByUidAsync(uid: Long): PersonNames?
+
+
 
     @Query("""
         UPDATE Person
