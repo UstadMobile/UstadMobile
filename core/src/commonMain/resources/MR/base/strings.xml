@@ -1777,4 +1777,10 @@
     -->
     <string name="declined_request_from_name">Declined request from %1$s</string>
 
+
+    <string name="could_not_restart">Ooops! Could not restart automatically. Please close the app and open it again. The new language will take effect after restart.</string>
+
+
+    <string name="close_now">Close now</string>
+
 </resources>
