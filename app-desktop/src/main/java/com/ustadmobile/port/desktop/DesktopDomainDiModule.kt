@@ -65,6 +65,8 @@ import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.launchopenlicenses.LaunchOpenLicensesUseCase
 import com.ustadmobile.core.domain.phonenumber.OnClickPhoneNumUseCase
 import com.ustadmobile.core.domain.phonenumber.OnClickPhoneNumUseCaseJvm
+import com.ustadmobile.core.domain.process.CloseProcessUseCase
+import com.ustadmobile.core.domain.process.CloseProcessUseCaseJvm
 import com.ustadmobile.core.domain.sendemail.OnClickEmailUseCase
 import com.ustadmobile.core.domain.sendemail.OnClickEmailUseCaseJvm
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
@@ -390,5 +392,9 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             endpoint = context,
             db = instance(tag = DoorTag.TAG_DB),
         )
+    }
+
+    bind<CloseProcessUseCase>() with scoped(EndpointScope.Default).provider {
+        CloseProcessUseCaseJvm()
     }
 }
