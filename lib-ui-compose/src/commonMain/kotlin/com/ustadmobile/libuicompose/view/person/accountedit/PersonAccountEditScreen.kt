@@ -18,7 +18,6 @@ import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditUiStat
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditViewModel
 import com.ustadmobile.core.viewmodel.person.accountedit.PersonUsernameAndPasswordModel
-import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
 import com.ustadmobile.libuicompose.components.UstadPasswordField
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.Dispatchers
@@ -52,76 +51,71 @@ fun PersonAccountEditScreen(
     )  {
 
         if (uiState.usernameVisible){
-            UstadInputFieldLayout(
-                modifier = Modifier.fillMaxWidth(),
-                errorText = uiState.usernameError
-            ) {
-                OutlinedTextField(
-                    modifier = Modifier.fillMaxWidth().testTag("username"),
-                    value = uiState.personAccount?.username ?: "",
-                    label = {
-                        Text(stringResource(MR.strings.username))
-                    },
-                    onValueChange = {
-                        onChange(
-                            uiState.personAccount?.copy(
-                                username = it
-                            )
-                        )
-
-                    },
-                    isError = uiState.usernameError != null,
-                    enabled = uiState.fieldsEnabled,
-                )
-            }
-
-        }
-
-        if (uiState.currentPasswordVisible){
-            UstadInputFieldLayout(
-                modifier = Modifier.fillMaxWidth(),
-                errorText = uiState.currentPasswordError,
-            ) {
-                UstadPasswordField(
-                    modifier = Modifier.fillMaxWidth().testTag("current_password"),
-                    value = uiState.personAccount?.currentPassword ?: "",
-                    label = {
-                        Text(stringResource(MR.strings.current_password))
-                    },
-                    onValueChange = {
-                        onChange(
-                            uiState.personAccount?.copy(
-                                currentPassword = it
-                            )
-                        )
-                    },
-                    isError = uiState.currentPasswordError != null,
-                    enabled = uiState.fieldsEnabled,
-                )
-            }
-
-        }
-
-        UstadInputFieldLayout(
-            modifier = Modifier.fillMaxWidth(),
-            errorText = uiState.newPasswordError
-        ) {
-            UstadPasswordField(
-                modifier = Modifier.fillMaxWidth().testTag("new_password"),
-                value = uiState.personAccount?.newPassword ?: "",
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth().testTag("username"),
+                value = uiState.personAccount?.username ?: "",
+                maxLines = 1,
                 label = {
-                    Text(stringResource(MR.strings.new_password))
+                    Text(stringResource(MR.strings.username) + "*")
                 },
                 onValueChange = {
                     onChange(
                         uiState.personAccount?.copy(
-                            newPassword = it
+                            username = it
+                        )
+                    )
+
+                },
+                isError = uiState.usernameError != null,
+                enabled = uiState.fieldsEnabled,
+                supportingText = {
+                    Text(uiState.usernameError ?: stringResource(MR.strings.required))
+                }
+            )
+        }
+
+
+
+        if (uiState.currentPasswordVisible){
+            UstadPasswordField(
+                modifier = Modifier.fillMaxWidth().testTag("current_password"),
+                value = uiState.personAccount?.currentPassword ?: "",
+                label = {
+                    Text(stringResource(MR.strings.current_password) + "*")
+                },
+                onValueChange = {
+                    onChange(
+                        uiState.personAccount?.copy(
+                            currentPassword = it
                         )
                     )
                 },
-                isError = uiState.newPasswordError != null,
+                isError = uiState.currentPasswordError != null,
                 enabled = uiState.fieldsEnabled,
+                supportingText = {
+                    Text(uiState.currentPasswordError ?: stringResource(MR.strings.required))
+                }
             )
         }
+
+        UstadPasswordField(
+            modifier = Modifier.fillMaxWidth().testTag("new_password"),
+            value = uiState.personAccount?.newPassword ?: "",
+            label = {
+                Text(stringResource(MR.strings.new_password) + "*")
+            },
+            onValueChange = {
+                onChange(
+                    uiState.personAccount?.copy(
+                        newPassword = it
+                    )
+                )
+            },
+            isError = uiState.newPasswordError != null,
+            enabled = uiState.fieldsEnabled,
+            supportingText = {
+                Text(uiState.newPasswordError ?: stringResource(MR.strings.required))
+            }
+        )
     }
 }
