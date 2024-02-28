@@ -34,6 +34,8 @@ import com.ustadmobile.core.domain.language.SetLanguageUseCaseAndroid
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.LaunchXapiUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.LaunchXapiUseCaseAndroid
 import com.ustadmobile.core.domain.contententry.move.MoveContentEntriesUseCase
+import com.ustadmobile.core.domain.process.CloseProcessUseCase
+import com.ustadmobile.core.domain.process.CloseProcessUseCaseAndroid
 import com.ustadmobile.core.impl.ContainerStorageManager
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -168,6 +170,10 @@ class AppActivity: AppCompatActivity(), DIAware {
                 repo = instance(tag = DoorTag.TAG_REPO),
                 systemImpl = instance()
             )
+        }
+
+        bind<CloseProcessUseCase>() with scoped(EndpointScope.Default).provider {
+            CloseProcessUseCaseAndroid(this@AppActivity)
         }
 
         registerContextTranslator { call: NanoHttpdCall -> Endpoint(call.urlParams["endpoint"] ?: "notfound") }
