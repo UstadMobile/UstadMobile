@@ -16,6 +16,8 @@ env:
       TESTFILENAME: Epub_Content1.epub
       CONTROLSERVER: ${CONTROLSERVER}
       TESTSERIAL: ${TESTSERIAL}
+- tapOn: "SAVE"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_add_to_library"
 - tapOn: "E-book"
 - tapOn: Open
 - runFlow:

@@ -16,6 +16,8 @@ env:
       TESTFILENAME: "H5p_Content.h5p"
       CONTROLSERVER: ${CONTROLSERVER}
       TESTSERIAL: ${TESTSERIAL}
+- tapOn: "SAVE"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_add_to_library"
 - tapOn: "True/False Question"
 - tapOn: Open
 - runFlow:

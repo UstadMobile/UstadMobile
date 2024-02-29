@@ -16,6 +16,8 @@ env:
       TESTFILENAME: Video_Content.mp4
       CONTROLSERVER: ${CONTROLSERVER}
       TESTSERIAL: ${TESTSERIAL}
+- tapOn: "SAVE"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_add_to_library"
 - tapOn: "Video"
 - tapOn: Open
 - runFlow:
@@ -27,7 +29,10 @@ env:
 - tapOn: "Video"
 - tapOn: Download
 - tapOn: Open
-- tapOn:
+- doubleTapOn:
     id: "com.toughra.ustadmobile:id/exo_ad_overlay"
-- assertVisible: "Pause"
+    delay: 100
+- extendedWaitUntil:
+    visible: "Play"
+    timeout: 20000
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_download_and_open"

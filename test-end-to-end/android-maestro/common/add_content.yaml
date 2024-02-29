@@ -33,14 +33,3 @@ appId: com.toughra.ustadmobile
       notVisible: "Downloads"
     file: redirect_to_downloads.yaml
 - tapOn: ${TESTFILENAME}
-  # id is  used for content title , text is not used because it keeps on changing
-#- tapOn:
-    # id: "title"
-#- longPressOn:
-     # id: "title"
-#- tapOn: 'Select All'
-#- eraseText: 100
-#- inputText: ${TESTCONTENTNAME}
-#- hideKeyboard
-- tapOn: "SAVE"
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_add_to_library"
