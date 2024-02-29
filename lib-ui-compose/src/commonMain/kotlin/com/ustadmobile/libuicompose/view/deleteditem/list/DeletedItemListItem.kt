@@ -81,7 +81,7 @@ fun DeletedItemListItem(
                     ) {
                         Icon(
                             Icons.Default.DeleteForever,
-                            contentDescription = stringResource(MR.strings.restore)
+                            contentDescription = stringResource(MR.strings.delete_permanently)
                         )
                     }
                 }
