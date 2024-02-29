@@ -1,5 +1,7 @@
 package com.ustadmobile.libuicompose.view.deleteditem.list
 
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
@@ -14,6 +16,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.viewmodel.deleteditem.delItemContentTypeStringResource
@@ -23,6 +26,7 @@ import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.datetime.TimeZone
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun DeletedItemListItem(
     deletedItem: DeletedItem?,
@@ -35,9 +39,15 @@ fun DeletedItemListItem(
     )
 
     ListItem(
-        headlineContent = { Text(deletedItem?.delItemName ?: "" ) },
+        headlineContent = {
+            Text(
+                deletedItem?.delItemName ?: "",
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        },
         supportingContent = {
-            Row {
+            FlowRow {
                 deletedItem?.delItemContentTypeStringResource?.also {
                     Text("${stringResource(MR.strings.type)}: ${stringResource(it)}")
                 }
