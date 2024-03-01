@@ -1,6 +1,7 @@
 package com.ustadmobile.core.viewmodel.clazzenrolment.edit
 
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.EnrolIntoCourseUseCase
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
@@ -14,7 +15,6 @@ import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
-import com.ustadmobile.lib.db.entities.Role
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -106,7 +106,7 @@ class ClazzEnrolmentEditViewModel(
             )
 
             suspend fun userHasPermission(permission: Long): Boolean {
-                return activeRepo.clazzDao.personHasPermissionWithClazz(
+                return activeRepo.clazzDao.personHasPermissionWithClazzAsync2(
                     accountPersonUid = activeUserPersonUid,
                     clazzUid = _uiState.value.clazzEnrolment?.clazzEnrolmentClazzUid ?: 0L,
                     permission = permission
@@ -114,11 +114,12 @@ class ClazzEnrolmentEditViewModel(
             }
 
             val canAddTeacher = async {
-                userHasPermission(Role.PERMISSION_CLAZZ_ADD_TEACHER)
+                userHasPermission(PermissionFlags.COURSE_MANAGE_TEACHER_ENROLMENT)
             }
             val canAddStudent = async {
-                userHasPermission(Role.PERMISSION_CLAZZ_ADD_STUDENT)
+                userHasPermission(PermissionFlags.COURSE_MANAGE_STUDENT_ENROLMENT)
             }
+
             val terminology = async {
                 activeRepo.courseTerminologyDao.getTerminologyForClazz(
                     _uiState.value.clazzEnrolment?.clazzEnrolmentClazzUid ?: 0

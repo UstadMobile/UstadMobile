@@ -3,7 +3,7 @@ package com.ustadmobile.core.viewmodel.person.edit
 import com.ustadmobile.core.account.AccountRegisterOptions
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
-import com.ustadmobile.core.domain.person.CreateNewPersonUseCase
+import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorUseCase
 import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
@@ -156,7 +156,7 @@ class PersonEditViewModel(
     private val enqueueSavePictureUseCase: EnqueueSavePictureUseCase? by
         on(accountManager.activeEndpoint).instanceOrNull()
 
-    private val createNewPersonUseCase: CreateNewPersonUseCase by di.onActiveEndpoint().instance()
+    private val createNewPersonUseCase: AddNewPersonUseCase by di.onActiveEndpoint().instance()
 
     init {
         loadingState = LoadingUiState.INDETERMINATE

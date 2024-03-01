@@ -5,7 +5,7 @@ import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.SystemPermission
 
-class CreateNewPersonUseCase(
+class AddNewPersonUseCase(
     private val db: UmAppDatabase,
     private val repo: UmAppDatabase?
 ) {

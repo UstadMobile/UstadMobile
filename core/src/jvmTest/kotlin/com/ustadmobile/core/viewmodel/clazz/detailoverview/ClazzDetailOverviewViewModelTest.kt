@@ -18,10 +18,19 @@ class ClazzDetailOverviewViewModelTest : AbstractMainDispatcherTest() {
     @Test
     fun givenClazzExists_whenOnCreateCalled_thenClazzIsSetOnView() {
         testViewModel<ClazzDetailOverviewViewModel> {
+            val user = setActiveUser(activeEndpoint)
             val testClazz = Clazz().apply {
                 clazzName = "Test"
                 clazzUid = activeDb.clazzDao.insert(this)
             }
+
+            activeDb.coursePermissionDao.upsertAsync(
+                CoursePermission(
+                    cpToPersonUid = user.personUid,
+                    cpPermissionsFlag = CoursePermission.TEACHER_DEFAULT_PERMISSIONS,
+                    cpClazzUid = testClazz.clazzUid
+                )
+            )
 
             viewModelFactory {
                 savedStateHandle[UstadView.ARG_ENTITY_UID] = testClazz.clazzUid.toString()

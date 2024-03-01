@@ -1,7 +1,7 @@
 package com.ustadmobile.core.viewmodel.clazz.edit
 
 import app.cash.turbine.test
-import com.soywiz.klock.DateTime
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
 import com.ustadmobile.core.domain.clazz.CreateNewClazzUseCase
@@ -13,6 +13,7 @@ import com.ustadmobile.core.util.ext.awaitItemWhere
 import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.flow.doorFlow
+import com.ustadmobile.lib.db.entities.SystemPermission
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.util.test.initNapierLog
 import kotlinx.coroutines.flow.filter
@@ -30,9 +31,18 @@ class ClazzEditViewModelTest : AbstractMainDispatcherTest() {
     fun givenNoExistingEntity_whenOnCreateAndHandleClickSaveCalled_thenShouldSaveToDatabase() {
         initNapierLog()
         testViewModel<ClazzEditViewModel> {
+            val user = setActiveUser(activeEndpoint)
+
             viewModelFactory {
                 ClazzEditViewModel(di, savedStateHandle)
             }
+
+            activeDb.systemPermissionDao.upsertAsync(
+                SystemPermission(
+                    spToPersonUid = user.personUid,
+                    spPermissionsFlag = PermissionFlags.ADD_COURSE or PermissionFlags.COURSE_EDIT
+                )
+            )
 
             extendDi {
                 bind<CreateNewClazzUseCase>() with scoped(endpointScope).singleton {
