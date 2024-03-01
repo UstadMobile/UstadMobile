@@ -106,7 +106,7 @@ class ClazzEnrolmentEditViewModel(
             )
 
             suspend fun userHasPermission(permission: Long): Boolean {
-                return activeRepo.clazzDao.personHasPermissionWithClazzAsync2(
+                return activeRepo.coursePermissionDao.personHasPermissionWithClazzAsync2(
                     accountPersonUid = activeUserPersonUid,
                     clazzUid = _uiState.value.clazzEnrolment?.clazzEnrolmentClazzUid ?: 0L,
                     permission = permission

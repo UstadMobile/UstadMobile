@@ -42,7 +42,7 @@ class CoursePermissionDetailViewModel(
         val entityFlow = activeRepo.coursePermissionDao.findByUidAndClazzUidAsFlow(
             entityUidArg, clazzUid)
 
-        val viewPermissionFlow = activeRepo.clazzDao.personHasPermissionWithClazzAsFlow2(
+        val viewPermissionFlow = activeRepo.coursePermissionDao.personHasPermissionWithClazzAsFlow2(
             accountPersonUid = activeUserPersonUid,
             clazzUid = clazzUid,
             permission = PermissionFlags.COURSE_VIEW
@@ -85,7 +85,7 @@ class CoursePermissionDetailViewModel(
                 }
 
                 launch {
-                    activeRepo.clazzDao.personHasPermissionWithClazzAsFlow2(
+                    activeRepo.coursePermissionDao.personHasPermissionWithClazzAsFlow2(
                         accountPersonUid = accountManager.currentAccount.personUid,
                         clazzUid = clazzUid,
                         permission = PermissionFlags.COURSE_EDIT,

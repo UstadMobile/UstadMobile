@@ -187,7 +187,7 @@ class ClazzMemberListViewModel(
 
             _uiState.whenSubscribed {
                 launch {
-                    activeDb.clazzDao.personHasPermissionWithClazzAsFlow2(
+                    activeDb.coursePermissionDao.personHasPermissionWithClazzAsFlow2(
                         accountPersonUid = activeUserPersonUid,
                         clazzUid = clazzUid,
                         permission = PermissionFlags.COURSE_MANAGE_TEACHER_ENROLMENT
@@ -199,7 +199,7 @@ class ClazzMemberListViewModel(
                 }
 
                 launch {
-                    activeDb.clazzDao.personHasPermissionWithClazzAsFlow2(
+                    activeDb.coursePermissionDao.personHasPermissionWithClazzAsFlow2(
                         accountPersonUid = activeUserPersonUid,
                         clazzUid = clazzUid,
                         permission = PermissionFlags.COURSE_MANAGE_STUDENT_ENROLMENT,

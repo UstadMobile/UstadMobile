@@ -120,7 +120,7 @@ class ClazzDetailOverviewViewModel(
             )
         }
 
-        val permissionFlow = activeRepo.clazzDao.personHasPermissionWithClazzAsFlow2(
+        val permissionFlow = activeRepo.coursePermissionDao.personHasPermissionWithClazzAsFlow2(
             accountPersonUid = activeUserPersonUid,
             clazzUid = entityUidArg,
             permission = PermissionFlags.COURSE_VIEW
@@ -154,7 +154,7 @@ class ClazzDetailOverviewViewModel(
                 }
 
                 launch {
-                    activeRepo.clazzDao.personHasPermissionWithClazzAsFlow2(
+                    activeRepo.coursePermissionDao.personHasPermissionWithClazzAsFlow2(
                         accountManager.currentAccount.personUid, entityUidArg, PermissionFlags.COURSE_VIEW
                     ).collect { hasEditPermission ->
                         _appUiState.update { prev ->
@@ -172,7 +172,7 @@ class ClazzDetailOverviewViewModel(
                 }
 
                 launch {
-                    activeDb.clazzDao.personHasPermissionWithClazzAsFlow2(
+                    activeDb.coursePermissionDao.personHasPermissionWithClazzAsFlow2(
                         accountPersonUid = activeUserPersonUid,
                         clazzUid = entityUidArg,
                         permission = PermissionFlags.COURSE_MANAGE_STUDENT_ENROLMENT

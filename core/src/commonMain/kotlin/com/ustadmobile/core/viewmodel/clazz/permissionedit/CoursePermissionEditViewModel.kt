@@ -46,7 +46,7 @@ class CoursePermissionEditViewModel(
 
         launchIfHasPermission(
             permissionCheck = {
-                it.clazzDao.personHasPermissionWithClazzAsync2(activeUserPersonUid, clazzUid,
+                it.coursePermissionDao.personHasPermissionWithClazzAsync2(activeUserPersonUid, clazzUid,
                     PermissionFlags.COURSE_EDIT)
             },
             onSetFieldsEnabled = {

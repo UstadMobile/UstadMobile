@@ -149,7 +149,7 @@ class ClazzEditViewModel(
         launchIfHasPermission(
             permissionCheck = {
                 if(entityUidArg != 0L) {
-                    it.clazzDao.personHasPermissionWithClazzAsync2(
+                    it.coursePermissionDao.personHasPermissionWithClazzAsync2(
                         activeUserPersonUid, entityUidArg, PermissionFlags.COURSE_EDIT
                     )
                 }else {

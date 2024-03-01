@@ -66,7 +66,7 @@ class CoursePermissionListViewModel(
         viewModelScope.launch {
             _uiState.whenSubscribed {
                 launch {
-                    activeRepo.clazzDao.personHasPermissionWithClazzAsFlow2(
+                    activeRepo.coursePermissionDao.personHasPermissionWithClazzAsFlow2(
                         accountPersonUid = activeUserPersonUid,
                         clazzUid = clazzUid,
                         permission = PermissionFlags.COURSE_VIEW,
@@ -82,7 +82,7 @@ class CoursePermissionListViewModel(
                 }
 
                 launch {
-                    activeRepo.clazzDao.personHasPermissionWithClazzAsFlow2(
+                    activeRepo.coursePermissionDao.personHasPermissionWithClazzAsFlow2(
                         accountPersonUid = activeUserPersonUid,
                         clazzUid = clazzUid,
                         permission = PermissionFlags.COURSE_EDIT,

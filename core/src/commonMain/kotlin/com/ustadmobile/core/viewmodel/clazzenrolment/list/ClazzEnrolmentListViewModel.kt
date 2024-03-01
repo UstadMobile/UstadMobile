@@ -75,7 +75,7 @@ class ClazzEnrolmentListViewModel(
                 }
 
                 launch {
-                    activeRepo.clazzDao.personHasPermissionWithClazzAsFlow2(
+                    activeRepo.coursePermissionDao.personHasPermissionWithClazzAsFlow2(
                         accountPersonUid = activeUserPersonUid,
                         clazzUid = argClazzUid,
                         permission = PermissionFlags.COURSE_MANAGE_STUDENT_ENROLMENT
@@ -89,7 +89,7 @@ class ClazzEnrolmentListViewModel(
                 }
 
                 launch {
-                    activeRepo.clazzDao.personHasPermissionWithClazzAsFlow2(
+                    activeRepo.coursePermissionDao.personHasPermissionWithClazzAsFlow2(
                         accountPersonUid = activeUserPersonUid,
                         clazzUid = argClazzUid,
                         permission = PermissionFlags.COURSE_MANAGE_TEACHER_ENROLMENT

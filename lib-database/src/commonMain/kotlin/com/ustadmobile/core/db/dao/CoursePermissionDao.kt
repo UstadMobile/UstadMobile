@@ -5,12 +5,14 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import app.cash.paging.PagingSource
 import com.ustadmobile.core.db.PermissionFlags
-import com.ustadmobile.core.db.dao.ClazzDaoCommon.SELECT_CLAZZ_UID_FOR_ENROLMENT_UID_SQL
+import com.ustadmobile.core.db.dao.CoursePermissionDaoCommon.SELECT_CLAZZ_UID_FOR_ENROLMENT_UID_SQL
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.PERMISSION_REQUIRED_BY_CLAZZENROLMENT_UID
+import com.ustadmobile.core.db.dao.CoursePermissionDaoCommon.PERSON_HAS_PERMISSION_WITH_CLAZZ_SQL
 import com.ustadmobile.door.annotation.DoorDao
 import com.ustadmobile.door.annotation.HttpAccessible
 import com.ustadmobile.door.annotation.HttpServerFunctionCall
 import com.ustadmobile.door.annotation.HttpServerFunctionParam
+import com.ustadmobile.door.annotation.QueryLiveTables
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.composites.CoursePermissionAndEnrolment
 import com.ustadmobile.lib.db.composites.CoursePermissionAndListDetail
@@ -145,11 +147,11 @@ expect abstract class CoursePermissionDao {
                             AND (SystemPermission.spPermissionsFlag & ${PermissionFlags.DIRECT_ENROL}) > 0
                             AND NOT SystemPermission.spIsDeleted))
                 ELSE (
-                  SELECT ${ClazzDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZENROLMENTUID_SQL_PT1} 
+                  SELECT ${CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZENROLMENTUID_SQL_PT1} 
                          ($PERMISSION_REQUIRED_BY_CLAZZENROLMENT_UID)
-                         ${ClazzDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT2} 
+                         ${CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT2} 
                          ($PERMISSION_REQUIRED_BY_CLAZZENROLMENT_UID)
-                         ${ClazzDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT3} 
+                         ${CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT3} 
                 )
                END 
     """)
@@ -157,6 +159,87 @@ expect abstract class CoursePermissionDao {
         accountPersonUid: Long,
         clazzEnrolmentUid: Long,
     ): Boolean
+
+
+    @Query("""
+       SELECT CoursePermission.*, ClazzEnrolment_ForAccountPerson.*
+         FROM CoursePermission
+              ${CoursePermissionDaoCommon.LEFT_JOIN_ENROLMENT_FROM_COURSEPERMISSION_WITH_ACCOUNT_UID_PARAM}
+        WHERE (:clazzUid = 0 OR CoursePermission.cpClazzUid = :clazzUid)
+          AND (CoursePermission.cpToPersonUid = :accountPersonUid 
+               OR CoursePermission.cpToEnrolmentRole = ClazzEnrolment_ForAccountPerson.clazzEnrolmentRole)
+    """)
+    abstract suspend fun personHasPermissionWithClazzEntities2(
+        accountPersonUid: Long,
+        clazzUid: Long,
+    ): List<CoursePermissionAndEnrolment>
+
+
+    /**
+     * Determine if a person as per accountPersonUid has a particular permission on the given
+     * clazz as per clazzUid
+     *those
+     * Note: when joining the coursepermission applicable for an enrolment role, there is only going
+     * to be one CoursePermission entity per clazz and role combination. The join therefor does not
+     * need to filter based on the permission.
+     */
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall(
+                functionName = "personHasPermissionWithClazzEntities2"
+            ),
+            HttpServerFunctionCall(
+                functionName = "findAllByPersonUid",
+                functionDao = SystemPermissionDao::class,
+                functionArgs = arrayOf(
+                    HttpServerFunctionParam(
+                        name = "includeDeleted",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "true",
+                    )
+                )
+            )
+        )
+    )
+    @Query(PERSON_HAS_PERMISSION_WITH_CLAZZ_SQL)
+    @QueryLiveTables(arrayOf("Clazz", "CoursePermission", "ClazzEnrolment"))
+    abstract fun personHasPermissionWithClazzAsFlow2(
+        accountPersonUid: Long,
+        clazzUid: Long,
+        permission: Long,
+    ): Flow<Boolean>
+
+
+
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall(
+                functionName = "personHasPermissionWithClazzEntities2"
+            ),
+            HttpServerFunctionCall(
+                functionName = "findAllByPersonUid",
+                functionDao = SystemPermissionDao::class,
+                functionArgs = arrayOf(
+                    HttpServerFunctionParam(
+                        name = "includeDeleted",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "true",
+                    )
+                )
+            )
+        )
+    )
+    @Query(PERSON_HAS_PERMISSION_WITH_CLAZZ_SQL)
+    @QueryLiveTables(arrayOf("Clazz", "CoursePermission", "ClazzEnrolment"))
+    abstract suspend fun personHasPermissionWithClazzAsync2(
+        accountPersonUid: Long,
+        clazzUid: Long,
+        permission: Long,
+    ): Boolean
+
+
 
 
 }
