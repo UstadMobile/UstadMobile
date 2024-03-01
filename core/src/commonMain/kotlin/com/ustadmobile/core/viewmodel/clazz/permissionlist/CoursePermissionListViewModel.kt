@@ -65,36 +65,28 @@ class CoursePermissionListViewModel(
 
         viewModelScope.launch {
             _uiState.whenSubscribed {
-                launch {
-                    activeRepo.coursePermissionDao.personHasPermissionWithClazzAsFlow2(
-                        accountPersonUid = activeUserPersonUid,
-                        clazzUid = clazzUid,
-                        permission = PermissionFlags.COURSE_VIEW,
-                    ).distinctUntilChanged().collect { hasViewPermission ->
-                        _uiState.update { prev ->
-                            prev.copy(
-                                permissionLabels = CoursePermissionConstants.COURSE_PERMISSIONS_LABELS,
-                                permissionsList = pagingSource.takeIf { hasViewPermission }
-                                    ?: { EmptyPagingSource() }
-                            )
-                        }
+                activeRepo.coursePermissionDao.personHasPermissionWithClazzPairAsFlow(
+                    accountPersonUid = activeUserPersonUid,
+                    clazzUid = clazzUid,
+                    firstPermission = PermissionFlags.COURSE_VIEW,
+                    secondPermission = PermissionFlags.COURSE_EDIT
+                ).distinctUntilChanged().collect {
+                    val (hasViewPermission, hasEditPermission) = it
+                    _uiState.update { prev ->
+                        prev.copy(
+                            permissionLabels = CoursePermissionConstants.COURSE_PERMISSIONS_LABELS,
+                            permissionsList = pagingSource.takeIf { hasViewPermission }
+                                ?: { EmptyPagingSource() },
+                            showDeleteOption = hasEditPermission,
+                        )
                     }
-                }
 
-                launch {
-                    activeRepo.coursePermissionDao.personHasPermissionWithClazzAsFlow2(
-                        accountPersonUid = activeUserPersonUid,
-                        clazzUid = clazzUid,
-                        permission = PermissionFlags.COURSE_EDIT,
-                    ).collect { hasEditPermission ->
-                        _appUiState.update { prev ->
-                            prev.copy(
-                                fabState = prev.fabState.copy(
-                                    visible = hasEditPermission
-                                )
+                    _appUiState.update { prev ->
+                        prev.copy(
+                            fabState = prev.fabState.copy(
+                                visible = hasEditPermission
                             )
-                        }
-                        _uiState.update { prev -> prev.copy(showDeleteOption = hasEditPermission) }
+                        )
                     }
                 }
             }

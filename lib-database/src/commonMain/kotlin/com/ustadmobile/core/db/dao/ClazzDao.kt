@@ -97,6 +97,17 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
                     )
                 )
             ),
+            HttpServerFunctionCall(
+                functionName = "findAllByPersonUid",
+                functionDao = SystemPermissionDao::class,
+                functionArgs = arrayOf(
+                    HttpServerFunctionParam(
+                        name = "includeDeleted",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "true",
+                    )
+                )
+            ),
         )
     )
     @Query("""
@@ -280,8 +291,19 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
         pullQueriesToReplicate = arrayOf(
             HttpServerFunctionCall(
-                "personHasPermissionWithClazzEntities2",
+                functionName = "personHasPermissionWithClazzEntities2",
                 functionDao = CoursePermissionDao::class,
+            ),
+            HttpServerFunctionCall(
+                functionName = "findAllByPersonUid",
+                functionDao = SystemPermissionDao::class,
+                functionArgs = arrayOf(
+                    HttpServerFunctionParam(
+                        name = "includeDeleted",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "true",
+                    )
+                )
             ),
             HttpServerFunctionCall("clazzAndDetailPermissionsAsFlow"),
         )

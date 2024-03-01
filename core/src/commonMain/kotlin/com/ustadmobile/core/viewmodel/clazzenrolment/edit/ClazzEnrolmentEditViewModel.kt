@@ -105,20 +105,15 @@ class ClazzEnrolmentEditViewModel(
                 }
             )
 
-            suspend fun userHasPermission(permission: Long): Boolean {
-                return activeRepo.coursePermissionDao.personHasPermissionWithClazzAsync2(
-                    accountPersonUid = activeUserPersonUid,
-                    clazzUid = _uiState.value.clazzEnrolment?.clazzEnrolmentClazzUid ?: 0L,
-                    permission = permission
-                )
-            }
+            //This can be run directly against the database, because any entities required would
+            // already have been pulled down by the inital launch permission check
+            val (canManageStudentEnrolment, canManageTeacherEnrolment) = activeDb.coursePermissionDao.personHasPermissionWithClazzPairAsync(
+                accountPersonUid = activeUserPersonUid,
+                clazzUid = _uiState.value.clazzEnrolment?.clazzEnrolmentClazzUid ?: 0L,
+                firstPermission = PermissionFlags.COURSE_MANAGE_STUDENT_ENROLMENT,
+                secondPermission = PermissionFlags.COURSE_MANAGE_TEACHER_ENROLMENT
+            )
 
-            val canAddTeacher = async {
-                userHasPermission(PermissionFlags.COURSE_MANAGE_TEACHER_ENROLMENT)
-            }
-            val canAddStudent = async {
-                userHasPermission(PermissionFlags.COURSE_MANAGE_STUDENT_ENROLMENT)
-            }
 
             val terminology = async {
                 activeRepo.courseTerminologyDao.getTerminologyForClazz(
@@ -127,10 +122,10 @@ class ClazzEnrolmentEditViewModel(
             }
 
             val roleOptions = buildList {
-                if(canAddStudent.await())
+                if(canManageStudentEnrolment)
                     add(ClazzEnrolment.ROLE_STUDENT)
 
-                if(canAddTeacher.await())
+                if(canManageTeacherEnrolment)
                     add(ClazzEnrolment.ROLE_TEACHER)
             }
 

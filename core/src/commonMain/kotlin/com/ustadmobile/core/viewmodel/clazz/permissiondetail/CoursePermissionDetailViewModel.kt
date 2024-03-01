@@ -42,11 +42,13 @@ class CoursePermissionDetailViewModel(
         val entityFlow = activeRepo.coursePermissionDao.findByUidAndClazzUidAsFlow(
             entityUidArg, clazzUid)
 
-        val viewPermissionFlow = activeRepo.coursePermissionDao.personHasPermissionWithClazzAsFlow2(
+        val permissionFlow = activeRepo.coursePermissionDao.personHasPermissionWithClazzPairAsFlow(
             accountPersonUid = activeUserPersonUid,
             clazzUid = clazzUid,
-            permission = PermissionFlags.COURSE_VIEW
-        ).distinctUntilChanged()
+            firstPermission = PermissionFlags.COURSE_VIEW,
+            secondPermission = PermissionFlags.COURSE_EDIT
+        )
+
 
         _appUiState.update { prev ->
             prev.copy(
@@ -61,13 +63,16 @@ class CoursePermissionDetailViewModel(
         viewModelScope.launch {
             _uiState.whenSubscribed {
                 launch {
-                    entityFlow.combine(viewPermissionFlow) { entity, hasViewPermission ->
-                        entity.takeIf { hasViewPermission }
-                    }.collectLatest {
+                    entityFlow.combine(permissionFlow) { entity, permissions ->
+                        Pair(entity.takeIf { permissions.firstPermission }, permissions)
+                    }.distinctUntilChanged().collectLatest {
+                        val (entity, permissionPair) = it
+                        val (_, hasEditPermission) = permissionPair
+
                         _uiState.update { prev ->
                             prev.copy(
-                                coursePermission = it,
-                                permissionLabels = if(it != null){
+                                coursePermission = entity,
+                                permissionLabels = if(entity != null){
                                     CoursePermissionConstants.COURSE_PERMISSIONS_LABELS
                                 }else {
                                     emptyList()
@@ -75,27 +80,19 @@ class CoursePermissionDetailViewModel(
                             )
                         }
 
-                        if(it != null) {
-                            val title = getTitleForCoursePermission(it)
-                            _appUiState.update { prev ->
-                                prev.copy(title = title)
-                            }
-                        }
-                    }
-                }
-
-                launch {
-                    activeRepo.coursePermissionDao.personHasPermissionWithClazzAsFlow2(
-                        accountPersonUid = accountManager.currentAccount.personUid,
-                        clazzUid = clazzUid,
-                        permission = PermissionFlags.COURSE_EDIT,
-                    ).distinctUntilChanged().collect { hasEditPermission ->
                         _appUiState.update { prev ->
                             prev.copy(
                                 fabState = prev.fabState.copy(
                                     visible = hasEditPermission
                                 )
                             )
+                        }
+
+                        if(entity != null) {
+                            val title = getTitleForCoursePermission(entity)
+                            _appUiState.update { prev ->
+                                prev.copy(title = title)
+                            }
                         }
                     }
                 }

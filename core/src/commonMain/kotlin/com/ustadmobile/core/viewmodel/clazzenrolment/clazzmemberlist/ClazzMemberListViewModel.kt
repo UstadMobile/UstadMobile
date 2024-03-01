@@ -32,6 +32,7 @@ import com.ustadmobile.lib.db.composites.EnrolmentRequestAndPersonDetails
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.composites.PersonAndClazzMemberListDetails
 import com.ustadmobile.lib.db.entities.EnrolmentRequest
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
@@ -168,44 +169,38 @@ class ClazzMemberListViewModel(
         }
 
         viewModelScope.launch {
-            launch {
-                activeRepo.clazzDao.getClazzNameAndTerminologyAsFlow(clazzUid).collect { nameAndTerminology ->
-                    parseAndUpdateTerminologyStringsIfNeeded(
-                        currentTerminologyStrings = _uiState.value.terminologyStrings,
-                        terminology = nameAndTerminology?.terminology,
-                        json = json,
-                        systemImpl = systemImpl,
-                    ) {
-                        _uiState.update { prev -> prev.copy(terminologyStrings = it) }
-                    }
-
-                    _appUiState.update { prev ->
-                        prev.copy(title = nameAndTerminology?.clazzName ?: "")
-                    }
-                }
-            }
-
             _uiState.whenSubscribed {
                 launch {
-                    activeDb.coursePermissionDao.personHasPermissionWithClazzAsFlow2(
-                        accountPersonUid = activeUserPersonUid,
-                        clazzUid = clazzUid,
-                        permission = PermissionFlags.COURSE_MANAGE_TEACHER_ENROLMENT
-                    ).collect { canAddTeacher ->
-                        _uiState.takeIf { it.value.addTeacherVisible != canAddTeacher }?.update { prev ->
-                            prev.copy(addTeacherVisible = canAddTeacher)
+                    activeRepo.clazzDao.getClazzNameAndTerminologyAsFlow(clazzUid).collect { nameAndTerminology ->
+                        parseAndUpdateTerminologyStringsIfNeeded(
+                            currentTerminologyStrings = _uiState.value.terminologyStrings,
+                            terminology = nameAndTerminology?.terminology,
+                            json = json,
+                            systemImpl = systemImpl,
+                        ) {
+                            _uiState.update { prev -> prev.copy(terminologyStrings = it) }
+                        }
+
+                        _appUiState.update { prev ->
+                            prev.copy(title = nameAndTerminology?.clazzName ?: "")
                         }
                     }
                 }
 
                 launch {
-                    activeDb.coursePermissionDao.personHasPermissionWithClazzAsFlow2(
+                    //Note: we can use the db here, because the permission entities will be pulled
+                    // down by the repo query that is running on the member list itself
+                    activeDb.coursePermissionDao.personHasPermissionWithClazzPairAsFlow(
                         accountPersonUid = activeUserPersonUid,
                         clazzUid = clazzUid,
-                        permission = PermissionFlags.COURSE_MANAGE_STUDENT_ENROLMENT,
-                    ).collect { canAddStudent ->
-                        _uiState.takeIf { it.value.addStudentVisible != canAddStudent }?.update { prev ->
-                            prev.copy(addStudentVisible = canAddStudent)
+                        firstPermission = PermissionFlags.COURSE_MANAGE_TEACHER_ENROLMENT,
+                        secondPermission = PermissionFlags.COURSE_MANAGE_STUDENT_ENROLMENT
+                    ).distinctUntilChanged().collect {
+                        _uiState.update { prev ->
+                            prev.copy(
+                                addTeacherVisible = it.firstPermission,
+                                addStudentVisible = it.secondPermission
+                            )
                         }
                     }
                 }

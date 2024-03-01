@@ -10,6 +10,13 @@ import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
 import com.ustadmobile.lib.db.entities.CourseTerminology
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -60,80 +67,87 @@ class ClazzEnrolmentListViewModel(
 
     init {
         viewModelScope.launch {
+            val permissionFlow = activeDb.coursePermissionDao.personHasPermissionWithClazzTripleAsFlow(
+                accountPersonUid = activeUserPersonUid,
+                clazzUid = argClazzUid,
+                firstPermission = PermissionFlags.COURSE_MANAGE_TEACHER_ENROLMENT,
+                secondPermission = PermissionFlags.COURSE_MANAGE_STUDENT_ENROLMENT,
+                thirdPermission = PermissionFlags.COURSE_VIEW_MEMBERS,
+            ).shareIn(viewModelScope, SharingStarted.WhileSubscribed())
+
+            val canViewMembersFlow = permissionFlow.map { it.thirdPermission }
+
             _uiState.whenSubscribed {
                 launch {
-                    activeRepo.clazzEnrolmentDao.findAllEnrolmentsByPersonAndClazzUid(
-                        personUid = argPersonUid,
-                        clazzUid = argClazzUid,
-                    ).collect {
+                    val terminology = activeRepo.courseTerminologyDao
+                        .getTerminologyForClazz(argClazzUid)
+                    _uiState.update { prev ->
+                        prev.copy(courseTerminology = terminology)
+                    }
+                }
+
+                launch {
+                    permissionFlow.distinctUntilChanged().collect {
+                        val (canEditTeacherEnrolments, canEditStudentEnrolments, _) = it
+
                         _uiState.update { prev ->
                             prev.copy(
-                                enrolmentList = it
+                                canEditTeacherEnrolments = canEditTeacherEnrolments,
+                                canEditStudentEnrolments = canEditStudentEnrolments,
                             )
                         }
                     }
                 }
 
                 launch {
-                    activeRepo.coursePermissionDao.personHasPermissionWithClazzAsFlow2(
-                        accountPersonUid = activeUserPersonUid,
-                        clazzUid = argClazzUid,
-                        permission = PermissionFlags.COURSE_MANAGE_STUDENT_ENROLMENT
-                    ).collect {
-                        _uiState.update { prev ->
-                            prev.copy(
-                                canEditStudentEnrolments = it
+                    canViewMembersFlow.distinctUntilChanged().collectLatest { canViewMembers ->
+                        val enrolmentsListFlow = if(canViewMembers) {
+                            activeRepo.clazzEnrolmentDao.findAllEnrolmentsByPersonAndClazzUid(
+                                personUid = argPersonUid,
+                                clazzUid = argClazzUid,
                             )
+                        }else {
+                            flowOf(emptyList())
+                        }
+
+                        enrolmentsListFlow.collect {
+                            _uiState.update { prev ->
+                                prev.copy(
+                                    enrolmentList = it
+                                )
+                            }
                         }
                     }
                 }
 
                 launch {
-                    activeRepo.coursePermissionDao.personHasPermissionWithClazzAsFlow2(
-                        accountPersonUid = activeUserPersonUid,
-                        clazzUid = argClazzUid,
-                        permission = PermissionFlags.COURSE_MANAGE_TEACHER_ENROLMENT
-                    ).collect {
-                        _uiState.update { prev ->
-                            prev.copy(
-                                canEditTeacherEnrolments = it
-                            )
+                    canViewMembersFlow.distinctUntilChanged().filter { it }.collectLatest { canViewMembers ->
+                        if(canViewMembers) {
+                            val courseAndPersonName = activeRepo
+                                .clazzEnrolmentDao.getClazzNameAndPersonName(
+                                    personUid = argPersonUid,
+                                    clazzUid = argClazzUid,
+                                )
+
+                            val personName = "${courseAndPersonName?.firstNames} ${courseAndPersonName?.lastName}"
+
+                            _uiState.update { prev ->
+                                prev.copy(
+                                    personName = personName,
+                                    courseName = courseAndPersonName?.clazzName,
+                                )
+                            }
+
+                            _appUiState.update { prev ->
+                                prev.copy(
+                                    title = personName
+                                )
+                            }
                         }
                     }
                 }
             }
         }
-
-        viewModelScope.launch {
-            val terminology = activeRepo.courseTerminologyDao
-                .getTerminologyForClazz(argClazzUid)
-            _uiState.update { prev ->
-                prev.copy(courseTerminology = terminology)
-            }
-        }
-
-        viewModelScope.launch {
-            val courseAndPersonName = activeRepo.clazzEnrolmentDao.getClazzNameAndPersonName(
-                personUid = argPersonUid,
-                clazzUid = argClazzUid,
-            )
-
-            val personName = "${courseAndPersonName?.firstNames} ${courseAndPersonName?.lastName}"
-
-            _uiState.update { prev ->
-                prev.copy(
-                    personName = personName,
-                    courseName = courseAndPersonName?.clazzName,
-                )
-            }
-
-            _appUiState.update { prev ->
-                prev.copy(
-                    title = personName
-                )
-            }
-        }
-
     }
 
     fun onClickEditEnrolment(enrolment: ClazzEnrolmentWithLeavingReason) {
