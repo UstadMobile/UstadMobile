@@ -4,11 +4,15 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import app.cash.paging.PagingSource
+import com.ustadmobile.core.db.PermissionFlags
+import com.ustadmobile.core.db.dao.ClazzDaoCommon.SELECT_CLAZZ_UID_FOR_ENROLMENT_UID_SQL
+import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.PERMISSION_REQUIRED_BY_CLAZZENROLMENT_UID
 import com.ustadmobile.door.annotation.DoorDao
 import com.ustadmobile.door.annotation.HttpAccessible
 import com.ustadmobile.door.annotation.HttpServerFunctionCall
 import com.ustadmobile.door.annotation.HttpServerFunctionParam
 import com.ustadmobile.door.annotation.Repository
+import com.ustadmobile.lib.db.composites.CoursePermissionAndEnrolment
 import com.ustadmobile.lib.db.composites.CoursePermissionAndListDetail
 import com.ustadmobile.lib.db.entities.CoursePermission
 import kotlinx.coroutines.flow.Flow
@@ -87,5 +91,72 @@ expect abstract class CoursePermissionDao {
          WHERE cpUid = :cpUid  
     """)
     abstract suspend fun setDeleted(cpUid: Long, isDeleted: Boolean, updateTime: Long)
+
+
+    @Query("""
+       SELECT CoursePermission.*, ClazzEnrolment_ForAccountPerson.*
+         FROM CoursePermission
+              ${CoursePermissionDaoCommon.LEFT_JOIN_ENROLMENT_FROM_COURSEPERMISSION_WITH_ACCOUNT_UID_PARAM}
+        WHERE CoursePermission.cpClazzUid = ($SELECT_CLAZZ_UID_FOR_ENROLMENT_UID_SQL)
+          AND (CoursePermission.cpToPersonUid = :accountPersonUid 
+               OR CoursePermission.cpToEnrolmentRole = ClazzEnrolment_ForAccountPerson.clazzEnrolmentRole)
+    """)
+    abstract suspend fun personHasPermissionWithClazzByEnrolmentUidEntities2(
+        accountPersonUid: Long,
+        clazzEnrolmentUid: Long,
+    ): List<CoursePermissionAndEnrolment>
+
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall(
+                functionName = "personHasPermissionWithClazzByEnrolmentUidEntities2"
+            ),
+            HttpServerFunctionCall(
+                functionName = "findAllByPersonUid",
+                functionDao = SystemPermissionDao::class,
+                functionArgs = arrayOf(
+                    HttpServerFunctionParam(
+                        name = "includeDeleted",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "true",
+                    )
+                )
+            )
+        )
+    )
+    /**
+     * Check if the current user has permission to edit/create an enrolment for a given course.
+     *
+     * If it is a new enrolment, then the user must have the system permission DIRECT_ENROL. If it
+     * is an existing enrolment, the user must have the COURSE_MANAGE_STUDENT_ENROLMENT or
+     * COURSE_MANAGE_TEACHER_ENROLMENT for the role of the given enrolmentUid.
+     *
+     * @param accountPersonUid the user to check for permissions
+     * @param clazzEnrolmentUid the enrolment uid, if existing, else 0 (for new enrolment creation)
+     */
+    @Query("""
+        SELECT CASE :clazzEnrolmentUid 
+                WHEN 0 THEN (SELECT EXISTS(
+                         SELECT 1
+                           FROM SystemPermission
+                          WHERE :accountPersonUid != 0 
+                            AND SystemPermission.spToPersonUid = :accountPersonUid
+                            AND (SystemPermission.spPermissionsFlag & ${PermissionFlags.DIRECT_ENROL}) > 0
+                            AND NOT SystemPermission.spIsDeleted))
+                ELSE (
+                  SELECT ${ClazzDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZENROLMENTUID_SQL_PT1} 
+                         ($PERMISSION_REQUIRED_BY_CLAZZENROLMENT_UID)
+                         ${ClazzDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT2} 
+                         ($PERMISSION_REQUIRED_BY_CLAZZENROLMENT_UID)
+                         ${ClazzDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT3} 
+                )
+               END 
+    """)
+    abstract suspend fun userHasEnrolmentEditPermission(
+        accountPersonUid: Long,
+        clazzEnrolmentUid: Long,
+    ): Boolean
+
 
 }

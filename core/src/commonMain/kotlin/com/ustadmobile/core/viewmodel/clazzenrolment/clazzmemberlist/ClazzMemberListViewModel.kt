@@ -28,7 +28,7 @@ import com.ustadmobile.core.util.ext.dayStringResource
 import com.ustadmobile.core.util.ext.localFirstThenRepoIfNull
 import com.ustadmobile.core.viewmodel.clazz.parseAndUpdateTerminologyStringsIfNeeded
 import com.ustadmobile.door.util.systemTimeInMillis
-import com.ustadmobile.lib.db.composites.EnrolmentRequestAndPersonPicture
+import com.ustadmobile.lib.db.composites.EnrolmentRequestAndPersonDetails
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.composites.PersonAndClazzMemberListDetails
 import com.ustadmobile.lib.db.entities.EnrolmentRequest
@@ -49,7 +49,7 @@ data class ClazzMemberListUiState(
 
     val teacherList: ListPagingSourceFactory<PersonAndClazzMemberListDetails> = { EmptyPagingSource() },
 
-    val pendingStudentList: ListPagingSourceFactory<EnrolmentRequestAndPersonPicture> = {
+    val pendingStudentList: ListPagingSourceFactory<EnrolmentRequestAndPersonDetails> = {
         EmptyPagingSource()
     },
 
@@ -105,7 +105,7 @@ class ClazzMemberListViewModel(
 
     private var lastStudentListPagingsource: PagingSource<Int, PersonAndClazzMemberListDetails>? = null
 
-    private var lastPendingEnrolmentRequestsPagingSource: PagingSource<Int, EnrolmentRequestAndPersonPicture>? = null
+    private var lastPendingEnrolmentRequestsPagingSource: PagingSource<Int, EnrolmentRequestAndPersonDetails>? = null
 
     private fun getMembersAsPagingSource(
         roleId: Int
@@ -134,7 +134,7 @@ class ClazzMemberListViewModel(
         }
     }
 
-    private val pendingStudentListPagingSource: ListPagingSourceFactory<EnrolmentRequestAndPersonPicture> = {
+    private val pendingStudentListPagingSource: ListPagingSourceFactory<EnrolmentRequestAndPersonDetails> = {
         activeRepo.enrolmentRequestDao.findPendingEnrolmentsForCourse(
             clazzUid = clazzUid,
             includeDeleted = false,

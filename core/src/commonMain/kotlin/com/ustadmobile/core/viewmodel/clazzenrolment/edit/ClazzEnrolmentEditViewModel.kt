@@ -42,10 +42,6 @@ data class ClazzEnrolmentEditUiState(
 
 ) {
 
-    val leavingReasonEnabled: Boolean
-        get() = clazzEnrolment?.clazzEnrolmentOutcome !=
-                ClazzEnrolment.OUTCOME_IN_PROGRESS
-
     val outcomeVisible: Boolean
         get() = clazzEnrolment?.clazzEnrolmentRole == ClazzEnrolment.ROLE_STUDENT
 }
@@ -72,7 +68,14 @@ class ClazzEnrolmentEditViewModel(
             )
         }
 
-        viewModelScope.launch {
+        launchIfHasPermission(
+            permissionCheck = { db ->
+                db.coursePermissionDao.userHasEnrolmentEditPermission(
+                    accountPersonUid = activeUserPersonUid,
+                    clazzEnrolmentUid = entityUidArg,
+                )
+            }
+        ) {
             loadEntity(
                 serializer = ClazzEnrolmentWithLeavingReason.serializer(),
                 onLoadFromDb = { db ->

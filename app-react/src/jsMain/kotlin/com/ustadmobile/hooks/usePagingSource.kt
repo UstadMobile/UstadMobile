@@ -57,7 +57,10 @@ fun <Key: Any, Value: Any> usePagingSource(
     placeholdersEnabled: Boolean,
     loadSize: Int = 50,
 ) : UseInfiniteQueryResult<PagingSourceLoadResult<Key, Value>, Throwable> {
-    console.log("PagingSource : usePagingSource key=${pagingSourceFactory.hashCode()}")
+    val pagingSourceHashCode = pagingSourceFactory.hashCode()
+    val logPrefix = "usePagingSource: $pagingSourceHashCode"
+
+    console.log("$logPrefix : start")
 
     var lastInvalidationTime: Long by useState { 0 }
     var lastRefreshedTime: Long by useState { 0 }
@@ -70,7 +73,7 @@ fun <Key: Any, Value: Any> usePagingSource(
     val invalidationCallback: () -> Unit = useMemo(pagingSourceFactory) {
         {
             val timeNow = systemTimeInMillis()
-            console.log("PagingSource: set last invalidation time = $timeNow")
+            console.log("$logPrefix: set last invalidation time = $timeNow")
             lastInvalidationTime = timeNow
         }
     }
@@ -83,7 +86,7 @@ fun <Key: Any, Value: Any> usePagingSource(
      */
     useEffect(pagingSource) {
         cleanup {
-            console.log("PagingSource: remove invalidation listener for old source")
+            console.log("$logPrefix: remove invalidation listener for old source")
             pagingSource?.unregisterInvalidatedCallback(invalidationCallback)
         }
     }
@@ -92,8 +95,8 @@ fun <Key: Any, Value: Any> usePagingSource(
         options = jso {
             queryKey = QueryKey(""+pagingSourceFactory.hashCode())
             queryFn = { queryContext: QueryFunctionContext<QueryKey, PagingSourceLoadParams<Key>> ->
-                console.log("queryContext = $queryContext")
-                console.log("PagingSource(): running QueryFn return promise key=${pagingSourceFactory.hashCode()}")
+                console.log("$logPrefix queryContext = $queryContext")
+                console.log("$logPrefix(): running QueryFn return promise key=${pagingSourceFactory.hashCode()}")
                 val pageParam = queryContext.getPageParam<Key>()
                 val loadParams = when(pageParam) {
                     is PagingSourceLoadParamsAppend<*> -> pageParam.unsafeCast<PagingSourceLoadParamsAppend<Key>>()
@@ -101,7 +104,7 @@ fun <Key: Any, Value: Any> usePagingSource(
                     is PagingSourceLoadParamsRefresh<*> -> pageParam.unsafeCast<PagingSourceLoadParamsRefresh<Key>>()
                     else -> PagingSourceLoadParamsRefresh<Key>(null, loadSize, placeholdersEnabled)
                 }
-                console.log("PagingSource(): loadParams = $loadParams")
+                console.log("$logPrefix(): loadParams = $loadParams")
 
                 //Must use PagingSourceFactory itself here: TanStack query will remember this function
                 //according to the QueryKey, so references would be to old data.
@@ -109,7 +112,9 @@ fun <Key: Any, Value: Any> usePagingSource(
                     pagingSourceFactory().also {
                         pagingSource = it
                         it.registerInvalidatedCallback(invalidationCallback)
-                    }.load(loadParams)
+                    }.load(loadParams).also {
+                        console.log("$logPrefix ran load with loadParams = $loadParams")
+                    }
                 }.unsafeCast<Promise<PagingSourceLoadResult<Key, Value>>>()
             }
             getNextPageParam = { lastPage: PagingSourceLoadResult<Key, Value>, allPages: Array<PagingSourceLoadResult<Key, Value>> ->
@@ -133,10 +138,10 @@ fun <Key: Any, Value: Any> usePagingSource(
      */
     useEffect(dependencies = arrayOf(lastInvalidationTime, infiniteQueryResult.isFetching, lastRefreshedTime)) {
         val dateUpdatedAt = infiniteQueryResult.dataUpdatedAt.toLong()
-        console.log("PagingSource: isFetching = ${infiniteQueryResult.isFetching} lastInvalidationTime=$lastInvalidationTime updatedAt=$dateUpdatedAt refreshTime=$lastRefreshedTime")
+        console.log("$logPrefix : isFetching = ${infiniteQueryResult.isFetching} lastInvalidationTime=$lastInvalidationTime updatedAt=$dateUpdatedAt refreshTime=$lastRefreshedTime")
         if(lastRefreshedTime < lastInvalidationTime && !infiniteQueryResult.isFetching) {
             lastRefreshedTime = systemTimeInMillis()
-            console.log("PagingSource: refetch: isFetching = ${infiniteQueryResult.isFetching} lastInvalidationTime=$lastInvalidationTime")
+            console.log("$logPrefix : refetch: isFetching = ${infiniteQueryResult.isFetching} lastInvalidationTime=$lastInvalidationTime")
             infiniteQueryResult.refetch(
                 jso {
 

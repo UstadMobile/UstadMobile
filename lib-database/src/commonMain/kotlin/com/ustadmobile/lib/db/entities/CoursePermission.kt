@@ -72,6 +72,7 @@ data class CoursePermission(
 
         const val TEACHER_DEFAULT_PERMISSIONS = COURSE_VIEW or
                 COURSE_EDIT or
+                COURSE_VIEW_MEMBERS or
                 COURSE_MODERATE or
                 COURSE_MANAGE_STUDENT_ENROLMENT or
                 COURSE_MANAGE_TEACHER_ENROLMENT or

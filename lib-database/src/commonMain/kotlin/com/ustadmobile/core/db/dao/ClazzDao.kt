@@ -277,12 +277,12 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
 
 
     @Query("""
-       SELECT CoursePermission.*, ClazzEnrolment.*
+       SELECT CoursePermission.*, ClazzEnrolment_ForAccountPerson.*
          FROM CoursePermission
               $LEFT_JOIN_ENROLMENT_FROM_COURSEPERMISSION_WITH_ACCOUNT_UID_PARAM
         WHERE (:clazzUid = 0 OR CoursePermission.cpClazzUid = :clazzUid)
           AND (CoursePermission.cpToPersonUid = :accountPersonUid 
-               OR CoursePermission.cpToEnrolmentRole = ClazzEnrolment.clazzEnrolmentRole)
+               OR CoursePermission.cpToEnrolmentRole = ClazzEnrolment_ForAccountPerson.clazzEnrolmentRole)
     """)
     abstract suspend fun personHasPermissionWithClazzEntities2(
         accountPersonUid: Long,

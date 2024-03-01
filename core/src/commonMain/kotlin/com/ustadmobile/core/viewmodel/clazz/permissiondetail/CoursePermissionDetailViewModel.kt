@@ -6,7 +6,6 @@ import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.core.viewmodel.clazz.permissionedit.CoursePermissionEditViewModel
 import com.ustadmobile.lib.db.entities.CoursePermission
-import com.ustadmobile.lib.db.entities.Role
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -86,10 +85,10 @@ class CoursePermissionDetailViewModel(
                 }
 
                 launch {
-                    activeRepo.clazzDao.personHasPermissionWithClazzAsFlow(
+                    activeRepo.clazzDao.personHasPermissionWithClazzAsFlow2(
                         accountPersonUid = accountManager.currentAccount.personUid,
                         clazzUid = clazzUid,
-                        permission = Role.PERMISSION_CLAZZ_UPDATE
+                        permission = PermissionFlags.COURSE_EDIT,
                     ).distinctUntilChanged().collect { hasEditPermission ->
                         _appUiState.update { prev ->
                             prev.copy(

@@ -212,7 +212,13 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
      * see other students etc).
      *
      * This Query is used by ClazzMemberListViewModel.
-     */
+     *
+     *
+     AND (
+                           ($PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL)
+                        OR Person.personUid = :accountPersonUid
+                       )
+     * */
     @Query("""
         SELECT * 
           FROM (SELECT Person.*, PersonPicture.*,
@@ -224,16 +230,18 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
                           FROM ClazzEnrolment 
                          WHERE Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid) AS latestDateLeft, 
         
-                       (SELECT clazzEnrolmentRole 
+                       (SELECT ClazzEnrolment.clazzEnrolmentRole 
                           FROM ClazzEnrolment 
                          WHERE Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid 
                            AND ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid 
-                           AND ClazzEnrolment.clazzEnrolmentActive) AS enrolmentRole
+                           AND ClazzEnrolment.clazzEnrolmentActive
+                      ORDER BY ClazzEnrolment.clazzEnrolmentDateLeft DESC
+                         LIMIT 1) AS enrolmentRole
                   FROM Person
                        LEFT JOIN PersonPicture
                                  ON PersonPicture.personPictureUid = Person.personUid
                  WHERE Person.personUid IN 
-                       (SELECT clazzEnrolmentPersonUid 
+                       (SELECT DISTINCT ClazzEnrolment.clazzEnrolmentPersonUid 
                           FROM ClazzEnrolment 
                          WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid 
                            AND ClazzEnrolment.clazzEnrolmentActive 
@@ -271,17 +279,11 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
                 ELSE 0
             END DESC
     """)
-    @QueryLiveTables(value = ["Clazz", "Person", "ClazzEnrolment", "PersonGroupMember", "ScopedGrant", "PersonPicture"])
+    @QueryLiveTables(value = ["Clazz", "Person", "ClazzEnrolment", "PersonPicture", "CoursePermission"])
     @HttpAccessible(
         pullQueriesToReplicate = arrayOf(
             HttpServerFunctionCall("findByClazzUidAndRole"),
-            HttpServerFunctionCall(
-                functionDao = ScopedGrantDao::class,
-                functionName = "findScopedGrantAndPersonGroupByPersonUid"
-            ),
-            HttpServerFunctionCall(
-                functionName = "findEnrolmentsByClazzUidAndRole"
-            )
+            HttpServerFunctionCall("findEnrolmentsByClazzUidAndRole"),
         )
     )
     abstract fun findByClazzUidAndRole(
@@ -296,27 +298,22 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
     ): PagingSource<Int, PersonAndClazzMemberListDetails>
 
     @Query("""
-        SELECT ClazzEnrolment.*
-          FROM PersonGroupMember
-               ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1} 
-                    ${Role.PERMISSION_PERSON_SELECT} 
-                    ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2} 
-               JOIN ClazzEnrolment
-                    ON ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid
-                       AND ClazzEnrolment.clazzEnrolmentPersonUid = Person.personUid
-         WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid
-           AND PersonGroupMember.groupMemberActive 
-           AND Person.personUid IN 
-               (SELECT clazzEnrolmentPersonUid 
-                  FROM ClazzEnrolment 
-                 WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid 
-                   AND ClazzEnrolment.clazzEnrolmentActive 
-                   AND ClazzEnrolment.clazzEnrolmentRole = :roleId)
+       SELECT ClazzEnrolment.*
+         FROM ClazzEnrolment
+        WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid
+          AND ClazzEnrolment.clazzEnrolmentRole = :roleId
+              /* Begin permission check*/
+          AND (
+                   ($PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL)
+                OR ClazzEnrolment.clazzEnrolmentPersonUid = :accountPersonUid
+              )  
+              /* End permission check */
     """)
     abstract suspend fun findEnrolmentsByClazzUidAndRole(
         clazzUid: Long,
         accountPersonUid: Long,
         roleId: Int,
+        permission: Long,
     ): List<ClazzEnrolment>
 
 
