@@ -16,12 +16,12 @@ class CreateNewClazzUseCase(
 
     suspend operator fun invoke(
         clazz: Clazz,
-    ) {
-        repoOrDb.withDoorTransactionAsync {
+    ) : Long {
+        return repoOrDb.withDoorTransactionAsync {
             clazz.takeIf { it.clazzCode == null }?.clazzCode =
                 randomString(Clazz.CLAZZ_CODE_DEFAULT_LENGTH)
 
-            repoOrDb.clazzDao.insertAsync(clazz)
+            val clazzUid = repoOrDb.clazzDao.insertAsync(clazz)
             repoOrDb.coursePermissionDao.upsertAsync(
                 CoursePermission(
                     cpClazzUid = clazz.clazzUid,
@@ -36,6 +36,8 @@ class CreateNewClazzUseCase(
                     cpPermissionsFlag = CoursePermission.STUDENT_DEFAULT_PERMISSIONS,
                 )
             )
+
+            clazzUid
         }
     }
 

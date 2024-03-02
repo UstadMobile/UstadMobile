@@ -43,6 +43,7 @@ import com.ustadmobile.libuicompose.components.ClazzLogEditAttendanceToggleGroup
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadPersonAvatar
 import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
+import com.ustadmobile.libuicompose.view.clazzlog.ATTENDANCE_STATUS_MAP
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.launch
 
@@ -80,36 +81,38 @@ fun ClazzLogEditAttendanceScreen(
             )
         }
 
-        item {
-            ListItem(
-                modifier = Modifier.clickable {
-                    onClickMarkAll(ClazzLogAttendanceRecord.STATUS_ATTENDED)
-                },
-                headlineContent = { Text(stringResource(MR.strings.mark_all_present)) },
-                leadingContent = {
-                    Icon(
-                        modifier = Modifier.size(40.dp).padding(8.dp),
-                        imageVector = Icons.Outlined.LibraryAddCheck,
-                        contentDescription = ""
-                    )
-                }
-            )
-        }
+        if(uiState.canEdit) {
+            item("mark_all_attended") {
+                ListItem(
+                    modifier = Modifier.clickable {
+                        onClickMarkAll(ClazzLogAttendanceRecord.STATUS_ATTENDED)
+                    },
+                    headlineContent = { Text(stringResource(MR.strings.mark_all_present)) },
+                    leadingContent = {
+                        Icon(
+                            modifier = Modifier.size(40.dp).padding(8.dp),
+                            imageVector = Icons.Outlined.LibraryAddCheck,
+                            contentDescription = ""
+                        )
+                    }
+                )
+            }
 
-        item {
-            ListItem(
-                modifier = Modifier.clickable {
-                    onClickMarkAll(ClazzLogAttendanceRecord.STATUS_ABSENT)
-                },
-                headlineContent = { Text(stringResource(MR.strings.mark_all_absent)) },
-                leadingContent = {
-                    Icon(
-                        modifier = Modifier.size(40.dp).padding(8.dp),
-                        imageVector = Icons.Outlined.CheckBox,
-                        contentDescription = ""
-                    )
-                }
-            )
+            item("mark_all_absent") {
+                ListItem(
+                    modifier = Modifier.clickable {
+                        onClickMarkAll(ClazzLogAttendanceRecord.STATUS_ABSENT)
+                    },
+                    headlineContent = { Text(stringResource(MR.strings.mark_all_absent)) },
+                    leadingContent = {
+                        Icon(
+                            modifier = Modifier.size(40.dp).padding(8.dp),
+                            imageVector = Icons.Outlined.CheckBox,
+                            contentDescription = ""
+                        )
+                    }
+                )
+            }
         }
 
         items(
@@ -119,7 +122,8 @@ fun ClazzLogEditAttendanceScreen(
             ClazzLogItemView(
                 clazzLog = clazzLogAttendance,
                 fieldsEnabled = uiState.fieldsEnabled,
-                onClazzLogAttendanceChanged = onClazzLogAttendanceChanged
+                onClazzLogAttendanceChanged = onClazzLogAttendanceChanged,
+                canEdit = uiState.canEdit
             )
         }
     }
@@ -212,9 +216,9 @@ private fun PagerView(
 private fun ClazzLogItemView(
     fieldsEnabled: Boolean,
     clazzLog: PersonAndClazzLogAttendanceRecord,
-    onClazzLogAttendanceChanged: (PersonAndClazzLogAttendanceRecord) -> Unit
+    onClazzLogAttendanceChanged: (PersonAndClazzLogAttendanceRecord) -> Unit,
+    canEdit: Boolean,
 ) {
-
     ListItem(
         headlineContent = {
             Text(text = clazzLog.person?.personFullName() ?: "")
@@ -226,19 +230,25 @@ private fun ClazzLogItemView(
             )
         },
         trailingContent = {
-            ClazzLogEditAttendanceToggleGroup(
-                isEnabled = fieldsEnabled,
-                attendanceStatus = clazzLog.attendanceRecord?.attendanceStatus ?: 0,
-                onAttendanceStatusChanged = { status ->
-                    onClazzLogAttendanceChanged(
-                        clazzLog.copy(
-                            attendanceRecord = clazzLog.attendanceRecord?.shallowCopy {
-                                attendanceStatus = status
-                            }
+            if(canEdit) {
+                ClazzLogEditAttendanceToggleGroup(
+                    isEnabled = fieldsEnabled,
+                    attendanceStatus = clazzLog.attendanceRecord?.attendanceStatus ?: 0,
+                    onAttendanceStatusChanged = { status ->
+                        onClazzLogAttendanceChanged(
+                            clazzLog.copy(
+                                attendanceRecord = clazzLog.attendanceRecord?.shallowCopy {
+                                    attendanceStatus = status
+                                }
+                            )
                         )
-                    )
+                    }
+                )
+            }else {
+                ATTENDANCE_STATUS_MAP[clazzLog.attendanceRecord?.attendanceStatus]?.also {
+                    Icon(it.first, contentDescription = stringResource(it.second))
                 }
-            )
+            }
         }
     )
 
