@@ -189,6 +189,7 @@ abstract class UstadListViewModel<S>(
         detailViewName: String,
         entityUid: Long,
         result: Any,
+        extraArgs: Map<String, String> = emptyMap(),
     ) {
         val resultDest = expectedResultDest
         if(resultDest != null) {
@@ -196,7 +197,10 @@ abstract class UstadListViewModel<S>(
         }else {
             navController.navigate(
                 detailViewName,
-                mapOf(UstadView.ARG_ENTITY_UID to entityUid.toString())
+                buildMap {
+                    putAll(extraArgs)
+                    put(ARG_ENTITY_UID, entityUid.toString())
+                }
             )
         }
     }

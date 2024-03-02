@@ -1,6 +1,8 @@
 package com.ustadmobile.core.viewmodel.coursegroupset.edit
 
 import app.cash.turbine.test
+import com.ustadmobile.core.domain.clazz.CreateNewClazzUseCase
+import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.test.viewmodeltest.ViewModelTestBuilder
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.ext.awaitItemWhere
@@ -14,6 +16,7 @@ import com.ustadmobile.door.flow.doorFlow
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
+import com.ustadmobile.lib.db.entities.CoursePermission
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import kotlin.test.Test
@@ -45,23 +48,36 @@ class CourseGroupSetEditViewModelTest : AbstractMainDispatcherTest()  {
             val clazz = Clazz().apply {
                 clazzName = "Test"
             }
+            val addPersonUseCase = AddNewPersonUseCase(activeDb, null)
+            val activeUser = setActiveUser(activeEndpoint)
+
 
             val testContext = activeDb.withDoorTransactionAsync {
-                activeDb.createNewClazzAndGroups(clazz, systemImpl, emptyMap())
+                clazz.clazzUid = CreateNewClazzUseCase(activeDb).invoke(clazz)
+
+                activeDb.coursePermissionDao.upsertAsync(
+                    CoursePermission(
+                        cpToPersonUid = activeUser.personUid,
+                        cpClazzUid = clazz.clazzUid,
+                        cpPermissionsFlag = CoursePermission.TEACHER_DEFAULT_PERMISSIONS
+                    )
+                )
+
                 val enrolledPeople = namesToEnrol.map { name ->
-                    val enrolledPerson = activeDb.insertPersonAndGroup(Person().apply {
+                    val personToEnrol = Person().apply {
                         firstNames = name.substringBefore(" ")
                         lastName = name.substringAfter(" ")
-                    })
+                    }
 
-                    activeDb.enrolPersonIntoClazzAtLocalTimezone(
-                        personToEnrol = enrolledPerson,
-                        clazzUid = clazz.clazzUid,
-                        role = ClazzEnrolment.ROLE_STUDENT
+                    personToEnrol.personUid = addPersonUseCase(personToEnrol)
+
+                    activeDb.clazzEnrolmentDao.insertAsync(
+                        ClazzEnrolment(
+                            clazz.clazzUid, personToEnrol.personUid, ClazzEnrolment.ROLE_STUDENT
+                        )
                     )
 
-                    enrolledPerson
-
+                    personToEnrol
                 }
                 TestContext(clazz, enrolledPeople)
             }
@@ -114,11 +130,13 @@ class CourseGroupSetEditViewModelTest : AbstractMainDispatcherTest()  {
                     cancelAndIgnoreRemainingEvents()
                 }
 
+                val activeUserPersonUid = accountManager.currentUserSession.person.personUid
                 val members = activeDb.courseGroupMemberDao.findByCourseGroupSetAndClazz(
                     cgsUid = courseGroupSetUid,
                     clazzUid = testContext.clazz.clazzUid,
                     time = systemTimeInMillis(),
                     activeFilter = 0,
+                    accountPersonUid = activeUserPersonUid
                 )
 
                 testContext.enrolledPeople.forEachIndexed { index, person ->

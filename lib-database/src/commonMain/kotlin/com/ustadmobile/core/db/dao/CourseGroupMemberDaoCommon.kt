@@ -1,5 +1,6 @@
 package com.ustadmobile.core.db.dao
 
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 
 object CourseGroupMemberDaoCommon  {
@@ -60,7 +61,21 @@ object CourseGroupMemberDaoCommon  {
                                 AND CourseGroupMember.cgmSetUid = :cgsUid 
                            ORDER BY CourseGroupMember.cgmLct DESC        
                               LIMIT 1)
-         WHERE (:activeFilter = 0 OR :activeFilter = EnrolledStudentPersonUids.isActive)                       
+         WHERE (:activeFilter = 0 OR :activeFilter = EnrolledStudentPersonUids.isActive)  
+               /* 
+                * Begin permission check -  must have course view members permission, or active 
+                * user must be in the same group 
+                */ 
+            AND (
+                    (${CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT1} ${PermissionFlags.COURSE_VIEW_MEMBERS}
+                     ${CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT2} ${PermissionFlags.COURSE_VIEW_MEMBERS}
+                     ${CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT3})
+                  OR EXISTS(
+                     SELECT 1
+                       FROM CourseGroupMember _CourseGroupMemberForActivePerson
+                      WHERE _CourseGroupMemberForActivePerson.cgmPersonUid = :accountPersonUid
+                        AND _CourseGroupMemberForActivePerson.cgmGroupNumber = CourseGroupMember.cgmGroupNumber)     
+                 )
       ORDER BY Person.firstNames, Person.lastName ASC
     """
 
