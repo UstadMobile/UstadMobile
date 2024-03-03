@@ -150,7 +150,7 @@ class PersonDetailViewModel(
             val hasManagePermissionsPermissionFlow = activeDb.systemPermissionDao
                 .personHasSystemPermissionAsFlow(
                     accountPersonUid = activeUserPersonUid,
-                    permission = PermissionFlags.MANAGE_SYSTEM_PERMISSIONS,
+                    permission = PermissionFlags.MANAGE_USER_PERMISSIONS,
                 )
 
             _uiState.whenSubscribed {

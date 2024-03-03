@@ -38,8 +38,6 @@ object PermissionFlags {
 
     const val EDIT_ALL_PERSONS = 32768L //2^15
 
-    const val MANAGE_SYSTEM_PERMISSIONS = 65536L //2^16
-
 
     const val ALL = Long.MAX_VALUE
 
