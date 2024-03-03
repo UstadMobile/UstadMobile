@@ -186,15 +186,9 @@ expect abstract class PersonDao : BaseDao<Person> {
     abstract suspend fun insertPersonGroupMember(personGroupMember:PersonGroupMember):Long
 
     @Query(SQL_SELECT_LIST_WITH_PERMISSION)
-    abstract fun findPersonsWithPermission(timestamp: Long, excludeClazz: Long,
-                                                 excludeSchool: Long, excludeSelected: List<Long>,
-                                                 accountPersonUid: Long, sortOrder: Int, searchText: String? = "%"): PagingSource<Int, PersonWithDisplayDetails>
-
-    @Query(SQL_SELECT_LIST_WITH_PERMISSION)
     abstract fun findPersonsWithPermissionAsList(
         timestamp: Long,
         excludeClazz: Long,
-        excludeSchool: Long,
         excludeSelected: List<Long>,
         accountPersonUid: Long,
         sortOrder: Int,
@@ -206,15 +200,36 @@ expect abstract class PersonDao : BaseDao<Person> {
         pullQueriesToReplicate = arrayOf(
             HttpServerFunctionCall("findPersonsWithPermissionAsPagingSource"),
             HttpServerFunctionCall(
-                functionDao = ScopedGrantDao::class,
-                functionName = "findScopedGrantAndPersonGroupByPersonUid"
+                functionName = "findAllByPersonUid",
+                functionDao = SystemPermissionDao::class,
+                functionArgs = arrayOf(
+                    HttpServerFunctionParam(
+                        name = "includeDeleted",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "true",
+                    )
+                )
+            ),
+            HttpServerFunctionCall(
+                functionName = "findApplicableCoursePermissionEntitiesForAccountPerson",
+                functionDao = CoursePermissionDao::class,
+            ),
+            HttpServerFunctionCall(
+                functionName = "findClazzEnrolmentEntitiesForPersonViewPermissionCheck",
+                functionDao = ClazzEnrolmentDao::class,
+                functionArgs = arrayOf(
+                    HttpServerFunctionParam(
+                        name = "otherPersonUid",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "0",
+                    )
+                )
             )
         )
     )
     abstract fun findPersonsWithPermissionAsPagingSource(
         timestamp: Long,
         excludeClazz: Long,
-        excludeSchool: Long,
         excludeSelected: List<Long>,
         accountPersonUid: Long,
         sortOrder: Int,

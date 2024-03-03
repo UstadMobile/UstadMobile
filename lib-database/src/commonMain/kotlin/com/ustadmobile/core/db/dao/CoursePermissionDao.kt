@@ -100,7 +100,7 @@ expect abstract class CoursePermissionDao {
     @Query("""
        SELECT CoursePermission.*, ClazzEnrolment_ForAccountPerson.*
          FROM CoursePermission
-              ${CoursePermissionDaoCommon.LEFT_JOIN_ENROLMENT_FROM_COURSEPERMISSION_WITH_ACCOUNT_UID_PARAM}
+              ${CoursePermissionDaoCommon.LEFT_JOIN_ENROLMENT_FOR_ACCOUNT_PERSON_FROM_COURSEPERMISSION_WITH_ACCOUNT_UID_PARAM}
         WHERE CoursePermission.cpClazzUid = ($SELECT_CLAZZ_UID_FOR_ENROLMENT_UID_SQL)
           AND (CoursePermission.cpToPersonUid = :accountPersonUid 
                OR CoursePermission.cpToEnrolmentRole = ClazzEnrolment_ForAccountPerson.clazzEnrolmentRole)
@@ -166,7 +166,7 @@ expect abstract class CoursePermissionDao {
     @Query("""
        SELECT CoursePermission.*, ClazzEnrolment_ForAccountPerson.*
          FROM CoursePermission
-              ${CoursePermissionDaoCommon.LEFT_JOIN_ENROLMENT_FROM_COURSEPERMISSION_WITH_ACCOUNT_UID_PARAM}
+              ${CoursePermissionDaoCommon.LEFT_JOIN_ENROLMENT_FOR_ACCOUNT_PERSON_FROM_COURSEPERMISSION_WITH_ACCOUNT_UID_PARAM}
         WHERE (:clazzUid = 0 OR CoursePermission.cpClazzUid = :clazzUid)
           AND (CoursePermission.cpToPersonUid = :accountPersonUid 
                OR CoursePermission.cpToEnrolmentRole = ClazzEnrolment_ForAccountPerson.clazzEnrolmentRole)
@@ -365,6 +365,30 @@ expect abstract class CoursePermissionDao {
         permission: Long,
     ): Boolean
 
+
+    /**
+     * Get all the CoursePermission entities that are applicable for a given user. This is useful
+     * as part of Replicatable permission checks e.g. when checking if a person can view another
+     * person, we need any course permissions that are granted to the given user based on their role
+     * in a course (e.g. student or teacher) and those that are given to them directly.
+     */
+    @Query("""
+       /* Get CoursePermissions given to the active user based on their enrolment role*/ 
+       SELECT CoursePermission.*
+          FROM ClazzEnrolment ClazzEnrolment_ActiveUser
+               JOIN CoursePermission 
+                    ON CoursePermission.cpClazzUid = ClazzEnrolment_ActiveUser.clazzEnrolmentClazzUid
+                   AND CoursePermission.cpToEnrolmentRole = ClazzEnrolment_ActiveUser.clazzEnrolmentRole
+         WHERE ClazzEnrolment_ActiveUser.clazzEnrolmentPersonUid = :accountPersonUid 
+         UNION
+        /* Get ClazzUids where the active user can view members based a grant directly to them */
+        SELECT CoursePermission.*
+          FROM CoursePermission
+         WHERE CoursePermission.cpToPersonUid  = :accountPersonUid
+    """)
+    abstract suspend fun findApplicableCoursePermissionEntitiesForAccountPerson(
+        accountPersonUid: Long,
+    ): List<CoursePermission>
 
 
 

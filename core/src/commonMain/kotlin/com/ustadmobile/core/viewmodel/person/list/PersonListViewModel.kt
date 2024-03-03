@@ -74,8 +74,6 @@ class PersonListViewModel(
 
     private val filterExcludeMembersOfClazz = savedStateHandle[ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ]?.toLong() ?: 0L
 
-    private val filterExcludeMemberOfSchool = savedStateHandle[ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL]?.toLong() ?: 0L
-
     private val filterAlreadySelectedList = savedStateHandle[ARG_EXCLUDE_PERSONUIDS_LIST]
         ?.split(",")?.filter { it.isNotEmpty() }?.map { it.trim().toLong() }
         ?: listOf()
@@ -85,10 +83,12 @@ class PersonListViewModel(
 
     private val pagingSourceFactory: () -> PagingSource<Int, PersonAndListDisplayDetails> = {
         activeRepo.personDao.findPersonsWithPermissionAsPagingSource(
-            getSystemTimeInMillis(), filterExcludeMembersOfClazz,
-            filterExcludeMemberOfSchool, filterAlreadySelectedList,
-            accountManager.currentAccount.personUid, _uiState.value.sortOption.flag,
-            _appUiState.value.searchState.searchText.toQueryLikeParam()
+            timestamp = getSystemTimeInMillis(),
+            excludeClazz = filterExcludeMembersOfClazz,
+            excludeSelected = filterAlreadySelectedList,
+            accountPersonUid = activeUserPersonUid,
+            sortOrder = _uiState.value.sortOption.flag,
+            searchText = _appUiState.value.searchState.searchText.toQueryLikeParam()
         ).also {
             lastPagingSource = it
         }
@@ -227,18 +227,12 @@ class PersonListViewModel(
 
         val ALL_DEST_NAMES = listOf(DEST_NAME, DEST_NAME_HOME)
 
-        const val RESULT_PERSON_KEY = "Person"
-
-        const val ARG_HIDE_PERSON_ADD = "ArgHidePersonAdd"
-
         /**
          * Exclude those who are already in the given class. This is useful for
          * the add to class picker (e.g. to avoid showing people who are already in the
          * given class)
          */
         const val ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ = "exlcudeFromClazz"
-
-        const val ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL = "excludeFromSchool"
 
         const val ARG_EXCLUDE_PERSONUIDS_LIST = "excludeAlreadySelectedList"
 

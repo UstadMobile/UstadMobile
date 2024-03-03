@@ -15,6 +15,7 @@ import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_LAST_NAME_ASC
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_LAST_NAME_DESC
 import com.ustadmobile.door.annotation.*
 import app.cash.paging.PagingSource
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.db.dao.CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL
 import com.ustadmobile.lib.db.composites.CourseNameAndPersonName
 import com.ustadmobile.lib.db.composites.PersonAndClazzMemberListDetails
@@ -371,5 +372,48 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         personUid: Long,
         clazzUid: Long,
     ): CourseNameAndPersonName?
+
+
+    /**
+     * Find the enrolments required for a given accountPersonUid to check their permissions to view
+     * another person, optionally filtered by person.
+     *
+     * This will include the ClazzEnrolment(s) of accountPersonUid themselves and all ClazzEnrolment
+     * entities for any Clazz where they have permission to view members.
+     *
+     * @param accountPersonUid the active user for whom we are checking permissions
+     * @param otherPersonUid the person that we want to check if accountPersonUid has permission to
+     *        view when checking for a specific person, or 0 if fetching all (e.g. listing all persons)
+     */
+    @Query("""
+          WITH CanViewMembersClazzesViaCoursePermission(clazzUid) AS
+               /* Get clazzuids where active user can view members based on their own enrolment role */
+               (SELECT CoursePermission.cpClazzUid
+                  FROM ClazzEnrolment ClazzEnrolment_ActiveUser
+                       JOIN CoursePermission 
+                            ON CoursePermission.cpClazzUid = ClazzEnrolment_ActiveUser.clazzEnrolmentClazzUid
+                           AND CoursePermission.cpToEnrolmentRole = ClazzEnrolment_ActiveUser.clazzEnrolmentRole
+                 WHERE ClazzEnrolment_ActiveUser.clazzEnrolmentPersonUid = :accountPersonUid 
+                   AND (CoursePermission.cpPermissionsFlag & ${PermissionFlags.COURSE_VIEW_MEMBERS}) > 0 
+                UNION
+                /* Get ClazzUids where the active user can view members based a grant directly to them */
+                SELECT CoursePermission.cpClazzUid
+                  FROM CoursePermission
+                 WHERE CoursePermission.cpToPersonUid  = :accountPersonUid
+                   AND (CoursePermission.cpPermissionsFlag & ${PermissionFlags.COURSE_VIEW_MEMBERS}) > 0
+               )
+        SELECT ClazzEnrolment.*
+          FROM ClazzEnrolment
+         WHERE ClazzEnrolment.clazzEnrolmentPersonUid = :accountPersonUid
+            OR (    ClazzEnrolment.clazzEnrolmentClazzUid IN 
+                        (SELECT CanViewMembersClazzesViaCoursePermission.clazzUid
+                           FROM CanViewMembersClazzesViaCoursePermission)
+                AND (:otherPersonUid = 0 OR ClazzEnrolment.clazzEnrolmentPersonUid = :otherPersonUid)   
+                )
+    """)
+    abstract suspend fun findClazzEnrolmentEntitiesForPersonViewPermissionCheck(
+        accountPersonUid: Long,
+        otherPersonUid: Long,
+    ): List<ClazzEnrolment>
 
 }

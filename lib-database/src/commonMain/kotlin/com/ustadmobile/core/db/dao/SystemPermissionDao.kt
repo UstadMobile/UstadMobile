@@ -3,6 +3,7 @@ package com.ustadmobile.core.db.dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import com.ustadmobile.core.db.dao.SystemPermissionDaoCommon.SELECT_SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL
 import com.ustadmobile.door.annotation.DoorDao
 import com.ustadmobile.door.annotation.HttpAccessible
 import com.ustadmobile.door.annotation.HttpServerFunctionCall
@@ -65,16 +66,7 @@ expect abstract class SystemPermissionDao {
             )
         )
     )
-    @Query("""
-        SELECT EXISTS(
-               SELECT 1
-                 FROM SystemPermission
-                WHERE :accountPersonUid != 0 
-                  AND SystemPermission.spToPersonUid = :accountPersonUid
-                  AND (SystemPermission.spPermissionsFlag & :permission) > 0
-                  AND NOT SystemPermission.spIsDeleted 
-        )
-    """)
+    @Query(SELECT_SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL)
     abstract suspend fun personHasSystemPermission(
         accountPersonUid: Long,
         permission: Long,
@@ -95,16 +87,7 @@ expect abstract class SystemPermissionDao {
             )
         )
     )
-    @Query("""
-        SELECT EXISTS(
-               SELECT 1
-                 FROM SystemPermission
-                WHERE :accountPersonUid != 0
-                  AND SystemPermission.spToPersonUid = :accountPersonUid
-                  AND (SystemPermission.spPermissionsFlag & :permission) > 0
-                  AND NOT SystemPermission.spIsDeleted 
-        )
-    """)
+    @Query(SELECT_SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL)
     abstract fun personHasSystemPermissionAsFlow(
         accountPersonUid: Long,
         permission: Long,

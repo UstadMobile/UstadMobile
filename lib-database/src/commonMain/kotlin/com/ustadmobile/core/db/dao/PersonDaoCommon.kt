@@ -1,9 +1,9 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.lib.db.entities.Clazz
+import com.ustadmobile.core.db.PermissionFlags
+import com.ustadmobile.core.db.dao.SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT1
+import com.ustadmobile.core.db.dao.SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT2
 import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.Role
-import com.ustadmobile.lib.db.entities.School
 
 object PersonDaoCommon {
 
@@ -16,28 +16,55 @@ object PersonDaoCommon {
     const val SORT_LAST_NAME_DESC = 4
 
     const val SQL_SELECT_LIST_WITH_PERMISSION = """
+         WITH CanViewPersonUidsViaCoursePermission(personUid) AS
+              /* Select personUids that can be viewed based on CoursePermission given the active user 
+                 for their enrolments 
+              */
+              (SELECT DISTINCT ClazzEnrolment_ForClazzMember.clazzEnrolmentPersonUid AS personUid
+                 FROM ClazzEnrolment ClazzEnrolment_ForActiveUser
+                      JOIN CoursePermission 
+                           ON CoursePermission.cpClazzUid = ClazzEnrolment_ForActiveUser.clazzEnrolmentClazzUid
+                          AND CoursePermission.cpToEnrolmentRole = ClazzEnrolment_ForActiveUser.clazzEnrolmentRole
+                          AND (CoursePermission.cpPermissionsFlag & ${PermissionFlags.COURSE_VIEW_MEMBERS}) > 0
+                      JOIN ClazzEnrolment ClazzEnrolment_ForClazzMember
+                           ON ClazzEnrolment_ForClazzMember.clazzEnrolmentClazzUid = CoursePermission.cpClazzUid
+                WHERE :accountPersonUid != 0
+                  AND ClazzEnrolment_ForActiveUser.clazzEnrolmentPersonUid = :accountPersonUid
+                  AND ClazzEnrolment_ForActiveUser.clazzEnrolmentActive
+              
+               UNION
+               /* Select personUids that can be viewed based on CoursePermission for the active user
+                  where the CoursePermission is granted directly to them
+                */   
+               SELECT DISTINCT ClazzEnrolment_ForClazzMember.clazzEnrolmentPersonUid AS personUid
+                 FROM CoursePermission
+                      JOIN ClazzEnrolment ClazzEnrolment_ForClazzMember
+                           ON ClazzEnrolment_ForClazzMember.clazzEnrolmentClazzUid = CoursePermission.cpClazzUid
+                WHERE :accountPersonUid != 0
+                  AND CoursePermission.cpToPersonUid = :accountPersonUid)
+               
          SELECT Person.*, PersonPicture.*
-           FROM PersonGroupMember 
-                ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1}
-                    ${Role.PERMISSION_PERSON_SELECT}
-                    ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2}
+           FROM Person
                 LEFT JOIN PersonPicture
                      ON PersonPicture.personPictureUid = Person.personUid
-         WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid
-           AND PersonGroupMember.groupMemberActive 
+          WHERE /* Begin permission check */ 
+                (         
+                      ($SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT1
+                       ${PermissionFlags.VIEW_ALL_PERSONS}
+                       $SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT2)
+                    OR (Person.personUid IN 
+                               (SELECT CanViewPersonUidsViaCoursePermission.personUid
+                                  FROM CanViewPersonUidsViaCoursePermission))
+                    OR (Person.personUid = :accountPersonUid)
+                )
+                /* End permission check */
            AND (:excludeClazz = 0 OR :excludeClazz NOT IN
                     (SELECT clazzEnrolmentClazzUid 
                        FROM ClazzEnrolment 
                       WHERE clazzEnrolmentPersonUid = Person.personUid 
                             AND :timestamp BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined 
                                 AND ClazzEnrolment.clazzEnrolmentDateLeft
-           AND ClazzEnrolment.clazzEnrolmentActive))
-           AND (:excludeSchool = 0 OR :excludeSchool NOT IN
-                    (SELECT schoolMemberSchoolUid
-                      FROM SchoolMember 
-                     WHERE schoolMemberPersonUid = Person.personUid 
-                       AND :timestamp BETWEEN SchoolMember.schoolMemberJoinDate
-                            AND SchoolMember.schoolMemberLeftDate ))
+                        AND ClazzEnrolment.clazzEnrolmentActive))
            AND Person.personType = ${Person.TYPE_NORMAL_PERSON}                  
            AND (Person.personUid NOT IN (:excludeSelected))
            AND (:searchText = '%' 
@@ -54,37 +81,5 @@ object PersonDaoCommon {
                ELSE ''
                END DESC
     """
-
-
-    internal const val ENTITY_PERSONS_WITH_PERMISSION_PT1 = """
-            SELECT DISTINCT Person_Perm.personUid FROM Person Person_Perm
-            LEFT JOIN PersonGroupMember ON Person_Perm.personUid = PersonGroupMember.groupMemberPersonUid
-            LEFT JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid
-            LEFT JOIN Role ON EntityRole.erRoleUid = Role.roleUid
-            WHERE
-            CAST(Person_Perm.admin AS INTEGER) = 1 OR ( (
-            """
-    internal const val ENTITY_PERSONS_WITH_PERMISSION_PT2 =  """
-            = 0) AND (Person_Perm.personUid = Person.personUid))
-            OR
-            (
-            ((EntityRole.erTableId = ${Person.TABLE_ID} AND EntityRole.erEntityUid = Person.personUid) OR 
-            (EntityRole.erTableId = ${Clazz.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT clazzEnrolmentClazzUid FROM ClazzEnrolment WHERE clazzEnrolmentPersonUid = Person.personUid)) OR
-            (EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT schoolMemberSchoolUid FROM SchoolMember WHERE schoolMemberPersonUid = Person.PersonUid)) OR
-            (EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid IN (
-                SELECT DISTINCT Clazz.clazzSchoolUid 
-                FROM Clazz
-                JOIN ClazzEnrolment ON ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid AND ClazzEnrolment.clazzEnrolmentPersonUid = Person.personUid
-            ))
-            ) 
-            AND (Role.rolePermissions & 
-        """
-
-    internal const val ENTITY_PERSONS_WITH_PERMISSION_PT4 = ") > 0)"
-
-    const val SESSION_LENGTH = 28L * 24L * 60L * 60L * 1000L// 28 days
-
-    @Deprecated("Replaced with ScopedGrant")
-    const val ENTITY_PERSONS_WITH_LEARNING_RECORD_PERMISSION = "$ENTITY_PERSONS_WITH_PERMISSION_PT1 0 ${ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} $ENTITY_PERSONS_WITH_PERMISSION_PT4"
 
 }

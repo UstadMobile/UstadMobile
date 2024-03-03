@@ -2,7 +2,7 @@ package com.ustadmobile.core.db.dao
 
 object CoursePermissionDaoCommon {
 
-    const val LEFT_JOIN_ENROLMENT_FROM_COURSEPERMISSION_WITH_ACCOUNT_UID_PARAM = """
+    const val LEFT_JOIN_ENROLMENT_FOR_ACCOUNT_PERSON_FROM_COURSEPERMISSION_WITH_ACCOUNT_UID_PARAM = """
         LEFT JOIN ClazzEnrolment ClazzEnrolment_ForAccountPerson 
                         ON CoursePermission.cpToEnrolmentRole != 0
                        AND ClazzEnrolment_ForAccountPerson.clazzEnrolmentUid = 
@@ -35,7 +35,7 @@ object CoursePermissionDaoCommon {
               */              
               OR EXISTS(SELECT CoursePermission.cpUid
                           FROM CoursePermission
-                               $LEFT_JOIN_ENROLMENT_FROM_COURSEPERMISSION_WITH_ACCOUNT_UID_PARAM
+                               $LEFT_JOIN_ENROLMENT_FOR_ACCOUNT_PERSON_FROM_COURSEPERMISSION_WITH_ACCOUNT_UID_PARAM
                          WHERE CoursePermission.cpClazzUid = :clazzUid
                            AND (CoursePermission.cpToPersonUid = :accountPersonUid 
                                 OR CoursePermission.cpToEnrolmentRole = ClazzEnrolment_ForAccountPerson.clazzEnrolmentRole)
@@ -67,7 +67,7 @@ object CoursePermissionDaoCommon {
               */              
               OR EXISTS(SELECT CoursePermission.cpUid
                           FROM CoursePermission
-                               $LEFT_JOIN_ENROLMENT_FROM_COURSEPERMISSION_WITH_ACCOUNT_UID_PARAM
+                               $LEFT_JOIN_ENROLMENT_FOR_ACCOUNT_PERSON_FROM_COURSEPERMISSION_WITH_ACCOUNT_UID_PARAM
                          WHERE CoursePermission.cpClazzUid = ($SELECT_CLAZZ_UID_FOR_ENROLMENT_UID_SQL)
                            AND (CoursePermission.cpToPersonUid = :accountPersonUid 
                                 OR CoursePermission.cpToEnrolmentRole = ClazzEnrolment_ForAccountPerson.clazzEnrolmentRole)
