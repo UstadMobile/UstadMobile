@@ -2,6 +2,7 @@ package com.ustadmobile.core.viewmodel.person.edit
 
 import com.ustadmobile.core.account.AccountRegisterOptions
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorUseCase
@@ -184,7 +185,36 @@ class PersonEditViewModel(
             )
         }
 
-        viewModelScope.launch {
+        launchIfHasPermission(
+            permissionCheck = { db ->
+                when {
+                    //Viewing in register mode is allowed
+                    registrationModeFlags != 0 && entityUidArg == 0L -> true
+
+                    //Person always has permission to edit their own profile
+                    entityUidArg != 0L && activeUserPersonUid == entityUidArg -> true
+
+                    //If adding a new person, then ADD_PERSON permission is required
+                    entityUidArg == 0L -> {
+                        db.systemPermissionDao.personHasSystemPermission(
+                            activeUserPersonUid, PermissionFlags.ADD_PERSON
+                        )
+                    }
+
+                    //If editing an existing person, which is not the active user, require edit all person permission
+                    else -> {
+                        db.systemPermissionDao.personHasSystemPermission(
+                            accountPersonUid = activeUserPersonUid,
+                            permission = PermissionFlags.EDIT_ALL_PERSONS,
+                        )
+                    }
+                }
+            },
+            onSetFieldsEnabled = {
+                _uiState.update { prev -> prev.copy(fieldsEnabled = it) }
+            },
+            setLoadingState = true,
+        ) {
             awaitAll(
                 async {
                     loadEntity(
@@ -479,10 +509,6 @@ class PersonEditViewModel(
                             parentJoin = parentJoin
                         )
                     )
-
-                    //TODO: this should be restored, but we need to avoid issue on web where
-                    // popupinclusive tries to go back past first destination
-                    val popUpToViewName = savedStateHandle[UstadView.ARG_POPUPTO_ON_FINISH] ?: UstadView.CURRENT_DEST
 
                     if(registrationModeFlags.hasFlag(REGISTER_MODE_MINOR)) {
                         val goOptions = UstadMobileSystemCommon.UstadGoOptions(

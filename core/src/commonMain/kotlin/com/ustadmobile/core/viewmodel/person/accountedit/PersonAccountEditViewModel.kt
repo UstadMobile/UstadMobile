@@ -3,6 +3,7 @@ package com.ustadmobile.core.viewmodel.person.accountedit
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.AuthManager
 import com.ustadmobile.core.account.UnauthorizedException
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.domain.account.SetPasswordUseCase
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -84,7 +85,17 @@ class PersonAccountEditViewModel(
             loadingState = LoadingUiState.INDETERMINATE,
         )
 
-        viewModelScope.launch {
+        launchIfHasPermission(
+            permissionCheck = { db ->
+                if(entityUidArg == activeUserPersonUid) {
+                    true
+                }else {
+                    db.systemPermissionDao.personHasSystemPermission(
+                        activeUserPersonUid, PermissionFlags.EDIT_ALL_PERSONS
+                    )
+                }
+            }
+        ) {
             loadEntity(
                 serializer = PersonUsernameAndPasswordModel.serializer(),
                 onLoadFromDb = { db ->
@@ -122,6 +133,7 @@ class PersonAccountEditViewModel(
                     }
                 }
             )
+
             _appUiState.update { prev ->
                 prev.copy(
                     actionBarButtonState = ActionBarButtonUiState(
