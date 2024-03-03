@@ -9,7 +9,7 @@ import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.PersonParentJoin
 import com.ustadmobile.lib.db.entities.PersonParentJoin.Companion.RELATIONSHIP_FATHER
 import com.ustadmobile.lib.db.entities.PersonParentJoin.Companion.RELATIONSHIP_MOTHER
-import com.ustadmobile.lib.db.entities.PersonParentJoin.Companion.RELATIONSHIP_OTHER
+import com.ustadmobile.lib.db.entities.PersonParentJoin.Companion.RELATIONSHIP_OTHER_LEGAL_GUARDIAN
 import com.ustadmobile.lib.db.entities.PersonParentJoinAndMinorPerson
 import com.ustadmobile.lib.db.entities.SiteTerms
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
@@ -177,7 +177,7 @@ class ParentalConsentManagementViewModel(
 
     fun onClickConsent() {
         if(_uiState.value.parentJoinAndMinor?.personParentJoin?.ppjRelationship?.let {
-            it in listOf(RELATIONSHIP_MOTHER, RELATIONSHIP_FATHER, RELATIONSHIP_OTHER)
+            it in listOf(RELATIONSHIP_MOTHER, RELATIONSHIP_FATHER, RELATIONSHIP_OTHER_LEGAL_GUARDIAN)
         } != true) {
             _uiState.update { prev ->
                 prev.copy(

@@ -157,7 +157,7 @@ class PersonEditViewModel(
     private val enqueueSavePictureUseCase: EnqueueSavePictureUseCase? by
         on(accountManager.activeEndpoint).instanceOrNull()
 
-    private val createNewPersonUseCase: AddNewPersonUseCase by di.onActiveEndpoint().instance()
+    private val addNewPersonUseCase: AddNewPersonUseCase by di.onActiveEndpoint().instance()
 
     init {
         loadingState = LoadingUiState.INDETERMINATE
@@ -221,7 +221,11 @@ class PersonEditViewModel(
                         serializer = PersonWithAccount.serializer(),
                         //If in registration mode, we should avoid attempting to connect ot the database at all
                         onLoadFromDb = if(entityUid != 0L) {
-                            { it.personDao.findPersonAccountByUid(entityUid) }
+                            {
+                                it.personDao.findPersonAccountByUid(entityUid)?.also {
+                                    savedStateHandle[KEY_INIT_DATE_OF_BIRTH] = it.dateOfBirth.toString()
+                                }
+                            }
                         }else {
                              null
                         },
@@ -546,12 +550,16 @@ class PersonEditViewModel(
                     _uiState.update { prev -> prev.copy(fieldsEnabled = true) }
                 }
             }else {
-                //If a person under 13 is being registered,
-                val isMinor = Instant.fromEpochMilliseconds(savePerson.dateOfBirth)
-                    .isDateOfBirthAMinor()
-                val consentToUpsert = if(
-                    isMinor &&
-                    (entityUidArg == 0L || !activeRepo.personParentJoinDao.isMinorApproved(savePerson.personUid))
+                //Not register mode
+
+                //If updating an existing person, and the person was not a minor before but is now,
+                //and there is no existing consent entity, then we need to create one
+                val consentToUpsert = if(entityUidArg != 0L &&
+                    Instant.fromEpochMilliseconds(savePerson.dateOfBirth).isDateOfBirthAMinor() &&
+                    !Instant.fromEpochMilliseconds(
+                        savedStateHandle[KEY_INIT_DATE_OF_BIRTH]?.toLong() ?: 0
+                    ).isDateOfBirthAMinor() &&
+                    !activeRepo.personParentJoinDao.isMinorApproved(savePerson.personUid)
                 ) {
                     PersonParentJoin().apply {
                         ppjMinorPersonUid = savePerson.personUid
@@ -565,7 +573,11 @@ class PersonEditViewModel(
 
                 activeRepo.withDoorTransactionAsync {
                     if(entityUidArg == 0L) {
-                        createNewPersonUseCase(savePerson)
+                        addNewPersonUseCase(
+                            person = savePerson,
+                            addedByPersonUid = activeUserPersonUid,
+                            createPersonParentApprovalIfMinor = true,
+                        )
                     }else {
                         activeRepo.personDao.updateAsync(savePerson)
                         consentToUpsert?.also {
@@ -672,6 +684,12 @@ class PersonEditViewModel(
             ARG_DATE_OF_BIRTH,
             ARG_REGISTRATION_MODE,
         )
+
+        /**
+         * Used to store the date of birth on first load so that we can determine if a date of birth
+         * update makes the person a minor.
+         */
+        val KEY_INIT_DATE_OF_BIRTH = "initDob"
 
     }
 

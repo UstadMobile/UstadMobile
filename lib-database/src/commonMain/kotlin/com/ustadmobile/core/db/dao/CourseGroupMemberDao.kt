@@ -119,6 +119,7 @@ expect abstract class CourseGroupMemberDao: BaseDao<CourseGroupMember> {
         )
     )
     @Query(FIND_BY_COURSEGROUPSET_AND_CLAZZ_SQL)
+    @QueryLiveTables(arrayOf("ClazzEnrolment", "Person", "PersonPicture", "CourseGroupMember", "CourseGroupSet"))
     abstract fun findByCourseGroupSetAndClazzAsFlow(
         cgsUid: Long,
         clazzUid: Long,
