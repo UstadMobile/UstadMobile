@@ -107,4 +107,20 @@ object CoursePermissionDaoCommon {
     """
 
 
+    const val SELECT_COURSEPERMISSION_ENTITES_FOR_ACCOUNT_PERSON_UID_SQL = """
+        /* Get CoursePermissions given to the active user based on their enrolment role*/
+        SELECT CoursePermission.*
+          FROM ClazzEnrolment ClazzEnrolment_ActiveUser
+               JOIN CoursePermission 
+                    ON CoursePermission.cpClazzUid = ClazzEnrolment_ActiveUser.clazzEnrolmentClazzUid
+                   AND CoursePermission.cpToEnrolmentRole = ClazzEnrolment_ActiveUser.clazzEnrolmentRole
+         WHERE ClazzEnrolment_ActiveUser.clazzEnrolmentPersonUid = :accountPersonUid 
+         UNION
+        /* Get ClazzUids where the active user can view members based a grant directly to them */
+        SELECT CoursePermission.*
+          FROM CoursePermission
+         WHERE CoursePermission.cpToPersonUid  = :accountPersonUid
+    """
+
+
 }

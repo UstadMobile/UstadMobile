@@ -144,7 +144,7 @@ class ClazzEnrolmentEditViewModelTest : AbstractMainDispatcherTest()  {
 
             readyAppUiState.actionBarButtonState.onClick()
 
-            activeDb.clazzEnrolmentDao.findAllClazzesByPersonWithClazz(
+            activeDb.clazzEnrolmentDao.findAllByPersonUid(
                 testContext.personToEnrol.personUid
             ).assertItemReceived(timeout = 5.seconds, name = "found person enrolled in course") {
                 it.isNotEmpty() &&
@@ -183,7 +183,7 @@ class ClazzEnrolmentEditViewModelTest : AbstractMainDispatcherTest()  {
                 cancelAndIgnoreRemainingEvents()
             }
 
-            activeDb.clazzEnrolmentDao.findAllClazzesByPersonWithClazz(
+            activeDb.clazzEnrolmentDao.findAllByPersonUid(
                 testContext.personToEnrol.personUid
             ).assertItemReceived { enrolments ->
                 enrolments.any {

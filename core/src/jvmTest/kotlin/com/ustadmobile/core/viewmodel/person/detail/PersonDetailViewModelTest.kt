@@ -2,10 +2,11 @@ package com.ustadmobile.core.viewmodel.person.detail
 
 import app.cash.turbine.test
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
-import com.ustadmobile.core.util.ext.grantScopedPermission
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.core.view.UstadView
@@ -14,8 +15,7 @@ import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonParentJoin
-import com.ustadmobile.lib.db.entities.Role
-import com.ustadmobile.lib.db.entities.ScopedGrant
+import com.ustadmobile.lib.db.entities.SystemPermission
 import kotlinx.coroutines.delay
 import org.junit.Test
 import org.kodein.di.direct
@@ -31,14 +31,22 @@ class PersonDetailViewModelTest: AbstractMainDispatcherTest() {
     @Test
     fun givenPersonDetails_whenPersonUsernameIsNullAndCantManageAccount_thenCreateAccountShouldBeHidden() {
         testViewModel<PersonDetailViewModel>() {
-            setActiveUser(endpoint)
-            val db: UmAppDatabase = di.direct.on(endpoint).instance(tag = DoorTag.TAG_DB)
+            val userPerson = setActiveUser(endpoint)
+            activeDb.systemPermissionDao.upsertAsync(
+                SystemPermission(
+                    spToPersonUid = userPerson.personUid,
+                    spPermissionsFlag = PermissionFlags.VIEW_ALL_PERSONS,
+                )
+            )
 
-            val personBeingViewed = db.insertPersonAndGroup(Person().apply {
+            val personBeingViewed = Person().apply {
                 firstNames = "Lenny"
                 lastName = "Fluff"
                 username = null
-            })
+            }
+
+            personBeingViewed.personUid = AddNewPersonUseCase(activeDb, null).invoke(
+                personBeingViewed)
 
             viewModelFactory {
                 savedStateHandle[UstadView.ARG_ENTITY_UID] = personBeingViewed.personUid.toString()
@@ -55,18 +63,21 @@ class PersonDetailViewModelTest: AbstractMainDispatcherTest() {
     fun givenPersonDetailsAndAdminLogged_whenPersonUsernameIsNullAndCanManageAccount_thenCreateAccountShouldBeShown() {
         testViewModel<PersonDetailViewModel> {
             val activeUser = setActiveUser(endpoint)
-            val db: UmAppDatabase = di.direct.on(endpoint).instance(tag = DoorTag.TAG_DB)
-
-            db.grantScopedPermission(
-                activeUser, Role.ALL_PERMISSIONS, ScopedGrant.ALL_TABLES,
-                ScopedGrant.ALL_ENTITIES
+            activeDb.systemPermissionDao.upsertAsync(
+                SystemPermission(
+                    spToPersonUid = activeUser.personUid,
+                    spPermissionsFlag = PermissionFlags.VIEW_ALL_PERSONS or PermissionFlags.EDIT_ALL_PERSONS,
+                )
             )
 
-            val personBeingViewed = db.insertPersonAndGroup(Person().apply {
+            val personBeingViewed = Person().apply {
                 firstNames = "Lenny"
                 lastName = "Fluff"
                 username = null
-            })
+            }
+
+            personBeingViewed.personUid = AddNewPersonUseCase(activeDb, null).invoke(
+                personBeingViewed)
 
             viewModelFactory {
                 savedStateHandle[UstadView.ARG_ENTITY_UID] = personBeingViewed.personUid.toString()
@@ -83,18 +94,21 @@ class PersonDetailViewModelTest: AbstractMainDispatcherTest() {
     fun givenPersonDetailsAndAdminLogged_whenPersonUsernameIsNotNullAndCanManageAccount_thenChangePasswordShouldBeShown() {
         testViewModel<PersonDetailViewModel> {
             val activeUser = setActiveUser(endpoint)
-            val db: UmAppDatabase = di.direct.on(endpoint).instance(tag = DoorTag.TAG_DB)
-
-            db.grantScopedPermission(
-                activeUser, Role.ALL_PERMISSIONS, ScopedGrant.ALL_TABLES,
-                ScopedGrant.ALL_ENTITIES
+            activeDb.systemPermissionDao.upsertAsync(
+                SystemPermission(
+                    spToPersonUid = activeUser.personUid,
+                    spPermissionsFlag = Long.MAX_VALUE,
+                )
             )
 
-            val personBeingViewed = db.insertPersonAndGroup(Person().apply {
+            val personBeingViewed = Person().apply {
                 firstNames = "Lenny"
                 lastName = "Fluff"
                 username = "lenny"
-            })
+            }
+
+            personBeingViewed.personUid = AddNewPersonUseCase(activeDb, null).invoke(
+                personBeingViewed)
 
             viewModelFactory {
                 savedStateHandle[UstadView.ARG_ENTITY_UID] = personBeingViewed.personUid.toString()
@@ -128,21 +142,26 @@ class PersonDetailViewModelTest: AbstractMainDispatcherTest() {
     fun givenActiveUserIsParent_whenOpenChildProfile_thenShouldShowManageParentalConsent() {
         testViewModel<PersonDetailViewModel> {
             val activeUser = setActiveUser(endpoint)
-            val db: UmAppDatabase = di.direct.on(endpoint).instance(tag = DoorTag.TAG_DB)
 
-            val child = db.withDoorTransactionAsync {
-                val childInDb = db.insertPersonAndGroup(Person().apply {
+
+            val child = activeDb.withDoorTransactionAsync {
+                val childInDb = Person().apply {
                     firstNames = "Bob"
                     lastName = "Young"
                     dateOfBirth = systemTimeInMillis() - (10 * 365 * 24 * 60 * 60 * 1000L)
                     username = "young"
-                })
+                }
 
-                db.personParentJoinDao.upsertAsync(PersonParentJoin().apply {
-                    ppjMinorPersonUid = childInDb.personUid
-                    ppjParentPersonUid = activeUser.personUid
-                    ppjRelationship = PersonParentJoin.RELATIONSHIP_MOTHER
-                })
+
+                childInDb.personUid = AddNewPersonUseCase(activeDb, null).invoke(childInDb)
+
+                activeDb.personParentJoinDao.upsertAsync(
+                    PersonParentJoin().apply {
+                        ppjMinorPersonUid = childInDb.personUid
+                        ppjParentPersonUid = activeUser.personUid
+                        ppjRelationship = PersonParentJoin.RELATIONSHIP_MOTHER
+                    }
+                )
 
                 childInDb
             }

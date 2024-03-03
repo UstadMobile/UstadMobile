@@ -47,8 +47,8 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.controller.PersonConstants
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailUiState
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
+import com.ustadmobile.lib.db.composites.ClazzEnrolmentAndPersonDetailDetails
 import com.ustadmobile.lib.db.composites.TransferJobItemStatus
-import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
 import com.ustadmobile.libuicompose.components.UstadAsyncImage
 import com.ustadmobile.libuicompose.components.UstadEditHeader
 import com.ustadmobile.libuicompose.components.UstadQuickActionButton
@@ -88,7 +88,7 @@ fun PersonDetailScreen(
     onClickChangePassword: () -> Unit = {},
     onClickManageParentalConsent: () -> Unit = {},
     onClickChat: () -> Unit = {},
-    onClickClazz: (ClazzEnrolmentWithClazzAndAttendance) -> Unit = {},
+    onClickClazz: (ClazzEnrolmentAndPersonDetailDetails) -> Unit = {},
     onClickPermissions: () -> Unit = { },
 ) {
     UstadVerticalScrollColumn(
@@ -382,15 +382,17 @@ private fun ContactDetails(
 
 @Composable
 private fun Classes(
-    clazzes: List<ClazzEnrolmentWithClazzAndAttendance> = emptyList(),
-    onClickClazz: (ClazzEnrolmentWithClazzAndAttendance) -> Unit = {}
+    clazzes: List<ClazzEnrolmentAndPersonDetailDetails> = emptyList(),
+    onClickClazz: (ClazzEnrolmentAndPersonDetailDetails) -> Unit = {}
 ){
-
-    clazzes.forEach { clazz ->
+    clazzes.forEach { clazzAndDetails ->
         ListItem(
-            modifier = Modifier.clickable { onClickClazz(clazz) },
+            modifier = Modifier.clickable {
+                clazzAndDetails.also(onClickClazz)
+                onClickClazz(clazzAndDetails)
+            },
             headlineContent = {
-                Text(clazz.clazz?.clazzName ?: "")
+                Text(clazzAndDetails.clazz?.clazzName ?: "")
             },
             leadingContent = {
                 Icon(Icons.Default.Group, contentDescription = null)

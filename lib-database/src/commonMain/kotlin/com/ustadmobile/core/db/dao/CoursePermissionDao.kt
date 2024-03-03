@@ -8,6 +8,7 @@ import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.db.dao.CoursePermissionDaoCommon.SELECT_CLAZZ_UID_FOR_ENROLMENT_UID_SQL
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.PERMISSION_REQUIRED_BY_CLAZZENROLMENT_UID
 import com.ustadmobile.core.db.dao.CoursePermissionDaoCommon.PERSON_HAS_PERMISSION_WITH_CLAZZ_SQL
+import com.ustadmobile.core.db.dao.CoursePermissionDaoCommon.SELECT_COURSEPERMISSION_ENTITES_FOR_ACCOUNT_PERSON_UID_SQL
 import com.ustadmobile.door.annotation.DoorDao
 import com.ustadmobile.door.annotation.HttpAccessible
 import com.ustadmobile.door.annotation.HttpServerFunctionCall
@@ -372,20 +373,7 @@ expect abstract class CoursePermissionDao {
      * person, we need any course permissions that are granted to the given user based on their role
      * in a course (e.g. student or teacher) and those that are given to them directly.
      */
-    @Query("""
-       /* Get CoursePermissions given to the active user based on their enrolment role*/ 
-       SELECT CoursePermission.*
-          FROM ClazzEnrolment ClazzEnrolment_ActiveUser
-               JOIN CoursePermission 
-                    ON CoursePermission.cpClazzUid = ClazzEnrolment_ActiveUser.clazzEnrolmentClazzUid
-                   AND CoursePermission.cpToEnrolmentRole = ClazzEnrolment_ActiveUser.clazzEnrolmentRole
-         WHERE ClazzEnrolment_ActiveUser.clazzEnrolmentPersonUid = :accountPersonUid 
-         UNION
-        /* Get ClazzUids where the active user can view members based a grant directly to them */
-        SELECT CoursePermission.*
-          FROM CoursePermission
-         WHERE CoursePermission.cpToPersonUid  = :accountPersonUid
-    """)
+    @Query(SELECT_COURSEPERMISSION_ENTITES_FOR_ACCOUNT_PERSON_UID_SQL)
     abstract suspend fun findApplicableCoursePermissionEntitiesForAccountPerson(
         accountPersonUid: Long,
     ): List<CoursePermission>

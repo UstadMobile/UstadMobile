@@ -17,10 +17,11 @@ import com.ustadmobile.door.annotation.*
 import app.cash.paging.PagingSource
 import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.db.dao.CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL
+import com.ustadmobile.core.db.dao.CoursePermissionDaoCommon.SELECT_COURSEPERMISSION_ENTITES_FOR_ACCOUNT_PERSON_UID_SQL
+import com.ustadmobile.lib.db.composites.ClazzEnrolmentAndPersonDetailDetails
 import com.ustadmobile.lib.db.composites.CourseNameAndPersonName
 import com.ustadmobile.lib.db.composites.PersonAndClazzMemberListDetails
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_ATTENDED
 import kotlinx.coroutines.flow.Flow
 
 @Repository
@@ -86,55 +87,75 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
     @Update
     abstract suspend fun updateAsync(entity: ClazzEnrolment): Int
 
+    @Query("""
+               /* List of all CoursePermissions that are granted to the person as per accountPersonUid */
+          WITH CoursePermissionsForAccountPerson AS (
+               $SELECT_COURSEPERMISSION_ENTITES_FOR_ACCOUNT_PERSON_UID_SQL),
+               /* Check if CoursePermission for accountPersonUid grants view permission */
+               CanViewPersonUidViaCoursePermission(personUid) AS (
+                    SELECT ClazzEnrolment.clazzEnrolmentPersonUid
+                      FROM CoursePermissionsForAccountPerson
+                           JOIN ClazzEnrolment 
+                                ON (CoursePermissionsForAccountPerson.cpPermissionsFlag & ${PermissionFlags.COURSE_VIEW_MEMBERS}) > 0
+                               AND ClazzEnrolment.clazzEnrolmentClazzUid = CoursePermissionsForAccountPerson.cpClazzUid  
+                     WHERE ClazzEnrolment.clazzEnrolmentPersonUid = :otherPersonUid         
+               )     
+        SELECT ClazzEnrolment.*,
+               Clazz.*,
+               CourseTerminology.*
+          FROM ClazzEnrolment
+               JOIN Clazz 
+                    ON Clazz.clazzUid = ClazzEnrolment.clazzEnrolmentClazzUid
+               LEFT JOIN CourseTerminology
+                    ON CourseTerminology.ctUid = Clazz.clazzTerminologyUid
+         WHERE (:accountPersonUid != 0 AND :otherPersonUid != 0)
+           AND ClazzEnrolment.clazzEnrolmentPersonUid = :otherPersonUid
+               /* Check that accountPersonUid has permission to see otherPerson */
+           AND (    (SELECT :accountPersonUid = :otherPersonUid)
+                 OR (SELECT ${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT1} 
+                            ${PermissionFlags.VIEW_ALL_PERSONS}
+                            ${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT2})
+                 OR (SELECT :otherPersonUid IN 
+                             (SELECT CanViewPersonUidViaCoursePermission.personUid
+                                 FROM CanViewPersonUidViaCoursePermission))           
+               ) 
+              /* Check that accountPersonUid has permission to see related Clazz */
+          AND (     (SELECT :accountPersonUid = :otherPersonUid)
+                 OR (SELECT ${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT1} 
+                            ${PermissionFlags.COURSE_VIEW}
+                            ${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT2})
+                 OR (EXISTS(SELECT 1
+                              FROM CoursePermissionsForAccountPerson
+                             WHERE CoursePermissionsForAccountPerson.cpClazzUid = ClazzEnrolment.clazzEnrolmentClazzUid
+                               AND (CoursePermissionsForAccountPerson.cpPermissionsFlag & ${PermissionFlags.COURSE_VIEW}) > 0)) 
+               )
+    """)
     /**
-     * Provide a list of the classes a given person is in with the class information itself (e.g.
-     * for person detail).
+     * Provide a list of the clazzes a given person is in with the class information itself (e.g.
+     * for use to show the enrolment list on PersonDetailViewModel). If the accountPersonUid does
+     * not have view permission for otherPersonUid, the list returned will be empty. The list
+     * returned will only include enrolments where the person has the view_course permission for the
+     * related Clazz.
      *
-     * @param personUid
+     * @param accountPersonUid the personuid of the currently active account (used for permission checks)
+     * @param otherPersonUid the personUid to get an enrolment list for
      */
-    @Query("""SELECT ClazzEnrolment.*, Clazz.*, (SELECT ((CAST(COUNT(DISTINCT CASE WHEN 
-        ClazzLogAttendanceRecord.attendanceStatus = $STATUS_ATTENDED THEN 
-        ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid ELSE NULL END) AS REAL) / 
-        MAX(COUNT(ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid),1)) * 100) 
-        FROM ClazzLogAttendanceRecord LEFT JOIN ClazzLog ON 
-        ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid WHERE 
-        ClazzLogAttendanceRecord.clazzLogAttendanceRecordPersonUid = :personUid 
-        AND ClazzLog.clazzLogClazzUid = Clazz.clazzUid AND ClazzLog.logDate 
-        BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined AND ClazzEnrolment.clazzEnrolmentDateLeft) 
-        as attendance
-        FROM ClazzEnrolment
-        LEFT JOIN Clazz ON ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid
-        WHERE ClazzEnrolment.clazzEnrolmentPersonUid = :personUid
-        AND ClazzEnrolment.clazzEnrolmentActive
-        ORDER BY ClazzEnrolment.clazzEnrolmentDateLeft DESC
-    """)
-    @PostgresQuery("""SELECT ClazzEnrolment.*, Clazz.*, (SELECT ((CAST(COUNT(DISTINCT CASE WHEN 
-        ClazzLogAttendanceRecord.attendanceStatus = $STATUS_ATTENDED THEN 
-        ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid ELSE NULL END) AS REAL) / 
-        GREATEST(COUNT(ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid),1)) * 100) 
-        FROM ClazzLogAttendanceRecord LEFT JOIN ClazzLog ON 
-        ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid WHERE 
-        ClazzLogAttendanceRecord.clazzLogAttendanceRecordPersonUid = :personUid 
-        AND ClazzLog.clazzLogClazzUid = Clazz.clazzUid AND ClazzLog.logDate 
-        BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined AND ClazzEnrolment.clazzEnrolmentDateLeft) 
-        as attendance
-        FROM ClazzEnrolment
-        LEFT JOIN Clazz ON ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid
-        WHERE ClazzEnrolment.clazzEnrolmentPersonUid = :personUid
-        AND ClazzEnrolment.clazzEnrolmentActive
-        ORDER BY ClazzEnrolment.clazzEnrolmentDateLeft DESC
-    """)
     abstract fun findAllClazzesByPersonWithClazz(
-        personUid: Long
-    ): Flow<List<ClazzEnrolmentWithClazzAndAttendance>>
+        accountPersonUid: Long,
+        otherPersonUid: Long
+    ): Flow<List<ClazzEnrolmentAndPersonDetailDetails>>
 
-    @Query("""SELECT COALESCE(MAX(clazzEnrolmentDateLeft),0) FROM ClazzEnrolment WHERE 
-        ClazzEnrolment.clazzEnrolmentPersonUid = :selectedPerson 
-        AND ClazzEnrolment.clazzEnrolmentActive 
-        AND clazzEnrolmentClazzUid = :selectedClazz AND clazzEnrolmentUid != :selectedEnrolment
+    /**
+     * Simple query for internal tests etc
+     */
+    @Query("""
+        SELECT ClazzEnrolment.*
+          FROM ClazzEnrolment
+         WHERE ClazzEnrolment.clazzEnrolmentPersonUid = :personUid 
     """)
-    abstract suspend fun findMaxEndDateForEnrolment(selectedClazz: Long, selectedPerson: Long,
-                                            selectedEnrolment: Long): Long
+    abstract fun findAllByPersonUid(personUid: Long): Flow<List<ClazzEnrolment>>
+
+
 
     @Query("""SELECT ClazzEnrolment.*, Clazz.* 
         FROM ClazzEnrolment 
@@ -187,22 +208,6 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
 
     @Query("SELECT * FROM ClazzEnrolment WHERE clazzEnrolmentUid = :uid")
     abstract fun findByUidLive(uid: Long): Flow<ClazzEnrolment?>
-
-    @Query("""
-                UPDATE ClazzEnrolment
-                   SET clazzEnrolmentActive = :active,
-                       clazzEnrolmentLct= :changeTime
-                WHERE clazzEnrolmentPersonUid = :personUid 
-                      AND clazzEnrolmentClazzUid = :clazzUid
-                      AND clazzEnrolmentRole = :roleId""")
-    abstract suspend fun updateClazzEnrolmentActiveForPersonAndClazz(
-        personUid: Long,
-        clazzUid: Long,
-        roleId: Int,
-        active: Boolean,
-        changeTime: Long
-    ): Int
-
 
     /*
      * Note: SELECT * FROM (Subquery) AS CourseMember is needed so that sorting by

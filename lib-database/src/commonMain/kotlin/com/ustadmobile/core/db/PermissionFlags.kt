@@ -34,7 +34,12 @@ object PermissionFlags {
 
     const val COURSE_VIEW_MEMBERS = 8192L //2^13
 
-    const val VIEW_ALL_PERSONS = 16384 //2^14
+    const val VIEW_ALL_PERSONS = 16384L //2^14
+
+    const val EDIT_ALL_PERSONS = 32768L //2^15
+
+    const val MANAGE_SYSTEM_PERMISSIONS = 65536L //2^16
+
 
     const val ALL = Long.MAX_VALUE
 

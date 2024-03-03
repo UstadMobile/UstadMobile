@@ -11,8 +11,6 @@ import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.locale.mapLookup
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
 import com.ustadmobile.lib.db.composites.TransferJobItemStatus
-import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.mui.components.UstadDetailField
 import com.ustadmobile.mui.components.UstadQuickActionButton
@@ -73,7 +71,6 @@ val PersonDetailScreen = FC<Props> {
 
 external interface PersonDetailProps : Props {
     var uiState: PersonDetailUiState
-    var clazzes: List<Clazz>
     var onClickDial: () -> Unit
     var onClickEmail: () -> Unit
     var onClickCreateAccount: () -> Unit
@@ -98,18 +95,7 @@ val PersonDetailPreview = FC<Props> {
                     personAddress = "Herat"
                 }
             },
-            clazzes = listOf(
-                ClazzEnrolmentWithClazzAndAttendance().apply {
-                    clazz = Clazz().apply {
-                        clazzName = "Jetpack Compose Class"
-                    }
-                },
-                ClazzEnrolmentWithClazzAndAttendance().apply {
-                    clazz = Clazz().apply {
-                        clazzName = "React Class"
-                    }
-                },
-            )
+            clazzes = listOf()
         )
     }
 }
@@ -355,19 +341,18 @@ private val ContactDetails = FC<PersonDetailProps> { props ->
 }
 
 private val Classes = FC<PersonDetailProps> { props ->
-
-    List{
+    List {
         props.uiState.clazzes.forEach {
-            ListItem{
-                Stack {
-                    direction = responsive(StackDirection.row)
-                    spacing = responsive(10.px)
+            ListItem {
+                key = "${it.enrolment?.clazzEnrolmentUid}"
 
-                    + PeopleIcon.create()
+                ListItemButton {
+                    ListItemIcon {
+                        PeopleIcon()
+                    }
 
-                    Typography {
-                        align = TypographyAlign.center
-                        + (it.clazz?.clazzName ?: "")
+                    ListItemText {
+                        primary = ReactNode(it.clazz?.clazzName ?: "")
                     }
                 }
             }

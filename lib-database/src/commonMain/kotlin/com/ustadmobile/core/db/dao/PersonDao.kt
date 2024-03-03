@@ -259,7 +259,7 @@ expect abstract class PersonDao : BaseDao<Person> {
                     (SELECT ppjUid 
                        FROM PersonParentJoin
                       WHERE ppjMinorPersonUid = :personUid 
-                        AND ppjParentPersonUid = :activeUserPersonUid 
+                        AND ppjParentPersonUid = :accountPersonUid 
                       LIMIT 1)  
                LEFT JOIN PersonPicture
                     ON PersonPicture.personPictureUid = :personUid
@@ -279,7 +279,7 @@ expect abstract class PersonDao : BaseDao<Person> {
     @HttpAccessible
     abstract fun findByUidWithDisplayDetailsFlow(
         personUid: Long,
-        activeUserPersonUid: Long
+        accountPersonUid: Long
     ): Flow<PersonAndDisplayDetail?>
 
 

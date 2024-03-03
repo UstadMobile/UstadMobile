@@ -10,7 +10,6 @@ import com.ustadmobile.core.view.*
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.person.PersonViewModelConstants.ARG_GO_TO_ON_PERSON_SELECTED
 import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -20,6 +19,7 @@ import app.cash.paging.PagingSourceLoadParams
 import app.cash.paging.PagingSourceLoadResult
 import app.cash.paging.PagingSourceLoadResultPage
 import app.cash.paging.PagingState
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.Snack
@@ -148,8 +148,8 @@ class PersonListViewModel(
         viewModelScope.launch {
             collectHasPermissionFlowAndSetAddNewItemUiState(
                 hasPermissionFlow = {
-                    activeRepo.scopedGrantDao.userHasSystemLevelPermissionAsFlow(
-                        accountManager.currentAccount.personUid, Role.PERMISSION_PERSON_INSERT
+                    activeRepo.systemPermissionDao.personHasSystemPermissionAsFlow(
+                        activeUserPersonUid, PermissionFlags.ADD_PERSON
                     )
                 },
                 fabStringResource = MR.strings.person,
