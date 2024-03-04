@@ -13,6 +13,7 @@ class SubmitMarkUseCase {
         repo: UmAppDatabase,
         activeUserPersonUid: Long,
         assignmentUid: Long,
+        clazzUid: Long,
         submitterUid: Long,
         draftMark: CourseAssignmentMark,
         submissions: List<CourseAssignmentSubmission>,
@@ -32,6 +33,7 @@ class SubmitMarkUseCase {
             camMarkerSubmitterUid = activeUserSubmitterUid
             camMarkerPersonUid = activeUserPersonUid
             camMaxMark = courseBlock.cbMaxPoints.toFloat()
+            camClazzUid = clazzUid
             if(applyPenalty) {
                 camPenalty = (camMark * (courseBlock.cbLateSubmissionPenalty.toFloat()/100f))
                     .roundTo(2)

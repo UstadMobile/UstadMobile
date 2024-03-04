@@ -1,5 +1,6 @@
 package com.ustadmobile.core.db.dao
 
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission.Companion.SUBMITTER_ENROLLED_BUT_NOT_IN_GROUP
 
@@ -82,42 +83,21 @@ object ClazzAssignmentDaoCommon {
             )
         """
 
-    const val WITH_HAS_LEARNINGRECORD_UPDATE_PERMISSION_SQL = """
-            WITH AssignmentPermission (hasPermission) AS
-            (SELECT EXISTS(
-               SELECT PrsGrpMbr.groupMemberPersonUid
-                  FROM Clazz
-                       ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
-                          ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT}
-                          ${Clazz.JOIN_FROM_SCOPEDGRANT_TO_PERSONGROUPMEMBER}
-                 WHERE Clazz.clazzUid = :clazzUid
-                   AND PrsGrpMbr.groupMemberPersonUid = :loggedInPersonUid))
-        """
+    private const val VIEW_MEMBERS_AND_LEARNING_RECORDS_PERMISSION =
+        PermissionFlags.COURSE_LEARNINGRECORD_VIEW or
+                PermissionFlags.COURSE_VIEW_MEMBERS
 
     /**
      * CTE that will have a single row/column indicating if the person logged in (accountPersonUid)
-     * has the learningrecord select permission for the given assignment's clazzUid.
+     * has the learningrecord select permission for the given clazzUid parameter
      */
     //language=RoomSql
-    const val HAS_LEARNINGRECORD_SELECT_PERMISSION_CTE_SQL = """
+    const val HAS_LEARNINGRECORD_AND_MEMBER_VIEW_PERMISSION_CTE_SQL = """
             HasLearningRecordSelectPermission (hasPermission) AS
-            (SELECT EXISTS(
-                    SELECT ScopedGrant.sgUid
-                      FROM PersonGroupMember
-                           JOIN ScopedGrant
-                                ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
-                     WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid
-                       AND (ScopedGrant.sgTableId = ${Clazz.TABLE_ID}
-                            OR
-                            ScopedGrant.sgTableId = ${ScopedGrant.ALL_TABLES})
-                       AND (ScopedGrant.sgEntityUid = 
-                            (SELECT ClazzAssignment.caClazzUid
-                               FROM ClazzAssignment
-                              WHERE ClazzAssignment.caUid = :assignmentUid)
-                            OR 
-                            ScopedGrant.sgEntityUid = ${ScopedGrant.ALL_ENTITIES})
-                       AND (ScopedGrant.sgPermissions & ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT}) > 0)
-            )
+            (SELECT (
+                  ${CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT1} $VIEW_MEMBERS_AND_LEARNING_RECORDS_PERMISSION
+                  ${CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT2} $VIEW_MEMBERS_AND_LEARNING_RECORDS_PERMISSION
+                  ${CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT3}))
         """
 
     /**
@@ -171,7 +151,7 @@ object ClazzAssignmentDaoCommon {
                 JOIN Person 
                      ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
           WHERE ($SELECT_GROUPSET_UID_FOR_ASSIGNMENT_UID_SQL) = 0
-            AND ClazzEnrolment.clazzEnrolmentClazzUid = (SELECT clazzUid FROM AssignmentClazzUid)
+            AND ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid
             AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
             -- either the active user has learnign record select permission on class or is an assigned reviewer for submitter
             AND (

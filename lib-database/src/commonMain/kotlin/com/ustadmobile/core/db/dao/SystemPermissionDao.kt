@@ -32,6 +32,16 @@ expect abstract class SystemPermissionDao {
         includeDeleted: Boolean
     ): List<SystemPermission>
 
+    //This version avoids the need to specify includeDeleted when used for http entity pulling
+    @Query("""
+        SELECT SystemPermission.*
+          FROM SystemPermission
+         WHERE SystemPermission.spToPersonUid = :accountPersonUid
+         """)
+    abstract suspend fun findAllByPersonUidEntities(
+        accountPersonUid: Long
+    ): List<SystemPermission>
+
 
     @Query("""
         SELECT SystemPermission.*

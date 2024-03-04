@@ -1795,6 +1795,18 @@ val MIGRATION_153_154 = DoorMigrationStatementList(153, 154) { db ->
     }
 }
 
+val MIGRATION_154_155 = DoorMigrationStatementList(154, 155) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("ALTER TABLE CourseAssignmentSubmission ADD COLUMN casClazzUid INTEGER NOT NULL DEFAULT 0")
+            add("ALTER TABLE CourseAssignmentMark ADD COLUMN camClazzUid INTEGER NOT NULL DEFAULT 0")
+        }else {
+            add("ALTER TABLE CourseAssignmentSubmission ADD COLUMN casClazzUid BIGINT NOT NULL DEFAULT 0")
+            add("ALTER TABLE CourseAssignmentMark ADD COLUMN camClazzUid BIGINT NOT NULL DEFAULT 0")
+        }
+    }
+}
+
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_102_103,
     MIGRATION_103_104, MIGRATION_104_105, MIGRATION_105_106, MIGRATION_106_107,
@@ -1806,7 +1818,7 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_137_138, MIGRATION_138_139, MIGRATION_139_140, MIGRATION_140_141,
     MIGRATION_141_142, MIGRATION_142_143, MIGRATION_143_144, MIGRATION_145_146,
     MIGRATION_146_147, MIGRATION_147_148, MIGRATION_149_150, MIGRATION_150_151,
-    MIGRATION_151_152, MIGRATION_152_153, MIGRATION_153_154,
+    MIGRATION_151_152, MIGRATION_152_153, MIGRATION_153_154, MIGRATION_154_155,
 )
 
 

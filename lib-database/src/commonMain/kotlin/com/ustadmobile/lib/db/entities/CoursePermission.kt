@@ -6,6 +6,8 @@ import androidx.room.PrimaryKey
 import com.ustadmobile.core.db.PermissionFlags.COURSE_ATTENDANCE_RECORD
 import com.ustadmobile.core.db.PermissionFlags.COURSE_ATTENDANCE_VIEW
 import com.ustadmobile.core.db.PermissionFlags.COURSE_EDIT
+import com.ustadmobile.core.db.PermissionFlags.COURSE_LEARNINGRECORD_EDIT
+import com.ustadmobile.core.db.PermissionFlags.COURSE_LEARNINGRECORD_VIEW
 import com.ustadmobile.core.db.PermissionFlags.COURSE_MANAGE_STUDENT_ENROLMENT
 import com.ustadmobile.core.db.PermissionFlags.COURSE_MANAGE_TEACHER_ENROLMENT
 import com.ustadmobile.core.db.PermissionFlags.COURSE_MODERATE
@@ -78,7 +80,9 @@ data class CoursePermission(
                 COURSE_MANAGE_STUDENT_ENROLMENT or
                 COURSE_MANAGE_TEACHER_ENROLMENT or
                 COURSE_ATTENDANCE_VIEW or
-                COURSE_ATTENDANCE_RECORD
+                COURSE_ATTENDANCE_RECORD or
+                COURSE_LEARNINGRECORD_VIEW or
+                COURSE_LEARNINGRECORD_EDIT
 
 
         const val STUDENT_DEFAULT_PERMISSIONS = COURSE_VIEW or

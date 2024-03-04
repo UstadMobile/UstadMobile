@@ -529,6 +529,11 @@ abstract class UstadViewModel(
 
         const val ARG_INVITE_CODE = "inviteCode"
 
+        /**
+         * The ClazzUid for screens where the entity is not the clazz itself. This is generally
+         * passed even when viewing related entities because it makes permission checks (which are
+         * based on the Clazz) easier.
+         */
         const val ARG_CLAZZUID = "clazzUid"
 
         const val ARG_PERSON_UID = "personUid"

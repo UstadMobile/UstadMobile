@@ -172,6 +172,9 @@ class ClazzAssignmentSubmitterDetailViewModel(
     private val submitterUid = savedStateHandle[ARG_SUBMITTER_UID]?.toLong()
         ?: throw IllegalArgumentException("No submitter uid")
 
+    private val clazzUid = savedStateHandle[ARG_CLAZZUID]?.toLong()
+        ?: throw IllegalArgumentException("No clazzUid")
+
     private val privateCommentsPagingSourceFactory: ListPagingSourceFactory<CommentsAndName> = {
         activeRepo.commentsDao.findPrivateCommentsForSubmitterByAssignmentUid(
             submitterUid = submitterUid,
@@ -344,6 +347,7 @@ class ClazzAssignmentSubmitterDetailViewModel(
                     repo = activeRepo,
                     activeUserPersonUid = activeUserPersonUid,
                     assignmentUid = assignmentUid,
+                    clazzUid = clazzUid,
                     submitterUid = submitterUid,
                     draftMark = draftMark,
                     submissions = submissions,

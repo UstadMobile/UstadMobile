@@ -204,23 +204,38 @@ class ClazzDetailOverviewViewModel(
                 lastCourseBlockPagingSource?.invalidate()
             }
             CourseBlock.BLOCK_TEXT_TYPE -> {
-                navController.navigate(TextBlockDetailViewModel.DEST_NAME,
-                    mapOf(ARG_ENTITY_UID to courseBlock.cbUid.toString()))
+                navController.navigate(
+                    TextBlockDetailViewModel.DEST_NAME,
+                    mapOf(
+                        ARG_ENTITY_UID to courseBlock.cbUid.toString(),
+                        ARG_CLAZZUID to entityUidArg.toString(),
+                    )
+                )
             }
             CourseBlock.BLOCK_ASSIGNMENT_TYPE -> {
                 navController.navigate(ClazzAssignmentDetailViewModel.DEST_NAME,
-                    mapOf(ARG_ENTITY_UID to courseBlock.cbEntityUid.toString()))
+                    mapOf(
+                        ARG_ENTITY_UID to courseBlock.cbEntityUid.toString(),
+                        ARG_CLAZZUID to entityUidArg.toString(),
+                    )
+                )
             }
             CourseBlock.BLOCK_DISCUSSION_TYPE -> {
                 navController.navigate(
                     viewName = CourseDiscussionDetailViewModel.DEST_NAME,
-                    args = mapOf(ARG_ENTITY_UID to courseBlock.cbUid.toString())
+                    args = mapOf(
+                        ARG_ENTITY_UID to courseBlock.cbUid.toString(),
+                        ARG_CLAZZUID to entityUidArg.toString(),
+                    )
                 )
             }
             CourseBlock.BLOCK_CONTENT_TYPE -> {
                 navController.navigate(
                     viewName = ContentEntryDetailViewModel.DEST_NAME,
-                    args = mapOf(ARG_ENTITY_UID to courseBlock.cbEntityUid.toString())
+                    args = mapOf(
+                        ARG_ENTITY_UID to courseBlock.cbEntityUid.toString(),
+                        ARG_CLAZZUID to entityUidArg.toString(),
+                    )
                 )
             }
         }

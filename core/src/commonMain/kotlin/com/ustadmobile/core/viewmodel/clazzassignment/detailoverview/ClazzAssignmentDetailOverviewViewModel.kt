@@ -269,6 +269,8 @@ class ClazzAssignmentDetailOverviewViewModel(
 
     private var savedSubmissionJob: Job? = null
 
+    private val clazzUid = savedStateHandle[ARG_CLAZZUID]?.toLong() ?: throw IllegalArgumentException("clazzUid arg is required")
+
     init {
         _uiState.update { prev ->
             prev.copy(
@@ -283,6 +285,7 @@ class ClazzAssignmentDetailOverviewViewModel(
                 launch {
                     activeRepo.clazzAssignmentDao.findAssignmentCourseBlockAndSubmitterUidAsFlow(
                         assignmentUid = entityUidArg,
+                        clazzUid = clazzUid,
                         accountPersonUid = accountManager.currentAccount.personUid,
                     ).collect { assignmentData ->
                         _uiState.update { prev ->
@@ -332,7 +335,7 @@ class ClazzAssignmentDetailOverviewViewModel(
                         loadFromStateKeys = listOf(STATE_LATEST_SUBMISSION),
                         onLoadFromDb = { db ->
                             db.courseAssignmentSubmissionDao.getLatestSubmissionForUserAsync(
-                                accountPersonUid = accountManager.currentUserSession.person.personUid,
+                                accountPersonUid = activeUserPersonUid,
                                 assignmentUid = entityUidArg,
                             )
                         },

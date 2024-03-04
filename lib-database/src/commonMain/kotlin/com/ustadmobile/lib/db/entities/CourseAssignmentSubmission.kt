@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.db.entities
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
@@ -71,6 +72,11 @@ open class CourseAssignmentSubmission {
     @ReplicateLastModified
     @ReplicateEtag
     var casTimestamp: Long = 0
+
+
+    @ColumnInfo(defaultValue = "0")
+    var casClazzUid: Long = 0
+
 
     companion object {
 

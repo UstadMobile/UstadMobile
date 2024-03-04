@@ -78,11 +78,15 @@ class ClazzAssignmentDetailSubmissionsTabViewModel(
 
     private val argEntityUid = savedStateHandle[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0L
 
+    private val argClazzUid = savedStateHandle[ARG_CLAZZUID]?.toLong()
+        ?: throw IllegalArgumentException("No ClazzUid provided")
+
     private var mLastPagingSource: PagingSource<Int, AssignmentSubmitterSummary>? = null
 
     private val pagingSourceFactory: ListPagingSourceFactory<AssignmentSubmitterSummary> = {
         activeRepo.clazzAssignmentDao.getAssignmentSubmitterSummaryListForAssignment(
             assignmentUid = argEntityUid,
+            clazzUid = argClazzUid,
             accountPersonUid = activeUserPersonUid,
             group = systemImpl.getString(MR.strings.group),
             searchText = _appUiState.value.searchState.searchText.toQueryLikeParam(),
@@ -120,6 +124,7 @@ class ClazzAssignmentDetailSubmissionsTabViewModel(
                 launch {
                     activeRepo.clazzAssignmentDao.getProgressSummaryForAssignment(
                         assignmentUid = argEntityUid,
+                        clazzUid = argClazzUid,
                         accountPersonUid = activeUserPersonUid,
                         group = systemImpl.getString(MR.strings.group)
                     ).collect {
