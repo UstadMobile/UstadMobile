@@ -13,6 +13,7 @@ import com.ustadmobile.core.viewmodel.clazzassignment.detail.ClazzAssignmentDeta
 import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import app.cash.paging.PagingSource
+import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.lib.db.entities.AssignmentProgressSummary
 import com.ustadmobile.lib.db.entities.AssignmentSubmitterSummary
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
@@ -153,6 +154,7 @@ class ClazzAssignmentDetailSubmissionsTabViewModel(
             args = mapOf(
                 ClazzAssignmentSubmitterDetailViewModel.ARG_ASSIGNMENT_UID to argEntityUid.toString(),
                 ClazzAssignmentSubmitterDetailViewModel.ARG_SUBMITTER_UID to assignmentSubmitter.submitterUid.toString(),
+                UstadViewModel.ARG_CLAZZUID to argClazzUid.toString(),
             )
         )
     }

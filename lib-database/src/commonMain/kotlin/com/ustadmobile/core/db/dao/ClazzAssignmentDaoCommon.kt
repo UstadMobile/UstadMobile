@@ -112,7 +112,7 @@ object ClazzAssignmentDaoCommon {
     """
 
     //Language=RoomSql
-    private const val SUBMITTER_UID_CTE = """
+    const val SELECT_SUBMITTER_UID_FOR_ACCOUNT_PERSON_UID_AND_ASSIGNMENT_CTE = """
         AccountSubmitterUid(accountSubmitterUid) AS 
         ($SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL)
     """

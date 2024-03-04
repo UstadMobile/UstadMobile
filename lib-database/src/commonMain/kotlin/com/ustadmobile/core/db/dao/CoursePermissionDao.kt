@@ -19,6 +19,7 @@ import com.ustadmobile.lib.db.composites.CoursePermissionAndEnrolment
 import com.ustadmobile.lib.db.composites.CoursePermissionAndListDetail
 import com.ustadmobile.lib.db.composites.PermissionPair
 import com.ustadmobile.lib.db.composites.PermissionTriple
+import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.CoursePermission
 import kotlinx.coroutines.flow.Flow
 
@@ -377,6 +378,106 @@ expect abstract class CoursePermissionDao {
     abstract suspend fun findApplicableCoursePermissionEntitiesForAccountPerson(
         accountPersonUid: Long,
     ): List<CoursePermission>
+
+
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            //Get the assignment entity itself
+            HttpServerFunctionCall(
+                functionName = "findByUidAndClazzUidAsync",
+                functionDao = ClazzAssignmentDao::class,
+            ),
+            //Get the clazzenrolment for accountPersonUid
+            HttpServerFunctionCall(
+                functionName = "findByAccountPersonUidAndClazzUid",
+                functionDao = ClazzEnrolmentDao::class,
+            ),
+            //Get the CoursePermission entities and any clazzenrolment related to those grants for
+            //accountPersonUid
+            HttpServerFunctionCall(
+                functionName = "personHasPermissionWithClazzEntities2"
+            ),
+            //Get the system permissions for the given accountpersonuid
+            HttpServerFunctionCall(
+                functionName = "findAllByPersonUidEntities",
+                functionDao = SystemPermissionDao::class,
+            ),
+            //Get CourseGroupMember for the current person uid (required if this is being used as part
+            // of a peer marked assignment to grant permission)
+            HttpServerFunctionCall(
+                functionName = "findCourseGroupMembersByPersonUidAndAssignmentUid",
+                functionDao = ClazzAssignmentDao::class
+            ),
+            //Get the peer reviewer allocations required for the current personuid
+            HttpServerFunctionCall(
+                functionName = "findPeerReviewerAllocationsByPersonUidAndAssignmentUid",
+                functionDao = ClazzAssignmentDao::class,
+            )
+
+        )
+    )
+    /**
+     * Determine what are the permissions available for accountPersonUid for the given assignment
+     * and the given submitter.
+     *
+     * CanView: will be true when the accountPersonUid has learning record view permission for the
+     * course, when the user is the submitter (either individually or as part of a group), or when
+     * the user is allocated as a peer reviewer
+     *
+     * CanMark: will be true when the assignment is marked by teacher and the active user has the
+     * learning record edit permission for the course, or when the assignment is marked by peers
+     * and the accountPersonUid is selected to mark it.
+     *
+     */
+    @Query("""
+        WITH ${ClazzAssignmentDaoCommon.SELECT_SUBMITTER_UID_FOR_ACCOUNT_PERSON_UID_AND_ASSIGNMENT_CTE},
+             CanMarkSubmitter(canMark) AS
+             (SELECT CASE (SELECT ClazzAssignment.caMarkingType
+                             FROM ClazzAssignment
+                            WHERE ClazzAssignment.caUid = :assignmentUid)
+                           WHEN ${ClazzAssignment.MARKED_BY_PEERS} THEN 
+                                EXISTS(SELECT 1
+                                         FROM PeerReviewerAllocation
+                                        WHERE PeerReviewerAllocation.praToMarkerSubmitterUid = :submitterUid
+                                          AND PeerReviewerAllocation.praMarkerSubmitterUid =
+                                              (SELECT AccountSubmitterUid.accountSubmitterUid
+                                                 FROM AccountSubmitterUid))
+                           ELSE (${CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT1} ${PermissionFlags.COURSE_LEARNINGRECORD_EDIT}
+                                 ${CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT2} ${PermissionFlags.COURSE_LEARNINGRECORD_EDIT}
+                                 ${CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT3})
+                          END)
+
+             
+                    /* Can edit */
+             SELECT (     (:accountPersonUid != 0 AND :assignmentUid != 0 AND :clazzUid != 0 AND :submitterUid != 0)
+                      AND (SELECT CanMarkSubmitter.canMark 
+                            FROM CanMarkSubmitter)) AS firstPermission,
+                    /* can view */   
+                    (     (:accountPersonUid != 0 AND :assignmentUid != 0 AND :clazzUid != 0 AND :submitterUid != 0)
+                      AND (     (SELECT CanMarkSubmitter.canMark
+                                   FROM CanMarkSubmitter)
+                             OR (SELECT :submitterUid = 
+                                  (SELECT AccountSubmitterUid.accountSubmitterUid
+                                     FROM AccountSubmitterUid))
+                             OR (${CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT1} ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}
+                                 ${CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT2} ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}
+                                 ${CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT3}))               
+                    ) AS secondPermission
+             
+    """)
+    @QueryLiveTables(
+        arrayOf(
+            "ClazzAssignment", "ClazzEnrolment", "CourseGroupMember", "PeerReviewerAllocation",
+            "CoursePermission", "SystemPermission"
+        )
+    )
+    abstract fun userPermissionsForAssignmentSubmitterUid(
+        accountPersonUid: Long,
+        assignmentUid: Long,
+        clazzUid: Long,
+        submitterUid: Long,
+    ): Flow<PermissionPair>
 
 
 

@@ -29,6 +29,9 @@ import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -83,6 +86,8 @@ data class ClazzAssignmentSubmitterDetailUiState(
     ),
 
     val privateCommentsList: ListPagingSourceFactory<CommentsAndName> = { EmptyPagingSource() },
+
+    val newPrivateCommentTextVisible: Boolean = false,
 
     val newPrivateCommentText: String = "",
 
@@ -197,66 +202,99 @@ class ClazzAssignmentSubmitterDetailViewModel(
             )
         }
 
+        val permissionFlow = activeRepo.coursePermissionDao
+            .userPermissionsForAssignmentSubmitterUid(
+                accountPersonUid = activeUserPersonUid,
+                assignmentUid = assignmentUid,
+                clazzUid = clazzUid,
+                submitterUid = submitterUid,
+            ).map { permissionPair ->
+                permissionPair.firstPermission && permissionPair.secondPermission
+            }
+
+
         viewModelScope.launch {
-            _uiState.update { prev ->
-                prev.copy(
-                    privateCommentsList = privateCommentsPagingSourceFactory,
-                    activeUserPersonUid = activeUserPersonUid,
-                    draftMark = CourseAssignmentMark().apply {
-                        camMark = (-1).toFloat()
-                    },
-                )
-            }
-
-            launch {
-                val submitterName = assignmentSubmitterNameUseCase.invoke(submitterUid)
-
-                _appUiState.update { prev ->
-                    prev.copy(
-                        title = submitterName
-                    )
-                }
-            }
-
-            launch {
-                val activeUserSubmitterId = activeRepo.clazzAssignmentDao.getSubmitterUid(
-                    assignmentUid = assignmentUid,
-                    accountPersonUid = activeUserPersonUid,
-                )
-                _uiState.update { prev ->
-                    prev.copy(
-                        activeUserSubmitterId = activeUserSubmitterId
-                    )
-                }
-            }
-
             _uiState.whenSubscribed {
                 launch {
-                    activeRepo.courseBlockDao.findCourseBlockByAssignmentUid(assignmentUid).collect {
-                        _uiState.update { prev ->
-                            prev.copy(courseBlock = it)
-                        }
-                    }
-                }
+                    permissionFlow.distinctUntilChanged().collectLatest { hasMarkAndViewPermission ->
+                        if(hasMarkAndViewPermission) {
+                            _uiState.update { prev ->
+                                prev.copy(
+                                    privateCommentsList = privateCommentsPagingSourceFactory,
+                                    activeUserPersonUid = activeUserPersonUid,
+                                    draftMark = CourseAssignmentMark().apply {
+                                        camMark = (-1).toFloat()
+                                    },
+                                    newPrivateCommentTextVisible = true,
+                                )
+                            }
 
-                launch {
-                    activeRepo.courseAssignmentSubmissionDao.getAllSubmissionsFromSubmitterAsFlow(
-                        submitterUid = submitterUid,
-                        assignmentUid = assignmentUid
-                    ).collect {
-                        _uiState.update { prev ->
-                            prev.copy(submissionList = it)
-                        }
-                    }
-                }
+                            launch {
+                                val submitterName = assignmentSubmitterNameUseCase.invoke(submitterUid)
 
-                launch {
-                    activeRepo.courseAssignmentMarkDao.getAllMarksForSubmitterAsFlow(
-                        submitterUid= submitterUid,
-                        assignmentUid = assignmentUid
-                    ).collect{
-                        _uiState.update { prev ->
-                            prev.copy(marks = it)
+                                _appUiState.update { prev ->
+                                    prev.copy(
+                                        title = submitterName
+                                    )
+                                }
+                            }
+
+                            launch {
+                                launch {
+                                    activeRepo.courseBlockDao.findCourseBlockByAssignmentUid(
+                                        assignmentUid
+                                    ).collect {
+                                        _uiState.update { prev ->
+                                            prev.copy(courseBlock = it)
+                                        }
+                                    }
+                                }
+                            }
+
+                            launch {
+                                val activeUserSubmitterId = activeRepo.clazzAssignmentDao.getSubmitterUid(
+                                    assignmentUid = assignmentUid,
+                                    accountPersonUid = activeUserPersonUid,
+                                )
+                                _uiState.update { prev ->
+                                    prev.copy(
+                                        activeUserSubmitterId = activeUserSubmitterId
+                                    )
+                                }
+                            }
+
+                            launch {
+                                activeRepo.courseAssignmentSubmissionDao.getAllSubmissionsFromSubmitterAsFlow(
+                                    submitterUid = submitterUid,
+                                    assignmentUid = assignmentUid
+                                ).collect {
+                                    _uiState.update { prev ->
+                                        prev.copy(submissionList = it)
+                                    }
+                                }
+                            }
+
+                            launch {
+                                activeRepo.courseAssignmentMarkDao.getAllMarksForSubmitterAsFlow(
+                                    submitterUid = submitterUid,
+                                    assignmentUid = assignmentUid
+                                ).collect{
+                                    _uiState.update { prev ->
+                                        prev.copy(marks = it)
+                                    }
+                                }
+                            }
+
+                        }else {
+                            _uiState.update { prev ->
+                                prev.copy(
+                                    privateCommentsList = { EmptyPagingSource() },
+                                    submissionList = emptyList(),
+                                    marks = emptyList(),
+                                    newPrivateCommentTextVisible = false,
+                                    courseBlock = null,
+                                )
+                            }
                         }
                     }
                 }

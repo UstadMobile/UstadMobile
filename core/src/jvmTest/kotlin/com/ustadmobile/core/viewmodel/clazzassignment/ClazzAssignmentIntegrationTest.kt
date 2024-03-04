@@ -79,6 +79,7 @@ class ClazzAssignmentIntegrationTest: AbstractMainDispatcherTest() {
             assertEquals(studentPerson.personUid, client1AccountManager.currentUserSession.person.personUid)
 
             enrolIntoCourse(studentPerson.personUid, ClazzEnrolment.ROLE_STUDENT)
+
             enrolIntoCourse(teacherPerson.personUid, ClazzEnrolment.ROLE_TEACHER)
 
             //Student makes submission

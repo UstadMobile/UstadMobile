@@ -533,6 +533,15 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
     """)
     abstract fun findByUidAndClazzUidAsFlow(uid: Long, clazzUid: Long): Flow<ClazzAssignment?>
 
+    @Query("""
+        SELECT ClazzAssignment.* 
+          FROM ClazzAssignment 
+         WHERE ClazzAssignment.caUid = :assignmentUid
+           AND ClazzAssignment.caClazzUid = :clazzUid
+    """)
+    abstract suspend fun findByUidAndClazzUidAsync(assignmentUid: Long, clazzUid: Long): ClazzAssignment?
+
+
     @HttpAccessible(
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
         pullQueriesToReplicate = arrayOf(
@@ -734,24 +743,25 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
         SELECT PeerReviewerAllocation.*
           FROM PeerReviewerAllocation
          WHERE PeerReviewerAllocation.praAssignmentUid = :assignmentUid
-           AND PeerReviewerAllocation.praMarkerSubmitterUid = :accountPersonUid
-            OR PeerReviewerAllocation.praToMarkerSubmitterUid = :accountPersonUid
-            OR PeerReviewerAllocation.praMarkerSubmitterUid IN
-               (SELECT CourseGroupMember.cgmGroupNumber
-                  FROM CourseGroupMember
-                 WHERE CourseGroupMember.cgmSetUid = 
-                       (SELECT ClazzAssignment.caGroupUid
-                          FROM ClazzAssignment
-                         WHERE ClazzAssignment.caUid = :assignmentUid)
-                   AND CourseGroupMember.cgmPersonUid = :accountPersonUid)
-            OR PeerReviewerAllocation.praToMarkerSubmitterUid IN
-               (SELECT CourseGroupMember.cgmGroupNumber
-                  FROM CourseGroupMember
-                 WHERE CourseGroupMember.cgmSetUid = 
-                       (SELECT ClazzAssignment.caGroupUid
-                          FROM ClazzAssignment
-                         WHERE ClazzAssignment.caUid = :assignmentUid)
-                   AND CourseGroupMember.cgmPersonUid = :accountPersonUid)
+           AND (
+                    PeerReviewerAllocation.praMarkerSubmitterUid = :accountPersonUid
+                 OR PeerReviewerAllocation.praToMarkerSubmitterUid = :accountPersonUid
+                 OR PeerReviewerAllocation.praMarkerSubmitterUid IN
+                    (SELECT CourseGroupMember.cgmGroupNumber
+                       FROM CourseGroupMember
+                      WHERE CourseGroupMember.cgmSetUid = 
+                            (SELECT ClazzAssignment.caGroupUid
+                               FROM ClazzAssignment
+                              WHERE ClazzAssignment.caUid = :assignmentUid)
+                        AND CourseGroupMember.cgmPersonUid = :accountPersonUid)
+                 OR PeerReviewerAllocation.praToMarkerSubmitterUid IN
+                    (SELECT CourseGroupMember.cgmGroupNumber
+                       FROM CourseGroupMember
+                      WHERE CourseGroupMember.cgmSetUid = 
+                            (SELECT ClazzAssignment.caGroupUid
+                               FROM ClazzAssignment
+                              WHERE ClazzAssignment.caUid = :assignmentUid)
+                                AND CourseGroupMember.cgmPersonUid = :accountPersonUid))
     """)
     abstract suspend fun findPeerReviewerAllocationsByPersonUidAndAssignmentUid(
         assignmentUid: Long,

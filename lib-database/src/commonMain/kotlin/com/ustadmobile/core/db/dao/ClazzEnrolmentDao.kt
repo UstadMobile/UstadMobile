@@ -35,11 +35,6 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
     @Insert
     abstract fun insertListAsync(entityList: List<ClazzEnrolment>)
 
-    @Query("""SELECT * FROM ClazzEnrolment WHERE clazzEnrolmentPersonUid = :personUid 
-        AND clazzEnrolmentClazzUid = :clazzUid 
-        AND clazzEnrolmentOutcome = ${ClazzEnrolment.OUTCOME_IN_PROGRESS} LIMIT 1""")
-    abstract suspend fun findByPersonUidAndClazzUidAsync(personUid: Long, clazzUid: Long): ClazzEnrolment?
-
     @Query("""
         SELECT ClazzEnrolment.*, LeavingReason.*, 
                COALESCE(Clazz.clazzTimeZone, COALESCE(School.schoolTimeZone, 'UTC')) as timeZone
@@ -55,8 +50,10 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
            AND clazzEnrolmentClazzUid = :clazzUid 
       ORDER BY clazzEnrolmentDateLeft DESC
            """)
-    abstract fun findAllEnrolmentsByPersonAndClazzUid(personUid: Long, clazzUid: Long):
-            Flow<List<ClazzEnrolmentWithLeavingReason>>
+    abstract fun findAllEnrolmentsByPersonAndClazzUid(
+        personUid: Long,
+        clazzUid: Long
+    ): Flow<List<ClazzEnrolmentWithLeavingReason>>
 
 
     @HttpAccessible
@@ -169,7 +166,8 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
     @Query("""
         SELECT ClazzEnrolment.*, Person.*
           FROM ClazzEnrolment
-    LEFT JOIN Person ON ClazzEnrolment.clazzEnrolmentPersonUid = Person.personUid
+                LEFT JOIN Person 
+                          ON ClazzEnrolment.clazzEnrolmentPersonUid = Person.personUid
         WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid
               AND :date BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined 
               AND ClazzEnrolment.clazzEnrolmentDateLeft
@@ -321,6 +319,18 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         roleId: Int,
         permission: Long,
     ): List<ClazzEnrolment>
+
+    @Query("""
+        SELECT ClazzEnrolment.*
+          FROM ClazzEnrolment
+         WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid
+           AND ClazzEnrolment.clazzEnrolmentPersonUid = :accountPersonUid
+    """)
+    abstract suspend fun findByAccountPersonUidAndClazzUid(
+        accountPersonUid: Long,
+        clazzUid: Long,
+    ): List<ClazzEnrolment>
+
 
 
     @Query("""
