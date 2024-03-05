@@ -40,7 +40,6 @@ import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
-import kotlin.jvm.JvmInline
 
 
 /**
@@ -223,14 +222,6 @@ data class ClazzAssignmentDetailOverviewUiState(
         get() = assignment?.caGroupUid?.let { it != 0L } ?: false
 
 }
-
-val CourseAssignmentMarkWithPersonMarker.listItemUiState
-    get() = CourseAssignmentMarkWithPersonMarkerUiState(this)
-
-@JvmInline
-value class CourseAssignmentMarkWithPersonMarkerUiState(
-    val mark: CourseAssignmentMarkWithPersonMarker,
-)
 
 class ClazzAssignmentDetailOverviewViewModel(
     di: DI,
@@ -562,7 +553,10 @@ class ClazzAssignmentDetailOverviewViewModel(
     fun onClickCourseGroupSet() {
         navController.navigate(
             viewName = CourseGroupSetDetailViewModel.DEST_NAME,
-            args = mapOf(ARG_ENTITY_UID to (_uiState.value.courseGroupSet?.cgsUid?.toString() ?: "0"))
+            args = mapOf(
+                ARG_ENTITY_UID to (_uiState.value.courseGroupSet?.cgsUid?.toString() ?: "0"),
+                ARG_CLAZZUID to clazzUid.toString(),
+            )
         )
     }
 

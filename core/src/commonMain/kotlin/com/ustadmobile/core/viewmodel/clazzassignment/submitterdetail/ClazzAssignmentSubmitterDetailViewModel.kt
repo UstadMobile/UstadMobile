@@ -31,7 +31,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -208,22 +207,25 @@ class ClazzAssignmentSubmitterDetailViewModel(
                 assignmentUid = assignmentUid,
                 clazzUid = clazzUid,
                 submitterUid = submitterUid,
-            ).map { permissionPair ->
-                permissionPair.firstPermission && permissionPair.secondPermission
-            }
+            )
 
 
         viewModelScope.launch {
             _uiState.whenSubscribed {
                 launch {
-                    permissionFlow.distinctUntilChanged().collectLatest { hasMarkAndViewPermission ->
-                        if(hasMarkAndViewPermission) {
+                    permissionFlow.distinctUntilChanged().collectLatest { permissionPair ->
+                        val (canMark, canView) = permissionPair
+                        if(canView) {
                             _uiState.update { prev ->
                                 prev.copy(
                                     privateCommentsList = privateCommentsPagingSourceFactory,
                                     activeUserPersonUid = activeUserPersonUid,
-                                    draftMark = CourseAssignmentMark().apply {
-                                        camMark = (-1).toFloat()
+                                    draftMark = if(canMark) {
+                                        CourseAssignmentMark().apply {
+                                            camMark = (-1).toFloat()
+                                        }
+                                    }else {
+                                          null
                                     },
                                     newPrivateCommentTextVisible = true,
                                 )
@@ -285,8 +287,7 @@ class ClazzAssignmentSubmitterDetailViewModel(
                                     }
                                 }
                             }
-
-                        }else {
+                        } else {
                             _uiState.update { prev ->
                                 prev.copy(
                                     privateCommentsList = { EmptyPagingSource() },

@@ -83,10 +83,6 @@ object ClazzAssignmentDaoCommon {
             )
         """
 
-    private const val VIEW_MEMBERS_AND_LEARNING_RECORDS_PERMISSION =
-        PermissionFlags.COURSE_LEARNINGRECORD_VIEW or
-                PermissionFlags.PERSON_VIEW
-
     /**
      * CTE that will have a single row/column indicating if the person logged in (accountPersonUid)
      * has the learningrecord select permission for the given clazzUid parameter
@@ -95,8 +91,8 @@ object ClazzAssignmentDaoCommon {
     const val HAS_LEARNINGRECORD_AND_MEMBER_VIEW_PERMISSION_CTE_SQL = """
             HasLearningRecordSelectPermission (hasPermission) AS
             (SELECT (
-                  ${CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT1} $VIEW_MEMBERS_AND_LEARNING_RECORDS_PERMISSION
-                  ${CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT2} $VIEW_MEMBERS_AND_LEARNING_RECORDS_PERMISSION
+                  ${CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT1} ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}
+                  ${CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT2} ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}
                   ${CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT3}))
         """
 
@@ -197,15 +193,6 @@ object ClazzAssignmentDaoCommon {
         )
         
     """
-
-
-    const val SORT_DEADLINE_ASC = 1
-
-    const val SORT_DEADLINE_DESC = 2
-
-    const val SORT_TITLE_ASC = 3
-
-    const val SORT_TITLE_DESC = 4
 
     const val SORT_NAME_ASC = 5
 

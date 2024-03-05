@@ -29,6 +29,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -114,25 +116,40 @@ class ClazzDetailOverviewViewModel(
                 )
             )
         }
-        _uiState.update { prev ->
-            prev.copy(
-                courseBlockList = pagingSourceFactory,
-            )
-        }
 
-        val permissionFlow = activeRepo.coursePermissionDao.personHasPermissionWithClazzAsFlow2(
-            accountPersonUid = activeUserPersonUid,
-            clazzUid = entityUidArg,
-            permission = PermissionFlags.COURSE_VIEW
-        ).shareIn(viewModelScope, SharingStarted.WhileSubscribed())
+
+        val permissionFlow = activeRepo.coursePermissionDao
+            .personHasPermissionWithClazzTripleAsFlow(
+                accountPersonUid = activeUserPersonUid,
+                clazzUid = entityUidArg,
+                firstPermission = PermissionFlags.COURSE_VIEW,
+                secondPermission = PermissionFlags.COURSE_EDIT,
+                thirdPermission = PermissionFlags.COURSE_MANAGE_STUDENT_ENROLMENT,
+            ).shareIn(viewModelScope, SharingStarted.WhileSubscribed())
 
         viewModelScope.launch {
             _uiState.whenSubscribed {
                 launch {
+                    permissionFlow.map {
+                        it.firstPermission
+                    }.distinctUntilChanged().collect { hasViewPermission ->
+                        _uiState.update { prev ->
+                            prev.copy(
+                                courseBlockList = if(hasViewPermission) {
+                                    pagingSourceFactory
+                                }else {
+                                    { EmptyPagingSource() }
+                                },
+                            )
+                        }
+                    }
+                }
+
+                launch {
                     activeRepo.clazzDao.getClazzWithDisplayDetails(
                         entityUidArg, systemTimeInMillis()
-                    ).combine(permissionFlow) { clazzWithDisplayDetails, hasViewPermission ->
-                        if(hasViewPermission) clazzWithDisplayDetails else null
+                    ).combine(permissionFlow) { clazzWithDisplayDetails, permissions ->
+                        clazzWithDisplayDetails.takeIf { permissions.firstPermission }
                     }.collect {
                         _uiState.update { prev ->
                             prev.copy(clazz = it)
@@ -154,9 +171,9 @@ class ClazzDetailOverviewViewModel(
                 }
 
                 launch {
-                    activeRepo.coursePermissionDao.personHasPermissionWithClazzAsFlow2(
-                        accountManager.currentAccount.personUid, entityUidArg, PermissionFlags.COURSE_VIEW
-                    ).collect { hasEditPermission ->
+                    permissionFlow.map {
+                        it.secondPermission
+                    }.distinctUntilChanged().collect { hasEditPermission ->
                         _appUiState.update { prev ->
                             prev.copy(
                                 fabState = prev.fabState.copy(visible = hasEditPermission)
@@ -172,11 +189,9 @@ class ClazzDetailOverviewViewModel(
                 }
 
                 launch {
-                    activeDb.coursePermissionDao.personHasPermissionWithClazzAsFlow2(
-                        accountPersonUid = activeUserPersonUid,
-                        clazzUid = entityUidArg,
-                        permission = PermissionFlags.COURSE_MANAGE_STUDENT_ENROLMENT
-                    ).collect { canAddStudent ->
+                    permissionFlow.map {
+                        it.thirdPermission
+                    }.distinctUntilChanged().collect { canAddStudent ->
                         _uiState.update { prev ->
                             prev.copy(
                                 clazzCodeVisible = canAddStudent,
