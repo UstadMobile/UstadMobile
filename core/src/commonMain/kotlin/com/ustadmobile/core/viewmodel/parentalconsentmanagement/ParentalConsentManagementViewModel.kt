@@ -101,8 +101,14 @@ class ParentalConsentManagementViewModel(
             viewModelScope.launch {
                 loadEntity(
                     serializer = PersonParentJoinAndMinorPerson.serializer(),
-                    onLoadFromDb = {
-                        it.personParentJoinDao.findByUidWithMinorAsync(entityUidArg)
+                    onLoadFromDb = { db ->
+                        db.personParentJoinDao.findByUidWithMinorAsync(entityUidArg)?.takeIf { ppjAndMinor ->
+                            ppjAndMinor.personParentJoin?.let {
+                                //If the join has already been claimed - and the active user is not the
+                                //parent/guardian, stop.
+                                !(it.ppjParentPersonUid != 0L && it.ppjParentPersonUid != activeUserPersonUid)
+                            } ?: false
+                        }
                     },
                     makeDefault = {
                         //Should never happen
@@ -118,7 +124,7 @@ class ParentalConsentManagementViewModel(
                 )
 
                 _uiState.update { prev ->
-                    prev.copy(fieldsEnabled = true)
+                    prev.copy(fieldsEnabled = prev.parentJoinAndMinor != null)
                 }
             }
 

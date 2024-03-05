@@ -455,7 +455,12 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
             )
         )
     )
+    //Note: clazzUid is used in http replicate query calls, it is added within the query because
+    //Room does not allow unused parameters.
     @Query("""
+        WITH ClazzUidDummy(clazzUid) AS
+             (SELECT :clazzUid)
+             
         $SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL
     """)
     abstract suspend fun getSubmitterUid(

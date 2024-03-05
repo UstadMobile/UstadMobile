@@ -3,10 +3,6 @@ package com.ustadmobile.core.db.dao
 import androidx.room.Query
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.AgentEntity
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.Person.Companion.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT1
-import com.ustadmobile.lib.db.entities.Person.Companion.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
-import com.ustadmobile.lib.db.entities.Role
 
 @DoorDao
 @Repository
