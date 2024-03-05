@@ -25,7 +25,7 @@ object PersonDaoCommon {
                       JOIN CoursePermission 
                            ON CoursePermission.cpClazzUid = ClazzEnrolment_ForActiveUser.clazzEnrolmentClazzUid
                           AND CoursePermission.cpToEnrolmentRole = ClazzEnrolment_ForActiveUser.clazzEnrolmentRole
-                          AND (CoursePermission.cpPermissionsFlag & ${PermissionFlags.COURSE_VIEW_MEMBERS}) > 0
+                          AND (CoursePermission.cpPermissionsFlag & ${PermissionFlags.PERSON_VIEW}) > 0
                       JOIN ClazzEnrolment ClazzEnrolment_ForClazzMember
                            ON ClazzEnrolment_ForClazzMember.clazzEnrolmentClazzUid = CoursePermission.cpClazzUid
                 WHERE :accountPersonUid != 0
@@ -50,7 +50,7 @@ object PersonDaoCommon {
           WHERE /* Begin permission check */ 
                 (         
                       ($SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT1
-                       ${PermissionFlags.VIEW_ALL_PERSONS}
+                       ${PermissionFlags.PERSON_VIEW}
                        $SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT2)
                     OR (Person.personUid IN 
                                (SELECT CanViewPersonUidsViaCoursePermission.personUid

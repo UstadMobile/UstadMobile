@@ -12,7 +12,7 @@ import com.ustadmobile.core.db.PermissionFlags.COURSE_MANAGE_STUDENT_ENROLMENT
 import com.ustadmobile.core.db.PermissionFlags.COURSE_MANAGE_TEACHER_ENROLMENT
 import com.ustadmobile.core.db.PermissionFlags.COURSE_MODERATE
 import com.ustadmobile.core.db.PermissionFlags.COURSE_VIEW
-import com.ustadmobile.core.db.PermissionFlags.COURSE_VIEW_MEMBERS
+import com.ustadmobile.core.db.PermissionFlags.PERSON_VIEW
 import com.ustadmobile.door.annotation.ReplicateEntity
 import com.ustadmobile.door.annotation.ReplicateEtag
 import com.ustadmobile.door.annotation.ReplicateLastModified
@@ -75,7 +75,7 @@ data class CoursePermission(
 
         const val TEACHER_DEFAULT_PERMISSIONS = COURSE_VIEW or
                 COURSE_EDIT or
-                COURSE_VIEW_MEMBERS or
+                PERSON_VIEW or
                 COURSE_MODERATE or
                 COURSE_MANAGE_STUDENT_ENROLMENT or
                 COURSE_MANAGE_TEACHER_ENROLMENT or
@@ -86,7 +86,7 @@ data class CoursePermission(
 
 
         const val STUDENT_DEFAULT_PERMISSIONS = COURSE_VIEW or
-                COURSE_VIEW_MEMBERS
+                PERSON_VIEW
 
 
     }

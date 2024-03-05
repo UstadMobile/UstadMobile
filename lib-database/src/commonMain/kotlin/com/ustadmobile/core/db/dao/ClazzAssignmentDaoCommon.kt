@@ -85,7 +85,7 @@ object ClazzAssignmentDaoCommon {
 
     private const val VIEW_MEMBERS_AND_LEARNING_RECORDS_PERMISSION =
         PermissionFlags.COURSE_LEARNINGRECORD_VIEW or
-                PermissionFlags.COURSE_VIEW_MEMBERS
+                PermissionFlags.PERSON_VIEW
 
     /**
      * CTE that will have a single row/column indicating if the person logged in (accountPersonUid)

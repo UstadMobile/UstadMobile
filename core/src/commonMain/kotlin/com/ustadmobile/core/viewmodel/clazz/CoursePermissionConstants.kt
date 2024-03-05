@@ -7,7 +7,7 @@ object CoursePermissionConstants {
 
     val COURSE_PERMISSIONS_LABELS = listOf(
         MR.strings.view_course to PermissionFlags.COURSE_VIEW,
-        MR.strings.view_members to PermissionFlags.COURSE_VIEW_MEMBERS,
+        MR.strings.view_members to PermissionFlags.PERSON_VIEW,
         MR.strings.edit_course to PermissionFlags.COURSE_EDIT,
         MR.strings.moderate to PermissionFlags.COURSE_MODERATE,
         MR.strings.manage_student_enrolments to PermissionFlags.COURSE_MANAGE_STUDENT_ENROLMENT,

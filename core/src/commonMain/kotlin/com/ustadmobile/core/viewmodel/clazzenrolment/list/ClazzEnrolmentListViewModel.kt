@@ -72,7 +72,7 @@ class ClazzEnrolmentListViewModel(
                 clazzUid = argClazzUid,
                 firstPermission = PermissionFlags.COURSE_MANAGE_TEACHER_ENROLMENT,
                 secondPermission = PermissionFlags.COURSE_MANAGE_STUDENT_ENROLMENT,
-                thirdPermission = PermissionFlags.COURSE_VIEW_MEMBERS,
+                thirdPermission = PermissionFlags.PERSON_VIEW,
             ).shareIn(viewModelScope, SharingStarted.WhileSubscribed())
 
             val canViewMembersFlow = permissionFlow.map { it.thirdPermission }

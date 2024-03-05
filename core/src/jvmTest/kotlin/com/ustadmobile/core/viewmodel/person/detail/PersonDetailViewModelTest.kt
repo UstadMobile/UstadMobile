@@ -35,7 +35,7 @@ class PersonDetailViewModelTest: AbstractMainDispatcherTest() {
             activeDb.systemPermissionDao.upsertAsync(
                 SystemPermission(
                     spToPersonUid = userPerson.personUid,
-                    spPermissionsFlag = PermissionFlags.VIEW_ALL_PERSONS,
+                    spPermissionsFlag = PermissionFlags.PERSON_VIEW,
                 )
             )
 
@@ -66,7 +66,7 @@ class PersonDetailViewModelTest: AbstractMainDispatcherTest() {
             activeDb.systemPermissionDao.upsertAsync(
                 SystemPermission(
                     spToPersonUid = activeUser.personUid,
-                    spPermissionsFlag = PermissionFlags.VIEW_ALL_PERSONS or PermissionFlags.EDIT_ALL_PERSONS,
+                    spPermissionsFlag = PermissionFlags.PERSON_VIEW or PermissionFlags.EDIT_ALL_PERSONS,
                 )
             )
 

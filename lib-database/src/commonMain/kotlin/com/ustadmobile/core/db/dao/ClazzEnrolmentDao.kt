@@ -18,6 +18,7 @@ import app.cash.paging.PagingSource
 import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.db.dao.CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL
 import com.ustadmobile.core.db.dao.CoursePermissionDaoCommon.SELECT_COURSEPERMISSION_ENTITES_FOR_ACCOUNT_PERSON_UID_SQL
+import com.ustadmobile.lib.db.composites.ClazzEnrolmentAndPerson
 import com.ustadmobile.lib.db.composites.ClazzEnrolmentAndPersonDetailDetails
 import com.ustadmobile.lib.db.composites.CourseNameAndPersonName
 import com.ustadmobile.lib.db.composites.PersonAndClazzMemberListDetails
@@ -93,7 +94,7 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
                     SELECT ClazzEnrolment.clazzEnrolmentPersonUid
                       FROM CoursePermissionsForAccountPerson
                            JOIN ClazzEnrolment 
-                                ON (CoursePermissionsForAccountPerson.cpPermissionsFlag & ${PermissionFlags.COURSE_VIEW_MEMBERS}) > 0
+                                ON (CoursePermissionsForAccountPerson.cpPermissionsFlag & ${PermissionFlags.PERSON_VIEW}) > 0
                                AND ClazzEnrolment.clazzEnrolmentClazzUid = CoursePermissionsForAccountPerson.cpClazzUid  
                      WHERE ClazzEnrolment.clazzEnrolmentPersonUid = :otherPersonUid         
                )     
@@ -110,7 +111,7 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
                /* Check that accountPersonUid has permission to see otherPerson */
            AND (    (SELECT :accountPersonUid = :otherPersonUid)
                  OR (SELECT ${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT1} 
-                            ${PermissionFlags.VIEW_ALL_PERSONS}
+                            ${PermissionFlags.PERSON_VIEW}
                             ${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT2})
                  OR (SELECT :otherPersonUid IN 
                              (SELECT CanViewPersonUidViaCoursePermission.personUid
@@ -301,6 +302,49 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         permission: Long,
     ): PagingSource<Int, PersonAndClazzMemberListDetails>
 
+    /**
+     * Get a list of all enrolments with associated person entity that the given accountpersonuid
+     * can access.
+     */
+    @Query("""
+       SELECT ClazzEnrolment.*,
+              Person.*,
+              PersonPicture.*
+         FROM ClazzEnrolment
+              JOIN Person
+                   ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
+              LEFT JOIN PersonPicture
+                   ON PersonPicture.personPictureUid = ClazzEnrolment.clazzEnrolmentPersonUid
+                   
+        WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid
+              /* Begin permission check*/
+          AND (
+                   (${CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT1}
+                    ${PermissionFlags.PERSON_VIEW}
+                    ${CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT2}
+                    ${PermissionFlags.PERSON_VIEW}
+                    ${CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT3})
+              )  
+              /* End permission check */
+    """)
+    abstract suspend fun findEnrolmentsAndPersonByClazzUidWithPermissionCheck(
+        clazzUid: Long,
+        accountPersonUid: Long,
+    ): List<ClazzEnrolmentAndPerson>
+
+
+    @Query("""
+        SELECT ClazzEnrolment.*
+          FROM ClazzEnrolment
+         WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid
+           AND ClazzEnrolment.clazzEnrolmentPersonUid = :accountPersonUid
+    """)
+    abstract suspend fun findByAccountPersonUidAndClazzUid(
+        accountPersonUid: Long,
+        clazzUid: Long,
+    ): List<ClazzEnrolment>
+
+
     @Query("""
        SELECT ClazzEnrolment.*
          FROM ClazzEnrolment
@@ -318,17 +362,6 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         accountPersonUid: Long,
         roleId: Int,
         permission: Long,
-    ): List<ClazzEnrolment>
-
-    @Query("""
-        SELECT ClazzEnrolment.*
-          FROM ClazzEnrolment
-         WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid
-           AND ClazzEnrolment.clazzEnrolmentPersonUid = :accountPersonUid
-    """)
-    abstract suspend fun findByAccountPersonUidAndClazzUid(
-        accountPersonUid: Long,
-        clazzUid: Long,
     ): List<ClazzEnrolment>
 
 
@@ -409,13 +442,13 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
                             ON CoursePermission.cpClazzUid = ClazzEnrolment_ActiveUser.clazzEnrolmentClazzUid
                            AND CoursePermission.cpToEnrolmentRole = ClazzEnrolment_ActiveUser.clazzEnrolmentRole
                  WHERE ClazzEnrolment_ActiveUser.clazzEnrolmentPersonUid = :accountPersonUid 
-                   AND (CoursePermission.cpPermissionsFlag & ${PermissionFlags.COURSE_VIEW_MEMBERS}) > 0 
+                   AND (CoursePermission.cpPermissionsFlag & ${PermissionFlags.PERSON_VIEW}) > 0 
                 UNION
                 /* Get ClazzUids where the active user can view members based a grant directly to them */
                 SELECT CoursePermission.cpClazzUid
                   FROM CoursePermission
                  WHERE CoursePermission.cpToPersonUid  = :accountPersonUid
-                   AND (CoursePermission.cpPermissionsFlag & ${PermissionFlags.COURSE_VIEW_MEMBERS}) > 0
+                   AND (CoursePermission.cpPermissionsFlag & ${PermissionFlags.PERSON_VIEW}) > 0
                )
         SELECT ClazzEnrolment.*
           FROM ClazzEnrolment

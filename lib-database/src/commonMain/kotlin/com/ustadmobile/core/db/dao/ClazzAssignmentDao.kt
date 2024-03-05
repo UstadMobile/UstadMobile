@@ -19,8 +19,6 @@ import app.cash.paging.PagingSource
 import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.db.dao.ClazzAssignmentDaoCommon.SELECT_ASSIGNMENT_IS_PEERMARKED_SQL
 import com.ustadmobile.lib.db.composites.AssignmentSubmitterUidAndName
-import com.ustadmobile.lib.db.composites.ClazzEnrolmentAndPerson
-import com.ustadmobile.lib.db.composites.ScopedGrantAndGroupMember
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission.Companion.MIN_SUBMITTER_UID_FOR_PERSON
 
@@ -98,19 +96,12 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
         pullQueriesToReplicate = arrayOf(
             //Get permission entities for this assignment / user
             HttpServerFunctionCall(
-                functionName = "personHasPermissionWithClazzByAssignmentUidEntities",
-                functionArgs = arrayOf(
-                    HttpServerFunctionParam(
-                        name = "clazzAssignmentUid",
-                        argType = HttpServerFunctionParam.ArgType.MAP_OTHER_PARAM,
-                        fromName = "assignmentUid"
-                    ),
-                    HttpServerFunctionParam(
-                        name = "permission",
-                        argType = HttpServerFunctionParam.ArgType.LITERAL,
-                        literalValue = "${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT}L"
-                    )
-                )
+                functionName = "personHasPermissionWithClazzEntities2",
+                functionDao = CoursePermissionDao::class,
+            ),
+            HttpServerFunctionCall(
+                functionName = "findAllByPersonUidEntities",
+                functionDao = SystemPermissionDao::class,
             ),
             //Get the assignment entity itself
             HttpServerFunctionCall(
@@ -126,14 +117,8 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
             ),
             //Get all ClazzEnrolment and Person entities for this assignment
             HttpServerFunctionCall(
-                functionName = "getClazzEnrolmentsAndPersonsByAssignmentUid",
-                functionArgs = arrayOf(
-                    HttpServerFunctionParam(
-                        name = "enrolmentFilterPersonUid",
-                        argType = HttpServerFunctionParam.ArgType.LITERAL,
-                        literalValue = "0",
-                    )
-                )
+                functionName = "findEnrolmentsAndPersonByClazzUidWithPermissionCheck",
+                functionDao = ClazzEnrolmentDao::class,
             ),
             //Get CourseGroupMember entities for this assignment
             HttpServerFunctionCall(
@@ -222,33 +207,6 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
         searchText: String,
         sortOption: Int,
     ): PagingSource<Int, AssignmentSubmitterSummary>
-
-    //Note: This does not cover the following edge scenario: where the assignment is peer-reviewed
-    // and does not otherwise have permission to other members of their course.
-    @Query("""
-        SELECT Person.*, ClazzEnrolment.*, PersonPicture.*
-          FROM PersonGroupMember
-               ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1} 
-                        ${Role.PERMISSION_PERSON_SELECT} 
-                        ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2} 
-               JOIN ClazzEnrolment
-                    ON ClazzEnrolment.clazzEnrolmentPersonUid = Person.personUid
-                       AND ClazzEnrolment.clazzEnrolmentClazzUid = 
-                           (SELECT ClazzAssignment.caClazzUid
-                              FROM ClazzAssignment
-                             WHERE ClazzAssignment.caUid = :assignmentUid)
-                    LEFT JOIN PersonPicture
-                              ON PersonPicture.personPictureUid =  Person.personUid
-             WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid
-               AND (    :enrolmentFilterPersonUid = 0 
-                     OR ClazzEnrolment.clazzEnrolmentPersonUid = :enrolmentFilterPersonUid)                
-                             
-    """)
-    abstract suspend fun getClazzEnrolmentsAndPersonsByAssignmentUid(
-        assignmentUid: Long,
-        accountPersonUid: Long,
-        enrolmentFilterPersonUid: Long,
-    ): List<ClazzEnrolmentAndPerson>
 
     @Query("""
         SELECT CourseGroupMember.*
@@ -488,14 +446,8 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
             ),
             //Get Person and Enrolment entities for the accountpersonuid
             HttpServerFunctionCall(
-                functionName = "getClazzEnrolmentsAndPersonsByAssignmentUid",
-                functionArgs = arrayOf(
-                    HttpServerFunctionParam(
-                        name = "enrolmentFilterPersonUid",
-                        argType = HttpServerFunctionParam.ArgType.MAP_OTHER_PARAM,
-                        fromName = "accountPersonUid"
-                    ),
-                )
+                functionName = "findEnrolmentsAndPersonByClazzUidWithPermissionCheck",
+                functionDao = ClazzEnrolmentDao::class,
             ),
             //Get the CourseGroupMember if any for the accountpersonuid
             HttpServerFunctionCall(
@@ -506,7 +458,11 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
     @Query("""
         $SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL
     """)
-    abstract suspend fun getSubmitterUid(assignmentUid: Long, accountPersonUid: Long): Long
+    abstract suspend fun getSubmitterUid(
+        assignmentUid: Long,
+        clazzUid: Long,
+        accountPersonUid: Long
+    ): Long
 
     @Update
     abstract suspend fun updateAsync(clazzAssignment: ClazzAssignment)
@@ -540,53 +496,6 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
            AND ClazzAssignment.caClazzUid = :clazzUid
     """)
     abstract suspend fun findByUidAndClazzUidAsync(assignmentUid: Long, clazzUid: Long): ClazzAssignment?
-
-
-    @HttpAccessible(
-        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
-        pullQueriesToReplicate = arrayOf(
-            HttpServerFunctionCall(functionName = "personHasPermissionWithClazzByAssignmentUidEntities")
-        )
-    )
-    @Query("""
-        SELECT EXISTS( 
-               SELECT PrsGrpMbr.groupMemberPersonUid
-                  FROM Clazz
-                       ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
-                          :permission
-                          ${Clazz.JOIN_FROM_SCOPEDGRANT_TO_PERSONGROUPMEMBER}
-                 WHERE Clazz.clazzUid = 
-                       (SELECT caClazzUid 
-                          FROM ClazzAssignment
-                         WHERE caUid = :clazzAssignmentUid)
-                   AND PrsGrpMbr.groupMemberPersonUid = :accountPersonUid)
-    """)
-    abstract fun personHasPermissionWithClazzByAssignmentUidAsFlow(
-        accountPersonUid: Long,
-        clazzAssignmentUid: Long,
-        permission: Long
-    ): Flow<Boolean>
-
-    @Query("""
-        SELECT PrsGrpMbr.*, ScopedGrant.*, PersonGroup.*
-          FROM Clazz
-               ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
-                  :permission
-                  ${Clazz.JOIN_FROM_SCOPEDGRANT_TO_PERSONGROUPMEMBER}
-               JOIN PersonGroup
-                    ON PersonGroup.groupUid = PrsGrpMbr.groupMemberGroupUid
-         WHERE Clazz.clazzUid = 
-               (SELECT caClazzUid 
-                  FROM ClazzAssignment
-                 WHERE caUid = :clazzAssignmentUid)
-           AND PrsGrpMbr.groupMemberPersonUid = :accountPersonUid
-    """)
-    abstract suspend fun personHasPermissionWithClazzByAssignmentUidEntities(
-        accountPersonUid: Long,
-        clazzAssignmentUid: Long,
-        permission: Long
-    ): List<ScopedGrantAndGroupMember>
-
 
     @Query("""
           SELECT COALESCE((

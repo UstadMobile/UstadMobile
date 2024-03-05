@@ -32,9 +32,14 @@ object PermissionFlags {
 
     const val MANAGE_USER_PERMISSIONS = 4096L // 2^12
 
-    const val COURSE_VIEW_MEMBERS = 8192L //2^13
-
-    const val VIEW_ALL_PERSONS = 16384L //2^14
+    /**
+     * When used as a CoursePermission flag, this gives permission to view all members of the course
+     * (students and teachers).
+     *
+     * When used as a SystemPermission flag, this gives permission to see all users in the system
+     *
+     */
+    const val PERSON_VIEW = 8192L //2^13
 
     const val EDIT_ALL_PERSONS = 32768L //2^15
 

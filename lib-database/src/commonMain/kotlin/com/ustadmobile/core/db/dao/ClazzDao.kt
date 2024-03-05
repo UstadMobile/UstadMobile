@@ -317,9 +317,9 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
                   $PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT3
                ) AS hasAttendancePermission,
                (  $PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT1 
-                  ${PermissionFlags.COURSE_VIEW_MEMBERS}
+                  ${PermissionFlags.PERSON_VIEW}
                   $PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT2
-                  ${PermissionFlags.COURSE_VIEW_MEMBERS}
+                  ${PermissionFlags.PERSON_VIEW}
                   $PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT3
                ) AS hasViewMembersPermission
           FROM Clazz

@@ -24,6 +24,7 @@ class SubmitMarkUseCase {
 
         val activeUserSubmitterUid = repo.clazzAssignmentDao.getSubmitterUid(
             assignmentUid = assignmentUid,
+            clazzUid = clazzUid,
             accountPersonUid = activeUserPersonUid,
         )
 

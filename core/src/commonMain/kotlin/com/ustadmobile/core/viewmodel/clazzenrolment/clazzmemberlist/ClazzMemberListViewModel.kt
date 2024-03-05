@@ -119,7 +119,7 @@ class ClazzMemberListViewModel(
             searchText = _appUiState.value.searchState.searchText.toQueryLikeParam(),
             accountPersonUid = activeUserPersonUid,
             currentTime = systemTimeInMillis(),
-            permission = PermissionFlags.COURSE_VIEW_MEMBERS,
+            permission = PermissionFlags.PERSON_VIEW,
         )
     }
 

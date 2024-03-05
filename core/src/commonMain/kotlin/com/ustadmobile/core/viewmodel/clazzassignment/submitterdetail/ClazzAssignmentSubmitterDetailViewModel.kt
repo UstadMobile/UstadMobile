@@ -254,6 +254,7 @@ class ClazzAssignmentSubmitterDetailViewModel(
                             launch {
                                 val activeUserSubmitterId = activeRepo.clazzAssignmentDao.getSubmitterUid(
                                     assignmentUid = assignmentUid,
+                                    clazzUid = clazzUid,
                                     accountPersonUid = activeUserPersonUid,
                                 )
                                 _uiState.update { prev ->
