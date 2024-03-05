@@ -4,8 +4,6 @@ import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.core.db.dao.ScopedGrantDaoCommon.SQL_FIND_BY_TABLE_AND_ENTITY
-import app.cash.paging.PagingSource
 import com.ustadmobile.core.db.dao.ScopedGrantDaoCommon.SQL_USER_HAS_SYSTEM_LEVEL_PERMISSION
 import kotlinx.coroutines.flow.Flow
 import com.ustadmobile.door.annotation.*
@@ -29,23 +27,6 @@ expect abstract class ScopedGrantDao {
     @Update
     abstract suspend fun updateListAsync(scopedGrantList: List<ScopedGrant>)
 
-    @Query(SQL_FIND_BY_TABLE_AND_ENTITY)
-    abstract suspend fun findByTableIdAndEntityUid(tableId: Int, entityUid: Long): List<ScopedGrantAndName>
-
-    @Query(SQL_FIND_BY_TABLE_AND_ENTITY)
-    abstract fun findByTableIdAndEntityUidWithNameAsDataSource(
-        tableId: Int,
-        entityUid: Long
-    ): PagingSource<Int, ScopedGrantWithName>
-
-
-    @Query("""
-        SELECT ScopedGrant.*
-          FROM ScopedGrant
-         WHERE sgTableId = :tableId
-           AND sgEntityUid = :entityUid
-    """)
-    abstract fun findByTableIdAndEntityIdSync(tableId: Int, entityUid: Long): List<ScopedGrant>
 
     @Query("""
         SELECT ScopedGrant.*
@@ -53,21 +34,6 @@ expect abstract class ScopedGrantDao {
          WHERE sgUid = :sgUid 
     """)
     abstract suspend fun findByUid(sgUid: Long): ScopedGrant?
-
-    @Query("""
-        SELECT ScopedGrant.*, 
-               CASE
-               WHEN Person.firstNames IS NOT NULL THEN Person.firstNames
-               ELSE PersonGroup.groupName 
-               END AS name
-          FROM ScopedGrant
-               LEFT JOIN PersonGroup 
-                    ON ScopedGrant.sgGroupUid = PersonGroup.groupUid
-               LEFT JOIN Person
-                    ON Person.personGroupUid = PersonGroup.groupUid
-         WHERE ScopedGrant.sgUid = :sgUid 
-    """)
-    abstract fun findByUidLiveWithName(sgUid: Long): Flow<ScopedGrantWithName?>
 
     @HttpAccessible(
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,

@@ -41,6 +41,8 @@ object PermissionFlags {
      */
     const val PERSON_VIEW = 8192L //2^13
 
+    const val MANAGE_SITE_SETTINGS = 16384L // 2^14
+
     const val EDIT_ALL_PERSONS = 32768L //2^15
 
 

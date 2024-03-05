@@ -181,48 +181,5 @@ open class Clazz() {
         const val CLAZZ_ENROLMENT_POLICY_WITH_LINK = 100
         const val CLAZZ_ENROLMENT_POLICY_OPEN = 102
 
-        //Because no subqueries are needed here, there is no need for multiple versions based
-        //on which way the joins are going
-        const val JOIN_SCOPEDGRANT_ON_CLAUSE = """
-            ((ScopedGrant.sgTableId = ${ScopedGrant.ALL_TABLES}
-                                AND ScopedGrant.sgEntityUid = ${ScopedGrant.ALL_ENTITIES})
-                            OR (ScopedGrant.sgTableId = ${Clazz.TABLE_ID}
-                                AND ScopedGrant.sgEntityUid = Clazz.clazzUid)
-                            OR (ScopedGrant.sgTableId = ${School.TABLE_ID}
-                                AND ScopedGrant.sgEntityUid = Clazz.clazzSchoolUid))
-        """
-
-        const val JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1 = """
-            JOIN ScopedGrant
-                 ON $JOIN_SCOPEDGRANT_ON_CLAUSE
-                    AND (ScopedGrant.sgPermissions & 
-        """
-
-        const val JOIN_FROM_SCOPEDGRANT_TO_PERSONGROUPMEMBER = """
-                                                       ) > 0
-             JOIN PersonGroupMember AS PrsGrpMbr
-                   ON ScopedGrant.sgGroupUid = PrsGrpMbr.groupMemberGroupUid
-        """
-
-        const val JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT2 = """
-              $JOIN_FROM_SCOPEDGRANT_TO_PERSONGROUPMEMBER                                       
-              JOIN UserSession
-                   ON UserSession.usPersonUid = PrsGrpMbr.groupMemberPersonUid
-                      AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE }
-        """
-
-        const val JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1 = """
-               JOIN ScopedGrant
-                    ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
-                        AND (ScopedGrant.sgPermissions & 
-        """
-
-        const val JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT2 = """
-                       ) > 0
-               JOIN Clazz 
-                    ON $JOIN_SCOPEDGRANT_ON_CLAUSE
-        """
-
-
     }
 }

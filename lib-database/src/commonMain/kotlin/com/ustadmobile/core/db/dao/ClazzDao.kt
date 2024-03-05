@@ -18,7 +18,6 @@ import com.ustadmobile.core.db.dao.CoursePermissionDaoCommon.PERSON_COURSE_PERMI
 import com.ustadmobile.core.db.dao.CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT3
 import com.ustadmobile.lib.db.composites.ClazzAndDetailPermissions
 import com.ustadmobile.lib.db.composites.ClazzNameAndTerminology
-import com.ustadmobile.lib.db.composites.ScopedGrantAndGroupMember
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.ROLE_STUDENT
 import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.ROLE_TEACHER
@@ -235,57 +234,6 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
     """)
     abstract suspend fun updateClazzAttendanceAverageAsync(clazzUid: Long, timeChanged: Long)
 
-    /** Check if a permission is present on a specific entity e.g. updateState/modify etc */
-    @HttpAccessible(
-        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
-        pullQueriesToReplicate = arrayOf(
-            HttpServerFunctionCall(
-                functionDao = ScopedGrantDao::class,
-                functionName = "findScopedGrantAndPersonGroupByPersonUidAndPermission"
-            )
-        )
-    )
-    @Query("""
-        SELECT EXISTS( 
-               SELECT PrsGrpMbr.groupMemberPersonUid
-                  FROM Clazz
-                       ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
-                          :permission
-                          ${Clazz.JOIN_FROM_SCOPEDGRANT_TO_PERSONGROUPMEMBER}
-                 WHERE Clazz.clazzUid = :clazzUid
-                   AND PrsGrpMbr.groupMemberPersonUid = :accountPersonUid)
-    """)
-    @Deprecated("use CoursePermission")
-    abstract suspend fun personHasPermissionWithClazz(
-        accountPersonUid: Long,
-        clazzUid: Long,
-        permission: Long
-    ) : Boolean
-
-    @HttpAccessible(
-        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
-        pullQueriesToReplicate = arrayOf(
-            HttpServerFunctionCall("personHasPermissionWithClazzAsFlowEntities")
-        )
-    )
-    @Query("""
-        SELECT EXISTS( 
-               SELECT PrsGrpMbr.groupMemberPersonUid
-                  FROM Clazz
-                       ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
-                          :permission
-                          ${Clazz.JOIN_FROM_SCOPEDGRANT_TO_PERSONGROUPMEMBER}
-                 WHERE Clazz.clazzUid = :clazzUid
-                   AND PrsGrpMbr.groupMemberPersonUid = :accountPersonUid)
-    """)
-    abstract fun personHasPermissionWithClazzAsFlow(
-        accountPersonUid: Long,
-        clazzUid: Long,
-        permission: Long
-    ): Flow<Boolean>
-
-
-
 
     @HttpAccessible(
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
@@ -337,24 +285,6 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
         clazzUid: Long,
     ): Flow<ClazzAndDetailPermissions?>
 
-
-    @Query("""
-        SELECT PrsGrpMbr.*, ScopedGrant.*, PersonGroup.*
-          FROM Clazz
-               ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
-                  :permission
-                  ${Clazz.JOIN_FROM_SCOPEDGRANT_TO_PERSONGROUPMEMBER}
-               LEFT JOIN PersonGroup
-                         ON PersonGroup.groupUid = PrsGrpMbr.groupMemberGroupUid
-         WHERE Clazz.clazzUid = :clazzUid
-           AND PrsGrpMbr.groupMemberPersonUid = :accountPersonUid
-    """)
-    @Deprecated("use CoursePermission")
-    abstract suspend fun personHasPermissionWithClazzAsFlowEntities(
-        accountPersonUid: Long,
-        clazzUid: Long,
-        permission: Long
-    ): List<ScopedGrantAndGroupMember>
 
     @HttpAccessible(
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
