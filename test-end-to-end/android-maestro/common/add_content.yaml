@@ -12,14 +12,11 @@ appId: com.toughra.ustadmobile
 # clear the app
 - clearState: com.toughra.ustadmobile
 # clear the downloads
-#- evalScript: ${http.get(CONTROLSERVER + "cleardownloads?device=" + TESTSERIAL)}
+- evalScript: ${http.get(CONTROLSERVER + "cleardownloads?device=" + TESTSERIAL)}
 # push the test file to the downloads
-#- evalScript: ${http.get(CONTROLSERVER + "pushcontent?test-file-name=" + TESTFILENAME +"&device=" + TESTSERIAL)}
+- evalScript: ${http.get(CONTROLSERVER + "pushcontent?test-file-name=" + TESTFILENAME +"&device=" + TESTSERIAL)}
 # get started
 - launchApp
-#- extendedWaitUntil:
- #   visible: "GET STARTED"
-  #  timeout: 50000
 - tapOn: "GET STARTED"
 # select site
 - runFlow: "./select_site.yaml"
@@ -28,38 +25,11 @@ appId: com.toughra.ustadmobile
     file: "./user_login.yaml"
 # adding content to library
 - tapOn: "Library"
-- tapOn: "CONTENT"
-- tapOn: "Add file"
+- tapOn:
+     id: "floating_action_button"
+- tapOn: "From file"
 - runFlow:
     when:
       notVisible: "Downloads"
     file: redirect_to_downloads.yaml
 - tapOn: ${TESTFILENAME}
-  # id is  used for content title , text is not used because it keeps on changing
-- tapOn:
-    id: "com.toughra.ustadmobile:id/entry_title_text"
-- longPressOn:
-   id: "com.toughra.ustadmobile:id/entry_title_text"
-- runFlow:
-    when:
-      visible: "Select all"
-    file: redirect_to_select.yaml
-- runFlow:
-    when:
-      visible:
-        text: "More options"
-    file: moreOptions.yaml
-- eraseText
-- inputText: ${TESTCONTENTNAME}
-- hideKeyboard
-- tapOn: "SAVE"
-- runFlow:
-    when:
-      visible: "Allow Ustad Mobile to send you notifications?"
-    file: dismiss_notification.yaml
-- tapOn:
-    text: ${TESTCONTENTNAME}
-- extendedWaitUntil:
-    visible: "Delete"
-    timeout: 600000
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_add_to_library"

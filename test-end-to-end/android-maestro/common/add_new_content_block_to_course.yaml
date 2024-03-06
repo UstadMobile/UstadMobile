@@ -29,15 +29,6 @@ appId: com.toughra.ustadmobile
       id: "com.toughra.ustadmobile:id/entry_title_text"
 - longPressOn:
       id: "com.toughra.ustadmobile:id/entry_title_text"
-- runFlow:
-      when:
-          visible: "Select all"
-      file: redirect_to_select.yaml
-- runFlow:
-      when:
-          visible:
-              text: "More options"
-      file: moreOptions.yaml
 - eraseText
 - inputText: ${TESTCONTENTNAME}
 - hideKeyboard
