@@ -1791,7 +1791,7 @@ val MIGRATION_153_154 = DoorMigrationStatementList(153, 154) { db ->
         }else {
             add("CREATE TABLE IF NOT EXISTS CoursePermission (  cpLastModified  BIGINT  NOT NULL , cpClazzUid  BIGINT  NOT NULL , cpToEnrolmentRole  INTEGER  NOT NULL , cpToPersonUid  BIGINT  NOT NULL , cpToGroupUid  BIGINT  NOT NULL , cpPermissionsFlag  BIGINT  NOT NULL , cpIsDeleted  BOOL  NOT NULL , cpUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
             add("CREATE TABLE IF NOT EXISTS SystemPermission (  spToPersonUid  BIGINT  NOT NULL , spToGroupUid  BIGINT  NOT NULL , spPermissionsFlag  BIGINT  NOT NULL , spLastModified  BIGINT  NOT NULL , spIsDeleted  BOOL  NOT NULL , spUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-            add("ALTER TABLE Clazz ADD COLUMN clazzOwnerPersonUid INTEGER NOT NULL DEFAULT 0")
+            add("ALTER TABLE Clazz ADD COLUMN clazzOwnerPersonUid BIGINT NOT NULL DEFAULT 0")
         }
         add("CREATE INDEX idx_coursepermission_clazzuid ON CoursePermission (cpClazzUid)")
         add("CREATE INDEX idx_systempermission_personuid ON SystemPermission (spToPersonUid)")
@@ -1865,6 +1865,13 @@ val MIGRATION_155_156_SERVER = DoorMigrationStatementList(155, 156) { db ->
                      FROM Person
                     WHERE Person.username = 'admin'
                     LIMIT 1) 
+        """)
+
+        //Disable old permissions
+        add("""
+            UPDATE ScopedGrant
+               SET sgPermissions = 0,
+                   sgLct = ${systemTimeInMillis()}
         """)
 
     }
