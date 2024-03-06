@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.GetHtmlContentDisplayEngineOptionsUseCase
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.GetHtmlContentDisplayEngineUseCase
@@ -115,9 +116,11 @@ class SettingsViewModel(
         }
 
         viewModelScope.launch {
-            activeRepo.scopedGrantDao.userHasAllPermissionsOnAllTablesGrant(activeUserPersonUid).collect { isAdmin ->
+            activeRepo.systemPermissionDao.personHasSystemPermissionAsFlow(
+                activeUserPersonUid, PermissionFlags.MANAGE_SITE_SETTINGS
+            ).collect { siteAdminSettingsVisible ->
                 _uiState.update { prev ->
-                    prev.copy(workspaceSettingsVisible = isAdmin)
+                    prev.copy(workspaceSettingsVisible = siteAdminSettingsVisible)
                 }
             }
         }

@@ -3,6 +3,7 @@ package com.ustadmobile.core.viewmodel.person.accountedit
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.AuthManager
 import com.ustadmobile.core.account.UnauthorizedException
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.domain.account.SetPasswordUseCase
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -14,7 +15,6 @@ import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditViewMo
 import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditViewModel.Companion.MODE_CREATE_ACCOUNT
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
-import com.ustadmobile.lib.db.entities.Role.Companion.PERMISSION_RESET_PASSWORD
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -84,14 +84,24 @@ class PersonAccountEditViewModel(
             loadingState = LoadingUiState.INDETERMINATE,
         )
 
-        viewModelScope.launch {
+        launchIfHasPermission(
+            permissionCheck = { db ->
+                if(entityUidArg == activeUserPersonUid) {
+                    true
+                }else {
+                    db.systemPermissionDao.personHasSystemPermission(
+                        activeUserPersonUid, PermissionFlags.EDIT_ALL_PERSONS
+                    )
+                }
+            }
+        ) {
             loadEntity(
                 serializer = PersonUsernameAndPasswordModel.serializer(),
                 onLoadFromDb = { db ->
                     val person = db.personDao.findByUidAsync(entityUidArg)
-                    val hasResetPermission = db.scopedGrantDao.userHasSystemLevelPermission(
+                    val hasResetPermission = db.systemPermissionDao.personHasSystemPermission(
                         accountPersonUid = activeUserPersonUid,
-                        permission = PERMISSION_RESET_PASSWORD,
+                        permission = PermissionFlags.RESET_PASSWORDS,
                     )
 
 
@@ -122,6 +132,7 @@ class PersonAccountEditViewModel(
                     }
                 }
             )
+
             _appUiState.update { prev ->
                 prev.copy(
                     actionBarButtonState = ActionBarButtonUiState(

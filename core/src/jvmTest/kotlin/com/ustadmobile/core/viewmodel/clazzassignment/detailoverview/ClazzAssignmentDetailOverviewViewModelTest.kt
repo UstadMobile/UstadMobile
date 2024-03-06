@@ -4,15 +4,16 @@ import app.cash.turbine.test
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.domain.assignment.submitassignment.AssignmentDeadlinePassedException
 import com.ustadmobile.core.domain.assignment.submitassignment.SubmitAssignmentUseCase
+import com.ustadmobile.core.domain.clazz.CreateNewClazzUseCase
+import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.EnrolIntoCourseUseCase
 import com.ustadmobile.core.test.viewmodeltest.ViewModelTestBuilder
 import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.ext.awaitItemWhere
-import com.ustadmobile.core.util.ext.createNewClazzAndGroups
-import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
 import com.ustadmobile.core.util.ext.loadFirstList
 import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.ext.withDoorTransactionAsync
@@ -69,10 +70,18 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
                     this.clazzUid = clazzUid
                     clazzName = "Test Course"
                 }
-                activeDb.createNewClazzAndGroups(clazz, systemImpl, emptyMap())
+                CreateNewClazzUseCase(activeDb).invoke(clazz)
 
-                activeDb.takeIf { activeUserRole != 0 }?.enrolPersonIntoClazzAtLocalTimezone(
-                    activePerson, clazzUid, activeUserRole
+                EnrolIntoCourseUseCase(
+                    db = activeDb, repo =  null
+                ).takeIf { activeUserRole != 0 }?.invoke(
+                    ClazzEnrolment(
+                        clazzUid = clazzUid,
+                        personUid = activePerson.personUid,
+                    ).also {
+                        it.clazzEnrolmentRole = activeUserRole
+                    },
+                    "UTC"
                 )
 
                 if(groupSet != null) {
@@ -109,6 +118,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
         ) { testContext ->
             viewModelFactory {
                 savedStateHandle[UstadView.ARG_ENTITY_UID] = testContext.assignment.caUid.toString()
+                savedStateHandle[UstadViewModel.ARG_CLAZZUID] = testContext.clazz.clazzUid.toString()
                 ClazzAssignmentDetailOverviewViewModel(di, savedStateHandle)
             }
 
@@ -148,6 +158,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
 
             viewModelFactory {
                 savedStateHandle[UstadView.ARG_ENTITY_UID] = testContext.assignment.caUid.toString()
+                savedStateHandle[UstadViewModel.ARG_CLAZZUID] = testContext.clazz.clazzUid.toString()
                 ClazzAssignmentDetailOverviewViewModel(di, savedStateHandle)
             }
 
@@ -183,6 +194,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
 
             viewModelFactory {
                 savedStateHandle[UstadView.ARG_ENTITY_UID] = testContext.assignment.caUid.toString()
+                savedStateHandle[UstadViewModel.ARG_CLAZZUID] = testContext.clazz.clazzUid.toString()
                 ClazzAssignmentDetailOverviewViewModel(di, savedStateHandle)
             }
 
@@ -218,6 +230,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
 
             viewModelFactory {
                 savedStateHandle[UstadView.ARG_ENTITY_UID] = testContext.assignment.caUid.toString()
+                savedStateHandle[UstadViewModel.ARG_CLAZZUID] = testContext.clazz.clazzUid.toString()
                 ClazzAssignmentDetailOverviewViewModel(
                     di, savedStateHandle,
                     submitAssignmentUseCase = mockSubmissionUseCase
@@ -267,6 +280,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
 
             viewModelFactory {
                 savedStateHandle[UstadView.ARG_ENTITY_UID] = testContext.assignment.caUid.toString()
+                savedStateHandle[UstadViewModel.ARG_CLAZZUID] = testContext.clazz.clazzUid.toString()
                 ClazzAssignmentDetailOverviewViewModel(di, savedStateHandle)
             }
 
@@ -308,6 +322,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
 
             viewModelFactory {
                 savedStateHandle[UstadView.ARG_ENTITY_UID] = testContext.assignment.caUid.toString()
+                savedStateHandle[UstadViewModel.ARG_CLAZZUID] = testContext.clazz.clazzUid.toString()
                 ClazzAssignmentDetailOverviewViewModel(di, savedStateHandle)
             }
 
@@ -346,6 +361,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
 
             viewModelFactory {
                 savedStateHandle[UstadView.ARG_ENTITY_UID] = testContext.assignment.caUid.toString()
+                savedStateHandle[UstadViewModel.ARG_CLAZZUID] = testContext.clazz.clazzUid.toString()
                 ClazzAssignmentDetailOverviewViewModel(di, savedStateHandle, mockSubmitterUseCase)
             }
 
@@ -393,6 +409,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
         ) { testContext ->
             viewModelFactory {
                 savedStateHandle[UstadView.ARG_ENTITY_UID] = testContext.assignment.caUid.toString()
+                savedStateHandle[UstadViewModel.ARG_CLAZZUID] = testContext.clazz.clazzUid.toString()
                 ClazzAssignmentDetailOverviewViewModel(di, savedStateHandle)
             }
 
@@ -420,6 +437,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
         ) { testContext ->
             viewModelFactory {
                 savedStateHandle[UstadView.ARG_ENTITY_UID] = testContext.assignment.caUid.toString()
+                savedStateHandle[UstadViewModel.ARG_CLAZZUID] = testContext.clazz.clazzUid.toString()
                 ClazzAssignmentDetailOverviewViewModel(di, savedStateHandle)
             }
 
@@ -451,6 +469,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
         ) {testContext ->
             viewModelFactory {
                 savedStateHandle[UstadView.ARG_ENTITY_UID] = testContext.assignment.caUid.toString()
+                savedStateHandle[UstadViewModel.ARG_CLAZZUID] = testContext.clazz.clazzUid.toString()
                 ClazzAssignmentDetailOverviewViewModel(di, savedStateHandle)
             }
 
@@ -481,6 +500,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
         ) { testContext ->
             viewModelFactory {
                 savedStateHandle[UstadView.ARG_ENTITY_UID] = testContext.assignment.caUid.toString()
+                savedStateHandle[UstadViewModel.ARG_CLAZZUID] = testContext.clazz.clazzUid.toString()
                 ClazzAssignmentDetailOverviewViewModel(di, savedStateHandle)
             }
 
@@ -517,6 +537,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
 
             viewModelFactory {
                 savedStateHandle[UstadView.ARG_ENTITY_UID] = testContext.assignment.caUid.toString()
+                savedStateHandle[UstadViewModel.ARG_CLAZZUID] = testContext.clazz.clazzUid.toString()
                 ClazzAssignmentDetailOverviewViewModel(di, savedStateHandle)
             }
 
@@ -563,6 +584,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
 
             viewModelFactory {
                 savedStateHandle[UstadView.ARG_ENTITY_UID] = testContext.assignment.caUid.toString()
+                savedStateHandle[UstadViewModel.ARG_CLAZZUID] = testContext.clazz.clazzUid.toString()
                 ClazzAssignmentDetailOverviewViewModel(di, savedStateHandle)
             }
 

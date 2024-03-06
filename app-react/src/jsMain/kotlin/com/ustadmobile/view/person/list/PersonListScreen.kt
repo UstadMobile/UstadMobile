@@ -35,6 +35,7 @@ import react.create
 import react.router.useLocation
 import tanstack.react.query.UseInfiniteQueryResult
 import mui.icons.material.Link as LinkIcon
+import mui.icons.material.CopyAll as CopyAllIcon
 
 
 external interface PersonListProps: Props {
@@ -43,6 +44,7 @@ external interface PersonListProps: Props {
     var onListItemClick: (Person) -> Unit
     var onClickAddItem: () -> Unit
     var onClickInviteWithLink: () -> Unit
+    var onClickCopyInviteCode: () -> Unit
 }
 
 val PersonListComponent2 = FC<PersonListProps> { props ->
@@ -82,10 +84,32 @@ val PersonListComponent2 = FC<PersonListProps> { props ->
                 }
             }
 
+            props.uiState.inviteCode?.also { inviteCode ->
+                item("copy_invite_code") {
+                    ListItem.create {
+                        ListItemButton {
+                            id = "copy_invite_code_button"
+                            onClick = {
+                                props.onClickCopyInviteCode()
+                            }
+
+                            ListItemIcon {
+                                CopyAllIcon()
+                            }
+
+                            ListItemText {
+                                primary = ReactNode(strings[MR.strings.copy_invite_code])
+                            }
+                        }
+                    }
+                }
+            }
+
             if(props.uiState.showInviteViaLink) {
                 item("invite_with_link") {
                     ListItem.create {
                         ListItemButton {
+                            id = "invite_with_link_button"
                             onClick = {
                                 props.onClickInviteWithLink()
                             }
@@ -171,6 +195,7 @@ val PersonListScreen = FC<Props> {
         onSortOrderChanged = viewModel::onSortOrderChanged
         onClickAddItem = viewModel::onClickAdd
         onClickInviteWithLink = viewModel::onClickInviteWithLink
+        onClickCopyInviteCode = viewModel::onClickCopyInviteCode
     }
 
 

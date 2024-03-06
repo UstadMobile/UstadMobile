@@ -22,50 +22,52 @@ import kotlinx.serialization.Serializable
          sqlStatements = [TRIGGER_UPSERT],
      )
 ))
-open class PersonParentJoin {
+data class PersonParentJoin(
 
     @PrimaryKey(autoGenerate = true)
-    var ppjUid: Long = 0
+    var ppjUid: Long = 0,
 
     @MasterChangeSeqNum
-    var ppjPcsn: Long = 0
+    var ppjPcsn: Long = 0,
 
     @LocalChangeSeqNum
-    var ppjLcsn: Long = 0
+    var ppjLcsn: Long = 0,
 
     @LastChangedBy
-    var ppjLcb: Int = 0
+    var ppjLcb: Int = 0,
 
     @ReplicateLastModified
     @ReplicateEtag
-    var ppjLct: Long = 0
+    var ppjLct: Long = 0,
 
     /**
      * The personUid of the parent or legal guardian
      */
-    var ppjParentPersonUid: Long = 0
+    var ppjParentPersonUid: Long = 0,
 
     /**
      * The personUid of the minor (e.g. the child)
      */
-    var ppjMinorPersonUid: Long = 0
+    var ppjMinorPersonUid: Long = 0,
 
     /**
      * The relationship type e.g. mother, father, other legal guardian
      */
-    var ppjRelationship: Int = 0
+    var ppjRelationship: Int = 0,
 
-    var ppjEmail: String? = null
+    var ppjEmail: String? = null,
 
-    var ppjPhone: String? = null
+    var ppjPhone: String? = null,
 
-    var ppjInactive: Boolean = false
+    var ppjInactive: Boolean = false,
 
-    var ppjStatus: Int = 0
+    var ppjStatus: Int = 0,
 
-    var ppjApprovalTiemstamp: Long = 0
+    var ppjApprovalTiemstamp: Long = 0,
 
-    var ppjApprovalIpAddr: String? = null
+    var ppjApprovalIpAddr: String? = null,
+) {
+
 
     companion object {
 
@@ -81,7 +83,9 @@ open class PersonParentJoin {
 
         const val RELATIONSHIP_FATHER = 2
 
-        const val RELATIONSHIP_OTHER = 4
+        const val RELATIONSHIP_OTHER_LEGAL_GUARDIAN = 4
+
+        const val RELATIONSHIP_OTHER = 8
     }
 
 }

@@ -1,6 +1,7 @@
 package com.ustadmobile.core.viewmodel.clazzenrolment.edit
 
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.EnrolIntoCourseUseCase
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
@@ -14,7 +15,6 @@ import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
-import com.ustadmobile.lib.db.entities.Role
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,10 +42,6 @@ data class ClazzEnrolmentEditUiState(
 
 ) {
 
-    val leavingReasonEnabled: Boolean
-        get() = clazzEnrolment?.clazzEnrolmentOutcome !=
-                ClazzEnrolment.OUTCOME_IN_PROGRESS
-
     val outcomeVisible: Boolean
         get() = clazzEnrolment?.clazzEnrolmentRole == ClazzEnrolment.ROLE_STUDENT
 }
@@ -72,7 +68,14 @@ class ClazzEnrolmentEditViewModel(
             )
         }
 
-        viewModelScope.launch {
+        launchIfHasPermission(
+            permissionCheck = { db ->
+                db.coursePermissionDao.userHasEnrolmentEditPermission(
+                    accountPersonUid = activeUserPersonUid,
+                    clazzEnrolmentUid = entityUidArg,
+                )
+            }
+        ) {
             loadEntity(
                 serializer = ClazzEnrolmentWithLeavingReason.serializer(),
                 onLoadFromDb = { db ->
@@ -102,20 +105,16 @@ class ClazzEnrolmentEditViewModel(
                 }
             )
 
-            suspend fun userHasPermission(permission: Long): Boolean {
-                return activeRepo.clazzDao.personHasPermissionWithClazz(
-                    accountPersonUid = activeUserPersonUid,
-                    clazzUid = _uiState.value.clazzEnrolment?.clazzEnrolmentClazzUid ?: 0L,
-                    permission = permission
-                )
-            }
+            //This can be run directly against the database, because any entities required would
+            // already have been pulled down by the inital launch permission check
+            val (canManageStudentEnrolment, canManageTeacherEnrolment) = activeDb.coursePermissionDao.personHasPermissionWithClazzPairAsync(
+                accountPersonUid = activeUserPersonUid,
+                clazzUid = _uiState.value.clazzEnrolment?.clazzEnrolmentClazzUid ?: 0L,
+                firstPermission = PermissionFlags.COURSE_MANAGE_STUDENT_ENROLMENT,
+                secondPermission = PermissionFlags.COURSE_MANAGE_TEACHER_ENROLMENT
+            )
 
-            val canAddTeacher = async {
-                userHasPermission(Role.PERMISSION_CLAZZ_ADD_TEACHER)
-            }
-            val canAddStudent = async {
-                userHasPermission(Role.PERMISSION_CLAZZ_ADD_STUDENT)
-            }
+
             val terminology = async {
                 activeRepo.courseTerminologyDao.getTerminologyForClazz(
                     _uiState.value.clazzEnrolment?.clazzEnrolmentClazzUid ?: 0
@@ -123,10 +122,10 @@ class ClazzEnrolmentEditViewModel(
             }
 
             val roleOptions = buildList {
-                if(canAddStudent.await())
+                if(canManageStudentEnrolment)
                     add(ClazzEnrolment.ROLE_STUDENT)
 
-                if(canAddTeacher.await())
+                if(canManageTeacherEnrolment)
                     add(ClazzEnrolment.ROLE_TEACHER)
             }
 

@@ -5,7 +5,6 @@ import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.schedule.generateUid
 import com.ustadmobile.core.util.ext.isDateSet
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.clazzlog.editattendance.ClazzLogEditAttendanceViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -43,6 +42,8 @@ class ClazzLogEditViewModel(
 
     val uiState: Flow<ClazzLogEditUiState> = _uiState.asStateFlow()
 
+    private val argClazzUid = savedStateHandle[ARG_CLAZZUID]?.toLong() ?: 0
+
     init {
         _appUiState.update { prev ->
             prev.copy(
@@ -58,7 +59,7 @@ class ClazzLogEditViewModel(
                 },
                 makeDefault = {
                     ClazzLog().apply {
-                        clazzLogClazzUid = savedStateHandle[UstadView.ARG_CLAZZUID]?.toLong() ?: 0
+                        clazzLogClazzUid = argClazzUid
                         logDate = systemTimeInMillis()
                     }
                 },
@@ -130,6 +131,7 @@ class ClazzLogEditViewModel(
             viewName = ClazzLogEditAttendanceViewModel.DEST_NAME,
             args = mapOf(
                 ClazzLogEditAttendanceViewModel.ARG_NEW_CLAZZLOG to newClazzLogJson,
+                ARG_CLAZZUID to argClazzUid.toString()
             )
         )
     }

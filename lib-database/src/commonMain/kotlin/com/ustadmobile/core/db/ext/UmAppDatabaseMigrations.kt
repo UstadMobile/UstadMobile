@@ -4,7 +4,10 @@ import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.door.migration.DoorMigrationStatementList
 import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.door.migration.DoorMigration
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.CacheLockJoin
+import com.ustadmobile.lib.db.entities.ClazzEnrolment
+import com.ustadmobile.lib.db.entities.CoursePermission
 import com.ustadmobile.lib.db.entities.Message
 import com.ustadmobile.lib.db.entities.UserSession
 
@@ -1779,6 +1782,106 @@ val MIGRATION_152_153 = DoorMigrationStatementList(152, 153) { db ->
     }
 }
 
+val MIGRATION_153_154 = DoorMigrationStatementList(153, 154) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS CoursePermission (  cpLastModified  INTEGER  NOT NULL , cpClazzUid  INTEGER  NOT NULL , cpToEnrolmentRole  INTEGER  NOT NULL , cpToPersonUid  INTEGER  NOT NULL , cpToGroupUid  INTEGER  NOT NULL , cpPermissionsFlag  INTEGER  NOT NULL , cpIsDeleted  INTEGER  NOT NULL , cpUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+            add("CREATE TABLE IF NOT EXISTS SystemPermission (  spToPersonUid  INTEGER  NOT NULL , spToGroupUid  INTEGER  NOT NULL , spPermissionsFlag  INTEGER  NOT NULL , spLastModified  INTEGER  NOT NULL , spIsDeleted  INTEGER  NOT NULL , spUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+            add("ALTER TABLE Clazz ADD COLUMN clazzOwnerPersonUid INTEGER NOT NULL DEFAULT 0")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS CoursePermission (  cpLastModified  BIGINT  NOT NULL , cpClazzUid  BIGINT  NOT NULL , cpToEnrolmentRole  INTEGER  NOT NULL , cpToPersonUid  BIGINT  NOT NULL , cpToGroupUid  BIGINT  NOT NULL , cpPermissionsFlag  BIGINT  NOT NULL , cpIsDeleted  BOOL  NOT NULL , cpUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+            add("CREATE TABLE IF NOT EXISTS SystemPermission (  spToPersonUid  BIGINT  NOT NULL , spToGroupUid  BIGINT  NOT NULL , spPermissionsFlag  BIGINT  NOT NULL , spLastModified  BIGINT  NOT NULL , spIsDeleted  BOOL  NOT NULL , spUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+            add("ALTER TABLE Clazz ADD COLUMN clazzOwnerPersonUid BIGINT NOT NULL DEFAULT 0")
+        }
+        add("CREATE INDEX idx_coursepermission_clazzuid ON CoursePermission (cpClazzUid)")
+        add("CREATE INDEX idx_systempermission_personuid ON SystemPermission (spToPersonUid)")
+    }
+}
+
+val MIGRATION_154_155 = DoorMigrationStatementList(154, 155) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("ALTER TABLE CourseAssignmentSubmission ADD COLUMN casClazzUid INTEGER NOT NULL DEFAULT 0")
+            add("ALTER TABLE CourseAssignmentMark ADD COLUMN camClazzUid INTEGER NOT NULL DEFAULT 0")
+        }else {
+            add("ALTER TABLE CourseAssignmentSubmission ADD COLUMN casClazzUid BIGINT NOT NULL DEFAULT 0")
+            add("ALTER TABLE CourseAssignmentMark ADD COLUMN camClazzUid BIGINT NOT NULL DEFAULT 0")
+        }
+    }
+}
+
+/**
+ * Migrate permissions. New entities should only be created on the server side.
+ * No entities will be created on the client migration.
+ */
+val MIGRATION_155_156_SERVER = DoorMigrationStatementList(155, 156) { db ->
+    buildList {
+        //Add SystemPermission for existing entities
+        val falseVal = if(db.dbType() == DoorDbType.SQLITE) "0" else "false"
+        add("""
+            INSERT INTO SystemPermission(spToPersonUid, spToGroupUid, spPermissionsFlag, spLastModified, spIsDeleted)
+            SELECT Person.personUid AS spToPersonUid,
+                   0 AS spToGroupUid,
+                   CASE 
+                   WHEN Person.username = 'admin' THEN ${Long.MAX_VALUE}
+                   ELSE 0
+                   END AS spPermissionsFlag,
+                   ${systemTimeInMillis()} AS spLastModified,
+                   $falseVal AS spIsDeleted
+              FROM Person
+        """)
+
+        //Add CoursePermission for all courses for teachers
+        add("""
+            INSERT INTO CoursePermission(cpLastModified, cpClazzUid, cpToEnrolmentRole, cpToPersonUid, cpToGroupUid, cpPermissionsFlag, cpIsDeleted)
+            SELECT ${systemTimeInMillis()} AS cpLastModified,
+                   Clazz.clazzUid AS cpClazzUid,
+                   ${ClazzEnrolment.ROLE_TEACHER} AS cpToEnrolmentRole,
+                   0 AS cpToPersonUid,
+                   0 AS cpToGroupUid,
+                   ${CoursePermission.TEACHER_DEFAULT_PERMISSIONS} AS cpPermissionsFlag,
+                   $falseVal AS cpIsDeleted
+              FROM Clazz     
+        """)
+
+        //Add CoursePermission for all courses for students
+        add("""
+            INSERT INTO CoursePermission(cpLastModified, cpClazzUid, cpToEnrolmentRole, cpToPersonUid, cpToGroupUid, cpPermissionsFlag, cpIsDeleted)
+            SELECT ${systemTimeInMillis()} AS cpLastModified,
+                   Clazz.clazzUid AS cpClazzUid,
+                   ${ClazzEnrolment.ROLE_STUDENT} AS cpToEnrolmentRole,
+                   0 AS cpToPersonUid,
+                   0 AS cpToGroupUid,
+                   ${CoursePermission.STUDENT_DEFAULT_PERMISSIONS} AS cpPermissionsFlag,
+                   $falseVal AS cpIsDeleted
+              FROM Clazz     
+        """)
+
+        //Set the current owner of all courses to the admin user
+        add("""
+           UPDATE Clazz
+              SET clazzOwnerPersonUid = 
+                  (SELECT Person.personUid
+                     FROM Person
+                    WHERE Person.username = 'admin'
+                    LIMIT 1) 
+        """)
+
+        //Disable old permissions
+        add("""
+            UPDATE ScopedGrant
+               SET sgPermissions = 0,
+                   sgLct = ${systemTimeInMillis()}
+        """)
+
+    }
+}
+
+val MIGRATION_155_156_CLIENT = DoorMigrationStatementList(155, 156) { db ->
+    emptyList()
+}
+
+
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_102_103,
     MIGRATION_103_104, MIGRATION_104_105, MIGRATION_105_106, MIGRATION_106_107,
@@ -1790,7 +1893,7 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_137_138, MIGRATION_138_139, MIGRATION_139_140, MIGRATION_140_141,
     MIGRATION_141_142, MIGRATION_142_143, MIGRATION_143_144, MIGRATION_145_146,
     MIGRATION_146_147, MIGRATION_147_148, MIGRATION_149_150, MIGRATION_150_151,
-    MIGRATION_151_152, MIGRATION_152_153,
+    MIGRATION_151_152, MIGRATION_152_153, MIGRATION_153_154, MIGRATION_154_155,
 )
 
 

@@ -5,7 +5,7 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.util.ext.insertPersonAndGroup
+import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UmAccount
@@ -39,9 +39,10 @@ class ClientServerTestClient(
     ): UmAccount {
         //put the person
         val serverDb: UmAppDatabase = serverDi.direct.on(Endpoint(serverUrl)).instance(tag = DoorTag.TAG_DB)
-        val personInServerDb = serverDb.insertPersonAndGroup(person)
+        val addNewPersonUseCase = AddNewPersonUseCase(serverDb, null)
+        val newPersonUid = addNewPersonUseCase(person)
         val serverAuthManager: AuthManager = serverDi.direct.on(Endpoint(serverUrl)).instance()
-        serverAuthManager.setAuth(personInServerDb.personUid, password)
+        serverAuthManager.setAuth(newPersonUid, password)
         return login(person.username ?: "", password)
     }
 

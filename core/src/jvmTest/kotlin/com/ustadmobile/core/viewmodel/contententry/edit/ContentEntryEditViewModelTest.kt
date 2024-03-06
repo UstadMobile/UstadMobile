@@ -1,12 +1,14 @@
 package com.ustadmobile.core.viewmodel.contententry.edit
 
 import com.ustadmobile.core.contentjob.MetadataResult
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
 import com.ustadmobile.core.domain.contententry.save.SaveContentEntryUseCase
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
+import com.ustadmobile.lib.db.entities.SystemPermission
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
@@ -41,6 +43,13 @@ class ContentEntryEditViewModelTest : AbstractMainDispatcherTest(){
         testViewModel<ContentEntryEditViewModel> {
             val mockSaveContentEntryUseCase = mock<SaveContentEntryUseCase>()
             val mockImportContentUseCase = mock<EnqueueContentEntryImportUseCase>()
+            val user = setActiveUser(activeEndpoint)
+            activeDb.systemPermissionDao.upsertAsync(
+                SystemPermission(
+                    spToPersonUid = user.personUid,
+                    spPermissionsFlag = PermissionFlags.EDIT_LIBRARY_CONTENT,
+                )
+            )
 
             extendDi {
                 bind<SaveContentEntryUseCase>() with scoped(endpointScope).singleton {
