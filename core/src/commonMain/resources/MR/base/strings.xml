@@ -1777,10 +1777,85 @@
     -->
     <string name="declined_request_from_name">Declined request from %1$s</string>
 
+    <!--
+    Used in the context of permission management
+    -->
+    <string name="view_course">View course</string>
+
+    <!--
+    Used in the context of permission management
+    -->
+    <string name="edit_course">Edit course</string>
+
+    <!--
+    Used in the context of permission management
+    -->
+    <string name="moderate">Moderate</string>
+
+    <!--
+    Used in the context of permission management
+    -->
+    <string name="manage_student_enrolments">Manage student enrolments</string>
+
+    <!--
+    Used in the context of permission management
+    -->
+    <string name="manage_teacher_enrolments">Manage teacher enrolments</string>
+
+    <!--
+    Used in the context of permission management
+    -->
+    <string name="view_learning_records">View learning records</string>
+
+    <!--
+    Used in the context of permission management
+    -->
+    <string name="edit_learning_records">Edit learning records</string>
+
+    <!--
+    Used in the context of permission management
+    -->
+    <string name="view_members">View members</string>
+
+
+    <string name="copy_invite_code">Copy invite code</string>
+
+    <string name="direct_enrol_users_onto_courses">Directly enrol users onto courses</string>
+
 
     <string name="could_not_restart">Ooops! Could not restart automatically. Please close the app and open it again. The new language will take effect after restart.</string>
 
 
     <string name="close_now">Close now</string>
+
+    <string name="view_all_courses">View all courses</string>
+
+    <string name="edit_all_courses">Edit all courses</string>
+
+    <string name="moderate_all_courses">Moderate all courses</string>
+
+    <string name="manage_student_enrolments_for_all_courses">Manage student enrolments for all courses</string>
+
+    <string name="manage_teacher_enrolments_for_all_courses">Manage student enrolments for all courses</string>
+
+    <string name="view_attendance_records_for_all_courses">View attendance records for all courses</string>
+
+    <string name="edit_attendance_records_for_all_courses">Edit attendance records for all courses</string>
+
+    <string name="add_new_users">Add new users</string>
+
+    <string name="view_all_users">View all users</string>
+
+    <string name="edit_all_users">Edit all users</string>
+
+    <string name="view_learning_records_for_all_courses">View learning records for all courses</string>
+
+    <string name="edit_learning_records_for_all_courses">Edit learning records for all courses</string>
+
+    <string name="add_new_courses">Add new courses</string>
+
+    <string name="manage_user_permissions">Manage user permissions</string>
+
+    <string name="reset_passwords">Reset passwords</string>
 
 </resources>

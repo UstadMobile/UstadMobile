@@ -13,6 +13,7 @@ import com.ustadmobile.core.impl.nav.*
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.isDateOfBirthAnAdult
 import com.ustadmobile.core.util.ext.isGuestUser
+import com.ustadmobile.core.util.ext.localFirstThenRepoIfFalse
 import com.ustadmobile.core.util.ext.navigateToLink
 import com.ustadmobile.core.util.ext.putFromSavedStateIfPresent
 import com.ustadmobile.core.util.ext.toQueryString
@@ -22,6 +23,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_KEY
 import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_VIEWNAME
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
+import com.ustadmobile.core.viewmodel.errors.ErrorViewModel
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -73,21 +75,21 @@ abstract class UstadViewModel(
     protected val activeUserPersonUid: Long
         get() = accountManager.currentUserSession.person.personUid
 
-    protected val activeDb: UmAppDatabase by on(accountManager.activeEndpoint)
+    internal val activeDb: UmAppDatabase by on(accountManager.activeEndpoint)
         .instance(tag = DoorTag.TAG_DB)
 
-    protected val activeRepo: UmAppDatabase by on(accountManager.activeEndpoint)
+    internal val activeRepo: UmAppDatabase by on(accountManager.activeEndpoint)
         .instance(tag = DoorTag.TAG_REPO)
 
     protected val navResultReturner: NavResultReturner by instance()
 
-    protected val json: Json by instance()
+    internal val json: Json by instance()
 
     protected val snackDispatcher: SnackBarDispatcher by instance()
 
     protected val resultReturner: NavResultReturner by instance()
 
-    protected val systemImpl: UstadMobileSystemImpl by instance()
+    internal val systemImpl: UstadMobileSystemImpl by instance()
 
     protected val onClickLinkUseCase: OnClickLinkUseCase by lazy {
         OnClickLinkUseCase(
@@ -340,6 +342,41 @@ abstract class UstadViewModel(
     }
 
     /**
+     * Launch a given codeblock if the permission check passes. Otherwise navigate to an error screen
+     */
+    protected fun launchIfHasPermission(
+        permissionCheck: suspend (UmAppDatabase) -> Boolean,
+        setLoadingState: Boolean = false,
+        onSetFieldsEnabled: ((Boolean) -> Unit)? = null,
+        block: suspend CoroutineScope.() -> Unit,
+    ) {
+        if(setLoadingState) {
+            _appUiState.update { prev -> prev.copy(loadingState = LoadingUiState.INDETERMINATE) }
+        }
+        onSetFieldsEnabled?.invoke(false)
+
+        viewModelScope.launch {
+            try {
+                if(!activeRepo.localFirstThenRepoIfFalse(permissionCheck)) {
+                    navController.navigate(
+                        ErrorViewModel.DEST_NAME,
+                        emptyMap(),
+                        goOptions = UstadMobileSystemCommon.UstadGoOptions(
+                            popUpToViewName = destinationName, popUpToInclusive = true
+                        )
+                    )
+                }else {
+                    block()
+                }
+            }finally {
+                _appUiState.update { prev -> prev.copy(loadingState = LoadingUiState.NOT_LOADING) }
+                onSetFieldsEnabled?.invoke(true)
+            }
+        }
+    }
+
+
+    /**
      * If the given key is present in the savedStateHandle for this ViewModel, then put it into
      * the Receiver MutableMap. This can be convenient for forwarding arguments when navigating
      */
@@ -492,6 +529,16 @@ abstract class UstadViewModel(
 
         const val ARG_INVITE_CODE = "inviteCode"
 
+        /**
+         * The ClazzUid for screens where the entity is not the clazz itself. This is generally
+         * passed even when viewing related entities because it makes permission checks (which are
+         * based on the Clazz) easier.
+         */
+        const val ARG_CLAZZUID = "clazzUid"
+
+        const val ARG_PERSON_UID = "personUid"
+
+        const val ARG_TITLE = "t"
 
     }
 

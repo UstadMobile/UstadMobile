@@ -61,13 +61,15 @@ import com.ustadmobile.lib.db.entities.*
     OfflineItemPendingTransferJob::class,
     DeletedItem::class,
     EnrolmentRequest::class,
+    CoursePermission::class,
+    SystemPermission::class,
 
     //Door entities
     OutgoingReplication::class,
     ReplicationOperation::class,
     PendingRepositorySession::class,
 
-], version = 153)
+], version = 156)
 /*
  Replicate entities (e.g. trackers) to drop:
      ClazzLogReplicate
@@ -327,5 +329,9 @@ expect abstract class UmAppDatabase : RoomDatabase {
     abstract val deletedItemDao: DeletedItemDao
 
     abstract val enrolmentRequestDao: EnrolmentRequestDao
+
+    abstract val coursePermissionDao: CoursePermissionDao
+
+    abstract val systemPermissionDao: SystemPermissionDao
 
 }

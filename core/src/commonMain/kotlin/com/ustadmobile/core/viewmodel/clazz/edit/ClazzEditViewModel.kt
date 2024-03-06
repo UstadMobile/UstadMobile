@@ -4,7 +4,9 @@ import com.ustadmobile.core.db.dao.deactivateByUids
 import com.ustadmobile.core.domain.courseblockupdate.AddOrUpdateCourseBlockUseCase
 import com.ustadmobile.core.domain.courseblockupdate.UpdateCourseBlocksOnReorderOrCommitUseCase
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
+import com.ustadmobile.core.domain.clazz.CreateNewClazzUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
 import com.ustadmobile.core.domain.contententry.save.SaveContentEntryUseCase
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
@@ -132,6 +134,8 @@ class ClazzEditViewModel(
     private val effectiveClazzUid = savedStateHandle[ARG_ENTITY_UID]?.toLong()
         ?: activeDb.doorPrimaryKeyManager.nextId(Clazz.TABLE_ID)
 
+    private val createNewClazzUseCase: CreateNewClazzUseCase by di.onActiveEndpoint().instance()
+
     init {
         val title = createEditTitle(MR.strings.add_a_new_course, MR.strings.edit_course)
         _appUiState.update {
@@ -142,7 +146,19 @@ class ClazzEditViewModel(
             )
         }
 
-        viewModelScope.launch {
+        launchIfHasPermission(
+            permissionCheck = {
+                if(entityUidArg != 0L) {
+                    it.coursePermissionDao.personHasPermissionWithClazzAsync2(
+                        activeUserPersonUid, entityUidArg, PermissionFlags.COURSE_EDIT
+                    )
+                }else {
+                    it.systemPermissionDao.personHasSystemPermission(
+                        activeUserPersonUid, PermissionFlags.ADD_COURSE
+                    )
+                }
+            }
+        ) {
             awaitAll(
                 async {
                     loadEntity(
@@ -171,14 +187,13 @@ class ClazzEditViewModel(
                                 clazzStartTime = systemTimeInMillis()
                                 clazzTimeZone = getDefaultTimeZoneId()
                                 clazzSchoolUid = savedStateHandle[UstadView.ARG_SCHOOL_UID]?.toLong() ?: 0L
-                                school = activeRepo.schoolDao.takeIf { clazzSchoolUid != 0L }
-                                    ?.findByUidAsync(clazzSchoolUid)
                                 terminology = activeRepo.courseTerminologyDao
                                     .takeIf { clazzTerminologyUid != 0L }
                                     ?.findByUidAsync(clazzTerminologyUid)
                                 coursePicture = CoursePicture(
                                     coursePictureUid = effectiveClazzUid
                                 )
+                                clazzOwnerPersonUid = activeUserPersonUid
                             }
                         },
                         uiUpdate = {
@@ -371,7 +386,6 @@ class ClazzEditViewModel(
                 )
             }
         }
-
     }
 
     private suspend fun updateCourseBlockList(
@@ -575,9 +589,7 @@ class ClazzEditViewModel(
 
             activeDb.withDoorTransactionAsync {
                 if(entityUidArg == 0L) {
-                    val termMap = activeDb.courseTerminologyDao.findByUidAsync(initEntity.clazzTerminologyUid)
-                        .toTermMap(json, systemImpl)
-                    activeRepo.createNewClazzAndGroups(initEntity, systemImpl, termMap)
+                    createNewClazzUseCase(initEntity)
                 }else {
                     activeRepo.clazzDao.updateAsync(initEntity)
                 }

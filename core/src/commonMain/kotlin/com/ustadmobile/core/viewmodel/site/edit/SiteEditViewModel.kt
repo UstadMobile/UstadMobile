@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
@@ -78,7 +79,17 @@ class SiteEditViewModel(
             )
         }
 
-        viewModelScope.launch {
+        launchIfHasPermission(
+            setLoadingState = true,
+            onSetFieldsEnabled = { enabled ->
+                _uiState.update { it.copy(fieldsEnabled = enabled) }
+            },
+            permissionCheck = { db ->
+                db.systemPermissionDao.personHasSystemPermission(
+                    activeUserPersonUid, PermissionFlags.MANAGE_SITE_SETTINGS
+                )
+            }
+        ) {
             loadEntity(
                 serializer = Site.serializer(),
                 onLoadFromDb = { db ->

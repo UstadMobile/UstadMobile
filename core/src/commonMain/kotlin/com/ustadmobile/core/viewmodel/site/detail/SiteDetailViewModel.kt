@@ -16,6 +16,7 @@ import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.viewmodel.site.termsdetail.SiteTermsDetailViewModel
 import com.ustadmobile.core.viewmodel.site.edit.SiteEditViewModel
 import kotlinx.coroutines.flow.combine
@@ -56,25 +57,25 @@ class SiteDetailViewModel(
         viewModelScope.launch {
             _uiState.whenSubscribed {
                 val siteFlow =activeRepo.siteDao.getSiteAsFlow()
-                val permissionFlow = activeRepo.scopedGrantDao
-                    .userHasAllPermissionsOnAllTablesGrant(
-                        activeUserPersonUid
-                    )
+                val permissionFlow = activeRepo.systemPermissionDao.personHasSystemPermissionAsFlow(
+                    activeUserPersonUid, PermissionFlags.MANAGE_SITE_SETTINGS
+                )
 
                 launch {
                     siteFlow.combine(permissionFlow) { site, hasAdminPermission ->
                         Pair(site, hasAdminPermission)
                     }.collect {
+                        val (entity, hasEditSitePermission) = it
                         _uiState.update { prev ->
                             prev.copy(
-                                site = it.first,
+                                site = entity,
                             )
                         }
 
                         _appUiState.update { prev ->
                             prev.copy(
                                 fabState = prev.fabState.copy(
-                                    visible = it.first != null && it.second
+                                    visible = it.first != null && hasEditSitePermission
                                 )
                             )
                         }

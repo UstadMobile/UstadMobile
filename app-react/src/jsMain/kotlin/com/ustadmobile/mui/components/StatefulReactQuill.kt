@@ -6,6 +6,10 @@ import react.FC
 import react.useEffect
 import react.useState
 
+/**
+ * Updates to components in a VirtualList are asynchronous (because virtualListContent uses a state
+ * to pass the content function).
+ */
 val StatefulReactQuill = FC<ReactQuillProps> { props ->
     var stateVar by useState {
         props.value

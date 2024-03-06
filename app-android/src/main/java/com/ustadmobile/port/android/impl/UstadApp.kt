@@ -24,6 +24,7 @@ import com.ustadmobile.core.contentformats.xapi.XapiZipContentImporter
 import com.ustadmobile.core.db.*
 import com.ustadmobile.core.db.ext.MIGRATION_144_145_CLIENT
 import com.ustadmobile.core.db.ext.MIGRATION_148_149_CLIENT_WITH_OFFLINE_ITEMS
+import com.ustadmobile.core.db.ext.MIGRATION_155_156_CLIENT
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.util.DiTag
@@ -290,6 +291,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 .addMigrations(*migrationList().toTypedArray())
                 .addMigrations(MIGRATION_144_145_CLIENT)
                 .addMigrations(MIGRATION_148_149_CLIENT_WITH_OFFLINE_ITEMS)
+                .addMigrations(MIGRATION_155_156_CLIENT)
                 .build()
 
             val cache: UstadCache = instance()

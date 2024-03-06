@@ -34,7 +34,7 @@ fun UmAppDatabase.createClazzLogs(
                 fromTime, toTime)
 
 
-        val effectiveTimeZoneId = clazz.clazzTimeZone ?: clazz.school?.schoolTimeZone ?: "UTC"
+        val effectiveTimeZoneId = clazz.clazzTimeZone ?: "UTC"
         val effectiveTimeZone = TimeZone.of(effectiveTimeZoneId)
 
         val fromLocalDateTime = Instant.fromEpochMilliseconds(fromTime)

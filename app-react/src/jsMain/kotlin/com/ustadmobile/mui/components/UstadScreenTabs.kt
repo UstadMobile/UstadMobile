@@ -1,6 +1,7 @@
 package com.ustadmobile.mui.components
 
 import com.ustadmobile.core.impl.appstate.TabItem
+import com.ustadmobile.entities.UstadScreens
 import web.cssom.Position
 import web.cssom.pct
 import web.cssom.px
@@ -35,6 +36,13 @@ val UstadScreenTabsStateContext = createContext<TabSizeStateInstance>()
 external interface UstadScreenTabsProps: Props {
 
     var tabs: List<TabItem>
+
+    /**
+     * The screens that can be used within the component. This should be specified by the parent
+     * component, so that Screen components which are used only within tabs cannot be accessed
+     * directly by browser url.
+     */
+    var screens: UstadScreens?
 
 }
 
@@ -112,6 +120,7 @@ val UstadScreenTabs = FC<UstadScreenTabsProps> { props ->
                         value = index.toString()
                         viewName = tab.viewName
                         args = tab.args
+                        screens = props.screens
                     }
                 }
             }

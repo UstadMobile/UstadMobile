@@ -171,22 +171,24 @@ val ClazzAssignmentSubmitterDetailComponent = FC<ClazzAssignmentSubmitterDetailP
                 }
             }
 
-            item(key = "private_comment_header") {
-                UstadDetailHeader.create {
-                    header = ReactNode(strings[MR.strings.private_comments])
+            if(props.uiState.newPrivateCommentTextVisible) {
+                item(key = "private_comment_header") {
+                    UstadDetailHeader.create {
+                        header = ReactNode(strings[MR.strings.private_comments])
+                    }
                 }
-            }
 
-            item(key = "new_private_comment") {
-                AssignmentCommentTextFieldListItem.create {
-                    onChange = props.onChangePrivateComment
-                    label = ReactNode(strings[MR.strings.add_private_comment])
-                    value = props.uiState.newPrivateCommentText
-                    activeUserPersonUid = props.uiState.activeUserPersonUid
-                    activeUserPersonName = props.uiState.activeUserPersonName
-                    activeUserPictureUri = props.uiState.activeUserPictureUri
-                    textFieldId = "private_comment_textfield"
-                    onClickSubmit = props.onClickSubmitPrivateComment
+                item(key = "new_private_comment") {
+                    AssignmentCommentTextFieldListItem.create {
+                        onChange = props.onChangePrivateComment
+                        label = ReactNode(strings[MR.strings.add_private_comment])
+                        value = props.uiState.newPrivateCommentText
+                        activeUserPersonUid = props.uiState.activeUserPersonUid
+                        activeUserPersonName = props.uiState.activeUserPersonName
+                        activeUserPictureUri = props.uiState.activeUserPictureUri
+                        textFieldId = "private_comment_textfield"
+                        onClickSubmit = props.onClickSubmitPrivateComment
+                    }
                 }
             }
 

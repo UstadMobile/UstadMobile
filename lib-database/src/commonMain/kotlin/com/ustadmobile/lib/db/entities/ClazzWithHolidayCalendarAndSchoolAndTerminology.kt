@@ -10,9 +10,6 @@ class ClazzWithHolidayCalendarAndSchoolAndTerminology: Clazz() {
     var holidayCalendar: HolidayCalendar? = null
 
     @Embedded
-    var school: School? = null
-
-    @Embedded
     var terminology: CourseTerminology? = null
 
     @Embedded
@@ -23,7 +20,6 @@ class ClazzWithHolidayCalendarAndSchoolAndTerminology: Clazz() {
         if (!super.equals(other)) return false
 
         if (holidayCalendar != other.holidayCalendar) return false
-        if (school != other.school) return false
         if (terminology != other.terminology) return false
         return coursePicture == other.coursePicture
     }
@@ -31,7 +27,6 @@ class ClazzWithHolidayCalendarAndSchoolAndTerminology: Clazz() {
     override fun hashCode(): Int {
         var result = super.hashCode()
         result = 31 * result + (holidayCalendar?.hashCode() ?: 0)
-        result = 31 * result + (school?.hashCode() ?: 0)
         result = 31 * result + (terminology?.hashCode() ?: 0)
         result = 31 * result + (coursePicture?.hashCode() ?: 0)
         return result
