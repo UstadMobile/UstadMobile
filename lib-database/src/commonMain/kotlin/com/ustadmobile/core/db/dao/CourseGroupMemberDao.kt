@@ -94,12 +94,14 @@ expect abstract class CourseGroupMemberDao: BaseDao<CourseGroupMember> {
      * @param clazzUid ClazzUid, required if the coursegroupset does not exist yet, otherwise may be 0
      * @param time the current time (used to determine if enrolments are active)
      * @param activeFilter if 1, then only return active members.
+     * @param accountPersonUid the currently active user (used for permission checks)
      */
     abstract suspend fun findByCourseGroupSetAndClazz(
         cgsUid: Long,
         clazzUid: Long,
         time: Long,
         activeFilter: Int,
+        accountPersonUid: Long,
     ): List<CourseGroupMemberAndName>
 
     @HttpAccessible(
@@ -117,11 +119,13 @@ expect abstract class CourseGroupMemberDao: BaseDao<CourseGroupMember> {
         )
     )
     @Query(FIND_BY_COURSEGROUPSET_AND_CLAZZ_SQL)
+    @QueryLiveTables(arrayOf("ClazzEnrolment", "Person", "PersonPicture", "CourseGroupMember", "CourseGroupSet"))
     abstract fun findByCourseGroupSetAndClazzAsFlow(
         cgsUid: Long,
         clazzUid: Long,
         time: Long,
         activeFilter: Int,
+        accountPersonUid: Long,
     ): Flow<List<CourseGroupMemberAndName>>
 
     @Query("""

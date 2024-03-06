@@ -9,7 +9,7 @@ import com.ustadmobile.door.annotation.HttpServerFunctionCall
 import com.ustadmobile.door.annotation.HttpServerFunctionParam
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.composites.EnrolmentRequestAndCoursePic
-import com.ustadmobile.lib.db.composites.EnrolmentRequestAndPersonPicture
+import com.ustadmobile.lib.db.composites.EnrolmentRequestAndPersonDetails
 import com.ustadmobile.lib.db.entities.EnrolmentRequest
 import kotlinx.coroutines.flow.Flow
 
@@ -123,8 +123,10 @@ expect abstract class EnrolmentRequestDao {
         )
     )
     @Query("""
-        SELECT EnrolmentRequest.*, PersonPicture.*
+        SELECT EnrolmentRequest.*, PersonPicture.*, Person.*
           FROM EnrolmentRequest
+               JOIN Person
+                    ON Person.personUid = EnrolmentRequest.erPersonUid
                LEFT JOIN PersonPicture
                          ON PersonPicture.personPictureUid = EnrolmentRequest.erPersonUid
          WHERE EnrolmentRequest.erClazzUid = :clazzUid
@@ -156,6 +158,6 @@ expect abstract class EnrolmentRequestDao {
         statusFilter: Int,
         searchText: String,
         sortOrder: Int,
-    ): PagingSource<Int, EnrolmentRequestAndPersonPicture>
+    ): PagingSource<Int, EnrolmentRequestAndPersonDetails>
 
 }

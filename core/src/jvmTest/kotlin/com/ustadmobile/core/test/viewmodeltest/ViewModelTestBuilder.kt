@@ -10,6 +10,7 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
+import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.config.ApiUrlConfig
@@ -211,6 +212,13 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
 
         bind<GenderConfig>() with singleton {
             GenderConfig()
+        }
+
+        bind<AddNewPersonUseCase>() with scoped(endpointScope).singleton {
+            AddNewPersonUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = instance(tag = DoorTag.TAG_REPO),
+            )
         }
     }
 

@@ -240,46 +240,6 @@ open class Person() {
         """
 
 
-
-        //The class/school subquery is most efficient and logical when Person has already been joined
-        // (e.g. we are looking to join from Person out to ScopedGrant)
-        const val FROM_SCOPEDGRANT_TO_PERSON_JOIN_ON_CLAUSE = """
-            ((ScopedGrant.sgTableId = ${ScopedGrant.ALL_TABLES}
-                    AND ScopedGrant.sgEntityUid = ${ScopedGrant.ALL_ENTITIES})
-                 OR (ScopedGrant.sgTableId = ${Person.TABLE_ID}
-                    AND ScopedGrant.sgEntityUid = Person.personUid)
-                 OR (ScopedGrant.sgTableId = ${Clazz.TABLE_ID}       
-                    AND ScopedGrant.sgEntityUid IN (
-                        SELECT DISTINCT clazzEnrolmentClazzUid
-                          FROM ClazzEnrolment
-                         WHERE clazzEnrolmentPersonUid = Person.personUid 
-                           AND ClazzEnrolment.clazzEnrolmentActive))
-                 OR (ScopedGrant.sgTableId = ${School.TABLE_ID}
-                    AND ScopedGrant.sgEntityUid IN (
-                        SELECT DISTINCT schoolMemberSchoolUid
-                          FROM SchoolMember
-                         WHERE schoolMemberPersonUid = Person.personUid
-                           AND schoolMemberActive))
-                           )
-        """
-
-
-        const val JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT1 = """
-            JOIN ScopedGrant 
-                   ON $FROM_SCOPEDGRANT_TO_PERSON_JOIN_ON_CLAUSE
-                   AND (ScopedGrant.sgPermissions & 
-        """
-
-
-        const val JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT2 = """
-                                                     ) > 0
-             JOIN PersonGroupMember AS PrsGrpMbr
-                   ON ScopedGrant.sgGroupUid = PrsGrpMbr.groupMemberGroupUid
-              JOIN UserSession
-                   ON UserSession.usPersonUid = PrsGrpMbr.groupMemberPersonUid
-                      AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
-        """
-
     }
 
 

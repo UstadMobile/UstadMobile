@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Sms
 import androidx.compose.material.icons.filled.SupervisedUserCircle
 import androidx.compose.material3.Divider
@@ -46,8 +47,8 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.controller.PersonConstants
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailUiState
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
+import com.ustadmobile.lib.db.composites.ClazzEnrolmentAndPersonDetailDetails
 import com.ustadmobile.lib.db.composites.TransferJobItemStatus
-import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
 import com.ustadmobile.libuicompose.components.UstadAsyncImage
 import com.ustadmobile.libuicompose.components.UstadEditHeader
 import com.ustadmobile.libuicompose.components.UstadQuickActionButton
@@ -73,6 +74,7 @@ fun PersonDetailScreen(viewModel: PersonDetailViewModel) {
         onClickDial = viewModel::onClickDial,
         onClickSms = viewModel::onClickSms,
         onClickEmail = viewModel::onClickEmail,
+        onClickPermissions = viewModel::onClickPermissions,
     )
 }
 
@@ -86,7 +88,8 @@ fun PersonDetailScreen(
     onClickChangePassword: () -> Unit = {},
     onClickManageParentalConsent: () -> Unit = {},
     onClickChat: () -> Unit = {},
-    onClickClazz: (ClazzEnrolmentWithClazzAndAttendance) -> Unit = {}
+    onClickClazz: (ClazzEnrolmentAndPersonDetailDetails) -> Unit = {},
+    onClickPermissions: () -> Unit = { },
 ) {
     UstadVerticalScrollColumn(
         modifier = Modifier.fillMaxSize()
@@ -127,7 +130,9 @@ fun PersonDetailScreen(
             onClickCreateAccount,
             onClickChangePassword,
             onClickManageParentalConsent,
-            onClickChat)
+            onClickChat,
+            onClickPermissions = onClickPermissions,
+        )
 
         Divider(thickness = 1.dp)
 
@@ -168,6 +173,7 @@ private fun QuickActionBar(
     onClickChangePassword: () -> Unit = {},
     onClickManageParentalConsent: () -> Unit = {},
     onClickChat: () -> Unit = {},
+    onClickPermissions: () -> Unit = { },
 ) {
     Row(
         modifier = Modifier.horizontalScroll(rememberScrollState())
@@ -210,6 +216,14 @@ private fun QuickActionBar(
                 labelText = stringResource(MR.strings.change_password),
                 imageVector = Icons.Default.Key,
                 onClick = onClickChangePassword
+            )
+        }
+
+        if(uiState.showPermissionButton) {
+            UstadQuickActionButton(
+                labelText = stringResource(MR.strings.permissions),
+                imageVector = Icons.Default.Shield,
+                onClick = onClickPermissions
             )
         }
 
@@ -368,15 +382,17 @@ private fun ContactDetails(
 
 @Composable
 private fun Classes(
-    clazzes: List<ClazzEnrolmentWithClazzAndAttendance> = emptyList(),
-    onClickClazz: (ClazzEnrolmentWithClazzAndAttendance) -> Unit = {}
+    clazzes: List<ClazzEnrolmentAndPersonDetailDetails> = emptyList(),
+    onClickClazz: (ClazzEnrolmentAndPersonDetailDetails) -> Unit = {}
 ){
-
-    clazzes.forEach { clazz ->
+    clazzes.forEach { clazzAndDetails ->
         ListItem(
-            modifier = Modifier.clickable { onClickClazz(clazz) },
+            modifier = Modifier.clickable {
+                clazzAndDetails.also(onClickClazz)
+                onClickClazz(clazzAndDetails)
+            },
             headlineContent = {
-                Text(clazz.clazz?.clazzName ?: "")
+                Text(clazzAndDetails.clazz?.clazzName ?: "")
             },
             leadingContent = {
                 Icon(Icons.Default.Group, contentDescription = null)

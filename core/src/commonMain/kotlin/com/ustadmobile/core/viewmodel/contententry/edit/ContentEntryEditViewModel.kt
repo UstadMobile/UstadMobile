@@ -2,6 +2,7 @@ package com.ustadmobile.core.viewmodel.contententry.edit
 
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
 import com.ustadmobile.core.domain.contententry.save.SaveContentEntryUseCase
 import com.ustadmobile.core.impl.ContainerStorageDir
@@ -123,13 +124,17 @@ class ContentEntryEditViewModel(
             )
         }
 
+        val courseBlockArgVal = savedStateHandle[ARG_COURSEBLOCK]?.let {
+            json.decodeFromString(CourseBlock.serializer(),  it)
+        }
 
-        viewModelScope.launch {
-            val courseBlockArgVal = savedStateHandle.getJson(
-                key = ARG_COURSEBLOCK,
-                deserializer = CourseBlock.serializer(),
-            )
-
+        launchIfHasPermission(
+            permissionCheck = { db ->
+                courseBlockArgVal != null || db.systemPermissionDao.personHasSystemPermission(
+                    activeUserPersonUid, PermissionFlags.EDIT_LIBRARY_CONTENT
+                )
+            }
+        ) {
             loadEntity(
                 serializer = ContentEntryBlockLanguageAndContentJob.serializer(),
                 onLoadFromDb = { db ->

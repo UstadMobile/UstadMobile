@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CopyAll
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -43,6 +44,7 @@ fun PersonListScreen(
         onClickAddNew = viewModel::onClickAdd,
         onSortOrderChanged = viewModel::onSortOrderChanged,
         onClickInviteWithLink = viewModel::onClickInviteWithLink,
+        onClickCopyInviteCode = viewModel::onClickCopyInviteCode,
     )
 }
 
@@ -53,6 +55,7 @@ fun PersonListScreen(
     onSortOrderChanged: (SortOrderOption) -> Unit = { },
     onClickAddNew: () -> Unit = {},
     onClickInviteWithLink: () -> Unit = {},
+    onClickCopyInviteCode: () -> Unit = { },
 ){
 
     // As per
@@ -71,15 +74,28 @@ fun PersonListScreen(
     UstadLazyColumn(
         modifier = Modifier.fillMaxSize()
     ){
-        item("sort_options") {
-            UstadListSortHeader(
-                modifier = Modifier
-                    .defaultItemPadding()
-                    .fillMaxWidth(),
-                activeSortOrderOption = uiState.sortOption,
-                sortOptions = uiState.sortOptions,
-                onClickSortOption =  onSortOrderChanged,
-            )
+        if(uiState.showSortOptions) {
+            item("sort_options") {
+                UstadListSortHeader(
+                    modifier = Modifier
+                        .defaultItemPadding()
+                        .fillMaxWidth(),
+                    activeSortOrderOption = uiState.sortOption,
+                    sortOptions = uiState.sortOptions,
+                    onClickSortOption =  onSortOrderChanged,
+                )
+            }
+        }
+
+        uiState.inviteCode?.also { inviteCode ->
+            item("copy_invite_code") {
+                ListItem(
+                    modifier = Modifier.testTag("copy_invite_code")
+                        .clickable { onClickCopyInviteCode() },
+                    headlineContent = { Text(stringResource(MR.strings.copy_invite_code) +": $inviteCode") },
+                    leadingContent = { Icon(Icons.Default.CopyAll, contentDescription = null)}
+                )
+            }
         }
 
         if(uiState.showInviteViaLink) {

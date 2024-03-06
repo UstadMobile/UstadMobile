@@ -104,47 +104,6 @@ open class ClazzEnrolment()  {
 
     companion object {
 
-        const val FROM_SCOPEDGRANT_TO_CLAZZENROLMENT_JOIN__ON_CLAUSE = """
-            ((ScopedGrant.sgTableId = ${ScopedGrant.ALL_TABLES}
-                  AND ScopedGrant.sgEntityUid = ${ScopedGrant.ALL_ENTITIES})
-              OR (ScopedGrant.sgTableId = ${Person.TABLE_ID}
-                  AND ScopedGrant.sgEntityUid = ClazzEnrolment.clazzEnrolmentPersonUid)
-              OR (ScopedGrant.sgTableId = ${Clazz.TABLE_ID}
-                  AND ScopedGrant.sgEntityUid = ClazzEnrolment.clazzEnrolmentClazzUid)
-              OR (ScopedGrant.sgTableId = ${School.TABLE_ID}
-                  AND ClazzEnrolment.clazzEnrolmentClazzUid IN (
-                      SELECT clazzUid 
-                        FROM Clazz
-                       WHERE clazzSchoolUid = ScopedGrant.sgEntityUid))
-                  )
-        """
-
-        const val FROM_CLAZZENROLMENT_TO_SCOPEDGRANT_JOIN_ON_CLAUSE = """
-            (ScopedGrant.sgTableId = ${Clazz.TABLE_ID}
-                  AND ScopedGrant.sgEntityUid = ClazzEnrolment.clazzEnrolmentClazzUid)
-        """
-
-
-        /**
-         * When the sync status of other tables is being invalidated because of a change on
-         * ClazzEnrolment, we only need to consider grants that are scoped by class. Grants that
-         * are scoped by School or Person are not affected.
-         */
-        const val JOIN_FROM_CLAZZENROLMENT_TO_USERSESSION_VIA_SCOPEDGRANT_CLAZZSCOPE_ONLY_PT1 = """
-            JOIN ScopedGrant 
-                 ON $FROM_CLAZZENROLMENT_TO_SCOPEDGRANT_JOIN_ON_CLAUSE
-                    AND (ScopedGrant.sgPermissions &
-        """
-
-        const val JOIN_FROM_CLAZZENROLMENT_TO_USERSESSION_VIA_SCOPEDGRANT_PT2 = """
-            ) > 0  
-            JOIN PersonGroupMember 
-                   ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
-            JOIN UserSession
-                   ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
-                      AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
-        """
-
         const val ROLE_STUDENT = 1000
 
         const val ROLE_TEACHER = 1001

@@ -1,6 +1,7 @@
 package com.ustadmobile.core.viewmodel.clazzlog.attendancelist
 
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
@@ -14,7 +15,6 @@ import com.ustadmobile.core.viewmodel.clazzlog.edit.ClazzLogEditViewModel
 import com.ustadmobile.core.viewmodel.clazzlog.editattendance.ClazzLogEditAttendanceViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.lib.db.entities.ClazzLog
-import com.ustadmobile.lib.db.entities.Role
 import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
@@ -124,10 +124,10 @@ class ClazzLogListAttendanceViewModel(
                 }
 
                 launch {
-                    val hasPermissionFlow = activeRepo.clazzDao.personHasPermissionWithClazzAsFlow(
+                    val hasPermissionFlow = activeRepo.coursePermissionDao.personHasPermissionWithClazzAsFlow2(
                         accountPersonUid = activeUserPersonUid,
                         clazzUid = clazzUid,
-                        permission = Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_INSERT,
+                        permission = PermissionFlags.COURSE_ATTENDANCE_RECORD,
                     )
 
                     val hasExistingLogs = activeRepo.clazzLogDao.clazzHasScheduleLive(
@@ -226,7 +226,10 @@ class ClazzLogListAttendanceViewModel(
     fun onClickEntry(clazzLog: ClazzLog) {
         navController.navigate(
             viewName = ClazzLogEditAttendanceViewModel.DEST_NAME,
-            args = mapOf(UstadView.ARG_ENTITY_UID to clazzLog.clazzLogUid.toString())
+            args = mapOf(
+                UstadView.ARG_ENTITY_UID to clazzLog.clazzLogUid.toString(),
+                ARG_CLAZZUID to clazzUid.toString(),
+            )
         )
     }
 
