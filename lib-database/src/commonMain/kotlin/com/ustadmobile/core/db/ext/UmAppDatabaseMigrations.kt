@@ -4,7 +4,10 @@ import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.door.migration.DoorMigrationStatementList
 import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.door.migration.DoorMigration
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.CacheLockJoin
+import com.ustadmobile.lib.db.entities.ClazzEnrolment
+import com.ustadmobile.lib.db.entities.CoursePermission
 import com.ustadmobile.lib.db.entities.Message
 import com.ustadmobile.lib.db.entities.UserSession
 
@@ -1806,6 +1809,60 @@ val MIGRATION_154_155 = DoorMigrationStatementList(154, 155) { db ->
         }
     }
 }
+
+/**
+ * Migrate permissions. New entities should only be created on the server side.
+ * No entities will be created on the client migration.
+ */
+val MIGRATION_155_156_SERVER = DoorMigrationStatementList(155, 156) { db ->
+    buildList {
+        //Add SystemPermission for existing entities
+        val falseVal = if(db.dbType() == DoorDbType.SQLITE) "0" else "false"
+        add("""
+            INSERT INTO SystemPermission(spToPersonUid, spToGroupUid, spPermissionsFlag, spLastModified, spIsDeleted)
+            SELECT Person.personUid AS spToPersonUid,
+                   0 AS spToGroupUid,
+                   CASE 
+                   WHEN Person.username = 'admin' THEN ${Long.MAX_VALUE}
+                   ELSE 0
+                   END AS spPermissionsFlag,
+                   ${systemTimeInMillis()} AS spLastModified,
+                   $falseVal AS spIsDeleted
+              FROM Person
+        """)
+
+        //Add CoursePermission for all courses for teachers
+        add("""
+            INSERT INTO CoursePermission(cpLastModified, cpClazzUid, cpToEnrolmentRole, cpToPersonUid, cpToGroupUid, cpPermissionsFlag, cpIsDeleted)
+            SELECT ${systemTimeInMillis()} AS cpLastModified,
+                   Clazz.clazzUid AS cpClazzUid,
+                   ${ClazzEnrolment.ROLE_TEACHER} AS cpToEnrolmentRole,
+                   0 AS cpToPersonUid,
+                   0 AS cpToGroupUid,
+                   ${CoursePermission.TEACHER_DEFAULT_PERMISSIONS} AS cpPermissionsFlag,
+                   $falseVal AS cpIsDeleted
+              FROM Clazz     
+        """)
+
+        //Add CoursePermission for all courses for students
+        add("""
+            INSERT INTO CoursePermission(cpLastModified, cpClazzUid, cpToEnrolmentRole, cpToPersonUid, cpToGroupUid, cpPermissionsFlag, cpIsDeleted)
+            SELECT ${systemTimeInMillis()} AS cpLastModified,
+                   Clazz.clazzUid AS cpClazzUid,
+                   ${ClazzEnrolment.ROLE_STUDENT} AS cpToEnrolmentRole,
+                   0 AS cpToPersonUid,
+                   0 AS cpToGroupUid,
+                   ${CoursePermission.STUDENT_DEFAULT_PERMISSIONS} AS cpPermissionsFlag,
+                   $falseVal AS cpIsDeleted
+              FROM Clazz     
+        """)
+    }
+}
+
+val MIGRATION_155_156_CLIENT = DoorMigrationStatementList(155, 156) { db ->
+    emptyList()
+}
+
 
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_102_103,
