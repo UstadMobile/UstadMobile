@@ -77,50 +77,6 @@ open class ClazzLogAttendanceRecord {
 
     companion object {
 
-        const val FROM_CLAZZLOGATTENDANCERECORD_TO_SCOPEDGRANT_JOIN_ON_CLAUSE = """
-            ((ScopedGrant.sgTableId = ${ScopedGrant.ALL_TABLES}
-                AND ScopedGrant.sgEntityUid = ${ScopedGrant.ALL_ENTITIES})
-             OR (ScopedGrant.sgTableId = ${Person.TABLE_ID}
-                AND ScopedGrant.sgEntityUid = ClazzLogAttendanceRecord.clazzLogAttendanceRecordPersonUid)
-             OR (ScopedGrant.sgTableId = ${Clazz.TABLE_ID}
-                AND ScopedGrant.sgEntityUid = (
-                    SELECT clazzLogClazzUid 
-                      FROM ClazzLog
-                     WHERE clazzLogUid = ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid))
-             OR (ScopedGrant.sgTableId = ${School.TABLE_ID}
-                AND ScopedGrant.sgEntityUid = (
-                    SELECT clazzSchoolUid
-                      FROM Clazz
-                     WHERE clazzUid = (
-                            SELECT clazzLogClazzUid 
-                              FROM ClazzLog
-                             WHERE clazzLogUid = ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid)))
-                     
-                     )
-            
-        """
-
-        const val FROM_SCOPEDGRANT_TO_CLAZZLOGATTENDANCERECORD_JOIN_ON_CLAUSE = """
-            ((ScopedGrant.sgTableId = ${ScopedGrant.ALL_TABLES}
-                AND ScopedGrant.sgEntityUid = ${ScopedGrant.ALL_ENTITIES})
-             OR (ScopedGrant.sgTableId = ${Person.TABLE_ID}
-                AND ScopedGrant.sgEntityUid = ClazzLogAttendanceRecord.clazzLogAttendanceRecordPersonUid)
-             OR (ScopedGrant.sgTableId = ${Clazz.TABLE_ID}
-                AND ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid IN (
-                    SELECT clazzLogUid 
-                      FROM ClazzLog
-                     WHERE clazzLogClazzUid = ScopedGrant.sgEntityUid))
-             OR (ScopedGrant.sgTableId = ${School.TABLE_ID}
-                AND ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid IN (
-                     SELECT clazzLogUid
-                       FROM ClazzLog
-                      WHERE clazzLogClazzUid IN (
-                            SELECT clazzUid
-                              FROM Clazz
-                             WHERE clazzSchoolUid = ScopedGrant.sgEntityUid)))
-            )         
-        """
-
 
         const val TABLE_ID = 15
 

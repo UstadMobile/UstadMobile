@@ -7,6 +7,7 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.NavigateNavCommand
@@ -24,6 +25,7 @@ import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.flow.doorFlow
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.SystemPermission
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.util.test.initNapierLog
@@ -156,6 +158,14 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
     fun givenPresenterCreatedInNonRegistrationMode_whenFormFilledAndClickSave_shouldSaveAPersonInDb() {
         initNapierLog()
         testViewModel<PersonEditViewModel> {
+            val activeUser = setActiveUser(activeEndpoint)
+            activeDb.systemPermissionDao.upsertAsync(
+                SystemPermission(
+                    spToPersonUid = activeUser.personUid,
+                    spPermissionsFlag = PermissionFlags.ADD_PERSON
+                )
+            )
+
             viewModelFactory {
                 PersonEditViewModel(di, savedStateHandle)
             }
@@ -339,6 +349,15 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
     @Test
     fun givenInvalidPhoneNumberIncluded_whenSaved_shouldValidatePhoneNumberAndShowError() {
         testViewModel<PersonEditViewModel> {
+            val activeUser = setActiveUser(activeEndpoint)
+            activeDb.systemPermissionDao.upsertAsync(
+                SystemPermission(
+                    spToPersonUid = activeUser.personUid,
+                    spPermissionsFlag = PermissionFlags.ADD_PERSON
+                )
+            )
+
+
             viewModelFactory {
                 PersonEditViewModel(di, savedStateHandle)
             }
@@ -380,6 +399,14 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
     @Test
     fun givenValidPhoneNumberIncluded_whenSaved_shouldValidatePhoneNumberAndShowError() {
         testViewModel<PersonEditViewModel> {
+            val activeUser = setActiveUser(activeEndpoint)
+            activeDb.systemPermissionDao.upsertAsync(
+                SystemPermission(
+                    spToPersonUid = activeUser.personUid,
+                    spPermissionsFlag = PermissionFlags.ADD_PERSON
+                )
+            )
+
             viewModelFactory {
                 PersonEditViewModel(di, savedStateHandle)
             }

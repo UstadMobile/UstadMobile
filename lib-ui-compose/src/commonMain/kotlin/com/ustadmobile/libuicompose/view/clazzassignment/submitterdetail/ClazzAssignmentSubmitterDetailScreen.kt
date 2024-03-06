@@ -150,24 +150,26 @@ fun ClazzAssignmentSubmitterDetailScreen(
             }
         }
 
-        item(key = "private_comment_header") {
-            UstadDetailHeader {
-                Text(stringResource(MR.strings.private_comments))
+        if(uiState.newPrivateCommentTextVisible) {
+            item(key = "private_comment_header") {
+                UstadDetailHeader {
+                    Text(stringResource(MR.strings.private_comments))
+                }
             }
-        }
 
-        item(key = "new_private_comment") {
-            UstadAddCommentListItem(
-                modifier = Modifier.testTag("add_private_comment"),
-                commentText = uiState.newPrivateCommentText,
-                commentLabel = stringResource(MR.strings.add_private_comment),
-                enabled = uiState.fieldsEnabled,
-                currentUserPersonUid = uiState.activeUserPersonUid,
-                onSubmitComment =  onClickSubmitPrivateComment,
-                currentUserPersonName = uiState.activeUserPersonName,
-                currentUserPictureUri = uiState.activeUserPictureUri,
-                onCommentChanged = onChangePrivateComment
-            )
+            item(key = "new_private_comment") {
+                UstadAddCommentListItem(
+                    modifier = Modifier.testTag("add_private_comment"),
+                    commentText = uiState.newPrivateCommentText,
+                    commentLabel = stringResource(MR.strings.add_private_comment),
+                    enabled = uiState.fieldsEnabled,
+                    currentUserPersonUid = uiState.activeUserPersonUid,
+                    onSubmitComment =  onClickSubmitPrivateComment,
+                    currentUserPersonName = uiState.activeUserPersonName,
+                    currentUserPictureUri = uiState.activeUserPictureUri,
+                    onCommentChanged = onChangePrivateComment
+                )
+            }
         }
 
         ustadPagedItems(

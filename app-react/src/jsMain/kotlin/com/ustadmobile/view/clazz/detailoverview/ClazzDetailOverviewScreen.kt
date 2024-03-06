@@ -19,6 +19,7 @@ import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.composites.CourseBlockAndDisplayDetails
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.UstadDetailField2
+import com.ustadmobile.mui.components.UstadQuickActionButton
 import com.ustadmobile.mui.components.UstadRawHtml
 import com.ustadmobile.view.components.UstadFab
 import com.ustadmobile.view.components.virtuallist.VirtualList
@@ -39,6 +40,7 @@ import mui.icons.material.Event
 import mui.icons.material.Login
 import react.dom.html.ReactHTML.img
 import react.router.useLocation
+import mui.icons.material.Shield as ShieldIcon
 
 
 external interface ClazzDetailOverviewProps : Props {
@@ -54,6 +56,8 @@ external interface ClazzDetailOverviewProps : Props {
 
     var onClickDownloadContentEntry: (
         ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer?) -> Unit
+
+    var onClickPermissions: () -> Unit
 }
 
 val ClazzDetailOverviewComponent2 = FC<ClazzDetailOverviewProps> { props ->
@@ -72,6 +76,9 @@ val ClazzDetailOverviewComponent2 = FC<ClazzDetailOverviewProps> { props ->
         props.uiState.courseBlockList, true, 50
     )
 
+    val coursePictureUri = props.uiState.clazz?.coursePicture?.coursePictureUri
+        ?: "img/default_course_banners/${defaultCourseBannerImageIndex(props.uiState.clazz?.clazzName)}.webp"
+
 
     VirtualList{
         style = jso {
@@ -82,58 +89,75 @@ val ClazzDetailOverviewComponent2 = FC<ClazzDetailOverviewProps> { props ->
         }
 
         content = virtualListContent {
-            item {
-                Stack.create {
-                    direction = responsive(StackDirection.column)
-
-                    val coursePictureUri = props.uiState.clazz?.coursePicture?.coursePictureUri
-                        ?: "img/default_course_banners/${defaultCourseBannerImageIndex(props.uiState.clazz?.clazzName)}.webp"
-                    img {
-                        css {
-                            height = 192.px
-                            width = 100.pct
-                            objectFit = ObjectFit.cover
-                        }
-                        src = coursePictureUri
+            item("banner") {
+                img.create {
+                    css {
+                        height = 192.px
+                        width = 100.pct
+                        objectFit = ObjectFit.cover
                     }
+                    src = coursePictureUri
+                }
+            }
 
-                    Typography{
-                        UstadRawHtml {
-                            html = (props.uiState.clazz?.clazzDesc ?: "")
-                        }
-                    }
+            if(props.uiState.quickActionBarVisible) {
+                item("quick_action_bar") {
+                    Stack.create {
+                        direction = responsive(StackDirection.column)
 
-                    UstadDetailField2 {
-                        leadingContent = Group.create()
-                        valueContent = ReactNode(props.uiState.membersString)
-                        labelContent = ReactNode(strings[MR.strings.members_key].capitalizeFirstLetter())
-                    }
+                        Stack {
+                            direction = responsive(StackDirection.row)
 
-                    if (props.uiState.clazzCodeVisible) {
-                        UstadDetailField2 {
-                            leadingContent = Login.create()
-                            valueContent = ReactNode(props.uiState.clazz?.clazzCode ?: "")
-                            labelContent = ReactNode(strings[MR.strings.invite_code])
-                            onClick = {
-                                props.onClickClazzCode(props.uiState.clazz?.clazzCode ?: "")
+                            if(props.uiState.managePermissionVisible) {
+                                UstadQuickActionButton {
+                                    text = strings[MR.strings.permissions]
+                                    icon = ShieldIcon.create()
+                                    onClick = {
+                                        props.onClickPermissions()
+                                    }
+                                }
                             }
                         }
-                    }
 
-                    if (props.uiState.clazzDateVisible){
-                        UstadDetailField2 {
-                            leadingContent = Event.create()
-                            valueContent = ReactNode(clazzDateRangeFormatted)
-                            labelContent = ReactNode("${strings[MR.strings.start_date]} - ${strings[MR.strings.end_date]}")
+                        Divider()
+                    }
+                }
+            }
+
+            item("description") {
+                Typography.create {
+                    UstadRawHtml {
+                        html = (props.uiState.clazz?.clazzDesc ?: "")
+                    }
+                }
+            }
+
+            item("members_total") {
+                UstadDetailField2.create {
+                    leadingContent = Group.create()
+                    valueContent = ReactNode(props.uiState.membersString)
+                    labelContent = ReactNode(strings[MR.strings.members_key].capitalizeFirstLetter())
+                }
+            }
+
+            if (props.uiState.clazzCodeVisible) {
+                item(key = "clazz_code") {
+                    UstadDetailField2.create {
+                        leadingContent = Login.create()
+                        valueContent = ReactNode(props.uiState.clazz?.clazzCode ?: "")
+                        labelContent = ReactNode(strings[MR.strings.invite_code])
+                        onClick = {
+                            props.onClickClazzCode(props.uiState.clazz?.clazzCode ?: "")
                         }
                     }
+                }
+            }
 
-                    if (props.uiState.clazzHolidayCalendarVisible){
-                        UstadDetailField2 {
-                            leadingContent = Event.create()
-                            valueContent = ReactNode(props.uiState.clazz?.clazzHolidayCalendar?.umCalendarName ?: "")
-                        }
-                    }
+            if(props.uiState.clazzDateVisible) {
+                UstadDetailField2.create {
+                    leadingContent = Event.create()
+                    valueContent = ReactNode(clazzDateRangeFormatted)
+                    labelContent = ReactNode("${strings[MR.strings.start_date]} - ${strings[MR.strings.end_date]}")
                 }
             }
 
@@ -192,6 +216,7 @@ val ClazzDetailOverviewScreen = FC<Props> {
         uiState = uiStateVal
         onClickCourseBlock = viewModel::onClickCourseBlock
         onClickClazzCode = viewModel::onClickClazzCode
+        onClickPermissions = viewModel::onClickPermissions
     }
 }
 

@@ -1,6 +1,7 @@
 package com.ustadmobile.core.viewmodel.coursegroupset.detail
 
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.whenSubscribed
@@ -10,11 +11,13 @@ import com.ustadmobile.core.viewmodel.coursegroupset.edit.CourseGroupSetEditView
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.CourseGroupMemberAndName
 import com.ustadmobile.lib.db.entities.CourseGroupSet
-import com.ustadmobile.lib.db.entities.Role
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -33,28 +36,60 @@ class CourseGroupSetDetailViewModel(
 
     val uiState: Flow<CourseGroupSetDetailUiState> = _uiState.asStateFlow()
 
+    val argClazzUid = savedStateHandle[ARG_CLAZZUID]?.toLong() ?: 0L
+
     init {
         viewModelScope.launch {
+            val permissionsFlow = activeRepo.coursePermissionDao
+                .personHasPermissionWithClazzPairAsFlow(
+                    accountPersonUid = activeUserPersonUid,
+                    clazzUid = argClazzUid,
+                    firstPermission = PermissionFlags.COURSE_VIEW,
+                    secondPermission = PermissionFlags.COURSE_MANAGE_STUDENT_ENROLMENT,
+                ).shareIn(viewModelScope, SharingStarted.WhileSubscribed())
+
+            val memberListFlow = activeRepo.courseGroupMemberDao
+                .findByCourseGroupSetAndClazzAsFlow(
+                    cgsUid = entityUidArg,
+                    clazzUid = argClazzUid,
+                    time = systemTimeInMillis(),
+                    activeFilter = 0,
+                    accountPersonUid = activeUserPersonUid,
+                )
+
+            val entityFlow = activeRepo.courseGroupSetDao.findByUidAsFlow(
+                entityUidArg
+            )
+
             _uiState.whenSubscribed {
                 launch {
-                    activeRepo.courseGroupMemberDao.findByCourseGroupSetAndClazzAsFlow(
-                        cgsUid = entityUidArg,
-                        clazzUid = 0L,
-                        time = systemTimeInMillis(),
-                        activeFilter = 0,
-                    ).collect {
+                    memberListFlow.combine(permissionsFlow) { entity, permissionPair ->
+                        entity to permissionPair
+                    }.distinctUntilChanged().collect {
+                        val (hasCourseViewPermission, hasManageStudentPermission) = it.second
                         _uiState.update { prev ->
                             prev.copy(
-                                membersList = it
+                                membersList = it.first.takeIf { hasCourseViewPermission } ?: emptyList()
+                            )
+                        }
+
+                        _appUiState.update { prev ->
+                            prev.copy(
+                                fabState = FabUiState(
+                                    visible = hasManageStudentPermission,
+                                    text = systemImpl.getString(MR.strings.edit),
+                                    icon = FabUiState.FabIcon.EDIT,
+                                    onClick = this@CourseGroupSetDetailViewModel::onClickEdit
+                                )
                             )
                         }
                     }
                 }
 
                 launch {
-                    activeRepo.courseGroupSetDao.findByUidAsFlow(
-                        entityUidArg
-                    ).collectLatest { courseGroupSet ->
+                    entityFlow.combine(permissionsFlow) { entity, permissionPair ->
+                        entity.takeIf { permissionPair.firstPermission }
+                    }.collect { courseGroupSet ->
                         _uiState.update { prev ->
                             prev.copy(
                                 courseGroupSet = courseGroupSet
@@ -66,28 +101,8 @@ class CourseGroupSetDetailViewModel(
                                 title = courseGroupSet?.cgsName ?: ""
                             )
                         }
-
-                        activeRepo.clazzDao.takeIf {
-                            courseGroupSet != null
-                        }?.personHasPermissionWithClazzAsFlow(
-                            accountPersonUid = activeUserPersonUid,
-                            clazzUid = courseGroupSet?.cgsClazzUid ?: 0L,
-                            permission = Role.PERMISSION_CLAZZ_ADD_STUDENT
-                        )?.collect { hasEditPermission ->
-                            _appUiState.update { prev ->
-                                prev.copy(
-                                    fabState = FabUiState(
-                                        visible = hasEditPermission,
-                                        text = systemImpl.getString(MR.strings.edit),
-                                        icon = FabUiState.FabIcon.EDIT,
-                                        onClick = this@CourseGroupSetDetailViewModel::onClickEdit
-                                    )
-                                )
-                            }
-                        }
                     }
                 }
-
             }
         }
     }
@@ -95,7 +110,10 @@ class CourseGroupSetDetailViewModel(
     fun onClickEdit() {
         navController.navigate(
             viewName = CourseGroupSetEditViewModel.DEST_NAME,
-            args = mapOf(UstadView.ARG_ENTITY_UID to entityUidArg.toString())
+            args = mapOf(
+                UstadView.ARG_ENTITY_UID to entityUidArg.toString(),
+                ARG_CLAZZUID to argClazzUid.toString(),
+            )
         )
     }
 

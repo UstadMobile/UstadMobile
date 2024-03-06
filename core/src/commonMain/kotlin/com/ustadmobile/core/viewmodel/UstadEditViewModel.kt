@@ -64,7 +64,8 @@ abstract class UstadEditViewModel(
     fun finishWithResult(
         detailViewName: String,
         entityUid: Long,
-        result: Any?
+        result: Any?,
+        detailViewExtraArgs: Map<String, String> = emptyMap()
     ) {
         val popUpToViewName = savedStateHandle[UstadView.ARG_RESULT_DEST_VIEWNAME]
         val saveToKey = savedStateHandle[UstadView.ARG_RESULT_DEST_KEY]
@@ -75,7 +76,10 @@ abstract class UstadEditViewModel(
         if(createdNewEntity && !returnResultExpected) {
             navController.navigate(
                 viewName = detailViewName,
-                args = mapOf(ARG_ENTITY_UID to entityUid.toString()),
+                args = buildMap {
+                    putAll(detailViewExtraArgs)
+                    put(ARG_ENTITY_UID, entityUid.toString())
+                },
                 goOptions = UstadMobileSystemCommon.UstadGoOptions(
                     popUpToViewName = CURRENT_DEST,
                     popUpToInclusive = true

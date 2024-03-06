@@ -3,7 +3,6 @@ package com.ustadmobile.port.android.view
 import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -11,7 +10,6 @@ import androidx.browser.customtabs.CustomTabsCallback
 import androidx.browser.customtabs.CustomTabsClient
 import androidx.browser.customtabs.CustomTabsServiceConnection
 import androidx.browser.customtabs.CustomTabsSession
-import androidx.browser.customtabs.EngagementSignalsCallback
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Surface
 import androidx.compose.material3.MaterialTheme
@@ -202,33 +200,15 @@ class AppActivity: AppCompatActivity(), DIAware {
         }
     }
 
-    private val engagementServiceCallback = object: EngagementSignalsCallback {
-        override fun onVerticalScrollEvent(isDirectionUp: Boolean, extras: Bundle) {
-            Log.d("CustomTabs", "onVerticalScrollEvent (isDirectionUp=$isDirectionUp)")
-        }
-
-        override fun onGreatestScrollPercentageIncreased(scrollPercentage: Int, extras: Bundle) {
-            Log.d("CustomTabs", "scroll percentage: $scrollPercentage%")
-        }
-
-        override fun onSessionEnded(didUserInteract: Boolean, extras: Bundle) {
-            Log.d("CustomTabs", "onSessionEnded (didUserInteract=$didUserInteract)")
-        }
-
-    }
-
     private val mCustomTabsServiceConnection = object: CustomTabsServiceConnection() {
 
         override fun onCustomTabsServiceConnected(name: ComponentName, client: CustomTabsClient) {
             Napier.d { "CustomTab: Service connected" }
             mCustomTabsClient = client
+            Napier.d { "CustomTab: Warmup" }
+            client.warmup(0)
             mCustomTabsSession = client.newSession(customTabCallback)
-            val enagagementSignalsAvailable = mCustomTabsSession?.isEngagementSignalsApiAvailable(Bundle.EMPTY) ?: false
-            if(!enagagementSignalsAvailable) {
-                Napier.d { "CustomTabs: engagement signals not available"}
-                return
-            }
-            mCustomTabsSession?.setEngagementSignalsCallback(engagementServiceCallback, Bundle.EMPTY)
+            Napier.d { "CustomTab: Session created" }
         }
 
         override fun onServiceDisconnected(name: ComponentName) {
@@ -243,7 +223,7 @@ class AppActivity: AppCompatActivity(), DIAware {
              */
             lifecycleScope.launch {
                 Napier.d { "CustomTab: disconnected, launching reconnection after 500ms" }
-                delay(500)
+                delay(1_000)
                 bindCustomTabsService()
             }
         }

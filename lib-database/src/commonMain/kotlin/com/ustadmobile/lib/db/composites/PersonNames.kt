@@ -6,4 +6,9 @@ import kotlinx.serialization.Serializable
 data class PersonNames(
     var firstNames: String? = null,
     var lastName: String? = null,
-)
+) {
+
+    override fun toString(): String {
+        return "${firstNames ?: ""} ${lastName ?: ""}"
+    }
+}

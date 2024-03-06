@@ -36,7 +36,6 @@ import mui.icons.material.Close
 import mui.icons.material.AccessTime
 import mui.icons.material.SvgIconComponent
 import react.dom.aria.ariaLabel
-import web.cssom.Cursor
 
 external interface ClazzLogEditAttendanceScreenProps : Props {
 
@@ -130,35 +129,40 @@ private val ClazzLogEditAttendanceScreenComponent = FC<ClazzLogEditAttendanceScr
             }
 
             List {
+                if(props.uiState.canEdit) {
+                    ListItem {
+                        ListItemButton {
+                            disableGutters = true
 
-                ListItem {
-                    ListItemButton {
-                        onClick = {
-                            props.onClickMarkAll(ClazzLogAttendanceRecord.STATUS_ATTENDED)
-                        }
+                            onClick = {
+                                props.onClickMarkAll(ClazzLogAttendanceRecord.STATUS_ATTENDED)
+                            }
 
-                        ListItemIcon {
-                            + LibraryAddCheckOutlined.create()
-                        }
+                            ListItemIcon {
+                                + LibraryAddCheckOutlined.create()
+                            }
 
-                        ListItemText {
-                            primary = ReactNode(strings[MR.strings.mark_all_present])
+                            ListItemText {
+                                primary = ReactNode(strings[MR.strings.mark_all_present])
+                            }
                         }
                     }
-                }
 
-                ListItem {
-                    ListItemButton {
-                        onClick = {
-                            props.onClickMarkAll(ClazzLogAttendanceRecord.STATUS_ABSENT)
-                        }
+                    ListItem {
+                        ListItemButton {
+                            disableGutters = true
 
-                        ListItemIcon {
-                            + CheckBoxOutlined.create()
-                        }
+                            onClick = {
+                                props.onClickMarkAll(ClazzLogAttendanceRecord.STATUS_ABSENT)
+                            }
 
-                        ListItemText {
-                            primary = ReactNode(strings[MR.strings.mark_all_absent])
+                            ListItemIcon {
+                                + CheckBoxOutlined.create()
+                            }
+
+                            ListItemText {
+                                primary = ReactNode(strings[MR.strings.mark_all_absent])
+                            }
                         }
                     }
                 }
@@ -169,6 +173,7 @@ private val ClazzLogEditAttendanceScreenComponent = FC<ClazzLogEditAttendanceScr
                         personAndRecord = clazzLogAttendance
                         onClazzLogAttendanceChanged = props.onClazzLogAttendanceChanged
                         fieldsEnabled = props.uiState.fieldsEnabled
+                        canEdit = props.uiState.canEdit
                     }
 
                 }
@@ -255,8 +260,6 @@ private val PagerView = FC<PagerViewProps> { props ->
     }
 }
 
-
-
 external interface ClazzLogItemViewProps : Props {
 
     var personAndRecord: PersonAndClazzLogAttendanceRecord
@@ -264,6 +267,8 @@ external interface ClazzLogItemViewProps : Props {
     var onClazzLogAttendanceChanged: (PersonAndClazzLogAttendanceRecord) -> Unit
 
     var fieldsEnabled: Boolean
+
+    var canEdit: Boolean
 }
 
 data class StatusIconAndLabel(
@@ -283,50 +288,50 @@ private val ClazzLogItemView = FC<ClazzLogItemViewProps> { props ->
     val strings = useStringProvider()
 
     ListItem{
-
-        ListItemButton {
-            sx {
-                cursor = Cursor.default
+        ListItemIcon {
+            UstadPersonAvatar {
+                personName = props.personAndRecord.person?.fullName()
+                pictureUri = props.personAndRecord.personPicture?.personPictureThumbnailUri
             }
-
-            ListItemIcon {
-                UstadPersonAvatar {
-                    personName = props.personAndRecord.person?.fullName()
-                    pictureUri = props.personAndRecord.personPicture?.personPictureThumbnailUri
-                }
-            }
-
-            ListItemText {
-                primary = ReactNode(
-                    props.personAndRecord.person?.personFullName() ?: ""
-                )
-            }
-
         }
 
-        secondaryAction = ButtonGroup.create {
+        ListItemText {
+            primary = ReactNode(
+                props.personAndRecord.person?.personFullName() ?: ""
+            )
+        }
 
-            STATUS_AND_ICONS.forEach { (status, icon, labelMessageId) ->
-                Tooltip{
-                    title = ReactNode(strings[labelMessageId])
+        secondaryAction = if(props.canEdit) {
+            ToggleButtonGroup.create {
+                value = (props.personAndRecord.attendanceRecord?.attendanceStatus ?: 0).toString()
+                exclusive = true
+                onChange = { _, newValue ->
+                    props.onClazzLogAttendanceChanged(
+                        props.personAndRecord.copy(
+                            person = props.personAndRecord.person,
+                            attendanceRecord = props.personAndRecord.attendanceRecord?.shallowCopy {
+                                attendanceStatus = newValue.toString().toIntOrNull() ?: 0
+                            }
+                        )
+                    )
+                }
+
+                STATUS_AND_ICONS.forEach { (status, icon, labelMessageId) ->
                     ToggleButton {
-                        disabled = !props.fieldsEnabled
-                        selected = (props.personAndRecord.attendanceRecord?.attendanceStatus == status)
                         ariaLabel = strings[labelMessageId]
-
-                        onChange = { _,_ ->
-                            props.onClazzLogAttendanceChanged(
-                                props.personAndRecord.copy(
-                                    person = props.personAndRecord.person,
-                                    attendanceRecord = props.personAndRecord.attendanceRecord?.shallowCopy {
-                                        attendanceStatus = status
-                                    }
-                                )
-                            )
-                        }
-
+                        disabled = !props.fieldsEnabled
+                        value = status.toString()
+                        title = strings[labelMessageId]
                         + icon.create()
                     }
+                }
+            }
+        }else {
+            STATUS_AND_ICONS.firstOrNull {
+                it.status == props.personAndRecord.attendanceRecord?.attendanceStatus
+            }?.let { statusAndLabel ->
+                statusAndLabel.icon.create {
+                    ariaLabel = strings[statusAndLabel.labelStringResource]
                 }
             }
         }
