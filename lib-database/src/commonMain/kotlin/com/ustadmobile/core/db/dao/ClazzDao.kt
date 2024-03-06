@@ -153,6 +153,7 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
                                    OR CoursePermission.cpToEnrolmentRole = ClazzEnrolment.clazzEnrolmentRole )
                               AND (CoursePermission.cpPermissionsFlag & :permission) > 0 
                               AND NOT CoursePermission.cpIsDeleted)   
+                 OR (${SystemPermissionDaoCommon.SELECT_SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL})             
                 )
                 /* End permission check clause */ 
            AND CAST(Clazz.isClazzActive AS INTEGER) = 1

@@ -1856,6 +1856,17 @@ val MIGRATION_155_156_SERVER = DoorMigrationStatementList(155, 156) { db ->
                    $falseVal AS cpIsDeleted
               FROM Clazz     
         """)
+
+        //Set the current owner of all courses to the admin user
+        add("""
+           UPDATE Clazz
+              SET clazzOwnerPersonUid = 
+                  (SELECT Person.personUid
+                     FROM Person
+                    WHERE Person.username = 'admin'
+                    LIMIT 1) 
+        """)
+
     }
 }
 
