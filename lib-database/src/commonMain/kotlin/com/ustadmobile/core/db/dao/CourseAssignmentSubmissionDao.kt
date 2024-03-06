@@ -31,6 +31,8 @@ expect abstract class CourseAssignmentSubmissionDao : BaseDao<CourseAssignmentSu
     abstract fun getAllSubmissionsFromSubmitter(assignmentUid: Long, submitterUid: Long)
             : PagingSource<Int, CourseAssignmentSubmissionWithAttachment>
 
+
+
     @Query("""
          SELECT CourseAssignmentSubmission.*, CourseAssignmentSubmissionAttachment.*
           FROM CourseAssignmentSubmission
@@ -186,5 +188,21 @@ expect abstract class CourseAssignmentSubmissionDao : BaseDao<CourseAssignmentSu
          WHERE casUid = :submissionUid
     """)
     abstract fun findByUidAsFlow(submissionUid: Long): Flow<CourseAssignmentSubmission?>
+
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+    )
+    @Query("""
+        SELECT CourseAssignmentSubmission.*
+          FROM CourseAssignmentSubmission
+         WHERE CourseAssignmentSubmission.casAssignmentUid = :assignmentUid
+           AND CourseAssignmentSubmission.casSubmitterUid = 
+               ($SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL)
+    """)
+    abstract fun findByAssignmentUidAndAccountPersonUid(
+        accountPersonUid: Long,
+        assignmentUid: Long,
+    ): Flow<List<CourseAssignmentSubmission>>
+
 
 }

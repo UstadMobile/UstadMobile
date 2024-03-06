@@ -124,13 +124,13 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
 
             viewModel.uiState.test(timeout = 5.seconds) {
                 val readyState = awaitItemWhere {
-                    it.assignment != null && it.courseBlock != null && it.latestSubmission != null
+                    it.assignment != null && it.courseBlock != null && it.editableSubmission != null
                 }
                 assertTrue(readyState.activeUserIsSubmitter)
                 assertTrue(readyState.activeUserCanSubmit)
                 assertTrue(readyState.addFileSubmissionVisible)
                 assertTrue(readyState.canEditSubmissionText)
-                assertEquals(0L, readyState.latestSubmission?.casTimestamp)
+                assertEquals(0L, readyState.editableSubmission?.casTimestamp)
                 cancelAndIgnoreRemainingEvents()
             }
         }
@@ -164,12 +164,12 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
 
             viewModel.uiState.test(timeout = 5.seconds) {
                 val readyState = awaitItemWhere {
-                    it.assignment != null && it.courseBlock != null && it.latestSubmissionAttachments != null
+                    it.assignment != null && it.courseBlock != null && it.submissions.isNotEmpty()
                 }
                 assertTrue(readyState.activeUserIsSubmitter)
                 assertFalse(readyState.addFileSubmissionVisible)
                 assertFalse(readyState.canEditSubmissionText)
-                assertTrue((readyState.latestSubmission?.casTimestamp ?: 0) > 0)
+                assertTrue(readyState.submissions.isNotEmpty())
                 cancelAndIgnoreRemainingEvents()
             }
         }
@@ -200,12 +200,12 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
 
             viewModel.uiState.test(timeout = 5.seconds) {
                 val readyState = awaitItemWhere {
-                    it.assignment != null && it.courseBlock != null && it.latestSubmissionAttachments != null
+                    it.assignment != null && it.courseBlock != null && it.submissions.isNotEmpty()
                 }
                 assertTrue(readyState.activeUserIsSubmitter)
                 assertTrue(readyState.addFileSubmissionVisible)
                 assertTrue(readyState.canEditSubmissionText)
-                assertTrue((readyState.latestSubmission?.casTimestamp ?: 0) > 0)
+                assertTrue(readyState.submissions.isNotEmpty())
                 cancelAndIgnoreRemainingEvents()
             }
         }
@@ -239,7 +239,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
 
             viewModel.uiState.test(timeout = 500.seconds) {
                 awaitItemWhere {
-                    it.assignment != null && it.courseBlock != null && it.latestSubmission != null
+                    it.assignment != null && it.courseBlock != null && it.editableSubmission != null
                 }
 
                 viewModel.onChangeSubmissionText("I can has cheezburger")
@@ -353,6 +353,15 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
             val mockSubmitterUseCase = mock<SubmitAssignmentUseCase> {
                 onBlocking { invoke(any(), any(), any(), any(), any()) }.thenAnswer {
                     val submission = it.arguments.last() as CourseAssignmentSubmission
+                    activeDb.courseAssignmentSubmissionDao.insert(
+                        submission.shallowCopy {
+                            casAssignmentUid = testContext.assignment.caUid
+                            casSubmitterUid = testContext.person.personUid
+                            casSubmitterPersonUid = testContext.person.personUid
+                            casTimestamp = systemTimeInMillis()
+                            casClazzUid = testContext.clazz.clazzUid
+                        }
+                    )
                     SubmitAssignmentUseCase.SubmitAssignmentResult(submission.shallowCopy {
                         casTimestamp = systemTimeInMillis()
                     })
@@ -367,7 +376,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
 
             viewModel.uiState.test(timeout = 5.seconds, name = "Wait for loading") {
                 awaitItemWhere {
-                    it.assignment != null && it.courseBlock != null && it.latestSubmission != null
+                    it.assignment != null && it.courseBlock != null && it.editableSubmission != null
                             && it.submitterUid != 0L
                 }
 
@@ -384,7 +393,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
 
             viewModel.uiState.test(timeout = 5.seconds, name = "wait for submission done") {
                 val submittedDoneState = awaitItemWhere {
-                    (it.latestSubmission?.casTimestamp ?: 0) > 0
+                    it.submissions.isNotEmpty()
                 }
 
                 assertFalse(submittedDoneState.activeUserCanSubmit)
@@ -392,7 +401,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
                     CourseAssignmentSubmission.SUBMITTED,
                     submittedDoneState.submissionStatus
                 )
-                assertEquals(submissionText, submittedDoneState.latestSubmission?.casText)
+                assertEquals(submissionText, submittedDoneState.editableSubmission?.casText)
                 cancelAndIgnoreRemainingEvents()
             }
         }

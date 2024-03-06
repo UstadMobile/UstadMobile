@@ -34,7 +34,6 @@ import mui.icons.material.Done as DoneIcon
 import mui.icons.material.DoneAll as DoneAllIcon
 import mui.icons.material.EventAvailable as EventAvailableIcon
 import mui.icons.material.Add as AddIcon
-import mui.icons.material.InsertDriveFile as InsertDriveFileIcon
 import mui.icons.material.Groups as GroupsIcon
 import mui.icons.material.Person as PersonIcon
 import mui.icons.material.Group as GroupIcon
@@ -45,6 +44,7 @@ import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.view.clazzassignment.AssignmentCommentTextFieldListItem
+import com.ustadmobile.view.clazzassignment.CourseAssignmentSubmissionComponent
 import com.ustadmobile.view.clazzassignment.UstadCommentListItem
 import com.ustadmobile.view.components.UstadDetailHeader
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
@@ -222,9 +222,8 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
 
                             StatefulReactQuill {
                                 id = "assignment_text"
-                                value = props.uiState.latestSubmission?.casText ?: ""
+                                value = props.uiState.editableSubmission?.casText ?: ""
                                 onChange = props.onChangeSubmissionText
-                                readOnly = !props.uiState.activeUserCanSubmit
                             }
 
                             props.uiState.currentSubmissionLength?.also { submissionLength ->
@@ -237,7 +236,6 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                                 + "${props.uiState.assignment?.caTextLimit} "
                             }
                         }
-
                     }
                 }
 
@@ -272,19 +270,10 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                     }
                 }
 
-                items(
-                    list = props.uiState.latestSubmissionAttachments ?: emptyList(),
-                    key = { "sa_${it.casaUid}"}
-                ) { submissionAttachment ->
-                    ListItem.create {
-                        ListItemButton {
-                            ListItemIcon {
-                                InsertDriveFileIcon { }
-                            }
-
-                            ListItemText {
-                                primary = ReactNode(submissionAttachment.casaFileName ?: "")
-                            }
+                props.uiState.submissions.forEach { submissionItem ->
+                    item(key = "submission_${submissionItem.submission.casUid}") {
+                        CourseAssignmentSubmissionComponent.create {
+                            submission = submissionItem.submission
                         }
                     }
                 }
@@ -461,15 +450,9 @@ val ClazzAssignmentDetailOverviewScreenPreview = FC<Props> {
             },
             submitterUid = 42L,
             addFileVisible = true,
-            latestSubmission = CourseAssignmentSubmission().apply {
+            editableSubmission = CourseAssignmentSubmission().apply {
                 casText = ""
             },
-            latestSubmissionAttachments = listOf(
-                CourseAssignmentSubmissionAttachment().apply {
-                    casaUid = 1L
-                    casaFileName = "File.pdf"
-                },
-            ),
             markList = listOf(
                 CourseAssignmentMarkAndMarkerName(
                     courseAssignmentMark = CourseAssignmentMark().apply {
@@ -518,7 +501,7 @@ val ClazzAssignmentDetailOverviewScreenPreview = FC<Props> {
         onClickDeleteSubmission = {}
         onChangeSubmissionText = {text ->
             uiStateVar = uiStateVar.copy(
-                latestSubmission = uiStateVar.latestSubmission?.shallowCopy {
+                editableSubmission = uiStateVar.editableSubmission?.shallowCopy {
                     casText = text
                 },
             )

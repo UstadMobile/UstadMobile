@@ -10,7 +10,6 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.EventAvailable
 import androidx.compose.material.icons.filled.Groups
-import androidx.compose.material.icons.filled.InsertDriveFile
 import androidx.compose.material.icons.filled.TaskAlt
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
@@ -49,6 +48,7 @@ import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadRichTextEdit
 import com.ustadmobile.libuicompose.util.linkify.rememberLinkExtractor
 import com.ustadmobile.libuicompose.view.clazzassignment.CommentListItem
+import com.ustadmobile.libuicompose.view.clazzassignment.CourseAssignmentSubmissionComponent
 import com.ustadmobile.libuicompose.view.clazzassignment.UstadAssignmentSubmissionStatusHeaderItems
 import kotlinx.coroutines.Dispatchers
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
@@ -192,7 +192,7 @@ fun ClazzAssignmentDetailOverviewScreen(
             submissionStatus = if(uiState.activeUserIsSubmitter) {
                 submissionStatusFor(
                     markList = uiState.markList,
-                    submissionList = uiState.latestSubmission?.let {
+                    submissionList = uiState.editableSubmission?.let {
                         if(it.casTimestamp > 0) {
                             listOf(it)
                         } else {
@@ -231,30 +231,20 @@ fun ClazzAssignmentDetailOverviewScreen(
 
             if(uiState.submissionTextFieldVisible) {
                 item(key = "submission") {
-                    if(uiState.activeUserCanSubmit) {
-                        UstadRichTextEdit(
-                            modifier = Modifier
-                                .testTag("submission_text_field")
-                                .defaultItemPadding()
-                                .fillMaxWidth(),
-                            html = uiState.latestSubmission?.casText ?: "",
-                            editInNewScreenLabel = stringResource(MR.strings.text),
-                            placeholderText = stringResource(MR.strings.text),
-                            onHtmlChange = {
-                                onChangeSubmissionText(it)
-                            },
-                            onClickToEditInNewScreen = onClickEditSubmission
-                        )
-                    }else {
-                        UstadHtmlText(
-                            modifier = Modifier
-                                .testTag("submission_text")
-                                .defaultItemPadding(),
-                            html = uiState.latestSubmission?.casText ?: ""
-                        )
-                    }
+                    UstadRichTextEdit(
+                        modifier = Modifier
+                            .testTag("submission_text_field")
+                            .defaultItemPadding()
+                            .fillMaxWidth(),
+                        html = uiState.editableSubmission?.casText ?: "",
+                        editInNewScreenLabel = stringResource(MR.strings.text),
+                        placeholderText = stringResource(MR.strings.text),
+                        onHtmlChange = {
+                            onChangeSubmissionText(it)
+                        },
+                        onClickToEditInNewScreen = onClickEditSubmission
+                    )
                 }
-
             }
 
             if(uiState.addFileVisible) {
@@ -276,17 +266,6 @@ fun ClazzAssignmentDetailOverviewScreen(
                 }
             }
 
-            items(
-                items = uiState.latestSubmissionAttachments ?: emptyList(),
-                key = { Pair(1, it.casaUid) }
-            ){ attachment ->
-                ListItem(
-                    headlineContent = { Text(attachment.casaFileName ?: "") },
-                    leadingContent = {
-                        Icon(imageVector = Icons.Default.InsertDriveFile, contentDescription = null)
-                    }
-                )
-            }
 
             if (uiState.submitSubmissionButtonVisible){
                 item(key = "submit_button") {
@@ -312,6 +291,11 @@ fun ClazzAssignmentDetailOverviewScreen(
                 }
             }
 
+            uiState.submissions.forEach { submissionAndAttachments ->
+                item(key = "submission_${submissionAndAttachments.submission.casUid}") {
+                    CourseAssignmentSubmissionComponent(submissionAndAttachments.submission)
+                }
+            }
 
             item(key = "grades_header") {
                 ListItem(

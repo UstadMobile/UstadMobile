@@ -23,6 +23,7 @@ import com.ustadmobile.core.viewmodel.coursegroupset.detail.CourseGroupSetDetail
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.CommentsAndName
 import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
+import com.ustadmobile.lib.db.composites.SubmissionAndAttachments
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import io.github.aakira.napier.Napier
@@ -32,19 +33,18 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
-import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
 
 
 /**
- * @param latestSubmissionAttachments List of submissions made by the active user (or their group).
- * null if not yet loaded
  *
  * @param newPrivateCommentText the text in the textfield for a new private comment
  */
@@ -61,11 +61,13 @@ data class ClazzAssignmentDetailOverviewUiState(
      */
     val submitterUid: Long = 0,
 
-    val latestSubmission: CourseAssignmentSubmission? = null,
+    val editableSubmission: CourseAssignmentSubmission? = null,
 
-    var submissionTooLong: Boolean = false,
+    val editableSubmissionFiles: List<CourseAssignmentSubmissionAttachment> = emptyList(),
 
-    val latestSubmissionAttachments: List<CourseAssignmentSubmissionAttachment>? = null,
+    val submissionTooLong: Boolean = false,
+
+    val submissions: List<SubmissionAndAttachments> = emptyList(),
 
     val markList: List<CourseAssignmentMarkAndMarkerName> = emptyList(),
 
@@ -149,11 +151,11 @@ data class ClazzAssignmentDetailOverviewUiState(
                 return false
 
             //User must not submit or be shown option to submit until the entity is added when loading
-            if(latestSubmission == null)
+            if(editableSubmission == null)
                 return false
 
             if(assignment?.caSubmissionPolicy == ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE &&
-                latestSubmission.casTimestamp > 0
+                submissions.isNotEmpty()
             ) {
                 return false
             }
@@ -172,7 +174,7 @@ data class ClazzAssignmentDetailOverviewUiState(
         get() {
             return if(submissionMark != null) {
                 CourseAssignmentSubmission.MARKED
-            }else if((latestSubmission?.casTimestamp ?: 0) > 0) {
+            }else if((editableSubmission?.casTimestamp ?: 0) > 0) {
                 CourseAssignmentSubmission.SUBMITTED
             }else {
                 null
@@ -186,7 +188,7 @@ data class ClazzAssignmentDetailOverviewUiState(
         get() = privateCommentSectionVisible && assignment?.caPrivateCommentsEnabled == true
 
     val currentSubmissionLength: Int? by lazy {
-        latestSubmission?.textLength(assignment?.caTextLimitType ?: ClazzAssignment.TEXT_WORD_LIMIT)
+        editableSubmission?.textLength(assignment?.caTextLimitType ?: ClazzAssignment.TEXT_WORD_LIMIT)
     }
 
     val pointsVisible: Boolean
@@ -200,7 +202,7 @@ data class ClazzAssignmentDetailOverviewUiState(
      * and the latest submission is not null (entity will be set by viewmodel as part of loading process).
      */
     val submissionTextFieldVisible: Boolean
-        get() = assignment?.caRequireTextSubmission == true && activeUserIsSubmitter && latestSubmission != null
+        get() = assignment?.caRequireTextSubmission == true && activeUserCanSubmit
 
     private val latestUniqueMarksByMarker: List<CourseAssignmentMarkAndMarkerName>
         get() = markList.latestUniqueMarksByMarker()
@@ -271,14 +273,16 @@ class ClazzAssignmentDetailOverviewViewModel(
             )
         }
 
+        val entityFlow = activeRepo.clazzAssignmentDao.findAssignmentCourseBlockAndSubmitterUidAsFlow(
+            assignmentUid = entityUidArg,
+            clazzUid = clazzUid,
+            accountPersonUid = accountManager.currentAccount.personUid,
+        ).shareIn(viewModelScope, SharingStarted.WhileSubscribed())
+
         viewModelScope.launch {
             _uiState.whenSubscribed {
                 launch {
-                    activeRepo.clazzAssignmentDao.findAssignmentCourseBlockAndSubmitterUidAsFlow(
-                        assignmentUid = entityUidArg,
-                        clazzUid = clazzUid,
-                        accountPersonUid = accountManager.currentAccount.personUid,
-                    ).collect { assignmentData ->
+                    entityFlow.collect { assignmentData ->
                         _uiState.update { prev ->
                             val isEnrolledButNotInGroup = assignmentData?.submitterUid ==
                                 CourseAssignmentSubmission.SUBMITTER_ENROLLED_BUT_NOT_IN_GROUP
@@ -298,6 +302,25 @@ class ClazzAssignmentDetailOverviewViewModel(
                         _appUiState.update { prev ->
                             prev.copy(
                                 title = assignmentData?.courseBlock?.cbTitle ?: ""
+                            )
+                        }
+                    }
+                }
+
+                launch {
+                    activeRepo.courseAssignmentSubmissionDao.findByAssignmentUidAndAccountPersonUid(
+                        accountPersonUid = activeUserPersonUid,
+                        assignmentUid = entityUidArg,
+                    ).collect { submissions ->
+                        val submissionAndAttachments = submissions.map {
+                            SubmissionAndAttachments(
+                                submission = it,
+                                attachments = emptyList()
+                            )
+                        }
+                        _uiState.update { prev ->
+                            prev.copy(
+                                submissions = submissionAndAttachments
                             )
                         }
                     }
@@ -325,10 +348,7 @@ class ClazzAssignmentDetailOverviewViewModel(
                         serializer = CourseAssignmentSubmission.serializer(),
                         loadFromStateKeys = listOf(STATE_LATEST_SUBMISSION),
                         onLoadFromDb = { db ->
-                            db.courseAssignmentSubmissionDao.getLatestSubmissionForUserAsync(
-                                accountPersonUid = activeUserPersonUid,
-                                assignmentUid = entityUidArg,
-                            )
+                            null
                         },
                         makeDefault = {
                             CourseAssignmentSubmission().apply {
@@ -339,34 +359,34 @@ class ClazzAssignmentDetailOverviewViewModel(
                         uiUpdate = {
                             _uiState.update { prev ->
                                 prev.copy(
-                                    latestSubmission = it
+                                    editableSubmission = it
                                 )
                             }
                         }
                     )
                 },
-                async {
-                    loadEntity(
-                        serializer = ListSerializer(CourseAssignmentSubmissionAttachment.serializer()),
-                        loadFromStateKeys = listOf(STATE_LATEST_SUBMISSION_ATTACHMENTS),
-                        onLoadFromDb = { db ->
-                            db.courseAssignmentSubmissionAttachmentDao.getLatestSubmissionAttachmentsForUserAsync(
-                                accountPersonUid = accountManager.currentUserSession.person.personUid,
-                                assignmentUid = entityUidArg
-                            )
-                        },
-                        makeDefault = {
-                            emptyList()
-                        },
-                        uiUpdate = {
-                            _uiState.update { prev ->
-                                prev.copy(
-                                    latestSubmissionAttachments = it
-                                )
-                            }
-                        }
-                    )
-                }
+//                async {
+//                    loadEntity(
+//                        serializer = ListSerializer(CourseAssignmentSubmissionAttachment.serializer()),
+//                        loadFromStateKeys = listOf(STATE_LATEST_SUBMISSION_ATTACHMENTS),
+//                        onLoadFromDb = { db ->
+//                            db.courseAssignmentSubmissionAttachmentDao.getLatestSubmissionAttachmentsForUserAsync(
+//                                accountPersonUid = accountManager.currentUserSession.person.personUid,
+//                                assignmentUid = entityUidArg
+//                            )
+//                        },
+//                        makeDefault = {
+//                            emptyList()
+//                        },
+//                        uiUpdate = {
+//                            _uiState.update { prev ->
+//                                prev.copy(
+//                                    latestSubmissionAttachments = it
+//                                )
+//                            }
+//                        }
+//                    )
+//                }
             )
 
             launch {
@@ -399,7 +419,7 @@ class ClazzAssignmentDetailOverviewViewModel(
      */
     fun onClickEditSubmissionText() {
         navigateToEditHtml(
-            currentValue = _uiState.value.latestSubmission?.casText ?: "",
+            currentValue = _uiState.value.editableSubmission?.casText ?: "",
             resultKey = KEY_SUBMISSION_HTML
         )
     }
@@ -408,7 +428,7 @@ class ClazzAssignmentDetailOverviewViewModel(
         val submissionToSave = _uiState.updateAndGet { prev ->
             if(prev.activeUserCanSubmit) {
                 prev.copy(
-                    latestSubmission = prev.latestSubmission?.shallowCopy {
+                    editableSubmission = prev.editableSubmission?.shallowCopy {
                         casUid = 0L
                         casText = text
                         casTimestamp = 0
@@ -417,7 +437,7 @@ class ClazzAssignmentDetailOverviewViewModel(
             }else {
                 prev
             }
-        }.latestSubmission
+        }.editableSubmission
 
         savedSubmissionJob?.cancel()
         savedSubmissionJob = viewModelScope.launch {
@@ -506,7 +526,7 @@ class ClazzAssignmentDetailOverviewViewModel(
         if(!_uiState.value.fieldsEnabled)
             return
 
-        val submission = _uiState.value.latestSubmission ?: return
+        val submission = _uiState.value.editableSubmission ?: return
 
         _uiState.update { prev -> prev.copy(fieldsEnabled = false) }
         loadingState = LoadingUiState.INDETERMINATE
@@ -523,10 +543,10 @@ class ClazzAssignmentDetailOverviewViewModel(
 
                 val submissionToSave = _uiState.updateAndGet { prev ->
                     prev.copy(
-                        latestSubmission = submissionResult.submission ?: prev.latestSubmission,
+                        editableSubmission = submissionResult.submission ?: prev.editableSubmission,
                         submissionError = null
                     )
-                }.latestSubmission
+                }.editableSubmission
 
                 if(submissionToSave != null) {
                     savedStateHandle.setJson(
