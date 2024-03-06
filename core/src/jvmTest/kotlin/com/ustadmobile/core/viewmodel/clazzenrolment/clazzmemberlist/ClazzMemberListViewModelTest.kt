@@ -2,11 +2,11 @@ package com.ustadmobile.core.viewmodel.clazzenrolment.clazzmemberlist
 
 import app.cash.turbine.test
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.domain.clazz.CreateNewClazzUseCase
+import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.EnrolIntoCourseUseCase
 import com.ustadmobile.core.test.viewmodeltest.ViewModelTestBuilder
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.ext.awaitItemWhere
-import com.ustadmobile.core.util.ext.createNewClazzAndGroups
-import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
 import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
@@ -43,10 +43,17 @@ class ClazzMemberListViewModelTest : AbstractMainDispatcherTest() {
                     this.clazzUid = clazzUid
                     clazzName = "Test Course"
                 }
-                activeDb.createNewClazzAndGroups(clazz, systemImpl, emptyMap())
 
-                activeDb.takeIf { activeUserRole != 0 }?.enrolPersonIntoClazzAtLocalTimezone(
-                    activePerson, clazzUid, activeUserRole
+                CreateNewClazzUseCase(activeDb).invoke(clazz)
+
+                EnrolIntoCourseUseCase(activeDb, null).invoke(
+                    ClazzEnrolment(
+                        clazzUid = clazzUid,
+                        personUid = activePerson.personUid,
+                    ).apply {
+                        clazzEnrolmentRole = activeUserRole
+                    },
+                    timeZoneId = "UTC"
                 )
 
                 ClazzMemberViewModelTestContext(clazz, activePerson)

@@ -1,6 +1,5 @@
 package com.ustadmobile.core.viewmodel.contententry.detailoverviewtab
 
-import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.viewmodel.DetailViewModel
@@ -124,27 +123,6 @@ class ContentEntryDetailOverviewViewModel(
                             prev.copy(
                                 title = it?.entry?.title ?: ""
                             )
-                        }
-                    }
-                }
-
-                launch {
-                    activeRepo.scopedGrantDao.userHasSystemLevelPermissionAsFlow(
-                        accountManager.currentAccount.personUid, Role.PERMISSION_CONTENT_INSERT
-                    ).collect { hasPermission ->
-                        _appUiState.update { prev ->
-                            if(prev.fabState.visible != hasPermission) {
-                                prev.copy(
-                                    fabState = FabUiState(
-                                        visible =  hasPermission,
-                                        text = systemImpl.getString(MR.strings.edit),
-                                        icon = FabUiState.FabIcon.EDIT,
-                                        onClick = ::onClickEdit
-                                    )
-                                )
-                            }else {
-                                prev
-                            }
                         }
                     }
                 }

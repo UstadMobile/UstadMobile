@@ -1856,4 +1856,6 @@
 
     <string name="manage_user_permissions">Manage user permissions</string>
 
+    <string name="reset_passwords">Reset passwords</string>
+
 </resources>

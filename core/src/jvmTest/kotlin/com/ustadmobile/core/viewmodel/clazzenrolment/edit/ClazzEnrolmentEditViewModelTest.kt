@@ -11,7 +11,6 @@ import com.ustadmobile.core.test.viewmodeltest.ViewModelTestBuilder
 import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.ext.awaitItemWhere
-import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
 import com.ustadmobile.core.util.ext.onActiveEndpoint
 import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.core.view.UstadView
@@ -157,9 +156,16 @@ class ClazzEnrolmentEditViewModelTest : AbstractMainDispatcherTest()  {
     @Test
     fun givenExistingLeavingReason_whenOnCreateAndHandleClickSaveCalled_thenValuesShouldBeSetOnViewAndDatabaseShouldBeUpdated() {
         testClazzEnrolmentEditViewModel {testContext ->
-            val enrolment = activeDb.enrolPersonIntoClazzAtLocalTimezone(
-                testContext.personToEnrol, testContext.clazz.clazzUid, ClazzEnrolment.ROLE_STUDENT
-            )
+            val enrolUseCase = EnrolIntoCourseUseCase(activeDb, null)
+            val enrolment = ClazzEnrolment(
+                personUid = testContext.personToEnrol.personUid,
+                clazzUid = testContext.clazz.clazzUid
+            ).also {
+                it.clazzEnrolmentRole = ClazzEnrolment.ROLE_STUDENT
+                it.clazzEnrolmentDateJoined = Clock.System.now().minus(1.days).toEpochMilliseconds()
+            }
+            enrolment.clazzEnrolmentUid = enrolUseCase(enrolment, timeZoneId = "UTC")
+
 
             viewModelFactory {
                 savedStateHandle[UstadView.ARG_ENTITY_UID] = enrolment.clazzEnrolmentUid.toString()
@@ -185,7 +191,7 @@ class ClazzEnrolmentEditViewModelTest : AbstractMainDispatcherTest()  {
 
             activeDb.clazzEnrolmentDao.findAllByPersonUid(
                 testContext.personToEnrol.personUid
-            ).assertItemReceived { enrolments ->
+            ).assertItemReceived(name = "enrolment date left is updated",timeout = 5.seconds) { enrolments ->
                 enrolments.any {
                     it.clazzEnrolmentDateLeft in leaveTime until MAX_VALID_DATE
                 }

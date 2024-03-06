@@ -6,8 +6,6 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.util.DiTag
-import com.ustadmobile.core.util.ext.grantScopedPermission
-import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.randomString
@@ -21,6 +19,7 @@ import org.kodein.di.instance
 import org.kodein.di.on
 import java.io.File
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 
 fun UmAppDatabase.insertCourseTerminology(di: DI){
     val termList = courseTerminologyDao.findAllCourseTerminologyList()
@@ -64,12 +63,14 @@ suspend fun UmAppDatabase.initAdminUser(
 ) {
     val passwordFilePath = di.on(endpoint).direct
         .instance<File>(tag = DiTag.TAG_CONTEXT_DATA_ROOT).absolutePath
+    val addNewPersonUseCase: AddNewPersonUseCase = di.on(endpoint).direct.instance()
+
     val adminUser = personDao.findByUsername("admin")
 
     if (adminUser == null) {
         val adminPerson = Person("admin", "Admin", "User")
-        adminPerson.admin = true
-        adminPerson.personUid = insertPersonAndGroup(adminPerson).personUid
+
+        adminPerson.personUid = addNewPersonUseCase(adminPerson)
 
         //Remove lower case l, upper case I, and the number 1
         val adminPass = defaultPassword
@@ -87,9 +88,6 @@ suspend fun UmAppDatabase.initAdminUser(
         val salt = siteDao.getSiteAsync()!!.authSalt!!
 
         saltFile.writeText("$salt / $adminPass")
-
-        grantScopedPermission(adminPerson, Role.ALL_PERMISSIONS, ScopedGrant.ALL_TABLES,
-                ScopedGrant.ALL_ENTITIES)
 
         systemPermissionDao.upsertAsync(
             SystemPermission(

@@ -1,187 +1,34 @@
 package com.ustadmobile.core.util.ext
 
 import app.cash.paging.PagingSource
-import com.ustadmobile.core.controller.TerminologyKeys
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.getResults
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.graph.LabelValueFormatter
 import com.ustadmobile.core.util.graph.MessageIdFormatter
 import com.ustadmobile.core.util.graph.TimeFormatter
 import com.ustadmobile.core.util.graph.UidAndLabelFormatter
+import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.door.SimpleDoorQuery
 import com.ustadmobile.door.ext.dbType
-import com.ustadmobile.door.ext.onRepoWithFallbackToDb
-import com.ustadmobile.door.util.systemTimeInMillis
-import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_NO_DELETE
-import com.ustadmobile.lib.util.randomString
-import com.ustadmobile.core.db.dao.getResults
-import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.AlreadyEnroledInClassException
-import com.ustadmobile.door.DoorDatabaseRepository
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
-
-/**
- * Insert a new class and
- * @param termMap course terminology map
- */
-suspend fun UmAppDatabase.createNewClazzAndGroups(
-    clazz: Clazz,
-    impl: UstadMobileSystemImpl,
-    termMap: Map<String, String>,
-) {
-    clazz.clazzTeachersPersonGroupUid = personGroupDao.insertAsync(
-            PersonGroup("${clazz.clazzName} - " + termMap[TerminologyKeys.TEACHER_KEY]))
-
-    clazz.clazzStudentsPersonGroupUid = personGroupDao.insertAsync(PersonGroup("${clazz.clazzName} - " +
-            termMap[TerminologyKeys.STUDENTS_KEY]))
-
-    clazz.clazzPendingStudentsPersonGroupUid = personGroupDao.insertAsync(PersonGroup("${clazz.clazzName} - " +
-            impl.getString(MR.strings.pending_requests)))
-
-    clazz.clazzParentsPersonGroupUid = personGroupDao.insertAsync(PersonGroup("${clazz.clazzName} - " +
-            impl.getString(MR.strings.parent)))
-
-    clazz.takeIf { it.clazzCode == null }?.clazzCode = randomString(Clazz.CLAZZ_CODE_DEFAULT_LENGTH)
-
-    val generatedUid = clazzDao.insertAsync(clazz)
-    if(clazz.clazzUid != 0L)
-        clazz.clazzUid = generatedUid
-
-    //Make the default ScopedGrants
-    scopedGrantDao.insertListAsync(listOf(ScopedGrant().apply {
-        sgFlags = ScopedGrant.FLAG_TEACHER_GROUP.or(FLAG_NO_DELETE)
-        sgPermissions = Role.ROLE_CLAZZ_TEACHER_PERMISSIONS_DEFAULT
-        sgGroupUid = clazz.clazzTeachersPersonGroupUid
-        sgEntityUid = clazz.clazzUid
-        sgTableId = Clazz.TABLE_ID
-    }, ScopedGrant().apply {
-        sgFlags = ScopedGrant.FLAG_STUDENT_GROUP.or(FLAG_NO_DELETE)
-        sgPermissions = Role.ROLE_CLAZZ_STUDENT_PERMISSIONS_DEFAULT
-        sgGroupUid = clazz.clazzStudentsPersonGroupUid
-        sgEntityUid = clazz.clazzUid
-        sgTableId = Clazz.TABLE_ID
-    }, ScopedGrant().apply {
-        sgFlags = (ScopedGrant.FLAG_PARENT_GROUP or FLAG_NO_DELETE)
-        sgPermissions = Role.ROLE_CLAZZ_PARENT_PERMISSION_DEFAULT
-        sgGroupUid = clazz.clazzParentsPersonGroupUid
-        sgEntityUid = clazz.clazzUid
-        sgTableId = Clazz.TABLE_ID
-    }))
-
-
-}
-
-
-/**
- * Enrol the given person into the given class. The effective date of joining is midnight as per
- * the timezone of the class (e.g. when a teacher adds a student to the system who just joined and
- * wants to mark their attendance for the same day).
- *
- * @throws IllegalStateException when the person is already in the class
- */
-@Throws(AlreadyEnroledInClassException::class)
-suspend fun UmAppDatabase.enrolPersonIntoClazzAtLocalTimezone(
-    personToEnrol: Person,
-    clazzUid: Long,
-    role: Int,
-    clazzWithSchool: ClazzWithSchool? = null
-): ClazzEnrolment {
-    val clazzWithSchoolVal = clazzWithSchool ?: clazzDao.getClazzWithSchool(clazzUid)
-        ?: throw IllegalArgumentException("Class does not exist")
-
-    val existingEnrolments = clazzEnrolmentDao.getAllClazzEnrolledAtTimeAsync(clazzUid,
-        systemTimeInMillis(), 0, personToEnrol.personUid)
-
-    if(existingEnrolments.isNotEmpty()) {
-        throw AlreadyEnroledInClassException()
-    }
-
-    val clazzTimeZone = clazzWithSchoolVal.effectiveTimeZone()
-    val joinTime = Clock.System.now().toLocalMidnight(clazzTimeZone).toEpochMilliseconds()
-
-    val clazzEnrolment = ClazzEnrolment().apply {
-        clazzEnrolmentPersonUid = personToEnrol.personUid
-        clazzEnrolmentClazzUid = clazzUid
-        clazzEnrolmentRole = role
-        clazzEnrolmentActive = true
-        clazzEnrolmentDateJoined = joinTime
-    }
-
-    return processEnrolmentIntoClass(clazzEnrolment, clazzWithSchoolVal)
-}
-
-/**
- * Process the given enrolment. This will insert the ClazzEnrolment itself and will add the person
- * being enroled into the PersonGroup according to their role.
- */
-suspend fun UmAppDatabase.processEnrolmentIntoClass(
-    enrolment: ClazzEnrolment,
-    clazzWithSchool: ClazzWithSchool? = null
-) : ClazzEnrolment {
-
-    val clazzWithSchoolVal = clazzWithSchool ?: clazzDao.getClazzWithSchool(
-        enrolment.clazzEnrolmentClazzUid)
-        ?: throw IllegalArgumentException("processEnrolmentIntoClass: Class does not exist")
-    val clazzTimeZone = clazzWithSchoolVal.effectiveTimeZone()
-
-    enrolment.clazzEnrolmentDateJoined = Instant.fromEpochMilliseconds(enrolment.clazzEnrolmentDateJoined)
-        .toLocalMidnight(clazzTimeZone).toEpochMilliseconds()
-
-    if(enrolment.clazzEnrolmentDateLeft != Long.MAX_VALUE){
-        enrolment.clazzEnrolmentDateLeft = Instant.fromEpochMilliseconds(enrolment.clazzEnrolmentDateLeft)
-            .toLocalEndOfDay(clazzTimeZone).toEpochMilliseconds()
-    }
-
-    enrolment.clazzEnrolmentUid = clazzEnrolmentDao.insertAsync(enrolment)
-
-
-    val personGroupUid = when(enrolment.clazzEnrolmentRole) {
-        ClazzEnrolment.ROLE_TEACHER -> clazzWithSchoolVal.clazzTeachersPersonGroupUid
-        ClazzEnrolment.ROLE_STUDENT -> clazzWithSchoolVal.clazzStudentsPersonGroupUid
-        ClazzEnrolment.ROLE_PARENT -> clazzWithSchoolVal.clazzParentsPersonGroupUid
-        ClazzEnrolment.ROLE_STUDENT_PENDING -> clazzWithSchoolVal.clazzPendingStudentsPersonGroupUid
-        else -> -1
-    }
-
-    if(personGroupUid != -1L) {
-        val existingGroupMemberships = personGroupMemberDao.checkPersonBelongsToGroup(
-            personGroupUid, enrolment.clazzEnrolmentPersonUid)
-        personGroupMemberDao.takeIf { existingGroupMemberships.isEmpty() }?.insertAsync(
-            PersonGroupMember().also {
-                it.groupMemberPersonUid = enrolment.clazzEnrolmentPersonUid
-                it.groupMemberGroupUid = personGroupUid
-            })
-    }
-
-    val parentsToEnrol = if(enrolment.clazzEnrolmentRole == ClazzEnrolment.ROLE_STUDENT) {
-        onRepoWithFallbackToDb(2500) {
-            it.personParentJoinDao.findByMinorPersonUidWhereParentNotEnrolledInClazz(
-                enrolment.clazzEnrolmentPersonUid, enrolment.clazzEnrolmentClazzUid)
-        }
-    }else {
-        listOf()
-    }
-
-    parentsToEnrol.forEach { parentJoin ->
-        onRepoWithFallbackToDb(2500) {
-            it.personDao.findByUidAsync(parentJoin.parentPersonUid)
-        }?.also { parentPerson ->
-            enrolPersonIntoClazzAtLocalTimezone(parentPerson, enrolment.clazzEnrolmentClazzUid,
-                ClazzEnrolment.ROLE_PARENT, clazzWithSchoolVal)
-        }
-
-    }
-
-    return enrolment
-}
+import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.PersonGroup
+import com.ustadmobile.lib.db.entities.PersonGroupMember
+import com.ustadmobile.lib.db.entities.Report
+import com.ustadmobile.lib.db.entities.ReportSeries
+import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
+import com.ustadmobile.lib.db.entities.Role
+import com.ustadmobile.lib.db.entities.ScopedGrant
+import com.ustadmobile.lib.db.entities.StatementEntityWithDisplayDetails
+import com.ustadmobile.lib.db.entities.StatementReportData
 
 
 /**
  * Inserts the person, sets its group and groupmember. Does not check if its an update
  */
+@Deprecated("Should use AddNewPersonUseCase instead")
 suspend fun <T: Person> UmAppDatabase.insertPersonAndGroup(
     entity: T,
     groupFlag: Int = PersonGroup.PERSONGROUP_FLAG_PERSONGROUP
@@ -208,29 +55,6 @@ suspend fun <T: Person> UmAppDatabase.insertPersonAndGroup(
     return entity
 }
 
-/**
- * Inserts the person, sets its group and groupmember. Does not check if its an update
- */
-fun UmAppDatabase.insertPersonOnlyAndGroup(entity: Person): Person{
-
-    val groupPerson = PersonGroup().apply {
-        groupName = "Person individual group"
-        personGroupFlag = PersonGroup.PERSONGROUP_FLAG_PERSONGROUP
-    }
-    //Create person's group
-    groupPerson.groupUid = personGroupDao.insert(groupPerson)
-
-    //Assign to person
-    entity.personGroupUid = groupPerson.groupUid
-    entity.personUid = personDao.insert(entity)
-
-    //Assign person to PersonGroup ie: Create PersonGroupMember
-    personGroupMemberDao.insert(
-            PersonGroupMember(entity.personUid, entity.personGroupUid))
-
-    return entity
-
-}
 
 suspend fun UmAppDatabase.generateChartData(
     report: ReportWithSeriesWithFilters,
@@ -360,6 +184,7 @@ internal val UmAppDatabase.maxQueryParamListSize: Int
 
 data class ScopedGrantResult(val sgUid: Long)
 
+@Deprecated("This has been replaced with SystemPermission and CoursePermission")
 suspend fun UmAppDatabase.grantScopedPermission(toGroupUid: Long, permissions: Long,
                                                 scopeTableId: Int, scopeEntityUid: Long) : ScopedGrantResult{
     val sgUid = scopedGrantDao.insertAsync(ScopedGrant().apply {
@@ -372,6 +197,7 @@ suspend fun UmAppDatabase.grantScopedPermission(toGroupUid: Long, permissions: L
     return ScopedGrantResult(sgUid)
 }
 
+@Deprecated("This has been replaced with SystemPermission and CoursePermission")
 suspend fun UmAppDatabase.grantScopedPermission(toPerson: Person, permissions: Long,
                                                 scopeTableId: Int, scopeEntityUid: Long): ScopedGrantResult {
     return grantScopedPermission(toPerson.personGroupUid, permissions, scopeTableId, scopeEntityUid)

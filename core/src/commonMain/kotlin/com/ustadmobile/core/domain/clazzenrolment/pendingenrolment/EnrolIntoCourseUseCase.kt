@@ -23,7 +23,7 @@ class EnrolIntoCourseUseCase(
     suspend operator fun invoke(
         enrolment: ClazzEnrolment,
         timeZoneId: String,
-    ) {
+    ) : Long {
         enrolment.clazzEnrolmentDateJoined = Instant
             .fromEpochMilliseconds(enrolment.clazzEnrolmentDateJoined)
             .toLocalMidnight(timeZoneId).toEpochMilliseconds()
@@ -36,7 +36,7 @@ class EnrolIntoCourseUseCase(
 
         val effectiveDb = (repo ?: db)
 
-        effectiveDb.withDoorTransactionAsync {
+        return effectiveDb.withDoorTransactionAsync {
             effectiveDb.clazzEnrolmentDao.insertAsync(enrolment)
         }
     }

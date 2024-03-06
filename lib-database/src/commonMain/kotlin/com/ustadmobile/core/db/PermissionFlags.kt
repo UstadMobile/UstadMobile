@@ -45,6 +45,9 @@ object PermissionFlags {
 
     const val EDIT_ALL_PERSONS = 32768L //2^15
 
+    const val EDIT_LIBRARY_CONTENT = 65536L //2^16
+
+    const val RESET_PASSWORDS = 131072L //2^17
 
     const val ALL = Long.MAX_VALUE
 

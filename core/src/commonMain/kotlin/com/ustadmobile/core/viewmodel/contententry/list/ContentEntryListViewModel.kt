@@ -13,6 +13,7 @@ import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewMode
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel.Companion.FILTER_BY_PARENT_UID
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import app.cash.paging.PagingSource
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.domain.contententry.delete.DeleteContentEntryParentChildJoinUseCase
 import com.ustadmobile.core.domain.contententry.move.MoveContentEntriesUseCase
 import com.ustadmobile.core.impl.appstate.AppActionButton
@@ -31,7 +32,6 @@ import com.ustadmobile.lib.db.composites.ContentEntryAndListDetail
 import com.ustadmobile.lib.db.composites.ContentEntryBlockLanguageAndContentJob
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.CourseBlock
-import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.SharingStarted
@@ -246,9 +246,10 @@ class ContentEntryListViewModel(
             }
         }
 
-        val hasPermissionFlow = activeRepo.scopedGrantDao.userHasSystemLevelPermissionAsFlow(
-            accountManager.currentAccount.personUid, Role.PERMISSION_CONTENT_INSERT
-        ).shareIn(viewModelScope, SharingStarted.WhileSubscribed())
+        val hasPermissionFlow = activeRepo.systemPermissionDao
+            .personHasSystemPermissionAsFlow(
+                accountManager.currentAccount.personUid, PermissionFlags.EDIT_LIBRARY_CONTENT
+            ).shareIn(viewModelScope, SharingStarted.WhileSubscribed())
 
         viewModelScope.launch {
             defaultTitle = when {

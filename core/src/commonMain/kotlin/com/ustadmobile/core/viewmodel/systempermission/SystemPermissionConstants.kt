@@ -9,6 +9,7 @@ object SystemPermissionConstants {
         MR.strings.add_new_users to PermissionFlags.ADD_PERSON,
         MR.strings.view_all_users to PermissionFlags.PERSON_VIEW,
         MR.strings.edit_all_users to PermissionFlags.EDIT_ALL_PERSONS,
+        MR.strings.reset_passwords to PermissionFlags.RESET_PASSWORDS,
         MR.strings.manage_user_permissions to PermissionFlags.MANAGE_USER_PERMISSIONS,
         MR.strings.add_new_courses to PermissionFlags.ADD_COURSE,
         MR.strings.view_all_courses to PermissionFlags.COURSE_VIEW,
