@@ -40,7 +40,6 @@ import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
-import kotlin.jvm.JvmInline
 
 
 /**
@@ -224,14 +223,6 @@ data class ClazzAssignmentDetailOverviewUiState(
 
 }
 
-val CourseAssignmentMarkWithPersonMarker.listItemUiState
-    get() = CourseAssignmentMarkWithPersonMarkerUiState(this)
-
-@JvmInline
-value class CourseAssignmentMarkWithPersonMarkerUiState(
-    val mark: CourseAssignmentMarkWithPersonMarker,
-)
-
 class ClazzAssignmentDetailOverviewViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
@@ -269,6 +260,8 @@ class ClazzAssignmentDetailOverviewViewModel(
 
     private var savedSubmissionJob: Job? = null
 
+    private val clazzUid = savedStateHandle[ARG_CLAZZUID]?.toLong() ?: throw IllegalArgumentException("clazzUid arg is required")
+
     init {
         _uiState.update { prev ->
             prev.copy(
@@ -283,6 +276,7 @@ class ClazzAssignmentDetailOverviewViewModel(
                 launch {
                     activeRepo.clazzAssignmentDao.findAssignmentCourseBlockAndSubmitterUidAsFlow(
                         assignmentUid = entityUidArg,
+                        clazzUid = clazzUid,
                         accountPersonUid = accountManager.currentAccount.personUid,
                     ).collect { assignmentData ->
                         _uiState.update { prev ->
@@ -332,7 +326,7 @@ class ClazzAssignmentDetailOverviewViewModel(
                         loadFromStateKeys = listOf(STATE_LATEST_SUBMISSION),
                         onLoadFromDb = { db ->
                             db.courseAssignmentSubmissionDao.getLatestSubmissionForUserAsync(
-                                accountPersonUid = accountManager.currentUserSession.person.personUid,
+                                accountPersonUid = activeUserPersonUid,
                                 assignmentUid = entityUidArg,
                             )
                         },
@@ -559,7 +553,10 @@ class ClazzAssignmentDetailOverviewViewModel(
     fun onClickCourseGroupSet() {
         navController.navigate(
             viewName = CourseGroupSetDetailViewModel.DEST_NAME,
-            args = mapOf(ARG_ENTITY_UID to (_uiState.value.courseGroupSet?.cgsUid?.toString() ?: "0"))
+            args = mapOf(
+                ARG_ENTITY_UID to (_uiState.value.courseGroupSet?.cgsUid?.toString() ?: "0"),
+                ARG_CLAZZUID to clazzUid.toString(),
+            )
         )
     }
 

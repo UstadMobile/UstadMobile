@@ -1,5 +1,6 @@
 package com.ustadmobile.core.db.dao
 
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 
 object ClazzEnrolmentDaoCommon {
@@ -11,10 +12,6 @@ object ClazzEnrolmentDaoCommon {
     const val SORT_LAST_NAME_ASC = 3
 
     const val SORT_LAST_NAME_DESC = 4
-
-    const val SORT_ATTENDANCE_ASC = 5
-
-    const val SORT_ATTENDANCE_DESC = 6
 
     const val SORT_DATE_REGISTERED_ASC = 7
 
@@ -39,4 +36,18 @@ object ClazzEnrolmentDaoCommon {
                   AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
                   AND :time BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined AND ClazzEnrolment.clazzEnrolmentDateLeft)
     """
+
+    const val SELECT_ENROLMENT_TYPE_BY_UID_SQL = """
+        SELECT ClazzEnrolment.clazzEnrolmentRole
+          FROM ClazzEnrolment
+         WHERE ClazzEnrolment.clazzEnrolmentUid = :clazzEnrolmentUid         
+    """
+
+    const val PERMISSION_REQUIRED_BY_CLAZZENROLMENT_UID = """
+        CASE ($SELECT_ENROLMENT_TYPE_BY_UID_SQL)
+             WHEN ${ClazzEnrolment.ROLE_STUDENT} THEN ${PermissionFlags.COURSE_MANAGE_STUDENT_ENROLMENT}
+             ELSE ${PermissionFlags.COURSE_MANAGE_STUDENT_ENROLMENT}
+        END     
+    """
+
 }

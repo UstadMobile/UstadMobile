@@ -9,3 +9,5 @@ To run:
 ```
 ./gradlew app-android:generateReleaseBaselineProfile
 ```
+
+Profiles are stored in app-android/src/release/generated

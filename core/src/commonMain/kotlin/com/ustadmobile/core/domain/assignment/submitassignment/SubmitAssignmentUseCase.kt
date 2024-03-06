@@ -79,6 +79,7 @@ class SubmitAssignmentUseCase(
             casSubmitterUid = submitterUid
             casSubmitterPersonUid = accountPersonUid
             casTimestamp = systemTimeInMillis()
+            casClazzUid = assignment.caClazzUid
         }
 
         Napier.d("SubmitAssignmentUseCase: save to repo for submitterUid=$submitterUid assignmentUid=$assignmentUid")

@@ -13,7 +13,7 @@ import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useTabAndAppBarHeight
 import com.ustadmobile.hooks.useTimeFormatter
 import com.ustadmobile.hooks.useUstadViewModel
-import com.ustadmobile.lib.db.composites.EnrolmentRequestAndPersonPicture
+import com.ustadmobile.lib.db.composites.EnrolmentRequestAndPersonDetails
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.composites.PersonAndClazzMemberListDetails
 import com.ustadmobile.lib.db.entities.EnrolmentRequest
@@ -272,7 +272,7 @@ private val StudentListItem = FC<StudentListItemProps> { props ->
 
 external interface PendingStudentListItemProps : Props {
 
-    var request: EnrolmentRequestAndPersonPicture?
+    var request: EnrolmentRequestAndPersonDetails?
 
     var onClick: (enrolment: EnrolmentRequest, approved: Boolean) -> Unit
 

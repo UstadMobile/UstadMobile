@@ -1,6 +1,7 @@
 package com.ustadmobile.core.viewmodel.clazzlog.editattendance
 
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.replace
@@ -34,6 +35,8 @@ data class ClazzLogEditAttendanceUiState(
     val clazzLogsList: List<ClazzLog> = emptyList(),
 
     val fieldsEnabled: Boolean = false,
+
+    val canEdit: Boolean = false,
 
     val timeZone: String = "UTC"
 
@@ -82,6 +85,8 @@ class ClazzLogEditAttendanceViewModel(
 
     private val saveAttendanceRecordsMutex = Mutex()
 
+    private val clazzUid = savedStateHandle[ARG_CLAZZUID]?.toLong() ?: 0
+
     init {
         _appUiState.update { prev ->
             prev.copy(
@@ -89,20 +94,28 @@ class ClazzLogEditAttendanceViewModel(
             )
         }
 
-        viewModelScope.launch {
+        launchIfHasPermission(
+            permissionCheck = { db ->
+                db.coursePermissionDao.personHasPermissionWithClazzAsync2(
+                    activeUserPersonUid, clazzUid, PermissionFlags.COURSE_ATTENDANCE_VIEW,
+                )
+            }
+        ) {
             //load the clazzloglist
             val newClazzLogVal = newClazzLog
+
+            //Note: required entities would be pulled down by the initial launch permission check
+            val hasEditPermission = activeDb.coursePermissionDao
+                .personHasPermissionWithClazzAsync2(
+                    activeUserPersonUid, clazzUid, PermissionFlags.COURSE_ATTENDANCE_RECORD
+                )
 
             loadEntity(
                 serializer = ListSerializer(ClazzLog.serializer()),
                 onLoadFromDb = { db ->
-                    val dbLogList = if(newClazzLogVal != null) {
-                        db.clazzLogDao.findByClazzUidAsync(newClazzLogVal.clazzLogClazzUid,
-                            ClazzLog.STATUS_RESCHEDULED)
-                    }else {
-                        db.clazzLogDao.findAllForClazzByClazzLogUid(entityUidArg,
-                            ClazzLog.STATUS_RESCHEDULED)
-                    }
+                    val dbLogList = db.clazzLogDao.findByClazzUidAsync(
+                        clazzUid, ClazzLog.STATUS_RESCHEDULED
+                    )
 
                     val list = if(newClazzLogVal != null) {
                         (dbLogList + listOf(newClazzLogVal)).sortedBy { it.logDate }
@@ -118,7 +131,10 @@ class ClazzLogEditAttendanceViewModel(
                 },
                 uiUpdate = {
                     _uiState.update { prev ->
-                        prev.copy(clazzLogsList = it ?: emptyList())
+                        prev.copy(
+                            clazzLogsList = it ?: emptyList(),
+                            canEdit = hasEditPermission,
+                        )
                     }
                 }
             )
@@ -230,7 +246,7 @@ class ClazzLogEditAttendanceViewModel(
                 if(!prev.actionBarButtonState.visible) {
                     prev.copy(
                         actionBarButtonState = ActionBarButtonUiState(
-                            visible = true,
+                            visible = _uiState.value.canEdit,
                             text = systemImpl.getString(MR.strings.save),
                             onClick = this@ClazzLogEditAttendanceViewModel::onClickSave
                         )

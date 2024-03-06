@@ -2,15 +2,16 @@ package com.ustadmobile.core.viewmodel.clazzassignment.submissionstab
 
 import app.cash.turbine.test
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.domain.clazz.CreateNewClazzUseCase
+import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.EnrolIntoCourseUseCase
+import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.test.viewmodeltest.ViewModelTestBuilder
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.ext.awaitItemWhere
-import com.ustadmobile.core.util.ext.createNewClazzAndGroups
-import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
-import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.loadFirstList
 import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.detail.submissionstab.ClazzAssignmentDetailSubmissionsTabViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.door.ext.withDoorTransactionAsync
@@ -55,19 +56,29 @@ class ClazzAssignmentDetailSubmissionsTabViewModelTest : AbstractMainDispatcherT
                     clazzTimeZone = "UTC"
                 }
 
-                activeDb.createNewClazzAndGroups(clazz, systemImpl, emptyMap())
+                clazz.clazzUid = CreateNewClazzUseCase(activeDb).invoke(clazz)
+
+                val enrolUseCase = EnrolIntoCourseUseCase(activeDb, null)
+                val addPersonuseCase = AddNewPersonUseCase(activeDb, null)
 
                 val students = studentNameList.map {name ->
                     val studentPerson = Person().apply {
                         firstNames = name.substringBefore(" ")
                         lastName = name.substringAfter(" ")
                     }
-                    activeDb.insertPersonAndGroup(studentPerson)
-                    activeDb.enrolPersonIntoClazzAtLocalTimezone(
-                        personToEnrol = studentPerson,
-                        clazzUid = clazz.clazzUid,
-                        role = ClazzEnrolment.ROLE_STUDENT
+
+                    studentPerson.personUid = addPersonuseCase(studentPerson)
+
+                    enrolUseCase(
+                        enrolment = ClazzEnrolment(
+                            clazzUid = clazz.clazzUid,
+                            personUid = studentPerson.personUid
+                        ).apply {
+                            clazzEnrolmentRole = ClazzEnrolment.ROLE_STUDENT
+                        },
+                        timeZoneId = "UTC"
                     )
+
                     studentPerson
                 }
 
@@ -88,12 +99,19 @@ class ClazzAssignmentDetailSubmissionsTabViewModelTest : AbstractMainDispatcherT
                 caUid = activeDb.clazzAssignmentDao.insertAsync(this)
             }
 
+            val enrolIntoCourseUseCase = EnrolIntoCourseUseCase(activeDb, null)
+
             activeDb.withDoorTransactionAsync {
-                activeDb.enrolPersonIntoClazzAtLocalTimezone(
-                    personToEnrol = testContext.activeUserPerson,
-                    clazzUid = testContext.clazz.clazzUid,
-                    role = ClazzEnrolment.ROLE_TEACHER
+                enrolIntoCourseUseCase(
+                    enrolment = ClazzEnrolment(
+                        clazzUid = testContext.clazz.clazzUid,
+                        personUid = testContext.activeUserPerson.personUid,
+                    ).apply {
+                        clazzEnrolmentRole = ClazzEnrolment.ROLE_TEACHER
+                    },
+                    timeZoneId = "UTC",
                 )
+
 
                 testContext.students.forEachIndexed { index, student ->
                     //put in submission for 2/3 of students
@@ -121,6 +139,7 @@ class ClazzAssignmentDetailSubmissionsTabViewModelTest : AbstractMainDispatcherT
 
             viewModelFactory {
                 savedStateHandle[UstadView.ARG_ENTITY_UID] = assignment.caUid.toString()
+                savedStateHandle[UstadViewModel.ARG_CLAZZUID] = testContext.clazz.clazzUid.toString()
                 ClazzAssignmentDetailSubmissionsTabViewModel(di, savedStateHandle)
             }
 

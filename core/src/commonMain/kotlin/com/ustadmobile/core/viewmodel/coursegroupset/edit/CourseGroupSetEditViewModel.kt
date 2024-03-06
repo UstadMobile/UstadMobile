@@ -1,6 +1,7 @@
 package com.ustadmobile.core.viewmodel.coursegroupset.edit
 
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.Snack
@@ -58,7 +59,13 @@ class CourseGroupSetEditViewModel(
             )
         }
 
-        viewModelScope.launch {
+        launchIfHasPermission(
+            permissionCheck = {db ->
+                db.coursePermissionDao.personHasPermissionWithClazzAsync2(
+                    activeUserPersonUid, clazzUidArg, PermissionFlags.COURSE_MANAGE_STUDENT_ENROLMENT,
+                )
+            }
+        ) {
             val courseGroupSetUid = if(entityUidArg != 0L)
                 entityUidArg
             else
@@ -75,6 +82,7 @@ class CourseGroupSetEditViewModel(
                                 clazzUid = clazzUidArg,
                                 time = systemTimeInMillis(),
                                 activeFilter = 0,
+                                accountPersonUid = activeUserPersonUid,
                             ).map {
                                 if(it.cgm == null) {
                                     CourseGroupMemberAndName().apply {
@@ -268,7 +276,8 @@ class CourseGroupSetEditViewModel(
             }
 
             finishWithResult(
-                CourseGroupSetDetailViewModel.DEST_NAME, courseGroupSet.cgsUid, courseGroupSet
+                CourseGroupSetDetailViewModel.DEST_NAME, courseGroupSet.cgsUid, courseGroupSet,
+                detailViewExtraArgs = mapOf(ARG_CLAZZUID to clazzUidArg.toString()),
             )
         }
     }

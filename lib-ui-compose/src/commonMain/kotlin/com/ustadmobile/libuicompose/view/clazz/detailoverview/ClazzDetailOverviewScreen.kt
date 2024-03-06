@@ -2,6 +2,8 @@ package com.ustadmobile.libuicompose.view.clazz.detailoverview
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,6 +18,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Login
 import androidx.compose.material.icons.filled.School
+import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
@@ -43,6 +46,7 @@ import com.ustadmobile.libuicompose.components.UstadAsyncImage
 import com.ustadmobile.libuicompose.components.UstadHtmlText
 import com.ustadmobile.libuicompose.components.UstadDetailField2
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
+import com.ustadmobile.libuicompose.components.UstadQuickActionButton
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.util.compose.stringIdMapResource
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
@@ -63,6 +67,7 @@ fun ClazzDetailOverviewScreen(viewModel: ClazzDetailOverviewViewModel) {
         uiState = uiState,
         onClickCourseBlock = viewModel::onClickCourseBlock,
         onClickClassCode = viewModel::onClickClazzCode,
+        onClickPermissions = viewModel::onClickPermissions,
     )
 }
 
@@ -71,6 +76,7 @@ fun ClazzDetailOverviewScreen(
     uiState: ClazzDetailOverviewUiState = ClazzDetailOverviewUiState(),
     onClickClassCode: (String) -> Unit = {},
     onClickCourseBlock: (CourseBlock) -> Unit = {},
+    onClickPermissions: () -> Unit = { },
 ) {
     val pager = remember(uiState.courseBlockList) {
         Pager(
@@ -108,6 +114,26 @@ fun ClazzDetailOverviewScreen(
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.height(156.dp).fillMaxWidth(),
                 )
+            }
+        }
+
+        if(uiState.quickActionBarVisible) {
+            item(key = "quick_action_row") {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Row {
+                        if(uiState.managePermissionVisible) {
+                            UstadQuickActionButton(
+                                imageVector = Icons.Default.Shield,
+                                labelText = stringResource(MR.strings.permissions),
+                                onClick = onClickPermissions,
+                            )
+                        }
+                    }
+
+                    Divider(Modifier.height(1.dp))
+                }
             }
         }
 

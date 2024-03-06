@@ -9,7 +9,7 @@ import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.PersonParentJoin
 import com.ustadmobile.lib.db.entities.PersonParentJoin.Companion.RELATIONSHIP_FATHER
 import com.ustadmobile.lib.db.entities.PersonParentJoin.Companion.RELATIONSHIP_MOTHER
-import com.ustadmobile.lib.db.entities.PersonParentJoin.Companion.RELATIONSHIP_OTHER
+import com.ustadmobile.lib.db.entities.PersonParentJoin.Companion.RELATIONSHIP_OTHER_LEGAL_GUARDIAN
 import com.ustadmobile.lib.db.entities.PersonParentJoinAndMinorPerson
 import com.ustadmobile.lib.db.entities.SiteTerms
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
@@ -101,8 +101,14 @@ class ParentalConsentManagementViewModel(
             viewModelScope.launch {
                 loadEntity(
                     serializer = PersonParentJoinAndMinorPerson.serializer(),
-                    onLoadFromDb = {
-                        it.personParentJoinDao.findByUidWithMinorAsync(entityUidArg)
+                    onLoadFromDb = { db ->
+                        db.personParentJoinDao.findByUidWithMinorAsync(entityUidArg)?.takeIf { ppjAndMinor ->
+                            ppjAndMinor.personParentJoin?.let {
+                                //If the join has already been claimed - and the active user is not the
+                                //parent/guardian, stop.
+                                !(it.ppjParentPersonUid != 0L && it.ppjParentPersonUid != activeUserPersonUid)
+                            } ?: false
+                        }
                     },
                     makeDefault = {
                         //Should never happen
@@ -118,7 +124,7 @@ class ParentalConsentManagementViewModel(
                 )
 
                 _uiState.update { prev ->
-                    prev.copy(fieldsEnabled = true)
+                    prev.copy(fieldsEnabled = prev.parentJoinAndMinor != null)
                 }
             }
 
@@ -177,7 +183,7 @@ class ParentalConsentManagementViewModel(
 
     fun onClickConsent() {
         if(_uiState.value.parentJoinAndMinor?.personParentJoin?.ppjRelationship?.let {
-            it in listOf(RELATIONSHIP_MOTHER, RELATIONSHIP_FATHER, RELATIONSHIP_OTHER)
+            it in listOf(RELATIONSHIP_MOTHER, RELATIONSHIP_FATHER, RELATIONSHIP_OTHER_LEGAL_GUARDIAN)
         } != true) {
             _uiState.update { prev ->
                 prev.copy(

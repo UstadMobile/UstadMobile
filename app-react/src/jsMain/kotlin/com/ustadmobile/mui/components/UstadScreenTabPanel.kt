@@ -1,6 +1,7 @@
 package com.ustadmobile.mui.components
 
 import com.ustadmobile.entities.USTAD_SCREENS
+import com.ustadmobile.entities.UstadScreens
 import com.ustadmobile.hooks.useMuiAppState
 import web.cssom.Height
 import web.cssom.Overflow
@@ -22,6 +23,10 @@ external interface UstadScreenTabProps: PropsWithChildren {
     var viewName: String
 
     var value: String
+
+    //Change this to specifying screens within the component so tab items that are not accessed
+    // directly cannot be accessed by browser url.
+    var screens: UstadScreens?
 
 }
 
@@ -58,9 +63,9 @@ val UstadScreenTabPanel = FC<UstadScreenTabProps> {props ->
                 }
 
                 try {
-                    + USTAD_SCREENS.single { it.key == props.viewName }.component.create()
-                }catch(e: Exception) {
-                    throw IllegalArgumentException("Cannot find/error creating view for ${props.viewName}")
+                    + (props.screens ?: USTAD_SCREENS).single { it.key == props.viewName }.component.create()
+                }catch(e: Throwable) {
+                    throw IllegalArgumentException("Cannot find/error creating view for ${props.viewName}: $e")
                 }
 
             }
