@@ -1,2 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <plurals name="number_of_attempts">
+        <item quantity="one">%d попытка</item>
+        <item quantity="few">%d попыток</item>
+        <item quantity="many">%d попытки</item>
+        <item quantity="other">%d попытки</item>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="one">%d час</item>
+        <item quantity="few">%d часа</item>
+        <item quantity="many">%d часов</item>
+        <item quantity="other">%d часов</item>
+    </plurals>
+    <plurals name="duration_minutes">
+        <item quantity="one">%d минута</item>
+        <item quantity="few">%d минуты</item>
+        <item quantity="many">%d минут</item>
+        <item quantity="other">%d минут</item>
+    </plurals>
+    <plurals name="duration_seconds">
+        <item quantity="one">%d секунда</item>
+        <item quantity="few">%d секунды</item>
+        <item quantity="many">%d секунд</item>
+        <item quantity="other">%d секунд</item>
+    </plurals>
+    <plurals name="items_selected">
+        <item quantity="one">%d элемент выделен</item>
+        <item quantity="few">%d элемента выделено</item>
+        <item quantity="many">%d элементов выделено</item>
+        <item quantity="other">%d элементов выделено</item>
+    </plurals>
+</resources>
