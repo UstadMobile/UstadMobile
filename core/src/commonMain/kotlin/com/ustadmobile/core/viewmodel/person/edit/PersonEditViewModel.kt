@@ -2,7 +2,9 @@ package com.ustadmobile.core.viewmodel.person.edit
 
 import com.ustadmobile.core.account.AccountRegisterOptions
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
+import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorUseCase
 import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
@@ -155,6 +157,8 @@ class PersonEditViewModel(
     private val enqueueSavePictureUseCase: EnqueueSavePictureUseCase? by
         on(accountManager.activeEndpoint).instanceOrNull()
 
+    private val addNewPersonUseCase: AddNewPersonUseCase by di.onActiveEndpoint().instance()
+
     init {
         loadingState = LoadingUiState.INDETERMINATE
 
@@ -181,14 +185,47 @@ class PersonEditViewModel(
             )
         }
 
-        viewModelScope.launch {
+        launchIfHasPermission(
+            permissionCheck = { db ->
+                when {
+                    //Viewing in register mode is allowed
+                    registrationModeFlags != 0 && entityUidArg == 0L -> true
+
+                    //Person always has permission to edit their own profile
+                    entityUidArg != 0L && activeUserPersonUid == entityUidArg -> true
+
+                    //If adding a new person, then ADD_PERSON permission is required
+                    entityUidArg == 0L -> {
+                        db.systemPermissionDao.personHasSystemPermission(
+                            activeUserPersonUid, PermissionFlags.ADD_PERSON
+                        )
+                    }
+
+                    //If editing an existing person, which is not the active user, require edit all person permission
+                    else -> {
+                        db.systemPermissionDao.personHasSystemPermission(
+                            accountPersonUid = activeUserPersonUid,
+                            permission = PermissionFlags.EDIT_ALL_PERSONS,
+                        )
+                    }
+                }
+            },
+            onSetFieldsEnabled = {
+                _uiState.update { prev -> prev.copy(fieldsEnabled = it) }
+            },
+            setLoadingState = true,
+        ) {
             awaitAll(
                 async {
                     loadEntity(
                         serializer = PersonWithAccount.serializer(),
                         //If in registration mode, we should avoid attempting to connect ot the database at all
                         onLoadFromDb = if(entityUid != 0L) {
-                            { it.personDao.findPersonAccountByUid(entityUid) }
+                            {
+                                it.personDao.findPersonAccountByUid(entityUid)?.also {
+                                    savedStateHandle[KEY_INIT_DATE_OF_BIRTH] = it.dateOfBirth.toString()
+                                }
+                            }
                         }else {
                              null
                         },
@@ -477,10 +514,6 @@ class PersonEditViewModel(
                         )
                     )
 
-                    //TODO: this should be restored, but we need to avoid issue on web where
-                    // popupinclusive tries to go back past first destination
-                    val popUpToViewName = savedStateHandle[UstadView.ARG_POPUPTO_ON_FINISH] ?: UstadView.CURRENT_DEST
-
                     if(registrationModeFlags.hasFlag(REGISTER_MODE_MINOR)) {
                         val goOptions = UstadMobileSystemCommon.UstadGoOptions(
                             RegisterAgeRedirectViewModel.DEST_NAME, true)
@@ -517,12 +550,16 @@ class PersonEditViewModel(
                     _uiState.update { prev -> prev.copy(fieldsEnabled = true) }
                 }
             }else {
-                //If a person under 13 is being registered,
-                val isMinor = Instant.fromEpochMilliseconds(savePerson.dateOfBirth)
-                    .isDateOfBirthAMinor()
-                val consentToUpsert = if(
-                    isMinor &&
-                    (entityUidArg == 0L || !activeRepo.personParentJoinDao.isMinorApproved(savePerson.personUid))
+                //Not register mode
+
+                //If updating an existing person, and the person was not a minor before but is now,
+                //and there is no existing consent entity, then we need to create one
+                val consentToUpsert = if(entityUidArg != 0L &&
+                    Instant.fromEpochMilliseconds(savePerson.dateOfBirth).isDateOfBirthAMinor() &&
+                    !Instant.fromEpochMilliseconds(
+                        savedStateHandle[KEY_INIT_DATE_OF_BIRTH]?.toLong() ?: 0
+                    ).isDateOfBirthAMinor() &&
+                    !activeRepo.personParentJoinDao.isMinorApproved(savePerson.personUid)
                 ) {
                     PersonParentJoin().apply {
                         ppjMinorPersonUid = savePerson.personUid
@@ -536,16 +573,11 @@ class PersonEditViewModel(
 
                 activeRepo.withDoorTransactionAsync {
                     if(entityUidArg == 0L) {
-                        val personWithGroup = activeRepo.insertPersonAndGroup(savePerson)
-                        savePerson.personGroupUid = personWithGroup.personGroupUid
-                        savePerson.personUid = personWithGroup.personUid
-                        consentToUpsert?.also {
-                            activeRepo.personParentJoinDao.upsertAsync(it.shallowCopy {
-                                ppjMinorPersonUid = personWithGroup.personUid
-                            })
-                        }
-
-                        savePerson.personUid
+                        addNewPersonUseCase(
+                            person = savePerson,
+                            addedByPersonUid = activeUserPersonUid,
+                            createPersonParentApprovalIfMinor = true,
+                        )
                     }else {
                         activeRepo.personDao.updateAsync(savePerson)
                         consentToUpsert?.also {
@@ -652,6 +684,12 @@ class PersonEditViewModel(
             ARG_DATE_OF_BIRTH,
             ARG_REGISTRATION_MODE,
         )
+
+        /**
+         * Used to store the date of birth on first load so that we can determine if a date of birth
+         * update makes the person a minor.
+         */
+        val KEY_INIT_DATE_OF_BIRTH = "initDob"
 
     }
 

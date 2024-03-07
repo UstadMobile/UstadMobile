@@ -1,6 +1,7 @@
 package com.ustadmobile.core.domain.clazzenrolment.pendingenrolment
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.EnrolmentRequest
@@ -18,24 +19,26 @@ class ApproveOrDeclinePendingEnrolmentUseCase(
         val effectiveClazz = db.clazzDao.findByUidAsync(enrolmentRequest.erClazzUid)
             ?: throw IllegalStateException("Class does not exist")
 
-        val requestStatus = if(approved){
-            enrolIntoCourseUseCase(
-                enrolment = ClazzEnrolment(
-                    clazzUid = enrolmentRequest.erClazzUid,
-                    personUid = enrolmentRequest.erPersonUid,
-                    role = ClazzEnrolment.ROLE_STUDENT
-                ),
-                timeZoneId = effectiveClazz.clazzTimeZone ?: "UTC"
-            )
-            EnrolmentRequest.STATUS_APPROVED
-        }else {
-            EnrolmentRequest.STATUS_REJECTED
-        }
+        repo.withDoorTransactionAsync {
+            val requestStatus = if(approved){
+                enrolIntoCourseUseCase(
+                    enrolment = ClazzEnrolment(
+                        clazzUid = enrolmentRequest.erClazzUid,
+                        personUid = enrolmentRequest.erPersonUid,
+                        role = ClazzEnrolment.ROLE_STUDENT
+                    ),
+                    timeZoneId = effectiveClazz.clazzTimeZone ?: "UTC"
+                )
+                EnrolmentRequest.STATUS_APPROVED
+            }else {
+                EnrolmentRequest.STATUS_REJECTED
+            }
 
-        repo.enrolmentRequestDao.updateStatus(
-            uid = enrolmentRequest.erUid,
-            status = requestStatus,
-            updateTime = systemTimeInMillis()
-        )
+            repo.enrolmentRequestDao.updateStatus(
+                uid = enrolmentRequest.erUid,
+                status = requestStatus,
+                updateTime = systemTimeInMillis()
+            )
+        }
     }
 }

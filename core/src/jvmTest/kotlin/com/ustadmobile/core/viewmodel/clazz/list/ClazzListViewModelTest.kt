@@ -35,9 +35,16 @@ class ClazzListViewModelTest : AbstractMainDispatcherTest()  {
                 .filter { it.clazzList() !is EmptyPagingSource }
                 .test {
                     awaitItem()
-                    verify(clazzRepo, timeout(5000).atLeastOnce()).findClazzesWithPermission(
-                        eq("%"), eq(accountPersonUid), eq(listOf()),
-                        eq(0), any(), any(), any(), any(), any()
+                    verify(
+                        clazzRepo, timeout(5000).atLeastOnce()
+                    ).findClazzesWithPermission(
+                        searchQuery = eq("%"),
+                        accountPersonUid = eq(accountPersonUid),
+                        excludeSelectedClazzList = eq(listOf()),
+                        sortOrder = any(),
+                        filter = any(),
+                        currentTime = any(),
+                        permission = any(),
                     )
 
                     cancelAndIgnoreRemainingEvents()

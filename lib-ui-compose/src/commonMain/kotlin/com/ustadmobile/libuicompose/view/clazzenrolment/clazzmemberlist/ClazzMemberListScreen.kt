@@ -25,7 +25,7 @@ import com.ustadmobile.core.viewmodel.clazzenrolment.clazzmemberlist.ClazzMember
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.util.SortOrderOption
-import com.ustadmobile.lib.db.composites.EnrolmentRequestAndPersonPicture
+import com.ustadmobile.lib.db.composites.EnrolmentRequestAndPersonDetails
 import com.ustadmobile.lib.db.composites.PersonAndClazzMemberListDetails
 import com.ustadmobile.libuicompose.components.UstadAddListItem
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
@@ -246,7 +246,7 @@ fun ClazzMemberListScreen(
 
 @Composable
 fun PendingStudentListItem(
-    request: EnrolmentRequestAndPersonPicture?,
+    request: EnrolmentRequestAndPersonDetails?,
     onClick: (enrolment: EnrolmentRequest, approved: Boolean) -> Unit,
     localDateTimeNow: LocalDateTime,
     timeFormatter: DateFormat,

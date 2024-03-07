@@ -14,8 +14,8 @@ import com.ustadmobile.core.viewmodel.coursegroupset.detail.CourseGroupSetDetail
 import com.ustadmobile.core.viewmodel.coursegroupset.edit.CourseGroupSetEditViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import app.cash.paging.PagingSource
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.lib.db.entities.CourseGroupSet
-import com.ustadmobile.lib.db.entities.Role
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -81,8 +81,8 @@ class CourseGroupSetListViewModel(
         viewModelScope.launch {
             collectHasPermissionFlowAndSetAddNewItemUiState(
                 hasPermissionFlow = {
-                    activeRepo.clazzDao.personHasPermissionWithClazzAsFlow(
-                        activeUserPersonUid, clazzUid, Role.PERMISSION_CLAZZ_UPDATE
+                    activeRepo.coursePermissionDao.personHasPermissionWithClazzAsFlow2(
+                        activeUserPersonUid, clazzUid, PermissionFlags.COURSE_MANAGE_STUDENT_ENROLMENT
                     )
                 },
                 fabStringResource = MR.strings.groups,
@@ -126,7 +126,8 @@ class CourseGroupSetListViewModel(
         navigateOnItemClicked(
             detailViewName = CourseGroupSetDetailViewModel.DEST_NAME,
             entityUid = entry.cgsUid,
-            result = entry
+            result = entry,
+            extraArgs = mapOf(ARG_CLAZZUID to clazzUid.toString())
         )
     }
 

@@ -19,6 +19,7 @@ import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntr
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseJvm
 import com.ustadmobile.core.domain.contententry.importcontent.ImportContentEntryUseCase
 import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServerUseCase
+import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseCommonJvm
 import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
@@ -494,6 +495,13 @@ fun Application.umRestApplication(
         bind<ValidateVideoFileUseCase>() with provider {
             ValidateVideoFileUseCaseFfprobe(
                 ffprobe = instance()
+            )
+        }
+
+        bind<AddNewPersonUseCase>() with scoped(EndpointScope.Default).singleton {
+            AddNewPersonUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = null,
             )
         }
 

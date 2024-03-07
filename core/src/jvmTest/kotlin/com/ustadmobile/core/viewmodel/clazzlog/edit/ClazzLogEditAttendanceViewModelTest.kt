@@ -2,17 +2,18 @@ package com.ustadmobile.core.viewmodel.clazzlog.edit
 
 import app.cash.turbine.test
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.domain.clazz.CreateNewClazzUseCase
+import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.EnrolIntoCourseUseCase
 import com.ustadmobile.core.schedule.generateUid
 import com.ustadmobile.core.test.awaitAppUiStateWithActionButtonVisible
 import com.ustadmobile.core.test.viewmodeltest.ViewModelTestBuilder
 import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.ext.awaitItemWhere
-import com.ustadmobile.core.util.ext.createNewClazzAndGroups
-import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.viewmodel.UstadViewModel.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.viewmodel.clazzlog.editattendance.ClazzLogEditAttendanceViewModel
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.flow.doorFlow
@@ -21,6 +22,7 @@ import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord
+import com.ustadmobile.lib.db.entities.CoursePermission
 import com.ustadmobile.lib.db.entities.Person
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -52,15 +54,30 @@ class ClazzLogEditAttendanceViewModelTest : AbstractMainDispatcherTest()  {
                     clazzTimeZone = "UTC"
                 }
 
-                activeDb.createNewClazzAndGroups(clazz, systemImpl, emptyMap())
+                clazz.clazzUid = CreateNewClazzUseCase(activeDb).invoke(clazz)
+                activeDb.coursePermissionDao.upsertAsync(
+                    CoursePermission(
+                        cpClazzUid = clazz.clazzUid,
+                        cpToPersonUid = person.personUid,
+                        cpPermissionsFlag = CoursePermission.TEACHER_DEFAULT_PERMISSIONS
+                    )
+                )
+
+                val enrolUseCase = EnrolIntoCourseUseCase(activeDb, null)
 
                 val enroledPersons = namesToEnrol.map {name ->
                     val studentPerson = activeDb.insertPersonAndGroup(Person().apply {
                         firstNames = name.split(" ").first()
                         lastName = name.split(" ").last()
                     })
-                    activeDb.enrolPersonIntoClazzAtLocalTimezone(studentPerson, clazz.clazzUid,
-                        ClazzEnrolment.ROLE_STUDENT)
+                    enrolUseCase(
+                        enrolment = ClazzEnrolment(
+                            clazzUid = clazz.clazzUid,
+                            personUid = studentPerson.personUid,
+                            role = ClazzEnrolment.ROLE_STUDENT
+                        ),
+                        timeZoneId = "UTC"
+                    )
 
                     studentPerson
                 }
@@ -86,6 +103,7 @@ class ClazzLogEditAttendanceViewModelTest : AbstractMainDispatcherTest()  {
                     serializer = ClazzLog.serializer(),
                     value = newClazzLog
                 )
+                savedStateHandle[ARG_CLAZZUID] = testContext.clazz.clazzUid.toString()
 
                 ClazzLogEditAttendanceViewModel(di, savedStateHandle)
             }
@@ -141,6 +159,7 @@ class ClazzLogEditAttendanceViewModelTest : AbstractMainDispatcherTest()  {
                     serializer = ClazzLog.serializer(),
                     value = newClazzLog
                 )
+                savedStateHandle[ARG_CLAZZUID] = testContext.clazz.clazzUid.toString()
 
                 ClazzLogEditAttendanceViewModel(di, savedStateHandle)
             }
@@ -192,6 +211,8 @@ class ClazzLogEditAttendanceViewModelTest : AbstractMainDispatcherTest()  {
 
             viewModelFactory {
                 savedStateHandle[UstadView.ARG_ENTITY_UID] = existingClazzLog.clazzLogUid.toString()
+                savedStateHandle[ARG_CLAZZUID] = testContext.clazz.clazzUid.toString()
+
                 ClazzLogEditAttendanceViewModel(di, savedStateHandle)
             }
 
@@ -228,6 +249,8 @@ class ClazzLogEditAttendanceViewModelTest : AbstractMainDispatcherTest()  {
 
             viewModelFactory {
                 savedStateHandle[UstadView.ARG_ENTITY_UID] = existingClazzLog.clazzLogUid.toString()
+                savedStateHandle[ARG_CLAZZUID] = testContext.clazz.clazzUid.toString()
+
                 ClazzLogEditAttendanceViewModel(di, savedStateHandle)
             }
 

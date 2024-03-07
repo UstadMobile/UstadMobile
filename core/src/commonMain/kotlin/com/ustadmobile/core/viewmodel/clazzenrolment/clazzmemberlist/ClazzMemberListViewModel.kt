@@ -22,16 +22,17 @@ import com.ustadmobile.core.viewmodel.person.PersonViewModelConstants
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import app.cash.paging.PagingSource
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.util.ext.dayStringResource
 import com.ustadmobile.core.util.ext.localFirstThenRepoIfNull
 import com.ustadmobile.core.viewmodel.clazz.parseAndUpdateTerminologyStringsIfNeeded
 import com.ustadmobile.door.util.systemTimeInMillis
-import com.ustadmobile.lib.db.composites.EnrolmentRequestAndPersonPicture
+import com.ustadmobile.lib.db.composites.EnrolmentRequestAndPersonDetails
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.composites.PersonAndClazzMemberListDetails
 import com.ustadmobile.lib.db.entities.EnrolmentRequest
-import com.ustadmobile.lib.db.entities.Role
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
@@ -49,7 +50,7 @@ data class ClazzMemberListUiState(
 
     val teacherList: ListPagingSourceFactory<PersonAndClazzMemberListDetails> = { EmptyPagingSource() },
 
-    val pendingStudentList: ListPagingSourceFactory<EnrolmentRequestAndPersonPicture> = {
+    val pendingStudentList: ListPagingSourceFactory<EnrolmentRequestAndPersonDetails> = {
         EmptyPagingSource()
     },
 
@@ -105,7 +106,7 @@ class ClazzMemberListViewModel(
 
     private var lastStudentListPagingsource: PagingSource<Int, PersonAndClazzMemberListDetails>? = null
 
-    private var lastPendingEnrolmentRequestsPagingSource: PagingSource<Int, EnrolmentRequestAndPersonPicture>? = null
+    private var lastPendingEnrolmentRequestsPagingSource: PagingSource<Int, EnrolmentRequestAndPersonDetails>? = null
 
     private fun getMembersAsPagingSource(
         roleId: Int
@@ -118,6 +119,7 @@ class ClazzMemberListViewModel(
             searchText = _appUiState.value.searchState.searchText.toQueryLikeParam(),
             accountPersonUid = activeUserPersonUid,
             currentTime = systemTimeInMillis(),
+            permission = PermissionFlags.PERSON_VIEW,
         )
     }
 
@@ -133,7 +135,7 @@ class ClazzMemberListViewModel(
         }
     }
 
-    private val pendingStudentListPagingSource: ListPagingSourceFactory<EnrolmentRequestAndPersonPicture> = {
+    private val pendingStudentListPagingSource: ListPagingSourceFactory<EnrolmentRequestAndPersonDetails> = {
         activeRepo.enrolmentRequestDao.findPendingEnrolmentsForCourse(
             clazzUid = clazzUid,
             includeDeleted = false,
@@ -167,42 +169,38 @@ class ClazzMemberListViewModel(
         }
 
         viewModelScope.launch {
-            launch {
-                activeRepo.clazzDao.getClazzNameAndTerminologyAsFlow(clazzUid).collect { nameAndTerminology ->
-                    parseAndUpdateTerminologyStringsIfNeeded(
-                        currentTerminologyStrings = _uiState.value.terminologyStrings,
-                        terminology = nameAndTerminology?.terminology,
-                        json = json,
-                        systemImpl = systemImpl,
-                    ) {
-                        _uiState.update { prev -> prev.copy(terminologyStrings = it) }
-                    }
-
-                    _appUiState.update { prev ->
-                        prev.copy(title = nameAndTerminology?.clazzName ?: "")
-                    }
-                }
-            }
-
             _uiState.whenSubscribed {
                 launch {
-                    activeDb.clazzDao.personHasPermissionWithClazzAsFlow(
-                        accountPersonUid = activeUserPersonUid, clazzUid = clazzUid,
-                        permission = Role.PERMISSION_CLAZZ_ADD_TEACHER
-                    ).collect { canAddTeacher ->
-                        _uiState.takeIf { it.value.addTeacherVisible != canAddTeacher }?.update { prev ->
-                            prev.copy(addTeacherVisible = canAddTeacher)
+                    activeRepo.clazzDao.getClazzNameAndTerminologyAsFlow(clazzUid).collect { nameAndTerminology ->
+                        parseAndUpdateTerminologyStringsIfNeeded(
+                            currentTerminologyStrings = _uiState.value.terminologyStrings,
+                            terminology = nameAndTerminology?.terminology,
+                            json = json,
+                            systemImpl = systemImpl,
+                        ) {
+                            _uiState.update { prev -> prev.copy(terminologyStrings = it) }
+                        }
+
+                        _appUiState.update { prev ->
+                            prev.copy(title = nameAndTerminology?.clazzName ?: "")
                         }
                     }
                 }
 
                 launch {
-                    activeDb.clazzDao.personHasPermissionWithClazzAsFlow(
-                        accountPersonUid = activeUserPersonUid, clazzUid = clazzUid,
-                        permission = Role.PERMISSION_CLAZZ_ADD_STUDENT
-                    ).collect { canAddStudent ->
-                        _uiState.takeIf { it.value.addStudentVisible != canAddStudent }?.update { prev ->
-                            prev.copy(addStudentVisible = canAddStudent)
+                    //Note: we can use the db here, because the permission entities will be pulled
+                    // down by the repo query that is running on the member list itself
+                    activeDb.coursePermissionDao.personHasPermissionWithClazzPairAsFlow(
+                        accountPersonUid = activeUserPersonUid,
+                        clazzUid = clazzUid,
+                        firstPermission = PermissionFlags.COURSE_MANAGE_TEACHER_ENROLMENT,
+                        secondPermission = PermissionFlags.COURSE_MANAGE_STUDENT_ENROLMENT
+                    ).distinctUntilChanged().collect {
+                        _uiState.update { prev ->
+                            prev.copy(
+                                addTeacherVisible = it.firstPermission,
+                                addStudentVisible = it.secondPermission
+                            )
                         }
                     }
                 }
@@ -263,6 +261,14 @@ class ClazzMemberListViewModel(
                     it.clazzDao.findByUidAsync(clazzUid)?.clazzCode
                 }
 
+            val titleStringResource = if(role == ClazzEnrolment.ROLE_STUDENT) {
+                MR.strings.add_a_student
+            }else {
+                MR.strings.add_a_teacher
+            }
+            val title = _uiState.value.terminologyStrings?.get(titleStringResource)
+                ?: systemImpl.getString(titleStringResource)
+
             val goToOnPersonSelectedArg = ClazzEnrolmentEditViewModel.DEST_NAME
                 .appendQueryArgs(
                     mapOf(
@@ -276,6 +282,9 @@ class ClazzMemberListViewModel(
                 put(PersonListViewModel.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ, clazzUid.toString())
                 put(UstadView.ARG_LISTMODE, ListViewMode.PICKER.mode)
                 put(PersonViewModelConstants.ARG_GO_TO_ON_PERSON_SELECTED, goToOnPersonSelectedArg)
+                put(ARG_TITLE, title)
+                put(PersonListViewModel.ARG_REQUIRE_PERMISSION_TO_SHOW_LIST,
+                    PermissionFlags.DIRECT_ENROL.toString())
 
                 if(clazzCode != null)
                     put(PersonListViewModel.ARG_SHOW_ADD_VIA_INVITE_LINK_CODE, clazzCode)

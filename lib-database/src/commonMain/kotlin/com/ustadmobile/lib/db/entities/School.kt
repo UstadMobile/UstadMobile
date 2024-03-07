@@ -120,50 +120,6 @@ open class School() {
     companion object {
         const val TABLE_ID = 164
 
-        const val SCHOOL_FEATURE_ATTENDANCE: Long  = 1
-
-        const val SCHOOL_GENDER_MALE : Int = 1
-        const val SCHOOL_GENDER_FEMALE : Int = 2
-        const val SCHOOL_GENDER_MIXED : Int = 3
-
-        const val JOIN_SCOPEDGRANT_ON_CLAUSE = """
-            ((ScopedGrant.sgTableId = ${ScopedGrant.ALL_TABLES}
-                    AND ScopedGrant.sgEntityUid = ${ScopedGrant.ALL_ENTITIES})
-                OR (ScopedGrant.sgTableId = ${School.TABLE_ID}
-                    AND ScopedGrant.sgEntityUid = School.schoolUid))
-        """
-
-
-        const val JOIN_FROM_SCHOOL_TO_USERSESSION_VIA_SCOPEDGRANT_PT1 = """
-            JOIN ScopedGrant
-                 ON $JOIN_SCOPEDGRANT_ON_CLAUSE
-                        AND (SCopedGrant.sgPermissions &
-        """
-
-        const val JOIN_FROM_SCHOOL_TO_USERSESSION_VIA_SCOPEDGRANT_PT2 = """
-                                                     ) > 0
-             JOIN PersonGroupMember AS PrsGrpMbr
-                   ON ScopedGrant.sgGroupUid = PrsGrpMbr.groupMemberGroupUid
-              JOIN UserSession
-                   ON UserSession.usPersonUid = PrsGrpMbr.groupMemberPersonUid
-                      AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
-                      
-        """
-
-        const val JOIN_FROM_PERSONGROUPMEMBER_TO_SCHOOL_VIA_SCOPEDGRANT_PT1 = """
-            JOIN ScopedGrant 
-                 ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
-                        AND (ScopedGrant.sgPermissions &
-                 
-        """
-
-        const val JOIN_FROM_PERSONGROUPMEMBER_TO_SCHOOL_VIA_SCOPEDGRANT_PT2 = """
-                    ) > 0
-            JOIN School
-                 ON $JOIN_SCOPEDGRANT_ON_CLAUSE
-        """
-
-
     }
 
 }

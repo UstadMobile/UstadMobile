@@ -1,10 +1,10 @@
 package com.ustadmobile.core.domain.assignment.submitassignment
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.clazz.CreateNewClazzUseCase
+import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.EnrolIntoCourseUseCase
+import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.ext.createNewClazzAndGroups
-import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
-import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.withDoorTransactionAsync
@@ -59,14 +59,22 @@ class SubmitAssignmentUseCaseTest {
             }
 
             courseBlock.cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
+            val enrolUseCase = EnrolIntoCourseUseCase(db, null)
 
             runBlocking {
                 db.withDoorTransactionAsync {
-                    db.createNewClazzAndGroups(clazz, systemImpl, emptyMap())
-                    db.insertPersonAndGroup(person)
+                    clazz.clazzUid = CreateNewClazzUseCase(db).invoke(clazz)
+                    person.personUid = AddNewPersonUseCase(db, null).invoke(person)
+
                     if(accountPersonUidRole != 0) {
-                        db.enrolPersonIntoClazzAtLocalTimezone(
-                            person, clazz.clazzUid, accountPersonUidRole,
+                        enrolUseCase(
+                            ClazzEnrolment(
+                                personUid = person.personUid,
+                                clazzUid = clazz.clazzUid
+                            ).also {
+                                it.clazzEnrolmentRole = accountPersonUidRole
+                            },
+                            timeZoneId = "UTC"
                         )
                     }
 

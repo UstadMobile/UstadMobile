@@ -2,6 +2,7 @@ package com.ustadmobile.lib.rest
 
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import io.ktor.server.application.*
 import io.ktor.http.*
 import io.ktor.server.routing.*
@@ -60,6 +61,14 @@ class PersonAuthRegisterRouteTest {
             bind<NotificationSender>() with singleton {
                 mockNotificationSender
             }
+
+            bind<AddNewPersonUseCase>() with scoped(endpointScope).singleton {
+                AddNewPersonUseCase(
+                    db = instance(tag = DoorTag.TAG_DB),
+                    repo = null,
+                )
+            }
+
 
             registerContextTranslator { _: ApplicationCall ->
                 Endpoint("localhost")
