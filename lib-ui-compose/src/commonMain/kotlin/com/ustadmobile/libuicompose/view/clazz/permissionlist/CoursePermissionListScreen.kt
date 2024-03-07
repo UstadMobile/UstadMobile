@@ -58,7 +58,7 @@ fun CoursePermissionListScreen(
     ) {
         ustadPagedItems(
             pagingItems = pagingItems,
-            key = { it}
+            key = { it.coursePermission?.cpUid ?: 0 }
         ) { item: CoursePermissionAndListDetail? ->
             CoursePermissionListItem(
                 coursePermission = item,

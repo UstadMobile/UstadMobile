@@ -1,6 +1,5 @@
 package com.ustadmobile.libuicompose.components
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.ustadmobile.core.util.ext.hasFlag
@@ -16,7 +15,7 @@ fun UstadPermissionEdit(
     enabled: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    Column(
+    UstadVerticalScrollColumn(
         modifier = modifier
     ) {
         permissionLabels.forEach {  permissionLabel ->
