@@ -42,12 +42,13 @@ class CoursePermissionEditViewModel(
                 permissionLabels = CoursePermissionConstants.COURSE_PERMISSIONS_LABELS,
             )
         }
-
+        _appUiState.update { prev -> prev.copy(hideBottomNavigation = true) }
 
         launchIfHasPermission(
             permissionCheck = {
-                it.coursePermissionDao.personHasPermissionWithClazzAsync2(activeUserPersonUid, clazzUid,
-                    PermissionFlags.COURSE_EDIT)
+                it.coursePermissionDao.personHasPermissionWithClazzAsync2(
+                    activeUserPersonUid, clazzUid, PermissionFlags.COURSE_EDIT
+                )
             },
             onSetFieldsEnabled = {
                 _uiState.update { prev -> prev.copy(fieldsEnabled = it) }
