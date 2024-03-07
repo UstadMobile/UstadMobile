@@ -655,7 +655,7 @@
     <string name="undo">Отменить</string>
     <string name="video">Видео</string>
     <string name="content_editor_create_new_category">Новая папка</string>
-    <string name="powered_by">Питаться от</string>
+    <string name="powered_by">Разработано Ustad Mobile</string>
     <string name="invalid_email">Пожалуйста, введите действительный адрес электронной почты</string>
     <string name="select_account">Выберите учетную запись</string>
     <string name="you_are_already_in_school">Ошибка: вы уже зачислены в школу: %1$s</string>
