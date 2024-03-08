@@ -3,23 +3,23 @@ package com.ustadmobile.core.db.dao
 import androidx.room.Insert
 import androidx.room.Query
 import com.ustadmobile.door.annotation.*
-import com.ustadmobile.lib.db.entities.CourseAssignmentSubmissionAttachment
+import com.ustadmobile.lib.db.entities.CourseAssignmentSubmissionFile
 import kotlin.js.JsName
 
 @DoorDao
 @Repository
-expect abstract class CourseAssignmentSubmissionAttachmentDao : BaseDao<CourseAssignmentSubmissionAttachment> {
+expect abstract class CourseAssignmentSubmissionFileDao : BaseDao<CourseAssignmentSubmissionFile> {
 
 
     @JsName("insertListAsync")
     @Insert
-    abstract suspend fun insertListAsync(entityList: List<CourseAssignmentSubmissionAttachment>)
+    abstract suspend fun insertListAsync(entityList: List<CourseAssignmentSubmissionFile>)
 
 
     @Query("""
-        SELECT CourseAssignmentSubmissionAttachment.*
-          FROM CourseAssignmentSubmissionAttachment 
-         WHERE CourseAssignmentSubmissionAttachment.casaSubmissionUid = 
+        SELECT CourseAssignmentSubmissionFile.*
+          FROM CourseAssignmentSubmissionFile 
+         WHERE CourseAssignmentSubmissionFile.casaSubmissionUid = 
                COALESCE((SELECT CourseAssignmentSubmission.casUid
                            FROM CourseAssignmentSubmission
                           WHERE casSubmitterUid = (${ClazzAssignmentDaoCommon.SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL})
@@ -29,7 +29,7 @@ expect abstract class CourseAssignmentSubmissionAttachmentDao : BaseDao<CourseAs
     abstract suspend fun getLatestSubmissionAttachmentsForUserAsync(
         accountPersonUid: Long,
         assignmentUid: Long
-    ): List<CourseAssignmentSubmissionAttachment>
+    ): List<CourseAssignmentSubmissionFile>
 
 
 }

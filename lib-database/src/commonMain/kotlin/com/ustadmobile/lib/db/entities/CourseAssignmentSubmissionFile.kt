@@ -3,7 +3,7 @@ package com.ustadmobile.lib.db.entities
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
-import com.ustadmobile.lib.db.entities.CourseAssignmentSubmissionAttachment.Companion.TABLE_ID
+import com.ustadmobile.lib.db.entities.CourseAssignmentSubmissionFile.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
 @Entity
@@ -24,26 +24,29 @@ import kotlinx.serialization.Serializable
     )
 )
 @Serializable
-class CourseAssignmentSubmissionAttachment {
-
+data class CourseAssignmentSubmissionFile(
     @PrimaryKey(autoGenerate = true)
-    var casaUid: Long = 0
+    var casaUid: Long = 0,
 
-    var casaSubmissionUid: Long = 0
+    var casaSubmissionUid: Long = 0,
 
-    var casaMimeType: String? = null
+    //Assignment Uid
+    var casaCaUid: Long = 0,
 
-    var casaFileName: String? = null
+    var casaClazzUid: Long = 0,
 
-    var casaUri: String? = null
+    var casaMimeType: String? = null,
 
-    var casaMd5: String? = null
+    var casaFileName: String? = null,
 
-    var casaSize: Int = 0
+    var casaUri: String? = null,
+
+    var casaSize: Int = 0,
 
     @ReplicateLastModified
     @ReplicateEtag
     var casaTimestamp: Long = 0
+) {
 
     companion object {
 

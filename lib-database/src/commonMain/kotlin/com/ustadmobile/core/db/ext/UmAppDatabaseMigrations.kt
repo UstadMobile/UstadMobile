@@ -1882,6 +1882,17 @@ val MIGRATION_155_156_CLIENT = DoorMigrationStatementList(155, 156) { db ->
 }
 
 
+val MIGRATION_156_157 = DoorMigrationStatementList(156, 157) { db ->
+    buildList {
+        add("DROP TABLE IF EXISTS CourseAssignmentSubmissionAttachment")
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS CourseAssignmentSubmissionFile (  casaSubmissionUid  INTEGER  NOT NULL , casaCaUid  INTEGER  NOT NULL , casaClazzUid  INTEGER  NOT NULL , casaMimeType  TEXT , casaFileName  TEXT , casaUri  TEXT , casaSize  INTEGER  NOT NULL , casaTimestamp  INTEGER  NOT NULL , casaUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS CourseAssignmentSubmissionFile (  casaSubmissionUid  BIGINT  NOT NULL , casaCaUid  BIGINT  NOT NULL , casaClazzUid  BIGINT  NOT NULL , casaMimeType  TEXT , casaFileName  TEXT , casaUri  TEXT , casaSize  INTEGER  NOT NULL , casaTimestamp  BIGINT  NOT NULL , casaUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+        }
+    }
+}
+
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_102_103,
     MIGRATION_103_104, MIGRATION_104_105, MIGRATION_105_106, MIGRATION_106_107,
@@ -1894,6 +1905,7 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_141_142, MIGRATION_142_143, MIGRATION_143_144, MIGRATION_145_146,
     MIGRATION_146_147, MIGRATION_147_148, MIGRATION_149_150, MIGRATION_150_151,
     MIGRATION_151_152, MIGRATION_152_153, MIGRATION_153_154, MIGRATION_154_155,
+    MIGRATION_156_157,
 )
 
 

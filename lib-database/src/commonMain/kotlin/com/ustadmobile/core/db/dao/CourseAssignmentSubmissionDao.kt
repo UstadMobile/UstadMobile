@@ -21,8 +21,8 @@ expect abstract class CourseAssignmentSubmissionDao : BaseDao<CourseAssignmentSu
         SELECT * 
           FROM CourseAssignmentSubmission
           
-               LEFT JOIN CourseAssignmentSubmissionAttachment
-               ON CourseAssignmentSubmissionAttachment.casaSubmissionUid = CourseAssignmentSubmission.casUid
+               LEFT JOIN CourseAssignmentSubmissionFile
+               ON CourseAssignmentSubmissionFile.casaSubmissionUid = CourseAssignmentSubmission.casUid
                
          WHERE casAssignmentUid = :assignmentUid
            AND casSubmitterUid = :submitterUid
@@ -34,10 +34,10 @@ expect abstract class CourseAssignmentSubmissionDao : BaseDao<CourseAssignmentSu
 
 
     @Query("""
-         SELECT CourseAssignmentSubmission.*, CourseAssignmentSubmissionAttachment.*
+         SELECT CourseAssignmentSubmission.*, CourseAssignmentSubmissionFile.*
           FROM CourseAssignmentSubmission
-               LEFT JOIN CourseAssignmentSubmissionAttachment
-                    ON CourseAssignmentSubmissionAttachment.casaSubmissionUid = CourseAssignmentSubmission.casUid
+               LEFT JOIN CourseAssignmentSubmissionFile
+                    ON CourseAssignmentSubmissionFile.casaSubmissionUid = CourseAssignmentSubmission.casUid
          WHERE casSubmitterUid = ($SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL)
     """)
     abstract fun getAllSubmissionsForUser(

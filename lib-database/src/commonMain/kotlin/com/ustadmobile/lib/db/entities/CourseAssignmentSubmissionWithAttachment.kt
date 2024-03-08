@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 class CourseAssignmentSubmissionWithAttachment : CourseAssignmentSubmission() {
 
     @Embedded
-    var attachment: CourseAssignmentSubmissionAttachment? = null
+    var attachment: CourseAssignmentSubmissionFile? = null
 
 }
 

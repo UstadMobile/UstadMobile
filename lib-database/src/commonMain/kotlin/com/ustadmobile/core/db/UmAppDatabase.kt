@@ -33,7 +33,7 @@ import com.ustadmobile.lib.db.entities.*
     ScopedGrant::class,
     ErrorReport::class,
     ClazzAssignment::class,  CourseAssignmentSubmission::class,
-    CourseAssignmentSubmissionAttachment::class, CourseAssignmentMark::class,
+    CourseAssignmentSubmissionFile::class, CourseAssignmentMark::class,
     PeerReviewerAllocation::class,
     PersonAuth2::class,
     UserSession::class,
@@ -69,7 +69,7 @@ import com.ustadmobile.lib.db.entities.*
     ReplicationOperation::class,
     PendingRepositorySession::class,
 
-], version = 156)
+], version = 157)
 /*
  Replicate entities (e.g. trackers) to drop:
      ClazzLogReplicate
@@ -270,7 +270,7 @@ expect abstract class UmAppDatabase : RoomDatabase {
 
     abstract val courseAssignmentSubmissionDao: CourseAssignmentSubmissionDao
 
-    abstract val courseAssignmentSubmissionAttachmentDao: CourseAssignmentSubmissionAttachmentDao
+    abstract val courseAssignmentSubmissionFileDao: CourseAssignmentSubmissionFileDao
 
     abstract val courseAssignmentMarkDao: CourseAssignmentMarkDao
 
