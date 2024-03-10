@@ -1858,4 +1858,6 @@
 
     <string name="reset_passwords">Reset passwords</string>
 
+    <string name="upload_failed">Upload failed</string>
+
 </resources>

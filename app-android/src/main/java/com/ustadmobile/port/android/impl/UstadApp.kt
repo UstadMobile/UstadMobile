@@ -47,6 +47,7 @@ import com.ustadmobile.core.domain.blob.download.EnqueueContentManifestDownloadJ
 import com.ustadmobile.core.domain.blob.download.MakeContentEntryAvailableOfflineUseCase
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCaseJvm
+import com.ustadmobile.core.domain.blob.saveandupload.SaveAndUploadLocalUrisUseCase
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCaseJvm
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
@@ -734,6 +735,15 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
         bind<ShareTextUseCase>() with singleton {
             ShareTextUseCaseAndroid(applicationContext)
+        }
+
+        bind<SaveAndUploadLocalUrisUseCase>() with scoped(EndpointScope.Default).singleton {
+            SaveAndUploadLocalUrisUseCase(
+                saveLocalUrisAsBlobsUseCase = instance(),
+                enqueueBlobUploadClientUseCase = instance(),
+                activeDb = instance(tag = DoorTag.TAG_DB),
+                activeRepo = instance(tag = DoorTag.TAG_REPO),
+            )
         }
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
