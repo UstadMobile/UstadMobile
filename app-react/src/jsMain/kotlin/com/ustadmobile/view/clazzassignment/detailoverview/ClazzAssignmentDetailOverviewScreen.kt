@@ -37,6 +37,7 @@ import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.virtualListContent
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useUstadViewModel
+import com.ustadmobile.lib.db.composites.CourseAssignmentSubmissionFileAndTransferJob
 import com.ustadmobile.view.clazzassignment.AssignmentCommentTextFieldListItem
 import com.ustadmobile.view.clazzassignment.CourseAssignmentSubmissionComponent
 import com.ustadmobile.view.clazzassignment.CourseAssignmentSubmissionFileListItem
@@ -84,6 +85,8 @@ external interface ClazzAssignmentDetailOverviewScreenProps : Props {
     var onClickCourseGroupSet: () -> Unit
 
     var onAddFile: (File) -> Unit
+
+    var onRemoveSubmissionFile: (CourseAssignmentSubmissionFileAndTransferJob) -> Unit
 
 }
 
@@ -304,6 +307,7 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                 ) {
                     CourseAssignmentSubmissionFileListItem.create {
                         file = it
+                        onRemove = props.onRemoveSubmissionFile
                     }
                 }
 
@@ -489,5 +493,6 @@ val ClazzAssignmentDetailOverviewScreen = FC<Props> {
                 size = file.size.toLong(),
             )
         }
+        onRemoveSubmissionFile = viewModel::onRemoveSubmissionFile
     }
 }

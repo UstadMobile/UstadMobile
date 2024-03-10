@@ -22,6 +22,7 @@ expect abstract class CourseAssignmentSubmissionFileDao : BaseDao<CourseAssignme
                          ON TransferJobItem.tjiEntityUid = CourseAssignmentSubmissionFile.casaUid
                             AND TransferJobItem.tjiTableId = ${CourseAssignmentSubmissionFile.TABLE_ID}
          WHERE CourseAssignmentSubmissionFile.casaSubmissionUid = :submissionUid
+           AND NOT CourseAssignmentSubmissionFile.casaDeleted
     """)
     abstract fun getBySubmissionUid(
         submissionUid: Long
@@ -43,6 +44,7 @@ expect abstract class CourseAssignmentSubmissionFileDao : BaseDao<CourseAssignme
                  WHERE CourseAssignmentSubmission.casAssignmentUid = :assignmentUid
                    AND CourseAssignmentSubmission.casSubmitterUid = 
                        (${ClazzAssignmentDaoCommon.SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL}))
+           AND NOT CourseAssignmentSubmissionFile.casaDeleted        
     """)
     abstract fun getByAssignmentUidAndPersonUid(
         accountPersonUid: Long,
@@ -58,6 +60,19 @@ expect abstract class CourseAssignmentSubmissionFileDao : BaseDao<CourseAssignme
     abstract suspend fun updateUri(
         casaUid: Long,
         uri: String,
+        updateTime: Long,
+    )
+
+
+    @Query("""
+        UPDATE CourseAssignmentSubmissionFile
+           SET casaDeleted = :deleted,
+               casaTimestamp = :updateTime
+         WHERE casaUid = :casaUid
+    """)
+    abstract suspend fun setDeleted(
+        casaUid: Long,
+        deleted: Boolean,
         updateTime: Long,
     )
 

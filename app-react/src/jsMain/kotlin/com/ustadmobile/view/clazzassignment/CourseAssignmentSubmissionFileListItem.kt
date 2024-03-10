@@ -19,19 +19,25 @@ import react.ReactNode
 import react.create
 import react.dom.html.ReactHTML
 import mui.icons.material.Error as ErrorIcon
+import mui.icons.material.Clear as ClearIcon
 import com.ustadmobile.core.MR
 import com.ustadmobile.mui.components.ThemeContext
+import mui.material.IconButton
 import mui.material.LinearProgressVariant
+import mui.material.Tooltip
 import mui.system.sx
+import react.dom.aria.ariaLabel
 import react.useRequiredContext
 
 external interface CourseAssignmentSubmissionFileListItemProps : Props {
     var file: CourseAssignmentSubmissionFileAndTransferJob
+    var onRemove: ((CourseAssignmentSubmissionFileAndTransferJob) -> Unit)?
 }
 
 val CourseAssignmentSubmissionFileListItem = FC<CourseAssignmentSubmissionFileListItemProps> { props ->
     val strings = useStringProvider()
     val theme by useRequiredContext(ThemeContext)
+    val onRemoveVal = props.onRemove
 
     ListItem {
         ListItemButton {
@@ -63,6 +69,19 @@ val CourseAssignmentSubmissionFileListItem = FC<CourseAssignmentSubmissionFileLi
                 }
                 secondaryTypographyProps = jso {
                     component = ReactHTML.div
+                }
+            }
+        }
+
+        secondaryAction = onRemoveVal?.let { onRemoveFn ->
+            Tooltip.create {
+                title = ReactNode(strings[MR.strings.remove])
+                IconButton {
+                    ariaLabel = strings[MR.strings.remove]
+                    onClick = {
+                        onRemoveFn(props.file)
+                    }
+                    ClearIcon()
                 }
             }
         }

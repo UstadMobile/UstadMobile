@@ -7,8 +7,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Article
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
@@ -20,10 +22,12 @@ import com.ustadmobile.lib.db.composites.CourseAssignmentSubmissionFileAndTransf
 import com.ustadmobile.lib.db.composites.TransferJobItemStatus
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
+import com.ustadmobile.libuicompose.components.UstadTooltipBox
 
 @Composable
 fun CourseAssignmentSubmissionFileListItem(
-    fileAndTransferJob: CourseAssignmentSubmissionFileAndTransferJob
+    fileAndTransferJob: CourseAssignmentSubmissionFileAndTransferJob,
+    onRemove: ((CourseAssignmentSubmissionFileAndTransferJob) -> Unit)? = null,
 ) {
     ListItem(
         leadingContent = {
@@ -52,6 +56,21 @@ fun CourseAssignmentSubmissionFileListItem(
                         }
                     }
 
+                }
+            }
+        },
+        trailingContent = onRemove?.let { onRemoveFn ->
+            {
+                UstadTooltipBox(
+                    tooltipText = stringResource(MR.strings.remove)
+                ) {
+                    IconButton(
+                        onClick = {
+                            onRemoveFn(fileAndTransferJob)
+                        }
+                    ) {
+                        Icon(Icons.Default.Clear, contentDescription = stringResource(MR.strings.remove))
+                    }
                 }
             }
         }

@@ -55,6 +55,8 @@ import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCaseAnd
 import com.ustadmobile.core.domain.blob.savepicture.SavePictureUseCase
 import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCase
 import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCaseJvm
+import com.ustadmobile.core.domain.blob.upload.CancelBlobUploadClientUseCase
+import com.ustadmobile.core.domain.blob.upload.CancelBlobUploadClientUseCaseAndroid
 import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCase
 import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCaseAndroid
 import com.ustadmobile.core.domain.blob.upload.UpdateFailedTransferJobUseCase
@@ -743,6 +745,14 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 enqueueBlobUploadClientUseCase = instance(),
                 activeDb = instance(tag = DoorTag.TAG_DB),
                 activeRepo = instance(tag = DoorTag.TAG_REPO),
+            )
+        }
+
+        bind<CancelBlobUploadClientUseCase>() with scoped(EndpointScope.Default).singleton {
+            CancelBlobUploadClientUseCaseAndroid(
+                appContext = applicationContext,
+                endpoint = context,
+                db = instance(tag = DoorTag.TAG_DB),
             )
         }
 

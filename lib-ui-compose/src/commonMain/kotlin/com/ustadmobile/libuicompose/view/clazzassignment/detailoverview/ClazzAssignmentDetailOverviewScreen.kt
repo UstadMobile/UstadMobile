@@ -43,6 +43,7 @@ import com.ustadmobile.libuicompose.components.ustadPagedItems
 import androidx.compose.runtime.remember
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.ustadmobile.core.viewmodel.clazzassignment.averageMark
+import com.ustadmobile.lib.db.composites.CourseAssignmentSubmissionFileAndTransferJob
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadPickFileOpts
 import com.ustadmobile.libuicompose.components.UstadRichTextEdit
@@ -83,7 +84,8 @@ fun ClazzAssignmentDetailOverviewScreen(viewModel: ClazzAssignmentDetailOverview
         onClickMarksFilterChip = viewModel::onClickMarksFilterChip,
         onClickAddFileSubmission = {
             filePickLauncher(UstadPickFileOpts())
-        }
+        },
+        onRemoveSubmissionFile = viewModel::onRemoveSubmissionFile,
     )
 }
 
@@ -100,6 +102,7 @@ fun ClazzAssignmentDetailOverviewScreen(
     onClickAddFileSubmission: () -> Unit = { },
     onClickSubmitSubmission: () -> Unit = { },
     onClickCourseGroupSet: () -> Unit = { },
+    onRemoveSubmissionFile: (CourseAssignmentSubmissionFileAndTransferJob) -> Unit = { },
 ){
 
     val privateCommentsPager = remember(uiState.privateComments) {
@@ -271,7 +274,8 @@ fun ClazzAssignmentDetailOverviewScreen(
                 key = { Pair(CourseAssignmentSubmissionFile.TABLE_ID, it.submissionFile?.casaUid) }
             ) { item ->
                 CourseAssignmentSubmissionFileListItem(
-                    fileAndTransferJob = item
+                    fileAndTransferJob = item,
+                    onRemove = onRemoveSubmissionFile,
                 )
             }
 

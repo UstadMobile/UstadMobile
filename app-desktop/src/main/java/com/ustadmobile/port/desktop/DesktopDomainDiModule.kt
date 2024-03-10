@@ -34,6 +34,8 @@ import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCaseJvm
 import com.ustadmobile.core.domain.blob.savepicture.SavePictureUseCase
 import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCase
 import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCaseJvm
+import com.ustadmobile.core.domain.blob.upload.CancelBlobUploadClientUseCase
+import com.ustadmobile.core.domain.blob.upload.CancelBlobUploadClientUseCaseJvm
 import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCase
 import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCaseJvm
 import com.ustadmobile.core.domain.blob.upload.UpdateFailedTransferJobUseCase
@@ -405,6 +407,14 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             enqueueBlobUploadClientUseCase = instance(),
             activeDb = instance(tag = DoorTag.TAG_DB),
             activeRepo = instance(tag = DoorTag.TAG_REPO),
+        )
+    }
+
+    bind<CancelBlobUploadClientUseCase>() with scoped(EndpointScope.Default).singleton {
+        CancelBlobUploadClientUseCaseJvm(
+            scheduler = instance(),
+            endpoint = context,
+            db = instance(tag = DoorTag.TAG_DB),
         )
     }
 

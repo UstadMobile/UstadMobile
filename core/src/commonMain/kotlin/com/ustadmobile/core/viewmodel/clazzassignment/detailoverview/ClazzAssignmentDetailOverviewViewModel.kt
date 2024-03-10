@@ -15,6 +15,7 @@ import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.UstadAssignmentSubmissionHeaderUiState
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import app.cash.paging.PagingSource
+import com.ustadmobile.core.domain.blob.upload.CancelBlobUploadClientUseCase
 import com.ustadmobile.core.domain.blob.saveandupload.SaveAndUploadLocalUrisUseCase
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
 import com.ustadmobile.core.util.ext.onActiveEndpoint
@@ -25,6 +26,7 @@ import com.ustadmobile.core.viewmodel.clazzassignment.latestUniqueMarksByMarker
 import com.ustadmobile.core.viewmodel.clazzassignment.submissionStatusFor
 import com.ustadmobile.core.viewmodel.coursegroupset.detail.CourseGroupSetDetailViewModel
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
+import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.CommentsAndName
 import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
@@ -50,6 +52,7 @@ import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
+import org.kodein.di.instanceOrNull
 
 
 /**
@@ -269,6 +272,9 @@ class ClazzAssignmentDetailOverviewViewModel(
 
     private val saveAndUploadUseCase: SaveAndUploadLocalUrisUseCase by di.onActiveEndpoint()
         .instance()
+
+    private val cancelTransferJobUseCase: CancelBlobUploadClientUseCase? by di.onActiveEndpoint()
+        .instanceOrNull()
 
     init {
         _uiState.update { prev ->
@@ -613,6 +619,22 @@ class ClazzAssignmentDetailOverviewViewModel(
                 ARG_CLAZZUID to clazzUid.toString(),
             )
         )
+    }
+
+    fun onRemoveSubmissionFile(file: CourseAssignmentSubmissionFileAndTransferJob) {
+        viewModelScope.launch {
+            activeRepo.withDoorTransactionAsync {
+                activeRepo.courseAssignmentSubmissionFileDao.setDeleted(
+                    casaUid = file.submissionFile?.casaUid ?: 0,
+                    deleted = true,
+                    updateTime = systemTimeInMillis(),
+                )
+            }
+
+            file.transferJobItem?.tjiTjUid?.also { transferJobId ->
+                cancelTransferJobUseCase?.invoke(transferJobId)
+            }
+        }
     }
 
     companion object {
