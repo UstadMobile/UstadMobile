@@ -20,30 +20,26 @@ expect abstract class CourseAssignmentSubmissionDao : BaseDao<CourseAssignmentSu
     @Query("""
         SELECT * 
           FROM CourseAssignmentSubmission
-          
-               LEFT JOIN CourseAssignmentSubmissionFile
-               ON CourseAssignmentSubmissionFile.casaSubmissionUid = CourseAssignmentSubmission.casUid
-               
          WHERE casAssignmentUid = :assignmentUid
            AND casSubmitterUid = :submitterUid
       ORDER BY casTimestamp DESC
     """)
-    abstract fun getAllSubmissionsFromSubmitter(assignmentUid: Long, submitterUid: Long)
-            : PagingSource<Int, CourseAssignmentSubmissionWithAttachment>
+    abstract fun getAllSubmissionsFromSubmitter(
+        assignmentUid: Long,
+        submitterUid: Long
+    ) : PagingSource<Int, CourseAssignmentSubmission>
 
 
 
     @Query("""
-         SELECT CourseAssignmentSubmission.*, CourseAssignmentSubmissionFile.*
+         SELECT CourseAssignmentSubmission.*
           FROM CourseAssignmentSubmission
-               LEFT JOIN CourseAssignmentSubmissionFile
-                    ON CourseAssignmentSubmissionFile.casaSubmissionUid = CourseAssignmentSubmission.casUid
          WHERE casSubmitterUid = ($SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL)
     """)
     abstract fun getAllSubmissionsForUser(
         accountPersonUid: Long,
         assignmentUid: Long,
-    ): Flow<List<CourseAssignmentSubmissionWithAttachment>>
+    ): Flow<List<CourseAssignmentSubmission>>
 
     @HttpAccessible(
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES

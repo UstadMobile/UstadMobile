@@ -393,7 +393,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
 
             viewModel.uiState.test(timeout = 5.seconds, name = "wait for submission done") {
                 val submittedDoneState = awaitItemWhere {
-                    it.submissions.isNotEmpty()
+                    it.submissions.firstOrNull()?.submission?.casText == submissionText
                 }
 
                 assertFalse(submittedDoneState.activeUserCanSubmit)
@@ -401,7 +401,8 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
                     CourseAssignmentSubmission.SUBMITTED,
                     submittedDoneState.submissionStatus
                 )
-                assertEquals(submissionText, submittedDoneState.editableSubmission?.casText)
+                assertEquals(submissionText,
+                    submittedDoneState.submissions.firstOrNull()?.submission?.casText)
                 cancelAndIgnoreRemainingEvents()
             }
         }

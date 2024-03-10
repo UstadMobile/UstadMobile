@@ -43,12 +43,14 @@ import com.ustadmobile.libuicompose.components.ustadPagedItems
 import androidx.compose.runtime.remember
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.ustadmobile.core.viewmodel.clazzassignment.averageMark
-import com.ustadmobile.core.viewmodel.clazzassignment.submissionStatusFor
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
+import com.ustadmobile.libuicompose.components.UstadPickFileOpts
 import com.ustadmobile.libuicompose.components.UstadRichTextEdit
+import com.ustadmobile.libuicompose.components.rememberUstadFilePickLauncher
 import com.ustadmobile.libuicompose.util.linkify.rememberLinkExtractor
 import com.ustadmobile.libuicompose.view.clazzassignment.CommentListItem
 import com.ustadmobile.libuicompose.view.clazzassignment.CourseAssignmentSubmissionComponent
+import com.ustadmobile.libuicompose.view.clazzassignment.CourseAssignmentSubmissionFileListItem
 import com.ustadmobile.libuicompose.view.clazzassignment.UstadAssignmentSubmissionStatusHeaderItems
 import kotlinx.coroutines.Dispatchers
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
@@ -58,6 +60,15 @@ fun ClazzAssignmentDetailOverviewScreen(viewModel: ClazzAssignmentDetailOverview
     val uiState by viewModel.uiState.collectAsStateWithLifecycle(
         ClazzAssignmentDetailOverviewUiState(), Dispatchers.Main.immediate
     )
+
+    val filePickLauncher = rememberUstadFilePickLauncher {
+        viewModel.onAddSubmissionFile(
+            uri = it.uri,
+            fileName =  it.fileName,
+            mimeType = "",
+            size = 0
+        )
+    }
 
     ClazzAssignmentDetailOverviewScreen(
         uiState = uiState,
@@ -70,6 +81,9 @@ fun ClazzAssignmentDetailOverviewScreen(viewModel: ClazzAssignmentDetailOverview
         onChangeSubmissionText = viewModel::onChangeSubmissionText,
         onClickCourseGroupSet = viewModel::onClickCourseGroupSet,
         onClickMarksFilterChip = viewModel::onClickMarksFilterChip,
+        onClickAddFileSubmission = {
+            filePickLauncher(UstadPickFileOpts())
+        }
     )
 }
 
@@ -83,11 +97,6 @@ fun ClazzAssignmentDetailOverviewScreen(
     onClickSubmitPrivateComment: () -> Unit = {},
     onClickEditSubmission: () -> Unit = {},
     onChangeSubmissionText: (String) -> Unit = { },
-    @Suppress("UNUSED_PARAMETER")
-    onClickOpenSubmission: (CourseAssignmentSubmissionWithAttachment) -> Unit = {},
-    @Suppress("UNUSED_PARAMETER")
-    onClickDeleteSubmission: (CourseAssignmentSubmissionWithAttachment) -> Unit = { },
-    @Suppress("UNUSED_PARAMETER")
     onClickAddFileSubmission: () -> Unit = { },
     onClickSubmitSubmission: () -> Unit = { },
     onClickCourseGroupSet: () -> Unit = { },
@@ -189,20 +198,7 @@ fun ClazzAssignmentDetailOverviewScreen(
         }
 
         UstadAssignmentSubmissionStatusHeaderItems(
-            submissionStatus = if(uiState.activeUserIsSubmitter) {
-                submissionStatusFor(
-                    markList = uiState.markList,
-                    submissionList = uiState.editableSubmission?.let {
-                        if(it.casTimestamp > 0) {
-                            listOf(it)
-                        } else {
-                            emptyList()
-                        }
-                    } ?: emptyList()
-                )
-            }else {
-                null
-            },
+            submissionStatus = uiState.submissionStatus,
             averageMark = uiState.markList.averageMark(),
             maxPoints = uiState.courseBlock?.cbMaxPoints ?: 0,
             submissionPenaltyPercent = uiState.courseBlock?.cbLateSubmissionPenalty ?: 0,
@@ -219,15 +215,16 @@ fun ClazzAssignmentDetailOverviewScreen(
         }
 
         if(uiState.activeUserIsSubmitter) {
-            item(key = "your_submission_header") {
-                val suffix = if (uiState.isGroupSubmission) {
-                    "(${stringResource(MR.strings.group_number, uiState.submitterUid.toString())})"
-                } else {
-                    ""
+            if(uiState.activeUserCanSubmit) {
+                item(key = "your_submission_header") {
+                    val suffix = if (uiState.isGroupSubmission) {
+                        "(${stringResource(MR.strings.group_number, uiState.submitterUid.toString())})"
+                    } else {
+                        ""
+                    }
+                    UstadEditHeader(stringResource(MR.strings.your_submission) + " " + suffix)
                 }
-                UstadEditHeader(stringResource(MR.strings.your_submission) + " " + suffix)
             }
-
 
             if(uiState.submissionTextFieldVisible) {
                 item(key = "submission") {
@@ -247,10 +244,13 @@ fun ClazzAssignmentDetailOverviewScreen(
                 }
             }
 
-            if(uiState.addFileVisible) {
+            println("addFileSubmissionVisible: ${uiState.addFileSubmissionVisible}")
+            if(uiState.addFileSubmissionVisible) {
                 item(key = "add_file_button") {
                     ListItem(
-                        modifier = Modifier.testTag("add_file"),
+                        modifier = Modifier.testTag("add_file").clickable {
+                            onClickAddFileSubmission()
+                        },
                         headlineContent = { Text(stringResource(MR.strings.add_file)) },
                         supportingContent = {
                             Text(
@@ -264,6 +264,15 @@ fun ClazzAssignmentDetailOverviewScreen(
                         }
                     )
                 }
+            }
+
+            items(
+                items = uiState.editableSubmissionFiles,
+                key = { Pair(CourseAssignmentSubmissionFile.TABLE_ID, it.submissionFile?.casaUid) }
+            ) { item ->
+                CourseAssignmentSubmissionFileListItem(
+                    fileAndTransferJob = item
+                )
             }
 
 
@@ -291,9 +300,18 @@ fun ClazzAssignmentDetailOverviewScreen(
                 }
             }
 
-            uiState.submissions.forEach { submissionAndAttachments ->
-                item(key = "submission_${submissionAndAttachments.submission.casUid}") {
-                    CourseAssignmentSubmissionComponent(submissionAndAttachments.submission)
+            uiState.submissions.forEach { submissionAndFiles ->
+                item(key = "submission_${submissionAndFiles.submission.casUid}") {
+                    CourseAssignmentSubmissionComponent(submissionAndFiles.submission)
+                }
+
+                items(
+                    items = submissionAndFiles.files,
+                    key = { Pair("submittedfile", it.submissionFile?.casaUid ?: 0)}
+                ) { file ->
+                    CourseAssignmentSubmissionFileListItem(
+                        fileAndTransferJob = file
+                    )
                 }
             }
 

@@ -13,11 +13,15 @@ import react.Props
 import react.useRequiredContext
 import mui.material.Stack
 import mui.material.StackDirection
-import mui.material.Typography
-import mui.material.styles.TypographyVariant
 import mui.system.responsive
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.util.ext.capitalizeFirstLetter
+import mui.material.IconButton
+import mui.material.ListItem
+import mui.material.ListItemButton
+import mui.material.ListItemText
+import react.ReactNode
+import react.create
+import mui.icons.material.ExpandMore as ExpandMoreIcon
 
 external interface CourseAssignmentSubmissionProps: Props {
     var submission: CourseAssignmentSubmission
@@ -31,26 +35,30 @@ val CourseAssignmentSubmissionComponent = FC<CourseAssignmentSubmissionProps> { 
         timezoneId = TimeZone.currentSystemDefault().id,
     )
 
+    Stack {
+        direction = responsive(StackDirection.column)
 
-    Box {
-        sx {
-            padding = theme.spacing(2)
+        ListItem {
+            ListItemButton {
+                disableGutters = true
+                ListItemText {
+                    primary = ReactNode("${strings[MR.strings.your_submission]} ($submittedTime)")
+                }
+            }
+
+            secondaryAction = IconButton.create {
+                ExpandMoreIcon()
+            }
         }
 
-        Stack {
-            direction = responsive(StackDirection.column)
+        Box {
+            sx {
+                padding = theme.spacing(4)
+            }
 
             UstadRawHtml {
                 html = props.submission.casText ?: ""
             }
-
-            Typography {
-                variant = TypographyVariant.caption
-                + "${strings[MR.strings.submitted_key].capitalizeFirstLetter()}: $submittedTime"
-            }
         }
-
     }
-
-
 }

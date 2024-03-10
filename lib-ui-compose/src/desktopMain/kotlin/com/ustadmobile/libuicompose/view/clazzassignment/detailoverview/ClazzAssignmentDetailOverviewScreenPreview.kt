@@ -23,7 +23,6 @@ fun ClazzAssignmentDetailOverviewScreenPreview(){
                 cbDescription = "Complete your assignment or <b>else</b>"
             },
             submitterUid = 42L,
-            addFileVisible = true,
             editableSubmission = CourseAssignmentSubmission().apply {
                 casText = ""
             },

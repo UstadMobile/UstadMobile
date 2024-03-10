@@ -15,26 +15,34 @@ import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.UstadAssignmentSubmissionHeaderUiState
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import app.cash.paging.PagingSource
+import com.ustadmobile.core.domain.blob.saveandupload.SaveAndUploadLocalUrisUseCase
+import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
+import com.ustadmobile.core.util.ext.onActiveEndpoint
 import com.ustadmobile.core.viewmodel.clazzassignment.averageMark
 import com.ustadmobile.core.viewmodel.clazzassignment.detail.ClazzAssignmentDetailViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.hasUpdatedMarks
 import com.ustadmobile.core.viewmodel.clazzassignment.latestUniqueMarksByMarker
+import com.ustadmobile.core.viewmodel.clazzassignment.submissionStatusFor
 import com.ustadmobile.core.viewmodel.coursegroupset.detail.CourseGroupSetDetailViewModel
+import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.CommentsAndName
 import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
-import com.ustadmobile.lib.db.composites.SubmissionAndAttachments
+import com.ustadmobile.lib.db.composites.CourseAssignmentSubmissionFileAndTransferJob
+import com.ustadmobile.lib.db.composites.SubmissionAndFiles
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
@@ -63,11 +71,11 @@ data class ClazzAssignmentDetailOverviewUiState(
 
     val editableSubmission: CourseAssignmentSubmission? = null,
 
-    val editableSubmissionFiles: List<CourseAssignmentSubmissionAttachment> = emptyList(),
+    val editableSubmissionFiles: List<CourseAssignmentSubmissionFileAndTransferJob> = emptyList(),
 
     val submissionTooLong: Boolean = false,
 
-    val submissions: List<SubmissionAndAttachments> = emptyList(),
+    val submissions: List<SubmissionAndFiles> = emptyList(),
 
     val markList: List<CourseAssignmentMarkAndMarkerName> = emptyList(),
 
@@ -88,8 +96,6 @@ data class ClazzAssignmentDetailOverviewUiState(
         UstadAssignmentSubmissionHeaderUiState(),
 
     val unassignedError: String? = null,
-
-    val addFileVisible: Boolean = false,
 
     val submissionError: String? = null,
 
@@ -172,13 +178,10 @@ data class ClazzAssignmentDetailOverviewUiState(
 
     val submissionStatus: Int?
         get() {
-            return if(submissionMark != null) {
-                CourseAssignmentSubmission.MARKED
-            }else if((editableSubmission?.casTimestamp ?: 0) > 0) {
-                CourseAssignmentSubmission.SUBMITTED
-            }else {
+            return if(activeUserIsSubmitter)
+                submissionStatusFor(markList, submissions)
+            else
                 null
-            }
         }
 
     val privateCommentSectionVisible: Boolean
@@ -264,6 +267,9 @@ class ClazzAssignmentDetailOverviewViewModel(
 
     private val clazzUid = savedStateHandle[ARG_CLAZZUID]?.toLong() ?: throw IllegalArgumentException("clazzUid arg is required")
 
+    private val saveAndUploadUseCase: SaveAndUploadLocalUrisUseCase by di.onActiveEndpoint()
+        .instance()
+
     init {
         _uiState.update { prev ->
             prev.copy(
@@ -280,6 +286,19 @@ class ClazzAssignmentDetailOverviewViewModel(
         ).shareIn(viewModelScope, SharingStarted.WhileSubscribed())
 
         viewModelScope.launch {
+            val editableSubmission = savedStateHandle.getJson(
+                STATE_EDITABLE_SUBMISSION, CourseAssignmentSubmission.serializer(),
+            ) ?: newCourseAssignmentSubmission()
+
+            _uiState.update { prev -> prev.copy(editableSubmission = editableSubmission) }
+
+            launch {
+                navResultReturner.filteredResultFlowForKey(KEY_SUBMISSION_HTML).collect {
+                    val newSubmissionHtml = it.result as? String ?: return@collect
+                    onChangeSubmissionText(newSubmissionHtml)
+                }
+            }
+
             _uiState.whenSubscribed {
                 launch {
                     entityFlow.collect { assignmentData ->
@@ -308,20 +327,30 @@ class ClazzAssignmentDetailOverviewViewModel(
                 }
 
                 launch {
-                    activeRepo.courseAssignmentSubmissionDao.findByAssignmentUidAndAccountPersonUid(
-                        accountPersonUid = activeUserPersonUid,
-                        assignmentUid = entityUidArg,
-                    ).collect { submissions ->
-                        val submissionAndAttachments = submissions.map {
-                            SubmissionAndAttachments(
-                                submission = it,
-                                attachments = emptyList()
+                    val submissionFlow = activeRepo
+                        .courseAssignmentSubmissionDao.findByAssignmentUidAndAccountPersonUid(
+                            accountPersonUid = activeUserPersonUid,
+                            assignmentUid = entityUidArg,
+                        )
+
+                    val submissionFilesFlow = activeRepo
+                        .courseAssignmentSubmissionFileDao.getByAssignmentUidAndPersonUid(
+                            accountPersonUid = activeUserPersonUid,
+                            assignmentUid = entityUidArg,
+                        )
+
+                    submissionFlow.combine(submissionFilesFlow) { submissions, submissionFiles ->
+                        submissions.map {  submission ->
+                            SubmissionAndFiles(
+                                submission = submission,
+                                files = submissionFiles.filter {
+                                    it.submissionFile?.casaSubmissionUid == submission.casUid
+                                }
                             )
                         }
+                    }.distinctUntilChanged().collect {
                         _uiState.update { prev ->
-                            prev.copy(
-                                submissions = submissionAndAttachments
-                            )
+                            prev.copy(submissions = it)
                         }
                     }
                 }
@@ -338,64 +367,20 @@ class ClazzAssignmentDetailOverviewViewModel(
                         }
                     }
                 }
-            }
-        }
 
-        viewModelScope.launch {
-            awaitAll(
-                async {
-                    loadEntity(
-                        serializer = CourseAssignmentSubmission.serializer(),
-                        loadFromStateKeys = listOf(STATE_LATEST_SUBMISSION),
-                        onLoadFromDb = { db ->
-                            null
-                        },
-                        makeDefault = {
-                            CourseAssignmentSubmission().apply {
-                                casAssignmentUid = entityUidArg
-                                casSubmitterPersonUid = accountManager.currentUserSession.person.personUid
-                            }
-                        },
-                        uiUpdate = {
-                            _uiState.update { prev ->
-                                prev.copy(
-                                    editableSubmission = it
-                                )
-                            }
+                launch {
+                    //Note: the submission uid will change when the user submits.
+                    _uiState.map {
+                        it.editableSubmission?.casUid ?: 0
+                    }.distinctUntilChanged().collectLatest { submissionUid ->
+                        activeDb.courseAssignmentSubmissionFileDao.getBySubmissionUid(
+                            submissionUid
+                        ).distinctUntilChanged().collect {
+                            _uiState.update { prev -> prev.copy(editableSubmissionFiles = it) }
                         }
-                    )
-                },
-//                async {
-//                    loadEntity(
-//                        serializer = ListSerializer(CourseAssignmentSubmissionAttachment.serializer()),
-//                        loadFromStateKeys = listOf(STATE_LATEST_SUBMISSION_ATTACHMENTS),
-//                        onLoadFromDb = { db ->
-//                            db.courseAssignmentSubmissionAttachmentDao.getLatestSubmissionAttachmentsForUserAsync(
-//                                accountPersonUid = accountManager.currentUserSession.person.personUid,
-//                                assignmentUid = entityUidArg
-//                            )
-//                        },
-//                        makeDefault = {
-//                            emptyList()
-//                        },
-//                        uiUpdate = {
-//                            _uiState.update { prev ->
-//                                prev.copy(
-//                                    latestSubmissionAttachments = it
-//                                )
-//                            }
-//                        }
-//                    )
-//                }
-            )
-
-            launch {
-                navResultReturner.filteredResultFlowForKey(KEY_SUBMISSION_HTML).collect {
-                    val newSubmissionHtml = it.result as? String ?: return@collect
-                    onChangeSubmissionText(newSubmissionHtml)
+                    }
                 }
             }
-
         }
 
         _uiState.update { prev ->
@@ -405,6 +390,19 @@ class ClazzAssignmentDetailOverviewViewModel(
             )
         }
     }
+
+    /**
+     * Create a new (blank) assignment submission. Used on instantiation and after a submission is
+     * made.
+     */
+    private fun newCourseAssignmentSubmission() = CourseAssignmentSubmission(
+        casUid = activeDb.doorPrimaryKeyManager.nextId(CourseAssignmentSubmission.TABLE_ID),
+        casAssignmentUid = entityUidArg,
+        casClazzUid = clazzUid,
+        casSubmitterPersonUid = accountManager.currentUserSession.person.personUid,
+        casText = "",
+    )
+
 
     fun onClickMarksFilterChip(option: MessageIdOption2) {
         _uiState.update { prev ->
@@ -429,9 +427,7 @@ class ClazzAssignmentDetailOverviewViewModel(
             if(prev.activeUserCanSubmit) {
                 prev.copy(
                     editableSubmission = prev.editableSubmission?.shallowCopy {
-                        casUid = 0L
                         casText = text
-                        casTimestamp = 0
                     }
                 )
             }else {
@@ -444,7 +440,7 @@ class ClazzAssignmentDetailOverviewViewModel(
             delay(200)
             if(submissionToSave != null) {
                 savedStateHandle.setJson(
-                    key = STATE_LATEST_SUBMISSION,
+                    key = STATE_EDITABLE_SUBMISSION,
                     serializer = CourseAssignmentSubmission.serializer(),
                     value = submissionToSave
                 )
@@ -522,6 +518,46 @@ class ClazzAssignmentDetailOverviewViewModel(
         }
     }
 
+    fun onAddSubmissionFile(
+        uri: String,
+        fileName: String,
+        mimeType: String,
+        size: Long,
+    ) {
+        viewModelScope.launch {
+            val newAttachment = CourseAssignmentSubmissionFile(
+                casaUid = activeDb.doorPrimaryKeyManager.nextIdAsync(
+                    CourseAssignmentSubmissionFile.TABLE_ID
+                ),
+                casaSubmissionUid = _uiState.value.editableSubmission?.casUid ?: 0,
+                casaFileName = fileName,
+                casaMimeType = mimeType,
+                casaSize = size.toInt(),
+                casaUri = uri,
+            )
+
+            activeDb.courseAssignmentSubmissionFileDao.insertListAsync(listOf(newAttachment))
+
+            try {
+                saveAndUploadUseCase(
+                    listOf(
+                        SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem(
+                            localUri = uri,
+                            entityUid = newAttachment.casaUid,
+                            tableId = CourseAssignmentSubmissionFile.TABLE_ID,
+                            mimeType = mimeType,
+                            createRetentionLock = true,
+                        )
+                    )
+                )
+            }catch(e: Throwable) {
+                Napier.w("WARNING: Exception attempting to save/enqueue submission file", e)
+                //Give the user bad news
+            }
+        }
+    }
+
+
     fun onClickSubmit() {
         if(!_uiState.value.fieldsEnabled)
             return
@@ -533,7 +569,7 @@ class ClazzAssignmentDetailOverviewViewModel(
 
         viewModelScope.launch {
             try {
-                val submissionResult = submitAssignmentUseCase(
+                submitAssignmentUseCase(
                     repo = activeRepo,
                     submitterUid = _uiState.value.submitterUid,
                     assignmentUid = entityUidArg,
@@ -543,19 +579,18 @@ class ClazzAssignmentDetailOverviewViewModel(
 
                 val submissionToSave = _uiState.updateAndGet { prev ->
                     prev.copy(
-                        editableSubmission = submissionResult.submission ?: prev.editableSubmission,
+                        editableSubmission = newCourseAssignmentSubmission(),
                         submissionError = null
                     )
                 }.editableSubmission
 
                 if(submissionToSave != null) {
                     savedStateHandle.setJson(
-                        key = STATE_LATEST_SUBMISSION,
+                        key = STATE_EDITABLE_SUBMISSION,
                         serializer = CourseAssignmentSubmission.serializer(),
                         value = submissionToSave,
                     )
                 }
-
 
                 snackDispatcher.showSnackBar(Snack(systemImpl.getString(MR.strings.submitted_key)))
             }catch(e: Exception) {
@@ -582,9 +617,7 @@ class ClazzAssignmentDetailOverviewViewModel(
 
     companion object {
 
-        const val STATE_LATEST_SUBMISSION = "latestSubmission"
-
-        const val STATE_LATEST_SUBMISSION_ATTACHMENTS = "latestSubmissionAttachments"
+        const val STATE_EDITABLE_SUBMISSION = "latestSubmission"
 
         const val KEY_SUBMISSION_HTML = "submissionHtml"
 

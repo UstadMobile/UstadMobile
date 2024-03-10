@@ -23,6 +23,7 @@ import com.ustadmobile.core.viewmodel.clazzassignment.submissiondetail.CourseAss
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.CommentsAndName
 import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
+import com.ustadmobile.lib.db.composites.SubmissionAndFiles
 import com.ustadmobile.lib.db.entities.*
 import dev.icerock.moko.resources.StringResource
 import io.github.aakira.napier.Napier
@@ -61,7 +62,7 @@ data class ClazzAssignmentSubmitterDetailUiState(
 
     val submissionList: List<CourseAssignmentSubmission> = emptyList(),
 
-    val submissionAttachments: List<CourseAssignmentSubmissionAttachment> = emptyList(),
+    val submissionAttachments: List<CourseAssignmentSubmissionFile> = emptyList(),
 
     val marks: List<CourseAssignmentMarkAndMarkerName> = emptyList(),
 
@@ -105,7 +106,15 @@ data class ClazzAssignmentSubmitterDetailUiState(
 
     val submissionStatus: Int
         get() {
-            return submissionStatusFor(marks, submissionList)
+            return submissionStatusFor(marks,
+                //TODO: change this
+                submissionList.map {
+                    SubmissionAndFiles(
+                        submission = it,
+                        files = emptyList()
+                    )
+                }
+            )
         }
 
     private val latestUniqueMarksByMarker: List<CourseAssignmentMarkAndMarkerName>

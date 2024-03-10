@@ -17,6 +17,7 @@ import com.ustadmobile.core.viewmodel.clazzassignment.averageMark
 import com.ustadmobile.core.viewmodel.clazzassignment.submissionStatusFor
 import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailUiState
 import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailViewModel
+import com.ustadmobile.lib.db.composites.SubmissionAndFiles
 import com.ustadmobile.lib.db.entities.Comments
 import com.ustadmobile.lib.db.entities.CourseAssignmentMark
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
@@ -29,7 +30,7 @@ import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
 import com.ustadmobile.libuicompose.util.linkify.rememberLinkExtractor
 import com.ustadmobile.libuicompose.view.clazzassignment.CommentListItem
-import com.ustadmobile.libuicompose.view.clazzassignment.CourseAssignmentSubmissionListItem
+import com.ustadmobile.libuicompose.view.clazzassignment.CourseAssignmentSubmissionComponent
 import com.ustadmobile.libuicompose.view.clazzassignment.UstadAssignmentSubmissionStatusHeaderItems
 import com.ustadmobile.libuicompose.view.clazzassignment.UstadCourseAssignmentMarkListItem
 import dev.icerock.moko.resources.compose.stringResource
@@ -85,7 +86,15 @@ fun ClazzAssignmentSubmitterDetailScreen(
             .fillMaxSize()
     ) {
         UstadAssignmentSubmissionStatusHeaderItems(
-            submissionStatus = submissionStatusFor(uiState.marks, uiState.submissionList),
+            submissionStatus = submissionStatusFor(uiState.marks,
+                //TODO: Change this
+                uiState.submissionList.map {
+                    SubmissionAndFiles(
+                        submission = it,
+                        files = emptyList()
+                    )
+                }
+            ),
             averageMark = uiState.marks.averageMark(),
             maxPoints = uiState.courseBlock?.cbMaxPoints ?: 0,
             submissionPenaltyPercent = uiState.courseBlock?.cbLateSubmissionPenalty ?: 0
@@ -101,11 +110,8 @@ fun ClazzAssignmentSubmitterDetailScreen(
             items = uiState.submissionList,
             key = { Pair(CourseAssignmentSubmission.TABLE_ID, it.casUid) }
         ) { submissionItem ->
-            CourseAssignmentSubmissionListItem(
+            CourseAssignmentSubmissionComponent(
                 submission = submissionItem,
-                onClick = {
-                    onClickOpenSubmission(submissionItem)
-                }
             )
         }
 

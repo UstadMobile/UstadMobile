@@ -5,7 +5,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
-import com.ustadmobile.door.ext.getFileName
+import com.ustadmobile.core.util.ext.getFileNameAndSize
 import kotlinx.coroutines.launch
 
 
@@ -21,11 +21,13 @@ actual fun rememberUstadFilePickLauncher(
     ) { uri ->
         if(uri != null) {
             coroutineScope.launch {
-                val fileName = context.contentResolver.getFileName(uri)
+                val (fileName, fileSize) = context.contentResolver.getFileNameAndSize(uri)
                 onFileSelected(
                     UstadFilePickResult(
                         uri = uri.toString(),
-                        fileName =fileName
+                        fileName = fileName,
+                        mimeType = context.contentResolver.getType(uri),
+                        size = fileSize,
                     )
                 )
             }
