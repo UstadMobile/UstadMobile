@@ -3,6 +3,8 @@ package com.ustadmobile.core.impl.di
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.domain.account.SetPasswordUseCase
 import com.ustadmobile.core.domain.account.SetPasswordUseCaseJs
+import com.ustadmobile.core.domain.blob.openblob.OpenBlobUseCase
+import com.ustadmobile.core.domain.blob.openblob.OpenBlobUseCaseJs
 import com.ustadmobile.core.domain.blob.saveandupload.SaveAndUploadLocalUrisUseCase
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobUseCaseJs
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
@@ -208,4 +210,9 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
             activeRepo = instance(tag = DoorTag.TAG_REPO),
         )
     }
+
+    bind<OpenBlobUseCase>() with scoped(EndpointScope.Default).provider {
+        OpenBlobUseCaseJs()
+    }
+
 }

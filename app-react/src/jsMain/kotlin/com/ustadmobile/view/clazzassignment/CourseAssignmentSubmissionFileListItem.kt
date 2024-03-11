@@ -34,6 +34,7 @@ import mui.icons.material.TextSnippet as TextSnippetIcon
 external interface CourseAssignmentSubmissionFileListItemProps : Props {
     var file: CourseAssignmentSubmissionFileAndTransferJob
     var onRemove: ((CourseAssignmentSubmissionFileAndTransferJob) -> Unit)?
+    var onClick: ((CourseAssignmentSubmissionFileAndTransferJob) -> Unit)?
 }
 
 val CourseAssignmentSubmissionFileListItem = FC<CourseAssignmentSubmissionFileListItemProps> { props ->
@@ -43,6 +44,12 @@ val CourseAssignmentSubmissionFileListItem = FC<CourseAssignmentSubmissionFileLi
 
     ListItem {
         ListItemButton {
+            props.onClick?.also { onClickFn ->
+                onClick = {
+                    onClickFn(props.file)
+                }
+            }
+
             ListItemIcon {
                 TextSnippetIcon()
             }

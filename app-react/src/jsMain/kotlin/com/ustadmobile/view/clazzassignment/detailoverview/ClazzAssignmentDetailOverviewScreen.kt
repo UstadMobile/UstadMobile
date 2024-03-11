@@ -92,6 +92,8 @@ external interface ClazzAssignmentDetailOverviewScreenProps : Props {
 
     var onToggleSubmissionExpandCollapse: (CourseAssignmentSubmission) -> Unit
 
+    var onClickSubmissionFile: (CourseAssignmentSubmissionFileAndTransferJob) -> Unit
+
 }
 
 private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDetailOverviewScreenProps> { props ->
@@ -366,6 +368,7 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                         ) {
                             CourseAssignmentSubmissionFileListItem.create {
                                 file = it
+                                onClick = props.onClickSubmissionFile
                             }
                         }
                     }
@@ -523,5 +526,6 @@ val ClazzAssignmentDetailOverviewScreen = FC<Props> {
         }
         onRemoveSubmissionFile = viewModel::onRemoveSubmissionFile
         onToggleSubmissionExpandCollapse = viewModel::onToggleSubmissionExpandCollapse
+        onClickSubmissionFile = viewModel::onClickSubmissionFile
     }
 }
