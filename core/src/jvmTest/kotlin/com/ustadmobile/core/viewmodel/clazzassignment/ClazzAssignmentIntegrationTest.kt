@@ -134,7 +134,7 @@ class ClazzAssignmentIntegrationTest: AbstractMainDispatcherTest() {
                         it.draftMark != null &&
                         it.courseBlock != null &&
                         it.submissionList.isNotEmpty() &&
-                        it.submissionList.first().casText == "I can has cheezburger" &&
+                        it.submissionList.first().submission.casText == "I can has cheezburger" &&
                         it.markFieldsEnabled
                     }
                     viewModel.onChangeDraftMark(uiState.draftMark?.shallowCopy {
