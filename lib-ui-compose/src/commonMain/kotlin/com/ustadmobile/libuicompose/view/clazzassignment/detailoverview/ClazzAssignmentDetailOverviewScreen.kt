@@ -68,8 +68,8 @@ fun ClazzAssignmentDetailOverviewScreen(viewModel: ClazzAssignmentDetailOverview
         viewModel.onAddSubmissionFile(
             uri = it.uri,
             fileName =  it.fileName,
-            mimeType = "",
-            size = 0
+            mimeType = it.mimeType ?: "application/octet-stream",
+            size = it.size
         )
     }
 
