@@ -1,6 +1,7 @@
 package com.ustadmobile.core.viewmodel.clazzassignment
 
 import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
+import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
 
 data class UstadCourseAssignmentMarkListItemUiState(
 
@@ -18,7 +19,7 @@ data class UstadCourseAssignmentMarkListItemUiState(
     val peerGroupNumber: Int
         get() {
             val markerSubmitterUid = mark.courseAssignmentMark?.camMarkerSubmitterUid ?: Long.MAX_VALUE
-            return if(markerSubmitterUid < 10000) {
+            return if(markerSubmitterUid < CourseAssignmentSubmission.MIN_SUBMITTER_UID_FOR_PERSON) {
                 markerSubmitterUid.toInt()
             }else {
                 0

@@ -65,8 +65,7 @@ data class CourseAssignmentSubmission(
     var casType: Int = 0,
 
     /**
-     * The timestamp for when this entry was submitted. Zero indicates that it is still a draft/not
-     * saved in the database yet.
+     * The timestamp for when this entry was submitted.
      */
     @ReplicateLastModified
     @ReplicateEtag

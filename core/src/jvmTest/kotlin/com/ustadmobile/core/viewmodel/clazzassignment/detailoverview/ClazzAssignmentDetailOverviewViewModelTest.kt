@@ -541,7 +541,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
             activeDb.commentsDao.insertAsync(Comments().apply {
                 commentsText = teacherComment
                 commentsEntityUid = testContext.assignment.caUid
-                commentSubmitterUid = testContext.person.personUid
+                commentsForSubmitterUid = testContext.person.personUid
                 commentsDateTimeAdded = systemTimeInMillis()
             })
 
@@ -589,7 +589,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
             activeDb.commentsDao.insertAsync(Comments().apply {
                 commentsText = startComment
                 commentsEntityUid = testContext.assignment.caUid
-                commentSubmitterUid = 0
+                commentsForSubmitterUid = 0
             })
 
             viewModelFactory {

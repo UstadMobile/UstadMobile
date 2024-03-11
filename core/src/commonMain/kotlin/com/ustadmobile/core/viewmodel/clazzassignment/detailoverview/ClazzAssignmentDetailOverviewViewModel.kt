@@ -20,6 +20,7 @@ import com.ustadmobile.core.domain.blob.saveandupload.SaveAndUploadLocalUrisUseC
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
 import com.ustadmobile.core.util.ext.onActiveEndpoint
 import com.ustadmobile.core.viewmodel.clazzassignment.averageMark
+import com.ustadmobile.core.viewmodel.clazzassignment.combineWithSubmissionFiles
 import com.ustadmobile.core.viewmodel.clazzassignment.detail.ClazzAssignmentDetailViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.hasUpdatedMarks
 import com.ustadmobile.core.viewmodel.clazzassignment.latestUniqueMarksByMarker
@@ -346,14 +347,7 @@ class ClazzAssignmentDetailOverviewViewModel(
                         )
 
                     submissionFlow.combine(submissionFilesFlow) { submissions, submissionFiles ->
-                        submissions.map {  submission ->
-                            SubmissionAndFiles(
-                                submission = submission,
-                                files = submissionFiles.filter {
-                                    it.submissionFile?.casaSubmissionUid == submission.casUid
-                                }
-                            )
-                        }
+                        submissions.combineWithSubmissionFiles(submissionFiles)
                     }.distinctUntilChanged().collect {
                         _uiState.update { prev ->
                             prev.copy(submissions = it)
@@ -478,8 +472,9 @@ class ClazzAssignmentDetailOverviewViewModel(
         viewModelScope.launch {
             try {
                 activeRepo.commentsDao.insertAsync(Comments().apply {
-                    commentSubmitterUid = submitterUid
-                    commentsPersonUid = activeUserPersonUid
+                    commentsForSubmitterUid = submitterUid
+                    commentsFromPersonUid = activeUserPersonUid
+                    commentsFromSubmitterUid = _uiState.value.submitterUid
                     commentsEntityUid = entityUidArg
                     commentsText = _uiState.value.newPrivateCommentText
                     commentsDateTimeAdded = systemTimeInMillis()
@@ -509,8 +504,8 @@ class ClazzAssignmentDetailOverviewViewModel(
         viewModelScope.launch {
             try {
                 activeRepo.commentsDao.insertAsync(Comments().apply {
-                    commentSubmitterUid = 0
-                    commentsPersonUid = activeUserPersonUid
+                    commentsForSubmitterUid = 0
+                    commentsFromPersonUid = activeUserPersonUid
                     commentsEntityUid = entityUidArg
                     commentsText = _uiState.value.newCourseCommentText
                     commentsDateTimeAdded = systemTimeInMillis()
@@ -537,9 +532,12 @@ class ClazzAssignmentDetailOverviewViewModel(
                 ),
                 casaSubmissionUid = _uiState.value.editableSubmission?.casUid ?: 0,
                 casaFileName = fileName,
+                casaSubmitterUid = _uiState.value.submitterUid,
                 casaMimeType = mimeType,
                 casaSize = size.toInt(),
                 casaUri = uri,
+                casaCaUid = entityUidArg,
+                casaClazzUid = clazzUid,
             )
 
             activeDb.courseAssignmentSubmissionFileDao.insertListAsync(listOf(newAttachment))

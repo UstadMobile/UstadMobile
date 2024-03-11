@@ -21,7 +21,8 @@ import kotlinx.datetime.TimeZone
 
 @Composable
 fun CourseAssignmentSubmissionComponent(
-    submission: CourseAssignmentSubmission
+    submission: CourseAssignmentSubmission,
+    submissionNum: Int,
 ) {
     val timeZoneId = remember { TimeZone.currentSystemDefault().id }
     val submittedTimeStamp = rememberFormattedDateTime(
@@ -34,7 +35,10 @@ fun CourseAssignmentSubmissionComponent(
     ) {
         ListItem(
             headlineContent = {
-                Text("${stringResource(MR.strings.your_submission)} ($submittedTimeStamp)")
+                Text("${stringResource(MR.strings.submission)} $submissionNum")
+            },
+            supportingContent = {
+                Text(submittedTimeStamp)
             },
             trailingContent = {
                 IconButton(

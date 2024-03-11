@@ -5,21 +5,16 @@ import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.impl.locale.mapLookup
-import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.ext.capitalizeFirstLetter
 import com.ustadmobile.core.viewmodel.clazzassignment.ClazzAssignmentViewModelConstants.SUBMISSION_STAUTUS_MESSAGE_ID
 import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailUiState
 import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailViewModel
-import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useUstadViewModel
-import com.ustadmobile.lib.db.composites.CommentsAndName
-import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.*
-import com.ustadmobile.view.clazzassignment.CourseAssignmentSubmissionListItem
 import com.ustadmobile.view.clazzassignment.SUBMISSION_STATUS_ICON_MAP
 import com.ustadmobile.view.components.UstadDetailHeader
 import com.ustadmobile.view.components.virtuallist.VirtualList
@@ -37,6 +32,8 @@ import react.ReactNode
 import react.create
 import mui.icons.material.EmojiEvents as EmojiEventsIcon
 import com.ustadmobile.view.clazzassignment.AssignmentCommentTextFieldListItem
+import com.ustadmobile.view.clazzassignment.CourseAssignmentSubmissionComponent
+import com.ustadmobile.view.clazzassignment.CourseAssignmentSubmissionFileListItem
 import com.ustadmobile.view.clazzassignment.UstadCommentListItem
 import kotlinx.coroutines.Dispatchers
 
@@ -49,8 +46,6 @@ external interface ClazzAssignmentSubmitterDetailProps : Props {
     var onClickSubmitGradeAndMarkNext: () -> Unit
 
     var onClickGradeFilterChip: (MessageIdOption2) -> Unit
-
-    var onClickOpenSubmission: (CourseAssignmentSubmission) -> Unit
 
     var onChangeDraftMark: (CourseAssignmentMark?) -> Unit
 
@@ -112,20 +107,20 @@ val ClazzAssignmentSubmitterDetailComponent = FC<ClazzAssignmentSubmitterDetailP
                 }
             }
 
-            item(key = "submissionheader") {
-                UstadDetailHeader.create {
-                    header = ReactNode(strings[MR.strings.submissions])
+            props.uiState.submissionList.forEachIndexed { index, submissionAndFiles ->
+                item("submission_${submissionAndFiles.submission.casUid}") {
+                    CourseAssignmentSubmissionComponent.create {
+                        submission = submissionAndFiles.submission
+                        submissionNum = props.uiState.submissionList.size - index
+                    }
                 }
-            }
 
-            items(
-                list = props.uiState.submissionList,
-                key = { it.casUid.toString() }
-            ) { submissionItem ->
-                CourseAssignmentSubmissionListItem.create {
-                    submission = submissionItem
-                    onClick = {
-                        props.onClickOpenSubmission(submissionItem)
+                items(
+                    list = submissionAndFiles.files,
+                    key = { "submissionfile_${it.submissionFile?.casaUid}" }
+                ) { fileItem ->
+                    CourseAssignmentSubmissionFileListItem.create {
+                        file = fileItem
                     }
                 }
             }
@@ -194,7 +189,7 @@ val ClazzAssignmentSubmitterDetailComponent = FC<ClazzAssignmentSubmitterDetailP
 
             infiniteQueryPagingItems(
                 items = commentsInfiniteQueryResult,
-                key = { it.comment.commentsUid.toString() }
+                key = { "comment_${it.comment.commentsUid}" }
             ) { comment ->
                 UstadCommentListItem.create {
                     commentsAndName = comment
@@ -226,54 +221,5 @@ val ClazzAssignmentSubmitterDetailScreen = FC<Props> {
         onChangeDraftMark = viewModel::onChangeDraftMark
         onClickSubmitGrade = viewModel::onClickSubmitMark
         onClickGradeFilterChip = viewModel::onClickGradeFilterChip
-    }
-}
-
-val ClazzAssignmentSubmitterDetailScreenPreview = FC<Props> {
-
-    val uiStateVal = ClazzAssignmentSubmitterDetailUiState(
-        courseBlock = CourseBlock().apply {
-            cbMaxPoints = 50
-        },
-        draftMark = CourseAssignmentMark().apply {
-
-        },
-        submissionList = listOf(
-            CourseAssignmentSubmission().apply {
-                casUid = 1
-                casTimestamp = 1677744388299
-                casText = "I can haz cheezburger"
-                casType = CourseAssignmentSubmission.SUBMISSION_TYPE_FILE
-            },
-        ),
-        marks = listOf(
-            CourseAssignmentMarkAndMarkerName(
-                courseAssignmentMark = CourseAssignmentMark().apply {
-                    camMarkerSubmitterUid = 2
-                    camMarkerComment = "Comment"
-                    camMark = 8.1f
-                    camPenalty = 0.9f
-                    camMaxMark = 10f
-                    camLct = systemTimeInMillis()
-                },
-                markerFirstNames = "John",
-                markerLastName = "Smith",
-            )
-        ),
-        privateCommentsList = {
-            ListPagingSource(listOf(
-                CommentsAndName(
-                    comment = Comments().apply {
-                        commentsText = "I like this activity. Shall we discuss this in our next meeting?"
-                    },
-                    firstNames = "Bob",
-                    lastName = "Dylan"
-                )
-            ))
-        },
-    )
-
-    ClazzAssignmentSubmitterDetailComponent {
-        uiState = uiStateVal
     }
 }

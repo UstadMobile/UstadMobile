@@ -4,13 +4,15 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.ustadmobile.core.viewmodel.clazzassignment.isFromSubmitterGroup
 import com.ustadmobile.lib.db.composites.CommentsAndName
 import com.ustadmobile.libuicompose.components.UstadLinkifyText
 import com.ustadmobile.libuicompose.components.UstadPersonAvatar
 import com.ustadmobile.libuicompose.util.linkify.ILinkExtractor
 import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
+import dev.icerock.moko.resources.compose.stringResource
 import java.util.TimeZone
-
+import com.ustadmobile.core.MR
 
 @Composable
 fun CommentListItem(
@@ -26,6 +28,9 @@ fun CommentListItem(
     )
 
     val fullName = "${commentAndName?.firstNames ?: ""} ${commentAndName?.lastName ?: ""}"
+    val groupSuffix = commentAndName?.comment
+        ?.takeIf { it.isFromSubmitterGroup }
+        ?.let { " (${stringResource(MR.strings.group)} ${it.commentsFromSubmitterUid})" }
 
     ListItem(
         modifier = modifier,
@@ -35,7 +40,7 @@ fun CommentListItem(
                 pictureUri = commentAndName?.pictureUri,
             )
         },
-        headlineContent = { Text(fullName) },
+        headlineContent = { Text("$fullName$groupSuffix") },
         supportingContent = {
             UstadLinkifyText(
                 text = commentAndName?.comment?.commentsText ?: "",

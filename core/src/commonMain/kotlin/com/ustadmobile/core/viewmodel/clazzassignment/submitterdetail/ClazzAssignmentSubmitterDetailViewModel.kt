@@ -16,6 +16,7 @@ import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import app.cash.paging.PagingSource
 import com.ustadmobile.core.domain.assignment.submittername.GetAssignmentSubmitterNameUseCase
 import com.ustadmobile.core.impl.appstate.Snack
+import com.ustadmobile.core.viewmodel.clazzassignment.combineWithSubmissionFiles
 import com.ustadmobile.core.viewmodel.clazzassignment.hasUpdatedMarks
 import com.ustadmobile.core.viewmodel.clazzassignment.latestUniqueMarksByMarker
 import com.ustadmobile.core.viewmodel.clazzassignment.submissionStatusFor
@@ -31,6 +32,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -60,7 +62,7 @@ data class ClazzAssignmentSubmitterDetailUiState(
 
     val gradeFilterChips: List<ListFilterIdOption> = emptyList(),
 
-    val submissionList: List<CourseAssignmentSubmission> = emptyList(),
+    val submissionList: List<SubmissionAndFiles> = emptyList(),
 
     val submissionAttachments: List<CourseAssignmentSubmissionFile> = emptyList(),
 
@@ -106,15 +108,7 @@ data class ClazzAssignmentSubmitterDetailUiState(
 
     val submissionStatus: Int
         get() {
-            return submissionStatusFor(marks,
-                //TODO: change this
-                submissionList.map {
-                    SubmissionAndFiles(
-                        submission = it,
-                        files = emptyList()
-                    )
-                }
-            )
+            return submissionStatusFor(marks, submissionList)
         }
 
     private val latestUniqueMarksByMarker: List<CourseAssignmentMarkAndMarkerName>
@@ -223,13 +217,13 @@ class ClazzAssignmentSubmitterDetailViewModel(
             _uiState.whenSubscribed {
                 launch {
                     permissionFlow.distinctUntilChanged().collectLatest { permissionPair ->
-                        val (canMark, canView) = permissionPair
-                        if(canView) {
+                        if(permissionPair.canView) {
                             _uiState.update { prev ->
                                 prev.copy(
                                     privateCommentsList = privateCommentsPagingSourceFactory,
                                     activeUserPersonUid = activeUserPersonUid,
-                                    draftMark = if(canMark) {
+                                    activeUserSubmitterId = permissionPair.activeUserSubmitterUid,
+                                    draftMark = if(permissionPair.canMark) {
                                         CourseAssignmentMark().apply {
                                             camMark = (-1).toFloat()
                                         }
@@ -263,23 +257,20 @@ class ClazzAssignmentSubmitterDetailViewModel(
                             }
 
                             launch {
-                                val activeUserSubmitterId = activeRepo.clazzAssignmentDao.getSubmitterUid(
-                                    assignmentUid = assignmentUid,
-                                    clazzUid = clazzUid,
-                                    accountPersonUid = activeUserPersonUid,
-                                )
-                                _uiState.update { prev ->
-                                    prev.copy(
-                                        activeUserSubmitterId = activeUserSubmitterId
+                                val submissionsFlow = activeRepo
+                                    .courseAssignmentSubmissionDao.getAllSubmissionsFromSubmitterAsFlow(
+                                        submitterUid = submitterUid,
+                                        assignmentUid = assignmentUid
                                     )
-                                }
-                            }
+                                val submissionFilesFlow = activeRepo
+                                    .courseAssignmentSubmissionFileDao.getAllSubmissionFilesFromSubmitterAsFlow(
+                                        submitterUid = submitterUid,
+                                        assignmentUid = assignmentUid
+                                    )
 
-                            launch {
-                                activeRepo.courseAssignmentSubmissionDao.getAllSubmissionsFromSubmitterAsFlow(
-                                    submitterUid = submitterUid,
-                                    assignmentUid = assignmentUid
-                                ).collect {
+                                submissionsFlow.combine(submissionFilesFlow) { submissions, submissionFiles ->
+                                    submissions.combineWithSubmissionFiles(submissionFiles)
+                                }.distinctUntilChanged().collect {
                                     _uiState.update { prev ->
                                         prev.copy(submissionList = it)
                                     }
@@ -304,6 +295,7 @@ class ClazzAssignmentSubmitterDetailViewModel(
                                     marks = emptyList(),
                                     newPrivateCommentTextVisible = false,
                                     courseBlock = null,
+                                    activeUserSubmitterId = 0
                                 )
                             }
                         }
@@ -329,8 +321,9 @@ class ClazzAssignmentSubmitterDetailViewModel(
         viewModelScope.launch {
             try {
                 activeRepo.commentsDao.insertAsync(Comments().apply {
-                    commentSubmitterUid = submitterUid
-                    commentsPersonUid = activeUserPersonUid
+                    commentsForSubmitterUid = submitterUid
+                    commentsFromSubmitterUid = _uiState.value.activeUserSubmitterId
+                    commentsFromPersonUid = activeUserPersonUid
                     commentsEntityUid = assignmentUid
                     commentsText = _uiState.value.newPrivateCommentText
                     commentsDateTimeAdded = systemTimeInMillis()
@@ -399,7 +392,7 @@ class ClazzAssignmentSubmitterDetailViewModel(
                     clazzUid = clazzUid,
                     submitterUid = submitterUid,
                     draftMark = draftMark,
-                    submissions = submissions,
+                    submissions = submissions.map { it.submission },
                     courseBlock = courseBlock
                 )
 

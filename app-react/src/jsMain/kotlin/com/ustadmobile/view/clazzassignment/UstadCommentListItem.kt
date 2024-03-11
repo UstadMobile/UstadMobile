@@ -1,5 +1,7 @@
 package com.ustadmobile.view.clazzassignment
 
+import com.ustadmobile.core.hooks.useStringProvider
+import com.ustadmobile.core.viewmodel.clazzassignment.isFromSubmitterGroup
 import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.lib.db.composites.CommentsAndName
 import kotlinx.datetime.TimeZone
@@ -11,7 +13,7 @@ import react.create
 import com.ustadmobile.lib.db.entities.Comments
 import com.ustadmobile.mui.components.UstadLinkify
 import com.ustadmobile.view.components.UstadPersonAvatar
-
+import com.ustadmobile.core.MR
 
 external interface UstadCommentListItemProps : Props {
 
@@ -21,10 +23,18 @@ external interface UstadCommentListItemProps : Props {
 
 val UstadCommentListItem = FC<UstadCommentListItemProps> { props ->
 
+    val strings = useStringProvider()
+
     val formattedTime = useFormattedDateAndTime(
         timeInMillis = props.commentsAndName?.comment?.commentsDateTimeAdded ?: 0L,
         timezoneId = TimeZone.currentSystemDefault().id
     )
+
+    val groupNumSuffix = props.commentsAndName?.comment
+        ?.takeIf { it.isFromSubmitterGroup }
+        ?.let { "(${strings[MR.strings.group]} ${it.commentsFromSubmitterUid})"}
+        ?: ""
+
 
     ListItem {
         ListItemIcon {
@@ -35,7 +45,9 @@ val UstadCommentListItem = FC<UstadCommentListItemProps> { props ->
         }
 
         ListItemText {
-            primary = ReactNode("${props.commentsAndName?.firstNames} ${props.commentsAndName?.lastName}")
+            primary = ReactNode(
+        "${props.commentsAndName?.firstNames} ${props.commentsAndName?.lastName} $groupNumSuffix"
+            )
             secondary = UstadLinkify.create {
                 + (props.commentsAndName?.comment?.commentsText ?: "")
             }

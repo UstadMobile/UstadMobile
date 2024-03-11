@@ -24,10 +24,12 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.mui.components.ThemeContext
 import mui.material.IconButton
 import mui.material.LinearProgressVariant
+import mui.material.ListItemIcon
 import mui.material.Tooltip
 import mui.system.sx
 import react.dom.aria.ariaLabel
 import react.useRequiredContext
+import mui.icons.material.TextSnippet as TextSnippetIcon
 
 external interface CourseAssignmentSubmissionFileListItemProps : Props {
     var file: CourseAssignmentSubmissionFileAndTransferJob
@@ -41,6 +43,10 @@ val CourseAssignmentSubmissionFileListItem = FC<CourseAssignmentSubmissionFileLi
 
     ListItem {
         ListItemButton {
+            ListItemIcon {
+                TextSnippetIcon()
+            }
+
             ListItemText {
                 primary = ReactNode(props.file.submissionFile?.casaFileName ?: "")
                 secondary = Stack.create {

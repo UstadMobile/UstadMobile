@@ -51,6 +51,24 @@ expect abstract class CourseAssignmentSubmissionFileDao : BaseDao<CourseAssignme
         assignmentUid: Long,
     ): Flow<List<CourseAssignmentSubmissionFileAndTransferJob>>
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+    )
+    @Query("""
+        SELECT CourseAssignmentSubmissionFile.*, TransferJobItem.*
+          FROM CourseAssignmentSubmissionFile
+               LEFT JOIN TransferJobItem
+                         ON TransferJobItem.tjiEntityUid = CourseAssignmentSubmissionFile.casaUid
+                            AND TransferJobItem.tjiTableId = ${CourseAssignmentSubmissionFile.TABLE_ID}
+         WHERE CourseAssignmentSubmissionFile.casaSubmitterUid = :submitterUid
+           AND CourseAssignmentSubmissionFile.casaCaUid = :assignmentUid
+           AND NOT CourseAssignmentSubmissionFile.casaDeleted
+    """)
+    abstract fun getAllSubmissionFilesFromSubmitterAsFlow(
+        submitterUid: Long,
+        assignmentUid: Long,
+    ): Flow<List<CourseAssignmentSubmissionFileAndTransferJob>>
+
     @Query("""
         UPDATE CourseAssignmentSubmissionFile
            SET casaUri = :uri,

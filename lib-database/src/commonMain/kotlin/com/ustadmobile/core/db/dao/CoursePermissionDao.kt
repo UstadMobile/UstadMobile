@@ -15,6 +15,7 @@ import com.ustadmobile.door.annotation.HttpServerFunctionCall
 import com.ustadmobile.door.annotation.HttpServerFunctionParam
 import com.ustadmobile.door.annotation.QueryLiveTables
 import com.ustadmobile.door.annotation.Repository
+import com.ustadmobile.lib.db.composites.AssignmentPermissionAndActiveUserSubmitterUid
 import com.ustadmobile.lib.db.composites.CoursePermissionAndEnrolment
 import com.ustadmobile.lib.db.composites.CoursePermissionAndListDetail
 import com.ustadmobile.lib.db.composites.PermissionPair
@@ -452,7 +453,7 @@ expect abstract class CoursePermissionDao {
                     /* Can edit */
              SELECT (     (:accountPersonUid != 0 AND :assignmentUid != 0 AND :clazzUid != 0 AND :submitterUid != 0)
                       AND (SELECT CanMarkSubmitter.canMark 
-                            FROM CanMarkSubmitter)) AS firstPermission,
+                            FROM CanMarkSubmitter)) AS canMark,
                     /* can view */   
                     (     (:accountPersonUid != 0 AND :assignmentUid != 0 AND :clazzUid != 0 AND :submitterUid != 0)
                       AND (     (SELECT CanMarkSubmitter.canMark
@@ -463,7 +464,9 @@ expect abstract class CoursePermissionDao {
                              OR (${CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT1} ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}
                                  ${CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT2} ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}
                                  ${CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT3}))               
-                    ) AS secondPermission
+                    ) AS canView,
+                    (SELECT accountSubmitterUid
+                       FROM AccountSubmitterUid) AS activeUserSubmitterUid
              
     """)
     @QueryLiveTables(
@@ -477,7 +480,7 @@ expect abstract class CoursePermissionDao {
         assignmentUid: Long,
         clazzUid: Long,
         submitterUid: Long,
-    ): Flow<PermissionPair>
+    ): Flow<AssignmentPermissionAndActiveUserSubmitterUid>
 
 
 

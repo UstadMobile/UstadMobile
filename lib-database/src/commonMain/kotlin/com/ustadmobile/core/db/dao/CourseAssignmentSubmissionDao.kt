@@ -194,6 +194,7 @@ expect abstract class CourseAssignmentSubmissionDao : BaseDao<CourseAssignmentSu
          WHERE CourseAssignmentSubmission.casAssignmentUid = :assignmentUid
            AND CourseAssignmentSubmission.casSubmitterUid = 
                ($SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL)
+      ORDER BY CourseAssignmentSubmission.casTimestamp DESC
     """)
     abstract fun findByAssignmentUidAndAccountPersonUid(
         accountPersonUid: Long,

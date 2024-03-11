@@ -166,7 +166,7 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
                             (SELECT Comments.commentsUid 
                                FROM Comments
                               WHERE Comments.commentsEntityUid = :assignmentUid
-                                AND Comments.commentSubmitterUid = SubmitterList.submitterId
+                                AND Comments.commentsForSubmitterUid = SubmitterList.submitterId
                            ORDER BY Comments.commentsDateTimeAdded DESC     
                               LIMIT 1) 
                LEFT JOIN CourseAssignmentMark

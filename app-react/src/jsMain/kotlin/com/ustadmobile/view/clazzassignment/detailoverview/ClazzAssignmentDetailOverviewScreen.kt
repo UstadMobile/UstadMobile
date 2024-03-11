@@ -338,10 +338,11 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                     }
                 }
 
-                props.uiState.submissions.forEach { submissionItem ->
+                props.uiState.submissions.forEachIndexed { index, submissionItem ->
                     item(key = "submission_${submissionItem.submission.casUid}") {
                         CourseAssignmentSubmissionComponent.create {
                             submission = submissionItem.submission
+                            submissionNum = props.uiState.submissions.size - index
                         }
                     }
 
@@ -390,7 +391,7 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                 item(key = "course_comments_header_item") {
                     ListItem.create {
                         ListItemText {
-                            primary = ReactNode(strings[MR.strings.class_comments])
+                            primary = ReactNode(strings[MR.strings.course_comments])
                         }
                     }
                 }

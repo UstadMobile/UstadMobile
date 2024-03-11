@@ -304,9 +304,12 @@ fun ClazzAssignmentDetailOverviewScreen(
                 }
             }
 
-            uiState.submissions.forEach { submissionAndFiles ->
+            uiState.submissions.forEachIndexed { index, submissionAndFiles ->
                 item(key = "submission_${submissionAndFiles.submission.casUid}") {
-                    CourseAssignmentSubmissionComponent(submissionAndFiles.submission)
+                    CourseAssignmentSubmissionComponent(
+                        submission = submissionAndFiles.submission,
+                        submissionNum = uiState.submissions.size - index
+                    )
                 }
 
                 items(

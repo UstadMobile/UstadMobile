@@ -25,6 +25,7 @@ import mui.icons.material.ExpandMore as ExpandMoreIcon
 
 external interface CourseAssignmentSubmissionProps: Props {
     var submission: CourseAssignmentSubmission
+    var submissionNum: Int
 }
 
 val CourseAssignmentSubmissionComponent = FC<CourseAssignmentSubmissionProps> { props ->
@@ -42,7 +43,8 @@ val CourseAssignmentSubmissionComponent = FC<CourseAssignmentSubmissionProps> { 
             ListItemButton {
                 disableGutters = true
                 ListItemText {
-                    primary = ReactNode("${strings[MR.strings.your_submission]} ($submittedTime)")
+                    primary = ReactNode("${strings[MR.strings.submission]} ${props.submissionNum}")
+                    secondary = ReactNode(submittedTime)
                 }
             }
 

@@ -71,7 +71,6 @@ import com.ustadmobile.view.discussionpost.edit.DiscussionPostEditScreen
 import com.ustadmobile.core.viewmodel.discussionpost.edit.DiscussionPostEditViewModel
 import com.ustadmobile.view.clazzassignment.UstadCommentListItemPreview
 import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailViewModel
-import com.ustadmobile.view.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailScreenPreview
 import com.ustadmobile.view.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailScreen
 import com.ustadmobile.core.viewmodel.LeavingReasonEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewViewModel
@@ -361,8 +360,6 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(CourseGroupSetListViewModel.DEST_NAME, "CourseGroupSetList",
         CourseGroupSetListScreen
     ),
-    UstadScreen("CourseAssignmentSubmitterDetailPreview", "CourseAssignmentSubmitterDetailPreview",
-        ClazzAssignmentSubmitterDetailScreenPreview),
     UstadScreen(ClazzAssignmentSubmitterDetailViewModel.DEST_NAME, "CourseAssignmentSubmitterDetail",
         ClazzAssignmentSubmitterDetailScreen),
     UstadScreen(LeavingReasonEditViewModel.DEST_NAME, "LeavingReasonEdit", LeavingReasonEditScreen),

@@ -31,6 +31,9 @@ data class CourseAssignmentSubmissionFile(
 
     var casaSubmissionUid: Long = 0,
 
+    @ColumnInfo(defaultValue = "0")
+    var casaSubmitterUid: Long = 0,
+
     //Assignment Uid
     var casaCaUid: Long = 0,
 
