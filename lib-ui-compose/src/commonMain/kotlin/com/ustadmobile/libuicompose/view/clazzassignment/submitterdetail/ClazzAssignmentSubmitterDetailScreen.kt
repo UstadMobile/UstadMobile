@@ -56,6 +56,7 @@ fun ClazzAssignmentSubmitterDetailScreen(
         onClickSubmitPrivateComment = viewModel::onSubmitPrivateComment,
         onClickGradeFilterChip = viewModel::onClickGradeFilterChip,
         onChangeDraftMark = viewModel::onChangeDraftMark,
+        onToggleSubmissionExpandCollapse = viewModel::onToggleSubmissionExpandCollapse,
     )
 }
 
@@ -68,6 +69,7 @@ fun ClazzAssignmentSubmitterDetailScreen(
     onClickSubmitPrivateComment: () -> Unit = {},
     onClickGradeFilterChip: (MessageIdOption2) -> Unit = {},
     onChangeDraftMark: (CourseAssignmentMark?) -> Unit = {},
+    onToggleSubmissionExpandCollapse: (CourseAssignmentSubmission) -> Unit = { },
 ){
 
     val privateCommentsPager = remember(uiState.privateCommentsList) {
@@ -103,20 +105,27 @@ fun ClazzAssignmentSubmitterDetailScreen(
         }
 
         uiState.submissionList.forEachIndexed { index, submissionAndFiles ->
+            val isCollapsedVal = submissionAndFiles.submission.casUid in uiState.collapsedSubmissions
             item(key = Pair(CourseAssignmentSubmission.TABLE_ID, submissionAndFiles.submission.casUid)) {
                 CourseAssignmentSubmissionComponent(
                     submission = submissionAndFiles.submission,
-                    submissionNum = uiState.submissionList.size - index
+                    submissionNum = uiState.submissionList.size - index,
+                    isCollapsed = isCollapsedVal,
+                    onToggleCollapse = {
+                        onToggleSubmissionExpandCollapse(submissionAndFiles.submission)
+                    }
                 )
             }
 
-            items(
-                items = submissionAndFiles.files,
-                key = { Pair(CourseAssignmentSubmission.TABLE_ID, it.submissionFile?.casaUid ?: 0) }
-            ) {
-                CourseAssignmentSubmissionFileListItem(
-                    fileAndTransferJob = it
-                )
+            if(!isCollapsedVal) {
+                items(
+                    items = submissionAndFiles.files,
+                    key = { Pair(CourseAssignmentSubmission.TABLE_ID, it.submissionFile?.casaUid ?: 0) }
+                ) {
+                    CourseAssignmentSubmissionFileListItem(
+                        fileAndTransferJob = it
+                    )
+                }
             }
         }
 

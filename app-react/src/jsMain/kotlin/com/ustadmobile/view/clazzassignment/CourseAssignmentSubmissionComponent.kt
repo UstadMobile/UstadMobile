@@ -19,13 +19,21 @@ import mui.material.IconButton
 import mui.material.ListItem
 import mui.material.ListItemButton
 import mui.material.ListItemText
+import mui.material.Tooltip
 import react.ReactNode
 import react.create
+import react.dom.aria.ariaLabel
 import mui.icons.material.ExpandMore as ExpandMoreIcon
+import mui.icons.material.ExpandLess as ExpandLessIcon
 
 external interface CourseAssignmentSubmissionProps: Props {
     var submission: CourseAssignmentSubmission
+
     var submissionNum: Int
+
+    var isCollapsed: Boolean
+
+    var onToggleExpandCollapse: () -> Unit
 }
 
 val CourseAssignmentSubmissionComponent = FC<CourseAssignmentSubmissionProps> { props ->
@@ -35,6 +43,7 @@ val CourseAssignmentSubmissionComponent = FC<CourseAssignmentSubmissionProps> { 
         timeInMillis = props.submission.casTimestamp,
         timezoneId = TimeZone.currentSystemDefault().id,
     )
+    val expandLabel = if(props.isCollapsed) strings[MR.strings.expand] else strings[MR.strings.collapse]
 
     Stack {
         direction = responsive(StackDirection.column)
@@ -42,24 +51,42 @@ val CourseAssignmentSubmissionComponent = FC<CourseAssignmentSubmissionProps> { 
         ListItem {
             ListItemButton {
                 disableGutters = true
+                onClick = {
+                    props.onToggleExpandCollapse()
+                }
+
                 ListItemText {
                     primary = ReactNode("${strings[MR.strings.submission]} ${props.submissionNum}")
                     secondary = ReactNode(submittedTime)
                 }
             }
 
-            secondaryAction = IconButton.create {
-                ExpandMoreIcon()
+            secondaryAction = Tooltip.create {
+                title = ReactNode(expandLabel)
+                IconButton {
+                    ariaLabel = expandLabel
+                    onClick = {
+                        props.onToggleExpandCollapse()
+                    }
+
+                    if(props.isCollapsed) {
+                        ExpandMoreIcon()
+                    }else {
+                        ExpandLessIcon()
+                    }
+                }
             }
         }
 
-        Box {
-            sx {
-                padding = theme.spacing(4)
-            }
+        if(!props.isCollapsed) {
+            Box {
+                sx {
+                    padding = theme.spacing(4)
+                }
 
-            UstadRawHtml {
-                html = props.submission.casText ?: ""
+                UstadRawHtml {
+                    html = props.submission.casText ?: ""
+                }
             }
         }
     }

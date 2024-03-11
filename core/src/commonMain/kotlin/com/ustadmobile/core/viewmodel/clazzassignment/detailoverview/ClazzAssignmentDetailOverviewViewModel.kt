@@ -19,6 +19,7 @@ import com.ustadmobile.core.domain.blob.upload.CancelBlobUploadClientUseCase
 import com.ustadmobile.core.domain.blob.saveandupload.SaveAndUploadLocalUrisUseCase
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
 import com.ustadmobile.core.util.ext.onActiveEndpoint
+import com.ustadmobile.core.util.ext.toggle
 import com.ustadmobile.core.viewmodel.clazzassignment.averageMark
 import com.ustadmobile.core.viewmodel.clazzassignment.combineWithSubmissionFiles
 import com.ustadmobile.core.viewmodel.clazzassignment.detail.ClazzAssignmentDetailViewModel
@@ -124,6 +125,8 @@ data class ClazzAssignmentDetailOverviewUiState(
         .toLocalDateTime(TimeZone.currentSystemDefault()),
 
     val dayOfWeekStringMap: Map<DayOfWeek, String> = emptyMap(),
+
+    val collapsedSubmissions: Set<Long> = emptySet(),
 
 ) {
 
@@ -621,6 +624,14 @@ class ClazzAssignmentDetailOverviewViewModel(
                 _uiState.update { prev -> prev.copy(fieldsEnabled = true) }
                 loadingState = LoadingUiState.NOT_LOADING
             }
+        }
+    }
+
+    fun onToggleSubmissionExpandCollapse(submission: CourseAssignmentSubmission) {
+        _uiState.update { prev ->
+            prev.copy(
+                collapsedSubmissions = prev.collapsedSubmissions.toggle(submission.casUid)
+            )
         }
     }
 

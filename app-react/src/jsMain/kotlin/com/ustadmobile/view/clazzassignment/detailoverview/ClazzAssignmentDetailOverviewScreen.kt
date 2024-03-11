@@ -90,6 +90,8 @@ external interface ClazzAssignmentDetailOverviewScreenProps : Props {
 
     var onRemoveSubmissionFile: (CourseAssignmentSubmissionFileAndTransferJob) -> Unit
 
+    var onToggleSubmissionExpandCollapse: (CourseAssignmentSubmission) -> Unit
+
 }
 
 private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDetailOverviewScreenProps> { props ->
@@ -345,19 +347,26 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                 }
 
                 props.uiState.submissions.forEachIndexed { index, submissionItem ->
+                    val isCollapsedVal = submissionItem.submission.casUid in props.uiState.collapsedSubmissions
                     item(key = "submission_${submissionItem.submission.casUid}") {
                         CourseAssignmentSubmissionComponent.create {
                             submission = submissionItem.submission
                             submissionNum = props.uiState.submissions.size - index
+                            isCollapsed = isCollapsedVal
+                            onToggleExpandCollapse = {
+                                props.onToggleSubmissionExpandCollapse(submissionItem.submission)
+                            }
                         }
                     }
 
-                    items(
-                        list = submissionItem.files,
-                        key = { "submitted_file_${it.submissionFile?.casaUid}"}
-                    ) {
-                        CourseAssignmentSubmissionFileListItem.create {
-                            file = it
+                    if(!isCollapsedVal) {
+                        items(
+                            list = submissionItem.files,
+                            key = { "submitted_file_${it.submissionFile?.casaUid}"}
+                        ) {
+                            CourseAssignmentSubmissionFileListItem.create {
+                                file = it
+                            }
                         }
                     }
                 }
@@ -513,5 +522,6 @@ val ClazzAssignmentDetailOverviewScreen = FC<Props> {
             )
         }
         onRemoveSubmissionFile = viewModel::onRemoveSubmissionFile
+        onToggleSubmissionExpandCollapse = viewModel::onToggleSubmissionExpandCollapse
     }
 }

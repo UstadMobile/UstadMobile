@@ -55,6 +55,8 @@ external interface ClazzAssignmentSubmitterDetailProps : Props {
 
     var onClickSubmitPrivateComment: () -> Unit
 
+    var onToggleSubmissionExpandCollapse: (CourseAssignmentSubmission) -> Unit
+
 }
 
 val ClazzAssignmentSubmitterDetailComponent = FC<ClazzAssignmentSubmitterDetailProps> { props ->
@@ -114,19 +116,26 @@ val ClazzAssignmentSubmitterDetailComponent = FC<ClazzAssignmentSubmitterDetailP
             }
 
             props.uiState.submissionList.forEachIndexed { index, submissionAndFiles ->
+                val isCollapsedVal = submissionAndFiles.submission.casUid in props.uiState.collapsedSubmissions
                 item("submission_${submissionAndFiles.submission.casUid}") {
                     CourseAssignmentSubmissionComponent.create {
                         submission = submissionAndFiles.submission
                         submissionNum = props.uiState.submissionList.size - index
+                        isCollapsed = isCollapsedVal
+                        onToggleExpandCollapse = {
+                            props.onToggleSubmissionExpandCollapse(submissionAndFiles.submission)
+                        }
                     }
                 }
 
-                items(
-                    list = submissionAndFiles.files,
-                    key = { "submissionfile_${it.submissionFile?.casaUid}" }
-                ) { fileItem ->
-                    CourseAssignmentSubmissionFileListItem.create {
-                        file = fileItem
+                if(!isCollapsedVal) {
+                    items(
+                        list = submissionAndFiles.files,
+                        key = { "submissionfile_${it.submissionFile?.casaUid}" }
+                    ) { fileItem ->
+                        CourseAssignmentSubmissionFileListItem.create {
+                            file = fileItem
+                        }
                     }
                 }
             }
@@ -233,5 +242,6 @@ val ClazzAssignmentSubmitterDetailScreen = FC<Props> {
         onChangeDraftMark = viewModel::onChangeDraftMark
         onClickSubmitGrade = viewModel::onClickSubmitMark
         onClickGradeFilterChip = viewModel::onClickGradeFilterChip
+        onToggleSubmissionExpandCollapse = viewModel::onToggleSubmissionExpandCollapse
     }
 }

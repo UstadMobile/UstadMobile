@@ -16,11 +16,11 @@ import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import app.cash.paging.PagingSource
 import com.ustadmobile.core.domain.assignment.submittername.GetAssignmentSubmitterNameUseCase
 import com.ustadmobile.core.impl.appstate.Snack
+import com.ustadmobile.core.util.ext.toggle
 import com.ustadmobile.core.viewmodel.clazzassignment.combineWithSubmissionFiles
 import com.ustadmobile.core.viewmodel.clazzassignment.hasUpdatedMarks
 import com.ustadmobile.core.viewmodel.clazzassignment.latestUniqueMarksByMarker
 import com.ustadmobile.core.viewmodel.clazzassignment.submissionStatusFor
-import com.ustadmobile.core.viewmodel.clazzassignment.submissiondetail.CourseAssignmentSubmissionDetailViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.CommentsAndName
 import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
@@ -113,6 +113,8 @@ data class ClazzAssignmentSubmitterDetailUiState(
         .toLocalDateTime(TimeZone.currentSystemDefault()),
 
     val dayOfWeekStrings: Map<DayOfWeek, String> = emptyMap(),
+
+    val collapsedSubmissions: Set<Long> = emptySet(),
 
 ) {
 
@@ -427,19 +429,19 @@ class ClazzAssignmentSubmitterDetailViewModel(
         //inactive
     }
 
-    fun onClickSubmission(submission: CourseAssignmentSubmission) {
-        navController.navigate(
-            viewName = CourseAssignmentSubmissionDetailViewModel.DEST_NAME,
-            args = mapOf(
-                ARG_ENTITY_UID to submission.casUid.toString()
-            )
-        )
-    }
 
     fun onClickGradeFilterChip(option: MessageIdOption2) {
         _uiState.update { prev ->
             prev.copy(
                 markListSelectedChipId = option.value
+            )
+        }
+    }
+
+    fun onToggleSubmissionExpandCollapse(submission: CourseAssignmentSubmission) {
+        _uiState.update { prev ->
+            prev.copy(
+                collapsedSubmissions = prev.collapsedSubmissions.toggle(submission.casUid)
             )
         }
     }

@@ -88,6 +88,7 @@ fun ClazzAssignmentDetailOverviewScreen(viewModel: ClazzAssignmentDetailOverview
             filePickLauncher(UstadPickFileOpts())
         },
         onRemoveSubmissionFile = viewModel::onRemoveSubmissionFile,
+        onToggleSubmissionExpandCollapse = viewModel::onToggleSubmissionExpandCollapse,
     )
 }
 
@@ -105,6 +106,7 @@ fun ClazzAssignmentDetailOverviewScreen(
     onClickSubmitSubmission: () -> Unit = { },
     onClickCourseGroupSet: () -> Unit = { },
     onRemoveSubmissionFile: (CourseAssignmentSubmissionFileAndTransferJob) -> Unit = { },
+    onToggleSubmissionExpandCollapse: (CourseAssignmentSubmission) -> Unit = { },
 ){
 
     val privateCommentsPager = remember(uiState.privateComments) {
@@ -253,7 +255,6 @@ fun ClazzAssignmentDetailOverviewScreen(
                 }
             }
 
-            println("addFileSubmissionVisible: ${uiState.addFileSubmissionVisible}")
             if(uiState.addFileSubmissionVisible) {
                 item(key = "add_file_button") {
                     ListItem(
@@ -311,20 +312,27 @@ fun ClazzAssignmentDetailOverviewScreen(
             }
 
             uiState.submissions.forEachIndexed { index, submissionAndFiles ->
+                val isCollapsedVal = submissionAndFiles.submission.casUid in uiState.collapsedSubmissions
                 item(key = "submission_${submissionAndFiles.submission.casUid}") {
                     CourseAssignmentSubmissionComponent(
                         submission = submissionAndFiles.submission,
-                        submissionNum = uiState.submissions.size - index
+                        submissionNum = uiState.submissions.size - index,
+                        isCollapsed = isCollapsedVal,
+                        onToggleCollapse = {
+                            onToggleSubmissionExpandCollapse(submissionAndFiles.submission)
+                        }
                     )
                 }
 
-                items(
-                    items = submissionAndFiles.files,
-                    key = { Pair("submittedfile", it.submissionFile?.casaUid ?: 0)}
-                ) { file ->
-                    CourseAssignmentSubmissionFileListItem(
-                        fileAndTransferJob = file
-                    )
+                if(!isCollapsedVal) {
+                    items(
+                        items = submissionAndFiles.files,
+                        key = { Pair("submittedfile", it.submissionFile?.casaUid ?: 0)}
+                    ) { file ->
+                        CourseAssignmentSubmissionFileListItem(
+                            fileAndTransferJob = file
+                        )
+                    }
                 }
             }
 
