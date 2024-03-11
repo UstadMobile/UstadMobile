@@ -9,22 +9,33 @@ import com.ustadmobile.lib.db.composites.CommentsAndName
 import com.ustadmobile.libuicompose.components.UstadLinkifyText
 import com.ustadmobile.libuicompose.components.UstadPersonAvatar
 import com.ustadmobile.libuicompose.util.linkify.ILinkExtractor
-import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
 import dev.icerock.moko.resources.compose.stringResource
-import java.util.TimeZone
 import com.ustadmobile.core.MR
+import com.ustadmobile.libuicompose.util.rememberDayOrDate
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDateTime
+import java.text.DateFormat
 
 @Composable
 fun CommentListItem(
     commentAndName: CommentsAndName?,
     linkExtractor: ILinkExtractor,
+    localDateTimeNow: LocalDateTime,
+    timeFormatter: DateFormat,
+    dateFormatter: DateFormat,
+    dayOfWeekStringMap: Map<DayOfWeek, String>,
     modifier: Modifier = Modifier,
 ){
 
-    val formattedDateTime = rememberFormattedDateTime(
-        timeInMillis = commentAndName?.comment?.commentsDateTimeAdded ?: 0,
-        timeZoneId = TimeZone.getDefault().id,
-        joinDateAndTime = { date, time -> "$date\n$time"}
+    val dayOrDate = rememberDayOrDate(
+        localDateTimeNow = localDateTimeNow,
+        timestamp = commentAndName?.comment?.commentsDateTimeAdded ?: 0,
+        timeZone = kotlinx.datetime.TimeZone.currentSystemDefault(),
+        showTimeIfToday = true,
+        timeFormatter = timeFormatter,
+        dateFormatter = dateFormatter,
+        dayOfWeekStringMap = dayOfWeekStringMap
+
     )
 
     val fullName = "${commentAndName?.firstNames ?: ""} ${commentAndName?.lastName ?: ""}"
@@ -47,7 +58,7 @@ fun CommentListItem(
                 linkExtractor = linkExtractor,
             )
         },
-        trailingContent = { Text(formattedDateTime) }
+        trailingContent = { Text(dayOrDate) }
     )
 
 }

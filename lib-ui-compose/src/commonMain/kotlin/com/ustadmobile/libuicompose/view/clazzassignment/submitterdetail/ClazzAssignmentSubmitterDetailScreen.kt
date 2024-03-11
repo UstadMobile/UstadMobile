@@ -28,6 +28,8 @@ import com.ustadmobile.libuicompose.components.UstadListSpacerItem
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
 import com.ustadmobile.libuicompose.util.linkify.rememberLinkExtractor
+import com.ustadmobile.libuicompose.util.rememberDateFormat
+import com.ustadmobile.libuicompose.util.rememberTimeFormatter
 import com.ustadmobile.libuicompose.view.clazzassignment.CommentListItem
 import com.ustadmobile.libuicompose.view.clazzassignment.CourseAssignmentSubmissionComponent
 import com.ustadmobile.libuicompose.view.clazzassignment.CourseAssignmentSubmissionFileListItem
@@ -36,6 +38,7 @@ import com.ustadmobile.libuicompose.view.clazzassignment.UstadCourseAssignmentMa
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.Dispatchers
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
+import java.util.TimeZone
 
 @Composable
 fun ClazzAssignmentSubmitterDetailScreen(
@@ -77,6 +80,9 @@ fun ClazzAssignmentSubmitterDetailScreen(
     val privateCommentsLazyPagingItems = privateCommentsPager.flow.collectAsLazyPagingItems()
 
     val linkExtractor = rememberLinkExtractor()
+
+    val timeFormatter = rememberTimeFormatter()
+    val dateFormatter = rememberDateFormat(TimeZone.getDefault().id)
 
     UstadLazyColumn (
         modifier = Modifier
@@ -136,7 +142,9 @@ fun ClazzAssignmentSubmitterDetailScreen(
             key = { Pair(CourseAssignmentMark.TABLE_ID, it.courseAssignmentMark?.camUid ?: 0) }
         ) { mark ->
             UstadCourseAssignmentMarkListItem(
-                uiState = uiState.markListItemUiState(mark)
+                uiState = uiState.markListItemUiState(mark),
+                timeFormatter = timeFormatter,
+                dateFormat = dateFormatter,
             )
         }
 
@@ -184,6 +192,10 @@ fun ClazzAssignmentSubmitterDetailScreen(
             CommentListItem(
                 commentAndName = comment,
                 linkExtractor = linkExtractor,
+                localDateTimeNow = uiState.localDateTimeNow,
+                timeFormatter = timeFormatter,
+                dateFormatter = dateFormatter,
+                dayOfWeekStringMap = uiState.dayOfWeekStrings,
             )
         }
 

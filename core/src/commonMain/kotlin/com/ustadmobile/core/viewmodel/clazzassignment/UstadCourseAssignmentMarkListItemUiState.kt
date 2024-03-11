@@ -2,10 +2,16 @@ package com.ustadmobile.core.viewmodel.clazzassignment
 
 import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDateTime
 
 data class UstadCourseAssignmentMarkListItemUiState(
 
     val mark: CourseAssignmentMarkAndMarkerName = CourseAssignmentMarkAndMarkerName(),
+
+    val localDateTimeNow: LocalDateTime,
+
+    val dayOfWeekStrings: Map<DayOfWeek, String>,
 
 ) {
 

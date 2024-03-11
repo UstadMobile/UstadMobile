@@ -49,6 +49,8 @@ import com.ustadmobile.libuicompose.components.UstadPickFileOpts
 import com.ustadmobile.libuicompose.components.UstadRichTextEdit
 import com.ustadmobile.libuicompose.components.rememberUstadFilePickLauncher
 import com.ustadmobile.libuicompose.util.linkify.rememberLinkExtractor
+import com.ustadmobile.libuicompose.util.rememberDateFormat
+import com.ustadmobile.libuicompose.util.rememberTimeFormatter
 import com.ustadmobile.libuicompose.view.clazzassignment.CommentListItem
 import com.ustadmobile.libuicompose.view.clazzassignment.CourseAssignmentSubmissionComponent
 import com.ustadmobile.libuicompose.view.clazzassignment.CourseAssignmentSubmissionFileListItem
@@ -137,6 +139,10 @@ fun ClazzAssignmentDetailOverviewScreen(
     )
 
     val linkExtractor = rememberLinkExtractor()
+
+    val dateFormatter = rememberDateFormat(TimeZone.getDefault().id)
+
+    val timeFormatter = rememberTimeFormatter()
 
     UstadLazyColumn(
         modifier = Modifier
@@ -346,7 +352,11 @@ fun ClazzAssignmentDetailOverviewScreen(
                 UstadCourseAssignmentMarkListItem(
                     uiState = UstadCourseAssignmentMarkListItemUiState(
                         mark = mark,
+                        localDateTimeNow = uiState.localDateTimeNow,
+                        dayOfWeekStrings = uiState.dayOfWeekStringMap,
                     ),
+                    timeFormatter = timeFormatter,
+                    dateFormat = dateFormatter,
                 )
             }
 
@@ -381,6 +391,10 @@ fun ClazzAssignmentDetailOverviewScreen(
                 CommentListItem(
                     commentAndName = it,
                     linkExtractor = linkExtractor,
+                    localDateTimeNow = uiState.localDateTimeNow,
+                    timeFormatter = timeFormatter,
+                    dateFormatter = dateFormatter,
+                    dayOfWeekStringMap = uiState.dayOfWeekStringMap,
                 )
             }
         }
@@ -414,6 +428,10 @@ fun ClazzAssignmentDetailOverviewScreen(
                 CommentListItem(
                     commentAndName = comment,
                     linkExtractor = linkExtractor,
+                    localDateTimeNow = uiState.localDateTimeNow,
+                    timeFormatter = timeFormatter,
+                    dateFormatter = dateFormatter,
+                    dayOfWeekStringMap = uiState.dayOfWeekStringMap,
                 )
             }
         }

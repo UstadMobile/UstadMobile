@@ -18,15 +18,17 @@ import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.util.ext.penaltyPercentage
 import com.ustadmobile.core.util.ext.roundTo
 import com.ustadmobile.core.viewmodel.clazzassignment.UstadCourseAssignmentMarkListItemUiState
-import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
 import dev.icerock.moko.resources.compose.stringResource
-import java.util.TimeZone
 import com.ustadmobile.core.MR
 import com.ustadmobile.libuicompose.components.UstadPersonAvatar
+import com.ustadmobile.libuicompose.util.rememberDayOrDate
+import java.text.DateFormat
 
 @Composable
 fun UstadCourseAssignmentMarkListItem(
     uiState: UstadCourseAssignmentMarkListItemUiState,
+    timeFormatter: DateFormat,
+    dateFormat: DateFormat,
     modifier: Modifier = Modifier,
 ){
 
@@ -36,10 +38,14 @@ fun UstadCourseAssignmentMarkListItem(
         text += "  (${stringResource(MR.strings.group_number, uiState.peerGroupNumber)})"
     }
 
-    val formattedTime = rememberFormattedDateTime(
-        timeInMillis = uiState.mark.courseAssignmentMark?.camLct ?: 0,
-        timeZoneId = TimeZone.getDefault().id,
-        joinDateAndTime = { date, time -> "$date\n$time" }
+    val dayOrDate = rememberDayOrDate(
+        localDateTimeNow = uiState.localDateTimeNow,
+        timestamp = uiState.mark.courseAssignmentMark?.camLct ?: 0,
+        timeZone = kotlinx.datetime.TimeZone.currentSystemDefault(),
+        showTimeIfToday = true,
+        timeFormatter = timeFormatter,
+        dateFormatter = dateFormat,
+        dayOfWeekStringMap = uiState.dayOfWeekStrings,
     )
 
     ListItem(
@@ -100,7 +106,7 @@ fun UstadCourseAssignmentMarkListItem(
             }
         },
         trailingContent = {
-            Text(formattedTime)
+            Text(dayOrDate)
         }
     )
 }

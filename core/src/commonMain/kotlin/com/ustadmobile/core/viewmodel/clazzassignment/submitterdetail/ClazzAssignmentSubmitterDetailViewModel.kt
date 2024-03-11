@@ -36,6 +36,11 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.on
@@ -104,6 +109,11 @@ data class ClazzAssignmentSubmitterDetailUiState(
 
     val activeUserPictureUri: String? = null,
 
+    val localDateTimeNow: LocalDateTime = Clock.System.now()
+        .toLocalDateTime(TimeZone.currentSystemDefault()),
+
+    val dayOfWeekStrings: Map<DayOfWeek, String> = emptyMap(),
+
 ) {
 
     val submissionStatus: Int
@@ -124,9 +134,7 @@ data class ClazzAssignmentSubmitterDetailUiState(
     fun markListItemUiState(
         mark: CourseAssignmentMarkAndMarkerName
     ): UstadCourseAssignmentMarkListItemUiState {
-        return UstadCourseAssignmentMarkListItemUiState(
-            mark
-        )
+        return UstadCourseAssignmentMarkListItemUiState(mark, localDateTimeNow, dayOfWeekStrings)
     }
 
     val submitGradeButtonMessageId: StringResource
@@ -169,8 +177,11 @@ class ClazzAssignmentSubmitterDetailViewModel(
     private val submitMarkUseCase: SubmitMarkUseCase = SubmitMarkUseCase(),
 ): DetailViewModel<CourseAssignmentSubmission>(di, savedStateHandle, DEST_NAME) {
 
-    private val _uiState = MutableStateFlow(ClazzAssignmentSubmitterDetailUiState())
-
+    private val _uiState = MutableStateFlow(
+        ClazzAssignmentSubmitterDetailUiState(
+            dayOfWeekStrings = systemImpl.getDayOfWeekStrings()
+        )
+    )
     val uiState: Flow<ClazzAssignmentSubmitterDetailUiState> = _uiState.asStateFlow()
 
     private val assignmentUid = savedStateHandle[ARG_ASSIGNMENT_UID]?.toLong()

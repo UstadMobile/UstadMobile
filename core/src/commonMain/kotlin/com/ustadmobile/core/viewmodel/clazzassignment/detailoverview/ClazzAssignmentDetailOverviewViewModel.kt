@@ -50,6 +50,11 @@ import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -114,6 +119,12 @@ data class ClazzAssignmentDetailOverviewUiState(
     val activeUserPictureUri: String? = null,
 
     val courseTerminology: CourseTerminology? = null,
+
+    val localDateTimeNow: LocalDateTime = Clock.System.now()
+        .toLocalDateTime(TimeZone.currentSystemDefault()),
+
+    val dayOfWeekStringMap: Map<DayOfWeek, String> = emptyMap(),
+
 ) {
 
     val caDescriptionVisible: Boolean
@@ -242,7 +253,11 @@ class ClazzAssignmentDetailOverviewViewModel(
     di, savedStateHandle, ClazzAssignmentDetailViewModel.DEST_NAME
 ){
 
-    private val _uiState = MutableStateFlow(ClazzAssignmentDetailOverviewUiState())
+    private val _uiState = MutableStateFlow(
+        ClazzAssignmentDetailOverviewUiState(
+            dayOfWeekStringMap = systemImpl.getDayOfWeekStrings()
+        )
+    )
 
     val uiState: Flow<ClazzAssignmentDetailOverviewUiState> = _uiState.asStateFlow()
 

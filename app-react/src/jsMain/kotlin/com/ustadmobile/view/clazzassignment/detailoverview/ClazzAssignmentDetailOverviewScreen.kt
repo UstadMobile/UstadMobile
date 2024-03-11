@@ -10,6 +10,7 @@ import com.ustadmobile.core.viewmodel.clazzassignment.detailoverview.ClazzAssign
 import com.ustadmobile.core.viewmodel.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewViewModel
 import com.ustadmobile.hooks.courseTerminologyResource
 import com.ustadmobile.hooks.useCourseTerminologyEntries
+import com.ustadmobile.hooks.useDateFormatter
 import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.lib.db.entities.*
@@ -36,6 +37,7 @@ import mui.icons.material.Group as GroupIcon
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.virtualListContent
 import com.ustadmobile.hooks.usePagingSource
+import com.ustadmobile.hooks.useTimeFormatter
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.composites.CourseAssignmentSubmissionFileAndTransferJob
 import com.ustadmobile.view.clazzassignment.AssignmentCommentTextFieldListItem
@@ -124,6 +126,10 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
     val courseTerminologyEntries = useCourseTerminologyEntries(props.uiState.courseTerminology)
 
     val inputRef = useRef<HTMLInputElement>(null)
+
+    val timeFormatterVal = useTimeFormatter()
+
+    val dateFormatterVal = useDateFormatter()
 
     /**
      * Used to handle submission file selection.
@@ -381,7 +387,11 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                     UstadCourseAssignmentMarkListItem.create {
                         uiState = UstadCourseAssignmentMarkListItemUiState(
                             mark = markItem,
+                            localDateTimeNow = props.uiState.localDateTimeNow,
+                            dayOfWeekStrings = props.uiState.dayOfWeekStringMap,
                         )
+                        timeFormatter = timeFormatterVal
+                        dateFormatter = dateFormatterVal
                     }
                 }
             }
@@ -414,6 +424,10 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                 ) { comment ->
                     UstadCommentListItem.create {
                         commentsAndName = comment
+                        timeFormatter = timeFormatterVal
+                        dateFormatter = dateFormatterVal
+                        dateTimeNow = props.uiState.localDateTimeNow
+                        dayOfWeekMap = props.uiState.dayOfWeekStringMap
                     }
                 }
             }
@@ -453,6 +467,10 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                 ) { comment ->
                     UstadCommentListItem.create {
                         commentsAndName = comment
+                        timeFormatter = timeFormatterVal
+                        dateFormatter = dateFormatterVal
+                        dateTimeNow = props.uiState.localDateTimeNow
+                        dayOfWeekMap = props.uiState.dayOfWeekStringMap
                     }
                 }
             }

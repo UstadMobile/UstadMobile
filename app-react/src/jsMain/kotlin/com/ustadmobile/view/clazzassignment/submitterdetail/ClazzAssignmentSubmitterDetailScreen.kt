@@ -10,8 +10,10 @@ import com.ustadmobile.core.util.ext.capitalizeFirstLetter
 import com.ustadmobile.core.viewmodel.clazzassignment.ClazzAssignmentViewModelConstants.SUBMISSION_STAUTUS_MESSAGE_ID
 import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailUiState
 import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailViewModel
+import com.ustadmobile.hooks.useDateFormatter
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
+import com.ustadmobile.hooks.useTimeFormatter
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.*
@@ -65,6 +67,10 @@ val ClazzAssignmentSubmitterDetailComponent = FC<ClazzAssignmentSubmitterDetailP
         pagingSourceFactory = props.uiState.privateCommentsList,
         placeholdersEnabled = true,
     )
+
+    val timeFormatterVal = useTimeFormatter()
+
+    val dateFormatterVal = useDateFormatter()
 
     VirtualList {
         style = jso {
@@ -147,6 +153,8 @@ val ClazzAssignmentSubmitterDetailComponent = FC<ClazzAssignmentSubmitterDetailP
             ){ mark ->
                 UstadCourseAssignmentMarkListItem.create {
                     uiState = props.uiState.markListItemUiState(mark)
+                    timeFormatter = timeFormatterVal
+                    dateFormatter = dateFormatterVal
                 }
             }
 
@@ -193,6 +201,10 @@ val ClazzAssignmentSubmitterDetailComponent = FC<ClazzAssignmentSubmitterDetailP
             ) { comment ->
                 UstadCommentListItem.create {
                     commentsAndName = comment
+                    timeFormatter = timeFormatterVal
+                    dateFormatter = dateFormatterVal
+                    dateTimeNow = props.uiState.localDateTimeNow
+                    dayOfWeekMap = props.uiState.dayOfWeekStrings
                 }
             }
         }

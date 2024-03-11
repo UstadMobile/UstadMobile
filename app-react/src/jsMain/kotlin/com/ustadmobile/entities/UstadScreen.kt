@@ -305,8 +305,6 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
         VirtualListPreview),
     UstadScreen("VirtualListReversedPreview", "Virtual List Reversed Preview",
         VirtualListPreviewReverse),
-    UstadScreen("UstadCourseAssignmentMarkListItem", "UstadCourseAssignmentMarkListItem Preview",
-        UstadCourseAssignmentMarkListItemPreview),
     UstadScreen("UstadCommentListItem", "UstadCommentListItem Preview",
         UstadCommentListItemPreview
     ),
