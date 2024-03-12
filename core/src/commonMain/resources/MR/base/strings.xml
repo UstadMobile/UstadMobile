@@ -1228,9 +1228,7 @@
     <string name="file_type_any">Any</string>
     <string name="file_document">Document (pdf, docx, odt)</string>
     <string name="file_image">Image</string>
-    <!-- Used to show the student the maximum number of files that can be submitted for an
-     assignment. %1$s will be replaced with the actual number (e.g. 1, 2, 3 etc) -->
-    <string name="max_number_of_files">Maximum number of files: %1$s</string>
+
     <!--
     Button for the teacher to submit their grade for an assignment submission
     -->
@@ -1857,5 +1855,9 @@
     <string name="manage_user_permissions">Manage user permissions</string>
 
     <string name="reset_passwords">Reset passwords</string>
+
+    <string name="upload_failed">Upload failed</string>
+
+    <string name="opening_name">Opening %1$s</string>
 
 </resources>

@@ -15,26 +15,42 @@ import com.ustadmobile.core.viewmodel.clazzassignment.UstadCourseAssignmentMarkL
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import app.cash.paging.PagingSource
 import com.ustadmobile.core.domain.assignment.submittername.GetAssignmentSubmitterNameUseCase
+import com.ustadmobile.core.domain.blob.openblob.OpenBlobUiUseCase
+import com.ustadmobile.core.domain.blob.openblob.OpenBlobUseCase
+import com.ustadmobile.core.domain.blob.openblob.OpeningBlobState
 import com.ustadmobile.core.impl.appstate.Snack
+import com.ustadmobile.core.util.ext.onActiveEndpoint
+import com.ustadmobile.core.util.ext.toggle
+import com.ustadmobile.core.viewmodel.clazzassignment.asBlobOpenItem
+import com.ustadmobile.core.viewmodel.clazzassignment.combineWithSubmissionFiles
 import com.ustadmobile.core.viewmodel.clazzassignment.hasUpdatedMarks
 import com.ustadmobile.core.viewmodel.clazzassignment.latestUniqueMarksByMarker
 import com.ustadmobile.core.viewmodel.clazzassignment.submissionStatusFor
-import com.ustadmobile.core.viewmodel.clazzassignment.submissiondetail.CourseAssignmentSubmissionDetailViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.CommentsAndName
 import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
+import com.ustadmobile.lib.db.composites.CourseAssignmentSubmissionFileAndTransferJob
+import com.ustadmobile.lib.db.composites.SubmissionAndFiles
 import com.ustadmobile.lib.db.entities.*
 import dev.icerock.moko.resources.StringResource
 import io.github.aakira.napier.Napier
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.kodein.di.DI
 import org.kodein.di.instance
+import org.kodein.di.instanceOrNull
 import org.kodein.di.on
 import kotlin.math.max
 
@@ -59,9 +75,9 @@ data class ClazzAssignmentSubmitterDetailUiState(
 
     val gradeFilterChips: List<ListFilterIdOption> = emptyList(),
 
-    val submissionList: List<CourseAssignmentSubmission> = emptyList(),
+    val submissionList: List<SubmissionAndFiles> = emptyList(),
 
-    val submissionAttachments: List<CourseAssignmentSubmissionAttachment> = emptyList(),
+    val submissionAttachments: List<CourseAssignmentSubmissionFile> = emptyList(),
 
     val marks: List<CourseAssignmentMarkAndMarkerName> = emptyList(),
 
@@ -101,6 +117,15 @@ data class ClazzAssignmentSubmitterDetailUiState(
 
     val activeUserPictureUri: String? = null,
 
+    val localDateTimeNow: LocalDateTime = Clock.System.now()
+        .toLocalDateTime(TimeZone.currentSystemDefault()),
+
+    val dayOfWeekStrings: Map<DayOfWeek, String> = emptyMap(),
+
+    val collapsedSubmissions: Set<Long> = emptySet(),
+
+    val openingFileState: OpeningBlobState? = null,
+
 ) {
 
     val submissionStatus: Int
@@ -121,9 +146,7 @@ data class ClazzAssignmentSubmitterDetailUiState(
     fun markListItemUiState(
         mark: CourseAssignmentMarkAndMarkerName
     ): UstadCourseAssignmentMarkListItemUiState {
-        return UstadCourseAssignmentMarkListItemUiState(
-            mark
-        )
+        return UstadCourseAssignmentMarkListItemUiState(mark, localDateTimeNow, dayOfWeekStrings)
     }
 
     val submitGradeButtonMessageId: StringResource
@@ -166,8 +189,11 @@ class ClazzAssignmentSubmitterDetailViewModel(
     private val submitMarkUseCase: SubmitMarkUseCase = SubmitMarkUseCase(),
 ): DetailViewModel<CourseAssignmentSubmission>(di, savedStateHandle, DEST_NAME) {
 
-    private val _uiState = MutableStateFlow(ClazzAssignmentSubmitterDetailUiState())
-
+    private val _uiState = MutableStateFlow(
+        ClazzAssignmentSubmitterDetailUiState(
+            dayOfWeekStrings = systemImpl.getDayOfWeekStrings()
+        )
+    )
     val uiState: Flow<ClazzAssignmentSubmitterDetailUiState> = _uiState.asStateFlow()
 
     private val assignmentUid = savedStateHandle[ARG_ASSIGNMENT_UID]?.toLong()
@@ -193,6 +219,10 @@ class ClazzAssignmentSubmitterDetailViewModel(
     private val assignmentSubmitterNameUseCase: GetAssignmentSubmitterNameUseCase by
         on(accountManager.activeEndpoint).instance()
 
+    private var openBlobJob: Job? = null
+
+    private val openBlobUiUseCase: OpenBlobUiUseCase? by di.onActiveEndpoint().instanceOrNull()
+
     init {
         _uiState.update { prev ->
             prev.copy(
@@ -214,13 +244,13 @@ class ClazzAssignmentSubmitterDetailViewModel(
             _uiState.whenSubscribed {
                 launch {
                     permissionFlow.distinctUntilChanged().collectLatest { permissionPair ->
-                        val (canMark, canView) = permissionPair
-                        if(canView) {
+                        if(permissionPair.canView) {
                             _uiState.update { prev ->
                                 prev.copy(
                                     privateCommentsList = privateCommentsPagingSourceFactory,
                                     activeUserPersonUid = activeUserPersonUid,
-                                    draftMark = if(canMark) {
+                                    activeUserSubmitterId = permissionPair.activeUserSubmitterUid,
+                                    draftMark = if(permissionPair.canMark) {
                                         CourseAssignmentMark().apply {
                                             camMark = (-1).toFloat()
                                         }
@@ -254,23 +284,20 @@ class ClazzAssignmentSubmitterDetailViewModel(
                             }
 
                             launch {
-                                val activeUserSubmitterId = activeRepo.clazzAssignmentDao.getSubmitterUid(
-                                    assignmentUid = assignmentUid,
-                                    clazzUid = clazzUid,
-                                    accountPersonUid = activeUserPersonUid,
-                                )
-                                _uiState.update { prev ->
-                                    prev.copy(
-                                        activeUserSubmitterId = activeUserSubmitterId
+                                val submissionsFlow = activeRepo
+                                    .courseAssignmentSubmissionDao.getAllSubmissionsFromSubmitterAsFlow(
+                                        submitterUid = submitterUid,
+                                        assignmentUid = assignmentUid
                                     )
-                                }
-                            }
+                                val submissionFilesFlow = activeRepo
+                                    .courseAssignmentSubmissionFileDao.getAllSubmissionFilesFromSubmitterAsFlow(
+                                        submitterUid = submitterUid,
+                                        assignmentUid = assignmentUid
+                                    )
 
-                            launch {
-                                activeRepo.courseAssignmentSubmissionDao.getAllSubmissionsFromSubmitterAsFlow(
-                                    submitterUid = submitterUid,
-                                    assignmentUid = assignmentUid
-                                ).collect {
+                                submissionsFlow.combine(submissionFilesFlow) { submissions, submissionFiles ->
+                                    submissions.combineWithSubmissionFiles(submissionFiles)
+                                }.distinctUntilChanged().collect {
                                     _uiState.update { prev ->
                                         prev.copy(submissionList = it)
                                     }
@@ -295,6 +322,7 @@ class ClazzAssignmentSubmitterDetailViewModel(
                                     marks = emptyList(),
                                     newPrivateCommentTextVisible = false,
                                     courseBlock = null,
+                                    activeUserSubmitterId = 0
                                 )
                             }
                         }
@@ -320,8 +348,9 @@ class ClazzAssignmentSubmitterDetailViewModel(
         viewModelScope.launch {
             try {
                 activeRepo.commentsDao.insertAsync(Comments().apply {
-                    commentSubmitterUid = submitterUid
-                    commentsPersonUid = activeUserPersonUid
+                    commentsForSubmitterUid = submitterUid
+                    commentsFromSubmitterUid = _uiState.value.activeUserSubmitterId
+                    commentsFromPersonUid = activeUserPersonUid
                     commentsEntityUid = assignmentUid
                     commentsText = _uiState.value.newPrivateCommentText
                     commentsDateTimeAdded = systemTimeInMillis()
@@ -390,7 +419,7 @@ class ClazzAssignmentSubmitterDetailViewModel(
                     clazzUid = clazzUid,
                     submitterUid = submitterUid,
                     draftMark = draftMark,
-                    submissions = submissions,
+                    submissions = submissions.map { it.submission },
                     courseBlock = courseBlock
                 )
 
@@ -414,14 +443,6 @@ class ClazzAssignmentSubmitterDetailViewModel(
         //inactive
     }
 
-    fun onClickSubmission(submission: CourseAssignmentSubmission) {
-        navController.navigate(
-            viewName = CourseAssignmentSubmissionDetailViewModel.DEST_NAME,
-            args = mapOf(
-                ARG_ENTITY_UID to submission.casUid.toString()
-            )
-        )
-    }
 
     fun onClickGradeFilterChip(option: MessageIdOption2) {
         _uiState.update { prev ->
@@ -430,6 +451,51 @@ class ClazzAssignmentSubmitterDetailViewModel(
             )
         }
     }
+
+    fun onToggleSubmissionExpandCollapse(submission: CourseAssignmentSubmission) {
+        _uiState.update { prev ->
+            prev.copy(
+                collapsedSubmissions = prev.collapsedSubmissions.toggle(submission.casUid)
+            )
+        }
+    }
+
+    private fun openSubmissionFileAsBlob(
+        file: CourseAssignmentSubmissionFileAndTransferJob,
+        intent: OpenBlobUseCase.OpenBlobIntent,
+    ){
+        val submissionFile = file.submissionFile ?: return
+        openBlobJob?.cancel()
+
+        openBlobJob = viewModelScope.launch {
+            openBlobUiUseCase?.invoke(
+                openItem = submissionFile.asBlobOpenItem(),
+                onUiUpdate = {
+                    _uiState.update { prev -> prev.copy(openingFileState = it) }
+                },
+                intent = intent,
+            )
+        }
+    }
+
+    fun onSendSubmissionFile(file: CourseAssignmentSubmissionFileAndTransferJob) {
+        openSubmissionFileAsBlob(file, OpenBlobUseCase.OpenBlobIntent.SEND)
+    }
+
+    fun onOpenSubmissionFile(file: CourseAssignmentSubmissionFileAndTransferJob) {
+        openSubmissionFileAsBlob(file, OpenBlobUseCase.OpenBlobIntent.VIEW)
+    }
+
+
+    fun onDismissOpenFileSubmission() {
+        openBlobJob?.cancel()
+        _uiState.update { prev ->
+            prev.copy(
+                openingFileState = null,
+            )
+        }
+    }
+
 
     companion object {
 

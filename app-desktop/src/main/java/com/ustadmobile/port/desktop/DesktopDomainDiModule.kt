@@ -24,8 +24,12 @@ import com.ustadmobile.core.domain.blob.download.EnqueueBlobDownloadClientUseCas
 import com.ustadmobile.core.domain.blob.download.EnqueueContentManifestDownloadUseCase
 import com.ustadmobile.core.domain.blob.download.EnqueueContentManifestDownloadUseCaseJvm
 import com.ustadmobile.core.domain.blob.download.MakeContentEntryAvailableOfflineUseCase
+import com.ustadmobile.core.domain.blob.openblob.OpenBlobUiUseCase
+import com.ustadmobile.core.domain.blob.openblob.OpenBlobUseCase
+import com.ustadmobile.core.domain.blob.openblob.OpenBlobUseCaseJvm
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCaseJvm
+import com.ustadmobile.core.domain.blob.saveandupload.SaveAndUploadLocalUrisUseCase
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCaseJvm
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
@@ -33,6 +37,8 @@ import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCaseJvm
 import com.ustadmobile.core.domain.blob.savepicture.SavePictureUseCase
 import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCase
 import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCaseJvm
+import com.ustadmobile.core.domain.blob.upload.CancelBlobUploadClientUseCase
+import com.ustadmobile.core.domain.blob.upload.CancelBlobUploadClientUseCaseJvm
 import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCase
 import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCaseJvm
 import com.ustadmobile.core.domain.blob.upload.UpdateFailedTransferJobUseCase
@@ -279,8 +285,9 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
 
     bind<GetStoragePathForUrlUseCase>() with singleton {
         GetStoragePathForUrlUseCaseCommonJvm(
-            httpClient = instance(),
+            okHttpClient = instance(),
             cache = instance(),
+            tmpDir = instance(tag = DiTag.TAG_TMP_DIR)
         )
     }
 
@@ -397,4 +404,36 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
     bind<CloseProcessUseCase>() with scoped(EndpointScope.Default).provider {
         CloseProcessUseCaseJvm()
     }
+
+    bind<SaveAndUploadLocalUrisUseCase>() with scoped(EndpointScope.Default).singleton {
+        SaveAndUploadLocalUrisUseCase(
+            saveLocalUrisAsBlobsUseCase = instance(),
+            enqueueBlobUploadClientUseCase = instance(),
+            activeDb = instance(tag = DoorTag.TAG_DB),
+            activeRepo = instance(tag = DoorTag.TAG_REPO),
+        )
+    }
+
+    bind<CancelBlobUploadClientUseCase>() with scoped(EndpointScope.Default).singleton {
+        CancelBlobUploadClientUseCaseJvm(
+            scheduler = instance(),
+            endpoint = context,
+            db = instance(tag = DoorTag.TAG_DB),
+        )
+    }
+
+    bind<OpenBlobUseCase>() with scoped(EndpointScope.Default).singleton {
+        OpenBlobUseCaseJvm(
+            getStoragePathForUrlUseCase = instance(),
+            rootTmpDir = instance(tag = DiTag.TAG_TMP_DIR)
+        )
+    }
+
+    bind<OpenBlobUiUseCase>() with scoped(EndpointScope.Default).singleton {
+        OpenBlobUiUseCase(
+            openBlobUseCase = instance(),
+            systemImpl = instance(),
+        )
+    }
+
 }

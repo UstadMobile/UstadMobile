@@ -17,6 +17,7 @@ import com.ustadmobile.core.viewmodel.clazzassignment.averageMark
 import com.ustadmobile.core.viewmodel.clazzassignment.submissionStatusFor
 import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailUiState
 import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailViewModel
+import com.ustadmobile.lib.db.composites.CourseAssignmentSubmissionFileAndTransferJob
 import com.ustadmobile.lib.db.entities.Comments
 import com.ustadmobile.lib.db.entities.CourseAssignmentMark
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
@@ -25,16 +26,22 @@ import com.ustadmobile.libuicompose.components.UstadDetailHeader
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadListFilterChipsHeader
 import com.ustadmobile.libuicompose.components.UstadListSpacerItem
+import com.ustadmobile.libuicompose.components.UstadOpeningBlobInfoBottomSheet
+import com.ustadmobile.libuicompose.components.isDesktop
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
 import com.ustadmobile.libuicompose.util.linkify.rememberLinkExtractor
+import com.ustadmobile.libuicompose.util.rememberDateFormat
+import com.ustadmobile.libuicompose.util.rememberTimeFormatter
 import com.ustadmobile.libuicompose.view.clazzassignment.CommentListItem
-import com.ustadmobile.libuicompose.view.clazzassignment.CourseAssignmentSubmissionListItem
+import com.ustadmobile.libuicompose.view.clazzassignment.CourseAssignmentSubmissionComponent
+import com.ustadmobile.libuicompose.view.clazzassignment.CourseAssignmentSubmissionFileListItem
 import com.ustadmobile.libuicompose.view.clazzassignment.UstadAssignmentSubmissionStatusHeaderItems
 import com.ustadmobile.libuicompose.view.clazzassignment.UstadCourseAssignmentMarkListItem
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.Dispatchers
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
+import java.util.TimeZone
 
 @Composable
 fun ClazzAssignmentSubmitterDetailScreen(
@@ -51,9 +58,18 @@ fun ClazzAssignmentSubmitterDetailScreen(
         onChangePrivateComment = viewModel::onChangePrivateComment,
         onClickSubmitPrivateComment = viewModel::onSubmitPrivateComment,
         onClickGradeFilterChip = viewModel::onClickGradeFilterChip,
-        onClickOpenSubmission = viewModel::onClickSubmission,
         onChangeDraftMark = viewModel::onChangeDraftMark,
+        onToggleSubmissionExpandCollapse = viewModel::onToggleSubmissionExpandCollapse,
+        onOpenSubmissionFile = viewModel::onOpenSubmissionFile,
+        onSendSubmissionFile = if(!isDesktop()) viewModel::onSendSubmissionFile else null
     )
+
+    uiState.openingFileState?.also { openingState ->
+        UstadOpeningBlobInfoBottomSheet(
+            openingBlobState = openingState,
+            onDismissRequest = viewModel::onDismissOpenFileSubmission,
+        )
+    }
 }
 
 @Composable
@@ -64,8 +80,10 @@ fun ClazzAssignmentSubmitterDetailScreen(
     onChangePrivateComment: (String) -> Unit = {},
     onClickSubmitPrivateComment: () -> Unit = {},
     onClickGradeFilterChip: (MessageIdOption2) -> Unit = {},
-    onClickOpenSubmission: (CourseAssignmentSubmission) -> Unit = {},
     onChangeDraftMark: (CourseAssignmentMark?) -> Unit = {},
+    onToggleSubmissionExpandCollapse: (CourseAssignmentSubmission) -> Unit = { },
+    onOpenSubmissionFile: (CourseAssignmentSubmissionFileAndTransferJob) -> Unit = { },
+    onSendSubmissionFile: ((CourseAssignmentSubmissionFileAndTransferJob) -> Unit)? = null,
 ){
 
     val privateCommentsPager = remember(uiState.privateCommentsList) {
@@ -78,6 +96,9 @@ fun ClazzAssignmentSubmitterDetailScreen(
     val privateCommentsLazyPagingItems = privateCommentsPager.flow.collectAsLazyPagingItems()
 
     val linkExtractor = rememberLinkExtractor()
+
+    val timeFormatter = rememberTimeFormatter()
+    val dateFormatter = rememberDateFormat(TimeZone.getDefault().id)
 
     UstadLazyColumn (
         modifier = Modifier
@@ -97,16 +118,31 @@ fun ClazzAssignmentSubmitterDetailScreen(
             }
         }
 
-        items(
-            items = uiState.submissionList,
-            key = { Pair(CourseAssignmentSubmission.TABLE_ID, it.casUid) }
-        ) { submissionItem ->
-            CourseAssignmentSubmissionListItem(
-                submission = submissionItem,
-                onClick = {
-                    onClickOpenSubmission(submissionItem)
+        uiState.submissionList.forEachIndexed { index, submissionAndFiles ->
+            val isCollapsedVal = submissionAndFiles.submission.casUid in uiState.collapsedSubmissions
+            item(key = Pair(CourseAssignmentSubmission.TABLE_ID, submissionAndFiles.submission.casUid)) {
+                CourseAssignmentSubmissionComponent(
+                    submission = submissionAndFiles.submission,
+                    submissionNum = uiState.submissionList.size - index,
+                    isCollapsed = isCollapsedVal,
+                    onToggleCollapse = {
+                        onToggleSubmissionExpandCollapse(submissionAndFiles.submission)
+                    }
+                )
+            }
+
+            if(!isCollapsedVal) {
+                items(
+                    items = submissionAndFiles.files,
+                    key = { Pair(CourseAssignmentSubmission.TABLE_ID, it.submissionFile?.casaUid ?: 0) }
+                ) {
+                    CourseAssignmentSubmissionFileListItem(
+                        fileAndTransferJob = it,
+                        onClickOpen = onOpenSubmissionFile,
+                        onSend = onSendSubmissionFile,
+                    )
                 }
-            )
+            }
         }
 
         item(key = "gradesheader") {
@@ -131,7 +167,9 @@ fun ClazzAssignmentSubmitterDetailScreen(
             key = { Pair(CourseAssignmentMark.TABLE_ID, it.courseAssignmentMark?.camUid ?: 0) }
         ) { mark ->
             UstadCourseAssignmentMarkListItem(
-                uiState = uiState.markListItemUiState(mark)
+                uiState = uiState.markListItemUiState(mark),
+                timeFormatter = timeFormatter,
+                dateFormat = dateFormatter,
             )
         }
 
@@ -179,6 +217,10 @@ fun ClazzAssignmentSubmitterDetailScreen(
             CommentListItem(
                 commentAndName = comment,
                 linkExtractor = linkExtractor,
+                localDateTimeNow = uiState.localDateTimeNow,
+                timeFormatter = timeFormatter,
+                dateFormatter = dateFormatter,
+                dayOfWeekStringMap = uiState.dayOfWeekStrings,
             )
         }
 
