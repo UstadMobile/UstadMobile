@@ -3,7 +3,6 @@ package com.ustadmobile.view.discussionpost.detail
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.hooks.useDayOrDate
-import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.lib.db.composites.DiscussionPostAndPosterNames
 import com.ustadmobile.mui.components.ThemeContext
 import com.ustadmobile.mui.components.UstadRawHtml
