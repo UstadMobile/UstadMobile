@@ -121,6 +121,7 @@ class CourseDiscussionDetailViewModel(
             DiscussionPostEditViewModel.DEST_NAME,
             extraArgs = mapOf(
                 ARG_COURSE_BLOCK_UID to courseBlockUid.toString(),
+                ARG_CLAZZUID to clazzUid.toString(),
             )
         )
     }
@@ -129,7 +130,8 @@ class CourseDiscussionDetailViewModel(
         navController.navigate(
             viewName = DiscussionPostDetailViewModel.DEST_NAME,
             args = mapOf(
-                UstadView.ARG_ENTITY_UID to post.discussionPostUid.toString()
+                UstadView.ARG_ENTITY_UID to post.discussionPostUid.toString(),
+                ARG_CLAZZUID to clazzUid.toString(),
             )
         )
     }

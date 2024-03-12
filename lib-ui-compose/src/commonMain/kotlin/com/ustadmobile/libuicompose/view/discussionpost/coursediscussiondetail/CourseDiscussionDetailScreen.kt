@@ -79,10 +79,6 @@ fun CourseDiscussionDetailScreen(
 
     val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
 
-    val systemTimeZone = remember {
-        TimeZone.getDefault().id
-    }
-
     val timeFormatter = rememberTimeFormatter()
     val dateFormatter = rememberDateFormat(TimeZone.getDefault().id)
 
@@ -109,7 +105,6 @@ fun CourseDiscussionDetailScreen(
         ) { discussionPostItem ->
             CourseDiscussionDetailDiscussionListItem(
                 discussionPostItem = discussionPostItem,
-                systemTimeZone = systemTimeZone,
                 onClickPost = onClickPost,
                 timeFormatter = timeFormatter,
                 dateFormatter = dateFormatter,
@@ -128,7 +123,6 @@ fun CourseDiscussionDetailScreen(
 @Composable
 fun CourseDiscussionDetailDiscussionListItem(
     discussionPostItem: DiscussionPostWithDetails?,
-    systemTimeZone: String,
     localDateTimeNow: LocalDateTime,
     dayOfWeekStringMap: Map<DayOfWeek, String>,
     timeFormatter: DateFormat,

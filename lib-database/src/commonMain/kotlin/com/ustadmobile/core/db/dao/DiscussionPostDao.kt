@@ -46,6 +46,7 @@ expect abstract class DiscussionPostDao: BaseDao<DiscussionPost>{
                (SELECT COUNT(*)
                   FROM DiscussionPost DiscussionPostReplies
                  WHERE DiscussionPostReplies.discussionPostReplyToPostUid = DiscussionPost.discussionPostUid
+                   AND NOT DiscussionPostReplies.dpDeleted
                ) AS postRepliesCount
           FROM DiscussionPost
                LEFT JOIN DiscussionPost AS MostRecentReply
@@ -131,7 +132,16 @@ expect abstract class DiscussionPostDao: BaseDao<DiscussionPost>{
     @HttpAccessible(
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
         pullQueriesToReplicate = arrayOf(
-            HttpServerFunctionCall("findByPostIdWithAllReplies"),
+            HttpServerFunctionCall(
+                functionName = "findByPostIdWithAllReplies",
+                functionArgs = arrayOf(
+                    HttpServerFunctionParam(
+                        name = "includeDeleted",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "true",
+                    )
+                )
+            ),
             HttpServerFunctionCall("findByPostIdWithAllRepliesPersons"),
         )
     )
@@ -145,8 +155,9 @@ expect abstract class DiscussionPostDao: BaseDao<DiscussionPost>{
                          ON Person.personUid = DiscussionPost.discussionPostStartedPersonUid
                LEFT JOIN PersonPicture
                          ON PersonPicture.personPictureUid = DiscussionPost.discussionPostStartedPersonUid
-         WHERE DiscussionPost.discussionPostUid = :postUid
-            OR DiscussionPost.discussionPostReplyToPostUid= :postUid
+         WHERE (DiscussionPost.discussionPostUid = :postUid
+                 OR DiscussionPost.discussionPostReplyToPostUid= :postUid)
+           AND (NOT DiscussionPost.dpDeleted OR CAST(:includeDeleted AS INTEGER) = 1)      
             -- Always get the starting post first, followed by replies
       ORDER BY CASE(DiscussionPost.discussionPostReplyToPostUid)
                WHEN 0 THEN 0
@@ -154,7 +165,8 @@ expect abstract class DiscussionPostDao: BaseDao<DiscussionPost>{
                DiscussionPost.discussionPostStartDate DESC 
     """)
     abstract fun findByPostIdWithAllReplies(
-        postUid: Long
+        postUid: Long,
+        includeDeleted: Boolean,
     ): PagingSource<Int, DiscussionPostAndPosterNames>
 
     @Query("""

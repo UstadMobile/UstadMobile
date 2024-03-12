@@ -18,6 +18,7 @@ import com.ustadmobile.mui.components.ThemeContext
 import com.ustadmobile.wrappers.intl.Intl
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDateTime
+import mui.material.styles.TypographyVariant
 import mui.system.responsive
 import mui.system.sx
 import react.dom.aria.AriaHasPopup
@@ -91,7 +92,10 @@ val UstadCommentListItem = FC<UstadCommentListItemProps> { props ->
 
         secondaryAction = Stack.create {
             direction = responsive(StackDirection.row)
-            + formattedTime
+            Typography {
+                variant = TypographyVariant.caption
+                + formattedTime
+            }
 
             if(props.showModerateOptions) {
                 IconButton {

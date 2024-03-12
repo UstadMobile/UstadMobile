@@ -97,7 +97,10 @@ val CourseDiscussionDetailPostListItem = FC<CourseDiscussionDetailPostListItemPr
 
         secondaryAction = Stack.create {
             direction = responsive(StackDirection.row)
-            + formattedTime
+            Typography {
+                variant = TypographyVariant.caption
+                +formattedTime
+            }
 
             if(props.showModerateOptions) {
                 IconButton {

@@ -185,7 +185,10 @@ class DiscussionPostEditViewModel (
                 }
 
                 finishWithResult(
-                    DiscussionPostDetailViewModel.DEST_NAME, post.discussionPostUid, post
+                    DiscussionPostDetailViewModel.DEST_NAME, post.discussionPostUid, post,
+                    detailViewExtraArgs = buildMap {
+                        putFromSavedStateIfPresent(ARG_CLAZZUID)
+                    }
                 )
             }
         }
