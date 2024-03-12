@@ -15,13 +15,14 @@ import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.UstadAssignmentSubmissionHeaderUiState
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import app.cash.paging.PagingSource
-import com.ustadmobile.core.domain.blob.openblob.OpenBlobItem
-import com.ustadmobile.core.domain.blob.openblob.OpenBlobUseCase
+import com.ustadmobile.core.domain.blob.openblob.OpenBlobUiUseCase
+import com.ustadmobile.core.domain.blob.openblob.OpeningBlobState
 import com.ustadmobile.core.domain.blob.upload.CancelBlobUploadClientUseCase
 import com.ustadmobile.core.domain.blob.saveandupload.SaveAndUploadLocalUrisUseCase
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
 import com.ustadmobile.core.util.ext.onActiveEndpoint
 import com.ustadmobile.core.util.ext.toggle
+import com.ustadmobile.core.viewmodel.clazzassignment.asBlobOpenItem
 import com.ustadmobile.core.viewmodel.clazzassignment.averageMark
 import com.ustadmobile.core.viewmodel.clazzassignment.combineWithSubmissionFiles
 import com.ustadmobile.core.viewmodel.clazzassignment.detail.ClazzAssignmentDetailViewModel
@@ -129,6 +130,13 @@ data class ClazzAssignmentDetailOverviewUiState(
     val dayOfWeekStringMap: Map<DayOfWeek, String> = emptyMap(),
 
     val collapsedSubmissions: Set<Long> = emptySet(),
+
+    /**
+     * If/when the user is opening a file submission, this is the progress and info. On desktop and
+     * Android this is used to show status in a bottom sheet (not applicable on web where blob
+     * download is done via browser).
+     */
+    val openingFileSubmissionState: OpeningBlobState? = null,
 
 ) {
 
@@ -297,7 +305,9 @@ class ClazzAssignmentDetailOverviewViewModel(
     private val cancelTransferJobUseCase: CancelBlobUploadClientUseCase? by di.onActiveEndpoint()
         .instanceOrNull()
 
-    private val openBlobUseCase: OpenBlobUseCase? by di.onActiveEndpoint().instanceOrNull()
+    private val openBlobUiUseCase: OpenBlobUiUseCase? by di.onActiveEndpoint().instanceOrNull()
+
+    private var openBlobJob: Job? = null
 
     init {
         _uiState.update { prev ->
@@ -665,16 +675,25 @@ class ClazzAssignmentDetailOverviewViewModel(
         }
     }
 
-    fun onClickSubmissionFile(file: CourseAssignmentSubmissionFileAndTransferJob) {
+    fun onOpenSubmissionFile(file: CourseAssignmentSubmissionFileAndTransferJob) {
         val submissionFile = file.submissionFile ?: return
-        viewModelScope.launch {
-            openBlobUseCase?.invoke(
-                OpenBlobItem(
-                    uri = submissionFile.casaUri ?: "",
-                    mimeType = submissionFile.casaMimeType ?: "application/octet-stream",
-                    fileName = submissionFile.casaFileName ?: "",
-                    fileSize = submissionFile.casaSize.toLong()
-                )
+        openBlobJob?.cancel()
+
+        openBlobJob = viewModelScope.launch {
+            openBlobUiUseCase?.invoke(
+                openItem = submissionFile.asBlobOpenItem(),
+                onUiUpdate = {
+                    _uiState.update { prev -> prev.copy(openingFileSubmissionState = it) }
+                }
+            )
+        }
+    }
+
+    fun onDismissOpenFileSubmission() {
+        openBlobJob?.cancel()
+        _uiState.update { prev ->
+            prev.copy(
+                openingFileSubmissionState = null,
             )
         }
     }

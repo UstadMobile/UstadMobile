@@ -102,7 +102,7 @@ abstract class AbstractContentImporterTest: AbstractMainDispatcherTest() {
             FileMimeTypeHelperImpl()
         )
         getStoragePathForUrlUseCase = GetStoragePathForUrlUseCaseCommonJvm(
-            httpClient = httpClient,
+            okHttpClient = okHttpClient,
             cache = ustadCache,
         )
     }

@@ -526,6 +526,6 @@ val ClazzAssignmentDetailOverviewScreen = FC<Props> {
         }
         onRemoveSubmissionFile = viewModel::onRemoveSubmissionFile
         onToggleSubmissionExpandCollapse = viewModel::onToggleSubmissionExpandCollapse
-        onClickSubmissionFile = viewModel::onClickSubmissionFile
+        onClickSubmissionFile = viewModel::onOpenSubmissionFile
     }
 }

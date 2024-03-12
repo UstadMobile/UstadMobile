@@ -1,5 +1,6 @@
 package com.ustadmobile.libuicompose.view.clazzassignment
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -28,8 +29,12 @@ import com.ustadmobile.libuicompose.components.UstadTooltipBox
 fun CourseAssignmentSubmissionFileListItem(
     fileAndTransferJob: CourseAssignmentSubmissionFileAndTransferJob,
     onRemove: ((CourseAssignmentSubmissionFileAndTransferJob) -> Unit)? = null,
+    onClickOpen: (CourseAssignmentSubmissionFileAndTransferJob) -> Unit = { },
 ) {
     ListItem(
+        modifier = Modifier.clickable {
+            onClickOpen(fileAndTransferJob)
+        },
         leadingContent = {
             Icon(Icons.Default.Article, contentDescription = null)
         },

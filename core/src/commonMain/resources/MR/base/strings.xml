@@ -1860,4 +1860,6 @@
 
     <string name="upload_failed">Upload failed</string>
 
+    <string name="opening_name">Opening %1$s</string>
+
 </resources>

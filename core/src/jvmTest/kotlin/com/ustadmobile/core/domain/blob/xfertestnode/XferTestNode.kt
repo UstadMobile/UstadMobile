@@ -183,7 +183,7 @@ class XferTestNode(
 
             bind<GetStoragePathForUrlUseCase>() with singleton {
                 GetStoragePathForUrlUseCaseCommonJvm(
-                    httpClient = httpClient,
+                    okHttpClient = okHttpClient,
                     cache = httpCache,
                 )
             }

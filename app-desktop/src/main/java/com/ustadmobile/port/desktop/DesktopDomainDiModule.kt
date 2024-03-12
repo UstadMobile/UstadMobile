@@ -24,6 +24,9 @@ import com.ustadmobile.core.domain.blob.download.EnqueueBlobDownloadClientUseCas
 import com.ustadmobile.core.domain.blob.download.EnqueueContentManifestDownloadUseCase
 import com.ustadmobile.core.domain.blob.download.EnqueueContentManifestDownloadUseCaseJvm
 import com.ustadmobile.core.domain.blob.download.MakeContentEntryAvailableOfflineUseCase
+import com.ustadmobile.core.domain.blob.openblob.OpenBlobUiUseCase
+import com.ustadmobile.core.domain.blob.openblob.OpenBlobUseCase
+import com.ustadmobile.core.domain.blob.openblob.OpenBlobUseCaseJvm
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCaseJvm
 import com.ustadmobile.core.domain.blob.saveandupload.SaveAndUploadLocalUrisUseCase
@@ -282,7 +285,7 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
 
     bind<GetStoragePathForUrlUseCase>() with singleton {
         GetStoragePathForUrlUseCaseCommonJvm(
-            httpClient = instance(),
+            okHttpClient = instance(),
             cache = instance(),
         )
     }
@@ -415,6 +418,20 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             scheduler = instance(),
             endpoint = context,
             db = instance(tag = DoorTag.TAG_DB),
+        )
+    }
+
+    bind<OpenBlobUseCase>() with scoped(EndpointScope.Default).singleton {
+        OpenBlobUseCaseJvm(
+            getStoragePathForUrlUseCase = instance(),
+            rootTmpDir = instance(tag = DiTag.TAG_TMP_DIR)
+        )
+    }
+
+    bind<OpenBlobUiUseCase>() with scoped(EndpointScope.Default).singleton {
+        OpenBlobUiUseCase(
+            openBlobUseCase = instance(),
+            systemImpl = instance(),
         )
     }
 

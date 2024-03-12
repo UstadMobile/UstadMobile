@@ -28,6 +28,9 @@ interface GetStoragePathForUrlUseCase {
 
     }
 
+    /**
+     * @return file uri (e.g. as per DoorUri)
+     */
     suspend operator fun invoke(
         url: String,
         progressInterval: Int = 500,

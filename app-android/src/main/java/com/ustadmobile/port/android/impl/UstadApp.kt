@@ -633,7 +633,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
         bind<GetStoragePathForUrlUseCase>() with singleton {
             GetStoragePathForUrlUseCaseCommonJvm(
-                httpClient = instance(),
+                okHttpClient = instance(),
                 cache = instance(),
             )
         }

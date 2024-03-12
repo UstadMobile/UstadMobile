@@ -478,7 +478,7 @@ fun Application.umRestApplication(
 
         bind<GetStoragePathForUrlUseCase>() with scoped(EndpointScope.Default).singleton {
             GetStoragePathForUrlUseCaseCommonJvm(
-                httpClient = instance(),
+                okHttpClient = instance(),
                 cache = instance()
             )
         }

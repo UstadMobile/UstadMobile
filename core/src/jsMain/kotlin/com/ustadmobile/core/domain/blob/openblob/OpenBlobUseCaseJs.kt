@@ -4,7 +4,10 @@ import web.dom.document
 
 class OpenBlobUseCaseJs: OpenBlobUseCase {
 
-    override suspend fun invoke(item: OpenBlobItem) {
+    override suspend fun invoke(
+        item: OpenBlobItem,
+        onProgress: (bytesTransferred: Long, totalBytes: Long) ->  Unit,
+    ) {
         val element = document.createElement("a")
         element.setAttribute("href", item.uri)
         element.setAttribute("download", item.fileName)

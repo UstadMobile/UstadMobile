@@ -3,6 +3,7 @@ package com.ustadmobile.core.impl.di
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.domain.account.SetPasswordUseCase
 import com.ustadmobile.core.domain.account.SetPasswordUseCaseJs
+import com.ustadmobile.core.domain.blob.openblob.OpenBlobUiUseCase
 import com.ustadmobile.core.domain.blob.openblob.OpenBlobUseCase
 import com.ustadmobile.core.domain.blob.openblob.OpenBlobUseCaseJs
 import com.ustadmobile.core.domain.blob.saveandupload.SaveAndUploadLocalUrisUseCase
@@ -213,6 +214,13 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
 
     bind<OpenBlobUseCase>() with scoped(EndpointScope.Default).provider {
         OpenBlobUseCaseJs()
+    }
+
+    bind<OpenBlobUiUseCase>() with scoped(EndpointScope.Default).singleton {
+        OpenBlobUiUseCase(
+            openBlobUseCase = instance(),
+            systemImpl = instance(),
+        )
     }
 
 }

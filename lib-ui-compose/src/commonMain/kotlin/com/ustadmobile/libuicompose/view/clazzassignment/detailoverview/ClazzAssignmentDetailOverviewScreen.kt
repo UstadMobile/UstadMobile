@@ -45,6 +45,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import com.ustadmobile.core.viewmodel.clazzassignment.averageMark
 import com.ustadmobile.lib.db.composites.CourseAssignmentSubmissionFileAndTransferJob
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
+import com.ustadmobile.libuicompose.components.UstadOpeningBlobInfoBottomSheet
 import com.ustadmobile.libuicompose.components.UstadPickFileOpts
 import com.ustadmobile.libuicompose.components.UstadRichTextEdit
 import com.ustadmobile.libuicompose.components.rememberUstadFilePickLauncher
@@ -73,6 +74,13 @@ fun ClazzAssignmentDetailOverviewScreen(viewModel: ClazzAssignmentDetailOverview
         )
     }
 
+    uiState.openingFileSubmissionState?.also { openingState ->
+        UstadOpeningBlobInfoBottomSheet(
+            openingBlobState = openingState,
+            onDismissRequest = viewModel::onDismissOpenFileSubmission,
+        )
+    }
+
     ClazzAssignmentDetailOverviewScreen(
         uiState = uiState,
         onClickEditSubmission = viewModel::onClickEditSubmissionText,
@@ -88,6 +96,7 @@ fun ClazzAssignmentDetailOverviewScreen(viewModel: ClazzAssignmentDetailOverview
             filePickLauncher(UstadPickFileOpts())
         },
         onRemoveSubmissionFile = viewModel::onRemoveSubmissionFile,
+        onOpenSubmissionFile =  viewModel::onOpenSubmissionFile,
         onToggleSubmissionExpandCollapse = viewModel::onToggleSubmissionExpandCollapse,
     )
 }
@@ -106,6 +115,7 @@ fun ClazzAssignmentDetailOverviewScreen(
     onClickSubmitSubmission: () -> Unit = { },
     onClickCourseGroupSet: () -> Unit = { },
     onRemoveSubmissionFile: (CourseAssignmentSubmissionFileAndTransferJob) -> Unit = { },
+    onOpenSubmissionFile: (CourseAssignmentSubmissionFileAndTransferJob) -> Unit = { },
     onToggleSubmissionExpandCollapse: (CourseAssignmentSubmission) -> Unit = { },
 ){
 
@@ -283,6 +293,7 @@ fun ClazzAssignmentDetailOverviewScreen(
                 CourseAssignmentSubmissionFileListItem(
                     fileAndTransferJob = item,
                     onRemove = onRemoveSubmissionFile,
+                    onClickOpen = onOpenSubmissionFile,
                 )
             }
 
@@ -330,7 +341,8 @@ fun ClazzAssignmentDetailOverviewScreen(
                         key = { Pair("submittedfile", it.submissionFile?.casaUid ?: 0)}
                     ) { file ->
                         CourseAssignmentSubmissionFileListItem(
-                            fileAndTransferJob = file
+                            fileAndTransferJob = file,
+                            onClickOpen = onOpenSubmissionFile,
                         )
                     }
                 }

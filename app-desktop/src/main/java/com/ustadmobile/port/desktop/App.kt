@@ -70,18 +70,20 @@ import org.kodein.di.compose.localDI
 import org.kodein.di.compose.withDI
 import org.kodein.di.direct
 import org.kodein.di.instance
+import org.quartz.Scheduler
 import java.awt.Desktop
 import java.io.File
 import java.net.URI
 import java.util.Locale
 import java.util.Properties
+import java.util.concurrent.atomic.AtomicReference
+import kotlin.system.exitProcess
 import com.ustadmobile.libuicompose.view.app.App as UstadPrecomposeApp
 
 //Roughly as per https://github.com/JetBrains/compose-multiplatform-desktop-template#readme
 fun main() {
     //Apply the language setting before startup
     val dataRoot = ustadAppDataDir()
-
 
     SetLanguageUseCaseJvm.init()
 
@@ -100,6 +102,8 @@ fun main() {
     Napier.base(LogbackAntiLog())
 
     val prefsPropertiesFiles = File(dataRoot, UstadMobileSystemImpl.PREFS_FILENAME)
+
+    val schedulerRef = AtomicReference<Scheduler?>()
 
     try {
         val props = prefsPropertiesFiles.takeIf {
@@ -140,7 +144,7 @@ fun main() {
         System.err.println("failed to read language setting")
     }
 
-    application {
+    application(exitProcessOnExit = false) {
         Napier.base(DebugAntilog())
 
         //App icon setting as per
@@ -183,6 +187,7 @@ fun main() {
                     it.start()
                     Napier.i("Embedded Server running on port ${it.listeningPort}")
                 }
+                schedulerRef.set(di.direct.instance())
             }
 
             CompositionLocalProvider(LocalKamelConfig provides desktopConfig) {
@@ -299,7 +304,10 @@ fun main() {
                 }
             }
         }
-
     }
 
+    //Now shutdown and exit
+    Napier.i("Shutdown: shutting down scheduler on app finished")
+    schedulerRef.get()?.shutdown()
+    exitProcess(0)
 }

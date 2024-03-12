@@ -1,23 +1,24 @@
 package com.ustadmobile.core.domain.cachestoragepath
 
+import com.ustadmobile.core.io.await
+import com.ustadmobile.core.io.ext.bodyAsDecodedByteStream
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.libcache.UstadCache
 import io.github.aakira.napier.Napier
-import io.ktor.client.HttpClient
-import io.ktor.client.request.get
-import io.ktor.client.statement.bodyAsChannel
-import io.ktor.utils.io.jvm.javaio.toInputStream
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import java.io.File
 import java.util.concurrent.atomic.AtomicLong
 
 
 class GetStoragePathForUrlUseCaseCommonJvm (
-    private val httpClient: HttpClient,
+    private val okHttpClient: OkHttpClient,
     private val cache: UstadCache,
 ): GetStoragePathForUrlUseCase{
 
@@ -29,28 +30,33 @@ class GetStoragePathForUrlUseCaseCommonJvm (
         val totalBytes = AtomicLong(1)
         val bytesTransferred = AtomicLong(0)
         val progressUpdateJob = launch {
-            onStateChange(
-                GetStoragePathForUrlUseCase.GetStoragePathForUrlState(
-                    fileUri = null,
-                    error = null,
-                    totalBytes = totalBytes.get(),
-                    bytesTransferred = bytesTransferred.get(),
-                    status = GetStoragePathForUrlUseCase.GetStoragePathForUrlState.Status.IN_PROGRESS,
+            while(isActive) {
+                onStateChange(
+                    GetStoragePathForUrlUseCase.GetStoragePathForUrlState(
+                        fileUri = null,
+                        error = null,
+                        totalBytes = totalBytes.get(),
+                        bytesTransferred = bytesTransferred.get(),
+                        status = GetStoragePathForUrlUseCase.GetStoragePathForUrlState.Status.IN_PROGRESS,
+                    )
                 )
-            )
 
-            delay(progressInterval.toLong())
+                delay(progressInterval.toLong())
+            }
         }
 
         try {
-            val response = httpClient.get(url)
+            val call = okHttpClient.newCall(Request.Builder()
+                .url(url)
+                .build())
+            val response = call.await()
 
             totalBytes.set(response.headers["content-length"]?.toLong() ?: 1)
 
             val buffer = ByteArray(8192)
 
             var bytesRead = 0
-            response.bodyAsChannel().toInputStream().use { inStream ->
+            response.bodyAsDecodedByteStream()?.use { inStream ->
                 while (isActive && inStream.read(buffer).also { bytesRead = it } != -1) {
                     bytesTransferred.set(bytesTransferred.get() + bytesRead)
                 }
@@ -88,15 +94,18 @@ class GetStoragePathForUrlUseCaseCommonJvm (
 
             fileUri
         }catch(e: Throwable) {
-            Napier.w(throwable = e) { "DownloadUrl: $url Fail" }
-            onStateChange(
-                GetStoragePathForUrlUseCase.GetStoragePathForUrlState(
-                    error = e.message ?: "Other error",
-                    bytesTransferred = bytesTransferred.get(),
-                    totalBytes = totalBytes.get(),
-                    status = GetStoragePathForUrlUseCase.GetStoragePathForUrlState.Status.FAILED,
+            if(e !is CancellationException) {
+                Napier.w(throwable = e) { "DownloadUrl: $url Fail" }
+                onStateChange(
+                    GetStoragePathForUrlUseCase.GetStoragePathForUrlState(
+                        error = e.message ?: "Other error",
+                        bytesTransferred = bytesTransferred.get(),
+                        totalBytes = totalBytes.get(),
+                        status = GetStoragePathForUrlUseCase.GetStoragePathForUrlState.Status.FAILED,
+                    )
                 )
-            )
+            }
+
             throw e
         }finally {
             progressUpdateJob.cancel()
