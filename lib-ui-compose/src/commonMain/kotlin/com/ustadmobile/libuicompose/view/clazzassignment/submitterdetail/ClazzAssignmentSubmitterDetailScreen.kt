@@ -61,7 +61,8 @@ fun ClazzAssignmentSubmitterDetailScreen(
         onChangeDraftMark = viewModel::onChangeDraftMark,
         onToggleSubmissionExpandCollapse = viewModel::onToggleSubmissionExpandCollapse,
         onOpenSubmissionFile = viewModel::onOpenSubmissionFile,
-        onSendSubmissionFile = if(!isDesktop()) viewModel::onSendSubmissionFile else null
+        onSendSubmissionFile = if(!isDesktop()) viewModel::onSendSubmissionFile else null,
+        onDeleteComment = viewModel::onDeleteComment,
     )
 
     uiState.openingFileState?.also { openingState ->
@@ -84,6 +85,7 @@ fun ClazzAssignmentSubmitterDetailScreen(
     onToggleSubmissionExpandCollapse: (CourseAssignmentSubmission) -> Unit = { },
     onOpenSubmissionFile: (CourseAssignmentSubmissionFileAndTransferJob) -> Unit = { },
     onSendSubmissionFile: ((CourseAssignmentSubmissionFileAndTransferJob) -> Unit)? = null,
+    onDeleteComment: (Comments) -> Unit = { },
 ){
 
     val privateCommentsPager = remember(uiState.privateCommentsList) {
@@ -221,6 +223,8 @@ fun ClazzAssignmentSubmitterDetailScreen(
                 timeFormatter = timeFormatter,
                 dateFormatter = dateFormatter,
                 dayOfWeekStringMap = uiState.dayOfWeekStrings,
+                showModerateOptions = uiState.showModerateOptions,
+                onDeleteComment = onDeleteComment,
             )
         }
 

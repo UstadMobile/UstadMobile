@@ -167,6 +167,7 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
                                FROM Comments
                               WHERE Comments.commentsEntityUid = :assignmentUid
                                 AND Comments.commentsForSubmitterUid = SubmitterList.submitterId
+                                AND NOT Comments.commentsDeleted
                            ORDER BY Comments.commentsDateTimeAdded DESC     
                               LIMIT 1) 
                LEFT JOIN CourseAssignmentMark
@@ -594,7 +595,11 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
         SELECT ClazzAssignment.*,
                CourseBlock.*,
                CourseGroupSet.*,
-               ($SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL) AS submitterUid
+               ($SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL) AS submitterUid,
+               
+               (${CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT1} ${PermissionFlags.COURSE_MODERATE}
+                ${CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT2} ${PermissionFlags.COURSE_MODERATE}
+                ${CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT3}) AS hasModeratePermission
                    
           FROM ClazzAssignment
                JOIN CourseBlock

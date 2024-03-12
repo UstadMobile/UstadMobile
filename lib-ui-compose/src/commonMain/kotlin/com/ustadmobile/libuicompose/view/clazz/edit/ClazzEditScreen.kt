@@ -46,7 +46,6 @@ import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 import org.burnoutcrew.reorderable.*
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Suppress("unused") // Pending add to navhost
 @Composable
 fun ClazzEditScreen(viewModel: ClazzEditViewModel) {
 

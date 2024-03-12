@@ -36,7 +36,16 @@ expect abstract class CommentsDao  {
     @HttpAccessible(
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
         pullQueriesToReplicate = arrayOf(
-            HttpServerFunctionCall(functionName = "findPrivateCommentsForUserByAssignmentUid"),
+            HttpServerFunctionCall(
+                functionName = "findPrivateCommentsForUserByAssignmentUid",
+                functionArgs = arrayOf(
+                    HttpServerFunctionParam(
+                        name = "includeDeleted",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "true",
+                    )
+                )
+            ),
             HttpServerFunctionCall(functionName = "findPrivateCommentsForUserByAssignmentUidPersons"),
             HttpServerFunctionCall(
                 functionDao = ClazzAssignmentDao::class,
@@ -61,12 +70,13 @@ expect abstract class CommentsDao  {
          WHERE Comments.commentsForSubmitterUid = ($SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL)
            AND Comments.commentsForSubmitterUid != 0
            AND Comments.commentsEntityUid = :assignmentUid
-           AND CAST(Comments.commentsDeleted AS INTEGER) = 0
+           AND (CAST(Comments.commentsDeleted AS INTEGER) = 0 OR CAST(:includeDeleted AS INTEGER) = 1) 
       ORDER BY Comments.commentsDateTimeAdded DESC     
     """)
     abstract fun findPrivateCommentsForUserByAssignmentUid(
         accountPersonUid: Long,
         assignmentUid: Long,
+        includeDeleted: Boolean,
     ): PagingSource<Int, CommentsAndName>
 
     @Query("""
@@ -90,7 +100,16 @@ expect abstract class CommentsDao  {
     @HttpAccessible(
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
         pullQueriesToReplicate = arrayOf(
-            HttpServerFunctionCall("findPrivateCommentsForSubmitterByAssignmentUid"),
+            HttpServerFunctionCall(
+                functionName = "findPrivateCommentsForSubmitterByAssignmentUid",
+                functionArgs = arrayOf(
+                    HttpServerFunctionParam(
+                        name = "includeDeleted",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "true",
+                    )
+                )
+            ),
             HttpServerFunctionCall("findPrivateCommentsForSubmitterByAssignmentUidPersons"),
             //Needs
         )
@@ -107,12 +126,13 @@ expect abstract class CommentsDao  {
                     ON PersonPicture.personPictureUid = Comments.commentsFromPersonUid
          WHERE Comments.commentsForSubmitterUid = :submitterUid
            AND Comments.commentsEntityUid = :assignmentUid
-           AND NOT Comments.commentsDeleted
+           AND (NOT Comments.commentsDeleted OR CAST(:includeDeleted AS INTEGER) = 1)
       ORDER BY Comments.commentsDateTimeAdded DESC        
     """)
     abstract fun findPrivateCommentsForSubmitterByAssignmentUid(
         submitterUid: Long,
         assignmentUid: Long,
+        includeDeleted: Boolean,
     ): PagingSource<Int, CommentsAndName>
 
     @Query("""
@@ -136,7 +156,16 @@ expect abstract class CommentsDao  {
     @HttpAccessible(
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
         pullQueriesToReplicate = arrayOf(
-            HttpServerFunctionCall(functionName = "findCourseCommentsByAssignmentUid"),
+            HttpServerFunctionCall(
+                functionName = "findCourseCommentsByAssignmentUid",
+                functionArgs = arrayOf(
+                    HttpServerFunctionParam(
+                        name = "includeDeleted",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "true",
+                    )
+                )
+            ),
             HttpServerFunctionCall(functionName = "findCourseCommentsByAssignmentUidPersons")
         )
     )
@@ -152,10 +181,12 @@ expect abstract class CommentsDao  {
                     ON PersonPicture.personPictureUid = Comments.commentsFromPersonUid
          WHERE Comments.commentsEntityUid = :assignmentUid
            AND Comments.commentsForSubmitterUid = 0
+           AND (CAST(Comments.commentsDeleted AS INTEGER) = 0 OR CAST(:includeDeleted AS INTEGER) = 1)
       ORDER BY Comments.commentsDateTimeAdded DESC     
     """)
     abstract fun findCourseCommentsByAssignmentUid(
-        assignmentUid: Long
+        assignmentUid: Long,
+        includeDeleted: Boolean,
     ): PagingSource<Int, CommentsAndName>
 
     @Query("""

@@ -1923,6 +1923,21 @@ val MIGRATION_159_160 = DoorMigrationStatementList(159, 160) { db ->
     }
 }
 
+val MIGRATION_160_161 = DoorMigrationStatementList(160, 161) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.POSTGRES) {
+            add("ALTER TABLE DiscussionPost DROP COLUMN discussionPostVisible")
+            add("ALTER TABLE DiscussionPost DROP COLUMN discussionPostArchive")
+            add("ALTER TABLE DiscussionPost ADD COLUMN dpDeleted BOOL NOT NULL DEFAULT FALSE")
+        }else {
+            add("ALTER TABLE DiscussionPost RENAME to DiscussionPost_OLD")
+            add("CREATE TABLE IF NOT EXISTS DiscussionPost (  discussionPostReplyToPostUid  INTEGER  NOT NULL , discussionPostTitle  TEXT , discussionPostMessage  TEXT , discussionPostStartDate  INTEGER  NOT NULL , discussionPostCourseBlockUid  INTEGER  NOT NULL , dpDeleted  INTEGER  NOT NULL , discussionPostStartedPersonUid  INTEGER  NOT NULL , discussionPostClazzUid  INTEGER  NOT NULL , discussionPostLct  INTEGER  NOT NULL , discussionPostUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+            add("INSERT INTO DiscussionPost (discussionPostReplyToPostUid, discussionPostTitle, discussionPostMessage, discussionPostStartDate, discussionPostCourseBlockUid, dpDeleted, discussionPostStartedPersonUid, discussionPostClazzUid, discussionPostLct, discussionPostUid) SELECT discussionPostReplyToPostUid, discussionPostTitle, discussionPostMessage, discussionPostStartDate, discussionPostCourseBlockUid, 0 AS dpDeleted, discussionPostStartedPersonUid, discussionPostClazzUid, discussionPostLct, discussionPostUid FROM DiscussionPost_OLD")
+            add("DROP TABLE DiscussionPost_OLD")
+        }
+    }
+}
+
 
 
 fun migrationList() = listOf<DoorMigration>(
@@ -1938,6 +1953,7 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_146_147, MIGRATION_147_148, MIGRATION_149_150, MIGRATION_150_151,
     MIGRATION_151_152, MIGRATION_152_153, MIGRATION_153_154, MIGRATION_154_155,
     MIGRATION_156_157, MIGRATION_157_158, MIGRATION_158_159, MIGRATION_159_160,
+    MIGRATION_160_161,
 )
 
 
