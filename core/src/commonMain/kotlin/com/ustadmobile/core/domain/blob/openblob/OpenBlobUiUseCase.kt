@@ -3,6 +3,7 @@ package com.ustadmobile.core.domain.blob.openblob
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import io.github.aakira.napier.Napier
+import io.ktor.utils.io.CancellationException
 
 /**
  * Runs the OpenBlob use case, and updates a UI. Handles try/catch and showing error if required
@@ -42,15 +43,17 @@ class OpenBlobUiUseCase(
 
             onUiUpdate(null)
         }catch(e: Throwable) {
-            Napier.w("ClazzAssignmentDetailOverview: could not open $openItem", e)
-            onUiUpdate(
-                OpeningBlobState(
-                    item = openItem,
-                    bytesReady = 0,
-                    totalBytes = 0,
-                    error = e.message ?: systemImpl.getString(MR.strings.error)
+            Napier.w("OpenBlobUiCase: could not open $openItem", e)
+            if(e !is CancellationException) {
+                onUiUpdate(
+                    OpeningBlobState(
+                        item = openItem,
+                        bytesReady = 0,
+                        totalBytes = 0,
+                        error = e.message ?: systemImpl.getString(MR.strings.error)
+                    )
                 )
-            )
+            }
         }
     }
 
