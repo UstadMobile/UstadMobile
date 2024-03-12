@@ -1,5 +1,6 @@
 package com.ustadmobile.libuicompose.components
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
@@ -53,7 +54,10 @@ fun UstadOpeningBlobInfoBottomSheet(
                     )
                 }
             }else {
-                Icon(Icons.Default.Error, contentDescription = null)
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    Icon(Icons.Default.Error, contentDescription = null)
+                }
+
                 Text(text = errorVal, modifier = Modifier.defaultItemPadding())
             }
         }

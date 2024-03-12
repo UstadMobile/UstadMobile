@@ -637,6 +637,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             GetStoragePathForUrlUseCaseCommonJvm(
                 okHttpClient = instance(),
                 cache = instance(),
+                tmpDir = instance(tag = DiTag.TAG_TMP_DIR),
             )
         }
 

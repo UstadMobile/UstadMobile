@@ -104,6 +104,7 @@ abstract class AbstractContentImporterTest: AbstractMainDispatcherTest() {
         getStoragePathForUrlUseCase = GetStoragePathForUrlUseCaseCommonJvm(
             okHttpClient = okHttpClient,
             cache = ustadCache,
+            tmpDir = temporaryFolder.newFolder(),
         )
     }
 

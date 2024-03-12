@@ -23,7 +23,8 @@ class OpenBlobUseCaseJvm(
             url = item.uri,
             onStateChange = {
                 onProgress(it.bytesTransferred, it.totalBytes)
-            }
+            },
+            inflateToTmpFileIfCompressed = true,
         )
 
         //Do not directly open the file from the cache dir - if opened using an editing program,
@@ -31,7 +32,7 @@ class OpenBlobUseCaseJvm(
         val openFromDir = File(rootTmpDir, "open-${systemTimeInMillis()}")
         openFromDir.mkdirs()
         val openFromFile = File(openFromDir, item.fileName)
-        val storageFile = DoorUri.parse(storageFileUri).toFile()
+        val storageFile = DoorUri.parse(storageFileUri.fileUri).toFile()
         storageFile.copyTo(openFromFile)
         Desktop.getDesktop().open(openFromFile)
     }

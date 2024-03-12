@@ -39,6 +39,7 @@ class GetStoragePathForUrlUseCaseCommonJvmTest {
         val getStoragePathUseCase = GetStoragePathForUrlUseCaseCommonJvm(
             okHttpClient = okHttpClient,
             cache = cache,
+            tmpDir = temporaryFolder.newFolder(),
         )
     }
 }

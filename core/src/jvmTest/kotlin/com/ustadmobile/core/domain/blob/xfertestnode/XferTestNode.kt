@@ -185,6 +185,7 @@ class XferTestNode(
                 GetStoragePathForUrlUseCaseCommonJvm(
                     okHttpClient = okHttpClient,
                     cache = httpCache,
+                    tmpDir = temporaryFolder.newFolder(),
                 )
             }
 

@@ -287,6 +287,7 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         GetStoragePathForUrlUseCaseCommonJvm(
             okHttpClient = instance(),
             cache = instance(),
+            tmpDir = instance(tag = DiTag.TAG_TMP_DIR)
         )
     }
 

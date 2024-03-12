@@ -26,6 +26,7 @@ import com.ustadmobile.libuicompose.components.UstadDetailHeader
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadListFilterChipsHeader
 import com.ustadmobile.libuicompose.components.UstadListSpacerItem
+import com.ustadmobile.libuicompose.components.UstadOpeningBlobInfoBottomSheet
 import com.ustadmobile.libuicompose.components.isDesktop
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
@@ -62,6 +63,13 @@ fun ClazzAssignmentSubmitterDetailScreen(
         onOpenSubmissionFile = viewModel::onOpenSubmissionFile,
         onSendSubmissionFile = if(!isDesktop()) viewModel::onSendSubmissionFile else null
     )
+
+    uiState.openingFileState?.also { openingState ->
+        UstadOpeningBlobInfoBottomSheet(
+            openingBlobState = openingState,
+            onDismissRequest = viewModel::onDismissOpenFileSubmission,
+        )
+    }
 }
 
 @Composable

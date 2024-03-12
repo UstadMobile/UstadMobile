@@ -486,6 +486,17 @@ class ClazzAssignmentSubmitterDetailViewModel(
         openSubmissionFileAsBlob(file, OpenBlobUseCase.OpenBlobIntent.VIEW)
     }
 
+
+    fun onDismissOpenFileSubmission() {
+        openBlobJob?.cancel()
+        _uiState.update { prev ->
+            prev.copy(
+                openingFileState = null,
+            )
+        }
+    }
+
+
     companion object {
 
         const val ARG_ASSIGNMENT_UID = "assignmentUid"

@@ -20,13 +20,14 @@ class OpenBlobUseCaseAndroid(
         onProgress: (bytesTransferred: Long, totalBytes: Long) -> Unit,
         intent: OpenBlobUseCase.OpenBlobIntent,
     ) {
-        val storageFileUri = getStoragePathForUrlUseCase(
+        val storagePathResult = getStoragePathForUrlUseCase(
             url = item.uri,
             onStateChange = {
                 onProgress(it.bytesTransferred, it.totalBytes)
-            }
+            },
+            inflateToTmpFileIfCompressed = true,
         )
-        val storageFile = DoorUri.parse(storageFileUri).toFile()
+        val storageFile = DoorUri.parse(storagePathResult.fileUri).toFile()
 
         val fromFile = if(intent == OpenBlobUseCase.OpenBlobIntent.SEND) {
             //Unfortunately the share seems to ignore the file name parameter, so we need to copy it
