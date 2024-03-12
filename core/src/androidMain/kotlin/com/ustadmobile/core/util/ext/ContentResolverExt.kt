@@ -1,4 +1,4 @@
-package com.ustadmobile.port.android.util.ext
+package com.ustadmobile.core.util.ext
 
 import android.content.ContentResolver
 import android.net.Uri
@@ -17,17 +17,15 @@ import kotlinx.coroutines.withContext
  *
  * @param uri the Uri of a file that has just been selected
  */
-suspend fun ContentResolver.getFileName(uri: Uri): String {
-    var fileName: String? = null
-
-    withContext(Dispatchers.IO) {
-        query(uri, arrayOf(OpenableColumns.DISPLAY_NAME),
-                null, null, null).use {
-            if(it != null && it.moveToFirst()) {
-                fileName = it.getString(0)
+suspend fun ContentResolver.getFileNameAndSize(uri: Uri): Pair<String, Long> {
+    return withContext(Dispatchers.IO) {
+        query(uri,
+            arrayOf(OpenableColumns.DISPLAY_NAME, OpenableColumns.SIZE),
+            null, null, null
+        )?.use { cursor ->
+            cursor.takeIf { cursor.moveToFirst() }?.let {
+                Pair(cursor.getString(0), cursor.getLong(1))
             }
-        }
+        } ?: Pair(uri.path?.substringAfterLast("/") ?: uri.toString(), -1)
     }
-
-    return fileName ?: uri.path?.substringAfterLast("/") ?: uri.toString()
 }

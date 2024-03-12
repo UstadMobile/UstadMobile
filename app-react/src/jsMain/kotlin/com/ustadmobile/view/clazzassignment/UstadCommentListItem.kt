@@ -1,6 +1,7 @@
 package com.ustadmobile.view.clazzassignment
 
-import com.ustadmobile.hooks.useFormattedDateAndTime
+import com.ustadmobile.core.hooks.useStringProvider
+import com.ustadmobile.core.viewmodel.clazzassignment.isFromSubmitterGroup
 import com.ustadmobile.lib.db.composites.CommentsAndName
 import kotlinx.datetime.TimeZone
 import mui.material.*
@@ -11,20 +12,46 @@ import react.create
 import com.ustadmobile.lib.db.entities.Comments
 import com.ustadmobile.mui.components.UstadLinkify
 import com.ustadmobile.view.components.UstadPersonAvatar
-
+import com.ustadmobile.core.MR
+import com.ustadmobile.hooks.useDayOrDate
+import com.ustadmobile.wrappers.intl.Intl
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDateTime
 
 external interface UstadCommentListItemProps : Props {
 
     var commentsAndName: CommentsAndName?
 
+    var dateTimeNow: LocalDateTime
+
+    var timeFormatter: Intl.Companion.DateTimeFormat
+
+    var dateFormatter: Intl.Companion.DateTimeFormat
+
+    var dayOfWeekMap: Map<DayOfWeek, String>
+
 }
 
 val UstadCommentListItem = FC<UstadCommentListItemProps> { props ->
 
-    val formattedTime = useFormattedDateAndTime(
-        timeInMillis = props.commentsAndName?.comment?.commentsDateTimeAdded ?: 0L,
-        timezoneId = TimeZone.currentSystemDefault().id
+    val strings = useStringProvider()
+
+    val formattedTime = useDayOrDate(
+        enabled = true,
+        localDateTimeNow = props.dateTimeNow,
+        timestamp = props.commentsAndName?.comment?.commentsDateTimeAdded ?: 0L,
+        timeZone = TimeZone.currentSystemDefault(),
+        showTimeIfToday = true,
+        timeFormatter = props.timeFormatter,
+        dateFormatter = props.dateFormatter,
+        dayOfWeekStringMap = props.dayOfWeekMap
     )
+
+    val groupNumSuffix = props.commentsAndName?.comment
+        ?.takeIf { it.isFromSubmitterGroup }
+        ?.let { "(${strings[MR.strings.group]} ${it.commentsFromSubmitterUid})"}
+        ?: ""
+
 
     ListItem {
         ListItemIcon {
@@ -35,7 +62,9 @@ val UstadCommentListItem = FC<UstadCommentListItemProps> { props ->
         }
 
         ListItemText {
-            primary = ReactNode("${props.commentsAndName?.firstNames} ${props.commentsAndName?.lastName}")
+            primary = ReactNode(
+        "${props.commentsAndName?.firstNames} ${props.commentsAndName?.lastName} $groupNumSuffix"
+            )
             secondary = UstadLinkify.create {
                 + (props.commentsAndName?.comment?.commentsText ?: "")
             }

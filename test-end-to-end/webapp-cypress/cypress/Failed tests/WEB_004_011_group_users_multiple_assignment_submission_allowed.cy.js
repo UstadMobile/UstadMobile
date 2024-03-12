@@ -1,3 +1,5 @@
+/* Test failed 11/march: with adding attachments: just needs to scroll
+ *
 describe('004_011_group_users_multiple_assignment_submission_allowed', () => {
 it('Start Ustad Test Server ', () => {
  // Start Test Server

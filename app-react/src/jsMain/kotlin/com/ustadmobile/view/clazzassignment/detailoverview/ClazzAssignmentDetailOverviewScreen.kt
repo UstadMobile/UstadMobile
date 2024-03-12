@@ -5,16 +5,14 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.locale.entityconstants.SubmissionPolicyConstants
-import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewUiState
 import com.ustadmobile.core.viewmodel.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewViewModel
-import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.hooks.courseTerminologyResource
 import com.ustadmobile.hooks.useCourseTerminologyEntries
+import com.ustadmobile.hooks.useDateFormatter
 import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.hooks.useMuiAppState
-import com.ustadmobile.lib.db.composites.CommentsAndName
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.*
 import kotlinx.datetime.TimeZone
@@ -22,7 +20,6 @@ import mui.material.*
 import mui.system.responsive
 import react.FC
 import react.Props
-import react.useState
 import react.ReactNode
 import react.create
 import com.ustadmobile.core.viewmodel.clazzassignment.UstadCourseAssignmentMarkListItemUiState as UstadCourseAssignmentMarkListItemUiState
@@ -34,26 +31,34 @@ import mui.icons.material.Done as DoneIcon
 import mui.icons.material.DoneAll as DoneAllIcon
 import mui.icons.material.EventAvailable as EventAvailableIcon
 import mui.icons.material.Add as AddIcon
-import mui.icons.material.InsertDriveFile as InsertDriveFileIcon
 import mui.icons.material.Groups as GroupsIcon
 import mui.icons.material.Person as PersonIcon
 import mui.icons.material.Group as GroupIcon
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.virtualListContent
 import com.ustadmobile.hooks.usePagingSource
+import com.ustadmobile.hooks.useTimeFormatter
 import com.ustadmobile.hooks.useUstadViewModel
-import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
-import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.lib.db.composites.CourseAssignmentSubmissionFileAndTransferJob
 import com.ustadmobile.view.clazzassignment.AssignmentCommentTextFieldListItem
+import com.ustadmobile.view.clazzassignment.CourseAssignmentSubmissionComponent
+import com.ustadmobile.view.clazzassignment.CourseAssignmentSubmissionFileListItem
 import com.ustadmobile.view.clazzassignment.UstadCommentListItem
 import com.ustadmobile.view.components.UstadDetailHeader
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
+import emotion.react.css
 import kotlinx.coroutines.Dispatchers
 import mui.system.sx
+import react.dom.html.ReactHTML.input
+import react.useRef
 import react.useRequiredContext
 import web.cssom.Contain
 import web.cssom.Overflow
 import web.cssom.TextAlign
+import web.file.File
+import web.html.HTMLInputElement
+import web.html.InputType
+import web.url.URL
 
 val ASSIGNMENT_STATUS_MAP = mapOf(
     CourseAssignmentSubmission.NOT_SUBMITTED to DoneIcon,
@@ -77,13 +82,17 @@ external interface ClazzAssignmentDetailOverviewScreenProps : Props {
 
     var onClickSubmitPrivateComment: () -> Unit
 
-    var onClickDeleteSubmission: (CourseAssignmentSubmissionWithAttachment) -> Unit
-
-    var onClickAddFileSubmission: () -> Unit
-
     var onClickSubmitSubmission: () -> Unit
 
     var onClickCourseGroupSet: () -> Unit
+
+    var onAddFile: (File) -> Unit
+
+    var onRemoveSubmissionFile: (CourseAssignmentSubmissionFileAndTransferJob) -> Unit
+
+    var onToggleSubmissionExpandCollapse: (CourseAssignmentSubmission) -> Unit
+
+    var onClickSubmissionFile: (CourseAssignmentSubmissionFileAndTransferJob) -> Unit
 
 }
 
@@ -119,6 +128,37 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
     )
 
     val courseTerminologyEntries = useCourseTerminologyEntries(props.uiState.courseTerminology)
+
+    val inputRef = useRef<HTMLInputElement>(null)
+
+    val timeFormatterVal = useTimeFormatter()
+
+    val dateFormatterVal = useDateFormatter()
+
+    /**
+     * Used to handle submission file selection.
+     */
+    input {
+        type = InputType.file
+        ref = inputRef
+        id = "assignment_file_input"
+
+        //Note: if the value is not set then React doesn't recognize this as a controlled component
+        // Components should not change between controlled and uncontrolled. We are just using the
+        // input to get the file from the onChange event.
+        value = ""
+
+        css {
+            asDynamic().display = "none"
+        }
+
+        onChange = {
+            val file = it.target.files?.get(0)
+            if (file != null) {
+                props.onAddFile(file)
+            }
+        }
+    }
 
     VirtualList {
         style = jso {
@@ -204,14 +244,16 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
 
             //submission section
             if(props.uiState.activeUserIsSubmitter) {
-                item("submission_header_item") {
-                    UstadDetailHeader.create {
-                        val suffix = if(props.uiState.isGroupSubmission) {
-                            "(${strings.format(MR.strings.group_number, props.uiState.submitterUid.toString())})"
-                        }else {
-                            ""
+                if(props.uiState.activeUserCanSubmit) {
+                    item("submission_header_item") {
+                        UstadDetailHeader.create {
+                            val suffix = if(props.uiState.isGroupSubmission) {
+                                "(${strings.format(MR.strings.group_number, props.uiState.submitterUid.toString())})"
+                            }else {
+                                ""
+                            }
+                            header = ReactNode("${strings[MR.strings.your_submission]} $suffix")
                         }
-                        header = ReactNode("${strings[MR.strings.your_submission]} $suffix")
                     }
                 }
 
@@ -222,9 +264,8 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
 
                             StatefulReactQuill {
                                 id = "assignment_text"
-                                value = props.uiState.latestSubmission?.casText ?: ""
+                                value = props.uiState.editableSubmission?.casText ?: ""
                                 onChange = props.onChangeSubmissionText
-                                readOnly = !props.uiState.activeUserCanSubmit
                             }
 
                             props.uiState.currentSubmissionLength?.also { submissionLength ->
@@ -237,34 +278,27 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                                 + "${props.uiState.assignment?.caTextLimit} "
                             }
                         }
-
                     }
                 }
 
-                if(props.uiState.addFileVisible) {
-                    item(key = "add_file_button") {
+                if(props.uiState.addFileSubmissionVisible) {
+                    item(key = "add_file_button_item") {
                         ListItem.create {
                             ListItemButton {
-                                id = "add_file"
+                                id = "add_file_button"
                                 onClick = {
-                                    props.onClickAddFileSubmission()
+                                    inputRef.current?.click()
                                 }
                                 ListItemIcon {
-                                    AddIcon { }
+                                    AddIcon()
                                 }
 
                                 ListItemText {
-                                    primary =
-                                        ReactNode(strings[MR.strings.add_file].uppercase())
+                                    primary = ReactNode(strings[MR.strings.add_file])
                                     secondary = ReactNode(
-                                        "${strings[MR.strings.file_type_chosen]} $caFileType " +
-                                            strings[MR.strings.max_number_of_files]
-                                                .replace(
-                                                    "%1\$s",
-                                                    (props.uiState.assignment?.caNumberOfFiles
-                                                        ?: 0)
-                                                        .toString()
-                                                )
+                                "${strings[MR.strings.file_type_chosen]} $caFileType " +
+                                        "${strings[MR.strings.number_of_files]}: ${props.uiState.assignment?.caNumberOfFiles} " +
+                                        "${strings[MR.strings.size_limit]}: ${props.uiState.assignment?.caSizeLimit}"
                                     )
                                 }
                             }
@@ -273,19 +307,12 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                 }
 
                 items(
-                    list = props.uiState.latestSubmissionAttachments ?: emptyList(),
-                    key = { "sa_${it.casaUid}"}
-                ) { submissionAttachment ->
-                    ListItem.create {
-                        ListItemButton {
-                            ListItemIcon {
-                                InsertDriveFileIcon { }
-                            }
-
-                            ListItemText {
-                                primary = ReactNode(submissionAttachment.casaFileName ?: "")
-                            }
-                        }
+                    list = props.uiState.editableSubmissionFiles,
+                    key = { "attachment_${it.submissionFile?.casaUid}" }
+                ) {
+                    CourseAssignmentSubmissionFileListItem.create {
+                        file = it
+                        onRemove = props.onRemoveSubmissionFile
                     }
                 }
 
@@ -316,6 +343,32 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                     }
                 }
 
+                props.uiState.submissions.forEachIndexed { index, submissionItem ->
+                    val isCollapsedVal = submissionItem.submission.casUid in props.uiState.collapsedSubmissions
+                    item(key = "submission_${submissionItem.submission.casUid}") {
+                        CourseAssignmentSubmissionComponent.create {
+                            submission = submissionItem.submission
+                            submissionNum = props.uiState.submissions.size - index
+                            isCollapsed = isCollapsedVal
+                            onToggleExpandCollapse = {
+                                props.onToggleSubmissionExpandCollapse(submissionItem.submission)
+                            }
+                        }
+                    }
+
+                    if(!isCollapsedVal) {
+                        items(
+                            list = submissionItem.files,
+                            key = { "submitted_file_${it.submissionFile?.casaUid}"}
+                        ) {
+                            CourseAssignmentSubmissionFileListItem.create {
+                                file = it
+                                onClick = props.onClickSubmissionFile
+                            }
+                        }
+                    }
+                }
+
                 //List of grades awarded
                 item(key = "grades_scoring_header") {
                     UstadDetailHeader.create {
@@ -341,7 +394,11 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                     UstadCourseAssignmentMarkListItem.create {
                         uiState = UstadCourseAssignmentMarkListItemUiState(
                             mark = markItem,
+                            localDateTimeNow = props.uiState.localDateTimeNow,
+                            dayOfWeekStrings = props.uiState.dayOfWeekStringMap,
                         )
+                        timeFormatter = timeFormatterVal
+                        dateFormatter = dateFormatterVal
                     }
                 }
             }
@@ -351,7 +408,7 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                 item(key = "course_comments_header_item") {
                     ListItem.create {
                         ListItemText {
-                            primary = ReactNode(strings[MR.strings.class_comments])
+                            primary = ReactNode(strings[MR.strings.course_comments])
                         }
                     }
                 }
@@ -374,6 +431,10 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                 ) { comment ->
                     UstadCommentListItem.create {
                         commentsAndName = comment
+                        timeFormatter = timeFormatterVal
+                        dateFormatter = dateFormatterVal
+                        dateTimeNow = props.uiState.localDateTimeNow
+                        dayOfWeekMap = props.uiState.dayOfWeekStringMap
                     }
                 }
             }
@@ -413,6 +474,10 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                 ) { comment ->
                     UstadCommentListItem.create {
                         commentsAndName = comment
+                        timeFormatter = timeFormatterVal
+                        dateFormatter = dateFormatterVal
+                        dateTimeNow = props.uiState.localDateTimeNow
+                        dayOfWeekMap = props.uiState.dayOfWeekStringMap
                     }
                 }
             }
@@ -445,88 +510,17 @@ val ClazzAssignmentDetailOverviewScreen = FC<Props> {
         onClickSubmitSubmission = viewModel::onClickSubmit
         onClickFilterChip = viewModel::onClickMarksFilterChip
         onClickCourseGroupSet = viewModel::onClickCourseGroupSet
-    }
-}
-
-val ClazzAssignmentDetailOverviewScreenPreview = FC<Props> {
-
-    var uiStateVar by useState {
-        ClazzAssignmentDetailOverviewUiState(
-            assignment = ClazzAssignment().apply {
-                caRequireTextSubmission = true
-            },
-            courseBlock = CourseBlock().apply {
-                cbDeadlineDate = 1685509200000L
-                cbDescription = "Complete your assignment or <b>else</b>"
-            },
-            submitterUid = 42L,
-            addFileVisible = true,
-            latestSubmission = CourseAssignmentSubmission().apply {
-                casText = ""
-            },
-            latestSubmissionAttachments = listOf(
-                CourseAssignmentSubmissionAttachment().apply {
-                    casaUid = 1L
-                    casaFileName = "File.pdf"
-                },
-            ),
-            markList = listOf(
-                CourseAssignmentMarkAndMarkerName(
-                    courseAssignmentMark = CourseAssignmentMark().apply {
-                        camMarkerSubmitterUid = 2
-                        camMarkerComment = "Comment"
-                        camMark = 8.1f
-                        camPenalty = 0.9f
-                        camMaxMark = 10f
-                        camLct = systemTimeInMillis()
-                    },
-                    markerFirstNames = "John",
-                    markerLastName = "Smith",
-                )
-            ),
-            courseComments = {
-                ListPagingSource(listOf(
-                    CommentsAndName().apply {
-                        comment = Comments().apply {
-                            commentsUid = 1
-                            commentsText = "This is a very difficult assignment."
-                        }
-                        firstNames = "Bob"
-                        lastName = "Dylan"
-                    }
-                ))
-            },
-            privateComments = {
-                ListPagingSource(
-                    listOf(
-                        CommentsAndName().apply {
-                            comment = Comments().apply {
-                                commentsUid = 2
-                                commentsText = "Can I please have extension? My rabbit ate my homework."
-                            }
-                            firstNames = "Bob"
-                            lastName = "Dylan"
-                        }
-                    ),
-                )
-            },
-        )
-    }
-
-    ClazzAssignmentDetailOverviewScreenComponent2 {
-        uiState = uiStateVar
-        onClickDeleteSubmission = {}
-        onChangeSubmissionText = {text ->
-            uiStateVar = uiStateVar.copy(
-                latestSubmission = uiStateVar.latestSubmission?.shallowCopy {
-                    casText = text
-                },
+        onAddFile = { file ->
+            val uri = URL.createObjectURL(file)
+            viewModel.onAddSubmissionFile(
+                uri = uri,
+                fileName = file.name,
+                mimeType = file.type,
+                size = file.size.toLong(),
             )
         }
-        onChangeCourseComment = {
-            uiStateVar = uiStateVar.copy(
-                newCourseCommentText = it
-            )
-        }
+        onRemoveSubmissionFile = viewModel::onRemoveSubmissionFile
+        onToggleSubmissionExpandCollapse = viewModel::onToggleSubmissionExpandCollapse
+        onClickSubmissionFile = viewModel::onOpenSubmissionFile
     }
 }

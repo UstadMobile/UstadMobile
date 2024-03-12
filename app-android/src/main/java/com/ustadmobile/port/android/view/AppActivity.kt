@@ -27,6 +27,7 @@ import androidx.lifecycle.lifecycleScope
 import com.jakewharton.processphoenix.ProcessPhoenix
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.domain.blob.openblob.OpenBlobUiUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseAndroid
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.LaunchXapiUseCase
@@ -172,6 +173,13 @@ class AppActivity: AppCompatActivity(), DIAware {
 
         bind<CloseProcessUseCase>() with scoped(EndpointScope.Default).provider {
             CloseProcessUseCaseAndroid(this@AppActivity)
+        }
+
+        bind<OpenBlobUiUseCase>() with scoped(EndpointScope.Default).singleton {
+            OpenBlobUiUseCase(
+                openBlobUseCase = instance(),
+                systemImpl = instance(),
+            )
         }
 
         registerContextTranslator { call: NanoHttpdCall -> Endpoint(call.urlParams["endpoint"] ?: "notfound") }

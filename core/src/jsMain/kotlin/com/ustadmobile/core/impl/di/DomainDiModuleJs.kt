@@ -3,6 +3,10 @@ package com.ustadmobile.core.impl.di
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.domain.account.SetPasswordUseCase
 import com.ustadmobile.core.domain.account.SetPasswordUseCaseJs
+import com.ustadmobile.core.domain.blob.openblob.OpenBlobUiUseCase
+import com.ustadmobile.core.domain.blob.openblob.OpenBlobUseCase
+import com.ustadmobile.core.domain.blob.openblob.OpenBlobUseCaseJs
+import com.ustadmobile.core.domain.blob.saveandupload.SaveAndUploadLocalUrisUseCase
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobUseCaseJs
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
@@ -194,4 +198,29 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
     bind<SetClipboardStringUseCase>() with singleton {
         SetClipboardStringUseCaseJs()
     }
+
+    /**
+     * SaveAndUploadLocalUris - because saving the local uri as a blob does the upload itself  on JS,
+     * there is no use of enqueueBlobUploadClientUseCase
+     */
+    bind<SaveAndUploadLocalUrisUseCase>() with scoped(EndpointScope.Default).singleton {
+        SaveAndUploadLocalUrisUseCase(
+            saveLocalUrisAsBlobsUseCase = instance(),
+            enqueueBlobUploadClientUseCase = null,
+            activeDb = instance(tag = DoorTag.TAG_DB),
+            activeRepo = instance(tag = DoorTag.TAG_REPO),
+        )
+    }
+
+    bind<OpenBlobUseCase>() with scoped(EndpointScope.Default).provider {
+        OpenBlobUseCaseJs()
+    }
+
+    bind<OpenBlobUiUseCase>() with scoped(EndpointScope.Default).singleton {
+        OpenBlobUiUseCase(
+            openBlobUseCase = instance(),
+            systemImpl = instance(),
+        )
+    }
+
 }

@@ -1,11 +1,16 @@
 package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
-@Entity
+@Entity(
+    indices = arrayOf(
+        Index("commentsEntityUid", "commentsForSubmitterUid", name = "idx_comments_entity_submitter")
+    )
+)
 @ReplicateEntity(
     tableId = Comments.TABLE_ID,
     remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW
@@ -22,61 +27,44 @@ import kotlinx.serialization.Serializable
 ))
 @Serializable
 // only used for assignment comments
-open class Comments() {
-
+data class Comments(
     @PrimaryKey(autoGenerate = true)
-    var commentsUid: Long = 0
+    var commentsUid: Long = 0,
 
-    var commentsText: String? = null
+    var commentsText: String? = null,
 
-    //Table name
-    var commentsEntityType : Int = 0
+    var commentsEntityUid : Long = 0,
 
-    var commentsEntityUid : Long = 0
-
-    var commentsPublic: Boolean = false
-
-    var commentsStatus: Int = COMMENTS_STATUS_APPROVED
+    var commentsStatus: Int = COMMENTS_STATUS_APPROVED,
 
     // person uid of whoever made the comment
-    var commentsPersonUid : Long = 0
+    var commentsFromPersonUid : Long = 0,
 
-    @Deprecated("use commentSubmitterUid")
-    var commentsToPersonUid: Long = 0
+    /**
+     * The submitter uid that these comments relate to.
+     *
+     * For course comments, this will be zero.
+     * For private comments, it will be the submitter uid (e.g. personUid for individual assignments,
+     * groupNum for group assignments).
+     */
+    var commentsForSubmitterUid: Long = 0,
 
-    // personUid if individual, groupNum if group, 0 for class comment)
-    var commentSubmitterUid: Long = 0
+    /**
+     * The submitter UID (if any) of the person who submitted the comment
+     */
+    var commentsFromSubmitterUid: Long = 0,
 
-    var commentsFlagged : Boolean = false
+    var commentsFlagged : Boolean = false,
 
-    var commentsInActive : Boolean = false
+    var commentsDeleted : Boolean = false,
 
-    var commentsDateTimeAdded : Long = 0
-
-    var commentsDateTimeUpdated: Long = 0
-
-    @MasterChangeSeqNum
-    var commentsMCSN: Long = 0
-
-    @LocalChangeSeqNum
-    var commentsLCSN: Long = 0
-
-    @LastChangedBy
-    var commentsLCB: Int = 0
+    var commentsDateTimeAdded : Long = 0,
 
     @ReplicateLastModified
     @ReplicateEtag
-    var commentsLct: Long = 0
+    var commentsLct: Long = 0,
+) {
 
-    constructor(table: Int, uid: Long, personUid: Long, now: Long, comment: String, isPublic: Boolean) : this() {
-        commentsText = comment
-        commentsEntityType = table
-        commentsEntityUid = uid
-        commentsPublic = isPublic
-        commentsPersonUid = personUid
-        commentsDateTimeAdded = now
-
-    }
 
     companion object {
 

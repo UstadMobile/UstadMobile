@@ -1,5 +1,7 @@
 package com.ustadmobile.core.domain.cachestoragepath
 
+import com.ustadmobile.core.domain.compress.CompressionType
+
 /**
  * There are various times where we want to get a (temporary) file path for a url, e.g.
  *
@@ -28,10 +30,19 @@ interface GetStoragePathForUrlUseCase {
 
     }
 
+    data class GetStoragePathResult(
+        val fileUri: String,
+        val compression: CompressionType,
+    )
+
+    /**
+     * @return file uri (e.g. as per DoorUri)
+     */
     suspend operator fun invoke(
         url: String,
         progressInterval: Int = 500,
         onStateChange: (GetStoragePathForUrlState) -> Unit = { },
-    ): String
+        inflateToTmpFileIfCompressed: Boolean = false,
+    ): GetStoragePathResult
 
 }
