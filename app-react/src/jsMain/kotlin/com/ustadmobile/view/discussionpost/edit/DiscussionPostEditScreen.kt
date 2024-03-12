@@ -87,7 +87,6 @@ val DiscussionPostEditPreview = FC<Props> {
             discussionPost = DiscussionPost().apply {
                 discussionPostTitle = "How to submit report A?"
                 discussionPostMessage = "For our sales report, do I upload or share a link? "
-                discussionPostVisible = true
             },
         )
     }

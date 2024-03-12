@@ -20,7 +20,16 @@ expect abstract class DiscussionPostDao: BaseDao<DiscussionPost>{
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
         pullQueriesToReplicate = arrayOf(
             //Get the top level posts themselves
-            HttpServerFunctionCall("getTopLevelPostsByCourseBlockUid"),
+            HttpServerFunctionCall(
+                functionName = "getTopLevelPostsByCourseBlockUid",
+                functionArgs = arrayOf(
+                    HttpServerFunctionParam(
+                        name = "includeDeleted",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "true"
+                    ),
+                )
+            ),
             //Get the person entity associated with the post
             HttpServerFunctionCall("getTopLevelPostsByCourseBlockUidPersons"),
             //Get the most recent reply.
@@ -52,11 +61,13 @@ expect abstract class DiscussionPostDao: BaseDao<DiscussionPost>{
                LEFT JOIN PersonPicture
                          ON PersonPicture.personPictureUid = DiscussionPost.discussionPostStartedPersonUid
          WHERE DiscussionPost.discussionPostCourseBlockUid = :courseBlockUid
-           AND DiscussionPost.discussionPostReplyToPostUid = 0         
+           AND DiscussionPost.discussionPostReplyToPostUid = 0
+           AND (NOT DiscussionPost.dpDeleted OR CAST(:includeDeleted AS INTEGER) = 1)
       ORDER BY DiscussionPost.discussionPostStartDate DESC          
     """)
     abstract fun getTopLevelPostsByCourseBlockUid(
-        courseBlockUid: Long
+        courseBlockUid: Long,
+        includeDeleted: Boolean,
     ): PagingSource<Int, DiscussionPostWithDetails>
 
     @Query("""
@@ -100,13 +111,6 @@ expect abstract class DiscussionPostDao: BaseDao<DiscussionPost>{
     abstract suspend fun getPostTitle(postUid: Long): String?
 
     @Query("""
-        SELECT DiscussionPost.discussionPostTitle 
-          FROM DiscussionPost 
-         WHERE DiscussionPost.discussionPostUid = :postUid
-    """)
-    abstract fun getPostTitleAsFlow(postUid: Long): Flow<String?>
-
-    @Query("""
         SELECT * 
          FROM DiscussionPost
         WHERE DiscussionPost.discussionPostUid = :uid
@@ -120,72 +124,9 @@ expect abstract class DiscussionPostDao: BaseDao<DiscussionPost>{
     """)
     abstract fun getTitleByUidAsFlow(uid: Long): Flow<String?>
 
-    @Query("""
-        SELECT DiscussionPost.*,
-            Person.firstNames as authorPersonFirstNames,
-            Person.lastName as authorPersonLastName,
-            '' AS postLatestMessage,
-            0 AS postRepliesCount, 
-            DiscussionPost.discussionPostLct AS postLatestMessageTimestamp
-             
-          FROM DiscussionPost     
-          LEFT JOIN Person ON Person.personUid = DiscussionPost.discussionPostStartedPersonUid
-         WHERE DiscussionPost.discussionPostUid = :uid
-           
-    """)
-    abstract suspend fun findWithDetailsByUid(uid: Long): DiscussionPostWithDetails?
-
-    @Query("""
-        SELECT DiscussionPost.*,
-            Person.firstNames as authorPersonFirstNames,
-            Person.lastName as authorPersonLastName,
-            '' AS postLatestMessage,
-            0 AS postRepliesCount, 
-            DiscussionPost.discussionPostLct AS postLatestMessageTimestamp
-             
-          FROM DiscussionPost     
-          LEFT JOIN Person ON Person.personUid = DiscussionPost.discussionPostStartedPersonUid
-         WHERE DiscussionPost.discussionPostUid = :uid
-           
-    """)
-    abstract fun findWithDetailsByUidAsFlow(uid: Long): Flow<DiscussionPostWithDetails?>
-
-    @Query("""
-        SELECT DiscussionPost.*,
-            Person.firstNames as authorPersonFirstNames,
-            Person.lastName as authorPersonLastName,
-            '' AS postLatestMessage,
-            0 AS postRepliesCount, 
-            DiscussionPost.discussionPostLct AS postLatestMessageTimestamp
-             
-          FROM DiscussionPost     
-          LEFT JOIN Person ON Person.personUid = DiscussionPost.discussionPostStartedPersonUid
-         WHERE DiscussionPost.discussionPostUid = :uid
-           
-    """)
-    abstract fun findWithDetailsByUidLive(uid: Long): Flow<DiscussionPostWithDetails?>
-
     @Update
     abstract suspend fun updateAsync(entity: DiscussionPost): Int
 
-
-
-    @Query("""
-       SELECT
-              DiscussionPost.*,
-              Person.*
-        FROM DiscussionPost
-        LEFT JOIN Person
-          ON DiscussionPost.discussionPostStartedPersonUid = Person.personUid
-        
-       WHERE DiscussionPost.discussionPostReplyToPostUid = :entityUid
-              AND CAST(DiscussionPost.discussionPostVisible AS INTEGER) = 1
-              AND CAST(DiscussionPost.discussionPostArchive AS INTEGER) = 0
-              
-    ORDER BY DiscussionPost.discussionPostStartDate DESC
-    """)
-    abstract fun findAllRepliesByPostUidAsFlow(entityUid: Long):
-            Flow<List<DiscussionPostWithPerson>>
 
     @HttpAccessible(
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
@@ -235,6 +176,18 @@ expect abstract class DiscussionPostDao: BaseDao<DiscussionPost>{
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun upsertAsync(
         entity: DiscussionPost
+    )
+
+    @Query("""
+        UPDATE DiscussionPost
+           SET dpDeleted = :deleted,
+               discussionPostLct = :updateTime
+         WHERE discussionPostUid = :uid   
+    """)
+    abstract suspend fun setDeletedAsync(
+        uid: Long,
+        deleted: Boolean,
+        updateTime: Long
     )
 
 }

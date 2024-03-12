@@ -7,10 +7,16 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Chat
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.ReplyAll
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -24,15 +30,21 @@ import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.util.ext.htmlToPlainText
 import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.CourseDiscussionDetailUiState
+import com.ustadmobile.lib.db.entities.DiscussionPost
 import com.ustadmobile.lib.db.entities.DiscussionPostWithDetails
 import com.ustadmobile.libuicompose.components.UstadDetailHeader
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadListSpacerItem
 import com.ustadmobile.libuicompose.components.UstadPersonAvatar
 import com.ustadmobile.libuicompose.components.ustadPagedItems
-import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
+import com.ustadmobile.libuicompose.util.rememberDateFormat
+import com.ustadmobile.libuicompose.util.rememberDayOrDate
+import com.ustadmobile.libuicompose.util.rememberTimeFormatter
 import kotlinx.coroutines.Dispatchers
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDateTime
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
+import java.text.DateFormat
 
 @Composable
 fun CourseDiscussionDetailScreen(
@@ -45,6 +57,7 @@ fun CourseDiscussionDetailScreen(
     CourseDiscussionDetailScreen(
         uiState = uiState,
         onClickPost = viewModel::onClickPost,
+        onDeletePost = viewModel::onDeletePost,
     )
 
 
@@ -53,7 +66,8 @@ fun CourseDiscussionDetailScreen(
 @Composable
 fun CourseDiscussionDetailScreen(
     uiState: CourseDiscussionDetailUiState = CourseDiscussionDetailUiState(),
-    onClickPost: (DiscussionPostWithDetails) -> Unit = {},
+    onClickPost: (DiscussionPostWithDetails) -> Unit = { },
+    onDeletePost: (DiscussionPost) -> Unit = { },
 ){
 
     val pager = remember(uiState.posts) {
@@ -68,6 +82,9 @@ fun CourseDiscussionDetailScreen(
     val systemTimeZone = remember {
         TimeZone.getDefault().id
     }
+
+    val timeFormatter = rememberTimeFormatter()
+    val dateFormatter = rememberDateFormat(TimeZone.getDefault().id)
 
     UstadLazyColumn{
         item(key = "description"){
@@ -93,7 +110,13 @@ fun CourseDiscussionDetailScreen(
             CourseDiscussionDetailDiscussionListItem(
                 discussionPostItem = discussionPostItem,
                 systemTimeZone = systemTimeZone,
-                onClickPost = onClickPost
+                onClickPost = onClickPost,
+                timeFormatter = timeFormatter,
+                dateFormatter = dateFormatter,
+                dayOfWeekStringMap = uiState.dayOfWeekStrings,
+                localDateTimeNow = uiState.localDateTimeNow,
+                showModerateOptions = uiState.showModerateOptions,
+                onDeletePost = onDeletePost,
             )
         }
 
@@ -106,12 +129,22 @@ fun CourseDiscussionDetailScreen(
 fun CourseDiscussionDetailDiscussionListItem(
     discussionPostItem: DiscussionPostWithDetails?,
     systemTimeZone: String,
+    localDateTimeNow: LocalDateTime,
+    dayOfWeekStringMap: Map<DayOfWeek, String>,
+    timeFormatter: DateFormat,
+    dateFormatter: DateFormat,
     onClickPost: (DiscussionPostWithDetails) -> Unit = { },
+    showModerateOptions: Boolean = false,
+    onDeletePost: (DiscussionPost) -> Unit = { },
 ) {
-    val datePosted = rememberFormattedDateTime(
-        timeInMillis = discussionPostItem?.discussionPostStartDate ?: 0,
-        timeZoneId = systemTimeZone,
-        joinDateAndTime = {date, time -> "$date\n$time"}
+    val dayPosted = rememberDayOrDate(
+        localDateTimeNow = localDateTimeNow,
+        timestamp = discussionPostItem?.discussionPostStartDate ?: 0,
+        timeZone = kotlinx.datetime.TimeZone.currentSystemDefault(),
+        showTimeIfToday = true,
+        timeFormatter = timeFormatter,
+        dateFormatter = dateFormatter,
+        dayOfWeekStringMap = dayOfWeekStringMap,
     )
 
     val messageText = remember(
@@ -123,6 +156,10 @@ fun CourseDiscussionDetailDiscussionListItem(
     }
 
     val authorName = "${discussionPostItem?.authorPersonFirstNames} ${discussionPostItem?.authorPersonLastName}"
+
+    var optionsExpanded by remember {
+        mutableStateOf(false)
+    }
 
     ListItem(
         modifier = Modifier.clickable {
@@ -183,10 +220,28 @@ fun CourseDiscussionDetailDiscussionListItem(
             }
         },
         trailingContent = {
-            Column {
-                Text(
-                    text = datePosted
-                )
+            Row {
+                Text(text = dayPosted)
+                if(showModerateOptions) {
+                    IconButton(
+                        onClick = { optionsExpanded = true }
+                    ) {
+                        Icon(Icons.Default.MoreVert, contentDescription = stringResource(MR.strings.more_options))
+                    }
+
+                    DropdownMenu(
+                        expanded = optionsExpanded,
+                        onDismissRequest = { optionsExpanded = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text(stringResource(MR.strings.delete)) },
+                            onClick = {
+                                optionsExpanded = false
+                                discussionPostItem?.also(onDeletePost)
+                            }
+                        )
+                    }
+                }
             }
         }
     )

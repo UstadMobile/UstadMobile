@@ -86,7 +86,6 @@ val DiscussionPostDetailPreview = FC<Props> {
                     DiscussionPostAndPosterNames(
                         discussionPost = DiscussionPost().apply {
                             discussionPostTitle = "Submitting an assignment"
-                            discussionPostVisible = true
                             discussionPostStartedPersonUid = 1
                             discussionPostReplyToPostUid = 0
                             discussionPostUid = 1
@@ -100,7 +99,6 @@ val DiscussionPostDetailPreview = FC<Props> {
                         discussionPost = DiscussionPost().apply {
                             discussionPostReplyToPostUid = 42
                             discussionPostTitle = null
-                            discussionPostVisible = true
                             discussionPostStartedPersonUid = 1
                             discussionPostUid = 2
                             discussionPostMessage = "Use ChatGPT"
@@ -112,7 +110,6 @@ val DiscussionPostDetailPreview = FC<Props> {
                     DiscussionPostAndPosterNames(
                         discussionPost = DiscussionPost().apply {
                             discussionPostReplyToPostUid = 42
-                            discussionPostVisible = true
                             discussionPostStartedPersonUid = 1
 
                             discussionPostUid = 3
@@ -124,7 +121,6 @@ val DiscussionPostDetailPreview = FC<Props> {
                     ),
                     DiscussionPostAndPosterNames(
                         discussionPost = DiscussionPost().apply {
-                            discussionPostVisible = true
                             discussionPostStartedPersonUid = 1
                             discussionPostReplyToPostUid = 42
                             discussionPostUid = 4
