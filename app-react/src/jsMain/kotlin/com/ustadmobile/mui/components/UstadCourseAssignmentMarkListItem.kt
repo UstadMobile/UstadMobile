@@ -12,6 +12,7 @@ import js.core.jso
 import kotlinx.datetime.TimeZone
 import mui.icons.material.EmojiEvents as EmojiEventsIcon
 import mui.material.*
+import mui.material.styles.TypographyVariant
 import react.FC
 import react.Props
 import react.ReactNode
@@ -53,7 +54,10 @@ val UstadCourseAssignmentMarkListItem = FC<UstadCourseAssignmentMarkListItemProp
 
     ListItem{
 
-        secondaryAction = ReactNode(dayOrDateStr)
+        secondaryAction = Typography.create {
+            variant = TypographyVariant.caption
+            + dayOrDateStr
+        }
 
         ListItemIcon {
             UstadPersonAvatar {
