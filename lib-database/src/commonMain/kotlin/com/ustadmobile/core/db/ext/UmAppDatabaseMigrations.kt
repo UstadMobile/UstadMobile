@@ -1903,7 +1903,7 @@ val MIGRATION_157_158 = DoorMigrationStatementList(157, 158) { db ->
     }
 }
 
-val MIGRATION_158_159 = DoorMigrationStatementList(157, 158) { db ->
+val MIGRATION_158_159 = DoorMigrationStatementList(158, 159) { db ->
     buildList {
         val colType = if(db.dbType() == DoorDbType.SQLITE) "INTEGER" else "BIGINT"
         add("ALTER TABLE CourseAssignmentSubmissionFile ADD COLUMN casaSubmitterUid $colType NOT NULL DEFAULT 0")
