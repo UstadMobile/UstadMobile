@@ -38,7 +38,7 @@ fun UstadOpeningBlobInfoBottomSheet(
                     modifier = Modifier.defaultItemPadding(),
                 )
 
-                if(openingBlobState.totalBytes > 0) {
+                if(openingBlobState.totalBytes > 1) {
                     LinearProgressIndicator(
                         progress = openingBlobState.progress,
                         modifier = Modifier.defaultItemPadding().fillMaxWidth(),
