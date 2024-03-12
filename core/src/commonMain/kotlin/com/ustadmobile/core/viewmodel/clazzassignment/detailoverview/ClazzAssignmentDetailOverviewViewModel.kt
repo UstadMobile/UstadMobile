@@ -203,7 +203,8 @@ data class ClazzAssignmentDetailOverviewUiState(
         get() = activeUserCanSubmit && assignment?.caRequireTextSubmission == true
 
     val addFileSubmissionVisible: Boolean
-        get() = activeUserCanSubmit && assignment?.caRequireFileSubmission == true
+        get() = activeUserCanSubmit && assignment?.caRequireFileSubmission == true &&
+                editableSubmissionFiles.size < assignment.caNumberOfFiles
 
     val submissionStatus: Int?
         get() {
@@ -558,6 +559,12 @@ class ClazzAssignmentDetailOverviewViewModel(
         mimeType: String,
         size: Long,
     ) {
+        val assignmentSizeLimit = _uiState.value.assignment?.caSizeLimit ?: 0
+        if(size > (assignmentSizeLimit * 1024 * 1024)) {
+            snackDispatcher.showSnackBar(Snack(systemImpl.getString(MR.strings.import_link_big_size)))
+            return
+        }
+
         viewModelScope.launch {
             val newAttachment = CourseAssignmentSubmissionFile(
                 casaUid = activeDb.doorPrimaryKeyManager.nextIdAsync(

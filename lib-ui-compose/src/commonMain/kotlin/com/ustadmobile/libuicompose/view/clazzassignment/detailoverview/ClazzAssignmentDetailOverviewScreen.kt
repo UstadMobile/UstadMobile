@@ -277,9 +277,9 @@ fun ClazzAssignmentDetailOverviewScreen(
                         headlineContent = { Text(stringResource(MR.strings.add_file)) },
                         supportingContent = {
                             Text(
-                                "${stringResource(MR.strings.file_type_chosen)} $caFileType" +
-                                        stringResource(MR.strings.max_number_of_files,
-                                            uiState.assignment?.caNumberOfFiles ?: 0),
+                            "${stringResource(MR.strings.file_type_chosen)} $caFileType" +
+                                "${stringResource(MR.strings.number_of_files)} ${uiState.assignment?.caNumberOfFiles ?: 0}" +
+                                "${stringResource(MR.strings.size_limit)}: ${uiState.assignment?.caSizeLimit}"
                             )
                         },
                         leadingContent = {

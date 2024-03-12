@@ -121,6 +121,8 @@ fun ClazzAssignmentEditScreen(
         }
 
         if (uiState.fileSubmissionVisible){
+            //Not currently enforced, will be restored later
+            /*
             UstadMessageIdOptionExposedDropDownMenuField(
                 modifier = Modifier
                     .defaultItemPadding()
@@ -137,6 +139,7 @@ fun ClazzAssignmentEditScreen(
                     )
                 },
             )
+            */
 
             UstadNumberTextField(
                 modifier = Modifier

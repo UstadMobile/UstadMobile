@@ -296,14 +296,9 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                                 ListItemText {
                                     primary = ReactNode(strings[MR.strings.add_file])
                                     secondary = ReactNode(
-                                        "${strings[MR.strings.file_type_chosen]} $caFileType " +
-                                            strings[MR.strings.max_number_of_files]
-                                                .replace(
-                                                    "%1\$s",
-                                                    (props.uiState.assignment?.caNumberOfFiles
-                                                        ?: 0)
-                                                        .toString()
-                                                )
+                                "${strings[MR.strings.file_type_chosen]} $caFileType " +
+                                        "${strings[MR.strings.number_of_files]}: ${props.uiState.assignment?.caNumberOfFiles} " +
+                                        "${strings[MR.strings.size_limit]}: ${props.uiState.assignment?.caSizeLimit}"
                                     )
                                 }
                             }
