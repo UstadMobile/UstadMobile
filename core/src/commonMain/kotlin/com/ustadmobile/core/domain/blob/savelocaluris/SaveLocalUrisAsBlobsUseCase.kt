@@ -1,5 +1,6 @@
 package com.ustadmobile.core.domain.blob.savelocaluris
 
+import com.ustadmobile.lib.db.entities.TransferJobItem
 import kotlinx.serialization.Serializable
 
 
@@ -52,6 +53,7 @@ interface SaveLocalUrisAsBlobsUseCase {
     @Serializable
     data class SavedBlob(
         val entityUid: Long,
+        val tableId: Int,
         val localUri: String,
         val blobUrl: String,
         val retentionLockId: Long = 0,
@@ -67,9 +69,13 @@ interface SaveLocalUrisAsBlobsUseCase {
      *        stored as blob URLs. This will be triggered when local storage is complete, so can be
      *        used to update the local database. If on Desktop/JVM, upload to the server is not yet
      *        done.
+     * @param onTransferJobItemCreated On Javscript: this function will upload blobs to the server
+     *        in order to get a URL. Anything that would wish to observe progress can use this
+     *        TransferJobItem to observe progress.
      */
     suspend operator fun invoke(
         localUrisToSave: List<SaveLocalUriAsBlobItem>,
+        onTransferJobItemCreated: (SaveLocalUriAsBlobItem, TransferJobItem) -> Unit = { _, _ -> },
     ): List<SavedBlob>
 
 }

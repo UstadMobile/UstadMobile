@@ -94,9 +94,9 @@ expect abstract class PersonDao : BaseDao<Person> {
           FROM Person
                LEFT JOIN PersonPicture
                     ON PersonPicture.personPictureUid = Person.personUid
-         WHERE Person.personUid = :uid           
+         WHERE Person.personUid = :accountPersonUid           
     """)
-    abstract suspend fun findByUidWithPicture(uid: Long): PersonAndPicture?
+    abstract suspend fun findByUidWithPicture(accountPersonUid: Long): PersonAndPicture?
 
     @Query("""
         SELECT Person.*, PersonPicture.*

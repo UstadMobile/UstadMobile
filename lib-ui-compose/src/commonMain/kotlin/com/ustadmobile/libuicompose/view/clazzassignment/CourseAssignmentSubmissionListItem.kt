@@ -15,6 +15,7 @@ import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
 import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
 import kotlinx.datetime.TimeZone
 
+@Deprecated("Will be replaced")
 @Composable
 fun CourseAssignmentSubmissionListItem(
     submission: CourseAssignmentSubmission,

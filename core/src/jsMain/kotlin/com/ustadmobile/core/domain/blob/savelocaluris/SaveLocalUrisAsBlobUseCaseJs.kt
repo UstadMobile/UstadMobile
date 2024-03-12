@@ -40,7 +40,8 @@ class SaveLocalUrisAsBlobUseCaseJs(
     )
 
     override suspend fun invoke(
-        localUrisToSave: List<SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem>
+        localUrisToSave: List<SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem>,
+        onTransferJobItemCreated: (SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem, TransferJobItem) -> Unit,
     ): List<SaveLocalUrisAsBlobsUseCase.SavedBlob> {
         val uriToSaveQueueItems = db.withDoorTransactionAsync {
             val transferJobUid = db.transferJobDao.insert(TransferJob()).toInt()
@@ -57,6 +58,12 @@ class SaveLocalUrisAsBlobUseCaseJs(
                     tjiEntityUid = localUriToSaveItem.entityUid,
                 )
                 val transferJobItemUid = db.transferJobItemDao.insert(transferJobItem).toInt()
+
+                onTransferJobItemCreated(
+                    localUriToSaveItem,
+                    transferJobItem.copy(tjiUid = transferJobItemUid)
+                )
+
                 updateTransferJobItemEtagUseCase(
                     db = db,
                     tableId = localUriToSaveItem.tableId,
@@ -125,6 +132,7 @@ class SaveLocalUrisAsBlobUseCaseJs(
 
                     savedBlob.copy(
                         entityUid = uriToSaveQueueItem.uriToSaveItem.entityUid,
+                        tableId = uriToSaveQueueItem.uriToSaveItem.tableId,
                         localUri = uriToSaveQueueItem.uriToSaveItem.localUri,
                     )
                 }

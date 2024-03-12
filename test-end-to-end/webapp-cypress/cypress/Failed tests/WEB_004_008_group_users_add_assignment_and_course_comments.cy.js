@@ -1,3 +1,5 @@
+/* Test failed 11/march: with adding attachments: just needs to scroll
+ */
 describe('004_008_group_users_add_assignment_and_course_comments', () => {
 it('Start Ustad Test Server ', () => {
  // Start Test Server

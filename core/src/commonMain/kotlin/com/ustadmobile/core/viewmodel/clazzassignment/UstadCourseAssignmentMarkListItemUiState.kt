@@ -1,10 +1,17 @@
 package com.ustadmobile.core.viewmodel.clazzassignment
 
 import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
+import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDateTime
 
 data class UstadCourseAssignmentMarkListItemUiState(
 
     val mark: CourseAssignmentMarkAndMarkerName = CourseAssignmentMarkAndMarkerName(),
+
+    val localDateTimeNow: LocalDateTime,
+
+    val dayOfWeekStrings: Map<DayOfWeek, String>,
 
 ) {
 
@@ -18,7 +25,7 @@ data class UstadCourseAssignmentMarkListItemUiState(
     val peerGroupNumber: Int
         get() {
             val markerSubmitterUid = mark.courseAssignmentMark?.camMarkerSubmitterUid ?: Long.MAX_VALUE
-            return if(markerSubmitterUid < 10000) {
+            return if(markerSubmitterUid < CourseAssignmentSubmission.MIN_SUBMITTER_UID_FOR_PERSON) {
                 markerSubmitterUid.toInt()
             }else {
                 0

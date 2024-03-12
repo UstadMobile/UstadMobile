@@ -24,8 +24,7 @@ expect abstract class SystemPermissionDao {
         SELECT SystemPermission.*
           FROM SystemPermission
          WHERE SystemPermission.spToPersonUid = :accountPersonUid
-           AND CAST(:includeDeleted AS INTEGER) = 1 
-            OR NOT SystemPermission.spIsDeleted
+           AND (CAST(:includeDeleted AS INTEGER) = 1 OR NOT SystemPermission.spIsDeleted)
     """)
     abstract suspend fun findAllByPersonUid(
         accountPersonUid: Long,

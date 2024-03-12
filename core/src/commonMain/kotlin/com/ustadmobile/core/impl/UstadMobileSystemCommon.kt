@@ -2,12 +2,14 @@ package com.ustadmobile.core.impl
 
 import com.russhwolf.settings.Settings
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
+import com.ustadmobile.core.util.ext.dayStringResource
 import com.ustadmobile.door.DoorUri
 import dev.icerock.moko.resources.StringResource
 import kotlinx.serialization.KSerializer
 import kotlin.js.JsName
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import dev.icerock.moko.resources.PluralsResource
+import kotlinx.datetime.DayOfWeek
 
 /**
  * Class has all the shared function across all supported platforms
@@ -111,6 +113,10 @@ abstract class UstadMobileSystemCommon(
     ): String
 
     abstract fun formatPlural(pluralsResource: PluralsResource, number: Int): String
+
+    fun getDayOfWeekStrings(): Map<DayOfWeek, String> = DayOfWeek.values().associateWith {
+        getString(it.dayStringResource)
+    }
 
     /**
      * Return the mime type for the given extension
