@@ -15,6 +15,7 @@ import com.ustadmobile.libcache.io.transferToAndGetSha256
 import kotlinx.io.files.Path
 import java.util.UUID
 import com.ustadmobile.core.util.ext.encodeBase64
+import com.ustadmobile.lib.db.entities.TransferJobItem
 import com.ustadmobile.libcache.headers.headersBuilder
 import com.ustadmobile.libcache.request.requestBuilder
 import com.ustadmobile.libcache.response.HttpPathResponse
@@ -62,6 +63,7 @@ class SaveLocalUrisAsBlobsUseCaseJvm(
      */
     override suspend fun invoke(
         localUrisToSave: List<SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem>,
+        onTransferJobItemCreated: (SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem, TransferJobItem) -> Unit,
     ): List<SaveLocalUrisAsBlobsUseCase.SavedBlob> = withContext(Dispatchers.Default) {
         createTmpPathIfNeeded()
 
@@ -127,6 +129,7 @@ class SaveLocalUrisAsBlobsUseCaseJvm(
 
             SaveLocalUrisAsBlobsUseCase.SavedBlob(
                 entityUid = it.saveBlobItem.entityUid,
+                tableId = it.saveBlobItem.tableId,
                 localUri = it.saveBlobItem.localUri,
                 blobUrl = it.cacheEntry.request.url,
                 retentionLockId = cacheStoreResult.lockId,

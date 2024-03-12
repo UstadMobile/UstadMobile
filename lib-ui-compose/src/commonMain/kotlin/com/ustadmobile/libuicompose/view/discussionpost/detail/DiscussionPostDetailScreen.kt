@@ -21,10 +21,14 @@ import com.ustadmobile.libuicompose.components.defaultEditHtmlInNewScreen
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
-import com.ustadmobile.libuicompose.components.UstadHtmlEditPlaceholder
+import com.ustadmobile.lib.db.entities.DiscussionPost
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
+import com.ustadmobile.libuicompose.components.UstadRichTextEdit
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
+import com.ustadmobile.libuicompose.util.rememberDateFormat
+import com.ustadmobile.libuicompose.util.rememberTimeFormatter
 import kotlinx.coroutines.Dispatchers
+import kotlinx.datetime.TimeZone
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 
 @Composable
@@ -37,7 +41,8 @@ fun DiscussionPostDetailScreen(viewModel: DiscussionPostDetailViewModel){
         uiState = uiState,
         onClickAddReply = viewModel::onClickEditReplyHtml,
         onChangeReplyText = viewModel::onChangeReplyText,
-        onClickReplyButton = viewModel::onClickPostReply
+        onClickReplyButton = viewModel::onClickPostReply,
+        onDeletePost = viewModel::onDeletePost,
     )
 
 }
@@ -48,6 +53,7 @@ fun DiscussionPostDetailScreen(
     onClickAddReply: () -> Unit = { },
     onChangeReplyText: (String) -> Unit = { },
     onClickReplyButton: () -> Unit = { },
+    onDeletePost: (DiscussionPost) -> Unit = { },
 ) {
 
     val pager = remember(uiState.discussionPosts) {
@@ -59,6 +65,9 @@ fun DiscussionPostDetailScreen(
 
     val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
 
+    val timeFormatter = rememberTimeFormatter()
+    val dateFormatter = rememberDateFormat(TimeZone.currentSystemDefault().id)
+
     UstadLazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -66,12 +75,21 @@ fun DiscussionPostDetailScreen(
             pagingItems = lazyPagingItems,
             key = { it.discussionPost?.discussionPostUid ?: 0}
         ) { discussionPostItem ->
+            val isRootPost = discussionPostItem?.discussionPost?.discussionPostReplyToPostUid == 0L
             DiscussionPostListItem(
-                discussionPost = discussionPostItem
+                discussionPost = discussionPostItem,
+                showModerateOptions = uiState.showModerateOptions && !isRootPost,
+                timeFormat = timeFormatter,
+                dateFormat = dateFormatter,
+                localDateTimeNow = uiState.localDateTimeNow,
+                dayOfWeekStringMap = uiState.dayOfWeekStrings,
+                onClickDelete = {
+                    discussionPostItem?.discussionPost?.also(onDeletePost)
+                }
             )
 
             //This is the root item - show add a reply here
-            if(discussionPostItem?.discussionPost?.discussionPostReplyToPostUid == 0L) {
+            if(isRootPost) {
                 if(editReplyInNewScreen) {
                     ListItem(
                         headlineContent = {
@@ -89,10 +107,11 @@ fun DiscussionPostDetailScreen(
                         }
                     )
                 }else {
-                    UstadHtmlEditPlaceholder(
-                        htmlTextTmp = uiState.replyText,
-                        onChangeHtmlTmp = onChangeReplyText,
-                        editInNewScreenTmp = false,
+                    UstadRichTextEdit(
+                        html =uiState.replyText,
+                        onHtmlChange = onChangeReplyText,
+                        onClickToEditInNewScreen =  { },
+                        editInNewScreen = false,
                         placeholderText = stringResource(MR.strings.add_a_reply),
                         modifier = Modifier.defaultItemPadding()
                             .fillMaxWidth()

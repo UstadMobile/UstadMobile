@@ -20,28 +20,26 @@ expect abstract class CourseAssignmentSubmissionDao : BaseDao<CourseAssignmentSu
     @Query("""
         SELECT * 
           FROM CourseAssignmentSubmission
-          
-               LEFT JOIN CourseAssignmentSubmissionAttachment
-               ON CourseAssignmentSubmissionAttachment.casaSubmissionUid = CourseAssignmentSubmission.casUid
-               
          WHERE casAssignmentUid = :assignmentUid
            AND casSubmitterUid = :submitterUid
       ORDER BY casTimestamp DESC
     """)
-    abstract fun getAllSubmissionsFromSubmitter(assignmentUid: Long, submitterUid: Long)
-            : PagingSource<Int, CourseAssignmentSubmissionWithAttachment>
+    abstract fun getAllSubmissionsFromSubmitter(
+        assignmentUid: Long,
+        submitterUid: Long
+    ) : PagingSource<Int, CourseAssignmentSubmission>
+
+
 
     @Query("""
-         SELECT CourseAssignmentSubmission.*, CourseAssignmentSubmissionAttachment.*
+         SELECT CourseAssignmentSubmission.*
           FROM CourseAssignmentSubmission
-               LEFT JOIN CourseAssignmentSubmissionAttachment
-                    ON CourseAssignmentSubmissionAttachment.casaSubmissionUid = CourseAssignmentSubmission.casUid
          WHERE casSubmitterUid = ($SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL)
     """)
     abstract fun getAllSubmissionsForUser(
         accountPersonUid: Long,
         assignmentUid: Long,
-    ): Flow<List<CourseAssignmentSubmissionWithAttachment>>
+    ): Flow<List<CourseAssignmentSubmission>>
 
     @HttpAccessible(
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
@@ -186,5 +184,22 @@ expect abstract class CourseAssignmentSubmissionDao : BaseDao<CourseAssignmentSu
          WHERE casUid = :submissionUid
     """)
     abstract fun findByUidAsFlow(submissionUid: Long): Flow<CourseAssignmentSubmission?>
+
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+    )
+    @Query("""
+        SELECT CourseAssignmentSubmission.*
+          FROM CourseAssignmentSubmission
+         WHERE CourseAssignmentSubmission.casAssignmentUid = :assignmentUid
+           AND CourseAssignmentSubmission.casSubmitterUid = 
+               ($SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL)
+      ORDER BY CourseAssignmentSubmission.casTimestamp DESC
+    """)
+    abstract fun findByAssignmentUidAndAccountPersonUid(
+        accountPersonUid: Long,
+        assignmentUid: Long,
+    ): Flow<List<CourseAssignmentSubmission>>
+
 
 }

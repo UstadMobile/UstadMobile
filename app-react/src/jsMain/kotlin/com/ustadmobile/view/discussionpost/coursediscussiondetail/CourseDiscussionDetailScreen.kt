@@ -6,8 +6,10 @@ import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.CourseDiscussionDetailUiState
 import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.CourseDiscussionDetailViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.hooks.useDateFormatter
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
+import com.ustadmobile.hooks.useTimeFormatter
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.*
@@ -27,6 +29,7 @@ import react.*
 external interface CourseDiscussionDetailProps: Props {
     var uiState: CourseDiscussionDetailUiState
     var onClickPost: (DiscussionPostWithDetails) -> Unit
+    var onDeletePost: (DiscussionPost) -> Unit
 }
 
 val CourseDiscussionDetailComponent = FC<CourseDiscussionDetailProps> { props ->
@@ -37,6 +40,9 @@ val CourseDiscussionDetailComponent = FC<CourseDiscussionDetailProps> { props ->
     )
 
     val muiAppState = useMuiAppState()
+
+    val timeFormatter = useTimeFormatter()
+    val dateFormatter = useDateFormatter()
 
     VirtualList {
         style = jso {
@@ -64,6 +70,14 @@ val CourseDiscussionDetailComponent = FC<CourseDiscussionDetailProps> { props ->
                     onClick = {
                         discussionPostItem?.also(props.onClickPost)
                     }
+                    onClickDelete = {
+                        discussionPostItem?.also(props.onDeletePost)
+                    }
+                    showModerateOptions = props.uiState.showModerateOptions
+                    localDateTimeNow = props.uiState.localDateTimeNow
+                    timeFormat = timeFormatter
+                    dateFormat = dateFormatter
+                    dayOfWeekStrings = props.uiState.dayOfWeekStrings
                 }
             }
         }
@@ -92,7 +106,6 @@ val CourseDiscussionDetailPreview = FC<Props> {
                         discussionPostTitle = "Can I join after week 2?"
                         discussionPostUid = 0L
                         discussionPostMessage = "Iam late to class, CAn I join after?"
-                        discussionPostVisible = true
                         postRepliesCount = 4
                         postLatestMessage = "Just make sure you submit a late assignment."
                         authorPersonFirstNames = "Mike"
@@ -102,7 +115,6 @@ val CourseDiscussionDetailPreview = FC<Props> {
                     DiscussionPostWithDetails().apply {
                         discussionPostTitle = "How to install xlib?"
                         discussionPostMessage = "Which version of python do I need?"
-                        discussionPostVisible = true
                         discussionPostUid = 1L
                         postRepliesCount = 2
                         postLatestMessage = "I have the same question"
@@ -127,6 +139,7 @@ val CourseDiscussionDetailScreen = FC<Props> {
     CourseDiscussionDetailComponent {
         uiState = uiStateVal
         onClickPost = viewModel::onClickPost
+        onDeletePost = viewModel::onDeletePost
     }
 
     UstadFab {

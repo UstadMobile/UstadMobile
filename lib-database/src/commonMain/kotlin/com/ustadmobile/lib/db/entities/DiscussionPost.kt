@@ -45,9 +45,7 @@ open class DiscussionPost() {
      */
     var discussionPostCourseBlockUid: Long = 0
 
-    var discussionPostVisible: Boolean = true
-
-    var discussionPostArchive: Boolean = false
+    var dpDeleted: Boolean = false
 
     //The person who started this post
     var discussionPostStartedPersonUid: Long = 0

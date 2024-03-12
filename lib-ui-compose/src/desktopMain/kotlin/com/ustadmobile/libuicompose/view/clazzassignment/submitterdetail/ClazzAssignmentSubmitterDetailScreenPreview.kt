@@ -17,14 +17,7 @@ fun ClazzAssignmentSubmitterDetailScreenPreview(){
         draftMark = CourseAssignmentMark().apply {
 
         },
-        submissionList = listOf(
-            CourseAssignmentSubmission().apply {
-                casUid = 1
-                casTimestamp = 1677744388299
-                casText = "I can haz cheezburger"
-                casType = CourseAssignmentSubmission.SUBMISSION_TYPE_FILE
-            },
-        ),
+        submissionList = emptyList(),
         marks = listOf(
             CourseAssignmentMarkAndMarkerName(
                 courseAssignmentMark = CourseAssignmentMark().apply {

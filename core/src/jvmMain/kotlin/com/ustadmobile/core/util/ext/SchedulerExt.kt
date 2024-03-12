@@ -78,3 +78,23 @@ fun Scheduler.unscheduleAnyExistingAndStartNow(
     Napier.d { "SchedulerExt: scheduleJob with replace $triggerKey : completed" }
 }
 
+
+fun Scheduler.interruptJobs(
+    triggerKeys: List<TriggerKey>,
+    cause: String,
+) {
+    val jobsToInterrupt = currentlyExecutingJobs.filter {
+        it.trigger.key in triggerKeys
+    }
+
+    jobsToInterrupt.forEach {
+        val triggerKey = it.trigger.key
+        try {
+            interrupt(it.fireInstanceId)
+            Napier.d { "Scheduler.interruptJobs: interrupted $triggerKey for cause: $cause" }
+        }catch(e: Throwable) {
+            Napier.w(e) { "Scheduler.interruptJobs: Exception attempting to interrupt $triggerKey for cause: $cause" }
+        }
+    }
+}
+
