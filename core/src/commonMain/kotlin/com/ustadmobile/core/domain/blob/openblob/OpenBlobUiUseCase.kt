@@ -14,7 +14,8 @@ class OpenBlobUiUseCase(
 
     suspend operator fun invoke(
         openItem: OpenBlobItem,
-        onUiUpdate: (OpeningBlobState?) -> Unit
+        onUiUpdate: (OpeningBlobState?) -> Unit,
+        intent: OpenBlobUseCase.OpenBlobIntent = OpenBlobUseCase.OpenBlobIntent.VIEW,
     ) {
         onUiUpdate(
             OpeningBlobState(
@@ -35,7 +36,8 @@ class OpenBlobUiUseCase(
                             totalBytes = total,
                         )
                     )
-                }
+                },
+                intent = intent,
             )
 
             onUiUpdate(null)

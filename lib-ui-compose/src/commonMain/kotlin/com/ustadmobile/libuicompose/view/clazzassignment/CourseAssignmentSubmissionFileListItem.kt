@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Article
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -23,6 +24,7 @@ import com.ustadmobile.lib.db.composites.CourseAssignmentSubmissionFileAndTransf
 import com.ustadmobile.lib.db.composites.TransferJobItemStatus
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.libuicompose.components.UstadTooltipBox
 
 @Composable
@@ -30,6 +32,7 @@ fun CourseAssignmentSubmissionFileListItem(
     fileAndTransferJob: CourseAssignmentSubmissionFileAndTransferJob,
     onRemove: ((CourseAssignmentSubmissionFileAndTransferJob) -> Unit)? = null,
     onClickOpen: (CourseAssignmentSubmissionFileAndTransferJob) -> Unit = { },
+    onSend: ((CourseAssignmentSubmissionFileAndTransferJob) -> Unit)? = null,
 ) {
     ListItem(
         modifier = Modifier.clickable {
@@ -43,6 +46,13 @@ fun CourseAssignmentSubmissionFileListItem(
         },
         supportingContent = {
             Column {
+                fileAndTransferJob.submissionFile?.also {
+                    Text(
+                        text = UMFileUtil.formatFileSize(it.casaSize.toLong()),
+                    )
+                }
+
+
                 fileAndTransferJob.transferJobItem?.also { transferJobItem ->
                     when(transferJobItem.tjiStatus) {
                         TransferJobItemStatus.STATUS_IN_PROGRESS_INT -> {
@@ -64,8 +74,8 @@ fun CourseAssignmentSubmissionFileListItem(
                 }
             }
         },
-        trailingContent = onRemove?.let { onRemoveFn ->
-            {
+        trailingContent = {
+            onRemove?.also { onRemoveFn ->
                 UstadTooltipBox(
                     tooltipText = stringResource(MR.strings.remove)
                 ) {
@@ -76,6 +86,16 @@ fun CourseAssignmentSubmissionFileListItem(
                     ) {
                         Icon(Icons.Default.Clear, contentDescription = stringResource(MR.strings.remove))
                     }
+                }
+            }
+
+            onSend?.also { onSendFn ->
+                IconButton(
+                    onClick = {
+                        onSendFn(fileAndTransferJob)
+                    }
+                ) {
+                    Icon(Icons.Default.Share, contentDescription = stringResource(MR.strings.send))
                 }
             }
         }

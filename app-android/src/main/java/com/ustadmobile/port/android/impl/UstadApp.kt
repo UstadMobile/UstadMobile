@@ -45,6 +45,8 @@ import com.ustadmobile.core.domain.blob.download.EnqueueBlobDownloadClientUseCas
 import com.ustadmobile.core.domain.blob.download.EnqueueBlobDownloadClientUseCaseAndroid
 import com.ustadmobile.core.domain.blob.download.EnqueueContentManifestDownloadJobUseCaseAndroid
 import com.ustadmobile.core.domain.blob.download.MakeContentEntryAvailableOfflineUseCase
+import com.ustadmobile.core.domain.blob.openblob.OpenBlobUseCase
+import com.ustadmobile.core.domain.blob.openblob.OpenBlobUseCaseAndroid
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCaseJvm
 import com.ustadmobile.core.domain.blob.saveandupload.SaveAndUploadLocalUrisUseCase
@@ -753,6 +755,13 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 appContext = applicationContext,
                 endpoint = context,
                 db = instance(tag = DoorTag.TAG_DB),
+            )
+        }
+
+        bind<OpenBlobUseCase>() with scoped(EndpointScope.Default).singleton {
+            OpenBlobUseCaseAndroid(
+                appContext = applicationContext,
+                getStoragePathForUrlUseCase = instance()
             )
         }
 

@@ -8,9 +8,17 @@ package com.ustadmobile.core.domain.blob.openblob
  */
 interface OpenBlobUseCase {
 
+    /**
+     * On Desktop/JS, only VIEW is available
+     */
+    enum class OpenBlobIntent {
+        VIEW, SEND
+    }
+
     suspend operator fun invoke(
         item: OpenBlobItem,
         onProgress: (bytesTransferred: Long, totalBytes: Long) ->  Unit = { _, _ -> },
+        intent: OpenBlobIntent = OpenBlobIntent.VIEW,
     )
 
 }

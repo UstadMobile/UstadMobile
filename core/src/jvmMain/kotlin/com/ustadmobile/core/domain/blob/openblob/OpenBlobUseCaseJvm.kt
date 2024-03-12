@@ -17,6 +17,7 @@ class OpenBlobUseCaseJvm(
     override suspend fun invoke(
         item: OpenBlobItem,
         onProgress: (bytesTransferred: Long, totalBytes: Long) ->  Unit,
+        intent: OpenBlobUseCase.OpenBlobIntent,
     ) = withContext(Dispatchers.IO){
         val storageFileUri = getStoragePathForUrlUseCase(
             url = item.uri,

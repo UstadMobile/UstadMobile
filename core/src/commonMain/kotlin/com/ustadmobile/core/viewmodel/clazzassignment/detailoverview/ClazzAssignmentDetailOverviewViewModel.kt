@@ -16,6 +16,7 @@ import com.ustadmobile.core.viewmodel.clazzassignment.UstadAssignmentSubmissionH
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import app.cash.paging.PagingSource
 import com.ustadmobile.core.domain.blob.openblob.OpenBlobUiUseCase
+import com.ustadmobile.core.domain.blob.openblob.OpenBlobUseCase
 import com.ustadmobile.core.domain.blob.openblob.OpeningBlobState
 import com.ustadmobile.core.domain.blob.upload.CancelBlobUploadClientUseCase
 import com.ustadmobile.core.domain.blob.saveandupload.SaveAndUploadLocalUrisUseCase
@@ -675,7 +676,18 @@ class ClazzAssignmentDetailOverviewViewModel(
         }
     }
 
+    fun onSendSubmissionFile(file: CourseAssignmentSubmissionFileAndTransferJob) {
+        openSubmissionFileAsBlob(file, OpenBlobUseCase.OpenBlobIntent.SEND)
+    }
+
     fun onOpenSubmissionFile(file: CourseAssignmentSubmissionFileAndTransferJob) {
+        openSubmissionFileAsBlob(file, OpenBlobUseCase.OpenBlobIntent.VIEW)
+    }
+
+    private fun openSubmissionFileAsBlob(
+        file: CourseAssignmentSubmissionFileAndTransferJob,
+        intent: OpenBlobUseCase.OpenBlobIntent,
+    ){
         val submissionFile = file.submissionFile ?: return
         openBlobJob?.cancel()
 
@@ -684,7 +696,8 @@ class ClazzAssignmentDetailOverviewViewModel(
                 openItem = submissionFile.asBlobOpenItem(),
                 onUiUpdate = {
                     _uiState.update { prev -> prev.copy(openingFileSubmissionState = it) }
-                }
+                },
+                intent = intent,
             )
         }
     }

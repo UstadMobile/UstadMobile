@@ -7,6 +7,7 @@ class OpenBlobUseCaseJs: OpenBlobUseCase {
     override suspend fun invoke(
         item: OpenBlobItem,
         onProgress: (bytesTransferred: Long, totalBytes: Long) ->  Unit,
+        intent: OpenBlobUseCase.OpenBlobIntent,
     ) {
         val element = document.createElement("a")
         element.setAttribute("href", item.uri)

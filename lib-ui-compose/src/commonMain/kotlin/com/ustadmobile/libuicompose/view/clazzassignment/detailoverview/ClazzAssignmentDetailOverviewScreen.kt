@@ -48,6 +48,7 @@ import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadOpeningBlobInfoBottomSheet
 import com.ustadmobile.libuicompose.components.UstadPickFileOpts
 import com.ustadmobile.libuicompose.components.UstadRichTextEdit
+import com.ustadmobile.libuicompose.components.isDesktop
 import com.ustadmobile.libuicompose.components.rememberUstadFilePickLauncher
 import com.ustadmobile.libuicompose.util.linkify.rememberLinkExtractor
 import com.ustadmobile.libuicompose.util.rememberDateFormat
@@ -97,6 +98,7 @@ fun ClazzAssignmentDetailOverviewScreen(viewModel: ClazzAssignmentDetailOverview
         },
         onRemoveSubmissionFile = viewModel::onRemoveSubmissionFile,
         onOpenSubmissionFile =  viewModel::onOpenSubmissionFile,
+        onSendSubmissionFile = if(!isDesktop()) viewModel::onSendSubmissionFile else null,
         onToggleSubmissionExpandCollapse = viewModel::onToggleSubmissionExpandCollapse,
     )
 }
@@ -116,6 +118,7 @@ fun ClazzAssignmentDetailOverviewScreen(
     onClickCourseGroupSet: () -> Unit = { },
     onRemoveSubmissionFile: (CourseAssignmentSubmissionFileAndTransferJob) -> Unit = { },
     onOpenSubmissionFile: (CourseAssignmentSubmissionFileAndTransferJob) -> Unit = { },
+    onSendSubmissionFile: ((CourseAssignmentSubmissionFileAndTransferJob) -> Unit)? = null,
     onToggleSubmissionExpandCollapse: (CourseAssignmentSubmission) -> Unit = { },
 ){
 
@@ -343,6 +346,7 @@ fun ClazzAssignmentDetailOverviewScreen(
                         CourseAssignmentSubmissionFileListItem(
                             fileAndTransferJob = file,
                             onClickOpen = onOpenSubmissionFile,
+                            onSend = onSendSubmissionFile,
                         )
                     }
                 }
