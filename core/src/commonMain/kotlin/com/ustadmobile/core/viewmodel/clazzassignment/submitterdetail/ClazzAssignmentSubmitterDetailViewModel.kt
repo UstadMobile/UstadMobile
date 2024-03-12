@@ -15,8 +15,13 @@ import com.ustadmobile.core.viewmodel.clazzassignment.UstadCourseAssignmentMarkL
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import app.cash.paging.PagingSource
 import com.ustadmobile.core.domain.assignment.submittername.GetAssignmentSubmitterNameUseCase
+import com.ustadmobile.core.domain.blob.openblob.OpenBlobUiUseCase
+import com.ustadmobile.core.domain.blob.openblob.OpenBlobUseCase
+import com.ustadmobile.core.domain.blob.openblob.OpeningBlobState
 import com.ustadmobile.core.impl.appstate.Snack
+import com.ustadmobile.core.util.ext.onActiveEndpoint
 import com.ustadmobile.core.util.ext.toggle
+import com.ustadmobile.core.viewmodel.clazzassignment.asBlobOpenItem
 import com.ustadmobile.core.viewmodel.clazzassignment.combineWithSubmissionFiles
 import com.ustadmobile.core.viewmodel.clazzassignment.hasUpdatedMarks
 import com.ustadmobile.core.viewmodel.clazzassignment.latestUniqueMarksByMarker
@@ -24,10 +29,12 @@ import com.ustadmobile.core.viewmodel.clazzassignment.submissionStatusFor
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.CommentsAndName
 import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
+import com.ustadmobile.lib.db.composites.CourseAssignmentSubmissionFileAndTransferJob
 import com.ustadmobile.lib.db.composites.SubmissionAndFiles
 import com.ustadmobile.lib.db.entities.*
 import dev.icerock.moko.resources.StringResource
 import io.github.aakira.napier.Napier
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -43,6 +50,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.kodein.di.DI
 import org.kodein.di.instance
+import org.kodein.di.instanceOrNull
 import org.kodein.di.on
 import kotlin.math.max
 
@@ -115,6 +123,8 @@ data class ClazzAssignmentSubmitterDetailUiState(
     val dayOfWeekStrings: Map<DayOfWeek, String> = emptyMap(),
 
     val collapsedSubmissions: Set<Long> = emptySet(),
+
+    val openingFileState: OpeningBlobState? = null,
 
 ) {
 
@@ -208,6 +218,10 @@ class ClazzAssignmentSubmitterDetailViewModel(
 
     private val assignmentSubmitterNameUseCase: GetAssignmentSubmitterNameUseCase by
         on(accountManager.activeEndpoint).instance()
+
+    private var openBlobJob: Job? = null
+
+    private val openBlobUiUseCase: OpenBlobUiUseCase? by di.onActiveEndpoint().instanceOrNull()
 
     init {
         _uiState.update { prev ->
@@ -444,6 +458,32 @@ class ClazzAssignmentSubmitterDetailViewModel(
                 collapsedSubmissions = prev.collapsedSubmissions.toggle(submission.casUid)
             )
         }
+    }
+
+    private fun openSubmissionFileAsBlob(
+        file: CourseAssignmentSubmissionFileAndTransferJob,
+        intent: OpenBlobUseCase.OpenBlobIntent,
+    ){
+        val submissionFile = file.submissionFile ?: return
+        openBlobJob?.cancel()
+
+        openBlobJob = viewModelScope.launch {
+            openBlobUiUseCase?.invoke(
+                openItem = submissionFile.asBlobOpenItem(),
+                onUiUpdate = {
+                    _uiState.update { prev -> prev.copy(openingFileState = it) }
+                },
+                intent = intent,
+            )
+        }
+    }
+
+    fun onSendSubmissionFile(file: CourseAssignmentSubmissionFileAndTransferJob) {
+        openSubmissionFileAsBlob(file, OpenBlobUseCase.OpenBlobIntent.SEND)
+    }
+
+    fun onOpenSubmissionFile(file: CourseAssignmentSubmissionFileAndTransferJob) {
+        openSubmissionFileAsBlob(file, OpenBlobUseCase.OpenBlobIntent.VIEW)
     }
 
     companion object {

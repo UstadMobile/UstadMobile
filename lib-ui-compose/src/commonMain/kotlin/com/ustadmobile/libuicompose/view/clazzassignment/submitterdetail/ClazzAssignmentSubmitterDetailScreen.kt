@@ -17,6 +17,7 @@ import com.ustadmobile.core.viewmodel.clazzassignment.averageMark
 import com.ustadmobile.core.viewmodel.clazzassignment.submissionStatusFor
 import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailUiState
 import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailViewModel
+import com.ustadmobile.lib.db.composites.CourseAssignmentSubmissionFileAndTransferJob
 import com.ustadmobile.lib.db.entities.Comments
 import com.ustadmobile.lib.db.entities.CourseAssignmentMark
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
@@ -25,6 +26,7 @@ import com.ustadmobile.libuicompose.components.UstadDetailHeader
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadListFilterChipsHeader
 import com.ustadmobile.libuicompose.components.UstadListSpacerItem
+import com.ustadmobile.libuicompose.components.isDesktop
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
 import com.ustadmobile.libuicompose.util.linkify.rememberLinkExtractor
@@ -57,6 +59,8 @@ fun ClazzAssignmentSubmitterDetailScreen(
         onClickGradeFilterChip = viewModel::onClickGradeFilterChip,
         onChangeDraftMark = viewModel::onChangeDraftMark,
         onToggleSubmissionExpandCollapse = viewModel::onToggleSubmissionExpandCollapse,
+        onOpenSubmissionFile = viewModel::onOpenSubmissionFile,
+        onSendSubmissionFile = if(!isDesktop()) viewModel::onSendSubmissionFile else null
     )
 }
 
@@ -70,6 +74,8 @@ fun ClazzAssignmentSubmitterDetailScreen(
     onClickGradeFilterChip: (MessageIdOption2) -> Unit = {},
     onChangeDraftMark: (CourseAssignmentMark?) -> Unit = {},
     onToggleSubmissionExpandCollapse: (CourseAssignmentSubmission) -> Unit = { },
+    onOpenSubmissionFile: (CourseAssignmentSubmissionFileAndTransferJob) -> Unit = { },
+    onSendSubmissionFile: ((CourseAssignmentSubmissionFileAndTransferJob) -> Unit)? = null,
 ){
 
     val privateCommentsPager = remember(uiState.privateCommentsList) {
@@ -123,7 +129,9 @@ fun ClazzAssignmentSubmitterDetailScreen(
                     key = { Pair(CourseAssignmentSubmission.TABLE_ID, it.submissionFile?.casaUid ?: 0) }
                 ) {
                     CourseAssignmentSubmissionFileListItem(
-                        fileAndTransferJob = it
+                        fileAndTransferJob = it,
+                        onClickOpen = onOpenSubmissionFile,
+                        onSend = onSendSubmissionFile,
                     )
                 }
             }

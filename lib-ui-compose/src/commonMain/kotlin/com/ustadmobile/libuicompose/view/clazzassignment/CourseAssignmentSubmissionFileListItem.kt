@@ -52,7 +52,6 @@ fun CourseAssignmentSubmissionFileListItem(
                     )
                 }
 
-
                 fileAndTransferJob.transferJobItem?.also { transferJobItem ->
                     when(transferJobItem.tjiStatus) {
                         TransferJobItemStatus.STATUS_IN_PROGRESS_INT -> {

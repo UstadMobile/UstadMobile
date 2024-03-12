@@ -15,6 +15,7 @@ import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useTimeFormatter
 import com.ustadmobile.hooks.useUstadViewModel
+import com.ustadmobile.lib.db.composites.CourseAssignmentSubmissionFileAndTransferJob
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.view.clazzassignment.SUBMISSION_STATUS_ICON_MAP
@@ -56,6 +57,8 @@ external interface ClazzAssignmentSubmitterDetailProps : Props {
     var onClickSubmitPrivateComment: () -> Unit
 
     var onToggleSubmissionExpandCollapse: (CourseAssignmentSubmission) -> Unit
+
+    var onClickSubmissionFile: (CourseAssignmentSubmissionFileAndTransferJob) -> Unit
 
 }
 
@@ -135,6 +138,7 @@ val ClazzAssignmentSubmitterDetailComponent = FC<ClazzAssignmentSubmitterDetailP
                     ) { fileItem ->
                         CourseAssignmentSubmissionFileListItem.create {
                             file = fileItem
+                            onClick = props.onClickSubmissionFile
                         }
                     }
                 }
@@ -243,5 +247,6 @@ val ClazzAssignmentSubmitterDetailScreen = FC<Props> {
         onClickSubmitGrade = viewModel::onClickSubmitMark
         onClickGradeFilterChip = viewModel::onClickGradeFilterChip
         onToggleSubmissionExpandCollapse = viewModel::onToggleSubmissionExpandCollapse
+        onClickSubmissionFile = viewModel::onOpenSubmissionFile
     }
 }
