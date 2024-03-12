@@ -139,6 +139,8 @@ data class ClazzAssignmentDetailOverviewUiState(
      */
     val openingFileSubmissionState: OpeningBlobState? = null,
 
+    val showModerateOptions: Boolean = false,
+
 ) {
 
     val caDescriptionVisible: Boolean
@@ -282,6 +284,7 @@ class ClazzAssignmentDetailOverviewViewModel(
         activeRepo.commentsDao.findPrivateCommentsForUserByAssignmentUid(
             accountPersonUid = activeUserPersonUid,
             assignmentUid = entityUidArg,
+            includeDeleted = false,
         ).also {
             lastPrivateCommentsPagingSource = it
         }
@@ -291,7 +294,8 @@ class ClazzAssignmentDetailOverviewViewModel(
 
     private val courseCommentsPagingSourceFactory: () -> PagingSource<Int, CommentsAndName> = {
         activeRepo.commentsDao.findCourseCommentsByAssignmentUid(
-            assignmentUid = entityUidArg
+            assignmentUid = entityUidArg,
+            includeDeleted = false,
         ).also {
             lastCourseCommentsPagingSourceFactory = it
         }
@@ -320,11 +324,12 @@ class ClazzAssignmentDetailOverviewViewModel(
             )
         }
 
-        val entityFlow = activeRepo.clazzAssignmentDao.findAssignmentCourseBlockAndSubmitterUidAsFlow(
-            assignmentUid = entityUidArg,
-            clazzUid = clazzUid,
-            accountPersonUid = accountManager.currentAccount.personUid,
-        ).shareIn(viewModelScope, SharingStarted.WhileSubscribed())
+        val entityFlow = activeRepo
+            .clazzAssignmentDao.findAssignmentCourseBlockAndSubmitterUidAsFlow(
+                assignmentUid = entityUidArg,
+                clazzUid = clazzUid,
+                accountPersonUid = accountManager.currentAccount.personUid,
+            ).shareIn(viewModelScope, SharingStarted.WhileSubscribed())
 
         viewModelScope.launch {
             val editableSubmission = savedStateHandle.getJson(
@@ -355,7 +360,8 @@ class ClazzAssignmentDetailOverviewViewModel(
                                     systemImpl.getString(MR.strings.unassigned_error)
                                 }else {
                                     null
-                                }
+                                },
+                                showModerateOptions = assignmentData?.hasModeratePermission ?: false,
                             )
                         }
 
@@ -715,6 +721,17 @@ class ClazzAssignmentDetailOverviewViewModel(
             prev.copy(
                 openingFileSubmissionState = null,
             )
+        }
+    }
+
+    fun onDeleteComment(comments: Comments) {
+        viewModelScope.launch {
+            activeRepo.commentsDao.updateDeletedByCommentUid(
+                uid = comments.commentsUid,
+                deleted = true,
+                changeTime = systemTimeInMillis()
+            )
+            snackDispatcher.showSnackBar(Snack(systemImpl.getString(MR.strings.deleted)))
         }
     }
 

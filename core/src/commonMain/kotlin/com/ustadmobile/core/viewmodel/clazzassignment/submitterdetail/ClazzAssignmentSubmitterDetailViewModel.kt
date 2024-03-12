@@ -126,6 +126,8 @@ data class ClazzAssignmentSubmitterDetailUiState(
 
     val openingFileState: OpeningBlobState? = null,
 
+    val showModerateOptions: Boolean = false,
+
 ) {
 
     val submissionStatus: Int
@@ -208,7 +210,8 @@ class ClazzAssignmentSubmitterDetailViewModel(
     private val privateCommentsPagingSourceFactory: ListPagingSourceFactory<CommentsAndName> = {
         activeRepo.commentsDao.findPrivateCommentsForSubmitterByAssignmentUid(
             submitterUid = submitterUid,
-            assignmentUid = assignmentUid
+            assignmentUid = assignmentUid,
+            includeDeleted = false,
         ).also {
             lastPrivateCommentsPagingSource = it
         }
@@ -258,6 +261,7 @@ class ClazzAssignmentSubmitterDetailViewModel(
                                           null
                                     },
                                     newPrivateCommentTextVisible = true,
+                                    showModerateOptions = permissionPair.canModerate,
                                 )
                             }
 
@@ -493,6 +497,17 @@ class ClazzAssignmentSubmitterDetailViewModel(
             prev.copy(
                 openingFileState = null,
             )
+        }
+    }
+
+    fun onDeleteComment(comments: Comments) {
+        viewModelScope.launch {
+            activeRepo.commentsDao.updateDeletedByCommentUid(
+                uid = comments.commentsUid,
+                deleted = true,
+                changeTime = systemTimeInMillis()
+            )
+            snackDispatcher.showSnackBar(Snack(systemImpl.getString(MR.strings.deleted)))
         }
     }
 

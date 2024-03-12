@@ -100,6 +100,7 @@ fun ClazzAssignmentDetailOverviewScreen(viewModel: ClazzAssignmentDetailOverview
         onOpenSubmissionFile =  viewModel::onOpenSubmissionFile,
         onSendSubmissionFile = if(!isDesktop()) viewModel::onSendSubmissionFile else null,
         onToggleSubmissionExpandCollapse = viewModel::onToggleSubmissionExpandCollapse,
+        onDeleteComment = viewModel::onDeleteComment,
     )
 }
 
@@ -120,6 +121,7 @@ fun ClazzAssignmentDetailOverviewScreen(
     onOpenSubmissionFile: (CourseAssignmentSubmissionFileAndTransferJob) -> Unit = { },
     onSendSubmissionFile: ((CourseAssignmentSubmissionFileAndTransferJob) -> Unit)? = null,
     onToggleSubmissionExpandCollapse: (CourseAssignmentSubmission) -> Unit = { },
+    onDeleteComment: (Comments) -> Unit = { },
 ){
 
     val privateCommentsPager = remember(uiState.privateComments) {
@@ -419,6 +421,8 @@ fun ClazzAssignmentDetailOverviewScreen(
                     timeFormatter = timeFormatter,
                     dateFormatter = dateFormatter,
                     dayOfWeekStringMap = uiState.dayOfWeekStringMap,
+                    showModerateOptions = uiState.showModerateOptions,
+                    onDeleteComment = onDeleteComment,
                 )
             }
         }
@@ -441,7 +445,7 @@ fun ClazzAssignmentDetailOverviewScreen(
                     currentUserPersonName = uiState.activeUserPersonName,
                     currentUserPictureUri = uiState.activeUserPictureUri,
                     onSubmitComment = onClickSubmitPrivateComment,
-                    onCommentChanged = onChangePrivateComment
+                    onCommentChanged = onChangePrivateComment,
                 )
             }
 
@@ -456,6 +460,8 @@ fun ClazzAssignmentDetailOverviewScreen(
                     timeFormatter = timeFormatter,
                     dateFormatter = dateFormatter,
                     dayOfWeekStringMap = uiState.dayOfWeekStringMap,
+                    showModerateOptions = uiState.showModerateOptions,
+                    onDeleteComment = onDeleteComment,
                 )
             }
         }

@@ -14,9 +14,19 @@ import com.ustadmobile.mui.components.UstadLinkify
 import com.ustadmobile.view.components.UstadPersonAvatar
 import com.ustadmobile.core.MR
 import com.ustadmobile.hooks.useDayOrDate
+import com.ustadmobile.mui.components.ThemeContext
 import com.ustadmobile.wrappers.intl.Intl
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDateTime
+import mui.system.responsive
+import mui.system.sx
+import react.dom.aria.AriaHasPopup
+import react.dom.aria.ariaExpanded
+import react.dom.aria.ariaHasPopup
+import react.useRequiredContext
+import react.useState
+import web.dom.Element
+import mui.icons.material.MoreVert as MoreVertIcon
 
 external interface UstadCommentListItemProps : Props {
 
@@ -30,11 +40,17 @@ external interface UstadCommentListItemProps : Props {
 
     var dayOfWeekMap: Map<DayOfWeek, String>
 
+    var showModerateOptions: Boolean
+
+    var onDeleteComment: (Comments) -> Unit
+
 }
 
 val UstadCommentListItem = FC<UstadCommentListItemProps> { props ->
 
     val strings = useStringProvider()
+
+    val theme by useRequiredContext(ThemeContext)
 
     val formattedTime = useDayOrDate(
         enabled = true,
@@ -52,6 +68,9 @@ val UstadCommentListItem = FC<UstadCommentListItemProps> { props ->
         ?.let { "(${strings[MR.strings.group]} ${it.commentsFromSubmitterUid})"}
         ?: ""
 
+    var overflowAnchor by useState<Element?> { null }
+
+    val overflowAnchorVal = overflowAnchor
 
     ListItem {
         ListItemIcon {
@@ -70,7 +89,53 @@ val UstadCommentListItem = FC<UstadCommentListItemProps> { props ->
             }
         }
 
-        secondaryAction = ReactNode(formattedTime)
+        secondaryAction = Stack.create {
+            direction = responsive(StackDirection.row)
+            + formattedTime
+
+            if(props.showModerateOptions) {
+                IconButton {
+                    ariaHasPopup = AriaHasPopup.`true`
+                    ariaExpanded = overflowAnchorVal != null
+
+                    onClick = {
+                        overflowAnchor = if(overflowAnchor == null) {
+                            it.currentTarget
+                        }else {
+                            null
+                        }
+                    }
+
+                    MoreVertIcon()
+                }
+
+                if(overflowAnchorVal != null) {
+                    Menu {
+                        open = true
+                        anchorEl = {
+                            overflowAnchorVal
+                        }
+
+                        sx {
+                            marginTop = theme.spacing(2)
+                        }
+
+                        onClose = {
+                            overflowAnchor = null
+                        }
+
+                        MenuItem {
+                            onClick = {
+                                props.commentsAndName?.comment?.also(props.onDeleteComment)
+                                overflowAnchor = null
+                            }
+
+                            + strings[MR.strings.delete]
+                        }
+                    }
+                }
+            }
+        }
     }
 
 }

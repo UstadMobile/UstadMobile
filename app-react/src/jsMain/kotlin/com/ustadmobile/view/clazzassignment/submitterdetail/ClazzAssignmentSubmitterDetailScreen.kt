@@ -60,6 +60,8 @@ external interface ClazzAssignmentSubmitterDetailProps : Props {
 
     var onClickSubmissionFile: (CourseAssignmentSubmissionFileAndTransferJob) -> Unit
 
+    var onDeleteComment: (Comments) -> Unit
+
 }
 
 val ClazzAssignmentSubmitterDetailComponent = FC<ClazzAssignmentSubmitterDetailProps> { props ->
@@ -218,6 +220,8 @@ val ClazzAssignmentSubmitterDetailComponent = FC<ClazzAssignmentSubmitterDetailP
                     dateFormatter = dateFormatterVal
                     dateTimeNow = props.uiState.localDateTimeNow
                     dayOfWeekMap = props.uiState.dayOfWeekStrings
+                    showModerateOptions = props.uiState.showModerateOptions
+                    onDeleteComment = props.onDeleteComment
                 }
             }
         }
@@ -248,5 +252,6 @@ val ClazzAssignmentSubmitterDetailScreen = FC<Props> {
         onClickGradeFilterChip = viewModel::onClickGradeFilterChip
         onToggleSubmissionExpandCollapse = viewModel::onToggleSubmissionExpandCollapse
         onClickSubmissionFile = viewModel::onOpenSubmissionFile
+        onDeleteComment = viewModel::onDeleteComment
     }
 }
