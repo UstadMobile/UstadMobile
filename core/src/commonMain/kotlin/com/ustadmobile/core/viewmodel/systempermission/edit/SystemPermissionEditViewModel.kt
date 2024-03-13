@@ -36,6 +36,8 @@ class SystemPermissionEditViewModel(
     private val argPersonUid = savedStateHandle[ARG_PERSON_UID]?.toLong() ?: 0L
 
     init {
+        _appUiState.update { it.copy(hideBottomNavigation = true) }
+
         launchIfHasPermission(
             permissionCheck = {
                 activeRepo.systemPermissionDao.personHasSystemPermission(activeUserPersonUid,

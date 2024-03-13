@@ -5,8 +5,10 @@ import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailUiState2
 import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.hooks.useDateFormatter
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
+import com.ustadmobile.hooks.useTimeFormatter
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.composites.DiscussionPostAndPosterNames
 import com.ustadmobile.lib.db.entities.DiscussionPost
@@ -29,6 +31,7 @@ external interface DiscussionPostDetailProps: Props {
     var uiState: DiscussionPostDetailUiState2
     var onClickPostReply: () -> Unit
     var onReplyChanged: (String) -> Unit
+    var onDeletePost: (DiscussionPost) -> Unit
 }
 
 val DiscussionPostDetailComponent2 = FC<DiscussionPostDetailProps> { props ->
@@ -39,6 +42,10 @@ val DiscussionPostDetailComponent2 = FC<DiscussionPostDetailProps> { props ->
         pagingSourceFactory = props.uiState.discussionPosts,
         placeholdersEnabled = true
     )
+
+    val timeFormatter = useTimeFormatter()
+    val dateFormatter = useDateFormatter()
+
 
     VirtualList {
         style = jso {
@@ -53,13 +60,22 @@ val DiscussionPostDetailComponent2 = FC<DiscussionPostDetailProps> { props ->
                 items = infiniteQueryResult,
                 key = { it.discussionPost?.discussionPostUid?.toString() ?: "" }
             ) { postItem ->
+                val isRootItem = postItem?.discussionPost?.discussionPostReplyToPostUid == 0L
                 Box.create {
                     DiscussionPostListItem {
                         discussionPost = postItem
+                        showModerateOptions = !isRootItem && props.uiState.showModerateOptions
+                        onClickDelete = {
+                            postItem?.discussionPost?.also(props.onDeletePost)
+                        }
+                        localDateTimeNow = props.uiState.localDateTimeNow
+                        timeFormat = timeFormatter
+                        dateFormat = dateFormatter
+                        dayOfWeekStrings = props.uiState.dayOfWeekStrings
                     }
 
                     //If this is the start post, put the
-                    if(postItem?.discussionPost?.discussionPostReplyToPostUid == 0L) {
+                    if(isRootItem) {
                         DiscussionPostReply {
                             reply = props.uiState.replyText
                             onClickPostReplyButton = props.onClickPostReply
@@ -86,7 +102,6 @@ val DiscussionPostDetailPreview = FC<Props> {
                     DiscussionPostAndPosterNames(
                         discussionPost = DiscussionPost().apply {
                             discussionPostTitle = "Submitting an assignment"
-                            discussionPostVisible = true
                             discussionPostStartedPersonUid = 1
                             discussionPostReplyToPostUid = 0
                             discussionPostUid = 1
@@ -100,7 +115,6 @@ val DiscussionPostDetailPreview = FC<Props> {
                         discussionPost = DiscussionPost().apply {
                             discussionPostReplyToPostUid = 42
                             discussionPostTitle = null
-                            discussionPostVisible = true
                             discussionPostStartedPersonUid = 1
                             discussionPostUid = 2
                             discussionPostMessage = "Use ChatGPT"
@@ -112,7 +126,6 @@ val DiscussionPostDetailPreview = FC<Props> {
                     DiscussionPostAndPosterNames(
                         discussionPost = DiscussionPost().apply {
                             discussionPostReplyToPostUid = 42
-                            discussionPostVisible = true
                             discussionPostStartedPersonUid = 1
 
                             discussionPostUid = 3
@@ -124,7 +137,6 @@ val DiscussionPostDetailPreview = FC<Props> {
                     ),
                     DiscussionPostAndPosterNames(
                         discussionPost = DiscussionPost().apply {
-                            discussionPostVisible = true
                             discussionPostStartedPersonUid = 1
                             discussionPostReplyToPostUid = 42
                             discussionPostUid = 4
@@ -158,6 +170,7 @@ val DiscussionPostDetailScreen = FC<Props>{
         uiState = uiStateVal
         onReplyChanged = viewModel::onChangeReplyText
         onClickPostReply = viewModel::onClickPostReply
+        onDeletePost = viewModel::onDeletePost
     }
 
 }

@@ -27,6 +27,7 @@ import androidx.lifecycle.lifecycleScope
 import com.jakewharton.processphoenix.ProcessPhoenix
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.domain.blob.openblob.OpenBlobUiUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseAndroid
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.LaunchXapiUseCase
@@ -174,6 +175,13 @@ class AppActivity: AppCompatActivity(), DIAware {
             CloseProcessUseCaseAndroid(this@AppActivity)
         }
 
+        bind<OpenBlobUiUseCase>() with scoped(EndpointScope.Default).singleton {
+            OpenBlobUiUseCase(
+                openBlobUseCase = instance(),
+                systemImpl = instance(),
+            )
+        }
+
         registerContextTranslator { call: NanoHttpdCall -> Endpoint(call.urlParams["endpoint"] ?: "notfound") }
 
         onReady {
@@ -235,7 +243,23 @@ class AppActivity: AppCompatActivity(), DIAware {
             return
         }
 
-        val packageName = CustomTabsClient.getPackageName(this, null)
+        /**
+         * Where the default browser does not support the custom tab service, we need to provide
+         * package names. On older Xiaomi devices their own browser is set as default, and it does not
+         * support Custom Chrome Tabs. This causes getPackageName to return null. When the intent
+         * to open a url is launched, it ignores the custom chrome tab extras and just opens the
+         * link as normal (including address bar etc).
+         *
+         * We therefor need to provide the package names of well known browsers (Chrome and Firefox)
+         * that properly support custom tabs.
+         */
+        val packageName = CustomTabsClient.getPackageName(
+            this, listOf("com.android.chrome", "org.mozilla.firefox"), false
+        )
+        if(packageName == null) {
+            Napier.w("CustomTabs: Service NOT supported")
+            return
+        }
         CustomTabsClient.bindCustomTabsService(this, packageName, mCustomTabsServiceConnection)
     }
 

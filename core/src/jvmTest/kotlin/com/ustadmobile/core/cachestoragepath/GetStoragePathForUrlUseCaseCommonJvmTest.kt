@@ -37,8 +37,9 @@ class GetStoragePathForUrlUseCaseCommonJvmTest {
     @Test
     fun givenRequestForUrl_whenInvoked_thenWillProvideValidPath() {
         val getStoragePathUseCase = GetStoragePathForUrlUseCaseCommonJvm(
-            httpClient = httpClient,
+            okHttpClient = okHttpClient,
             cache = cache,
+            tmpDir = temporaryFolder.newFolder(),
         )
     }
 }

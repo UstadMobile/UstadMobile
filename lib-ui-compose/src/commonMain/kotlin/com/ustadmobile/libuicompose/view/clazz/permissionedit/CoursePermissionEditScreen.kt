@@ -1,8 +1,10 @@
 package com.ustadmobile.libuicompose.view.clazz.permissionedit
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import com.ustadmobile.core.viewmodel.clazz.permissionedit.CoursePermissionEditUiState
 import com.ustadmobile.core.viewmodel.clazz.permissionedit.CoursePermissionEditViewModel
 import com.ustadmobile.libuicompose.components.UstadPermissionEdit
@@ -29,5 +31,6 @@ fun CoursePermissionEditScreen(
         permissionLabels = uiState.permissionLabels,
         onToggle = onTogglePermission,
         enabled = uiState.fieldsEnabled,
+        modifier = Modifier.fillMaxSize(),
     )
 }

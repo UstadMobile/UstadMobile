@@ -91,6 +91,7 @@ kotlin {
                 implementation(project(":lib-ui-compose-videoplayer"))
                 implementation(libs.pdfbox)
                 implementation(libs.vlcj)
+                implementation(project(":lib-cache"))
             }
         }
     }
