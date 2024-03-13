@@ -5,7 +5,6 @@ import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.lib.db.entities.*
 import web.cssom.Padding
-import web.cssom.px
 import kotlinx.datetime.TimeZone
 import mui.icons.material.BookOutlined
 import mui.icons.material.Delete
@@ -19,13 +18,13 @@ import react.dom.aria.ariaLabel
 
 external interface UstadAssignmentSubmissionListItemProps: Props {
 
-    var submission: CourseAssignmentSubmissionWithAttachment
+    var submission: CourseAssignmentSubmission
 
     var padding: Padding
 
-    var onClickOpenSubmission: (CourseAssignmentSubmissionWithAttachment) -> Unit
+    var onClickOpenSubmission: (CourseAssignmentSubmission) -> Unit
 
-    var onClickDeleteSubmission: ((CourseAssignmentSubmissionWithAttachment) -> Unit)?
+    var onClickDeleteSubmission: ((CourseAssignmentSubmission) -> Unit)?
 
 }
 
@@ -55,7 +54,7 @@ val UstadAssignmentSubmissionListItem = FC<UstadAssignmentSubmissionListItemProp
             }
 
             ListItemText {
-                primary = ReactNode(props.submission.displayTitle)
+                primary = ReactNode(props.submission.casText ?: "")
 
                 if (props.submission.casTimestamp.isSetDate()){
 
@@ -77,19 +76,4 @@ val UstadAssignmentSubmissionListItem = FC<UstadAssignmentSubmissionListItemProp
             }
         }
     }
-}
-
-
-val UstadAssignmentFileSubmissionListItemPreview = FC<Props> {
-
-    UstadAssignmentSubmissionListItem {
-        submission = CourseAssignmentSubmissionWithAttachment().apply {
-            casTimestamp = 1677744388299
-            casType = CourseAssignmentSubmission.SUBMISSION_TYPE_FILE
-            attachment = CourseAssignmentSubmissionAttachment().apply {
-                casaFileName = "Content Title"
-            }
-        }
-    }
-
 }

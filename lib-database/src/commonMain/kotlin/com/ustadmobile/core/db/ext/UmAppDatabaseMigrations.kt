@@ -1882,6 +1882,64 @@ val MIGRATION_155_156_CLIENT = DoorMigrationStatementList(155, 156) { db ->
 }
 
 
+val MIGRATION_156_157 = DoorMigrationStatementList(156, 157) { db ->
+    buildList {
+        add("DROP TABLE IF EXISTS CourseAssignmentSubmissionAttachment")
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS CourseAssignmentSubmissionFile (  casaSubmissionUid  INTEGER  NOT NULL , casaCaUid  INTEGER  NOT NULL , casaClazzUid  INTEGER  NOT NULL , casaMimeType  TEXT , casaFileName  TEXT , casaUri  TEXT , casaSize  INTEGER  NOT NULL , casaTimestamp  INTEGER  NOT NULL , casaUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS CourseAssignmentSubmissionFile (  casaSubmissionUid  BIGINT  NOT NULL , casaCaUid  BIGINT  NOT NULL , casaClazzUid  BIGINT  NOT NULL , casaMimeType  TEXT , casaFileName  TEXT , casaUri  TEXT , casaSize  INTEGER  NOT NULL , casaTimestamp  BIGINT  NOT NULL , casaUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+        }
+    }
+}
+
+val MIGRATION_157_158 = DoorMigrationStatementList(157, 158) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("ALTER TABLE CourseAssignmentSubmissionFile ADD COLUMN casaDeleted INTEGER NOT NULL DEFAULT 0")
+        }else {
+            add("ALTER TABLE CourseAssignmentSubmissionFile ADD COLUMN casaDeleted BOOL NOT NULL DEFAULT FALSE")
+        }
+    }
+}
+
+val MIGRATION_158_159 = DoorMigrationStatementList(158, 159) { db ->
+    buildList {
+        val colType = if(db.dbType() == DoorDbType.SQLITE) "INTEGER" else "BIGINT"
+        add("ALTER TABLE CourseAssignmentSubmissionFile ADD COLUMN casaSubmitterUid $colType NOT NULL DEFAULT 0")
+    }
+}
+
+val MIGRATION_159_160 = DoorMigrationStatementList(159, 160) { db ->
+    buildList {
+        add("DROP TABLE IF EXISTS Comments")
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS Comments (  commentsText  TEXT , commentsEntityUid  INTEGER  NOT NULL , commentsStatus  INTEGER  NOT NULL , commentsFromPersonUid  INTEGER  NOT NULL , commentsForSubmitterUid  INTEGER  NOT NULL , commentsFromSubmitterUid  INTEGER  NOT NULL , commentsFlagged  INTEGER  NOT NULL , commentsDeleted  INTEGER  NOT NULL , commentsDateTimeAdded  INTEGER  NOT NULL , commentsLct  INTEGER  NOT NULL , commentsUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS Comments (  commentsText  TEXT , commentsEntityUid  BIGINT  NOT NULL , commentsStatus  INTEGER  NOT NULL , commentsFromPersonUid  BIGINT  NOT NULL , commentsForSubmitterUid  BIGINT  NOT NULL , commentsFromSubmitterUid  BIGINT  NOT NULL , commentsFlagged  BOOL  NOT NULL , commentsDeleted  BOOL  NOT NULL , commentsDateTimeAdded  BIGINT  NOT NULL , commentsLct  BIGINT  NOT NULL , commentsUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+        }
+
+        add("CREATE INDEX idx_comments_entity_submitter ON Comments (commentsEntityUid, commentsForSubmitterUid)")
+    }
+}
+
+val MIGRATION_160_161 = DoorMigrationStatementList(160, 161) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.POSTGRES) {
+            add("ALTER TABLE DiscussionPost DROP COLUMN discussionPostVisible")
+            add("ALTER TABLE DiscussionPost DROP COLUMN discussionPostArchive")
+            add("ALTER TABLE DiscussionPost ADD COLUMN dpDeleted BOOL NOT NULL DEFAULT FALSE")
+        }else {
+            add("ALTER TABLE DiscussionPost RENAME to DiscussionPost_OLD")
+            add("CREATE TABLE IF NOT EXISTS DiscussionPost (  discussionPostReplyToPostUid  INTEGER  NOT NULL , discussionPostTitle  TEXT , discussionPostMessage  TEXT , discussionPostStartDate  INTEGER  NOT NULL , discussionPostCourseBlockUid  INTEGER  NOT NULL , dpDeleted  INTEGER  NOT NULL , discussionPostStartedPersonUid  INTEGER  NOT NULL , discussionPostClazzUid  INTEGER  NOT NULL , discussionPostLct  INTEGER  NOT NULL , discussionPostUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+            add("INSERT INTO DiscussionPost (discussionPostReplyToPostUid, discussionPostTitle, discussionPostMessage, discussionPostStartDate, discussionPostCourseBlockUid, dpDeleted, discussionPostStartedPersonUid, discussionPostClazzUid, discussionPostLct, discussionPostUid) SELECT discussionPostReplyToPostUid, discussionPostTitle, discussionPostMessage, discussionPostStartDate, discussionPostCourseBlockUid, 0 AS dpDeleted, discussionPostStartedPersonUid, discussionPostClazzUid, discussionPostLct, discussionPostUid FROM DiscussionPost_OLD")
+            add("DROP TABLE DiscussionPost_OLD")
+        }
+    }
+}
+
+
+
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_102_103,
     MIGRATION_103_104, MIGRATION_104_105, MIGRATION_105_106, MIGRATION_106_107,
@@ -1894,6 +1952,8 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_141_142, MIGRATION_142_143, MIGRATION_143_144, MIGRATION_145_146,
     MIGRATION_146_147, MIGRATION_147_148, MIGRATION_149_150, MIGRATION_150_151,
     MIGRATION_151_152, MIGRATION_152_153, MIGRATION_153_154, MIGRATION_154_155,
+    MIGRATION_156_157, MIGRATION_157_158, MIGRATION_158_159, MIGRATION_159_160,
+    MIGRATION_160_161,
 )
 
 

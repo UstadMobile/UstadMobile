@@ -5,6 +5,19 @@ End-to-end tests that start a blank new server/app and test functionality end-to
 * [android-maestro](android-maestro/) Android end-to-end tests built using [Maestro](https://maestro.mobile.dev)
 * [webapp-cypress](webapp-cypress/) Web end-to-end tests built using [Cypress](https://www.cypress.io/)
 
+
+## Simulating limited connections
+
+It is useful to simulate a lower speed connection to test the app under conditions that more closely
+match actual network conditions. This can be done on using trickle:
+
+Run the trickle command (rates are in KB/s) before the startserver.sh command e.g.
+
+```
+trickle -s -d 128 -u 128 bash
+./startserver.sh ...
+```
+
 ## Tests
 
 ### 1 : Library

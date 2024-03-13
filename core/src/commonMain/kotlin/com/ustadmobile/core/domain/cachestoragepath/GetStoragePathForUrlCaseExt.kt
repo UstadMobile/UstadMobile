@@ -7,7 +7,7 @@ suspend fun GetStoragePathForUrlUseCase.getLocalUriIfRemote(
     uri: DoorUri
 ) : DoorUri {
     return if(uri.isRemote()) {
-        DoorUri.parse(invoke(url = uri.toString()))
+        DoorUri.parse(invoke(url = uri.toString()).fileUri)
     }else {
         uri
     }

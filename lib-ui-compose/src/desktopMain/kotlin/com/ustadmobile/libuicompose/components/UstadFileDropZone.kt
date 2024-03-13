@@ -24,6 +24,11 @@ import androidx.compose.ui.onExternalDrag
 import androidx.compose.ui.unit.dp
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
+import com.ustadmobile.libcache.headers.MimeTypeHelper
+import org.kodein.di.compose.localDI
+import org.kodein.di.instance
+import java.net.URI
+import kotlin.io.path.toPath
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -35,6 +40,9 @@ actual fun UstadFileDropZone(
     var isDragging by remember {
         mutableStateOf(false)
     }
+
+    val di = localDI()
+    val mimeTypeHelper: MimeTypeHelper by di.instance()
 
     Box(
         modifier = modifier
@@ -60,10 +68,15 @@ actual fun UstadFileDropZone(
                         val fileList = data.readFiles()
                         val fileUri = fileList.firstOrNull()
                         if(fileUri != null) {
+                            val uriObj = URI(fileUri)
+                            val fileObj = uriObj.toPath().toFile()
+
                             onFileDropped(
                                 UstadFilePickResult(
                                     uri = fileUri,
-                                    fileName = fileUri.substringAfterLast("/")
+                                    fileName = fileUri.substringAfterLast("/"),
+                                    size = fileObj.length(),
+                                    mimeType = mimeTypeHelper.mimeTypeByUri(fileUri),
                                 )
                             )
                         }

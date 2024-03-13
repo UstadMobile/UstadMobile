@@ -1,6 +1,7 @@
 package com.ustadmobile.core.viewmodel.clazzassignment
 
 import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
+import com.ustadmobile.lib.db.composites.SubmissionAndFiles
 import com.ustadmobile.lib.db.entities.AverageCourseAssignmentMark
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
 import kotlin.math.roundToInt
@@ -51,7 +52,7 @@ fun List<CourseAssignmentMarkAndMarkerName>.hasUpdatedMarks(): Boolean {
 
 fun submissionStatusFor(
     markList: List<CourseAssignmentMarkAndMarkerName>,
-    submissionList: List<CourseAssignmentSubmission>,
+    submissionList: List<SubmissionAndFiles>,
 ): Int {
     return when {
         markList.isNotEmpty() -> CourseAssignmentSubmission.MARKED
