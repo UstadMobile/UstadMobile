@@ -20,9 +20,11 @@ env:
       TESTCOURSENAME: " "
 # assert to make sure the course is not saved because of blank course title
 - assertVisible: "SAVE"
-- assertNotVisible: "Edit"
+- assertNotVisible:
+    id: "floating_action_button"
 # add course name and save
 - tapOn: "Name*"
 - inputText: "TEST COURSE"
 - tapOn: "SAVE"
-- assertVisible: "Edit"
+- assertVisible:
+   id: "floating_action_button"
