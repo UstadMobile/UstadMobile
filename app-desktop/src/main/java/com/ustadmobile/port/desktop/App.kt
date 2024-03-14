@@ -83,7 +83,12 @@ import java.util.concurrent.atomic.AtomicReference
 import kotlin.system.exitProcess
 import com.ustadmobile.libuicompose.view.app.App as UstadPrecomposeApp
 
-//Roughly as per https://github.com/JetBrains/compose-multiplatform-desktop-template#readme
+/*
+ * Note this is called by AppRun.kt to ensure that if the user has multiple versions (e.g. multiple
+ * brands) each has its own id. See common on AppRun.kt
+ *
+ * Roughly as per https://github.com/JetBrains/compose-multiplatform-desktop-template#readme
+ */
 fun main() {
     val windowRef = AtomicReference<Window?>(null)
     try {
