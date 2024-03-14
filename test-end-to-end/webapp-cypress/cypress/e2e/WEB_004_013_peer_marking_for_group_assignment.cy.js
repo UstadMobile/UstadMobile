@@ -132,6 +132,8 @@ it('Group 1- Student 1 submit assignment', () => {
   cy.get('#assignment_text').type("Text 1")
   cy.contains('SUBMIT',{timeout:5000}).click()
   cy.contains("Not submitted").should('not.exist')
+  cy.contains("Submission 1").should("be.visible")
+  cy.contains("Text 1").should("be.visible")
   cy.go('back')
   cy.contains('Assignment 1',{timeout:1000}).click()
   cy.contains("Not submitted").should('not.exist')
