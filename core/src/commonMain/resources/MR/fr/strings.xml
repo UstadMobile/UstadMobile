@@ -515,7 +515,6 @@
     <string name="scope_description">Sélectionnez la portée (par exemple une classe, une école ou une personne en particulier) pour laquelle seront appliquées les permissions.</string>
     <string name="assign_role">Assigner le rôle</string>
     <string name="more_information">Plus d\'informations</string>
-    <string name="class_code">Code de la classe</string>
     <string name="pending_requests">Demandes en attente</string>
     <string name="pending">En attente</string>
     <string name="ask_your_teacher_for_code">Demandez le code à votre enseignant, saisissez le ci-dessous :</string>

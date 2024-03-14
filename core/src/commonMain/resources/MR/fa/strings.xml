@@ -450,7 +450,6 @@
     <string name="question_text">متن سوال</string>
     <string name="question_type">نوع سوال</string>
     <string name="add_option">اضافه نمودن گزینه</string>
-    <string name="class_code">کود صنف</string>
     <string name="pending_requests">درخواستهای درحال انتظار</string>
     <string name="pending">درحال انتظار</string>
     <string name="please_wait_for_approval">لطفاً متنظر باشید تا درخواست شما توسط استاد شما و یا مدیر منظور گردد.</string>
@@ -914,7 +913,6 @@
     <string name="past_enrolments">ثبت‌نام های گذشته</string>
     <string name="standard">معیاری</string>
     <string name="group_number" formatted="false">گروه %1$s</string>
-    <string name="course_code">کود دوره درسی</string>
     <string name="edit_group">ویرایش گروه</string>
     <string name="unread">خوانده نشده</string>
     <string name="new_group">گروه جدید</string>

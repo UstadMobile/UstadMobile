@@ -592,7 +592,6 @@
     <string name="percentage_complete" formatted="false">%1$s%% पूरा</string>
     <string name="started_date" formatted="false">सुरू गरेको %1$s%</string>
     <string name="due_date">अन्तिम मिति</string>
-    <string name="class_code">कक्षा कोड</string>
     <string name="copy_link">लिंक कपी गरौं</string>
     <string name="copy_code">कोड कपी गरौं</string>
     <string name="share_link">लिंक सेयर गरौं</string>
@@ -995,7 +994,6 @@
     <string name="assign_to_random_groups">अनियमित समूहहरूमा (random group) निर्दिष्ट गर्नुहोस्</string>
     <string name="course_comments">पाठ्यक्रम (कोर्स)को बारे टिप्पनीहरु</string>
     <string name="submit_all_at_once_submission_policy">सबै एकसाथ पेश गर्नु पर्दछ</string>
-    <string name="course_code">कोर्स कोड</string>
     <string name="add_a_new_course">नयाँ कोर्स थप्नुहोस्</string>
     <string name="join_existing_course">हाल उपलब्ध कोर्समा सामेल हुनुहोस्</string>
     <string name="edit_course">कोर्स सम्पादन गर्नुहोस्</string>

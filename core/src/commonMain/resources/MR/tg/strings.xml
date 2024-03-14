@@ -460,7 +460,6 @@
     <string name="please_wait_for_approval">Лутфан, тасдиқи дархостатонро аз ҷониби омӯзгор ё маъмур мунтазир шавед.</string>
     <string name="pending">Дар ҳоли интизорӣ</string>
     <string name="pending_requests">Дархостҳои дар ҳоли интизорӣ</string>
-    <string name="class_code">Рамзи синф</string>
     <string name="sel_question_type_multiple_choice">Интихоби чандкарата</string>
     <string name="incorrect_current_password">Пароли мазкур нодуруст аст</string>
     <string name="person_exists">Шахс аллакай вуҷуд дорад, номи корбарии дигарро интихоб кунед</string>
@@ -915,7 +914,6 @@
     <string name="past_enrolments">Қайдшуда</string>
     <string name="standard">Стандарт</string>
     <string name="group_number" formatted="false">Гурӯҳ %1$s</string>
-    <string name="course_code">Рамзи дастрасӣ ба курс</string>
     <string name="edit_group">Муҳаррирон</string>
     <string name="extra_active_tab_warning">Якбора бо як чанд ҷадвал кор кардан ғайри имкон аст, якеро интихоб намоед.</string>
     <string name="new_group_set">Гурӯҳи нав</string>

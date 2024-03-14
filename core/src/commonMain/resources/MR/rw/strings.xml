@@ -697,7 +697,6 @@
     <string name="scope_description">Hitamo imiterere(e.g. Ishuri, ikigo cg umuntu runaka) uzahabwa uburenganzira.</string>
     <string name="pending_requests">Abasabye kwiga bataremererwa</string>
     <string name="more_information">Amakuru menshi</string>
-    <string name="class_code">Ikode y\'ishuri ihabwa abanyeshuri</string>
     <string name="reject">Hakana</string>
     <string name="yes">Yego</string>
     <string name="onboarding_get_started_label">Tangira</string>
@@ -932,7 +931,6 @@
     <string name="past_enrolments">Abanyeshuri ba kera</string>
     <string name="standard">Ikigero</string>
     <string name="group_number" formatted="false">Itsinda %1$s</string>
-    <string name="course_code">Kode y\' isomo</string>
     <string name="add_group">Ongera ho itsinda</string>
     <string name="edit_group">Hindura itsinda</string>
     <string name="new_group_set">Itsinda rishya</string>
