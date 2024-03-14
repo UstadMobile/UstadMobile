@@ -74,11 +74,11 @@ allprojects {
             url "https://maven.pkg.jetbrains.space/public/p/compose/dev"
         }
 
-        //Compose Multiplatform Webview requirement
+        //JUnique (required to prevent multiple instqances of desktop app)
+        //As per https://github.com/terjedahl/junique
         maven {
-            url "https://jogamp.org/deployment/maven/"
+            url "https://raw.githubusercontent.com/terjedahl/junique/master/maven2"
         }
-
     }
 }
 
