@@ -325,7 +325,6 @@
     <string name="choose_template">टेम्प्लेट छानौं</string>
     <string name="accounts">अकाउन्टहरू/खाताहरू</string>
     <string name="lets_get_started_label">ल अब सुरू गरौं</string>
-    <string name="invalid_register_code">अमान्य दर्ता कोड</string>
     <string name="xapi_score">स्कोर (%)</string>
     <string name="import_title_not_entered">शीर्षक हालिएको छैन</string>
     <string name="invalid_link">अमान्य लिंक</string>
@@ -877,7 +876,6 @@
     <string name="score_greater_than_zero">० भन्दा बढि हुनु पर्दछ</string>
     <string name="file_document">कागजात (pdf, docx, odt)</string>
     <string name="file_image">छवि (image)</string>
-    <string name="max_number_of_files">फाइलहरूको अधिकतम सङ्ख्या:%1$s</string>
     <string name="submit_grade">प्राप्ताङ्क पेश गर्नुहोस्</string>
     <string name="submit_grade_and_mark_next">प्राप्ताङ्क पेश गर्नुहोस् र अर्को परिक्षण गर्नुहोस्</string>
     <string name="submissions">पेसगरिएका कागजातहरु</string>

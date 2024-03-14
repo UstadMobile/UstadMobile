@@ -129,7 +129,6 @@
     <string name="error_message_load_page">Бор кардани саҳифа муяссар нашуд</string>
     <string name="content_entry_export_inprogress">Ҳолати содирот</string>
     <string name="content_entry_export_message">Шумо дар ҳоли %1$s -ро ба захираи дастгоҳатон содир қарор доред. Мехоҳед идома диҳед\?</string>
-    <string name="invalid_register_code">Рамзи бақайдгирии нодуруст</string>
     <string name="bar_chart" value="100">Диаграммаи сутунӣ</string>
     <string name="score" value="200">Холи миёна</string>
     <string name="xapi_day" value="300">Рӯз</string>
@@ -898,7 +897,6 @@
     <string name="dont_show_before">Нишон надодан пеш аз</string>
     <string name="maximum">Максимум</string>
     <string name="edit_after_submission">Таҳрир пас аз пешниҳод</string>
-    <string name="max_number_of_files">Шумораи максималии файлҳо: %1$s</string>
     <string name="penalty_label">Агар пас аз мӯҳлат анҷом дода шуда бошад, аммо то ба охир расидани давраи имтиёзнок</string>
     <string name="add_block">Илова кардани блок</string>
     <string name="discussion_board">Форум</string>

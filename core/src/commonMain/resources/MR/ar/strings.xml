@@ -133,7 +133,6 @@
         <b>تم تنزيل</b> ما مجموعه %1$s بند، الذي سيستخدم %2$s من مساحة التخزين.</string>
     <string name="content_editor_save_error">خطأ اثناء الحفظ، حاول مرة اخرى</string>
     <string name="content_entry_export_inprogress">جاري التصدير</string>
-    <string name="invalid_register_code">رمز التسجيل غير صحيح</string>
     <string name="enter_register_code">ادخل رمز التسجيل</string>
     <string name="bar_chart" value="100">شريط تخطيط</string>
     <string name="content_entry_export_message">سوف تقوم بتصدير %1$s لسعة تخزين جهازك. هل تريد الاستمرار؟</string>
@@ -829,7 +828,6 @@
     <string name="file_type_chosen">يكتب</string>
     <string name="file_document">المستند (pdf، docx، odt)</string>
     <string name="file_image">صورة</string>
-    <string name="max_number_of_files">أقصى عدد من الملفات: %1$s</string>
     <string name="submit_grade">إرسال الدرجة</string>
     <string name="graded">منقط</string>
     <string name="score_greater_than_zero">يجب أن يكون أكبر من 0</string>

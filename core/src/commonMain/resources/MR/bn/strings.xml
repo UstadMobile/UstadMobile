@@ -339,7 +339,6 @@
     <string name="percentage_complete" formatted="false">%1$s% সম্পূর্ণ</string>
     <string name="started_date" formatted="false">%1$s% শুরু হয়েছে</string>
     <string name="started">শুরু হয়েছে</string>
-    <string name="invalid_register_code">অবৈধ নিবন্ধকরণ কোড</string>
     <string name="mixed">মিশ্রিত</string>
     <string name="store_description_short">অ্যাক্সেস এবং শিক্ষাগত সামগ্রী অফলাইনে ভাগ করুন</string>
     <string name="submit_your_answer">আপনার উত্তর জমা দিন</string>

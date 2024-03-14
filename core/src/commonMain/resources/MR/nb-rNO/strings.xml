@@ -134,6 +134,5 @@
     <string name="download_storage_option_device">Bruk %1$s - %2$s ledig</string>
     <string name="download_locally_availability">Tilgjengelig i nærheten</string>
     <string name="download_cloud_availability">Tilgjengelig i sky</string>
-    <string name="invalid_register_code">Ugyldig registreringskode</string>
     <string name="enter_register_code">Skriv inn registreringskode</string>
 </resources>

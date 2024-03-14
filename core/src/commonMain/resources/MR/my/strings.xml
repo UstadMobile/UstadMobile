@@ -188,7 +188,6 @@
     <string name="show_hidden_items">ဝှက်ထားသောပစ္စည်းများကိုပြရန်</string>
     <string name="open_folder">ဖိုင်ကိုဖွင့်</string>
     <string name="action_hidden">ဝှက်ထား</string>
-    <string name="invalid_register_code">မမှန်ကန်သောမှတ်ပုံတင်နံပါတ်</string>
     <string name="enter_register_code">မှတ်ပုံတင်နံပါတ်ထည့်ပါ</string>
     <string name="bar_chart" value="100">ဘားဇယား</string>
     <string name="line_chart" value="101">လိုင်းဇယား</string>

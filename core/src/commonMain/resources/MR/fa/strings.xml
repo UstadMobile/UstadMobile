@@ -126,7 +126,6 @@
     <string name="content_editor_save_error">خطا در هنگام ذخیره‌سازی، دوباره کوشش کنید</string>
     <string name="export">صادر کردن</string>
     <string name="content_entry_export_message">شما در حال صادر ساختن %1$s به حافظه دستگاه تان هستید. آیا میخواهید ادامه بدهید؟</string>
-    <string name="invalid_register_code">کود ثبت‌نام درست نیست</string>
     <string name="enter_register_code">کود ثبت‌نام را وارد نمائید</string>
     <string name="bar_chart" value="100">نمودار میله‌ای</string>
     <string name="score" value="200">نمرۀ اوسط</string>
@@ -943,7 +942,6 @@
     <string name="assign_random_reviewers">تعیین داوران تصادفی</string>
     <string name="reviewer">داور شماره %1$s</string>
     <string name="allowed_till_deadline">تا زمان ضرب‌الاجل اجازه دارد</string>
-    <string name="max_number_of_files">تعداد اعظمی پرونده‌ها: %1$s</string>
     <string name="course_blocks">قطعات دوره آموزشی</string>
     <string name="add_course_block_content_desc">صدا، ویدیو، کتاب‌های الکترونیک یا محتوای تعاملی (H5P، xAPI، وغیره) را از پرونده‌ها یا پیوندها اضافه کنید</string>
     <string name="institution">نهاد</string>

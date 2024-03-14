@@ -95,7 +95,6 @@
     <string name="content_entry_export_inprogress">Iri koherezwa hanze</string>
     <string name="show_hidden_items">Erekana ibihishwe</string>
     <string name="open_folder">Fungura ububiko</string>
-    <string name="invalid_register_code">ikodi ukoresheje kwiyandikisha ntabwo zihuye</string>
     <string name="enter_register_code">Injiza kode zo kwiyandikisha</string>
     <string name="bar_chart">Imbonerahamwe</string>
     <string name="line_chart">Ishusho nyamirongo</string>
@@ -897,7 +896,6 @@
     <string name="deleting_content">Irigusibwa%1$s</string>
     <string name="individual">Buri muntu</string>
     <string name="edit_after_submission">Guhindura nyuma yo kohereza</string>
-    <string name="max_number_of_files">Umubare munini ntarengwa wa dosiye: %1$s</string>
     <string name="add_block">Ongeraho ibigize isomo</string>
     <string name="formatted_text_to_show_to_course_participants">Ikigize isomo cyerekana inyadiko yemewe</string>
     <string name="enrolment_requests_must_be_approved">Ubusabe bwo kwiyandikisha bugomba kwemererwa</string>

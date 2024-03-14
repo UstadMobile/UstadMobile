@@ -126,7 +126,6 @@
     <string name="content_creation_folder_new_message">نوی پوښئ په بریا سره زیات شو</string>
     <string name="export">بهرول</string>
     <string name="content_entry_export_inprogress">بهرول</string>
-    <string name="invalid_register_code">د نومکښنې ناسم کوډ</string>
     <string name="enter_register_code">د نومکښنې کوډ دننه کړئ</string>
     <string name="bar_chart" value="100">پټه ییز څرګندوی (بار چارټ)</string>
     <string name="content_creation_storage_option_title">د ذخیرې ځای غوراوی</string>

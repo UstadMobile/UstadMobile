@@ -198,7 +198,6 @@
     <string name="content_entry_export_inprogress">Экспортирование</string>
     <string name="show_hidden_items">Показать скрытые предметы</string>
     <string name="open_folder">Открыть папку</string>
-    <string name="invalid_register_code">Неверный регистрационный код</string>
     <string name="enter_register_code">Введите код регистрации</string>
     <string name="bar_chart">Гистограмма</string>
     <string name="score">Средний счет</string>
@@ -906,7 +905,6 @@
     <string name="file_type_any">Любое</string>
     <string name="file_document">Документы (pdf, docx, odt)</string>
     <string name="file_image">Изображение</string>
-    <string name="max_number_of_files">Максимальное количество файлов: %1$s</string>
     <string name="submit_grade">Выставить оценку</string>
     <string name="graded">Оценка выставлена</string>
     <string name="score_greater_than_zero">Должно быть больше 0</string>
