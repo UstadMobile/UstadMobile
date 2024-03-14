@@ -607,7 +607,6 @@
     <string name="role_description">Роль (например, учитель, ученик и т. д.) дает набор разрешений (например, просмотр сведений о человеке, запись посещаемости и т. д.), которые применяются к области, выбранной выше.</string>
     <string name="assign_role">Назначить роль</string>
     <string name="more_information">Больше информации</string>
-    <string name="class_code">Код класса</string>
     <string name="pending_requests">Ожидающие запросы</string>
     <string name="pending">В ожидании</string>
     <string name="please_wait_for_approval">Подождите, пока ваш запрос будет одобрен преподавателем или администратором.</string>
@@ -858,7 +857,6 @@
     <string name="num_replies">%1$d ответов</string>
     <string name="add_a_reply">Добавить ответ</string>
     <string name="posts">Публикации</string>
-    <string name="course_code">Код курса</string>
     <string name="add_group">Добавить группу</string>
     <string name="unread">Не прочитано</string>
     <string name="individual_submission">Индивидуальное представление</string>

@@ -466,7 +466,6 @@
     <string name="question_text">প্রশ্ন পাঠ্য</string>
     <string name="question_type">প্রশ্নের ধরন</string>
     <string name="add_option">বিকল্প যুক্ত করুন</string>
-    <string name="class_code">ক্লাস কোড</string>
     <string name="pending_requests">অনুরোধ অপেক্ষারত</string>
     <string name="pending">বিচারাধীন</string>
     <string name="please_wait_for_approval">আপনার অনুরোধটি আপনার শিক্ষক বা প্রশাসকের দ্বারা অনুমোদিত হওয়ার জন্য অপেক্ষা করুন।</string>

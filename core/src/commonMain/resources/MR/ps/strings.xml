@@ -594,7 +594,6 @@
     <string name="question_text">د پوښتنې متن</string>
     <string name="question_type">د پوښتنې ډول</string>
     <string name="add_option">د غوراوی زیاتول</string>
-    <string name="class_code">د ټولګۍ کوډ</string>
     <string name="pending_requests">نا تمامه غوښتني</string>
     <string name="permission_school_select">د ښوونځیو لیدل او غوره کول</string>
     <string name="pending">نا تمامه</string>

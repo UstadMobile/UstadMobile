@@ -489,7 +489,6 @@
     <string name="ask_your_teacher_for_code">اسأل معلمك عن الرمز ، ثم أدخله أدناه:</string>
     <string name="reject">رفض</string>
     <string name="pending_requests">الطلبات المعلقة</string>
-    <string name="class_code">رمز الصف</string>
     <string name="copied_to_clipboard">تم النسخ</string>
     <string name="please_wait_for_approval">الرجاء الانتظار لموافقة طلبك من المعلمة.</string>
     <string name="pending">في الانتظار</string>
@@ -882,7 +881,6 @@
     <string name="add_discussion_board_desc">مناقشة منظمة مع المواضيع والمواضيع</string>
     <string name="select_terminology">حدد المصطلحات</string>
     <string name="add_new_terminology">أضف مصطلحات جديدة</string>
-    <string name="course_code">كود الدورة</string>
     <string name="blank_report">تقرير فارغ</string>
     <string name="your_account_needs_approved">يجب أن يوافق والديك على حسابك باستخدام الرابط الذي تم إرساله. إذا كنت أحد الوالدين ، فأنت بحاجة إلى تسجيل الدخول إلى حسابك الحالي أو إنشاء حساب جديد.</string>
     <string name="percentage_of_students_attending_over_time">النسبة المئوية للطلاب الذين يحضرون بمرور الوقت</string>
