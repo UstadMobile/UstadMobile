@@ -83,6 +83,8 @@ import java.util.concurrent.atomic.AtomicReference
 import kotlin.system.exitProcess
 import com.ustadmobile.libuicompose.view.app.App as UstadPrecomposeApp
 
+const val JUNIQUE_LOCK_ID = "com.ustadmobile.apprun.lock"
+
 /*
  * Note this is called by AppRun.kt to ensure that if the user has multiple versions (e.g. multiple
  * brands) each has its own id. See common on AppRun.kt
@@ -92,7 +94,7 @@ import com.ustadmobile.libuicompose.view.app.App as UstadPrecomposeApp
 fun main() {
     val windowRef = AtomicReference<Window?>(null)
     try {
-        JUnique.acquireLock("com.ustadmobile.app") { message ->
+        JUnique.acquireLock(JUNIQUE_LOCK_ID) { message ->
             //The user tried to launch another instance. We will just bring the existing instance to front
             val window = windowRef.get()
             if(window != null) {
@@ -106,7 +108,7 @@ fun main() {
         }
     }catch(e: AlreadyLockedException) {
         println("There is already another instance running: sending message")
-        JUnique.sendMessage("com.ustadmobile.app","front")
+        JUnique.sendMessage(JUNIQUE_LOCK_ID,"front")
         println("There is already another instance running: exiting")
         return
     }
