@@ -2,6 +2,7 @@ package com.ustadmobile.libcache
 
 import android.content.Context
 import com.ustadmobile.door.DatabaseBuilder
+import com.ustadmobile.libcache.db.MIGRATE_8_9
 import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.db.addCacheDbMigrations
 import com.ustadmobile.libcache.logging.UstadCacheLogger
@@ -17,9 +18,9 @@ class UstadCacheBuilder(
     var sizeLimit: () -> Long,
     var cachePathsProvider: CachePathsProvider = CachePathsProvider {
         CachePaths(
-            tmpWorkPath = Path(storagePath, "tmpwork"),
-            persistentPath = Path(storagePath, "persistent"),
-            cachePath = Path(appContext.cacheDir.absolutePath, "ustad-cache"),
+            tmpWorkPath = Path(storagePath, DEFAULT_SUBPATH_WORK),
+            persistentPath = Path(storagePath, DEFAULT_SUBPATH_PERSISTENT),
+            cachePath = Path(appContext.cacheDir.absolutePath, DEFAULT_SUBPATH_CACHE),
         )
     }
 ) {
@@ -35,8 +36,21 @@ class UstadCacheBuilder(
                 dbClass = UstadCacheDb::class,
                 dbName = dbName,
                 nodeId = 1L
-            ).addCacheDbMigrations().build()
+            )
+            .addCacheDbMigrations()
+            .addMigrations(MIGRATE_8_9)
+            .build()
         )
+    }
+
+    companion object {
+
+        const val DEFAULT_SUBPATH_WORK = "tmpwork"
+
+        const val DEFAULT_SUBPATH_PERSISTENT = "persistent"
+
+        const val DEFAULT_SUBPATH_CACHE = "ustad-cache"
+
     }
 
 }

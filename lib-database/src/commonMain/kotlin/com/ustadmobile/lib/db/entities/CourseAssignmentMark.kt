@@ -75,6 +75,10 @@ open class CourseAssignmentMark {
     @ReplicateEtag
     var camLct: Long = 0
 
+    @ColumnInfo(defaultValue = "0")
+    var camClazzUid: Long = 0
+
+
     companion object {
 
         const val TABLE_ID = 523

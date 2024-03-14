@@ -1,6 +1,7 @@
 package com.ustadmobile.libuicompose.components
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.DownloadDone
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Schedule
@@ -26,6 +27,7 @@ fun UstadTransferStatusIcon(
         TransferJobItemStatus.QUEUED -> Icons.Default.Schedule to MR.strings.queued
         TransferJobItemStatus.FAILED -> Icons.Default.Error to MR.strings.failed
         TransferJobItemStatus.COMPLETE -> Icons.Default.DownloadDone to MR.strings.completed
+        TransferJobItemStatus.CANCELLED -> Icons.Default.Cancel to MR.strings.canceled
     }
 
     Icon(

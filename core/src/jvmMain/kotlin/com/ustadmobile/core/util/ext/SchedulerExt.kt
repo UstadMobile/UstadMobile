@@ -57,7 +57,7 @@ fun JobExecutionContext.scheduleRetryOrThrow(
             .usingJobData(mergedJobDataMap)
             .usingJobData(BlobUploadClientJob.KEY_ATTEMPTS_COUNT, attemptCount + 1)
             .build()
-        Napier.d("BlobUploadClientJob: attempt $attemptCount failed, rescheduling")
+        Napier.d("scheduleRetryOrThrow: attempt $attemptCount failed, rescheduling")
         scheduler.scheduleJob(jobDetail, trigger)
     }else {
         throw IllegalStateException("Cannot reschedule: ${trigger.key.name}: attempts exceed $maxAttemptsAllowed")
@@ -68,11 +68,33 @@ fun Scheduler.unscheduleAnyExistingAndStartNow(
     job: JobDetail,
     triggerKey: TriggerKey
 ) {
-    unscheduleJob(triggerKey)
     val jobTrigger = TriggerBuilder.newTrigger()
         .withIdentity(triggerKey)
         .startNow()
         .build()
-    scheduleJob(job, jobTrigger)
+
+    Napier.d { "SchedulerExt: scheduleJob with replace $triggerKey" }
+    scheduleJob(job, setOf(jobTrigger), true)
+    Napier.d { "SchedulerExt: scheduleJob with replace $triggerKey : completed" }
+}
+
+
+fun Scheduler.interruptJobs(
+    triggerKeys: List<TriggerKey>,
+    cause: String,
+) {
+    val jobsToInterrupt = currentlyExecutingJobs.filter {
+        it.trigger.key in triggerKeys
+    }
+
+    jobsToInterrupt.forEach {
+        val triggerKey = it.trigger.key
+        try {
+            interrupt(it.fireInstanceId)
+            Napier.d { "Scheduler.interruptJobs: interrupted $triggerKey for cause: $cause" }
+        }catch(e: Throwable) {
+            Napier.w(e) { "Scheduler.interruptJobs: Exception attempting to interrupt $triggerKey for cause: $cause" }
+        }
+    }
 }
 

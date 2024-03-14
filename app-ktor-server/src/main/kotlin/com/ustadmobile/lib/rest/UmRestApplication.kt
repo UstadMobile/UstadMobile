@@ -19,6 +19,7 @@ import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntr
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseJvm
 import com.ustadmobile.core.domain.contententry.importcontent.ImportContentEntryUseCase
 import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServerUseCase
+import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseCommonJvm
 import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
@@ -260,6 +261,7 @@ fun Application.umRestApplication(
                         cache = instance(),
                         tmpDir = File(appConfig.absoluteDataDir(), "httpfiles"),
                         logger = NapierLoggingAdapter(),
+                        json = json,
                     )
                 )
                 .build()
@@ -335,6 +337,7 @@ fun Application.umRestApplication(
                 .replace("(datadir)", appConfig.absoluteDataDir().absolutePath)
             UstadCacheBuilder(
                 dbUrl = dbUrl,
+                logger = NapierLoggingAdapter(),
                 storagePath = Path(
                     File(appConfig.absoluteDataDir(), "httpfiles").absolutePath.toString()
                 ),
@@ -475,8 +478,9 @@ fun Application.umRestApplication(
 
         bind<GetStoragePathForUrlUseCase>() with scoped(EndpointScope.Default).singleton {
             GetStoragePathForUrlUseCaseCommonJvm(
-                httpClient = instance(),
-                cache = instance()
+                okHttpClient = instance(),
+                cache = instance(),
+                tmpDir = instance(tag = DiTag.TAG_TMP_DIR)
             )
         }
 
@@ -492,6 +496,13 @@ fun Application.umRestApplication(
         bind<ValidateVideoFileUseCase>() with provider {
             ValidateVideoFileUseCaseFfprobe(
                 ffprobe = instance()
+            )
+        }
+
+        bind<AddNewPersonUseCase>() with scoped(EndpointScope.Default).singleton {
+            AddNewPersonUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = null,
             )
         }
 
@@ -526,11 +537,11 @@ fun Application.umRestApplication(
         }
 
         onReady {
-            if(dbMode == CONF_DBMODE_SINGLETON) {
+            if(dbMode == CONF_DBMODE_SINGLETON && siteUrl != null) {
                 //Get the container dir so that any old directories (build/storage etc) are moved if required
-                di.on(Endpoint("localhost")).direct.instance<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
+                di.on(Endpoint(siteUrl)).direct.instance<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
                 //Generate the admin username/password etc.
-                di.on(Endpoint("localhost")).direct.instance<AuthManager>()
+                di.on(Endpoint(siteUrl)).direct.instance<AuthManager>()
             }
 
             instance<Scheduler>().start()

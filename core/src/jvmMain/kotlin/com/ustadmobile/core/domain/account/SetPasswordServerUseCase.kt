@@ -1,8 +1,8 @@
 package com.ustadmobile.core.domain.account
 
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.util.NodeIdAuthCache
-import com.ustadmobile.lib.db.entities.Role
 import io.github.aakira.napier.Napier
 
 /**
@@ -46,9 +46,9 @@ class SetPasswordServerUseCase(
             }
 
             if(currentPassword == null) {
-                if(!db.scopedGrantDao.userHasSystemLevelPermission(
+                if(!db.systemPermissionDao.personHasSystemPermission(
                         accountPersonUid = nodeActiveUserUid,
-                        permission = Role.PERMISSION_RESET_PASSWORD,
+                        permission = PermissionFlags.RESET_PASSWORDS,
                     )
                 ) {
                     throw IllegalArgumentException("Password reset, but user does not have reset permission")

@@ -2,12 +2,11 @@ package com.ustadmobile.core.viewmodel.clazzassignment.peerreviewerallocationedi
 
 import app.cash.turbine.test
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.domain.clazz.CreateNewClazzUseCase
 import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.EnrolIntoCourseUseCase
+import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.test.viewmodeltest.ViewModelTestBuilder
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
-import com.ustadmobile.core.util.ext.createNewClazzAndGroups
-import com.ustadmobile.core.util.ext.grantScopedPermission
-import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZ_ASSIGNMENT_UID
@@ -15,9 +14,9 @@ import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
+import com.ustadmobile.lib.db.entities.CoursePermission
 import com.ustadmobile.lib.db.entities.PeerReviewerAllocation
 import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.Role
 import kotlinx.coroutines.flow.filter
 import kotlinx.datetime.TimeZone
 import kotlinx.serialization.builtins.ListSerializer
@@ -50,27 +49,34 @@ class PeerReviewerAllocationEditViewModelTest : AbstractMainDispatcherTest() {
                     clazzName = "Test Course"
                     clazzTimeZone = TimeZone.currentSystemDefault().id
                 }
-                activeDb.createNewClazzAndGroups(clazz, systemImpl, emptyMap())
-                activeDb.grantScopedPermission(activeUserPerson,
-                    Role.ROLE_CLAZZ_TEACHER_PERMISSIONS_DEFAULT, Clazz.TABLE_ID, clazz.clazzUid)
 
-                val enrolUseCase = EnrolIntoCourseUseCase()
+                CreateNewClazzUseCase(activeDb).invoke(clazz)
+                activeDb.coursePermissionDao.upsertAsync(
+                    CoursePermission(
+                        cpToPersonUid = activeUserPerson.personUid,
+                        cpClazzUid = clazzUid,
+                        cpPermissionsFlag = CoursePermission.TEACHER_DEFAULT_PERMISSIONS
+                    )
+                )
+
+                val enrolUseCase = EnrolIntoCourseUseCase(db = activeDb, repo = null)
+                val addNewPersonUseCase = AddNewPersonUseCase(activeDb, null)
                 val studentPersons = (0 until numStudentsToAdd).map { index ->
-                    activeDb.insertPersonAndGroup(Person().apply {
+                    val studentPerson = Person().apply {
                         firstNames = "test"
                         lastName = "student${index}"
-                    }).also { studentPerson ->
-                        enrolUseCase(
-                            enrolment = ClazzEnrolment(
-                                clazzUid = clazzUid,
-                                personUid = studentPerson.personUid,
-                                role = ClazzEnrolment.ROLE_STUDENT
-                            ),
-                            timeZoneId = TimeZone.currentSystemDefault().id,
-                            db = activeDb,
-                            repo = null,
-                        )
                     }
+                    studentPerson.personUid = addNewPersonUseCase(studentPerson)
+
+                    enrolUseCase(
+                        enrolment = ClazzEnrolment(
+                            clazzUid = clazzUid,
+                            personUid = studentPerson.personUid,
+                            role = ClazzEnrolment.ROLE_STUDENT
+                        ),
+                        timeZoneId = TimeZone.currentSystemDefault().id,
+                    )
+                    studentPerson
                 }
 
                 PeerReviewerAllocationEditViewModelTestContext(

@@ -11,8 +11,6 @@ import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.locale.mapLookup
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
 import com.ustadmobile.lib.db.composites.TransferJobItemStatus
-import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.mui.components.UstadDetailField
 import com.ustadmobile.mui.components.UstadQuickActionButton
@@ -42,6 +40,7 @@ import web.cssom.Display
 import kotlin.js.Date
 import web.cssom.px
 import web.cssom.JustifyContent
+import mui.icons.material.Shield as ShieldIcon
 
 val PersonDetailScreen = FC<Props> {
     val viewModel = useUstadViewModel { di, savedStateHandle ->
@@ -65,19 +64,20 @@ val PersonDetailScreen = FC<Props> {
         onClickManageParentalConsent = viewModel::onClickManageParentalConsent
         onClickDial = viewModel::onClickDial
         onClickEmail = viewModel::onClickEmail
+        onClickPermissions = viewModel::onClickPermissions
     }
 
 }
 
 external interface PersonDetailProps : Props {
     var uiState: PersonDetailUiState
-    var clazzes: List<Clazz>
     var onClickDial: () -> Unit
     var onClickEmail: () -> Unit
     var onClickCreateAccount: () -> Unit
     var onClickChangePassword: () -> Unit
     var onClickManageParentalConsent: () -> Unit
     var onClickChat: () -> Unit
+    var onClickPermissions: () -> Unit
 }
 
 val PersonDetailPreview = FC<Props> {
@@ -95,18 +95,7 @@ val PersonDetailPreview = FC<Props> {
                     personAddress = "Herat"
                 }
             },
-            clazzes = listOf(
-                ClazzEnrolmentWithClazzAndAttendance().apply {
-                    clazz = Clazz().apply {
-                        clazzName = "Jetpack Compose Class"
-                    }
-                },
-                ClazzEnrolmentWithClazzAndAttendance().apply {
-                    clazz = Clazz().apply {
-                        clazzName = "React Class"
-                    }
-                },
-            )
+            clazzes = listOf()
         )
     }
 }
@@ -250,6 +239,14 @@ private val QuickActionBar = FC<PersonDetailProps> { props ->
             }
         }
 
+        if(props.uiState.showPermissionButton) {
+            UstadQuickActionButton {
+                icon = ShieldIcon.create()
+                text = strings[MR.strings.permissions]
+                onClick = { props.onClickPermissions() }
+            }
+        }
+
         if (props.uiState.manageParentalConsentVisible) {
             UstadQuickActionButton {
                 icon = SupervisedUserCircleIcon.create()
@@ -344,19 +341,18 @@ private val ContactDetails = FC<PersonDetailProps> { props ->
 }
 
 private val Classes = FC<PersonDetailProps> { props ->
-
-    List{
+    List {
         props.uiState.clazzes.forEach {
-            ListItem{
-                Stack {
-                    direction = responsive(StackDirection.row)
-                    spacing = responsive(10.px)
+            ListItem {
+                key = "${it.enrolment?.clazzEnrolmentUid}"
 
-                    + PeopleIcon.create()
+                ListItemButton {
+                    ListItemIcon {
+                        PeopleIcon()
+                    }
 
-                    Typography {
-                        align = TypographyAlign.center
-                        + (it.clazz?.clazzName ?: "")
+                    ListItemText {
+                        primary = ReactNode(it.clazz?.clazzName ?: "")
                     }
                 }
             }

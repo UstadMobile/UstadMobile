@@ -39,7 +39,6 @@ import com.ustadmobile.core.impl.nav.NavCommand
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.message.conversationlist.ConversationListViewModel
-import com.ustadmobile.core.viewmodel.message.messagelist.MessageListViewModel
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import com.ustadmobile.core.viewmodel.redirect.RedirectViewModel
 import dev.icerock.moko.resources.StringResource
@@ -96,7 +95,12 @@ fun App(
     initialRoute: String = "/${RedirectViewModel.DEST_NAME}",
 ) {
     val appUiState = remember {
-        mutableStateOf(AppUiState())
+        mutableStateOf(
+            AppUiState(
+                navigationVisible = false,
+                hideAppBar = true,
+            )
+        )
     }
 
     var appUiStateVal by appUiState
@@ -172,7 +176,10 @@ fun App(
                     modifier = Modifier.testTag("floating_action_button"),
                     onClick = appUiStateVal.fabState.onClick,
                     text = {
-                        Text(appUiStateVal.fabState.text ?: "")
+                         Text(
+                            modifier = Modifier.testTag("floating_action_button_text"),
+                            text = appUiStateVal.fabState.text ?: ""
+                        )
                     },
                     icon = {
                         val imageVector = when(appUiStateVal.fabState.icon)  {

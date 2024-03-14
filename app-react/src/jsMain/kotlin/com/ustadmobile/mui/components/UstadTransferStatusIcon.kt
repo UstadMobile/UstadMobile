@@ -6,6 +6,7 @@ import mui.icons.material.Sync as SyncIcon
 import mui.icons.material.Schedule as ScheduleIcon
 import mui.icons.material.Error as ErrorIcon
 import mui.icons.material.DownloadDone as DownloadDoneIcon
+import mui.icons.material.Cancel as CancelIcon
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.useStringProvider
 import mui.material.SvgIconProps
@@ -23,6 +24,7 @@ val UstadTransferStatusIcon = FC<UstadTransferStatusIconProps> {props ->
         TransferJobItemStatus.QUEUED -> ScheduleIcon to MR.strings.queued
         TransferJobItemStatus.FAILED -> ErrorIcon to MR.strings.failed
         TransferJobItemStatus.COMPLETE -> DownloadDoneIcon to MR.strings.completed
+        TransferJobItemStatus.CANCELLED -> CancelIcon to MR.strings.canceled
     }
 
     +icon.create {

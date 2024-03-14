@@ -4,15 +4,16 @@ import app.cash.turbine.test
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.domain.assignment.submitassignment.AssignmentDeadlinePassedException
 import com.ustadmobile.core.domain.assignment.submitassignment.SubmitAssignmentUseCase
+import com.ustadmobile.core.domain.clazz.CreateNewClazzUseCase
+import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.EnrolIntoCourseUseCase
 import com.ustadmobile.core.test.viewmodeltest.ViewModelTestBuilder
 import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.ext.awaitItemWhere
-import com.ustadmobile.core.util.ext.createNewClazzAndGroups
-import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
 import com.ustadmobile.core.util.ext.loadFirstList
 import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.ext.withDoorTransactionAsync
@@ -69,10 +70,18 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
                     this.clazzUid = clazzUid
                     clazzName = "Test Course"
                 }
-                activeDb.createNewClazzAndGroups(clazz, systemImpl, emptyMap())
+                CreateNewClazzUseCase(activeDb).invoke(clazz)
 
-                activeDb.takeIf { activeUserRole != 0 }?.enrolPersonIntoClazzAtLocalTimezone(
-                    activePerson, clazzUid, activeUserRole
+                EnrolIntoCourseUseCase(
+                    db = activeDb, repo =  null
+                ).takeIf { activeUserRole != 0 }?.invoke(
+                    ClazzEnrolment(
+                        clazzUid = clazzUid,
+                        personUid = activePerson.personUid,
+                    ).also {
+                        it.clazzEnrolmentRole = activeUserRole
+                    },
+                    "UTC"
                 )
 
                 if(groupSet != null) {
@@ -109,18 +118,19 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
         ) { testContext ->
             viewModelFactory {
                 savedStateHandle[UstadView.ARG_ENTITY_UID] = testContext.assignment.caUid.toString()
+                savedStateHandle[UstadViewModel.ARG_CLAZZUID] = testContext.clazz.clazzUid.toString()
                 ClazzAssignmentDetailOverviewViewModel(di, savedStateHandle)
             }
 
             viewModel.uiState.test(timeout = 5.seconds) {
                 val readyState = awaitItemWhere {
-                    it.assignment != null && it.courseBlock != null && it.latestSubmission != null
+                    it.assignment != null && it.courseBlock != null && it.editableSubmission != null
                 }
                 assertTrue(readyState.activeUserIsSubmitter)
                 assertTrue(readyState.activeUserCanSubmit)
                 assertTrue(readyState.addFileSubmissionVisible)
                 assertTrue(readyState.canEditSubmissionText)
-                assertEquals(0L, readyState.latestSubmission?.casTimestamp)
+                assertEquals(0L, readyState.editableSubmission?.casTimestamp)
                 cancelAndIgnoreRemainingEvents()
             }
         }
@@ -148,17 +158,18 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
 
             viewModelFactory {
                 savedStateHandle[UstadView.ARG_ENTITY_UID] = testContext.assignment.caUid.toString()
+                savedStateHandle[UstadViewModel.ARG_CLAZZUID] = testContext.clazz.clazzUid.toString()
                 ClazzAssignmentDetailOverviewViewModel(di, savedStateHandle)
             }
 
             viewModel.uiState.test(timeout = 5.seconds) {
                 val readyState = awaitItemWhere {
-                    it.assignment != null && it.courseBlock != null && it.latestSubmissionAttachments != null
+                    it.assignment != null && it.courseBlock != null && it.submissions.isNotEmpty()
                 }
                 assertTrue(readyState.activeUserIsSubmitter)
                 assertFalse(readyState.addFileSubmissionVisible)
                 assertFalse(readyState.canEditSubmissionText)
-                assertTrue((readyState.latestSubmission?.casTimestamp ?: 0) > 0)
+                assertTrue(readyState.submissions.isNotEmpty())
                 cancelAndIgnoreRemainingEvents()
             }
         }
@@ -183,17 +194,18 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
 
             viewModelFactory {
                 savedStateHandle[UstadView.ARG_ENTITY_UID] = testContext.assignment.caUid.toString()
+                savedStateHandle[UstadViewModel.ARG_CLAZZUID] = testContext.clazz.clazzUid.toString()
                 ClazzAssignmentDetailOverviewViewModel(di, savedStateHandle)
             }
 
             viewModel.uiState.test(timeout = 5.seconds) {
                 val readyState = awaitItemWhere {
-                    it.assignment != null && it.courseBlock != null && it.latestSubmissionAttachments != null
+                    it.assignment != null && it.courseBlock != null && it.submissions.isNotEmpty()
                 }
                 assertTrue(readyState.activeUserIsSubmitter)
                 assertTrue(readyState.addFileSubmissionVisible)
                 assertTrue(readyState.canEditSubmissionText)
-                assertTrue((readyState.latestSubmission?.casTimestamp ?: 0) > 0)
+                assertTrue(readyState.submissions.isNotEmpty())
                 cancelAndIgnoreRemainingEvents()
             }
         }
@@ -218,6 +230,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
 
             viewModelFactory {
                 savedStateHandle[UstadView.ARG_ENTITY_UID] = testContext.assignment.caUid.toString()
+                savedStateHandle[UstadViewModel.ARG_CLAZZUID] = testContext.clazz.clazzUid.toString()
                 ClazzAssignmentDetailOverviewViewModel(
                     di, savedStateHandle,
                     submitAssignmentUseCase = mockSubmissionUseCase
@@ -226,7 +239,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
 
             viewModel.uiState.test(timeout = 500.seconds) {
                 awaitItemWhere {
-                    it.assignment != null && it.courseBlock != null && it.latestSubmission != null
+                    it.assignment != null && it.courseBlock != null && it.editableSubmission != null
                 }
 
                 viewModel.onChangeSubmissionText("I can has cheezburger")
@@ -267,6 +280,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
 
             viewModelFactory {
                 savedStateHandle[UstadView.ARG_ENTITY_UID] = testContext.assignment.caUid.toString()
+                savedStateHandle[UstadViewModel.ARG_CLAZZUID] = testContext.clazz.clazzUid.toString()
                 ClazzAssignmentDetailOverviewViewModel(di, savedStateHandle)
             }
 
@@ -308,6 +322,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
 
             viewModelFactory {
                 savedStateHandle[UstadView.ARG_ENTITY_UID] = testContext.assignment.caUid.toString()
+                savedStateHandle[UstadViewModel.ARG_CLAZZUID] = testContext.clazz.clazzUid.toString()
                 ClazzAssignmentDetailOverviewViewModel(di, savedStateHandle)
             }
 
@@ -338,6 +353,15 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
             val mockSubmitterUseCase = mock<SubmitAssignmentUseCase> {
                 onBlocking { invoke(any(), any(), any(), any(), any()) }.thenAnswer {
                     val submission = it.arguments.last() as CourseAssignmentSubmission
+                    activeDb.courseAssignmentSubmissionDao.insert(
+                        submission.shallowCopy {
+                            casAssignmentUid = testContext.assignment.caUid
+                            casSubmitterUid = testContext.person.personUid
+                            casSubmitterPersonUid = testContext.person.personUid
+                            casTimestamp = systemTimeInMillis()
+                            casClazzUid = testContext.clazz.clazzUid
+                        }
+                    )
                     SubmitAssignmentUseCase.SubmitAssignmentResult(submission.shallowCopy {
                         casTimestamp = systemTimeInMillis()
                     })
@@ -346,12 +370,13 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
 
             viewModelFactory {
                 savedStateHandle[UstadView.ARG_ENTITY_UID] = testContext.assignment.caUid.toString()
+                savedStateHandle[UstadViewModel.ARG_CLAZZUID] = testContext.clazz.clazzUid.toString()
                 ClazzAssignmentDetailOverviewViewModel(di, savedStateHandle, mockSubmitterUseCase)
             }
 
             viewModel.uiState.test(timeout = 5.seconds, name = "Wait for loading") {
                 awaitItemWhere {
-                    it.assignment != null && it.courseBlock != null && it.latestSubmission != null
+                    it.assignment != null && it.courseBlock != null && it.editableSubmission != null
                             && it.submitterUid != 0L
                 }
 
@@ -368,7 +393,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
 
             viewModel.uiState.test(timeout = 5.seconds, name = "wait for submission done") {
                 val submittedDoneState = awaitItemWhere {
-                    (it.latestSubmission?.casTimestamp ?: 0) > 0
+                    it.submissions.firstOrNull()?.submission?.casText == submissionText
                 }
 
                 assertFalse(submittedDoneState.activeUserCanSubmit)
@@ -376,7 +401,8 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
                     CourseAssignmentSubmission.SUBMITTED,
                     submittedDoneState.submissionStatus
                 )
-                assertEquals(submissionText, submittedDoneState.latestSubmission?.casText)
+                assertEquals(submissionText,
+                    submittedDoneState.submissions.firstOrNull()?.submission?.casText)
                 cancelAndIgnoreRemainingEvents()
             }
         }
@@ -393,6 +419,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
         ) { testContext ->
             viewModelFactory {
                 savedStateHandle[UstadView.ARG_ENTITY_UID] = testContext.assignment.caUid.toString()
+                savedStateHandle[UstadViewModel.ARG_CLAZZUID] = testContext.clazz.clazzUid.toString()
                 ClazzAssignmentDetailOverviewViewModel(di, savedStateHandle)
             }
 
@@ -420,6 +447,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
         ) { testContext ->
             viewModelFactory {
                 savedStateHandle[UstadView.ARG_ENTITY_UID] = testContext.assignment.caUid.toString()
+                savedStateHandle[UstadViewModel.ARG_CLAZZUID] = testContext.clazz.clazzUid.toString()
                 ClazzAssignmentDetailOverviewViewModel(di, savedStateHandle)
             }
 
@@ -451,6 +479,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
         ) {testContext ->
             viewModelFactory {
                 savedStateHandle[UstadView.ARG_ENTITY_UID] = testContext.assignment.caUid.toString()
+                savedStateHandle[UstadViewModel.ARG_CLAZZUID] = testContext.clazz.clazzUid.toString()
                 ClazzAssignmentDetailOverviewViewModel(di, savedStateHandle)
             }
 
@@ -481,6 +510,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
         ) { testContext ->
             viewModelFactory {
                 savedStateHandle[UstadView.ARG_ENTITY_UID] = testContext.assignment.caUid.toString()
+                savedStateHandle[UstadViewModel.ARG_CLAZZUID] = testContext.clazz.clazzUid.toString()
                 ClazzAssignmentDetailOverviewViewModel(di, savedStateHandle)
             }
 
@@ -511,12 +541,13 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
             activeDb.commentsDao.insertAsync(Comments().apply {
                 commentsText = teacherComment
                 commentsEntityUid = testContext.assignment.caUid
-                commentSubmitterUid = testContext.person.personUid
+                commentsForSubmitterUid = testContext.person.personUid
                 commentsDateTimeAdded = systemTimeInMillis()
             })
 
             viewModelFactory {
                 savedStateHandle[UstadView.ARG_ENTITY_UID] = testContext.assignment.caUid.toString()
+                savedStateHandle[UstadViewModel.ARG_CLAZZUID] = testContext.clazz.clazzUid.toString()
                 ClazzAssignmentDetailOverviewViewModel(di, savedStateHandle)
             }
 
@@ -558,11 +589,12 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
             activeDb.commentsDao.insertAsync(Comments().apply {
                 commentsText = startComment
                 commentsEntityUid = testContext.assignment.caUid
-                commentSubmitterUid = 0
+                commentsForSubmitterUid = 0
             })
 
             viewModelFactory {
                 savedStateHandle[UstadView.ARG_ENTITY_UID] = testContext.assignment.caUid.toString()
+                savedStateHandle[UstadViewModel.ARG_CLAZZUID] = testContext.clazz.clazzUid.toString()
                 ClazzAssignmentDetailOverviewViewModel(di, savedStateHandle)
             }
 

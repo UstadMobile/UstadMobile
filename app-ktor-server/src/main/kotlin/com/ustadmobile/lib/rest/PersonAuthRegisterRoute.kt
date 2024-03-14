@@ -28,6 +28,7 @@ import org.kodein.di.ktor.closestDI
 import kotlin.IllegalStateException
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.doubleEncryptWithPbkdf2V2
+import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.viewmodel.parentalconsentmanagement.ParentalConsentManagementViewModel
 
 fun Route.personAuthRegisterRoute() {
@@ -66,6 +67,7 @@ fun Route.personAuthRegisterRoute() {
         post("register"){
             val di: DI by closestDI()
             val db: UmAppDatabase by di.on(call).instance(tag = DoorTag.TAG_DB)
+            val addNewPersonUseCase: AddNewPersonUseCase by di.on(call).instance()
 
             val registerRequest: RegisterRequest = call.receive()
 
@@ -97,7 +99,11 @@ fun Route.personAuthRegisterRoute() {
 
             if(existingPerson == null) {
                 mPerson.apply {
-                    personUid = db.insertPersonAndGroup(mPerson).personUid
+                    personUid = addNewPersonUseCase(
+                        person = mPerson,
+                        addedByPersonUid = 0,
+                        createPersonParentApprovalIfMinor = false,
+                    )
                 }
             } else {
                 db.personDao.update(mPerson)

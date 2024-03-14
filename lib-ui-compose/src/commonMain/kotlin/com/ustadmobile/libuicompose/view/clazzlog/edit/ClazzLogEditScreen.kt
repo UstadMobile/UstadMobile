@@ -35,7 +35,7 @@ fun ClazzLogEditScreen(
         modifier = Modifier
             .defaultItemPadding()
             .fillMaxWidth()
-            .testTag("log_datetime"),
+            .testTag("date"),
         value = uiState.clazzLog?.logDate ?: 0L,
         isError = uiState.dateError != null,
         dateLabel = { Text(stringResource(MR.strings.date) + "*") },
@@ -51,7 +51,8 @@ fun ClazzLogEditScreen(
         },
         timeSupportingText = {
             Text(stringResource(MR.strings.required))
-        }
+        },
+        baseTestTag = "date",
     )
 
 

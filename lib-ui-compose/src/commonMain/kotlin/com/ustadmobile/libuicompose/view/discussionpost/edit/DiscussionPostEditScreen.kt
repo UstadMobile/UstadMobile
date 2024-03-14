@@ -15,7 +15,7 @@ import com.ustadmobile.libuicompose.components.UstadErrorText
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
 import com.ustadmobile.libuicompose.components.UstadRichTextEdit
-import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
+import com.ustadmobile.libuicompose.components.isDesktop
 import com.ustadmobile.libuicompose.util.HideSoftInputEffect
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import kotlinx.coroutines.Dispatchers
@@ -40,13 +40,14 @@ fun DiscussionPostEditScreen(
     onContentChanged: (DiscussionPost?) -> Unit = {},
     onDiscussionPostBodyChanged: (String) -> Unit = { },
 ){
-    UstadVerticalScrollColumn(
+    //Note: should not use vertical scroll column here. This should fil the whole screen and
+    // Aztec toolbar should appear at the bottom (Android).
+    Column(
         modifier = Modifier.fillMaxSize(),
     )  {
-
         OutlinedTextField(
             value = uiState.discussionPost?.discussionPostTitle ?: "",
-            modifier = Modifier.testTag("discussion_post_title").fillMaxWidth().defaultItemPadding(),
+            modifier = Modifier.testTag("title").fillMaxWidth().defaultItemPadding(),
             label = { Text(stringResource(MR.strings.title) + "*") },
             isError = uiState.discussionPostTitleError != null,
             enabled = uiState.fieldsEnabled,
@@ -68,7 +69,11 @@ fun DiscussionPostEditScreen(
         }
 
         UstadRichTextEdit(
-            modifier = Modifier.fillMaxSize().testTag("discussion_post_body"),
+            modifier = Modifier.fillMaxSize().testTag("discussion_post_body").let {
+                //On desktop; we need to apply padding. On Android, this should not be done (Aztec
+                // editing area has padding, toolbar should be edge-to-edge
+                if(isDesktop()) it.defaultItemPadding() else it
+            },
             html = uiState.discussionPost?.discussionPostMessage ?: "",
             onHtmlChange = onDiscussionPostBodyChanged,
             editInNewScreen = false,

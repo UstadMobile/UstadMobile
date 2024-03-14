@@ -14,6 +14,8 @@ import com.ustadmobile.core.contentformats.epub.XhtmlFixerJsoup
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.MIGRATION_144_145_CLIENT
 import com.ustadmobile.core.db.ext.MIGRATION_148_149_CLIENT_WITH_OFFLINE_ITEMS
+import com.ustadmobile.core.db.ext.MIGRATION_155_156_CLIENT
+import com.ustadmobile.core.db.ext.MIGRATION_161_162_CLIENT
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.core.domain.cachelock.AddOfflineItemInactiveTriggersCallback
@@ -67,6 +69,7 @@ import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.headers.MimeTypeHelper
 import com.ustadmobile.libcache.logging.NapierLoggingAdapter
 import com.ustadmobile.libcache.okhttp.UstadCacheInterceptor
+import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.HttpTimeout
@@ -200,6 +203,7 @@ val DesktopHttpModule = DI.Module("Desktop-HTTP") {
                     cache = instance(),
                     tmpDir = interceptorTmpDir,
                     logger = cacheLogger,
+                    json = instance(),
                 )
             )
             .build()
@@ -331,6 +335,8 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
             .addMigrations(*migrationList().toTypedArray())
             .addMigrations(MIGRATION_144_145_CLIENT)
             .addMigrations(MIGRATION_148_149_CLIENT_WITH_OFFLINE_ITEMS)
+            .addMigrations(MIGRATION_155_156_CLIENT)
+            .addMigrations(MIGRATION_161_162_CLIENT)
             .addCallback(AddOfflineItemInactiveTriggersCallback())
             .build()
 
@@ -487,6 +493,7 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         instance<ConnectivityTriggerGroupController>()
         instance<Scheduler>().start()
         Runtime.getRuntime().addShutdownHook(Thread{
+            Napier.i("Shutdown: shutting down scheduler")
             instance<Scheduler>().shutdown()
         })
     }

@@ -1,6 +1,5 @@
 package com.ustadmobile.core.viewmodel.contententry.detailoverviewtab
 
-import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.viewmodel.DetailViewModel
@@ -12,12 +11,15 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.blob.download.CancelDownloadUseCase
 import com.ustadmobile.core.domain.blob.download.MakeContentEntryAvailableOfflineUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.LaunchContentEntryVersionUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.epub.LaunchEpubUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.LaunchXapiUseCase
+import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.Snack
+import com.ustadmobile.core.util.ext.localFirstThenRepoIfNull
 import com.ustadmobile.core.util.ext.onActiveEndpoint
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.lib.db.composites.ContentEntryAndDetail
@@ -88,6 +90,8 @@ class ContentEntryDetailOverviewViewModel(
     private val makeContentEntryAvailableOfflineUseCase: MakeContentEntryAvailableOfflineUseCase by
             di.onActiveEndpoint().instance()
 
+    private val cancelDownloadUseCase: CancelDownloadUseCase by di.onActiveEndpoint().instance()
+
     val nodeIdAndAuth: NodeIdAndAuth by di.onActiveEndpoint().instance()
 
     val uiState: Flow<ContentEntryDetailOverviewUiState> = _uiState.asStateFlow()
@@ -98,6 +102,8 @@ class ContentEntryDetailOverviewViewModel(
     private val launchXapiUseCase: LaunchXapiUseCase? by di.onActiveEndpoint().instanceOrNull()
 
     private val launchEpubUseCase: LaunchEpubUseCase? by di.onActiveEndpoint().instanceOrNull()
+
+    private val target = savedStateHandle[ARG_TARGET]
 
 
     init {
@@ -117,27 +123,6 @@ class ContentEntryDetailOverviewViewModel(
                             prev.copy(
                                 title = it?.entry?.title ?: ""
                             )
-                        }
-                    }
-                }
-
-                launch {
-                    activeRepo.scopedGrantDao.userHasSystemLevelPermissionAsFlow(
-                        accountManager.currentAccount.personUid, Role.PERMISSION_CONTENT_INSERT
-                    ).collect { hasPermission ->
-                        _appUiState.update { prev ->
-                            if(prev.fabState.visible != hasPermission) {
-                                prev.copy(
-                                    fabState = FabUiState(
-                                        visible =  hasPermission,
-                                        text = systemImpl.getString(MR.strings.edit),
-                                        icon = FabUiState.FabIcon.EDIT,
-                                        onClick = ::onClickEdit
-                                    )
-                                )
-                            }else {
-                                prev
-                            }
                         }
                     }
                 }
@@ -180,14 +165,29 @@ class ContentEntryDetailOverviewViewModel(
         viewModelScope.launch {
             val offlineItemAndStateVal = _uiState.value.offlineItemAndState
             val offlineItemVal = offlineItemAndStateVal?.offlineItem
-            if(offlineItemVal == null || !offlineItemVal.oiActive) {
-                makeContentEntryAvailableOfflineUseCase(contentEntryUid = entityUidArg)
-            }else if(offlineItemAndStateVal.readyForOffline) {
+            val activeDownload = offlineItemAndStateVal?.activeDownload
+
+            when {
+                //Not available for offline use yet, mark as selected for offline and start download
+                offlineItemVal == null || !offlineItemVal.oiActive -> {
+                    makeContentEntryAvailableOfflineUseCase(contentEntryUid = entityUidArg)
+                }
+
+                //Currently in progress, if clicked, cancel
+                activeDownload != null -> {
+                    cancelDownloadUseCase(
+                        transferJobId = activeDownload.transferJob?.tjUid ?: 0,
+                        offlineItemUid = offlineItemVal.oiUid
+                    )
+                }
+
                 //There is an offline item, transfer was completed, we can set the offline item inactive
                 //The trigger created by AddOfflineItemInactiveTriggersCallback will set the
                 //remove CacheLockJoin(s) status to pending deletion so cache content becomes
                 // eligible for eviction as required.
-                activeRepo.offlineItemDao.updateActiveByOfflineItemUid(offlineItemVal.oiUid, false)
+                offlineItemAndStateVal.readyForOffline -> {
+                    activeRepo.offlineItemDao.updateActiveByOfflineItemUid(offlineItemVal.oiUid, false)
+                }
             }
         }
     }
@@ -197,8 +197,13 @@ class ContentEntryDetailOverviewViewModel(
             try {
                 loadingState = LoadingUiState.INDETERMINATE
                 _uiState.update { it.copy(openButtonEnabled = false) }
-                val latestContentEntryVersion = activeRepo.contentEntryVersionDao
-                    .findLatestVersionUidByContentEntryUidEntity(entityUidArg)
+                val latestContentEntryVersion = activeRepo.localFirstThenRepoIfNull {
+                    it.contentEntryVersionDao.findLatestVersionUidByContentEntryUidEntity(entityUidArg)
+                }
+
+                val openTarget = target?.let {
+                    OpenExternalLinkUseCase.Companion.LinkTarget.of(it)
+                } ?: OpenExternalLinkUseCase.Companion.LinkTarget.DEFAULT
 
                 if(latestContentEntryVersion != null) {
                     val contentSpecificLauncher = when(latestContentEntryVersion.cevContentType) {
@@ -208,7 +213,7 @@ class ContentEntryDetailOverviewViewModel(
                     }
 
                     val launcher = (contentSpecificLauncher ?: defaultLaunchContentEntryUseCase)
-                    launcher(latestContentEntryVersion, navController)
+                    launcher(latestContentEntryVersion, navController, openTarget)
                 }else {
                     snackDispatcher.showSnackBar(Snack(systemImpl.getString(MR.strings.content_not_ready_try_later)))
                 }
@@ -225,6 +230,8 @@ class ContentEntryDetailOverviewViewModel(
     companion object {
 
         const val DEST_NAME = "ContentEntryDetailOverviewView"
+
+        const val ARG_TARGET = "target"
 
     }
 

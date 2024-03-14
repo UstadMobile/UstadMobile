@@ -6,6 +6,7 @@ import com.ustadmobile.door.annotation.DoorDao
 import com.ustadmobile.lib.db.composites.TransferJobItemStatus
 import com.ustadmobile.lib.db.composites.TransferJobItemStatus.Companion.STATUS_COMPLETE_INT
 import com.ustadmobile.lib.db.entities.TransferJobItem
+import kotlinx.coroutines.flow.Flow
 
 @DoorDao
 expect abstract class TransferJobItemDao {
@@ -23,6 +24,14 @@ expect abstract class TransferJobItemDao {
     """)
     abstract suspend fun findByJobUid(jobUid: Int): List<TransferJobItem>
 
+
+    @Query("""
+        SELECT TransferJobItem.*
+          FROM TransferJobItem
+         WHERE TransferJobItem.tjiTjUid = :jobUid
+           AND TransferJobItem.tjiStatus < ${TransferJobItemStatus.STATUS_COMPLETE_INT}
+    """)
+    abstract suspend fun findPendingByJobUid(jobUid: Int): List<TransferJobItem>
 
     @Query("""
         UPDATE TransferJobItem
@@ -97,5 +106,16 @@ expect abstract class TransferJobItemDao {
     abstract suspend fun findNumberJobItemsNotComplete(
         jobUid: Int,
     ): Int
+
+    @Query("""
+        SELECT TransferJobItem.*
+          FROM TransferJobItem
+         WHERE TransferJobItem.tjiTableId = :tableId
+           AND TransferJobItem.tjiEntityUid IN (:entityUidList)
+    """)
+    abstract fun findByEntityUidList(
+        entityUidList: List<Long>,
+        tableId: Int,
+    ): Flow<List<TransferJobItem>>
 
 }

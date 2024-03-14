@@ -2,11 +2,10 @@ package com.ustadmobile.core.viewmodel.coursegroupset.list
 
 import app.cash.turbine.test
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.domain.clazz.CreateNewClazzUseCase
 import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.ext.awaitItemWhere
-import com.ustadmobile.core.util.ext.createNewClazzAndGroups
-import com.ustadmobile.core.util.ext.grantScopedPermission
 import com.ustadmobile.core.util.ext.loadFirstList
 import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.core.view.UstadView
@@ -14,7 +13,7 @@ import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.CourseGroupSet
-import com.ustadmobile.lib.db.entities.Role
+import com.ustadmobile.lib.db.entities.CoursePermission
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.time.Duration.Companion.seconds
@@ -30,12 +29,14 @@ class CourseGroupSetListViewModelTest : AbstractMainDispatcherTest() {
                 val clazz = Clazz().apply {
                     clazzName = "Group Course"
                 }
-                activeDb.createNewClazzAndGroups(clazz, systemImpl, emptyMap())
-                activeDb.grantScopedPermission(
-                    toPerson = activeUser,
-                    permissions = Role.ROLE_CLAZZ_TEACHER_PERMISSIONS_DEFAULT,
-                    scopeTableId = Clazz.TABLE_ID,
-                    scopeEntityUid = clazz.clazzUid
+                clazz.clazzUid = CreateNewClazzUseCase(activeDb).invoke(clazz)
+
+                activeDb.coursePermissionDao.upsertAsync(
+                    CoursePermission(
+                        cpToPersonUid = activeUser.personUid,
+                        cpClazzUid =  clazz.clazzUid,
+                        cpPermissionsFlag = CoursePermission.TEACHER_DEFAULT_PERMISSIONS
+                    )
                 )
 
                 activeDb.courseGroupSetDao.insertAsync(CourseGroupSet().apply {

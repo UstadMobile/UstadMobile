@@ -11,16 +11,24 @@ import com.ustadmobile.core.view.*
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import app.cash.paging.PagingSource
+import com.ustadmobile.core.db.PermissionFlags
+import com.ustadmobile.core.impl.appstate.Snack
+import com.ustadmobile.core.util.ext.dayStringResource
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
-import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.lib.db.composites.EnrolmentRequestAndCoursePic
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
-import com.ustadmobile.lib.db.entities.Role
+import com.ustadmobile.lib.db.entities.EnrolmentRequest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.kodein.di.DI
 
 
@@ -40,13 +48,21 @@ data class ClazzListUiState(
 
     val canAddNewCourse: Boolean = false,
 
+    val pendingEnrolments: List<EnrolmentRequestAndCoursePic> = emptyList(),
+
     val filterOptions: List<MessageIdOption2> = listOf(
         MessageIdOption2(MR.strings.currently_enrolled, ClazzDaoCommon.FILTER_CURRENTLY_ENROLLED),
         MessageIdOption2(MR.strings.past_enrollments, ClazzDaoCommon.FILTER_PAST_ENROLLMENTS),
         MessageIdOption2(MR.strings.all, 0)
     ),
 
-    ) {
+    val dayOfWeekStrings: Map<DayOfWeek, String> = emptyMap(),
+
+    val localDateTimeNow: LocalDateTime = Clock.System.now().toLocalDateTime(
+        TimeZone.currentSystemDefault()
+    )
+
+) {
     companion object {
 
         val DEFAULT_SORT_OTIONS = listOf(
@@ -72,11 +88,9 @@ class ClazzListViewModel(
         ?.split(",")?.filter { it.isNotEmpty() }?.map { it.trim().toLong() }
         ?: listOf()
 
-    private val filterExcludeMembersOfSchool =
-        savedStateHandle[PersonListViewModel.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL]?.toLong() ?: 0L
 
     private val filterByPermission = savedStateHandle[UstadView.ARG_FILTER_BY_PERMISSION]?.toLong()
-        ?: Role.PERMISSION_CLAZZ_SELECT
+        ?: PermissionFlags.COURSE_VIEW
 
     private var lastPagingSource: PagingSource<Int, ClazzWithListDisplayDetails>? = null
 
@@ -85,12 +99,10 @@ class ClazzListViewModel(
             searchQuery =  _appUiState.value.searchState.searchText.toQueryLikeParam(),
             accountPersonUid = accountManager.currentAccount.personUid,
             excludeSelectedClazzList = filterAlreadySelectedList,
-            excludeSchoolUid = filterExcludeMembersOfSchool,
             sortOrder = _uiState.value.activeSortOrderOption.flag,
             filter = _uiState.value.selectedChipId,
             currentTime = systemTimeInMillis(),
             permission = filterByPermission,
-            selectedSchool = 0,
         ).also {
             lastPagingSource = it
         }
@@ -102,20 +114,26 @@ class ClazzListViewModel(
                 navigationVisible = true,
                 searchState = createSearchEnabledState(),
                 title = listTitle(MR.strings.courses, MR.strings.courses),
-                fabState = createFabState(true, MR.strings.course)
+                fabState = createFabState(
+                    hasAddPermission = activeUserPersonUid != 0L,
+                    stringResource = MR.strings.course,
+                )
             )
         }
 
         _uiState.update { prev ->
             prev.copy(
+                dayOfWeekStrings = DayOfWeek.values().associateWith {
+                    systemImpl.getString(it.dayStringResource)
+                },
                 clazzList = pagingSourceFactory
             )
         }
 
         viewModelScope.launch {
             _uiState.whenSubscribed {
-                activeRepo.scopedGrantDao.userHasSystemLevelPermissionAsFlow(
-                    accountManager.currentAccount.personUid, Role.PERMISSION_CLAZZ_INSERT
+                activeRepo.systemPermissionDao.personHasSystemPermissionAsFlow(
+                    accountManager.currentAccount.personUid, PermissionFlags.ADD_COURSE
                 ).distinctUntilChanged().collect { hasPermission ->
                     _uiState.update { prev ->
                         prev.copy(
@@ -127,7 +145,18 @@ class ClazzListViewModel(
             }
         }
 
-
+        viewModelScope.launch {
+            _uiState.whenSubscribed {
+                activeRepo.enrolmentRequestDao.findRequestsForUserAsFlow(
+                    accountPersonUid = activeUserPersonUid,
+                    statusFilter = EnrolmentRequest.STATUS_PENDING,
+                ).collect {
+                    _uiState.update { prev ->
+                        prev.copy(pendingEnrolments = it)
+                    }
+                }
+            }
+        }
     }
 
     override fun onUpdateSearchResult(searchText: String) {
@@ -167,6 +196,17 @@ class ClazzListViewModel(
         lastPagingSource?.invalidate()
     }
 
+
+    fun onClickCancelEnrolmentRequest(enrolmentRequest: EnrolmentRequest) {
+        viewModelScope.launch {
+            activeRepo.enrolmentRequestDao.updateStatus(
+                uid = enrolmentRequest.erUid,
+                status = EnrolmentRequest.STATUS_CANCELED,
+                updateTime = systemTimeInMillis(),
+            )
+            snackDispatcher.showSnackBar(Snack(systemImpl.getString(MR.strings.canceled_enrolment_request)))
+        }
+    }
 
 
     companion object {

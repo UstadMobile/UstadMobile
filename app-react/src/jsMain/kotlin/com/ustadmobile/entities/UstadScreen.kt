@@ -33,10 +33,6 @@ import com.ustadmobile.view.person.edit.PersonEditScreenPreview
 import com.ustadmobile.view.person.list.PersonListScreen
 import com.ustadmobile.view.person.list.PersonListScreenPreview
 import com.ustadmobile.view.clazzassignment.detail.ClazzAssignmentDetailScreen
-import com.ustadmobile.view.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewScreenPreview
-import com.ustadmobile.view.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewScreen
-import com.ustadmobile.core.viewmodel.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewViewModel
-import com.ustadmobile.view.clazzassignment.detail.submissionstab.ClazzAssignmentDetailSubmissionsTabScreen
 import com.ustadmobile.view.clazzenrolment.clazzmemberlist.ClazzMemberListScreen
 import com.ustadmobile.view.courseterminology.edit.CourseTerminologyEditScreen
 import com.ustadmobile.view.login.LoginScreen
@@ -65,7 +61,6 @@ import com.ustadmobile.view.coursegroupset.edit.CourseGroupSetEditScreen
 import com.ustadmobile.core.viewmodel.coursegroupset.edit.CourseGroupSetEditViewModel
 import com.ustadmobile.view.coursegroupset.detail.CourseGroupSetDetailScreen
 import com.ustadmobile.core.viewmodel.coursegroupset.detail.CourseGroupSetDetailViewModel
-import com.ustadmobile.core.viewmodel.clazzassignment.detail.submissionstab.ClazzAssignmentDetailSubmissionsTabViewModel
 import com.ustadmobile.view.discussionpost.coursediscussiondetail.CourseDiscussionDetailScreen
 import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.CourseDiscussionDetailViewModel
 import com.ustadmobile.view.discussionpost.detail.DiscussionPostDetailPreview
@@ -76,7 +71,6 @@ import com.ustadmobile.view.discussionpost.edit.DiscussionPostEditScreen
 import com.ustadmobile.core.viewmodel.discussionpost.edit.DiscussionPostEditViewModel
 import com.ustadmobile.view.clazzassignment.UstadCommentListItemPreview
 import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailViewModel
-import com.ustadmobile.view.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailScreenPreview
 import com.ustadmobile.view.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailScreen
 import com.ustadmobile.core.viewmodel.LeavingReasonEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewViewModel
@@ -149,9 +143,25 @@ import com.ustadmobile.view.message.messagelist.MessageListScreen
 import com.ustadmobile.view.message.messagelist.MessageListScreenPreview
 import com.ustadmobile.view.person.registerminorwaitforparent.RegisterMinorWaitForParentScreen
 import com.ustadmobile.core.viewmodel.about.OpenLicensesViewModel
+import com.ustadmobile.core.viewmodel.clazz.joinwithcode.JoinWithCodeViewModel
 import com.ustadmobile.view.about.OpenLicensesScreen
 import com.ustadmobile.core.viewmodel.deleteditem.DeletedItemListViewModel
+import com.ustadmobile.view.clazz.invitevialink.InviteViaLinkPreview
 import com.ustadmobile.view.deleteditem.list.DeletedItemListScreen
+import com.ustadmobile.view.clazz.joinwithcode.JoinWithCodeScreen
+import com.ustadmobile.core.viewmodel.clazz.invitevialink.InviteViaLinkViewModel
+import com.ustadmobile.view.clazz.invitevialink.InviteViaLinkScreen
+import com.ustadmobile.core.viewmodel.clazz.permissionlist.CoursePermissionListViewModel
+import com.ustadmobile.view.clazz.permissionlist.CoursePermissionListScreen
+import com.ustadmobile.view.clazz.permissionedit.CoursePermissionEditScreen
+import com.ustadmobile.core.viewmodel.clazz.permissionedit.CoursePermissionEditViewModel
+import com.ustadmobile.view.clazz.permissiondetail.CoursePermissionDetailScreen
+import com.ustadmobile.core.viewmodel.clazz.permissiondetail.CoursePermissionDetailViewModel
+import com.ustadmobile.core.viewmodel.systempermission.detail.SystemPermissionDetailViewModel
+import com.ustadmobile.view.systempermission.detail.SystemPermissionDetailScreen
+import com.ustadmobile.view.systempermission.edit.SystemPermissionEditScreen
+import com.ustadmobile.core.viewmodel.systempermission.edit.SystemPermissionEditViewModel
+
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -188,7 +198,8 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
         ParentalConsentManagementScreen),
     UstadScreen(SettingsViewModel.DEST_NAME, "Settings", SettingsScreen),
     UstadScreen(InviteViaLinkView.VIEW_NAME, "Invite Via Link Preview",
-        InviteViaLinkPreview),
+        InviteViaLinkPreview
+    ),
     UstadScreen(ClazzEnrolmentEditViewModel.DEST_NAME, "ClazzEnrolmentEdit",
         ClazzEnrolmentEditScreen
     ),
@@ -274,8 +285,6 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
         ClazzLogEditAttendanceViewModel.DEST_NAME, name = "ClazzLogEditAttendance Preview",
         ClazzLogEditAttendanceScreen
     ),
-    UstadScreen(JoinWithCodeView.VIEW_NAME, "JoinWithCode Preview",
-        JoinWithCodeScreenPreview),
     UstadScreen(ClazzLogListAttendanceViewModel.DEST_NAME, "ClazzLogListAttendance Preview",
         ClazzLogListAttendanceScreen
     ),
@@ -296,16 +305,11 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
         VirtualListPreview),
     UstadScreen("VirtualListReversedPreview", "Virtual List Reversed Preview",
         VirtualListPreviewReverse),
-    UstadScreen("UstadCourseAssignmentMarkListItem", "UstadCourseAssignmentMarkListItem Preview",
-        UstadCourseAssignmentMarkListItemPreview),
     UstadScreen("UstadCommentListItem", "UstadCommentListItem Preview",
         UstadCommentListItemPreview
     ),
     UstadScreen("UstadAddCommentListItem", "UstadAddCommentListItem Preview",
         UstadAddCommentListItemPreview),
-    UstadScreen("UstadAssignmentFileSubmissionListItem",
-        "UstadAssignmentFileSubmissionListItem Preview",
-        UstadAssignmentFileSubmissionListItemPreview),
     UstadScreen("UstadImageSelectButtonPreview", "UstadImageSelectButtonPreview",
         UstadImageSelectButtonPreview),
     UstadScreen("UstadSelectFieldPreview", "UstadSelectFieldPreview",
@@ -351,20 +355,9 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     ),
     UstadScreen(ClazzAssignmentDetailViewModel.DEST_NAME, "ClazzAssignmentDetail",
         ClazzAssignmentDetailScreen),
-    UstadScreen("ClazzAssignmentDetailOverviewPreview", "ClazzAssignmentDetailOverview",
-        ClazzAssignmentDetailOverviewScreenPreview
-    ),
-    UstadScreen(ClazzAssignmentDetailOverviewViewModel.DEST_NAME, "ClazzAssignmentDetailOverview",
-        ClazzAssignmentDetailOverviewScreen
-    ),
-    UstadScreen(ClazzAssignmentDetailSubmissionsTabViewModel.DEST_NAME,
-        "ClazzAssignmentDetailStudentProgressOverviewList",
-        ClazzAssignmentDetailSubmissionsTabScreen),
     UstadScreen(CourseGroupSetListViewModel.DEST_NAME, "CourseGroupSetList",
         CourseGroupSetListScreen
     ),
-    UstadScreen("CourseAssignmentSubmitterDetailPreview", "CourseAssignmentSubmitterDetailPreview",
-        ClazzAssignmentSubmitterDetailScreenPreview),
     UstadScreen(ClazzAssignmentSubmitterDetailViewModel.DEST_NAME, "CourseAssignmentSubmitterDetail",
         ClazzAssignmentSubmitterDetailScreen),
     UstadScreen(LeavingReasonEditViewModel.DEST_NAME, "LeavingReasonEdit", LeavingReasonEditScreen),
@@ -394,6 +387,13 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen("ConversationListPreview", "ConversationListPreview", ConversationListScreenPreview),
     UstadScreen(MessageListViewModel.DEST_NAME, "MessageList", MessageListScreen),
     UstadScreen("MessageListScreenPreview", "MessageListPreview", MessageListScreenPreview),
+    UstadScreen(JoinWithCodeViewModel.DEST_NAME, "JoinWithCode", JoinWithCodeScreen),
+    UstadScreen(InviteViaLinkViewModel.DEST_NAME, "InviteviaLink", InviteViaLinkScreen),
+    UstadScreen(CoursePermissionListViewModel.DEST_NAME, "CoursePermissionList", CoursePermissionListScreen),
+    UstadScreen(CoursePermissionEditViewModel.DEST_NAME, "CoursePermissionEdit", CoursePermissionEditScreen),
+    UstadScreen(CoursePermissionDetailViewModel.DEST_NAME, "CoursePermissionDetail", CoursePermissionDetailScreen),
+    UstadScreen(SystemPermissionDetailViewModel.DEST_NAME, "SystemPermissionDetail", SystemPermissionDetailScreen),
+    UstadScreen(SystemPermissionEditViewModel.DEST_NAME, "SystemPermissionEdit", SystemPermissionEditScreen),
 )
 
 //Here as per the MUI showcase template

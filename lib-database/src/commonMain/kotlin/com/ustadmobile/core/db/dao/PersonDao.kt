@@ -9,7 +9,6 @@ import com.ustadmobile.lib.db.composites.PersonAndListDisplayDetails
 import com.ustadmobile.lib.db.composites.PersonAndPicture
 import com.ustadmobile.lib.db.composites.PersonNames
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.lib.db.entities.Person.Companion.FROM_PERSON_TO_SCOPEDGRANT_JOIN_ON_CLAUSE
 
 
 @DoorDao
@@ -62,61 +61,6 @@ expect abstract class PersonDao : BaseDao<Person> {
     @Insert
     abstract fun insertPersonAuth(personAuth: PersonAuth)
 
-    /**
-     * Checks if a user has the given permission over a given person in the database
-     *
-     * @param accountPersonUid the personUid of the person who wants to perform the operation
-     * @param personUid the personUid of the person object in the database to perform the operation on
-     * @param permission permission to check for
-     */
-    @Query("""
-        SELECT EXISTS(
-                SELECT 1
-                  FROM Person
-                  JOIN ScopedGrant
-                       ON $FROM_PERSON_TO_SCOPEDGRANT_JOIN_ON_CLAUSE
-                  JOIN PersonGroupMember 
-                       ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
-                 WHERE Person.personUid = :personUid
-                   AND (ScopedGrant.sgPermissions & :permission) > 0
-                   AND PersonGroupMember.groupMemberPersonUid = :accountPersonUid
-                 LIMIT 1)
-    """)
-    abstract suspend fun personHasPermissionAsync(
-        accountPersonUid: Long,
-        personUid: Long,
-        permission: Long
-    ): Boolean
-
-
-    @Query("""
-        SELECT EXISTS(
-                SELECT 1
-                  FROM Person
-                  JOIN ScopedGrant
-                       ON $FROM_PERSON_TO_SCOPEDGRANT_JOIN_ON_CLAUSE
-                  JOIN PersonGroupMember 
-                       ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
-                 WHERE Person.personUid = :personUid
-                   AND (ScopedGrant.sgPermissions & :permission) > 0
-                   AND PersonGroupMember.groupMemberPersonUid = :accountPersonUid
-                 LIMIT 1)
-    """)
-    @HttpAccessible(
-        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
-        pullQueriesToReplicate = arrayOf(
-            HttpServerFunctionCall(
-                functionDao = ScopedGrantDao::class,
-                functionName = "personPermissionsForPerson",
-            )
-        )
-    )
-    abstract fun personHasPermissionFlow(
-        accountPersonUid: Long,
-        personUid: Long,
-        permission: Long
-    ): Flow<Boolean>
-
     @Query("SELECT COALESCE((SELECT admin FROM Person WHERE personUid = :accountPersonUid), 0)")
     @PostgresQuery("SELECT COALESCE((SELECT admin FROM Person WHERE personUid = :accountPersonUid), FALSE)")
     abstract suspend fun personIsAdmin(accountPersonUid: Long): Boolean
@@ -150,9 +94,9 @@ expect abstract class PersonDao : BaseDao<Person> {
           FROM Person
                LEFT JOIN PersonPicture
                     ON PersonPicture.personPictureUid = Person.personUid
-         WHERE Person.personUid = :uid           
+         WHERE Person.personUid = :accountPersonUid           
     """)
-    abstract suspend fun findByUidWithPicture(uid: Long): PersonAndPicture?
+    abstract suspend fun findByUidWithPicture(accountPersonUid: Long): PersonAndPicture?
 
     @Query("""
         SELECT Person.*, PersonPicture.*
@@ -186,15 +130,9 @@ expect abstract class PersonDao : BaseDao<Person> {
     abstract suspend fun insertPersonGroupMember(personGroupMember:PersonGroupMember):Long
 
     @Query(SQL_SELECT_LIST_WITH_PERMISSION)
-    abstract fun findPersonsWithPermission(timestamp: Long, excludeClazz: Long,
-                                                 excludeSchool: Long, excludeSelected: List<Long>,
-                                                 accountPersonUid: Long, sortOrder: Int, searchText: String? = "%"): PagingSource<Int, PersonWithDisplayDetails>
-
-    @Query(SQL_SELECT_LIST_WITH_PERMISSION)
     abstract fun findPersonsWithPermissionAsList(
         timestamp: Long,
         excludeClazz: Long,
-        excludeSchool: Long,
         excludeSelected: List<Long>,
         accountPersonUid: Long,
         sortOrder: Int,
@@ -206,15 +144,36 @@ expect abstract class PersonDao : BaseDao<Person> {
         pullQueriesToReplicate = arrayOf(
             HttpServerFunctionCall("findPersonsWithPermissionAsPagingSource"),
             HttpServerFunctionCall(
-                functionDao = ScopedGrantDao::class,
-                functionName = "findScopedGrantAndPersonGroupByPersonUid"
+                functionName = "findAllByPersonUid",
+                functionDao = SystemPermissionDao::class,
+                functionArgs = arrayOf(
+                    HttpServerFunctionParam(
+                        name = "includeDeleted",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "true",
+                    )
+                )
+            ),
+            HttpServerFunctionCall(
+                functionName = "findApplicableCoursePermissionEntitiesForAccountPerson",
+                functionDao = CoursePermissionDao::class,
+            ),
+            HttpServerFunctionCall(
+                functionName = "findClazzEnrolmentEntitiesForPersonViewPermissionCheck",
+                functionDao = ClazzEnrolmentDao::class,
+                functionArgs = arrayOf(
+                    HttpServerFunctionParam(
+                        name = "otherPersonUid",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "0",
+                    )
+                )
             )
         )
     )
     abstract fun findPersonsWithPermissionAsPagingSource(
         timestamp: Long,
         excludeClazz: Long,
-        excludeSchool: Long,
         excludeSelected: List<Long>,
         accountPersonUid: Long,
         sortOrder: Int,
@@ -244,7 +203,7 @@ expect abstract class PersonDao : BaseDao<Person> {
                     (SELECT ppjUid 
                        FROM PersonParentJoin
                       WHERE ppjMinorPersonUid = :personUid 
-                        AND ppjParentPersonUid = :activeUserPersonUid 
+                        AND ppjParentPersonUid = :accountPersonUid 
                       LIMIT 1)  
                LEFT JOIN PersonPicture
                     ON PersonPicture.personPictureUid = :personUid
@@ -264,7 +223,7 @@ expect abstract class PersonDao : BaseDao<Person> {
     @HttpAccessible
     abstract fun findByUidWithDisplayDetailsFlow(
         personUid: Long,
-        activeUserPersonUid: Long
+        accountPersonUid: Long
     ): Flow<PersonAndDisplayDetail?>
 
 
@@ -283,6 +242,20 @@ expect abstract class PersonDao : BaseDao<Person> {
          WHERE Person.personUid = :uid  
     """)
     abstract fun getNamesByUid(uid: Long): Flow<PersonNames?>
+
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall(functionName = "findByUidAsync")
+        )
+    )
+    @Query("""
+        SELECT Person.firstNames, Person.lastName
+          FROM Person
+         WHERE Person.personUid = :uid  
+    """)
+    abstract suspend fun getNamesByUidAsync(uid: Long): PersonNames?
+
 
 
     @Query("""

@@ -21,6 +21,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
 import com.ustadmobile.core.viewmodel.accountlist.AccountListUiState
@@ -89,7 +90,8 @@ fun AccountListScreen(
 
                     OutlinedButton(
                         modifier = Modifier
-                            .padding(start = 10.dp),
+                            .padding(start = 10.dp)
+                            .testTag("logout_button"),
                         onClick = onLogoutClick,
                     ) {
                         Text(stringResource(MR.strings.logout))

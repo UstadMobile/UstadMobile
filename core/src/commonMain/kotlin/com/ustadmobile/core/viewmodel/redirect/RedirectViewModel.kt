@@ -31,7 +31,10 @@ class RedirectViewModel(
     private val settings: Settings by instance()
 
     init {
-        _appUiState.value = AppUiState(navigationVisible = false)
+        _appUiState.value = AppUiState(
+            navigationVisible = false,
+            hideAppBar = true,
+        )
         val destinationArg = deepLink ?: nextViewArg
 
         if(settings.getStringOrNull(OnBoardingViewModel.PREF_TAG) != true.toString()) {

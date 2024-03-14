@@ -4,9 +4,13 @@ import com.ustadmobile.libcache.cachecontrol.ResponseCacheabilityChecker
 import okhttp3.Response
 import okhttp3.internal.http.promisesBody
 
-fun ResponseCacheabilityChecker.canStore(response: Response) : Boolean{
+fun ResponseCacheabilityChecker.canStore(
+    response: Response,
+    acceptPartialResponse: Boolean = false,
+) : Boolean{
     return response.promisesBody() && this(
         statusCode = response.code,
-        responseHeaders = response.headers.asCacheHttpHeaders()
+        responseHeaders = response.headers.asCacheHttpHeaders(),
+        acceptPartialContent = acceptPartialResponse,
     )
 }

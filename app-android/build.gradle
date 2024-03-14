@@ -7,6 +7,7 @@ plugins {
     id 'kotlin-parcelize'
     alias(libs.plugins.jetbrains.compose)
     alias(libs.plugins.license)
+    id 'androidx.baselineprofile'
 }
 
 //As Per https://developer.android.com/studio/publish/app-signing.html#release-mode
@@ -204,6 +205,8 @@ configurations.all {
 }
 
 dependencies {
+    implementation 'androidx.profileinstaller:profileinstaller:1.3.1'
+    baselineProfile project(':app-android-baselineprofile')
     coreLibraryDesugaring libs.android.desugar.libs
 
     implementation project(':core')
@@ -364,6 +367,9 @@ dependencies {
     implementation libs.process.phoenix
 
     implementation libs.androidx.browser
+    implementation libs.androidx.core.splashscreen
+
+    implementation libs.androidx.profileinstaller
 
     testImplementation project(":lib-test-common")
     testImplementation "org.mockito:mockito-core:$version_android_mockito"

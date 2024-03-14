@@ -19,6 +19,7 @@ import kotlinx.coroutines.isActive
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.transferjobitem.TransferJobItemStatusUpdater
 import com.ustadmobile.door.ext.withDoorTransactionAsync
+import com.ustadmobile.libcache.UstadCache
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.withContext
 
@@ -26,6 +27,7 @@ class BlobDownloadClientUseCaseCommonJvm(
     private val okHttpClient: OkHttpClient,
     private val db: UmAppDatabase,
     private val repo: UmAppDatabase?,
+    private val httpCache: UstadCache
 ) : BlobDownloadClientUseCase{
 
     data class DownloadQueueItem(
@@ -40,9 +42,11 @@ class BlobDownloadClientUseCaseCommonJvm(
         val buffer = ByteArray(8192)
         async {
             for(queueItem in channel) {
-                val logPrefix = "BlobDownloadClientUseCaseCommonJvm: ${queueItem.transferJobItem.blobUrl}"
+                val logPrefix = "BlobDownloadClientUseCaseCommonJvm: " +
+                        "#${queueItem.transferJobItem.transferJobItemUid} " +
+                        "${queueItem.transferJobItem.blobUrl} "
                 //Pull the item through OkHttp. This will pull it through the lib-cache interceptor.
-                Napier.v { "$logPrefix : start download"}
+                Napier.v { "$logPrefix : channel: start"}
                 try {
                     onStatusUpdate(
                         BlobTransferStatusUpdate(
@@ -53,6 +57,11 @@ class BlobDownloadClientUseCaseCommonJvm(
 
                     val request = Request.Builder()
                         .url(queueItem.transferJobItem.blobUrl)
+                        .apply {
+                            queueItem.transferJobItem.partialResponseFile?.also {
+                                header("X-Interceptor-Partial-File", it)
+                            }
+                        }
                         .build()
 
                     val response = okHttpClient.newCall(request).await()
@@ -72,7 +81,7 @@ class BlobDownloadClientUseCaseCommonJvm(
                         }
                     }
 
-                    Napier.v { "$logPrefix : completed"}
+                    Napier.v { "$logPrefix channel: completed"}
                     onStatusUpdate(
                         BlobTransferStatusUpdate(
                             transferItem = queueItem.transferJobItem,
@@ -80,7 +89,7 @@ class BlobDownloadClientUseCaseCommonJvm(
                         )
                     )
                 }catch(e: Throwable) {
-                    Napier.i("$logPrefix : Exception downloading", e)
+                    Napier.i("$logPrefix : channel: Exception downloading", e)
                 }
             }
         }
@@ -92,6 +101,11 @@ class BlobDownloadClientUseCaseCommonJvm(
         onProgress: (BlobTransferProgressUpdate) -> Unit,
         onStatusUpdate: (BlobTransferStatusUpdate) -> Unit
     ) {
+        //Prime the cache to get the status of all entries that are going to be required. This will
+        // avoid (potentially hundreds) of separate SQLite queries for each new request by triggering
+        // the cache to load entry status into the LRU in-memory map
+        httpCache.getEntries(items.map { it.blobUrl }.toSet())
+
         coroutineScope {
             val receiveChannel = produce(
                 capacity = Channel.UNLIMITED
@@ -116,7 +130,8 @@ class BlobDownloadClientUseCaseCommonJvm(
         val logPrefix = "BlobDownloadClientUseCaseCommonJvm (#$transferJobUid)"
         val transferJob = db.transferJobDao.findByUid(transferJobUid)
             ?: throw IllegalArgumentException("$logPrefix: TransferJob #$transferJobUid does not exist")
-        val transferJobItems = db.transferJobItemDao.findByJobUid(transferJobUid)
+        val transferJobItems = db.transferJobItemDao.findPendingByJobUid(
+            transferJobUid)
 
         coroutineScope {
             //Here, if needed, can check size of items where size is unknown use a head request
@@ -126,6 +141,7 @@ class BlobDownloadClientUseCaseCommonJvm(
                 BlobTransferJobItem(
                     blobUrl = it.tjiSrc!!,
                     transferJobItemUid = it.tjiUid,
+                    partialResponseFile = it.tjiPartialTmpFile,
                 )
             }
             val transferJobItemStatusUpdater = TransferJobItemStatusUpdater(db, repo, this)
@@ -137,13 +153,13 @@ class BlobDownloadClientUseCaseCommonJvm(
                 )
 
                 val numIncompleteItems = db.withDoorTransactionAsync {
-                    transferJobItemStatusUpdater.commit(transferJobUid)
                     transferJobItemStatusUpdater.onFinished()
+                    transferJobItemStatusUpdater.commit(transferJobUid)
                     db.transferJobItemDao.findNumberJobItemsNotComplete(transferJobUid)
                 }
 
                 if(numIncompleteItems != 0) {
-                    throw IllegalStateException("BlobDownloadClientUseCaseCommonJvm: not complete.")
+                    throw IllegalStateException("$logPrefix: not complete.")
                 }
                 Napier.d { "$logPrefix complete!"}
             }catch(e: Throwable) {

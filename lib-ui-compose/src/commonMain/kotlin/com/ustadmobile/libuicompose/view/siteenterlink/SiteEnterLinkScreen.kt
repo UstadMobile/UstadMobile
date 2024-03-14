@@ -76,7 +76,7 @@ fun SiteEnterLinkScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .defaultItemPadding()
-                .testTag("site_link_text")
+                .testTag("site_link")
                 ,
             value = uiState.siteLink,
             label = { Text(stringResource(MR.strings.site_link)) },

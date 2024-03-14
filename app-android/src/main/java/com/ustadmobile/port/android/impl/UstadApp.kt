@@ -24,6 +24,8 @@ import com.ustadmobile.core.contentformats.xapi.XapiZipContentImporter
 import com.ustadmobile.core.db.*
 import com.ustadmobile.core.db.ext.MIGRATION_144_145_CLIENT
 import com.ustadmobile.core.db.ext.MIGRATION_148_149_CLIENT_WITH_OFFLINE_ITEMS
+import com.ustadmobile.core.db.ext.MIGRATION_155_156_CLIENT
+import com.ustadmobile.core.db.ext.MIGRATION_161_162_CLIENT
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.util.DiTag
@@ -37,13 +39,18 @@ import com.ustadmobile.core.domain.account.SetPasswordUseCase
 import com.ustadmobile.core.domain.account.SetPasswordUseCaseCommonJvm
 import com.ustadmobile.core.domain.blob.download.BlobDownloadClientUseCase
 import com.ustadmobile.core.domain.blob.download.BlobDownloadClientUseCaseCommonJvm
+import com.ustadmobile.core.domain.blob.download.CancelDownloadUseCase
+import com.ustadmobile.core.domain.blob.download.CancelDownloadUseCaseAndroid
 import com.ustadmobile.core.domain.blob.download.ContentManifestDownloadUseCase
 import com.ustadmobile.core.domain.blob.download.EnqueueBlobDownloadClientUseCase
 import com.ustadmobile.core.domain.blob.download.EnqueueBlobDownloadClientUseCaseAndroid
 import com.ustadmobile.core.domain.blob.download.EnqueueContentManifestDownloadJobUseCaseAndroid
 import com.ustadmobile.core.domain.blob.download.MakeContentEntryAvailableOfflineUseCase
+import com.ustadmobile.core.domain.blob.openblob.OpenBlobUseCase
+import com.ustadmobile.core.domain.blob.openblob.OpenBlobUseCaseAndroid
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCaseJvm
+import com.ustadmobile.core.domain.blob.saveandupload.SaveAndUploadLocalUrisUseCase
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCaseJvm
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
@@ -51,6 +58,8 @@ import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCaseAnd
 import com.ustadmobile.core.domain.blob.savepicture.SavePictureUseCase
 import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCase
 import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCaseJvm
+import com.ustadmobile.core.domain.blob.upload.CancelBlobUploadClientUseCase
+import com.ustadmobile.core.domain.blob.upload.CancelBlobUploadClientUseCaseAndroid
 import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCase
 import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCaseAndroid
 import com.ustadmobile.core.domain.blob.upload.UpdateFailedTransferJobUseCase
@@ -82,6 +91,8 @@ import com.ustadmobile.core.domain.deleteditem.DeletePermanentlyUseCase
 import com.ustadmobile.core.domain.deleteditem.RestoreDeletedItemUseCase
 import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCase
 import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCaseAndroid
+import com.ustadmobile.core.domain.share.ShareTextUseCase
+import com.ustadmobile.core.domain.share.ShareTextUseCaseAndroid
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseCommonJvm
@@ -113,6 +124,7 @@ import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.uri.UriHelperAndroid
 import com.ustadmobile.core.util.ext.appMetaData
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
+import com.ustadmobile.core.util.ext.requireFileSeparatorSuffix
 import com.ustadmobile.core.util.ext.toNullIfBlank
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.libcache.UstadCache
@@ -149,6 +161,10 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
         val updateCacheLockJoinUseCase: UpdateCacheLockJoinUseCase,
     )
 
+    private val Context.httpPersistentFilesDir: File
+        get() = File(filesDir, "httpfiles")
+
+
     @OptIn(ExperimentalXmlUtilApi::class)
     override val di: DI by DI.lazy {
         bind<OkHttpClient>() with singleton {
@@ -166,6 +182,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                         cache = instance(),
                         tmpDir = File(rootTmpDir, "okhttp-tmp"),
                         logger = NapierLoggingAdapter(),
+                        json = instance(),
                     )
                 )
                 .build()
@@ -231,6 +248,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
         bind<Json>() with singleton {
             Json {
                 encodeDefaults = true
+                ignoreUnknownKeys = true
             }
         }
 
@@ -279,6 +297,8 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 .addMigrations(*migrationList().toTypedArray())
                 .addMigrations(MIGRATION_144_145_CLIENT)
                 .addMigrations(MIGRATION_148_149_CLIENT_WITH_OFFLINE_ITEMS)
+                .addMigrations(MIGRATION_155_156_CLIENT)
+                .addMigrations(MIGRATION_161_162_CLIENT)
                 .build()
 
             val cache: UstadCache = instance()
@@ -321,7 +341,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
         }
 
         bind<UstadCache>() with singleton {
-            val httpCacheDir = File(applicationContext.filesDir, "httpfiles")
+            val httpCacheDir =  applicationContext.httpPersistentFilesDir
             val storagePath = Path(httpCacheDir.absolutePath)
             UstadCacheBuilder(
                 appContext = applicationContext,
@@ -572,6 +592,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 okHttpClient = instance(),
                 db = instance(tag = DoorTag.TAG_DB),
                 repo = instance(tag = DoorTag.TAG_REPO),
+                httpCache = instance(),
             )
         }
 
@@ -589,6 +610,10 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 db = instance(tag = DoorTag.TAG_DB),
                 httpClient = instance(),
                 json = instance(),
+                cacheTmpPath = File(
+                    applicationContext.httpPersistentFilesDir,
+                    UstadCacheBuilder.DEFAULT_SUBPATH_WORK
+                ).absolutePath.requireFileSeparatorSuffix(),
             )
         }
 
@@ -612,8 +637,9 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
         bind<GetStoragePathForUrlUseCase>() with singleton {
             GetStoragePathForUrlUseCaseCommonJvm(
-                httpClient = instance(),
+                okHttpClient = instance(),
                 cache = instance(),
+                tmpDir = instance(tag = DiTag.TAG_TMP_DIR),
             )
         }
 
@@ -703,6 +729,42 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 repo = instance(tag = DoorTag.TAG_REPO),
                 nodeIdAndAuth = instance(),
                 enqueueContentManifestDownloadUseCase = instance(),
+            )
+        }
+
+        bind<CancelDownloadUseCase>() with scoped(EndpointScope.Default).provider {
+            CancelDownloadUseCaseAndroid(
+                appContext = applicationContext,
+                endpoint = context,
+                db = instance(tag = DoorTag.TAG_DB)
+            )
+        }
+
+        bind<ShareTextUseCase>() with singleton {
+            ShareTextUseCaseAndroid(applicationContext)
+        }
+
+        bind<SaveAndUploadLocalUrisUseCase>() with scoped(EndpointScope.Default).singleton {
+            SaveAndUploadLocalUrisUseCase(
+                saveLocalUrisAsBlobsUseCase = instance(),
+                enqueueBlobUploadClientUseCase = instance(),
+                activeDb = instance(tag = DoorTag.TAG_DB),
+                activeRepo = instance(tag = DoorTag.TAG_REPO),
+            )
+        }
+
+        bind<CancelBlobUploadClientUseCase>() with scoped(EndpointScope.Default).singleton {
+            CancelBlobUploadClientUseCaseAndroid(
+                appContext = applicationContext,
+                endpoint = context,
+                db = instance(tag = DoorTag.TAG_DB),
+            )
+        }
+
+        bind<OpenBlobUseCase>() with scoped(EndpointScope.Default).singleton {
+            OpenBlobUseCaseAndroid(
+                appContext = applicationContext,
+                getStoragePathForUrlUseCase = instance()
             )
         }
 

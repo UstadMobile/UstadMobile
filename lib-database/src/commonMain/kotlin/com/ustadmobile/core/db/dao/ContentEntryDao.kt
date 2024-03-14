@@ -207,7 +207,7 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
                     IN (SELECT ceccjContentCategoryUid 
                           FROM ContentEntryContentCategoryJoin 
                          WHERE ceccjContentEntryUid = ContentEntry.contentEntryUid)) 
-               AND (:includeDeleted = 1 OR CAST(ContentEntryParentChildJoin.cepcjDeleted AS INTEGER) = 0)          
+               AND (CAST(:includeDeleted AS INTEGER) = 1 OR CAST(ContentEntryParentChildJoin.cepcjDeleted AS INTEGER) = 0)          
             ORDER BY ContentEntryParentChildJoin.childIndex,
                      CASE(:sortOrder)
                      WHEN $SORT_TITLE_ASC THEN ContentEntry.title

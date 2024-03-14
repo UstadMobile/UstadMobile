@@ -111,6 +111,7 @@ class XferTestNode(
                     cache = httpCache,
                     tmpDir = File(rootTmpDir, "okhttp-tmp"),
                     logger = NapierLoggingAdapter(),
+                    json = json,
                 )
             )
             .build()
@@ -182,8 +183,9 @@ class XferTestNode(
 
             bind<GetStoragePathForUrlUseCase>() with singleton {
                 GetStoragePathForUrlUseCaseCommonJvm(
-                    httpClient = httpClient,
+                    okHttpClient = okHttpClient,
                     cache = httpCache,
+                    tmpDir = temporaryFolder.newFolder(),
                 )
             }
 

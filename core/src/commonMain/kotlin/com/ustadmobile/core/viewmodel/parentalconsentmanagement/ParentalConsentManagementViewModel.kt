@@ -1,9 +1,17 @@
 package com.ustadmobile.core.viewmodel.parentalconsentmanagement
 
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.siteterms.GetLocaleForSiteTermsUseCase
+import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.PersonParentJoin
+import com.ustadmobile.lib.db.entities.PersonParentJoin.Companion.RELATIONSHIP_FATHER
+import com.ustadmobile.lib.db.entities.PersonParentJoin.Companion.RELATIONSHIP_MOTHER
+import com.ustadmobile.lib.db.entities.PersonParentJoin.Companion.RELATIONSHIP_OTHER_LEGAL_GUARDIAN
+import com.ustadmobile.lib.db.entities.PersonParentJoinAndMinorPerson
+import com.ustadmobile.lib.db.entities.SiteTerms
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.flow.Flow
@@ -13,18 +21,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
-import com.ustadmobile.core.MR
-import com.ustadmobile.core.domain.siteterms.GetLocaleForSiteTermsUseCase
-import com.ustadmobile.core.impl.UstadMobileSystemCommon
-import com.ustadmobile.core.impl.appstate.Snack
-import com.ustadmobile.core.impl.config.ApiUrlConfig
-import com.ustadmobile.core.util.ext.isDateOfBirthAnAdult
-import com.ustadmobile.core.util.ext.isGuestUser
-import com.ustadmobile.core.util.ext.navigateToLink
-import com.ustadmobile.lib.db.entities.PersonParentJoin.Companion.RELATIONSHIP_FATHER
-import com.ustadmobile.lib.db.entities.PersonParentJoin.Companion.RELATIONSHIP_MOTHER
-import com.ustadmobile.lib.db.entities.PersonParentJoin.Companion.RELATIONSHIP_OTHER
-import kotlinx.datetime.Instant
 import org.kodein.di.instance
 import org.kodein.di.on
 
@@ -91,24 +87,11 @@ class ParentalConsentManagementViewModel(
     private val getLocaleForSiteTermsUseCase: GetLocaleForSiteTermsUseCase by
         on(accountManager.activeEndpoint).instance()
 
-    private val apiUrlConfig: ApiUrlConfig by instance()
-
     init {
-        //On the web version this might be opened directly, in which case we need to take the user
-        // to login/create account first.
-        if(accountManager.currentUserSession.person.let {
-            it.isGuestUser() || !Instant.fromEpochMilliseconds(it.dateOfBirth).isDateOfBirthAnAdult()
-        }) {
-            navController.navigateToLink(
-                link = "$DEST_NAME?${ARG_ENTITY_UID}=$entityUidArg",
-                accountManager = accountManager,
-                openExternalLinkUseCase = { _, _ -> Unit },
-                goOptions = UstadMobileSystemCommon.UstadGoOptions(
-                    popUpToViewName = DEST_NAME, popUpToInclusive = true
-                ),
-                userCanSelectServer = apiUrlConfig.canSelectServer,
-            )
-        }else {
+        ifLoggedInElseNavigateToLoginWithNextDestSet(
+            requireAdultAccount = true,
+            args = mapOf(ARG_ENTITY_UID to entityUidArg.toString())
+        ) {
             _appUiState.update { prev ->
                 prev.copy(
                     title = systemImpl.getString(MR.strings.manage_parental_consent)
@@ -118,8 +101,14 @@ class ParentalConsentManagementViewModel(
             viewModelScope.launch {
                 loadEntity(
                     serializer = PersonParentJoinAndMinorPerson.serializer(),
-                    onLoadFromDb = {
-                        it.personParentJoinDao.findByUidWithMinorAsync(entityUidArg)
+                    onLoadFromDb = { db ->
+                        db.personParentJoinDao.findByUidWithMinorAsync(entityUidArg)?.takeIf { ppjAndMinor ->
+                            ppjAndMinor.personParentJoin?.let {
+                                //If the join has already been claimed - and the active user is not the
+                                //parent/guardian, stop.
+                                !(it.ppjParentPersonUid != 0L && it.ppjParentPersonUid != activeUserPersonUid)
+                            } ?: false
+                        }
                     },
                     makeDefault = {
                         //Should never happen
@@ -135,7 +124,7 @@ class ParentalConsentManagementViewModel(
                 )
 
                 _uiState.update { prev ->
-                    prev.copy(fieldsEnabled = true)
+                    prev.copy(fieldsEnabled = prev.parentJoinAndMinor != null)
                 }
             }
 
@@ -194,7 +183,7 @@ class ParentalConsentManagementViewModel(
 
     fun onClickConsent() {
         if(_uiState.value.parentJoinAndMinor?.personParentJoin?.ppjRelationship?.let {
-            it in listOf(RELATIONSHIP_MOTHER, RELATIONSHIP_FATHER, RELATIONSHIP_OTHER)
+            it in listOf(RELATIONSHIP_MOTHER, RELATIONSHIP_FATHER, RELATIONSHIP_OTHER_LEGAL_GUARDIAN)
         } != true) {
             _uiState.update { prev ->
                 prev.copy(

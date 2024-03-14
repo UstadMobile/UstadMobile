@@ -46,7 +46,6 @@ import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 import org.burnoutcrew.reorderable.*
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Suppress("unused") // Pending add to navhost
 @Composable
 fun ClazzEditScreen(viewModel: ClazzEditViewModel) {
 
@@ -230,7 +229,7 @@ fun ClazzEditScreen(
                     },
                     modifier = Modifier.clickable {
                         onClickAddCourseBlock()
-                    },
+                    }.testTag("add_block_button"),
                     headlineContent = { Text(stringResource(MR.strings.add_block)) },
                 )
             }
@@ -295,7 +294,7 @@ fun ClazzEditScreen(
             ListItem(
                 modifier = Modifier.clickable {
                     onClickAddSchedule()
-                },
+                }.testTag("add_a_schedule"),
                 headlineContent = { Text(stringResource(MR.strings.add_a_schedule)) },
                 leadingContent ={
                     Icon(
@@ -349,6 +348,7 @@ fun ClazzEditScreen(
         item {
             UstadClickableTextField(
                 modifier = Modifier
+                    .testTag("timezone")
                     .fillMaxWidth()
                     .defaultItemPadding(),
                 label = { Text(stringResource(MR.strings.timezone)) },
@@ -366,7 +366,7 @@ fun ClazzEditScreen(
                 checked = uiState.clazzEditAttendanceChecked,
                 onChange = { onCheckedAttendance(it) },
                 enabled = uiState.fieldsEnabled,
-                modifier = Modifier.defaultItemPadding(),
+                modifier = Modifier.defaultItemPadding().testTag("attendance"),
             )
         }
 
@@ -380,6 +380,7 @@ fun ClazzEditScreen(
                 singleLine = true,
                 modifier = Modifier
                     .fillMaxWidth()
+                    .testTag("terminology")
                     .defaultItemPadding(),
             )
         }
@@ -404,7 +405,6 @@ private fun ClazzEditBasicDetails(
             UstadImageSelectButton(
                 imageUri = uiState.entity?.coursePicture?.coursePictureUri,
                 onImageUriChanged = { imageUri ->
-                    println("onImageUriChanged: $imageUri")
                     onClazzChanged(
                         uiState.entity?.shallowCopy {
                             coursePicture = coursePicture?.copy(
@@ -422,6 +422,7 @@ private fun ClazzEditBasicDetails(
         OutlinedTextField(
             modifier = Modifier
                 .fillMaxWidth()
+                .testTag("name")
                 .defaultItemPadding(),
             value = uiState.entity?.clazzName ?: "",
             label = { Text(stringResource(MR.strings.name_key ) + "*") },

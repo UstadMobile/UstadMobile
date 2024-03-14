@@ -1,6 +1,5 @@
 package com.ustadmobile.libuicompose.view.app
 
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -17,8 +16,8 @@ import com.ustadmobile.core.impl.nav.NavResultReturner
 import com.ustadmobile.core.impl.nav.NavResultReturnerImpl
 import com.ustadmobile.core.impl.nav.PopNavCommand
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.core.view.JoinWithCodeView
 import com.ustadmobile.core.viewmodel.HtmlEditViewModel
+import com.ustadmobile.core.viewmodel.clazz.invitevialink.InviteViaLinkViewModel
 import com.ustadmobile.core.viewmodel.OnBoardingViewModel
 import com.ustadmobile.core.viewmodel.person.registerageredirect.RegisterAgeRedirectViewModel
 import com.ustadmobile.core.viewmodel.site.termsdetail.SiteTermsDetailViewModel
@@ -27,7 +26,11 @@ import com.ustadmobile.core.viewmodel.about.OpenLicensesViewModel
 import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
+import com.ustadmobile.core.viewmodel.clazz.joinwithcode.JoinWithCodeViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
+import com.ustadmobile.core.viewmodel.clazz.permissiondetail.CoursePermissionDetailViewModel
+import com.ustadmobile.core.viewmodel.clazz.permissionedit.CoursePermissionEditViewModel
+import com.ustadmobile.core.viewmodel.clazz.permissionlist.CoursePermissionListViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.detail.ClazzAssignmentDetailViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.edit.ClazzAssignmentEditViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.peerreviewerallocationedit.PeerReviewerAllocationEditViewModel
@@ -125,9 +128,16 @@ import org.kodein.di.instance
 import kotlin.reflect.KClass
 import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel
 import com.ustadmobile.core.viewmodel.settings.DeveloperSettingsViewModel
+import com.ustadmobile.core.viewmodel.systempermission.detail.SystemPermissionDetailViewModel
+import com.ustadmobile.core.viewmodel.systempermission.edit.SystemPermissionEditViewModel
 import com.ustadmobile.core.viewmodel.videocontent.VideoContentViewModel
 import com.ustadmobile.core.viewmodel.xapicontent.XapiContentViewModel
 import com.ustadmobile.libuicompose.view.about.OpenLicensesScreen
+import com.ustadmobile.libuicompose.view.clazz.invitevialink.InviteViaLinkScreen
+import com.ustadmobile.libuicompose.view.clazz.joinwithcode.JoinWithCodeScreen
+import com.ustadmobile.libuicompose.view.clazz.permissiondetail.CoursePermissionDetailScreen
+import com.ustadmobile.libuicompose.view.clazz.permissionedit.CoursePermissionEditScreen
+import com.ustadmobile.libuicompose.view.clazz.permissionlist.CoursePermissionListScreen
 import com.ustadmobile.libuicompose.view.contententry.detail.ContentEntryDetailScreen
 import com.ustadmobile.libuicompose.view.contententry.edit.ContentEntryEditScreen
 import com.ustadmobile.libuicompose.view.contententry.getmetadata.ContentEntryGetMetadataScreen
@@ -143,6 +153,8 @@ import com.ustadmobile.libuicompose.view.parentalconsentmanagement.ParentalConse
 import com.ustadmobile.libuicompose.view.pdfcontent.PdfContentScreen
 import com.ustadmobile.libuicompose.view.person.registerminorwaitforparent.RegisterMinorWaitForParentScreen
 import com.ustadmobile.libuicompose.view.settings.DeveloperSettingsScreen
+import com.ustadmobile.libuicompose.view.systempermission.detail.SystemPermissionDetailScreen
+import com.ustadmobile.libuicompose.view.systempermission.edit.SystemPermissionEditScreen
 import com.ustadmobile.libuicompose.view.videocontent.VideoContentScreen
 import com.ustadmobile.libuicompose.view.xapicontent.XapiContentScreen
 import kotlinx.coroutines.flow.Flow
@@ -664,8 +676,10 @@ fun AppNavHost(
                 )
             }
 
-            contentScene("/${JoinWithCodeView.VIEW_NAME}") { backStackEntry ->
-                Text("Join via code: coming soon")
+            contentScene("/${JoinWithCodeViewModel.DEST_NAME}") { backStackEntry ->
+                JoinWithCodeScreen(
+                    appViewModel(backStackEntry, JoinWithCodeViewModel::class, ::JoinWithCodeViewModel)
+                )
             }
 
             contentScene("/${OpenLicensesViewModel.DEST_NAME}") { backStackEntry ->
@@ -687,6 +701,49 @@ fun AppNavHost(
                         ::DeletedItemListViewModel)
                 )
             }
+
+            contentScene("/${InviteViaLinkViewModel.DEST_NAME}") { backStackEntry ->
+                InviteViaLinkScreen(
+                    appViewModel(backStackEntry, InviteViaLinkViewModel::class,
+                        ::InviteViaLinkViewModel)
+                )
+            }
+
+            contentScene("/${CoursePermissionListViewModel.DEST_NAME}") { backStackEntry ->
+                CoursePermissionListScreen(
+                    appViewModel(backStackEntry, CoursePermissionListViewModel::class,
+                        ::CoursePermissionListViewModel)
+                )
+            }
+
+            contentScene("/${CoursePermissionEditViewModel.DEST_NAME}") { backStackEntry ->
+                CoursePermissionEditScreen(
+                    appViewModel(backStackEntry, CoursePermissionEditViewModel::class,
+                        ::CoursePermissionEditViewModel)
+                )
+            }
+
+            contentScene("/${CoursePermissionDetailViewModel.DEST_NAME}") { backStackEntry ->
+                CoursePermissionDetailScreen(
+                    appViewModel(backStackEntry, CoursePermissionDetailViewModel::class,
+                        ::CoursePermissionDetailViewModel)
+                )
+            }
+
+            contentScene("/${SystemPermissionDetailViewModel.DEST_NAME}") { backStackEntry ->
+                SystemPermissionDetailScreen(
+                    appViewModel(backStackEntry, SystemPermissionDetailViewModel::class,
+                        ::SystemPermissionDetailViewModel)
+                )
+            }
+
+            contentScene("/${SystemPermissionEditViewModel.DEST_NAME}") { backStackEntry ->
+                SystemPermissionEditScreen(
+                    appViewModel(backStackEntry, SystemPermissionEditViewModel::class,
+                        ::SystemPermissionEditViewModel)
+                )
+            }
+
         }
     }
 }

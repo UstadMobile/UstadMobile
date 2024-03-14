@@ -2,15 +2,16 @@ package com.ustadmobile.core.viewmodel.clazzassignment
 
 import app.cash.turbine.test
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.domain.clazz.CreateNewClazzUseCase
 import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.EnrolIntoCourseUseCase
 import com.ustadmobile.core.test.clientservertest.clientServerIntegrationTest
 import com.ustadmobile.core.test.savedStateOf
 import com.ustadmobile.core.test.use
 import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
 import com.ustadmobile.core.util.ext.awaitItemWhere
-import com.ustadmobile.core.util.ext.createNewClazzAndGroups
 import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailViewModel
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
@@ -43,7 +44,7 @@ class ClazzAssignmentIntegrationTest: AbstractMainDispatcherTest() {
             }
 
             val assignmentUid = serverDb.withDoorTransactionAsync {
-                serverDb.createNewClazzAndGroups(testCourse, serverDi.direct.instance(), emptyMap())
+                CreateNewClazzUseCase(serverDb).invoke(testCourse)
 
                 val clazzAssignmentUid = serverDb.clazzAssignmentDao.insertAsync(ClazzAssignment().apply {
                     caClazzUid = testCourse.clazzUid
@@ -64,15 +65,13 @@ class ClazzAssignmentIntegrationTest: AbstractMainDispatcherTest() {
             val teacherPerson = teacherClient.createUserAndLogin()
 
             suspend fun enrolIntoCourse(personUid: Long, role: Int) {
-                EnrolIntoCourseUseCase().invoke(
+                EnrolIntoCourseUseCase(db = serverDb, repo = null).invoke(
                     enrolment = ClazzEnrolment(
                         clazzUid = testCourse.clazzUid,
                         personUid = personUid,
                         role = role,
                     ),
                     timeZoneId = testCourse.clazzTimeZone ?: "UTC",
-                    db = serverDb,
-                    repo = null
                 )
             }
 
@@ -80,31 +79,31 @@ class ClazzAssignmentIntegrationTest: AbstractMainDispatcherTest() {
             assertEquals(studentPerson.personUid, client1AccountManager.currentUserSession.person.personUid)
 
             enrolIntoCourse(studentPerson.personUid, ClazzEnrolment.ROLE_STUDENT)
+
             enrolIntoCourse(teacherPerson.personUid, ClazzEnrolment.ROLE_TEACHER)
 
             //Student makes submission
             ClazzAssignmentDetailOverviewViewModel(
                 studentClient.di,
                 savedStateHandle = savedStateOf(
-                    UstadView.ARG_ENTITY_UID to assignmentUid.toString()
+                    UstadView.ARG_ENTITY_UID to assignmentUid.toString(),
+                    UstadViewModel.ARG_CLAZZUID to testCourse.clazzUid.toString(),
                 )
             ).use { viewModel ->
                 viewModel.uiState.test(timeout = 10.seconds, name = "student can submit") {
                     awaitItemWhere {
                         it.activeUserCanSubmit && it.submissionTextFieldVisible &&
-                            it.fieldsEnabled && it.latestSubmission != null
+                            it.fieldsEnabled && it.editableSubmission != null
                     }
                     viewModel.onChangeSubmissionText("I can has cheezburger")
                     viewModel.onClickSubmit()
 
                     val uiStateAfterSubmit = awaitItemWhere {
-                        it.fieldsEnabled && it.latestSubmission?.casText == "I can has cheezburger"
-                                && !it.activeUserCanSubmit && it.submissionTextFieldVisible
+                        it.fieldsEnabled && it.submissions.firstOrNull()?.submission?.casText == "I can has cheezburger"
+                                && !it.activeUserCanSubmit
                     }
                     assertFalse(uiStateAfterSubmit.activeUserCanSubmit,
                         message = "After submission, using default policy of must submit all at once, user must not be able to submit again")
-                    assertTrue(uiStateAfterSubmit.submissionTextFieldVisible,
-                        message = "After submission user should still be able to see the submission")
 
                     cancelAndIgnoreRemainingEvents()
                 }
@@ -123,7 +122,9 @@ class ClazzAssignmentIntegrationTest: AbstractMainDispatcherTest() {
                 teacherClient.di,
                 savedStateHandle = savedStateOf(
                     ClazzAssignmentSubmitterDetailViewModel.ARG_ASSIGNMENT_UID to assignmentUid.toString(),
-                    ClazzAssignmentSubmitterDetailViewModel.ARG_SUBMITTER_UID to studentPerson.personUid.toString()
+                    ClazzAssignmentSubmitterDetailViewModel.ARG_SUBMITTER_UID to studentPerson.personUid.toString(),
+                    UstadViewModel.ARG_CLAZZUID to testCourse.clazzUid.toString(),
+
                 )
             ).use { viewModel ->
                 Napier.d("===TEST teacher can mark student===")
@@ -133,7 +134,7 @@ class ClazzAssignmentIntegrationTest: AbstractMainDispatcherTest() {
                         it.draftMark != null &&
                         it.courseBlock != null &&
                         it.submissionList.isNotEmpty() &&
-                        it.submissionList.first().casText == "I can has cheezburger" &&
+                        it.submissionList.first().submission.casText == "I can has cheezburger" &&
                         it.markFieldsEnabled
                     }
                     viewModel.onChangeDraftMark(uiState.draftMark?.shallowCopy {
@@ -165,7 +166,8 @@ class ClazzAssignmentIntegrationTest: AbstractMainDispatcherTest() {
             ClazzAssignmentDetailOverviewViewModel(
                 studentClient.di,
                 savedStateHandle = savedStateOf(
-                    UstadView.ARG_ENTITY_UID to assignmentUid.toString()
+                    UstadView.ARG_ENTITY_UID to assignmentUid.toString(),
+                    UstadViewModel.ARG_CLAZZUID to testCourse.clazzUid.toString(),
                 )
             ).use { viewModel ->
                 viewModel.uiState.test(timeout = 5.seconds, name = "student can see grade") {

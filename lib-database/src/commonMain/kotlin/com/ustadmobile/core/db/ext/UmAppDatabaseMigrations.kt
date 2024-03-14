@@ -4,7 +4,10 @@ import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.door.migration.DoorMigrationStatementList
 import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.door.migration.DoorMigration
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.CacheLockJoin
+import com.ustadmobile.lib.db.entities.ClazzEnrolment
+import com.ustadmobile.lib.db.entities.CoursePermission
 import com.ustadmobile.lib.db.entities.Message
 import com.ustadmobile.lib.db.entities.UserSession
 
@@ -1579,6 +1582,466 @@ val MIGRATION_148_149_NO_OFFLINE_ITEMS = DoorMigrationStatementList(148, 149) {
     emptyList()
 }
 
+val MIGRATION_149_150 = DoorMigrationStatementList(149, 150) { db ->
+    buildList {
+        val fieldType = if(db.dbType() == DoorDbType.SQLITE) "INTEGER" else "BIGINT"
+
+        add("ALTER TABLE ContentEntryVersion ADD COLUMN cevStorageSize $fieldType NOT NULL DEFAULT 0")
+        add("ALTER TABLE ContentEntryVersion ADD COLUMN cevOriginalSize $fieldType NOT NULL DEFAULT 0")
+    }
+}
+
+val MIGRATION_150_151 = DoorMigrationStatementList(150, 151) { db ->
+    listOf(
+        "ALTER TABLE TransferJobItem ADD COLUMN tjiPartialTmpFile TEXT"
+    )
+}
+
+/**
+ * Add triggers to be used on Postgres to retain all active URIs for PersonPicture and CoursePicture
+ * by creating locks. See AddRetainAllActiveUriTriggersUseCase
+ *
+ * Note: this was already added on SQLite,
+ */
+val MIGRATION_151_152 = DoorMigrationStatementList(151, 152) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.POSTGRES) {
+            add("""
+                            CREATE OR REPLACE FUNCTION retain_c_clj_50_personPictureUri() RETURNS TRIGGER AS $$
+                            BEGIN
+                            INSERT INTO CacheLockJoin(cljTableId, cljEntityUid, cljUrl, cljLockId, cljStatus, cljType)
+                            VALUES(50, NEW.personPictureUid, NEW.personPictureUri, 0, 1, 1);
+                            RETURN NEW;
+                            END $$ LANGUAGE plpgsql
+                        """)
+            add("""
+                            CREATE OR REPLACE FUNCTION retain_d_clj_50_personPictureUri() RETURNS TRIGGER AS $$
+                            BEGIN
+                            UPDATE CacheLockJoin 
+                               SET cljStatus = 3
+                             WHERE cljTableId = 50
+                               AND cljEntityUid = OLD.personPictureUid
+                               AND cljUrl = OLD.personPictureUri;
+                            RETURN OLD;
+                            END $$ LANGUAGE plpgsql   
+                        """)
+            add("""
+                            CREATE TRIGGER retain_c_clj_50_personPictureUri_ins_t
+                            AFTER INSERT ON PersonPicture
+                            FOR EACH ROW
+                            WHEN (NEW.personPictureUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_c_clj_50_personPictureUri();
+                        """)
+            add("""
+                            CREATE TRIGGER retain_c_clj_50_personPictureUri_upd_t
+                            AFTER UPDATE ON PersonPicture
+                            FOR EACH ROW
+                            WHEN (NEW.personPictureUri IS DISTINCT FROM OLD.personPictureUri AND OLD.personPictureUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_c_clj_50_personPictureUri();
+                        """)
+            add("""
+                            CREATE TRIGGER retain_d_clj_50_personPictureUri_upd_t
+                            AFTER UPDATE ON PersonPicture
+                            FOR EACH ROW
+                            WHEN (NEW.personPictureUri IS DISTINCT FROM OLD.personPictureUri AND NEW.personPictureUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_d_clj_50_personPictureUri();
+                        """)
+            add("""
+                            CREATE OR REPLACE FUNCTION retain_c_clj_50_personPictureThumbnailUr() RETURNS TRIGGER AS $$
+                            BEGIN
+                            INSERT INTO CacheLockJoin(cljTableId, cljEntityUid, cljUrl, cljLockId, cljStatus, cljType)
+                            VALUES(50, NEW.personPictureUid, NEW.personPictureThumbnailUri, 0, 1, 1);
+                            RETURN NEW;
+                            END $$ LANGUAGE plpgsql
+                        """)
+            add("""
+                            CREATE OR REPLACE FUNCTION retain_d_clj_50_personPictureThumbnailUr() RETURNS TRIGGER AS $$
+                            BEGIN
+                            UPDATE CacheLockJoin 
+                               SET cljStatus = 3
+                             WHERE cljTableId = 50
+                               AND cljEntityUid = OLD.personPictureUid
+                               AND cljUrl = OLD.personPictureThumbnailUri;
+                            RETURN OLD;
+                            END $$ LANGUAGE plpgsql   
+                        """)
+            add("""
+                            CREATE TRIGGER retain_c_clj_50_personPictureThumbnailUr_ins_t
+                            AFTER INSERT ON PersonPicture
+                            FOR EACH ROW
+                            WHEN (NEW.personPictureThumbnailUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_c_clj_50_personPictureThumbnailUr();
+                        """)
+            add("""
+                            CREATE TRIGGER retain_c_clj_50_personPictureThumbnailUr_upd_t
+                            AFTER UPDATE ON PersonPicture
+                            FOR EACH ROW
+                            WHEN (NEW.personPictureThumbnailUri IS DISTINCT FROM OLD.personPictureThumbnailUri AND OLD.personPictureThumbnailUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_c_clj_50_personPictureThumbnailUr();
+                        """)
+            add("""
+                            CREATE TRIGGER retain_d_clj_50_personPictureThumbnailUr_upd_t
+                            AFTER UPDATE ON PersonPicture
+                            FOR EACH ROW
+                            WHEN (NEW.personPictureThumbnailUri IS DISTINCT FROM OLD.personPictureThumbnailUri AND NEW.personPictureThumbnailUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_d_clj_50_personPictureThumbnailUr();
+                        """)
+                    add("""
+                            CREATE OR REPLACE FUNCTION retain_c_clj_125_coursePictureUri() RETURNS TRIGGER AS $$
+                            BEGIN
+                            INSERT INTO CacheLockJoin(cljTableId, cljEntityUid, cljUrl, cljLockId, cljStatus, cljType)
+                            VALUES(125, NEW.coursePictureUid, NEW.coursePictureUri, 0, 1, 1);
+                            RETURN NEW;
+                            END $$ LANGUAGE plpgsql
+                        """)
+                    add("""
+                            CREATE OR REPLACE FUNCTION retain_d_clj_125_coursePictureUri() RETURNS TRIGGER AS $$
+                            BEGIN
+                            UPDATE CacheLockJoin 
+                               SET cljStatus = 3
+                             WHERE cljTableId = 125
+                               AND cljEntityUid = OLD.coursePictureUid
+                               AND cljUrl = OLD.coursePictureUri;
+                            RETURN OLD;
+                            END $$ LANGUAGE plpgsql   
+                        """)
+                    add("""
+                            CREATE TRIGGER retain_c_clj_125_coursePictureUri_ins_t
+                            AFTER INSERT ON CoursePicture
+                            FOR EACH ROW
+                            WHEN (NEW.coursePictureUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_c_clj_125_coursePictureUri();
+                        """)
+                    add("""
+                            CREATE TRIGGER retain_c_clj_125_coursePictureUri_upd_t
+                            AFTER UPDATE ON CoursePicture
+                            FOR EACH ROW
+                            WHEN (NEW.coursePictureUri IS DISTINCT FROM OLD.coursePictureUri AND OLD.coursePictureUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_c_clj_125_coursePictureUri();
+                        """)
+                    add("""
+                            CREATE TRIGGER retain_d_clj_125_coursePictureUri_upd_t
+                            AFTER UPDATE ON CoursePicture
+                            FOR EACH ROW
+                            WHEN (NEW.coursePictureUri IS DISTINCT FROM OLD.coursePictureUri AND NEW.coursePictureUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_d_clj_125_coursePictureUri();
+                        """)
+                    add("""
+                            CREATE OR REPLACE FUNCTION retain_c_clj_125_coursePictureThumbnailUr() RETURNS TRIGGER AS $$
+                            BEGIN
+                            INSERT INTO CacheLockJoin(cljTableId, cljEntityUid, cljUrl, cljLockId, cljStatus, cljType)
+                            VALUES(125, NEW.coursePictureUid, NEW.coursePictureThumbnailUri, 0, 1, 1);
+                            RETURN NEW;
+                            END $$ LANGUAGE plpgsql
+                        """)
+                    add("""
+                            CREATE OR REPLACE FUNCTION retain_d_clj_125_coursePictureThumbnailUr() RETURNS TRIGGER AS $$
+                            BEGIN
+                            UPDATE CacheLockJoin 
+                               SET cljStatus = 3
+                             WHERE cljTableId = 125
+                               AND cljEntityUid = OLD.coursePictureUid
+                               AND cljUrl = OLD.coursePictureThumbnailUri;
+                            RETURN OLD;
+                            END $$ LANGUAGE plpgsql   
+                        """)
+                    add("""
+                            CREATE TRIGGER retain_c_clj_125_coursePictureThumbnailUr_ins_t
+                            AFTER INSERT ON CoursePicture
+                            FOR EACH ROW
+                            WHEN (NEW.coursePictureThumbnailUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_c_clj_125_coursePictureThumbnailUr();
+                        """)
+                    add("""
+                            CREATE TRIGGER retain_c_clj_125_coursePictureThumbnailUr_upd_t
+                            AFTER UPDATE ON CoursePicture
+                            FOR EACH ROW
+                            WHEN (NEW.coursePictureThumbnailUri IS DISTINCT FROM OLD.coursePictureThumbnailUri AND OLD.coursePictureThumbnailUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_c_clj_125_coursePictureThumbnailUr();
+                        """)
+                    add("""
+                            CREATE TRIGGER retain_d_clj_125_coursePictureThumbnailUr_upd_t
+                            AFTER UPDATE ON CoursePicture
+                            FOR EACH ROW
+                            WHEN (NEW.coursePictureThumbnailUri IS DISTINCT FROM OLD.coursePictureThumbnailUri AND NEW.coursePictureThumbnailUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_d_clj_125_coursePictureThumbnailUr();
+                        """)
+        }
+    }
+}
+
+val MIGRATION_152_153 = DoorMigrationStatementList(152, 153) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS EnrolmentRequest (  erClazzUid  INTEGER  NOT NULL , erClazzName  TEXT , erPersonUid  INTEGER  NOT NULL , erPersonFullname  TEXT , erPersonPictureUri  TEXT , erPersonUsername  TEXT , erRole  INTEGER  NOT NULL , erRequestTime  INTEGER  NOT NULL , erStatus  INTEGER  NOT NULL , erStatusSetByPersonUid  INTEGER  NOT NULL , erDeleted  INTEGER  NOT NULL , erStatusSetAuth  TEXT , erLastModified  INTEGER  NOT NULL , erUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS EnrolmentRequest (  erClazzUid  BIGINT  NOT NULL , erClazzName  TEXT , erPersonUid  BIGINT  NOT NULL , erPersonFullname  TEXT , erPersonPictureUri  TEXT , erPersonUsername  TEXT , erRole  INTEGER  NOT NULL , erRequestTime  BIGINT  NOT NULL , erStatus  INTEGER  NOT NULL , erStatusSetByPersonUid  BIGINT  NOT NULL , erDeleted  BOOL  NOT NULL , erStatusSetAuth  TEXT , erLastModified  BIGINT  NOT NULL , erUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+        }
+        add("CREATE INDEX idx_enrolmentrequest_by_clazz ON EnrolmentRequest (erClazzUid, erStatus)")
+        add("CREATE INDEX idx_enrolmentrequest_by_person ON EnrolmentRequest (erPersonUid, erStatus)")
+    }
+}
+
+val MIGRATION_153_154 = DoorMigrationStatementList(153, 154) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS CoursePermission (  cpLastModified  INTEGER  NOT NULL , cpClazzUid  INTEGER  NOT NULL , cpToEnrolmentRole  INTEGER  NOT NULL , cpToPersonUid  INTEGER  NOT NULL , cpToGroupUid  INTEGER  NOT NULL , cpPermissionsFlag  INTEGER  NOT NULL , cpIsDeleted  INTEGER  NOT NULL , cpUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+            add("CREATE TABLE IF NOT EXISTS SystemPermission (  spToPersonUid  INTEGER  NOT NULL , spToGroupUid  INTEGER  NOT NULL , spPermissionsFlag  INTEGER  NOT NULL , spLastModified  INTEGER  NOT NULL , spIsDeleted  INTEGER  NOT NULL , spUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+            add("ALTER TABLE Clazz ADD COLUMN clazzOwnerPersonUid INTEGER NOT NULL DEFAULT 0")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS CoursePermission (  cpLastModified  BIGINT  NOT NULL , cpClazzUid  BIGINT  NOT NULL , cpToEnrolmentRole  INTEGER  NOT NULL , cpToPersonUid  BIGINT  NOT NULL , cpToGroupUid  BIGINT  NOT NULL , cpPermissionsFlag  BIGINT  NOT NULL , cpIsDeleted  BOOL  NOT NULL , cpUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+            add("CREATE TABLE IF NOT EXISTS SystemPermission (  spToPersonUid  BIGINT  NOT NULL , spToGroupUid  BIGINT  NOT NULL , spPermissionsFlag  BIGINT  NOT NULL , spLastModified  BIGINT  NOT NULL , spIsDeleted  BOOL  NOT NULL , spUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+            add("ALTER TABLE Clazz ADD COLUMN clazzOwnerPersonUid BIGINT NOT NULL DEFAULT 0")
+        }
+        add("CREATE INDEX idx_coursepermission_clazzuid ON CoursePermission (cpClazzUid)")
+        add("CREATE INDEX idx_systempermission_personuid ON SystemPermission (spToPersonUid)")
+    }
+}
+
+val MIGRATION_154_155 = DoorMigrationStatementList(154, 155) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("ALTER TABLE CourseAssignmentSubmission ADD COLUMN casClazzUid INTEGER NOT NULL DEFAULT 0")
+            add("ALTER TABLE CourseAssignmentMark ADD COLUMN camClazzUid INTEGER NOT NULL DEFAULT 0")
+        }else {
+            add("ALTER TABLE CourseAssignmentSubmission ADD COLUMN casClazzUid BIGINT NOT NULL DEFAULT 0")
+            add("ALTER TABLE CourseAssignmentMark ADD COLUMN camClazzUid BIGINT NOT NULL DEFAULT 0")
+        }
+    }
+}
+
+/**
+ * Migrate permissions. New entities should only be created on the server side.
+ * No entities will be created on the client migration.
+ */
+val MIGRATION_155_156_SERVER = DoorMigrationStatementList(155, 156) { db ->
+    buildList {
+        //Add SystemPermission for existing entities
+        val falseVal = if(db.dbType() == DoorDbType.SQLITE) "0" else "false"
+        add("""
+            INSERT INTO SystemPermission(spToPersonUid, spToGroupUid, spPermissionsFlag, spLastModified, spIsDeleted)
+            SELECT Person.personUid AS spToPersonUid,
+                   0 AS spToGroupUid,
+                   CASE 
+                   WHEN Person.username = 'admin' THEN ${Long.MAX_VALUE}
+                   ELSE 0
+                   END AS spPermissionsFlag,
+                   ${systemTimeInMillis()} AS spLastModified,
+                   $falseVal AS spIsDeleted
+              FROM Person
+        """)
+
+        //Add CoursePermission for all courses for teachers
+        add("""
+            INSERT INTO CoursePermission(cpLastModified, cpClazzUid, cpToEnrolmentRole, cpToPersonUid, cpToGroupUid, cpPermissionsFlag, cpIsDeleted)
+            SELECT ${systemTimeInMillis()} AS cpLastModified,
+                   Clazz.clazzUid AS cpClazzUid,
+                   ${ClazzEnrolment.ROLE_TEACHER} AS cpToEnrolmentRole,
+                   0 AS cpToPersonUid,
+                   0 AS cpToGroupUid,
+                   ${CoursePermission.TEACHER_DEFAULT_PERMISSIONS} AS cpPermissionsFlag,
+                   $falseVal AS cpIsDeleted
+              FROM Clazz     
+        """)
+
+        //Add CoursePermission for all courses for students
+        add("""
+            INSERT INTO CoursePermission(cpLastModified, cpClazzUid, cpToEnrolmentRole, cpToPersonUid, cpToGroupUid, cpPermissionsFlag, cpIsDeleted)
+            SELECT ${systemTimeInMillis()} AS cpLastModified,
+                   Clazz.clazzUid AS cpClazzUid,
+                   ${ClazzEnrolment.ROLE_STUDENT} AS cpToEnrolmentRole,
+                   0 AS cpToPersonUid,
+                   0 AS cpToGroupUid,
+                   ${CoursePermission.STUDENT_DEFAULT_PERMISSIONS} AS cpPermissionsFlag,
+                   $falseVal AS cpIsDeleted
+              FROM Clazz     
+        """)
+
+        //Set the current owner of all courses to the admin user
+        add("""
+           UPDATE Clazz
+              SET clazzOwnerPersonUid = 
+                  (SELECT Person.personUid
+                     FROM Person
+                    WHERE Person.username = 'admin'
+                    LIMIT 1) 
+        """)
+
+        //Disable old permissions
+        add("""
+            UPDATE ScopedGrant
+               SET sgPermissions = 0,
+                   sgLct = ${systemTimeInMillis()}
+        """)
+
+    }
+}
+
+val MIGRATION_155_156_CLIENT = DoorMigrationStatementList(155, 156) { db ->
+    emptyList()
+}
+
+
+val MIGRATION_156_157 = DoorMigrationStatementList(156, 157) { db ->
+    buildList {
+        add("DROP TABLE IF EXISTS CourseAssignmentSubmissionAttachment")
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS CourseAssignmentSubmissionFile (  casaSubmissionUid  INTEGER  NOT NULL , casaCaUid  INTEGER  NOT NULL , casaClazzUid  INTEGER  NOT NULL , casaMimeType  TEXT , casaFileName  TEXT , casaUri  TEXT , casaSize  INTEGER  NOT NULL , casaTimestamp  INTEGER  NOT NULL , casaUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS CourseAssignmentSubmissionFile (  casaSubmissionUid  BIGINT  NOT NULL , casaCaUid  BIGINT  NOT NULL , casaClazzUid  BIGINT  NOT NULL , casaMimeType  TEXT , casaFileName  TEXT , casaUri  TEXT , casaSize  INTEGER  NOT NULL , casaTimestamp  BIGINT  NOT NULL , casaUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+        }
+    }
+}
+
+val MIGRATION_157_158 = DoorMigrationStatementList(157, 158) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("ALTER TABLE CourseAssignmentSubmissionFile ADD COLUMN casaDeleted INTEGER NOT NULL DEFAULT 0")
+        }else {
+            add("ALTER TABLE CourseAssignmentSubmissionFile ADD COLUMN casaDeleted BOOL NOT NULL DEFAULT FALSE")
+        }
+    }
+}
+
+val MIGRATION_158_159 = DoorMigrationStatementList(158, 159) { db ->
+    buildList {
+        val colType = if(db.dbType() == DoorDbType.SQLITE) "INTEGER" else "BIGINT"
+        add("ALTER TABLE CourseAssignmentSubmissionFile ADD COLUMN casaSubmitterUid $colType NOT NULL DEFAULT 0")
+    }
+}
+
+val MIGRATION_159_160 = DoorMigrationStatementList(159, 160) { db ->
+    buildList {
+        add("DROP TABLE IF EXISTS Comments")
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS Comments (  commentsText  TEXT , commentsEntityUid  INTEGER  NOT NULL , commentsStatus  INTEGER  NOT NULL , commentsFromPersonUid  INTEGER  NOT NULL , commentsForSubmitterUid  INTEGER  NOT NULL , commentsFromSubmitterUid  INTEGER  NOT NULL , commentsFlagged  INTEGER  NOT NULL , commentsDeleted  INTEGER  NOT NULL , commentsDateTimeAdded  INTEGER  NOT NULL , commentsLct  INTEGER  NOT NULL , commentsUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS Comments (  commentsText  TEXT , commentsEntityUid  BIGINT  NOT NULL , commentsStatus  INTEGER  NOT NULL , commentsFromPersonUid  BIGINT  NOT NULL , commentsForSubmitterUid  BIGINT  NOT NULL , commentsFromSubmitterUid  BIGINT  NOT NULL , commentsFlagged  BOOL  NOT NULL , commentsDeleted  BOOL  NOT NULL , commentsDateTimeAdded  BIGINT  NOT NULL , commentsLct  BIGINT  NOT NULL , commentsUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+        }
+
+        add("CREATE INDEX idx_comments_entity_submitter ON Comments (commentsEntityUid, commentsForSubmitterUid)")
+    }
+}
+
+val MIGRATION_160_161 = DoorMigrationStatementList(160, 161) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.POSTGRES) {
+            add("ALTER TABLE DiscussionPost DROP COLUMN discussionPostVisible")
+            add("ALTER TABLE DiscussionPost DROP COLUMN discussionPostArchive")
+            add("ALTER TABLE DiscussionPost ADD COLUMN dpDeleted BOOL NOT NULL DEFAULT FALSE")
+        }else {
+            add("ALTER TABLE DiscussionPost RENAME to DiscussionPost_OLD")
+            add("CREATE TABLE IF NOT EXISTS DiscussionPost (  discussionPostReplyToPostUid  INTEGER  NOT NULL , discussionPostTitle  TEXT , discussionPostMessage  TEXT , discussionPostStartDate  INTEGER  NOT NULL , discussionPostCourseBlockUid  INTEGER  NOT NULL , dpDeleted  INTEGER  NOT NULL , discussionPostStartedPersonUid  INTEGER  NOT NULL , discussionPostClazzUid  INTEGER  NOT NULL , discussionPostLct  INTEGER  NOT NULL , discussionPostUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+            add("INSERT INTO DiscussionPost (discussionPostReplyToPostUid, discussionPostTitle, discussionPostMessage, discussionPostStartDate, discussionPostCourseBlockUid, dpDeleted, discussionPostStartedPersonUid, discussionPostClazzUid, discussionPostLct, discussionPostUid) SELECT discussionPostReplyToPostUid, discussionPostTitle, discussionPostMessage, discussionPostStartDate, discussionPostCourseBlockUid, 0 AS dpDeleted, discussionPostStartedPersonUid, discussionPostClazzUid, discussionPostLct, discussionPostUid FROM DiscussionPost_OLD")
+            add("DROP TABLE DiscussionPost_OLD")
+        }
+    }
+}
+
+/**
+ * Add retention creation triggers (see AddRetainAllActiveTriggerUseCase) for CourseAssignmentSubmission
+ * entity on server.
+ */
+val MIGRATION_161_162_SERVER = DoorMigrationStatementList(161, 162) { db ->
+    //Add creation of retention locks for assignment file submissions
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("""
+                        CREATE TRIGGER IF NOT EXISTS Retain_CourseAssignmentSubmissionFile_Ins_casaUri
+                        AFTER INSERT ON CourseAssignmentSubmissionFile
+                        FOR EACH ROW WHEN NEW.casaUri IS NOT NULL
+                        BEGIN
+                        INSERT OR REPLACE INTO CacheLockJoin(cljTableId, cljEntityUid, cljUrl, cljLockId, cljStatus, cljType)
+                        VALUES(90, NEW.casaUid, NEW.casaUri, 0, 1, 1);
+                        END
+                    """)
+
+            add("""
+                    CREATE TRIGGER IF NOT EXISTS Retain_CourseAssignmentSubmissionFile_Upd_casaUri_New
+                    AFTER UPDATE ON CourseAssignmentSubmissionFile
+                    FOR EACH ROW WHEN NEW.casaUri != OLD.casaUri AND NEW.casaUri IS NOT NULL
+                    BEGIN
+                        INSERT OR REPLACE INTO CacheLockJoin(cljTableId, cljEntityUid, cljUrl, cljLockId, cljStatus, cljType)
+                        VALUES(90, NEW.casaUid, NEW.casaUri, 0, 1, 1);
+                    END   
+                """)
+
+            add("""CREATE TRIGGER IF NOT EXISTS Retain_CourseAssignmentSubmissionFile_Upd_casaUri_Old
+AFTER UPDATE ON CourseAssignmentSubmissionFile
+FOR EACH ROW WHEN NEW.casaUri != OLD.casaUri AND OLD.casaUri IS NOT NULL
+BEGIN
+    UPDATE CacheLockJoin 
+       SET cljStatus = 3
+     WHERE cljTableId = 90
+       AND cljEntityUid = OLD.casaUid
+       AND cljUrl = OLD.casaUri;
+END        """)
+
+            add("""CREATE TRIGGER IF NOT EXISTS Retain_CourseAssignmentSubmissionFile_Del_casaUri
+AFTER DELETE ON CourseAssignmentSubmissionFile
+FOR EACH ROW WHEN OLD.casaUri IS NOT NULL
+BEGIN
+    UPDATE CacheLockJoin 
+       SET cljStatus = 3
+     WHERE cljTableId = 90
+       AND cljEntityUid = OLD.casaUid
+       AND cljUrl = OLD.casaUri;
+END       """)
+        }else {
+            add("""
+                            CREATE OR REPLACE FUNCTION retain_c_clj_90_casaUri() RETURNS TRIGGER AS $$
+                            BEGIN
+                            INSERT INTO CacheLockJoin(cljTableId, cljEntityUid, cljUrl, cljLockId, cljStatus, cljType)
+                            VALUES(90, NEW.casaUid, NEW.casaUri, 0, 1, 1);
+                            RETURN NEW;
+                            END $$ LANGUAGE plpgsql
+                        """)
+
+            add("""
+                            CREATE OR REPLACE FUNCTION retain_d_clj_90_casaUri() RETURNS TRIGGER AS $$
+                            BEGIN
+                            UPDATE CacheLockJoin 
+                               SET cljStatus = 3
+                             WHERE cljTableId = 90
+                               AND cljEntityUid = OLD.casaUid
+                               AND cljUrl = OLD.casaUri;
+                            RETURN OLD;
+                            END $$ LANGUAGE plpgsql   
+                        """)
+
+            add("""
+                            CREATE TRIGGER retain_c_clj_90_casaUri_ins_t
+                            AFTER INSERT ON CourseAssignmentSubmissionFile
+                            FOR EACH ROW
+                            WHEN (NEW.casaUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_c_clj_90_casaUri();
+                        """)
+
+            add("""
+                            CREATE TRIGGER retain_c_clj_90_casaUri_upd_t
+                            AFTER UPDATE ON CourseAssignmentSubmissionFile
+                            FOR EACH ROW
+                            WHEN (NEW.casaUri IS DISTINCT FROM OLD.casaUri AND OLD.casaUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_c_clj_90_casaUri();
+                        """)
+
+            add("""
+                            CREATE TRIGGER retain_d_clj_90_casaUri_upd_t
+                            AFTER UPDATE ON CourseAssignmentSubmissionFile
+                            FOR EACH ROW
+                            WHEN (NEW.casaUri IS DISTINCT FROM OLD.casaUri AND NEW.casaUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_d_clj_90_casaUri();
+                        """)
+        }
+    }
+}
+
+val MIGRATION_161_162_CLIENT = DoorMigrationStatementList(161, 162) {
+    emptyList()
+}
+
+
+
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_102_103,
     MIGRATION_103_104, MIGRATION_104_105, MIGRATION_105_106, MIGRATION_106_107,
@@ -1589,7 +2052,10 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_133_134, MIGRATION_134_135, MIGRATION_135_136, MIGRATION_136_137,
     MIGRATION_137_138, MIGRATION_138_139, MIGRATION_139_140, MIGRATION_140_141,
     MIGRATION_141_142, MIGRATION_142_143, MIGRATION_143_144, MIGRATION_145_146,
-    MIGRATION_146_147, MIGRATION_147_148,
+    MIGRATION_146_147, MIGRATION_147_148, MIGRATION_149_150, MIGRATION_150_151,
+    MIGRATION_151_152, MIGRATION_152_153, MIGRATION_153_154, MIGRATION_154_155,
+    MIGRATION_156_157, MIGRATION_157_158, MIGRATION_158_159, MIGRATION_159_160,
+    MIGRATION_160_161,
 )
 
 

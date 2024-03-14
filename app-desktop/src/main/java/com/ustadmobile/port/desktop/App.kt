@@ -61,6 +61,8 @@ import io.kamel.core.config.takeFrom
 import io.kamel.image.config.Default
 import io.kamel.image.config.LocalKamelConfig
 import io.ktor.client.HttpClient
+import it.sauronsoftware.junique.AlreadyLockedException
+import it.sauronsoftware.junique.JUnique
 import moe.tlaster.precompose.PreComposeApp
 import moe.tlaster.precompose.navigation.NavOptions
 import moe.tlaster.precompose.navigation.PopUpTo
@@ -70,18 +72,49 @@ import org.kodein.di.compose.localDI
 import org.kodein.di.compose.withDI
 import org.kodein.di.direct
 import org.kodein.di.instance
+import org.quartz.Scheduler
 import java.awt.Desktop
+import java.awt.Window
 import java.io.File
 import java.net.URI
 import java.util.Locale
 import java.util.Properties
+import java.util.concurrent.atomic.AtomicReference
+import kotlin.system.exitProcess
 import com.ustadmobile.libuicompose.view.app.App as UstadPrecomposeApp
 
-//Roughly as per https://github.com/JetBrains/compose-multiplatform-desktop-template#readme
+const val JUNIQUE_LOCK_ID = "com.ustadmobile.apprun.lock"
+
+/*
+ * Note this is called by AppRun.kt to ensure that if the user has multiple versions (e.g. multiple
+ * brands) each has its own id. See common on AppRun.kt
+ *
+ * Roughly as per https://github.com/JetBrains/compose-multiplatform-desktop-template#readme
+ */
 fun main() {
+    val windowRef = AtomicReference<Window?>(null)
+    try {
+        JUnique.acquireLock(JUNIQUE_LOCK_ID) { message ->
+            //The user tried to launch another instance. We will just bring the existing instance to front
+            val window = windowRef.get()
+            if(window != null) {
+                Napier.d { "Received JUnique message: $message . Will attempt to move window to front." }
+                window.toFront()
+            }else {
+                Napier.w("Received JUnique message $message, but window reference is null")
+            }
+
+            "OK"
+        }
+    }catch(e: AlreadyLockedException) {
+        println("There is already another instance running: sending message")
+        JUnique.sendMessage(JUNIQUE_LOCK_ID,"front")
+        println("There is already another instance running: exiting")
+        return
+    }
+
     //Apply the language setting before startup
     val dataRoot = ustadAppDataDir()
-
 
     SetLanguageUseCaseJvm.init()
 
@@ -100,6 +133,8 @@ fun main() {
     Napier.base(LogbackAntiLog())
 
     val prefsPropertiesFiles = File(dataRoot, UstadMobileSystemImpl.PREFS_FILENAME)
+
+    val schedulerRef = AtomicReference<Scheduler?>()
 
     try {
         val props = prefsPropertiesFiles.takeIf {
@@ -140,7 +175,7 @@ fun main() {
         System.err.println("failed to read language setting")
     }
 
-    application {
+    application(exitProcessOnExit = false) {
         Napier.base(DebugAntilog())
 
         //App icon setting as per
@@ -183,6 +218,7 @@ fun main() {
                     it.start()
                     Napier.i("Embedded Server running on port ${it.listeningPort}")
                 }
+                schedulerRef.set(di.direct.instance())
             }
 
             CompositionLocalProvider(LocalKamelConfig provides desktopConfig) {
@@ -196,6 +232,10 @@ fun main() {
                         splashScreen?.close()
                         splashScreen = null
                     }
+                    LaunchedEffect(window) {
+                        windowRef.set(window)
+                    }
+
                     PreComposeApp {
                         val navigator = rememberNavigator()
                         val currentDestination by navigator.currentEntry.collectAsState(null)
@@ -299,7 +339,10 @@ fun main() {
                 }
             }
         }
-
     }
 
+    //Now shutdown and exit
+    Napier.i("Shutdown: shutting down scheduler on app finished")
+    schedulerRef.get()?.shutdown()
+    exitProcess(0)
 }

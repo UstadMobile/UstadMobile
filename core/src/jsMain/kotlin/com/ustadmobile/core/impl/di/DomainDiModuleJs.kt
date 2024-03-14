@@ -3,17 +3,25 @@ package com.ustadmobile.core.impl.di
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.domain.account.SetPasswordUseCase
 import com.ustadmobile.core.domain.account.SetPasswordUseCaseJs
+import com.ustadmobile.core.domain.blob.openblob.OpenBlobUiUseCase
+import com.ustadmobile.core.domain.blob.openblob.OpenBlobUseCase
+import com.ustadmobile.core.domain.blob.openblob.OpenBlobUseCaseJs
+import com.ustadmobile.core.domain.blob.saveandupload.SaveAndUploadLocalUrisUseCase
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobUseCaseJs
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCaseJs
 import com.ustadmobile.core.domain.blob.savepicture.SavePictureUseCase
+import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCase
+import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCaseJs
 import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseJs
 import com.ustadmobile.core.domain.contententry.delete.DeleteContentEntryParentChildJoinUseCase
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCaseJs
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseRemote
+import com.ustadmobile.core.domain.contententry.launchcontent.xapi.LaunchXapiUseCase
+import com.ustadmobile.core.domain.contententry.launchcontent.xapi.LaunchXapiUseCaseJs
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseJs
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.ResolveXapiLaunchHrefUseCase
@@ -156,6 +164,12 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
         )
     }
 
+    bind<LaunchXapiUseCase>() with scoped(endpointScope).provider {
+        LaunchXapiUseCaseJs(
+            resolveXapiLaunchHrefUseCase = instance()
+        )
+    }
+
     bind<MoveContentEntriesUseCase>() with scoped(EndpointScope.Default).provider {
         MoveContentEntriesUseCase(
             repo = instance(tag = DoorTag.TAG_REPO),
@@ -180,4 +194,33 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
             repoOrDb = instance(tag = DoorTag.TAG_REPO),
         )
     }
+
+    bind<SetClipboardStringUseCase>() with singleton {
+        SetClipboardStringUseCaseJs()
+    }
+
+    /**
+     * SaveAndUploadLocalUris - because saving the local uri as a blob does the upload itself  on JS,
+     * there is no use of enqueueBlobUploadClientUseCase
+     */
+    bind<SaveAndUploadLocalUrisUseCase>() with scoped(EndpointScope.Default).singleton {
+        SaveAndUploadLocalUrisUseCase(
+            saveLocalUrisAsBlobsUseCase = instance(),
+            enqueueBlobUploadClientUseCase = null,
+            activeDb = instance(tag = DoorTag.TAG_DB),
+            activeRepo = instance(tag = DoorTag.TAG_REPO),
+        )
+    }
+
+    bind<OpenBlobUseCase>() with scoped(EndpointScope.Default).provider {
+        OpenBlobUseCaseJs()
+    }
+
+    bind<OpenBlobUiUseCase>() with scoped(EndpointScope.Default).singleton {
+        OpenBlobUiUseCase(
+            openBlobUseCase = instance(),
+            systemImpl = instance(),
+        )
+    }
+
 }

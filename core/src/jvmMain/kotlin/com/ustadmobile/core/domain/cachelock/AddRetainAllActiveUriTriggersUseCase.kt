@@ -1,9 +1,11 @@
 package com.ustadmobile.core.domain.cachelock
 
+import com.ustadmobile.core.util.ext.truncate
 import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.lib.db.entities.CacheLockJoin.Companion.STATUS_PENDING_DELETE
 import com.ustadmobile.lib.db.entities.CacheLockJoin.Companion.STATUS_PENDING_CREATION
 import com.ustadmobile.lib.db.entities.CacheLockJoin.Companion.TYPE_SERVER_RETENTION
+import com.ustadmobile.lib.db.entities.CourseAssignmentSubmissionFile
 import com.ustadmobile.lib.db.entities.CoursePicture
 import com.ustadmobile.lib.db.entities.PersonPicture
 
@@ -23,7 +25,7 @@ import com.ustadmobile.lib.db.entities.PersonPicture
 class AddRetainAllActiveUriTriggersUseCase {
 
 
-    fun triggersForEntity(
+    fun triggersForEntityV1(
         dbType: Int,
         tableName: String,
         tableId: Int,
@@ -90,7 +92,58 @@ class AddRetainAllActiveUriTriggersUseCase {
                     }
                 }
                 DoorDbType.POSTGRES -> {
-                    //Pending
+                    uriFieldNames.forEach { fieldName ->
+                        // function name is limited to 63 bytes Create cache lock join...
+                        val createFnName = "retain_c_clj_${tableId}_${fieldName.truncate(24, null)}"
+                        val deleteFnName = "retain_d_clj_${tableId}_${fieldName.truncate(24, null)}"
+
+                        add("""
+                            CREATE OR REPLACE FUNCTION $createFnName() RETURNS TRIGGER AS ${'$'}${'$'}
+                            BEGIN
+                            INSERT INTO CacheLockJoin(cljTableId, cljEntityUid, cljUrl, cljLockId, cljStatus, cljType)
+                            VALUES($tableId, NEW.$entityUidFieldName, NEW.$fieldName, 0, $STATUS_PENDING_CREATION, $TYPE_SERVER_RETENTION);
+                            RETURN NEW;
+                            END ${'$'}${'$'} LANGUAGE plpgsql
+                        """)
+
+                        //Delete cache lock join
+                        add("""
+                            CREATE OR REPLACE FUNCTION $deleteFnName() RETURNS TRIGGER AS ${'$'}${'$'}
+                            BEGIN
+                            UPDATE CacheLockJoin 
+                               SET cljStatus = $STATUS_PENDING_DELETE
+                             WHERE cljTableId = $tableId
+                               AND cljEntityUid = OLD.$entityUidFieldName
+                               AND cljUrl = OLD.$fieldName;
+                            RETURN OLD;
+                            END ${'$'}${'$'} LANGUAGE plpgsql   
+                        """)
+
+                        add("""
+                            CREATE TRIGGER ${createFnName}_ins_t
+                            AFTER INSERT ON $tableName
+                            FOR EACH ROW
+                            WHEN (NEW.$fieldName IS NOT NULL)
+                            EXECUTE FUNCTION $createFnName();
+                        """)
+
+                        add("""
+                            CREATE TRIGGER ${createFnName}_upd_t
+                            AFTER UPDATE ON $tableName
+                            FOR EACH ROW
+                            WHEN (NEW.$fieldName IS DISTINCT FROM OLD.$fieldName AND OLD.$fieldName IS NOT NULL)
+                            EXECUTE FUNCTION $createFnName();
+                        """)
+
+
+                        add("""
+                            CREATE TRIGGER ${deleteFnName}_upd_t
+                            AFTER UPDATE ON $tableName
+                            FOR EACH ROW
+                            WHEN (NEW.$fieldName IS DISTINCT FROM OLD.$fieldName AND NEW.$fieldName IS NOT NULL)
+                            EXECUTE FUNCTION $deleteFnName();
+                        """)
+                    }
                 }
             }
         }
@@ -99,7 +152,7 @@ class AddRetainAllActiveUriTriggersUseCase {
     operator fun invoke(dbType: Int): List<String> {
         return buildList {
             addAll(
-                triggersForEntity(
+                triggersForEntityV1(
                     dbType = dbType,
                     tableName = "PersonPicture",
                     tableId = PersonPicture.TABLE_ID,
@@ -108,12 +161,21 @@ class AddRetainAllActiveUriTriggersUseCase {
                 )
             )
             addAll(
-                triggersForEntity(
+                triggersForEntityV1(
                     dbType = dbType,
                     tableName = "CoursePicture",
                     tableId = CoursePicture.TABLE_ID,
                     entityUidFieldName = "coursePictureUid",
                     uriFieldNames = listOf("coursePictureUri", "coursePictureThumbnailUri")
+                )
+            )
+            addAll(
+                triggersForEntityV1(
+                    dbType  = dbType,
+                    tableName = "CourseAssignmentSubmissionFile",
+                    tableId = CourseAssignmentSubmissionFile.TABLE_ID,
+                    entityUidFieldName = "casaUid",
+                    uriFieldNames = listOf("casaUri"),
                 )
             )
         }

@@ -3,16 +3,21 @@ package com.ustadmobile.view.clazzenrolment.clazzmemberlist
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
-import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.viewmodel.clazzenrolment.clazzmemberlist.ClazzMemberListUiState
 import com.ustadmobile.core.viewmodel.clazzenrolment.clazzmemberlist.ClazzMemberListViewModel
+import com.ustadmobile.hooks.useDateFormatter
+import com.ustadmobile.hooks.useDayOrDate
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useTabAndAppBarHeight
+import com.ustadmobile.hooks.useTimeFormatter
 import com.ustadmobile.hooks.useUstadViewModel
+import com.ustadmobile.lib.db.composites.EnrolmentRequestAndPersonDetails
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.composites.PersonAndClazzMemberListDetails
+import com.ustadmobile.lib.db.entities.EnrolmentRequest
+import com.ustadmobile.mui.components.ThemeContext
 import com.ustadmobile.mui.components.UstadAddListItem
 import com.ustadmobile.mui.components.UstadListFilterChipsHeader
 import com.ustadmobile.mui.components.UstadListSortHeader
@@ -20,20 +25,28 @@ import com.ustadmobile.view.components.UstadPersonAvatar
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
+import com.ustadmobile.wrappers.intl.Intl
 import web.cssom.Contain
 import web.cssom.Height
 import web.cssom.Overflow
 import web.cssom.pct
 import js.core.jso
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
 //WARNING: DO NOT Replace with import mui.icons.material.[*] - Leads to severe IDE performance issues 10/Apr/23 https://youtrack.jetbrains.com/issue/KT-57897/Intellisense-and-code-analysis-is-extremely-slow-and-unusable-on-Kotlin-JS
 import mui.icons.material.PersonAdd as PersonAddIcon
-import mui.icons.material.AccountCircle as AccountCircleIcon
 import mui.icons.material.Check as CheckIcon
 import mui.icons.material.Close as CloseIcon
+import mui.icons.material.Person as PersonIcon
+import mui.icons.material.Schedule as ScheduleIcon
 import mui.material.*
 import mui.material.List
 import mui.system.responsive
+import mui.system.sx
 import react.*
+import react.dom.aria.ariaLabel
+import react.dom.html.ReactHTML
 
 
 external interface ClazzMemberListScreenProps : Props {
@@ -42,8 +55,7 @@ external interface ClazzMemberListScreenProps : Props {
 
     var onClickEntry: (PersonAndClazzMemberListDetails) -> Unit
 
-    var onClickPendingRequest: (enrolment: PersonAndClazzMemberListDetails,
-                                approved: Boolean) -> Unit
+    var onClickPendingRequest: (enrolment: EnrolmentRequest, approved: Boolean) -> Unit
 
     var onClickFilterChip: (MessageIdOption2) -> Unit
 
@@ -66,6 +78,9 @@ private val ClazzMemberListScreenComponent2 = FC<ClazzMemberListScreenProps> { p
 
     val pendingStudentsInfiniteQueryResult = usePagingSource(props.uiState.pendingStudentList, true)
 
+    val timeFormatterVal = useTimeFormatter()
+
+    val dateFormatterVal = useDateFormatter()
 
     VirtualList {
         style = jso {
@@ -111,6 +126,7 @@ private val ClazzMemberListScreenComponent2 = FC<ClazzMemberListScreenProps> { p
                         enabled = props.uiState.fieldsEnabled
                         icon = PersonAddIcon.create()
                         onClickAdd = { props.onClickAddNewMember(ClazzEnrolment.ROLE_TEACHER) }
+                        disableGutters = true
                     }
                 }
             }
@@ -122,6 +138,7 @@ private val ClazzMemberListScreenComponent2 = FC<ClazzMemberListScreenProps> { p
                 ListItem.create {
                     ListItemButton {
                         onClick = { member?.also { props.onClickEntry(it) } }
+                        disableGutters = true
 
                         ListItemIcon {
                             UstadPersonAvatar {
@@ -154,6 +171,7 @@ private val ClazzMemberListScreenComponent2 = FC<ClazzMemberListScreenProps> { p
                         enabled = props.uiState.fieldsEnabled
                         icon = PersonAddIcon.create()
                         onClickAdd = { props.onClickAddNewMember(ClazzEnrolment.ROLE_STUDENT) }
+                        disableGutters = true
                     }
                 }
             }
@@ -179,11 +197,15 @@ private val ClazzMemberListScreenComponent2 = FC<ClazzMemberListScreenProps> { p
 
                 infiniteQueryPagingItems(
                     items = pendingStudentsInfiniteQueryResult,
-                    key = { "p_${it.person?.personUid} "}
+                    key = { "p_${it.enrolmentRequest?.erUid} "}
                 ) { pendingStudent ->
                     PendingStudentListItem.create {
-                        person = pendingStudent
+                        request = pendingStudent
                         onClick = props.onClickPendingRequest
+                        localDateTimeNow = props.uiState.localDateTimeNow
+                        dayOfWeekStringMap = props.uiState.dayOfWeekStrings
+                        timeFormatter = timeFormatterVal
+                        dateFormatter = dateFormatterVal
                     }
                 }
             }
@@ -226,6 +248,8 @@ external interface StudentListItemProps : Props {
 private val StudentListItem = FC<StudentListItemProps> { props ->
     ListItem{
         ListItemButton {
+            disableGutters = true
+
             onClick = {
                 props.person?.also { props.onClick(it) }
             }
@@ -248,50 +272,100 @@ private val StudentListItem = FC<StudentListItemProps> { props ->
 
 external interface PendingStudentListItemProps : Props {
 
-    var person: PersonAndClazzMemberListDetails?
+    var request: EnrolmentRequestAndPersonDetails?
 
-    var onClick: (enrolment: PersonAndClazzMemberListDetails, approved: Boolean) -> Unit
+    var onClick: (enrolment: EnrolmentRequest, approved: Boolean) -> Unit
 
+    var localDateTimeNow: LocalDateTime
+
+    var timeFormatter: Intl.Companion.DateTimeFormat
+
+    var dateFormatter: Intl.Companion.DateTimeFormat
+
+    var dayOfWeekStringMap: Map<DayOfWeek, String>
 }
 
 private val PendingStudentListItem = FC<PendingStudentListItemProps> { props ->
+    val strings = useStringProvider()
+    val theme by useRequiredContext(ThemeContext)
+    val requestTimeStr = useDayOrDate(
+        enabled = true,
+        localDateTimeNow = props.localDateTimeNow,
+        timestamp = props.request?.enrolmentRequest?.erRequestTime ?: 0,
+        timeZone = TimeZone.currentSystemDefault(),
+        showTimeIfToday = true,
+        timeFormatter = props.timeFormatter,
+        dateFormatter = props.dateFormatter,
+        dayOfWeekStringMap = props.dayOfWeekStringMap,
+    )
 
     ListItem {
-        ListItemButton {
-            onClick = { props.onClick }
-
-            ListItemIcon {
-                UstadPersonAvatar {
-                    pictureUri = props.person?.personPicture?.personPictureThumbnailUri
-                    personName = props.person?.person?.fullName()
-                }
-            }
-
-            ListItemText {
-                primary = ReactNode(props.person?.person?.fullName())
+        ListItemIcon {
+            UstadPersonAvatar {
+                pictureUri = props.request?.personPicture?.personPictureThumbnailUri
+                personName = props.request?.enrolmentRequest?.erPersonFullname
             }
         }
+
+        ListItemText {
+            primary = ReactNode(props.request?.enrolmentRequest?.erPersonFullname ?: "")
+            secondary = Stack.create {
+                direction = responsive(StackDirection.row)
+
+                PersonIcon {
+                    sx {
+                        marginRight = theme.spacing(1)
+                    }
+
+                    fontSize = SvgIconSize.small
+                }
+
+                + (props.request?.enrolmentRequest?.erPersonUsername ?: "")
+
+                ScheduleIcon {
+                    sx  {
+                        marginLeft = theme.spacing(1)
+                        marginRight = theme.spacing(1)
+                    }
+
+                    fontSize = SvgIconSize.small
+                }
+
+                + requestTimeStr
+
+            }
+            secondaryTypographyProps = jso {
+                component = ReactHTML.div
+            }
+        }
+
 
         secondaryAction = Stack.create {
             direction = responsive(StackDirection.row)
 
-            Button {
-                variant = ButtonVariant.text
-                onClick = {
-                    props.person?.also { props.onClick(it, true) }
-                }
+            Tooltip {
+                title = ReactNode(strings[MR.strings.accept])
+                IconButton {
+                    ariaLabel = strings[MR.strings.accept]
+                    onClick = {
+                        props.request?.enrolmentRequest?.also { props.onClick(it, true) }
+                    }
 
-                + CheckIcon.create()
+                    CheckIcon()
+                }
             }
 
-            Button {
-                variant = ButtonVariant.text
+            Tooltip {
+                title = ReactNode(strings[MR.strings.reject])
+                IconButton {
+                    ariaLabel = strings[MR.strings.reject]
 
-                onClick = {
-                    props.person?.also { props.onClick(it, false) }
+                    onClick = {
+                        props.request?.enrolmentRequest?.also { props.onClick(it, false) }
+                    }
+
+                    CloseIcon()
                 }
-
-                + CloseIcon.create()
             }
         }
     }

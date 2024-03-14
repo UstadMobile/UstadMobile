@@ -1,5 +1,6 @@
 package com.ustadmobile.util.test
 
+import com.ustadmobile.lib.util.parseRangeRequestHeader
 import com.ustadmobile.util.test.ext.gzipped
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
@@ -30,12 +31,23 @@ open class ResourcesDispatcher(
         } ?: return MockResponse().setResponseCode(404)
         val contentInStream = ByteArrayInputStream(contentBytes)
 
-        val contentSource = contentInStream.source().buffer()
+        val rangeResponse = request.getHeader("range")?.let {
+            parseRangeRequestHeader(it, contentBytes.size.toLong())
+        }
+
+        val contentSource = if(rangeResponse != null) {
+            RangeInputStream(contentInStream, rangeResponse.fromByte, rangeResponse.toByte)
+                .source().buffer()
+        }else {
+            contentInStream.source().buffer()
+        }
+
         contentSource.readAll(buffer)
-        val contentLength = buffer.size
+        val contentLength = rangeResponse?.actualContentLength ?: contentBytes.size.toLong()
 
         return responseTransform(
             MockResponse()
+                .setResponseCode(rangeResponse?.statusCode ?: 200)
                 .setBody(buffer)
                 .addHeader("content-length", contentLength)
                 .apply {

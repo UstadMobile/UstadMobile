@@ -2,12 +2,13 @@ package com.ustadmobile.libuicompose.view.clazz.detailoverview
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.Icons
@@ -17,6 +18,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Login
 import androidx.compose.material.icons.filled.School
+import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
@@ -44,6 +46,7 @@ import com.ustadmobile.libuicompose.components.UstadAsyncImage
 import com.ustadmobile.libuicompose.components.UstadHtmlText
 import com.ustadmobile.libuicompose.components.UstadDetailField2
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
+import com.ustadmobile.libuicompose.components.UstadQuickActionButton
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.util.compose.stringIdMapResource
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
@@ -63,15 +66,17 @@ fun ClazzDetailOverviewScreen(viewModel: ClazzDetailOverviewViewModel) {
     ClazzDetailOverviewScreen(
         uiState = uiState,
         onClickCourseBlock = viewModel::onClickCourseBlock,
+        onClickClassCode = viewModel::onClickClazzCode,
+        onClickPermissions = viewModel::onClickPermissions,
     )
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ClazzDetailOverviewScreen(
     uiState: ClazzDetailOverviewUiState = ClazzDetailOverviewUiState(),
     onClickClassCode: (String) -> Unit = {},
     onClickCourseBlock: (CourseBlock) -> Unit = {},
+    onClickPermissions: () -> Unit = { },
 ) {
     val pager = remember(uiState.courseBlockList) {
         Pager(
@@ -112,6 +117,26 @@ fun ClazzDetailOverviewScreen(
             }
         }
 
+        if(uiState.quickActionBarVisible) {
+            item(key = "quick_action_row") {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Row {
+                        if(uiState.managePermissionVisible) {
+                            UstadQuickActionButton(
+                                imageVector = Icons.Default.Shield,
+                                labelText = stringResource(MR.strings.permissions),
+                                onClick = onClickPermissions,
+                            )
+                        }
+                    }
+
+                    Divider(Modifier.height(1.dp))
+                }
+            }
+        }
+
         item(key = "clazz_desc") {
             UstadHtmlText(
                 html = uiState.clazz?.clazzDesc ?: "",
@@ -131,9 +156,12 @@ fun ClazzDetailOverviewScreen(
         if (uiState.clazzCodeVisible) {
             item(key = "clazzcode") {
                 UstadDetailField2(
-                    valueText = uiState.clazz?.clazzCode ?: "",
-                    labelText = stringResource(MR.strings.class_code),
-                    icon = Icons.Filled.Login
+                    modifier = Modifier.clickable { onClickClassCode(uiState.clazz?.clazzCode ?: "") },
+                    valueContent = { Text(uiState.clazz?.clazzCode ?: "") },
+                    labelContent = { Text(stringResource(MR.strings.invite_code)) },
+                    leadingContent = {
+                        Icon(Icons.Filled.Login, contentDescription = null)
+                    },
                 )
             }
         }

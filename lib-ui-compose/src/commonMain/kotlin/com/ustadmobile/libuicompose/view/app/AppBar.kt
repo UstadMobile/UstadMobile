@@ -114,7 +114,12 @@ fun UstadAppBar(
                 )
             },
             title = {
-                Text(text = title, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(
+                    text = title,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.testTag("app_title"),
+                )
             },
             navigationIcon = {
                 val leadingActionButton = appUiState.leadingActionButton
@@ -181,6 +186,7 @@ fun UstadAppBar(
                             trailingIcon = {
                                 if(searchActive) {
                                     IconButton(
+                                        modifier = Modifier.testTag("close_search_button"),
                                         onClick = {
                                             appUiState.searchState.onSearchTextChanged("")
                                             searchActive = false
@@ -198,6 +204,7 @@ fun UstadAppBar(
                         )
                     }else {
                         IconButton(
+                            modifier = Modifier.testTag("expand_search_icon_button"),
                             onClick = {
                                 searchActive = true
                             }

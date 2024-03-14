@@ -16,14 +16,20 @@ import com.ustadmobile.core.domain.account.SetPasswordUseCase
 import com.ustadmobile.core.domain.account.SetPasswordUseCaseCommonJvm
 import com.ustadmobile.core.domain.blob.download.BlobDownloadClientUseCase
 import com.ustadmobile.core.domain.blob.download.BlobDownloadClientUseCaseCommonJvm
+import com.ustadmobile.core.domain.blob.download.CancelDownloadUseCase
+import com.ustadmobile.core.domain.blob.download.CancelDownloadUseCaseJvm
 import com.ustadmobile.core.domain.blob.download.ContentManifestDownloadUseCase
 import com.ustadmobile.core.domain.blob.download.EnqueueBlobDownloadClientUseCase
 import com.ustadmobile.core.domain.blob.download.EnqueueBlobDownloadClientUseCaseJvm
 import com.ustadmobile.core.domain.blob.download.EnqueueContentManifestDownloadUseCase
 import com.ustadmobile.core.domain.blob.download.EnqueueContentManifestDownloadUseCaseJvm
 import com.ustadmobile.core.domain.blob.download.MakeContentEntryAvailableOfflineUseCase
+import com.ustadmobile.core.domain.blob.openblob.OpenBlobUiUseCase
+import com.ustadmobile.core.domain.blob.openblob.OpenBlobUseCase
+import com.ustadmobile.core.domain.blob.openblob.OpenBlobUseCaseJvm
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCaseJvm
+import com.ustadmobile.core.domain.blob.saveandupload.SaveAndUploadLocalUrisUseCase
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCaseJvm
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
@@ -31,6 +37,8 @@ import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCaseJvm
 import com.ustadmobile.core.domain.blob.savepicture.SavePictureUseCase
 import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCase
 import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCaseJvm
+import com.ustadmobile.core.domain.blob.upload.CancelBlobUploadClientUseCase
+import com.ustadmobile.core.domain.blob.upload.CancelBlobUploadClientUseCaseJvm
 import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCase
 import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCaseJvm
 import com.ustadmobile.core.domain.blob.upload.UpdateFailedTransferJobUseCase
@@ -63,6 +71,8 @@ import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.launchopenlicenses.LaunchOpenLicensesUseCase
 import com.ustadmobile.core.domain.phonenumber.OnClickPhoneNumUseCase
 import com.ustadmobile.core.domain.phonenumber.OnClickPhoneNumUseCaseJvm
+import com.ustadmobile.core.domain.process.CloseProcessUseCase
+import com.ustadmobile.core.domain.process.CloseProcessUseCaseJvm
 import com.ustadmobile.core.domain.sendemail.OnClickEmailUseCase
 import com.ustadmobile.core.domain.sendemail.OnClickEmailUseCaseJvm
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
@@ -77,6 +87,7 @@ import com.ustadmobile.core.impl.config.AppConfig
 import com.ustadmobile.core.impl.config.AppConfig.Companion.KEY_CONFIG_SHOW_POWERED_BY
 import com.ustadmobile.core.launchopenlicenses.LaunchOpenLicensesUseCaseJvm
 import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.core.util.ext.requireFileSeparatorSuffix
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import kotlinx.io.files.Path
@@ -235,7 +246,8 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         BlobDownloadClientUseCaseCommonJvm(
             okHttpClient = instance(),
             db = instance(tag = DoorTag.TAG_DB),
-            repo = instance(tag = DoorTag.TAG_REPO)
+            repo = instance(tag = DoorTag.TAG_REPO),
+            httpCache = instance(),
         )
     }
 
@@ -253,6 +265,7 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             db = instance(tag = DoorTag.TAG_DB),
             httpClient = instance(),
             json = instance(),
+            cacheTmpPath = instance<File>(tag = TAG_CACHE_DIR).absolutePath.requireFileSeparatorSuffix()
         )
     }
 
@@ -272,8 +285,9 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
 
     bind<GetStoragePathForUrlUseCase>() with singleton {
         GetStoragePathForUrlUseCaseCommonJvm(
-            httpClient = instance(),
+            okHttpClient = instance(),
             cache = instance(),
+            tmpDir = instance(tag = DiTag.TAG_TMP_DIR)
         )
     }
 
@@ -371,11 +385,55 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         )
     }
 
-    bind<MakeContentEntryAvailableOfflineUseCase>() with scoped(EndpointScope.Default).provider {
+    bind<MakeContentEntryAvailableOfflineUseCase>() with scoped(EndpointScope.Default).singleton {
         MakeContentEntryAvailableOfflineUseCase(
             repo = instance(tag = DoorTag.TAG_REPO),
             nodeIdAndAuth = instance(),
             enqueueContentManifestDownloadUseCase = instance(),
         )
     }
+
+    bind<CancelDownloadUseCase>() with scoped(EndpointScope.Default).singleton {
+        CancelDownloadUseCaseJvm(
+            scheduler = instance(),
+            endpoint = context,
+            db = instance(tag = DoorTag.TAG_DB),
+        )
+    }
+
+    bind<CloseProcessUseCase>() with scoped(EndpointScope.Default).provider {
+        CloseProcessUseCaseJvm()
+    }
+
+    bind<SaveAndUploadLocalUrisUseCase>() with scoped(EndpointScope.Default).singleton {
+        SaveAndUploadLocalUrisUseCase(
+            saveLocalUrisAsBlobsUseCase = instance(),
+            enqueueBlobUploadClientUseCase = instance(),
+            activeDb = instance(tag = DoorTag.TAG_DB),
+            activeRepo = instance(tag = DoorTag.TAG_REPO),
+        )
+    }
+
+    bind<CancelBlobUploadClientUseCase>() with scoped(EndpointScope.Default).singleton {
+        CancelBlobUploadClientUseCaseJvm(
+            scheduler = instance(),
+            endpoint = context,
+            db = instance(tag = DoorTag.TAG_DB),
+        )
+    }
+
+    bind<OpenBlobUseCase>() with scoped(EndpointScope.Default).singleton {
+        OpenBlobUseCaseJvm(
+            getStoragePathForUrlUseCase = instance(),
+            rootTmpDir = instance(tag = DiTag.TAG_TMP_DIR)
+        )
+    }
+
+    bind<OpenBlobUiUseCase>() with scoped(EndpointScope.Default).singleton {
+        OpenBlobUiUseCase(
+            openBlobUseCase = instance(),
+            systemImpl = instance(),
+        )
+    }
+
 }

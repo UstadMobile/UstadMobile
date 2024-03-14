@@ -29,7 +29,7 @@ class GetStoragePathForUrlUseCaseCommonJvmTest {
     fun setup() {
         val json = Json { encodeDefaults = true }
         cache = newTestUstadCache(temporaryFolder)
-        okHttpClient = newTestOkHttpClient(temporaryFolder, cache)
+        okHttpClient = newTestOkHttpClient(temporaryFolder, cache, json)
         httpClient = okHttpClient.newTestHttpClient(json)
 
     }
@@ -37,8 +37,9 @@ class GetStoragePathForUrlUseCaseCommonJvmTest {
     @Test
     fun givenRequestForUrl_whenInvoked_thenWillProvideValidPath() {
         val getStoragePathUseCase = GetStoragePathForUrlUseCaseCommonJvm(
-            httpClient = httpClient,
+            okHttpClient = okHttpClient,
             cache = cache,
+            tmpDir = temporaryFolder.newFolder(),
         )
     }
 }

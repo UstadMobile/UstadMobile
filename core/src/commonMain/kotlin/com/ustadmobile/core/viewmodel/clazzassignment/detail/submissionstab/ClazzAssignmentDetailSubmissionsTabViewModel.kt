@@ -13,6 +13,7 @@ import com.ustadmobile.core.viewmodel.clazzassignment.detail.ClazzAssignmentDeta
 import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import app.cash.paging.PagingSource
+import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.lib.db.entities.AssignmentProgressSummary
 import com.ustadmobile.lib.db.entities.AssignmentSubmitterSummary
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
@@ -78,11 +79,15 @@ class ClazzAssignmentDetailSubmissionsTabViewModel(
 
     private val argEntityUid = savedStateHandle[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0L
 
+    private val argClazzUid = savedStateHandle[ARG_CLAZZUID]?.toLong()
+        ?: throw IllegalArgumentException("No ClazzUid provided")
+
     private var mLastPagingSource: PagingSource<Int, AssignmentSubmitterSummary>? = null
 
     private val pagingSourceFactory: ListPagingSourceFactory<AssignmentSubmitterSummary> = {
         activeRepo.clazzAssignmentDao.getAssignmentSubmitterSummaryListForAssignment(
             assignmentUid = argEntityUid,
+            clazzUid = argClazzUid,
             accountPersonUid = activeUserPersonUid,
             group = systemImpl.getString(MR.strings.group),
             searchText = _appUiState.value.searchState.searchText.toQueryLikeParam(),
@@ -120,6 +125,7 @@ class ClazzAssignmentDetailSubmissionsTabViewModel(
                 launch {
                     activeRepo.clazzAssignmentDao.getProgressSummaryForAssignment(
                         assignmentUid = argEntityUid,
+                        clazzUid = argClazzUid,
                         accountPersonUid = activeUserPersonUid,
                         group = systemImpl.getString(MR.strings.group)
                     ).collect {
@@ -148,6 +154,7 @@ class ClazzAssignmentDetailSubmissionsTabViewModel(
             args = mapOf(
                 ClazzAssignmentSubmitterDetailViewModel.ARG_ASSIGNMENT_UID to argEntityUid.toString(),
                 ClazzAssignmentSubmitterDetailViewModel.ARG_SUBMITTER_UID to assignmentSubmitter.submitterUid.toString(),
+                UstadViewModel.ARG_CLAZZUID to argClazzUid.toString(),
             )
         )
     }

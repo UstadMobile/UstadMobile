@@ -3,7 +3,6 @@ package com.ustadmobile.port.android.view
 import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -11,25 +10,31 @@ import androidx.browser.customtabs.CustomTabsCallback
 import androidx.browser.customtabs.CustomTabsClient
 import androidx.browser.customtabs.CustomTabsServiceConnection
 import androidx.browser.customtabs.CustomTabsSession
-import androidx.browser.customtabs.EngagementSignalsCallback
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Surface
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.core.os.LocaleListCompat
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import com.jakewharton.processphoenix.ProcessPhoenix
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.domain.blob.openblob.OpenBlobUiUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseAndroid
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.LaunchXapiUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.LaunchXapiUseCaseAndroid
 import com.ustadmobile.core.domain.contententry.move.MoveContentEntriesUseCase
+import com.ustadmobile.core.domain.process.CloseProcessUseCase
+import com.ustadmobile.core.domain.process.CloseProcessUseCaseAndroid
 import com.ustadmobile.core.impl.ContainerStorageManager
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -166,6 +171,17 @@ class AppActivity: AppCompatActivity(), DIAware {
             )
         }
 
+        bind<CloseProcessUseCase>() with scoped(EndpointScope.Default).provider {
+            CloseProcessUseCaseAndroid(this@AppActivity)
+        }
+
+        bind<OpenBlobUiUseCase>() with scoped(EndpointScope.Default).singleton {
+            OpenBlobUiUseCase(
+                openBlobUseCase = instance(),
+                systemImpl = instance(),
+            )
+        }
+
         registerContextTranslator { call: NanoHttpdCall -> Endpoint(call.urlParams["endpoint"] ?: "notfound") }
 
         onReady {
@@ -192,33 +208,15 @@ class AppActivity: AppCompatActivity(), DIAware {
         }
     }
 
-    private val engagementServiceCallback = object: EngagementSignalsCallback {
-        override fun onVerticalScrollEvent(isDirectionUp: Boolean, extras: Bundle) {
-            Log.d("CustomTabs", "onVerticalScrollEvent (isDirectionUp=$isDirectionUp)")
-        }
-
-        override fun onGreatestScrollPercentageIncreased(scrollPercentage: Int, extras: Bundle) {
-            Log.d("CustomTabs", "scroll percentage: $scrollPercentage%")
-        }
-
-        override fun onSessionEnded(didUserInteract: Boolean, extras: Bundle) {
-            Log.d("CustomTabs", "onSessionEnded (didUserInteract=$didUserInteract)")
-        }
-
-    }
-
     private val mCustomTabsServiceConnection = object: CustomTabsServiceConnection() {
 
         override fun onCustomTabsServiceConnected(name: ComponentName, client: CustomTabsClient) {
             Napier.d { "CustomTab: Service connected" }
             mCustomTabsClient = client
+            Napier.d { "CustomTab: Warmup" }
+            client.warmup(0)
             mCustomTabsSession = client.newSession(customTabCallback)
-            val enagagementSignalsAvailable = mCustomTabsSession?.isEngagementSignalsApiAvailable(Bundle.EMPTY) ?: false
-            if(!enagagementSignalsAvailable) {
-                Napier.d { "CustomTabs: engagement signals not available"}
-                return
-            }
-            mCustomTabsSession?.setEngagementSignalsCallback(engagementServiceCallback, Bundle.EMPTY)
+            Napier.d { "CustomTab: Session created" }
         }
 
         override fun onServiceDisconnected(name: ComponentName) {
@@ -233,7 +231,7 @@ class AppActivity: AppCompatActivity(), DIAware {
              */
             lifecycleScope.launch {
                 Napier.d { "CustomTab: disconnected, launching reconnection after 500ms" }
-                delay(500)
+                delay(1_000)
                 bindCustomTabsService()
             }
         }
@@ -245,7 +243,23 @@ class AppActivity: AppCompatActivity(), DIAware {
             return
         }
 
-        val packageName = CustomTabsClient.getPackageName(this, null)
+        /**
+         * Where the default browser does not support the custom tab service, we need to provide
+         * package names. On older Xiaomi devices their own browser is set as default, and it does not
+         * support Custom Chrome Tabs. This causes getPackageName to return null. When the intent
+         * to open a url is launched, it ignores the custom chrome tab extras and just opens the
+         * link as normal (including address bar etc).
+         *
+         * We therefor need to provide the package names of well known browsers (Chrome and Firefox)
+         * that properly support custom tabs.
+         */
+        val packageName = CustomTabsClient.getPackageName(
+            this, listOf("com.android.chrome", "org.mozilla.firefox"), false
+        )
+        if(packageName == null) {
+            Napier.w("CustomTabs: Service NOT supported")
+            return
+        }
         CustomTabsClient.bindCustomTabsService(this, packageName, mCustomTabsServiceConnection)
     }
 
@@ -265,8 +279,9 @@ class AppActivity: AppCompatActivity(), DIAware {
         ProcessPhoenix.triggerRebirth(this@AppActivity)
     }
 
-    @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
+    @OptIn(ExperimentalMaterial3WindowSizeClassApi::class, ExperimentalComposeUiApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
         super.onCreate(savedInstanceState)
 
         /**
@@ -287,7 +302,9 @@ class AppActivity: AppCompatActivity(), DIAware {
             val windowSizeClass = calculateWindowSizeClass(this)
             UstadAppTheme {
                 Surface(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.fillMaxSize().semantics {
+                        testTagsAsResourceId = true
+                    },
                     color = MaterialTheme.colorScheme.background,
                 ) {
                     withDI(di) {

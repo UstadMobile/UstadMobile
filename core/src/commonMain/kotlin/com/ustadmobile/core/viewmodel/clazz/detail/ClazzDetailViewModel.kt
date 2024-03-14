@@ -13,7 +13,6 @@ import com.ustadmobile.core.viewmodel.clazzenrolment.clazzmemberlist.ClazzMember
 import com.ustadmobile.core.viewmodel.clazzlog.attendancelist.ClazzLogListAttendanceViewModel
 import com.ustadmobile.core.viewmodel.coursegroupset.list.CourseGroupSetListViewModel
 import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.Role.Companion.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -31,19 +30,26 @@ class ClazzDetailViewModel(
 
     val uiState: Flow<ClazzDetailUiState> = _uiState.asStateFlow()
 
-    private fun createTabList(showAttendance: Boolean): List<TabItem> {
+    private fun createTabList(
+        showAttendance: Boolean,
+        showMembers: Boolean,
+    ): List<TabItem> {
         val tabs = mutableListOf(
             TabItem(
                 viewName = ClazzDetailOverviewViewModel.DEST_NAME,
                 args = mapOf(UstadView.ARG_ENTITY_UID to entityUidArg.toString()),
                 label = systemImpl.getString(MR.strings.course),
             ),
-            TabItem(
-                viewName = ClazzMemberListViewModel.DEST_NAME,
-                args = mapOf(UstadView.ARG_CLAZZUID to entityUidArg.toString()),
-                label = systemImpl.getString(MR.strings.members_key).capitalizeFirstLetter(),
-            )
         )
+        if(showMembers) {
+            tabs.add(
+                TabItem(
+                    viewName = ClazzMemberListViewModel.DEST_NAME,
+                    args = mapOf(UstadView.ARG_CLAZZUID to entityUidArg.toString()),
+                    label = systemImpl.getString(MR.strings.members_key).capitalizeFirstLetter(),
+                )
+            )
+        }
 
         if(showAttendance) {
             tabs.add(
@@ -66,29 +72,27 @@ class ClazzDetailViewModel(
     }
 
     init {
-        val accountPersonUid = accountManager.currentAccount.personUid
-        _uiState.update { prev ->
-            prev.copy(tabs = createTabList(false))
-        }
-
         viewModelScope.launch {
             _uiState.whenSubscribed {
                 launch {
-                    activeDb.clazzDao.findByUidAsFlow(entityUidArg)
-                        .combine(activeDb.clazzDao.personHasPermissionWithClazzAsFlow(
-                            accountPersonUid, entityUidArg, PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT
-                        )) { clazz: Clazz?, permission: Boolean ->
-                            clazz to permission
-                        }.collect {
-                            val (clazz, hasAttendancePermission) = it
-                            val showAttendance =
-                                clazz?.clazzFeatures?.hasFlag(Clazz.CLAZZ_FEATURE_ATTENDANCE) == true &&
-                                hasAttendancePermission
-
-                            _uiState.update { prev ->
-                                prev.copy(tabs = createTabList(showAttendance))
-                            }
+                    activeDb.clazzDao.clazzAndDetailPermissionsAsFlow(
+                        accountPersonUid = activeUserPersonUid,
+                        clazzUid = entityUidArg
+                    ).collect {
+                        val clazz = it?.clazz
+                        val tabList = when (clazz) {
+                            null -> emptyList()
+                            else -> createTabList(
+                                showAttendance = clazz.clazzFeatures.hasFlag(Clazz.CLAZZ_FEATURE_ATTENDANCE) &&
+                                    it.hasAttendancePermission,
+                                showMembers = it.hasViewMembersPermission,
+                            )
                         }
+
+                        _uiState.update { prev ->
+                            prev.copy(tabs = tabList)
+                        }
+                    }
                 }
             }
         }

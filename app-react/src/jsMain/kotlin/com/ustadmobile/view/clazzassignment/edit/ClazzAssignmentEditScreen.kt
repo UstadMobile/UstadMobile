@@ -113,6 +113,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
             }
 
             if (props.uiState.fileSubmissionVisible){
+                /* Not currently enforced
                 UstadMessageIdSelectField {
                     id = "caFileType"
                     value = props.uiState.entity?.assignment?.caFileType ?: 0
@@ -126,7 +127,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
                             }
                         )
                     }
-                }
+                }*/
 
                 UstadNumberTextField {
                     id = "caSizeLimit"

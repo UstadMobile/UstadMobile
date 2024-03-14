@@ -11,3 +11,5 @@ actual fun String.htmlToPlainText(): String {
     return element.innerText
 }
 
+
+actual fun String.requireFileSeparatorSuffix(): String = requirePostfix("/")

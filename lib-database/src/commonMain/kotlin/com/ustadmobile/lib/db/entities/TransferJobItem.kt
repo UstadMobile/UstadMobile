@@ -21,6 +21,8 @@ import kotlinx.serialization.Serializable
  *        transfer for the previous version is no longer relevant.
  * @param tjiLockIdToRelease when an upload is finished, then the retention lock that was created to
  *        prevent its eviction from the cache before upload is finished should be cleared.
+ * @param tjiPartialTmpFile when a download is running, this is the file to use to store a partial
+ *        response so it can be resumed if the download is interrupted.
  */
 @Entity(
     indices = arrayOf(
@@ -61,4 +63,7 @@ data class TransferJobItem(
 
     @ColumnInfo(defaultValue = "0")
     var tjiLockIdToRelease: Long = 0,
+
+    var tjiPartialTmpFile: String? = null,
+
 )

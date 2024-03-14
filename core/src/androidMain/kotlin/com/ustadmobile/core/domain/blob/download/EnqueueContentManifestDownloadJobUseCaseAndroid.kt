@@ -35,6 +35,7 @@ class EnqueueContentManifestDownloadJobUseCaseAndroid(
 
         val workRequest = OneTimeWorkRequestBuilder<ContentManifestDownloadWorker>()
             .setInputData(jobData)
+            .addTag("offlineitem-${endpoint.url}-$offlineItemUid")
             .setBackoffCriteria(BackoffPolicy.LINEAR, 10, TimeUnit.SECONDS)
             .setConstraints(
                 Constraints.Builder()
@@ -43,7 +44,7 @@ class EnqueueContentManifestDownloadJobUseCaseAndroid(
             ).build()
 
         WorkManager.getInstance(appContext).enqueueUniqueWork(
-            "contentmanifest-download-${endpoint.url}-${transferJob.tjUid}",
+            uniqueNameFor(endpoint, transferJob.tjUid),
             ExistingWorkPolicy.REPLACE, workRequest)
     }
 }

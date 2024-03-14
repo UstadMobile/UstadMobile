@@ -2,6 +2,7 @@ package com.ustadmobile.core.viewmodel.person.detail
 
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.domain.phonenumber.IPhoneNumberUtil
 import com.ustadmobile.core.domain.phonenumber.OnClickPhoneNumUseCase
 import com.ustadmobile.core.domain.phonenumber.formatInternationalOrNull
@@ -27,6 +28,8 @@ import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.message.messagelist.MessageListViewModel
 import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
+import com.ustadmobile.core.viewmodel.systempermission.detail.SystemPermissionDetailViewModel
+import com.ustadmobile.lib.db.composites.ClazzEnrolmentAndPersonDetailDetails
 import org.kodein.di.instanceOrNull
 
 data class PersonDetailUiState(
@@ -39,11 +42,15 @@ data class PersonDetailUiState(
 
     val canSendSms: Boolean = false,
 
-    val clazzes: List<ClazzEnrolmentWithClazzAndAttendance> = emptyList(),
+    val clazzes: List<ClazzEnrolmentAndPersonDetailDetails> = emptyList(),
 
     internal val hasChangePasswordPermission: Boolean = false,
 
-    ) {
+    val showPermissionButton: Boolean = false,
+
+    val isActiveUser: Boolean = false,
+
+) {
 
     val dateOfBirthVisible: Boolean
         get() = person?.person?.dateOfBirth.isDateSet()
@@ -80,7 +87,7 @@ data class PersonDetailUiState(
         get() = canSendSms && !person?.person?.phoneNum.isNullOrBlank()
 
     val chatVisible: Boolean
-        get() = !person?.person?.username.isNullOrBlank()
+        get() = !person?.person?.username.isNullOrBlank() && !isActiveUser
 
 }
 
@@ -107,10 +114,6 @@ class PersonDetailViewModel(
     init {
         val accountManager: UstadAccountManager by instance()
 
-        val currentUserUid = accountManager.currentUserSession.userSession.usPersonUid
-
-        val entityUid: Long = savedStateHandle[ARG_ENTITY_UID]?.toLong() ?: 0
-
         _appUiState.update { prev ->
             prev.copy(
                 loadingState = INDETERMINATE,
@@ -125,17 +128,36 @@ class PersonDetailViewModel(
 
         _uiState.update { prev ->
             prev.copy(
+                isActiveUser = entityUidArg == activeUserPersonUid,
                 canSendSms = onClickSendSmsUseCase != null
             )
         }
 
         viewModelScope.launch {
+            val entityFlow = activeRepo.personDao.findByUidWithDisplayDetailsFlow(
+                personUid = entityUidArg,
+                accountPersonUid = activeUserPersonUid,
+            )
+
+            val viewAndEditPermissionFlow = activeRepo.systemPermissionDao
+                .personHasEditAndViewPermissionForPersonAsFlow(
+                    accountPersonUid = activeUserPersonUid,
+                    otherPersonUid = entityUidArg
+                ).shareIn(viewModelScope, SharingStarted.WhileSubscribed())
+
+            //Any required SystemPermission entities will be pulled down by viewAndEditPermissionFlow
+            //So hasSystemPermissionFlow can use db instead of repo
+            val hasManagePermissionsPermissionFlow = activeDb.systemPermissionDao
+                .personHasSystemPermissionAsFlow(
+                    accountPersonUid = activeUserPersonUid,
+                    permission = PermissionFlags.MANAGE_USER_PERMISSIONS,
+                )
+
             _uiState.whenSubscribed {
                 launch {
-                    activeRepo.personDao.findByUidWithDisplayDetailsFlow(
-                        entityUid,
-                        currentUserUid
-                    ).collect { person ->
+                    entityFlow.combine(viewAndEditPermissionFlow) { entity, permissions ->
+                        entity.takeIf { permissions.hasViewPermission }
+                    }.collect { person ->
                         _uiState.update { prev ->
                             prev.copy(
                                 person = person,
@@ -144,6 +166,7 @@ class PersonDetailViewModel(
                                 }
                             )
                         }
+
                         _appUiState.update { prev ->
                             prev.copy(
                                 title = person?.person?.personFullName() ?: "",
@@ -154,28 +177,22 @@ class PersonDetailViewModel(
                 }
 
                 launch {
-                    activeRepo.personPictureDao.findByPersonUidAsFlow(
-                        entityUid
-                    ).collect { personPicture ->
-                        _uiState.update { prev -> prev.copy(personPicture = personPicture) }
+                    hasManagePermissionsPermissionFlow.distinctUntilChanged().collect {
+                        _uiState.update { prev -> prev.copy(showPermissionButton = it) }
                     }
                 }
 
                 launch {
-                    activeRepo.personDao.personHasPermissionFlow(currentUserUid,
-                        entityUid, Role.PERMISSION_RESET_PASSWORD
-                    ).collect {
-                        _uiState.update { prev -> prev.copy(hasChangePasswordPermission = it) }
-                    }
-                }
+                    viewAndEditPermissionFlow.collect {
+                        _uiState.update { prev ->
+                            prev.copy(
+                                hasChangePasswordPermission = it.hasEditPermission
+                            )
+                        }
 
-                launch {
-                    activeRepo.personDao.personHasPermissionFlow(currentUserUid, entityUid,
-                        Role.PERMISSION_PERSON_UPDATE
-                    ).collect { hasEditPermission ->
                         _appUiState.update { prev ->
                             prev.copy(
-                                fabState = if(hasEditPermission) {
+                                fabState = if(it.hasEditPermission) {
                                     FabUiState(
                                         visible = true,
                                         text = systemImpl.getString(MR.strings.edit),
@@ -191,22 +208,15 @@ class PersonDetailViewModel(
                 }
 
                 launch {
-                    activeDb.clazzEnrolmentDao.findAllClazzesByPersonWithClazz(personUid).collect {
-                        _uiState.update { prev -> prev.copy(clazzes = it) }
-                    }
-                }
-            }
-        }
-
-        viewModelScope.launch {
-            _appUiState.whenSubscribed {
-                activeDb.personDao.personHasPermissionFlow(currentUserUid,
-                    entityUid, Role.PERMISSION_PERSON_UPDATE
-                ).distinctUntilChanged().collect { hasUpdatePermission ->
-                    _appUiState.update { prev ->
-                        prev.copy(
-                            fabState = prev.fabState.copy(visible = hasUpdatePermission),
-                        )
+                    activeDb.clazzEnrolmentDao.findAllClazzesByPersonWithClazz(
+                        accountPersonUid = activeUserPersonUid,
+                        otherPersonUid = entityUidArg
+                    ).collect {
+                        _uiState.update { prev ->
+                            prev.copy(
+                                clazzes = it
+                            )
+                        }
                     }
                 }
             }
@@ -218,11 +228,13 @@ class PersonDetailViewModel(
             mapOf(ARG_ENTITY_UID to personUid.toString()))
     }
 
-    fun onClickClazz(clazz: ClazzEnrolmentWithClazz) {
-        navController.navigate(ClazzDetailViewModel.DEST_NAME,
-            mapOf(ARG_ENTITY_UID to clazz.clazzEnrolmentClazzUid.toString()))
+    fun onClickClazz(clazz: ClazzEnrolmentAndPersonDetailDetails) {
+        val clazzUid = clazz.clazz?.clazzUid ?: return
+        navController.navigate(
+            ClazzDetailViewModel.DEST_NAME,
+            mapOf(ARG_ENTITY_UID to clazzUid.toString())
+        )
     }
-
 
     private fun navigateToEditAccount() {
         navController.navigate(PersonAccountEditViewModel.DEST_NAME,
@@ -256,6 +268,15 @@ class PersonDetailViewModel(
         _uiState.value.person?.person?.emailAddr?.also {
             onClickEmailUseCase(it)
         }
+    }
+
+    fun onClickPermissions() {
+        navController.navigate(
+            SystemPermissionDetailViewModel.DEST_NAME,
+            mapOf(
+                ARG_PERSON_UID to entityUidArg.toString()
+            )
+        )
     }
 
     fun onClickManageParentalConsent() {
