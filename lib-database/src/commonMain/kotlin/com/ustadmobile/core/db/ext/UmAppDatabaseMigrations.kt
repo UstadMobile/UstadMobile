@@ -1938,6 +1938,108 @@ val MIGRATION_160_161 = DoorMigrationStatementList(160, 161) { db ->
     }
 }
 
+/**
+ * Add retention creation triggers (see AddRetainAllActiveTriggerUseCase) for CourseAssignmentSubmission
+ * entity on server.
+ */
+val MIGRATION_161_162_SERVER = DoorMigrationStatementList(161, 162) { db ->
+    //Add creation of retention locks for assignment file submissions
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("""
+                        CREATE TRIGGER IF NOT EXISTS Retain_CourseAssignmentSubmissionFile_Ins_casaUri
+                        AFTER INSERT ON CourseAssignmentSubmissionFile
+                        FOR EACH ROW WHEN NEW.casaUri IS NOT NULL
+                        BEGIN
+                        INSERT OR REPLACE INTO CacheLockJoin(cljTableId, cljEntityUid, cljUrl, cljLockId, cljStatus, cljType)
+                        VALUES(90, NEW.casaUid, NEW.casaUri, 0, 1, 1);
+                        END
+                    """)
+
+            add("""
+                    CREATE TRIGGER IF NOT EXISTS Retain_CourseAssignmentSubmissionFile_Upd_casaUri_New
+                    AFTER UPDATE ON CourseAssignmentSubmissionFile
+                    FOR EACH ROW WHEN NEW.casaUri != OLD.casaUri AND NEW.casaUri IS NOT NULL
+                    BEGIN
+                        INSERT OR REPLACE INTO CacheLockJoin(cljTableId, cljEntityUid, cljUrl, cljLockId, cljStatus, cljType)
+                        VALUES(90, NEW.casaUid, NEW.casaUri, 0, 1, 1);
+                    END   
+                """)
+
+            add("""CREATE TRIGGER IF NOT EXISTS Retain_CourseAssignmentSubmissionFile_Upd_casaUri_Old
+AFTER UPDATE ON CourseAssignmentSubmissionFile
+FOR EACH ROW WHEN NEW.casaUri != OLD.casaUri AND OLD.casaUri IS NOT NULL
+BEGIN
+    UPDATE CacheLockJoin 
+       SET cljStatus = 3
+     WHERE cljTableId = 90
+       AND cljEntityUid = OLD.casaUid
+       AND cljUrl = OLD.casaUri;
+END        """)
+
+            add("""CREATE TRIGGER IF NOT EXISTS Retain_CourseAssignmentSubmissionFile_Del_casaUri
+AFTER DELETE ON CourseAssignmentSubmissionFile
+FOR EACH ROW WHEN OLD.casaUri IS NOT NULL
+BEGIN
+    UPDATE CacheLockJoin 
+       SET cljStatus = 3
+     WHERE cljTableId = 90
+       AND cljEntityUid = OLD.casaUid
+       AND cljUrl = OLD.casaUri;
+END       """)
+        }else {
+            add("""
+                            CREATE OR REPLACE FUNCTION retain_c_clj_90_casaUri() RETURNS TRIGGER AS $$
+                            BEGIN
+                            INSERT INTO CacheLockJoin(cljTableId, cljEntityUid, cljUrl, cljLockId, cljStatus, cljType)
+                            VALUES(90, NEW.casaUid, NEW.casaUri, 0, 1, 1);
+                            RETURN NEW;
+                            END $$ LANGUAGE plpgsql
+                        """)
+
+            add("""
+                            CREATE OR REPLACE FUNCTION retain_d_clj_90_casaUri() RETURNS TRIGGER AS $$
+                            BEGIN
+                            UPDATE CacheLockJoin 
+                               SET cljStatus = 3
+                             WHERE cljTableId = 90
+                               AND cljEntityUid = OLD.casaUid
+                               AND cljUrl = OLD.casaUri;
+                            RETURN OLD;
+                            END $$ LANGUAGE plpgsql   
+                        """)
+
+            add("""
+                            CREATE TRIGGER retain_c_clj_90_casaUri_ins_t
+                            AFTER INSERT ON CourseAssignmentSubmissionFile
+                            FOR EACH ROW
+                            WHEN (NEW.casaUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_c_clj_90_casaUri();
+                        """)
+
+            add("""
+                            CREATE TRIGGER retain_c_clj_90_casaUri_upd_t
+                            AFTER UPDATE ON CourseAssignmentSubmissionFile
+                            FOR EACH ROW
+                            WHEN (NEW.casaUri IS DISTINCT FROM OLD.casaUri AND OLD.casaUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_c_clj_90_casaUri();
+                        """)
+
+            add("""
+                            CREATE TRIGGER retain_d_clj_90_casaUri_upd_t
+                            AFTER UPDATE ON CourseAssignmentSubmissionFile
+                            FOR EACH ROW
+                            WHEN (NEW.casaUri IS DISTINCT FROM OLD.casaUri AND NEW.casaUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_d_clj_90_casaUri();
+                        """)
+        }
+    }
+}
+
+val MIGRATION_161_162_CLIENT = DoorMigrationStatementList(161, 162) {
+    emptyList()
+}
+
 
 
 fun migrationList() = listOf<DoorMigration>(

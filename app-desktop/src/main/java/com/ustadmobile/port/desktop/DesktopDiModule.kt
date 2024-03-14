@@ -15,6 +15,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.MIGRATION_144_145_CLIENT
 import com.ustadmobile.core.db.ext.MIGRATION_148_149_CLIENT_WITH_OFFLINE_ITEMS
 import com.ustadmobile.core.db.ext.MIGRATION_155_156_CLIENT
+import com.ustadmobile.core.db.ext.MIGRATION_161_162_CLIENT
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.core.domain.cachelock.AddOfflineItemInactiveTriggersCallback
@@ -335,6 +336,7 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
             .addMigrations(MIGRATION_144_145_CLIENT)
             .addMigrations(MIGRATION_148_149_CLIENT_WITH_OFFLINE_ITEMS)
             .addMigrations(MIGRATION_155_156_CLIENT)
+            .addMigrations(MIGRATION_161_162_CLIENT)
             .addCallback(AddOfflineItemInactiveTriggersCallback())
             .build()
 
