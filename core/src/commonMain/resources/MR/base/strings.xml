@@ -196,7 +196,6 @@
     <string name="show_hidden_items">Show hidden items</string>
     <string name="open_folder">Open Folder</string>
     <string name="action_hidden">Hidden</string>
-    <string name="invalid_course_code">Invalid course code</string>
     <string name="invalid">Invalid</string>
     <string name="enter_register_code">Enter Registration Code</string>
     <string name="bar_chart">Bar Chart</string>
@@ -788,8 +787,6 @@
     <string name="role_description">A role(e.g. teacher, student, etc) gives a set of permissions (e.g. view person details, record attendance, etc) that apply to the scope selected above.</string>
     <string name="assign_role">Assign role</string>
     <string name="more_information">More information</string>
-    <!-- This is a code that the teacher can give to students to allow them to join the class -->
-    <string name="class_code">Class code</string>
     <!-- Pending requests - use on classes / schools to list people who have requested to join a class / school -->
     <string name="pending_requests">Pending requests</string>
     <!-- Used to indicate that something is pending e.g. "Student (Pending)" when the student has not yet been approved -->
@@ -815,7 +812,8 @@
     <string name="add_staff_to_school">Add staff to school</string>
     <string name="permission_password_reset">Reset and update persons password</string>
     <string name="school_code">School code</string>
-    <string name="course_code">Course code</string>
+
+    <!-- A code that the teacher or admin can use to invite students (or other teachers) to join a course -->
     <string name="invite_code">Invite code</string>
     <string name="entity_code">%1$s code</string>
     <string name="join_code_instructions">Ask your teacher/admin for the invite code, then enter it below. The course teacher/admin can then approve or deny your request to join.</string>
@@ -1421,8 +1419,6 @@
     <!-- used to show what group a member of a course would be in. The
     %1$s% will be replaced with the number of the group e.g. Group 1, Group 2, etc-->
     <string name="group_number" formatted="false">Group %1$s</string>
-    <!-- This is a code that the teacher can give to students to allow them to join the course -->
-    <string name="course_code">Course code</string>
     <string name="add_group">Add group</string>
     <string name="edit_group">Edit group</string>
     <string name="new_group_set">New group set</string>
@@ -1859,5 +1855,7 @@
     <string name="upload_failed">Upload failed</string>
 
     <string name="opening_name">Opening %1$s</string>
+
+    <string name="invalid_invite_code">Invalid invite code</string>
 
 </resources>
