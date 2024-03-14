@@ -1830,7 +1830,7 @@
 
     <string name="manage_student_enrolments_for_all_courses">Manage student enrolments for all courses</string>
 
-    <string name="manage_teacher_enrolments_for_all_courses">Manage student enrolments for all courses</string>
+    <string name="manage_teacher_enrolments_for_all_courses">Manage teacher enrolments for all courses</string>
 
     <string name="view_attendance_records_for_all_courses">View attendance records for all courses</string>
 
@@ -1854,6 +1854,10 @@
 
     <string name="upload_failed">Upload failed</string>
 
+    <!--
+    Message that will be shown when opening a file is in progress. %1$s will be replaced with
+    the file name being opened
+    -->
     <string name="opening_name">Opening %1$s</string>
 
     <string name="invalid_invite_code">Invalid invite code</string>
