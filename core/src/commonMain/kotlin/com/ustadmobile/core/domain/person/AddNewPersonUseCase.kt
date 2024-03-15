@@ -18,6 +18,7 @@ class AddNewPersonUseCase(
         person: Person,
         addedByPersonUid: Long = 0,
         createPersonParentApprovalIfMinor: Boolean = true,
+        systemPermissions: Long = SystemPermission.PERSON_DEFAULT_PERMISSIONS,
     ) : Long {
         val effectiveDb = (repo ?: db)
         return effectiveDb.withDoorTransactionAsync {
@@ -25,7 +26,7 @@ class AddNewPersonUseCase(
             effectiveDb.systemPermissionDao.upsertAsync(
                 SystemPermission(
                     spToPersonUid = personUid,
-                    spPermissionsFlag = SystemPermission.PERSON_DEFAULT_PERMISSIONS,
+                    spPermissionsFlag = systemPermissions,
                 )
             )
 
