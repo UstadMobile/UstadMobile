@@ -4,6 +4,7 @@ import com.ustadmobile.core.account.AuthManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.EnrolIntoCourseUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
+import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsUseCaseImpl
 import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorUseCase
 import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.io.ext.readString
@@ -63,7 +64,7 @@ class BulkAddUsersUseCaseJvmTest {
     fun givenValidImportRows_whenInvoked_thenWillAddNewPerson() {
         val csvData = readCsv("valid-import.csv")
 
-        val importUseCase = BulkAddUsersUseCaseImpl(
+        val importUseCase = BulkAddPersonsUseCaseImpl(
             addNewPersonUseCase = mockAddNewPersonUseCase,
             validateEmailUseCase = mockValidateEmailUseCase,
             validatePhoneNumUseCase = mockValidatePhoneUseCase,
@@ -84,7 +85,7 @@ class BulkAddUsersUseCaseJvmTest {
 
         runBlocking {
             try {
-                BulkAddUsersUseCaseImpl(
+                BulkAddPersonsUseCaseImpl(
                     addNewPersonUseCase = mockAddNewPersonUseCase,
                     validateEmailUseCase = mockValidateEmailUseCase,
                     validatePhoneNumUseCase = mockValidatePhoneUseCase,

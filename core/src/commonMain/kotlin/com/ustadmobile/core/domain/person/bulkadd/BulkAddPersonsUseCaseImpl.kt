@@ -1,4 +1,4 @@
-package com.ustadmobile.core.domain.bulkaddusers
+package com.ustadmobile.core.domain.person.bulkadd
 
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
 import com.ustadmobile.core.account.AuthManager
@@ -16,7 +16,7 @@ import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 
-class BulkAddUsersUseCaseImpl(
+class BulkAddPersonsUseCaseImpl(
     private val addNewPersonUseCase: AddNewPersonUseCase,
     private val validateEmailUseCase: ValidateEmailUseCase,
     private val validatePhoneNumUseCase: PhoneNumValidatorUseCase,
@@ -24,11 +24,11 @@ class BulkAddUsersUseCaseImpl(
     private val enrolUseCase: EnrolIntoCourseUseCase,
     private val activeDb: UmAppDatabase,
     private val activeRepo: UmAppDatabase?,
-): BulkAddUsersUseCase {
+): BulkAddPersonsUseCase {
 
-    override suspend fun invoke(csv: String): BulkAddUsersUseCase.BulkAddUsersResult {
+    override suspend fun invoke(csv: String): BulkAddPersonsUseCase.BulkAddUsersResult {
         val csvData = csvReader().readAllWithHeader(csv)
-        val errors = mutableListOf<BulkImportDataError>()
+        val errors = mutableListOf<BulkAddPersonsDataError>()
 
         if(csvData.isEmpty())
             throw IllegalArgumentException("No rows")
@@ -51,26 +51,26 @@ class BulkAddUsersUseCaseImpl(
             //Required fields
             val username = row[HEADER_USERNAME]!!
             if(username.isBlank())
-                errors += BulkImportDataError(lineNum, HEADER_USERNAME, username)
+                errors += BulkAddPersonsDataError(lineNum, HEADER_USERNAME, username)
 
             allUsernames += username to lineNum
 
             val password = row[HEADER_PASSWORD]!!
             if(password.isBlank() || password.length < 6)
-                errors += BulkImportDataError(lineNum, HEADER_PASSWORD, password)
+                errors += BulkAddPersonsDataError(lineNum, HEADER_PASSWORD, password)
 
             val firstNames = row[HEADER_FIRSTNAMES]!!
             if(firstNames.isBlank())
-                errors += BulkImportDataError(lineNum, HEADER_FIRSTNAMES, firstNames)
+                errors += BulkAddPersonsDataError(lineNum, HEADER_FIRSTNAMES, firstNames)
 
             val familyNames = row[HEADER_FAMILYNAME]!!
             if(familyNames.isBlank()) {
-                errors += BulkImportDataError(lineNum, HEADER_FAMILYNAME, familyNames)
+                errors += BulkAddPersonsDataError(lineNum, HEADER_FAMILYNAME, familyNames)
             }
 
             val sex = row[HEADER_SEX]!!
             if(sex.lowercase() !in SEX_VALID_VALUES) {
-                errors += BulkImportDataError(lineNum, HEADER_SEX, sex)
+                errors += BulkAddPersonsDataError(lineNum, HEADER_SEX, sex)
             }
 
             val dateOfBirthStr = row[HEADER_DATE_OF_BIRTH]
@@ -78,18 +78,18 @@ class BulkAddUsersUseCaseImpl(
                 try {
                     LocalDate.parse(dateOfBirthStr)
                 }catch(e: Throwable) {
-                    errors += BulkImportDataError(lineNum, HEADER_DATE_OF_BIRTH, dateOfBirthStr)
+                    errors += BulkAddPersonsDataError(lineNum, HEADER_DATE_OF_BIRTH, dateOfBirthStr)
                 }
             }
 
             val emailStr = row[HEADER_EMAIL]
             if(!emailStr.isNullOrBlank() && validateEmailUseCase(emailStr) == null) {
-                errors += BulkImportDataError(lineNum, HEADER_EMAIL, emailStr)
+                errors += BulkAddPersonsDataError(lineNum, HEADER_EMAIL, emailStr)
             }
 
             val phoneNum = row[HEADER_PHONE]
             if(!phoneNum.isNullOrBlank() && !validatePhoneNumUseCase.isValid(phoneNum)) {
-                errors += BulkImportDataError(lineNum, HEADER_PHONE, phoneNum)
+                errors += BulkAddPersonsDataError(lineNum, HEADER_PHONE, phoneNum)
             }
 
             val courseNames = row[HEADER_COURSES]
@@ -99,6 +99,10 @@ class BulkAddUsersUseCaseImpl(
                     .map { it.trim() }
                     .filter { it.isNotBlank() }
             }
+        }
+
+        if(errors.isNotEmpty()) {
+            throw BulkAddPersonException(errors = errors)
         }
 
         val duplicateUsernames = allUsernames.map { it.first }.duplicates()
@@ -157,7 +161,7 @@ class BulkAddUsersUseCaseImpl(
             //Do enrolment...
         }
 
-        return BulkAddUsersUseCase.BulkAddUsersResult(0)
+        return BulkAddPersonsUseCase.BulkAddUsersResult(csvData.size)
     }
 
     companion object {
@@ -182,8 +186,10 @@ class BulkAddUsersUseCaseImpl(
 
         const val HEADER_COURSES = "courses"
 
-        val REQUIRED_COLUMNS = listOf(HEADER_USERNAME, HEADER_FIRSTNAMES,
-            HEADER_FAMILYNAME, HEADER_SEX, HEADER_PASSWORD)
+        val REQUIRED_COLUMNS = listOf(
+            HEADER_USERNAME, HEADER_FIRSTNAMES,
+            HEADER_FAMILYNAME, HEADER_SEX, HEADER_PASSWORD
+        )
 
         val SEX_VALID_VALUES = listOf("male", "female", "other")
 

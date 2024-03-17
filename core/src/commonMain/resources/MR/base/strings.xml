@@ -1862,4 +1862,8 @@
 
     <string name="invalid_invite_code">Invalid invite code</string>
 
+    <string name="bulk_import">Bulk import</string>
+
+    <string name="import">Import</string>
+
 </resources>

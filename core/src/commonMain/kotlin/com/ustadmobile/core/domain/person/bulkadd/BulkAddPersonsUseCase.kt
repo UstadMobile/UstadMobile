@@ -1,4 +1,4 @@
-package com.ustadmobile.core.domain.bulkaddusers
+package com.ustadmobile.core.domain.person.bulkadd
 
 import kotlinx.serialization.Serializable
 
@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
  *
  * OneRoster CSVs use separate files for demographics (including date of birth, sex, etc).
  */
-interface BulkAddUsersUseCase {
+interface BulkAddPersonsUseCase {
 
     @Serializable
     data class BulkAddUsersResult(
