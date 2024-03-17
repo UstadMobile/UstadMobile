@@ -271,7 +271,7 @@ expect abstract class PersonDao : BaseDao<Person> {
           FROM Person
          WHERE Person.username IN (:usernames)
     """)
-    abstract suspend fun selectExistingUsernames(usernames: List<String>): List<String>
+    abstract suspend fun selectExistingUsernames(usernames: List<String>): List<String?>
 
 
 }

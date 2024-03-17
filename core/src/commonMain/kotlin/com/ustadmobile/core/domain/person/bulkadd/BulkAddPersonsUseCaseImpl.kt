@@ -119,7 +119,7 @@ class BulkAddPersonsUseCaseImpl(
         allUsernames.chunked(100).forEach {
             existingUsernames += effectiveDb.personDao.selectExistingUsernames(
                 it.map { it.first.lowercase() }
-            )
+            ).mapNotNull { it }
         }
 
         if(existingUsernames.isNotEmpty()) {
