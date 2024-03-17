@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
+import com.ustadmobile.core.MR
 
 data class BulkAddPersonRunImportUiState(
     val inProgress: Boolean = true,
@@ -51,6 +52,10 @@ class BulkAddPersonRunImportViewModel(
         .instance()
 
     init {
+        _appUiState.update {
+            it.copy(title = systemImpl.getString(MR.strings.bulk_import))
+        }
+
         viewModelScope.launch {
             try {
                 val result = bulkAddFromUriUseCase(

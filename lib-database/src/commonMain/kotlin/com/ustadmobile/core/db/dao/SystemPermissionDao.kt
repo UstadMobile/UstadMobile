@@ -138,6 +138,38 @@ expect abstract class SystemPermissionDao {
     ): Flow<PermissionPair>
 
 
+
+
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall(
+                functionName = "findAllByPersonUid",
+                functionArgs = arrayOf(
+                    HttpServerFunctionParam(
+                        name = "includeDeleted",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "true",
+                    )
+                )
+            )
+        )
+    )
+    @Query("""
+        SELECT ($SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT1
+                :firstPermission
+                $SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT2) as firstPermission,
+                ($SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT1
+                :secondPermission
+                $SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT2) as secondPermission
+    """)
+    abstract suspend fun personHasSystemPermissionPair(
+        accountPersonUid: Long,
+        firstPermission: Long,
+        secondPermission: Long,
+    ): PermissionPair
+
+
     @HttpAccessible(
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
         pullQueriesToReplicate = arrayOf(

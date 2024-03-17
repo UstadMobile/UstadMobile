@@ -41,7 +41,8 @@ fun BulkAddPersonSelectFileScreen(viewModel: BulkAddPersonSelectFileViewModel) {
             filePickLauncher(UstadPickFileOpts())
         },
         onFileSelected = viewModel::onFileSelected,
-        onClickImportButton = viewModel::onClickImportButton
+        onClickImportButton = viewModel::onClickImportButton,
+        onClickGetTemplate = viewModel::onClickGetTemplate,
     )
 }
 
@@ -51,11 +52,12 @@ fun BulkAddPersonSelectFileScreen(
     onClickSelectFile: () -> Unit,
     onFileSelected: (uri: String, name: String) -> Unit,
     onClickImportButton: () -> Unit,
+    onClickGetTemplate: () -> Unit,
 ) {
 
     Column {
         Text(
-            text = "Instructions...",
+            text = stringResource(MR.strings.you_can_import_users_using_a_csv_file),
             modifier = Modifier.defaultItemPadding(),
         )
 
@@ -80,8 +82,17 @@ fun BulkAddPersonSelectFileScreen(
                 OutlinedButton(
                     onClick = onClickSelectFile,
                     modifier = Modifier.defaultItemPadding().fillMaxWidth(),
+                    enabled = uiState.fieldsEnabled,
                 ) {
-                    Text("Select file")
+                    Text(stringResource(MR.strings.select_file))
+                }
+
+                OutlinedButton(
+                    onClick = onClickGetTemplate,
+                    enabled = uiState.fieldsEnabled,
+                    modifier = Modifier.defaultItemPadding().fillMaxWidth(),
+                ) {
+                    Text(stringResource(MR.strings.get_template))
                 }
 
                 Button(

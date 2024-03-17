@@ -114,10 +114,10 @@ val REQUIRED_EXTERNAL_COMMANDS = emptyList<String>()
  * other url will be sent to the JS dev proxy
  */
 val KTOR_SERVER_ROUTES = listOf(
-    "/UmAppDatabase", "/ConcatenatedContainerFiles2",
+    "/UmAppDatabase",
     "/ContainerEntryList", "/ContainerEntryFile", "/auth", "/ContainerMount",
-    "/ContainerUpload2", "/Site", "/import", "/contentupload", "/websocket", "/pdf",
-    "/api"
+    "/Site", "/import", "/contentupload", "/websocket", "/pdf",
+    "/api", "/staticfiles"
 )
 
 
@@ -659,6 +659,11 @@ fun Application.umRestApplication(
                 defaultResource("umapp/index.html")
             }
         }
+
+        staticResources(
+            remotePath = "staticfiles",
+            basePackage = "staticfiles"
+        )
 
         //Handle default route when running behind proxy
         if(!jsDevServer.isNullOrBlank()) {

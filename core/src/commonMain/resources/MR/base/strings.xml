@@ -1866,4 +1866,18 @@
 
     <string name="import_key">Import</string>
 
+    <string name="imported">Imported</string>
+
+    <string name="you_can_import_users_using_a_csv_file">You can import users using a CSV file exported from a spreadsheet</string>
+
+    <string name="get_template">Get template</string>
+
+    <string name="importing">Importing</string>
+
+    <!--
+    If there is an error with a file the user is importing, this is used to tell the user which
+    line has the error
+    -->
+    <string name="line_number">Line number</string>
+
 </resources>
