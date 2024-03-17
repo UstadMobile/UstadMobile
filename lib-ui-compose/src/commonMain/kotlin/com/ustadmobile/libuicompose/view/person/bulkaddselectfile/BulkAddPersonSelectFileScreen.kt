@@ -86,7 +86,7 @@ fun BulkAddPersonSelectFileScreen(
                     enabled = uiState.importButtonEnabled,
                     modifier = Modifier.defaultItemPadding().fillMaxWidth(),
                 ) {
-                    Text(stringResource(MR.strings.import))
+                    Text(stringResource(MR.strings.import_key))
                 }
             }
         }

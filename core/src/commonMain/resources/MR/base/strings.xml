@@ -1864,6 +1864,6 @@
 
     <string name="bulk_import">Bulk import</string>
 
-    <string name="import">Import</string>
+    <string name="import_key">Import</string>
 
 </resources>

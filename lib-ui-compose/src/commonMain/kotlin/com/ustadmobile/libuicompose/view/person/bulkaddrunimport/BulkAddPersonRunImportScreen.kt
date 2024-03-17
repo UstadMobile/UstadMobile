@@ -3,10 +3,11 @@ package com.ustadmobile.libuicompose.view.person.bulkaddrunimport
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Error
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -14,6 +15,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.viewmodel.person.bulkaddrunimport.BulkAddPersonRunImportUiState
 import com.ustadmobile.core.viewmodel.person.bulkaddrunimport.BulkAddPersonRunImportViewModel
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
@@ -37,7 +39,18 @@ fun BulkAddPersonRunImportScreen(uiState: BulkAddPersonRunImportUiState) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    CircularProgressIndicator()
+                    val progressVal = uiState.progress
+                    if(progressVal > 0) {
+                        LinearProgressIndicator(
+                            progress = progressVal,
+                            modifier = Modifier.width(192.dp),
+                        )
+                    }else {
+                        LinearProgressIndicator(
+                            modifier = Modifier.width(192.dp),
+                        )
+                    }
+
                     Text("Importing")
                 }
             }

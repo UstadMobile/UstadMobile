@@ -7,6 +7,7 @@ import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.onActiveEndpoint
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.door.DoorUri
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,6 +25,13 @@ data class BulkAddPersonRunImportUiState(
 ) {
     val hasErrors: Boolean
         get() = errors.isNotEmpty() || errorMessage != null
+
+    val progress: Float
+        get() = if(totalRecords > 0) {
+            numImported.toFloat() / totalRecords.toFloat()
+        }else {
+            0f
+        }
 }
 
 class BulkAddPersonRunImportViewModel(
@@ -45,7 +53,18 @@ class BulkAddPersonRunImportViewModel(
     init {
         viewModelScope.launch {
             try {
-                val result = bulkAddFromUriUseCase(DoorUri.parse(fileUri))
+                val result = bulkAddFromUriUseCase(
+                    DoorUri.parse(fileUri),
+                    onProgress = { numImported, totalRecords ->
+                        _uiState.update { prev ->
+                            prev.copy(
+                                numImported = numImported,
+                                totalRecords = totalRecords,
+                            )
+                        }
+                    }
+                )
+
                 _uiState.update { prev ->
                     prev.copy(
                         inProgress = false,
@@ -53,6 +72,7 @@ class BulkAddPersonRunImportViewModel(
                     )
                 }
             }catch(e: Throwable) {
+                Napier.e("Exception running import", e)
                 _uiState.update { prev ->
                     prev.copy(
                         inProgress = false,

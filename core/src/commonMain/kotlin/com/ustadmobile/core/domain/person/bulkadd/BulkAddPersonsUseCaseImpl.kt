@@ -26,7 +26,10 @@ class BulkAddPersonsUseCaseImpl(
     private val activeRepo: UmAppDatabase?,
 ): BulkAddPersonsUseCase {
 
-    override suspend fun invoke(csv: String): BulkAddPersonsUseCase.BulkAddUsersResult {
+    override suspend fun invoke(
+        csv: String,
+        onProgress: BulkAddPersonsUseCase.BulkAddOnProgress,
+    ): BulkAddPersonsUseCase.BulkAddUsersResult {
         val csvData = csvReader().readAllWithHeader(csv)
         val errors = mutableListOf<BulkAddPersonsDataError>()
 
@@ -139,27 +142,37 @@ class BulkAddPersonsUseCaseImpl(
             throw IllegalArgumentException("Cannot find courses: ${missingCourseNames.joinToString()}")
         }
 
-        effectiveDb.withDoorTransactionAsync {
-            csvData.forEach { row ->
-                val personUid = addNewPersonUseCase(
-                    person = Person().also {
-                        it.username = row[HEADER_USERNAME]!!.lowercase().trim()
-                        it.firstNames = row[HEADER_FIRSTNAMES]!!.trim()
-                        it.lastName = row[HEADER_FAMILYNAME]!!.trim()
-                        it.gender = SEX_VALID_VALUES_MAP[row[HEADER_SEX]!!.trim().lowercase()]!!
-                        it.dateOfBirth = row[HEADER_DATE_OF_BIRTH]?.let { dateOfBirthStr ->
-                            LocalDateTime(LocalDate.parse(dateOfBirthStr), LocalTime(0, 0))
-                                .toInstant(TimeZone.UTC).toEpochMilliseconds()
-                        } ?: 0L
-                        it.emailAddr = row[HEADER_EMAIL]
-                        it.phoneNum = row[HEADER_PHONE]
-                    }
-                )
-                authManager.setAuth(personUid, row[HEADER_PASSWORD]!!.trim())
-            }
+        val chunkSize = 10
 
-            //Do enrolment...
+        //Importing too many users in a single transaction will result in the transaction timing out.
+        onProgress(0, csvData.size)
+
+        csvData.chunked(chunkSize).forEachIndexed { chunkIndex, rowsChunk ->
+            effectiveDb.withDoorTransactionAsync {
+                rowsChunk.forEach { row ->
+                    val personUid = addNewPersonUseCase(
+                        person = Person().also {
+                            it.username = row[HEADER_USERNAME]!!.lowercase().trim()
+                            it.firstNames = row[HEADER_FIRSTNAMES]!!.trim()
+                            it.lastName = row[HEADER_FAMILYNAME]!!.trim()
+                            it.gender = SEX_VALID_VALUES_MAP[row[HEADER_SEX]!!.trim().lowercase()]!!
+                            it.dateOfBirth = row[HEADER_DATE_OF_BIRTH]?.let { dateOfBirthStr ->
+                                LocalDateTime(LocalDate.parse(dateOfBirthStr), LocalTime(0, 0))
+                                    .toInstant(TimeZone.UTC).toEpochMilliseconds()
+                            } ?: 0L
+                            it.emailAddr = row[HEADER_EMAIL]
+                            it.phoneNum = row[HEADER_PHONE]
+                        }
+                    )
+                    authManager.setAuth(personUid, row[HEADER_PASSWORD]!!.trim())
+                }
+                onProgress(chunkIndex * chunkSize, csvData.size)
+
+                //Do enrolment...
+            }
         }
+
+        onProgress(csvData.size, csvData.size)
 
         return BulkAddPersonsUseCase.BulkAddUsersResult(csvData.size)
     }

@@ -456,6 +456,7 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
     bind<BulkAddPersonsFromLocalUriUseCase>() with scoped(EndpointScope.Default).singleton {
         BulkAddPersonsFromLocalUriUseCaseCommonJvm(
             bulkAddPersonsUseCase = instance(),
+            uriHelper = instance(),
         )
     }
 

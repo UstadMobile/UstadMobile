@@ -15,6 +15,15 @@ interface BulkAddPersonsUseCase {
         val numImported: Int,
     )
 
-    suspend operator fun invoke(csv: String): BulkAddUsersResult
+    fun interface BulkAddOnProgress {
+        operator fun invoke(numImported: Int, totalRecords: Int)
+
+    }
+
+
+    suspend operator fun invoke(
+        csv: String,
+        onProgress: BulkAddOnProgress,
+    ): BulkAddUsersResult
 
 }
