@@ -74,7 +74,10 @@ class BulkAddUsersUseCaseJvmTest {
             activeRepo = null,
         )
         runBlocking {
-            importUseCase(csvData)
+            importUseCase(
+                csv = csvData,
+                onProgress = { _, _ -> }
+            )
         }
     }
 
@@ -93,7 +96,10 @@ class BulkAddUsersUseCaseJvmTest {
                     enrolUseCase = mockEnrolUseCase,
                     activeDb = activeDb,
                     activeRepo = null,
-                ).invoke(csvData)
+                ).invoke(
+                    csv = csvData,
+                    onProgress = { _, _ -> }
+                )
             }catch(e: Throwable) {
                 exception  = e
             }

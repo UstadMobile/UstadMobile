@@ -28,7 +28,10 @@ fun BulkAddPersonSelectFileScreen(viewModel: BulkAddPersonSelectFileViewModel) {
         BulkAddPersonSelectFileUiState()
     )
 
-    val filePickLauncher = rememberUstadFilePickLauncher {
+    val filePickLauncher = rememberUstadFilePickLauncher(
+        fileExtensions = listOf("csv"),
+        mimeTypes = listOf("text/*"), //Android does not recognize CSV as its own mime type
+    ) {
         viewModel.onFileSelected(uri = it.uri, name = it.fileName)
     }
 
