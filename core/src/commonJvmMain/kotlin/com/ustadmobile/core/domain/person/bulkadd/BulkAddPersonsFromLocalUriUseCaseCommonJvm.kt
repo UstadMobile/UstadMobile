@@ -16,6 +16,11 @@ class BulkAddPersonsFromLocalUriUseCaseCommonJvm(
         onProgress: BulkAddPersonsUseCase.BulkAddOnProgress,
     ): BulkAddPersonsUseCase.BulkAddUsersResult {
         val csvString = withContext(Dispatchers.IO) {
+            val size = uriHelper.getSize(uri)
+            if(size > MAX_IMPORT_SIZE) {
+                throw IllegalArgumentException("File too big")
+            }
+
             uriHelper.openSource(uri).use {
                 it.readString()
             }
@@ -27,4 +32,10 @@ class BulkAddPersonsFromLocalUriUseCaseCommonJvm(
         )
     }
 
+    companion object {
+
+        //Limit to 10MB
+        const val MAX_IMPORT_SIZE = (10 * 1024 * 1024)
+
+    }
 }
