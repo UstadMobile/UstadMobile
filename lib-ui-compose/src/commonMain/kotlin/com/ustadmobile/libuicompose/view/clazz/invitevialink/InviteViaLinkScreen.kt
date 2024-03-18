@@ -51,7 +51,7 @@ fun InviteViaLinkScreen(
         )
 
         OutlinedTextField(
-            modifier = Modifier.fillMaxWidth().testTag("course_code").defaultItemPadding(),
+            modifier = Modifier.fillMaxWidth().testTag("invite_code").defaultItemPadding(),
             value = uiState.inviteLink ?: "",
             readOnly = true,
             maxLines = 1,

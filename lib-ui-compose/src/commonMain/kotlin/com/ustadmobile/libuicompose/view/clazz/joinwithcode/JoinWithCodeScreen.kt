@@ -56,11 +56,11 @@ fun JoinWithCodeScreen(
        )
 
         OutlinedTextField(
-            modifier = Modifier.defaultItemPadding().testTag("course_code")
+            modifier = Modifier.defaultItemPadding().testTag("invite_code")
                 .fillMaxWidth(),
             value = uiState.code,
             label = {
-                Text(stringResource(MR.strings.course_code) + "*")
+                Text(stringResource(MR.strings.invite_code) + "*")
             },
             isError = uiState.codeError != null,
             enabled = uiState.fieldsEnabled,
