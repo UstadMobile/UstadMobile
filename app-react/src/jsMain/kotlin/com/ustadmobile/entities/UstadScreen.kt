@@ -163,6 +163,8 @@ import com.ustadmobile.view.systempermission.edit.SystemPermissionEditScreen
 import com.ustadmobile.core.viewmodel.systempermission.edit.SystemPermissionEditViewModel
 import com.ustadmobile.view.person.bulkaddselectfile.BulkAddPersonSelectFileScreen
 import com.ustadmobile.core.viewmodel.person.bulkaddselectfile.BulkAddPersonSelectFileViewModel
+import com.ustadmobile.view.person.bulkaddrunimport.BulkAddPersonRunImportScreen
+import com.ustadmobile.core.viewmodel.person.bulkaddrunimport.BulkAddPersonRunImportViewModel
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -396,6 +398,7 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(SystemPermissionDetailViewModel.DEST_NAME, "SystemPermissionDetail", SystemPermissionDetailScreen),
     UstadScreen(SystemPermissionEditViewModel.DEST_NAME, "SystemPermissionEdit", SystemPermissionEditScreen),
     UstadScreen(BulkAddPersonSelectFileViewModel.DEST_NAME, "BulkAddPersonSelectFile", BulkAddPersonSelectFileScreen),
+    UstadScreen(BulkAddPersonRunImportViewModel.DEST_NAME, "BulkAddPersonRunImport", BulkAddPersonRunImportScreen),
 )
 
 //Here as per the MUI showcase template

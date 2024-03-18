@@ -16,7 +16,9 @@ import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
 import com.ustadmobile.core.MR
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class BulkAddPersonRunImportUiState(
     val inProgress: Boolean = true,
     val totalRecords: Int = 0,
@@ -59,7 +61,8 @@ class BulkAddPersonRunImportViewModel(
         viewModelScope.launch {
             try {
                 val result = bulkAddFromUriUseCase(
-                    DoorUri.parse(fileUri),
+                    uri = DoorUri.parse(fileUri),
+                    accountPersonUid = activeUserPersonUid,
                     onProgress = { numImported, totalRecords ->
                         _uiState.update { prev ->
                             prev.copy(

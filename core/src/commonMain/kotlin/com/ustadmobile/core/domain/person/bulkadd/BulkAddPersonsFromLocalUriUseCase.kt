@@ -6,6 +6,7 @@ interface BulkAddPersonsFromLocalUriUseCase {
 
     suspend operator fun invoke(
         uri: DoorUri,
+        accountPersonUid: Long,
         onProgress: BulkAddPersonsUseCase.BulkAddOnProgress,
     ): BulkAddPersonsUseCase.BulkAddUsersResult
 

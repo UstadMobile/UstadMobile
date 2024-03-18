@@ -13,6 +13,7 @@ class BulkAddPersonsFromLocalUriUseCaseCommonJvm(
 
     override suspend fun invoke(
         uri: DoorUri,
+        accountPersonUid: Long,
         onProgress: BulkAddPersonsUseCase.BulkAddOnProgress,
     ): BulkAddPersonsUseCase.BulkAddUsersResult {
         val csvString = withContext(Dispatchers.IO) {

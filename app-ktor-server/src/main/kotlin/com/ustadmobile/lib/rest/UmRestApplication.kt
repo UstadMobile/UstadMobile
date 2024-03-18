@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.rest
 
 import com.google.gson.Gson
+import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.contentformats.ContentImportersDiModuleJvm
 import com.ustadmobile.core.db.UmAppDatabase
@@ -8,6 +9,7 @@ import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
 import com.ustadmobile.core.domain.account.SetPasswordServerUseCase
 import com.ustadmobile.core.domain.account.SetPasswordUseCase
 import com.ustadmobile.core.domain.account.SetPasswordUseCaseCommonJvm
+import com.ustadmobile.core.domain.account.VerifyClientUserSessionUseCase
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCaseJvm
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
@@ -15,15 +17,26 @@ import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCas
 import com.ustadmobile.core.domain.blob.upload.BlobUploadServerUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCaseCommonJvm
+import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.EnrolIntoCourseUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseJvm
 import com.ustadmobile.core.domain.contententry.importcontent.ImportContentEntryUseCase
 import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServerUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
+import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonStatusMap
+import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsUseCase
+import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsUseCaseImpl
+import com.ustadmobile.core.domain.person.bulkadd.EnqueueBulkAddPersonServerUseCase
+import com.ustadmobile.core.domain.person.bulkadd.EnqueueBulkAddPersonUseCase
+import com.ustadmobile.core.domain.phonenumber.IPhoneNumberUtil
+import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorJvm
+import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorUseCase
+import com.ustadmobile.core.domain.phonenumber.PhoneNumberUtilJvm
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseCommonJvm
 import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
 import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseJvm
+import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCaseFfprobe
 import com.ustadmobile.core.util.DiTag
@@ -75,6 +88,7 @@ import io.ktor.server.plugins.statuspages.*
 import org.kodein.di.ktor.di
 import java.util.*
 import com.ustadmobile.core.logging.LogbackAntiLog
+import com.ustadmobile.lib.rest.domain.person.bulkadd.BulkAddPersonRoute
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
@@ -84,6 +98,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.serialization.kotlinx.json.json
+import io.netty.handler.codec.http2.Http2Connection
 import kotlinx.io.files.Path
 import net.bramp.ffmpeg.FFmpeg
 import net.bramp.ffmpeg.FFprobe
@@ -506,6 +521,66 @@ fun Application.umRestApplication(
             )
         }
 
+        bind<BulkAddPersonsUseCase>() with scoped(EndpointScope.Default).provider {
+            BulkAddPersonsUseCaseImpl(
+                addNewPersonUseCase = instance(),
+                validateEmailUseCase  = instance(),
+                validatePhoneNumUseCase = instance(),
+                authManager = instance(),
+                enrolUseCase = instance(),
+                activeDb = instance(tag = DoorTag.TAG_DB),
+                activeRepo = null,
+            )
+        }
+
+        bind<ValidateEmailUseCase>() with provider {
+            ValidateEmailUseCase()
+        }
+
+        bind<IPhoneNumberUtil>() with provider {
+            PhoneNumberUtilJvm(PhoneNumberUtil.getInstance())
+        }
+
+        bind<PhoneNumValidatorUseCase>() with provider {
+            PhoneNumValidatorJvm(
+                iPhoneNumberUtil = instance()
+            )
+        }
+
+        bind<EnrolIntoCourseUseCase>() with scoped(EndpointScope.Default).provider {
+            EnrolIntoCourseUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = null,
+            )
+        }
+
+        bind<VerifyClientUserSessionUseCase>() with scoped(EndpointScope.Default).singleton {
+            VerifyClientUserSessionUseCase(
+                nodeIdAndAuthCache = instance(),
+                db = instance(tag = DoorTag.TAG_DB),
+            )
+        }
+
+        bind<EnqueueBulkAddPersonServerUseCase>() with scoped(EndpointScope.Default).provider {
+            EnqueueBulkAddPersonServerUseCase(
+                verifyClientSessionUseCase = instance(),
+                enqueueBulkAddPersonUseCase = instance(),
+                activeDb = instance(tag = DoorTag.TAG_DB),
+            )
+        }
+
+        bind<EnqueueBulkAddPersonUseCase>() with scoped(EndpointScope.Default).provider {
+            EnqueueBulkAddPersonUseCase(
+                scheduler = instance(),
+                endpoint = context,
+                tmpDir = instance(tag = DiTag.TAG_TMP_DIR),
+            )
+        }
+
+        bind<BulkAddPersonStatusMap>() with scoped(EndpointScope.Default).singleton {
+            BulkAddPersonStatusMap()
+        }
+
         try {
             appConfig.config("mail")
 
@@ -646,6 +721,16 @@ fun Application.umRestApplication(
                 ContentEntryVersionRoute(
                     useCase = { call -> di.on(call).direct.instance() }
                 )
+            }
+
+            route("person") {
+                route("bulkadd") {
+                    BulkAddPersonRoute(
+                        enqueueBulkAddPersonServerUseCase = { call -> di.on(call).direct.instance() },
+                        bulkAddPersonStatusMap = { call -> di.on(call).direct.instance() },
+                        json = json,
+                    )
+                }
             }
 
             CacheRoute(

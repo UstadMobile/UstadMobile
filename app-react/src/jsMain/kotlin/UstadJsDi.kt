@@ -6,6 +6,8 @@ import com.ustadmobile.BuildConfigJs
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
+import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCase
+import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCaseJs
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.config.ApiUrlConfig
@@ -217,6 +219,15 @@ internal fun ustadJsDi(
 
     bind<GetShowPoweredByUseCase>() with singleton {
         GetShowPoweredByUseCase(BuildConfigJs.APP_UI_SHOW_POWERED_BY.toBoolean())
+    }
+
+    bind<BulkAddPersonsFromLocalUriUseCase>() with scoped(EndpointScope.Default).provider {
+        BulkAddPersonsFromLocalUriUseCaseJs(
+            httpClient = instance(),
+            endpoint = context,
+            json = instance(),
+            repo = instance(tag = DoorTag.TAG_REPO),
+        )
     }
 
 }
