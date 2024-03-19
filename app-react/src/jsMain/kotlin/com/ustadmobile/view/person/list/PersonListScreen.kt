@@ -36,6 +36,8 @@ import react.router.useLocation
 import tanstack.react.query.UseInfiniteQueryResult
 import mui.icons.material.Link as LinkIcon
 import mui.icons.material.CopyAll as CopyAllIcon
+import mui.icons.material.PersonAdd as PersonAddIcon
+import mui.icons.material.GroupAdd as GroupAddIcon
 
 
 external interface PersonListProps: Props {
@@ -178,6 +180,8 @@ val PersonListScreenPreview = FC<Props> { props ->
 
 val PersonListScreen = FC<Props> {
     val location = useLocation()
+    val strings = useStringProvider()
+
     val viewModel = useUstadViewModel {di, savedStateHandle ->
         PersonListViewModel(di, savedStateHandle, location.ustadViewName)
     }
@@ -187,6 +191,52 @@ val PersonListScreen = FC<Props> {
 
     UstadFab {
         fabState = appState.fabState
+    }
+
+
+    Dialog {
+        open = uiState.addSheetOrDialogVisible
+
+        onClose = { _, _ ->
+            viewModel.onDismissAddSheetOrDialog()
+        }
+
+        List {
+            ListItem {
+                ListItemButton {
+                    id = "add_person_button"
+                    onClick = {
+                        viewModel.onClickAdd()
+                    }
+
+                    ListItemIcon {
+                        PersonAddIcon()
+                    }
+
+                    ListItemText {
+                        primary = ReactNode(strings[MR.strings.add_person])
+                    }
+                }
+            }
+
+            ListItem {
+                ListItemButton {
+                    id = "bulk_import_button"
+
+                    onClick = {
+                        viewModel.onClickBulkAdd()
+                    }
+
+                    ListItemIcon {
+                        GroupAddIcon()
+                    }
+
+                    ListItemText {
+                        primary = ReactNode(strings[MR.strings.bulk_import])
+                    }
+                }
+            }
+        }
     }
 
     PersonListComponent2 {

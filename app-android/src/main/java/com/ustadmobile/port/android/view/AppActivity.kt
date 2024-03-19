@@ -33,6 +33,10 @@ import com.ustadmobile.core.domain.language.SetLanguageUseCaseAndroid
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.LaunchXapiUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.LaunchXapiUseCaseAndroid
 import com.ustadmobile.core.domain.contententry.move.MoveContentEntriesUseCase
+import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCase
+import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCaseCommonJvm
+import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsUseCase
+import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsUseCaseImpl
 import com.ustadmobile.core.domain.process.CloseProcessUseCase
 import com.ustadmobile.core.domain.process.CloseProcessUseCaseAndroid
 import com.ustadmobile.core.impl.ContainerStorageManager
@@ -179,6 +183,25 @@ class AppActivity: AppCompatActivity(), DIAware {
             OpenBlobUiUseCase(
                 openBlobUseCase = instance(),
                 systemImpl = instance(),
+            )
+        }
+
+        bind<BulkAddPersonsUseCase>() with scoped(EndpointScope.Default).provider {
+            BulkAddPersonsUseCaseImpl(
+                addNewPersonUseCase = instance(),
+                validateEmailUseCase = instance(),
+                validatePhoneNumUseCase = instance(),
+                authManager = instance(),
+                enrolUseCase = instance(),
+                activeDb = instance(tag = DoorTag.TAG_DB),
+                activeRepo = instance(tag = DoorTag.TAG_REPO),
+            )
+        }
+
+        bind<BulkAddPersonsFromLocalUriUseCase>() with scoped(EndpointScope.Default).provider {
+            BulkAddPersonsFromLocalUriUseCaseCommonJvm(
+                bulkAddPersonsUseCase = instance(),
+                uriHelper = instance(),
             )
         }
 

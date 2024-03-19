@@ -101,6 +101,7 @@ import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseAndroid
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientChunkGetterUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
+import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCaseAndroid
 import com.ustadmobile.core.embeddedhttp.EmbeddedHttpServer
@@ -766,6 +767,10 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 appContext = applicationContext,
                 getStoragePathForUrlUseCase = instance()
             )
+        }
+
+        bind<ValidateEmailUseCase>() with provider {
+            ValidateEmailUseCase()
         }
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }

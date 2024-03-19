@@ -79,7 +79,6 @@ val VirtualListPreview = FC<Props> {
         Container {
             VirtualListOutlet()
         }
-
     }
 }
 
