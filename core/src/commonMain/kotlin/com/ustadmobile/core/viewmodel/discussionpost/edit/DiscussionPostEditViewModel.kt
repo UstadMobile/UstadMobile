@@ -79,7 +79,6 @@ class DiscussionPostEditViewModel (
                                 it.discussionPostUid = activeDb.doorPrimaryKeyManager
                                     .nextIdAsync(DiscussionPost.TABLE_ID)
                                 it.discussionPostCourseBlockUid = courseBlockUidArg
-                                it.discussionPostArchive = false
                                 it.discussionPostStartedPersonUid = accountManager.currentAccount.personUid
                                 it.discussionPostStartDate = systemTimeInMillis()
                             }
@@ -186,7 +185,10 @@ class DiscussionPostEditViewModel (
                 }
 
                 finishWithResult(
-                    DiscussionPostDetailViewModel.DEST_NAME, post.discussionPostUid, post
+                    DiscussionPostDetailViewModel.DEST_NAME, post.discussionPostUid, post,
+                    detailViewExtraArgs = buildMap {
+                        putFromSavedStateIfPresent(ARG_CLAZZUID)
+                    }
                 )
             }
         }

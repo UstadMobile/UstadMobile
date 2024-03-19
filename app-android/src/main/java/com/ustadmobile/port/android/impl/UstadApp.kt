@@ -25,6 +25,7 @@ import com.ustadmobile.core.db.*
 import com.ustadmobile.core.db.ext.MIGRATION_144_145_CLIENT
 import com.ustadmobile.core.db.ext.MIGRATION_148_149_CLIENT_WITH_OFFLINE_ITEMS
 import com.ustadmobile.core.db.ext.MIGRATION_155_156_CLIENT
+import com.ustadmobile.core.db.ext.MIGRATION_161_162_CLIENT
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.util.DiTag
@@ -45,8 +46,11 @@ import com.ustadmobile.core.domain.blob.download.EnqueueBlobDownloadClientUseCas
 import com.ustadmobile.core.domain.blob.download.EnqueueBlobDownloadClientUseCaseAndroid
 import com.ustadmobile.core.domain.blob.download.EnqueueContentManifestDownloadJobUseCaseAndroid
 import com.ustadmobile.core.domain.blob.download.MakeContentEntryAvailableOfflineUseCase
+import com.ustadmobile.core.domain.blob.openblob.OpenBlobUseCase
+import com.ustadmobile.core.domain.blob.openblob.OpenBlobUseCaseAndroid
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCaseJvm
+import com.ustadmobile.core.domain.blob.saveandupload.SaveAndUploadLocalUrisUseCase
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCaseJvm
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
@@ -54,6 +58,8 @@ import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCaseAnd
 import com.ustadmobile.core.domain.blob.savepicture.SavePictureUseCase
 import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCase
 import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCaseJvm
+import com.ustadmobile.core.domain.blob.upload.CancelBlobUploadClientUseCase
+import com.ustadmobile.core.domain.blob.upload.CancelBlobUploadClientUseCaseAndroid
 import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCase
 import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCaseAndroid
 import com.ustadmobile.core.domain.blob.upload.UpdateFailedTransferJobUseCase
@@ -95,6 +101,7 @@ import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseAndroid
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientChunkGetterUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
+import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCaseAndroid
 import com.ustadmobile.core.embeddedhttp.EmbeddedHttpServer
@@ -292,6 +299,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 .addMigrations(MIGRATION_144_145_CLIENT)
                 .addMigrations(MIGRATION_148_149_CLIENT_WITH_OFFLINE_ITEMS)
                 .addMigrations(MIGRATION_155_156_CLIENT)
+                .addMigrations(MIGRATION_161_162_CLIENT)
                 .build()
 
             val cache: UstadCache = instance()
@@ -630,8 +638,9 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
         bind<GetStoragePathForUrlUseCase>() with singleton {
             GetStoragePathForUrlUseCaseCommonJvm(
-                httpClient = instance(),
+                okHttpClient = instance(),
                 cache = instance(),
+                tmpDir = instance(tag = DiTag.TAG_TMP_DIR),
             )
         }
 
@@ -734,6 +743,34 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
         bind<ShareTextUseCase>() with singleton {
             ShareTextUseCaseAndroid(applicationContext)
+        }
+
+        bind<SaveAndUploadLocalUrisUseCase>() with scoped(EndpointScope.Default).singleton {
+            SaveAndUploadLocalUrisUseCase(
+                saveLocalUrisAsBlobsUseCase = instance(),
+                enqueueBlobUploadClientUseCase = instance(),
+                activeDb = instance(tag = DoorTag.TAG_DB),
+                activeRepo = instance(tag = DoorTag.TAG_REPO),
+            )
+        }
+
+        bind<CancelBlobUploadClientUseCase>() with scoped(EndpointScope.Default).singleton {
+            CancelBlobUploadClientUseCaseAndroid(
+                appContext = applicationContext,
+                endpoint = context,
+                db = instance(tag = DoorTag.TAG_DB),
+            )
+        }
+
+        bind<OpenBlobUseCase>() with scoped(EndpointScope.Default).singleton {
+            OpenBlobUseCaseAndroid(
+                appContext = applicationContext,
+                getStoragePathForUrlUseCase = instance()
+            )
+        }
+
+        bind<ValidateEmailUseCase>() with provider {
+            ValidateEmailUseCase()
         }
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }

@@ -38,10 +38,7 @@ class EnqueueBlobUploadClientUseCaseJvm(
             .usingJobData(DATA_ENDPOINT, endpoint.url)
             .build()
 
-        val triggerKey = TriggerKey(
-            "blob-upload-${endpoint.url}-${transferJob.tjUid}",
-            ConnectivityTriggerGroupController.TRIGGERKEY_CONNECTIVITY_REQUIRED_GROUP
-        )
+        val triggerKey = triggerKeyFor(endpoint, transferJob.tjUid)
         scheduler.unscheduleJob(triggerKey)
         val jobTrigger = TriggerBuilder.newTrigger()
             .withIdentity(triggerKey)
@@ -53,5 +50,16 @@ class EnqueueBlobUploadClientUseCaseJvm(
         scheduler.scheduleJob(quartzJob, jobTrigger)
 
         return transferJob
+    }
+
+    companion object {
+
+        fun triggerKeyFor(endpoint: Endpoint, transferJobId: Int) : TriggerKey {
+            return TriggerKey(
+                "blob-upload-${endpoint.url}-$transferJobId",
+                ConnectivityTriggerGroupController.TRIGGERKEY_CONNECTIVITY_REQUIRED_GROUP
+            )
+        }
+
     }
 }

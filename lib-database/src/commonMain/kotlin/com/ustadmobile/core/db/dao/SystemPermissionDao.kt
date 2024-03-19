@@ -13,6 +13,7 @@ import com.ustadmobile.door.annotation.HttpServerFunctionCall
 import com.ustadmobile.door.annotation.HttpServerFunctionParam
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.composites.EditAndViewPermission
+import com.ustadmobile.lib.db.composites.PermissionPair
 import com.ustadmobile.lib.db.entities.SystemPermission
 import kotlinx.coroutines.flow.Flow
 
@@ -24,8 +25,7 @@ expect abstract class SystemPermissionDao {
         SELECT SystemPermission.*
           FROM SystemPermission
          WHERE SystemPermission.spToPersonUid = :accountPersonUid
-           AND CAST(:includeDeleted AS INTEGER) = 1 
-            OR NOT SystemPermission.spIsDeleted
+           AND (CAST(:includeDeleted AS INTEGER) = 1 OR NOT SystemPermission.spIsDeleted)
     """)
     abstract suspend fun findAllByPersonUid(
         accountPersonUid: Long,
@@ -107,6 +107,67 @@ expect abstract class SystemPermissionDao {
         permission: Long,
     ): Flow<Boolean>
 
+
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall(
+                functionName = "findAllByPersonUid",
+                functionArgs = arrayOf(
+                    HttpServerFunctionParam(
+                        name = "includeDeleted",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "true",
+                    )
+                )
+            )
+        )
+    )
+    @Query("""
+        SELECT ($SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT1
+                :firstPermission
+                $SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT2) as firstPermission,
+                ($SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT1
+                :secondPermission
+                $SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT2) as secondPermission
+    """)
+    abstract fun personHasSystemPermissionPairAsFlow(
+        accountPersonUid: Long,
+        firstPermission: Long,
+        secondPermission: Long,
+    ): Flow<PermissionPair>
+
+
+
+
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall(
+                functionName = "findAllByPersonUid",
+                functionArgs = arrayOf(
+                    HttpServerFunctionParam(
+                        name = "includeDeleted",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "true",
+                    )
+                )
+            )
+        )
+    )
+    @Query("""
+        SELECT ($SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT1
+                :firstPermission
+                $SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT2) as firstPermission,
+                ($SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT1
+                :secondPermission
+                $SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT2) as secondPermission
+    """)
+    abstract suspend fun personHasSystemPermissionPair(
+        accountPersonUid: Long,
+        firstPermission: Long,
+        secondPermission: Long,
+    ): PermissionPair
 
 
     @HttpAccessible(

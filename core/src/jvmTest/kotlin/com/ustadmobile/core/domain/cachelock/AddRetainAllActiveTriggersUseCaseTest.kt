@@ -7,10 +7,18 @@ class AddRetainAllActiveTriggersUseCaseTest {
 
     @Test
     fun test(){
+        println("===SQLITE===")
         AddRetainAllActiveUriTriggersUseCase().invoke(
             dbType = DoorDbType.SQLITE,
         ).forEach {
-            println("add(\"\"\"$it;\"\"\")")
+            println("add(\"\"\"$it\"\"\")")
+            println()
+        }
+        println("===POSTGRES===")
+        AddRetainAllActiveUriTriggersUseCase().invoke(
+            dbType = DoorDbType.POSTGRES,
+        ).forEach {
+            println("add(\"\"\"$it\"\"\")")
             println()
         }
     }

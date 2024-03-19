@@ -71,7 +71,6 @@ import com.ustadmobile.view.discussionpost.edit.DiscussionPostEditScreen
 import com.ustadmobile.core.viewmodel.discussionpost.edit.DiscussionPostEditViewModel
 import com.ustadmobile.view.clazzassignment.UstadCommentListItemPreview
 import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailViewModel
-import com.ustadmobile.view.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailScreenPreview
 import com.ustadmobile.view.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailScreen
 import com.ustadmobile.core.viewmodel.LeavingReasonEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewViewModel
@@ -162,7 +161,10 @@ import com.ustadmobile.core.viewmodel.systempermission.detail.SystemPermissionDe
 import com.ustadmobile.view.systempermission.detail.SystemPermissionDetailScreen
 import com.ustadmobile.view.systempermission.edit.SystemPermissionEditScreen
 import com.ustadmobile.core.viewmodel.systempermission.edit.SystemPermissionEditViewModel
-
+import com.ustadmobile.view.person.bulkaddselectfile.BulkAddPersonSelectFileScreen
+import com.ustadmobile.core.viewmodel.person.bulkaddselectfile.BulkAddPersonSelectFileViewModel
+import com.ustadmobile.view.person.bulkaddrunimport.BulkAddPersonRunImportScreen
+import com.ustadmobile.core.viewmodel.person.bulkaddrunimport.BulkAddPersonRunImportViewModel
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -306,16 +308,11 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
         VirtualListPreview),
     UstadScreen("VirtualListReversedPreview", "Virtual List Reversed Preview",
         VirtualListPreviewReverse),
-    UstadScreen("UstadCourseAssignmentMarkListItem", "UstadCourseAssignmentMarkListItem Preview",
-        UstadCourseAssignmentMarkListItemPreview),
     UstadScreen("UstadCommentListItem", "UstadCommentListItem Preview",
         UstadCommentListItemPreview
     ),
     UstadScreen("UstadAddCommentListItem", "UstadAddCommentListItem Preview",
         UstadAddCommentListItemPreview),
-    UstadScreen("UstadAssignmentFileSubmissionListItem",
-        "UstadAssignmentFileSubmissionListItem Preview",
-        UstadAssignmentFileSubmissionListItemPreview),
     UstadScreen("UstadImageSelectButtonPreview", "UstadImageSelectButtonPreview",
         UstadImageSelectButtonPreview),
     UstadScreen("UstadSelectFieldPreview", "UstadSelectFieldPreview",
@@ -364,8 +361,6 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(CourseGroupSetListViewModel.DEST_NAME, "CourseGroupSetList",
         CourseGroupSetListScreen
     ),
-    UstadScreen("CourseAssignmentSubmitterDetailPreview", "CourseAssignmentSubmitterDetailPreview",
-        ClazzAssignmentSubmitterDetailScreenPreview),
     UstadScreen(ClazzAssignmentSubmitterDetailViewModel.DEST_NAME, "CourseAssignmentSubmitterDetail",
         ClazzAssignmentSubmitterDetailScreen),
     UstadScreen(LeavingReasonEditViewModel.DEST_NAME, "LeavingReasonEdit", LeavingReasonEditScreen),
@@ -402,6 +397,8 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(CoursePermissionDetailViewModel.DEST_NAME, "CoursePermissionDetail", CoursePermissionDetailScreen),
     UstadScreen(SystemPermissionDetailViewModel.DEST_NAME, "SystemPermissionDetail", SystemPermissionDetailScreen),
     UstadScreen(SystemPermissionEditViewModel.DEST_NAME, "SystemPermissionEdit", SystemPermissionEditScreen),
+    UstadScreen(BulkAddPersonSelectFileViewModel.DEST_NAME, "BulkAddPersonSelectFile", BulkAddPersonSelectFileScreen),
+    UstadScreen(BulkAddPersonRunImportViewModel.DEST_NAME, "BulkAddPersonRunImport", BulkAddPersonRunImportScreen),
 )
 
 //Here as per the MUI showcase template

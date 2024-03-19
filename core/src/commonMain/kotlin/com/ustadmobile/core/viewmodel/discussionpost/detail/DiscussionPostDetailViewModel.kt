@@ -9,7 +9,9 @@ import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import app.cash.paging.PagingSource
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.impl.appstate.Snack
+import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.DiscussionPostAndPosterNames
 import com.ustadmobile.lib.db.entities.*
@@ -17,6 +19,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.kodein.di.DI
 
 data class DiscussionPostDetailUiState2(
@@ -28,9 +35,11 @@ data class DiscussionPostDetailUiState2(
     val loggedInPersonName: String = "",
     val loggedInPersonPictureUri: String? = null,
     val fieldsEnabled: Boolean = true,
-){
-
-}
+    val showModerateOptions: Boolean = false,
+    val localDateTimeNow: LocalDateTime = Clock.System.now().toLocalDateTime(
+        TimeZone.currentSystemDefault()),
+    val dayOfWeekStrings: Map<DayOfWeek, String> = emptyMap()
+)
 
 class DiscussionPostDetailViewModel(
     di: DI,
@@ -39,7 +48,7 @@ class DiscussionPostDetailViewModel(
 ): DetailViewModel<DiscussionPostWithDetails>(di, savedStateHandle, destinationName){
 
     private val pagingSourceFactory: ListPagingSourceFactory<DiscussionPostAndPosterNames> = {
-        activeRepo.discussionPostDao.findByPostIdWithAllReplies(entityUidArg).also {
+        activeRepo.discussionPostDao.findByPostIdWithAllReplies(entityUidArg, false).also {
             lastPagingSource = it
         }
     }
@@ -52,35 +61,63 @@ class DiscussionPostDetailViewModel(
 
     private var saveReplyJob: Job? = null
 
+    private val clazzUid = savedStateHandle[ARG_CLAZZUID]?.toLong() ?: 0L
+
     init {
-        _uiState.update { prev ->
-            prev.copy(
-                discussionPosts = pagingSourceFactory,
-                loggedInPersonUid = activeUserPersonUid,
-                loggedInPersonName = accountManager.currentUserSession.person.fullName(),
-                loggedInPersonPictureUri = accountManager.currentUserSession.personPicture?.personPictureThumbnailUri,
-                replyText = savedStateHandle[STATE_KEY_REPLY_TEXT] ?: "",
-            )
-        }
-
         viewModelScope.launch {
-            launch {
-                resultReturner.filteredResultFlowForKey(RESULT_KEY_REPLY_TEXT).collect { result ->
-                    val replyText = result.result as? String ?: return@collect
-                    submitReply(replyText)
-                }
-            }
+            _uiState.whenSubscribed {
+                activeRepo.coursePermissionDao.personHasPermissionWithClazzPairAsFlow(
+                    accountPersonUid = activeUserPersonUid,
+                    clazzUid = clazzUid,
+                    firstPermission = PermissionFlags.COURSE_VIEW,
+                    secondPermission = PermissionFlags.COURSE_MODERATE
+                ).distinctUntilChanged().collectLatest { permissionPair ->
+                    val (hasViewPermission, hasModeratePermission) = permissionPair
 
-            launch {
-                activeRepo.discussionPostDao.getTitleByUidAsFlow(entityUidArg).collect {postTitle ->
-                    _appUiState.takeIf { it.value.title != postTitle }?.update { prev ->
-                        prev.copy(
-                            title = postTitle
-                        )
+                    if(hasViewPermission) {
+                        _uiState.update { prev ->
+                            prev.copy(
+                                discussionPosts = pagingSourceFactory,
+                                loggedInPersonUid = activeUserPersonUid,
+                                loggedInPersonName = accountManager.currentUserSession.person.fullName(),
+                                loggedInPersonPictureUri = accountManager.currentUserSession.personPicture?.personPictureThumbnailUri,
+                                replyText = savedStateHandle[STATE_KEY_REPLY_TEXT] ?: "",
+                                showModerateOptions = hasModeratePermission,
+                            )
+                        }
+
+                        launch {
+                            resultReturner.filteredResultFlowForKey(RESULT_KEY_REPLY_TEXT).collect { result ->
+                                val replyText = result.result as? String ?: return@collect
+                                submitReply(replyText)
+                            }
+                        }
+
+                        launch {
+                            activeRepo.discussionPostDao.getTitleByUidAsFlow(entityUidArg).collect {postTitle ->
+                                _appUiState.takeIf { it.value.title != postTitle }?.update { prev ->
+                                    prev.copy(
+                                        title = postTitle
+                                    )
+                                }
+                            }
+                        }
+                    }else {
+                        _uiState.update { prev ->
+                            prev.copy(
+                                discussionPosts = {  EmptyPagingSource() },
+                                loggedInPersonUid = activeUserPersonUid,
+                                loggedInPersonName = accountManager.currentUserSession.person.fullName(),
+                                loggedInPersonPictureUri = accountManager.currentUserSession.personPicture?.personPictureThumbnailUri,
+                                replyText = savedStateHandle[STATE_KEY_REPLY_TEXT] ?: "",
+                                showModerateOptions = false,
+                            )
+                        }
                     }
                 }
             }
         }
+
     }
 
     fun onChangeReplyText(replyText: String) {
@@ -158,6 +195,15 @@ class DiscussionPostDetailViewModel(
                     fieldsEnabled = true,
                 )
             }
+        }
+    }
+
+    fun onDeletePost(post: DiscussionPost) {
+        viewModelScope.launch {
+            activeRepo.discussionPostDao.setDeletedAsync(
+                uid = post.discussionPostUid, deleted = true, updateTime = systemTimeInMillis()
+            )
+            snackDispatcher.showSnackBar(Snack(systemImpl.getString(MR.strings.deleted)))
         }
     }
 

@@ -8,8 +8,8 @@ import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission.Companion.NOT_
 import com.ustadmobile.view.clazzassignment.detailoverview.ASSIGNMENT_STATUS_MAP
 import web.cssom.rgb
 import js.core.jso
-import mui.icons.material.Done
-import mui.icons.material.EmojiEvents
+import mui.icons.material.Done as DoneIcon
+import mui.icons.material.EmojiEvents as EmojiEventsIcon
 import mui.material.ListItem
 import mui.material.ListItemIcon
 import mui.material.ListItemText
@@ -34,7 +34,7 @@ val UstadAssignmentSubmissionHeader = FC<UstadAssignmentSubmissionHeaderProps> {
         if(props.uiState.activeUserIsSubmitter) {
             ListItem {
                 ListItemIcon {
-                    + (ASSIGNMENT_STATUS_MAP[props.uiState.submissionStatus ?: NOT_SUBMITTED] ?: Done).create()
+                    + (ASSIGNMENT_STATUS_MAP[props.uiState.submissionStatus ?: NOT_SUBMITTED] ?: DoneIcon).create()
                 }
                 ListItemText {
                     primary = ReactNode(strings[SubmissionConstants.STATUS_MAP
@@ -69,7 +69,7 @@ val UstadAssignmentSubmissionHeader = FC<UstadAssignmentSubmissionHeaderProps> {
             UstadDetailField2 {
                 valueContent = pointsElement
                 labelContent = ReactNode(strings[MR.strings.xapi_result_header])
-                leadingContent = EmojiEvents.create()
+                leadingContent = EmojiEventsIcon.create()
             }
         }
 

@@ -70,7 +70,9 @@ suspend fun UmAppDatabase.initAdminUser(
     if (adminUser == null) {
         val adminPerson = Person("admin", "Admin", "User")
 
-        adminPerson.personUid = addNewPersonUseCase(adminPerson)
+        adminPerson.personUid = addNewPersonUseCase(
+            adminPerson, systemPermissions = Long.MAX_VALUE,
+        )
 
         //Remove lower case l, upper case I, and the number 1
         val adminPass = defaultPassword
@@ -88,13 +90,6 @@ suspend fun UmAppDatabase.initAdminUser(
         val salt = siteDao.getSiteAsync()!!.authSalt!!
 
         saltFile.writeText("$salt / $adminPass")
-
-        systemPermissionDao.upsertAsync(
-            SystemPermission(
-                spToPersonUid = adminPerson.personUid,
-                spPermissionsFlag = Long.MAX_VALUE,
-            )
-        )
 
 
         adminPassFile.writeText(adminPass)

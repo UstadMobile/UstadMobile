@@ -94,9 +94,9 @@ expect abstract class PersonDao : BaseDao<Person> {
           FROM Person
                LEFT JOIN PersonPicture
                     ON PersonPicture.personPictureUid = Person.personUid
-         WHERE Person.personUid = :uid           
+         WHERE Person.personUid = :accountPersonUid           
     """)
-    abstract suspend fun findByUidWithPicture(uid: Long): PersonAndPicture?
+    abstract suspend fun findByUidWithPicture(accountPersonUid: Long): PersonAndPicture?
 
     @Query("""
         SELECT Person.*, PersonPicture.*
@@ -265,5 +265,13 @@ expect abstract class PersonDao : BaseDao<Person> {
          WHERE Person.personUid = :personUid  
     """)
     abstract suspend fun updateUsername(personUid: Long, username: String, currentTime: Long): Int
+
+    @Query("""
+        SELECT Person.username
+          FROM Person
+         WHERE Person.username IN (:usernames)
+    """)
+    abstract suspend fun selectExistingUsernames(usernames: List<String>): List<String?>
+
 
 }

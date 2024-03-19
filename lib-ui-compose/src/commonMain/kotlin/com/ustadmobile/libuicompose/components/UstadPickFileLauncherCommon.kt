@@ -9,5 +9,7 @@ data class UstadPickFileOpts(
 data class UstadFilePickResult(
     val uri: String,
     val fileName: String,
+    val mimeType: String?,
+    val size: Long,
 )
 

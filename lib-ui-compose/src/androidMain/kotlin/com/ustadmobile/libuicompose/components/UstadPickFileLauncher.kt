@@ -5,13 +5,15 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
-import com.ustadmobile.door.ext.getFileName
+import com.ustadmobile.core.util.ext.getFileNameAndSize
 import kotlinx.coroutines.launch
 
 
 @Composable
 actual fun rememberUstadFilePickLauncher(
-    onFileSelected: (UstadFilePickResult) -> Unit
+    fileExtensions: List<String>,
+    mimeTypes: List<String>,
+    onFileSelected: (UstadFilePickResult) -> Unit,
 ): LaunchFilePickFn {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -21,11 +23,13 @@ actual fun rememberUstadFilePickLauncher(
     ) { uri ->
         if(uri != null) {
             coroutineScope.launch {
-                val fileName = context.contentResolver.getFileName(uri)
+                val (fileName, fileSize) = context.contentResolver.getFileNameAndSize(uri)
                 onFileSelected(
                     UstadFilePickResult(
                         uri = uri.toString(),
-                        fileName =fileName
+                        fileName = fileName,
+                        mimeType = context.contentResolver.getType(uri),
+                        size = fileSize,
                     )
                 )
             }
@@ -33,6 +37,6 @@ actual fun rememberUstadFilePickLauncher(
     }
 
     return {
-        activityLauncher.launch(arrayOf("*/*"))
+        activityLauncher.launch(mimeTypes.ifEmpty { listOf("*/*") }.toTypedArray())
     }
 }

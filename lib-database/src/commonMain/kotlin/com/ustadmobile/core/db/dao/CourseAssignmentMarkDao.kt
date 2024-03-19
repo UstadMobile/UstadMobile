@@ -101,7 +101,7 @@ expect abstract class CourseAssignmentMarkDao : BaseDao<CourseAssignmentMark> {
     ): Flow<List<CourseAssignmentMarkAndMarkerName>>
 
     @Query("""
-        SELECT Person.*
+        SELECT Person.*, PersonPicture.*
           FROM Person
                LEFT JOIN PersonPicture
                          ON PersonPicture.personPictureUid = Person.personUid

@@ -10,7 +10,6 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.EventAvailable
 import androidx.compose.material.icons.filled.Groups
-import androidx.compose.material.icons.filled.InsertDriveFile
 import androidx.compose.material.icons.filled.TaskAlt
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
@@ -44,11 +43,19 @@ import com.ustadmobile.libuicompose.components.ustadPagedItems
 import androidx.compose.runtime.remember
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.ustadmobile.core.viewmodel.clazzassignment.averageMark
-import com.ustadmobile.core.viewmodel.clazzassignment.submissionStatusFor
+import com.ustadmobile.lib.db.composites.CourseAssignmentSubmissionFileAndTransferJob
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
+import com.ustadmobile.libuicompose.components.UstadOpeningBlobInfoBottomSheet
+import com.ustadmobile.libuicompose.components.UstadPickFileOpts
 import com.ustadmobile.libuicompose.components.UstadRichTextEdit
+import com.ustadmobile.libuicompose.components.isDesktop
+import com.ustadmobile.libuicompose.components.rememberUstadFilePickLauncher
 import com.ustadmobile.libuicompose.util.linkify.rememberLinkExtractor
+import com.ustadmobile.libuicompose.util.rememberDateFormat
+import com.ustadmobile.libuicompose.util.rememberTimeFormatter
 import com.ustadmobile.libuicompose.view.clazzassignment.CommentListItem
+import com.ustadmobile.libuicompose.view.clazzassignment.CourseAssignmentSubmissionComponent
+import com.ustadmobile.libuicompose.view.clazzassignment.CourseAssignmentSubmissionFileListItem
 import com.ustadmobile.libuicompose.view.clazzassignment.UstadAssignmentSubmissionStatusHeaderItems
 import kotlinx.coroutines.Dispatchers
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
@@ -58,6 +65,22 @@ fun ClazzAssignmentDetailOverviewScreen(viewModel: ClazzAssignmentDetailOverview
     val uiState by viewModel.uiState.collectAsStateWithLifecycle(
         ClazzAssignmentDetailOverviewUiState(), Dispatchers.Main.immediate
     )
+
+    val filePickLauncher = rememberUstadFilePickLauncher {
+        viewModel.onAddSubmissionFile(
+            uri = it.uri,
+            fileName =  it.fileName,
+            mimeType = it.mimeType ?: "application/octet-stream",
+            size = it.size
+        )
+    }
+
+    uiState.openingFileSubmissionState?.also { openingState ->
+        UstadOpeningBlobInfoBottomSheet(
+            openingBlobState = openingState,
+            onDismissRequest = viewModel::onDismissOpenFileSubmission,
+        )
+    }
 
     ClazzAssignmentDetailOverviewScreen(
         uiState = uiState,
@@ -70,6 +93,14 @@ fun ClazzAssignmentDetailOverviewScreen(viewModel: ClazzAssignmentDetailOverview
         onChangeSubmissionText = viewModel::onChangeSubmissionText,
         onClickCourseGroupSet = viewModel::onClickCourseGroupSet,
         onClickMarksFilterChip = viewModel::onClickMarksFilterChip,
+        onClickAddFileSubmission = {
+            filePickLauncher(UstadPickFileOpts())
+        },
+        onRemoveSubmissionFile = viewModel::onRemoveSubmissionFile,
+        onOpenSubmissionFile =  viewModel::onOpenSubmissionFile,
+        onSendSubmissionFile = if(!isDesktop()) viewModel::onSendSubmissionFile else null,
+        onToggleSubmissionExpandCollapse = viewModel::onToggleSubmissionExpandCollapse,
+        onDeleteComment = viewModel::onDeleteComment,
     )
 }
 
@@ -83,14 +114,14 @@ fun ClazzAssignmentDetailOverviewScreen(
     onClickSubmitPrivateComment: () -> Unit = {},
     onClickEditSubmission: () -> Unit = {},
     onChangeSubmissionText: (String) -> Unit = { },
-    @Suppress("UNUSED_PARAMETER")
-    onClickOpenSubmission: (CourseAssignmentSubmissionWithAttachment) -> Unit = {},
-    @Suppress("UNUSED_PARAMETER")
-    onClickDeleteSubmission: (CourseAssignmentSubmissionWithAttachment) -> Unit = { },
-    @Suppress("UNUSED_PARAMETER")
     onClickAddFileSubmission: () -> Unit = { },
     onClickSubmitSubmission: () -> Unit = { },
     onClickCourseGroupSet: () -> Unit = { },
+    onRemoveSubmissionFile: (CourseAssignmentSubmissionFileAndTransferJob) -> Unit = { },
+    onOpenSubmissionFile: (CourseAssignmentSubmissionFileAndTransferJob) -> Unit = { },
+    onSendSubmissionFile: ((CourseAssignmentSubmissionFileAndTransferJob) -> Unit)? = null,
+    onToggleSubmissionExpandCollapse: (CourseAssignmentSubmission) -> Unit = { },
+    onDeleteComment: (Comments) -> Unit = { },
 ){
 
     val privateCommentsPager = remember(uiState.privateComments) {
@@ -125,6 +156,10 @@ fun ClazzAssignmentDetailOverviewScreen(
     )
 
     val linkExtractor = rememberLinkExtractor()
+
+    val dateFormatter = rememberDateFormat(TimeZone.getDefault().id)
+
+    val timeFormatter = rememberTimeFormatter()
 
     UstadLazyColumn(
         modifier = Modifier
@@ -189,20 +224,7 @@ fun ClazzAssignmentDetailOverviewScreen(
         }
 
         UstadAssignmentSubmissionStatusHeaderItems(
-            submissionStatus = if(uiState.activeUserIsSubmitter) {
-                submissionStatusFor(
-                    markList = uiState.markList,
-                    submissionList = uiState.latestSubmission?.let {
-                        if(it.casTimestamp > 0) {
-                            listOf(it)
-                        } else {
-                            emptyList()
-                        }
-                    } ?: emptyList()
-                )
-            }else {
-                null
-            },
+            submissionStatus = uiState.submissionStatus,
             averageMark = uiState.markList.averageMark(),
             maxPoints = uiState.courseBlock?.cbMaxPoints ?: 0,
             submissionPenaltyPercent = uiState.courseBlock?.cbLateSubmissionPenalty ?: 0,
@@ -219,54 +241,47 @@ fun ClazzAssignmentDetailOverviewScreen(
         }
 
         if(uiState.activeUserIsSubmitter) {
-            item(key = "your_submission_header") {
-                val suffix = if (uiState.isGroupSubmission) {
-                    "(${stringResource(MR.strings.group_number, uiState.submitterUid.toString())})"
-                } else {
-                    ""
+            if(uiState.activeUserCanSubmit) {
+                item(key = "your_submission_header") {
+                    val suffix = if (uiState.isGroupSubmission) {
+                        "(${stringResource(MR.strings.group_number, uiState.submitterUid.toString())})"
+                    } else {
+                        ""
+                    }
+                    UstadEditHeader(stringResource(MR.strings.your_submission) + " " + suffix)
                 }
-                UstadEditHeader(stringResource(MR.strings.your_submission) + " " + suffix)
             }
-
 
             if(uiState.submissionTextFieldVisible) {
                 item(key = "submission") {
-                    if(uiState.activeUserCanSubmit) {
-                        UstadRichTextEdit(
-                            modifier = Modifier
-                                .testTag("submission_text_field")
-                                .defaultItemPadding()
-                                .fillMaxWidth(),
-                            html = uiState.latestSubmission?.casText ?: "",
-                            editInNewScreenLabel = stringResource(MR.strings.text),
-                            placeholderText = stringResource(MR.strings.text),
-                            onHtmlChange = {
-                                onChangeSubmissionText(it)
-                            },
-                            onClickToEditInNewScreen = onClickEditSubmission
-                        )
-                    }else {
-                        UstadHtmlText(
-                            modifier = Modifier
-                                .testTag("submission_text")
-                                .defaultItemPadding(),
-                            html = uiState.latestSubmission?.casText ?: ""
-                        )
-                    }
+                    UstadRichTextEdit(
+                        modifier = Modifier
+                            .testTag("submission_text_field")
+                            .defaultItemPadding()
+                            .fillMaxWidth(),
+                        html = uiState.editableSubmission?.casText ?: "",
+                        editInNewScreenLabel = stringResource(MR.strings.text),
+                        placeholderText = stringResource(MR.strings.text),
+                        onHtmlChange = {
+                            onChangeSubmissionText(it)
+                        },
+                        onClickToEditInNewScreen = onClickEditSubmission
+                    )
                 }
-
             }
 
-            if(uiState.addFileVisible) {
+            if(uiState.addFileSubmissionVisible) {
                 item(key = "add_file_button") {
                     ListItem(
-                        modifier = Modifier.testTag("add_file"),
+                        modifier = Modifier.testTag("add_file").clickable {
+                            onClickAddFileSubmission()
+                        },
                         headlineContent = { Text(stringResource(MR.strings.add_file)) },
                         supportingContent = {
                             Text(
-                                "${stringResource(MR.strings.file_type_chosen)} $caFileType" +
-                                        stringResource(MR.strings.max_number_of_files,
-                                            uiState.assignment?.caNumberOfFiles ?: 0),
+                            "${stringResource(MR.strings.file_type_chosen)} $caFileType" +
+                                "${stringResource(MR.strings.number_of_files)} ${uiState.assignment?.caNumberOfFiles ?: 0}" +
+                                "${stringResource(MR.strings.size_limit)}: ${uiState.assignment?.caSizeLimit}"
                             )
                         },
                         leadingContent = {
@@ -277,16 +292,16 @@ fun ClazzAssignmentDetailOverviewScreen(
             }
 
             items(
-                items = uiState.latestSubmissionAttachments ?: emptyList(),
-                key = { Pair(1, it.casaUid) }
-            ){ attachment ->
-                ListItem(
-                    headlineContent = { Text(attachment.casaFileName ?: "") },
-                    leadingContent = {
-                        Icon(imageVector = Icons.Default.InsertDriveFile, contentDescription = null)
-                    }
+                items = uiState.editableSubmissionFiles,
+                key = { Pair(CourseAssignmentSubmissionFile.TABLE_ID, it.submissionFile?.casaUid) }
+            ) { item ->
+                CourseAssignmentSubmissionFileListItem(
+                    fileAndTransferJob = item,
+                    onRemove = onRemoveSubmissionFile,
+                    onClickOpen = onOpenSubmissionFile,
                 )
             }
+
 
             if (uiState.submitSubmissionButtonVisible){
                 item(key = "submit_button") {
@@ -312,6 +327,32 @@ fun ClazzAssignmentDetailOverviewScreen(
                 }
             }
 
+            uiState.submissions.forEachIndexed { index, submissionAndFiles ->
+                val isCollapsedVal = submissionAndFiles.submission.casUid in uiState.collapsedSubmissions
+                item(key = "submission_${submissionAndFiles.submission.casUid}") {
+                    CourseAssignmentSubmissionComponent(
+                        submission = submissionAndFiles.submission,
+                        submissionNum = uiState.submissions.size - index,
+                        isCollapsed = isCollapsedVal,
+                        onToggleCollapse = {
+                            onToggleSubmissionExpandCollapse(submissionAndFiles.submission)
+                        }
+                    )
+                }
+
+                if(!isCollapsedVal) {
+                    items(
+                        items = submissionAndFiles.files,
+                        key = { Pair("submittedfile", it.submissionFile?.casaUid ?: 0)}
+                    ) { file ->
+                        CourseAssignmentSubmissionFileListItem(
+                            fileAndTransferJob = file,
+                            onClickOpen = onOpenSubmissionFile,
+                            onSend = onSendSubmissionFile,
+                        )
+                    }
+                }
+            }
 
             item(key = "grades_header") {
                 ListItem(
@@ -337,7 +378,11 @@ fun ClazzAssignmentDetailOverviewScreen(
                 UstadCourseAssignmentMarkListItem(
                     uiState = UstadCourseAssignmentMarkListItemUiState(
                         mark = mark,
+                        localDateTimeNow = uiState.localDateTimeNow,
+                        dayOfWeekStrings = uiState.dayOfWeekStringMap,
                     ),
+                    timeFormatter = timeFormatter,
+                    dateFormat = dateFormatter,
                 )
             }
 
@@ -372,6 +417,12 @@ fun ClazzAssignmentDetailOverviewScreen(
                 CommentListItem(
                     commentAndName = it,
                     linkExtractor = linkExtractor,
+                    localDateTimeNow = uiState.localDateTimeNow,
+                    timeFormatter = timeFormatter,
+                    dateFormatter = dateFormatter,
+                    dayOfWeekStringMap = uiState.dayOfWeekStringMap,
+                    showModerateOptions = uiState.showModerateOptions,
+                    onDeleteComment = onDeleteComment,
                 )
             }
         }
@@ -394,7 +445,7 @@ fun ClazzAssignmentDetailOverviewScreen(
                     currentUserPersonName = uiState.activeUserPersonName,
                     currentUserPictureUri = uiState.activeUserPictureUri,
                     onSubmitComment = onClickSubmitPrivateComment,
-                    onCommentChanged = onChangePrivateComment
+                    onCommentChanged = onChangePrivateComment,
                 )
             }
 
@@ -405,6 +456,12 @@ fun ClazzAssignmentDetailOverviewScreen(
                 CommentListItem(
                     commentAndName = comment,
                     linkExtractor = linkExtractor,
+                    localDateTimeNow = uiState.localDateTimeNow,
+                    timeFormatter = timeFormatter,
+                    dateFormatter = dateFormatter,
+                    dayOfWeekStringMap = uiState.dayOfWeekStringMap,
+                    showModerateOptions = uiState.showModerateOptions,
+                    onDeleteComment = onDeleteComment,
                 )
             }
         }

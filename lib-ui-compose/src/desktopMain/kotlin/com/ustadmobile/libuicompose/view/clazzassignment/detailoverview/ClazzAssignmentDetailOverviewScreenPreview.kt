@@ -7,7 +7,6 @@ import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.CourseAssignmentMark
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
-import com.ustadmobile.lib.db.entities.CourseAssignmentSubmissionAttachment
 import com.ustadmobile.lib.db.entities.CourseBlock
 
 @Composable
@@ -24,14 +23,7 @@ fun ClazzAssignmentDetailOverviewScreenPreview(){
                 cbDescription = "Complete your assignment or <b>else</b>"
             },
             submitterUid = 42L,
-            addFileVisible = true,
-            latestSubmissionAttachments = listOf(
-                CourseAssignmentSubmissionAttachment().apply {
-                    casaUid = 1L
-                    casaFileName = "File.pdf"
-                },
-            ),
-            latestSubmission = CourseAssignmentSubmission().apply {
+            editableSubmission = CourseAssignmentSubmission().apply {
                 casText = ""
             },
             markList = listOf(

@@ -1,7 +1,9 @@
 package com.ustadmobile.core.io.ext
 
+import com.ustadmobile.core.domain.compress.CompressionType
 import java.io.InputStream
 import java.security.MessageDigest
+import java.util.zip.GZIPInputStream
 
 
 fun InputStream.readString(): String{
@@ -18,3 +20,14 @@ fun InputStream.readSha256(): ByteArray {
 
     return digest.digest()
 }
+
+
+fun InputStream.uncompress(
+    compressionType: CompressionType
+): InputStream {
+    return when(compressionType) {
+        CompressionType.NONE -> this
+        CompressionType.GZIP -> GZIPInputStream(this)
+    }
+}
+
