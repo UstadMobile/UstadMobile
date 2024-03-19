@@ -266,4 +266,12 @@ expect abstract class PersonDao : BaseDao<Person> {
     """)
     abstract suspend fun updateUsername(personUid: Long, username: String, currentTime: Long): Int
 
+    @Query("""
+        SELECT Person.username
+          FROM Person
+         WHERE Person.username IN (:usernames)
+    """)
+    abstract suspend fun selectExistingUsernames(usernames: List<String>): List<String?>
+
+
 }

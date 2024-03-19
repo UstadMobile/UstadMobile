@@ -5,9 +5,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CopyAll
+import androidx.compose.material.icons.filled.GroupAdd
 import androidx.compose.material.icons.filled.Link
+import androidx.compose.material.icons.filled.PersonAdd
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -26,11 +30,13 @@ import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.libuicompose.components.UstadBottomSheetOption
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadPersonAvatar
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Suppress("unused") // Pending
 @Composable
 fun PersonListScreen(
@@ -46,6 +52,39 @@ fun PersonListScreen(
         onClickInviteWithLink = viewModel::onClickInviteWithLink,
         onClickCopyInviteCode = viewModel::onClickCopyInviteCode,
     )
+
+    if(uiState.addSheetOrDialogVisible) {
+        ModalBottomSheet(
+            onDismissRequest = viewModel::onDismissAddSheetOrDialog
+        ) {
+            UstadBottomSheetOption(
+                modifier = Modifier.clickable {
+                    viewModel.onDismissAddSheetOrDialog()
+                    viewModel.onClickAdd()
+                },
+                headlineContent = {
+                    Text(stringResource(MR.strings.add_person))
+                },
+                leadingContent = {
+                    Icon(Icons.Default.PersonAdd, contentDescription = null)
+                }
+            )
+
+            UstadBottomSheetOption(
+                modifier = Modifier.clickable {
+                    viewModel.onDismissAddSheetOrDialog()
+                    viewModel.onClickBulkAdd()
+                },
+                headlineContent = {
+                    Text(stringResource(MR.strings.bulk_import))
+                },
+                leadingContent = {
+                    Icon(Icons.Default.GroupAdd, contentDescription = null)
+                }
+            )
+        }
+    }
+
 }
 
 @Composable

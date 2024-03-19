@@ -399,4 +399,14 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
          WHERE Clazz.clazzUid = :clazzUid 
     """)
     abstract suspend fun getClazzTimeZoneByClazzUidAsync(clazzUid: Long): String?
+
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+    )
+    @Query("""
+        SELECT Clazz.*
+          FROM Clazz
+         WHERE Clazz.clazzName IN (:names) 
+    """)
+    abstract suspend fun getCoursesByName(names: List<String>): List<Clazz>
 }
