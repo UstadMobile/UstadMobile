@@ -89,6 +89,8 @@ dependencyResolutionManagement {
             version("version_androidx_core_splashscreen", "1.0.1")
             version("version_androidx_profileinstaller", "1.3.1")
             version("version_junique", "1.0.4")
+            version("version_kotlin_csv", "1.9.3")
+            version("version_hsqldb", "2.7.2")
 
             plugin("jetbrains-compose", "org.jetbrains.compose").versionRef("jetbrains-compose")
             plugin("moko-resources-plugin", "dev.icerock.mobile.multiplatform-resources").versionRef("version-moko-resources")
@@ -204,6 +206,8 @@ dependencyResolutionManagement {
             library("androidx-core-splashscreen", "androidx.core", "core-splashscreen").versionRef("version_androidx_core_splashscreen")
             library("androidx-profileinstaller", "androidx.profileinstaller", "profileinstaller").versionRef("version_androidx_profileinstaller")
             library("junique", "it.sauronsoftware", "junique").versionRef("version_junique")
+            library("kotlin-csv", "com.github.doyaaaaaken", "kotlin-csv").versionRef("version_kotlin_csv")
+            library("hsqldb", "org.hsqldb", "hsqldb").versionRef("version_hsqldb")
         }
     }
 }
