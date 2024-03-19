@@ -1,4 +1,4 @@
-describe('007_004_user_registration_dob_field_is_mandatory', () => {
+describe('WEB_007_005_student_registered_by_admin_or_teacher_dont_need_parentConsent', () => {
  it('Start Ustad Test Server ', () => {
   // Start Test Server
     cy.ustadStartTestServer()
