@@ -123,6 +123,8 @@ dependencies {
     implementation(libs.xmlpullparsekmp)
     implementation(libs.kxml2)
     implementation(libs.logback.classic)
+    implementation(libs.junique)
+    implementation(libs.hsqldb)
 
     //as per https://conveyor.hydraulic.dev/13.0/tutorial/tortoise/2-gradle/#adapting-a-compose-desktop-app
     linuxAmd64(compose.desktop.linux_x64)

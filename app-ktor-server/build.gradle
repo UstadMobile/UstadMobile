@@ -134,6 +134,10 @@ dependencies {
 
     implementation project(":lib-cache")
 
+    implementation(libs.libphonenumber.google)
+
+    implementation libs.hsqldb
+
     //test
     testImplementation project(":lib-test-common")
     testImplementation project(":sharedse")

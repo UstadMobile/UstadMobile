@@ -74,16 +74,16 @@ allprojects {
             url "https://maven.pkg.jetbrains.space/public/p/compose/dev"
         }
 
-        //Compose Multiplatform Webview requirement
+        //JUnique (required to prevent multiple instqances of desktop app)
+        //As per https://github.com/terjedahl/junique
         maven {
-            url "https://jogamp.org/deployment/maven/"
+            url "https://raw.githubusercontent.com/terjedahl/junique/master/maven2"
         }
-
     }
 }
 
 //Major.minor.database version
-version = "0.4.97"
+version = "0.4.101"
 group = "com.ustadmobile.app"
 
 /**
@@ -93,7 +93,7 @@ group = "com.ustadmobile.app"
  */
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 321
+    ustadVersionCode = 325
 
     version_retriever = "0.0.1e"
     version_xmlpullparserkmp = '0.0.26'
