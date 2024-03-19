@@ -28,7 +28,7 @@
 #Quartz does not seem like to like being obfuscated
 -keep class org.quartz.** { *; }
 -keep class org.quartz.impl.jdbcjobstore.JobStoreTX { * ; }
--keep class com.ustadmobile.core.schedule.SqliteJDBCDelegate { * ; }
+-keep class org.quartz.impl.jdbcjobstore.HSQLDBDelegate { * ; }
 
 #not using terracotta...
 -dontwarn org.terracotta.toolkit.**
@@ -331,4 +331,13 @@
 # Although these are quite wide keep rules, the difference in final size is only 528KB.
 -keep class ch.qos.** { *; }
 -keep class org.slf4j.** { *; }
+
+
+# HSQLDB
+-dontwarn org.hsqldb.util.Transfer
+-keep class org.hsqldb.jdbc.JDBCDriver {
+    public <init>(...);
+}
+
+-keep class org.hsqldb.dbinfo.DatabaseInformationFull { *; }
 

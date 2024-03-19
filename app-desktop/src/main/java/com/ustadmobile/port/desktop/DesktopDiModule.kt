@@ -411,11 +411,11 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
 
     bind<Scheduler>() with singleton {
         val dataDir: File = instance(tag = TAG_DATA_DIR)
-        val dbUrl = "jdbc:sqlite:${dataDir.absolutePath}/quartz.db"
+        val dbUrl = "jdbc:hsqldb:file:${dataDir.absolutePath}/quartz"
         val dbProperties = Properties().also {
             it["url"] = dbUrl
-            it["driver"] = "org.sqlite.JDBC"
-            it["user"] = ""
+            it["driver"] = "org.hsqldb.jdbc.JDBCDriver"
+            it["user"] = "SA"
             it["password"] = ""
         }
 

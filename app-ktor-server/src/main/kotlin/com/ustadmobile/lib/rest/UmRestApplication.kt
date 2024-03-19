@@ -369,8 +369,13 @@ fun Application.umRestApplication(
 
 
         bind<Scheduler>() with singleton {
-            val dbProperties = environment.config.databasePropertiesFromSection("quartz",
-                "jdbc:sqlite:(datadir)/quartz.sqlite?journal_mode=WAL&synchronous=OFF&busy_timeout=30000")
+            val dbProperties = environment.config
+                .databasePropertiesFromSection(
+                    section = "quartz",
+                    defaultUrl = "jdbc:hsqldb:file:(datadir)/quartz",
+                    defaultDriver = "org.hsqldb.jdbc.JDBCDriver",
+                    defaultUser = "SA",
+                )
             dbProperties.setProperty("url", dbProperties.getProperty("url").replaceDbUrlVars())
 
             InitialContext().apply {
