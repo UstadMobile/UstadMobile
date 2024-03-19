@@ -11,7 +11,9 @@ import kotlinx.coroutines.launch
 
 @Composable
 actual fun rememberUstadFilePickLauncher(
-    onFileSelected: (UstadFilePickResult) -> Unit
+    fileExtensions: List<String>,
+    mimeTypes: List<String>,
+    onFileSelected: (UstadFilePickResult) -> Unit,
 ): LaunchFilePickFn {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -35,6 +37,6 @@ actual fun rememberUstadFilePickLauncher(
     }
 
     return {
-        activityLauncher.launch(arrayOf("*/*"))
+        activityLauncher.launch(mimeTypes.ifEmpty { listOf("*/*") }.toTypedArray())
     }
 }

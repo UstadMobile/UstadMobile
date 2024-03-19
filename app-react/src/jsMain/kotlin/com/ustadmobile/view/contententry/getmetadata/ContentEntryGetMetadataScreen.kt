@@ -8,6 +8,7 @@ import com.ustadmobile.core.viewmodel.contententry.getmetadata.ContentEntryGetMe
 import com.ustadmobile.core.viewmodel.contententry.getmetadata.ContentEntryGetMetadataViewModel
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.useUstadViewModel
+import com.ustadmobile.util.ext.useCenterAlignGridContainer
 import mui.material.CircularProgress
 import mui.material.CircularProgressVariant
 import mui.material.Grid
@@ -17,11 +18,7 @@ import mui.system.responsive
 import mui.system.sx
 import react.FC
 import react.Props
-import web.cssom.AlignItems
-import web.cssom.Height
-import web.cssom.JustifyContent
 import web.cssom.PaddingLeft
-import web.cssom.TextAlign
 import mui.icons.material.ErrorOutline as ErrorIcon
 
 external interface ContentEntryGetMetadataProps: Props {
@@ -35,10 +32,7 @@ val ContentEntryGetMetadataComponent = FC<ContentEntryGetMetadataProps> {props -
         container = true
         direction = responsive(GridDirection.column)
         sx {
-            alignItems = AlignItems.center
-            justifyContent = JustifyContent.center
-            height = "calc(100vh - ${muiAppState.appBarHeight}px)".unsafeCast<Height>()
-            textAlign = TextAlign.center
+            useCenterAlignGridContainer(muiAppState)
         }
 
         val errorStr = props.uiState.status.error
