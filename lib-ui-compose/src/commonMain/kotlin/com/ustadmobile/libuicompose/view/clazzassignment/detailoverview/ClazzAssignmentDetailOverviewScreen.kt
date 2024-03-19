@@ -43,11 +43,11 @@ import com.ustadmobile.libuicompose.components.ustadPagedItems
 import androidx.compose.runtime.remember
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.ustadmobile.core.viewmodel.clazzassignment.averageMark
+import com.ustadmobile.core.viewmodel.clazzassignment.detailoverview.ClazzAssignmentDetailoverviewSubmissionUiState
 import com.ustadmobile.lib.db.composites.CourseAssignmentSubmissionFileAndTransferJob
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadOpeningBlobInfoBottomSheet
 import com.ustadmobile.libuicompose.components.UstadPickFileOpts
-import com.ustadmobile.libuicompose.components.UstadRichTextEdit
 import com.ustadmobile.libuicompose.components.isDesktop
 import com.ustadmobile.libuicompose.components.rememberUstadFilePickLauncher
 import com.ustadmobile.libuicompose.util.linkify.rememberLinkExtractor
@@ -58,6 +58,7 @@ import com.ustadmobile.libuicompose.view.clazzassignment.CourseAssignmentSubmiss
 import com.ustadmobile.libuicompose.view.clazzassignment.CourseAssignmentSubmissionFileListItem
 import com.ustadmobile.libuicompose.view.clazzassignment.UstadAssignmentSubmissionStatusHeaderItems
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 
 @Composable
@@ -84,6 +85,7 @@ fun ClazzAssignmentDetailOverviewScreen(viewModel: ClazzAssignmentDetailOverview
 
     ClazzAssignmentDetailOverviewScreen(
         uiState = uiState,
+        editableSubmissionFlow = viewModel.editableSubmissionUiState,
         onClickEditSubmission = viewModel::onClickEditSubmissionText,
         onChangeCourseComment = viewModel::onChangeCourseCommentText,
         onChangePrivateComment = viewModel::onChangePrivateCommentText,
@@ -107,6 +109,7 @@ fun ClazzAssignmentDetailOverviewScreen(viewModel: ClazzAssignmentDetailOverview
 @Composable
 fun ClazzAssignmentDetailOverviewScreen(
     uiState: ClazzAssignmentDetailOverviewUiState,
+    editableSubmissionFlow: Flow<ClazzAssignmentDetailoverviewSubmissionUiState>,
     onClickMarksFilterChip: (MessageIdOption2) -> Unit = {},
     onChangeCourseComment: (String) -> Unit = {},
     onChangePrivateComment: (String) -> Unit = {},
@@ -254,18 +257,10 @@ fun ClazzAssignmentDetailOverviewScreen(
 
             if(uiState.submissionTextFieldVisible) {
                 item(key = "submission") {
-                    UstadRichTextEdit(
-                        modifier = Modifier
-                            .testTag("submission_text_field")
-                            .defaultItemPadding()
-                            .fillMaxWidth(),
-                        html = uiState.editableSubmission?.casText ?: "",
-                        editInNewScreenLabel = stringResource(MR.strings.text),
-                        placeholderText = stringResource(MR.strings.text),
-                        onHtmlChange = {
-                            onChangeSubmissionText(it)
-                        },
-                        onClickToEditInNewScreen = onClickEditSubmission
+                    CourseAssignmentSubmissionEdit(
+                        stateFlow = editableSubmissionFlow,
+                        onChangeSubmissionText = onChangeSubmissionText,
+                        onClickEditSubmission = onClickEditSubmission,
                     )
                 }
             }

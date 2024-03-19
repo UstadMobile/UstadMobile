@@ -9,7 +9,6 @@ import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.ext.UNSET_DISTANT_FUTURE
 import com.ustadmobile.core.util.ext.isDateSet
-import com.ustadmobile.core.util.ext.textLength
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.UstadAssignmentSubmissionHeaderUiState
@@ -82,8 +81,6 @@ data class ClazzAssignmentDetailOverviewUiState(
      * The submitter uid of the active user - see CourseAssignmentSubmission.casSubmitterUid
      */
     val submitterUid: Long = 0,
-
-    val editableSubmission: CourseAssignmentSubmission? = null,
 
     val editableSubmissionFiles: List<CourseAssignmentSubmissionFileAndTransferJob> = emptyList(),
 
@@ -187,10 +184,6 @@ data class ClazzAssignmentDetailOverviewUiState(
             if(!isWithinDeadlineOrGracePeriod)
                 return false
 
-            //User must not submit or be shown option to submit until the entity is added when loading
-            if(editableSubmission == null)
-                return false
-
             if(assignment?.caSubmissionPolicy == ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE &&
                 submissions.isNotEmpty()
             ) {
@@ -221,10 +214,6 @@ data class ClazzAssignmentDetailOverviewUiState(
 
     val submitPrivateCommentVisible: Boolean
         get() = privateCommentSectionVisible && assignment?.caPrivateCommentsEnabled == true
-
-    val currentSubmissionLength: Int? by lazy {
-        editableSubmission?.textLength(assignment?.caTextLimitType ?: ClazzAssignment.TEXT_WORD_LIMIT)
-    }
 
     val pointsVisible: Boolean
         get() = submissionMark != null
@@ -260,6 +249,15 @@ data class ClazzAssignmentDetailOverviewUiState(
 
 }
 
+/**
+ * Assignment text editing takes place inside a VirtualList. The Virtual List is not able to deliver
+ * changes synchronously, so the state must be separated out
+ */
+data class ClazzAssignmentDetailoverviewSubmissionUiState(
+    val editableSubmission: CourseAssignmentSubmission? = null,
+)
+
+
 class ClazzAssignmentDetailOverviewViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
@@ -277,6 +275,12 @@ class ClazzAssignmentDetailOverviewViewModel(
     )
 
     val uiState: Flow<ClazzAssignmentDetailOverviewUiState> = _uiState.asStateFlow()
+
+    private val _editableSubmissionUiState = MutableStateFlow(
+        ClazzAssignmentDetailoverviewSubmissionUiState()
+    )
+
+    val editableSubmissionUiState: Flow<ClazzAssignmentDetailoverviewSubmissionUiState> = _editableSubmissionUiState.asStateFlow()
 
     private var lastPrivateCommentsPagingSource: PagingSource<Int, CommentsAndName>? = null
 
@@ -336,7 +340,7 @@ class ClazzAssignmentDetailOverviewViewModel(
                 STATE_EDITABLE_SUBMISSION, CourseAssignmentSubmission.serializer(),
             ) ?: newCourseAssignmentSubmission()
 
-            _uiState.update { prev -> prev.copy(editableSubmission = editableSubmission) }
+            _editableSubmissionUiState.update { prev -> prev.copy(editableSubmission = editableSubmission) }
 
             launch {
                 navResultReturner.filteredResultFlowForKey(KEY_SUBMISSION_HTML).collect {
@@ -410,7 +414,7 @@ class ClazzAssignmentDetailOverviewViewModel(
 
                 launch {
                     //Note: the submission uid will change when the user submits.
-                    _uiState.map {
+                    _editableSubmissionUiState.map {
                         it.editableSubmission?.casUid ?: 0
                     }.distinctUntilChanged().collectLatest { submissionUid ->
                         activeDb.courseAssignmentSubmissionFileDao.getBySubmissionUid(
@@ -457,22 +461,18 @@ class ClazzAssignmentDetailOverviewViewModel(
      */
     fun onClickEditSubmissionText() {
         navigateToEditHtml(
-            currentValue = _uiState.value.editableSubmission?.casText ?: "",
+            currentValue = _editableSubmissionUiState.value.editableSubmission?.casText ?: "",
             resultKey = KEY_SUBMISSION_HTML
         )
     }
 
     fun onChangeSubmissionText(text: String) {
-        val submissionToSave = _uiState.updateAndGet { prev ->
-            if(prev.activeUserCanSubmit) {
-                prev.copy(
-                    editableSubmission = prev.editableSubmission?.shallowCopy {
-                        casText = text
-                    }
-                )
-            }else {
-                prev
-            }
+        val submissionToSave = _editableSubmissionUiState.updateAndGet { prev ->
+            prev.copy(
+                editableSubmission = prev.editableSubmission?.shallowCopy {
+                    casText = text
+                }
+            )
         }.editableSubmission
 
         savedSubmissionJob?.cancel()
@@ -576,7 +576,7 @@ class ClazzAssignmentDetailOverviewViewModel(
                 casaUid = activeDb.doorPrimaryKeyManager.nextIdAsync(
                     CourseAssignmentSubmissionFile.TABLE_ID
                 ),
-                casaSubmissionUid = _uiState.value.editableSubmission?.casUid ?: 0,
+                casaSubmissionUid = _editableSubmissionUiState.value.editableSubmission?.casUid ?: 0,
                 casaFileName = fileName,
                 casaSubmitterUid = _uiState.value.submitterUid,
                 casaMimeType = mimeType,
@@ -612,7 +612,7 @@ class ClazzAssignmentDetailOverviewViewModel(
         if(!_uiState.value.fieldsEnabled)
             return
 
-        val submission = _uiState.value.editableSubmission ?: return
+        val submission = _editableSubmissionUiState.value.editableSubmission ?: return
 
         _uiState.update { prev -> prev.copy(fieldsEnabled = false) }
         loadingState = LoadingUiState.INDETERMINATE
@@ -627,12 +627,13 @@ class ClazzAssignmentDetailOverviewViewModel(
                     submission = submission
                 )
 
-                val submissionToSave = _uiState.updateAndGet { prev ->
+                val submissionToSave = _editableSubmissionUiState.updateAndGet { prev ->
                     prev.copy(
                         editableSubmission = newCourseAssignmentSubmission(),
-                        submissionError = null
                     )
                 }.editableSubmission
+
+                _uiState.update { it.copy(submissionError = null) }
 
                 if(submissionToSave != null) {
                     savedStateHandle.setJson(
