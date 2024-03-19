@@ -1,5 +1,3 @@
-/* Test failed 11/march: with adding attachments: just needs to scroll
- */
 describe('004_009_group_users_add_private_comments', () => {
 it('Start Ustad Test Server ', () => {
  // Start Test Server
@@ -97,7 +95,7 @@ it('Group 1 - Student add private comment', () => {
   cy.contains("Course").click()
   cy.contains("004_009").click()
   cy.contains('Assignment 1').click()
-   cy.get('#course_comment_textfield',{timeout:6000}).scrollTo('bottom',{ensureScrollable: false})
+   cy.get(".VirtualList").scrollTo('bottom')
   cy.ustadTypeAndSubmitAssignmentComment('#private_comment_textfield','#private_comment_textfield_send_button','comment2')
   cy.contains("comment2").should('exist')
 })
@@ -117,7 +115,7 @@ it('Group 1 - Student2 able to view Group 1 private comment', () => {
   cy.contains("Course").click()
   cy.contains("004_009").click()
   cy.contains('Assignment 1').click()
-  cy.get('#course_comment_textfield').scrollTo('bottom',{ensureScrollable: false})
+  cy.get(".VirtualList").scrollTo('bottom')
   cy.contains("comment1").should('exist')
   cy.contains("comment2").should('exist')
 })
