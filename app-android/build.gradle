@@ -197,11 +197,11 @@ configurations.all {
      * duplicate class error
      */
     exclude group: "com.github.UstadMobile.door", module: "room-annotations"
-    resolutionStrategy {
-        force "androidx.lifecycle:lifecycle-livedata-core:$version_androidx_lifecycle"
-        force "androidx.lifecycle:lifecycle-runtime:$version_androidx_lifecycle"
-        force "androidx.arch.core:core-runtime:$version_androidx_arch"
-    }
+//    resolutionStrategy {
+//        force "androidx.lifecycle:lifecycle-livedata-core:$version_androidx_lifecycle"
+//        force "androidx.lifecycle:lifecycle-runtime:$version_androidx_lifecycle"
+//        force "androidx.arch.core:core-runtime:$version_androidx_arch"
+//    }
 }
 
 dependencies {

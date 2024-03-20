@@ -167,6 +167,6 @@ dependencies {
     kspJs libs.door.compiler
     kspJs libs.door.shallowcopy
     kspAndroid libs.door.compiler
-    kspAndroid "androidx.room:room-compiler:$version_android_room"
+    kspAndroid libs.androidx.room.compiler
     kspAndroid libs.door.shallowcopy
 }
