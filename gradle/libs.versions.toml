@@ -107,6 +107,13 @@ netty-tcnative = "2.0.62.Final"
 jakarta-mail = "2.0.1"
 argparse4j = "0.9.0"
 commons-dbcp2 = "2.11.0"
+junit = "4.13.2"
+byte-buddy = "1.14.10"
+pdfview-android = "1.1.0"
+androidx-coordinatorlayout = "1.2.0"
+androidx-test-runner = "1.5.2"
+robolectric = "4.10.3"
+androidx-test-core = "1.5.0"
 
 [plugins]
 
@@ -234,6 +241,7 @@ androidx-annotation = { module = "androidx.annotation:annotation", version.ref =
 androidx-work-runtime = { module = "androidx.work:work-runtime", version.ref = "androidx-work"}
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "androidx-work" }
 klock-android = { module = "com.soywiz.korlibs.klock:klock-android", version.ref = "klock" }
+klock = { module = "com.soywiz.korlibs.klock:klock", version.ref = "klock"}
 acra-http = { module = "ch.acra:acra-http", version.ref = "acra" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "androidx-datastore" }
 androidx-legacy-core-utils = { module = "androidx.legacy:legacy-support-core-utils", version.ref = "androidx-legacy-support"}
@@ -293,5 +301,21 @@ kotlin-wrappers-kotlin-tanstack-query-core = { module = "org.jetbrains.kotlin-wr
 kotlin-wrappers-kotlin-tanstack-react-query = { module = "org.jetbrains.kotlin-wrappers:kotlin-tanstack-react-query" }
 kotlin-wrappers-kotlin-tanstack-virtual-core = { module = "org.jetbrains.kotlin-wrappers:kotlin-tanstack-virtual-core" }
 kotlin-wrappers-kotlin-tanstack-react-virtual = { module = "org.jetbrains.kotlin-wrappers:kotlin-tanstack-react-virtual" }
+kotlin-wrappers-kotlin-extensions = { module = "org.jetbrains.kotlin-wrappers:kotlin-extensions" }
 ktor-client-js = { module = "io.ktor:ktor-client-js", version.ref = "ktor" }
 kotlin-test = { module ="org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin"}
+ktor-client-json = { module = "io.ktor:ktor-client-json", version.ref = "ktor" }
+coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
+ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }
+junit = { module = "junit:junit", version.ref = "junit" }
+byte-buddy = { module = "net.bytebuddy:byte-buddy", version.ref = "byte-buddy" }
+pdfview-android = { module = "com.dmitryborodin:pdfview-android", version.ref = "pdfview-android" }
+androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref="androidx-lifecycle"}
+androidx-coordinatorlayout = { module = "androidx.coordinatorlayout:coordinatorlayout", version.ref = "androidx-coordinatorlayout"}
+ktor-client-android = { module = "io.ktor:ktor-client-android", version.ref = "ktor" }
+androidx-test-runner = { module = "androidx.test:runner", version.ref = "androidx-test-runner" }
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+androidx-test-core = { module = "androidx.test:core", version.ref = "androidx-test-core" }
+ktor-client-json-js = { module = "io.ktor:ktor-client-json-js", version.ref = "ktor" }
+ktor-client-serialization-js = { module = "io.ktor:ktor-client-serialization-js", version.ref ="ktor" }
