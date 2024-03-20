@@ -95,8 +95,6 @@ ext {
     ustadVersion = project.version
     ustadVersionCode = 325
 
-    version_retriever = "0.0.1e"
-    version_xmlpullparserkmp = '0.0.26'
 
     version_gradle_buildconfig_plugin = "1.1.7"
     version_ksp = "1.0.15"
