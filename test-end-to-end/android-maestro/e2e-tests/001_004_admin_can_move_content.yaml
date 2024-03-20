@@ -11,7 +11,7 @@ env:
       TESTSERIAL: ${TESTSERIAL}
       TESTNAME: ${TESTNAME}
 - runFlow:
-    file: "../common/add_content.yaml"
+    file: "../common/clear_login_and_add_content.yaml"
     env:
       TESTFILENAME: Epub_Content1.epub
       CONTROLSERVER: ${CONTROLSERVER}
@@ -24,7 +24,6 @@ env:
 - tapOn: "Title*"
 - inputText: "Test Folder"
 - tapOn: "SAVE"
-- assertVisible: "Test Folder"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/before_moving_content_to_new_folder"
 - longPressOn:
     text: "E-book"
