@@ -99,6 +99,14 @@ picasso = "2.8"
 seismic = "1.0.3"
 android-play = "1.10.3"
 guardianproject-panic = "1.0"
+sqlite-jdbc = "3.42.0.0"
+postgresql = "42.6.0"
+jsoup = "1.17.2"
+commons-lang3 = "3.14.0"
+netty-tcnative = "2.0.62.Final"
+jakarta-mail = "2.0.1"
+argparse4j = "0.9.0"
+commons-dbcp2 = "2.11.0"
 
 [plugins]
 
@@ -248,3 +256,24 @@ ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negoti
 ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor"}
 android-play-core = { module = "com.google.android.play:core", version.ref = "android-play"}
 guardianproject-panic = { module = "info.guardianproject.panic:panic", version.ref = "guardianproject-panic"}
+ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
+ktor-io = { module = "io.ktor:ktor-io", version.ref = "ktor" }
+ktor-server-netty = { module = "io.ktor:ktor-server-netty", version.ref = "ktor" }
+ktor-server-cors = { module = "io.ktor:ktor-server-cors", version.ref = "ktor" }
+ktor-server-call-logging = { module = "io.ktor:ktor-server-call-logging", version.ref = "ktor" }
+ktor-server-content-negotiation = { module = "io.ktor:ktor-server-content-negotiation", version.ref = "ktor" }
+ktor-server-conditional-headers = { module = "io.ktor:ktor-server-conditional-headers", version.ref = "ktor" }
+ktor-server-status-pages = { module = "io.ktor:ktor-server-status-pages", version.ref = "ktor" }
+ktor-server-html-builder = { module = "io.ktor:ktor-server-html-builder", version.ref = "ktor"}
+sqlite-jdbc = { module = "org.xerial:sqlite-jdbc", version.ref = "sqlite-jdbc" }
+postgresql = {  module = "org.postgresql:postgresql", version.ref = "postgresql" }
+jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
+commons-lang3 = { module = "org.apache.commons:commons-lang3", version.ref = "commons-lang3" }
+kodein-di-framework-ktor-server-jvm = { module = "org.kodein.di:kodein-di-framework-ktor-server-jvm", version.ref = "kodein-di" }
+ktor-server-websockets = { module = "io.ktor:ktor-server-websockets", version.ref = "ktor" }
+kotlin-stdlib-jdk8 = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version.ref = "kotlin" }
+netty-tcnative-boring-ssl-static = { module = "io.netty:netty-tcnative-boringssl-static", version.ref = "netty-tcnative" }
+jakarta-mail = { module = "com.sun.mail:jakarta.mail", version.ref = "jakarta-mail" }
+argparse4j = { module = "net.sourceforge.argparse4j:argparse4j", version.ref = "argparse4j" }
+ktor-server-test-host = { module = "io.ktor:ktor-server-test-host", version.ref = "ktor" }
+commons-dbcp2 = { module = "org.apache.commons:commons-dbcp2", version.ref = "commons-dbcp2" }

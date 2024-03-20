@@ -215,7 +215,6 @@ ext {
     version_jakartamail="2.0.1"
 
     version_persian_date_picker_aliab="1.7.1"
-    version_better_link_movement="2.2.0"
 
     version_jcabi_manifests = "2.1.0"
 
