@@ -204,7 +204,8 @@ Cypress.Commands.add('ustadTypeAndSubmitAssignmentComment', (commentid, sendid, 
     cy.get('input' + commentid + '[value=\"' + comment + '\"]')
     cy.get(commentid).should('have.value', comment);
     cy.get(sendid).click();
-    cy.contains(comment).should('exist');
+    cy.contains('.MuiListItemText-secondary',comment).should('exist');
+
 });
 
 

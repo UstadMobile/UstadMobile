@@ -25,6 +25,7 @@ import com.ustadmobile.core.db.*
 import com.ustadmobile.core.db.ext.MIGRATION_144_145_CLIENT
 import com.ustadmobile.core.db.ext.MIGRATION_148_149_CLIENT_WITH_OFFLINE_ITEMS
 import com.ustadmobile.core.db.ext.MIGRATION_155_156_CLIENT
+import com.ustadmobile.core.db.ext.MIGRATION_161_162_CLIENT
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.util.DiTag
@@ -100,6 +101,7 @@ import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseAndroid
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientChunkGetterUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
+import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCaseAndroid
 import com.ustadmobile.core.embeddedhttp.EmbeddedHttpServer
@@ -297,6 +299,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 .addMigrations(MIGRATION_144_145_CLIENT)
                 .addMigrations(MIGRATION_148_149_CLIENT_WITH_OFFLINE_ITEMS)
                 .addMigrations(MIGRATION_155_156_CLIENT)
+                .addMigrations(MIGRATION_161_162_CLIENT)
                 .build()
 
             val cache: UstadCache = instance()
@@ -764,6 +767,10 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 appContext = applicationContext,
                 getStoragePathForUrlUseCase = instance()
             )
+        }
+
+        bind<ValidateEmailUseCase>() with provider {
+            ValidateEmailUseCase()
         }
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }

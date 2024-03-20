@@ -11,6 +11,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.MIGRATION_144_145_SERVER
 import com.ustadmobile.core.db.ext.MIGRATION_148_149_NO_OFFLINE_ITEMS
 import com.ustadmobile.core.db.ext.MIGRATION_155_156_SERVER
+import com.ustadmobile.core.db.ext.MIGRATION_161_162_SERVER
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.core.domain.cachelock.AddRetainAllActiveUriTriggersCallback
@@ -141,6 +142,7 @@ fun makeJvmBackendDiModule(
             .addMigrations(MIGRATION_144_145_SERVER)
             .addMigrations(MIGRATION_148_149_NO_OFFLINE_ITEMS)
             .addMigrations(MIGRATION_155_156_SERVER)
+            .addMigrations(MIGRATION_161_162_SERVER)
             .build().also {
                 it.ktorInitDb(di)
             }

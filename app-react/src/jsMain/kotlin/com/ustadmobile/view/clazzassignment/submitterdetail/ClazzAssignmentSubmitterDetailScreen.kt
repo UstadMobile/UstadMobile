@@ -87,6 +87,8 @@ val ClazzAssignmentSubmitterDetailComponent = FC<ClazzAssignmentSubmitterDetailP
             overflowY = Overflow.scroll
         }
 
+        id = "VirtualList"
+
         content = virtualListContent {
             item(key = "header") {
                 ListItem.create {

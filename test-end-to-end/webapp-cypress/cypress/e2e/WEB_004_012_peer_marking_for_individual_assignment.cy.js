@@ -1,5 +1,3 @@
-/* 12/Mar/24 - this seems to work when run manually. Should be checked shortly.
- */
 describe('004_012_peer_marking_for_individual_assignment', () => {
 it('Start Ustad Test Server ', () => {
  // Start Test Server
@@ -97,6 +95,9 @@ it('Student1 submit assignment', () => {
   cy.get('#assignment_text').click()
   cy.get('#assignment_text').type("Text 1")
   cy.contains('SUBMIT',{timeout:5000}).click()
+  cy.contains("Submission 1").should("be.visible")
+  cy.contains("Text 1").should("be.visible")
+
   cy.go('back')
   cy.contains('Assignment 1',{timeout:1000}).click()
   cy.contains("Not submitted").should('not.exist')

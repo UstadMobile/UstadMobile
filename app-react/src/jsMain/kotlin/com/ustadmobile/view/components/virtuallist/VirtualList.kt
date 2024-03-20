@@ -8,6 +8,7 @@ import react.*
 import react.dom.html.ReactHTML.div
 import tanstack.react.query.UseInfiniteQueryResult
 import tanstack.react.virtual.useVirtualizer
+import web.cssom.ClassName
 import web.cssom.scaley
 import web.html.HTMLElement
 import web.uievents.WheelEvent
@@ -38,6 +39,8 @@ external interface VirtualListProps: PropsWithChildren {
      * on Jetpack Compose
      */
     var reverseLayout: Boolean?
+
+    var id: String?
 }
 
 
@@ -122,6 +125,9 @@ val VirtualList = FC<VirtualListProps> {props ->
 
     div {
         ref = parentRef
+        id = props.id
+        className = ClassName("VirtualList")
+
         style = if(props.reverseLayout == true) {
             jso {
                 props.style?.also { propsStyle ->
