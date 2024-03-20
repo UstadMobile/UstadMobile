@@ -241,8 +241,8 @@ kotlin {
                 implementation "androidx.recyclerview:recyclerview:$version_androidx_recyclerview"
                 implementation "androidx.room:room-runtime:$version_android_room"
                 implementation(libs.androidx.paging.runtime)
-                implementation "androidx.work:work-runtime:$version_android_workmanager"
-                implementation "androidx.work:work-runtime-ktx:$version_android_workmanager"
+                implementation libs.androidx.work.runtime
+                implementation libs.androidx.work.runtime.ktx
                 implementation "org.jsoup:jsoup:$version_jsoup"
                 //Image loading library
                 implementation "com.squareup.picasso:picasso:$version_android_picasso"

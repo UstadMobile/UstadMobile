@@ -222,28 +222,25 @@ dependencies {
     api libs.moko.resources.compose
 
     implementation libs.napier
-    implementation libs.androidx.constraintlayout
-    implementation "androidx.activity:activity:$version_androidx_activity"
-    implementation "androidx.activity:activity-ktx:$version_androidx_activity"
-    implementation "androidx.fragment:fragment:$version_androidx_fragment"
-    implementation "androidx.legacy:legacy-support-v4:$version_androidx_legacy_support"
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
-    implementation "commons-io:commons-io:$version_commons_io"
+    implementation libs.androidx.activity
+    implementation libs.androidx.activity.ktx
+    implementation libs.androidx.fragment
+    implementation libs.androidx.legacy.support.v4
+    implementation libs.kotlinx.serialization
+    implementation libs.kotlinx.coroutines.android
+    implementation libs.commons.io
 
     //ViewModel and LiveData
-    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$version_androidx_lifecycle"
-    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$version_androidx_lifecycle"
-    implementation "androidx.lifecycle:lifecycle-common-java8:$version_androidx_lifecycle"
+    implementation libs.androidx.lifecycle.livedata.ktx
+    implementation libs.androidx.lifecycle.runtime.ktx
+    implementation libs.androidx.lifecycle.common.java8
 
     //Provides ProcessLifecycleOwner
-    implementation "androidx.lifecycle:lifecycle-process:$version_androidx_lifecycle"
+    implementation libs.androidx.lifecycle.process
 
-    //Provides findViewTreeLifecycleOwner useful for two-way data binding that uses prepareCall (e.g. images/files)
-    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$version_androidx_lifecycle"
 
     // Room (annotation processing takes place only on lib-database to improve build times)
-    implementation "androidx.room:room-runtime:$version_android_room"
+    implementation libs.androidx.room.runtime
 
     implementation libs.androidx.core.ktx
 
@@ -251,29 +248,25 @@ dependencies {
     implementation(libs.androidx.paging.runtime)
     implementation(libs.androidx.paging.compose)
 
-    implementation "androidx.annotation:annotation:$version_androidx_annotation"
+    implementation libs.androidx.annotation
 
     //Work manager
-    implementation "androidx.work:work-runtime:$version_android_workmanager"
+    implementation libs.androidx.work.runtime
 
     //Klock
-    implementation "com.soywiz.korlibs.klock:klock-android:$version_klock"
+    implementation libs.klock.android
 
     //Crash reporting
-    implementation "ch.acra:acra-http:$version_android_acra"
+    implementation libs.acra.http
 
     //DataStore
-    implementation "androidx.datastore:datastore-preferences:$version_android_datastore"
+    implementation  libs.androidx.datastore.preferences
 
-    implementation "com.linkedin.android.litr:litr:$version_android_litr"
-
-
-    implementation "androidx.legacy:legacy-support-core-utils:$version_androidx_legacy"
+    implementation libs.androidx.legacy.core.utils
     implementation libs.androidx.appcompat
-    implementation "androidx.cardview:cardview:$version_androidx_cardview"
     implementation libs.android.material
-    implementation "androidx.legacy:legacy-support-v4:$version_androidx_legacy"
-    implementation "androidx.recyclerview:recyclerview:$version_androidx_recyclerview"
+    implementation libs.androidx.legacy.support.v4
+    implementation libs.androidx.recyclerview
 
     //Compose
 
