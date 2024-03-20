@@ -319,3 +319,5 @@ robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectr
 androidx-test-core = { module = "androidx.test:core", version.ref = "androidx-test-core" }
 ktor-client-json-js = { module = "io.ktor:ktor-client-json-js", version.ref = "ktor" }
 ktor-client-serialization-js = { module = "io.ktor:ktor-client-serialization-js", version.ref ="ktor" }
+androidx-room-paging = { module = "androidx.room:room-paging", version.ref = "android-room" }
+androidx-room-testing = { module = "androidx.room:room-testing", version.ref = "android-room" }
