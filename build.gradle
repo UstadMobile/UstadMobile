@@ -230,8 +230,6 @@ ext {
     version_npm_timezones = "^1.6.1"
 
     version_npm_emotion = "11.10.5"
-    version_npm_google_charts = "^3.0.15"
-    version_npm_html_to_image = "^1.9.0"
     version_npm_date_fns = "2.29.1"
     version_npm_mime_matcher = "^1.0.5"
     version_npm_react_quill = "2.0.0"

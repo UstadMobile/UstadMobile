@@ -277,3 +277,21 @@ jakarta-mail = { module = "com.sun.mail:jakarta.mail", version.ref = "jakarta-ma
 argparse4j = { module = "net.sourceforge.argparse4j:argparse4j", version.ref = "argparse4j" }
 ktor-server-test-host = { module = "io.ktor:ktor-server-test-host", version.ref = "ktor" }
 commons-dbcp2 = { module = "org.apache.commons:commons-dbcp2", version.ref = "commons-dbcp2" }
+kotlin-wrappers-kotlin-react = { module = "org.jetbrains.kotlin-wrappers:kotlin-react" }
+kotlin-wrappers-kotlin-react-dom = { module = "org.jetbrains.kotlin-wrappers:kotlin-react-dom" }
+kotlin-wrappers-kotlin-styled = { module = "org.jetbrains.kotlin-wrappers:kotlin-styled" }
+kotlin-wrappers-kotlin-react-router-dom = { module = "org.jetbrains.kotlin-wrappers:kotlin-react-router-dom" }
+kotlin-wrappers-kotlin-remix-run-router = { module = "org.jetbrains.kotlin-wrappers:kotlin-remix-run-router" }
+kotlin-wrappers-kotlin-mui-base = { module = "org.jetbrains.kotlin-wrappers:kotlin-mui-base" }
+kotlin-wrappers-kotlin-mui-material = { module = "org.jetbrains.kotlin-wrappers:kotlin-mui-material" }
+kotlin-wrappers-kotlin-mui-lab = { module = "org.jetbrains.kotlin-wrappers:kotlin-mui-lab" }
+kotlin-wrappers-kotlin-mui-system = { module = "org.jetbrains.kotlin-wrappers:kotlin-mui-system" }
+kotlin-wrappers-kotlin-mui-icons-material = { module = "org.jetbrains.kotlin-wrappers:kotlin-mui-icons-material" }
+kotlin-wrappers-kotlin-muix-date-pickers = { module = "org.jetbrains.kotlin-wrappers:kotlin-muix-date-pickers" }
+kotlin-wrappers-kotlin-emotion = { module = "org.jetbrains.kotlin-wrappers:kotlin-emotion" }
+kotlin-wrappers-kotlin-tanstack-query-core = { module = "org.jetbrains.kotlin-wrappers:kotlin-tanstack-query-core" }
+kotlin-wrappers-kotlin-tanstack-react-query = { module = "org.jetbrains.kotlin-wrappers:kotlin-tanstack-react-query" }
+kotlin-wrappers-kotlin-tanstack-virtual-core = { module = "org.jetbrains.kotlin-wrappers:kotlin-tanstack-virtual-core" }
+kotlin-wrappers-kotlin-tanstack-react-virtual = { module = "org.jetbrains.kotlin-wrappers:kotlin-tanstack-react-virtual" }
+ktor-client-js = { module = "io.ktor:ktor-client-js", version.ref = "ktor" }
+kotlin-test = { module ="org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
