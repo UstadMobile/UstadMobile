@@ -131,6 +131,7 @@ import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
+import com.ustadmobile.libcache.headers.MimeTypeHelper
 import com.ustadmobile.libcache.logging.NapierLoggingAdapter
 import com.ustadmobile.libcache.okhttp.UstadCacheInterceptor
 import io.ktor.client.HttpClient
@@ -362,6 +363,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             val tmpRoot: File = instance(tag = DiTag.TAG_TMP_DIR)
             val contentImportTmpPath = Path(tmpRoot.absolutePath, "contentimport")
             val getStoragePathForUrlUseCase: GetStoragePathForUrlUseCase= instance()
+            val mimeTypeHelper: MimeTypeHelper = instance()
 
             ContentImportersManager(
                 buildList {
@@ -418,6 +420,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
                             json = instance(),
                             getStoragePathForUrlUseCase  = getStoragePathForUrlUseCase,
+                            mimeTypeHelper = mimeTypeHelper,
                         )
                     )
 
@@ -472,10 +475,14 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             )
         }
 
+        bind<MimeTypeHelper>() with singleton {
+            FileMimeTypeHelperImpl()
+        }
+
         bind<SaveLocalUriAsBlobAndManifestUseCase>() with scoped(EndpointScope.Default).singleton {
             SaveLocalUriAsBlobAndManifestUseCaseJvm(
                 saveLocalUrisAsBlobsUseCase = instance(),
-                mimeTypeHelper = FileMimeTypeHelperImpl(),
+                mimeTypeHelper = instance(),
             )
         }
 

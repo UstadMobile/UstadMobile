@@ -13,6 +13,7 @@ import net.sourceforge.argparse4j.ArgumentParsers
 import net.sourceforge.argparse4j.inf.ArgumentParserException
 import net.sourceforge.argparse4j.inf.Namespace
 import org.kodein.di.*
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.system.exitProcess
 
 /**
@@ -64,7 +65,7 @@ fun main(args: Array<String>) {
     }
 
     val di = DI {
-        import(makeJvmBackendDiModule(conf))
+        import(makeJvmBackendDiModule(conf, ranMvvmMigration = AtomicBoolean()))
     }
 
 

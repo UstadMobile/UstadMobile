@@ -6,6 +6,7 @@ import com.ustadmobile.core.account.*
 import com.ustadmobile.core.contentformats.ContentImportersDiModuleJvm
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
+import com.ustadmobile.core.db.ext.MigrateContainerToContentEntryVersion
 import com.ustadmobile.core.domain.account.SetPasswordServerUseCase
 import com.ustadmobile.core.domain.account.SetPasswordUseCase
 import com.ustadmobile.core.domain.account.SetPasswordUseCaseCommonJvm
@@ -92,13 +93,14 @@ import com.ustadmobile.lib.rest.domain.person.bulkadd.BulkAddPersonRoute
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
+import com.ustadmobile.libcache.headers.MimeTypeHelper
 import com.ustadmobile.libcache.logging.NapierLoggingAdapter
 import com.ustadmobile.libcache.okhttp.UstadCacheInterceptor
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.serialization.kotlinx.json.json
-import io.netty.handler.codec.http2.Http2Connection
+import kotlinx.coroutines.runBlocking
 import kotlinx.io.files.Path
 import net.bramp.ffmpeg.FFmpeg
 import net.bramp.ffmpeg.FFprobe
@@ -107,6 +109,7 @@ import okhttp3.OkHttpClient
 import org.kodein.di.ktor.closestDI
 import java.net.Inet6Address
 import java.net.NetworkInterface
+import java.util.concurrent.atomic.AtomicBoolean
 
 const val TAG_UPLOAD_DIR = 10
 
@@ -259,8 +262,14 @@ fun Application.umRestApplication(
 
     val apiKey = environment.config.propertyOrNull("ktor.ustad.googleApiKey")?.getString() ?: CONF_GOOGLE_API
 
+    val ranMvvmMigration = AtomicBoolean(false)
+
     di {
-        import(makeJvmBackendDiModule(environment.config))
+        import(
+            makeJvmBackendDiModule(
+                config = environment.config, ranMvvmMigration = ranMvvmMigration
+            )
+        )
         import(ContentImportersDiModuleJvm)
 
         bind<OkHttpClient>() with singleton {
@@ -359,9 +368,17 @@ fun Application.umRestApplication(
             ).build()
         }
 
+        bind<FileMimeTypeHelperImpl>() with singleton {
+            FileMimeTypeHelperImpl()
+        }
+
+        bind<MimeTypeHelper>() with singleton {
+            instance<FileMimeTypeHelperImpl>()
+        }
+
         bind<UriHelper>() with singleton {
             UriHelperJvm(
-                mimeTypeHelperImpl = FileMimeTypeHelperImpl(),
+                mimeTypeHelperImpl = instance(),
                 httpClient = instance(),
                 okHttpClient = instance(),
             )
@@ -456,7 +473,7 @@ fun Application.umRestApplication(
         bind<SaveLocalUriAsBlobAndManifestUseCase>() with scoped(EndpointScope.Default).singleton {
             SaveLocalUriAsBlobAndManifestUseCaseJvm(
                 saveLocalUrisAsBlobsUseCase = instance(),
-                mimeTypeHelper = FileMimeTypeHelperImpl(),
+                mimeTypeHelper = instance(),
             )
         }
 
@@ -618,10 +635,21 @@ fun Application.umRestApplication(
 
         onReady {
             if(dbMode == CONF_DBMODE_SINGLETON && siteUrl != null) {
+                val endpoint = Endpoint(siteUrl)
                 //Get the container dir so that any old directories (build/storage etc) are moved if required
-                di.on(Endpoint(siteUrl)).direct.instance<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
+                di.on(endpoint).direct.instance<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
                 //Generate the admin username/password etc.
-                di.on(Endpoint(siteUrl)).direct.instance<AuthManager>()
+                di.on(endpoint).direct.instance<AuthManager>()
+
+                val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
+
+                if(ranMvvmMigration.get()) {
+                    runBlocking {
+                        db.MigrateContainerToContentEntryVersion(
+                            importUseCase = on(endpoint).instance()
+                        )
+                    }
+                }
             }
 
             instance<Scheduler>().start()

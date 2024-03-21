@@ -47,6 +47,7 @@ import org.xmlpull.v1.XmlPullParserFactory
 import java.io.FileReader
 import java.io.FileWriter
 import java.util.Properties
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * The database and use cases that need to start observing once the database is created
@@ -65,6 +66,7 @@ data class DbAndObservers(
 fun makeJvmBackendDiModule(
     config: ApplicationConfig,
     contextScope: EndpointScope = EndpointScope.Default,
+    ranMvvmMigration: AtomicBoolean,
 ) = DI.Module("JvmBackendDiModule") {
     val dataDirPath = config.absoluteDataDir()
     dataDirPath.takeIf { !it.exists() }?.mkdirs()
@@ -138,7 +140,11 @@ fun makeJvmBackendDiModule(
             .addCallback(InsertDefaultSiteCallback())
             .addCallback(AddRetainAllActiveUriTriggersCallback())
             .addCallback(AddOutgoingReplicationForMessageTriggerCallback())
-            .addMigrations(MigrateMvvm)
+            .addMigrations(
+                MigrateMvvm(
+                    onRan = { ranMvvmMigration.set(true) }
+                )
+            )
             .addMigrations(*migrationList().toTypedArray())
             .addMigrations(Migrate131to132AddRetainActiveUriTriggers)
             .addMigrations(MIGRATION_144_145_SERVER)

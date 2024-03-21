@@ -14,6 +14,7 @@ import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.libcache.UstadCache
+import com.ustadmobile.libcache.headers.MimeTypeHelper
 import kotlinx.io.files.Path
 import nl.adaptivity.xmlutil.serialization.XML
 import org.kodein.di.DI
@@ -37,6 +38,7 @@ val ContentImportersDiModuleJvm = DI.Module("ContentImporters-Jvm"){
         val tmpRoot: File = instance(tag = DiTag.TAG_TMP_DIR)
         val contentImportTmpPath = Path(tmpRoot.absolutePath, "contentimport")
         val getStoragePathForUrlUseCase: GetStoragePathForUrlUseCase = instance()
+        val mimeTypeHelper: MimeTypeHelper = instance()
 
         ContentImportersManager(
             buildList {
@@ -99,6 +101,7 @@ val ContentImportersDiModuleJvm = DI.Module("ContentImporters-Jvm"){
                         tmpPath = contentImportTmpPath,
                         saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
                         getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
+                        mimeTypeHelper = mimeTypeHelper,
                     )
                 )
             }
