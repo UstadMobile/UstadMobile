@@ -12,6 +12,7 @@ import com.ustadmobile.core.db.ext.MIGRATION_144_145_SERVER
 import com.ustadmobile.core.db.ext.MIGRATION_148_149_NO_OFFLINE_ITEMS
 import com.ustadmobile.core.db.ext.MIGRATION_155_156_SERVER
 import com.ustadmobile.core.db.ext.MIGRATION_161_162_SERVER
+import com.ustadmobile.core.db.ext.MigrateMvvm
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.core.domain.cachelock.AddRetainAllActiveUriTriggersCallback
@@ -137,6 +138,7 @@ fun makeJvmBackendDiModule(
             .addCallback(InsertDefaultSiteCallback())
             .addCallback(AddRetainAllActiveUriTriggersCallback())
             .addCallback(AddOutgoingReplicationForMessageTriggerCallback())
+            .addMigrations(MigrateMvvm)
             .addMigrations(*migrationList().toTypedArray())
             .addMigrations(Migrate131to132AddRetainActiveUriTriggers)
             .addMigrations(MIGRATION_144_145_SERVER)
