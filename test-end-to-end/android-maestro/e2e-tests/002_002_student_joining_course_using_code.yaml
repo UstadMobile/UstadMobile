@@ -40,7 +40,7 @@ env:
 - back
 - tapOn: "Courses"
 - tapOn: ${TESTCOURSENAME}
-- tapOn: "Invite code"
+- tapOn: "Invite code*"
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:

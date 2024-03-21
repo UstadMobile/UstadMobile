@@ -3,6 +3,7 @@ appId: com.toughra.ustadmobile
 - tapOn: "People"
 - tapOn:
     id: "floating_action_button"
+- tapOn: "Add Person"
 - tapOn: "First names*"
 - inputText: ${FIRSTNAME}
 - tapOn: "Last name*"
