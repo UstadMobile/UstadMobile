@@ -23,6 +23,7 @@ import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLoc
 import com.ustadmobile.core.domain.message.AddOutgoingReplicationForMessageTriggerCallback
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 import com.ustadmobile.door.DatabaseBuilder
@@ -40,12 +41,25 @@ import java.io.File
 import com.ustadmobile.lib.rest.ext.absoluteDataDir
 import com.ustadmobile.lib.rest.ext.ktorInitDb
 import com.ustadmobile.libcache.UstadCache
+import com.ustadmobile.libcache.UstadCacheBuilder
+import com.ustadmobile.libcache.logging.NapierLoggingAdapter
+import com.ustadmobile.libcache.okhttp.UstadCacheInterceptor
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.serialization.kotlinx.json.json
+import kotlinx.io.files.Path
+import kotlinx.serialization.json.Json
 import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
 import nl.adaptivity.xmlutil.serialization.XML
 import nl.adaptivity.xmlutil.serialization.XmlConfig
+import okhttp3.Dispatcher
+import okhttp3.OkHttpClient
 import org.xmlpull.v1.XmlPullParserFactory
 import java.io.FileReader
 import java.io.FileWriter
+import java.util.Locale
 import java.util.Properties
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -65,6 +79,7 @@ data class DbAndObservers(
 @OptIn(ExperimentalXmlUtilApi::class)
 fun makeJvmBackendDiModule(
     config: ApplicationConfig,
+    json: Json,
     contextScope: EndpointScope = EndpointScope.Default,
     ranMvvmMigration: AtomicBoolean,
 ) = DI.Module("JvmBackendDiModule") {
@@ -72,6 +87,10 @@ fun makeJvmBackendDiModule(
     dataDirPath.takeIf { !it.exists() }?.mkdirs()
 
     val dbMode = config.dbModeProperty()
+
+    bind<Json>() with singleton {
+        json
+    }
 
     bind<File>(tag = DiTag.TAG_CONTEXT_DATA_ROOT) with scoped(contextScope).singleton {
         File(dataDirPath, context.identifier(dbMode)).also {
@@ -203,4 +222,63 @@ fun makeJvmBackendDiModule(
     bind<XhtmlFixer>() with singleton {
         XhtmlFixerJsoup(xml = instance())
     }
+
+    bind<SupportedLanguagesConfig>() with singleton {
+        SupportedLanguagesConfig(
+            systemLocales = listOf(Locale.getDefault().language),
+            settings = instance(),
+        )
+    }
+
+    bind<UstadCache>() with singleton {
+        val dbUrl = "jdbc:sqlite:(datadir)/ustadcache.db"
+            .replace("(datadir)", config.absoluteDataDir().absolutePath)
+        UstadCacheBuilder(
+            dbUrl = dbUrl,
+            logger = NapierLoggingAdapter(),
+            storagePath = Path(
+                File(config.absoluteDataDir(), "httpfiles").absolutePath.toString()
+            ),
+        ).build()
+    }
+
+
+    bind<OkHttpClient>() with singleton {
+        OkHttpClient.Builder()
+            .dispatcher(
+                Dispatcher().also {
+                    it.maxRequests = 30
+                    it.maxRequestsPerHost = 10
+                }
+            )
+            .addInterceptor(
+                UstadCacheInterceptor(
+                    cache = instance(),
+                    tmpDir = File(config.absoluteDataDir(), "httpfiles"),
+                    logger = NapierLoggingAdapter(),
+                    json = json,
+                )
+            )
+            .build()
+    }
+
+    bind<HttpClient>() with singleton {
+        HttpClient(OkHttp) {
+
+            install(ContentNegotiation) {
+                json(json = instance())
+            }
+            install(HttpTimeout)
+
+            val dispatcher = Dispatcher()
+            dispatcher.maxRequests = 30
+            dispatcher.maxRequestsPerHost = 10
+
+            engine {
+                preconfigured = instance()
+            }
+
+        }
+    }
+
 }

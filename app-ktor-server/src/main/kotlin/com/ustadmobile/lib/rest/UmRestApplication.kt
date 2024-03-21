@@ -62,7 +62,6 @@ import org.quartz.impl.StdSchedulerFactory
 import java.io.File
 import javax.naming.InitialContext
 import com.ustadmobile.door.util.NodeIdAuthCache
-import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.impl.locale.StringProviderJvm
 import com.ustadmobile.core.schedule.initQuartzDb
@@ -91,21 +90,11 @@ import java.util.*
 import com.ustadmobile.core.logging.LogbackAntiLog
 import com.ustadmobile.lib.rest.domain.person.bulkadd.BulkAddPersonRoute
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
-import com.ustadmobile.libcache.UstadCache
-import com.ustadmobile.libcache.UstadCacheBuilder
 import com.ustadmobile.libcache.headers.MimeTypeHelper
-import com.ustadmobile.libcache.logging.NapierLoggingAdapter
-import com.ustadmobile.libcache.okhttp.UstadCacheInterceptor
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.okhttp.OkHttp
-import io.ktor.client.plugins.HttpTimeout
-import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.files.Path
 import net.bramp.ffmpeg.FFmpeg
 import net.bramp.ffmpeg.FFprobe
-import okhttp3.Dispatcher
-import okhttp3.OkHttpClient
 import org.kodein.di.ktor.closestDI
 import java.net.Inet6Address
 import java.net.NetworkInterface
@@ -267,56 +256,12 @@ fun Application.umRestApplication(
     di {
         import(
             makeJvmBackendDiModule(
-                config = environment.config, ranMvvmMigration = ranMvvmMigration
+                config = environment.config, json = json, ranMvvmMigration = ranMvvmMigration
             )
         )
         import(ContentImportersDiModuleJvm)
 
-        bind<OkHttpClient>() with singleton {
-            OkHttpClient.Builder()
-                .dispatcher(
-                    Dispatcher().also {
-                        it.maxRequests = 30
-                        it.maxRequestsPerHost = 10
-                    }
-                )
-                .addInterceptor(
-                    UstadCacheInterceptor(
-                        cache = instance(),
-                        tmpDir = File(appConfig.absoluteDataDir(), "httpfiles"),
-                        logger = NapierLoggingAdapter(),
-                        json = json,
-                    )
-                )
-                .build()
-        }
 
-        bind<HttpClient>() with singleton {
-            HttpClient(OkHttp) {
-
-                install(io.ktor.client.plugins.contentnegotiation.ContentNegotiation) {
-                    json(json = instance())
-                }
-                install(HttpTimeout)
-
-                val dispatcher = Dispatcher()
-                dispatcher.maxRequests = 30
-                dispatcher.maxRequestsPerHost = 10
-
-                engine {
-                    preconfigured = instance()
-                }
-
-            }
-        }
-
-        bind<SupportedLanguagesConfig>() with singleton {
-            SupportedLanguagesConfig(
-                systemLocales = listOf(Locale.getDefault().language),
-                settings = instance(),
-
-            )
-        }
         bind<StringProvider>() with singleton { StringProviderJvm(Locale.getDefault()) }
 
         bind<File>(tag = TAG_UPLOAD_DIR) with scoped(EndpointScope.Default).singleton {
@@ -356,18 +301,6 @@ fun Application.umRestApplication(
 
         bind<Gson>() with singleton { Gson() }
 
-        bind<UstadCache>() with singleton {
-            val dbUrl = "jdbc:sqlite:(datadir)/ustadcache.db"
-                .replace("(datadir)", appConfig.absoluteDataDir().absolutePath)
-            UstadCacheBuilder(
-                dbUrl = dbUrl,
-                logger = NapierLoggingAdapter(),
-                storagePath = Path(
-                    File(appConfig.absoluteDataDir(), "httpfiles").absolutePath.toString()
-                ),
-            ).build()
-        }
-
         bind<FileMimeTypeHelperImpl>() with singleton {
             FileMimeTypeHelperImpl()
         }
@@ -402,10 +335,6 @@ fun Application.umRestApplication(
             StdSchedulerFactory.getDefaultScheduler().also {
                 it.context.put("di", di)
             }
-        }
-
-        bind<Json>() with singleton {
-            json
         }
 
         bind<FFmpeg>() with provider {
@@ -646,7 +575,8 @@ fun Application.umRestApplication(
                 if(ranMvvmMigration.get()) {
                     runBlocking {
                         db.MigrateContainerToContentEntryVersion(
-                            importUseCase = on(endpoint).instance()
+                            importUseCase = on(endpoint).instance(),
+                            importersManager = on(endpoint).instance(),
                         )
                     }
                 }
