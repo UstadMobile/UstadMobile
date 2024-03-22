@@ -109,7 +109,8 @@ android {
             "presetLocale" : rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.presetlocale"),
             "uiLanguages": rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.uilanguages"),
             "showPoweredByMsg": rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.showpoweredbymsg"),
-            "gopts": rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.gopts")
+            "gopts": rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.gopts"),
+            "apiUrl": rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.apiurl"),
         ]
 
         //When using variables the build analyzer reports that major tasks reran because of a

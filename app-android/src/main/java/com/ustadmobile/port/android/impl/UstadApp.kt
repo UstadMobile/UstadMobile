@@ -243,7 +243,8 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
         bind<ApiUrlConfig>() with singleton {
             ApiUrlConfig(
-                presetApiUrl = applicationContext.appMetaData?.getString(METADATA_KEY_API_URL)
+                presetApiUrl = applicationContext.appMetaData?.getString(AppConfig.KEY_API_URL)
+                    ?.ifBlank { null }
             )
         }
 
@@ -837,7 +838,6 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
         const val METADATA_KEY_SUPPORTED_LANGS = "com.ustadmobile.uilanguages"
 
-        const val METADATA_KEY_API_URL = "com.ustadmobile.apiurl"
     }
 
 }

@@ -105,12 +105,11 @@
 
 
         <!--
-        The API url endpoint can be explicitly specified by uncommenting the metadata key here. If
+        The API url endpoint can be explicitly specified by setting it in buildconfig.properties. If
         it is not specified, the user will be prompted to enter the link.
-
-        <meta-data android:name="com.ustadmobile.apiurl"
-            android:value="https://myserver.domain.com/"/>
         -->
+        <meta-data android:name="com.ustadmobile.apiurl" android:value="${apiUrl}"/>
+
 
         <!--
         When the app APK itself is shared locally (eg. using the share app menu which
