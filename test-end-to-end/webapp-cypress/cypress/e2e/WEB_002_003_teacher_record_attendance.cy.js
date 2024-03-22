@@ -1,4 +1,4 @@
-describe('002_003_teacher_record_attendance', () => {
+describe('WEB_002_003_teacher_record_attendance', () => {
 it('Start Ustad Test Server ', () => {
   // Start Test Server
   cy.ustadStartTestServer()

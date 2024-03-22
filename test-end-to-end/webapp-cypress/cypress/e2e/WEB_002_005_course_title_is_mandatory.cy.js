@@ -1,4 +1,4 @@
-describe('002_005_course_title_is_mandatory', () => {
+describe('WEB_002_005_course_title_is_mandatory', () => {
  it('Start Ustad Test Server ', () => {
   // Start Test Server
     cy.ustadStartTestServer()

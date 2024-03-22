@@ -1,4 +1,4 @@
-describe('001_001_add_content', () => {
+describe('WEB_001_001_add_content', () => {
  it('Start Ustad Test Server ', () => {
   // Start Test Server
     cy.ustadStartTestServer()

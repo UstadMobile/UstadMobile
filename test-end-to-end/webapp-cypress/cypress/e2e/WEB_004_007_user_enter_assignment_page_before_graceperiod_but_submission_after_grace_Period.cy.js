@@ -1,4 +1,4 @@
-describe('004_007_user_enter_assignment_page_before_graceperiod_but_submission_after_grace_Period', () => {
+describe('WEB_004_007_user_enter_assignment_page_before_graceperiod_but_submission_after_grace_Period', () => {
 it('Start Ustad Test Server ', () => {
  // Start Test Server
   cy.ustadStartTestServer()

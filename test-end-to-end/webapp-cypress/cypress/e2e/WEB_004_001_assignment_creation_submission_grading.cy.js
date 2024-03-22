@@ -1,4 +1,4 @@
-describe('004_001_assignment_creation_submission_grading', () => {
+describe('WEB_004_001_assignment_creation_submission_grading', () => {
 it('Start Ustad Test Server ', () => {
  // Start Test Server
   cy.ustadStartTestServer()

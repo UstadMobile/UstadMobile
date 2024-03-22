@@ -1,4 +1,4 @@
-describe('004_011_group_users_multiple_assignment_submission_allowed', () => {
+describe('WEB_004_011_group_users_multiple_assignment_submission_allowed', () => {
 it('Start Ustad Test Server ', () => {
  // Start Test Server
   cy.ustadStartTestServer()

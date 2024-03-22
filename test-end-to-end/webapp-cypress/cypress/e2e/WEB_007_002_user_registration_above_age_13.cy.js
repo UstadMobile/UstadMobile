@@ -1,4 +1,4 @@
-describe('007_002_user_registration_above_age_13', () => {
+describe('WEB_007_002_user_registration_above_age_13', () => {
  it('Start Ustad Test Server ', () => {
   // Start Test Server
     cy.ustadStartTestServer()

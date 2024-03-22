@@ -1,6 +1,7 @@
 appId: com.toughra.ustadmobile
 
 ---
+- clearState: com.toughra.ustadmobile
 - runFlow:
    file: "../common/startserver.yaml"
    env:

@@ -1,4 +1,4 @@
-describe('005_001_teacher_add_discussion_and_post', () => {
+describe('WEB_005_001_teacher_add_discussion_and_post', () => {
 it('Start Ustad Test Server ', () => {
   // Start Test Server
   cy.ustadStartTestServer()
