@@ -1,4 +1,4 @@
-package com.ustadmobile.port.desktop.apprun
+package com.ustadmobile.port.desktop.apprunnayestane
 
 import com.ustadmobile.port.desktop.main as appMain
 

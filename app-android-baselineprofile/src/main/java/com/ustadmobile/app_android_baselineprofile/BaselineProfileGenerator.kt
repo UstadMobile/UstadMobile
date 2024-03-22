@@ -44,9 +44,9 @@ class BaselineProfileGenerator {
 
     @Test
     fun generate() {
-        // This example works only with the variant with application id `com.toughra.ustadmobile`."
+        // This example works only with the variant with application id `org.nayestane.ustad`."
         rule.collect(
-            packageName = "com.toughra.ustadmobile",
+            packageName = "org.nayestane.ustad",
 
             // See: https://d.android.com/topic/performance/baselineprofiles/dex-layout-optimizations
             includeInStartupProfile = true
