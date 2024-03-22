@@ -1,4 +1,4 @@
-describe('005_004_user_add_internal_links_post_reply', () => {
+describe('WEB_005_004_user_add_internal_links_post_reply', () => {
 it('Start Ustad Test Server ', () => {
   // Start Test Server
   cy.ustadStartTestServer()

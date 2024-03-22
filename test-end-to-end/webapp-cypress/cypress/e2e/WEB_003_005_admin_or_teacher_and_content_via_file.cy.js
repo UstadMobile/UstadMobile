@@ -1,4 +1,4 @@
-describe('003_005_admin_or_teacher_and_content_via_file', () => {
+describe('WEB_003_005_admin_or_teacher_and_content_via_file', () => {
 it('Start Ustad Test Server ', () => {
   // Start Test Server
   cy.ustadStartTestServer()

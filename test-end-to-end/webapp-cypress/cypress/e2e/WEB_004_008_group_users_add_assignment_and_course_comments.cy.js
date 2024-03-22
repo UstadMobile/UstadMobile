@@ -1,4 +1,4 @@
-describe('004_008_group_users_add_assignment_and_course_comments', () => {
+describe('WEB_004_008_group_users_add_assignment_and_course_comments', () => {
 it('Start Ustad Test Server ', () => {
  // Start Test Server
   cy.ustadStartTestServer()

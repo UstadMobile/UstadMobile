@@ -1,4 +1,4 @@
-describe('005_003_all_user_add_post_and_reply', () => {
+describe('WEB_005_003_all_user_add_post_and_reply', () => {
 it('Start Ustad Test Server ', () => {
   // Start Test Server
   cy.ustadStartTestServer()
