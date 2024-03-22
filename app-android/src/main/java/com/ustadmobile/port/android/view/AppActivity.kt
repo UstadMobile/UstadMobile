@@ -51,7 +51,6 @@ import com.ustadmobile.core.impl.nav.CommandFlowUstadNavController
 import com.ustadmobile.core.networkmanager.ConnectionManager
 import com.ustadmobile.core.schedule.ClazzLogCreatorManager
 import com.ustadmobile.core.schedule.ClazzLogCreatorManagerAndroidImpl
-import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.appendQueryArgs
 import com.ustadmobile.core.util.ext.navigateToLink
@@ -146,10 +145,6 @@ class AppActivity: AppCompatActivity(), DIAware {
         }
 
         constant(UstadMobileSystemCommon.TAG_DOWNLOAD_ENABLED) with true
-
-        bind<ContentEntryOpener>() with scoped(EndpointScope.Default).singleton {
-            ContentEntryOpener(di, context)
-        }
 
         bind<ConnectionManager>() with singleton{
             ConnectionManager(applicationContext, di)

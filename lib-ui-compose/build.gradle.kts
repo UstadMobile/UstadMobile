@@ -73,6 +73,7 @@ kotlin {
                 implementation(libs.pdfviewer)
                 implementation(libs.nestedscroll.webview)
                 implementation(libs.androidx.webkit)
+                implementation(libs.androidx.constraintlayout)
             }
         }
 

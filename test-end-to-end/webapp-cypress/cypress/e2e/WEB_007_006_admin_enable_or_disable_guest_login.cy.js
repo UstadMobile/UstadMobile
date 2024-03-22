@@ -1,4 +1,4 @@
-describe('007_006_admin_enable_or_disable_guest_login', () => {
+describe('WEB_007_006_admin_enable_or_disable_guest_login', () => {
  it('Start Ustad Test Server ', () => {
   // Start Test Server
     cy.ustadStartTestServer()
