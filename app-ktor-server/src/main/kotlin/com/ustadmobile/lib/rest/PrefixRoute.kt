@@ -15,7 +15,8 @@ fun Route.prefixRoute(
     build: Route.() -> Unit,
 ) {
     if(prefix != null) {
-        route(prefix, build)
+        //The route must not end with "/", otherwise we would be looking for //path instead /path
+        route(prefix.removeSuffix("/"), build)
     }else {
         apply(build)
     }
