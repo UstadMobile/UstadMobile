@@ -63,11 +63,12 @@ suspend fun UmAppDatabase.initAdminUser(
 ) {
     val passwordFilePath = di.on(endpoint).direct
         .instance<File>(tag = DiTag.TAG_CONTEXT_DATA_ROOT).absolutePath
-    val addNewPersonUseCase: AddNewPersonUseCase = di.on(endpoint).direct.instance()
 
     val adminUser = personDao.findByUsername("admin")
 
     if (adminUser == null) {
+        val addNewPersonUseCase: AddNewPersonUseCase = di.on(endpoint).direct.instance()
+
         val adminPerson = Person("admin", "Admin", "User")
 
         adminPerson.personUid = addNewPersonUseCase(

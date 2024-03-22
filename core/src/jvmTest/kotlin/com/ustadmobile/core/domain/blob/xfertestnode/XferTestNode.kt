@@ -29,6 +29,7 @@ import com.ustadmobile.lib.util.SysPathUtil
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
+import com.ustadmobile.libcache.headers.MimeTypeHelper
 import com.ustadmobile.libcache.integrity.sha256Integrity
 import com.ustadmobile.libcache.io.useAndReadSha256
 import com.ustadmobile.libcache.logging.NapierLoggingAdapter
@@ -118,8 +119,9 @@ class XferTestNode(
 
         httpClient =  okHttpClient.newTestHttpClient(json)
 
+        val mimeTypeHelper = FileMimeTypeHelperImpl()
         uriHelper = UriHelperJvm(
-            mimeTypeHelperImpl = FileMimeTypeHelperImpl(),
+            mimeTypeHelperImpl = mimeTypeHelper,
             httpClient = httpClient,
             okHttpClient = okHttpClient,
         )
@@ -203,6 +205,8 @@ class XferTestNode(
                     )
                 )
             }
+
+            bind<MimeTypeHelper>() with singleton { mimeTypeHelper }
         }
     }
 
