@@ -88,6 +88,7 @@ import io.ktor.server.plugins.statuspages.*
 import org.kodein.di.ktor.di
 import java.util.*
 import com.ustadmobile.core.logging.LogbackAntiLog
+import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.lib.rest.domain.person.bulkadd.BulkAddPersonRoute
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.headers.MimeTypeHelper
@@ -110,6 +111,8 @@ const val CONF_DBMODE_SINGLETON = "singleton"
 const val CONF_GOOGLE_API = "secret"
 
 const val CONF_KEY_SITE_URL = "ktor.ustad.siteUrl"
+
+const val CONF_KEY_URL_PREFIX = "ktor.ustad.urlPrefix"
 
 /**
  * List of external commands (e.g. media converters) that must be found or have locations specified
@@ -148,6 +151,8 @@ fun Application.umRestApplication(
     val appConfig = environment.config
 
     val siteUrl = environment.config.propertyOrNull(CONF_KEY_SITE_URL)?.getString()
+
+    val sitePrefix = environment.config.propertyOrNull(CONF_KEY_URL_PREFIX)?.getString()
 
     val dbMode = dbModeOverride ?:  appConfig.propertyOrNull("ktor.ustad.dbmode")?.getString() ?: CONF_DBMODE_SINGLETON
 
@@ -601,6 +606,12 @@ fun Application.umRestApplication(
     if(jsDevServer != null) {
         install(io.ktor.server.websocket.WebSockets)
 
+        val effectiveKtorServerRoutes = if(sitePrefix != null) {
+            KTOR_SERVER_ROUTES.map { UMFileUtil.joinPaths(sitePrefix, it) }
+        }else {
+            KTOR_SERVER_ROUTES
+        }
+
         intercept(ApplicationCallPipeline.Setup) {
             val requestUri = call.request.uri.let {
                 if(it.startsWith("//")) {
@@ -621,7 +632,7 @@ fun Application.umRestApplication(
 
             //If the request is not matching any API route, then use the reverse proxy to send the
             // request to the javascript development server.
-            if(!KTOR_SERVER_ROUTES.any { requestUri.startsWith(it) }) {
+            if(!effectiveKtorServerRoutes.any { requestUri.startsWith(it) }) {
                 call.respondReverseProxy(jsDevServer)
                 return@intercept finish()
             }
@@ -633,93 +644,95 @@ fun Application.umRestApplication(
      * in UstadAppReactProxy
      */
     install(Routing) {
-        addHostCheckIntercept()
-        personAuthRegisterRoute()
-        route("UmAppDatabase") {
-            UmAppDatabase_KtorRoute(DoorHttpServerConfig(json = json)) { call ->
-                val di: DI by call.closestDI()
-                di.on(call).direct.instance(tag = DoorTag.TAG_DB)
+        prefixRoute(sitePrefix) {
+            addHostCheckIntercept()
+            personAuthRegisterRoute()
+            route("UmAppDatabase") {
+                UmAppDatabase_KtorRoute(DoorHttpServerConfig(json = json)) { call ->
+                    val di: DI by call.closestDI()
+                    di.on(call).direct.instance(tag = DoorTag.TAG_DB)
+                }
             }
-        }
-        SiteRoute()
+            SiteRoute()
 
-        GetAppRoute()
+            GetAppRoute()
 
-        route("api") {
-            val di: DI by closestDI()
+            route("api") {
+                val di: DI by closestDI()
 
-            route("account"){
-                SetPasswordRoute(
-                    useCase = { call ->
-                        di.on(call).direct.instance()
+                route("account"){
+                    SetPasswordRoute(
+                        useCase = { call ->
+                            di.on(call).direct.instance()
+                        }
+                    )
+                }
+
+                route("pbkdf2"){
+                    Pbkdf2Route()
+                }
+
+                route("contentupload") {
+                    ContentUploadRoute()
+                }
+
+                route("import") {
+                    ContentEntryImportRoute()
+                }
+
+                route("blob") {
+                    BlobUploadServerRoute(
+                        useCase = { call ->
+                            di.on(call).direct.instance()
+                        }
+                    )
+
+                    CacheRoute(
+                        cache = di.direct.instance()
+                    )
+                }
+
+                route("content") {
+                    ContentEntryVersionRoute(
+                        useCase = { call -> di.on(call).direct.instance() }
+                    )
+                }
+
+                route("person") {
+                    route("bulkadd") {
+                        BulkAddPersonRoute(
+                            enqueueBulkAddPersonServerUseCase = { call -> di.on(call).direct.instance() },
+                            bulkAddPersonStatusMap = { call -> di.on(call).direct.instance() },
+                            json = json,
+                        )
                     }
-                )
-            }
-
-            route("pbkdf2"){
-                Pbkdf2Route()
-            }
-
-            route("contentupload") {
-                ContentUploadRoute()
-            }
-
-            route("import") {
-                ContentEntryImportRoute()
-            }
-
-            route("blob") {
-                BlobUploadServerRoute(
-                    useCase = { call ->
-                        di.on(call).direct.instance()
-                    }
-                )
+                }
 
                 CacheRoute(
                     cache = di.direct.instance()
                 )
             }
 
-            route("content") {
-                ContentEntryVersionRoute(
-                    useCase = { call -> di.on(call).direct.instance() }
-                )
-            }
-
-            route("person") {
-                route("bulkadd") {
-                    BulkAddPersonRoute(
-                        enqueueBulkAddPersonServerUseCase = { call -> di.on(call).direct.instance() },
-                        bulkAddPersonStatusMap = { call -> di.on(call).direct.instance() },
-                        json = json,
-                    )
+            static("umapp") {
+                resources("umapp")
+                static("/") {
+                    defaultResource("umapp/index.html")
                 }
             }
 
-            CacheRoute(
-                cache = di.direct.instance()
+            staticResources(
+                remotePath = "staticfiles",
+                basePackage = "staticfiles"
             )
-        }
 
-        static("umapp") {
-            resources("umapp")
-            static("/") {
-                defaultResource("umapp/index.html")
-            }
-        }
-
-        staticResources(
-            remotePath = "staticfiles",
-            basePackage = "staticfiles"
-        )
-
-        //Handle default route when running behind proxy
-        if(!jsDevServer.isNullOrBlank()) {
-            webSocketProxyRoute(jsDevServer)
-        }else {
-            route("/"){
-                get{
-                    call.respondRedirect("umapp/")
+            //Handle default route when running behind proxy
+            if(!jsDevServer.isNullOrBlank()) {
+                webSocketProxyRoute(jsDevServer)
+            }else {
+                route("/"){
+                    get{
+                        call.respondRedirect("umapp/")
+                    }
                 }
             }
         }

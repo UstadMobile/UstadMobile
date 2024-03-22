@@ -81,7 +81,7 @@ class SaveLocalUrisAsBlobsUseCaseJvm(
 
             val sha256Base64 = transferResult.sha256.encodeBase64()
 
-            val blobUrl = endpointUrl.resolve("/api/blob/" +
+            val blobUrl = endpointUrl.resolve("api/blob/" +
                     UMURLEncoder.encodeUTF8(sha256Base64))
 
             val blobUrlStr = blobUrl.toString()
