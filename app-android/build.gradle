@@ -102,7 +102,7 @@ android {
     compileSdk rootProject.ext.version_android_compile_sdk
 
     defaultConfig {
-        applicationId 'com.toughra.ustadmobile'
+        applicationId 'org.kaisipan.mobile'
         testInstrumentationRunnerArguments clearPackageData: 'true', notAnnotation: 'com.ustadmobile.test.core.annotation.PeerServerRequiredTest,com.ustadmobile.test.core.annotation.ImplementationRequiredTest'
 
         manifestPlaceholders = [
