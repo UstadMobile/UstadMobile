@@ -1,4 +1,4 @@
-describe('007_010_user_registration_phone_field_verification', () => {
+describe('WEB_007_010_user_registration_phone_field_verification', () => {
  it('Start Ustad Test Server ', () => {
   // Start Test Server
     cy.ustadStartTestServer()

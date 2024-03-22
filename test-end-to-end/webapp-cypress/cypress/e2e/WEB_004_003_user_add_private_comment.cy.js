@@ -1,4 +1,4 @@
-describe('004_003_user_add_private_comment', () => {
+describe('WEB_004_003_user_add_private_comment', () => {
 it('Start Ustad Test Server ', () => {
  // Start Test Server
   cy.ustadStartTestServer()

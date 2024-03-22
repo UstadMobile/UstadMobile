@@ -19,6 +19,7 @@ import com.ustadmobile.core.domain.contententry.ContentConstants
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
 import com.ustadmobile.core.io.ext.toDoorUri
 import com.ustadmobile.core.uri.UriHelper
+import com.ustadmobile.core.util.ext.fileExtensionOrNull
 import com.ustadmobile.core.util.ext.requireSourceAsDoorUri
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
@@ -28,6 +29,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryImportJob
 import com.ustadmobile.lib.db.entities.ContentEntryVersion
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.libcache.UstadCache
+import com.ustadmobile.libcache.headers.MimeTypeHelper
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -50,11 +52,12 @@ class VideoContentImporterCommonJvm(
     private val saveLocalUriAsBlobAndManifestUseCase: SaveLocalUriAsBlobAndManifestUseCase,
     private val getStoragePathForUrlUseCase: GetStoragePathForUrlUseCase,
     private val validateVideoFileUseCase: ValidateVideoFileUseCase,
+    private val mimeTypeHelper: MimeTypeHelper,
 ) : ContentImporter(endpoint) {
 
 
     override val importerId: Int
-        get() = 101
+        get() = IMPORTER_ID
     override val supportedMimeTypes: List<String>
         get() = listOf("video/mpeg")
 
@@ -87,8 +90,8 @@ class VideoContentImporterCommonJvm(
         // If not, try looking at the original filename (might be needed where using temp import
         // files etc.
         val mimeType = uriHelper.getMimeType(jobUri)
-            ?: jobItem.cjiOriginalFilename?.let {
-                uriHelper.getMimeType(DoorUri.parse("file:///$it"))
+            ?: jobItem.cjiOriginalFilename?.fileExtensionOrNull()?.let {
+                mimeTypeHelper.guessByExtension(it)
             } ?: throw IllegalStateException("Cannot get mime type")
 
         val mediaContentInfo = MediaContentInfo(
@@ -197,5 +200,10 @@ class VideoContentImporterCommonJvm(
             Napier.w(throwable = e) { "Exception importing what looked like video: $e" }
             throw InvalidContentException("Exception importing what looked like video", e)
         }
+    }
+
+    companion object {
+
+        const val IMPORTER_ID = 101
     }
 }

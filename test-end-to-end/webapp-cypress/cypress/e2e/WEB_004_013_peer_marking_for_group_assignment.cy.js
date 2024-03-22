@@ -1,4 +1,4 @@
-describe('004_013_peer_marking_for_group_assignment', () => {
+describe('WEB_004_013_peer_marking_for_group_assignment', () => {
 it('Start Ustad Test Server ', () => {
  // Start Test Server
   cy.ustadStartTestServer()

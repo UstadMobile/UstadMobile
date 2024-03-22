@@ -52,7 +52,7 @@ env:
 - tapOn: "DOWNLOAD"
 - tapOn: "DOWNLOAD"
 - extendedWaitUntil:
-    visible: "Delete"
+    visible: "OPEN"
     timeout: 600000
 - tapOn: "OPEN"
 - tapOn: "Leave"

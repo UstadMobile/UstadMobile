@@ -22,6 +22,8 @@ interface AppConfig {
 
         const val KEY_CONFIG_SHOW_POWERED_BY = "com.ustadmobile.showpoweredbymsg"
 
+        const val KEY_API_URL = "com.ustadmobile.apiurl"
+
     }
 
 }

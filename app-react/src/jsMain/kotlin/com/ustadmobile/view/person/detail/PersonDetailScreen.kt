@@ -112,7 +112,7 @@ val PersonDetailComponent2 = FC<PersonDetailProps> { props ->
             spacing = responsive(8.px)
 
 
-            props.uiState.personPicture?.personPictureUri?.also { imgSrc ->
+            props.uiState.person?.personPicture?.personPictureUri?.also { imgSrc ->
                 mui.material.Box {
                     sx {
                         justifyContent = JustifyContent.center
