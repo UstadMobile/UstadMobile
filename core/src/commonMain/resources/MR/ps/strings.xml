@@ -652,4 +652,12 @@
     <string name="or">او یا</string>
     <string name="terms_and_policies_text">د شرایط او پالیسیو متن</string>
     <string name="edit_terms_and_policies">د شرایطو او پالیسیو سمون</string>
+    <string name="first_key">لومړی</string>
+    <string name="last_key">آخری</string>
+    <string name="question_key">پوښتنه</string>
+    <string name="to_key">ته</string>
+    <string name="onboarding_headline1">انټرنټ نشته؟ هیڅ ستونزه نده.</string>
+    <string name="onboarding_subheadline1">تعلیمی ویډیو، مقالې، او محاوره یی تمرینونه کښته کړئ ترڅو وروسته ورڅخه کار واخلئ.</string>
+    <string name="onboarding_headline2">نالیکی شریکول</string>
+    <string name="onboarding_subheadline2">محتویات په لوړ سرعت سره له نورو نږدی کاروونکو سره شریک کړئ.</string>
 </resources>
