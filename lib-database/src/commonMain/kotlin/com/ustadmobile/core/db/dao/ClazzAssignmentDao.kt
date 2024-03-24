@@ -94,6 +94,9 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
     @HttpAccessible(
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
         pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall(
+                functionName = "getAssignmentSubmitterSummaryListForAssignment"
+            ),
             //Get permission entities for this assignment / user
             HttpServerFunctionCall(
                 functionName = "personHasPermissionWithClazzEntities2",
@@ -192,6 +195,8 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
                WHEN $SORT_NAME_DESC THEN SubmitterList.name
                ELSE '' END DESC
     """)
+    @QueryLiveTables(arrayOf("SystemPermission", "CoursePermission", "ClazzAssignment",
+        "ClazzEnrolment", "PeerReviewerAllocation", "Person", "CourseGroupMember"))
     /**
      * Used by the ClazzAssignmentDetailSubmissionsListTab - gets a list of the name (e.g. the
      * person name when submissions are by individual students, "group (groupnum)" when submissions

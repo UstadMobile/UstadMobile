@@ -31,6 +31,7 @@ import com.ustadmobile.core.viewmodel.person.bulkaddselectfile.BulkAddPersonSele
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.lib.db.composites.PersonAndListDisplayDetails
+import kotlinx.coroutines.channels.BufferOverflow
 import org.kodein.di.instance
 
 data class PersonListUiState(
@@ -103,6 +104,12 @@ class PersonListViewModel(
     private val inviteCode = savedStateHandle[ARG_SHOW_ADD_VIA_INVITE_LINK_CODE]
 
     private val setClipboardStringUseCase: SetClipboardStringUseCase by instance()
+
+    private val _listRefreshCommandFlow = MutableSharedFlow<Boolean>(
+        replay = 1, extraBufferCapacity = 0, onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
+    val listRefreshCommandFlow: Flow<Boolean> = _listRefreshCommandFlow.asSharedFlow()
 
     init {
         _appUiState.update { prev ->
@@ -181,7 +188,7 @@ class PersonListViewModel(
 
     override fun onUpdateSearchResult(searchText: String) {
         //will use the searchText as per the appUiState
-        lastPagingSource?.invalidate()
+        //lastPagingSource?.invalidate()
     }
 
     fun onSortOrderChanged(sortOption: SortOrderOption) {
@@ -190,7 +197,7 @@ class PersonListViewModel(
                 sortOption = sortOption
             )
         }
-        lastPagingSource?.invalidate()
+        //lastPagingSource?.invalidate()
     }
 
     fun onClickInviteWithLink() {

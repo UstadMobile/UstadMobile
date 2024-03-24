@@ -19,6 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.paging.ExperimentalPagingApi
 import androidx.paging.compose.collectAsLazyPagingItems
 import app.cash.paging.Pager
 import app.cash.paging.PagingConfig
@@ -29,6 +30,7 @@ import com.ustadmobile.libuicompose.components.UstadListSortHeader
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.util.SortOrderOption
+import com.ustadmobile.door.paging.DoorRepositoryRemoteMediator
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.libuicompose.components.UstadBottomSheetOption
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
@@ -87,6 +89,7 @@ fun PersonListScreen(
 
 }
 
+@OptIn(ExperimentalPagingApi::class)
 @Composable
 fun PersonListScreen(
     uiState: PersonListUiState,
@@ -104,7 +107,8 @@ fun PersonListScreen(
     val pager = remember(uiState.personList) {
         Pager(
             config = PagingConfig(pageSize = 20, enablePlaceholders = true, maxSize = 200),
-            pagingSourceFactory = uiState.personList
+            pagingSourceFactory = uiState.personList,
+            remoteMediator = DoorRepositoryRemoteMediator(uiState.personList),
         )
     }
 

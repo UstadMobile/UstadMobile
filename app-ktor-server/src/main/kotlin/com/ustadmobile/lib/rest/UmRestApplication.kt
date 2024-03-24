@@ -89,6 +89,7 @@ import org.kodein.di.ktor.di
 import java.util.*
 import com.ustadmobile.core.logging.LogbackAntiLog
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.door.log.NapierDoorLogger
 import com.ustadmobile.lib.rest.domain.person.bulkadd.BulkAddPersonRoute
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.headers.MimeTypeHelper
@@ -648,7 +649,7 @@ fun Application.umRestApplication(
             addHostCheckIntercept()
             personAuthRegisterRoute()
             route("UmAppDatabase") {
-                UmAppDatabase_KtorRoute(DoorHttpServerConfig(json = json)) { call ->
+                UmAppDatabase_KtorRoute(DoorHttpServerConfig(json = json, logger = NapierDoorLogger())) { call ->
                     val di: DI by call.closestDI()
                     di.on(call).direct.instance(tag = DoorTag.TAG_DB)
                 }
