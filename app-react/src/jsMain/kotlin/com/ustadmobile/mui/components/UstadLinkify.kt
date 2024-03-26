@@ -2,7 +2,7 @@ package com.ustadmobile.mui.components
 
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase.Companion.LinkTarget
 import com.ustadmobile.wrappers.linkify.Linkify
-import js.core.jso
+import js.objects.jso
 import react.FC
 import react.PropsWithChildren
 import react.useContext

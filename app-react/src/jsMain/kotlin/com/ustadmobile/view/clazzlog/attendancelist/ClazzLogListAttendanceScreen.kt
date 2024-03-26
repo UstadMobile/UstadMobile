@@ -23,7 +23,7 @@ import web.cssom.Height
 import web.cssom.Overflow
 import web.cssom.pct
 import web.cssom.px
-import js.core.jso
+import js.objects.jso
 import mui.icons.material.CalendarToday as CalendarTodayIcon
 import mui.material.*
 import mui.system.responsive

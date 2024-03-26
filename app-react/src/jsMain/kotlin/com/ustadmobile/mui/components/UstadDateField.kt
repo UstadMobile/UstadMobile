@@ -1,6 +1,6 @@
 package com.ustadmobile.mui.components
 
-import js.core.jso
+import js.objects.jso
 import kotlinx.datetime.*
 import mui.material.TextField
 import react.*

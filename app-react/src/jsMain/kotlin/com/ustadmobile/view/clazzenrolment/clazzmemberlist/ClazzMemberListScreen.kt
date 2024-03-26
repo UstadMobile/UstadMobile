@@ -30,7 +30,7 @@ import web.cssom.Contain
 import web.cssom.Height
 import web.cssom.Overflow
 import web.cssom.pct
-import js.core.jso
+import js.objects.jso
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone

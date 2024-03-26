@@ -26,7 +26,7 @@ import com.ustadmobile.core.viewmodel.clazzassignment.UstadCourseAssignmentMarkL
 import com.ustadmobile.mui.components.UstadCourseAssignmentMarkListItem
 import web.cssom.Height
 import web.cssom.pct
-import js.core.jso
+import js.objects.jso
 import mui.icons.material.Done as DoneIcon
 import mui.icons.material.DoneAll as DoneAllIcon
 import mui.icons.material.EventAvailable as EventAvailableIcon

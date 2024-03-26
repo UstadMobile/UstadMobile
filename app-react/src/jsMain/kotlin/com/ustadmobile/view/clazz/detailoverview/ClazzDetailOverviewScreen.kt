@@ -27,7 +27,7 @@ import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
 import emotion.react.css
 import web.cssom.*
-import js.core.jso
+import js.objects.jso
 import mui.material.*
 import mui.material.Stack
 import mui.material.List

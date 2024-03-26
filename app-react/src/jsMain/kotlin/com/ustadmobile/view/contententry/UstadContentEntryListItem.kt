@@ -10,7 +10,7 @@ import com.ustadmobile.mui.common.justifyContent
 import com.ustadmobile.mui.ext.paddingCourseBlockIndent
 import com.ustadmobile.util.ext.useLineClamp
 import com.ustadmobile.view.contententry.detailoverviewtab.CONTENT_ENTRY_TYPE_ICON_MAP
-import js.core.jso
+import js.objects.jso
 import web.cssom.*
 //WARNING: DO NOT Replace with import mui.icons.material.[*] - Leads to severe IDE performance issues 10/Apr/23 https://youtrack.jetbrains.com/issue/KT-57897/Intellisense-and-code-analysis-is-extremely-slow-and-unusable-on-Kotlin-JS
 import mui.icons.material.BookOutlined as BookOutlinedIcon

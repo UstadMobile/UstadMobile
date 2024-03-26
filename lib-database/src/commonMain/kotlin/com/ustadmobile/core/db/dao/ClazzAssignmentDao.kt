@@ -81,6 +81,8 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
                  FROM ClazzAssignment
                 WHERE ClazzAssignment.caUid = :assignmentUid) AS isGroupAssignment
     """)
+    @QueryLiveTables(arrayOf("SystemPermission", "CoursePermission", "ClazzEnrolment",
+        "ClazzAssignment", "CourseAssignmentMark", "CourseAssignmentSubmission", "CourseGroupMember"))
     /**
      * Get a summary of the numbers that have submitted/been marked for a given assignment.
      */

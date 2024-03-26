@@ -5,7 +5,7 @@ import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditUiState
 import com.ustadmobile.lib.db.composites.CourseBlockAndEditEntities
 import web.cssom.ClassName
-import js.core.jso
+import js.objects.jso
 import mui.icons.material.MoreVert
 import mui.material.IconButton
 import mui.material.Menu

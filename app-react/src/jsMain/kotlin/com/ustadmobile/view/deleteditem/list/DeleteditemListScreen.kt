@@ -11,7 +11,7 @@ import com.ustadmobile.lib.db.entities.DeletedItem
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
-import js.core.jso
+import js.objects.jso
 import mui.material.Button
 import mui.material.Container
 import mui.material.Dialog

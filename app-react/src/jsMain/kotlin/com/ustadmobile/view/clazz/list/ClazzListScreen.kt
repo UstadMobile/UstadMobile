@@ -28,7 +28,7 @@ import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
 import web.cssom.*
-import js.core.jso
+import js.objects.jso
 import mui.icons.material.Add
 import mui.icons.material.Login
 import mui.material.*
@@ -41,7 +41,6 @@ import web.dom.getComputedStyle
 import web.events.Event
 import web.events.EventHandler
 import web.html.HTMLElement
-import web.window.RESIZE
 import web.window.window
 import mui.icons.material.Badge as BadgeIcon
 import com.ustadmobile.hooks.useDateFormatter
@@ -49,6 +48,10 @@ import com.ustadmobile.hooks.useTimeFormatter
 import com.ustadmobile.lib.db.entities.EnrolmentRequest
 import com.ustadmobile.view.clazz.uriOrDefaultBanner
 import com.ustadmobile.view.components.UstadDetailHeader
+import web.events.addEventListener
+import web.events.removeEventListener
+import web.window.Window
+import web.window.resize
 
 external interface ClazzListScreenProps : Props {
 
@@ -93,14 +96,14 @@ private val ClazzListScreenComponent2 = FC<ClazzListScreenProps> { props ->
             }
         }
 
-        val eventListener :  EventHandler<Event> = {
+        val eventListener :  EventHandler<Event, Window> = EventHandler {
             calcContainerWidth()
         }
 
-        window.addEventListener(Event.Companion.RESIZE, eventListener)
+        window.addEventListener(Event.Companion.resize(), eventListener)
 
         cleanup {
-            window.removeEventListener(Event.Companion.RESIZE, eventListener)
+            window.removeEventListener(Event.Companion.resize(), eventListener)
         }
     }
 

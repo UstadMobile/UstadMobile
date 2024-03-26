@@ -18,7 +18,7 @@ import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
 import web.cssom.*
-import js.core.jso
+import js.objects.jso
 import mui.material.*
 import mui.material.List
 import mui.system.responsive
@@ -37,6 +37,7 @@ external interface ClazzAssignmentDetailSubmissionsTabComponentProps : Props {
 
 }
 
+@Suppress("unused")
 val ClazzAssignmentDetailSubmissionsTabPreview = FC<Props> {
 
     ClazzAssignmentDetailSubmissionsTabComponent {

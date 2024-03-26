@@ -1,10 +1,10 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
-    ext.version_kotlin = '1.9.21'
+    ext.version_kotlin = '1.9.23'
     ext.version_shadow = "8.1.1"
-    ext.atomicfu_version = '0.23.1'
-    ext.version_ktor = "2.3.6"
+    ext.atomicfu_version = '0.23.2'
+    ext.version_ktor = "2.3.9"
     ext.version_moko_resources = "0.23.0"
 
     repositories {
@@ -97,7 +97,7 @@ ext {
 
 
     version_gradle_buildconfig_plugin = "1.1.7"
-    version_ksp = "1.0.15"
+    version_ksp = "1.0.19"
     version_kotlin_jvmTarget = "17"
     //We need to use an exclude on this dependency, so cannot use only the TOML
     version_jcabi_manifests = "2.1.0"
@@ -109,7 +109,7 @@ ext {
     version_android_min_sdk = 21
 
     /*Kotlin react web app*/
-    kotlinWrappersVersion = "1.0.0-pre.651"
+    kotlinWrappersVersion = "1.0.0-pre.721"
 
     version_npm_mement_io = "^2.14.0"
 

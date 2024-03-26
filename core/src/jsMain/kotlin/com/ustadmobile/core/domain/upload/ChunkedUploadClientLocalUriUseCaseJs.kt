@@ -5,11 +5,12 @@ import com.ustadmobile.core.util.stringvalues.IStringValues
 import com.ustadmobile.core.util.stringvalues.asIStringValues
 import com.ustadmobile.door.DoorUri
 import io.github.aakira.napier.Napier
-import js.core.jso
+import js.objects.jso
 import js.promise.await
+import web.http.BodyInit
+import web.http.Headers
 import web.http.fetch
 import web.http.fetchAsync
-import kotlin.js.json
 
 
 class ChunkedUploadClientLocalUriUseCaseJs: ChunkedUploadClientLocalUriUseCase {
@@ -50,29 +51,26 @@ class ChunkedUploadClientLocalUriUseCaseJs: ChunkedUploadClientLocalUriUseCase {
             onStatusChange(TransferJobItemStatus.IN_PROGRESS)
             chunkInfo.forEachIndexed { index, chunk ->
                 Napier.v { "$logPrefix : upload chunk #${index+1}/${chunkInfo.numChunks}" }
-                val uploadChunkBlob = blob.slice(chunk.start.toInt(), chunk.end.toInt())
-                val headerPairs = buildList {
-                    add(HEADER_UPLOAD_UUID to uploadUuid)
-                    add(HEADER_IS_FINAL_CHUNK to chunk.isLastChunk.toString())
-                    add(HEADER_UPLOAD_START_BYTE to chunk.start.toString())
-
-                    if(chunk.isLastChunk && lastChunkHeaders != null) {
-                        lastChunkHeaders.names().forEach { headerName ->
-                            lastChunkHeaders.getAll(headerName).forEach { headerVal ->
-                                add(headerName to headerVal)
-                            }
-                        }
-                    }
-                }
-
-
+                val uploadChunkBlob = blob.slice(chunk.start.toDouble(), chunk.end.toDouble())
                 val fetchResponse = try {
                     fetchAsync(
                         input = remoteUrl,
                         init = jso {
-                            body = uploadChunkBlob
+                            body = BodyInit(uploadChunkBlob)
                             method = "POST"
-                            headers = json(*headerPairs.toTypedArray())
+                            headers = Headers().also {
+                                it[HEADER_UPLOAD_UUID] = uploadUuid
+                                it[HEADER_IS_FINAL_CHUNK] = chunk.isLastChunk.toString()
+                                it[HEADER_UPLOAD_START_BYTE] = chunk.start.toString()
+
+                                if(chunk.isLastChunk && lastChunkHeaders != null) {
+                                    lastChunkHeaders.names().forEach { headerName ->
+                                        lastChunkHeaders.getAll(headerName).forEach { headerVal ->
+                                            it.append(headerName, headerVal)
+                                        }
+                                    }
+                                }
+                            }
                         }
                     ).await()
                 }catch(e: Throwable) {
@@ -100,12 +98,12 @@ class ChunkedUploadClientLocalUriUseCaseJs: ChunkedUploadClientLocalUriUseCase {
                      * empty string.
                      */
                     return ChunkedUploadClientLocalUriUseCase.LastChunkResponse(
-                        body = if(fetchResponse.status != 204) {
+                        body = if(fetchResponse.status.toInt() != 204) {
                             fetchResponse.text().await()
                         }else {
                             null
                         },
-                        statusCode = fetchResponse.status,
+                        statusCode = fetchResponse.status.toInt(),
                         headers = fetchResponse.headers.asIStringValues(),
                     )
                 }

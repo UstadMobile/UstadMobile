@@ -1,14 +1,16 @@
 package com.ustadmobile.mui.components
 
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase.Companion.LinkTarget
-import js.core.jso
+import js.objects.jso
 import react.FC
 import react.Props
 import react.dom.html.ReactHTML.div
 import react.useContext
 import react.useEffect
 import react.useRef
+import web.events.addEventListener
 import web.html.HTMLDivElement
+import web.html.HTMLElement
 
 external interface UstadRawHtmlProps: Props {
 
@@ -39,8 +41,8 @@ val UstadRawHtml = FC<UstadRawHtmlProps> { props ->
         divRef.current?.querySelectorAll("a")?.iterator()?.forEach { anchorEl ->
             if(!anchorEl.hasAttribute("ustadlink")) {
                 anchorEl.addEventListener(
-                    type = web.uievents.MouseEvent.Companion.CLICK,
-                    callback = { evt ->
+                    type = web.uievents.MouseEvent.Companion.click<HTMLElement>(),
+                    handler = { evt ->
                         evt.preventDefault()
                         evt.stopPropagation()
                         val href = anchorEl.getAttribute("href")

@@ -132,7 +132,7 @@ fun clientServerIntegrationTest(
     block: suspend ClientServerIntegrationTestContext.() -> Unit
 ) {
     val json = Json { encodeDefaults = true }
-    val doorServerConfig = DoorHttpServerConfig(json)
+    val doorServerConfig = DoorHttpServerConfig(json, logger = NapierDoorLogger())
     val serverDb: UmAppDatabase = DatabaseBuilder.databaseBuilder(
         UmAppDatabase::class,
         "jdbc:sqlite::memory:", nodeId = 1L)

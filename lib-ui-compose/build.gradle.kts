@@ -100,7 +100,7 @@ kotlin {
 }
 
 android {
-    compileSdk = 33
+    compileSdk = 34
     namespace = "com.ustadmobile.libuicompose"
 
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
@@ -109,7 +109,7 @@ android {
 
     defaultConfig {
         minSdk = 21
-        targetSdk = 33
+        lint.targetSdk = 34
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

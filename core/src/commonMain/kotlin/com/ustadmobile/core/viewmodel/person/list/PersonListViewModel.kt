@@ -189,6 +189,7 @@ class PersonListViewModel(
     override fun onUpdateSearchResult(searchText: String) {
         //will use the searchText as per the appUiState
         //lastPagingSource?.invalidate()
+        _listRefreshCommandFlow.tryEmit(true)
     }
 
     fun onSortOrderChanged(sortOption: SortOrderOption) {
@@ -197,6 +198,7 @@ class PersonListViewModel(
                 sortOption = sortOption
             )
         }
+        _listRefreshCommandFlow.tryEmit(true)
         //lastPagingSource?.invalidate()
     }
 

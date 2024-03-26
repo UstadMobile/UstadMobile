@@ -14,6 +14,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -37,6 +38,8 @@ import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadPersonAvatar
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Suppress("unused") // Pending
@@ -48,6 +51,7 @@ fun PersonListScreen(
 
     PersonListScreen(
         uiState = uiState,
+        listRefreshCommand = viewModel.listRefreshCommandFlow,
         onListItemClick = viewModel::onClickEntry,
         onClickAddNew = viewModel::onClickAdd,
         onSortOrderChanged = viewModel::onSortOrderChanged,
@@ -93,6 +97,7 @@ fun PersonListScreen(
 @Composable
 fun PersonListScreen(
     uiState: PersonListUiState,
+    listRefreshCommand: Flow<Boolean> = emptyFlow(),
     onListItemClick: (Person) -> Unit = {},
     onSortOrderChanged: (SortOrderOption) -> Unit = { },
     onClickAddNew: () -> Unit = {},
@@ -113,6 +118,12 @@ fun PersonListScreen(
     }
 
     val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
+
+    LaunchedEffect(listRefreshCommand) {
+        listRefreshCommand.collect {
+            lazyPagingItems.refresh()
+        }
+    }
 
     UstadLazyColumn(
         modifier = Modifier.fillMaxSize()
