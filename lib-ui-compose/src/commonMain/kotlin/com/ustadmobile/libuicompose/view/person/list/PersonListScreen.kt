@@ -38,6 +38,7 @@ import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadPersonAvatar
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 
@@ -107,12 +108,14 @@ fun PersonListScreen(
 
     // As per
     // https://developer.android.com/reference/kotlin/androidx/paging/compose/package-summary#collectaslazypagingitems
-    // Must provide a factory to pagingSourceFactory that will
     // https://issuetracker.google.com/issues/241124061
     val pager = remember(uiState.personList) {
         Pager(
             config = PagingConfig(pageSize = 20, enablePlaceholders = true, maxSize = 200),
-            pagingSourceFactory = uiState.personList,
+            pagingSourceFactory = {
+                Napier.d("PersonListScreen: Invoke pagingSourceFactory")
+                uiState.personList()
+            },
             remoteMediator = DoorRepositoryRemoteMediator(uiState.personList),
         )
     }
@@ -121,6 +124,7 @@ fun PersonListScreen(
 
     LaunchedEffect(listRefreshCommand) {
         listRefreshCommand.collect {
+            Napier.d("PersonListScreen: refresh lazypagingitems")
             lazyPagingItems.refresh()
         }
     }

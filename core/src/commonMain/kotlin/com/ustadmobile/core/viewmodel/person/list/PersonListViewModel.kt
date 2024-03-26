@@ -31,6 +31,7 @@ import com.ustadmobile.core.viewmodel.person.bulkaddselectfile.BulkAddPersonSele
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.lib.db.composites.PersonAndListDisplayDetails
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.channels.BufferOverflow
 import org.kodein.di.instance
 
@@ -87,7 +88,8 @@ class PersonListViewModel(
         savedStateHandle[ARG_REQUIRE_PERMISSION_TO_SHOW_LIST]?.toLong() ?: 0
 
     private val pagingSourceFactory: () -> PagingSource<Int, PersonAndListDisplayDetails> = {
-        activeRepo.personDao.findPersonsWithPermissionAsPagingSource(
+        Napier.d("PersonListScreen: create PagingSource factory invoked")
+        activeDb.personDao.findPersonsWithPermissionAsPagingSource(
             timestamp = getSystemTimeInMillis(),
             excludeClazz = filterExcludeMembersOfClazz,
             excludeSelected = filterAlreadySelectedList,
