@@ -8,10 +8,8 @@ appId: com.toughra.ustadmobile
 -  tapOn: "Courses"
 - tapOn: ${TESTCOURSENAME}
 - tapOn: "MEMBERS"
+- scroll
 - tapOn:
-    id: "com.toughra.ustadmobile:id/accept_icon"
-- extendedWaitUntil:
-    notVisible:
-      id: "com.toughra.ustadmobile:id/accept_icon"
-    timeout: 10000
+   text: "Accept"
+   rightOf: "Student 1"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/added_student_using _code"

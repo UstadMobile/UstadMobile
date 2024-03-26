@@ -10,15 +10,10 @@ appId: com.toughra.ustadmobile
 - swipe:
       start: 100,400
       end: 100,100
-      # text available for this button keep on changing because it's - date and time so we are using id here
-- tapOn:
-    id: "com.toughra.ustadmobile:id/item_clazz_log_attendance_list"
+- tapOn: "1 Present, 1 Partial, 0 Absent"
 - tapOn: "Mark all present"
 - tapOn:
-        text: "Absent"
-        index: 0
-- tapOn:
-    text: "Absent"
+    id: "com.toughra.ustadmobile:id/absent_button"
     index: 1
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/edited_attendance"
 - tapOn: "Save"

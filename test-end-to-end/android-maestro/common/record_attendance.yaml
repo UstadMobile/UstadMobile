@@ -7,12 +7,12 @@ appId: com.toughra.ustadmobile
 - tapOn: "Courses"
 - tapOn: ${TESTCOURSENAME}
 - tapOn: "ATTENDANCE"
-- tapOn: "Record attendance"
-- tapOn: "Add a new occurrence"
-- tapOn: "Done"
+- tapOn:
+      id: "floating_action_button"
+- tapOn: "Next"
 - tapOn: "Mark all present"
 - tapOn:
-    text: "Partial"
-    index: 1
+      id: "com.toughra.ustadmobile:id/late_button"
+      index: 1
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/recorded_attendance"
 - tapOn: "Save"

@@ -18,11 +18,3 @@ env:
     file: "../common/create_course_with_1teacher_1student.yaml"
     env:
       TESTCOURSENAME: "Test Course"
-- runFlow: "../common/clear_state_and_get_started.yaml"
-- runFlow: "../common/select_site.yaml"
-- runFlow:
-    file: "../common/user_login.yaml"
-    env:
-      USERNAME: "t1"
-      PASSWORD: "test"
-- tapOn: "courses"
