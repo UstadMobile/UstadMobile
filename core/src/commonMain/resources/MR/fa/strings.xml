@@ -1,49 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">استاد موبايل‬</string>
-    <string name="login">وارد شدن</string>
-    <string name="error">خطا</string>
-    <string name="err_registering_new_user">خطا در ثبت نام کاربر جدید:</string>
-    <string name="wrong_user_pass_combo">نام کاربری/ رمز عبور اشتباه است: دوباره کوشش نمائید.</string>
-    <string name="login_network_error">خطای شبکه: لطفا چک کنید که آنلاین هستید.</string>
-    <string name="download"> دانلود</string>
-    <string name="ok">درست</string>
-    <string name="cancel">لغو کردن</string>
-    <string name="delete">حذف کردن</string>
-    <string name="loading">بارگیری </string>
-    <string name="error_opening_file">خطا در باز کردن پرونده:</string>
-    <string name="logout"> خارج شدن</string>
-    <string name="about">درباره </string>
-    <string name="download_all">دانلود همه </string>
-    <string name="next">بعدی</string>
-    <string name="back"> بازگشت</string>
-    <string name="username">اسم کاربری</string>
-    <string name="password">رمز ورودی</string>
-    <string name="phone_memory">حافظه تلفون</string>
-    <string name="memory_card">کارت حافظه</string>
-    <string name="device">دستگاه</string>
-    <string name="register">ثبت نام</string>
-    <string name="phone_number">شماره تلفن</string>
-    <string name="male">مذکر</string>
-    <string name="female">مونث</string>
-    <string name="settings">تنظیمات</string>
-    <string name="language">زبان</string>
-    <string name="advanced">پیشرفته</string>
-    <string name="optional">اختیاری</string>
-    <string name="email">ایمیل</string>
-    <string name="regcode">کود ثبت نام</string>
-    <string name="home">صفحه اول</string>
-    <string name="attendance">حاضری</string>
-    <string name="classes">صنف‌ها</string>
-    <string name="exams">آزمون‌ها</string>
-    <string name="reports">گزارش‌ها</string>
-    <string name="notifications">هشدارها</string>
-    <string name="forgot_password">فراموشی رمزکاربری</string>
-    <string name="account">حساب</string>
+    <string name="app_name">ګرځنده ښوونکی</string>
+    <string name="login">دننه کېدل</string>
+    <string name="error">تېروتنه</string>
+    <string name="err_registering_new_user">د نوي کاروونکي په ثبتولو کې تېروتنه:</string>
+    <string name="wrong_user_pass_combo">ناسم کارن نوم/پټنوم: بیا هڅه وکړئ</string>
+    <string name="login_network_error">د شبکې تېروتنه: مهرباني وکړئ وګورئ چې پرلیکه ياست.</string>
+    <string name="download">راښکته کول</string>
+    <string name="ok">سم</string>
+    <string name="cancel">لغوه کول</string>
+    <string name="delete">ړنګول</string>
+    <string name="loading">بارول</string>
+    <string name="error_opening_file">د فایل پرانيستلو کې تېروتنه:</string>
+    <string name="logout">وتل</string>
+    <string name="about">په اړه</string>
+    <string name="download_all">ټول ښکته کول</string>
+    <string name="next">وروسته</string>
+    <string name="back">بېرته تګ</string>
+    <string name="username">کارن نوم</string>
+    <string name="password">پټنوم</string>
+    <string name="phone_memory">د ټليفون حافظه</string>
+    <string name="memory_card">د حافظې کارت</string>
+    <string name="device">وسیله</string>
+    <string name="register">نوم لیکنه</string>
+    <string name="phone_number">د ټيلیفون شمېره</string>
+    <string name="male">نارینه</string>
+    <string name="female">ښځینه</string>
+    <string name="settings">امستنې</string>
+    <string name="language">ژبه</string>
+    <string name="advanced">پرمختللی</string>
+    <string name="optional">اختياري</string>
+    <string name="email">برېښنالیک</string>
+    <string name="regcode">د نوم ليکنې کوډ</string>
+    <string name="home">کورپاڼه</string>
+    <string name="attendance">حاضري</string>
+    <string name="classes">ټولګي</string>
+    <string name="exams">آزموينې</string>
+    <string name="reports">راپورونه</string>
+    <string name="notifications">ګواښونه</string>
+    <string name="forgot_password">د پټنوم هېرول</string>
+    <string name="account">ګڼوڼ</string>
     <string name="open">پرانیستل</string>
-    <string name="share_application">اپلکیشن را شریک سازید</string>
-    <string name="share">شریک کردن</string>
-    <string name="send">فرستادن</string>
+    <string name="share_application">اپليکيشن شريک کړئ</string>
+    <string name="share">شریکول</string>
+    <string name="send">استول</string>
     <string name="passed">بریالی شو</string>
     <string name="in_progress">در جریان</string>
     <string name="downloading">راښکته کېږي</string>
@@ -54,24 +54,24 @@
 \n۱. امستنې پرانیزئ &gt; د بلوټوت امستنې.
 \n۲. ډاډ ترلاسه کړئ، چې وسیله د لیدلو وړ ده.</string>
     <string name="accept">منل</string>
-    <string name="downloaded">دانلود شد</string>
-    <string name="new_password">رمز عبور جدید</string>
-    <string name="phone">تیلفون</string>
+    <string name="downloaded">راښکته شو</string>
+    <string name="new_password">نوی پټنوم</string>
+    <string name="phone">ټيليفون</string>
     <string name="preparing">د چمتو کېدو په حال کې</string>
     <string name="field_required_prompt">دې برخې ته اړتیا ده</string>
     <!-- Registration dialog feedback -->
-    <string name="register_incorrect_email">آدرس ایمیل اشتباه است</string>
-    <string name="libraries">کتابخانه‌ها</string>
-    <string name="confirm_password">تأیید رمز عبور</string>
+    <string name="register_incorrect_email">برېښنالیک ناسم دی</string>
+    <string name="libraries">کتابتونونه</string>
+    <string name="confirm_password">د پټنوم تاییدول</string>
     <string name="last_name">تخلص</string>
-    <string name="first_name">نام</string>
-    <string name="register_empty_fields">لطفاً تمام بخشهای لازمی را پر نمائید</string>
-    <string name="other">دیگر</string>
-    <string name="unset">بی‌ترتیب</string>
-    <string name="recycled">بازیابی شده</string>
-    <string name="new_tab">در برگ جدید نشان داده میشود</string>
-    <string name="deleting">حذف میگردد</string>
-    <string name="previous">قبلی</string>
+    <string name="first_name">نوم</string>
+    <string name="register_empty_fields">مهرباني وکړئ ټولې اړينې برخې ډکې کړئ</string>
+    <string name="other">نور</string>
+    <string name="unset">بې ترتیبه</string>
+    <string name="recycled">بیارغنی شوی</string>
+    <string name="new_tab">په نوي ټب کې ښودل کېږي</string>
+    <string name="deleting">ړنګېږي</string>
+    <string name="previous">مخکینې</string>
     <string name="success">بریالیتوب</string>
     <string name="completed">بشپړ شو</string>
     <string name="select_subtitle_video">د فرعي سرلیک ژبه غوره کړئ</string>
@@ -86,9 +86,9 @@
     <string name="dialog_download_from_playstore_ok">همدا اوس یې راښکته کړئ (وړیا)</string>
     <string name="dialog_download_from_playstore_cancel">په ویب سایټ کې پاتې شئ</string>
     <string name="onboarding_get_started_label">پیل کړئ</string>
-    <string name="pause_download">مکث دانلود</string>
-    <string name="canceled">لغو شده</string>
-    <string name="deleted">حذف شده</string>
+    <string name="pause_download">راښکته کول ودروئ</string>
+    <string name="canceled">لغوه شوی</string>
+    <string name="deleted">ړنګ شوی</string>
     <string name="download_continue_stacked_label">د راښکته کېدو دوام</string>
     <string name="download_continue_btn_label">دوام ورکړئ</string>
     <string name="update">مهالول</string>
@@ -106,14 +106,14 @@
     <string name="download_storage_option_device">%1$s کارول شوی - %2$s خالي دی</string>
     <string name="download_locally_availability">ستاسې شاوخوا شته</string>
     <string name="download_cloud_availability">په کلوډ کې شته</string>
-    <string name="xapi_day" value="300">روز</string>
+    <string name="xapi_day" value="300">ورځ</string>
     <string name="download_entry_state_paused">درول شوی</string>
     <string name="get_app">اپلیکیشن ترلاسه کړئ</string>
     <string name="no_app_found">د فایل پرانیستلو لپاره هېڅ اپلیکیشن ونه موندل شو</string>
     <string name="entry_details_author">لیکوال</string>
     <string name="file_not_found">فایل ونه موندل شو</string>
     <string name="multiple_choice">ګڼ انتخابه</string>
-    <string name="confirm">تأیید کردن</string>
+    <string name="confirm">تاییدول</string>
     <string name="entry_details_license">جواز:</string>
     <string name="video">ویدیو</string>
     <string name="content_from_file">له فایل څخه</string>
@@ -122,32 +122,32 @@
     <string name="file_required_prompt">د واردولو فایل انتخاب شوی نه دی. بیا هڅه وکړئ</string>
     <string name="content_creation_folder_new_message">نوې پوښۍ په بریاليتوب سره زیاته شوه</string>
     <string name="content_creation_folder_update_message">پوښۍ په بریالیتوب سره اوسمهاله شوه</string>
-    <string name="error_message_update_document">بروزرسانی مدرک نامؤفق بود</string>
-    <string name="content_editor_save_error">خطا در هنگام ذخیره‌سازی، دوباره کوشش کنید</string>
+    <string name="error_message_update_document">د لاسوند مهالول بريالي نه شو</string>
+    <string name="content_editor_save_error">د خوندي کولو په وخت کې تېروتنه، بيا هڅه وکړئ</string>
     <string name="export">صادر کردن</string>
-    <string name="content_entry_export_message">شما در حال صادر ساختن %1$s به حافظه دستگاه تان هستید. آیا میخواهید ادامه بدهید؟</string>
-    <string name="enter_register_code">کود ثبت‌نام را وارد نمائید</string>
-    <string name="bar_chart" value="100">نمودار میله‌ای</string>
-    <string name="score" value="200">نمرۀ اوسط</string>
-    <string name="xapi_week" value="301">هفته</string>
-    <string name="xapi_month" value="302">ماه</string>
-    <string name="xapi_custom_date" value="303">تاریخ دلخواه</string>
-    <string name="xapi_content_entry" value="304">داخل ساختن محتوا</string>
-    <string name="xapi_clear">پاک کردن</string>
-    <string name="from">از</string>
-    <string name="xapi_options_general">عمومی</string>
-    <string name="xapi_options_report_title">عنوان گزارش</string>
-    <string name="xapi_options_visual_type">نوع تجسم</string>
-    <string name="xapi_options_axes">محورها</string>
+    <string name="content_entry_export_message">تاسې د خپلې وسیلې حافظې ته %1$s صادرولو به حال کې یاست. غواړئ، چې دوام ورکړئ؟</string>
+    <string name="enter_register_code">د نوم ليکنې کوډ ورکړئ</string>
+    <string name="bar_chart" value="100">چارت پټه</string>
+    <string name="score" value="200">اوسط نمرې</string>
+    <string name="xapi_week" value="301">اونۍ</string>
+    <string name="xapi_month" value="302">میاشت</string>
+    <string name="xapi_custom_date" value="303">د خوښې نېټه</string>
+    <string name="xapi_content_entry" value="304">د منځپانګې داخلول</string>
+    <string name="xapi_clear">پاکول</string>
+    <string name="from">له</string>
+    <string name="xapi_options_general">عمومي</string>
+    <string name="xapi_options_report_title">د ګزارش سرلیک</string>
+    <string name="xapi_options_visual_type">د لید ډول</string>
+    <string name="xapi_options_axes">محورونه</string>
     <string name="xapi_options_y_axes">محور-Y</string>
     <string name="xapi_options_x_axes">محور-X</string>
-    <string name="xapi_options_subgroup">گروپ فرعی توسط</string>
-    <string name="xapi_options_filters">فیلترها</string>
-    <string name="xapi_options_who">کی</string>
-    <string name="xapi_options_did">انجام داد</string>
-    <string name="xapi_options_what">چی</string>
-    <string name="xapi_options_where">کجا</string>
-    <string name="activity_import_link">وارد نمودن پیوند</string>
+    <string name="xapi_options_subgroup">فرعي ګروپ لخوا</string>
+    <string name="xapi_options_filters">چاڼونه</string>
+    <string name="xapi_options_who">څوک</string>
+    <string name="xapi_options_did">ترسره کړ</string>
+    <string name="xapi_options_what">څه</string>
+    <string name="xapi_options_where">چېرې</string>
+    <string name="activity_import_link">د لینک واردول</string>
     <string name="xapi_hours">ساعات</string>
     <string name="xapi_minutes">دقایق</string>
     <string name="xapi_seconds">ثانیه‌ها</string>
@@ -170,14 +170,14 @@
     <string name="repo_loading_status_failed_connection_error">خطا در اتصال</string>
     <string name="publicly_accessible">په عامه توګه د لاسرسي وړ</string>
     <string name="error_message_load_page">پاڼې ته ورتلل بریالي نه شو</string>
-    <string name="xapi_options_when">چه وقت</string>
+    <string name="xapi_options_when">کله</string>
     <string name="content_from_link">له لینک څخه</string>
-    <string name="supported_files">پرونده‌های مورد پشتیبانی: <b> ویدیو، صوت، EPUB، زاپی، فشرده شده، H5P </b></string>
-    <string name="done">تمام</string>
+    <string name="supported_files">ملاتړي فايلونه: <b> ویډيو، غږ، EPUB، Xapi، زیپ، H5P </b></string>
+    <string name="done">ترسره شو</string>
     <string name="content_editor_create_new_category">دوسیه جدید</string>
     <string name="dropdown">کشویی</string>
     <string name="option_value">مقدار گزینه</string>
-    <string name="contents">محتویات</string>
+    <string name="contents">منځپانګې</string>
     <string name="sort_by_name_desc">نام (نزولی)</string>
     <string name="basic_details">جزئیات اساسی</string>
     <string name="locations">موقعیت ها</string>
@@ -201,20 +201,20 @@
     <string name="first_names">نامهای اول</string>
     <string name="permission_person_insert">اضافه کردن مردم</string>
     <string name="custom_fields">ساحات دلخواه</string>
-    <string name="group_activity">گروپ 
+    <string name="group_activity">ګروپ
 \nفعالیت</string>
-    <string name="select_group_members">انتخاب اعضای جدید گروپ</string>
-    <string name="register_now">همین اکنون ثبت نام نمایید</string>
-    <string name="choose_template">انتخاب نمونه</string>
-    <string name="description">جزئیات</string>
-    <string name="select_language">انتخاب زبان</string>
-    <string name="add_a_new_language">اضافه نمودن زبان جدید</string>
-    <string name="confirm_delete_message">آیا واقعاً میخواهید این ورودی را از دستگاه خود حذف نمائید؟</string>
-    <string name="processing">در جریان عمل</string>
-    <string name="uploading">در حال آپلود</string>
-    <string name="save_as_template">حفظ به حیث نمونه</string>
-    <string name="students">متعلمین</string>
-    <string name="add_a_student">اضافه نمودن یک متعلم</string>
+    <string name="select_group_members">د ګروپ د نويو غړو ټاکل</string>
+    <string name="register_now">همدا اوس نوم لیکنه وکړئ</string>
+    <string name="choose_template">د بېلګې ټاکل</string>
+    <string name="description">تشریح</string>
+    <string name="select_language">ژبه غوره کړئ</string>
+    <string name="add_a_new_language">د نوې ژبې زیاتول</string>
+    <string name="confirm_delete_message">آیا ډاډه یاست، چې غواړئ له خپلې وسیلې څخه دا ننوت ړنګ کړئ؟</string>
+    <string name="processing">د کړنې په لړ کې</string>
+    <string name="uploading">د پورته کېدو په حال کې</string>
+    <string name="save_as_template">د بېلګې په توګه خوندي کول</string>
+    <string name="students">زده کوونکي</string>
+    <string name="add_a_student">د يوه زده کوونکي زیاتول</string>
     <string name="sort_by_name_asc">نام (صعودی)</string>
     <string name="date_enroll">تاریخ ثبت نام</string>
     <string name="created_partnership">په ملګرتیا (ګډون) سره رامنځته شوی له:</string>
@@ -226,7 +226,7 @@
     <string name="graduated">فارغ</string>
     <string name="dropped_out">محروم شده</string>
     <string name="moved">تبدیل گردیده</string>
-    <string name="content_total_duration" value="200">استفاده محتوی - مجموع مدت</string>
+    <string name="content_total_duration" value="200">د منځپانګې کارونه - ټوله موده</string>
     <string name="new_leaving_reason">دلیل نتیجه ثبت نام جدید</string>
     <string name="title">سرلیک</string>
     <string name="leaving_reason">دلیل ترک نمودن</string>
@@ -252,21 +252,21 @@
     <string name="add_a_new_school">اضافه نمودن یک مکتب جدید</string>
     <string name="edit_school">ویرایش مکتب</string>
     <string name="preview">مخلید</string>
-    <string name="interaction_recorded" value="203">استفاده محتوی - تعداد کارکردهای ثبت شده</string>
-    <string name="number_students_completed" value="206">استفاده محتوی - تعداد شاگردانی که محتوی را تکمیل نموده اند</string>
-    <string name="total_lates" value="210">حاضری - مجموع شاگردان که ناوقت آمدند</string>
-    <string name="percent_students_attended_or_late" value="212">حاضری - فیصدی شاگردانی که اشتراک کرده اند و یا ناوقت آمدند</string>
-    <string name="verb">فعل</string>
-    <string name="selected_custom_range">محدود دلخواه: %1$s%</string>
-    <string name="add_a_new_verb">اضافه فعل جدید</string>
+    <string name="interaction_recorded" value="203">د منځپانګې کارونه- د ثبت شویو کړنو شمېر</string>
+    <string name="number_students_completed" value="206">د منځپانګې کارونه- د هغو زده کوونکو شمېر، چې منځپانګه یې بشپړه کړې ده</string>
+    <string name="total_lates" value="210">حاضري - ناوخته راغلو زده کوونکو مجموعه</string>
+    <string name="percent_students_attended_or_late" value="212">حاضري - د هغو زده کوونکو سلنه، چې ګډون يې کړی او یا ناوخت راغلي دي</string>
+    <string name="verb">کړ (فعل)</string>
+    <string name="selected_custom_range">د خوښې حد: %1$s%</string>
+    <string name="add_a_new_verb">یو نوی کړ زیات کړئ</string>
     <string name="error_start_date_before_previous_enrolment_date">ثبت نام جدید باید بعد از ختم ثبت نام اخیری برای این شخص باشد %1$s</string>
-    <string name="content_entry_export_inprogress">صادر کردن</string>
-    <string name="field_content_completion">حالت تکمیل محتوی</string>
-    <string name="condition_not_in_list">در فهرست موجود نیست</string>
+    <string name="content_entry_export_inprogress">صادرول</string>
+    <string name="field_content_completion">د منځپانګې د بشپړېدو حالت</string>
+    <string name="condition_not_in_list">په لړلیک کې نه شته</string>
     <string name="descending">نزولی</string>
-    <string name="add_person_filter">اضافه نمودن فیلتر شخص</string>
+    <string name="add_person_filter">د شخص چاڼ زیات کړئ</string>
     <string name="add_activity">اضافه نمودن یک فعالیت جدید...</string>
-    <string name="report">گزارش</string>
+    <string name="report">ګزارش</string>
     <string name="measurement_type">نوع اندازه گیری</string>
     <string name="copy_link">کاپی نمودن پیوند</string>
     <string name="licence_type_cc_by_nc">مجوز CC توسط NC</string>
@@ -350,7 +350,7 @@
     <string name="sync">همگام سازی</string>
     <string name="not_recorded">ضبط نشده</string>
     <string name="rols_assignment">واگذاری نقشها</string>
-    <string name="add_verb_filter">اضافه نمودن فلتر فعل</string>
+    <string name="add_verb_filter">د کړ چاڼ زیات کړئ</string>
     <string name="sel_question_set_to_use">سوالات SEL برای استفاده</string>
     <string name="licence_type_cc_by">مجوز CC توسط</string>
     <string name="licence_type_cc_by_sa">مجوز CC توسط SA</string>
@@ -386,7 +386,7 @@
     <string name="mixed">مختلط</string>
     <string name="permission_activity_insert">گرفتن فعالیت صنف</string>
     <string name="lets_get_started_label">راځئ چې پیل یې کړو</string>
-    <string name="id_verbentity_urlid">شناسه: %s</string>
+    <string name="id_verbentity_urlid">پېژند: %s</string>
     <string name="invalid_link">پیوند نادست</string>
     <string name="due_date">تاریخ سررسید</string>
     <string name="ascending">صعودی</string>
@@ -457,7 +457,7 @@
     <string name="ask_your_teacher_for_code">کود را از استاد تان بپرسید، سپس در پایین وارد نمایید:</string>
     <string name="feedback_hint">لطفاً نظر خود را وارد نمایید</string>
     <string name="send_feedback">نظر ارسال نمایید</string>
-    <string name="create_a_new_report">ایجاد گزارش جدید</string>
+    <string name="create_a_new_report">یو نوی راپور جوړ کړئ</string>
     <string name="store_description_full">استاد مبایل یک اپلیکیشن منبع باز است که ازین طریق کاربران میتوانند به منابع زیاد و متنوع آموزشی باز بشکل آنلاین و آفلاین دسترسی داشته باشند. اپلیکیشن و متحویات آن هر دو بین دو دستگاه بشکل آفلاین شریک ساخته شده میتواند.
 \n
 \nاستاد مبایل دارنده محتویات مجاز از بعضی منابع آموزشی باز (OER) از وبسایتهای پیشتاز انترنت میباشد:
@@ -556,12 +556,12 @@
     <string name="terms_and_policies_text">متن شرایط و پالیسی ها</string>
     <string name="scope_description">انتخاب محدوده (مثلاً: صنف، مکتب و یا فرد مشخص) که بر آن مجوزها وضع خواهد گردید.</string>
     <string name="copied_to_clipboard">در کلیپ بورد کاپی گردید</string>
-    <string name="invite_link_desc">هر شخص که این پیوند را دارد میتواند شامل شود و به %1$s درخواست شمولیت دهد. شما سپس می‌توانید درخواست آن‌ها را برای شمولیت تائید یا رد کنید.</string>
+    <string name="invite_link_desc">هر څوک کولی شي، چې د دې لینک له لارې يوځای شي او یا د يوځای کېدو لپاره غوښتنه وکړي. بیا تاسو کولی شئ، چې د هغوی د یو ځای کېدو لپاره غوښتنه ومنئ يا رد کړئ.</string>
     <string name="invite_with_link">دعوت نمودن توسط پیوند</string>
     <string name="permission_person_delegate">سپردن نقشها و اختیارات به دیگران</string>
     <string name="add_student_to_school">اضافه نمودن شاگرد به مکتب</string>
-    <string name="condition_less_than">کمتر از</string>
-    <string name="join_code_instructions">از استاد خود کود را بپرسید، سپس در زیر وارد نمایید:</string>
+    <string name="condition_less_than">څخه لږ</string>
+    <string name="join_code_instructions">له ښوونکي/مدير څخه د بلنې کوډ وپوښتئ، بیا یې لاندې وارد کړئ. بیا د کورس ښوونکی/مدیر کولی شي، چې د يوځای کېدو لپاره ستاسې غوښتنه ومنې یا رد کړي</string>
     <string name="record_for_student">ثبت نمودن معلومات به نمایندگی شاگرد</string>
     <string name="update_content">د منځپانګو اوسمهالول</string>
     <string name="interactive">محاوره يي</string>
@@ -576,47 +576,47 @@
     <string name="fixed_date">ټاکلې نېټه</string>
     <string name="relative_date">اړوند نېټه</string>
     <string name="entry_details_publisher">خپروونکی</string>
-    <string name="condition_in_list">در فهرست</string>
-    <string name="show_hidden_items">نمایش اشیای پنهان شده</string>
-    <string name="open_folder">باز نمودن دوسیه</string>
-    <string name="action_hidden">پنهان شده</string>
-    <string name="line_chart" value="101">نمودار خطی</string>
-    <string name="content_average_duration" value="201">استفاده محتوی - اوسط مدت در هر جلسه</string>
-    <string name="count_session" value="202">استفاده محتوی - تعداد جلسات</string>
-    <string name="number_active_users" value="204">استفاده محتوی - تعداد کاربران فعال</string>
-    <string name="average_usage_time_per_user" value="205">استفاده محتوی - میانگین زمان استفاده هر کاربر</string>
-    <string name="percent_students_completed" value="207">استفاده محتوی - فیصدی شاگردانی که محتوی را تکمیل نموده اند</string>
-    <string name="total_attendances" value="208">حاضری - مجموع حاضری</string>
-    <string name="total_absences" value="209">حاضری - مجموع غیرحاضرین</string>
-    <string name="percent_students_attended" value="211">حاضری - فیصدی شاگردانی که اشتراک کرده اند</string>
-    <string name="total_number_of_classes" value="213">حاضری - تعداد مجموعی صنوف</string>
-    <string name="number_unique_students_attending" value="214">حاضری - تعداد شاگردان بی‌مانند که حاضر اند</string>
-    <string name="last_three_months_date_range" value="803">سه ماه اخیر</string>
-    <string name="last_week_date_range" value="800">هفته گذشته</string>
-    <string name="last_two_week_date_range" value="801">دو هفته اخیر</string>
-    <string name="last_month_date_range" value="802">ماه گذشته</string>
-    <string name="new_custom_date_range" value="804">محدود زمانی دلخواه جدید…</string>
-    <string name="time_range">محدوده زمان</string>
-    <string name="year">سال</string>
-    <string name="xapi_options_data_set">بسته داده‌ها</string>
-    <string name="xapi_options_series">سلسله</string>
-    <string name="time_range_all">همه چیز</string>
-    <string name="report_filter_edit_field">ساحه</string>
+    <string name="condition_in_list">په لړلیک کې</string>
+    <string name="show_hidden_items">پټ توکي ښکاره کړئ</string>
+    <string name="open_folder">پوښۍ پرانيزئ</string>
+    <string name="action_hidden">پټ شوي</string>
+    <string name="line_chart" value="101">کرښه چارټ</string>
+    <string name="content_average_duration" value="201">د منځپانګې کارونه- په هرې ناسته کې اوسط موده</string>
+    <string name="count_session" value="202">د منځپانګې کارونه- د ناستو شمېر</string>
+    <string name="number_active_users" value="204">د منځپانګې کارونه- د فعالو کاروونکو شمېر</string>
+    <string name="average_usage_time_per_user" value="205">د منځپانګې کارونه- د هر کاروونکي د کارونې اوسط وخت</string>
+    <string name="percent_students_completed" value="207">د منځپانګې کارونه- د هغو زده کوونکو سلنه، چې منځپانګه یې بشپړه کړې ده</string>
+    <string name="total_attendances" value="208">حاضري - ټوله حاضري</string>
+    <string name="total_absences" value="209">حاضري - د غيرحاضرو مجموعه</string>
+    <string name="percent_students_attended" value="211">حاضري - د ګډونوالو زده کوونکو سلنه</string>
+    <string name="total_number_of_classes" value="213">حاضري - د ټولګیو مجموعي شمېر</string>
+    <string name="number_unique_students_attending" value="214">حاضري - د ځانګړو حاضرو زده کوونکو شمېر</string>
+    <string name="last_three_months_date_range" value="803">وروستۍ درې میاشتې</string>
+    <string name="last_week_date_range" value="800">تېره اونۍ</string>
+    <string name="last_two_week_date_range" value="801">وروستۍ دوه اونۍ</string>
+    <string name="last_month_date_range" value="802">تېره میاشت</string>
+    <string name="new_custom_date_range" value="804">د نوې خوښې نېټې حد…</string>
+    <string name="time_range">د وخت حد</string>
+    <string name="year">کال</string>
+    <string name="xapi_options_data_set">د ډېټا بنډل</string>
+    <string name="xapi_options_series">لړۍ</string>
+    <string name="time_range_all">هر څه</string>
+    <string name="report_filter_edit_field">ډګر</string>
     <string name="report_filter_edit_condition">حالت</string>
-    <string name="report_filter_edit_values">ارزش (ها)</string>
-    <string name="edit_report">ویرایش گزارش</string>
-    <string name="edit_filters">ویرایش فلترها</string>
-    <string name="field_person_gender">جنسیت شخص</string>
-    <string name="field_person_age">عمر شخص</string>
-    <string name="field_content_entry">ورودی محتوی</string>
-    <string name="field_content_progress">پیشرفت محتوی</string>
-    <string name="field_attendance_percentage">فیصدی حاضری</string>
-    <string name="condition_is">است</string>
-    <string name="condition_is_not">نیست</string>
-    <string name="condition_greater_than">بیشتر از</string>
-    <string name="condition_between">بین</string>
-    <string name="add_content_filter">اضافه نمودن فیلتر محتوی</string>
-    <string name="dashboard">میزکار</string>
+    <string name="report_filter_edit_values">ارزښت (ونه)</string>
+    <string name="edit_report">د راپور سمون</string>
+    <string name="edit_filters">د چاڼونو سمون</string>
+    <string name="field_person_gender">د شخص جنسیت</string>
+    <string name="field_person_age">د شخص عمر</string>
+    <string name="field_content_entry">دمنځپانګې داخلول</string>
+    <string name="field_content_progress">د منځپانګې پرمختګ</string>
+    <string name="field_attendance_percentage">د حاضري سلنه</string>
+    <string name="condition_is">دی</string>
+    <string name="condition_is_not">نه دی</string>
+    <string name="condition_greater_than">څخه ډېر</string>
+    <string name="condition_between">ترمنځ</string>
+    <string name="add_content_filter">د منځپانګې چاڼ زیات کړئ</string>
+    <string name="dashboard">د کار تخته</string>
     <string name="supported_link">انواع پیوندهای قابل قبول: گوگل درایو (فولدر و یا فایل) و پیوند های ساده HTTP</string>
     <string name="add_a_schedule">اضافه نمودن تقسیم اوقات</string>
     <string name="edit_schedule">ویرایش تقسیم اوقات</string>
@@ -634,7 +634,7 @@
     <string name="record_attendance_for_most_recent_occurrence">ثبت حاضری برای جدیدترین وقایع موجود</string>
     <string name="manage_site_settings">مدیریت پالیسیها و تنظیمات سایت</string>
     <string name="add_a_new_holiday_calendar">اضافه نمودن یک تقویم جدید رخصتی</string>
-    <string name="accounts">حساب‌ها</string>
+    <string name="accounts">ګڼوڼونه</string>
     <string name="yearly">سالانه</string>
     <string name="import_content">د منځپانګو واردول</string>
     <string name="change_implemented_if_any">تغییر اجرا شده (در صورتیکه موجود باشد)</string>
@@ -658,7 +658,7 @@
     <string name="content_usage_duration">طول استفاده محتوی</string>
     <string name="manage_download">تنظیم دانلود</string>
     <string name="select_account_to_continue">برای ادامه حساب را انتخاب نمایید</string>
-    <string name="you_are_already_in_class">خطا: شما از قبل درین صنف شامل هستید: %1$s</string>
+    <string name="you_are_already_in_class">تېروتنه: تاسې له وړاندې په دې ټولګي کې شامل یاست: %1$s</string>
     <string name="join_school">شمولیت در مکتب</string>
     <string name="you_are_already_in_school">خطا: شما از قبل درین مکتب ثبت‌نام کرده اید: %1$s</string>
     <string name="what_is_your_date_of_birth">تاریخ تولد شما چیست؟</string>
@@ -726,12 +726,12 @@
     <string name="opening_link">در حال باز کردن لینک: %1$s</string>
     <string name="join_class">شمولیت در صنف</string>
     <string name="connectivity">اتصال</string>
-    <string name="add_new_language">زبان جدید اضافه کنید</string>
-    <string name="languages">زبان‌ها</string>
-    <string name="edit_language">زبان را ویرایش کنید</string>
-    <string name="two_letter_code">کود دو رقمی (ISO 639-1)</string>
-    <string name="three_letter_code">کود سه رقمی (ISO 639-2)</string>
-    <string name="languages_description">اضافه، حذف، و ویرایش زبان مورد استفاده برای طبقه‌بندی محتوای علمی و اولویت‌های کاربر</string>
+    <string name="add_new_language">نوې ژبه زیاته کړئ</string>
+    <string name="languages">ژبې</string>
+    <string name="edit_language">ژبه اېډېټ کړئ</string>
+    <string name="two_letter_code">دوه لیکې کوډ (ISO 639-1)</string>
+    <string name="three_letter_code">درې لیکې کوډ (ISO 639-2)</string>
+    <string name="languages_description">د علمي منځپانګې د درجه بندۍ او د کاروونکي لومړيتوبونو لپاره د پام وړ ژبه زیاته، ړنګه او اېډېټ کړئ</string>
     <string name="incomplete">نابشپړ</string>
     <string name="attempts">هڅې</string>
     <string name="waiting_for_connection">د پيوستون لپاره د انتظار په حال کې</string>
@@ -760,7 +760,7 @@
     <string name="deleting_content">در حال حذف نمودن %1$s</string>
     <string name="add_folder_description">اضافه نمودن همه محتوی آموزشی پشتیبانی شده از یک دوسیه</string>
     <string name="connect">متصل شدن</string>
-    <string name="powered_by">پشتیبانی شده توسط</string>
+    <string name="powered_by">د ګرځنده ښوونکي له خوا جوړ شوی</string>
     <string name="parent_child_register_message">والدین گرامی، کودک شما ( %1$s ) برای ثبت‌نام با %2$s درخواست داده است. لطفاً با استفاده از پیوند زیر درخواست‌شان را تائید یا رد کنید. %3$s اگر درخواست در مدت 30 روز قبول نشود، آن وقت درخواست (و همه معلومات شخصی) حذف می‌گردند. شما هر زمانی که خواستید با استفاده از همان پیوند تائیدی تان را دوباره پس بردارید. تشکر %2$s</string>
     <string name="parent_consent_explanation">من تائید می‌کنم که من والدین یا ولی قانونی این کودک هستم:
 \n
@@ -958,7 +958,7 @@
     <string name="enabled">فعال شده</string>
     <string name="disabled">غیرفعال شده</string>
     <string name="from_my_courses">از دوره‌های درسی من</string>
-    <string name="name_key">نام</string>
+    <string name="name_key">نوم</string>
     <string name="and_key">او</string>
     <string name="import_from_file">له فایل څخه وارد کړئ</string>
     <string name="import_from_link">له لینک څخه وارد کړئ</string>
@@ -968,4 +968,129 @@
     <string name="onboarding_subheadline2">د سوپر فاسټ (پياوړي چټک) بې لیکي شریکولو سره وخت او ډېټا مو خوندي کړئ</string>
     <string name="onboarding_headline3">منظم اوسئ</string>
     <string name="onboarding_subheadline3">ښوونيزې منځپانګې، دندې، ټولګي او حاضري ټول په يوه ځای کې</string>
+    <string name="question_key">پوښتنه</string>
+    <string name="size_limit_error">د اندازې حد باید د %1$s او %2$sترمنځ وي</string>
+    <string name="pdf">پي ډي ايف</string>
+    <string name="panic_button_app">د ډار تڼۍ اپليکيشن</string>
+    <string name="exit_app">له اپليکيشن څخه وتل</string>
+    <string name="delete_app_data_from_device">له وسيلې څخه د اپليکيشن ډېټا له منځه يوسئ</string>
+    <string name="hide_app">اپليکیشن پټ کړئ</string>
+    <string name="grant_app_permission">د %1$s اجازه ورکړئ</string>
+    <string name="required">* اړین دی</string>
+    <string name="expand">پراخول</string>
+    <string name="time_submitted">د سپارلو وخت</string>
+    <string name="compose_post">پوست جوړ کړئ</string>
+    <string name="invite_code">ناباوري کوډ</string>
+    <string name="num_holidays">%1$s رخصتۍ</string>
+    <string name="more_options">نور غوراوي</string>
+    <string name="edit_content">د منځپانګې سمون</string>
+    <string name="your_submission">ستاسې سپارل</string>
+    <string name="mark">په نښه کول</string>
+    <string name="table_of_contents">لړلیک</string>
+    <string name="delete_permanently">د تل لپاره ړنګول</string>
+    <string name="restore">بیا رغول</string>
+    <string name="request_submitted">غوښتنه سپارل شوې</string>
+    <string name="view_course">کورس وګورئ</string>
+    <string name="manage_teacher_enrolments">د ښوونکو نوم لیکنه اداره کړئ</string>
+    <string name="copy_invite_code">د بلنې کوډ کاپي کړئ</string>
+    <string name="opening_name">پرانېستل%1$s</string>
+    <string name="invalid">ناباوري</string>
+    <string name="invalid_file">ناباوري فایل</string>
+    <string name="member_key">غړی</string>
+    <string name="group_submission">د ګروپ سپارل</string>
+    <string name="edit_groups">د ګروپونو سمون</string>
+    <string name="edit_folder">د پوښۍ سمون</string>
+    <string name="restarting">بیا پیلېږي</string>
+    <string name="app_language">د اپليکيشن ژبه</string>
+    <string name="actions_to_be_taken_in_case_of_emergency">په بېړني حالت کې باید کړنې ترسره شي</string>
+    <string name="my_profile">زما پروفایل</string>
+    <string name="add_another_account">بل ګڼوڼ زیات کړئ</string>
+    <string name="end_is_before_start">پای له پيل څخه مخکې دی</string>
+    <string name="select_person">شخص غوره کړئ</string>
+    <string name="add_new_post">یو نوی پوست ورزیات کړئ</string>
+    <string name="grades_scoring">درجې</string>
+    <string name="mark_comment">څرګندونه په نښه کړئ</string>
+    <string name="too_high">ډېر لوړ!</string>
+    <string name="collapse">نسکورېدل</string>
+    <string name="select_date">نېټه غوره کړئ</string>
+    <string name="link">لینک</string>
+    <string name="group_assignment">د ګروپ دنده</string>
+    <string name="menu">مینو</string>
+    <string name="drop_files_to_import">د واردولو لپاره فایل(ونه) پرېږدئ</string>
+    <string name="password_updated">پټنوم تازه شو</string>
+    <string name="chrome_recommended">کروم (سپارښتنه)</string>
+    <string name="internal_webview">داخلي ويب ليد</string>
+    <string name="cannot_record_attendance_for_future_date_time">د راتلونکي نېټې/وخت لپاره حاضري نه شي ثبتولی</string>
+    <string name="clear_selection">ټاکنه پاک کړئ</string>
+    <string name="move_entries_to_this_folder">ننوتنې دې پوښۍ ته ولېږدوئ</string>
+    <string name="cannot_move_already_in_same_folder">خوځېدای نه شي: توکي له مخکې په دې پوښۍ کې دي</string>
+    <string name="move_to">ته لاړ شه…</string>
+    <string name="deleted_items">ړنګ شوي توکي</string>
+    <string name="delete_or_restore_items">توکي ړنګ کړئ يا بیا ورغوئ</string>
+    <string name="yesterday">پرون</string>
+    <string name="request_to_enrol_already_pending">د نوم لیکنې غوښتنه لا دمخه پاتې ده</string>
+    <string name="canceled_enrolment_request">د نوم لیکنې غوښتنه لغوه شوه</string>
+    <string name="enroled_into_name">نوم لیکنه%1$s</string>
+    <string name="moderate">اعتدال</string>
+    <string name="manage_student_enrolments">د زده کوونکو نوم لیکنه اداره کړئ</string>
+    <string name="view_learning_records">د زده کړې ریکارډونه وګورئ</string>
+    <string name="edit_learning_records">د زده کړې ریکارډونو سمون</string>
+    <string name="view_members">غړي وګورئ</string>
+    <string name="direct_enrol_users_onto_courses">په مستقیمه توګه په کورسونو کې کاروونکي راجستر کړئ</string>
+    <string name="close_now">اوس یې وتړئ</string>
+    <string name="view_all_courses">ټول کورسونه وګورئ</string>
+    <string name="edit_all_courses">ټول کورسونه اېډېټ کړئ</string>
+    <string name="moderate_all_courses">ټول کورسونه معتدله کړئ</string>
+    <string name="manage_student_enrolments_for_all_courses">د ټولو کورسونو لپاره د زده کوونکو نوم لیکنې اداره کړئ</string>
+    <string name="view_attendance_records_for_all_courses">د ټولو کورسونو لپاره د حاضرۍ ریکارډونه وګورئ</string>
+    <string name="edit_attendance_records_for_all_courses">د ټولو کورسونو لپاره د حاضرۍ ریکارډونه اېډېټ کړئ</string>
+    <string name="add_new_users">نوي کاروونکي زیات کړئ</string>
+    <string name="view_all_users">ټول کاروونکي وګورئ</string>
+    <string name="edit_all_users">ټول کاروونکي اېډېټ کړئ</string>
+    <string name="view_learning_records_for_all_courses">د ټولو کورسونو لپاره د زده کړې ريکارډونه وګورئ</string>
+    <string name="edit_learning_records_for_all_courses">د ټولو کورسونو لپاره د زده کړې ریکارډونه اېډېټ کړئ</string>
+    <string name="add_new_courses">نوي کورسونه زیات کړئ</string>
+    <string name="manage_user_permissions">د کاروونکي اجازې اداره کړئ</string>
+    <string name="reset_passwords">پټنومونه بیا تنظیم کړئ</string>
+    <string name="upload_failed">پورته کول بريالي نه شو</string>
+    <string name="invalid_invite_code">د بلنې ناسم کوډ</string>
+    <string name="last_key">وروستی</string>
+    <string name="up_key">پورته</string>
+    <string name="over_key">زيات</string>
+    <string name="permission_key">اجازه</string>
+    <string name="members_key">غړي</string>
+    <string name="assignment">دنده</string>
+    <string name="none_key">هېڅ نه</string>
+    <string name="exceeds_word_limit">د کلمې له حد څخه تېرېري:%1$s/%2$s</string>
+    <string name="exceeds_char_limit">د توري له حد څخه تېرېږي: %1$s/ %2$s</string>
+    <string name="unsupported_file_type">د ناملاتړي فایل ډول. ملاتړي ډولونه دي: %1$s</string>
+    <string name="first_key">لومړی</string>
+    <string name="to_key">ته</string>
+    <string name="down_key">ښکته</string>
+    <string name="entry_key">ننوتل</string>
+    <string name="select_file">فایل غوره کړئ</string>
+    <string name="peers_to_review">د بیا کتنې لپاره جوړه</string>
+    <string name="already_submitted">له مخکې سپارل شوی</string>
+    <string name="panic_button_explanation">%1$s په اتومات ډول وتلی شئ، په دې وسيله کې خوندي شوې ډېټا پاکولی شئ او په خپله يې پټولی شئ، کله چې د یوه داسې ډار تڼۍ ايپ له خوا وپارول شي، چې د PanicKit معیار ملاتړ کوي(لکه Ripple). د Ripple راښکته کولو لپاره ټایپ تڼۍ کېکاږئ.</string>
+    <string name="hide_app_explanation">ښکاره کوډ:%2$s
+\nکه پټ ايپ فعال شوی وي، نو بیا %1$s به پټ شي او کله چې د ډار تڼۍ پيل شي، نو په جعلي نوټ پيډ باندې به بدل شي.نو تاسې اړ یاست، چې د%1$s ښکاره کولو لپاره په جعلي نوټ پيډ ايپ کې د (%2$s) دپاسه د ښکاره کولو کوډ ټايپ کړئ.</string>
+    <string name="remove">لرې کول</string>
+    <string name="terms_required_if_registration_enabled">که د ځان راجسترول فعال شوی وي، نو تاسې باید لږ تر لږه په يوه ژبه کې شرایط او پاليسۍ برابرې کړئ، چې کاروونکی یې د راجستر کولو په وخت کې ومني.</string>
+    <string name="chrome_recommended_info">دسیستم تلوالي لټونې کارونه (په نورماله توګه کروم)</string>
+    <string name="html5_content_display_engine">HTML5 ښودلو انجن</string>
+    <string name="internal_webview_info">دا يوازې په هغه وخت کې سپارښتنه کېږي، چې په وسيله کې لټوني ته د لاسرسي اجازه نه وي</string>
+    <string name="content_not_ready_try_later">منځپانګه لا چمتو نه دی، وروسته بیا هڅه وکړئ.</string>
+    <string name="cannot_move_to_subfolder_of_self">يوه پوښۍ په خپله نه شي کولی، چې فرعي پوښۍ ته واړوي</string>
+    <string name="declined_request_from_name">له %1$s څخه غوښتنه رد شوه</string>
+    <string name="could_not_restart">اووف! په اتومات ډول بیا پیل نه شو. مهرباني وکړئ ايپ بند کړئ او بيا یې پرانيزئ. له بیا پيلولو څخه وروسته به نوې ژبه ښايي اغيزمنه شي.</string>
+    <string name="version">نسخه</string>
+    <string name="licenses">جوازونه</string>
+    <string name="manage_teacher_enrolments_for_all_courses">د ټولو کورسونو لپاره د ښوونکو نوم لیکنې اداره کړئ</string>
+    <string name="could_not_load_vlc">VLC پورته کولی نه شي. پلې بیک د نصبولو لپاره د VLC ۶۴ بایټ نسخې ته اړتیا لري. مهرباني وکړئ له https://www.videolan.org/ څخه ۶۴ بایټ نسخه راښکته او سمبال کړئ او وروسته دا اپليکيشن بیا پيل کړئ.</string>
+    <string name="selected">ټاکلی</string>
+    <string name="most_recent">تر ټولو وروستي</string>
+    <string name="comment">څرګندونه</string>
+    <string name="this_app_will_receive">دا ايپ به ستاسو د پروفایل او کورسونو په اړه معلومات ترلاسه کړي</string>
+    <string name="marked_key">نښه شوی</string>
+    <string name="submitted_key">سپارل شوی</string>
 </resources>
