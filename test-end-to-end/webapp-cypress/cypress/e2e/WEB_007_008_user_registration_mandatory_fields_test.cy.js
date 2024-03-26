@@ -1,4 +1,4 @@
-describe('007_008_user_registration_mandatory_fields_test', () => {
+describe('WEB_007_008_user_registration_mandatory_fields_test', () => {
  it('Start Ustad Test Server ', () => {
   // Start Test Server
     cy.ustadStartTestServer()

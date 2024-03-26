@@ -1,4 +1,4 @@
-describe('003_002_add_module_text_blocks_and_perform_indent_hide_delete_actions', () => {
+describe('WEB_003_002_add_module_text_blocks_and_perform_indent_hide_delete_actions', () => {
 it('Start Ustad Test Server ', () => {
   // Start Test Server
   cy.ustadStartTestServer()

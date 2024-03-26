@@ -1,4 +1,4 @@
-describe('004_004_multiple_submission_possible _for_student', () => {
+describe('WEB_004_004_multiple_submission_possible _for_student', () => {
 it('Start Ustad Test Server ', () => {
  // Start Test Server
   cy.ustadStartTestServer()

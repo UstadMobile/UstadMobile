@@ -1,4 +1,4 @@
-describe('005_002_teacher_can_edit_discussion_board', () => {
+describe('WEB_005_002_teacher_can_edit_discussion_board', () => {
 it('Start Ustad Test Server ', () => {
   // Start Test Server
   cy.ustadStartTestServer()

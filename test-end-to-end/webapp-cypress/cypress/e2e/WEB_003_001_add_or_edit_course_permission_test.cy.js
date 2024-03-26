@@ -1,4 +1,4 @@
-describe('003_001_add_or_edit_course_permission_test', () => {
+describe('WEB_003_001_add_or_edit_course_permission_test', () => {
 it('Start Ustad Test Server ', () => {
   // Start Test Server
   cy.ustadStartTestServer()

@@ -11,7 +11,7 @@ env:
       TESTSERIAL: ${TESTSERIAL}
       TESTNAME: ${TESTNAME}
 - runFlow:
-    file: "../common/add_content.yaml"
+    file: "../common/clear_login_and_add_content.yaml"
     env:
       TESTFILENAME: Epub_Content1.epub
       CONTROLSERVER: ${CONTROLSERVER}
@@ -32,4 +32,7 @@ env:
 - tapOn: "Move entries to this folder"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/after_moving_content_to_new_folder_test"
 - tapOn: "Folder"
+- assertVisible:
+      id: "app_title"
+      text: "Test Folder"
 - assertVisible: "E-book"

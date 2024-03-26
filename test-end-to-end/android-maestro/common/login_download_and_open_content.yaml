@@ -12,11 +12,6 @@ appId: com.toughra.ustadmobile
     file: "../common/user_login.yaml"
 #Download and open content
 - tapOn: "Library"
-- runFlow:
-      when:
-          visible:
-            text: "Play"
-      file: play_video_content.yaml
 
 
 

@@ -51,6 +51,8 @@ tasks.withType<Jar> {
         attributes["com-ustadmobile-gopts"] = buildConfigProps?.getProperty("com.ustadmobile.gopts") ?: ""
 
         attributes["com-ustadmobile-showpoweredbymsg"] = buildConfigProps?.getProperty("com.ustadmobile.showpoweredbymsg") ?: ""
+
+        attributes["com-ustadmobile-apiurl"] = buildConfigProps?.getProperty("com.ustadmobile.apiurl") ?: ""
     }
 }
 

@@ -1,4 +1,4 @@
-describe('004_005_assignment_after_deadline_and_before_grace_Period', () => {
+describe('WEB_004_005_assignment_after_deadline_and_before_grace_Period', () => {
 it('Start Ustad Test Server ', () => {
  // Start Test Server
   cy.ustadStartTestServer()

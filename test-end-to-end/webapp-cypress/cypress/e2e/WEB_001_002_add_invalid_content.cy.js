@@ -1,4 +1,4 @@
-describe('001_002_add_invalid_content', () => {
+describe('WEB_001_002_add_invalid_content', () => {
  it('Start Ustad Test Server ', () => {
   // Start Test Server
     cy.ustadStartTestServer()
