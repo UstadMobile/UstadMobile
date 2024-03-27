@@ -89,7 +89,7 @@ class PersonListViewModel(
 
     private val pagingSourceFactory: () -> PagingSource<Int, PersonAndListDisplayDetails> = {
         Napier.d("PersonListScreen: create PagingSource factory invoked")
-        activeDb.personDao.findPersonsWithPermissionAsPagingSource(
+        activeRepo.personDao.findPersonsWithPermissionAsPagingSource(
             timestamp = getSystemTimeInMillis(),
             excludeClazz = filterExcludeMembersOfClazz,
             excludeSelected = filterAlreadySelectedList,
@@ -190,7 +190,6 @@ class PersonListViewModel(
 
     override fun onUpdateSearchResult(searchText: String) {
         //will use the searchText as per the appUiState
-        //lastPagingSource?.invalidate()
         _listRefreshCommandFlow.tryEmit(true)
     }
 
@@ -201,7 +200,6 @@ class PersonListViewModel(
             )
         }
         _listRefreshCommandFlow.tryEmit(true)
-        //lastPagingSource?.invalidate()
     }
 
     fun onClickInviteWithLink() {

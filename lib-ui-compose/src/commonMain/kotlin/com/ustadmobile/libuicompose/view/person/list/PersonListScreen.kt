@@ -14,15 +14,11 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.paging.ExperimentalPagingApi
-import androidx.paging.compose.collectAsLazyPagingItems
-import app.cash.paging.Pager
 import app.cash.paging.PagingConfig
 import com.ustadmobile.core.viewmodel.person.list.PersonListUiState
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
@@ -31,14 +27,13 @@ import com.ustadmobile.libuicompose.components.UstadListSortHeader
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.util.SortOrderOption
-import com.ustadmobile.door.paging.DoorRepositoryRemoteMediator
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.libuicompose.components.UstadBottomSheetOption
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadPersonAvatar
 import com.ustadmobile.libuicompose.components.ustadPagedItems
+import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
-import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 
@@ -106,28 +101,11 @@ fun PersonListScreen(
     onClickCopyInviteCode: () -> Unit = { },
 ){
 
-    // As per
-    // https://developer.android.com/reference/kotlin/androidx/paging/compose/package-summary#collectaslazypagingitems
-    // https://issuetracker.google.com/issues/241124061
-    val pager = remember(uiState.personList) {
-        Pager(
-            config = PagingConfig(pageSize = 20, enablePlaceholders = true, maxSize = 200),
-            pagingSourceFactory = {
-                Napier.d("PersonListScreen: Invoke pagingSourceFactory")
-                uiState.personList()
-            },
-            remoteMediator = DoorRepositoryRemoteMediator(uiState.personList),
-        )
-    }
-
-    val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
-
-    LaunchedEffect(listRefreshCommand) {
-        listRefreshCommand.collect {
-            Napier.d("PersonListScreen: refresh lazypagingitems")
-            lazyPagingItems.refresh()
-        }
-    }
+    val lazyPagingItems = rememberDoorRepositoryPager(
+        pagingSourceFactory = uiState.personList,
+        config = PagingConfig(20, enablePlaceholders = true, maxSize = 200),
+        refreshCommandFlow = listRefreshCommand,
+    ).lazyPagingItems
 
     UstadLazyColumn(
         modifier = Modifier.fillMaxSize()
