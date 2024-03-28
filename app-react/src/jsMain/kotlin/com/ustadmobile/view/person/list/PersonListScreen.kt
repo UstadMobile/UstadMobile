@@ -11,6 +11,7 @@ import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.viewmodel.person.list.PersonListUiState
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
+import com.ustadmobile.hooks.useDoorRemoteMediator
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.lib.db.composites.PersonAndListDisplayDetails
@@ -27,6 +28,8 @@ import web.cssom.Height
 import web.cssom.Overflow
 import web.cssom.pct
 import js.objects.jso
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import mui.material.*
 import react.FC
 import react.Props
@@ -42,6 +45,7 @@ import mui.icons.material.GroupAdd as GroupAddIcon
 
 external interface PersonListProps: Props {
     var uiState: PersonListUiState
+    var refreshCommandFlow: Flow<Boolean> ?
     var onSortOrderChanged: (SortOrderOption) -> Unit
     var onListItemClick: (Person) -> Unit
     var onClickAddItem: () -> Unit
@@ -52,8 +56,13 @@ external interface PersonListProps: Props {
 val PersonListComponent2 = FC<PersonListProps> { props ->
     val strings = useStringProvider()
 
+    val remoteMediatorResult = useDoorRemoteMediator(
+        pagingSourceFactory = props.uiState.personList,
+        refreshCommandFlow = (props.refreshCommandFlow ?: emptyFlow())
+    )
+
     val infiniteQueryResult : UseInfiniteQueryResult<PagingSourceLoadResult<Int, PersonAndListDisplayDetails>, Throwable> = usePagingSource(
-        props.uiState.personList, true, 50
+        remoteMediatorResult.pagingSourceFactory, true, 50
     )
     val muiAppState = useMuiAppState()
 
@@ -241,6 +250,7 @@ val PersonListScreen = FC<Props> {
 
     PersonListComponent2 {
         this.uiState = uiState
+        refreshCommandFlow = viewModel.listRefreshCommandFlow
         onListItemClick = viewModel::onClickEntry
         onSortOrderChanged = viewModel::onSortOrderChanged
         onClickAddItem = viewModel::onClickAdd
