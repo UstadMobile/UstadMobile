@@ -1,22 +1,66 @@
-package com.ustadmobile.door.paging
+package com.ustadmobile.core.paging
 
-import app.cash.paging.PagingSource
 import app.cash.paging.PagingSourceLoadParams
-import app.cash.paging.PagingSourceLoadParamsRefresh
 import com.ustadmobile.door.ext.concurrentSafeListOf
+import com.ustadmobile.door.paging.getLimit
+import com.ustadmobile.door.paging.getOffset
+import com.ustadmobile.door.util.systemTimeInMillis
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import kotlin.concurrent.Volatile
 
 /**
+ * A "normal" RemoteMediator doesn't work in the following situations:
+ *   1) Let's say a user opens a list that contains 1,000 items. When:
+ *      a) The user loads the initial list e.g. the first 100 items
+ *      b) The user filters the query e.g. that loads items 500-550
+ *      c) The user clears the filter
+ *     What will happen: The RemoteMediator won't attempt to load anything until the user reaches
+ *     the end of the (local) list. The user will see items 1-100, then items 500-550. Items 101-499
+ *     will be missing.
  *
+ *   2) The user has opened the list before
+ *     a) The user loads the initial list - the RemoteMediator runs a refresh, items 1-100 will be
+ *        updated if they changed on the server
+ *     b) The user scrolls down to view items 101-200.
+ *     Viewing items 101-200 will not trigger the RemoteMediator to refresh.
+ *
+ * DoorOffsetLimitRemoteMediator works by receiving an event each time the underlying (local)
+ * PagingSource.load function is called. Each time PagingSource.load is called it will:
+ *   1) Calculate the range that the PagingSource would be loading (e.g. the offset and limit)
+ *      based on the PagingSourceLoadParams using the same logic as is used by the OffsetLimit
+ *      PagingSource itself.
+ *   2) Calculate an expanded range that should be fetched from the server based on
+ *      prefetchDistance e.g. items from (loadparams offset minus prefetchDistance) until (
+ *      loadparams offset plus loadparams limit plus prefetchDistance).
+ *   3) Reduce the range to load from the server based on ranges that were already loaded within
+ *      the time to live which have not been invalidated.
+ *   4) If anything remains to be loaded, then invoke onRemoteLoad for the required range.
+ *
+ *  Finally, the RemoteMediator will normally run three requests : an initial refresh, a prepend,
+ *  and then an append. Those can be handled using just one request.
+ *
+ *  Efficiency can be further improved using the threshold e.g. if the prefetchDistance is 100,
+ *  items 1-100 have already been fetched from the remote, and the pagingsource just loaded items
+ *  10-20, then normally a request for items 101-120 would be sent. If a threshold is set (e.g. to
+ *  wait until the prefetch exceeds the known range by 50), this could further reduce the number of
+ *  requests made.
+ *
+ * @param prefetchDistance the distance by which to prefetch before and after each  page load
+ * @param scope - the coroutineScope e.g. the composable scope.
+ * @param onRemoteLoad A remote load function to invoke when ranges need to be fetched
  */
-class DoorOffsetLimitRemoteMediator<Value: Any>(
-    private val pagingSource: () -> PagingSource<Int, Value>
+class DoorOffsetLimitRemoteMediator(
+    private val prefetchDistance: Int = 100,
+    private val prefetchThreshold: Int = (prefetchDistance / 2),
+    private val scope: CoroutineScope,
+    private val onRemoteLoad: OnRemoteLoad,
 ) {
+
+    fun interface OnRemoteLoad {
+        suspend operator fun invoke(offset: Int, limit: Int)
+
+    }
 
     data class LoadedRange(
         val offset: Int,
@@ -26,19 +70,9 @@ class DoorOffsetLimitRemoteMediator<Value: Any>(
 
     private val loadedRanges = concurrentSafeListOf<LoadedRange>()
 
-    private val scope = CoroutineScope(Dispatchers.Default + Job())
-
-    private val prefetchDistance = 100
-
-    private val defaultTtl = 5_000
-
-    @Volatile
-    private var endOfPaginationReached: Boolean? = null
-
     /**
      * Must be invoked when the underlying PagingSource is invoked
      */
-    @Suppress("CAST_NEVER_SUCCEEDS")
     fun onLoad(params: PagingSourceLoadParams<Int>) {
         val pagingOffset = getOffset(params, (params.key ?: 0), Int.MAX_VALUE)
         val pagingLimit: Int = getLimit(params, (params.key ?: 0))
@@ -53,22 +87,70 @@ class DoorOffsetLimitRemoteMediator<Value: Any>(
         val rangeLimit = pagingLimit + (pagingOffset - rangeOffset) + prefetchDistance
 
         //Improvement to be made - trim the load range based on items already recently loaded.
+        var loadOffset = rangeOffset
 
-        val pagingSourceInstance = pagingSource()
-        if(pagingSourceInstance is DoorRepositoryReplicatePullPagingSource<*>) {
-            scope.launch {
-                Napier.d { "DoorOffsetLimitRemoteMediator: loadHttp from offset=$rangeOffset limit=$rangeLimit" }
-                pagingSourceInstance.loadHttp(
-                    PagingSourceLoadParamsRefresh(rangeOffset, rangeLimit, false) as PagingSourceLoadParams<Int>
-                )
-            }
+        //Go forward through all the ranges we already have loaded, push back the loadOffset if we already
+        // have that range loaded
+        loadedRanges.sortedBy { it.offset }.forEach {
+            if(it.offset <= rangeOffset && (it.offset + it.limit) > loadOffset)
+                loadOffset = (it.offset + it.limit)
+        }
+
+        if(loadOffset >= (rangeOffset + rangeLimit)) {
+            Napier.d { "DoorOffsetLimitRemoteMediator: already loaded everything required." }
+            return
+        }
+
+        var loadEnd = (rangeOffset + rangeLimit)
+
+        loadedRanges.sortedByDescending { it.offset }.forEach {
+            if(it.offset < loadEnd && (it.offset + it.limit) > loadEnd)
+                loadEnd = it.offset
+        }
+
+        val loadLimit = loadEnd - loadOffset
+
+        //Check if the range to load overlaps the range actually being loaded by the pagingSource
+        val loadPagingOverlap = minOf(pagingOffset + pagingLimit, loadOffset + loadLimit) -
+                maxOf(pagingOffset, loadOffset)
+
+        //Calculate (if required) how many items would be prefetched
+        val prefetchSize = if(loadPagingOverlap > 0) {
+            -1 //Doesn't matter, loading must happen anyway
         }else {
-            Napier.d { "DoorOffsetLimitRemoteMediator: not a DoorRepositoryReplicatePullPagingSource" }
+            var alreadyLoadedStart = pagingOffset
+            loadedRanges.sortedByDescending { it.offset }.forEach {
+                if(it.offset < alreadyLoadedStart && it.offset + it.limit >= alreadyLoadedStart)
+                    alreadyLoadedStart = it.offset
+            }
+
+            var alreadyLoadedEnd = (pagingOffset + pagingLimit)
+            loadedRanges.sortedBy { it.offset }.forEach {
+                if(it.offset <= alreadyLoadedEnd && (it.offset + it.limit) > alreadyLoadedEnd) {
+                    alreadyLoadedEnd = it.offset + it.limit
+                }
+            }
+
+            (rangeOffset - alreadyLoadedStart) + ((rangeOffset + rangeLimit) - alreadyLoadedEnd)
+        }
+
+
+        //Run the request if a) there is any overlap with the range requested by the PagingSource or
+        // b) the number of items to prefetch exceeds the prefetch threshold
+        if(loadPagingOverlap > 0 || prefetchSize > prefetchThreshold) {
+            scope.launch {
+                try {
+                    onRemoteLoad(loadOffset, loadLimit)
+                    loadedRanges.add(LoadedRange(loadOffset, loadLimit, systemTimeInMillis()))
+                }catch(e: Throwable) {
+                    Napier.w("Attempted to load from offset=$loadOffset limit=$loadLimit faled ", e)
+                }
+            }
         }
     }
 
-    fun cancel() {
-
+    fun invalidate() {
+        loadedRanges.clear()
     }
 
 }

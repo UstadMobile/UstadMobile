@@ -12,7 +12,7 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import app.cash.paging.PagingConfig
 import app.cash.paging.PagingSource
-import com.ustadmobile.door.paging.DoorOffsetLimitRemoteMediator
+import com.ustadmobile.core.paging.DoorOffsetLimitRemoteMediator
 import com.ustadmobile.door.paging.PagingSourceInterceptor
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
@@ -36,9 +36,9 @@ fun <T: Any> rememberDoorRepositoryPager(
         mutableStateOf(null)
     }
 
-    val offsetLimitMediator = remember(pagingSourceFactory) {
-        DoorOffsetLimitRemoteMediator(pagingSourceFactory)
-    }
+//    val offsetLimitMediator = remember(pagingSourceFactory) {
+//        DoorOffsetLimitRemoteMediator(pagingSourceFactory)
+//    }
 
     val pager = remember(pagingSourceFactory) {
         Pager(
@@ -47,7 +47,7 @@ fun <T: Any> rememberDoorRepositoryPager(
                 PagingSourceInterceptor(
                     src = pagingSourceFactory(),
                     onLoad = {
-                        offsetLimitMediator.onLoad(it)
+                        //offsetLimitMediator.onLoad(it)
                     }
                 ).also {
                     currentPagingSource = it
