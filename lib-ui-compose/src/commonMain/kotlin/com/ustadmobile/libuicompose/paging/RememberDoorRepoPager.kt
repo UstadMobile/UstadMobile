@@ -13,7 +13,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import app.cash.paging.PagingConfig
 import app.cash.paging.PagingSource
 import app.cash.paging.PagingSourceLoadParamsRefresh
-import com.ustadmobile.core.paging.DoorOffsetLimitRemoteMediator
+import com.ustadmobile.door.paging.DoorOffsetLimitRemoteMediator
 import com.ustadmobile.door.paging.DoorRepositoryReplicatePullPagingSource
 import com.ustadmobile.door.paging.PagingSourceInterceptor
 import io.github.aakira.napier.Napier
