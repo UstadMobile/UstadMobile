@@ -37,9 +37,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.paging.compose.collectAsLazyPagingItems
-import app.cash.paging.Pager
-import app.cash.paging.PagingConfig
 import com.ustadmobile.core.impl.locale.entityconstants.RoleConstants
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListUiState
@@ -51,6 +48,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.nav.NavResultReturner
+import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.EnrolmentRequest
@@ -62,6 +60,7 @@ import com.ustadmobile.libuicompose.components.UstadListFilterChipsHeader
 import com.ustadmobile.libuicompose.components.UstadListSortHeader
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.nav.UstadNavControllerPreCompose
+import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
 import com.ustadmobile.libuicompose.util.compose.courseTerminologyEntryResource
 import com.ustadmobile.libuicompose.util.compose.rememberCourseTerminologyEntries
 import com.ustadmobile.libuicompose.util.ext.copyWithNewFabOnClick
@@ -72,6 +71,8 @@ import com.ustadmobile.libuicompose.util.rememberHtmlToPlainText
 import com.ustadmobile.libuicompose.util.rememberTimeFormatter
 import com.ustadmobile.libuicompose.view.clazz.CourseImage
 import com.ustadmobile.libuicompose.viewmodel.ustadViewModel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import moe.tlaster.precompose.navigation.BackStackEntry
 import java.util.TimeZone
 
@@ -138,6 +139,7 @@ fun ClazzListScreen(
 
     ClazzListScreen(
         uiState = uiState,
+        refreshCommandFlow = viewModel.refreshCommandFlow,
         onClickClazz = viewModel::onClickEntry,
         onClickFilterChip = viewModel::onClickFilterChip,
         onClickSortOption = viewModel::onSortOrderChanged,
@@ -148,21 +150,17 @@ fun ClazzListScreen(
 @Composable
 fun ClazzListScreen(
     uiState: ClazzListUiState = ClazzListUiState(),
+    refreshCommandFlow: Flow<RefreshCommand> = emptyFlow(),
     onClickClazz: (Clazz) -> Unit = {},
     onClickFilterChip: (MessageIdOption2) -> Unit = {},
     onClickSortOption: (SortOrderOption) -> Unit = { },
     onClickCancelEnrolmentRequest: (EnrolmentRequest) -> Unit = { },
     sortListMode: SortListMode = defaultSortListMode(),
 ) {
-
-    val pager = remember(uiState.clazzList){
-        Pager(
-            config = PagingConfig(pageSize = 20, enablePlaceholders = true, maxSize = 200),
-            pagingSourceFactory = uiState.clazzList
-        )
-    }
-
-    val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
+    val lazyPagingItems = rememberDoorRepositoryPager(
+        pagingSourceFactory = uiState.clazzList,
+        refreshCommandFlow = refreshCommandFlow,
+    ).lazyPagingItems
 
     val hasPendingEnrolments = uiState.pendingEnrolments.isNotEmpty()
     val timeFormatter = rememberTimeFormatter()

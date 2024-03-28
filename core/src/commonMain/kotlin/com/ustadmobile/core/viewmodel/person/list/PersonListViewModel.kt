@@ -32,7 +32,6 @@ import com.ustadmobile.core.viewmodel.person.bulkaddselectfile.BulkAddPersonSele
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.lib.db.composites.PersonAndListDisplayDetails
-import io.github.aakira.napier.Napier
 import org.kodein.di.instance
 
 data class PersonListUiState(
@@ -88,7 +87,6 @@ class PersonListViewModel(
         savedStateHandle[ARG_REQUIRE_PERMISSION_TO_SHOW_LIST]?.toLong() ?: 0
 
     private val pagingSourceFactory: () -> PagingSource<Int, PersonAndListDisplayDetails> = {
-        Napier.d("PersonListScreen: create PagingSource factory invoked")
         activeRepo.personDao.findPersonsWithPermissionAsPagingSource(
             timestamp = getSystemTimeInMillis(),
             excludeClazz = filterExcludeMembersOfClazz,
@@ -96,12 +94,8 @@ class PersonListViewModel(
             accountPersonUid = activeUserPersonUid,
             sortOrder = _uiState.value.sortOption.flag,
             searchText = _appUiState.value.searchState.searchText.toQueryLikeParam()
-        ).also {
-            lastPagingSource = it
-        }
+        )
     }
-
-    private var lastPagingSource: PagingSource<Int, PersonAndListDisplayDetails>? = null
 
     private val inviteCode = savedStateHandle[ARG_SHOW_ADD_VIA_INVITE_LINK_CODE]
 

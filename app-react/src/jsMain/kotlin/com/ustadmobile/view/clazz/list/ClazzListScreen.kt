@@ -8,6 +8,7 @@ import com.ustadmobile.core.hooks.ustadViewName
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.locale.entityconstants.RoleConstants
+import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListUiState
@@ -44,10 +45,13 @@ import web.html.HTMLElement
 import web.window.window
 import mui.icons.material.Badge as BadgeIcon
 import com.ustadmobile.hooks.useDateFormatter
+import com.ustadmobile.hooks.useDoorRemoteMediator
 import com.ustadmobile.hooks.useTimeFormatter
 import com.ustadmobile.lib.db.entities.EnrolmentRequest
 import com.ustadmobile.view.clazz.uriOrDefaultBanner
 import com.ustadmobile.view.components.UstadDetailHeader
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import web.events.addEventListener
 import web.events.removeEventListener
 import web.window.Window
@@ -56,6 +60,8 @@ import web.window.resize
 external interface ClazzListScreenProps : Props {
 
     var uiState: ClazzListUiState
+
+    var refreshCommandFlow: Flow<RefreshCommand>?
 
     var onClickClazz: (Clazz) -> Unit
 
@@ -70,8 +76,12 @@ external interface ClazzListScreenProps : Props {
 private val ClazzListScreenComponent2 = FC<ClazzListScreenProps> { props ->
     val strings = useStringProvider()
 
+    val remoteMediatorResult = useDoorRemoteMediator(
+        props.uiState.clazzList, props.refreshCommandFlow ?: emptyFlow()
+    )
+
     val infiniteQueryResult = usePagingSource(
-        props.uiState.clazzList, true, 50
+        remoteMediatorResult.pagingSourceFactory, true, 50
     )
 
     val containerRef = useRef<HTMLElement>(null)
@@ -221,6 +231,7 @@ val ClazzListScreen = FC<Props> { props ->
     ClazzListScreenComponent2 {
         + props
         this.uiState = uiState
+        refreshCommandFlow = viewModel.refreshCommandFlow
         onClickClazz = viewModel::onClickEntry
         onClickSort = viewModel::onSortOrderChanged
         onClickFilterChip = viewModel::onClickFilterChip
