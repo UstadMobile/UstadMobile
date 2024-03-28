@@ -1,18 +1,20 @@
 package com.ustadmobile.libuicompose.paging
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import app.cash.paging.PagingConfig
 import app.cash.paging.PagingSource
+import app.cash.paging.PagingSourceLoadParamsRefresh
 import com.ustadmobile.core.paging.DoorOffsetLimitRemoteMediator
+import com.ustadmobile.door.paging.DoorRepositoryReplicatePullPagingSource
 import com.ustadmobile.door.paging.PagingSourceInterceptor
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
@@ -23,9 +25,8 @@ class DoorRepositoryPagerResult<T : Any>(
 )
 
 /**
- * Workaround
+ * Use the DoorOffsetLimitRemoteMediator and
  */
-@OptIn(ExperimentalPagingApi::class)
 @Composable
 fun <T: Any> rememberDoorRepositoryPager(
     pagingSourceFactory: () -> PagingSource<Int, T>,
@@ -36,39 +37,67 @@ fun <T: Any> rememberDoorRepositoryPager(
         mutableStateOf(null)
     }
 
-//    val offsetLimitMediator = remember(pagingSourceFactory) {
-//        DoorOffsetLimitRemoteMediator(pagingSourceFactory)
-//    }
+    var pagingSourceFactoryState by remember {
+        mutableStateOf(pagingSourceFactory)
+    }
+
+    val offsetLimitMediator = remember {
+        DoorOffsetLimitRemoteMediator(
+            onRemoteLoad = { offset, limit ->
+                Napier.v { "rememberDoorRepositoryPager: fetch remote offset=$offset limit=$limit" }
+                (currentPagingSource as? DoorRepositoryReplicatePullPagingSource)?.loadHttp(
+                    PagingSourceLoadParamsRefresh(offset, limit, false)
+                )
+            }
+        )
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            offsetLimitMediator.cancel()
+        }
+    }
+
+    /**
+     * Detect when PagingSourceFactory has been changed. If that happens, then invalidate the
+     * offsetLimitMediator.
+     */
+    LaunchedEffect(currentPagingSource) {
+        if(pagingSourceFactoryState !== pagingSourceFactory) {
+            Napier.v {
+                "rememberDoorRepositoryPager: new pagingSourceFactory set, invalidating offset limit mediator"
+            }
+            offsetLimitMediator.invalidate()
+            pagingSourceFactoryState = pagingSourceFactory
+        }
+    }
+
 
     val pager = remember(pagingSourceFactory) {
         Pager(
             config = config,
             pagingSourceFactory = {
                 PagingSourceInterceptor(
-                    src = pagingSourceFactory(),
+                    src = pagingSourceFactory().also { pagingSource ->
+                        currentPagingSource = pagingSource
+                    },
                     onLoad = {
-                        //offsetLimitMediator.onLoad(it)
+                        offsetLimitMediator.onLoad(it)
                     }
-                ).also {
-                    currentPagingSource = it
-                }
+                )
             },
         )
     }
 
     val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
 
-    var refreshMediatorPending by remember {
-        mutableStateOf(false)//User100
-    }
-
     LaunchedEffect(refreshCommandFlow) {
         refreshCommandFlow.collect {
             Napier.d("rememberDoorRepositoryPager: refresh")
             //Normally, this would use lazyPagingItems.refresh, but that doesn't actually work.
-            //TODO: Invalidate the offsetLimitMediator first e.g. its next request will not consider previous loads as cached.
+
+            offsetLimitMediator.invalidate()
             currentPagingSource?.invalidate()
-            refreshMediatorPending = true
         }
     }
 

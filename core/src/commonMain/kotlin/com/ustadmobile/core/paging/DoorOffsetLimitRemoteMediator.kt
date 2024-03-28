@@ -7,6 +7,9 @@ import com.ustadmobile.door.paging.getOffset
 import com.ustadmobile.door.util.systemTimeInMillis
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
 /**
@@ -46,16 +49,19 @@ import kotlinx.coroutines.launch
  *  wait until the prefetch exceeds the known range by 50), this could further reduce the number of
  *  requests made.
  *
- * @param prefetchDistance the distance by which to prefetch before and after each  page load
- * @param scope - the coroutineScope e.g. the composable scope.
- * @param onRemoteLoad A remote load function to invoke when ranges need to be fetched
+ * @param prefetchDistance the distance by which to prefetch before and after each page load
+ * @param prefetchThreshold when all the data required by a PagingSource load itself has already
+ *        been loaded, however more data would need to be loaded to reach the prefetchDistance, the
+ *        threshold is the minimum number of prefetch items to initiate a request (as outlined above).
+ * @param onRemoteLoad A remote load function to invoke when ranges need to be fetched.
  */
 class DoorOffsetLimitRemoteMediator(
     private val prefetchDistance: Int = 100,
     private val prefetchThreshold: Int = (prefetchDistance / 2),
-    private val scope: CoroutineScope,
     private val onRemoteLoad: OnRemoteLoad,
 ) {
+
+    private val scope = CoroutineScope(Dispatchers.Default + Job())
 
     fun interface OnRemoteLoad {
         suspend operator fun invoke(offset: Int, limit: Int)
@@ -151,6 +157,10 @@ class DoorOffsetLimitRemoteMediator(
 
     fun invalidate() {
         loadedRanges.clear()
+    }
+
+    fun cancel() {
+        scope.cancel()
     }
 
 }
