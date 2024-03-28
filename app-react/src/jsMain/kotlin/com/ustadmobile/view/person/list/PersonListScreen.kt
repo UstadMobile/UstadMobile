@@ -8,6 +8,7 @@ import com.ustadmobile.core.hooks.ustadViewName
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.paging.ListPagingSource
+import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.viewmodel.person.list.PersonListUiState
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
@@ -45,7 +46,7 @@ import mui.icons.material.GroupAdd as GroupAddIcon
 
 external interface PersonListProps: Props {
     var uiState: PersonListUiState
-    var refreshCommandFlow: Flow<Boolean> ?
+    var refreshCommandFlow: Flow<RefreshCommand> ?
     var onSortOrderChanged: (SortOrderOption) -> Unit
     var onListItemClick: (Person) -> Unit
     var onClickAddItem: () -> Unit
@@ -250,7 +251,7 @@ val PersonListScreen = FC<Props> {
 
     PersonListComponent2 {
         this.uiState = uiState
-        refreshCommandFlow = viewModel.listRefreshCommandFlow
+        refreshCommandFlow = viewModel.refreshCommandFlow
         onListItemClick = viewModel::onClickEntry
         onSortOrderChanged = viewModel::onSortOrderChanged
         onClickAddItem = viewModel::onClickAdd

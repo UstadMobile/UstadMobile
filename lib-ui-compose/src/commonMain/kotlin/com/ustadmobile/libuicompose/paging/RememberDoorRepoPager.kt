@@ -13,11 +13,14 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import app.cash.paging.PagingConfig
 import app.cash.paging.PagingSource
 import app.cash.paging.PagingSourceLoadParamsRefresh
+import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.door.paging.DoorOffsetLimitRemoteMediator
 import com.ustadmobile.door.paging.DoorRepositoryReplicatePullPagingSource
 import com.ustadmobile.door.paging.PagingSourceInterceptor
+import com.ustadmobile.door.util.systemTimeInMillis
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filter
 
 class DoorRepositoryPagerResult<T : Any>(
     val pager: Pager<Int, T>,
@@ -25,13 +28,14 @@ class DoorRepositoryPagerResult<T : Any>(
 )
 
 /**
- * Use the DoorOffsetLimitRemoteMediator and
+ * Use DoorOffsetLimitRemoteMediator to trigger remote paged loads as required
  */
 @Composable
 fun <T: Any> rememberDoorRepositoryPager(
     pagingSourceFactory: () -> PagingSource<Int, T>,
-    config: PagingConfig,
-    refreshCommandFlow: Flow<Boolean>,
+    refreshCommandFlow: Flow<RefreshCommand>,
+    config: PagingConfig = PagingConfig(20, maxSize = 200),
+    refreshCommandTimeout: Long = 2_000,
 ): DoorRepositoryPagerResult<T> {
     var currentPagingSource: PagingSource<*, *>? by remember {
         mutableStateOf(null)
@@ -92,7 +96,9 @@ fun <T: Any> rememberDoorRepositoryPager(
     val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
 
     LaunchedEffect(refreshCommandFlow) {
-        refreshCommandFlow.collect {
+        refreshCommandFlow.filter {
+            systemTimeInMillis() - it.time < refreshCommandTimeout
+        }.collect {
             Napier.d("rememberDoorRepositoryPager: refresh")
             //Normally, this would use lazyPagingItems.refresh, but that doesn't actually work.
 

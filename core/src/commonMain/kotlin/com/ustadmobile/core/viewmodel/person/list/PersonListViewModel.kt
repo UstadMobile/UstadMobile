@@ -24,6 +24,7 @@ import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.impl.appstate.Snack
+import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.viewmodel.clazz.invitevialink.InviteViaLinkViewModel
 import com.ustadmobile.core.viewmodel.person.PersonViewModelConstants.ARG_POPUP_TO_ON_PERSON_SELECTED
@@ -32,7 +33,6 @@ import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.lib.db.composites.PersonAndListDisplayDetails
 import io.github.aakira.napier.Napier
-import kotlinx.coroutines.channels.BufferOverflow
 import org.kodein.di.instance
 
 data class PersonListUiState(
@@ -52,7 +52,7 @@ data class PersonListUiState(
     val hasBulkImportPermission: Boolean = false,
 )
 
-class EmptyPagingSource<Key: Any, Value: Any>(): PagingSource<Key, Value>() {
+class EmptyPagingSource<Key: Any, Value: Any>: PagingSource<Key, Value>() {
 
     override fun getRefreshKey(state: PagingState<Key, Value>): Key? {
         return null
@@ -107,11 +107,6 @@ class PersonListViewModel(
 
     private val setClipboardStringUseCase: SetClipboardStringUseCase by instance()
 
-    private val _listRefreshCommandFlow = MutableSharedFlow<Boolean>(
-        replay = 1, extraBufferCapacity = 0, onBufferOverflow = BufferOverflow.DROP_OLDEST
-    )
-
-    val listRefreshCommandFlow: Flow<Boolean> = _listRefreshCommandFlow.asSharedFlow()
 
     init {
         _appUiState.update { prev ->
@@ -190,7 +185,7 @@ class PersonListViewModel(
 
     override fun onUpdateSearchResult(searchText: String) {
         //will use the searchText as per the appUiState
-        _listRefreshCommandFlow.tryEmit(true)
+        _refreshCommandFlow.tryEmit(RefreshCommand())
     }
 
     fun onSortOrderChanged(sortOption: SortOrderOption) {
@@ -199,7 +194,7 @@ class PersonListViewModel(
                 sortOption = sortOption
             )
         }
-        _listRefreshCommandFlow.tryEmit(true)
+        _refreshCommandFlow.tryEmit(RefreshCommand())
     }
 
     fun onClickInviteWithLink() {

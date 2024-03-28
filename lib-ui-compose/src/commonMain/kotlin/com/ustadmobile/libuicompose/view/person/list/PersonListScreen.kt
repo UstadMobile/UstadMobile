@@ -18,14 +18,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.paging.ExperimentalPagingApi
-import app.cash.paging.PagingConfig
 import com.ustadmobile.core.viewmodel.person.list.PersonListUiState
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import com.ustadmobile.libuicompose.components.UstadAddListItem
 import com.ustadmobile.libuicompose.components.UstadListSortHeader
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.libuicompose.components.UstadBottomSheetOption
@@ -38,7 +37,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Suppress("unused") // Pending
 @Composable
 fun PersonListScreen(
     viewModel: PersonListViewModel
@@ -47,7 +45,7 @@ fun PersonListScreen(
 
     PersonListScreen(
         uiState = uiState,
-        listRefreshCommand = viewModel.listRefreshCommandFlow,
+        listRefreshCommand = viewModel.refreshCommandFlow,
         onListItemClick = viewModel::onClickEntry,
         onClickAddNew = viewModel::onClickAdd,
         onSortOrderChanged = viewModel::onSortOrderChanged,
@@ -89,11 +87,10 @@ fun PersonListScreen(
 
 }
 
-@OptIn(ExperimentalPagingApi::class)
 @Composable
 fun PersonListScreen(
     uiState: PersonListUiState,
-    listRefreshCommand: Flow<Boolean> = emptyFlow(),
+    listRefreshCommand: Flow<RefreshCommand> = emptyFlow(),
     onListItemClick: (Person) -> Unit = {},
     onSortOrderChanged: (SortOrderOption) -> Unit = { },
     onClickAddNew: () -> Unit = {},
@@ -103,7 +100,6 @@ fun PersonListScreen(
 
     val lazyPagingItems = rememberDoorRepositoryPager(
         pagingSourceFactory = uiState.personList,
-        config = PagingConfig(20, enablePlaceholders = true, maxSize = 200),
         refreshCommandFlow = listRefreshCommand,
     ).lazyPagingItems
 

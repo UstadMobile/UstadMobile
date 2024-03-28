@@ -3,6 +3,7 @@ package com.ustadmobile.hooks
 import app.cash.paging.PagingSource
 import app.cash.paging.PagingSourceLoadParamsRefresh
 import com.ustadmobile.core.hooks.useLaunchedEffect
+import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.door.paging.DoorOffsetLimitRemoteMediator
 import com.ustadmobile.door.paging.PagingSourceInterceptor
@@ -10,7 +11,9 @@ import kotlinx.coroutines.flow.Flow
 import react.useMemo
 import react.useState
 import com.ustadmobile.door.paging.DoorRepositoryReplicatePullPagingSource
+import com.ustadmobile.door.util.systemTimeInMillis
 import io.github.aakira.napier.Napier
+import kotlinx.coroutines.flow.filter
 import react.useEffect
 
 data class DoorRemoteMediatorResult<T: Any>(
@@ -31,7 +34,8 @@ data class DoorRemoteMediatorResult<T: Any>(
  */
 fun <T:Any> useDoorRemoteMediator(
     pagingSourceFactory: ListPagingSourceFactory<T>,
-    refreshCommandFlow: Flow<Boolean>
+    refreshCommandFlow: Flow<RefreshCommand>,
+    refreshCommandTimeout: Long = 2_000,
 ): DoorRemoteMediatorResult<T> {
     var pagingSourceFactoryState by useState { pagingSourceFactory }
 
@@ -99,7 +103,9 @@ fun <T:Any> useDoorRemoteMediator(
     }
 
     useLaunchedEffect(refreshCommandFlow) {
-        refreshCommandFlow.collect {
+        refreshCommandFlow.filter {
+            systemTimeInMillis() - it.time < refreshCommandTimeout
+        }.collect {
             Napier.v { "useDoorRemoteMediator: refresh" }
             offsetLimitMediator.invalidate()
             pagingSourceRef.first()?.invalidate()
