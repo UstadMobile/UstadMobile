@@ -8,7 +8,7 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.ext.toUrlQueryString
 import remix.run.router.Location
 import io.github.aakira.napier.Napier
-import js.core.jso
+import js.objects.jso
 import kotlinx.browser.sessionStorage
 import kotlinx.coroutines.*
 import org.w3c.dom.Storage

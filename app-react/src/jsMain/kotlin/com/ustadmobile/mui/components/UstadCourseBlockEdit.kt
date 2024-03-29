@@ -12,7 +12,7 @@ import com.ustadmobile.util.ext.onTextChange
 import com.ustadmobile.view.components.UstadSelectField
 import com.ustadmobile.wrappers.quill.ReactQuill
 import web.cssom.px
-import js.core.jso
+import js.objects.jso
 import kotlinx.datetime.TimeZone
 import mui.material.*
 import mui.system.Stack

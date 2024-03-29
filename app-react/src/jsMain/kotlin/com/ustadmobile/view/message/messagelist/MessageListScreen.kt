@@ -2,9 +2,12 @@ package com.ustadmobile.view.message.messagelist
 
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.paging.ListPagingSource
+import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.viewmodel.message.messagelist.MessageListUiState
 import com.ustadmobile.core.viewmodel.message.messagelist.MessageListViewModel
 import com.ustadmobile.hooks.useDateFormatter
+import com.ustadmobile.hooks.useDoorRemoteMediator
+import com.ustadmobile.hooks.useEmptyFlow
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useTimeFormatter
@@ -15,7 +18,7 @@ import com.ustadmobile.util.ext.onTextChange
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
-import js.core.jso
+import js.objects.jso
 import mui.material.Container
 import react.FC
 import react.Props
@@ -43,8 +46,14 @@ external interface MessageListScreenProps : Props {
 
 private val MessageListScreenComponent2 = FC<MessageListScreenProps> { props ->
 
+    val emptyRefreshFlow = useEmptyFlow<RefreshCommand>()
+
+    val mediatorResult = useDoorRemoteMediator(
+        props.uiState.messages, emptyRefreshFlow
+    )
+
     val infiniteQueryResult = usePagingSource(
-        props.uiState.messages, true, 50
+        mediatorResult.pagingSourceFactory, true, 50
     )
     val muiAppState = useMuiAppState()
 

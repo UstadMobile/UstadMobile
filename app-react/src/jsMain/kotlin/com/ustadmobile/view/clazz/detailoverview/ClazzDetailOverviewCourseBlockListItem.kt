@@ -22,7 +22,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.hooks.useHtmlToPlainText
 import com.ustadmobile.util.ext.useLineClamp
-import js.core.jso
+import js.objects.jso
 import react.dom.html.ReactHTML.div
 
 external interface ClazzDetailOverviewCourseBlockListItemProps : Props {

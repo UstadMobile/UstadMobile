@@ -5,10 +5,10 @@ import com.ustadmobile.core.domain.compress.CompressResult
 import com.ustadmobile.core.domain.compress.CompressUseCase
 import com.ustadmobile.core.wrappers.compressorjs.Compressor
 import io.github.aakira.napier.Napier
-import js.core.jso
+import js.objects.jso
 import js.promise.await
 import kotlinx.coroutines.CompletableDeferred
-import web.buffer.Blob
+import web.blob.Blob
 import web.http.fetchAsync
 import web.url.URL
 

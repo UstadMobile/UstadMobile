@@ -3,7 +3,7 @@ package com.ustadmobile.view
 import com.ustadmobile.core.viewmodel.site.termsdetail.SiteTermsDetailUiState
 import com.ustadmobile.lib.db.entities.SiteTerms
 import web.cssom.px
-import js.core.jso
+import js.objects.jso
 import mui.material.Container
 import mui.system.Stack
 import mui.system.StackDirection

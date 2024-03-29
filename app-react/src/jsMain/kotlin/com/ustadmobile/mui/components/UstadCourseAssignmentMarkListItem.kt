@@ -8,7 +8,7 @@ import com.ustadmobile.hooks.useDayOrDate
 import com.ustadmobile.view.components.UstadPersonAvatar
 import com.ustadmobile.wrappers.intl.Intl
 import web.cssom.rgb
-import js.core.jso
+import js.objects.jso
 import kotlinx.datetime.TimeZone
 import mui.icons.material.EmojiEvents as EmojiEventsIcon
 import mui.material.*
