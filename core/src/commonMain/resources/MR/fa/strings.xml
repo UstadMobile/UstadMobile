@@ -771,7 +771,7 @@
 \n
 \nمیتوانید موافقت خود را با استفاده از لینک که به شما ایمیل شد، هر زمانی از بین ببرید. اگر شما می‌خواهید موافقت ننمایید، همه داده‌های که توسط کودک شما ارائه گردیده است، طی 24 ساعت حذف می‌گردد.</string>
     <string name="add_educational_content_to_new_learning_env">محتوی آموزش (کتاب‌های الکترونیک، ویدیوها، تمرینات تعاملی و چیزهای دیگری) را از خود اضافه نمایید، یا با استفاده از یک پیوند از سایر ویب‌سایت‌ها وارد کنید. مکاتب، صنوف و گروه‌ها را ترتیب نمایید. بعداً شاگران، استادان و کارمندان را برای دسترسی به آن دعوت نمایید: بشکل آنلاین یا آفلاین.</string>
-    <string name="this_class">این صنف</string>
+    <string name="this_class">دا ټولګی</string>
     <string name="connect_to_an_existing_learning_environment">به یک محیط آموزشی موجود وصل شوید</string>
     <string name="does_your_class_already_have_learning_env">آیا صنف، مکتب یا سازمان شما یک تاسیس محیط آموزشی دارد؟ عالیست!</string>
     <string name="use_the_public_lib_env">از محیط آموزشی کتابخانه عمومی کار بگیرید</string>
@@ -960,4 +960,6 @@
     <string name="from_my_courses">از دوره‌های درسی من</string>
     <string name="name_key">نام</string>
     <string name="and_key">و</string>
+    <string name="import_from_file">از فایل وارد نمایید</string>
+    <string name="import_from_link">از فایل وارد نمایید</string>
 </resources>
