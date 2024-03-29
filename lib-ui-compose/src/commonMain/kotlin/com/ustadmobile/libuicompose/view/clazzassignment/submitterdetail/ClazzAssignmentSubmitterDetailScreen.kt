@@ -5,12 +5,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.paging.compose.collectAsLazyPagingItems
-import app.cash.paging.Pager
-import app.cash.paging.PagingConfig
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.clazzassignment.averageMark
@@ -29,9 +25,11 @@ import com.ustadmobile.libuicompose.components.UstadListSpacerItem
 import com.ustadmobile.libuicompose.components.UstadOpeningBlobInfoBottomSheet
 import com.ustadmobile.libuicompose.components.isDesktop
 import com.ustadmobile.libuicompose.components.ustadPagedItems
+import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
 import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
 import com.ustadmobile.libuicompose.util.linkify.rememberLinkExtractor
 import com.ustadmobile.libuicompose.util.rememberDateFormat
+import com.ustadmobile.libuicompose.util.rememberEmptyFlow
 import com.ustadmobile.libuicompose.util.rememberTimeFormatter
 import com.ustadmobile.libuicompose.view.clazzassignment.CommentListItem
 import com.ustadmobile.libuicompose.view.clazzassignment.CourseAssignmentSubmissionComponent
@@ -88,14 +86,11 @@ fun ClazzAssignmentSubmitterDetailScreen(
     onDeleteComment: (Comments) -> Unit = { },
 ){
 
-    val privateCommentsPager = remember(uiState.privateCommentsList) {
-        Pager(
-            pagingSourceFactory = uiState.privateCommentsList,
-            config = PagingConfig(pageSize = 50, enablePlaceholders = true)
-        )
-    }
+    val privateCommentsPager = rememberDoorRepositoryPager(
+        uiState.privateCommentsList, rememberEmptyFlow()
+    )
 
-    val privateCommentsLazyPagingItems = privateCommentsPager.flow.collectAsLazyPagingItems()
+    val privateCommentsLazyPagingItems = privateCommentsPager.lazyPagingItems
 
     val linkExtractor = rememberLinkExtractor()
 

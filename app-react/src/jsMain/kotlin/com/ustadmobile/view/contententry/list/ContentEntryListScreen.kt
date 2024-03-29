@@ -6,9 +6,12 @@ import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.hooks.ustadViewName
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.paging.ListPagingSource
+import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListUiState
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
+import com.ustadmobile.hooks.useDoorRemoteMediator
+import com.ustadmobile.hooks.useEmptyFlow
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useUstadViewModel
@@ -23,6 +26,7 @@ import com.ustadmobile.view.components.virtuallist.virtualListContent
 import emotion.react.css
 import web.cssom.*
 import js.objects.jso
+import kotlinx.coroutines.flow.Flow
 import mui.material.*
 import mui.material.List
 import mui.system.sx
@@ -46,6 +50,8 @@ import mui.icons.material.FileUpload as FileUploadIcon
 external interface ContentEntryListScreenProps : Props {
 
     var uiState: ContentEntryListUiState
+
+    var refreshCommandFlow: Flow<RefreshCommand>?
 
     var onClickContentEntry: (ContentEntry?) -> Unit
 
@@ -124,6 +130,7 @@ val ContentEntryListScreen = FC<Props> {
 
     ContentEntryListScreenComponent {
         uiState = uiStateVal
+        refreshCommandFlow = viewModel.refreshCommandFlow
         onClickContentEntry = viewModel::onClickEntry
         onClickImportFromLink = viewModel::onClickImportFromLink
         onClickImportFromFile = {
@@ -202,8 +209,14 @@ val ContentEntryListScreen = FC<Props> {
 
 private val ContentEntryListScreenComponent = FC<ContentEntryListScreenProps> { props ->
 
+    val emptyCommandFlow = useEmptyFlow<RefreshCommand>()
+
+    val mediatorResult = useDoorRemoteMediator(
+        props.uiState.contentEntryList, props.refreshCommandFlow ?: emptyCommandFlow
+    )
+
     val infiniteQueryResult = usePagingSource(
-        pagingSourceFactory = props.uiState.contentEntryList,
+        pagingSourceFactory = mediatorResult.pagingSourceFactory,
         placeholdersEnabled = true
     )
 

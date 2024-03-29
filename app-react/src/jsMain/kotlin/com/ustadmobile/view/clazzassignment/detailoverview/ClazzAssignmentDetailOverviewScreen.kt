@@ -5,6 +5,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.locale.entityconstants.SubmissionPolicyConstants
+import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewUiState
 import com.ustadmobile.core.viewmodel.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewViewModel
@@ -12,6 +13,8 @@ import com.ustadmobile.core.viewmodel.clazzassignment.detailoverview.ClazzAssign
 import com.ustadmobile.hooks.courseTerminologyResource
 import com.ustadmobile.hooks.useCourseTerminologyEntries
 import com.ustadmobile.hooks.useDateFormatter
+import com.ustadmobile.hooks.useDoorRemoteMediator
+import com.ustadmobile.hooks.useEmptyFlow
 import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.lib.db.entities.*
@@ -124,12 +127,22 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
 
     val muiAppState = useMuiAppState()
 
+    val refreshCommandFlow = useEmptyFlow<RefreshCommand>()
+
+    val courseCommentMediatorResult = useDoorRemoteMediator(
+        props.uiState.courseComments, refreshCommandFlow
+    )
+
     val courseCommentInfiniteQueryResult = usePagingSource(
-        props.uiState.courseComments, true, 50
+        courseCommentMediatorResult.pagingSourceFactory, true, 50
+    )
+
+    val privateCommentMediatorResult = useDoorRemoteMediator(
+        props.uiState.privateComments, refreshCommandFlow
     )
 
     val privateCommentIninfiteQueryResult = usePagingSource(
-        props.uiState.privateComments, true, 50
+        privateCommentMediatorResult.pagingSourceFactory, true, 50
     )
 
     val courseTerminologyEntries = useCourseTerminologyEntries(props.uiState.courseTerminology)

@@ -2,10 +2,13 @@ package com.ustadmobile.view.discussionpost.detail
 
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.paging.ListPagingSource
+import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailUiState2
 import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.hooks.useDateFormatter
+import com.ustadmobile.hooks.useDoorRemoteMediator
+import com.ustadmobile.hooks.useEmptyFlow
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useTimeFormatter
@@ -38,8 +41,14 @@ val DiscussionPostDetailComponent2 = FC<DiscussionPostDetailProps> { props ->
 
     val muiAppState = useMuiAppState()
 
+    val emptyRefreshFlow = useEmptyFlow<RefreshCommand>()
+
+    val mediatorResult = useDoorRemoteMediator(
+        props.uiState.discussionPosts, emptyRefreshFlow
+    )
+
     val infiniteQueryResult = usePagingSource(
-        pagingSourceFactory = props.uiState.discussionPosts,
+        pagingSourceFactory = mediatorResult.pagingSourceFactory,
         placeholdersEnabled = true
     )
 

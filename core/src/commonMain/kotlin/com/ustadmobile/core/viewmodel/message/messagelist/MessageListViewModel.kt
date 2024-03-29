@@ -40,12 +40,8 @@ class MessageListViewModel(
         activeRepo.messageDao.messagesFromOtherUserAsPagingSource(
             accountPersonUid = activeUserPersonUid,
             otherPersonUid = otherPersonUid
-        ).also {
-            lastPagingSource = it
-        }
+        )
     }
-
-    private var lastPagingSource: PagingSource<Int, Message>? = null
 
     init {
         _appUiState.update { prev ->

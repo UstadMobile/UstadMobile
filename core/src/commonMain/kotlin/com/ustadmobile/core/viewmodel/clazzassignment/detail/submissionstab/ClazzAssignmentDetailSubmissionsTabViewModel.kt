@@ -12,8 +12,7 @@ import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.detail.ClazzAssignmentDetailViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
-import app.cash.paging.PagingSource
-import com.ustadmobile.core.viewmodel.UstadViewModel
+import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.lib.db.entities.AssignmentProgressSummary
 import com.ustadmobile.lib.db.entities.AssignmentSubmitterSummary
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
@@ -82,8 +81,6 @@ class ClazzAssignmentDetailSubmissionsTabViewModel(
     private val argClazzUid = savedStateHandle[ARG_CLAZZUID]?.toLong()
         ?: throw IllegalArgumentException("No ClazzUid provided")
 
-    private var mLastPagingSource: PagingSource<Int, AssignmentSubmitterSummary>? = null
-
     private val pagingSourceFactory: ListPagingSourceFactory<AssignmentSubmitterSummary> = {
         activeRepo.clazzAssignmentDao.getAssignmentSubmitterSummaryListForAssignment(
             assignmentUid = argEntityUid,
@@ -92,9 +89,7 @@ class ClazzAssignmentDetailSubmissionsTabViewModel(
             group = systemImpl.getString(MR.strings.group),
             searchText = _appUiState.value.searchState.searchText.toQueryLikeParam(),
             sortOption = _uiState.value.sortOption.flag,
-        ).also {
-            mLastPagingSource = it
-        }
+        )
     }
 
     init {
@@ -154,7 +149,7 @@ class ClazzAssignmentDetailSubmissionsTabViewModel(
             args = mapOf(
                 ClazzAssignmentSubmitterDetailViewModel.ARG_ASSIGNMENT_UID to argEntityUid.toString(),
                 ClazzAssignmentSubmitterDetailViewModel.ARG_SUBMITTER_UID to assignmentSubmitter.submitterUid.toString(),
-                UstadViewModel.ARG_CLAZZUID to argClazzUid.toString(),
+                ARG_CLAZZUID to argClazzUid.toString(),
             )
         )
     }
@@ -165,11 +160,11 @@ class ClazzAssignmentDetailSubmissionsTabViewModel(
                 sortOption = sortOrderOption
             )
         }
-        mLastPagingSource?.invalidate()
+        _refreshCommandFlow.tryEmit(RefreshCommand())
     }
 
     override fun onUpdateSearchResult(searchText: String) {
-        mLastPagingSource?.invalidate()
+        _refreshCommandFlow.tryEmit(RefreshCommand())
     }
 
     override fun onClickAdd() {

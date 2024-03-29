@@ -12,7 +12,6 @@ import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel.Companion.FILTER_BY_PARENT_UID
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
-import app.cash.paging.PagingSource
 import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.domain.contententry.delete.DeleteContentEntryParentChildJoinUseCase
 import com.ustadmobile.core.domain.contententry.move.MoveContentEntriesUseCase
@@ -21,6 +20,7 @@ import com.ustadmobile.core.impl.appstate.AppBarColors
 import com.ustadmobile.core.impl.appstate.AppStateIcon
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.appstate.UstadContextMenuItem
+import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.ext.onActiveEndpoint
 import com.ustadmobile.core.view.ListViewMode
@@ -177,12 +177,9 @@ class ContentEntryListViewModel(
             }
 
             else -> EmptyPagingSource()
-        }.also {
-            lastPagingSource = it
         }
     }
 
-    private var lastPagingSource: PagingSource<Int, ContentEntryAndListDetail>? = null
 
     private var defaultTitle: String = ""
 
@@ -649,7 +646,7 @@ class ContentEntryListViewModel(
             )
         }
         savedStateHandle[KEY_FILTER_CHIP_ID] = filterOption.value.toString()
-        lastPagingSource?.invalidate()
+        _refreshCommandFlow.tryEmit(RefreshCommand())
     }
 
     companion object {
