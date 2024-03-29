@@ -21,6 +21,7 @@ import com.ustadmobile.door.util.systemTimeInMillis
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
+import java.util.concurrent.atomic.AtomicReference
 
 class DoorRepositoryPagerResult<T : Any>(
     val pager: Pager<Int, T>,
@@ -37,8 +38,18 @@ fun <T: Any> rememberDoorRepositoryPager(
     config: PagingConfig = PagingConfig(20, maxSize = 200),
     refreshCommandTimeout: Long = 2_000,
 ): DoorRepositoryPagerResult<T> {
-    var currentPagingSource: PagingSource<*, *>? by remember {
-        mutableStateOf(null)
+
+    /**
+     * When mutableState is used, then the state is set asynchronously. This could (in theory)
+     * be a problem because if the currentPagingSource is set by the interceptor, but not yet
+     * taken effect when the onRemoteLoad function is called, then the onRemoteLoad will missed
+     * or possibly invoked on the wrong object.
+     *
+     * currentPagingSource is not used as part of the layout. It is used only by events that happen
+     * outside the composition, so there is no safety issue with setting it immediately.
+     */
+    val currentPagingSource: AtomicReference<PagingSource<*, *>?> = remember {
+        AtomicReference(null)
     }
 
     var pagingSourceFactoryState by remember {
@@ -49,7 +60,7 @@ fun <T: Any> rememberDoorRepositoryPager(
         DoorOffsetLimitRemoteMediator(
             onRemoteLoad = { offset, limit ->
                 Napier.v { "rememberDoorRepositoryPager: fetch remote offset=$offset limit=$limit" }
-                (currentPagingSource as? DoorRepositoryReplicatePullPagingSource)?.loadHttp(
+                (currentPagingSource.get() as? DoorRepositoryReplicatePullPagingSource)?.loadHttp(
                     PagingSourceLoadParamsRefresh(offset, limit, false)
                 )
             }
@@ -66,7 +77,7 @@ fun <T: Any> rememberDoorRepositoryPager(
      * Detect when PagingSourceFactory has been changed. If that happens, then invalidate the
      * offsetLimitMediator.
      */
-    LaunchedEffect(currentPagingSource) {
+    LaunchedEffect(pagingSourceFactory) {
         if(pagingSourceFactoryState !== pagingSourceFactory) {
             Napier.v {
                 "rememberDoorRepositoryPager: new pagingSourceFactory set, invalidating offset limit mediator"
@@ -83,7 +94,7 @@ fun <T: Any> rememberDoorRepositoryPager(
             pagingSourceFactory = {
                 PagingSourceInterceptor(
                     src = pagingSourceFactory().also { pagingSource ->
-                        currentPagingSource = pagingSource
+                        currentPagingSource.set(pagingSource)
                     },
                     onLoad = {
                         offsetLimitMediator.onLoad(it)
@@ -103,7 +114,7 @@ fun <T: Any> rememberDoorRepositoryPager(
             //Normally, this would use lazyPagingItems.refresh, but that doesn't actually work.
 
             offsetLimitMediator.invalidate()
-            currentPagingSource?.invalidate()
+            currentPagingSource.get()?.invalidate()
         }
     }
 

@@ -19,7 +19,6 @@ import com.ustadmobile.libuicompose.components.UstadListSortHeader
 import com.ustadmobile.libuicompose.components.UstadListSpacerItem
 import com.ustadmobile.libuicompose.util.compose.courseTerminologyEntryResource
 import com.ustadmobile.libuicompose.util.compose.rememberCourseTerminologyEntries
-import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.core.paging.RefreshCommand
@@ -72,9 +71,7 @@ fun ClazzAssignmentDetailSubmissionsTabScreen(
     }
 
     UstadLazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .defaultScreenPadding()
+        modifier = Modifier.fillMaxSize()
     ) {
 
         item(key = "header") {
