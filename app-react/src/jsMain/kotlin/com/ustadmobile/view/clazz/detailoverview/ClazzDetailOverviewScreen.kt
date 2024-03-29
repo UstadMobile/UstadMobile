@@ -224,6 +224,7 @@ val ClazzDetailOverviewScreen = FC<Props> {
 
     ClazzDetailOverviewComponent2 {
         uiState = uiStateVal
+        listRefreshCommandFlow = viewModel.listRefreshCommandFlow
         onClickCourseBlock = viewModel::onClickCourseBlock
         onClickClazzCode = viewModel::onClickClazzCode
         onClickPermissions = viewModel::onClickPermissions
