@@ -17,13 +17,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Badge
-import androidx.compose.material.icons.filled.Login
 import androidx.compose.material3.Badge
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.runtime.Composable
@@ -121,7 +121,7 @@ fun ClazzListScreen(
                     viewModel.onClickJoinExistingClazz()
                 },
                 headlineContent = { Text(stringResource(MR.strings.join_existing_course)) },
-                leadingContent = { Icon(Icons.Default.Login, contentDescription = null) },
+                leadingContent = { Icon(Icons.AutoMirrored.Default.Login, contentDescription = null) },
             )
 
             if(uiState.canAddNewCourse) {
@@ -202,7 +202,7 @@ fun ClazzListScreen(
                 key = "pending_divider",
                 span = { GridItemSpan(maxLineSpan) },
             ) {
-                Divider(modifier = Modifier.fillMaxWidth(), thickness = 1.dp)
+                HorizontalDivider(modifier = Modifier.fillMaxWidth(), thickness = 1.dp)
             }
         }
 
@@ -220,7 +220,7 @@ fun ClazzListScreen(
 
         item(span = { GridItemSpan(maxLineSpan) }) {
             UstadListFilterChipsHeader(
-                modifier = Modifier.defaultItemPadding(),
+                modifier = Modifier.fillMaxWidth(),
                 filterOptions = uiState.filterOptions,
                 selectedChipId = uiState.selectedChipId,
                 enabled = uiState.fieldsEnabled,

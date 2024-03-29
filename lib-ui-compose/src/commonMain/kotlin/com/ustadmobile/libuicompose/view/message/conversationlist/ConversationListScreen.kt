@@ -26,6 +26,7 @@ fun ConversationListScreen(
 
     ConversationListScreen(
         uiState = uiState,
+        refreshCommandFlow = viewModel.refreshCommandFlow,
         onClickEntry = viewModel::onClickEntry,
     )
 }

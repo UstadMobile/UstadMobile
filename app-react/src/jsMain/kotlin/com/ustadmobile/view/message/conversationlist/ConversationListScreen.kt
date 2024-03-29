@@ -129,6 +129,7 @@ val ConversationListScreen = FC<Props> {
 
     ConversationListScreenComponent2 {
         uiState = uiStateVal
+        refreshCommandFlow = viewModel.refreshCommandFlow
         onClickEntry = viewModel::onClickEntry
     }
 }

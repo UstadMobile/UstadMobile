@@ -48,6 +48,7 @@ class MessageListViewModel(
             prev.copy(
                 navigationVisible = true,
                 userAccountIconVisible = false,
+                hideBottomNavigation = true,
             )
         }
 
