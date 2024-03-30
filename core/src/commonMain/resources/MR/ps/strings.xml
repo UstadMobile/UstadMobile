@@ -57,7 +57,7 @@
     <string name="field_required_prompt">دا برخه لازمه ده </string>
     <!-- Registration dialog feedback -->
     <string name="field_password_error_min">پټ نوم باید لږ تر لږه ۵ توري ولری</string>
-    <string name="filed_password_no_match">پټ نوم سره ورته نه دی، بیا هڅه وکړئ</string>
+    <string name="filed_password_no_match">پټنوم سره ورته نه دی، بیا هڅه وکړئ.</string>
     <!-- Update student details action button -->
     <string name="update">Update</string>
     <string name="profile">پیژنپال</string>
@@ -92,17 +92,16 @@
     <string name="download_continue_btn_label">ادامه ورکول</string>
     <string name="download_wifi_only">یوازی وایفای</string>
     <string name="download_calculating">اټکلول…</string>
-    <string name="download_state_downloaded">
-        <b>کښته شو</b> ټولټال %1$s توکي، چې ستاسو د وزلې په حافظه کې یې %2$s ځای نیولی.</string>
-    <string name="download_downloading_placeholder">د کښته کیدو په حالت کې، ٪ کښته شوی له ٪ څخه</string>
-    <string name="download_storage_option_device">٪ ډک - ٪ خالی</string>
+    <string name="download_state_downloaded"><b>راکښته شو</b> ټولټال %1$s توکي، چې ستاسو د وزلې په حافظه کې یې %2$s ځای نیولی.</string>
+    <string name="download_downloading_placeholder">د کښته کېدو په حالت کې%1$s کښته شوی له %2$sڅخه</string>
+    <string name="download_storage_option_device">%1$sډک - %2$s خالی</string>
     <string name="download_locally_availability">نژدې موجود دی</string>
     <string name="canceled">ړنګول</string>
     <string name="deleted">ړنګول/حذف کول</string>
     <string name="deleting">ړنګوی</string>
     <string name="share_application">د اپلیکیشن شریکول</string>
     <string name="share">شریک کول</string>
-    <string name="download_summary_title">٪ فعاله کښته کیدل</string>
+    <string name="download_summary_title">%1$s فعاله کښته کېدل</string>
     <string name="download_pause_download">ځنډ</string>
     <string name="download_entry_state_paused">ځنډ ورکړی شوی</string>
     <string name="get_app">اپلیکیشن لاسته راوړئ</string>
@@ -113,10 +112,8 @@
     <string name="file_not_found">دوتنه و نه موندل شو</string>
     <string name="multiple_choice">ګڼ ځوابه</string>
     <string name="video">ویډیو</string>
-    <string name="download_state_download">
-        <b>کښته کول</b> ټول %1$s توکي، چې ستاسو په وزله کې ټولټال %2$s ځای نیسی.</string>
-    <string name="download_state_downloading">
-        <b>کښته کول</b> ټولټال %1$s توکي، چې ستاسو په وزله کې به %2$s ځای ونیسی.</string>
+    <string name="download_state_download"><b>راکښته کول</b> ټول %1$s توکي، چې ستاسو په وزله کې ټولټال %2$s ځای نیسي.</string>
+    <string name="download_state_downloading"><b>راښکته کول</b> ټولټال %1$s توکي، چې ستاسو په وزله کې به %2$s ځای ونیسی.</string>
     <string name="download_cancel_label">د کښته کولو ړنګول</string>
     <string name="content_editor_create_new_category">نوی پوښه</string>
     <string name="licence">منښتلیک</string>
@@ -156,8 +153,7 @@
     <string name="xapi_seconds">ثانیې</string>
     <string name="xapi_verb_header">څه کار ترسره کړ</string>
     <string name="xapi_result_header">پایله</string>
-    <string name="supported_files">د ملاتړ وړ دوتني: <b> ایپب، ټینکان (XAPI)، زیپ</b>
-    </string>
+    <string name="supported_files">د ملاتړ وړ دوتنې: <b> ,ویډيو، غږ، EPUB, Xapi Zip,H5P</b></string>
     <string name="xapi_score">نمرې</string>
     <string name="import_title_not_entered">سرلیک دننه شوی نه دی</string>
     <string name="no_account">تاسو حساب/اکاونټ نلرئ؟</string>
@@ -165,7 +161,7 @@
     <string name="import_link_content_not_supported">دمحتویاتو ملاتړ نشته</string>
     <string name="import_link_big_size">د دوتنې اندازه ډیره زیاته ده</string>
     <string name="import_link_error">په واردولو کې تیروتنه</string>
-    <string name="content_entry_export_message">اوس تاسو ٪ د خپل وزلې په حافظه کې بهروئ. آیا غواړئ چې دې کار ته ادامه ورکړئ؟</string>
+    <string name="content_entry_export_message">اوس تاسو %1$s د خپل وزلې په حافظه کې بهروئ. آیا غواړئ چې دې کار ته ادامه ورکړئ؟</string>
     <string name="offline_sharing_enable_bluetooth_prompt">نالیکه/آفلاین شریکول بلوټوټ ته اړتیا لری</string>
     <string name="offline_sharing_enable_wifi_promot">د نالیکی/آفلاین شریکولو لپاره باید وایفای روښانه وی</string>
     <string name="enable">وړ کول</string>
@@ -385,7 +381,7 @@
     <string name="permission_sel_question_select">د ټولنیز احساسی زده کړو پوښتنو لیدل</string>
     <string name="role_name">د رول نوم</string>
     <string name="timezone">د وخت زون</string>
-    <string name="add_a_new_school">د نوی ښوونځی زیاتول</string>
+    <string name="add_a_new_school">د نوي ښوونځی زیاتول</string>
     <string name="permission_person_select">د خلکو لیدل</string>
     <string name="permission_person_picture_select">د پروفایل انځور لیدل</string>
     <string name="started_date" formatted="false">پیل %1$s</string>
@@ -632,7 +628,7 @@
     <string name="add_role_permission">د رول..اجازه زیاتول</string>
     <string name="scope">مقصد</string>
     <string name="reject">ردول</string>
-    <string name="invite_link_desc">هرڅوک چې دا پیوند/لینک ولري کولای شئ %1$s سره یوځای شئ او د یوځای کېدو غوښتنه وکړئ. وروسته بیا تاسو کولای شئ، چې د دوی غوښتنه ومنئ یا یې رد کړئ.</string>
+    <string name="invite_link_desc">هرڅوک چې دا پیوند/لینک ولري کولی شي سره یوځای شي او د یوځای کېدو غوښتنه وکړي. وروسته بیا تاسو کولای شئ، چې د دوی غوښتنه ومنئ یا یې رد کړئ.</string>
     <string name="copy_code">کوډ کاپی کول</string>
     <string name="share_link">د لینک شریکول</string>
     <string name="invite_with_link">له لینک سره بلنه ورکول</string>
@@ -641,7 +637,7 @@
     <string name="this_field_is_mandatory">دا ځای ضروری دی</string>
     <string name="permission_role_select">د ټولو نقشونو لیدل او غوره کول</string>
     <string name="permission_role_insert">د نوی نقش زیاتول</string>
-    <string name="permission_school_insert">د نوی ښوونځی زیاتول</string>
+    <string name="permission_school_insert">د نوي ښوونځی ورزیاتول</string>
     <string name="add_student_to_school">ښوونځی ته د زده کوونکی زیاتول</string>
     <string name="add_staff_to_school">ښوونځی ته د مامورینو زیاتول</string>
     <string name="moved_x_entries">%1$s شیان بل ځای ته لیږل شوي</string>
@@ -657,9 +653,9 @@
     <string name="question_key">پوښتنه</string>
     <string name="to_key">ته</string>
     <string name="onboarding_headline1">انټرنټ نشته؟ هیڅ ستونزه نده.</string>
-    <string name="onboarding_subheadline1">تعلیمی ویډیو، مقالې، او محاوره یی تمرینونه کښته کړئ ترڅو وروسته ورڅخه کار واخلئ.</string>
+    <string name="onboarding_subheadline1">هر څه له انټرنیټ پرته کار کوي</string>
     <string name="onboarding_headline2">نالیکی شریکول</string>
-    <string name="onboarding_subheadline2">محتویات په لوړ سرعت سره له نورو نږدی کاروونکو سره شریک کړئ.</string>
+    <string name="onboarding_subheadline2">په لوړ سرعت او له انټرنیټ پرته شریکولو سره وخت او ډېټا مو خوندي کړئ</string>
     <string name="add_new_language">نوې ژبه زیاته کړئ</string>
     <string name="languages">ژبې</string>
     <string name="edit_language">ژبه اېډېټ کړئ</string>
@@ -703,11 +699,14 @@
     <string name="what_is_your_date_of_birth">ستاسې د زېږېدنې نېټه څه ده؟</string>
     <string name="toggle_visibility">د لیدلو وړ بدلون وضعيت</string>
     <string name="parent_child_register_message_subject">مور او پلار: مهرباني وکړئ د خپلو ماشومانو نوم لیکنه له %1$s تاييد يا رد کړئ</string>
-    <string name="parent_child_register_message">"قدرمن مور او پلار، ستاسې ماشوم %1$s د نوم لیکنې لپاره له%2$sسره غوښتنه ورکړې ده. مهرباني وکړئ د لاندې لينک له لارې غوښتنه تایید يا رد کړئ. %3$s که غوښتنه په ۳۰ ورځو کې ونه منل شوه، نو غوښتنه (او ټول شخصي معلومات ) ړنګېږي. تاسې کولی شئ، هر وخت  د هماغه تاییدې لینک له لارې بېرته لغوه کړئ. مننه%2$s"</string>
+    <string name="parent_child_register_message">قدرمن مور او پلار، ستاسې ماشوم %1$s د نوم لیکنې لپاره له%2$sسره غوښتنه ورکړې ده. مهرباني وکړئ د لاندې لينک له لارې غوښتنه تایید يا رد کړئ. %3$s که غوښتنه په ۳۰ ورځو کې ونه منل شوه، نو غوښتنه (او ټول شخصي معلومات ) ړنګېږي. تاسې کولی شئ، هر وخت د هماغه تاییدې لینک له لارې بېرته لغوه کړئ. مننه%2$s</string>
     <string name="parent_consent_explanation">زه تصديقوم، چې زه د دې ماشوم مور او پلار او قانوني سرپرست یم.
+\n
 \nنوم: %1$s
 \nد زېږېدنې نېټه: %2$s
-\nکه زه خپل ماشوم ته %3$s رضايت ورکړم، نو د شخصي پېژندلو معلوماتو راټول او پروسس د محرمیت پاليسۍ او شرایطو پر بنسټ ترسره شي.
+\n
+\nکه زه خپل ماشوم ته %3$s رضايت ورکړم، نو د شخصي پېژندلو معلوماتو راټولول او پروسس د محرمیت د لاندې پاليسۍ او شرایطو پر بنسټ ترسره شي.
+\n
 \nرضايت هر وخت د برېښناليک د لینک په کارولو سره لغوه کېدای شي. که تاسو رضایت غوره نه کړئ، نو تاسې ماشوم له خوا هر ډول ورکړې شوې ډېټا به د ۲۴ ساعتونو په موده کې ړنګه شي.</string>
     <string name="invalid">ناباوري</string>
     <string name="invalid_file">ناباوري فایل</string>
@@ -793,7 +792,7 @@
     <string name="please_download_the_app">مهرباني وکړئ اپليکيشن راښکته کړئ</string>
     <string name="alternatively_you_can_download_the_apk">همدارنګه که وغواړئ د خپلې خوښې سمبالولو لپاره APK د فايل راښکته کړئ.</string>
     <string name="full_i_can_download_as_much_as_i_like">بشپړ - څومره چې وغواړم راښکته کولی شم</string>
-    <string name="limited_i_avoid_downloading_too_much">محدود- زه له له ډېر راښکته کولو څخه ډډه کوم</string>
+    <string name="limited_i_avoid_downloading_too_much">محدود- زه له ډېر کښته کولو څخه ډډه کوم</string>
     <string name="view_clazz">د ټولګي لیدل</string>
     <string name="view_clazzes">د ټولګيو لیدل</string>
     <string name="enrol_and_unenrol_students">د زده کوونکو نوم لیکنه د نوم لیکنې لغوه</string>
@@ -1005,13 +1004,13 @@
     <string name="add_using_a_web_link_then">د ویب لینک له لارې د يوې ښوونيزې منځپانګې زیاتول، بیا په بې لیکې ډول د هغه کارول</string>
     <string name="downloading_content">د راښکته کولو په حال کې%1$s</string>
     <string name="deleting_content">د ړنګولو په حال کې %1$s</string>
-    <string name="add_educational_content_using_supported_formats_eg_pdf_xapi_h5p">"د ملاتړو فارمټونو لکه  PDF, xAPI, H5P په مټ د ښوونيزې منځپانګې زیاتول"</string>
+    <string name="add_educational_content_using_supported_formats_eg_pdf_xapi_h5p">د ملاتړو فارمټونو لکه PDF, xAPI, H5P په مټ د ښوونيزې منځپانګې زیاتول</string>
     <string name="select_country">د هېواد ټاکل</string>
     <string name="current_status_consent_granted">اوسنی حالت: رضايت ترسره شو %1$s</string>
     <string name="enter_link">د لینک واردول</string>
     <string name="add_subject">د موضوع زیاتول</string>
-    <string name="share_via">"شریکول  د ... لارې"</string>
-    <string name="content_usage_time">د منځپانګې د کارولو موده</string>
+    <string name="share_via">شریکول لارې…</string>
+    <string name="content_usage_time">د منځپانګې د کارولو وخت</string>
     <string name="add_educational_content_to_new_learning_env">خپلې ښوونيزې منځپانګې (برېښنايي کتابونه، ويډيوګانې، متقابل تمرینونه او نور) ورزیات کړئ او يا د لينک په کارولو سره له نورو ويب سايټونو څخه يې را وارد کړئ. ښوونځي، ټولګي او ډلې جوړې کړئ. بيا د لاسرسي لپاره خپلو زده کوونکو، ښوونکو او کارکوونکو ته بلنه وکړئ: په بې ليکې يا پرلیکې.</string>
     <string name="connect_to_an_existing_learning_environment">له یوه شته ښوونيز چاپېريال سره وصل شئ</string>
     <string name="see_supported_sites">ملاتړي ويب سايټونه وګورئ</string>
@@ -1064,7 +1063,7 @@
     <string name="link">لینک</string>
     <string name="terms_required_if_registration_enabled">که د ځان راجسترول فعال شوی وي، نو تاسې باید لږ تر لږه په يوه ژبه کې شرایط او پاليسۍ برابرې کړئ، چې کاروونکی یې د راجستر کولو په وخت کې ومني.</string>
     <string name="chrome_recommended">کروم (سپارښتنه)</string>
-    <string name="chrome_recommended_info">دسیستم تلوالي لټونې کارونه (په نورماله توګه کروم)</string>
+    <string name="chrome_recommended_info">دسیستم تلوالي لټونې کارونه (په نورماله توګه کروم).</string>
     <string name="grant_app_permission">د %1$s اجازه ورکړئ</string>
     <string name="selected">ټاکلی</string>
     <string name="move_entries_to_this_folder">ننوتنې دې پوښۍ ته ولېږدوئ</string>
