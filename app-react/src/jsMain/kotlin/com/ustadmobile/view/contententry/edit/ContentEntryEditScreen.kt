@@ -16,6 +16,8 @@ import com.ustadmobile.mui.components.UstadTextEditField
 import com.ustadmobile.util.ext.onTextChange
 import com.ustadmobile.view.components.UstadMessageIdSelectField
 import com.ustadmobile.view.components.UstadSwitchField
+import com.ustadmobile.wrappers.quill.ReactQuill
+import kotlinx.coroutines.Dispatchers
 import mui.material.Button
 import mui.material.ButtonVariant
 import mui.material.Stack
@@ -46,7 +48,9 @@ val ContentEntryEditScreen = FC<Props> {
         ContentEntryEditViewModel(di, savedStateHandle)
     }
 
-    val uiStateVal by viewModel.uiState.collectAsState(ContentEntryEditUiState())
+    val uiStateVal by viewModel.uiState.collectAsState(
+        ContentEntryEditUiState(), Dispatchers.Main.immediate
+    )
 
     ContentEntryEditScreenComponent {
         uiState = uiStateVal
@@ -107,11 +111,11 @@ private val ContentEntryEditScreenComponent = FC<ContentEntryEditScreenProps> { 
             }
 
             if(props.uiState.contentEntryDescriptionVisible) {
-                UstadTextEditField {
+                ReactQuill {
                     value = props.uiState.entity?.entry?.description ?: ""
-                    id = "content_description"
-                    label = strings[MR.strings.description]
-                    enabled = props.uiState.fieldsEnabled
+                    id = "description_quill"
+                    placeholder = strings[MR.strings.description]
+                    readOnly = !props.uiState.fieldsEnabled
                     onChange = {
                         props.onContentEntryChanged(
                             props.uiState.entity?.entry?.shallowCopy {

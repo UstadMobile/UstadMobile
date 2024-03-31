@@ -4,6 +4,7 @@ import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.appstate.UstadContextMenuItem
 import com.ustadmobile.core.viewmodel.contententry.contentTypeStringResource
 import com.ustadmobile.core.viewmodel.contententry.list.listItemUiState
+import com.ustadmobile.hooks.useHtmlToPlainText
 import com.ustadmobile.lib.db.composites.ContentEntryAndListDetail
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.mui.common.justifyContent
@@ -176,6 +177,8 @@ private external interface SecondaryContentProps: Props {
 private val SecondaryContent = FC<SecondaryContentProps> { props ->
 
     val strings = useStringProvider()
+    val descriptionPlainText = useHtmlToPlainText(props.contentEntryItem?.description ?: "")
+
     val uiState = props.contentEntryItem?.listItemUiState
 
     Stack {
@@ -189,7 +192,7 @@ private val SecondaryContent = FC<SecondaryContentProps> { props ->
                     useLineClamp(2)
                 }
 
-                + (props.contentEntryItem?.description ?: "")
+                + descriptionPlainText
             }
         }
 

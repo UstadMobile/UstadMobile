@@ -11,6 +11,7 @@ import mui.system.responsive
 import react.FC
 import react.Props
 import react.dom.html.ReactHTML.div
+import react.useMemo
 import react.useState
 
 external interface SiteTermsDetailScreenProps : Props {
@@ -20,6 +21,9 @@ external interface SiteTermsDetailScreenProps : Props {
 }
 
 val SiteTermsDetailScreenComponent2 = FC<SiteTermsDetailScreenProps> { props ->
+    val termsCleanHtml = useMemo(props.uiState.siteTerms?.termsHtml ?: "") {
+        props.uiState.siteTerms?.termsHtml ?: ""
+    }
 
     Container {
         Stack {
@@ -28,7 +32,7 @@ val SiteTermsDetailScreenComponent2 = FC<SiteTermsDetailScreenProps> { props ->
 
             div {
                 dangerouslySetInnerHTML = jso {
-                    __html = props.uiState.siteTerms?.termsHtml ?: ""
+                    __html = termsCleanHtml
                 }
             }
         }
