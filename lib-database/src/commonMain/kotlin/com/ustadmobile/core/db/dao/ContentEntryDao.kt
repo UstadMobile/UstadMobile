@@ -34,22 +34,6 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
     ): ContentEntryAndLanguage?
 
     @Query("""
-        SELECT ContentEntry.*, 
-               Language.*,
-               CourseBlock.*
-          FROM ContentEntry
-               LEFT JOIN Language 
-               ON Language.langUid = ContentEntry.primaryLanguageUid 
-               
-               LEFT JOIN CourseBlock
-               ON CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
-               AND CourseBlock.cbEntityUid = :entityUid
-               
-         WHERE ContentEntry.contentEntryUid = :entityUid       
-    """)
-    abstract suspend fun findEntryWithBlockAndLanguageByUidAsync(entityUid: Long): ContentEntryWithBlockAndLanguage?
-
-    @Query("""
         SELECT ContentEntry.*
           FROM ContentEntry
          WHERE ContentEntry.contentEntryUid = :entryUuid 

@@ -28,6 +28,7 @@ import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
 import com.ustadmobile.core.viewmodel.contententry.detail.ContentEntryDetailViewModel
 import com.ustadmobile.core.viewmodel.contententry.getmetadata.ContentEntryGetMetadataViewModel
 import com.ustadmobile.core.viewmodel.contententry.importlink.ContentEntryImportLinkViewModel
+import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
 import com.ustadmobile.lib.db.composites.ContentEntryAndListDetail
 import com.ustadmobile.lib.db.composites.ContentEntryBlockLanguageAndContentJob
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -458,6 +459,7 @@ class ContentEntryListViewModel(
                 put(ContentEntryGetMetadataViewModel.ARG_FILENAME, fileName)
                 put(ARG_PARENT_UID, parentEntryUid.toString())
                 putFromSavedStateIfPresent(ContentEntryEditViewModel.ARG_COURSEBLOCK)
+                putFromSavedStateIfPresent(ContentEntryEditViewModel.ARG_GO_TO_ON_CONTENT_ENTRY_DONE)
             }
         )
     }
@@ -469,30 +471,42 @@ class ContentEntryListViewModel(
         //When the user is selecting content from ClazzEdit
         val courseBlockArg = savedStateHandle[ContentEntryEditViewModel.ARG_COURSEBLOCK]
 
+        val goToOnContentEntryEdit = savedStateHandle[ContentEntryEditViewModel.ARG_GO_TO_ON_CONTENT_ENTRY_DONE]?.toInt() ?: 0
+
         when {
             //If user is selecting a folder, and they have clicked on something that is not a folder, do nothing
             entry.leaf && showSelectFolderButton -> return
 
-            entry.leaf && courseBlockArg != null -> {
+            entry.leaf && goToOnContentEntryEdit != 0 && courseBlockArg != null -> {
                 val courseBlock = json.decodeFromString(
                     deserializer = CourseBlock.serializer(),
                     string = courseBlockArg,
                 ).shallowCopy {
                     cbTitle = entry.title
                     cbDescription = entry.description
+                    cbEntityUid = entry.contentEntryUid
+                    cbType = CourseBlock.BLOCK_CONTENT_TYPE
                 }
 
                 navigateForResult(
-                    nextViewName = ContentEntryEditViewModel.DEST_NAME,
+                    nextViewName = CourseBlockEditViewModel.DEST_NAME,
                     key = ClazzEditViewModel.RESULT_KEY_CONTENTENTRY,
-                    currentValue = ContentEntryBlockLanguageAndContentJob(
-                        entry = entry,
-                        block = courseBlock,
-                        contentJob = null,
-                        contentJobItem = null,
-                    ),
-                    serializer = ContentEntryBlockLanguageAndContentJob.serializer(),
-                    overwriteDestination = false
+                    currentValue = courseBlock,
+                    serializer = CourseBlock.serializer(),
+                    overwriteDestination = false,
+                    args = buildMap {
+                        putFromSavedStateIfPresent(ContentEntryEditViewModel.ARG_GO_TO_ON_CONTENT_ENTRY_DONE)
+
+                        this[CourseBlockEditViewModel.ARG_SELECTED_CONTENT_ENTRY] = json.encodeToString(
+                            ContentEntryBlockLanguageAndContentJob.serializer(),
+                            ContentEntryBlockLanguageAndContentJob(
+                                entry = entry,
+                                block = courseBlock,
+                                contentJob = null,
+                                contentJobItem = null,
+                            ),
+                        )
+                    }
                 )
                 return
             }

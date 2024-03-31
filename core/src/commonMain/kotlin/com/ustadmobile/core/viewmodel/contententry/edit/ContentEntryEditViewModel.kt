@@ -11,8 +11,11 @@ import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.ext.onActiveEndpoint
+import com.ustadmobile.core.view.UstadEditView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditUiState
+import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.lib.db.composites.ContentEntryBlockLanguageAndContentJob
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -58,17 +61,6 @@ data class ContentEntryEditUiState(
     val contentCompressVisible: Boolean
         get() = metadataResult != null
 
-    val courseBlockVisible: Boolean
-        get() = entity?.block != null
-
-    //Where a CourseBlock is being edited, then the title/description will be taken from the
-    //CourseBlock
-    val contentEntryTitleVisible: Boolean
-        get() = !courseBlockVisible
-
-    val contentEntryDescriptionVisible: Boolean
-        get() = !courseBlockVisible
-
     fun copyWithFieldsEnabled(fieldsEnabled: Boolean) : ContentEntryEditUiState{
         return copy(
             fieldsEnabled = fieldsEnabled,
@@ -84,26 +76,21 @@ data class ContentEntryEditUiState(
  * When there is no associated CourseBlock
  *    Show only the ContentEntryEdit part
  *
- * When there is an associated CourseBlock and the user has permission to edit the ContentEntry itself:
- *    The title and description will be shown only once (e.g. as part of CourseBlockEdit). The title
- *    and description will be copied from CourseBlock to ContentEntry
+ * When adding a new ContentEntry as a CourseBlock:
+ *   User selects ContentEntry, sees imported data. Then clicks NEXT
+ *   Goes to CourseBlockEdit
+ *   Clicks DONE
  *
- * When there is an associated CourseBlock and the user does not have permission to edit the ContentEntry itself:
- *    Only the CourseBlock part of the screen will be displayed. ContentEntry specific fields (e.g.
- *    license, author, etc) will not be displayed. This would probably be the case if a teacher
- *    selects a content item from the library.
- *
- * Only a user with permission to edit the ContentEntry can update the file associated with the
- * ContentEntry. This ensures that the ContentEntryVersionUid when used for usage data tracking
- * will be accurate and include usage from all courses.
-
+ * When editing a ContentEntry that was added to a CourseBlock
+ *   In ClazzEdit, user clicks on the CourseBlock, goes to CourseBlockEdit
+ *   User clicks on edit icon next to "Selected Content"
  */
 class ContentEntryEditViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
     private val saveContentEntryUseCase: SaveContentEntryUseCase =
         di.onActiveEndpoint().direct.instance(),
-    private val enqueueContentEntryImporseUseCase: EnqueueContentEntryImportUseCase =
+    private val enqueueContentEntryImportUseCase: EnqueueContentEntryImportUseCase =
         di.onActiveEndpoint().direct.instance(),
 ) : UstadEditViewModel(di, savedStateHandle, DEST_NAME){
 
@@ -154,7 +141,13 @@ class ContentEntryEditViewModel(
                         ContentEntryBlockLanguageAndContentJob(
                             entry = importedMetaData.entry.shallowCopy {
                                 contentEntryUid = newContentEntryUid
-                                contentOwner = activeUserPersonUid
+                                if(courseBlockArgVal != null) {
+                                    contentOwnerType = ContentEntry.OWNER_TYPE_COURSE
+                                    contentOwner = courseBlockArgVal.cbClazzUid
+                                }else {
+                                    contentOwnerType = ContentEntry.OWNER_TYPE_LIBRARY
+                                    contentOwner = activeUserPersonUid
+                                }
                             },
                             block = courseBlockArgVal?.shallowCopy {
                                 cbTitle = importedMetaData.entry.title
@@ -212,10 +205,15 @@ class ContentEntryEditViewModel(
                         text = systemImpl.getString(
                             //If the CourseBlock arg is provided, then the actual save to db is
                             // done by ClazzEdit, not here
-                            if(_uiState.value.entity?.block != null)
-                                MR.strings.done
-                            else
-                                MR.strings.save
+                            when {
+                                savedStateHandle[ARG_GO_TO_ON_CONTENT_ENTRY_DONE] == GO_TO_COURSE_BLOCK_EDIT.toString() -> {
+                                    MR.strings.next
+                                }
+                                _uiState.value.entity?.block != null -> {
+                                    MR.strings.done
+                                }
+                                else -> MR.strings.save
+                            }
                         ),
                         onClick = this@ContentEntryEditViewModel::onClickSave,
                     )
@@ -294,52 +292,82 @@ class ContentEntryEditViewModel(
 
         _uiState.update { prev -> prev.copyWithFieldsEnabled(false) }
 
-        if(entityVal.block != null) {
-            //This is being edited as part of a course. We won't save anything here. Saving will
-            //be done in ClazzEditViewModel
-            finishWithResult(entityVal)
-        }else {
-            viewModelScope.launch {
-                val parentUidArg = savedStateHandle[ARG_PARENT_UID]?.toLong()
-                saveContentEntryUseCase(
-                    contentEntry = contentEntryVal,
-                    //Where this is a new ContentEntry (e.g. entityUidArg == 0), it should be
-                    // joined to the parentUidArg
-                    joinToParentUid = if(entityUidArg == 0L) parentUidArg else null
+        val courseBlockVal = entityVal.block
+        val goToOnContentEntryDone = savedStateHandle[ARG_GO_TO_ON_CONTENT_ENTRY_DONE]?.toInt() ?: 0
+
+        when {
+            /* When a new ContentEntry is being added to a course, then the newly created ContentEntry,
+             * associated import job, and courseblock are all passed along to CourseBlockEdit
+             * e.g. ClazzEdit -> ContentEntryList -> ContentEntryEdit -> CourseBlockEdit -> return to ClazzEdit
+             */
+            courseBlockVal != null && goToOnContentEntryDone == GO_TO_COURSE_BLOCK_EDIT -> {
+                navController.navigate(
+                    CourseBlockEditViewModel.DEST_NAME,
+                    args = buildMap {
+                        this[CourseBlockEditViewModel.ARG_SELECTED_CONTENT_ENTRY] = json.encodeToString(
+                            ContentEntryBlockLanguageAndContentJob.serializer(), entityVal
+                        )
+                        this[UstadEditView.ARG_ENTITY_JSON] = json.encodeToString(
+                            CourseBlock.serializer(), courseBlockVal,
+                        )
+
+                        putFromSavedStateIfPresent(UstadView.ARG_RESULT_DEST_VIEWNAME)
+                        putFromSavedStateIfPresent(UstadView.ARG_RESULT_DEST_KEY)
+                    }
                 )
+            }
 
-                val contentJobItemVal = entityVal.contentJobItem
-                if(contentJobItemVal != null) {
-                    enqueueContentEntryImporseUseCase(
-                        contentJobItem = contentJobItemVal
+            /* When an existing CourseBlock is edited, we return the ContentEntry and any associated
+             * import job back to CourseBlockEdit
+             * e.g. ClazzEdit -> CourseBlockEdit -> Content Entry Edit -> return to CourseBlockEdit -> return to ClazzEdit
+             */
+            goToOnContentEntryDone == FINISH_WITHOUT_SAVE_TO_DB -> {
+                finishWithResult(entityVal)
+            }
+
+            else -> {
+                viewModelScope.launch {
+                    val parentUidArg = savedStateHandle[ARG_PARENT_UID]?.toLong()
+                    saveContentEntryUseCase(
+                        contentEntry = contentEntryVal,
+                        //Where this is a new ContentEntry (e.g. entityUidArg == 0), it should be
+                        // joined to the parentUidArg
+                        joinToParentUid = if(entityUidArg == 0L) parentUidArg else null
                     )
-                }
 
-                val popUpToOnFinish = savedStateHandle[ARG_POPUPTO_ON_FINISH]
-                when {
-                    expectedResultDest != null -> {
-                        finishWithResult(contentEntryVal)
-                    }
-
-                    //Here, we don't go to the detail view. We go back to where the user came from
-                    // That is correct for folders. For leaf nodes, maybe should change
-                    else -> {
-                        navController.popBackStack(
-                            viewName = popUpToOnFinish ?: destinationName,
-                            inclusive = true
-                        )
-                    }
-                }
-
-                if (_uiState.value.hasErrors()) {
-                    loadingState = LoadingUiState.NOT_LOADING
-                    _uiState.update { prev ->
-                        prev.copy(
-                            fieldsEnabled = true
+                    val contentJobItemVal = entityVal.contentJobItem
+                    if(contentJobItemVal != null) {
+                        enqueueContentEntryImportUseCase(
+                            contentJobItem = contentJobItemVal
                         )
                     }
 
-                    return@launch
+                    val popUpToOnFinish = savedStateHandle[ARG_POPUPTO_ON_FINISH]
+                    when {
+                        expectedResultDest != null -> {
+                            finishWithResult(contentEntryVal)
+                        }
+
+                        //Here, we don't go to the detail view. We go back to where the user came from
+                        // That is correct for folders. For leaf nodes, maybe should change
+                        else -> {
+                            navController.popBackStack(
+                                viewName = popUpToOnFinish ?: destinationName,
+                                inclusive = true
+                            )
+                        }
+                    }
+
+                    if (_uiState.value.hasErrors()) {
+                        loadingState = LoadingUiState.NOT_LOADING
+                        _uiState.update { prev ->
+                            prev.copy(
+                                fieldsEnabled = true
+                            )
+                        }
+
+                        return@launch
+                    }
                 }
             }
         }
@@ -357,6 +385,12 @@ class ContentEntryEditViewModel(
 
         //Used to save the title after parsing metadata
         private const val KEY_TITLE = "savedTitle"
+
+        const val ARG_GO_TO_ON_CONTENT_ENTRY_DONE = "goToOnContentEntryDone"
+
+        const val GO_TO_COURSE_BLOCK_EDIT = 1
+
+        const val FINISH_WITHOUT_SAVE_TO_DB = 2
 
     }
 

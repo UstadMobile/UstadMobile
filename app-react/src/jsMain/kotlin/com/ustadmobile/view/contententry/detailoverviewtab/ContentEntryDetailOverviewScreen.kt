@@ -406,14 +406,11 @@ val ContentEntryDetailOverviewScreenPreview = FC<Props> {
     val uiStateVar by useState {
         ContentEntryDetailOverviewUiState(
             contentEntry = ContentEntryAndDetail(
-                entry = ContentEntryWithMostRecentContainer().apply {
+                entry = ContentEntry().apply {
                     title = "Content Title"
                     author = "Author"
                     publisher = "Publisher"
                     licenseName = "BY_SA"
-                    container = com.ustadmobile.lib.db.entities.Container().apply {
-                        fileSize = 50
-                    }
                     description = "Content Description"
                 }
             ),
