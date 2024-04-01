@@ -446,6 +446,7 @@ class ContentEntryListViewModel(
                 put(ARG_PARENT_UID, parentEntryUid.toString())
                 put(ARG_NEXT, ContentEntryEditViewModel.DEST_NAME)
                 putFromSavedStateIfPresent(ContentEntryEditViewModel.ARG_COURSEBLOCK)
+                putFromSavedStateIfPresent(ContentEntryEditViewModel.ARG_GO_TO_ON_CONTENT_ENTRY_DONE)
             }
         )
     }
