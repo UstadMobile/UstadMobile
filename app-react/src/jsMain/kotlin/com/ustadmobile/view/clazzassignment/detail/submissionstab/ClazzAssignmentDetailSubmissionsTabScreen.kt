@@ -4,11 +4,13 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.paging.ListPagingSource
+import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.viewmodel.clazzassignment.detail.submissionstab.ClazzAssignmentDetailSubmissionsTabUiState
 import com.ustadmobile.core.viewmodel.clazzassignment.detail.submissionstab.ClazzAssignmentDetailSubmissionsTabViewModel
 import com.ustadmobile.hooks.courseTerminologyResource
 import com.ustadmobile.hooks.useCourseTerminologyEntries
+import com.ustadmobile.hooks.useDoorRemoteMediator
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useTabAndAppBarHeight
 import com.ustadmobile.hooks.useUstadViewModel
@@ -18,7 +20,9 @@ import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
 import web.cssom.*
-import js.core.jso
+import js.objects.jso
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import mui.material.*
 import mui.material.List
 import mui.system.responsive
@@ -31,12 +35,15 @@ external interface ClazzAssignmentDetailSubmissionsTabComponentProps : Props {
 
     var uiState: ClazzAssignmentDetailSubmissionsTabUiState
 
+    var refreshCommandFlow: Flow<RefreshCommand>?
+
     var onClickSubmitter: (AssignmentSubmitterSummary) -> Unit
 
     var onChangeSortOption: (SortOrderOption) -> Unit
 
 }
 
+@Suppress("unused")
 val ClazzAssignmentDetailSubmissionsTabPreview = FC<Props> {
 
     ClazzAssignmentDetailSubmissionsTabComponent {
@@ -75,6 +82,7 @@ val ClazzAssignmentDetailSubmissionsTabScreen = FC<Props> {
 
     ClazzAssignmentDetailSubmissionsTabComponent {
         uiState = uiStateVal
+        refreshCommandFlow = viewModel.refreshCommandFlow
         onClickSubmitter = viewModel::onClickSubmitter
         onChangeSortOption = viewModel::onChangeSortOption
     }
@@ -85,8 +93,12 @@ private val ClazzAssignmentDetailSubmissionsTabComponent = FC<ClazzAssignmentDet
 
     val tabAndAppBarHeight = useTabAndAppBarHeight()
 
+    val mediatorResult = useDoorRemoteMediator(
+        props.uiState.assignmentSubmitterList, props.refreshCommandFlow ?: emptyFlow()
+    )
+
     val infiniteQueryResult = usePagingSource(
-        pagingSourceFactory = props.uiState.assignmentSubmitterList,
+        pagingSourceFactory = mediatorResult.pagingSourceFactory,
         placeholdersEnabled = true
     )
 

@@ -6,12 +6,14 @@ import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.hooks.ustadViewName
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.paging.ListPagingSource
+import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.MS_PER_HOUR
 import com.ustadmobile.core.util.MS_PER_MIN
 import com.ustadmobile.core.util.ext.capitalizeFirstLetter
 import com.ustadmobile.core.viewmodel.clazz.defaultCourseBannerImageIndex
 import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewUiState
 import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewViewModel
+import com.ustadmobile.hooks.useDoorRemoteMediator
 import com.ustadmobile.hooks.useFormattedDateRange
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useTabAndAppBarHeight
@@ -27,7 +29,9 @@ import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
 import emotion.react.css
 import web.cssom.*
-import js.core.jso
+import js.objects.jso
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import mui.material.*
 import mui.material.Stack
 import mui.material.List
@@ -46,6 +50,8 @@ import mui.icons.material.Shield as ShieldIcon
 external interface ClazzDetailOverviewProps : Props {
 
     var uiState: ClazzDetailOverviewUiState
+
+    var listRefreshCommandFlow: Flow<RefreshCommand>?
 
     var onClickClazzCode: (String) -> Unit
 
@@ -72,8 +78,12 @@ val ClazzDetailOverviewComponent2 = FC<ClazzDetailOverviewProps> { props ->
 
     val tabAndAppBarHeight = useTabAndAppBarHeight()
 
+    val courseBlocksMediator = useDoorRemoteMediator(
+        props.uiState.courseBlockList, props.listRefreshCommandFlow ?: emptyFlow()
+    )
+
     val courseBlocksResult = usePagingSource(
-        props.uiState.courseBlockList, true, 50
+        courseBlocksMediator.pagingSourceFactory, true, 50
     )
 
     val coursePictureUri = props.uiState.clazz?.coursePicture?.coursePictureUri
@@ -214,6 +224,7 @@ val ClazzDetailOverviewScreen = FC<Props> {
 
     ClazzDetailOverviewComponent2 {
         uiState = uiStateVal
+        listRefreshCommandFlow = viewModel.listRefreshCommandFlow
         onClickCourseBlock = viewModel::onClickCourseBlock
         onClickClazzCode = viewModel::onClickClazzCode
         onClickPermissions = viewModel::onClickPermissions

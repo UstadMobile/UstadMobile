@@ -25,7 +25,7 @@ import com.ustadmobile.view.components.UstadSelectField
 import com.ustadmobile.view.components.UstadSwitchField
 import web.cssom.Cursor
 import web.cssom.px
-import js.core.jso
+import js.objects.jso
 import mui.material.*
 import mui.system.responsive
 import mui.system.sx

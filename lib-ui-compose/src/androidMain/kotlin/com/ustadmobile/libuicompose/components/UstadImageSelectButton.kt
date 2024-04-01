@@ -149,6 +149,7 @@ actual fun UstadImageSelectButton(
                 if(imageUri != null) {
                     ListItem(
                         modifier = Modifier.clickable {
+                            dialogVisible = false
                             onImageUriChanged(null)
                         },
                         headlineContent = {

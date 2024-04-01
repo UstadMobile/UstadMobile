@@ -59,7 +59,6 @@ kotlin {
                 implementation enforcedPlatform("org.jetbrains.kotlin-wrappers:kotlin-wrappers-bom:$kotlinWrappersVersion")
                 implementation libs.kotlin.wrappers.kotlin.react
                 implementation libs.kotlin.wrappers.kotlin.react.dom
-                implementation libs.kotlin.wrappers.kotlin.styled
                 implementation libs.kotlin.wrappers.kotlin.react.router.dom
                 implementation libs.kotlin.wrappers.kotlin.remix.run.router
                 implementation libs.kotlin.wrappers.kotlin.mui.base
@@ -75,6 +74,7 @@ kotlin {
                 implementation libs.kotlin.wrappers.kotlin.tanstack.react.virtual
                 implementation libs.kotlinx.datetime
                 implementation libs.multiplatformsettings
+                implementation libs.kotlin.wrappers.kotlin.extensions
 
                 implementation npm("@js-joda/timezone", "$version_npm_joda_timezone")
 
@@ -98,6 +98,7 @@ kotlin {
 
                 implementation npm("mui-tel-input", "$version_npm_mui_tel_input")
                 implementation npm("libphonenumber-js", "$version_npm_libphonenumber_js")
+                implementation npm("dompurify", "$version_npm_dompurify")
 
             }
         }
