@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
-import androidx.compose.material3.Divider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
@@ -26,6 +25,7 @@ import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.FileDownload
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -99,7 +99,7 @@ fun ContentEntryDetailOverviewScreen(
         }
 
         item(key = "upper_divider") {
-            Divider(thickness = 1.dp)
+            HorizontalDivider(thickness = 1.dp)
         }
 
         item("quick_action_row") {
@@ -122,7 +122,9 @@ fun ContentEntryDetailOverviewScreen(
                 headlineContent = {
                     LinearProgressIndicator(
                         modifier = Modifier.fillMaxWidth(),
-                        progress = (item.transferred.toFloat() / max(item.totalSize.toFloat(), 1f))
+                        progress = {
+                            (item.transferred.toFloat() / max(item.totalSize.toFloat(), 1f))
+                        }
                     )
                 },
                 supportingContent = {
@@ -144,7 +146,7 @@ fun ContentEntryDetailOverviewScreen(
 
 
         item {
-            Divider(thickness = 1.dp)
+            HorizontalDivider(thickness = 1.dp)
         }
 
         item {
@@ -268,9 +270,8 @@ fun ContentJobListItem(
         },
         supportingContent = {
             LinearProgressIndicator(
-                progress = (contentJob.progress/100.0).toFloat(),
-                modifier = Modifier
-                    .height(4.dp),
+                progress = { (contentJob.progress/100.0).toFloat() },
+                modifier = Modifier.height(4.dp),
             )
         }
     )

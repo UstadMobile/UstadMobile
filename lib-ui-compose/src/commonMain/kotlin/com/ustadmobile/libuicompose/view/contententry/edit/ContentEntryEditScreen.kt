@@ -17,7 +17,6 @@ import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewMode
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.libuicompose.components.UstadCourseBlockEdit
 import com.ustadmobile.libuicompose.components.UstadMessageIdOptionExposedDropDownMenuField
 import com.ustadmobile.libuicompose.components.UstadRichTextEdit
 import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
