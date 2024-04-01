@@ -40,6 +40,7 @@ import com.ustadmobile.core.viewmodel.contententry.detailoverviewtab.ContentEntr
 import com.ustadmobile.core.viewmodel.contententry.detailoverviewtab.ContentEntryDetailOverviewViewModel
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 import com.ustadmobile.lib.db.entities.ContentJobItemProgress
+import com.ustadmobile.libuicompose.components.UstadHtmlText
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadOfflineItemStatusQuickActionButton
 import com.ustadmobile.libuicompose.components.UstadQuickActionButton
@@ -156,8 +157,8 @@ fun ContentEntryDetailOverviewScreen(
         }
 
         item {
-            Text(
-                text = uiState.contentEntry?.entry?.description ?: "",
+            UstadHtmlText(
+                html = uiState.contentEntry?.entry?.description ?: "",
                 modifier = Modifier.defaultItemPadding()
             )
         }

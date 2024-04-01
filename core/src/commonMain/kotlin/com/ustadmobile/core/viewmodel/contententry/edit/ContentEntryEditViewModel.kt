@@ -223,6 +223,17 @@ class ContentEntryEditViewModel(
             _uiState.update { prev ->
                 prev.copyWithFieldsEnabled(true)
             }
+
+            launch {
+                navResultReturner.filteredResultFlowForKey(KEY_HTML_DESCRIPTION).collect {
+                    val newDecription =it.result as? String ?: return@collect
+                    onContentEntryChanged(
+                        _uiState.value.entity?.entry?.shallowCopy {
+                            description = newDecription
+                        }
+                    )
+                }
+            }
         }
     }
 
@@ -256,6 +267,15 @@ class ContentEntryEditViewModel(
             )
         }
     }
+
+    fun onEditDescriptionInNewWindow() {
+        navigateToEditHtml(
+            currentValue = _uiState.value.entity?.entry?.description ?: "",
+            resultKey = KEY_HTML_DESCRIPTION,
+            title = systemImpl.getString(MR.strings.description),
+        )
+    }
+
 
     fun onClickSave() {
         val entityVal = _uiState.value.entity?.copy(
@@ -387,6 +407,8 @@ class ContentEntryEditViewModel(
         private const val KEY_TITLE = "savedTitle"
 
         const val ARG_GO_TO_ON_CONTENT_ENTRY_DONE = "goToOnContentEntryDone"
+
+        const val KEY_HTML_DESCRIPTION = "contentEntryDesc"
 
         const val GO_TO_COURSE_BLOCK_EDIT = 1
 

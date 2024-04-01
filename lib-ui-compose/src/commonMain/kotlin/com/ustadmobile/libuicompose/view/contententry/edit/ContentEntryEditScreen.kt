@@ -19,6 +19,7 @@ import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.libuicompose.components.UstadCourseBlockEdit
 import com.ustadmobile.libuicompose.components.UstadMessageIdOptionExposedDropDownMenuField
+import com.ustadmobile.libuicompose.components.UstadRichTextEdit
 import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import dev.icerock.moko.resources.compose.stringResource
@@ -31,7 +32,8 @@ fun ContentEntryEditScreen(
 
     ContentEntryEditScreen(
         uiState = uiState,
-        onContentEntryChanged = viewModel::onContentEntryChanged
+        onContentEntryChanged = viewModel::onContentEntryChanged,
+        onClickEditDescription = viewModel::onEditDescriptionInNewWindow,
     )
 }
 
@@ -39,7 +41,8 @@ fun ContentEntryEditScreen(
 fun ContentEntryEditScreen(
     uiState: ContentEntryEditUiState = ContentEntryEditUiState(),
     onCourseBlockChange: (CourseBlock?) -> Unit = {},
-    onClickUpdateContent: () -> Unit = {},
+    onClickEditDescription: () -> Unit = { },
+    onClickUpdateContent: () -> Unit = { },
     onContentEntryChanged: (ContentEntry?) -> Unit = {},
 ) {
     UstadVerticalScrollColumn(
@@ -89,27 +92,21 @@ fun ContentEntryEditScreen(
             }
         )
 
-        OutlinedTextField(
-            modifier = Modifier.testTag("description").fillMaxWidth()
-                .defaultItemPadding(),
-            value = uiState.entity?.entry?.description ?: "",
-            label = { Text(stringResource(MR.strings.description)) },
-            enabled = uiState.fieldsEnabled,
-            onValueChange = {
+        UstadRichTextEdit(
+            html = uiState.entity?.entry?.description ?: "",
+            modifier = Modifier.fillMaxWidth().defaultItemPadding()
+                .testTag("description"),
+            onHtmlChange = {
                 onContentEntryChanged(
                     uiState.entity?.entry?.shallowCopy {
                         description = it
                     }
                 )
-            }
+            },
+            onClickToEditInNewScreen = onClickEditDescription,
+            editInNewScreenLabel = stringResource(MR.strings.description),
+            placeholderText = stringResource(MR.strings.description),
         )
-
-        if(uiState.courseBlockVisible) {
-            UstadCourseBlockEdit(
-                uiState = uiState.courseBlockEditUiState,
-                onCourseBlockChange = onCourseBlockChange
-            )
-        }
 
         OutlinedTextField(
             modifier = Modifier.testTag("author").fillMaxWidth().defaultItemPadding(),
