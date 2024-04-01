@@ -1,6 +1,0 @@
-appId: com.toughra.ustadmobile
----
-# this flow clicks on more option button if the option select all is not visible on long press on a text
-- tapOn:
-    text: "More options"
-- tapOn: "Select all"

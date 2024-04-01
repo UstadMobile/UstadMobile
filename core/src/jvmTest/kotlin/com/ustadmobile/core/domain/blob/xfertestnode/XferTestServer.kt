@@ -7,6 +7,7 @@ import com.ustadmobile.core.domain.cachelock.CreateCacheLocksForActiveContentEnt
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.http.DoorHttpServerConfig
+import com.ustadmobile.door.log.NapierDoorLogger
 import com.ustadmobile.lib.rest.CacheRoute
 import com.ustadmobile.lib.rest.api.blob.BlobUploadServerRoute
 import com.ustadmobile.lib.rest.ext.clientProtocolAndHost
@@ -128,7 +129,7 @@ class XferTestServer(
 
                 route("UmAppDatabase") {
                     UmAppDatabase_KtorRoute(
-                        DoorHttpServerConfig(json = di.direct.instance())
+                        DoorHttpServerConfig(json = di.direct.instance(), logger = NapierDoorLogger())
                     ) { call ->
                         di.on(call).direct.instance(tag = DoorTag.TAG_DB)
                     }

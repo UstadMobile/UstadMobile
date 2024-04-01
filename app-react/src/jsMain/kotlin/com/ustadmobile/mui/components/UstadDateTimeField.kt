@@ -3,7 +3,7 @@ package com.ustadmobile.mui.components
 import com.ustadmobile.core.util.ext.chopOffSeconds
 import com.ustadmobile.hooks.useFormattedDateAndTime
 import web.cssom.px
-import js.core.jso
+import js.objects.jso
 import kotlinx.datetime.*
 import mui.material.TextField
 import mui.system.PropsWithSx

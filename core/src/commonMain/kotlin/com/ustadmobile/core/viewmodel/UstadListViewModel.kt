@@ -8,6 +8,7 @@ import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadView
 import app.cash.paging.PagingSource
+import com.ustadmobile.core.paging.RefreshCommand
 import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.*
@@ -40,6 +41,14 @@ abstract class UstadListViewModel<S>(
     protected val _uiState = MutableStateFlow(initialState)
 
     val uiState: Flow<S> = _uiState.asStateFlow()
+
+    protected val _refreshCommandFlow = MutableSharedFlow<RefreshCommand>(
+        replay = 1, extraBufferCapacity = 0, onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
+    val refreshCommandFlow: Flow<RefreshCommand> = _refreshCommandFlow.asSharedFlow()
+
+
 
     open val listMode: ListViewMode
         get() {

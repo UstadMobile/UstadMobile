@@ -26,7 +26,7 @@ import mui.system.sx
 import react.*
 import com.ustadmobile.util.ext.onTextChange
 import web.cssom.Cursor
-import js.core.jso
+import js.objects.jso
 import com.ustadmobile.mui.common.inputCursor
 import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.mui.components.UstadTextField

@@ -476,6 +476,7 @@ class ClazzEditViewModel(
                 serializer = ContentEntryBlockLanguageAndContentJob.serializer(),
                 args = mapOf(
                     UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString(),
+                    ContentEntryEditViewModel.ARG_GO_TO_ON_CONTENT_ENTRY_DONE to ContentEntryEditViewModel.GO_TO_COURSE_BLOCK_EDIT.toString(),
                     ContentEntryEditViewModel.ARG_COURSEBLOCK to json.encodeToString(
                         serializer = CourseBlock.serializer(),
                         value = CourseBlock().apply {
@@ -780,15 +781,21 @@ class ClazzEditViewModel(
     fun onClickEditCourseBlock(block: CourseBlockAndEditEntities) {
         if(block.courseBlock.cbType == CourseBlock.BLOCK_CONTENT_TYPE) {
             navigateForResult(
-                nextViewName = ContentEntryEditViewModel.DEST_NAME,
+                nextViewName = CourseBlockEditViewModel.DEST_NAME,
                 key = RESULT_KEY_CONTENTENTRY,
-                currentValue =  ContentEntryBlockLanguageAndContentJob(
-                    entry = block.contentEntry,
-                    block = block.courseBlock,
-                    contentJob = block.contentJob,
-                    contentJobItem = block.contentJobItem,
-                ),
-                serializer = ContentEntryBlockLanguageAndContentJob.serializer(),
+                currentValue =  block.courseBlock,
+                serializer = CourseBlock.serializer(),
+                args = mapOf(
+                    CourseBlockEditViewModel.ARG_SELECTED_CONTENT_ENTRY to json.encodeToString(
+                        serializer = ContentEntryBlockLanguageAndContentJob.serializer(),
+                        value = ContentEntryBlockLanguageAndContentJob(
+                            entry = block.contentEntry,
+                            block = block.courseBlock,
+                            contentJob = block.contentJob,
+                            contentJobItem = block.contentJobItem,
+                        )
+                    )
+                )
             )
             return
         }

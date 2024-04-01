@@ -5,12 +5,15 @@ import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.impl.locale.mapLookup
+import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.ext.capitalizeFirstLetter
 import com.ustadmobile.core.viewmodel.clazzassignment.ClazzAssignmentViewModelConstants.SUBMISSION_STAUTUS_MESSAGE_ID
 import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailUiState
 import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailViewModel
 import com.ustadmobile.hooks.useDateFormatter
+import com.ustadmobile.hooks.useDoorRemoteMediator
+import com.ustadmobile.hooks.useEmptyFlow
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useTimeFormatter
@@ -27,7 +30,7 @@ import web.cssom.Contain
 import web.cssom.Height
 import web.cssom.Overflow
 import web.cssom.pct
-import js.core.jso
+import js.objects.jso
 import mui.material.*
 import react.FC
 import react.Props
@@ -70,8 +73,14 @@ val ClazzAssignmentSubmitterDetailComponent = FC<ClazzAssignmentSubmitterDetailP
 
     val muiAppState = useMuiAppState()
 
+    val refreshCommandFlow = useEmptyFlow<RefreshCommand>()
+
+    val commentsMediatorResult = useDoorRemoteMediator(
+        props.uiState.privateCommentsList, refreshCommandFlow
+    )
+
     val commentsInfiniteQueryResult = usePagingSource(
-        pagingSourceFactory = props.uiState.privateCommentsList,
+        pagingSourceFactory = commentsMediatorResult.pagingSourceFactory,
         placeholdersEnabled = true,
     )
 

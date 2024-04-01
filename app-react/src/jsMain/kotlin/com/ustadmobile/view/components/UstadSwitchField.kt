@@ -1,7 +1,7 @@
 package com.ustadmobile.view.components
 
 import web.cssom.*
-import js.core.jso
+import js.objects.jso
 import mui.material.*
 import mui.system.PropsWithSx
 import mui.system.sx

@@ -3,7 +3,7 @@ package com.ustadmobile.mui.common
 import web.cssom.Cursor
 import web.cssom.JustifyContent
 import csstype.PropertiesBuilder
-import js.core.jso
+import js.objects.jso
 import mui.material.*
 import web.cssom.Display
 

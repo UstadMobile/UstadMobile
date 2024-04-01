@@ -1,13 +1,16 @@
 package com.ustadmobile.core.viewmodel.courseblock.edit
 
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.isDateSet
 import com.ustadmobile.core.view.UstadEditView.Companion.DEFAULT_COMMIT_DELAY
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
+import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewModel
 import com.ustadmobile.core.viewmodel.courseblock.CourseBlockViewModelConstants.CompletionCriteria
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
+import com.ustadmobile.lib.db.composites.ContentEntryBlockLanguageAndContentJob
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
@@ -23,6 +26,10 @@ import org.kodein.di.DI
 data class CourseBlockEditUiState(
 
     val courseBlock: CourseBlock? = null,
+
+    val selectedContentEntry: ContentEntryBlockLanguageAndContentJob? = null,
+
+    val canEditSelectedContentEntry: Boolean = false,
 
     val completionCriteriaOptions: List<CompletionCriteria> = emptyList(),
 
@@ -90,6 +97,18 @@ class CourseBlockEditViewModel(
         }
 
         viewModelScope.launch {
+            val selectedContentJson = savedStateHandle[KEY_SAVED_STATE_SELECTED_CONTENT_ENTRY]
+                ?: savedStateHandle[ARG_SELECTED_CONTENT_ENTRY]
+            if(selectedContentJson != null) {
+                _uiState.update { prev ->
+                    prev.copy(
+                        selectedContentEntry = json.decodeFromString(
+                            ContentEntryBlockLanguageAndContentJob.serializer(), selectedContentJson
+                        )
+                    )
+                }
+            }
+
             loadEntity(
                 serializer = CourseBlock.serializer(),
                 makeDefault = {
@@ -107,6 +126,29 @@ class CourseBlockEditViewModel(
                 }
             )
 
+            val contentEntryVal = _uiState.value.selectedContentEntry
+            val courseBlockVal = _uiState.value.courseBlock
+            if(contentEntryVal != null && courseBlockVal != null) {
+                val canEditContentEntry = when {
+                    contentEntryVal.entry?.contentOwnerType == ContentEntry.OWNER_TYPE_COURSE &&
+                            contentEntryVal.entry?.contentOwner == courseBlockVal.cbUid -> {
+                        true
+                    }
+
+                    contentEntryVal.entry?.contentOwnerType == ContentEntry.OWNER_TYPE_COURSE -> {
+                        activeRepo.coursePermissionDao.personHasPermissionWithClazzAsync2(
+                            accountPersonUid = activeUserPersonUid,
+                            clazzUid = contentEntryVal.entry?.contentOwner ?: 0L,
+                            permission = PermissionFlags.COURSE_EDIT
+                        )
+                    }
+                    else -> false
+                }
+
+                println("CourseBlock: can edit content entry = $canEditContentEntry ownerType= ${contentEntryVal.entry?.contentOwnerType} owner=${contentEntryVal.entry?.contentOwner}")
+                _uiState.update { it.copy(canEditSelectedContentEntry = canEditContentEntry) }
+            }
+
             _uiState.update { prev ->
                 prev.copy(fieldsEnabled = true)
             }
@@ -120,6 +162,8 @@ class CourseBlockEditViewModel(
                             createEditTitle(MR.strings.add_text, MR.strings.edit_text)
                         CourseBlock.BLOCK_DISCUSSION_TYPE ->
                             createEditTitle(MR.strings.add_discussion, MR.strings.edit_discussion)
+                        CourseBlock.BLOCK_CONTENT_TYPE ->
+                            createEditTitle(MR.strings.add_content, MR.strings.edit_content_block)
                         else -> ""
                     },
                     actionBarButtonState = ActionBarButtonUiState(
@@ -136,6 +180,17 @@ class CourseBlockEditViewModel(
                     onEntityChanged(_uiState.value.courseBlock?.shallowCopy {
                         cbDescription = descriptionHtml
                     })
+                }
+            }
+
+            launch {
+                resultReturner.filteredResultFlowForKey(KEY_CONTENT_ENTRY_EDIT_RESULT).collect { result ->
+                    val contentEntryResult = result.result
+                            as? ContentEntryBlockLanguageAndContentJob ?: return@collect
+                    _uiState.update { it.copy(selectedContentEntry = contentEntryResult) }
+                    savedStateHandle[KEY_SAVED_STATE_SELECTED_CONTENT_ENTRY] = json.encodeToString(
+                        ContentEntryBlockLanguageAndContentJob.serializer(), contentEntryResult
+                    )
                 }
             }
         }
@@ -166,6 +221,23 @@ class CourseBlockEditViewModel(
         )
     }
 
+    fun onClickEditContentEntry() {
+        navigateForResult(
+            nextViewName = ContentEntryEditViewModel.DEST_NAME,
+            key = KEY_CONTENT_ENTRY_EDIT_RESULT,
+            currentValue = _uiState.value.selectedContentEntry,
+            serializer = ContentEntryBlockLanguageAndContentJob.serializer(),
+            args = buildMap {
+                _uiState.value.courseBlock?.also {
+                    this[ContentEntryEditViewModel.ARG_COURSEBLOCK] = json.encodeToString(
+                        CourseBlock.serializer(), it
+                    )
+                    this[ContentEntryEditViewModel.ARG_GO_TO_ON_CONTENT_ENTRY_DONE] = ContentEntryEditViewModel.FINISH_WITHOUT_SAVE_TO_DB.toString()
+                }
+            }
+        )
+    }
+
     fun onClickSave() {
         val courseBlockVal = _uiState.value.courseBlock ?: return
         if(courseBlockVal.cbTitle.isNullOrBlank()) {
@@ -179,13 +251,25 @@ class CourseBlockEditViewModel(
         if(_uiState.value.hasErrors)
             return
 
-        finishWithResult(_uiState.value.courseBlock)
+        val contentEntryVal = _uiState.value.selectedContentEntry
+        if(contentEntryVal != null) {
+            finishWithResult(
+                contentEntryVal.copy(
+                    block = _uiState.value.courseBlock
+                )
+            )
+        }else {
+            finishWithResult(_uiState.value.courseBlock)
+        }
+
     }
 
 
     companion object {
 
         const val DEST_NAME = "CourseBlockEdit"
+
+        const val ARG_SELECTED_CONTENT_ENTRY = "SelectedContentEntry"
 
         const val ARG_BLOCK_TYPE = "blockType"
 
@@ -195,6 +279,9 @@ class CourseBlockEditViewModel(
          */
         const val KEY_HTML_DESCRIPTION = "courseBlockDesc"
 
+        const val KEY_CONTENT_ENTRY_EDIT_RESULT = "courseBlockEditContentEntry"
+
+        const val KEY_SAVED_STATE_SELECTED_CONTENT_ENTRY = "SavedSelectedContentEntry"
 
     }
 

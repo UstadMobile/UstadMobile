@@ -7,7 +7,7 @@ import com.ustadmobile.core.util.MS_PER_MIN
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.mui.common.*
 import com.ustadmobile.view.components.UstadSwitchField
-import js.core.jso
+import js.objects.jso
 import kotlinx.datetime.*
 import mui.icons.material.Visibility
 import mui.icons.material.VisibilityOff

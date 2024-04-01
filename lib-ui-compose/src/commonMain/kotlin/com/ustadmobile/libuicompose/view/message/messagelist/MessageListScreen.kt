@@ -9,21 +9,19 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
-import app.cash.paging.Pager
-import app.cash.paging.PagingConfig
 import com.ustadmobile.core.viewmodel.message.messagelist.MessageListUiState
 import com.ustadmobile.core.viewmodel.message.messagelist.MessageListViewModel
 import com.ustadmobile.libuicompose.components.LazyColumnVerticalScrollbar
+import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.util.ext.scrollBarPadding
 import com.ustadmobile.libuicompose.util.linkify.rememberLinkExtractor
 import com.ustadmobile.libuicompose.util.rememberDateFormat
+import com.ustadmobile.libuicompose.util.rememberEmptyFlow
 import com.ustadmobile.libuicompose.util.rememberTimeFormatter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -51,15 +49,12 @@ fun MessageListScreen(
     onClickSend: () -> Unit = { },
 ){
 
-    val pager = remember(uiState.messages) {
-        Pager(
-            config = PagingConfig(pageSize = 20, enablePlaceholders = true, maxSize = 200),
-            pagingSourceFactory = uiState.messages
-        )
-    }
+    val mediatorResult = rememberDoorRepositoryPager(
+        uiState.messages, rememberEmptyFlow()
+    )
 
     val linkExtractor = rememberLinkExtractor()
-    val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
+    val lazyPagingItems = mediatorResult.lazyPagingItems
     val coroutineScope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState()
     val itemCount = lazyPagingItems.itemCount

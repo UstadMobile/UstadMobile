@@ -269,7 +269,8 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
     }
 
     bind<ApiUrlConfig>() with singleton {
-        ApiUrlConfig(presetApiUrl = null)
+        val appConfig : AppConfig = instance()
+        ApiUrlConfig(presetApiUrl = appConfig[AppConfig.KEY_API_URL]?.ifBlank { null })
     }
 
     bind<File>(tag = TAG_DATA_DIR) with singleton {
