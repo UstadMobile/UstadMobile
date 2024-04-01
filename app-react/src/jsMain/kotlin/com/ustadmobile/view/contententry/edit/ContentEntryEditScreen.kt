@@ -10,12 +10,13 @@ import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.mui.components.UstadCourseBlockEdit
 import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.mui.components.UstadTextEditField
 import com.ustadmobile.util.ext.onTextChange
 import com.ustadmobile.view.components.UstadMessageIdSelectField
 import com.ustadmobile.view.components.UstadSwitchField
+import com.ustadmobile.wrappers.quill.ReactQuill
+import kotlinx.coroutines.Dispatchers
 import mui.material.Button
 import mui.material.ButtonVariant
 import mui.material.Stack
@@ -46,7 +47,9 @@ val ContentEntryEditScreen = FC<Props> {
         ContentEntryEditViewModel(di, savedStateHandle)
     }
 
-    val uiStateVal by viewModel.uiState.collectAsState(ContentEntryEditUiState())
+    val uiStateVal by viewModel.uiState.collectAsState(
+        ContentEntryEditUiState(), Dispatchers.Main.immediate
+    )
 
     ContentEntryEditScreenComponent {
         uiState = uiStateVal
@@ -88,44 +91,36 @@ private val ContentEntryEditScreenComponent = FC<ContentEntryEditScreenProps> { 
                 }
             }
 
-            if(props.uiState.contentEntryTitleVisible) {
-                TextField {
-                    value = props.uiState.entity?.entry?.title ?: ""
-                    id = "content_title"
-                    label = ReactNode(strings[MR.strings.title]  + "*")
-                    helperText = ReactNode(props.uiState.titleError ?: strings[MR.strings.required])
-                    error = props.uiState.titleError != null
-                    disabled = !props.uiState.fieldsEnabled
-                    onTextChange = {
-                        props.onContentEntryChanged(
-                            props.uiState.entity?.entry?.shallowCopy {
-                                title = it
-                            }
-                        )
-                    }
+
+            TextField {
+                value = props.uiState.entity?.entry?.title ?: ""
+                id = "content_title"
+                label = ReactNode(strings[MR.strings.title]  + "*")
+                helperText = ReactNode(props.uiState.titleError ?: strings[MR.strings.required])
+                error = props.uiState.titleError != null
+                disabled = !props.uiState.fieldsEnabled
+                onTextChange = {
+                    props.onContentEntryChanged(
+                        props.uiState.entity?.entry?.shallowCopy {
+                            title = it
+                        }
+                    )
                 }
             }
 
-            if(props.uiState.contentEntryDescriptionVisible) {
-                UstadTextEditField {
-                    value = props.uiState.entity?.entry?.description ?: ""
-                    id = "content_description"
-                    label = strings[MR.strings.description]
-                    enabled = props.uiState.fieldsEnabled
-                    onChange = {
-                        props.onContentEntryChanged(
-                            props.uiState.entity?.entry?.shallowCopy {
-                                description = it
-                            }
-                        )
-                    }
-                }
-            }
 
-            if(props.uiState.courseBlockVisible) {
-                UstadCourseBlockEdit {
-                    uiState = props.uiState.courseBlockEditUiState
-                    onCourseBlockChange = props.onCourseBlockChanged
+
+            ReactQuill {
+                value = props.uiState.entity?.entry?.description ?: ""
+                id = "description_quill"
+                placeholder = strings[MR.strings.description]
+                readOnly = !props.uiState.fieldsEnabled
+                onChange = {
+                    props.onContentEntryChanged(
+                        props.uiState.entity?.entry?.shallowCopy {
+                            description = it
+                        }
+                    )
                 }
             }
 
