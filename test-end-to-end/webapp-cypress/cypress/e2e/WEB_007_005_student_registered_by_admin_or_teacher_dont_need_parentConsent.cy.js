@@ -1,4 +1,4 @@
-describe('007_004_user_registration_dob_field_is_mandatory', () => {
+describe('WEB_007_005_student_registered_by_admin_or_teacher_dont_need_parentConsent', () => {
  it('Start Ustad Test Server ', () => {
   // Start Test Server
     cy.ustadStartTestServer()
@@ -9,6 +9,7 @@ it('Admin add a student aged below 13', () => {
   cy.ustadClearDbAndLogin('admin','testpass',{timeout:8000})
   cy.contains("People").click()
   cy.contains("button","Person").click()
+  cy.contains("Add Person").click()
   cy.contains("label", "First names").parent().find("input").clear().type("Student")
   cy.contains("label", "Last name").parent().find("input").clear().type("1")
   cy.get('div[id="gender"]').click()

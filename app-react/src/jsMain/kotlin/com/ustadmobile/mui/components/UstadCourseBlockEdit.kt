@@ -12,8 +12,9 @@ import com.ustadmobile.util.ext.onTextChange
 import com.ustadmobile.view.components.UstadSelectField
 import com.ustadmobile.wrappers.quill.ReactQuill
 import web.cssom.px
-import js.core.jso
+import js.objects.jso
 import kotlinx.datetime.TimeZone
+import mui.icons.material.BookOutlined as BookOutlinedIcon
 import mui.material.*
 import mui.system.Stack
 import mui.system.StackDirection
@@ -22,12 +23,16 @@ import react.FC
 import react.Props
 import react.ReactNode
 import react.create
+import react.useRequiredContext
+import mui.icons.material.Edit as EditIcon
 
 external interface UstadCourseBlockEditProps: Props {
 
     var uiState: CourseBlockEditUiState
 
     var onCourseBlockChange: ((CourseBlock?) -> Unit)
+
+    var onClickEditSelectedContentEntry: () -> Unit
 
 }
 
@@ -38,8 +43,36 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
 
     val strings = useStringProvider()
 
+    val theme by useRequiredContext(ThemeContext)
+
     Stack{
-        spacing = responsive(20.px)
+        spacing = responsive(theme.spacing(2))
+
+        props.uiState.selectedContentEntry?.also { selectedContentEntry ->
+            ListItem {
+                ListItemIcon {
+                    BookOutlinedIcon()
+                }
+
+                ListItemText {
+                    primary = ReactNode(selectedContentEntry.entry?.title ?: "")
+                    secondary = ReactNode(strings[MR.strings.selected_content])
+                }
+
+                if(props.uiState.canEditSelectedContentEntry) {
+                    secondaryAction = Tooltip.create {
+                        title = ReactNode(strings[MR.strings.edit])
+                        IconButton {
+                            onClick = {
+                                props.onClickEditSelectedContentEntry()
+                            }
+
+                            EditIcon()
+                        }
+                    }
+                }
+            }
+        }
 
         UstadTextField {
             id = "title"

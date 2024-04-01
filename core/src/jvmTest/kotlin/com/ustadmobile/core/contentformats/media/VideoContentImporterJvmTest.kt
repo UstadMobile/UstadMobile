@@ -10,6 +10,7 @@ import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryImportJob
 import com.ustadmobile.lib.util.SysPathUtil
+import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.request.requestBuilder
 import com.ustadmobile.libcache.response.bodyAsString
 import com.ustadmobile.util.test.ext.newFileFromResource
@@ -49,7 +50,8 @@ class VideoContentImporterJvmTest : AbstractContentImporterTest() {
             json = json,
             tmpPath = Path(rootTmpFolder.absolutePath),
             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
-            getStoragePathForUrlUseCase = getStoragePathForUrlUseCase
+            getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
+            mimeTypeHelper = FileMimeTypeHelperImpl(),
         )
         val metadataResult = runBlocking {
             importer.extractMetadata(videoFile.toDoorUri(), "BigBuckBunny.mp4")
@@ -72,6 +74,7 @@ class VideoContentImporterJvmTest : AbstractContentImporterTest() {
             tmpPath = Path(rootTmpFolder.absolutePath),
             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
             getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
+            mimeTypeHelper = FileMimeTypeHelperImpl(),
         )
         runBlocking {
             try {
@@ -98,6 +101,7 @@ class VideoContentImporterJvmTest : AbstractContentImporterTest() {
             tmpPath = Path(rootTmpFolder.absolutePath),
             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
             getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
+            mimeTypeHelper = FileMimeTypeHelperImpl(),
         )
         runBlocking {
             assertNull(importer.extractMetadata(txtFile.toDoorUri(), "file.txt"))
@@ -119,6 +123,7 @@ class VideoContentImporterJvmTest : AbstractContentImporterTest() {
             tmpPath = Path(rootTmpFolder.absolutePath),
             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
             getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
+            mimeTypeHelper = FileMimeTypeHelperImpl(),
         )
 
         val result = runBlocking {

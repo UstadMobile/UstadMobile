@@ -1880,4 +1880,8 @@
     -->
     <string name="line_number">Line number</string>
 
+    <string name="selected_content">Selected content</string>
+
+    <string name="edit_content_block">Edit content block</string>
+
 </resources>

@@ -9,6 +9,8 @@ import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorUseCase
 import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.util.ext.duplicates
 import com.ustadmobile.door.ext.withDoorTransactionAsync
+import com.ustadmobile.lib.db.entities.Clazz
+import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.Person
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
@@ -126,7 +128,7 @@ class BulkAddPersonsUseCaseImpl(
             throw IllegalArgumentException("Usernames already exist: ${existingUsernames.joinToString()}")
         }
 
-        val courseUidMap = mutableMapOf<String, Long>()
+        val courseUidMap = mutableMapOf<String, Clazz>()
         val missingCourseNames = mutableSetOf<String>()
         allCourseNames.chunked(100).forEach { nameList ->
             val clazzesFound = effectiveDb.clazzDao.getCoursesByName(nameList)
@@ -134,7 +136,7 @@ class BulkAddPersonsUseCaseImpl(
 
             missingCourseNames.addAll(nameList.filter { it !in clazzNamesFound } )
             clazzesFound.forEach {
-                courseUidMap[it.clazzName ?: ""] = it.clazzUid
+                courseUidMap[it.clazzName ?: ""] = it
             }
         }
 
@@ -165,10 +167,26 @@ class BulkAddPersonsUseCaseImpl(
                         }
                     )
                     authManager.setAuth(personUid, row[HEADER_PASSWORD]!!.trim())
-                }
-                onProgress(chunkIndex * chunkSize, csvData.size)
 
-                //Do enrolment...
+                    val coursesToEnrolIn = row[HEADER_COURSES]?.split(";")
+                        ?.map { it.trim() }
+                        ?.filter { it.isNotBlank() } ?: emptyList()
+
+                    coursesToEnrolIn.forEach { clazzName ->
+                        courseUidMap[clazzName]?.also { clazz ->
+                            enrolUseCase(
+                                enrolment = ClazzEnrolment(
+                                    clazzUid = clazz.clazzUid,
+                                    personUid = personUid,
+                                    role = ClazzEnrolment.ROLE_STUDENT
+                                ),
+                                timeZoneId = clazz.clazzTimeZone ?: "UTC"
+                            )
+                        }
+                    }
+                }
+
+                onProgress(chunkIndex * chunkSize, csvData.size)
             }
         }
 

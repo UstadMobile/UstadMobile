@@ -38,8 +38,6 @@ data class PersonDetailUiState(
 
     val displayPhoneNum: String? = null,
 
-    val personPicture: PersonPicture? = null,
-
     val canSendSms: Boolean = false,
 
     val clazzes: List<ClazzEnrolmentAndPersonDetailDetails> = emptyList(),

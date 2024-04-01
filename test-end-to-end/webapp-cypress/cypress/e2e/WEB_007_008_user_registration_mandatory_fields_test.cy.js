@@ -1,4 +1,4 @@
-describe('007_006_admin_enable_or_disable_guest_login', () => {
+describe('WEB_007_008_user_registration_mandatory_fields_test', () => {
  it('Start Ustad Test Server ', () => {
   // Start Test Server
     cy.ustadStartTestServer()

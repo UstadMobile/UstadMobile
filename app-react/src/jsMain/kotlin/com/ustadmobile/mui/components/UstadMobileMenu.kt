@@ -1,7 +1,7 @@
 package com.ustadmobile.mui.components
 
 import com.ustadmobile.mui.common.Sizes
-import js.core.jso
+import js.objects.jso
 import mui.material.Box
 import mui.material.DrawerAnchor
 import mui.material.List

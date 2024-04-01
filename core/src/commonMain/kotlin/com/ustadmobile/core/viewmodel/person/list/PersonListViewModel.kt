@@ -24,6 +24,7 @@ import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.impl.appstate.Snack
+import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.viewmodel.clazz.invitevialink.InviteViaLinkViewModel
 import com.ustadmobile.core.viewmodel.person.PersonViewModelConstants.ARG_POPUP_TO_ON_PERSON_SELECTED
@@ -50,7 +51,7 @@ data class PersonListUiState(
     val hasBulkImportPermission: Boolean = false,
 )
 
-class EmptyPagingSource<Key: Any, Value: Any>(): PagingSource<Key, Value>() {
+class EmptyPagingSource<Key: Any, Value: Any>: PagingSource<Key, Value>() {
 
     override fun getRefreshKey(state: PagingState<Key, Value>): Key? {
         return null
@@ -93,16 +94,13 @@ class PersonListViewModel(
             accountPersonUid = activeUserPersonUid,
             sortOrder = _uiState.value.sortOption.flag,
             searchText = _appUiState.value.searchState.searchText.toQueryLikeParam()
-        ).also {
-            lastPagingSource = it
-        }
+        )
     }
-
-    private var lastPagingSource: PagingSource<Int, PersonAndListDisplayDetails>? = null
 
     private val inviteCode = savedStateHandle[ARG_SHOW_ADD_VIA_INVITE_LINK_CODE]
 
     private val setClipboardStringUseCase: SetClipboardStringUseCase by instance()
+
 
     init {
         _appUiState.update { prev ->
@@ -181,7 +179,7 @@ class PersonListViewModel(
 
     override fun onUpdateSearchResult(searchText: String) {
         //will use the searchText as per the appUiState
-        lastPagingSource?.invalidate()
+        _refreshCommandFlow.tryEmit(RefreshCommand())
     }
 
     fun onSortOrderChanged(sortOption: SortOrderOption) {
@@ -190,7 +188,7 @@ class PersonListViewModel(
                 sortOption = sortOption
             )
         }
-        lastPagingSource?.invalidate()
+        _refreshCommandFlow.tryEmit(RefreshCommand())
     }
 
     fun onClickInviteWithLink() {

@@ -21,7 +21,6 @@ import com.ustadmobile.core.impl.di.DomainDiModuleJs
 import com.ustadmobile.core.impl.di.commonDomainDiModule
 import com.ustadmobile.core.schedule.ClazzLogCreatorManager
 import com.ustadmobile.core.schedule.ClazzLogCreatorManagerJs
-import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.RepositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
@@ -170,10 +169,6 @@ internal fun ustadJsDi(
 
     bind<CoroutineDispatcher>(tag = UstadMobileSystemCommon.TAG_MAIN_COROUTINE_CONTEXT) with singleton {
         Dispatchers.Main
-    }
-
-    bind<ContentEntryOpener>() with scoped(EndpointScope.Default).singleton {
-        ContentEntryOpener(di, context)
     }
 
     bind<HttpClient>() with singleton {

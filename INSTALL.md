@@ -117,6 +117,13 @@ ProxyPreserveHost On
 RequestHeader set X-Forwarded-Proto https
 ```
 
+URL prefixes: if the system is not accessed via the top level URL, then the prefix must be specified
+in ustad-server.conf using the urlPrefix property. The full URL must be passed e.g.
+```
+ProxyPass /ustad/ http://localhost:8087/ustad/ nocanon
+ProxyPassReverse /ustad/ http://localhost:8087/ustad/
+```
+
 Enable required Apache modules:
 ```
 a2enmod proxy headers

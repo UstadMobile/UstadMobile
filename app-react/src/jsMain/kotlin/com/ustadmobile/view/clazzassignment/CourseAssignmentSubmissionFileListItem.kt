@@ -4,7 +4,7 @@ import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.util.ext.progressAsFloat
 import com.ustadmobile.lib.db.composites.CourseAssignmentSubmissionFileAndTransferJob
 import com.ustadmobile.lib.db.composites.TransferJobItemStatus
-import js.core.jso
+import js.objects.jso
 import mui.material.LinearProgress
 import react.FC
 import react.Props

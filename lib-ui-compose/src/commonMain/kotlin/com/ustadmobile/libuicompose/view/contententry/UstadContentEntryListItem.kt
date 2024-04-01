@@ -23,6 +23,7 @@ import com.ustadmobile.lib.db.composites.ContentEntryAndListDetail
 import com.ustadmobile.libuicompose.components.UstadContextMenuArea
 import com.ustadmobile.libuicompose.components.UstadSelectableListItem
 import com.ustadmobile.libuicompose.components.UstadSelectedIcon
+import com.ustadmobile.libuicompose.util.rememberHtmlToPlainText
 import dev.icerock.moko.resources.compose.stringResource
 
 @Composable
@@ -34,6 +35,9 @@ fun UstadContentEntryListItem(
     contextMenuItems: (ContentEntryAndListDetail) -> List<UstadContextMenuItem> = { emptyList() },
     onSetSelected: (contentEntry: ContentEntryAndListDetail, selected: Boolean) -> Unit = { _, _ -> },
 ) {
+    val descriptionPlainText = rememberHtmlToPlainText(
+        entry?.contentEntry?.description ?: ""
+    )
     UstadContextMenuArea(
         items = {
             entry?.let { contextMenuItems(it) } ?: emptyList()
@@ -73,9 +77,11 @@ fun UstadContentEntryListItem(
                 Column(
                     verticalArrangement = Arrangement.spacedBy(5.dp)
                 ) {
-                    if(!entry?.contentEntry?.description.isNullOrBlank()) {
-                        Text((entry?.contentEntry?.description ?: ""),
-                            maxLines = 2, overflow = TextOverflow.Ellipsis,
+                    if(descriptionPlainText.isNotBlank()) {
+                        Text(
+                            text = descriptionPlainText,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
                         )
                     }
 

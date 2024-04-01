@@ -12,7 +12,7 @@ import dev.icerock.moko.resources.StringResource
 import web.cssom.Display
 import web.cssom.JustifyContent
 import web.cssom.pct
-import js.core.jso
+import js.objects.jso
 import mui.material.Box
 import mui.material.Button
 import mui.material.ButtonVariant

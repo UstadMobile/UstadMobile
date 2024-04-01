@@ -9,16 +9,15 @@ import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.UstadTextEditField
 import com.ustadmobile.view.components.UstadBlankIcon
-import kotlinx.css.px
 import mui.icons.material.Add
 import mui.icons.material.Delete
 import mui.material.*
-import mui.material.styles.TypographyVariant
 import mui.system.responsive
 import react.FC
 import react.Props
 import react.ReactNode
 import react.create
+import web.cssom.px
 
 external interface HolidayCalendarEditProps: Props {
     var uiState: HolidayCalendarEditUiState
@@ -36,7 +35,7 @@ val HolidayCalendarEditComponent2 = FC<HolidayCalendarEditProps> { props ->
         maxWidth = "lg"
 
         Stack{
-            direction = responsive(mui.material.StackDirection.column)
+            direction = responsive(StackDirection.column)
             spacing = responsive(10.px)
 
             UstadTextEditField {

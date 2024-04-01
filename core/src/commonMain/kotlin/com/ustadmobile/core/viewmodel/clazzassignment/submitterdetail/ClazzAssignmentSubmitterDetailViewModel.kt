@@ -13,7 +13,6 @@ import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.clazzassignment.UstadCourseAssignmentMarkListItemUiState
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
-import app.cash.paging.PagingSource
 import com.ustadmobile.core.domain.assignment.submittername.GetAssignmentSubmitterNameUseCase
 import com.ustadmobile.core.domain.blob.openblob.OpenBlobUiUseCase
 import com.ustadmobile.core.domain.blob.openblob.OpenBlobUseCase
@@ -212,12 +211,8 @@ class ClazzAssignmentSubmitterDetailViewModel(
             submitterUid = submitterUid,
             assignmentUid = assignmentUid,
             includeDeleted = false,
-        ).also {
-            lastPrivateCommentsPagingSource = it
-        }
+        )
     }
-
-    private var lastPrivateCommentsPagingSource: PagingSource<Int, CommentsAndName>? = null
 
     private val assignmentSubmitterNameUseCase: GetAssignmentSubmitterNameUseCase by
         on(accountManager.activeEndpoint).instance()

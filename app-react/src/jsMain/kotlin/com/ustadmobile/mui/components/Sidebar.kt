@@ -8,7 +8,7 @@ import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import com.ustadmobile.mui.common.Area
 import com.ustadmobile.mui.common.Sizes
 import dev.icerock.moko.resources.StringResource
-import js.core.jso
+import js.objects.jso
 import mui.icons.material.Chat
 import web.cssom.Display
 import mui.material.Box
