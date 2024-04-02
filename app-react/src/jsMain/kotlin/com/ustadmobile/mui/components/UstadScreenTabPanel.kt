@@ -3,10 +3,10 @@ package com.ustadmobile.mui.components
 import com.ustadmobile.entities.USTAD_SCREENS
 import com.ustadmobile.entities.UstadScreens
 import com.ustadmobile.hooks.useMuiAppState
+import js.array.tupleOf
 import web.cssom.Height
 import web.cssom.Overflow
 import web.cssom.px
-import js.core.tupleOf
 import mui.lab.TabPanel
 import mui.material.Box
 import mui.system.sx

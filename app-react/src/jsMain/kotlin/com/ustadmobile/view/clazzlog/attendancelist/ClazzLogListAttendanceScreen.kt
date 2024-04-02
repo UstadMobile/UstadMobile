@@ -5,9 +5,12 @@ import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.paging.ListPagingSource
+import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.schedule.totalAttendeeStatusRecorded
 import com.ustadmobile.core.viewmodel.clazzlog.attendancelist.ClazzLogListAttendanceUiState
 import com.ustadmobile.core.viewmodel.clazzlog.attendancelist.ClazzLogListAttendanceViewModel
+import com.ustadmobile.hooks.useDoorRemoteMediator
+import com.ustadmobile.hooks.useEmptyFlow
 import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useTabAndAppBarHeight
@@ -23,7 +26,7 @@ import web.cssom.Height
 import web.cssom.Overflow
 import web.cssom.pct
 import web.cssom.px
-import js.core.jso
+import js.objects.jso
 import mui.icons.material.CalendarToday as CalendarTodayIcon
 import mui.material.*
 import mui.system.responsive
@@ -120,7 +123,16 @@ val ClazzLogListAttendanceScreenPreview = FC<Props> {
 private val ClazzLogListAttendanceScreenComponent = FC<ClazzLogListAttendanceScreenProps> { props ->
 
     val tabAndAppBarHeight = useTabAndAppBarHeight()
-    val infiniteQueryResult = usePagingSource(props.uiState.clazzLogsList, true)
+
+    val refreshCommandFlow = useEmptyFlow<RefreshCommand>()
+
+    val mediatorResult = useDoorRemoteMediator(
+        props.uiState.clazzLogsList, refreshCommandFlow
+    )
+
+    val infiniteQueryResult = usePagingSource(
+        mediatorResult.pagingSourceFactory, true
+    )
 
     VirtualList {
         style = jso {

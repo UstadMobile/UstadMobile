@@ -1,7 +1,7 @@
 package com.ustadmobile.mui.components
 
 import com.ustadmobile.util.ext.assignPropsTo
-import js.core.jso
+import js.objects.jso
 import mui.material.*
 import mui.system.responsive
 import react.*

@@ -24,6 +24,7 @@ import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import app.cash.paging.PagingSource
 import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.impl.appstate.Snack
+import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.ext.dayStringResource
 import com.ustadmobile.core.util.ext.localFirstThenRepoIfNull
 import com.ustadmobile.core.viewmodel.clazz.parseAndUpdateTerminologyStringsIfNeeded
@@ -102,12 +103,6 @@ class ClazzMemberListViewModel(
     private val clazzUid = savedStateHandle[UstadView.ARG_CLAZZUID]?.toLong()
         ?: throw IllegalArgumentException("No clazzuid")
 
-    private var lastTeacherListPagingSource: PagingSource<Int, PersonAndClazzMemberListDetails>? = null
-
-    private var lastStudentListPagingsource: PagingSource<Int, PersonAndClazzMemberListDetails>? = null
-
-    private var lastPendingEnrolmentRequestsPagingSource: PagingSource<Int, EnrolmentRequestAndPersonDetails>? = null
-
     private fun getMembersAsPagingSource(
         roleId: Int
     ) : PagingSource<Int, PersonAndClazzMemberListDetails>  {
@@ -124,15 +119,11 @@ class ClazzMemberListViewModel(
     }
 
     private val teacherListPagingSource: ListPagingSourceFactory<PersonAndClazzMemberListDetails> = {
-        getMembersAsPagingSource(ClazzEnrolment.ROLE_TEACHER).also {
-            lastTeacherListPagingSource = it
-        }
+        getMembersAsPagingSource(ClazzEnrolment.ROLE_TEACHER)
     }
 
     private val studentListPagingSource: ListPagingSourceFactory<PersonAndClazzMemberListDetails> = {
-        getMembersAsPagingSource(ClazzEnrolment.ROLE_STUDENT).also {
-            lastStudentListPagingsource = it
-        }
+        getMembersAsPagingSource(ClazzEnrolment.ROLE_STUDENT)
     }
 
     private val pendingStudentListPagingSource: ListPagingSourceFactory<EnrolmentRequestAndPersonDetails> = {
@@ -142,9 +133,7 @@ class ClazzMemberListViewModel(
             searchText = _appUiState.value.searchState.searchText.toQueryLikeParam(),
             statusFilter = EnrolmentRequest.STATUS_PENDING,
             sortOrder = _uiState.value.activeSortOrderOption.flag,
-        ).also {
-            lastPendingEnrolmentRequestsPagingSource = it
-        }
+        )
     }
 
 
@@ -208,14 +197,8 @@ class ClazzMemberListViewModel(
         }
     }
 
-    private fun invalidatePagingSources(){
-        lastTeacherListPagingSource?.invalidate()
-        lastStudentListPagingsource?.invalidate()
-        lastPendingEnrolmentRequestsPagingSource?.invalidate()
-    }
-
     override fun onUpdateSearchResult(searchText: String) {
-        invalidatePagingSources()
+        _refreshCommandFlow.tryEmit(RefreshCommand())
     }
 
     override fun onClickAdd() {
@@ -227,7 +210,7 @@ class ClazzMemberListViewModel(
             prev.copy(selectedChipId = filterOption.value)
         }
 
-        invalidatePagingSources()
+        _refreshCommandFlow.tryEmit(RefreshCommand())
     }
 
     fun onClickRespondToPendingEnrolment(
@@ -314,7 +297,7 @@ class ClazzMemberListViewModel(
         _uiState.update { prev ->
             prev.copy(activeSortOrderOption = sortOption)
         }
-        invalidatePagingSources()
+        _refreshCommandFlow.tryEmit(RefreshCommand())
     }
 
     companion object {

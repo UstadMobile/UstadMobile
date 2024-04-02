@@ -129,9 +129,18 @@ open class ContentEntry() {
     var contentTypeFlag: Int = 0
 
     /**
-     * The personUid of the owner of the content e.g. the person to add this content
+     * The personUid of the owner of the content. If this is a Library ContentEntry, then the owner
+     * will be the personUid of the person who added it. If this is a ContentEntry created as part
+     * of a Course (e.g. joined to Clazz via CourseBlock), then it will be the Clazz.clazzUid
      */
     var contentOwner: Long = 0
+
+    /**
+     * OWNER_TYPE_LIBRARY if a library entry. OWNER_TYPE_COURSE if added as part of a Course. See
+     * above
+     */
+    @ColumnInfo(defaultValue = "$OWNER_TYPE_LIBRARY")
+    var contentOwnerType: Int = 0
 
     @LocalChangeSeqNum
     var contentEntryLocalChangeSeqNum: Long = 0
@@ -210,6 +219,11 @@ open class ContentEntry() {
         const val COMPLETION_CRITERIA_AUTOMATIC = 0
         const val COMPLETION_CRITERIA_MIN_SCORE = 1
         const val COMPLETION_CRITERIA_MARKED_BY_STUDENT = 2
+
+        const val OWNER_TYPE_LIBRARY = 1
+
+        const val OWNER_TYPE_COURSE = 2
+
     }
 
     override fun equals(other: Any?): Boolean {

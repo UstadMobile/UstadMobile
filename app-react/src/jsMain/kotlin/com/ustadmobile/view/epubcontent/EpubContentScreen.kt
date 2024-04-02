@@ -14,7 +14,7 @@ import com.ustadmobile.view.components.virtuallist.VirtualListContext
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
 import emotion.react.css
-import js.core.jso
+import js.objects.jso
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
@@ -51,11 +51,14 @@ import com.ustadmobile.hooks.useWindowSize
 import kotlinx.coroutines.delay
 import mui.material.Container
 import mui.material.DrawerVariant
-import mui.material.useMediaQuery
+import mui.system.useMediaQuery
 import web.cssom.Auto
 import web.cssom.GridTemplateAreas
 import web.cssom.array
 import web.cssom.ident
+import web.events.EventHandler
+import web.events.addEventListener
+import web.html.HTMLElement
 
 external interface EpubContentProps : Props{
     var uiState: EpubContentUiState
@@ -370,8 +373,8 @@ val EpubSpineItem = FC<EpubSpineItemProps> { props ->
 
                 bodyEl.getElementsByTagName("a").forEach { element ->
                     element.addEventListener(
-                        type = web.uievents.MouseEvent.Companion.CLICK,
-                        callback = { evt ->
+                        type = web.uievents.MouseEvent.click<HTMLElement>(),
+                        handler = EventHandler { evt ->
                             evt.preventDefault()
                             evt.stopPropagation()
                             val href = element.getAttribute("href")

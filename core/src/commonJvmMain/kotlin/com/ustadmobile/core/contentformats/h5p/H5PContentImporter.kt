@@ -236,6 +236,7 @@ class H5PContentImporter(
                     """
                 <html>
                 <head>
+                <meta charset="utf-8"/> 
                 <title>${h5pTitle.escapeHTML()}</title>
                 <script src="dist/main.bundle.js" type="text/javascript">
                 </script>

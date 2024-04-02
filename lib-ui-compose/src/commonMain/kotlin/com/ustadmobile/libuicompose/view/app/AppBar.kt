@@ -8,11 +8,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -124,6 +124,9 @@ fun UstadAppBar(
             navigationIcon = {
                 val leadingActionButton = appUiState.leadingActionButton
                 when {
+                    compactHeader && searchHasFocus -> {
+                        //Space needed for search.
+                    }
                     leadingActionButton != null -> {
                         UstadActionButtonIcon(leadingActionButton)
                     }
@@ -135,7 +138,7 @@ fun UstadAppBar(
                             }
                         ) {
                             Icon(
-                                imageVector = Icons.Outlined.ArrowBack,
+                                imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
                                 contentDescription = stringResource(MR.strings.back)
                             )
                         }

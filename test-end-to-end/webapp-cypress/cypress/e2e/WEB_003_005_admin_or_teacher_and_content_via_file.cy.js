@@ -46,9 +46,16 @@ it('Teacher able to add content block from file', () => {
   cy.contains('Import from file').click()
   cy.get('input[type="file"]')
     .selectFile('../test-files/content/Epub_Content1.epub',{force: true})
+
+  //Continue import
+  cy.contains('#actionBarButton', 'Next').click()
+
+  //Set CourseBlock title
+  cy.contains("#appbar_title", "Edit content block").should("be.visible")
   cy.get('input[id="title"]').click()
   cy.get('input[id="title"]').clear().type('Content_002',{timeout: 2000})
-  cy.get('#actionBarButton').click()
+  cy.contains('#actionBarButton', 'Done').click()
+
   cy.contains("button","Save").click()
   cy.contains('button','Edit').should('exist')
   cy.contains("Content_001").click()

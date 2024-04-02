@@ -282,27 +282,20 @@ class ClazzAssignmentDetailOverviewViewModel(
 
     val editableSubmissionUiState: Flow<ClazzAssignmentDetailoverviewSubmissionUiState> = _editableSubmissionUiState.asStateFlow()
 
-    private var lastPrivateCommentsPagingSource: PagingSource<Int, CommentsAndName>? = null
 
     private val privateCommentsPagingSourceFactory: () -> PagingSource<Int, CommentsAndName> = {
         activeRepo.commentsDao.findPrivateCommentsForUserByAssignmentUid(
             accountPersonUid = activeUserPersonUid,
             assignmentUid = entityUidArg,
             includeDeleted = false,
-        ).also {
-            lastPrivateCommentsPagingSource = it
-        }
+        )
     }
-
-    private var lastCourseCommentsPagingSourceFactory: PagingSource<Int, CommentsAndName>? = null
 
     private val courseCommentsPagingSourceFactory: () -> PagingSource<Int, CommentsAndName> = {
         activeRepo.commentsDao.findCourseCommentsByAssignmentUid(
             assignmentUid = entityUidArg,
             includeDeleted = false,
-        ).also {
-            lastCourseCommentsPagingSourceFactory = it
-        }
+        )
     }
 
     private var savedSubmissionJob: Job? = null

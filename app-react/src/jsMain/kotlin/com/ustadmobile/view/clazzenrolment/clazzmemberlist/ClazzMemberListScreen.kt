@@ -3,12 +3,14 @@ package com.ustadmobile.view.clazzenrolment.clazzmemberlist
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
+import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.viewmodel.clazzenrolment.clazzmemberlist.ClazzMemberListUiState
 import com.ustadmobile.core.viewmodel.clazzenrolment.clazzmemberlist.ClazzMemberListViewModel
 import com.ustadmobile.hooks.useDateFormatter
 import com.ustadmobile.hooks.useDayOrDate
+import com.ustadmobile.hooks.useDoorRemoteMediator
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useTabAndAppBarHeight
 import com.ustadmobile.hooks.useTimeFormatter
@@ -30,7 +32,8 @@ import web.cssom.Contain
 import web.cssom.Height
 import web.cssom.Overflow
 import web.cssom.pct
-import js.core.jso
+import js.objects.jso
+import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -53,6 +56,8 @@ external interface ClazzMemberListScreenProps : Props {
 
     var uiState: ClazzMemberListUiState
 
+    var refreshCommandFlow: Flow<RefreshCommand>
+
     var onClickEntry: (PersonAndClazzMemberListDetails) -> Unit
 
     var onClickPendingRequest: (enrolment: EnrolmentRequest, approved: Boolean) -> Unit
@@ -72,11 +77,27 @@ private val ClazzMemberListScreenComponent2 = FC<ClazzMemberListScreenProps> { p
 
     val tabAndAppBarHeight = useTabAndAppBarHeight()
 
-    val teachersInfiniteQueryResult = usePagingSource(props.uiState.teacherList, true)
+    val teachersMediatorResult = useDoorRemoteMediator(
+        props.uiState.teacherList, props.refreshCommandFlow
+    )
+    val teachersInfiniteQueryResult = usePagingSource(
+        teachersMediatorResult.pagingSourceFactory, true
+    )
 
-    val studentsInfiniteQueryResult = usePagingSource(props.uiState.studentList, true)
+    val studentsMediatorResult = useDoorRemoteMediator(
+        props.uiState.studentList, props.refreshCommandFlow
+    )
+    val studentsInfiniteQueryResult = usePagingSource(
+        studentsMediatorResult.pagingSourceFactory, true
+    )
 
-    val pendingStudentsInfiniteQueryResult = usePagingSource(props.uiState.pendingStudentList, true)
+
+    val pendingStudentsMediatorResult = useDoorRemoteMediator(
+        props.uiState.pendingStudentList, props.refreshCommandFlow
+    )
+    val pendingStudentsInfiniteQueryResult = usePagingSource(
+        pendingStudentsMediatorResult.pagingSourceFactory, true
+    )
 
     val timeFormatterVal = useTimeFormatter()
 

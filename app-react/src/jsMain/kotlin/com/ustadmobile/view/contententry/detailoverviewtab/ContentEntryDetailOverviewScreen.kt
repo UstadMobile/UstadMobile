@@ -16,6 +16,7 @@ import com.ustadmobile.mui.common.justifyContent
 import com.ustadmobile.mui.common.md
 import com.ustadmobile.mui.common.xs
 import com.ustadmobile.mui.components.UstadQuickActionButton
+import com.ustadmobile.mui.components.UstadRawHtml
 import web.cssom.*
 import mui.material.*
 import mui.material.Badge
@@ -122,8 +123,8 @@ val ContentEntryDetailOverviewComponent2 = FC<ContentEntryDetailOverviewScreenPr
                 onClickManageDownload =  props.onClickMarkComplete
             }
 
-            Typography{
-                + (props.uiState.contentEntry?.entry?.description ?: "")
+            UstadRawHtml {
+                html = props.uiState.contentEntry?.entry?.description ?: ""
             }
 
             Divider { orientation = Orientation.horizontal }
@@ -405,14 +406,11 @@ val ContentEntryDetailOverviewScreenPreview = FC<Props> {
     val uiStateVar by useState {
         ContentEntryDetailOverviewUiState(
             contentEntry = ContentEntryAndDetail(
-                entry = ContentEntryWithMostRecentContainer().apply {
+                entry = ContentEntry().apply {
                     title = "Content Title"
                     author = "Author"
                     publisher = "Publisher"
                     licenseName = "BY_SA"
-                    container = com.ustadmobile.lib.db.entities.Container().apply {
-                        fileSize = 50
-                    }
                     description = "Content Description"
                 }
             ),
