@@ -275,6 +275,7 @@
 # For enumeration classes, see http://proguard.sourceforge.net/manual/examples.html#enumerations
 -keepclassmembers,allowoptimization enum * {
     public static **[] values();
+    public static **[] entries();
     public static ** valueOf(java.lang.String);
 }
 

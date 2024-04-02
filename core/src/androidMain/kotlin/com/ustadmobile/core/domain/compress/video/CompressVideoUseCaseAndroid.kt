@@ -10,6 +10,7 @@ import com.ustadmobile.core.domain.compress.CompressParams
 import com.ustadmobile.core.domain.compress.CompressProgressUpdate
 import com.ustadmobile.core.domain.compress.CompressResult
 import com.ustadmobile.core.domain.compress.CompressUseCase
+import com.ustadmobile.core.domain.compress.CompressionLevel
 import com.ustadmobile.core.ext.requireExtension
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.door.DoorUri
@@ -25,6 +26,32 @@ class CompressVideoUseCaseAndroid(
     private val uriHelper: UriHelper,
 ): CompressUseCase {
 
+    //As per https://developer.android.com/media/platform/supported-formats#video-encoding
+    fun CompressionLevel.videoStrategy() : DefaultVideoStrategy {
+        return when(this) {
+            CompressionLevel.HIGH -> DefaultVideoStrategy.atMost(360, 640) // Recommendation is 176x144 - but this doesn't work
+                .bitRate(56_000L)
+                .frameRate(12)
+                .mimeType("video/avc")
+                .build()
+            CompressionLevel.MEDIUM -> DefaultVideoStrategy.atMost(360, 640)
+                .bitRate(500_000L)
+                .frameRate(30)
+                .mimeType("video/avc")
+                .build()
+            CompressionLevel.LOW -> DefaultVideoStrategy.atMost(720, 1280)
+                .bitRate(2_000_000L)
+                .frameRate(30)
+                .mimeType("video/avc")
+                .build()
+
+            CompressionLevel.NONE -> throw IllegalArgumentException("")
+
+        }
+
+    }
+
+
     override suspend fun invoke(
         fromUri: String,
         toUri: String?,
@@ -32,12 +59,7 @@ class CompressVideoUseCaseAndroid(
         onProgress: CompressUseCase.OnCompressProgress?
     ): CompressResult {
         //As per https://developer.android.com/media/platform/supported-formats
-        val vidStrategy = DefaultVideoStrategy
-            .atMost(720, 1280)
-            .bitRate(500 * 1000)
-            .frameRate(30)
-            .mimeType("video/avc")
-            .build()
+        val vidStrategy = params.compressionLevel.videoStrategy()
 
         val destFile = if(toUri != null) {
             Uri.parse(toUri).toFile().requireExtension("mp4")

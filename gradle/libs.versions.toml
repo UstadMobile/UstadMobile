@@ -114,6 +114,7 @@ androidx-coordinatorlayout = "1.2.0"
 androidx-test-runner = "1.5.2"
 robolectric = "4.11.1"
 androidx-test-core = "1.5.0"
+androidx-test-orchestrator = "1.4.2"
 json = "20231013"
 commons-cli = "1.6.0"
 kotlinx-html = "0.11.0"
@@ -321,6 +322,7 @@ androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-view
 androidx-coordinatorlayout = { module = "androidx.coordinatorlayout:coordinatorlayout", version.ref = "androidx-coordinatorlayout"}
 ktor-client-android = { module = "io.ktor:ktor-client-android", version.ref = "ktor" }
 androidx-test-runner = { module = "androidx.test:runner", version.ref = "androidx-test-runner" }
+androidx-test-orchestrator = { module = "androidx.test:orchestrator", version.ref = "androidx-test-orchestrator" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 androidx-test-core = { module = "androidx.test:core", version.ref = "androidx-test-core" }
 ktor-client-json-js = { module = "io.ktor:ktor-client-json-js", version.ref = "ktor" }

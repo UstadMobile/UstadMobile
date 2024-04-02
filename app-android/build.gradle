@@ -332,6 +332,12 @@ dependencies {
 
     implementation libs.androidx.browser
     implementation libs.androidx.core.splashscreen
+
+
+    androidTestImplementation libs.androidx.test.runner
+    androidTestImplementation libs.junit
+    androidTestImplementation libs.androidx.test.core
+    androidTestUtil libs.androidx.test.orchestrator
 }
 
 licenseReport {
