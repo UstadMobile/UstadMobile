@@ -263,6 +263,8 @@ kotlin {
                 implementation libs.compressor
                 implementation libs.coil
                 implementation libs.androidx.browser
+
+                implementation libs.transcoder
             }
         }
 

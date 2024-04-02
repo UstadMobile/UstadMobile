@@ -72,7 +72,8 @@ data class ContentEntryImportJob(
     var cjiItemTotal: Long = 0,
 
     /**
-     * Represents the status to the process of this job item and not including any child items.
+     * Represents the status to the process of this job item and not including any child items (as
+     * per JobStatus).
      * Status set to default JobStatus.QUEUED
      */
     var cjiStatus: Int = 4,

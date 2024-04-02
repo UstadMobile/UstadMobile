@@ -37,8 +37,8 @@ class EnqueueImportContentEntryUseCaseAndroid(
                 .setInputData(jobData)
                 .build()
 
-            val workName = "import-content-entry-${endpoint.url}-$uid"
-            WorkManager.getInstance(appContext).enqueueUniqueWork(workName,
+            WorkManager.getInstance(appContext).enqueueUniqueWork(
+                EnqueueContentEntryImportUseCase.uniqueIdFor(endpoint, uid),
                 ExistingWorkPolicy.REPLACE, workRequest)
         }
     }

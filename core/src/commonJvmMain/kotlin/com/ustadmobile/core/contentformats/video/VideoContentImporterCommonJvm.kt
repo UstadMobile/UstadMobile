@@ -15,6 +15,7 @@ import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndMan
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
 import com.ustadmobile.core.domain.cachestoragepath.getLocalUriIfRemote
+import com.ustadmobile.core.domain.compress.CompressUseCase
 import com.ustadmobile.core.domain.contententry.ContentConstants
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
 import com.ustadmobile.core.io.ext.toDoorUri
@@ -53,6 +54,7 @@ class VideoContentImporterCommonJvm(
     private val getStoragePathForUrlUseCase: GetStoragePathForUrlUseCase,
     private val validateVideoFileUseCase: ValidateVideoFileUseCase,
     private val mimeTypeHelper: MimeTypeHelper,
+    private val compressUseCase: CompressUseCase? = null,
 ) : ContentImporter(endpoint) {
 
 
@@ -76,7 +78,34 @@ class VideoContentImporterCommonJvm(
         progressListener: ContentImportProgressListener,
     ): ContentEntryVersion = withContext(Dispatchers.IO) {
         val jobUri = jobItem.requireSourceAsDoorUri()
-        val localUri = getStoragePathForUrlUseCase.getLocalUriIfRemote(jobUri)
+        val fromUri = getStoragePathForUrlUseCase.getLocalUriIfRemote(jobUri)
+
+        //Get the mime type from the uri to import if possible
+        // If not, try looking at the original filename (might be needed where using temp import
+        // files etc.
+        val fromMimeType = uriHelper.getMimeType(jobUri)
+            ?: jobItem.cjiOriginalFilename?.fileExtensionOrNull()?.let {
+                mimeTypeHelper.guessByExtension(it)
+            } ?: throw IllegalStateException("Cannot get mime type")
+
+
+        val compressUseCaseVal = compressUseCase
+        val (uri, mimeType) =  if(compressUseCaseVal != null) {
+            compressUseCaseVal(
+                fromUri = fromUri.toString(),
+                toUri = null,
+                onProgress = {
+                    progressListener.onProgress(
+                        jobItem.copy(
+                            cjiItemTotal = it.total,
+                            cjiItemProgress = it.completed
+                        )
+                    )
+                }
+            ).let { DoorUri.parse(it.uri) to it.mimeType }
+        }else {
+            fromUri to fromMimeType
+        }
 
         val contentEntryVersionUid = db.doorPrimaryKeyManager.nextId(ContentEntryVersion.TABLE_ID)
         val urlPrefix = createContentUrlPrefix(contentEntryVersionUid)
@@ -85,14 +114,6 @@ class VideoContentImporterCommonJvm(
         val mediaInfoEntryUri = "media.json"
         val workDir = Path(tmpPath, "video-import-${systemTimeInMillis()}")
         fileSystem.createDirectories(workDir)
-
-        //Get the mime type from the uri to import if possible
-        // If not, try looking at the original filename (might be needed where using temp import
-        // files etc.
-        val mimeType = uriHelper.getMimeType(jobUri)
-            ?: jobItem.cjiOriginalFilename?.fileExtensionOrNull()?.let {
-                mimeTypeHelper.guessByExtension(it)
-            } ?: throw IllegalStateException("Cannot get mime type")
 
         val mediaContentInfo = MediaContentInfo(
             sources = listOf(
@@ -117,7 +138,7 @@ class VideoContentImporterCommonJvm(
                 listOf(
                     SaveLocalUriAsBlobAndManifestUseCase.SaveLocalUriAsBlobAndManifestItem(
                         blobItem = SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem(
-                            localUri = localUri.toString(),
+                            localUri = uri.toString(),
                             entityUid = contentEntryVersionUid,
                             tableId = ContentEntryVersion.TABLE_ID,
                             mimeType = mimeType,

@@ -503,7 +503,6 @@ class ContentEntryListViewModel(
                             ContentEntryBlockLanguageAndContentJob(
                                 entry = entry,
                                 block = courseBlock,
-                                contentJob = null,
                                 contentJobItem = null,
                             ),
                         )

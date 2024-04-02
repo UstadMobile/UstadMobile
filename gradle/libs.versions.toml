@@ -118,6 +118,7 @@ json = "20231013"
 commons-cli = "1.6.0"
 kotlinx-html = "0.11.0"
 nv-i18n = "1.29"
+transcoder = "0.10.5"
 
 [plugins]
 
@@ -333,3 +334,5 @@ commons-cli = { module ="commons-cli:commons-cli", version.ref = "commons-cli" }
 kotlinx-html-jvm =  { module = "org.jetbrains.kotlinx:kotlinx-html-jvm", version.ref = "kotlinx-html" }
 nv-i18n = { module ="com.neovisionaries:nv-i18n", version.ref = "nv-i18n" }
 ktor-io-jvm = { module = "io.ktor:ktor-io-jvm", version.ref = "ktor" }
+transcoder = { module = "com.otaliastudios:transcoder", version.ref = "transcoder" }
+

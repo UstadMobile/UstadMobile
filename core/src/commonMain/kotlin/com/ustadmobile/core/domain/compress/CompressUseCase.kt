@@ -7,12 +7,7 @@ interface CompressUseCase {
 
     fun interface OnCompressProgress {
 
-        operator fun invoke(
-            fromUri: String,
-            toUri: String,
-            completed: Long,
-            total: Long
-        )
+        operator fun invoke(update: CompressProgressUpdate)
 
     }
 

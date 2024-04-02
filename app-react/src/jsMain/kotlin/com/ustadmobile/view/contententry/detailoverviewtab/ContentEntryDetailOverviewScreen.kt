@@ -12,7 +12,6 @@ import com.ustadmobile.core.viewmodel.contententry.detailoverviewtab.ContentEntr
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.composites.ContentEntryAndDetail
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.mui.common.justifyContent
 import com.ustadmobile.mui.common.md
 import com.ustadmobile.mui.common.xs
 import com.ustadmobile.mui.components.UstadQuickActionButton
@@ -20,7 +19,6 @@ import com.ustadmobile.mui.components.UstadRawHtml
 import web.cssom.*
 import mui.material.*
 import mui.material.Badge
-import mui.material.List
 import mui.material.styles.TypographyVariant
 import mui.system.Container
 import mui.system.responsive
@@ -73,7 +71,6 @@ external interface ContentEntryDetailOverviewScreenProps : Props {
 
     var onClickTranslation: (ContentEntryRelatedEntryJoinWithLanguage) -> Unit
 
-    var onClickContentJobItem: () -> Unit
 }
 
 val ContentEntryDetailOverviewComponent2 = FC<ContentEntryDetailOverviewScreenProps> { props ->
@@ -106,9 +103,9 @@ val ContentEntryDetailOverviewComponent2 = FC<ContentEntryDetailOverviewScreenPr
                 }
             }
 
-            ContentJobList{
-                uiState = props.uiState
-            }
+//            ContentJobList{
+//                uiState = props.uiState
+//            }
 
             if (props.uiState.locallyAvailable) {
                 LocallyAvailableRow()
@@ -299,41 +296,6 @@ private val ContentDetailRightColumn = FC <ContentEntryDetailOverviewScreenProps
     }
 }
 
-private val ContentJobList = FC <ContentEntryDetailOverviewScreenProps> { props ->
-
-    List{
-        props.uiState.activeContentJobItems.forEach {
-            onClick = { props.onClickContentJobItem }
-            ListItemText{
-                sx {
-                    padding = 10.px
-                }
-
-                Stack {
-                    Stack {
-                        direction = responsive(StackDirection.row)
-                        justifyContent = JustifyContent.spaceBetween
-
-
-                        Typography {
-                            + (it.progressTitle ?: "")
-                        }
-
-                        Typography {
-                            + (it.progress.toString()+" %")
-                        }
-                    }
-
-                    LinearProgress {
-                        value = it.progress / it.total
-                        variant = LinearProgressVariant.determinate
-                    }
-                }
-            }
-        }
-    }
-}
-
 private val LocallyAvailableRow = FC <ContentEntryDetailOverviewScreenProps> {
 
     val strings: StringProvider = useStringProvider()
@@ -500,7 +462,7 @@ val ContentEntryDetailOverviewScreenPreview = FC<Props> {
                     }
                 }
             ),
-            activeContentJobItems = listOf(
+            activeImportJobs = listOf(
                 ContentJobItemProgress().apply {
                     progressTitle = "First"
                     progress = 30

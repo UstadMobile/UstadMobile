@@ -70,9 +70,12 @@ import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCaseC
 import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCase
 import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCaseAndroid
 import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseAndroid
+import com.ustadmobile.core.domain.compress.video.CompressVideoUseCaseAndroid
 import com.ustadmobile.core.domain.contententry.delete.DeleteContentEntryParentChildJoinUseCase
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCase
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCaseCommonJvm
+import com.ustadmobile.core.domain.contententry.importcontent.CancelImportContentEntryUseCase
+import com.ustadmobile.core.domain.contententry.importcontent.CancelImportContentEntryUseCaseAndroid
 import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCaseCommonJvm
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
@@ -422,6 +425,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                             json = instance(),
                             getStoragePathForUrlUseCase  = getStoragePathForUrlUseCase,
                             mimeTypeHelper = mimeTypeHelper,
+                            compressUseCase = instance<CompressVideoUseCaseAndroid>(),
                         )
                     )
 
@@ -439,6 +443,13 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                         )
                     )
                 }
+            )
+        }
+
+        bind<CompressVideoUseCaseAndroid>() with singleton {
+            CompressVideoUseCaseAndroid(
+                appContext = applicationContext,
+                uriHelper = instance(),
             )
         }
 
@@ -576,6 +587,13 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                     httpClient = instance(),
                     json = instance(),
                 )
+            )
+        }
+
+        bind<CancelImportContentEntryUseCase>() with scoped(EndpointScope.Default).provider {
+            CancelImportContentEntryUseCaseAndroid(
+                appContext = applicationContext,
+                endpoint = context,
             )
         }
 

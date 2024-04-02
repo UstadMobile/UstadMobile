@@ -13,6 +13,7 @@ import org.kodein.di.DI
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.blob.download.CancelDownloadUseCase
 import com.ustadmobile.core.domain.blob.download.MakeContentEntryAvailableOfflineUseCase
+import com.ustadmobile.core.domain.contententry.importcontent.CancelImportContentEntryUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.LaunchContentEntryVersionUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.epub.LaunchEpubUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.LaunchXapiUseCase
@@ -23,6 +24,7 @@ import com.ustadmobile.core.util.ext.localFirstThenRepoIfNull
 import com.ustadmobile.core.util.ext.onActiveEndpoint
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.lib.db.composites.ContentEntryAndDetail
+import com.ustadmobile.lib.db.composites.ContentEntryImportJobProgress
 import com.ustadmobile.lib.db.composites.OfflineItemAndState
 import com.ustadmobile.lib.db.composites.TransferJobAndTotals
 import io.github.aakira.napier.Napier
@@ -45,7 +47,7 @@ data class ContentEntryDetailOverviewUiState(
 
     val availableTranslations: List<ContentEntryRelatedEntryJoinWithLanguage> = emptyList(),
 
-    val activeContentJobItems: List<ContentJobItemProgress> = emptyList(),
+    val activeImportJobs: List<ContentEntryImportJobProgress> = emptyList(),
 
     val activeUploadJobs: List<TransferJobAndTotals> = emptyList(),
 
@@ -105,6 +107,9 @@ class ContentEntryDetailOverviewViewModel(
 
     private val target = savedStateHandle[ARG_TARGET]
 
+    private val cancelImportContentEntryUseCase: CancelImportContentEntryUseCase? by
+        di.onActiveEndpoint().instanceOrNull()
+
 
     init {
         viewModelScope.launch {
@@ -141,6 +146,18 @@ class ContentEntryDetailOverviewViewModel(
                 }
 
                 launch {
+                    activeDb.contentEntryImportJobDao.findInProgressJobsByContentEntryUid(
+                        contentEntryUid = entityUidArg
+                    ).collect {
+                        _uiState.update { prev ->
+                            prev.copy(
+                                activeImportJobs = it
+                            )
+                        }
+                    }
+                }
+
+                launch {
                     activeDb.offlineItemDao.findByContentEntryUid(
                         contentEntryUid = entityUidArg,
                         nodeId = nodeIdAndAuth.nodeId
@@ -154,10 +171,6 @@ class ContentEntryDetailOverviewViewModel(
                 }
             }
         }
-    }
-
-    fun onClickEdit() {
-
     }
 
 
@@ -224,6 +237,13 @@ class ContentEntryDetailOverviewViewModel(
                 loadingState = LoadingUiState.NOT_LOADING
                 _uiState.update { it.copy(openButtonEnabled = true) }
             }
+        }
+    }
+
+    fun onCancelImport(jobUid: Long) {
+        viewModelScope.launch {
+            cancelImportContentEntryUseCase?.invoke(jobUid)
+            snackDispatcher.showSnackBar(Snack(systemImpl.getString(MR.strings.canceled)))
         }
     }
 

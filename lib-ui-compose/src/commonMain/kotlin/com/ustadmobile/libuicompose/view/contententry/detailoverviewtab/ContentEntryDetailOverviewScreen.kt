@@ -1,6 +1,5 @@
 package com.ustadmobile.libuicompose.view.contententry.detailoverviewtab
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -16,8 +15,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material.icons.Icons
@@ -38,10 +35,12 @@ import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.viewmodel.contententry.detailoverviewtab.ContentEntryDetailOverviewUiState
 import com.ustadmobile.core.viewmodel.contententry.detailoverviewtab.ContentEntryDetailOverviewViewModel
+import com.ustadmobile.lib.db.entities.ContentEntryImportJob
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
-import com.ustadmobile.lib.db.entities.ContentJobItemProgress
+import com.ustadmobile.lib.db.entities.TransferJob
 import com.ustadmobile.libuicompose.components.UstadHtmlText
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
+import com.ustadmobile.libuicompose.components.UstadLinearProgressListItem
 import com.ustadmobile.libuicompose.components.UstadOfflineItemStatusQuickActionButton
 import com.ustadmobile.libuicompose.components.UstadQuickActionButton
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
@@ -60,6 +59,7 @@ fun ContentEntryDetailOverviewScreen(
         uiState = uiState,
         onClickOpen = viewModel::onClickOpen,
         onClickOfflineButton = viewModel::onClickOffline,
+        onCancelImport = viewModel::onCancelImport,
     )
 }
 
@@ -73,7 +73,7 @@ fun ContentEntryDetailOverviewScreen(
     onClickDelete: () -> Unit = {},
     onClickManageDownload: () -> Unit = {},
     onClickTranslation: (ContentEntryRelatedEntryJoinWithLanguage) -> Unit = {},
-    onClickContentJobItem: () -> Unit = {},
+    onCancelImport: (Long) -> Unit = { }
 ) {
     UstadLazyColumn(
         verticalArrangement = Arrangement.spacedBy(5.dp),
@@ -116,34 +116,33 @@ fun ContentEntryDetailOverviewScreen(
 
         items(
             items = uiState.activeUploadJobs,
-            key = { item -> item.transferJob?.tjUid ?: 0 }
+            key = { item -> Pair(TransferJob.TABLE_ID, item.transferJob?.tjUid ?: 0) }
         ) { item ->
-            ListItem(
-                headlineContent = {
-                    LinearProgressIndicator(
-                        modifier = Modifier.fillMaxWidth(),
-                        progress = {
-                            (item.transferred.toFloat() / max(item.totalSize.toFloat(), 1f))
-                        }
-                    )
-                },
+            UstadLinearProgressListItem(
+                progress = (item.transferred.toFloat() / max(item.totalSize.toFloat(), 1f)),
                 supportingContent = {
                     Text(stringResource(MR.strings.uploading))
+                },
+                onCancel = {
+
                 }
             )
         }
 
         items(
-            items = uiState.activeContentJobItems,
-            key = { contentJob -> contentJob.cjiUid }
+            items = uiState.activeImportJobs,
+            key = { Pair(ContentEntryImportJob.TABLE_ID, it.cjiUid) }
         ){ contentJobItem ->
-            ContentJobListItem(
-                uiState = uiState,
-                onClickContentJobItem = onClickContentJobItem,
-                contentJob = contentJobItem
+            UstadLinearProgressListItem(
+                progress = contentJobItem.progress,
+                supportingContent = {
+                    Text(stringResource(MR.strings.importing))
+                },
+                onCancel = {
+                    onCancelImport(contentJobItem.cjiUid)
+                }
             )
         }
-
 
         item {
             HorizontalDivider(thickness = 1.dp)
@@ -248,33 +247,6 @@ fun ContentDetailRightColumn(
             }
         }
     }
-}
-
-@Composable
-fun ContentJobListItem(
-    uiState: ContentEntryDetailOverviewUiState,
-    onClickContentJobItem: () -> Unit,
-    contentJob: ContentJobItemProgress
-){
-    ListItem(
-        modifier = Modifier.clickable {
-            onClickContentJobItem()
-        },
-        headlineContent = {
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(contentJob.progressTitle ?: "")
-                Text(contentJob.progress.toString()+" %")
-            }
-        },
-        supportingContent = {
-            LinearProgressIndicator(
-                progress = { (contentJob.progress/100.0).toFloat() },
-                modifier = Modifier.height(4.dp),
-            )
-        }
-    )
 }
 
 @Composable

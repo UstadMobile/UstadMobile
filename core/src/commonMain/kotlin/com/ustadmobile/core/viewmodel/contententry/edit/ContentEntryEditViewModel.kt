@@ -19,7 +19,6 @@ import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.lib.db.composites.ContentEntryBlockLanguageAndContentJob
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentJob
 import com.ustadmobile.lib.db.entities.ContentEntryImportJob
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
@@ -159,7 +158,6 @@ class ContentEntryEditViewModel(
                                 sourceUri = importedMetaData.entry.sourceUrl,
                                 cjiOriginalFilename = importedMetaData.originalFilename,
                             ),
-                            contentJob = ContentJob()
                         ).also {
                             savedStateHandle[KEY_TITLE] = systemImpl.formatString(MR.strings.importing,
                                 (importedMetaData.originalFilename ?: importedMetaData.entry.sourceUrl ?: ""))
