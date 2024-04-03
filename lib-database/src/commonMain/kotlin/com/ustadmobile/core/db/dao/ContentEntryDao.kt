@@ -183,10 +183,6 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
                          ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid 
              WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid 
                AND (:langParam = 0 OR ContentEntry.primaryLanguageUid = :langParam)
-               AND (ContentEntry.publik 
-                    OR (SELECT username
-                          FROM Person
-                         WHERE personUid = :personUid) IS NOT NULL) 
                AND (:categoryParam0 = 0 OR :categoryParam0 
                     IN (SELECT ceccjContentCategoryUid 
                           FROM ContentEntryContentCategoryJoin 
@@ -206,7 +202,6 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
         parentUid: Long,
         langParam: Long,
         categoryParam0: Long,
-        personUid: Long,
         sortOrder: Int,
         includeDeleted: Boolean,
     ): PagingSource<Int, ContentEntryAndListDetail>
