@@ -26,6 +26,7 @@ appId: com.toughra.ustadmobile
           notVisible: "Downloads"
       file: redirect_to_downloads.yaml
 - tapOn: ${TESTFILENAME}
+- tapOn: "Next"
 - tapOn: "Done"
 - tapOn: "SAVE"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/able_to_add_new_content_block_inside_course"

@@ -81,6 +81,14 @@ env:
 - tapOn: "Interactive"
 - tapOn: "Done"
 - tapOn: "SAVE"
+- scrollUntilVisible:
+    element:
+      text:  "True/False Question"
+    direction: DOWN
+- assertVisible:
+    text:  "True/False Question"
+- assertVisible:
+    text: "The Adopting of Rosa Marie / (A Sequel to Dandelion Cottage)"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/able_to_add_existing_content_block_inside_course"
 
 

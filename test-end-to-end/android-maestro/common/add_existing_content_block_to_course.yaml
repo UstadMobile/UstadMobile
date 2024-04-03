@@ -6,10 +6,11 @@ appId: com.toughra.ustadmobile
 - tapOn:
       id: "floating_action_button"
 # Add block button will be only visible after scrolling to down
-- swipe:
-    start: 100,400
-    end: 100,100
+- scrollUntilVisible:
+    element:
+      text: "Add block"
+    direction: DOWN
 # add existing content
 - tapOn: "Add block"
 - tapOn: "Content"
-- tapOn: "My content"
+- tapOn: "Library"

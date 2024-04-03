@@ -21,5 +21,4 @@ env:
     id: "floating_action_button"
 - tapOn: "Add"
 - tapOn: "Remove photo"
-- tapOn:
-    id: "Save"
+- tapOn: "Save"
