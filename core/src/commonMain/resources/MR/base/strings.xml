@@ -1884,4 +1884,14 @@
 
     <string name="edit_content_block">Edit content block</string>
 
+    <string name="compression">Compression</string>
+
+    <string name="compression_high">Maximum (smallest file size)</string>
+
+    <string name="compression_medium">Medium</string>
+
+    <string name="compression_low">Low (highest quality)</string>
+
+    <string name="compression_none">None (original quality and file size)</string>
+
 </resources>

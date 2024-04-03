@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.db.entities
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
@@ -112,6 +113,12 @@ data class ContentEntryImportJob(
      *  don't make the contententry inactive
      */
     var cjiContentDeletedOnCancellation:  Boolean = false,
+
+    /**
+     * CompressionLevel to use for import - integer constants as per CompressionLevel (on core)
+     */
+    @ColumnInfo(defaultValue = "2")
+    var cjiCompressionLevel: Int = 2,
 
 ) {
     companion object {

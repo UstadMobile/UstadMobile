@@ -3,6 +3,7 @@ package com.ustadmobile.core.viewmodel.contententry.edit
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.db.PermissionFlags
+import com.ustadmobile.core.domain.compress.CompressionLevel
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
 import com.ustadmobile.core.domain.contententry.save.SaveContentEntryUseCase
 import com.ustadmobile.core.impl.ContainerStorageDir
@@ -272,6 +273,18 @@ class ContentEntryEditViewModel(
             resultKey = KEY_HTML_DESCRIPTION,
             title = systemImpl.getString(MR.strings.description),
         )
+    }
+
+    fun onSetCompressionLevel(compressionLevel: CompressionLevel) {
+        _uiState.update { prev ->
+            prev.copy(
+                entity = prev.entity?.copy(
+                    contentJobItem = prev.entity.contentJobItem?.copy(
+                        cjiCompressionLevel = compressionLevel.value
+                    )
+                )
+            )
+        }
     }
 
 

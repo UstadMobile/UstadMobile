@@ -34,8 +34,8 @@ class CompressVideoUseCaseAndroidTest {
         val uriHelper = UriHelperAndroid(context)
         useCase = CompressVideoUseCaseAndroid(context, uriHelper)
 
-        videoFile = tempFolder.newFile("bunny.mp4")
-        this::class.java.getResourceAsStream("/bunny.mp4")!!.use { assetIn ->
+        videoFile = tempFolder.newFile("bus.mp4")
+        this::class.java.getResourceAsStream("/bus.mp4")!!.use { assetIn ->
             FileOutputStream(videoFile).use { fileOut ->
                 assetIn.copyTo(fileOut)
                 fileOut.flush()

@@ -462,23 +462,6 @@ val ContentEntryDetailOverviewScreenPreview = FC<Props> {
                     }
                 }
             ),
-            activeImportJobs = listOf(
-                ContentJobItemProgress().apply {
-                    progressTitle = "First"
-                    progress = 30
-                    total = 2
-                },
-                ContentJobItemProgress().apply {
-                    progressTitle = "Second"
-                    progress = 10
-                    total = 5
-                },
-                ContentJobItemProgress().apply {
-                    progressTitle = "Third"
-                    progress = 70
-                    total = 4
-                }
-            ),
             locallyAvailable = true,
             markCompleteVisible = true,
             translationVisibile = true
