@@ -3,7 +3,6 @@ plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.plugin.serialization'
     id 'org.jetbrains.kotlin.android'
-    id 'org.jetbrains.kotlin.kapt'
     id 'kotlin-parcelize'
     alias(libs.plugins.jetbrains.compose)
     alias(libs.plugins.license)
@@ -18,7 +17,6 @@ if(keyStoreFile == null) {
 
 def keyStorePropertiesExists = rootProject.file(keyStoreFile).exists()
 def keystoreProperties = new Properties()
-def baseAppId = "com.toughra.ustadmobile"
 
 if (keyStorePropertiesExists) {
     keystoreProperties.load(new FileInputStream(rootProject.file(keyStoreFile)))
@@ -36,17 +34,9 @@ configurations.all {
     resolutionStrategy.force 'org.objenesis:objenesis:2.6'
 }
 
-kapt {
-    javacOptions {
-        // Increase the max count of errors from annotation processors.
-        // Default is 100.
-        option("-Xmaxerrs", 500)
-    }
-}
-
 android {
     buildFeatures {
-        dataBinding true
+        dataBinding false
     }
 
     //APK splitting would interfere with sideloading the app between different targets and the size
