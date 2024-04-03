@@ -15,7 +15,9 @@ import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndMan
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
 import com.ustadmobile.core.domain.cachestoragepath.getLocalUriIfRemote
+import com.ustadmobile.core.domain.compress.CompressParams
 import com.ustadmobile.core.domain.compress.CompressUseCase
+import com.ustadmobile.core.domain.compress.CompressionLevel
 import com.ustadmobile.core.domain.contententry.ContentConstants
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
 import com.ustadmobile.core.io.ext.toDoorUri
@@ -90,7 +92,8 @@ class VideoContentImporterCommonJvm(
 
 
         val compressUseCaseVal = compressUseCase
-        val (uri, mimeType) =  if(compressUseCaseVal != null) {
+        val compressionLevel = CompressionLevel.forValue(jobItem.cjiCompressionLevel)
+        val (uri, mimeType) =  if(compressUseCaseVal != null && compressionLevel != CompressionLevel.NONE) {
             compressUseCaseVal(
                 fromUri = fromUri.toString(),
                 toUri = null,
@@ -101,7 +104,10 @@ class VideoContentImporterCommonJvm(
                             cjiItemProgress = it.completed
                         )
                     )
-                }
+                },
+                params = CompressParams(
+                    compressionLevel = compressionLevel,
+                )
             ).let { DoorUri.parse(it.uri) to it.mimeType }
         }else {
             fromUri to fromMimeType

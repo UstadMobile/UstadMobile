@@ -1,14 +1,18 @@
 package com.ustadmobile.core.domain.compress.video
 
 import android.content.Context
+import android.media.MediaMetadataRetriever
 import android.net.Uri
 import androidx.annotation.OptIn
 import androidx.core.net.toFile
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MimeTypes
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.effect.Presentation
 import androidx.media3.transformer.Composition
 import androidx.media3.transformer.DefaultEncoderFactory
+import androidx.media3.transformer.EditedMediaItem
+import androidx.media3.transformer.Effects
 import androidx.media3.transformer.ExportException
 import androidx.media3.transformer.ExportResult
 import androidx.media3.transformer.ProgressHolder
@@ -44,48 +48,48 @@ class CompressVideoUseCaseAndroid(
     private val uriHelper: UriHelper,
 ): CompressUseCase {
 
-    //As per https://developer.android.com/media/platform/supported-formats#video-encoding
-    /**
-     * https://developer.android.com/reference/android/media/MediaExtractor#getTrackFormat(int)
-     *  See sar-width / sar-height : https://developer.android.com/reference/android/media/MediaExtractor
-     *
-     *
-     *  https://android-developers.googleblog.com/2023/05/media-transcoding-and-editing-transform-and-roll-out.html
-     *
-     */
-//    fun CompressionLevel.videoStrategy(
-//        displayDimensions: DisplayDimensions?
-//    ) : DefaultVideoStrategy {
-////        val displayDimensionStrategy = displayDimensions?.let {
-////            val aspectRatio =  it.height.toFloat() / it.width.toFloat()
-////            DefaultVideoStrategy.aspectRatio(aspectRatio)
-////        }
-//        val displayDimensionStrategy = DefaultVideoStrategy.exact(480, 853)
-//
-//
-//        return when(this) {
-//            CompressionLevel.HIGH -> (displayDimensionStrategy ?: DefaultVideoStrategy.atMost(360, 640)) // Recommendation is 176x144 - but this doesn't work
-//                .bitRate(56_000L)
-//                .frameRate(12)
-//                .mimeType("video/avc")
-//                .build()
-//            CompressionLevel.MEDIUM -> (displayDimensionStrategy ?: DefaultVideoStrategy.atMost(360, 640))
-//                .bitRate(500_000L)
-//                .frameRate(30)
-//                .mimeType("video/avc")
-//                .build()
-//            CompressionLevel.LOW -> (displayDimensionStrategy ?: DefaultVideoStrategy.atMost(720, 1280))
-//                .bitRate(2_000_000L)
-//                .frameRate(30)
-//                .mimeType("video/avc")
-//                .build()
-//
-//            CompressionLevel.NONE -> throw IllegalArgumentException("")
-//
-//        }
-//
-//    }
+    @OptIn(UnstableApi::class)
+    fun createPresentationHeightByCompressionLevel(
+        compressionLevel: CompressionLevel,
+        widthIn: Int,
+        heightIn: Int,
+    ) : Presentation? {
+        val height = when {
+            compressionLevel == CompressionLevel.HIGH && widthIn > heightIn ->  144
+            compressionLevel == CompressionLevel.HIGH -> 176
 
+            compressionLevel == CompressionLevel.MEDIUM && widthIn > heightIn -> 360
+            compressionLevel == CompressionLevel.MEDIUM -> 480
+
+            compressionLevel == CompressionLevel.LOW && widthIn > heightIn -> 720
+            compressionLevel == CompressionLevel.LOW -> 1280
+            else -> null
+        }
+
+        return height?.let { Presentation.createForHeight(it) }
+    }
+
+    @OptIn(UnstableApi::class)
+    fun VideoEncoderSettings.Builder.setBitrateForCompressionLevel(
+        compressionLevel: CompressionLevel
+    ) : VideoEncoderSettings.Builder {
+        when(compressionLevel) {
+            CompressionLevel.HIGH -> {
+                setBitrate(56_000)
+            }
+            CompressionLevel.MEDIUM -> {
+                setBitrate(500_000)
+            }
+            CompressionLevel.LOW -> {
+                setBitrate(2_000_000)
+            }
+            else -> {
+                //do nothing
+            }
+        }
+
+        return this
+    }
 
     @OptIn(UnstableApi::class)
     override suspend fun invoke(
@@ -96,7 +100,6 @@ class CompressVideoUseCaseAndroid(
     ): CompressResult {
         //As per https://developer.android.com/media/platform/supported-formats
 
-
         val destFile = if(toUri != null) {
             Uri.parse(toUri).toFile().requireExtension("mp4")
         }else {
@@ -104,20 +107,37 @@ class CompressVideoUseCaseAndroid(
         }
 
         val sizeIn = uriHelper.getSize(DoorUri.parse(fromUri))
+        val metaRetriever = MediaMetadataRetriever()
+        metaRetriever.setDataSource(appContext, Uri.parse(fromUri))
+        val originalWidth = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)?.toInt() ?: 0
+        val originalHeight = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toInt() ?: 0
+        metaRetriever.release()
 
         val inputMediaItem = MediaItem.fromUri(Uri.parse(fromUri))
 
         //https://developer.android.com/media/media3/transformer/transformations
-//        val editedMediaItem = EditedMediaItem.Builder(inputMediaItem)
-//            .setEffects(
-//                Effects(
-//                    /* audio processors */ emptyList(),
-//                    /* video processors */ listOf(Presentation.createForWidthAndHeight(853, 480, LAYOUT_STRETCH_TO_FIT)),
-//                )
-//            )
-//            .build()
+        val presentation = if(originalWidth != 0 && originalHeight != 0) {
+            createPresentationHeightByCompressionLevel(params.compressionLevel, originalWidth, originalHeight)
+        }else {
+            null
+        }
+
+
+        val editedMediaItem = if(presentation != null) {
+            EditedMediaItem.Builder(inputMediaItem)
+                .setEffects(
+                    Effects(
+                        /* audio processors */ emptyList(),
+                        /* video processors */ listOf(presentation),
+                    )
+                )
+                .build()
+        }else {
+            null
+        }
+
         val videoEncoderSettings = VideoEncoderSettings.Builder()
-            .setBitrate(500_000)
+            .setBitrateForCompressionLevel(params.compressionLevel)
             .build()
         val encoderFactory = DefaultEncoderFactory.Builder(appContext)
             .setRequestedVideoEncoderSettings(videoEncoderSettings)
@@ -148,7 +168,11 @@ class CompressVideoUseCaseAndroid(
 
             })
 
-            transformer.start(inputMediaItem, destFile.absolutePath)
+            if(editedMediaItem != null) {
+                transformer.start(editedMediaItem, destFile.absolutePath)
+            }else {
+                transformer.start(inputMediaItem, destFile.absolutePath)
+            }
 
             val progressUpdateJob = launch {
                 val progressHolder = ProgressHolder()
