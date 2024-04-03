@@ -160,7 +160,6 @@ class ContentEntryListViewModel(
                     parentUid = parentEntryUid,
                     langParam = 0,
                     categoryParam0 = 0,
-                    personUid = activeUserPersonUid,
                     sortOrder = _uiState.value.activeSortOption.flag,
                     includeDeleted = false,
                 )
@@ -171,7 +170,6 @@ class ContentEntryListViewModel(
                     parentUid = parentEntryUid,
                     langParam = 0,
                     categoryParam0 = 0,
-                    personUid = activeUserPersonUid,
                     sortOrder = _uiState.value.activeSortOption.flag,
                     includeDeleted = false,
                 )
