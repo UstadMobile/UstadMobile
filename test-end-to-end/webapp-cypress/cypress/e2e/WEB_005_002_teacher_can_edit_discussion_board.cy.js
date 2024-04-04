@@ -40,7 +40,7 @@ it('Teacher able to edit discussion board ', () => {
   cy.contains('005_002').click()
   // Add discussion board
   cy.contains('button','Edit').click()
-  cy.contains('.MuiTypography-root','Discussion 1').click()
+  cy.contains('Discussion 1').click()
   cy.get('div[data-placeholder="Description"]').clear().type("teacher edit discussion description")
   cy.contains("button","Done").click()
 })

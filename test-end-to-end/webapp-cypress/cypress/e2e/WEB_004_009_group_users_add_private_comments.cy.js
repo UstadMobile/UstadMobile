@@ -84,7 +84,7 @@ it('Teacher add assignment and course comment', () => {
   cy.contains("button","Save").should('be.visible')
   cy.contains("button","Save").click()
   cy.contains("button","Members").should('be.visible')
-  cy.contains('.MuiTypography-root.MuiTypography-body1','Assignment 1').click()
+  cy.contains('Assignment 1').click()
   cy.contains('Submissions').click()
   cy.contains('Group 1').click()
   cy.ustadTypeAndSubmitAssignmentComment('#private_comment_textfield','#private_comment_textfield_send_button','comment1')

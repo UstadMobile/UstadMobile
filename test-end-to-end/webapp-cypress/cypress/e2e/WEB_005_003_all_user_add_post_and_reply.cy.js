@@ -55,7 +55,7 @@ it('Teacher able to add a new post and reply', () => {
   cy.go('back')
   cy.go('back')
   // Teacher add new post -2
-  cy.contains('.MuiTypography-root','Discussion 1').click()
+  cy.contains('Discussion 1').click()
   cy.contains('.MuiButtonBase-root','Post').click()
   cy.get('#discussion_post_title').type('Topic 2')
   cy.get('.ql-editor.ql-blank').type('Discusssion post')
@@ -68,7 +68,7 @@ it('Student able to add a post and reply', () => {
   cy.contains("Courses").should('be.visible')
   cy.contains('005_003').click()
   // Add reply to the post board
-  cy.contains('.MuiTypography-root','Discussion 1').click()
+  cy.contains('Discussion 1').click()
   cy.contains('Topic 1').click()
   cy.get('[data-placeholder="Add a reply"]').type('Reply from Student',{delay : 20})
   cy.contains('button','Post').click()
@@ -77,7 +77,7 @@ it('Student able to add a post and reply', () => {
   cy.go('back')
   cy.go('back')
   // Student add new post -3
-  cy.contains('.MuiTypography-root','Discussion 1').click()
+  cy.contains('Discussion 1').click()
   cy.contains('.MuiButtonBase-root','Post').click()
   cy.get('#discussion_post_title').type('Topic 3')
   cy.get('.ql-editor.ql-blank').type('Discusssion post')
