@@ -971,6 +971,16 @@ val MIGRATION_163_164 = DoorMigrationStatementList(163, 164) {
     listOf("ALTER TABLE ContentEntryImportJob ADD COLUMN cjiCompressionLevel INTEGER NOT NULL DEFAULT 0")
 }
 
+val MIGRATION_164_165 = DoorMigrationStatementList(164, 165) {
+    buildList {
+        add("ALTER TABLE ContentEntryImportJob ADD COLUMN cjiError TEXT")
+        if(it.dbType() == DoorDbType.SQLITE) {
+            add("ALTER TABLE ContentEntryImportJob ADD COLUMN cjiErrorDismissed INTEGER NOT NULL DEFAULT 0")
+        }else {
+            add("ALTER TABLE ContentEntryImportJob ADD COLUMN cjiErrorDismissed BOOL NOT NULL DEFAULT FALSE")
+        }
+    }
+}
 
 
 fun migrationList() = listOf<DoorMigration>(
@@ -985,7 +995,7 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_146_147, MIGRATION_147_148, MIGRATION_149_150, MIGRATION_150_151,
     MIGRATION_151_152, MIGRATION_152_153, MIGRATION_153_154, MIGRATION_154_155,
     MIGRATION_156_157, MIGRATION_157_158, MIGRATION_158_159, MIGRATION_159_160,
-    MIGRATION_160_161, MIGRATION_162_163, MIGRATION_163_164,
+    MIGRATION_160_161, MIGRATION_162_163, MIGRATION_163_164, MIGRATION_164_165,
 )
 
 

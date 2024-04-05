@@ -15,4 +15,6 @@ data class ContentEntryImportJobProgress(
 
     var cjiStatus: Int = 4,
 
+    var cjiError: String? = null,
+
 )

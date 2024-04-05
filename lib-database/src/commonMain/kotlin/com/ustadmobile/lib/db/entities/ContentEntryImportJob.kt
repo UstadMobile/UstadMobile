@@ -120,6 +120,10 @@ data class ContentEntryImportJob(
     @ColumnInfo(defaultValue = "2")
     var cjiCompressionLevel: Int = 2,
 
+    var cjiError: String? = null,
+
+    var cjiErrorDismissed: Boolean = false,
+
 ) {
     companion object {
         const val TABLE_ID = 720

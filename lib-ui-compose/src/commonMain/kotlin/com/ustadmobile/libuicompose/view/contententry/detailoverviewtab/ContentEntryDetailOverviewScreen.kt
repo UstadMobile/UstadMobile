@@ -62,6 +62,7 @@ fun ContentEntryDetailOverviewScreen(
         onClickOpen = viewModel::onClickOpen,
         onClickOfflineButton = viewModel::onClickOffline,
         onCancelImport = viewModel::onCancelImport,
+        onDismissImportError = viewModel::onDismissImportError,
     )
 }
 
@@ -75,7 +76,8 @@ fun ContentEntryDetailOverviewScreen(
     onClickDelete: () -> Unit = {},
     onClickManageDownload: () -> Unit = {},
     onClickTranslation: (ContentEntryRelatedEntryJoinWithLanguage) -> Unit = {},
-    onCancelImport: (Long) -> Unit = { }
+    onCancelImport: (Long) -> Unit = { },
+    onDismissImportError: (Long) -> Unit = { },
 ) {
     UstadLazyColumn(
         verticalArrangement = Arrangement.spacedBy(5.dp),
@@ -156,6 +158,10 @@ fun ContentEntryDetailOverviewScreen(
                 },
                 onCancel = {
                     onCancelImport(contentJobItem.cjiUid)
+                },
+                error = contentJobItem.cjiError,
+                onDismissError = {
+                    onDismissImportError(contentJobItem.cjiUid)
                 }
             )
         }

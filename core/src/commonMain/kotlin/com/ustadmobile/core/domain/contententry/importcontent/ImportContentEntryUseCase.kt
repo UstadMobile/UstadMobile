@@ -88,13 +88,14 @@ class ImportContentEntryUseCase(
             }
         }catch(e: Throwable) {
             withContext(NonCancellable) {
-                db.contentEntryImportJobDao.updateItemStatus(
+                db.contentEntryImportJobDao.updateItemStatusAndError(
                     cjiUid = job.cjiUid,
                     status = if(e is CancellationException) {
                         JobStatus.CANCELED
                     }else {
                         JobStatus.FAILED
-                    }
+                    },
+                    error = if(e !is CancellationException) e.message else null
                 )
             }
 

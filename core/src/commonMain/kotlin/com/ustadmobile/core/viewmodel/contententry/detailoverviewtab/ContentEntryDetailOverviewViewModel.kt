@@ -271,6 +271,12 @@ class ContentEntryDetailOverviewViewModel(
         }
     }
 
+    fun onDismissImportError(jobUid: Long) {
+        viewModelScope.launch {
+            activeDb.contentEntryImportJobDao.updateErrorDismissed(jobUid, true)
+        }
+    }
+
     companion object {
 
         const val DEST_NAME = "ContentEntryDetailOverviewView"

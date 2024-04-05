@@ -22,6 +22,22 @@ expect abstract class ContentEntryImportJobDao {
     abstract suspend fun updateItemStatus(cjiUid: Long, status: Int)
 
     @Query("""
+        UPDATE ContentEntryImportJob 
+           SET cjiStatus = :status,
+               cjiError = :error
+         WHERE cjiUid= :cjiUid  
+    """)
+    abstract suspend fun updateItemStatusAndError(cjiUid: Long, status: Int, error: String?)
+
+
+    @Query("""
+        UPDATE ContentEntryImportJob
+           SET cjiErrorDismissed = :dismissed
+         WHERE cjiUid = :cjiUid  
+    """)
+    abstract suspend fun updateErrorDismissed(cjiUid: Long, dismissed: Boolean)
+
+    @Query("""
         UPDATE ContentEntryImportJob
            SET cjiItemProgress = :cjiProgress,
                cjiItemTotal = :cjiTotal
@@ -36,16 +52,16 @@ expect abstract class ContentEntryImportJobDao {
     """)
     abstract suspend fun findByUidAsync(cjiUid: Long): ContentEntryImportJob?
 
-
-
     @Query("""
         SELECT ContentEntryImportJob.cjiUid,
                ContentEntryImportJob.cjiItemProgress,
                ContentEntryImportJob.cjiItemTotal,
-               ContentEntryImportJob.cjiStatus
+               ContentEntryImportJob.cjiStatus,
+               ContentEntryImportJob.cjiError
           FROM ContentEntryImportJob
          WHERE ContentEntryImportJob.cjiContentEntryUid = :contentEntryUid
-           AND ContentEntryImportJob.cjiStatus BETWEEN ${JobStatus.QUEUED} AND ${JobStatus.RUNNING_MAX}
+           AND (   ContentEntryImportJob.cjiStatus BETWEEN ${JobStatus.QUEUED} AND ${JobStatus.RUNNING_MAX}
+                OR (ContentEntryImportJob.cjiStatus = ${JobStatus.FAILED} AND NOT ContentEntryImportJob.cjiErrorDismissed))
     """)
     abstract fun findInProgressJobsByContentEntryUid(
         contentEntryUid: Long,
