@@ -55,11 +55,11 @@ class CompressVideoUseCaseAndroid(
         heightIn: Int,
     ) : Presentation? {
         val height = when {
-            compressionLevel == CompressionLevel.HIGH && widthIn > heightIn ->  144
-            compressionLevel == CompressionLevel.HIGH -> 176
+            compressionLevel == CompressionLevel.HIGH && widthIn > heightIn ->  480
+            compressionLevel == CompressionLevel.HIGH -> 720
 
-            compressionLevel == CompressionLevel.MEDIUM && widthIn > heightIn -> 360
-            compressionLevel == CompressionLevel.MEDIUM -> 480
+            compressionLevel == CompressionLevel.MEDIUM && widthIn > heightIn -> 480
+            compressionLevel == CompressionLevel.MEDIUM -> 720
 
             compressionLevel == CompressionLevel.LOW && widthIn > heightIn -> 720
             compressionLevel == CompressionLevel.LOW -> 1280
@@ -75,7 +75,7 @@ class CompressVideoUseCaseAndroid(
     ) : VideoEncoderSettings.Builder {
         when(compressionLevel) {
             CompressionLevel.HIGH -> {
-                setBitrate(56_000)
+                setBitrate(170_000)
             }
             CompressionLevel.MEDIUM -> {
                 setBitrate(500_000)
@@ -99,6 +99,7 @@ class CompressVideoUseCaseAndroid(
         onProgress: CompressUseCase.OnCompressProgress?
     ): CompressResult {
         //As per https://developer.android.com/media/platform/supported-formats
+        //See also: https://developer.android.com/media/optimize/sharing#hdr_to_sdr
 
         val destFile = if(toUri != null) {
             Uri.parse(toUri).toFile().requireExtension("mp4")

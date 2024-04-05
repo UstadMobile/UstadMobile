@@ -2,8 +2,11 @@ package com.ustadmobile.core.uri
 
 import android.annotation.SuppressLint
 import android.content.Context
+import androidx.core.net.toFile
 import com.ustadmobile.core.util.ext.getFileNameAndSize
 import com.ustadmobile.door.DoorUri
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.io.Source
 import kotlinx.io.asSource
 import kotlinx.io.buffered
@@ -20,7 +23,11 @@ class UriHelperAndroid(private val appContext: Context): UriHelper{
     }
 
     override suspend fun getSize(uri: DoorUri): Long {
-        return appContext.contentResolver.getFileNameAndSize(uri.uri).second
+        return if(uri.uri.scheme == "file") {
+            withContext(Dispatchers.IO) { uri.uri.toFile().length() }
+        }else {
+            appContext.contentResolver.getFileNameAndSize(uri.uri).second
+        }
     }
 
     @SuppressLint("Recycle") //The input stream is closed when the source is closed.

@@ -1886,7 +1886,7 @@
 
     <string name="compression">Compression</string>
 
-    <string name="compression_high">Maximum (smallest file size)</string>
+    <string name="compression_high">High (smallest file size)</string>
 
     <string name="compression_medium">Medium</string>
 

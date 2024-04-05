@@ -93,6 +93,7 @@ class VideoContentImporterCommonJvm(
 
         val compressUseCaseVal = compressUseCase
         val compressionLevel = CompressionLevel.forValue(jobItem.cjiCompressionLevel)
+        val originalSize = uriHelper.getSize(fromUri)
         val (uri, mimeType) =  if(compressUseCaseVal != null && compressionLevel != CompressionLevel.NONE) {
             compressUseCaseVal(
                 fromUri = fromUri.toString(),
@@ -185,6 +186,8 @@ class VideoContentImporterCommonJvm(
                 cevContentEntryUid = jobItem.cjiContentEntryUid,
                 cevManifestUrl = manifestUrl,
                 cevOpenUri = mediaInfoEntryUri,
+                cevOriginalSize = originalSize,
+                cevStorageSize = uriHelper.getSize(uri),
             )
         }finally {
             File(workDir.toString()).deleteRecursively()

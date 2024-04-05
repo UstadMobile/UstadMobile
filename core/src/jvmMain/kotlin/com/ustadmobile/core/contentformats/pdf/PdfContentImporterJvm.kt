@@ -22,7 +22,7 @@ import org.apache.pdfbox.Loader
 import org.apache.pdfbox.pdmodel.PDDocument
 
 /**
- * For PDF on JVM view: maybe: https://github.com/pcorless/icepdf
+ * Potential compression: see https://gist.github.com/farhan-raza/6b2f5c95c9bbd2dcb035cc3176ecbd2b
  */
 class PdfContentImporterJvm(
     endpoint: Endpoint,
