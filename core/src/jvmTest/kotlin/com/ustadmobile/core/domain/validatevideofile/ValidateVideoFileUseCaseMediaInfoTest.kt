@@ -1,5 +1,6 @@
 package com.ustadmobile.core.domain.validatevideofile
 
+import com.ustadmobile.core.domain.extractmediametadata.mediainfo.ExtractMediaMetadataUseCaseMediaInfo
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.util.test.ext.newFileFromResource
 import kotlinx.coroutines.runBlocking
@@ -23,12 +24,14 @@ class ValidateVideoFileUseCaseMediaInfoTest {
     @BeforeTest
     fun setup() {
         validatorUseCase = ValidateVideoFileUseCaseMediaInfo(
-            mediaInfoPath = "/usr/bin/mediainfo",
-            workingDir = temporaryFolder.newFolder(),
-            json = Json {
-                encodeDefaults = true
-                ignoreUnknownKeys = true
-            }
+            extractMediaMetadataUseCase = ExtractMediaMetadataUseCaseMediaInfo(
+                mediaInfoPath = "/usr/bin/mediainfo",
+                workingDir = temporaryFolder.newFolder(),
+                json = Json {
+                    encodeDefaults = true
+                    ignoreUnknownKeys = true
+                }
+            ),
         )
     }
 

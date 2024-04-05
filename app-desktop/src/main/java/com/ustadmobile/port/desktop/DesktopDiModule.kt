@@ -23,6 +23,8 @@ import com.ustadmobile.core.domain.cachelock.UpdateCacheLockJoinUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseJvm
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseRemote
+import com.ustadmobile.core.domain.extractmediametadata.ExtractMediaMetadataUseCase
+import com.ustadmobile.core.domain.extractmediametadata.mediainfo.ExtractMediaMetadataUseCaseMediaInfo
 import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseJvm
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
@@ -455,11 +457,18 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         )
     }
 
-    bind<ValidateVideoFileUseCase>() with singleton {
-        ValidateVideoFileUseCaseMediaInfo(
+    bind<ExtractMediaMetadataUseCase>() with singleton {
+        ExtractMediaMetadataUseCaseMediaInfo(
             mediaInfoPath = mediaInfoFile.absolutePath,
             workingDir = ustadAppDataDir(),
             json = instance(),
+        )
+    }
+
+
+    bind<ValidateVideoFileUseCase>() with singleton {
+        ValidateVideoFileUseCaseMediaInfo(
+            extractMediaMetadataUseCase = instance(),
         )
     }
 
