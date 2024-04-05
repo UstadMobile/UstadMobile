@@ -91,13 +91,25 @@ class CompressVideoUseCaseAndroid(
         return this
     }
 
+    /**
+     * Note: Audio bitrates are estimates. Media3 API doesn't seem to have a convenient way to set
+     * the audio bitrate.
+     */
+    private fun CompressionLevel.expectedTotalBitrate(): Int = when(this) {
+        CompressionLevel.HIGH -> 170_000 + 96_000
+        CompressionLevel.MEDIUM -> 500_000 + 128_000
+        CompressionLevel.LOW -> 2_000_000 + 196_000
+        else -> -1
+    }
+
+
     @OptIn(UnstableApi::class)
     override suspend fun invoke(
         fromUri: String,
         toUri: String?,
         params: CompressParams,
         onProgress: CompressUseCase.OnCompressProgress?
-    ): CompressResult {
+    ): CompressResult? {
         //As per https://developer.android.com/media/platform/supported-formats
         //See also: https://developer.android.com/media/optimize/sharing#hdr_to_sdr
 
@@ -112,7 +124,18 @@ class CompressVideoUseCaseAndroid(
         metaRetriever.setDataSource(appContext, Uri.parse(fromUri))
         val originalWidth = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)?.toInt() ?: 0
         val originalHeight = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toInt() ?: 0
+        //Duration in ms.
+        val duration = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLong() ?: 0
         metaRetriever.release()
+
+        val expectedSize = params.compressionLevel.expectedTotalBitrate() * (duration / 1000)
+        if(expectedSize > (sizeIn * COMPRESS_THRESHOLD)) {
+            Napier.d {
+                "CompressVideoUseCaseAndroid: already compressed enough, expected compression result " +
+                        "saves less than (${(1 - COMPRESS_THRESHOLD)*100})%"
+            }
+            return null
+        }
 
         val inputMediaItem = MediaItem.fromUri(Uri.parse(fromUri))
 
@@ -122,7 +145,6 @@ class CompressVideoUseCaseAndroid(
         }else {
             null
         }
-
 
         val editedMediaItem = if(presentation != null) {
             EditedMediaItem.Builder(inputMediaItem)
@@ -210,5 +232,11 @@ class CompressVideoUseCaseAndroid(
             uri = destFile.toDoorUri().toString(),
             mimeType = "video/mp4"
         )
+    }
+
+    companion object {
+
+        const val COMPRESS_THRESHOLD = 0.95f
+
     }
 }

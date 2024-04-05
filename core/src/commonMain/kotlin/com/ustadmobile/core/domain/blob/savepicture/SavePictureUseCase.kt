@@ -40,14 +40,17 @@ class SavePictureUseCase(
         pictureUri: String?,
     ) {
         if(pictureUri != null) {
-            val mainCompressionResult = compressImageUseCase(fromUri = pictureUri)
+            val mainCompressionResult = compressImageUseCase(
+                fromUri = pictureUri
+            ) ?: throw IllegalStateException("Compressor did not compress $pictureUri")
+
             val thumbnailCompressionResult = compressImageUseCase(
                 fromUri = pictureUri,
                 params = CompressParams(
                     maxWidth = THUMBNAIL_DIMENSION,
                     maxHeight = THUMBNAIL_DIMENSION,
                 )
-            )
+            ) ?: throw IllegalStateException("Compressor did not compress $pictureUri")
 
             val savedBlobs = saveLocalUrisAsBlobUseCase(
                 localUrisToSave = listOf(

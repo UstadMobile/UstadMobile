@@ -109,9 +109,9 @@ class VideoContentImporterCommonJvm(
                 params = CompressParams(
                     compressionLevel = compressionLevel,
                 )
-            ).let { DoorUri.parse(it.uri) to it.mimeType }
+            )?.let { Pair(DoorUri.parse(it.uri), it.mimeType) } ?: Pair(fromUri, fromMimeType)
         }else {
-            fromUri to fromMimeType
+            Pair(fromUri, fromMimeType)
         }
 
         val contentEntryVersionUid = db.doorPrimaryKeyManager.nextId(ContentEntryVersion.TABLE_ID)

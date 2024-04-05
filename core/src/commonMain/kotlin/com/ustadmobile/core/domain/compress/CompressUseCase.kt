@@ -18,13 +18,15 @@ interface CompressUseCase {
      *        the actual data is.
      * @param params Compression parameters
      * @param onProgress progress listener
-     * @return CompressResult including the uri where the compressed data was stored.
+     * @return CompressResult including the uri where the compressed data was stored, or null if
+     *         the compressor decided not to compress (e.g. because the original file was already
+     *         sufficiently compressed)
      */
     suspend operator fun invoke(
         fromUri: String,
         toUri: String? = null,
         params: CompressParams = CompressParams(),
         onProgress: OnCompressProgress? = null,
-    ): CompressResult
+    ): CompressResult?
 
 }
