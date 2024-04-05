@@ -47,9 +47,9 @@ class CompressVideoUseCaseJvmVlc(
     ): CompressResult? = withContext(Dispatchers.IO) {
         val fromFile = DoorUri.parse(fromUri).toFile()
         val destFile = if(toUri != null) {
-            DoorUri.parse(toUri).toFile().requireExtension("mpg")
+            DoorUri.parse(toUri).toFile().requireExtension("mp4")
         }else {
-            File.createTempFile(UUID.randomUUID().toString(), ".mpg")
+            File.createTempFile(UUID.randomUUID().toString(), ".mp4")
         }
 
         try {
@@ -60,7 +60,7 @@ class CompressVideoUseCaseJvmVlc(
             val args = listOf(
                 vlcPath, "-I", "dummy", "--no-repeat", "--no-loop", "-vv",
                 fromFile.absolutePath,
-                        "--sout=#transcode{vcodec=mp4v,acodec=mpga,vb=800,ab=128,deinterlace}:standard{access=file,mux=ps,dst=${destFile.absolutePath}}",
+                        "--sout=#transcode{vcodec=h264,acodec=mp4a,vb=800,ab=128,deinterlace}:standard{access=file,mux=mp4,dst=${destFile.absolutePath}}",
                 "vlc://quit"
             )
             println(args.joinToString(separator = " "))
