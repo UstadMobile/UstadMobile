@@ -37,6 +37,8 @@ data class ContentEntryDetailOverviewUiState(
 
     val contentEntry: ContentEntryAndDetail? = null,
 
+    val latestContentEntryVersion: ContentEntryVersion? = null,
+
     val contentEntryButtons: ContentEntryButtonModel? = null,
 
     val locallyAvailable: Boolean = false,
@@ -75,6 +77,16 @@ data class ContentEntryDetailOverviewUiState(
 
     val openButtonVisible: Boolean
         get() = true
+
+    val compressedSizeVisible: Boolean
+        get() = latestContentEntryVersion?.let {
+            it.cevStorageSize > 0 && it.cevStorageSize > 0 && it.cevStorageSize < it.cevOriginalSize
+        } ?: false
+
+    val sizeVisible: Boolean
+        get() = latestContentEntryVersion?.let {
+            it.cevStorageSize > 0
+        } ?: false
 
 }
 
@@ -127,6 +139,18 @@ class ContentEntryDetailOverviewViewModel(
                         _appUiState.update { prev ->
                             prev.copy(
                                 title = it?.entry?.title ?: ""
+                            )
+                        }
+                    }
+                }
+
+                launch {
+                    activeRepo.contentEntryVersionDao.findLatestByContentEntryUidAsFlow(
+                        contentEntryUid = entityUidArg
+                    ).collect{
+                        _uiState.update { prev ->
+                            prev.copy(
+                                latestContentEntryVersion = it
                             )
                         }
                     }

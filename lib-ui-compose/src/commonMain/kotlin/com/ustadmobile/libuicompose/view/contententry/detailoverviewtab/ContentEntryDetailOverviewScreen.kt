@@ -1,6 +1,7 @@
 package com.ustadmobile.libuicompose.view.contententry.detailoverviewtab
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -33,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.viewmodel.contententry.detailoverviewtab.ContentEntryDetailOverviewUiState
 import com.ustadmobile.core.viewmodel.contententry.detailoverviewtab.ContentEntryDetailOverviewViewModel
 import com.ustadmobile.lib.db.entities.ContentEntryImportJob
@@ -82,9 +84,23 @@ fun ContentEntryDetailOverviewScreen(
     )  {
 
         item("details") {
-            ContentDetails(
-                uiState = uiState
-            )
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+
+                Box(
+                    modifier = Modifier.width(80.dp),
+                    contentAlignment = Alignment.Center
+                ){
+                    Icon(
+                        imageVector = Icons.Default.Book,
+                        contentDescription = "",
+                        modifier = Modifier.size(80.dp),
+                    )
+                }
+
+                ContentDetailRightColumn(uiState = uiState)
+            }
         }
 
         if (uiState.openButtonVisible){
@@ -185,35 +201,6 @@ fun ContentEntryDetailOverviewScreen(
 }
 
 @Composable
-fun ContentDetails(
-    uiState: ContentEntryDetailOverviewUiState = ContentEntryDetailOverviewUiState(),
-){
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(20.dp)
-    ) {
-
-        ContentDetailLeftColumn()
-
-        ContentDetailRightColumn(uiState = uiState)
-    }
-}
-
-@Composable
-fun ContentDetailLeftColumn(){
-    Column(
-        modifier = Modifier.width(80.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ){
-        Icon(
-            imageVector = Icons.Default.Book,
-            contentDescription = "",
-            modifier = Modifier.size(80.dp),
-        )
-    }
-}
-
-@Composable
 fun ContentDetailRightColumn(
     uiState: ContentEntryDetailOverviewUiState = ContentEntryDetailOverviewUiState(),
 ){
@@ -228,22 +215,53 @@ fun ContentDetailRightColumn(
             maxLines = 2,
         )
 
+        if(uiState.compressedSizeVisible) {
+            Text(
+                text = stringResource(
+                    MR.strings.size_compressed_was,
+                    UMFileUtil.formatFileSize(uiState.latestContentEntryVersion?.cevStorageSize ?: 0),
+                    UMFileUtil.formatFileSize(uiState.latestContentEntryVersion?.cevOriginalSize ?: 0),
+                ),
+                style = MaterialTheme.typography.labelSmall,
+            )
+        }else if(uiState.sizeVisible) {
+            Text(
+                text = stringResource(
+                    MR.strings.size,
+                    UMFileUtil.formatFileSize(uiState.latestContentEntryVersion?.cevStorageSize ?: 0),
+                ),
+                style = MaterialTheme.typography.labelSmall,
+            )
+        }
+
         if (uiState.authorVisible){
-            Text(text = uiState.contentEntry?.entry?.author ?: "")
+            Text(
+                text = uiState.contentEntry?.entry?.author ?: "",
+                style = MaterialTheme.typography.labelSmall,
+            )
         }
 
         if (uiState.publisherVisible){
-            Text(text = uiState.contentEntry?.entry?.publisher ?: "")
+            Text(
+                text = uiState.contentEntry?.entry?.publisher ?: "",
+                style = MaterialTheme.typography.labelSmall,
+            )
         }
 
         if (uiState.licenseNameVisible){
             Row{
 
-                Text(text = stringResource(MR.strings.entry_details_license))
+                Text(
+                    text = stringResource(MR.strings.entry_details_license),
+                    style = MaterialTheme.typography.labelSmall,
+                )
 
                 Spacer(modifier = Modifier.width(5.dp))
 
-                Text(text = uiState.contentEntry?.entry?.licenseName ?: "")
+                Text(
+                    text = uiState.contentEntry?.entry?.licenseName ?: "",
+                    style = MaterialTheme.typography.labelSmall,
+                )
             }
         }
     }

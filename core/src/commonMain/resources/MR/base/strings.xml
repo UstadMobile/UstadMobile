@@ -1894,4 +1894,8 @@
 
     <string name="compression_none">None (original quality and file size)</string>
 
+    <string name="size_compressed_was">Size: %1$s (compressed, was %2$s)</string>
+
+    <string name="size">Size: %1$s</string>
+
 </resources>
