@@ -51,6 +51,7 @@ class CompressVideoUseCaseHandbrakeTest {
         val useCase = CompressVideoUseCaseHandbrake(
             workingDir = workingDir,
             extractMediaMetadataUseCase = extractMediaMetadataUseCase,
+            json = json,
         )
 
         runBlocking {

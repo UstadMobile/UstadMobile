@@ -1,9 +1,11 @@
 package com.ustadmobile.core.domain.compress.video
 
 import com.ustadmobile.core.domain.compress.CompressParams
+import com.ustadmobile.core.domain.compress.CompressProgressUpdate
 import com.ustadmobile.core.domain.compress.CompressResult
 import com.ustadmobile.core.domain.compress.CompressUseCase
 import com.ustadmobile.core.domain.compress.CompressionLevel
+import com.ustadmobile.core.domain.compress.video.json.Progress
 import com.ustadmobile.core.domain.extractmediametadata.ExtractMediaMetadataUseCase
 import com.ustadmobile.core.ext.requireExtension
 import com.ustadmobile.core.util.UMFileUtil
@@ -17,6 +19,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
 import java.io.BufferedReader
 import java.io.File
 import java.util.UUID
@@ -24,8 +27,11 @@ import java.util.UUID
 /**
  * Compress a video using HandBrakeCLI
  *
+ * TODO: Check handling of non-English file names and files that contain spaces
+ *
  * Windows is supposed to support this:
  *   https://learn.microsoft.com/en-us/windows/uwp/audio-video-camera/transcode-media-files
+ *   https://blogs.windows.com/windowsdeveloper/2018/06/06/c-console-uwp-applications/
  *
  * Unfortunately, there is straightforward
  *
@@ -34,17 +40,47 @@ class CompressVideoUseCaseHandbrake(
     private val handbrakePath: String = "/usr/bin/HandBrakeCLI",
     private val workingDir: File,
     private val extractMediaMetadataUseCase: ExtractMediaMetadataUseCase,
+    private val json: Json,
 ): CompressVideoUseCase {
+
     /**
-     * VLC generates a lot of command line output. Needs to be read to avoid process being blocked
+     * When using --json on the command line, then progress will be output. Unfortunately, the progress
+     * JSON is not all on one line. A JSON begins with 'Progress: {' and then ends with a line that
+     * contains only a single '}'.
      */
-    private fun CoroutineScope.launchReader(bufferedReader: BufferedReader): Job = launch {
-        bufferedReader.use {
-            it.lines().forEach {
-                println(it)
+    private fun CoroutineScope.launchHandbrakeOutputReader(
+        bufferedReader: BufferedReader,
+        onProgress: (Progress) -> Unit,
+    ): Job = launch {
+        var jsonStr = StringBuilder()
+        var inProgressLines = false
+
+        bufferedReader.use { reader ->
+            reader.lines().forEach { line ->
+                when {
+                    line.startsWith("Progress:") -> {
+                        jsonStr.append("{")
+                        inProgressLines = true
+                    }
+                    inProgressLines && line == "}" -> {
+                        inProgressLines = false
+                        jsonStr.append("}")
+
+                        try {
+                            val progressJsonEntity = json.decodeFromString<Progress>(jsonStr.toString())
+                            onProgress(progressJsonEntity)
+                        }catch(e: Throwable) {
+                            //do nothing - was not a progress line we wanted
+                        }
+
+                        jsonStr = StringBuilder()
+                    }
+                    inProgressLines -> jsonStr.append(line)
+                }
             }
         }
     }
+
 
     //Bitrate to use in bps
     private val CompressionLevel.videoBitRate: Int
@@ -127,7 +163,8 @@ class CompressVideoUseCaseHandbrake(
         val kiloBytesPerSecond = (params.compressionLevel.videoBitRate + params.compressionLevel.audioBitRate)/8
         val expectedSize = (mediaInfo.duration / 1000) * kiloBytesPerSecond
 
-        if(expectedSize >= (fromFile.length() * COMPRESS_THRESHOLD)) {
+        val fromFileSize = fromFile.length()
+        if(expectedSize >= (fromFileSize * COMPRESS_THRESHOLD)) {
             Napier.d {
                 "CompressVideoUseCaseJvmVlc: expected size of " +
                         "${UMFileUtil.formatFileSize(expectedSize)} is not within threshold to compress. " +
@@ -155,13 +192,33 @@ class CompressVideoUseCaseHandbrake(
                     addAll(params.compressionLevel.handbrakeParams(
                         mediaInfo.storageWidth, mediaInfo.storageHeight
                     ))
+                    add("--json")
                 })
                 .redirectOutput(ProcessBuilder.Redirect.PIPE)
                 .directory(workingDir)
                 .start()
 
-            val outputReader = launchReader(process.inputStream.bufferedReader())
-            val errReader = launchReader(process.errorStream.bufferedReader())
+            val onProgressUpdate: (Progress) -> Unit = {
+                val progressPct = it.working?.progress
+                if(progressPct != null) {
+                    onProgress?.invoke(
+                        CompressProgressUpdate(
+                            fromUri = fromUri,
+                            completed = (progressPct * fromFileSize).toLong(),
+                            total = fromFileSize,
+                        )
+                    )
+                }
+            }
+
+            val outputReader = launchHandbrakeOutputReader(
+                process.inputStream.bufferedReader(),
+                onProgress = onProgressUpdate,
+            )
+            val errReader = launchHandbrakeOutputReader(
+                process.errorStream.bufferedReader(),
+                onProgress = onProgressUpdate,
+            )
 
             process.waitForAsync()
 

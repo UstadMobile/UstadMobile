@@ -470,6 +470,7 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         CompressVideoUseCaseHandbrake(
             extractMediaMetadataUseCase = instance(),
             workingDir = instance(tag = TAG_DATA_DIR),
+            json = instance(),
         )
     }
 
