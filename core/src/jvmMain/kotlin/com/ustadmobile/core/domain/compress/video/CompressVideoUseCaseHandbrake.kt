@@ -1,7 +1,6 @@
 package com.ustadmobile.core.domain.compress.video
 
 import com.ustadmobile.core.domain.compress.CompressParams
-import com.ustadmobile.core.domain.compress.CompressProgressUpdate
 import com.ustadmobile.core.domain.compress.CompressResult
 import com.ustadmobile.core.domain.compress.CompressUseCase
 import com.ustadmobile.core.domain.compress.CompressionLevel
@@ -16,8 +15,6 @@ import io.github.aakira.napier.Napier
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.BufferedReader
@@ -25,18 +22,19 @@ import java.io.File
 import java.util.UUID
 
 /**
- * Compress a video using VLC command line
+ * Compress a video using HandBrakeCLI
  *
- * This is, unfortunately, for the moment, a fail. VLC transcoding output is buggy: output videos
- * open in Ubuntu's default video player and Chrome OK, but then don't play the first 30 seconds
- * when opened in VLC itself or Firefox.
+ * Windows is supposed to support this:
+ *   https://learn.microsoft.com/en-us/windows/uwp/audio-video-camera/transcode-media-files
+ *
+ * Unfortunately, there is straightforward
+ *
  */
-class CompressVideoUseCaseJvmVlc(
-    private val vlcPath: String = "/usr/bin/vlc",
+class CompressVideoUseCaseHandbrake(
+    private val handbrakePath: String = "/usr/bin/HandBrakeCLI",
     private val workingDir: File,
     private val extractMediaMetadataUseCase: ExtractMediaMetadataUseCase,
 ): CompressVideoUseCase {
-
     /**
      * VLC generates a lot of command line output. Needs to be read to avoid process being blocked
      */
@@ -74,10 +72,10 @@ class CompressVideoUseCaseJvmVlc(
      * @param inputWidth the width of the original video (storage width)
      * @param inputHeight the height of the original video (storage height)
      */
-    private fun CompressionLevel.vlcParams(
+    private fun CompressionLevel.handbrakeParams(
         inputWidth: Int,
         inputHeight: Int,
-    ): String {
+    ): List<String> {
         val isPortrait = inputWidth > inputHeight
         val storageAspectRatio = inputWidth.toFloat() / inputHeight.toFloat()
         val maxMajor = when(this) {
@@ -93,25 +91,25 @@ class CompressVideoUseCaseJvmVlc(
             else -> Pair(inputWidth.toFloat(), inputHeight.toFloat())
         }
 
-        val bitRateParams = "vb=${videoBitRate/1000},ab=${audioBitRate/1000}"
-        val widthHeightParams = "width=${outputWidth.toInt()},height=${outputHeight.toInt()}"
+        return buildList {
+            add("--maxWidth")
+            add(outputWidth.toString())
+            add("--maxHeight")
+            add(outputHeight.toString())
+            add("--vb")
+            add("${videoBitRate / 1000}")
+            add("--ab")
+            add("${audioBitRate / 1000}")
+            add("--rate")
 
-        return when {
-            this == CompressionLevel.HIGH -> "fps=12,$bitRateParams,$widthHeightParams"
-
-            this == CompressionLevel.MEDIUM -> "fps=30,$bitRateParams,$widthHeightParams"
-
-            this == CompressionLevel.LOW  -> "fps=30,$bitRateParams,$widthHeightParams"
-
-            else -> ""
+            when(this@handbrakeParams) {
+                CompressionLevel.HIGH ->  add("12")
+                else -> add("30")
+            }
         }
     }
 
 
-    /**
-     * Use the VLC command line to compress a video as per
-     * https://wiki.videolan.org/Transcode/#Command-line
-     */
     override suspend fun invoke(
         fromUri: String,
         toUri: String?,
@@ -129,13 +127,11 @@ class CompressVideoUseCaseJvmVlc(
         val kiloBytesPerSecond = (params.compressionLevel.videoBitRate + params.compressionLevel.audioBitRate)/8
         val expectedSize = (mediaInfo.duration / 1000) * kiloBytesPerSecond
 
-        val fromFileSize = fromFile.length()
-
         if(expectedSize >= (fromFile.length() * COMPRESS_THRESHOLD)) {
             Napier.d {
                 "CompressVideoUseCaseJvmVlc: expected size of " +
-                "${UMFileUtil.formatFileSize(expectedSize)} is not within threshold to compress. " +
-                "Original size = ${UMFileUtil.formatFileSize(fromFile.length())}."
+                        "${UMFileUtil.formatFileSize(expectedSize)} is not within threshold to compress. " +
+                        "Original size = ${UMFileUtil.formatFileSize(fromFile.length())}."
             }
 
             return@withContext null
@@ -148,46 +144,29 @@ class CompressVideoUseCaseJvmVlc(
         }
 
         try {
-            /*
-             * Note the single quotes shown in command line examples from the VLC reference must be
-             * removed. They would be removed by the shell when run on the real command line
-             */
-            val args = listOf(
-                vlcPath, "-I", "dummy", "--no-repeat", "--no-loop", "-vv",
-                fromFile.absolutePath,
-                        "--sout=#transcode{vcodec=h264,acodec=mp4a,deinterlace," +
-                        "${params.compressionLevel.vlcParams(mediaInfo.storageWidth, mediaInfo.storageHeight)}}" +
-                        ":standard{access=file,mux=mp4,dst=${destFile.absolutePath}}",
-                "vlc://quit"
-            )
-            Napier.i("CompressVideoUseCase: Running vlc: ${args.joinToString(separator = " ")}")
-            val process = ProcessBuilder(args)
+            val process = ProcessBuilder(
+                buildList {
+                    add(handbrakePath)
+                    add("-i")
+                    add(fromFile.absolutePath)
+                    add("-o")
+                    add(destFile.absolutePath)
+                    addAll(listOf("--encoder", "x264", "--aencoder", "av_aac"))
+                    addAll(params.compressionLevel.handbrakeParams(
+                        mediaInfo.storageWidth, mediaInfo.storageHeight
+                    ))
+                })
                 .redirectOutput(ProcessBuilder.Redirect.PIPE)
                 .directory(workingDir)
                 .start()
+
             val outputReader = launchReader(process.inputStream.bufferedReader())
             val errReader = launchReader(process.errorStream.bufferedReader())
 
-            val updateJob = launch {
-                while (isActive) {
-                    onProgress?.invoke(
-                        CompressProgressUpdate(
-                            fromUri = fromUri,
-                            completed = ((destFile.length().toFloat() / expectedSize) * fromFileSize).toLong(),
-                            total = fromFileSize
-                        )
-                    )
-
-                    delay(200)
-                }
-            }
-
             process.waitForAsync()
 
-            updateJob.cancel()
             outputReader.cancel()
             errReader.cancel()
-
             CompressResult(
                 uri = destFile.toDoorUri().toString(),
                 mimeType = "video/mp4"
@@ -198,10 +177,6 @@ class CompressVideoUseCaseJvmVlc(
     }
 
     companion object {
-
         const val COMPRESS_THRESHOLD = 0.95f
-
     }
-
-
 }

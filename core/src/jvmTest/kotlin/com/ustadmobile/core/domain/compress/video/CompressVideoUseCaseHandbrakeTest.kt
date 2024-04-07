@@ -15,7 +15,7 @@ import org.junit.rules.TemporaryFolder
 import java.io.File
 import kotlin.test.assertTrue
 
-class CompressVideoUseCaseJvmVlcTest {
+class CompressVideoUseCaseHandbrakeTest {
 
     @JvmField
     @Rule
@@ -48,7 +48,7 @@ class CompressVideoUseCaseJvmVlcTest {
         val videoFile = File(tmpDir, "BigBuckBunny.mp4")
         videoExtracted.renameTo(videoFile)
 
-        val useCase = CompressVideoUseCaseJvmVlc(
+        val useCase = CompressVideoUseCaseHandbrake(
             workingDir = workingDir,
             extractMediaMetadataUseCase = extractMediaMetadataUseCase,
         )
