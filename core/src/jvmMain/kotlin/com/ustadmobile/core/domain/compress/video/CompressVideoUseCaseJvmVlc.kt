@@ -1,12 +1,14 @@
 package com.ustadmobile.core.domain.compress.video
 
 import com.ustadmobile.core.domain.compress.CompressParams
+import com.ustadmobile.core.domain.compress.CompressProgressUpdate
 import com.ustadmobile.core.domain.compress.CompressResult
 import com.ustadmobile.core.domain.compress.CompressUseCase
 import com.ustadmobile.core.domain.compress.CompressionLevel
 import com.ustadmobile.core.domain.extractmediametadata.ExtractMediaMetadataUseCase
 import com.ustadmobile.core.ext.requireExtension
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.ext.waitForAsync
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.ext.toFile
@@ -14,6 +16,8 @@ import io.github.aakira.napier.Napier
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.BufferedReader
@@ -22,6 +26,10 @@ import java.util.UUID
 
 /**
  * Compress a video using VLC command line
+ *
+ * This is, unfortunately, for the moment, a fail. VLC transcoding output is buggy: output videos
+ * open in Ubuntu's default video player and Chrome OK, but then don't play the first 30 seconds
+ * when opened in VLC itself or Firefox.
  */
 class CompressVideoUseCaseJvmVlc(
     private val vlcPath: String = "/usr/bin/vlc",
@@ -40,6 +48,7 @@ class CompressVideoUseCaseJvmVlc(
         }
     }
 
+    //Bitrate to use in bps
     private val CompressionLevel.videoBitRate: Int
         get() = when(this) {
             CompressionLevel.HIGH -> 170_000
@@ -48,6 +57,7 @@ class CompressVideoUseCaseJvmVlc(
             else -> -1
         }
 
+    //Bitrate to use in bps
     private val CompressionLevel.audioBitRate: Int
         get() = when(this) {
             CompressionLevel.HIGH -> 64_000
@@ -83,14 +93,15 @@ class CompressVideoUseCaseJvmVlc(
             else -> Pair(inputWidth.toFloat(), inputHeight.toFloat())
         }
 
+        val bitRateParams = "vb=${videoBitRate/1000},ab=${audioBitRate/1000}"
         val widthHeightParams = "width=${outputWidth.toInt()},height=${outputHeight.toInt()}"
 
         return when {
-            this == CompressionLevel.HIGH -> "fps=12,vb=$videoBitRate,ab=$audioBitRate,$widthHeightParams"
+            this == CompressionLevel.HIGH -> "fps=12,$bitRateParams,$widthHeightParams"
 
-            this == CompressionLevel.MEDIUM -> "fps=30,vb=$videoBitRate,ab=$audioBitRate,$widthHeightParams"
+            this == CompressionLevel.MEDIUM -> "fps=30,$bitRateParams,$widthHeightParams"
 
-            this == CompressionLevel.LOW  -> "fps=30,vb=$videoBitRate,ab$audioBitRate,$widthHeightParams"
+            this == CompressionLevel.LOW  -> "fps=30,$bitRateParams,$widthHeightParams"
 
             else -> ""
         }
@@ -117,6 +128,8 @@ class CompressVideoUseCaseJvmVlc(
 
         val kiloBytesPerSecond = (params.compressionLevel.videoBitRate + params.compressionLevel.audioBitRate)/8
         val expectedSize = (mediaInfo.duration / 1000) * kiloBytesPerSecond
+
+        val fromFileSize = fromFile.length()
 
         if(expectedSize >= (fromFile.length() * COMPRESS_THRESHOLD)) {
             Napier.d {
@@ -147,7 +160,7 @@ class CompressVideoUseCaseJvmVlc(
                         ":standard{access=file,mux=mp4,dst=${destFile.absolutePath}}",
                 "vlc://quit"
             )
-            println(args.joinToString(separator = " "))
+            Napier.i("CompressVideoUseCase: Running vlc: ${args.joinToString(separator = " ")}")
             val process = ProcessBuilder(args)
                 .redirectOutput(ProcessBuilder.Redirect.PIPE)
                 .directory(workingDir)
@@ -155,8 +168,23 @@ class CompressVideoUseCaseJvmVlc(
             val outputReader = launchReader(process.inputStream.bufferedReader())
             val errReader = launchReader(process.errorStream.bufferedReader())
 
-            process.waitFor()
+            val updateJob = launch {
+                while (isActive) {
+                    onProgress?.invoke(
+                        CompressProgressUpdate(
+                            fromUri = fromUri,
+                            completed = ((destFile.length().toFloat() / expectedSize) * fromFileSize).toLong(),
+                            total = fromFileSize
+                        )
+                    )
 
+                    delay(200)
+                }
+            }
+
+            process.waitForAsync()
+
+            updateJob.cancel()
             outputReader.cancel()
             errReader.cancel()
 
