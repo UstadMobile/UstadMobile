@@ -16,8 +16,8 @@ import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCas
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
 import com.ustadmobile.core.domain.cachestoragepath.getLocalUriIfRemote
 import com.ustadmobile.core.domain.compress.CompressParams
-import com.ustadmobile.core.domain.compress.CompressUseCase
 import com.ustadmobile.core.domain.compress.CompressionLevel
+import com.ustadmobile.core.domain.compress.video.CompressVideoUseCase
 import com.ustadmobile.core.domain.contententry.ContentConstants
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
 import com.ustadmobile.core.io.ext.toDoorUri
@@ -56,7 +56,7 @@ class VideoContentImporterCommonJvm(
     private val getStoragePathForUrlUseCase: GetStoragePathForUrlUseCase,
     private val validateVideoFileUseCase: ValidateVideoFileUseCase,
     private val mimeTypeHelper: MimeTypeHelper,
-    private val compressUseCase: CompressUseCase? = null,
+    private val compressUseCase: CompressVideoUseCase? = null,
 ) : ContentImporter(endpoint) {
 
 

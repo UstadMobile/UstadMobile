@@ -26,11 +26,18 @@ class ExtractMediaMetadataUseCaseMediaInfo (
                 .start()
             val processOutput = process.inputStream.bufferedReader().use { it.readText() }
             val mediaInfo = json.decodeFromString(MediaInfoResult.serializer(), processOutput)
+            val videoTrack = mediaInfo.media?.track?.firstOrNull {
+                it.type.equals("video", true)
+            }
+
             ExtractMediaMetadataUseCase.MediaMetaData(
                 duration = mediaInfo.media?.track?.maxOfOrNull {
                     ((it.duration?.toFloat() ?: 0f) * 1000).toLong()
                 } ?: 0,
-                hasVideo = mediaInfo.media?.track?.any { (it.videoCount?.toIntOrNull() ?: 0) > 0 } == true
+                hasVideo = videoTrack != null,
+                storageHeight = videoTrack?.height?.toInt() ?: -1,
+                storageWidth = videoTrack?.width?.toInt() ?: -1,
+                aspectRatio = videoTrack?.displayAspectRatio?.toFloat() ?: -1f,
             )
         }catch(e: Throwable) {
             throw e

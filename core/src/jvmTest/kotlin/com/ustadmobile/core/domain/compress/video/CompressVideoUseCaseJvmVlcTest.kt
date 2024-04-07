@@ -1,10 +1,13 @@
 package com.ustadmobile.core.domain.compress.video
 
+import com.ustadmobile.core.domain.extractmediametadata.ExtractMediaMetadataUseCase
+import com.ustadmobile.core.domain.extractmediametadata.mediainfo.ExtractMediaMetadataUseCaseMediaInfo
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.ext.toFile
 import com.ustadmobile.util.test.ext.newFileFromResource
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.Json
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -20,9 +23,21 @@ class CompressVideoUseCaseJvmVlcTest {
 
     private lateinit var workingDir: File
 
+    private lateinit var extractMediaMetadataUseCase: ExtractMediaMetadataUseCase
+
+    private val json = Json {
+        ignoreUnknownKeys = true
+    }
+
     @Before
     fun setup() {
         workingDir = temporaryFolder.newFolder()
+        extractMediaMetadataUseCase = ExtractMediaMetadataUseCaseMediaInfo(
+            mediaInfoPath = "/usr/bin/mediainfo",
+            workingDir = workingDir,
+            json = json
+        )
+
     }
 
     @Test
@@ -34,7 +49,8 @@ class CompressVideoUseCaseJvmVlcTest {
         videoExtracted.renameTo(videoFile)
 
         val useCase = CompressVideoUseCaseJvmVlc(
-            workingDir = workingDir
+            workingDir = workingDir,
+            extractMediaMetadataUseCase = extractMediaMetadataUseCase,
         )
 
         runBlocking {

@@ -47,6 +47,8 @@ import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCaseC
 import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCase
 import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCaseJvm
 import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseJvm
+import com.ustadmobile.core.domain.compress.video.CompressVideoUseCase
+import com.ustadmobile.core.domain.compress.video.CompressVideoUseCaseJvmVlc
 import com.ustadmobile.core.domain.contententry.delete.DeleteContentEntryParentChildJoinUseCase
 import com.ustadmobile.core.domain.contententry.getlocalurlforcontent.GetLocalUrlForContentUseCase
 import com.ustadmobile.core.domain.contententry.getlocalurlforcontent.GetLocalUrlForContentUseCaseCommonJvm
@@ -464,6 +466,12 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         ValidateEmailUseCase()
     }
 
+    bind<CompressVideoUseCase>() with provider {
+        CompressVideoUseCaseJvmVlc(
+            extractMediaMetadataUseCase = instance(),
+            workingDir = instance(tag = TAG_DATA_DIR),
+        )
+    }
 
 
 }

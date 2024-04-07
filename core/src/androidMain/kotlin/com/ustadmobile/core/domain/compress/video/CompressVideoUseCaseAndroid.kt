@@ -46,7 +46,7 @@ import java.util.UUID
 class CompressVideoUseCaseAndroid(
     private val appContext: Context,
     private val uriHelper: UriHelper,
-): CompressUseCase {
+): CompressVideoUseCase {
 
     @OptIn(UnstableApi::class)
     fun createPresentationHeightByCompressionLevel(

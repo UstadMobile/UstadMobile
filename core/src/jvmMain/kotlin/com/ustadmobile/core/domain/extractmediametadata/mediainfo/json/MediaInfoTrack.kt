@@ -17,4 +17,10 @@ class MediaInfoTrack(
     val format: String? = null,
     @SerialName("Duration")
     val duration: String? = null,
+    @SerialName("Width")
+    val width: String? = null,
+    @SerialName("Height")
+    val height: String? = null,
+    @SerialName("DisplayAspectRatio")
+    val displayAspectRatio: String? = null,
 )
