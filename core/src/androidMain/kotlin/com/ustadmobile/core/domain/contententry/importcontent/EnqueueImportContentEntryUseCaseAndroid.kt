@@ -38,7 +38,7 @@ class EnqueueImportContentEntryUseCaseAndroid(
                 .build()
 
             WorkManager.getInstance(appContext).enqueueUniqueWork(
-                EnqueueContentEntryImportUseCase.uniqueIdFor(endpoint, uid),
+                EnqueueContentEntryImportUseCase.uniqueNameFor(endpoint, uid),
                 ExistingWorkPolicy.REPLACE, workRequest)
         }
     }

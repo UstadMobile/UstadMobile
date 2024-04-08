@@ -26,7 +26,7 @@ interface EnqueueContentEntryImportUseCase {
 
         const val DATA_JOB_UID = "jobUid"
 
-        fun uniqueIdFor(endpoint: Endpoint, uid: Long) : String {
+        fun uniqueNameFor(endpoint: Endpoint, uid: Long) : String {
             return "import-content-entry-${endpoint.url}-$uid"
         }
 

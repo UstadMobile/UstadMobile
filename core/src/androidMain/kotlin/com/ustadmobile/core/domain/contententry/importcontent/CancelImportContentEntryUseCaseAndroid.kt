@@ -11,7 +11,7 @@ class CancelImportContentEntryUseCaseAndroid(
 
     override fun invoke(cjiUid: Long) {
         WorkManager.getInstance(appContext).cancelUniqueWork(
-            EnqueueContentEntryImportUseCase.uniqueIdFor(endpoint, cjiUid)
+            EnqueueContentEntryImportUseCase.uniqueNameFor(endpoint, cjiUid)
         )
     }
 }

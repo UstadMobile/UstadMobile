@@ -54,6 +54,8 @@ import com.ustadmobile.core.domain.contententry.getlocalurlforcontent.GetLocalUr
 import com.ustadmobile.core.domain.contententry.getlocalurlforcontent.GetLocalUrlForContentUseCaseCommonJvm
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCase
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCaseCommonJvm
+import com.ustadmobile.core.domain.contententry.importcontent.CancelImportContentEntryUseCase
+import com.ustadmobile.core.domain.contententry.importcontent.CancelImportContentEntryUseCaseJvm
 import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCaseCommonJvm
 import com.ustadmobile.core.domain.contententry.importcontent.ImportContentEntryUseCase
@@ -471,6 +473,13 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             extractMediaMetadataUseCase = instance(),
             workingDir = instance(tag = TAG_DATA_DIR),
             json = instance(),
+        )
+    }
+
+    bind<CancelImportContentEntryUseCase>() with scoped(EndpointScope.Default).provider {
+        CancelImportContentEntryUseCaseJvm(
+            scheduler = instance(),
+            endpoint = context,
         )
     }
 

@@ -33,7 +33,7 @@ import java.util.UUID
  *   https://learn.microsoft.com/en-us/windows/uwp/audio-video-camera/transcode-media-files
  *   https://blogs.windows.com/windowsdeveloper/2018/06/06/c-console-uwp-applications/
  *
- * Unfortunately, there is straightforward
+ * Unfortunately, there is no straightforward way to access this from Java/Kotlin land.
  *
  */
 class CompressVideoUseCaseHandbrake(
@@ -55,29 +55,33 @@ class CompressVideoUseCaseHandbrake(
         var jsonStr = StringBuilder()
         var inProgressLines = false
 
-        bufferedReader.use { reader ->
-            reader.lines().forEach { line ->
-                when {
-                    line.startsWith("Progress:") -> {
-                        jsonStr.append("{")
-                        inProgressLines = true
-                    }
-                    inProgressLines && line == "}" -> {
-                        inProgressLines = false
-                        jsonStr.append("}")
-
-                        try {
-                            val progressJsonEntity = json.decodeFromString<Progress>(jsonStr.toString())
-                            onProgress(progressJsonEntity)
-                        }catch(e: Throwable) {
-                            //do nothing - was not a progress line we wanted
+        try {
+            bufferedReader.use { reader ->
+                reader.lines().forEach { line ->
+                    when {
+                        line.startsWith("Progress:") -> {
+                            jsonStr.append("{")
+                            inProgressLines = true
                         }
+                        inProgressLines && line == "}" -> {
+                            inProgressLines = false
+                            jsonStr.append("}")
 
-                        jsonStr = StringBuilder()
+                            try {
+                                val progressJsonEntity = json.decodeFromString<Progress>(jsonStr.toString())
+                                onProgress(progressJsonEntity)
+                            }catch(e: Throwable) {
+                                //do nothing - was not a progress line we wanted
+                            }
+
+                            jsonStr = StringBuilder()
+                        }
+                        inProgressLines -> jsonStr.append(line)
                     }
-                    inProgressLines -> jsonStr.append(line)
                 }
             }
+        }catch(e: Throwable) {
+            Napier.d { "launchHandbrakeOutputReader: Exception, maybe process was canceled? ${e.message}" }
         }
     }
 
