@@ -5,6 +5,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.locale.StringProvider
+import com.ustadmobile.core.impl.locale.StringProviderJs
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.progressBadge
 import com.ustadmobile.core.viewmodel.contententry.detailoverviewtab.ContentEntryDetailOverviewUiState
@@ -223,16 +224,33 @@ private val ContentDetailLeftColumn = FC <ContentEntryDetailOverviewScreenProps>
 
 private val ContentDetailRightColumn = FC <ContentEntryDetailOverviewScreenProps> { props ->
 
-    val strings: StringProvider = useStringProvider()
+    val strings: StringProviderJs = useStringProvider()
 
     Stack {
         direction = responsive(StackDirection.column)
 
-        Typography{
+        Typography {
             variant = TypographyVariant.h4
             + (props.uiState.contentEntry?.entry?.title ?: "")
         }
 
+        if(props.uiState.compressedSizeVisible) {
+            Typography {
+                variant = TypographyVariant.caption
+                + strings.format(MR.strings.size_compressed_was,
+                    UMFileUtil.formatFileSize(props.uiState.latestContentEntryVersion?.cevStorageSize ?: 0),
+                    UMFileUtil.formatFileSize(props.uiState.latestContentEntryVersion?.cevOriginalSize ?: 0),
+                )
+            }
+        }else if(props.uiState.sizeVisible) {
+            Typography {
+                variant = TypographyVariant.caption
+                + strings.format(
+                    MR.strings.size,
+                    UMFileUtil.formatFileSize(props.uiState.latestContentEntryVersion?.cevStorageSize ?: 0),
+                )
+            }
+        }
 
         if (props.uiState.authorVisible){
             Typography{

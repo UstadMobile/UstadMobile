@@ -19,6 +19,8 @@ import com.ustadmobile.core.domain.blob.upload.BlobUploadServerUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCaseCommonJvm
 import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.EnrolIntoCourseUseCase
+import com.ustadmobile.core.domain.compress.video.CompressVideoUseCase
+import com.ustadmobile.core.domain.compress.video.CompressVideoUseCaseHandbrake
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseJvm
 import com.ustadmobile.core.domain.contententry.importcontent.ImportContentEntryUseCase
@@ -77,7 +79,7 @@ import com.ustadmobile.lib.rest.domain.contententry.getmetadatafromuri.ContentEn
 import com.ustadmobile.lib.rest.api.contentupload.ContentUploadRoute
 import com.ustadmobile.lib.rest.api.contentupload.UPLOAD_TMP_SUBDIR
 import com.ustadmobile.lib.rest.domain.account.SetPasswordRoute
-import com.ustadmobile.lib.rest.ffmpeghelper.MissingMediaProgramsException
+import com.ustadmobile.lib.rest.mediahelpers.MissingMediaProgramsException
 import io.ktor.server.response.*
 import kotlinx.serialization.json.Json
 import com.ustadmobile.lib.util.SysPathUtil
@@ -453,6 +455,15 @@ fun Application.umRestApplication(
                 mediaInfoPath = mediaInfoFile.absolutePath,
                 workingDir = ktorAppHomeDir(),
                 json = instance()
+            )
+        }
+
+        bind<CompressVideoUseCase>() with provider {
+            CompressVideoUseCaseHandbrake(
+                handbrakePath = handbrakeCliFile.absolutePath,
+                workingDir = ktorAppHomeDir(),
+                json = instance(),
+                extractMediaMetadataUseCase = instance(),
             )
         }
 

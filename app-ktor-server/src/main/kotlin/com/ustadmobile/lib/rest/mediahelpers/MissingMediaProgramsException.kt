@@ -1,4 +1,4 @@
-package com.ustadmobile.lib.rest.ffmpeghelper
+package com.ustadmobile.lib.rest.mediahelpers
 
 /**
  * Exception that can be thrown by the Rest application to indicate that FFMPEG is not installed.

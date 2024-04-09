@@ -1,6 +1,6 @@
 package com.ustadmobile.lib.rest
 
-import com.ustadmobile.lib.rest.ffmpeghelper.MissingMediaProgramsException
+import com.ustadmobile.lib.rest.mediahelpers.MissingMediaProgramsException
 import io.ktor.server.engine.commandLineEnvironment
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
