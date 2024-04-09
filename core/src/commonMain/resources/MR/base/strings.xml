@@ -1892,7 +1892,7 @@
 
     <string name="compression_medium">Medium</string>
 
-    <string name="compression_low">Low (highest quality)</string>
+    <string name="compression_low">Low</string>
 
     <string name="compression_lowest">Lowest (highest quality)</string>
 
