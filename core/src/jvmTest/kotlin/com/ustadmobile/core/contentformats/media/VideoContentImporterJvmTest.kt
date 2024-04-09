@@ -4,7 +4,10 @@ import com.ustadmobile.core.contentformats.AbstractContentImporterTest
 import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.contentformats.video.VideoContentImporterCommonJvm
 import com.ustadmobile.core.contentjob.InvalidContentException
-import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCaseFfprobe
+import com.ustadmobile.core.domain.extractmediametadata.ExtractMediaMetadataUseCase
+import com.ustadmobile.core.domain.extractmediametadata.mediainfo.ExtractMediaMetadataUseCaseMediaInfo
+import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
+import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCaseMediaInfo
 import com.ustadmobile.core.test.assertCachedBodyMatchesFileContent
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -16,7 +19,7 @@ import com.ustadmobile.libcache.response.bodyAsString
 import com.ustadmobile.util.test.ext.newFileFromResource
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.files.Path
-import net.bramp.ffmpeg.FFprobe
+import java.io.File
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -26,14 +29,23 @@ import kotlin.test.assertTrue
 
 class VideoContentImporterJvmTest : AbstractContentImporterTest() {
 
-    private lateinit var ffProbe: FFprobe
+    private lateinit var extractMediaUseCase: ExtractMediaMetadataUseCase
+
+    private lateinit var validateVideoUseCase: ValidateVideoFileUseCase
+
 
     @BeforeTest
     fun setupVideoTest() {
-        ffProbe = SysPathUtil.findCommandInPath("ffprobe")?.let {
-            FFprobe(it.absolutePath)
-        } ?: throw IllegalStateException("Cannot find ffmpeg in path. FFMPEG must be in path to run this test")
-
+        val mediaInfoPath = SysPathUtil.findCommandInPath("mediainfo")
+            ?: throw IllegalStateException("Cannot find mediainfo in path. MediaInfo must be in path to run this test")
+        extractMediaUseCase =ExtractMediaMetadataUseCaseMediaInfo(
+            mediaInfoPath = mediaInfoPath.absolutePath,
+            workingDir = File(System.getProperty("user.dir")),
+            json = json,
+        )
+        validateVideoUseCase = ValidateVideoFileUseCaseMediaInfo(
+            extractMediaMetadataUseCase = extractMediaUseCase
+        )
     }
 
     @Test
@@ -45,7 +57,7 @@ class VideoContentImporterJvmTest : AbstractContentImporterTest() {
             endpoint = activeEndpoint,
             db = db,
             cache = ustadCache,
-            validateVideoFileUseCase = ValidateVideoFileUseCaseFfprobe(ffProbe),
+            validateVideoFileUseCase = validateVideoUseCase,
             uriHelper = uriHelper,
             json = json,
             tmpPath = Path(rootTmpFolder.absolutePath),
@@ -68,7 +80,7 @@ class VideoContentImporterJvmTest : AbstractContentImporterTest() {
             endpoint = activeEndpoint,
             db = db,
             cache = ustadCache,
-            validateVideoFileUseCase = ValidateVideoFileUseCaseFfprobe(ffProbe),
+            validateVideoFileUseCase = validateVideoUseCase,
             uriHelper = uriHelper,
             json = json,
             tmpPath = Path(rootTmpFolder.absolutePath),
@@ -95,7 +107,7 @@ class VideoContentImporterJvmTest : AbstractContentImporterTest() {
             endpoint = activeEndpoint,
             db = db,
             cache = ustadCache,
-            validateVideoFileUseCase = ValidateVideoFileUseCaseFfprobe(ffProbe),
+            validateVideoFileUseCase = validateVideoUseCase,
             uriHelper = uriHelper,
             json = json,
             tmpPath = Path(rootTmpFolder.absolutePath),
@@ -117,7 +129,7 @@ class VideoContentImporterJvmTest : AbstractContentImporterTest() {
             endpoint = activeEndpoint,
             db = db,
             cache = ustadCache,
-            validateVideoFileUseCase = ValidateVideoFileUseCaseFfprobe(ffProbe),
+            validateVideoFileUseCase = validateVideoUseCase,
             uriHelper = uriHelper,
             json = json,
             tmpPath = Path(rootTmpFolder.absolutePath),

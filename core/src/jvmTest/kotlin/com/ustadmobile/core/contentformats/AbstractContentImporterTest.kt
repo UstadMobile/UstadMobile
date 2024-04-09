@@ -74,6 +74,7 @@ abstract class AbstractContentImporterTest: AbstractMainDispatcherTest() {
 
         json = Json {
             encodeDefaults = true
+            ignoreUnknownKeys = true
         }
 
         ustadCache = newTestUstadCache(temporaryFolder)

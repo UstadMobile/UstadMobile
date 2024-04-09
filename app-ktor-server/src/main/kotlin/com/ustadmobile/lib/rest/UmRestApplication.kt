@@ -23,6 +23,8 @@ import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntr
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseJvm
 import com.ustadmobile.core.domain.contententry.importcontent.ImportContentEntryUseCase
 import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServerUseCase
+import com.ustadmobile.core.domain.extractmediametadata.ExtractMediaMetadataUseCase
+import com.ustadmobile.core.domain.extractmediametadata.mediainfo.ExtractMediaMetadataUseCaseMediaInfo
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonStatusMap
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsUseCase
@@ -39,7 +41,7 @@ import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
 import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseJvm
 import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
-import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCaseFfprobe
+import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCaseMediaInfo
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.DiTag.TAG_CONTEXT_DATA_ROOT
 import com.ustadmobile.door.ext.*
@@ -75,8 +77,7 @@ import com.ustadmobile.lib.rest.domain.contententry.getmetadatafromuri.ContentEn
 import com.ustadmobile.lib.rest.api.contentupload.ContentUploadRoute
 import com.ustadmobile.lib.rest.api.contentupload.UPLOAD_TMP_SUBDIR
 import com.ustadmobile.lib.rest.domain.account.SetPasswordRoute
-import com.ustadmobile.lib.rest.ffmpeghelper.InvalidFffmpegException
-import com.ustadmobile.lib.rest.ffmpeghelper.NoFfmpegException
+import com.ustadmobile.lib.rest.ffmpeghelper.MissingMediaProgramsException
 import io.ktor.server.response.*
 import kotlinx.serialization.json.Json
 import com.ustadmobile.lib.util.SysPathUtil
@@ -95,8 +96,6 @@ import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.headers.MimeTypeHelper
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.files.Path
-import net.bramp.ffmpeg.FFmpeg
-import net.bramp.ffmpeg.FFprobe
 import org.kodein.di.ktor.closestDI
 import java.net.Inet6Address
 import java.net.NetworkInterface
@@ -171,29 +170,21 @@ fun Application.umRestApplication(
                 "set this in the config file e.g. uncomment siteUrl and set as siteUrl = \"$likelyAddr\"")
     }
 
-    val appFfmpegDir = ktorAppHomeFfmpegDir()
-    val ffmpegFile = SysPathUtil.findCommandInPath(
-        commandName = "ffmpeg",
-        manuallySpecifiedLocation = appConfig.commandFileProperty("ffmpeg"),
-        extraSearchPaths = appFfmpegDir.absolutePath,
-    )
-    val ffprobeFile = SysPathUtil.findCommandInPath(
-        commandName = "ffprobe",
-        manuallySpecifiedLocation = appConfig.commandFileProperty("ffprobe"),
-        extraSearchPaths = appFfmpegDir.absolutePath
+    val mediaInfoFile = SysPathUtil.findCommandInPath(
+        commandName = "mediainfo",
+        manuallySpecifiedLocation = appConfig.commandFileProperty("mediainfo"),
     )
 
-    if(ffmpegFile == null || ffprobeFile == null) {
-        throw NoFfmpegException()
-    }
+    val handbrakeCliFile = SysPathUtil.findCommandInPath(
+        commandName = "HandBrakeCLI",
+        manuallySpecifiedLocation = appConfig.commandFileProperty("handbrakecli"),
+    )
 
-    try {
-        if(!FFmpeg(ffmpegFile.absolutePath).isFFmpeg || !FFprobe(ffprobeFile.absolutePath).isFFprobe) {
-            throw InvalidFffmpegException(ffmpegFile, ffprobeFile)
-        }
-    }catch(e: Exception) {
-        //If an exception occurs running them, it is also invalid
-        throw InvalidFffmpegException(ffmpegFile, ffprobeFile)
+    if(
+        mediaInfoFile == null || handbrakeCliFile == null || !mediaInfoFile.exists() ||
+            !handbrakeCliFile.exists()
+    ) {
+        throw MissingMediaProgramsException()
     }
 
     val devMode = environment.config.propertyOrNull("ktor.ustad.devmode")?.getString().toBoolean()
@@ -343,14 +334,6 @@ fun Application.umRestApplication(
             }
         }
 
-        bind<FFmpeg>() with provider {
-            FFmpeg(ffmpegFile.absolutePath)
-        }
-
-        bind<FFprobe>() with provider {
-            FFprobe(ffprobeFile.absolutePath)
-        }
-
         bind<File>(tag = DiTag.TAG_TMP_DIR) with singleton {
             File(dataDirPath, "tmp")
         }
@@ -465,9 +448,17 @@ fun Application.umRestApplication(
             )
         }
 
+        bind<ExtractMediaMetadataUseCase>() with provider {
+            ExtractMediaMetadataUseCaseMediaInfo(
+                mediaInfoPath = mediaInfoFile.absolutePath,
+                workingDir = ktorAppHomeDir(),
+                json = instance()
+            )
+        }
+
         bind<ValidateVideoFileUseCase>() with provider {
-            ValidateVideoFileUseCaseFfprobe(
-                ffprobe = instance()
+            ValidateVideoFileUseCaseMediaInfo(
+                extractMediaMetadataUseCase = instance()
             )
         }
 
