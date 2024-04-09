@@ -67,22 +67,29 @@ entire project.
 *  __Step 1: Download and install Android Studio__: If you don't already have the latest version, download 
 from [https://developer.android.com/studio](https://developer.android.com/studio).
 
-* __Step 2: Make sure that java is on your system path__: If you already have OpenJDK17, you can 
-  use that, otherwise you need to download from the Java website or install using your system package
-  manager.
-
-Supported JDK Version: JDK17 (only). JDK21 not supported yet due to Proguard issues on app-desktop.
+* __Step 2: Install dependencies__
+ 
+Development requirements are:
+* JDK17 (only): JDK21 not supported yet due to Proguard issues on app-desktop.
+* MediaInfo: MediaInfo is used by the server and desktop version to validate media files and extract
+  metadata
+* VLC: VLC is used on the desktop version (via VLC4J) to play videos.
+* HandBrakeCLI: HandBrake (Command Line Interface) is used by the server and desktop version to 
+  compress videos.
 
 Linux:
 
-Install OpenJDK17, ffmpeg, and mediainfo using the system package manager e.g.
+If you already have JDK 17 installed, you can use it.
+
+OpenJDK17, mediainfo, vlc, and handbrake-cli can be installed using the system package manager e.g.
 
 ```
-sudo apt-get install openjdk-17-jdk ffmpeg mediainfo
+sudo apt-get install openjdk-17-jdk mediainfo vlc handbrake-cli
 ```
 
 Windows: 
 
+__JDK__
 Download and install Java (JDK17) if not already installed from the Java site
 [https://www.oracle.com/java/technologies/downloads/#jdk17-windows](https://www.oracle.com/java/technologies/downloads/#jdk17-windows)
 
@@ -96,8 +103,24 @@ Now find the PATH variable. Append ```;%JAVA_HOME%\bin``` to the value and save 
 
 Further details: see the [Java website](https://www.java.com/en/download/help/path.html).
 
-If you don't have ffmpeg installed, the server can download it for you when you run it for the first
-time.
+__VLC__
+Download and install from [https://www.videolan.org/](https://www.videolan.org/). Make sure to choose
+a 64bit version (using a non-64bit version will fail). VLC is used by the Desktop version to play 
+videos via VLCJ.
+
+__MediaInfo__
+Download and install such that the MediaInfo command is in the PATH. This can be done using winget:
+
+```
+winget install -e --id MediaArea.MediaInfo
+```
+
+__HandBrakeCLI__
+Download and install such that the HandBrakeCLI command is in the PATH. This can be done using winget:
+
+```
+winget install -e --id HandBrake.HandBrake.CLI
+```
 
 * __Step 3: Import the project in Android Studio__: Select File, New, Project from Version Control. Enter
 https://github.com/UstadMobile/UstadMobile.git and wait for the project to import. Switch to the

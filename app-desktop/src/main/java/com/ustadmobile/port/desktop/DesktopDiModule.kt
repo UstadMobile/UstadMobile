@@ -20,6 +20,8 @@ import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.core.domain.cachelock.AddOfflineItemInactiveTriggersCallback
 import com.ustadmobile.core.domain.cachelock.UpdateCacheLockJoinUseCase
+import com.ustadmobile.core.domain.compress.video.CompressVideoUseCase
+import com.ustadmobile.core.domain.compress.video.CompressVideoUseCaseHandbrake
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseJvm
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseRemote
@@ -86,6 +88,7 @@ import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
 import org.kodein.di.direct
 import org.kodein.di.on
+import org.kodein.di.provider
 import org.quartz.Scheduler
 import org.quartz.impl.StdSchedulerFactory
 import org.xmlpull.v1.XmlPullParserFactory
@@ -249,6 +252,12 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         commandName = "mediainfo",
         manuallySpecifiedLocation = File(mediaInfoResourcesDir, "mediainfo").getCommandFile(),
     ) ?: throw IllegalStateException("No MediaInfo found")
+
+    val handbrakeResourcesDir = File(resourcesDir, "handbrakecli")
+    val handbrakeCliFile = SysPathUtil.findCommandInPath(
+        commandName = "HandBrakeCLI",
+        manuallySpecifiedLocation = File(handbrakeResourcesDir, "HandBrakeCLI").getCommandFile(),
+    ) ?: throw IllegalStateException("No HandBrakeCLI found")
 
     bind<AppConfig>() with singleton {
         ManifestAppConfig()
@@ -493,6 +502,15 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         GetDeveloperInfoUseCaseJvm(
             appResourcesDir = ustadAppResourcesDir(),
             dataDir = ustadAppDataDir(),
+        )
+    }
+
+    bind<CompressVideoUseCase>() with provider {
+        CompressVideoUseCaseHandbrake(
+            handbrakePath = handbrakeCliFile.absolutePath,
+            extractMediaMetadataUseCase = instance(),
+            workingDir = instance(tag = TAG_DATA_DIR),
+            json = instance(),
         )
     }
 
