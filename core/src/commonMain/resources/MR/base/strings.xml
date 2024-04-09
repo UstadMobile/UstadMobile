@@ -1886,11 +1886,15 @@
 
     <string name="compression">Compression</string>
 
-    <string name="compression_high">High (smallest file size)</string>
+    <string name="compression_highest">Highest (smallest file size)</string>
+
+    <string name="compression_high">High</string>
 
     <string name="compression_medium">Medium</string>
 
     <string name="compression_low">Low (highest quality)</string>
+
+    <string name="compression_lowest">Lowest (highest quality)</string>
 
     <string name="compression_none">None (original quality and file size)</string>
 

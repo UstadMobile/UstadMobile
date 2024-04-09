@@ -25,15 +25,19 @@ import java.io.File
 import java.util.UUID
 
 /**
- * Compress a video using HandBrakeCLI
+ * Compress a video using HandBrakeCLI. Videos will be encoded as MP4 using AV1 as the video codec
+ * and Opus as the audio codec.
  *
  * TODO: Check handling of non-English file names and files that contain spaces
  *
- * Windows is supposed to support this:
+ * Windows UWP is supposed to support this:
  *   https://learn.microsoft.com/en-us/windows/uwp/audio-video-camera/transcode-media-files
  *   https://blogs.windows.com/windowsdeveloper/2018/06/06/c-console-uwp-applications/
  *
  * Unfortunately, there is no straightforward way to access this from Java/Kotlin land.
+ *
+ * Handbrake settings: see
+ *    https://handbrake.fr/docs/en/latest/workflow/adjust-quality.html#:~:text=Recommended%20settings%20for%20the%20SVT,for%201080p%20Full%20High%20Definition
  *
  */
 class CompressVideoUseCaseHandbrake(
@@ -42,6 +46,25 @@ class CompressVideoUseCaseHandbrake(
     private val extractMediaMetadataUseCase: ExtractMediaMetadataUseCase,
     private val json: Json,
 ): CompressVideoUseCase {
+
+    /**
+     * @param videoBitRate guesstimate video bitrate. The actual bitrate will vary depending on how
+     *        complex the video is. We only set the quality setting, we do not directly set the video
+     *        bitrate. This is used to guess when compression is unlikely to yield a smaller file
+     * @param audioBitRate audio bitrate to use (audio codec will always be opus)
+     * @param quality the quality setting to pass to Handbrake
+     * @param maxMajor the max major resolution
+     * @param maxMinor the max minor resolution
+     * @param frameRate the framerate setting
+     */
+    data class HandbrakeCompressionLevelParams(
+        val videoBitRate: Int,
+        val audioBitRate: Int,
+        val quality: Int,
+        val maxMajor: Int,
+        val maxMinor: Int,
+        val frameRate: Int,
+    )
 
     /**
      * When using --json on the command line, then progress will be output. Unfortunately, the progress
@@ -86,23 +109,56 @@ class CompressVideoUseCaseHandbrake(
     }
 
 
-    //Bitrate to use in bps
-    private val CompressionLevel.videoBitRate: Int
-        get() = when(this) {
-            CompressionLevel.HIGH -> 170_000
-            CompressionLevel.MEDIUM -> 500_000
-            CompressionLevel.LOW -> 2_000_000
-            else -> -1
+    private val CompressionLevel.params: HandbrakeCompressionLevelParams
+        get() = when(this){
+            //Output is roughly 1.1MB per minute of video
+            CompressionLevel.HIGHEST -> HandbrakeCompressionLevelParams(
+                videoBitRate = 130_000,
+                audioBitRate = 32_000,
+                quality = 55,
+                maxMajor = 480,
+                maxMinor = 360,
+                frameRate = 15,
+            )
+            //Output is roughly 2MB per minute of video
+            CompressionLevel.HIGH -> HandbrakeCompressionLevelParams(
+                videoBitRate = 190_000,
+                audioBitRate = 48_000,
+                quality = 55,
+                maxMajor = 480,
+                maxMinor = 360,
+                frameRate = 30,
+            )
+            //Output is roughly 3MB per minute of video
+            CompressionLevel.MEDIUM -> HandbrakeCompressionLevelParams(
+                videoBitRate = 300_000,
+                audioBitRate = 96_000,
+                quality = 55,
+                maxMajor = 720,
+                maxMinor = 480,
+                frameRate = 30,
+            )
+            //Output roughly 5MB per minute of video
+            CompressionLevel.LOW -> HandbrakeCompressionLevelParams(
+                videoBitRate = 600_000,
+                audioBitRate = 128_000,
+                quality = 45,
+                maxMajor = 720,
+                maxMinor = 480,
+                frameRate = 30,
+            )
+            //Roughly 11-12MB per minute of video
+            CompressionLevel.LOWEST -> HandbrakeCompressionLevelParams(
+                videoBitRate = 1_400_000,
+                audioBitRate = 196_000,
+                quality = 40,
+                maxMajor = 1280,
+                maxMinor = 720,
+                frameRate = 30,
+            )
+            else -> throw IllegalArgumentException("Cannot create params for no compression")
         }
 
-    //Bitrate to use in bps
-    private val CompressionLevel.audioBitRate: Int
-        get() = when(this) {
-            CompressionLevel.HIGH -> 64_000
-            CompressionLevel.MEDIUM -> 128_000
-            CompressionLevel.LOW -> 192_000
-            else -> -1
-        }
 
     /**
      * Whe the storage size and display size vary, the VLC transcoder preserves the display aspect
@@ -118,12 +174,8 @@ class CompressVideoUseCaseHandbrake(
     ): List<String> {
         val isPortrait = inputWidth > inputHeight
         val storageAspectRatio = inputWidth.toFloat() / inputHeight.toFloat()
-        val maxMajor = when(this) {
-            CompressionLevel.HIGH -> 480
-            CompressionLevel.MEDIUM -> 720
-            CompressionLevel.LOW -> 1280
-            else -> -1
-        }
+        val params = this.params
+        val maxMajor = params.maxMajor
 
         val (outputWidth, outputHeight) = when {
             isPortrait && inputWidth > maxMajor -> Pair(maxMajor.toFloat(), maxMajor / storageAspectRatio)
@@ -136,16 +188,12 @@ class CompressVideoUseCaseHandbrake(
             add(outputWidth.toString())
             add("--maxHeight")
             add(outputHeight.toString())
-            add("--vb")
-            add("${videoBitRate / 1000}")
+            add("--quality")
+            add("${params.quality}")
             add("--ab")
-            add("${audioBitRate / 1000}")
+            add("${params.audioBitRate / 1000}")
             add("--rate")
-
-            when(this@handbrakeParams) {
-                CompressionLevel.HIGH ->  add("12")
-                else -> add("30")
-            }
+            add("${params.frameRate}")
         }
     }
 
@@ -163,12 +211,13 @@ class CompressVideoUseCaseHandbrake(
         if(!mediaInfo.hasVideo) {
             throw IllegalArgumentException("${fromFile.absolutePath} has no video")
         }
+        val compressParams = params.compressionLevel.params
 
-        val kiloBytesPerSecond = (params.compressionLevel.videoBitRate + params.compressionLevel.audioBitRate)/8
+        val kiloBytesPerSecond = (compressParams.videoBitRate + compressParams.audioBitRate)/8
         val expectedSize = (mediaInfo.duration / 1000) * kiloBytesPerSecond
 
         val fromFileSize = fromFile.length()
-        if(expectedSize >= (fromFileSize * COMPRESS_THRESHOLD)) {
+        if((expectedSize * COMPRESS_THRESHOLD) >= (fromFileSize)) {
             Napier.d {
                 "CompressVideoUseCaseJvmVlc: expected size of " +
                         "${UMFileUtil.formatFileSize(expectedSize)} is not within threshold to compress. " +
@@ -192,7 +241,7 @@ class CompressVideoUseCaseHandbrake(
                     add(fromFile.absolutePath)
                     add("-o")
                     add(destFile.absolutePath)
-                    addAll(listOf("--encoder", "x264", "--aencoder", "av_aac"))
+                    addAll(listOf("--encoder", "svt_av1", "--aencoder", "opus"))
                     addAll(params.compressionLevel.handbrakeParams(
                         mediaInfo.storageWidth, mediaInfo.storageHeight
                     ))
@@ -228,16 +277,33 @@ class CompressVideoUseCaseHandbrake(
 
             outputReader.cancel()
             errReader.cancel()
-            CompressResult(
-                uri = destFile.toDoorUri().toString(),
-                mimeType = "video/mp4"
-            )
+
+            //Check if the result is smaller than the original. We won't know for sure because
+            // more complex video will be bigger
+            if(destFile.length() < fromFile.length()) {
+                CompressResult(
+                    uri = destFile.toDoorUri().toString(),
+                    mimeType = "video/mp4"
+                )
+            }else {
+                //The result was bigger
+                Napier.d {
+                    "CompressVideoUseCaseHandbrake: result was ${destFile.length()} - bigger " +
+                    "than original ${fromFile.length()}. Deleting attempt file ${destFile.absolutePath}"
+                }
+                destFile.delete()
+                null
+            }
+
+
         }catch(e: Throwable) {
             throw e
         }
     }
 
     companion object {
-        const val COMPRESS_THRESHOLD = 0.95f
+
+        const val COMPRESS_THRESHOLD = 0.20f
+
     }
 }

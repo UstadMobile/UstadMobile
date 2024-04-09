@@ -117,8 +117,8 @@ data class ContentEntryImportJob(
     /**
      * CompressionLevel to use for import - integer constants as per CompressionLevel (on core)
      */
-    @ColumnInfo(defaultValue = "2")
-    var cjiCompressionLevel: Int = 2,
+    @ColumnInfo(defaultValue = "3")
+    var cjiCompressionLevel: Int = 3,
 
     var cjiError: String? = null,
 

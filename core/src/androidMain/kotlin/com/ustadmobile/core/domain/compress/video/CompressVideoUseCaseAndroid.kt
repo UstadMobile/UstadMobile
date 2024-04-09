@@ -1,6 +1,7 @@
 package com.ustadmobile.core.domain.compress.video
 
 import android.content.Context
+import android.media.MediaCodecList
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import androidx.annotation.OptIn
@@ -41,7 +42,19 @@ import java.util.UUID
 
 
 /**
- * On desktop: see https://gist.github.com/belachkar/c35fd2c4832d841970035b06019f3558
+ * Compress Videos on Android using the Jetpack Media3 transcoder. This will always use H264 for the
+ * moment because:
+ *  1) Jetpack Media3 will always output an MP4 file ( https://developer.android.com/media/media3/transformer/supported-formats ).
+ *     An MP4 file cannot contain VP8 or VP9 video.
+ *  2) Litr can encode VP9, however it does not handle display width/height vs. storage width/height
+ *     and does not have the fallback logic that Jetpack Media3 has.
+ *  3) H265 is more efficient and the encoder is available on many devices, and it can be contained
+ *     in an MP4 file. H265 playback is not supported on Firefox (due to licensing / patent issues)
+ *     and Chrome (on devices without hardware support).
+ *  4) AV1 : only Android14+ requires AV1 encoding support.
+ *
+ * In reality, most videos will be uploaded/added using the Web version or Desktop version from a
+ * computer (in both cases the encoding work will be done using the JVM UseCase).
  */
 class CompressVideoUseCaseAndroid(
     private val appContext: Context,
@@ -53,20 +66,18 @@ class CompressVideoUseCaseAndroid(
         compressionLevel: CompressionLevel,
         widthIn: Int,
         heightIn: Int,
-    ) : Presentation? {
+    ) : Presentation {
+        val isHd = compressionLevel.value >= CompressionLevel.MEDIUM.value
+
         val height = when {
-            compressionLevel == CompressionLevel.HIGH && widthIn > heightIn ->  480
-            compressionLevel == CompressionLevel.HIGH -> 720
+            isHd && widthIn > heightIn -> 720 //HD landscape mode
+            isHd -> 1280 // HD portrait mode
 
-            compressionLevel == CompressionLevel.MEDIUM && widthIn > heightIn -> 480
-            compressionLevel == CompressionLevel.MEDIUM -> 720
-
-            compressionLevel == CompressionLevel.LOW && widthIn > heightIn -> 720
-            compressionLevel == CompressionLevel.LOW -> 1280
-            else -> null
+            widthIn > heightIn -> 480 //SD landscape mode
+            else -> 720 //SD portrait mode
         }
 
-        return height?.let { Presentation.createForHeight(it) }
+        return Presentation.createForHeight(height)
     }
 
     @OptIn(UnstableApi::class)
@@ -74,15 +85,11 @@ class CompressVideoUseCaseAndroid(
         compressionLevel: CompressionLevel
     ) : VideoEncoderSettings.Builder {
         when(compressionLevel) {
-            CompressionLevel.HIGH -> {
-                setBitrate(170_000)
-            }
-            CompressionLevel.MEDIUM -> {
-                setBitrate(500_000)
-            }
-            CompressionLevel.LOW -> {
-                setBitrate(2_000_000)
-            }
+            CompressionLevel.HIGHEST -> setBitrate(170_000)
+            CompressionLevel.HIGH -> setBitrate(250_000)
+            CompressionLevel.MEDIUM -> setBitrate(500_000)
+            CompressionLevel.LOW -> setBitrate(2_000_000)
+            CompressionLevel.LOWEST -> setBitrate(5_000_000)
             else -> {
                 //do nothing
             }
@@ -96,9 +103,11 @@ class CompressVideoUseCaseAndroid(
      * the audio bitrate.
      */
     private fun CompressionLevel.expectedTotalBitrate(): Int = when(this) {
-        CompressionLevel.HIGH -> 170_000 + 96_000
+        CompressionLevel.HIGHEST -> 170_000 + 96_000
+        CompressionLevel.HIGH -> 250_000 + 96_000
         CompressionLevel.MEDIUM -> 500_000 + 128_000
         CompressionLevel.LOW -> 2_000_000 + 196_000
+        CompressionLevel.LOWEST -> 5_000_000 + 196_000
         else -> -1
     }
 
@@ -167,8 +176,15 @@ class CompressVideoUseCaseAndroid(
             .build()
 
 
+        val codecList = MediaCodecList(MediaCodecList.ALL_CODECS)
+        val hasAV1Support = codecList.codecInfos.any {
+            it.isEncoder && "video/AV1" in it.supportedTypes
+        }
+        val videoMimeType = if(hasAV1Support) MimeTypes.VIDEO_AV1 else MimeTypes.VIDEO_H264
+        Napier.d { "CompressVideoUseCaseAndroid: will encode using $videoMimeType" }
+
         val transformer = Transformer.Builder(appContext)
-            .setVideoMimeType(MimeTypes.VIDEO_H264)
+            .setVideoMimeType(videoMimeType)
             .setEncoderFactory(encoderFactory)
             .build()
 

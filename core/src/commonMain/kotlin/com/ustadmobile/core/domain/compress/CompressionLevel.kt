@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable(with = CompressionLevelSerializer::class)
 enum class CompressionLevel(val value: Int) {
 
-    NONE(0), LOW(1),  MEDIUM(2), HIGH(3);
+    NONE(0), LOWEST(1), LOW(2),  MEDIUM(3), HIGH(4), HIGHEST(5);
 
     companion object {
 
