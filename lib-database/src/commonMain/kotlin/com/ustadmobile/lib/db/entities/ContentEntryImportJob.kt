@@ -124,6 +124,8 @@ data class ContentEntryImportJob(
 
     var cjiErrorDismissed: Boolean = false,
 
+    var cjiOwnerPersonUid: Long = 0,
+
 ) {
     companion object {
         const val TABLE_ID = 720

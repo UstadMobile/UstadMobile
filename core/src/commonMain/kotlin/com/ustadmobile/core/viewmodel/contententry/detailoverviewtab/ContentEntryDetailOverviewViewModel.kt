@@ -20,6 +20,7 @@ import com.ustadmobile.core.domain.contententry.launchcontent.xapi.LaunchXapiUse
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.Snack
+import com.ustadmobile.core.util.ext.bodyAsDecodedText
 import com.ustadmobile.core.util.ext.localFirstThenRepoIfNull
 import com.ustadmobile.core.util.ext.onActiveEndpoint
 import com.ustadmobile.door.entities.NodeIdAndAuth
@@ -28,6 +29,11 @@ import com.ustadmobile.lib.db.composites.ContentEntryImportJobProgress
 import com.ustadmobile.lib.db.composites.OfflineItemAndState
 import com.ustadmobile.lib.db.composites.TransferJobAndTotals
 import io.github.aakira.napier.Napier
+import io.ktor.client.HttpClient
+import io.ktor.client.request.get
+import io.ktor.client.request.parameter
+import kotlinx.coroutines.flow.updateAndGet
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.instance
 import org.kodein.di.instanceOrNull
 
@@ -50,6 +56,8 @@ data class ContentEntryDetailOverviewUiState(
     val availableTranslations: List<ContentEntryRelatedEntryJoinWithLanguage> = emptyList(),
 
     val activeImportJobs: List<ContentEntryImportJobProgress> = emptyList(),
+
+    val remoteImportJobs: List<ContentEntryImportJobProgress> = emptyList(),
 
     val activeUploadJobs: List<TransferJobAndTotals> = emptyList(),
 
@@ -122,6 +130,8 @@ class ContentEntryDetailOverviewViewModel(
     private val cancelImportContentEntryUseCase: CancelImportContentEntryUseCase? by
         di.onActiveEndpoint().instanceOrNull()
 
+    private val httpClient: HttpClient by di.instance()
+
 
     init {
         viewModelScope.launch {
@@ -191,6 +201,30 @@ class ContentEntryDetailOverviewViewModel(
                                 offlineItemAndState = it
                             )
                         }
+                    }
+                }
+
+                launch {
+                    try {
+                        do {
+                            val remoteImportJobsJson = httpClient.get(
+                                "${accountManager.activeEndpoint.url}api/contententryimportjob/importjobs"
+                            ) {
+                                parameter("contententryuid", entityUidArg.toString())
+                            }.bodyAsDecodedText()
+                            val remoteImportJobs = json.decodeFromString(
+                                ListSerializer(ContentEntryImportJobProgress.serializer()),
+                                remoteImportJobsJson
+                            )
+
+                            val state = _uiState.updateAndGet { prev ->
+                                prev.copy(
+                                    remoteImportJobs = remoteImportJobs
+                                )
+                            }
+                        } while(state.remoteImportJobs.isNotEmpty())
+                    }catch(e: Throwable) {
+                        Napier.d { "Could not get list of jobs" }
                     }
                 }
             }

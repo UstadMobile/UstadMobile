@@ -1,4 +1,4 @@
-package com.ustadmobile.libuicompose.view.contententry.detailoverviewtab
+package com.ustadmobile.core.viewmodel.contententry.detailoverviewtab
 
 import com.ustadmobile.lib.db.composites.ContentEntryImportJobProgress
 

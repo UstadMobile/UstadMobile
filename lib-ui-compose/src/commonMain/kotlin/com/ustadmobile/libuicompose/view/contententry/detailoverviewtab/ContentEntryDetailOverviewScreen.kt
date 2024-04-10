@@ -37,6 +37,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.viewmodel.contententry.detailoverviewtab.ContentEntryDetailOverviewUiState
 import com.ustadmobile.core.viewmodel.contententry.detailoverviewtab.ContentEntryDetailOverviewViewModel
+import com.ustadmobile.core.viewmodel.contententry.detailoverviewtab.progress
 import com.ustadmobile.lib.db.entities.ContentEntryImportJob
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 import com.ustadmobile.lib.db.entities.TransferJob

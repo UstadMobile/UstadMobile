@@ -10,11 +10,13 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.progressBadge
 import com.ustadmobile.core.viewmodel.contententry.detailoverviewtab.ContentEntryDetailOverviewUiState
 import com.ustadmobile.core.viewmodel.contententry.detailoverviewtab.ContentEntryDetailOverviewViewModel
+import com.ustadmobile.core.viewmodel.contententry.detailoverviewtab.progress
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.composites.ContentEntryAndDetail
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.common.md
 import com.ustadmobile.mui.common.xs
+import com.ustadmobile.mui.components.UstadLinearProgressListItem
 import com.ustadmobile.mui.components.UstadQuickActionButton
 import com.ustadmobile.mui.components.UstadRawHtml
 import web.cssom.*
@@ -41,10 +43,10 @@ import mui.icons.material.CheckCircle
 import mui.icons.material.Cancel
 import mui.icons.material.BookOutlined
 import mui.icons.material.EmojiEvents
-import mui.icons.material.LocationOnOutlined
 import mui.icons.material.CheckBoxOutlined
 import mui.icons.material.Delete
 import mui.icons.material.Download
+import react.ReactNode
 
 val CONTENT_ENTRY_TYPE_ICON_MAP = mapOf(
     ContentEntry.TYPE_EBOOK to Book,
@@ -59,8 +61,6 @@ val CONTENT_ENTRY_TYPE_ICON_MAP = mapOf(
 external interface ContentEntryDetailOverviewScreenProps : Props {
 
     var uiState: ContentEntryDetailOverviewUiState
-
-    var onClickDownload: () -> Unit
 
     var onClickOpen: () -> Unit
 
@@ -82,17 +82,8 @@ val ContentEntryDetailOverviewComponent2 = FC<ContentEntryDetailOverviewScreenPr
         Stack {
             spacing = responsive(20.px)
 
-            ContentDetails{
+            ContentDetails {
                 uiState = props.uiState
-            }
-
-            if (props.uiState.contentEntryButtons?.showDownloadButton == true){
-                Button{
-                    variant = ButtonVariant.contained
-                    onClick = { props.onClickDownload }
-
-                    + strings[MR.strings.download].uppercase()
-                }
             }
 
             if (props.uiState.openButtonVisible){
@@ -104,14 +95,6 @@ val ContentEntryDetailOverviewComponent2 = FC<ContentEntryDetailOverviewScreenPr
                 }
             }
 
-//            ContentJobList{
-//                uiState = props.uiState
-//            }
-
-            if (props.uiState.locallyAvailable) {
-                LocallyAvailableRow()
-            }
-
             Divider { orientation = Orientation.horizontal }
 
             QuickActionBarsRow {
@@ -119,6 +102,14 @@ val ContentEntryDetailOverviewComponent2 = FC<ContentEntryDetailOverviewScreenPr
                 onClickMarkComplete = props.onClickMarkComplete
                 onClickDelete = props.onClickMarkComplete
                 onClickManageDownload =  props.onClickMarkComplete
+            }
+
+            props.uiState.remoteImportJobs.forEach {
+                UstadLinearProgressListItem {
+                    progress = it.progress
+                    secondaryContent = ReactNode(strings[MR.strings.importing])
+                    error = it.cjiError
+                }
             }
 
             UstadRawHtml {
@@ -314,21 +305,6 @@ private val ContentDetailRightColumn = FC <ContentEntryDetailOverviewScreenProps
     }
 }
 
-private val LocallyAvailableRow = FC <ContentEntryDetailOverviewScreenProps> {
-
-    val strings: StringProvider = useStringProvider()
-
-    Stack {
-        direction = responsive(StackDirection.row)
-        spacing = responsive(10.px)
-
-        + LocationOnOutlined.create()
-
-        Typography{
-            +strings[MR.strings.download_locally_availability]
-        }
-    }
-}
 
 private val QuickActionBarsRow = FC <ContentEntryDetailOverviewScreenProps> { props ->
 

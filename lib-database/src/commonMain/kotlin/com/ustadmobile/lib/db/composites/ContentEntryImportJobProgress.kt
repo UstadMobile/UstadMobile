@@ -1,5 +1,8 @@
 package com.ustadmobile.lib.db.composites
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class ContentEntryImportJobProgress(
     var cjiUid: Long = 0,
 
