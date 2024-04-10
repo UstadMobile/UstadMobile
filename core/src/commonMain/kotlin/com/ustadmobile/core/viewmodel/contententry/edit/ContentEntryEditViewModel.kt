@@ -158,6 +158,7 @@ class ContentEntryEditViewModel(
                                 cjiContentEntryUid = newContentEntryUid,
                                 sourceUri = importedMetaData.entry.sourceUrl,
                                 cjiOriginalFilename = importedMetaData.originalFilename,
+                                cjiOwnerPersonUid = activeUserPersonUid,
                             ),
                         ).also {
                             savedStateHandle[KEY_TITLE] = systemImpl.formatString(MR.strings.importing,

@@ -20,9 +20,9 @@ import dev.icerock.moko.resources.compose.stringResource
 fun UstadLinearProgressListItem(
     progress: Float?,
     supportingContent: @Composable () -> Unit,
-    onCancel: () -> Unit,
+    onCancel: (() -> Unit)?,
     error: String? = null,
-    onDismissError: () -> Unit = { },
+    onDismissError: (() -> Unit)? = { },
     modifier: Modifier = Modifier,
 ) {
     ListItem(
@@ -58,13 +58,21 @@ fun UstadLinearProgressListItem(
             }
         },
         trailingContent = {
-            UstadTooltipBox(
-                tooltipText = stringResource(MR.strings.cancel),
-            ) {
-                IconButton(
-                    onClick = if(error != null) onDismissError else onCancel
+            val showButton  = (error != null && onDismissError != null) ||
+                    onCancel != null
+            if(showButton){
+                UstadTooltipBox(
+                    tooltipText = stringResource(MR.strings.cancel),
                 ) {
-                    Icon(Icons.Default.Close, contentDescription = stringResource(MR.strings.cancel))
+                    IconButton(
+                        onClick = if(error != null && onDismissError != null) {
+                            { onDismissError.invoke() }
+                        }else {
+                            { onCancel?.invoke() }
+                        }
+                    ) {
+                        Icon(Icons.Default.Close, contentDescription = stringResource(MR.strings.cancel))
+                    }
                 }
             }
         }

@@ -63,7 +63,9 @@ fun ContentEntryDetailOverviewScreen(
         onClickOpen = viewModel::onClickOpen,
         onClickOfflineButton = viewModel::onClickOffline,
         onCancelImport = viewModel::onCancelImport,
+        onCancelRemoteImport = viewModel::onCancelRemoteImport,
         onDismissImportError = viewModel::onDismissImportError,
+        onDismissRemoteImportError = viewModel::onDismissRemoteImportError,
     )
 }
 
@@ -78,7 +80,9 @@ fun ContentEntryDetailOverviewScreen(
     onClickManageDownload: () -> Unit = {},
     onClickTranslation: (ContentEntryRelatedEntryJoinWithLanguage) -> Unit = {},
     onCancelImport: (Long) -> Unit = { },
+    onCancelRemoteImport: (Long) -> Unit = { },
     onDismissImportError: (Long) -> Unit = { },
+    onDismissRemoteImportError: (Long) -> Unit = { },
 ) {
     UstadLazyColumn(
         verticalArrangement = Arrangement.spacedBy(5.dp),
@@ -163,6 +167,29 @@ fun ContentEntryDetailOverviewScreen(
                 error = contentJobItem.cjiError,
                 onDismissError = {
                     onDismissImportError(contentJobItem.cjiUid)
+                }
+            )
+        }
+
+        items(
+            items = uiState.remoteImportJobs,
+            key = { Pair("remoteimport", it.cjiUid) }
+        ) {contentJobItem ->
+            val canCancel = uiState.canCancelRemoteImportJob(contentJobItem)
+
+            UstadLinearProgressListItem(
+                progress = contentJobItem.progress,
+                supportingContent = {
+                    Text(stringResource(MR.strings.importing))
+                },
+                onCancel = if(canCancel) {
+                    { onCancelRemoteImport(contentJobItem.cjiUid) }
+                }else {
+                    null
+                },
+                error = contentJobItem.cjiError,
+                onDismissError = {
+                    onDismissRemoteImportError(contentJobItem.cjiUid)
                 }
             )
         }

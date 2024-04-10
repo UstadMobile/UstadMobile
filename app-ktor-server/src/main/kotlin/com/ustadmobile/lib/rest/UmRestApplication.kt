@@ -21,6 +21,9 @@ import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCaseC
 import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.EnrolIntoCourseUseCase
 import com.ustadmobile.core.domain.compress.video.CompressVideoUseCase
 import com.ustadmobile.core.domain.compress.video.CompressVideoUseCaseHandbrake
+import com.ustadmobile.core.domain.contententry.importcontent.CancelImportContentEntryServerUseCase
+import com.ustadmobile.core.domain.contententry.importcontent.CancelImportContentEntryUseCase
+import com.ustadmobile.core.domain.contententry.importcontent.CancelImportContentEntryUseCaseJvm
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseJvm
 import com.ustadmobile.core.domain.contententry.importcontent.ImportContentEntryUseCase
@@ -41,6 +44,7 @@ import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseCommonJvm
 import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
 import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseJvm
+import com.ustadmobile.core.domain.usersession.ValidateUserSessionOnServerUseCase
 import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCaseMediaInfo
@@ -93,7 +97,7 @@ import java.util.*
 import com.ustadmobile.core.logging.LogbackAntiLog
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.door.log.NapierDoorLogger
-import com.ustadmobile.lib.rest.domain.contententry.importcontent.ImportContentEntryJobStatus
+import com.ustadmobile.lib.rest.domain.contententry.importcontent.ImportContentEntryJobRoute
 import com.ustadmobile.lib.rest.domain.person.bulkadd.BulkAddPersonRoute
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.headers.MimeTypeHelper
@@ -426,11 +430,18 @@ fun Application.umRestApplication(
             )
         }
 
+        bind<ValidateUserSessionOnServerUseCase>() with scoped(EndpointScope.Default).singleton {
+            ValidateUserSessionOnServerUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                nodeIdAuthCache = instance(),
+            )
+        }
+
         bind<SetPasswordServerUseCase>() with scoped(EndpointScope.Default).singleton {
             SetPasswordServerUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
                 setPasswordUseCase = instance(),
-                nodeIdAndAuthCache = instance(),
+                validateUserSessionOnServerUseCase = instance()
             )
         }
 
@@ -539,6 +550,22 @@ fun Application.umRestApplication(
 
         bind<BulkAddPersonStatusMap>() with scoped(EndpointScope.Default).singleton {
             BulkAddPersonStatusMap()
+        }
+
+        bind<CancelImportContentEntryUseCase>() with scoped(EndpointScope.Default).singleton {
+            CancelImportContentEntryUseCaseJvm(
+                scheduler = instance(),
+                endpoint = context,
+            )
+        }
+
+        bind<CancelImportContentEntryServerUseCase>() with scoped(EndpointScope.Default).singleton {
+            CancelImportContentEntryServerUseCase(
+                cancelImportContentEntryUseCase = instance(),
+                validateUserSessionOnServerUseCase = instance(),
+                db = instance(tag = DoorTag.TAG_DB),
+                endpoint = context,
+            )
         }
 
         try {
@@ -703,9 +730,10 @@ fun Application.umRestApplication(
                 }
 
                 route("contententryimportjob"){
-                    ImportContentEntryJobStatus(
+                    ImportContentEntryJobRoute(
                         json = di.direct.instance(),
-                        dbFn = { call -> di.on(call).direct.instance(tag = DoorTag.TAG_DB) }
+                        dbFn = { call -> di.on(call).direct.instance(tag = DoorTag.TAG_DB) },
+                        cancelImportContentEntryServerUseCase = { call -> di.on(call).direct.instance() }
                     )
                 }
 

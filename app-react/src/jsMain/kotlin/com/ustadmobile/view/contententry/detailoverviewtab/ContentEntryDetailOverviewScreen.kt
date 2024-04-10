@@ -72,6 +72,10 @@ external interface ContentEntryDetailOverviewScreenProps : Props {
 
     var onClickTranslation: (ContentEntryRelatedEntryJoinWithLanguage) -> Unit
 
+    var onCancelRemoteImport: (Long) -> Unit
+
+    var onDismissRemoteImportError: (Long) -> Unit
+
 }
 
 val ContentEntryDetailOverviewComponent2 = FC<ContentEntryDetailOverviewScreenProps> { props ->
@@ -105,10 +109,20 @@ val ContentEntryDetailOverviewComponent2 = FC<ContentEntryDetailOverviewScreenPr
             }
 
             props.uiState.remoteImportJobs.forEach {
+                val canCancelJob = props.uiState.canCancelRemoteImportJob(it)
                 UstadLinearProgressListItem {
                     progress = it.progress
                     secondaryContent = ReactNode(strings[MR.strings.importing])
                     error = it.cjiError
+                    if(canCancelJob) {
+                        onCancel = {
+                            props.onCancelRemoteImport(it.cjiUid)
+                        }
+                        onDismissError = {
+                            props.onDismissRemoteImportError(it.cjiUid)
+                        }
+                    }
+
                 }
             }
 
@@ -353,6 +367,8 @@ val ContentEntryDetailOverviewScreen = FC<Props> {
     ContentEntryDetailOverviewComponent2 {
         uiState = uiStateVal
         onClickOpen = viewModel::onClickOpen
+        onCancelRemoteImport = viewModel::onCancelRemoteImport
+        onDismissRemoteImportError = viewModel::onDismissRemoteImportError
     }
 }
 

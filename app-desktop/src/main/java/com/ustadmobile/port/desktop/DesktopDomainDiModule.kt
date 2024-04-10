@@ -54,6 +54,7 @@ import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryG
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCaseCommonJvm
 import com.ustadmobile.core.domain.contententry.importcontent.CancelImportContentEntryUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.CancelImportContentEntryUseCaseJvm
+import com.ustadmobile.core.domain.contententry.importcontent.CancelRemoteContentEntryImportUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCaseCommonJvm
 import com.ustadmobile.core.domain.contententry.importcontent.ImportContentEntryUseCase
@@ -471,6 +472,14 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         CancelImportContentEntryUseCaseJvm(
             scheduler = instance(),
             endpoint = context,
+        )
+    }
+
+    bind<CancelRemoteContentEntryImportUseCase>() with scoped(EndpointScope.Default).provider {
+        CancelRemoteContentEntryImportUseCase(
+            endpoint = context,
+            httpClient = instance(),
+            repo = instance(tag = DoorTag.TAG_REPO),
         )
     }
 

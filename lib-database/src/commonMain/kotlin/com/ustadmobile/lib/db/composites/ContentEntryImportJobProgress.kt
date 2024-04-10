@@ -20,4 +20,6 @@ data class ContentEntryImportJobProgress(
 
     var cjiError: String? = null,
 
+    var cjiOwnerPersonUid: Long = 0,
+
 )

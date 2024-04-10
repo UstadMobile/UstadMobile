@@ -21,7 +21,9 @@ class EnqueueImportContentEntryUseCaseAndroid(
     private val enqueueRemoteImport: EnqueueContentEntryImportUseCase,
 ) : EnqueueContentEntryImportUseCase {
 
-    override suspend fun invoke(contentJobItem: ContentEntryImportJob) {
+    override suspend fun invoke(
+        contentJobItem: ContentEntryImportJob,
+    ) {
         val sourceUri = DoorUri.parse(contentJobItem.sourceUri!!)
         if(sourceUri.isRemote()) {
             enqueueRemoteImport(contentJobItem)

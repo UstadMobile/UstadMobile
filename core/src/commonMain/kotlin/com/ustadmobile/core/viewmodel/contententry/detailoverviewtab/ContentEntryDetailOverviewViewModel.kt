@@ -14,6 +14,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.blob.download.CancelDownloadUseCase
 import com.ustadmobile.core.domain.blob.download.MakeContentEntryAvailableOfflineUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.CancelImportContentEntryUseCase
+import com.ustadmobile.core.domain.contententry.importcontent.CancelRemoteContentEntryImportUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.LaunchContentEntryVersionUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.epub.LaunchEpubUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.LaunchXapiUseCase
@@ -31,6 +32,7 @@ import com.ustadmobile.lib.db.composites.TransferJobAndTotals
 import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
+import io.ktor.client.request.header
 import io.ktor.client.request.parameter
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.serialization.builtins.ListSerializer
@@ -64,6 +66,8 @@ data class ContentEntryDetailOverviewUiState(
     val offlineItemAndState: OfflineItemAndState? = null,
 
     val openButtonEnabled: Boolean = true,
+
+    val activeUserPersonUid: Long = 0,
 ) {
     val scoreProgressVisible: Boolean
         get() = scoreProgress?.progress != null && scoreProgress.progress > 0
@@ -95,6 +99,10 @@ data class ContentEntryDetailOverviewUiState(
         get() = latestContentEntryVersion?.let {
             it.cevStorageSize > 0
         } ?: false
+
+    fun canCancelRemoteImportJob(importJobProgress: ContentEntryImportJobProgress): Boolean {
+        return importJobProgress.cjiOwnerPersonUid == activeUserPersonUid
+    }
 
 }
 
@@ -130,10 +138,14 @@ class ContentEntryDetailOverviewViewModel(
     private val cancelImportContentEntryUseCase: CancelImportContentEntryUseCase? by
         di.onActiveEndpoint().instanceOrNull()
 
+    private val cancelRemoteContentEntryImportUseCase: CancelRemoteContentEntryImportUseCase by
+        di.onActiveEndpoint().instance()
+
     private val httpClient: HttpClient by di.instance()
 
-
     init {
+        _uiState.update { it.copy(activeUserPersonUid = activeUserPersonUid) }
+
         viewModelScope.launch {
             _uiState.whenSubscribed {
                 launch {
@@ -211,6 +223,7 @@ class ContentEntryDetailOverviewViewModel(
                                 "${accountManager.activeEndpoint.url}api/contententryimportjob/importjobs"
                             ) {
                                 parameter("contententryuid", entityUidArg.toString())
+                                header("cache-control", "no-store")
                             }.bodyAsDecodedText()
                             val remoteImportJobs = json.decodeFromString(
                                 ListSerializer(ContentEntryImportJobProgress.serializer()),
@@ -305,10 +318,25 @@ class ContentEntryDetailOverviewViewModel(
         }
     }
 
+    fun onCancelRemoteImport(jobUid: Long) {
+        viewModelScope.launch {
+            try {
+                cancelRemoteContentEntryImportUseCase(jobUid, activeUserPersonUid)
+                snackDispatcher.showSnackBar(Snack(systemImpl.getString(MR.strings.canceled)))
+            }catch(e: Throwable) {
+                snackDispatcher.showSnackBar(Snack(systemImpl.getString(MR.strings.error)))
+            }
+        }
+    }
+
     fun onDismissImportError(jobUid: Long) {
         viewModelScope.launch {
             activeDb.contentEntryImportJobDao.updateErrorDismissed(jobUid, true)
         }
+    }
+
+    fun onDismissRemoteImportError(jobUid: Long) {
+
     }
 
     companion object {

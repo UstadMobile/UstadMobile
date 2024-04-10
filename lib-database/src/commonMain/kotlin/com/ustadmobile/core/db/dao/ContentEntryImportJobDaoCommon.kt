@@ -9,7 +9,8 @@ object ContentEntryImportJobDaoCommon {
                ContentEntryImportJob.cjiItemProgress,
                ContentEntryImportJob.cjiItemTotal,
                ContentEntryImportJob.cjiStatus,
-               ContentEntryImportJob.cjiError
+               ContentEntryImportJob.cjiError,
+               ContentEntryImportJob.cjiOwnerPersonUid
           FROM ContentEntryImportJob
          WHERE ContentEntryImportJob.cjiContentEntryUid = :contentEntryUid
            AND (   ContentEntryImportJob.cjiStatus BETWEEN ${JobStatus.QUEUED} AND ${JobStatus.RUNNING_MAX}

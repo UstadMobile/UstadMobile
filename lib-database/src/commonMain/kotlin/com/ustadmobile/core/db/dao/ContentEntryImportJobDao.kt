@@ -52,6 +52,15 @@ expect abstract class ContentEntryImportJobDao {
     """)
     abstract suspend fun findByUidAsync(cjiUid: Long): ContentEntryImportJob?
 
+    @Query("""
+        SELECT COALESCE(
+               (SELECT ContentEntryImportJob.cjiOwnerPersonUid
+                  FROM ContentEntryImportJob
+                 WHERE ContentEntryImportJob.cjiUid = :cjiUid), 0)
+    """)
+    abstract suspend fun findOwnerByUidAsync(cjiUid: Long): Long
+
+
     @Query(FIND_IN_PROGRESS_JOBS_BY_CONTENT_ENTRY_UID)
     abstract fun findInProgressJobsByContentEntryUid(
         contentEntryUid: Long,
