@@ -188,8 +188,10 @@ fun ContentEntryDetailOverviewScreen(
                     null
                 },
                 error = contentJobItem.cjiError,
-                onDismissError = {
-                    onDismissRemoteImportError(contentJobItem.cjiUid)
+                onDismissError = if(canCancel) {
+                    { onDismissRemoteImportError(contentJobItem.cjiUid) }
+                }else {
+                    null
                 }
             )
         }

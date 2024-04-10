@@ -15,6 +15,7 @@ import com.ustadmobile.core.domain.blob.download.CancelDownloadUseCase
 import com.ustadmobile.core.domain.blob.download.MakeContentEntryAvailableOfflineUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.CancelImportContentEntryUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.CancelRemoteContentEntryImportUseCase
+import com.ustadmobile.core.domain.contententry.importcontent.DismissRemoteContentEntryImportErrorUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.LaunchContentEntryVersionUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.epub.LaunchEpubUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.LaunchXapiUseCase
@@ -139,6 +140,9 @@ class ContentEntryDetailOverviewViewModel(
         di.onActiveEndpoint().instanceOrNull()
 
     private val cancelRemoteContentEntryImportUseCase: CancelRemoteContentEntryImportUseCase by
+        di.onActiveEndpoint().instance()
+
+    private val dismissRemoteContentEntryImportErrorUseCase: DismissRemoteContentEntryImportErrorUseCase by
         di.onActiveEndpoint().instance()
 
     private val httpClient: HttpClient by di.instance()
@@ -336,7 +340,15 @@ class ContentEntryDetailOverviewViewModel(
     }
 
     fun onDismissRemoteImportError(jobUid: Long) {
-
+        viewModelScope.launch {
+            try{
+                dismissRemoteContentEntryImportErrorUseCase(jobUid, activeUserPersonUid)
+            }catch(e: Throwable) {
+                //Error dismissing error? Unlucky day
+                Napier.w { "ContentEntryDetailoverview: could not dismiss remote error message"}
+                snackDispatcher.showSnackBar(Snack(systemImpl.getString(MR.strings.error)))
+            }
+        }
     }
 
     companion object {

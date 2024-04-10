@@ -76,8 +76,10 @@ import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryG
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCaseCommonJvm
 import com.ustadmobile.core.domain.contententry.importcontent.CancelImportContentEntryUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.CancelImportContentEntryUseCaseAndroid
+import com.ustadmobile.core.domain.contententry.importcontent.CancelRemoteContentEntryImportUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCaseCommonJvm
+import com.ustadmobile.core.domain.contententry.importcontent.DismissRemoteContentEntryImportErrorUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseAndroid
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseRemote
@@ -797,6 +799,22 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
         bind<ValidateEmailUseCase>() with provider {
             ValidateEmailUseCase()
+        }
+
+        bind<CancelRemoteContentEntryImportUseCase>() with scoped(EndpointScope.Default).singleton {
+            CancelRemoteContentEntryImportUseCase(
+                endpoint = context,
+                httpClient = instance(),
+                repo = instance(tag = DoorTag.TAG_REPO),
+            )
+        }
+
+        bind<DismissRemoteContentEntryImportErrorUseCase>() with scoped(EndpointScope.Default).singleton {
+            DismissRemoteContentEntryImportErrorUseCase(
+                endpoint = context,
+                httpClient = instance(),
+                repo = instance(tag = DoorTag.TAG_REPO),
+            )
         }
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }

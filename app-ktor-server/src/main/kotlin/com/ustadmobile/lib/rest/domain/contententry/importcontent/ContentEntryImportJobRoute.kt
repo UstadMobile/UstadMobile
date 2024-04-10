@@ -17,7 +17,7 @@ import io.ktor.server.routing.get
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 
-fun Route.ImportContentEntryJobRoute(
+fun Route.ContentEntryImportJobRoute(
     json: Json,
     dbFn: (ApplicationCall) -> UmAppDatabase,
     cancelImportContentEntryServerUseCase: (ApplicationCall) -> CancelImportContentEntryServerUseCase,
@@ -50,9 +50,19 @@ fun Route.ImportContentEntryJobRoute(
                 remoteNodeId = fromNode,
                 nodeAuth = auth,
             )
+            call.response.header("cache-control", "no-store")
             call.respond(HttpStatusCode.OK, "")
         }catch(e: Throwable) {
             Napier.w("CancelImportContentEntryServer: exception with cancel request", e)
         }
+    }
+
+    get("dismissError") {
+        val jobUid = call.request.queryParameters["jobUid"]?.toLong() ?: 0
+
+        requireRemoteNodeIdAndAuth()
+        dbFn(call).contentEntryImportJobDao.updateErrorDismissed(jobUid, true)
+        call.response.header("cache-control", "no-store")
+        call.respond(HttpStatusCode.OK, "")
     }
 }

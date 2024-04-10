@@ -57,6 +57,7 @@ import com.ustadmobile.core.domain.contententry.importcontent.CancelImportConten
 import com.ustadmobile.core.domain.contententry.importcontent.CancelRemoteContentEntryImportUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCaseCommonJvm
+import com.ustadmobile.core.domain.contententry.importcontent.DismissRemoteContentEntryImportErrorUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.ImportContentEntryUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.epub.LaunchEpubUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.epub.LaunchEpubUseCaseJvm
@@ -483,5 +484,12 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         )
     }
 
+    bind<DismissRemoteContentEntryImportErrorUseCase>() with scoped(EndpointScope.Default).singleton {
+        DismissRemoteContentEntryImportErrorUseCase(
+            endpoint = context,
+            httpClient = instance(),
+            repo = instance(tag = DoorTag.TAG_REPO),
+        )
+    }
 
 }

@@ -19,6 +19,7 @@ import com.ustadmobile.core.domain.contententry.delete.DeleteContentEntryParentC
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCaseJs
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.CancelRemoteContentEntryImportUseCase
+import com.ustadmobile.core.domain.contententry.importcontent.DismissRemoteContentEntryImportErrorUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseRemote
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.LaunchXapiUseCase
@@ -232,4 +233,11 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
         )
     }
 
+    bind<DismissRemoteContentEntryImportErrorUseCase>() with scoped(EndpointScope.Default).singleton {
+        DismissRemoteContentEntryImportErrorUseCase(
+            endpoint = context,
+            httpClient = instance(),
+            repo = instance(tag = DoorTag.TAG_REPO),
+        )
+    }
 }

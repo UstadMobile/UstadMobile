@@ -97,7 +97,7 @@ import java.util.*
 import com.ustadmobile.core.logging.LogbackAntiLog
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.door.log.NapierDoorLogger
-import com.ustadmobile.lib.rest.domain.contententry.importcontent.ImportContentEntryJobRoute
+import com.ustadmobile.lib.rest.domain.contententry.importcontent.ContentEntryImportJobRoute
 import com.ustadmobile.lib.rest.domain.person.bulkadd.BulkAddPersonRoute
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.headers.MimeTypeHelper
@@ -730,7 +730,7 @@ fun Application.umRestApplication(
                 }
 
                 route("contententryimportjob"){
-                    ImportContentEntryJobRoute(
+                    ContentEntryImportJobRoute(
                         json = di.direct.instance(),
                         dbFn = { call -> di.on(call).direct.instance(tag = DoorTag.TAG_DB) },
                         cancelImportContentEntryServerUseCase = { call -> di.on(call).direct.instance() }
