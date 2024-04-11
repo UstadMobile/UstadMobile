@@ -60,8 +60,9 @@ class CompressVideoUseCaseHandbrakeTest {
             )
 
             val outputFile = DoorUri.parse(result?.uri!!).toFile()
-            assertTrue(outputFile.exists())
-            assertTrue(outputFile.length() > 0)
+            assertTrue(outputFile.exists(), "Output file $outputFile should exist")
+            assertTrue(outputFile.length() > 0,
+                "Output file $outputFile should have file size > 0 (actual ${outputFile.length()}bytes)")
         }
     }
 
