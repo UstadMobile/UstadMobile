@@ -43,7 +43,8 @@ allprojects {
         mavenCentral()
         mavenLocal()
 
-        //Temp jitpack substitute
+        //Primary Maven repository for artifacts built on UstadMobile Jenkins
+        // Includes Door and Jetpack Media3 AV1 decoder
         maven {
             url "https://devserver3.ustadmobile.com/maven2"
         }

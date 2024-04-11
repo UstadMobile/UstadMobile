@@ -338,3 +338,8 @@ ktor-io-jvm = { module = "io.ktor:ktor-io-jvm", version.ref = "ktor" }
 androidx-media3-transformer = { module = "androidx.media3:media3-transformer", version.ref = "androidx-media3" }
 androidx-media3-effect = { module = "androidx.media3:media3-effect", version.ref = "androidx-media3" }
 androidx-media3-common = { module = "androidx.media3:media3-common", version.ref = "androidx-media3" }
+
+# The av1 module is hosted on the UstadMobile Maven repository (because Google doesn't publish it as
+# an artifact). It is required to support AV1 codec on version prior to Android 10. See
+# lib-ui-compose/README-ExoPlayer-AV1.MD for additional information.
+androidx-media3-decoder-av1 = { module = "androidx.media3:lib-decoder-av1", version.ref = "androidx-media3" }
