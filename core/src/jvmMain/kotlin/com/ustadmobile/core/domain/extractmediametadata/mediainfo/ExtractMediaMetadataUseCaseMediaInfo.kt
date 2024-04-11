@@ -25,6 +25,7 @@ class ExtractMediaMetadataUseCaseMediaInfo (
                 .directory(workingDir)
                 .start()
             val processOutput = process.inputStream.bufferedReader().use { it.readText() }
+            println("MediaInfo output: $processOutput")
             val mediaInfo = json.decodeFromString(MediaInfoResult.serializer(), processOutput)
             val videoTrack = mediaInfo.media?.track?.firstOrNull {
                 it.type.equals("video", true)
