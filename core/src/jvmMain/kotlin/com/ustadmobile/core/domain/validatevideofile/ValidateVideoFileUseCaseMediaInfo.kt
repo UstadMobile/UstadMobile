@@ -1,5 +1,7 @@
 package com.ustadmobile.core.domain.validatevideofile
 
+import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
+import com.ustadmobile.core.domain.cachestoragepath.getLocalUriIfRemote
 import com.ustadmobile.core.domain.extractmediametadata.ExtractMediaMetadataUseCase
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.toFile
@@ -11,10 +13,19 @@ import com.ustadmobile.door.ext.toFile
  */
 class ValidateVideoFileUseCaseMediaInfo(
     private val extractMediaMetadataUseCase: ExtractMediaMetadataUseCase,
+    private val getStoragePathForUrlUseCase: GetStoragePathForUrlUseCase,
 ): ValidateVideoFileUseCase {
 
     override suspend fun invoke(
         videoUri: DoorUri
-    ): Boolean = extractMediaMetadataUseCase(videoUri.toFile()).hasVideo
+    ): Boolean {
+        val localUri = getStoragePathForUrlUseCase.getLocalUriIfRemote(videoUri)
+        val file = localUri.toFile()
+        return if(file.exists()) {
+            extractMediaMetadataUseCase(file).hasVideo
+        }else {
+            false
+        }
+    }
 
 }

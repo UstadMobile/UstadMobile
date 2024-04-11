@@ -478,6 +478,7 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
     bind<ValidateVideoFileUseCase>() with singleton {
         ValidateVideoFileUseCaseMediaInfo(
             extractMediaMetadataUseCase = instance(),
+            getStoragePathForUrlUseCase = instance(),
         )
     }
 

@@ -210,6 +210,7 @@ class XferTestNode(
             bind<ValidateVideoFileUseCase>() with singleton {
                 ValidateVideoFileUseCaseMediaInfo(
                     extractMediaMetadataUseCase = instance(),
+                    getStoragePathForUrlUseCase = instance(),
                 )
             }
 

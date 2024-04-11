@@ -4,6 +4,8 @@ import com.ustadmobile.core.contentformats.AbstractContentImporterTest
 import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.contentformats.video.VideoContentImporterCommonJvm
 import com.ustadmobile.core.contentjob.InvalidContentException
+import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
+import com.ustadmobile.core.domain.compress.CompressionType
 import com.ustadmobile.core.domain.extractmediametadata.ExtractMediaMetadataUseCase
 import com.ustadmobile.core.domain.extractmediametadata.mediainfo.ExtractMediaMetadataUseCaseMediaInfo
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
@@ -19,6 +21,8 @@ import com.ustadmobile.libcache.response.bodyAsString
 import com.ustadmobile.util.test.ext.newFileFromResource
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.files.Path
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
 import java.io.File
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -33,6 +37,7 @@ class VideoContentImporterJvmTest : AbstractContentImporterTest() {
 
     private lateinit var validateVideoUseCase: ValidateVideoFileUseCase
 
+    private lateinit var getStoragePathUseCaseMock: GetStoragePathForUrlUseCase
 
     @BeforeTest
     fun setupVideoTest() {
@@ -43,8 +48,18 @@ class VideoContentImporterJvmTest : AbstractContentImporterTest() {
             workingDir = File(System.getProperty("user.dir")),
             json = json,
         )
+
+        getStoragePathUseCaseMock = mock {
+            onBlocking { invoke(any(), any(), any(), any()) }.thenAnswer { invocation ->
+                GetStoragePathForUrlUseCase.GetStoragePathResult(
+                    fileUri = invocation.arguments.first() as String,
+                    compression = CompressionType.NONE,
+                )
+            }
+        }
         validateVideoUseCase = ValidateVideoFileUseCaseMediaInfo(
-            extractMediaMetadataUseCase = extractMediaUseCase
+            extractMediaMetadataUseCase = extractMediaUseCase,
+            getStoragePathForUrlUseCase = getStoragePathUseCaseMock,
         )
     }
 

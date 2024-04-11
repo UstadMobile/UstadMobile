@@ -481,7 +481,8 @@ fun Application.umRestApplication(
 
         bind<ValidateVideoFileUseCase>() with provider {
             ValidateVideoFileUseCaseMediaInfo(
-                extractMediaMetadataUseCase = instance()
+                extractMediaMetadataUseCase = instance(),
+                getStoragePathForUrlUseCase = instance(),
             )
         }
 

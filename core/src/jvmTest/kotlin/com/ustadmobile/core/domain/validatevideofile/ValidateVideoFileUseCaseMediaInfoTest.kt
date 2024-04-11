@@ -1,5 +1,7 @@
 package com.ustadmobile.core.domain.validatevideofile
 
+import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
+import com.ustadmobile.core.domain.compress.CompressionType
 import com.ustadmobile.core.domain.extractmediametadata.mediainfo.ExtractMediaMetadataUseCaseMediaInfo
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.util.test.ext.newFileFromResource
@@ -7,6 +9,8 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
 import java.io.File
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -23,6 +27,15 @@ class ValidateVideoFileUseCaseMediaInfoTest {
 
     @BeforeTest
     fun setup() {
+        val mockGetStoragePathForUrlUseCase: GetStoragePathForUrlUseCase  = mock {
+            onBlocking { invoke(any(), any(), any(), any()) }.thenAnswer { invocation ->
+                GetStoragePathForUrlUseCase.GetStoragePathResult(
+                    fileUri = invocation.arguments.first() as String,
+                    compression = CompressionType.NONE,
+                )
+            }
+        }
+
         validatorUseCase = ValidateVideoFileUseCaseMediaInfo(
             extractMediaMetadataUseCase = ExtractMediaMetadataUseCaseMediaInfo(
                 mediaInfoPath = "/usr/bin/mediainfo",
@@ -30,8 +43,9 @@ class ValidateVideoFileUseCaseMediaInfoTest {
                 json = Json {
                     encodeDefaults = true
                     ignoreUnknownKeys = true
-                }
+                },
             ),
+            getStoragePathForUrlUseCase = mockGetStoragePathForUrlUseCase
         )
     }
 
