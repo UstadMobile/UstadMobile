@@ -26,6 +26,7 @@ import com.ustadmobile.core.util.ext.fileExtensionOrNull
 import com.ustadmobile.core.util.ext.requireSourceAsDoorUri
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
+import com.ustadmobile.door.ext.toFile
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryImportJob
@@ -94,22 +95,26 @@ class VideoContentImporterCommonJvm(
         val compressUseCaseVal = compressUseCase
         val compressionLevel = CompressionLevel.forValue(jobItem.cjiCompressionLevel)
         val originalSize = uriHelper.getSize(fromUri)
-        val (uri, mimeType) =  if(compressUseCaseVal != null && compressionLevel != CompressionLevel.NONE) {
-            compressUseCaseVal(
-                fromUri = fromUri.toString(),
-                toUri = null,
-                onProgress = {
-                    progressListener.onProgress(
-                        jobItem.copy(
-                            cjiItemTotal = it.total,
-                            cjiItemProgress = it.completed
-                        )
+        val compressionResult = compressUseCaseVal?.takeIf {
+            compressionLevel != CompressionLevel.NONE
+        }?.invoke(
+            fromUri = fromUri.toString(),
+            toUri = null,
+            onProgress = {
+                progressListener.onProgress(
+                    jobItem.copy(
+                        cjiItemTotal = it.total,
+                        cjiItemProgress = it.completed
                     )
-                },
-                params = CompressParams(
-                    compressionLevel = compressionLevel,
                 )
-            )?.let { Pair(DoorUri.parse(it.uri), it.mimeType) } ?: Pair(fromUri, fromMimeType)
+            },
+            params = CompressParams(
+                compressionLevel = compressionLevel,
+            )
+        )
+
+        val (uri, mimeType) = if(compressionResult != null) {
+            Pair(DoorUri.parse(compressionResult.uri), compressionResult.mimeType)
         }else {
             Pair(fromUri, fromMimeType)
         }
@@ -165,6 +170,10 @@ class VideoContentImporterCommonJvm(
                     )
                 )
             )
+
+            //Now that the video has been saved as a local URI, delete the temporary copy
+            compressionResult?.uri?.takeIf { it.startsWith("file:") }
+                ?.let { DoorUri.parse(it) }?.toFile()?.delete()
 
             val manifest = ContentManifest(
                 version = 1,

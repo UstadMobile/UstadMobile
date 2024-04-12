@@ -472,7 +472,7 @@ fun Application.umRestApplication(
         bind<CompressVideoUseCase>() with singleton {
             CompressVideoUseCaseHandbrake(
                 handbrakeCommand = handBrakeCliCommand.command,
-                workDir = ktorAppHomeDir(),
+                workDir = instance<File>(tag = DiTag.TAG_TMP_DIR),
                 json = instance(),
                 extractMediaMetadataUseCase = instance(),
             )

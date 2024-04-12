@@ -20,6 +20,8 @@ it('Admin user add content to the library', () => {
  // Add Video Content
   cy.ustadAddContentToLibrary('../test-files/content/Video_Content.mp4','Content_003')
   cy.contains('Content_003').click()
+  cy.contains("Importing").should("be.visible")
+  cy.contains("Importing", { timeout: 20000 }).should("not.exist") //Wait for importing (conversion) to finish
   cy.contains("button","OPEN").click()
   cy.contains("#appbar_title", "Content_003").should("be.visible")
   cy.ustadVerifyVideo()
