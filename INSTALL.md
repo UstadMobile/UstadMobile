@@ -18,7 +18,7 @@ using apt-get on Ubuntu or MSI/EXE for Windows).
 
 On Ubuntu:
 ```
-apt-get install openjdk-18-jdk mediainfo
+apt-get install openjdk-18-jdk mediainfo sox libsox-fmt-mp3
 ```
 Note: if you have other Java versions, make sure you run the server jar using JDK17+. You can use ``sudo update-alternatives --config java``
 to set the default java version to run.
@@ -42,6 +42,9 @@ On Windows:
 winget install -e --id MediaArea.MediaInfo
 winget install -e --id HandBrake.HandBrake.CLI
 ```
+* Download and install from the [Sox website](https://sourceforge.net/projects/sox/files/sox/14.4.2/) 
+  (the Winget package does not work because it does not get added to the path).
+
 
 ### 3. Unzip ustad-server.zip and start server
 

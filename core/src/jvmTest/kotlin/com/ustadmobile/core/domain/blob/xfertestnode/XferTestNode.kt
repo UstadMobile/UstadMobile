@@ -10,6 +10,7 @@ import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCas
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCaseJvm
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCaseCommonJvm
+import com.ustadmobile.core.domain.compress.list.CompressListUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCaseCommonJvm
 import com.ustadmobile.core.domain.extractmediametadata.ExtractMediaMetadataUseCase
@@ -215,6 +216,14 @@ class XferTestNode(
             }
 
             bind<MimeTypeHelper>() with singleton { mimeTypeHelper }
+
+            bind<CompressListUseCase>() with singleton {
+                CompressListUseCase(
+                    compressVideoUseCase = null,
+                    mimeTypeHelper = instance(),
+                    compressImageUseCase = null,
+                )
+            }
         }
     }
 

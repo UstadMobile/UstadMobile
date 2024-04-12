@@ -70,6 +70,7 @@ import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCaseC
 import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCase
 import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCaseAndroid
 import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseAndroid
+import com.ustadmobile.core.domain.compress.list.CompressListUseCase
 import com.ustadmobile.core.domain.compress.video.CompressVideoUseCaseAndroid
 import com.ustadmobile.core.domain.contententry.delete.DeleteContentEntryParentChildJoinUseCase
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCase
@@ -396,6 +397,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                             json = instance(),
                             tmpPath = contentImportTmpPath,
                             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
+                            compressListUseCase = instance(),
                         )
                     )
 
@@ -814,6 +816,14 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 endpoint = context,
                 httpClient = instance(),
                 repo = instance(tag = DoorTag.TAG_REPO),
+            )
+        }
+
+        bind<CompressListUseCase>() with singleton {
+            CompressListUseCase(
+                compressVideoUseCase = instance(),
+                compressImageUseCase = instance(),
+                mimeTypeHelper = instance(),
             )
         }
 

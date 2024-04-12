@@ -243,6 +243,8 @@ class CompressVideoUseCaseHandbrake(
                 add(fromFile.absolutePath)
                 add("-o")
                 add(destFile.absolutePath)
+                add("--format")
+                add("av_mp4")
                 addAll(listOf("--encoder", "svt_av1", "--aencoder", "opus"))
                 addAll(params.compressionLevel.handbrakeParams(
                     mediaInfo.storageWidth, mediaInfo.storageHeight

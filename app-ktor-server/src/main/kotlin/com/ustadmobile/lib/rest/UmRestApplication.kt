@@ -19,6 +19,10 @@ import com.ustadmobile.core.domain.blob.upload.BlobUploadServerUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCaseCommonJvm
 import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.EnrolIntoCourseUseCase
+import com.ustadmobile.core.domain.compress.audio.CompressAudioUseCaseJvm
+import com.ustadmobile.core.domain.compress.image.CompressImageUseCase
+import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseJvm
+import com.ustadmobile.core.domain.compress.list.CompressListUseCase
 import com.ustadmobile.core.domain.compress.video.CompressVideoUseCase
 import com.ustadmobile.core.domain.compress.video.CompressVideoUseCaseHandbrake
 import com.ustadmobile.core.domain.compress.video.FindHandBrakeUseCase
@@ -189,7 +193,9 @@ fun Application.umRestApplication(
         ).invoke()
     }
 
-    if(mediaInfoFile == null || handBrakeCliCommand == null || !mediaInfoFile.exists()) {
+    val soxCommand = CompressAudioUseCaseJvm.findSox()
+
+    if(mediaInfoFile == null || handBrakeCliCommand == null || !mediaInfoFile.exists() || soxCommand == null) {
         throw MissingMediaProgramsException()
     }
 
@@ -565,6 +571,18 @@ fun Application.umRestApplication(
                 validateUserSessionOnServerUseCase = instance(),
                 db = instance(tag = DoorTag.TAG_DB),
                 endpoint = context,
+            )
+        }
+
+        bind<CompressImageUseCase>() with singleton {
+            CompressImageUseCaseJvm()
+        }
+
+        bind<CompressListUseCase>() with singleton {
+            CompressListUseCase(
+                compressVideoUseCase = instance(),
+                mimeTypeHelper = instance(),
+                compressImageUseCase = instance(),
             )
         }
 

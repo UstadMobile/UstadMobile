@@ -76,6 +76,7 @@ Development requirements are:
 * VLC (3.0.0)+ : VLC is used on the desktop version (via VLC4J) to play videos.
 * HandBrakeCLI (1.6.0+): HandBrake (Command Line Interface) is used by the server and desktop version 
   to compress videos.
+* SOX (14+) : Sox is used to transcode audio files
 
 Linux:
 
@@ -84,7 +85,7 @@ If you already have JDK 17 installed, you can use it.
 OpenJDK17, mediainfo, and vlc, can be installed using the system package manager e.g.
 
 ```
-sudo apt-get install openjdk-17-jdk mediainfo vlc
+sudo apt-get install openjdk-17-jdk mediainfo vlc sox libsox-fmt-mp3
 ```
 
 If using Ubuntu 23.10+, you can use the HandBrakeCLI from the Ubuntu package manager (1.6.1):
@@ -133,6 +134,10 @@ Download and install such that the HandBrakeCLI command is in the PATH. This can
 ```
 winget install -e --id HandBrake.HandBrake.CLI
 ```
+
+__Sox__
+Download and install from the [Sox website](https://sourceforge.net/projects/sox/files/sox/14.4.2/) (the Winget package does not work because it does not get
+added to the path).
 
 * __Step 3: Import the project in Android Studio__: Select File, New, Project from Version Control. Enter
 https://github.com/UstadMobile/UstadMobile.git and wait for the project to import. Switch to the
