@@ -18,10 +18,22 @@ using apt-get on Ubuntu or MSI/EXE for Windows).
 
 On Ubuntu:
 ```
-apt-get install openjdk-18-jdk mediainfo handbrake-cli
+apt-get install openjdk-18-jdk mediainfo
 ```
 Note: if you have other Java versions, make sure you run the server jar using JDK17+. You can use ``sudo update-alternatives --config java``
 to set the default java version to run.
+
+If using Ubuntu 23.10+, you can use the HandBrakeCLI from the Ubuntu package manager (1.6.1):
+```
+apt-get install handbrake-cli
+```
+
+Previous versions (including 22.04 LTS) package HandBrake 1.5 (which is not supported due to lack of
+AV1 support). You can install the latest HandBrake CLI using flatpak as per [HandBrake website](https://handbrake.fr/downloads2.php):
+```
+apt-get install flatpak
+flatpak install /path/where/downloaded/HandBrakeCLI-1.7.3-x86_64.flatpak
+```
 
 On Windows:
 * Download and install Java (JDK17+) if not already installed from the Java site [https://www.oracle.com/java/technologies/downloads/#jdk17-windows](https://www.oracle.com/java/technologies/downloads/#jdk17-windows)

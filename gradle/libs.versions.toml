@@ -119,6 +119,7 @@ json = "20231013"
 commons-cli = "1.6.0"
 kotlinx-html = "0.11.0"
 nv-i18n = "1.29"
+semver = "2.0.0"
 
 [plugins]
 
@@ -343,3 +344,4 @@ androidx-media3-common = { module = "androidx.media3:media3-common", version.ref
 # an artifact). It is required to support AV1 codec on version prior to Android 10. See
 # lib-ui-compose/README-ExoPlayer-AV1.MD for additional information.
 androidx-media3-decoder-av1 = { module = "androidx.media3:lib-decoder-av1", version.ref = "androidx-media3" }
+semver = { module = "io.github.z4kn4fein:semver", version.ref = "semver" }

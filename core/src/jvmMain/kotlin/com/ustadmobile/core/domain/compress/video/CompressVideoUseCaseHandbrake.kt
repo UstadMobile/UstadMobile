@@ -23,26 +23,29 @@ import kotlinx.serialization.json.Json
 import java.io.BufferedReader
 import java.io.File
 import java.util.UUID
+import kotlin.math.roundToInt
 
 /**
  * Compress a video using HandBrakeCLI. Videos will be encoded as MP4 using AV1 as the video codec
- * and Opus as the audio codec.
+ * and Opus as the audio codec. HandBrake 1.6.0+ is required.
  *
- * TODO: Check handling of non-English file names and files that contain spaces
+ * Handbrake settings: see
+ *    https://handbrake.fr/docs/en/latest/workflow/adjust-quality.html#:~:text=Recommended%20settings%20for%20the%20SVT,for%201080p%20Full%20High%20Definition
+ *
+ * Using HandBrakeCLI itself from the command line (Windows and Linux) is supported. Using the
+ * flatpak version is also supported.
+ *
+ * IMPORTANT: FlatPak does not allow access to the /tmp directory on Linux.
  *
  * Windows UWP is supposed to support this:
  *   https://learn.microsoft.com/en-us/windows/uwp/audio-video-camera/transcode-media-files
  *   https://blogs.windows.com/windowsdeveloper/2018/06/06/c-console-uwp-applications/
  *
- * Unfortunately, there is no straightforward way to access this from Java/Kotlin land.
- *
- * Handbrake settings: see
- *    https://handbrake.fr/docs/en/latest/workflow/adjust-quality.html#:~:text=Recommended%20settings%20for%20the%20SVT,for%201080p%20Full%20High%20Definition
- *
+ * Unfortunately, there is no straightforward way to access that from Java/Kotlin land.
  */
 class CompressVideoUseCaseHandbrake(
-    private val handbrakePath: String = "/usr/bin/HandBrakeCLI",
-    private val workingDir: File,
+    private val handbrakeCommand: List<String>,
+    private val workDir: File,
     private val extractMediaMetadataUseCase: ExtractMediaMetadataUseCase,
     private val json: Json,
 ): CompressVideoUseCase {
@@ -185,9 +188,9 @@ class CompressVideoUseCaseHandbrake(
 
         return buildList {
             add("--maxWidth")
-            add(outputWidth.toString())
+            add(outputWidth.roundToInt().toString())
             add("--maxHeight")
-            add(outputHeight.toString())
+            add(outputHeight.roundToInt().toString())
             add("--quality")
             add("${params.quality}")
             add("--ab")
@@ -230,25 +233,26 @@ class CompressVideoUseCaseHandbrake(
         val destFile = if(toUri != null) {
             DoorUri.parse(toUri).toFile().requireExtension("mp4")
         }else {
-            File.createTempFile(UUID.randomUUID().toString(), ".mp4")
+            File(workDir, UUID.randomUUID().toString() + ".mp4")
         }
 
         try {
-            val process = ProcessBuilder(
-                buildList {
-                    add(handbrakePath)
-                    add("-i")
-                    add(fromFile.absolutePath)
-                    add("-o")
-                    add(destFile.absolutePath)
-                    addAll(listOf("--encoder", "svt_av1", "--aencoder", "opus"))
-                    addAll(params.compressionLevel.handbrakeParams(
-                        mediaInfo.storageWidth, mediaInfo.storageHeight
-                    ))
-                    add("--json")
-                })
+            val command = buildList {
+                addAll(handbrakeCommand)
+                add("-i")
+                add(fromFile.absolutePath)
+                add("-o")
+                add(destFile.absolutePath)
+                addAll(listOf("--encoder", "svt_av1", "--aencoder", "opus"))
+                addAll(params.compressionLevel.handbrakeParams(
+                    mediaInfo.storageWidth, mediaInfo.storageHeight
+                ))
+                add("--json")
+            }
+            Napier.d { "CompressVideoUseCase: running ${command.joinToString(separator = " ")} " }
+            val process = ProcessBuilder(command)
                 .redirectOutput(ProcessBuilder.Redirect.PIPE)
-                .directory(workingDir)
+                .directory(workDir)
                 .start()
 
             val onProgressUpdate: (Progress) -> Unit = {
@@ -294,9 +298,8 @@ class CompressVideoUseCaseHandbrake(
                 destFile.delete()
                 null
             }
-
-
         }catch(e: Throwable) {
+            Napier.w("CompressVideoUseCase: Exception attempting to encode fromUri=$fromUri", e)
             throw e
         }
     }

@@ -22,6 +22,7 @@ import com.ustadmobile.core.domain.cachelock.AddOfflineItemInactiveTriggersCallb
 import com.ustadmobile.core.domain.cachelock.UpdateCacheLockJoinUseCase
 import com.ustadmobile.core.domain.compress.video.CompressVideoUseCase
 import com.ustadmobile.core.domain.compress.video.CompressVideoUseCaseHandbrake
+import com.ustadmobile.core.domain.compress.video.FindHandBrakeUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseJvm
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseRemote
@@ -79,6 +80,7 @@ import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.runBlocking
 import kotlinx.io.files.Path
 import kotlinx.serialization.json.Json
 import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
@@ -254,10 +256,11 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
     ) ?: throw IllegalStateException("No MediaInfo found")
 
     val handbrakeResourcesDir = File(resourcesDir, "handbrakecli")
-    val handbrakeCliFile = SysPathUtil.findCommandInPath(
-        commandName = "HandBrakeCLI",
-        manuallySpecifiedLocation = File(handbrakeResourcesDir, "HandBrakeCLI").getCommandFile(),
-    ) ?: throw IllegalStateException("No HandBrakeCLI found")
+    val findHandBrakeResult = runBlocking {
+        FindHandBrakeUseCase(
+            specifiedLocation = File(handbrakeResourcesDir, "HandBrakeCLI").getCommandFile()?.absolutePath,
+        ).invoke()
+    }
 
     bind<AppConfig>() with singleton {
         ManifestAppConfig()
@@ -437,7 +440,7 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         }
 
         StdSchedulerFactory.getDefaultScheduler().also {
-            it.context.put("di", di)
+            it.context["di"] = di
         }
     }
 
@@ -506,15 +509,16 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         )
     }
 
-    bind<CompressVideoUseCase>() with provider {
-        CompressVideoUseCaseHandbrake(
-            handbrakePath = handbrakeCliFile.absolutePath,
-            extractMediaMetadataUseCase = instance(),
-            workingDir = instance(tag = TAG_DATA_DIR),
-            json = instance(),
-        )
+    if(findHandBrakeResult != null) {
+        bind<CompressVideoUseCase>() with provider {
+            CompressVideoUseCaseHandbrake(
+                handbrakeCommand = findHandBrakeResult.command,
+                extractMediaMetadataUseCase = instance(),
+                workDir = instance(tag = TAG_DATA_DIR),
+                json = instance(),
+            )
+        }
     }
-
 
     onReady {
         instance<File>(tag = TAG_DATA_DIR).takeIf { !it.exists() }?.mkdirs()

@@ -21,6 +21,7 @@ import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCaseC
 import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.EnrolIntoCourseUseCase
 import com.ustadmobile.core.domain.compress.video.CompressVideoUseCase
 import com.ustadmobile.core.domain.compress.video.CompressVideoUseCaseHandbrake
+import com.ustadmobile.core.domain.compress.video.FindHandBrakeUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.CancelImportContentEntryServerUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.CancelImportContentEntryUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.CancelImportContentEntryUseCaseJvm
@@ -182,15 +183,13 @@ fun Application.umRestApplication(
         manuallySpecifiedLocation = appConfig.commandFileProperty("mediainfo"),
     )
 
-    val handbrakeCliFile = SysPathUtil.findCommandInPath(
-        commandName = "HandBrakeCLI",
-        manuallySpecifiedLocation = appConfig.commandFileProperty("handbrakecli"),
-    )
+    val handBrakeCliCommand = runBlocking {
+        FindHandBrakeUseCase(
+            specifiedLocation = appConfig.commandFileProperty("handbrakecli")?.absolutePath
+        ).invoke()
+    }
 
-    if(
-        mediaInfoFile == null || handbrakeCliFile == null || !mediaInfoFile.exists() ||
-            !handbrakeCliFile.exists()
-    ) {
+    if(mediaInfoFile == null || handBrakeCliCommand == null || !mediaInfoFile.exists()) {
         throw MissingMediaProgramsException()
     }
 
@@ -470,10 +469,10 @@ fun Application.umRestApplication(
             )
         }
 
-        bind<CompressVideoUseCase>() with provider {
+        bind<CompressVideoUseCase>() with singleton {
             CompressVideoUseCaseHandbrake(
-                handbrakePath = handbrakeCliFile.absolutePath,
-                workingDir = ktorAppHomeDir(),
+                handbrakeCommand = handBrakeCliCommand.command,
+                workDir = ktorAppHomeDir(),
                 json = instance(),
                 extractMediaMetadataUseCase = instance(),
             )

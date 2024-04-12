@@ -73,18 +73,30 @@ Development requirements are:
 * JDK17 (only): JDK21 not supported yet due to Proguard issues on app-desktop.
 * MediaInfo: MediaInfo is used by the server and desktop version to validate media files and extract
   metadata
-* VLC: VLC is used on the desktop version (via VLC4J) to play videos.
-* HandBrakeCLI: HandBrake (Command Line Interface) is used by the server and desktop version to 
-  compress videos.
+* VLC (3.0.0)+ : VLC is used on the desktop version (via VLC4J) to play videos.
+* HandBrakeCLI (1.6.0+): HandBrake (Command Line Interface) is used by the server and desktop version 
+  to compress videos.
 
 Linux:
 
 If you already have JDK 17 installed, you can use it.
 
-OpenJDK17, mediainfo, vlc, and handbrake-cli can be installed using the system package manager e.g.
+OpenJDK17, mediainfo, and vlc, can be installed using the system package manager e.g.
 
 ```
-sudo apt-get install openjdk-17-jdk mediainfo vlc handbrake-cli
+sudo apt-get install openjdk-17-jdk mediainfo vlc
+```
+
+If using Ubuntu 23.10+, you can use the HandBrakeCLI from the Ubuntu package manager (1.6.1):
+```
+apt-get install handbrake-cli
+```
+
+Previous versions (including 22.04 LTS) has HandBrake 1.5 (which is not supported due to lack of 
+AV1 support). You can install the latest HandBrake CLI using flatpak as per [HandBrake website](https://handbrake.fr/downloads2.php):
+```
+apt-get install flatpak
+flatpak install /path/where/downloaded/HandBrakeCLI-1.7.3-x86_64.flatpak
 ```
 
 Windows: 
