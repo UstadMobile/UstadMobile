@@ -210,7 +210,9 @@ class CompressVideoUseCaseHandbrake(
         //fromUri will always be a file here. VideoContentImporter will use path to the cached version
         //if required
         val fromFile = DoorUri.parse(fromUri).toFile()
-        val mediaInfo = extractMediaMetadataUseCase(fromFile)
+        val mediaInfo = extractMediaMetadataUseCase(
+            DoorUri.parse(fromUri)
+        )
         if(!mediaInfo.hasVideo) {
             throw IllegalArgumentException("${fromFile.absolutePath} has no video")
         }

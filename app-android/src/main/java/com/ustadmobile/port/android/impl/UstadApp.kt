@@ -69,8 +69,12 @@ import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCaseCommonJvm
 import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCase
 import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCaseAndroid
+import com.ustadmobile.core.domain.compress.audio.CompressAudioUseCase
+import com.ustadmobile.core.domain.compress.audio.CompressAudioUseCaseAndroid
+import com.ustadmobile.core.domain.compress.image.CompressImageUseCase
 import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseAndroid
 import com.ustadmobile.core.domain.compress.list.CompressListUseCase
+import com.ustadmobile.core.domain.compress.video.CompressVideoUseCase
 import com.ustadmobile.core.domain.compress.video.CompressVideoUseCaseAndroid
 import com.ustadmobile.core.domain.contententry.delete.DeleteContentEntryParentChildJoinUseCase
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCase
@@ -95,6 +99,8 @@ import com.ustadmobile.core.domain.htmlcontentdisplayengine.SetHtmlContentDispla
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.ResolveXapiLaunchHrefUseCase
 import com.ustadmobile.core.domain.deleteditem.DeletePermanentlyUseCase
 import com.ustadmobile.core.domain.deleteditem.RestoreDeletedItemUseCase
+import com.ustadmobile.core.domain.extractmediametadata.ExtractMediaMetadataUseCase
+import com.ustadmobile.core.domain.extractmediametadata.ExtractMediaMetadataUseCaseAndroid
 import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCase
 import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCaseAndroid
 import com.ustadmobile.core.domain.share.ShareTextUseCase
@@ -109,7 +115,6 @@ import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
 import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
-import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCaseAndroid
 import com.ustadmobile.core.embeddedhttp.EmbeddedHttpServer
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
@@ -429,7 +434,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                             json = instance(),
                             getStoragePathForUrlUseCase  = getStoragePathForUrlUseCase,
                             mimeTypeHelper = mimeTypeHelper,
-                            compressUseCase = instance<CompressVideoUseCaseAndroid>(),
+                            compressUseCase = instance(),
                         )
                     )
 
@@ -450,11 +455,22 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             )
         }
 
-        bind<CompressVideoUseCaseAndroid>() with singleton {
+        bind<CompressVideoUseCase>() with singleton {
             CompressVideoUseCaseAndroid(
                 appContext = applicationContext,
                 uriHelper = instance(),
             )
+        }
+
+        bind<CompressAudioUseCase>() with singleton {
+            CompressAudioUseCaseAndroid(
+                appContext = applicationContext,
+                uriHelper = instance(),
+            )
+        }
+
+        bind<CompressImageUseCase>() with singleton {
+            CompressImageUseCaseAndroid(applicationContext)
         }
 
         bind<XmlPullParserFactory>(tag  = DiTag.XPP_FACTORY_NSAWARE) with singleton {
@@ -548,7 +564,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 db = on(context).instance(tag = DoorTag.TAG_DB),
                 repo = on(context).instance(tag = DoorTag.TAG_REPO),
                 enqueueBlobUploadClientUseCase = on(context).instance(),
-                compressImageUseCase = CompressImageUseCaseAndroid(applicationContext),
+                compressImageUseCase = instance(),
                 deleteUrisUseCase = instance(),
             )
         }
@@ -720,7 +736,13 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
         }
 
         bind<ValidateVideoFileUseCase>() with singleton {
-            ValidateVideoFileUseCaseAndroid(appContext = applicationContext)
+            ValidateVideoFileUseCase(
+                extractMediaMetadataUseCase = instance()
+            )
+        }
+
+        bind<ExtractMediaMetadataUseCase>() with singleton {
+            ExtractMediaMetadataUseCaseAndroid(applicationContext)
         }
 
         bind<GetShowPoweredByUseCase>() with singleton {
@@ -823,6 +845,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             CompressListUseCase(
                 compressVideoUseCase = instance(),
                 compressImageUseCase = instance(),
+                compressAudioUseCase = instance(),
                 mimeTypeHelper = instance(),
             )
         }

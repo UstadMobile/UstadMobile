@@ -1,4 +1,4 @@
-package video
+package com.ustadmobile.core.domain.compress.video
 
 import android.content.Context
 import android.net.Uri
@@ -7,7 +7,6 @@ import androidx.core.net.toUri
 import androidx.test.core.app.ApplicationProvider
 import com.ustadmobile.core.domain.compress.CompressParams
 import com.ustadmobile.core.domain.compress.CompressionLevel
-import com.ustadmobile.core.domain.compress.video.CompressVideoUseCaseAndroid
 import com.ustadmobile.core.uri.UriHelperAndroid
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
@@ -52,7 +51,7 @@ class CompressVideoUseCaseAndroidTest {
                 )
             )
 
-            val outFile = Uri.parse(result.uri).toFile()
+            val outFile = Uri.parse(result!!.uri).toFile()
             Assert.assertTrue(outFile.length() > 0)
         }
     }

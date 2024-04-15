@@ -36,7 +36,7 @@ class ValidateVideoFileUseCaseMediaInfoTest {
             }
         }
 
-        validatorUseCase = ValidateVideoFileUseCaseMediaInfo(
+        validatorUseCase = ValidateVideoFileUseCase(
             extractMediaMetadataUseCase = ExtractMediaMetadataUseCaseMediaInfo(
                 mediaInfoPath = "/usr/bin/mediainfo",
                 workingDir = temporaryFolder.newFolder(),
@@ -44,8 +44,8 @@ class ValidateVideoFileUseCaseMediaInfoTest {
                     encodeDefaults = true
                     ignoreUnknownKeys = true
                 },
+                getStoragePathForUrlUseCase = mockGetStoragePathForUrlUseCase
             ),
-            getStoragePathForUrlUseCase = mockGetStoragePathForUrlUseCase
         )
     }
 

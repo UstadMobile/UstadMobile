@@ -55,11 +55,13 @@ class CompressListUseCase(
         workDir: Path,
         onProgress: CompressUseCase.OnCompressProgress? = null,
     ) : List<ItemResult> {
-        val totalSize = items.sumOf {
-            filesystem.metadataOrNull(it.path)?.size ?: 0
-        }
 
-        val completedItemsSize = 0
+        val sizes = items.associate {
+            Pair(it.path.toString(),  filesystem.metadataOrNull(it.path)?.size ?: 0)
+        }
+        val totalSize = sizes.values.sum()
+
+        var completedItemsSize = 0L
 
         val results = items.map { item ->
             val mimeType = item.mimeType ?: item.name.fileExtensionOrNull()?.let {
@@ -100,6 +102,7 @@ class CompressListUseCase(
                 null
             }
 
+            completedItemsSize += (sizes[item.path.toString()] ?: 0L)
 
             ItemResult(
                 originalItem = item,

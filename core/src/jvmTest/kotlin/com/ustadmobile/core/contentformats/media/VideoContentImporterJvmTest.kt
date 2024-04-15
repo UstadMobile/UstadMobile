@@ -9,7 +9,6 @@ import com.ustadmobile.core.domain.compress.CompressionType
 import com.ustadmobile.core.domain.extractmediametadata.ExtractMediaMetadataUseCase
 import com.ustadmobile.core.domain.extractmediametadata.mediainfo.ExtractMediaMetadataUseCaseMediaInfo
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
-import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCaseMediaInfo
 import com.ustadmobile.core.test.assertCachedBodyMatchesFileContent
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -43,12 +42,6 @@ class VideoContentImporterJvmTest : AbstractContentImporterTest() {
     fun setupVideoTest() {
         val mediaInfoPath = SysPathUtil.findCommandInPath("mediainfo")
             ?: throw IllegalStateException("Cannot find mediainfo in path. MediaInfo must be in path to run this test")
-        extractMediaUseCase =ExtractMediaMetadataUseCaseMediaInfo(
-            mediaInfoPath = mediaInfoPath.absolutePath,
-            workingDir = File(System.getProperty("user.dir")),
-            json = json,
-        )
-
         getStoragePathUseCaseMock = mock {
             onBlocking { invoke(any(), any(), any(), any()) }.thenAnswer { invocation ->
                 GetStoragePathForUrlUseCase.GetStoragePathResult(
@@ -57,9 +50,16 @@ class VideoContentImporterJvmTest : AbstractContentImporterTest() {
                 )
             }
         }
-        validateVideoUseCase = ValidateVideoFileUseCaseMediaInfo(
+
+        extractMediaUseCase =ExtractMediaMetadataUseCaseMediaInfo(
+            mediaInfoPath = mediaInfoPath.absolutePath,
+            workingDir = File(System.getProperty("user.dir")),
+            json = json,
+            getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
+        )
+
+        validateVideoUseCase = ValidateVideoFileUseCase(
             extractMediaMetadataUseCase = extractMediaUseCase,
-            getStoragePathForUrlUseCase = getStoragePathUseCaseMock,
         )
     }
 

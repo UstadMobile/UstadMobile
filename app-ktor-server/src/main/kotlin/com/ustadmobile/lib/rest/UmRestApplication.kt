@@ -52,7 +52,6 @@ import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseJvm
 import com.ustadmobile.core.domain.usersession.ValidateUserSessionOnServerUseCase
 import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
-import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCaseMediaInfo
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.DiTag.TAG_CONTEXT_DATA_ROOT
 import com.ustadmobile.door.ext.*
@@ -471,7 +470,8 @@ fun Application.umRestApplication(
             ExtractMediaMetadataUseCaseMediaInfo(
                 mediaInfoPath = mediaInfoFile.absolutePath,
                 workingDir = ktorAppHomeDir(),
-                json = instance()
+                json = instance(),
+                getStoragePathForUrlUseCase = instance(),
             )
         }
 
@@ -485,9 +485,8 @@ fun Application.umRestApplication(
         }
 
         bind<ValidateVideoFileUseCase>() with provider {
-            ValidateVideoFileUseCaseMediaInfo(
+            ValidateVideoFileUseCase(
                 extractMediaMetadataUseCase = instance(),
-                getStoragePathForUrlUseCase = instance(),
             )
         }
 

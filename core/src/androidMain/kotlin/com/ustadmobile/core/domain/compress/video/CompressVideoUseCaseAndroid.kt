@@ -26,6 +26,7 @@ import com.ustadmobile.core.domain.compress.CompressUseCase
 import com.ustadmobile.core.domain.compress.CompressionLevel
 import com.ustadmobile.core.ext.requireExtension
 import com.ustadmobile.core.uri.UriHelper
+import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.toDoorUri
 import io.github.aakira.napier.Napier
@@ -137,11 +138,12 @@ class CompressVideoUseCaseAndroid(
         val duration = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLong() ?: 0
         metaRetriever.release()
 
-        val expectedSize = params.compressionLevel.expectedTotalBitrate() * (duration / 1000)
-        if(expectedSize > (sizeIn * COMPRESS_THRESHOLD)) {
+        val expectedSize = (params.compressionLevel.expectedTotalBitrate() / 8) * (duration / 1000)
+        if((expectedSize * COMPRESS_THRESHOLD) >= (sizeIn)) {
             Napier.d {
-                "CompressVideoUseCaseAndroid: already compressed enough, expected compression result " +
-                        "saves less than (${(1 - COMPRESS_THRESHOLD)*100})%"
+                "CompressVideoUseCaseAndroid: expected size of " +
+                        "${UMFileUtil.formatFileSize(expectedSize)} is not within threshold to compress. " +
+                        "Original size = ${UMFileUtil.formatFileSize(sizeIn)}."
             }
             return null
         }

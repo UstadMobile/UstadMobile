@@ -2,6 +2,7 @@ package com.ustadmobile.core.domain.compress.video
 
 import com.ustadmobile.core.domain.extractmediametadata.ExtractMediaMetadataUseCase
 import com.ustadmobile.core.domain.extractmediametadata.mediainfo.ExtractMediaMetadataUseCaseMediaInfo
+import com.ustadmobile.core.util.mockGetStoragePathUseCase
 import com.ustadmobile.core.util.requireHandBrakeCommand
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.toDoorUri
@@ -37,7 +38,8 @@ class CompressVideoUseCaseHandbrakeTest {
         extractMediaMetadataUseCase = ExtractMediaMetadataUseCaseMediaInfo(
             mediaInfoPath = "/usr/bin/mediainfo",
             workingDir = workingDir,
-            json = json
+            json = json,
+            getStoragePathForUrlUseCase = mockGetStoragePathUseCase(),
         )
 
     }

@@ -1,6 +1,7 @@
 package com.ustadmobile.core.domain.extractmediametadata
 
-import java.io.File
+import com.ustadmobile.door.DoorUri
+
 
 interface ExtractMediaMetadataUseCase {
 
@@ -20,7 +21,7 @@ interface ExtractMediaMetadataUseCase {
     )
 
     suspend operator fun invoke(
-        file: File
+        uri: DoorUri
     ): MediaMetaData
 
 }

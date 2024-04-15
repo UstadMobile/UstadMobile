@@ -20,7 +20,6 @@ import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseCommonJvm
 import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
 import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseJvm
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
-import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCaseMediaInfo
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.uri.UriHelperJvm
 import com.ustadmobile.core.util.DiTag
@@ -205,13 +204,13 @@ class XferTestNode(
                         ?: throw IllegalStateException("Could not find mediainfo"),
                     workingDir = File(System.getProperty("user.dir")),
                     json = instance(),
+                    getStoragePathForUrlUseCase = instance()
                 )
             }
 
             bind<ValidateVideoFileUseCase>() with singleton {
-                ValidateVideoFileUseCaseMediaInfo(
+                ValidateVideoFileUseCase(
                     extractMediaMetadataUseCase = instance(),
-                    getStoragePathForUrlUseCase = instance(),
                 )
             }
 

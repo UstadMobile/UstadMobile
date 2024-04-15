@@ -31,7 +31,6 @@ import com.ustadmobile.core.domain.extractmediametadata.mediainfo.ExtractMediaMe
 import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseJvm
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
-import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCaseMediaInfo
 import com.ustadmobile.core.embeddedhttp.EmbeddedHttpServer
 import com.ustadmobile.core.getdeveloperinfo.GetDeveloperInfoUseCaseJvm
 import com.ustadmobile.core.impl.UstadMobileConstants
