@@ -19,7 +19,6 @@ appId: com.toughra.ustadmobile
 # add new content block inside course
 - tapOn: "Add block"
 - tapOn: "Content"
-- tapOn: "My content"
 - tapOn: "Import from file"
 - runFlow:
       when:

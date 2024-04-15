@@ -5,10 +5,13 @@ appId: com.toughra.ustadmobile
 # 1) TESTRESULTSDIR : ${TESTRESULTSDIR} : provides the path to store test results
 # 2) TESTCOURSENAME: provide course name of string type
 
--  tapOn: "Courses"
+- tapOn: "Courses"
 - tapOn: ${TESTCOURSENAME}
 - tapOn: "MEMBERS"
-- scroll
+- scrollUntilVisible:
+     element:
+        text:  "Student 1"
+     direction: DOWN
 - tapOn:
    text: "Accept"
    rightOf: "Student 1"
