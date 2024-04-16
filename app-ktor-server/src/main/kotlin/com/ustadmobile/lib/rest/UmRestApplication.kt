@@ -449,7 +449,7 @@ fun Application.umRestApplication(
             )
         }
 
-        bind<GetStoragePathForUrlUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<GetStoragePathForUrlUseCase>() with singleton {
             GetStoragePathForUrlUseCaseCommonJvm(
                 okHttpClient = instance(),
                 cache = instance(),
