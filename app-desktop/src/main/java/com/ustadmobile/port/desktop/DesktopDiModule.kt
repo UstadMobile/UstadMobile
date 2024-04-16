@@ -473,14 +473,14 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
             mediaInfoPath = mediaInfoFile.absolutePath,
             workingDir = ustadAppDataDir(),
             json = instance(),
+            getStoragePathForUrlUseCase = instance(),
         )
     }
 
 
     bind<ValidateVideoFileUseCase>() with singleton {
-        ValidateVideoFileUseCaseMediaInfo(
+        ValidateVideoFileUseCase(
             extractMediaMetadataUseCase = instance(),
-            getStoragePathForUrlUseCase = instance(),
         )
     }
 

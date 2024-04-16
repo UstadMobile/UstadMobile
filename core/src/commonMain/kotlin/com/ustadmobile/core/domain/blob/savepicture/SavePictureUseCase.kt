@@ -5,7 +5,7 @@ import com.ustadmobile.core.db.dao.ImageDao
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
 import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCase
 import com.ustadmobile.core.domain.compress.CompressParams
-import com.ustadmobile.core.domain.compress.CompressUseCase
+import com.ustadmobile.core.domain.compress.image.CompressImageUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
 import com.ustadmobile.core.util.uuid.randomUuidAsString
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -22,7 +22,7 @@ class SavePictureUseCase(
     private val enqueueBlobUploadClientUseCase: EnqueueBlobUploadClientUseCase?,
     private val db: UmAppDatabase,
     private val repo: UmAppDatabase,
-    private val compressImageUseCase: CompressUseCase,
+    private val compressImageUseCase: CompressImageUseCase,
     private val deleteUrisUseCase: DeleteUrisUseCase,
 ) {
 
@@ -42,7 +42,7 @@ class SavePictureUseCase(
         if(pictureUri != null) {
             val mainCompressionResult = compressImageUseCase(
                 fromUri = pictureUri
-            ) ?: throw IllegalStateException("Compressor did not compress $pictureUri")
+            )
 
             val thumbnailCompressionResult = compressImageUseCase(
                 fromUri = pictureUri,
@@ -50,44 +50,67 @@ class SavePictureUseCase(
                     maxWidth = THUMBNAIL_DIMENSION,
                     maxHeight = THUMBNAIL_DIMENSION,
                 )
-            ) ?: throw IllegalStateException("Compressor did not compress $pictureUri")
+            )
 
             val savedBlobs = saveLocalUrisAsBlobUseCase(
-                localUrisToSave = listOf(
-                    SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem(
-                        localUri = mainCompressionResult.uri,
-                        entityUid = entityUid,
-                        tableId = tableId,
-                        mimeType = mainCompressionResult.mimeType,
-                        deleteLocalUriAfterSave = true,
-                        createRetentionLock = true,
+                localUrisToSave = buildList {
+                    mainCompressionResult?.also {
+                        add(
+                            SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem(
+                                localUri = mainCompressionResult.uri,
+                                entityUid = entityUid,
+                                tableId = tableId,
+                                mimeType = mainCompressionResult.mimeType,
+                                deleteLocalUriAfterSave = true,
+                                createRetentionLock = true,
+                            )
+                        )
+                    }
 
-                    ),
-                    SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem(
-                        localUri = thumbnailCompressionResult.uri,
-                        entityUid = entityUid,
-                        tableId = tableId,
-                        mimeType = mainCompressionResult.mimeType,
-                        deleteLocalUriAfterSave = true,
-                        createRetentionLock = true,
-                    )
-                ),
+                    thumbnailCompressionResult?.also {
+                        add(
+                            SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem(
+                                localUri = thumbnailCompressionResult.uri,
+                                entityUid = entityUid,
+                                tableId = tableId,
+                                mimeType = thumbnailCompressionResult.mimeType,
+                                deleteLocalUriAfterSave = true,
+                                createRetentionLock = true,
+                            )
+                        )
+                    }
+
+                    if(mainCompressionResult == null || thumbnailCompressionResult == null) {
+                        add(
+                            SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem(
+                                localUri = pictureUri,
+                                entityUid = entityUid,
+                                tableId = tableId,
+                                createRetentionLock = true,
+                            )
+                        )
+                    }
+                },
             )
 
             deleteUrisUseCase(listOf(pictureUri), onlyIfTemp = true)
 
-            val pictureBlob = savedBlobs.first {
-                it.localUri == mainCompressionResult.uri
+            val originalPictureBlob = savedBlobs.firstOrNull {
+                it.localUri == pictureUri
             }
-            val thumbnailBlob = savedBlobs.first {
-                it.localUri == thumbnailCompressionResult.uri
-            }
+
+            val pictureBlob = savedBlobs.firstOrNull {
+                it.localUri == mainCompressionResult?.uri
+            } ?: originalPictureBlob
+            val thumbnailBlob = savedBlobs.firstOrNull {
+                it.localUri == thumbnailCompressionResult?.uri
+            } ?: originalPictureBlob
 
             if(enqueueBlobUploadClientUseCase != null) {
                 db.imageDaoForTable(tableId)?.updateUri(
                     uid = entityUid,
-                    uri = pictureBlob.blobUrl,
-                    thumbnailUri = thumbnailBlob.blobUrl,
+                    uri = pictureBlob?.blobUrl,
+                    thumbnailUri = thumbnailBlob?.blobUrl,
                     time = systemTimeInMillis()
                 )
 
@@ -106,8 +129,8 @@ class SavePictureUseCase(
                 //No upload needed, directly update repo
                 repo.imageDaoForTable(tableId)?.updateUri(
                     uid = entityUid,
-                    uri = pictureBlob.blobUrl,
-                    thumbnailUri = thumbnailBlob.blobUrl,
+                    uri = pictureBlob?.blobUrl,
+                    thumbnailUri = thumbnailBlob?.blobUrl,
                     time = systemTimeInMillis()
                 )
             }

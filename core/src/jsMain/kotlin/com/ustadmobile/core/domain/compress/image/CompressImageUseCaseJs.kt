@@ -15,7 +15,7 @@ import web.url.URL
 /**
  * Implementation of image compression for Javascript. Uses compressorjs.
  */
-class CompressImageUseCaseJs : CompressUseCase {
+class CompressImageUseCaseJs : CompressImageUseCase {
     override suspend fun invoke(
         fromUri: String,
         toUri: String?,
