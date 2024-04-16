@@ -80,6 +80,7 @@ class EpubContentImporterCommonJvmTest : AbstractContentImporterTest() {
             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
             json = json,
             getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
+            compressListUseCase = compressListUseCase,
         )
 
         runBlocking {
@@ -109,6 +110,7 @@ class EpubContentImporterCommonJvmTest : AbstractContentImporterTest() {
             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
             json = json,
             getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
+            compressListUseCase = compressListUseCase,
         )
 
         runBlocking {
@@ -139,6 +141,7 @@ class EpubContentImporterCommonJvmTest : AbstractContentImporterTest() {
             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
             json = json,
             getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
+            compressListUseCase = compressListUseCase,
         )
 
         runBlocking {
@@ -170,6 +173,7 @@ class EpubContentImporterCommonJvmTest : AbstractContentImporterTest() {
             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
             json = json,
             getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
+            compressListUseCase = compressListUseCase,
         )
 
         runBlocking {
@@ -198,6 +202,7 @@ class EpubContentImporterCommonJvmTest : AbstractContentImporterTest() {
             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
             json = json,
             getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
+            compressListUseCase = compressListUseCase,
         )
 
         runBlocking{
