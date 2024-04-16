@@ -415,6 +415,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                             tmpPath = contentImportTmpPath,
                             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
                             json = instance(),
+                            compressListUseCase = instance(),
                             h5pInStream = {
                                 applicationContext.assets.open("h5p/h5p-standalone-3.6.0.zip",
                                     AssetManager.ACCESS_STREAMING)
