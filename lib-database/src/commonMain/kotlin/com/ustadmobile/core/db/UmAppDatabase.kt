@@ -63,13 +63,14 @@ import com.ustadmobile.lib.db.entities.*
     EnrolmentRequest::class,
     CoursePermission::class,
     SystemPermission::class,
+    CourseBlockPicture::class,
 
     //Door entities
     OutgoingReplication::class,
     ReplicationOperation::class,
     PendingRepositorySession::class,
 
-], version = 166)
+], version = 167)
 expect abstract class UmAppDatabase : RoomDatabase {
 
     /*
@@ -247,5 +248,7 @@ expect abstract class UmAppDatabase : RoomDatabase {
     abstract val coursePermissionDao: CoursePermissionDao
 
     abstract val systemPermissionDao: SystemPermissionDao
+
+    abstract val courseBlockPictureDao: CourseBlockPictureDao
 
 }

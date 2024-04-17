@@ -5,6 +5,7 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentJob
 import com.ustadmobile.lib.db.entities.ContentEntryImportJob
 import com.ustadmobile.lib.db.entities.CourseBlock
+import com.ustadmobile.lib.db.entities.CourseBlockPicture
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.PeerReviewerAllocation
 import kotlinx.serialization.Serializable
@@ -16,6 +17,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class CourseBlockAndEditEntities(
     val courseBlock: CourseBlock,
+
+    var courseBlockPicture: CourseBlockPicture? = null,
 
     val contentEntry: ContentEntry? = null,
 

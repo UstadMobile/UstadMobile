@@ -23,5 +23,4 @@ data class CourseBlockAndDbEntities(
 
     var assignmentCourseGroupSetName: String? = null,
 
-) {
-}
+)
