@@ -13,6 +13,7 @@ import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
 import com.ustadmobile.core.domain.cachestoragepath.getLocalUriIfRemote
 import com.ustadmobile.core.domain.compress.CompressParams
 import com.ustadmobile.core.domain.compress.CompressionLevel
+import com.ustadmobile.core.domain.compress.originalSizeHeaders
 import com.ustadmobile.core.domain.compress.pdf.CompressPdfUseCase
 import com.ustadmobile.core.domain.contententry.ContentConstants
 import com.ustadmobile.core.uri.UriHelper
@@ -83,6 +84,7 @@ abstract class AbstractPdfContentImportCommonJvm(
                         entityUid = contentEntryVersionUid,
                         tableId = ContentEntryVersion.TABLE_ID,
                         mimeType = "application/pdf",
+                        extraHeaders = compressResult.originalSizeHeaders(),
                     ),
                     manifestUri = "content.pdf",
                 )

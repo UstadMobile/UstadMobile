@@ -17,6 +17,7 @@ import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
 import com.ustadmobile.core.domain.cachestoragepath.getLocalUriIfRemote
 import com.ustadmobile.core.domain.compress.CompressParams
 import com.ustadmobile.core.domain.compress.CompressionLevel
+import com.ustadmobile.core.domain.compress.originalSizeHeaders
 import com.ustadmobile.core.domain.compress.video.CompressVideoUseCase
 import com.ustadmobile.core.domain.contententry.ContentConstants
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
@@ -155,6 +156,7 @@ class VideoContentImporterCommonJvm(
                             tableId = ContentEntryVersion.TABLE_ID,
                             mimeType = mimeType,
                             deleteLocalUriAfterSave = false,
+                            extraHeaders = compressionResult.originalSizeHeaders(),
                         ),
                         manifestUri = videoEntryUri
                     ),

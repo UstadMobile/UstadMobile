@@ -102,7 +102,7 @@ class CompressPdfUseCaseJvm(
                 uri = destFile.toDoorUri().toString(),
                 mimeType = "application/pdf",
                 compressedSize = compressedSize,
-                originalSize = compressedSize,
+                originalSize = fileSizeIn,
             )
         }else {
             Napier.d {

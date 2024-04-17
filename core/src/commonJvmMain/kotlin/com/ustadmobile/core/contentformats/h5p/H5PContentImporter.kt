@@ -14,6 +14,7 @@ import com.ustadmobile.core.domain.compress.CompressParams
 import com.ustadmobile.core.domain.compress.CompressionLevel
 import com.ustadmobile.core.domain.compress.list.CompressListUseCase
 import com.ustadmobile.core.domain.compress.list.toItemToCompress
+import com.ustadmobile.core.domain.compress.originalSizeHeaders
 import com.ustadmobile.core.domain.contententry.ContentConstants
 import com.ustadmobile.core.io.ext.readString
 import com.ustadmobile.core.io.ext.skipToEntry
@@ -196,6 +197,7 @@ class H5PContentImporter(
                             entityUid = contentEntryVersionUid,
                             tableId = ContentEntryVersion.TABLE_ID,
                             mimeType = compressedEntry.mimeType,
+                            extraHeaders = compressedEntry.compressedResult.originalSizeHeaders(),
                         ),
                         manifestUri = "h5p-folder/${compressedEntry.originalItem.name}",
                         manifestMimeType = compressedEntry.mimeType,

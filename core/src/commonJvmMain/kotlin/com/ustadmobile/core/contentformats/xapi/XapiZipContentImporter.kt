@@ -15,6 +15,7 @@ import com.ustadmobile.core.domain.compress.CompressParams
 import com.ustadmobile.core.domain.compress.CompressionLevel
 import com.ustadmobile.core.domain.compress.list.CompressListUseCase
 import com.ustadmobile.core.domain.compress.list.toItemToCompress
+import com.ustadmobile.core.domain.compress.originalSizeHeaders
 import com.ustadmobile.core.domain.contententry.ContentConstants
 import com.ustadmobile.core.io.ext.*
 import com.ustadmobile.core.uri.UriHelper
@@ -160,6 +161,7 @@ class XapiZipContentImporter(
                             entityUid = contentEntryVersionUid,
                             tableId = ContentEntryVersion.TABLE_ID,
                             mimeType = compressListResult.mimeType,
+                            extraHeaders = compressListResult.compressedResult.originalSizeHeaders(),
                         ),
                         manifestUri = compressListResult.originalItem.name,
                         manifestMimeType = compressListResult.mimeType,
