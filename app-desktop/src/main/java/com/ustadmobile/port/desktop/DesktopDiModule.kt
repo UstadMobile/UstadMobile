@@ -20,6 +20,8 @@ import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.core.domain.cachelock.AddOfflineItemInactiveTriggersCallback
 import com.ustadmobile.core.domain.cachelock.UpdateCacheLockJoinUseCase
+import com.ustadmobile.core.domain.compress.pdf.CompressPdfUseCase
+import com.ustadmobile.core.domain.compress.pdf.CompressPdfUseCaseJvm
 import com.ustadmobile.core.domain.compress.video.CompressVideoUseCase
 import com.ustadmobile.core.domain.compress.video.CompressVideoUseCaseHandbrake
 import com.ustadmobile.core.domain.compress.video.FindHandBrakeUseCase
@@ -260,6 +262,8 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
             specifiedLocation = File(handbrakeResourcesDir, "HandBrakeCLI").getCommandFile()?.absolutePath,
         ).invoke()
     }
+
+    val gsPath = SysPathUtil.findCommandInPath("gs")
 
     bind<AppConfig>() with singleton {
         ManifestAppConfig()
@@ -515,6 +519,15 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
                 extractMediaMetadataUseCase = instance(),
                 workDir = instance(tag = TAG_DATA_DIR),
                 json = instance(),
+            )
+        }
+    }
+
+    gsPath?.also {
+        bind<CompressPdfUseCase>() with provider {
+            CompressPdfUseCaseJvm(
+                gsPath = it,
+                workDir = instance(tag = TAG_DATA_DIR),
             )
         }
     }

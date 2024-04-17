@@ -202,7 +202,7 @@ class XapiZipContentImporter(
 
         const val PLUGIN_ID = 8
 
-        private const val MAX_SIZE_LIMIT: Long = 100 * 1024 * 1024 //100MB
+        private const val MAX_SIZE_LIMIT: Long = 500 * 1024 * 1024 //500MB
 
     }
 }

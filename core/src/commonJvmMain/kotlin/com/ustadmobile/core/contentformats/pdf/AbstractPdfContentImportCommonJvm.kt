@@ -11,6 +11,9 @@ import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndMan
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
 import com.ustadmobile.core.domain.cachestoragepath.getLocalUriIfRemote
+import com.ustadmobile.core.domain.compress.CompressParams
+import com.ustadmobile.core.domain.compress.CompressionLevel
+import com.ustadmobile.core.domain.compress.pdf.CompressPdfUseCase
 import com.ustadmobile.core.domain.contententry.ContentConstants
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.util.ext.requireSourceAsDoorUri
@@ -33,6 +36,7 @@ abstract class AbstractPdfContentImportCommonJvm(
     protected val db: UmAppDatabase,
     protected val saveLocalUriAsBlobAndManifestUseCase: SaveLocalUriAsBlobAndManifestUseCase,
     protected val getStoragePathForUrlUseCase: GetStoragePathForUrlUseCase,
+    protected val compressPdfUseCase: CompressPdfUseCase?,
 ) : ContentImporter(endpoint){
 
     override val importerId: Int = PLUGINID
@@ -51,6 +55,21 @@ abstract class AbstractPdfContentImportCommonJvm(
         val jobUri =  getStoragePathForUrlUseCase.getLocalUriIfRemote(
             jobItem.requireSourceAsDoorUri())
 
+        val compressResult = compressPdfUseCase?.invoke(
+            fromUri = jobUri.toString(),
+            params = CompressParams(
+                compressionLevel = CompressionLevel.forValue(jobItem.cjiCompressionLevel)
+            ),
+            onProgress = {
+                progressListener.onProgress(
+                    jobItem.copy(
+                        cjiItemProgress = it.completed,
+                        cjiItemTotal = it.total,
+                    )
+                )
+            }
+        )
+
         val contentEntryVersionUid = db.doorPrimaryKeyManager.nextId(ContentEntryVersion.TABLE_ID)
         val urlPrefix = createContentUrlPrefix(contentEntryVersionUid)
         val pdfManifestUri = "content.pdf"
@@ -60,7 +79,7 @@ abstract class AbstractPdfContentImportCommonJvm(
             listOf(
                 SaveLocalUriAsBlobAndManifestUseCase.SaveLocalUriAsBlobAndManifestItem(
                     blobItem = SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem(
-                        localUri = jobUri.toString(),
+                        localUri = compressResult?.uri ?: jobUri.toString(),
                         entityUid = contentEntryVersionUid,
                         tableId = ContentEntryVersion.TABLE_ID,
                         mimeType = "application/pdf",
@@ -76,6 +95,8 @@ abstract class AbstractPdfContentImportCommonJvm(
             cevContentEntryUid = jobItem.cjiContentEntryUid,
             cevManifestUrl = manifestUrl,
             cevOpenUri = pdfManifestUri,
+            cevOriginalSize = uriHelper.getSize(jobUri),
+            cevStorageSize = manifestEntriesAndBlobs.sumOf { it.savedBlob.storageSize },
         )
 
         val manifest = ContentManifest(

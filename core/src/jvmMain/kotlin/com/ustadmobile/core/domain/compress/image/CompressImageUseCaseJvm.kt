@@ -36,10 +36,15 @@ class CompressImageUseCaseJvm: CompressImageUseCase {
             .size(params.maxWidth, params.maxHeight)
             .toFile(outFile)
 
-        if(outFile.length() < fileIn.length()) {
+        val compressedSize = outFile.length()
+        val originalSize = fileIn.length()
+
+        if(compressedSize < originalSize) {
             CompressResult(
                 uri = outFile.toDoorUri().toString(),
-                mimeType = "image/webp"
+                mimeType = "image/webp",
+                compressedSize = compressedSize,
+                originalSize = originalSize,
             )
         }else {
             //Whatever we did - we made it bigger. Delete attempt and return null

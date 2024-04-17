@@ -100,6 +100,11 @@ apt-get install flatpak
 flatpak install /path/where/downloaded/HandBrakeCLI-1.7.3-x86_64.flatpak
 ```
 
+Ghostscript (optional): The ghostscript (gs) command can be used to compress PDFs. 
+```
+apt-get install ghostscript
+```
+
 Windows: 
 
 __JDK__

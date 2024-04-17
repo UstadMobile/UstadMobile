@@ -23,6 +23,8 @@ import com.ustadmobile.core.domain.compress.audio.CompressAudioUseCaseJvm
 import com.ustadmobile.core.domain.compress.image.CompressImageUseCase
 import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseJvm
 import com.ustadmobile.core.domain.compress.list.CompressListUseCase
+import com.ustadmobile.core.domain.compress.pdf.CompressPdfUseCase
+import com.ustadmobile.core.domain.compress.pdf.CompressPdfUseCaseJvm
 import com.ustadmobile.core.domain.compress.video.CompressVideoUseCase
 import com.ustadmobile.core.domain.compress.video.CompressVideoUseCaseHandbrake
 import com.ustadmobile.core.domain.compress.video.FindHandBrakeUseCase
@@ -197,6 +199,12 @@ fun Application.umRestApplication(
     if(mediaInfoFile == null || handBrakeCliCommand == null || !mediaInfoFile.exists() || soxCommand == null) {
         throw MissingMediaProgramsException()
     }
+
+    //GhostScript - used for PDF compression (optional)
+    val gsCommand = SysPathUtil.findCommandInPath(
+        commandName = "gs",
+        manuallySpecifiedLocation = appConfig.commandFileProperty("gs"),
+    )
 
     val devMode = environment.config.propertyOrNull("ktor.ustad.devmode")?.getString().toBoolean()
 
@@ -482,6 +490,15 @@ fun Application.umRestApplication(
                 json = instance(),
                 extractMediaMetadataUseCase = instance(),
             )
+        }
+
+        gsCommand?.also {
+            bind<CompressPdfUseCase>() with singleton {
+                CompressPdfUseCaseJvm(
+                    gsPath = it,
+                    workDir = instance<File>(tag = DiTag.TAG_TMP_DIR),
+                )
+            }
         }
 
         bind<ValidateVideoFileUseCase>() with provider {

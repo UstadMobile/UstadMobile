@@ -24,7 +24,7 @@ class CompressListUseCaseTest {
         val mockVideoCompressor: CompressVideoUseCase = mock {
             onBlocking { invoke(any(), anyOrNull(), any(), any()) }.thenReturn(
                 CompressResult(
-                    compressedFileMockUri, "video/mp4"
+                    compressedFileMockUri, "video/mp4", 2_000_000, 1_000_000,
                 )
             )
         }

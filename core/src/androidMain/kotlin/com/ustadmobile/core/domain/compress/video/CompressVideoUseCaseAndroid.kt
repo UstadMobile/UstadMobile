@@ -246,10 +246,18 @@ class CompressVideoUseCaseAndroid(
             }
         }
 
-        return CompressResult(
-            uri = destFile.toDoorUri().toString(),
-            mimeType = "video/mp4"
-        )
+        val resultSize = destFile.length()
+        return if(resultSize < sizeIn) {
+            CompressResult(
+                uri = destFile.toDoorUri().toString(),
+                mimeType = "video/mp4",
+                compressedSize = resultSize,
+                originalSize = sizeIn,
+            )
+        }else {
+            destFile.delete()
+            null
+        }
     }
 
     companion object {

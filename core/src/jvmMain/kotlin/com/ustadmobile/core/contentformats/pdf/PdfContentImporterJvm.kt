@@ -7,6 +7,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
 import com.ustadmobile.core.domain.cachestoragepath.getLocalUriIfRemote
+import com.ustadmobile.core.domain.compress.pdf.CompressPdfUseCase
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.util.ext.displayFilename
 import com.ustadmobile.door.DoorUri
@@ -32,6 +33,7 @@ class PdfContentImporterJvm(
     saveLocalUriAsBlobAndManifestUseCase: SaveLocalUriAsBlobAndManifestUseCase,
     getStoragePathForUrlUseCase: GetStoragePathForUrlUseCase,
     json: Json,
+    compressPdfUseCase: CompressPdfUseCase?,
 ) : AbstractPdfContentImportCommonJvm(
     endpoint = endpoint,
     cache = cache,
@@ -40,6 +42,7 @@ class PdfContentImporterJvm(
     saveLocalUriAsBlobAndManifestUseCase = saveLocalUriAsBlobAndManifestUseCase,
     getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
     json = json,
+    compressPdfUseCase = compressPdfUseCase,
 ) {
 
     @Suppress("NewApi") //This is JVM only, warning is wrong

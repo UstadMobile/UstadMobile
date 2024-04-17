@@ -84,10 +84,17 @@ class CompressAudioUseCaseAndroid(
 
         Napier.d("CompressAudioUseCaseAndroid: compressed $fromUri from $sizeIn bytes to ${destFile.length()}")
         onProgress?.invoke(CompressProgressUpdate(fromUri, sizeIn, sizeIn))
-
-        CompressResult(
-            uri = destFile.toDoorUri().toString(),
-            mimeType = "audio/mp4",
-        )
+        val compressedSize = destFile.length()
+        if(compressedSize < sizeIn) {
+            CompressResult(
+                uri = destFile.toDoorUri().toString(),
+                mimeType = "audio/mp4",
+                originalSize = sizeIn,
+                compressedSize = compressedSize,
+            )
+        }else {
+            destFile.delete()
+            null
+        }
     }
 }

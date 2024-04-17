@@ -50,6 +50,8 @@ class CompressImageUseCaseJs : CompressImageUseCase {
             return CompressResult(
                 uri = resultUri,
                 mimeType = compressedBlob.type,
+                originalSize = blob.size.toLong(),
+                compressedSize = compressedBlob.size.toLong(),
             )
         }catch(e: Throwable) {
             Napier.e("CompressImageUseCase: Exception caught: ", e)

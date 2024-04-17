@@ -79,6 +79,7 @@ val ContentImportersDiModuleJvm = DI.Module("ContentImporters-Jvm"){
                         uriHelper = uriHelper,
                         json = instance(),
                         getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
+                        compressPdfUseCase = instanceOrNull(),
                     ),
                 )
                 add(

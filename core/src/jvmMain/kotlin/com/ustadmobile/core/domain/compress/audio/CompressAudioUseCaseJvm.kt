@@ -58,17 +58,24 @@ class CompressAudioUseCaseJvm(
             destFile.absolutePath
         )
 
-        val process = ProcessBuilder(cmd).start()
+        val process = ProcessBuilder(cmd)
+            .directory(workDir)
+            .start()
 
         val result = process.waitForAsync()
         if(result != 0) {
             throw IllegalStateException("SOX returned non-zero exit value: $result")
         }
 
-        if(destFile.length() < inFile.length()) {
+        val originalSize = inFile.length()
+        val compressedSize = destFile.length()
+
+        if(compressedSize < originalSize) {
             CompressResult(
                 uri = destFile.toDoorUri().toString(),
-                mimeType = "audio/ogg"
+                mimeType = "audio/ogg",
+                compressedSize = compressedSize,
+                originalSize = originalSize,
             )
         }else {
             destFile.delete()

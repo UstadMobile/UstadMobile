@@ -288,10 +288,14 @@ class CompressVideoUseCaseHandbrake(
 
             //Check if the result is smaller than the original. We won't know for sure because
             // more complex video will be bigger
-            if(destFile.length() < fromFile.length()) {
+            val compressedFileSize = destFile.length()
+
+            if(compressedFileSize < fromFileSize) {
                 CompressResult(
                     uri = destFile.toDoorUri().toString(),
-                    mimeType = "video/mp4"
+                    mimeType = "video/mp4",
+                    originalSize = fromFileSize,
+                    compressedSize = compressedFileSize,
                 )
             }else {
                 //The result was bigger

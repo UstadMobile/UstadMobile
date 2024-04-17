@@ -391,6 +391,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
                             json = instance(),
                             getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
+                            compressListUseCase = instance(),
                         )
                     )
                     add(

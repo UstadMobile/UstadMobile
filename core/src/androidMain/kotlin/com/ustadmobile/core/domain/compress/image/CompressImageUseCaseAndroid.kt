@@ -122,7 +122,9 @@ class CompressImageUseCaseAndroid(
                     Napier.d("CompressImageUseCaseAndroid: compressed $fromUri $sizeIn bytes to ${resultFile.length()} bytes")
                     CompressResult(
                         uri = resultFile.toUri().toString(),
-                        mimeType = "image/webp"
+                        mimeType = "image/webp",
+                        compressedSize = outputSize,
+                        originalSize = sizeIn,
                     )
                 }else {
                     Napier.d("CompressImageUseCaseAndroid: result was larger - deleting " +
