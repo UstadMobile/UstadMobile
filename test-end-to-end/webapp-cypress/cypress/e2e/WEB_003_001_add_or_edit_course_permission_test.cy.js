@@ -11,7 +11,8 @@ it('Admin has course edit permission', () => {
   cy.ustadAddCourse('003_001')
   // Admin test the course edit permission
   cy.contains('button','Edit').click()
-  cy.get('div[data-placeholder="Description"]').clear().type("Admin has edit permission")
+  cy.get('div[data-placeholder="Description"]',{timeout: 5000}).clear()
+  cy.get('div[data-placeholder="Description"]').type("Admin has edit permission")
   cy.contains("button","Save").click()
   cy.contains("Admin has edit permission").should('be.visible')
   //Add a teacher

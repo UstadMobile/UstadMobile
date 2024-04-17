@@ -67,6 +67,7 @@ fun ContentEntryListScreenForViewModel(
         onSetSelected = viewModel::onSetSelected,
         onClickSelectThisFolder = viewModel::onClickSelectThisFolder,
         contextMenuItems = viewModel::createContextMenuItemsForEntry,
+        refreshCommandFlow = viewModel.refreshCommandFlow,
     )
 
     if(uiState.createNewOptionsVisible) {
