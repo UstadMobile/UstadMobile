@@ -37,7 +37,7 @@ class EnqueueImportContentEntryUseCaseJvm(
                 .usingJobData(EnqueueContentEntryImportUseCase.DATA_ENDPOINT, endpoint.url)
                 .usingJobData(EnqueueContentEntryImportUseCase.DATA_JOB_UID, uid)
                 .build()
-            val triggerKey = TriggerKey("contententryimport-${endpoint.url}-$uid")
+            val triggerKey = TriggerKey(EnqueueContentEntryImportUseCase.uniqueNameFor(endpoint, uid))
             scheduler.unscheduleJob(triggerKey)
             val jobTrigger = TriggerBuilder.newTrigger()
                 .withIdentity(triggerKey)

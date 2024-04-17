@@ -7,6 +7,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
 import com.ustadmobile.core.domain.cachestoragepath.getLocalUriIfRemote
+import com.ustadmobile.core.domain.compress.pdf.CompressPdfUseCase
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.util.ext.displayFilename
 import com.ustadmobile.door.DoorUri
@@ -22,7 +23,7 @@ import org.apache.pdfbox.Loader
 import org.apache.pdfbox.pdmodel.PDDocument
 
 /**
- * For PDF on JVM view: maybe: https://github.com/pcorless/icepdf
+ * Potential compression: see https://gist.github.com/farhan-raza/6b2f5c95c9bbd2dcb035cc3176ecbd2b
  */
 class PdfContentImporterJvm(
     endpoint: Endpoint,
@@ -32,6 +33,7 @@ class PdfContentImporterJvm(
     saveLocalUriAsBlobAndManifestUseCase: SaveLocalUriAsBlobAndManifestUseCase,
     getStoragePathForUrlUseCase: GetStoragePathForUrlUseCase,
     json: Json,
+    compressPdfUseCase: CompressPdfUseCase?,
 ) : AbstractPdfContentImportCommonJvm(
     endpoint = endpoint,
     cache = cache,
@@ -40,6 +42,7 @@ class PdfContentImporterJvm(
     saveLocalUriAsBlobAndManifestUseCase = saveLocalUriAsBlobAndManifestUseCase,
     getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
     json = json,
+    compressPdfUseCase = compressPdfUseCase,
 ) {
 
     @Suppress("NewApi") //This is JVM only, warning is wrong

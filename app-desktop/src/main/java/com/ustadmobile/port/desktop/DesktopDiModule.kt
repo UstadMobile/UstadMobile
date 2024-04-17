@@ -20,13 +20,19 @@ import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.core.domain.cachelock.AddOfflineItemInactiveTriggersCallback
 import com.ustadmobile.core.domain.cachelock.UpdateCacheLockJoinUseCase
+import com.ustadmobile.core.domain.compress.pdf.CompressPdfUseCase
+import com.ustadmobile.core.domain.compress.pdf.CompressPdfUseCaseJvm
+import com.ustadmobile.core.domain.compress.video.CompressVideoUseCase
+import com.ustadmobile.core.domain.compress.video.CompressVideoUseCaseHandbrake
+import com.ustadmobile.core.domain.compress.video.FindHandBrakeUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseJvm
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseRemote
+import com.ustadmobile.core.domain.extractmediametadata.ExtractMediaMetadataUseCase
+import com.ustadmobile.core.domain.extractmediametadata.mediainfo.ExtractMediaMetadataUseCaseMediaInfo
 import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseJvm
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
-import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCaseMediaInfo
 import com.ustadmobile.core.embeddedhttp.EmbeddedHttpServer
 import com.ustadmobile.core.getdeveloperinfo.GetDeveloperInfoUseCaseJvm
 import com.ustadmobile.core.impl.UstadMobileConstants
@@ -75,6 +81,7 @@ import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.runBlocking
 import kotlinx.io.files.Path
 import kotlinx.serialization.json.Json
 import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
@@ -84,6 +91,7 @@ import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
 import org.kodein.di.direct
 import org.kodein.di.on
+import org.kodein.di.provider
 import org.quartz.Scheduler
 import org.quartz.impl.StdSchedulerFactory
 import org.xmlpull.v1.XmlPullParserFactory
@@ -247,6 +255,15 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         commandName = "mediainfo",
         manuallySpecifiedLocation = File(mediaInfoResourcesDir, "mediainfo").getCommandFile(),
     ) ?: throw IllegalStateException("No MediaInfo found")
+
+    val handbrakeResourcesDir = File(resourcesDir, "handbrakecli")
+    val findHandBrakeResult = runBlocking {
+        FindHandBrakeUseCase(
+            specifiedLocation = File(handbrakeResourcesDir, "HandBrakeCLI").getCommandFile()?.absolutePath,
+        ).invoke()
+    }
+
+    val gsPath = SysPathUtil.findCommandInPath("gs")
 
     bind<AppConfig>() with singleton {
         ManifestAppConfig()
@@ -426,7 +443,7 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         }
 
         StdSchedulerFactory.getDefaultScheduler().also {
-            it.context.put("di", di)
+            it.context["di"] = di
         }
     }
 
@@ -455,11 +472,19 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         )
     }
 
-    bind<ValidateVideoFileUseCase>() with singleton {
-        ValidateVideoFileUseCaseMediaInfo(
+    bind<ExtractMediaMetadataUseCase>() with singleton {
+        ExtractMediaMetadataUseCaseMediaInfo(
             mediaInfoPath = mediaInfoFile.absolutePath,
             workingDir = ustadAppDataDir(),
             json = instance(),
+            getStoragePathForUrlUseCase = instance(),
+        )
+    }
+
+
+    bind<ValidateVideoFileUseCase>() with singleton {
+        ValidateVideoFileUseCase(
+            extractMediaMetadataUseCase = instance(),
         )
     }
 
@@ -487,6 +512,25 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         )
     }
 
+    if(findHandBrakeResult != null) {
+        bind<CompressVideoUseCase>() with provider {
+            CompressVideoUseCaseHandbrake(
+                handbrakeCommand = findHandBrakeResult.command,
+                extractMediaMetadataUseCase = instance(),
+                workDir = instance(tag = TAG_DATA_DIR),
+                json = instance(),
+            )
+        }
+    }
+
+    gsPath?.also {
+        bind<CompressPdfUseCase>() with provider {
+            CompressPdfUseCaseJvm(
+                gsPath = it,
+                workDir = instance(tag = TAG_DATA_DIR),
+            )
+        }
+    }
 
     onReady {
         instance<File>(tag = TAG_DATA_DIR).takeIf { !it.exists() }?.mkdirs()

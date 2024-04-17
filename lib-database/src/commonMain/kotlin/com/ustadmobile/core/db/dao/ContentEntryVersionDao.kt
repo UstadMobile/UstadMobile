@@ -6,6 +6,7 @@ import com.ustadmobile.door.annotation.DoorDao
 import com.ustadmobile.door.annotation.HttpAccessible
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.ContentEntryVersion
+import kotlinx.coroutines.flow.Flow
 
 @DoorDao
 @Repository
@@ -34,6 +35,20 @@ expect abstract class ContentEntryVersionDao {
     abstract suspend fun findLatestVersionUidByContentEntryUidEntity(
         contentEntryUid: Long
     ): ContentEntryVersion?
+
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+    )
+    @Query("""
+        SELECT ContentEntryVersion.*
+          FROM ContentEntryVersion
+         WHERE ContentEntryVersion.cevContentEntryUid = :contentEntryUid
+      ORDER BY ContentEntryVersion.cevLastModified DESC
+         LIMIT 1
+    """)
+    abstract fun findLatestByContentEntryUidAsFlow(
+        contentEntryUid: Long
+    ): Flow<ContentEntryVersion?>
 
 
     @Query("""

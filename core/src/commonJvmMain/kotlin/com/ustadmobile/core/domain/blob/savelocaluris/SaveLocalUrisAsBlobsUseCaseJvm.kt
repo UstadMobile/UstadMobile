@@ -100,6 +100,11 @@ class SaveLocalUrisAsBlobsUseCaseJvm(
                         request = blobRequest,
                         extraHeaders = headersBuilder {
                             header("cache-control", "immutable")
+                            saveItem.extraHeaders.names().forEach { extraHeaderName ->
+                                saveItem.extraHeaders[extraHeaderName]?.also {
+                                    header(extraHeaderName, it)
+                                }
+                            }
                         },
                     ),
                     createRetentionLock = saveItem.createRetentionLock,

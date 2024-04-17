@@ -335,7 +335,6 @@ class ClazzEditViewModel(
                             courseBlock = block,
                             contentEntry = contentEntryResult.entry,
                             contentJobItem = contentEntryResult.contentJobItem,
-                            contentJob = contentEntryResult.contentJob,
                         )
                     )
 
@@ -791,8 +790,6 @@ class ClazzEditViewModel(
                         value = ContentEntryBlockLanguageAndContentJob(
                             entry = block.contentEntry,
                             block = block.courseBlock,
-                            contentJob = block.contentJob,
-                            contentJobItem = block.contentJobItem,
                         )
                     )
                 )

@@ -45,7 +45,6 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import org.kodein.di.DI
 import org.kodein.di.instance
-import org.kodein.di.instanceOrNull
 import org.kodein.di.on
 
 data class PersonEditUiState(
@@ -154,8 +153,8 @@ class PersonEditViewModel(
 
     private val genderConfig : GenderConfig by instance()
 
-    private val enqueueSavePictureUseCase: EnqueueSavePictureUseCase? by
-        on(accountManager.activeEndpoint).instanceOrNull()
+    private val enqueueSavePictureUseCase: EnqueueSavePictureUseCase by
+        on(accountManager.activeEndpoint).instance()
 
     private val addNewPersonUseCase: AddNewPersonUseCase by di.onActiveEndpoint().instance()
 
@@ -596,7 +595,7 @@ class PersonEditViewModel(
                     if(initPictureUri != personPictureUriVal) {
                         //Save if changed
                         activeDb.personPictureDao.upsert(personPictureVal)
-                        enqueueSavePictureUseCase?.invoke(
+                        enqueueSavePictureUseCase(
                             entityUid = savePerson.personUid,
                             tableId = PersonPicture.TABLE_ID,
                             pictureUri = personPictureUriVal
