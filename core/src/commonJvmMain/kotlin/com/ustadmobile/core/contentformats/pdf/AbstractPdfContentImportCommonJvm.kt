@@ -55,21 +55,26 @@ abstract class AbstractPdfContentImportCommonJvm(
     ): ContentEntryVersion = withContext(Dispatchers.IO) {
         val jobUri =  getStoragePathForUrlUseCase.getLocalUriIfRemote(
             jobItem.requireSourceAsDoorUri())
-
-        val compressResult = compressPdfUseCase?.invoke(
-            fromUri = jobUri.toString(),
-            params = CompressParams(
-                compressionLevel = CompressionLevel.forValue(jobItem.cjiCompressionLevel)
-            ),
-            onProgress = {
-                progressListener.onProgress(
-                    jobItem.copy(
-                        cjiItemProgress = it.completed,
-                        cjiItemTotal = it.total,
-                    )
-                )
-            }
+        val compressParams = CompressParams(
+            compressionLevel = CompressionLevel.forValue(jobItem.cjiCompressionLevel)
         )
+
+        val compressResult = compressPdfUseCase
+            ?.takeIf { compressParams.compressionLevel != CompressionLevel.NONE }
+            ?.invoke(
+                fromUri = jobUri.toString(),
+                params = CompressParams(
+                    compressionLevel = CompressionLevel.forValue(jobItem.cjiCompressionLevel)
+                ),
+                onProgress = {
+                    progressListener.onProgress(
+                        jobItem.copy(
+                            cjiItemProgress = it.completed,
+                            cjiItemTotal = it.total,
+                        )
+                    )
+                }
+            )
 
         val contentEntryVersionUid = db.doorPrimaryKeyManager.nextId(ContentEntryVersion.TABLE_ID)
         val urlPrefix = createContentUrlPrefix(contentEntryVersionUid)

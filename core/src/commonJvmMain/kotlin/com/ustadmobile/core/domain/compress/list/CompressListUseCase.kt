@@ -4,6 +4,7 @@ import com.ustadmobile.core.domain.compress.CompressParams
 import com.ustadmobile.core.domain.compress.CompressProgressUpdate
 import com.ustadmobile.core.domain.compress.CompressResult
 import com.ustadmobile.core.domain.compress.CompressUseCase
+import com.ustadmobile.core.domain.compress.CompressionLevel
 import com.ustadmobile.core.domain.compress.audio.CompressAudioUseCase
 import com.ustadmobile.core.domain.compress.image.CompressImageUseCase
 import com.ustadmobile.core.domain.compress.video.CompressVideoUseCase
@@ -62,6 +63,16 @@ class CompressListUseCase(
         val totalSize = sizes.values.sum()
 
         var completedItemsSize = 0L
+
+        //Do not compress
+        if(params.compressionLevel == CompressionLevel.NONE) {
+            return items.map {
+                ItemResult(
+                    originalItem = it,
+                    compressedResult = null,
+                )
+            }
+        }
 
         val results = items.map { item ->
             val mimeType = item.mimeType ?: item.name.fileExtensionOrNull()?.let {
