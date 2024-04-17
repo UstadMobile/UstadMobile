@@ -91,7 +91,7 @@ it('Teacher add assignment and course comment', () => {
   cy.contains("button","Save").should('be.visible')
   cy.contains("button","Save").click()
   cy.contains("button","Members").should('be.visible')
-  cy.get('svg[data-testid="AssignmentTurnedInIcon"]').click()
+  cy.contains('Assignment 1').click()
   cy.ustadTypeAndSubmitAssignmentComment('#course_comment_textfield','#course_comment_textfield_send_button','comment1')
 })
 

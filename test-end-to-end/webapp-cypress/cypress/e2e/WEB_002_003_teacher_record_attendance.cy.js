@@ -41,8 +41,7 @@ it('Admin record student attendance', () => {
   cy.get('button[aria-label="Absent"]').last().click()
   cy.contains("button","Save").should('be.visible')
   cy.contains("button","Save").click()
-  cy.contains('1 Present, 0 Partial, 1 Absent').should('be.visible')
-  cy.get('svg[data-testid="CalendarTodayIcon"]').should('be.visible')
+  cy.contains('.MuiListItemText-secondary','1 Present, 0 Partial, 1 Absent').should('be.visible')
 })
 
 it('Teacher has permission to edit attendance of students ', () => {
@@ -52,7 +51,7 @@ it('Teacher has permission to edit attendance of students ', () => {
   cy.contains("button","Attendance").click()
   // Edit recorded attendance
   cy.contains('1 Present, 0 Partial, 1 Absent').should('be.visible')
-  cy.get('svg[data-testid="CalendarTodayIcon"]',{timeout:2000}).first().click()
+  cy.contains('.MuiListItemText-secondary','1 Present, 0 Partial, 1 Absent').click()
   cy.contains('Student 002_A').should('be.visible')
   cy.contains('Mark all present').click()
   cy.contains("button","Save").should('be.visible')
