@@ -1,0 +1,61 @@
+appId: com.toughra.ustadmobile
+env:
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/003_002_add_module_text_blocks_and_perform_indent_hide_delete_actions"
+  TESTNAME:  "003_002_add_module_text_blocks_and_perform_indent_hide_delete_actions"
+---
+- clearState: com.toughra.ustadmobile
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+      TESTNAME: ${TESTNAME}
+
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+#admin login
+- runFlow:
+    file: "../common/user_login.yaml"
+- runFlow:
+    file: "../common/add_course.yaml"
+    env:
+     TESTCOURSENAME: "Test Course Block Test"
+# edit the course to add blocks
+- tapOn:
+    id: "floating_action_button"
+# add assignment block ------ 1
+- scrollUntilVisible:
+    element:
+      text: "Add block"
+    direction: DOWN
+- tapOn: "Add block"
+- swipe:
+    from:
+      text: "Drag handle" # From (x, y) center of element
+    direction: UP # To (50% of width, 10% of height)
+
+#- longPressOn: Drag handle
+#- swipe:
+#    start: 50%, 50% # From (50% of width, 50% of height)
+#    end: 50%, 10% # To (50% of width, 10% of height)
+- tapOn: "Assignment"
+- tapOn: "Title*"
+- inputText: "Assignment 1"
+- tapOn: "Description"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/editor"
+- inputText: "test block"
+- tapOn: "Done"
+- tapOn:
+   text: dd/mm/yyyy
+   index: 0
+- inputText: 12/05/2024
+- scrollUntilVisible:
+    element:
+      text: "Submission policy"
+    direction: DOWN
+- assertVisible: "Must submit all at once"
+- assertVisible: "Done"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/added_assignment"
+- tapOn: "Done"
+- assertNotVisible: "Done"
