@@ -51,7 +51,7 @@ See [INSTALL.md](../INSTALL.md) for recommendations on production configuration.
 
 By default the Javascript (app-react) version will not be built and bundled in the static resources
 directory (because this will slow down development including building jvm tests etc). When building
-the server for production, use -Pktorbundleproductionjs to include the app-react web app as a
+the server for production, use -Pktor bundleproductionjs to include the app-react web app as a
 static resource.
 
 Linux:

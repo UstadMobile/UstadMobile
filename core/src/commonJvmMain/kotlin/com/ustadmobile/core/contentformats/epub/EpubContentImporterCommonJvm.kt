@@ -13,6 +13,9 @@ import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndMan
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
 import com.ustadmobile.core.domain.cachestoragepath.getLocalUriIfRemote
+import com.ustadmobile.core.domain.compress.CompressParams
+import com.ustadmobile.core.domain.compress.CompressionLevel
+import com.ustadmobile.core.domain.compress.list.CompressListUseCase
 import com.ustadmobile.core.domain.contententry.ContentConstants
 import com.ustadmobile.core.domain.epub.GetEpubTableOfContentsUseCase
 import com.ustadmobile.core.io.ext.*
@@ -56,6 +59,7 @@ class EpubContentImporterCommonJvm(
     private val saveLocalUriAsBlobAndManifestUseCase: SaveLocalUriAsBlobAndManifestUseCase,
     private val json: Json,
     private val getStoragePathForUrlUseCase: GetStoragePathForUrlUseCase,
+    private val compressListUseCase: CompressListUseCase,
 ) : ContentImporter(endpoint) {
 
     val viewName: String
@@ -190,6 +194,9 @@ class EpubContentImporterCommonJvm(
         val jobUri = jobItem.sourceUri?.let { DoorUri.parse(it) }
             ?: throw IllegalArgumentException("no sourceUri")
         val localUri =  getStoragePathForUrlUseCase.getLocalUriIfRemote(jobUri)
+        val compressParams = CompressParams(
+            compressionLevel = CompressionLevel.forValue(jobItem.cjiCompressionLevel)
+        )
 
         val contentEntryVersionUid = db.doorPrimaryKeyManager.nextId(ContentEntryVersion.TABLE_ID)
         val urlPrefix = createContentUrlPrefix(contentEntryVersionUid)
@@ -198,14 +205,6 @@ class EpubContentImporterCommonJvm(
         val opfPath = ZipInputStream(uriHelper.openSource(localUri).asInputStream()).use {
             it.findFirstOpfPath()
         } ?: throw IllegalArgumentException("No OPF found")
-
-        val contentEntryVersion = ContentEntryVersion(
-            cevUid = contentEntryVersionUid,
-            cevContentType = ContentEntryVersion.TYPE_EPUB,
-            cevContentEntryUid = jobItem.cjiContentEntryUid,
-            cevManifestUrl = manifestUrl,
-            cevOpenUri = opfPath,
-        )
 
         val workPath = Path(tmpPath, "epub-import-${systemTimeInMillis()}")
 
@@ -217,45 +216,65 @@ class EpubContentImporterCommonJvm(
             val opfPackage = xml.decodeFromString(PackageDocument.serializer(), opfStr)
 
             try {
-                val manifestedItems = saveLocalUriAsBlobAndManifestUseCase(
-                    items = opfPackage.manifest.items.map { opfItem ->
-                        val hrefDecoded = URLDecoder.decode(opfItem.href, "UTF-8")
-                        val opfBasePath = opfEntry.name.substringUntilLastIndexOfInclusive("/", "")
-                        val pathInZip = opfBasePath + hrefDecoded
+                val opfManifestItems = opfPackage.manifest.items.map { opfItem ->
+                    val hrefDecoded = URLDecoder.decode(opfItem.href, "UTF-8")
+                    val opfBasePath = opfEntry.name.substringUntilLastIndexOfInclusive("/", "")
+                    val pathInZip = opfBasePath + hrefDecoded
 
-                        val unzippedPath = unzippedEntries.firstOrNull {
-                            it.name == pathInZip
-                        }?.path ?: throw IllegalArgumentException("Cannot find $pathInZip")
+                    val unzippedEntry = unzippedEntries.firstOrNull {
+                        it.name == pathInZip
+                    } ?: throw IllegalArgumentException("Cannot find $pathInZip")
 
-                        /* If this is XHTML, then use the xhtmlFixer to check for invalid XHTML
+                    /* If this is XHTML, then use the xhtmlFixer to check for invalid XHTML
                          * content (some content e.g. Storyweaver includes br's without the trailing
                          * slash etc).
                          */
-                        if (opfItem.mediaType == "application/xhtml+xml") {
-                            val xhtmlText =
-                                fileSystem.source(unzippedPath).buffered().use { fileSource ->
-                                    fileSource.readString()
-                                }
+                    if (opfItem.mediaType == "application/xhtml+xml") {
+                        val xhtmlText =
+                            fileSystem.source(unzippedEntry.path).buffered().use { fileSource ->
+                                fileSource.readString()
+                            }
 
-                            val fixResult = xhtmlFixer.fixXhtml(xhtmlText)
-                            if (!fixResult.wasValid) {
-                                fileSystem.sink(unzippedPath).buffered().use {
-                                    it.writeString(fixResult.xhtml)
-                                }
+                        val fixResult = xhtmlFixer.fixXhtml(xhtmlText)
+                        if (!fixResult.wasValid) {
+                            fileSystem.sink(unzippedEntry.path).buffered().use {
+                                it.writeString(fixResult.xhtml)
                             }
                         }
+                    }
 
-                        val uriInManifest = opfBasePath + opfItem.href
+                    CompressListUseCase.ItemToCompress(
+                        path = unzippedEntry.path,
+                        name = unzippedEntry.name,
+                        mimeType = opfItem.mediaType,
+                    )
+                }
 
+                val compressedItems = compressListUseCase(
+                    items = opfManifestItems,
+                    params = compressParams,
+                    workDir = workPath,
+                    onProgress = {
+                        progressListener.onProgress(
+                            jobItem.copy(
+                                cjiItemTotal = it.total,
+                                cjiItemProgress = it.completed
+                            )
+                        )
+                    }
+                )
+
+                val manifestedItems = saveLocalUriAsBlobAndManifestUseCase(
+                    items = compressedItems.map {
                         SaveLocalUriAsBlobAndManifestUseCase.SaveLocalUriAsBlobAndManifestItem(
                             blobItem = SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem(
-                                localUri = unzippedPath.toDoorUri().toString(),
+                                localUri = it.localUri,
                                 entityUid = contentEntryVersionUid,
                                 tableId = ContentEntryVersion.TABLE_ID,
-                                mimeType = opfItem.mediaType
+                                mimeType = it.mimeType,
                             ),
-                            manifestUri = uriInManifest,
-                            manifestMimeType = opfItem.mediaType,
+                            manifestUri = it.originalItem.name,
+                            manifestMimeType = it.mimeType,
                         )
                     } + SaveLocalUriAsBlobAndManifestUseCase.SaveLocalUriAsBlobAndManifestItem(
                         blobItem = SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem(
@@ -279,6 +298,18 @@ class EpubContentImporterCommonJvm(
                     text = json.encodeToString(ContentManifest.serializer(), manifest),
                     mimeType = "application/json"
                 )
+
+                ContentEntryVersion(
+                    cevUid = contentEntryVersionUid,
+                    cevContentType = ContentEntryVersion.TYPE_EPUB,
+                    cevContentEntryUid = jobItem.cjiContentEntryUid,
+                    cevManifestUrl = manifestUrl,
+                    cevOpenUri = opfPath,
+                    cevOriginalSize = uriHelper.getSize(jobUri),
+                    cevStorageSize = manifestedItems.sumOf {
+                        it.savedBlob.storageSize
+                    }
+                )
             }catch(e: Exception) {
                 Napier.e("EpubTypePlugin: Exception importing epub", e)
                 throw e
@@ -286,8 +317,6 @@ class EpubContentImporterCommonJvm(
                 File(workPath.toString()).deleteRecursively()
             }
         }
-
-        contentEntryVersion
     }
 
     companion object {

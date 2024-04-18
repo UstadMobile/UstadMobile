@@ -26,7 +26,6 @@ interface MimeTypeHelper {
 
             //Image formats as per https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types
             "webp" to "image/webp",
-            "webm" to "image/webm",
             "gif" to "image/gif",
             "jpg" to "image/jpg",
             "jpeg" to "image/jpeg",
@@ -40,12 +39,17 @@ interface MimeTypeHelper {
             "opus" to "audio/ogg",
             "wav" to "audio/wav",
 
+            "avi" to "video/x-msvideo",
             "mp4" to "video/mp4",
             "m4v" to "video/mp4",
+            "mkv" to "video/x-matroska",
             "ogv" to "video/ogg",
             "flv" to "video/x-flv",
             "mov" to "video/quicktime",
             "swf" to "application/x-shockwave-flash",
+            "mpeg" to "video/mpeg",
+            "mpg" to "video/mpeg",
+            "webm" to "video/webm",
 
             "js" to "text/javascript",
             "pdf" to "application/pdf",
