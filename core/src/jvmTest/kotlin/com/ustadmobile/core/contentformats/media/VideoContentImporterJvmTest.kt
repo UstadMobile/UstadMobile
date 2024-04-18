@@ -4,18 +4,25 @@ import com.ustadmobile.core.contentformats.AbstractContentImporterTest
 import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.contentformats.video.VideoContentImporterCommonJvm
 import com.ustadmobile.core.contentjob.InvalidContentException
-import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCaseFfprobe
+import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
+import com.ustadmobile.core.domain.compress.CompressionType
+import com.ustadmobile.core.domain.extractmediametadata.ExtractMediaMetadataUseCase
+import com.ustadmobile.core.domain.extractmediametadata.mediainfo.ExtractMediaMetadataUseCaseMediaInfo
+import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
 import com.ustadmobile.core.test.assertCachedBodyMatchesFileContent
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryImportJob
 import com.ustadmobile.lib.util.SysPathUtil
+import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.request.requestBuilder
 import com.ustadmobile.libcache.response.bodyAsString
 import com.ustadmobile.util.test.ext.newFileFromResource
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.files.Path
-import net.bramp.ffmpeg.FFprobe
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
+import java.io.File
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -25,14 +32,35 @@ import kotlin.test.assertTrue
 
 class VideoContentImporterJvmTest : AbstractContentImporterTest() {
 
-    private lateinit var ffProbe: FFprobe
+    private lateinit var extractMediaUseCase: ExtractMediaMetadataUseCase
+
+    private lateinit var validateVideoUseCase: ValidateVideoFileUseCase
+
+    private lateinit var getStoragePathUseCaseMock: GetStoragePathForUrlUseCase
 
     @BeforeTest
     fun setupVideoTest() {
-        ffProbe = SysPathUtil.findCommandInPath("ffprobe")?.let {
-            FFprobe(it.absolutePath)
-        } ?: throw IllegalStateException("Cannot find ffmpeg in path. FFMPEG must be in path to run this test")
+        val mediaInfoPath = SysPathUtil.findCommandInPath("mediainfo")
+            ?: throw IllegalStateException("Cannot find mediainfo in path. MediaInfo must be in path to run this test")
+        getStoragePathUseCaseMock = mock {
+            onBlocking { invoke(any(), any(), any(), any()) }.thenAnswer { invocation ->
+                GetStoragePathForUrlUseCase.GetStoragePathResult(
+                    fileUri = invocation.arguments.first() as String,
+                    compression = CompressionType.NONE,
+                )
+            }
+        }
 
+        extractMediaUseCase =ExtractMediaMetadataUseCaseMediaInfo(
+            mediaInfoPath = mediaInfoPath.absolutePath,
+            workingDir = File(System.getProperty("user.dir")),
+            json = json,
+            getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
+        )
+
+        validateVideoUseCase = ValidateVideoFileUseCase(
+            extractMediaMetadataUseCase = extractMediaUseCase,
+        )
     }
 
     @Test
@@ -44,12 +72,13 @@ class VideoContentImporterJvmTest : AbstractContentImporterTest() {
             endpoint = activeEndpoint,
             db = db,
             cache = ustadCache,
-            validateVideoFileUseCase = ValidateVideoFileUseCaseFfprobe(ffProbe),
+            validateVideoFileUseCase = validateVideoUseCase,
             uriHelper = uriHelper,
             json = json,
             tmpPath = Path(rootTmpFolder.absolutePath),
             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
-            getStoragePathForUrlUseCase = getStoragePathForUrlUseCase
+            getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
+            mimeTypeHelper = FileMimeTypeHelperImpl(),
         )
         val metadataResult = runBlocking {
             importer.extractMetadata(videoFile.toDoorUri(), "BigBuckBunny.mp4")
@@ -66,12 +95,13 @@ class VideoContentImporterJvmTest : AbstractContentImporterTest() {
             endpoint = activeEndpoint,
             db = db,
             cache = ustadCache,
-            validateVideoFileUseCase = ValidateVideoFileUseCaseFfprobe(ffProbe),
+            validateVideoFileUseCase = validateVideoUseCase,
             uriHelper = uriHelper,
             json = json,
             tmpPath = Path(rootTmpFolder.absolutePath),
             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
             getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
+            mimeTypeHelper = FileMimeTypeHelperImpl(),
         )
         runBlocking {
             try {
@@ -92,12 +122,13 @@ class VideoContentImporterJvmTest : AbstractContentImporterTest() {
             endpoint = activeEndpoint,
             db = db,
             cache = ustadCache,
-            validateVideoFileUseCase = ValidateVideoFileUseCaseFfprobe(ffProbe),
+            validateVideoFileUseCase = validateVideoUseCase,
             uriHelper = uriHelper,
             json = json,
             tmpPath = Path(rootTmpFolder.absolutePath),
             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
             getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
+            mimeTypeHelper = FileMimeTypeHelperImpl(),
         )
         runBlocking {
             assertNull(importer.extractMetadata(txtFile.toDoorUri(), "file.txt"))
@@ -113,12 +144,13 @@ class VideoContentImporterJvmTest : AbstractContentImporterTest() {
             endpoint = activeEndpoint,
             db = db,
             cache = ustadCache,
-            validateVideoFileUseCase = ValidateVideoFileUseCaseFfprobe(ffProbe),
+            validateVideoFileUseCase = validateVideoUseCase,
             uriHelper = uriHelper,
             json = json,
             tmpPath = Path(rootTmpFolder.absolutePath),
             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
             getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
+            mimeTypeHelper = FileMimeTypeHelperImpl(),
         )
 
         val result = runBlocking {

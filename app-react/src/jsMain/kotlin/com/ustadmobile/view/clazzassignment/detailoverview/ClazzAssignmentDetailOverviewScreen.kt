@@ -5,19 +5,22 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.locale.entityconstants.SubmissionPolicyConstants
+import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewUiState
 import com.ustadmobile.core.viewmodel.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewViewModel
+import com.ustadmobile.core.viewmodel.clazzassignment.detailoverview.ClazzAssignmentDetailoverviewSubmissionUiState
 import com.ustadmobile.hooks.courseTerminologyResource
 import com.ustadmobile.hooks.useCourseTerminologyEntries
 import com.ustadmobile.hooks.useDateFormatter
+import com.ustadmobile.hooks.useDoorRemoteMediator
+import com.ustadmobile.hooks.useEmptyFlow
 import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.*
 import kotlinx.datetime.TimeZone
 import mui.material.*
-import mui.system.responsive
 import react.FC
 import react.Props
 import react.ReactNode
@@ -26,7 +29,7 @@ import com.ustadmobile.core.viewmodel.clazzassignment.UstadCourseAssignmentMarkL
 import com.ustadmobile.mui.components.UstadCourseAssignmentMarkListItem
 import web.cssom.Height
 import web.cssom.pct
-import js.core.jso
+import js.objects.jso
 import mui.icons.material.Done as DoneIcon
 import mui.icons.material.DoneAll as DoneAllIcon
 import mui.icons.material.EventAvailable as EventAvailableIcon
@@ -48,6 +51,7 @@ import com.ustadmobile.view.components.UstadDetailHeader
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import emotion.react.css
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import mui.system.sx
 import react.dom.html.ReactHTML.input
 import react.useRef
@@ -69,6 +73,8 @@ val ASSIGNMENT_STATUS_MAP = mapOf(
 external interface ClazzAssignmentDetailOverviewScreenProps : Props {
 
     var uiState: ClazzAssignmentDetailOverviewUiState
+
+    var editableSubmissionFlow: Flow<ClazzAssignmentDetailoverviewSubmissionUiState>
 
     var onChangeSubmissionText: (String) -> Unit
 
@@ -121,12 +127,22 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
 
     val muiAppState = useMuiAppState()
 
+    val refreshCommandFlow = useEmptyFlow<RefreshCommand>()
+
+    val courseCommentMediatorResult = useDoorRemoteMediator(
+        props.uiState.courseComments, refreshCommandFlow
+    )
+
     val courseCommentInfiniteQueryResult = usePagingSource(
-        props.uiState.courseComments, true, 50
+        courseCommentMediatorResult.pagingSourceFactory, true, 50
+    )
+
+    val privateCommentMediatorResult = useDoorRemoteMediator(
+        props.uiState.privateComments, refreshCommandFlow
     )
 
     val privateCommentIninfiteQueryResult = usePagingSource(
-        props.uiState.privateComments, true, 50
+        privateCommentMediatorResult.pagingSourceFactory, true, 50
     )
 
     val courseTerminologyEntries = useCourseTerminologyEntries(props.uiState.courseTerminology)
@@ -169,6 +185,8 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
             contain = Contain.strict
             overflowY = Overflow.scroll
         }
+
+        id = "VirtualList"
 
         content = virtualListContent {
             //Header section - description, deadline, etc
@@ -261,24 +279,10 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
 
                 if(props.uiState.submissionTextFieldVisible) {
                     item(key = "assignment_text_item") {
-                        Stack.create {
-                            direction = responsive(StackDirection.column)
-
-                            StatefulReactQuill {
-                                id = "assignment_text"
-                                value = props.uiState.editableSubmission?.casText ?: ""
-                                onChange = props.onChangeSubmissionText
-                            }
-
-                            props.uiState.currentSubmissionLength?.also { submissionLength ->
-                                val limitTypeMessageId = if(props.uiState.assignment?.caTextLimitType == ClazzAssignment.TEXT_CHAR_LIMIT) {
-                                    MR.strings.characters
-                                }else {
-                                    MR.strings.words
-                                }
-                                + "${strings[limitTypeMessageId]}: $submissionLength / "
-                                + "${props.uiState.assignment?.caTextLimit} "
-                            }
+                        CourseAssignmentSubmissionEditComponent.create {
+                            stateFlow = props.editableSubmissionFlow
+                            overviewUiState = props.uiState
+                            onChangeSubmissionText = props.onChangeSubmissionText
                         }
                     }
                 }
@@ -508,6 +512,7 @@ val ClazzAssignmentDetailOverviewScreen = FC<Props> {
 
     ClazzAssignmentDetailOverviewScreenComponent2 {
         uiState = uiStateVal
+        editableSubmissionFlow = viewModel.editableSubmissionUiState
         onChangeSubmissionText = viewModel::onChangeSubmissionText
         onChangeCourseComment = viewModel::onChangeCourseCommentText
         onChangePrivateComment = viewModel::onChangePrivateCommentText

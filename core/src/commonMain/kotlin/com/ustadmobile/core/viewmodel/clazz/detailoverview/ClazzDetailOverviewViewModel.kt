@@ -15,6 +15,7 @@ import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCase
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.locale.CourseTerminologyStrings
+import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.parseAndUpdateTerminologyStringsIfNeeded
 import com.ustadmobile.core.viewmodel.clazz.permissionlist.CoursePermissionListViewModel
@@ -24,9 +25,12 @@ import com.ustadmobile.core.viewmodel.courseblock.textblockdetail.TextBlockDetai
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.CourseBlockAndDisplayDetails
 import com.ustadmobile.lib.db.entities.*
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -89,8 +93,6 @@ class ClazzDetailOverviewViewModel(
 
     val uiState: Flow<ClazzDetailOverviewUiState> = _uiState.asStateFlow()
 
-    private var lastCourseBlockPagingSource: PagingSource<Int, CourseBlockAndDisplayDetails>? = null
-
     private val setClipboardStringUseCase: SetClipboardStringUseCase by instance()
 
     private val pagingSourceFactory: () -> PagingSource<Int, CourseBlockAndDisplayDetails> = {
@@ -100,10 +102,14 @@ class ClazzDetailOverviewViewModel(
             includeInactive = false,
             includeHidden = false,
             hideUntilFilterTime = systemTimeInMillis(),
-        ).also {
-            lastCourseBlockPagingSource = it
-        }
+        )
     }
+
+    private val _listRefreshCommandFlow = MutableSharedFlow<RefreshCommand>(
+        replay = 1, extraBufferCapacity = 0, onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
+    val listRefreshCommandFlow: Flow<RefreshCommand> = _listRefreshCommandFlow.asSharedFlow()
 
     init {
         _appUiState.update { prev ->
@@ -216,7 +222,7 @@ class ClazzDetailOverviewViewModel(
                         collapsedBlockUids = prev.collapsedBlockUids.toggle(courseBlock.cbUid)
                     )
                 }
-                lastCourseBlockPagingSource?.invalidate()
+                _listRefreshCommandFlow.tryEmit(RefreshCommand())
             }
             CourseBlock.BLOCK_TEXT_TYPE -> {
                 navController.navigate(

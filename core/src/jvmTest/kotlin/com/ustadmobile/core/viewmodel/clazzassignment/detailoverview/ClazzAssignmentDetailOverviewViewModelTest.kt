@@ -124,14 +124,17 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
 
             viewModel.uiState.test(timeout = 5.seconds) {
                 val readyState = awaitItemWhere {
-                    it.assignment != null && it.courseBlock != null && it.editableSubmission != null
+                    it.assignment != null && it.courseBlock != null
                 }
                 assertTrue(readyState.activeUserIsSubmitter)
                 assertTrue(readyState.activeUserCanSubmit)
                 assertTrue(readyState.addFileSubmissionVisible)
                 assertTrue(readyState.canEditSubmissionText)
-                assertEquals(0L, readyState.editableSubmission?.casTimestamp)
                 cancelAndIgnoreRemainingEvents()
+            }
+
+            viewModel.editableSubmissionUiState.assertItemReceived {
+                it.editableSubmission?.casTimestamp == 0L
             }
         }
     }
@@ -237,9 +240,15 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
                 )
             }
 
-            viewModel.uiState.test(timeout = 500.seconds) {
+            viewModel.uiState.test(timeout = 10.seconds) {
                 awaitItemWhere {
-                    it.assignment != null && it.courseBlock != null && it.editableSubmission != null
+                    it.assignment != null && it.courseBlock != null
+                }
+
+                viewModel.editableSubmissionUiState.assertItemReceived(
+                    timeout = 10.seconds, name = "editable submission not null"
+                ) {
+                    it.editableSubmission != null
                 }
 
                 viewModel.onChangeSubmissionText("I can has cheezburger")
@@ -376,8 +385,13 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
 
             viewModel.uiState.test(timeout = 5.seconds, name = "Wait for loading") {
                 awaitItemWhere {
-                    it.assignment != null && it.courseBlock != null && it.editableSubmission != null
-                            && it.submitterUid != 0L
+                    it.assignment != null && it.courseBlock != null && it.submitterUid != 0L
+                }
+
+                viewModel.editableSubmissionUiState.assertItemReceived (
+                    timeout = 5.seconds, name = "editable submission not null"
+                ) {
+                    it.editableSubmission != null
                 }
 
                 viewModel.onChangeSubmissionText(submissionText)

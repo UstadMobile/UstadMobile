@@ -12,7 +12,7 @@ import react.FC
 import react.Props
 import com.ustadmobile.view.components.UstadPersonAvatar
 import com.ustadmobile.wrappers.intl.Intl
-import js.core.jso
+import js.objects.jso
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone

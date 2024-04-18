@@ -18,4 +18,10 @@ interface IStringValues {
 
     fun names(): Set<String>
 
+    companion object {
+
+        fun empty(): IStringValues = MapStringValues(emptyMap())
+
+    }
+
 }

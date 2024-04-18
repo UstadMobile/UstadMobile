@@ -18,15 +18,33 @@ using apt-get on Ubuntu or MSI/EXE for Windows).
 
 On Ubuntu:
 ```
-apt-get install openjdk-18-jdk ffmpeg
+apt-get install openjdk-18-jdk mediainfo sox libsox-fmt-mp3
 ```
 Note: if you have other Java versions, make sure you run the server jar using JDK17+. You can use ``sudo update-alternatives --config java``
 to set the default java version to run.
 
+If using Ubuntu 23.10+, you can use the HandBrakeCLI from the Ubuntu package manager (1.6.1):
+```
+apt-get install handbrake-cli
+```
+
+Previous versions (including 22.04 LTS) package HandBrake 1.5 (which is not supported due to lack of
+AV1 support). You can install the latest HandBrake CLI using flatpak as per [HandBrake website](https://handbrake.fr/downloads2.php):
+```
+apt-get install flatpak
+flatpak install /path/where/downloaded/HandBrakeCLI-1.7.3-x86_64.flatpak
+```
+
 On Windows:
 * Download and install Java (JDK17+) if not already installed from the Java site [https://www.oracle.com/java/technologies/downloads/#jdk17-windows](https://www.oracle.com/java/technologies/downloads/#jdk17-windows)
-* FFMPEG is required. If you don't already have it in your path, the server can download it for you 
-  when you run it for the first time.
+* Use Winget to download and install MediaInfo and HandBrakeCLI:
+```
+winget install -e --id MediaArea.MediaInfo
+winget install -e --id HandBrake.HandBrake.CLI
+```
+* Download and install from the [Sox website](https://sourceforge.net/projects/sox/files/sox/14.4.2/) 
+  (the Winget package does not work because it does not get added to the path).
+
 
 ### 3. Unzip ustad-server.zip and start server
 
@@ -115,6 +133,13 @@ ProxyPassReverse / http://localhost:8087/
 SSLProxyEngine On
 ProxyPreserveHost On
 RequestHeader set X-Forwarded-Proto https
+```
+
+URL prefixes: if the system is not accessed via the top level URL, then the prefix must be specified
+in ustad-server.conf using the urlPrefix property. The full URL must be passed e.g.
+```
+ProxyPass /ustad/ http://localhost:8087/ustad/ nocanon
+ProxyPassReverse /ustad/ http://localhost:8087/ustad/
 ```
 
 Enable required Apache modules:

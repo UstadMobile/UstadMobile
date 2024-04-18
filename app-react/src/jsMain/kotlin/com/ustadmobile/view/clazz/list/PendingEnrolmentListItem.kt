@@ -15,7 +15,7 @@ import com.ustadmobile.lib.db.entities.EnrolmentRequest
 import com.ustadmobile.mui.components.ThemeContext
 import com.ustadmobile.view.clazz.uriOrDefaultBanner
 import com.ustadmobile.wrappers.intl.Intl
-import js.core.jso
+import js.objects.jso
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone

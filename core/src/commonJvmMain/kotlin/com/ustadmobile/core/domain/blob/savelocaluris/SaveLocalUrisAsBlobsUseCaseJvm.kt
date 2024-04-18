@@ -81,7 +81,7 @@ class SaveLocalUrisAsBlobsUseCaseJvm(
 
             val sha256Base64 = transferResult.sha256.encodeBase64()
 
-            val blobUrl = endpointUrl.resolve("/api/blob/" +
+            val blobUrl = endpointUrl.resolve("api/blob/" +
                     UMURLEncoder.encodeUTF8(sha256Base64))
 
             val blobUrlStr = blobUrl.toString()
@@ -100,6 +100,11 @@ class SaveLocalUrisAsBlobsUseCaseJvm(
                         request = blobRequest,
                         extraHeaders = headersBuilder {
                             header("cache-control", "immutable")
+                            saveItem.extraHeaders.names().forEach { extraHeaderName ->
+                                saveItem.extraHeaders[extraHeaderName]?.also {
+                                    header(extraHeaderName, it)
+                                }
+                            }
                         },
                     ),
                     createRetentionLock = saveItem.createRetentionLock,

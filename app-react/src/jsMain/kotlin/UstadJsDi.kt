@@ -5,6 +5,7 @@ import com.russhwolf.settings.set
 import com.ustadmobile.BuildConfigJs
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.contententry.importcontent.CancelRemoteContentEntryImportUseCase
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCaseJs
@@ -21,7 +22,6 @@ import com.ustadmobile.core.impl.di.DomainDiModuleJs
 import com.ustadmobile.core.impl.di.commonDomainDiModule
 import com.ustadmobile.core.schedule.ClazzLogCreatorManager
 import com.ustadmobile.core.schedule.ClazzLogCreatorManagerJs
-import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.RepositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
@@ -170,10 +170,6 @@ internal fun ustadJsDi(
 
     bind<CoroutineDispatcher>(tag = UstadMobileSystemCommon.TAG_MAIN_COROUTINE_CONTEXT) with singleton {
         Dispatchers.Main
-    }
-
-    bind<ContentEntryOpener>() with scoped(EndpointScope.Default).singleton {
-        ContentEntryOpener(di, context)
     }
 
     bind<HttpClient>() with singleton {

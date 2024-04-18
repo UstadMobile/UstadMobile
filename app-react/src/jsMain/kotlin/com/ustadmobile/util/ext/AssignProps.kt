@@ -1,6 +1,6 @@
 package com.ustadmobile.util.ext
 
-import kotlinext.js.getOwnPropertyNames
+import js.objects.Object.Companion.getOwnPropertyNames
 
 /**
  * Like Object.assign, but with a filter so that some properties can be excluded. Will assign all own
@@ -12,7 +12,7 @@ fun Any.assignPropsTo(
 ) {
     val thisDynamic = this.asDynamic()
     val receiverDynamic = receiver.asDynamic()
-    this.getOwnPropertyNames().filter(filter).forEach { propName ->
+    getOwnPropertyNames(this).filter(filter).forEach { propName ->
         receiverDynamic[propName] = thisDynamic[propName]
     }
 }

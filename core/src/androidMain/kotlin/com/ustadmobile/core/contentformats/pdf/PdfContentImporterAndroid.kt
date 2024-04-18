@@ -42,6 +42,7 @@ class PdfContentImporterAndroid(
     saveLocalUriAsBlobAndManifestUseCase = saveLocalUriAsBlobAndManifestUseCase,
     getStoragePathForUrlUseCase =  getStoragePathForUrlUseCase,
     json = json,
+    compressPdfUseCase = null,
 ) {
 
     override suspend fun extractMetadata(

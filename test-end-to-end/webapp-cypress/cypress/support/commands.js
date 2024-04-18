@@ -134,7 +134,7 @@ Cypress.Commands.add('ustadAddCourse',(courseName) => {
     cy.contains("button","Course").click()
     cy.contains("Add a new course").click()
     cy.get('input[id="clazz_name"]').type(courseName)
-    cy.get('div[data-placeholder="Description"]').type("test class")
+    cy.get('div[data-placeholder="Description"][contenteditable="true"]').type("test class")
     cy.contains("button","Save").click()
 })
 
@@ -204,7 +204,8 @@ Cypress.Commands.add('ustadTypeAndSubmitAssignmentComment', (commentid, sendid, 
     cy.get('input' + commentid + '[value=\"' + comment + '\"]')
     cy.get(commentid).should('have.value', comment);
     cy.get(sendid).click();
-    cy.contains(comment).should('exist');
+    cy.contains('.MuiListItemText-secondary',comment).should('exist');
+
 });
 
 

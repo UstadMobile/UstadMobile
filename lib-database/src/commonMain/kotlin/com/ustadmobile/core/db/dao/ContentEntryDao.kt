@@ -34,22 +34,6 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
     ): ContentEntryAndLanguage?
 
     @Query("""
-        SELECT ContentEntry.*, 
-               Language.*,
-               CourseBlock.*
-          FROM ContentEntry
-               LEFT JOIN Language 
-               ON Language.langUid = ContentEntry.primaryLanguageUid 
-               
-               LEFT JOIN CourseBlock
-               ON CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
-               AND CourseBlock.cbEntityUid = :entityUid
-               
-         WHERE ContentEntry.contentEntryUid = :entityUid       
-    """)
-    abstract suspend fun findEntryWithBlockAndLanguageByUidAsync(entityUid: Long): ContentEntryWithBlockAndLanguage?
-
-    @Query("""
         SELECT ContentEntry.*
           FROM ContentEntry
          WHERE ContentEntry.contentEntryUid = :entryUuid 
@@ -199,10 +183,6 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
                          ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid 
              WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid 
                AND (:langParam = 0 OR ContentEntry.primaryLanguageUid = :langParam)
-               AND (ContentEntry.publik 
-                    OR (SELECT username
-                          FROM Person
-                         WHERE personUid = :personUid) IS NOT NULL) 
                AND (:categoryParam0 = 0 OR :categoryParam0 
                     IN (SELECT ceccjContentCategoryUid 
                           FROM ContentEntryContentCategoryJoin 
@@ -222,7 +202,6 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
         parentUid: Long,
         langParam: Long,
         categoryParam0: Long,
-        personUid: Long,
         sortOrder: Int,
         includeDeleted: Boolean,
     ): PagingSource<Int, ContentEntryAndListDetail>

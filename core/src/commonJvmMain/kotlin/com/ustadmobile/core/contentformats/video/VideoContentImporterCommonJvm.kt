@@ -15,19 +15,26 @@ import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndMan
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
 import com.ustadmobile.core.domain.cachestoragepath.getLocalUriIfRemote
+import com.ustadmobile.core.domain.compress.CompressParams
+import com.ustadmobile.core.domain.compress.CompressionLevel
+import com.ustadmobile.core.domain.compress.originalSizeHeaders
+import com.ustadmobile.core.domain.compress.video.CompressVideoUseCase
 import com.ustadmobile.core.domain.contententry.ContentConstants
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
 import com.ustadmobile.core.io.ext.toDoorUri
 import com.ustadmobile.core.uri.UriHelper
+import com.ustadmobile.core.util.ext.fileExtensionOrNull
 import com.ustadmobile.core.util.ext.requireSourceAsDoorUri
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
+import com.ustadmobile.door.ext.toFile
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryImportJob
 import com.ustadmobile.lib.db.entities.ContentEntryVersion
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.libcache.UstadCache
+import com.ustadmobile.libcache.headers.MimeTypeHelper
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -50,11 +57,13 @@ class VideoContentImporterCommonJvm(
     private val saveLocalUriAsBlobAndManifestUseCase: SaveLocalUriAsBlobAndManifestUseCase,
     private val getStoragePathForUrlUseCase: GetStoragePathForUrlUseCase,
     private val validateVideoFileUseCase: ValidateVideoFileUseCase,
+    private val mimeTypeHelper: MimeTypeHelper,
+    private val compressUseCase: CompressVideoUseCase? = null,
 ) : ContentImporter(endpoint) {
 
 
     override val importerId: Int
-        get() = 101
+        get() = IMPORTER_ID
     override val supportedMimeTypes: List<String>
         get() = listOf("video/mpeg")
 
@@ -73,7 +82,43 @@ class VideoContentImporterCommonJvm(
         progressListener: ContentImportProgressListener,
     ): ContentEntryVersion = withContext(Dispatchers.IO) {
         val jobUri = jobItem.requireSourceAsDoorUri()
-        val localUri = getStoragePathForUrlUseCase.getLocalUriIfRemote(jobUri)
+        val fromUri = getStoragePathForUrlUseCase.getLocalUriIfRemote(jobUri)
+
+        //Get the mime type from the uri to import if possible
+        // If not, try looking at the original filename (might be needed where using temp import
+        // files etc.
+        val fromMimeType = uriHelper.getMimeType(jobUri)
+            ?: jobItem.cjiOriginalFilename?.fileExtensionOrNull()?.let {
+                mimeTypeHelper.guessByExtension(it)
+            } ?: throw IllegalStateException("Cannot get mime type")
+
+
+        val compressUseCaseVal = compressUseCase
+        val compressionLevel = CompressionLevel.forValue(jobItem.cjiCompressionLevel)
+        val originalSize = uriHelper.getSize(fromUri)
+        val compressionResult = compressUseCaseVal?.takeIf {
+            compressionLevel != CompressionLevel.NONE
+        }?.invoke(
+            fromUri = fromUri.toString(),
+            toUri = null,
+            onProgress = {
+                progressListener.onProgress(
+                    jobItem.copy(
+                        cjiItemTotal = it.total,
+                        cjiItemProgress = it.completed
+                    )
+                )
+            },
+            params = CompressParams(
+                compressionLevel = compressionLevel,
+            )
+        )
+
+        val (uri, mimeType) = if(compressionResult != null) {
+            Pair(DoorUri.parse(compressionResult.uri), compressionResult.mimeType)
+        }else {
+            Pair(fromUri, fromMimeType)
+        }
 
         val contentEntryVersionUid = db.doorPrimaryKeyManager.nextId(ContentEntryVersion.TABLE_ID)
         val urlPrefix = createContentUrlPrefix(contentEntryVersionUid)
@@ -82,14 +127,6 @@ class VideoContentImporterCommonJvm(
         val mediaInfoEntryUri = "media.json"
         val workDir = Path(tmpPath, "video-import-${systemTimeInMillis()}")
         fileSystem.createDirectories(workDir)
-
-        //Get the mime type from the uri to import if possible
-        // If not, try looking at the original filename (might be needed where using temp import
-        // files etc.
-        val mimeType = uriHelper.getMimeType(jobUri)
-            ?: jobItem.cjiOriginalFilename?.let {
-                uriHelper.getMimeType(DoorUri.parse("file:///$it"))
-            } ?: throw IllegalStateException("Cannot get mime type")
 
         val mediaContentInfo = MediaContentInfo(
             sources = listOf(
@@ -114,11 +151,12 @@ class VideoContentImporterCommonJvm(
                 listOf(
                     SaveLocalUriAsBlobAndManifestUseCase.SaveLocalUriAsBlobAndManifestItem(
                         blobItem = SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem(
-                            localUri = localUri.toString(),
+                            localUri = uri.toString(),
                             entityUid = contentEntryVersionUid,
                             tableId = ContentEntryVersion.TABLE_ID,
                             mimeType = mimeType,
                             deleteLocalUriAfterSave = false,
+                            extraHeaders = compressionResult.originalSizeHeaders(),
                         ),
                         manifestUri = videoEntryUri
                     ),
@@ -134,6 +172,10 @@ class VideoContentImporterCommonJvm(
                     )
                 )
             )
+
+            //Now that the video has been saved as a local URI, delete the temporary copy
+            compressionResult?.uri?.takeIf { it.startsWith("file:") }
+                ?.let { DoorUri.parse(it) }?.toFile()?.delete()
 
             val manifest = ContentManifest(
                 version = 1,
@@ -155,6 +197,8 @@ class VideoContentImporterCommonJvm(
                 cevContentEntryUid = jobItem.cjiContentEntryUid,
                 cevManifestUrl = manifestUrl,
                 cevOpenUri = mediaInfoEntryUri,
+                cevOriginalSize = originalSize,
+                cevStorageSize = compressionResult?.compressedSize ?: originalSize,
             )
         }finally {
             File(workDir.toString()).deleteRecursively()
@@ -197,5 +241,10 @@ class VideoContentImporterCommonJvm(
             Napier.w(throwable = e) { "Exception importing what looked like video: $e" }
             throw InvalidContentException("Exception importing what looked like video", e)
         }
+    }
+
+    companion object {
+
+        const val IMPORTER_ID = 101
     }
 }

@@ -1880,4 +1880,32 @@
     -->
     <string name="line_number">Line number</string>
 
+    <string name="selected_content">Selected content</string>
+
+    <string name="edit_content_block">Edit content block</string>
+
+    <string name="compression">Compression</string>
+
+    <string name="compression_highest">Highest (smallest file size)</string>
+
+    <string name="compression_high">High</string>
+
+    <string name="compression_medium">Medium</string>
+
+    <string name="compression_low">Low</string>
+
+    <string name="compression_lowest">Lowest (highest quality)</string>
+
+    <string name="compression_none">None (original quality and file size)</string>
+
+    <!--
+    Tells the user the size of a piece of content. %1$s will be replaced with the current (compressed)
+    size. %2$s will be replaced with the original (e.g. larger) size.
+    -->
+    <string name="size_compressed_was">Size: %1$s (compressed, was %2$s)</string>
+
+    <string name="size">Size: %1$s</string>
+
+    <string name="import_error">Import error</string>
+
 </resources>

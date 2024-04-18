@@ -26,7 +26,7 @@ import mui.system.sx
 import react.*
 import com.ustadmobile.util.ext.onTextChange
 import web.cssom.Cursor
-import js.core.jso
+import js.objects.jso
 import com.ustadmobile.mui.common.inputCursor
 import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.mui.components.UstadTextField
@@ -117,6 +117,7 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
             ReactQuill {
                 value = props.uiState.entity?.clazzDesc ?: ""
                 id = "clazz_desc"
+                readOnly = !props.uiState.fieldsEnabled
                 placeholder = strings[MR.strings.description]
                 onChange = {
                     props.uiState.entity?.also { entity ->

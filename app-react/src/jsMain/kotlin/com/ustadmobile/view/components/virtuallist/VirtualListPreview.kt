@@ -6,7 +6,7 @@ import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
 import web.cssom.*
-import js.core.jso
+import js.objects.jso
 import mui.material.Container
 import mui.material.ListItem
 import mui.material.ListItemText

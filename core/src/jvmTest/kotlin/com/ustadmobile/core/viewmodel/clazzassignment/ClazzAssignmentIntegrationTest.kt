@@ -93,8 +93,13 @@ class ClazzAssignmentIntegrationTest: AbstractMainDispatcherTest() {
                 viewModel.uiState.test(timeout = 10.seconds, name = "student can submit") {
                     awaitItemWhere {
                         it.activeUserCanSubmit && it.submissionTextFieldVisible &&
-                            it.fieldsEnabled && it.editableSubmission != null
+                            it.fieldsEnabled
                     }
+
+                    viewModel.editableSubmissionUiState.assertItemReceived(
+                        timeout = 10.seconds, name = "editable submission received"
+                    ) { it.editableSubmission != null }
+
                     viewModel.onChangeSubmissionText("I can has cheezburger")
                     viewModel.onClickSubmit()
 

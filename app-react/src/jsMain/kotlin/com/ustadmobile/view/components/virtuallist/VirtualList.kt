@@ -2,13 +2,17 @@ package com.ustadmobile.view.components.virtuallist
 
 import app.cash.paging.PagingSourceLoadResult
 import app.cash.paging.PagingSourceLoadResultPage
-import js.core.Object
-import js.core.jso
+import js.objects.Object
+import js.objects.jso
 import react.*
 import react.dom.html.ReactHTML.div
 import tanstack.react.query.UseInfiniteQueryResult
 import tanstack.react.virtual.useVirtualizer
+import web.cssom.ClassName
 import web.cssom.scaley
+import web.events.EventHandler
+import web.events.addEventListener
+import web.events.removeEventListener
 import web.html.HTMLElement
 import web.uievents.WheelEvent
 
@@ -38,6 +42,8 @@ external interface VirtualListProps: PropsWithChildren {
      * on Jetpack Compose
      */
     var reverseLayout: Boolean?
+
+    var id: String?
 }
 
 
@@ -63,7 +69,7 @@ val VirtualList = FC<VirtualListProps> {props ->
     val parentRef = useRef<HTMLElement>(null)
 
     useEffect(parentRef.current) {
-        val handleScroll: (evt: WheelEvent) -> Unit = { evt ->
+        val handleScroll: EventHandler<WheelEvent, HTMLElement> = EventHandler { evt ->
             evt.preventDefault()
             val currentTarget = evt.currentTarget as? HTMLElement
             if(currentTarget != null){
@@ -73,7 +79,7 @@ val VirtualList = FC<VirtualListProps> {props ->
 
         if(props.reverseLayout == true) {
             parentRef.current?.addEventListener(
-                WheelEvent.WHEEL, handleScroll, jso {
+                WheelEvent.wheel(), handleScroll, jso {
                     passive = false
                 }
             )
@@ -81,7 +87,7 @@ val VirtualList = FC<VirtualListProps> {props ->
 
         cleanup {
             if(props.reverseLayout == true) {
-                parentRef.current?.removeEventListener(WheelEvent.WHEEL, handleScroll)
+                parentRef.current?.removeEventListener(WheelEvent.wheel(), handleScroll)
             }
         }
     }
@@ -122,6 +128,9 @@ val VirtualList = FC<VirtualListProps> {props ->
 
     div {
         ref = parentRef
+        id = props.id
+        className = ClassName("VirtualList")
+
         style = if(props.reverseLayout == true) {
             jso {
                 props.style?.also { propsStyle ->

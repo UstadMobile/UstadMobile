@@ -18,7 +18,7 @@ import com.ustadmobile.lib.db.entities.UserSession
 import com.ustadmobile.mui.common.Area
 import com.ustadmobile.mui.common.Sizes
 import com.ustadmobile.view.components.UstadPersonAvatar
-import js.core.jso
+import js.objects.jso
 import web.cssom.*
 import mui.system.sx
 import mui.material.*
