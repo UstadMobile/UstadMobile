@@ -11,6 +11,7 @@ import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndMan
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCaseJvm
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCaseJvm
+import com.ustadmobile.core.domain.compress.list.CompressListUseCase
 import com.ustadmobile.core.domain.contententry.ContentConstants
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseCommonJvm
@@ -87,6 +88,8 @@ class XapiZipContentImporterTest :AbstractMainDispatcherTest() {
 
     private lateinit var activeEndpoint: Endpoint
 
+    private lateinit var compressListUseCase: CompressListUseCase
+
     @Before
     fun setup(){
         endpointScope = EndpointScope()
@@ -130,6 +133,12 @@ class XapiZipContentImporterTest :AbstractMainDispatcherTest() {
             tmpDir = Path(rootTmpPath.absolutePath),
             deleteUrisUseCase = deleteUrisUseCase,
         )
+        compressListUseCase = CompressListUseCase(
+            compressVideoUseCase = null,
+            mimeTypeHelper = FileMimeTypeHelperImpl(),
+            compressImageUseCase = null,
+        )
+
         saveAndManifestUseCase = SaveLocalUriAsBlobAndManifestUseCaseJvm(saveLocalUriAsBlobUseCase,
             FileMimeTypeHelperImpl())
     }
@@ -147,6 +156,7 @@ class XapiZipContentImporterTest :AbstractMainDispatcherTest() {
             json = di.direct.instance(),
             tmpPath = Path(rootTmpPath.absolutePath),
             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
+            compressListUseCase = compressListUseCase,
         )
 
         val metadata = runBlocking {
@@ -172,6 +182,7 @@ class XapiZipContentImporterTest :AbstractMainDispatcherTest() {
             json = di.direct.instance(),
             tmpPath = Path(rootTmpPath.absolutePath),
             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
+            compressListUseCase = compressListUseCase,
         )
 
         runBlocking {
@@ -196,6 +207,7 @@ class XapiZipContentImporterTest :AbstractMainDispatcherTest() {
             json = di.direct.instance(),
             tmpPath = Path(rootTmpPath.absolutePath),
             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
+            compressListUseCase = compressListUseCase,
         )
         runBlocking {
             assertNull(xapiPlugin.extractMetadata(tempFile.toDoorUri(), "file.zip"))
@@ -218,6 +230,7 @@ class XapiZipContentImporterTest :AbstractMainDispatcherTest() {
             json = di.direct.instance(),
             tmpPath = Path(rootTmpPath.absolutePath),
             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
+            compressListUseCase = compressListUseCase,
         )
 
         val result = runBlocking {

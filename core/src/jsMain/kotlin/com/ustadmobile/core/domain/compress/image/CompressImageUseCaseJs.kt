@@ -15,7 +15,7 @@ import web.url.URL
 /**
  * Implementation of image compression for Javascript. Uses compressorjs.
  */
-class CompressImageUseCaseJs : CompressUseCase {
+class CompressImageUseCaseJs : CompressImageUseCase {
     override suspend fun invoke(
         fromUri: String,
         toUri: String?,
@@ -50,6 +50,8 @@ class CompressImageUseCaseJs : CompressUseCase {
             return CompressResult(
                 uri = resultUri,
                 mimeType = compressedBlob.type,
+                originalSize = blob.size.toLong(),
+                compressedSize = compressedBlob.size.toLong(),
             )
         }catch(e: Throwable) {
             Napier.e("CompressImageUseCase: Exception caught: ", e)
