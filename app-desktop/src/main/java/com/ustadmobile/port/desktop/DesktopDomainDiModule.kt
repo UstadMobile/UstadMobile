@@ -46,14 +46,22 @@ import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCaseCommonJvm
 import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCase
 import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCaseJvm
+import com.ustadmobile.core.domain.compress.audio.CompressAudioUseCase
+import com.ustadmobile.core.domain.compress.audio.CompressAudioUseCaseJvm
+import com.ustadmobile.core.domain.compress.image.CompressImageUseCase
 import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseJvm
+import com.ustadmobile.core.domain.compress.list.CompressListUseCase
 import com.ustadmobile.core.domain.contententry.delete.DeleteContentEntryParentChildJoinUseCase
 import com.ustadmobile.core.domain.contententry.getlocalurlforcontent.GetLocalUrlForContentUseCase
 import com.ustadmobile.core.domain.contententry.getlocalurlforcontent.GetLocalUrlForContentUseCaseCommonJvm
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCase
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCaseCommonJvm
+import com.ustadmobile.core.domain.contententry.importcontent.CancelImportContentEntryUseCase
+import com.ustadmobile.core.domain.contententry.importcontent.CancelImportContentEntryUseCaseJvm
+import com.ustadmobile.core.domain.contententry.importcontent.CancelRemoteContentEntryImportUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCaseCommonJvm
+import com.ustadmobile.core.domain.contententry.importcontent.DismissRemoteContentEntryImportErrorUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.ImportContentEntryUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.epub.LaunchEpubUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.epub.LaunchEpubUseCaseJvm
@@ -98,6 +106,7 @@ import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
 import org.kodein.di.instance
+import org.kodein.di.instanceOrNull
 import org.kodein.di.on
 import org.kodein.di.scoped
 import org.kodein.di.singleton
@@ -188,13 +197,17 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         )
     }
 
+    bind<CompressImageUseCase>() with singleton {
+        CompressImageUseCaseJvm()
+    }
+
     bind<SavePictureUseCase>() with scoped(EndpointScope.Default).singleton {
         SavePictureUseCase(
             saveLocalUrisAsBlobUseCase = on(context).instance(),
             db = on(context).instance(tag = DoorTag.TAG_DB),
             repo = on(context).instance(tag = DoorTag.TAG_REPO),
             enqueueBlobUploadClientUseCase = on(context).instance(),
-            compressImageUseCase = CompressImageUseCaseJvm(),
+            compressImageUseCase = instance(),
             deleteUrisUseCase = instance()
         )
     }
@@ -465,5 +478,42 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
     }
 
 
+    bind<CancelImportContentEntryUseCase>() with scoped(EndpointScope.Default).provider {
+        CancelImportContentEntryUseCaseJvm(
+            scheduler = instance(),
+            endpoint = context,
+        )
+    }
+
+    bind<CancelRemoteContentEntryImportUseCase>() with scoped(EndpointScope.Default).provider {
+        CancelRemoteContentEntryImportUseCase(
+            endpoint = context,
+            httpClient = instance(),
+            repo = instance(tag = DoorTag.TAG_REPO),
+        )
+    }
+
+    bind<DismissRemoteContentEntryImportErrorUseCase>() with scoped(EndpointScope.Default).singleton {
+        DismissRemoteContentEntryImportErrorUseCase(
+            endpoint = context,
+            httpClient = instance(),
+            repo = instance(tag = DoorTag.TAG_REPO),
+        )
+    }
+
+    bind<CompressAudioUseCase>() with singleton {
+        CompressAudioUseCaseJvm(
+            workDir = instance(tag = DiTag.TAG_TMP_DIR)
+        )
+    }
+
+    bind<CompressListUseCase>() with singleton {
+        CompressListUseCase(
+            compressVideoUseCase = instanceOrNull(),
+            compressImageUseCase = instance(),
+            compressAudioUseCase = instance(),
+            mimeTypeHelper = instance(),
+        )
+    }
 
 }

@@ -69,12 +69,22 @@ import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCaseCommonJvm
 import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCase
 import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCaseAndroid
+import com.ustadmobile.core.domain.compress.audio.CompressAudioUseCase
+import com.ustadmobile.core.domain.compress.audio.CompressAudioUseCaseAndroid
+import com.ustadmobile.core.domain.compress.image.CompressImageUseCase
 import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseAndroid
+import com.ustadmobile.core.domain.compress.list.CompressListUseCase
+import com.ustadmobile.core.domain.compress.video.CompressVideoUseCase
+import com.ustadmobile.core.domain.compress.video.CompressVideoUseCaseAndroid
 import com.ustadmobile.core.domain.contententry.delete.DeleteContentEntryParentChildJoinUseCase
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCase
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCaseCommonJvm
+import com.ustadmobile.core.domain.contententry.importcontent.CancelImportContentEntryUseCase
+import com.ustadmobile.core.domain.contententry.importcontent.CancelImportContentEntryUseCaseAndroid
+import com.ustadmobile.core.domain.contententry.importcontent.CancelRemoteContentEntryImportUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCaseCommonJvm
+import com.ustadmobile.core.domain.contententry.importcontent.DismissRemoteContentEntryImportErrorUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseAndroid
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseRemote
@@ -89,6 +99,8 @@ import com.ustadmobile.core.domain.htmlcontentdisplayengine.SetHtmlContentDispla
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.ResolveXapiLaunchHrefUseCase
 import com.ustadmobile.core.domain.deleteditem.DeletePermanentlyUseCase
 import com.ustadmobile.core.domain.deleteditem.RestoreDeletedItemUseCase
+import com.ustadmobile.core.domain.extractmediametadata.ExtractMediaMetadataUseCase
+import com.ustadmobile.core.domain.extractmediametadata.ExtractMediaMetadataUseCaseAndroid
 import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCase
 import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCaseAndroid
 import com.ustadmobile.core.domain.share.ShareTextUseCase
@@ -103,7 +115,6 @@ import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
 import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
-import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCaseAndroid
 import com.ustadmobile.core.embeddedhttp.EmbeddedHttpServer
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
@@ -380,6 +391,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
                             json = instance(),
                             getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
+                            compressListUseCase = instance(),
                         )
                     )
                     add(
@@ -391,6 +403,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                             json = instance(),
                             tmpPath = contentImportTmpPath,
                             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
+                            compressListUseCase = instance(),
                         )
                     )
 
@@ -403,6 +416,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                             tmpPath = contentImportTmpPath,
                             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
                             json = instance(),
+                            compressListUseCase = instance(),
                             h5pInStream = {
                                 applicationContext.assets.open("h5p/h5p-standalone-3.6.0.zip",
                                     AssetManager.ACCESS_STREAMING)
@@ -422,6 +436,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                             json = instance(),
                             getStoragePathForUrlUseCase  = getStoragePathForUrlUseCase,
                             mimeTypeHelper = mimeTypeHelper,
+                            compressUseCase = instance(),
                         )
                     )
 
@@ -440,6 +455,24 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                     )
                 }
             )
+        }
+
+        bind<CompressVideoUseCase>() with singleton {
+            CompressVideoUseCaseAndroid(
+                appContext = applicationContext,
+                uriHelper = instance(),
+            )
+        }
+
+        bind<CompressAudioUseCase>() with singleton {
+            CompressAudioUseCaseAndroid(
+                appContext = applicationContext,
+                uriHelper = instance(),
+            )
+        }
+
+        bind<CompressImageUseCase>() with singleton {
+            CompressImageUseCaseAndroid(applicationContext)
         }
 
         bind<XmlPullParserFactory>(tag  = DiTag.XPP_FACTORY_NSAWARE) with singleton {
@@ -533,7 +566,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 db = on(context).instance(tag = DoorTag.TAG_DB),
                 repo = on(context).instance(tag = DoorTag.TAG_REPO),
                 enqueueBlobUploadClientUseCase = on(context).instance(),
-                compressImageUseCase = CompressImageUseCaseAndroid(applicationContext),
+                compressImageUseCase = instance(),
                 deleteUrisUseCase = instance(),
             )
         }
@@ -576,6 +609,13 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                     httpClient = instance(),
                     json = instance(),
                 )
+            )
+        }
+
+        bind<CancelImportContentEntryUseCase>() with scoped(EndpointScope.Default).provider {
+            CancelImportContentEntryUseCaseAndroid(
+                appContext = applicationContext,
+                endpoint = context,
             )
         }
 
@@ -698,7 +738,13 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
         }
 
         bind<ValidateVideoFileUseCase>() with singleton {
-            ValidateVideoFileUseCaseAndroid(appContext = applicationContext)
+            ValidateVideoFileUseCase(
+                extractMediaMetadataUseCase = instance()
+            )
+        }
+
+        bind<ExtractMediaMetadataUseCase>() with singleton {
+            ExtractMediaMetadataUseCaseAndroid(applicationContext)
         }
 
         bind<GetShowPoweredByUseCase>() with singleton {
@@ -779,6 +825,31 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
         bind<ValidateEmailUseCase>() with provider {
             ValidateEmailUseCase()
+        }
+
+        bind<CancelRemoteContentEntryImportUseCase>() with scoped(EndpointScope.Default).singleton {
+            CancelRemoteContentEntryImportUseCase(
+                endpoint = context,
+                httpClient = instance(),
+                repo = instance(tag = DoorTag.TAG_REPO),
+            )
+        }
+
+        bind<DismissRemoteContentEntryImportErrorUseCase>() with scoped(EndpointScope.Default).singleton {
+            DismissRemoteContentEntryImportErrorUseCase(
+                endpoint = context,
+                httpClient = instance(),
+                repo = instance(tag = DoorTag.TAG_REPO),
+            )
+        }
+
+        bind<CompressListUseCase>() with singleton {
+            CompressListUseCase(
+                compressVideoUseCase = instance(),
+                compressImageUseCase = instance(),
+                compressAudioUseCase = instance(),
+                mimeTypeHelper = instance(),
+            )
         }
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }

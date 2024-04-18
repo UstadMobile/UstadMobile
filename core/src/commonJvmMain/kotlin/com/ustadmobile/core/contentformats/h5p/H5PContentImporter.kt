@@ -10,6 +10,11 @@ import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
+import com.ustadmobile.core.domain.compress.CompressParams
+import com.ustadmobile.core.domain.compress.CompressionLevel
+import com.ustadmobile.core.domain.compress.list.CompressListUseCase
+import com.ustadmobile.core.domain.compress.list.toItemToCompress
+import com.ustadmobile.core.domain.compress.originalSizeHeaders
 import com.ustadmobile.core.domain.contententry.ContentConstants
 import com.ustadmobile.core.io.ext.readString
 import com.ustadmobile.core.io.ext.skipToEntry
@@ -72,6 +77,7 @@ class H5PContentImporter(
     private val json: Json,
     private val tmpPath: Path,
     private val saveLocalUriAsBlobAndManifestUseCase: SaveLocalUriAsBlobAndManifestUseCase,
+    private val compressListUseCase: CompressListUseCase,
     private val fileSystem: FileSystem = SystemFileSystem,
     private val h5pInStream: () -> InputStream = {
         this::class.java.getResourceAsStream(
@@ -152,6 +158,9 @@ class H5PContentImporter(
     ): ContentEntryVersion = withContext(Dispatchers.IO) {
         val jobUri = jobItem.requireSourceAsDoorUri()
         val entry = db.contentEntryDao.findByUid(jobItem.cjiContentEntryUid)
+        val params = CompressParams(
+            compressionLevel = CompressionLevel.forValue(jobItem.cjiCompressionLevel)
+        )
 
         val contentEntryVersionUid = db.doorPrimaryKeyManager.nextIdAsync(
             ContentEntryVersion.TABLE_ID)
@@ -166,15 +175,32 @@ class H5PContentImporter(
                 zipSource.unzipTo(h5pUnzippedPath)
             }
 
+            val compressedEntries = compressListUseCase(
+                items = h5pZipEntries.map { it.toItemToCompress() },
+                params = params,
+                workDir = workTmpPath,
+                onProgress = {
+                    progressListener.onProgress(
+                        jobItem.copy(
+                            cjiItemTotal = it.total,
+                            cjiItemProgress = it.completed
+                        )
+                    )
+                }
+            )
+
             val h5pContentManifestEntries = saveLocalUriAsBlobAndManifestUseCase(
-                items = h5pZipEntries.map { unzippedEntry ->
+                items = compressedEntries.map { compressedEntry ->
                     SaveLocalUriAsBlobAndManifestUseCase.SaveLocalUriAsBlobAndManifestItem(
                         blobItem = SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem(
-                            localUri = unzippedEntry.path.toDoorUri().toString(),
+                            localUri = compressedEntry.localUri,
                             entityUid = contentEntryVersionUid,
                             tableId = ContentEntryVersion.TABLE_ID,
+                            mimeType = compressedEntry.mimeType,
+                            extraHeaders = compressedEntry.compressedResult.originalSizeHeaders(),
                         ),
-                        manifestUri = "h5p-folder/${unzippedEntry.name}"
+                        manifestUri = "h5p-folder/${compressedEntry.originalItem.name}",
+                        manifestMimeType = compressedEntry.mimeType,
                     )
                 }
             )
@@ -311,7 +337,11 @@ class H5PContentImporter(
                 cevContentType = ContentEntryVersion.TYPE_XAPI,
                 cevManifestUrl = manifestUrl,
                 cevContentEntryUid = jobItem.cjiContentEntryUid,
-                cevOpenUri = "tincan.xml"
+                cevOpenUri = "tincan.xml",
+                cevStorageSize = h5pContentManifestEntries.sumOf { it.savedBlob.storageSize } +
+                    h5pStandAloneManifestEntries.sumOf { it.savedBlob.storageSize } +
+                    tinCanAndIndexEntries.sumOf { it.savedBlob.storageSize },
+                cevOriginalSize = uriHelper.getSize(jobUri),
             )
         }finally {
             File(workTmpPath.toString()).deleteRecursively()

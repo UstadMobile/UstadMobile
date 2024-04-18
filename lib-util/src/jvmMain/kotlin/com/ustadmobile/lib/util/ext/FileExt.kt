@@ -7,6 +7,10 @@ fun isWindowsOs(osName: String = System.getProperty("os.name") ?: ""): Boolean {
     return osName.lowercase().contains("win")
 }
 
+fun isLinuxOs(osName: String = System.getProperty("os.name") ?: ""): Boolean {
+    return osName.lowercase().let { it.contains("linux") || it.contains("nix") }
+}
+
 /**
  * Find a file that implements a command for the receiver's name. On Unix/Linux, this is simple, it
  * is just the file itself (if it exists).
@@ -24,10 +28,3 @@ fun File.getCommandFile(
         else -> null
     }
 }
-
-/**
- * Checks to see if there is a valid command here. On Linux this is the same as file.exists(). On windows, this will look for the file itself as well as variants with .exe and .bat
- */
-fun File.commandExists(
-    osName: String = System.getProperty("os.name") ?: ""
-) = this.getCommandFile(osName) != null

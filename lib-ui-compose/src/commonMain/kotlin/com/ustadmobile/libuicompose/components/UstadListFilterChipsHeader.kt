@@ -1,8 +1,9 @@
 package com.ustadmobile.libuicompose.components
 
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -11,6 +12,7 @@ import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.util.MessageIdOption2
 import dev.icerock.moko.resources.compose.stringResource
 
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun UstadListFilterChipsHeader(
     modifier: Modifier = Modifier,
@@ -19,21 +21,14 @@ fun UstadListFilterChipsHeader(
     enabled: Boolean = true,
     onClickFilterChip: (MessageIdOption2) -> Unit = {},
 ){
-    Row (
-        modifier = modifier.horizontalScroll(
-            rememberScrollState()
-        )
-    ){
-        filterOptions.forEachIndexed { index, filterOption ->
+    FlowRow(modifier = modifier) {
+        filterOptions.forEach { filterOption ->
             FilterChip(
                 selected = filterOption.value == selectedChipId,
                 onClick = { onClickFilterChip(filterOption) },
                 enabled = enabled,
                 modifier = Modifier
-                    .padding(
-                        start = if(index == 0) 16.dp else 8.dp,
-                        end = if(index == filterOptions.size - 1) 16.dp else 8.dp
-                    ),
+                    .padding(start = 8.dp, end = 8.dp),
                 label = {
                     Text(stringResource(resource = filterOption.stringResource))
                 }
