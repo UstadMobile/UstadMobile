@@ -46,8 +46,6 @@ import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCaseCommonJvm
 import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCase
 import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCaseJvm
-import com.ustadmobile.core.domain.compress.audio.CompressAudioUseCase
-import com.ustadmobile.core.domain.compress.audio.CompressAudioUseCaseJvm
 import com.ustadmobile.core.domain.compress.image.CompressImageUseCase
 import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseJvm
 import com.ustadmobile.core.domain.compress.list.CompressListUseCase
@@ -498,12 +496,6 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             endpoint = context,
             httpClient = instance(),
             repo = instance(tag = DoorTag.TAG_REPO),
-        )
-    }
-
-    bind<CompressAudioUseCase>() with singleton {
-        CompressAudioUseCaseJvm(
-            workDir = instance(tag = DiTag.TAG_TMP_DIR)
         )
     }
 

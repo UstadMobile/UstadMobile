@@ -20,6 +20,8 @@ import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.core.domain.cachelock.AddOfflineItemInactiveTriggersCallback
 import com.ustadmobile.core.domain.cachelock.UpdateCacheLockJoinUseCase
+import com.ustadmobile.core.domain.compress.audio.CompressAudioUseCase
+import com.ustadmobile.core.domain.compress.audio.CompressAudioUseCaseJvm
 import com.ustadmobile.core.domain.compress.pdf.CompressPdfUseCase
 import com.ustadmobile.core.domain.compress.pdf.CompressPdfUseCaseJvm
 import com.ustadmobile.core.domain.compress.video.CompressVideoUseCase
@@ -262,6 +264,11 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
             specifiedLocation = File(handbrakeResourcesDir, "HandBrakeCLI").getCommandFile()?.absolutePath,
         ).invoke()
     }
+
+    val soxCommand = SysPathUtil.findCommandInPath(
+        commandName = "sox",
+        manuallySpecifiedLocation = File(mediaInfoResourcesDir, "sox").getCommandFile(),
+    ) ?: throw IllegalArgumentException("sox command not found")
 
     val gsPath = SysPathUtil.findCommandInPath("gs")
 
@@ -522,6 +529,14 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
             )
         }
     }
+
+    bind<CompressAudioUseCase>() with singleton {
+        CompressAudioUseCaseJvm(
+            soxPath = soxCommand.absolutePath,
+            workDir = instance(tag = DiTag.TAG_TMP_DIR),
+        )
+    }
+
 
     gsPath?.also {
         bind<CompressPdfUseCase>() with provider {
