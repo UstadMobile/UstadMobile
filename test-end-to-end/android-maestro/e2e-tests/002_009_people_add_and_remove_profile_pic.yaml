@@ -17,8 +17,12 @@ env:
       TESTFILENAME: "admin_pic.jpg"
       CONTROLSERVER: ${CONTROLSERVER}
       TESTSERIAL: ${TESTSERIAL}
+- assertVisible:
+    id: "person_picture"
 - tapOn:
     id: "floating_action_button"
 - tapOn: "Add"
 - tapOn: "Remove photo"
 - tapOn: "Save"
+- assertNotVisible:
+    id: "person_picture"

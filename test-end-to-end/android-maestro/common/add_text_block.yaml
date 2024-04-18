@@ -20,5 +20,8 @@ appId: com.toughra.ustadmobile
     id: "com.toughra.ustadmobile:id/editor"
 - inputText:  ${TEXT}
 - tapOn: "Done"
+- assertVisible:
+        id: "app_title"
+        text: "Add text"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/added_text_${TEXTTITLE}"
 - tapOn: "Done"
