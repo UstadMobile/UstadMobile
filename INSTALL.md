@@ -18,10 +18,10 @@ using apt-get on Ubuntu or MSI/EXE for Windows).
 
 On Ubuntu:
 ```
-apt-get install openjdk-18-jdk mediainfo sox libsox-fmt-mp3
+apt-get install openjdk-17-jdk mediainfo sox libsox-fmt-all
 ```
-Note: if you have other Java versions, make sure you run the server jar using JDK17+. You can use ``sudo update-alternatives --config java``
-to set the default java version to run.
+Note: if you have other Java versions, make sure you run the server jar using JDK17+. You can use 
+``sudo update-alternatives --config java`` to set the default java version to run.
 
 If using Ubuntu 23.10+, you can use the HandBrakeCLI from the Ubuntu package manager (1.6.1):
 ```
