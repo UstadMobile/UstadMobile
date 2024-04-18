@@ -1,6 +1,6 @@
 package com.ustadmobile.view.components.virtuallist
 
-import js.core.jso
+import js.objects.jso
 import react.FC
 import react.PropsWithChildren
 import react.useEffect

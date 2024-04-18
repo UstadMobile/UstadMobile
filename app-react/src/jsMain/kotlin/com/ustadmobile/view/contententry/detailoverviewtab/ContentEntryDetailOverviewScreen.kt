@@ -5,21 +5,23 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.locale.StringProvider
+import com.ustadmobile.core.impl.locale.StringProviderJs
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.progressBadge
 import com.ustadmobile.core.viewmodel.contententry.detailoverviewtab.ContentEntryDetailOverviewUiState
 import com.ustadmobile.core.viewmodel.contententry.detailoverviewtab.ContentEntryDetailOverviewViewModel
+import com.ustadmobile.core.viewmodel.contententry.detailoverviewtab.progress
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.composites.ContentEntryAndDetail
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.mui.common.justifyContent
 import com.ustadmobile.mui.common.md
 import com.ustadmobile.mui.common.xs
+import com.ustadmobile.mui.components.UstadLinearProgressListItem
 import com.ustadmobile.mui.components.UstadQuickActionButton
+import com.ustadmobile.mui.components.UstadRawHtml
 import web.cssom.*
 import mui.material.*
 import mui.material.Badge
-import mui.material.List
 import mui.material.styles.TypographyVariant
 import mui.system.Container
 import mui.system.responsive
@@ -41,10 +43,10 @@ import mui.icons.material.CheckCircle
 import mui.icons.material.Cancel
 import mui.icons.material.BookOutlined
 import mui.icons.material.EmojiEvents
-import mui.icons.material.LocationOnOutlined
 import mui.icons.material.CheckBoxOutlined
 import mui.icons.material.Delete
 import mui.icons.material.Download
+import react.ReactNode
 
 val CONTENT_ENTRY_TYPE_ICON_MAP = mapOf(
     ContentEntry.TYPE_EBOOK to Book,
@@ -60,8 +62,6 @@ external interface ContentEntryDetailOverviewScreenProps : Props {
 
     var uiState: ContentEntryDetailOverviewUiState
 
-    var onClickDownload: () -> Unit
-
     var onClickOpen: () -> Unit
 
     var onClickMarkComplete: () -> Unit
@@ -72,7 +72,10 @@ external interface ContentEntryDetailOverviewScreenProps : Props {
 
     var onClickTranslation: (ContentEntryRelatedEntryJoinWithLanguage) -> Unit
 
-    var onClickContentJobItem: () -> Unit
+    var onCancelRemoteImport: (Long) -> Unit
+
+    var onDismissRemoteImportError: (Long) -> Unit
+
 }
 
 val ContentEntryDetailOverviewComponent2 = FC<ContentEntryDetailOverviewScreenProps> { props ->
@@ -83,17 +86,8 @@ val ContentEntryDetailOverviewComponent2 = FC<ContentEntryDetailOverviewScreenPr
         Stack {
             spacing = responsive(20.px)
 
-            ContentDetails{
+            ContentDetails {
                 uiState = props.uiState
-            }
-
-            if (props.uiState.contentEntryButtons?.showDownloadButton == true){
-                Button{
-                    variant = ButtonVariant.contained
-                    onClick = { props.onClickDownload }
-
-                    + strings[MR.strings.download].uppercase()
-                }
             }
 
             if (props.uiState.openButtonVisible){
@@ -105,14 +99,6 @@ val ContentEntryDetailOverviewComponent2 = FC<ContentEntryDetailOverviewScreenPr
                 }
             }
 
-            ContentJobList{
-                uiState = props.uiState
-            }
-
-            if (props.uiState.locallyAvailable) {
-                LocallyAvailableRow()
-            }
-
             Divider { orientation = Orientation.horizontal }
 
             QuickActionBarsRow {
@@ -122,8 +108,26 @@ val ContentEntryDetailOverviewComponent2 = FC<ContentEntryDetailOverviewScreenPr
                 onClickManageDownload =  props.onClickMarkComplete
             }
 
-            Typography{
-                + (props.uiState.contentEntry?.entry?.description ?: "")
+            props.uiState.remoteImportJobs.forEach {
+                val canCancelJob = props.uiState.canCancelRemoteImportJob(it)
+                UstadLinearProgressListItem {
+                    progress = it.progress
+                    secondaryContent = ReactNode(strings[MR.strings.importing])
+                    error = it.cjiError
+                    if(canCancelJob) {
+                        onCancel = {
+                            props.onCancelRemoteImport(it.cjiUid)
+                        }
+                        onDismissError = {
+                            props.onDismissRemoteImportError(it.cjiUid)
+                        }
+                    }
+
+                }
+            }
+
+            UstadRawHtml {
+                html = props.uiState.contentEntry?.entry?.description ?: ""
             }
 
             Divider { orientation = Orientation.horizontal }
@@ -225,16 +229,33 @@ private val ContentDetailLeftColumn = FC <ContentEntryDetailOverviewScreenProps>
 
 private val ContentDetailRightColumn = FC <ContentEntryDetailOverviewScreenProps> { props ->
 
-    val strings: StringProvider = useStringProvider()
+    val strings: StringProviderJs = useStringProvider()
 
     Stack {
         direction = responsive(StackDirection.column)
 
-        Typography{
+        Typography {
             variant = TypographyVariant.h4
             + (props.uiState.contentEntry?.entry?.title ?: "")
         }
 
+        if(props.uiState.compressedSizeVisible) {
+            Typography {
+                variant = TypographyVariant.caption
+                + strings.format(MR.strings.size_compressed_was,
+                    UMFileUtil.formatFileSize(props.uiState.latestContentEntryVersion?.cevStorageSize ?: 0),
+                    UMFileUtil.formatFileSize(props.uiState.latestContentEntryVersion?.cevOriginalSize ?: 0),
+                )
+            }
+        }else if(props.uiState.sizeVisible) {
+            Typography {
+                variant = TypographyVariant.caption
+                + strings.format(
+                    MR.strings.size,
+                    UMFileUtil.formatFileSize(props.uiState.latestContentEntryVersion?.cevStorageSize ?: 0),
+                )
+            }
+        }
 
         if (props.uiState.authorVisible){
             Typography{
@@ -298,56 +319,6 @@ private val ContentDetailRightColumn = FC <ContentEntryDetailOverviewScreenProps
     }
 }
 
-private val ContentJobList = FC <ContentEntryDetailOverviewScreenProps> { props ->
-
-    List{
-        props.uiState.activeContentJobItems.forEach {
-            onClick = { props.onClickContentJobItem }
-            ListItemText{
-                sx {
-                    padding = 10.px
-                }
-
-                Stack {
-                    Stack {
-                        direction = responsive(StackDirection.row)
-                        justifyContent = JustifyContent.spaceBetween
-
-
-                        Typography {
-                            + (it.progressTitle ?: "")
-                        }
-
-                        Typography {
-                            + (it.progress.toString()+" %")
-                        }
-                    }
-
-                    LinearProgress {
-                        value = it.progress / it.total
-                        variant = LinearProgressVariant.determinate
-                    }
-                }
-            }
-        }
-    }
-}
-
-private val LocallyAvailableRow = FC <ContentEntryDetailOverviewScreenProps> {
-
-    val strings: StringProvider = useStringProvider()
-
-    Stack {
-        direction = responsive(StackDirection.row)
-        spacing = responsive(10.px)
-
-        + LocationOnOutlined.create()
-
-        Typography{
-            +strings[MR.strings.download_locally_availability]
-        }
-    }
-}
 
 private val QuickActionBarsRow = FC <ContentEntryDetailOverviewScreenProps> { props ->
 
@@ -396,6 +367,8 @@ val ContentEntryDetailOverviewScreen = FC<Props> {
     ContentEntryDetailOverviewComponent2 {
         uiState = uiStateVal
         onClickOpen = viewModel::onClickOpen
+        onCancelRemoteImport = viewModel::onCancelRemoteImport
+        onDismissRemoteImportError = viewModel::onDismissRemoteImportError
     }
 }
 
@@ -405,14 +378,11 @@ val ContentEntryDetailOverviewScreenPreview = FC<Props> {
     val uiStateVar by useState {
         ContentEntryDetailOverviewUiState(
             contentEntry = ContentEntryAndDetail(
-                entry = ContentEntryWithMostRecentContainer().apply {
+                entry = ContentEntry().apply {
                     title = "Content Title"
                     author = "Author"
                     publisher = "Publisher"
                     licenseName = "BY_SA"
-                    container = com.ustadmobile.lib.db.entities.Container().apply {
-                        fileSize = 50
-                    }
                     description = "Content Description"
                 }
             ),
@@ -500,23 +470,6 @@ val ContentEntryDetailOverviewScreenPreview = FC<Props> {
                     language = Language().apply {
                         name = "Hindi"
                     }
-                }
-            ),
-            activeContentJobItems = listOf(
-                ContentJobItemProgress().apply {
-                    progressTitle = "First"
-                    progress = 30
-                    total = 2
-                },
-                ContentJobItemProgress().apply {
-                    progressTitle = "Second"
-                    progress = 10
-                    total = 5
-                },
-                ContentJobItemProgress().apply {
-                    progressTitle = "Third"
-                    progress = 70
-                    total = 4
                 }
             ),
             locallyAvailable = true,

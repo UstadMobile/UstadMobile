@@ -38,6 +38,7 @@ class H5PContentImporterTest : AbstractContentImporterTest() {
             uriHelper = uriHelper,
             json = json,
             tmpPath = Path(rootTmpFolder.absolutePath),
+            compressListUseCase = compressListUseCase,
             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
         )
 
@@ -63,6 +64,7 @@ class H5PContentImporterTest : AbstractContentImporterTest() {
             json = json,
             tmpPath = Path(rootTmpFolder.absolutePath),
             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
+            compressListUseCase = compressListUseCase,
         )
 
         runBlocking {
@@ -87,6 +89,7 @@ class H5PContentImporterTest : AbstractContentImporterTest() {
             json = json,
             tmpPath = Path(rootTmpFolder.absolutePath),
             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
+            compressListUseCase = compressListUseCase,
         )
 
         runBlocking {
@@ -107,6 +110,7 @@ class H5PContentImporterTest : AbstractContentImporterTest() {
             json = json,
             tmpPath = Path(rootTmpFolder.absolutePath),
             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
+            compressListUseCase = compressListUseCase,
         )
 
         val result = runBlocking {

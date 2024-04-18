@@ -3,7 +3,7 @@ package com.ustadmobile.view.components
 import com.ustadmobile.mui.components.ThemeContext
 import web.cssom.*
 import emotion.react.css
-import js.core.jso
+import js.objects.jso
 import mui.icons.material.AddAPhoto
 import mui.material.*
 import mui.system.sx

@@ -1,35 +1,35 @@
 [versions]
 
 version-moko-resources = "0.23.0"
-jetbrains-compose = "1.5.11"
-androidx-activity = "1.8.1"
+jetbrains-compose = "1.6.1"
+androidx-activity = "1.8.2"
 version-androidx-appcompat = "1.6.1"
 androidx-core = "1.12.0"
-kotlin = "1.9.21"
+kotlin = "1.9.23"
 okhttp = "4.12.0"
-door = "0.70b42"
-coroutines = "1.7.3"
-atomicfu = "0.23.1"
+door = "0.71"
+coroutines = "1.8.0"
+atomicfu = "0.23.2"
 kotlinx-io = "0.3.0"
-android-room = "2.6.0"
-paging-multiplatform = "3.3.0-alpha02-0.4.0"
+android-room = "2.6.1"
+paging-multiplatform = "3.3.0-alpha02-0.5.1"
 paging-androidx = "3.3.0-alpha02"
-android-navigation = "2.7.5"
-androidx-lifecycle = "2.6.2"
+android-navigation = "2.7.7"
+androidx-lifecycle = "2.7.0"
 kodein-di = "7.21.2"
-kodein-kaverit = "2.8.0"
+kodein-kaverit = "2.8.2"
 precompose = "1.5.7"
 dragdropswiperecyclerview = "1.2.0"
 napier = "2.6.1"
 xmlutil = "0.86.2"
 javaffmpeg = "0.8.0"
 android-desugar-jdk-libs = "2.0.4"
-android-material = "1.9.0"
-ktor = "2.3.6"
-kotlinx-datetime = "0.4.0"
+android-material = "1.11.0"
+ktor = "2.3.9"
+kotlinx-datetime = "0.4.1"
 richeditor-multiplatform = "1.0.0-beta04"
 reorderable-compose = "0.9.6"
-androidx-window = "1.2.0-rc01"
+androidx-window = "1.2.0"
 quartz = "2.3.2"
 simplejndi = "0.23.0"
 htmltext-android = "2.0.0-beta01"
@@ -50,13 +50,13 @@ compressor =  "3.0.1"
 thumbnailator =  "0.4.20"
 webpimageio =  "0.6.0"
 compose-video =  "1.2.0a"
-androidx-media3 =  "1.1.0"
+androidx-media3 =  "1.3.0"
 jetpdfvue =  "1.0.5"
 pdfviewer =  "2.0.5"
 urlencoder =  "1.4.0"
 nestedscroll-webview =  "0.1.6"
-androidx-webkit =  "1.9.0"
-androidx-browser =  "1.8.0-beta01"
+androidx-webkit =  "1.10.0"
+androidx-browser =  "1.8.0"
 conveyor =  "1.5"
 download-task =  "5.5.0"
 jspecify =  "0.3.0"
@@ -78,13 +78,13 @@ androidx-profileinstaller =  "1.3.1"
 junique =  "1.0.4"
 kotlin-csv =  "1.9.3"
 hsqldb =  "2.7.2"
-ksp = "1.9.20-1.0.13"
+ksp = "1.9.23-1.0.19"
 androidx-fragment = "1.6.2"
 androidx-legacy-support = "1.0.0"
 commons-io = "2.15.0"
 gson = "2.10.1"
-androidx-annotation = "1.7.0"
-androidx-work = "2.8.1"
+androidx-annotation = "1.7.1"
+androidx-work = "2.9.0"
 klock = "2.4.13"
 acra = "5.11.3"
 androidx-datastore = "1.0.0"
@@ -92,9 +92,9 @@ androidx-datastore = "1.0.0"
 # on mavenCentral after jcenter shutdown.
 volley = "1.2.1"
 androidx-recyclerview = "1.3.2"
-compose-bom = "2023.10.01"
-accompanist-themeadapter = "0.32.0"
-compose-accompanist = "0.32.0"
+compose-bom = "2024.02.02"
+accompanist-themeadapter = "0.34.0"
+compose-accompanist = "0.34.0"
 picasso = "2.8"
 seismic = "1.0.3"
 android-play = "1.10.3"
@@ -112,12 +112,14 @@ byte-buddy = "1.14.10"
 pdfview-android = "1.1.0"
 androidx-coordinatorlayout = "1.2.0"
 androidx-test-runner = "1.5.2"
-robolectric = "4.10.3"
+robolectric = "4.11.1"
 androidx-test-core = "1.5.0"
+androidx-test-orchestrator = "1.4.2"
 json = "20231013"
 commons-cli = "1.6.0"
-kotlinx-html = "0.9.1"
+kotlinx-html = "0.11.0"
 nv-i18n = "1.29"
+semver = "2.0.0"
 
 [plugins]
 
@@ -127,7 +129,6 @@ atomicfu = { id = "org.jetbrains.kotlin.plugin.atomicfu", version.ref = "kotlin"
 serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 conveyor = { id = "dev.hydraulic.conveyor", version.ref = "conveyor" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-download-task = { id = "de.undercouch.download", version.ref = "download-task"}
 license = { id = "com.jaredsburrows.license", version.ref = "plugin-license" }
 
 
@@ -321,6 +322,7 @@ androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-view
 androidx-coordinatorlayout = { module = "androidx.coordinatorlayout:coordinatorlayout", version.ref = "androidx-coordinatorlayout"}
 ktor-client-android = { module = "io.ktor:ktor-client-android", version.ref = "ktor" }
 androidx-test-runner = { module = "androidx.test:runner", version.ref = "androidx-test-runner" }
+androidx-test-orchestrator = { module = "androidx.test:orchestrator", version.ref = "androidx-test-orchestrator" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 androidx-test-core = { module = "androidx.test:core", version.ref = "androidx-test-core" }
 ktor-client-json-js = { module = "io.ktor:ktor-client-json-js", version.ref = "ktor" }
@@ -334,3 +336,12 @@ commons-cli = { module ="commons-cli:commons-cli", version.ref = "commons-cli" }
 kotlinx-html-jvm =  { module = "org.jetbrains.kotlinx:kotlinx-html-jvm", version.ref = "kotlinx-html" }
 nv-i18n = { module ="com.neovisionaries:nv-i18n", version.ref = "nv-i18n" }
 ktor-io-jvm = { module = "io.ktor:ktor-io-jvm", version.ref = "ktor" }
+androidx-media3-transformer = { module = "androidx.media3:media3-transformer", version.ref = "androidx-media3" }
+androidx-media3-effect = { module = "androidx.media3:media3-effect", version.ref = "androidx-media3" }
+androidx-media3-common = { module = "androidx.media3:media3-common", version.ref = "androidx-media3" }
+
+# The av1 module is hosted on the UstadMobile Maven repository (because Google doesn't publish it as
+# an artifact). It is required to support AV1 codec on version prior to Android 10. See
+# lib-ui-compose/README-ExoPlayer-AV1.MD for additional information.
+androidx-media3-decoder-av1 = { module = "androidx.media3:lib-decoder-av1", version.ref = "androidx-media3" }
+semver = { module = "io.github.z4kn4fein:semver", version.ref = "semver" }

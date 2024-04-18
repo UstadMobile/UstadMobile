@@ -20,6 +20,7 @@ import nl.adaptivity.xmlutil.serialization.XML
 import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.instance
+import org.kodein.di.instanceOrNull
 import org.kodein.di.scoped
 import org.kodein.di.singleton
 import java.io.File
@@ -54,6 +55,7 @@ val ContentImportersDiModuleJvm = DI.Module("ContentImporters-Jvm"){
                         saveLocalUriAsBlobAndManifestUseCase =  saveAndManifestUseCase,
                         json = instance(),
                         getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
+                        compressListUseCase = instance(),
                     )
                 )
                 add(
@@ -65,6 +67,7 @@ val ContentImportersDiModuleJvm = DI.Module("ContentImporters-Jvm"){
                         json = instance(),
                         tmpPath = contentImportTmpPath,
                         saveLocalUriAsBlobAndManifestUseCase =  saveAndManifestUseCase,
+                        compressListUseCase = instance(),
                     )
                 )
                 add(
@@ -76,6 +79,7 @@ val ContentImportersDiModuleJvm = DI.Module("ContentImporters-Jvm"){
                         uriHelper = uriHelper,
                         json = instance(),
                         getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
+                        compressPdfUseCase = instanceOrNull(),
                     ),
                 )
                 add(
@@ -86,6 +90,7 @@ val ContentImportersDiModuleJvm = DI.Module("ContentImporters-Jvm"){
                         uriHelper = uriHelper,
                         tmpPath = contentImportTmpPath,
                         saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
+                        compressListUseCase = instance(),
                         json = instance(),
                     ),
                 )
@@ -102,6 +107,7 @@ val ContentImportersDiModuleJvm = DI.Module("ContentImporters-Jvm"){
                         saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
                         getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
                         mimeTypeHelper = mimeTypeHelper,
+                        compressUseCase = instanceOrNull(),
                     )
                 )
             }

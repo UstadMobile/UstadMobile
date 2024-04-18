@@ -19,7 +19,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Login
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Shield
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,10 +30,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.paging.compose.collectAsLazyPagingItems
-import app.cash.paging.Pager
-import app.cash.paging.PagingConfig
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.ext.UNSET_DISTANT_FUTURE
 import com.ustadmobile.core.util.ext.capitalizeFirstLetter
 import com.ustadmobile.core.util.ext.htmlToPlainText
@@ -48,6 +46,7 @@ import com.ustadmobile.libuicompose.components.UstadDetailField2
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadQuickActionButton
 import com.ustadmobile.libuicompose.components.ustadPagedItems
+import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
 import com.ustadmobile.libuicompose.util.compose.stringIdMapResource
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.util.rememberFormattedDateRange
@@ -56,6 +55,8 @@ import com.ustadmobile.libuicompose.view.clazz.paddingCourseBlockIndent
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.libuicompose.view.clazz.iconContent
 import com.ustadmobile.libuicompose.view.clazz.painterForDefaultCourseImage
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 
 @Composable
 fun ClazzDetailOverviewScreen(viewModel: ClazzDetailOverviewViewModel) {
@@ -65,6 +66,7 @@ fun ClazzDetailOverviewScreen(viewModel: ClazzDetailOverviewViewModel) {
 
     ClazzDetailOverviewScreen(
         uiState = uiState,
+        refreshCommandFlow = viewModel.listRefreshCommandFlow,
         onClickCourseBlock = viewModel::onClickCourseBlock,
         onClickClassCode = viewModel::onClickClazzCode,
         onClickPermissions = viewModel::onClickPermissions,
@@ -74,18 +76,16 @@ fun ClazzDetailOverviewScreen(viewModel: ClazzDetailOverviewViewModel) {
 @Composable
 fun ClazzDetailOverviewScreen(
     uiState: ClazzDetailOverviewUiState = ClazzDetailOverviewUiState(),
+    refreshCommandFlow: Flow<RefreshCommand> = emptyFlow(),
     onClickClassCode: (String) -> Unit = {},
     onClickCourseBlock: (CourseBlock) -> Unit = {},
     onClickPermissions: () -> Unit = { },
 ) {
-    val pager = remember(uiState.courseBlockList) {
-        Pager(
-            config = PagingConfig(pageSize = 20, enablePlaceholders = true, maxSize = 200),
-            pagingSourceFactory = uiState.courseBlockList,
-        )
-    }
+    val mediatorResult = rememberDoorRepositoryPager(
+        uiState.courseBlockList, refreshCommandFlow,
+    )
 
-    val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
+    val lazyPagingItems = mediatorResult.lazyPagingItems
 
     val clazzDateRange = rememberFormattedDateRange(
         startTimeInMillis = uiState.clazz?.clazzStartTime ?: 0L,
@@ -132,7 +132,7 @@ fun ClazzDetailOverviewScreen(
                         }
                     }
 
-                    Divider(Modifier.height(1.dp))
+                    HorizontalDivider(thickness = 1.dp)
                 }
             }
         }
@@ -142,7 +142,7 @@ fun ClazzDetailOverviewScreen(
                 html = uiState.clazz?.clazzDesc ?: "",
                 modifier = Modifier.defaultItemPadding()
             )
-            Divider(Modifier.height(1.dp))
+            HorizontalDivider(thickness = 1.dp)
         }
 
         item(key = "members") {
@@ -198,7 +198,7 @@ fun ClazzDetailOverviewScreen(
         }
 
         item {
-            Divider(Modifier.height(1.dp))
+            HorizontalDivider(thickness = 1.dp)
             Spacer(modifier = Modifier.height(16.dp))
         }
 
@@ -243,7 +243,7 @@ fun ClazzDetailOverviewScreen(
         }
 
         item(key = "blockdivider") {
-            Divider(thickness = 1.dp)
+            HorizontalDivider(thickness = 1.dp)
         }
 
         ustadPagedItems(

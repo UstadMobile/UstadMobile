@@ -47,6 +47,7 @@ fun DiscussionPostEditScreen(
     )  {
         OutlinedTextField(
             value = uiState.discussionPost?.discussionPostTitle ?: "",
+            singleLine = true,
             modifier = Modifier.testTag("title").fillMaxWidth().defaultItemPadding(),
             label = { Text(stringResource(MR.strings.title) + "*") },
             isError = uiState.discussionPostTitleError != null,

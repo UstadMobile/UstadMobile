@@ -2,6 +2,9 @@ package com.ustadmobile.libuicompose.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.outlined.Book
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -24,11 +27,40 @@ fun UstadCourseBlockEdit(
     modifier: Modifier = Modifier,
     onCourseBlockChange: (CourseBlock?) -> Unit = {},
     onClickEditDescription: () -> Unit = {},
+    onClickEditContentEntry: () -> Unit = { },
 ){
-
     Column(
         modifier = modifier
     ) {
+        uiState.selectedContentEntry?.also { selectedContentEntry ->
+            ListItem(
+                headlineContent = {
+                    Text(selectedContentEntry.entry?.title ?: "")
+                },
+                supportingContent = {
+                    Text(stringResource(MR.strings.selected_content))
+                },
+                leadingContent = {
+                    Icon(Icons.Outlined.Book, contentDescription = null)
+                },
+                trailingContent = if(uiState.canEditSelectedContentEntry) {
+                    {
+                        UstadTooltipBox(
+                            tooltipText = stringResource(MR.strings.edit)
+                        ) {
+                            IconButton(
+                                onClick = onClickEditContentEntry
+                            ) {
+                                Icon(Icons.Default.Edit, contentDescription = stringResource(MR.strings.edit))
+                            }
+                        }
+                    }
+                }else {
+                    null
+                }
+            )
+        }
+
         OutlinedTextField(
             modifier = Modifier
                 .fillMaxWidth()

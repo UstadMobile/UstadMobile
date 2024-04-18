@@ -21,7 +21,7 @@ import web.cssom.Overflow
 import web.cssom.pct
 import com.ustadmobile.core.MR
 import com.ustadmobile.mui.components.ThemeContext
-import js.core.jso
+import js.objects.jso
 import mui.material.ButtonVariant
 import react.useRequiredContext
 import web.cssom.Display

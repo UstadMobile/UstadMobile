@@ -3,10 +3,13 @@ package com.ustadmobile.view.discussionpost.coursediscussiondetail
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.paging.ListPagingSource
+import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.CourseDiscussionDetailUiState
 import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.CourseDiscussionDetailViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.hooks.useDateFormatter
+import com.ustadmobile.hooks.useDoorRemoteMediator
+import com.ustadmobile.hooks.useEmptyFlow
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useTimeFormatter
@@ -21,21 +24,29 @@ import web.cssom.Contain
 import web.cssom.Height
 import web.cssom.Overflow
 import web.cssom.pct
-import js.core.jso
+import js.objects.jso
+import kotlinx.coroutines.flow.Flow
 import mui.material.*
 import mui.material.List
 import react.*
 
 external interface CourseDiscussionDetailProps: Props {
     var uiState: CourseDiscussionDetailUiState
+    var refreshCommandFlow: Flow<RefreshCommand>?
     var onClickPost: (DiscussionPostWithDetails) -> Unit
     var onDeletePost: (DiscussionPost) -> Unit
 }
 
 val CourseDiscussionDetailComponent = FC<CourseDiscussionDetailProps> { props ->
 
+    val emptyRefreshFlow = useEmptyFlow<RefreshCommand>()
+
+    val mediatorResult = useDoorRemoteMediator(
+        props.uiState.posts, props.refreshCommandFlow ?: emptyRefreshFlow
+    )
+
     val infiniteQueryResult = usePagingSource(
-        pagingSourceFactory = props.uiState.posts,
+        pagingSourceFactory = mediatorResult.pagingSourceFactory,
         placeholdersEnabled = true
     )
 

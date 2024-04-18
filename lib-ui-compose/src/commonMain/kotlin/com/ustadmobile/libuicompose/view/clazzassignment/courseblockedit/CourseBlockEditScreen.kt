@@ -23,7 +23,8 @@ fun CourseBlockEditScreen(
     CourseBlockEditScreen(
         uiState = uiState,
         onCourseBlockChange = viewModel::onEntityChanged,
-        onEditDescriptionInNewScreen = viewModel::onClickEditDescription
+        onEditDescriptionInNewScreen = viewModel::onClickEditDescription,
+        onClickEditContentEntry = viewModel::onClickEditContentEntry,
     )
 }
 
@@ -31,6 +32,7 @@ fun CourseBlockEditScreen(
 fun CourseBlockEditScreen(
     uiState: CourseBlockEditUiState,
     onCourseBlockChange: (CourseBlock?) -> Unit,
+    onClickEditContentEntry: () -> Unit,
     onEditDescriptionInNewScreen: () -> Unit,
 ) {
     UstadVerticalScrollColumn(
@@ -39,7 +41,8 @@ fun CourseBlockEditScreen(
         UstadCourseBlockEdit(
             uiState = uiState,
             onCourseBlockChange = onCourseBlockChange,
-            onClickEditDescription = onEditDescriptionInNewScreen
+            onClickEditDescription = onEditDescriptionInNewScreen,
+            onClickEditContentEntry = onClickEditContentEntry,
         )
     }
 

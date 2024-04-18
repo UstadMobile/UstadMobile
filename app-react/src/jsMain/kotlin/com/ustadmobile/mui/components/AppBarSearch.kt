@@ -4,7 +4,7 @@ import com.ustadmobile.core.hooks.useStringProvider
 import csstype.PropertiesBuilder
 import web.cssom.*
 import emotion.react.css
-import js.core.jso
+import js.objects.jso
 import mui.icons.material.Search
 import mui.material.InputBase
 import mui.system.Breakpoint

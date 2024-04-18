@@ -8,7 +8,6 @@ import com.ustadmobile.core.viewmodel.HtmlEditViewModel
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.door.ext.withDoorTransactionAsync
-import app.cash.paging.PagingSource
 import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.util.ext.whenSubscribed
@@ -48,12 +47,8 @@ class DiscussionPostDetailViewModel(
 ): DetailViewModel<DiscussionPostWithDetails>(di, savedStateHandle, destinationName){
 
     private val pagingSourceFactory: ListPagingSourceFactory<DiscussionPostAndPosterNames> = {
-        activeRepo.discussionPostDao.findByPostIdWithAllReplies(entityUidArg, false).also {
-            lastPagingSource = it
-        }
+        activeRepo.discussionPostDao.findByPostIdWithAllReplies(entityUidArg, false)
     }
-
-    private var lastPagingSource: PagingSource<Int, DiscussionPostAndPosterNames>? = null
 
     private val _uiState = MutableStateFlow(DiscussionPostDetailUiState2())
 

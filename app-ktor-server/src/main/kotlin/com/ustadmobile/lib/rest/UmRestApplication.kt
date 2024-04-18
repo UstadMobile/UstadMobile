@@ -19,10 +19,24 @@ import com.ustadmobile.core.domain.blob.upload.BlobUploadServerUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCaseCommonJvm
 import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.EnrolIntoCourseUseCase
+import com.ustadmobile.core.domain.compress.audio.CompressAudioUseCaseJvm
+import com.ustadmobile.core.domain.compress.image.CompressImageUseCase
+import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseJvm
+import com.ustadmobile.core.domain.compress.list.CompressListUseCase
+import com.ustadmobile.core.domain.compress.pdf.CompressPdfUseCase
+import com.ustadmobile.core.domain.compress.pdf.CompressPdfUseCaseJvm
+import com.ustadmobile.core.domain.compress.video.CompressVideoUseCase
+import com.ustadmobile.core.domain.compress.video.CompressVideoUseCaseHandbrake
+import com.ustadmobile.core.domain.compress.video.FindHandBrakeUseCase
+import com.ustadmobile.core.domain.contententry.importcontent.CancelImportContentEntryServerUseCase
+import com.ustadmobile.core.domain.contententry.importcontent.CancelImportContentEntryUseCase
+import com.ustadmobile.core.domain.contententry.importcontent.CancelImportContentEntryUseCaseJvm
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseJvm
 import com.ustadmobile.core.domain.contententry.importcontent.ImportContentEntryUseCase
 import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServerUseCase
+import com.ustadmobile.core.domain.extractmediametadata.ExtractMediaMetadataUseCase
+import com.ustadmobile.core.domain.extractmediametadata.mediainfo.ExtractMediaMetadataUseCaseMediaInfo
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonStatusMap
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsUseCase
@@ -37,9 +51,9 @@ import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseCommonJvm
 import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
 import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseJvm
+import com.ustadmobile.core.domain.usersession.ValidateUserSessionOnServerUseCase
 import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
-import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCaseFfprobe
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.DiTag.TAG_CONTEXT_DATA_ROOT
 import com.ustadmobile.door.ext.*
@@ -75,8 +89,7 @@ import com.ustadmobile.lib.rest.domain.contententry.getmetadatafromuri.ContentEn
 import com.ustadmobile.lib.rest.api.contentupload.ContentUploadRoute
 import com.ustadmobile.lib.rest.api.contentupload.UPLOAD_TMP_SUBDIR
 import com.ustadmobile.lib.rest.domain.account.SetPasswordRoute
-import com.ustadmobile.lib.rest.ffmpeghelper.InvalidFffmpegException
-import com.ustadmobile.lib.rest.ffmpeghelper.NoFfmpegException
+import com.ustadmobile.lib.rest.mediahelpers.MissingMediaProgramsException
 import io.ktor.server.response.*
 import kotlinx.serialization.json.Json
 import com.ustadmobile.lib.util.SysPathUtil
@@ -89,13 +102,13 @@ import org.kodein.di.ktor.di
 import java.util.*
 import com.ustadmobile.core.logging.LogbackAntiLog
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.door.log.NapierDoorLogger
+import com.ustadmobile.lib.rest.domain.contententry.importcontent.ContentEntryImportJobRoute
 import com.ustadmobile.lib.rest.domain.person.bulkadd.BulkAddPersonRoute
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.headers.MimeTypeHelper
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.files.Path
-import net.bramp.ffmpeg.FFmpeg
-import net.bramp.ffmpeg.FFprobe
 import org.kodein.di.ktor.closestDI
 import java.net.Inet6Address
 import java.net.NetworkInterface
@@ -170,30 +183,28 @@ fun Application.umRestApplication(
                 "set this in the config file e.g. uncomment siteUrl and set as siteUrl = \"$likelyAddr\"")
     }
 
-    val appFfmpegDir = ktorAppHomeFfmpegDir()
-    val ffmpegFile = SysPathUtil.findCommandInPath(
-        commandName = "ffmpeg",
-        manuallySpecifiedLocation = appConfig.commandFileProperty("ffmpeg"),
-        extraSearchPaths = appFfmpegDir.absolutePath,
-    )
-    val ffprobeFile = SysPathUtil.findCommandInPath(
-        commandName = "ffprobe",
-        manuallySpecifiedLocation = appConfig.commandFileProperty("ffprobe"),
-        extraSearchPaths = appFfmpegDir.absolutePath
+    val mediaInfoFile = SysPathUtil.findCommandInPath(
+        commandName = "mediainfo",
+        manuallySpecifiedLocation = appConfig.commandFileProperty("mediainfo"),
     )
 
-    if(ffmpegFile == null || ffprobeFile == null) {
-        throw NoFfmpegException()
+    val handBrakeCliCommand = runBlocking {
+        FindHandBrakeUseCase(
+            specifiedLocation = appConfig.commandFileProperty("handbrakecli")?.absolutePath
+        ).invoke()
     }
 
-    try {
-        if(!FFmpeg(ffmpegFile.absolutePath).isFFmpeg || !FFprobe(ffprobeFile.absolutePath).isFFprobe) {
-            throw InvalidFffmpegException(ffmpegFile, ffprobeFile)
-        }
-    }catch(e: Exception) {
-        //If an exception occurs running them, it is also invalid
-        throw InvalidFffmpegException(ffmpegFile, ffprobeFile)
+    val soxCommand = CompressAudioUseCaseJvm.findSox()
+
+    if(mediaInfoFile == null || handBrakeCliCommand == null || !mediaInfoFile.exists() || soxCommand == null) {
+        throw MissingMediaProgramsException()
     }
+
+    //GhostScript - used for PDF compression (optional)
+    val gsCommand = SysPathUtil.findCommandInPath(
+        commandName = "gs",
+        manuallySpecifiedLocation = appConfig.commandFileProperty("gs"),
+    )
 
     val devMode = environment.config.propertyOrNull("ktor.ustad.devmode")?.getString().toBoolean()
 
@@ -342,14 +353,6 @@ fun Application.umRestApplication(
             }
         }
 
-        bind<FFmpeg>() with provider {
-            FFmpeg(ffmpegFile.absolutePath)
-        }
-
-        bind<FFprobe>() with provider {
-            FFprobe(ffprobeFile.absolutePath)
-        }
-
         bind<File>(tag = DiTag.TAG_TMP_DIR) with singleton {
             File(dataDirPath, "tmp")
         }
@@ -439,15 +442,22 @@ fun Application.umRestApplication(
             )
         }
 
+        bind<ValidateUserSessionOnServerUseCase>() with scoped(EndpointScope.Default).singleton {
+            ValidateUserSessionOnServerUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                nodeIdAuthCache = instance(),
+            )
+        }
+
         bind<SetPasswordServerUseCase>() with scoped(EndpointScope.Default).singleton {
             SetPasswordServerUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
                 setPasswordUseCase = instance(),
-                nodeIdAndAuthCache = instance(),
+                validateUserSessionOnServerUseCase = instance()
             )
         }
 
-        bind<GetStoragePathForUrlUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<GetStoragePathForUrlUseCase>() with singleton {
             GetStoragePathForUrlUseCaseCommonJvm(
                 okHttpClient = instance(),
                 cache = instance(),
@@ -464,9 +474,36 @@ fun Application.umRestApplication(
             )
         }
 
+        bind<ExtractMediaMetadataUseCase>() with provider {
+            ExtractMediaMetadataUseCaseMediaInfo(
+                mediaInfoPath = mediaInfoFile.absolutePath,
+                workingDir = ktorAppHomeDir(),
+                json = instance(),
+                getStoragePathForUrlUseCase = instance(),
+            )
+        }
+
+        bind<CompressVideoUseCase>() with singleton {
+            CompressVideoUseCaseHandbrake(
+                handbrakeCommand = handBrakeCliCommand.command,
+                workDir = instance<File>(tag = DiTag.TAG_TMP_DIR),
+                json = instance(),
+                extractMediaMetadataUseCase = instance(),
+            )
+        }
+
+        gsCommand?.also {
+            bind<CompressPdfUseCase>() with singleton {
+                CompressPdfUseCaseJvm(
+                    gsPath = it,
+                    workDir = instance<File>(tag = DiTag.TAG_TMP_DIR),
+                )
+            }
+        }
+
         bind<ValidateVideoFileUseCase>() with provider {
-            ValidateVideoFileUseCaseFfprobe(
-                ffprobe = instance()
+            ValidateVideoFileUseCase(
+                extractMediaMetadataUseCase = instance(),
             )
         }
 
@@ -535,6 +572,34 @@ fun Application.umRestApplication(
 
         bind<BulkAddPersonStatusMap>() with scoped(EndpointScope.Default).singleton {
             BulkAddPersonStatusMap()
+        }
+
+        bind<CancelImportContentEntryUseCase>() with scoped(EndpointScope.Default).singleton {
+            CancelImportContentEntryUseCaseJvm(
+                scheduler = instance(),
+                endpoint = context,
+            )
+        }
+
+        bind<CancelImportContentEntryServerUseCase>() with scoped(EndpointScope.Default).singleton {
+            CancelImportContentEntryServerUseCase(
+                cancelImportContentEntryUseCase = instance(),
+                validateUserSessionOnServerUseCase = instance(),
+                db = instance(tag = DoorTag.TAG_DB),
+                endpoint = context,
+            )
+        }
+
+        bind<CompressImageUseCase>() with singleton {
+            CompressImageUseCaseJvm()
+        }
+
+        bind<CompressListUseCase>() with singleton {
+            CompressListUseCase(
+                compressVideoUseCase = instance(),
+                mimeTypeHelper = instance(),
+                compressImageUseCase = instance(),
+            )
         }
 
         try {
@@ -648,7 +713,7 @@ fun Application.umRestApplication(
             addHostCheckIntercept()
             personAuthRegisterRoute()
             route("UmAppDatabase") {
-                UmAppDatabase_KtorRoute(DoorHttpServerConfig(json = json)) { call ->
+                UmAppDatabase_KtorRoute(DoorHttpServerConfig(json = json, logger = NapierDoorLogger())) { call ->
                     val di: DI by call.closestDI()
                     di.on(call).direct.instance(tag = DoorTag.TAG_DB)
                 }
@@ -695,6 +760,14 @@ fun Application.umRestApplication(
                 route("content") {
                     ContentEntryVersionRoute(
                         useCase = { call -> di.on(call).direct.instance() }
+                    )
+                }
+
+                route("contententryimportjob"){
+                    ContentEntryImportJobRoute(
+                        json = di.direct.instance(),
+                        dbFn = { call -> di.on(call).direct.instance(tag = DoorTag.TAG_DB) },
+                        cancelImportContentEntryServerUseCase = { call -> di.on(call).direct.instance() }
                     )
                 }
 
