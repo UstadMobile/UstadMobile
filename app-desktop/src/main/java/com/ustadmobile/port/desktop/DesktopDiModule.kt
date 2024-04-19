@@ -252,6 +252,7 @@ data class DbAndObservers(
 val DesktopDiModule = DI.Module("Desktop-Main") {
     val resourcesDir = ustadAppResourcesDir()
     val mediaInfoResourcesDir = File(resourcesDir, "mediainfo")
+    val soxResourcesDir = File(resourcesDir, "sox")
 
     val mediaInfoFile = SysPathUtil.findCommandInPath(
         commandName = "mediainfo",
@@ -267,7 +268,7 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
 
     val soxCommand = SysPathUtil.findCommandInPath(
         commandName = "sox",
-        manuallySpecifiedLocation = File(mediaInfoResourcesDir, "sox").getCommandFile(),
+        manuallySpecifiedLocation = File(soxResourcesDir, "sox").getCommandFile(),
     ) ?: throw IllegalArgumentException("sox command not found")
 
     val gsPath = SysPathUtil.findCommandInPath("gs")
