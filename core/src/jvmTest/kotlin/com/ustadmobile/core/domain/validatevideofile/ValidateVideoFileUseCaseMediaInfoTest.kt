@@ -2,6 +2,7 @@ package com.ustadmobile.core.domain.validatevideofile
 
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
 import com.ustadmobile.core.domain.compress.CompressionType
+import com.ustadmobile.core.domain.extractmediametadata.mediainfo.ExecuteMediaInfoUseCase
 import com.ustadmobile.core.domain.extractmediametadata.mediainfo.ExtractMediaMetadataUseCaseMediaInfo
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.util.test.ext.newFileFromResource
@@ -25,6 +26,8 @@ class ValidateVideoFileUseCaseMediaInfoTest {
 
     private lateinit var validatorUseCase: ValidateVideoFileUseCase
 
+    private lateinit var executeMediaInfoUseCase: ExecuteMediaInfoUseCase
+
     @BeforeTest
     fun setup() {
         val mockGetStoragePathForUrlUseCase: GetStoragePathForUrlUseCase  = mock {
@@ -36,14 +39,18 @@ class ValidateVideoFileUseCaseMediaInfoTest {
             }
         }
 
+        executeMediaInfoUseCase = ExecuteMediaInfoUseCase(
+            mediaInfoPath = "/usr/bin/mediainfo",
+            workingDir = temporaryFolder.newFolder(),
+            json = Json {
+                encodeDefaults = true
+                ignoreUnknownKeys = true
+            },
+        )
+
         validatorUseCase = ValidateVideoFileUseCase(
             extractMediaMetadataUseCase = ExtractMediaMetadataUseCaseMediaInfo(
-                mediaInfoPath = "/usr/bin/mediainfo",
-                workingDir = temporaryFolder.newFolder(),
-                json = Json {
-                    encodeDefaults = true
-                    ignoreUnknownKeys = true
-                },
+                executeMediaInfoUseCase = executeMediaInfoUseCase,
                 getStoragePathForUrlUseCase = mockGetStoragePathForUrlUseCase
             ),
         )
