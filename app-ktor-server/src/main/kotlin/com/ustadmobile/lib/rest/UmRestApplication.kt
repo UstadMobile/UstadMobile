@@ -19,7 +19,8 @@ import com.ustadmobile.core.domain.blob.upload.BlobUploadServerUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCaseCommonJvm
 import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.EnrolIntoCourseUseCase
-import com.ustadmobile.core.domain.compress.audio.CompressAudioUseCaseJvm
+import com.ustadmobile.core.domain.compress.audio.CompressAudioUseCase
+import com.ustadmobile.core.domain.compress.audio.CompressAudioUseCaseSox
 import com.ustadmobile.core.domain.compress.image.CompressImageUseCase
 import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseJvm
 import com.ustadmobile.core.domain.compress.list.CompressListUseCase
@@ -36,6 +37,7 @@ import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportConte
 import com.ustadmobile.core.domain.contententry.importcontent.ImportContentEntryUseCase
 import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServerUseCase
 import com.ustadmobile.core.domain.extractmediametadata.ExtractMediaMetadataUseCase
+import com.ustadmobile.core.domain.extractmediametadata.mediainfo.ExecuteMediaInfoUseCase
 import com.ustadmobile.core.domain.extractmediametadata.mediainfo.ExtractMediaMetadataUseCaseMediaInfo
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonStatusMap
@@ -102,6 +104,7 @@ import org.kodein.di.ktor.di
 import java.util.*
 import com.ustadmobile.core.logging.LogbackAntiLog
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.ext.isWindowsOs
 import com.ustadmobile.door.log.NapierDoorLogger
 import com.ustadmobile.lib.rest.domain.contententry.importcontent.ContentEntryImportJobRoute
 import com.ustadmobile.lib.rest.domain.person.bulkadd.BulkAddPersonRoute
@@ -169,6 +172,8 @@ fun Application.umRestApplication(
 
     val dbMode = dbModeOverride ?:  appConfig.propertyOrNull("ktor.ustad.dbmode")?.getString() ?: CONF_DBMODE_SINGLETON
 
+    val ktorAppHome = ktorAppHomeDir()
+
     if(dbMode != CONF_DBMODE_VIRTUALHOST && siteUrl.isNullOrBlank()) {
         val likelyAddr = NetworkInterface.getNetworkInterfaces().toList().filter {
             !it.isLoopback
@@ -194,10 +199,47 @@ fun Application.umRestApplication(
         ).invoke()
     }
 
-    val soxCommand = CompressAudioUseCaseJvm.findSox()
+    val soxCommand = CompressAudioUseCaseSox.findSox()
 
-    if(mediaInfoFile == null || handBrakeCliCommand == null || !mediaInfoFile.exists() || soxCommand == null) {
-        throw MissingMediaProgramsException()
+    if(mediaInfoFile == null || !mediaInfoFile.exists()) {
+        throw MissingMediaProgramsException("Cannot find mediainfo command you must install it: \n" +
+                "On Ubuntu: apt-get install mediainfo\n" +
+                "On Windows: winget install -e --id MediaArea.MediaInfo")
+    }
+
+    if(handBrakeCliCommand == null) {
+        throw MissingMediaProgramsException("Cannot find HandBrakeCLI or version is less than 1.6\n" +
+                "On Ubuntu 23.04+: apt-get-install handbrake-cli\n" +
+                "On Ubuntu (pre 23.04): apt-get install flatpak, download HandBrakeCLI from handbrake.fr, " +
+                "flatpak install /path/where/downloaded/HandBrakeCLI-1.7.3-x86_64.flatpak" +
+                "on Windows: winget install -e --id HandBrake.HandBrake.CLI")
+    }
+
+    if(soxCommand == null) {
+        throw MissingMediaProgramsException("Cannot find SoX" +
+                "On Ubuntu: apt-get install sox libsox-fmt-all\n" +
+                "On Windows: Download and install from SoX website: https://sourceforge.net/projects/sox/files/sox/14.4.2/")
+    }
+
+    val commandsDir = File(ktorAppHome, "commands")
+    val mpg123Command = if(isWindowsOs()) {
+        val extraSearchPaths = listOf("mpg123", "mpg123-1.32.6-x86").map { commandSubDir ->
+            File(commandsDir, commandSubDir).absolutePath
+        }.joinToString(separator = File.pathSeparator)
+
+        SysPathUtil.findCommandInPath(
+            commandName = "mpg123",
+            extraSearchPaths = extraSearchPaths,
+        ).also {
+            if(it == null) {
+                throw MissingMediaProgramsException("Cannot find mpg123. This is required on Windows.\n" +
+                        "Download it from https://www.mpg123.de/download/win32/1.32.6/\n" +
+                        "Then unzip into ${commandsDir.absolutePath}, or put it anywhere in your" +
+                        "PATH environment variable, or manually specify location using ustad-server.conf")
+            }
+        }
+    }else {
+        null
     }
 
     //GhostScript - used for PDF compression (optional)
@@ -474,11 +516,17 @@ fun Application.umRestApplication(
             )
         }
 
-        bind<ExtractMediaMetadataUseCase>() with provider {
-            ExtractMediaMetadataUseCaseMediaInfo(
+        bind<ExecuteMediaInfoUseCase>() with provider {
+            ExecuteMediaInfoUseCase(
                 mediaInfoPath = mediaInfoFile.absolutePath,
                 workingDir = ktorAppHomeDir(),
                 json = instance(),
+            )
+        }
+
+        bind<ExtractMediaMetadataUseCase>() with provider {
+            ExtractMediaMetadataUseCaseMediaInfo(
+                executeMediaInfoUseCase = instance(),
                 getStoragePathForUrlUseCase = instance(),
             )
         }
@@ -489,6 +537,15 @@ fun Application.umRestApplication(
                 workDir = instance<File>(tag = DiTag.TAG_TMP_DIR),
                 json = instance(),
                 extractMediaMetadataUseCase = instance(),
+            )
+        }
+
+        bind<CompressAudioUseCase>() with singleton {
+            CompressAudioUseCaseSox(
+                soxPath = soxCommand.absolutePath,
+                executeMediaInfoUseCase = instance(),
+                mpg123Path = mpg123Command?.absolutePath,
+                workDir = instance<File>(tag = DiTag.TAG_TMP_DIR),
             )
         }
 
@@ -599,6 +656,7 @@ fun Application.umRestApplication(
                 compressVideoUseCase = instance(),
                 mimeTypeHelper = instance(),
                 compressImageUseCase = instance(),
+                compressAudioUseCase = instance(),
             )
         }
 

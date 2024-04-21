@@ -27,7 +27,7 @@ class LogbackAntiLog: Antilog() {
 
     override fun isEnable(priority: LogLevel, tag: String?): Boolean {
         return when {
-            tag == DoorTag.LOG_TAG && priority == LogLevel.VERBOSE -> true
+            tag == DoorTag.LOG_TAG && priority == LogLevel.VERBOSE -> false
             else -> true
         }
     }
