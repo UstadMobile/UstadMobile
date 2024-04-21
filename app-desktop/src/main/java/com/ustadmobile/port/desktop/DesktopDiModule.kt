@@ -21,7 +21,7 @@ import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.core.domain.cachelock.AddOfflineItemInactiveTriggersCallback
 import com.ustadmobile.core.domain.cachelock.UpdateCacheLockJoinUseCase
 import com.ustadmobile.core.domain.compress.audio.CompressAudioUseCase
-import com.ustadmobile.core.domain.compress.audio.CompressAudioUseCaseJvm
+import com.ustadmobile.core.domain.compress.audio.CompressAudioUseCaseSox
 import com.ustadmobile.core.domain.compress.pdf.CompressPdfUseCase
 import com.ustadmobile.core.domain.compress.pdf.CompressPdfUseCaseJvm
 import com.ustadmobile.core.domain.compress.video.CompressVideoUseCase
@@ -31,6 +31,7 @@ import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntr
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseJvm
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseRemote
 import com.ustadmobile.core.domain.extractmediametadata.ExtractMediaMetadataUseCase
+import com.ustadmobile.core.domain.extractmediametadata.mediainfo.ExecuteMediaInfoUseCase
 import com.ustadmobile.core.domain.extractmediametadata.mediainfo.ExtractMediaMetadataUseCaseMediaInfo
 import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseJvm
@@ -253,6 +254,7 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
     val resourcesDir = ustadAppResourcesDir()
     val mediaInfoResourcesDir = File(resourcesDir, "mediainfo")
     val soxResourcesDir = File(resourcesDir, "sox")
+    val mpg123ResourcesDir = File(resourcesDir, "mpg123")
 
     val mediaInfoFile = SysPathUtil.findCommandInPath(
         commandName = "mediainfo",
@@ -270,6 +272,16 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         commandName = "sox",
         manuallySpecifiedLocation = File(soxResourcesDir, "sox").getCommandFile(),
     ) ?: throw IllegalArgumentException("sox command not found")
+
+    val mpg123Command = SysPathUtil.findCommandInPath(
+        commandName = "mpg123",
+        pathVar = "",
+        manuallySpecifiedLocation = File(mpg123ResourcesDir, "mpg123.exe")
+    )
+
+    if(isWindowsOs() && mpg123Command == null) {
+        throw IllegalStateException("Could not find mpg123.exe : this is required when running on Windows")
+    }
 
     val gsPath = SysPathUtil.findCommandInPath("gs")
 
@@ -480,11 +492,17 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         )
     }
 
-    bind<ExtractMediaMetadataUseCase>() with singleton {
-        ExtractMediaMetadataUseCaseMediaInfo(
+    bind<ExecuteMediaInfoUseCase>() with singleton {
+        ExecuteMediaInfoUseCase(
             mediaInfoPath = mediaInfoFile.absolutePath,
             workingDir = ustadAppDataDir(),
             json = instance(),
+        )
+    }
+
+    bind<ExtractMediaMetadataUseCase>() with singleton {
+        ExtractMediaMetadataUseCaseMediaInfo(
+            executeMediaInfoUseCase = instance(),
             getStoragePathForUrlUseCase = instance(),
         )
     }
@@ -532,8 +550,10 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
     }
 
     bind<CompressAudioUseCase>() with singleton {
-        CompressAudioUseCaseJvm(
+        CompressAudioUseCaseSox(
             soxPath = soxCommand.absolutePath,
+            mpg123Path = mpg123Command?.absolutePath,
+            executeMediaInfoUseCase = instance(),
             workDir = instance(tag = DiTag.TAG_TMP_DIR),
         )
     }

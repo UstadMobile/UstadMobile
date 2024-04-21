@@ -194,3 +194,30 @@ effects) using any one of the following combiner methods:
   o  mix
   o  merge: E.g. two mono files to one stereo file
   o  sequence: For playing multiple audio files/streams
+
+
+Acknowledgements
+----------------
+
+SOX.EXE included in this package makes use of the following projects.
+See the cygbuild script included with the source code package for
+further information on how it was compiled and packaged.
+
+  SoX - http://sox.sourceforge.net
+
+  FLAC - http://flac.sourceforge.net
+
+  LADSPA - http://www.ladspa.org
+
+  libid3tag - http://www.underbit.com/products/mad
+
+  libsndfile - http://www.mega-nerd.com/libsndfile
+
+  Ogg Vorbis - http://www.vorbis.com
+
+  PNG - http://www.libpng.org/pub/png
+
+  WavPack - http://www.wavpack.com
+
+  wget - http://www.gnu.org/software/wget
+
