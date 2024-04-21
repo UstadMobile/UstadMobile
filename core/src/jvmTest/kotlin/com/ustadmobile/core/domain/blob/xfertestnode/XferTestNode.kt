@@ -14,6 +14,7 @@ import com.ustadmobile.core.domain.compress.list.CompressListUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCaseCommonJvm
 import com.ustadmobile.core.domain.extractmediametadata.ExtractMediaMetadataUseCase
+import com.ustadmobile.core.domain.extractmediametadata.mediainfo.ExecuteMediaInfoUseCase
 import com.ustadmobile.core.domain.extractmediametadata.mediainfo.ExtractMediaMetadataUseCaseMediaInfo
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseCommonJvm
@@ -198,12 +199,18 @@ class XferTestNode(
                 )
             }
 
-            bind<ExtractMediaMetadataUseCase>() with singleton {
-                ExtractMediaMetadataUseCaseMediaInfo(
+            bind<ExecuteMediaInfoUseCase>() with singleton {
+                ExecuteMediaInfoUseCase(
                     mediaInfoPath = SysPathUtil.findCommandInPath("mediainfo")?.absolutePath
                         ?: throw IllegalStateException("Could not find mediainfo"),
                     workingDir = File(System.getProperty("user.dir")),
                     json = instance(),
+                )
+            }
+
+            bind<ExtractMediaMetadataUseCase>() with singleton {
+                ExtractMediaMetadataUseCaseMediaInfo(
+                    executeMediaInfoUseCase = instance(),
                     getStoragePathForUrlUseCase = instance()
                 )
             }

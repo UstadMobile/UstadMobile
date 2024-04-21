@@ -47,12 +47,8 @@ class ServerAppMain {
             }catch(e: SiteConfigException) {
                 System.err.println(e.message)
             }catch(e: MissingMediaProgramsException) {
-                System.err.println("Required media programs (MediaInfo and/or Handbrake CLI) were not found.")
-                System.err.println("On Ubuntu: \n" +
-                        "apt-get install mediainfo handbrake-cli")
-                System.err.println("On Windows: \n" +
-                        "winget install -e --id MediaArea.MediaInfo\n" +
-                        "winget install -e --id HandBrake.HandBrake.CLI")
+                System.err.println("Required media programs (e.g. MediaInfo, Handbrake CLI, Sox, etc.) were not found.")
+                System.err.println(e.message ?: "")
                 System.err.println("See the README for more information")
             }catch(e: Throwable) {
                 e.printStackTrace()

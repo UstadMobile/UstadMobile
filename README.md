@@ -85,7 +85,7 @@ If you already have JDK 17 installed, you can use it.
 OpenJDK17, mediainfo, and vlc, can be installed using the system package manager e.g.
 
 ```
-sudo apt-get install openjdk-17-jdk mediainfo vlc sox libsox-fmt-mp3
+sudo apt-get install openjdk-17-jdk mediainfo vlc sox libsox-fmt-all
 ```
 
 If using Ubuntu 23.10+, you can use the HandBrakeCLI from the Ubuntu package manager (1.6.1):
@@ -143,6 +143,22 @@ winget install -e --id HandBrake.HandBrake.CLI
 __Sox__
 Download and install from the [Sox website](https://sourceforge.net/projects/sox/files/sox/14.4.2/) (the Winget package does not work because it does not get
 added to the path).
+
+__Mpg123__
+
+Mpg123 is required on Windows because the SoX Windows binary cannot read mp3 files. Download it from 
+the [Mpg123 Website](https://www.mpg123.de/download/win32/) and unzip it into the commands directory.
+Alternatively, you can put it in your PATH environment variable or manually specify the location in
+ustad-server.conf.
+
+__GhostScript (optional)__
+Ghostscript (if installed and detected on the system path) can be used to compress PDFs. It can be 
+installed using winget:
+```
+winget install -e --id ArtifexSoftware.GhostScript
+```
+
+
 
 * __Step 3: Import the project in Android Studio__: Select File, New, Project from Version Control. Enter
 https://github.com/UstadMobile/UstadMobile.git and wait for the project to import. Switch to the
