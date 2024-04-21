@@ -1,6 +1,7 @@
 package com.ustadmobile.core.domain.compress.video
 
 import com.ustadmobile.core.domain.extractmediametadata.ExtractMediaMetadataUseCase
+import com.ustadmobile.core.domain.extractmediametadata.mediainfo.ExecuteMediaInfoUseCase
 import com.ustadmobile.core.domain.extractmediametadata.mediainfo.ExtractMediaMetadataUseCaseMediaInfo
 import com.ustadmobile.core.util.mockGetStoragePathUseCase
 import com.ustadmobile.core.util.requireHandBrakeCommand
@@ -28,6 +29,8 @@ class CompressVideoUseCaseHandbrakeTest {
 
     private lateinit var extractMediaMetadataUseCase: ExtractMediaMetadataUseCase
 
+    private lateinit var executeMediaInfoUseCase: ExecuteMediaInfoUseCase
+
     private val json = Json {
         ignoreUnknownKeys = true
     }
@@ -35,10 +38,14 @@ class CompressVideoUseCaseHandbrakeTest {
     @Before
     fun setup() {
         workingDir = temporaryFolder.newFolder()
-        extractMediaMetadataUseCase = ExtractMediaMetadataUseCaseMediaInfo(
+
+        executeMediaInfoUseCase = ExecuteMediaInfoUseCase(
             mediaInfoPath = "/usr/bin/mediainfo",
             workingDir = workingDir,
             json = json,
+        )
+        extractMediaMetadataUseCase = ExtractMediaMetadataUseCaseMediaInfo(
+            executeMediaInfoUseCase = executeMediaInfoUseCase,
             getStoragePathForUrlUseCase = mockGetStoragePathUseCase(),
         )
 

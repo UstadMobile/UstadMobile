@@ -7,6 +7,7 @@ import com.ustadmobile.core.contentjob.InvalidContentException
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
 import com.ustadmobile.core.domain.compress.CompressionType
 import com.ustadmobile.core.domain.extractmediametadata.ExtractMediaMetadataUseCase
+import com.ustadmobile.core.domain.extractmediametadata.mediainfo.ExecuteMediaInfoUseCase
 import com.ustadmobile.core.domain.extractmediametadata.mediainfo.ExtractMediaMetadataUseCaseMediaInfo
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
 import com.ustadmobile.core.test.assertCachedBodyMatchesFileContent
@@ -34,6 +35,8 @@ class VideoContentImporterJvmTest : AbstractContentImporterTest() {
 
     private lateinit var extractMediaUseCase: ExtractMediaMetadataUseCase
 
+    private lateinit var executeMediaInfoUseCase: ExecuteMediaInfoUseCase
+
     private lateinit var validateVideoUseCase: ValidateVideoFileUseCase
 
     private lateinit var getStoragePathUseCaseMock: GetStoragePathForUrlUseCase
@@ -51,10 +54,14 @@ class VideoContentImporterJvmTest : AbstractContentImporterTest() {
             }
         }
 
-        extractMediaUseCase =ExtractMediaMetadataUseCaseMediaInfo(
+        executeMediaInfoUseCase = ExecuteMediaInfoUseCase(
             mediaInfoPath = mediaInfoPath.absolutePath,
             workingDir = File(System.getProperty("user.dir")),
             json = json,
+        )
+
+        extractMediaUseCase = ExtractMediaMetadataUseCaseMediaInfo(
+            executeMediaInfoUseCase=  executeMediaInfoUseCase,
             getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
         )
 
