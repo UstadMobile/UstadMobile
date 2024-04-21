@@ -5,11 +5,9 @@ import androidx.compose.desktop.ui.tooling.preview.Preview
 import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditUiState
 import com.ustadmobile.core.contentjob.MetadataResult
-import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditUiState
 import com.ustadmobile.lib.db.composites.ContentEntryAndContentJob
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
-import com.ustadmobile.lib.db.entities.CourseBlock
 
 @Composable
 @Preview
