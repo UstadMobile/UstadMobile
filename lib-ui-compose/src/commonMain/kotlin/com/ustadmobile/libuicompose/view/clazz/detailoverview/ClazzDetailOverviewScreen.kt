@@ -12,11 +12,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.Login
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.HorizontalDivider
@@ -42,6 +42,7 @@ import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewVi
 import com.ustadmobile.lib.db.composites.CourseBlockAndDisplayDetails
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.libuicompose.components.UstadAsyncImage
+import com.ustadmobile.libuicompose.components.UstadBlockIcon
 import com.ustadmobile.libuicompose.components.UstadHtmlText
 import com.ustadmobile.libuicompose.components.UstadDetailField2
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
@@ -54,7 +55,6 @@ import com.ustadmobile.libuicompose.util.rememberFormattedDateRange
 import com.ustadmobile.libuicompose.util.rememberFormattedTime
 import com.ustadmobile.libuicompose.view.clazz.paddingCourseBlockIndent
 import dev.icerock.moko.resources.compose.stringResource
-import com.ustadmobile.libuicompose.view.clazz.iconContent
 import com.ustadmobile.libuicompose.view.clazz.painterForDefaultCourseImage
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
@@ -161,7 +161,7 @@ fun ClazzDetailOverviewScreen(
                     valueContent = { Text(uiState.clazz?.clazzCode ?: "") },
                     labelContent = { Text(stringResource(MR.strings.invite_code)) },
                     leadingContent = {
-                        Icon(Icons.Filled.Login, contentDescription = null)
+                        Icon(Icons.AutoMirrored.Filled.Login, contentDescription = null)
                     },
                 )
             }
@@ -283,7 +283,12 @@ fun CourseBlockListItem(
             Text(descriptionPlainText, maxLines = 2, overflow = TextOverflow.Ellipsis)
         },
         leadingContent = {
-            courseBlock?.courseBlock?.iconContent()
+            UstadBlockIcon(
+                title = courseBlock?.courseBlock?.cbTitle ?: "",
+                courseBlock = courseBlock?.courseBlock,
+                contentEntry = courseBlock?.contentEntry,
+                pictureUri = null
+            )
         },
         trailingContent = {
             if(courseBlock?.courseBlock?.cbType == CourseBlock.BLOCK_MODULE_TYPE) {
