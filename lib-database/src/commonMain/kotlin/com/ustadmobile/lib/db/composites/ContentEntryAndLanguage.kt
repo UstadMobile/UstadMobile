@@ -12,12 +12,5 @@ data class ContentEntryAndLanguage(
     var contentEntry: ContentEntry? = null,
     @Embedded
     var language: Language? = null,
-) {
-    fun toContentEntryAndBlock(
-        block: CourseBlock?
-    ): ContentEntryBlockLanguageAndContentJob = ContentEntryBlockLanguageAndContentJob(
-        entry = contentEntry,
-        language = language,
-        block = block,
-    )
-}
+)
+

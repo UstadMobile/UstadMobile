@@ -66,7 +66,7 @@ fun UstadCourseBlockEdit(
                 .fillMaxWidth()
                 .testTag("title")
                 .defaultItemPadding(),
-            value = uiState.courseBlock?.cbTitle ?: "",
+            value = uiState.block?.courseBlock?.cbTitle ?: "",
             label = { Text(stringResource(MR.strings.title) + "*") },
             isError = uiState.caTitleError != null,
             enabled = uiState.fieldsEnabled,
@@ -75,19 +75,19 @@ fun UstadCourseBlockEdit(
                 Text(uiState.caTitleError ?: stringResource(MR.strings.required))
             },
             onValueChange = {
-                onCourseBlockChange(uiState.courseBlock?.shallowCopy {
+                onCourseBlockChange(uiState.block?.courseBlock?.shallowCopy {
                     cbTitle = it
                 })
             },
         )
 
         UstadRichTextEdit(
-            html = uiState.courseBlock?.cbDescription ?: "",
+            html = uiState.block?.courseBlock?.cbDescription ?: "",
             modifier = Modifier.fillMaxWidth().defaultItemPadding()
                 .testTag("description"),
             onHtmlChange = {
-                uiState.courseBlock?.also { courseBlock ->
-                    onCourseBlockChange(courseBlock.shallowCopy {
+                uiState.block?.also { block ->
+                    onCourseBlockChange(block.courseBlock.shallowCopy {
                         cbDescription = it
                     })
                 }
@@ -102,14 +102,14 @@ fun UstadCourseBlockEdit(
             errorText = uiState.caHideUntilDateError,
         ) {
             UstadDateTimeField(
-                value = uiState.courseBlock?.cbHideUntilDate ?: 0,
+                value = uiState.block?.courseBlock?.cbHideUntilDate ?: 0,
                 modifier = Modifier
                     .testTag("dont_show_before"),
                 dateLabel = { Text(stringResource(MR.strings.dont_show_before)) },
                 timeLabel = { Text(stringResource(MR.strings.time)) },
                 timeZoneId = uiState.timeZone,
                 onValueChange = {
-                    onCourseBlockChange(uiState.courseBlock?.shallowCopy {
+                    onCourseBlockChange(uiState.block?.courseBlock?.shallowCopy {
                         cbHideUntilDate = it
                     })
                 },
@@ -126,13 +126,13 @@ fun UstadCourseBlockEdit(
                         .weight(0.5F)
                         .defaultItemPadding(end = if (uiState.minScoreVisible) 8.dp else 16.dp),
                     value = CompletionCriteria.valueOf(
-                        uiState.courseBlock?.cbCompletionCriteria ?: 0
+                        uiState.block?.courseBlock?.cbCompletionCriteria ?: 0
                     ),
                     label = stringResource(MR.strings.completion_criteria),
                     itemText = { stringResource(it.stringResource).capitalizeFirstLetter() },
                     options = uiState.completionCriteriaOptions,
                     onOptionSelected = {
-                        onCourseBlockChange(uiState.courseBlock?.shallowCopy{
+                        onCourseBlockChange(uiState.block?.courseBlock?.shallowCopy{
                             cbCompletionCriteria = it.value
                         })
                     },
@@ -148,7 +148,7 @@ fun UstadCourseBlockEdit(
                         .testTag("points")
                         .weight(0.5F)
                         .defaultItemPadding(start = 0.dp),
-                    value = (uiState.courseBlock?.cbMinPoints?.toFloat() ?: 0f),
+                    value = (uiState.block?.courseBlock?.cbMinPoints?.toFloat() ?: 0f),
                     label = { Text(stringResource(MR.strings.points)) },
                     enabled = uiState.fieldsEnabled,
                     trailingIcon = {
@@ -158,7 +158,7 @@ fun UstadCourseBlockEdit(
                         )
                     },
                     onValueChange = {
-                        onCourseBlockChange(uiState.courseBlock?.shallowCopy {
+                        onCourseBlockChange(uiState.block?.courseBlock?.shallowCopy {
                             cbMinPoints = it.toInt()
                         })
                     },
@@ -176,7 +176,7 @@ fun UstadCourseBlockEdit(
                     modifier = Modifier
                         .testTag("maximum_points")
                         .fillMaxWidth(),
-                    value = (uiState.courseBlock?.cbMaxPoints?.toFloat() ?: 0f),
+                    value = (uiState.block?.courseBlock?.cbMaxPoints?.toFloat() ?: 0f),
                     label = { Text(stringResource(MR.strings.maximum_points)) },
                     trailingIcon = {
                         Text(
@@ -187,7 +187,7 @@ fun UstadCourseBlockEdit(
                     isError = uiState.caMaxPointsError != null,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     onValueChange = {
-                        onCourseBlockChange(uiState.courseBlock?.shallowCopy {
+                        onCourseBlockChange(uiState.block?.courseBlock?.shallowCopy {
                             cbMaxPoints = it.toInt()
                         })
                     },
@@ -203,14 +203,14 @@ fun UstadCourseBlockEdit(
             ) {
                 UstadDateTimeField(
                     modifier = Modifier.testTag("deadline"),
-                    value = uiState.courseBlock?.cbDeadlineDate ?: 0,
+                    value = uiState.block?.courseBlock?.cbDeadlineDate ?: 0,
                     isError = uiState.caDeadlineError != null,
                     unsetDefault = UNSET_DISTANT_FUTURE,
                     dateLabel = { Text(stringResource(MR.strings.deadline)) },
                     timeLabel = { stringResource(MR.strings.time) },
                     timeZoneId = uiState.timeZone,
                     onValueChange = {
-                        onCourseBlockChange(uiState.courseBlock?.shallowCopy {
+                        onCourseBlockChange(uiState.block?.courseBlock?.shallowCopy {
                             cbDeadlineDate = it
                         })
                     },
@@ -227,14 +227,14 @@ fun UstadCourseBlockEdit(
             ) {
                 UstadDateTimeField(
                     modifier = Modifier.testTag("end_of_grace_period"),
-                    value = uiState.courseBlock?.cbGracePeriodDate ?: 0,
+                    value = uiState.block?.courseBlock?.cbGracePeriodDate ?: 0,
                     unsetDefault = UNSET_DISTANT_FUTURE,
                     dateLabel = { Text(stringResource(MR.strings.end_of_grace_period)) },
                     timeLabel = { stringResource(MR.strings.time) },
                     timeZoneId = uiState.timeZone,
                     baseTestTag = "end_of_grace_period",
                     onValueChange = {
-                        onCourseBlockChange(uiState.courseBlock?.shallowCopy {
+                        onCourseBlockChange(uiState.block?.courseBlock?.shallowCopy {
                             cbGracePeriodDate = it
                         })
                     }
@@ -248,7 +248,7 @@ fun UstadCourseBlockEdit(
                     .defaultItemPadding(bottom = 0.dp)
                     .fillMaxWidth()
                     .testTag("late_submission_penalty"),
-                value = (uiState.courseBlock?.cbLateSubmissionPenalty?.toFloat() ?: 0f),
+                value = (uiState.block?.courseBlock?.cbLateSubmissionPenalty?.toFloat() ?: 0f),
                 label = { Text(stringResource(MR.strings.late_submission_penalty)) },
                 enabled = uiState.fieldsEnabled,
                 trailingIcon = {
@@ -256,7 +256,7 @@ fun UstadCourseBlockEdit(
                 },
                 keyboardOptions =  KeyboardOptions(keyboardType = KeyboardType.Number),
                 onValueChange = {
-                    onCourseBlockChange(uiState.courseBlock?.shallowCopy {
+                    onCourseBlockChange(uiState.block?.courseBlock?.shallowCopy {
                         cbLateSubmissionPenalty = it.toInt()
                     })
                 },

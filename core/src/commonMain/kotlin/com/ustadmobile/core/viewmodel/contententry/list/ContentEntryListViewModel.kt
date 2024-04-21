@@ -30,7 +30,8 @@ import com.ustadmobile.core.viewmodel.contententry.getmetadata.ContentEntryGetMe
 import com.ustadmobile.core.viewmodel.contententry.importlink.ContentEntryImportLinkViewModel
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
 import com.ustadmobile.lib.db.composites.ContentEntryAndListDetail
-import com.ustadmobile.lib.db.composites.ContentEntryBlockLanguageAndContentJob
+import com.ustadmobile.lib.db.composites.ContentEntryAndContentJob
+import com.ustadmobile.lib.db.composites.CourseBlockAndEditEntities
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
@@ -477,33 +478,25 @@ class ContentEntryListViewModel(
             entry.leaf && showSelectFolderButton -> return
 
             entry.leaf && goToOnContentEntryEdit != 0 && courseBlockArg != null -> {
-                val courseBlock = json.decodeFromString(
-                    deserializer = CourseBlock.serializer(),
-                    string = courseBlockArg,
-                ).shallowCopy {
+                val courseBlock = CourseBlock().apply {
                     cbTitle = entry.title
                     cbDescription = entry.description
                     cbEntityUid = entry.contentEntryUid
                     cbType = CourseBlock.BLOCK_CONTENT_TYPE
                 }
 
+
                 navigateForResult(
                     nextViewName = CourseBlockEditViewModel.DEST_NAME,
                     key = ClazzEditViewModel.RESULT_KEY_CONTENTENTRY,
-                    currentValue = courseBlock,
-                    serializer = CourseBlock.serializer(),
+                    currentValue = CourseBlockAndEditEntities(
+                        courseBlock = courseBlock,
+                        contentEntry = entry,
+                    ),
+                    serializer = CourseBlockAndEditEntities.serializer(),
                     overwriteDestination = false,
                     args = buildMap {
                         putFromSavedStateIfPresent(ContentEntryEditViewModel.ARG_GO_TO_ON_CONTENT_ENTRY_DONE)
-
-                        this[CourseBlockEditViewModel.ARG_SELECTED_CONTENT_ENTRY] = json.encodeToString(
-                            ContentEntryBlockLanguageAndContentJob.serializer(),
-                            ContentEntryBlockLanguageAndContentJob(
-                                entry = entry,
-                                block = courseBlock,
-                                contentJobItem = null,
-                            ),
-                        )
                     }
                 )
                 return

@@ -55,7 +55,7 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
         )
     )
     @Query("""
-        SELECT CourseBlock.*, Assignment.*, Entry.*, Language.*,
+        SELECT CourseBlock.*, Assignment.*, Entry.*, Language.*, CourseBlockPicture.*,
                (SELECT CourseGroupSet.cgsName
                   FROM CourseGroupSet
                  WHERE CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
@@ -71,6 +71,8 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
                LEFT JOIN Language
                          ON Language.langUid = Entry.primaryLanguageUid
                             AND CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
+               LEFT JOIN CourseBlockPicture
+                         ON CourseBlockPicture.cbpUid = CourseBlock.cbUid    
          WHERE CourseBlock.cbClazzUid = :clazzUid
            AND (CAST(:includeInactive AS INTEGER) = 1 OR CourseBlock.cbActive)
       ORDER BY CourseBlock.cbIndex

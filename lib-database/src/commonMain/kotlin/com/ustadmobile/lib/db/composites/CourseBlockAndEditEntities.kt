@@ -18,7 +18,7 @@ import kotlinx.serialization.Serializable
 data class CourseBlockAndEditEntities(
     val courseBlock: CourseBlock,
 
-    var courseBlockPicture: CourseBlockPicture? = null,
+    val courseBlockPicture: CourseBlockPicture? = null,
 
     val contentEntry: ContentEntry? = null,
 

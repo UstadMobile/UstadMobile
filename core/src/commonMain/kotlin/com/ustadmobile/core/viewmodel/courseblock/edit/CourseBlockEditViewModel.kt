@@ -10,7 +10,8 @@ import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewModel
 import com.ustadmobile.core.viewmodel.courseblock.CourseBlockViewModelConstants.CompletionCriteria
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
-import com.ustadmobile.lib.db.composites.ContentEntryBlockLanguageAndContentJob
+import com.ustadmobile.lib.db.composites.ContentEntryAndContentJob
+import com.ustadmobile.lib.db.composites.CourseBlockAndEditEntities
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
@@ -25,9 +26,9 @@ import org.kodein.di.DI
 @kotlinx.serialization.Serializable
 data class CourseBlockEditUiState(
 
-    val courseBlock: CourseBlock? = null,
+    val block: CourseBlockAndEditEntities? = null,
 
-    val selectedContentEntry: ContentEntryBlockLanguageAndContentJob? = null,
+    val selectedContentEntry: ContentEntryAndContentJob? = null,
 
     val canEditSelectedContentEntry: Boolean = false,
 
@@ -52,25 +53,25 @@ data class CourseBlockEditUiState(
     val timeZone: String = "UTC",
 ) {
     val minScoreVisible: Boolean
-        get() = courseBlock?.cbCompletionCriteria == ContentEntry.COMPLETION_CRITERIA_MIN_SCORE
+        get() = block?.courseBlock?.cbCompletionCriteria == ContentEntry.COMPLETION_CRITERIA_MIN_SCORE
 
     val gracePeriodVisible: Boolean
-        get() = deadlineVisible && courseBlock?.cbDeadlineDate.isDateSet()
+        get() = deadlineVisible && block?.courseBlock?.cbDeadlineDate.isDateSet()
 
     val latePenaltyVisible: Boolean
-        get() = gracePeriodVisible && courseBlock?.cbGracePeriodDate.isDateSet()
+        get() = gracePeriodVisible && block?.courseBlock?.cbGracePeriodDate.isDateSet()
 
     val completionCriteriaVisible: Boolean
         get() = completionCriteriaOptions.isNotEmpty()
      
     val deadlineVisible: Boolean
-        get() = courseBlock?.cbType == CourseBlock.BLOCK_ASSIGNMENT_TYPE ||
-            courseBlock?.cbType == CourseBlock.BLOCK_CONTENT_TYPE
+        get() = block?.courseBlock?.cbType == CourseBlock.BLOCK_ASSIGNMENT_TYPE ||
+            block?.courseBlock?.cbType == CourseBlock.BLOCK_CONTENT_TYPE
 
     //For now - really the same as the deadline
     val maxPointsVisible: Boolean
-        get() = courseBlock?.cbType == CourseBlock.BLOCK_ASSIGNMENT_TYPE ||
-            courseBlock?.cbType == CourseBlock.BLOCK_CONTENT_TYPE
+        get() = block?.courseBlock?.cbType == CourseBlock.BLOCK_ASSIGNMENT_TYPE ||
+            block?.courseBlock?.cbType == CourseBlock.BLOCK_CONTENT_TYPE
 
     val hasErrors: Boolean
         get() = caTitleError != null || caDeadlineError != null || caGracePeriodError != null ||
@@ -103,35 +104,37 @@ class CourseBlockEditViewModel(
                 _uiState.update { prev ->
                     prev.copy(
                         selectedContentEntry = json.decodeFromString(
-                            ContentEntryBlockLanguageAndContentJob.serializer(), selectedContentJson
+                            ContentEntryAndContentJob.serializer(), selectedContentJson
                         )
                     )
                 }
             }
 
             loadEntity(
-                serializer = CourseBlock.serializer(),
+                serializer = CourseBlockAndEditEntities.serializer(),
                 makeDefault = {
-                    CourseBlock().apply {
-                        cbUid = activeDb.doorPrimaryKeyManager.nextIdAsync(CourseBlock.TABLE_ID)
-                        cbActive = true
-                        cbType = savedStateHandle[ARG_BLOCK_TYPE]?.toInt() ?: CourseBlock.BLOCK_MODULE_TYPE
-                    }
+                    CourseBlockAndEditEntities(
+                        courseBlock = CourseBlock().apply {
+                            cbUid = activeDb.doorPrimaryKeyManager.nextIdAsync(CourseBlock.TABLE_ID)
+                            cbActive = true
+                            cbType = savedStateHandle[ARG_BLOCK_TYPE]?.toInt() ?: CourseBlock.BLOCK_MODULE_TYPE
+                        }
+                    )
                 },
                 onLoadFromDb = { null }, //Does not load from database - always JSON passed from ClazzEdit
                 uiUpdate = {
                     _uiState.update { prev ->
-                        prev.copy(courseBlock = it)
+                        prev.copy(block = it)
                     }
                 }
             )
 
             val contentEntryVal = _uiState.value.selectedContentEntry
-            val courseBlockVal = _uiState.value.courseBlock
-            if(contentEntryVal != null && courseBlockVal != null) {
+            val blockVal = _uiState.value.block
+            if(contentEntryVal != null && blockVal != null) {
                 val canEditContentEntry = when {
                     contentEntryVal.entry?.contentOwnerType == ContentEntry.OWNER_TYPE_COURSE &&
-                            contentEntryVal.entry?.contentOwner == courseBlockVal.cbUid -> {
+                            contentEntryVal.entry?.contentOwner == blockVal.courseBlock.cbUid -> {
                         true
                     }
 
@@ -155,7 +158,7 @@ class CourseBlockEditViewModel(
 
             _appUiState.update {prev ->
                 prev.copy(
-                    title = when(_uiState.value.courseBlock?.cbType) {
+                    title = when(_uiState.value.block?.courseBlock?.cbType) {
                         CourseBlock.BLOCK_MODULE_TYPE ->
                             createEditTitle(MR.strings.add_module, MR.strings.edit_module)
                         CourseBlock.BLOCK_TEXT_TYPE ->
@@ -177,7 +180,7 @@ class CourseBlockEditViewModel(
             launch {
                 resultReturner.filteredResultFlowForKey(KEY_HTML_DESCRIPTION).collect { result ->
                     val descriptionHtml = result.result as? String ?: return@collect
-                    onEntityChanged(_uiState.value.courseBlock?.shallowCopy {
+                    onEntityChanged(_uiState.value.block?.courseBlock?.shallowCopy {
                         cbDescription = descriptionHtml
                     })
                 }
@@ -186,10 +189,10 @@ class CourseBlockEditViewModel(
             launch {
                 resultReturner.filteredResultFlowForKey(KEY_CONTENT_ENTRY_EDIT_RESULT).collect { result ->
                     val contentEntryResult = result.result
-                            as? ContentEntryBlockLanguageAndContentJob ?: return@collect
+                            as? ContentEntryAndContentJob ?: return@collect
                     _uiState.update { it.copy(selectedContentEntry = contentEntryResult) }
                     savedStateHandle[KEY_SAVED_STATE_SELECTED_CONTENT_ENTRY] = json.encodeToString(
-                        ContentEntryBlockLanguageAndContentJob.serializer(), contentEntryResult
+                        ContentEntryAndContentJob.serializer(), contentEntryResult
                     )
                 }
             }
@@ -197,11 +200,17 @@ class CourseBlockEditViewModel(
     }
 
     fun onEntityChanged(courseBlock: CourseBlock?) {
+        if(courseBlock == null)
+            return
+
         _uiState.update { prev ->
             prev.copy(
-                courseBlock = courseBlock,
-                caTitleError = updateErrorMessageOnChange(prev.courseBlock?.cbTitle,
-                    courseBlock?.cbTitle, prev.caTitleError)
+                block = prev.block?.copy(
+                    courseBlock = courseBlock
+                ),
+                caTitleError = updateErrorMessageOnChange(
+                    prev.block?.courseBlock?.cbTitle,
+                    courseBlock.cbTitle, prev.caTitleError)
             )
         }
 
@@ -215,7 +224,7 @@ class CourseBlockEditViewModel(
     //Take the user to a separate screen with rich text editor.
     fun onClickEditDescription() {
         navigateToEditHtml(
-            currentValue = _uiState.value.courseBlock?.cbDescription,
+            currentValue = _uiState.value.block?.courseBlock?.cbDescription,
             resultKey = KEY_HTML_DESCRIPTION,
             title = systemImpl.getString(MR.strings.description),
         )
@@ -226,11 +235,11 @@ class CourseBlockEditViewModel(
             nextViewName = ContentEntryEditViewModel.DEST_NAME,
             key = KEY_CONTENT_ENTRY_EDIT_RESULT,
             currentValue = _uiState.value.selectedContentEntry,
-            serializer = ContentEntryBlockLanguageAndContentJob.serializer(),
+            serializer = ContentEntryAndContentJob.serializer(),
             args = buildMap {
-                _uiState.value.courseBlock?.also {
+                _uiState.value.block?.also {
                     this[ContentEntryEditViewModel.ARG_COURSEBLOCK] = json.encodeToString(
-                        CourseBlock.serializer(), it
+                        CourseBlock.serializer(), it.courseBlock
                     )
                     this[ContentEntryEditViewModel.ARG_GO_TO_ON_CONTENT_ENTRY_DONE] = ContentEntryEditViewModel.FINISH_WITHOUT_SAVE_TO_DB.toString()
                 }
@@ -239,8 +248,8 @@ class CourseBlockEditViewModel(
     }
 
     fun onClickSave() {
-        val courseBlockVal = _uiState.value.courseBlock ?: return
-        if(courseBlockVal.cbTitle.isNullOrBlank()) {
+        val courseBlockVal = _uiState.value.block ?: return
+        if(courseBlockVal.courseBlock.cbTitle.isNullOrBlank()) {
             _uiState.update { prev ->
                 prev.copy(
                     caTitleError = systemImpl.getString(MR.strings.required)
@@ -251,17 +260,9 @@ class CourseBlockEditViewModel(
         if(_uiState.value.hasErrors)
             return
 
-        val contentEntryVal = _uiState.value.selectedContentEntry
-        if(contentEntryVal != null) {
-            finishWithResult(
-                contentEntryVal.copy(
-                    block = _uiState.value.courseBlock
-                )
-            )
-        }else {
-            finishWithResult(_uiState.value.courseBlock)
-        }
-
+        finishWithResult(
+            _uiState.value
+        )
     }
 
 

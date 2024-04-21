@@ -32,8 +32,6 @@ external interface ContentEntryEditScreenProps : Props {
 
     var uiState: ContentEntryEditUiState
 
-    var onCourseBlockChanged: (CourseBlock?) -> Unit
-
     var onClickUpdateContent: () -> Unit
 
     var onContentEntryChanged: (ContentEntry?) -> Unit
@@ -54,7 +52,6 @@ val ContentEntryEditScreen = FC<Props> {
     ContentEntryEditScreenComponent {
         uiState = uiStateVal
         onContentEntryChanged = viewModel::onContentEntryChanged
-        onCourseBlockChanged = viewModel::onCourseBlockChanged
     }
 }
 

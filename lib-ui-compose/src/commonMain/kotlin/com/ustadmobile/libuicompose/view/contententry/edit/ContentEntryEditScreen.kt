@@ -23,7 +23,6 @@ import com.ustadmobile.core.impl.locale.entityconstants.LicenceConstants
 import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditUiState
 import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewModel
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.libuicompose.components.UstadMessageIdOptionExposedDropDownMenuField
 import com.ustadmobile.libuicompose.components.UstadRichTextEdit
@@ -50,7 +49,6 @@ fun ContentEntryEditScreen(
 @Composable
 fun ContentEntryEditScreen(
     uiState: ContentEntryEditUiState = ContentEntryEditUiState(),
-    onCourseBlockChange: (CourseBlock?) -> Unit = {},
     onClickEditDescription: () -> Unit = { },
     onClickUpdateContent: () -> Unit = { },
     onContentEntryChanged: (ContentEntry?) -> Unit = {},

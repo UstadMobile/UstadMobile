@@ -30,7 +30,7 @@ import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
-import com.ustadmobile.lib.db.composites.ContentEntryBlockLanguageAndContentJob
+import com.ustadmobile.lib.db.composites.ContentEntryAndContentJob
 import com.ustadmobile.lib.db.composites.CourseBlockAndEditEntities
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.Clazz.Companion.CLAZZ_FEATURE_ATTENDANCE
@@ -244,6 +244,7 @@ class ClazzEditViewModel(
                             courseBlocksDb.map {
                                 CourseBlockAndEditEntities(
                                     courseBlock = it.courseBlock!!, //CourseBlock can't be null as per query
+                                    courseBlockPicture = it.courseBlockPicture,
                                     contentEntry = it.contentEntry,
                                     contentEntryLang = it.contentEntryLang,
                                     assignment = it.assignment,
@@ -324,23 +325,23 @@ class ClazzEditViewModel(
                 }
             }
 
-            launch {
-                resultReturner.filteredResultFlowForKey(RESULT_KEY_CONTENTENTRY).collect { result ->
-                    val contentEntryResult = result.result as? ContentEntryBlockLanguageAndContentJob ?: return@collect
-                    val block = contentEntryResult.block ?: return@collect //Block must not be null
-                    val newCourseBlockList = addOrUpdateCourseBlockUseCase(
-                        currentList = _uiState.value.courseBlockList,
-                        clazzUid = _uiState.value.entity?.clazzUid ?: 0L,
-                        addOrUpdateBlock = CourseBlockAndEditEntities(
-                            courseBlock = block,
-                            contentEntry = contentEntryResult.entry,
-                            contentJobItem = contentEntryResult.contentJobItem,
-                        )
-                    )
-
-                    updateCourseBlockList(newCourseBlockList)
-                }
-            }
+//            launch {
+//                resultReturner.filteredResultFlowForKey(RESULT_KEY_CONTENTENTRY).collect { result ->
+//                    val contentEntryResult = result.result as? ContentEntryAndContentJob ?: return@collect
+//                    val block = contentEntryResult.block ?: return@collect //Block must not be null
+//                    val newCourseBlockList = addOrUpdateCourseBlockUseCase(
+//                        currentList = _uiState.value.courseBlockList,
+//                        clazzUid = _uiState.value.entity?.clazzUid ?: 0L,
+//                        addOrUpdateBlock = CourseBlockAndEditEntities(
+//                            courseBlock = block,
+//                            contentEntry = contentEntryResult.entry,
+//                            contentJobItem = contentEntryResult.contentJobItem,
+//                        )
+//                    )
+//
+//                    updateCourseBlockList(newCourseBlockList)
+//                }
+//            }
 
             launch {
                 resultReturner.filteredResultFlowForKey(RESULT_KEY_TIMEZONE).collect { result ->
@@ -470,20 +471,12 @@ class ClazzEditViewModel(
         if(blockType == CourseBlock.BLOCK_CONTENT_TYPE) {
             navigateForResult(
                 nextViewName = ContentEntryListViewModel.DEST_NAME,
-                key = RESULT_KEY_CONTENTENTRY,
+                key = RESULT_KEY_COURSEBLOCK,
                 currentValue = null,
-                serializer = ContentEntryBlockLanguageAndContentJob.serializer(),
+                serializer = ContentEntryAndContentJob.serializer(),
                 args = mapOf(
                     UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString(),
                     ContentEntryEditViewModel.ARG_GO_TO_ON_CONTENT_ENTRY_DONE to ContentEntryEditViewModel.GO_TO_COURSE_BLOCK_EDIT.toString(),
-                    ContentEntryEditViewModel.ARG_COURSEBLOCK to json.encodeToString(
-                        serializer = CourseBlock.serializer(),
-                        value = CourseBlock().apply {
-                            cbUid = activeDb.doorPrimaryKeyManager.nextId(CourseBlock.TABLE_ID)
-                            cbClazzUid = _uiState.value.entity?.clazzUid ?: 0L
-                            cbType = CourseBlock.BLOCK_CONTENT_TYPE
-                        }
-                    )
                 ),
             )
 
@@ -778,35 +771,33 @@ class ClazzEditViewModel(
     }
 
     fun onClickEditCourseBlock(block: CourseBlockAndEditEntities) {
-        if(block.courseBlock.cbType == CourseBlock.BLOCK_CONTENT_TYPE) {
-            navigateForResult(
-                nextViewName = CourseBlockEditViewModel.DEST_NAME,
-                key = RESULT_KEY_CONTENTENTRY,
-                currentValue =  block.courseBlock,
-                serializer = CourseBlock.serializer(),
-                args = mapOf(
-                    CourseBlockEditViewModel.ARG_SELECTED_CONTENT_ENTRY to json.encodeToString(
-                        serializer = ContentEntryBlockLanguageAndContentJob.serializer(),
-                        value = ContentEntryBlockLanguageAndContentJob(
-                            entry = block.contentEntry,
-                            block = block.courseBlock,
-                        )
-                    )
-                )
-            )
-            return
-        }
-
-
         when(block.courseBlock.cbType) {
+//            CourseBlock.BLOCK_CONTENT_TYPE -> {
+//                navigateForResult(
+//                    nextViewName = CourseBlockEditViewModel.DEST_NAME,
+//                    key = RESULT_KEY_CONTENTENTRY,
+//                    currentValue =  block.courseBlock,
+//                    serializer = CourseBlock.serializer(),
+//                    args = mapOf(
+//                        CourseBlockEditViewModel.ARG_SELECTED_CONTENT_ENTRY to json.encodeToString(
+//                            serializer = ContentEntryAndContentJob.serializer(),
+//                            value = ContentEntryAndContentJob(
+//                                entry = block.contentEntry,
+//                            )
+//                        )
+//                    )
+//                )
+//            }
+
+            CourseBlock.BLOCK_CONTENT_TYPE,
             CourseBlock.BLOCK_DISCUSSION_TYPE,
             CourseBlock.BLOCK_TEXT_TYPE,
             CourseBlock.BLOCK_MODULE_TYPE -> {
                 navigateForResult(
                     nextViewName = CourseBlockEditViewModel.DEST_NAME,
                     key = RESULT_KEY_COURSEBLOCK,
-                    serializer = CourseBlock.serializer(),
-                    currentValue = block.courseBlock,
+                    serializer = CourseBlockAndEditEntities.serializer(),
+                    currentValue = block,
                 )
             }
             CourseBlock.BLOCK_ASSIGNMENT_TYPE -> {
