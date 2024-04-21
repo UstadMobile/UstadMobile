@@ -1,4 +1,4 @@
-package com.ustadmobile.libuicompose.util.ext
+package com.ustadmobile.core.viewmodel.contententry
 
 import com.ustadmobile.core.domain.compress.CompressionLevel
 import dev.icerock.moko.resources.StringResource

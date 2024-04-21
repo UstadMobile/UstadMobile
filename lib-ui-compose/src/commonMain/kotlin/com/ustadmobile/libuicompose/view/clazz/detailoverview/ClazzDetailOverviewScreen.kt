@@ -28,6 +28,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
@@ -105,14 +106,14 @@ fun ClazzDetailOverviewScreen(
                     uri = courseBannerUri,
                     contentDescription = "",
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier.height(156.dp).fillMaxWidth()
+                    modifier = Modifier.height(156.dp).fillMaxWidth().testTag("course_banner")
                 )
             }else {
                 Image(
                     painter = painterForDefaultCourseImage(uiState.clazz?.clazzName),
                     contentDescription = "",
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier.height(156.dp).fillMaxWidth(),
+                    modifier = Modifier.height(156.dp).fillMaxWidth().testTag("default_banner"),
                 )
             }
         }

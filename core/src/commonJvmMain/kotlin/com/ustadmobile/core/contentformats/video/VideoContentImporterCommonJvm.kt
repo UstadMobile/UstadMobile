@@ -198,7 +198,7 @@ class VideoContentImporterCommonJvm(
                 cevManifestUrl = manifestUrl,
                 cevOpenUri = mediaInfoEntryUri,
                 cevOriginalSize = originalSize,
-                cevStorageSize = uriHelper.getSize(uri),
+                cevStorageSize = compressionResult?.compressedSize ?: originalSize,
             )
         }finally {
             File(workDir.toString()).deleteRecursively()

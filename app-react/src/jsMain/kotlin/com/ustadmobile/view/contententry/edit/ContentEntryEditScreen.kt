@@ -1,11 +1,13 @@
 package com.ustadmobile.view.contententry.edit
 
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.compress.CompressionLevel
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.locale.entityconstants.LicenceConstants
 import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditUiState
 import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewModel
+import com.ustadmobile.core.viewmodel.contententry.stringResource
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.CourseBlock
@@ -14,11 +16,14 @@ import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.mui.components.UstadTextEditField
 import com.ustadmobile.util.ext.onTextChange
 import com.ustadmobile.view.components.UstadMessageIdSelectField
-import com.ustadmobile.view.components.UstadSwitchField
 import com.ustadmobile.wrappers.quill.ReactQuill
 import kotlinx.coroutines.Dispatchers
 import mui.material.Button
 import mui.material.ButtonVariant
+import mui.material.FormControl
+import mui.material.InputLabel
+import mui.material.MenuItem
+import mui.material.Select
 import mui.material.Stack
 import mui.material.TextField
 import mui.material.Typography
@@ -36,7 +41,7 @@ external interface ContentEntryEditScreenProps : Props {
 
     var onContentEntryChanged: (ContentEntry?) -> Unit
 
-    var onChangeCompress: (Boolean) -> Unit
+    var onSetCompressionLevel: (CompressionLevel) -> Unit
 
 }
 
@@ -52,6 +57,7 @@ val ContentEntryEditScreen = FC<Props> {
     ContentEntryEditScreenComponent {
         uiState = uiStateVal
         onContentEntryChanged = viewModel::onContentEntryChanged
+        onSetCompressionLevel = viewModel::onSetCompressionLevel
     }
 }
 
@@ -163,13 +169,35 @@ private val ContentEntryEditScreenComponent = FC<ContentEntryEditScreenProps> { 
                 }
             }
 
-            if (props.uiState.contentCompressVisible){
-                UstadSwitchField {
-                    id = "content_compression_enabled"
-                    checked= props.uiState.compressionEnabled
-                    onChanged = { props.onChangeCompress(it) }
-                    label = strings[MR.strings.compress]
-                    enabled = props.uiState.fieldsEnabled
+            FormControl {
+                fullWidth = true
+
+                InputLabel {
+                    id = "compression_label"
+                    + strings[MR.strings.compression]
+                }
+
+                Select {
+                    value = props.uiState.entity?.contentJobItem?.cjiCompressionLevel?.toString()
+                        ?: CompressionLevel.MEDIUM.value.toString()
+                    id = "compression"
+                    labelId = "compression_label"
+                    label = ReactNode(strings[MR.strings.compression])
+                    disabled = !props.uiState.fieldsEnabled
+                    fullWidth = true
+                    onChange = { event, _ ->
+                        val selectedVal = ("" + event.target.value)
+                        selectedVal.toIntOrNull()?.also {
+                            props.onSetCompressionLevel(CompressionLevel.forValue(it))
+                        }
+                    }
+
+                    CompressionLevel.entries.forEach {
+                        MenuItem {
+                            value = it.value.toString()
+                            + strings[it.stringResource]
+                        }
+                    }
                 }
             }
         }

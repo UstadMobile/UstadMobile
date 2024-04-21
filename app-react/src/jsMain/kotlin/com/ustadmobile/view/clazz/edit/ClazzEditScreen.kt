@@ -117,6 +117,7 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
             ReactQuill {
                 value = props.uiState.entity?.clazzDesc ?: ""
                 id = "clazz_desc"
+                readOnly = !props.uiState.fieldsEnabled
                 placeholder = strings[MR.strings.description]
                 onChange = {
                     props.uiState.entity?.also { entity ->

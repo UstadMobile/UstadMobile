@@ -28,7 +28,7 @@ import com.ustadmobile.libuicompose.components.UstadMessageIdOptionExposedDropDo
 import com.ustadmobile.libuicompose.components.UstadRichTextEdit
 import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
-import com.ustadmobile.libuicompose.util.ext.stringResource
+import com.ustadmobile.core.viewmodel.contententry.stringResource
 import dev.icerock.moko.resources.compose.stringResource
 
 @Composable
