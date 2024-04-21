@@ -30,7 +30,6 @@ import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
-import com.ustadmobile.lib.db.composites.ContentEntryAndContentJob
 import com.ustadmobile.lib.db.composites.CourseBlockAndEditEntities
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.Clazz.Companion.CLAZZ_FEATURE_ATTENDANCE
@@ -296,52 +295,18 @@ class ClazzEditViewModel(
                 //Handle text, module, and discussion topic (e.g. plain CourseBlock that does not
                 // include any other entities)
                 resultReturner.filteredResultFlowForKey(RESULT_KEY_COURSEBLOCK).collect { result ->
-                    val courseBlockResult = result.result as? CourseBlock
+                    val courseBlockResult = result.result as? CourseBlockAndEditEntities
                         ?: return@collect
 
                     val newCourseBlockList = addOrUpdateCourseBlockUseCase(
                         currentList = _uiState.value.courseBlockList,
                         clazzUid = _uiState.value.entity?.clazzUid ?: 0L,
-                        addOrUpdateBlock = CourseBlockAndEditEntities(
-                            courseBlock = courseBlockResult
-                        ),
+                        addOrUpdateBlock = courseBlockResult,
                     )
 
                     updateCourseBlockList(newCourseBlockList)
                 }
             }
-
-            launch {
-                resultReturner.filteredResultFlowForKey(RESULT_KEY_ASSIGNMENT).collect { result ->
-                    val assignmentResultBlock = result.result as? CourseBlockAndEditEntities ?: return@collect
-
-                    val newCourseBlockList = addOrUpdateCourseBlockUseCase(
-                        currentList = _uiState.value.courseBlockList,
-                        clazzUid = _uiState.value.entity?.clazzUid ?: 0L,
-                        addOrUpdateBlock = assignmentResultBlock
-                    )
-
-                    updateCourseBlockList(newCourseBlockList)
-                }
-            }
-
-//            launch {
-//                resultReturner.filteredResultFlowForKey(RESULT_KEY_CONTENTENTRY).collect { result ->
-//                    val contentEntryResult = result.result as? ContentEntryAndContentJob ?: return@collect
-//                    val block = contentEntryResult.block ?: return@collect //Block must not be null
-//                    val newCourseBlockList = addOrUpdateCourseBlockUseCase(
-//                        currentList = _uiState.value.courseBlockList,
-//                        clazzUid = _uiState.value.entity?.clazzUid ?: 0L,
-//                        addOrUpdateBlock = CourseBlockAndEditEntities(
-//                            courseBlock = block,
-//                            contentEntry = contentEntryResult.entry,
-//                            contentJobItem = contentEntryResult.contentJobItem,
-//                        )
-//                    )
-//
-//                    updateCourseBlockList(newCourseBlockList)
-//                }
-//            }
 
             launch {
                 resultReturner.filteredResultFlowForKey(RESULT_KEY_TIMEZONE).collect { result ->
@@ -473,9 +438,11 @@ class ClazzEditViewModel(
                 nextViewName = ContentEntryListViewModel.DEST_NAME,
                 key = RESULT_KEY_COURSEBLOCK,
                 currentValue = null,
-                serializer = ContentEntryAndContentJob.serializer(),
+                serializer = CourseBlockAndEditEntities.serializer(),
                 args = mapOf(
                     UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString(),
+                    UstadView.ARG_CLAZZUID to effectiveClazzUid.toString(),
+                    CourseBlockEditViewModel.ARG_BLOCK_TYPE to CourseBlock.BLOCK_CONTENT_TYPE.toString(),
                     ContentEntryEditViewModel.ARG_GO_TO_ON_CONTENT_ENTRY_DONE to ContentEntryEditViewModel.GO_TO_COURSE_BLOCK_EDIT.toString(),
                 ),
             )

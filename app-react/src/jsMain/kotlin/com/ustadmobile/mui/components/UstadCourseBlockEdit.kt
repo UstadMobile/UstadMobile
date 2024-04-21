@@ -5,6 +5,7 @@ import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.util.ext.capitalizeFirstLetter
 import com.ustadmobile.core.viewmodel.courseblock.CourseBlockViewModelConstants.CompletionCriteria
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditUiState
+import com.ustadmobile.lib.db.composites.CourseBlockAndEditEntities
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
@@ -48,14 +49,14 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
     Stack{
         spacing = responsive(theme.spacing(2))
 
-        props.uiState.selectedContentEntry?.also { selectedContentEntry ->
+        props.uiState.block?.contentEntry?.also { selectedContentEntry ->
             ListItem {
                 ListItemIcon {
                     BookOutlinedIcon()
                 }
 
                 ListItemText {
-                    primary = ReactNode(selectedContentEntry.entry?.title ?: "")
+                    primary = ReactNode(selectedContentEntry.title ?: "")
                     secondary = ReactNode(strings[MR.strings.selected_content])
                 }
 
@@ -76,14 +77,14 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
 
         UstadTextField {
             id = "title"
-            value = props.uiState.block?.cbTitle ?: ""
+            value = props.uiState.block?.courseBlock?.cbTitle ?: ""
             label = ReactNode(strings[MR.strings.title] + "*")
             disabled = !props.uiState.fieldsEnabled
             fullWidth = true
             error = props.uiState.caTitleError != null
             helperText =  ReactNode(props.uiState.caTitleError ?: strings[MR.strings.required])
             onTextChange = {
-                props.onCourseBlockChange(props.uiState.block?.shallowCopy {
+                props.onCourseBlockChange(props.uiState.block?.courseBlock?.shallowCopy {
                     cbTitle = it
                 })
             }
@@ -91,12 +92,12 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
 
 
         ReactQuill {
-            value = props.uiState.block?.cbDescription ?: ""
+            value = props.uiState.block?.courseBlock?.cbDescription ?: ""
             id = "description_quill"
             placeholder = strings[MR.strings.description]
             onChange = {
                 props.uiState.block?.also { courseBlock ->
-                    props.onCourseBlockChange(courseBlock.shallowCopy {
+                    props.onCourseBlockChange(courseBlock.courseBlock.shallowCopy {
                         cbDescription = it
                     })
                 }
@@ -105,7 +106,7 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
 
 
         UstadDateTimeField {
-            timeInMillis = props.uiState.block?.cbHideUntilDate ?: 0
+            timeInMillis = props.uiState.block?.courseBlock?.cbHideUntilDate ?: 0
             label = ReactNode(strings[MR.strings.dont_show_before])
             id = "hide_until_date"
             disabled = !props.uiState.fieldsEnabled
@@ -113,7 +114,7 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
             error = props.uiState.caHideUntilDateError != null
             timeZoneId = props.uiState.timeZone
             onChange = {
-                props.onCourseBlockChange(props.uiState.block?.shallowCopy {
+                props.onCourseBlockChange(props.uiState.block?.courseBlock?.shallowCopy {
                     cbHideUntilDate = it
                 })
             }
@@ -127,14 +128,14 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
             if(props.uiState.completionCriteriaVisible) {
                 UstadSelectField<CompletionCriteria> {
                     id = "cbCompletionCriteria"
-                    value = CompletionCriteria.valueOf(props.uiState.block?.cbCompletionCriteria ?: 0)
+                    value = CompletionCriteria.valueOf(props.uiState.block?.courseBlock?.cbCompletionCriteria ?: 0)
                     label = strings[MR.strings.completion_criteria]
                     options = props.uiState.completionCriteriaOptions
                     itemValue = { it.value.toString() }
                     itemLabel = { ReactNode(strings[it.stringResource].capitalizeFirstLetter()) }
                     enabled = props.uiState.fieldsEnabled
                     onChange = {
-                        props.onCourseBlockChange(props.uiState.block?.shallowCopy {
+                        props.onCourseBlockChange(props.uiState.block?.courseBlock?.shallowCopy {
                             cbCompletionCriteria = it.value
                         })
                     }
@@ -144,7 +145,7 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
             if (props.uiState.minScoreVisible){
                 UstadNumberTextField {
                     id = "cbMinPoints"
-                    numValue = (props.uiState.block?.cbMinPoints ?: 0).toFloat()
+                    numValue = (props.uiState.block?.courseBlock?.cbMinPoints ?: 0).toFloat()
                     asDynamic().InputProps = jso<InputBaseProps> {
                         endAdornment = InputAdornment.create {
                             position = InputAdornmentPosition.end
@@ -154,7 +155,7 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
                     label = ReactNode(strings[MR.strings.points])
                     disabled = !props.uiState.fieldsEnabled
                     onChange = {
-                        props.onCourseBlockChange(props.uiState.block?.shallowCopy {
+                        props.onCourseBlockChange(props.uiState.block?.courseBlock?.shallowCopy {
                             cbMinPoints = it.toInt()
                         })
                     }
@@ -165,13 +166,13 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
         if(props.uiState.maxPointsVisible) {
             UstadNumberTextField {
                 id = "cbMaxPoints"
-                numValue = (props.uiState.block?.cbMaxPoints ?: 0).toFloat()
+                numValue = (props.uiState.block?.courseBlock?.cbMaxPoints ?: 0).toFloat()
                 label = ReactNode(strings[MR.strings.maximum_points])
                 error = (props.uiState.caMaxPointsError != null)
                 helperText = props.uiState.caMaxPointsError?.let { ReactNode(it) }
                 disabled = !props.uiState.fieldsEnabled
                 onChange = {
-                    props.onCourseBlockChange(props.uiState.block?.shallowCopy {
+                    props.onCourseBlockChange(props.uiState.block?.courseBlock?.shallowCopy {
                         cbMaxPoints = it.toInt()
                     })
                 }
@@ -182,7 +183,7 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
         if(props.uiState.deadlineVisible) {
             UstadDateTimeField {
                 id = "cbDeadlineDate"
-                timeInMillis = props.uiState.block?.cbDeadlineDate ?: 0
+                timeInMillis = props.uiState.block?.courseBlock?.cbDeadlineDate ?: 0
                 timeZoneId = props.uiState.timeZone
                 unsetDefault = Long.MAX_VALUE
                 label = ReactNode(strings[MR.strings.deadline])
@@ -190,7 +191,7 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
                 helperText = props.uiState.caDeadlineError?.let { ReactNode(it) }
                 error = props.uiState.caDeadlineError != null
                 onChange = {
-                    props.onCourseBlockChange(props.uiState.block?.shallowCopy {
+                    props.onCourseBlockChange(props.uiState.block?.courseBlock?.shallowCopy {
                         cbDeadlineDate = it
                     })
                 }
@@ -201,7 +202,7 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
         if (props.uiState.gracePeriodVisible){
             UstadDateTimeField {
                 id = "cbGracePeriodDate"
-                timeInMillis = props.uiState.block?.cbGracePeriodDate ?: 0
+                timeInMillis = props.uiState.block?.courseBlock?.cbGracePeriodDate ?: 0
                 timeZoneId = props.uiState.timeZone
                 unsetDefault = Long.MAX_VALUE
                 label = ReactNode(strings[MR.strings.end_of_grace_period])
@@ -210,7 +211,7 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
                 error = props.uiState.caGracePeriodError != null
                 timeZoneId = TimeZone.currentSystemDefault().id
                 onChange = {
-                    props.onCourseBlockChange(props.uiState.block?.shallowCopy {
+                    props.onCourseBlockChange(props.uiState.block?.courseBlock?.shallowCopy {
                         cbGracePeriodDate = it
                     })
                 }
@@ -220,7 +221,7 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
         if(props.uiState.latePenaltyVisible) {
             UstadNumberTextField {
                 id = "cbLateSubmissionPenalty"
-                numValue = (props.uiState.block?.cbLateSubmissionPenalty ?: 0).toFloat()
+                numValue = (props.uiState.block?.courseBlock?.cbLateSubmissionPenalty ?: 0).toFloat()
                 label = ReactNode(strings[MR.strings.late_submission_penalty])
                 disabled = !props.uiState.fieldsEnabled
                 helperText = ReactNode(strings[MR.strings.penalty_label])
@@ -231,7 +232,7 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
                     }
                 }
                 onChange = { newString ->
-                    props.onCourseBlockChange(props.uiState.block?.shallowCopy {
+                    props.onCourseBlockChange(props.uiState.block?.courseBlock?.shallowCopy {
                         cbLateSubmissionPenalty = newString.toInt()
                     })
                 }
@@ -246,10 +247,12 @@ val UstadCourseBlockEditPreview = FC<Props> {
 
         UstadCourseBlockEdit {
             uiState = CourseBlockEditUiState(
-                block = CourseBlock().apply {
-                    cbMaxPoints = 78
-                    cbCompletionCriteria = ContentEntry.COMPLETION_CRITERIA_MIN_SCORE
-                },
+                block = CourseBlockAndEditEntities(
+                    courseBlock = CourseBlock().apply {
+                        cbMaxPoints = 78
+                        cbCompletionCriteria = ContentEntry.COMPLETION_CRITERIA_MIN_SCORE
+                    }
+                ),
             )
         }
     }

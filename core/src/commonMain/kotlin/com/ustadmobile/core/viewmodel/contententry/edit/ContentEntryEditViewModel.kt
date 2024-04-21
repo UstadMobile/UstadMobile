@@ -12,8 +12,6 @@ import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.ext.onActiveEndpoint
-import com.ustadmobile.core.view.UstadEditView
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditUiState
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
@@ -21,7 +19,6 @@ import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.lib.db.composites.ContentEntryAndContentJob
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryImportJob
-import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -56,17 +53,7 @@ data class ContentEntryEditUiState(
 
     val compressionEnabled: Boolean = false,
 
-    ) {
-    val contentCompressVisible: Boolean
-        get() = metadataResult != null
-
-    fun copyWithFieldsEnabled(fieldsEnabled: Boolean) : ContentEntryEditUiState{
-        return copy(
-            fieldsEnabled = fieldsEnabled,
-        )
-    }
-
-}
+)
 
 /**
  * When there is no associated CourseBlock
@@ -96,9 +83,9 @@ class ContentEntryEditViewModel(
 
     val uiState: Flow<ContentEntryEditUiState> = _uiState.asStateFlow()
 
-    private val courseBlockArgVal = savedStateHandle[ARG_COURSEBLOCK]?.let {
-        json.decodeFromString(CourseBlock.serializer(),  it)
-    }
+    private val goToOnContentEntryDone = savedStateHandle[ARG_GO_TO_ON_CONTENT_ENTRY_DONE]?.toInt() ?: 0
+
+    private val goingToCourseBlockEdit = goToOnContentEntryDone == GO_TO_COURSE_BLOCK_EDIT
 
     init {
         _appUiState.update { prev ->
@@ -109,9 +96,10 @@ class ContentEntryEditViewModel(
 
         launchIfHasPermission(
             permissionCheck = { db ->
-                courseBlockArgVal != null || db.systemPermissionDao.personHasSystemPermission(
-                    activeUserPersonUid, PermissionFlags.EDIT_LIBRARY_CONTENT
-                )
+                goingToCourseBlockEdit ||
+                    db.systemPermissionDao.personHasSystemPermission(
+                        activeUserPersonUid, PermissionFlags.EDIT_LIBRARY_CONTENT
+                    )
             }
         ) {
             loadEntity(
@@ -133,9 +121,9 @@ class ContentEntryEditViewModel(
                         ContentEntryAndContentJob(
                             entry = importedMetaData.entry.shallowCopy {
                                 contentEntryUid = newContentEntryUid
-                                if(courseBlockArgVal != null) {
+                                if(goingToCourseBlockEdit) {
                                     contentOwnerType = ContentEntry.OWNER_TYPE_COURSE
-                                    contentOwner = courseBlockArgVal.cbClazzUid
+                                    contentOwner = savedStateHandle[ARG_CLAZZUID]?.toLong() ?: 0
                                 }else {
                                     contentOwnerType = ContentEntry.OWNER_TYPE_LIBRARY
                                     contentOwner = activeUserPersonUid
@@ -189,10 +177,9 @@ class ContentEntryEditViewModel(
                         text = systemImpl.getString(
                             //If the CourseBlock arg is provided, then the actual save to db is
                             // done by ClazzEdit, not here
-                            when {
-                                savedStateHandle[ARG_GO_TO_ON_CONTENT_ENTRY_DONE] == GO_TO_COURSE_BLOCK_EDIT.toString() -> {
-                                    MR.strings.next
-                                }
+                            when (goToOnContentEntryDone) {
+                                GO_TO_COURSE_BLOCK_EDIT -> MR.strings.next
+                                FINISH_WITHOUT_SAVE_TO_DB -> MR.strings.done
                                 else -> MR.strings.save
                             }
                         ),
@@ -202,7 +189,7 @@ class ContentEntryEditViewModel(
             }
 
             _uiState.update { prev ->
-                prev.copyWithFieldsEnabled(true)
+                prev.copy(fieldsEnabled = true)
             }
 
             launch {
@@ -282,33 +269,22 @@ class ContentEntryEditViewModel(
             return
         }
 
-        _uiState.update { prev -> prev.copyWithFieldsEnabled(false) }
-
-        val goToOnContentEntryDone = savedStateHandle[ARG_GO_TO_ON_CONTENT_ENTRY_DONE]?.toInt() ?: 0
+        _uiState.update { prev -> prev.copy(fieldsEnabled = false) }
 
         when {
             /* When a new ContentEntry is being added to a course, then the newly created ContentEntry,
              * associated import job, and courseblock are all passed along to CourseBlockEdit
              * e.g. ClazzEdit -> ContentEntryList -> ContentEntryEdit -> CourseBlockEdit -> return to ClazzEdit
              */
-            courseBlockArgVal != null && goToOnContentEntryDone == GO_TO_COURSE_BLOCK_EDIT -> {
+            goToOnContentEntryDone == GO_TO_COURSE_BLOCK_EDIT -> {
                 navController.navigate(
                     CourseBlockEditViewModel.DEST_NAME,
                     args = buildMap {
                         this[CourseBlockEditViewModel.ARG_SELECTED_CONTENT_ENTRY] = json.encodeToString(
                             ContentEntryAndContentJob.serializer(), entityVal
                         )
-                        this[UstadEditView.ARG_ENTITY_JSON] = json.encodeToString(
-                            CourseBlock.serializer(), courseBlockArgVal.shallowCopy {
-                                cbEntityUid = contentEntryVal.contentEntryUid
-                                cbType = CourseBlock.BLOCK_CONTENT_TYPE
-                                cbTitle = contentEntryVal.title
-                                cbDescription = contentEntryVal.description
-                            },
-                        )
 
-                        putFromSavedStateIfPresent(UstadView.ARG_RESULT_DEST_VIEWNAME)
-                        putFromSavedStateIfPresent(UstadView.ARG_RESULT_DEST_KEY)
+                        putFromSavedStateIfPresent(CourseBlockEditViewModel.COURSE_BLOCK_CONTENT_ENTRY_PASS_THROUGH_ARGS)
                     }
                 )
             }

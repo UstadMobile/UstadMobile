@@ -32,10 +32,10 @@ fun UstadCourseBlockEdit(
     Column(
         modifier = modifier
     ) {
-        uiState.selectedContentEntry?.also { selectedContentEntry ->
+        uiState.block?.contentEntry?.also { selectedContentEntry ->
             ListItem(
                 headlineContent = {
-                    Text(selectedContentEntry.entry?.title ?: "")
+                    Text(selectedContentEntry.title ?: "")
                 },
                 supportingContent = {
                     Text(stringResource(MR.strings.selected_content))

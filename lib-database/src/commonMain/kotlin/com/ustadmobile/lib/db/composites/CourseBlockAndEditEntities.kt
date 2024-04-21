@@ -35,4 +35,12 @@ data class CourseBlockAndEditEntities(
     val assignmentCourseGroupSetName: String? = null,
 
     val assignmentPeerAllocations: List<PeerReviewerAllocation> = emptyList(),
-)
+) {
+
+    fun asContentEntryAndJob(): ContentEntryAndContentJob = ContentEntryAndContentJob(
+        entry = contentEntry,
+        contentJob = contentJob,
+        contentJobItem = contentJobItem,
+    )
+
+}

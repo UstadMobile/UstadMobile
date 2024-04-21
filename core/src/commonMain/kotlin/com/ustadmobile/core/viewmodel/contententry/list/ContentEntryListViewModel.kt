@@ -29,10 +29,10 @@ import com.ustadmobile.core.viewmodel.contententry.detail.ContentEntryDetailView
 import com.ustadmobile.core.viewmodel.contententry.getmetadata.ContentEntryGetMetadataViewModel
 import com.ustadmobile.core.viewmodel.contententry.importlink.ContentEntryImportLinkViewModel
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
+import com.ustadmobile.lib.db.composites.ContentEntryAndContentJob
 import com.ustadmobile.lib.db.composites.ContentEntryAndListDetail
 import com.ustadmobile.lib.db.composites.CourseBlockAndEditEntities
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.CourseBlock
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
@@ -140,7 +140,8 @@ class ContentEntryListViewModel(
     /**
      * This will be true when the user is selecting content as part of selecting it from ClazzEdit
      */
-    private val hasCourseBlockArg: Boolean = savedStateHandle[ContentEntryEditViewModel.ARG_COURSEBLOCK] != null
+    private val hasCourseBlockArg: Boolean =
+        savedStateHandle[ContentEntryEditViewModel.ARG_GO_TO_ON_CONTENT_ENTRY_DONE]?.toInt() == ContentEntryEditViewModel.GO_TO_COURSE_BLOCK_EDIT
 
     private val selectFolderMode: Boolean = savedStateHandle[ARG_SELECT_FOLDER_MODE]?.toBoolean() ?: false
 
@@ -442,8 +443,7 @@ class ContentEntryListViewModel(
                 put(ContentEntryEditViewModel.ARG_LEAF, true.toString())
                 put(ARG_PARENT_UID, parentEntryUid.toString())
                 put(ARG_NEXT, ContentEntryEditViewModel.DEST_NAME)
-                putFromSavedStateIfPresent(ContentEntryEditViewModel.ARG_COURSEBLOCK)
-                putFromSavedStateIfPresent(ContentEntryEditViewModel.ARG_GO_TO_ON_CONTENT_ENTRY_DONE)
+                putFromSavedStateIfPresent(CourseBlockEditViewModel.COURSE_BLOCK_CONTENT_ENTRY_PASS_THROUGH_ARGS)
             }
         )
     }
@@ -456,8 +456,7 @@ class ContentEntryListViewModel(
                 put(ContentEntryGetMetadataViewModel.ARG_URI, fileUri)
                 put(ContentEntryGetMetadataViewModel.ARG_FILENAME, fileName)
                 put(ARG_PARENT_UID, parentEntryUid.toString())
-                putFromSavedStateIfPresent(ContentEntryEditViewModel.ARG_COURSEBLOCK)
-                putFromSavedStateIfPresent(ContentEntryEditViewModel.ARG_GO_TO_ON_CONTENT_ENTRY_DONE)
+                putFromSavedStateIfPresent(CourseBlockEditViewModel.COURSE_BLOCK_CONTENT_ENTRY_PASS_THROUGH_ARGS)
             }
         )
     }
@@ -466,35 +465,28 @@ class ContentEntryListViewModel(
         if(entry == null)
             return
 
-        //When the user is selecting content from ClazzEdit
-        val courseBlockArg = savedStateHandle[ContentEntryEditViewModel.ARG_COURSEBLOCK]
-
         val goToOnContentEntryEdit = savedStateHandle[ContentEntryEditViewModel.ARG_GO_TO_ON_CONTENT_ENTRY_DONE]?.toInt() ?: 0
 
         when {
             //If user is selecting a folder, and they have clicked on something that is not a folder, do nothing
             entry.leaf && showSelectFolderButton -> return
 
-            entry.leaf && goToOnContentEntryEdit != 0 && courseBlockArg != null -> {
-                val courseBlock = CourseBlock().apply {
-                    cbTitle = entry.title
-                    cbDescription = entry.description
-                    cbEntityUid = entry.contentEntryUid
-                    cbType = CourseBlock.BLOCK_CONTENT_TYPE
-                }
-
-
+            entry.leaf && goToOnContentEntryEdit != ContentEntryEditViewModel.GO_TO_COURSE_BLOCK_EDIT -> {
                 navigateForResult(
                     nextViewName = CourseBlockEditViewModel.DEST_NAME,
                     key = ClazzEditViewModel.RESULT_KEY_CONTENTENTRY,
-                    currentValue = CourseBlockAndEditEntities(
-                        courseBlock = courseBlock,
-                        contentEntry = entry,
-                    ),
+                    currentValue = null,
                     serializer = CourseBlockAndEditEntities.serializer(),
                     overwriteDestination = false,
                     args = buildMap {
-                        putFromSavedStateIfPresent(ContentEntryEditViewModel.ARG_GO_TO_ON_CONTENT_ENTRY_DONE)
+                        putFromSavedStateIfPresent(CourseBlockEditViewModel.COURSE_BLOCK_CONTENT_ENTRY_PASS_THROUGH_ARGS)
+                        put(
+                            CourseBlockEditViewModel.ARG_SELECTED_CONTENT_ENTRY,
+                            json.encodeToString(
+                                ContentEntryAndContentJob.serializer(),
+                                ContentEntryAndContentJob(entry)
+                            )
+                        )
                     }
                 )
                 return
