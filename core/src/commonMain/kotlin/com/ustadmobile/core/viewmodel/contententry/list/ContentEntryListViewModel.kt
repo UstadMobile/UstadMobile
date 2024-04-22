@@ -471,7 +471,11 @@ class ContentEntryListViewModel(
             //If user is selecting a folder, and they have clicked on something that is not a folder, do nothing
             entry.leaf && showSelectFolderButton -> return
 
-            entry.leaf && goToOnContentEntryEdit != ContentEntryEditViewModel.GO_TO_COURSE_BLOCK_EDIT -> {
+            //When the user is selecting a ContentEntry and then going onwards to CourseBlockEdit
+            //As part of adding a content course block
+            listMode == ListViewMode.PICKER && entry.leaf &&
+                    goToOnContentEntryEdit == ContentEntryEditViewModel.GO_TO_COURSE_BLOCK_EDIT -> {
+
                 navigateForResult(
                     nextViewName = CourseBlockEditViewModel.DEST_NAME,
                     key = ClazzEditViewModel.RESULT_KEY_CONTENTENTRY,
@@ -489,7 +493,6 @@ class ContentEntryListViewModel(
                         )
                     }
                 )
-                return
             }
 
             entry.leaf -> {
@@ -509,10 +512,10 @@ class ContentEntryListViewModel(
                     args = buildMap {
                         put(ARG_FILTER, FILTER_BY_PARENT_UID.toString())
                         put(ARG_PARENT_UID, entry.contentEntryUid.toString())
-                        putFromSavedStateIfPresent(ContentEntryEditViewModel.ARG_COURSEBLOCK)
                         putFromSavedStateIfPresent(UstadView.ARG_RESULT_DEST_KEY)
                         putFromSavedStateIfPresent(UstadView.ARG_RESULT_DEST_VIEWNAME)
                         putFromSavedStateIfPresent(ARG_SELECT_FOLDER_MODE)
+                        putFromSavedStateIfPresent(ContentEntryEditViewModel.ARG_GO_TO_ON_CONTENT_ENTRY_DONE)
                     }
                 )
             }

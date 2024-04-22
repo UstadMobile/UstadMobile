@@ -9,6 +9,7 @@ import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadEditView.Companion.DEFAULT_COMMIT_DELAY
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
+import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewModel
 import com.ustadmobile.core.viewmodel.courseblock.CourseBlockViewModelConstants.CompletionCriteria
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
@@ -116,6 +117,7 @@ class CourseBlockEditViewModel(
 
                             if(selectedContentEntry != null) {
                                 cbEntityUid = selectedContentEntry.entry?.contentEntryUid ?: 0
+                                cbType = CourseBlock.BLOCK_CONTENT_TYPE
                             }
                         },
                         contentEntry = selectedContentEntry?.entry,
@@ -306,6 +308,7 @@ class CourseBlockEditViewModel(
             ARG_BLOCK_TYPE,
             UstadView.ARG_RESULT_DEST_VIEWNAME,
             UstadView.ARG_RESULT_DEST_KEY,
+            UstadListViewModel.ARG_LISTMODE,
         )
 
     }

@@ -22,9 +22,9 @@ import com.ustadmobile.libuicompose.view.contententry.contentTypeImageVector
 @Composable
 fun UstadBlockIcon(
     title: String,
-    courseBlock: CourseBlock?,
-    contentEntry: ContentEntry?,
-    pictureUri: String?,
+    courseBlock: CourseBlock? = null,
+    contentEntry: ContentEntry? = null,
+    pictureUri: String? = null,
     modifier: Modifier = Modifier,
 ) {
     val baseModifier = modifier.width(40.dp).height(40.dp)
@@ -38,19 +38,13 @@ fun UstadBlockIcon(
             val icon = contentEntry?.contentTypeImageVector
                 ?: courseBlock?.blockTypeImageVector
 
-//            Box(
-//                modifier = Modifier.fillMaxWidth().padding(8.dp),
-//                contentAlignment = Alignment.Center,
-//            ) {
-                if(icon != null) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = null,
-                        tint = Color.White,
-                    )
-                }
-            //}
-
+            if(icon != null) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = Color.White,
+                )
+            }
         }
     }else {
         Box(

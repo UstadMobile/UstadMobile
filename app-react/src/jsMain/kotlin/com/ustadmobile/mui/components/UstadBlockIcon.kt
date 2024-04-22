@@ -8,6 +8,7 @@ import com.ustadmobile.view.clazz.iconComponent
 import com.ustadmobile.view.contententry.contentTypeIconComponent
 import emotion.react.css
 import mui.material.Box
+import mui.material.SvgIconSize
 import mui.system.sx
 import react.FC
 import react.Props
@@ -17,8 +18,10 @@ import react.useMemo
 import react.useRequiredContext
 import web.cssom.AlignItems
 import web.cssom.Display
+import web.cssom.Height
 import web.cssom.JustifyContent
 import web.cssom.ObjectFit
+import web.cssom.Width
 import web.cssom.px
 
 external interface UstadBlockIconProps: Props {
@@ -30,6 +33,12 @@ external interface UstadBlockIconProps: Props {
     var contentEntry: ContentEntry?
 
     var pictureUri: String?
+
+    var width: Width?
+
+    var height: Height?
+
+    var iconSize: SvgIconSize?
 
 }
 
@@ -50,8 +59,8 @@ val UstadBlockIcon = FC<UstadBlockIconProps> { props ->
             if(props.pictureUri == null)
                 backgroundColor = bgColor
 
-            width = 40.px
-            height = 40.px
+            width = props.width ?: 40.px
+            height = props.height ?: 40.px
             display = Display.flex
             justifyContent = JustifyContent.center
             alignItems  = AlignItems.center
@@ -61,8 +70,8 @@ val UstadBlockIcon = FC<UstadBlockIconProps> { props ->
             img {
                 css {
                     objectFit = ObjectFit.scaleDown
-                    height = 40.px
-                    width = 40.px
+                    height = props.height ?: 40.px
+                    width = props.width ?: 40.px
                     display = Display.block
                 }
 
@@ -75,6 +84,10 @@ val UstadBlockIcon = FC<UstadBlockIconProps> { props ->
                 + iconComponent.create {
                     sx {
                         color = theme.palette.primary.contrastText
+                    }
+
+                    props.iconSize?.also {
+                        fontSize = it
                     }
                 }
             }
