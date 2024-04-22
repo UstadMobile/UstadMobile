@@ -4,11 +4,21 @@ import com.ustadmobile.core.util.avatarColorForName
 import com.ustadmobile.core.util.ext.rgbColorProperty
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.CourseBlock
+import com.ustadmobile.view.clazz.iconComponent
+import com.ustadmobile.view.contententry.contentTypeIconComponent
+import emotion.react.css
 import mui.material.Box
 import mui.system.sx
 import react.FC
 import react.Props
+import react.create
+import react.dom.html.ReactHTML.img
 import react.useMemo
+import react.useRequiredContext
+import web.cssom.AlignItems
+import web.cssom.Display
+import web.cssom.JustifyContent
+import web.cssom.ObjectFit
 import web.cssom.px
 
 external interface UstadBlockIconProps: Props {
@@ -29,14 +39,46 @@ val UstadBlockIcon = FC<UstadBlockIconProps> { props ->
         avatarColorForName(props.title).rgbColorProperty()
     }
 
+    val theme by useRequiredContext(ThemeContext)
+
+    val contentEntryVal = props.contentEntry
+    val courseBlockVal = props.courseBlock
+    val pictureUriVal = props.pictureUri
+
     Box {
         sx {
-            backgroundColor = bgColor
+            if(props.pictureUri == null)
+                backgroundColor = bgColor
+
             width = 40.px
             height = 40.px
+            display = Display.flex
+            justifyContent = JustifyContent.center
+            alignItems  = AlignItems.center
+        }
+
+        if(pictureUriVal != null) {
+            img {
+                css {
+                    objectFit = ObjectFit.scaleDown
+                    height = 40.px
+                    width = 40.px
+                    display = Display.block
+                }
+
+                src = pictureUriVal
+            }
+        }else {
+            val iconComponent = contentEntryVal?.contentTypeIconComponent()
+                ?: courseBlockVal?.iconComponent()
+            if(iconComponent != null) {
+                + iconComponent.create {
+                    sx {
+                        color = theme.palette.primary.contrastText
+                    }
+                }
+            }
         }
     }
-
-
 
 }

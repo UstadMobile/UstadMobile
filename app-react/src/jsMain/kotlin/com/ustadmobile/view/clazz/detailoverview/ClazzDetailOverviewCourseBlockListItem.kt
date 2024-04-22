@@ -13,14 +13,10 @@ import react.create
 import mui.icons.material.KeyboardArrowUp
 import mui.icons.material.KeyboardArrowDown
 import react.dom.aria.ariaLabel
-import mui.icons.material.Forum as ForumIcon
-import mui.icons.material.Folder as FolderIcon
-import mui.icons.material.Title as TitleIcon
-import mui.icons.material.AssignmentTurnedIn as AssignmentTurnedInIcon
-import mui.icons.material.Book as BookIcon
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.hooks.useHtmlToPlainText
+import com.ustadmobile.mui.components.UstadBlockIcon
 import com.ustadmobile.util.ext.useLineClamp
 import js.objects.jso
 import react.dom.html.ReactHTML.div
@@ -39,14 +35,6 @@ external interface ClazzDetailOverviewCourseBlockListItemProps : Props {
 
 }
 
-private val MODULE_TYPE_TO_ICON_MAP = mapOf(
-    CourseBlock.BLOCK_MODULE_TYPE to FolderIcon,
-    CourseBlock.BLOCK_DISCUSSION_TYPE to ForumIcon,
-    CourseBlock.BLOCK_TEXT_TYPE to TitleIcon,
-    CourseBlock.BLOCK_ASSIGNMENT_TYPE to AssignmentTurnedInIcon,
-    CourseBlock.BLOCK_CONTENT_TYPE to BookIcon,
-)
-
 val ClazzDetailOverviewCourseBlockListItem = FC<ClazzDetailOverviewCourseBlockListItemProps> { props ->
     val courseBlockVal = props.courseBlock?.courseBlock
 
@@ -63,15 +51,15 @@ val ClazzDetailOverviewCourseBlockListItem = FC<ClazzDetailOverviewCourseBlockLi
             }
 
             ListItemIcon {
-                + MODULE_TYPE_TO_ICON_MAP[courseBlockVal?.cbType ?: CourseBlock.BLOCK_MODULE_TYPE]?.create {
-                    sx {
-                        width = ICON_SIZE
-                        height = ICON_SIZE
-                    }
+                UstadBlockIcon {
+                    title = courseBlockVal?.cbTitle ?: ""
+                    pictureUri = null
+                    courseBlock = props.courseBlock?.courseBlock
+                    contentEntry = props.courseBlock?.contentEntry
                 }
             }
 
-            Box{
+            Box {
                 sx {
                     width = 10.px
                 }
