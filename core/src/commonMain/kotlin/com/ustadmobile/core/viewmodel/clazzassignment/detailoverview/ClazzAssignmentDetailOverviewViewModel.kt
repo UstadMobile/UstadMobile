@@ -22,6 +22,7 @@ import com.ustadmobile.core.domain.blob.saveandupload.SaveAndUploadLocalUrisUseC
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
 import com.ustadmobile.core.util.ext.onActiveEndpoint
 import com.ustadmobile.core.util.ext.toggle
+import com.ustadmobile.core.viewmodel.clazz.launchSetTitleFromClazzUid
 import com.ustadmobile.core.viewmodel.clazzassignment.asBlobOpenItem
 import com.ustadmobile.core.viewmodel.clazzassignment.averageMark
 import com.ustadmobile.core.viewmodel.clazzassignment.combineWithSubmissionFiles
@@ -74,6 +75,8 @@ data class ClazzAssignmentDetailOverviewUiState(
     val assignment: ClazzAssignment? = null,
 
     val courseBlock: CourseBlock? = null,
+
+    val courseBlockPicture: CourseBlockPicture? = null,
 
     val courseGroupSet: CourseGroupSet? = null,
 
@@ -351,6 +354,7 @@ class ClazzAssignmentDetailOverviewViewModel(
                             prev.copy(
                                 assignment = assignmentData?.clazzAssignment,
                                 courseBlock = assignmentData?.courseBlock,
+                                courseBlockPicture = assignmentData?.courseBlockPicture,
                                 submitterUid = assignmentData?.submitterUid ?: 0,
                                 courseGroupSet = assignmentData?.courseGroupSet,
                                 unassignedError = if(isEnrolledButNotInGroup) {
@@ -361,13 +365,11 @@ class ClazzAssignmentDetailOverviewViewModel(
                                 showModerateOptions = assignmentData?.hasModeratePermission ?: false,
                             )
                         }
-
-                        _appUiState.update { prev ->
-                            prev.copy(
-                                title = assignmentData?.courseBlock?.cbTitle ?: ""
-                            )
-                        }
                     }
+                }
+
+                launchSetTitleFromClazzUid(clazzUid) { title ->
+                    _appUiState.update { it.copy(title = title) }
                 }
 
                 launch {

@@ -14,6 +14,7 @@ import com.ustadmobile.door.annotation.HttpServerFunctionCall
 import com.ustadmobile.door.annotation.HttpServerFunctionParam
 import com.ustadmobile.lib.db.composites.CourseBlockAndDisplayDetails
 import com.ustadmobile.lib.db.composites.CourseBlockAndDbEntities
+import com.ustadmobile.lib.db.composites.CourseBlockAndPicture
 import com.ustadmobile.lib.db.composites.CourseBlockUidAndClazzUid
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.flow.Flow
@@ -37,6 +38,18 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
     )
     @Query("SELECT * FROM CourseBlock WHERE cbUid = :uid")
     abstract fun findByUidAsyncAsFlow(uid: Long): Flow<CourseBlock?>
+
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
+    )
+    @Query("""
+        SELECT CourseBlock.*, CourseBlockPicture.*
+          FROM CourseBlock
+               LEFT JOIN CourseBlockPicture 
+                         ON CourseBlockPicture.cbpUid = :uid
+         WHERE CourseBlock.cbUid = :uid                
+    """)
+    abstract fun findByUidWithPictureAsFlow(uid: Long): Flow<CourseBlockAndPicture?>
 
     @HttpAccessible(
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,

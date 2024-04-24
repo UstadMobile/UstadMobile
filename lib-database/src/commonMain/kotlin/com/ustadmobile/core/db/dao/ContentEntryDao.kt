@@ -22,6 +22,9 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun upsertAsync(entity: ContentEntry)
 
+    @Query("SELECT * FROM ContentEntry WHERE contentEntryUid = :entryUid")
+    abstract suspend fun findByUidAsync(entryUid: Long): ContentEntry?
+
     @Query("""
         SELECT ContentEntry.*, Language.* 
           FROM ContentEntry 
@@ -45,15 +48,6 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
     abstract suspend fun findByUidWithEditDetails(
         uid: Long,
     ): ContentEntryAndPicture?
-
-    @Query("""
-        SELECT ContentEntry.*
-          FROM ContentEntry
-         WHERE ContentEntry.contentEntryUid = :entryUuid 
-    """)
-    abstract suspend fun findEntryWithContainerByEntryId(
-        entryUuid: Long
-    ): ContentEntry?
 
     @HttpAccessible(
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
@@ -84,12 +78,12 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
         pullQueriesToReplicate = arrayOf(
             HttpServerFunctionCall(
-                functionName = "findEntryWithContainerByEntryId",
+                functionName = "findByUidAsync",
             )
         )
     )
-    @Query("SELECT title FROM ContentEntry WHERE contentEntryUid = :entryUuid")
-    abstract suspend fun findTitleByUidAsync(entryUuid: Long): String?
+    @Query("SELECT title FROM ContentEntry WHERE contentEntryUid = :entryUid")
+    abstract suspend fun findTitleByUidAsync(entryUid: Long): String?
 
     @Query("SELECT ContentEntry.* FROM ContentEntry LEFT Join ContentEntryParentChildJoin " +
             "ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
@@ -120,36 +114,10 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
             "WHERE ContentEntryRelatedEntryJoin.relType = 1 AND ContentEntryRelatedEntryJoin.cerejRelatedEntryUid != :entryUuid")
     abstract suspend fun findAllLanguageRelatedEntriesAsync(entryUuid: Long): List<ContentEntry>
 
-    @Repository(methodType = Repository.METHOD_DELEGATE_TO_WEB)
-    @Query("SELECT DISTINCT ContentCategory.contentCategoryUid, ContentCategory.name AS categoryName, " +
-            "ContentCategorySchema.contentCategorySchemaUid, ContentCategorySchema.schemaName FROM ContentEntry " +
-            "LEFT JOIN ContentEntryContentCategoryJoin ON ContentEntryContentCategoryJoin.ceccjContentEntryUid = ContentEntry.contentEntryUid " +
-            "LEFT JOIN ContentCategory ON ContentCategory.contentCategoryUid = ContentEntryContentCategoryJoin.ceccjContentCategoryUid " +
-            "LEFT JOIN ContentCategorySchema ON ContentCategorySchema.contentCategorySchemaUid = ContentCategory.ctnCatContentCategorySchemaUid " +
-            "LEFT JOIN ContentEntryParentChildJoin ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
-            "WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid " +
-            "AND ContentCategory.contentCategoryUid != 0 ORDER BY ContentCategory.name")
-    abstract suspend fun findListOfCategoriesAsync(parentUid: Long): List<DistinctCategorySchema>
-
-    @Query("SELECT DISTINCT Language.* from Language " +
-            "LEFT JOIN ContentEntry ON ContentEntry.primaryLanguageUid = Language.langUid " +
-            "LEFT JOIN ContentEntryParentChildJoin ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
-            "WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid ORDER BY Language.name")
-    abstract suspend fun findUniqueLanguagesInListAsync(parentUid: Long): List<Language>
-
-    @Repository(methodType = Repository.METHOD_DELEGATE_TO_WEB)
-    @Query("""SELECT DISTINCT Language.langUid, Language.name AS langName from Language
-        LEFT JOIN ContentEntry ON ContentEntry.primaryLanguageUid = Language.langUid
-        LEFT JOIN ContentEntryParentChildJoin ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid 
-        WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid ORDER BY Language.name""")
-    abstract suspend fun findUniqueLanguageWithParentUid(parentUid: Long): List<LangUidAndName>
-
     @Update
     abstract override fun update(entity: ContentEntry)
 
 
-    @Query("SELECT * FROM ContentEntry WHERE contentEntryUid = :entryUid")
-    abstract suspend fun findByUidAsync(entryUid: Long): ContentEntry?
 
     @Query("""
         SELECT ContentEntry.*, Language.*

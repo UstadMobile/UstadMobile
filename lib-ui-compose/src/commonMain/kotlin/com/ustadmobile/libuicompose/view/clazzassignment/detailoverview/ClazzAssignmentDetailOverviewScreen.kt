@@ -42,6 +42,7 @@ import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.viewmodel.clazzassignment.averageMark
 import com.ustadmobile.core.viewmodel.clazzassignment.detailoverview.ClazzAssignmentDetailoverviewSubmissionUiState
 import com.ustadmobile.lib.db.composites.CourseAssignmentSubmissionFileAndTransferJob
+import com.ustadmobile.libuicompose.components.UstadCourseBlockHeader
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadOpeningBlobInfoBottomSheet
 import com.ustadmobile.libuicompose.components.UstadPickFileOpts
@@ -162,6 +163,14 @@ fun ClazzAssignmentDetailOverviewScreen(
         modifier = Modifier
             .fillMaxSize()
     ) {
+        item(key = "header") {
+            UstadCourseBlockHeader(
+                block = uiState.courseBlock,
+                picture = uiState.courseBlockPicture,
+                modifier = Modifier.defaultItemPadding(top = 16.dp).fillMaxWidth()
+            )
+        }
+
         item(key = "cbDescription") {
             if (uiState.caDescriptionVisible){
                 UstadHtmlText(

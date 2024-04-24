@@ -498,7 +498,10 @@ class ContentEntryListViewModel(
             entry.leaf -> {
                 navController.navigate(
                     viewName = ContentEntryDetailViewModel.DEST_NAME,
-                    args = mapOf(UstadView.ARG_ENTITY_UID to entry.contentEntryUid.toString())
+                    args = mapOf(
+                        UstadView.ARG_ENTITY_UID to entry.contentEntryUid.toString(),
+                        ARG_PARENT_UID to parentEntryUid.toString(),
+                    )
                 )
             }
 

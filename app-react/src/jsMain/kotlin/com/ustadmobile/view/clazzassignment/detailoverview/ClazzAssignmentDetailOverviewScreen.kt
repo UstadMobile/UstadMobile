@@ -189,6 +189,17 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
         id = "VirtualList"
 
         content = virtualListContent {
+            item("block_header") {
+                UstadCourseBlockHeader.create {
+                    sx {
+                        paddingTop = theme.spacing(2)
+                    }
+
+                    block = props.uiState.courseBlock
+                    picture = props.uiState.courseBlockPicture
+                }
+            }
+
             //Header section - description, deadline, etc
             item("header_section_item") {
                 Stack.create {
