@@ -114,10 +114,12 @@ androidx-coordinatorlayout = "1.2.0"
 androidx-test-runner = "1.5.2"
 robolectric = "4.11.1"
 androidx-test-core = "1.5.0"
+androidx-test-orchestrator = "1.4.2"
 json = "20231013"
 commons-cli = "1.6.0"
 kotlinx-html = "0.11.0"
 nv-i18n = "1.29"
+semver = "2.0.0"
 
 [plugins]
 
@@ -320,6 +322,7 @@ androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-view
 androidx-coordinatorlayout = { module = "androidx.coordinatorlayout:coordinatorlayout", version.ref = "androidx-coordinatorlayout"}
 ktor-client-android = { module = "io.ktor:ktor-client-android", version.ref = "ktor" }
 androidx-test-runner = { module = "androidx.test:runner", version.ref = "androidx-test-runner" }
+androidx-test-orchestrator = { module = "androidx.test:orchestrator", version.ref = "androidx-test-orchestrator" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 androidx-test-core = { module = "androidx.test:core", version.ref = "androidx-test-core" }
 ktor-client-json-js = { module = "io.ktor:ktor-client-json-js", version.ref = "ktor" }
@@ -333,3 +336,12 @@ commons-cli = { module ="commons-cli:commons-cli", version.ref = "commons-cli" }
 kotlinx-html-jvm =  { module = "org.jetbrains.kotlinx:kotlinx-html-jvm", version.ref = "kotlinx-html" }
 nv-i18n = { module ="com.neovisionaries:nv-i18n", version.ref = "nv-i18n" }
 ktor-io-jvm = { module = "io.ktor:ktor-io-jvm", version.ref = "ktor" }
+androidx-media3-transformer = { module = "androidx.media3:media3-transformer", version.ref = "androidx-media3" }
+androidx-media3-effect = { module = "androidx.media3:media3-effect", version.ref = "androidx-media3" }
+androidx-media3-common = { module = "androidx.media3:media3-common", version.ref = "androidx-media3" }
+
+# The av1 module is hosted on the UstadMobile Maven repository (because Google doesn't publish it as
+# an artifact). It is required to support AV1 codec on version prior to Android 10. See
+# lib-ui-compose/README-ExoPlayer-AV1.MD for additional information.
+androidx-media3-decoder-av1 = { module = "androidx.media3:lib-decoder-av1", version.ref = "androidx-media3" }
+semver = { module = "io.github.z4kn4fein:semver", version.ref = "semver" }

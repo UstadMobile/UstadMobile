@@ -134,7 +134,7 @@ Cypress.Commands.add('ustadAddCourse',(courseName) => {
     cy.contains("button","Course").click()
     cy.contains("Add a new course").click()
     cy.get('input[id="clazz_name"]').type(courseName)
-    cy.get('div[data-placeholder="Description"]').type("test class")
+    cy.get('div[data-placeholder="Description"][contenteditable="true"]').type("test class")
     cy.contains("button","Save").click()
 })
 

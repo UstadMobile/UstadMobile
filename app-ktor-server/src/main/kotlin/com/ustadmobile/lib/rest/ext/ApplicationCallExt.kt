@@ -3,6 +3,7 @@ package com.ustadmobile.lib.rest.ext
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentformats.ContentImportersManager
 import com.ustadmobile.core.contentjob.MetadataResult
+import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.lib.rest.CONF_DBMODE_SINGLETON
 import com.ustadmobile.lib.rest.CONF_DBMODE_VIRTUALHOST
 import com.ustadmobile.lib.rest.CONF_KEY_SITE_URL
@@ -132,7 +133,7 @@ val ApplicationCall.callEndpoint: Endpoint
         val dbMode = config.dbModeProperty()
 
         return if(dbMode == CONF_DBMODE_SINGLETON) {
-            Endpoint(config.property(CONF_KEY_SITE_URL).getString())
+            Endpoint(config.property(CONF_KEY_SITE_URL).getString().requirePostfix("/"))
         }else {
             Endpoint(request.clientProtocolAndHost())
         }

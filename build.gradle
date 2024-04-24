@@ -43,7 +43,8 @@ allprojects {
         mavenCentral()
         mavenLocal()
 
-        //Temp jitpack substitute
+        //Primary Maven repository for artifacts built on UstadMobile Jenkins
+        // Includes Door and Jetpack Media3 AV1 decoder
         maven {
             url "https://devserver3.ustadmobile.com/maven2"
         }
@@ -83,7 +84,7 @@ allprojects {
 }
 
 //Major.minor.database version
-version = "0.4.108"
+version = "0.4.115"
 group = "com.ustadmobile.app"
 
 /**
@@ -93,7 +94,7 @@ group = "com.ustadmobile.app"
  */
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 332
+    ustadVersionCode = 339
 
 
     version_gradle_buildconfig_plugin = "1.1.7"

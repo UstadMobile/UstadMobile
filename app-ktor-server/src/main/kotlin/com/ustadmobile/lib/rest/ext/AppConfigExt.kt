@@ -15,12 +15,6 @@ fun ktorAppHomeDir(): File {
     return System.getProperty("app_home")?.let { File(it) } ?: File(System.getProperty("user.dir"))
 }
 
-/**
- * The FFMPEG dir within the app directory itself (e.g. installpath/ffmpeg). This will be searched by
- * default for ffmpeg and ffprobe
- */
-fun ktorAppHomeFfmpegDir(): File = File(ktorAppHomeDir(), "ffmpeg")
-
 
 fun ApplicationConfig.absoluteDataDir(): File {
     val dataDirPropValue = propertyOrNull("ktor.ustad.datadir")?.getString() ?: "data"

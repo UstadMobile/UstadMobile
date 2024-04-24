@@ -776,6 +776,7 @@ class UstadCacheImpl(
             prev + locksToRemove.map { it.lockId }
         }
         val md5Digest = Md5Digest()
+        val entriesWithLostLock = mutableListOf<CacheEntry>()
 
         locksToRemove.forEach { removeRequest ->
             lruMap.computeIfPresent(md5Digest.urlKey(removeRequest.url)) { key, prev ->
@@ -787,13 +788,19 @@ class UstadCacheImpl(
 
                     entry = if(isNewlyUnlocked) {
                         prev.moveLock.withLock {
-                            prev.entry?.moveToNewPath(pathsProvider().cachePath)
+                            prev.entry?.moveToNewPath(pathsProvider().cachePath)?.also { entry ->
+                                entriesWithLostLock += entry
+                            }
                         }
                     }else {
                         prev.entry
                     }
                 )
             }
+        }
+
+        pendingCacheEntryUpdates.update { prev ->
+            prev +  entriesWithLostLock
         }
     }
 
