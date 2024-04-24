@@ -24,7 +24,9 @@ env:
     when:
       visible: "Accept & continue"
     file: "../common/google_permission.yaml"
-- assertVisible: "Check"
+- extendedWaitUntil:
+    visible: "Check"
+    timeout: 5000
 - tapOn: "Close tab"
 - runFlow:
     file: "../common/login_download_and_open_content.yaml"
