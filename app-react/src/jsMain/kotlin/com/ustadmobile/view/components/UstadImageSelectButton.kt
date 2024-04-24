@@ -4,7 +4,7 @@ import com.ustadmobile.mui.components.ThemeContext
 import web.cssom.*
 import emotion.react.css
 import js.objects.jso
-import mui.icons.material.AddAPhoto
+import mui.icons.material.AddAPhoto as AddAPhotoIcon
 import mui.material.*
 import mui.system.sx
 import react.*
@@ -59,47 +59,73 @@ val UstadImageSelectButton = FC<UstadImageSelectButtonProps> { props ->
             }
         }
 
-        Badge {
-            overlap = BadgeOverlap.circular
-            anchorOrigin = jso {
-                vertical = BadgeOriginVertical.bottom
-                horizontal = BadgeOriginHorizontal.right
-            }
-            badgeContent = Avatar.create {
-                onClick = {
-                    inputRef.current?.click()
+        if(props.imageUri != null) {
+            Badge {
+                overlap = BadgeOverlap.circular
+                anchorOrigin = jso {
+                    vertical = BadgeOriginVertical.bottom
+                    horizontal = BadgeOriginHorizontal.right
                 }
-                sx {
-                    backgroundColor = theme.palette.secondary.main
-                    height = 24.px
-                    width = 24.px
-                    cursor = Cursor.pointer
-                }
-                AddAPhoto {
+                badgeContent = Avatar.create {
+                    onClick = {
+                        inputRef.current?.click()
+                    }
                     sx {
-                        height = 16.px
-                        width = 16.px
+                        backgroundColor = theme.palette.secondary.main
+                        height = 24.px
+                        width = 24.px
+                        cursor = Cursor.pointer
+                    }
+                    AddAPhotoIcon {
+                        sx {
+                            height = 16.px
+                            width = 16.px
+                        }
                     }
                 }
+
+                ImageSelectButtonAvatar {
+                    imageUri = props.imageUri
+                    onClick = { inputRef.current?.click() }
+                }
             }
-
-            Avatar {
-                src = props.imageUri
-                onClick = {
-                    inputRef.current?.click()
-                }
-
-                sx {
-                    cursor = Cursor.pointer
-                    height = 64.px
-                    width = 64.px
-                }
+        }else {
+            ImageSelectButtonAvatar {
+                imageUri = props.imageUri
+                onClick = { inputRef.current?.click() }
             }
         }
     }
-
-
 }
+
+private external interface ImageSelectButtonAvatarProps: Props {
+    var onClick: () -> Unit
+    var imageUri: String?
+}
+
+private val ImageSelectButtonAvatar = FC<ImageSelectButtonAvatarProps> { props ->
+    val theme by useRequiredContext(ThemeContext)
+
+    Avatar {
+        src = props.imageUri
+        onClick = {
+            props.onClick()
+        }
+
+        sx {
+            cursor = Cursor.pointer
+            height = 64.px
+            width = 64.px
+
+            backgroundColor = theme.palette.secondary.main
+        }
+
+        if(props.imageUri == null) {
+            AddAPhotoIcon()
+        }
+    }
+}
+
 
 val UstadImageSelectButtonPreview = FC<Props> {
 

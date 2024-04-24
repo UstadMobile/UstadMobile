@@ -7,6 +7,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.outlined.Book
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.KeyboardType
@@ -26,6 +27,7 @@ fun UstadCourseBlockEdit(
     uiState: CourseBlockEditUiState,
     modifier: Modifier = Modifier,
     onCourseBlockChange: (CourseBlock?) -> Unit = {},
+    onPictureChanged: (String?) -> Unit = { },
     onClickEditDescription: () -> Unit = {},
     onClickEditContentEntry: () -> Unit = { },
 ){
@@ -58,6 +60,16 @@ fun UstadCourseBlockEdit(
                 }else {
                     null
                 }
+            )
+        }
+
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.fillMaxWidth().defaultItemPadding(),
+        ) {
+            UstadImageSelectButton(
+                imageUri = uiState.block?.courseBlockPicture?.cbpPictureUri,
+                onImageUriChanged = onPictureChanged,
             )
         }
 

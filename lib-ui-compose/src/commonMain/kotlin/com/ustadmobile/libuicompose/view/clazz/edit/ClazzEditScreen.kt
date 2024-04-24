@@ -270,7 +270,7 @@ fun ClazzEditScreen(
                                 title = block.courseBlock.cbTitle ?: "",
                                 courseBlock = block.courseBlock,
                                 contentEntry = block.contentEntry,
-                                pictureUri = null,
+                                pictureUri = block.courseBlockPicture?.cbpPictureUri,
                             )
                         }
                     },

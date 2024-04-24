@@ -9,6 +9,7 @@ import com.ustadmobile.core.domain.compress.image.CompressImageUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
 import com.ustadmobile.core.util.uuid.randomUuidAsString
 import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.lib.db.entities.CourseBlockPicture
 import com.ustadmobile.lib.db.entities.CoursePicture
 import com.ustadmobile.lib.db.entities.PersonPicture
 
@@ -30,6 +31,7 @@ class SavePictureUseCase(
         return when(tableId) {
             PersonPicture.TABLE_ID -> personPictureDao
             CoursePicture.TABLE_ID -> coursePictureDao
+            CourseBlockPicture.TABLE_ID -> courseBlockPictureDao
             else -> null
         }
     }

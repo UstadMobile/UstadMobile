@@ -373,6 +373,26 @@ class ClazzAssignmentEditViewModel(
         )
     }
 
+    fun onPictureChanged(pictureUri: String?) {
+        val newState = _uiState.updateAndGet { prev ->
+            prev.copy(
+                courseBlockEditUiState = prev.courseBlockEditUiState.copy(
+                    block = prev.courseBlockEditUiState.block?.copy(
+                        courseBlockPicture = prev.courseBlockEditUiState.block.courseBlockPicture?.copy(
+                            cbpPictureUri = pictureUri
+                        )
+                    )
+                )
+            )
+        }
+
+        scheduleEntityCommitToSavedState(
+            entity = newState.entity,
+            serializer = CourseBlockAndEditEntities.serializer(),
+            commitDelay = 200,
+        )
+    }
+
     private fun ClazzAssignmentEditUiState.hasErrors() : Boolean {
         return submissionRequiredError != null ||
             courseBlockEditUiState.caMaxPointsError != null ||

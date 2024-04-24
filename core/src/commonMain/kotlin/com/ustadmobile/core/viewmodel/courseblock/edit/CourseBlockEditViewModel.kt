@@ -17,11 +17,13 @@ import com.ustadmobile.lib.db.composites.ContentEntryAndContentJob
 import com.ustadmobile.lib.db.composites.CourseBlockAndEditEntities
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.CourseBlock
+import com.ustadmobile.lib.db.entities.CourseBlockPicture
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import org.kodein.di.DI
@@ -107,9 +109,10 @@ class CourseBlockEditViewModel(
             loadEntity(
                 serializer = CourseBlockAndEditEntities.serializer(),
                 makeDefault = {
+                    val newUid = activeDb.doorPrimaryKeyManager.nextIdAsync(CourseBlock.TABLE_ID)
                     CourseBlockAndEditEntities(
                         courseBlock = CourseBlock().apply {
-                            cbUid = activeDb.doorPrimaryKeyManager.nextIdAsync(CourseBlock.TABLE_ID)
+                            cbUid = newUid
                             cbActive = true
                             cbType = savedStateHandle[ARG_BLOCK_TYPE]?.toInt() ?: CourseBlock.BLOCK_MODULE_TYPE
                             cbTitle = selectedContentEntry?.entry?.title
@@ -122,7 +125,8 @@ class CourseBlockEditViewModel(
                         },
                         contentEntry = selectedContentEntry?.entry,
                         contentJob = selectedContentEntry?.contentJob,
-                        contentJobItem = selectedContentEntry?.contentJobItem
+                        contentJobItem = selectedContentEntry?.contentJobItem,
+                        courseBlockPicture = CourseBlockPicture(cbpUid = newUid),
                     )
                 },
                 onLoadFromDb = { null }, //Does not load from database - always JSON passed from ClazzEdit
@@ -218,7 +222,7 @@ class CourseBlockEditViewModel(
         if(courseBlock == null)
             return
 
-        _uiState.update { prev ->
+        val blockAndEntities = _uiState.updateAndGet { prev ->
             prev.copy(
                 block = prev.block?.copy(
                     courseBlock = courseBlock
@@ -227,11 +231,11 @@ class CourseBlockEditViewModel(
                     prev.block?.courseBlock?.cbTitle,
                     courseBlock.cbTitle, prev.caTitleError)
             )
-        }
+        }.block
 
         scheduleEntityCommitToSavedState(
-            entity = courseBlock,
-            serializer = CourseBlock.serializer(),
+            entity = blockAndEntities,
+            serializer = CourseBlockAndEditEntities.serializer(),
             commitDelay = DEFAULT_COMMIT_DELAY
         )
     }
@@ -259,6 +263,24 @@ class CourseBlockEditViewModel(
                     this[ContentEntryEditViewModel.ARG_GO_TO_ON_CONTENT_ENTRY_DONE] = ContentEntryEditViewModel.FINISH_WITHOUT_SAVE_TO_DB.toString()
                 }
             }
+        )
+    }
+
+    fun onPictureChanged(pictureUri: String?) {
+        val blockAndEntities = _uiState.updateAndGet { prev ->
+            prev.copy(
+                block = prev.block?.copy(
+                    courseBlockPicture = prev.block.courseBlockPicture?.copy(
+                        cbpPictureUri = pictureUri
+                    )
+                )
+            )
+        }.block
+
+        scheduleEntityCommitToSavedState(
+            entity = blockAndEntities,
+            serializer = CourseBlockAndEditEntities.serializer(),
+            commitDelay = DEFAULT_COMMIT_DELAY
         )
     }
 

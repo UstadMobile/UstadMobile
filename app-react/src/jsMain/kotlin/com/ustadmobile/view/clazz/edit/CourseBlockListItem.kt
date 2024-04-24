@@ -72,6 +72,7 @@ val CourseBlockListItem = FC<CourseBlockListItemProps> { props ->
                             title = props.block.courseBlock.cbTitle ?: ""
                             contentEntry = props.block.contentEntry
                             courseBlock = props.block.courseBlock
+                            pictureUri = props.block.courseBlockPicture?.cbpPictureUri
                         }
                     }
 

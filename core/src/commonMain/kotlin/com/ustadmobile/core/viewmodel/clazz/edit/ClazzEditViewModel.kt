@@ -243,7 +243,9 @@ class ClazzEditViewModel(
                             courseBlocksDb.map {
                                 CourseBlockAndEditEntities(
                                     courseBlock = it.courseBlock!!, //CourseBlock can't be null as per query
-                                    courseBlockPicture = it.courseBlockPicture,
+                                    courseBlockPicture = it.courseBlockPicture ?: CourseBlockPicture(
+                                        cbpUid = it.courseBlock!!.cbUid
+                                    ),
                                     contentEntry = it.contentEntry,
                                     contentEntryLang = it.contentEntryLang,
                                     assignment = it.assignment,
@@ -457,7 +459,7 @@ class ClazzEditViewModel(
             CourseBlock.BLOCK_MODULE_TYPE ->
                 CourseBlockEditViewModel.DEST_NAME to RESULT_KEY_COURSEBLOCK
             CourseBlock.BLOCK_ASSIGNMENT_TYPE ->
-                ClazzAssignmentEditViewModel.DEST_NAME to RESULT_KEY_ASSIGNMENT
+                ClazzAssignmentEditViewModel.DEST_NAME to RESULT_KEY_COURSEBLOCK
             else -> return
         }
 
@@ -547,6 +549,15 @@ class ClazzEditViewModel(
             val updateImage = coursePictureVal != null &&
                     savedStateHandle[INIT_PIC_URI] != (entity.coursePicture?.coursePictureUri ?: "")
 
+            val updatedCourseBlockPictures = courseBlockListVal.mapNotNull { block ->
+                val imageUriNow = block.courseBlockPicture?.cbpPictureUri
+                val initImageUri = initState.courseBlockList.firstOrNull {
+                    it.courseBlockPicture?.cbpUid == block.courseBlockPicture?.cbpUid
+                }?.courseBlockPicture?.cbpPictureUri
+
+                block.courseBlockPicture?.takeIf { imageUriNow != initImageUri }
+            }
+
             activeDb.withDoorTransactionAsync {
                 if(entityUidArg == 0L) {
                     createNewClazzUseCase(initEntity)
@@ -620,6 +631,9 @@ class ClazzEditViewModel(
                     )
                 }
 
+                activeDb.courseBlockPictureDao
+                    .takeIf { updatedCourseBlockPictures.isNotEmpty() }
+                    ?.upsertListAsync(updatedCourseBlockPictures)
                 Napier.d("onClickSave: transaction block done")
             }
             Napier.d("onClickSave: transaction done")
@@ -629,6 +643,14 @@ class ClazzEditViewModel(
                 tableId = CoursePicture.TABLE_ID,
                 pictureUri = coursePictureVal?.coursePictureUri
             )
+
+            updatedCourseBlockPictures.forEach {
+                enqueueSavePictureUseCase(
+                    entityUid = it.cbpUid,
+                    tableId = CourseBlockPicture.TABLE_ID,
+                    pictureUri = it.cbpPictureUri
+                )
+            }
 
             val entityTimeZone = TimeZone.of(entity.effectiveTimeZone)
             val fromLocalDate = Clock.System.now().toLocalDateTime(entityTimeZone)
@@ -770,7 +792,7 @@ class ClazzEditViewModel(
             CourseBlock.BLOCK_ASSIGNMENT_TYPE -> {
                 navigateForResult(
                     nextViewName = ClazzAssignmentEditViewModel.DEST_NAME,
-                    key = RESULT_KEY_ASSIGNMENT,
+                    key = RESULT_KEY_COURSEBLOCK,
                     serializer = CourseBlockAndEditEntities.serializer(),
                     currentValue = block,
                     args = buildMap {

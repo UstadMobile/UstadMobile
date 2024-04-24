@@ -10,6 +10,7 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.util.ext.onTextChange
+import com.ustadmobile.view.components.UstadImageSelectButton
 import com.ustadmobile.view.components.UstadSelectField
 import com.ustadmobile.wrappers.quill.ReactQuill
 import web.cssom.px
@@ -34,6 +35,8 @@ external interface UstadCourseBlockEditProps: Props {
     var onCourseBlockChange: ((CourseBlock?) -> Unit)
 
     var onClickEditSelectedContentEntry: () -> Unit
+
+    var onPictureChanged: (String?) -> Unit
 
 }
 
@@ -72,6 +75,13 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
                         }
                     }
                 }
+            }
+        }
+
+        UstadImageSelectButton {
+            imageUri = props.uiState.block?.courseBlockPicture?.cbpPictureUri
+            onImageUriChanged = { imageUri ->
+                props.onPictureChanged(imageUri)
             }
         }
 
