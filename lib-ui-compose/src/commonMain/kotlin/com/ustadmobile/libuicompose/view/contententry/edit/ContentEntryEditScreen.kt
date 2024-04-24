@@ -1,5 +1,6 @@
 package com.ustadmobile.libuicompose.view.contententry.edit
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Button
@@ -15,6 +16,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import com.ustadmobile.core.MR
@@ -29,6 +31,7 @@ import com.ustadmobile.libuicompose.components.UstadRichTextEdit
 import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.core.viewmodel.contententry.stringResource
+import com.ustadmobile.libuicompose.components.UstadImageSelectButton
 import dev.icerock.moko.resources.compose.stringResource
 
 @Composable
@@ -42,6 +45,7 @@ fun ContentEntryEditScreen(
         onContentEntryChanged = viewModel::onContentEntryChanged,
         onClickEditDescription = viewModel::onEditDescriptionInNewWindow,
         onSetCompressionLevel = viewModel::onSetCompressionLevel,
+        onPictureChanged = viewModel::onPictureChanged,
     )
 }
 
@@ -53,6 +57,7 @@ fun ContentEntryEditScreen(
     onClickUpdateContent: () -> Unit = { },
     onContentEntryChanged: (ContentEntry?) -> Unit = {},
     onSetCompressionLevel: (CompressionLevel) -> Unit = { },
+    onPictureChanged: (String?) -> Unit = { },
 ) {
     UstadVerticalScrollColumn(
         modifier = Modifier.fillMaxSize()
@@ -77,6 +82,17 @@ fun ContentEntryEditScreen(
             Text(
                 modifier = Modifier.defaultItemPadding(),
                 text = updateContentText
+            )
+        }
+
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.fillMaxWidth().defaultItemPadding(),
+        ) {
+            UstadImageSelectButton(
+                imageUri = uiState.entity?.picture?.cepPictureUri,
+                onImageUriChanged = onPictureChanged,
+                modifier = Modifier.testTag("image_button")
             )
         }
 

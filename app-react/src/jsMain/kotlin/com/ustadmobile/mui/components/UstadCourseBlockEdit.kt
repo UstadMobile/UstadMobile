@@ -83,6 +83,7 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
             onImageUriChanged = { imageUri ->
                 props.onPictureChanged(imageUri)
             }
+            disabled = !props.uiState.fieldsEnabled
         }
 
         UstadTextField {

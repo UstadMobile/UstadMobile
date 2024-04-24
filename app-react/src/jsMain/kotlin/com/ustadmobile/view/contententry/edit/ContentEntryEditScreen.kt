@@ -14,6 +14,7 @@ import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.mui.components.UstadTextEditField
 import com.ustadmobile.util.ext.onTextChange
+import com.ustadmobile.view.components.UstadImageSelectButton
 import com.ustadmobile.view.components.UstadMessageIdSelectField
 import com.ustadmobile.wrappers.quill.ReactQuill
 import kotlinx.coroutines.Dispatchers
@@ -42,6 +43,8 @@ external interface ContentEntryEditScreenProps : Props {
 
     var onSetCompressionLevel: (CompressionLevel) -> Unit
 
+    var onPictureChanged: (String?) -> Unit
+
 }
 
 val ContentEntryEditScreen = FC<Props> {
@@ -57,6 +60,7 @@ val ContentEntryEditScreen = FC<Props> {
         uiState = uiStateVal
         onContentEntryChanged = viewModel::onContentEntryChanged
         onSetCompressionLevel = viewModel::onSetCompressionLevel
+        onPictureChanged = viewModel::onPictureChanged
     }
 }
 
@@ -85,6 +89,13 @@ private val ContentEntryEditScreenComponent = FC<ContentEntryEditScreenProps> { 
                 Typography {
                     + updateContentText
                 }
+            }
+
+            UstadImageSelectButton {
+                imageUri = props.uiState.entity?.picture?.cepPictureUri
+                onImageUriChanged = props.onPictureChanged
+                id = "content_entry_image"
+                disabled = !props.uiState.fieldsEnabled
             }
 
             if (props.uiState.entity?.entry?.leaf == true){

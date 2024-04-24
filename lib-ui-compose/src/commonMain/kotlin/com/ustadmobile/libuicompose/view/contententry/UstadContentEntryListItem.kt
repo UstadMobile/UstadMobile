@@ -61,7 +61,7 @@ fun UstadContentEntryListItem(
                         title = entry?.contentEntry?.title ?: "",
                         contentEntry = entry?.contentEntry,
                         courseBlock = null,
-                        pictureUri = null,
+                        pictureUri = entry?.picture?.cepThumbnailUri,
                     )
                 }
 

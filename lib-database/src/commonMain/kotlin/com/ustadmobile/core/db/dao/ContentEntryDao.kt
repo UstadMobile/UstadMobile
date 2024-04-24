@@ -9,6 +9,7 @@ import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.composites.ContentEntryAndDetail
 import com.ustadmobile.lib.db.composites.ContentEntryAndLanguage
 import com.ustadmobile.lib.db.composites.ContentEntryAndListDetail
+import com.ustadmobile.lib.db.composites.ContentEntryAndPicture
 import com.ustadmobile.lib.db.entities.*
 
 @DoorDao
@@ -33,6 +34,18 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
         entryUuid: Long
     ): ContentEntryAndLanguage?
 
+    @HttpAccessible
+    @Query("""
+        SELECT ContentEntry.*, ContentEntryPicture2.*
+          FROM ContentEntry
+               LEFT JOIN ContentEntryPicture2 
+                         ON ContentEntryPicture2.cepUid = :uid
+         WHERE ContentEntry.contentEntryUid = :uid                
+    """)
+    abstract suspend fun findByUidWithEditDetails(
+        uid: Long,
+    ): ContentEntryAndPicture?
+
     @Query("""
         SELECT ContentEntry.*
           FROM ContentEntry
@@ -46,7 +59,7 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
     )
     @Query("""
-            SELECT ContentEntry.*, ContentEntryVersion.*
+            SELECT ContentEntry.*, ContentEntryVersion.*, ContentEntryPicture2.*
               FROM ContentEntry
                    LEFT JOIN ContentEntryVersion
                              ON ContentEntryVersion.cevUid = 
@@ -56,6 +69,8 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
                                  AND CAST(cevInActive AS INTEGER) = 0
                             ORDER BY ContentEntryVersion.cevLct DESC
                               LIMIT 1)
+                   LEFT JOIN ContentEntryPicture2
+                             ON ContentEntryPicture2.cepUid = :entryUuid   
              WHERE ContentEntry.contentEntryUid = :entryUuid
             """)
     abstract fun findEntryWithContainerByEntryIdLive(
@@ -177,10 +192,12 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
         )
     )
     @Query("""
-            SELECT ContentEntry.*, ContentEntryParentChildJoin.*
+            SELECT ContentEntry.*, ContentEntryParentChildJoin.*, ContentEntryPicture2.*
               FROM ContentEntry 
                     LEFT JOIN ContentEntryParentChildJoin 
                          ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid 
+                    LEFT JOIN ContentEntryPicture2
+                         ON ContentEntryPicture2.cepUid = ContentEntry.contentEntryUid
              WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid 
                AND (:langParam = 0 OR ContentEntry.primaryLanguageUid = :langParam)
                AND (:categoryParam0 = 0 OR :categoryParam0 
@@ -207,7 +224,7 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
     ): PagingSource<Int, ContentEntryAndListDetail>
 
     @Query("""
-        SELECT ContentEntry.*, ContentEntryParentChildJoin.*
+        SELECT ContentEntry.*, ContentEntryParentChildJoin.*, ContentEntryPicture2.*
           FROM CourseBlock
                JOIN ContentEntry 
                     ON CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
@@ -215,6 +232,8 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
                        AND CAST(CourseBlock.cbActive AS INTEGER) = 1
                LEFT JOIN ContentEntryParentChildJoin
                          ON ContentEntryParentChildJoin.cepcjParentContentEntryUid = 0
+               LEFT JOIN ContentEntryPicture2
+                         ON ContentEntryPicture2.cepUid = ContentEntry.contentEntryUid          
          WHERE CourseBlock.cbClazzUid IN
                (SELECT ClazzEnrolment.clazzEnrolmentClazzUid
                   FROM ClazzEnrolment
@@ -226,10 +245,12 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
 
 
     @Query("""
-        SELECT ContentEntry.*, ContentEntryParentChildJoin.*
+        SELECT ContentEntry.*, ContentEntryParentChildJoin.*, ContentEntryPicture2.*
           FROM ContentEntry
                LEFT JOIN ContentEntryParentChildJoin
                          ON ContentEntryParentChildJoin.cepcjParentContentEntryUid = 0
+               LEFT JOIN ContentEntryPicture2
+                         ON ContentEntryPicture2.cepUid = ContentEntry.contentEntryUid
          WHERE ContentEntry.contentOwner = :personUid
     """)
     abstract fun getContentByOwner(

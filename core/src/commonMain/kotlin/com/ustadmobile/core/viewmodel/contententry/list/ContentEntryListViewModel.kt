@@ -478,7 +478,7 @@ class ContentEntryListViewModel(
 
                 navigateForResult(
                     nextViewName = CourseBlockEditViewModel.DEST_NAME,
-                    key = ClazzEditViewModel.RESULT_KEY_CONTENTENTRY,
+                    key = ClazzEditViewModel.RESULT_KEY_COURSEBLOCK,
                     currentValue = null,
                     serializer = CourseBlockAndEditEntities.serializer(),
                     overwriteDestination = false,

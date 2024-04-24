@@ -90,6 +90,7 @@ val UstadContentEntryListItem = FC<UstadContentEntryListItemProps> { props ->
                     contentEntry = props.contentEntry?.contentEntry
                     courseBlock = null
                     title = props.contentEntry?.contentEntry?.title ?: ""
+                    pictureUri = props.contentEntry?.picture?.cepThumbnailUri
                 }
             }
 

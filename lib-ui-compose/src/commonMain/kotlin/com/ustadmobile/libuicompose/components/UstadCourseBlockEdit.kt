@@ -70,6 +70,7 @@ fun UstadCourseBlockEdit(
             UstadImageSelectButton(
                 imageUri = uiState.block?.courseBlockPicture?.cbpPictureUri,
                 onImageUriChanged = onPictureChanged,
+                modifier = Modifier.testTag("image_button"),
             )
         }
 

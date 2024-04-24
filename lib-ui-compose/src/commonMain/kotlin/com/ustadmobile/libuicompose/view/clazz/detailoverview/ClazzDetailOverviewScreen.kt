@@ -287,7 +287,8 @@ fun CourseBlockListItem(
                 title = courseBlock?.courseBlock?.cbTitle ?: "",
                 courseBlock = courseBlock?.courseBlock,
                 contentEntry = courseBlock?.contentEntry,
-                pictureUri = courseBlock?.courseBlockPicture?.cbpThumbnailUri,
+                pictureUri = courseBlock?.courseBlockPicture?.cbpThumbnailUri
+                    ?: courseBlock?.contentEntryPicture2?.cepThumbnailUri,
             )
         },
         trailingContent = {

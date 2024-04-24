@@ -97,6 +97,7 @@ fun ContentEntryDetailOverviewScreen(
                     UstadBlockIcon(
                         title = uiState.contentEntry?.entry?.title ?: "",
                         contentEntry = uiState.contentEntry?.entry,
+                        pictureUri = uiState.contentEntry?.picture?.cepPictureUri,
                         modifier = Modifier.size(80.dp),
                     )
                 }

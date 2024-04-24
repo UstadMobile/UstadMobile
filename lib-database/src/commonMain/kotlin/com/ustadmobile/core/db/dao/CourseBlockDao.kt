@@ -111,7 +111,7 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
         )
     )
     @Query("""
-        SELECT CourseBlock.*, ContentEntry.*, CourseBlockPicture.*,
+        SELECT CourseBlock.*, ContentEntry.*, CourseBlockPicture.*, ContentEntryPicture2.*,
                CourseBlock.cbUid NOT IN(:collapseList) AS expanded
           FROM CourseBlock
                LEFT JOIN ContentEntry
@@ -119,6 +119,9 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
                             AND ContentEntry.contentEntryUid = CourseBlock.cbEntityUid
                LEFT JOIN CourseBlockPicture
                          ON CourseBlockPicture.cbpUid = CourseBlock.cbUid    
+               LEFT JOIN ContentEntryPicture2
+                         ON CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
+                            AND ContentEntryPicture2.cepUid = CourseBlock.cbEntityUid
          WHERE CourseBlock.cbClazzUid = :clazzUid
            AND CourseBlock.cbModuleParentBlockUid NOT IN(:collapseList)
            AND (CAST(:includeInactive AS INTEGER) = 1 OR CourseBlock.cbActive)

@@ -162,6 +162,7 @@ private val ContentDetails = FC<ContentEntryDetailOverviewScreenProps> { props -
         UstadBlockIcon {
             title = props.uiState.contentEntry?.entry?.title ?: ""
             contentEntry = props.uiState.contentEntry?.entry
+            pictureUri = props.uiState.contentEntry?.picture?.cepPictureUri
             width = 100.px
             height = 100.px
             iconSize = SvgIconSize.large

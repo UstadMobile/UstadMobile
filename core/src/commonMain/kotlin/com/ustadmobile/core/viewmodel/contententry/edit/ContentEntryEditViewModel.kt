@@ -12,6 +12,7 @@ import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.ext.onActiveEndpoint
+import com.ustadmobile.core.util.ext.setIfNoValueSetYet
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditUiState
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
@@ -19,11 +20,13 @@ import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.lib.db.composites.ContentEntryAndContentJob
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryImportJob
+import com.ustadmobile.lib.db.entities.ContentEntryPicture2
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.direct
@@ -107,8 +110,18 @@ class ContentEntryEditViewModel(
                 onLoadFromDb = { db ->
                     //Check if the user can edit the content entry itself...
                     db.takeIf { entityUidArg != 0L }?.contentEntryDao
-                        ?.findEntryWithLanguageByEntryIdAsync(entityUidArg)
-                        ?.let { ContentEntryAndContentJob(entry = it.contentEntry ) }
+                        ?.findByUidWithEditDetails(entityUidArg)?.let { entryAndPicture ->
+                            if (entryAndPicture.entry != null) {
+                                ContentEntryAndContentJob(
+                                    entry = entryAndPicture.entry,
+                                    picture = entryAndPicture.picture ?: ContentEntryPicture2(
+                                        cepUid = entityUidArg
+                                    )
+                                )
+                            }else {
+                                null
+                            }
+                        }
                 },
                 makeDefault = {
                     val newContentEntryUid = activeDb.doorPrimaryKeyManager.nextId(ContentEntry.TABLE_ID)
@@ -136,6 +149,9 @@ class ContentEntryEditViewModel(
                                 cjiOriginalFilename = importedMetaData.originalFilename,
                                 cjiOwnerPersonUid = activeUserPersonUid,
                             ),
+                            picture = ContentEntryPicture2(
+                                cepUid = newContentEntryUid,
+                            )
                         ).also {
                             savedStateHandle[KEY_TITLE] = systemImpl.formatString(MR.strings.importing,
                                 (importedMetaData.originalFilename ?: importedMetaData.entry.sourceUrl ?: ""))
@@ -147,6 +163,9 @@ class ContentEntryEditViewModel(
                                 leaf = savedStateHandle[ARG_LEAF]?.toBoolean() == true
                                 contentOwner = activeUserPersonUid
                             },
+                            picture = ContentEntryPicture2(
+                                cepUid = newContentEntryUid,
+                            )
                         )
                     }
                 },
@@ -157,7 +176,9 @@ class ContentEntryEditViewModel(
                         )
                     }
                 }
-            )
+            ).also {
+                savedStateHandle.setIfNoValueSetYet(INIT_PIC_URI, it?.picture?.cepPictureUri ?: "")
+            }
 
             val isLeaf = _uiState.value.entity?.entry?.leaf == true
             val savedStateTitle = savedStateHandle[KEY_TITLE]
@@ -208,13 +229,37 @@ class ContentEntryEditViewModel(
     fun onContentEntryChanged(
         contentEntry: ContentEntry?
     ) {
-        _uiState.update { prev ->
+        val updatedState = _uiState.updateAndGet { prev ->
             prev.copy(
                 entity = prev.entity?.copy(
                     entry = contentEntry,
                 )
             )
         }
+
+        scheduleEntityCommit(updatedState.entity)
+    }
+
+    fun onPictureChanged(pictureUri: String?) {
+        val updatedState = _uiState.updateAndGet { prev ->
+            prev.copy(
+                entity = prev.entity?.copy(
+                    picture = prev.entity.picture?.copy(
+                        cepPictureUri = pictureUri,
+                    )
+                )
+            )
+        }
+
+        scheduleEntityCommit(updatedState.entity)
+    }
+
+    private fun scheduleEntityCommit(entity: ContentEntryAndContentJob?) {
+        scheduleEntityCommitToSavedState(
+            entity = entity,
+            serializer = ContentEntryAndContentJob.serializer(),
+            commitDelay = 200,
+        )
     }
 
     private fun ContentEntryEditUiState.hasErrors(): Boolean {
@@ -304,7 +349,9 @@ class ContentEntryEditViewModel(
                         contentEntry = contentEntryVal,
                         //Where this is a new ContentEntry (e.g. entityUidArg == 0), it should be
                         // joined to the parentUidArg
-                        joinToParentUid = if(entityUidArg == 0L) parentUidArg else null
+                        joinToParentUid = if(entityUidArg == 0L) parentUidArg else null,
+                        picture = entityVal.picture,
+                        initPictureUri = savedStateHandle[INIT_PIC_URI],
                     )
 
                     val contentJobItemVal = entityVal.contentJobItem

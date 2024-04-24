@@ -127,6 +127,7 @@ class CourseBlockEditViewModel(
                         contentJob = selectedContentEntry?.contentJob,
                         contentJobItem = selectedContentEntry?.contentJobItem,
                         courseBlockPicture = CourseBlockPicture(cbpUid = newUid),
+                        contentEntryPicture = selectedContentEntry?.picture
                     )
                 },
                 onLoadFromDb = { null }, //Does not load from database - always JSON passed from ClazzEdit

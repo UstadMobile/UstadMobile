@@ -115,6 +115,7 @@ class ClazzEditViewModel(
     private val saveContentEntryUseCase: SaveContentEntryUseCase = SaveContentEntryUseCase(
         db = di.onActiveEndpoint().direct.instance(tag = DoorTag.TAG_DB),
         repo = di.onActiveEndpoint().direct.instanceOrNull(tag = DoorTag.TAG_REPO),
+        enqueueSavePictureUseCase = di.onActiveEndpoint().direct.instance(),
     ),
     private val importContentUseCase: EnqueueContentEntryImportUseCase = di.onActiveEndpoint().direct.instance(),
     private val enqueueSavePictureUseCase: EnqueueSavePictureUseCase = di.onActiveEndpoint().direct
@@ -600,12 +601,20 @@ class ClazzEditViewModel(
                     .findKeysNotInOtherList(assignmentsToUpsert) { it.caUid }
                 activeRepo.clazzAssignmentDao.takeIf { assignmentsToDeactivate.isNotEmpty() }
                     ?.updateActiveByList(assignmentsToDeactivate, false, systemTimeInMillis())
-                courseBlockListVal.mapNotNull { it.contentEntry }.forEach {
-                    saveContentEntryUseCase.invoke(
-                        contentEntry = it,
-                        joinToParentUid = null,
-                    )
+
+                courseBlockListVal.forEach { block ->
+                    block.contentEntry?.also { contentEntry ->
+                        saveContentEntryUseCase(
+                            contentEntry = contentEntry,
+                            joinToParentUid = null,
+                            picture = block.contentEntryPicture,
+                            initPictureUri = initState.courseBlockList.firstOrNull {
+                                it.courseBlockPicture?.cbpUid == block.courseBlockPicture?.cbpUid
+                            }?.courseBlockPicture?.cbpPictureUri
+                        )
+                    }
                 }
+
                 val currentPeerReviewAllocations = courseBlockListVal.flatMap {
                     it.assignmentPeerAllocations
                 }
@@ -761,23 +770,6 @@ class ClazzEditViewModel(
 
     fun onClickEditCourseBlock(block: CourseBlockAndEditEntities) {
         when(block.courseBlock.cbType) {
-//            CourseBlock.BLOCK_CONTENT_TYPE -> {
-//                navigateForResult(
-//                    nextViewName = CourseBlockEditViewModel.DEST_NAME,
-//                    key = RESULT_KEY_CONTENTENTRY,
-//                    currentValue =  block.courseBlock,
-//                    serializer = CourseBlock.serializer(),
-//                    args = mapOf(
-//                        CourseBlockEditViewModel.ARG_SELECTED_CONTENT_ENTRY to json.encodeToString(
-//                            serializer = ContentEntryAndContentJob.serializer(),
-//                            value = ContentEntryAndContentJob(
-//                                entry = block.contentEntry,
-//                            )
-//                        )
-//                    )
-//                )
-//            }
-
             CourseBlock.BLOCK_CONTENT_TYPE,
             CourseBlock.BLOCK_DISCUSSION_TYPE,
             CourseBlock.BLOCK_TEXT_TYPE,
@@ -821,10 +813,6 @@ class ClazzEditViewModel(
          * Plain CourseBlock will be returned
          */
         const val RESULT_KEY_COURSEBLOCK = "courseblock"
-
-        const val RESULT_KEY_ASSIGNMENT = "assignmentResult"
-
-        const val RESULT_KEY_CONTENTENTRY = "contentEntryResult"
 
         const val RESULT_KEY_TIMEZONE = "timeZone"
 

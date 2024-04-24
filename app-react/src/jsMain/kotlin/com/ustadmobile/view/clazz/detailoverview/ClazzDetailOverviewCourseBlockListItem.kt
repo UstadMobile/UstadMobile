@@ -54,6 +54,7 @@ val ClazzDetailOverviewCourseBlockListItem = FC<ClazzDetailOverviewCourseBlockLi
                 UstadBlockIcon {
                     title = courseBlockVal?.cbTitle ?: ""
                     pictureUri = props.courseBlock?.courseBlockPicture?.cbpThumbnailUri
+                        ?: props.courseBlock?.contentEntryPicture2?.cepThumbnailUri
                     courseBlock = props.courseBlock?.courseBlock
                     contentEntry = props.courseBlock?.contentEntry
                 }

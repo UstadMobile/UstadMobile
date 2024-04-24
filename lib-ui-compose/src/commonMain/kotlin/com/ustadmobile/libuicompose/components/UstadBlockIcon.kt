@@ -54,7 +54,7 @@ fun UstadBlockIcon(
             UstadAsyncImage(
                 uri = pictureUri,
                 contentDescription = "",
-                contentScale = ContentScale.Crop,
+                contentScale = ContentScale.Fit,
                 modifier = Modifier.fillMaxSize(),
             )
         }

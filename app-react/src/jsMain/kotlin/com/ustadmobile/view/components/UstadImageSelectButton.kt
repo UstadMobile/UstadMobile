@@ -8,6 +8,7 @@ import mui.icons.material.AddAPhoto as AddAPhotoIcon
 import mui.material.*
 import mui.system.sx
 import react.*
+import react.dom.aria.ariaDisabled
 import react.dom.html.ReactHTML.input
 import web.html.HTMLInputElement
 import web.html.InputType
@@ -20,6 +21,8 @@ external interface UstadImageSelectButtonProps: Props {
     var onImageUriChanged: (String?) -> Unit
 
     var id: String?
+
+    var disabled: Boolean?
 
 }
 
@@ -67,15 +70,21 @@ val UstadImageSelectButton = FC<UstadImageSelectButtonProps> { props ->
                     horizontal = BadgeOriginHorizontal.right
                 }
                 badgeContent = Avatar.create {
-                    onClick = {
-                        inputRef.current?.click()
+                    if(props.disabled != true) {
+                        onClick = {
+                            inputRef.current?.click()
+                        }
                     }
+
                     sx {
                         backgroundColor = theme.palette.secondary.main
                         height = 24.px
                         width = 24.px
-                        cursor = Cursor.pointer
+
+                        if(props.disabled != true)
+                            cursor = Cursor.pointer
                     }
+
                     AddAPhotoIcon {
                         sx {
                             height = 16.px
@@ -87,12 +96,14 @@ val UstadImageSelectButton = FC<UstadImageSelectButtonProps> { props ->
                 ImageSelectButtonAvatar {
                     imageUri = props.imageUri
                     onClick = { inputRef.current?.click() }
+                    disabled = props.disabled
                 }
             }
         }else {
             ImageSelectButtonAvatar {
                 imageUri = props.imageUri
                 onClick = { inputRef.current?.click() }
+                disabled = props.disabled
             }
         }
     }
@@ -101,14 +112,19 @@ val UstadImageSelectButton = FC<UstadImageSelectButtonProps> { props ->
 private external interface ImageSelectButtonAvatarProps: Props {
     var onClick: () -> Unit
     var imageUri: String?
+    var disabled: Boolean?
 }
 
 private val ImageSelectButtonAvatar = FC<ImageSelectButtonAvatarProps> { props ->
     Avatar {
         src = props.imageUri
-        onClick = {
-            props.onClick()
+        ariaDisabled = props.disabled == true
+        if(props.disabled != true) {
+            onClick = {
+                props.onClick()
+            }
         }
+
 
         sx {
             cursor = Cursor.pointer
