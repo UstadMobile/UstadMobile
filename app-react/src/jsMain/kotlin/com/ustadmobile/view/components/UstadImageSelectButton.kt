@@ -104,8 +104,6 @@ private external interface ImageSelectButtonAvatarProps: Props {
 }
 
 private val ImageSelectButtonAvatar = FC<ImageSelectButtonAvatarProps> { props ->
-    val theme by useRequiredContext(ThemeContext)
-
     Avatar {
         src = props.imageUri
         onClick = {
@@ -116,8 +114,6 @@ private val ImageSelectButtonAvatar = FC<ImageSelectButtonAvatarProps> { props -
             cursor = Cursor.pointer
             height = 64.px
             width = 64.px
-
-            backgroundColor = theme.palette.secondary.main
         }
 
         if(props.imageUri == null) {

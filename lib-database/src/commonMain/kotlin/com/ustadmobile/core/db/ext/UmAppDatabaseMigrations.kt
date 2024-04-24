@@ -998,6 +998,14 @@ val MIGRATION_166_167 = DoorMigrationStatementList(166, 167) { db ->
     }
 }
 
+val MIGRATION_167_168 = DoorMigrationStatementList(167, 168) { db ->
+    if(db.dbType() == DoorDbType.SQLITE) {
+        listOf("CREATE TABLE IF NOT EXISTS ContentEntryPicture2 (  cepUid  INTEGER  PRIMARY KEY  NOT NULL , cepLct  INTEGER  NOT NULL , cepPictureUri  TEXT , cepThumbnailUri  TEXT )")
+    }else {
+        listOf("CREATE TABLE IF NOT EXISTS ContentEntryPicture2 (  cepUid  BIGINT  PRIMARY KEY  NOT NULL , cepLct  BIGINT  NOT NULL , cepPictureUri  TEXT , cepThumbnailUri  TEXT )")
+    }
+}
+
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_105_106, MIGRATION_106_107,
     MIGRATION_107_108, MIGRATION_108_109,
@@ -1011,7 +1019,7 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_151_152, MIGRATION_152_153, MIGRATION_153_154, MIGRATION_154_155,
     MIGRATION_156_157, MIGRATION_157_158, MIGRATION_158_159, MIGRATION_159_160,
     MIGRATION_160_161, MIGRATION_162_163, MIGRATION_163_164, MIGRATION_164_165,
-    MIGRATION_165_166, MIGRATION_166_167,
+    MIGRATION_165_166, MIGRATION_166_167, MIGRATION_167_168,
 )
 
 
