@@ -29,17 +29,22 @@ env:
       PASSWORD: "test"
 - repeat:
     while:
-      notVisible: "OVERVIEW"
+      notVisible: "Course"
     commands:
       - back
-- tapOn: "OVERVIEW"
+- tapOn: "Course"
 - runFlow:
     file: "../common/add_new_content_block_to_course.yaml"
     env:
       TESTFILENAME: "H5p_Content.h5p"
-      TESTCONTENTNAME: H5PContent
       CONTROLSERVER: ${CONTROLSERVER}
       TESTSERIAL: ${TESTSERIAL}
+- scrollUntilVisible:
+    element:
+      text:  "True/False Question"
+    direction: DOWN
+- assertVisible:
+    text:  "True/False Question"
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
@@ -52,7 +57,14 @@ env:
 - runFlow:
     file: "../common/add_new_content_block_to_course.yaml"
     env:
-      TESTFILENAME: Epub_Content.epub
-      TESTCONTENTNAME: EpubContent
+      TESTFILENAME: Epub_Content1.epub
       CONTROLSERVER: ${CONTROLSERVER}
       TESTSERIAL: ${TESTSERIAL}
+- scrollUntilVisible:
+    element:
+      text:  "True/False Question"
+    direction: DOWN
+- assertVisible:
+    text:  "True/False Question"
+- assertVisible:
+    text: "The Adopting of Rosa Marie / (A Sequel to Dandelion Cottage)"

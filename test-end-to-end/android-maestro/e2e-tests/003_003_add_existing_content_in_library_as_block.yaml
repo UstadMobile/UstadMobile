@@ -14,18 +14,30 @@ env:
 - runFlow:
     file: "../common/clear_login_and_add_content.yaml"
     env:
-      TESTFILENAME: "H5p_Content.h5p"
-      TESTCONTENTNAME: H5PContent
-      CONTROLSERVER: ${CONTROLSERVER}
-      TESTSERIAL: ${TESTSERIAL}
+     TESTFILENAME: "H5p_Content.h5p"
+     TESTCONTENTNAME: H5PContent
+     CONTROLSERVER: ${CONTROLSERVER}
+     TESTSERIAL: ${TESTSERIAL}
+- tapOn: "SAVE"
 #---------add content to library ---------#
 - runFlow:
-    file: "../common/clear_login_and_add_content.yaml"
-    env:
-      TESTFILENAME: Epub_Content.epub
-      TESTCONTENTNAME: EpubContent
-      CONTROLSERVER: ${CONTROLSERVER}
-      TESTSERIAL: ${TESTSERIAL}
+   file: "../common/push_test_file_to_downloads.yaml"
+   env:
+    TESTFILENAME: "Epub_Content1.epub"
+
+- launchApp
+# adding content to library
+- tapOn: "Library"
+- tapOn:
+    id: "floating_action_button"
+- tapOn: "From file"
+- runFlow:
+    when:
+      notVisible: "Downloads"
+    file: "../common/redirect_to_downloads.yaml"
+- tapOn: "Epub_Content1.epub"
+
+- tapOn: "SAVE"
 #---------add course ---------#
 - runFlow:
     file: "../common/add_course.yaml"
@@ -44,14 +56,14 @@ env:
 #--- add epub content already added by admin in library to course block----#
 - repeat:
     while:
-      notVisible: "OVERVIEW"
+      notVisible: "Course"
     commands:
       - back
-- tapOn: "OVERVIEW"
+- tapOn: "Course"
 - runFlow:
     file: "../common/add_existing_content_block_to_course.yaml"
-- tapOn: "EpubContent"
-- tapOn: "SAVE"
+- tapOn: "E-book"
+- tapOn: "Done"
 - tapOn: "SAVE"
 
 # teacher add existing content in library to course as a content block
@@ -66,9 +78,17 @@ env:
 - tapOn: "Existing Content Block Test"
 - runFlow:
     file: "../common/add_existing_content_block_to_course.yaml"
-- tapOn: "H5PContent"
+- tapOn: "Interactive"
+- tapOn: "Done"
 - tapOn: "SAVE"
-- tapOn: "SAVE"
+- scrollUntilVisible:
+    element:
+      text:  "True/False Question"
+    direction: DOWN
+- assertVisible:
+    text:  "True/False Question"
+- assertVisible:
+    text: "The Adopting of Rosa Marie / (A Sequel to Dandelion Cottage)"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/able_to_add_existing_content_block_inside_course"
 
 
