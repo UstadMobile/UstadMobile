@@ -111,6 +111,8 @@ val ContentImportersDiModuleJvm = DI.Module("ContentImporters-Jvm"){
                         getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
                         mimeTypeHelper = mimeTypeHelper,
                         compressUseCase = instanceOrNull(),
+                        extractVideoThumbnailUseCase = instanceOrNull(),
+                        saveLocalUrisAsBlobsUseCase = instanceOrNull(),
                     )
                 )
             }

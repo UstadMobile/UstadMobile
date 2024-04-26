@@ -73,7 +73,8 @@ Development requirements are:
 * JDK17 (only): JDK21 not supported yet due to Proguard issues on app-desktop.
 * MediaInfo: MediaInfo is used by the server and desktop version to validate media files and extract
   metadata
-* VLC (3.0.0)+ : VLC is used on the desktop version (via VLC4J) to play videos.
+* VLC (3.0.0)+ : VLC is used on the desktop version (via VLC4J) to play videos and by both the server
+  and desktop version to extract video thumbnails
 * HandBrakeCLI (1.6.0+): HandBrake (Command Line Interface) is used by the server and desktop version 
   to compress videos.
 * SOX (14+) : Sox is used to transcode audio files
