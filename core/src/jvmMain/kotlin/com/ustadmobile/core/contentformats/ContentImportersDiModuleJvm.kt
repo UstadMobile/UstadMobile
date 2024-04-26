@@ -56,6 +56,7 @@ val ContentImportersDiModuleJvm = DI.Module("ContentImporters-Jvm"){
                         json = instance(),
                         getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
                         compressListUseCase = instance(),
+                        saveLocalUrisAsBlobsUseCase = instance(),
                     )
                 )
                 add(
