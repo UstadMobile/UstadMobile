@@ -6,6 +6,7 @@ import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
 import com.ustadmobile.lib.db.entities.ContentEntryPicture2
+import io.github.aakira.napier.Napier
 
 class SaveContentEntryUseCase(
     private val db: UmAppDatabase,
@@ -29,12 +30,10 @@ class SaveContentEntryUseCase(
         effectiveDb.withDoorTransactionAsync {
             effectiveDb.contentEntryDao.upsertAsync(contentEntry)
             if(picture != null && picture.cepPictureUri != initPictureUri) {
+                Napier.v {
+                    "SavePictureUseCase: ContentEntry Set picture upsert uri = ${picture.cepPictureUri} uid=${picture.cepUid}"
+                }
                 db.contentEntryPicture2Dao.upsertListAsync(listOf(picture))
-                enqueueSavePictureUseCase(
-                    entityUid = picture.cepUid,
-                    tableId = ContentEntryPicture2.TABLE_ID,
-                    pictureUri = picture.cepPictureUri,
-                )
             }
 
             if(joinToParentUid != null) {
@@ -45,6 +44,15 @@ class SaveContentEntryUseCase(
                     )
                 )
             }
+        }
+
+        //Run EnqueueSavePictureUseCase after the database transaction has finished.
+        if(picture != null && picture.cepPictureUri != initPictureUri) {
+            enqueueSavePictureUseCase(
+                entityUid = picture.cepUid,
+                tableId = ContentEntryPicture2.TABLE_ID,
+                pictureUri = picture.cepPictureUri,
+            )
         }
     }
 

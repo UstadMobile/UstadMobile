@@ -21,7 +21,7 @@ expect abstract class ContentEntryPicture2Dao: ImageDao {
                cepLct = :time
          WHERE cepUid = :uid  
     """)
-    override suspend fun updateUri(
+    abstract override suspend fun updateUri(
         uid: Long, uri: String?, thumbnailUri: String?, time: Long
     )
 }

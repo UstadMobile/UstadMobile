@@ -131,6 +131,12 @@ class ContentEntryEditViewModel(
                     )
 
                     if(importedMetaData != null) {
+                        val pictureUri = importedMetaData.picture?.cepPictureUri
+                        if(pictureUri != null) {
+                            //Ensure that the
+                            savedStateHandle[INIT_PIC_URI] = ""
+                        }
+
                         ContentEntryAndContentJob(
                             entry = importedMetaData.entry.shallowCopy {
                                 contentEntryUid = newContentEntryUid
@@ -149,7 +155,9 @@ class ContentEntryEditViewModel(
                                 cjiOriginalFilename = importedMetaData.originalFilename,
                                 cjiOwnerPersonUid = activeUserPersonUid,
                             ),
-                            picture = ContentEntryPicture2(
+                            picture = importedMetaData.picture?.copy(
+                                cepUid = newContentEntryUid,
+                            ) ?: ContentEntryPicture2(
                                 cepUid = newContentEntryUid,
                             )
                         ).also {

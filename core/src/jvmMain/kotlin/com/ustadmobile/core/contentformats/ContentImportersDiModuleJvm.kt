@@ -80,6 +80,8 @@ val ContentImportersDiModuleJvm = DI.Module("ContentImporters-Jvm"){
                         json = instance(),
                         getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
                         compressPdfUseCase = instanceOrNull(),
+                        saveLocalUriAsBlobUseCase = instance(),
+                        tmpPath = instance(tag = DiTag.TAG_TMP_DIR),
                     ),
                 )
                 add(

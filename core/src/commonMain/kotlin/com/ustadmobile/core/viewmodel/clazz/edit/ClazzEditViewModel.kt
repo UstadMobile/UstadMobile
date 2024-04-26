@@ -602,19 +602,6 @@ class ClazzEditViewModel(
                 activeRepo.clazzAssignmentDao.takeIf { assignmentsToDeactivate.isNotEmpty() }
                     ?.updateActiveByList(assignmentsToDeactivate, false, systemTimeInMillis())
 
-                courseBlockListVal.forEach { block ->
-                    block.contentEntry?.also { contentEntry ->
-                        saveContentEntryUseCase(
-                            contentEntry = contentEntry,
-                            joinToParentUid = null,
-                            picture = block.contentEntryPicture,
-                            initPictureUri = initState.courseBlockList.firstOrNull {
-                                it.courseBlockPicture?.cbpUid == block.courseBlockPicture?.cbpUid
-                            }?.courseBlockPicture?.cbpPictureUri
-                        )
-                    }
-                }
-
                 val currentPeerReviewAllocations = courseBlockListVal.flatMap {
                     it.assignmentPeerAllocations
                 }
@@ -646,6 +633,23 @@ class ClazzEditViewModel(
                 Napier.d("onClickSave: transaction block done")
             }
             Napier.d("onClickSave: transaction done")
+
+            //Saving the ContentEntry entity can include saving the picture for the content entry.
+            //Because enqueueing a save picture must be done only after the entity with the picture
+            //itself is committed, SaveContentEntry must be invoked outside the main transaction so
+            //that SaveContentEntryUseCase can control the transactions.
+            courseBlockListVal.forEach { block ->
+                block.contentEntry?.also { contentEntry ->
+                    saveContentEntryUseCase(
+                        contentEntry = contentEntry,
+                        joinToParentUid = null,
+                        picture = block.contentEntryPicture,
+                        initPictureUri = initState.courseBlockList.firstOrNull {
+                            it.courseBlockPicture?.cbpUid == block.courseBlockPicture?.cbpUid
+                        }?.courseBlockPicture?.cbpPictureUri
+                    )
+                }
+            }
 
             enqueueSavePictureUseCase.takeIf { updateImage }?.invoke(
                 entityUid = entity.clazzUid,

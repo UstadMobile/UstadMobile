@@ -451,6 +451,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                             json = instance(),
                             appContext = applicationContext,
                             tmpDir = File(contentImportTmpPath.toString()),
+                            saveLocalUriAsBlobUseCase = instance(),
                         )
                     )
                 }
@@ -568,6 +569,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 enqueueBlobUploadClientUseCase = on(context).instance(),
                 compressImageUseCase = instance(),
                 deleteUrisUseCase = instance(),
+                getStoragePathForUrlUseCase = instance(),
             )
         }
 

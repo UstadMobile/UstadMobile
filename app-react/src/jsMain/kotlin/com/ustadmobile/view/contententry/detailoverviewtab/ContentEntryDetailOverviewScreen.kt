@@ -206,12 +206,14 @@ private val ContentDetailRightColumn = FC <ContentEntryDetailOverviewScreenProps
 
         if (props.uiState.authorVisible){
             Typography{
+                variant = TypographyVariant.caption
                 + (props.uiState.contentEntry?.entry?.author ?: "")
             }
         }
 
         if (props.uiState.publisherVisible){
             Typography{
+                variant = TypographyVariant.caption
                 + (props.uiState.contentEntry?.entry?.publisher ?: "")
             }
         }
@@ -225,11 +227,12 @@ private val ContentDetailRightColumn = FC <ContentEntryDetailOverviewScreenProps
                 }
 
                 Typography{
+                    variant = TypographyVariant.caption
                     + strings[MR.strings.entry_details_license]
                 }
 
                 Typography {
-                    variant = TypographyVariant.h6
+                    variant = TypographyVariant.caption
                     + (props.uiState.contentEntry?.entry?.licenseName ?: "")
                 }
             }

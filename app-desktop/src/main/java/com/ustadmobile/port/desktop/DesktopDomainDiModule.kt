@@ -206,7 +206,8 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             repo = on(context).instance(tag = DoorTag.TAG_REPO),
             enqueueBlobUploadClientUseCase = on(context).instance(),
             compressImageUseCase = instance(),
-            deleteUrisUseCase = instance()
+            deleteUrisUseCase = instance(),
+            getStoragePathForUrlUseCase = instance(),
         )
     }
 
