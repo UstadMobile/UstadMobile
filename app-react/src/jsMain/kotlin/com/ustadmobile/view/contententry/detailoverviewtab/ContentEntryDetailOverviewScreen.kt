@@ -183,6 +183,7 @@ private val ContentDetailRightColumn = FC <ContentEntryDetailOverviewScreenProps
 
         Typography {
             variant = TypographyVariant.h4
+            id = "courseblock_title"
             + (props.uiState.contentEntry?.entry?.title ?: "")
         }
 

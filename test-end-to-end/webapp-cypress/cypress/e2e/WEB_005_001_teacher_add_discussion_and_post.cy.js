@@ -36,7 +36,7 @@ it('Teacher able to add a new discussion board and post to the discussion', () =
   cy.contains("button","Save").click()
 
   //ensure that save course has finished
-  cy.contains("#appbar_title", "005_001")
+  cy.contains("#courseblock_title", "005_001")
   cy.contains("Discussion 2").click()
   cy.contains('Post').click()
   cy.get('#discussion_post_title').type('Post Title')

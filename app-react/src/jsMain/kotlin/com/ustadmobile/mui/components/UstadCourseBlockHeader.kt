@@ -20,6 +20,8 @@ external interface UstadCourseBlockHeaderProps : PropsWithSx {
 
     var picture: CourseBlockPicture?
 
+    var id: String?
+
 }
 
 val UstadCourseBlockHeader = FC<UstadCourseBlockHeaderProps> { props ->
@@ -28,6 +30,7 @@ val UstadCourseBlockHeader = FC<UstadCourseBlockHeaderProps> { props ->
     Stack {
         direction = responsive(StackDirection.row)
         sx = props.sx
+        id = props.id
 
         UstadBlockIcon {
             courseBlock = props.block
@@ -40,6 +43,7 @@ val UstadCourseBlockHeader = FC<UstadCourseBlockHeaderProps> { props ->
 
         Typography {
             variant = TypographyVariant.h4
+            id = "${props.id ?: "courseblock"}_title"
             sx {
                 paddingLeft = theme.spacing(1)
             }
