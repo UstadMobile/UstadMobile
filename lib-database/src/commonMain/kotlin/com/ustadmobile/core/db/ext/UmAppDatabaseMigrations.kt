@@ -990,7 +990,16 @@ val MIGRATION_165_166 = DoorMigrationStatementList(165, 166) {
     }
 }
 
+/**
+ * Previous versions of the system did not set the cjiStatus field. Those jobs are almost certainly
+ * finished. If we don't mark them as complete, then the new version will show an "importing"
+ * progress bar on already imported content.
+ */
 val MIGRATION_166_167 = DoorMigrationStatementList(166, 167) { db ->
+    listOf("UPDATE ContentEntryImportJob SET cjiStatus = 24 WHERE cjiStatus = 4")
+}
+
+val MIGRATION_167_168 = DoorMigrationStatementList(167, 168) { db ->
     if(db.dbType() == DoorDbType.SQLITE) {
         listOf("CREATE TABLE IF NOT EXISTS CourseBlockPicture (  cbpUid  INTEGER  PRIMARY KEY  NOT NULL , cbpLct  INTEGER  NOT NULL , cbpPictureUri  TEXT , cbpThumbnailUri  TEXT )")
     }else {
@@ -998,7 +1007,7 @@ val MIGRATION_166_167 = DoorMigrationStatementList(166, 167) { db ->
     }
 }
 
-val MIGRATION_167_168 = DoorMigrationStatementList(167, 168) { db ->
+val MIGRATION_168_169 = DoorMigrationStatementList(168, 169) { db ->
     if(db.dbType() == DoorDbType.SQLITE) {
         listOf("CREATE TABLE IF NOT EXISTS ContentEntryPicture2 (  cepUid  INTEGER  PRIMARY KEY  NOT NULL , cepLct  INTEGER  NOT NULL , cepPictureUri  TEXT , cepThumbnailUri  TEXT )")
     }else {
@@ -1019,7 +1028,7 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_151_152, MIGRATION_152_153, MIGRATION_153_154, MIGRATION_154_155,
     MIGRATION_156_157, MIGRATION_157_158, MIGRATION_158_159, MIGRATION_159_160,
     MIGRATION_160_161, MIGRATION_162_163, MIGRATION_163_164, MIGRATION_164_165,
-    MIGRATION_165_166, MIGRATION_166_167, MIGRATION_167_168,
+    MIGRATION_165_166, MIGRATION_166_167, MIGRATION_167_168, MIGRATION_168_169,
 )
 
 

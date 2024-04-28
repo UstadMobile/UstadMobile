@@ -39,16 +39,20 @@ env:
       PASSWORD: "test"
 - repeat:
     while:
-      notVisible: "OVERVIEW"
+      notVisible: "Course"
     commands:
       - back
-- tapOn: "OVERVIEW"
+- tapOn: "Course"
 - runFlow:
     file: "../common/add_demo_block_structure.yaml"
     env:
       MODULETITLE: "SEMESTER 1"
       TEXTTITLE: "PRIMARY COLOURS"
       TEXT: "RED,BLUE,GREEN"
+- scrollUntilVisible:
+    element:
+      text: ${TEXTTITLE}
+    direction: DOWN
 - tapOn:
     text: ${TEXTTITLE}
 - extendedWaitUntil:
@@ -67,10 +71,16 @@ env:
 - tapOn: "courses"
 - tapOn: "Text Block Test"
 #--- open text block by student---#
+- scrollUntilVisible:
+    element:
+      text: ${TEXTTITLE}
+    direction: DOWN
 - tapOn: "PRIMARY COLOURS"
 - extendedWaitUntil:
     visible: ${TEXTTITLE}
     timeout: 1000
+- assertVisible:
+    text: "RED,BLUE,GREEN"
 - takeScreenshot: "${TESTRESULTSDIR}/text_block_student_view"
 #---------Launch App & Teacher Login------------------#
 - runFlow: "../common/clear_state_and_get_started.yaml"
@@ -83,8 +93,14 @@ env:
 - tapOn: "courses"
 - tapOn: "Text Block Test"
 #--- open text block by teacher ---#
+- scrollUntilVisible:
+    element:
+      text: ${TEXTTITLE}
+    direction: DOWN
 - tapOn: "PRIMARY COLOURS"
 - extendedWaitUntil:
     visible: ${TEXTTITLE}
     timeout: 1000
+- assertVisible:
+    text: "RED,BLUE,GREEN"
 - takeScreenshot: "${TESTRESULTSDIR}/text_block_teacher_view"

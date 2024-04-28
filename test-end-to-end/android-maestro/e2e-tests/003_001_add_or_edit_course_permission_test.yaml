@@ -45,4 +45,5 @@ env:
       PASSWORD: "test"
 - tapOn: "Courses"
 - tapOn: "Permission Test"
-- assertNotVisible: "EDIT"
+- assertNotVisible:
+            id: "floating_action_button"

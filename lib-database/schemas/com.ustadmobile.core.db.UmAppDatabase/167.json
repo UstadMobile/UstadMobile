@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 167,
-    "identityHash": "2cf6d8beea50ebd2fda9d134848b9650",
+    "identityHash": "84e94f3e54a333006595c24dbe482ffb",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -6880,44 +6880,6 @@
         "foreignKeys": []
       },
       {
-        "tableName": "CourseBlockPicture",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cbpUid` INTEGER NOT NULL, `cbpLct` INTEGER NOT NULL, `cbpPictureUri` TEXT, `cbpThumbnailUri` TEXT, PRIMARY KEY(`cbpUid`))",
-        "fields": [
-          {
-            "fieldPath": "cbpUid",
-            "columnName": "cbpUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "cbpLct",
-            "columnName": "cbpLct",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "cbpPictureUri",
-            "columnName": "cbpPictureUri",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "cbpThumbnailUri",
-            "columnName": "cbpThumbnailUri",
-            "affinity": "TEXT",
-            "notNull": false
-          }
-        ],
-        "primaryKey": {
-          "autoGenerate": false,
-          "columnNames": [
-            "cbpUid"
-          ]
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
         "tableName": "OutgoingReplication",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`orUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `destNodeId` INTEGER NOT NULL, `orTableId` INTEGER NOT NULL, `orPk1` INTEGER NOT NULL, `orPk2` INTEGER NOT NULL)",
         "fields": [
@@ -7030,7 +6992,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2cf6d8beea50ebd2fda9d134848b9650')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '84e94f3e54a333006595c24dbe482ffb')"
     ]
   }
 }
