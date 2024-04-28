@@ -75,7 +75,7 @@ it('Student not able to submit assignment', () => {
 
 })
 
-it('Teacher add assignment mark and course comment', () => {
+it('Teacher checks submissions', () => {
   cy.ustadClearDbAndLogin('teacher1','test1234')
  //  Assignment block
   cy.contains("Course").click()
@@ -83,7 +83,7 @@ it('Teacher add assignment mark and course comment', () => {
   cy.contains("button","Course").click()
   cy.contains("Assignment 1").click()
   cy.contains('Submissions').click()
-  cy.contains('Student 1').click()
+  cy.contains('Student 1', {timeout:5000}).click()
   cy.contains("Not submitted").should('exist')
 })
 
