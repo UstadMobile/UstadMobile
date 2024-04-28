@@ -40,6 +40,10 @@ appId: com.toughra.ustadmobile
           - tapOn:
               id: com.google.android.documentsui:id/sub_menu
 - tapOn: admin_pic.jpg
+- scrollUntilVisible:
+    element:
+      text: "Gender*"
+    direction: DOWN
 - tapOn: "Gender*"
 - tapOn: "Male"
 - tapOn: "SAVE"

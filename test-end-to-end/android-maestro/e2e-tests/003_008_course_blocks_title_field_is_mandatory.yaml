@@ -95,7 +95,7 @@ env:
 #Assertion to make sure the page is not saved because title is blank
 - assertNotVisible:
     id: "app_title"
-    text: "Edit content block"
+    text: "Add content"
 - inputText: H5p Content
 - tapOn: "Description"
 - tapOn:
@@ -105,6 +105,6 @@ env:
 - tapOn: "Next"
 - assertVisible:
     id: "app_title"
-    text: "Edit content block"
+    text: "Add content"
 - tapOn: "Done"
 - tapOn: "Save"

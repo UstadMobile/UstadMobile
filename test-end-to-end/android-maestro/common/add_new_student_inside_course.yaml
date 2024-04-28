@@ -23,6 +23,10 @@ appId: com.toughra.ustadmobile
 - inputText: ${STUDENTFIRSTNAME}
 - tapOn: "Last name*"
 - inputText: ${STUDENTLASTNAME}
+- scrollUntilVisible:
+    element:
+      text: "Gender*"
+    direction: DOWN
 - tapOn: "Gender*"
 - tapOn: ${GENDER}
 - tapOn: "SAVE"

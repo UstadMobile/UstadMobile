@@ -64,7 +64,6 @@ import kotlin.math.max
  * @param markNextStudentVisible if true, show a button for the marker to record the mark for the
  * current submitter and move to the next submission that requires marking.
  * @param privateCommentsList list of private comments for this submitter
- * @param newPrivateCommentText private comment text currently being drafted by user on screen
  */
 data class ClazzAssignmentSubmitterDetailUiState(
 
@@ -102,8 +101,6 @@ data class ClazzAssignmentSubmitterDetailUiState(
     val privateCommentsList: ListPagingSourceFactory<CommentsAndName> = { EmptyPagingSource() },
 
     val newPrivateCommentTextVisible: Boolean = false,
-
-    val newPrivateCommentText: String = "",
 
     val activeUserPersonUid: Long = 0,
 
@@ -196,6 +193,12 @@ class ClazzAssignmentSubmitterDetailViewModel(
         )
     )
     val uiState: Flow<ClazzAssignmentSubmitterDetailUiState> = _uiState.asStateFlow()
+
+    //This is its own flow because it is used within a virtuallist which would deliver changes
+    //asynchronously to the text field if it was part of the main ui state
+    private val _newPrivateCommentText = MutableStateFlow("")
+
+    val newPrivateCommentText: Flow<String> = _newPrivateCommentText.asStateFlow()
 
     private val assignmentUid = savedStateHandle[ARG_ASSIGNMENT_UID]?.toLong()
         ?: throw IllegalArgumentException("No assignmentUid")
@@ -332,11 +335,7 @@ class ClazzAssignmentSubmitterDetailViewModel(
     }
 
     fun onChangePrivateComment(text: String) {
-        _uiState.update { prev ->
-            prev.copy(
-                newPrivateCommentText = text
-            )
-        }
+        _newPrivateCommentText.value = text
     }
 
     fun onSubmitPrivateComment() {
@@ -351,12 +350,10 @@ class ClazzAssignmentSubmitterDetailViewModel(
                     commentsFromSubmitterUid = _uiState.value.activeUserSubmitterId
                     commentsFromPersonUid = activeUserPersonUid
                     commentsEntityUid = assignmentUid
-                    commentsText = _uiState.value.newPrivateCommentText
+                    commentsText = _newPrivateCommentText.value
                     commentsDateTimeAdded = systemTimeInMillis()
                 })
-                _uiState.update { prev ->
-                    prev.copy(newPrivateCommentText = "")
-                }
+                _newPrivateCommentText.value = ""
             }finally {
                 loadingState = LoadingUiState.NOT_LOADING
             }

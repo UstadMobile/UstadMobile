@@ -9,6 +9,7 @@ import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.composites.ContentEntryAndDetail
 import com.ustadmobile.lib.db.composites.ContentEntryAndLanguage
 import com.ustadmobile.lib.db.composites.ContentEntryAndListDetail
+import com.ustadmobile.lib.db.composites.ContentEntryAndPicture
 import com.ustadmobile.lib.db.entities.*
 
 @DoorDao
@@ -20,6 +21,9 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun upsertAsync(entity: ContentEntry)
+
+    @Query("SELECT * FROM ContentEntry WHERE contentEntryUid = :entryUid")
+    abstract suspend fun findByUidAsync(entryUid: Long): ContentEntry?
 
     @Query("""
         SELECT ContentEntry.*, Language.* 
@@ -33,20 +37,23 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
         entryUuid: Long
     ): ContentEntryAndLanguage?
 
+    @HttpAccessible
     @Query("""
-        SELECT ContentEntry.*
+        SELECT ContentEntry.*, ContentEntryPicture2.*
           FROM ContentEntry
-         WHERE ContentEntry.contentEntryUid = :entryUuid 
+               LEFT JOIN ContentEntryPicture2 
+                         ON ContentEntryPicture2.cepUid = :uid
+         WHERE ContentEntry.contentEntryUid = :uid                
     """)
-    abstract suspend fun findEntryWithContainerByEntryId(
-        entryUuid: Long
-    ): ContentEntry?
+    abstract suspend fun findByUidWithEditDetails(
+        uid: Long,
+    ): ContentEntryAndPicture?
 
     @HttpAccessible(
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
     )
     @Query("""
-            SELECT ContentEntry.*, ContentEntryVersion.*
+            SELECT ContentEntry.*, ContentEntryVersion.*, ContentEntryPicture2.*
               FROM ContentEntry
                    LEFT JOIN ContentEntryVersion
                              ON ContentEntryVersion.cevUid = 
@@ -56,6 +63,8 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
                                  AND CAST(cevInActive AS INTEGER) = 0
                             ORDER BY ContentEntryVersion.cevLct DESC
                               LIMIT 1)
+                   LEFT JOIN ContentEntryPicture2
+                             ON ContentEntryPicture2.cepUid = :entryUuid   
              WHERE ContentEntry.contentEntryUid = :entryUuid
             """)
     abstract fun findEntryWithContainerByEntryIdLive(
@@ -69,12 +78,12 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
         pullQueriesToReplicate = arrayOf(
             HttpServerFunctionCall(
-                functionName = "findEntryWithContainerByEntryId",
+                functionName = "findByUidAsync",
             )
         )
     )
-    @Query("SELECT title FROM ContentEntry WHERE contentEntryUid = :entryUuid")
-    abstract suspend fun findTitleByUidAsync(entryUuid: Long): String?
+    @Query("SELECT title FROM ContentEntry WHERE contentEntryUid = :entryUid")
+    abstract suspend fun findTitleByUidAsync(entryUid: Long): String?
 
     @Query("SELECT ContentEntry.* FROM ContentEntry LEFT Join ContentEntryParentChildJoin " +
             "ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
@@ -105,36 +114,10 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
             "WHERE ContentEntryRelatedEntryJoin.relType = 1 AND ContentEntryRelatedEntryJoin.cerejRelatedEntryUid != :entryUuid")
     abstract suspend fun findAllLanguageRelatedEntriesAsync(entryUuid: Long): List<ContentEntry>
 
-    @Repository(methodType = Repository.METHOD_DELEGATE_TO_WEB)
-    @Query("SELECT DISTINCT ContentCategory.contentCategoryUid, ContentCategory.name AS categoryName, " +
-            "ContentCategorySchema.contentCategorySchemaUid, ContentCategorySchema.schemaName FROM ContentEntry " +
-            "LEFT JOIN ContentEntryContentCategoryJoin ON ContentEntryContentCategoryJoin.ceccjContentEntryUid = ContentEntry.contentEntryUid " +
-            "LEFT JOIN ContentCategory ON ContentCategory.contentCategoryUid = ContentEntryContentCategoryJoin.ceccjContentCategoryUid " +
-            "LEFT JOIN ContentCategorySchema ON ContentCategorySchema.contentCategorySchemaUid = ContentCategory.ctnCatContentCategorySchemaUid " +
-            "LEFT JOIN ContentEntryParentChildJoin ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
-            "WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid " +
-            "AND ContentCategory.contentCategoryUid != 0 ORDER BY ContentCategory.name")
-    abstract suspend fun findListOfCategoriesAsync(parentUid: Long): List<DistinctCategorySchema>
-
-    @Query("SELECT DISTINCT Language.* from Language " +
-            "LEFT JOIN ContentEntry ON ContentEntry.primaryLanguageUid = Language.langUid " +
-            "LEFT JOIN ContentEntryParentChildJoin ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
-            "WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid ORDER BY Language.name")
-    abstract suspend fun findUniqueLanguagesInListAsync(parentUid: Long): List<Language>
-
-    @Repository(methodType = Repository.METHOD_DELEGATE_TO_WEB)
-    @Query("""SELECT DISTINCT Language.langUid, Language.name AS langName from Language
-        LEFT JOIN ContentEntry ON ContentEntry.primaryLanguageUid = Language.langUid
-        LEFT JOIN ContentEntryParentChildJoin ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid 
-        WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid ORDER BY Language.name""")
-    abstract suspend fun findUniqueLanguageWithParentUid(parentUid: Long): List<LangUidAndName>
-
     @Update
     abstract override fun update(entity: ContentEntry)
 
 
-    @Query("SELECT * FROM ContentEntry WHERE contentEntryUid = :entryUid")
-    abstract suspend fun findByUidAsync(entryUid: Long): ContentEntry?
 
     @Query("""
         SELECT ContentEntry.*, Language.*
@@ -177,10 +160,12 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
         )
     )
     @Query("""
-            SELECT ContentEntry.*, ContentEntryParentChildJoin.*
+            SELECT ContentEntry.*, ContentEntryParentChildJoin.*, ContentEntryPicture2.*
               FROM ContentEntry 
                     LEFT JOIN ContentEntryParentChildJoin 
                          ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid 
+                    LEFT JOIN ContentEntryPicture2
+                         ON ContentEntryPicture2.cepUid = ContentEntry.contentEntryUid
              WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid 
                AND (:langParam = 0 OR ContentEntry.primaryLanguageUid = :langParam)
                AND (:categoryParam0 = 0 OR :categoryParam0 
@@ -207,7 +192,7 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
     ): PagingSource<Int, ContentEntryAndListDetail>
 
     @Query("""
-        SELECT ContentEntry.*, ContentEntryParentChildJoin.*
+        SELECT ContentEntry.*, ContentEntryParentChildJoin.*, ContentEntryPicture2.*
           FROM CourseBlock
                JOIN ContentEntry 
                     ON CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
@@ -215,6 +200,8 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
                        AND CAST(CourseBlock.cbActive AS INTEGER) = 1
                LEFT JOIN ContentEntryParentChildJoin
                          ON ContentEntryParentChildJoin.cepcjParentContentEntryUid = 0
+               LEFT JOIN ContentEntryPicture2
+                         ON ContentEntryPicture2.cepUid = ContentEntry.contentEntryUid          
          WHERE CourseBlock.cbClazzUid IN
                (SELECT ClazzEnrolment.clazzEnrolmentClazzUid
                   FROM ClazzEnrolment
@@ -226,10 +213,12 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
 
 
     @Query("""
-        SELECT ContentEntry.*, ContentEntryParentChildJoin.*
+        SELECT ContentEntry.*, ContentEntryParentChildJoin.*, ContentEntryPicture2.*
           FROM ContentEntry
                LEFT JOIN ContentEntryParentChildJoin
                          ON ContentEntryParentChildJoin.cepcjParentContentEntryUid = 0
+               LEFT JOIN ContentEntryPicture2
+                         ON ContentEntryPicture2.cepUid = ContentEntry.contentEntryUid
          WHERE ContentEntry.contentOwner = :personUid
     """)
     abstract fun getContentByOwner(

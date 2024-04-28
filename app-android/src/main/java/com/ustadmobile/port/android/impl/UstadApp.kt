@@ -101,6 +101,8 @@ import com.ustadmobile.core.domain.deleteditem.DeletePermanentlyUseCase
 import com.ustadmobile.core.domain.deleteditem.RestoreDeletedItemUseCase
 import com.ustadmobile.core.domain.extractmediametadata.ExtractMediaMetadataUseCase
 import com.ustadmobile.core.domain.extractmediametadata.ExtractMediaMetadataUseCaseAndroid
+import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCase
+import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCaseAndroid
 import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCase
 import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCaseAndroid
 import com.ustadmobile.core.domain.share.ShareTextUseCase
@@ -392,6 +394,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                             json = instance(),
                             getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
                             compressListUseCase = instance(),
+                            saveLocalUrisAsBlobsUseCase = instance(),
                         )
                     )
                     add(
@@ -437,6 +440,8 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                             getStoragePathForUrlUseCase  = getStoragePathForUrlUseCase,
                             mimeTypeHelper = mimeTypeHelper,
                             compressUseCase = instance(),
+                            extractVideoThumbnailUseCase = instance(),
+                            saveLocalUrisAsBlobsUseCase = instance(),
                         )
                     )
 
@@ -451,6 +456,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                             json = instance(),
                             appContext = applicationContext,
                             tmpDir = File(contentImportTmpPath.toString()),
+                            saveLocalUriAsBlobUseCase = instance(),
                         )
                     )
                 }
@@ -568,6 +574,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 enqueueBlobUploadClientUseCase = on(context).instance(),
                 compressImageUseCase = instance(),
                 deleteUrisUseCase = instance(),
+                getStoragePathForUrlUseCase = instance(),
             )
         }
 
@@ -850,6 +857,10 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 compressAudioUseCase = instance(),
                 mimeTypeHelper = instance(),
             )
+        }
+
+        bind<ExtractVideoThumbnailUseCase>() with singleton {
+            ExtractVideoThumbnailUseCaseAndroid(applicationContext)
         }
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }

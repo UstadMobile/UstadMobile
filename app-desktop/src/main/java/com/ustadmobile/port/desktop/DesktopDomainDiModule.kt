@@ -73,6 +73,8 @@ import com.ustadmobile.core.domain.contententry.launchcontent.xapi.ResolveXapiLa
 import com.ustadmobile.core.domain.contententry.move.MoveContentEntriesUseCase
 import com.ustadmobile.core.domain.deleteditem.DeletePermanentlyUseCase
 import com.ustadmobile.core.domain.deleteditem.RestoreDeletedItemUseCase
+import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCase
+import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCaseJvm
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.launchopenlicenses.LaunchOpenLicensesUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCase
@@ -206,7 +208,8 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             repo = on(context).instance(tag = DoorTag.TAG_REPO),
             enqueueBlobUploadClientUseCase = on(context).instance(),
             compressImageUseCase = instance(),
-            deleteUrisUseCase = instance()
+            deleteUrisUseCase = instance(),
+            getStoragePathForUrlUseCase = instance(),
         )
     }
 
@@ -506,6 +509,10 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             compressAudioUseCase = instance(),
             mimeTypeHelper = instance(),
         )
+    }
+
+    bind<ExtractVideoThumbnailUseCase>() with singleton {
+        ExtractVideoThumbnailUseCaseJvm()
     }
 
 }

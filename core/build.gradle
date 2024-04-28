@@ -181,6 +181,7 @@ kotlin {
                     exclude group: "org.mockito.kotlin"
                 }
                 implementation libs.semver
+                implementation libs.vlcj
             }
         }
 

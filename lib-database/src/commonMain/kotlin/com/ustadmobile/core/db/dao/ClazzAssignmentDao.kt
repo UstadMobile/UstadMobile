@@ -601,6 +601,7 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
                         
         SELECT ClazzAssignment.*,
                CourseBlock.*,
+               CourseBlockPicture.*,
                CourseGroupSet.*,
                ($SELECT_SUBMITTER_UID_FOR_PERSONUID_AND_ASSIGNMENTUID_SQL) AS submitterUid,
                
@@ -611,6 +612,8 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
           FROM ClazzAssignment
                JOIN CourseBlock
                     ON CourseBlock.cbEntityUid = ClazzAssignment.caUid
+               LEFT JOIN CourseBlockPicture
+                    ON CourseBlockPicture.cbpUid = CourseBlock.cbUid
                LEFT JOIN CourseGroupSet
                     ON CourseGroupSet.cgsUid = ClazzAssignment.caGroupUid
          WHERE ClazzAssignment.caUid = :assignmentUid
@@ -621,7 +624,7 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
                 ${CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT3})
     """)
     @QueryLiveTables(arrayOf("Person", "ClazzAssignment", "CourseBlock", "CourseGroupMember",
-        "ClazzEnrolment", "CoursePermission", "SystemPermission"))
+        "ClazzEnrolment", "CoursePermission", "SystemPermission", "CourseBlockPicture"))
     abstract fun findAssignmentCourseBlockAndSubmitterUidAsFlow(
         assignmentUid: Long,
         clazzUid: Long,

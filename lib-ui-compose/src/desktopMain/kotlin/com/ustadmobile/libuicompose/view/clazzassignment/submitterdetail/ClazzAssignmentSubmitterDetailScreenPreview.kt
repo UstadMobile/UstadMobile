@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailUiState
 import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
 import com.ustadmobile.lib.db.entities.*
+import kotlinx.coroutines.flow.flowOf
 
 @Composable
 @Preview
@@ -35,5 +36,5 @@ fun ClazzAssignmentSubmitterDetailScreenPreview(){
     )
 
 
-    ClazzAssignmentSubmitterDetailScreen(uiStateVal)
+    ClazzAssignmentSubmitterDetailScreen(uiStateVal, flowOf(""))
 }
