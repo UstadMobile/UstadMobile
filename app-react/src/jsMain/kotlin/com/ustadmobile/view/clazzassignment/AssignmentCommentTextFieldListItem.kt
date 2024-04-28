@@ -28,8 +28,6 @@ val AssignmentCommentTextFieldListItem = FC<AssignmentCommentTextFieldListItemPr
         "", Dispatchers.Main.immediate
     )
 
-    println("AssignmentCommentTextFieldListItem: textValue=$textValue")
-
     ListItem {
         ListItemIcon {
             UstadPersonAvatar {

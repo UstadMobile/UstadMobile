@@ -32,7 +32,11 @@ fun UstadBlockIcon(
         val backgroundColor = avatarColorForName(title).rgbaColor()
 
         Box(
-            modifier = baseModifier.background(backgroundColor),
+            modifier = if(title.isNotEmpty()){
+                baseModifier.background(backgroundColor)
+            } else {
+                modifier
+            },
             contentAlignment = Alignment.Center,
         ) {
             val icon = contentEntry?.contentTypeImageVector

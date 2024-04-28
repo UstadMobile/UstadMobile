@@ -56,7 +56,7 @@ val UstadBlockIcon = FC<UstadBlockIconProps> { props ->
 
     Box {
         sx {
-            if(props.pictureUri == null)
+            if(props.pictureUri == null && props.title.isNotEmpty())
                 backgroundColor = bgColor
 
             width = props.width ?: 40.px

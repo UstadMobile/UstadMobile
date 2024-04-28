@@ -24,5 +24,3 @@ fun imageVectorForCourseBlockType(
 
 val CourseBlock.blockTypeImageVector: ImageVector?
     get() = imageVectorForCourseBlockType(cbType)
-
-

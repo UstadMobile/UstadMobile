@@ -15,10 +15,16 @@ import mui.icons.material.KeyboardArrowDown
 import react.dom.aria.ariaLabel
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.useStringProvider
+import com.ustadmobile.core.viewmodel.clazz.blockTypeStringResource
+import com.ustadmobile.core.viewmodel.contententry.contentTypeStringResource
 import com.ustadmobile.hooks.useHtmlToPlainText
 import com.ustadmobile.mui.components.UstadBlockIcon
 import com.ustadmobile.util.ext.useLineClamp
+import com.ustadmobile.view.clazz.iconComponent
+import com.ustadmobile.view.contententry.contentTypeIconComponent
+import emotion.react.css
 import js.objects.jso
+import mui.system.responsive
 import react.dom.html.ReactHTML.div
 
 external interface ClazzDetailOverviewCourseBlockListItemProps : Props {
@@ -37,8 +43,10 @@ external interface ClazzDetailOverviewCourseBlockListItemProps : Props {
 
 val ClazzDetailOverviewCourseBlockListItem = FC<ClazzDetailOverviewCourseBlockListItemProps> { props ->
     val courseBlockVal = props.courseBlock?.courseBlock
+    val contentEntryVal = props.courseBlock?.contentEntry
 
     val blockDescription = useHtmlToPlainText(courseBlockVal?.cbDescription ?: "")
+    val strings = useStringProvider()
 
     ListItem {
         ListItemButton {
@@ -68,18 +76,56 @@ val ClazzDetailOverviewCourseBlockListItem = FC<ClazzDetailOverviewCourseBlockLi
 
             ListItemText {
                 primary = ReactNode(courseBlockVal?.cbTitle ?: "")
-                secondary = ReactNode(blockDescription)
+                secondary = Stack.create {
+                    direction = responsive(StackDirection.column)
+
+                    div {
+                        when {
+                            contentEntryVal != null -> {
+                                val iconType = contentEntryVal.contentTypeIconComponent()
+                                if(iconType != null) {
+                                    +iconType.create {
+                                        fontSize = SvgIconSize.small
+                                        ariaLabel = ""
+                                        sx {
+                                            marginRight = 8.px
+                                            padding = 1.px
+                                        }
+                                    }
+                                }
+                                + strings[contentEntryVal.contentTypeStringResource]
+                            }
+                            courseBlockVal != null -> {
+                                val iconType = courseBlockVal.iconComponent()
+                                if(iconType != null) {
+                                    + iconType.create {
+                                        fontSize = SvgIconSize.small
+                                        ariaLabel = ""
+                                        sx {
+                                            marginRight = 8.px
+                                            padding = 1.px
+                                        }
+                                    }
+                                }
+
+                                + strings[courseBlockVal.blockTypeStringResource]
+                            }
+                        }
+                    }
+                    div {
+                        css {
+                            useLineClamp(1)
+                        }
+                        + blockDescription
+                    }
+                }
                 secondaryTypographyProps = jso {
                     component = div
-                    sx {
-                        useLineClamp(2)
-                    }
                 }
             }
         }
 
         secondaryAction = Tooltip.create {
-            val strings = useStringProvider()
             val labelText = if(props.courseBlock?.expanded == true) {
                 strings[MR.strings.collapse]
             }else {

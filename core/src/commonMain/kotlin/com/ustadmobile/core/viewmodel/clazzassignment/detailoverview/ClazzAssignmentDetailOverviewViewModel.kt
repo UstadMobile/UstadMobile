@@ -520,7 +520,6 @@ class ClazzAssignmentDetailOverviewViewModel(
     }
 
     fun onChangeCourseCommentText(text: String) {
-        println("onChangeCourseCommentText: $text")
         _newCourseCommentText.value = text
     }
 
