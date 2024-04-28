@@ -20,6 +20,20 @@ import com.ustadmobile.lib.db.entities.PersonPicture
 import io.github.aakira.napier.Napier
 
 /**
+ * Save a picture (compressed where required), updates the local database and repository as follows:
+ * Android/JVM
+ * 1) Attempt to compress the image and generate a thumbnail (using CompressImageUseCase)
+ * 2) Store the compressed images in the local cache. Update the local database to the compressed
+ *    images.
+ * 3) Upload the image to server (if this isn't the server itself e.g. where enqueueBlobUploadClientCase != null)
+ * 4) When upload is complete, because the entityUid and tableId is set on the generated TransferJobItem,
+ *    an OutgoingReplication will be sent to the server to update the image path on the server.
+ *
+ * JS:
+ * 1) Attempt to compress the image and generate a thumbnail (using CompressImageUseCase)
+ * 2) Use saveLocalUriAsBlobUseCase - this will upload to the server and return a blob url.
+ * 3) Directly update the image path for the entity on the repository.
+ *
  * @param enqueueBlobUploadClientUseCase on platforms where a separate upload is required (e.g.
  *        Android and Desktop). On the web, SaveLocalUriAsBlob does the uploads itself, so no
  *        upload client is required.

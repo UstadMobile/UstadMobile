@@ -89,6 +89,7 @@ fun ContentEntryListScreenForViewModel(
 
             UstadBottomSheetOption(
                 modifier = Modifier.clickable {
+                    viewModel.onDismissCreateNewOptions()
                     filePickLauncher(UstadPickFileOpts())
                 },
                 headlineContent = {

@@ -1015,6 +1015,368 @@ val MIGRATION_168_169 = DoorMigrationStatementList(168, 169) { db ->
     }
 }
 
+//Add retention lock creation for the new CourseBlockPicture table and ContentEntryPicture2 table
+//on server (only)
+val MIGRATION_169_170_SERVER = DoorMigrationStatementList(169, 170) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("""
+                        CREATE TRIGGER IF NOT EXISTS Retain_CourseBlockPicture_Ins_cbpPictureUri
+                        AFTER INSERT ON CourseBlockPicture
+                        FOR EACH ROW WHEN NEW.cbpPictureUri IS NOT NULL
+                        BEGIN
+                        INSERT OR REPLACE INTO CacheLockJoin(cljTableId, cljEntityUid, cljUrl, cljLockId, cljStatus, cljType)
+                        VALUES(6677, NEW.cbpUid, NEW.cbpPictureUri, 0, 1, 1);
+                        END
+                    """)
+
+            add("""
+                        CREATE TRIGGER IF NOT EXISTS Retain_CourseBlockPicture_Ins_cbpThumbnailUri
+                        AFTER INSERT ON CourseBlockPicture
+                        FOR EACH ROW WHEN NEW.cbpThumbnailUri IS NOT NULL
+                        BEGIN
+                        INSERT OR REPLACE INTO CacheLockJoin(cljTableId, cljEntityUid, cljUrl, cljLockId, cljStatus, cljType)
+                        VALUES(6677, NEW.cbpUid, NEW.cbpThumbnailUri, 0, 1, 1);
+                        END
+                    """)
+
+            add("""
+                    CREATE TRIGGER IF NOT EXISTS Retain_CourseBlockPicture_Upd_cbpPictureUri_New
+                    AFTER UPDATE ON CourseBlockPicture
+                    FOR EACH ROW WHEN NEW.cbpPictureUri != OLD.cbpPictureUri AND NEW.cbpPictureUri IS NOT NULL
+                    BEGIN
+                        INSERT OR REPLACE INTO CacheLockJoin(cljTableId, cljEntityUid, cljUrl, cljLockId, cljStatus, cljType)
+                        VALUES(6677, NEW.cbpUid, NEW.cbpPictureUri, 0, 1, 1);
+                    END   
+                """)
+
+            add("""CREATE TRIGGER IF NOT EXISTS Retain_CourseBlockPicture_Upd_cbpPictureUri_Old
+AFTER UPDATE ON CourseBlockPicture
+FOR EACH ROW WHEN NEW.cbpPictureUri != OLD.cbpPictureUri AND OLD.cbpPictureUri IS NOT NULL
+BEGIN
+    UPDATE CacheLockJoin 
+       SET cljStatus = 3
+     WHERE cljTableId = 6677
+       AND cljEntityUid = OLD.cbpUid
+       AND cljUrl = OLD.cbpPictureUri;
+END        """)
+
+            add("""
+                    CREATE TRIGGER IF NOT EXISTS Retain_CourseBlockPicture_Upd_cbpThumbnailUri_New
+                    AFTER UPDATE ON CourseBlockPicture
+                    FOR EACH ROW WHEN NEW.cbpThumbnailUri != OLD.cbpThumbnailUri AND NEW.cbpThumbnailUri IS NOT NULL
+                    BEGIN
+                        INSERT OR REPLACE INTO CacheLockJoin(cljTableId, cljEntityUid, cljUrl, cljLockId, cljStatus, cljType)
+                        VALUES(6677, NEW.cbpUid, NEW.cbpThumbnailUri, 0, 1, 1);
+                    END   
+                """)
+
+            add("""CREATE TRIGGER IF NOT EXISTS Retain_CourseBlockPicture_Upd_cbpThumbnailUri_Old
+AFTER UPDATE ON CourseBlockPicture
+FOR EACH ROW WHEN NEW.cbpThumbnailUri != OLD.cbpThumbnailUri AND OLD.cbpThumbnailUri IS NOT NULL
+BEGIN
+    UPDATE CacheLockJoin 
+       SET cljStatus = 3
+     WHERE cljTableId = 6677
+       AND cljEntityUid = OLD.cbpUid
+       AND cljUrl = OLD.cbpThumbnailUri;
+END        """)
+
+            add("""CREATE TRIGGER IF NOT EXISTS Retain_CourseBlockPicture_Del_cbpPictureUri
+AFTER DELETE ON CourseBlockPicture
+FOR EACH ROW WHEN OLD.cbpPictureUri IS NOT NULL
+BEGIN
+    UPDATE CacheLockJoin 
+       SET cljStatus = 3
+     WHERE cljTableId = 6677
+       AND cljEntityUid = OLD.cbpUid
+       AND cljUrl = OLD.cbpPictureUri;
+END       """)
+
+            add("""CREATE TRIGGER IF NOT EXISTS Retain_CourseBlockPicture_Del_cbpThumbnailUri
+AFTER DELETE ON CourseBlockPicture
+FOR EACH ROW WHEN OLD.cbpThumbnailUri IS NOT NULL
+BEGIN
+    UPDATE CacheLockJoin 
+       SET cljStatus = 3
+     WHERE cljTableId = 6677
+       AND cljEntityUid = OLD.cbpUid
+       AND cljUrl = OLD.cbpThumbnailUri;
+END       """)
+
+            add("""
+                        CREATE TRIGGER IF NOT EXISTS Retain_ContentEntryPicture2_Ins_cepPictureUri
+                        AFTER INSERT ON ContentEntryPicture2
+                        FOR EACH ROW WHEN NEW.cepPictureUri IS NOT NULL
+                        BEGIN
+                        INSERT OR REPLACE INTO CacheLockJoin(cljTableId, cljEntityUid, cljUrl, cljLockId, cljStatus, cljType)
+                        VALUES(6678, NEW.cepUid, NEW.cepPictureUri, 0, 1, 1);
+                        END
+                    """)
+
+            add("""
+                        CREATE TRIGGER IF NOT EXISTS Retain_ContentEntryPicture2_Ins_cepThumbnailUri
+                        AFTER INSERT ON ContentEntryPicture2
+                        FOR EACH ROW WHEN NEW.cepThumbnailUri IS NOT NULL
+                        BEGIN
+                        INSERT OR REPLACE INTO CacheLockJoin(cljTableId, cljEntityUid, cljUrl, cljLockId, cljStatus, cljType)
+                        VALUES(6678, NEW.cepUid, NEW.cepThumbnailUri, 0, 1, 1);
+                        END
+                    """)
+
+            add("""
+                    CREATE TRIGGER IF NOT EXISTS Retain_ContentEntryPicture2_Upd_cepPictureUri_New
+                    AFTER UPDATE ON ContentEntryPicture2
+                    FOR EACH ROW WHEN NEW.cepPictureUri != OLD.cepPictureUri AND NEW.cepPictureUri IS NOT NULL
+                    BEGIN
+                        INSERT OR REPLACE INTO CacheLockJoin(cljTableId, cljEntityUid, cljUrl, cljLockId, cljStatus, cljType)
+                        VALUES(6678, NEW.cepUid, NEW.cepPictureUri, 0, 1, 1);
+                    END   
+                """)
+
+            add("""CREATE TRIGGER IF NOT EXISTS Retain_ContentEntryPicture2_Upd_cepPictureUri_Old
+AFTER UPDATE ON ContentEntryPicture2
+FOR EACH ROW WHEN NEW.cepPictureUri != OLD.cepPictureUri AND OLD.cepPictureUri IS NOT NULL
+BEGIN
+    UPDATE CacheLockJoin 
+       SET cljStatus = 3
+     WHERE cljTableId = 6678
+       AND cljEntityUid = OLD.cepUid
+       AND cljUrl = OLD.cepPictureUri;
+END        """)
+
+            add("""
+                    CREATE TRIGGER IF NOT EXISTS Retain_ContentEntryPicture2_Upd_cepThumbnailUri_New
+                    AFTER UPDATE ON ContentEntryPicture2
+                    FOR EACH ROW WHEN NEW.cepThumbnailUri != OLD.cepThumbnailUri AND NEW.cepThumbnailUri IS NOT NULL
+                    BEGIN
+                        INSERT OR REPLACE INTO CacheLockJoin(cljTableId, cljEntityUid, cljUrl, cljLockId, cljStatus, cljType)
+                        VALUES(6678, NEW.cepUid, NEW.cepThumbnailUri, 0, 1, 1);
+                    END   
+                """)
+
+            add("""CREATE TRIGGER IF NOT EXISTS Retain_ContentEntryPicture2_Upd_cepThumbnailUri_Old
+AFTER UPDATE ON ContentEntryPicture2
+FOR EACH ROW WHEN NEW.cepThumbnailUri != OLD.cepThumbnailUri AND OLD.cepThumbnailUri IS NOT NULL
+BEGIN
+    UPDATE CacheLockJoin 
+       SET cljStatus = 3
+     WHERE cljTableId = 6678
+       AND cljEntityUid = OLD.cepUid
+       AND cljUrl = OLD.cepThumbnailUri;
+END        """)
+
+            add("""CREATE TRIGGER IF NOT EXISTS Retain_ContentEntryPicture2_Del_cepPictureUri
+AFTER DELETE ON ContentEntryPicture2
+FOR EACH ROW WHEN OLD.cepPictureUri IS NOT NULL
+BEGIN
+    UPDATE CacheLockJoin 
+       SET cljStatus = 3
+     WHERE cljTableId = 6678
+       AND cljEntityUid = OLD.cepUid
+       AND cljUrl = OLD.cepPictureUri;
+END       """)
+
+            add("""CREATE TRIGGER IF NOT EXISTS Retain_ContentEntryPicture2_Del_cepThumbnailUri
+AFTER DELETE ON ContentEntryPicture2
+FOR EACH ROW WHEN OLD.cepThumbnailUri IS NOT NULL
+BEGIN
+    UPDATE CacheLockJoin 
+       SET cljStatus = 3
+     WHERE cljTableId = 6678
+       AND cljEntityUid = OLD.cepUid
+       AND cljUrl = OLD.cepThumbnailUri;
+END       """)
+        }else {
+            add("""
+                            CREATE OR REPLACE FUNCTION retain_c_clj_6677_cbpPictureUri() RETURNS TRIGGER AS $$
+                            BEGIN
+                            INSERT INTO CacheLockJoin(cljTableId, cljEntityUid, cljUrl, cljLockId, cljStatus, cljType)
+                            VALUES(6677, NEW.cbpUid, NEW.cbpPictureUri, 0, 1, 1);
+                            RETURN NEW;
+                            END $$ LANGUAGE plpgsql
+                        """)
+
+            add("""
+                            CREATE OR REPLACE FUNCTION retain_d_clj_6677_cbpPictureUri() RETURNS TRIGGER AS $$
+                            BEGIN
+                            UPDATE CacheLockJoin 
+                               SET cljStatus = 3
+                             WHERE cljTableId = 6677
+                               AND cljEntityUid = OLD.cbpUid
+                               AND cljUrl = OLD.cbpPictureUri;
+                            RETURN OLD;
+                            END $$ LANGUAGE plpgsql   
+                        """)
+
+            add("""
+                            CREATE TRIGGER retain_c_clj_6677_cbpPictureUri_ins_t
+                            AFTER INSERT ON CourseBlockPicture
+                            FOR EACH ROW
+                            WHEN (NEW.cbpPictureUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_c_clj_6677_cbpPictureUri();
+                        """)
+
+            add("""
+                            CREATE TRIGGER retain_c_clj_6677_cbpPictureUri_upd_t
+                            AFTER UPDATE ON CourseBlockPicture
+                            FOR EACH ROW
+                            WHEN (NEW.cbpPictureUri IS DISTINCT FROM OLD.cbpPictureUri AND OLD.cbpPictureUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_c_clj_6677_cbpPictureUri();
+                        """)
+
+            add("""
+                            CREATE TRIGGER retain_d_clj_6677_cbpPictureUri_upd_t
+                            AFTER UPDATE ON CourseBlockPicture
+                            FOR EACH ROW
+                            WHEN (NEW.cbpPictureUri IS DISTINCT FROM OLD.cbpPictureUri AND NEW.cbpPictureUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_d_clj_6677_cbpPictureUri();
+                        """)
+
+            add("""
+                            CREATE OR REPLACE FUNCTION retain_c_clj_6677_cbpThumbnailUri() RETURNS TRIGGER AS $$
+                            BEGIN
+                            INSERT INTO CacheLockJoin(cljTableId, cljEntityUid, cljUrl, cljLockId, cljStatus, cljType)
+                            VALUES(6677, NEW.cbpUid, NEW.cbpThumbnailUri, 0, 1, 1);
+                            RETURN NEW;
+                            END $$ LANGUAGE plpgsql
+                        """)
+
+            add("""
+                            CREATE OR REPLACE FUNCTION retain_d_clj_6677_cbpThumbnailUri() RETURNS TRIGGER AS $$
+                            BEGIN
+                            UPDATE CacheLockJoin 
+                               SET cljStatus = 3
+                             WHERE cljTableId = 6677
+                               AND cljEntityUid = OLD.cbpUid
+                               AND cljUrl = OLD.cbpThumbnailUri;
+                            RETURN OLD;
+                            END $$ LANGUAGE plpgsql   
+                        """)
+
+            add("""
+                            CREATE TRIGGER retain_c_clj_6677_cbpThumbnailUri_ins_t
+                            AFTER INSERT ON CourseBlockPicture
+                            FOR EACH ROW
+                            WHEN (NEW.cbpThumbnailUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_c_clj_6677_cbpThumbnailUri();
+                        """)
+
+            add("""
+                            CREATE TRIGGER retain_c_clj_6677_cbpThumbnailUri_upd_t
+                            AFTER UPDATE ON CourseBlockPicture
+                            FOR EACH ROW
+                            WHEN (NEW.cbpThumbnailUri IS DISTINCT FROM OLD.cbpThumbnailUri AND OLD.cbpThumbnailUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_c_clj_6677_cbpThumbnailUri();
+                        """)
+
+            add("""
+                            CREATE TRIGGER retain_d_clj_6677_cbpThumbnailUri_upd_t
+                            AFTER UPDATE ON CourseBlockPicture
+                            FOR EACH ROW
+                            WHEN (NEW.cbpThumbnailUri IS DISTINCT FROM OLD.cbpThumbnailUri AND NEW.cbpThumbnailUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_d_clj_6677_cbpThumbnailUri();
+                        """)
+
+            add("""
+                            CREATE OR REPLACE FUNCTION retain_c_clj_6678_cepPictureUri() RETURNS TRIGGER AS $$
+                            BEGIN
+                            INSERT INTO CacheLockJoin(cljTableId, cljEntityUid, cljUrl, cljLockId, cljStatus, cljType)
+                            VALUES(6678, NEW.cepUid, NEW.cepPictureUri, 0, 1, 1);
+                            RETURN NEW;
+                            END $$ LANGUAGE plpgsql
+                        """)
+
+            add("""
+                            CREATE OR REPLACE FUNCTION retain_d_clj_6678_cepPictureUri() RETURNS TRIGGER AS $$
+                            BEGIN
+                            UPDATE CacheLockJoin 
+                               SET cljStatus = 3
+                             WHERE cljTableId = 6678
+                               AND cljEntityUid = OLD.cepUid
+                               AND cljUrl = OLD.cepPictureUri;
+                            RETURN OLD;
+                            END $$ LANGUAGE plpgsql   
+                        """)
+
+            add("""
+                            CREATE TRIGGER retain_c_clj_6678_cepPictureUri_ins_t
+                            AFTER INSERT ON ContentEntryPicture2
+                            FOR EACH ROW
+                            WHEN (NEW.cepPictureUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_c_clj_6678_cepPictureUri();
+                        """)
+
+            add("""
+                            CREATE TRIGGER retain_c_clj_6678_cepPictureUri_upd_t
+                            AFTER UPDATE ON ContentEntryPicture2
+                            FOR EACH ROW
+                            WHEN (NEW.cepPictureUri IS DISTINCT FROM OLD.cepPictureUri AND OLD.cepPictureUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_c_clj_6678_cepPictureUri();
+                        """)
+
+            add("""
+                            CREATE TRIGGER retain_d_clj_6678_cepPictureUri_upd_t
+                            AFTER UPDATE ON ContentEntryPicture2
+                            FOR EACH ROW
+                            WHEN (NEW.cepPictureUri IS DISTINCT FROM OLD.cepPictureUri AND NEW.cepPictureUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_d_clj_6678_cepPictureUri();
+                        """)
+
+            add("""
+                            CREATE OR REPLACE FUNCTION retain_c_clj_6678_cepThumbnailUri() RETURNS TRIGGER AS $$
+                            BEGIN
+                            INSERT INTO CacheLockJoin(cljTableId, cljEntityUid, cljUrl, cljLockId, cljStatus, cljType)
+                            VALUES(6678, NEW.cepUid, NEW.cepThumbnailUri, 0, 1, 1);
+                            RETURN NEW;
+                            END $$ LANGUAGE plpgsql
+                        """)
+
+            add("""
+                            CREATE OR REPLACE FUNCTION retain_d_clj_6678_cepThumbnailUri() RETURNS TRIGGER AS $$
+                            BEGIN
+                            UPDATE CacheLockJoin 
+                               SET cljStatus = 3
+                             WHERE cljTableId = 6678
+                               AND cljEntityUid = OLD.cepUid
+                               AND cljUrl = OLD.cepThumbnailUri;
+                            RETURN OLD;
+                            END $$ LANGUAGE plpgsql   
+                        """)
+
+            add("""
+                            CREATE TRIGGER retain_c_clj_6678_cepThumbnailUri_ins_t
+                            AFTER INSERT ON ContentEntryPicture2
+                            FOR EACH ROW
+                            WHEN (NEW.cepThumbnailUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_c_clj_6678_cepThumbnailUri();
+                        """)
+
+            add("""
+                            CREATE TRIGGER retain_c_clj_6678_cepThumbnailUri_upd_t
+                            AFTER UPDATE ON ContentEntryPicture2
+                            FOR EACH ROW
+                            WHEN (NEW.cepThumbnailUri IS DISTINCT FROM OLD.cepThumbnailUri AND OLD.cepThumbnailUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_c_clj_6678_cepThumbnailUri();
+                        """)
+
+            add("""
+                            CREATE TRIGGER retain_d_clj_6678_cepThumbnailUri_upd_t
+                            AFTER UPDATE ON ContentEntryPicture2
+                            FOR EACH ROW
+                            WHEN (NEW.cepThumbnailUri IS DISTINCT FROM OLD.cepThumbnailUri AND NEW.cepThumbnailUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_d_clj_6678_cepThumbnailUri();
+                        """)
+        }
+    }
+}
+
+//Do nothing on client
+val MIGRATION_169_170_CLIENT = DoorMigrationStatementList(169, 170) { db ->
+    emptyList()
+}
+
+
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_105_106, MIGRATION_106_107,
     MIGRATION_107_108, MIGRATION_108_109,
@@ -1029,6 +1391,7 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_156_157, MIGRATION_157_158, MIGRATION_158_159, MIGRATION_159_160,
     MIGRATION_160_161, MIGRATION_162_163, MIGRATION_163_164, MIGRATION_164_165,
     MIGRATION_165_166, MIGRATION_166_167, MIGRATION_167_168, MIGRATION_168_169,
+    MIGRATION_169_170_SERVER,
 )
 
 

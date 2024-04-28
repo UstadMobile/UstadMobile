@@ -19,6 +19,7 @@ env:
 - tapOn: "SAVE"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_add_to_library"
 - tapOn: "True/False Question"
+- assertNotVisible: "Importing"
 - tapOn: Open
 - runFlow:
     when:
