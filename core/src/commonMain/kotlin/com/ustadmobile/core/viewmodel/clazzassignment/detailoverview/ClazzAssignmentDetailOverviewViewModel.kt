@@ -68,7 +68,6 @@ import org.kodein.di.instanceOrNull
 
 /**
  *
- * @param newPrivateCommentText the text in the textfield for a new private comment
  */
 data class ClazzAssignmentDetailOverviewUiState(
 
@@ -112,10 +111,6 @@ data class ClazzAssignmentDetailOverviewUiState(
     val unassignedError: String? = null,
 
     val submissionError: String? = null,
-
-    val newPrivateCommentText: String = "",
-
-    val newCourseCommentText: String = "",
 
     val activeUserPersonUid: Long = 0,
 
@@ -253,13 +248,13 @@ data class ClazzAssignmentDetailOverviewUiState(
 }
 
 /**
- * Assignment text editing takes place inside a VirtualList. The Virtual List is not able to deliver
- * changes synchronously, so the state must be separated out
+ * Assignment text editing and comment editing takes place inside a VirtualList. The Virtual List is
+ * not able to deliver changes synchronously, so the state must be separated out so the child
+ * component can consume it independently of the main UI state.
  */
 data class ClazzAssignmentDetailoverviewSubmissionUiState(
     val editableSubmission: CourseAssignmentSubmission? = null,
 )
-
 
 class ClazzAssignmentDetailOverviewViewModel(
     di: DI,
@@ -285,6 +280,13 @@ class ClazzAssignmentDetailOverviewViewModel(
 
     val editableSubmissionUiState: Flow<ClazzAssignmentDetailoverviewSubmissionUiState> = _editableSubmissionUiState.asStateFlow()
 
+    private val _newPrivateCommentText = MutableStateFlow("")
+
+    val newPrivateCommentText: Flow<String> = _newPrivateCommentText.asStateFlow()
+
+    private val _newCourseCommentText = MutableStateFlow("")
+
+    val newCourseCommentText: Flow<String> = _newCourseCommentText.asStateFlow()
 
     private val privateCommentsPagingSourceFactory: () -> PagingSource<Int, CommentsAndName> = {
         activeRepo.commentsDao.findPrivateCommentsForUserByAssignmentUid(
@@ -485,11 +487,7 @@ class ClazzAssignmentDetailOverviewViewModel(
     }
 
     fun onChangePrivateCommentText(text: String) {
-        _uiState.update { prev ->
-            prev.copy(
-                newPrivateCommentText = text
-            )
-        }
+        _newPrivateCommentText.value = text
     }
 
     fun onClickSubmitPrivateComment() {
@@ -511,12 +509,10 @@ class ClazzAssignmentDetailOverviewViewModel(
                     commentsFromPersonUid = activeUserPersonUid
                     commentsFromSubmitterUid = _uiState.value.submitterUid
                     commentsEntityUid = entityUidArg
-                    commentsText = _uiState.value.newPrivateCommentText
+                    commentsText = _newPrivateCommentText.value
                     commentsDateTimeAdded = systemTimeInMillis()
                 })
-                _uiState.update { prev ->
-                    prev.copy(newPrivateCommentText = "")
-                }
+                _newPrivateCommentText.value = ""
             }finally {
                 loadingState = LoadingUiState.NOT_LOADING
             }
@@ -524,11 +520,8 @@ class ClazzAssignmentDetailOverviewViewModel(
     }
 
     fun onChangeCourseCommentText(text: String) {
-        _uiState.update { prev ->
-            prev.copy(
-                newCourseCommentText = text
-            )
-        }
+        println("onChangeCourseCommentText: $text")
+        _newCourseCommentText.value = text
     }
 
     fun onClickSubmitCourseComment() {
@@ -542,12 +535,11 @@ class ClazzAssignmentDetailOverviewViewModel(
                     commentsForSubmitterUid = 0
                     commentsFromPersonUid = activeUserPersonUid
                     commentsEntityUid = entityUidArg
-                    commentsText = _uiState.value.newCourseCommentText
+                    commentsText = _newCourseCommentText.value
                     commentsDateTimeAdded = systemTimeInMillis()
                 })
-                _uiState.update { prev ->
-                    prev.copy(newCourseCommentText = "")
-                }
+
+                _newCourseCommentText.value = ""
             }finally {
                 loadingState = LoadingUiState.NOT_LOADING
             }

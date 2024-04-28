@@ -85,6 +85,8 @@ fun ClazzAssignmentDetailOverviewScreen(viewModel: ClazzAssignmentDetailOverview
 
     ClazzAssignmentDetailOverviewScreen(
         uiState = uiState,
+        newCourseCommentFlow = viewModel.newCourseCommentText,
+        newPrivateCommentFlow = viewModel.newPrivateCommentText,
         editableSubmissionFlow = viewModel.editableSubmissionUiState,
         onClickEditSubmission = viewModel::onClickEditSubmissionText,
         onChangeCourseComment = viewModel::onChangeCourseCommentText,
@@ -110,6 +112,8 @@ fun ClazzAssignmentDetailOverviewScreen(viewModel: ClazzAssignmentDetailOverview
 fun ClazzAssignmentDetailOverviewScreen(
     uiState: ClazzAssignmentDetailOverviewUiState,
     editableSubmissionFlow: Flow<ClazzAssignmentDetailoverviewSubmissionUiState>,
+    newPrivateCommentFlow: Flow<String>,
+    newCourseCommentFlow: Flow<String>,
     onClickMarksFilterChip: (MessageIdOption2) -> Unit = {},
     onChangeCourseComment: (String) -> Unit = {},
     onChangePrivateComment: (String) -> Unit = {},
@@ -397,7 +401,7 @@ fun ClazzAssignmentDetailOverviewScreen(
             item(key = "add_class_comment_item") {
                 UstadAddCommentListItem(
                     modifier = Modifier.testTag("add_class_comment"),
-                    commentText = uiState.newCourseCommentText,
+                    commentText = newCourseCommentFlow,
                     commentLabel = stringResource(MR.strings.add_class_comment),
                     enabled = uiState.fieldsEnabled,
                     currentUserPersonUid = uiState.activeUserPersonUid,
@@ -436,7 +440,7 @@ fun ClazzAssignmentDetailOverviewScreen(
             item(key = "add_private_comment_item") {
                 UstadAddCommentListItem(
                     modifier = Modifier.testTag("add_private_comment"),
-                    commentText = uiState.newPrivateCommentText,
+                    commentText = newPrivateCommentFlow,
                     commentLabel = stringResource(MR.strings.add_private_comment),
                     enabled = uiState.fieldsEnabled,
                     currentUserPersonUid = uiState.activeUserPersonUid,
