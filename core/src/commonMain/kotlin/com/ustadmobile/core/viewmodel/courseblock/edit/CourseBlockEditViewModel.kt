@@ -106,7 +106,7 @@ class CourseBlockEditViewModel(
                 ARG_SELECTED_CONTENT_ENTRY, ContentEntryAndContentJob.serializer()
             )
 
-            loadEntity(
+            val loadedEntity = loadEntity(
                 serializer = CourseBlockAndEditEntities.serializer(),
                 makeDefault = {
                     val newUid = activeDb.doorPrimaryKeyManager.nextIdAsync(CourseBlock.TABLE_ID)
@@ -138,8 +138,8 @@ class CourseBlockEditViewModel(
                 }
             )
 
-            val contentEntryVal = _uiState.value.block?.contentEntry
-            val blockVal = _uiState.value.block
+            val contentEntryVal = loadedEntity?.contentEntry
+            val blockVal = loadedEntity?.courseBlock
             if(contentEntryVal != null && blockVal != null) {
                 val canEditContentEntry = when {
                     //When the user has just imported or selected something, they can go back to edit.
@@ -147,7 +147,7 @@ class CourseBlockEditViewModel(
                     savedStateHandle[ARG_ENTITY_JSON] == null -> false
 
                     contentEntryVal.contentOwnerType == ContentEntry.OWNER_TYPE_COURSE &&
-                            contentEntryVal.contentOwner == blockVal.courseBlock.cbUid -> {
+                            contentEntryVal.contentOwner == blockVal.cbUid -> {
                         true
                     }
 
@@ -168,17 +168,16 @@ class CourseBlockEditViewModel(
                 prev.copy(fieldsEnabled = true)
             }
 
-            _appUiState.update {prev ->
+            _appUiState.update { prev ->
                 prev.copy(
-                    title = when(_uiState.value.block?.courseBlock?.cbType) {
+                    title = when(blockVal?.cbType) {
                         CourseBlock.BLOCK_MODULE_TYPE ->
                             createEditTitle(MR.strings.add_module, MR.strings.edit_module)
                         CourseBlock.BLOCK_TEXT_TYPE ->
                             createEditTitle(MR.strings.add_text, MR.strings.edit_text)
                         CourseBlock.BLOCK_DISCUSSION_TYPE ->
                             createEditTitle(MR.strings.add_discussion, MR.strings.edit_discussion)
-                        CourseBlock.BLOCK_CONTENT_TYPE ->
-                            createEditTitle(MR.strings.add_content, MR.strings.edit_content_block)
+                        CourseBlock.BLOCK_CONTENT_TYPE -> systemImpl.getString(MR.strings.edit_content_block)
                         else -> ""
                     },
                     actionBarButtonState = ActionBarButtonUiState(
