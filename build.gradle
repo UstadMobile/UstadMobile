@@ -33,6 +33,7 @@ plugins {
     id 'com.github.gmazzo.buildconfig' version '5.3.5' apply false
     id 'com.android.test' version '8.2.2' apply false
     id 'androidx.baselineprofile' version '1.2.2' apply false
+    id 'base'
 }
 
 
@@ -212,3 +213,12 @@ tasks.named("dependencyUpdates").configure {
         isNonStable(it.candidate.version)
     }
 }
+
+clean {
+    delete("test-end-to-end/android-maestro/build",
+            "test-end-to-end/webapp-cypress/cypress/videos",
+            "test-end-to-end/webapp-cypress/cypress/screenshots",
+            "test-end-to-end/webapp-cypress/results",
+            "test-end-to-end/webapp-cypress/logs")
+}
+
