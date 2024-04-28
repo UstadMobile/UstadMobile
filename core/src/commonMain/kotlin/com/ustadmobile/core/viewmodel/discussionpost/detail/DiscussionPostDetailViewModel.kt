@@ -29,7 +29,6 @@ data class DiscussionPostDetailUiState2(
     val discussionPosts: ListPagingSourceFactory<DiscussionPostAndPosterNames> = {
         EmptyPagingSource()
     },
-    val replyText: String = "",
     val loggedInPersonUid: Long = 0L,
     val loggedInPersonName: String = "",
     val loggedInPersonPictureUri: String? = null,
@@ -54,6 +53,10 @@ class DiscussionPostDetailViewModel(
 
     val uiState: Flow<DiscussionPostDetailUiState2> = _uiState.asStateFlow()
 
+    private val _replyText = MutableStateFlow("")
+
+    val replyText: Flow<String> = _replyText.asStateFlow()
+
     private var saveReplyJob: Job? = null
 
     private val clazzUid = savedStateHandle[ARG_CLAZZUID]?.toLong() ?: 0L
@@ -76,10 +79,11 @@ class DiscussionPostDetailViewModel(
                                 loggedInPersonUid = activeUserPersonUid,
                                 loggedInPersonName = accountManager.currentUserSession.person.fullName(),
                                 loggedInPersonPictureUri = accountManager.currentUserSession.personPicture?.personPictureThumbnailUri,
-                                replyText = savedStateHandle[STATE_KEY_REPLY_TEXT] ?: "",
                                 showModerateOptions = hasModeratePermission,
                             )
                         }
+
+                        _replyText.value = savedStateHandle[STATE_KEY_REPLY_TEXT] ?: ""
 
                         launch {
                             resultReturner.filteredResultFlowForKey(RESULT_KEY_REPLY_TEXT).collect { result ->
@@ -104,10 +108,10 @@ class DiscussionPostDetailViewModel(
                                 loggedInPersonUid = activeUserPersonUid,
                                 loggedInPersonName = accountManager.currentUserSession.person.fullName(),
                                 loggedInPersonPictureUri = accountManager.currentUserSession.personPicture?.personPictureThumbnailUri,
-                                replyText = savedStateHandle[STATE_KEY_REPLY_TEXT] ?: "",
                                 showModerateOptions = false,
                             )
                         }
+                        _replyText.value = savedStateHandle[STATE_KEY_REPLY_TEXT] ?: ""
                     }
                 }
             }
@@ -116,9 +120,7 @@ class DiscussionPostDetailViewModel(
     }
 
     fun onChangeReplyText(replyText: String) {
-        _uiState.update { prev ->
-            prev.copy(replyText = replyText)
-        }
+        _replyText.value = replyText
 
         saveReplyJob?.cancel()
         saveReplyJob = viewModelScope.launch {
@@ -131,7 +133,7 @@ class DiscussionPostDetailViewModel(
     //On Android - take the user to a new fullscreen richtext editor
     fun onClickEditReplyHtml() {
         navigateToEditHtml(
-            currentValue = _uiState.value.replyText,
+            currentValue = _replyText.value,
             resultKey = RESULT_KEY_REPLY_TEXT,
             extraArgs = mapOf(
                 HtmlEditViewModel.ARG_DONE_STR to systemImpl.getString(MR.strings.post),
@@ -142,7 +144,7 @@ class DiscussionPostDetailViewModel(
 
     fun onClickPostReply() {
         viewModelScope.launch {
-            submitReply(_uiState.value.replyText)
+            submitReply(_replyText.value)
         }
     }
 

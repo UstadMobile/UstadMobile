@@ -46,6 +46,7 @@ fun ClazzAssignmentEditScreen(viewModel: ClazzAssignmentEditViewModel) {
         onClickSubmissionType = viewModel::onClickSubmissionType,
         onClickEditDescription = viewModel::onClickEditDescription,
         onGroupSubmissionOnChanged = viewModel::onGroupSubmissionOnChanged,
+        onPictureChanged = viewModel::onPictureChanged,
     )
 }
 
