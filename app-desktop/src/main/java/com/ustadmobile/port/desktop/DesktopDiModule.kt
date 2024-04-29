@@ -72,6 +72,7 @@ import org.kodein.di.singleton
 import java.io.File
 import java.util.Locale
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
+import com.ustadmobile.libcache.CachePaths
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
@@ -189,11 +190,27 @@ val DesktopHttpModule = DI.Module("Desktop-HTTP") {
 
         val dbUrl = "jdbc:sqlite:(datadir)/ustadcache.db"
             .replace("(datadir)", dataDir.absolutePath)
+        val cacheStoragePath = Path(
+            File(dataDir, "httpfiles").absolutePath.toString()
+        )
+
+        /* Persistent path and cache path are the same. Trying to move files on Windows has caused
+         * resulted in errors appearing in logs where files apparently weren't released quickly
+         * enough (never seen on Linux).
+         *
+         * There is no need on the desktop to separate the persistent and cache path on desktop,
+         * as is required on Android (where the OS provides a dedicated cache dir for each app).
+         */
         UstadCacheBuilder(
             dbUrl = dbUrl,
-            storagePath = Path(
-                File(dataDir, "httpfiles").absolutePath.toString()
-            ),
+            storagePath = cacheStoragePath,
+            pathsProvider = {
+                CachePaths(
+                    tmpWorkPath = Path(cacheStoragePath, "tmpWork"),
+                    persistentPath = Path(cacheStoragePath, "cache"),
+                    cachePath = Path(cacheStoragePath, "cache")
+                )
+            },
             logger = cacheLogger,
 
         ).build()
