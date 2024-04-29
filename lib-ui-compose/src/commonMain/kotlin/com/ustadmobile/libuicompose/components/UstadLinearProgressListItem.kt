@@ -21,6 +21,7 @@ fun UstadLinearProgressListItem(
     progress: Float?,
     supportingContent: @Composable () -> Unit,
     onCancel: (() -> Unit)?,
+    errorTitle: String = stringResource(MR.strings.import_error),
     error: String? = null,
     onDismissError: (() -> Unit)? = { },
     modifier: Modifier = Modifier,
@@ -30,7 +31,7 @@ fun UstadLinearProgressListItem(
         headlineContent = {
             when {
                 error != null -> {
-                    Text(stringResource(MR.strings.import_error))
+                    Text(errorTitle)
                 }
 
                 progress != null -> {

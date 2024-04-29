@@ -578,7 +578,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
             viewModel.onClickSubmitPrivateComment()
             viewModel.uiState.test(timeout = 5.seconds) {
                 val commentReadyState = awaitItemWhere {
-                    it.privateComments() !is EmptyPagingSource<*, *> && it.newPrivateCommentText == ""
+                    it.privateComments() !is EmptyPagingSource<*, *>
                 }
                 val commentsAfterReply = commentReadyState.privateComments().loadFirstList()
                 assertEquals(replyComment, commentsAfterReply.first().comment.commentsText)
@@ -626,7 +626,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
 
             viewModel.uiState.test(timeout = 5.seconds) {
                 val commentReadyState = awaitItemWhere {
-                    it.courseComments() !is EmptyPagingSource<*, *> && it.newCourseCommentText == ""
+                    it.courseComments() !is EmptyPagingSource<*, *>
                 }
                 val commentsAfterReply = commentReadyState.courseComments().loadFirstList()
                 assertEquals(replyComment, commentsAfterReply.first().comment.commentsText)

@@ -6,6 +6,8 @@ appId: com.toughra.ustadmobile
 
 - tapOn: "COURSES"
 - tapOn: ${TESTCOURSENAME}
-- assertVisible: "EDIT"
-- tapOn: "Edit"
+- assertVisible:
+     id: "floating_action_button"
+- tapOn:
+    id: "floating_action_button"
 

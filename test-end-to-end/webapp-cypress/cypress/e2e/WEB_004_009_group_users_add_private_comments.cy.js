@@ -105,6 +105,7 @@ it('Group 2 - Student3 not able to view Group 1 private comments', () => {
   cy.contains("Course").click()
   cy.contains("004_009").click()
   cy.contains('Assignment 1').click()
+  cy.get(".VirtualList").scrollTo('bottom')
   cy.get('#private_comment_textfield').should('exist')
   cy.contains("comment1").should('not.exist')
   cy.contains("comment2").should('not.exist')

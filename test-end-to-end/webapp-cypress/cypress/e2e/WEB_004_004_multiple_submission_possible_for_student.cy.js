@@ -66,6 +66,7 @@ it('Student submit assignment', () => {
   cy.get('#assignment_text').get('div[contenteditable="true"]',{timeout:5000}).should('be.visible')
   cy.get('#assignment_text').type("Text 1")
   cy.contains('SUBMIT').click()
+  cy.contains("Submission 1").should("be.visible")
   cy.contains("Text 1").should('be.visible')
 })
 
@@ -89,6 +90,7 @@ it('Student can add another submission', () => {
   cy.contains("Course").click()
   cy.contains("004_004").click()
   cy.contains('Assignment 1').click()
+  cy.get(".VirtualList").scrollTo('bottom')
   cy.contains('Keep it up').should('exist')
   cy.contains('9/10 Points').should('exist')
   cy.get('#assignment_text').get('div[contenteditable="true"]',{timeout:5000}).should('exist')

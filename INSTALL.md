@@ -18,7 +18,7 @@ using apt-get on Ubuntu or MSI/EXE for Windows).
 
 On Ubuntu:
 ```
-apt-get install openjdk-17-jdk mediainfo sox libsox-fmt-all
+apt-get install openjdk-17-jdk mediainfo sox libsox-fmt-all vlc
 ```
 Note: if you have other Java versions, make sure you run the server jar using JDK17+. You can use 
 ``sudo update-alternatives --config java`` to set the default java version to run.
@@ -44,7 +44,7 @@ winget install -e --id HandBrake.HandBrake.CLI
 ```
 * Download and install from the [Sox website](https://sourceforge.net/projects/sox/files/sox/14.4.2/) 
   (the Winget package does not work because it does not get added to the path).
-
+* Download and install a __64bit version__ of VLC from the [VLC website](https://videolan.org)
 
 ### 3. Unzip ustad-server.zip and start server
 

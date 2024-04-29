@@ -13,7 +13,6 @@ import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.lib.db.entities.ContentEntry
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
-import io.ktor.client.statement.bodyAsText
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -45,6 +44,8 @@ data class VideoContentUiState(
     val mediaMimeType: String? = null,
 
     val contentEntry: ContentEntry? = null,
+
+    val isFullScreen: Boolean = false,
 ) {
     /**
      * The path of the media item within the content
@@ -122,6 +123,11 @@ class VideoContentViewModel(
             }
 
         }
+    }
+
+    fun onSetFullScreen(isFullScreen: Boolean) {
+        _appUiState.update { it.copy(hideAppBar = isFullScreen) }
+        _uiState.update { it.copy(isFullScreen = isFullScreen) }
     }
 
     companion object {

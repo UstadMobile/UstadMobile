@@ -18,6 +18,8 @@ external interface UstadRootScreenNavLinksProps: Props {
     var selectedItem: Int
 
     var onClick: (() -> Unit)?
+
+    var idPrefix: String
 }
 
 val UstadRootScreenNavLinks = FC<UstadRootScreenNavLinksProps> { props ->
@@ -25,6 +27,7 @@ val UstadRootScreenNavLinks = FC<UstadRootScreenNavLinksProps> { props ->
     ROOT_SCREENS.forEachIndexed { index, screen ->
         NavLink {
             to = screen.key
+            id = "${props.idPrefix}_${screen.key}"
 
             props.onClick?.also { onClickFn ->
                 onClick = {

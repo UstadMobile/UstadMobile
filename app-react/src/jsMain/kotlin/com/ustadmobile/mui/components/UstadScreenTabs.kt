@@ -15,6 +15,7 @@ import web.html.HTMLElement
 import kotlin.js.Json
 import kotlin.js.json
 import kotlinx.browser.window
+import web.cssom.None
 
 data class UstadScreenTabsState(val height: Int = DEFAULT_HEIGHT) {
     companion object {
@@ -43,6 +44,8 @@ external interface UstadScreenTabsProps: Props {
      * directly by browser url.
      */
     var screens: UstadScreens?
+
+    var autoHideIfOneTab: Boolean?
 
 }
 
@@ -87,6 +90,9 @@ val UstadScreenTabs = FC<UstadScreenTabsProps> { props ->
                     sx {
                         borderBottom = 1.px
                         borderColor = theme.palette.divider
+                        if(props.tabs.size == 1 && props.autoHideIfOneTab == true){
+                            display = None.none
+                        }
                     }
 
                     Tabs {
