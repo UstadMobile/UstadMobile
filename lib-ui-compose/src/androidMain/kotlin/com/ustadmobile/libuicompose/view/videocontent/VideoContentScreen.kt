@@ -5,6 +5,7 @@ package com.ustadmobile.libuicompose.view.videocontent
 import android.net.Uri
 import android.os.Build
 import androidx.annotation.OptIn
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Text
@@ -45,7 +46,10 @@ actual fun VideoContentScreen(
     viewModel: VideoContentViewModel,
 ) {
     val uiState by viewModel.uiState.collectAsState(VideoContentUiState())
-    VideoContentScreen(uiState)
+    VideoContentScreen(
+        uiState = uiState,
+        onSetFullScreen = viewModel::onSetFullScreen,
+    )
 }
 
 /**
@@ -65,6 +69,7 @@ actual fun VideoContentScreen(
 @Composable
 fun ExoPlayerView(
     mediaSrc: String,
+    onSetFullScreen: (Boolean) -> Unit,
     modifier: Modifier,
 ) {
     val context = LocalContext.current
@@ -72,6 +77,12 @@ fun ExoPlayerView(
     val okHttpClient : OkHttpClient = di.direct.instance()
     val mediaDataSource = remember {
         OkHttpDataSource.Factory(okHttpClient)
+    }
+
+    val fullScreenListener: PlayerView.FullscreenButtonClickListener = remember(onSetFullScreen) {
+        PlayerView.FullscreenButtonClickListener {
+            onSetFullScreen(it)
+        }
     }
 
     val exoPlayer = remember {
@@ -102,6 +113,7 @@ fun ExoPlayerView(
         factory = { ctx ->
             PlayerView(ctx).apply {
                 player = exoPlayer
+                setFullscreenButtonClickListener(fullScreenListener)
             }
         },
         modifier = modifier,
@@ -110,23 +122,23 @@ fun ExoPlayerView(
 
 @Composable
 fun VideoContentScreen(
-    uiState: VideoContentUiState
+    uiState: VideoContentUiState,
+    onSetFullScreen: (Boolean) -> Unit = { },
 ) {
     //val mediaSrc = uiState.mediaSrc
     val mediaSrc = uiState.mediaDataUrl
     val mimeType = uiState.mediaMimeType
 
-    if(Build.VERSION.SDK_INT >= 23) {
-        if(mediaSrc != null && mimeType != null) {
-            ExoPlayerView(
-                mediaSrc  = mediaSrc,
-                modifier = Modifier.fillMaxWidth().height(200.dp)
-            )
-        }
-    }else {
-        Text("Sorry, video player requires Android 6+")
-    }
 
+    if(mediaSrc != null && mimeType != null) {
+        ExoPlayerView(
+            mediaSrc  = mediaSrc,
+            modifier = Modifier.fillMaxWidth().let {
+                if(uiState.isFullScreen) it.fillMaxHeight() else it.height(200.dp)
+            },
+            onSetFullScreen = onSetFullScreen,
+        )
+    }
 }
 
 

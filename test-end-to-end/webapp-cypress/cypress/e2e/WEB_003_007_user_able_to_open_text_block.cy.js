@@ -20,7 +20,7 @@ it('User able to expand and collapse the module blocks', () => {
   cy.contains("button","Save").click()
   cy.contains('button','Edit').should('exist')
   cy.contains('text 1').click()
-  cy.get('#appbar_title').should('be.visible').invoke('text').should('eq','text 1')
+  cy.get('#courseblock_title').should('be.visible').invoke('text').should('eq','text 1')
   cy.contains('a simple block test').should('be.visible')
 })
 })

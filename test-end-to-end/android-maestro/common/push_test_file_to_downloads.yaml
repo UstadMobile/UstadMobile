@@ -1,0 +1,9 @@
+appId: com.toughra.ustadmobile
+
+---
+
+# Test parameters needs to provide for this test :
+ # 1) TESTFILENAME : provide the content name inside the 'test-files/content' folder
+
+# push the test file to the downloads
+- evalScript: ${http.get(CONTROLSERVER + "pushcontent?test-file-name=" + TESTFILENAME +"&device=" + TESTSERIAL)}

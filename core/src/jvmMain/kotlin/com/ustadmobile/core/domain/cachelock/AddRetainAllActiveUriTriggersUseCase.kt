@@ -5,7 +5,9 @@ import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.lib.db.entities.CacheLockJoin.Companion.STATUS_PENDING_DELETE
 import com.ustadmobile.lib.db.entities.CacheLockJoin.Companion.STATUS_PENDING_CREATION
 import com.ustadmobile.lib.db.entities.CacheLockJoin.Companion.TYPE_SERVER_RETENTION
+import com.ustadmobile.lib.db.entities.ContentEntryPicture2
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmissionFile
+import com.ustadmobile.lib.db.entities.CourseBlockPicture
 import com.ustadmobile.lib.db.entities.CoursePicture
 import com.ustadmobile.lib.db.entities.PersonPicture
 
@@ -176,6 +178,24 @@ class AddRetainAllActiveUriTriggersUseCase {
                     tableId = CourseAssignmentSubmissionFile.TABLE_ID,
                     entityUidFieldName = "casaUid",
                     uriFieldNames = listOf("casaUri"),
+                )
+            )
+            addAll(
+                triggersForEntityV1(
+                    dbType  = dbType,
+                    tableName = "CourseBlockPicture",
+                    tableId = CourseBlockPicture.TABLE_ID,
+                    entityUidFieldName = "cbpUid",
+                    uriFieldNames = listOf("cbpPictureUri", "cbpThumbnailUri"),
+                )
+            )
+            addAll(
+                triggersForEntityV1(
+                    dbType  = dbType,
+                    tableName = "ContentEntryPicture2",
+                    tableId = ContentEntryPicture2.TABLE_ID,
+                    entityUidFieldName = "cepUid",
+                    uriFieldNames = listOf("cepPictureUri", "cepThumbnailUri"),
                 )
             )
         }

@@ -114,6 +114,13 @@ class CompressListUseCase(
             }
 
             completedItemsSize += (sizes[item.path.toString()] ?: 0L)
+            onProgress?.invoke(
+                CompressProgressUpdate(
+                    fromUri = "",
+                    completed = completedItemsSize,
+                    total = totalSize,
+                )
+            )
 
             ItemResult(
                 originalItem = item,

@@ -25,6 +25,8 @@ import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.util.ext.bodyAsDecodedText
 import com.ustadmobile.core.util.ext.localFirstThenRepoIfNull
 import com.ustadmobile.core.util.ext.onActiveEndpoint
+import com.ustadmobile.core.viewmodel.clazz.launchSetTitleFromClazzUid
+import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.lib.db.composites.ContentEntryAndDetail
 import com.ustadmobile.lib.db.composites.ContentEntryImportJobProgress
@@ -147,6 +149,10 @@ class ContentEntryDetailOverviewViewModel(
 
     private val httpClient: HttpClient by di.instance()
 
+    private val clazzUid = savedStateHandle[ARG_CLAZZUID]?.toLong() ?: 0
+
+    private val parentEntryUid = savedStateHandle[ARG_PARENT_UID]?.toLong() ?: 0
+
     init {
         _uiState.update { it.copy(activeUserPersonUid = activeUserPersonUid) }
 
@@ -161,13 +167,25 @@ class ContentEntryDetailOverviewViewModel(
                                 contentEntry = it
                             )
                         }
-
-                        _appUiState.update { prev ->
-                            prev.copy(
-                                title = it?.entry?.title ?: ""
-                            )
-                        }
                     }
+                }
+
+                if(clazzUid == 0L && parentEntryUid != 0L) {
+                    launch {
+                        val parentTitle = if(parentEntryUid == ContentEntryListViewModel.LIBRARY_ROOT_CONTENT_ENTRY_UID) {
+                            systemImpl.getString(MR.strings.library)
+                        }else {
+                            activeRepo.localFirstThenRepoIfNull { db ->
+                                db.contentEntryDao.findTitleByUidAsync(parentEntryUid)
+                            }
+                        }
+
+                        _appUiState.update { it.copy(title = parentTitle) }
+                    }
+                }
+
+                launchSetTitleFromClazzUid(clazzUid) { title ->
+                    _appUiState.update { it.copy(title = title) }
                 }
 
                 launch {
@@ -348,6 +366,12 @@ class ContentEntryDetailOverviewViewModel(
                 Napier.w { "ContentEntryDetailoverview: could not dismiss remote error message"}
                 snackDispatcher.showSnackBar(Snack(systemImpl.getString(MR.strings.error)))
             }
+        }
+    }
+
+    fun onDismissUploadError(jobUid: Int) {
+        viewModelScope.launch {
+            activeDb.transferJobErrorDao.dismissErrorByJobId(jobUid, true)
         }
     }
 

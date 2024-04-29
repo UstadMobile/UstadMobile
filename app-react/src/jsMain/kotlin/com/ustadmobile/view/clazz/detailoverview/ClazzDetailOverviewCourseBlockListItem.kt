@@ -13,16 +13,18 @@ import react.create
 import mui.icons.material.KeyboardArrowUp
 import mui.icons.material.KeyboardArrowDown
 import react.dom.aria.ariaLabel
-import mui.icons.material.Forum as ForumIcon
-import mui.icons.material.Folder as FolderIcon
-import mui.icons.material.Title as TitleIcon
-import mui.icons.material.AssignmentTurnedIn as AssignmentTurnedInIcon
-import mui.icons.material.Book as BookIcon
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.useStringProvider
+import com.ustadmobile.core.viewmodel.clazz.blockTypeStringResource
+import com.ustadmobile.core.viewmodel.contententry.contentTypeStringResource
 import com.ustadmobile.hooks.useHtmlToPlainText
+import com.ustadmobile.mui.components.UstadBlockIcon
 import com.ustadmobile.util.ext.useLineClamp
+import com.ustadmobile.view.clazz.iconComponent
+import com.ustadmobile.view.contententry.contentTypeIconComponent
+import emotion.react.css
 import js.objects.jso
+import mui.system.responsive
 import react.dom.html.ReactHTML.div
 
 external interface ClazzDetailOverviewCourseBlockListItemProps : Props {
@@ -39,18 +41,12 @@ external interface ClazzDetailOverviewCourseBlockListItemProps : Props {
 
 }
 
-private val MODULE_TYPE_TO_ICON_MAP = mapOf(
-    CourseBlock.BLOCK_MODULE_TYPE to FolderIcon,
-    CourseBlock.BLOCK_DISCUSSION_TYPE to ForumIcon,
-    CourseBlock.BLOCK_TEXT_TYPE to TitleIcon,
-    CourseBlock.BLOCK_ASSIGNMENT_TYPE to AssignmentTurnedInIcon,
-    CourseBlock.BLOCK_CONTENT_TYPE to BookIcon,
-)
-
 val ClazzDetailOverviewCourseBlockListItem = FC<ClazzDetailOverviewCourseBlockListItemProps> { props ->
     val courseBlockVal = props.courseBlock?.courseBlock
+    val contentEntryVal = props.courseBlock?.contentEntry
 
     val blockDescription = useHtmlToPlainText(courseBlockVal?.cbDescription ?: "")
+    val strings = useStringProvider()
 
     ListItem {
         ListItemButton {
@@ -63,15 +59,16 @@ val ClazzDetailOverviewCourseBlockListItem = FC<ClazzDetailOverviewCourseBlockLi
             }
 
             ListItemIcon {
-                + MODULE_TYPE_TO_ICON_MAP[courseBlockVal?.cbType ?: CourseBlock.BLOCK_MODULE_TYPE]?.create {
-                    sx {
-                        width = ICON_SIZE
-                        height = ICON_SIZE
-                    }
+                UstadBlockIcon {
+                    title = courseBlockVal?.cbTitle ?: ""
+                    pictureUri = props.courseBlock?.courseBlockPicture?.cbpThumbnailUri
+                        ?: props.courseBlock?.contentEntryPicture2?.cepThumbnailUri
+                    courseBlock = props.courseBlock?.courseBlock
+                    contentEntry = props.courseBlock?.contentEntry
                 }
             }
 
-            Box{
+            Box {
                 sx {
                     width = 10.px
                 }
@@ -79,18 +76,56 @@ val ClazzDetailOverviewCourseBlockListItem = FC<ClazzDetailOverviewCourseBlockLi
 
             ListItemText {
                 primary = ReactNode(courseBlockVal?.cbTitle ?: "")
-                secondary = ReactNode(blockDescription)
+                secondary = Stack.create {
+                    direction = responsive(StackDirection.column)
+
+                    div {
+                        when {
+                            contentEntryVal != null -> {
+                                val iconType = contentEntryVal.contentTypeIconComponent()
+                                if(iconType != null) {
+                                    +iconType.create {
+                                        fontSize = SvgIconSize.small
+                                        ariaLabel = ""
+                                        sx {
+                                            marginRight = 8.px
+                                            padding = 1.px
+                                        }
+                                    }
+                                }
+                                + strings[contentEntryVal.contentTypeStringResource]
+                            }
+                            courseBlockVal != null -> {
+                                val iconType = courseBlockVal.iconComponent()
+                                if(iconType != null) {
+                                    + iconType.create {
+                                        fontSize = SvgIconSize.small
+                                        ariaLabel = ""
+                                        sx {
+                                            marginRight = 8.px
+                                            padding = 1.px
+                                        }
+                                    }
+                                }
+
+                                + strings[courseBlockVal.blockTypeStringResource]
+                            }
+                        }
+                    }
+                    div {
+                        css {
+                            useLineClamp(1)
+                        }
+                        + blockDescription
+                    }
+                }
                 secondaryTypographyProps = jso {
                     component = div
-                    sx {
-                        useLineClamp(2)
-                    }
                 }
             }
         }
 
         secondaryAction = Tooltip.create {
-            val strings = useStringProvider()
             val labelText = if(props.courseBlock?.expanded == true) {
                 strings[MR.strings.collapse]
             }else {

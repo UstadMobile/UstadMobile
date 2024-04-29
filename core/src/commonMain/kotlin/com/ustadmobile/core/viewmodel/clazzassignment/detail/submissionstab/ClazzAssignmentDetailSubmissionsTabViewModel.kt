@@ -13,6 +13,7 @@ import com.ustadmobile.core.viewmodel.clazzassignment.detail.ClazzAssignmentDeta
 import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.core.paging.RefreshCommand
+import com.ustadmobile.core.viewmodel.clazz.launchSetTitleFromClazzUid
 import com.ustadmobile.lib.db.entities.AssignmentProgressSummary
 import com.ustadmobile.lib.db.entities.AssignmentSubmitterSummary
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
@@ -132,12 +133,8 @@ class ClazzAssignmentDetailSubmissionsTabViewModel(
                     }
                 }
 
-                launch {
-                    activeRepo.courseBlockDao.getTitleByAssignmentUid(argEntityUid).collect {
-                        _appUiState.update { prev ->
-                            prev.copy(title = it)
-                        }
-                    }
+                launchSetTitleFromClazzUid(argClazzUid) { title ->
+                    _appUiState.update { it.copy(title = title) }
                 }
             }
         }
