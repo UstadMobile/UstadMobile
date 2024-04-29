@@ -30,7 +30,6 @@ import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
-import com.ustadmobile.lib.db.composites.ContentEntryBlockLanguageAndContentJob
 import com.ustadmobile.lib.db.composites.CourseBlockAndEditEntities
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.Clazz.Companion.CLAZZ_FEATURE_ATTENDANCE
@@ -116,6 +115,7 @@ class ClazzEditViewModel(
     private val saveContentEntryUseCase: SaveContentEntryUseCase = SaveContentEntryUseCase(
         db = di.onActiveEndpoint().direct.instance(tag = DoorTag.TAG_DB),
         repo = di.onActiveEndpoint().direct.instanceOrNull(tag = DoorTag.TAG_REPO),
+        enqueueSavePictureUseCase = di.onActiveEndpoint().direct.instance(),
     ),
     private val importContentUseCase: EnqueueContentEntryImportUseCase = di.onActiveEndpoint().direct.instance(),
     private val enqueueSavePictureUseCase: EnqueueSavePictureUseCase = di.onActiveEndpoint().direct
@@ -244,6 +244,9 @@ class ClazzEditViewModel(
                             courseBlocksDb.map {
                                 CourseBlockAndEditEntities(
                                     courseBlock = it.courseBlock!!, //CourseBlock can't be null as per query
+                                    courseBlockPicture = it.courseBlockPicture ?: CourseBlockPicture(
+                                        cbpUid = it.courseBlock!!.cbUid
+                                    ),
                                     contentEntry = it.contentEntry,
                                     contentEntryLang = it.contentEntryLang,
                                     assignment = it.assignment,
@@ -295,47 +298,13 @@ class ClazzEditViewModel(
                 //Handle text, module, and discussion topic (e.g. plain CourseBlock that does not
                 // include any other entities)
                 resultReturner.filteredResultFlowForKey(RESULT_KEY_COURSEBLOCK).collect { result ->
-                    val courseBlockResult = result.result as? CourseBlock
+                    val courseBlockResult = result.result as? CourseBlockAndEditEntities
                         ?: return@collect
 
                     val newCourseBlockList = addOrUpdateCourseBlockUseCase(
                         currentList = _uiState.value.courseBlockList,
                         clazzUid = _uiState.value.entity?.clazzUid ?: 0L,
-                        addOrUpdateBlock = CourseBlockAndEditEntities(
-                            courseBlock = courseBlockResult
-                        ),
-                    )
-
-                    updateCourseBlockList(newCourseBlockList)
-                }
-            }
-
-            launch {
-                resultReturner.filteredResultFlowForKey(RESULT_KEY_ASSIGNMENT).collect { result ->
-                    val assignmentResultBlock = result.result as? CourseBlockAndEditEntities ?: return@collect
-
-                    val newCourseBlockList = addOrUpdateCourseBlockUseCase(
-                        currentList = _uiState.value.courseBlockList,
-                        clazzUid = _uiState.value.entity?.clazzUid ?: 0L,
-                        addOrUpdateBlock = assignmentResultBlock
-                    )
-
-                    updateCourseBlockList(newCourseBlockList)
-                }
-            }
-
-            launch {
-                resultReturner.filteredResultFlowForKey(RESULT_KEY_CONTENTENTRY).collect { result ->
-                    val contentEntryResult = result.result as? ContentEntryBlockLanguageAndContentJob ?: return@collect
-                    val block = contentEntryResult.block ?: return@collect //Block must not be null
-                    val newCourseBlockList = addOrUpdateCourseBlockUseCase(
-                        currentList = _uiState.value.courseBlockList,
-                        clazzUid = _uiState.value.entity?.clazzUid ?: 0L,
-                        addOrUpdateBlock = CourseBlockAndEditEntities(
-                            courseBlock = block,
-                            contentEntry = contentEntryResult.entry,
-                            contentJobItem = contentEntryResult.contentJobItem,
-                        )
+                        addOrUpdateBlock = courseBlockResult,
                     )
 
                     updateCourseBlockList(newCourseBlockList)
@@ -470,20 +439,14 @@ class ClazzEditViewModel(
         if(blockType == CourseBlock.BLOCK_CONTENT_TYPE) {
             navigateForResult(
                 nextViewName = ContentEntryListViewModel.DEST_NAME,
-                key = RESULT_KEY_CONTENTENTRY,
+                key = RESULT_KEY_COURSEBLOCK,
                 currentValue = null,
-                serializer = ContentEntryBlockLanguageAndContentJob.serializer(),
+                serializer = CourseBlockAndEditEntities.serializer(),
                 args = mapOf(
                     UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString(),
+                    UstadView.ARG_CLAZZUID to effectiveClazzUid.toString(),
+                    CourseBlockEditViewModel.ARG_BLOCK_TYPE to CourseBlock.BLOCK_CONTENT_TYPE.toString(),
                     ContentEntryEditViewModel.ARG_GO_TO_ON_CONTENT_ENTRY_DONE to ContentEntryEditViewModel.GO_TO_COURSE_BLOCK_EDIT.toString(),
-                    ContentEntryEditViewModel.ARG_COURSEBLOCK to json.encodeToString(
-                        serializer = CourseBlock.serializer(),
-                        value = CourseBlock().apply {
-                            cbUid = activeDb.doorPrimaryKeyManager.nextId(CourseBlock.TABLE_ID)
-                            cbClazzUid = _uiState.value.entity?.clazzUid ?: 0L
-                            cbType = CourseBlock.BLOCK_CONTENT_TYPE
-                        }
-                    )
                 ),
             )
 
@@ -497,7 +460,7 @@ class ClazzEditViewModel(
             CourseBlock.BLOCK_MODULE_TYPE ->
                 CourseBlockEditViewModel.DEST_NAME to RESULT_KEY_COURSEBLOCK
             CourseBlock.BLOCK_ASSIGNMENT_TYPE ->
-                ClazzAssignmentEditViewModel.DEST_NAME to RESULT_KEY_ASSIGNMENT
+                ClazzAssignmentEditViewModel.DEST_NAME to RESULT_KEY_COURSEBLOCK
             else -> return
         }
 
@@ -587,6 +550,15 @@ class ClazzEditViewModel(
             val updateImage = coursePictureVal != null &&
                     savedStateHandle[INIT_PIC_URI] != (entity.coursePicture?.coursePictureUri ?: "")
 
+            val updatedCourseBlockPictures = courseBlockListVal.mapNotNull { block ->
+                val imageUriNow = block.courseBlockPicture?.cbpPictureUri
+                val initImageUri = initState.courseBlockList.firstOrNull {
+                    it.courseBlockPicture?.cbpUid == block.courseBlockPicture?.cbpUid
+                }?.courseBlockPicture?.cbpPictureUri
+
+                block.courseBlockPicture?.takeIf { imageUriNow != initImageUri }
+            }
+
             activeDb.withDoorTransactionAsync {
                 if(entityUidArg == 0L) {
                     createNewClazzUseCase(initEntity)
@@ -629,12 +601,7 @@ class ClazzEditViewModel(
                     .findKeysNotInOtherList(assignmentsToUpsert) { it.caUid }
                 activeRepo.clazzAssignmentDao.takeIf { assignmentsToDeactivate.isNotEmpty() }
                     ?.updateActiveByList(assignmentsToDeactivate, false, systemTimeInMillis())
-                courseBlockListVal.mapNotNull { it.contentEntry }.forEach {
-                    saveContentEntryUseCase.invoke(
-                        contentEntry = it,
-                        joinToParentUid = null,
-                    )
-                }
+
                 val currentPeerReviewAllocations = courseBlockListVal.flatMap {
                     it.assignmentPeerAllocations
                 }
@@ -660,15 +627,43 @@ class ClazzEditViewModel(
                     )
                 }
 
+                activeDb.courseBlockPictureDao
+                    .takeIf { updatedCourseBlockPictures.isNotEmpty() }
+                    ?.upsertListAsync(updatedCourseBlockPictures)
                 Napier.d("onClickSave: transaction block done")
             }
             Napier.d("onClickSave: transaction done")
+
+            //Saving the ContentEntry entity can include saving the picture for the content entry.
+            //Because enqueueing a save picture must be done only after the entity with the picture
+            //itself is committed, SaveContentEntry must be invoked outside the main transaction so
+            //that SaveContentEntryUseCase can control the transactions.
+            courseBlockListVal.forEach { block ->
+                block.contentEntry?.also { contentEntry ->
+                    saveContentEntryUseCase(
+                        contentEntry = contentEntry,
+                        joinToParentUid = null,
+                        picture = block.contentEntryPicture,
+                        initPictureUri = initState.courseBlockList.firstOrNull {
+                            it.courseBlockPicture?.cbpUid == block.courseBlockPicture?.cbpUid
+                        }?.courseBlockPicture?.cbpPictureUri
+                    )
+                }
+            }
 
             enqueueSavePictureUseCase.takeIf { updateImage }?.invoke(
                 entityUid = entity.clazzUid,
                 tableId = CoursePicture.TABLE_ID,
                 pictureUri = coursePictureVal?.coursePictureUri
             )
+
+            updatedCourseBlockPictures.forEach {
+                enqueueSavePictureUseCase(
+                    entityUid = it.cbpUid,
+                    tableId = CourseBlockPicture.TABLE_ID,
+                    pictureUri = it.cbpPictureUri
+                )
+            }
 
             val entityTimeZone = TimeZone.of(entity.effectiveTimeZone)
             val fromLocalDate = Clock.System.now().toLocalDateTime(entityTimeZone)
@@ -778,41 +773,22 @@ class ClazzEditViewModel(
     }
 
     fun onClickEditCourseBlock(block: CourseBlockAndEditEntities) {
-        if(block.courseBlock.cbType == CourseBlock.BLOCK_CONTENT_TYPE) {
-            navigateForResult(
-                nextViewName = CourseBlockEditViewModel.DEST_NAME,
-                key = RESULT_KEY_CONTENTENTRY,
-                currentValue =  block.courseBlock,
-                serializer = CourseBlock.serializer(),
-                args = mapOf(
-                    CourseBlockEditViewModel.ARG_SELECTED_CONTENT_ENTRY to json.encodeToString(
-                        serializer = ContentEntryBlockLanguageAndContentJob.serializer(),
-                        value = ContentEntryBlockLanguageAndContentJob(
-                            entry = block.contentEntry,
-                            block = block.courseBlock,
-                        )
-                    )
-                )
-            )
-            return
-        }
-
-
         when(block.courseBlock.cbType) {
+            CourseBlock.BLOCK_CONTENT_TYPE,
             CourseBlock.BLOCK_DISCUSSION_TYPE,
             CourseBlock.BLOCK_TEXT_TYPE,
             CourseBlock.BLOCK_MODULE_TYPE -> {
                 navigateForResult(
                     nextViewName = CourseBlockEditViewModel.DEST_NAME,
                     key = RESULT_KEY_COURSEBLOCK,
-                    serializer = CourseBlock.serializer(),
-                    currentValue = block.courseBlock,
+                    serializer = CourseBlockAndEditEntities.serializer(),
+                    currentValue = block,
                 )
             }
             CourseBlock.BLOCK_ASSIGNMENT_TYPE -> {
                 navigateForResult(
                     nextViewName = ClazzAssignmentEditViewModel.DEST_NAME,
-                    key = RESULT_KEY_ASSIGNMENT,
+                    key = RESULT_KEY_COURSEBLOCK,
                     serializer = CourseBlockAndEditEntities.serializer(),
                     currentValue = block,
                     args = buildMap {
@@ -841,10 +817,6 @@ class ClazzEditViewModel(
          * Plain CourseBlock will be returned
          */
         const val RESULT_KEY_COURSEBLOCK = "courseblock"
-
-        const val RESULT_KEY_ASSIGNMENT = "assignmentResult"
-
-        const val RESULT_KEY_CONTENTENTRY = "contentEntryResult"
 
         const val RESULT_KEY_TIMEZONE = "timeZone"
 

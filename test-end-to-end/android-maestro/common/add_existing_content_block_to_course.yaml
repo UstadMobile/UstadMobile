@@ -3,11 +3,13 @@ appId: com.toughra.ustadmobile
 #this flow add content that is already added to library by admin as a content block inside course
 
 # edit the course to add blocks
-- tapOn: "Edit"
+- tapOn:
+      id: "floating_action_button"
 # Add block button will be only visible after scrolling to down
-- swipe:
-    start: 100,400
-    end: 100,100
+- scrollUntilVisible:
+    element:
+      text: "Add block"
+    direction: DOWN
 # add existing content
 - tapOn: "Add block"
 - tapOn: "Content"

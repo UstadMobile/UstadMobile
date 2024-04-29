@@ -1908,4 +1908,6 @@
 
     <string name="import_error">Import error</string>
 
+    <string name="upload_error">Upload error</string>
+
 </resources>

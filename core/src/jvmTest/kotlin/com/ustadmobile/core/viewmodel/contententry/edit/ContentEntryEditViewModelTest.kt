@@ -84,7 +84,7 @@ class ContentEntryEditViewModelTest : AbstractMainDispatcherTest(){
             var contentEntryUid: Long = 0
             argumentCaptor<ContentEntry> {
                 verifyBlocking(mockSaveContentEntryUseCase, timeout(5000)) {
-                    invoke(capture(), anyOrNull())
+                    invoke(capture(), anyOrNull(), anyOrNull(), anyOrNull())
                     contentEntryUid = firstValue.contentEntryUid
                     assertEquals("new description", firstValue.description)
                     assertEquals(metadata.entry.sourceUrl, firstValue.sourceUrl)

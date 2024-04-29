@@ -68,7 +68,7 @@ Cypress.Commands.add('ustadLogout', () => {
 
 // Add a content to Library
 Cypress.Commands.add('ustadAddContentToLibrary',(contentPath,contentName) => {
-  cy.contains("Library").click()
+  cy.get("#sidebar_ContentEntryListHome").click()
   cy.contains("button","Content").click()
   cy.get('#new_content_from_file').click({force: true})
   cy.get('input[type="file"]').selectFile(contentPath,{force:true})
@@ -98,7 +98,8 @@ Cypress.Commands.add('ustadOpenH5pEpub', (ContentName) => {
   const modifiedUrl = url + '&target=_top';
  // Visit the modified URL
   cy.visit(modifiedUrl)
-  cy.contains("#appbar_title", ContentName).should("be.visible")
+  cy.contains("#courseblock_title", ContentName).should("be.visible")
+  cy.contains("importing").should("not.exist")
   cy.contains('OPEN').click()
 })
 })

@@ -26,6 +26,7 @@ import com.ustadmobile.core.db.ext.MIGRATION_144_145_CLIENT
 import com.ustadmobile.core.db.ext.MIGRATION_148_149_CLIENT_WITH_OFFLINE_ITEMS
 import com.ustadmobile.core.db.ext.MIGRATION_155_156_CLIENT
 import com.ustadmobile.core.db.ext.MIGRATION_161_162_CLIENT
+import com.ustadmobile.core.db.ext.MIGRATION_169_170_CLIENT
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.util.DiTag
@@ -101,6 +102,8 @@ import com.ustadmobile.core.domain.deleteditem.DeletePermanentlyUseCase
 import com.ustadmobile.core.domain.deleteditem.RestoreDeletedItemUseCase
 import com.ustadmobile.core.domain.extractmediametadata.ExtractMediaMetadataUseCase
 import com.ustadmobile.core.domain.extractmediametadata.ExtractMediaMetadataUseCaseAndroid
+import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCase
+import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCaseAndroid
 import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCase
 import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCaseAndroid
 import com.ustadmobile.core.domain.share.ShareTextUseCase
@@ -313,6 +316,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 .addMigrations(MIGRATION_148_149_CLIENT_WITH_OFFLINE_ITEMS)
                 .addMigrations(MIGRATION_155_156_CLIENT)
                 .addMigrations(MIGRATION_161_162_CLIENT)
+                .addMigrations(MIGRATION_169_170_CLIENT)
                 .build()
 
             val cache: UstadCache = instance()
@@ -392,6 +396,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                             json = instance(),
                             getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
                             compressListUseCase = instance(),
+                            saveLocalUrisAsBlobsUseCase = instance(),
                         )
                     )
                     add(
@@ -437,6 +442,8 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                             getStoragePathForUrlUseCase  = getStoragePathForUrlUseCase,
                             mimeTypeHelper = mimeTypeHelper,
                             compressUseCase = instance(),
+                            extractVideoThumbnailUseCase = instance(),
+                            saveLocalUrisAsBlobsUseCase = instance(),
                         )
                     )
 
@@ -451,6 +458,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                             json = instance(),
                             appContext = applicationContext,
                             tmpDir = File(contentImportTmpPath.toString()),
+                            saveLocalUriAsBlobUseCase = instance(),
                         )
                     )
                 }
@@ -568,6 +576,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 enqueueBlobUploadClientUseCase = on(context).instance(),
                 compressImageUseCase = instance(),
                 deleteUrisUseCase = instance(),
+                getStoragePathForUrlUseCase = instance(),
             )
         }
 
@@ -850,6 +859,10 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 compressAudioUseCase = instance(),
                 mimeTypeHelper = instance(),
             )
+        }
+
+        bind<ExtractVideoThumbnailUseCase>() with singleton {
+            ExtractVideoThumbnailUseCaseAndroid(applicationContext)
         }
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }

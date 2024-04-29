@@ -682,6 +682,11 @@ class UstadCacheImpl(
         }.toMap()
     }
 
+    private fun CacheEntry.isStoredIn(parent: Path): Boolean {
+        val currentPath = Path(storageUri)
+        return currentPath.toString().startsWith(parent.toString())
+    }
+
     /**
      * Used when an existing cache entry is locked or unlocked
      */
@@ -706,18 +711,17 @@ class UstadCacheImpl(
 
     private fun addLockToLruMap(retentionLock: RetentionLock): CacheEntryAndLocks {
         return lruMap.compute(retentionLock.lockKey) { urlKey, entryAndLocks ->
-            entryAndLocks?.let {
-                val isNewlyLocked = it.locks.isEmpty()
+            entryAndLocks?.let { entryVal ->
+                val isNewlyLocked = entryVal.locks.isEmpty()
+                val persistentPath = pathsProvider().persistentPath
 
-                it.copy(
-                    locks = it.locks + retentionLock,
-                    entry = if(isNewlyLocked) {
-                        it.moveLock.withLock {
-                            it.entry?.moveToNewPath(pathsProvider().persistentPath)
-                        }
-                    }else {
-                        it.entry
-                    }
+                entryVal.copy(
+                    locks = entryVal.locks + retentionLock,
+                    entry = entryVal.takeIf {
+                        isNewlyLocked && it.entry?.isStoredIn(persistentPath) == false
+                    }?.moveLock?.withLock {
+                        entryVal.entry?.moveToNewPath(pathsProvider().persistentPath)
+                    } ?: entryVal.entry
                 )
             } ?: CacheEntryAndLocks(
                 urlKey = urlKey,
@@ -782,19 +786,16 @@ class UstadCacheImpl(
             lruMap.computeIfPresent(md5Digest.urlKey(removeRequest.url)) { key, prev ->
                 val newLockList = prev.locks.filter { it.lockId != removeRequest.lockId }
                 val isNewlyUnlocked = prev.locks.isNotEmpty() && newLockList.isEmpty()
+                val cachePath = pathsProvider().cachePath
 
                 prev.copy(
                     locks = prev.locks.filter { it.lockId != removeRequest.lockId },
 
-                    entry = if(isNewlyUnlocked) {
-                        prev.moveLock.withLock {
-                            prev.entry?.moveToNewPath(pathsProvider().cachePath)?.also { entry ->
-                                entriesWithLostLock += entry
-                            }
-                        }
-                    }else {
-                        prev.entry
-                    }
+                    entry = prev.takeIf {
+                        isNewlyUnlocked && it.entry?.isStoredIn(cachePath) == false
+                    }?.entry?.moveToNewPath(cachePath)?.also {
+                        entriesWithLostLock += it
+                    } ?: prev.entry
                 )
             }
         }

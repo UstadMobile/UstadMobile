@@ -67,6 +67,7 @@ it('Student add private comment', () => {
   cy.contains("Course").click()
   cy.contains("004_003").click()
   cy.contains('Assignment 1').click()
+  cy.get(".VirtualList").scrollTo('bottom')
   cy.ustadTypeAndSubmitAssignmentComment('#private_comment_textfield','#private_comment_textfield_send_button','comment2')
   cy.contains("comment1").should('exist')
 })

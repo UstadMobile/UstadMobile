@@ -29,10 +29,10 @@ env:
       PASSWORD: "test"
 - repeat:
     while:
-      notVisible: "OVERVIEW"
+      notVisible: "Course"
     commands:
       - back
-- tapOn: "OVERVIEW"
+- tapOn: "Course"
 - runFlow:
     file: "../common/add_demo_block_structure.yaml"
     env:
@@ -48,7 +48,6 @@ env:
       PASSWORD: "test"
 - tapOn: "courses"
 - tapOn: "Course view Test"
-
 # Collapse the module by tapping it
 - tapOn: "SEMESTER 1"
 - assertNotVisible:
@@ -56,6 +55,10 @@ env:
 - takeScreenshot: "${TESTRESULTSDIR}/able_to_collapse_module"
 #--- expand the Module ---#
 - tapOn: "SEMESTER 1"
+- scrollUntilVisible:
+    element:
+      text: "PRIMARY COLOURS"
+    direction: DOWN
 - assertVisible:
     text: "PRIMARY COLOURS"
 - takeScreenshot: "${TESTRESULTSDIR}/able_to_expand_module"

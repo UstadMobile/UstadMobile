@@ -2,7 +2,6 @@ package com.ustadmobile.core.viewmodel.contententry.detail
 
 import com.ustadmobile.core.impl.appstate.TabItem
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.core.viewmodel.contententry.detailoverviewtab.ContentEntryDetailOverviewViewModel
 import com.ustadmobile.lib.db.entities.Clazz
@@ -25,7 +24,11 @@ class ContentEntryDetailViewModel(
             listOf(
                 TabItem(
                     viewName = ContentEntryDetailOverviewViewModel.DEST_NAME,
-                    args = mapOf(UstadView.ARG_ENTITY_UID to entityUidArg.toString()),
+                    args = buildMap {
+                        putFromSavedStateIfPresent(ARG_ENTITY_UID)
+                        putFromSavedStateIfPresent(ARG_CLAZZUID)
+                        putFromSavedStateIfPresent(ARG_PARENT_UID)
+                    },
                     label = systemImpl.getString(MR.strings.overview)
                 )
             )
