@@ -10,4 +10,5 @@ data class TransferJobAndTotals(
     var transferJob: TransferJob? = null,
     var totalSize: Long = 0,
     var transferred: Long = 0,
+    var latestErrorStr: String? = null,
 )

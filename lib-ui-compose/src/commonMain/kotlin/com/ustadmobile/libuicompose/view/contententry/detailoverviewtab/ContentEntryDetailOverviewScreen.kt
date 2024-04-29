@@ -64,6 +64,7 @@ fun ContentEntryDetailOverviewScreen(
         onCancelRemoteImport = viewModel::onCancelRemoteImport,
         onDismissImportError = viewModel::onDismissImportError,
         onDismissRemoteImportError = viewModel::onDismissRemoteImportError,
+        onDismissUploadError = viewModel::onDismissUploadError,
     )
 }
 
@@ -81,6 +82,7 @@ fun ContentEntryDetailOverviewScreen(
     onCancelRemoteImport: (Long) -> Unit = { },
     onDismissImportError: (Long) -> Unit = { },
     onDismissRemoteImportError: (Long) -> Unit = { },
+    onDismissUploadError: (Int) -> Unit = { },
 ) {
     UstadLazyColumn(
         verticalArrangement = Arrangement.spacedBy(5.dp),
@@ -144,6 +146,11 @@ fun ContentEntryDetailOverviewScreen(
                 },
                 onCancel = {
 
+                },
+                error = item.latestErrorStr,
+                errorTitle = stringResource(MR.strings.upload_error),
+                onDismissError = {
+                    onDismissUploadError(item.transferJob?.tjUid ?: 0)
                 }
             )
         }

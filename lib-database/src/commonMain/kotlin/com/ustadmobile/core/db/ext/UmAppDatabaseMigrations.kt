@@ -1376,6 +1376,17 @@ val MIGRATION_169_170_CLIENT = DoorMigrationStatementList(169, 170) { db ->
     emptyList()
 }
 
+val MIGRATION_170_171 = DoorMigrationStatementList(170, 171) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS TransferJobError (  tjeTjUid  INTEGER  NOT NULL , tjeTime  INTEGER  NOT NULL , tjeErrorStr  TEXT , tjeDismissed  INTEGER  NOT NULL , tjeId  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS TransferJobError (  tjeTjUid  INTEGER  NOT NULL , tjeTime  BIGINT  NOT NULL , tjeErrorStr  TEXT , tjeDismissed  BOOL  NOT NULL , tjeId  SERIAL  PRIMARY KEY  NOT NULL )")
+        }
+        add("CREATE INDEX idx_transferjoberror_tjetjuid ON TransferJobError (tjeTjUid)")
+    }
+}
+
 
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_105_106, MIGRATION_106_107,
@@ -1391,7 +1402,7 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_156_157, MIGRATION_157_158, MIGRATION_158_159, MIGRATION_159_160,
     MIGRATION_160_161, MIGRATION_162_163, MIGRATION_163_164, MIGRATION_164_165,
     MIGRATION_165_166, MIGRATION_166_167, MIGRATION_167_168, MIGRATION_168_169,
-    MIGRATION_169_170_SERVER,
+    MIGRATION_170_171,
 )
 
 
