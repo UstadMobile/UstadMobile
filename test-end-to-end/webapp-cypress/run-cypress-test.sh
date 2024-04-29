@@ -71,7 +71,9 @@ cd $SCRIPTDIR
 
 # Run npm install and Cypress tests
 npm install || exit_with_error "Failed to run 'npm install'"
-npm exec cypress run --spec "$SPECARG"  || exit_with_error "Cypress test run failed"
+#Note additional -- required to split up arguments between npm exec and cypress
+# as per https://stackoverflow.com/questions/63854769/cypress-runs-all-test-files-even-when-spec-parameter-is-used
+npm exec cypress run -- --spec "$SPECARG"  || exit_with_error "Cypress test run failed"
 
 # Capture the exit status of the Cypress test run
 teststatus=$?
