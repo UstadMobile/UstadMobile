@@ -38,6 +38,7 @@ import com.ustadmobile.libuicompose.view.clazzassignment.UstadAssignmentSubmissi
 import com.ustadmobile.libuicompose.view.clazzassignment.UstadCourseAssignmentMarkListItem
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 import java.util.TimeZone
 
@@ -51,6 +52,7 @@ fun ClazzAssignmentSubmitterDetailScreen(
 
     ClazzAssignmentSubmitterDetailScreen(
         uiState = uiState,
+        newPrivateCommentText = viewModel.newPrivateCommentText,
         onClickSubmitGrade = viewModel::onClickSubmitMark,
         onClickSubmitGradeAndMarkNext = viewModel::onClickSubmitMarkAndGoNext,
         onChangePrivateComment = viewModel::onChangePrivateComment,
@@ -74,6 +76,7 @@ fun ClazzAssignmentSubmitterDetailScreen(
 @Composable
 fun ClazzAssignmentSubmitterDetailScreen(
     uiState: ClazzAssignmentSubmitterDetailUiState,
+    newPrivateCommentText: Flow<String>,
     onClickSubmitGrade: () -> Unit = {},
     onClickSubmitGradeAndMarkNext: () -> Unit = {},
     onChangePrivateComment: (String) -> Unit = {},
@@ -195,7 +198,7 @@ fun ClazzAssignmentSubmitterDetailScreen(
             item(key = "new_private_comment") {
                 UstadAddCommentListItem(
                     modifier = Modifier.testTag("add_private_comment"),
-                    commentText = uiState.newPrivateCommentText,
+                    commentText = newPrivateCommentText,
                     commentLabel = stringResource(MR.strings.add_private_comment),
                     enabled = uiState.fieldsEnabled,
                     currentUserPersonUid = uiState.activeUserPersonUid,

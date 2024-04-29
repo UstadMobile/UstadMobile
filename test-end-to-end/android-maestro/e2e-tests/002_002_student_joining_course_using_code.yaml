@@ -15,19 +15,47 @@ env:
 - runFlow:
     file: "../common/user_login.yaml"
 #---------Add Course with members------------------#
+# add new course
 - runFlow:
-    file: "../common/create_course_with_1teacher_1student.yaml"
+    file: "../common/add_course.yaml"
+    env:
+      TESTCOURSENAME: "Test Course"
+- runFlow:
+    file: "../common/add_new_teacher_inside_course.yaml"
+    env:
+      TESTCOURSENAME: "Test Course"
+      TEACHERFIRSTNAME: "Teacher"
+      TEACHERLASTNAME: "1"
+      USERNAME: "t1"
+      GENDER: "Female"
+      PASSWORD: "test"
+- runFlow:
+    file: "../common/add_new_people.yaml"
+    env:
+      FIRSTNAME: "Student"
+      LASTNAME: "1"
+      USERNAME: "s1"
+      GENDER: "Male"
+      PASSWORD: "test"
+- back
+- tapOn: "Courses"
+- tapOn: ${TESTCOURSENAME}
+- tapOn: "Invite code*"
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
 - runFlow:
     file: "../common/user_login.yaml"
     env:
       USERNAME: "s1"
       PASSWORD: "test"
-- runFlow: "../common/student_send_course_join_request_using_code.yaml"
+- runFlow:  "../common/student_send_course_join_request_using_code.yaml"
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: "admin"
-      PASSWORD: "testpass"
+      USERNAME: "t1"
+      PASSWORD: "test"
 - runFlow: "../common/accepting_course_join_request.yaml"
 #---------Launch App & Student Login------------------#
 - runFlow: "../common/clear_state_and_get_started.yaml"
@@ -38,3 +66,4 @@ env:
       USERNAME: "s1"
       PASSWORD: "test"
 - tapOn: "Courses"
+- assertVisible: ${TESTCOURSENAME}

@@ -49,6 +49,7 @@ fun commonDomainDiModule(endpointScope: EndpointScope) = DI.Module("CommonDomain
         SaveContentEntryUseCase(
             db = instance(tag = DoorTag.TAG_DB),
             repo = instanceOrNull(tag = DoorTag.TAG_REPO),
+            enqueueSavePictureUseCase = instance(),
         )
     }
 

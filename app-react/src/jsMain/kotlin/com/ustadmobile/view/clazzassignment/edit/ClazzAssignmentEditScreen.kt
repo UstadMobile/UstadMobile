@@ -48,6 +48,8 @@ external interface ClazzAssignmentEditScreenProps : Props {
 
     var onGroupSubmissionOnChanged: (Boolean) -> Unit
 
+    var onPictureChanged: (String?) -> Unit
+
 }
 
 
@@ -65,6 +67,7 @@ private val ClazzAssignmentEditScreenComponent2 = FC<ClazzAssignmentEditScreenPr
             UstadCourseBlockEdit {
                 uiState = props.uiState.courseBlockEditUiState
                 onCourseBlockChange = props.onChangeCourseBlock
+                onPictureChanged = props.onPictureChanged
             }
 
 
@@ -329,6 +332,7 @@ val ClazzAssignmentEditScreen = FC<Props> {
         onClickSubmissionType = viewModel::onClickSubmissionType
         onClickAssignReviewers = viewModel::onClickAssignReviewers
         onGroupSubmissionOnChanged = viewModel::onGroupSubmissionOnChanged
+        onPictureChanged = viewModel::onPictureChanged
     }
 
 }

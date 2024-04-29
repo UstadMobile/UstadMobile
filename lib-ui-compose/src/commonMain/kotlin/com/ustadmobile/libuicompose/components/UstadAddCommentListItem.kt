@@ -12,6 +12,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -23,12 +24,14 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 
 @Composable
 fun UstadAddCommentListItem(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    commentText: String,
+    commentText: Flow<String>,
     commentLabel: String,
     onCommentChanged: (String) -> Unit = { },
     currentUserPersonUid: Long,
@@ -37,6 +40,7 @@ fun UstadAddCommentListItem(
     onSubmitComment: () -> Unit = {  },
     editCommentInBottomSheet: Boolean = !isDesktop(), //Will be true on Android, false on desktop
 ){
+    val commentTextVal by commentText.collectAsState("", Dispatchers.Main.immediate)
 
     val onShowBottomSheetFunction = onShowBottomSheetFragmentFunction { onDismissFun: () -> Unit ->
         val focusRequester = remember { FocusRequester() }
@@ -69,9 +73,8 @@ fun UstadAddCommentListItem(
 
             UstadOutlinedCommentTextField(
                 modifier = Modifier.weight(1f).focusRequester(focusRequester),
-                value = commentTextState,
+                value = commentTextVal,
                 onValueChange = {
-                    commentTextState = it
                     onCommentChanged(it)
                 },
                 label = {
@@ -119,7 +122,7 @@ fun UstadAddCommentListItem(
             } else {
                 UstadOutlinedCommentTextField(
                     modifier = Modifier.fillMaxWidth(),
-                    value = commentText,
+                    value = commentTextVal,
                     onValueChange = onCommentChanged,
                     label = { Text(commentLabel) },
                     enabled = enabled,

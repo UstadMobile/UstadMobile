@@ -32,7 +32,9 @@ class BulkAddPersonsUseCaseImpl(
         csv: String,
         onProgress: BulkAddPersonsUseCase.BulkAddOnProgress,
     ): BulkAddPersonsUseCase.BulkAddUsersResult {
-        val csvData = csvReader().readAllWithHeader(csv)
+        val csvData = csvReader {
+            autoRenameDuplicateHeaders = true
+        }.readAllWithHeader(csv)
         val errors = mutableListOf<BulkAddPersonsDataError>()
 
         if(csvData.isEmpty())

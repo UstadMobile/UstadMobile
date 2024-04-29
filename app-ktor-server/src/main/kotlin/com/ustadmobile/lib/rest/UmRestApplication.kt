@@ -39,6 +39,8 @@ import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServer
 import com.ustadmobile.core.domain.extractmediametadata.ExtractMediaMetadataUseCase
 import com.ustadmobile.core.domain.extractmediametadata.mediainfo.ExecuteMediaInfoUseCase
 import com.ustadmobile.core.domain.extractmediametadata.mediainfo.ExtractMediaMetadataUseCaseMediaInfo
+import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCase
+import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCaseJvm
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonStatusMap
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsUseCase
@@ -113,6 +115,7 @@ import com.ustadmobile.libcache.headers.MimeTypeHelper
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.files.Path
 import org.kodein.di.ktor.closestDI
+import uk.co.caprica.vlcj.factory.discovery.NativeDiscovery
 import java.net.Inet6Address
 import java.net.NetworkInterface
 import java.util.concurrent.atomic.AtomicBoolean
@@ -219,6 +222,12 @@ fun Application.umRestApplication(
         throw MissingMediaProgramsException("Cannot find SoX" +
                 "On Ubuntu: apt-get install sox libsox-fmt-all\n" +
                 "On Windows: Download and install from SoX website: https://sourceforge.net/projects/sox/files/sox/14.4.2/")
+    }
+
+    if(!NativeDiscovery().discover()) {
+        throw MissingMediaProgramsException("Cannot find VLC.\n" +
+                "On Ubuntu: apt-get install vlc\n" +
+                "On Windows: Download and install a **64bit** version from videolan.org")
     }
 
     val commandsDir = File(ktorAppHome, "commands")
@@ -658,6 +667,10 @@ fun Application.umRestApplication(
                 compressImageUseCase = instance(),
                 compressAudioUseCase = instance(),
             )
+        }
+
+        bind<ExtractVideoThumbnailUseCase>() with singleton {
+            ExtractVideoThumbnailUseCaseJvm()
         }
 
         try {

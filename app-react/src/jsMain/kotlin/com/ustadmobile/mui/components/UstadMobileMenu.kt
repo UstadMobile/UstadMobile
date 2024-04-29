@@ -76,6 +76,7 @@ val UstadMobileMenu = FC<UstadMobileMenuProps> { props ->
 
                     UstadRootScreenNavLinks {
                         selectedItem = props.selectedRootItemIndex
+                        idPrefix = "mobilemenu"
                         onClick = {
                             props.onSetOpen(false)
                         }
