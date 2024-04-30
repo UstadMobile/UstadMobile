@@ -109,7 +109,6 @@ it('Teacher add assignment', () => {
   cy.url().should('include', "CourseAssignmentEdit") //Ensure that navigation to assignment edit done
   cy.contains("button","Done").should('be.visible')
   cy.contains("button","Done").click()
-
   cy.contains("button","Save").should('be.visible')
   cy.contains("button","Save").click()
   cy.contains("button","Members").should('be.visible')
@@ -129,7 +128,8 @@ it('Group 1- Student 1 submit assignment', () => {
   cy.contains('Assignment 1').click()
   cy.get('#assignment_text').get('div[contenteditable="true"]',{timeout:6000}).should('be.visible')
   cy.get('#assignment_text').click()
-  cy.get('#assignment_text').type("Text 1")
+  cy.get('#assignment_text').type("Text 1",{delay:25})
+  cy.get('.ql-editor').ustadTypeAndVerify('Text 1')
   cy.contains('SUBMIT',{timeout:5000}).click()
   cy.contains("Not submitted").should('not.exist')
   cy.contains("Submission 1").should("be.visible")

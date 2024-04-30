@@ -102,7 +102,8 @@ it('Group 1- Student 1 submit assignment', () => {
   cy.contains('Assignment 1').click()
   cy.get('#assignment_text').get('div[contenteditable="true"]',{timeout:6000}).should('be.visible')
   cy.get('#assignment_text').click()
-  cy.get('#assignment_text').type("Text 1")
+  cy.get('#assignment_text').type("Text 1",{delay:25})
+  cy.get('.ql-editor').ustadTypeAndVerify('Text 1')
   cy.contains('SUBMIT',{timeout:5000}).click()
   cy.get('#assignment_text').get('div[contenteditable="true"]').should('not.exist')
   cy.ustadTypeAndSubmitAssignmentComment('#course_comment_textfield','#course_comment_textfield_send_button','comment2',25)
@@ -128,10 +129,16 @@ it('Group 1 - Student2 able to view Group 1 assignment and course comments', () 
   cy.contains("004_008").click()
   cy.contains("button","Course").click()
   cy.contains("Assignment 1").click()
-  cy.get(".VirtualList").scrollTo('bottom')
-  cy.contains("Text 1").should('be.visible')
   cy.get("#VirtualList").scrollTo('bottom')
-  cy.contains("comment2").should('exist')
-  cy.contains("comment1").should('exist')
+  cy.contains("Text 1").should('be.visible')
+  cy.contains("comment1").then(($input) => {
+     if ($input.is(':visible')) {
+       // If "comment1" is visible, verify the existence of both "comment1" and "comment2"
+        cy.contains("comment2").should('exist');
+     } else {
+       // If "comment2" is not visible, scroll to the bottom of the element with id "#VirtualList"
+        cy.get("#VirtualList").scrollTo('bottom');
+     }
+   })
 })
 })

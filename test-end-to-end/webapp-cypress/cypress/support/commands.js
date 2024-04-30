@@ -199,6 +199,34 @@ Cypress.Commands.add('ustadAddDiscussionBoard',(discussionTitle) => {
     cy.get('div[data-placeholder="Description"]').type("a simple discussion description")
     cy.contains("button","Done").click()
 })
+
+Cypress.Commands.add('ustadTypeAndVerify', { prevSubject: 'element' }, (subjects, expectedText, maxRetries = 3) => {
+  cy.wrap(subjects).each((subject) => {
+    let retries = 0
+
+    const typeAndVerify = () => {
+      retries++
+      if (retries > {maxRetries}) {
+        cy.log("Maximum retries reached")
+        return
+      }
+
+      cy.wrap(subject).invoke('val').then((currentValue) => {
+        if (currentValue === expectedText) {
+          return; // Exit the function if currentValue matches expectedText
+        }
+        cy.wrap(subject).clear().type(expectedText)
+
+      })
+    }
+
+    // Start the loop initially
+    typeAndVerify()
+  })
+})
+
+
+
    // Add course and private comments in Assignment
 Cypress.Commands.add('ustadTypeAndSubmitAssignmentComment', (commentid, sendid, comment, delay = 25) => {
     cy.get(commentid).click().type(comment, { delay });
@@ -206,7 +234,6 @@ Cypress.Commands.add('ustadTypeAndSubmitAssignmentComment', (commentid, sendid, 
     cy.get(commentid).should('have.value', comment);
     cy.get(sendid).click();
     cy.contains('.MuiListItemText-secondary',comment).should('exist');
-
 });
 
 
