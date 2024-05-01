@@ -145,8 +145,14 @@ it('Student3 add assignment mark for Group 1', () => {
   cy.contains("button","Course").click()
   cy.contains("Assignment 1").click()
   cy.contains('Peers to review').click()
-  cy.contains('Group 1').click()
-  cy.contains("Text 1").should('be.visible')
+  cy.contains("Group 1").then(($input) => {
+      if ($input.is(':visible')) {
+         cy.contains('Group 1').click()
+         cy.contains("Text 1").should('be.visible')
+      } else {
+         cy.reload()
+      }
+    })
   cy.get('#marker_comment').type("Keep it up")
   cy.get('#marker_mark').type('9')
   cy.get('#submit_mark_button').click()

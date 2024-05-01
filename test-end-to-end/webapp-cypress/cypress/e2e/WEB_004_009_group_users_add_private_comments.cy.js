@@ -118,17 +118,13 @@ it('Group 1 - Student2 able to view Group 1 private comment', () => {
   cy.contains('Assignment 1').click()
   cy.get("#VirtualList").scrollTo('bottom');
    cy.contains("comment1").then(($input) => {
-       if ($input.is(':visible')) {
-           // If "comment1" is visible, verify the existence of both "comment1" and "comment2"
-           cy.contains("comment2").should('exist');
-       } else {
-           // If "comment2" is not visible, scroll to the bottom of the element with id "#VirtualList"
-           cy.get("#VirtualList").scrollTo('bottom');
-       }
+     if ($input.is(':visible')) {
+       // If "comment1" is visible, verify the existence of both "comment1" and "comment2"
+          cy.contains("comment2").should('exist');
+     } else {
+       // If "comment2" is not visible, scroll to the bottom of the element with id "#VirtualList"
+          cy.get("#VirtualList").scrollTo('bottom');
+     }
    })
-
-  /*cy.get(".VirtualList").scrollTo('bottom')
-  cy.contains("comment1").should('exist')
-  cy.contains("comment2").should('exist')*/
 })
 })

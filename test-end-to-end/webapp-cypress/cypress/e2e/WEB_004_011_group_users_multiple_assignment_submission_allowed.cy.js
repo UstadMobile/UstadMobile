@@ -72,7 +72,6 @@ it('Teacher add multiple submission assignment and group ', () => {
      }
      })
   cy.contains('Add new groups',{timeout: 5000}).click()
-
   cy.get('#cgs_name').type('Assignment Team')
   cy.get('#cgs_total_groups').clear().type('2')
   cy.contains('Unassigned').eq(0).click()  // s1
@@ -92,7 +91,6 @@ it('Teacher add multiple submission assignment and group ', () => {
   cy.contains("button","Save").click()
   cy.wait(1000) // This command helps to view Assignment to user
   cy.contains("button","Members").should('be.visible')
-
 })
 
 it('Group 1- Student 1 submit assignment', () => {
@@ -129,5 +127,4 @@ it('Group 1 - Student2 able to view Group 1 assignment and submit button should 
   cy.contains('Assignment 1',{timeout:1000}).click()
   cy.contains("Not submitted").should('not.exist')
 })
-
 })
