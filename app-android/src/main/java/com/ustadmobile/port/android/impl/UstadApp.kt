@@ -109,6 +109,10 @@ import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCaseAndro
 import com.ustadmobile.core.domain.share.ShareTextUseCase
 import com.ustadmobile.core.domain.share.ShareTextUseCaseAndroid
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
+import com.ustadmobile.core.domain.storage.GetOfflineStorageOptionsUseCase
+import com.ustadmobile.core.domain.storage.GetOfflineStorageOptionsUseCaseAndroid
+import com.ustadmobile.core.domain.storage.GetOfflineStorageSettingUseCase
+import com.ustadmobile.core.domain.storage.SetOfflineStorageSettingUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseCommonJvm
 import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
@@ -361,6 +365,8 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
         bind<UstadCache>() with singleton {
             val httpCacheDir =  applicationContext.httpPersistentFilesDir
             val storagePath = Path(httpCacheDir.absolutePath)
+
+
             UstadCacheBuilder(
                 appContext = applicationContext,
                 storagePath = storagePath,
@@ -863,6 +869,21 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
         bind<ExtractVideoThumbnailUseCase>() with singleton {
             ExtractVideoThumbnailUseCaseAndroid(applicationContext)
+        }
+
+        bind<GetOfflineStorageOptionsUseCase>() with singleton {
+            GetOfflineStorageOptionsUseCaseAndroid(applicationContext)
+        }
+
+        bind<GetOfflineStorageSettingUseCase>() with singleton {
+            GetOfflineStorageSettingUseCase(
+                getOfflineStorageOptionsUseCase = instance(),
+                settings = instance(),
+            )
+        }
+
+        bind<SetOfflineStorageSettingUseCase>() with singleton {
+            SetOfflineStorageSettingUseCase(settings = instance())
         }
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }

@@ -1910,4 +1910,6 @@
 
     <string name="upload_error">Upload error</string>
 
+    <string name="offline_items_storage">Offline items storage</string>
+
 </resources>
