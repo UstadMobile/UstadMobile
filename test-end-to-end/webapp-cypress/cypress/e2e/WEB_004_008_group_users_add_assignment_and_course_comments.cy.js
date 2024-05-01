@@ -129,15 +129,8 @@ it('Group 1 - Student2 able to view Group 1 assignment and course comments', () 
   cy.contains("button","Course").click()
   cy.contains("Assignment 1").click()
   cy.get("#VirtualList").scrollTo('bottom')
-  cy.contains("Text 1").should('be.visible')
-  cy.contains("comment1").then(($input) => {
-     if ($input.is(':visible')) {
-       // If "comment1" is visible, verify the existence of both "comment1" and "comment2"
-        cy.contains("comment2").should('exist');
-     } else {
-       // If "comment2" is not visible, scroll to the bottom of the element with id "#VirtualList"
-        cy.get("#VirtualList").scrollTo('bottom');
-     }
-   })
+  cy.contains("Text 1").ustadScrollUntilVisible("Text 1")
+  cy.contains("comment1").ustadScrollUntilVisible("comment1")
+  cy.contains("comment2").should('exist')
 })
 })

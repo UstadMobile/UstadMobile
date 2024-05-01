@@ -256,6 +256,18 @@ clickAndVerify();
 
 })
 
+// Scroll until a text is visible
+Cypress.Commands.add('ustadScrollUntilVisible', { prevSubject: 'element' }, (subjects, expectedName) => {
+ cy.contains(expectedName).then(($input) => {
+     if ($input.is(':visible')) {
+         cy.contains(expectedName).should('exist');
+
+     } else {
+       // If "expectedName" is not visible, scroll to the bottom of the element with id "#VirtualList"
+        cy.get("#VirtualList").scrollTo('bottom');
+     }
+   })
+})
 
    // Add course and private comments in Assignment
 Cypress.Commands.add('ustadTypeAndSubmitAssignmentComment', (commentid, sendid, comment, delay = 25) => {

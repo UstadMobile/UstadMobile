@@ -97,7 +97,7 @@ it('Group 1 - Student add private comment', () => {
   cy.contains('Assignment 1').click()
    cy.get(".VirtualList").scrollTo('bottom')
   cy.ustadTypeAndSubmitAssignmentComment('#private_comment_textfield','#private_comment_textfield_send_button','comment2')
-  cy.contains("comment2").should('exist')
+  cy.contains("comment2").ustadScrollUntilVisible("comment2")
 })
 
 it('Group 2 - Student3 not able to view Group 1 private comments', () => {
@@ -117,14 +117,7 @@ it('Group 1 - Student2 able to view Group 1 private comment', () => {
   cy.contains("004_009").click()
   cy.contains('Assignment 1').click()
   cy.get("#VirtualList").scrollTo('bottom');
-   cy.contains("comment1").then(($input) => {
-     if ($input.is(':visible')) {
-       // If "comment1" is visible, verify the existence of both "comment1" and "comment2"
-          cy.contains("comment2").should('exist');
-     } else {
-       // If "comment2" is not visible, scroll to the bottom of the element with id "#VirtualList"
-          cy.get("#VirtualList").scrollTo('bottom');
-     }
-   })
+  cy.contains("comment1").ustadScrollUntilVisible("comment1")
+  cy.contains("comment2").should('exist')
 })
 })
