@@ -81,8 +81,14 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
                  FROM ClazzAssignment
                 WHERE ClazzAssignment.caUid = :assignmentUid) AS isGroupAssignment
     """)
-    @QueryLiveTables(arrayOf("SystemPermission", "CoursePermission", "ClazzEnrolment",
-        "ClazzAssignment", "CourseAssignmentMark", "CourseAssignmentSubmission", "CourseGroupMember"))
+    @QueryLiveTables(
+        arrayOf(
+            "SystemPermission", "CoursePermission", "ClazzAssignment",
+            "ClazzEnrolment", "PeerReviewerAllocation", "Person", "CourseGroupMember",
+            "CourseAssignmentSubmission", "CourseAssignmentMark", "Comments",
+            "PersonPicture"
+        )
+    )
     /**
      * Get a summary of the numbers that have submitted/been marked for a given assignment.
      */
@@ -197,8 +203,14 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
                WHEN $SORT_NAME_DESC THEN SubmitterList.name
                ELSE '' END DESC
     """)
-    @QueryLiveTables(arrayOf("SystemPermission", "CoursePermission", "ClazzAssignment",
-        "ClazzEnrolment", "PeerReviewerAllocation", "Person", "CourseGroupMember"))
+    @QueryLiveTables(
+        arrayOf(
+            "SystemPermission", "CoursePermission", "ClazzAssignment",
+            "ClazzEnrolment", "PeerReviewerAllocation", "Person", "CourseGroupMember",
+            "CourseAssignmentSubmission", "CourseAssignmentMark", "Comments",
+            "PersonPicture"
+        )
+    )
     /**
      * Used by the ClazzAssignmentDetailSubmissionsListTab - gets a list of the name (e.g. the
      * person name when submissions are by individual students, "group (groupnum)" when submissions
