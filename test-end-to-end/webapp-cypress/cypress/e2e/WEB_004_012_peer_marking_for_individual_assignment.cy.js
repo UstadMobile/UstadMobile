@@ -93,7 +93,7 @@ it('Student1 submit assignment', () => {
   cy.contains('Assignment 1').click()
   cy.get('#assignment_text').get('div[contenteditable="true"]',{timeout:6000}).should('be.visible')
   cy.get('#assignment_text').click()
-  cy.get('#assignment_text').type("Text 1")
+  cy.get('.ql-editor').ustadTypeAndVerify('Text 1')
   cy.contains('SUBMIT',{timeout:5000}).click()
   cy.contains("Submission 1").should("be.visible")
   cy.contains("Text 1").should("be.visible")
