@@ -225,6 +225,36 @@ Cypress.Commands.add('ustadTypeAndVerify', { prevSubject: 'element' }, (subjects
   })
 })
 
+// Assignment Submission page page verifies submission list is visible
+Cypress.Commands.add('ustadVerifySubmissionList', { prevSubject: 'element' }, (subjects, expectedName, retryLimit = 3) => {
+
+let retries = 0;
+
+const clickAndVerify = () => {
+    cy.contains(expectedName).then(($input) => {
+        if ($input.is(':visible')) {
+            cy.contains(expectedName).click();
+        }
+        else {
+            // If "expectedName" is not visible, reload the page
+            cy.reload();
+            retries++;
+
+            // Retry if the maximum number of retries is not reached
+            if (($input.is.not(':visible')) && (retries <= {retryLimit})) {
+                clickAndVerify();
+            } else {
+                // Log an error if the maximum number of retries is reached
+                cy.log("Maximum retries reached. Unable to find 'Group 1'.");
+            }
+        }
+    });
+};
+
+// Start the function to click and verify
+clickAndVerify();
+
+})
 
 
    // Add course and private comments in Assignment
