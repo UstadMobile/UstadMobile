@@ -110,6 +110,7 @@ import com.ustadmobile.core.domain.share.ShareTextUseCase
 import com.ustadmobile.core.domain.share.ShareTextUseCaseAndroid
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
 import com.ustadmobile.core.domain.storage.CachePathsProviderAndroid
+import com.ustadmobile.core.domain.storage.GetAndroidSdCardDirUseCase
 import com.ustadmobile.core.domain.storage.GetOfflineStorageOptionsUseCase
 import com.ustadmobile.core.domain.storage.GetOfflineStorageOptionsUseCaseAndroid
 import com.ustadmobile.core.domain.storage.GetOfflineStorageSettingUseCase
@@ -366,7 +367,8 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
         bind<CachePathsProvider>() with singleton {
             CachePathsProviderAndroid(
                 appContext = applicationContext,
-                getOfflineStorageSettingUseCase = instance(),
+                getAndroidSdCardPathUseCase = instance(),
+                getOfflineStorageSettingUseCase = instance()
             )
         }
 
@@ -879,8 +881,14 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             ExtractVideoThumbnailUseCaseAndroid(applicationContext)
         }
 
+        bind<GetAndroidSdCardDirUseCase>() with singleton {
+            GetAndroidSdCardDirUseCase(applicationContext)
+        }
+
         bind<GetOfflineStorageOptionsUseCase>() with singleton {
-            GetOfflineStorageOptionsUseCaseAndroid()
+            GetOfflineStorageOptionsUseCaseAndroid(
+                getAndroidSdCardDirUseCase = instance()
+            )
         }
 
         bind<GetOfflineStorageSettingUseCase>() with singleton {

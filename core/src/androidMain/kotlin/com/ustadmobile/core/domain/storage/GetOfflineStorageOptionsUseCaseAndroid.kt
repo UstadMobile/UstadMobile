@@ -1,9 +1,10 @@
 package com.ustadmobile.core.domain.storage
 
-import android.os.Environment
 import com.ustadmobile.core.MR
 
-class GetOfflineStorageOptionsUseCaseAndroid: GetOfflineStorageOptionsUseCase {
+class GetOfflineStorageOptionsUseCaseAndroid(
+    private val getAndroidSdCardDirUseCase: GetAndroidSdCardDirUseCase,
+): GetOfflineStorageOptionsUseCase {
 
     private val internalStorage = OfflineStorageOption(
         label = MR.strings.phone_memory,
@@ -11,9 +12,7 @@ class GetOfflineStorageOptionsUseCaseAndroid: GetOfflineStorageOptionsUseCase {
     )
 
     override fun invoke(): List<OfflineStorageOption> {
-        return if(
-            Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED
-        ) {
+        return if(getAndroidSdCardDirUseCase() != null) {
             listOf(
                 internalStorage,
                 OfflineStorageOption(MR.strings.memory_card, EXTERNAL),
