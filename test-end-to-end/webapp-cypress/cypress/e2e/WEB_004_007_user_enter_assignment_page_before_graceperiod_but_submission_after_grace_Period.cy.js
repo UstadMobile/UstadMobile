@@ -83,7 +83,7 @@ it('Teacher checks submissions', () => {
   cy.contains("button","Course").click()
   cy.contains("Assignment 1").click()
   cy.contains('Submissions').click()
-  cy.contains('Student 1', {timeout: 10000 }).click()
+  cy.contains("Student 1").ustadVerifySubmissionList('Student 1',1)
   cy.contains("Not submitted").should('exist')
 })
 
