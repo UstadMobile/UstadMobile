@@ -137,11 +137,11 @@ class SettingsViewModel(
         viewModelScope.launch {
             val offlineStorageOptions = getStorageOptionsUseCase?.invoke()
             val selectedOfflineStorage = getOfflineStorageSettingUseCase?.invoke()
-            if(offlineStorageOptions != null && selectedOfflineStorage != null) {
+            if(offlineStorageOptions != null) {
                 _uiState.update {
                     it.copy(
                         storageOptions = offlineStorageOptions,
-                        selectedOfflineStorageOption = selectedOfflineStorage,
+                        selectedOfflineStorageOption = selectedOfflineStorage ?: offlineStorageOptions.first(),
                     )
                 }
             }

@@ -12,7 +12,7 @@ class GetOfflineStorageSettingUseCase(
         val setting = settings.getStringOrNull(PREFKEY_OFFLINE_STORAGE)
         val options = getOfflineStorageOptionsUseCase()
         return options.takeIf { setting != null }?.firstOrNull {
-            it.path == setting
+            it.value == setting
         } ?: options.first()
     }
 }

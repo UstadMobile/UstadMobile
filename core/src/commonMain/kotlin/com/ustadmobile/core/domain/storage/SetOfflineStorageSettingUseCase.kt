@@ -8,6 +8,6 @@ class SetOfflineStorageSettingUseCase(
 ) {
 
     operator fun invoke(option: OfflineStorageOption) {
-        settings.putString(PREFKEY_OFFLINE_STORAGE, option.path)
+        settings.putString(PREFKEY_OFFLINE_STORAGE, option.value)
     }
 }
