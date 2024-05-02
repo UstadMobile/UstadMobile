@@ -241,23 +241,28 @@ const clickAndVerify = () => {
             retries++;
 
             // Retry if the maximum number of retries is not reached
-            if (($input.is.not(':visible')) && (retries <= {retryLimit})) {
+            if (!($input.is(':visible')) && (retries <= {retryLimit})) {
                 clickAndVerify();
             } else {
                 // Log an error if the maximum number of retries is reached
-                cy.log("Maximum retries reached. Unable to find 'Group 1'.");
+                cy.log("Maximum retries reached.");
             }
         }
-    });
-};
+    })
+}
 
 // Start the function to click and verify
 clickAndVerify();
 
 })
 
+
 // Scroll until a text is visible
-Cypress.Commands.add('ustadScrollUntilVisible', { prevSubject: 'element' }, (subjects, expectedName) => {
+Cypress.Commands.add('ustadScrollUntilVisible', { prevSubject: 'element' }, (subjects, expectedName,retryLimit=2) => {
+
+ let retries = 0;
+
+ const scrollAndVerify = () => {
  cy.contains(expectedName).then(($input) => {
      if ($input.is(':visible')) {
          cy.contains(expectedName).should('exist');
@@ -265,9 +270,23 @@ Cypress.Commands.add('ustadScrollUntilVisible', { prevSubject: 'element' }, (sub
      } else {
        // If "expectedName" is not visible, scroll to the bottom of the element with id "#VirtualList"
         cy.get("#VirtualList").scrollTo('bottom');
+        retries++;
+       // Retry if the maximum number of retries is not reached
+     if (!($input.is(':visible')) && (retries <= {retryLimit})) {
+         scrollAndVerify();
+     }
+     else {
+        // Log an error if the maximum number of retries is reached
+          cy.log("Maximum retries reached.");
+     }
      }
    })
+}
+
+// Start the function to scroll and verify
+scrollAndVerify();
 })
+
 
    // Add course and private comments in Assignment
 Cypress.Commands.add('ustadTypeAndSubmitAssignmentComment', (commentid, sendid, comment, delay = 25) => {
