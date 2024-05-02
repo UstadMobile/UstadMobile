@@ -40,7 +40,7 @@ it('Teacher able to add a new discussion board and post to the discussion', () =
   cy.contains("Discussion 2").click()
   cy.contains('Post').click()
   cy.get('#discussion_post_title').type('Post Title')
-  cy.get('#discussion_post_message .ql-editor').type('Discusssion post')
+  cy.get('.ql-editor').ustadTypeAndVerify('Discusssion post')
   cy.get('#actionBarButton').click()
 })
 })

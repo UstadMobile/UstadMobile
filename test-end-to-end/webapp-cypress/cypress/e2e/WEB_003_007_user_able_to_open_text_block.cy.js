@@ -1,4 +1,4 @@
-describe('WEB_003_006_user_able_to_expand _and_collapse_modules', () => {
+describe('WEB_003_007_user_able_to_open_text_block', () => {
 it('Start Ustad Test Server ', () => {
   // Start Test Server
   cy.ustadStartTestServer()
