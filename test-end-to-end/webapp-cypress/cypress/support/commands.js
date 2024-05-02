@@ -200,13 +200,17 @@ Cypress.Commands.add('ustadAddDiscussionBoard',(discussionTitle) => {
     cy.contains("button","Done").click()
 })
 
-Cypress.Commands.add('ustadTypeAndVerify', { prevSubject: 'element' }, (subjects, expectedText, maxRetries = 3) => {
+// Type and verify text in text field
+Cypress.Commands.add('ustadTypeAndVerify', { prevSubject: 'element' }, (subjects, expectedText, options = {}) => {
+   // Set maxRetries to options.maxRetries if provided, otherwise default to 3
+    let maxRetries = options.maxRetries || 3
+
   cy.wrap(subjects).each((subject) => {
     let retries = 0
 
     const typeAndVerify = () => {
       retries++
-      if (retries > {maxRetries}) {
+      if (retries > maxRetries) {
         cy.log("Maximum retries reached")
         return
       }
@@ -225,77 +229,74 @@ Cypress.Commands.add('ustadTypeAndVerify', { prevSubject: 'element' }, (subjects
   })
 })
 
-// Assignment Submission page page verifies submission list is visible
-Cypress.Commands.add('ustadVerifySubmissionList', { prevSubject: 'element' }, (subjects, expectedName, retryLimit = 3) => {
+// Assignment Submission page verifies submission list is visible
+Cypress.Commands.add('ustadVerifySubmissionList', { prevSubject: 'element' }, (subject, options = {}) => {
+  // Set retryLimit to options.retryLimit if provided, otherwise default to 3
+  let retryLimit = options.retryLimit || 3
+  let retries = 0
 
-let retries = 0;
+  const clickAndVerify = () => {
+    if (Cypress.dom.isVisible(subject)) {
+      cy.wrap(subject).click()
+    } else {
+      // If subject is not visible, reload the page
+      cy.reload()
+      retries++
 
-const clickAndVerify = () => {
-    cy.contains(expectedName).then(($input) => {
-        if ($input.is(':visible')) {
-            cy.contains(expectedName).click();
-        }
-        else {
-            // If "expectedName" is not visible, reload the page
-            cy.reload();
-            retries++;
+      // Retry if the maximum number of retries is not reached
+      if (!Cypress.dom.isVisible(subject) && retries <= retryLimit) {
+        clickAndVerify()
+      } else {
+        // Log an error if the maximum number of retries is reached
+        cy.log("Maximum retries reached.")
+      }
+    }
+  }
 
-            // Retry if the maximum number of retries is not reached
-            if (!($input.is(':visible')) && (retries <= {retryLimit})) {
-                clickAndVerify();
-            } else {
-                // Log an error if the maximum number of retries is reached
-                cy.log("Maximum retries reached.");
-            }
-        }
-    })
-}
-
-// Start the function to click and verify
-clickAndVerify();
-
+  // Start the function to click and verify
+  clickAndVerify()
 })
 
 
-// Scroll until a text is visible
-Cypress.Commands.add('ustadScrollUntilVisible', { prevSubject: 'element' }, (subjects, expectedName,retryLimit=2) => {
+//Scroll until a subject is visible
+Cypress.Commands.add('ustadScrollUntilVisible', { prevSubject: 'element' }, (subject, options = {}) => {
 
- let retries = 0;
+  // Set scrollElement to options.scrollElement if provided, otherwise default to "#VirtualList"
+  let scrollElement = options.scrollElement || "#VirtualList"
+  // Set retryLimit to options.retryLimit if provided, otherwise default to 3
+  let retryLimit = options.retryLimit || 3
+  let retries = 0;
 
- const scrollAndVerify = () => {
- cy.contains(expectedName).then(($input) => {
-     if ($input.is(':visible')) {
-         cy.contains(expectedName).should('exist');
-
-     } else {
-       // If "expectedName" is not visible, scroll to the bottom of the element with id "#VirtualList"
-        cy.get("#VirtualList").scrollTo('bottom');
-        retries++;
-       // Retry if the maximum number of retries is not reached
-     if (!($input.is(':visible')) && (retries <= {retryLimit})) {
-         scrollAndVerify();
-     }
-     else {
+  const scrollAndVerify = () => {
+    if (Cypress.dom.isVisible(subject)) {
+      cy.wrap(subject).should('exist')
+    } else {
+      // If subject is not visible, scroll to the bottom of the specified scroll element
+      cy.get(scrollElement).scrollTo('bottom')
+      retries++
+      // Retry if the maximum number of retries is not reached
+      if (!Cypress.dom.isVisible(subject) && retries <= retryLimit) {
+        scrollAndVerify()
+      } else {
         // Log an error if the maximum number of retries is reached
-          cy.log("Maximum retries reached.");
-     }
-     }
-   })
-}
+        cy.log("Maximum retries reached.")
+      }
+    }
+  }
 
-// Start the function to scroll and verify
-scrollAndVerify();
+  // Start the function to scroll and verify
+  scrollAndVerify()
 })
 
 
    // Add course and private comments in Assignment
 Cypress.Commands.add('ustadTypeAndSubmitAssignmentComment', (commentid, sendid, comment, delay = 25) => {
-    cy.get(commentid).click().type(comment, { delay });
+    cy.get(commentid).click().type(comment, { delay })
     cy.get('input' + commentid + '[value=\"' + comment + '\"]')
-    cy.get(commentid).should('have.value', comment);
-    cy.get(sendid).click();
-    cy.contains('.MuiListItemText-secondary',comment).should('exist');
-});
+    cy.get(commentid).should('have.value', comment)
+    cy.get(sendid).click()
+    cy.contains('.MuiListItemText-secondary',comment).should('exist')
+})
 
 
   // Enable User Registration
@@ -343,6 +344,9 @@ Cypress.Commands.add("ustadBirthDate", (element, date) => {
      String(date.getDate()).padStart(2, '0')
      );
 });
+
+
+
 
 //commands.js
 //

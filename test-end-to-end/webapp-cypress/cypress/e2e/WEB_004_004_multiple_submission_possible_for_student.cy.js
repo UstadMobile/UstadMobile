@@ -77,7 +77,7 @@ it('Teacher can mark assignment and add course comment', () => {
   cy.contains("button","Course").click()
   cy.contains("Assignment 1").click()
   cy.contains('Submissions').click()
-  cy.contains("Student 1").ustadVerifySubmissionList('Student 1',1)
+  cy.contains("Student 1").ustadVerifySubmissionList()
   cy.get('#marker_comment').type("Keep it up")
   cy.get('#marker_mark').type('9')
   cy.get('#submit_mark_button').click()
