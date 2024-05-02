@@ -18,6 +18,7 @@ import com.ustadmobile.core.domain.htmlcontentdisplayengine.GetHtmlContentDispla
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.HtmlContentDisplayEngineOption
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.SetHtmlContentDisplayEngineUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
+import com.ustadmobile.core.domain.storage.GetOfflineStorageAvailableSpace
 import com.ustadmobile.core.domain.storage.GetOfflineStorageOptionsUseCase
 import com.ustadmobile.core.domain.storage.GetOfflineStorageSettingUseCase
 import com.ustadmobile.core.domain.storage.OfflineStorageOption
@@ -31,6 +32,11 @@ import com.ustadmobile.core.viewmodel.site.detail.SiteDetailViewModel
 import kotlinx.atomicfu.atomic
 import org.kodein.di.instance
 import org.kodein.di.instanceOrNull
+
+data class SettingsOfflineStorageOption(
+    val option: OfflineStorageOption,
+    val availableSpace: Long,
+)
 
 data class SettingsUiState(
 
@@ -58,7 +64,7 @@ data class SettingsUiState(
 
     val version: String = "",
 
-    val storageOptions: List<OfflineStorageOption> = emptyList(),
+    val storageOptions: List<SettingsOfflineStorageOption> = emptyList(),
 
     val selectedOfflineStorageOption: OfflineStorageOption? = null,
 
@@ -105,6 +111,8 @@ class SettingsViewModel(
 
     private val setOfflineStorageSettingUseCase: SetOfflineStorageSettingUseCase? by instanceOrNull()
 
+    private val getOfflineStorageAvailableSpace: GetOfflineStorageAvailableSpace? by instanceOrNull()
+
     private val versionClickCount = atomic(0)
 
     private val settings: Settings by instance()
@@ -137,10 +145,17 @@ class SettingsViewModel(
         viewModelScope.launch {
             val offlineStorageOptions = getStorageOptionsUseCase?.invoke()
             val selectedOfflineStorage = getOfflineStorageSettingUseCase?.invoke()
-                if(offlineStorageOptions != null) {
+            if(offlineStorageOptions != null) {
+                val optionsWithSpace = offlineStorageOptions.map {
+                    SettingsOfflineStorageOption(
+                        option = it,
+                        availableSpace = getOfflineStorageAvailableSpace?.invoke(it) ?: 0
+                    )
+                }
+
                 _uiState.update {
                     it.copy(
-                        storageOptions = offlineStorageOptions,
+                        storageOptions = optionsWithSpace,
                         selectedOfflineStorageOption = selectedOfflineStorage ?: offlineStorageOptions.first(),
                     )
                 }

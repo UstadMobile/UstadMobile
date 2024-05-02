@@ -111,6 +111,8 @@ import com.ustadmobile.core.domain.share.ShareTextUseCaseAndroid
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
 import com.ustadmobile.core.domain.storage.CachePathsProviderAndroid
 import com.ustadmobile.core.domain.storage.GetAndroidSdCardDirUseCase
+import com.ustadmobile.core.domain.storage.GetOfflineStorageAvailableSpace
+import com.ustadmobile.core.domain.storage.GetOfflineStorageAvailableSpaceAndroid
 import com.ustadmobile.core.domain.storage.GetOfflineStorageOptionsUseCase
 import com.ustadmobile.core.domain.storage.GetOfflineStorageOptionsUseCaseAndroid
 import com.ustadmobile.core.domain.storage.GetOfflineStorageSettingUseCase
@@ -900,6 +902,13 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
         bind<SetOfflineStorageSettingUseCase>() with singleton {
             SetOfflineStorageSettingUseCase(settings = instance())
+        }
+
+        bind<GetOfflineStorageAvailableSpace>() with singleton {
+            GetOfflineStorageAvailableSpaceAndroid(
+                getAndroidSdCardDirUseCase = instance(),
+                appContext = applicationContext,
+            )
         }
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }

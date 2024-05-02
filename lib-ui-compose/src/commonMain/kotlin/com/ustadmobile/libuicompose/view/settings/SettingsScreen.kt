@@ -24,6 +24,7 @@ import com.ustadmobile.core.viewmodel.settings.SettingsUiState
 import com.ustadmobile.libuicompose.components.UstadDetailField2
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.viewmodel.settings.SettingsViewModel
 import com.ustadmobile.libuicompose.components.UstadDetailHeader
 import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
@@ -86,9 +87,17 @@ fun SettingsScreen(
             uiState.storageOptions.forEach { option ->
                 ListItem(
                     modifier = Modifier.clickable {
-                        viewModel.onSelectOfflineStorageOption(option)
+                        viewModel.onSelectOfflineStorageOption(option.option)
                     },
-                    headlineContent = { Text(stringResource(option.label)) }
+                    headlineContent = { Text(stringResource(option.option.label)) },
+                    supportingContent = {
+                        Text(
+                            stringResource(
+                                MR.strings.space_available,
+                                UMFileUtil.formatFileSize(option.availableSpace)
+                            )
+                        )
+                    }
                 )
             }
         }

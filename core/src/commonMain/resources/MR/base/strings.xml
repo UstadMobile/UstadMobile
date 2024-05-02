@@ -1912,4 +1912,9 @@
 
     <string name="offline_items_storage">Offline items storage</string>
 
+    <!--
+    Tells the user how much space is available - %1$s will be replaced with available space e.g. 10GB etc.
+    -->
+    <string name="space_available">%1$s available</string>
+
 </resources>
