@@ -148,7 +148,6 @@ fun ContentEntryListScreen(
                 if(uiState.showChips) {
                     item(key = "filterchips") {
                         UstadListFilterChipsHeader(
-                            modifier = Modifier.defaultItemPadding(),
                             filterOptions = uiState.filterOptions,
                             selectedChipId = uiState.selectedChipId,
                             onClickFilterChip = onClickFilterChip,

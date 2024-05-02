@@ -55,7 +55,7 @@ import java.util.concurrent.Executors
  */
 class UstadCacheInterceptor(
     private val cache: UstadCache,
-    private val tmpDir: File,
+    private val tmpDirProvider: () -> File,
     private val logger : UstadCacheLogger? = null,
     private val cacheControlFreshnessChecker: CacheControlFreshnessChecker =
         CacheControlFreshnessCheckerImpl(),
@@ -96,6 +96,7 @@ class UstadCacheInterceptor(
             val digest = MessageDigest.getInstance("SHA-256")
             val partialFile = call.request().headers[HEADER_X_INTERCEPTOR_PARTIAL_FILE]
 
+            val tmpDir = tmpDirProvider()
             val responseBodyFile = partialFile?.let { File(it) }
                 ?: File(tmpDir, UUID.randomUUID().toString())
             val partialFileMetadataFile = if(partialFile != null) {

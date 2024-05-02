@@ -107,13 +107,13 @@ class ContentManifestDownloadUseCaseTest {
             ).toInt()
         }
 
+        val tmpResponseFolder = temporaryFolder.newFolder("cache-tmp-partial-responses")
         val useCase = ContentManifestDownloadUseCase(
             enqueueBlobDownloadClientUseCase = mockEnqueueBlobDownloadUseCase,
             db = db,
             httpClient = httpClient,
             json = json,
-            cacheTmpPath = temporaryFolder.newFolder("cache-tmp-partial-responses")
-                .absolutePath.requireFileSeparatorSuffix()
+            cacheTmpPath = { tmpResponseFolder.absolutePath.requireFileSeparatorSuffix() }
         )
 
         runBlocking {

@@ -100,8 +100,8 @@ import com.ustadmobile.core.impl.config.AppConfig
 import com.ustadmobile.core.impl.config.AppConfig.Companion.KEY_CONFIG_SHOW_POWERED_BY
 import com.ustadmobile.core.launchopenlicenses.LaunchOpenLicensesUseCaseJvm
 import com.ustadmobile.core.util.DiTag
-import com.ustadmobile.core.util.ext.requireFileSeparatorSuffix
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.libcache.CachePathsProvider
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
@@ -279,12 +279,14 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
     }
 
     bind<ContentManifestDownloadUseCase>() with scoped(EndpointScope.Default).singleton {
+        val cachePathsProvider: CachePathsProvider = instance()
+
         ContentManifestDownloadUseCase(
             enqueueBlobDownloadClientUseCase = instance(),
             db = instance(tag = DoorTag.TAG_DB),
             httpClient = instance(),
             json = instance(),
-            cacheTmpPath = instance<File>(tag = TAG_CACHE_DIR).absolutePath.requireFileSeparatorSuffix()
+            cacheTmpPath = { cachePathsProvider().tmpWorkPath.toString() }
         )
     }
 
