@@ -219,8 +219,10 @@ Cypress.Commands.add('ustadTypeAndVerify', { prevSubject: 'element' }, (subjects
         if (currentValue === expectedText) {
           return; // Exit the function if currentValue matches expectedText
         }
+        else{
         cy.wrap(subject).clear().type(expectedText)
-
+      typeAndVerify()
+      }
       })
     }
 
@@ -271,7 +273,7 @@ Cypress.Commands.add('ustadScrollUntilVisible', { prevSubject: 'element' }, (sub
     if (Cypress.dom.isVisible(subject)) {
       cy.wrap(subject).should('exist')
     } else {
-      // If subject is not visible, scroll to the bottom of the specified scroll element
+      // scroll to bottom
       cy.get(scrollElement).scrollTo('bottom')
       retries++
       // Retry if the maximum number of retries is not reached
