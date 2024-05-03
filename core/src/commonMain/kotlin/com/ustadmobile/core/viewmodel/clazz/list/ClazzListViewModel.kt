@@ -53,7 +53,6 @@ data class ClazzListUiState(
 
     val filterOptions: List<MessageIdOption2> = listOf(
         MessageIdOption2(MR.strings.currently_enrolled, ClazzDaoCommon.FILTER_CURRENTLY_ENROLLED),
-        MessageIdOption2(MR.strings.past_enrollments, ClazzDaoCommon.FILTER_PAST_ENROLLMENTS),
         MessageIdOption2(MR.strings.all, 0)
     ),
 

@@ -66,7 +66,7 @@ it('Student not able to submit assignment', () => {
   cy.contains('Assignment 1').click()
   cy.get('#assignment_text').get('div[contenteditable="true"]',{timeout:6000}).should('be.visible')
   cy.get('#assignment_text').click()
-  cy.get('#assignment_text').type("Text 1")
+  cy.get('.ql-editor').ustadTypeAndVerify('Text 1')
   cy.wait(120000) //wait before submitting the assignment -2 mins-120sec
   cy.contains('SUBMIT',{timeout:5000}).click()
   cy.wait(1000) //This wait command added to make sure to the error message is visible
@@ -83,7 +83,7 @@ it('Teacher checks submissions', () => {
   cy.contains("button","Course").click()
   cy.contains("Assignment 1").click()
   cy.contains('Submissions').click()
-  cy.contains('Student 1', {timeout: 10000 }).click()
+  cy.contains("Student 1").ustadVerifySubmissionList()
   cy.contains("Not submitted").should('exist')
 })
 

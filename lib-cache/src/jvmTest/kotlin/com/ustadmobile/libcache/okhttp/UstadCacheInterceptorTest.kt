@@ -112,7 +112,7 @@ class UstadCacheInterceptorTest {
         okHttpClient = OkHttpClient.Builder()
             .addInterceptor(
                 UstadCacheInterceptor(
-                    ustadCache, interceptorTmpDir,
+                    ustadCache, { interceptorTmpDir} ,
                     logger = logger,
                     json = json,
                 ))
