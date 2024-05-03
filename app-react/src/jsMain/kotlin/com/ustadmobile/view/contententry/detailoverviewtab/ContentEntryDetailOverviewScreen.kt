@@ -73,6 +73,7 @@ val ContentEntryDetailOverviewComponent2 = FC<ContentEntryDetailOverviewScreenPr
 
 
             Button {
+                id = "open_button"
                 onClick = {
                     console.log("ContentEntryDetailOverviewScreen: onClickOpen")
                     props.onClickOpen()
