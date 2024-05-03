@@ -24,6 +24,7 @@ import mui.system.responsive
 import react.FC
 import react.Props
 import react.ReactNode
+import kotlinx.coroutines.Dispatchers
 
 external interface SiteEditProps: Props {
     var uiState: SiteEditUiState
@@ -114,7 +115,7 @@ val SiteEditScreen = FC<Props> {
     val viewModel = useUstadViewModel { di, savedStateHandle ->
         SiteEditViewModel(di, savedStateHandle)
     }
-    val uiStateVal by viewModel.uiState.collectAsState(SiteEditUiState())
+    val uiStateVal by viewModel.uiState.collectAsState(SiteEditUiState(), Dispatchers.Main.immediate)
 
     SiteEditComponent2 {
         uiState = uiStateVal
