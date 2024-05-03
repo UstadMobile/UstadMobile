@@ -20,4 +20,9 @@ expect fun FileSystem.rangeSource(path: Path, fromByte: Long, toByte: Long): Raw
  */
 expect fun FileSystem.lastModified(path: Path): Long
 
-
+/**
+ * Move from the source to the destination. Normally this will just use AtomicMove. If that fails
+ * (e.g. because source and destination are on different volumes), then the bytes will be copied
+ * from source to destination and source will be deleted.
+ */
+expect fun FileSystem.moveWithFallback(source: Path, destination: Path)

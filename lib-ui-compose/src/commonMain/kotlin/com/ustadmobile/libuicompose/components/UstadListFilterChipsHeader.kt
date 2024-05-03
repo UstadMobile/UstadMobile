@@ -1,7 +1,10 @@
 package com.ustadmobile.libuicompose.components
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -15,24 +18,27 @@ import dev.icerock.moko.resources.compose.stringResource
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun UstadListFilterChipsHeader(
-    modifier: Modifier = Modifier,
     filterOptions: List<MessageIdOption2>,
     selectedChipId: Int,
     enabled: Boolean = true,
     onClickFilterChip: (MessageIdOption2) -> Unit = {},
 ){
-    FlowRow(modifier = modifier) {
-        filterOptions.forEach { filterOption ->
-            FilterChip(
-                selected = filterOption.value == selectedChipId,
-                onClick = { onClickFilterChip(filterOption) },
-                enabled = enabled,
-                modifier = Modifier
-                    .padding(start = 8.dp, end = 8.dp),
-                label = {
-                    Text(stringResource(resource = filterOption.stringResource))
-                }
-            )
+    Box(Modifier.padding(start = 16.dp, end= 16.dp).fillMaxWidth()) {
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            filterOptions.forEachIndexed { index, filterOption ->
+                FilterChip(
+                    selected = filterOption.value == selectedChipId,
+                    onClick = { onClickFilterChip(filterOption) },
+                    enabled = enabled,
+                    label = {
+                        Text(stringResource(resource = filterOption.stringResource))
+                    }
+                )
+            }
         }
     }
+
 }

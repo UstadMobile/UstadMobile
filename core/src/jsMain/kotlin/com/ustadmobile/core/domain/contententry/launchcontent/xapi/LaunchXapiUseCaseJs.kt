@@ -5,6 +5,7 @@ import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.ext.asWindowTarget
 import com.ustadmobile.lib.db.entities.ContentEntryVersion
+import io.github.aakira.napier.Napier
 import web.location.location
 import web.window.window
 
@@ -22,8 +23,10 @@ class LaunchXapiUseCaseJs(
         )
 
         if(target != OpenExternalLinkUseCase.Companion.LinkTarget.TOP) {
+            Napier.d { "LaunchXapiUseCaseJs: launching xapi in new windows: ${resolveResult.url}" }
             window.open(resolveResult.url, target.asWindowTarget(), features = "popup=true,noopener,noreferrer")
         }else {
+            Napier.d { "LaunchXapiUseCaseJs: navigating to: ${resolveResult.url}" }
             location.href = resolveResult.url
         }
 

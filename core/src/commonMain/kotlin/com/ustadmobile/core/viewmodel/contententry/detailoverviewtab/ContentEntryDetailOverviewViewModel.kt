@@ -299,9 +299,11 @@ class ContentEntryDetailOverviewViewModel(
     }
 
     fun onClickOpen() {
+        Napier.d("ContentEntryDetailOverviewViewModel: onClickOpen")
         viewModelScope.launch {
             try {
                 loadingState = LoadingUiState.INDETERMINATE
+                Napier.d("ContentEntryDetailOverviewViewModel: onClickOpen launched")
                 _uiState.update { it.copy(openButtonEnabled = false) }
                 val latestContentEntryVersion = activeRepo.localFirstThenRepoIfNull {
                     it.contentEntryVersionDao.findLatestVersionUidByContentEntryUidEntity(entityUidArg)
@@ -319,8 +321,10 @@ class ContentEntryDetailOverviewViewModel(
                     }
 
                     val launcher = (contentSpecificLauncher ?: defaultLaunchContentEntryUseCase)
+                    Napier.d("ContentEntryDetailOverviewViewModel: onClickOpen : Launching using $launcher")
                     launcher(latestContentEntryVersion, navController, openTarget)
                 }else {
+                    Napier.d("ContentEntryDetailOverviewViewModel: onClickOpen: latestContentEntryVersion = null")
                     snackDispatcher.showSnackBar(Snack(systemImpl.getString(MR.strings.content_not_ready_try_later)))
                 }
             }catch(e: Throwable) {

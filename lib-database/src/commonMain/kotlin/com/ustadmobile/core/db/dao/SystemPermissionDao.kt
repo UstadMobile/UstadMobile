@@ -43,6 +43,9 @@ expect abstract class SystemPermissionDao {
     ): List<SystemPermission>
 
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+    )
     @Query("""
         SELECT SystemPermission.*
           FROM SystemPermission
