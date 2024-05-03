@@ -112,7 +112,7 @@ class XferTestNode(
             .addInterceptor(
                 UstadCacheInterceptor(
                     cache = httpCache,
-                    tmpDir = File(rootTmpDir, "okhttp-tmp"),
+                    tmpDirProvider = { File(rootTmpDir, "okhttp-tmp") },
                     logger = NapierLoggingAdapter(),
                     json = json,
                 )

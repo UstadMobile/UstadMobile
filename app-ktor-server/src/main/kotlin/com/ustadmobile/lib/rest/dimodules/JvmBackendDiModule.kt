@@ -256,7 +256,7 @@ fun makeJvmBackendDiModule(
             .addInterceptor(
                 UstadCacheInterceptor(
                     cache = instance(),
-                    tmpDir = File(config.absoluteDataDir(), "httpfiles"),
+                    tmpDirProvider = { File(config.absoluteDataDir(), "httpfiles") },
                     logger = NapierLoggingAdapter(),
                     json = json,
                 )

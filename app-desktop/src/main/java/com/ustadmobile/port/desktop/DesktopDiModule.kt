@@ -230,7 +230,7 @@ val DesktopHttpModule = DI.Module("Desktop-HTTP") {
             .addInterceptor(
                 UstadCacheInterceptor(
                     cache = instance(),
-                    tmpDir = interceptorTmpDir,
+                    tmpDirProvider = { interceptorTmpDir },
                     logger = cacheLogger,
                     json = instance(),
                 )

@@ -109,6 +109,14 @@ import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCaseAndro
 import com.ustadmobile.core.domain.share.ShareTextUseCase
 import com.ustadmobile.core.domain.share.ShareTextUseCaseAndroid
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
+import com.ustadmobile.core.domain.storage.CachePathsProviderAndroid
+import com.ustadmobile.core.domain.storage.GetAndroidSdCardDirUseCase
+import com.ustadmobile.core.domain.storage.GetOfflineStorageAvailableSpace
+import com.ustadmobile.core.domain.storage.GetOfflineStorageAvailableSpaceAndroid
+import com.ustadmobile.core.domain.storage.GetOfflineStorageOptionsUseCase
+import com.ustadmobile.core.domain.storage.GetOfflineStorageOptionsUseCaseAndroid
+import com.ustadmobile.core.domain.storage.GetOfflineStorageSettingUseCase
+import com.ustadmobile.core.domain.storage.SetOfflineStorageSettingUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseCommonJvm
 import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
@@ -139,9 +147,9 @@ import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.uri.UriHelperAndroid
 import com.ustadmobile.core.util.ext.appMetaData
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
-import com.ustadmobile.core.util.ext.requireFileSeparatorSuffix
 import com.ustadmobile.core.util.ext.toNullIfBlank
 import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.libcache.CachePathsProvider
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
@@ -184,7 +192,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
     @OptIn(ExperimentalXmlUtilApi::class)
     override val di: DI by DI.lazy {
         bind<OkHttpClient>() with singleton {
-            val rootTmpDir: File = instance(tag = DiTag.TAG_TMP_DIR)
+            val cachePathProvider: CachePathsProvider = instance()
 
             OkHttpClient.Builder()
                 .dispatcher(
@@ -196,7 +204,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 .addInterceptor(
                     UstadCacheInterceptor(
                         cache = instance(),
-                        tmpDir = File(rootTmpDir, "okhttp-tmp"),
+                        tmpDirProvider = { File(cachePathProvider().tmpWorkPath.toString()) },
                         logger = NapierLoggingAdapter(),
                         json = instance(),
                     )
@@ -358,14 +366,25 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             XhtmlFixerJsoup(xml = instance())
         }
 
+        bind<CachePathsProvider>() with singleton {
+            CachePathsProviderAndroid(
+                appContext = applicationContext,
+                getAndroidSdCardPathUseCase = instance(),
+                getOfflineStorageSettingUseCase = instance()
+            )
+        }
+
         bind<UstadCache>() with singleton {
             val httpCacheDir =  applicationContext.httpPersistentFilesDir
             val storagePath = Path(httpCacheDir.absolutePath)
+
+
             UstadCacheBuilder(
                 appContext = applicationContext,
                 storagePath = storagePath,
                 logger = NapierLoggingAdapter(),
                 sizeLimit = { 100_000_000L },
+                cachePathsProvider = instance(),
             ).build()
         }
 
@@ -663,15 +682,14 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
         }
 
         bind<ContentManifestDownloadUseCase>() with scoped(EndpointScope.Default).singleton {
+            val cachePathsProvider: CachePathsProvider = instance()
+
             ContentManifestDownloadUseCase(
                 enqueueBlobDownloadClientUseCase = instance(),
                 db = instance(tag = DoorTag.TAG_DB),
                 httpClient = instance(),
                 json = instance(),
-                cacheTmpPath = File(
-                    applicationContext.httpPersistentFilesDir,
-                    UstadCacheBuilder.DEFAULT_SUBPATH_WORK
-                ).absolutePath.requireFileSeparatorSuffix(),
+                cacheTmpPath = { cachePathsProvider().tmpWorkPath.toString() }
             )
         }
 
@@ -863,6 +881,34 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
         bind<ExtractVideoThumbnailUseCase>() with singleton {
             ExtractVideoThumbnailUseCaseAndroid(applicationContext)
+        }
+
+        bind<GetAndroidSdCardDirUseCase>() with singleton {
+            GetAndroidSdCardDirUseCase(applicationContext)
+        }
+
+        bind<GetOfflineStorageOptionsUseCase>() with singleton {
+            GetOfflineStorageOptionsUseCaseAndroid(
+                getAndroidSdCardDirUseCase = instance()
+            )
+        }
+
+        bind<GetOfflineStorageSettingUseCase>() with singleton {
+            GetOfflineStorageSettingUseCase(
+                getOfflineStorageOptionsUseCase = instance(),
+                settings = instance(),
+            )
+        }
+
+        bind<SetOfflineStorageSettingUseCase>() with singleton {
+            SetOfflineStorageSettingUseCase(settings = instance())
+        }
+
+        bind<GetOfflineStorageAvailableSpace>() with singleton {
+            GetOfflineStorageAvailableSpaceAndroid(
+                getAndroidSdCardDirUseCase = instance(),
+                appContext = applicationContext,
+            )
         }
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
