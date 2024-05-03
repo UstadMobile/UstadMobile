@@ -266,34 +266,28 @@ Cypress.Commands.add('ustadTypeAndVerify', { prevSubject: 'element' }, (subjects
   })
 })
 
-// Assignment Submission page verifies submission list is visible
-//Could be done using cypress recurse as per
-// https://github.com/bahmutov/cypress-recurse/blob/main/cypress/e2e/reload-page/reload-spec.js
-Cypress.Commands.add('ustadVerifySubmissionList', { prevSubject: 'element' }, (subject, options = {}) => {
-  // Set retryLimit to options.retryLimit if provided, otherwise default to 3
-  let retryLimit = options.retryLimit || 3
-  let retries = 0
-
-  const clickAndVerify = () => {
-    if (Cypress.dom.isVisible(subject)) {
-      cy.wrap(subject).click()
-    } else {
-      // If subject is not visible, reload the page
-      cy.reload()
-      retries++
-
-      // Retry if the maximum number of retries is not reached
-      if (!Cypress.dom.isVisible(subject) && retries <= retryLimit) {
-        clickAndVerify()
-      } else {
-        // Log an error if the maximum number of retries is reached
-        cy.log("Maximum retries reached.")
-      }
-    }
-  }
-
-  // Start the function to click and verify
-  clickAndVerify()
+/*
+ * The student list in assignment very rarely does not load as expected. This has never been seen
+ * outside of the automated test environment.
+ *
+ * See https://github.com/bahmutov/cypress-recurse/blob/main/cypress/e2e/reload-page/reload-spec.js
+ */
+Cypress.Commands.add("ustadReloadUntilVisible", (text) => {
+    cy.recurse(
+        () => {
+            cy.wait(1000)
+            return cy.contains(text).should(Cypress._.noop)
+        },
+        ($el) => $el && $el.text().includes(text),
+        {
+            limit: 10,
+            delay: 1000,
+            timeout: 10000,
+            post: () => {
+                cy.reload()
+            }
+        }
+    )
 })
 
 
