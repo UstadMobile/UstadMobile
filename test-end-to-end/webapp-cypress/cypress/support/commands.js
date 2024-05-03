@@ -340,7 +340,7 @@ Cypress.Commands.add('ustadEnableUserRegistration' ,() => {
   //https://docs.cypress.io/api/commands/should#Assert-the-href-attribute-is-equal-to-users
     cy.get('#terms_html_edit .ql-editor').as('editor')
     cy.get('@editor').should('have.attr', 'contenteditable').and('equal', 'true',{timeout:3000})
-    cy.get('@editor').click().clear().type("New Terms",{delay:25})
+    cy.get('@editor').click().clear().ustadTypeAndVerify("New Terms")
     cy.get('#registration_allowed').click({force:true})
     cy.get('#actionBarButton').should('be.visible')
     cy.get('#actionBarButton').click()
