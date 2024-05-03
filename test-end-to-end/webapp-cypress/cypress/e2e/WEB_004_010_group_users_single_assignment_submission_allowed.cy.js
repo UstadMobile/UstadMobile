@@ -100,7 +100,7 @@ it('Group 1- Student 1 submit assignment', () => {
   cy.contains('Assignment 1').click()
   cy.get('#assignment_text').get('div[contenteditable="true"]',{timeout:6000}).should('be.visible')
   cy.get('#assignment_text').click()
-  cy.get('#assignment_text').type("Text 1")
+  cy.get('.ql-editor').ustadTypeAndVerify('Text 1')
   cy.contains('SUBMIT').click()
   cy.get('#assignment_text').get('div[contenteditable="true"]',{timeout:6000}).should('not.exist')
   cy.contains("Not submitted").should('not.exist')

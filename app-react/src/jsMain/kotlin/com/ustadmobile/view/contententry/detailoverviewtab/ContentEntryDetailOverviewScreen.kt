@@ -71,13 +71,15 @@ val ContentEntryDetailOverviewComponent2 = FC<ContentEntryDetailOverviewScreenPr
                 uiState = props.uiState
             }
 
-            if (props.uiState.openButtonVisible){
-                Button {
-                    onClick = { props.onClickOpen() }
-                    variant = ButtonVariant.contained
 
-                    + strings[MR.strings.open].uppercase()
+            Button {
+                onClick = {
+                    console.log("ContentEntryDetailOverviewScreen: onClickOpen")
+                    props.onClickOpen()
                 }
+                variant = ButtonVariant.contained
+
+                + strings[MR.strings.open].uppercase()
             }
 
             Divider { orientation = Orientation.horizontal }
