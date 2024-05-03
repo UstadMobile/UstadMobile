@@ -104,6 +104,39 @@ Cypress.Commands.add('ustadOpenH5pEpub', (ContentName) => {
 })
 })
 
+/* Open an H5P:
+ * a) Add the _top parameter to the URL to prevent the default behavior of opening in a new window
+ *    (as cypress does not support new windows)
+ * b) Use cypress-recurse to retry clicking the open button if needed, checking for the h5p-container
+ *    element (see inline comment explaining why this is needed)
+ */
+Cypress.Commands.add('ustadOpenH5P', (ContentName) => {
+    cy.ustadAddTargetToUrl("_top")
+
+    /* For no apparent reason, the open button has been flakey on opening an h5p in automated tests.
+     * Logging did not catch even the click event itself. No such issue has ever been seen outside
+     * automated testing. Therefor we are using cypress-recurse here to try clicking open again if
+     * needed.
+     */
+    cy.recurse(
+        () => {
+            return cy.get("body").then(($body) => {
+                if($body.find("#open_button").length > 0) {
+                    $body.find("#open_button").click()
+                }
+            })
+        },
+        ($el) => $el.find("#h5p-container").length > 0
+    )
+})
+
+Cypress.Commands.add('ustadAddTargetToUrl', (target) => {
+    cy.url().then((url) => {
+        const modifiedUrl = url + '&target=' + target;
+        cy.visit(modifiedUrl)
+    })
+})
+
 /*****
     Verify H5p Content
     -------------------
@@ -201,6 +234,8 @@ Cypress.Commands.add('ustadAddDiscussionBoard',(discussionTitle) => {
 })
 
 // Type and verify text in text field
+//Could be change to use recurse as per:
+// https://github.com/bahmutov/cypress-recurse/blob/main/cypress/e2e/type-with-retries-spec.js
 Cypress.Commands.add('ustadTypeAndVerify', { prevSubject: 'element' }, (subjects, expectedText, options = {}) => {
    // Set maxRetries to options.maxRetries if provided, otherwise default to 3
     let maxRetries = options.maxRetries || 3
@@ -232,6 +267,8 @@ Cypress.Commands.add('ustadTypeAndVerify', { prevSubject: 'element' }, (subjects
 })
 
 // Assignment Submission page verifies submission list is visible
+//Could be done using cypress recurse as per
+// https://github.com/bahmutov/cypress-recurse/blob/main/cypress/e2e/reload-page/reload-spec.js
 Cypress.Commands.add('ustadVerifySubmissionList', { prevSubject: 'element' }, (subject, options = {}) => {
   // Set retryLimit to options.retryLimit if provided, otherwise default to 3
   let retryLimit = options.retryLimit || 3

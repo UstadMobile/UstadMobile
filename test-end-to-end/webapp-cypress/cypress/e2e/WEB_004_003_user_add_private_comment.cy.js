@@ -53,7 +53,7 @@ it('Teacher add assignment and course comment', () => {
   cy.contains("button","Members").should('be.visible')
   cy.contains("Assignment 1").click()
   cy.contains('Submissions').click()
-  cy.contains('Student 1').click()
+  cy.contains("Student 1").ustadVerifySubmissionList()
   cy.ustadTypeAndSubmitAssignmentComment('#private_comment_textfield','#private_comment_textfield_send_button','comment1')
 
 })

@@ -18,6 +18,6 @@ require('cypress-terminal-report/src/installLogsCollector')();
 
 // Import commands.js using ES2015 syntax:
 import './commands'
-
+import 'cypress-recurse/commands'
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
