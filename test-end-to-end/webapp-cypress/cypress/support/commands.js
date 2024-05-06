@@ -237,34 +237,33 @@ Cypress.Commands.add('ustadAddDiscussionBoard',(discussionTitle) => {
 //Could be change to use recurse as per:
 // https://github.com/bahmutov/cypress-recurse/blob/main/cypress/e2e/type-with-retries-spec.js
 Cypress.Commands.add('ustadTypeAndVerify', { prevSubject: 'element' }, (subjects, expectedText, options = {}) => {
-   // Set maxRetries to options.maxRetries if provided, otherwise default to 3
-    let maxRetries = options.maxRetries || 3
+  cy.recurse(
+    () => {
+      // Type the expected text
+      cy.wrap(subjects).clear().type(expectedText);
 
-  cy.wrap(subjects).each((subject) => {
-    let retries = 0
-
-    const typeAndVerify = () => {
-      retries++
-      if (retries > maxRetries) {
-        cy.log("Maximum retries reached")
-        return
-      }
-
-      cy.wrap(subject).invoke('val').then((currentValue) => {
-        if (currentValue === expectedText) {
-          return; // Exit the function if currentValue matches expectedText
+      // Check if the typed value matches the expected text
+      return cy.wrap(subjects).invoke('val').then((currentValue) => {
+        if (currentValue !== expectedText) {
+            return false;
         }
-        else{
-        cy.wrap(subject).clear().type(expectedText)
-      typeAndVerify()
+        return true; // Return true if assertion passes
+      });
+    },
+    (currentValue !== expectedText) => retry === false, // Exit condition when assertion fails (retry is false)
+    {
+      limit: options.maxRetries || 3, // Maximum number of retries
+      delay: 1000, // Delay between retries
+      timeout: 10000, // Timeout for each retry
+      post: () => {
+        // Additional actions after successful verification (if needed)
+        cy.wrap(subjects).clear().type(expectedText); // Type again after successful verification
       }
-      })
     }
+  );
+});
 
-    // Start the loop initially
-    typeAndVerify()
-  })
-})
+
 
 /*
  * The student list in assignment very rarely does not load as expected. This has never been seen
@@ -293,33 +292,28 @@ Cypress.Commands.add("ustadReloadUntilVisible", (text) => {
 
 //Scroll until a subject is visible
 Cypress.Commands.add('ustadScrollUntilVisible', { prevSubject: 'element' }, (subject, options = {}) => {
-
-  // Set scrollElement to options.scrollElement if provided, otherwise default to "#VirtualList"
-  let scrollElement = options.scrollElement || "#VirtualList"
+  // Set scrollElement to options.scrollElement if provided, otherwise default to "window"
+  const scrollElement = options.scrollElement || "window";
   // Set retryLimit to options.retryLimit if provided, otherwise default to 3
-  let retryLimit = options.retryLimit || 3
-  let retries = 0;
+  const retryLimit = options.retryLimit || 3;
 
-  const scrollAndVerify = () => {
-    if (Cypress.dom.isVisible(subject)) {
-      cy.wrap(subject).should('exist')
-    } else {
-      // scroll to bottom
-      cy.get(scrollElement).scrollTo('bottom')
-      retries++
-      // Retry if the maximum number of retries is not reached
-      if (!Cypress.dom.isVisible(subject) && retries <= retryLimit) {
-        scrollAndVerify()
-      } else {
-        // Log an error if the maximum number of retries is reached
-        cy.log("Maximum retries reached.")
+  cy.recurse(
+    () => {
+      return Cypress.dom.isVisible(subject)
+    },
+    (isVisible) => isVisible === true,
+    {
+      limit: retryLimit,
+      delay: 0, // No delay between retries
+      timeout: 0, // No timeout for each retry
+      post: () => {
+        // Scroll down by a certain amount (e.g., 100 pixels)
+        cy.get(scrollElement).scrollBy(0, 100);
       }
     }
-  }
-
-  // Start the function to scroll and verify
-  scrollAndVerify()
+  )
 })
+
 
 
    // Add course and private comments in Assignment
