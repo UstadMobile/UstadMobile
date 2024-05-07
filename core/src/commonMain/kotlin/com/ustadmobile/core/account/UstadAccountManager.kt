@@ -103,6 +103,9 @@ class UstadAccountManager(
     val activeEndpoint: Endpoint
         get() = _currentUserSession.value.endpoint
 
+    val activeEndpoints: List<Endpoint>
+        get() = _endpointsWithActiveSessions.value
+
 
     fun interface EndpointFilter {
 

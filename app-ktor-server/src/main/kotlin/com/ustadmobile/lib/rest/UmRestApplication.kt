@@ -684,8 +684,7 @@ fun Application.umRestApplication(
         onReady {
             if(dbMode == CONF_DBMODE_SINGLETON && siteUrl != null) {
                 val endpoint = Endpoint(siteUrl)
-                //Get the container dir so that any old directories (build/storage etc) are moved if required
-                di.on(endpoint).direct.instance<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
+
                 //Generate the admin username/password etc.
                 di.on(endpoint).direct.instance<AuthManager>()
 

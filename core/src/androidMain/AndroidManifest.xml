@@ -5,7 +5,7 @@
     <application>
 
         <service
-            android:name=".domain.interop.oneroster.OneRosterHttpEndpointIpcService"
+            android:name=".domain.interop.UstadHttpOverIpcServer"
             android:exported="true">
             <intent-filter>
                 <action android:name="oneroster"/>
