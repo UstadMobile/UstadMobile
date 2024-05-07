@@ -17,7 +17,6 @@ import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseCommonJvm
 import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
 import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseJvm
-import com.ustadmobile.core.impl.ContainerStorageManager
 import com.ustadmobile.core.test.assertZipIsManifested
 import com.ustadmobile.util.test.ext.newFileFromResource
 import com.ustadmobile.core.uri.UriHelper
@@ -43,12 +42,9 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.kodein.di.DI
-import org.kodein.di.bind
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
-import org.kodein.di.scoped
-import org.kodein.di.singleton
 import java.io.File
 import java.util.zip.ZipFile
 import kotlin.test.assertNotNull
@@ -97,9 +93,6 @@ class XapiZipContentImporterTest :AbstractMainDispatcherTest() {
 
         di = DI {
             import(ustadTestRule.diModule)
-            bind<ContainerStorageManager>() with scoped(endpointScope).singleton {
-                ContainerStorageManager(listOf(temporaryFolder.newFolder()))
-            }
         }
 
         val accountManager: UstadAccountManager by di.instance()

@@ -3,8 +3,14 @@ package com.ustadmobile.port.android.authenticator
 import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
+import com.ustadmobile.core.domain.interop.externalapppermission.GetExternalAppPermissionRequestInfoUseCase
+import com.ustadmobile.core.domain.interop.externalapppermission.GetExternalAppPermissionRequestInfoUseCaseAndroid
+import com.ustadmobile.core.viewmodel.interop.externalapppermissionrequestredirect.GrantExternalAppPermissionRedirectViewModel
+import com.ustadmobile.port.android.view.AbstractAppActivity
+import org.kodein.di.DI
+import org.kodein.di.bind
+import org.kodein.di.singleton
 
-import com.ustadmobile.port.android.view.UstadBaseActivity
 
 /**
  * This activity handles intents that get created by the authenticator service. It must be a
@@ -12,9 +18,21 @@ import com.ustadmobile.port.android.view.UstadBaseActivity
  * e.g. the app to which the user is granting access permissions).
  *
  */
-class AuthenticatorActivity: UstadBaseActivity(), IAuthenticatorActivity {
+class AuthenticatorActivity: AbstractAppActivity(), IAuthenticatorActivity {
 
-    override var loading: Boolean = false
+    override val defaultInitialRoute: String = "/${GrantExternalAppPermissionRedirectViewModel.DEST_NAME}"
+
+    override val callingComponent: ComponentName?
+        get() = callingActivity
+
+    override val di by DI.lazy {
+        extend(super.di)
+
+        bind<GetExternalAppPermissionRequestInfoUseCase>() with singleton {
+            GetExternalAppPermissionRequestInfoUseCaseAndroid(this@AuthenticatorActivity)
+        }
+
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,6 +52,4 @@ class AuthenticatorActivity: UstadBaseActivity(), IAuthenticatorActivity {
         finish()
     }
 
-    override val callingComponent: ComponentName?
-        get() = callingActivity
 }

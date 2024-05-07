@@ -263,6 +263,7 @@ accompanist-themeadapter-material = { module = "com.google.accompanist:accompani
 accompanist-pager = { module = "com.google.accompanist:accompanist-pager", version.ref = "compose-accompanist" }
 accompanist-pager-indicators = { module = "com.google.accompanist:accompanist-pager-indicators", version.ref = "compose-accompanist"}
 accompanist-flowlayout = { module = "com.google.accompanist:accompanist-flowlayout", version.ref = "compose-accompanist" }
+accompanist-drawablepainter = { module = "com.google.accompanist:accompanist-drawablepainter", version.ref= "compose-accompanist" }
 picasso = { module = "com.squareup.picasso:picasso", version.ref = "picasso" }
 seismic = { module = "com.squareup:seismic", version.ref = "seismic" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
