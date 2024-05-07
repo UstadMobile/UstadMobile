@@ -12,6 +12,9 @@ import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.interop.externalapppermission.DeclineExternalAppPermissionUseCase
+import com.ustadmobile.core.domain.interop.externalapppermission.GrantExternalAppPermissionUseCase
+import com.ustadmobile.core.util.ext.onActiveEndpoint
 
 data class ExternalAppPermissionRequestUiState(
     val appName: String = "",
@@ -31,14 +34,21 @@ class ExternalAppPermissionRequestViewModel(
 
     val uiState: Flow<ExternalAppPermissionRequestUiState> = _uiState.asStateFlow()
 
-    private val getExternalAppPermissionRequestInfo: GetExternalAppPermissionRequestInfoUseCase by instance()
+    private val getExternalAppPermissionRequestInfo: GetExternalAppPermissionRequestInfoUseCase by
+        instance()
+
+    private val grantExternalAppPermissionUseCase: GrantExternalAppPermissionUseCase by
+        di.onActiveEndpoint().instance()
+
+    private val declineExternalAppPermissionUseCase: DeclineExternalAppPermissionUseCase by
+        instance()
 
     init {
         viewModelScope.launch {
             val appInfo = getExternalAppPermissionRequestInfo()
             _uiState.update {
                 it.copy(
-                    appName = appInfo.appName,
+                    appName = appInfo.appDisplayName,
                     icon = appInfo.icon,
                 )
             }
@@ -50,6 +60,18 @@ class ExternalAppPermissionRequestViewModel(
                 navigationVisible = false,
                 title = systemImpl.getString(MR.strings.grant_permission)
             )
+        }
+    }
+
+    fun onClickAccept() {
+        viewModelScope.launch {
+            grantExternalAppPermissionUseCase(activeUserPersonUid)
+        }
+    }
+
+    fun onClickDecline() {
+        viewModelScope.launch {
+            declineExternalAppPermissionUseCase()
         }
     }
 

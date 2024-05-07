@@ -22,7 +22,7 @@ class GetExternalAppPermissionRequestInfoUseCaseAndroid(
         val activityInfo = activity.packageManager.getActivityInfo(caller, 0)
 
         return GetExternalAppPermissionRequestInfoUseCase.ExternalAppPermissionRequestInfo(
-            appName = activityInfo.loadLabel(activity.packageManager).toString(),
+            appDisplayName = activityInfo.loadLabel(activity.packageManager).toString(),
             icon = InteropIconAndroid(activityInfo.loadIcon(activity.packageManager))
         )
 

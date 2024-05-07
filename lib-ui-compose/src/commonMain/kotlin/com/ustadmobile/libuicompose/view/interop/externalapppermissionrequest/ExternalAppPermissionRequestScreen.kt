@@ -30,7 +30,11 @@ fun ExternalAppPermissionRequestScreen(
         ExternalAppPermissionRequestUiState()
     )
 
-    ExternalAppPermissionRequestScreen(uiState)
+    ExternalAppPermissionRequestScreen(
+        uiState = uiState,
+        onClickAccept = viewModel::onClickAccept,
+        onClickCancel = viewModel::onClickDecline,
+    )
 }
 @Composable
 fun ExternalAppPermissionRequestScreen(

@@ -5,8 +5,9 @@ import com.ustadmobile.core.domain.interop.InteropIcon
 interface GetExternalAppPermissionRequestInfoUseCase {
 
     data class ExternalAppPermissionRequestInfo(
-        val appName: String,
+        val appDisplayName: String,
         val icon: InteropIcon,
+        val packageName: String? = null,
     )
 
     suspend operator fun invoke() : ExternalAppPermissionRequestInfo

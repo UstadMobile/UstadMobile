@@ -5,14 +5,14 @@ The Android offline API uses intents and a bound service to allow other apps to 
 request an authentication token, and then access user data without requiring an Internet connection.
 The token generated can be verified online by backend servers after the client reconnects and syncs.
 
-## Authentication
+## Getting a token
 
-* The caller app sends an intent
+The caller app sends an intent
 ```
 val authIntent = Intent("com.ustadmobile.AUTH_GET_TOKEN", Uri.parse("local-auth://[server-url]")
 ```
 server-url is optional. If server-url is omitted, then authenticator may prompt the user to select
-a server.
+a server where the Ustad app supports connecting to different servers.
 
 * The Ustad app will allow the user to select an account, and will then ask the user if they wish
   to grant permission to the caller app.
@@ -20,8 +20,13 @@ a server.
 * If the user accepts to grant permission to the caller app, the caller receives the result:
 
 ```
+//In the form of username@https://server-url/
 val accountName = resultIntent.getStringExtra(AccountManager.KEY_ACCOUNT_NAME)
+
+//As per UstadAccountManager.ACCOUNT_TYPE
 val accountType = resultIntent.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE)
+
+//Auth token itself
 val authToken = resultIntent.getStringExtra(AccountManager.KEY_AUTHTOKEN)
 ```
 
@@ -40,8 +45,7 @@ class GetOfflineAuthActivityResultContract: ActivityResultContract<String?, GetT
      * @param input where the desired endpoint servername is known, it can provided.
      */
     override fun createIntent(context: Context, input: String?): Intent {
-        return Intent("com.ustadmobile.AUTH_GET_TOKEN",
-            Uri.parse("local-auth://${input ?: ""}"))
+        return Intent("com.ustadmobile.AUTH_GET_TOKEN", Uri.parse("local-auth://${input ?: ""}"))
     }
 
     override fun parseResult(resultCode: Int, intent: Intent?): GetTokenResult {
@@ -53,3 +57,16 @@ class GetOfflineAuthActivityResultContract: ActivityResultContract<String?, GetT
     }
 }
 ```
+
+Note: The Android AccountManager is not used here (as seems to be the case with all other third 
+party login APIs) because the AccountManager does not allow the receiving app (e.g. the Ustad app) 
+to receive the calling app's information e.g. callingActivity. This makes it impossible to tell the 
+user which app is requesting permission.
+
+The AccountManager does allow seamless sharing of authentication tokens by apps that share the same
+signature, but that is not the use case here.
+
+## Requesting user data using a token
+
+The API works by sending serialized http requests using Android IPC.
+

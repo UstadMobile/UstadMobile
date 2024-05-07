@@ -2,6 +2,6 @@ package com.ustadmobile.core.domain.interop.externalapppermission
 
 interface GrantExternalAppPermissionUseCase {
 
-    operator fun invoke()
+    suspend operator fun invoke(personUid: Long)
 
 }
