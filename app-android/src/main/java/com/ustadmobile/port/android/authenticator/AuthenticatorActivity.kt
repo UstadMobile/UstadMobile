@@ -1,8 +1,5 @@
 package com.ustadmobile.port.android.authenticator
 
-import android.content.ComponentName
-import android.content.Intent
-import android.os.Bundle
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.domain.interop.externalapppermission.DeclineExternalAppPermissionUseCase
 import com.ustadmobile.core.domain.interop.externalapppermission.DeclineExternalAppPermissionUseCaseAndroid
@@ -29,12 +26,9 @@ import org.kodein.di.singleton
  * caller (e.g. the app to which the user is granting access permissions).
  *
  */
-class AuthenticatorActivity: AbstractAppActivity(), IAuthenticatorActivity {
+class AuthenticatorActivity: AbstractAppActivity() {
 
     override val defaultInitialRoute: String = "/${GrantExternalAppPermissionRedirectViewModel.DEST_NAME}"
-
-    override val callingComponent: ComponentName?
-        get() = callingActivity
 
     override val di by DI.lazy {
         extend(super.di)
@@ -63,22 +57,5 @@ class AuthenticatorActivity: AbstractAppActivity(), IAuthenticatorActivity {
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-    }
-
-    override fun finishWithAccountAuthenticatorResult(
-        resultCode: Int,
-        resultData: Intent?,
-    ) {
-        if(resultData == null) {
-            setResult(resultCode)
-        }else {
-            setResult(resultCode, resultData)
-        }
-
-        finish()
-    }
 
 }

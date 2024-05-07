@@ -66,11 +66,15 @@ import org.kodein.di.with
 
 abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
 
-    protected val appContextDi: DI by closestDI()
+    private val appContextDi: DI by closestDI()
 
     //Used to execute navigation when a link is received via OnNewIntent
     protected val commandFlowNavigator = CommandFlowUstadNavController()
 
+    /**
+     * The default initial route (Compose Navigation) to use. This can be overriden on activities
+     * which are called for specific purposes (e.g. AuthenticatorActivity).
+     */
     protected open val defaultInitialRoute: String? = null
 
     override val di by  DI.lazy {
