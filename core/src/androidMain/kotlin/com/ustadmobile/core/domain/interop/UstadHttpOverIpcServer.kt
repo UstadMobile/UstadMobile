@@ -2,7 +2,7 @@ package com.ustadmobile.core.domain.interop
 
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.domain.interop.oneroster.OneRosterEndpointUseCase
+import com.ustadmobile.core.domain.interop.oneroster.OneRosterHttpServerUseCase
 import com.ustadmobile.core.util.ext.clientUrl
 import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.core.util.isimplerequest.asISimpleTextRequest
@@ -67,7 +67,7 @@ class UstadHttpOverIpcServer : AbstractHttpOverIpcServer(){
             try {
                 when(apiName) {
                     "oneroster" -> {
-                        val oneRosterEndpoint: OneRosterEndpointUseCase = di.on(endpoint).direct
+                        val oneRosterEndpoint: OneRosterHttpServerUseCase = di.on(endpoint).direct
                             .instance()
                         oneRosterEndpoint(simpleTextRequest).toRawResponse(rawHttp)
                     }

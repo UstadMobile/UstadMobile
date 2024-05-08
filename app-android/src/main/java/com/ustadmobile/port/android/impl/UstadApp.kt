@@ -106,7 +106,8 @@ import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUs
 import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCaseAndroid
 import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCase
 import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCaseAndroid
-import com.ustadmobile.core.domain.interop.oneroster.OneRosterEndpointUseCase
+import com.ustadmobile.core.domain.interop.oneroster.OneRosterEndpoint
+import com.ustadmobile.core.domain.interop.oneroster.OneRosterHttpServerUseCase
 import com.ustadmobile.core.domain.share.ShareTextUseCase
 import com.ustadmobile.core.domain.share.ShareTextUseCaseAndroid
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
@@ -917,11 +918,18 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             RawHttp()
         }
 
-        bind<OneRosterEndpointUseCase>() with scoped(EndpointScope.Default).singleton {
-            OneRosterEndpointUseCase(
+        bind<OneRosterEndpoint>() with scoped(EndpointScope.Default).singleton {
+            OneRosterEndpoint(
                 db = instance(tag = DoorTag.TAG_DB),
                 repo = instance(tag = DoorTag.TAG_REPO),
+            )
+        }
+
+        bind<OneRosterHttpServerUseCase>() with scoped(EndpointScope.Default).singleton {
+            OneRosterHttpServerUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
                 json = instance(),
+                oneRosterEndpoint = instance(),
             )
         }
 

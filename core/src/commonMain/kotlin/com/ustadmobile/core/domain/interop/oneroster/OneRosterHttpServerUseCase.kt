@@ -2,16 +2,19 @@ package com.ustadmobile.core.domain.interop.oneroster
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.interop.oneroster.model.Clazz
-import com.ustadmobile.core.domain.interop.oneroster.model.toOneRosterClass
 import com.ustadmobile.core.util.isimplerequest.ISimpleTextRequest
 import com.ustadmobile.door.http.DoorJsonResponse
 import com.ustadmobile.door.util.systemTimeInMillis
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 
-class OneRosterEndpointUseCase(
+/**
+ * Processes OneRoster HTTP requests (serializing/deserializing, checking authentication, etc)
+ * and delegates to the OneRoster endpoint to run the required logic.
+ */
+class OneRosterHttpServerUseCase(
     private val db: UmAppDatabase,
-    private val repo: UmAppDatabase,
+    private val oneRosterEndpoint: OneRosterEndpoint,
     private val json: Json,
 ) {
 
@@ -45,16 +48,10 @@ class OneRosterEndpointUseCase(
         return when {
             //getClassesForUser
             apiPathSegments[0] == "users" && apiPathSegments.getOrNull(2) == "classes" -> {
-                val filterByPersonUid = apiPathSegments[1].toLong()
-                val oneRosterClazzes = db.clazzDao.findOneRosterUserClazzes(
-                    accountPersonUid, filterByPersonUid
-                ).map {
-                    it.toOneRosterClass()
-                }
-
+                val classes = oneRosterEndpoint.getClassesForUser(accountPersonUid, apiPathSegments[1])
                 DoorJsonResponse(
                     responseCode = 200,
-                    bodyText = json.encodeToString(ListSerializer(Clazz.serializer()), oneRosterClazzes),
+                    bodyText = json.encodeToString(ListSerializer(Clazz.serializer()), classes),
                     contentType = "application/json"
                 )
             }
