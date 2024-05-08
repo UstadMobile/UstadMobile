@@ -921,6 +921,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             OneRosterEndpointUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
                 repo = instance(tag = DoorTag.TAG_REPO),
+                json = instance(),
             )
         }
 

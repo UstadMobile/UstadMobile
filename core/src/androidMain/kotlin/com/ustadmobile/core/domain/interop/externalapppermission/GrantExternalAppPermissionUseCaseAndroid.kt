@@ -4,6 +4,7 @@ import android.accounts.AccountManager
 import android.app.Activity
 import android.content.Intent
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.util.UMFileUtil
 
 
 class GrantExternalAppPermissionUseCaseAndroid(
@@ -22,6 +23,9 @@ class GrantExternalAppPermissionUseCaseAndroid(
             putExtra(AccountManager.KEY_ACCOUNT_TYPE, UstadAccountManager.ACCOUNT_TYPE)
             putExtra(AccountManager.KEY_AUTHTOKEN, permission.eapAuthToken)
             putExtra("endpointUrl", accountManager.activeEndpoint.url)
+            putExtra("onerosterUrl",
+                UMFileUtil.joinPaths(accountManager.activeEndpoint.url, "api", "oneroster")
+            )
             putExtra("sourcedId", personUid.toString())
         }
 

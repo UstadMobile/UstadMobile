@@ -3,7 +3,14 @@
 
 The Android offline API uses intents and a bound service to allow other apps to authenticate users,
 request an authentication token, and then access user data without requiring an Internet connection.
-The token generated can be verified online by backend servers after the client reconnects and syncs.
+
+Getting a token (e.g. as would normally be done using OAuth via redirection in the browser) is done
+using [start activity for result](https://developer.android.com/training/basics/intents/result) 
+where the app requesting a token sends an intent to the app that will issue the token.  
+
+Subsequent API requests using the token are done using Http over IPC where http requests are 
+serialized and sent to the app that issued the token using a [Bound Service](https://developer.android.com/develop/background-work/services/bound-services#Messenger).
+
 
 ## Getting a token
 

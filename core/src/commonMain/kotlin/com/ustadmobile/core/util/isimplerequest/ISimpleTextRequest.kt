@@ -8,7 +8,7 @@ interface ISimpleTextRequest {
 
     val method: String
 
-    val uri: String
+    val path: String
 
     val body: String?
 

@@ -10,8 +10,8 @@ class RawHttpSimpleRequest(private val rawRequest: RawHttpRequest): ISimpleTextR
         get() = rawRequest.headers.asIStringValues()
     override val method: String
         get() = rawRequest.method
-    override val uri: String
-        get() = rawRequest.uri.toString()
+    override val path: String
+        get() = rawRequest.uri.path
     override val body: String?
         get() = rawRequest.body?.get()?.decodeBodyToString(Charsets.UTF_8)
 

@@ -409,4 +409,50 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
          WHERE Clazz.clazzName IN (:names) 
     """)
     abstract suspend fun getCoursesByName(names: List<String>): List<Clazz>
+
+
+    /**
+     *
+     * @param accountPersonUid the personuid for the auth token holder
+     * @param filterByEnrolledMemberPersonUid the sourcedid of the user
+     */
+    @Query("""
+        SELECT Clazz.*
+          FROM CLAZZ
+               LEFT JOIN ClazzEnrolment 
+                    ON ClazzEnrolment.clazzEnrolmentUid =
+                       COALESCE(
+                       (SELECT ClazzEnrolment.clazzEnrolmentUid 
+                          FROM ClazzEnrolment
+                         WHERE ClazzEnrolment.clazzEnrolmentPersonUid = :accountPersonUid
+                           AND ClazzEnrolment.clazzEnrolmentActive
+                           AND ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid 
+                      ORDER BY ClazzEnrolment.clazzEnrolmentDateLeft DESC   
+                         LIMIT 1), 0)
+          WHERE (   Clazz.clazzOwnerPersonUid = :accountPersonUid
+                 OR EXISTS(SELECT CoursePermission.cpUid
+                             FROM CoursePermission
+                            WHERE CoursePermission.cpClazzUid = Clazz.clazzUid
+                              AND (   CoursePermission.cpToPersonUid = :accountPersonUid 
+                                   OR CoursePermission.cpToEnrolmentRole = ClazzEnrolment.clazzEnrolmentRole )
+                              AND (CoursePermission.cpPermissionsFlag & ${PermissionFlags.COURSE_VIEW}) > 0 
+                              AND NOT CoursePermission.cpIsDeleted)   
+                 OR (${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT1}
+                     ${PermissionFlags.COURSE_VIEW}
+                     ${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT2}
+                    )             
+                )
+           AND EXISTS 
+                (SELECT ClazzEnrolment.clazzEnrolmentUid
+                   FROM ClazzEnrolment
+                  WHERE ClazzEnrolment.clazzEnrolmentPersonUid = :filterByEnrolledMemberPersonUid
+                    AND ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid
+                )  
+    """)
+    abstract suspend fun findOneRosterUserClazzes(
+        accountPersonUid: Long,
+        filterByEnrolledMemberPersonUid: Long,
+    ): List<Clazz>
+
+
 }
