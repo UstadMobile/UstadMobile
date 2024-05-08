@@ -29,6 +29,7 @@ class CacheControlFreshnessCheckerImpl: CacheControlFreshnessChecker {
         val requestMaxStale = requestDirectives?.maxStale ?: 0
         val isExplicitlyStale = requestDirectives?.noCache == true ||
                 responseDirectives?.let { it.noCache || it.mustRevalidate } == true ||
+                requestDirectives?.noCache == true ||
                 requestDirectives?.let { requestDir ->
                     requestDir.staleAtAge?.let { age > (it + requestMaxStale)  }
                 } == true

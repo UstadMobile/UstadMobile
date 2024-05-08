@@ -32,6 +32,7 @@ class GrantExternalAppPermissionRedirectViewModel(
                     clearStack = true
                 ),
                 forceAccountSelection = true,
+                dontSetCurrentSession = true,
             )
         }
     }

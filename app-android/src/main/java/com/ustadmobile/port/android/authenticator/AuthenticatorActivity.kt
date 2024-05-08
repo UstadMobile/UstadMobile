@@ -48,7 +48,8 @@ class AuthenticatorActivity: AbstractAppActivity() {
             GrantExternalAppPermissionUseCaseAndroid(
                 storeExternalAppPermissionUseCase = instance(),
                 activity = this@AuthenticatorActivity,
-                accountManager = instance(),
+                db = instance(tag = DoorTag.TAG_DB),
+                endpoint = context,
             )
         }
 
