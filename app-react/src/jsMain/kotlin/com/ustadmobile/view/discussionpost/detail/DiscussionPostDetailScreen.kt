@@ -23,6 +23,7 @@ import web.cssom.Height
 import web.cssom.Overflow
 import web.cssom.pct
 import js.objects.jso
+import kotlinx.coroutines.flow.Flow
 import mui.material.Box
 import mui.material.Container
 import mui.material.List
@@ -32,6 +33,7 @@ import react.create
 
 external interface DiscussionPostDetailProps: Props {
     var uiState: DiscussionPostDetailUiState2
+    var replyTextFlow: Flow<String>
     var onClickPostReply: () -> Unit
     var onReplyChanged: (String) -> Unit
     var onDeletePost: (DiscussionPost) -> Unit
@@ -86,7 +88,7 @@ val DiscussionPostDetailComponent2 = FC<DiscussionPostDetailProps> { props ->
                     //If this is the start post, put the
                     if(isRootItem) {
                         DiscussionPostReply {
-                            reply = props.uiState.replyText
+                            reply = props.replyTextFlow
                             onClickPostReplyButton = props.onClickPostReply
                             onReplyChanged = props.onReplyChanged
                         }
@@ -177,6 +179,7 @@ val DiscussionPostDetailScreen = FC<Props>{
 
     DiscussionPostDetailComponent2 {
         uiState = uiStateVal
+        replyTextFlow = viewModel.replyText
         onReplyChanged = viewModel::onChangeReplyText
         onClickPostReply = viewModel::onClickPostReply
         onDeletePost = viewModel::onDeletePost

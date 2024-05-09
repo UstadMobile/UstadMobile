@@ -220,7 +220,6 @@ fun ClazzListScreen(
 
         item(span = { GridItemSpan(maxLineSpan) }) {
             UstadListFilterChipsHeader(
-                modifier = Modifier.fillMaxWidth(),
                 filterOptions = uiState.filterOptions,
                 selectedChipId = uiState.selectedChipId,
                 enabled = uiState.fieldsEnabled,

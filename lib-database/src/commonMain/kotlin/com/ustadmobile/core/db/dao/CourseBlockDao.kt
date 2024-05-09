@@ -14,6 +14,7 @@ import com.ustadmobile.door.annotation.HttpServerFunctionCall
 import com.ustadmobile.door.annotation.HttpServerFunctionParam
 import com.ustadmobile.lib.db.composites.CourseBlockAndDisplayDetails
 import com.ustadmobile.lib.db.composites.CourseBlockAndDbEntities
+import com.ustadmobile.lib.db.composites.CourseBlockAndPicture
 import com.ustadmobile.lib.db.composites.CourseBlockUidAndClazzUid
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.flow.Flow
@@ -39,6 +40,18 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
     abstract fun findByUidAsyncAsFlow(uid: Long): Flow<CourseBlock?>
 
     @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
+    )
+    @Query("""
+        SELECT CourseBlock.*, CourseBlockPicture.*
+          FROM CourseBlock
+               LEFT JOIN CourseBlockPicture 
+                         ON CourseBlockPicture.cbpUid = :uid
+         WHERE CourseBlock.cbUid = :uid                
+    """)
+    abstract fun findByUidWithPictureAsFlow(uid: Long): Flow<CourseBlockAndPicture?>
+
+    @HttpAccessible(
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
         pullQueriesToReplicate = arrayOf(
             HttpServerFunctionCall(
@@ -55,7 +68,7 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
         )
     )
     @Query("""
-        SELECT CourseBlock.*, Assignment.*, Entry.*, Language.*,
+        SELECT CourseBlock.*, Assignment.*, Entry.*, Language.*, CourseBlockPicture.*,
                (SELECT CourseGroupSet.cgsName
                   FROM CourseGroupSet
                  WHERE CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
@@ -71,6 +84,8 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
                LEFT JOIN Language
                          ON Language.langUid = Entry.primaryLanguageUid
                             AND CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
+               LEFT JOIN CourseBlockPicture
+                         ON CourseBlockPicture.cbpUid = CourseBlock.cbUid    
          WHERE CourseBlock.cbClazzUid = :clazzUid
            AND (CAST(:includeInactive AS INTEGER) = 1 OR CourseBlock.cbActive)
       ORDER BY CourseBlock.cbIndex
@@ -109,9 +124,17 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
         )
     )
     @Query("""
-        SELECT CourseBlock.*,
+        SELECT CourseBlock.*, ContentEntry.*, CourseBlockPicture.*, ContentEntryPicture2.*,
                CourseBlock.cbUid NOT IN(:collapseList) AS expanded
           FROM CourseBlock
+               LEFT JOIN ContentEntry
+                         ON CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
+                            AND ContentEntry.contentEntryUid = CourseBlock.cbEntityUid
+               LEFT JOIN CourseBlockPicture
+                         ON CourseBlockPicture.cbpUid = CourseBlock.cbUid    
+               LEFT JOIN ContentEntryPicture2
+                         ON CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
+                            AND ContentEntryPicture2.cepUid = CourseBlock.cbEntityUid
          WHERE CourseBlock.cbClazzUid = :clazzUid
            AND CourseBlock.cbModuleParentBlockUid NOT IN(:collapseList)
            AND (CAST(:includeInactive AS INTEGER) = 1 OR CourseBlock.cbActive)

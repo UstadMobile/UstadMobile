@@ -24,7 +24,7 @@ it('Admin add discussion board and post', () => {
   cy.contains('Discussion 1').click()
   cy.contains('Post').click()
   cy.get('#discussion_post_title').type('Topic 1')
-  cy.get('#discussion_post_message .ql-editor').type('Discusssion post')
+  cy.get('.ql-editor').ustadTypeAndVerify('Discusssion post')
   cy.get('#actionBarButton').click()
   cy.go('back')
   cy.go('back')

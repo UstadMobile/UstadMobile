@@ -19,6 +19,8 @@ appId: com.toughra.ustadmobile
     id: "com.toughra.ustadmobile:id/editor"
 - inputText: "test block"
 - tapOn: "Done"
-- assertVisible: "Done"
+- assertVisible:
+    id: "app_title"
+    text: "Add module"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/added_module_${MODULETITLE}"
 - tapOn: "Done"

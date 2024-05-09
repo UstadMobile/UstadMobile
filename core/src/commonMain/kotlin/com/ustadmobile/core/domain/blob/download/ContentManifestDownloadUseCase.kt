@@ -28,14 +28,8 @@ class ContentManifestDownloadUseCase(
     private val db: UmAppDatabase,
     private val httpClient: HttpClient,
     private val json: Json,
-    private val cacheTmpPath: String,
+    private val cacheTmpPath: () -> String,
 ) {
-
-    init {
-        if(!cacheTmpPath.let { it.endsWith("/") || it.endsWith("\\") }) {
-            throw IllegalArgumentException("Cache tmp path must end with separator character")
-        }
-    }
 
     /**
      *
@@ -47,6 +41,13 @@ class ContentManifestDownloadUseCase(
         contentEntryVersionUid: Long,
         transferJobUid: Int,
     ) {
+        val tmpPath = cacheTmpPath().let {
+            if(!it.endsWith("/") || it.endsWith("\\"))
+                "$it/"
+            else
+                it
+        }
+
         val contentEntryVersion = db.contentEntryVersionDao
             .findByUidAsync(contentEntryVersionUid)
                 ?: throw IllegalArgumentException("ContentEntryVersion $contentEntryVersionUid not in db")
@@ -90,7 +91,7 @@ class ContentManifestDownloadUseCase(
                     expectedSize = it.second,
                     entityUid = contentEntryVersion.cevUid,
                     tableId = ContentEntryVersion.TABLE_ID,
-                    partialTmpFile = "${cacheTmpPath}${randomUuidAsString()}"
+                    partialTmpFile = "${tmpPath}${randomUuidAsString()}"
                 )
             },
             existingTransferJobId = transferJobUid,

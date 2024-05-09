@@ -46,6 +46,7 @@ fun ClazzAssignmentEditScreen(viewModel: ClazzAssignmentEditViewModel) {
         onClickSubmissionType = viewModel::onClickSubmissionType,
         onClickEditDescription = viewModel::onClickEditDescription,
         onGroupSubmissionOnChanged = viewModel::onGroupSubmissionOnChanged,
+        onPictureChanged = viewModel::onPictureChanged,
     )
 }
 
@@ -58,6 +59,7 @@ fun ClazzAssignmentEditScreen(
     onClickAssignReviewers: () -> Unit = {},
     onClickEditDescription: () -> Unit = {},
     onGroupSubmissionOnChanged: (Boolean) -> Unit = { },
+    onPictureChanged: (String?) -> Unit = { },
 ) {
 
     val terminologyEntries = rememberCourseTerminologyEntries(uiState.courseTerminology)
@@ -71,6 +73,7 @@ fun ClazzAssignmentEditScreen(
             uiState = uiState.courseBlockEditUiState,
             onCourseBlockChange = onChangeCourseBlock,
             onClickEditDescription = onClickEditDescription,
+            onPictureChanged = onPictureChanged,
         )
 
         UstadSwitchField(

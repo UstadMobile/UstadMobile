@@ -4,6 +4,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetadataStatus
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
+import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.viewmodel.contententry.getmetadata.ContentEntryGetMetadataUiState
 import com.ustadmobile.core.viewmodel.contententry.getmetadata.ContentEntryGetMetadataViewModel
 import com.ustadmobile.hooks.useMuiAppState
@@ -27,6 +28,7 @@ external interface ContentEntryGetMetadataProps: Props {
 
 val ContentEntryGetMetadataComponent = FC<ContentEntryGetMetadataProps> {props ->
     val muiAppState = useMuiAppState()
+    val strings = useStringProvider()
 
     Grid {
         container = true
@@ -58,10 +60,11 @@ val ContentEntryGetMetadataComponent = FC<ContentEntryGetMetadataProps> {props -
             }
 
             Grid {
-                val strings = useStringProvider()
                 item = true
 
-                + strings[MR.strings.uploading]
+                + "${strings[MR.strings.uploading]}: "
+                + "${UMFileUtil.formatFileSizeMb(props.uiState.status.processedBytes)} /"
+                + "${UMFileUtil.formatFileSizeMb(props.uiState.status.totalBytes)} "
             }
         }else {
             Grid {
@@ -101,7 +104,6 @@ val ContentEntryGetMetadataPreview = FC<Props> {
         uiState = ContentEntryGetMetadataUiState(
             status = ContentEntryGetMetadataStatus(
                 indeterminate = true,
-                progress = 25,
                 error = "SNAFU"
             ),
         )

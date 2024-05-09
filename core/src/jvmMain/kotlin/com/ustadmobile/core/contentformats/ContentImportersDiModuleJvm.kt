@@ -56,6 +56,7 @@ val ContentImportersDiModuleJvm = DI.Module("ContentImporters-Jvm"){
                         json = instance(),
                         getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
                         compressListUseCase = instance(),
+                        saveLocalUrisAsBlobsUseCase = instance(),
                     )
                 )
                 add(
@@ -80,6 +81,8 @@ val ContentImportersDiModuleJvm = DI.Module("ContentImporters-Jvm"){
                         json = instance(),
                         getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
                         compressPdfUseCase = instanceOrNull(),
+                        saveLocalUriAsBlobUseCase = instance(),
+                        tmpPath = instance(tag = DiTag.TAG_TMP_DIR),
                     ),
                 )
                 add(
@@ -108,6 +111,8 @@ val ContentImportersDiModuleJvm = DI.Module("ContentImporters-Jvm"){
                         getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
                         mimeTypeHelper = mimeTypeHelper,
                         compressUseCase = instanceOrNull(),
+                        extractVideoThumbnailUseCase = instanceOrNull(),
+                        saveLocalUrisAsBlobsUseCase = instanceOrNull(),
                     )
                 )
             }

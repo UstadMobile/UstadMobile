@@ -91,6 +91,7 @@ val Sidebar = FC<SidebarProps> { props ->
 
                     UstadRootScreenNavLinks {
                         selectedItem = props.selectedRootItemIndex
+                        idPrefix = "sidebar"
                     }
                 }
 

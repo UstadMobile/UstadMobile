@@ -385,6 +385,8 @@ class BlobUploadClientUseCaseJvmTest {
             }catch(e: Throwable) {
                 e.printStackTrace()
                 assertTrue(e is TestUploadException)
+                val errors = realDatabase.transferJobErrorDao.findByJobId(jobId)
+                assertEquals(1, errors.size)
             }
         }
     }

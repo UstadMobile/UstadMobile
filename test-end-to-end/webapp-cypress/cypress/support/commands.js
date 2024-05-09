@@ -68,7 +68,7 @@ Cypress.Commands.add('ustadLogout', () => {
 
 // Add a content to Library
 Cypress.Commands.add('ustadAddContentToLibrary',(contentPath,contentName) => {
-  cy.contains("Library").click()
+  cy.get("#sidebar_ContentEntryListHome").click()
   cy.contains("button","Content").click()
   cy.get('#new_content_from_file').click({force: true})
   cy.get('input[type="file"]').selectFile(contentPath,{force:true})
@@ -98,9 +98,43 @@ Cypress.Commands.add('ustadOpenH5pEpub', (ContentName) => {
   const modifiedUrl = url + '&target=_top';
  // Visit the modified URL
   cy.visit(modifiedUrl)
-  cy.contains("#appbar_title", ContentName).should("be.visible")
+  cy.contains("#courseblock_title", ContentName).should("be.visible")
+  cy.contains("importing").should("not.exist")
   cy.contains('OPEN').click()
 })
+})
+
+/* Open an H5P:
+ * a) Add the _top parameter to the URL to prevent the default behavior of opening in a new window
+ *    (as cypress does not support new windows)
+ * b) Use cypress-recurse to retry clicking the open button if needed, checking for the h5p-container
+ *    element (see inline comment explaining why this is needed)
+ */
+Cypress.Commands.add('ustadOpenH5P', (ContentName) => {
+    cy.ustadAddTargetToUrl("_top")
+
+    /* For no apparent reason, the open button has been flakey on opening an h5p in automated tests.
+     * Logging did not catch even the click event itself. No such issue has ever been seen outside
+     * automated testing. Therefor we are using cypress-recurse here to try clicking open again if
+     * needed.
+     */
+    cy.recurse(
+        () => {
+            return cy.get("body").then(($body) => {
+                if($body.find("#open_button").length > 0) {
+                    $body.find("#open_button").click()
+                }
+            })
+        },
+        ($el) => $el.find("#h5p-container").length > 0
+    )
+})
+
+Cypress.Commands.add('ustadAddTargetToUrl', (target) => {
+    cy.url().then((url) => {
+        const modifiedUrl = url + '&target=' + target;
+        cy.visit(modifiedUrl)
+    })
 })
 
 /*****
@@ -198,15 +232,92 @@ Cypress.Commands.add('ustadAddDiscussionBoard',(discussionTitle) => {
     cy.get('div[data-placeholder="Description"]').type("a simple discussion description")
     cy.contains("button","Done").click()
 })
+
+// Type and verify text - for use with the rich text editor that can be flakey in tests
+Cypress.Commands.add('ustadTypeAndVerify', { prevSubject: 'element' }, (subject, expectedText, options = {}) => {
+  // Log statement at the beginning of the command function
+  cy.log("Starting ustadTypeAndVerify command..");
+
+  return cy.recurse(
+    () => {
+      cy.log("Inside recurse command 1");
+      return cy.wrap(subject).clear().type(expectedText, { delay: 30 });
+    },
+    ($el) => {
+      cy.log("Inside recurse command 2", Cypress.$($el).text());
+      const text = Cypress.$($el).text(); // Accessing the text content using jQuery's text() function
+      return text === expectedText;
+    },
+    {
+      limit: options.maxRetries || 3, // Maximum number of retries
+    }
+  );
+});
+
+/*
+ * The student list in assignment very rarely does not load as expected. This has never been seen
+ * outside of the automated test environment.
+ *
+ * See https://github.com/bahmutov/cypress-recurse/blob/main/cypress/e2e/reload-page/reload-spec.js
+ */
+Cypress.Commands.add("ustadReloadUntilVisible", (text) => {
+    cy.recurse(
+        () => {
+            cy.wait(1000)
+            return cy.contains(text).should(Cypress._.noop)
+        },
+        ($el) => $el && $el.text().includes(text),
+        {
+            limit: 10,
+            delay: 1000,
+            timeout: 10000,
+            post: () => {
+                cy.reload()
+            }
+        }
+    )
+})
+
+
+//Scroll until a subject is visible
+Cypress.Commands.add('ustadScrollUntilVisible', { prevSubject: 'element' }, (subject, options = {}) => {
+
+  // Set scrollElement to options.scrollElement if provided, otherwise default to "#VirtualList"
+  let scrollElement = options.scrollElement || "#VirtualList"
+  // Set retryLimit to options.retryLimit if provided, otherwise default to 3
+  let retryLimit = options.retryLimit || 3
+  let retries = 0;
+
+  const scrollAndVerify = () => {
+    if (Cypress.dom.isVisible(subject)) {
+      cy.wrap(subject).should('exist')
+    } else {
+      // scroll to bottom
+      cy.get(scrollElement).scrollTo('bottom')
+      retries++
+      // Retry if the maximum number of retries is not reached
+      if (!Cypress.dom.isVisible(subject) && retries <= retryLimit) {
+        scrollAndVerify()
+      } else {
+        // Log an error if the maximum number of retries is reached
+        cy.log("Maximum retries reached.")
+      }
+    }
+  }
+
+  // Start the function to scroll and verify
+  scrollAndVerify()
+})
+
+
    // Add course and private comments in Assignment
 Cypress.Commands.add('ustadTypeAndSubmitAssignmentComment', (commentid, sendid, comment, delay = 25) => {
-    cy.get(commentid).click().type(comment, { delay });
+    cy.get(commentid).click().type(comment, { delay })
     cy.get('input' + commentid + '[value=\"' + comment + '\"]')
-    cy.get(commentid).should('have.value', comment);
-    cy.get(sendid).click();
-    cy.contains('.MuiListItemText-secondary',comment).should('exist');
-
-});
+    cy.get(commentid).should('have.value', comment)
+    cy.get(sendid).click()
+    cy.contains('.MuiListItemText-secondary',comment).should('exist')
+})
 
 
   // Enable User Registration
@@ -217,7 +328,7 @@ Cypress.Commands.add('ustadEnableUserRegistration' ,() => {
   //https://docs.cypress.io/api/commands/should#Assert-the-href-attribute-is-equal-to-users
     cy.get('#terms_html_edit .ql-editor').as('editor')
     cy.get('@editor').should('have.attr', 'contenteditable').and('equal', 'true',{timeout:3000})
-    cy.get('@editor').click().clear().type("New Terms",{delay:25})
+    cy.get('@editor').click().clear().ustadTypeAndVerify("New Terms")
     cy.get('#registration_allowed').click({force:true})
     cy.get('#actionBarButton').should('be.visible')
     cy.get('#actionBarButton').click()
@@ -254,6 +365,9 @@ Cypress.Commands.add("ustadBirthDate", (element, date) => {
      String(date.getDate()).padStart(2, '0')
      );
 });
+
+
+
 
 //commands.js
 //

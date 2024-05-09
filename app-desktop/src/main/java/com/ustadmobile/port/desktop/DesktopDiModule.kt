@@ -16,6 +16,7 @@ import com.ustadmobile.core.db.ext.MIGRATION_144_145_CLIENT
 import com.ustadmobile.core.db.ext.MIGRATION_148_149_CLIENT_WITH_OFFLINE_ITEMS
 import com.ustadmobile.core.db.ext.MIGRATION_155_156_CLIENT
 import com.ustadmobile.core.db.ext.MIGRATION_161_162_CLIENT
+import com.ustadmobile.core.db.ext.MIGRATION_169_170_CLIENT
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.core.domain.cachelock.AddOfflineItemInactiveTriggersCallback
@@ -72,6 +73,7 @@ import org.kodein.di.singleton
 import java.io.File
 import java.util.Locale
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
+import com.ustadmobile.libcache.CachePaths
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
@@ -189,11 +191,27 @@ val DesktopHttpModule = DI.Module("Desktop-HTTP") {
 
         val dbUrl = "jdbc:sqlite:(datadir)/ustadcache.db"
             .replace("(datadir)", dataDir.absolutePath)
+        val cacheStoragePath = Path(
+            File(dataDir, "httpfiles").absolutePath.toString()
+        )
+
+        /* Persistent path and cache path are the same. Trying to move files on Windows has caused
+         * resulted in errors appearing in logs where files apparently weren't released quickly
+         * enough (never seen on Linux).
+         *
+         * There is no need on the desktop to separate the persistent and cache path on desktop,
+         * as is required on Android (where the OS provides a dedicated cache dir for each app).
+         */
         UstadCacheBuilder(
             dbUrl = dbUrl,
-            storagePath = Path(
-                File(dataDir, "httpfiles").absolutePath.toString()
-            ),
+            storagePath = cacheStoragePath,
+            pathsProvider = {
+                CachePaths(
+                    tmpWorkPath = Path(cacheStoragePath, "tmpWork"),
+                    persistentPath = Path(cacheStoragePath, "cache"),
+                    cachePath = Path(cacheStoragePath, "cache")
+                )
+            },
             logger = cacheLogger,
 
         ).build()
@@ -212,7 +230,7 @@ val DesktopHttpModule = DI.Module("Desktop-HTTP") {
             .addInterceptor(
                 UstadCacheInterceptor(
                     cache = instance(),
-                    tmpDir = interceptorTmpDir,
+                    tmpDirProvider = { interceptorTmpDir },
                     logger = cacheLogger,
                     json = instance(),
                 )
@@ -375,6 +393,7 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
             .addMigrations(MIGRATION_148_149_CLIENT_WITH_OFFLINE_ITEMS)
             .addMigrations(MIGRATION_155_156_CLIENT)
             .addMigrations(MIGRATION_161_162_CLIENT)
+            .addMigrations(MIGRATION_169_170_CLIENT)
             .addCallback(AddOfflineItemInactiveTriggersCallback())
             .build()
 

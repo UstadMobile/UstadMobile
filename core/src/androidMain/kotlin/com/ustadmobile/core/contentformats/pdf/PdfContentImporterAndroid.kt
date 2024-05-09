@@ -1,20 +1,26 @@
 package com.ustadmobile.core.contentformats.pdf
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.pdf.PdfRenderer
+import android.os.Build
 import android.os.ParcelFileDescriptor
+import androidx.core.net.toUri
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
+import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.util.ext.fileExtensionOrNull
 import com.ustadmobile.core.util.ext.removeFileExtension
+import com.ustadmobile.core.util.uuid.randomUuidAsString
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.ContentEntryPicture2
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.libcache.UstadCache
 import io.github.aakira.napier.Napier
@@ -34,6 +40,7 @@ class PdfContentImporterAndroid(
     json: Json,
     private val appContext: Context,
     private val tmpDir: File,
+    private val saveLocalUriAsBlobUseCase: SaveLocalUrisAsBlobsUseCase,
 ): AbstractPdfContentImportCommonJvm(
     endpoint = endpoint,
     cache = cache,
@@ -79,8 +86,40 @@ class PdfContentImporterAndroid(
 
         try {
             if(fileDescriptor != null) {
-                val pdfRenderer = PdfRenderer(fileDescriptor)
-                if(pdfRenderer.pageCount > 0) {
+                @Suppress("DEPRECATION")
+                val firstPageImageUri = PdfRenderer(fileDescriptor).use { pdfRenderer ->
+                    if(pdfRenderer.pageCount > 0) {
+                        pdfRenderer.openPage(0).use { page ->
+                            val bitmap = Bitmap.createBitmap(page.width ,page.height,
+                                Bitmap.Config.ARGB_8888)
+                            page.render(bitmap, null, null,
+                                PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
+                            val firstPageImgTmpFile = File(tmpDir, randomUuidAsString() + ".webp")
+                            firstPageImgTmpFile.outputStream().use { fileOut ->
+                                bitmap.compress(
+                                    if(Build.VERSION.SDK_INT >= 30) {
+                                        Bitmap.CompressFormat.WEBP_LOSSY
+                                    }else {
+                                        Bitmap.CompressFormat.WEBP
+                                    }, 80, fileOut
+                                )
+                                fileOut.flush()
+                            }
+
+                            saveLocalUriAsBlobUseCase(
+                                listOf(
+                                    SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem(
+                                        localUri = firstPageImgTmpFile.toUri().toString(),
+                                    )
+                                )
+                            ).firstOrNull()?.blobUrl
+                        }
+                    }else {
+                        null
+                    }
+                }
+
+                if(firstPageImageUri != null) {
                     MetadataResult(
                         entry = ContentEntryWithLanguage().apply {
                             title = originalFilename?.removeFileExtension() ?: uri.toString()
@@ -90,7 +129,11 @@ class PdfContentImporterAndroid(
                             contentTypeFlag = ContentEntry.TYPE_DOCUMENT
                         },
                         importerId = importerId,
-                        originalFilename = originalFilename
+                        originalFilename = originalFilename,
+                        picture = ContentEntryPicture2(
+                            cepPictureUri = firstPageImageUri,
+                            cepThumbnailUri = firstPageImageUri,
+                        )
                     )
                 }else {
                     null

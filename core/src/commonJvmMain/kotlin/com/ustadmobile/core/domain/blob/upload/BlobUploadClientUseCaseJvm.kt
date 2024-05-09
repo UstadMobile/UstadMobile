@@ -27,7 +27,9 @@ import com.ustadmobile.core.domain.upload.ChunkedUploadClientChunkGetterUseCase
 import com.ustadmobile.core.domain.upload.DEFAULT_CHUNK_SIZE
 import com.ustadmobile.door.ext.setBodyJson
 import com.ustadmobile.door.ext.withDoorTransactionAsync
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.TransferJobItemStatus
+import com.ustadmobile.lib.db.entities.TransferJobError
 import com.ustadmobile.libcache.RemoveLockRequest
 import com.ustadmobile.libcache.response.requireHeadersContentLength
 import io.github.aakira.napier.Napier
@@ -310,6 +312,13 @@ class BlobUploadClientUseCaseJvm(
 
                 withContext(NonCancellable) {
                     transferJobItemStatusUpdater.onFinished()
+                    db.transferJobErrorDao.insertAsync(
+                        TransferJobError(
+                            tjeTime = systemTimeInMillis(),
+                            tjeErrorStr = e.message ?: e::class.java.name,
+                            tjeTjUid = transferJob.tjUid,
+                        )
+                    )
                 }
 
                 throw e
