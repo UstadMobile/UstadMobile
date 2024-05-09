@@ -4,10 +4,13 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.interop.oneroster.model.Clazz
 import com.ustadmobile.core.domain.interop.oneroster.model.LineItem
+import com.ustadmobile.core.domain.interop.oneroster.model.Status
+import com.ustadmobile.core.domain.interop.oneroster.model.toCourseBlock
 import com.ustadmobile.core.domain.interop.oneroster.model.Result as OneRosterResult
 import com.ustadmobile.core.domain.interop.oneroster.model.toOneRosterClass
 import com.ustadmobile.core.domain.interop.oneroster.model.toOneRosterLineItem
 import com.ustadmobile.core.domain.interop.oneroster.model.toOneRosterResult
+import com.ustadmobile.core.domain.interop.timestamp.parse8601Timestamp
 
 /**
  *  Implements OneRoster Endpoints by running a database query and converting from database entities
@@ -59,5 +62,40 @@ class OneRosterEndpoint(
             accountPersonUid = accountPersonUid
         )?.toOneRosterLineItem(endpoint)
     }
+
+    /**
+     * @return As per OneRoster spec (Section 3.5) 201 is returned if a new resource is created,
+     *         200 otherwise
+     */
+    suspend fun putLineItem(
+        accountPersonUid: Long,
+        lineItemSourcedId: String,
+        lineItem: LineItem
+    ) : Int {
+        val existingCourseBlock = db.courseBlockDao.findBySourcedId(
+            lineItemSourcedId, accountPersonUid
+        )
+
+        return if(existingCourseBlock == null) {
+            db.courseBlockDao.insert(lineItem.toCourseBlock())
+            201
+        }else {
+            db.courseBlockDao.updateFromLineItem(
+                cbUid = existingCourseBlock.cbUid,
+                active = lineItem.status == Status.ACTIVE,
+                dateLastModified = parse8601Timestamp(lineItem.dateLastModified),
+                title = lineItem.description,
+                description = lineItem.description,
+                assignDate = parse8601Timestamp(lineItem.assignDate),
+                dueDate = parse8601Timestamp(lineItem.dueDate),
+                resultValueMin = lineItem.resultValueMin,
+                resultValueMax = lineItem.resultValueMax
+            )
+            200
+        }
+
+
+    }
+
 
 }

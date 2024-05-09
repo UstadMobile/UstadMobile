@@ -253,4 +253,31 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
     )
     abstract suspend fun findBySourcedId(sourcedId: String, accountPersonUid: Long): CourseBlock?
 
+    /**
+     *
+     */
+    @Query("""
+        UPDATE CourseBlock
+           SET cbActive = :active,
+               cbLct = :dateLastModified,
+               cbTitle = :title,
+               cbDescription = :description,
+               cbHideUntilDate = :assignDate,
+               cbDeadlineDate = :dueDate,
+               cbMinPoints = :resultValueMin,
+               cbMaxPoints = :resultValueMax
+         WHERE cbUid = :cbUid      
+    """)
+    abstract suspend fun updateFromLineItem(
+        cbUid: Long,
+        active: Boolean,
+        dateLastModified: Long,
+        title: String,
+        description: String,
+        assignDate: Long,
+        dueDate: Long,
+        resultValueMin: Float,
+        resultValueMax: Float,
+    )
+
 }

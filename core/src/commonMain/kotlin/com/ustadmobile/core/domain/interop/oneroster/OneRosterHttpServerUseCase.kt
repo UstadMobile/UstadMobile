@@ -5,7 +5,8 @@ import com.ustadmobile.core.domain.interop.oneroster.model.Clazz
 import com.ustadmobile.core.domain.interop.oneroster.model.LineItem
 import com.ustadmobile.core.domain.interop.oneroster.model.Result as OneRosterResult
 import com.ustadmobile.core.util.isimplerequest.ISimpleTextRequest
-import com.ustadmobile.door.http.DoorJsonResponse
+import com.ustadmobile.core.util.isimpleresponse.StringSimpleTextResponse
+import com.ustadmobile.core.util.stringvalues.IStringValues
 import com.ustadmobile.door.util.systemTimeInMillis
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
@@ -21,15 +22,15 @@ class OneRosterHttpServerUseCase(
 ) {
 
 
-    private fun newPlainTextResponse(statusCode: Int, bodyText: String) = DoorJsonResponse(
+    private fun newPlainTextResponse(statusCode: Int, bodyText: String) = StringSimpleTextResponse(
         responseCode = statusCode,
-        bodyText = bodyText,
-        contentType = "text/plain"
+        responseBody = bodyText,
+        headers = IStringValues.contentType("text/plain"),
     )
 
     suspend operator fun invoke(
         request: ISimpleTextRequest
-    ): DoorJsonResponse {
+    ): StringSimpleTextResponse {
         val authToken = request.headers["Authorization"]?.substringAfter("Bearer ")?.trim()
             ?: return newPlainTextResponse(401, "No auth token")
 
@@ -51,10 +52,10 @@ class OneRosterHttpServerUseCase(
             //getClassesForUser
             apiPathSegments[0] == "users" && apiPathSegments.getOrNull(2) == "classes" -> {
                 val classes = oneRosterEndpoint.getClassesForUser(accountPersonUid, apiPathSegments[1])
-                DoorJsonResponse(
+                StringSimpleTextResponse(
                     responseCode = 200,
-                    bodyText = json.encodeToString(ListSerializer(Clazz.serializer()), classes),
-                    contentType = "application/json"
+                    responseBody = json.encodeToString(ListSerializer(Clazz.serializer()), classes),
+                    headers = IStringValues.contentType("application/json"),
                 )
             }
 
@@ -69,12 +70,12 @@ class OneRosterHttpServerUseCase(
                     studentSourcedId = apiPathSegments[3],
                 )
 
-                DoorJsonResponse(
+                StringSimpleTextResponse(
                     responseCode = 200,
-                    bodyText = json.encodeToString(
+                    responseBody = json.encodeToString(
                         ListSerializer(OneRosterResult.serializer()), results
                     ),
-                    contentType = "application/json"
+                    headers = IStringValues.contentType("application/json"),
                 )
             }
 
@@ -86,14 +87,35 @@ class OneRosterHttpServerUseCase(
                     accountPersonUid = accountPersonUid,
                     lineItemSourcedId = apiPathSegments[1],
                 )?.let {
-                    DoorJsonResponse(
+                    StringSimpleTextResponse(
                         responseCode = 200,
-                        bodyText = json.encodeToString(LineItem.serializer(), it),
-                        contentType = "application/json"
+                        responseBody = json.encodeToString(LineItem.serializer(), it),
+                        headers = IStringValues.contentType("application/json"),
                     )
                 } ?: newPlainTextResponse(
                     404,
                     "Not Found LineItem sourcedId= ${apiPathSegments[1]}"
+                )
+            }
+
+            //putLineItem
+            apiPathSegments[0] == "lineItems" && apiPathSegments.size == 2  &&
+                    request.method.equals("PUT", true)-> {
+                val lineItemSourcedId = apiPathSegments[1]
+                val requestBody = request.body ?: return newPlainTextResponse(
+                    400, "Put line item request had no body")
+
+                val lineItem = json.decodeFromString(LineItem.serializer(), requestBody)
+                val responseCode = oneRosterEndpoint.putLineItem(
+                    accountPersonUid = accountPersonUid,
+                    lineItemSourcedId = lineItemSourcedId,
+                    lineItem = lineItem
+                )
+
+                return StringSimpleTextResponse(
+                    headers = IStringValues.contentType("text/plain"),
+                    responseCode = responseCode,
+                    responseBody = null,
                 )
             }
 

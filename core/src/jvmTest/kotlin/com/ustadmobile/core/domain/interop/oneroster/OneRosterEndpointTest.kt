@@ -6,12 +6,17 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.clazz.CreateNewClazzUseCase
 import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.EnrolIntoCourseUseCase
 import com.ustadmobile.core.domain.interop.oneroster.model.Clazz
+import com.ustadmobile.core.domain.interop.oneroster.model.GUIDRef
+import com.ustadmobile.core.domain.interop.oneroster.model.GuidRefType
 import com.ustadmobile.core.domain.interop.oneroster.model.LineItem
+import com.ustadmobile.core.domain.interop.oneroster.model.Status
+import com.ustadmobile.core.domain.interop.timestamp.format8601Timestamp
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.util.isimplerequest.StringSimpleTextRequest
 import com.ustadmobile.core.util.stringvalues.asIStringValues
 import com.ustadmobile.core.util.uuid.randomUuidAsString
 import com.ustadmobile.door.DatabaseBuilder
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Clazz as ClazzEntity
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.CourseBlock
@@ -122,7 +127,7 @@ class OneRosterEndpointTest {
 
             assertEquals(200, response.responseCode)
             val responseResults = json.decodeFromString(
-                ListSerializer(Clazz.serializer()), response.bodyText)
+                ListSerializer(Clazz.serializer()), response.responseBody!!)
             assertEquals(1, responseResults.size)
             assertEquals(clazzAndEnrolment.first.clazzName, responseResults.first().title)
         }
@@ -154,12 +159,12 @@ class OneRosterEndpointTest {
             )
 
             assertEquals(200, response.responseCode)
-            val responseResults = response.bodyText.let {
+            val responseResults = response.responseBody?.let {
                 json.decodeFromString(ListSerializer(OneRosterResult.serializer()), it)
             }
 
 
-            assertEquals(studentResults.size, responseResults.size)
+            assertEquals(studentResults.size, responseResults!!.size)
             studentResults.forEach {studentResult ->
                 assertTrue(responseResults.any { it.score == studentResult.srScore })
             }
@@ -184,9 +189,69 @@ class OneRosterEndpointTest {
             )
 
             assertEquals(200, response.responseCode)
-            val lineItem = json.decodeFromString(LineItem.serializer(), response.bodyText)
+            val lineItem = json.decodeFromString(LineItem.serializer(), response.responseBody!!)
             assertEquals(courseBlock.cbSourcedId, lineItem.sourcedId)
         }
     }
+
+    @Test
+    fun givenLineItemDoesNotExist_whenCallGetLineItem_thenShouldReturn404() {
+        val httpEndpoint = OneRosterHttpServerUseCase(db, oneRosterEndpoint, json)
+        runBlocking {
+            createCourseAndEnrolPerson()
+            grantExternalAppPermission()
+
+            val response = httpEndpoint.invoke(
+                StringSimpleTextRequest(
+                    path = "/api/oneroster/lineItems/doesNotExist",
+                    headers = mapOf("Authorization" to listOf("Bearer test-token")).asIStringValues(),
+                )
+            )
+
+            assertEquals(404, response.responseCode)
+        }
+    }
+
+    @Test
+    fun givenValidLineItem_whenCallPutLineItem_thenShouldInsertAndReturn201() {
+        val httpEndpoint = OneRosterHttpServerUseCase(db, oneRosterEndpoint, json)
+        runBlocking {
+            val (clazz, _) = createCourseAndEnrolPerson()
+            grantExternalAppPermission()
+
+            val newLineItem = LineItem(
+                sourcedId = "${clazz.clazzUid}_lesson001",
+                status = Status.ACTIVE,
+                dateLastModified = format8601Timestamp(systemTimeInMillis()),
+                title = "Lesson 001",
+                description = "Lesson 001 result",
+                assignDate = format8601Timestamp(0),
+                dueDate = format8601Timestamp(systemTimeInMillis()),
+                `class` = GUIDRef(
+                    href = "http://localhost/",
+                    sourcedId = clazz.clazzUid.toString(),
+                    type = GuidRefType.clazz
+                ),
+                resultValueMin = 0.toFloat(),
+                resultValueMax = 10.toFloat(),
+            )
+
+            val response = httpEndpoint.invoke(
+                StringSimpleTextRequest(
+                    method = "PUT",
+                    headers = mapOf("Authorization" to listOf("Bearer test-token")).asIStringValues(),
+                    path = "/api/oneroster/lineItems/${newLineItem.sourcedId}",
+                    body = json.encodeToString(LineItem.serializer(), newLineItem)
+                )
+            )
+
+            assertEquals(201, response.responseCode)
+            val courseBlockInDb = db.courseBlockDao.findBySourcedId(
+                newLineItem.sourcedId, accountPerson.personUid)
+            assertEquals(newLineItem.sourcedId, courseBlockInDb?.cbSourcedId)
+            assertEquals(clazz.clazzUid, courseBlockInDb?.cbClazzUid ?: -1)
+        }
+    }
+
 
 }
