@@ -272,8 +272,6 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(CourseGroupSetDetailViewModel.DEST_NAME, "CourseGroupSetDetail Preview",
         CourseGroupSetDetailScreen
     ),
-    UstadScreen("UstadClazzAssignmentListItem", "UstadClazzAssignmentListItem Preview",
-        UstadClazzAssignmentListItemPreview),
     UstadScreen(HolidayCalendarListViewModel.DEST_NAME, "HolidayCalendarList Preview",
         HolidayCalendarListScreenPreview),
     UstadScreen(LanguageListViewModel.DEST_NAME, "LanguageList Preview",

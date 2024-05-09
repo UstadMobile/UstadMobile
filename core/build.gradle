@@ -269,6 +269,10 @@ kotlin {
                 implementation libs.androidx.media3.transformer
                 implementation libs.androidx.media3.effect
                 implementation libs.androidx.media3.common
+
+                implementation libs.httpoveripc.core
+                implementation libs.httpoveripc.server
+                implementation libs.rawhttp.core
             }
         }
 

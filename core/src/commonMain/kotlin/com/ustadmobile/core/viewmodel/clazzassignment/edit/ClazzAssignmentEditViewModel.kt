@@ -205,9 +205,9 @@ class ClazzAssignmentEditViewModel(
                 navResultReturner.filteredResultFlowForKey(CourseBlockEditViewModel.KEY_HTML_DESCRIPTION).collect { result ->
                     val descriptionHtml = result.result as? String ?: return@collect
                     onCourseBlockChanged(
-                        _uiState.value.entity?.courseBlock?.shallowCopy {
+                        _uiState.value.entity?.courseBlock?.copy(
                             cbDescription = descriptionHtml
-                        }
+                        )
                     )
                 }
             }

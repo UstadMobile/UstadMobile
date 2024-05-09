@@ -106,6 +106,8 @@ import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUs
 import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCaseAndroid
 import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCase
 import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCaseAndroid
+import com.ustadmobile.core.domain.interop.oneroster.OneRosterEndpoint
+import com.ustadmobile.core.domain.interop.oneroster.OneRosterHttpServerUseCase
 import com.ustadmobile.core.domain.share.ShareTextUseCase
 import com.ustadmobile.core.domain.share.ShareTextUseCaseAndroid
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
@@ -176,6 +178,7 @@ import org.acra.config.httpSender
 import org.acra.data.StringFormat
 import org.acra.ktx.initAcra
 import org.acra.sender.HttpSender
+import rawhttp.core.RawHttp
 
 class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
@@ -908,6 +911,25 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             GetOfflineStorageAvailableSpaceAndroid(
                 getAndroidSdCardDirUseCase = instance(),
                 appContext = applicationContext,
+            )
+        }
+
+        bind<RawHttp>() with singleton {
+            RawHttp()
+        }
+
+        bind<OneRosterEndpoint>() with scoped(EndpointScope.Default).singleton {
+            OneRosterEndpoint(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = instance(tag = DoorTag.TAG_REPO),
+            )
+        }
+
+        bind<OneRosterHttpServerUseCase>() with scoped(EndpointScope.Default).singleton {
+            OneRosterHttpServerUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                json = instance(),
+                oneRosterEndpoint = instance(),
             )
         }
 

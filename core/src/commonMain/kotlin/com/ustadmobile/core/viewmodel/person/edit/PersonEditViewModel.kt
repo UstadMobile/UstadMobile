@@ -2,6 +2,7 @@ package com.ustadmobile.core.viewmodel.person.edit
 
 import com.ustadmobile.core.account.AccountRegisterOptions
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
@@ -157,6 +158,9 @@ class PersonEditViewModel(
         on(accountManager.activeEndpoint).instance()
 
     private val addNewPersonUseCase: AddNewPersonUseCase by di.onActiveEndpoint().instance()
+
+    private val dontSetCurrentSession: Boolean = savedStateHandle[ARG_DONT_SET_CURRENT_SESSION]
+        ?.toBoolean() ?: false
 
     init {
         loadingState = LoadingUiState.INDETERMINATE
@@ -504,13 +508,14 @@ class PersonEditViewModel(
                         personUid = savePerson.personUid
                     }
 
-                    accountManager.register(
+                    val registeredPerson = accountManager.register(
                         person = personToRegister,
                         endpointUrl = serverUrl,
                         accountRegisterOptions = AccountRegisterOptions(
-                            makeAccountActive = !registrationModeFlags.hasFlag(REGISTER_MODE_MINOR),
+                            makeAccountActive = !registrationModeFlags.hasFlag(REGISTER_MODE_MINOR)
+                                    && !dontSetCurrentSession,
                             parentJoin = parentJoin
-                        )
+                        ),
                     )
 
                     if(registrationModeFlags.hasFlag(REGISTER_MODE_MINOR)) {
@@ -527,10 +532,14 @@ class PersonEditViewModel(
                         navController.navigate(RegisterMinorWaitForParentViewModel.DEST_NAME, args,
                             goOptions)
                     }else {
-                        val goOptions = UstadMobileSystemCommon.UstadGoOptions(
-                            clearStack = true
+                        navController.navigateToViewUri(
+                            viewUri = nextDestination.appendSelectedAccount(
+                                registeredPerson.personUid, Endpoint(serverUrl)
+                            ),
+                            goOptions = UstadMobileSystemCommon.UstadGoOptions(
+                                clearStack = true
+                            )
                         )
-                        navController.navigateToViewUri(nextDestination, goOptions)
                     }
                 } catch (e: Exception) {
                     if (e is IllegalStateException) {
@@ -682,6 +691,7 @@ class PersonEditViewModel(
             REGISTER_VIA_LINK,
             ARG_DATE_OF_BIRTH,
             ARG_REGISTRATION_MODE,
+            ARG_DONT_SET_CURRENT_SESSION,
         )
 
         /**

@@ -8,13 +8,6 @@ object DiTag {
      */
     const val TAG_CONTEXT_DATA_ROOT = 13
 
-    /**
-     * The default directory to which ContainerEntryFile data will be saved. This is not necessarily
-     * the only directory.
-     */
-    @Deprecated("use ContainerStorageManager")
-    const val TAG_DEFAULT_CONTAINER_DIR = 11
-
     const val TAG_GOOGLE_API = 12
 
     const val XPP_FACTORY_NSAWARE = 1

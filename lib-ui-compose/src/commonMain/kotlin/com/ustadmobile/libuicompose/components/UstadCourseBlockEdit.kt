@@ -15,7 +15,6 @@ import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.viewmodel.courseblock.CourseBlockViewModelConstants.CompletionCriteria
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditUiState
 import com.ustadmobile.lib.db.entities.CourseBlock
-import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.db.UNSET_DISTANT_FUTURE
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
@@ -88,9 +87,7 @@ fun UstadCourseBlockEdit(
                 Text(uiState.caTitleError ?: stringResource(MR.strings.required))
             },
             onValueChange = {
-                onCourseBlockChange(uiState.block?.courseBlock?.shallowCopy {
-                    cbTitle = it
-                })
+                onCourseBlockChange(uiState.block?.courseBlock?.copy(cbTitle = it))
             },
         )
 
@@ -100,9 +97,7 @@ fun UstadCourseBlockEdit(
                 .testTag("description"),
             onHtmlChange = {
                 uiState.block?.also { block ->
-                    onCourseBlockChange(block.courseBlock.shallowCopy {
-                        cbDescription = it
-                    })
+                    onCourseBlockChange(block.courseBlock.copy(cbDescription = it))
                 }
             },
             onClickToEditInNewScreen = onClickEditDescription,
@@ -122,9 +117,7 @@ fun UstadCourseBlockEdit(
                 timeLabel = { Text(stringResource(MR.strings.time)) },
                 timeZoneId = uiState.timeZone,
                 onValueChange = {
-                    onCourseBlockChange(uiState.block?.courseBlock?.shallowCopy {
-                        cbHideUntilDate = it
-                    })
+                    onCourseBlockChange(uiState.block?.courseBlock?.copy(cbHideUntilDate = it))
                 },
                 baseTestTag = "dont_show_before",
             )
@@ -145,9 +138,9 @@ fun UstadCourseBlockEdit(
                     itemText = { stringResource(it.stringResource).capitalizeFirstLetter() },
                     options = uiState.completionCriteriaOptions,
                     onOptionSelected = {
-                        onCourseBlockChange(uiState.block?.courseBlock?.shallowCopy{
-                            cbCompletionCriteria = it.value
-                        })
+                        onCourseBlockChange(
+                            uiState.block?.courseBlock?.copy(cbCompletionCriteria = it.value)
+                        )
                     },
                     enabled = uiState.fieldsEnabled,
                 )
@@ -171,9 +164,9 @@ fun UstadCourseBlockEdit(
                         )
                     },
                     onValueChange = {
-                        onCourseBlockChange(uiState.block?.courseBlock?.shallowCopy {
-                            cbMinPoints = it.toInt()
-                        })
+                        onCourseBlockChange(
+                            uiState.block?.courseBlock?.copy(cbMinPoints = it.toInt())
+                        )
                     },
                 )
             }
@@ -200,9 +193,9 @@ fun UstadCourseBlockEdit(
                     isError = uiState.caMaxPointsError != null,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     onValueChange = {
-                        onCourseBlockChange(uiState.block?.courseBlock?.shallowCopy {
-                            cbMaxPoints = it.toInt()
-                        })
+                        onCourseBlockChange(
+                            uiState.block?.courseBlock?.copy(cbMaxPoints = it.toInt())
+                        )
                     },
                 )
             }
@@ -223,9 +216,9 @@ fun UstadCourseBlockEdit(
                     timeLabel = { stringResource(MR.strings.time) },
                     timeZoneId = uiState.timeZone,
                     onValueChange = {
-                        onCourseBlockChange(uiState.block?.courseBlock?.shallowCopy {
-                            cbDeadlineDate = it
-                        })
+                        onCourseBlockChange(
+                            uiState.block?.courseBlock?.copy(cbDeadlineDate = it)
+                        )
                     },
                     baseTestTag = "deadline"
                 )
@@ -247,9 +240,7 @@ fun UstadCourseBlockEdit(
                     timeZoneId = uiState.timeZone,
                     baseTestTag = "end_of_grace_period",
                     onValueChange = {
-                        onCourseBlockChange(uiState.block?.courseBlock?.shallowCopy {
-                            cbGracePeriodDate = it
-                        })
+                        onCourseBlockChange(uiState.block?.courseBlock?.copy(cbGracePeriodDate = it))
                     }
                 )
             }
@@ -269,9 +260,9 @@ fun UstadCourseBlockEdit(
                 },
                 keyboardOptions =  KeyboardOptions(keyboardType = KeyboardType.Number),
                 onValueChange = {
-                    onCourseBlockChange(uiState.block?.courseBlock?.shallowCopy {
-                        cbLateSubmissionPenalty = it.toInt()
-                    })
+                    onCourseBlockChange(
+                        uiState.block?.courseBlock?.copy(cbLateSubmissionPenalty = it.toInt())
+                    )
                 },
                 supportingText = {
                     Text(stringResource(MR.strings.penalty_label))

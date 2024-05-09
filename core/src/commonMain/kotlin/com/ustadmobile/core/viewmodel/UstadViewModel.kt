@@ -540,6 +540,26 @@ abstract class UstadViewModel(
 
         const val ARG_TITLE = "t"
 
+        /**
+         * Screens that handle selecting an account (e.g. AccountList, Login, Register) in some rare
+         * scenarios should not change the active session e.g. when the user is granting or denying
+         * a request for external app permission (in a separate activity) we don't want the session
+         * for the main activity to be changed.
+         */
+        const val ARG_DONT_SET_CURRENT_SESSION = "noSessionChange"
+
+        /**
+         * Where the current user session is not changed, the next view needs to know which account
+         * was selected (e.g. by UstadAccountManager, Login, Register, etc).
+         */
+        const val ARG_SELECTED_ACCOUNT_PERSON_UID = "selectedAccountPersonUid"
+
+        /**
+         * Where the current user session is not changed, the next view needs to know which account
+         * was selected (e.g. by UstadAccountManager, Login, Register, etc).
+         */
+        const val ARG_SELECTED_ACCOUNT_ENDPOINT_URL = "selectedAccountEndpointUrl"
+
     }
 
 }

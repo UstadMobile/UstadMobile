@@ -6,5 +6,4 @@ import kotlinx.serialization.Serializable
 data class CourseBlockUidAndClazzUid(
     var clazzUid: Long = 0,
     var courseBlockUid: Long = 0,
-) {
-}
+)

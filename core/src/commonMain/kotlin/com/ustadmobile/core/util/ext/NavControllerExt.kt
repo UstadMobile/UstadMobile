@@ -12,6 +12,7 @@ import com.ustadmobile.core.util.UstadUrlComponents.Companion.DEFAULT_DIVIDER
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_API_URL
+import com.ustadmobile.core.viewmodel.UstadViewModel.Companion.ARG_DONT_SET_CURRENT_SESSION
 import com.ustadmobile.core.viewmodel.parentalconsentmanagement.ParentalConsentManagementViewModel
 import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
@@ -54,6 +55,9 @@ fun UstadNavController.navigateToViewUri(
  * Note: if we are opening an external link, this must be done synchronously. On Javascript opening
  * tabs is only allowed in response to events.
  *
+ * @param dontSetCurrentSession Set UstadViewModel.ARG_DONT_SET_CURRENT_SESSION when navigating to
+ *        Login, AccountList, etc.
+ *
  * @return If the link is internal, then opening the link will be done asynchronously (required to
  * check existing accounts etc) a Job will be returned. If the link is external, it is opened
  * synchronously and null will be returned.
@@ -69,6 +73,7 @@ fun UstadNavController.navigateToLink(
     accountName: String? = null,
     scope: CoroutineScope = GlobalScope,
     linkTarget: LinkTarget = LinkTarget.DEFAULT,
+    dontSetCurrentSession: Boolean = false,
 ) : Job? {
     var endpointUrl: String? = null
     var viewUri: String? = null
@@ -115,7 +120,7 @@ fun UstadNavController.navigateToLink(
                         it.person.username == accountName.substringBefore("@")
                     }
                     if(session != null) {
-                        accountManager.currentUserSession = session
+                        accountManager.takeIf { !dontSetCurrentSession }?.currentUserSession = session
                         navigateToViewUri(viewUri, goOptions)
                     }
                 }
@@ -139,7 +144,11 @@ fun UstadNavController.navigateToLink(
                 (endpointUrl == null && accountManager.activeSessionCount(maxDateOfBirth) == 0
                 && !userCanSelectServer) ->
                 {
-                    val args = mutableMapOf(ARG_NEXT to viewUri)
+                    val args = mutableMapOf(
+                        ARG_NEXT to viewUri,
+                        ARG_DONT_SET_CURRENT_SESSION to dontSetCurrentSession.toString(),
+                    )
+
                     if(endpointUrl != null)
                         args[ARG_API_URL] = endpointUrl
 
@@ -147,12 +156,23 @@ fun UstadNavController.navigateToLink(
                 }
                 //If there are no accounts, the endpoint url is not specified, and the user can select the server, go to EnterLink
                 endpointUrl == null && accountManager.activeSessionCount(maxDateOfBirth) == 0 && userCanSelectServer -> {
-                    navigate(SiteEnterLinkViewModel.DEST_NAME, mapOf(ARG_NEXT to viewUri), goOptions)
+                    navigate(
+                        viewName = SiteEnterLinkViewModel.DEST_NAME,
+                        args = mapOf(
+                            ARG_NEXT to viewUri,
+                            ARG_DONT_SET_CURRENT_SESSION to dontSetCurrentSession.toString(),
+                        ),
+                        goOptions = goOptions
+                    )
                 }
 
                 //else - go to the account manager
                 else -> {
-                    val args = mutableMapOf(ARG_NEXT to viewUri)
+                    val args = mutableMapOf(
+                        ARG_NEXT to viewUri,
+                        ARG_DONT_SET_CURRENT_SESSION to dontSetCurrentSession.toString(),
+                    )
+
                     if(endpointUrl != null)
                         args[AccountListViewModel.ARG_FILTER_BY_ENDPOINT] = endpointUrl
 

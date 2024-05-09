@@ -14,9 +14,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.lib.db.entities.CourseAssignmentMark
-import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import dev.icerock.moko.resources.StringResource
 import com.ustadmobile.core.MR
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.libuicompose.components.UstadNumberTextField
 import dev.icerock.moko.resources.compose.stringResource
 import dev.icerock.moko.resources.compose.stringResource as mrStringResource

@@ -198,11 +198,7 @@ class UstadTestRule(): TestWatcher() {
             bind<XmlPullParserFactory>(tag  = DiTag.XPP_FACTORY_NSAWARE) with singleton {
                 xppFactory
             }
-            bind<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR) with scoped(endpointScope).singleton {
-                val containerFolder = File(tempFolder, "containerDir")
-                containerFolder.mkdirs()
-                containerFolder
-            }
+
             bind<XmlPullParserFactory>(tag = DiTag.XPP_FACTORY_NSUNAWARE) with singleton {
                 XmlPullParserFactory.newInstance()
             }

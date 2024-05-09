@@ -1387,6 +1387,14 @@ val MIGRATION_170_171 = DoorMigrationStatementList(170, 171) { db ->
     }
 }
 
+val MIGRATION_171_172 = DoorMigrationStatementList(171, 172) { db ->
+    buildList {
+        add("ALTER TABLE CourseBlock ADD COLUMN cbSourcedId TEXT")
+        add("CREATE INDEX idx_courseblock_cbclazzuid ON CourseBlock (cbClazzUid)")
+        add("CREATE INDEX idx_courseblock_cbsourcedid ON CourseBlock (cbSourcedId)")
+    }
+}
+
 
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_105_106, MIGRATION_106_107,
@@ -1402,7 +1410,7 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_156_157, MIGRATION_157_158, MIGRATION_158_159, MIGRATION_159_160,
     MIGRATION_160_161, MIGRATION_162_163, MIGRATION_163_164, MIGRATION_164_165,
     MIGRATION_165_166, MIGRATION_166_167, MIGRATION_167_168, MIGRATION_168_169,
-    MIGRATION_170_171,
+    MIGRATION_170_171, MIGRATION_171_172,
 )
 
 

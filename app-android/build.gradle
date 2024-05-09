@@ -323,6 +323,8 @@ dependencies {
     implementation libs.androidx.browser
     implementation libs.androidx.core.splashscreen
 
+    implementation libs.rawhttp.core
+
 
     androidTestImplementation libs.androidx.test.runner
     androidTestImplementation libs.junit
