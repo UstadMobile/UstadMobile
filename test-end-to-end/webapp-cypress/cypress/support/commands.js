@@ -233,38 +233,26 @@ Cypress.Commands.add('ustadAddDiscussionBoard',(discussionTitle) => {
     cy.contains("button","Done").click()
 })
 
-// Type and verify text in text field
-//Could be change to use recurse as per:
-// https://github.com/bahmutov/cypress-recurse/blob/main/cypress/e2e/type-with-retries-spec.js
-Cypress.Commands.add('ustadTypeAndVerify', { prevSubject: 'element' }, (subjects, expectedText, options = {}) => {
-   // Set maxRetries to options.maxRetries if provided, otherwise default to 3
-    let maxRetries = options.maxRetries || 3
+// Type and verify text - for use with the rich text editor that can be flakey in tests
+Cypress.Commands.add('ustadTypeAndVerify', { prevSubject: 'element' }, (subject, expectedText, options = {}) => {
+  // Log statement at the beginning of the command function
+  cy.log("Starting ustadTypeAndVerify command..");
 
-  cy.wrap(subjects).each((subject) => {
-    let retries = 0
-
-    const typeAndVerify = () => {
-      retries++
-      if (retries > maxRetries) {
-        cy.log("Maximum retries reached")
-        return
-      }
-
-      cy.wrap(subject).invoke('val').then((currentValue) => {
-        if (currentValue === expectedText) {
-          return; // Exit the function if currentValue matches expectedText
-        }
-        else{
-        cy.wrap(subject).clear().type(expectedText)
-      typeAndVerify()
-      }
-      })
+  return cy.recurse(
+    () => {
+      cy.log("Inside recurse command 1");
+      return cy.wrap(subject).clear().type(expectedText, { delay: 30 });
+    },
+    ($el) => {
+      cy.log("Inside recurse command 2", Cypress.$($el).text());
+      const text = Cypress.$($el).text(); // Accessing the text content using jQuery's text() function
+      return text === expectedText;
+    },
+    {
+      limit: options.maxRetries || 3, // Maximum number of retries
     }
-
-    // Start the loop initially
-    typeAndVerify()
-  })
-})
+  );
+});
 
 /*
  * The student list in assignment very rarely does not load as expected. This has never been seen
