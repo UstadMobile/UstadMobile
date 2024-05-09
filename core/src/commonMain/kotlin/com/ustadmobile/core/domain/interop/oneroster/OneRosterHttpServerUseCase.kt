@@ -2,6 +2,7 @@ package com.ustadmobile.core.domain.interop.oneroster
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.interop.oneroster.model.Clazz
+import com.ustadmobile.core.domain.interop.oneroster.model.Result as OneRosterResult
 import com.ustadmobile.core.util.isimplerequest.ISimpleTextRequest
 import com.ustadmobile.door.http.DoorJsonResponse
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -52,6 +53,26 @@ class OneRosterHttpServerUseCase(
                 DoorJsonResponse(
                     responseCode = 200,
                     bodyText = json.encodeToString(ListSerializer(Clazz.serializer()), classes),
+                    contentType = "application/json"
+                )
+            }
+
+            //GerResultsForStudentForClass
+            apiPathSegments[0] == "classes" &&
+                    apiPathSegments.getOrNull(2) == "students" &&
+                    apiPathSegments.getOrNull(4) == "results"
+            -> {
+                val results = oneRosterEndpoint.getResultsForStudentForClass(
+                    accountPersonUid = accountPersonUid,
+                    clazzSourcedId = apiPathSegments[1],
+                    studentSourcedId = apiPathSegments[3],
+                )
+
+                DoorJsonResponse(
+                    responseCode = 200,
+                    bodyText = json.encodeToString(
+                        ListSerializer(OneRosterResult.serializer()), results
+                    ),
                     contentType = "application/json"
                 )
             }

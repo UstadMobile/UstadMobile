@@ -2,11 +2,17 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
-@Entity
+@Entity(
+    indices = arrayOf(
+        Index("cbClazzUid", name = "idx_courseblock_cbclazzuid"),
+        Index("cbSourcedId", name = "idx_courseblock_cbsourcedid"),
+    )
+)
 @ReplicateEntity(
     tableId = CourseBlock.TABLE_ID,
     remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW
@@ -67,7 +73,14 @@ data class CourseBlock(
 
     @ReplicateLastModified
     @ReplicateEtag
-    var cbLct: Long = 0
+    var cbLct: Long = 0,
+
+    /**
+     * The sourcedId as per the OneRoster API model e.g. as the CourseBlock is essentially a LineItem
+     * as per the data model
+     */
+    var cbSourcedId: String? = null,
+
 ) {
 
     companion object {
@@ -83,6 +96,11 @@ data class CourseBlock(
         const val BLOCK_CONTENT_TYPE = 104
 
         const val BLOCK_DISCUSSION_TYPE = 105
+
+        /**
+         * Represents a LineItme created using the OneRoster API by an external app.
+         */
+        const val BLOCK_EXTERNAL_APP = 300
 
     }
 

@@ -1,5 +1,6 @@
 package com.ustadmobile.core.domain.interop.oneroster
 
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UNSET_DISTANT_FUTURE
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.clazz.CreateNewClazzUseCase
@@ -14,6 +15,7 @@ import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ExternalAppPermission
 import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.StudentResult
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.TimeZone
 import kotlinx.serialization.builtins.ListSerializer
@@ -21,6 +23,8 @@ import kotlinx.serialization.json.Json
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
+import com.ustadmobile.core.domain.interop.oneroster.model.Result as OneRosterResult
 
 class OneRosterEndpointTest {
 
@@ -35,12 +39,14 @@ class OneRosterEndpointTest {
 
     private lateinit var accountPerson: Person
 
+    private val endpoint = Endpoint("http://localhost:8087/")
+
     @BeforeTest
     fun setup() {
         db = DatabaseBuilder.databaseBuilder(
             UmAppDatabase::class, "jdbc:sqlite::memory:", nodeId = 1L
         ).build()
-        oneRosterEndpoint = OneRosterEndpoint(db, null)
+        oneRosterEndpoint = OneRosterEndpoint(db, null, endpoint)
         runBlocking {
             accountPerson = Person().apply {
                 firstNames = "One"
@@ -72,11 +78,14 @@ class OneRosterEndpointTest {
         return Pair(clazz, enrolment)
     }
 
-    private suspend fun createCourseBlock(clazzUid: Long) {
-        db.courseBlockDao.insertAsync(
-            CourseBlock(
+    private suspend fun createCourseBlock(clazzUid: Long) : CourseBlock{
+        val courseBlock = CourseBlock(
+            cbClazzUid = clazzUid,
+            cbType = CourseBlock.BLOCK_EXTERNAL_APP,
+        )
 
-            )
+        return courseBlock.copy(
+            cbUid = db.courseBlockDao.insertAsync(courseBlock)
         )
     }
 
@@ -113,10 +122,41 @@ class OneRosterEndpointTest {
         }
     }
 
+    @Test
     fun givenValidAuth_whenRequestResultsForStudentClass_thenShouldReturnResults() {
         val httpEndpoint = OneRosterHttpServerUseCase(db, oneRosterEndpoint, json)
         runBlocking {
-            val clazzAndEnrolment= createCourseAndEnrolPerson()
+            val (clazz, _)= createCourseAndEnrolPerson()
+            val courseBlock = createCourseBlock(clazz.clazzUid)
+            grantExternalAppPermission()
+
+            val studentResults = (0 .. 2).map { score ->
+                StudentResult(
+                    srStudentPersonUid = accountPerson.personUid,
+                    srClazzUid = clazz.clazzUid,
+                    srCourseBlockUid =  courseBlock.cbUid,
+                    srScore = score.toFloat()
+                )
+            }
+            db.studentResultDao.insertListAsync(studentResults)
+
+            val response = httpEndpoint.invoke(
+                StringSimpleTextRequest(
+                    path = "/api/oneroster/classes/${clazz.clazzUid}/students/${accountPerson.personUid}/results",
+                    headers = mapOf("Authorization" to listOf("Bearer test-token")).asIStringValues(),
+                )
+            )
+
+            assertEquals(200, response.responseCode)
+            val responseResults = response.bodyText.let {
+                json.decodeFromString(ListSerializer(OneRosterResult.serializer()), it)
+            }
+
+
+            assertEquals(studentResults.size, responseResults.size)
+            studentResults.forEach {studentResult ->
+                assertTrue(responseResults.any { it.score == studentResult.srScore })
+            }
         }
     }
 

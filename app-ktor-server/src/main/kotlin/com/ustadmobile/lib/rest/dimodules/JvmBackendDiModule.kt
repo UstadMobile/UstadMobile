@@ -143,6 +143,8 @@ fun makeJvmBackendDiModule(
     }
 
     bind<DbAndObservers>() with scoped(contextScope).singleton {
+        instance<File>(DiTag.TAG_CONTEXT_DATA_ROOT) //Ensure data dir for context is created
+
         val dbHostName = context.identifier(dbMode, "UmAppDatabase")
         val nodeIdAndAuth: NodeIdAndAuth = instance()
         val dbUrl = config.property("ktor.database.url").getString()

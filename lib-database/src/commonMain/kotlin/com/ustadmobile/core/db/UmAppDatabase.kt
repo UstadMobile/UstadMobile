@@ -72,7 +72,7 @@ import com.ustadmobile.lib.db.entities.*
     ReplicationOperation::class,
     PendingRepositorySession::class,
 
-], version = 171)
+], version = 172)
 expect abstract class UmAppDatabase : RoomDatabase {
 
     /*
@@ -256,5 +256,7 @@ expect abstract class UmAppDatabase : RoomDatabase {
     abstract val contentEntryPicture2Dao: ContentEntryPicture2Dao
 
     abstract val transferJobErrorDao: TransferJobErrorDao
+
+    abstract val studentResultDao: StudentResultDao
 
 }
