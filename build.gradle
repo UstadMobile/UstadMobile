@@ -85,7 +85,7 @@ allprojects {
 }
 
 //Major.minor.database version
-version = "0.4.121"
+version = "0.4.122"
 group = "com.ustadmobile.app"
 
 /**
@@ -95,7 +95,7 @@ group = "com.ustadmobile.app"
  */
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 345
+    ustadVersionCode = 346
 
 
     version_gradle_buildconfig_plugin = "1.1.7"
