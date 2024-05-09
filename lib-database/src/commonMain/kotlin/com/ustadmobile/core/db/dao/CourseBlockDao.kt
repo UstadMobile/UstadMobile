@@ -238,4 +238,19 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
     abstract fun findCourseBlockByAssignmentUid(
         assignmentUid: Long
     ): Flow<CourseBlock?>
+
+    /**
+     * Find a CourseBlock using a sourcedId to search by
+     */
+    @Query(
+        """
+            SELECT CourseBlock.*
+              FROM CourseBlock
+             WHERE CAST(cbUid AS TEXT) = :sourcedId
+                OR cbSourcedId = :sourcedId
+               AND :accountPersonUid != 0 
+        """
+    )
+    abstract suspend fun findBySourcedId(sourcedId: String, accountPersonUid: Long): CourseBlock?
+
 }

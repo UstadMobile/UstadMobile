@@ -2,6 +2,7 @@ package com.ustadmobile.core.domain.interop.oneroster
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.interop.oneroster.model.Clazz
+import com.ustadmobile.core.domain.interop.oneroster.model.LineItem
 import com.ustadmobile.core.domain.interop.oneroster.model.Result as OneRosterResult
 import com.ustadmobile.core.util.isimplerequest.ISimpleTextRequest
 import com.ustadmobile.door.http.DoorJsonResponse
@@ -74,6 +75,25 @@ class OneRosterHttpServerUseCase(
                         ListSerializer(OneRosterResult.serializer()), results
                     ),
                     contentType = "application/json"
+                )
+            }
+
+            //getLineItem
+            apiPathSegments[0] == "lineItems" && apiPathSegments.size == 2  &&
+                    request.method.equals("GET", true)-> {
+
+                oneRosterEndpoint.getLineItem(
+                    accountPersonUid = accountPersonUid,
+                    lineItemSourcedId = apiPathSegments[1],
+                )?.let {
+                    DoorJsonResponse(
+                        responseCode = 200,
+                        bodyText = json.encodeToString(LineItem.serializer(), it),
+                        contentType = "application/json"
+                    )
+                } ?: newPlainTextResponse(
+                    404,
+                    "Not Found LineItem sourcedId= ${apiPathSegments[1]}"
                 )
             }
 

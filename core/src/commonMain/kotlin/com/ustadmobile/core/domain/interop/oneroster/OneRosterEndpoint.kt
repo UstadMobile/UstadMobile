@@ -3,8 +3,10 @@ package com.ustadmobile.core.domain.interop.oneroster
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.interop.oneroster.model.Clazz
+import com.ustadmobile.core.domain.interop.oneroster.model.LineItem
 import com.ustadmobile.core.domain.interop.oneroster.model.Result as OneRosterResult
 import com.ustadmobile.core.domain.interop.oneroster.model.toOneRosterClass
+import com.ustadmobile.core.domain.interop.oneroster.model.toOneRosterLineItem
 import com.ustadmobile.core.domain.interop.oneroster.model.toOneRosterResult
 
 /**
@@ -46,6 +48,16 @@ class OneRosterEndpoint(
         ).map {
             it.toOneRosterResult(endpoint)
         }
+    }
+
+    suspend fun getLineItem(
+        accountPersonUid: Long,
+        lineItemSourcedId: String,
+    ) : LineItem? {
+        return db.courseBlockDao.findBySourcedId(
+            sourcedId = lineItemSourcedId,
+            accountPersonUid = accountPersonUid
+        )?.toOneRosterLineItem(endpoint)
     }
 
 }

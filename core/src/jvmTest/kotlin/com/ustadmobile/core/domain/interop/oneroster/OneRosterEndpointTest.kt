@@ -6,9 +6,11 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.clazz.CreateNewClazzUseCase
 import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.EnrolIntoCourseUseCase
 import com.ustadmobile.core.domain.interop.oneroster.model.Clazz
+import com.ustadmobile.core.domain.interop.oneroster.model.LineItem
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.util.isimplerequest.StringSimpleTextRequest
 import com.ustadmobile.core.util.stringvalues.asIStringValues
+import com.ustadmobile.core.util.uuid.randomUuidAsString
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.lib.db.entities.Clazz as ClazzEntity
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
@@ -78,9 +80,13 @@ class OneRosterEndpointTest {
         return Pair(clazz, enrolment)
     }
 
-    private suspend fun createCourseBlock(clazzUid: Long) : CourseBlock{
+    private suspend fun createCourseBlock(
+        clazzUid: Long,
+        sourcedId: String? = null,
+    ) : CourseBlock{
         val courseBlock = CourseBlock(
             cbClazzUid = clazzUid,
+            cbSourcedId = sourcedId,
             cbType = CourseBlock.BLOCK_EXTERNAL_APP,
         )
 
@@ -157,6 +163,29 @@ class OneRosterEndpointTest {
             studentResults.forEach {studentResult ->
                 assertTrue(responseResults.any { it.score == studentResult.srScore })
             }
+        }
+    }
+
+    @Test
+    fun givenLineItemExists_whenCallGetLineItemWithSourcedId_thenShouldReturn200() {
+        val httpEndpoint = OneRosterHttpServerUseCase(db, oneRosterEndpoint, json)
+        runBlocking {
+            val (clazz, _)= createCourseAndEnrolPerson()
+            val courseBlock = createCourseBlock(
+                clazz.clazzUid, sourcedId = randomUuidAsString()
+            )
+            grantExternalAppPermission()
+
+            val response = httpEndpoint.invoke(
+                StringSimpleTextRequest(
+                    path = "/api/oneroster/lineItems/${courseBlock.cbSourcedId}",
+                    headers = mapOf("Authorization" to listOf("Bearer test-token")).asIStringValues(),
+                )
+            )
+
+            assertEquals(200, response.responseCode)
+            val lineItem = json.decodeFromString(LineItem.serializer(), response.bodyText)
+            assertEquals(courseBlock.cbSourcedId, lineItem.sourcedId)
         }
     }
 
