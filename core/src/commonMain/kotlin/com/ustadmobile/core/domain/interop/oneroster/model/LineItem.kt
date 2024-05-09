@@ -5,9 +5,17 @@ import com.ustadmobile.core.domain.interop.timestamp.format8601Timestamp
 import com.ustadmobile.core.domain.interop.timestamp.parse8601Timestamp
 import com.ustadmobile.lib.db.entities.CourseBlock
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
-
-@kotlinx.serialization.Serializable
+/**
+ * LineItem as per OneRoster spec section 5.6 ( https://www.imsglobal.org/oneroster-v11-final-specification#_Toc480452039 )
+ *
+ * As per the spec (section 4) : A class is assessed via a number of line items (columns in a gradebook),
+ *
+ * This is represented by the CourseBlock in database. Where a OneRoster LineItem is created by an
+ * external app, the CourseBlock.cbType is set to CourseBlock.BLOCK_EXTERNAL_APP.
+ */
+@Serializable
 data class LineItem(
     val sourcedId: String,
     val status: Status,
@@ -20,8 +28,7 @@ data class LineItem(
     val `class`: GUIDRef,
     val resultValueMin: Float,
     val resultValueMax: Float,
-) {
-}
+)
 
 fun CourseBlock.toOneRosterLineItem(
     endpoint: Endpoint,

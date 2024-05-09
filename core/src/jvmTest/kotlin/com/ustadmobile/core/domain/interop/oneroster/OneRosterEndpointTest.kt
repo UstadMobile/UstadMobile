@@ -254,4 +254,101 @@ class OneRosterEndpointTest {
     }
 
 
+    @Test
+    fun givenValidResult_whenCallPutResult_thenShouldInsertAndReturn201() {
+        val httpEndpoint = OneRosterHttpServerUseCase(db, oneRosterEndpoint, json)
+        runBlocking {
+            val (clazz, _)= createCourseAndEnrolPerson()
+            val lineItemSourcedId = "${clazz.clazzUid}-Lesson001"
+            createCourseBlock(
+                clazz.clazzUid, sourcedId = lineItemSourcedId
+            )
+            grantExternalAppPermission()
+
+            val oneRosterResult = OneRosterResult(
+                sourcedId = randomUuidAsString(),
+                status = Status.ACTIVE,
+                dateLastModified = format8601Timestamp(systemTimeInMillis()),
+                metaData = null,
+                lineItem = GUIDRef(
+                    sourcedId = lineItemSourcedId,
+                    href = "http://localhost",
+                    type = GuidRefType.lineItem
+                ),
+                student = GUIDRef(
+                    sourcedId = accountPerson.personUid.toString(),
+                    href = "http://localhost/",
+                    type = GuidRefType.student
+                ),
+                score = 5.toFloat(),
+                scoreDate = format8601Timestamp(systemTimeInMillis()),
+                comment = "OK, not great, not terrible"
+            )
+
+            val response = httpEndpoint.invoke(
+                StringSimpleTextRequest(
+                    method = "PUT",
+                    headers = mapOf("Authorization" to listOf("Bearer test-token")).asIStringValues(),
+                    path = "/api/oneroster/results/${oneRosterResult.sourcedId}",
+                    body = json.encodeToString(OneRosterResult.serializer(), oneRosterResult),
+                )
+            )
+
+            assertEquals(201, response.responseCode)
+            val resultInDb = db.studentResultDao.findByClazzAndStudent(
+                clazz.clazzUid, accountPerson.personUid, accountPerson.personUid
+            )
+            assertEquals(oneRosterResult.score, resultInDb.first().studentResult.srScore)
+        }
+    }
+
+    @Test
+    fun givenValidRawOneRosterLineItem_whenCallPutLineItem_thenShouldRespond201() {
+        val httpEndpoint = OneRosterHttpServerUseCase(db, oneRosterEndpoint, json)
+        runBlocking {
+            val (clazz, _)= createCourseAndEnrolPerson()
+            val lineItemSourcedId = "${clazz.clazzUid}-Lesson001"
+            createCourseBlock(
+                clazz.clazzUid, sourcedId = lineItemSourcedId
+            )
+            grantExternalAppPermission()
+
+            val lineItemId = "puzzle0102-${clazz.clazzUid}"
+            val lineItemJson = """
+                {
+                  "sourcedId": "$lineItemId",
+                  "status": "active",
+                  "dateLastModified": "2023-03-14T10:09:04.004Z",
+                  "metadata": {},
+                  "title": "puzzle0102",
+                  "description": "puzzle0102",
+                  "assignDate": "2023-03-14T10:09:04.004Z",
+                  "dueDate": "2024-03-14T10:09:04.013Z",
+                  "class": {
+                    "href": "${clazz.clazzUid}",
+                    "sourcedId": "${clazz.clazzUid}",
+                    "type": "class"
+                  },
+                  "category": {
+                    "href": "category",
+                    "sourcedId": "category",
+                    "type": "category"
+                  },
+                  "resultValueMin": 0,
+                  "resultValueMax": 100
+                }
+            """
+
+            val response = httpEndpoint(
+                StringSimpleTextRequest(
+                    method = "PUT",
+                    headers = mapOf("Authorization" to listOf("Bearer test-token")).asIStringValues(),
+                    path = "/api/oneroster/lineItems/$lineItemId",
+                    body = lineItemJson
+                )
+            )
+            assertEquals(201, response.responseCode)
+        }
+    }
+
 }

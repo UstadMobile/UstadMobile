@@ -13,7 +13,8 @@ import kotlinx.serialization.json.Json
 
 /**
  * Processes OneRoster HTTP requests (serializing/deserializing, checking authentication, etc)
- * and delegates to the OneRoster endpoint to run the required logic.
+ * and delegates to the OneRosterEndpoint to run the required logic (validation, converting between
+ * the OneRoster model and database entities, etc).
  */
 class OneRosterHttpServerUseCase(
     private val db: UmAppDatabase,
@@ -112,7 +113,28 @@ class OneRosterHttpServerUseCase(
                     lineItem = lineItem
                 )
 
-                return StringSimpleTextResponse(
+                StringSimpleTextResponse(
+                    headers = IStringValues.contentType("text/plain"),
+                    responseCode = responseCode,
+                    responseBody = null,
+                )
+            }
+
+            //putResult
+            apiPathSegments[0] == "results" && apiPathSegments.size == 2  &&
+                    request.method.equals("PUT", true)-> {
+                val sourcedId = apiPathSegments[1]
+                val bodyStr = request.body ?: return newPlainTextResponse(400,
+                    "Put result request had no body")
+                val result = json.decodeFromString(OneRosterResult.serializer(), bodyStr)
+
+                val responseCode = oneRosterEndpoint.putResult(
+                    accountPersonUid = accountPersonUid,
+                    resultSourcedId = sourcedId,
+                    result = result,
+                )
+
+                StringSimpleTextResponse(
                     headers = IStringValues.contentType("text/plain"),
                     responseCode = responseCode,
                     responseBody = null,

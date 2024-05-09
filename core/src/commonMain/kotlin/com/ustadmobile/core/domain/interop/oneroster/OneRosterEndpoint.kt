@@ -10,6 +10,7 @@ import com.ustadmobile.core.domain.interop.oneroster.model.Result as OneRosterRe
 import com.ustadmobile.core.domain.interop.oneroster.model.toOneRosterClass
 import com.ustadmobile.core.domain.interop.oneroster.model.toOneRosterLineItem
 import com.ustadmobile.core.domain.interop.oneroster.model.toOneRosterResult
+import com.ustadmobile.core.domain.interop.oneroster.model.toStudentResult
 import com.ustadmobile.core.domain.interop.timestamp.parse8601Timestamp
 
 /**
@@ -93,8 +94,37 @@ class OneRosterEndpoint(
             )
             200
         }
+    }
 
+    /**
+     * @return As per OneRoster spec (Section 3.5) 201 is returned if a new resource is created,
+     *         200 otherwise
+     */
+    suspend fun putResult(
+        accountPersonUid: Long,
+        resultSourcedId: String,
+        result: OneRosterResult
+    ) : Int {
+        val existingStudentResultUid = db.studentResultDao.findUidBySourcedId(resultSourcedId)
 
+        val blockUidAndClazzUid = db.courseBlockDao
+            .findCourseBlockUidAndClazzUidBySourcedId(
+                result.lineItem.sourcedId, accountPersonUid
+            ) ?: throw IllegalArgumentException("Cannot find LineItem (courseblock) for result: " +
+                "${result.lineItem.sourcedId} ")
+
+        val studentResult = result.toStudentResult().copy(
+            srCourseBlockUid = blockUidAndClazzUid.courseBlockUid,
+            srClazzUid = blockUidAndClazzUid.clazzUid,
+        )
+
+        return if(existingStudentResultUid == 0L) {
+            db.studentResultDao.insertListAsync(listOf(studentResult))
+            201
+        }else {
+            db.studentResultDao.updateAsync(studentResult.copy(srUid = existingStudentResultUid))
+            200
+        }
     }
 
 

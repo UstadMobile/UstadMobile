@@ -280,4 +280,18 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
         resultValueMax: Float,
     )
 
+    @Query("""
+        SELECT CourseBlock.cbUid AS courseBlockUid, 
+               CourseBlock.cbClazzUid AS clazzUid
+          FROM CourseBlock
+         WHERE CAST(cbUid AS TEXT) = :sourcedId
+            OR cbSourcedId = :sourcedId
+           AND :accountPersonUid != 0     
+    """)
+    abstract suspend fun findCourseBlockUidAndClazzUidBySourcedId(
+        sourcedId: String,
+        accountPersonUid: Long
+    ): CourseBlockUidAndClazzUid?
+
+
 }
