@@ -11,6 +11,7 @@ import com.ustadmobile.core.util.stringvalues.asIStringValues
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.lib.db.entities.Clazz as ClazzEntity
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
+import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ExternalAppPermission
 import com.ustadmobile.lib.db.entities.Person
 import kotlinx.coroutines.runBlocking
@@ -71,6 +72,14 @@ class OneRosterEndpointTest {
         return Pair(clazz, enrolment)
     }
 
+    private suspend fun createCourseBlock(clazzUid: Long) {
+        db.courseBlockDao.insertAsync(
+            CourseBlock(
+
+            )
+        )
+    }
+
     private suspend fun grantExternalAppPermission() {
         db.externalAppPermissionDao.insertAsync(
             ExternalAppPermission(
@@ -101,6 +110,13 @@ class OneRosterEndpointTest {
                 ListSerializer(Clazz.serializer()), response.bodyText)
             assertEquals(1, responseResults.size)
             assertEquals(clazzAndEnrolment.first.clazzName, responseResults.first().title)
+        }
+    }
+
+    fun givenValidAuth_whenRequestResultsForStudentClass_thenShouldReturnResults() {
+        val httpEndpoint = OneRosterHttpServerUseCase(db, oneRosterEndpoint, json)
+        runBlocking {
+            val clazzAndEnrolment= createCourseAndEnrolPerson()
         }
     }
 

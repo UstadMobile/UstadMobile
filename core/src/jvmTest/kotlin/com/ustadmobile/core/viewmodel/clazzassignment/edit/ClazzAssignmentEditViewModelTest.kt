@@ -44,9 +44,9 @@ class ClazzAssignmentEditViewModelTest  : AbstractMainDispatcherTest() {
                 })
 
                 viewModel.onCourseBlockChanged(
-                    readyState.entity?.courseBlock?.shallowCopy {
+                    readyState.entity?.courseBlock?.copy(
                         cbTitle = "Assignment"
-                    }
+                    )
                 )
 
                 viewModel.onClickSave()
@@ -97,9 +97,9 @@ class ClazzAssignmentEditViewModelTest  : AbstractMainDispatcherTest() {
             viewModel.uiState.test(timeout = 5.seconds) {
                 val readyState = awaitItemWhere { it.fieldsEnabled }
                 viewModel.onCourseBlockChanged(
-                    readyState.entity?.courseBlock?.shallowCopy {
+                    readyState.entity?.courseBlock?.copy(
                         cbMaxPoints = 0
-                    }
+                    )
                 )
                 viewModel.onClickSave()
                 cancelAndIgnoreRemainingEvents()
@@ -122,10 +122,10 @@ class ClazzAssignmentEditViewModelTest  : AbstractMainDispatcherTest() {
             viewModel.uiState.test(timeout = 5.seconds) {
                 val readyState = awaitItemWhere { it.fieldsEnabled }
                 viewModel.onCourseBlockChanged(
-                    readyState.entity?.courseBlock?.shallowCopy {
-                        cbHideUntilDate = systemTimeInMillis()
+                    readyState.entity?.courseBlock?.copy(
+                        cbHideUntilDate = systemTimeInMillis(),
                         cbDeadlineDate = systemTimeInMillis() - 100000
-                    }
+                    )
                 )
                 viewModel.onClickSave()
 
@@ -149,10 +149,10 @@ class ClazzAssignmentEditViewModelTest  : AbstractMainDispatcherTest() {
                 val readyState = awaitItemWhere { it.fieldsEnabled }
 
                 viewModel.onCourseBlockChanged(
-                    readyState.entity?.courseBlock?.shallowCopy {
-                        cbDeadlineDate = systemTimeInMillis() + 100000
+                    readyState.entity?.courseBlock?.copy(
+                        cbDeadlineDate = systemTimeInMillis() + 100000,
                         cbGracePeriodDate = systemTimeInMillis()
-                    }
+                    )
                 )
 
                 viewModel.onClickSave()

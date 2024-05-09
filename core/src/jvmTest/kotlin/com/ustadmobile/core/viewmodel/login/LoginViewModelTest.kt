@@ -51,7 +51,7 @@ class LoginViewModelTest : AbstractMainDispatcherTest(){
         validPassword: String = VALID_PASS,
     ): UstadAccountManager {
         return mock {
-            onBlocking { login(eq(validUsername), eq(validPassword), any(), any()) }.thenAnswer {
+            onBlocking { login(eq(validUsername), eq(validPassword), any(), any(), any()) }.thenAnswer {
                 val url = it.arguments[2] as String
                 UmAccount(personUid = 42,
                     username = VALID_USER, firstName = "user", lastName = "last", endpointUrl = url)
@@ -175,7 +175,7 @@ class LoginViewModelTest : AbstractMainDispatcherTest(){
     @Test
     fun givenInvalidUsernameAndPassword_whenHandleLoginCalled_thenShouldCallSetErrorMessage() {
         val mockAccountManager: UstadAccountManager = mock {
-            onBlocking { login(any(), any(), any(), any()) }.then {
+            onBlocking { login(any(), any(), any(), any(), any()) }.then {
                 throw UnauthorizedException("Access denied")
             }
             on { activeEndpoint }.thenReturn(Endpoint("http://localhost:8087/"))
@@ -222,7 +222,7 @@ class LoginViewModelTest : AbstractMainDispatcherTest(){
     @Test
     fun givenServerOffline_whenCreated_thenShouldShowErrorMessage() {
         val mockAccountManager: UstadAccountManager = mock {
-            onBlocking { login(any(), any(), any(), any()) }.then {
+            onBlocking { login(any(), any(), any(), any(), any()) }.then {
                 throw IOException("Server offline")
             }
             on { activeEndpoint }.thenReturn(Endpoint("http://localhost:79/"))

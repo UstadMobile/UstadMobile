@@ -8,9 +8,9 @@ import com.ustadmobile.core.util.ext.lastPossibleSubmissionTime
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
-import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import io.github.aakira.napier.Napier
 import com.ustadmobile.core.MR
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
 
 /**
  * Handle submission of an assignment - checks to ensure that the submission is valid and then stores

@@ -28,5 +28,13 @@ class OneRosterEndpoint(
         }
     }
 
+    suspend fun getResultsForStudentForClass(
+        accountPersonUid: Long,
+        clazzSourcedId: String,
+        studentSourcedId: String,
+    ) {
+
+    }
+
 
 }

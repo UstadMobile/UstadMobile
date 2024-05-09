@@ -10,9 +10,9 @@ import androidx.compose.ui.platform.testTag
 import com.ustadmobile.core.viewmodel.clazzlog.edit.ClazzLogEditUiState
 import com.ustadmobile.core.viewmodel.clazzlog.edit.ClazzLogEditViewModel
 import com.ustadmobile.lib.db.entities.ClazzLog
-import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.core.MR
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.libuicompose.components.UstadDateTimeField
 import dev.icerock.moko.resources.compose.stringResource
 
