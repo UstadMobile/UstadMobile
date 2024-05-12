@@ -6,8 +6,8 @@ import com.ustadmobile.core.domain.interop.oneroster.OneRosterHttpServerUseCase
 import com.ustadmobile.core.util.ext.clientUrl
 import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.core.util.isimplerequest.asISimpleTextRequest
+import com.ustadmobile.core.util.isimpleresponse.ISimpleTextResponse
 import com.ustadmobile.core.util.rawhttp.newRawHttpStringResponse
-import com.ustadmobile.door.http.DoorJsonResponse
 import com.ustadmobile.httpoveripc.core.SimpleTextResponse
 import com.ustadmobile.httpoveripc.server.AbstractHttpOverIpcServer
 import io.github.aakira.napier.Napier
@@ -28,16 +28,25 @@ import rawhttp.core.body.StringBody
  */
 class UstadHttpOverIpcServer : AbstractHttpOverIpcServer(){
 
-    private fun DoorJsonResponse.toRawResponse(rawHttp: RawHttp): RawHttpResponse<*> {
+    private fun ISimpleTextResponse.toRawResponse(rawHttp: RawHttp): RawHttpResponse<*> {
+        val contentType = headers["content-type"] ?: "application/octet-stream"
         return rawHttp.parseResponse(
             "HTTP/1.1 $responseCode ${SimpleTextResponse.STATUS_RESPONSES[responseCode] ?: ""}\n" +
                     "Content-Type: $contentType\n" +
-                    headers.joinToString(separator = "") {
-                        "${it.first}: ${it.second}\n"
+                    buildString {
+                        headers.names().forEach { headerName ->
+                            headers.getAll(headerName).forEach { headerVal ->
+                                append("$headerName: $headerVal\n")
+                            }
+                        }
                     }
-        ).withBody(StringBody(bodyText))
+        ).let {
+            if(responseBody != null)
+                it.withBody(StringBody(responseBody))
+            else
+                it
+        }
     }
-
 
     override fun handleRequest(request: RawHttpRequest): RawHttpResponse<*> {
         Napier.d { "${request.method} : ${request.uri}" }
