@@ -411,6 +411,34 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
     abstract suspend fun getCoursesByName(names: List<String>): List<Clazz>
 
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall("findOneRosterUserClazzes"),
+            HttpServerFunctionCall(
+                functionName = "personHasPermissionWithClazzEntities2",
+                functionDao = CoursePermissionDao::class,
+                functionArgs = arrayOf(
+                    HttpServerFunctionParam(
+                        name = "clazzUid",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "0",
+                    )
+                )
+            ),
+            HttpServerFunctionCall(
+                functionName = "findAllByPersonUid",
+                functionDao = SystemPermissionDao::class,
+                functionArgs = arrayOf(
+                    HttpServerFunctionParam(
+                        name = "includeDeleted",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "true",
+                    )
+                )
+            ),
+        )
+    )
     /**
      *
      * @param accountPersonUid the personuid for the auth token holder
