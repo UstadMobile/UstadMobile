@@ -120,6 +120,8 @@ commons-cli = "1.6.0"
 kotlinx-html = "0.11.0"
 nv-i18n = "1.29"
 semver = "2.0.0"
+httpoveripc = "0.0.3"
+rawhttp = "2.6.0"
 
 [plugins]
 
@@ -263,6 +265,7 @@ accompanist-themeadapter-material = { module = "com.google.accompanist:accompani
 accompanist-pager = { module = "com.google.accompanist:accompanist-pager", version.ref = "compose-accompanist" }
 accompanist-pager-indicators = { module = "com.google.accompanist:accompanist-pager-indicators", version.ref = "compose-accompanist"}
 accompanist-flowlayout = { module = "com.google.accompanist:accompanist-flowlayout", version.ref = "compose-accompanist" }
+accompanist-drawablepainter = { module = "com.google.accompanist:accompanist-drawablepainter", version.ref= "compose-accompanist" }
 picasso = { module = "com.squareup.picasso:picasso", version.ref = "picasso" }
 seismic = { module = "com.squareup:seismic", version.ref = "seismic" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
@@ -345,3 +348,6 @@ androidx-media3-common = { module = "androidx.media3:media3-common", version.ref
 # lib-ui-compose/README-ExoPlayer-AV1.MD for additional information.
 androidx-media3-decoder-av1 = { module = "androidx.media3:lib-decoder-av1", version.ref = "androidx-media3" }
 semver = { module = "io.github.z4kn4fein:semver", version.ref = "semver" }
+httpoveripc-core = { module = "com.github.UstadMobile.httpoveripc:core", version.ref = "httpoveripc" }
+httpoveripc-server = { module = "com.github.UstadMobile.httpoveripc:server", version.ref = "httpoveripc" }
+rawhttp-core = { module = "com.athaydes.rawhttp:rawhttp-core", version.ref = "rawhttp" }

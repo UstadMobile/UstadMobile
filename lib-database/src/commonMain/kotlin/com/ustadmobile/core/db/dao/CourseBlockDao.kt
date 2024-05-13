@@ -238,4 +238,60 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
     abstract fun findCourseBlockByAssignmentUid(
         assignmentUid: Long
     ): Flow<CourseBlock?>
+
+    /**
+     * Find a CourseBlock using a sourcedId to search by
+     */
+    @Query(
+        """
+            SELECT CourseBlock.*
+              FROM CourseBlock
+             WHERE CAST(cbUid AS TEXT) = :sourcedId
+                OR cbSourcedId = :sourcedId
+               AND :accountPersonUid != 0 
+        """
+    )
+    abstract suspend fun findBySourcedId(sourcedId: String, accountPersonUid: Long): CourseBlock?
+
+    /**
+     *
+     */
+    @Query("""
+        UPDATE CourseBlock
+           SET cbActive = :active,
+               cbLct = :dateLastModified,
+               cbTitle = :title,
+               cbDescription = :description,
+               cbHideUntilDate = :assignDate,
+               cbDeadlineDate = :dueDate,
+               cbMinPoints = :resultValueMin,
+               cbMaxPoints = :resultValueMax
+         WHERE cbUid = :cbUid      
+    """)
+    abstract suspend fun updateFromLineItem(
+        cbUid: Long,
+        active: Boolean,
+        dateLastModified: Long,
+        title: String,
+        description: String,
+        assignDate: Long,
+        dueDate: Long,
+        resultValueMin: Float,
+        resultValueMax: Float,
+    )
+
+    @Query("""
+        SELECT CourseBlock.cbUid AS courseBlockUid, 
+               CourseBlock.cbClazzUid AS clazzUid
+          FROM CourseBlock
+         WHERE CAST(cbUid AS TEXT) = :sourcedId
+            OR cbSourcedId = :sourcedId
+           AND :accountPersonUid != 0     
+    """)
+    abstract suspend fun findCourseBlockUidAndClazzUidBySourcedId(
+        sourcedId: String,
+        accountPersonUid: Long
+    ): CourseBlockUidAndClazzUid?
+
+
 }

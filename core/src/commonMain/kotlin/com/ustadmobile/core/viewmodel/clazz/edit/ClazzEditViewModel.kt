@@ -727,9 +727,9 @@ class ClazzEditViewModel(
     fun onClickHideBlockPopupMenu(block: CourseBlockAndEditEntities) {
         updateCourseBlock(
             block.copy(
-                courseBlock = block.courseBlock.shallowCopy {
+                courseBlock = block.courseBlock.copy(
                     cbHidden = true
-                }
+                )
             )
         )
     }
@@ -737,9 +737,9 @@ class ClazzEditViewModel(
     fun onClickUnHideBlockPopupMenu(block: CourseBlockAndEditEntities) {
         updateCourseBlock(
             block.copy(
-                courseBlock = block.courseBlock.shallowCopy {
+                courseBlock = block.courseBlock.copy(
                     cbHidden = false
-                }
+                )
             )
         )
     }
@@ -747,9 +747,9 @@ class ClazzEditViewModel(
     fun onClickIndentBlockPopupMenu(block: CourseBlockAndEditEntities) {
         updateCourseBlock(
             block.copy(
-                courseBlock = block.courseBlock.shallowCopy {
+                courseBlock = block.courseBlock.copy(
                     cbIndentLevel = block.courseBlock.cbIndentLevel + 1
-                }
+                )
             )
         )
     }
@@ -757,9 +757,9 @@ class ClazzEditViewModel(
     fun onClickUnIndentBlockPopupMenu(block: CourseBlockAndEditEntities) {
         updateCourseBlock(
             block.copy(
-                courseBlock = block.courseBlock.shallowCopy {
+                courseBlock = block.courseBlock.copy(
                     cbIndentLevel = block.courseBlock.cbIndentLevel - 1
-                }
+                )
             )
         )
     }

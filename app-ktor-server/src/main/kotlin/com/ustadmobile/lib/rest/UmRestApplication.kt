@@ -59,9 +59,7 @@ import com.ustadmobile.core.domain.usersession.ValidateUserSessionOnServerUseCas
 import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
 import com.ustadmobile.core.util.DiTag
-import com.ustadmobile.core.util.DiTag.TAG_CONTEXT_DATA_ROOT
 import com.ustadmobile.door.ext.*
-import com.ustadmobile.core.impl.*
 import com.ustadmobile.lib.rest.ext.*
 import com.ustadmobile.lib.rest.messaging.MailProperties
 import com.ustadmobile.lib.util.ext.bindDataSourceIfNotExisting
@@ -338,28 +336,8 @@ fun Application.umRestApplication(
             }
         }
 
-        bind<ContainerStorageManager>() with scoped(EndpointScope.Default).singleton {
-            ContainerStorageManager(listOf(instance<File>(tag = TAG_CONTEXT_DATA_ROOT)))
-        }
-
         bind<NodeIdAuthCache>() with scoped(EndpointScope.Default).singleton {
             instance<UmAppDatabase>(tag = DoorTag.TAG_DB).nodeIdAuthCache
-        }
-
-        bind<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR) with scoped(EndpointScope.Default).singleton {
-            val containerDir = File(instance<File>(tag = TAG_CONTEXT_DATA_ROOT), "container")
-
-            //Move any old container directory to the new path (e.g. pre database v57)
-            if(context == Endpoint("localhost")){
-                val oldContainerDir = File("build/storage/singleton/container")
-                if(oldContainerDir.exists() && !oldContainerDir.renameTo(containerDir)) {
-                    throw IllegalStateException("Old singleton container dir present but cannot " +
-                            "rename from ${oldContainerDir.absolutePath} to ${containerDir.absolutePath}")
-                }
-            }
-
-            containerDir.takeIf { !it.exists() }?.mkdirs()
-            containerDir
         }
 
         bind<String>(tag = DiTag.TAG_GOOGLE_API) with singleton {
@@ -706,8 +684,7 @@ fun Application.umRestApplication(
         onReady {
             if(dbMode == CONF_DBMODE_SINGLETON && siteUrl != null) {
                 val endpoint = Endpoint(siteUrl)
-                //Get the container dir so that any old directories (build/storage etc) are moved if required
-                di.on(endpoint).direct.instance<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
+
                 //Generate the admin username/password etc.
                 di.on(endpoint).direct.instance<AuthManager>()
 

@@ -76,6 +76,7 @@ kotlin {
                 implementation(libs.androidx.webkit)
                 implementation(libs.androidx.constraintlayout)
                 implementation(libs.androidx.media3.decoder.av1)
+                implementation(libs.accompanist.drawablepainter)
             }
         }
 

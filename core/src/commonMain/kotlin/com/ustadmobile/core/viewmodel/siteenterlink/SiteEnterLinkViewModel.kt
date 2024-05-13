@@ -71,9 +71,7 @@ class SiteEnterLinkViewModel(
                     ARG_SITE to json.encodeToString(site),
                 )
                 ARGS_TO_PASS_THROUGH.forEach { argName ->
-                    savedStateHandle.get(argName)?.also { argValue ->
-                        args[argName] = argValue
-                    }
+                    args.putFromSavedStateIfPresent(argName)
                 }
 
                 loadingState = LoadingUiState.NOT_LOADING
@@ -107,7 +105,9 @@ class SiteEnterLinkViewModel(
 
         const val DEST_NAME = "SiteEnterLink"
 
-        val ARGS_TO_PASS_THROUGH = listOf(UstadView.ARG_NEXT, UstadView.ARG_INTENT_MESSAGE)
+        val ARGS_TO_PASS_THROUGH = listOf(
+            ARG_NEXT, UstadView.ARG_INTENT_MESSAGE, ARG_DONT_SET_CURRENT_SESSION,
+        )
 
         val KEY_LINK = "stateUrl"
 

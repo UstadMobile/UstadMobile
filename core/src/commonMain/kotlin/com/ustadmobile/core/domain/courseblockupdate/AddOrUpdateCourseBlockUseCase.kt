@@ -1,7 +1,6 @@
 package com.ustadmobile.core.domain.courseblockupdate
 
 import com.ustadmobile.lib.db.composites.CourseBlockAndEditEntities
-import com.ustadmobile.lib.db.entities.ext.shallowCopy
 
 /**
  * Handle when a new course block is added to the list, or when an existing course block has been
@@ -29,9 +28,9 @@ class AddOrUpdateCourseBlockUseCase {
         }else {
             courseBlockMutableList.add(
                 addOrUpdateBlock.copy(
-                    courseBlock = addOrUpdateBlock.courseBlock.shallowCopy {
+                    courseBlock = addOrUpdateBlock.courseBlock.copy(
                         cbClazzUid = clazzUid
-                    }
+                    )
                 )
             )
             courseBlockMutableList.autoIndent(courseBlockMutableList.size - 1)

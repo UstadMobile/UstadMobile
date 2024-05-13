@@ -58,7 +58,6 @@ class UstadAccountManager(
 
     private val _currentUserSession : MutableStateFlow<UserSessionWithPersonAndEndpoint>
 
-
     /**
      * The current user session is the one for the currently selected account
      */
@@ -102,6 +101,9 @@ class UstadAccountManager(
 
     val activeEndpoint: Endpoint
         get() = _currentUserSession.value.endpoint
+
+    val activeEndpoints: List<Endpoint>
+        get() = _endpointsWithActiveSessions.value
 
 
     fun interface EndpointFilter {
@@ -308,18 +310,18 @@ class UstadAccountManager(
             val repo: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_REPO)
             getSiteFromDbOrLoadFromHttp(repo)
 
-            if(accountRegisterOptions.makeAccountActive){
-                val session = addSession(registeredPerson,
-                    endpointUrl, newPassword)
+            val session = addSession(registeredPerson,
+                endpointUrl, newPassword)
 
-                //If the person is not loaded into the database (probably not), then put in the db.
-                val db: UmAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
-                db.withDoorTransactionAsync {
-                    if(db.personDao.findPersonAccountByUid(registeredPerson.personUid) == null) {
-                        db.personDao.insertAsync(registeredPerson)
-                    }
+            //If the person is not loaded into the database (probably not), then put in the db.
+            val db: UmAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
+            db.withDoorTransactionAsync {
+                if(db.personDao.findPersonAccountByUid(registeredPerson.personUid) == null) {
+                    db.personDao.insertAsync(registeredPerson)
                 }
+            }
 
+            if(accountRegisterOptions.makeAccountActive){
                 currentUserSession = session
             }
 
@@ -443,7 +445,8 @@ class UstadAccountManager(
         username: String,
         password: String,
         endpointUrl: String,
-        maxDateOfBirth: Long = 0L
+        maxDateOfBirth: Long = 0L,
+        dontSetCurrentSession: Boolean = false
     ): UmAccount = withContext(Dispatchers.Default){
         assertNotClosed()
 
@@ -484,7 +487,9 @@ class UstadAccountManager(
         getSiteFromDbOrLoadFromHttp(repo)
 
         val newSession = addSession(personInDb, endpointUrl, password)
-        currentUserSession = newSession
+        if(!dontSetCurrentSession) {
+            currentUserSession = newSession
+        }
 
         //This should not be needed - as responseAccount can be smartcast, but will not otherwise compile
         responseAccount
@@ -500,7 +505,7 @@ class UstadAccountManager(
         }
     }
 
-    suspend fun startGuestSession(endpointUrl: String) {
+    suspend fun startGuestSession(endpointUrl: String): UserSessionWithPersonAndEndpoint {
         val repo: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = DoorTag.TAG_REPO)
         val guestPerson = repo.insertPersonAndGroup(Person().apply {
             username = null
@@ -511,7 +516,9 @@ class UstadAccountManager(
 
         getSiteFromDbOrLoadFromHttp(repo)
 
-        currentUserSession = addSession(guestPerson, endpointUrl, null)
+        val guestSession = addSession(guestPerson, endpointUrl, null)
+        currentUserSession = guestSession
+        return guestSession
     }
 
     fun close() {
@@ -538,11 +545,6 @@ class UstadAccountManager(
         const val MANIFEST_URL_FALLBACK = "http://localhost/"
 
         /**
-         * Prefix for preference keys related to External Access Permission
-         */
-        const val KEY_PREFIX_EAPUID = "eap_"
-
-        /**
          * The AccountType (if used)
          */
         const val ACCOUNT_TYPE = "com.ustadmobile"
@@ -550,6 +552,7 @@ class UstadAccountManager(
         /**
          * Intent action indicating that the caller wants to get an authentication token
          */
+        @Suppress("unused")
         const val ACTION_GET_AUTH_TOKEN = "com.ustadmobile.AUTH_GET_TOKEN"
 
     }
