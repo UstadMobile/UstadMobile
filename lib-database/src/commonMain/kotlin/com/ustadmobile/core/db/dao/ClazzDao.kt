@@ -53,6 +53,21 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
 
     @HttpAccessible(
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall("findByUidAsync")
+        )
+    )
+    @Query("""
+        SELECT EXISTS(
+               SELECT Clazz.clazzUid
+                 FROM Clazz
+                WHERE Clazz.clazzUid = :clazzUid)
+    """)
+    abstract suspend fun clazzUidExistsAsync(clazzUid: Long): Boolean
+
+
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
     )
     @Query("SELECT * FROM Clazz WHERE clazzUid = :uid")
     abstract fun findByUidAsFlow(uid: Long): Flow<Clazz?>

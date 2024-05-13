@@ -60,7 +60,7 @@ fun LineItem.toCourseBlock(): CourseBlock {
         cbDescription = description
         cbHideUntilDate = parse8601Timestamp(assignDate)
         cbDeadlineDate = parse8601Timestamp(dueDate)
-        cbClazzUid = `class`.sourcedId.toLong()
+        cbClazzUid = `class`.sourcedId.toLongOrNull() ?: 0
         cbMinPoints = resultValueMin.toInt()
         cbMaxPoints = resultValueMax.toInt()
     }

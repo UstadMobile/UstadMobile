@@ -107,7 +107,7 @@ class OneRosterHttpServerUseCase(
                     400, "Put line item request had no body")
 
                 val lineItem = json.decodeFromString(LineItem.serializer(), requestBody)
-                val responseCode = oneRosterEndpoint.putLineItem(
+                val putResult = oneRosterEndpoint.putLineItem(
                     accountPersonUid = accountPersonUid,
                     lineItemSourcedId = lineItemSourcedId,
                     lineItem = lineItem
@@ -115,8 +115,8 @@ class OneRosterHttpServerUseCase(
 
                 StringSimpleTextResponse(
                     headers = IStringValues.contentType("text/plain"),
-                    responseCode = responseCode,
-                    responseBody = null,
+                    responseCode = putResult.statusCode,
+                    responseBody = putResult.body,
                 )
             }
 
@@ -128,7 +128,7 @@ class OneRosterHttpServerUseCase(
                     "Put result request had no body")
                 val result = json.decodeFromString(OneRosterResult.serializer(), bodyStr)
 
-                val responseCode = oneRosterEndpoint.putResult(
+                val response = oneRosterEndpoint.putResult(
                     accountPersonUid = accountPersonUid,
                     resultSourcedId = sourcedId,
                     result = result,
@@ -136,8 +136,8 @@ class OneRosterHttpServerUseCase(
 
                 StringSimpleTextResponse(
                     headers = IStringValues.contentType("text/plain"),
-                    responseCode = responseCode,
-                    responseBody = null,
+                    responseCode = response.statusCode,
+                    responseBody = response.body,
                 )
             }
 
