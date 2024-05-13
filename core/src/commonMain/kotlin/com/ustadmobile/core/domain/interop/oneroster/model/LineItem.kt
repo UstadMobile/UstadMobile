@@ -47,7 +47,7 @@ fun CourseBlock.toOneRosterLineItem(
             type = GuidRefType.clazz
         ),
         resultValueMin = cbMinPoints.toFloat(),
-        resultValueMax = cbMinPoints.toFloat()
+        resultValueMax = cbMaxPoints.toFloat()
     )
 }
 

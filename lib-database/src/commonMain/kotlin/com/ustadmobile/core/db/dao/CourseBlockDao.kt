@@ -239,6 +239,9 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
         assignmentUid: Long
     ): Flow<CourseBlock?>
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
+    )
     /**
      * Find a CourseBlock using a sourcedId to search by
      */
@@ -252,6 +255,13 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
         """
     )
     abstract suspend fun findBySourcedId(sourcedId: String, accountPersonUid: Long): CourseBlock?
+
+    @Query("""
+        SELECT CourseBlock.*
+          FROM CourseBlock
+         WHERE CourseBlock.cbClazzUid = :clazzUid 
+    """)
+    abstract suspend fun findByClazzUid(clazzUid: Long): List<CourseBlock>
 
     /**
      *

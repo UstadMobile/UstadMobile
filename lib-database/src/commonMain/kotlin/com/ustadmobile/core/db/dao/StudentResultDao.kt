@@ -4,6 +4,8 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.door.annotation.DoorDao
+import com.ustadmobile.door.annotation.HttpAccessible
+import com.ustadmobile.door.annotation.HttpServerFunctionCall
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.composites.StudentResultAndCourseBlockSourcedId
 import com.ustadmobile.lib.db.entities.StudentResult
@@ -15,6 +17,16 @@ expect abstract class StudentResultDao {
     @Insert
     abstract suspend fun insertListAsync(list: List<StudentResult>)
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall("findByClazzAndStudent"),
+            HttpServerFunctionCall(
+                functionName = "findByClazzUid",
+                functionDao = CourseBlockDao::class,
+            )
+        )
+    )
     @Query("""
         SELECT StudentResult.*,
                CourseBlock.cbSourcedId AS cbSourcedId
