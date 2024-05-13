@@ -16,6 +16,7 @@ import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.VisualTransformation
+import com.ustadmobile.libuicompose.util.ext.testTagIfNotNull
 
 /**
  * TextField by default will not handle onClick events. This is a workaround.
@@ -42,6 +43,7 @@ fun UstadClickableTextField(
     shape: Shape = OutlinedTextFieldDefaults.shape,
     colors: TextFieldColors = OutlinedTextFieldDefaults.colors(),
     supportingText: @Composable (() -> Unit)? = null,
+    clickableTestTag: String? = null,
 ) {
     Box {
         OutlinedTextField(
@@ -71,6 +73,7 @@ fun UstadClickableTextField(
                 .pointerHoverIcon(PointerIcon.Hand)
                 .alpha(0f)
                 .clickable(onClick = onClick)
+                .testTagIfNotNull(clickableTestTag)
         )
     }
 }

@@ -98,7 +98,8 @@ fun DiscussionPostDetailScreen(
                             UstadClickableTextField(
                                 value = stringResource(MR.strings.add_a_reply) + "…",
                                 onValueChange = { },
-                                onClick = onClickAddReply
+                                onClick = onClickAddReply,
+                                clickableTestTag = "add_a_reply",
                             )
                         },
                         leadingContent = {
