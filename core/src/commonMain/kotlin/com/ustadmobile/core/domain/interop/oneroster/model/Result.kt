@@ -62,7 +62,7 @@ fun Result.toStudentResult() : StudentResult {
         srLastModified = parse8601Timestamp(dateLastModified),
         srMetaData = metaData,
         srLineItemSourcedId = lineItem.sourcedId,
-        srStudentPersonUid = student.sourcedId.toLong(),
+        srStudentPersonUid = student.sourcedId.toLongOrNull() ?: 0,
         srScore = score,
         srScoreDate = parse8601Timestamp(scoreDate),
         srComment = comment
