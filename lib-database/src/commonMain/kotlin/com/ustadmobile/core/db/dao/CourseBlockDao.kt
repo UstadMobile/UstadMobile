@@ -88,6 +88,7 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
                          ON CourseBlockPicture.cbpUid = CourseBlock.cbUid    
          WHERE CourseBlock.cbClazzUid = :clazzUid
            AND (CAST(:includeInactive AS INTEGER) = 1 OR CourseBlock.cbActive)
+           AND (CourseBlock.cbType != ${CourseBlock.BLOCK_EXTERNAL_APP})
       ORDER BY CourseBlock.cbIndex
           """)
     abstract suspend fun findAllCourseBlockByClazzUidAsync(
@@ -144,6 +145,7 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
                 (SELECT CourseBlockParent.cbHideUntilDate
                    FROM CourseBlock CourseBlockParent
                   WHERE CourseBlockParent.cbUid = CourseBlock.cbModuleParentBlockUid), 0))
+           AND (CourseBlock.cbType != ${CourseBlock.BLOCK_EXTERNAL_APP})        
       ORDER BY CourseBlock.cbIndex       
     """)
     abstract fun findAllCourseBlockByClazzUidAsPagingSource(
@@ -239,6 +241,9 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
         assignmentUid: Long
     ): Flow<CourseBlock?>
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
+    )
     /**
      * Find a CourseBlock using a sourcedId to search by
      */
@@ -252,6 +257,13 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
         """
     )
     abstract suspend fun findBySourcedId(sourcedId: String, accountPersonUid: Long): CourseBlock?
+
+    @Query("""
+        SELECT CourseBlock.*
+          FROM CourseBlock
+         WHERE CourseBlock.cbClazzUid = :clazzUid 
+    """)
+    abstract suspend fun findByClazzUid(clazzUid: Long): List<CourseBlock>
 
     /**
      *

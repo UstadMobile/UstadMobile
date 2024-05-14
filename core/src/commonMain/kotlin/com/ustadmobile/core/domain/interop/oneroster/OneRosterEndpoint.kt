@@ -12,6 +12,8 @@ import com.ustadmobile.core.domain.interop.oneroster.model.toOneRosterLineItem
 import com.ustadmobile.core.domain.interop.oneroster.model.toOneRosterResult
 import com.ustadmobile.core.domain.interop.oneroster.model.toStudentResult
 import com.ustadmobile.core.domain.interop.timestamp.parse8601Timestamp
+import com.ustadmobile.core.util.ext.localFirstThenRepoIfFalse
+import com.ustadmobile.core.util.ext.localFirstThenRepoIfNull
 
 /**
  *  Implements OneRoster Endpoints by running a database query and converting from database entities
@@ -19,9 +21,16 @@ import com.ustadmobile.core.domain.interop.timestamp.parse8601Timestamp
  */
 class OneRosterEndpoint(
     private val db: UmAppDatabase,
-    private val repo: UmAppDatabase?,
+    repo: UmAppDatabase?,
     private val endpoint: Endpoint,
 ) {
+
+    private val repoOrDb = repo ?: db
+
+    data class PutResponse(
+        val statusCode: Int,
+        val body: String?
+    )
 
     /**
      * @param userSourcedId in reality this is the personUid. This will likely need to change to
@@ -31,8 +40,8 @@ class OneRosterEndpoint(
         accountPersonUid: Long,
         userSourcedId: String,
     ) : List<Clazz> {
-        return db.clazzDao.findOneRosterUserClazzes(
-            accountPersonUid, userSourcedId.toLong()
+        return repoOrDb.clazzDao.findOneRosterUserClazzes(
+            accountPersonUid, userSourcedId.toLongOrNull() ?: 0
         ).map {
             it.toOneRosterClass()
         }
@@ -44,10 +53,10 @@ class OneRosterEndpoint(
         clazzSourcedId: String,
         studentSourcedId: String,
     ) : List<OneRosterResult> {
-        val clazzUid = clazzSourcedId.toLong()
-        val studentPersonUid = studentSourcedId.toLong()
+        val clazzUid = clazzSourcedId.toLongOrNull() ?: 0
+        val studentPersonUid = studentSourcedId.toLongOrNull() ?: 0
 
-        return db.studentResultDao.findByClazzAndStudent(
+        return repoOrDb.studentResultDao.findByClazzAndStudent(
             clazzUid, studentPersonUid, accountPersonUid
         ).map {
             it.toOneRosterResult(endpoint)
@@ -58,7 +67,7 @@ class OneRosterEndpoint(
         accountPersonUid: Long,
         lineItemSourcedId: String,
     ) : LineItem? {
-        return db.courseBlockDao.findBySourcedId(
+        return repoOrDb.courseBlockDao.findBySourcedId(
             sourcedId = lineItemSourcedId,
             accountPersonUid = accountPersonUid
         )?.toOneRosterLineItem(endpoint)
@@ -72,16 +81,32 @@ class OneRosterEndpoint(
         accountPersonUid: Long,
         lineItemSourcedId: String,
         lineItem: LineItem
-    ) : Int {
+    ) : PutResponse {
         val existingCourseBlock = db.courseBlockDao.findBySourcedId(
             lineItemSourcedId, accountPersonUid
         )
 
         return if(existingCourseBlock == null) {
-            db.courseBlockDao.insert(lineItem.toCourseBlock())
-            201
+            val courseBlock = lineItem.toCourseBlock()
+
+            when {
+                courseBlock.cbClazzUid == 0L -> {
+                    PutResponse(400, "Invalid class sourcedId: ${lineItem.sourcedId}")
+                }
+
+                !repoOrDb.localFirstThenRepoIfFalse {
+                    it.clazzDao.clazzUidExistsAsync(courseBlock.cbClazzUid)
+                } -> {
+                    PutResponse(400, "Clazz SourcedId does not exist: ${courseBlock.cbClazzUid}")
+                }
+
+                else -> {
+                    repoOrDb.courseBlockDao.insert(lineItem.toCourseBlock())
+                    PutResponse(201, null)
+                }
+            }
         }else {
-            db.courseBlockDao.updateFromLineItem(
+            repoOrDb.courseBlockDao.updateFromLineItem(
                 cbUid = existingCourseBlock.cbUid,
                 active = lineItem.status == Status.ACTIVE,
                 dateLastModified = parse8601Timestamp(lineItem.dateLastModified),
@@ -92,7 +117,7 @@ class OneRosterEndpoint(
                 resultValueMin = lineItem.resultValueMin,
                 resultValueMax = lineItem.resultValueMax
             )
-            200
+            PutResponse(200, "")
         }
     }
 
@@ -104,26 +129,36 @@ class OneRosterEndpoint(
         accountPersonUid: Long,
         resultSourcedId: String,
         result: OneRosterResult
-    ) : Int {
-        val existingStudentResultUid = db.studentResultDao.findUidBySourcedId(resultSourcedId)
+    ) : PutResponse {
+        val existingStudentResultUid = repoOrDb.localFirstThenRepoIfNull {
+            it.studentResultDao.findUidBySourcedId(resultSourcedId)
+        }
 
-        val blockUidAndClazzUid = db.courseBlockDao
-            .findCourseBlockUidAndClazzUidBySourcedId(
+        val blockUidAndClazzUid = repoOrDb.localFirstThenRepoIfNull {
+            it.courseBlockDao.findCourseBlockUidAndClazzUidBySourcedId(
                 result.lineItem.sourcedId, accountPersonUid
-            ) ?: throw IllegalArgumentException("Cannot find LineItem (courseblock) for result: " +
-                "${result.lineItem.sourcedId} ")
+            )
+        } ?: return PutResponse(400, "LineItem SourcedId does not exist: ${result.lineItem.sourcedId}")
 
         val studentResult = result.toStudentResult().copy(
             srCourseBlockUid = blockUidAndClazzUid.courseBlockUid,
             srClazzUid = blockUidAndClazzUid.clazzUid,
         )
 
+        if(
+            repoOrDb.localFirstThenRepoIfNull {
+                it.personDao.findByUidAsync(studentResult.srStudentPersonUid)
+            } == null
+        ) {
+            return PutResponse(400, "Invalid student sourcedId (not found): ${result.student.sourcedId}")
+        }
+
         return if(existingStudentResultUid == 0L) {
-            db.studentResultDao.insertListAsync(listOf(studentResult))
-            201
+            repoOrDb.studentResultDao.insertListAsync(listOf(studentResult))
+            PutResponse(201, null)
         }else {
-            db.studentResultDao.updateAsync(studentResult.copy(srUid = existingStudentResultUid))
-            200
+            repoOrDb.studentResultDao.updateAsync(studentResult.copy(srUid = existingStudentResultUid))
+            PutResponse(200, "")
         }
     }
 
