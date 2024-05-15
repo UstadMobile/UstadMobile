@@ -4,6 +4,12 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonSerializationContext
 import com.google.gson.JsonSerializer
+import com.ustadmobile.core.domain.xapi.model.Actor
+import com.ustadmobile.core.domain.xapi.model.Result
+import com.ustadmobile.core.domain.xapi.model.Statement
+import com.ustadmobile.core.domain.xapi.model.Verb
+import com.ustadmobile.core.domain.xapi.model.XContext
+import com.ustadmobile.core.domain.xapi.model.XObject
 
 import java.lang.reflect.Type
 

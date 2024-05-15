@@ -5,6 +5,13 @@ import com.google.gson.JsonDeserializer
 import com.google.gson.JsonElement
 import com.google.gson.JsonParseException
 import com.google.gson.reflect.TypeToken
+import com.ustadmobile.core.domain.xapi.model.Actor
+import com.ustadmobile.core.domain.xapi.model.Attachment
+import com.ustadmobile.core.domain.xapi.model.Result
+import com.ustadmobile.core.domain.xapi.model.Statement
+import com.ustadmobile.core.domain.xapi.model.Verb
+import com.ustadmobile.core.domain.xapi.model.XContext
+import com.ustadmobile.core.domain.xapi.model.XObject
 
 import java.lang.reflect.Type
 import java.util.ArrayList

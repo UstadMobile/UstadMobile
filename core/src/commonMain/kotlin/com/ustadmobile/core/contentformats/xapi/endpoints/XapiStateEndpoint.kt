@@ -1,6 +1,6 @@
 package com.ustadmobile.core.contentformats.xapi.endpoints
 
-import com.ustadmobile.core.contentformats.xapi.State
+import com.ustadmobile.core.domain.xapi.model.State
 import org.kodein.di.DIAware
 
 interface XapiStateEndpoint : DIAware {

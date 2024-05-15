@@ -8,9 +8,9 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.contentformats.xapi.ContextActivity
+import com.ustadmobile.core.domain.xapi.model.ContextActivity
 import com.ustadmobile.core.contentformats.xapi.ContextDeserializer
-import com.ustadmobile.core.contentformats.xapi.Statement
+import com.ustadmobile.core.domain.xapi.model.Statement
 import com.ustadmobile.core.contentformats.xapi.StatementDeserializer
 import com.ustadmobile.core.contentformats.xapi.StatementSerializer
 import com.ustadmobile.core.db.UmAppDatabase
