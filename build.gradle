@@ -136,6 +136,8 @@ ext {
 
     version_npm_uuid = "^9.0.1"
     version_compressorjs = "^1.2.1"
+    version_npm_xxhash = "^0.2.2"
+    version_npm_cuint = "^0.2.2"
 }
 
 /*

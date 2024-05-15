@@ -122,6 +122,7 @@ nv-i18n = "1.29"
 semver = "2.0.0"
 httpoveripc = "0.0.3"
 rawhttp = "2.6.0"
+lz4 = "1.8.0"
 
 [plugins]
 
@@ -351,3 +352,4 @@ semver = { module = "io.github.z4kn4fein:semver", version.ref = "semver" }
 httpoveripc-core = { module = "com.github.UstadMobile.httpoveripc:core", version.ref = "httpoveripc" }
 httpoveripc-server = { module = "com.github.UstadMobile.httpoveripc:server", version.ref = "httpoveripc" }
 rawhttp-core = { module = "com.athaydes.rawhttp:rawhttp-core", version.ref = "rawhttp" }
+lz4-pure-java = { module = "org.lz4:lz4-pure-java", version.ref = "lz4" }

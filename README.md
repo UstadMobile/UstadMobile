@@ -196,6 +196,10 @@ Note: If self-registration is enabled, you must add an email server configuratio
 ustad-server.conf file. See [app-ktor-server/README.md](app-ktor-server/README.md) for details on
 using the ustad-server.conf file.
 
+## Javascript package updates
+
+When prompted to run kotlinUpgradePackageLock, run kotlinUpgradeYarnLock instead.
+
 ### Code structure
 
 This multi-module Gradle project built using Kotlin Multiplatform. It builds for:
