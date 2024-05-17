@@ -7,6 +7,19 @@ import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
+/**
+ * CourseBlock - Can be:
+ *  1) A Module (eg. use to collapse/expand other blocks)
+ *  2) Text, Content, Assignment, or Discussion blocks
+ *  3) Created by an external application via the OneRoster API
+ *
+ *  A CourseBlock is used as a LineItem in the OneRoster API. This allows OneRoster clients to access
+ *  the course structure and assignment marks etc.
+ *
+ *  @param cbUid The primary key - auto-generated if created internally within the app or an externally
+ *         provided sourcedId is a valid long, otherwise the hash of cbSourcedId. See OneRosterEndpoint
+ *         on mapping sourcedId to uid methodology.
+ */
 @Entity(
     indices = arrayOf(
         Index("cbClazzUid", name = "idx_courseblock_cbclazzuid"),
@@ -65,6 +78,8 @@ data class CourseBlock(
     @ColumnInfo(index = true)
     var cbClazzUid: Long = 0,
 
+    var cbClazzSourcedId: String? = null,
+
     var cbActive: Boolean = true,
 
     var cbHidden: Boolean = false,
@@ -75,12 +90,11 @@ data class CourseBlock(
     @ReplicateEtag
     var cbLct: Long = 0,
 
-    /**
-     * The sourcedId as per the OneRoster API model e.g. as the CourseBlock is essentially a LineItem
-     * as per the data model
-     */
     var cbSourcedId: String? = null,
 
+    var cbMetadata: String? = null,
+
+    var cbCreatedByAppId: String? = null,
 ) {
 
     companion object {

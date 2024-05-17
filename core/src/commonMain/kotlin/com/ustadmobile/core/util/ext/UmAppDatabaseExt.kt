@@ -21,7 +21,7 @@ import com.ustadmobile.lib.db.entities.ReportSeries
 import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.ScopedGrant
-import com.ustadmobile.lib.db.entities.StatementEntityWithDisplayDetails
+import com.ustadmobile.lib.db.entities.StatementEntityAndDisplayDetails
 import com.ustadmobile.lib.db.entities.StatementReportData
 
 
@@ -153,10 +153,10 @@ suspend fun UmAppDatabase.generateChartData(
 }
 
 fun UmAppDatabase.generateStatementList(report: ReportWithSeriesWithFilters, loggedInPersonUid: Long):
-        List<PagingSource<Int, StatementEntityWithDisplayDetails>> {
+        List<PagingSource<Int, StatementEntityAndDisplayDetails>> {
 
     val queries = report.generateSql(loggedInPersonUid, dbType())
-    val statementDataSourceList = mutableListOf<PagingSource<Int, StatementEntityWithDisplayDetails>>()
+    val statementDataSourceList = mutableListOf<PagingSource<Int, StatementEntityAndDisplayDetails>>()
     queries.forEach {
         statementDataSourceList.add(statementDao.getListResults(SimpleDoorQuery(it.value.sqlListStr, it.value.queryParams)))
     }

@@ -1395,6 +1395,33 @@ val MIGRATION_171_172 = DoorMigrationStatementList(171, 172) { db ->
     }
 }
 
+//StudentResult no longer uses auto-generated primary keys.
+val MIGRATION_172_173 = DoorMigrationStatementList(172, 173) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.POSTGRES) {
+            //Postgres is server only, and this update will be done before the table is actually ever
+            //used to store data
+            add("DROP TABLE StudentResult")
+            add("CREATE TABLE IF NOT EXISTS StudentResult (  srUid  BIGINT  PRIMARY KEY  NOT NULL , srSourcedId  TEXT , srCourseBlockUid  BIGINT  NOT NULL , srClazzUid  BIGINT  NOT NULL , srAssignmentUid  BIGINT  NOT NULL , srLineItemSourcedId  TEXT , srStatus  INTEGER  NOT NULL , srMetaData  TEXT , srStudentPersonUid  BIGINT  NOT NULL , srStudentGroupId  INTEGER  NOT NULL , srMarkerPersonUid  BIGINT  NOT NULL , srMarkerGroupId  INTEGER  NOT NULL , srScoreStatus  INTEGER  NOT NULL , srScore  FLOAT  NOT NULL , srScoreDate  BIGINT  NOT NULL , srLastModified  BIGINT  NOT NULL , srComment  TEXT , srAppId  TEXT , srActive  BOOL  NOT NULL )")
+        }else {
+            //SQLite is used on the client, and this update might take place after the table has been used
+            add("DROP INDEX IF EXISTS index_StudentResult_srSourcedId")
+            add("ALTER TABLE StudentResult RENAME to StudentResult_OLD")
+            add("CREATE TABLE IF NOT EXISTS StudentResult (  srUid  INTEGER  PRIMARY KEY  NOT NULL , srSourcedId  TEXT , srCourseBlockUid  INTEGER  NOT NULL , srClazzUid  INTEGER  NOT NULL , srAssignmentUid  INTEGER  NOT NULL , srLineItemSourcedId  TEXT , srStatus  INTEGER  NOT NULL , srMetaData  TEXT , srStudentPersonUid  INTEGER  NOT NULL , srStudentGroupId  INTEGER  NOT NULL , srMarkerPersonUid  INTEGER  NOT NULL , srMarkerGroupId  INTEGER  NOT NULL , srScoreStatus  INTEGER  NOT NULL , srScore  REAl  NOT NULL , srScoreDate  INTEGER  NOT NULL , srLastModified  INTEGER  NOT NULL , srComment  TEXT , srAppId  TEXT , srActive  INTEGER  NOT NULL )")
+            add("INSERT INTO StudentResult (srUid, srSourcedId, srCourseBlockUid, srClazzUid, srAssignmentUid, srLineItemSourcedId, srStatus, srMetaData, srStudentPersonUid, srStudentGroupId, srMarkerPersonUid, srMarkerGroupId, srScoreStatus, srScore, srScoreDate, srLastModified, srComment, srAppId, srActive) SELECT srUid, srSourcedId, srCourseBlockUid, srClazzUid, srAssignmentUid, srLineItemSourcedId, srStatus, srMetaData, srStudentPersonUid, srStudentGroupId, srMarkerPersonUid, srMarkerGroupId, srScoreStatus, srScore, srScoreDate, srLastModified, srComment, srAppId, srActive FROM StudentResult_OLD")
+            add("DROP TABLE StudentResult_OLD")
+        }
+    }
+}
+
+val MIGRATION_173_174 = DoorMigrationStatementList(173, 174) { db ->
+    buildList {
+        add("ALTER TABLE CourseBlock ADD COLUMN cbClazzSourcedId TEXT")
+        add("ALTER TABLE CourseBlock ADD COLUMN cbCreatedByAppId TEXT")
+        add("ALTER TABLE CourseBlock ADD COLUMN cbMetadata TEXT")
+    }
+}
+
 
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_105_106, MIGRATION_106_107,
@@ -1410,7 +1437,7 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_156_157, MIGRATION_157_158, MIGRATION_158_159, MIGRATION_159_160,
     MIGRATION_160_161, MIGRATION_162_163, MIGRATION_163_164, MIGRATION_164_165,
     MIGRATION_165_166, MIGRATION_166_167, MIGRATION_167_168, MIGRATION_168_169,
-    MIGRATION_170_171, MIGRATION_171_172,
+    MIGRATION_170_171, MIGRATION_171_172, MIGRATION_172_173, MIGRATION_173_174,
 )
 
 

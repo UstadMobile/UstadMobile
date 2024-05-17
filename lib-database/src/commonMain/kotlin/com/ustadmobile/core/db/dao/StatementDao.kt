@@ -39,7 +39,7 @@ expect abstract class StatementDao : BaseDao<StatementEntity> {
 
     @RawQuery(observedEntities = [StatementEntity::class, Person::class, XLangMapEntry::class])
     @QueryLiveTables(["StatementEntity", "Person", "XLangMapEntry"])
-    abstract fun getListResults(query: DoorQuery): PagingSource<Int, StatementEntityWithDisplayDetails>
+    abstract fun getListResults(query: DoorQuery): PagingSource<Int, StatementEntityAndDisplayDetails>
 
 
     // This is required because of above raw query
@@ -281,9 +281,12 @@ expect abstract class StatementDao : BaseDao<StatementEntity> {
             AND contextRegistration = :contextRegistration 
          ORDER BY StatementEntity.timestamp DESC
          """)
-    abstract fun findSessionDetailForPerson(contentEntryUid: Long, accountPersonUid: Long,
-                                            personUid: Long, contextRegistration: String)
-            : PagingSource<Int, StatementWithSessionDetailDisplay>
+    abstract fun findSessionDetailForPerson(
+        contentEntryUid: Long,
+        accountPersonUid: Long,
+        personUid: Long,
+        contextRegistration: String
+    ) : PagingSource<Int, StatementAndSessionDetailDisplay>
 
 
     @Query("""

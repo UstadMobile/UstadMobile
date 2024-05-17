@@ -26,6 +26,15 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
     @Query("SELECT * FROM CourseBlock WHERE cbUid = :uid")
     abstract suspend fun findByUidAsync(uid: Long): CourseBlock?
 
+
+    @Query("""
+        SELECT EXISTS(
+               SELECT CourseBlock.cbUid
+                 FROM CourseBlock
+                WHERE CourseBlock.cbUid = :cbUid)
+    """)
+    abstract suspend fun existsByUid(cbUid: Long): Boolean
+
     @Update
     abstract suspend fun updateAsync(entity: CourseBlock): Int
 

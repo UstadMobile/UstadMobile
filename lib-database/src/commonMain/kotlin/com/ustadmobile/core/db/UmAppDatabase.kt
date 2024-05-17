@@ -72,7 +72,7 @@ import com.ustadmobile.lib.db.entities.*
     ReplicationOperation::class,
     PendingRepositorySession::class,
 
-], version = 172)
+], version = 174)
 expect abstract class UmAppDatabase : RoomDatabase {
 
     /*

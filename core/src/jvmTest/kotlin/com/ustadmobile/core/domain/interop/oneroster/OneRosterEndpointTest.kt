@@ -12,6 +12,7 @@ import com.ustadmobile.core.domain.interop.oneroster.model.LineItem
 import com.ustadmobile.core.domain.interop.oneroster.model.Status
 import com.ustadmobile.core.domain.interop.timestamp.format8601Timestamp
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
+import com.ustadmobile.core.domain.xxhash.XXHashCommonJvm
 import com.ustadmobile.core.util.isimplerequest.StringSimpleTextRequest
 import com.ustadmobile.core.util.stringvalues.asIStringValues
 import com.ustadmobile.core.util.uuid.randomUuidAsString
@@ -48,12 +49,14 @@ class OneRosterEndpointTest {
 
     private val endpoint = Endpoint("http://localhost:8087/")
 
+    private val xxHasher = XXHashCommonJvm()
+
     @BeforeTest
     fun setup() {
         db = DatabaseBuilder.databaseBuilder(
             UmAppDatabase::class, "jdbc:sqlite::memory:", nodeId = 1L
         ).build()
-        oneRosterEndpoint = OneRosterEndpoint(db, null, endpoint)
+        oneRosterEndpoint = OneRosterEndpoint(db, null, endpoint, xxHasher, json)
         runBlocking {
             accountPerson = Person().apply {
                 firstNames = "One"
@@ -141,8 +144,9 @@ class OneRosterEndpointTest {
             val courseBlock = createCourseBlock(clazz.clazzUid)
             grantExternalAppPermission()
 
-            val studentResults = (0 .. 2).map { score ->
+            val studentResults = (0 .. 2).mapIndexed { index, score ->
                 StudentResult(
+                    srUid = index.toLong(),
                     srStudentPersonUid = accountPerson.personUid,
                     srClazzUid = clazz.clazzUid,
                     srCourseBlockUid =  courseBlock.cbUid,

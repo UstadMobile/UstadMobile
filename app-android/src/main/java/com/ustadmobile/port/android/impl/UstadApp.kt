@@ -128,6 +128,8 @@ import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
 import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
+import com.ustadmobile.core.domain.xxhash.XXHashCommonJvm
+import com.ustadmobile.core.domain.xxhash.XXHasher
 import com.ustadmobile.core.embeddedhttp.EmbeddedHttpServer
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
@@ -923,6 +925,8 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 db = instance(tag = DoorTag.TAG_DB),
                 repo = instance(tag = DoorTag.TAG_REPO),
                 endpoint = context,
+                xxHasher = instance(),
+                json = instance(),
             )
         }
 
@@ -932,6 +936,10 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 json = instance(),
                 oneRosterEndpoint = instance(),
             )
+        }
+
+        bind<XXHasher>() with singleton {
+            XXHashCommonJvm()
         }
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }

@@ -4,25 +4,35 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.interop.oneroster.model.Clazz
 import com.ustadmobile.core.domain.interop.oneroster.model.LineItem
-import com.ustadmobile.core.domain.interop.oneroster.model.Status
 import com.ustadmobile.core.domain.interop.oneroster.model.toCourseBlock
 import com.ustadmobile.core.domain.interop.oneroster.model.Result as OneRosterResult
 import com.ustadmobile.core.domain.interop.oneroster.model.toOneRosterClass
 import com.ustadmobile.core.domain.interop.oneroster.model.toOneRosterLineItem
 import com.ustadmobile.core.domain.interop.oneroster.model.toOneRosterResult
 import com.ustadmobile.core.domain.interop.oneroster.model.toStudentResult
-import com.ustadmobile.core.domain.interop.timestamp.parse8601Timestamp
+import com.ustadmobile.core.domain.xxhash.XXHasher
+import com.ustadmobile.core.domain.xxhash.toLongOrHash
 import com.ustadmobile.core.util.ext.localFirstThenRepoIfFalse
 import com.ustadmobile.core.util.ext.localFirstThenRepoIfNull
+import kotlinx.serialization.json.Json
 
 /**
  *  Implements OneRoster Endpoints by running a database query and converting from database entities
  *  to the OneRoster model.
+ *
+ *  Mapping OneRoster sourcedId to database primary keys methodology:
+ *    If a sourcedId string is a valid Long (eg toLongOrNull != null), then it will be used as the
+ *    primary key value.
+ *    When a sourcedId string is not a valid long, the string will be hashed using XXHash64(seed=0),
+ *    and the hash will be used as the primary key value.
+ *
  */
 class OneRosterEndpoint(
     private val db: UmAppDatabase,
     repo: UmAppDatabase?,
     private val endpoint: Endpoint,
+    private val xxHasher: XXHasher,
+    private val json: Json,
 ) {
 
     private val repoOrDb = repo ?: db
@@ -70,54 +80,39 @@ class OneRosterEndpoint(
         return repoOrDb.courseBlockDao.findBySourcedId(
             sourcedId = lineItemSourcedId,
             accountPersonUid = accountPersonUid
-        )?.toOneRosterLineItem(endpoint)
+        )?.toOneRosterLineItem(endpoint, json)
     }
 
     /**
+     * As per the spec (table 3.1c), if a given LineItem already exists, it will be replaced
+     *
      * @return As per OneRoster spec (Section 3.5) 201 is returned if a new resource is created,
      *         200 otherwise
      */
     suspend fun putLineItem(
+        @Suppress("UNUSED_PARAMETER")  //Reserved for future use
         accountPersonUid: Long,
         lineItemSourcedId: String,
         lineItem: LineItem
     ) : PutResponse {
-        val existingCourseBlock = db.courseBlockDao.findBySourcedId(
-            lineItemSourcedId, accountPersonUid
-        )
+        val courseBlock = lineItem.toCourseBlock(xxHasher, json)
 
-        return if(existingCourseBlock == null) {
-            val courseBlock = lineItem.toCourseBlock()
-
-            when {
-                courseBlock.cbClazzUid == 0L -> {
-                    PutResponse(400, "Invalid class sourcedId: ${lineItem.sourcedId}")
-                }
-
-                !repoOrDb.localFirstThenRepoIfFalse {
-                    it.clazzDao.clazzUidExistsAsync(courseBlock.cbClazzUid)
-                } -> {
-                    PutResponse(400, "Clazz SourcedId does not exist: ${courseBlock.cbClazzUid}")
-                }
-
-                else -> {
-                    repoOrDb.courseBlockDao.insert(lineItem.toCourseBlock())
-                    PutResponse(201, null)
-                }
+        if(
+            !repoOrDb.localFirstThenRepoIfFalse {
+                it.clazzDao.clazzUidExistsAsync(courseBlock.cbClazzUid)
             }
-        }else {
-            repoOrDb.courseBlockDao.updateFromLineItem(
-                cbUid = existingCourseBlock.cbUid,
-                active = lineItem.status == Status.ACTIVE,
-                dateLastModified = parse8601Timestamp(lineItem.dateLastModified),
-                title = lineItem.description,
-                description = lineItem.description,
-                assignDate = parse8601Timestamp(lineItem.assignDate),
-                dueDate = parse8601Timestamp(lineItem.dueDate),
-                resultValueMin = lineItem.resultValueMin,
-                resultValueMax = lineItem.resultValueMax
-            )
+        ) {
+            return PutResponse(400, "Clazz SourcedId does not exist: ${courseBlock.cbClazzUid}")
+        }
+
+        val isUpdate = db.courseBlockDao.existsByUid(
+            xxHasher.toLongOrHash(lineItemSourcedId))
+        repoOrDb.courseBlockDao.replaceListAsync(listOf(courseBlock))
+
+        return if(isUpdate) {
             PutResponse(200, "")
+        }else {
+            PutResponse(201, null)
         }
     }
 
@@ -140,7 +135,7 @@ class OneRosterEndpoint(
             )
         } ?: return PutResponse(400, "LineItem SourcedId does not exist: ${result.lineItem.sourcedId}")
 
-        val studentResult = result.toStudentResult().copy(
+        val studentResult = result.toStudentResult(xxHasher).copy(
             srCourseBlockUid = blockUidAndClazzUid.courseBlockUid,
             srClazzUid = blockUidAndClazzUid.clazzUid,
         )
