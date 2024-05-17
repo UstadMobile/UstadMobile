@@ -1,8 +1,8 @@
 package com.ustadmobile.core.db.dao
 
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Update
 import com.ustadmobile.door.annotation.DoorDao
 import com.ustadmobile.door.annotation.HttpAccessible
 import com.ustadmobile.door.annotation.HttpServerFunctionCall
@@ -16,6 +16,10 @@ expect abstract class StudentResultDao {
 
     @Insert
     abstract suspend fun insertListAsync(list: List<StudentResult>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract suspend fun upsertAsync(studentResult: StudentResult)
+
 
     @HttpAccessible(
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
@@ -51,8 +55,15 @@ expect abstract class StudentResultDao {
     """)
     abstract suspend fun findUidBySourcedId(sourcedId: String): Long
 
-    @Update
-    abstract suspend fun updateAsync(studentResult: StudentResult)
+
+    @Query("""
+        SELECT EXISTS(
+               SELECT StudentResult.srUid
+                 FROM StudentResult
+                WHERE StudentResult.srUid = :srUid)
+    """)
+
+    abstract suspend fun existsByUid(srUid: Long): Boolean
 
 
 }

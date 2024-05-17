@@ -125,19 +125,18 @@ class OneRosterEndpoint(
         resultSourcedId: String,
         result: OneRosterResult
     ) : PutResponse {
-        val existingStudentResultUid = repoOrDb.localFirstThenRepoIfNull {
-            it.studentResultDao.findUidBySourcedId(resultSourcedId)
-        }
+        val srUid = xxHasher.toLongOrHash(resultSourcedId)
+        val lineItemUid = xxHasher.toLongOrHash(result.lineItem.sourcedId)
+        val isUpdate = db.studentResultDao.existsByUid(srUid)
 
         val blockUidAndClazzUid = repoOrDb.localFirstThenRepoIfNull {
-            it.courseBlockDao.findCourseBlockUidAndClazzUidBySourcedId(
-                result.lineItem.sourcedId, accountPersonUid
+            it.courseBlockDao.findCourseBlockAndClazzUidByCbUid(
+                lineItemUid, accountPersonUid
             )
         } ?: return PutResponse(400, "LineItem SourcedId does not exist: ${result.lineItem.sourcedId}")
 
-        val studentResult = result.toStudentResult(xxHasher).copy(
-            srCourseBlockUid = blockUidAndClazzUid.courseBlockUid,
-            srClazzUid = blockUidAndClazzUid.clazzUid,
+        val studentResult = result.toStudentResult(
+            xxHasher = xxHasher, clazzUid = blockUidAndClazzUid.clazzUid
         )
 
         if(
@@ -148,12 +147,12 @@ class OneRosterEndpoint(
             return PutResponse(400, "Invalid student sourcedId (not found): ${result.student.sourcedId}")
         }
 
-        return if(existingStudentResultUid == 0L) {
-            repoOrDb.studentResultDao.insertListAsync(listOf(studentResult))
-            PutResponse(201, null)
-        }else {
-            repoOrDb.studentResultDao.updateAsync(studentResult.copy(srUid = existingStudentResultUid))
+        repoOrDb.studentResultDao.upsertAsync(studentResult)
+
+        return if(isUpdate) {
             PutResponse(200, "")
+        }else {
+            PutResponse(201, null)
         }
     }
 

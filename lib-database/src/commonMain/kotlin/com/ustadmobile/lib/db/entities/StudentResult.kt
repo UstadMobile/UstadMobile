@@ -55,6 +55,16 @@ data class StudentResult(
     var srCourseBlockUid: Long = 0,
 
     /**
+     * The sourcedId of the related LineItem (e.g. CourseBlock)
+     */
+    var srLineItemSourcedId: String? = "",
+
+    /**
+     * The HREF of the GUID of the related LineItem if created via OneRoster, otherwise null
+     */
+    var srLineItemHref: String? = "",
+
+    /**
      * The clazzUid for the class/course. Whilst this can be obtained through the CourseBlock, it is
      * better for any key that is used in permission scopes to be present directly
      */
@@ -64,11 +74,6 @@ data class StudentResult(
      * If this result represents an assignment mark, then this will contain the uid of the assignment
      */
     var srAssignmentUid: Long = 0,
-
-    /**
-     * The sourcedId of the related LineItem (e.g. CourseBlock)
-     */
-    var srLineItemSourcedId: String? = "",
 
     var srStatus: Int = 0,
 
@@ -81,6 +86,11 @@ data class StudentResult(
      * The personUid of the student that this result is for
      */
     var srStudentPersonUid: Long = 0,
+
+    /**
+     * The HREF of the Person GUID for this LineItem if created via OneRoster, otherwise null
+     */
+    var srStudentPersonSourcedId: String? = "",
 
     /**
      * If this result is for a group assignment, then this is the group that submitted the assignment
@@ -129,8 +139,7 @@ data class StudentResult(
      */
     var srAppId: String? = null,
 
-    var srActive: Boolean = true,
-
+    var srDeleted: Boolean = false,
 ) {
     companion object {
 

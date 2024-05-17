@@ -305,12 +305,11 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
         SELECT CourseBlock.cbUid AS courseBlockUid, 
                CourseBlock.cbClazzUid AS clazzUid
           FROM CourseBlock
-         WHERE CAST(cbUid AS TEXT) = :sourcedId
-            OR cbSourcedId = :sourcedId
+         WHERE cbUid = :cbUid
            AND :accountPersonUid != 0     
     """)
-    abstract suspend fun findCourseBlockUidAndClazzUidBySourcedId(
-        sourcedId: String,
+    abstract suspend fun findCourseBlockAndClazzUidByCbUid(
+        cbUid: Long,
         accountPersonUid: Long
     ): CourseBlockUidAndClazzUid?
 

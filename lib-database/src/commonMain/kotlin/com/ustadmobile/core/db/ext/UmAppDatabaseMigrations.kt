@@ -1422,6 +1422,17 @@ val MIGRATION_173_174 = DoorMigrationStatementList(173, 174) { db ->
     }
 }
 
+val MIGRATION_174_175 = DoorMigrationStatementList(174, 175) { db ->
+    buildList {
+        add("DROP TABLE StudentResult")
+        if(db.dbType() == DoorDbType.POSTGRES) {
+            add("CREATE TABLE IF NOT EXISTS StudentResult (  srUid  BIGINT  PRIMARY KEY  NOT NULL , srSourcedId  TEXT , srCourseBlockUid  BIGINT  NOT NULL , srLineItemSourcedId  TEXT , srLineItemHref  TEXT , srClazzUid  BIGINT  NOT NULL , srAssignmentUid  BIGINT  NOT NULL , srStatus  INTEGER  NOT NULL , srMetaData  TEXT , srStudentPersonUid  BIGINT  NOT NULL , srStudentPersonSourcedId  TEXT , srStudentGroupId  INTEGER  NOT NULL , srMarkerPersonUid  BIGINT  NOT NULL , srMarkerGroupId  INTEGER  NOT NULL , srScoreStatus  INTEGER  NOT NULL , srScore  FLOAT  NOT NULL , srScoreDate  BIGINT  NOT NULL , srLastModified  BIGINT  NOT NULL , srComment  TEXT , srAppId  TEXT , srDeleted  BOOL  NOT NULL )")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS StudentResult (  srUid  INTEGER  PRIMARY KEY  NOT NULL , srSourcedId  TEXT , srCourseBlockUid  INTEGER  NOT NULL , srLineItemSourcedId  TEXT , srLineItemHref  TEXT , srClazzUid  INTEGER  NOT NULL , srAssignmentUid  INTEGER  NOT NULL , srStatus  INTEGER  NOT NULL , srMetaData  TEXT , srStudentPersonUid  INTEGER  NOT NULL , srStudentPersonSourcedId  TEXT , srStudentGroupId  INTEGER  NOT NULL , srMarkerPersonUid  INTEGER  NOT NULL , srMarkerGroupId  INTEGER  NOT NULL , srScoreStatus  INTEGER  NOT NULL , srScore  REAl  NOT NULL , srScoreDate  INTEGER  NOT NULL , srLastModified  INTEGER  NOT NULL , srComment  TEXT , srAppId  TEXT , srDeleted  INTEGER  NOT NULL )")
+        }
+    }
+}
+
 
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_105_106, MIGRATION_106_107,
@@ -1438,6 +1449,7 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_160_161, MIGRATION_162_163, MIGRATION_163_164, MIGRATION_164_165,
     MIGRATION_165_166, MIGRATION_166_167, MIGRATION_167_168, MIGRATION_168_169,
     MIGRATION_170_171, MIGRATION_171_172, MIGRATION_172_173, MIGRATION_173_174,
+    MIGRATION_174_175,
 )
 
 
