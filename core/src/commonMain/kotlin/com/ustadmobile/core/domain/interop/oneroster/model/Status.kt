@@ -8,9 +8,15 @@ import kotlinx.serialization.encoding.Encoder
 
 
 @kotlinx.serialization.Serializable(with = StatusSerializer::class)
-enum class Status() {
+enum class Status {
 
-    ACTIVE(), TOBEDELETED()
+    ACTIVE, TOBEDELETED;
+
+    companion object {
+
+        fun fromIsDeletedBool(isDeleted: Boolean) = if(isDeleted) TOBEDELETED else ACTIVE
+
+    }
 
 }
 

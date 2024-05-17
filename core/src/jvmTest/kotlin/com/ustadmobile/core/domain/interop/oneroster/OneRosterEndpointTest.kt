@@ -13,10 +13,12 @@ import com.ustadmobile.core.domain.interop.oneroster.model.Status
 import com.ustadmobile.core.domain.interop.timestamp.format8601Timestamp
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.xxhash.XXHashCommonJvm
+import com.ustadmobile.core.domain.xxhash.toLongOrHash
 import com.ustadmobile.core.util.isimplerequest.StringSimpleTextRequest
 import com.ustadmobile.core.util.stringvalues.asIStringValues
 import com.ustadmobile.core.util.uuid.randomUuidAsString
 import com.ustadmobile.door.DatabaseBuilder
+import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Clazz as ClazzEntity
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
@@ -93,6 +95,8 @@ class OneRosterEndpointTest {
         sourcedId: String? = null,
     ) : CourseBlock{
         val courseBlock = CourseBlock(
+            cbUid = sourcedId?.let { xxHasher.toLongOrHash(sourcedId) }
+                ?: db.doorPrimaryKeyManager.nextId(CourseBlock.TABLE_ID),
             cbClazzUid = clazzUid,
             cbSourcedId = sourcedId,
             cbType = CourseBlock.BLOCK_EXTERNAL_APP,
@@ -298,7 +302,8 @@ class OneRosterEndpointTest {
                 )
             )
 
-            assertEquals(201, response.responseCode)
+            assertEquals(201, response.responseCode,
+                "Response code should be 201. Body=${response.responseBody}")
             val resultInDb = db.studentResultDao.findByClazzAndStudent(
                 clazz.clazzUid, accountPerson.personUid, accountPerson.personUid
             )
