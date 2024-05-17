@@ -1,7 +1,7 @@
 appId: com.toughra.ustadmobile
 env:
   TESTRESULTSDIR: "${TESTRESULTSDIR}/003_002_add_module_text_blocks_and_perform_indent_hide_delete_actions"
-  TESTNAME:  "005_001_add_discussionBoard"
+  TESTNAME:  "003_002_add_module_text_blocks_and_perform_indent_hide_delete_actions"
 ---
 - runFlow:
     file: "../common/add_6_students_by_bulk_import.yaml"
@@ -9,13 +9,6 @@ env:
       TESTFILENAME: "Ustad_Students_List.csv"
       CONTROLSERVER: ${CONTROLSERVER}
       TESTSERIAL: ${TESTSERIAL}
-- runFlow: "../common/clear_state_and_get_started.yaml"
-- runFlow: "../common/select_site.yaml"
-- runFlow:
-    file: "../common/user_login.yaml"
-    env:
-      USERNAME: "t1"
-      PASSWORD: "test"
 - tapOn: "Courses"
 - tapOn: "Test Course Block"
 # edit the course to add blocks
@@ -36,26 +29,27 @@ env:
 #- swipe:
 #    start: 50%, 50% # From (50% of width, 50% of height)
 #    end: 50%, 10% # To (50% of width, 10% of height)
-- tapOn: "Discussion board"
+- tapOn: "Assignment"
 - tapOn: "Title*"
-- inputText: "Discussion 1"
-- tapOn:
-    text: "dd/mm/yyyy"
-    index: "0"
-- inputText: "12/01/2024"
-- tapOn: "hh:mm"
-- inputText: "23:45"
+- inputText: "Assignment 1"
 - tapOn: "Description"
 - tapOn:
     id: "com.toughra.ustadmobile:id/editor"
 - inputText: "test block"
 - tapOn: "Done"
-- tapOn: "Done"
-- tapOn: "Save"
+#- tapOn:
+ #  text: dd/mm/yyyy
+  # index: 0
+#- inputText: 12/03/2024
 - scrollUntilVisible:
     element:
-      text: "Discussion 1"
+      text: "Submission policy"
     direction: DOWN
-- tapOn: "Discussion 1"
-- assertVisible:            #  +POST button
-    id: "floating_action_button"
+- assertVisible: "Must submit all at once"
+- assertVisible: "Done"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/added_assignment"
+- tapOn:
+    text: "Done"
+    delay: 1000
+- assertNotVisible: "Done"
+- tapOn: "Save"

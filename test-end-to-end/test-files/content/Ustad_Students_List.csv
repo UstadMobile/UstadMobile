@@ -1,0 +1,7 @@
+username,givenName,familyName,sex,dateOfBirth,identifier,email,phone,password,courses
+s1,Student,1,female,2009-01-01,Project-ID,student1@email.com,12345678900,tests1,Test Course Block
+s2,Student,2,male,2009-01-02,Project-ID,student2@email.com,12345678901,tests2,Test Course Block
+s3,Student,3,female,2009-01-03,Project-ID,student3@email.com,12345678902,tests3,Test Course Block
+s4,Student,4,male,2009-01-04,Project-ID,student4@email.com,12345678903,tests4,Test Course Block
+s5,Student,5,female,2009-01-05,Project-ID,student5@email.com,12345678904,tests5,Test Course Block
+s6,Student,6,male,2009-01-06,Project-ID,student6@email.com,12345678905,tests6,Test Course Block
