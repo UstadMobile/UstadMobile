@@ -1,26 +1,23 @@
 package com.ustadmobile.core.db.dao
 
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.AgentEntity
 
 @DoorDao
 @Repository
-expect abstract class AgentDao :BaseDao<AgentEntity> {
+expect abstract class AgentDao {
 
-
-
-    @Query("SELECT * FROM AgentEntity WHERE agentOpenId = :openId OR agentMbox = :mbox " +
-            "OR agentMbox_sha1sum = :sha1 OR (agentAccountName = :account AND agentHomePage = :homepage)")
-    abstract fun getAgentByAnyId(openId: String? = "", mbox: String? = "", account: String? = "", homepage: String? = "", sha1: String? = ""): AgentEntity?
-
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    abstract suspend fun insertOrIgnoreListAsync(entities: List<AgentEntity>)
 
     @Query("""
-        SELECT *
+        SELECT AgentEntity.*
           FROM AgentEntity
-         WHERE agentAccountName = :username 
-           AND agentHomePage = :endpoint
+         WHERE AgentEntity.agentUid = :uid
     """)
-    abstract suspend fun getAgentFromPersonUsername(endpoint: String, username: String): AgentEntity?
+    abstract suspend fun findByUidAsync(uid: Long): AgentEntity
 
 }

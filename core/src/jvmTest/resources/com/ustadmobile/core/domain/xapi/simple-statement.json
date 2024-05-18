@@ -1,0 +1,18 @@
+{
+  "actor": {
+    "account" : {
+      "name": "user",
+      "homePage": "http://localhost/"
+    }
+  },
+  "verb": {
+    "id": "http://adlnet.gov/expapi/verbs/experienced",
+    "display": { "en-US": "experienced" }
+  },
+  "object": {
+    "id": "http://example.com/activities/solo-hang-gliding",
+    "definition": {
+      "name": { "en-US": "Solo Hang Gliding" }
+    }
+  }
+}

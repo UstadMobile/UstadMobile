@@ -123,6 +123,7 @@ semver = "2.0.0"
 httpoveripc = "0.0.3"
 rawhttp = "2.6.0"
 lz4 = "1.8.0"
+kmp-uuid = "0.8.4"
 
 [plugins]
 
@@ -353,3 +354,4 @@ httpoveripc-core = { module = "com.github.UstadMobile.httpoveripc:core", version
 httpoveripc-server = { module = "com.github.UstadMobile.httpoveripc:server", version.ref = "httpoveripc" }
 rawhttp-core = { module = "com.athaydes.rawhttp:rawhttp-core", version.ref = "rawhttp" }
 lz4-pure-java = { module = "org.lz4:lz4-pure-java", version.ref = "lz4" }
+kmp-uuid = { module = "com.benasher44:uuid", version.ref = "kmp-uuid" }

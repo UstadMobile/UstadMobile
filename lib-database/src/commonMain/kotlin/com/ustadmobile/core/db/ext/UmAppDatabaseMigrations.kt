@@ -1433,6 +1433,20 @@ val MIGRATION_174_175 = DoorMigrationStatementList(174, 175) { db ->
     }
 }
 
+val MIGRATION_175_176 = DoorMigrationStatementList(175, 176) { db ->
+    buildList {
+        add("DROP TABLE StatementEntity")
+        add("DROP TABLE AgentEntity")
+        if(db.dbType() == DoorDbType.POSTGRES) {
+            add("CREATE TABLE IF NOT EXISTS StatementEntity (  statementIdHi  BIGINT  NOT NULL , statementIdLo  BIGINT  NOT NULL , statementActorPersonUid  BIGINT  NOT NULL , statementVerbUid  BIGINT  NOT NULL , xObjectUid  BIGINT  NOT NULL , subStatementActorUid  BIGINT  NOT NULL , subStatementVerbUid  BIGINT  NOT NULL , subStatementObjectUid  BIGINT  NOT NULL , agentUid  BIGINT  NOT NULL , instructorUid  BIGINT  NOT NULL , authorityUid  BIGINT  NOT NULL , teamUid  BIGINT  NOT NULL , resultCompletion  BOOL  NOT NULL , resultSuccess  SMALLINT  NOT NULL , resultScoreScaled  FLOAT  NOT NULL , resultScoreRaw  BIGINT  NOT NULL , resultScoreMin  BIGINT  NOT NULL , resultScoreMax  BIGINT  NOT NULL , resultDuration  BIGINT  NOT NULL , resultResponse  TEXT , timestamp  BIGINT  NOT NULL , stored  BIGINT  NOT NULL , contextRegistrationHi  BIGINT  NOT NULL , contextRegistrationLo  BIGINT  NOT NULL , contextPlatform  TEXT , contextStatementRefIdHi  BIGINT  NOT NULL , contextStatementRefIdLo  BIGINT  NOT NULL , fullStatement  TEXT , statementLct  BIGINT  NOT NULL , extensionProgress  INTEGER  NOT NULL , contentEntryRoot  BOOL  NOT NULL , statementContentEntryUid  BIGINT  NOT NULL , statementLearnerGroupUid  BIGINT  NOT NULL , statementClazzUid  BIGINT  NOT NULL , statementCbUid  BIGINT  NOT NULL , statementDoorNode  BIGINT  NOT NULL , PRIMARY KEY (statementIdHi, statementIdLo) )")
+            add("CREATE TABLE IF NOT EXISTS AgentEntity (  agentUid  BIGINT  PRIMARY KEY  NOT NULL , agentMbox  TEXT , agentMbox_sha1sum  TEXT , agentOpenid  TEXT , agentAccountName  TEXT , agentHomePage  TEXT , agentLct  BIGINT  NOT NULL )")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS StatementEntity (  statementIdHi  INTEGER  NOT NULL , statementIdLo  INTEGER  NOT NULL , statementActorPersonUid  INTEGER  NOT NULL , statementVerbUid  INTEGER  NOT NULL , xObjectUid  INTEGER  NOT NULL , subStatementActorUid  INTEGER  NOT NULL , subStatementVerbUid  INTEGER  NOT NULL , subStatementObjectUid  INTEGER  NOT NULL , agentUid  INTEGER  NOT NULL , instructorUid  INTEGER  NOT NULL , authorityUid  INTEGER  NOT NULL , teamUid  INTEGER  NOT NULL , resultCompletion  INTEGER  NOT NULL , resultSuccess  INTEGER  NOT NULL , resultScoreScaled  REAl  NOT NULL , resultScoreRaw  INTEGER  NOT NULL , resultScoreMin  INTEGER  NOT NULL , resultScoreMax  INTEGER  NOT NULL , resultDuration  INTEGER  NOT NULL , resultResponse  TEXT , timestamp  INTEGER  NOT NULL , stored  INTEGER  NOT NULL , contextRegistrationHi  INTEGER  NOT NULL , contextRegistrationLo  INTEGER  NOT NULL , contextPlatform  TEXT , contextStatementRefIdHi  INTEGER  NOT NULL , contextStatementRefIdLo  INTEGER  NOT NULL , fullStatement  TEXT , statementLct  INTEGER  NOT NULL , extensionProgress  INTEGER  NOT NULL , contentEntryRoot  INTEGER  NOT NULL , statementContentEntryUid  INTEGER  NOT NULL , statementLearnerGroupUid  INTEGER  NOT NULL , statementClazzUid  INTEGER  NOT NULL , statementCbUid  INTEGER  NOT NULL , statementDoorNode  INTEGER  NOT NULL , PRIMARY KEY (statementIdHi, statementIdLo) )")
+            add("CREATE TABLE IF NOT EXISTS AgentEntity (  agentUid  INTEGER  PRIMARY KEY  NOT NULL , agentMbox  TEXT , agentMbox_sha1sum  TEXT , agentOpenid  TEXT , agentAccountName  TEXT , agentHomePage  TEXT , agentLct  INTEGER  NOT NULL )")
+        }
+    }
+}
+
 
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_105_106, MIGRATION_106_107,
@@ -1449,7 +1463,7 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_160_161, MIGRATION_162_163, MIGRATION_163_164, MIGRATION_164_165,
     MIGRATION_165_166, MIGRATION_166_167, MIGRATION_167_168, MIGRATION_168_169,
     MIGRATION_170_171, MIGRATION_171_172, MIGRATION_172_173, MIGRATION_173_174,
-    MIGRATION_174_175,
+    MIGRATION_174_175, MIGRATION_175_176,
 )
 
 

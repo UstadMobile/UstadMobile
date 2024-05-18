@@ -20,36 +20,30 @@ import kotlinx.serialization.Serializable
  )
  )
 )
+/**
+ * @param agentUid The uid is the XXHash64 of the mbox, openId, or
+ *        "agentAccountName@agentaHomePage" depending on which type
+ *        of identifier is used.
+ */
 @Serializable
-class AgentEntity {
+data class AgentEntity(
+    @PrimaryKey
+    var agentUid: Long = 0,
 
-    @PrimaryKey(autoGenerate = true)
-    var agentUid: Long = 0
+    var agentMbox: String? = null,
 
-    var agentMbox: String? = null
+    var agentMbox_sha1sum: String? = null,
 
-    var agentMbox_sha1sum: String? = null
+    var agentOpenid: String? = null,
 
-    var agentOpenid: String? = null
+    var agentAccountName: String? = null,
 
-    var agentAccountName: String? = null
-
-    var agentHomePage: String? = null
-
-    var agentPersonUid: Long = 0
-
-    @MasterChangeSeqNum
-    var statementMasterChangeSeqNum: Long = 0
-
-    @LocalChangeSeqNum
-    var statementLocalChangeSeqNum: Long = 0
-
-    @LastChangedBy
-    var statementLastChangedBy: Int = 0
+    var agentHomePage: String? = null,
 
     @ReplicateEtag
     @ReplicateLastModified
-    var agentLct: Long = 0
+    var agentLct: Long = 0,
+) {
 
     companion object {
 
