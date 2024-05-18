@@ -66,13 +66,14 @@ import com.ustadmobile.lib.db.entities.*
     CourseBlockPicture::class,
     ContentEntryPicture2::class,
     TransferJobError::class,
+    VerbLangMapEntry::class,
 
     //Door entities
     OutgoingReplication::class,
     ReplicationOperation::class,
     PendingRepositorySession::class,
 
-], version = 176)
+], version = 177)
 expect abstract class UmAppDatabase : RoomDatabase {
 
     /*
@@ -258,5 +259,7 @@ expect abstract class UmAppDatabase : RoomDatabase {
     abstract val transferJobErrorDao: TransferJobErrorDao
 
     abstract val studentResultDao: StudentResultDao
+
+    abstract val verbLangMapEntryDao: VerbLangMapEntryDao
 
 }

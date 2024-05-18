@@ -30,40 +30,31 @@ class VerbDisplay {
      sqlStatements = [ TRIGGER_UPSERT ]
  )
 ))
-class VerbEntity() {
+/**
+ * Verb as per the xAPI spec. Verb only has two properties ( id and display ) as per the spec:
+ * https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Data.md#243-verb
+ *
+ * Joins with VerbXLangMapEntry to handle the display langmap
+ *
+ * @param verbUid The XXHash64 of verbUrlId
+ */
+data class VerbEntity(
+    @PrimaryKey
+    var verbUid: Long = 0,
 
-    constructor(uid: Long, url: String?) : this(){
-        verbUid = uid
-        urlId = url
-    }
+    var verbUrlId: String? = null,
 
-    @PrimaryKey(autoGenerate = true)
-    var verbUid: Long = 0
-
-    var urlId: String? = null
-
-    var verbInActive: Boolean = false
-
-    @MasterChangeSeqNum
-    var verbMasterChangeSeqNum: Long = 0
-
-    @LocalChangeSeqNum
-    var verbLocalChangeSeqNum: Long = 0
-
-    @LastChangedBy
-    var verbLastChangedBy: Int = 0
+    var verbDeleted: Boolean = false,
 
     @ReplicateLastModified
     @ReplicateEtag
-    var verbLct: Long = 0
+    var verbLct: Long = 0,
+) {
+
 
     companion object {
 
         const val TABLE_ID = 62
-
-        const val VERB_PROGRESSED_URL = "http://adlnet.gov/expapi/verbs/progressed"
-
-        const val VERB_PROGRESSED_UID = 10000L
 
         const val VERB_COMPLETED_URL = "http://adlnet.gov/expapi/verbs/completed"
 
@@ -76,41 +67,6 @@ class VerbEntity() {
         const val VERB_FAILED_URL = "http://adlnet.gov/expapi/verbs/failed"
 
         const val VERB_FAILED_UID = 10003L
-
-        const val VERB_SATISFIED_URL = "https://w3id.org/xapi/adl/verbs/satisfied"
-
-        const val VERB_SATISFIED_UID = 10004L
-
-        const val VERB_ATTEMPTED_URL = "http://adlnet.gov/expapi/verbs/attempted"
-
-        const val VERB_ATTEMPTED_UID = 10005L
-
-        const val VERB_INTERACTED_URL = "http://adlnet.gov/expapi/verbs/interacted"
-
-        const val VERB_INTERACTED_UID = 10006L
-
-        const val VERB_ANSWERED_URL = "http://adlnet.gov/expapi/verbs/answered"
-
-        const val VERB_ANSWERED_UID = 10007L
-
-        const val VERB_SUBMITTED_URL = "http://activitystrea.ms/schema/1.0/submit"
-
-        const val VERB_SUBMITTED_UID = 10008L
-
-        const val VERB_SCORED_URL = "http://adlnet.gov/expapi/verbs/scored"
-
-        const val VERB_SCORED_UID = 10009L
-
-        val FIXED_UIDS = mapOf(VERB_PROGRESSED_URL to VERB_PROGRESSED_UID,
-                VERB_COMPLETED_URL to VERB_COMPLETED_UID,
-                VERB_PASSED_URL to VERB_PASSED_UID,
-                VERB_FAILED_URL to VERB_FAILED_UID,
-                VERB_SATISFIED_URL to VERB_SATISFIED_UID,
-                VERB_ANSWERED_URL to VERB_ANSWERED_UID,
-                VERB_ATTEMPTED_URL to VERB_ATTEMPTED_UID,
-                VERB_INTERACTED_URL to VERB_INTERACTED_UID,
-                VERB_SUBMITTED_URL to VERB_SUBMITTED_UID,
-                VERB_SCORED_URL to VERB_SCORED_UID)
 
     }
 
