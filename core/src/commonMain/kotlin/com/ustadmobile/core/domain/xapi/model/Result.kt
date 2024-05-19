@@ -17,9 +17,9 @@ data class Result(
     @Serializable
     data class Score(
         var scaled: Float,
-        var raw: Long,
-        var min: Long,
-        var max: Long
+        var raw: Float,
+        var min: Float,
+        var max: Float,
     )
 
 }

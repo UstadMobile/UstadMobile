@@ -13,6 +13,9 @@ import kotlinx.serialization.Serializable
  *        https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Data.md#231-statement-immutability.
  *        The canonical JSON will be generated based on the entity fields.
  * @param resultDuration the duration of the result in ms (if provided), otherwise 0
+ * @param extensionProgress Captures the progress extension ( as per
+ *        https://aicc.github.io/CMI-5_Spec_Current/samples/scenarios/13-progress_usage/ ) for use
+ *        to show progress in the UI.
  */
 @Entity(
     primaryKeys = arrayOf("statementIdHi", "statementIdLo")
@@ -58,19 +61,19 @@ data class StatementEntity(
 
     var teamUid: Long = 0,
 
-    var resultCompletion: Boolean = false,
+    var resultCompletion: Boolean? = null,
 
-    var resultSuccess: Byte = RESULT_UNSET,
+    var resultSuccess: Boolean? = null,
 
-    var resultScoreScaled: Float = 0f,
+    var resultScoreScaled: Float? = null,
 
-    var resultScoreRaw: Long = 0,
+    var resultScoreRaw: Float? = null,
 
-    var resultScoreMin: Long = 0,
+    var resultScoreMin: Float? = null,
 
-    var resultScoreMax: Long = 0,
+    var resultScoreMax: Float? = null,
 
-    var resultDuration: Long = 0,
+    var resultDuration: Long? = null,
 
     var resultResponse: String? = null,
 
@@ -94,7 +97,7 @@ data class StatementEntity(
     @ReplicateEtag
     var statementLct: Long = 0,
 
-    var extensionProgress: Int = 0,
+    var extensionProgress: Int? = null,
 
     /**
      *  indicates whether or not the statement is about the root contentEntry or child entries

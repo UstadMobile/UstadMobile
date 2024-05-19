@@ -4,10 +4,13 @@ import com.benasher44.uuid.Uuid
 import com.benasher44.uuid.uuidFrom
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.xapi.model.Actor
 import com.ustadmobile.core.domain.xapi.model.Statement
 import com.ustadmobile.core.domain.xapi.model.toEntities
 import com.ustadmobile.core.domain.xxhash.XXHasher
+import com.ustadmobile.core.util.uuid.randomUuidAsString
 import com.ustadmobile.door.ext.withDoorTransactionAsync
+import kotlinx.datetime.Clock
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 
@@ -15,8 +18,8 @@ import kotlinx.serialization.json.JsonObject
  *
  */
 class XapiStatementResource(
-    private val db: UmAppDatabase,
-    private val repo: UmAppDatabase?,
+    db: UmAppDatabase,
+    repo: UmAppDatabase?,
     private val xxHasher: XXHasher,
     private val endpoint: Endpoint,
     private val json: Json,
@@ -37,8 +40,22 @@ class XapiStatementResource(
         xapiSession: XapiSession,
     ): StatementStoreResult {
         val statementEntities = statements.map {stmt ->
-            //HERE: Set stored time, timestamps, etc.
-            val exactStatement = stmt.copy()
+            val timeNowStr = Clock.System.now().toString()
+
+            //Set properties to be set by LRS as per
+            // https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Data.md#24-statement-properties
+            // https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Data.md#231-statement-immutability
+            val exactStatement = stmt.copy(
+                stored = timeNowStr,
+                timestamp = stmt.timestamp ?: timeNowStr,
+                id = xapiRequireValidUuidOrNullAsString(stmt.id) ?: randomUuidAsString(),
+                authority = Actor(
+                    account = Actor.Account(
+                        name = xapiSession.accountUsername,
+                        homePage = xapiSession.endpoint.url,
+                    )
+                )
+            )
 
             exactStatement.toEntities(
                 xxHasher = xxHasher,
@@ -52,6 +69,12 @@ class XapiStatementResource(
             statementEntities.mapNotNull { it.agentEntity }.takeIf { it.isNotEmpty() }?.also {
                 repoOrDb.agentDao.insertOrIgnoreListAsync(it)
             }
+            repoOrDb.verbDao.insertOrIgnoreAsync(
+                statementEntities.map { it.verbEntities.verbEntity }
+            )
+            repoOrDb.verbLangMapEntryDao.upsertList(
+                statementEntities.flatMap { it.verbEntities.verbLangMapEntries }
+            )
         }
 
         return StatementStoreResult(

@@ -1457,6 +1457,17 @@ val MIGRATION_176_177 = DoorMigrationStatementList(176, 177) { db ->
     }
 }
 
+//Modify StatementEntity to make optional fields nullable.
+val MIGRATION_177_178 = DoorMigrationStatementList(177, 178) { db ->
+    buildList {
+        add("DROP TABLE StatementEntity")
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS StatementEntity (  statementIdHi  INTEGER  NOT NULL , statementIdLo  INTEGER  NOT NULL , statementActorPersonUid  INTEGER  NOT NULL , statementVerbUid  INTEGER  NOT NULL , xObjectUid  INTEGER  NOT NULL , subStatementActorUid  INTEGER  NOT NULL , subStatementVerbUid  INTEGER  NOT NULL , subStatementObjectUid  INTEGER  NOT NULL , agentUid  INTEGER  NOT NULL , instructorUid  INTEGER  NOT NULL , authorityUid  INTEGER  NOT NULL , teamUid  INTEGER  NOT NULL , resultCompletion  INTEGER , resultSuccess  INTEGER , resultScoreScaled  REAl , resultScoreRaw  REAl , resultScoreMin  REAl , resultScoreMax  REAl , resultDuration  INTEGER , resultResponse  TEXT , timestamp  INTEGER  NOT NULL , stored  INTEGER  NOT NULL , contextRegistrationHi  INTEGER  NOT NULL , contextRegistrationLo  INTEGER  NOT NULL , contextPlatform  TEXT , contextStatementRefIdHi  INTEGER  NOT NULL , contextStatementRefIdLo  INTEGER  NOT NULL , fullStatement  TEXT , statementLct  INTEGER  NOT NULL , extensionProgress  INTEGER , contentEntryRoot  INTEGER  NOT NULL , statementContentEntryUid  INTEGER  NOT NULL , statementLearnerGroupUid  INTEGER  NOT NULL , statementClazzUid  INTEGER  NOT NULL , statementCbUid  INTEGER  NOT NULL , statementDoorNode  INTEGER  NOT NULL , PRIMARY KEY (statementIdHi, statementIdLo) )")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS StatementEntity (  statementIdHi  INTEGER  NOT NULL , statementIdLo  INTEGER  NOT NULL , statementActorPersonUid  INTEGER  NOT NULL , statementVerbUid  INTEGER  NOT NULL , xObjectUid  INTEGER  NOT NULL , subStatementActorUid  INTEGER  NOT NULL , subStatementVerbUid  INTEGER  NOT NULL , subStatementObjectUid  INTEGER  NOT NULL , agentUid  INTEGER  NOT NULL , instructorUid  INTEGER  NOT NULL , authorityUid  INTEGER  NOT NULL , teamUid  INTEGER  NOT NULL , resultCompletion  INTEGER , resultSuccess  INTEGER , resultScoreScaled  REAl , resultScoreRaw  REAl , resultScoreMin  REAl , resultScoreMax  REAl , resultDuration  INTEGER , resultResponse  TEXT , timestamp  INTEGER  NOT NULL , stored  INTEGER  NOT NULL , contextRegistrationHi  INTEGER  NOT NULL , contextRegistrationLo  INTEGER  NOT NULL , contextPlatform  TEXT , contextStatementRefIdHi  INTEGER  NOT NULL , contextStatementRefIdLo  INTEGER  NOT NULL , fullStatement  TEXT , statementLct  INTEGER  NOT NULL , extensionProgress  INTEGER , contentEntryRoot  INTEGER  NOT NULL , statementContentEntryUid  INTEGER  NOT NULL , statementLearnerGroupUid  INTEGER  NOT NULL , statementClazzUid  INTEGER  NOT NULL , statementCbUid  INTEGER  NOT NULL , statementDoorNode  INTEGER  NOT NULL , PRIMARY KEY (statementIdHi, statementIdLo) )")
+        }
+    }
+}
 
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_105_106, MIGRATION_106_107,
@@ -1473,7 +1484,7 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_160_161, MIGRATION_162_163, MIGRATION_163_164, MIGRATION_164_165,
     MIGRATION_165_166, MIGRATION_166_167, MIGRATION_167_168, MIGRATION_168_169,
     MIGRATION_170_171, MIGRATION_171_172, MIGRATION_172_173, MIGRATION_173_174,
-    MIGRATION_174_175, MIGRATION_175_176, MIGRATION_176_177,
+    MIGRATION_174_175, MIGRATION_175_176, MIGRATION_176_177, MIGRATION_177_178,
 )
 
 

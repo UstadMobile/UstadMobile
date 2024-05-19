@@ -10,6 +10,8 @@ data class XapiSession(
     val accountPersonUid: Long,
     val accountUsername: String,
     val clazzUid: Long,
-    val contentEntryUid: Long,
+    val cbUid: Long = 0,
+    val contentEntryUid: Long = 0,
+    val rootActivityId: String? = null,
 )
 

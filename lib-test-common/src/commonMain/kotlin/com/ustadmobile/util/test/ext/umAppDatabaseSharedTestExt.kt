@@ -87,27 +87,24 @@ fun UmAppDatabase.insertTestStatementsForReports() {
 
 
     val completedVerb = VerbEntity().apply {
-        urlId = VerbEntity.VERB_COMPLETED_URL
         verbUid = VerbEntity.VERB_COMPLETED_UID
-        verbDao.insert(this)
+
     }
 
     val firstVerbLangMap = XLangMapEntry(completedVerb.verbUid, 0, 0, 0, "completed Entry 1")
     firstVerbLangMap.languageLangMapUid = xLangMapEntryDao.insert(firstVerbLangMap)
 
     val passedVerb = VerbEntity().apply {
-        urlId = VerbEntity.VERB_PASSED_URL
         verbUid = VerbEntity.VERB_PASSED_UID
-        verbDao.insert(this)
     }
 
     val secondVerbLangMap = XLangMapEntry(passedVerb.verbUid, 0, 0, 0, "Passed Entry 1")
     secondVerbLangMap.languageLangMapUid = xLangMapEntryDao.insert(secondVerbLangMap)
 
     val failedVerb = VerbEntity().apply {
-        urlId = VerbEntity.VERB_FAILED_URL
+
         verbUid = VerbEntity.VERB_FAILED_UID
-        verbDao.insert(this)
+
     }
 
     val thirdVerbLangMap = XLangMapEntry(failedVerb.verbUid, 0, 0, 0, "Failed Entry 1")
@@ -220,7 +217,6 @@ fun UmAppDatabase.insertTestStatementsForReports() {
         statementVerbUid = completedVerb.verbUid
         xObjectUid = firstObject.xObjectUid
         statementContentEntryUid = khanclass1.contentEntryUid
-        resultSuccess = StatementEntity.RESULT_FAILURE
         timestamp = DateTime(2019, 6, 11).unixMillisLong
         contentEntryRoot = true
     }
@@ -234,8 +230,7 @@ fun UmAppDatabase.insertTestStatementsForReports() {
         statementVerbUid = passedVerb.verbUid
         xObjectUid = firstObject.xObjectUid
         statementContentEntryUid = khanclass1.contentEntryUid
-        resultSuccess = StatementEntity.RESULT_SUCCESS
-        
+
         timestamp = DateTime(2019, 5, 1).unixMillisLong
         contentEntryRoot = false
     }
@@ -250,7 +245,6 @@ fun UmAppDatabase.insertTestStatementsForReports() {
         statementVerbUid = completedVerb.verbUid
         xObjectUid = secondObject.xObjectUid
         statementContentEntryUid = khanclass2.contentEntryUid
-        resultSuccess = StatementEntity.RESULT_FAILURE
         timestamp = DateTime(2019, 4, 10).unixMillisLong
         contentEntryRoot = true
     }
@@ -265,7 +259,6 @@ fun UmAppDatabase.insertTestStatementsForReports() {
         statementVerbUid = completedVerb.verbUid
         xObjectUid = secondObject.xObjectUid
         statementContentEntryUid = khanclass2.contentEntryUid
-        resultSuccess = StatementEntity.RESULT_SUCCESS
         timestamp = DateTime(2019, 6, 30).unixMillisLong
         contentEntryRoot = true
     }
@@ -281,7 +274,6 @@ fun UmAppDatabase.insertTestStatementsForReports() {
         statementVerbUid = failedVerb.verbUid
         xObjectUid = firstObject.xObjectUid
         statementContentEntryUid = khanclass1.contentEntryUid
-        resultSuccess = StatementEntity.RESULT_SUCCESS
         timestamp = DateTime(2019, 7, 10).unixMillisLong
         contentEntryRoot = true
     }
@@ -294,7 +286,6 @@ fun UmAppDatabase.insertTestStatementsForReports() {
         resultScoreScaled = 25f
         resultCompletion = true
         statementVerbUid = completedVerb.verbUid
-        resultSuccess = StatementEntity.RESULT_FAILURE
         xObjectUid = secondObject.xObjectUid
         statementContentEntryUid = khanclass2.contentEntryUid
         timestamp = DateTime(2019, 5, 25).unixMillisLong
@@ -310,7 +301,6 @@ fun UmAppDatabase.insertTestStatementsForReports() {
         statementVerbUid = completedVerb.verbUid
         xObjectUid = firstObject.xObjectUid
         statementContentEntryUid = khanclass1.contentEntryUid
-        resultSuccess = StatementEntity.RESULT_FAILURE
         timestamp = DateTime(2019, 6, 11).unixMillisLong
         contentEntryRoot = true
 
@@ -326,7 +316,6 @@ fun UmAppDatabase.insertTestStatementsForReports() {
             statementVerbUid = completedVerb.verbUid
             xObjectUid = thirdObject.xObjectUid
             statementContentEntryUid = khanclass1.contentEntryUid
-            resultSuccess = StatementEntity.RESULT_SUCCESS
             timestamp = DateTime(2019, 6, 11).unixMillisLong
         }
     }
