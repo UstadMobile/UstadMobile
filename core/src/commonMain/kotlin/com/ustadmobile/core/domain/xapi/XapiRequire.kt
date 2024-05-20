@@ -2,6 +2,7 @@ package com.ustadmobile.core.domain.xapi
 
 import com.benasher44.uuid.Uuid
 import com.benasher44.uuid.uuidFrom
+import com.ustadmobile.door.DoorUri
 import kotlinx.datetime.Instant
 import kotlin.time.Duration
 
@@ -58,4 +59,25 @@ fun xapiRequireValidUuidOrNullAsString(
         throw XapiException(400, "$errorMessage: ${e.message}", e)
     }
 }
+
+fun xapiRequireValidIRIOrNull(iri: String?, errorMessage: String = "Invalid IRI:") : String? {
+    if(iri != null) {
+        try {
+            DoorUri.parse(iri)
+        }catch(e: Throwable) {
+            throw XapiException(400, "$errorMessage: ${e.message}", e)
+        }
+    }
+
+    return iri
+}
+
+fun xapiRequireValidIRI(iri: String?, errorMessage: String = "Invalid iri") : String {
+    if(iri == null)
+        throw XapiException(400, "$errorMessage: iri is null")
+
+    xapiRequireValidIRIOrNull(iri)
+    return iri
+}
+
 

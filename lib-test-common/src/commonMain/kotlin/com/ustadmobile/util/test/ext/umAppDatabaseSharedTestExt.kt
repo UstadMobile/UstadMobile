@@ -5,8 +5,7 @@ import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.*
-
-
+import com.ustadmobile.lib.db.entities.xapi.StatementEntity
 
 
 fun UmAppDatabase.insertTestStatementsForReports() {
@@ -183,7 +182,7 @@ fun UmAppDatabase.insertTestStatementsForReports() {
 
     var firstObject = XObjectEntity()
     firstObject.objectId = "hello"
-    firstObject.objectContentEntryUid = khanclass1.contentEntryUid
+    
     firstObject.xObjectUid =  xObjectDao.insert(firstObject)
 
 
@@ -192,7 +191,6 @@ fun UmAppDatabase.insertTestStatementsForReports() {
 
     var secondObject = XObjectEntity()
     secondObject.objectId = "world"
-    secondObject.objectContentEntryUid = khanclass2.contentEntryUid
     secondObject.xObjectUid =  xObjectDao.insert(secondObject)
 
 
@@ -201,7 +199,6 @@ fun UmAppDatabase.insertTestStatementsForReports() {
 
     var thirdObject = XObjectEntity()
     thirdObject.objectId = "now"
-    thirdObject.objectContentEntryUid = khanclass1.contentEntryUid
     thirdObject.xObjectUid =  xObjectDao.insert(thirdObject)
 
 

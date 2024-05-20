@@ -4,12 +4,16 @@ import com.benasher44.uuid.Uuid
 import com.benasher44.uuid.uuidFrom
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.domain.xapi.model.Actor
-import com.ustadmobile.core.domain.xapi.model.Statement
+import com.ustadmobile.core.domain.xapi.model.XapiAccount
+import com.ustadmobile.core.domain.xapi.model.XapiAgent
+import com.ustadmobile.core.domain.xapi.model.XapiStatement
 import com.ustadmobile.core.domain.xapi.model.toEntities
-import com.ustadmobile.core.domain.xxhash.XXHasher
+import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
+import com.ustadmobile.core.domain.xxhash.XXStringHasher
 import com.ustadmobile.core.util.uuid.randomUuidAsString
+import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.ext.withDoorTransactionAsync
+import com.ustadmobile.door.util.systemTimeInMillis
 import kotlinx.datetime.Clock
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
@@ -18,11 +22,12 @@ import kotlinx.serialization.json.JsonObject
  *
  */
 class XapiStatementResource(
-    db: UmAppDatabase,
+    private val db: UmAppDatabase,
     repo: UmAppDatabase?,
-    private val xxHasher: XXHasher,
+    private val xxHasher: XXStringHasher,
     private val endpoint: Endpoint,
     private val json: Json,
+    private val hasherFactory: XXHasher64Factory,
 ) {
 
     private val repoOrDb = repo ?: db
@@ -36,7 +41,7 @@ class XapiStatementResource(
     )
 
     private suspend fun storeStatements(
-        statements: List<Statement>,
+        statements: List<XapiStatement>,
         xapiSession: XapiSession,
     ): StatementStoreResult {
         val statementEntities = statements.map {stmt ->
@@ -49,8 +54,8 @@ class XapiStatementResource(
                 stored = timeNowStr,
                 timestamp = stmt.timestamp ?: timeNowStr,
                 id = xapiRequireValidUuidOrNullAsString(stmt.id) ?: randomUuidAsString(),
-                authority = Actor(
-                    account = Actor.Account(
+                authority = XapiAgent(
+                    account = XapiAccount(
                         name = xapiSession.accountUsername,
                         homePage = xapiSession.endpoint.url,
                     )
@@ -58,20 +63,37 @@ class XapiStatementResource(
             )
 
             exactStatement.toEntities(
-                xxHasher = xxHasher,
+                stringHasher = xxHasher,
                 xapiSession = xapiSession,
-                exactJson = json.encodeToString(Statement.serializer(), exactStatement)
+                exactJson = json.encodeToString(XapiStatement.serializer(), exactStatement),
+                primaryKeyManager = db.doorPrimaryKeyManager,
+                hasherFactory = hasherFactory
             )
         }
 
         repoOrDb.withDoorTransactionAsync {
             repoOrDb.statementDao.insertOrIgnoreListAsync(statementEntities.map { it.statementEntity } )
-            statementEntities.mapNotNull { it.agentEntity }.takeIf { it.isNotEmpty() }?.also {
-                repoOrDb.agentDao.insertOrIgnoreListAsync(it)
-            }
+            statementEntities.map { it.agentEntities }.flatMap { it.actors }
+                .takeIf { it.isNotEmpty() }
+                ?.also { agents ->
+                    //Name is the only property that could be updated on the Agent. All other
+                    //properties are identifiers
+                    agents.forEach {
+                        repoOrDb.agentDao.updateIfNameChanged(
+                            uid = it.actorUid, name = it.actorName, updateTime = systemTimeInMillis()
+                        )
+                    }
+
+                    repoOrDb.agentDao.insertOrIgnoreListAsync(agents)
+                }
+
+            //Handle groups here - check for changes as per logic in XapiGroup.toGroupEntities
+
+
             repoOrDb.verbDao.insertOrIgnoreAsync(
                 statementEntities.map { it.verbEntities.verbEntity }
             )
+
             repoOrDb.verbLangMapEntryDao.upsertList(
                 statementEntities.flatMap { it.verbEntities.verbLangMapEntries }
             )
@@ -90,7 +112,7 @@ class XapiStatementResource(
      *
      */
     suspend fun put(
-        statement: Statement,
+        statement: XapiStatement,
         statementIdParam: String,
         xapiSession: XapiSession,
     ): String {

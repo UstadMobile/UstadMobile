@@ -22,6 +22,7 @@ import com.ustadmobile.lib.db.entities.ReportSeries.Companion.TOTAL_ATTENDANCE
 import com.ustadmobile.lib.db.entities.ReportSeries.Companion.TOTAL_CLASSES
 import com.ustadmobile.lib.db.entities.ReportSeries.Companion.TOTAL_DURATION
 import com.ustadmobile.lib.db.entities.ReportSeries.Companion.TOTAL_LATES
+import com.ustadmobile.lib.db.entities.xapi.StatementEntity
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.TimeZone

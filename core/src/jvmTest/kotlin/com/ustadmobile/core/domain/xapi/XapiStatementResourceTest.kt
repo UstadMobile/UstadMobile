@@ -3,8 +3,9 @@ package com.ustadmobile.core.domain.xapi
 import com.benasher44.uuid.uuid4
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.domain.xapi.model.Statement
-import com.ustadmobile.core.domain.xxhash.XXHashCommonJvm
+import com.ustadmobile.core.domain.xapi.model.XapiStatement
+import com.ustadmobile.core.domain.xxhash.XXHasher64FactoryCommonJvm
+import com.ustadmobile.core.domain.xxhash.XXStringHasherCommonJvm
 import com.ustadmobile.door.DatabaseBuilder
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
@@ -16,7 +17,7 @@ class XapiStatementResourceTest {
 
     private lateinit var db: UmAppDatabase
 
-    private val xxHasher = XXHashCommonJvm()
+    private val xxHasher = XXStringHasherCommonJvm()
 
     private val endpoint = Endpoint("http://localhost/")
 
@@ -38,6 +39,7 @@ class XapiStatementResourceTest {
             xxHasher = xxHasher,
             endpoint = endpoint,
             json = json,
+            hasherFactory = XXHasher64FactoryCommonJvm(),
         )
     }
 
@@ -45,7 +47,7 @@ class XapiStatementResourceTest {
     fun givenStatementPut_whenGetCalled_thenShouldBeRetrieved() = runBlocking {
         val id = uuid4().toString()
         val stmtJson = this::class.java.getResource("/com/ustadmobile/core/domain/xapi/simple-statement.json")!!.readText()
-        val stmt = json.decodeFromString(Statement.serializer(), stmtJson)
+        val stmt = json.decodeFromString(XapiStatement.serializer(), stmtJson)
         val xapiSession = XapiSession(
             endpoint = endpoint,
             accountPersonUid = 42L,

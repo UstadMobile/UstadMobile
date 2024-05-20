@@ -12,6 +12,7 @@ import com.ustadmobile.core.viewmodel.contententry.detailoverviewtab.progress
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.composites.ContentEntryAndDetail
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.xapi.StatementEntity
 import com.ustadmobile.mui.common.md
 import com.ustadmobile.mui.common.xs
 import com.ustadmobile.mui.components.ThemeContext

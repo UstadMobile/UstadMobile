@@ -12,7 +12,7 @@ import com.ustadmobile.core.domain.interop.oneroster.model.LineItem
 import com.ustadmobile.core.domain.interop.oneroster.model.Status
 import com.ustadmobile.core.domain.interop.timestamp.format8601Timestamp
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
-import com.ustadmobile.core.domain.xxhash.XXHashCommonJvm
+import com.ustadmobile.core.domain.xxhash.XXStringHasherCommonJvm
 import com.ustadmobile.core.domain.xxhash.toLongOrHash
 import com.ustadmobile.core.util.isimplerequest.StringSimpleTextRequest
 import com.ustadmobile.core.util.stringvalues.asIStringValues
@@ -51,7 +51,7 @@ class OneRosterEndpointTest {
 
     private val endpoint = Endpoint("http://localhost:8087/")
 
-    private val xxHasher = XXHashCommonJvm()
+    private val xxHasher = XXStringHasherCommonJvm()
 
     @BeforeTest
     fun setup() {

@@ -6,6 +6,6 @@ package com.ustadmobile.core.domain.xxhash
  *
  * This is the strategy that is used to generate uid 64bit longs for OneRoster and xAPI items.
  */
-fun XXHasher.toLongOrHash(string: String): Long {
+fun XXStringHasher.toLongOrHash(string: String): Long {
     return string.toLongOrNull() ?: hash(string)
 }

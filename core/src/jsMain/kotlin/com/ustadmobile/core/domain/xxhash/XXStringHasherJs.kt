@@ -4,7 +4,7 @@ import com.ustadmobile.core.wrappers.xxhash.XXH
 import io.ktor.utils.io.core.toByteArray
 import js.typedarrays.toUint8Array
 
-class XXHasherJs: XXHasher {
+class XXStringHasherJs: XXStringHasher {
 
     override fun hash(string: String): Long {
         val array = string.toByteArray().toUint8Array()

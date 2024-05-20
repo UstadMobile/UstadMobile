@@ -1,13 +1,16 @@
 package com.ustadmobile.core.domain.xapi
 
+import com.benasher44.uuid.Uuid
 import com.benasher44.uuid.uuidFrom
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.domain.xapi.model.Actor
-import com.ustadmobile.core.domain.xapi.model.Statement
-import com.ustadmobile.core.domain.xapi.model.toAgentEntity
-import com.ustadmobile.core.domain.xxhash.XXHasher
+import com.ustadmobile.core.domain.xapi.model.XapiActor
+import com.ustadmobile.core.domain.xapi.model.XapiAgent
+import com.ustadmobile.core.domain.xapi.model.XapiStatement
+import com.ustadmobile.core.domain.xapi.model.toActorEntity
+import com.ustadmobile.core.domain.xxhash.XXStringHasher
 import kotlinx.coroutines.runBlocking
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 
 /**
@@ -16,9 +19,10 @@ import kotlin.test.assertNotNull
  * are present (e.g. Verb, Agent, etc)
  */
 fun assertStatementStoredInDb(
-    statement: Statement,
+    statement: XapiStatement,
     db: UmAppDatabase,
-    xxHasher: XXHasher,
+    xxHasher: XXStringHasher,
+    xapiSession: XapiSession? = null,
 ) {
     runBlocking {
         val stmtUuid = uuidFrom(statement.id!!)
@@ -28,22 +32,45 @@ fun assertStatementStoredInDb(
         )
 
         assertNotNull(statementInDb, "Statement $stmtUuid is in database")
+        assertEquals(statement.result?.completion, statementInDb.resultCompletion)
+        assertEquals(statement.result?.success, statementInDb.resultSuccess)
+        assertEquals(statement.result?.score?.scaled, statementInDb.resultScoreScaled)
+        assertEquals(statement.result?.score?.raw, statementInDb.resultScoreRaw)
+        assertEquals(statement.result?.score?.max, statementInDb.resultScoreMax)
+        assertEquals(statement.result?.score?.min, statementInDb.resultScoreMin)
+        assertEquals(xapiRequireDurationOrNullAsLong(statement.result?.duration),
+            statementInDb.resultDuration)
+        statement.timestamp?.also { timestamp ->
+            assertEquals(xapiRequireTimestampAsLong(timestamp), statementInDb.timestamp)
+        }
+        assertNotEquals(0, statementInDb.stored)
+        statement.context?.registration?.also { registrationUuid ->
+            assertEquals(uuidFrom(registrationUuid),
+                Uuid(statementInDb.contextRegistrationHi, statementInDb.contextRegistrationLo))
+        }
+        if(xapiSession != null) {
+            assertEquals(xapiSession.contentEntryUid, statementInDb.statementContentEntryUid)
+            assertEquals(xapiSession.clazzUid, statementInDb.statementClazzUid)
+            assertEquals(xapiSession.cbUid, statementInDb.statementCbUid)
+            assertEquals(statement.`object`.id == xapiSession.rootActivityId,
+                statementInDb.contentEntryRoot)
+        }
 
-        assertActorStoredInDb(statement.actor!!, db, xxHasher)
+        assertActorStoredInDb(statement.actor, db, xxHasher)
     }
 }
 
 fun assertActorStoredInDb(
-    actor: Actor,
+    actor: XapiActor,
     db: UmAppDatabase,
-    xxHasher: XXHasher,
+    xxHasher: XXStringHasher,
 ) = runBlocking {
-    if(actor.isAgent()) {
-        val agentEntity = actor.toAgentEntity(xxHasher)
-        val agentInDb = db.agentDao.findByUidAsync(agentEntity.agentUid)
+    if(actor is XapiAgent) {
+        val agentEntity = actor.toActorEntity(xxHasher)
+        val agentInDb = db.agentDao.findByUidAsync(agentEntity.actorUid)
         assertNotNull(agentInDb, "Agent is in database")
-        assertEquals(actor.account?.name ?: "", agentInDb.agentAccountName ?: "")
-        assertEquals(actor.mbox, agentInDb.agentMbox)
-        assertEquals(actor.openid, agentInDb.agentOpenid)
+        assertEquals(actor.account?.name ?: "", agentInDb.actorAccountName ?: "")
+        assertEquals(actor.mbox, agentInDb.actorMbox)
+        assertEquals(actor.openid, agentInDb.actorOpenid)
     }
 }

@@ -5,11 +5,13 @@ import com.ustadmobile.core.domain.xapi.XapiSession
 import com.ustadmobile.core.domain.xapi.xapiRequireDurationOrNullAsLong
 import com.ustadmobile.core.domain.xapi.xapiRequireNotNullOrThrow
 import com.ustadmobile.core.domain.xapi.xapiRequireTimestampAsLong
+import com.ustadmobile.core.domain.xapi.xapiRequireValidIRI
 import com.ustadmobile.core.domain.xapi.xapiRequireValidUuidOrNull
-import com.ustadmobile.core.domain.xxhash.XXHasher
+import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
+import com.ustadmobile.core.domain.xxhash.XXStringHasher
+import com.ustadmobile.door.DoorPrimaryKeyManager
 import com.ustadmobile.door.util.systemTimeInMillis
-import com.ustadmobile.lib.db.entities.AgentEntity
-import com.ustadmobile.lib.db.entities.StatementEntity
+import com.ustadmobile.lib.db.entities.xapi.StatementEntity
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.intOrNull
@@ -18,26 +20,26 @@ import kotlinx.serialization.json.jsonPrimitive
 const val XAPI_RESULT_EXTENSION_PROGRESS = "https://w3id.org/xapi/cmi5/result/extensions/progress"
 
 @Serializable
-data class Statement(
+data class XapiStatement(
     val id: String? = null,
-    val actor: Actor? = null,
-    val verb: Verb? = null,
+    val actor: XapiActor,
+    val verb: Verb,
     @SerialName("object")
-    val `object`: XObject? = null,
-    val subStatement: Statement? = null,
+    val `object`: XapiStatementObject,
+    val subStatement: XapiStatement? = null,
     val result: Result? = null,
-    val context: XContext? = null,
+    val context: XapiContext? = null,
     val timestamp: String? = null,
     val stored: String? = null,
-    val authority: Actor? = null,
+    val authority: XapiActor? = null,
     val version: String? = null,
     val attachments: List<Attachment>? = null,
-    val objectType: String? = null,
+    val objectType: XapiObjectType? = null,
 )
 
 data class StatementEntities(
     val statementEntity: StatementEntity,
-    val agentEntity: AgentEntity?,
+    val agentEntities: ActorEntities,
     val verbEntities: VerbEntities,
 )
 
@@ -47,8 +49,10 @@ data class StatementEntities(
  * Most of the time the statement received will be when running an xAPI activity, and the actor will
  * be an Agent for the current user.
  */
-fun Statement.toEntities(
-    xxHasher: XXHasher,
+fun XapiStatement.toEntities(
+    stringHasher: XXStringHasher,
+    primaryKeyManager: DoorPrimaryKeyManager,
+    hasherFactory: XXHasher64Factory,
     xapiSession: XapiSession,
     exactJson: String,
 ): StatementEntities {
@@ -62,17 +66,19 @@ fun Statement.toEntities(
             statementIdHi = statementUuid.mostSignificantBits,
             statementIdLo = statementUuid.leastSignificantBits,
             statementActorPersonUid = if(
-                actor?.account?.homePage == xapiSession.endpoint.url &&
-                actor.account.name == xapiSession.accountUsername
+                actor.account?.homePage == xapiSession.endpoint.url &&
+                actor.account?.name == xapiSession.accountUsername
             ) {
                 xapiSession.accountPersonUid
             }else {
                 0
             },
-            statementVerbUid = xxHasher.hash(
-                xapiRequireNotNullOrThrow(verb?.id,"Missing verb id")
+            statementVerbUid = stringHasher.hash(
+                xapiRequireValidIRI(verb.id,
+                    "Statement $statementUuid VerbID ${verb.id} is not a valid IRI"
+                )
             ),
-            resultCompletion = result?.completion ?: false,
+            resultCompletion = result?.completion,
             resultSuccess = result?.success,
             resultScoreScaled = result?.score?.scaled,
             resultScoreRaw = result?.score?.raw,
@@ -88,19 +94,16 @@ fun Statement.toEntities(
             statementContentEntryUid = xapiSession.contentEntryUid,
             statementClazzUid = xapiSession.clazzUid,
             statementCbUid = xapiSession.cbUid,
-            contentEntryRoot = `object`?.id != null && `object`.id == xapiSession.rootActivityId,
+            contentEntryRoot = `object`.objectType.let { it == null || it == XapiObjectType.Activity } &&
+                    `object`.id == xapiSession.rootActivityId,
             fullStatement = exactJson,
             extensionProgress = result?.extensions?.get(XAPI_RESULT_EXTENSION_PROGRESS)
                 ?.jsonPrimitive?.intOrNull
         ),
-        agentEntity = if(actor?.isAgent() == true) {
-            actor.toAgentEntity(xxHasher)
-        }else {
-            null
-        },
+        agentEntities = actor.toEntities(stringHasher, primaryKeyManager, hasherFactory),
         verbEntities = xapiRequireNotNullOrThrow(
             verb, message = "Missing verb"
-        ).toVerbEntities(xxHasher),
+        ).toVerbEntities(stringHasher),
     )
 }
 

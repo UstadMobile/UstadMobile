@@ -2,7 +2,7 @@ package com.ustadmobile.core.impl.locale.entityconstants
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.util.MessageIdOption2
-import com.ustadmobile.lib.db.entities.StatementEntity
+import com.ustadmobile.lib.db.entities.xapi.StatementEntity
 
 object ContentCompletionStatusConstants {
 

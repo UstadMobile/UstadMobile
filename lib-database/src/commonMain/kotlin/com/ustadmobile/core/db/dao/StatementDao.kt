@@ -9,6 +9,7 @@ import com.ustadmobile.door.annotation.*
 import kotlinx.coroutines.flow.Flow
 import app.cash.paging.PagingSource
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.xapi.StatementEntity
 
 @DoorDao
 @Repository

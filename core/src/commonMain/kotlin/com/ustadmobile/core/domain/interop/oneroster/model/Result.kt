@@ -3,7 +3,7 @@ package com.ustadmobile.core.domain.interop.oneroster.model
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.domain.interop.timestamp.format8601Timestamp
 import com.ustadmobile.core.domain.interop.timestamp.parse8601Timestamp
-import com.ustadmobile.core.domain.xxhash.XXHasher
+import com.ustadmobile.core.domain.xxhash.XXStringHasher
 import com.ustadmobile.core.domain.xxhash.toLongOrHash
 import com.ustadmobile.lib.db.composites.StudentResultAndCourseBlockSourcedId
 import com.ustadmobile.lib.db.entities.StudentResult
@@ -58,7 +58,7 @@ fun StudentResultAndCourseBlockSourcedId.toOneRosterResult(
 
 
 fun Result.toStudentResult(
-    xxHasher: XXHasher,
+    xxHasher: XXStringHasher,
     clazzUid: Long,
 ) : StudentResult {
     return StudentResult(

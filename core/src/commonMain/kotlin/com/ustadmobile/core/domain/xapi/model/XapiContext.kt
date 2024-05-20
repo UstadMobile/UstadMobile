@@ -4,8 +4,8 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
 
 @Serializable
-data class XContext(
-    var instructor: Actor? = null,
+data class XapiContext(
+    var instructor: XapiActor? = null,
 
     var registration: String? = null,
 
@@ -15,11 +15,11 @@ data class XContext(
 
     var revision: String? = null,
 
-    var team: Actor? = null,
+    var team: XapiActor? = null,
 
-    var statement: XObject? = null,
+    var statement: XapiActivityStatementObject? = null,
 
-    var contextActivities: ContextActivity? = null,
+    var contextActivities: XapiContextActivities? = null,
 
     var extensions: Map<String, JsonElement>? = null,
 )

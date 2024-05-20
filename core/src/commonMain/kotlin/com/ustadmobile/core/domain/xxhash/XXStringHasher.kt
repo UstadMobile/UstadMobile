@@ -12,7 +12,7 @@ package com.ustadmobile.core.domain.xxhash
  * e.g. when records sync with the server, both statement entities will still link to the same verb
  * entity.
  */
-interface XXHasher {
+interface XXStringHasher {
 
     fun hash(string: String): Long
 

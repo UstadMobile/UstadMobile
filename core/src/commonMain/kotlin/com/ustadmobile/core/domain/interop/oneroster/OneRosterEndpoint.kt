@@ -10,7 +10,7 @@ import com.ustadmobile.core.domain.interop.oneroster.model.toOneRosterClass
 import com.ustadmobile.core.domain.interop.oneroster.model.toOneRosterLineItem
 import com.ustadmobile.core.domain.interop.oneroster.model.toOneRosterResult
 import com.ustadmobile.core.domain.interop.oneroster.model.toStudentResult
-import com.ustadmobile.core.domain.xxhash.XXHasher
+import com.ustadmobile.core.domain.xxhash.XXStringHasher
 import com.ustadmobile.core.domain.xxhash.toLongOrHash
 import com.ustadmobile.core.util.ext.localFirstThenRepoIfFalse
 import com.ustadmobile.core.util.ext.localFirstThenRepoIfNull
@@ -31,7 +31,7 @@ class OneRosterEndpoint(
     private val db: UmAppDatabase,
     repo: UmAppDatabase?,
     private val endpoint: Endpoint,
-    private val xxHasher: XXHasher,
+    private val xxHasher: XXStringHasher,
     private val json: Json,
 ) {
 

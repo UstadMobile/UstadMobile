@@ -10,7 +10,7 @@ class XXHashJsTest {
 
     @Test
     fun test() {
-        val hasher = XXHasherJs()
+        val hasher = XXStringHasherJs()
         assertEquals(-6241840830881246551L, hasher.hash("http://adlnet.gov/expapi/verbs/progressed"))
     }
 

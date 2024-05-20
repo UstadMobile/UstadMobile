@@ -1,7 +1,7 @@
 package com.ustadmobile.core.domain.xapi.model
 
-import com.ustadmobile.core.domain.xapi.XapiException
-import com.ustadmobile.core.domain.xxhash.XXHasher
+import com.ustadmobile.core.domain.xapi.xapiRequireValidIRI
+import com.ustadmobile.core.domain.xxhash.XXStringHasher
 import com.ustadmobile.lib.db.entities.VerbEntity
 import com.ustadmobile.lib.db.entities.VerbLangMapEntry
 import kotlinx.serialization.Serializable
@@ -19,9 +19,11 @@ data class VerbEntities(
 )
 
 fun Verb.toVerbEntities(
-    xxHasher: XXHasher,
+    xxHasher: XXStringHasher,
 ): VerbEntities {
-    val verbUid = xxHasher.hash(id ?: throw XapiException(400, "Verb has no id"))
+    val verbIri = xapiRequireValidIRI(id)
+    val verbUid = xxHasher.hash(verbIri)
+
     return VerbEntities(
         verbEntity = VerbEntity(
             verbUid = verbUid,

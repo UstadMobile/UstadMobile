@@ -6,6 +6,9 @@ import com.ustadmobile.door.SyncNode
 import com.ustadmobile.door.entities.*
 import com.ustadmobile.door.room.RoomDatabase
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.xapi.ActorEntity
+import com.ustadmobile.lib.db.entities.xapi.GroupMemberActorJoin
+import com.ustadmobile.lib.db.entities.xapi.StatementEntity
 
 @DoorDatabase(entities = [NetworkNode::class,
     ClazzLog::class, ClazzLogAttendanceRecord::class,
@@ -20,7 +23,7 @@ import com.ustadmobile.lib.db.entities.*
     ScrapeQueueItem::class, ScrapeRun::class, ConnectivityStatus::class,
     Container::class, ContainerEntry::class, ContainerEntryFile::class,
     VerbEntity::class, XObjectEntity::class, StatementEntity::class,
-    ContextXObjectStatementJoin::class, AgentEntity::class,
+    ContextXObjectStatementJoin::class, ActorEntity::class,
     StateEntity::class, StateContentEntity::class, XLangMapEntry::class,
     SyncNode::class, LocallyAvailableContainer::class, ContainerETag::class,
     School::class,
@@ -67,13 +70,14 @@ import com.ustadmobile.lib.db.entities.*
     ContentEntryPicture2::class,
     TransferJobError::class,
     VerbLangMapEntry::class,
+    GroupMemberActorJoin::class,
 
     //Door entities
     OutgoingReplication::class,
     ReplicationOperation::class,
     PendingRepositorySession::class,
 
-], version = 178)
+], version = 179)
 expect abstract class UmAppDatabase : RoomDatabase {
 
     /*
@@ -167,7 +171,7 @@ expect abstract class UmAppDatabase : RoomDatabase {
 
     abstract val stateContentDao: StateContentDao
 
-    abstract val agentDao: AgentDao
+    abstract val agentDao: ActorDao
 
     abstract val clazzLogAttendanceRecordDao: ClazzLogAttendanceRecordDao
     abstract val clazzLogDao: ClazzLogDao

@@ -128,8 +128,8 @@ import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
 import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
-import com.ustadmobile.core.domain.xxhash.XXHashCommonJvm
-import com.ustadmobile.core.domain.xxhash.XXHasher
+import com.ustadmobile.core.domain.xxhash.XXStringHasherCommonJvm
+import com.ustadmobile.core.domain.xxhash.XXStringHasher
 import com.ustadmobile.core.embeddedhttp.EmbeddedHttpServer
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
@@ -938,8 +938,8 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             )
         }
 
-        bind<XXHasher>() with singleton {
-            XXHashCommonJvm()
+        bind<XXStringHasher>() with singleton {
+            XXStringHasherCommonJvm()
         }
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }

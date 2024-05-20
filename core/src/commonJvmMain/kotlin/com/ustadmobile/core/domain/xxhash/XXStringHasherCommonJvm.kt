@@ -4,7 +4,7 @@ import kotlinx.atomicfu.locks.ReentrantLock
 import kotlinx.atomicfu.locks.withLock
 import net.jpountz.xxhash.XXHashFactory
 
-class XXHashCommonJvm: XXHasher {
+class XXStringHasherCommonJvm: XXStringHasher {
 
     private val factory = XXHashFactory.fastestJavaInstance()
 
