@@ -7,7 +7,7 @@ import com.ustadmobile.lib.db.entities.VerbLangMapEntry
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Verb(
+data class XapiVerb(
     val id: String? = null,
 
     val display: Map<String, String>? = null,
@@ -18,7 +18,7 @@ data class VerbEntities(
     val verbLangMapEntries: List<VerbLangMapEntry>,
 )
 
-fun Verb.toVerbEntities(
+fun XapiVerb.toVerbEntities(
     xxHasher: XXStringHasher,
 ): VerbEntities {
     val verbIri = xapiRequireValidIRI(id)

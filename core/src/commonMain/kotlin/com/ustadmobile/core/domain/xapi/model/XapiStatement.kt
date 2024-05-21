@@ -3,7 +3,6 @@ package com.ustadmobile.core.domain.xapi.model
 import com.benasher44.uuid.uuidFrom
 import com.ustadmobile.core.domain.xapi.XapiSession
 import com.ustadmobile.core.domain.xapi.xapiRequireDurationOrNullAsLong
-import com.ustadmobile.core.domain.xapi.xapiRequireNotNullOrThrow
 import com.ustadmobile.core.domain.xapi.xapiRequireTimestampAsLong
 import com.ustadmobile.core.domain.xapi.xapiRequireValidIRI
 import com.ustadmobile.core.domain.xapi.xapiRequireValidUuidOrNull
@@ -23,7 +22,7 @@ const val XAPI_RESULT_EXTENSION_PROGRESS = "https://w3id.org/xapi/cmi5/result/ex
 data class XapiStatement(
     val id: String? = null,
     val actor: XapiActor,
-    val verb: Verb,
+    val verb: XapiVerb,
     @SerialName("object")
     val `object`: XapiStatementObject,
     val subStatement: XapiStatement? = null,
@@ -105,9 +104,7 @@ fun XapiStatement.toEntities(
                 ?.jsonPrimitive?.intOrNull
         ),
         actorEntities = actor.toEntities(stringHasher, primaryKeyManager, hasherFactory),
-        verbEntities = xapiRequireNotNullOrThrow(
-            verb, message = "Missing verb"
-        ).toVerbEntities(stringHasher),
+        verbEntities = verb.toVerbEntities(stringHasher),
     )
 }
 

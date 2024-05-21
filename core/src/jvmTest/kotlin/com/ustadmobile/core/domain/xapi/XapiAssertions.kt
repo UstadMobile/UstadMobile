@@ -4,6 +4,7 @@ import com.benasher44.uuid.Uuid
 import com.benasher44.uuid.uuidFrom
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.xapi.model.XapiActor
+import com.ustadmobile.core.domain.xapi.model.XapiVerb
 import com.ustadmobile.core.domain.xapi.model.XapiAgent
 import com.ustadmobile.core.domain.xapi.model.XapiGroup
 import com.ustadmobile.core.domain.xapi.model.XapiStatement
@@ -63,6 +64,36 @@ fun assertStatementStoredInDb(
             db = db,
             xxHasher = xxHasher
         )
+
+        assertVerbStoredInDb(
+            verb = statement.verb,
+            verbUid = statementInDb.statementVerbUid,
+            db = db,
+            xxHasher = xxHasher,
+        )
+    }
+}
+
+fun assertVerbStoredInDb(
+    verb: XapiVerb,
+    verbUid: Long,
+    db: UmAppDatabase,
+    xxHasher: XXStringHasher,
+) = runBlocking {
+    val verbInDb = db.verbDao.findByUid(verbUid)
+    assertNotNull(verbInDb, "Verb $verbUid is in database")
+    assertEquals(verb.id, verbInDb.verbUrlId)
+
+    val verbLangMapEntries = db.verbLangMapEntryDao.findByVerbUidAsync(verbUid)
+    verb.display?.forEach { displayEntry ->
+        val langMapEntity = verbLangMapEntries.firstOrNull {
+            it.vlmeLangCode == displayEntry.key
+        }
+
+        assertNotNull(langMapEntity,
+            "Verb ${verb.id} should have entity for langmap lang code ${displayEntry.key}")
+        assertEquals(xxHasher.hash(displayEntry.key), langMapEntity.vlmeLangHash)
+        assertEquals(displayEntry.value, langMapEntity.vlmeEntryString)
     }
 }
 
