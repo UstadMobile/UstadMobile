@@ -43,13 +43,25 @@ class XapiStatementResourceTest {
         )
     }
 
+    suspend fun storeStatementAndAssert(
+        resourcePath: String,
+        xapiSession: XapiSession,
+    ) : String {
+        val id = uuid4().toString()
+        val stmtJson = this::class.java.getResource(resourcePath)!!.readText()
+        val stmt = json.decodeFromString(XapiStatement.serializer(), stmtJson)
+        xapiStatementResource.put(
+            statement = stmt,
+            statementIdParam = id,
+            xapiSession = xapiSession
+        )
+        assertStatementStoredInDb(stmt.copy(id = id), db, xxHasher)
+
+        return id
+    }
+
     @Test
     fun givenStatementPut_whenGetCalled_thenShouldBeRetrieved() = runBlocking {
-        val id = uuid4().toString()
-        val stmtJson = this::class.java.getResource(
-            "/com/ustadmobile/core/domain/xapi/simple-statement.json"
-        )!!.readText()
-        val stmt = json.decodeFromString(XapiStatement.serializer(), stmtJson)
         val xapiSession = XapiSession(
             endpoint = endpoint,
             accountPersonUid = 42L,
@@ -58,13 +70,10 @@ class XapiStatementResourceTest {
             contentEntryUid = 0L,
         )
 
-        xapiStatementResource.put(
-            statement = stmt,
-            statementIdParam = id,
-            xapiSession = xapiSession
+        val id = storeStatementAndAssert(
+            resourcePath = "$RESOURCE_PATH/simple-statement.json",
+            xapiSession = xapiSession,
         )
-
-        assertStatementStoredInDb(stmt.copy(id = id), db, xxHasher)
 
         val retrieved = xapiStatementResource.get(
             xapiSession = xapiSession,
@@ -74,5 +83,22 @@ class XapiStatementResourceTest {
         assertEquals(1, retrieved.size)
     }
 
+    @Test
+    fun givenStatementWithGroupActor_whenPutCalled_thenShouldBeStored() = runBlocking {
+        val xapiSession = XapiSession(
+            endpoint = endpoint,
+            accountPersonUid = 42L,
+            accountUsername = "user",
+            clazzUid = 0L,
+            contentEntryUid = 0L,
+        )
+
+        storeStatementAndAssert("$RESOURCE_PATH/group-statement.json", xapiSession)
+        Unit
+    }
+
+    companion object {
+        const val RESOURCE_PATH = "/com/ustadmobile/core/domain/xapi"
+    }
 
 }

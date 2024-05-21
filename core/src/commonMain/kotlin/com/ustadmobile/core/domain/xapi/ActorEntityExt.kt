@@ -7,6 +7,6 @@ import com.ustadmobile.lib.db.entities.xapi.ActorEntity
  * as per the xAPI spec.
  */
 fun ActorEntity.isAnonymous(): Boolean {
-    return (actorOpenid == null && actorMbox == null && actorAccountName == null)
+    return (actorOpenid == null && actorMbox == null && actorAccountName == null && actorMbox_sha1sum == null)
 }
 

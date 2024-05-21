@@ -30,6 +30,7 @@ fun XapiActor.identifierHash(xxHasher: XXStringHasher) :Long {
     val idStr = when {
         account != null -> "${account?.name}@${account?.homePage}"
         mbox != null -> mbox
+        mbox_sha1sum != null -> mbox_sha1sum
         openid != null -> openid
         else -> null
     }
