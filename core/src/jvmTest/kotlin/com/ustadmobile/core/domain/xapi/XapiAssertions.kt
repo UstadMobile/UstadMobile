@@ -67,7 +67,7 @@ fun assertActorStoredInDb(
 ) = runBlocking {
     if(actor is XapiAgent) {
         val agentEntity = actor.toActorEntity(xxHasher)
-        val agentInDb = db.agentDao.findByUidAsync(agentEntity.actorUid)
+        val agentInDb = db.actorDao.findByUidAsync(agentEntity.actorUid)
         assertNotNull(agentInDb, "Agent is in database")
         assertEquals(actor.account?.name ?: "", agentInDb.actorAccountName ?: "")
         assertEquals(actor.mbox, agentInDb.actorMbox)

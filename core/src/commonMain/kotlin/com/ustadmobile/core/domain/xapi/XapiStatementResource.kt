@@ -4,6 +4,8 @@ import com.benasher44.uuid.Uuid
 import com.benasher44.uuid.uuidFrom
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.xapi.ext.insertOrUpdateActorsIfNameChanged
+import com.ustadmobile.core.domain.xapi.ext.insertOrUpdateIfLastModChanged
 import com.ustadmobile.core.domain.xapi.model.XapiAccount
 import com.ustadmobile.core.domain.xapi.model.XapiAgent
 import com.ustadmobile.core.domain.xapi.model.XapiStatement
@@ -13,7 +15,6 @@ import com.ustadmobile.core.domain.xxhash.XXStringHasher
 import com.ustadmobile.core.util.uuid.randomUuidAsString
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.ext.withDoorTransactionAsync
-import com.ustadmobile.door.util.systemTimeInMillis
 import kotlinx.datetime.Clock
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
@@ -73,22 +74,68 @@ class XapiStatementResource(
 
         repoOrDb.withDoorTransactionAsync {
             repoOrDb.statementDao.insertOrIgnoreListAsync(statementEntities.map { it.statementEntity } )
-            statementEntities.map { it.agentEntities }.flatMap { it.actors }
+            val actorEntities = statementEntities.map { it.actorEntities }
+            actorEntities.flatMap { it.agents }
                 .takeIf { it.isNotEmpty() }
                 ?.also { agents ->
                     //Name is the only property that could be updated on the Agent. All other
                     //properties are identifiers
-                    agents.forEach {
-                        repoOrDb.agentDao.updateIfNameChanged(
-                            uid = it.actorUid, name = it.actorName, updateTime = systemTimeInMillis()
-                        )
-                    }
-
-                    repoOrDb.agentDao.insertOrIgnoreListAsync(agents)
+                    repoOrDb.actorDao.insertOrUpdateActorsIfNameChanged(agents)
                 }
 
-            //Handle groups here - check for changes as per logic in XapiGroup.toGroupEntities
+            val groupEntities = actorEntities.flatMap { it.groups }
+            val existingGroupActorHashes = db.actorDao.findUidAndEtagByListAsync(
+                groupEntities.map { it.actorUid }
+            )
 
+            val allGroupMemberAgents = actorEntities.flatMap { it.groupMemberAgents }
+                .associateBy { it.actorUid }
+
+            actorEntities.flatMap { it.groups }.forEach { groupActorEntity ->
+                /* A group can be an identified group or anonymous group
+                 * See XapiGroup.toGroupEntities for details on how this is handled.
+                 */
+                val existingEtagAndLct = existingGroupActorHashes.firstOrNull {
+                    it.actorUid == groupActorEntity.actorUid
+                }
+
+                val groupIsNewOrUpdated = if(!groupActorEntity.isAnonymous()) {
+                    groupActorEntity.actorEtag != existingEtagAndLct?.actorEtag
+                }else {
+                    true
+                }
+
+                val groupMemberJoins = actorEntities.flatMap {
+                    it.groupMemberJoins
+                }.filter {
+                    it.gmajGroupActorUid == groupActorEntity.actorUid
+                }
+
+                val groupMemberActors = groupMemberJoins.mapNotNull {
+                    allGroupMemberAgents[it.gmajMemberActorUid]
+                }
+
+                //Just in case we don't have the actor entity locally, run insert or ignore
+                repoOrDb.actorDao.insertOrUpdateActorsIfNameChanged(groupMemberActors)
+
+                if(!groupIsNewOrUpdated && existingEtagAndLct != null) {
+                    //Run only insert or ignore statements for GroupMemberJoin. Set the last mod
+                    //time on all group member joins to match the group actor's last mod time.
+
+                    //Do not update the ActorEntity for the group itself - it hasn't changed.
+
+                    repoOrDb.groupMemberActorJoinDao.insertOrUpdateIfLastModChanged(
+                        memberJoins = groupMemberJoins.map {
+                            it.copy(gmajLastMod = existingEtagAndLct.actorLct)
+                        },
+                        lastModTime = existingEtagAndLct.actorLct,
+                    )
+                }else {
+                    //Group is new or has been updated.
+                    repoOrDb.actorDao.upsertListAsync(listOf(groupActorEntity))
+                    repoOrDb.groupMemberActorJoinDao.upsertListAsync(groupMemberJoins)
+                }
+            }
 
             repoOrDb.verbDao.insertOrIgnoreAsync(
                 statementEntities.map { it.verbEntities.verbEntity }

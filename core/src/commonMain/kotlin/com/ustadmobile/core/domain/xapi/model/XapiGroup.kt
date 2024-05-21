@@ -87,7 +87,9 @@ fun XapiGroup.toGroupEntities(
 
 
     return ActorEntities(
-        actors = memberActors.map { it.second },
+        groups = listOf(groupActor),
+        agents = emptyList(),
+        groupMemberAgents = memberActors.map { it.second },
         groupMemberJoins = memberActors.map {
             GroupMemberActorJoin(
                 gmajGroupActorUid = groupActor.actorUid,

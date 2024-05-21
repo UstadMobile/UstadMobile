@@ -2,6 +2,8 @@ package com.ustadmobile.core.db
 
 import com.ustadmobile.door.annotation.DoorDatabase
 import com.ustadmobile.core.db.dao.*
+import com.ustadmobile.core.db.dao.xapi.ActorDao
+import com.ustadmobile.core.db.dao.xapi.GroupMemberActorJoinDao
 import com.ustadmobile.door.SyncNode
 import com.ustadmobile.door.entities.*
 import com.ustadmobile.door.room.RoomDatabase
@@ -171,7 +173,7 @@ expect abstract class UmAppDatabase : RoomDatabase {
 
     abstract val stateContentDao: StateContentDao
 
-    abstract val agentDao: ActorDao
+    abstract val actorDao: ActorDao
 
     abstract val clazzLogAttendanceRecordDao: ClazzLogAttendanceRecordDao
     abstract val clazzLogDao: ClazzLogDao
@@ -265,5 +267,7 @@ expect abstract class UmAppDatabase : RoomDatabase {
     abstract val studentResultDao: StudentResultDao
 
     abstract val verbLangMapEntryDao: VerbLangMapEntryDao
+
+    abstract val groupMemberActorJoinDao: GroupMemberActorJoinDao
 
 }

@@ -1,9 +1,11 @@
-package com.ustadmobile.core.db.dao
+package com.ustadmobile.core.db.dao.xapi
 
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.ustadmobile.door.annotation.*
+import com.ustadmobile.door.annotation.DoorDao
+import com.ustadmobile.door.annotation.Repository
+import com.ustadmobile.lib.db.composites.ActorUidEtagAndLastMod
 import com.ustadmobile.lib.db.entities.xapi.ActorEntity
 
 @DoorDao
@@ -13,11 +15,15 @@ expect abstract class ActorDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     abstract suspend fun insertOrIgnoreListAsync(entities: List<ActorEntity>)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract suspend fun upsertListAsync(entities: List<ActorEntity>)
+
     @Query("""
         UPDATE ActorEntity
            SET actorName = :name,
                actorLct = :updateTime
-         WHERE actorUid = :uid     
+         WHERE actorUid = :uid
+           AND ActorEntity.actorName != :name
     """)
     abstract suspend fun updateIfNameChanged(
         uid: Long,
@@ -31,5 +37,12 @@ expect abstract class ActorDao {
          WHERE ActorEntity.actorUid = :uid
     """)
     abstract suspend fun findByUidAsync(uid: Long): ActorEntity
+
+    @Query("""
+        SELECT ActorEntity.actorUid, ActorEntity.actorEtag
+          FROM ActorEntity
+         WHERE ActorEntity.actorUid IN (:uidList)
+    """)
+    abstract suspend fun findUidAndEtagByListAsync(uidList: List<Long>): List<ActorUidEtagAndLastMod>
 
 }

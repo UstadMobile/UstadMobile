@@ -28,6 +28,9 @@ import kotlinx.serialization.Serializable
  * Represents an xAPI Actor (Agent or Group). Various properties on a Statement are an actor that
  * can be a group or agent e.g. the actor themselves, instructor / team context, etc.
  *
+ * Where the ActorEntity represents a group, then GroupMemberActorJoin is used to join the group
+ * ActorEntity to a list of agent ActorEntities (members).
+ *
  * @param actorUid For an agent or identified group, this is the XXHash64 of the mbox, openId, or
  *        "agentAccountName@agentaHomePage" depending on which type
  *        of identifier is used. For an anonymous group this uses the door primary key manager.

@@ -39,7 +39,7 @@ data class XapiStatement(
 
 data class StatementEntities(
     val statementEntity: StatementEntity,
-    val agentEntities: ActorEntities,
+    val actorEntities: ActorEntities,
     val verbEntities: VerbEntities,
 )
 
@@ -100,7 +100,7 @@ fun XapiStatement.toEntities(
             extensionProgress = result?.extensions?.get(XAPI_RESULT_EXTENSION_PROGRESS)
                 ?.jsonPrimitive?.intOrNull
         ),
-        agentEntities = actor.toEntities(stringHasher, primaryKeyManager, hasherFactory),
+        actorEntities = actor.toEntities(stringHasher, primaryKeyManager, hasherFactory),
         verbEntities = xapiRequireNotNullOrThrow(
             verb, message = "Missing verb"
         ).toVerbEntities(stringHasher),
