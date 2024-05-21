@@ -88,8 +88,7 @@ fun ClazzAssignmentEditScreen(
             UstadClickableTextField(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .defaultItemPadding()
-                    .testTag("groups"),
+                    .defaultItemPadding(),
                 value = uiState.entity?.assignmentCourseGroupSetName
                     ?: "(${stringResource(MR.strings.unset)})",
                 label = { Text(stringResource(MR.strings.groups) + "*") },
@@ -99,7 +98,8 @@ fun ClazzAssignmentEditScreen(
                     Text(uiState.groupSetError ?: stringResource(MR.strings.required))
                 },
                 isError = uiState.groupSetError != null,
-                onValueChange = {}
+                onValueChange = {},
+                clickableTestTag = "groups",
             )
         }
 
