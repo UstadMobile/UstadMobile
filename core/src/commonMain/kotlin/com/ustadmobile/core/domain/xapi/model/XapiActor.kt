@@ -53,8 +53,7 @@ object XapiActorSerializer: JsonContentPolymorphicSerializer<XapiActor>(XapiActo
 }
 
 data class ActorEntities(
-    val agents: List<ActorEntity>,
-    val groups: List<ActorEntity> = emptyList(),
+    val actor: ActorEntity,
     val groupMemberAgents: List<ActorEntity> = emptyList(),
     val groupMemberJoins: List<GroupMemberActorJoin> = emptyList(),
 )
@@ -65,7 +64,7 @@ fun XapiActor.toEntities(
     hasherFactory: XXHasher64Factory,
 ): ActorEntities {
     return when(this) {
-        is XapiAgent -> ActorEntities(agents = listOf(this.toActorEntity(stringHasher)))
+        is XapiAgent -> ActorEntities(actor =toActorEntity(stringHasher))
         is XapiGroup -> this.toGroupEntities(stringHasher, primaryKeyManager, hasherFactory)
     }
 }

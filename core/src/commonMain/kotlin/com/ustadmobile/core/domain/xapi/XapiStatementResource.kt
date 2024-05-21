@@ -15,6 +15,7 @@ import com.ustadmobile.core.domain.xxhash.XXStringHasher
 import com.ustadmobile.core.util.uuid.randomUuidAsString
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.ext.withDoorTransactionAsync
+import com.ustadmobile.lib.db.entities.xapi.ActorEntity
 import kotlinx.datetime.Clock
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
@@ -75,7 +76,8 @@ class XapiStatementResource(
         repoOrDb.withDoorTransactionAsync {
             repoOrDb.statementDao.insertOrIgnoreListAsync(statementEntities.map { it.statementEntity } )
             val actorEntities = statementEntities.map { it.actorEntities }
-            actorEntities.flatMap { it.agents }
+            actorEntities.map { it.actor }
+                .filter { it.actorObjectType == ActorEntity.OBJECT_TYPE_AGENT }
                 .takeIf { it.isNotEmpty() }
                 ?.also { agents ->
                     //Name is the only property that could be updated on the Agent. All other
@@ -83,7 +85,9 @@ class XapiStatementResource(
                     repoOrDb.actorDao.insertOrUpdateActorsIfNameChanged(agents)
                 }
 
-            val groupEntities = actorEntities.flatMap { it.groups }
+            val groupEntities = actorEntities.map { it.actor }
+                .filter { it.actorObjectType == ActorEntity.OBJECT_TYPE_GROUP }
+
             val existingGroupActorHashes = db.actorDao.findUidAndEtagByListAsync(
                 groupEntities.map { it.actorUid }
             )
@@ -91,7 +95,7 @@ class XapiStatementResource(
             val allGroupMemberAgents = actorEntities.flatMap { it.groupMemberAgents }
                 .associateBy { it.actorUid }
 
-            actorEntities.flatMap { it.groups }.forEach { groupActorEntity ->
+            groupEntities.forEach { groupActorEntity ->
                 /* A group can be an identified group or anonymous group
                  * See XapiGroup.toGroupEntities for details on how this is handled.
                  */

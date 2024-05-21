@@ -28,5 +28,6 @@ fun XapiAgent.toActorEntity(
         actorAccountHomePage = account?.homePage,
         actorLct = lastModifiedTime,
         actorEtag = name?.let { xxHasher.hash(it) } ?: 0,
+        actorObjectType = ActorEntity.OBJECT_TYPE_AGENT,
     )
 }

@@ -5,8 +5,9 @@ import com.benasher44.uuid.uuidFrom
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.xapi.model.XapiActor
 import com.ustadmobile.core.domain.xapi.model.XapiAgent
+import com.ustadmobile.core.domain.xapi.model.XapiGroup
 import com.ustadmobile.core.domain.xapi.model.XapiStatement
-import com.ustadmobile.core.domain.xapi.model.toActorEntity
+import com.ustadmobile.core.domain.xapi.model.identifierHash
 import com.ustadmobile.core.domain.xxhash.XXStringHasher
 import kotlinx.coroutines.runBlocking
 import kotlin.test.assertEquals
@@ -56,21 +57,38 @@ fun assertStatementStoredInDb(
                 statementInDb.contentEntryRoot)
         }
 
-        assertActorStoredInDb(statement.actor, db, xxHasher)
+        assertActorStoredInDb(
+            actor = statement.actor,
+            actorUid = statementInDb.statementActorUid,
+            db = db,
+            xxHasher = xxHasher
+        )
     }
 }
 
+/**
+ * @param actorUid Normally this is the identifier hash, however in the case of an anonymous group
+ * it may be a generated key.
+ */
 fun assertActorStoredInDb(
     actor: XapiActor,
+    actorUid: Long,
     db: UmAppDatabase,
     xxHasher: XXStringHasher,
 ) = runBlocking {
+    val agentInDb = db.actorDao.findByUidAsync(actorUid)
+    assertNotNull(agentInDb, "Agent is in database")
+
     if(actor is XapiAgent) {
-        val agentEntity = actor.toActorEntity(xxHasher)
-        val agentInDb = db.actorDao.findByUidAsync(agentEntity.actorUid)
-        assertNotNull(agentInDb, "Agent is in database")
         assertEquals(actor.account?.name ?: "", agentInDb.actorAccountName ?: "")
+        assertEquals(actor.account?.homePage ?: "", agentInDb.actorAccountHomePage ?: "")
         assertEquals(actor.mbox, agentInDb.actorMbox)
         assertEquals(actor.openid, agentInDb.actorOpenid)
+    }else if(actor is XapiGroup) {
+        val membersInDb = db.actorDao.findGroupMembers(actorUid)
+        actor.member.forEach { member ->
+            val memberInDb = membersInDb.firstOrNull { it.actorUid == member.identifierHash(xxHasher) }
+            assertNotNull(memberInDb, "Member $member was found in db when querying for group members")
+        }
     }
 }

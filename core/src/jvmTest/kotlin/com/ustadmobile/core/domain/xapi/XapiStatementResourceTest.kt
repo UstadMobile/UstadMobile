@@ -46,7 +46,9 @@ class XapiStatementResourceTest {
     @Test
     fun givenStatementPut_whenGetCalled_thenShouldBeRetrieved() = runBlocking {
         val id = uuid4().toString()
-        val stmtJson = this::class.java.getResource("/com/ustadmobile/core/domain/xapi/simple-statement.json")!!.readText()
+        val stmtJson = this::class.java.getResource(
+            "/com/ustadmobile/core/domain/xapi/simple-statement.json"
+        )!!.readText()
         val stmt = json.decodeFromString(XapiStatement.serializer(), stmtJson)
         val xapiSession = XapiSession(
             endpoint = endpoint,

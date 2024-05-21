@@ -61,6 +61,9 @@ fun XapiStatement.toEntities(
         context?.registration, errorMessage = "Invalid context registration uuid"
     )
 
+    val statementActorEntities = actor.toEntities(stringHasher, primaryKeyManager,
+        hasherFactory)
+
     return StatementEntities(
         statementEntity = StatementEntity(
             statementIdHi = statementUuid.mostSignificantBits,
@@ -73,6 +76,7 @@ fun XapiStatement.toEntities(
             }else {
                 0
             },
+            statementActorUid = statementActorEntities.actor.actorUid,
             statementVerbUid = stringHasher.hash(
                 xapiRequireValidIRI(verb.id,
                     "Statement $statementUuid VerbID ${verb.id} is not a valid IRI"

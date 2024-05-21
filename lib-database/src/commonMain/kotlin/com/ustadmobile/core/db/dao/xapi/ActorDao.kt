@@ -36,7 +36,7 @@ expect abstract class ActorDao {
           FROM ActorEntity
          WHERE ActorEntity.actorUid = :uid
     """)
-    abstract suspend fun findByUidAsync(uid: Long): ActorEntity
+    abstract suspend fun findByUidAsync(uid: Long): ActorEntity?
 
     @Query("""
         SELECT ActorEntity.actorUid, ActorEntity.actorEtag
@@ -44,5 +44,22 @@ expect abstract class ActorDao {
          WHERE ActorEntity.actorUid IN (:uidList)
     """)
     abstract suspend fun findUidAndEtagByListAsync(uidList: List<Long>): List<ActorUidEtagAndLastMod>
+
+    @Query("""
+        SELECT ActorEntity.*
+          FROM ActorEntity
+         WHERE ActorEntity.actorUid IN (
+               SELECT GroupMemberActorJoin.gmajMemberActorUid
+                 FROM GroupMemberActorJoin
+                WHERE GroupMemberActorJoin.gmajGroupActorUid = :groupActorUid
+                  AND GroupMemberActorJoin.gmajLastMod = (
+                      SELECT GroupActorEntity.actorLct
+                        FROM ActorEntity GroupActorEntity
+                       WHERE GroupActorEntity.actorUid = :groupActorUid)
+              ) 
+    """)
+    abstract suspend fun findGroupMembers(groupActorUid: Long): List<ActorEntity>
+
+
 
 }
