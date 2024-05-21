@@ -98,3 +98,5 @@ fun <T> List<T>.duplicates() : List<T> {
         count { it == item }  > 1
     }
 }
+
+fun <T> List<T>?.toEmptyIfNull(): List<T> = this ?: emptyList()

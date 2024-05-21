@@ -1,15 +1,10 @@
 package com.ustadmobile.util.test.ext
 
-import com.soywiz.klock.Date
-import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.door.util.randomUuid
-import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.lib.db.entities.xapi.StatementEntity
 
 
 fun UmAppDatabase.insertTestStatementsForReports() {
-
+/*
     val firstPerson = Person().apply {
         firstNames = "Bobb"
         lastName = "Ross"
@@ -180,29 +175,29 @@ fun UmAppDatabase.insertTestStatementsForReports() {
     khanclass2Join.cepcjChildContentEntryUid = khanclass2.contentEntryUid
     khanclass2Join.cepcjUid = contentEntryParentChildJoinDao.insert(khanclass2Join)
 
-    var firstObject = XObjectEntity()
+    var firstObject = ActivityEntity()
     firstObject.objectId = "hello"
     
-    firstObject.xObjectUid =  xObjectDao.insert(firstObject)
+    firstObject.activityUid =  activityEntityDao.insert(firstObject)
 
 
-    var firstObjectLangMap = XLangMapEntry(0, firstObject.xObjectUid, 0, 0, khanclass1.title!!)
+    var firstObjectLangMap = XLangMapEntry(0, firstObject.activityUid, 0, 0, khanclass1.title!!)
     firstObjectLangMap.languageLangMapUid = xLangMapEntryDao.insert(firstObjectLangMap)
 
-    var secondObject = XObjectEntity()
+    var secondObject = ActivityEntity()
     secondObject.objectId = "world"
-    secondObject.xObjectUid =  xObjectDao.insert(secondObject)
+    secondObject.activityUid =  activityEntityDao.insert(secondObject)
 
 
-    var secondObjectLangMap = XLangMapEntry(0, secondObject.xObjectUid, 0, 0, khanclass2.title!!)
+    var secondObjectLangMap = XLangMapEntry(0, secondObject.activityUid, 0, 0, khanclass2.title!!)
     secondObjectLangMap.languageLangMapUid = xLangMapEntryDao.insert(secondObjectLangMap)
 
-    var thirdObject = XObjectEntity()
+    var thirdObject = ActivityEntity()
     thirdObject.objectId = "now"
-    thirdObject.xObjectUid =  xObjectDao.insert(thirdObject)
+    thirdObject.activityUid =  activityEntityDao.insert(thirdObject)
 
 
-    var thirdObjectLangMap = XLangMapEntry(0, thirdObject.xObjectUid, 0, 0, khanclass1.title!!)
+    var thirdObjectLangMap = XLangMapEntry(0, thirdObject.activityUid, 0, 0, khanclass1.title!!)
     thirdObjectLangMap.languageLangMapUid = xLangMapEntryDao.insert(thirdObjectLangMap)
     
     StatementEntity().apply {
@@ -212,7 +207,7 @@ fun UmAppDatabase.insertTestStatementsForReports() {
         resultScoreScaled = 50f
         
         statementVerbUid = completedVerb.verbUid
-        xObjectUid = firstObject.xObjectUid
+        xObjectUid = firstObject.activityUid
         statementContentEntryUid = khanclass1.contentEntryUid
         timestamp = DateTime(2019, 6, 11).unixMillisLong
         contentEntryRoot = true
@@ -225,7 +220,7 @@ fun UmAppDatabase.insertTestStatementsForReports() {
         resultCompletion = true
         
         statementVerbUid = passedVerb.verbUid
-        xObjectUid = firstObject.xObjectUid
+        xObjectUid = firstObject.activityUid
         statementContentEntryUid = khanclass1.contentEntryUid
 
         timestamp = DateTime(2019, 5, 1).unixMillisLong
@@ -240,7 +235,7 @@ fun UmAppDatabase.insertTestStatementsForReports() {
         resultScoreScaled = 50f
         resultCompletion = true
         statementVerbUid = completedVerb.verbUid
-        xObjectUid = secondObject.xObjectUid
+        xObjectUid = secondObject.activityUid
         statementContentEntryUid = khanclass2.contentEntryUid
         timestamp = DateTime(2019, 4, 10).unixMillisLong
         contentEntryRoot = true
@@ -254,7 +249,7 @@ fun UmAppDatabase.insertTestStatementsForReports() {
         resultScoreScaled = 20f
         resultCompletion = true
         statementVerbUid = completedVerb.verbUid
-        xObjectUid = secondObject.xObjectUid
+        xObjectUid = secondObject.activityUid
         statementContentEntryUid = khanclass2.contentEntryUid
         timestamp = DateTime(2019, 6, 30).unixMillisLong
         contentEntryRoot = true
@@ -269,7 +264,7 @@ fun UmAppDatabase.insertTestStatementsForReports() {
         resultCompletion = true
         
         statementVerbUid = failedVerb.verbUid
-        xObjectUid = firstObject.xObjectUid
+        xObjectUid = firstObject.activityUid
         statementContentEntryUid = khanclass1.contentEntryUid
         timestamp = DateTime(2019, 7, 10).unixMillisLong
         contentEntryRoot = true
@@ -283,7 +278,7 @@ fun UmAppDatabase.insertTestStatementsForReports() {
         resultScoreScaled = 25f
         resultCompletion = true
         statementVerbUid = completedVerb.verbUid
-        xObjectUid = secondObject.xObjectUid
+        xObjectUid = secondObject.activityUid
         statementContentEntryUid = khanclass2.contentEntryUid
         timestamp = DateTime(2019, 5, 25).unixMillisLong
         contentEntryRoot = true
@@ -296,7 +291,7 @@ fun UmAppDatabase.insertTestStatementsForReports() {
         resultScoreScaled = 5f
         resultCompletion = true
         statementVerbUid = completedVerb.verbUid
-        xObjectUid = firstObject.xObjectUid
+        xObjectUid = firstObject.activityUid
         statementContentEntryUid = khanclass1.contentEntryUid
         timestamp = DateTime(2019, 6, 11).unixMillisLong
         contentEntryRoot = true
@@ -311,10 +306,10 @@ fun UmAppDatabase.insertTestStatementsForReports() {
             resultCompletion = false
             
             statementVerbUid = completedVerb.verbUid
-            xObjectUid = thirdObject.xObjectUid
+            xObjectUid = thirdObject.activityUid
             statementContentEntryUid = khanclass1.contentEntryUid
             timestamp = DateTime(2019, 6, 11).unixMillisLong
         }
-    }
+    }*/
 }
 

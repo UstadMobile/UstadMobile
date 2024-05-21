@@ -1,15 +1,16 @@
-package com.ustadmobile.lib.db.entities
+package com.ustadmobile.lib.db.entities.xapi
 
-import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
+import com.ustadmobile.lib.db.entities.TRIGGER_CONDITION_WHERE_NEWER
+import com.ustadmobile.lib.db.entities.TRIGGER_UPSERT
 import kotlinx.serialization.Serializable
 
 @Entity
 @Serializable
 @ReplicateEntity(
-    tableId =  XObjectEntity.TABLE_ID,
+    tableId = ActivityEntity.TABLE_ID,
     remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW,
 )
 @Triggers(arrayOf(
@@ -23,28 +24,26 @@ import kotlinx.serialization.Serializable
  )
 ))
 /**
- * @param correctResponsePattern the JSON of the correct responses pattern (array of strings)
+ * @param actCorrectResponsePatterns the JSON of the correct responses pattern (array of strings)
  */
-class XObjectEntity(
+data class ActivityEntity(
 
     @PrimaryKey
-    var xObjectUid: Long = 0,
+    var actUid: Long = 0,
 
-    var objectType: String? = null,
+    var actIdIri: String? = null,
 
-    var objectId: String? = null,
+    var actType: String? = null,
 
-    var definitionType: String? = null,
+    var actMoreInfo: String? = null,
 
-    var interactionType: String? = null,
+    var actInteractionType: String? = null,
 
-    var definitionMoreInfo: String? = null,
-
-    var correctResponsePattern: String? = null,
+    var actCorrectResponsePatterns: String? = null,
 
     @ReplicateLastModified
     @ReplicateEtag
-    var xObjectLct: Long = 0,
+    var actLct: Long = 0,
 
 ) {
 

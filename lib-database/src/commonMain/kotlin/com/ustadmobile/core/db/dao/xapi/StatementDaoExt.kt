@@ -1,4 +1,4 @@
-package com.ustadmobile.core.db.dao
+package com.ustadmobile.core.db.dao.xapi
 
 import com.ustadmobile.door.SimpleDoorQuery
 import com.ustadmobile.lib.db.entities.StatementReportData

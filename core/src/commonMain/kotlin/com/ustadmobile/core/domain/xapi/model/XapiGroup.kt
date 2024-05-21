@@ -7,6 +7,7 @@ import com.ustadmobile.door.DoorPrimaryKeyManager
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.xapi.ActorEntity
 import com.ustadmobile.lib.db.entities.xapi.GroupMemberActorJoin
+import com.ustadmobile.lib.db.entities.xapi.XapiEntityObjectTypeFlags
 import kotlinx.serialization.Serializable
 
 /**
@@ -74,7 +75,7 @@ fun XapiGroup.toGroupEntities(
         }else {
             identifierHash(stringHasher)
         },
-        actorObjectType = ActorEntity.OBJECT_TYPE_GROUP,
+        actorObjectType = XapiEntityObjectTypeFlags.GROUP,
         actorName = name,
         actorMbox = mbox,
         actorMbox_sha1sum = mbox_sha1sum,

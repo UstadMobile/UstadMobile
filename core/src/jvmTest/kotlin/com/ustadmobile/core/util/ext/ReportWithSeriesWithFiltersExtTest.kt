@@ -19,7 +19,7 @@ import org.junit.Test
 import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.singleton
-import com.ustadmobile.core.db.dao.getResults
+import com.ustadmobile.core.db.dao.xapi.getResults
 import com.ustadmobile.door.ext.withDoorTransaction
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 

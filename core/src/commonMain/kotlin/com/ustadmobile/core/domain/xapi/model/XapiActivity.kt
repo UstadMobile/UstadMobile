@@ -1,10 +1,15 @@
 package com.ustadmobile.core.domain.xapi.model
 
+import com.ustadmobile.core.domain.xapi.model.XapiActivity.Companion.PROPNAME_NAME
 import com.ustadmobile.core.domain.xxhash.XXStringHasher
-import com.ustadmobile.lib.db.entities.XObjectInteractionEntity
-import com.ustadmobile.lib.db.entities.XObjectLangMapEntry
+import com.ustadmobile.core.util.ext.toEmptyIfNull
+import com.ustadmobile.lib.db.entities.xapi.ActivityEntity
+import com.ustadmobile.lib.db.entities.xapi.ActivityInteractionEntity
+import com.ustadmobile.lib.db.entities.xapi.ActivityLangMapEntry
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 
 /**
@@ -34,31 +39,50 @@ data class XapiActivity(
         val id: String? = null,
         val description: Map<String, String>? = null
     )
+
+    companion object {
+
+        const val PROPNAME_NAME = "name"
+
+        const val PROPNAME_DESCRIPTION = "description"
+
+    }
 }
 
-data class XObjectInteractionEntityAndLangMapEntries(
-    val entity: XObjectInteractionEntity,
-    val langMapEntries: List<XObjectLangMapEntry>,
+data class ActivityEntities(
+    val activityEntity: ActivityEntity,
+    val activityLangMapEntries: List<ActivityLangMapEntry>,
+    val activityInteractionEntities: List<ActivityInteractionEntity>,
 )
 
-/**
- * @param property the property for this interaction on the definition e.g.
- * as per XObjectInteractionEntity.PROP_ constants.
- */
-fun XapiActivity.Interaction.toEntity(
-    xxHasher: XXStringHasher,
-    xObjectUid: Long,
-    property: Int
-) : XObjectInteractionEntityAndLangMapEntries {
+fun XapiActivity?.toEntities(
+    id: String,
+    stringHasher: XXStringHasher,
+    json: Json,
+): ActivityEntities {
+    val activityUid = stringHasher.hash(id)
 
-    return XObjectInteractionEntityAndLangMapEntries(
-        entity = XObjectInteractionEntity(
-            xoieObjectUid = xObjectUid,
-            xoieIdHash = xxHasher.hash("$property$id"),
-            xoieProp = property,
-            xoieId = id,
+    fun Map<String, String>.toLangMapEntries(propName: String) = entries.map { (lang, text) ->
+        ActivityLangMapEntry(
+            almeActivityUid = activityUid,
+            almeHash = stringHasher.hash("$propName-$lang"),
+            almeLangCode = lang,
+            almeEntry = text,
+        )
+    }
+
+    return ActivityEntities(
+        activityEntity = ActivityEntity(
+            actUid = activityUid,
+            actIdIri = id,
+            actType = this?.type,
+            actMoreInfo = this?.moreInfo,
+            actInteractionType = this?.interactionType,
+            actCorrectResponsePatterns = this?.correctResponsePattern?.let { json.encodeToString(it) },
         ),
-        langMapEntries = emptyList(),
+        activityLangMapEntries =
+            this?.name?.toLangMapEntries(PROPNAME_NAME).toEmptyIfNull() +
+            this?.description?.toLangMapEntries(XapiActivity.PROPNAME_DESCRIPTION).toEmptyIfNull(),
+        activityInteractionEntities = emptyList(),
     )
-
 }

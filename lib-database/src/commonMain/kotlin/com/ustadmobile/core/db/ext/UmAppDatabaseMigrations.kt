@@ -1488,6 +1488,22 @@ val MIGRATION_178_179 = DoorMigrationStatementList(178, 179) { db ->
     }
 }
 
+val MIGRATION_179_180 = DoorMigrationStatementList(179, 180) { db ->
+    buildList {
+        add("DROP TABLE XObjectEntity")
+        add("DROP TABLE StatementEntity")
+        add("DROP TABLE ContextXObjectStatementJoin")
+
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS ActivityEntity (  actUid  INTEGER  PRIMARY KEY  NOT NULL , actIdIri  TEXT , actType  TEXT , actMoreInfo  TEXT , actInteractionType  TEXT , actCorrectResponsePatterns  TEXT , actLct  INTEGER  NOT NULL )")
+            add("CREATE TABLE IF NOT EXISTS StatementEntity (  statementIdHi  INTEGER  NOT NULL , statementIdLo  INTEGER  NOT NULL , statementActorPersonUid  INTEGER  NOT NULL , statementVerbUid  INTEGER  NOT NULL , statementObjectType  INTEGER  NOT NULL , statementObjectUid1  INTEGER  NOT NULL , statementObjectUid2  INTEGER  NOT NULL , statementActorUid  INTEGER  NOT NULL , instructorUid  INTEGER  NOT NULL , authorityUid  INTEGER  NOT NULL , teamUid  INTEGER  NOT NULL , resultCompletion  INTEGER , resultSuccess  INTEGER , resultScoreScaled  REAl , resultScoreRaw  REAl , resultScoreMin  REAl , resultScoreMax  REAl , resultDuration  INTEGER , resultResponse  TEXT , timestamp  INTEGER  NOT NULL , stored  INTEGER  NOT NULL , contextRegistrationHi  INTEGER  NOT NULL , contextRegistrationLo  INTEGER  NOT NULL , contextPlatform  TEXT , contextStatementRefIdHi  INTEGER  NOT NULL , contextStatementRefIdLo  INTEGER  NOT NULL , fullStatement  TEXT , statementLct  INTEGER  NOT NULL , extensionProgress  INTEGER , contentEntryRoot  INTEGER  NOT NULL , statementContentEntryUid  INTEGER  NOT NULL , statementLearnerGroupUid  INTEGER  NOT NULL , statementClazzUid  INTEGER  NOT NULL , statementCbUid  INTEGER  NOT NULL , statementDoorNode  INTEGER  NOT NULL , PRIMARY KEY (statementIdHi, statementIdLo) )")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS ActivityEntity (  actUid  BIGINT  PRIMARY KEY  NOT NULL , actIdIri  TEXT , actType  TEXT , actMoreInfo  TEXT , actInteractionType  TEXT , actCorrectResponsePatterns  TEXT , actLct  BIGINT  NOT NULL )")
+            add("CREATE TABLE IF NOT EXISTS StatementEntity (  statementIdHi  BIGINT  NOT NULL , statementIdLo  BIGINT  NOT NULL , statementActorPersonUid  BIGINT  NOT NULL , statementVerbUid  BIGINT  NOT NULL , statementObjectType  INTEGER  NOT NULL , statementObjectUid1  BIGINT  NOT NULL , statementObjectUid2  BIGINT  NOT NULL , statementActorUid  BIGINT  NOT NULL , instructorUid  BIGINT  NOT NULL , authorityUid  BIGINT  NOT NULL , teamUid  BIGINT  NOT NULL , resultCompletion  BOOL , resultSuccess  BOOL , resultScoreScaled  FLOAT , resultScoreRaw  FLOAT , resultScoreMin  FLOAT , resultScoreMax  FLOAT , resultDuration  BIGINT , resultResponse  TEXT , timestamp  BIGINT  NOT NULL , stored  BIGINT  NOT NULL , contextRegistrationHi  BIGINT  NOT NULL , contextRegistrationLo  BIGINT  NOT NULL , contextPlatform  TEXT , contextStatementRefIdHi  BIGINT  NOT NULL , contextStatementRefIdLo  BIGINT  NOT NULL , fullStatement  TEXT , statementLct  BIGINT  NOT NULL , extensionProgress  INTEGER , contentEntryRoot  BOOL  NOT NULL , statementContentEntryUid  BIGINT  NOT NULL , statementLearnerGroupUid  BIGINT  NOT NULL , statementClazzUid  BIGINT  NOT NULL , statementCbUid  BIGINT  NOT NULL , statementDoorNode  BIGINT  NOT NULL , PRIMARY KEY (statementIdHi, statementIdLo) )")
+        }
+    }
+}
+
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_105_106, MIGRATION_106_107,
     MIGRATION_107_108, MIGRATION_108_109,
@@ -1504,7 +1520,7 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_165_166, MIGRATION_166_167, MIGRATION_167_168, MIGRATION_168_169,
     MIGRATION_170_171, MIGRATION_171_172, MIGRATION_172_173, MIGRATION_173_174,
     MIGRATION_174_175, MIGRATION_175_176, MIGRATION_176_177, MIGRATION_177_178,
-    MIGRATION_178_179,
+    MIGRATION_178_179, MIGRATION_179_180,
 )
 
 

@@ -1,10 +1,11 @@
-package com.ustadmobile.lib.db.entities
+package com.ustadmobile.core.db.dao.xapi
 
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.ustadmobile.door.annotation.DoorDao
 import com.ustadmobile.door.annotation.Repository
+import com.ustadmobile.lib.db.entities.xapi.VerbLangMapEntry
 
 @DoorDao
 @Repository

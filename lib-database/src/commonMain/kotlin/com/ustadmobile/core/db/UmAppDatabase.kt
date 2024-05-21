@@ -2,8 +2,12 @@ package com.ustadmobile.core.db
 
 import com.ustadmobile.door.annotation.DoorDatabase
 import com.ustadmobile.core.db.dao.*
+import com.ustadmobile.core.db.dao.xapi.ActivityEntityDao
 import com.ustadmobile.core.db.dao.xapi.ActorDao
 import com.ustadmobile.core.db.dao.xapi.GroupMemberActorJoinDao
+import com.ustadmobile.core.db.dao.xapi.StatementDao
+import com.ustadmobile.core.db.dao.xapi.VerbDao
+import com.ustadmobile.core.db.dao.xapi.VerbLangMapEntryDao
 import com.ustadmobile.door.SyncNode
 import com.ustadmobile.door.entities.*
 import com.ustadmobile.door.room.RoomDatabase
@@ -11,6 +15,9 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.xapi.ActorEntity
 import com.ustadmobile.lib.db.entities.xapi.GroupMemberActorJoin
 import com.ustadmobile.lib.db.entities.xapi.StatementEntity
+import com.ustadmobile.lib.db.entities.xapi.VerbEntity
+import com.ustadmobile.lib.db.entities.xapi.VerbLangMapEntry
+import com.ustadmobile.lib.db.entities.xapi.ActivityEntity
 
 @DoorDatabase(entities = [NetworkNode::class,
     ClazzLog::class, ClazzLogAttendanceRecord::class,
@@ -24,8 +31,8 @@ import com.ustadmobile.lib.db.entities.xapi.StatementEntity
     PersonPicture::class,
     ScrapeQueueItem::class, ScrapeRun::class, ConnectivityStatus::class,
     Container::class, ContainerEntry::class, ContainerEntryFile::class,
-    VerbEntity::class, XObjectEntity::class, StatementEntity::class,
-    ContextXObjectStatementJoin::class, ActorEntity::class,
+    VerbEntity::class, ActivityEntity::class, StatementEntity::class,
+    ActorEntity::class,
     StateEntity::class, StateContentEntity::class, XLangMapEntry::class,
     SyncNode::class, LocallyAvailableContainer::class, ContainerETag::class,
     School::class,
@@ -79,7 +86,7 @@ import com.ustadmobile.lib.db.entities.xapi.StatementEntity
     ReplicationOperation::class,
     PendingRepositorySession::class,
 
-], version = 179)
+], version = 180)
 expect abstract class UmAppDatabase : RoomDatabase {
 
     /*
@@ -159,15 +166,13 @@ expect abstract class UmAppDatabase : RoomDatabase {
 
     abstract val verbDao: VerbDao
 
-    abstract val xObjectDao: XObjectDao
+    abstract val activityEntityDao: ActivityEntityDao
 
     abstract val reportDao: ReportDao
 
     abstract val containerImportJobDao: ContainerImportJobDao
 
     abstract val statementDao: StatementDao
-
-    abstract val contextXObjectStatementJoinDao: ContextXObjectStatementJoinDao
 
     abstract val stateDao: StateDao
 

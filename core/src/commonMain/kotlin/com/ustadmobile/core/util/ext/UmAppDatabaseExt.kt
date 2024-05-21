@@ -3,7 +3,7 @@ package com.ustadmobile.core.util.ext
 import app.cash.paging.PagingSource
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.getResults
+import com.ustadmobile.core.db.dao.xapi.getResults
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.graph.LabelValueFormatter
 import com.ustadmobile.core.util.graph.MessageIdFormatter

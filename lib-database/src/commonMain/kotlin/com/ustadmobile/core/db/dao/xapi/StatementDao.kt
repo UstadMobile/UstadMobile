@@ -1,15 +1,19 @@
-package com.ustadmobile.core.db.dao
+package com.ustadmobile.core.db.dao.xapi
 
-import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.RawQuery
-import com.ustadmobile.door.*
-import com.ustadmobile.door.annotation.*
-import kotlinx.coroutines.flow.Flow
 import app.cash.paging.PagingSource
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.door.DoorQuery
+import com.ustadmobile.door.annotation.DoorDao
+import com.ustadmobile.door.annotation.QueryLiveTables
+import com.ustadmobile.door.annotation.Repository
+import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.StatementEntityAndDisplayDetails
+import com.ustadmobile.lib.db.entities.StatementReportData
+import com.ustadmobile.lib.db.entities.XLangMapEntry
 import com.ustadmobile.lib.db.entities.xapi.StatementEntity
+import kotlinx.coroutines.flow.Flow
 
 @DoorDao
 @Repository

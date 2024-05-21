@@ -1,9 +1,11 @@
-package com.ustadmobile.lib.db.entities
+package com.ustadmobile.lib.db.entities.xapi
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
-import com.ustadmobile.lib.db.entities.VerbEntity.Companion.TABLE_ID
+import com.ustadmobile.lib.db.entities.TRIGGER_CONDITION_WHERE_NEWER
+import com.ustadmobile.lib.db.entities.TRIGGER_UPSERT
+import com.ustadmobile.lib.db.entities.xapi.VerbEntity.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
 @Serializable

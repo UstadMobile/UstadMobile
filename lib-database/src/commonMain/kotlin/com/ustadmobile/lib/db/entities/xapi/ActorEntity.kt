@@ -5,6 +5,7 @@ import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.TRIGGER_CONDITION_WHERE_NEWER
 import com.ustadmobile.lib.db.entities.TRIGGER_UPSERT
+import com.ustadmobile.lib.db.entities.xapi.XapiEntityObjectTypeFlags.AGENT
 import kotlinx.serialization.Serializable
 
 @Entity
@@ -63,14 +64,11 @@ data class ActorEntity(
     @ReplicateLastModified(autoSet = false)
     var actorLct: Long = 0,
 
-    var actorObjectType: Int = OBJECT_TYPE_AGENT,
+    var actorObjectType: Int = AGENT,
 ) {
 
     companion object {
 
-        const val OBJECT_TYPE_AGENT = 1
-
-        const val OBJECT_TYPE_GROUP = 2
 
         const val TABLE_ID = 68
     }

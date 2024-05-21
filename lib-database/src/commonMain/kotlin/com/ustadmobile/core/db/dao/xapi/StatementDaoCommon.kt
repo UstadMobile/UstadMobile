@@ -1,4 +1,4 @@
-package com.ustadmobile.core.db.dao
+package com.ustadmobile.core.db.dao.xapi
 
 object StatementDaoCommon {
     const val SORT_FIRST_NAME_ASC = 1

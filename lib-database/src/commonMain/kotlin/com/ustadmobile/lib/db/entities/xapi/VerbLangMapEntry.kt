@@ -1,4 +1,4 @@
-package com.ustadmobile.lib.db.entities
+package com.ustadmobile.lib.db.entities.xapi
 
 import androidx.room.Entity
 import com.ustadmobile.door.annotation.ReplicateEntity
@@ -6,6 +6,8 @@ import com.ustadmobile.door.annotation.ReplicateEtag
 import com.ustadmobile.door.annotation.ReplicateLastModified
 import com.ustadmobile.door.annotation.Trigger
 import com.ustadmobile.door.annotation.Triggers
+import com.ustadmobile.lib.db.entities.TRIGGER_CONDITION_WHERE_NEWER
+import com.ustadmobile.lib.db.entities.TRIGGER_UPSERT
 import kotlinx.serialization.Serializable
 
 @Entity(

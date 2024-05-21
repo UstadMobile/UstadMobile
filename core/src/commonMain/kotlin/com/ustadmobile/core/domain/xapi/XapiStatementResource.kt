@@ -15,7 +15,7 @@ import com.ustadmobile.core.domain.xxhash.XXStringHasher
 import com.ustadmobile.core.util.uuid.randomUuidAsString
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.ext.withDoorTransactionAsync
-import com.ustadmobile.lib.db.entities.xapi.ActorEntity
+import com.ustadmobile.lib.db.entities.xapi.XapiEntityObjectTypeFlags
 import kotlinx.datetime.Clock
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
@@ -46,7 +46,7 @@ class XapiStatementResource(
         statements: List<XapiStatement>,
         xapiSession: XapiSession,
     ): StatementStoreResult {
-        val statementEntities = statements.map {stmt ->
+        val statementEntities = statements.flatMap { stmt ->
             val timeNowStr = Clock.System.now().toString()
 
             //Set properties to be set by LRS as per
@@ -69,15 +69,16 @@ class XapiStatementResource(
                 xapiSession = xapiSession,
                 exactJson = json.encodeToString(XapiStatement.serializer(), exactStatement),
                 primaryKeyManager = db.doorPrimaryKeyManager,
-                hasherFactory = hasherFactory
+                hasherFactory = hasherFactory,
+                json = json,
             )
         }
 
         repoOrDb.withDoorTransactionAsync {
-            repoOrDb.statementDao.insertOrIgnoreListAsync(statementEntities.map { it.statementEntity } )
+            repoOrDb.statementDao.insertOrIgnoreListAsync(statementEntities.mapNotNull { it.statementEntity } )
             val actorEntities = statementEntities.map { it.actorEntities }
-            actorEntities.map { it.actor }
-                .filter { it.actorObjectType == ActorEntity.OBJECT_TYPE_AGENT }
+            actorEntities.mapNotNull { it?.actor }
+                .filter { it.actorObjectType == XapiEntityObjectTypeFlags.AGENT }
                 .takeIf { it.isNotEmpty() }
                 ?.also { agents ->
                     //Name is the only property that could be updated on the Agent. All other
@@ -85,15 +86,16 @@ class XapiStatementResource(
                     repoOrDb.actorDao.insertOrUpdateActorsIfNameChanged(agents)
                 }
 
-            val groupEntities = actorEntities.map { it.actor }
-                .filter { it.actorObjectType == ActorEntity.OBJECT_TYPE_GROUP }
+            val groupEntities = actorEntities.mapNotNull { it?.actor }
+                .filter { it.actorObjectType == XapiEntityObjectTypeFlags.GROUP }
 
             val existingGroupActorHashes = db.actorDao.findUidAndEtagByListAsync(
                 groupEntities.map { it.actorUid }
             )
 
-            val allGroupMemberAgents = actorEntities.flatMap { it.groupMemberAgents }
-                .associateBy { it.actorUid }
+            val allGroupMemberAgents = actorEntities.flatMap {
+                it?.groupMemberAgents ?: emptyList()
+            }.associateBy { it.actorUid }
 
             groupEntities.forEach { groupActorEntity ->
                 /* A group can be an identified group or anonymous group
@@ -110,7 +112,7 @@ class XapiStatementResource(
                 }
 
                 val groupMemberJoins = actorEntities.flatMap {
-                    it.groupMemberJoins
+                    it?.groupMemberJoins ?: emptyList()
                 }.filter {
                     it.gmajGroupActorUid == groupActorEntity.actorUid
                 }
@@ -142,17 +144,17 @@ class XapiStatementResource(
             }
 
             repoOrDb.verbDao.insertOrIgnoreAsync(
-                statementEntities.map { it.verbEntities.verbEntity }
+                statementEntities.mapNotNull { it.verbEntities?.verbEntity }
             )
 
             repoOrDb.verbLangMapEntryDao.upsertList(
-                statementEntities.flatMap { it.verbEntities.verbLangMapEntries }
+                statementEntities.flatMap { it.verbEntities?.verbLangMapEntries ?: emptyList() }
             )
         }
 
         return StatementStoreResult(
-            statementUuids = statementEntities.map {
-                Uuid(it.statementEntity.statementIdHi, it.statementEntity.statementIdLo)
+            statementUuids = statementEntities.mapNotNull { statementEntity ->
+                statementEntity.statementEntity?.let { Uuid(it.statementIdHi, it.statementIdLo) }
             }
         )
     }

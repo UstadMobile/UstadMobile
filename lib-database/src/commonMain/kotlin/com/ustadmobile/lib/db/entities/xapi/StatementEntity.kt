@@ -18,8 +18,15 @@ import kotlinx.serialization.Serializable
  * @param extensionProgress Captures the progress extension ( as per
  *        https://aicc.github.io/CMI-5_Spec_Current/samples/scenarios/13-progress_usage/ ) for use
  *        to show progress in the UI.
- * @param statementActorUid where the actor is an Agent, the UID of the AgentEntity
- * @param statementGroupUid where the actor is a Group, the UID of the group
+ * @param statementActorUid the ActorEntity.actorUid for the actor referenced by the actor property
+ * @param statementObjectType the object type of the statement as a flag : Activity, Agent, Group,
+ * StatementRef, or SubStatement
+ * @param statementObjectUid1 where the object type is an Activity, Agent, or Group the uid of the
+ * respective entity. When a StatementRef, the most significant uuid bits (hi). When a SubStatement,
+ * the statementId will be set to the same as statementIdHi
+ * @param statementObjectUid2 where the object type is an Activity, Agent, or Group, then 0. When a
+ * StatementRef, the least significant uuid bits (lo). When a substatement, then statementIdLo + 1
+ *
  */
 @Entity(
     primaryKeys = arrayOf("statementIdHi", "statementIdLo")
@@ -49,13 +56,12 @@ data class StatementEntity(
 
     var statementVerbUid: Long = 0,
 
-    var xObjectUid: Long = 0,
+    //As per the spec could be Activity, Agent, Group, StatementRef, or SubStatement
+    var statementObjectType: Int = 0,
 
-    var subStatementActorUid: Long = 0,
+    var statementObjectUid1: Long = 0,
 
-    var subStatementVerbUid: Long = 0,
-
-    var subStatementObjectUid: Long = 0,
+    var statementObjectUid2: Long = 0,
 
     var statementActorUid: Long = 0,
 

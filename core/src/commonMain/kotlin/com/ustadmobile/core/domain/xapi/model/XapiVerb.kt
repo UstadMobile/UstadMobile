@@ -2,8 +2,8 @@ package com.ustadmobile.core.domain.xapi.model
 
 import com.ustadmobile.core.domain.xapi.xapiRequireValidIRI
 import com.ustadmobile.core.domain.xxhash.XXStringHasher
-import com.ustadmobile.lib.db.entities.VerbEntity
-import com.ustadmobile.lib.db.entities.VerbLangMapEntry
+import com.ustadmobile.lib.db.entities.xapi.VerbEntity
+import com.ustadmobile.lib.db.entities.xapi.VerbLangMapEntry
 import kotlinx.serialization.Serializable
 
 @Serializable

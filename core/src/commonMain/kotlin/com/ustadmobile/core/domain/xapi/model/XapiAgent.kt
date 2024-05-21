@@ -3,6 +3,7 @@ package com.ustadmobile.core.domain.xapi.model
 import com.ustadmobile.core.domain.xxhash.XXStringHasher
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.xapi.ActorEntity
+import com.ustadmobile.lib.db.entities.xapi.XapiEntityObjectTypeFlags
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -28,6 +29,6 @@ fun XapiAgent.toActorEntity(
         actorAccountHomePage = account?.homePage,
         actorLct = lastModifiedTime,
         actorEtag = name?.let { xxHasher.hash(it) } ?: 0,
-        actorObjectType = ActorEntity.OBJECT_TYPE_AGENT,
+        actorObjectType = XapiEntityObjectTypeFlags.AGENT,
     )
 }
