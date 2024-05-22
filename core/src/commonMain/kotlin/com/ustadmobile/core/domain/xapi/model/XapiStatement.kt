@@ -1,6 +1,7 @@
 package com.ustadmobile.core.domain.xapi.model
 
 import com.benasher44.uuid.uuidFrom
+import com.ustadmobile.core.db.dao.xapi.StatementContextActivityJoin
 import com.ustadmobile.core.domain.xapi.XapiSession
 import com.ustadmobile.core.domain.xapi.xapiRequireDurationOrNullAsLong
 import com.ustadmobile.core.domain.xapi.xapiRequireTimestampAsLong
@@ -38,9 +39,10 @@ data class XapiStatement(
 
 data class StatementEntities(
     val statementEntity: StatementEntity? = null,
+    val statementContextActivityJoins: List<StatementContextActivityJoin> = emptyList(),
     val actorEntities: ActorEntities? = null,
     val verbEntities: VerbEntities? = null,
-    val activityEntities: ActivityEntities? = null,
+    val contextActivityEntities: List<ActivityEntities>? = null,
 )
 
 /**
@@ -112,6 +114,8 @@ fun XapiStatement.toEntities(
             ),
             actorEntities = actor.toEntities(stringHasher, primaryKeyManager, hasherFactory),
             verbEntities = verb.toVerbEntities(stringHasher),
+            contextActivityEntities = context?.contextActivities
+                ?.toEntities(stringHasher, json , statementUuid)
         ),
         `object`.toEntities(stringHasher, json)
     )

@@ -36,16 +36,18 @@ import kotlinx.serialization.Serializable
     tableId = StatementEntity.TABLE_ID,
     remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW,
 )
-@Triggers(arrayOf(
- Trigger(
-     name = "statemententity_remote_insert",
-     order = Trigger.Order.INSTEAD_OF,
-     on = Trigger.On.RECEIVEVIEW,
-     events = [Trigger.Event.INSERT],
-     conditionSql = TRIGGER_CONDITION_WHERE_NEWER,
-     sqlStatements = [TRIGGER_UPSERT],
- )
-))
+@Triggers(
+    arrayOf(
+        Trigger(
+             name = "statemententity_remote_insert",
+             order = Trigger.Order.INSTEAD_OF,
+             on = Trigger.On.RECEIVEVIEW,
+             events = [Trigger.Event.INSERT],
+             conditionSql = TRIGGER_CONDITION_WHERE_NEWER,
+             sqlStatements = [TRIGGER_UPSERT],
+        )
+    )
+)
 data class StatementEntity(
     var statementIdHi: Long = 0,
 
@@ -64,8 +66,6 @@ data class StatementEntity(
     var statementObjectUid2: Long = 0,
 
     var statementActorUid: Long = 0,
-
-    var instructorUid: Long = 0,
 
     var authorityUid: Long = 0,
 
@@ -100,6 +100,8 @@ data class StatementEntity(
     var contextStatementRefIdHi: Long = 0,
 
     var contextStatementRefIdLo: Long = 0,
+
+    var contextInstructorUid: Long = 0,
 
     var fullStatement: String? = null,
 

@@ -76,7 +76,7 @@ fun XapiStatementObject.toEntities(
     return when(this) {
         is XapiActivityStatementObject -> {
             StatementEntities(
-                activityEntities = definition.toEntities(id, stringHasher, json)
+                contextActivityEntities = listOf(definition.toEntities(id, stringHasher, json))
             )
         }
         else -> { TODO() }

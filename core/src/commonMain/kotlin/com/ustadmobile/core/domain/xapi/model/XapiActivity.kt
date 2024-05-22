@@ -1,5 +1,6 @@
 package com.ustadmobile.core.domain.xapi.model
 
+import com.ustadmobile.core.db.dao.xapi.StatementContextActivityJoin
 import com.ustadmobile.core.domain.xapi.model.XapiActivity.Companion.PROPNAME_NAME
 import com.ustadmobile.core.domain.xxhash.XXStringHasher
 import com.ustadmobile.core.util.ext.toEmptyIfNull
@@ -31,7 +32,7 @@ data class XapiActivity(
     val scale: List<Interaction>? = null,
     val source: List<Interaction>? = null,
     val target: List<Interaction>? = null,
-    val steps: List<Interaction>? = null
+    val steps: List<Interaction>? = null,
 ) {
 
     @Serializable
@@ -49,10 +50,15 @@ data class XapiActivity(
     }
 }
 
+/**
+ * @param statementContextActivityJoin Join entity used where the activity is part of a Statement's
+ * contextActivities
+ */
 data class ActivityEntities(
     val activityEntity: ActivityEntity,
-    val activityLangMapEntries: List<ActivityLangMapEntry>,
-    val activityInteractionEntities: List<ActivityInteractionEntity>,
+    val activityLangMapEntries: List<ActivityLangMapEntry> = emptyList(),
+    val activityInteractionEntities: List<ActivityInteractionEntity>  = emptyList(),
+    val statementContextActivityJoin: StatementContextActivityJoin? = null,
 )
 
 fun XapiActivity?.toEntities(
