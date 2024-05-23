@@ -89,7 +89,7 @@ import com.ustadmobile.lib.db.entities.xapi.ActivityLangMapEntryDao
     ReplicationOperation::class,
     PendingRepositorySession::class,
 
-], version = 182)
+], version = 183)
 expect abstract class UmAppDatabase : RoomDatabase {
 
     /*

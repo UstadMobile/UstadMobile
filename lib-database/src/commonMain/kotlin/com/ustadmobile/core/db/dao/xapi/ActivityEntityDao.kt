@@ -31,7 +31,7 @@ expect abstract class ActivityEntityDao  {
         activityUid: Long,
         actType: String?,
         actMoreInfo: String?,
-        actInteractionType: String?,
+        actInteractionType: Int,
         actCorrectResponsePatterns: String?,
         actLct: Long,
     )

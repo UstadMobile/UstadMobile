@@ -25,7 +25,7 @@ data class XapiActivity(
     val type: String? = null,
     val extensions: Map<String, JsonElement>? = null,
     val moreInfo: String? = null,
-    val interactionType: String? = null,
+    val interactionType: XapiInteractionType? = null,
     val correctResponsePattern: List<String>? = null,
     val choices: List<Interaction>? = null,
     val scale: List<Interaction>? = null,
@@ -74,7 +74,7 @@ fun XapiActivity?.toEntities(
             actIdIri = id,
             actType = this?.type,
             actMoreInfo = this?.moreInfo,
-            actInteractionType = this?.interactionType,
+            actInteractionType = this?.interactionType?.dbFlag ?: ActivityEntity.TYPE_UNSET,
             actCorrectResponsePatterns = this?.correctResponsePattern?.let { json.encodeToString(it) },
         ),
         activityLangMapEntries =

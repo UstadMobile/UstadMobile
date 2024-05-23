@@ -9,6 +9,7 @@ import com.ustadmobile.core.domain.xapi.model.XapiActor
 import com.ustadmobile.core.domain.xapi.model.XapiVerb
 import com.ustadmobile.core.domain.xapi.model.XapiAgent
 import com.ustadmobile.core.domain.xapi.model.XapiGroup
+import com.ustadmobile.core.domain.xapi.model.XapiInteractionType
 import com.ustadmobile.core.domain.xapi.model.XapiStatement
 import com.ustadmobile.core.domain.xapi.model.identifierHash
 import com.ustadmobile.core.domain.xxhash.XXStringHasher
@@ -137,6 +138,8 @@ fun assertActivityStoredInDb(
     activity?.correctResponsePattern?.forEach {
         assertTrue(it in responsePatternsFromDb)
     }
+    assertEquals(activity?.interactionType,
+        XapiInteractionType.fromDbFlag(activityInDb.actInteractionType))
 
     val langMapEntries = db.activityLangMapEntryDao
         .findAllByActivityUid(activityUid)

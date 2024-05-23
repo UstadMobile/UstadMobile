@@ -12,7 +12,9 @@ class StoreActivitiesUseCase(
 
     private val ActivityEntity.isIdOnly: Boolean
         get() {
-            return actType == null && actMoreInfo == null && actInteractionType == null
+            return actType == null
+                    && actMoreInfo == null
+                    && actInteractionType == ActivityEntity.TYPE_UNSET
                     && actCorrectResponsePatterns == null
         }
 
