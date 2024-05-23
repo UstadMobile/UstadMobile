@@ -1516,6 +1516,16 @@ val MIGRATION_180_181 = DoorMigrationStatementList(180, 181) { db ->
     }
 }
 
+val MIGRATION_181_182 = DoorMigrationStatementList(181, 182) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS ActivityLangMapEntry (  almeActivityUid  INTEGER  NOT NULL , almeHash  INTEGER  NOT NULL , almeLangCode  TEXT , almeValue  TEXT , almeLastMod  INTEGER  NOT NULL , PRIMARY KEY (almeActivityUid, almeHash) )")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS ActivityLangMapEntry (  almeActivityUid  BIGINT  NOT NULL , almeHash  BIGINT  NOT NULL , almeLangCode  TEXT , almeValue  TEXT , almeLastMod  BIGINT  NOT NULL , PRIMARY KEY (almeActivityUid, almeHash) )")
+        }
+    }
+}
+
 
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_105_106, MIGRATION_106_107,
@@ -1533,7 +1543,7 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_165_166, MIGRATION_166_167, MIGRATION_167_168, MIGRATION_168_169,
     MIGRATION_170_171, MIGRATION_171_172, MIGRATION_172_173, MIGRATION_173_174,
     MIGRATION_174_175, MIGRATION_175_176, MIGRATION_176_177, MIGRATION_177_178,
-    MIGRATION_178_179, MIGRATION_179_180, MIGRATION_180_181,
+    MIGRATION_178_179, MIGRATION_179_180, MIGRATION_180_181, MIGRATION_181_182
 )
 
 

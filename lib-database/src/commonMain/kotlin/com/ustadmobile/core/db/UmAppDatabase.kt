@@ -18,6 +18,8 @@ import com.ustadmobile.lib.db.entities.xapi.StatementEntity
 import com.ustadmobile.lib.db.entities.xapi.VerbEntity
 import com.ustadmobile.lib.db.entities.xapi.VerbLangMapEntry
 import com.ustadmobile.lib.db.entities.xapi.ActivityEntity
+import com.ustadmobile.lib.db.entities.xapi.ActivityLangMapEntry
+import com.ustadmobile.lib.db.entities.xapi.ActivityLangMapEntryDao
 
 @DoorDatabase(entities = [NetworkNode::class,
     ClazzLog::class, ClazzLogAttendanceRecord::class,
@@ -80,13 +82,14 @@ import com.ustadmobile.lib.db.entities.xapi.ActivityEntity
     TransferJobError::class,
     VerbLangMapEntry::class,
     GroupMemberActorJoin::class,
+    ActivityLangMapEntry::class,
 
     //Door entities
     OutgoingReplication::class,
     ReplicationOperation::class,
     PendingRepositorySession::class,
 
-], version = 180)
+], version = 182)
 expect abstract class UmAppDatabase : RoomDatabase {
 
     /*
@@ -274,5 +277,7 @@ expect abstract class UmAppDatabase : RoomDatabase {
     abstract val verbLangMapEntryDao: VerbLangMapEntryDao
 
     abstract val groupMemberActorJoinDao: GroupMemberActorJoinDao
+
+    abstract val activityLangMapEntryDao: ActivityLangMapEntryDao
 
 }

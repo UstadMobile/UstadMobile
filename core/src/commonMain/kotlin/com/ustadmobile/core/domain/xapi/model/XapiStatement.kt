@@ -42,7 +42,7 @@ data class StatementEntities(
     val statementContextActivityJoins: List<StatementContextActivityJoin> = emptyList(),
     val actorEntities: ActorEntities? = null,
     val verbEntities: VerbEntities? = null,
-    val contextActivityEntities: List<ActivityEntities>? = null,
+    val activityEntities: List<ActivityEntities>? = null,
 )
 
 /**
@@ -70,6 +70,7 @@ fun XapiStatement.toEntities(
 
     val statementActorEntities = actor.toEntities(stringHasher, primaryKeyManager,
         hasherFactory)
+    val statementObjectForeignKeys = `object`.objectForeignKeys(stringHasher, statementUuid)
 
     return listOf(
         StatementEntities(
@@ -106,15 +107,17 @@ fun XapiStatement.toEntities(
                 statementContentEntryUid = xapiSession.contentEntryUid,
                 statementClazzUid = xapiSession.clazzUid,
                 statementCbUid = xapiSession.cbUid,
-                contentEntryRoot = `object`.objectType.let { it == null || it == XapiObjectType.Activity } &&
-                        `object`.id == xapiSession.rootActivityId,
+                contentEntryRoot = (`object` as? XapiActivityStatementObject)?.id == xapiSession.rootActivityId,
                 fullStatement = exactJson,
                 extensionProgress = result?.extensions?.get(XAPI_RESULT_EXTENSION_PROGRESS)
-                    ?.jsonPrimitive?.intOrNull
+                    ?.jsonPrimitive?.intOrNull,
+                statementObjectType = `object`.objectTypeFlag,
+                statementObjectUid1 = statementObjectForeignKeys.first,
+                statementObjectUid2 = statementObjectForeignKeys.second,
             ),
             actorEntities = actor.toEntities(stringHasher, primaryKeyManager, hasherFactory),
             verbEntities = verb.toVerbEntities(stringHasher),
-            contextActivityEntities = context?.contextActivities
+            activityEntities = context?.contextActivities
                 ?.toEntities(stringHasher, json , statementUuid)
         ),
         `object`.toEntities(stringHasher, json)

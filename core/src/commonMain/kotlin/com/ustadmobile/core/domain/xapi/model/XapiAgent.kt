@@ -14,7 +14,7 @@ data class XapiAgent(
     override val openid: String? = null,
     override val objectType: XapiObjectType? = null,
     override val account: XapiAccount? = null,
-): XapiActor
+): XapiActor, XapiStatementObject
 
 fun XapiAgent.toActorEntity(
     xxHasher: XXStringHasher,

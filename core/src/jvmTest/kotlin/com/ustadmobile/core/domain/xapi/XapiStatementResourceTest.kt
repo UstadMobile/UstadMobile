@@ -23,6 +23,8 @@ class XapiStatementResourceTest {
 
     private lateinit var xapiStatementResource: XapiStatementResource
 
+    private lateinit var storeActivitiesUseCase: StoreActivitiesUseCase
+
     //Note: as per xAPI spec, we should NOT encode default (eg. null) key values
     private val json = Json {
         encodeDefaults = false
@@ -33,6 +35,7 @@ class XapiStatementResourceTest {
     fun setup() {
         db = DatabaseBuilder.databaseBuilder(UmAppDatabase::class, "jdbc:sqlite::memory:", nodeId = 1L)
             .build()
+        storeActivitiesUseCase = StoreActivitiesUseCase(db)
         xapiStatementResource = XapiStatementResource(
             db = db,
             repo = null,
@@ -40,6 +43,7 @@ class XapiStatementResourceTest {
             endpoint = endpoint,
             json = json,
             hasherFactory = XXHasher64FactoryCommonJvm(),
+            storeActivitiesUseCase = storeActivitiesUseCase,
         )
     }
 
@@ -55,7 +59,7 @@ class XapiStatementResourceTest {
             statementIdParam = id,
             xapiSession = xapiSession
         )
-        assertStatementStoredInDb(stmt.copy(id = id), db, xxHasher)
+        assertStatementStoredInDb(stmt.copy(id = id), db, xxHasher, json)
 
         return id
     }

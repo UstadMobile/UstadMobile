@@ -15,7 +15,7 @@ import kotlinx.serialization.Serializable
 )
 @Triggers(arrayOf(
  Trigger(
-     name = "xobjectentity_remote_insert",
+     name = "activityentity_remote_insert",
      order = Trigger.Order.INSTEAD_OF,
      on = Trigger.On.RECEIVEVIEW,
      events = [Trigger.Event.INSERT],

@@ -30,10 +30,12 @@ class XapiStatementResource(
     private val endpoint: Endpoint,
     private val json: Json,
     private val hasherFactory: XXHasher64Factory,
+    private val storeActivitiesUseCase: StoreActivitiesUseCase,
 ) {
 
     private val repoOrDb = repo ?: db
 
+    @Suppress("unused") //Some here reserved for future use
     enum class Format {
         EXACT, IDS, CANONICAL
     }
@@ -150,6 +152,8 @@ class XapiStatementResource(
             repoOrDb.verbLangMapEntryDao.upsertList(
                 statementEntities.flatMap { it.verbEntities?.verbLangMapEntries ?: emptyList() }
             )
+
+            storeActivitiesUseCase(statementEntities.flatMap { it.activityEntities ?: emptyList() })
         }
 
         return StatementStoreResult(

@@ -1,7 +1,6 @@
 package com.ustadmobile.core.domain.xapi.model
 
 import com.ustadmobile.core.db.dao.xapi.StatementContextActivityJoin
-import com.ustadmobile.core.domain.xapi.model.XapiActivity.Companion.PROPNAME_NAME
 import com.ustadmobile.core.domain.xxhash.XXStringHasher
 import com.ustadmobile.core.util.ext.toEmptyIfNull
 import com.ustadmobile.lib.db.entities.xapi.ActivityEntity
@@ -40,14 +39,6 @@ data class XapiActivity(
         val id: String? = null,
         val description: Map<String, String>? = null
     )
-
-    companion object {
-
-        const val PROPNAME_NAME = "name"
-
-        const val PROPNAME_DESCRIPTION = "description"
-
-    }
 }
 
 /**
@@ -73,7 +64,7 @@ fun XapiActivity?.toEntities(
             almeActivityUid = activityUid,
             almeHash = stringHasher.hash("$propName-$lang"),
             almeLangCode = lang,
-            almeEntry = text,
+            almeValue = text,
         )
     }
 
@@ -87,8 +78,8 @@ fun XapiActivity?.toEntities(
             actCorrectResponsePatterns = this?.correctResponsePattern?.let { json.encodeToString(it) },
         ),
         activityLangMapEntries =
-            this?.name?.toLangMapEntries(PROPNAME_NAME).toEmptyIfNull() +
-            this?.description?.toLangMapEntries(XapiActivity.PROPNAME_DESCRIPTION).toEmptyIfNull(),
+            this?.name?.toLangMapEntries(ActivityLangMapEntry.PROPNAME_NAME).toEmptyIfNull() +
+            this?.description?.toLangMapEntries(ActivityLangMapEntry.PROPNAME_DESCRIPTION).toEmptyIfNull(),
         activityInteractionEntities = emptyList(),
     )
 }
