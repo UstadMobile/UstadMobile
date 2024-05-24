@@ -110,7 +110,7 @@ fun List<XapiActivityStatementObject>.toEntities(
         )
 
         contextActivityObj.definition?.toEntities(
-            id = contextActivityObj.id,
+            activityId = contextActivityObj.id,
             stringHasher = stringHasher,
             json = json,
         )?.copy(statementContextActivityJoin = statementContextActivityJoin)

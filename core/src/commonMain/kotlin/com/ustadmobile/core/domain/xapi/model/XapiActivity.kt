@@ -58,11 +58,11 @@ data class ActivityEntities(
 )
 
 fun XapiActivity?.toEntities(
-    id: String,
+    activityId: String,
     stringHasher: XXStringHasher,
     json: Json,
 ): ActivityEntities {
-    val activityUid = stringHasher.hash(id)
+    val activityUid = stringHasher.hash(activityId)
 
     fun Map<String, String>.toLangMapEntries(
         propName: String,
@@ -88,7 +88,7 @@ fun XapiActivity?.toEntities(
             aieHash = aieHash,
             aieProp = propId,
             aieId = id,
-        ) to description?.toLangMapEntries(propName, almeAieHash = aieHash).toEmptyIfNull()
+        ) to description?.toLangMapEntries("$propName-$id", almeAieHash = aieHash).toEmptyIfNull()
     }
 
     val interactionEntitiesAndLangMaps =
@@ -101,7 +101,7 @@ fun XapiActivity?.toEntities(
     return ActivityEntities(
         activityEntity = ActivityEntity(
             actUid = activityUid,
-            actIdIri = id,
+            actIdIri = activityId,
             actType = this?.type,
             actMoreInfo = this?.moreInfo,
             actInteractionType = this?.interactionType?.dbFlag ?: ActivityEntity.TYPE_UNSET,

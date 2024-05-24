@@ -38,7 +38,7 @@ import kotlinx.serialization.Serializable
  * @param almeHash hash of "propertyname-langcode" where  propertyname is PROPNAME_NAME or
  * PROPNAME_DESCRIPTION as per PROP_NAME_constants and langcode is almeLangCode OR
  * an interaction property name (choices,scale,source,target,steps) - id - lang code e.g.
- * "choices-
+ * "choices-choiceid-en-US"
  * @param almeLangCode the lang code as per the xAPI language map eg en-US
  * @param almeValue the string value for the given language
  * @param almeAieHash where this entity represents a langmap for an interaction property, the hash

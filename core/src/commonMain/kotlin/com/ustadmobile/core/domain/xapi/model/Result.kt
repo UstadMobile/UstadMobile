@@ -5,21 +5,21 @@ import kotlinx.serialization.json.JsonElement
 
 @Serializable
 data class Result(
-    var completion: Boolean,
-    var success: Boolean?,
-    var score: Score?,
-    var duration: String?,
-    var response: String?,
-    var extensions: Map<String, JsonElement>? = null
+    var completion: Boolean? = null,
+    var success: Boolean? = null,
+    var score: Score? = null,
+    var duration: String? = null,
+    var response: String? = null,
+    var extensions: Map<String, JsonElement>? = null,
 ) {
 
 
     @Serializable
     data class Score(
-        var scaled: Float,
-        var raw: Float,
-        var min: Float,
-        var max: Float,
+        var scaled: Float? = null,
+        var raw: Float? = null,
+        var min: Float? = null,
+        var max: Float? = null,
     )
 
 }

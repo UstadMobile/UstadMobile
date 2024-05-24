@@ -13,6 +13,7 @@ import com.ustadmobile.core.domain.xapi.model.XapiInteractionType
 import com.ustadmobile.core.domain.xapi.model.XapiStatement
 import com.ustadmobile.core.domain.xapi.model.identifierHash
 import com.ustadmobile.core.domain.xxhash.XXStringHasher
+import com.ustadmobile.lib.db.entities.xapi.ActivityInteractionEntity
 import com.ustadmobile.lib.db.entities.xapi.ActivityLangMapEntry
 import com.ustadmobile.lib.db.entities.xapi.ActivityLangMapEntry.Companion.PROPNAME_DESCRIPTION
 import com.ustadmobile.lib.db.entities.xapi.ActivityLangMapEntry.Companion.PROPNAME_NAME
@@ -45,12 +46,16 @@ fun assertStatementStoredInDb(
         )
 
         assertNotNull(statementInDb, "Statement $stmtUuid is in database")
-        assertEquals(statement.result?.completion, statementInDb.resultCompletion)
+
+        //Note nullable boolean properties need to use .toString() otherwise null can cause exceptions
+        assertEquals(statement.result?.completion.toString(),
+            statementInDb.resultCompletion.toString())
         assertEquals(statement.result?.success, statementInDb.resultSuccess)
-        assertEquals(statement.result?.score?.scaled, statementInDb.resultScoreScaled)
-        assertEquals(statement.result?.score?.raw, statementInDb.resultScoreRaw)
-        assertEquals(statement.result?.score?.max, statementInDb.resultScoreMax)
-        assertEquals(statement.result?.score?.min, statementInDb.resultScoreMin)
+        assertEquals(statement.result?.score?.scaled.toString(),
+            statementInDb.resultScoreScaled.toString())
+        assertEquals(statement.result?.score?.raw.toString(), statementInDb.resultScoreRaw.toString())
+        assertEquals(statement.result?.score?.max.toString(), statementInDb.resultScoreMax.toString())
+        assertEquals(statement.result?.score?.min.toString(), statementInDb.resultScoreMin.toString())
         assertEquals(xapiRequireDurationOrNullAsLong(statement.result?.duration),
             statementInDb.resultDuration)
         statement.timestamp?.also { timestamp ->
@@ -128,6 +133,25 @@ fun assertActivityStoredInDb(
     json: Json,
 ) = runBlocking {
     assertEquals(xxHasher.hash(activityId), activityUid)
+    val langMapEntries = db.activityLangMapEntryDao
+        .findAllByActivityUid(activityUid)
+    val interactionEntities = db.activityInteractionDao
+        .findAllByActivityUidAsync(activityUid)
+
+    fun List<XapiActivity.Interaction>.assertInteractionsStoredInDb(propName: String, propFlag: Int) {
+        forEach { interaction ->
+            val interactionEntity = interactionEntities.firstOrNull {
+                it.aieId == interaction.id
+            }
+            assertNotNull(interactionEntity)
+            assertEquals(interaction.id, interactionEntity.aieId)
+            assertEquals(propFlag, interactionEntity.aieProp)
+            assertActivityLangMapEntriesMatch(
+                interaction.description, langMapEntries, "$propName-${interaction.id}", xxHasher)
+            assertTrue { langMapEntries.any { it.almeAieHash == interactionEntity.aieHash } }
+        }
+    }
+
     val activityInDb = db.activityEntityDao.findByUidAsync(activityUid)
     assertNotNull(activityInDb, "Activity $activityUid is in database")
     assertEquals(activityInDb.actIdIri, activityId)
@@ -141,15 +165,18 @@ fun assertActivityStoredInDb(
     assertEquals(activity?.interactionType,
         XapiInteractionType.fromDbFlag(activityInDb.actInteractionType))
 
-    val langMapEntries = db.activityLangMapEntryDao
-        .findAllByActivityUid(activityUid)
+    activity?.choices?.assertInteractionsStoredInDb("choices", ActivityInteractionEntity.PROP_CHOICES)
+    activity?.scale?.assertInteractionsStoredInDb("scale", ActivityInteractionEntity.PROP_SCALE)
+    activity?.source?.assertInteractionsStoredInDb("source", ActivityInteractionEntity.PROP_SOURCE)
+    activity?.target?.assertInteractionsStoredInDb("target", ActivityInteractionEntity.PROP_TARGET)
+    activity?.steps?.assertInteractionsStoredInDb("steps", ActivityInteractionEntity.PROP_STEPS)
+
     assertActivityLangMapEntriesMatch(
         activity?.name, langMapEntries, PROPNAME_NAME, xxHasher
     )
     assertActivityLangMapEntriesMatch(
         activity?.description, langMapEntries, PROPNAME_DESCRIPTION, xxHasher
     )
-
 }
 
 fun assertVerbStoredInDb(

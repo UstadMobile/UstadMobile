@@ -25,6 +25,8 @@ class XapiStatementResourceTest {
 
     private lateinit var storeActivitiesUseCase: StoreActivitiesUseCase
 
+    private lateinit var defaultXapiSession: XapiSession
+
     //Note: as per xAPI spec, we should NOT encode default (eg. null) key values
     private val json = Json {
         encodeDefaults = false
@@ -44,6 +46,13 @@ class XapiStatementResourceTest {
             json = json,
             hasherFactory = XXHasher64FactoryCommonJvm(),
             storeActivitiesUseCase = storeActivitiesUseCase,
+        )
+        defaultXapiSession = XapiSession(
+            endpoint = endpoint,
+            accountPersonUid = 42L,
+            accountUsername = "user",
+            clazzUid = 0L,
+            contentEntryUid = 0L,
         )
     }
 
@@ -89,15 +98,13 @@ class XapiStatementResourceTest {
 
     @Test
     fun givenStatementWithGroupActor_whenPutCalled_thenShouldBeStored() = runBlocking {
-        val xapiSession = XapiSession(
-            endpoint = endpoint,
-            accountPersonUid = 42L,
-            accountUsername = "user",
-            clazzUid = 0L,
-            contentEntryUid = 0L,
-        )
+        storeStatementAndAssert("$RESOURCE_PATH/group-statement.json", defaultXapiSession)
+        Unit
+    }
 
-        storeStatementAndAssert("$RESOURCE_PATH/group-statement.json", xapiSession)
+    @Test
+    fun givenStatementWithChoiceActivity_whenStored_thenShouldBeInDb() = runBlocking {
+        storeStatementAndAssert("$RESOURCE_PATH/multi-choice-statement.json", defaultXapiSession)
         Unit
     }
 

@@ -22,6 +22,15 @@ expect abstract class ActivityInteractionDao {
         activityUids: List<Long>
     ): List<Long>
 
+    @Query("""
+        SELECT ActivityInteractionEntity.*
+          FROM ActivityInteractionEntity
+         WHERE ActivityInteractionEntity.aieActivityUid = :activityUid 
+    """)
+    abstract suspend fun findAllByActivityUidAsync(
+        activityUid: Long
+    ): List<ActivityInteractionEntity>
+
 
 
 }
