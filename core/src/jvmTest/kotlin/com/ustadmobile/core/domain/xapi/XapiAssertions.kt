@@ -11,6 +11,7 @@ import com.ustadmobile.core.domain.xapi.model.XapiAgent
 import com.ustadmobile.core.domain.xapi.model.XapiGroup
 import com.ustadmobile.core.domain.xapi.model.XapiInteractionType
 import com.ustadmobile.core.domain.xapi.model.XapiStatement
+import com.ustadmobile.core.domain.xapi.model.XapiStatementRef
 import com.ustadmobile.core.domain.xapi.model.identifierHash
 import com.ustadmobile.core.domain.xxhash.XXStringHasher
 import com.ustadmobile.lib.db.entities.xapi.ActivityInteractionEntity
@@ -108,6 +109,12 @@ fun assertStatementStoredInDb(
                     actorUid = statementInDb.statementObjectUid1,
                     db = db,
                     xxHasher = xxHasher
+                )
+            }
+            is XapiStatementRef -> {
+                assertEquals(
+                    uuidFrom(stmtObject.id),
+                    Uuid(statementInDb.statementObjectUid1, statementInDb.statementObjectUid2)
                 )
             }
             else -> {

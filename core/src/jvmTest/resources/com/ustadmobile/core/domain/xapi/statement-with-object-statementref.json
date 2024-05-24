@@ -1,0 +1,21 @@
+{
+  "actor": {
+    "account" : {
+      "name": "user",
+      "homePage": "http://localhost/"
+    }
+  },
+  "verb" : {
+    "id":"http://example.com/commented",
+    "display": {
+      "en-US":"commented"
+    }
+  },
+  "object" : {
+    "objectType":"StatementRef",
+    "id":"8f87ccde-bb56-4c2e-ab83-44982ef22df0"
+  },
+  "result" : {
+    "response" : "Wow, nice work!"
+  }
+}

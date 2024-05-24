@@ -2,9 +2,12 @@ package com.ustadmobile.core.domain.xapi.model
 
 import kotlinx.serialization.Serializable
 
+/**
+ * As per https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Data.md#object-is-statement
+ */
 @Serializable
 data class XapiStatementRef(
-    val objectType: XapiObjectType,
+    override val objectType: XapiObjectType,
     val id: String,
-)
+): XapiStatementObject
 

@@ -46,14 +46,6 @@ data class XapiActivityStatementObject(
     val definition: XapiActivity?,
 ): XapiStatementObject
 
-/**
- * As per https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Data.md#object-is-statement
- */
-@Serializable
-data class XapiStatementRefStatementObject(
-    override val objectType: XapiObjectType? = null,
-    val id: String,
-): XapiStatementObject
 
 @Serializable
 data class XapiSubStatementStatementObject(
@@ -83,7 +75,7 @@ fun XapiStatementObject.objectForeignKeys(
         is XapiGroup -> {
             Pair(this.identifierHash(stringHasher), 0)
         }
-        is XapiStatementRefStatementObject -> {
+        is XapiStatementRef -> {
             val uuid = uuidFrom(id)
             Pair(uuid.mostSignificantBits, uuid.leastSignificantBits)
         }
@@ -105,18 +97,25 @@ fun XapiStatementObject.objectToEntities(
     primaryKeyManager: DoorPrimaryKeyManager,
     hasherFactory: XXHasher64Factory,
     json: Json,
-) : StatementEntities {
+) : StatementEntities? {
     return when(this) {
         is XapiActivityStatementObject -> {
             StatementEntities(
                 activityEntities = listOf(definition.toEntities(id, stringHasher, json))
             )
         }
+
         is XapiActor -> {
             StatementEntities(
                 actorEntities = toEntities(stringHasher, primaryKeyManager, hasherFactory)
             )
         }
+
+        is XapiStatementRef -> {
+            //When the object is a statement ref, there are no other entities. Its just a link by uuid
+            null
+        }
+
         else -> { TODO() }
     }
 }
@@ -135,7 +134,7 @@ object XapiStatementObjectSerializer: JsonContentPolymorphicSerializer<XapiState
             XapiObjectType.Activity -> XapiActivityStatementObject.serializer()
             XapiObjectType.Agent -> XapiAgent.serializer()
             XapiObjectType.Group -> XapiGroup.serializer()
-            XapiObjectType.StatementRef -> XapiStatementRefStatementObject.serializer()
+            XapiObjectType.StatementRef -> XapiStatementRef.serializer()
             XapiObjectType.SubStatement -> XapiSubStatementStatementObject.serializer()
             else -> throw XapiException(400, "Statement object type invalid")
         }

@@ -121,7 +121,7 @@ fun XapiStatement.toEntities(
                 ?.toEntities(stringHasher, json , statementUuid)
         ),
         `object`.objectToEntities(stringHasher, primaryKeyManager, hasherFactory, json)
-    )
+    ).filterNotNull()
 
 }
 
