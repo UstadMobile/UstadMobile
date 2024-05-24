@@ -120,7 +120,7 @@ fun XapiStatement.toEntities(
             activityEntities = context?.contextActivities
                 ?.toEntities(stringHasher, json , statementUuid)
         ),
-        `object`.toEntities(stringHasher, json)
+        `object`.objectToEntities(stringHasher, primaryKeyManager, hasherFactory, json)
     )
 
 }

@@ -3,7 +3,9 @@ package com.ustadmobile.core.domain.xapi.model
 import com.benasher44.uuid.Uuid
 import com.benasher44.uuid.uuidFrom
 import com.ustadmobile.core.domain.xapi.XapiException
+import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
 import com.ustadmobile.core.domain.xxhash.XXStringHasher
+import com.ustadmobile.door.DoorPrimaryKeyManager
 import com.ustadmobile.lib.db.entities.xapi.XapiEntityObjectTypeFlags
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.Serializable
@@ -98,14 +100,21 @@ fun XapiStatementObject.objectForeignKeys(
  * Convert the statement object into entities. Because the object could be an activity, substatement,
  * statementref, agent, or group, this function returns StatementEntities itself
  */
-fun XapiStatementObject.toEntities(
+fun XapiStatementObject.objectToEntities(
     stringHasher: XXStringHasher,
-    json: Json
+    primaryKeyManager: DoorPrimaryKeyManager,
+    hasherFactory: XXHasher64Factory,
+    json: Json,
 ) : StatementEntities {
     return when(this) {
         is XapiActivityStatementObject -> {
             StatementEntities(
                 activityEntities = listOf(definition.toEntities(id, stringHasher, json))
+            )
+        }
+        is XapiActor -> {
+            StatementEntities(
+                actorEntities = toEntities(stringHasher, primaryKeyManager, hasherFactory)
             )
         }
         else -> { TODO() }
@@ -118,7 +127,7 @@ fun XapiStatementObject.toEntities(
 object XapiStatementObjectSerializer: JsonContentPolymorphicSerializer<XapiStatementObject>(XapiStatementObject::class) {
     override fun selectDeserializer(element: JsonElement): DeserializationStrategy<XapiStatementObject> {
 
-        val objectType = element.jsonObject["type"]
+        val objectType = element.jsonObject["objectType"]
             ?.jsonPrimitive?.content?.let { XapiObjectType.valueOf(it) }
             ?: XapiObjectType.Activity
 

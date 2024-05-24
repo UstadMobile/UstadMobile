@@ -102,6 +102,14 @@ fun assertStatementStoredInDb(
                     json = json
                 )
             }
+            is XapiActor -> {
+                assertActorStoredInDb(
+                    actor = stmtObject,
+                    actorUid = statementInDb.statementObjectUid1,
+                    db = db,
+                    xxHasher = xxHasher
+                )
+            }
             else -> {
                 //do nothing
             }
