@@ -73,6 +73,7 @@ class XapiStatementResource(
                 primaryKeyManager = db.doorPrimaryKeyManager,
                 hasherFactory = hasherFactory,
                 json = json,
+                isSubStatement = false,
             )
         }
 

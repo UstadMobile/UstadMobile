@@ -32,6 +32,9 @@ import kotlin.test.assertTrue
  * Verifies that the statement and all related entities are stored / parsed in the database
  * e.g. statement is retrieved by UUID, properties are parsed (e.g. duration), and related entities
  * are present (e.g. Verb, Agent, etc)
+ *
+ * @param subStatementUuid a substatement doesn't really have an ID of its own, our convention is
+ * that we assign a substatement a UUID of the parent statement plus 1 on the least significant bits.
  */
 fun assertStatementStoredInDb(
     statement: XapiStatement,
@@ -39,9 +42,10 @@ fun assertStatementStoredInDb(
     xxHasher: XXStringHasher,
     json: Json,
     xapiSession: XapiSession? = null,
+    subStatementUuid: Uuid? = null
 ) {
     runBlocking {
-        val stmtUuid = uuidFrom(statement.id!!)
+        val stmtUuid = subStatementUuid ?: uuidFrom(statement.id!!)
         val statementInDb = db.statementDao.findById(
             statementIdHi = stmtUuid.mostSignificantBits,
             statementIdLo = stmtUuid.leastSignificantBits,
@@ -115,6 +119,19 @@ fun assertStatementStoredInDb(
                 assertEquals(
                     uuidFrom(stmtObject.id),
                     Uuid(statementInDb.statementObjectUid1, statementInDb.statementObjectUid2)
+                )
+            }
+            is XapiStatement -> {
+                assertStatementStoredInDb(
+                    statement = stmtObject,
+                    db = db,
+                    xxHasher = xxHasher,
+                    json = json,
+                    xapiSession = xapiSession,
+                    subStatementUuid = Uuid(
+                        stmtUuid.mostSignificantBits,
+                        stmtUuid.leastSignificantBits + 1
+                    )
                 )
             }
             else -> {

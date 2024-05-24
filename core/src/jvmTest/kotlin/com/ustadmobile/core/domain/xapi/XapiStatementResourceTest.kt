@@ -120,6 +120,12 @@ class XapiStatementResourceTest {
         Unit
     }
 
+    @Test
+    fun givenStatementWithObjectAsSubStatement_whenStored_thenShouldBeInDb() = runBlocking {
+        storeStatementAndAssert("$RESOURCE_PATH/statement-with-object-substatement.json", defaultXapiSession)
+        Unit
+    }
+
     companion object {
         const val RESOURCE_PATH = "/com/ustadmobile/core/domain/xapi"
     }

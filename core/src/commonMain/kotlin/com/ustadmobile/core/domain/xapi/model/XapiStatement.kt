@@ -2,6 +2,7 @@ package com.ustadmobile.core.domain.xapi.model
 
 import com.benasher44.uuid.uuidFrom
 import com.ustadmobile.core.db.dao.xapi.StatementContextActivityJoin
+import com.ustadmobile.core.domain.xapi.XapiException
 import com.ustadmobile.core.domain.xapi.XapiSession
 import com.ustadmobile.core.domain.xapi.xapiRequireDurationOrNullAsLong
 import com.ustadmobile.core.domain.xapi.xapiRequireTimestampAsLong
@@ -20,6 +21,10 @@ import kotlinx.serialization.json.jsonPrimitive
 
 const val XAPI_RESULT_EXTENSION_PROGRESS = "https://w3id.org/xapi/cmi5/result/extensions/progress"
 
+/**
+ * XapiStatement represents both a Statement and a SubStatement, therefor it implements the sealed
+ * interface XapiStatementObject
+ */
 @Serializable
 data class XapiStatement(
     val id: String? = null,
@@ -34,8 +39,8 @@ data class XapiStatement(
     val authority: XapiActor? = null,
     val version: String? = null,
     val attachments: List<Attachment>? = null,
-    val objectType: XapiObjectType? = null,
-)
+    override val objectType: XapiObjectType? = null,
+): XapiStatementObject
 
 data class StatementEntities(
     val statementEntity: StatementEntity? = null,
@@ -51,6 +56,9 @@ data class StatementEntities(
  * Most of the time the statement received will be when running an xAPI activity, and the actor will
  * be an Agent for the current user.
  *
+ * @param isSubStatement true if the statement being processed is a substatement, in which case, it
+ * must not as per the spec contain another nested substatement.
+ *
  * @return list of two statement entities - the statement itself, and the entities of the object (
  * which could be a substatement, agent, group, or statementref)
  */
@@ -64,6 +72,9 @@ fun XapiStatement.toEntities(
     isSubStatement: Boolean = false,
 ): List<StatementEntities> {
     val statementUuid = id?.let { uuidFrom(it) } ?: throw IllegalArgumentException("id is null")
+    if(isSubStatement && `object` is XapiStatement)
+        throw XapiException(400, "SubStatement cannot have another nested subs== XapiObjectType.SubStatementtatement")
+
     val contextRegistration = xapiRequireValidUuidOrNull(
         context?.registration, errorMessage = "Invalid context registration uuid"
     )
@@ -114,14 +125,21 @@ fun XapiStatement.toEntities(
                 statementObjectType = `object`.objectTypeFlag,
                 statementObjectUid1 = statementObjectForeignKeys.first,
                 statementObjectUid2 = statementObjectForeignKeys.second,
+                isSubStatement = isSubStatement,
             ),
             actorEntities = actor.toEntities(stringHasher, primaryKeyManager, hasherFactory),
             verbEntities = verb.toVerbEntities(stringHasher),
             activityEntities = context?.contextActivities
                 ?.toEntities(stringHasher, json , statementUuid)
         ),
-        `object`.objectToEntities(stringHasher, primaryKeyManager, hasherFactory, json)
-    ).filterNotNull()
+    ) + `object`.objectToEntities(
+        stringHasher = stringHasher,
+        primaryKeyManager = primaryKeyManager,
+        hasherFactory = hasherFactory,
+        json = json,
+        xapiSession = xapiSession,
+        parentStatementUuid = statementUuid,
+    )
 
 }
 

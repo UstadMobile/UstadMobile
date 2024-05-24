@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
  * the statementId will be set to the same as statementIdHi
  * @param statementObjectUid2 where the object type is an Activity, Agent, or Group, then 0. When a
  * StatementRef, the least significant uuid bits (lo). When a substatement, then statementIdLo + 1
- *
+ * @param isSubStatement if true, this is a substatement which cannot be independently retrieved.
  */
 @Entity(
     primaryKeys = arrayOf("statementIdHi", "statementIdLo")
@@ -131,6 +131,8 @@ data class StatementEntity(
     var statementCbUid: Long = 0,
 
     var statementDoorNode: Long = 0,
+
+    var isSubStatement: Boolean = false,
 ) {
 
     companion object {
