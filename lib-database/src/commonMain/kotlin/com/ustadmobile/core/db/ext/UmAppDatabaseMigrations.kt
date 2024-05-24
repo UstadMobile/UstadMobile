@@ -1550,7 +1550,25 @@ val MIGRATION_183_184 = DoorMigrationStatementList(183, 184) { db ->
     }
 }
 
+val MIGRATION_184_185 = DoorMigrationStatementList(184, 185) { db ->
+    buildList {
+        val bigIntType = if(db.dbType() == DoorDbType.SQLITE) "INTEGER" else "BIGINT"
+        (2..4).forEach {
+            add("ALTER TABLE OutgoingReplication ADD COLUMN orPk$it $bigIntType NOT NULL DEFAULT 0")
+        }
+        add("DROP TABLE ActivityInteractionEntity")
 
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS ActivityExtensionEntity (  aeeActivityUid  INTEGER  NOT NULL , aeeKeyHash  INTEGER  NOT NULL , aeeKey  TEXT , aeeJson  TEXT , aeeLastMod  INTEGER  NOT NULL , aeeIsDeleted  INTEGER  NOT NULL , PRIMARY KEY (aeeActivityUid, aeeKeyHash) )")
+            add("CREATE TABLE IF NOT EXISTS ActivityInteractionEntity (  aieActivityUid  INTEGER  NOT NULL , aieHash  INTEGER  NOT NULL , aieProp  INTEGER  NOT NULL , aieId  TEXT , aieLastMod  INTEGER  NOT NULL , aieIsDeleted  INTEGER  NOT NULL , PRIMARY KEY (aieActivityUid, aieHash) )")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS ActivityExtensionEntity (  aeeActivityUid  BIGINT  NOT NULL , aeeKeyHash  BIGINT  NOT NULL , aeeKey  TEXT , aeeJson  TEXT , aeeLastMod  BIGINT  NOT NULL , aeeIsDeleted  BOOL  NOT NULL , PRIMARY KEY (aeeActivityUid, aeeKeyHash) )")
+            add("CREATE TABLE IF NOT EXISTS ActivityInteractionEntity (  aieActivityUid  BIGINT  NOT NULL , aieHash  BIGINT  NOT NULL , aieProp  INTEGER  NOT NULL , aieId  TEXT , aieLastMod  BIGINT  NOT NULL , aieIsDeleted  BOOL  NOT NULL , PRIMARY KEY (aieActivityUid, aieHash) )")
+        }
+
+
+    }
+}
 
 
 fun migrationList() = listOf<DoorMigration>(
@@ -1570,7 +1588,7 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_170_171, MIGRATION_171_172, MIGRATION_172_173, MIGRATION_173_174,
     MIGRATION_174_175, MIGRATION_175_176, MIGRATION_176_177, MIGRATION_177_178,
     MIGRATION_178_179, MIGRATION_179_180, MIGRATION_180_181, MIGRATION_181_182,
-    MIGRATION_182_183, MIGRATION_183_184,
+    MIGRATION_182_183, MIGRATION_183_184, MIGRATION_184_185,
 )
 
 

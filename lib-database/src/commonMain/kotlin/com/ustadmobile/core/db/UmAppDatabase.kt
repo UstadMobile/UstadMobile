@@ -3,6 +3,7 @@ package com.ustadmobile.core.db
 import com.ustadmobile.door.annotation.DoorDatabase
 import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.core.db.dao.xapi.ActivityEntityDao
+import com.ustadmobile.core.db.dao.xapi.ActivityExtensionDao
 import com.ustadmobile.core.db.dao.xapi.ActivityInteractionDao
 import com.ustadmobile.core.db.dao.xapi.ActorDao
 import com.ustadmobile.core.db.dao.xapi.GroupMemberActorJoinDao
@@ -22,6 +23,7 @@ import com.ustadmobile.lib.db.entities.xapi.ActivityEntity
 import com.ustadmobile.lib.db.entities.xapi.ActivityInteractionEntity
 import com.ustadmobile.lib.db.entities.xapi.ActivityLangMapEntry
 import com.ustadmobile.core.db.dao.xapi.ActivityLangMapEntryDao
+import com.ustadmobile.lib.db.entities.xapi.ActivityExtensionEntity
 
 @DoorDatabase(entities = [NetworkNode::class,
     ClazzLog::class, ClazzLogAttendanceRecord::class,
@@ -86,13 +88,14 @@ import com.ustadmobile.core.db.dao.xapi.ActivityLangMapEntryDao
     VerbLangMapEntry::class,
     GroupMemberActorJoin::class,
     ActivityLangMapEntry::class,
+    ActivityExtensionEntity::class,
 
     //Door entities
     OutgoingReplication::class,
     ReplicationOperation::class,
     PendingRepositorySession::class,
 
-], version = 184)
+], version = 186)
 expect abstract class UmAppDatabase : RoomDatabase {
 
     /*
@@ -284,5 +287,7 @@ expect abstract class UmAppDatabase : RoomDatabase {
     abstract val activityLangMapEntryDao: ActivityLangMapEntryDao
 
     abstract val activityInteractionDao: ActivityInteractionDao
+
+    abstract val activityExtensionDao: ActivityExtensionDao
 
 }

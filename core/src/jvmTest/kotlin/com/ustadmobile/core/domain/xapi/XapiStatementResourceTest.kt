@@ -97,7 +97,7 @@ class XapiStatementResourceTest {
     }
 
     @Test
-    fun givenStatementWithGroupActor_whenPutCalled_thenShouldBeStored() = runBlocking {
+    fun givenStatementWithGroupActorAndExtensions_whenPutCalled_thenShouldBeStored() = runBlocking {
         storeStatementAndAssert("$RESOURCE_PATH/group-statement.json", defaultXapiSession)
         Unit
     }

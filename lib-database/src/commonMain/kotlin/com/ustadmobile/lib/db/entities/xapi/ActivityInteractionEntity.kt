@@ -51,6 +51,7 @@ data class ActivityInteractionEntity(
     @ReplicateLastModified(autoSet = false)
     @ReplicateEtag
     var aieLastMod: Long = 0,
+    var aieIsDeleted: Boolean = false,
 ) {
 
     companion object {

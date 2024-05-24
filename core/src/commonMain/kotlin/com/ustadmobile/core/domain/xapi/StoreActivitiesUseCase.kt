@@ -109,7 +109,6 @@ class StoreActivitiesUseCase(
                 )
             }
 
-
             allLangMapEntries.forEach {
                 dbOrRepo.activityLangMapEntryDao.updateIfChanged(
                     almeActivityUid = it.almeActivityUid,
@@ -118,6 +117,10 @@ class StoreActivitiesUseCase(
                     almeLastMod = timeNow,
                 )
             }
+
+            dbOrRepo.activityExtensionDao.upsertListAsync(
+                activityEntities.flatMap { it.activityExtensionEntities }
+            )
         }
     }
 }

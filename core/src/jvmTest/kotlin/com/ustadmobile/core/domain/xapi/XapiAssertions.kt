@@ -21,6 +21,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
@@ -137,6 +138,7 @@ fun assertActivityStoredInDb(
         .findAllByActivityUid(activityUid)
     val interactionEntities = db.activityInteractionDao
         .findAllByActivityUidAsync(activityUid)
+    val extensionEntities = db.activityExtensionDao.findAllByActivityUid(activityUid)
 
     fun List<XapiActivity.Interaction>.assertInteractionsStoredInDb(propName: String, propFlag: Int) {
         forEach { interaction ->
@@ -177,6 +179,18 @@ fun assertActivityStoredInDb(
     assertActivityLangMapEntriesMatch(
         activity?.description, langMapEntries, PROPNAME_DESCRIPTION, xxHasher
     )
+
+    activity?.extensions?.forEach { extension ->
+        val extensionEntity = extensionEntities.firstOrNull {
+            it.aeeKey == extension.key
+        }
+
+        assertNotNull(extensionEntity)
+        val extensionJsonDecoded = extensionEntity.aeeJson?.let {
+            json.decodeFromString(JsonElement.serializer(), it)
+        }
+        assertEquals(extension.value, extensionJsonDecoded)
+    }
 }
 
 fun assertVerbStoredInDb(

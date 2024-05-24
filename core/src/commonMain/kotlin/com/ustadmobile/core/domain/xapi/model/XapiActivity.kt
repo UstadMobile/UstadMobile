@@ -1,9 +1,11 @@
 package com.ustadmobile.core.domain.xapi.model
 
 import com.ustadmobile.core.db.dao.xapi.StatementContextActivityJoin
+import com.ustadmobile.core.domain.xapi.xapiRequireValidIRI
 import com.ustadmobile.core.domain.xxhash.XXStringHasher
 import com.ustadmobile.core.util.ext.toEmptyIfNull
 import com.ustadmobile.lib.db.entities.xapi.ActivityEntity
+import com.ustadmobile.lib.db.entities.xapi.ActivityExtensionEntity
 import com.ustadmobile.lib.db.entities.xapi.ActivityInteractionEntity
 import com.ustadmobile.lib.db.entities.xapi.ActivityInteractionEntity.Companion.PROP_CHOICES
 import com.ustadmobile.lib.db.entities.xapi.ActivityInteractionEntity.Companion.PROP_SCALE
@@ -54,6 +56,7 @@ data class ActivityEntities(
     val activityEntity: ActivityEntity,
     val activityLangMapEntries: List<ActivityLangMapEntry> = emptyList(),
     val activityInteractionEntities: List<ActivityInteractionEntity>  = emptyList(),
+    val activityExtensionEntities: List<ActivityExtensionEntity> = emptyList(),
     val statementContextActivityJoin: StatementContextActivityJoin? = null,
 )
 
@@ -62,6 +65,7 @@ fun XapiActivity?.toEntities(
     stringHasher: XXStringHasher,
     json: Json,
 ): ActivityEntities {
+    xapiRequireValidIRI(activityId, "Activity ID is not a valid IRI: $activityId")
     val activityUid = stringHasher.hash(activityId)
 
     fun Map<String, String>.toLangMapEntries(
@@ -112,5 +116,13 @@ fun XapiActivity?.toEntities(
             this?.description?.toLangMapEntries(ActivityLangMapEntry.PROPNAME_DESCRIPTION).toEmptyIfNull() +
             interactionEntitiesAndLangMaps.flatMap { it.second },
         activityInteractionEntities = interactionEntitiesAndLangMaps.map { it.first },
+        activityExtensionEntities = this?.extensions?.map { (key, value) ->
+            ActivityExtensionEntity(
+                aeeActivityUid = activityUid,
+                aeeKeyHash = stringHasher.hash(key),
+                aeeKey = xapiRequireValidIRI(key, "$activityId extension $key is not a valid IRI"),
+                aeeJson = json.encodeToString(JsonElement.serializer(), value)
+            )
+        } ?: emptyList()
     )
 }
