@@ -35,7 +35,7 @@ class XapiStatementResourceTest {
     fun setup() {
         db = DatabaseBuilder.databaseBuilder(UmAppDatabase::class, "jdbc:sqlite::memory:", nodeId = 1L)
             .build()
-        storeActivitiesUseCase = StoreActivitiesUseCase(db)
+        storeActivitiesUseCase = StoreActivitiesUseCase(db, null)
         xapiStatementResource = XapiStatementResource(
             db = db,
             repo = null,

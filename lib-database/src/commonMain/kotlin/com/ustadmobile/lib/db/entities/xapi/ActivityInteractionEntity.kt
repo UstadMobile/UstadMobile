@@ -16,15 +16,15 @@ import kotlinx.serialization.Serializable
  *
  * Used as a 1:many join with Xobject (xoieObjectUid is the foreign key)
  *
- * @param xoieObjectUid foreign key (XObjectEntity.xObjectUid)
- * @param xoieIdHash hash of "$xoieProp$xoieId" used to uniquely identify the Interaction component
+ * @param aieActivityUid activity uid (foreign key)
+ * @param aieHash hash of "$aieProp$aieId" used to uniquely identify the Interaction component
  *        within a given Object.
- * @param xoieProp one of the PROP_ constants
- * @param xoieId the id of this choice as per the spec
- * @param xoieLastMod last modified time.
+ * @param aieProp one of the PROP_ constants
+ * @param aieId the id of this choice as per the spec
+ * @param aieLastMod last modified time.
  */
 @Entity(
-    primaryKeys = arrayOf("xoieObjectUid", "xoieIdHash")
+    primaryKeys = arrayOf("aieActivityUid", "aieHash")
 )
 @Serializable
 @ReplicateEntity(
@@ -34,7 +34,7 @@ import kotlinx.serialization.Serializable
 @Triggers(
     arrayOf(
         Trigger(
-            name = "xobjectinteractionentity_remote_insert",
+            name = "activityinteractionentity_remote_insert",
             order = Trigger.Order.INSTEAD_OF,
             on = Trigger.On.RECEIVEVIEW,
             events = [ Trigger.Event.INSERT ],
@@ -44,13 +44,13 @@ import kotlinx.serialization.Serializable
     )
 )
 data class ActivityInteractionEntity(
-    var xoieObjectUid: Long = 0,
-    var xoieIdHash: Long = 0,
-    var xoieProp: Int = 0,
-    var xoieId: String? = null,
-    @ReplicateLastModified
+    var aieActivityUid: Long = 0,
+    var aieHash: Long = 0,
+    var aieProp: Int = 0,
+    var aieId: String? = null,
+    @ReplicateLastModified(autoSet = false)
     @ReplicateEtag
-    var xoieLastMod: Long = 0,
+    var aieLastMod: Long = 0,
 ) {
 
     companion object {

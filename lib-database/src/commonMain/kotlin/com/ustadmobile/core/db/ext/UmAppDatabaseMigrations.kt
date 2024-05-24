@@ -1537,6 +1537,21 @@ val MIGRATION_182_183 = DoorMigrationStatementList(182, 183) { db ->
     }
 }
 
+val MIGRATION_183_184 = DoorMigrationStatementList(183, 184) { db ->
+    buildList {
+        add("DROP TABLE ActivityLangMapEntry")
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS ActivityInteractionEntity (  aieActivityUid  INTEGER  NOT NULL , aieHash  INTEGER  NOT NULL , aieProp  INTEGER  NOT NULL , aieId  TEXT , aieLastMod  INTEGER  NOT NULL , PRIMARY KEY (aieActivityUid, aieHash) )")
+            add("CREATE TABLE IF NOT EXISTS ActivityLangMapEntry (  almeActivityUid  INTEGER  NOT NULL , almeHash  INTEGER  NOT NULL , almeLangCode  TEXT , almeValue  TEXT , almeAieHash  INTEGER  NOT NULL , almeLastMod  INTEGER  NOT NULL , PRIMARY KEY (almeActivityUid, almeHash) )")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS ActivityInteractionEntity (  aieActivityUid  BIGINT  NOT NULL , aieHash  BIGINT  NOT NULL , aieProp  INTEGER  NOT NULL , aieId  TEXT , aieLastMod  BIGINT  NOT NULL , PRIMARY KEY (aieActivityUid, aieHash) )")
+            add("CREATE TABLE IF NOT EXISTS ActivityLangMapEntry (  almeActivityUid  BIGINT  NOT NULL , almeHash  BIGINT  NOT NULL , almeLangCode  TEXT , almeValue  TEXT , almeAieHash  BIGINT  NOT NULL , almeLastMod  BIGINT  NOT NULL , PRIMARY KEY (almeActivityUid, almeHash) )")
+        }
+    }
+}
+
+
+
 
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_105_106, MIGRATION_106_107,
@@ -1555,7 +1570,7 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_170_171, MIGRATION_171_172, MIGRATION_172_173, MIGRATION_173_174,
     MIGRATION_174_175, MIGRATION_175_176, MIGRATION_176_177, MIGRATION_177_178,
     MIGRATION_178_179, MIGRATION_179_180, MIGRATION_180_181, MIGRATION_181_182,
-    MIGRATION_182_183,
+    MIGRATION_182_183, MIGRATION_183_184,
 )
 
 

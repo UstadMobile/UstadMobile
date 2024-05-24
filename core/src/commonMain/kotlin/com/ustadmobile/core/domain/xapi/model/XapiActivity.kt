@@ -5,6 +5,11 @@ import com.ustadmobile.core.domain.xxhash.XXStringHasher
 import com.ustadmobile.core.util.ext.toEmptyIfNull
 import com.ustadmobile.lib.db.entities.xapi.ActivityEntity
 import com.ustadmobile.lib.db.entities.xapi.ActivityInteractionEntity
+import com.ustadmobile.lib.db.entities.xapi.ActivityInteractionEntity.Companion.PROP_CHOICES
+import com.ustadmobile.lib.db.entities.xapi.ActivityInteractionEntity.Companion.PROP_SCALE
+import com.ustadmobile.lib.db.entities.xapi.ActivityInteractionEntity.Companion.PROP_SOURCE
+import com.ustadmobile.lib.db.entities.xapi.ActivityInteractionEntity.Companion.PROP_STEPS
+import com.ustadmobile.lib.db.entities.xapi.ActivityInteractionEntity.Companion.PROP_TARGET
 import com.ustadmobile.lib.db.entities.xapi.ActivityLangMapEntry
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -59,14 +64,39 @@ fun XapiActivity?.toEntities(
 ): ActivityEntities {
     val activityUid = stringHasher.hash(id)
 
-    fun Map<String, String>.toLangMapEntries(propName: String) = entries.map { (lang, text) ->
+    fun Map<String, String>.toLangMapEntries(
+        propName: String,
+        almeAieHash: Long = 0,
+    ) = entries.map { (lang, text) ->
         ActivityLangMapEntry(
             almeActivityUid = activityUid,
             almeHash = stringHasher.hash("$propName-$lang"),
             almeLangCode = lang,
             almeValue = text,
+            almeAieHash = almeAieHash,
         )
     }
+
+    fun XapiActivity.Interaction.toEntities(
+        propId: Int,
+        propName: String,
+    ): Pair<ActivityInteractionEntity, List<ActivityLangMapEntry>> {
+        val aieHash = stringHasher.hash("$propId$id")
+
+        return ActivityInteractionEntity(
+            aieActivityUid = activityUid,
+            aieHash = aieHash,
+            aieProp = propId,
+            aieId = id,
+        ) to description?.toLangMapEntries(propName, almeAieHash = aieHash).toEmptyIfNull()
+    }
+
+    val interactionEntitiesAndLangMaps =
+        this?.choices?.map { it.toEntities(PROP_CHOICES, "choices") }.toEmptyIfNull() +
+        this?.scale?.map { it.toEntities(PROP_SCALE, "scale") }.toEmptyIfNull() +
+        this?.source?.map { it.toEntities(PROP_SOURCE, "source") }.toEmptyIfNull() +
+        this?.target?.map { it.toEntities(PROP_TARGET, "target") }.toEmptyIfNull() +
+        this?.steps?.map { it.toEntities(PROP_STEPS, "steps") }.toEmptyIfNull()
 
     return ActivityEntities(
         activityEntity = ActivityEntity(
@@ -79,7 +109,8 @@ fun XapiActivity?.toEntities(
         ),
         activityLangMapEntries =
             this?.name?.toLangMapEntries(ActivityLangMapEntry.PROPNAME_NAME).toEmptyIfNull() +
-            this?.description?.toLangMapEntries(ActivityLangMapEntry.PROPNAME_DESCRIPTION).toEmptyIfNull(),
-        activityInteractionEntities = emptyList(),
+            this?.description?.toLangMapEntries(ActivityLangMapEntry.PROPNAME_DESCRIPTION).toEmptyIfNull() +
+            interactionEntitiesAndLangMaps.flatMap { it.second },
+        activityInteractionEntities = interactionEntitiesAndLangMaps.map { it.first },
     )
 }
