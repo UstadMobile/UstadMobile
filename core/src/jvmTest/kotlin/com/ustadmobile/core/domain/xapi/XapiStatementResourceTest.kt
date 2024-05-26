@@ -126,6 +126,12 @@ class XapiStatementResourceTest {
         Unit
     }
 
+    @Test
+    fun givenLongStatementWithContextActivities_whenStored_thenShouldBeInDb() = runBlocking {
+        storeStatementAndAssert("$RESOURCE_PATH/appendix-a-long-statement.json", defaultXapiSession)
+        Unit
+    }
+
     companion object {
         const val RESOURCE_PATH = "/com/ustadmobile/core/domain/xapi"
     }

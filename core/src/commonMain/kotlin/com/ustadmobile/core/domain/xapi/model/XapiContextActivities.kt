@@ -118,7 +118,8 @@ fun List<XapiActivityStatementObject>.toEntities(
                 activityEntity = ActivityEntity(
                     actUid = activityUid,
                     actIdIri = contextActivityObj.id,
-                )
+                ),
+                statementContextActivityJoin = statementContextActivityJoin,
             )
     }
 }

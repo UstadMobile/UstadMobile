@@ -3,6 +3,7 @@ package com.ustadmobile.core.domain.xapi
 import com.benasher44.uuid.Uuid
 import com.benasher44.uuid.uuidFrom
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.xapi.StatementContextActivityJoin
 import com.ustadmobile.core.domain.xapi.model.XapiActivity
 import com.ustadmobile.core.domain.xapi.model.XapiActivityStatementObject
 import com.ustadmobile.core.domain.xapi.model.XapiActor
@@ -72,6 +73,22 @@ fun assertStatementStoredInDb(
             assertEquals(uuidFrom(registrationUuid),
                 Uuid(statementInDb.contextRegistrationHi, statementInDb.contextRegistrationLo))
         }
+
+        fun assertContextActivitiesInternal(
+            contextActivities: List<XapiActivityStatementObject>?,
+            typeFlag: Int
+        ) =assertStatementContextActivitiesInDb(
+            statement, contextActivities, db, typeFlag, xxHasher, json
+        )
+        assertContextActivitiesInternal(statement.context?.contextActivities?.parent,
+            StatementContextActivityJoin.TYPE_PARENT)
+        assertContextActivitiesInternal(statement.context?.contextActivities?.category,
+            StatementContextActivityJoin.TYPE_CATEGORY)
+        assertContextActivitiesInternal(statement.context?.contextActivities?.grouping,
+            StatementContextActivityJoin.TYPE_GROUPING)
+        assertContextActivitiesInternal(statement.context?.contextActivities?.other,
+            StatementContextActivityJoin.TYPE_OTHER)
+
         if(xapiSession != null) {
             assertEquals(xapiSession.contentEntryUid, statementInDb.statementContentEntryUid)
             assertEquals(xapiSession.clazzUid, statementInDb.statementClazzUid)
@@ -139,6 +156,43 @@ fun assertStatementStoredInDb(
             }
         }
     }
+}
+
+fun assertStatementContextActivitiesInDb(
+    statement: XapiStatement,
+    contextActivities: List<XapiActivityStatementObject>?,
+    db: UmAppDatabase,
+    scajContextType: Int,
+    stringHasher: XXStringHasher,
+    json: Json,
+) = runBlocking {
+    if(contextActivities == null)
+        return@runBlocking
+
+    val stmtUuid = uuidFrom(statement.id!!)
+    val contextActivityEntities = db.statementContextActivityJoinDao.findAllByStatementId(
+        stmtUuid.mostSignificantBits, stmtUuid.leastSignificantBits, scajContextType
+    )
+    assertEquals(contextActivities.size, contextActivityEntities.size)
+    contextActivities.forEach { contextActivity ->
+        val contextActivityEntity = contextActivityEntities.firstOrNull {
+            it.scajToActivityId == contextActivity.id
+        }
+        assertNotNull(contextActivityEntity)
+        assertEquals(stringHasher.hash("$scajContextType-${contextActivity.id}"),
+            contextActivityEntity.scajToHash)
+        assertEquals(stringHasher.hash(contextActivity.id), contextActivityEntity.scajToActivityUid)
+
+        assertActivityStoredInDb(
+            activity = contextActivity.definition,
+            activityUid = contextActivityEntity.scajToActivityUid,
+            activityId = contextActivity.id,
+            db = db,
+            xxHasher = stringHasher,
+            json = json,
+        )
+    }
+
 }
 
 fun assertActivityLangMapEntriesMatch(

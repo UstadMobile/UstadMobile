@@ -1,7 +1,6 @@
 package com.ustadmobile.core.domain.xapi.model
 
 import com.benasher44.uuid.uuidFrom
-import com.ustadmobile.core.db.dao.xapi.StatementContextActivityJoin
 import com.ustadmobile.core.domain.xapi.XapiException
 import com.ustadmobile.core.domain.xapi.XapiSession
 import com.ustadmobile.core.domain.xapi.xapiRequireDurationOrNullAsLong
@@ -10,6 +9,7 @@ import com.ustadmobile.core.domain.xapi.xapiRequireValidIRI
 import com.ustadmobile.core.domain.xapi.xapiRequireValidUuidOrNull
 import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
 import com.ustadmobile.core.domain.xxhash.XXStringHasher
+import com.ustadmobile.core.util.ext.toEmptyIfNull
 import com.ustadmobile.door.DoorPrimaryKeyManager
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.xapi.StatementEntity
@@ -44,7 +44,6 @@ data class XapiStatement(
 
 data class StatementEntities(
     val statementEntity: StatementEntity? = null,
-    val statementContextActivityJoins: List<StatementContextActivityJoin> = emptyList(),
     val actorEntities: ActorEntities? = null,
     val verbEntities: VerbEntities? = null,
     val activityEntities: List<ActivityEntities>? = null,
@@ -129,8 +128,12 @@ fun XapiStatement.toEntities(
             ),
             actorEntities = actor.toEntities(stringHasher, primaryKeyManager, hasherFactory),
             verbEntities = verb.toVerbEntities(stringHasher),
+            /*
+             * Note: object.objectToEntities will generate the ActivityEntities where an the object
+             * of the statement is an activity.
+             */
             activityEntities = context?.contextActivities
-                ?.toEntities(stringHasher, json , statementUuid)
+                ?.toEntities(stringHasher, json , statementUuid).toEmptyIfNull()
         ),
     ) + `object`.objectToEntities(
         stringHasher = stringHasher,

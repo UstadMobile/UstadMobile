@@ -6,6 +6,12 @@ import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.xapi.ActivityEntity
 
+/**
+ * UseCase to handle storing xAPI activities. This can be used from the statement endpoint (e.g.
+ * to handle when a statement includes an activity or reference to an activity as statement object,
+ * substatement object, or via contextActivities properties), or for the activity profile resource
+ * itself.
+ */
 class StoreActivitiesUseCase(
     private val db: UmAppDatabase,
     repo: UmAppDatabase?,
@@ -121,6 +127,13 @@ class StoreActivitiesUseCase(
             dbOrRepo.activityExtensionDao.upsertListAsync(
                 activityEntities.flatMap { it.activityExtensionEntities }
             )
+
+            activityEntities.mapNotNull { it.statementContextActivityJoin }
+                .takeIf { it.isNotEmpty() }
+                ?.also {
+                    dbOrRepo.statementContextActivityJoinDao.insertOrIgnoreListAsync(it)
+                }
+
         }
     }
 }

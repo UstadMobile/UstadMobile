@@ -1571,6 +1571,16 @@ val MIGRATION_184_185 = DoorMigrationStatementList(184, 185) { db ->
     }
 }
 
+val MIGRATION_185_186 = DoorMigrationStatementList(185, 186) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS StatementContextActivityJoin (  scajFromStatementIdHi  INTEGER  NOT NULL , scajFromStatementIdLo  INTEGER  NOT NULL , scajToHash  INTEGER  NOT NULL , scajContextType  INTEGER  NOT NULL , scajToActivityUid  INTEGER  NOT NULL , scajToActivityId  TEXT , scajEtag  INTEGER  NOT NULL , PRIMARY KEY (scajFromStatementIdHi, scajFromStatementIdLo, scajToHash) )")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS StatementContextActivityJoin (  scajFromStatementIdHi  BIGINT  NOT NULL , scajFromStatementIdLo  BIGINT  NOT NULL , scajToHash  BIGINT  NOT NULL , scajContextType  INTEGER  NOT NULL , scajToActivityUid  BIGINT  NOT NULL , scajToActivityId  TEXT , scajEtag  BIGINT  NOT NULL , PRIMARY KEY (scajFromStatementIdHi, scajFromStatementIdLo, scajToHash) )")
+        }
+    }
+}
+
 
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_105_106, MIGRATION_106_107,
@@ -1589,7 +1599,7 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_170_171, MIGRATION_171_172, MIGRATION_172_173, MIGRATION_173_174,
     MIGRATION_174_175, MIGRATION_175_176, MIGRATION_176_177, MIGRATION_177_178,
     MIGRATION_178_179, MIGRATION_179_180, MIGRATION_180_181, MIGRATION_181_182,
-    MIGRATION_182_183, MIGRATION_183_184, MIGRATION_184_185,
+    MIGRATION_182_183, MIGRATION_183_184, MIGRATION_184_185, MIGRATION_185_186,
 )
 
 

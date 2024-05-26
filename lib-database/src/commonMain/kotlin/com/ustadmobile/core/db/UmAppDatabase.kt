@@ -23,6 +23,8 @@ import com.ustadmobile.lib.db.entities.xapi.ActivityEntity
 import com.ustadmobile.lib.db.entities.xapi.ActivityInteractionEntity
 import com.ustadmobile.lib.db.entities.xapi.ActivityLangMapEntry
 import com.ustadmobile.core.db.dao.xapi.ActivityLangMapEntryDao
+import com.ustadmobile.core.db.dao.xapi.StatementContextActivityJoin
+import com.ustadmobile.core.db.dao.xapi.StatementContextActivityJoinDao
 import com.ustadmobile.lib.db.entities.xapi.ActivityExtensionEntity
 
 @DoorDatabase(entities = [NetworkNode::class,
@@ -89,6 +91,7 @@ import com.ustadmobile.lib.db.entities.xapi.ActivityExtensionEntity
     GroupMemberActorJoin::class,
     ActivityLangMapEntry::class,
     ActivityExtensionEntity::class,
+    StatementContextActivityJoin::class,
 
     //Door entities
     OutgoingReplication::class,
@@ -289,5 +292,7 @@ expect abstract class UmAppDatabase : RoomDatabase {
     abstract val activityInteractionDao: ActivityInteractionDao
 
     abstract val activityExtensionDao: ActivityExtensionDao
+
+    abstract val statementContextActivityJoinDao: StatementContextActivityJoinDao
 
 }

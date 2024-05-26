@@ -44,7 +44,7 @@ sealed interface XapiStatementObject {
 data class XapiActivityStatementObject(
     override val objectType: XapiObjectType? = null,
     val id: String,
-    val definition: XapiActivity?,
+    val definition: XapiActivity? = null,
 ): XapiStatementObject
 
 /**
