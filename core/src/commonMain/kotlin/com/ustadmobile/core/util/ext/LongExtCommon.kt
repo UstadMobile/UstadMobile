@@ -31,6 +31,9 @@ fun Long?.isDateSet(): Boolean {
 }
 
 
+/**
+ * Converts a Long to a byte array without requiring ByteBuffer
+ */
 fun Long.toByteArray(): ByteArray {
     val buffer = ByteArray(8)
     var temp = this
