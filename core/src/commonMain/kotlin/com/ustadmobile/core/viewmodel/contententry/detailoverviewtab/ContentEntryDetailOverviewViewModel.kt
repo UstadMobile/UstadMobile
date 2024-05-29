@@ -20,7 +20,6 @@ import com.ustadmobile.core.domain.contententry.launchcontent.LaunchContentEntry
 import com.ustadmobile.core.domain.contententry.launchcontent.epub.LaunchEpubUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.LaunchXapiUseCase
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
-import com.ustadmobile.core.domain.xapi.XapiSession
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.util.ext.bodyAsDecodedText
@@ -160,8 +159,8 @@ class ContentEntryDetailOverviewViewModel(
         viewModelScope.launch {
             _uiState.whenSubscribed {
                 launch {
-                    activeRepo.contentEntryDao.findEntryWithContainerByEntryIdLive(
-                        entryUuid = entityUidArg,
+                    activeRepo.contentEntryDao.findByContentEntryUidWithDetailsAsFlow(
+                        contentEntryUid = entityUidArg,
                         courseBlockUid = savedStateHandle[ARG_COURSE_BLOCK_UID]?.toLong() ?: 0,
                         accountPersonUid = activeUserPersonUid,
                     ).collect {

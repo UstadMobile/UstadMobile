@@ -4,7 +4,8 @@ import androidx.room.*
 import com.ustadmobile.core.db.dao.ContentEntryDaoCommon.SORT_TITLE_ASC
 import com.ustadmobile.core.db.dao.ContentEntryDaoCommon.SORT_TITLE_DESC
 import app.cash.paging.PagingSource
-import com.ustadmobile.core.db.dao.ContentEntryDaoCommon.FROM_STATEMENT_ENTITY_WHERE_MATCHES_ACCOUNT_PERSON_UID_AND_CONTENT_ENTRY_ROOT
+import com.ustadmobile.core.db.dao.xapi.StatementDao
+import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CONTENT_ENTRY
 import kotlinx.coroutines.flow.Flow
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.composites.ContentEntryAndDetail
@@ -50,15 +51,22 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
         uid: Long,
     ): ContentEntryAndPicture?
 
+
+
     @HttpAccessible(
-        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall("findByContentEntryUidWithDetailsAsFlow"),
+            HttpServerFunctionCall(
+                functionName = "findStatusStatementsByContentEntryUid",
+                functionDao = StatementDao::class,
+            )
+        )
     )
     @Query("""
             WITH ContentResultStatements AS(
                  SELECT StatementEntity.*
-                        $FROM_STATEMENT_ENTITY_WHERE_MATCHES_ACCOUNT_PERSON_UID_AND_CONTENT_ENTRY_ROOT
-                    AND (    (StatementEntity.resultCompletion IS NOT NULL)
-                          OR (StatementEntity.extensionProgress IS NOT NULL))
+                        $FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CONTENT_ENTRY
             )
         
             SELECT ContentEntry.*, ContentEntryVersion.*, ContentEntryPicture2.*,
@@ -96,16 +104,16 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
                              ON ContentEntryVersion.cevUid = 
                              (SELECT ContentEntryVersion.cevUid
                                 FROM ContentEntryVersion
-                               WHERE ContentEntryVersion.cevContentEntryUid = :entryUuid
+                               WHERE ContentEntryVersion.cevContentEntryUid = :contentEntryUid
                                  AND CAST(cevInActive AS INTEGER) = 0
                             ORDER BY ContentEntryVersion.cevLct DESC
                               LIMIT 1)
                    LEFT JOIN ContentEntryPicture2
-                             ON ContentEntryPicture2.cepUid = :entryUuid   
-             WHERE ContentEntry.contentEntryUid = :entryUuid
+                             ON ContentEntryPicture2.cepUid = :contentEntryUid   
+             WHERE ContentEntry.contentEntryUid = :contentEntryUid
             """)
-    abstract fun findEntryWithContainerByEntryIdLive(
-        entryUuid: Long,
+    abstract fun findByContentEntryUidWithDetailsAsFlow(
+        contentEntryUid: Long,
         courseBlockUid: Long,
         accountPersonUid: Long,
     ): Flow<ContentEntryAndDetail?>

@@ -4,6 +4,7 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.RawQuery
 import app.cash.paging.PagingSource
+import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CONTENT_ENTRY
 import com.ustadmobile.door.DoorQuery
 import com.ustadmobile.door.annotation.DoorDao
 import com.ustadmobile.door.annotation.QueryLiveTables
@@ -59,5 +60,21 @@ expect abstract class StatementDao {
         statementIdHi: Long,
         statementIdLo: Long,
     ): StatementEntity?
+
+
+    /**
+     * Find Xapi Statements that are relevant to determining the completion status of a
+     * given ContentEntry for a given user (e.g. they match the content entry, person,
+     * StatementEntity.contentEntryRoot is true, and (progress > 0 OR completion = true)
+     */
+    @Query("""
+        SELECT StatementEntity.*
+               $FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CONTENT_ENTRY
+    """)
+    abstract suspend fun findStatusStatementsByContentEntryUid(
+        contentEntryUid: Long,
+        courseBlockUid: Long,
+        accountPersonUid: Long,
+    ): List<StatementEntity>
 
 }
