@@ -39,7 +39,7 @@ expect abstract class ActorDao {
     abstract suspend fun findByUidAsync(uid: Long): ActorEntity?
 
     @Query("""
-        SELECT ActorEntity.actorUid, ActorEntity.actorEtag
+        SELECT ActorEntity.actorUid, ActorEntity.actorEtag, ActorEntity.actorLct
           FROM ActorEntity
          WHERE ActorEntity.actorUid IN (:uidList)
     """)

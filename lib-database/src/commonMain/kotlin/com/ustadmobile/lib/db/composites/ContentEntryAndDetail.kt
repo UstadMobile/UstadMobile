@@ -16,4 +16,7 @@ data class ContentEntryAndDetail(
 
     @Embedded
     var picture: ContentEntryPicture2? = null,
+
+    @Embedded
+    var status: BlockStatus? = null,
 )

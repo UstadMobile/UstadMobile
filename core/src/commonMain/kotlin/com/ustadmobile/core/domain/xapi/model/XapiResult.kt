@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
 
 @Serializable
-data class Result(
+data class XapiResult(
     var completion: Boolean? = null,
     var success: Boolean? = null,
     var score: Score? = null,

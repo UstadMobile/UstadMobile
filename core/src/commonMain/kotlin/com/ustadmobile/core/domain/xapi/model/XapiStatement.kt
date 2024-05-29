@@ -32,7 +32,7 @@ data class XapiStatement(
     val verb: XapiVerb,
     @SerialName("object")
     val `object`: XapiStatementObject,
-    val result: Result? = null,
+    val result: XapiResult? = null,
     val context: XapiContext? = null,
     val timestamp: String? = null,
     val stored: String? = null,

@@ -13,6 +13,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -38,12 +39,20 @@ actual fun VideoContentScreen(
 ) {
 
     val uiState by viewModel.uiState.collectAsState(VideoContentUiState())
-    VideoContentScreen(uiState)
+    VideoContentScreen(
+        uiState = uiState,
+        onResumed = viewModel::onPlay,
+        onPaused = viewModel::onPause,
+        onCompleted = viewModel::onComplete,
+    )
 }
 
 @Composable
 fun VideoContentScreen(
-    uiState: VideoContentUiState
+    uiState: VideoContentUiState,
+    onResumed: () -> Unit,
+    onPaused: () -> Unit,
+    onCompleted: () ->  Unit,
 ) {
     val mediaSrc = uiState.firstMediaUri
     val endpoint = uiState.endpoint
@@ -76,6 +85,14 @@ fun VideoContentScreen(
                 }
             }
 
+            LaunchedEffect(state.isResumed) {
+                if(state.isResumed) {
+                    onResumed()
+                }else {
+                    onPaused()
+                }
+            }
+
             Column {
                 VideoPlayer(
                     modifier = Modifier
@@ -83,7 +100,10 @@ fun VideoContentScreen(
                         .fillMaxHeight(fraction = 0.8f),
                     url = url,
                     state = state,
-                    onFinish = state::stopPlayback
+                    onFinish = {
+                        onCompleted()
+                        state.stopPlayback()
+                    }
                 )
                 Row(
                     modifier = Modifier.fillMaxWidth(),

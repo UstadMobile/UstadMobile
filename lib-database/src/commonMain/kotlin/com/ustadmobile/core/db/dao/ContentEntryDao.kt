@@ -4,6 +4,7 @@ import androidx.room.*
 import com.ustadmobile.core.db.dao.ContentEntryDaoCommon.SORT_TITLE_ASC
 import com.ustadmobile.core.db.dao.ContentEntryDaoCommon.SORT_TITLE_DESC
 import app.cash.paging.PagingSource
+import com.ustadmobile.core.db.dao.ContentEntryDaoCommon.FROM_STATEMENT_ENTITY_WHERE_MATCHES_ACCOUNT_PERSON_UID_AND_CONTENT_ENTRY_ROOT
 import kotlinx.coroutines.flow.Flow
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.composites.ContentEntryAndDetail
@@ -53,7 +54,43 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
     )
     @Query("""
-            SELECT ContentEntry.*, ContentEntryVersion.*, ContentEntryPicture2.*
+            WITH ContentResultStatements AS(
+                 SELECT StatementEntity.*
+                        $FROM_STATEMENT_ENTITY_WHERE_MATCHES_ACCOUNT_PERSON_UID_AND_CONTENT_ENTRY_ROOT
+                    AND (    (StatementEntity.resultCompletion IS NOT NULL)
+                          OR (StatementEntity.extensionProgress IS NOT NULL))
+            )
+        
+            SELECT ContentEntry.*, ContentEntryVersion.*, ContentEntryPicture2.*,
+                   :accountPersonUid AS sPersonUid,
+                   :courseBlockUid AS sCbUid,
+                   (SELECT MAX(ContentResultStatements.extensionProgress)
+                      FROM ContentResultStatements
+                   ) AS sProgress,
+                   (SELECT CASE 
+                           WHEN (SELECT EXISTS(
+                                        SELECT 1
+                                          FROM ContentResultStatements
+                                         WHERE ContentResultStatements.resultSuccess IS NOT NULL 
+                                           AND CAST(ContentResultStatements.resultSuccess AS INTEGER) = 1))
+                                    THEN 1
+                           WHEN (SELECT EXISTS(
+                                        SELECT 1
+                                          FROM ContentResultStatements
+                                         WHERE ContentResultStatements.resultSuccess IS NOT NULL 
+                                           AND CAST(ContentResultStatements.resultSuccess AS INTEGER) = 0))
+                                    THEN 0   
+                           ELSE NULL              
+                           END
+                   ) AS sIsSuccess,
+                   (SELECT EXISTS(
+                           SELECT 1
+                             FROM ContentResultStatements
+                            WHERE CAST(ContentResultStatements.resultCompletion AS INTEGER) = 1)
+                   ) AS sIsCompleted,
+                   (SELECT MAX(ContentResultStatements.resultScoreScaled)
+                      FROM ContentResultStatements) AS sRawScore,
+                   0 AS sMaxScore
               FROM ContentEntry
                    LEFT JOIN ContentEntryVersion
                              ON ContentEntryVersion.cevUid = 
@@ -68,7 +105,9 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
              WHERE ContentEntry.contentEntryUid = :entryUuid
             """)
     abstract fun findEntryWithContainerByEntryIdLive(
-        entryUuid: Long
+        entryUuid: Long,
+        courseBlockUid: Long,
+        accountPersonUid: Long,
     ): Flow<ContentEntryAndDetail?>
 
     @Query("SELECT * FROM ContentEntry WHERE sourceUrl = :sourceUrl LIMIT 1")

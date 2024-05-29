@@ -25,9 +25,7 @@ class ContentEntryDetailViewModel(
                 TabItem(
                     viewName = ContentEntryDetailOverviewViewModel.DEST_NAME,
                     args = buildMap {
-                        putFromSavedStateIfPresent(ARG_ENTITY_UID)
-                        putFromSavedStateIfPresent(ARG_CLAZZUID)
-                        putFromSavedStateIfPresent(ARG_PARENT_UID)
+                        putFromSavedStateIfPresent(PASS_THROUGH_ARGS)
                     },
                     label = systemImpl.getString(MR.strings.overview)
                 )
@@ -40,6 +38,11 @@ class ContentEntryDetailViewModel(
 
     companion object {
         const val DEST_NAME = "ContentEntry"
+
+        //Arguments that are passed through to child tabs
+        private val PASS_THROUGH_ARGS = listOf(ARG_ENTITY_UID, ARG_CLAZZUID,
+            ARG_PARENT_UID, ARG_COURSE_BLOCK_UID)
+
     }
 
 }

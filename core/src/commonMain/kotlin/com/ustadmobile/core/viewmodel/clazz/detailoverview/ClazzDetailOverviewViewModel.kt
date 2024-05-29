@@ -244,6 +244,7 @@ class ClazzDetailOverviewViewModel(
                     args = mapOf(
                         ARG_ENTITY_UID to courseBlock.cbEntityUid.toString(),
                         ARG_CLAZZUID to entityUidArg.toString(),
+                        ARG_COURSE_BLOCK_UID to courseBlock.cbUid.toString(),
                     )
                 )
             }
