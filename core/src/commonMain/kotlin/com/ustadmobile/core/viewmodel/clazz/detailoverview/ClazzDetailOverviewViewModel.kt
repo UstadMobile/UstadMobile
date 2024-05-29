@@ -102,6 +102,7 @@ class ClazzDetailOverviewViewModel(
             includeInactive = false,
             includeHidden = false,
             hideUntilFilterTime = systemTimeInMillis(),
+            accountPersonUid = activeUserPersonUid,
         )
     }
 

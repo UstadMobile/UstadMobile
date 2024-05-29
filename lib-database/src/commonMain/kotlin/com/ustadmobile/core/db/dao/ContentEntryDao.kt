@@ -64,7 +64,7 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
         )
     )
     @Query("""
-            WITH ContentResultStatements AS(
+            WITH StatusStatements AS(
                  SELECT StatementEntity.*
                         $FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CONTENT_ENTRY
             )
@@ -72,32 +72,32 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
             SELECT ContentEntry.*, ContentEntryVersion.*, ContentEntryPicture2.*,
                    :accountPersonUid AS sPersonUid,
                    :courseBlockUid AS sCbUid,
-                   (SELECT MAX(ContentResultStatements.extensionProgress)
-                      FROM ContentResultStatements
+                   (SELECT MAX(StatusStatements.extensionProgress)
+                      FROM StatusStatements
                    ) AS sProgress,
                    (SELECT CASE 
                            WHEN (SELECT EXISTS(
                                         SELECT 1
-                                          FROM ContentResultStatements
-                                         WHERE ContentResultStatements.resultSuccess IS NOT NULL 
-                                           AND CAST(ContentResultStatements.resultSuccess AS INTEGER) = 1))
+                                          FROM StatusStatements
+                                         WHERE StatusStatements.resultSuccess IS NOT NULL 
+                                           AND CAST(StatusStatements.resultSuccess AS INTEGER) = 1))
                                     THEN 1
                            WHEN (SELECT EXISTS(
                                         SELECT 1
-                                          FROM ContentResultStatements
-                                         WHERE ContentResultStatements.resultSuccess IS NOT NULL 
-                                           AND CAST(ContentResultStatements.resultSuccess AS INTEGER) = 0))
+                                          FROM StatusStatements
+                                         WHERE StatusStatements.resultSuccess IS NOT NULL 
+                                           AND CAST(StatusStatements.resultSuccess AS INTEGER) = 0))
                                     THEN 0   
                            ELSE NULL              
                            END
                    ) AS sIsSuccess,
                    (SELECT EXISTS(
                            SELECT 1
-                             FROM ContentResultStatements
-                            WHERE CAST(ContentResultStatements.resultCompletion AS INTEGER) = 1)
+                             FROM StatusStatements
+                            WHERE CAST(StatusStatements.resultCompletion AS INTEGER) = 1)
                    ) AS sIsCompleted,
-                   (SELECT MAX(ContentResultStatements.resultScoreScaled)
-                      FROM ContentResultStatements) AS sRawScore,
+                   (SELECT MAX(StatusStatements.resultScoreScaled)
+                      FROM StatusStatements) AS sRawScore,
                    0 AS sMaxScore
               FROM ContentEntry
                    LEFT JOIN ContentEntryVersion

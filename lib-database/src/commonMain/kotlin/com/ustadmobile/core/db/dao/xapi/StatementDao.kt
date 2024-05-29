@@ -4,6 +4,7 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.RawQuery
 import app.cash.paging.PagingSource
+import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CLAZZ_STUDENT
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CONTENT_ENTRY
 import com.ustadmobile.door.DoorQuery
 import com.ustadmobile.door.annotation.DoorDao
@@ -74,6 +75,15 @@ expect abstract class StatementDao {
     abstract suspend fun findStatusStatementsByContentEntryUid(
         contentEntryUid: Long,
         courseBlockUid: Long,
+        accountPersonUid: Long,
+    ): List<StatementEntity>
+
+    @Query("""
+        SELECT StatementEntity.*
+               $FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CLAZZ_STUDENT
+    """)
+    abstract suspend fun findStatusStatementsForStudentByClazzUid(
+        clazzUid: Long,
         accountPersonUid: Long,
     ): List<StatementEntity>
 

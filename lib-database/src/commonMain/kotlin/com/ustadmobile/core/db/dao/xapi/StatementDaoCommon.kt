@@ -1,5 +1,7 @@
 package com.ustadmobile.core.db.dao.xapi
 
+import com.ustadmobile.lib.db.entities.ClazzEnrolment
+
 object StatementDaoCommon {
 
     const val FROM_STATEMENT_ENTITY_WHERE_MATCHES_ACCOUNT_PERSON_UID_AND_CONTENT_ENTRY_ROOT = """
@@ -16,6 +18,20 @@ object StatementDaoCommon {
               OR (StatementEntity.extensionProgress IS NOT NULL))
         
         
+    """
+
+    const val FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CLAZZ_STUDENT = """
+               FROM StatementEntity
+              WHERE (SELECT EXISTS(
+                            SELECT 1
+                              FROM ClazzEnrolment
+                             WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid
+                               AND ClazzEnrolment.clazzEnrolmentPersonUid = :accountPersonUid
+                               AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}))
+                AND StatementEntity.statementActorPersonUid = :accountPersonUid
+                AND StatementEntity.statementClazzUid = :clazzUid
+                AND (    (CAST(StatementEntity.resultCompletion AS INTEGER) = 1)
+                      OR (StatementEntity.extensionProgress IS NOT NULL))
     """
 
     const val SORT_FIRST_NAME_ASC = 1

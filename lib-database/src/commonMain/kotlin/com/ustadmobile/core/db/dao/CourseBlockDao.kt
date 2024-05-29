@@ -9,6 +9,8 @@ import com.ustadmobile.door.annotation.DoorDao
 import com.ustadmobile.door.annotation.Repository
 import app.cash.paging.PagingSource
 import com.ustadmobile.core.db.UNSET_DISTANT_FUTURE
+import com.ustadmobile.core.db.dao.xapi.StatementDao
+import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CLAZZ_STUDENT
 import com.ustadmobile.door.annotation.HttpAccessible
 import com.ustadmobile.door.annotation.HttpServerFunctionCall
 import com.ustadmobile.door.annotation.HttpServerFunctionParam
@@ -107,6 +109,10 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
 
 
 
+    /*
+     * Note: no need to pull enrolment entities: this is always used after a permission check that
+     * would pull those entities
+     */
     @HttpAccessible(
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
         pullQueriesToReplicate = arrayOf(
@@ -128,14 +134,64 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
                         name = "hideUntilFilterTime",
                         argType = HttpServerFunctionParam.ArgType.LITERAL,
                         literalValue = "${UNSET_DISTANT_FUTURE}L",
-                    )
+                    ),
                 )
+            ),
+            HttpServerFunctionCall(
+                functionName = "findStatusStatementsForStudentByClazzUid",
+                functionDao = StatementDao::class,
             )
         )
     )
     @Query("""
+        WITH StatusStatements AS (
+             SELECT StatementEntity.*
+                    $FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CLAZZ_STUDENT
+        )
+        
         SELECT CourseBlock.*, ContentEntry.*, CourseBlockPicture.*, ContentEntryPicture2.*,
-               CourseBlock.cbUid NOT IN(:collapseList) AS expanded
+               CourseBlock.cbUid NOT IN(:collapseList) AS expanded,
+               
+               --Begin BlockStatus fields
+               :accountPersonUid AS sPersonUid,
+               CourseBlock.cbUid AS sCbUid,
+               (SELECT MAX(StatusStatements.extensionProgress)
+                  FROM StatusStatements
+                 WHERE StatusStatements.statementCbUid = CourseBlock.cbUid
+               ) AS sProgress,
+               (SELECT CASE
+                       -- If a successful completion statement exists, then count as success
+                       WHEN (SELECT EXISTS(
+                                    SELECT 1
+                                      FROM StatusStatements
+                                     WHERE StatusStatements.statementCbUid = CourseBlock.cbUid 
+                                       AND CAST(StatusStatements.resultSuccess AS INTEGER) = 1))
+                            THEN 1
+                       -- Else if a record exsits where      
+                       WHEN (SELECT EXISTS(
+                                    SELECT 1
+                                      FROM StatusStatements
+                                     WHERE StatusStatements.statementCbUid = CourseBlock.cbUid 
+                                       AND (    StatusStatements.resultCompletion IS NOT NULL 
+                                            AND CAST(StatusStatements.resultSuccess AS INTEGER) = 0)))
+                            THEN 0
+                            
+                       ELSE NULL
+                       END                    
+               ) AS sIsSuccess,
+               (SELECT EXISTS(
+                       SELECT 1
+                         FROM StatusStatements
+                        WHERE StatusStatements.statementCbUid = CourseBlock.cbUid
+                          AND CAST(StatusStatements.resultCompletion AS INTEGER) = 1)
+               ) AS sIsCompleted,
+               (SELECT MAX(StatusStatements.resultScoreScaled)
+                  FROM StatusStatements
+                 WHERE StatusStatements.statementCbUid = CourseBlock.cbUid
+               ) AS sRawScore,
+               0 AS sMaxScore
+               -- End block status fields
+               
           FROM CourseBlock
                LEFT JOIN ContentEntry
                          ON CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
@@ -163,6 +219,7 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
         includeInactive: Boolean,
         includeHidden: Boolean,
         hideUntilFilterTime: Long,
+        accountPersonUid: Long,
     ): PagingSource<Int, CourseBlockAndDisplayDetails>
 
     @Query("""
