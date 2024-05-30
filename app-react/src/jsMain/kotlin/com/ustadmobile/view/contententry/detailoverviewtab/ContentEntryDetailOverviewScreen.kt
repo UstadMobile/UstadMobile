@@ -17,9 +17,11 @@ import com.ustadmobile.mui.common.md
 import com.ustadmobile.mui.common.xs
 import com.ustadmobile.mui.components.ThemeContext
 import com.ustadmobile.mui.components.UstadBlockIcon
+import com.ustadmobile.mui.components.UstadBlockStatusProgressBar
 import com.ustadmobile.mui.components.UstadLinearProgressListItem
 import com.ustadmobile.mui.components.UstadQuickActionButton
 import com.ustadmobile.mui.components.UstadRawHtml
+import com.ustadmobile.util.ext.useAbsolutePositionBottom
 import web.cssom.*
 import mui.material.*
 import mui.material.styles.TypographyVariant
@@ -163,13 +165,30 @@ private val ContentDetails = FC<ContentEntryDetailOverviewScreenProps> { props -
             paddingTop = theme.spacing(2)
         }
 
-        UstadBlockIcon {
-            title = props.uiState.contentEntry?.entry?.title ?: ""
-            contentEntry = props.uiState.contentEntry?.entry
-            pictureUri = props.uiState.contentEntry?.picture?.cepPictureUri
-            width = 100.px
-            height = 100.px
-            iconSize = SvgIconSize.large
+        Box {
+            sx {
+                width = 100.px
+                height = 100.px
+                position = Position.relative
+            }
+
+            UstadBlockStatusProgressBar {
+                sx {
+                    useAbsolutePositionBottom()
+                    width = 100.pct
+                }
+
+                blockStatus = props.uiState.contentEntry?.status
+            }
+
+            UstadBlockIcon {
+                title = props.uiState.contentEntry?.entry?.title ?: ""
+                contentEntry = props.uiState.contentEntry?.entry
+                pictureUri = props.uiState.contentEntry?.picture?.cepPictureUri
+                width = 100.px
+                height = 100.px
+                iconSize = SvgIconSize.large
+            }
         }
 
         ContentDetailRightColumn {

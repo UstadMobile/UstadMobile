@@ -9,8 +9,11 @@ import web.cssom.AlignItems
 import web.cssom.Height
 import web.cssom.JustifyContent
 import web.cssom.Overflow
+import web.cssom.Position
 import web.cssom.TextAlign
 import web.cssom.TextOverflow
+import web.cssom.integer
+import web.cssom.px
 
 fun PropertiesBuilder.useLineClamp(numLines: Int) {
     webKitLineClamp = numLines
@@ -32,3 +35,11 @@ fun PropertiesBuilder.useCenterAlignGridContainer(
     textAlign = TextAlign.center
 }
 
+
+fun PropertiesBuilder.useAbsolutePositionBottom(
+    zIndexVal: Int = 1_500,
+) {
+    position = Position.absolute
+    bottom = 0.px
+    zIndex = integer(zIndexVal)
+}

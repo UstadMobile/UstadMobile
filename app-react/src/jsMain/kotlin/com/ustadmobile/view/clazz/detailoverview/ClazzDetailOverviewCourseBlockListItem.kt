@@ -19,6 +19,8 @@ import com.ustadmobile.core.viewmodel.clazz.blockTypeStringResource
 import com.ustadmobile.core.viewmodel.contententry.contentTypeStringResource
 import com.ustadmobile.hooks.useHtmlToPlainText
 import com.ustadmobile.mui.components.UstadBlockIcon
+import com.ustadmobile.mui.components.UstadBlockStatusProgressBar
+import com.ustadmobile.util.ext.useAbsolutePositionBottom
 import com.ustadmobile.util.ext.useLineClamp
 import com.ustadmobile.view.clazz.iconComponent
 import com.ustadmobile.view.contententry.contentTypeIconComponent
@@ -26,6 +28,8 @@ import emotion.react.css
 import js.objects.jso
 import mui.system.responsive
 import react.dom.html.ReactHTML.div
+import web.cssom.Position
+import web.cssom.pct
 
 external interface ClazzDetailOverviewCourseBlockListItemProps : Props {
 
@@ -59,12 +63,29 @@ val ClazzDetailOverviewCourseBlockListItem = FC<ClazzDetailOverviewCourseBlockLi
             }
 
             ListItemIcon {
-                UstadBlockIcon {
-                    title = courseBlockVal?.cbTitle ?: ""
-                    pictureUri = props.courseBlock?.courseBlockPicture?.cbpThumbnailUri
-                        ?: props.courseBlock?.contentEntryPicture2?.cepThumbnailUri
-                    courseBlock = props.courseBlock?.courseBlock
-                    contentEntry = props.courseBlock?.contentEntry
+                Box {
+                    sx {
+                        position = Position.relative
+                        width = 40.px
+                        height = 40.px
+                    }
+
+                    UstadBlockStatusProgressBar {
+                        sx {
+                            useAbsolutePositionBottom()
+                            width = 100.pct
+                        }
+
+                        blockStatus = props.courseBlock?.status
+                    }
+
+                    UstadBlockIcon {
+                        title = courseBlockVal?.cbTitle ?: ""
+                        pictureUri = props.courseBlock?.courseBlockPicture?.cbpThumbnailUri
+                            ?: props.courseBlock?.contentEntryPicture2?.cepThumbnailUri
+                        courseBlock = props.courseBlock?.courseBlock
+                        contentEntry = props.courseBlock?.contentEntry
+                    }
                 }
             }
 

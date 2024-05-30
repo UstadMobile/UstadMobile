@@ -9,7 +9,9 @@ import com.ustadmobile.lib.db.composites.ContentEntryAndListDetail
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.mui.common.justifyContent
 import com.ustadmobile.mui.components.UstadBlockIcon
+import com.ustadmobile.mui.components.UstadBlockStatusProgressBar
 import com.ustadmobile.mui.ext.paddingCourseBlockIndent
+import com.ustadmobile.util.ext.useAbsolutePositionBottom
 import com.ustadmobile.util.ext.useLineClamp
 import js.objects.jso
 import web.cssom.*
@@ -86,11 +88,28 @@ val UstadContentEntryListItem = FC<UstadContentEntryListItemProps> { props ->
             selected = props.selected
 
             ListItemIcon {
-                UstadBlockIcon {
-                    contentEntry = props.contentEntry?.contentEntry
-                    courseBlock = null
-                    title = props.contentEntry?.contentEntry?.title ?: ""
-                    pictureUri = props.contentEntry?.picture?.cepThumbnailUri
+                Box {
+                    sx {
+                        position = Position.relative
+                        width = 40.px
+                        height = 40.px
+                    }
+
+                    UstadBlockStatusProgressBar {
+                        sx {
+                            useAbsolutePositionBottom()
+                            width = 100.pct
+                        }
+
+                        blockStatus = props.contentEntry?.status
+                    }
+
+                    UstadBlockIcon {
+                        contentEntry = props.contentEntry?.contentEntry
+                        courseBlock = null
+                        title = props.contentEntry?.contentEntry?.title ?: ""
+                        pictureUri = props.contentEntry?.picture?.cepThumbnailUri
+                    }
                 }
             }
 
