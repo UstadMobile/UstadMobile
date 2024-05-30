@@ -31,6 +31,23 @@ import kotlinx.datetime.minus
 
 data class QueryParts(val sqlStr: String, val sqlListStr: String, val queryParams: Array<Any>)
 
+/**
+ * Turn a ReportSeries object into SQL that we can run.
+ *
+ * e.g. Where the Y Axis is the total duration of usage
+ *      X Axis is the day
+ *      Subgrouped by clazz
+ *
+ * SELECT SUM(ResultSource.resultDuration) AS yAxis,
+ *        -- Turn the timestamp into the day
+ *        GROUP BY (strftime('%d/%m/%Y', ResultSource.timestamp/1000, 'unixepoch')) AS xAxis,
+ *        GROUP BY ResultSource.clazzUid AS subgroup
+ *
+ * So we should get results like:
+ *
+ *   yAxis   | xAxis | subGroup
+ *   20k(ms) | 01/01 | clazzUid
+ */
 fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): QueryParts {
 
     val paramList = mutableListOf<Any>()
