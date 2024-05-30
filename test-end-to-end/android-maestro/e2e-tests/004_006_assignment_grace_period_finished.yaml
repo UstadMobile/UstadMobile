@@ -1,7 +1,7 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/003_002_add_module_text_blocks_and_perform_indent_hide_delete_actions"
-  TESTNAME:  "005_003_users_can_post_on_discussion_board"
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/004_006_assignment_grace_period_finished"
+  TESTNAME:  "004_006_assignment_grace_period_finished"
 ---
 # Admin login
 - clearState: com.toughra.ustadmobile
@@ -37,7 +37,7 @@ env:
       TESTFILENAME: "Ustad_Students_List.csv"
       CONTROLSERVER: ${CONTROLSERVER}
       TESTSERIAL: ${TESTSERIAL}
-# teacher add an discussion board block
+# teacher add an assignment block
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
@@ -60,72 +60,56 @@ env:
     from:
       text: "Drag handle" # From (x, y) center of element
     direction: UP # To (50% of width, 10% of height)
-- tapOn: "Discussion board"
+- tapOn: "Assignment"
 - tapOn: "Title*"
-- inputText: "Discussion 1"
+- inputText: "Assignment 1"
+- tapOn: "Description"
 - tapOn:
-    text: "dd/mm/yyyy"
-    index: "0"
-- inputText: "12/01/2024"
+    id: "com.toughra.ustadmobile:id/editor"
+- inputText: "test block"
+- tapOn: "Done"
+- assertVisible: "Don't show before"
+- tapOn:
+    text: "Don't show before"
+- inputText: "10/05/2024"
 - tapOn: "hh:mm"
 - inputText: "23:45"
-- tapOn: "Description"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      text: "Deadline"
+    direction: DOWN
+- tapOn: "Deadline"
+- inputText: "14/05/2024"
+- tapOn: "hh:mm"
+- inputText: "23:45"
+- hideKeyboard
+- tapOn: "End of grace period"
+- inputText: "19/05/2024"
+- tapOn: "hh:mm"
+- inputText: "23:45"
+- hideKeyboard
+- tapOn: "Late submission penalty"
+- inputText: "10"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      text: "Submission policy"
+    direction: DOWN
+- assertVisible: "Must submit all at once"
+- assertVisible: "Done"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/added_assignment"
 - tapOn:
-    id: "com.toughra.ustadmobile:id/editor"
-- inputText: "test block"
-- tapOn: "Done"
-- assertVisible:
-    id: "app_title"
-    text: "Add discussion"
-- tapOn: "Done"
+    text: "Done"
+    delay: 1000
+- repeat:
+    while:
+      visible: "Done"
+    commands:
+      - tapOn: Done
+- assertNotVisible: "Done"
 - tapOn: "Save"
-- scrollUntilVisible:
-    element:
-      text: "Discussion 1"
-    direction: DOWN
-- tapOn: "Discussion 1"
-- assertVisible:            #  +POST button
-    id: "floating_action_button"
-- back
-- tapOn:            #  Edit button
-    id: "floating_action_button"
-- scrollUntilVisible:
-    element:
-      text: "Discussion 1"
-    direction: DOWN
-- tapOn: "Discussion 1"
-- tapOn: "Description"
-- tapOn:
-    id: "com.toughra.ustadmobile:id/editor"
-- inputText: "test block"
-- tapOn: "Done"
-- assertVisible:
-    id: "app_title"
-    text: "Edit discussion"
-- tapOn: "Done"
-- tapOn: "Save"
-- assertVisible:
-    id: "app_title"
-    text: "Test Course Block"
-- scrollUntilVisible:
-    element:
-      text: "Discussion 1"
-    direction: DOWN
-- tapOn: "Discussion 1"
-- tapOn:            #  +POST button
-    id: "floating_action_button"
-- tapOn: "Title*"
-- inputText: "Post 1"
-- tapOn:
-    id: "com.toughra.ustadmobile:id/editor"
-- inputText: "This is post by teacher"
-- tapOn: "Post"
-- assertVisible:
-    id: "app_title"
-    text: "Post 1"
-- assertVisible:
-    text: "This is post by teacher"
-
+# student not able to view submit button
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
@@ -137,35 +121,7 @@ env:
 - tapOn: "Test Course Block"
 - scrollUntilVisible:
     element:
-      text: "Discussion 1"
+      text: "Assignment 1"
     direction: DOWN
-- tapOn: "Discussion 1"
-- tapOn:            #  +POST button
-    id: "floating_action_button"
-- tapOn: "Title*"
-- inputText: "Post 2"
-- tapOn:
-    id: "com.toughra.ustadmobile:id/editor"
-- inputText: "This is post by student"
-- tapOn: "Post"
-- assertVisible:
-    id: "app_title"
-    text: "Post 2"
-- assertVisible:
-    text: "This is post by student"
-- back
-- assertVisible:
-    id: "app_title"
-    text: "Test Course Block"
-- assertVisible:
-    text: "Post 1"
-- assertVisible:
-    text: "Post 2"
-- tapOn: "Post 1"
-- extendedWaitUntil:
-    visible: "add_a_reply"
-    timeout: 10000
-- tapOn:
-    id: "add_a_reply"
-- inputText: "Comment from student"
-- tapOn: "Post"
+- tapOn: "Assignment 1"
+- assertNotVisible: "Submit"
