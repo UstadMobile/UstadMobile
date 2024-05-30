@@ -20,6 +20,19 @@ object StatementDaoCommon {
         
     """
 
+    const val FROM_STATEMENT_ENTITY_WHERE_MATCHES_ACCOUNT_PERSON_UID_AND_PARENT_CONTENT_ENTRY_ROOT = """
+        FROM StatementEntity
+       WHERE StatementEntity.statementActorPersonUid = :accountPersonUid
+         AND StatementEntity.statementContentEntryUid IN (
+             SELECT ContentEntryParentChildJoin.cepcjChildContentEntryUid
+               FROM ContentEntryParentChildJoin
+              WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid)
+         AND CAST(StatementEntity.contentEntryRoot AS INTEGER) = 1
+         AND (    (CAST(StatementEntity.resultCompletion AS INTEGER) = 1)
+              OR (StatementEntity.extensionProgress IS NOT NULL))     
+    """
+
+
     const val FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CLAZZ_STUDENT = """
                FROM StatementEntity
               WHERE (${ClazzEnrolmentDaoCommon.SELECT_ACCOUNT_PERSON_UID_IS_STUDENT_IN_CLAZZ_UID})

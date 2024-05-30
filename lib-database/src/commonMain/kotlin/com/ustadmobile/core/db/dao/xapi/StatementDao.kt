@@ -6,6 +6,7 @@ import androidx.room.RawQuery
 import app.cash.paging.PagingSource
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CLAZZ_STUDENT
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CONTENT_ENTRY
+import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY_WHERE_MATCHES_ACCOUNT_PERSON_UID_AND_PARENT_CONTENT_ENTRY_ROOT
 import com.ustadmobile.door.DoorQuery
 import com.ustadmobile.door.annotation.DoorDao
 import com.ustadmobile.door.annotation.QueryLiveTables
@@ -77,6 +78,16 @@ expect abstract class StatementDao {
         courseBlockUid: Long,
         accountPersonUid: Long,
     ): List<StatementEntity>
+
+    @Query("""
+        SELECT StatementEntity.*
+               $FROM_STATEMENT_ENTITY_WHERE_MATCHES_ACCOUNT_PERSON_UID_AND_PARENT_CONTENT_ENTRY_ROOT
+    """)
+    abstract suspend fun findStatusStatementByParentContentEntryUid(
+        parentUid: Long,
+        accountPersonUid: Long,
+    ): List<StatementEntity>
+
 
     @Query("""
         SELECT StatementEntity.*

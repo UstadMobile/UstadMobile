@@ -193,6 +193,10 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
                 functionName = "findListOfChildsByParentUuid",
                 functionDao = ContentEntryParentChildJoinDao::class,
             ),
+            HttpServerFunctionCall(
+                functionName = "findStatusStatementByParentContentEntryUid",
+                functionDao = StatementDao::class,
+            )
         )
     )
     @Query("""
