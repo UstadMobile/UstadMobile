@@ -50,4 +50,18 @@ object ClazzEnrolmentDaoCommon {
         END     
     """
 
+    /**
+     * Commonly used snippet to check if the current user as per the accountPersonUid param is a
+     * student in the given class as per clazzUid
+     */
+    const val SELECT_ACCOUNT_PERSON_UID_IS_STUDENT_IN_CLAZZ_UID = """
+        (SELECT EXISTS(
+                SELECT 1
+                  FROM ClazzEnrolment
+                 WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid
+                   AND ClazzEnrolment.clazzEnrolmentPersonUid = :accountPersonUid
+                   AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}))
+    """
+
+
 }

@@ -1,6 +1,6 @@
 package com.ustadmobile.core.db.dao.xapi
 
-import com.ustadmobile.lib.db.entities.ClazzEnrolment
+import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon
 
 object StatementDaoCommon {
 
@@ -22,17 +22,41 @@ object StatementDaoCommon {
 
     const val FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CLAZZ_STUDENT = """
                FROM StatementEntity
-              WHERE (SELECT EXISTS(
-                            SELECT 1
-                              FROM ClazzEnrolment
-                             WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid
-                               AND ClazzEnrolment.clazzEnrolmentPersonUid = :accountPersonUid
-                               AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}))
+              WHERE (${ClazzEnrolmentDaoCommon.SELECT_ACCOUNT_PERSON_UID_IS_STUDENT_IN_CLAZZ_UID})
                 AND StatementEntity.statementActorPersonUid = :accountPersonUid
                 AND StatementEntity.statementClazzUid = :clazzUid
                 AND (    (CAST(StatementEntity.resultCompletion AS INTEGER) = 1)
                       OR (StatementEntity.extensionProgress IS NOT NULL))
     """
+
+    const val STATEMENT_ENTITY_IS_SUCCESSFUL_COMPLETION_CLAUSE = """
+              CAST(StatementEntity.contentEntryRoot AS INTEGER) = 1
+          AND CAST(StatementEntity.resultCompletion AS INTEGER) = 1    
+          AND CAST(StatementEntity.resultSuccess AS INTEGER) = 1
+    """
+
+    //Exactly as above, changing only the table name to StatusStatements
+    const val STATUS_STATEMENTS_IS_SUCCESSFUL_COMPLETION_CLAUSE = """
+              CAST(StatusStatements.contentEntryRoot AS INTEGER) = 1
+          AND CAST(StatusStatements.resultCompletion AS INTEGER) = 1    
+          AND CAST(StatusStatements.resultSuccess AS INTEGER) = 1
+    """
+
+
+    const val STATEMENT_ENTITY_IS_FAILED_COMPLETION_CLAUSE = """
+              CAST(StatementEntity.contentEntryRoot AS INTEGER) = 1
+          AND CAST(StatementEntity.resultCompletion AS INTEGER) = 1
+          AND CAST(StatementEntity.resultSuccess AS INTEGER) = 0
+    """
+
+    const val STATUS_STATEMENTS_IS_FAILED_COMPLETION_CLAUSE = """
+              CAST(StatusStatements.contentEntryRoot AS INTEGER) = 1
+          AND CAST(StatusStatements.resultCompletion AS INTEGER) = 1
+          AND CAST(StatusStatements.resultSuccess AS INTEGER) = 0
+    """
+
+
+
 
     const val SORT_FIRST_NAME_ASC = 1
 

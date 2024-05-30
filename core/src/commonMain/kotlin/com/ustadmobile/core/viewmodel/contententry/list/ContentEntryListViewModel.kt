@@ -157,6 +157,7 @@ class ContentEntryListViewModel(
 
             FILTER_FROM_LIBRARY -> {
                 activeRepo.contentEntryDao.getChildrenByParentUidWithCategoryFilterOrderByName(
+                    accountPersonUid = activeUserPersonUid,
                     parentUid = parentEntryUid,
                     langParam = 0,
                     categoryParam0 = 0,
@@ -167,6 +168,7 @@ class ContentEntryListViewModel(
 
             FILTER_BY_PARENT_UID -> {
                 activeRepo.contentEntryDao.getChildrenByParentUidWithCategoryFilterOrderByName(
+                    accountPersonUid = activeUserPersonUid,
                     parentUid = parentEntryUid,
                     langParam = 0,
                     categoryParam0 = 0,

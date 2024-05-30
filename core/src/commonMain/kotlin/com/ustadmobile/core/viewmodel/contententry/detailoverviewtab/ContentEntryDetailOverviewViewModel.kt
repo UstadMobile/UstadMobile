@@ -161,6 +161,7 @@ class ContentEntryDetailOverviewViewModel(
                 launch {
                     activeRepo.contentEntryDao.findByContentEntryUidWithDetailsAsFlow(
                         contentEntryUid = entityUidArg,
+                        clazzUid = clazzUid,
                         courseBlockUid = savedStateHandle[ARG_COURSE_BLOCK_UID]?.toLong() ?: 0,
                         accountPersonUid = activeUserPersonUid,
                     ).collect {

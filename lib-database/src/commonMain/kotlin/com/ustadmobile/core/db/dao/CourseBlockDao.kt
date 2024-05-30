@@ -11,6 +11,8 @@ import app.cash.paging.PagingSource
 import com.ustadmobile.core.db.UNSET_DISTANT_FUTURE
 import com.ustadmobile.core.db.dao.xapi.StatementDao
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CLAZZ_STUDENT
+import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.STATUS_STATEMENTS_IS_FAILED_COMPLETION_CLAUSE
+import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.STATUS_STATEMENTS_IS_SUCCESSFUL_COMPLETION_CLAUSE
 import com.ustadmobile.door.annotation.HttpAccessible
 import com.ustadmobile.door.annotation.HttpServerFunctionCall
 import com.ustadmobile.door.annotation.HttpServerFunctionParam
@@ -165,15 +167,14 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
                                     SELECT 1
                                       FROM StatusStatements
                                      WHERE StatusStatements.statementCbUid = CourseBlock.cbUid 
-                                       AND CAST(StatusStatements.resultSuccess AS INTEGER) = 1))
+                                       AND ($STATUS_STATEMENTS_IS_SUCCESSFUL_COMPLETION_CLAUSE)))
                             THEN 1
                        -- Else if a record exsits where      
                        WHEN (SELECT EXISTS(
                                     SELECT 1
                                       FROM StatusStatements
                                      WHERE StatusStatements.statementCbUid = CourseBlock.cbUid 
-                                       AND (    StatusStatements.resultCompletion IS NOT NULL 
-                                            AND CAST(StatusStatements.resultSuccess AS INTEGER) = 0)))
+                                       AND ($STATUS_STATEMENTS_IS_FAILED_COMPLETION_CLAUSE)))
                             THEN 0
                             
                        ELSE NULL

@@ -4,8 +4,9 @@ import androidx.room.*
 import com.ustadmobile.core.db.dao.ContentEntryDaoCommon.SORT_TITLE_ASC
 import com.ustadmobile.core.db.dao.ContentEntryDaoCommon.SORT_TITLE_DESC
 import app.cash.paging.PagingSource
+import com.ustadmobile.core.db.dao.ContentEntryDaoCommon.SELECT_ACCOUNT_PERSON_AND_STATUS_FIELDS
+import com.ustadmobile.core.db.dao.ContentEntryDaoCommon.SELECT_STATUS_FIELDS_FOR_CONTENT_ENTRY
 import com.ustadmobile.core.db.dao.xapi.StatementDao
-import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CONTENT_ENTRY
 import kotlinx.coroutines.flow.Flow
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.composites.ContentEntryAndDetail
@@ -64,41 +65,22 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
         )
     )
     @Query("""
-            WITH StatusStatements AS(
-                 SELECT StatementEntity.*
-                        $FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CONTENT_ENTRY
-            )
-        
-            SELECT ContentEntry.*, ContentEntryVersion.*, ContentEntryPicture2.*,
+              -- When the user is viewing ContentEntryDetail where the class is specified eg 
+              -- for a ContentEntry that is part of a Clazz then results information will only be
+              -- included if the user is a student in the class
+              -- If the user is viewing the ContentEntryDetail via the library then the results
+              -- information will always be included
+              WITH IncludeResults(includeResults) AS (
+                   SELECT CAST(
+                      (SELECT (:clazzUid = 0)
+                           OR (${ClazzEnrolmentDaoCommon.SELECT_ACCOUNT_PERSON_UID_IS_STUDENT_IN_CLAZZ_UID})
+                      ) AS INTEGER)
+                  )
+
+              SELECT ContentEntry.*, ContentEntryVersion.*, ContentEntryPicture2.*,
                    :accountPersonUid AS sPersonUid,
                    :courseBlockUid AS sCbUid,
-                   (SELECT MAX(StatusStatements.extensionProgress)
-                      FROM StatusStatements
-                   ) AS sProgress,
-                   (SELECT CASE 
-                           WHEN (SELECT EXISTS(
-                                        SELECT 1
-                                          FROM StatusStatements
-                                         WHERE StatusStatements.resultSuccess IS NOT NULL 
-                                           AND CAST(StatusStatements.resultSuccess AS INTEGER) = 1))
-                                    THEN 1
-                           WHEN (SELECT EXISTS(
-                                        SELECT 1
-                                          FROM StatusStatements
-                                         WHERE StatusStatements.resultSuccess IS NOT NULL 
-                                           AND CAST(StatusStatements.resultSuccess AS INTEGER) = 0))
-                                    THEN 0   
-                           ELSE NULL              
-                           END
-                   ) AS sIsSuccess,
-                   (SELECT EXISTS(
-                           SELECT 1
-                             FROM StatusStatements
-                            WHERE CAST(StatusStatements.resultCompletion AS INTEGER) = 1)
-                   ) AS sIsCompleted,
-                   (SELECT MAX(StatusStatements.resultScoreScaled)
-                      FROM StatusStatements) AS sRawScore,
-                   0 AS sMaxScore
+                   $SELECT_STATUS_FIELDS_FOR_CONTENT_ENTRY
               FROM ContentEntry
                    LEFT JOIN ContentEntryVersion
                              ON ContentEntryVersion.cevUid = 
@@ -112,8 +94,15 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
                              ON ContentEntryPicture2.cepUid = :contentEntryUid   
              WHERE ContentEntry.contentEntryUid = :contentEntryUid
             """)
+    @QueryLiveTables(
+        arrayOf(
+            "ContentEntry", "ContentEntryVersion", "ContentEntryPicture2", "CourseBlock",
+            "ClazzEnrolment", "StatementEntity"
+        )
+    )
     abstract fun findByContentEntryUidWithDetailsAsFlow(
         contentEntryUid: Long,
+        clazzUid: Long,
         courseBlockUid: Long,
         accountPersonUid: Long,
     ): Flow<ContentEntryAndDetail?>
@@ -207,7 +196,10 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
         )
     )
     @Query("""
-            SELECT ContentEntry.*, ContentEntryParentChildJoin.*, ContentEntryPicture2.*
+            WITH IncludeResults(includeResults) AS (SELECT 1)
+            
+            SELECT ContentEntry.*, ContentEntryParentChildJoin.*, ContentEntryPicture2.*,
+                   $SELECT_ACCOUNT_PERSON_AND_STATUS_FIELDS
               FROM ContentEntry 
                     LEFT JOIN ContentEntryParentChildJoin 
                          ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid 
@@ -231,6 +223,7 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
                      END DESC,             
                      ContentEntry.contentEntryUid""")
     abstract fun getChildrenByParentUidWithCategoryFilterOrderByName(
+        accountPersonUid: Long,
         parentUid: Long,
         langParam: Long,
         categoryParam0: Long,
@@ -239,7 +232,10 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
     ): PagingSource<Int, ContentEntryAndListDetail>
 
     @Query("""
-        SELECT ContentEntry.*, ContentEntryParentChildJoin.*, ContentEntryPicture2.*
+        WITH IncludeResults(includeResults) AS (SELECT 1)
+        
+        SELECT ContentEntry.*, ContentEntryParentChildJoin.*, ContentEntryPicture2.*,
+               $SELECT_ACCOUNT_PERSON_AND_STATUS_FIELDS
           FROM CourseBlock
                JOIN ContentEntry 
                     ON CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
@@ -252,24 +248,27 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
          WHERE CourseBlock.cbClazzUid IN
                (SELECT ClazzEnrolment.clazzEnrolmentClazzUid
                   FROM ClazzEnrolment
-                 WHERE ClazzEnrolment.clazzEnrolmentPersonUid = :personUid)
+                 WHERE ClazzEnrolment.clazzEnrolmentPersonUid = :accountPersonUid)
     """)
     abstract fun getContentFromMyCourses(
-        personUid: Long
+        accountPersonUid: Long
     ): PagingSource<Int, ContentEntryAndListDetail>
 
 
     @Query("""
-        SELECT ContentEntry.*, ContentEntryParentChildJoin.*, ContentEntryPicture2.*
+        WITH IncludeResults(includeResults) AS (SELECT 1)
+        
+        SELECT ContentEntry.*, ContentEntryParentChildJoin.*, ContentEntryPicture2.*, 
+               $SELECT_ACCOUNT_PERSON_AND_STATUS_FIELDS
           FROM ContentEntry
                LEFT JOIN ContentEntryParentChildJoin
                          ON ContentEntryParentChildJoin.cepcjParentContentEntryUid = 0
                LEFT JOIN ContentEntryPicture2
                          ON ContentEntryPicture2.cepUid = ContentEntry.contentEntryUid
-         WHERE ContentEntry.contentOwner = :personUid
+         WHERE ContentEntry.contentOwner = :accountPersonUid
     """)
     abstract fun getContentByOwner(
-        personUid: Long
+        accountPersonUid: Long
     ): PagingSource<Int, ContentEntryAndListDetail>
 
 
