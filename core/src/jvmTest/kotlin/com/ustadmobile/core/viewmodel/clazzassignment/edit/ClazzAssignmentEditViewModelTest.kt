@@ -45,7 +45,8 @@ class ClazzAssignmentEditViewModelTest  : AbstractMainDispatcherTest() {
 
                 viewModel.onCourseBlockChanged(
                     readyState.entity?.courseBlock?.copy(
-                        cbTitle = "Assignment"
+                        cbTitle = "Assignment",
+                        cbMaxPoints = 10f,
                     )
                 )
 
@@ -98,7 +99,7 @@ class ClazzAssignmentEditViewModelTest  : AbstractMainDispatcherTest() {
                 val readyState = awaitItemWhere { it.fieldsEnabled }
                 viewModel.onCourseBlockChanged(
                     readyState.entity?.courseBlock?.copy(
-                        cbMaxPoints = 0
+                        cbMaxPoints = 0f
                     )
                 )
                 viewModel.onClickSave()

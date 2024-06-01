@@ -33,7 +33,7 @@ class SubmitMarkUseCase {
             camSubmitterUid = submitterUid
             camMarkerSubmitterUid = activeUserSubmitterUid
             camMarkerPersonUid = activeUserPersonUid
-            camMaxMark = courseBlock.cbMaxPoints.toFloat()
+            camMaxMark = courseBlock.cbMaxPoints ?: 0f
             camClazzUid = clazzUid
             if(applyPenalty) {
                 camPenalty = (camMark * (courseBlock.cbLateSubmissionPenalty.toFloat()/100f))

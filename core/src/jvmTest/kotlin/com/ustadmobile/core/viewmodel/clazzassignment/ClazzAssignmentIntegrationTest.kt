@@ -53,6 +53,8 @@ class ClazzAssignmentIntegrationTest: AbstractMainDispatcherTest() {
                 serverDb.courseBlockDao.insertAsync(CourseBlock().apply {
                     cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
                     cbEntityUid = clazzAssignmentUid
+                    cbMinPoints = 0f
+                    cbMaxPoints = 10f
                 })
 
                 clazzAssignmentUid

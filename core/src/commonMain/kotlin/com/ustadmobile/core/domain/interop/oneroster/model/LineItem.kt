@@ -52,8 +52,8 @@ fun CourseBlock.toOneRosterLineItem(
             sourcedId = cbClazzSourcedId ?: cbClazzUid.toString(),
             type = GuidRefType.clazz
         ),
-        resultValueMin = cbMinPoints.toFloat(),
-        resultValueMax = cbMaxPoints.toFloat(),
+        resultValueMin = cbMinPoints ?: 0f,
+        resultValueMax = cbMaxPoints ?: 0f,
         metadata = cbMetadata?.let { json.decodeFromString(it) },
     )
 }
@@ -73,8 +73,8 @@ fun LineItem.toCourseBlock(
         cbDeadlineDate = parse8601Timestamp(dueDate),
         cbClazzUid =  xxHasher.toLongOrHash(`class`.sourcedId),
         cbClazzSourcedId = `class`.sourcedId,
-        cbMinPoints = resultValueMin.toInt(),
-        cbMaxPoints = resultValueMax.toInt(),
+        cbMinPoints = resultValueMin,
+        cbMaxPoints = resultValueMax,
         cbMetadata = metadata?.let { json.encodeToString(JsonObject.serializer(), it) },
     )
 }

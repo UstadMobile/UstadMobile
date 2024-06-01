@@ -395,7 +395,7 @@ class ClazzAssignmentSubmitterDetailViewModel(
                 )
             }
             return
-        }else if(draftMark.camMark > courseBlock.cbMaxPoints){
+        }else if(draftMark.camMark > (courseBlock.cbMaxPoints ?: 0f)){
             _uiState.update { prev ->
                 prev.copy(
                     submitMarkError = systemImpl.getString(MR.strings.too_high),

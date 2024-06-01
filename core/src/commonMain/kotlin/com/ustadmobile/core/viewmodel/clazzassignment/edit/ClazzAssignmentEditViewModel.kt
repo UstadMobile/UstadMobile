@@ -467,7 +467,7 @@ class ClazzAssignmentEditViewModel(
                 }
             }
 
-            if(courseBlock.cbMaxPoints <= 0) {
+            if(courseBlock.cbMaxPoints.let { it == null || it <= 0 } ) {
                 _uiState.update { prev ->
                     prev.copy(
                         courseBlockEditUiState = prev.courseBlockEditUiState.copy(
