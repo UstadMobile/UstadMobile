@@ -1581,6 +1581,25 @@ val MIGRATION_185_186 = DoorMigrationStatementList(185, 186) { db ->
     }
 }
 
+/**
+ * CourseBlock: migrate to using nullable float instead of integer for min/max points
+ */
+val MIGRATION_186_187 = DoorMigrationStatementList(186, 187) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("ALTER TABLE CourseBlock RENAME to CourseBlock_OLD")
+            add("CREATE TABLE IF NOT EXISTS CourseBlock (  cbType  INTEGER  NOT NULL , cbIndentLevel  INTEGER  NOT NULL , cbModuleParentBlockUid  INTEGER  NOT NULL , cbTitle  TEXT , cbDescription  TEXT , cbCompletionCriteria  INTEGER  NOT NULL , cbHideUntilDate  INTEGER  NOT NULL , cbDeadlineDate  INTEGER  NOT NULL , cbLateSubmissionPenalty  INTEGER  NOT NULL , cbGracePeriodDate  INTEGER  NOT NULL , cbMaxPoints  REAl , cbMinPoints  REAl , cbIndex  INTEGER  NOT NULL , cbClazzUid  INTEGER  NOT NULL , cbClazzSourcedId  TEXT , cbActive  INTEGER  NOT NULL , cbHidden  INTEGER  NOT NULL , cbEntityUid  INTEGER  NOT NULL , cbLct  INTEGER  NOT NULL , cbSourcedId  TEXT , cbMetadata  TEXT , cbCreatedByAppId  TEXT , cbUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+            add("INSERT INTO CourseBlock (cbType, cbIndentLevel, cbModuleParentBlockUid, cbTitle, cbDescription, cbCompletionCriteria, cbHideUntilDate, cbDeadlineDate, cbLateSubmissionPenalty, cbGracePeriodDate, cbMaxPoints, cbMinPoints, cbIndex, cbClazzUid, cbClazzSourcedId, cbActive, cbHidden, cbEntityUid, cbLct, cbSourcedId, cbMetadata, cbCreatedByAppId, cbUid) SELECT cbType, cbIndentLevel, cbModuleParentBlockUid, cbTitle, cbDescription, cbCompletionCriteria, cbHideUntilDate, cbDeadlineDate, cbLateSubmissionPenalty, cbGracePeriodDate, cbMaxPoints, cbMinPoints, cbIndex, cbClazzUid, cbClazzSourcedId, cbActive, cbHidden, cbEntityUid, cbLct, cbSourcedId, cbMetadata, cbCreatedByAppId, cbUid FROM CourseBlock_OLD")
+            add("DROP TABLE CourseBlock_OLD")
+            add("CREATE INDEX idx_courseblock_cbclazzuid ON CourseBlock (cbClazzUid)")
+            add("CREATE INDEX idx_courseblock_cbsourcedid ON CourseBlock (cbSourcedId)")
+        }else {
+            add("ALTER TABLE CourseBlock ALTER COLUMN cbMaxPoints TYPE FLOAT")
+            add("ALTER TABLE CourseBlock ALTER COLUMN cbMinPoints TYPE FLOAT")
+        }
+    }
+}
+
 
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_105_106, MIGRATION_106_107,
@@ -1600,6 +1619,7 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_174_175, MIGRATION_175_176, MIGRATION_176_177, MIGRATION_177_178,
     MIGRATION_178_179, MIGRATION_179_180, MIGRATION_180_181, MIGRATION_181_182,
     MIGRATION_182_183, MIGRATION_183_184, MIGRATION_184_185, MIGRATION_185_186,
+    MIGRATION_186_187,
 )
 
 
