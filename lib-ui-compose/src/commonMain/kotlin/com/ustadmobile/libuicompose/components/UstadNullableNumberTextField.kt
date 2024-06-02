@@ -2,22 +2,21 @@ package com.ustadmobile.libuicompose.components
 
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import com.ustadmobile.core.util.ext.toDisplayString
 
-/**
- * See
- *  https://dev.to/pchmielowski/jetpack-compose-textfield-which-accepts-and-emits-value-other-than-string-1g3o
- *
- *  @param value Float - decimal point values are not currently supported, however this will be
- *  an option in future. Hence type is set as float.
- */
+
 @Composable
-fun UstadNumberTextField(
-    value: Float,
-    onValueChange: (Float) -> Unit,
+fun UstadNullableNumberTextField(
+    value: Float?,
+    onValueChange: (Float?) -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     isError: Boolean = false,
@@ -28,18 +27,15 @@ fun UstadNumberTextField(
         keyboardType = KeyboardType.Number
     ),
     supportingText: (@Composable () -> Unit)? = null,
-    unsetDefault: Float = 0f,
     singleLine: Boolean = true,
 ) {
-    fun Float.numberString() = if(this == unsetDefault) "" else toDisplayString()
-
     var rawValue by remember {
-        mutableStateOf(value.numberString())
+        mutableStateOf(value?.toDisplayString() ?: "")
     }
 
     LaunchedEffect(value) {
-        if((rawValue.toFloatOrNull() ?: unsetDefault) != value) {
-            rawValue = value.numberString()
+        if(rawValue.toFloatOrNull() != value) {
+            rawValue = value?.toDisplayString() ?: ""
         }
     }
 
@@ -49,7 +45,7 @@ fun UstadNumberTextField(
         onValueChange = { text ->
             val filteredText = text.filter { it.isDigit() || it == '.' }
             rawValue = filteredText
-            val floatVal = filteredText.toFloatOrNull() ?: unsetDefault
+            val floatVal = filteredText.toFloatOrNull()
             onValueChange(floatVal)
         },
         isError = isError,
@@ -62,3 +58,4 @@ fun UstadNumberTextField(
         singleLine = singleLine,
     )
 }
+
