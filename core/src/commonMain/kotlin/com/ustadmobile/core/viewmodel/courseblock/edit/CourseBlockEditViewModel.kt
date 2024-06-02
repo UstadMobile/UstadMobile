@@ -46,6 +46,8 @@ data class CourseBlockEditUiState(
 
     val caMaxPointsError: String? = null,
 
+    val maxPointsRequired: Boolean = false,
+
     val caGracePeriodError: String? = null,
 
     /**

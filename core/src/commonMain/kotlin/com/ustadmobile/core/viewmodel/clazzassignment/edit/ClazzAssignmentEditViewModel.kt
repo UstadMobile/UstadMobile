@@ -106,6 +106,7 @@ class ClazzAssignmentEditViewModel(
             courseBlockEditUiState = CourseBlockEditUiState(
                 completionCriteriaOptions = ASSIGNMENT_COMPLETION_CRITERIAS,
                 timeZone = TimeZone.currentSystemDefault().id,
+                maxPointsRequired = true,
             )
         )
     )

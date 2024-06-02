@@ -13,7 +13,7 @@ fun ClazzAssignmentSubmitterDetailScreenPreview(){
 
     val uiStateVal = ClazzAssignmentSubmitterDetailUiState(
         courseBlock = CourseBlock().apply {
-            cbMaxPoints = 50
+            cbMaxPoints = 50f
         },
         draftMark = CourseAssignmentMark().apply {
 
