@@ -161,9 +161,9 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
             }
 
             if (props.uiState.minScoreVisible){
-                UstadNumberTextField {
+                UstadNullableNumberTextField {
                     id = "cbMinPoints"
-                    numValue = (props.uiState.block?.courseBlock?.cbMinPoints ?: 0).toFloat()
+                    numValue = props.uiState.block?.courseBlock?.cbMinPoints
                     asDynamic().InputProps = jso<InputBaseProps> {
                         endAdornment = InputAdornment.create {
                             position = InputAdornmentPosition.end
@@ -175,7 +175,7 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
                     onChange = {
                         props.onCourseBlockChange(
                             props.uiState.block?.courseBlock?.copy(
-                                cbMinPoints = it.toInt()
+                                cbMinPoints = it
                             )
                         )
                     }
@@ -184,17 +184,28 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
         }
 
         if(props.uiState.maxPointsVisible) {
-            UstadNumberTextField {
+            UstadNullableNumberTextField {
                 id = "cbMaxPoints"
-                numValue = (props.uiState.block?.courseBlock?.cbMaxPoints ?: 0).toFloat()
-                label = ReactNode(strings[MR.strings.maximum_points])
+                numValue = props.uiState.block?.courseBlock?.cbMaxPoints
+                label = ReactNode(
+                    buildString {
+                        append(strings[MR.strings.maximum_points])
+                        if(props.uiState.maxPointsRequired)
+                            append("*")
+                    }
+                )
                 error = (props.uiState.caMaxPointsError != null)
                 helperText = props.uiState.caMaxPointsError?.let { ReactNode(it) }
+                    ?: if(props.uiState.maxPointsRequired) {
+                        ReactNode(strings[MR.strings.required])
+                    } else {
+                        null
+                    }
                 disabled = !props.uiState.fieldsEnabled
                 onChange = {
                     props.onCourseBlockChange(
                         props.uiState.block?.courseBlock?.copy(
-                            cbMaxPoints = it.toInt()
+                            cbMaxPoints = it
                         )
                     )
                 }
@@ -277,7 +288,7 @@ val UstadCourseBlockEditPreview = FC<Props> {
             uiState = CourseBlockEditUiState(
                 block = CourseBlockAndEditEntities(
                     courseBlock = CourseBlock().apply {
-                        cbMaxPoints = 78
+                        cbMaxPoints = 78f
                         cbCompletionCriteria = ContentEntry.COMPLETION_CRITERIA_MIN_SCORE
                     }
                 ),

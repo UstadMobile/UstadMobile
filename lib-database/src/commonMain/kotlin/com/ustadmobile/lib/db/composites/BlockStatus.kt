@@ -12,9 +12,10 @@ import kotlinx.serialization.Serializable
  *
  * Maybe convert 1 and 3 into xAPI?
  *
- * @param cbUid the CourseBlock UID
+ * @param sCbUid the CourseBlock UID
  * @param sProgress integer between 0 and 100 of progress, if known
  * @param sIsCompleted
+ * @param sScoreScaled as per xAPI result (could be the most recent, best, or average).
  *
  */
 @Serializable
@@ -24,8 +25,7 @@ data class BlockStatus(
     var sProgress: Int? = null,
     var sIsCompleted: Boolean = false,
     var sIsSuccess: Boolean? = null,
-    var sRawScore: Float? = null,
-    var sMaxScore: Float? = null,
+    var sScoreScaled: Float? = null,
 ) {
 
     companion object {

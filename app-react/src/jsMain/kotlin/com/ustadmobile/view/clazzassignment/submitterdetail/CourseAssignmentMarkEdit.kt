@@ -32,7 +32,7 @@ external interface CourseAssignmentMarkEditProps: Props {
 
     var draftMark: CourseAssignmentMark
 
-    var maxPoints: Int
+    var maxPoints: Float
 
     var scoreError: String?
 

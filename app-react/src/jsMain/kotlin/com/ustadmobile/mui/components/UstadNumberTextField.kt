@@ -1,5 +1,6 @@
 package com.ustadmobile.mui.components
 
+import com.ustadmobile.core.util.ext.toDisplayString
 import com.ustadmobile.util.ext.assignPropsTo
 import js.objects.jso
 import mui.material.*
@@ -34,12 +35,12 @@ private val UstadNumberTextFieldProps.effectiveValueIfBlank: Float
 val UstadNumberTextField = FC<UstadNumberTextFieldProps> { props ->
 
     var rawValue by useState {
-        if(props.numValue != props.effectiveValueIfBlank) props.numValue.toString() else ""
+        if(props.numValue != props.effectiveValueIfBlank) props.numValue.toDisplayString() else ""
     }
 
     //If props change to something other than what we have set, change rawValue
     useEffect(props.numValue) {
-        if(props.numValue != (rawValue.toIntOrNull()?.toFloat() ?: props.effectiveValueIfBlank)) {
+        if(props.numValue != (rawValue.toFloatOrNull() ?: props.effectiveValueIfBlank)) {
             //When the value has been reset to the numValueIfBlank, then make the text blank
             rawValue = if(props.numValue == props.numValueIfBlank) {
                 ""
@@ -65,7 +66,7 @@ val UstadNumberTextField = FC<UstadNumberTextFieldProps> { props ->
         onChange = { evt ->
             val text = evt.target.unsafeCast<HTMLInputElement>().value
 
-            val filteredText = text.filter { it.isDigit() || it == '-' }
+            val filteredText = text.filter { it.isDigit() || it == '-' || it == '.' }
             rawValue = filteredText
             val floatVal = filteredText.toFloatOrNull() ?: props.effectiveValueIfBlank
             props.onChange(floatVal)

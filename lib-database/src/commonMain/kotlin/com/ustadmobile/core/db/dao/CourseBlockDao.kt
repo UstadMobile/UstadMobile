@@ -189,8 +189,7 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
                (SELECT MAX(StatusStatements.resultScoreScaled)
                   FROM StatusStatements
                  WHERE StatusStatements.statementCbUid = CourseBlock.cbUid
-               ) AS sRawScore,
-               0 AS sMaxScore
+               ) AS sScoreScaled
                -- End block status fields
                
           FROM CourseBlock

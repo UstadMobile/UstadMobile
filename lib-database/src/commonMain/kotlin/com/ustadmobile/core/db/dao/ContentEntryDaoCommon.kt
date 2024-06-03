@@ -57,8 +57,7 @@ object ContentEntryDaoCommon {
                      WHERE (SELECT includeResults FROM IncludeResults) = 1
                        AND StatementEntity.statementActorPersonUid = :accountPersonUid
                        AND StatementEntity.statementContentEntryUid = ContentEntry.contentEntryUid
-                   ) AS sRawScore,
-                   0 AS sMaxScore
+                   ) AS sRawScore
     """
 
     const val SELECT_ACCOUNT_PERSON_AND_STATUS_FIELDS = """
