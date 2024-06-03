@@ -16,6 +16,7 @@ import react.dom.aria.ariaLabel
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.viewmodel.clazz.blockTypeStringResource
+import com.ustadmobile.core.viewmodel.clazz.detailoverview.getScoreInPointsStr
 import com.ustadmobile.core.viewmodel.contententry.contentTypeStringResource
 import com.ustadmobile.hooks.useHtmlToPlainText
 import com.ustadmobile.mui.components.UstadBlockIcon
@@ -30,6 +31,7 @@ import mui.system.responsive
 import react.dom.html.ReactHTML.div
 import web.cssom.Position
 import web.cssom.pct
+import mui.icons.material.EmojiEvents as EmojiEventsIcon
 
 external interface ClazzDetailOverviewCourseBlockListItemProps : Props {
 
@@ -138,6 +140,21 @@ val ClazzDetailOverviewCourseBlockListItem = FC<ClazzDetailOverviewCourseBlockLi
                             useLineClamp(1)
                         }
                         + blockDescription
+                    }
+
+                    div {
+                        props.courseBlock?.getScoreInPointsStr()?.also { scoreInPts ->
+                            EmojiEventsIcon {
+                                fontSize = SvgIconSize.small
+                                ariaLabel = ""
+                                sx {
+                                    marginRight = 8.px
+                                    padding = 1.px
+                                }
+                            }
+
+                            + "$scoreInPts/ ${courseBlockVal?.cbMaxPoints} ${strings[MR.strings.points]}"
+                        }
                     }
                 }
                 secondaryTypographyProps = jso {

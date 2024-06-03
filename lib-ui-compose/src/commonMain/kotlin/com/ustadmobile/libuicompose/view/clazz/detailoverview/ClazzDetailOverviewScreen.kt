@@ -16,6 +16,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Login
+import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -44,6 +45,7 @@ import com.ustadmobile.core.viewmodel.clazz.ClazzScheduleConstants
 import com.ustadmobile.core.viewmodel.clazz.blockTypeStringResource
 import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewUiState
 import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewViewModel
+import com.ustadmobile.core.viewmodel.clazz.detailoverview.getScoreInPointsStr
 import com.ustadmobile.core.viewmodel.contententry.contentTypeStringResource
 import com.ustadmobile.lib.db.composites.CourseBlockAndDisplayDetails
 import com.ustadmobile.lib.db.entities.CourseBlock
@@ -289,11 +291,10 @@ fun CourseBlockListItem(
             Text(courseBlock?.courseBlock?.cbTitle ?: "")
         },
         supportingContent = {
+            val contentEntryVal = courseBlock?.contentEntry
+            val courseBlockVal = courseBlock?.courseBlock
             Column {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    val contentEntryVal = courseBlock?.contentEntry
-                    val courseBlockVal = courseBlock?.courseBlock
-
                     when {
                         contentEntryVal != null -> {
                             Icon(contentEntryVal.contentTypeImageVector, "",
@@ -312,6 +313,13 @@ fun CourseBlockListItem(
                     }
                 }
                 Text(descriptionPlainText, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                courseBlock?.getScoreInPointsStr()?.also { scoreInPoints ->
+                    Row {
+                        Icon(Icons.Filled.EmojiEvents, contentDescription = null)
+                        Spacer(Modifier.width(8.dp))
+                        Text("$scoreInPoints/${courseBlockVal?.cbMaxPoints} ${stringResource(MR.strings.points)}")
+                    }
+                }
             }
         },
         leadingContent = {
