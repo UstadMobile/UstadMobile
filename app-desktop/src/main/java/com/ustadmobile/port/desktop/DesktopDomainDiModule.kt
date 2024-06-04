@@ -98,6 +98,8 @@ import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
 import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.domain.xapi.StoreActivitiesUseCase
 import com.ustadmobile.core.domain.xapi.XapiStatementResource
+import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnClearUseCase
+import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnClearUseCaseJvm
 import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
 import com.ustadmobile.core.domain.xxhash.XXHasher64FactoryCommonJvm
 import com.ustadmobile.core.domain.xxhash.XXStringHasher
@@ -547,6 +549,14 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             json = instance(),
             hasherFactory = instance(),
             storeActivitiesUseCase = instance(),
+        )
+    }
+
+    bind<SaveStatementOnClearUseCase>() with scoped(EndpointScope.Default).singleton {
+        SaveStatementOnClearUseCaseJvm(
+            scheduler = instance(),
+            endpoint = context,
+            json = instance()
         )
     }
 

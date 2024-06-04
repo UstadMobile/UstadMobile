@@ -4,12 +4,14 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.domain.xapi.model.XapiAccount
 import com.ustadmobile.core.domain.xapi.model.XapiAgent
 import com.ustadmobile.core.domain.xapi.model.XapiObjectType
+import kotlinx.serialization.Serializable
 
 /**
  * Represents an xAPI session e.g. where a given content entry is opened for a given user
  *
  * @param endpoint The system endpoint (NOT the local xapi endpoint e.g. a localhost url for the content etc)
  */
+@Serializable
 data class XapiSession(
     val endpoint: Endpoint,
     val accountPersonUid: Long,

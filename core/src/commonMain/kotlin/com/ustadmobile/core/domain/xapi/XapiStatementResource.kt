@@ -78,9 +78,11 @@ class XapiStatementResource(
         }
 
         repoOrDb.withDoorTransactionAsync {
-            repoOrDb.statementDao.insertOrIgnoreListAsync(statementEntities.mapNotNull {
-                it.statementEntity
-            } )
+            repoOrDb.statementDao.insertOrIgnoreListAsync(
+                statementEntities.mapNotNull {
+                    it.statementEntity
+                }
+            )
             val actorEntities = statementEntities.map { it.actorEntities }
             actorEntities.mapNotNull { it?.actor }
                 .filter { it.actorObjectType == XapiEntityObjectTypeFlags.AGENT }
@@ -181,6 +183,13 @@ class XapiStatementResource(
         )
 
         return storeResult.statementUuids.first().toString()
+    }
+
+    suspend fun post(
+        statements: List<XapiStatement>,
+        xapiSession: XapiSession
+    ) {
+        storeStatements(statements, xapiSession)
     }
 
     /**

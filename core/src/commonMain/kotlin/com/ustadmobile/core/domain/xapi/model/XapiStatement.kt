@@ -3,6 +3,7 @@ package com.ustadmobile.core.domain.xapi.model
 import com.benasher44.uuid.uuidFrom
 import com.ustadmobile.core.domain.xapi.XapiException
 import com.ustadmobile.core.domain.xapi.XapiSession
+import com.ustadmobile.core.domain.xapi.ext.resultProgressExtension
 import com.ustadmobile.core.domain.xapi.xapiRequireDurationOrNullAsLong
 import com.ustadmobile.core.domain.xapi.xapiRequireTimestampAsLong
 import com.ustadmobile.core.domain.xapi.xapiRequireValidIRI
@@ -16,8 +17,6 @@ import com.ustadmobile.lib.db.entities.xapi.StatementEntity
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.intOrNull
-import kotlinx.serialization.json.jsonPrimitive
 
 const val XAPI_RESULT_EXTENSION_PROGRESS = "https://w3id.org/xapi/cmi5/result/extensions/progress"
 
@@ -119,8 +118,7 @@ fun XapiStatement.toEntities(
                 statementCbUid = xapiSession.cbUid,
                 contentEntryRoot = (`object` as? XapiActivityStatementObject)?.id == xapiSession.rootActivityId,
                 fullStatement = exactJson,
-                extensionProgress = result?.extensions?.get(XAPI_RESULT_EXTENSION_PROGRESS)
-                    ?.jsonPrimitive?.intOrNull,
+                extensionProgress = resultProgressExtension,
                 statementObjectType = `object`.objectTypeFlag,
                 statementObjectUid1 = statementObjectForeignKeys.first,
                 statementObjectUid2 = statementObjectForeignKeys.second,

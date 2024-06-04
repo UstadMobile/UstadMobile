@@ -23,6 +23,7 @@ import com.ustadmobile.core.domain.contententry.getlocalurlforcontent.GetLocalUr
 import com.ustadmobile.core.util.ext.onActiveEndpoint
 import com.ustadmobile.core.viewmodel.videocontent.VideoContentUiState
 import com.ustadmobile.core.viewmodel.videocontent.VideoContentViewModel
+import com.ustadmobile.door.util.systemTimeInMillis
 import org.jetbrains.compose.videoplayer.VideoPlayer
 import org.jetbrains.compose.videoplayer.rememberVideoPlayerState
 import org.kodein.di.compose.localDI
@@ -41,8 +42,7 @@ actual fun VideoContentScreen(
     val uiState by viewModel.uiState.collectAsState(VideoContentUiState())
     VideoContentScreen(
         uiState = uiState,
-        onResumed = viewModel::onPlay,
-        onPaused = viewModel::onPause,
+        onPlayStateChanged = viewModel::onPlayStateChanged,
         onCompleted = viewModel::onComplete,
     )
 }
@@ -50,8 +50,7 @@ actual fun VideoContentScreen(
 @Composable
 fun VideoContentScreen(
     uiState: VideoContentUiState,
-    onResumed: () -> Unit,
-    onPaused: () -> Unit,
+    onPlayStateChanged: (VideoContentViewModel.MediaPlayState) -> Unit,
     onCompleted: () ->  Unit,
 ) {
     val mediaSrc = uiState.firstMediaUri
@@ -69,6 +68,8 @@ fun VideoContentScreen(
             }
 
             val state = rememberVideoPlayerState()
+            val progress by state.progress
+
             val progressVal = state.progress.value
             val totalTime = remember(progressVal.length) {
                 if(progressVal.length > 0) {
@@ -85,12 +86,15 @@ fun VideoContentScreen(
                 }
             }
 
-            LaunchedEffect(state.isResumed) {
-                if(state.isResumed) {
-                    onResumed()
-                }else {
-                    onPaused()
-                }
+            LaunchedEffect(state.isResumed, progress) {
+                onPlayStateChanged(
+                    VideoContentViewModel.MediaPlayState(
+                        timestamp = systemTimeInMillis(),
+                        timeInMillis = progress.timeMillis,
+                        totalDuration = progress.length,
+                        resumed = state.isResumed,
+                    )
+                )
             }
 
             Column {
