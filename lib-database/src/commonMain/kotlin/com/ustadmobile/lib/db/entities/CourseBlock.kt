@@ -1,6 +1,5 @@
 package com.ustadmobile.lib.db.entities
 
-import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
@@ -25,7 +24,6 @@ import kotlinx.serialization.Serializable
 @Entity(
     indices = arrayOf(
         Index("cbClazzUid", name = "idx_courseblock_cbclazzuid"),
-        Index("cbSourcedId", name = "idx_courseblock_cbsourcedid"),
     )
 )
 @ReplicateEntity(
@@ -77,7 +75,6 @@ data class CourseBlock(
 
     var cbIndex: Int = 0,
 
-    @ColumnInfo(index = true)
     var cbClazzUid: Long = 0,
 
     var cbClazzSourcedId: String? = null,

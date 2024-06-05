@@ -1,7 +1,7 @@
 package com.ustadmobile.lib.db.entities.xapi
 
-import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.TRIGGER_CONDITION_WHERE_NEWER
 import com.ustadmobile.lib.db.entities.TRIGGER_UPSERT
@@ -29,7 +29,10 @@ import kotlinx.serialization.Serializable
  * @param isSubStatement if true, this is a substatement which cannot be independently retrieved.
  */
 @Entity(
-    primaryKeys = arrayOf("statementIdHi", "statementIdLo")
+    primaryKeys = arrayOf("statementIdHi", "statementIdLo"),
+    indices = arrayOf(
+        Index(value = arrayOf("statementActorPersonUid"), name = "idx_stmt_actor_person")
+    )
 )
 @Serializable
 @ReplicateEntity(
@@ -53,7 +56,6 @@ data class StatementEntity(
 
     var statementIdLo: Long = 0,
 
-    @ColumnInfo(index = true)
     var statementActorPersonUid: Long = 0,
 
     var statementVerbUid: Long = 0,
