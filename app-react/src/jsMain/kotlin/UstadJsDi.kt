@@ -227,31 +227,5 @@ internal fun ustadJsDi(
         )
     }
 
-    bind<XXStringHasher>() with singleton {
-        XXStringHasherJs()
-    }
-
-    bind<XXHasher64Factory>() with singleton {
-        XXHasher64FactoryJs()
-    }
-
-    bind<StoreActivitiesUseCase>() with scoped(EndpointScope.Default).singleton {
-        StoreActivitiesUseCase(
-            db = instance(tag = DoorTag.TAG_DB),
-            repo = instance(tag = DoorTag.TAG_REPO),
-        )
-    }
-
-    bind<XapiStatementResource>() with scoped(EndpointScope.Default).singleton {
-        XapiStatementResource(
-            db = instance(tag = DoorTag.TAG_DB),
-            repo = instance(tag = DoorTag.TAG_REPO),
-            xxHasher = instance(),
-            endpoint = context,
-            json = instance(),
-            hasherFactory = instance(),
-            storeActivitiesUseCase = instance(),
-        )
-    }
 
 }

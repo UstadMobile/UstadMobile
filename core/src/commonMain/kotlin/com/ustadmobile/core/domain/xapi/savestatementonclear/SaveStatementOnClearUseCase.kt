@@ -10,7 +10,9 @@ import com.ustadmobile.core.domain.xapi.model.XapiStatement
  *
  * On Desktop: enqueue a quartz task
  * On Android: enqueue a work request
- * On Web: tbd
+ * On Web: If navigating within the app, just use a GlobalScope.launch that is triggered by the
+ * ViewModel onClear. If navigating away, use beforeUnload to trigger SaveStatementOnUnloadUseCase
+ * which will use sendBeacon.
  */
 interface SaveStatementOnClearUseCase {
 

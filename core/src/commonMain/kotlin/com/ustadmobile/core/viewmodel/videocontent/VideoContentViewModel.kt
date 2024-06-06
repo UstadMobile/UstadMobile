@@ -12,6 +12,7 @@ import com.ustadmobile.core.domain.xapi.model.XapiResult
 import com.ustadmobile.core.domain.xapi.model.XapiStatement
 import com.ustadmobile.core.domain.xapi.model.XapiVerb
 import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnClearUseCase
+import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnUnloadUseCase
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.url.UrlKmp
 import com.ustadmobile.core.util.ext.bodyAsDecodedText
@@ -22,6 +23,7 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ContentEntry
+import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import kotlinx.atomicfu.atomic
@@ -117,7 +119,11 @@ class VideoContentViewModel(
 
     private val xapiSession = createXapiSession(contentEntryUid = contentEntryUid)
 
-    private val saveStatementOnClearUseCase: SaveStatementOnClearUseCase? by di.onActiveEndpoint().instanceOrNull()
+    private val saveStatementOnClearUseCase: SaveStatementOnClearUseCase? by di.onActiveEndpoint()
+        .instanceOrNull()
+
+    private val saveStatementOnUnloadUseCase: SaveStatementOnUnloadUseCase? by di.onActiveEndpoint()
+        .instanceOrNull()
 
     init {
         _appUiState.update { prev ->
@@ -241,22 +247,31 @@ class VideoContentViewModel(
 
     internal fun onClear() = onCleared()
 
-    override fun onCleared() {
+    fun SaveStatementOnClearUseCase.saveProgressStatement() {
         val playDurationVal = playDurationMs.value
         val maxProgressVal = maxProgress.value
 
         if(playDurationVal > 0 || maxProgressVal > 0) {
             //isComplete is false if we hit this e.g. avoid recording completion because 99.5 would
             //be rounded up to 100. Completion is recorded by onComplete only
-            saveStatementOnClearUseCase?.invoke(
+            this.invoke(
                 statements = listOf(
                     createXapiStatement(playDurationVal, maxProgressVal, false)
                 ),
                 xapiSession = xapiSession,
             )
         }
+    }
+
+    override fun onCleared() {
+        Napier.d { "VideoContentViewModel: onCleared" }
+        saveStatementOnClearUseCase?.saveProgressStatement()
 
         super.onCleared()
+    }
+
+    fun onUnload() {
+        saveStatementOnUnloadUseCase?.saveProgressStatement()
     }
 
     companion object {

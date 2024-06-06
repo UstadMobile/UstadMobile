@@ -58,6 +58,12 @@ import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseJvm
 import com.ustadmobile.core.domain.usersession.ValidateUserSessionOnServerUseCase
 import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
+import com.ustadmobile.core.domain.xapi.StoreActivitiesUseCase
+import com.ustadmobile.core.domain.xapi.XapiStatementResource
+import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
+import com.ustadmobile.core.domain.xxhash.XXHasher64FactoryCommonJvm
+import com.ustadmobile.core.domain.xxhash.XXStringHasher
+import com.ustadmobile.core.domain.xxhash.XXStringHasherCommonJvm
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.ext.*
 import com.ustadmobile.lib.rest.ext.*
@@ -108,6 +114,7 @@ import com.ustadmobile.core.util.ext.isWindowsOs
 import com.ustadmobile.door.log.NapierDoorLogger
 import com.ustadmobile.lib.rest.domain.contententry.importcontent.ContentEntryImportJobRoute
 import com.ustadmobile.lib.rest.domain.person.bulkadd.BulkAddPersonRoute
+import com.ustadmobile.lib.rest.domain.xapi.savestatementonclear.SaveStatementOnUnloadRoute
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.headers.MimeTypeHelper
 import kotlinx.coroutines.runBlocking
@@ -651,6 +658,33 @@ fun Application.umRestApplication(
             ExtractVideoThumbnailUseCaseJvm()
         }
 
+        bind<XXStringHasher>() with singleton {
+            XXStringHasherCommonJvm()
+        }
+
+        bind<XXHasher64Factory>() with singleton {
+            XXHasher64FactoryCommonJvm()
+        }
+
+        bind<StoreActivitiesUseCase>() with scoped(EndpointScope.Default).singleton {
+            StoreActivitiesUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = null,
+            )
+        }
+
+        bind<XapiStatementResource>() with scoped(EndpointScope.Default).singleton {
+            XapiStatementResource(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = null,
+                xxHasher = instance(),
+                endpoint = context,
+                json = instance(),
+                hasherFactory = instance(),
+                storeActivitiesUseCase = instance(),
+            )
+        }
+
         try {
             appConfig.config("mail")
 
@@ -828,6 +862,14 @@ fun Application.umRestApplication(
                         )
                     }
                 }
+
+                route("xapi") {
+                    SaveStatementOnUnloadRoute(
+                        statementResource = { call -> di.on(call).direct.instance() },
+                        json = json,
+                    )
+                }
+
 
                 CacheRoute(
                     cache = di.direct.instance()
