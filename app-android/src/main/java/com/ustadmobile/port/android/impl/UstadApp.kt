@@ -128,6 +128,12 @@ import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
 import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
+import com.ustadmobile.core.domain.xapi.StoreActivitiesUseCase
+import com.ustadmobile.core.domain.xapi.XapiStatementResource
+import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnClearUseCase
+import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnClearUseCaseAndroid
+import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
+import com.ustadmobile.core.domain.xxhash.XXHasher64FactoryCommonJvm
 import com.ustadmobile.core.domain.xxhash.XXStringHasherCommonJvm
 import com.ustadmobile.core.domain.xxhash.XXStringHasher
 import com.ustadmobile.core.embeddedhttp.EmbeddedHttpServer
@@ -938,8 +944,39 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             )
         }
 
+        bind<XXHasher64Factory>() with singleton {
+            XXHasher64FactoryCommonJvm()
+        }
+
         bind<XXStringHasher>() with singleton {
             XXStringHasherCommonJvm()
+        }
+
+        bind<StoreActivitiesUseCase>() with scoped(EndpointScope.Default).singleton {
+            StoreActivitiesUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = instance(tag = DoorTag.TAG_REPO),
+            )
+        }
+
+        bind<XapiStatementResource>() with scoped(EndpointScope.Default).singleton {
+            XapiStatementResource(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = instance(tag = DoorTag.TAG_REPO),
+                xxHasher = instance(),
+                endpoint = context,
+                json = instance(),
+                hasherFactory = instance(),
+                storeActivitiesUseCase = instance(),
+            )
+        }
+
+        bind<SaveStatementOnClearUseCase>() with scoped(EndpointScope.Default).singleton {
+            SaveStatementOnClearUseCaseAndroid(
+                appContext = applicationContext,
+                endpoint = context,
+                json = instance(),
+            )
         }
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
