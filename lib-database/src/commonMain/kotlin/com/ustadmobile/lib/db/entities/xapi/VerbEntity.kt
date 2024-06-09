@@ -8,14 +8,6 @@ import com.ustadmobile.lib.db.entities.TRIGGER_UPSERT
 import com.ustadmobile.lib.db.entities.xapi.VerbEntity.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
-@Serializable
-class VerbDisplay {
-
-    var verbUid: Long = 0
-    var urlId: String? = null
-    var display: String? = null
-}
-
 @Entity
 @Serializable
 @ReplicateEntity(
