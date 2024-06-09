@@ -3,12 +3,10 @@
 package com.ustadmobile.libuicompose.view.videocontent
 
 import android.net.Uri
-import android.os.Build
 import androidx.annotation.OptIn
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -29,7 +27,6 @@ import androidx.media3.datasource.okhttp.OkHttpDataSource
 //This import is not being used directly. It is here to ensure that the AV1 decoder is included (e.g.
 // compilation would fail). The encoder itself will be autoloaded by setting EXTENSION_RENDERER_MODE_ON
 // on the ExoPlayer builder.
-import androidx.media3.decoder.av1.Libgav1VideoRenderer
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory

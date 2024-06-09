@@ -9,12 +9,7 @@ import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCaseJs
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
-import com.ustadmobile.core.domain.xapi.StoreActivitiesUseCase
-import com.ustadmobile.core.domain.xapi.XapiStatementResource
-import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
-import com.ustadmobile.core.domain.xxhash.XXHasher64FactoryJs
-import com.ustadmobile.core.domain.xxhash.XXStringHasher
-import com.ustadmobile.core.domain.xxhash.XXStringHasherJs
+import com.ustadmobile.core.domain.xapi.noninteractivecontentusagestatementrecorder.NonInteractiveContentXapiStatementRecorderFactory
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.config.AppConfig
@@ -226,6 +221,5 @@ internal fun ustadJsDi(
             repo = instance(tag = DoorTag.TAG_REPO),
         )
     }
-
 
 }

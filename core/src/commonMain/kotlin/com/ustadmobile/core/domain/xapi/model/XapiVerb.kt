@@ -6,6 +6,11 @@ import com.ustadmobile.lib.db.entities.xapi.VerbEntity
 import com.ustadmobile.lib.db.entities.xapi.VerbLangMapEntry
 import kotlinx.serialization.Serializable
 
+
+const val VERB_COMPLETED = "http://adlnet.gov/expapi/verbs/completed"
+
+const val VERB_PROGRESSED = "http://adlnet.gov/expapi/verbs/progressed"
+
 @Serializable
 data class XapiVerb(
     val id: String? = null,

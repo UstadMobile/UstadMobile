@@ -130,6 +130,7 @@ import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
 import com.ustadmobile.core.domain.xapi.StoreActivitiesUseCase
 import com.ustadmobile.core.domain.xapi.XapiStatementResource
+import com.ustadmobile.core.domain.xapi.noninteractivecontentusagestatementrecorder.NonInteractiveContentXapiStatementRecorderFactory
 import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnClearUseCase
 import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnClearUseCaseAndroid
 import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
@@ -976,6 +977,14 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 appContext = applicationContext,
                 endpoint = context,
                 json = instance(),
+            )
+        }
+
+        bind<NonInteractiveContentXapiStatementRecorderFactory>() with scoped(EndpointScope.Default).provider {
+            NonInteractiveContentXapiStatementRecorderFactory(
+                saveStatementOnClearUseCase = instance(),
+                saveStatementOnUnloadUseCase = null,
+                xapiStatementResource = instance(),
             )
         }
 

@@ -5,8 +5,11 @@ import com.ustadmobile.core.contentformats.manifest.ContentManifestEntry
 import com.ustadmobile.core.contentformats.media.MediaContentInfo
 import com.ustadmobile.core.contentformats.media.MediaSource
 import com.ustadmobile.core.domain.contententry.ContentConstants
+import com.ustadmobile.core.domain.xapi.XapiStatementResource
 import com.ustadmobile.core.domain.xapi.ext.resultDurationMillis
 import com.ustadmobile.core.domain.xapi.ext.resultProgressExtension
+import com.ustadmobile.core.domain.xapi.model.XapiStatement
+import com.ustadmobile.core.domain.xapi.noninteractivecontentusagestatementrecorder.NonInteractiveContentXapiStatementRecorderFactory
 import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnClearUseCase
 import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
@@ -23,6 +26,7 @@ import okhttp3.mockwebserver.RecordedRequest
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import org.kodein.di.bind
+import org.kodein.di.instance
 import org.kodein.di.scoped
 import org.kodein.di.singleton
 import org.mockito.kotlin.any
@@ -74,9 +78,23 @@ class VideoContentViewModelTest {
     fun givenVideoPlayStarted_whenCleared_thenShouldRecordStatement() {
         testViewModel<VideoContentViewModel> {
             val mockSaveOnClearUseCase = mock<SaveStatementOnClearUseCase>()
+            val mockStatementResource = mock<XapiStatementResource>()
+
             extendDi {
                 bind<SaveStatementOnClearUseCase>() with scoped(endpointScope).singleton {
                     mockSaveOnClearUseCase
+                }
+
+                bind<XapiStatementResource>() with scoped(endpointScope).singleton {
+                    mockStatementResource
+                }
+
+                bind<NonInteractiveContentXapiStatementRecorderFactory>() with scoped(endpointScope).singleton {
+                    NonInteractiveContentXapiStatementRecorderFactory(
+                        saveStatementOnClearUseCase = instance(),
+                        saveStatementOnUnloadUseCase = null,
+                        xapiStatementResource = instance()
+                    )
                 }
             }
 
