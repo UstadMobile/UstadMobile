@@ -11,6 +11,7 @@ import com.ustadmobile.core.domain.xapi.ext.resultProgressExtension
 import com.ustadmobile.core.domain.xapi.model.XapiStatement
 import com.ustadmobile.core.domain.xapi.noninteractivecontentusagestatementrecorder.NonInteractiveContentXapiStatementRecorderFactory
 import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnClearUseCase
+import com.ustadmobile.core.test.isWithinThreshold
 import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.stringvalues.emptyStringValues
@@ -150,10 +151,7 @@ class VideoContentViewModelTest {
             viewModel.onClear()
             verify(mockSaveOnClearUseCase, timeout(5_000)).invoke(
                 statements = argWhere { stmts ->
-                    stmts.first().let {
-                        it.resultDurationMillis!! > (delay - 100) &&
-                                it.resultProgressExtension!! < (delay + 100)
-                    }
+                    isWithinThreshold(delay, stmts.first().resultDurationMillis!!, 100)
                 },
                 xapiSession = any(),
             )

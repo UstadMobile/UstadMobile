@@ -2,6 +2,7 @@ package com.ustadmobile.view.epubcontent
 
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useLaunchedEffect
+import com.ustadmobile.core.hooks.useOnUnloadEffect
 import com.ustadmobile.core.util.ext.forEach
 import com.ustadmobile.core.viewmodel.epubcontent.EpubContentUiState
 import com.ustadmobile.core.viewmodel.epubcontent.EpubContentViewModel
@@ -56,8 +57,11 @@ import web.cssom.Auto
 import web.cssom.GridTemplateAreas
 import web.cssom.array
 import web.cssom.ident
+import web.dom.scroll
+import web.events.Event
 import web.events.EventHandler
 import web.events.addEventListener
+import web.events.removeEventListener
 import web.html.HTMLElement
 
 external interface EpubContentProps : Props{
@@ -72,6 +76,8 @@ external interface EpubContentProps : Props{
     var onClickTocItem: (EpubTocItem) -> Unit
 
     var onClickToggleTogItem: (EpubTocItem) -> Unit
+
+    var onSpineIndexChanged: (Int) -> Unit
 }
 
 object EpubArea{
@@ -184,6 +190,7 @@ val EpubContentComponent = FC<EpubContentProps> { props ->
             EpubScrollComponent {
                 scrollToCommands = props.scrollToCommands
                 scrollByCommands = scrollByCommandFlow
+                onSpineIndexChanged = props.onSpineIndexChanged
             }
         }
 
@@ -220,11 +227,34 @@ external interface EpubScrollProps : Props {
     var scrollToCommands: Flow<EpubScrollCommand>
 
     var scrollByCommands: Flow<Int>
+
+    var onSpineIndexChanged: (Int) -> Unit
 }
 
+/*
+ * EpubScrollComponent has to be a child component of VirtualList in order to use VirtualListContext
+ */
 val EpubScrollComponent = FC<EpubScrollProps> { props ->
-    //EpubScrollComponent has to be a child component of VirtualList in order to use  VirtualListContext
+
     val virtualizerContext by useRequiredContext(VirtualListContext)
+    val scrollElement = virtualizerContext.virtualizer.scrollElement
+
+    useEffect(scrollElement) {
+        val scrollListener: (Event) -> Unit = {
+            val scrollTop = scrollElement?.scrollTop
+            if(scrollTop != null){
+                val spineIndex = virtualizerContext.virtualizer
+                    .getVirtualItemForOffset(scrollTop.roundToInt()).index
+                props.onSpineIndexChanged(spineIndex)
+            }
+        }
+
+        scrollElement?.addEventListener(Event.Companion.scroll(), scrollListener)
+
+        cleanup {
+            scrollElement?.removeEventListener(Event.Companion.scroll(), scrollListener)
+        }
+    }
 
     /**
      * The scroll offset that the virtualizer needs to hit in order to reach the spine index as per
@@ -244,10 +274,13 @@ val EpubScrollComponent = FC<EpubScrollProps> { props ->
             )
             val offsetAsInt = offsetTarget.component1().toInt()
             spineIndexOffsetTarget = offsetAsInt
-            virtualizerContext.virtualizer.scrollToOffset(offsetAsInt, jso {
-                align = ScrollAlignment.start
-                behavior = ScrollBehavior.instant
-            })
+            virtualizerContext.virtualizer.scrollToOffset(
+                offsetAsInt,
+                jso {
+                    align = ScrollAlignment.start
+                    behavior = ScrollBehavior.instant
+                }
+            )
         }
     }
 
@@ -405,6 +438,8 @@ val EpubContentScreen = FC<Props> {
 
     val uiStateVal by epubViewModel.uiState.collectAsState(EpubContentUiState())
 
+    useOnUnloadEffect(epubViewModel::onUnload)
+
     EpubContentComponent {
         uiState = uiStateVal
         onClickLink = epubViewModel::onClickLink
@@ -412,6 +447,7 @@ val EpubContentScreen = FC<Props> {
         onDismissTableOfContents = epubViewModel::onDismissTableOfContentsDrawer
         onClickTocItem = epubViewModel::onClickTocItem
         onClickToggleTogItem = epubViewModel::onClickToggleTocItem
+        onSpineIndexChanged = epubViewModel::onSpineIndexChanged
     }
 }
 
