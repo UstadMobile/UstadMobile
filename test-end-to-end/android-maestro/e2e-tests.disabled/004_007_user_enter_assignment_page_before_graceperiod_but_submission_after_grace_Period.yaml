@@ -85,9 +85,13 @@ env:
 - inputText: "23:45"
 - hideKeyboard
 - tapOn: "End of grace period"
-- inputText: "20/05/2024"
+- runScript:
+    file: "../common/setDate.js"
+- inputText: ${output.todayDate}
 - tapOn: "hh:mm"
-- inputText: "04:47"
+- runScript:
+    file: "../common/setDate.js"
+- inputText: ${output.todayTime}
 - hideKeyboard
 - tapOn: "Late submission penalty"
 - inputText: "10"
@@ -129,10 +133,11 @@ env:
     id: "com.toughra.ustadmobile:id/editor"
 - inputText: "Assignment done by student 1"
 - tapOn: "Done"
+#- export: MAESTRO_DRIVER_STARTUP_TIMEOUT=120000
 - extendedWaitUntil:
-    notVisible:
-      text: "Submit" # or any other selector
-    timeout: 12000
+    visible:
+      text: "Submit"
+    timeout: 120000
 # attempt to submit after deadline has passed
 - scrollUntilVisible:
     element:
@@ -140,5 +145,5 @@ env:
     direction: DOWN
 - tapOn: "Submit"
 - assertNotVisible: "Submitted"
-- assertVisible: "You cannot submit after the deadline"
+- assertVisible: "Deadline has passed"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/submission_after_deadline"

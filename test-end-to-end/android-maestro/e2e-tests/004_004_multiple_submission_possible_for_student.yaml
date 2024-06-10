@@ -201,4 +201,8 @@ env:
       text: "Submission 2"
     direction: DOWN
 - assertVisible: "Submission 2"
+- scrollUntilVisible:
+    element:
+      text: "Submission 1"
+    direction: DOWN
 - assertVisible: "Submission 1"
