@@ -378,6 +378,12 @@ class EpubContentViewModel(
          */
         const val ARG_TOC_OPTIONS_STRING = "tocString"
 
+        /**
+         * Argument that can be used to specify the xAPI statements url. This is used when embedded
+         * via the desktop
+         */
+        const val ARG_XAPI_STATEMENTS_URL = "xapiStatementsUrl"
+
         const val DEST_NAME = "EpubContent"
     }
 

@@ -7,7 +7,8 @@ import com.ustadmobile.core.domain.xapi.model.XapiObjectType
 import kotlinx.serialization.Serializable
 
 /**
- * Represents an xAPI session e.g. where a given content entry is opened for a given user
+ * Represents an xAPI session e.g. where a given content entry is opened for a given user. Used where
+ * an xAPI session happens within the app itself (e.g. not involving external content).
  *
  * @param endpoint The system endpoint (NOT the local xapi endpoint e.g. a localhost url for the content etc)
  */

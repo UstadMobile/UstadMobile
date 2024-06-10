@@ -40,6 +40,9 @@ class LaunchEpubUseCaseJvm(
         val localManifestUrl = embeddedHttpServer.endpointUrl(
             endpoint, manifestUrl.substringAfter(endpoint.url)
         )
+        val xapiStatementsUrl = embeddedHttpServer.endpointUrl(
+            endpoint, "api/xapi/statement"
+        )
 
         val cevOpenUri = contentEntryVersion.cevOpenUri ?:
             throw IllegalStateException("ContentEntryVersion $contentEntryVersion openUri is null")
@@ -51,7 +54,9 @@ class LaunchEpubUseCaseJvm(
                     "${EpubContentViewModel.ARG_MANIFEST_URL}=${UrlEncoderUtil.encode(localManifestUrl)}&" +
                     "${EpubContentViewModel.ARG_CEV_URI}=${UrlEncoderUtil.encode(cevOpenUri)}&" +
                     "${EpubContentViewModel.ARG_NAVIGATION_VISIBLE}=false&" +
-                    "${EpubContentViewModel.ARG_TOC_OPTIONS_STRING}=${UrlEncoderUtil.encode(tocString)}"
+                    "${EpubContentViewModel.ARG_TOC_OPTIONS_STRING}=${UrlEncoderUtil.encode(tocString)}&" +
+                    "${EpubContentViewModel.ARG_XAPI_STATEMENTS_URL}=${UrlEncoderUtil.encode(xapiStatementsUrl)}"
+
         )
         launchChromeUseCase(url)
         return LaunchContentEntryVersionUseCase.LaunchResult()

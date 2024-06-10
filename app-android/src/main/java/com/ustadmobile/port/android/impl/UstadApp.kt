@@ -757,6 +757,9 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                     di.on(it).direct.instance()
                 },
                 staticUmAppFilesDir = null,
+                xapiStatementResource = {
+                    di.on(it).direct.instance()
+                },
                 mimeTypeHelper = FileMimeTypeHelperImpl(),
             )
         }

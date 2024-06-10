@@ -34,6 +34,9 @@ private val PDF_DEFAULT_SCALE = 1.5f
 @Composable
 actual fun PdfFileComponent(
     pdfFile: File,
+    onActiveChanged: (Boolean) -> Unit,
+    onProgressed: (Int) -> Unit,
+    onCompleted: () -> Unit,
     modifier: Modifier,
 ) {
     val helper: PdfFileHelper = remember {
@@ -57,6 +60,18 @@ actual fun PdfFileComponent(
     val numPages: Int by helper.numPages.collectAsState(0)
 
     val lazyListState = rememberLazyListState()
+    val lastVisibleIndex = lazyListState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
+    val totalItems = lazyListState.layoutInfo.totalItemsCount
+    LaunchedEffect(lastVisibleIndex, totalItems) {
+        if(totalItems == 0 || lastVisibleIndex  == null)
+            return@LaunchedEffect
+
+        if (lastVisibleIndex == totalItems - 1) {
+            onCompleted()
+        }else {
+            onProgressed(((lastVisibleIndex + 1) * 100 / totalItems))
+        }
+    }
 
     UstadLazyColumn(
         modifier = Modifier.fillMaxSize(),

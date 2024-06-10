@@ -7,5 +7,8 @@ import java.io.File
 @Composable
 expect fun PdfFileComponent(
     pdfFile: File,
+    onActiveChanged: (Boolean) -> Unit,
+    onProgressed: (Int) -> Unit,
+    onCompleted: () -> Unit,
     modifier: Modifier = Modifier
 )

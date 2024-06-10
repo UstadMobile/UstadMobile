@@ -68,6 +68,7 @@ class UstadAccountManager(
 
             val activeAccountJson = json.encodeToString(value)
             settings[ACCOUNTS_ACTIVE_SESSION_PREFKEY] = activeAccountJson
+            settings[ACCOUNTS_ACTIVE_ENDPOINT_PREFKEY] = value.endpoint.url
         }
 
     /**
