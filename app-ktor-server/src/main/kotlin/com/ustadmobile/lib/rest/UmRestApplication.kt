@@ -150,8 +150,7 @@ val REQUIRED_EXTERNAL_COMMANDS = emptyList<String>()
 val KTOR_SERVER_ROUTES = listOf(
     "/UmAppDatabase",
     "/ContainerEntryList", "/ContainerEntryFile", "/auth", "/ContainerMount",
-    "/Site", "/import", "/contentupload", "/websocket", "/pdf",
-    "/api", "/staticfiles"
+    "/Site", "/import", "/contentupload", "/websocket", "/api", "/staticfiles"
 )
 
 
