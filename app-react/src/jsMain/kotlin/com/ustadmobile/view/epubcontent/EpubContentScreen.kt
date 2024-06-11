@@ -10,6 +10,7 @@ import com.ustadmobile.core.viewmodel.epubcontent.EpubScrollCommand
 import com.ustadmobile.core.viewmodel.epubcontent.EpubTocItem
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.useUstadViewModel
+import com.ustadmobile.hooks.useWindowFocusedEffect
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListContext
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
@@ -78,6 +79,8 @@ external interface EpubContentProps : Props{
     var onClickToggleTogItem: (EpubTocItem) -> Unit
 
     var onSpineIndexChanged: (Int) -> Unit
+
+    var onActiveChanged: (Boolean) -> Unit
 }
 
 object EpubArea{
@@ -109,6 +112,11 @@ object EpubArea{
 val EpubContentComponent = FC<EpubContentProps> { props ->
     val muiAppState = useMuiAppState()
     val mobileMode = useMediaQuery("(max-width:960px)")
+
+
+    useWindowFocusedEffect { focused ->
+        props.onActiveChanged(focused)
+    }
 
     val defaultHeightMap = useMemo(dependencies = emptyArray()) {
         MutableStateFlow(mapOf<Int, String>())
@@ -448,6 +456,7 @@ val EpubContentScreen = FC<Props> {
         onClickTocItem = epubViewModel::onClickTocItem
         onClickToggleTogItem = epubViewModel::onClickToggleTocItem
         onSpineIndexChanged = epubViewModel::onSpineIndexChanged
+        onActiveChanged = epubViewModel::onActiveChanged
     }
 }
 

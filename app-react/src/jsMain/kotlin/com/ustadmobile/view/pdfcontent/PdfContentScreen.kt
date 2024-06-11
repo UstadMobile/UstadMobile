@@ -7,6 +7,7 @@ import com.ustadmobile.core.viewmodel.pdfcontent.PdfContentUiState
 import com.ustadmobile.core.viewmodel.pdfcontent.PdfContentViewModel
 import com.ustadmobile.hooks.useMessageEffect
 import com.ustadmobile.hooks.useUstadViewModel
+import com.ustadmobile.hooks.useWindowFocusedEffect
 import com.ustadmobile.mui.components.UstadFullSizeIframe
 import js.uri.encodeURIComponent
 import org.kodein.di.direct
@@ -30,6 +31,8 @@ external interface PdfContentScreenProps : Props{
     var onProgressed: (Int) -> Unit
 
     var onComplete: () -> Unit
+
+    var onActiveChanged: (Boolean) -> Unit
 }
 
 /**
@@ -52,12 +55,16 @@ val PdfContentComponent = FC<PdfContentScreenProps> { props ->
         di.direct.instance<UstadAccountManager>().activeEndpoint
     }
 
+    useWindowFocusedEffect { focused ->
+        props.onActiveChanged(focused)
+    }
+
     useMessageEffect<String> {
         if(!endpoint.url.startsWith(it.origin, ignoreCase = true))
             return@useMessageEffect
 
         //viewer.html will send a message in the form of pdf-pages:pageNum/numPages
-        if(it.data.startsWith("pdf-pages:")) {
+        if(it.data.startsWith("pdf-pages:", ignoreCase = true)) {
             val pageComponents = it.data.substringAfter("pdf-pages:")
                 .split("/")
 
@@ -65,7 +72,6 @@ val PdfContentComponent = FC<PdfContentScreenProps> { props ->
             if(numPages == 0)
                 return@useMessageEffect
 
-            console.log("PDF progress: $pageNum/$numPages")
             if(pageNum == numPages) {
                 props.onComplete()
             }else {
@@ -106,6 +112,7 @@ val PdfContentScreen = FC<Props> {
         uiState  = uiStateVal
         onProgressed = viewModel::onProgressed
         onComplete = viewModel::onComplete
+        onActiveChanged = viewModel::onActiveChanged
     }
 }
 
