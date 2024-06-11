@@ -26,6 +26,10 @@ import web.window.window
 
 external interface PdfContentScreenProps : Props{
     var uiState: PdfContentUiState
+
+    var onProgressed: (Int) -> Unit
+
+    var onComplete: () -> Unit
 }
 
 /**
@@ -49,7 +53,25 @@ val PdfContentComponent = FC<PdfContentScreenProps> { props ->
     }
 
     useMessageEffect<String> {
-        console.log("message: ${it.data}")
+        if(!endpoint.url.startsWith(it.origin, ignoreCase = true))
+            return@useMessageEffect
+
+        //viewer.html will send a message in the form of pdf-pages:pageNum/numPages
+        if(it.data.startsWith("pdf-pages:")) {
+            val pageComponents = it.data.substringAfter("pdf-pages:")
+                .split("/")
+
+            val (pageNum, numPages) = pageComponents[0].toInt() to pageComponents[1].toInt()
+            if(numPages == 0)
+                return@useMessageEffect
+
+            console.log("PDF progress: $pageNum/$numPages")
+            if(pageNum == numPages) {
+                props.onComplete()
+            }else {
+                props.onProgressed((pageNum * 100) / numPages)
+            }
+        }
     }
 
     props.uiState.pdfUrl?.also { pdfUrl ->
@@ -82,6 +104,8 @@ val PdfContentScreen = FC<Props> {
 
     PdfContentComponent {
         uiState  = uiStateVal
+        onProgressed = viewModel::onProgressed
+        onComplete = viewModel::onComplete
     }
 }
 
