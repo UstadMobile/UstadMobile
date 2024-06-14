@@ -16,6 +16,7 @@ import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.STATUS_STATEMENTS_IS_
 import com.ustadmobile.door.annotation.HttpAccessible
 import com.ustadmobile.door.annotation.HttpServerFunctionCall
 import com.ustadmobile.door.annotation.HttpServerFunctionParam
+import com.ustadmobile.lib.db.composites.CourseBlockAndAssignment
 import com.ustadmobile.lib.db.composites.CourseBlockAndDisplayDetails
 import com.ustadmobile.lib.db.composites.CourseBlockAndDbEntities
 import com.ustadmobile.lib.db.composites.CourseBlockAndPicture
@@ -297,15 +298,16 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
     )
     @Query("""
-        SELECT CourseBlock.*
-          FROM CourseBlock
-         WHERE CourseBlock.cbEntityUid = :assignmentUid
-           AND CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
+        SELECT ClazzAssignment.*, CourseBlock.* 
+          FROM ClazzAssignment
+               JOIN CourseBlock 
+                    ON CourseBlock.cbEntityUid = :assignmentUid
+         WHERE ClazzAssignment.caUid = :assignmentUid
          LIMIT 1 
     """)
     abstract fun findCourseBlockByAssignmentUid(
         assignmentUid: Long
-    ): Flow<CourseBlock?>
+    ): Flow<CourseBlockAndAssignment?>
 
     @HttpAccessible(
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES

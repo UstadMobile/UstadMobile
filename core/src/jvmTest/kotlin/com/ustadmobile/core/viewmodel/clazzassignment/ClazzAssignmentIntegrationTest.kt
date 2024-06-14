@@ -139,7 +139,7 @@ class ClazzAssignmentIntegrationTest: AbstractMainDispatcherTest() {
                     //this is too long... should be on the uistate itself.
                     val uiState = awaitItemWhere {
                         it.draftMark != null &&
-                        it.courseBlock != null &&
+                        it.block != null &&
                         it.submissionList.isNotEmpty() &&
                         it.submissionList.first().submission.casText == "I can has cheezburger" &&
                         it.markFieldsEnabled

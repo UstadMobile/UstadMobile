@@ -2,7 +2,6 @@ package com.ustadmobile.core.embeddedhttp
 
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServerUseCase
-import com.ustadmobile.core.domain.xapi.XapiStatementResource
 import com.ustadmobile.libcache.headers.MimeTypeHelper
 import com.ustadmobile.libcache.request.HttpRequest
 import com.ustadmobile.libcache.request.requestBuilder
@@ -17,7 +16,6 @@ import java.io.File
 class EmbeddedHttpServer(
     port: Int,
     private val contentEntryVersionServerUseCase: (Endpoint) -> ContentEntryVersionServerUseCase,
-    private val xapiStatementResource: (Endpoint) -> XapiStatementResource,
     private val staticUmAppFilesDir: File?,
     private val mimeTypeHelper: MimeTypeHelper,
 ) : NanoHTTPD(port) {

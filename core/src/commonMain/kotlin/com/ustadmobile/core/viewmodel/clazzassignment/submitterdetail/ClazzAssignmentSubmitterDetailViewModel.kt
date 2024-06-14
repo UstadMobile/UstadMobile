@@ -29,6 +29,7 @@ import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.CommentsAndName
 import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
 import com.ustadmobile.lib.db.composites.CourseAssignmentSubmissionFileAndTransferJob
+import com.ustadmobile.lib.db.composites.CourseBlockAndAssignment
 import com.ustadmobile.lib.db.composites.SubmissionAndFiles
 import com.ustadmobile.lib.db.entities.*
 import dev.icerock.moko.resources.StringResource
@@ -69,7 +70,7 @@ data class ClazzAssignmentSubmitterDetailUiState(
 
     val submitMarkError: String? = null,
 
-    val courseBlock: CourseBlock? = null,
+    val block: CourseBlockAndAssignment? = null,
 
     val gradeFilterChips: List<ListFilterIdOption> = emptyList(),
 
@@ -81,11 +82,7 @@ data class ClazzAssignmentSubmitterDetailUiState(
 
     val draftMark: CourseAssignmentMark? = null,
 
-    /**
-     * Whether or not the mark fields (e.g. score itself, comment, and button) are enabled. This is
-     * independent of comments
-     */
-    val markFieldsEnabled: Boolean = true,
+    val markSubmissionInProgress: Boolean = false,
 
     val markNextStudentVisible: Boolean =  true,
 
@@ -123,8 +120,14 @@ data class ClazzAssignmentSubmitterDetailUiState(
     val openingFileState: OpeningBlobState? = null,
 
     val showModerateOptions: Boolean = false,
-
 ) {
+
+    /**
+     * Whether or not the mark fields (e.g. score itself, comment, and button) are enabled. This is
+     * independent of comments
+     */
+    val markFieldsEnabled: Boolean
+        get() = !markSubmissionInProgress && block.let { it?.assignment != null && it.courseBlock != null }
 
     val submissionStatus: Int
         get() {
@@ -136,8 +139,10 @@ data class ClazzAssignmentSubmitterDetailUiState(
 
     val averageScore: Float
         get() {
-            return latestUniqueMarksByMarker.let {
-                it.sumOf { it.courseAssignmentMark?.camMark?.toDouble() ?: 0.0 }.toFloat() / max(it.size, 1)
+            return latestUniqueMarksByMarker.let { latestUniqueMarks ->
+                latestUniqueMarks.sumOf {
+                    it.courseAssignmentMark?.camMark?.toDouble() ?: 0.0
+                }.toFloat() / max(latestUniqueMarks.size, 1)
             }
         }
 
@@ -184,7 +189,6 @@ data class ClazzAssignmentSubmitterDetailUiState(
 class ClazzAssignmentSubmitterDetailViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
-    private val submitMarkUseCase: SubmitMarkUseCase = SubmitMarkUseCase(),
 ): DetailViewModel<CourseAssignmentSubmission>(di, savedStateHandle, DEST_NAME) {
 
     private val _uiState = MutableStateFlow(
@@ -223,6 +227,8 @@ class ClazzAssignmentSubmitterDetailViewModel(
     private var openBlobJob: Job? = null
 
     private val openBlobUiUseCase: OpenBlobUiUseCase? by di.onActiveEndpoint().instanceOrNull()
+
+    private val submitMarkUseCase: SubmitMarkUseCase by di.onActiveEndpoint().instance()
 
     init {
         _uiState.update { prev ->
@@ -279,7 +285,7 @@ class ClazzAssignmentSubmitterDetailViewModel(
                                         assignmentUid
                                     ).collect {
                                         _uiState.update { prev ->
-                                            prev.copy(courseBlock = it)
+                                            prev.copy(block = it)
                                         }
                                     }
                                 }
@@ -323,7 +329,7 @@ class ClazzAssignmentSubmitterDetailViewModel(
                                     submissionList = emptyList(),
                                     marks = emptyList(),
                                     newPrivateCommentTextVisible = false,
-                                    courseBlock = null,
+                                    block = null,
                                     activeUserSubmitterId = 0
                                 )
                             }
@@ -379,7 +385,9 @@ class ClazzAssignmentSubmitterDetailViewModel(
 
         val draftMark = _uiState.value.draftMark ?: return
         val submissions = _uiState.value.submissionList // note: this would be better to check by making it nullable
-        val courseBlock = _uiState.value.courseBlock ?: return
+        val block = _uiState.value.block ?: return
+        val courseBlock = block.courseBlock ?: return
+        val assignment = block.assignment ?: return
 
         if(draftMark.camMark == (-1).toFloat()) {
             _uiState.update { prev ->
@@ -404,14 +412,13 @@ class ClazzAssignmentSubmitterDetailViewModel(
             return
         }
 
-        _uiState.update { prev -> prev.copy(markFieldsEnabled = false) }
+        _uiState.update { prev -> prev.copy(markSubmissionInProgress = true) }
 
         viewModelScope.launch {
             try {
                 submitMarkUseCase(
-                    repo = activeRepo,
-                    activeUserPersonUid = activeUserPersonUid,
-                    assignmentUid = assignmentUid,
+                    activeUserPerson = accountManager.currentUserSession.person,
+                    assignment = assignment,
                     clazzUid = clazzUid,
                     submitterUid = submitterUid,
                     draftMark = draftMark,
@@ -430,7 +437,7 @@ class ClazzAssignmentSubmitterDetailViewModel(
                 snackDispatcher.showSnackBar(Snack("Error: ${e.message}"))
                 Napier.w("Exception submitting mark:", e)
             }finally {
-                _uiState.update { prev -> prev.copy(markFieldsEnabled = true) }
+                _uiState.update { prev -> prev.copy(markSubmissionInProgress = false) }
             }
         }
     }
