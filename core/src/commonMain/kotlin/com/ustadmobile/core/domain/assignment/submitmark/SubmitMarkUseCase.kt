@@ -20,6 +20,7 @@ import com.ustadmobile.core.util.ext.toXapiAgent
 import com.ustadmobile.core.viewmodel.UstadViewModel.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.viewmodel.UstadViewModel.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.viewmodel.clazzassignment.detail.ClazzAssignmentDetailViewModel
+import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.CourseAssignmentMark
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
@@ -33,7 +34,10 @@ import com.ustadmobile.lib.db.entities.ext.shallowCopy
  *
  * To report a student's score based on Xapi statements; one can use:
  * - The latest score for the student (generally the right way to handle assignments e.g. if a mark is updated)
- * - The best score achieved for the student(generally the right way to handle self-directed content)
+ * - The best score achieved for the student(generally the right way to handle self-paced content)
+ *
+ * Where an assignment is peer marked, we need to take the average of the latest distinct marks
+ * per distinct instructor.
  *
  * How do we decide on the XapiStatement(s) to determine the mark. Could be
  *   Assignment: latest mark (when marked by teacher) or average of latest distinct marks (peer marking)
@@ -110,8 +114,6 @@ class SubmitMarkUseCase(
             }
         }
 
-        repo.courseAssignmentMarkDao.insertAsync(markToRecord)
-
         val activityId = UstadUrlComponents(
             viewName = ClazzAssignmentDetailViewModel.DEST_NAME,
             endpoint = endpoint.url,
@@ -137,24 +139,28 @@ class SubmitMarkUseCase(
                 completion = true,
                 success = true,
                 score = XapiResult.Score(
-                    scaled = draftMark.camMark / draftMark.camMaxMark,
-                    raw = draftMark.camMark,
+                    scaled = markToRecord.camMark / markToRecord.camMaxMark,
+                    raw = markToRecord.camMark,
                     min = 0f,
-                    max = draftMark.camMaxMark,
+                    max = markToRecord.camMaxMark,
                 )
             )
         )
-        xapiStatementResource.post(
-            statements = listOf(stmt),
-            xapiSession = XapiSession(
-                endpoint = endpoint,
-                accountPersonUid = activeUserPerson.personUid,
-                accountUsername = activeUserPerson.username!!,
-                clazzUid = clazzUid,
-                cbUid = courseBlock.cbUid,
-                rootActivityId = activityId,
-            )
-        )
 
+        repo.withDoorTransactionAsync {
+            xapiStatementResource.post(
+                statements = listOf(stmt),
+                xapiSession = XapiSession(
+                    endpoint = endpoint,
+                    accountPersonUid = activeUserPerson.personUid,
+                    accountUsername = activeUserPerson.username!!,
+                    clazzUid = clazzUid,
+                    cbUid = courseBlock.cbUid,
+                    rootActivityId = activityId,
+                )
+            )
+
+            repo.courseAssignmentMarkDao.insertAsync(markToRecord)
+        }
     }
 }
