@@ -19,6 +19,7 @@ import app.cash.paging.PagingSource
 import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.db.dao.ClazzAssignmentDaoCommon.SELECT_ASSIGNMENT_IS_PEERMARKED_SQL
 import com.ustadmobile.lib.db.composites.AssignmentSubmitterUidAndName
+import com.ustadmobile.lib.db.composites.ClazzAssignmentAndBlock
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission.Companion.MIN_SUBMITTER_UID_FOR_PERSON
 
@@ -549,7 +550,7 @@ expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJo
                AND CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
          WHERE caUid = :uid
     """)
-    abstract suspend fun findByUidWithBlockAsync(uid: Long): ClazzAssignmentWithCourseBlock?
+    abstract suspend fun findByUidWithBlockAsync(uid: Long): ClazzAssignmentAndBlock?
 
     @Query("""
         SELECT * 

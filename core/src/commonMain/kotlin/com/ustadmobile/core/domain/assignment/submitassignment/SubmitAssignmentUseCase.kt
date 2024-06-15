@@ -41,10 +41,12 @@ class SubmitAssignmentUseCase(
         if(submitterUid == 0L)
             throw AccountIsNotSubmitterException("Not a valid submitter")
 
-        val assignment = repo.clazzAssignmentDao.findByUidWithBlockAsync(assignmentUid)
+        val assignmentAndBlock = repo.clazzAssignmentDao.findByUidWithBlockAsync(assignmentUid)
             ?: throw IllegalArgumentException("Could not find assignment uid $assignmentUid")
-        val courseBlock = assignment.block
+        val courseBlock = assignmentAndBlock.block
             ?: throw IllegalArgumentException("Could not load courseblock")
+        val assignment = assignmentAndBlock.assignment
+            ?: throw IllegalArgumentException("assignment cannot be null")
 
         if(assignment.caSubmissionPolicy == ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE
             && repo.courseAssignmentSubmissionDao.doesUserHaveSubmissions(accountPersonUid, assignmentUid)

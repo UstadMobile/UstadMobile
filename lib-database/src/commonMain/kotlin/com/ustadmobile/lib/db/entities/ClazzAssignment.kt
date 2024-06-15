@@ -32,90 +32,88 @@ import kotlinx.serialization.Serializable
  * Submitter Uids will be the group number if submitting by group, or the personuid if submitting
  * individually. See CourseAssignmentSubmission.casSubmitterUid
  *
+ * @param caGroupUid Assignments can be for individuals or groups. If the assignment should be submitted by each,
+ * individual student, then caGroupUid = 0 (the default). If in groups, then caGroupUid is the
+ * cgsUid of the CourseGroupSet
+ * @param caPrivateCommentsEnabled True if submitters can submit a private comment (e.g. from student
+ * to teacher, or peer to peer). Those with create learner record permission can always make a
+ * private comment.
+ *
  */
 @Serializable
-open class ClazzAssignment {
-
+data class ClazzAssignment(
     @PrimaryKey(autoGenerate = true)
-    var caUid: Long = 0
+    var caUid: Long = 0,
 
     @Deprecated("Use title on courseblock")
-    var caTitle: String? = null
+    var caTitle: String? = null,
 
     @Deprecated("Use description on courseblock")
-    var caDescription: String? = null
+    var caDescription: String? = null,
 
-    /**
-     * Assignments can be for individuals or groups. If the assignment should be submitted by each,
-     * individual student, then caGroupUid = 0 (the default). If in groups, then caGroupUid is the
-     * cgsUid of the CourseGroupSet
-     */
     @ColumnInfo(defaultValue = "0")
-    var caGroupUid: Long = 0
+    var caGroupUid: Long = 0,
 
-    var caActive: Boolean = true
+    var caActive: Boolean = true,
 
-    var caClassCommentEnabled: Boolean = true
+    var caClassCommentEnabled: Boolean = true,
 
-    /**
-     * True if submitters can submit a private comment (e.g. from student to teacher, or peer to peer).
-     * Those with create learner record permission can always make a private comment.
-     */
     @ColumnInfo(defaultValue = "1")
-    var caPrivateCommentsEnabled: Boolean = true
+    var caPrivateCommentsEnabled: Boolean = true,
 
     @Deprecated("use on courseBlock, will be removed soon")
     @ColumnInfo(defaultValue = "100")
-    var caCompletionCriteria: Int = COMPLETION_CRITERIA_SUBMIT
+    var caCompletionCriteria: Int = COMPLETION_CRITERIA_SUBMIT,
 
     @ColumnInfo(defaultValue = "1")
-    var caRequireFileSubmission: Boolean = true
+    var caRequireFileSubmission: Boolean = true,
 
     @ColumnInfo(defaultValue = "0")
-    var caFileType: Int = 0
+    var caFileType: Int = 0,
 
     @ColumnInfo(defaultValue = "50")
-    var caSizeLimit: Int = 50
+    var caSizeLimit: Int = 50,
 
     @ColumnInfo(defaultValue = "1")
-    var caNumberOfFiles: Int = 1
+    var caNumberOfFiles: Int = 1,
 
     @ColumnInfo(defaultValue = "$SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE")
-    var caSubmissionPolicy: Int = SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE
+    var caSubmissionPolicy: Int = SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE,
 
     @ColumnInfo(defaultValue = "$MARKED_BY_COURSE_LEADER")
-    var caMarkingType: Int = MARKED_BY_COURSE_LEADER
+    var caMarkingType: Int = MARKED_BY_COURSE_LEADER,
 
     @ColumnInfo(defaultValue = "1")
-    var caRequireTextSubmission: Boolean = true
+    var caRequireTextSubmission: Boolean = true,
 
     @ColumnInfo(defaultValue = "$TEXT_WORD_LIMIT")
-    var caTextLimitType: Int = TEXT_WORD_LIMIT
+    var caTextLimitType: Int = TEXT_WORD_LIMIT,
 
     @ColumnInfo(defaultValue = "500")
-    var caTextLimit: Int = 500
+    var caTextLimit: Int = 500,
 
     @ColumnInfo(defaultValue = "0")
-    var caXObjectUid: Long = 0
+    var caXObjectUid: Long = 0,
 
     @ColumnInfo(index = true)
-    var caClazzUid: Long = 0
+    var caClazzUid: Long = 0,
 
     @ColumnInfo(defaultValue = "0")
-    var caPeerReviewerCount: Int = 0
+    var caPeerReviewerCount: Int = 0,
 
     @LocalChangeSeqNum
-    var caLocalChangeSeqNum: Long = 0
+    var caLocalChangeSeqNum: Long = 0,
 
     @MasterChangeSeqNum
-    var caMasterChangeSeqNum: Long = 0
+    var caMasterChangeSeqNum: Long = 0,
 
     @LastChangedBy
-    var caLastChangedBy: Int = 0
+    var caLastChangedBy: Int = 0,
 
     @ReplicateLastModified
     @ReplicateEtag
-    var caLct: Long = 0
+    var caLct: Long = 0,
+) {
 
     companion object {
 
@@ -132,11 +130,6 @@ open class ClazzAssignment {
         const val FILE_TYPE_IMAGE = 2
         const val FILE_TYPE_VIDEO = 3
         const val FILE_TYPE_AUDIO = 4
-
-        const val FILE_SUBMISSION_NOT_REQUIRED = 0
-        const val FILE_NOT_SUBMITTED = 1
-        const val FILE_SUBMITTED = 2
-        const val FILE_MARKED = 3
 
         const val TEXT_WORD_LIMIT = 1
         const val TEXT_CHAR_LIMIT = 2

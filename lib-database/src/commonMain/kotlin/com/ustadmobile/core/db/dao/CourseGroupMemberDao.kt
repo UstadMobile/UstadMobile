@@ -20,46 +20,11 @@ expect abstract class CourseGroupMemberDao: BaseDao<CourseGroupMember> {
 
 
     @Query("""
-        SELECT Person.*, CourseGroupMember.* 
-          FROM Person
-               JOIN ClazzEnrolment 
-               ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
-               AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
-               AND ClazzEnrolment.clazzEnrolmentOutcome = ${ClazzEnrolment.OUTCOME_IN_PROGRESS}
-               
-               LEFT JOIN CourseGroupMember
-               ON CourseGroupMember.cgmPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid
-               AND CourseGroupMember.cgmSetUid = :setUid
-               
-         WHERE clazzEnrolmentClazzUid = :clazzUid
-      ORDER BY Person.firstNames
-    """)
-    abstract suspend fun findByGroupSetAsync(setUid: Long, clazzUid: Long): List<CourseGroupMemberPerson>
-
-    @Query("""
         SELECT CourseGroupMember.*
           FROM CourseGroupMember
          WHERE cgmSetUid = :groupSetUid 
     """)
     abstract suspend fun findByGroupSetUidAsync(groupSetUid: Long): List<CourseGroupMember>
-
-
-    @Query("""
-        SELECT Person.*, CourseGroupMember.* 
-          FROM Person
-               JOIN ClazzEnrolment 
-               ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
-               AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT} 
-               AND ClazzEnrolment.clazzEnrolmentOutcome = ${ClazzEnrolment.OUTCOME_IN_PROGRESS}
-               
-               LEFT JOIN CourseGroupMember
-               ON CourseGroupMember.cgmPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid
-               AND CourseGroupMember.cgmSetUid = :setUid
-               
-         WHERE clazzEnrolmentClazzUid = :clazzUid
-      ORDER BY CourseGroupMember.cgmGroupNumber, Person.firstNames
-    """)
-    abstract suspend fun findByGroupSetOrderedAsync(setUid: Long, clazzUid: Long): List<CourseGroupMemberPerson>
 
     @Query("""
         SELECT * 
