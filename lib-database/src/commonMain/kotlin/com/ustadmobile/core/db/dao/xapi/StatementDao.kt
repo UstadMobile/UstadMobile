@@ -1,6 +1,7 @@
 package com.ustadmobile.core.db.dao.xapi
 
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.RawQuery
 import app.cash.paging.PagingSource
@@ -22,7 +23,7 @@ import kotlinx.coroutines.flow.Flow
 @Repository
 expect abstract class StatementDao {
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     abstract suspend fun insertOrIgnoreListAsync(entityList: List<StatementEntity>)
 
     @Query("SELECT * From StatementEntity LIMIT 1")

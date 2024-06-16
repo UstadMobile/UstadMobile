@@ -8,12 +8,14 @@ import com.ustadmobile.lib.db.entities.TRIGGER_UPSERT
 import kotlinx.serialization.Serializable
 
 /**
+ * The primary representation of an Xapi Statement in the database. Note that the full original
+ * json is stored on StatementEntityJson (such that results data can be retrieved without downloading
+ * the full json string).
+ *
  * @param statementIdHi the hi bits of the statement id (which is a UUID)
  * @param statementIdLo the lo bits of the statement id (which is a UUID)
- * @param fullStatement the JSON for the statement as per the 'exact' representation spec of xAPI
- *        as per statement immutability rules :
- *        https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Data.md#231-statement-immutability.
- *        The canonical JSON will be generated based on the entity fields.
+ * @param statementActorPersonUid where the actor is a single person, the personUid. This is NOT
+ *        always the case e.g. group assignments where the actor is a group.
  * @param resultDuration the duration of the result in ms (if provided), otherwise 0
  * @param extensionProgress Captures the progress extension ( as per
  *        https://aicc.github.io/CMI-5_Spec_Current/samples/scenarios/13-progress_usage/ ) for use
@@ -104,8 +106,6 @@ data class StatementEntity(
     var contextStatementRefIdLo: Long = 0,
 
     var contextInstructorUid: Long = 0,
-
-    var fullStatement: String? = null,
 
     @ReplicateLastModified
     @ReplicateEtag

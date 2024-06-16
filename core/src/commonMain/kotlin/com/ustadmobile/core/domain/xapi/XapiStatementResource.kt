@@ -79,10 +79,13 @@ class XapiStatementResource(
 
         repoOrDb.withDoorTransactionAsync {
             repoOrDb.statementDao.insertOrIgnoreListAsync(
-                statementEntities.mapNotNull {
-                    it.statementEntity
-                }
+                statementEntities.mapNotNull { it.statementEntity }
             )
+
+            repoOrDb.statementEntityJsonDao.insertOrIgnoreListAsync(
+                statementEntities.mapNotNull { it.statementEntityJson }
+            )
+
             val actorEntities = statementEntities.map { it.actorEntities }
             actorEntities.mapNotNull { it?.actor }
                 .filter { it.actorObjectType == XapiEntityObjectTypeFlags.AGENT }
@@ -210,9 +213,9 @@ class XapiStatementResource(
             Pair(0L, 0L)
         }
 
-        val statements = repoOrDb.statementDao.getStatements(
-            statementIdHi = statementIdHi,
-            statementIdLo = statementIdLo,
+        val statements = repoOrDb.statementEntityJsonDao.getStatements(
+            stmtJsonIdHi = statementIdHi,
+            stmtJsonIdLo = statementIdLo,
         )
 
         return statements.mapNotNull {

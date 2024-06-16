@@ -14,6 +14,7 @@ import com.ustadmobile.core.util.ext.toEmptyIfNull
 import com.ustadmobile.door.DoorPrimaryKeyManager
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.xapi.StatementEntity
+import com.ustadmobile.lib.db.entities.xapi.StatementEntityJson
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -43,6 +44,7 @@ data class XapiStatement(
 
 data class StatementEntities(
     val statementEntity: StatementEntity? = null,
+    val statementEntityJson: StatementEntityJson? = null,
     val actorEntities: ActorEntities? = null,
     val verbEntities: VerbEntities? = null,
     val activityEntities: List<ActivityEntities>? = null,
@@ -117,12 +119,17 @@ fun XapiStatement.toEntities(
                 statementClazzUid = xapiSession.clazzUid,
                 statementCbUid = xapiSession.cbUid,
                 contentEntryRoot = (`object` as? XapiActivityStatementObject)?.id == xapiSession.rootActivityId,
-                fullStatement = exactJson,
+
                 extensionProgress = resultProgressExtension,
                 statementObjectType = `object`.objectTypeFlag,
                 statementObjectUid1 = statementObjectForeignKeys.first,
                 statementObjectUid2 = statementObjectForeignKeys.second,
                 isSubStatement = isSubStatement,
+            ),
+            statementEntityJson = StatementEntityJson(
+                stmtJsonIdHi = statementUuid.mostSignificantBits,
+                stmtJsonIdLo = statementUuid.leastSignificantBits,
+                fullStatement = exactJson,
             ),
             actorEntities = actor.toEntities(stringHasher, primaryKeyManager, hasherFactory),
             verbEntities = verb.toVerbEntities(stringHasher),
