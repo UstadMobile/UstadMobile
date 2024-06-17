@@ -333,6 +333,15 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
     """)
     abstract suspend fun findByClazzUid(clazzUid: Long): List<CourseBlock>
 
+    @HttpAccessible
+    @Query("""
+        SELECT CourseBlock.*
+          FROM CourseBlock
+         WHERE CourseBlock.cbClazzUid = :clazzUid 
+    """)
+    abstract suspend fun findByClazzUidAsFlow(clazzUid: Long): Flow<List<CourseBlock>>
+
+
     /**
      *
      */

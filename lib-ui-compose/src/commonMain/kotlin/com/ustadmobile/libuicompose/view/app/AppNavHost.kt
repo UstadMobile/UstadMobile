@@ -777,6 +777,8 @@ fun AppNavHost(
                     GrantExternalAppPermissionRedirectViewModel(di, savedStateHandle)
                 }
             }
+
+
         }
     }
 }

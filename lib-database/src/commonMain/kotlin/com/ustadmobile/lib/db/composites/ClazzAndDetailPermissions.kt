@@ -10,4 +10,5 @@ data class ClazzAndDetailPermissions(
     var clazz: Clazz? = null,
     var hasAttendancePermission: Boolean = false,
     var hasViewMembersPermission: Boolean = false,
+    var hasLearningRecordPermission: Boolean = false,
 )

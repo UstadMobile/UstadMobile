@@ -7,7 +7,7 @@ version-androidx-appcompat = "1.6.1"
 androidx-core = "1.12.0"
 kotlin = "1.9.23"
 okhttp = "4.12.0"
-door = "0.79.1"
+door = "0.79.2"
 coroutines = "1.8.0"
 atomicfu = "0.23.2"
 kotlinx-io = "0.3.0"
@@ -124,6 +124,7 @@ httpoveripc = "0.0.3"
 rawhttp = "2.6.0"
 lz4 = "1.8.0"
 kmp-uuid = "0.8.4"
+lazytable = "1.8.0"
 
 [plugins]
 
@@ -355,3 +356,5 @@ httpoveripc-server = { module = "com.github.UstadMobile.httpoveripc:server", ver
 rawhttp-core = { module = "com.athaydes.rawhttp:rawhttp-core", version.ref = "rawhttp" }
 lz4-pure-java = { module = "org.lz4:lz4-pure-java", version.ref = "lz4" }
 kmp-uuid = { module = "com.benasher44:uuid", version.ref = "kmp-uuid" }
+
+lazytable = { module = "io.github.oleksandrbalan:lazytable", version.ref = "lazytable" }

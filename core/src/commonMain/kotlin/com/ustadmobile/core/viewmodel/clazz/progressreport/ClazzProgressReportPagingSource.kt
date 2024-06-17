@@ -3,9 +3,12 @@ package com.ustadmobile.core.viewmodel.clazz.progressreport
 import app.cash.paging.PagingSource
 import app.cash.paging.PagingSourceLoadParams
 import app.cash.paging.PagingSourceLoadResult
+import app.cash.paging.PagingSourceLoadResultError
+import app.cash.paging.PagingSourceLoadResultInvalid
 import app.cash.paging.PagingSourceLoadResultPage
 import app.cash.paging.PagingState
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.door.paging.PagingSourceWithHttpLoader
 import com.ustadmobile.lib.db.composites.PersonAndClazzMemberListDetails
 import com.ustadmobile.lib.db.composites.StudentAndBlockStatuses
 
@@ -25,7 +28,7 @@ import com.ustadmobile.lib.db.composites.StudentAndBlockStatuses
 class ClazzProgressReportPagingSource(
     private val studentListPagingSource: PagingSource<Int, PersonAndClazzMemberListDetails>,
     private val db: UmAppDatabase,
-): PagingSource<Int, StudentAndBlockStatuses>() {
+): PagingSource<Int, StudentAndBlockStatuses>(), PagingSourceWithHttpLoader<Int> {
 
     override fun getRefreshKey(state: PagingState<Int, StudentAndBlockStatuses>): Int? {
         return studentListPagingSource.getRefreshKey(
@@ -47,9 +50,40 @@ class ClazzProgressReportPagingSource(
     override suspend fun load(
         params: PagingSourceLoadParams<Int>
     ): PagingSourceLoadResult<Int, StudentAndBlockStatuses> {
-        //Will need to convert params into offset and limit.
-        TODO()
+        //Will need to convert params into offset and limit to do query to find statements OR use an IN syntax
 
+        val studentListResult = studentListPagingSource.load(params)
+        return when(studentListResult) {
+            is PagingSourceLoadResultPage<*, *> -> {
+                val studentListResultCasted = studentListResult as
+                        PagingSourceLoadResultPage<Int, PersonAndClazzMemberListDetails>
+                PagingSourceLoadResultPage<Int, StudentAndBlockStatuses>(
+                    data = studentListResultCasted.data.map {
+                        StudentAndBlockStatuses(
+                            student = it,
+                            blockStatuses = emptyList()
+                        )
+                    },
+                    prevKey = studentListResultCasted.prevKey,
+                    nextKey = studentListResultCasted.nextKey,
+                    itemsBefore = studentListResultCasted.itemsBefore,
+                    itemsAfter = studentListResultCasted.itemsAfter
+                )
+            }
+            is PagingSourceLoadResultError<*, *> -> {
+                PagingSourceLoadResultError<Int, StudentAndBlockStatuses>(studentListResult.throwable)
+            }
+            is PagingSourceLoadResultInvalid<*, *> -> {
+                PagingSourceLoadResultInvalid<Int, StudentAndBlockStatuses>()
+            }
+            else -> {
+                throw IllegalStateException("Cant get here really, but compiler doesn't know that")
+            }
+        } as PagingSourceLoadResult<Int, StudentAndBlockStatuses>
+    }
 
+    @Suppress("UNCHECKED_CAST")
+    override suspend fun loadHttp(params: PagingSourceLoadParams<Int>): Boolean {
+        return (studentListPagingSource as? PagingSourceWithHttpLoader<Int>)?.loadHttp(params) ?: true
     }
 }

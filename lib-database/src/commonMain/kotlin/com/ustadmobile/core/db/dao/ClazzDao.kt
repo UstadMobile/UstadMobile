@@ -285,7 +285,13 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
                   $PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT2
                   ${PermissionFlags.PERSON_VIEW}
                   $PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT3
-               ) AS hasViewMembersPermission
+               ) AS hasViewMembersPermission,
+               (  $PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT1 
+                  ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}
+                  $PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT2
+                  ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}
+                  $PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT3
+               ) AS hasLearningRecordPermission
           FROM Clazz
          WHERE Clazz.clazzUid = :clazzUid
            AND (  $PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT1 
