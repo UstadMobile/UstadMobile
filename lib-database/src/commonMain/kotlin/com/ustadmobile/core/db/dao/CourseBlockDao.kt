@@ -339,7 +339,7 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
           FROM CourseBlock
          WHERE CourseBlock.cbClazzUid = :clazzUid 
     """)
-    abstract suspend fun findByClazzUidAsFlow(clazzUid: Long): Flow<List<CourseBlock>>
+    abstract fun findByClazzUidAsFlow(clazzUid: Long): Flow<List<CourseBlock>>
 
 
     /**
