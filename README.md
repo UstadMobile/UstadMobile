@@ -196,6 +196,19 @@ Note: If self-registration is enabled, you must add an email server configuratio
 ustad-server.conf file. See [app-ktor-server/README.md](app-ktor-server/README.md) for details on
 using the ustad-server.conf file.
 
+To build the entire project (Android, Web, Desktop, everything) use the normal gradle build command:
+Linux: 
+```
+$ ./gradlew build
+```
+Windows:
+```
+$ gradlew build
+```
+Please see [app-android/README.md](app-android/README.md) instructions to setup release version
+signing. Make sure you are running an SDK33+ device or emulator connected using ADB for the 
+[baseline profile](https://developer.android.com/topic/performance/baselineprofiles/overview) build.
+
 ## Javascript package updates
 
 When prompted to run kotlinUpgradePackageLock, run kotlinUpgradeYarnLock instead.
