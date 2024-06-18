@@ -32,6 +32,8 @@ plugins {
     alias(libs.plugins.jetbrains.compose) apply false
     id 'com.github.gmazzo.buildconfig' version '5.3.5' apply false
     id 'com.android.test' version '8.5.0' apply false
+    // Version of Android.baselineprofile as per
+    // https://mvnrepository.com/artifact/androidx.baselineprofile/androidx.baselineprofile.gradle.plugin
     id 'androidx.baselineprofile' version '1.2.4' apply false
     id 'base'
 }

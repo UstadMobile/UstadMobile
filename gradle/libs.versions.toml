@@ -124,6 +124,7 @@ androidx-test-ext-junit = "1.1.5"
 androidx-test-espresso = "3.5.1"
 androidx-test-uiautomator = "2.3.0"
 androidx-benchmark = "1.2.4"
+android-emulator-plugin = "0.4.5"
 
 [plugins]
 
@@ -134,6 +135,7 @@ serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref 
 conveyor = { id = "dev.hydraulic.conveyor", version.ref = "conveyor" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 license = { id = "com.jaredsburrows.license", version.ref = "plugin-license" }
+android-emulator = { id = "com.quittle.android-emulator", version.ref = "android-emulator-plugin" }
 
 
 [libraries]

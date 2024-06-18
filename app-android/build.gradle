@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.jetbrains.compose)
     alias(libs.plugins.license)
     id 'androidx.baselineprofile'
+    alias(libs.plugins.android.emulator)
 }
 
 //As Per https://developer.android.com/studio/publish/app-signing.html#release-mode
@@ -173,6 +174,20 @@ android {
     kotlinOptions {
         jvmTarget = '17'
     }
+}
+
+/*
+ * Android Emulator plugin will start the emulator required for baseline profile generation
+ */
+androidEmulator {
+    emulator {
+        sdkVersion 33
+        abi 'x86_64'
+        includeGoogleApis false
+    }
+
+    enableForAndroidTests true
+    headless true
 }
 
 tasks.configureEach { task ->
