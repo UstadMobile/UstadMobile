@@ -1,7 +1,10 @@
+import com.quittle.androidemulator.AndroidEmulatorExtension
+
 plugins {
     id("com.android.test")
     id("org.jetbrains.kotlin.android")
     id("androidx.baselineprofile")
+    alias(libs.plugins.android.emulator)
 }
 
 android {
@@ -26,6 +29,16 @@ android {
 
     targetProjectPath = ":app-android"
 
+}
+
+configure<AndroidEmulatorExtension> {
+    emulator {
+        sdkVersion(33)
+        abi("x86_64")
+        includeGoogleApis = false
+    }
+    headless = true
+    enableForAndroidTests = true
 }
 
 // This is the configuration block for the Baseline Profile plugin.
