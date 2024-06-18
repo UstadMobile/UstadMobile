@@ -70,9 +70,10 @@ The release variant will now be signed with the key as per keystore.properties.
 (run from root project directory):
 
 ```
- $ ./gradlew ':app-android:assembleDebug'
+ $ ./gradlew ':app-android:assembleRelease'
 ```
-
+Make sure you are running an SDK33+ device or emulator connected using ADB for the
+[baseline profile](https://developer.android.com/topic/performance/baselineprofiles/overview) build.
 
 ### Known issues
 * Collapsing toolbar / coordinator layout does not work with Jetpack compose views: see https://developer.android.com/reference/kotlin/androidx/compose/ui/input/nestedscroll/package-summary 
