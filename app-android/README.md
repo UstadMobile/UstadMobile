@@ -7,7 +7,11 @@ via fragments.
 ## Getting started from source
 
 * Follow steps in the [main project README](../README.md#development-environment-setup) to setup development
-  environment and start the server.
+  environment and start the server. _Android SDK command line tools are required_:
+  In Android Studio: Menu - Tools - SDK Manager - SDK Tools Tab - Check
+  Android SDK Command Line Tools (Latest). This is required by the [Android Emulator Gradle Plugin](https://github.com/quittle/gradle-android-emulator)
+  which is used to start/stop the emulator to create the [baseline profile](https://developer.android.com/topic/performance/baselineprofiles/overview).
+
 * ![android run screenshot](android-run.png)  
 Run the app by selecting "app-android" in the Android toolbar and clicking the run button.
 * Enter the URL of the server and tap "next". You can use the local IP address of your laptop. e.g.
