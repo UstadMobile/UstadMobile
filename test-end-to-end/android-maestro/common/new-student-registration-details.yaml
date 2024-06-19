@@ -1,0 +1,21 @@
+appId: com.toughra.ustadmobile
+---
+- tapOn: "First names*"
+- inputText: ${FIRSTNAME}
+- tapOn: "Last name*"
+- inputText: ${LASTNAME}
+- scrollUntilVisible:
+      element:
+          text: "Gender*"
+      direction: DOWN
+- tapOn: "Gender*"
+- tapOn: ${GENDER}
+- tapOn: "Parents' email address"
+- inputText: ${PARENTEMAIL}
+- hideKeyboard
+- tapOn: "Username*"
+- inputText: ${USERNAME}
+- hideKeyboard
+- tapOn: "Password*"
+- inputText: ${PASSWORD}
+- tapOn: "Register"
