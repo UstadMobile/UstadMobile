@@ -65,7 +65,9 @@ backend server source code in its modules. Android Studio is the development env
 entire project. 
 
 *  __Step 1: Download and install Android Studio__: If you don't already have the latest version, download 
-from [https://developer.android.com/studio](https://developer.android.com/studio).
+from [https://developer.android.com/studio](https://developer.android.com/studio). _Make sure Android SDK Command Line Tools are
+installed_. In Android Studio: Menu - Tools - SDK Manager - SDK Tools Tab - Check
+Android SDK Command Line Tools (Latest).
 
 * __Step 2: Install dependencies__
  
