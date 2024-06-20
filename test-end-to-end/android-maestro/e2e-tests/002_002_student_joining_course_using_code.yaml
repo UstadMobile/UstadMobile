@@ -40,7 +40,11 @@ env:
 - back
 - tapOn: "Courses"
 - tapOn: ${TESTCOURSENAME}
-- tapOn: "Invite code*"
+- scrollUntilVisible:
+    element:
+      text: "Invite code"
+    direction: DOWN
+- tapOn: "Invite code"
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:

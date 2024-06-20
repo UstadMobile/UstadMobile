@@ -10,7 +10,6 @@ env:
       CONTROLSERVER: ${CONTROLSERVER}
       TESTSERIAL: ${TESTSERIAL}
       TESTNAME: ${TESTNAME}
-
 - runFlow:
     file: "../common/add_profile_pic.yaml"
     env:
