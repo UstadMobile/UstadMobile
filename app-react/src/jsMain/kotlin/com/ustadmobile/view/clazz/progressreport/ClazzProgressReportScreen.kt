@@ -14,7 +14,6 @@ import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
 import js.objects.jso
 import kotlinx.coroutines.flow.Flow
-import mui.material.Container
 import mui.material.Stack
 import mui.material.Box
 import mui.material.StackDirection
@@ -25,6 +24,7 @@ import react.FC
 import react.Props
 import react.create
 import react.useRequiredContext
+import web.cssom.ClassName
 import web.cssom.Contain
 import web.cssom.Display
 import web.cssom.Height
@@ -63,9 +63,11 @@ val ClazzProgressReportComponent = FC<ClazzProgressReportProps> { props ->
 
     val totalWidth = NAME_WIDTH + COLUMN_WIDTH * props.uiState.courseBlocks.size
 
+    val heightMargin = 0
+
     VirtualList {
         style = jso {
-            height = "calc(100vh - ${tabAndAppBarHeight + 8}px)".unsafeCast<Height>()
+            height = "calc(100vh - ${tabAndAppBarHeight + heightMargin}px)".unsafeCast<Height>()
             width = 100.pct
             contain = Contain.strict
             overflowY = Overflow.scroll
@@ -73,6 +75,9 @@ val ClazzProgressReportComponent = FC<ClazzProgressReportProps> { props ->
             display = Display.block
         }
 
+        //Css class scrollbarAlwaysVisible is used in index.css to exempt the element from hiding
+        //scrollbars as would normally happen.
+        className = ClassName("VirtualList scrollbarAlwaysVisible")
         content = virtualListContent {
             infiniteQueryPagingItemsIndexed(
                 items = infiniteQueryResult,

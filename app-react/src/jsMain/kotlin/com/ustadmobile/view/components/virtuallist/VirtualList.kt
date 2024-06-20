@@ -44,6 +44,8 @@ external interface VirtualListProps: PropsWithChildren {
     var reverseLayout: Boolean?
 
     var id: String?
+
+    var className: ClassName?
 }
 
 
@@ -129,7 +131,7 @@ val VirtualList = FC<VirtualListProps> {props ->
     div {
         ref = parentRef
         id = props.id
-        className = ClassName("VirtualList")
+        className = props.className ?: ClassName("VirtualList")
 
         style = if(props.reverseLayout == true) {
             jso {
