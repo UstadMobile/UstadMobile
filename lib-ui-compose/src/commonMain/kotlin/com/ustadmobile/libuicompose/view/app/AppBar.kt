@@ -88,10 +88,13 @@ fun UstadAppBar(
 
     val focusRequester = remember { FocusRequester() }
 
+
     //Focus the search box when it appears after the user clicks the search icon
     LaunchedEffect(searchActive) {
         if(compactHeader && searchActive)
             focusRequester.requestFocus()
+
+
     }
 
     //As per https://developer.android.com/jetpack/compose/components/app-bars#small
@@ -275,6 +278,7 @@ fun UstadAppBar(
                 }
             }
         )
+
 
         if(appUiState.loadingState.loadingState == LoadingUiState.State.INDETERMINATE) {
             LinearProgressIndicator(

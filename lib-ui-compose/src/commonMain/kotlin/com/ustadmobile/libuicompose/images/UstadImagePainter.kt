@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 
 enum class UstadImage {
+    GOOGLE_ICON,
     ILLUSTRATION_CONNECT,
     ILLUSTRATION_ONBOARDING1,
     ILLUSTRATION_ONBOARDING2,

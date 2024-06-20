@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -52,14 +53,16 @@ fun OnboardingScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle(OnboardingUiState())
 
-    if(uiState.showWaitForRestart) {
+    if (uiState.showWaitForRestart) {
         UstadWaitForRestartDialog()
     }
 
     OnboardingScreen(
         uiState = uiState,
         onSetLanguage = viewModel::onLanguageSelected,
-        onClickNext = viewModel::onClickNext,
+        onClickNext = viewModel::onClickExistJoining,
+        onClickIndividual = viewModel::onClickIndividual,
+        onClickAddNewOrganization = viewModel::onClickAddNewOrganization,
         showArrows = showArrows,
     )
 }
@@ -70,7 +73,9 @@ fun OnboardingScreen(
     uiState: OnboardingUiState,
     showArrows: Boolean,
     onSetLanguage: (UstadMobileSystemCommon.UiLanguage) -> Unit = { },
-    onClickNext: () -> Unit = { }
+    onClickNext: () -> Unit = { },
+    onClickIndividual: () -> Unit = { },
+    onClickAddNewOrganization: () -> Unit = { },
 ) {
     val pagerState = rememberPagerState(
         initialPage = 0,
@@ -80,14 +85,11 @@ fun OnboardingScreen(
     val scope = rememberCoroutineScope()
 
     Column(
-        modifier = Modifier
-            .fillMaxHeight()
-            .padding(16.dp)
+        modifier = Modifier.fillMaxHeight().padding(16.dp)
     ) {
         Box {
             TopRow(
-                uiState,
-                onSetLanguage = onSetLanguage
+                uiState, onSetLanguage = onSetLanguage
             )
         }
 
@@ -98,17 +100,15 @@ fun OnboardingScreen(
             modifier = Modifier.weight(1f).fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if(showArrows) {
-                IconButton(
-                    enabled = pagerState.currentPage >= 1,
-                    onClick = {
-                        scope.launch {
-                            pagerState.animateScrollToPage(pagerState.currentPage - 1)
-                        }
+            if (showArrows) {
+                IconButton(enabled = pagerState.currentPage >= 1, onClick = {
+                    scope.launch {
+                        pagerState.animateScrollToPage(pagerState.currentPage - 1)
                     }
-                ) {
+                }) {
                     Icon(
-                        Icons.Default.ArrowBack, contentDescription = stringResource(MR.strings.previous)
+                        Icons.Default.ArrowBack,
+                        contentDescription = stringResource(MR.strings.previous)
                     )
                 }
             }
@@ -118,24 +118,28 @@ fun OnboardingScreen(
                 pagerState = pagerState,
             )
 
-            if(showArrows) {
+            if (showArrows) {
                 IconButton(
                     enabled = pagerState.currentPage < (onboardingItems.size - 1),
                     onClick = {
                         scope.launch {
                             pagerState.animateScrollToPage(pagerState.currentPage + 1)
                         }
-                    }
-                ) {
+                    }) {
                     Icon(
-                        Icons.Default.ArrowForward, contentDescription = stringResource(MR.strings.next)
+                        Icons.Default.ArrowForward,
+                        contentDescription = stringResource(MR.strings.next)
                     )
                 }
             }
         }
 
         Box {
-            BottomRow(onClickNext)
+            BottomRow(
+                onClickNext,
+                onClickIndividual,
+                onClickAddNewOrganization,
+            )
         }
     }
 }
@@ -144,13 +148,11 @@ fun OnboardingScreen(
 private fun TopRow(
     uiState: OnboardingUiState,
     onSetLanguage: (UstadMobileSystemCommon.UiLanguage) -> Unit = { },
-){
+) {
     Row(
-        modifier = Modifier
-            .wrapContentHeight()
-            .fillMaxWidth()
+        modifier = Modifier.wrapContentHeight().fillMaxWidth()
     ) {
-        Box{
+        Box {
             UstadSetLanguageDropDown(
                 langList = uiState.languageList,
                 currentLanguage = uiState.currentLanguage,
@@ -168,13 +170,11 @@ val onboardingItems: List<OnboardingItem> = listOf(
         MR.strings.onboarding_headline1,
         MR.strings.onboarding_subheadline1,
         UstadImage.ILLUSTRATION_ONBOARDING1
-    ),
-    OnboardingItem(
+    ), OnboardingItem(
         MR.strings.onboarding_headline2,
         MR.strings.onboarding_subheadline2,
         UstadImage.ILLUSTRATION_ONBOARDING2,
-    ),
-    OnboardingItem(
+    ), OnboardingItem(
         MR.strings.onboarding_headline2,
         MR.strings.onboarding_subheadline3,
         UstadImage.ILLUSTRATION_ONBOARDING3,
@@ -196,8 +196,7 @@ private fun PagerView(
 ) {
 
     Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
         Box(Modifier.weight(0.76f)) {
@@ -208,7 +207,7 @@ private fun PagerView(
             }
         }
 
-        Box() {
+        Box {
             UstadHorizontalPagingIndicator(
                 modifier = Modifier.padding(vertical = 8.dp),
                 pageCount = onboardingItems.size,
@@ -223,9 +222,7 @@ private fun PagerView(
 @Composable
 private fun ItemView(onboardingItem: OnboardingItem) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(20.dp, 0.dp, 10.dp, 0.dp),
+        modifier = Modifier.fillMaxWidth().padding(20.dp, 0.dp, 10.dp, 0.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -234,10 +231,11 @@ private fun ItemView(onboardingItem: OnboardingItem) {
             Image(
                 painter = ustadAppImagePainter(onboardingItem.imgPath),
                 contentDescription = null,
-                modifier = Modifier.padding(10.dp))
+                modifier = Modifier.padding(10.dp)
+            )
         }
 
-        Box(modifier = Modifier.weight(0.4f)){
+        Box(modifier = Modifier.weight(0.4f)) {
             PagerBottomRow(onboardingItem)
         }
 
@@ -245,21 +243,20 @@ private fun ItemView(onboardingItem: OnboardingItem) {
 }
 
 @Composable
-private fun PagerBottomRow(onboardingItem: OnboardingItem){
+private fun PagerBottomRow(onboardingItem: OnboardingItem) {
     Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
         Text(
-            text =  stringResource(onboardingItem.headerId),
+            text = stringResource(onboardingItem.headerId),
             style = MaterialTheme.typography.headlineSmall,
             textAlign = TextAlign.Center,
         )
 
 
         Text(
-            text =  stringResource(onboardingItem.subheaderId),
+            text = stringResource(onboardingItem.subheaderId),
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
         )
@@ -268,19 +265,48 @@ private fun PagerBottomRow(onboardingItem: OnboardingItem){
 }
 
 @Composable
-private fun BottomRow(onClickNext: () -> Unit = { }){
+private fun BottomRow(
+    onClickJoinOrganization: () -> Unit = {},
+    onClickIndividual: () -> Unit = {},
+    onClickAddOrganization: () -> Unit = {}
+) {
     Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxWidth().padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        Button(
-            onClick = onClickNext,
-        ) {
-            Text(stringResource(MR.strings.onboarding_get_started_label))
-        }
 
+        Button(
+            onClick = onClickJoinOrganization, colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.secondary,
+                contentColor = MaterialTheme.colorScheme.onSecondary
+            ), modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(text = stringResource(MR.strings.onboarding_join_org_text))
+        }
         Spacer(modifier = Modifier.height(8.dp))
+
+        Button(
+            onClick = onClickAddOrganization, colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.tertiary,
+                contentColor = MaterialTheme.colorScheme.onTertiary
+            ), modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(text = stringResource(MR.strings.onboarding_add_org_text))
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+
+
+        Button(
+            onClick = onClickIndividual, colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
+            ), modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(text = stringResource(MR.strings.onboarding_individual_text))
+        }
 
     }
 }
+
+

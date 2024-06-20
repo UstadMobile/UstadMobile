@@ -58,6 +58,7 @@ import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.Cours
 import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailViewModel
 import com.ustadmobile.core.viewmodel.discussionpost.edit.DiscussionPostEditViewModel
 import com.ustadmobile.core.viewmodel.epubcontent.EpubContentViewModel
+import com.ustadmobile.core.viewmodel.individual.IndividualLearnerViewModel
 import com.ustadmobile.core.viewmodel.interop.externalapppermissionrequestredirect.GrantExternalAppPermissionRedirectViewModel
 import com.ustadmobile.core.viewmodel.interop.externalapppermissionrequest.ExternalAppPermissionRequestViewModel
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
@@ -151,6 +152,7 @@ import com.ustadmobile.libuicompose.view.courseterminology.list.CourseTerminolog
 import com.ustadmobile.libuicompose.view.deleteditem.list.DeletedItemListScreen
 import com.ustadmobile.libuicompose.view.epubcontent.EpubContentScreen
 import com.ustadmobile.libuicompose.view.clazzlog.edit.ClazzLogEditScreen
+import com.ustadmobile.libuicompose.view.individual.IndividualLearnerScreen
 import com.ustadmobile.libuicompose.view.interop.externalapppermissionrequest.ExternalAppPermissionRequestScreen
 import com.ustadmobile.libuicompose.view.message.conversationlist.ConversationListScreen
 import com.ustadmobile.libuicompose.view.message.messagelist.MessageListScreen
@@ -280,6 +282,14 @@ fun AppNavHost(
             contentScene("/${OnBoardingViewModel.DEST_NAME}") { backStackEntry ->
                 OnboardingScreen(
                     appViewModel(backStackEntry, OnBoardingViewModel::class, ::OnBoardingViewModel)
+                )
+            }
+
+            contentScene("/${IndividualLearnerViewModel.DEST_NAME}") { backStackEntry ->
+                IndividualLearnerScreen(
+                    appViewModel(backStackEntry, IndividualLearnerViewModel::class) { di, savedStateHandle ->
+                        IndividualLearnerViewModel(di, savedStateHandle)
+                    }
                 )
             }
 

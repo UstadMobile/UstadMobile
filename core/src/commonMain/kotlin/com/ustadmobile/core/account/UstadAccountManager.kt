@@ -7,6 +7,7 @@ import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.util.ext.withEndpoint
+import com.ustadmobile.core.util.ioDispatcher
 import com.ustadmobile.door.*
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.*
@@ -16,6 +17,7 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.PersonGroup.Companion.PERSONGROUP_FLAG_GUESTPERSON
 import com.ustadmobile.lib.db.entities.PersonGroup.Companion.PERSONGROUP_FLAG_PERSONGROUP
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.lib.util.randomString
 import io.ktor.client.*
 import io.ktor.client.plugins.*
 import io.ktor.client.request.*
@@ -248,6 +250,9 @@ class UstadAccountManager(
         if(closed.value)
             throw IllegalStateException("UstadAccountManager is closed")
     }
+
+
+
 
     /**
      * Get a list of all accounts that are on the system across all endpoints
@@ -504,6 +509,26 @@ class UstadAccountManager(
             repo.siteDao.getSiteAsync() ?: throw IllegalStateException("Internal error: no Site in database and could not fetch it from server")
         }
     }
+
+    suspend fun newLocalAccount(): UserSessionWithPersonAndEndpoint {
+        val randomIp = "169.${(0..255).random()}.${(0..255).random()}.${(0..255).random()}"
+        val randomPort = (1000..9999).random()
+        val fakeEndpoint = Endpoint("http://$randomIp:$randomPort/")
+        val db: UmAppDatabase by di.on(fakeEndpoint).instance(tag = DoorTag.TAG_DB)
+
+        val newSite = Site().apply {
+            siteName = "Local"
+            authSalt = "$fakeEndpoint ${randomString(5)}"
+        }
+
+        withContext(ioDispatcher) {
+            db.siteDao.insert(newSite)
+        }
+
+        return makeNewTempGuestSession(fakeEndpoint.toString(), db)
+    }
+
+
 
     suspend fun startGuestSession(endpointUrl: String): UserSessionWithPersonAndEndpoint {
         val repo: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = DoorTag.TAG_REPO)

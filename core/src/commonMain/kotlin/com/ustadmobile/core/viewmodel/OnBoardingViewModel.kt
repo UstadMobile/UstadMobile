@@ -7,6 +7,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.viewmodel.individual.IndividualLearnerViewModel
 import com.ustadmobile.core.viewmodel.redirect.RedirectViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -53,13 +54,23 @@ class OnBoardingViewModel(
         }
     }
 
-    fun onClickNext(){
+    fun onClickExistJoining(){
         settings[PREF_TAG] =  true.toString()
         navController.navigate(RedirectViewModel.DEST_NAME, buildMap {
             putFromSavedStateIfPresent(ARG_NEXT)
             putFromSavedStateIfPresent(ARG_OPEN_LINK)
         })
     }
+
+
+    fun onClickIndividual() {
+        navController.navigate(IndividualLearnerViewModel.DEST_NAME, buildMap {
+        })
+    }
+    fun onClickAddNewOrganization() {
+
+    }
+
 
     fun onLanguageSelected(uiLanguage: UstadMobileSystemCommon.UiLanguage) {
         if(uiLanguage != _uiState.value.currentLanguage) {
@@ -79,7 +90,6 @@ class OnBoardingViewModel(
     companion object {
 
         const val DEST_NAME = "Onboarding"
-
         const val PREF_TAG = "onboaring_screen"
 
     }
