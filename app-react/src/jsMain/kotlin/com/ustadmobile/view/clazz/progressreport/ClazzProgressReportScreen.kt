@@ -25,12 +25,14 @@ import react.Props
 import react.create
 import react.useRequiredContext
 import web.cssom.ClassName
+import web.cssom.Color
 import web.cssom.Contain
 import web.cssom.Display
 import web.cssom.Height
 import web.cssom.Overflow
 import web.cssom.Position
 import web.cssom.TextOverflow
+import web.cssom.integer
 import web.cssom.pct
 import web.cssom.px
 
@@ -63,7 +65,8 @@ val ClazzProgressReportComponent = FC<ClazzProgressReportProps> { props ->
 
     val totalWidth = NAME_WIDTH + COLUMN_WIDTH * props.uiState.courseBlocks.size
 
-    val heightMargin = 0
+    //account for half of scrollbar height?
+    val heightMargin = 4
 
     VirtualList {
         style = jso {
@@ -89,6 +92,7 @@ val ClazzProgressReportComponent = FC<ClazzProgressReportProps> { props ->
                     direction = responsive(StackDirection.row)
                     sx {
                         width = totalWidth.px
+                        zIndex = integer(900)
                     }
 
                     //Person name and picture
@@ -100,6 +104,7 @@ val ClazzProgressReportComponent = FC<ClazzProgressReportProps> { props ->
                             paddingTop = 16.px
                             paddingBottom = 16.px
                             position = Position.sticky
+                            backgroundColor = Color(theme.palette.background.default)
 
                             //Setting left to a non-auto value, and then leaving top/bottom alone
                             // makes sticky apply to the x-axis, not the y axis, as we want.
@@ -128,24 +133,33 @@ val ClazzProgressReportComponent = FC<ClazzProgressReportProps> { props ->
         Stack {
             direction = responsive(StackDirection.column)
 
-
             // Course Block header row
             Stack {
                 direction = responsive(StackDirection.row)
                 sx {
                     height = headerRowHeight.px
                     width = totalWidth.px
+                    backgroundColor = Color(theme.palette.background.default)
 
                     //Setting top to a non-auto value, and then leaving left/right alone
                     // makes sticky apply to the y-axis, not the x axis, as we want.
                     position = Position.sticky
                     top = 0.px
-                    //backgroundColor = theme.palette.background.default
+                    zIndex = integer(1_000)
                 }
 
                 //Spacer
                 Box {
-                    sx { width = NAME_WIDTH.px }
+                    sx {
+                        width = NAME_WIDTH.px
+                        height = headerRowHeight.px
+                        backgroundColor = Color(theme.palette.background.default)
+
+                        position = Position.sticky
+                        left = 0.px
+                        top = 0.px
+                        zIndex = integer(1_100)
+                    }
                 }
 
                 props.uiState.courseBlocks.forEach { block ->
