@@ -8,7 +8,7 @@ import com.ustadmobile.core.impl.nav.NavResultReturner
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailUiState
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewViewModel
-import com.ustadmobile.core.viewmodel.clazz.progressreport.ClazzProgressReportViewModel
+import com.ustadmobile.core.viewmodel.clazz.progressreport.ClazzGradebookViewModel
 import com.ustadmobile.core.viewmodel.clazzenrolment.clazzmemberlist.ClazzMemberListViewModel
 import com.ustadmobile.core.viewmodel.clazzlog.attendancelist.ClazzLogListAttendanceViewModel
 import com.ustadmobile.core.viewmodel.coursegroupset.list.CourseGroupSetListViewModel
@@ -16,7 +16,7 @@ import com.ustadmobile.libuicompose.components.UstadScreenTabs
 import com.ustadmobile.libuicompose.components.isDesktop
 import com.ustadmobile.libuicompose.nav.UstadNavControllerPreCompose
 import com.ustadmobile.libuicompose.view.clazz.detailoverview.ClazzDetailOverviewScreen
-import com.ustadmobile.libuicompose.view.clazz.progressreport.ClazzProgressReportScreen
+import com.ustadmobile.libuicompose.view.clazz.gradebook.ClazzGradebookScreen
 import com.ustadmobile.libuicompose.view.clazzenrolment.clazzmemberlist.ClazzMemberListScreen
 import com.ustadmobile.libuicompose.view.clazzlog.attendancelist.ClazzLogListAttendanceScreen
 import com.ustadmobile.libuicompose.view.coursegroupset.list.CourseGroupSetListScreen
@@ -112,10 +112,10 @@ fun ClazzDetailScreen(
                 )
             }
 
-            ClazzProgressReportViewModel.DEST_NAME -> {
-                ClazzProgressReportScreen(
-                    tabViewModel(ClazzProgressReportViewModel::class, tabItem) { di, savedStateHandle ->
-                        ClazzProgressReportViewModel(di, savedStateHandle)
+            ClazzGradebookViewModel.DEST_NAME -> {
+                ClazzGradebookScreen(
+                    tabViewModel(ClazzGradebookViewModel::class, tabItem) { di, savedStateHandle ->
+                        ClazzGradebookViewModel(di, savedStateHandle)
                     }
                 )
             }

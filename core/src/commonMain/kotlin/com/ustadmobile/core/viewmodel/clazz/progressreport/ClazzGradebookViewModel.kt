@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 
-data class ClazzProgressReportUiState(
+data class ClazzGradebookUiState(
     val courseBlocks: List<CourseBlock> = emptyList(),
     val results: ListPagingSourceFactory<StudentAndBlockStatuses> = { EmptyPagingSource() }
 )
@@ -23,11 +23,11 @@ data class ClazzProgressReportUiState(
 /**
  *
  */
-class ClazzProgressReportViewModel(
+class ClazzGradebookViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
-): UstadListViewModel<ClazzProgressReportUiState>(
-    di, savedStateHandle, ClazzProgressReportUiState(), DEST_NAME
+): UstadListViewModel<ClazzGradebookUiState>(
+    di, savedStateHandle, ClazzGradebookUiState(), DEST_NAME
 ) {
 
     private val clazzUid = savedStateHandle[ARG_CLAZZUID]?.toLong()
@@ -75,7 +75,7 @@ class ClazzProgressReportViewModel(
 
     companion object {
 
-        const val DEST_NAME = "ClazzProgress"
+        const val DEST_NAME = "Gradebook"
 
     }
 }

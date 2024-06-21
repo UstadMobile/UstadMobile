@@ -1,9 +1,9 @@
-package com.ustadmobile.view.clazz.progressreport
+package com.ustadmobile.view.clazz.gradebook
 
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.paging.RefreshCommand
-import com.ustadmobile.core.viewmodel.clazz.progressreport.ClazzProgressReportUiState
-import com.ustadmobile.core.viewmodel.clazz.progressreport.ClazzProgressReportViewModel
+import com.ustadmobile.core.viewmodel.clazz.progressreport.ClazzGradebookUiState
+import com.ustadmobile.core.viewmodel.clazz.progressreport.ClazzGradebookViewModel
 import com.ustadmobile.hooks.useDoorRemoteMediator
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useTabAndAppBarHeight
@@ -36,8 +36,8 @@ import web.cssom.integer
 import web.cssom.pct
 import web.cssom.px
 
-external interface ClazzProgressReportProps: Props {
-    var uiState: ClazzProgressReportUiState
+external interface ClazzGradebookProps: Props {
+    var uiState: ClazzGradebookUiState
 
     var refreshCommandFlow: Flow<RefreshCommand>
 }
@@ -50,7 +50,7 @@ private val COLUMN_WIDTH = 100
  * To check: try and put the horizontal scrolling into the virtual list element e.g. have one
  * element that handles horizontal AND vertical scrolling
  */
-val ClazzProgressReportComponent = FC<ClazzProgressReportProps> { props ->
+val ClazzGradebookComponent = FC<ClazzGradebookProps> { props ->
     val mediatorResult = useDoorRemoteMediator(props.uiState.results, props.refreshCommandFlow)
 
     val infiniteQueryResult = usePagingSource(
@@ -98,7 +98,7 @@ val ClazzProgressReportComponent = FC<ClazzProgressReportProps> { props ->
                     //Person name and picture
                     Stack {
                         sx {
-                            width = NAME_WIDTH.px
+              width = NAME_WIDTH.px
                             overflowInline = Overflow.clip
                             textOverflow = TextOverflow.ellipsis
                             paddingTop = 16.px
@@ -182,14 +182,14 @@ val ClazzProgressReportComponent = FC<ClazzProgressReportProps> { props ->
     }
 }
 
-val ClazzProgressReportScreen = FC<Props> {
+val ClazzGradebookScreen = FC<Props> {
     val viewModel = useUstadViewModel { di, savedStateHandle ->
-        ClazzProgressReportViewModel(di, savedStateHandle)
+        ClazzGradebookViewModel(di, savedStateHandle)
     }
 
-    val uiStateVal by viewModel.uiState.collectAsState(ClazzProgressReportUiState())
+    val uiStateVal by viewModel.uiState.collectAsState(ClazzGradebookUiState())
 
-    ClazzProgressReportComponent {
+    ClazzGradebookComponent {
         uiState = uiStateVal
         refreshCommandFlow = viewModel.refreshCommandFlow
     }

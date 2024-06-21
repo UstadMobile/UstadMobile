@@ -9,7 +9,7 @@ import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewViewModel
-import com.ustadmobile.core.viewmodel.clazz.progressreport.ClazzProgressReportViewModel
+import com.ustadmobile.core.viewmodel.clazz.progressreport.ClazzGradebookViewModel
 import com.ustadmobile.core.viewmodel.clazzenrolment.clazzmemberlist.ClazzMemberListViewModel
 import com.ustadmobile.core.viewmodel.clazzlog.attendancelist.ClazzLogListAttendanceViewModel
 import com.ustadmobile.core.viewmodel.coursegroupset.list.CourseGroupSetListViewModel
@@ -55,7 +55,7 @@ class ClazzDetailViewModel(
         if(showProgressReport) {
             tabs.add(
                 TabItem(
-                    viewName = ClazzProgressReportViewModel.DEST_NAME,
+                    viewName = ClazzGradebookViewModel.DEST_NAME,
                     args = mapOf(UstadView.ARG_CLAZZUID to entityUidArg.toString()),
                     label = systemImpl.getString(MR.strings.report),
                 )
