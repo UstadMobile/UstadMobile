@@ -127,7 +127,6 @@ androidx-benchmark = "1.2.4"
 android-emulator-plugin = "0.4.5"
 lz4 = "1.8.0"
 kmp-uuid = "0.8.4"
-lazytable = "1.8.0"
 
 [plugins]
 
@@ -364,4 +363,3 @@ androidx-benchmark-macro-junit4 = { module = "androidx.benchmark:benchmark-macro
 lz4-pure-java = { module = "org.lz4:lz4-pure-java", version.ref = "lz4" }
 kmp-uuid = { module = "com.benasher44:uuid", version.ref = "kmp-uuid" }
 
-lazytable = { module = "io.github.oleksandrbalan:lazytable", version.ref = "lazytable" }

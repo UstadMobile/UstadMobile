@@ -1,10 +1,21 @@
 package com.ustadmobile.libuicompose.view.clazz.progressreport
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -13,12 +24,8 @@ import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.viewmodel.clazz.progressreport.ClazzProgressReportUiState
 import com.ustadmobile.core.viewmodel.clazz.progressreport.ClazzProgressReportViewModel
+import com.ustadmobile.libuicompose.components.UstadHorizontalScrollbar
 import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
-import eu.wewox.lazytable.LazyTable
-import eu.wewox.lazytable.LazyTableItem
-import eu.wewox.lazytable.lazyTableDimensions
-import eu.wewox.lazytable.lazyTablePinConfiguration
-import eu.wewox.lazytable.rememberLazyTableState
 import kotlinx.coroutines.flow.Flow
 
 @Composable
@@ -32,6 +39,10 @@ fun ClazzProgressReportScreen(
     )
 }
 
+//Might be possible to use stickyHeader and
+// https://developer.android.com/develop/ui/compose/touch-input/pointer-input/scroll
+// e.g. consume the delta, do not apply it to the sticky section
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ClazzProgressReportScreen(
     uiState: ClazzProgressReportUiState,
@@ -45,62 +56,60 @@ fun ClazzProgressReportScreen(
     val rows = listResult.lazyPagingItems.itemCount + 1
     val columns = uiState.courseBlocks.size + 1
 
+    val numcols = 20
+    val colWidth = 80
+    val width = (numcols * colWidth)
 
-    val state = rememberLazyTableState()
+    val horizontalScrollState = rememberScrollState()
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ) {
 
+        LazyColumn(
+            modifier = Modifier.weight(1.0f).fillMaxWidth()
+        ) {
+            stickyHeader {
+                Row(
+                    modifier = Modifier
+                        .background(MaterialTheme.colorScheme.background)
+                        .fillMaxWidth()
+                ) {
+                    Spacer(Modifier.width(colWidth.dp))
 
-    LazyTable(
-        modifier = Modifier.fillMaxSize(),
-        dimensions = lazyTableDimensions(
-            columnsSize = listOf(150.dp) + (0 until uiState.courseBlocks.size).map { 80.dp },
-            rowsSize = (0 until rows).map { 40.dp },
-        ),
-        state = state,
-        pinConfiguration = lazyTablePinConfiguration(
-            columns = 1, rows = 1,
-        )
-    ){
-        items(
-            count = rows * columns,
-            layoutInfo = { index ->
-                LazyTableItem(
-                    column = index % columns,
-                    row = index / columns,
-                )
-            }
-        ) { index ->
-            val column = index % columns
-            val row = index / columns
-
-            val courseBlockIndex = column - 1
-
-            when {
-                //Top start spacer - do nothing
-                row == 0 && column == 0 -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize()
-                            .background(MaterialTheme.colors.background),
+                    Row(
+                        modifier = Modifier
+                            .weight(1.0f)
+                            .horizontalScroll(horizontalScrollState)
                     ) {
-                        //nothing
+                        (0..numcols).forEach { col ->
+                            Text("C $col", modifier = Modifier.width(colWidth.dp))
+                        }
                     }
                 }
+            }
 
-                //Course Block header
-                row == 0 && column > 0 -> {
-                    Text(uiState.courseBlocks.getOrNull(courseBlockIndex)?.cbTitle ?: "Null")
-                }
-
-                //Student name, pic, etc.
-                column == 0 -> {
-                    val studentItem = listResult.lazyPagingItems.get(row - 1)
-                    Text(studentItem?.student?.person?.fullName() ?: "Null person")
-                }
-
-                //Student result for given course block item.
-                else -> {
-                    Text("Cat")
+            items(count = 100) { row ->
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    Text("Row $row", modifier = Modifier.width(colWidth.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(horizontalScrollState)
+                    ) {
+                        (0..numcols).forEach { col ->
+                            Text("$row-$col", modifier = Modifier.width(colWidth.dp))
+                        }
+                    }
                 }
             }
+        }
+
+        Row(Modifier.fillMaxWidth()) {
+            Spacer(Modifier.width(colWidth.dp))
+            UstadHorizontalScrollbar(
+                scrollState = horizontalScrollState,
+                modifier = Modifier.weight(1.0f).height(8.dp)
+            )
         }
     }
 }

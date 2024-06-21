@@ -42,7 +42,6 @@ kotlin {
                 api(libs.precompose)
                 api(libs.precompose.viewmodel)
                 implementation(libs.napier)
-                implementation(libs.lazytable)
             }
         }
 
