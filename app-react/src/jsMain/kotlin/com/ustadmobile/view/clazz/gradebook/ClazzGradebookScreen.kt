@@ -2,8 +2,8 @@ package com.ustadmobile.view.clazz.gradebook
 
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.paging.RefreshCommand
-import com.ustadmobile.core.viewmodel.clazz.progressreport.ClazzGradebookUiState
-import com.ustadmobile.core.viewmodel.clazz.progressreport.ClazzGradebookViewModel
+import com.ustadmobile.core.viewmodel.clazz.gradebook.ClazzGradebookUiState
+import com.ustadmobile.core.viewmodel.clazz.gradebook.ClazzGradebookViewModel
 import com.ustadmobile.hooks.useDoorRemoteMediator
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useTabAndAppBarHeight
@@ -46,6 +46,7 @@ import web.cssom.integer
 import web.cssom.pct
 import web.cssom.px
 import web.cssom.rotate
+import com.ustadmobile.core.viewmodel.clazz.gradebook.thumbnailUri
 
 external interface ClazzGradebookProps: Props {
     var uiState: ClazzGradebookUiState
@@ -208,13 +209,15 @@ val ClazzGradebookComponent = FC<ClazzGradebookProps> { props ->
                             ListItem {
                                 ListItemIcon {
                                     UstadBlockIcon {
-                                        title = block.cbTitle ?: ""
-                                        courseBlock = block
+                                        title = block.block?.cbTitle ?: ""
+                                        courseBlock = block.block
+                                        contentEntry = block.contentEntry
+                                        pictureUri = block.thumbnailUri
                                     }
                                 }
 
                                 ListItemText {
-                                    primary = ReactNode(block.cbTitle ?: "")
+                                    primary = ReactNode(block.block?.cbTitle ?: "")
                                 }
                             }
                         }

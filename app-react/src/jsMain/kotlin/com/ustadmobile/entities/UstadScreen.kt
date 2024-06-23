@@ -165,7 +165,7 @@ import com.ustadmobile.view.person.bulkaddselectfile.BulkAddPersonSelectFileScre
 import com.ustadmobile.core.viewmodel.person.bulkaddselectfile.BulkAddPersonSelectFileViewModel
 import com.ustadmobile.view.person.bulkaddrunimport.BulkAddPersonRunImportScreen
 import com.ustadmobile.core.viewmodel.person.bulkaddrunimport.BulkAddPersonRunImportViewModel
-import com.ustadmobile.core.viewmodel.clazz.progressreport.ClazzGradebookViewModel
+import com.ustadmobile.core.viewmodel.clazz.gradebook.ClazzGradebookViewModel
 import com.ustadmobile.view.clazz.gradebook.ClazzGradebookScreen
 
 

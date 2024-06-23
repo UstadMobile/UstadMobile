@@ -13,7 +13,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.unit.Dp
-import com.ustadmobile.lib.db.entities.CourseBlock
+import com.ustadmobile.core.viewmodel.clazz.gradebook.thumbnailUri
+import com.ustadmobile.lib.db.composites.CourseBlockAndGradebookDisplayDetails
 import com.ustadmobile.libuicompose.components.UstadBlockIcon
 
 /**
@@ -23,7 +24,7 @@ import com.ustadmobile.libuicompose.components.UstadBlockIcon
  */
 @Composable
 fun GradebookCourseBlockHeader(
-    courseBlock: CourseBlock,
+    courseBlock: CourseBlockAndGradebookDisplayDetails,
     width: Dp,
     height: Dp,
 ) {
@@ -44,13 +45,13 @@ fun GradebookCourseBlockHeader(
             verticalArrangement = Arrangement.Center
         ) {
             ListItem(
-                headlineContent = { Text(courseBlock.cbTitle ?: "") },
+                headlineContent = { Text(courseBlock.block?.cbTitle ?: "") },
                 leadingContent = {
                     UstadBlockIcon(
-                        title = courseBlock.cbTitle ?: "",
-                        courseBlock = courseBlock,
-                        contentEntry = null,
-                        pictureUri = null,
+                        title = courseBlock.block?.cbTitle ?: "",
+                        courseBlock = courseBlock.block,
+                        contentEntry = courseBlock.contentEntry,
+                        pictureUri = courseBlock.thumbnailUri,
                     )
                 }
             )

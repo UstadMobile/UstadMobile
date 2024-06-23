@@ -29,8 +29,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.ext.roundTo
-import com.ustadmobile.core.viewmodel.clazz.progressreport.ClazzGradebookUiState
-import com.ustadmobile.core.viewmodel.clazz.progressreport.ClazzGradebookViewModel
+import com.ustadmobile.core.viewmodel.clazz.gradebook.ClazzGradebookUiState
+import com.ustadmobile.core.viewmodel.clazz.gradebook.ClazzGradebookViewModel
 import com.ustadmobile.libuicompose.components.UstadPersonAvatar
 import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
 import kotlinx.coroutines.flow.Flow
@@ -112,7 +112,7 @@ fun ClazzGradebookScreen(
             items(
                 count = listResult.lazyPagingItems.itemCount,
                 key = { index ->
-                    listResult.lazyPagingItems.get(index)?.student?.person?.personUid ?: index.toLong()
+                    listResult.lazyPagingItems[index]?.student?.person?.personUid ?: index.toLong()
                 }
             ) { row ->
                 val rowItem = listResult.lazyPagingItems[row]
@@ -122,7 +122,7 @@ fun ClazzGradebookScreen(
                     ListItem(
                         modifier = Modifier.width(nameColWidth),
                         headlineContent = {
-                            Text(rowItem?.student?.person?.fullName() ?: "-",)
+                            Text(rowItem?.student?.person?.fullName() ?: "-")
                         },
                         leadingContent = {
                             UstadPersonAvatar(
@@ -139,11 +139,11 @@ fun ClazzGradebookScreen(
                     ) {
                         uiState.courseBlocks.forEach { block ->
                             val result = rowItem?.blockStatuses?.firstOrNull {
-                                it.sCbUid == block.cbUid
+                                it.sCbUid == block.block?.cbUid
                             }
 
                             val scoreScaled = result?.sScoreScaled
-                            val maxPoints = block.cbMaxPoints
+                            val maxPoints = block.block?.cbMaxPoints
                             val mark = if(scoreScaled != null && maxPoints != null) {
                                 scoreScaled * maxPoints
                             }else {

@@ -1,4 +1,4 @@
-package com.ustadmobile.core.viewmodel.clazz.progressreport
+package com.ustadmobile.core.viewmodel.clazz.gradebook
 
 import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon
@@ -7,9 +7,9 @@ import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.lib.db.composites.CourseBlockAndGradebookDisplayDetails
 import com.ustadmobile.lib.db.composites.StudentAndBlockStatuses
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
-import com.ustadmobile.lib.db.entities.CourseBlock
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
@@ -17,7 +17,7 @@ import kotlinx.coroutines.launch
 import org.kodein.di.DI
 
 data class ClazzGradebookUiState(
-    val courseBlocks: List<CourseBlock> = emptyList(),
+    val courseBlocks: List<CourseBlockAndGradebookDisplayDetails> = emptyList(),
     val results: ListPagingSourceFactory<StudentAndBlockStatuses> = { EmptyPagingSource() },
     val isFullScreen: Boolean = false,
 )

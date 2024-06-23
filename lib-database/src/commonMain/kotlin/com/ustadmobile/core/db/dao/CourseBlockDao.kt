@@ -16,6 +16,7 @@ import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.STATUS_STATEMENTS_IS_
 import com.ustadmobile.door.annotation.HttpAccessible
 import com.ustadmobile.door.annotation.HttpServerFunctionCall
 import com.ustadmobile.door.annotation.HttpServerFunctionParam
+import com.ustadmobile.lib.db.composites.CourseBlockAndGradebookDisplayDetails
 import com.ustadmobile.lib.db.composites.CourseBlockAndAssignment
 import com.ustadmobile.lib.db.composites.CourseBlockAndDisplayDetails
 import com.ustadmobile.lib.db.composites.CourseBlockAndDbEntities
@@ -335,11 +336,21 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
 
     @HttpAccessible
     @Query("""
-        SELECT CourseBlock.*
+        SELECT CourseBlock.*, ContentEntry.*, CourseBlockPicture.*, ContentEntryPicture2.*
           FROM CourseBlock
-         WHERE CourseBlock.cbClazzUid = :clazzUid 
+               LEFT JOIN ContentEntry
+                         ON CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
+                            AND ContentEntry.contentEntryUid = CourseBlock.cbEntityUid
+               LEFT JOIN CourseBlockPicture
+                         ON CourseBlockPicture.cbpUid = CourseBlock.cbUid    
+               LEFT JOIN ContentEntryPicture2
+                         ON CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
+                            AND ContentEntryPicture2.cepUid = CourseBlock.cbEntityUid
+         WHERE CourseBlock.cbClazzUid = :clazzUid
+           AND CAST(CourseBlock.cbActive AS INTEGER) = 1
+      ORDER BY CourseBlock.cbIndex
     """)
-    abstract fun findByClazzUidAsFlow(clazzUid: Long): Flow<List<CourseBlock>>
+    abstract fun findByClazzUidAsFlow(clazzUid: Long): Flow<List<CourseBlockAndGradebookDisplayDetails>>
 
 
     /**

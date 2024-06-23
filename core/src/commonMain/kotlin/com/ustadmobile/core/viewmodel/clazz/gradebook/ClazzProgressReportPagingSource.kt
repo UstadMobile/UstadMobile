@@ -1,4 +1,4 @@
-package com.ustadmobile.core.viewmodel.clazz.progressreport
+package com.ustadmobile.core.viewmodel.clazz.gradebook
 
 import app.cash.paging.PagingSource
 import app.cash.paging.PagingSourceLoadParams
