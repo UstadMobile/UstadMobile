@@ -3,6 +3,7 @@ package com.ustadmobile.core.viewmodel.clazz.gradebook
 import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
@@ -20,7 +21,16 @@ data class ClazzGradebookUiState(
     val courseBlocks: List<CourseBlockAndGradebookDisplayDetails> = emptyList(),
     val results: ListPagingSourceFactory<StudentAndBlockStatuses> = { EmptyPagingSource() },
     val isFullScreen: Boolean = false,
-)
+    val scale: Float = 1.0f,
+) {
+
+    val canZoomIn
+        get() = scale < 1.0f
+
+    val canZoomOut
+        get() = scale > 0.25f
+
+}
 
 /**
  *
@@ -54,14 +64,30 @@ class ClazzGradebookViewModel(
 
     init {
         viewModelScope.launch {
-            activeRepo.courseBlockDao.findByClazzUidAsFlow(
-                clazzUid = clazzUid
-            ).distinctUntilChanged().collect { courseBlockList ->
-                _uiState.update { prev ->
-                    prev.copy(
-                        courseBlocks = courseBlockList,
-                        results = studentPagingSource,
-                    )
+            _uiState.whenSubscribed {
+                launch {
+                    activeRepo.courseBlockDao.findByClazzUidAsFlow(
+                        clazzUid = clazzUid
+                    ).distinctUntilChanged().collect { courseBlockList ->
+                        _uiState.update { prev ->
+                            prev.copy(
+                                courseBlocks = courseBlockList,
+                                results = studentPagingSource,
+                            )
+                        }
+                    }
+                }
+
+                launch {
+                    activeRepo.clazzDao.getClazzNameAsFlow(
+                        clazzUid = clazzUid
+                    ).distinctUntilChanged().collect {
+                        _appUiState.update { prev ->
+                            prev.copy(
+                                title = it
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -84,9 +110,38 @@ class ClazzGradebookViewModel(
             it.copy(
                 hideAppBar = isFullScreen,
                 hideBottomNavigation = isFullScreen,
+                navigationVisible = !isFullScreen,
             )
         }
     }
+
+    fun onClickZoomIn() {
+        _uiState.update {
+            it.copy(
+                scale = if(it.canZoomIn) it.scale + 0.25f else it.scale
+            )
+        }
+    }
+
+    fun onClickZoomOut() {
+        _uiState.update {
+            it.copy(
+                scale = if(it.canZoomOut) it.scale - 0.25f else it.scale
+            )
+        }
+    }
+
+    /**
+     * Triggered by double tap on mobile
+     */
+    fun onToggleZoom() {
+        _uiState.update {
+            it.copy(
+                scale = if(it.scale != 0.5f) 0.5f else 1.0f
+            )
+        }
+    }
+
 
     companion object {
 

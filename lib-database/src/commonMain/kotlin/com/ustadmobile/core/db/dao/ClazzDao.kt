@@ -410,6 +410,21 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
     abstract fun getClazzNameAndTerminologyAsFlow(clazzUid: Long): Flow<ClazzNameAndTerminology?>
 
     @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall("getClazzNameAndTerminologyAsFlow"),
+            HttpServerFunctionCall("findByUidAsync")
+        )
+    )
+    @Query("""
+        SELECT Clazz.clazzName AS clazzName
+          FROM Clazz
+         WHERE Clazz.clazzUid = :clazzUid                
+    """)
+    abstract fun getClazzNameAsFlow(clazzUid: Long): Flow<String?>
+
+
+    @HttpAccessible(
         pullQueriesToReplicate = arrayOf(
             HttpServerFunctionCall("findByUidAsync")
         ),

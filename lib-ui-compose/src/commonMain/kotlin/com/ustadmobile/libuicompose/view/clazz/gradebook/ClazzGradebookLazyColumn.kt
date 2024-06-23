@@ -23,6 +23,9 @@ expect fun ClazzGradebookLazyColumn(
     lazyListState: LazyListState,
     stickyHeight: Dp,
     stickyWidth: Dp,
+    maxWidth: Dp,
+    maxHeight: Dp,
+    scale: Float,
     modifier: Modifier = Modifier,
     content: LazyListScope.() -> Unit
 )

@@ -2,8 +2,13 @@ package com.ustadmobile.libuicompose.view.clazz.gradebook
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.foundation.gestures.rememberTransformableState
+import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,6 +19,10 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Fullscreen
+import androidx.compose.material.icons.filled.ZoomIn
+import androidx.compose.material.icons.filled.ZoomOut
+import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -22,8 +31,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -45,6 +58,9 @@ fun ClazzGradebookScreen(
         uiState = uiState,
         refreshCommandFlow = viewModel.refreshCommandFlow,
         onClickFullScreen = viewModel::onClickFullScreen,
+        onClickZoomIn =  viewModel::onClickZoomIn,
+        onClickZoomOut = viewModel::onClickZoomOut,
+        onToggleZoom = viewModel::onToggleZoom,
     )
 }
 
@@ -63,6 +79,9 @@ fun ClazzGradebookScreen(
     uiState: ClazzGradebookUiState,
     refreshCommandFlow: Flow<RefreshCommand>,
     onClickFullScreen: () -> Unit,
+    onClickZoomIn: () -> Unit,
+    onClickZoomOut: () -> Unit,
+    onToggleZoom: () -> Unit,
 ) {
     val listResult = rememberDoorRepositoryPager(
         pagingSourceFactory = uiState.results,
@@ -73,6 +92,13 @@ fun ClazzGradebookScreen(
 
     BoxWithConstraints(
         modifier = Modifier.fillMaxSize()
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onDoubleTap = {
+                            onToggleZoom()
+                        }
+                    )
+                }
     ) {
         val nameColWidth = minOf(maxWidth / 2, NAME_WIDTH.dp)
         val headerHeight = minOf(maxHeight / 2, HEADER_HEIGHT.dp)
@@ -82,6 +108,9 @@ fun ClazzGradebookScreen(
             lazyListState = rememberLazyListState(),
             stickyHeight = headerHeight,
             stickyWidth = nameColWidth,
+            maxWidth = maxWidth,
+            maxHeight = maxHeight,
+            scale = uiState.scale,
             modifier = Modifier.fillMaxSize()
         ) {
             stickyHeader {
@@ -122,7 +151,11 @@ fun ClazzGradebookScreen(
                     ListItem(
                         modifier = Modifier.width(nameColWidth),
                         headlineContent = {
-                            Text(rowItem?.student?.person?.fullName() ?: "-")
+                            Text(
+                                text = rowItem?.student?.person?.fullName() ?: "-",
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis,
+                            )
                         },
                         leadingContent = {
                             UstadPersonAvatar(
@@ -162,12 +195,31 @@ fun ClazzGradebookScreen(
             }
         }
 
-        IconButton(
-            onClick = onClickFullScreen,
+        Column(
             modifier = Modifier.align(Alignment.BottomEnd)
         ) {
-            Icon(Icons.Default.Fullscreen, contentDescription = null)
+            FilledTonalIconButton(
+                onClick = onClickZoomIn,
+                enabled = uiState.canZoomIn,
+            ) {
+                Icon(Icons.Default.ZoomIn, contentDescription = null)
+            }
+
+            FilledTonalIconButton(
+                onClick = onClickZoomOut,
+                enabled = uiState.canZoomOut,
+            ) {
+                Icon(Icons.Default.ZoomOut, contentDescription = null)
+            }
+
+            IconButton(
+                onClick = onClickFullScreen,
+            ) {
+                Icon(Icons.Default.Fullscreen, contentDescription = null)
+            }
         }
+
+
     }
 
 }

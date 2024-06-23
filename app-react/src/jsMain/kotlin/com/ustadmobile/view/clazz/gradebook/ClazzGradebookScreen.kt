@@ -47,6 +47,9 @@ import web.cssom.pct
 import web.cssom.px
 import web.cssom.rotate
 import com.ustadmobile.core.viewmodel.clazz.gradebook.thumbnailUri
+import com.ustadmobile.util.ext.useLineClamp
+import emotion.react.css
+import react.dom.html.ReactHTML.div
 
 external interface ClazzGradebookProps: Props {
     var uiState: ClazzGradebookUiState
@@ -128,7 +131,16 @@ val ClazzGradebookComponent = FC<ClazzGradebookProps> { props ->
                         }
 
                         ListItemText {
-                            primary = ReactNode(item?.student?.person?.fullName() ?: "null")
+                            primary = div.create {
+                                css {
+                                    useLineClamp(2)
+                                }
+
+                                + (item?.student?.person?.fullName() ?: "null")
+                            }
+                            primaryTypographyProps = jso {
+                                component = div
+                            }
                         }
                     }
 
@@ -217,7 +229,15 @@ val ClazzGradebookComponent = FC<ClazzGradebookProps> { props ->
                                 }
 
                                 ListItemText {
-                                    primary = ReactNode(block.block?.cbTitle ?: "")
+                                    primary = div.create {
+                                        css {
+                                            useLineClamp(2)
+                                        }
+                                        + block.block?.cbTitle ?: ""
+                                    }
+                                    primaryTypographyProps = jso {
+                                        component = div
+                                    }
                                 }
                             }
                         }

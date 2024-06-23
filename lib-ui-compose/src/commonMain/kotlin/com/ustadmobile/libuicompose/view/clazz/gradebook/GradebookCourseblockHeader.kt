@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import com.ustadmobile.core.viewmodel.clazz.gradebook.thumbnailUri
 import com.ustadmobile.lib.db.composites.CourseBlockAndGradebookDisplayDetails
@@ -45,7 +46,13 @@ fun GradebookCourseBlockHeader(
             verticalArrangement = Arrangement.Center
         ) {
             ListItem(
-                headlineContent = { Text(courseBlock.block?.cbTitle ?: "") },
+                headlineContent = {
+                    Text(
+                        text = courseBlock.block?.cbTitle ?: "",
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                },
                 leadingContent = {
                     UstadBlockIcon(
                         title = courseBlock.block?.cbTitle ?: "",
