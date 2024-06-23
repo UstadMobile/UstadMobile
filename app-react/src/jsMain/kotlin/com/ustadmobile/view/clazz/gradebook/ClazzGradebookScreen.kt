@@ -28,13 +28,17 @@ import web.cssom.ClassName
 import web.cssom.Color
 import web.cssom.Contain
 import web.cssom.Display
+import web.cssom.GeometryPosition
 import web.cssom.Height
 import web.cssom.Overflow
 import web.cssom.Position
 import web.cssom.TextOverflow
+import web.cssom.TransformOrigin
+import web.cssom.deg
 import web.cssom.integer
 import web.cssom.pct
 import web.cssom.px
+import web.cssom.rotate
 
 external interface ClazzGradebookProps: Props {
     var uiState: ClazzGradebookUiState
@@ -44,11 +48,10 @@ external interface ClazzGradebookProps: Props {
 
 private val NAME_WIDTH = 240
 
-private val COLUMN_WIDTH = 100
+private val COLUMN_WIDTH = 50
 
 /**
- * To check: try and put the horizontal scrolling into the virtual list element e.g. have one
- * element that handles horizontal AND vertical scrolling
+ * See https://stackoverflow.com/questions/15806925/how-to-rotate-text-left-90-degree-and-cell-size-is-adjusted-according-to-text-in
  */
 val ClazzGradebookComponent = FC<ClazzGradebookProps> { props ->
     val mediatorResult = useDoorRemoteMediator(props.uiState.results, props.refreshCommandFlow)
@@ -61,7 +64,7 @@ val ClazzGradebookComponent = FC<ClazzGradebookProps> { props ->
 
     val tabAndAppBarHeight = useTabAndAppBarHeight()
 
-    val headerRowHeight =  30
+    val headerRowHeight =  120
 
     val totalWidth = NAME_WIDTH + COLUMN_WIDTH * props.uiState.courseBlocks.size
 
@@ -98,7 +101,7 @@ val ClazzGradebookComponent = FC<ClazzGradebookProps> { props ->
                     //Person name and picture
                     Stack {
                         sx {
-              width = NAME_WIDTH.px
+                            width = NAME_WIDTH.px
                             overflowInline = Overflow.clip
                             textOverflow = TextOverflow.ellipsis
                             paddingTop = 16.px
@@ -163,16 +166,30 @@ val ClazzGradebookComponent = FC<ClazzGradebookProps> { props ->
                 }
 
                 props.uiState.courseBlocks.forEach { block ->
-                    Typography {
+                    Box {
                         sx {
                             width = COLUMN_WIDTH.px
-                            //transform = rotate(270.deg)
-                            textOverflow = TextOverflow.ellipsis
-                            overflowInline = Overflow.clip
-                            overflowX = Overflow.clip
+                            height = headerRowHeight.px
+                            position = Position.relative
                         }
 
-                        + (block.cbTitle ?: "")
+                        Typography {
+                            sx {
+                                transform = rotate((-90f).deg)
+                                transformOrigin = TransformOrigin(
+                                    GeometryPosition.left, GeometryPosition.bottom
+                                )
+                                bottom = 4.px
+                                left = 100.pct
+                                textOverflow = TextOverflow.ellipsis
+                                overflowInline = Overflow.clip
+                                position = Position.absolute
+                                width = headerRowHeight.px
+                                height = COLUMN_WIDTH.px
+                            }
+
+                            + (block.cbTitle ?: "")
+                        }
                     }
                 }
             }
