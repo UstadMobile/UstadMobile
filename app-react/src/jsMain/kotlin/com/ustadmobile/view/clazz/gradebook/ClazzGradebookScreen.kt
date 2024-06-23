@@ -9,6 +9,8 @@ import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useTabAndAppBarHeight
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.mui.components.ThemeContext
+import com.ustadmobile.mui.components.UstadBlockIcon
+import com.ustadmobile.view.components.UstadPersonAvatar
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
@@ -16,12 +18,16 @@ import js.objects.jso
 import kotlinx.coroutines.flow.Flow
 import mui.material.Stack
 import mui.material.Box
+import mui.material.ListItem
+import mui.material.ListItemIcon
+import mui.material.ListItemText
 import mui.material.StackDirection
 import mui.material.Typography
 import mui.system.responsive
 import mui.system.sx
 import react.FC
 import react.Props
+import react.ReactNode
 import react.create
 import react.useRequiredContext
 import web.cssom.ClassName
@@ -32,6 +38,7 @@ import web.cssom.GeometryPosition
 import web.cssom.Height
 import web.cssom.Overflow
 import web.cssom.Position
+import web.cssom.TextAlign
 import web.cssom.TextOverflow
 import web.cssom.TransformOrigin
 import web.cssom.deg
@@ -48,7 +55,7 @@ external interface ClazzGradebookProps: Props {
 
 private val NAME_WIDTH = 240
 
-private val COLUMN_WIDTH = 50
+private val COLUMN_WIDTH = 56
 
 /**
  * See https://stackoverflow.com/questions/15806925/how-to-rotate-text-left-90-degree-and-cell-size-is-adjusted-according-to-text-in
@@ -64,7 +71,7 @@ val ClazzGradebookComponent = FC<ClazzGradebookProps> { props ->
 
     val tabAndAppBarHeight = useTabAndAppBarHeight()
 
-    val headerRowHeight =  120
+    val headerRowHeight =  180
 
     val totalWidth = NAME_WIDTH + COLUMN_WIDTH * props.uiState.courseBlocks.size
 
@@ -99,13 +106,11 @@ val ClazzGradebookComponent = FC<ClazzGradebookProps> { props ->
                     }
 
                     //Person name and picture
-                    Stack {
+                    ListItem {
                         sx {
                             width = NAME_WIDTH.px
                             overflowInline = Overflow.clip
                             textOverflow = TextOverflow.ellipsis
-                            paddingTop = 16.px
-                            paddingBottom = 16.px
                             position = Position.sticky
                             backgroundColor = Color(theme.palette.background.default)
 
@@ -114,7 +119,16 @@ val ClazzGradebookComponent = FC<ClazzGradebookProps> { props ->
                             left = 0.px
                         }
 
-                        + (item?.student?.person?.fullName() ?: "null")
+                        ListItemIcon {
+                            UstadPersonAvatar {
+                                pictureUri = item?.student?.personPicture?.personPictureThumbnailUri
+                                personName = item?.student?.person?.fullName()
+                            }
+                        }
+
+                        ListItemText {
+                            primary = ReactNode(item?.student?.person?.fullName() ?: "null")
+                        }
                     }
 
                     //Progress blocks for each here.
@@ -124,6 +138,7 @@ val ClazzGradebookComponent = FC<ClazzGradebookProps> { props ->
                                 width = COLUMN_WIDTH.px
                                 paddingTop = 16.px
                                 paddingBottom = 16.px
+                                textAlign = TextAlign.center
                             }
 
                             + "-"
@@ -173,7 +188,9 @@ val ClazzGradebookComponent = FC<ClazzGradebookProps> { props ->
                             position = Position.relative
                         }
 
-                        Typography {
+                        Stack {
+                            direction = responsive(StackDirection.row)
+
                             sx {
                                 transform = rotate((-90f).deg)
                                 transformOrigin = TransformOrigin(
@@ -188,7 +205,18 @@ val ClazzGradebookComponent = FC<ClazzGradebookProps> { props ->
                                 height = COLUMN_WIDTH.px
                             }
 
-                            + (block.cbTitle ?: "")
+                            ListItem {
+                                ListItemIcon {
+                                    UstadBlockIcon {
+                                        title = block.cbTitle ?: ""
+                                        courseBlock = block
+                                    }
+                                }
+
+                                ListItemText {
+                                    primary = ReactNode(block.cbTitle ?: "")
+                                }
+                            }
                         }
                     }
                 }

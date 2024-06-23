@@ -6,12 +6,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.unit.Dp
+import com.ustadmobile.lib.db.entities.CourseBlock
+import com.ustadmobile.libuicompose.components.UstadBlockIcon
 
 /**
  * Make a box where text will appear vertically aligned to the bottom of the box.
@@ -20,8 +23,7 @@ import androidx.compose.ui.unit.Dp
  */
 @Composable
 fun GradebookCourseBlockHeader(
-    headline: String,
-    subtitle: String?,
+    courseBlock: CourseBlock,
     width: Dp,
     height: Dp,
 ) {
@@ -41,10 +43,17 @@ fun GradebookCourseBlockHeader(
                 .align(Alignment.Center),
             verticalArrangement = Arrangement.Center
         ) {
-            Text(headline, maxLines = 2)
-            subtitle?.also {
-                Text(it, maxLines = 1)
-            }
+            ListItem(
+                headlineContent = { Text(courseBlock.cbTitle ?: "") },
+                leadingContent = {
+                    UstadBlockIcon(
+                        title = courseBlock.cbTitle ?: "",
+                        courseBlock = courseBlock,
+                        contentEntry = null,
+                        pictureUri = null,
+                    )
+                }
+            )
         }
     }
 }

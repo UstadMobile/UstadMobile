@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.Dp
  * @param content
  */
 @Composable
-expect fun ClazzProgressReportLazyColumn(
+expect fun ClazzGradebookLazyColumn(
     horizontalScrollState: ScrollState,
     lazyListState: LazyListState,
     stickyHeight: Dp,

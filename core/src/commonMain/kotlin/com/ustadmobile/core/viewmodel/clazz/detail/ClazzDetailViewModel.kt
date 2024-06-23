@@ -57,7 +57,7 @@ class ClazzDetailViewModel(
                 TabItem(
                     viewName = ClazzGradebookViewModel.DEST_NAME,
                     args = mapOf(UstadView.ARG_CLAZZUID to entityUidArg.toString()),
-                    label = systemImpl.getString(MR.strings.report),
+                    label = systemImpl.getString(MR.strings.gradebook),
                 )
             )
         }

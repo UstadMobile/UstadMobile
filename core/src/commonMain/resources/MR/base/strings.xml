@@ -1919,4 +1919,6 @@
 
     <string name="grant_permission">Grant permission</string>
 
+    <string name="gradebook">Gradebook</string>
+
 </resources>

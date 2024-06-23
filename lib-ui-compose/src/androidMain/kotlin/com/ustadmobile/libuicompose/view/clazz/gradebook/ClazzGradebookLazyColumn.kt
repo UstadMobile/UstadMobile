@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 
 @Composable
-actual fun ClazzProgressReportLazyColumn(
+actual fun ClazzGradebookLazyColumn(
     horizontalScrollState: ScrollState,
     lazyListState: LazyListState,
     stickyHeight: Dp,
