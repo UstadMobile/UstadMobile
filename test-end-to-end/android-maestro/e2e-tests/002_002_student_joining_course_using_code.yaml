@@ -46,6 +46,13 @@ env:
       text: "Invite code"
     direction: DOWN
 - tapOn: "Invite code"
+- runFlow:
+    when:
+      visible:
+       id: "com.android.systemui:id/dismiss_image"
+    commands:
+      - tapOn:
+          id: "com.android.systemui:id/dismiss_image"
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
