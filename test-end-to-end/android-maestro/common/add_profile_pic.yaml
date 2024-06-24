@@ -13,8 +13,8 @@ appId: com.toughra.ustadmobile
 - clearState: com.toughra.ustadmobile
 # clear the downloads
 - evalScript: ${http.get(CONTROLSERVER + "cleardownloads?device=" + TESTSERIAL)}
-# push the test file to the downloads
-- evalScript: ${http.get(CONTROLSERVER + "pushcontent?test-file-name=" + TESTFILENAME +"&device=" + TESTSERIAL)}
+# push the test file to the Pictures folder
+- evalScript: ${http.get(CONTROLSERVER + "pushcontent?test-file-name=" + TESTFILENAME + "&device=" + TESTSERIAL + "&folder=Pictures")}
 # get started
 - launchApp
 - tapOn: "GET STARTED"
@@ -29,20 +29,21 @@ appId: com.toughra.ustadmobile
     id: "floating_action_button"
 - tapOn: "Add"
 - tapOn: "Select new photo from gallery"
-#- tapOn:
- #   id: "com.google.android.providers.media.module:id/icon_thumbnail"
-- runFlow:
-    when:
-      notVisible: "Downloads"
-    file: redirect_to_downloads.yaml
-- runFlow:
-      when:
-          notVisible: admin_pic.jpg
-      commands:
-          - tapOn:
+#- runFlow:
+   # when:
+  #    notVisible: "Downloads"
+ #   file: redirect_to_downloads.yaml
+#- runFlow:
+     # when:
+    #      notVisible: admin_pic.jpg
+   #   commands:
+  #        - tapOn:
+ #             id: com.google.android.documentsui:id/sub_menu
+#- tapOn: admin_pic.jpg
 
-              id: com.google.android.documentsui:id/sub_menu
-- tapOn: admin_pic.jpg
+- tapOn:
+    id: "com.google.android.providers.media.module:id/icon_thumbnail"
+    index: 0
 - scrollUntilVisible:
     element:
       text: "Gender*"
