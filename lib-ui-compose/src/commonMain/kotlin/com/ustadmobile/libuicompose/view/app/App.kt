@@ -115,6 +115,7 @@ fun App(
         )
     }
 
+
     var appUiStateVal by appUiState
     LaunchedEffect(appUiStateVal) {
         onAppStateChanged(appUiStateVal)
@@ -146,12 +147,7 @@ fun App(
             var selectedTopLevelItemIndex by remember { mutableIntStateOf(0) }
 
 
-            //Hide bottom navigation bar if current user is local
-            if(accountManager.currentUserSession.endpoint.isLocal){
-                appUiStateVal = appUiStateVal.copy(hideBottomNavigation = true)
-            }
-
-            if(useBottomBar) {
+            if(useBottomBar && currentSession?.endpoint?.isLocal != true) {
                 val currentDestination by navigator.currentEntry.collectAsState(null)
 
                 /**
