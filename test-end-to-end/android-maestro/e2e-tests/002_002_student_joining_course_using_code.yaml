@@ -1,5 +1,6 @@
 appId: com.toughra.ustadmobile
 env:
+  TESTNAME: "002_002_student_joining_course_using_code"
   TESTRESULTSDIR: "${TESTRESULTSDIR}/002_002_student_joining_course_using_code"
 ---
 - clearState: com.toughra.ustadmobile
