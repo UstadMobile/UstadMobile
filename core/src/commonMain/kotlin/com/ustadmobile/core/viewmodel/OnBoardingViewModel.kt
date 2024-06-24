@@ -68,7 +68,7 @@ class OnBoardingViewModel(
         })
     }
     fun onClickAddNewOrganization() {
-
+        //Redirect to website (ask mike that is there prebuild util class to open website)
     }
 
 

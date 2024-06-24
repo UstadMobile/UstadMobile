@@ -32,14 +32,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.nav.NavCommand
-import com.ustadmobile.core.util.ioDispatcher
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.message.conversationlist.ConversationListViewModel
@@ -49,7 +46,6 @@ import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import moe.tlaster.precompose.navigation.NavOptions
 import moe.tlaster.precompose.navigation.Navigator
 import moe.tlaster.precompose.navigation.PopUpTo
@@ -103,25 +99,18 @@ fun App(
     initialRoute: String = "/${RedirectViewModel.DEST_NAME}",
 ) {
 
+
     val di = localDI()
-
     val accountManager: UstadAccountManager = di.direct.instance()
-    var userSession by remember { mutableStateOf<UserSessionWithPersonAndEndpoint?>(null) }
-    val coroutineScope = rememberCoroutineScope()
-
-    LaunchedEffect(Unit) {
-        coroutineScope.launch {
-            userSession =accountManager.newLocalAccount()
-        }
-    }
-
-
+    val currentSession by accountManager.currentUserSessionFlow
+        .collectAsState(null)
 
     val appUiState = remember {
         mutableStateOf(
             AppUiState(
                 navigationVisible = false,
                 hideAppBar = true,
+
             )
         )
     }
@@ -134,7 +123,7 @@ fun App(
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     val onShowSnackBar: SnackBarDispatcher = remember {
-        SnackBarDispatcher { snack ->
+        SnackBarDispatcher {  snack ->
             scope.launch {
                 snackbarHostState.showSnackbar(snack.message, snack.action)
             }
@@ -144,7 +133,7 @@ fun App(
 
     Scaffold(
         topBar = {
-            if (!appUiStateVal.hideAppBar) {
+            if(!appUiStateVal.hideAppBar) {
                 UstadAppBar(
                     compactHeader = (widthClass != SizeClass.EXPANDED),
                     appUiState = appUiStateVal,
@@ -155,7 +144,14 @@ fun App(
         bottomBar = {
             //As per https://developer.android.com/reference/kotlin/androidx/compose/material3/package-summary#navigationbar
             var selectedTopLevelItemIndex by remember { mutableIntStateOf(0) }
-            if (useBottomBar) {
+
+
+            //Hide bottom navigation bar if current user is local
+            if(accountManager.currentUserSession.endpoint.isLocal){
+                appUiStateVal = appUiStateVal.copy(hideBottomNavigation = true)
+            }
+
+            if(useBottomBar) {
                 val currentDestination by navigator.currentEntry.collectAsState(null)
 
                 /**
@@ -168,11 +164,11 @@ fun App(
                         "/${it.destRoute}" == pathVal
                     }
 
-                    if (topLevelIndex >= 0)
+                    if(topLevelIndex >= 0)
                         selectedTopLevelItemIndex = topLevelIndex
                 }
 
-                if (appUiStateVal.navigationVisible && !appUiStateVal.hideBottomNavigation) {
+                if(appUiStateVal.navigationVisible && !appUiStateVal.hideBottomNavigation) {
                     NavigationBar {
                         APP_TOP_LEVEL_NAV_ITEMS.forEachIndexed { index, item ->
                             NavigationBarItem(
@@ -183,7 +179,7 @@ fun App(
                                 selected = selectedTopLevelItemIndex == index,
                                 onClick = {
                                     navigator.navigate(
-                                        route = "/${item.destRoute}",
+                                        route  = "/${item.destRoute}",
                                         options = NavOptions(popUpTo = PopUpTo.First(inclusive = true))
                                     )
                                 }
@@ -191,11 +187,10 @@ fun App(
                         }
                     }
                 }
-
             }
         },
         floatingActionButton = {
-            if (appUiStateVal.fabState.visible) {
+            if(appUiStateVal.fabState.visible) {
                 ExtendedFloatingActionButton(
                     modifier = Modifier.testTag("floating_action_button"),
                     onClick = appUiStateVal.fabState.onClick,
@@ -206,12 +201,12 @@ fun App(
                         )
                     },
                     icon = {
-                        val imageVector = when (appUiStateVal.fabState.icon) {
+                        val imageVector = when(appUiStateVal.fabState.icon)  {
                             FabUiState.FabIcon.ADD -> Icons.Default.Add
                             FabUiState.FabIcon.EDIT -> Icons.Default.Edit
                             else -> null
                         }
-                        if (imageVector != null) {
+                        if(imageVector != null) {
                             Icon(
                                 imageVector = imageVector,
                                 contentDescription = null,

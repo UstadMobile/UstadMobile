@@ -11,6 +11,8 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -55,11 +57,17 @@ class IndividualLearnerViewModel(
         loadingState = LoadingUiState.INDETERMINATE
 
         viewModelScope.launch {
-            accountManager.newLocalAccount()
+            accountManager.createLocalAccount()
             goToNextDestAfterLoginOrGuestSelected(
-                accountManager.newLocalAccount().userSession.usUid,
-                accountManager.newLocalAccount().endpoint
+                accountManager.createLocalAccount().userSession.usPersonUid,
+                accountManager.createLocalAccount().endpoint
             )
+        }
+    }
+
+    fun onClickRestoreFile() {
+        CoroutineScope(Dispatchers.Main).launch {
+
         }
     }
 

@@ -11,6 +11,7 @@ import com.ustadmobile.core.util.ioDispatcher
 import com.ustadmobile.door.*
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.*
+import com.ustadmobile.door.log.NapierDoorLogger
 import com.ustadmobile.door.message.DoorMessage
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
@@ -30,6 +31,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
@@ -510,22 +512,52 @@ class UstadAccountManager(
         }
     }
 
-    suspend fun newLocalAccount(): UserSessionWithPersonAndEndpoint {
+    suspend fun createLocalAccount(): UserSessionWithPersonAndEndpoint {
+        // Create a random IP and endpoint
         val randomIp = "169.${(0..255).random()}.${(0..255).random()}.${(0..255).random()}"
         val randomPort = (1000..9999).random()
         val fakeEndpoint = Endpoint("http://$randomIp:$randomPort/")
+
         val db: UmAppDatabase by di.on(fakeEndpoint).instance(tag = DoorTag.TAG_DB)
 
-        val newSite = Site().apply {
-            siteName = "Local"
-            authSalt = "$fakeEndpoint ${randomString(5)}"
-        }
-
-        withContext(ioDispatcher) {
+        return db.withDoorTransactionAsync {
+            val newSite = Site().apply {
+                siteName = "Local Site"
+                authSalt = "local_${randomString(10)}"
+            }
             db.siteDao.insert(newSite)
-        }
 
-        return makeNewTempGuestSession(fakeEndpoint.toString(), db)
+            val newPerson = Person().apply {
+                personUid = db.doorPrimaryKeyManager.nextId(Person.TABLE_ID)
+                username = "local_user_${randomString(5)}"
+                firstNames = "Local"
+                lastName = "User"
+                personType = Person.TYPE_GUEST
+            }
+            db.personDao.insert(newPerson)
+
+            val newSession = UserSession().apply {
+                usUid = db.doorPrimaryKeyManager.nextId(UserSession.TABLE_ID)
+                usClientNodeId = db.doorWrapperNodeId
+                usStartTime = systemTimeInMillis()
+                usSessionType = UserSession.TYPE_TEMP_LOCAL or UserSession.TYPE_GUEST
+                usStatus = UserSession.STATUS_ACTIVE
+                usPersonUid = newPerson.personUid
+            }
+            db.userSessionDao.insertSession(newSession)
+
+            UserSessionWithPersonAndEndpoint(newSession, newPerson, fakeEndpoint)
+        }.also { newSession ->
+            addActiveEndpoint(fakeEndpoint)
+            currentUserSession = newSession
+        }
+    }
+
+    private fun randomString(length: Int): String {
+        val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')
+        return (1..length)
+            .map { allowedChars.random() }
+            .joinToString("")
     }
 
 

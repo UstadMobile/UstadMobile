@@ -165,10 +165,11 @@
     <string name="onboarding_join_org_text">I want to join my organization/school</string>
     <string name="onboarding_add_org_text">I want to add my organization/school</string>
     <string name="individual_action_title">Sign-in Choices</string>
-    <string name="individual_title">Unlock Individual Access</string>
-    <string name="individual_sub_title">Sign in securely with Google to ensure your privacy. Alternatively, you can continue without creating an account. </string>
-    <string name="continue_with_google">Continue with Google</string>
-    <string name="continue_without_account">Continue without Account</string>
+
+    <string name="Create_new_local_account_title">Create new local account</string>
+    <string name="Create_new_local_account_description">Your data will only be saved on your phone. You can manually backup to an SD card or USB drive</string>
+    <string name="Restore_local_account_title">Restore local account from file</string>
+    <string name="Restore_local_account_description">Create new scratch file from selection</string>
 
 
     <string name="download_continue_btn_label">Continue</string>
