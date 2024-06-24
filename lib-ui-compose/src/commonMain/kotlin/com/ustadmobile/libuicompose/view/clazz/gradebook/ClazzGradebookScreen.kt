@@ -1,11 +1,8 @@
 package com.ustadmobile.libuicompose.view.clazz.gradebook
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.gestures.detectTransformGestures
-import androidx.compose.foundation.gestures.rememberTransformableState
-import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -14,37 +11,37 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Fullscreen
-import androidx.compose.material.icons.filled.ZoomIn
-import androidx.compose.material.icons.filled.ZoomOut
-import androidx.compose.material3.FilledIconButton
+import androidx.compose.material.icons.filled.TextDecrease
+import androidx.compose.material.icons.filled.TextIncrease
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.ext.roundTo
 import com.ustadmobile.core.viewmodel.clazz.gradebook.ClazzGradebookUiState
 import com.ustadmobile.core.viewmodel.clazz.gradebook.ClazzGradebookViewModel
+import com.ustadmobile.libuicompose.components.ScaledListItem
 import com.ustadmobile.libuicompose.components.UstadPersonAvatar
+import com.ustadmobile.libuicompose.components.scaledTextStyle
 import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
 import kotlinx.coroutines.flow.Flow
 
@@ -64,11 +61,11 @@ fun ClazzGradebookScreen(
     )
 }
 
-private val NAME_WIDTH = 240
+private const val NAME_WIDTH = 240
 
-private val COLUMN_WIDTH = 72
+private const val COLUMN_WIDTH = 72
 
-private val HEADER_HEIGHT = 192
+private const val HEADER_HEIGHT = 192
 
 //Might be possible to use stickyHeader and
 // https://developer.android.com/develop/ui/compose/touch-input/pointer-input/scroll
@@ -90,27 +87,25 @@ fun ClazzGradebookScreen(
 
     val horizontalScrollState = rememberScrollState()
 
+    val animatedScale by animateFloatAsState(
+        targetValue = uiState.scale
+    )
+
     BoxWithConstraints(
         modifier = Modifier.fillMaxSize()
-                .pointerInput(Unit) {
-                    detectTapGestures(
-                        onDoubleTap = {
-                            onToggleZoom()
-                        }
-                    )
-                }
     ) {
-        val nameColWidth = minOf(maxWidth / 2, NAME_WIDTH.dp)
+        val nameColWidth = minOf(maxWidth / 2, (NAME_WIDTH * animatedScale).dp)
         val headerHeight = minOf(maxHeight / 2, HEADER_HEIGHT.dp)
+        val scaledHeaderHeight = headerHeight * animatedScale
+        val scaledColumnWidth = (COLUMN_WIDTH * animatedScale).dp
+
 
         ClazzGradebookLazyColumn(
             horizontalScrollState = horizontalScrollState,
             lazyListState = rememberLazyListState(),
             stickyHeight = headerHeight,
             stickyWidth = nameColWidth,
-            maxWidth = maxWidth,
-            maxHeight = maxHeight,
-            scale = uiState.scale,
+            scale = animatedScale,
             modifier = Modifier.fillMaxSize()
         ) {
             stickyHeader {
@@ -118,7 +113,7 @@ fun ClazzGradebookScreen(
                     modifier = Modifier
                         .background(MaterialTheme.colorScheme.background)
                         .fillMaxWidth()
-                        .height(headerHeight)
+                        .height(scaledHeaderHeight)
                 ) {
                     Spacer(Modifier.width(nameColWidth))
 
@@ -130,8 +125,9 @@ fun ClazzGradebookScreen(
                         uiState.courseBlocks.forEach { block ->
                             GradebookCourseBlockHeader(
                                 courseBlock = block,
-                                width = COLUMN_WIDTH.dp,
-                                height = headerHeight
+                                width = scaledColumnWidth,
+                                height = scaledHeaderHeight,
+                                scale = animatedScale
                             )
                         }
                     }
@@ -148,21 +144,25 @@ fun ClazzGradebookScreen(
                 Row(
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    ListItem(
+                    ScaledListItem(
                         modifier = Modifier.width(nameColWidth),
                         headlineContent = {
                             Text(
                                 text = rowItem?.student?.person?.fullName() ?: "-",
-                                maxLines = 2,
+                                maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
+                                style = scaledTextStyle(animatedScale)
                             )
                         },
                         leadingContent = {
                             UstadPersonAvatar(
                                 pictureUri = rowItem?.student?.personPicture?.personPictureThumbnailUri,
                                 personName = rowItem?.student?.person?.fullName(),
+                                modifier = Modifier.size((40 * animatedScale).dp),
+                                fontScale = animatedScale,
                             )
-                        }
+                        },
+                        scale = animatedScale
                     )
 
                     Row(
@@ -185,9 +185,10 @@ fun ClazzGradebookScreen(
 
                             Text(
                                 text = mark?.roundTo(2)?.toString() ?: "-",
-                                modifier = Modifier.width(COLUMN_WIDTH.dp),
+                                modifier = Modifier.width(scaledColumnWidth),
                                 textAlign = TextAlign.Center,
                                 overflow = TextOverflow.Ellipsis,
+                                style = scaledTextStyle(animatedScale)
                             )
                         }
                     }
@@ -200,16 +201,16 @@ fun ClazzGradebookScreen(
         ) {
             FilledTonalIconButton(
                 onClick = onClickZoomIn,
-                enabled = uiState.canZoomIn,
+                enabled = uiState.canIncreaseScale,
             ) {
-                Icon(Icons.Default.ZoomIn, contentDescription = null)
+                Icon(Icons.Default.TextIncrease, contentDescription = null)
             }
 
             FilledTonalIconButton(
                 onClick = onClickZoomOut,
-                enabled = uiState.canZoomOut,
+                enabled = uiState.canDecreaseScale,
             ) {
-                Icon(Icons.Default.ZoomOut, contentDescription = null)
+                Icon(Icons.Default.TextDecrease, contentDescription = null)
             }
 
             IconButton(

@@ -24,11 +24,11 @@ data class ClazzGradebookUiState(
     val scale: Float = 1.0f,
 ) {
 
-    val canZoomIn
-        get() = scale < 1.0f
-
-    val canZoomOut
+    val canDecreaseScale
         get() = scale > 0.25f
+
+    val canIncreaseScale
+        get() = scale < 1.0f
 
 }
 
@@ -118,7 +118,7 @@ class ClazzGradebookViewModel(
     fun onClickZoomIn() {
         _uiState.update {
             it.copy(
-                scale = if(it.canZoomIn) it.scale + 0.25f else it.scale
+                scale = if(it.canIncreaseScale) it.scale + 0.25f else it.scale
             )
         }
     }
@@ -126,7 +126,7 @@ class ClazzGradebookViewModel(
     fun onClickZoomOut() {
         _uiState.update {
             it.copy(
-                scale = if(it.canZoomOut) it.scale - 0.25f else it.scale
+                scale = if(it.canDecreaseScale) it.scale - 0.25f else it.scale
             )
         }
     }

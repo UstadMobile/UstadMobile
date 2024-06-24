@@ -28,18 +28,15 @@ actual fun ClazzGradebookLazyColumn(
     lazyListState: LazyListState,
     stickyHeight: Dp,
     stickyWidth: Dp,
-    maxWidth: Dp,
-    maxHeight: Dp,
     scale: Float,
     modifier: Modifier,
     content: LazyListScope.() -> Unit
 ) {
     Box(modifier = modifier) {
         LazyColumn(
-            modifier = Modifier.padding(end = 12.dp, bottom = 12.dp)
-                .wrapContentSize(unbounded = true)
-                .width(maxWidth / scale).height(maxHeight / scale)
-                .graphicsLayer(scaleX = scale, scaleY = scale),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(end = 12.dp, bottom = 12.dp),
             content = content,
             state = lazyListState,
         )
@@ -48,9 +45,7 @@ actual fun ClazzGradebookLazyColumn(
             modifier = Modifier.align(Alignment.CenterEnd)
                 .padding(top = stickyHeight)
                 .fillMaxHeight(),
-            adapter = rememberScrollbarAdapter(
-                scrollState = lazyListState
-            )
+            adapter = rememberScrollbarAdapter(scrollState = lazyListState)
         )
 
         HorizontalScrollbar(

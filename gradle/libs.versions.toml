@@ -127,6 +127,7 @@ androidx-benchmark = "1.2.4"
 android-emulator-plugin = "0.4.5"
 lz4 = "1.8.0"
 kmp-uuid = "0.8.4"
+zoomable = "1.6.1"
 
 [plugins]
 
@@ -362,4 +363,4 @@ androidx-test-uiautomator = { module = "androidx.test.uiautomator:uiautomator", 
 androidx-benchmark-macro-junit4 = { module = "androidx.benchmark:benchmark-macro-junit4", version.ref = "androidx-benchmark" }
 lz4-pure-java = { module = "org.lz4:lz4-pure-java", version.ref = "lz4" }
 kmp-uuid = { module = "com.benasher44:uuid", version.ref = "kmp-uuid" }
-
+zoomable = { module = "net.engawapg.lib:zoomable", version.ref = "zoomable" }
