@@ -58,6 +58,7 @@ class ClazzGradebookViewModel(
                 permission = PermissionFlags.PERSON_VIEW
             ),
             db = activeDb,
+            clazzUid = clazzUid,
         )
     }
 

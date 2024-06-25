@@ -30,8 +30,8 @@ import com.ustadmobile.libuicompose.theme.successContainerDark
 fun UstadBlockStatusProgressBar(
     blockStatus: BlockStatus?,
     modifier: Modifier = Modifier,
-    iconSize: Int = 16,
-    iconOutlineSize: Int = 2,
+    iconSize: Float = 16f,
+    iconOutlineSize: Float = 2f,
 ) {
     val hasIcon = blockStatus?.sIsCompleted == true || blockStatus?.sIsSuccess != null
 
@@ -70,8 +70,8 @@ fun UstadBlockStatusProgressBar(
 
 @Composable
 private fun PaddedCircleIcon(
-    size: Int = 16,
-    outlineSize: Int = 2,
+    size: Float = 16f,
+    outlineSize: Float = 2f,
     imageVector: ImageVector,
     modifier: Modifier = Modifier,
     containerColor: Color,

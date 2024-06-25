@@ -8,6 +8,7 @@ import app.cash.paging.PagingSourceLoadResultInvalid
 import app.cash.paging.PagingSourceLoadResultPage
 import app.cash.paging.PagingState
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.door.paging.DelegatedInvalidationPagingSource
 import com.ustadmobile.door.paging.PagingSourceWithHttpLoader
 import com.ustadmobile.lib.db.composites.PersonAndClazzMemberListDetails
 import com.ustadmobile.lib.db.composites.StudentAndBlockStatuses
@@ -28,7 +29,10 @@ import com.ustadmobile.lib.db.composites.StudentAndBlockStatuses
 class ClazzProgressReportPagingSource(
     private val studentListPagingSource: PagingSource<Int, PersonAndClazzMemberListDetails>,
     private val db: UmAppDatabase,
-): PagingSource<Int, StudentAndBlockStatuses>(), PagingSourceWithHttpLoader<Int> {
+    private val clazzUid: Long,
+): DelegatedInvalidationPagingSource<Int, StudentAndBlockStatuses>(
+    invalidationDelegate = studentListPagingSource
+), PagingSourceWithHttpLoader<Int> {
 
     override fun getRefreshKey(state: PagingState<Int, StudentAndBlockStatuses>): Int? {
         return studentListPagingSource.getRefreshKey(
@@ -50,18 +54,29 @@ class ClazzProgressReportPagingSource(
     override suspend fun load(
         params: PagingSourceLoadParams<Int>
     ): PagingSourceLoadResult<Int, StudentAndBlockStatuses> {
+        registerInvalidationCallbackIfNeeded()
+
         //Will need to convert params into offset and limit to do query to find statements OR use an IN syntax
 
         val studentListResult = studentListPagingSource.load(params)
+
+        val blockResults = db.statementDao.findStatusForStudentsInClazz(
+            clazzUid = clazzUid,
+            studentPersonUids = (studentListResult as? PagingSourceLoadResultPage<Int, PersonAndClazzMemberListDetails>)
+                ?.data?.mapNotNull { it.person?.personUid } ?: emptyList()
+        )
+
         return when(studentListResult) {
             is PagingSourceLoadResultPage<*, *> -> {
                 val studentListResultCasted = studentListResult as
                         PagingSourceLoadResultPage<Int, PersonAndClazzMemberListDetails>
                 PagingSourceLoadResultPage<Int, StudentAndBlockStatuses>(
-                    data = studentListResultCasted.data.map {
+                    data = studentListResultCasted.data.map { student ->
                         StudentAndBlockStatuses(
-                            student = it,
-                            blockStatuses = emptyList()
+                            student = student,
+                            blockStatuses = blockResults.filter {
+                                it.sPersonUid == student.person?.personUid
+                            }
                         )
                     },
                     prevKey = studentListResultCasted.prevKey,
@@ -84,6 +99,7 @@ class ClazzProgressReportPagingSource(
 
     @Suppress("UNCHECKED_CAST")
     override suspend fun loadHttp(params: PagingSourceLoadParams<Int>): Boolean {
+        //This function annotation will be updated so that it will also pull the statement entities for the results
         return (studentListPagingSource as? PagingSourceWithHttpLoader<Int>)?.loadHttp(params) ?: true
     }
 }

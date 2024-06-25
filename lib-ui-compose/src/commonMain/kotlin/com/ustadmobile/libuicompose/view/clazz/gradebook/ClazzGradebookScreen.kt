@@ -98,7 +98,7 @@ fun ClazzGradebookScreen(
         val headerHeight = minOf(maxHeight / 2, HEADER_HEIGHT.dp)
         val scaledHeaderHeight = headerHeight * animatedScale
         val scaledColumnWidth = (COLUMN_WIDTH * animatedScale).dp
-
+        val scaledRowHeight = scaledColumnWidth
 
         ClazzGradebookLazyColumn(
             horizontalScrollState = horizontalScrollState,
@@ -175,20 +175,12 @@ fun ClazzGradebookScreen(
                                 it.sCbUid == block.block?.cbUid
                             }
 
-                            val scoreScaled = result?.sScoreScaled
-                            val maxPoints = block.block?.cbMaxPoints
-                            val mark = if(scoreScaled != null && maxPoints != null) {
-                                scoreScaled * maxPoints
-                            }else {
-                                null
-                            }
-
-                            Text(
-                                text = mark?.roundTo(2)?.toString() ?: "-",
-                                modifier = Modifier.width(scaledColumnWidth),
-                                textAlign = TextAlign.Center,
-                                overflow = TextOverflow.Ellipsis,
-                                style = scaledTextStyle(animatedScale)
+                            ClazzGradebookCell(
+                                blockStatus = result,
+                                block = block.block,
+                                scale = animatedScale,
+                                modifier = Modifier.width(scaledColumnWidth)
+                                    .height(scaledRowHeight)
                             )
                         }
                     }

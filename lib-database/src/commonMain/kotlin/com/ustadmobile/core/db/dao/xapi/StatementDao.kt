@@ -12,6 +12,7 @@ import com.ustadmobile.door.DoorQuery
 import com.ustadmobile.door.annotation.DoorDao
 import com.ustadmobile.door.annotation.QueryLiveTables
 import com.ustadmobile.door.annotation.Repository
+import com.ustadmobile.lib.db.composites.BlockStatus
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.StatementEntityAndDisplayDetails
 import com.ustadmobile.lib.db.entities.StatementReportData
@@ -98,5 +99,30 @@ expect abstract class StatementDao {
         clazzUid: Long,
         accountPersonUid: Long,
     ): List<StatementEntity>
+
+    //To pull over http - change these to selecting the statementuid(s)
+    @Query("""
+        SELECT Person.personUid AS sPersonUid,
+               CourseBlock.cbUid AS sCbUid,
+               (SELECT MAX(StatementEntity.extensionProgress)
+                  FROM StatementEntity
+                       JOIN ActorEntity
+                            ON StatementEntity.statementActorUid = ActorEntity.actorUid
+                 WHERE StatementEntity.statementCbUid = CourseBlock.cbUid
+                   AND ActorEntity.actorAccountName = Person.username 
+               ) AS sProgress,
+               FALSE AS sIsCompleted,
+               NULL AS sIsSuccess,
+               1 AS sScoreScaled
+          FROM Person
+               JOIN CourseBlock
+                    ON CourseBlock.cbClazzUid = :clazzUid
+         WHERE Person.personUid IN (:studentPersonUids)           
+    """)
+    abstract suspend fun findStatusForStudentsInClazz(
+        clazzUid: Long,
+        studentPersonUids: List<Long>,
+    ): List<BlockStatus>
+
 
 }
