@@ -15,15 +15,12 @@ appId: com.toughra.ustadmobile
 - evalScript: ${http.get(CONTROLSERVER + "cleardownloads?device=" + TESTSERIAL)}
 # push the test file to the downloads
 - evalScript: ${http.get(CONTROLSERVER + "pushcontent?test-file-name=" + TESTFILENAME +"&device=" + TESTSERIAL)}
-# copy the test file to the Pictures folder using ADB command
-#- evalScript: adb shell cp /document/raw:/storage/emulator/0/Download/${TESTFILENAME} /sdcard/Pictures/${TESTFILENAME}
+
 - runFlow:
       file: "./copy_image_file_to_picture_folder.yaml"
       env:
           TESTFILENAME: ${TESTFILENAME}
-# ensure the app has storage permissions
-- evalScript: adb shell pm grant com.toughra.ustadmobile android.permission.READ_EXTERNAL_STORAGE
-- evalScript: adb shell pm grant com.toughra.ustadmobile android.permission.WRITE_EXTERNAL_STORAGE
+
 # get started
 - launchApp
 - tapOn: "GET STARTED"
