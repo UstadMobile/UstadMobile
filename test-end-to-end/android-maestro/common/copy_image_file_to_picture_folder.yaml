@@ -1,0 +1,11 @@
+appId: com.google.android.documentsui
+
+---
+- launchApp
+- longPressOn: ${TESTFILENAME}
+- tapOn: "More options"
+- tapOn: "Copy to…"
+- tapOn: "Show roots"
+- tapOn: "SDCARD"
+- tapOn: "Pictures"
+- tapOn: "COPY"

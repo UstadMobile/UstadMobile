@@ -13,8 +13,17 @@ appId: com.toughra.ustadmobile
 - clearState: com.toughra.ustadmobile
 # clear the downloads
 - evalScript: ${http.get(CONTROLSERVER + "cleardownloads?device=" + TESTSERIAL)}
-# push the test file to the Pictures folder
-- evalScript: ${http.get(CONTROLSERVER + "pushcontent?test-file-name=" + TESTFILENAME + "&device=" + TESTSERIAL + "&folder=Pictures")}
+# push the test file to the downloads
+- evalScript: ${http.get(CONTROLSERVER + "pushcontent?test-file-name=" + TESTFILENAME +"&device=" + TESTSERIAL)}
+# copy the test file to the Pictures folder using ADB command
+#- evalScript: adb shell cp /document/raw:/storage/emulator/0/Download/${TESTFILENAME} /sdcard/Pictures/${TESTFILENAME}
+- runFlow:
+      file: "./copy_image_file_to_picture_folder.yaml"
+      env:
+          TESTFILENAME: ${TESTFILENAME}
+# ensure the app has storage permissions
+- evalScript: adb shell pm grant com.toughra.ustadmobile android.permission.READ_EXTERNAL_STORAGE
+- evalScript: adb shell pm grant com.toughra.ustadmobile android.permission.WRITE_EXTERNAL_STORAGE
 # get started
 - launchApp
 - tapOn: "GET STARTED"
@@ -29,21 +38,19 @@ appId: com.toughra.ustadmobile
     id: "floating_action_button"
 - tapOn: "Add"
 - tapOn: "Select new photo from gallery"
-#- runFlow:
-   # when:
-  #    notVisible: "Downloads"
- #   file: redirect_to_downloads.yaml
-#- runFlow:
-     # when:
-    #      notVisible: admin_pic.jpg
-   #   commands:
-  #        - tapOn:
- #             id: com.google.android.documentsui:id/sub_menu
-#- tapOn: admin_pic.jpg
-
-- tapOn:
-    id: "com.google.android.providers.media.module:id/icon_thumbnail"
-    index: 0
+- runFlow:
+    when:
+      visible: "Show roots"
+    file: redirect_to_downloads.yaml
+    env:
+      TESTFILENAME: ${TESTFILENAME}
+- runFlow:
+     when:
+       visible: Photos
+     commands:
+       - tapOn:
+           id: "com.google.android.providers.media.module:id/icon_thumbnail"
+           index: 0
 - scrollUntilVisible:
     element:
       text: "Gender*"
