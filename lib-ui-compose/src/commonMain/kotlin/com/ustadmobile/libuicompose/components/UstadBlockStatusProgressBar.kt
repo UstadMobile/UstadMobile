@@ -69,7 +69,7 @@ fun UstadBlockStatusProgressBar(
 }
 
 @Composable
-private fun PaddedCircleIcon(
+fun PaddedCircleIcon(
     size: Float = 16f,
     outlineSize: Float = 2f,
     imageVector: ImageVector,

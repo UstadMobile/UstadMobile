@@ -167,7 +167,7 @@ import com.ustadmobile.view.person.bulkaddrunimport.BulkAddPersonRunImportScreen
 import com.ustadmobile.core.viewmodel.person.bulkaddrunimport.BulkAddPersonRunImportViewModel
 import com.ustadmobile.core.viewmodel.clazz.gradebook.ClazzGradebookViewModel
 import com.ustadmobile.view.clazz.gradebook.ClazzGradebookScreen
-
+import com.ustadmobile.view.clazz.gradebook.ClazzGradebookPreview
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -401,6 +401,7 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(BulkAddPersonSelectFileViewModel.DEST_NAME, "BulkAddPersonSelectFile", BulkAddPersonSelectFileScreen),
     UstadScreen(BulkAddPersonRunImportViewModel.DEST_NAME, "BulkAddPersonRunImport", BulkAddPersonRunImportScreen),
     UstadScreen(ClazzGradebookViewModel.DEST_NAME, "ClazzProgressReport", ClazzGradebookScreen),
+    UstadScreen("ClazzGradebookPreview", "ClazzGradebookPreview", ClazzGradebookPreview),
 )
 
 //Here as per the MUI showcase template

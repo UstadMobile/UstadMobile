@@ -113,7 +113,7 @@ expect abstract class StatementDao {
                ) AS sProgress,
                FALSE AS sIsCompleted,
                NULL AS sIsSuccess,
-               1 AS sScoreScaled
+               NULL AS sScoreScaled
           FROM Person
                JOIN CourseBlock
                     ON CourseBlock.cbClazzUid = :clazzUid

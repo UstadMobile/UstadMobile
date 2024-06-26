@@ -61,6 +61,8 @@ private val NAME_WIDTH = 240
 
 private val COLUMN_WIDTH = 56
 
+private val COLUMN_HEIGHT = 56
+
 /**
  * See https://stackoverflow.com/questions/15806925/how-to-rotate-text-left-90-degree-and-cell-size-is-adjusted-according-to-text-in
  */
@@ -145,16 +147,14 @@ val ClazzGradebookComponent = FC<ClazzGradebookProps> { props ->
                     }
 
                     //Progress blocks for each here.
-                    props.uiState.courseBlocks.forEach { block ->
-                        Typography {
-                            sx {
-                                width = COLUMN_WIDTH.px
-                                paddingTop = 16.px
-                                paddingBottom = 16.px
-                                textAlign = TextAlign.center
+                    props.uiState.courseBlocks.forEach { blockVal ->
+                        ClazzGradebookCell {
+                            blockStatus = item?.blockStatuses?.firstOrNull {
+                                it.sCbUid == blockVal.block?.cbUid
                             }
-
-                            + "-"
+                            block = blockVal.block
+                            width = COLUMN_WIDTH
+                            height = COLUMN_HEIGHT
                         }
                     }
                 }

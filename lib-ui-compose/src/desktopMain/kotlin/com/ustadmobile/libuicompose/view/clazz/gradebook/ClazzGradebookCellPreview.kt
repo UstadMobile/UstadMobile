@@ -10,7 +10,7 @@ import com.ustadmobile.lib.db.entities.CourseBlock
 
 @Preview
 @Composable
-fun ClazzGradebookCellPreview() {
+fun ClazzGradebookCellMarkedPreview() {
     ClazzGradebookCell(
         blockStatus = BlockStatus(
             sIsCompleted = true,
@@ -24,3 +24,50 @@ fun ClazzGradebookCellPreview() {
         modifier = Modifier.size(40.dp)
     )
 }
+
+@Preview
+@Composable
+fun ClazzGradebookCellCompletedPreview() {
+    ClazzGradebookCell(
+        blockStatus = BlockStatus(
+            sIsCompleted = true,
+            sProgress = 100,
+        ),
+        block = CourseBlock(
+            cbMaxPoints = null,
+        ),
+        scale = 1f,
+        modifier = Modifier.size(40.dp)
+    )
+}
+
+@Preview
+@Composable
+fun ClazzGradebookCellProgressedPreview() {
+    ClazzGradebookCell(
+        blockStatus = BlockStatus(
+            sProgress = 60,
+        ),
+        block = CourseBlock(
+            cbMaxPoints = null,
+        ),
+        scale = 1f,
+        modifier = Modifier.size(40.dp)
+    )
+}
+
+@Preview
+@Composable
+fun ClazzGradebookCellEmptyPreview() {
+    ClazzGradebookCell(
+        blockStatus = BlockStatus(
+
+        ),
+        block = CourseBlock(
+            cbMaxPoints = null,
+        ),
+        scale = 1f,
+        modifier = Modifier.size(40.dp)
+    )
+}
+
