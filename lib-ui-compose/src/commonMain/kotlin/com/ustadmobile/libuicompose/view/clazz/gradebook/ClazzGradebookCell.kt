@@ -2,13 +2,13 @@ package com.ustadmobile.libuicompose.view.clazz.gradebook
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -79,7 +79,10 @@ fun ClazzGradebookCell(
             progress != null -> {
                 CircularProgressIndicator(
                     progress = { progress.toFloat() / 100f },
-                    modifier = Modifier.align(Alignment.Center).padding(8.dp * scale)
+                    strokeWidth = 4.dp * scale,
+                    modifier = Modifier.align(Alignment.Center)
+                        .fillMaxSize()
+                        .padding(16.dp * scale)
                 )
             }
 

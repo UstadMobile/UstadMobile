@@ -145,7 +145,7 @@ fun ClazzGradebookScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     ScaledListItem(
-                        modifier = Modifier.width(nameColWidth),
+                        modifier = Modifier.width(nameColWidth).height(scaledRowHeight),
                         headlineContent = {
                             Text(
                                 text = rowItem?.student?.person?.fullName() ?: "-",

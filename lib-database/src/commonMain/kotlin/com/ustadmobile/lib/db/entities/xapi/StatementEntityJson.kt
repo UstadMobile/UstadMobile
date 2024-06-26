@@ -1,7 +1,13 @@
 package com.ustadmobile.lib.db.entities.xapi
 
 import androidx.room.Entity
+import com.ustadmobile.door.annotation.ReplicateEntity
 import com.ustadmobile.door.annotation.ReplicateEtag
+import com.ustadmobile.door.annotation.Trigger
+import com.ustadmobile.door.annotation.Triggers
+import com.ustadmobile.lib.db.entities.TRIGGER_CONDITION_ETAG_NOT_EQUALS
+import com.ustadmobile.lib.db.entities.TRIGGER_UPSERT
+import kotlinx.serialization.Serializable
 
 /**
  * StatementEntityJson is split into a separate entity so that the statement data on StatementEntity
@@ -19,6 +25,23 @@ import com.ustadmobile.door.annotation.ReplicateEtag
  */
 @Entity(
     primaryKeys = ["stmtJsonIdHi", "stmtJsonIdLo"]
+)
+@Serializable
+@ReplicateEntity(
+    tableId = StatementEntityJson.TABLE_ID,
+    remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW,
+)
+@Triggers(
+    arrayOf(
+        Trigger(
+            name = "statemententityjson_remote_insert",
+            order = Trigger.Order.INSTEAD_OF,
+            on = Trigger.On.RECEIVEVIEW,
+            events = [Trigger.Event.INSERT],
+            conditionSql = TRIGGER_CONDITION_ETAG_NOT_EQUALS,
+            sqlStatements = [TRIGGER_UPSERT],
+        )
+    )
 )
 data class StatementEntityJson(
     var stmtJsonIdHi: Long = 0,

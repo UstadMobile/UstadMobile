@@ -8,6 +8,7 @@ import app.cash.paging.PagingSource
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CLAZZ_STUDENT
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CONTENT_ENTRY
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY_WHERE_MATCHES_ACCOUNT_PERSON_UID_AND_PARENT_CONTENT_ENTRY_ROOT
+import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.STATEMENT_MATCHES_PERSON_AND_COURSEBLOCK_CLAUSE
 import com.ustadmobile.door.DoorQuery
 import com.ustadmobile.door.annotation.DoorDao
 import com.ustadmobile.door.annotation.QueryLiveTables
@@ -108,11 +109,47 @@ expect abstract class StatementDao {
                   FROM StatementEntity
                        JOIN ActorEntity
                             ON StatementEntity.statementActorUid = ActorEntity.actorUid
-                 WHERE StatementEntity.statementCbUid = CourseBlock.cbUid
-                   AND ActorEntity.actorAccountName = Person.username 
+                 WHERE $STATEMENT_MATCHES_PERSON_AND_COURSEBLOCK_CLAUSE 
                ) AS sProgress,
-               FALSE AS sIsCompleted,
-               NULL AS sIsSuccess,
+               (SELECT EXISTS(
+                       SELECT 1
+                         FROM StatementEntity
+                              JOIN ActorEntity
+                                   ON StatementEntity.statementActorUid = ActorEntity.actorUid
+                        WHERE ($STATEMENT_MATCHES_PERSON_AND_COURSEBLOCK_CLAUSE)
+                          AND CAST(StatementEntity.resultCompletion AS INTEGER) = 1
+               )) AS sIsCompleted,
+               (SELECT CASE
+                       /*If there is a statement marked as success, then count as successful even if
+                        *there were subsequent failed attempts
+                        */
+                       WHEN (
+                            SELECT EXISTS(
+                                    SELECT 1
+                                      FROM StatementEntity
+                                           JOIN ActorEntity
+                                                ON StatementEntity.statementActorUid = ActorEntity.actorUid
+                                    WHERE ($STATEMENT_MATCHES_PERSON_AND_COURSEBLOCK_CLAUSE)
+                                      AND CAST(StatementEntity.resultSuccess AS INTEGER) = 1
+                                   )                           
+                       ) THEN 1
+                       /*If there are no statements marked as success, however there are statements marekd as fail,
+                        *then count as fail 
+                        */
+                       WHEN (
+                            SELECT EXISTS(
+                                    SELECT 1
+                                      FROM StatementEntity
+                                           JOIN ActorEntity
+                                                ON StatementEntity.statementActorUid = ActorEntity.actorUid
+                                    WHERE ($STATEMENT_MATCHES_PERSON_AND_COURSEBLOCK_CLAUSE)
+                                      AND CAST(StatementEntity.resultSuccess AS INTEGER) = 0
+                                   )                           
+                       ) THEN 0
+                       /* Else there is no known success/fail result*/
+                       ELSE NULL
+                       END
+               ) AS sIsSuccess,
                NULL AS sScoreScaled
           FROM Person
                JOIN CourseBlock
