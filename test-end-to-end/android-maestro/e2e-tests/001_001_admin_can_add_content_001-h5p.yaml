@@ -21,6 +21,10 @@ env:
 - tapOn: "True/False Question"
 - assertNotVisible: "Importing"
 - tapOn: Open
+- runFlow:
+    when:
+      visible: "Accept & continue"
+    file: "../common/google_permission.yaml"
 - assertVisible: "Check"
 - tapOn: "Close tab"
 - runFlow:
