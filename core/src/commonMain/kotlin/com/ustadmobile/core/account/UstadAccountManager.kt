@@ -25,6 +25,7 @@ import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.db.entities.UserSession
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.lib.util.randomString
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.expectSuccess
 import io.ktor.client.request.header
@@ -565,13 +566,6 @@ class UstadAccountManager(
             addActiveEndpoint(fakeEndpoint)
             currentUserSession = newSession
         }
-    }
-
-    private fun randomString(length: Int): String {
-        val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')
-        return (1..length)
-            .map { allowedChars.random() }
-            .joinToString("")
     }
 
 

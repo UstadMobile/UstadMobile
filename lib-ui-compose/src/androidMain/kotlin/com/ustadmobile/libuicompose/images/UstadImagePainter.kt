@@ -6,7 +6,6 @@ import androidx.compose.ui.res.painterResource
 import com.ustadmobile.libuicompose.R
 
 private val nameMap = mapOf(
-    UstadImage.GOOGLE_ICON to R.drawable.icn_google,
     UstadImage.ILLUSTRATION_CONNECT to R.drawable.illustration_connect,
     UstadImage.ILLUSTRATION_ONBOARDING1 to R.drawable.illustration_onboarding1,
     UstadImage.ILLUSTRATION_ONBOARDING2 to R.drawable.illustration_onboarding2,

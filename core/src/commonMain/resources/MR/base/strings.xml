@@ -161,9 +161,9 @@
     <string name="onboarding_subheadline3">Education content, assignments, classes, and attendance all in one place</string>
     <string name="download_continue_stacked_label">Continue download</string>
 
-    <string name="onboarding_individual_text">I\'m an individual learner</string>
-    <string name="onboarding_join_org_text">I want to join my organization/school</string>
-    <string name="onboarding_add_org_text">I want to add my organization/school</string>
+    <string name="im_an_individual_learner">I\'m an individual learner</string>
+    <string name="i_want_to_join_my_organization_school">I want to join my organization/school</string>
+    <string name="i_want_to_add_my_organization_school">I want to add my organization/school</string>
     <string name="individual_action_title">Sign-in Choices</string>
 
     <string name="create_new_local_account_title">Create new local account</string>

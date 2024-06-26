@@ -5,7 +5,6 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 
 val nameMap = mapOf(
-    UstadImage.GOOGLE_ICON to "/img/icn_google.png",
     UstadImage.ILLUSTRATION_CONNECT to "/img/illustration_connect.png",
     UstadImage.ILLUSTRATION_ONBOARDING1 to "/img/illustration_onboarding1.png",
     UstadImage.ILLUSTRATION_ONBOARDING2 to "/img/illustration_onboarding2.png",

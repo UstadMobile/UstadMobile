@@ -24,7 +24,7 @@ data class AppUiState(
     val loadingState: LoadingUiState = LoadingUiState(),
     val title: String? = null,
     val navigationVisible: Boolean = true,
-    var hideBottomNavigation: Boolean = false,
+    val hideBottomNavigation: Boolean = false,
     val hideSettingsIcon: Boolean = false,
     val userAccountIconVisible: Boolean = true,
     val searchState: AppBarSearchUiState = AppBarSearchUiState(),

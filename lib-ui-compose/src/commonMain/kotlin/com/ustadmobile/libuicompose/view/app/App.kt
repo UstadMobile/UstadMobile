@@ -98,8 +98,6 @@ fun App(
     navCommandFlow: Flow<NavCommand>? = null,
     initialRoute: String = "/${RedirectViewModel.DEST_NAME}",
 ) {
-
-
     val di = localDI()
     val accountManager: UstadAccountManager = di.direct.instance()
     val currentSession by accountManager.currentUserSessionFlow
@@ -110,11 +108,9 @@ fun App(
             AppUiState(
                 navigationVisible = false,
                 hideAppBar = true,
-
             )
         )
     }
-
 
     var appUiStateVal by appUiState
     LaunchedEffect(appUiStateVal) {
@@ -131,6 +127,16 @@ fun App(
         }
     }
 
+    val isLocalSession = currentSession?.endpoint?.isLocal == true
+    if (isLocalSession) {
+        // Automatically navigate to the library screen for local users
+        LaunchedEffect(Unit) {
+            navigator.navigate(
+                route = "/${ContentEntryListViewModel.DEST_NAME_HOME}",
+                options = NavOptions(popUpTo = PopUpTo.First(inclusive = true))
+            )
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -145,9 +151,7 @@ fun App(
         bottomBar = {
             //As per https://developer.android.com/reference/kotlin/androidx/compose/material3/package-summary#navigationbar
             var selectedTopLevelItemIndex by remember { mutableIntStateOf(0) }
-
-
-            if(useBottomBar && currentSession?.endpoint?.isLocal != true) {
+            if(useBottomBar && !isLocalSession) {
                 val currentDestination by navigator.currentEntry.collectAsState(null)
 
                 /**

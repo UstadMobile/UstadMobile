@@ -15,13 +15,16 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.viewmodel.individual.IndividualLearnerViewModel
+import com.ustadmobile.libuicompose.components.UstadPickFileOpts
+import com.ustadmobile.libuicompose.components.rememberUstadFilePickLauncher
 import com.ustadmobile.libuicompose.images.UstadImage
 import com.ustadmobile.libuicompose.images.ustadAppImagePainter
 import dev.icerock.moko.resources.compose.stringResource
@@ -34,6 +37,15 @@ fun IndividualLearnerScreen(viewModel: IndividualLearnerViewModel) {
 @Composable
 fun IndividualLearnerScreenContent(viewModel: IndividualLearnerViewModel) {
 
+    val uiState by viewModel.uiState.collectAsState()
+
+    val filePickLauncher = rememberUstadFilePickLauncher { result ->
+        viewModel.onRestoreFileSelected(fileUri = result.uri, fileName = result.fileName)
+    }
+    uiState.selectedFileName?.let { fileName ->
+        Text("Selected file: $fileName")
+    }
+
     Column(
         modifier = Modifier.fillMaxHeight().padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -43,70 +55,48 @@ fun IndividualLearnerScreenContent(viewModel: IndividualLearnerViewModel) {
             contentDescription = "",
             modifier = Modifier.size(200.dp)
         )
-
         Spacer(modifier = Modifier.height(20.dp))
-
-
         LazyColumn(
             modifier = Modifier.fillMaxSize()
         ) {
-
-
-
             item {
-                UstadTitleDescriptionButton(
-                    title = stringResource(MR.strings.create_new_local_account_title),
-                    description = stringResource(MR.strings.create_new_local_account_description),
-                    onClick = { viewModel.onClickContinueWithoutLogin() }
+                ListItem(
+                    headlineContent = {
+                        Text(
+                            text = stringResource(MR.strings.create_new_local_account_title),
+                            fontSize = 16.sp
+                        )
+                    },
+                    supportingContent = {
+                        Text(
+                            text = stringResource(MR.strings.create_new_local_account_description),
+                            fontSize = 12.sp
+                        )
+                    },
+                    modifier = Modifier.clickable { viewModel.onClickContinueWithoutLogin() }
                 )
+                HorizontalDivider()
             }
-
-
-
             item {
-                UstadTitleDescriptionButton(
-                    title = stringResource(MR.strings.restore_local_account_title),
-                    description = stringResource(MR.strings.restore_local_account_description),
-                    onClick = {}
+                ListItem(
+                    headlineContent = {
+                        Text(
+                            text = stringResource(MR.strings.restore_local_account_title),
+                            fontSize = 16.sp
+                        )
+                    },
+                    supportingContent = {
+                        Text(
+                            text = stringResource(MR.strings.restore_local_account_description),
+                            fontSize = 12.sp
+                        )
+                    },
+                    modifier = Modifier.clickable {
+                        filePickLauncher(UstadPickFileOpts())
+                    }
                 )
+                HorizontalDivider()
             }
-
-
         }
-    }
-
-
-}
-
-@Composable
-fun UstadTitleDescriptionButton(
-    title: String,
-    description: String,
-    titleColor: Color = Color.Black,
-    titleSize: Float = 16f,
-    descriptionSize: Float = 12f,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit
-) {
-    Column(
-        modifier = modifier.clickable { onClick() }
-    ) {
-
-        ListItem(
-            headlineContent = {
-                Text(
-                    text = title,
-                    color = titleColor,
-                    fontSize = titleSize.sp
-                )
-            },
-            supportingContent = {
-                Text(
-                    text = description,
-                    fontSize = descriptionSize.sp)
-            },
-        )
-        HorizontalDivider()
-
     }
 }

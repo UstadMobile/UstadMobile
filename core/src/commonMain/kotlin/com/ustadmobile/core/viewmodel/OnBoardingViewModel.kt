@@ -3,6 +3,7 @@ package com.ustadmobile.core.viewmodel
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.set
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
+import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
@@ -32,6 +33,8 @@ class OnBoardingViewModel(
     private val supportLangConfig: SupportedLanguagesConfig by instance()
 
     private val setLanguageUseCase: SetLanguageUseCase by instance()
+
+    private val openExternalLinkUseCase: OpenExternalLinkUseCase by instance()
 
     private val settings: Settings by instance()
 
@@ -64,13 +67,12 @@ class OnBoardingViewModel(
 
 
     fun onClickIndividual() {
-        navController.navigate(IndividualLearnerViewModel.DEST_NAME, buildMap {
-        })
+        navController.navigate(IndividualLearnerViewModel.DEST_NAME, emptyMap())
     }
     fun onClickAddNewOrganization() {
-        //Redirect to website (ask mike that is there prebuild util class to open website)
+        val url = "http://ustadmobile.com/"
+        openExternalLinkUseCase(url, OpenExternalLinkUseCase.Companion.LinkTarget.BLANK)
     }
-
 
     fun onLanguageSelected(uiLanguage: UstadMobileSystemCommon.UiLanguage) {
         if(uiLanguage != _uiState.value.currentLanguage) {

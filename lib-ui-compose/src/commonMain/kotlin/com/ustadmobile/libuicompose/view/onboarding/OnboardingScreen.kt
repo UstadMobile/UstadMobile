@@ -274,16 +274,15 @@ private fun BottomRow(
         modifier = Modifier.fillMaxWidth().padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
-
         Button(
             onClick = onClickJoinOrganization, colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.secondary,
                 contentColor = MaterialTheme.colorScheme.onSecondary
             ), modifier = Modifier.fillMaxWidth()
         ) {
-            Text(text = stringResource(MR.strings.onboarding_join_org_text))
+            Text(text = stringResource(MR.strings.i_want_to_join_my_organization_school))
         }
+
         Spacer(modifier = Modifier.height(8.dp))
 
         Button(
@@ -292,10 +291,10 @@ private fun BottomRow(
                 contentColor = MaterialTheme.colorScheme.onTertiary
             ), modifier = Modifier.fillMaxWidth()
         ) {
-            Text(text = stringResource(MR.strings.onboarding_add_org_text))
+            Text(text = stringResource(MR.strings.i_want_to_add_my_organization_school))
         }
-        Spacer(modifier = Modifier.height(8.dp))
 
+        Spacer(modifier = Modifier.height(8.dp))
 
         Button(
             onClick = onClickIndividual, colors = ButtonDefaults.buttonColors(
@@ -303,7 +302,7 @@ private fun BottomRow(
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ), modifier = Modifier.fillMaxWidth()
         ) {
-            Text(text = stringResource(MR.strings.onboarding_individual_text))
+            Text(text = stringResource(MR.strings.im_an_individual_learner))
         }
 
     }

@@ -13,10 +13,19 @@ import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
+
+data class IndividualLearnerUiState(
+    val selectedFileUri: String? = null,
+    val selectedFileName: String? = null
+)
+
 
 class IndividualLearnerViewModel(
     di: DI,
@@ -28,6 +37,8 @@ class IndividualLearnerViewModel(
         savedStateHandle[UstadView.ARG_NEXT] ?: ClazzListViewModel.DEST_NAME_HOME
 
 
+    private val _uiState = MutableStateFlow(IndividualLearnerUiState())
+    val uiState: StateFlow<IndividualLearnerUiState> = _uiState.asStateFlow()
     init {
         _appUiState.update { prev ->
             prev.copy(
@@ -39,7 +50,10 @@ class IndividualLearnerViewModel(
         }
     }
 
-
+    fun onRestoreFileSelected(fileUri: String, fileName: String) {
+        _uiState.update { it.copy(selectedFileUri = fileUri, selectedFileName = fileName) }
+        // add logic to handle the selected file, e.g., start the restore process
+    }
     private fun goToNextDestAfterLoginOrGuestSelected(personUid: Long, endpoint: Endpoint) {
         val goOptions = UstadMobileSystemCommon.UstadGoOptions(clearStack = true)
         navController.navigateToViewUri(
@@ -49,8 +63,6 @@ class IndividualLearnerViewModel(
                 )
             ), goOptions
         )
-
-
     }
 
     fun onClickContinueWithoutLogin() {
@@ -65,13 +77,7 @@ class IndividualLearnerViewModel(
         }
     }
 
-    fun onClickRestoreFile() {
-        CoroutineScope(Dispatchers.Main).launch {
-
-        }
-    }
-
     companion object {
-        const val DEST_NAME = "individualLearner"
+        const val DEST_NAME = "IndividualLearner"
     }
 }
