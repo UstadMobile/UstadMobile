@@ -1,6 +1,9 @@
 appId: com.google.android.documentsui
 
 ---
+
+# This flow copy an image file from downloads to pictures folder
+
 - launchApp
 - longPressOn: ${TESTFILENAME}
 - tapOn: "More options"
