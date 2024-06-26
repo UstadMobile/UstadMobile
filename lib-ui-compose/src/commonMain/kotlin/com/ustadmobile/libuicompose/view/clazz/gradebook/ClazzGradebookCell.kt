@@ -30,11 +30,7 @@ fun ClazzGradebookCell(
         block?.colorsForMark(it)
     }
 
-    Box(
-        modifier.let {
-            if(markColors != null) it.background(color = markColors.second) else it
-        }
-    ) {
+    Box(modifier) {
         val displayMark = blockStatus?.displayMarkFor(block)
         val progress = blockStatus?.sProgress
 
@@ -44,6 +40,15 @@ fun ClazzGradebookCell(
              */
             displayMark != null -> {
                 val textStyle = scaledTextStyle(scale)
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .padding(8.dp * scale)
+                        .let {
+                            if(markColors != null) it.background(color = markColors.second) else it
+                        }
+                )
+
                 Text(
                     text = displayMark,
                     modifier = Modifier.align(Alignment.Center),

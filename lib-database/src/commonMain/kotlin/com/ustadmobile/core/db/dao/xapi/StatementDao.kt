@@ -14,6 +14,8 @@ import com.ustadmobile.door.annotation.DoorDao
 import com.ustadmobile.door.annotation.QueryLiveTables
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.composites.BlockStatus
+import com.ustadmobile.lib.db.entities.ClazzAssignment
+import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.StatementEntityAndDisplayDetails
 import com.ustadmobile.lib.db.entities.StatementReportData
@@ -150,11 +152,37 @@ expect abstract class StatementDao {
                        ELSE NULL
                        END
                ) AS sIsSuccess,
-               NULL AS sScoreScaled
+               -- See ClazzGradebookScreen for info on which score is selected
+               (SELECT CASE
+                       -- When there is a peer marked assignment, take the average of the latest distinct ...
+                       WHEN (     CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
+                              AND ClazzAssignment.caMarkingType = ${ClazzAssignment.MARKED_BY_PEERS} 
+                            ) 
+                            THEN 0
+                       -- When an assignment, but not peer marked, then the latest score     
+                       WHEN CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
+                            THEN (SELECT StatementEntity.resultScoreScaled
+                                    FROM StatementEntity
+                                         JOIN ActorEntity
+                                              ON StatementEntity.statementActorUid = ActorEntity.actorUid
+                                   WHERE ($STATEMENT_MATCHES_PERSON_AND_COURSEBLOCK_CLAUSE)
+                                ORDER BY StatementEntity.timestamp DESC
+                                   LIMIT 1)
+                       -- else the best score accomplished so far            
+                       ELSE (SELECT MAX(StatementEntity.resultScoreScaled) 
+                               FROM StatementEntity
+                                    JOIN ActorEntity
+                                         ON StatementEntity.statementActorUid = ActorEntity.actorUid
+                              WHERE ($STATEMENT_MATCHES_PERSON_AND_COURSEBLOCK_CLAUSE))            
+                       END
+               ) AS sScoreScaled
           FROM Person
                JOIN CourseBlock
                     ON CourseBlock.cbClazzUid = :clazzUid
-         WHERE Person.personUid IN (:studentPersonUids)           
+               LEFT JOIN ClazzAssignment
+                    ON CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
+                       AND ClazzAssignment.caUid = CourseBlock.cbEntityUid
+         WHERE Person.personUid IN (:studentPersonUids)
     """)
     abstract suspend fun findStatusForStudentsInClazz(
         clazzUid: Long,

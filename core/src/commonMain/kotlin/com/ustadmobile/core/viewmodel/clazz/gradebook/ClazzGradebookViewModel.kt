@@ -33,7 +33,18 @@ data class ClazzGradebookUiState(
 }
 
 /**
+ * Creates a table showing the result of each student in the class for each course block in the
+ * class. Student names are on the left hand column and blocks are along the top e.g. similar to a
+ * paper gradebook.
  *
+ * Whats shown:
+ *    If the student has a mark for the given block, then the mark is shown with a color coded
+ *    background. One student might have more than one mark for a given courseblock e.g. if they
+ *    repeated self-paced content. A mark for an assignment might be revised. The mark dislpayed is
+ *    as follows:
+ *      i) self-paced content: the highest mark achieved
+ *      ii) assignment: the most recent mark. If the assignment is peer marked, then it will be the
+ *          average of the most recent mark by each distinct peer reviewer.
  */
 class ClazzGradebookViewModel(
     di: DI,

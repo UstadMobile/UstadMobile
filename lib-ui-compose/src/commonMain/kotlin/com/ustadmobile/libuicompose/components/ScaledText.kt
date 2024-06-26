@@ -8,7 +8,10 @@ import androidx.compose.ui.text.TextStyle
 fun scaledTextStyle(scale: Float): TextStyle {
     val currentTextStyle = LocalTextStyle.current
     return if(scale != 1.0f) {
-        currentTextStyle.copy(fontSize = currentTextStyle.fontSize * scale)
+        currentTextStyle.copy(
+            fontSize = currentTextStyle.fontSize * scale,
+            lineHeight = currentTextStyle.lineHeight * scale
+        )
     }else {
         currentTextStyle
     }
