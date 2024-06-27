@@ -152,15 +152,14 @@ fi
 
 maestro  --device=$TESTSERIAL  test -e ENDPOINT=$ENDPOINT -e USERNAME=$TESTUSER \
          -e PASSWORD=$TESTPASS -e CONTROLSERVER=$CONTROLSERVER \
-         -e TESTSERIAL=$TESTSERIAL $TESTARG -e TEST=$TEST -e TESTRESULTSDIR=$TESTRESULTSDIR
-         #$OUTPUTARGS
+         -e TESTSERIAL=$TESTSERIAL $TESTARG -e TEST=$TEST -e TESTRESULTSDIR=$TESTRESULTSDIR $OUTPUTARGS
 
 
 TESTSTATUS=$?
 
-#$SCRIPTDIR/../../testserver-controller/stop.sh
+$SCRIPTDIR/../../testserver-controller/stop.sh
 
 #Uninstall when finished
-#adb shell pm uninstall com.toughra.ustadmobile
+adb shell pm uninstall com.toughra.ustadmobile
 
 exit $TESTSTATUS
