@@ -265,6 +265,7 @@ class ClazzMemberListViewModel(
                 put(PersonListViewModel.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ, clazzUid.toString())
                 put(UstadView.ARG_LISTMODE, ListViewMode.PICKER.mode)
                 put(PersonViewModelConstants.ARG_GO_TO_ON_PERSON_SELECTED, goToOnPersonSelectedArg)
+                put(PersonListViewModel.ARG_SHOW_ADD_VIA_CONTACT, "true")
                 put(ARG_TITLE, title)
                 put(PersonListViewModel.ARG_REQUIRE_PERMISSION_TO_SHOW_LIST,
                     PermissionFlags.DIRECT_ENROL.toString())

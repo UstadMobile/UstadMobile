@@ -1919,4 +1919,15 @@
 
     <string name="grant_permission">Grant permission</string>
 
+    <string name="invite_via_contact">Invite Via Contact</string>
+
+    <string name="invite_to_course">Invite to course</string>
+
+    <string name="use_email">Use email</string>
+
+    <string name="use_phone_number">Use phone number</string>
+
+    <string name="add_username_email_phone">Add Username, Email or Phone</string>
+
+
 </resources>

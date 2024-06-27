@@ -35,7 +35,7 @@ kotlin {
                 api(libs.moko.resources.compose)
                 api(libs.paging.multiplatform.common)
                 api(libs.paging.multiplatform.compose)
-
+                implementation(libs.chiptextfield)
                 implementation(libs.kotlinx.datetime)
                 implementation(libs.reorderable.compose)
                 api(libs.door.runtime)
@@ -122,6 +122,9 @@ android {
         jvmToolchain(17)
     }
 }
+//dependencies {
+//    implementation(libs.androidx.material3.android)
+//}
 
 multiplatformResources {
     multiplatformResourcesPackage = "com.ustadmobile.libuicompose"

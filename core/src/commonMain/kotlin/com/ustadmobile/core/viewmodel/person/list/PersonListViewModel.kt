@@ -26,6 +26,7 @@ import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.ext.whenSubscribed
+import com.ustadmobile.core.viewmodel.clazz.inviteviaContact.InviteViaContactViewModel
 import com.ustadmobile.core.viewmodel.clazz.invitevialink.InviteViaLinkViewModel
 import com.ustadmobile.core.viewmodel.person.PersonViewModelConstants.ARG_POPUP_TO_ON_PERSON_SELECTED
 import com.ustadmobile.core.viewmodel.person.bulkaddselectfile.BulkAddPersonSelectFileViewModel
@@ -45,6 +46,7 @@ data class PersonListUiState(
     val sortOption: SortOrderOption = sortOptions.first(),
     val showAddItem: Boolean = false,
     val showInviteViaLink: Boolean = false,
+    val showInviteViaContact: Boolean = false,
     val inviteCode: String? = null,
     val showSortOptions: Boolean = true,
     val addSheetOrDialogVisible: Boolean = false,
@@ -99,6 +101,8 @@ class PersonListViewModel(
 
     private val inviteCode = savedStateHandle[ARG_SHOW_ADD_VIA_INVITE_LINK_CODE]
 
+    private val showInviteViaContact = savedStateHandle[ARG_SHOW_ADD_VIA_CONTACT]=="true"
+
     private val setClipboardStringUseCase: SetClipboardStringUseCase by instance()
 
 
@@ -137,6 +141,7 @@ class PersonListViewModel(
                             },
                             showInviteViaLink = inviteCode != null,
                             inviteCode = inviteCode,
+                            showInviteViaContact = showInviteViaContact,
                             showSortOptions = hasPermissionToList,
                         )
                     }
@@ -209,6 +214,11 @@ class PersonListViewModel(
             snackDispatcher.showSnackBar(Snack(systemImpl.getString(MR.strings.copied_to_clipboard)))
         }
     }
+    fun onClickInviteViaContact() {
+        navController.navigate(InviteViaContactViewModel.DEST_NAME, emptyMap())
+
+
+    }
 
     private fun onClickFab() {
         if(_uiState.value.hasBulkImportPermission) {
@@ -269,6 +279,11 @@ class PersonListViewModel(
         const val ARG_EXCLUDE_PERSONUIDS_LIST = "excludeAlreadySelectedList"
 
         const val ARG_SHOW_ADD_VIA_INVITE_LINK_CODE = "showAddViaInviteLink"
+
+        /**
+         * to give this option only while adding users to course
+         */
+        const val ARG_SHOW_ADD_VIA_CONTACT= "showAddViaContact"
 
         /**
          * Require a specific system permission to show the list. This has no security implication,

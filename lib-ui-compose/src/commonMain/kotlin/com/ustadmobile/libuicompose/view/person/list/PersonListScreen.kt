@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Contacts
 import androidx.compose.material.icons.filled.CopyAll
 import androidx.compose.material.icons.filled.GroupAdd
 import androidx.compose.material.icons.filled.Link
@@ -51,6 +52,7 @@ fun PersonListScreen(
         onSortOrderChanged = viewModel::onSortOrderChanged,
         onClickInviteWithLink = viewModel::onClickInviteWithLink,
         onClickCopyInviteCode = viewModel::onClickCopyInviteCode,
+        onClickInviteViaContact = viewModel::onClickInviteViaContact,
     )
 
     if(uiState.addSheetOrDialogVisible) {
@@ -96,6 +98,7 @@ fun PersonListScreen(
     onClickAddNew: () -> Unit = {},
     onClickInviteWithLink: () -> Unit = {},
     onClickCopyInviteCode: () -> Unit = { },
+    onClickInviteViaContact: () -> Unit = { },
 ){
 
     val lazyPagingItems = rememberDoorRepositoryPager(
@@ -140,6 +143,19 @@ fun PersonListScreen(
                     leadingContent = { Icon(Icons.Default.Link, contentDescription = null) },
                 )
             }
+        }
+
+        if(uiState.showInviteViaContact) {
+            item("invite_via_contact") {
+                ListItem(
+                    modifier = Modifier
+                        .testTag("invite_via_contact")
+                        .clickable { onClickInviteViaContact() },
+                    headlineContent = { Text(stringResource(MR.strings.invite_via_contact)) },
+                    leadingContent = { Icon(Icons.Default.Contacts, contentDescription = null) },
+                )
+            }
+
         }
 
         if(uiState.showAddItem) {
