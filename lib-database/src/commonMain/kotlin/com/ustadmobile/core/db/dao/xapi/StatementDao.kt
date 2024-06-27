@@ -187,38 +187,41 @@ expect abstract class StatementDao {
                           FROM StatementEntity
                                JOIN ActorEntity
                                     ON StatementEntity.statementActorUid = ActorEntity.actorUid
+                               
+                         WHERE ($STATEMENT_MATCHES_PERSONUIDS_AND_COURSEBLOCKS)
                                -- Where there is a peer marked assignment  - Work in progress    
-                         WHERE (    PersonUidsAndCourseBlocks.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
-                                AND PersonUidsAndCourseBlocks.caMarkingType = ${ClazzAssignment.MARKED_BY_PEERS}
-                                AND (1 + 1 = 5))
-                                -- Where this is an assignment marked by teacher
-                            OR (    PersonUidsAndCourseBlocks.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
-                                AND PersonUidsAndCourseBlocks.caMarkingType = ${ClazzAssignment.MARKED_BY_COURSE_LEADER}
-                                AND StatementEntity.resultScoreScaled IS NOT NULL
-                                AND StatementEntity.timestamp = (
-                                    SELECT MAX(StatementEntityInner.timestamp)
-                                      FROM StatementEntity StatementEntityInner
-                                           JOIN ActorEntity ActorEntityInner
-                                                ON StatementEntityInner.statementActorUid = ActorEntityInner.actorUid
-                                     WHERE StatementEntityInner.statementCbUid = PersonUidsAndCourseBlocks.cbUid
-                                       AND ActorEntityInner.actorAccountName = PersonUidsAndCourseBlocks.username
-                                       AND StatementEntityInner.resultScoreScaled IS NOT NULL
-                                    )
-                                )
-                                -- This is self-paced content so take the best score
-                                -- note should check root attribute
-                            OR  (    PersonUidsAndCourseBlocks.cbType != ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
-                                 AND StatementEntity.resultScoreScaled IS NOT NULL
-                                 AND StatementEntity.resultScoreScaled = (
-                                     SELECT MAX(StatementEntityInner.resultScoreScaled)
-                                       FROM StatementEntity StatementEntityInner
-                                            JOIN ActorEntity ActorEntityInner
-                                                ON StatementEntityInner.statementActorUid = ActorEntityInner.actorUid
-                                      WHERE StatementEntityInner.statementCbUid = PersonUidsAndCourseBlocks.cbUid
-                                       AND ActorEntityInner.actorAccountName = PersonUidsAndCourseBlocks.username
-                                       AND StatementEntityInner.resultScoreScaled IS NOT NULL) 
-                                )        
-                    )
+                           AND ((      PersonUidsAndCourseBlocks.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
+                                  AND PersonUidsAndCourseBlocks.caMarkingType = ${ClazzAssignment.MARKED_BY_PEERS}
+                                  AND 1 + 1 = 5)
+                               -- Where this is an assignment marked by teacher
+                              OR (    PersonUidsAndCourseBlocks.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
+                                  AND PersonUidsAndCourseBlocks.caMarkingType = ${ClazzAssignment.MARKED_BY_COURSE_LEADER}
+                                  AND StatementEntity.resultScoreScaled IS NOT NULL
+                                  AND StatementEntity.timestamp = (
+                                      SELECT MAX(StatementEntityInner.timestamp)
+                                        FROM StatementEntity StatementEntityInner
+                                             JOIN ActorEntity ActorEntityInner
+                                                  ON StatementEntityInner.statementActorUid = ActorEntityInner.actorUid
+                                       WHERE StatementEntityInner.statementCbUid = PersonUidsAndCourseBlocks.cbUid
+                                         AND ActorEntityInner.actorAccountName = PersonUidsAndCourseBlocks.username
+                                         AND StatementEntityInner.resultScoreScaled IS NOT NULL
+                                      )
+                                  )
+                               -- This is self-paced content so take the best score
+                               -- note should check root attribute
+                              OR  (    PersonUidsAndCourseBlocks.cbType != ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
+                                   AND StatementEntity.resultScoreScaled IS NOT NULL
+                                   AND StatementEntity.resultScoreScaled = (
+                                       SELECT MAX(StatementEntityInner.resultScoreScaled)
+                                         FROM StatementEntity StatementEntityInner
+                                              JOIN ActorEntity ActorEntityInner
+                                                  ON StatementEntityInner.statementActorUid = ActorEntityInner.actorUid
+                                        WHERE StatementEntityInner.statementCbUid = PersonUidsAndCourseBlocks.cbUid
+                                          AND ActorEntityInner.actorAccountName = PersonUidsAndCourseBlocks.username
+                                          AND StatementEntityInner.resultScoreScaled IS NOT NULL) 
+                                  )
+                              )
+                        )
                JOIN ActorEntity ActorEntity_Outer
                     ON ActorEntity_Outer.actorUid = StatementEntity_Outer.statementActorUid         
     """)

@@ -16,7 +16,9 @@ import react.Props
 import react.useRequiredContext
 import web.cssom.Position
 import web.cssom.TextAlign
+import web.cssom.pct
 import web.cssom.px
+import web.cssom.translate
 import mui.icons.material.Check as CheckIcon
 import mui.icons.material.Close as CloseIcon
 
@@ -30,10 +32,13 @@ external interface ClazzGradebookCellProps: Props {
 
     var height: Int
 
+    var scoreMargin: Int?
+
 }
 
 val ClazzGradebookCell = FC<ClazzGradebookCellProps> { props ->
     val theme by useRequiredContext(ThemeContext)
+    val scoreMarginVal = (props.scoreMargin ?: 8)
 
     Box {
         sx {
@@ -52,10 +57,13 @@ val ClazzGradebookCell = FC<ClazzGradebookCellProps> { props ->
                     props.block?.colorForMark(theme, it)
                 }
 
+                val scoreMargin = 8
                 Typography {
                     sx {
                         textAlign = TextAlign.center
-                        lineHeight = props.height.px
+                        lineHeight = (props.height - (scoreMarginVal*2)).px
+                        width = (props.width - (scoreMarginVal *2)).px
+                        margin = scoreMargin.px
                         backgroundColor = markColor?.main
                         color = markColor?.contrastText
                     }
@@ -65,11 +73,25 @@ val ClazzGradebookCell = FC<ClazzGradebookCellProps> { props ->
             }
 
             props.blockStatus?.sIsCompleted == true || props.blockStatus?.sIsSuccess == true -> {
-                CheckIcon()
+                CheckIcon {
+                    sx {
+                        position = Position.absolute
+                        top = 50.pct
+                        left = 50.pct
+                        transform =  translate((-50).pct, (-50).pct)
+                    }
+                }
             }
 
             props.blockStatus?.sIsSuccess == false -> {
-                CloseIcon()
+                CloseIcon {
+                    sx {
+                        position = Position.absolute
+                        top = 50.pct
+                        left = 50.pct
+                        transform =  translate((-50).pct, (-50).pct)
+                    }
+                }
             }
 
             progress != null -> {

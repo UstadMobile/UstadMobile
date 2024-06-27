@@ -12,11 +12,13 @@ fun Float.roundTo(decimalPlaces: Int = 0): Float {
 /**
  * Remove the decimal point if this float has nothing after the decimal point.
  */
-fun Float.toDisplayString(): String {
+fun Float.toDisplayString(
+    decimalPlaces: Int = 2
+): String {
     val strVal = toString()
     return if(round(this) == this) {
         strVal.substringBefore('.')
     }else {
-        strVal
+        this.roundTo(decimalPlaces).toString()
     }
 }
