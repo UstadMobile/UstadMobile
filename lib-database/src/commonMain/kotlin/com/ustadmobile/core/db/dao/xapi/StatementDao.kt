@@ -8,12 +8,14 @@ import app.cash.paging.PagingSource
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CLAZZ_STUDENT
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CONTENT_ENTRY
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY_WHERE_MATCHES_ACCOUNT_PERSON_UID_AND_PARENT_CONTENT_ENTRY_ROOT
+import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.STATEMENT_MATCHES_PERSONUIDS_AND_COURSEBLOCKS
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.STATEMENT_MATCHES_PERSON_AND_COURSEBLOCK_CLAUSE
 import com.ustadmobile.door.DoorQuery
 import com.ustadmobile.door.annotation.DoorDao
 import com.ustadmobile.door.annotation.QueryLiveTables
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.composites.BlockStatus
+import com.ustadmobile.lib.db.composites.xapi.StatementEntityAndRelated
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.Person
@@ -102,6 +104,128 @@ expect abstract class StatementDao {
         clazzUid: Long,
         accountPersonUid: Long,
     ): List<StatementEntity>
+
+    @Query("""
+        WITH PersonUidsAndCourseBlocks(personUid, username, cbUid, cbType, caMarkingType) AS (
+             SELECT Person.personUid AS personUid, 
+                    Person.username AS username, 
+                    CourseBlock.cbUid AS cbUid,
+                    CourseBlock.cbType AS cbType,
+                    ClazzAssignment.caMarkingType AS caMarkingType
+               FROM Person
+                    JOIN CourseBlock
+                         ON CourseBlock.cbClazzUid = :clazzUid
+                    LEFT JOIN ClazzAssignment
+                         ON CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
+                        AND ClazzAssignment.caUid = CourseBlock.cbEntityUid     
+              WHERE Person.personUid IN 
+                    (SELECT DISTINCT ClazzEnrolment.clazzEnrolmentPersonUid
+                       FROM ClazzEnrolment
+                      WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid)       
+        )
+        
+        -- Maximum score statement
+        SELECT StatementEntity_Outer.*, ActorEntity_Outer.*
+          FROM PersonUidsAndCourseBlocks
+               JOIN StatementEntity StatementEntity_Outer
+                    ON (StatementEntity_Outer.statementIdHi, StatementEntity_Outer.statementIdLo) IN (
+                        SELECT StatementEntity.statementIdHi, StatementEntity.statementIdLo
+                          FROM StatementEntity
+                               JOIN ActorEntity
+                                    ON StatementEntity.statementActorUid = ActorEntity.actorUid
+                         WHERE $STATEMENT_MATCHES_PERSONUIDS_AND_COURSEBLOCKS 
+                      ORDER BY StatementEntity.extensionProgress DESC
+                         LIMIT 1
+                    )
+               JOIN ActorEntity ActorEntity_Outer
+                    ON ActorEntity_Outer.actorUid = StatementEntity_Outer.statementActorUid
+                    
+        UNION
+        
+        --Completed statement
+        SELECT StatementEntity_Outer.*, ActorEntity_Outer.*
+          FROM PersonUidsAndCourseBlocks
+               JOIN StatementEntity StatementEntity_Outer
+                    ON (StatementEntity_Outer.statementIdHi, StatementEntity_Outer.statementIdLo) IN (
+                          SELECT StatementEntity.statementIdHi, StatementEntity.statementIdLo
+                            FROM StatementEntity
+                                 JOIN ActorEntity
+                                      ON StatementEntity.statementActorUid = ActorEntity.actorUid
+                           WHERE ($STATEMENT_MATCHES_PERSONUIDS_AND_COURSEBLOCKS)
+                             AND CAST(StatementEntity.resultCompletion AS INTEGER) = 1
+                           LIMIT 1     
+                    )
+               JOIN ActorEntity ActorEntity_Outer
+                    ON ActorEntity_Outer.actorUid = StatementEntity_Outer.statementActorUid    
+        UNION 
+        
+        -- StatementEntity for success or fail e.g. resultSuccess is not null             
+        SELECT StatementEntity_Outer.*, ActorEntity_Outer.*
+          FROM PersonUidsAndCourseBlocks
+               JOIN StatementEntity StatementEntity_Outer
+                    ON (StatementEntity_Outer.statementIdHi, StatementEntity_Outer.statementIdLo) IN (
+                          SELECT StatementEntity.statementIdHi, StatementEntity.statementIdLo
+                            FROM StatementEntity
+                                 JOIN ActorEntity
+                                      ON StatementEntity.statementActorUid = ActorEntity.actorUid
+                           WHERE ($STATEMENT_MATCHES_PERSONUIDS_AND_COURSEBLOCKS)
+                             AND StatementEntity.resultSuccess IS NOT NULL
+                        ORDER BY StatementEntity.resultSuccess DESC     
+                           LIMIT 1     
+                    )
+               JOIN ActorEntity ActorEntity_Outer
+                    ON ActorEntity_Outer.actorUid = StatementEntity_Outer.statementActorUid    
+        
+        UNION
+        
+        --StatementEntity for score
+        SELECT StatementEntity_Outer.*, ActorEntity_Outer.*
+          FROM PersonUidsAndCourseBlocks
+               JOIN StatementEntity StatementEntity_Outer
+                    ON (StatementEntity_Outer.statementIdHi, StatementEntity_Outer.statementIdLo) IN (
+                        SELECT StatementEntity.statementIdHi, StatementEntity.statementIdLo
+                          FROM StatementEntity
+                               JOIN ActorEntity
+                                    ON StatementEntity.statementActorUid = ActorEntity.actorUid
+                               -- Where there is a peer marked assignment  - Work in progress    
+                         WHERE (    PersonUidsAndCourseBlocks.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
+                                AND PersonUidsAndCourseBlocks.caMarkingType = ${ClazzAssignment.MARKED_BY_PEERS}
+                                AND (1 + 1 = 5))
+                                -- Where this is an assignment marked by teacher
+                            OR (    PersonUidsAndCourseBlocks.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
+                                AND PersonUidsAndCourseBlocks.caMarkingType = ${ClazzAssignment.MARKED_BY_COURSE_LEADER}
+                                AND StatementEntity.resultScoreScaled IS NOT NULL
+                                AND StatementEntity.timestamp = (
+                                    SELECT MAX(StatementEntityInner.timestamp)
+                                      FROM StatementEntity StatementEntityInner
+                                           JOIN ActorEntity ActorEntityInner
+                                                ON StatementEntityInner.statementActorUid = ActorEntityInner.actorUid
+                                     WHERE StatementEntityInner.statementCbUid = PersonUidsAndCourseBlocks.cbUid
+                                       AND ActorEntityInner.actorAccountName = PersonUidsAndCourseBlocks.username
+                                       AND StatementEntityInner.resultScoreScaled IS NOT NULL
+                                    )
+                                )
+                                -- This is self-paced content so take the best score
+                                -- note should check root attribute
+                            OR  (    PersonUidsAndCourseBlocks.cbType != ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
+                                 AND StatementEntity.resultScoreScaled IS NOT NULL
+                                 AND StatementEntity.resultScoreScaled = (
+                                     SELECT MAX(StatementEntityInner.resultScoreScaled)
+                                       FROM StatementEntity StatementEntityInner
+                                            JOIN ActorEntity ActorEntityInner
+                                                ON StatementEntityInner.statementActorUid = ActorEntityInner.actorUid
+                                      WHERE StatementEntityInner.statementCbUid = PersonUidsAndCourseBlocks.cbUid
+                                       AND ActorEntityInner.actorAccountName = PersonUidsAndCourseBlocks.username
+                                       AND StatementEntityInner.resultScoreScaled IS NOT NULL) 
+                                )        
+                    )
+               JOIN ActorEntity ActorEntity_Outer
+                    ON ActorEntity_Outer.actorUid = StatementEntity_Outer.statementActorUid         
+    """)
+    abstract suspend fun findStatusForStudentsInClazzStatements(
+        clazzUid: Long,
+    ): List<StatementEntityAndRelated>
+
 
     //To pull over http - change these to selecting the statementuid(s)
     @Query("""

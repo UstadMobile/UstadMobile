@@ -58,7 +58,7 @@ class ClazzGradebookViewModel(
 
     private val studentPagingSource: ListPagingSourceFactory<StudentAndBlockStatuses> = {
         ClazzProgressReportPagingSource(
-            studentListPagingSource = activeRepo.clazzEnrolmentDao.findByClazzUidAndRole(
+            studentListPagingSource = activeRepo.clazzEnrolmentDao.findByClazzUidAndRoleForGradebook(
                 clazzUid = clazzUid,
                 roleId = ClazzEnrolment.ROLE_STUDENT,
                 sortOrder = ClazzEnrolmentDaoCommon.SORT_FIRST_NAME_ASC,

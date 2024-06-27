@@ -4,20 +4,12 @@ import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.FILTER_ACTIVE_ONLY
-import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_DATE_LEFT_ASC
-import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_DATE_LEFT_DESC
-import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_DATE_REGISTERED_ASC
-import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_DATE_REGISTERED_DESC
-import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_FIRST_NAME_ASC
-import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_FIRST_NAME_DESC
-import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_LAST_NAME_ASC
-import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_LAST_NAME_DESC
 import com.ustadmobile.door.annotation.*
 import app.cash.paging.PagingSource
 import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.db.dao.CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL
 import com.ustadmobile.core.db.dao.CoursePermissionDaoCommon.SELECT_COURSEPERMISSION_ENTITES_FOR_ACCOUNT_PERSON_UID_SQL
+import com.ustadmobile.core.db.dao.xapi.StatementDao
 import com.ustadmobile.lib.db.composites.ClazzEnrolmentAndPerson
 import com.ustadmobile.lib.db.composites.ClazzEnrolmentAndPersonDetailDetails
 import com.ustadmobile.lib.db.composites.CourseNameAndPersonName
@@ -208,82 +200,8 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
     @Query("SELECT * FROM ClazzEnrolment WHERE clazzEnrolmentUid = :uid")
     abstract fun findByUidLive(uid: Long): Flow<ClazzEnrolment?>
 
-    /*
-     * Note: SELECT * FROM (Subquery) AS CourseMember is needed so that sorting by
-     * earliestJoinDate/latestDateLeft will work as expected on postgres.
-     *
-     * This query uses a permission check so that users will only see participants that they have
-     * permission to see (e.g. on some courses / MOOC style students might not have permission to
-     * see other students etc).
-     *
-     * This Query is used by ClazzMemberListViewModel.
-     *
-     *
-     AND (
-                           ($PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL)
-                        OR Person.personUid = :accountPersonUid
-                       )
-     * */
-    @Query("""
-        SELECT * 
-          FROM (SELECT Person.*, PersonPicture.*,
-                       (SELECT MIN(ClazzEnrolment.clazzEnrolmentDateJoined) 
-                          FROM ClazzEnrolment 
-                         WHERE Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid) AS earliestJoinDate, 
-        
-                       (SELECT MAX(ClazzEnrolment.clazzEnrolmentDateLeft) 
-                          FROM ClazzEnrolment 
-                         WHERE Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid) AS latestDateLeft, 
-        
-                       (SELECT ClazzEnrolment.clazzEnrolmentRole 
-                          FROM ClazzEnrolment 
-                         WHERE Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid 
-                           AND ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid 
-                           AND ClazzEnrolment.clazzEnrolmentActive
-                      ORDER BY ClazzEnrolment.clazzEnrolmentDateLeft DESC
-                         LIMIT 1) AS enrolmentRole
-                  FROM Person
-                       LEFT JOIN PersonPicture
-                                 ON PersonPicture.personPictureUid = Person.personUid
-                 WHERE Person.personUid IN 
-                       (SELECT DISTINCT ClazzEnrolment.clazzEnrolmentPersonUid 
-                          FROM ClazzEnrolment 
-                         WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid 
-                           AND ClazzEnrolment.clazzEnrolmentActive 
-                           AND ClazzEnrolment.clazzEnrolmentRole = :roleId 
-                           AND (:filter != $FILTER_ACTIVE_ONLY 
-                                 OR (:currentTime 
-                                      BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined 
-                                      AND ClazzEnrolment.clazzEnrolmentDateLeft))) 
-                   /* Begin permission check */
-                   AND (
-                           ($PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL)
-                        OR Person.personUid = :accountPersonUid
-                       )  
-                   /* End permission check */                   
-                   AND Person.firstNames || ' ' || Person.lastName LIKE :searchText
-               GROUP BY Person.personUid, PersonPicture.personPictureUid) AS CourseMember
-      ORDER BY CASE(:sortOrder)
-                WHEN $SORT_FIRST_NAME_ASC THEN CourseMember.firstNames
-                WHEN $SORT_LAST_NAME_ASC THEN CourseMember.lastName
-                ELSE ''
-            END ASC,
-            CASE(:sortOrder)
-                WHEN $SORT_FIRST_NAME_DESC THEN CourseMember.firstNames
-                WHEN $SORT_LAST_NAME_DESC THEN CourseMember.lastName
-                ELSE ''
-            END DESC,
-            CASE(:sortOrder)
-                WHEN $SORT_DATE_REGISTERED_ASC THEN CourseMember.earliestJoinDate
-                WHEN $SORT_DATE_LEFT_ASC THEN CourseMember.latestDateLeft
-                ELSE 0
-            END ASC,
-            CASE(:sortOrder)
-                WHEN $SORT_DATE_REGISTERED_DESC THEN CourseMember.earliestJoinDate
-                WHEN $SORT_DATE_LEFT_DESC THEN CourseMember.latestDateLeft
-                ELSE 0
-            END DESC
-    """)
+
+    @Query(ClazzEnrolmentDaoCommon.SELECT_BY_UID_AND_ROLE_SQL)
     @QueryLiveTables(value = ["Clazz", "Person", "ClazzEnrolment", "PersonPicture", "CoursePermission"])
     @HttpAccessible(
         pullQueriesToReplicate = arrayOf(
@@ -292,6 +210,34 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         )
     )
     abstract fun findByClazzUidAndRole(
+        clazzUid: Long,
+        roleId: Int,
+        sortOrder: Int,
+        searchText: String? = "%",
+        filter: Int,
+        accountPersonUid: Long,
+        currentTime: Long,
+        permission: Long,
+    ): PagingSource<Int, PersonAndClazzMemberListDetails>
+
+
+    /**
+     * This is effectively the same query as above, however needs to trigger additional
+     * http server function calls
+     */
+    @Query(ClazzEnrolmentDaoCommon.SELECT_BY_UID_AND_ROLE_SQL)
+    @QueryLiveTables(value = ["Clazz", "Person", "ClazzEnrolment", "PersonPicture", "CoursePermission"])
+    @HttpAccessible(
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall("findByClazzUidAndRoleForGradebook"),
+            HttpServerFunctionCall("findEnrolmentsByClazzUidAndRole"),
+            HttpServerFunctionCall(
+                functionName = "findStatusForStudentsInClazzStatements",
+                functionDao = StatementDao::class,
+            )
+        )
+    )
+    abstract fun findByClazzUidAndRoleForGradebook(
         clazzUid: Long,
         roleId: Int,
         sortOrder: Int,

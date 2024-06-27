@@ -76,18 +76,10 @@ object StatementDaoCommon {
     """
 
 
+    const val STATEMENT_MATCHES_PERSONUIDS_AND_COURSEBLOCKS = """
+            StatementEntity.statementCbUid = PersonUidsAndCourseBlocks.cbUid
+        AND ActorEntity.actorAccountName = PersonUidsAndCourseBlocks.username 
+    """
 
-
-    const val SORT_FIRST_NAME_ASC = 1
-
-    const val SORT_FIRST_NAME_DESC = 2
-
-    const val SORT_LAST_NAME_ASC = 3
-
-    const val SORT_LAST_NAME_DESC = 4
-
-    const val SORT_LAST_ACTIVE_ASC = 5
-
-    const val SORT_LAST_ACTIVE_DESC = 6
 
 }

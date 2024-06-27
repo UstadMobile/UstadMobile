@@ -1,6 +1,7 @@
 package com.ustadmobile.core.db.dao
 
 import com.ustadmobile.core.db.PermissionFlags
+import com.ustadmobile.core.db.dao.CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 
 object ClazzEnrolmentDaoCommon {
@@ -63,5 +64,83 @@ object ClazzEnrolmentDaoCommon {
                    AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}))
     """
 
+
+    /*
+    * Note: SELECT * FROM (Subquery) AS CourseMember is needed so that sorting by
+    * earliestJoinDate/latestDateLeft will work as expected on postgres.
+    *
+    * This query uses a permission check so that users will only see participants that they have
+    * permission to see (e.g. on some courses / MOOC style students might not have permission to
+    * see other students etc).
+    *
+    * This Query is used by ClazzMemberListViewModel.
+    *
+    *
+    AND (
+                          ($PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL)
+                       OR Person.personUid = :accountPersonUid
+                      )
+    *
+    */
+    const val SELECT_BY_UID_AND_ROLE_SQL = """
+        SELECT * 
+          FROM (SELECT Person.*, PersonPicture.*,
+                       (SELECT MIN(ClazzEnrolment.clazzEnrolmentDateJoined) 
+                          FROM ClazzEnrolment 
+                         WHERE Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid) AS earliestJoinDate, 
+        
+                       (SELECT MAX(ClazzEnrolment.clazzEnrolmentDateLeft) 
+                          FROM ClazzEnrolment 
+                         WHERE Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid) AS latestDateLeft, 
+        
+                       (SELECT ClazzEnrolment.clazzEnrolmentRole 
+                          FROM ClazzEnrolment 
+                         WHERE Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid 
+                           AND ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid 
+                           AND ClazzEnrolment.clazzEnrolmentActive
+                      ORDER BY ClazzEnrolment.clazzEnrolmentDateLeft DESC
+                         LIMIT 1) AS enrolmentRole
+                  FROM Person
+                       LEFT JOIN PersonPicture
+                                 ON PersonPicture.personPictureUid = Person.personUid
+                 WHERE Person.personUid IN 
+                       (SELECT DISTINCT ClazzEnrolment.clazzEnrolmentPersonUid 
+                          FROM ClazzEnrolment 
+                         WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid 
+                           AND ClazzEnrolment.clazzEnrolmentActive 
+                           AND ClazzEnrolment.clazzEnrolmentRole = :roleId 
+                           AND (:filter != $FILTER_ACTIVE_ONLY 
+                                 OR (:currentTime 
+                                      BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined 
+                                      AND ClazzEnrolment.clazzEnrolmentDateLeft))) 
+                   /* Begin permission check */
+                   AND (
+                           ($PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL)
+                        OR Person.personUid = :accountPersonUid
+                       )  
+                   /* End permission check */                   
+                   AND Person.firstNames || ' ' || Person.lastName LIKE :searchText
+               GROUP BY Person.personUid, PersonPicture.personPictureUid) AS CourseMember
+      ORDER BY CASE(:sortOrder)
+                WHEN $SORT_FIRST_NAME_ASC THEN CourseMember.firstNames
+                WHEN $SORT_LAST_NAME_ASC THEN CourseMember.lastName
+                ELSE ''
+            END ASC,
+            CASE(:sortOrder)
+                WHEN $SORT_FIRST_NAME_DESC THEN CourseMember.firstNames
+                WHEN $SORT_LAST_NAME_DESC THEN CourseMember.lastName
+                ELSE ''
+            END DESC,
+            CASE(:sortOrder)
+                WHEN $SORT_DATE_REGISTERED_ASC THEN CourseMember.earliestJoinDate
+                WHEN $SORT_DATE_LEFT_ASC THEN CourseMember.latestDateLeft
+                ELSE 0
+            END ASC,
+            CASE(:sortOrder)
+                WHEN $SORT_DATE_REGISTERED_DESC THEN CourseMember.earliestJoinDate
+                WHEN $SORT_DATE_LEFT_DESC THEN CourseMember.latestDateLeft
+                ELSE 0
+            END DESC
+    """
 
 }
