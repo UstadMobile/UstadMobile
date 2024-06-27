@@ -223,9 +223,6 @@ kotlin {
             dependsOn commonJvmMain
 
             dependencies {
-
-                implementation libs.pdfview.android
-
                 implementation libs.kotlin.stdlib.jdk8
                 implementation libs.kotlinx.coroutines.android
                 implementation libs.androidx.lifecycle.livedata.ktx
