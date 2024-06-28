@@ -18,6 +18,9 @@ import com.ustadmobile.core.viewmodel.clazz.gradebook.displayMarkFor
 import com.ustadmobile.lib.db.composites.BlockStatus
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.libuicompose.components.scaledTextStyle
+import dev.icerock.moko.resources.compose.stringResource
+import com.ustadmobile.core.MR
+import com.ustadmobile.libuicompose.components.UstadTooltipBox
 
 @Composable
 fun ClazzGradebookCell(
@@ -63,22 +66,30 @@ fun ClazzGradebookCell(
              * checkmark
              */
             blockStatus?.sIsCompleted == true || blockStatus?.sIsSuccess == true -> {
-                Icon(
-                    imageVector = Icons.Default.Check,
-                    contentDescription = null,
+                UstadTooltipBox(
+                    tooltipText = stringResource(MR.strings.completed),
                     modifier = Modifier.align(Alignment.Center)
-                )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = stringResource(MR.strings.completed),
+                    )
+                }
             }
 
             /**
              * Edge case - there is no mark, however it is marked as a failure.
              */
             blockStatus?.sIsSuccess == false -> {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = null,
+                UstadTooltipBox(
+                    tooltipText = stringResource(MR.strings.failed),
                     modifier = Modifier.align(Alignment.Center)
-                )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = stringResource(MR.strings.failed),
+                    )
+                }
             }
 
             progress != null -> {

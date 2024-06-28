@@ -13,11 +13,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Fullscreen
+import androidx.compose.material.icons.filled.FullscreenExit
 import androidx.compose.material.icons.filled.TextDecrease
 import androidx.compose.material.icons.filled.TextIncrease
 import androidx.compose.material3.FilledTonalIconButton
@@ -30,13 +30,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.paging.RefreshCommand
-import com.ustadmobile.core.util.ext.roundTo
 import com.ustadmobile.core.viewmodel.clazz.gradebook.ClazzGradebookUiState
 import com.ustadmobile.core.viewmodel.clazz.gradebook.ClazzGradebookViewModel
 import com.ustadmobile.libuicompose.components.ScaledListItem
@@ -208,7 +204,12 @@ fun ClazzGradebookScreen(
             IconButton(
                 onClick = onClickFullScreen,
             ) {
-                Icon(Icons.Default.Fullscreen, contentDescription = null)
+                if(uiState.isFullScreen) {
+                    Icon(Icons.Default.FullscreenExit, contentDescription = null)
+                }else {
+                    Icon(Icons.Default.Fullscreen, contentDescription = null)
+                }
+
             }
         }
 

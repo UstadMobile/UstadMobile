@@ -1,5 +1,6 @@
 package com.ustadmobile.view.clazz.gradebook
 
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.viewmodel.clazz.gradebook.displayMarkFor
 import com.ustadmobile.lib.db.composites.BlockStatus
 import com.ustadmobile.lib.db.entities.CourseBlock
@@ -13,6 +14,7 @@ import mui.system.responsive
 import mui.system.sx
 import react.FC
 import react.Props
+import react.dom.aria.ariaLabel
 import react.useRequiredContext
 import web.cssom.Position
 import web.cssom.TextAlign
@@ -21,6 +23,9 @@ import web.cssom.px
 import web.cssom.translate
 import mui.icons.material.Check as CheckIcon
 import mui.icons.material.Close as CloseIcon
+import com.ustadmobile.core.MR
+import mui.material.Tooltip
+import react.ReactNode
 
 external interface ClazzGradebookCellProps: Props {
 
@@ -39,6 +44,7 @@ external interface ClazzGradebookCellProps: Props {
 val ClazzGradebookCell = FC<ClazzGradebookCellProps> { props ->
     val theme by useRequiredContext(ThemeContext)
     val scoreMarginVal = (props.scoreMargin ?: 8)
+    val strings = useStringProvider()
 
     Box {
         sx {
@@ -73,23 +79,36 @@ val ClazzGradebookCell = FC<ClazzGradebookCellProps> { props ->
             }
 
             props.blockStatus?.sIsCompleted == true || props.blockStatus?.sIsSuccess == true -> {
-                CheckIcon {
-                    sx {
-                        position = Position.absolute
-                        top = 50.pct
-                        left = 50.pct
-                        transform =  translate((-50).pct, (-50).pct)
+                Tooltip {
+                    title = ReactNode(strings[MR.strings.completed])
+
+                    CheckIcon {
+                        sx {
+                            position = Position.absolute
+                            top = 50.pct
+                            left = 50.pct
+                            transform =  translate((-50).pct, (-50).pct)
+                        }
+
+                        ariaLabel = strings[MR.strings.completed]
                     }
                 }
+
             }
 
             props.blockStatus?.sIsSuccess == false -> {
-                CloseIcon {
-                    sx {
-                        position = Position.absolute
-                        top = 50.pct
-                        left = 50.pct
-                        transform =  translate((-50).pct, (-50).pct)
+                Tooltip {
+                    title = ReactNode(strings[MR.strings.failed])
+
+                    CloseIcon {
+                        sx {
+                            position = Position.absolute
+                            top = 50.pct
+                            left = 50.pct
+                            transform =  translate((-50).pct, (-50).pct)
+                        }
+
+                        ariaLabel = strings[MR.strings.failed]
                     }
                 }
             }
