@@ -26,7 +26,7 @@ import com.ustadmobile.lib.db.composites.StudentAndBlockStatuses
  *     DoorRepositoryReplicatePullPagingSource so that it can be used by DoorRemoteMediator the same
  *     way.
  */
-class ClazzProgressReportPagingSource(
+class ClazzGradebookPagingSource(
     private val studentListPagingSource: PagingSource<Int, PersonAndClazzMemberListDetails>,
     private val db: UmAppDatabase,
     private val clazzUid: Long,

@@ -57,7 +57,7 @@ class ClazzGradebookViewModel(
         ?: throw IllegalArgumentException("No clazzuid")
 
     private val studentPagingSource: ListPagingSourceFactory<StudentAndBlockStatuses> = {
-        ClazzProgressReportPagingSource(
+        ClazzGradebookPagingSource(
             studentListPagingSource = activeRepo.clazzEnrolmentDao.findByClazzUidAndRoleForGradebook(
                 clazzUid = clazzUid,
                 roleId = ClazzEnrolment.ROLE_STUDENT,

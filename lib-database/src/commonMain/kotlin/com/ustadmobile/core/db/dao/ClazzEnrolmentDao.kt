@@ -7,6 +7,15 @@ import androidx.room.Update
 import com.ustadmobile.door.annotation.*
 import app.cash.paging.PagingSource
 import com.ustadmobile.core.db.PermissionFlags
+import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.FILTER_ACTIVE_ONLY
+import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_DATE_LEFT_ASC
+import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_DATE_LEFT_DESC
+import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_DATE_REGISTERED_ASC
+import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_DATE_REGISTERED_DESC
+import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_FIRST_NAME_ASC
+import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_FIRST_NAME_DESC
+import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_LAST_NAME_ASC
+import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_LAST_NAME_DESC
 import com.ustadmobile.core.db.dao.CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL
 import com.ustadmobile.core.db.dao.CoursePermissionDaoCommon.SELECT_COURSEPERMISSION_ENTITES_FOR_ACCOUNT_PERSON_UID_SQL
 import com.ustadmobile.core.db.dao.xapi.StatementDao
@@ -225,8 +234,77 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
      * This is effectively the same query as above, however needs to trigger additional
      * http server function calls
      */
-    @Query(ClazzEnrolmentDaoCommon.SELECT_BY_UID_AND_ROLE_SQL)
-    @QueryLiveTables(value = ["Clazz", "Person", "ClazzEnrolment", "PersonPicture", "CoursePermission"])
+    @Query("""
+        SELECT * 
+          FROM (SELECT Person.*, PersonPicture.*,
+                       (SELECT MIN(ClazzEnrolment.clazzEnrolmentDateJoined) 
+                          FROM ClazzEnrolment 
+                         WHERE Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid) AS earliestJoinDate, 
+        
+                       (SELECT MAX(ClazzEnrolment.clazzEnrolmentDateLeft) 
+                          FROM ClazzEnrolment 
+                         WHERE Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid) AS latestDateLeft, 
+        
+                       (SELECT ClazzEnrolment.clazzEnrolmentRole 
+                          FROM ClazzEnrolment 
+                         WHERE Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid 
+                           AND ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid 
+                           AND ClazzEnrolment.clazzEnrolmentActive
+                      ORDER BY ClazzEnrolment.clazzEnrolmentDateLeft DESC
+                         LIMIT 1) AS enrolmentRole
+                  FROM Person
+                       LEFT JOIN PersonPicture
+                                 ON PersonPicture.personPictureUid = Person.personUid
+                       --Dummy join so that invalidations of the StatementEntity table will trigger
+                       -- PagingSource invalidation of ClazzGradebookPagingSource
+                       LEFT JOIN StatementEntity
+                                 ON StatementEntity.statementIdHi = 0 
+                                    AND StatementEntity.statementIdLo = 0
+                 WHERE Person.personUid IN 
+                       (SELECT DISTINCT ClazzEnrolment.clazzEnrolmentPersonUid 
+                          FROM ClazzEnrolment 
+                         WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid 
+                           AND ClazzEnrolment.clazzEnrolmentActive 
+                           AND ClazzEnrolment.clazzEnrolmentRole = :roleId 
+                           AND (:filter != $FILTER_ACTIVE_ONLY 
+                                 OR (:currentTime 
+                                      BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined 
+                                      AND ClazzEnrolment.clazzEnrolmentDateLeft))) 
+                   /* Begin permission check */
+                   AND (
+                           ($PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL)
+                        OR Person.personUid = :accountPersonUid
+                       )  
+                   /* End permission check */                   
+                   AND Person.firstNames || ' ' || Person.lastName LIKE :searchText
+               GROUP BY Person.personUid, PersonPicture.personPictureUid) AS CourseMember
+      ORDER BY CASE(:sortOrder)
+                WHEN $SORT_FIRST_NAME_ASC THEN CourseMember.firstNames
+                WHEN $SORT_LAST_NAME_ASC THEN CourseMember.lastName
+                ELSE ''
+            END ASC,
+            CASE(:sortOrder)
+                WHEN $SORT_FIRST_NAME_DESC THEN CourseMember.firstNames
+                WHEN $SORT_LAST_NAME_DESC THEN CourseMember.lastName
+                ELSE ''
+            END DESC,
+            CASE(:sortOrder)
+                WHEN $SORT_DATE_REGISTERED_ASC THEN CourseMember.earliestJoinDate
+                WHEN $SORT_DATE_LEFT_ASC THEN CourseMember.latestDateLeft
+                ELSE 0
+            END ASC,
+            CASE(:sortOrder)
+                WHEN $SORT_DATE_REGISTERED_DESC THEN CourseMember.earliestJoinDate
+                WHEN $SORT_DATE_LEFT_DESC THEN CourseMember.latestDateLeft
+                ELSE 0
+            END DESC
+    """)
+    @QueryLiveTables(
+        value = [
+            "Clazz", "Person", "ClazzEnrolment", "PersonPicture",
+            "CoursePermission", "StatementEntity"
+        ]
+    )
     @HttpAccessible(
         pullQueriesToReplicate = arrayOf(
             HttpServerFunctionCall("findByClazzUidAndRoleForGradebook"),
