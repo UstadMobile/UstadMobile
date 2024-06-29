@@ -6,9 +6,13 @@ import org.kodein.di.DI
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.invite.ParseInviteUseCase
 import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorUseCase
+import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
+import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.viewmodel.UstadViewModel
+import io.github.aakira.napier.Napier
+import io.ktor.util.logging.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -30,8 +34,7 @@ class InviteViaContactViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
 ) : UstadViewModel(di, savedStateHandle, DEST_NAME) {
-    private val phoneNumValidatorUseCase: PhoneNumValidatorUseCase by instance()
-
+    private val parseInviteUseCase: ParseInviteUseCase by instance()
     private var _uiState = MutableStateFlow(InviteViaContactUiState())
 
     val uiState: Flow<InviteViaContactUiState> = _uiState.asStateFlow()
@@ -42,7 +45,7 @@ class InviteViaContactViewModel(
             AppUiState(
                 title = systemImpl.getString(MR.strings.invite_to_course),
                 hideBottomNavigation = true,
-                )
+            )
         }
 
         _appUiState.update { prev ->
@@ -60,14 +63,27 @@ class InviteViaContactViewModel(
 
     }
 
+    fun onContactError(error: String) {
+        snackDispatcher.showSnackBar(Snack(error))
+    }
 
     fun onClickChipSubmit(
         text: String,
     ) {
+        _uiState.update { prev ->
+            prev.copy(
+                chips = prev.chips + parseInviteUseCase.invoke(text)
+            )
+        }
+    }
 
-        _uiState.update { perv ->
-            perv.copy(
-                chips = ParseInviteUseCase().invoke(text, phoneNumValidatorUseCase)
+    fun onChipRemoved(
+        text: String,
+    ) {
+        val newChips = _uiState.value.chips.filter { it.text != text }
+        _uiState.update { prev ->
+            prev.copy(
+                chips = newChips
             )
         }
     }

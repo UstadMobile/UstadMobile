@@ -2,7 +2,6 @@ package com.ustadmobile.libuicompose.view.clazz.inviteViaContact
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -11,7 +10,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
@@ -20,9 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.dokar.chiptextfield.Chip
 import com.dokar.chiptextfield.m3.OutlinedChipTextField
 import com.dokar.chiptextfield.rememberChipTextFieldState
@@ -39,6 +35,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.ImeAction
 import com.dokar.chiptextfield.m3.ChipTextFieldDefaults
+import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 
 
 @Composable
@@ -53,7 +50,9 @@ fun InviteViaContactScreen(
             viewModel.onClickChipSubmit(
                 it
             )
-        }
+        },
+        onContactError = { viewModel.onContactError(it) },
+        onChipRemoved = { viewModel.onChipRemoved(it) }
 
     )
 }
@@ -64,14 +63,16 @@ class AvatarChip(text: String, val avatar: ImageVector) : Chip(text)
 fun InviteViaContactScreen(
     uiState: InviteViaContactUiState = InviteViaContactUiState(),
     onChipSubmitClick: (String) -> Unit,
+    onContactError: (String) -> Unit,
+    onChipRemoved: (String) -> Unit,
 ) {
     val state = rememberChipTextFieldState<AvatarChip>()
     val scrollState = rememberScrollState()
-    Column(
+    UstadVerticalScrollColumn(
         modifier = Modifier
-            .fillMaxSize().verticalScroll(scrollState), // Make the column scrollable
+            .fillMaxSize(),
 
-    ) {
+        ) {
 
 
         OutlinedChipTextField(
@@ -81,15 +82,12 @@ fun InviteViaContactScreen(
                 .padding(10.dp).fillMaxWidth(),
 
             onSubmit = {
-
                 onChipSubmitClick(it)
-
                 null
-
             },
 
             chipStyle = ChipTextFieldDefaults.chipStyle(shape = RoundedCornerShape(20.dp)),
-            textStyle = TextStyle(fontSize = 13.sp),
+            textStyle = MaterialTheme.typography.bodySmall,
             chipLeadingIcon = { chip -> Avatar(chip, modifier = Modifier) },
             label = { Text(text = stringResource(MR.strings.add_username_email_phone)) },
             chipHorizontalSpacing = 8.dp,
@@ -102,26 +100,43 @@ fun InviteViaContactScreen(
                 if (it != null) {
                     onChipSubmitClick(it)
                 }
+            },
+            onContactError = {
+                if (it != null) {
+                    onContactError(it)
+                }
             }
         )
     }
 
     LaunchedEffect(uiState.chips) {
-        uiState.chips?.let { validChip ->
-            validChip.forEach {
-                it
+        uiState.chips.let { uiChips ->
 
-                if (it.isValid) {
-                    state.addChip(AvatarChip(it.text, Icons.Default.Check))
-                } else {
-                    state.addChip(AvatarChip(it.text, Icons.Default.Close))
-
-                }
+            val chipsToAdd = uiChips.filterNot { chip ->
+                state.chips.any { it.text == chip.text }
             }
 
+            chipsToAdd.forEach { chip ->
+                if (chip.isValid) {
+                    state.addChip(AvatarChip(chip.text, Icons.Default.Check))
+                } else {
+                    state.addChip(AvatarChip(chip.text, Icons.Default.Close))
+                }
+            }
         }
     }
 
+    LaunchedEffect(state.chips) {
+        state.chips.let { stateChips ->
+
+            val removedChips = uiState.chips.filterNot { chip ->
+                stateChips.any { it.text == chip.text }
+            }
+            removedChips.forEach {
+                onChipRemoved(it.text)
+            }
+        }
+    }
 
 }
 

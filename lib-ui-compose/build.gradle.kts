@@ -122,9 +122,7 @@ android {
         jvmToolchain(17)
     }
 }
-//dependencies {
-//    implementation(libs.androidx.material3.android)
-//}
+
 
 multiplatformResources {
     multiplatformResourcesPackage = "com.ustadmobile.libuicompose"

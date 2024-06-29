@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -26,18 +27,24 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.ustadmobile.core.MR
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
+import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 @Composable
 actual fun UstadContactPickButton(
-    onContactPicked: (String?) -> Unit
+    onContactPicked: (String?) -> Unit,
+    onContactError: (String?) -> Unit
 
 ) {
+    val scope = rememberCoroutineScope()
     val context = LocalContext.current
+
+
     var dialogVisible: Boolean by remember {
         mutableStateOf(false)
     }
@@ -51,26 +58,31 @@ actual fun UstadContactPickButton(
         if (result.resultCode == Activity.RESULT_OK) {
             val data: Intent? = result.data
             val contactUri: Uri? = data?.data
+
             if (contactUri != null) {
                 val projection = arrayOf(ContactsContract.CommonDataKinds.Phone.NUMBER)
                 val cursor = context.contentResolver.query(contactUri, projection, null, null, null)
-                CoroutineScope(Dispatchers.IO).launch {
-                    cursor?.use {
-                        if (it.moveToFirst()) {
-                            val numberIndex =
-                                it.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)
-                            val number = it.getString(numberIndex)
+                scope.launch {
+                    withContext(Dispatchers.IO) {
+                        cursor?.use {
+                            if (it.moveToFirst()) {
+                                val numberIndex =
+                                    it.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)
+                                val number = it.getString(numberIndex)
 
-                            onContactPicked(number)
+                                onContactPicked(number)
+                            } else {
+                                onContactError("null")
+
+                            }
                         }
                     }
                 }
 
+
             } else {
-                onContactPicked(null)
+                onContactError("null")
             }
-        } else {
-            onContactPicked(null)
         }
     }
 
@@ -86,20 +98,23 @@ actual fun UstadContactPickButton(
             if (contactUri != null) {
                 val projection = arrayOf(ContactsContract.CommonDataKinds.Email.ADDRESS)
                 val cursor = context.contentResolver.query(contactUri, projection, null, null, null)
-                CoroutineScope(Dispatchers.IO).launch {
-                    cursor?.use {
-                        if (it.moveToFirst()) {
-                            val emailIndex =
-                                it.getColumnIndex(ContactsContract.CommonDataKinds.Email.ADDRESS)
-                            onContactPicked(it.getString(emailIndex))
+                scope.launch {
+                    withContext(Dispatchers.IO) {
+                        cursor?.use {
+                            if (it.moveToFirst()) {
+                                val emailIndex =
+                                    it.getColumnIndex(ContactsContract.CommonDataKinds.Email.ADDRESS)
+                                onContactPicked(it.getString(emailIndex))
+                            } else {
+                                onContactError("null")
+                            }
                         }
                     }
                 }
+
             } else {
-                onContactPicked(null)
+                onContactError("null")
             }
-        } else {
-            onContactPicked(null)
         }
     }
 
