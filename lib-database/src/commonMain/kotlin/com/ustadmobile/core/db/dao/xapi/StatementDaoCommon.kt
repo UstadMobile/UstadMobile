@@ -96,5 +96,22 @@ object StatementDaoCommon {
                            WHERE ActorUidsForPersonUid.actorPersonUid = PersonUidsAndCourseBlocks.personUid))
     """
 
+    const val JOIN_ACTOR_TABLES_FROM_STATEMENT_OUTER = """
+       JOIN ActorEntity ActorEntity_Outer
+            ON ActorEntity_Outer.actorUid = StatementEntity_Outer.statementActorUid
+       LEFT JOIN GroupMemberActorJoin GroupMemberActorJoin_Outer
+            ON ActorEntity_Outer.actorObjectType = ${XapiEntityObjectTypeFlags.GROUP}
+               AND (GroupMemberActorJoin_Outer.gmajGroupActorUid, GroupMemberActorJoin_Outer.gmajMemberActorUid) IN (
+                   SELECT GroupMemberActorJoin.gmajGroupActorUid, 
+                          GroupMemberActorJoin.gmajMemberActorUid
+                     FROM GroupMemberActorJoin
+                    WHERE GroupMemberActorJoin.gmajGroupActorUid = StatementEntity_Outer.statementActorUid
+                      AND GroupMemberActorJoin.gmajMemberActorUid IN (
+                          SELECT ActorUidsForPersonUid.actorUid
+                            FROM ActorUidsForPersonUid
+                           WHERE ActorUidsForPersonUid.actorPersonUid = PersonUidsAndCourseBlocks.personUid))
+    """
+
+
 
 }

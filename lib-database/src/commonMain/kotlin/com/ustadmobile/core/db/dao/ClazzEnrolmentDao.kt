@@ -24,6 +24,7 @@ import com.ustadmobile.lib.db.composites.ClazzEnrolmentAndPersonDetailDetails
 import com.ustadmobile.lib.db.composites.CourseNameAndPersonName
 import com.ustadmobile.lib.db.composites.PersonAndClazzMemberListDetails
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.xapi.ActorEntity
 import kotlinx.coroutines.flow.Flow
 
 @Repository
@@ -260,6 +261,8 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
                        LEFT JOIN StatementEntity
                                  ON StatementEntity.statementIdHi = 0 
                                     AND StatementEntity.statementIdLo = 0
+                       LEFT JOIN ActorEntity
+                                 ON ActorEntity.actorUid = 0
                  WHERE Person.personUid IN 
                        (SELECT DISTINCT ClazzEnrolment.clazzEnrolmentPersonUid 
                           FROM ClazzEnrolment 
@@ -302,7 +305,7 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
     @QueryLiveTables(
         value = [
             "Clazz", "Person", "ClazzEnrolment", "PersonPicture",
-            "CoursePermission", "StatementEntity"
+            "CoursePermission", "StatementEntity", "ActorEntity"
         ]
     )
     @HttpAccessible(
@@ -312,6 +315,9 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
             HttpServerFunctionCall(
                 functionName = "findStatusForStudentsInClazzStatements",
                 functionDao = StatementDao::class,
+            ),
+            HttpServerFunctionCall(
+                functionName = "findActorEntitiesForGradebook"
             )
         )
     )
@@ -325,6 +331,20 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         currentTime: Long,
         permission: Long,
     ): PagingSource<Int, PersonAndClazzMemberListDetails>
+
+    @Query("""
+        SELECT ActorEntity.*
+          FROM ActorEntity
+         WHERE ActorEntity.actorPersonUid IN 
+               (SELECT DISTINCT ClazzEnrolment.clazzEnrolmentPersonUid 
+                  FROM ClazzEnrolment 
+                 WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid 
+                   AND ClazzEnrolment.clazzEnrolmentActive 
+                   AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT})
+    """)
+    abstract suspend fun findActorEntitiesForGradebook(
+        clazzUid: Long,
+    ): List<ActorEntity>
 
     /**
      * Get a list of all enrolments with associated person entity that the given accountpersonuid

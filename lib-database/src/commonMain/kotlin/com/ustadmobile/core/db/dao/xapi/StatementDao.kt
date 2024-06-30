@@ -9,6 +9,7 @@ import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CONTENT_ENTRY
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY_WHERE_MATCHES_ACCOUNT_PERSON_UID_AND_PARENT_CONTENT_ENTRY_ROOT
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.JOIN_ACTOR_TABLES_FROM_ACTOR_UIDS_FOR_PERSON_UID
+import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.JOIN_ACTOR_TABLES_FROM_STATEMENT_OUTER
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.STATEMENT_MATCHES_PERSONUIDS_AND_COURSEBLOCKS
 import com.ustadmobile.door.DoorQuery
 import com.ustadmobile.door.annotation.DoorDao
@@ -135,7 +136,7 @@ expect abstract class StatementDao {
         
         
         -- Maximum score statement
-        SELECT StatementEntity_Outer.*, ActorEntity_Outer.*
+        SELECT StatementEntity_Outer.*, ActorEntity_Outer.*, GroupMemberActorJoin_Outer.*
           FROM PersonUidsAndCourseBlocks
                JOIN StatementEntity StatementEntity_Outer
                     ON (StatementEntity_Outer.statementIdHi, StatementEntity_Outer.statementIdLo) IN (
@@ -146,13 +147,12 @@ expect abstract class StatementDao {
                       ORDER BY StatementEntity.extensionProgress DESC
                          LIMIT 1
                     )
-               JOIN ActorEntity ActorEntity_Outer
-                    ON ActorEntity_Outer.actorUid = StatementEntity_Outer.statementActorUid
+               $JOIN_ACTOR_TABLES_FROM_STATEMENT_OUTER
                     
         UNION
         
         --Completed statement
-        SELECT StatementEntity_Outer.*, ActorEntity_Outer.*
+        SELECT StatementEntity_Outer.*, ActorEntity_Outer.*, GroupMemberActorJoin_Outer.*
           FROM PersonUidsAndCourseBlocks
                JOIN StatementEntity StatementEntity_Outer
                     ON (StatementEntity_Outer.statementIdHi, StatementEntity_Outer.statementIdLo) IN (
@@ -163,12 +163,11 @@ expect abstract class StatementDao {
                              AND CAST(StatementEntity.resultCompletion AS INTEGER) = 1
                            LIMIT 1     
                     )
-               JOIN ActorEntity ActorEntity_Outer
-                    ON ActorEntity_Outer.actorUid = StatementEntity_Outer.statementActorUid    
+               $JOIN_ACTOR_TABLES_FROM_STATEMENT_OUTER  
         UNION 
         
         -- StatementEntity for success or fail e.g. resultSuccess is not null             
-        SELECT StatementEntity_Outer.*, ActorEntity_Outer.*
+        SELECT StatementEntity_Outer.*, ActorEntity_Outer.*, GroupMemberActorJoin_Outer.*
           FROM PersonUidsAndCourseBlocks
                JOIN StatementEntity StatementEntity_Outer
                     ON (StatementEntity_Outer.statementIdHi, StatementEntity_Outer.statementIdLo) IN (
@@ -180,13 +179,12 @@ expect abstract class StatementDao {
                         ORDER BY StatementEntity.resultSuccess DESC     
                            LIMIT 1     
                     )
-               JOIN ActorEntity ActorEntity_Outer
-                    ON ActorEntity_Outer.actorUid = StatementEntity_Outer.statementActorUid    
+               $JOIN_ACTOR_TABLES_FROM_STATEMENT_OUTER
         
         UNION
         
         --StatementEntity for score
-        SELECT StatementEntity_Outer.*, ActorEntity_Outer.*
+        SELECT StatementEntity_Outer.*, ActorEntity_Outer.*, GroupMemberActorJoin_Outer.*
           FROM PersonUidsAndCourseBlocks
                JOIN StatementEntity StatementEntity_Outer
                     ON (StatementEntity_Outer.statementIdHi, StatementEntity_Outer.statementIdLo) IN (
@@ -230,8 +228,7 @@ expect abstract class StatementDao {
                                   )
                               )
                         )
-               JOIN ActorEntity ActorEntity_Outer
-                    ON ActorEntity_Outer.actorUid = StatementEntity_Outer.statementActorUid         
+               $JOIN_ACTOR_TABLES_FROM_STATEMENT_OUTER
     """)
     abstract suspend fun findStatusForStudentsInClazzStatements(
         clazzUid: Long,
