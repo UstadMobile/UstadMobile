@@ -127,16 +127,7 @@ fun App(
         }
     }
 
-    val isLocalSession = currentSession?.endpoint?.isLocal == true
-    if (isLocalSession) {
-        // Automatically navigate to the library screen for local users
-        LaunchedEffect(Unit) {
-            navigator.navigate(
-                route = "/${ContentEntryListViewModel.DEST_NAME_HOME}",
-                options = NavOptions(popUpTo = PopUpTo.First(inclusive = true))
-            )
-        }
-    }
+
 
     Scaffold(
         topBar = {
@@ -151,7 +142,7 @@ fun App(
         bottomBar = {
             //As per https://developer.android.com/reference/kotlin/androidx/compose/material3/package-summary#navigationbar
             var selectedTopLevelItemIndex by remember { mutableIntStateOf(0) }
-            if(useBottomBar && !isLocalSession) {
+            if(useBottomBar && currentSession?.endpoint?.isLocal != true) {
                 val currentDestination by navigator.currentEntry.collectAsState(null)
 
                 /**
