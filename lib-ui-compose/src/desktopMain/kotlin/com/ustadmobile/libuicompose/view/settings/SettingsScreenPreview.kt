@@ -5,8 +5,9 @@ import androidx.compose.runtime.Composable
 import com.ustadmobile.core.viewmodel.settings.SettingsUiState
 
 
-@Composable
+
 @Preview
+@Composable
 fun SettingsPreview() {
     val uiState = SettingsUiState(
         reasonLeavingVisible = true,
@@ -14,5 +15,15 @@ fun SettingsPreview() {
         workspaceSettingsVisible = true,
         langDialogVisible = true
     )
-    SettingsScreen(uiState)
+    SettingsScreen(
+        uiState = uiState,
+        onClickAppLanguage = { },
+        onClickWorkspace = { },
+        onClickHtmlContentDisplayEngine = { },
+        onClickVersion = { },
+        onClickDeveloperOptions = { },
+        onClickDeletedItems = { },
+        onClickOfflineStorageOptionsDialog = { },
+        onClickCreateBackup = { }
+    )
 }

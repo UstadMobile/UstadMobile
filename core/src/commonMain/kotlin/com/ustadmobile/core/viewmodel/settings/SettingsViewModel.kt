@@ -11,6 +11,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.model.FileToZip
+import com.ustadmobile.core.util.FolderSelector
+import com.ustadmobile.core.domain.backup.ZipFileUseCase
 import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.GetHtmlContentDisplayEngineOptionsUseCase
@@ -30,6 +33,7 @@ import com.ustadmobile.core.viewmodel.deleteditem.DeletedItemListViewModel
 import com.ustadmobile.core.viewmodel.settings.DeveloperSettingsViewModel.Companion.PREFKEY_DEVSETTINGS_ENABLED
 import com.ustadmobile.core.viewmodel.site.detail.SiteDetailViewModel
 import kotlinx.atomicfu.atomic
+import kotlinx.datetime.Clock
 import org.kodein.di.instance
 import org.kodein.di.instanceOrNull
 
@@ -39,9 +43,9 @@ data class SettingsOfflineStorageOption(
 )
 
 data class SettingsUiState(
-
+    val backupDialogVisible: Boolean = false,
+    val selectedBackupPath: String? = null,
     val htmlContentDisplayOptions: List<HtmlContentDisplayEngineOption> = emptyList(),
-
     val currentHtmlContentDisplayOption: HtmlContentDisplayEngineOption? = null,
 
     val holidayCalendarVisible: Boolean = false,
@@ -117,7 +121,20 @@ class SettingsViewModel(
 
     private val settings: Settings by instance()
 
+    private val zipFileUseCase: ZipFileUseCase by instance()
+    private val folderSelector: FolderSelector by instance()
+
     init {
+
+        viewModelScope.launch {
+            folderSelector.selectedFolder.collect { selectedPath ->
+                if (selectedPath != null) {
+                    _uiState.update { it.copy(selectedBackupPath = selectedPath) }
+                    createBackup(selectedPath)
+                }
+            }
+        }
+
         _appUiState.update { prev ->
             prev.copy(
                 title = systemImpl.getString(MR.strings.settings),
@@ -240,6 +257,51 @@ class SettingsViewModel(
             prev.copy(langDialogVisible = false)
         }
     }
+
+    fun onClickCreateBackup() {
+        _uiState.update { it.copy(backupDialogVisible = true) }
+    }
+
+    fun onDismissBackupDialog() {
+        _uiState.update { it.copy(backupDialogVisible = false) }
+    }
+
+
+    fun onSelectBackupFolder() {
+        viewModelScope.launch {
+            folderSelector.selectFolder()
+        }
+    }
+
+    private fun createBackup(folderUri: String) {
+        viewModelScope.launch {
+
+            try {
+                val filesToBackup = listOf(
+                    FileToZip("", "database.db"),
+                    // Add more files or folders to backup as needed
+                )
+
+                val backupFileName = "backup_${Clock.System.toString()}.zip"
+                val backupFilePath = "$folderUri/$backupFileName"
+
+                zipFileUseCase(filesToBackup, backupFilePath).collect { progress ->
+                }
+
+                _uiState.update {
+                    it.copy(
+                        backupDialogVisible = false
+                    )
+                }
+
+                snackDispatcher.showSnackBar(Snack("Backup Created"))
+            } catch (e: Exception) {
+                snackDispatcher.showSnackBar(Snack("Failed to Created"))
+            }
+        }
+    }
+
+
 
     fun onClickSiteSettings() {
         navController.navigate(SiteDetailViewModel.DEST_NAME, emptyMap())

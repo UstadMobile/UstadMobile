@@ -1,6 +1,11 @@
 package com.ustadmobile.core.impl.di
 
 import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.domain.backup.UnzipFileUseCase
+import com.ustadmobile.core.domain.backup.ZipFileUseCase
+import com.ustadmobile.core.domain.backup.createUnzipFileUseCase
+import com.ustadmobile.core.domain.backup.createZipFileUseCase
+
 import com.ustadmobile.core.domain.assignment.submittername.GetAssignmentSubmitterNameUseCase
 import com.ustadmobile.core.domain.clazz.CreateNewClazzUseCase
 import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.ApproveOrDeclinePendingEnrolmentUseCase
@@ -30,6 +35,10 @@ import org.kodein.di.singleton
  * at the Application level di.
  */
 fun commonDomainDiModule(endpointScope: EndpointScope) = DI.Module("CommonDomain") {
+
+    bind<ZipFileUseCase>() with singleton { createZipFileUseCase() }
+    bind<UnzipFileUseCase>() with singleton { createUnzipFileUseCase() }
+
     bind<EnrolIntoCourseUseCase>() with scoped(endpointScope).provider {
         EnrolIntoCourseUseCase(
             db = instance(tag = DoorTag.TAG_DB),

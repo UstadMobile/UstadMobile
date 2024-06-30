@@ -6,12 +6,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeveloperMode
 import androidx.compose.material.icons.filled.DisplaySettings
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.SdStorage
 import androidx.compose.material.icons.filled.Workspaces
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
@@ -30,6 +33,7 @@ import com.ustadmobile.libuicompose.components.UstadDetailHeader
 import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 import com.ustadmobile.libuicompose.components.UstadWaitForRestartDialog
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
+import kotlin.reflect.KFunction0
 
 @Composable
 fun SettingsScreen(
@@ -39,6 +43,7 @@ fun SettingsScreen(
 
     SettingsScreen(
         uiState = uiState,
+        onClickCreateBackup = viewModel::onClickCreateBackup,
         onClickAppLanguage = viewModel::onClickLanguage,
         onClickWorkspace = viewModel::onClickSiteSettings,
         onClickHtmlContentDisplayEngine = viewModel::onClickHtmlContentDisplayEngine,
@@ -103,10 +108,31 @@ fun SettingsScreen(
         }
     }
 
+    if (uiState.backupDialogVisible) {
+        AlertDialog(
+            onDismissRequest = { viewModel.onDismissBackupDialog() },
+            title = { Text("Select Backup Location") },
+            text = {
+                uiState.selectedBackupPath?.let { path ->
+                    Text("Selected backup path: $path")
+                }
+            },
+            confirmButton = {
+                Button(onClick = { viewModel.onSelectBackupFolder() }) {
+                    Text("Select Folder")
+                }
+            },
+            dismissButton = {
+                Button(onClick = { viewModel.onDismissBackupDialog() }) {
+                    Text(stringResource(MR.strings.cancel))
+                }
+            }
+        )
+    }
+
     if(uiState.waitForRestartDialogVisible) {
         UstadWaitForRestartDialog()
     }
-
 }
 
 @Composable
@@ -121,6 +147,7 @@ fun SettingsScreen(
     onClickDeveloperOptions: () -> Unit = { },
     onClickDeletedItems: () -> Unit = { },
     onClickOfflineStorageOptionsDialog: () -> Unit = { },
+    onClickCreateBackup: () -> Unit = { },
 ) {
     UstadVerticalScrollColumn(
         modifier = Modifier.fillMaxSize()
@@ -131,6 +158,13 @@ fun SettingsScreen(
             icon= Icons.Default.Language,
             valueText = uiState.currentLanguage,
             labelText = stringResource(MR.strings.app_language),
+        )
+
+        UstadDetailField2(
+            modifier = Modifier.clickable(onClick = onClickCreateBackup),
+            icon = Icons.Default.Backup,
+            valueText = "Create Backup",
+            labelText = "Backup your data",
         )
 
         if(uiState.storageOptionsVisible) {
@@ -163,22 +197,21 @@ fun SettingsScreen(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        if (uiState.workspaceSettingsVisible){
+        if (uiState.workspaceSettingsVisible) {
             UstadDetailField2(
                 icon = Icons.Default.Workspaces,
                 valueText = stringResource(MR.strings.site),
                 labelText = stringResource(MR.strings.manage_site_settings),
-                modifier = Modifier.clickable { onClickWorkspace() },
+                modifier = Modifier.clickable(onClick = onClickWorkspace),
             )
         }
 
-
-        if (uiState.reasonLeavingVisible){
+        if (uiState.reasonLeavingVisible) {
             UstadDetailField2(
                 icon = Icons.AutoMirrored.Filled.Logout,
                 valueText = stringResource(MR.strings.leaving_reason),
                 labelText = stringResource(MR.strings.leaving_reason_manage),
-                modifier = Modifier.clickable { onClickLeavingReason() },
+                modifier = Modifier.clickable { /* onClickLeavingReason() */ },
             )
         }
 
@@ -196,10 +229,12 @@ fun SettingsScreen(
             }
         }
 
+
+
         if(uiState.showDeveloperOptions) {
             //Developer settings are not translated
             UstadDetailField2(
-                modifier = Modifier.clickable { onClickDeveloperOptions() },
+                modifier = Modifier.clickable(onClick = onClickDeveloperOptions),
                 icon = Icons.Default.DeveloperMode,
                 valueText = "Developer Settings",
                 labelText = "File paths, logging options, etc.",
