@@ -72,8 +72,7 @@ fun Route.personAuthRegisterRoute() {
             val registerRequest: RegisterRequest = call.receive()
 
             val mPerson = registerRequest.person
-            val newPassword = registerRequest.person.newPassword
-                ?: throw IllegalArgumentException("register request with no password!")
+            val newPassword = registerRequest.newPassword
 
             val mLangCode = call.request.queryParameters["locale"] ?: "en"
 

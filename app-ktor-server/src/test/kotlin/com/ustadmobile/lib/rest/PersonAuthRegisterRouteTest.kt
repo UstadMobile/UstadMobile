@@ -117,8 +117,7 @@ class PersonAuthRegisterRouteTest {
     fun givenRegisterRequestFromMinor_whenRegisterCalled_thenShouldSendEmailAndReply(
 
     ) = testPersonAuthRegisterApplication { client ->
-        val registerPerson = PersonWithAccount().apply {
-            this.newPassword = "test"
+        val registerPerson = Person().apply {
             firstNames = "Bob"
             lastName = "Jones"
             username = "bobjones"
@@ -133,6 +132,7 @@ class PersonAuthRegisterRouteTest {
                 contentType(ContentType.Application.Json)
                 setBody(RegisterRequest(
                     person = registerPerson,
+                    newPassword = "test",
                     parent = registerParent,
                     endpointUrl = "https://org.ustadmobile.app/"
                 ))
@@ -150,13 +150,11 @@ class PersonAuthRegisterRouteTest {
     fun givenRegisterPersonWithAuth_whenRegisterCalled_thenShouldGenerateAuth(
 
     ) = testPersonAuthRegisterApplication { client ->
-        val registerPerson = PersonWithAccount().apply {
-            this.newPassword = "test"
+        val registerPerson = Person().apply {
             firstNames = "Bob"
             lastName = "Jones"
             username = "bobjones"
             dateOfBirth = systemTimeInMillis() - (20 * 365 * 24 * 60 * 60 * 1000L) //approx 20 years
-            newPassword = "secret23"
         }
 
         val httpResponse = runBlocking {
@@ -164,13 +162,14 @@ class PersonAuthRegisterRouteTest {
                 contentType(ContentType.Application.Json)
                 setBody(RegisterRequest(
                     person = registerPerson,
+                    newPassword = "secret23",
                     parent = null,
                     endpointUrl = "https://org.ustadmobile.app/"
                 ))
             }
         }
 
-        val createdAccount: PersonWithAccount = runBlocking { httpResponse.body() }
+        val createdAccount: Person = runBlocking { httpResponse.body() }
 
 
         val pbkdf2Params: Pbkdf2Params = serverDi.direct.instance()

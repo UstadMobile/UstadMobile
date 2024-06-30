@@ -34,7 +34,6 @@ import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.Person.Companion.GENDER_UNSET
 import com.ustadmobile.lib.db.entities.PersonParentJoin
 import com.ustadmobile.lib.db.entities.PersonPicture
-import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -42,6 +41,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import org.kodein.di.DI
@@ -221,19 +221,13 @@ class PersonEditViewModel(
             awaitAll(
                 async {
                     loadEntity(
-                        serializer = PersonWithAccount.serializer(),
+                        serializer = Person.serializer(),
                         //If in registration mode, we should avoid attempting to connect ot the database at all
-                        onLoadFromDb = if(entityUid != 0L) {
-                            {
-                                it.personDao.findPersonAccountByUid(entityUid)?.also {
-                                    savedStateHandle[KEY_INIT_DATE_OF_BIRTH] = it.dateOfBirth.toString()
-                                }
-                            }
-                        }else {
-                             null
+                        onLoadFromDb = {
+                            it.personDao.takeIf { entityUid != 0L }?.findByUidAsync(entityUid)
                         },
                         makeDefault = {
-                            PersonWithAccount().also {
+                            Person().also {
                                 it.dateOfBirth = savedStateHandle[ARG_DATE_OF_BIRTH]?.toLong() ?: 0L
                             }
                         },
@@ -461,14 +455,15 @@ class PersonEditViewModel(
         viewModelScope.launch {
             if(isRegistrationMode) {
                 val parentJoin = _uiState.value.approvalPersonParentJoin
-                _uiState.update { prev ->
+                val passwordVal = _uiState.value.password
+                val checkedUiState = _uiState.updateAndGet { prev ->
                     prev.copy(
                         usernameError = if(savePerson.username.isNullOrEmpty()) {
                             requiredFieldMessage
                         }else {
                             null
                         },
-                        passwordError = if(_uiState.value.password.isNullOrEmpty()) {
+                        passwordError = if(passwordVal.isNullOrEmpty()) {
                             requiredFieldMessage
                         }else {
                             null
@@ -489,27 +484,16 @@ class PersonEditViewModel(
                     )
                 }
 
-                if(_uiState.value.hasErrors()) {
+                if(checkedUiState.hasErrors() || passwordVal == null) {
                     loadingState = LoadingUiState.NOT_LOADING
                     _uiState.update { prev -> prev.copy(fieldsEnabled = true) }
                     return@launch
                 }
 
                 try {
-                    val personToRegister = PersonWithAccount().apply {
-                        firstNames = savePerson.firstNames
-                        lastName = savePerson.lastName
-                        dateOfBirth = savePerson.dateOfBirth
-                        username = savePerson.username
-                        emailAddr = savePerson.emailAddr
-                        personAddress = savePerson.personAddress
-                        gender = savePerson.gender
-                        newPassword = _uiState.value.password
-                        personUid = savePerson.personUid
-                    }
-
                     val registeredPerson = accountManager.register(
-                        person = personToRegister,
+                        person = savePerson,
+                        password = passwordVal,
                         endpointUrl = serverUrl,
                         accountRegisterOptions = AccountRegisterOptions(
                             makeAccountActive = !registrationModeFlags.hasFlag(REGISTER_MODE_MINOR)
@@ -698,7 +682,7 @@ class PersonEditViewModel(
          * Used to store the date of birth on first load so that we can determine if a date of birth
          * update makes the person a minor.
          */
-        val KEY_INIT_DATE_OF_BIRTH = "initDob"
+        const val KEY_INIT_DATE_OF_BIRTH = "initDob"
 
     }
 

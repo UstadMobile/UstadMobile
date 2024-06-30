@@ -43,7 +43,7 @@ import kotlinx.serialization.Serializable
      )
  ))
 @Serializable
-open class Person() {
+class Person() {
 
     @PrimaryKey(autoGenerate = true)
     var personUid: Long = 0

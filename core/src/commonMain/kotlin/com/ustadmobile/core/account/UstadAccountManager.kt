@@ -280,10 +280,11 @@ class UstadAccountManager(
 
 
     suspend fun register(
-        person: PersonWithAccount,
+        person: Person,
+        password: String,
         endpointUrl: String,
         accountRegisterOptions: AccountRegisterOptions = AccountRegisterOptions()
-    ): PersonWithAccount = withContext(Dispatchers.Default){
+    ): Person = withContext(Dispatchers.Default){
         assertNotClosed()
         val endpoint = Endpoint(endpointUrl)
         val parentVal = accountRegisterOptions.parentJoin
@@ -293,31 +294,34 @@ class UstadAccountManager(
             setBodyJson(
                 json = json,
                 serializer = RegisterRequest.serializer(),
-                value = RegisterRequest(person, parentVal, endpointUrl)
+                value = RegisterRequest(
+                    person = person,
+                    newPassword = password,
+                    parent = parentVal,
+                    endpointUrl = endpointUrl
+                )
             )
         }
 
         val (registeredPerson: Person?, status: Int) = httpStmt.execute { response ->
             if(response.status.value == 200) {
-                Pair(json.decodeFromString<PersonWithAccount>(response.bodyAsText()), 200)
+                Pair(json.decodeFromString<Person>(response.bodyAsText()), 200)
             }else {
                 Pair(null, response.status.value)
             }
         }
 
-        val newPassword = person.newPassword
-        if(status == 200 && registeredPerson != null && newPassword != null) {
+        if(status == 200 && registeredPerson != null) {
             //Must ensure that the site object is loaded to get auth salt.
             val repo: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_REPO)
             getSiteFromDbOrLoadFromHttp(repo)
 
-            val session = addSession(registeredPerson,
-                endpointUrl, newPassword)
+            val session = addSession(registeredPerson, endpointUrl, password)
 
             //If the person is not loaded into the database (probably not), then put in the db.
             val db: UmAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
             db.withDoorTransactionAsync {
-                if(db.personDao.findPersonAccountByUid(registeredPerson.personUid) == null) {
+                if(db.personDao.findByUidAsync(registeredPerson.personUid) == null) {
                     db.personDao.insertAsync(registeredPerson)
                 }
             }

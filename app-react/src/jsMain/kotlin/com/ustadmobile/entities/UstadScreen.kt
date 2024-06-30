@@ -99,7 +99,6 @@ import com.ustadmobile.core.viewmodel.schedule.edit.ScheduleEditViewModel
 import com.ustadmobile.view.dbexport.DbExportScreen
 import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditViewModel
 import com.ustadmobile.view.accountlist.AccountListScreen
-import com.ustadmobile.view.person.accountedit.PersonAccountEditPreview
 import com.ustadmobile.view.person.accountedit.PersonAccountEditScreen
 import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
 import com.ustadmobile.view.contententry.importlink.ContentEntryImportLinkScreen
@@ -190,9 +189,6 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     ),
     UstadScreen(PersonEditViewModel.DEST_NAME, "PersonEdit", PersonEditScreen),
     UstadScreen(PersonEditViewModel.DEST_NAME_REGISTER, "Register", PersonEditScreen),
-    UstadScreen(PersonAccountEditView.VIEW_NAME, "Person Account Edit Preview",
-        PersonAccountEditPreview
-    ),
     UstadScreen(LoginViewModel.DEST_NAME, "Login Preview",
         LoginScreen
     ),

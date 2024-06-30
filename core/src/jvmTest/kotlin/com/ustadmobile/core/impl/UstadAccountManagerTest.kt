@@ -509,20 +509,19 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
     fun givenValidRegistrationRequest_whenNewAccountRequested_thenShouldBeRequestedOnServerAndActive() {
         val accountManager = UstadAccountManager(mockSettings, di)
 
-        val personToRegister = PersonWithAccount().apply {
+        val personToRegister = Person().apply {
             firstNames = "Mary"
             lastName = "Poppins"
             phoneNum = "1234567"
             emailAddr = "mary@email.com"
             username = "mary"
-            newPassword = "password"
         }
 
         val accountResponse = UmAccount(42L, "mary", "", "")
         mockDispatcher.registerUmAccount = accountResponse
 
         runBlocking {
-            accountManager.register(personToRegister, mockServerUrl)
+            accountManager.register(personToRegister, password = "password", mockServerUrl)
         }
 
         Assert.assertEquals("Active account is the account registered",

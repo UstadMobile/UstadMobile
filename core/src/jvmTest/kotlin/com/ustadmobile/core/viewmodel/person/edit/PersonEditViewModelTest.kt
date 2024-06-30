@@ -145,8 +145,12 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
                 viewModel.onClickSave()
 
                 verifyBlocking(accountManager, timeout(5000)) {
-                    register(argWhere { it.firstNames == "Test" && it.username == "testuser"},
-                        eq(serverUrl), argWhere { it.makeAccountActive })
+                    register(
+                        argWhere { it.firstNames == "Test" && it.username == "testuser" },
+                        eq("test#@@12"),
+                        eq(serverUrl),
+                        argWhere { it.makeAccountActive }
+                    )
                 }
 
                 cancelAndIgnoreRemainingEvents()
@@ -241,6 +245,7 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
             verifyBlocking(accountManager, timeout(5000)) {
                 register(
                     argWhere { it.username == "janedoe" },
+                    eq("secret"),
                     eq(serverUrl),
                     argWhere { it.parentJoin?.ppjEmail == "parent@somewhere.com" }
                 )

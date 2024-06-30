@@ -82,10 +82,6 @@ expect abstract class PersonDao : BaseDao<Person> {
     @Query("SELECT * FROM PERSON WHERE Person.personUid = :uid")
     abstract fun findByUid(uid: Long): Person?
 
-    @Query("SELECT Person.*, null as newPassword, null as currentPassword,null as confirmedPassword" +
-            " FROM PERSON WHERE Person.personUid = :uid")
-    abstract suspend fun findPersonAccountByUid(uid: Long): PersonWithAccount?
-
     @HttpAccessible(
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
     )
