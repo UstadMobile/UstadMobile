@@ -1646,8 +1646,37 @@ val MIGRATION_189_190 = DoorMigrationStatementList(189, 190) { db ->
             add("CREATE TABLE IF NOT EXISTS StatementEntity (  statementIdHi  BIGINT  NOT NULL , statementIdLo  BIGINT  NOT NULL , statementActorPersonUid  BIGINT  NOT NULL , statementVerbUid  BIGINT  NOT NULL , statementObjectType  INTEGER  NOT NULL , statementObjectUid1  BIGINT  NOT NULL , statementObjectUid2  BIGINT  NOT NULL , statementActorUid  BIGINT  NOT NULL , authorityUid  BIGINT  NOT NULL , teamUid  BIGINT  NOT NULL , resultCompletion  BOOL , resultSuccess  BOOL , resultScoreScaled  FLOAT , resultScoreRaw  FLOAT , resultScoreMin  FLOAT , resultScoreMax  FLOAT , resultDuration  BIGINT , resultResponse  TEXT , timestamp  BIGINT  NOT NULL , stored  BIGINT  NOT NULL , contextRegistrationHi  BIGINT  NOT NULL , contextRegistrationLo  BIGINT  NOT NULL , contextPlatform  TEXT , contextStatementRefIdHi  BIGINT  NOT NULL , contextStatementRefIdLo  BIGINT  NOT NULL , contextInstructorUid  BIGINT  NOT NULL , statementLct  BIGINT  NOT NULL , extensionProgress  INTEGER , contentEntryRoot  BOOL  NOT NULL , statementContentEntryUid  BIGINT  NOT NULL , statementLearnerGroupUid  BIGINT  NOT NULL , statementClazzUid  BIGINT  NOT NULL , statementCbUid  BIGINT  NOT NULL , statementDoorNode  BIGINT  NOT NULL , isSubStatement  BOOL  NOT NULL , PRIMARY KEY (statementIdHi, statementIdLo) )")
         }
     }
-
 }
+
+/**
+ * Adds personUid to ActorEntity and drops unused person columns.
+ */
+val MIGRATION_190_191 = DoorMigrationStatementList(190, 191) { db ->
+    buildList {
+        add("DROP TABLE ActorEntity")
+
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS ActorEntity (  actorPersonUid  INTEGER  NOT NULL , actorName  TEXT , actorMbox  TEXT , actorMbox_sha1sum  TEXT , actorOpenid  TEXT , actorAccountName  TEXT , actorAccountHomePage  TEXT , actorEtag  INTEGER  NOT NULL , actorLct  INTEGER  NOT NULL , actorObjectType  INTEGER  NOT NULL , actorUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+            add("ALTER TABLE Person RENAME to Person_OLD")
+            add("CREATE TABLE IF NOT EXISTS Person (  username  TEXT , firstNames  TEXT , lastName  TEXT , emailAddr  TEXT , phoneNum  TEXT , gender  INTEGER  NOT NULL , active  INTEGER  NOT NULL , dateOfBirth  INTEGER  NOT NULL , personAddress  TEXT , personOrgId  TEXT , personGroupUid  INTEGER  NOT NULL , personLct  INTEGER  NOT NULL , personCountry  TEXT , personType  INTEGER  NOT NULL  DEFAULT 0 , personUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+            add("INSERT INTO Person (username, firstNames, lastName, emailAddr, phoneNum, gender, active, dateOfBirth, personAddress, personOrgId, personGroupUid, personLct, personCountry, personType, personUid) SELECT username, firstNames, lastName, emailAddr, phoneNum, gender, active, dateOfBirth, personAddress, personOrgId, personGroupUid, personLct, personCountry, personType, personUid FROM Person_OLD")
+            add("DROP TABLE Person_OLD")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS ActorEntity (  actorPersonUid  BIGINT  NOT NULL , actorName  TEXT , actorMbox  TEXT , actorMbox_sha1sum  TEXT , actorOpenid  TEXT , actorAccountName  TEXT , actorAccountHomePage  TEXT , actorEtag  BIGINT  NOT NULL , actorLct  BIGINT  NOT NULL , actorObjectType  INTEGER  NOT NULL , actorUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+            listOf(
+                "fatherName", "fatherNumber", "motherName", "motherNumber",
+                "personMasterChangeSeqNum", "personLocalChangeSeqNum", "personLastChangedBy",
+                "personNotes", "admin"
+            ).forEach {
+                add("ALTER TABLE Person DROP COLUMN $it")
+            }
+        }
+
+        add("CREATE INDEX idx_actorentity_uid_personuid ON ActorEntity (actorPersonUid)")
+    }
+}
+
+
 
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_105_106, MIGRATION_106_107,
@@ -1668,6 +1697,7 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_178_179, MIGRATION_179_180, MIGRATION_180_181, MIGRATION_181_182,
     MIGRATION_182_183, MIGRATION_183_184, MIGRATION_184_185, MIGRATION_185_186,
     MIGRATION_186_187, MIGRATION_187_188, MIGRATION_188_189, MIGRATION_189_190,
+    MIGRATION_190_191,
 )
 
 

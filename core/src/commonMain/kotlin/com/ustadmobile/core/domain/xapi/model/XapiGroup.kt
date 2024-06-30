@@ -56,11 +56,12 @@ fun XapiGroup.toGroupEntities(
     stringHasher: XXStringHasher,
     primaryKeyManager: DoorPrimaryKeyManager,
     hasherFactory: XXHasher64Factory,
+    knownActorUidToPersonUidMap: Map<Long, Long> = emptyMap(),
 ) : ActorEntities {
     val modTime = systemTimeInMillis()
 
     val memberActors = member.map {
-        it.identifierHash(stringHasher) to it.toActorEntity(stringHasher)
+        it.identifierHash(stringHasher) to it.toActorEntity(stringHasher, knownActorUidToPersonUidMap)
     }.sortedBy { it.first }
 
     val hasher = hasherFactory.newHasher(0)

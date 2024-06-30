@@ -107,6 +107,7 @@ fun commonDomainDiModule(endpointScope: EndpointScope) = DI.Module("CommonDomain
         CreateXapiGroupForCourseGroupUseCase(
             repo = instance(tag = DoorTag.TAG_REPO),
             endpoint = context,
+            stringHasher = instance(),
         )
     }
 

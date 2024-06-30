@@ -8,13 +8,9 @@ import com.ustadmobile.lib.db.entities.UmAccount
 
 fun Person.personFullName(): String = "${firstNames ?: ""} ${lastName ?: ""}"
 
-fun Person.initials(): String {
-    return (firstNames?.initials() ?: "") + " " + (lastName?.initials() ?: "")
-}
-
 fun Person.toUmAccount(endpointUrl: String) = UmAccount(personUid = personUid,
     username = username, auth = "", endpointUrl = endpointUrl, firstName = firstNames,
-    lastName = lastName, admin = admin)
+    lastName = lastName)
 
 
 fun Person.isGuestUser() : Boolean {
@@ -25,8 +21,7 @@ fun Person.isGuestUser() : Boolean {
  * Converts a Person to an XapiAgent
  * name - full name e.g. first names last name
  * account - homepage is endpoint.url
- * account name is the username (if available), or the personuid if not. Ordinary usernames MUST not
- * start with a number.
+ * account name is the personuid.
  */
 fun Person.toXapiAgent(endpoint: Endpoint): XapiAgent {
     return XapiAgent(

@@ -9,6 +9,7 @@ import com.ustadmobile.core.domain.xapi.ext.insertOrUpdateIfLastModChanged
 import com.ustadmobile.core.domain.xapi.model.XapiAccount
 import com.ustadmobile.core.domain.xapi.model.XapiAgent
 import com.ustadmobile.core.domain.xapi.model.XapiStatement
+import com.ustadmobile.core.domain.xapi.model.identifierHash
 import com.ustadmobile.core.domain.xapi.model.toEntities
 import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
 import com.ustadmobile.core.domain.xxhash.XXStringHasher
@@ -48,6 +49,19 @@ class XapiStatementResource(
         statements: List<XapiStatement>,
         xapiSession: XapiSession,
     ): StatementStoreResult {
+        val sessionActorUid = xapiSession.agent.identifierHash(xxHasher)
+
+        //Ensure the known actor uid to person uid map has the person uid for the session actor uid
+        val effectiveSession = if(
+            !xapiSession.knownActorUidToPersonUidMap.containsKey(sessionActorUid)
+        ) {
+            xapiSession.copy(
+                knownActorUidToPersonUidMap = xapiSession.knownActorUidToPersonUidMap + (sessionActorUid to xapiSession.accountPersonUid)
+            )
+        }else {
+            xapiSession
+        }
+
         val statementEntities = statements.flatMap { stmt ->
             val timeNowStr = Clock.System.now().toString()
 
@@ -60,15 +74,15 @@ class XapiStatementResource(
                 id = xapiRequireValidUuidOrNullAsString(stmt.id) ?: randomUuidAsString(),
                 authority = XapiAgent(
                     account = XapiAccount(
-                        name = xapiSession.accountUsername,
-                        homePage = xapiSession.endpoint.url,
+                        name = effectiveSession.accountUsername,
+                        homePage = effectiveSession.endpoint.url,
                     )
                 )
             )
 
             exactStatement.toEntities(
                 stringHasher = xxHasher,
-                xapiSession = xapiSession,
+                xapiSession = effectiveSession,
                 exactJson = json.encodeToString(XapiStatement.serializer(), exactStatement),
                 primaryKeyManager = db.doorPrimaryKeyManager,
                 hasherFactory = hasherFactory,

@@ -69,7 +69,7 @@ suspend fun UmAppDatabase.initAdminUser(
     if (adminUser == null) {
         val addNewPersonUseCase: AddNewPersonUseCase = di.on(endpoint).direct.instance()
 
-        val adminPerson = Person("admin", "Admin", "User")
+        val adminPerson = Person(username = "admin", firstNames = "Admin", lastName = "User")
 
         adminPerson.personUid = addNewPersonUseCase(
             adminPerson, systemPermissions = Long.MAX_VALUE,

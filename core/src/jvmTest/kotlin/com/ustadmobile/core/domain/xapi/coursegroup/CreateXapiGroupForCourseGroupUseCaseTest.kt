@@ -4,6 +4,8 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.clazz.CreateNewClazzUseCase
 import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.EnrolIntoCourseUseCase
+import com.ustadmobile.core.domain.xxhash.XXStringHasher
+import com.ustadmobile.core.domain.xxhash.XXStringHasherCommonJvm
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.entities.Clazz
@@ -18,16 +20,18 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 
 class CreateXapiGroupForCourseGroupUseCaseTest {
 
     private lateinit var db: UmAppDatabase
 
+    private lateinit var stringHasher: XXStringHasher
+
     private val endpoint = Endpoint("http://example.com/")
 
     @BeforeTest
     fun setup() {
+        stringHasher = XXStringHasherCommonJvm()
         db = DatabaseBuilder.databaseBuilder(
             UmAppDatabase::class, "jdbc:sqlite::memory:", nodeId = 1L
         )
@@ -108,8 +112,8 @@ class CreateXapiGroupForCourseGroupUseCaseTest {
             )
             db.clazzAssignmentDao.insertAsync(assignment)
 
-            val useCase = CreateXapiGroupForCourseGroupUseCase(db, endpoint)
-            val group = useCase(
+            val useCase = CreateXapiGroupForCourseGroupUseCase(db, endpoint, stringHasher)
+            val result = useCase(
                 groupSetUid = courseGroupSet.cgsUid,
                 groupNum = 1,
                 clazzUid = clazz.clazzUid,
@@ -118,9 +122,8 @@ class CreateXapiGroupForCourseGroupUseCaseTest {
             )
             assertEquals(
                 studentPersons.map { it.second }.count { it.cgmGroupNumber == 1 },
-                group.member.size
+                result.group.member.size
             )
-            assertNotNull(group)
         }
     }
 

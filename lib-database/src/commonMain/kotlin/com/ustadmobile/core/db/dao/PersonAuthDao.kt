@@ -24,13 +24,9 @@ expect abstract class PersonAuthDao : BaseDao<PersonAuth> {
     @Update
     abstract suspend fun updateAsync(entity: PersonAuth):Int
 
-    @Query("SELECT admin from Person WHERE personUid = :uid")
-    abstract fun isPersonAdmin(uid: Long): Boolean
-
     @Query("UPDATE PersonAuth set passwordHash = :passwordHash " +
             " WHERE personAuthUid = :personUid")
     abstract suspend fun updatePasswordForPersonUid(personUid: Long, passwordHash: String): Int
-
 
     @Insert
     abstract fun insertAccessToken(token: AccessToken)

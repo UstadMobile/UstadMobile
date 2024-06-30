@@ -75,8 +75,8 @@ class SubmitMarkUseCase(
 
 
         //Xapi Actor object representing the one who is marking the assignment.
-        val instructorActor: XapiActor = if(assignment.caGroupUid == 0L) {
-            activeUserPerson.toXapiAgent(endpoint)
+        val (instructorActor: XapiActor, instructorActorToPersonUidMap) = if(assignment.caGroupUid == 0L) {
+            activeUserPerson.toXapiAgent(endpoint) to emptyMap()
         } else {
             createXapiGroupUseCase(
                 groupSetUid = assignment.caGroupUid,
@@ -84,12 +84,12 @@ class SubmitMarkUseCase(
                 clazzUid = assignment.caClazzUid,
                 assignmentUid = assignment.caUid,
                 accountPersonUid = activeUserPerson.personUid,
-            )
+            ).let { it.group to it.actorUidToPersonUidMap }
         }
 
-        val statementActor: XapiActor = if(assignment.caGroupUid == 0L) {
-            repo.personDao.findByUidAsync(submitterUid)?.toXapiAgent(endpoint)
-                ?: throw IllegalStateException("Could not find person for $submitterUid")
+        val (statementActor: XapiActor, actorToPersonUidMap) = if(assignment.caGroupUid == 0L) {
+            (repo.personDao.findByUidAsync(submitterUid)?.toXapiAgent(endpoint)
+                ?: throw IllegalStateException("Could not find person for $submitterUid")) to emptyMap()
         }else {
             createXapiGroupUseCase(
                 groupSetUid = assignment.caGroupUid,
@@ -97,7 +97,7 @@ class SubmitMarkUseCase(
                 clazzUid = assignment.caClazzUid,
                 assignmentUid = assignment.caUid,
                 accountPersonUid = submitterUid,
-            )
+            ).let { it.group to it.actorUidToPersonUidMap }
         }
 
         val markToRecord = draftMark.shallowCopy {
@@ -157,6 +157,7 @@ class SubmitMarkUseCase(
                     clazzUid = clazzUid,
                     cbUid = courseBlock.cbUid,
                     rootActivityId = activityId,
+                    knownActorUidToPersonUidMap = instructorActorToPersonUidMap + actorToPersonUidMap
                 )
             )
 

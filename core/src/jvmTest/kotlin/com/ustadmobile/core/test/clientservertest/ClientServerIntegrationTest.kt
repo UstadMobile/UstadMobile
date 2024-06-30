@@ -12,6 +12,8 @@ import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
 import com.ustadmobile.core.domain.assignment.submitmark.SubmitMarkUseCase
 import com.ustadmobile.core.domain.assignment.submittername.GetAssignmentSubmitterNameUseCase
 import com.ustadmobile.core.domain.xapi.coursegroup.CreateXapiGroupForCourseGroupUseCase
+import com.ustadmobile.core.domain.xxhash.XXStringHasher
+import com.ustadmobile.core.domain.xxhash.XXStringHasherCommonJvm
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.config.ApiUrlConfig
@@ -172,7 +174,7 @@ fun clientServerIntegrationTest(
         onReady {
             val localhostEndpoint = Endpoint("localhost")
             val authManager: AuthManager = on(localhostEndpoint).instance()
-            val adminPerson = Person(adminUsername, "Admin", "User")
+            val adminPerson = Person(username = adminUsername, firstNames = "Admin", lastName = "User")
             runBlocking {
                 val adminPersonUid = serverDb.insertPersonAndGroup(adminPerson).personUid
                 authManager.setAuth(adminPersonUid, adminPassword)
@@ -259,7 +261,12 @@ fun clientServerIntegrationTest(
                     CreateXapiGroupForCourseGroupUseCase(
                         repo = clientRepo,
                         endpoint = context,
+                        stringHasher = instance(),
                     )
+                }
+
+                bind<XXStringHasher>() with singleton {
+                    XXStringHasherCommonJvm()
                 }
 
                 registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }

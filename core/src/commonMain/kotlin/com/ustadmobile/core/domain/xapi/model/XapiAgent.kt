@@ -7,10 +7,6 @@ import com.ustadmobile.lib.db.entities.xapi.XapiEntityObjectTypeFlags
 import kotlinx.serialization.Serializable
 
 /**
- * Needs to be joinable to person -
- *  Ideally: xapiIdentifierHash should be added to the person entity and set when there is a userame
- *
- *  a) could link by username
  *
  */
 @Serializable
@@ -25,10 +21,13 @@ data class XapiAgent(
 
 fun XapiAgent.toActorEntity(
     xxHasher: XXStringHasher,
+    knownActorUidToPersonUidMap: Map<Long, Long>,
     lastModifiedTime: Long = systemTimeInMillis(),
 ) : ActorEntity {
+    val uid = identifierHash(xxHasher)
     return ActorEntity(
-        actorUid = identifierHash(xxHasher),
+        actorUid = uid,
+        actorPersonUid = knownActorUidToPersonUidMap[uid] ?: 0L,
         actorMbox = mbox,
         actorMbox_sha1sum = mbox_sha1sum,
         actorOpenid = openid,

@@ -4,6 +4,8 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.xapi.model.XapiAccount
 import com.ustadmobile.core.domain.xapi.model.XapiGroup
+import com.ustadmobile.core.domain.xapi.model.identifierHash
+import com.ustadmobile.core.domain.xxhash.XXStringHasher
 import com.ustadmobile.core.util.ext.toXapiAgent
 
 /**
@@ -13,7 +15,13 @@ import com.ustadmobile.core.util.ext.toXapiAgent
 class CreateXapiGroupForCourseGroupUseCase(
     private val repo: UmAppDatabase,
     private val endpoint: Endpoint,
+    private val stringHasher: XXStringHasher,
 )  {
+
+    data class XapiGroupAndPersonUidMap(
+        val group: XapiGroup,
+        val actorUidToPersonUidMap: Map<Long, Long>
+    )
 
     suspend operator fun invoke(
         groupSetUid: Long,
@@ -21,7 +29,7 @@ class CreateXapiGroupForCourseGroupUseCase(
         clazzUid: Long,
         assignmentUid: Long,
         accountPersonUid: Long,
-    ): XapiGroup {
+    ): XapiGroupAndPersonUidMap {
         val groupMembers = repo.courseGroupMemberDao
             .findByCourseGroupSetAndGroupNumAsync(
                 courseGroupSetUid = groupSetUid,
@@ -31,13 +39,22 @@ class CreateXapiGroupForCourseGroupUseCase(
                 accountPersonUid = accountPersonUid
             )
 
-        return XapiGroup(
-            account = XapiAccount(
-                homePage = endpoint.url,
-                name = "cgs-$groupSetUid-$groupNum"
+        val membersAndPersonUids = groupMembers.mapNotNull { courseGroupMember ->
+            courseGroupMember.person?.toXapiAgent(endpoint)?.let {
+                Pair(it, courseGroupMember.courseGroupMember?.cgmPersonUid ?: 0)
+            }
+        }
+
+        return XapiGroupAndPersonUidMap(
+            group = XapiGroup(
+                account = XapiAccount(
+                    homePage = endpoint.url,
+                    name = "cgs-$groupSetUid-$groupNum"
+                ),
+                member = membersAndPersonUids.map { it.first }
             ),
-            member = groupMembers.mapNotNull {
-                it.person?.toXapiAgent(endpoint)
+            actorUidToPersonUidMap = membersAndPersonUids.associate {
+                it.first.identifierHash(stringHasher) to it.second
             }
         )
     }

@@ -63,9 +63,12 @@ fun XapiActor.toEntities(
     stringHasher: XXStringHasher,
     primaryKeyManager: DoorPrimaryKeyManager,
     hasherFactory: XXHasher64Factory,
+    knownActorUidToPersonUidMap: Map<Long, Long> = emptyMap(),
 ): ActorEntities {
     return when(this) {
-        is XapiAgent -> ActorEntities(actor =toActorEntity(stringHasher))
-        is XapiGroup -> this.toGroupEntities(stringHasher, primaryKeyManager, hasherFactory)
+        is XapiAgent -> ActorEntities(toActorEntity(stringHasher, knownActorUidToPersonUidMap))
+        is XapiGroup -> toGroupEntities(
+            stringHasher, primaryKeyManager, hasherFactory, knownActorUidToPersonUidMap
+        )
     }
 }

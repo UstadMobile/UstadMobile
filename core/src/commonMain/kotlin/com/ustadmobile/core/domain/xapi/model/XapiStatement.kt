@@ -79,8 +79,9 @@ fun XapiStatement.toEntities(
         context?.registration, errorMessage = "Invalid context registration uuid"
     )
 
-    val statementActorEntities = actor.toEntities(stringHasher, primaryKeyManager,
-        hasherFactory)
+    val statementActorEntities = actor.toEntities(
+        stringHasher, primaryKeyManager, hasherFactory, xapiSession.knownActorUidToPersonUidMap
+    )
     val statementObjectForeignKeys = `object`.objectForeignKeys(stringHasher, statementUuid)
 
     return listOf(
@@ -131,7 +132,8 @@ fun XapiStatement.toEntities(
                 stmtJsonIdLo = statementUuid.leastSignificantBits,
                 fullStatement = exactJson,
             ),
-            actorEntities = actor.toEntities(stringHasher, primaryKeyManager, hasherFactory),
+            actorEntities = actor.toEntities(stringHasher, primaryKeyManager, hasherFactory,
+                xapiSession.knownActorUidToPersonUidMap),
             verbEntities = verb.toVerbEntities(stringHasher),
             /*
              * Note: object.objectToEntities will generate the ActivityEntities where an the object

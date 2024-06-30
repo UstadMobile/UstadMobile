@@ -72,13 +72,13 @@ object StatementDaoCommon {
     //May also need to check that the statement is for the root entry.
     const val STATEMENT_MATCHES_PERSON_AND_COURSEBLOCK_CLAUSE = """
          StatementEntity.statementCbUid = CourseBlock.cbUid
-     AND ActorEntity.actorAccountName = Person.username 
+     AND ActorEntity.actorPersonUid = Person.personUid 
     """
 
 
     const val STATEMENT_MATCHES_PERSONUIDS_AND_COURSEBLOCKS = """
             StatementEntity.statementCbUid = PersonUidsAndCourseBlocks.cbUid
-        AND ActorEntity.actorAccountName = PersonUidsAndCourseBlocks.username 
+        AND ActorEntity.actorPersonUid = PersonUidsAndCourseBlocks.personUid 
     """
 
 
