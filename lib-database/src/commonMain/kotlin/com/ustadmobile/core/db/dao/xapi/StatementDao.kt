@@ -8,6 +8,7 @@ import app.cash.paging.PagingSource
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CLAZZ_STUDENT
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CONTENT_ENTRY
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY_WHERE_MATCHES_ACCOUNT_PERSON_UID_AND_PARENT_CONTENT_ENTRY_ROOT
+import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.JOIN_ACTOR_TABLES_FROM_ACTOR_UIDS_FOR_PERSON_UID
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.STATEMENT_MATCHES_PERSONUIDS_AND_COURSEBLOCKS
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.STATEMENT_MATCHES_PERSON_AND_COURSEBLOCK_CLAUSE
 import com.ustadmobile.door.DoorQuery
@@ -122,7 +123,17 @@ expect abstract class StatementDao {
                     (SELECT DISTINCT ClazzEnrolment.clazzEnrolmentPersonUid
                        FROM ClazzEnrolment
                       WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid)       
+        ),
+        
+        ActorUidsForPersonUid(actorUid, actorPersonUid) AS(
+             SELECT ActorEntity.actorUid AS actorUid, 
+                    ActorEntity.actorPersonUid AS actorPersonUid
+               FROM ActorEntity
+              WHERE ActorEntity.actorPersonUid IN
+                    (SELECT PersonUidsAndCourseBlocks.personUid
+                       FROM PersonUidsAndCourseBlocks)
         )
+        
         
         -- Maximum score statement
         SELECT StatementEntity_Outer.*, ActorEntity_Outer.*
@@ -131,8 +142,7 @@ expect abstract class StatementDao {
                     ON (StatementEntity_Outer.statementIdHi, StatementEntity_Outer.statementIdLo) IN (
                         SELECT StatementEntity.statementIdHi, StatementEntity.statementIdLo
                           FROM StatementEntity
-                               JOIN ActorEntity
-                                    ON StatementEntity.statementActorUid = ActorEntity.actorUid
+                               $JOIN_ACTOR_TABLES_FROM_ACTOR_UIDS_FOR_PERSON_UID
                          WHERE $STATEMENT_MATCHES_PERSONUIDS_AND_COURSEBLOCKS 
                       ORDER BY StatementEntity.extensionProgress DESC
                          LIMIT 1
@@ -149,8 +159,7 @@ expect abstract class StatementDao {
                     ON (StatementEntity_Outer.statementIdHi, StatementEntity_Outer.statementIdLo) IN (
                           SELECT StatementEntity.statementIdHi, StatementEntity.statementIdLo
                             FROM StatementEntity
-                                 JOIN ActorEntity
-                                      ON StatementEntity.statementActorUid = ActorEntity.actorUid
+                                 $JOIN_ACTOR_TABLES_FROM_ACTOR_UIDS_FOR_PERSON_UID
                            WHERE ($STATEMENT_MATCHES_PERSONUIDS_AND_COURSEBLOCKS)
                              AND CAST(StatementEntity.resultCompletion AS INTEGER) = 1
                            LIMIT 1     
@@ -166,8 +175,7 @@ expect abstract class StatementDao {
                     ON (StatementEntity_Outer.statementIdHi, StatementEntity_Outer.statementIdLo) IN (
                           SELECT StatementEntity.statementIdHi, StatementEntity.statementIdLo
                             FROM StatementEntity
-                                 JOIN ActorEntity
-                                      ON StatementEntity.statementActorUid = ActorEntity.actorUid
+                                 $JOIN_ACTOR_TABLES_FROM_ACTOR_UIDS_FOR_PERSON_UID
                            WHERE ($STATEMENT_MATCHES_PERSONUIDS_AND_COURSEBLOCKS)
                              AND StatementEntity.resultSuccess IS NOT NULL
                         ORDER BY StatementEntity.resultSuccess DESC     
@@ -185,8 +193,7 @@ expect abstract class StatementDao {
                     ON (StatementEntity_Outer.statementIdHi, StatementEntity_Outer.statementIdLo) IN (
                         SELECT StatementEntity.statementIdHi, StatementEntity.statementIdLo
                           FROM StatementEntity
-                               JOIN ActorEntity
-                                    ON StatementEntity.statementActorUid = ActorEntity.actorUid
+                               $JOIN_ACTOR_TABLES_FROM_ACTOR_UIDS_FOR_PERSON_UID
                                
                          WHERE ($STATEMENT_MATCHES_PERSONUIDS_AND_COURSEBLOCKS)
                                -- Where there is a peer marked assignment  - Work in progress    
@@ -203,7 +210,8 @@ expect abstract class StatementDao {
                                              JOIN ActorEntity ActorEntityInner
                                                   ON StatementEntityInner.statementActorUid = ActorEntityInner.actorUid
                                        WHERE StatementEntityInner.statementCbUid = PersonUidsAndCourseBlocks.cbUid
-                                         AND ActorEntityInner.actorAccountName = PersonUidsAndCourseBlocks.username
+                                         AND (   ActorEntityInner.actorPersonUid = PersonUidsAndCourseBlocks.personUid
+                                              OR GroupMemberActorJoin.gmajGroupActorUid = StatementEntity.statementActorUid)
                                          AND StatementEntityInner.resultScoreScaled IS NOT NULL
                                       )
                                   )
@@ -217,7 +225,8 @@ expect abstract class StatementDao {
                                               JOIN ActorEntity ActorEntityInner
                                                   ON StatementEntityInner.statementActorUid = ActorEntityInner.actorUid
                                         WHERE StatementEntityInner.statementCbUid = PersonUidsAndCourseBlocks.cbUid
-                                          AND ActorEntityInner.actorAccountName = PersonUidsAndCourseBlocks.username
+                                          AND (   ActorEntityInner.actorPersonUid = PersonUidsAndCourseBlocks.personUid
+                                               OR GroupMemberActorJoin.gmajGroupActorUid = StatementEntity.statementActorUid)
                                           AND StatementEntityInner.resultScoreScaled IS NOT NULL) 
                                   )
                               )
@@ -230,7 +239,6 @@ expect abstract class StatementDao {
     ): List<StatementEntityAndRelated>
 
 
-    //To pull over http - change these to selecting the statementuid(s)
     @Query("""
         SELECT Person.personUid AS sPersonUid,
                CourseBlock.cbUid AS sCbUid,

@@ -8,6 +8,7 @@ import com.ustadmobile.door.annotation.Trigger
 import com.ustadmobile.door.annotation.Triggers
 import com.ustadmobile.lib.db.entities.TRIGGER_CONDITION_WHERE_NEWER
 import com.ustadmobile.lib.db.entities.TRIGGER_UPSERT
+import kotlinx.serialization.Serializable
 
 /**
  * See XapiGroup.toGroupEntities for further details on the mapping between the Xapi Spec and the
@@ -32,6 +33,7 @@ import com.ustadmobile.lib.db.entities.TRIGGER_UPSERT
         )
     )
 )
+@Serializable
 data class GroupMemberActorJoin(
     var gmajGroupActorUid: Long = 0,
     var gmajMemberActorUid: Long = 0,

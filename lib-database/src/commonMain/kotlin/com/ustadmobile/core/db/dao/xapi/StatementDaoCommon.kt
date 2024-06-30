@@ -1,6 +1,7 @@
 package com.ustadmobile.core.db.dao.xapi
 
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon
+import com.ustadmobile.lib.db.entities.xapi.XapiEntityObjectTypeFlags
 
 object StatementDaoCommon {
 
@@ -76,9 +77,30 @@ object StatementDaoCommon {
     """
 
 
+    //If the GroupMemberActorJoin does not match the statement and person, it will be null
     const val STATEMENT_MATCHES_PERSONUIDS_AND_COURSEBLOCKS = """
             StatementEntity.statementCbUid = PersonUidsAndCourseBlocks.cbUid
-        AND ActorEntity.actorPersonUid = PersonUidsAndCourseBlocks.personUid 
+        AND (    ActorEntity.actorPersonUid = PersonUidsAndCourseBlocks.personUid
+              OR GroupMemberActorJoin.gmajGroupActorUid = StatementEntity.statementActorUid)
+                   
+    """
+
+    //Join the actor entity, and, if relevant, the GroupMemberActorJoin for the actor group and
+    //person as per ActorUidsForPersonUid
+    const val JOIN_ACTOR_TABLES_FROM_ACTOR_UIDS_FOR_PERSON_UID = """
+       JOIN ActorEntity
+            ON StatementEntity.statementActorUid = ActorEntity.actorUid
+       LEFT JOIN GroupMemberActorJoin
+            ON ActorEntity.actorObjectType = ${XapiEntityObjectTypeFlags.GROUP}
+               AND (GroupMemberActorJoin.gmajGroupActorUid, GroupMemberActorJoin.gmajMemberActorUid) IN (
+                   SELECT GroupMemberActorJoin.gmajGroupActorUid, 
+                          GroupMemberActorJoin.gmajMemberActorUid
+                     FROM GroupMemberActorJoin
+                    WHERE GroupMemberActorJoin.gmajGroupActorUid = StatementEntity.statementActorUid
+                      AND GroupMemberActorJoin.gmajMemberActorUid IN (
+                          SELECT ActorUidsForPersonUid.actorUid
+                            FROM ActorUidsForPersonUid
+                           WHERE ActorUidsForPersonUid.actorPersonUid = PersonUidsAndCourseBlocks.personUid))
     """
 
 
