@@ -75,7 +75,9 @@ class SubmitMarkUseCase(
 
 
         //Xapi Actor object representing the one who is marking the assignment.
-        val (instructorActor: XapiActor, instructorActorToPersonUidMap) = if(assignment.caGroupUid == 0L) {
+        val (instructorActor: XapiActor, instructorActorToPersonUidMap) = if(
+            assignment.caGroupUid == 0L || assignment.caMarkingType == ClazzAssignment.MARKED_BY_COURSE_LEADER
+        ) {
             activeUserPerson.toXapiAgent(endpoint) to emptyMap()
         } else {
             createXapiGroupUseCase(
@@ -96,7 +98,7 @@ class SubmitMarkUseCase(
                 groupNum = submitterUid.toInt(),
                 clazzUid = assignment.caClazzUid,
                 assignmentUid = assignment.caUid,
-                accountPersonUid = submitterUid,
+                accountPersonUid = activeUserPerson.personUid,
             ).let { it.group to it.actorUidToPersonUidMap }
         }
 

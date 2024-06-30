@@ -1,6 +1,7 @@
 package com.ustadmobile.core.db.dao.xapi
 
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.ustadmobile.door.annotation.DoorDao
 import com.ustadmobile.door.annotation.Repository
@@ -10,10 +11,10 @@ import com.ustadmobile.lib.db.entities.xapi.GroupMemberActorJoin
 @DoorDao
 expect abstract class GroupMemberActorJoinDao {
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     abstract suspend fun insertOrIgnoreListAsync(entities: List<GroupMemberActorJoin>)
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun upsertListAsync(entities: List<GroupMemberActorJoin>)
 
     @Query("""
