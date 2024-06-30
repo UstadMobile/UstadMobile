@@ -69,13 +69,6 @@ object StatementDaoCommon {
           AND CAST(StatusStatements.resultSuccess AS INTEGER) = 0
     """
 
-    //This will evolve to include handling group membership
-    //May also need to check that the statement is for the root entry.
-    const val STATEMENT_MATCHES_PERSON_AND_COURSEBLOCK_CLAUSE = """
-         StatementEntity.statementCbUid = CourseBlock.cbUid
-     AND ActorEntity.actorPersonUid = Person.personUid 
-    """
-
 
     //If the GroupMemberActorJoin does not match the statement and person, it will be null
     const val STATEMENT_MATCHES_PERSONUIDS_AND_COURSEBLOCKS = """
