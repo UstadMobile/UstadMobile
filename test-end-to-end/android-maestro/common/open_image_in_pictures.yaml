@@ -5,6 +5,6 @@ appId: com.google.android.documentsui
 ##   Creating a separate flow file to open and view the image in the Pictures folder
 - launchApp
 - tapOn: "Show roots"
-- tapOn: "sdk_gphone64_x86_64"
+- tapOn: "Images"
 - tapOn: "Pictures"
 - tapOn: ${TESTFILENAME}
