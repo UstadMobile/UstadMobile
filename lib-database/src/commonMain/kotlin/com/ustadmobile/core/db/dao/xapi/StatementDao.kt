@@ -193,10 +193,16 @@ expect abstract class StatementDao {
                                $JOIN_ACTOR_TABLES_FROM_ACTOR_UIDS_FOR_PERSON_UID
                                
                          WHERE ($STATEMENT_MATCHES_PERSONUIDS_AND_COURSEBLOCKS)
-                               -- Where there is a peer marked assignment  - Work in progress    
+                               -- Where there is a peer marked assignment get the latest statement 
+                               -- for each distinct peer marker as per contextInstructorUid
                            AND ((      PersonUidsAndCourseBlocks.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
                                   AND PersonUidsAndCourseBlocks.caMarkingType = ${ClazzAssignment.MARKED_BY_PEERS}
-                                  AND 1 + 1 = 5)
+                                  AND StatementEntity.timestamp = 
+                                      (SELECT MAX(StatementEntityInner.timestamp)
+                                         FROM StatementEntity StatementEntityInner
+                                        WHERE StatementEntityInner.statementObjectUid1 = StatementEntity.statementIdHi
+                                          AND StatementEntityInner.statementActorUid = StatementEntity.statementActorUid
+                                          AND StatementEntityInner.contextInstructorUid = StatementEntity.contextInstructorUid))
                                -- Where this is an assignment marked by teacher
                               OR (    PersonUidsAndCourseBlocks.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
                                   AND PersonUidsAndCourseBlocks.caMarkingType = ${ClazzAssignment.MARKED_BY_COURSE_LEADER}
@@ -306,9 +312,19 @@ expect abstract class StatementDao {
                (SELECT CASE
                        -- When there is a peer marked assignment, take the average of the latest distinct ...
                        WHEN (     PersonUidsAndCourseBlocks.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
-                              AND PersonUidsAndCourseBlocks.caMarkingType = ${ClazzAssignment.MARKED_BY_PEERS} 
+                              AND PersonUidsAndCourseBlocks.caMarkingType = ${ClazzAssignment.MARKED_BY_PEERS}
                             ) 
-                            THEN 0
+                            THEN (SELECT AVG(StatementEntity.resultScoreScaled)
+                                    FROM StatementEntity
+                                         $JOIN_ACTOR_TABLES_FROM_ACTOR_UIDS_FOR_PERSON_UID
+                                   WHERE ($STATEMENT_MATCHES_PERSONUIDS_AND_COURSEBLOCKS)
+                                     AND StatementEntity.timestamp = (
+                                         SELECT MAX(StatementEntityInner.timestamp)
+                                           FROM StatementEntity StatementEntityInner
+                                          WHERE StatementEntityInner.statementObjectUid1 = StatementEntity.statementIdHi
+                                            AND StatementEntityInner.statementActorUid = StatementEntity.statementActorUid
+                                            AND StatementEntityInner.contextInstructorUid = StatementEntity.contextInstructorUid)
+                                   LIMIT 1)
                        -- When an assignment, but not peer marked, then the latest score     
                        WHEN PersonUidsAndCourseBlocks.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
                             THEN (SELECT StatementEntity.resultScoreScaled
