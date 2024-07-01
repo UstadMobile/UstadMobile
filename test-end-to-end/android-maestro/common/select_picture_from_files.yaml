@@ -1,0 +1,22 @@
+appId: com.toughra.ustadmobile
+---
+# this flow directs the user to downloads screen if it's not visible when needed
+#- repeat:
+ #    while:
+  #      visible: "Recent"
+   #  commands:
+    #    - tapOn:
+     #        text: "Show roots"
+- tapOn:
+    text: "Show roots"
+- tapOn:
+    id: "android:id/title"
+    index: 2
+- tapOn: "Pictures"
+- runFlow:
+    when:
+      notVisible: ${TESTFILENAME}
+    commands:
+      - tapOn: "List view"
+- tapOn: ${TESTFILENAME}
+
