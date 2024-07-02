@@ -31,6 +31,8 @@ import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.lib.db.composites.ContentEntryAndListDetail
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.libuicompose.components.PickFileOptions
+import com.ustadmobile.libuicompose.components.PickType
 import com.ustadmobile.libuicompose.components.UstadFileDropZone
 import com.ustadmobile.libuicompose.components.UstadFilePickResult
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
@@ -61,7 +63,7 @@ fun ContentEntryListScreenForViewModel(
         },
         onClickFilterChip = viewModel::onClickFilterChip,
         onClickImportFile = {
-            filePickLauncher(UstadPickFileOpts())
+            filePickLauncher(PickFileOptions(pickType = PickType.FILE))
         },
         onClickImportFromLink = viewModel::onClickImportFromLink,
         onSetSelected = viewModel::onSetSelected,
@@ -90,7 +92,7 @@ fun ContentEntryListScreenForViewModel(
             UstadBottomSheetOption(
                 modifier = Modifier.clickable {
                     viewModel.onDismissCreateNewOptions()
-                    filePickLauncher(UstadPickFileOpts())
+                    filePickLauncher(PickFileOptions(pickType = PickType.FILE))
                 },
                 headlineContent = {
                     Text(stringResource(MR.strings.content_from_file))

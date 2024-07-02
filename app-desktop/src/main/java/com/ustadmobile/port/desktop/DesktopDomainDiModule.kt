@@ -14,6 +14,10 @@ import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.domain.getversion.GetVersionUseCaseJvm
 import com.ustadmobile.core.domain.account.SetPasswordUseCase
 import com.ustadmobile.core.domain.account.SetPasswordUseCaseCommonJvm
+import com.ustadmobile.core.domain.backup.JvmUnzipFileUseCase
+import com.ustadmobile.core.domain.backup.JvmZipFileUseCase
+import com.ustadmobile.core.domain.backup.UnzipFileUseCase
+import com.ustadmobile.core.domain.backup.ZipFileUseCase
 import com.ustadmobile.core.domain.blob.download.BlobDownloadClientUseCase
 import com.ustadmobile.core.domain.blob.download.BlobDownloadClientUseCaseCommonJvm
 import com.ustadmobile.core.domain.blob.download.CancelDownloadUseCase
@@ -113,6 +117,10 @@ import org.kodein.di.singleton
 import java.io.File
 
 val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
+
+    bind<UnzipFileUseCase>() with singleton { JvmUnzipFileUseCase() }
+    bind<ZipFileUseCase>() with singleton { JvmZipFileUseCase() }
+
     bind<OpenExternalLinkUseCase>() with provider {
         OpenExternalLinkUseCaseJvm()
     }

@@ -13,8 +13,6 @@ import androidx.compose.material.icons.filled.DisplaySettings
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.SdStorage
 import androidx.compose.material.icons.filled.Workspaces
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
@@ -23,27 +21,30 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import com.ustadmobile.core.viewmodel.settings.SettingsUiState
-import com.ustadmobile.libuicompose.components.UstadDetailField2
-import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.viewmodel.settings.SettingsUiState
 import com.ustadmobile.core.viewmodel.settings.SettingsViewModel
+import com.ustadmobile.libuicompose.components.PickFileOptions
+import com.ustadmobile.libuicompose.components.PickType
+import com.ustadmobile.libuicompose.components.UstadDetailField2
 import com.ustadmobile.libuicompose.components.UstadDetailHeader
 import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 import com.ustadmobile.libuicompose.components.UstadWaitForRestartDialog
+import com.ustadmobile.libuicompose.components.rememberUstadFilePickLauncher
+import dev.icerock.moko.resources.compose.stringResource
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
-import kotlin.reflect.KFunction0
 
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle(SettingsUiState())
-
+    val folderPickLauncher = rememberUstadFilePickLauncher { result ->
+        viewModel.onBackupFolderSelected(result.uri, result.fileName)
+    }
     SettingsScreen(
         uiState = uiState,
-        onClickCreateBackup = viewModel::onClickCreateBackup,
         onClickAppLanguage = viewModel::onClickLanguage,
         onClickWorkspace = viewModel::onClickSiteSettings,
         onClickHtmlContentDisplayEngine = viewModel::onClickHtmlContentDisplayEngine,
@@ -51,8 +52,8 @@ fun SettingsScreen(
         onClickDeveloperOptions = viewModel::onClickDeveloperOptions,
         onClickDeletedItems = viewModel::onClickDeletedItems,
         onClickOfflineStorageOptionsDialog = viewModel::onClickOfflineStorageOptionsDialog,
+        folderPickLauncher = folderPickLauncher // <-- Pass the folderPickLauncher here
     )
-
     if(uiState.langDialogVisible) {
         //As per https://developer.android.com/jetpack/compose/components/dialog
         SettingsDialog(
@@ -108,28 +109,6 @@ fun SettingsScreen(
         }
     }
 
-    if (uiState.backupDialogVisible) {
-        AlertDialog(
-            onDismissRequest = { viewModel.onDismissBackupDialog() },
-            title = { Text("Select Backup Location") },
-            text = {
-                uiState.selectedBackupPath?.let { path ->
-                    Text("Selected backup path: $path")
-                }
-            },
-            confirmButton = {
-                Button(onClick = { viewModel.onSelectBackupFolder() }) {
-                    Text("Select Folder")
-                }
-            },
-            dismissButton = {
-                Button(onClick = { viewModel.onDismissBackupDialog() }) {
-                    Text(stringResource(MR.strings.cancel))
-                }
-            }
-        )
-    }
-
     if(uiState.waitForRestartDialogVisible) {
         UstadWaitForRestartDialog()
     }
@@ -148,6 +127,7 @@ fun SettingsScreen(
     onClickDeletedItems: () -> Unit = { },
     onClickOfflineStorageOptionsDialog: () -> Unit = { },
     onClickCreateBackup: () -> Unit = { },
+    folderPickLauncher: (PickFileOptions) -> Unit
 ) {
     UstadVerticalScrollColumn(
         modifier = Modifier.fillMaxSize()
@@ -161,11 +141,27 @@ fun SettingsScreen(
         )
 
         UstadDetailField2(
-            modifier = Modifier.clickable(onClick = onClickCreateBackup),
+            modifier = Modifier.clickable {
+                folderPickLauncher(PickFileOptions(pickType = PickType.FOLDER))
+            },
             icon = Icons.Default.Backup,
-            valueText = "Create Backup",
-            labelText = "Backup your data",
+            valueText = stringResource(MR.strings.create_backup),
+            labelText = stringResource(MR.strings.create_backup_description),
         )
+
+        if(uiState.storageOptionsVisible) {
+            UstadDetailField2(
+                modifier = Modifier.clickable {
+                    onClickOfflineStorageOptionsDialog()
+                },
+                labelText = stringResource(MR.strings.offline_items_storage),
+                valueText = uiState.selectedOfflineStorageOption?.label?.let {
+                    stringResource(it)
+                } ?: "",
+                icon = Icons.Default.SdStorage,
+            )
+        }
+
 
         if(uiState.storageOptionsVisible) {
             UstadDetailField2(

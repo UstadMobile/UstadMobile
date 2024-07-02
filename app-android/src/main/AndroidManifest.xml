@@ -1,46 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-
-    <!-- Required for BLE peer-to-peer GATT server -->
-    <uses-permission android:name="android.permission.BLUETOOTH" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-
-    <uses-permission android:name="android.permission.INTERNET" />
-
-    <!-- Used for content editing when a user wants to add pictures/video from camera -->
-    <!--
-    Temporarily disabled until we introduce syncable attachments
-    <uses-permission android:name="android.permission.CAMERA" />
-    -->
-    <!-- Required for peer-to-peer connecting using WiFi direct -->
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
-    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
-
-    <!-- This is required on android 12 to handle shake detection -->
-    <uses-permission android:name="android.permission.HIGH_SAMPLING_RATE_SENSORS"/>
-
-
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-
-    <!-- To obtain wifi lock to avoid wifi powering down during download -->
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-
-    <!-- Required to show download progress indicator -->
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-
-    <!-- Remove permission requested by wordpress utils -->
-    <uses-permission
-        android:name="android.permission.GET_ACCOUNTS"
-        tools:node="remove" />
-
-    <uses-feature
-        android:name="android.hardware.camera"
-        android:required="false" />
-
     <!--
     Aztec is used for HTML WYSIWYG editing. This is only be available on SDK24+. Html editing is
     disabled for earlier Android versions.
@@ -49,68 +9,92 @@
 
     Compose Video Player requires SDK 23. The VideoPlayer uses an if check for SDK version.
     -->
-    <uses-sdk tools:overrideLibrary="org.wordpress.aztec,org.wordpress.android.util,com.multiplatform.webview,io.sanghun.compose.video"/>
+    <uses-sdk tools:overrideLibrary="org.wordpress.aztec,org.wordpress.android.util,com.multiplatform.webview,io.sanghun.compose.video" />
 
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" /> <!-- Required for BLE peer-to-peer GATT server -->
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.INTERNET" /> <!-- Used for content editing when a user wants to add pictures/video from camera -->
     <!--
-    Required to find PanicKit responders.
+    Temporarily disabled until we introduce syncable attachments
+    <uses-permission android:name="android.permission.CAMERA" />
     -->
+    <!-- Required for peer-to-peer connecting using WiFi direct -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" /> <!-- This is required on android 12 to handle shake detection -->
+    <uses-permission android:name="android.permission.HIGH_SAMPLING_RATE_SENSORS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" /> <!-- To obtain wifi lock to avoid wifi powering down during download -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" /> <!-- Required to show download progress indicator -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" /> <!-- Remove permission requested by wordpress utils -->
+    <uses-permission
+        android:name="android.permission.GET_ACCOUNTS"
+        tools:node="remove" />
+
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+    <!--     Required to find PanicKit responders. -->
     <queries>
         <intent>
-            <action android:name="info.guardianproject.panic.action.CONNECT"/>
+            <action android:name="info.guardianproject.panic.action.CONNECT" />
         </intent>
-
         <intent>
-            <action android:name="info.guardianproject.panic.action.TRIGGER"/>
+            <action android:name="info.guardianproject.panic.action.TRIGGER" />
         </intent>
-
         <intent>
             <action android:name="android.support.customtabs.action.CustomTabsService" />
         </intent>
-
     </queries>
 
     <application
         android:name="com.ustadmobile.port.android.impl.UstadApp"
         android:allowBackup="false"
-        android:icon="@drawable/ic_launcher_icon"
-        android:roundIcon="@drawable/ic_launcher_icon"
-        android:label="@string/app_name"
-        android:usesCleartextTraffic="true"
-        android:theme="@style/Theme.App.Starting"
-        android:supportsRtl="true"
-        tools:ignore="GoogleAppIndexingWarning"
-        android:fullBackupContent="@xml/backup_rules"
         android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@drawable/ic_launcher_icon"
+        android:label="@string/app_name"
         android:localeConfig="@xml/locales_config"
-        >
-
+        android:roundIcon="@drawable/ic_launcher_icon"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.App.Starting"
+        android:usesCleartextTraffic="true"
+        tools:ignore="GoogleAppIndexingWarning">
+        <activity
+            android:name="com.ustadmobile.port.android.view.SettingsActivity"
+            android:exported="false"
+            android:label="@string/title_activity_settings"
+            android:theme="@style/Theme.App.Starting" />
         <!--
         The list of available UI languages as a comma separated list. See
         com.ustadmobile.core.impl.config.SupportedLanguagesConfig
         -->
-        <meta-data android:name="com.ustadmobile.uilanguages" android:value="${uiLanguages}"/>
-
+        <meta-data
+            android:name="com.ustadmobile.uilanguages"
+            android:value="${uiLanguages}" />
         <!--
         Preset locale setting: if present, this locale will be automatically set as the app locale
         (regardless of the device default). This can be useful where a particular build is intended
         for an area with one language, especially if that language is not supported as a locale by
         most operating systems.
         -->
-        <meta-data android:name="com.ustadmobile.presetlocale" android:value="${presetLocale}"/>
-
-        <!--
-        If true, add a small Powered by Ustad Mobile message on splash screen / login screen etc.
-        -->
-        <meta-data android:name="com.ustadmobile.showpoweredbymsg" android:value="${showPoweredByMsg}"/>
-
-
+        <meta-data
+            android:name="com.ustadmobile.presetlocale"
+            android:value="${presetLocale}" />
+        <!--         If true, add a small Powered by Ustad Mobile message on splash screen / login screen etc. -->
+        <meta-data
+            android:name="com.ustadmobile.showpoweredbymsg"
+            android:value="${showPoweredByMsg}" />
         <!--
         The API url endpoint can be explicitly specified by setting it in buildconfig.properties. If
         it is not specified, the user will be prompted to enter the link.
         -->
-        <meta-data android:name="com.ustadmobile.apiurl" android:value="${apiUrl}"/>
-
-
+        <meta-data
+            android:name="com.ustadmobile.apiurl"
+            android:value="${apiUrl}" />
         <!--
         When the app APK itself is shared locally (eg. using the share app menu which
         triggers nearby share), then we can set the filename of the APK as the user sees it.
@@ -120,42 +104,38 @@
         <meta-data android:name="com.ustadmobile.shareappbasename"
             android:value="ustad"/>
         -->
-
         <!-- End Metadata Settings -->
-
-        <!--
-        The MainActivity containing Jetpack Compose UI
-        -->
+        <!--         The MainActivity containing Jetpack Compose UI -->
         <activity
             android:name="com.ustadmobile.port.android.view.AppActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
-            android:windowSoftInputMode="adjustResize"
             android:exported="true"
-            android:launchMode="singleTask">
-
+            android:launchMode="singleTask"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
 
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <!--
         Photopicker support for older versions as per
         https://developer.android.com/training/data-storage/shared/photopicker
         -->
         <!-- Trigger Google Play services to install the backported photo picker module. -->
-        <service android:name="com.google.android.gms.metadata.ModuleDependencies"
+        <service
+            android:name="com.google.android.gms.metadata.ModuleDependencies"
             android:enabled="false"
             android:exported="false"
             tools:ignore="MissingClass">
             <intent-filter>
                 <action android:name="com.google.android.gms.metadata.MODULE_DEPENDENCIES" />
             </intent-filter>
-            <meta-data android:name="photopicker_activity:0:required" android:value="" />
+
+            <meta-data
+                android:name="photopicker_activity:0:required"
+                android:value="" />
         </service>
-
-
         <!--
         Service to hold locale config as per
         https://developer.android.com/guide/topics/resources/app-languages#use-localeconfig
@@ -182,15 +162,17 @@
         <activity
             android:name="com.ustadmobile.port.android.authenticator.AuthenticatorActivity"
             android:exported="true">
-
             <intent-filter>
-                <data android:host="*" android:pathPattern=".*" android:scheme="local-auth" />
-                <action android:name="com.ustadmobile.AUTH_GET_TOKEN"/>
+                <data
+                    android:host="*"
+                    android:pathPattern=".*"
+                    android:scheme="local-auth" />
+
+                <action android:name="com.ustadmobile.AUTH_GET_TOKEN" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        
-        
     </application>
 
 </manifest>

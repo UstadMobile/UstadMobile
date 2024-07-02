@@ -1,33 +1,21 @@
 package com.ustadmobile.core.domain.backup
 
-import com.ustadmobile.core.model.FileToZip
-import com.ustadmobile.core.util.ZipProgress
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.withContext
+import android.content.Context
+import android.net.Uri
 import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.util.zip.ZipEntry
-import java.util.zip.ZipOutputStream
+import java.io.InputStream
 
-class AndroidZipFileUseCase : ZipFileUseCase {
-    override suspend fun invoke(filesToZip: List<FileToZip>, outputPath: String): Flow<ZipProgress> = flow {
-        withContext(Dispatchers.IO) {
-            ZipOutputStream(FileOutputStream(outputPath)).use { zipOut ->
-                filesToZip.forEachIndexed { index, fileToZip ->
-                    val inputFile = File(fileToZip.pathInZip)
-                    val entry = ZipEntry(fileToZip.pathInZip)
-                    zipOut.putNextEntry(entry)
-                    FileInputStream(inputFile).use { input ->
-                        input.copyTo(zipOut)
-                    }
-                    zipOut.closeEntry()
-                    emit(ZipProgress(fileToZip.pathInZip, filesToZip.size, (index + 1f) / filesToZip.size))
-                }
-            }
-        }
+
+class AndroidZipFileUseCase(private val context: Context) : CommonJvmZipFileUseCase() {
+
+    override fun openInputStream(uri: String): InputStream {
+        return context.contentResolver.openInputStream(Uri.parse(uri))
+            ?: throw IllegalArgumentException("Unable to open input stream for URI: $uri")
+    }
+
+    override fun createOutputFile(path: String): File {
+        val file = File(context.getExternalFilesDir(null), path)
+        file.parentFile?.mkdirs() // Ensure parent directories exist
+        return file
     }
 }
-actual fun createZipFileUseCase(): ZipFileUseCase = AndroidZipFileUseCase()

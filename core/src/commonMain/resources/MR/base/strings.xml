@@ -5,6 +5,8 @@
     <string name="blank" translatable="false"></string>
     <string name="login">Login</string>
     <string name="error">Error</string>
+    <string name="create_backup">Create Backup</string>
+    <string name="create_backup_description">Backup your data</string>
     <string name="err_registering_new_user">Error registering new user:</string>
     <string name="register_empty_fields">Please fill out all required fields</string>
     <string name="register_incorrect_email">Wrong email address</string>

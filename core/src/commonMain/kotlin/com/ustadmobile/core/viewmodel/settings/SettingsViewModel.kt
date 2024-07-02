@@ -2,19 +2,10 @@ package com.ustadmobile.core.viewmodel.settings
 
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.set
-import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.core.viewmodel.UstadViewModel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
-import org.kodein.di.DI
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.model.FileToZip
-import com.ustadmobile.core.util.FolderSelector
-import com.ustadmobile.core.domain.backup.ZipFileUseCase
 import com.ustadmobile.core.db.PermissionFlags
+import com.ustadmobile.core.domain.backup.FileToZip
+import com.ustadmobile.core.domain.backup.ZipFileUseCase
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.GetHtmlContentDisplayEngineOptionsUseCase
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.GetHtmlContentDisplayEngineUseCase
@@ -29,11 +20,19 @@ import com.ustadmobile.core.domain.storage.SetOfflineStorageSettingUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
+import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.deleteditem.DeletedItemListViewModel
 import com.ustadmobile.core.viewmodel.settings.DeveloperSettingsViewModel.Companion.PREFKEY_DEVSETTINGS_ENABLED
 import com.ustadmobile.core.viewmodel.site.detail.SiteDetailViewModel
 import kotlinx.atomicfu.atomic
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
+import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.instanceOrNull
 
@@ -43,11 +42,14 @@ data class SettingsOfflineStorageOption(
 )
 
 data class SettingsUiState(
-    val backupDialogVisible: Boolean = false,
+    val selectedBackupFolderUri: String? = null,
+    val selectedBackupFolderName: String? = null,
+    val isCreatingBackup: Boolean = false,
+    val backupProgress: Float = 0f,
+
     val selectedBackupPath: String? = null,
     val htmlContentDisplayOptions: List<HtmlContentDisplayEngineOption> = emptyList(),
     val currentHtmlContentDisplayOption: HtmlContentDisplayEngineOption? = null,
-
     val holidayCalendarVisible: Boolean = false,
 
     val workspaceSettingsVisible: Boolean = false,
@@ -122,17 +124,12 @@ class SettingsViewModel(
     private val settings: Settings by instance()
 
     private val zipFileUseCase: ZipFileUseCase by instance()
-    private val folderSelector: FolderSelector by instance()
+
 
     init {
 
         viewModelScope.launch {
-            folderSelector.selectedFolder.collect { selectedPath ->
-                if (selectedPath != null) {
-                    _uiState.update { it.copy(selectedBackupPath = selectedPath) }
-                    createBackup(selectedPath)
-                }
-            }
+
         }
 
         _appUiState.update { prev ->
@@ -190,6 +187,9 @@ class SettingsViewModel(
         }
 
     }
+
+
+
 
     fun onClickLanguage() {
         _uiState.update { prev ->
@@ -258,49 +258,49 @@ class SettingsViewModel(
         }
     }
 
-    fun onClickCreateBackup() {
-        _uiState.update { it.copy(backupDialogVisible = true) }
-    }
-
-    fun onDismissBackupDialog() {
-        _uiState.update { it.copy(backupDialogVisible = false) }
-    }
-
-
-    fun onSelectBackupFolder() {
-        viewModelScope.launch {
-            folderSelector.selectFolder()
+    fun onBackupFolderSelected(folderUri: String, folderName: String) {
+        _uiState.update {
+            it.copy(
+                selectedBackupFolderUri = folderUri,
+                selectedBackupFolderName = folderName,
+            )
         }
+        createBackup(folderUri)
     }
 
     private fun createBackup(folderUri: String) {
         viewModelScope.launch {
-
             try {
                 val filesToBackup = listOf(
-                    FileToZip("", "database.db"),
-                    // Add more files or folders to backup as needed
+                    FileToZip("/sdcard/Download/PKD.pdf", "backup/PKD.pdf")
                 )
-
-                val backupFileName = "backup_${Clock.System.toString()}.zip"
+                val backupFileName = "backup_${Clock.System.now()}.zip"
                 val backupFilePath = "$folderUri/$backupFileName"
 
+                _uiState.update { it.copy(isCreatingBackup = true, backupProgress = 0f) }
+
                 zipFileUseCase(filesToBackup, backupFilePath).collect { progress ->
+                    _uiState.update { it.copy(backupProgress = progress.progress) }
                 }
 
                 _uiState.update {
                     it.copy(
-                        backupDialogVisible = false
+                        isCreatingBackup = false,
+                        backupProgress = 1f,
+                        selectedBackupFolderUri = null,
+                        selectedBackupFolderName = null
                     )
                 }
 
-                snackDispatcher.showSnackBar(Snack("Backup Created"))
+                snackDispatcher.showSnackBar(Snack("Backup created successfully"))
             } catch (e: Exception) {
-                snackDispatcher.showSnackBar(Snack("Failed to Created"))
+                _uiState.update { it.copy(isCreatingBackup = false, backupProgress = 0f) }
+                snackDispatcher.showSnackBar(Snack("Backup failed"))
+                e.printStackTrace()
+                println(e.message)
             }
         }
     }
-
 
 
     fun onClickSiteSettings() {
@@ -351,10 +351,8 @@ class SettingsViewModel(
         }
     }
 
-
     companion object {
         const val DEST_NAME = "Settings"
     }
-
 
 }

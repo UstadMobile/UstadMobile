@@ -1,16 +1,12 @@
 package com.ustadmobile.core.viewmodel.individual
 
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.domain.backup.UnzipFileUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.core.util.ext.appendSelectedAccount
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadViewModel
-import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,13 +36,13 @@ class IndividualLearnerViewModel(
 ) : UstadViewModel(di, savedStateHandle, LoginViewModel.DEST_NAME) {
 
     private val impl: UstadMobileSystemImpl by instance()
-    private var nextDestination: String =
-        savedStateHandle[UstadView.ARG_NEXT] ?: ClazzListViewModel.DEST_NAME_HOME
 
     private val unzipFileUseCase: UnzipFileUseCase by instance()
 
     private val _uiState = MutableStateFlow(IndividualLearnerUiState())
     val uiState: StateFlow<IndividualLearnerUiState> = _uiState.asStateFlow()
+
+
     init {
         _appUiState.update { prev ->
             prev.copy(
@@ -57,6 +53,7 @@ class IndividualLearnerViewModel(
             )
         }
     }
+
     fun onRestoreFileSelected(fileUri: String, fileName: String) {
         _uiState.update {
             it.copy(
@@ -72,15 +69,11 @@ class IndividualLearnerViewModel(
     private fun extractZipFile(fileUri: String) {
         viewModelScope.launch {
             try {
-                val outputDirectory = "/storage/emulated/0/"
-                println("Output Directory: $outputDirectory")
-
-                unzipFileUseCase(fileUri, outputDirectory).collect { progress ->
-                    println("Extraction Progress: ${progress.progress}")
+                unzipFileUseCase(fileUri).collect { progress ->
                     _uiState.update {
                         it.copy(
-                            extractionProgress = progress.progress,
-                            extractionStatus = ExtractionStatus.Extracting
+                            extractionStatus = ExtractionStatus.Extracting,
+                            extractionProgress = progress.progress
                         )
                     }
                 }
@@ -92,15 +85,6 @@ class IndividualLearnerViewModel(
                 _uiState.update { it.copy(extractionStatus = ExtractionStatus.Error) }
             }
         }
-    }    private fun goToNextDestAfterLoginOrGuestSelected(personUid: Long, endpoint: Endpoint) {
-        val goOptions = UstadMobileSystemCommon.UstadGoOptions(clearStack = true)
-        navController.navigateToViewUri(
-            nextDestination.appendSelectedAccount(
-                personUid, Endpoint(
-                    endpoint.toString()
-                )
-            ), goOptions
-        )
     }
 
     fun onClickContinueWithoutLogin() {
@@ -109,7 +93,7 @@ class IndividualLearnerViewModel(
         viewModelScope.launch {
             accountManager.createLocalAccount()
             val goOptions = UstadMobileSystemCommon.UstadGoOptions(clearStack = true)
-            navController.navigate(ContentEntryListViewModel.DEST_NAME_HOME, emptyMap(),goOptions)
+            navController.navigate(ContentEntryListViewModel.DEST_NAME_HOME, emptyMap(), goOptions)
 
         }
     }
