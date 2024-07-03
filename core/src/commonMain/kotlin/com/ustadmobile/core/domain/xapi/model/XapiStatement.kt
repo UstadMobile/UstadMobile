@@ -45,7 +45,7 @@ data class XapiStatement(
 data class StatementEntities(
     val statementEntity: StatementEntity? = null,
     val statementEntityJson: StatementEntityJson? = null,
-    val actorEntities: ActorEntities? = null,
+    val actorEntities: List<ActorEntities>? = null,
     val verbEntities: VerbEntities? = null,
     val activityEntities: List<ActivityEntities>? = null,
 )
@@ -82,6 +82,12 @@ fun XapiStatement.toEntities(
     val statementActorEntities = actor.toEntities(
         stringHasher, primaryKeyManager, hasherFactory, xapiSession.knownActorUidToPersonUidMap
     )
+
+    val contextInstructorActorEntities = context?.instructor?.toEntities(
+        stringHasher, primaryKeyManager, hasherFactory,
+        xapiSession.knownActorUidToPersonUidMap
+    )
+
     val statementObjectForeignKeys = `object`.objectForeignKeys(stringHasher, statementUuid)
 
     return listOf(
@@ -116,6 +122,7 @@ fun XapiStatement.toEntities(
                 contextRegistrationHi = contextRegistration?.mostSignificantBits ?: 0,
                 contextRegistrationLo = contextRegistration?.leastSignificantBits ?: 0,
                 contextPlatform = context?.platform,
+                contextInstructorUid = contextInstructorActorEntities?.actor?.actorUid ?: 0,
                 statementContentEntryUid = xapiSession.contentEntryUid,
                 statementClazzUid = xapiSession.clazzUid,
                 statementCbUid = xapiSession.cbUid,
@@ -132,8 +139,10 @@ fun XapiStatement.toEntities(
                 stmtJsonIdLo = statementUuid.leastSignificantBits,
                 fullStatement = exactJson,
             ),
-            actorEntities = actor.toEntities(stringHasher, primaryKeyManager, hasherFactory,
-                xapiSession.knownActorUidToPersonUidMap),
+            actorEntities = buildList {
+                add(statementActorEntities)
+                contextInstructorActorEntities?.also { add(it) }
+            },
             verbEntities = verb.toVerbEntities(stringHasher),
             /*
              * Note: object.objectToEntities will generate the ActivityEntities where an the object

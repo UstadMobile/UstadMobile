@@ -100,8 +100,8 @@ class XapiStatementResource(
                 statementEntities.mapNotNull { it.statementEntityJson }
             )
 
-            val actorEntities = statementEntities.map { it.actorEntities }
-            actorEntities.mapNotNull { it?.actor }
+            val actorEntities = statementEntities.flatMap { it.actorEntities ?: emptyList() }
+            actorEntities.map { it.actor }
                 .filter { it.actorObjectType == XapiEntityObjectTypeFlags.AGENT }
                 .takeIf { it.isNotEmpty() }
                 ?.also { agents ->
@@ -110,7 +110,7 @@ class XapiStatementResource(
                     repoOrDb.actorDao.insertOrUpdateActorsIfNameChanged(agents)
                 }
 
-            val groupEntities = actorEntities.mapNotNull { it?.actor }
+            val groupEntities = actorEntities.map { it.actor }
                 .filter { it.actorObjectType == XapiEntityObjectTypeFlags.GROUP }
 
             val existingGroupActorHashes = db.actorDao.findUidAndEtagByListAsync(
@@ -118,7 +118,7 @@ class XapiStatementResource(
             )
 
             val allGroupMemberAgents = actorEntities.flatMap {
-                it?.groupMemberAgents ?: emptyList()
+                it.groupMemberAgents
             }.associateBy { it.actorUid }
 
             groupEntities.forEach { groupActorEntity ->

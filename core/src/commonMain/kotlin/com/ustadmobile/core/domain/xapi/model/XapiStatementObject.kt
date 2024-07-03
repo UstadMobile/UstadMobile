@@ -107,8 +107,10 @@ fun XapiStatementObject.objectToEntities(
         is XapiActor -> {
             listOf(
                 StatementEntities(
-                    actorEntities = toEntities(
-                        stringHasher, primaryKeyManager, hasherFactory, xapiSession.knownActorUidToPersonUidMap
+                    actorEntities = listOf(
+                        toEntities(
+                            stringHasher, primaryKeyManager, hasherFactory, xapiSession.knownActorUidToPersonUidMap
+                        )
                     )
                 )
             )
