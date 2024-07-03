@@ -11,10 +11,9 @@ appId: com.toughra.ustadmobile
 
 # clear the app
 - clearState: com.toughra.ustadmobile
+
 # clear the downloads
 - evalScript: ${http.get(CONTROLSERVER + "cleardownloads?device=" + TESTSERIAL)}
-# push the test file to the downloads
-- evalScript: ${http.get(CONTROLSERVER + "pushcontent?test-file-name=" + TESTFILENAME +"&device=" + TESTSERIAL)}
 
 # push the test file to the Pictures folder using URL encoding for dest parameter
 - evalScript: ${http.get(CONTROLSERVER + "pushcontent?test-file-name=" + TESTFILENAME + "&device=" + TESTSERIAL + "&dest=%2Fstorage%2Femulated%2F0%2FPictures")}
@@ -23,8 +22,6 @@ appId: com.toughra.ustadmobile
 - evalScript: adb shell pm grant com.toughra.ustadmobile android.permission.READ_EXTERNAL_STORAGE
 - evalScript: adb shell pm grant com.toughra.ustadmobile android.permission.WRITE_EXTERNAL_STORAGE
 
-# trigger media scanner to update with the new file
-- evalScript: adb shell content call --method scan_volume --uri content://media --arg external_primary
 
 # get started
 - launchApp
