@@ -17,6 +17,9 @@ import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_FIRST_NAME_DESC
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_LAST_NAME_ASC
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_LAST_NAME_DESC
 import com.ustadmobile.core.db.dao.CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL
+import com.ustadmobile.core.db.dao.CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT1
+import com.ustadmobile.core.db.dao.CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT2
+import com.ustadmobile.core.db.dao.CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT3
 import com.ustadmobile.core.db.dao.CoursePermissionDaoCommon.SELECT_COURSEPERMISSION_ENTITES_FOR_ACCOUNT_PERSON_UID_SQL
 import com.ustadmobile.core.db.dao.xapi.StatementDao
 import com.ustadmobile.lib.db.composites.ClazzEnrolmentAndPerson
@@ -278,7 +281,9 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
                                       AND ClazzEnrolment.clazzEnrolmentDateLeft))) 
                    /* Begin permission check */
                    AND (
-                           ($PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL)
+                           ($PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT1 ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}
+                            $PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT2 ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}
+                            $PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT3)
                         OR Person.personUid = :accountPersonUid
                        )  
                    /* End permission check */                   
@@ -314,7 +319,16 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
     @HttpAccessible(
         pullQueriesToReplicate = arrayOf(
             HttpServerFunctionCall("findByClazzUidAndRoleForGradebook"),
-            HttpServerFunctionCall("findEnrolmentsByClazzUidAndRole"),
+            HttpServerFunctionCall(
+                functionName = "findEnrolmentsByClazzUidAndRole",
+                functionArgs = arrayOf(
+                    HttpServerFunctionParam(
+                        name = "permission",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}"
+                    )
+                )
+            ),
             HttpServerFunctionCall(
                 functionName = "findStatusForStudentsInClazzStatements",
                 functionDao = StatementDao::class,
@@ -342,7 +356,6 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         filter: Int,
         accountPersonUid: Long,
         currentTime: Long,
-        permission: Long,
     ): PagingSource<Int, PersonAndClazzMemberListDetails>
 
     @Query("""
@@ -376,11 +389,11 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid
               /* Begin permission check*/
           AND (
-                   (${CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT1}
+                   ($PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT1
                     ${PermissionFlags.PERSON_VIEW}
-                    ${CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT2}
+                    $PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT2
                     ${PermissionFlags.PERSON_VIEW}
-                    ${CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT3})
+                    $PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT3)
               )  
               /* End permission check */
     """)

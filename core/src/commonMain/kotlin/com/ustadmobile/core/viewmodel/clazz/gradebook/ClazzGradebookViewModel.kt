@@ -1,6 +1,5 @@
 package com.ustadmobile.core.viewmodel.clazz.gradebook
 
-import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.whenSubscribed
@@ -66,7 +65,6 @@ class ClazzGradebookViewModel(
                 filter = 0,
                 accountPersonUid = activeUserPersonUid,
                 currentTime = systemTimeInMillis(),
-                permission = PermissionFlags.PERSON_VIEW
             ),
             db = activeDb,
             clazzUid = clazzUid,
