@@ -78,14 +78,38 @@ object StatementDaoCommon {
                    
     """
 
+    //Same as above, modified for where tables are using an _inner postfix
+    const val STATEMENT_MATCHES_PERSONUIDS_AND_COURSEBLOCKS_INNER = """
+            StatementEntity_Inner.statementCbUid = PersonUidsAndCourseBlocks.cbUid
+        AND (    ActorEntity_Inner.actorPersonUid = PersonUidsAndCourseBlocks.personUid
+              OR GroupMemberActorJoin_Inner.gmajGroupActorUid = StatementEntity.statementActorUid)
+                   
+    """
+
     //Join the actor entity, and, if relevant, the GroupMemberActorJoin for the actor group and
     //person as per ActorUidsForPersonUid
     const val JOIN_ACTOR_TABLES_FROM_ACTOR_UIDS_FOR_PERSON_UID = """
        JOIN ActorEntity
-            ON StatementEntity.statementActorUid = ActorEntity.actorUid
+            ON ActorEntity.actorUid = StatementEntity.statementActorUid
        LEFT JOIN GroupMemberActorJoin
             ON ActorEntity.actorObjectType = ${XapiEntityObjectTypeFlags.GROUP}
                AND (GroupMemberActorJoin.gmajGroupActorUid, GroupMemberActorJoin.gmajMemberActorUid) IN (
+                   SELECT GroupMemberActorJoin.gmajGroupActorUid, 
+                          GroupMemberActorJoin.gmajMemberActorUid
+                     FROM GroupMemberActorJoin
+                    WHERE GroupMemberActorJoin.gmajGroupActorUid = StatementEntity.statementActorUid
+                      AND GroupMemberActorJoin.gmajMemberActorUid IN (
+                          SELECT ActorUidsForPersonUid.actorUid
+                            FROM ActorUidsForPersonUid
+                           WHERE ActorUidsForPersonUid.actorPersonUid = PersonUidsAndCourseBlocks.personUid))
+    """
+
+    const val JOIN_ACTOR_TABLES_FROM_ACTOR_UIDS_FOR_PERSON_UID_INNER = """
+       JOIN ActorEntity ActorEntity_Inner
+            ON ActorEntity_Inner.actorUid = StatementEntity_Inner.statementActorUid
+       LEFT JOIN GroupMemberActorJoin GroupMemberActorJoin_Inner
+            ON ActorEntity_Inner.actorObjectType = ${XapiEntityObjectTypeFlags.GROUP}
+               AND (GroupMemberActorJoin_Inner.gmajGroupActorUid, GroupMemberActorJoin_Inner.gmajMemberActorUid) IN (
                    SELECT GroupMemberActorJoin.gmajGroupActorUid, 
                           GroupMemberActorJoin.gmajMemberActorUid
                      FROM GroupMemberActorJoin

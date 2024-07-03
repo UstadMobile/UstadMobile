@@ -22,8 +22,10 @@ import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CONTENT_ENTRY
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY_WHERE_MATCHES_ACCOUNT_PERSON_UID_AND_PARENT_CONTENT_ENTRY_ROOT
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.JOIN_ACTOR_TABLES_FROM_ACTOR_UIDS_FOR_PERSON_UID
+import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.JOIN_ACTOR_TABLES_FROM_ACTOR_UIDS_FOR_PERSON_UID_INNER
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.JOIN_ACTOR_TABLES_FROM_STATEMENT_OUTER
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.STATEMENT_MATCHES_PERSONUIDS_AND_COURSEBLOCKS
+import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.STATEMENT_MATCHES_PERSONUIDS_AND_COURSEBLOCKS_INNER
 import com.ustadmobile.door.DoorQuery
 import com.ustadmobile.door.annotation.DoorDao
 import com.ustadmobile.door.annotation.QueryLiveTables
@@ -270,11 +272,11 @@ expect abstract class StatementDao {
                            AND ((      PersonUidsAndCourseBlocks.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
                                   AND PersonUidsAndCourseBlocks.caMarkingType = ${ClazzAssignment.MARKED_BY_PEERS}
                                   AND StatementEntity.timestamp = 
-                                      (SELECT MAX(StatementEntityInner.timestamp)
-                                         FROM StatementEntity StatementEntityInner
-                                        WHERE StatementEntityInner.statementObjectUid1 = StatementEntity.statementIdHi
-                                          AND StatementEntityInner.statementActorUid = StatementEntity.statementActorUid
-                                          AND StatementEntityInner.contextInstructorUid = StatementEntity.contextInstructorUid))
+                                      (SELECT MAX(StatementEntity_Inner.timestamp)
+                                         FROM StatementEntity StatementEntity_Inner
+                                              $JOIN_ACTOR_TABLES_FROM_ACTOR_UIDS_FOR_PERSON_UID_INNER
+                                        WHERE ($STATEMENT_MATCHES_PERSONUIDS_AND_COURSEBLOCKS_INNER)
+                                          AND StatementEntity_Inner.contextInstructorUid = StatementEntity.contextInstructorUid))
                                -- Where this is an assignment marked by teacher
                               OR (    PersonUidsAndCourseBlocks.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
                                   AND PersonUidsAndCourseBlocks.caMarkingType = ${ClazzAssignment.MARKED_BY_COURSE_LEADER}
@@ -399,11 +401,11 @@ expect abstract class StatementDao {
                                          $JOIN_ACTOR_TABLES_FROM_ACTOR_UIDS_FOR_PERSON_UID
                                    WHERE ($STATEMENT_MATCHES_PERSONUIDS_AND_COURSEBLOCKS)
                                      AND StatementEntity.timestamp = (
-                                         SELECT MAX(StatementEntityInner.timestamp)
-                                           FROM StatementEntity StatementEntityInner
-                                          WHERE StatementEntityInner.statementObjectUid1 = StatementEntity.statementIdHi
-                                            AND StatementEntityInner.statementActorUid = StatementEntity.statementActorUid
-                                            AND StatementEntityInner.contextInstructorUid = StatementEntity.contextInstructorUid)
+                                         SELECT MAX(StatementEntity_Inner.timestamp)
+                                           FROM StatementEntity StatementEntity_Inner
+                                                $JOIN_ACTOR_TABLES_FROM_ACTOR_UIDS_FOR_PERSON_UID_INNER
+                                          WHERE ($STATEMENT_MATCHES_PERSONUIDS_AND_COURSEBLOCKS_INNER)
+                                            AND StatementEntity_Inner.contextInstructorUid = StatementEntity.contextInstructorUid)
                                    LIMIT 1)
                        -- When an assignment, but not peer marked, then the latest score     
                        WHEN PersonUidsAndCourseBlocks.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}

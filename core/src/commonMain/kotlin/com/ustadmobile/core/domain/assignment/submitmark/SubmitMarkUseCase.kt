@@ -13,6 +13,8 @@ import com.ustadmobile.core.domain.xapi.model.XapiObjectType
 import com.ustadmobile.core.domain.xapi.model.XapiResult
 import com.ustadmobile.core.domain.xapi.model.XapiStatement
 import com.ustadmobile.core.domain.xapi.model.XapiVerb
+import com.ustadmobile.core.domain.xapi.model.identifierHash
+import com.ustadmobile.core.domain.xxhash.XXStringHasher
 import com.ustadmobile.core.util.UstadUrlComponents
 import com.ustadmobile.core.util.ext.roundTo
 import com.ustadmobile.core.util.ext.toQueryString
@@ -53,6 +55,7 @@ class SubmitMarkUseCase(
     private val endpoint: Endpoint,
     private val createXapiGroupUseCase: CreateXapiGroupForCourseGroupUseCase,
     private val xapiStatementResource: XapiStatementResource,
+    private val xxStringHasher: XXStringHasher,
 ) {
 
     suspend operator fun invoke(
@@ -78,7 +81,10 @@ class SubmitMarkUseCase(
         val (instructorActor: XapiActor, instructorActorToPersonUidMap) = if(
             assignment.caGroupUid == 0L || assignment.caMarkingType == ClazzAssignment.MARKED_BY_COURSE_LEADER
         ) {
-            activeUserPerson.toXapiAgent(endpoint) to emptyMap()
+            val activeUserPersonXapiAgent = activeUserPerson.toXapiAgent(endpoint)
+            activeUserPersonXapiAgent to mapOf(
+                activeUserPersonXapiAgent.identifierHash(xxStringHasher) to activeUserPerson.personUid
+            )
         } else {
             createXapiGroupUseCase(
                 groupSetUid = assignment.caGroupUid,
@@ -90,8 +96,11 @@ class SubmitMarkUseCase(
         }
 
         val (statementActor: XapiActor, actorToPersonUidMap) = if(assignment.caGroupUid == 0L) {
-            (repo.personDao.findByUidAsync(submitterUid)?.toXapiAgent(endpoint)
-                ?: throw IllegalStateException("Could not find person for $submitterUid")) to emptyMap()
+            val stmtActor = (repo.personDao.findByUidAsync(submitterUid)?.toXapiAgent(endpoint)
+                ?: throw IllegalStateException("Could not find person for $submitterUid"))
+            stmtActor to mapOf(
+                stmtActor.identifierHash(xxStringHasher) to submitterUid
+            )
         }else {
             createXapiGroupUseCase(
                 groupSetUid = assignment.caGroupUid,
@@ -159,7 +168,7 @@ class SubmitMarkUseCase(
                     clazzUid = clazzUid,
                     cbUid = courseBlock.cbUid,
                     rootActivityId = activityId,
-                    knownActorUidToPersonUidMap = instructorActorToPersonUidMap + actorToPersonUidMap
+                    knownActorUidToPersonUidMap = instructorActorToPersonUidMap + actorToPersonUidMap,
                 )
             )
 
