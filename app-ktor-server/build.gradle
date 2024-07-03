@@ -137,6 +137,7 @@ dependencies {
     implementation libs.hsqldb
 
     implementation libs.vlcj
+    implementation libs.generateuuid
 
     //test
     testImplementation project(":lib-test-common")

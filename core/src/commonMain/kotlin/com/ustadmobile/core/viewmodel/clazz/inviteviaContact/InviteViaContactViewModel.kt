@@ -21,7 +21,8 @@ import org.kodein.di.instance
 
 data class InviteViaContactChip(
     val text: String,
-    val isValid: Boolean
+    val isValid: Boolean,
+    val inviteType:Int
 )
 
 data class InviteViaContactUiState(

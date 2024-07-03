@@ -11,7 +11,7 @@ import com.ustadmobile.lib.db.entities.*
     ClazzLog::class, ClazzLogAttendanceRecord::class,
     Schedule::class, HolidayCalendar::class, Holiday::class,
     Person::class,
-    Clazz::class, ClazzEnrolment::class, LeavingReason::class,
+    Clazz::class, ClazzEnrolment::class, LeavingReason::class,ClazzInvite::class,
     ContentEntry::class, ContentEntryContentCategoryJoin::class, ContentEntryParentChildJoin::class,
     ContentEntryRelatedEntryJoin::class, ContentCategorySchema::class, ContentCategory::class,
     Language::class, LanguageVariant::class, AccessToken::class, PersonAuth::class, Role::class,
@@ -72,7 +72,7 @@ import com.ustadmobile.lib.db.entities.*
     ReplicationOperation::class,
     PendingRepositorySession::class,
 
-], version = 172)
+], version = 173)
 expect abstract class UmAppDatabase : RoomDatabase {
 
     /*
@@ -109,6 +109,8 @@ expect abstract class UmAppDatabase : RoomDatabase {
     abstract val courseGroupMemberDao: CourseGroupMemberDao
 
     abstract val clazzEnrolmentDao: ClazzEnrolmentDao
+
+    abstract val clazzInviteDao:ClazzInviteDao
 
     abstract val leavingReasonDao: LeavingReasonDao
 

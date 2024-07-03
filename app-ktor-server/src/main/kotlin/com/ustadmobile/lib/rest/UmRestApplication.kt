@@ -107,6 +107,10 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.isWindowsOs
 import com.ustadmobile.door.log.NapierDoorLogger
 import com.ustadmobile.lib.rest.domain.contententry.importcontent.ContentEntryImportJobRoute
+import com.ustadmobile.lib.rest.domain.invite.ProcessInviteUseCase
+import com.ustadmobile.lib.rest.domain.invite.email.SendEmailUseCase
+import com.ustadmobile.lib.rest.domain.invite.message.SendMessageUseCase
+import com.ustadmobile.lib.rest.domain.invite.sms.SendSmsUseCase
 import com.ustadmobile.lib.rest.domain.person.bulkadd.BulkAddPersonRoute
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.headers.MimeTypeHelper
@@ -572,6 +576,28 @@ fun Application.umRestApplication(
 
         bind<ValidateEmailUseCase>() with provider {
             ValidateEmailUseCase()
+        }
+        bind<SendEmailUseCase>() with provider {
+            SendEmailUseCase(notificationSender = instance())
+        }
+
+        bind<SendMessageUseCase>() with provider {
+            SendMessageUseCase()
+        }
+
+        bind<ProcessInviteUseCase>() with scoped(EndpointScope.Default).provider {
+            ProcessInviteUseCase(
+                sendEmailUseCase = instance(),
+                sendSmsUseCase = instance(),
+                sendMessageUseCase = instance(),
+                db = instance(tag = DoorTag.TAG_DB),
+                endpoint = context,
+
+            )
+        }
+
+        bind<SendSmsUseCase>() with provider {
+            SendSmsUseCase()
         }
 
         bind<IPhoneNumberUtil>() with provider {

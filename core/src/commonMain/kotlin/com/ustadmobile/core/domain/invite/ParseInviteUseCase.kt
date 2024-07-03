@@ -3,6 +3,7 @@ package com.ustadmobile.core.domain.invite
 import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorUseCase
 import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.viewmodel.clazz.inviteviaContact.InviteViaContactChip
+import com.ustadmobile.lib.db.entities.ClazzInvite
 
 
 class ParseInviteUseCase(
@@ -19,11 +20,20 @@ class ParseInviteUseCase(
             val part = parts[i].trim() // Trim to remove any leading or trailing whitespace
 
             // Check if the part is a valid email or phone number
-            if (validateEmailUseCase(part) != null || phoneNumValidatorUseCase.isValid(part) || isValidUserName(part)
-            ) {
-                validatedChips.add(InviteViaContactChip(part, true))
+            if (validateEmailUseCase(part) != null) {
+
+                validatedChips.add(InviteViaContactChip(part, true, ClazzInvite.EMAIL))
+
+            } else if (phoneNumValidatorUseCase.isValid(part)) {
+
+                validatedChips.add(InviteViaContactChip(part, true, ClazzInvite.PHONE))
+
+            } else if (isValidUserName(part)) {
+
+                validatedChips.add(InviteViaContactChip(part, true, ClazzInvite.INTERNAL_MESSAGE))
+
             } else {
-                validatedChips.add(InviteViaContactChip(part, false))
+                validatedChips.add(InviteViaContactChip(part, false, 0))
 
             }
         }

@@ -1,6 +1,7 @@
 package com.ustadmobile.core.domain.invite
 
 import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorUseCase
+import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import org.mockito.kotlin.any
@@ -11,6 +12,7 @@ import kotlin.test.assertEquals
 class ParseInviteUseCaseTest {
 
     private lateinit var parseInviteUseCase: ParseInviteUseCase
+    private lateinit var mockEmailUseCase: ValidateEmailUseCase
 
 
     private lateinit var mockValidatePhoneUseCase: PhoneNumValidatorUseCase
@@ -18,11 +20,11 @@ class ParseInviteUseCaseTest {
     @BeforeTest
     fun setUp() {
 
-
+        mockEmailUseCase = mock()
         mockValidatePhoneUseCase = mock {
             on { isValid(any()) }.thenReturn(false)
         }
-        parseInviteUseCase = ParseInviteUseCase()
+        parseInviteUseCase = ParseInviteUseCase(mockValidatePhoneUseCase,mockEmailUseCase)
 
     }
 
@@ -30,7 +32,7 @@ class ParseInviteUseCaseTest {
     @Test
     fun givenValidEmail_whenInvoke_thenReturnTrue() = runBlocking {
 
-        val result = parseInviteUseCase.invoke("valid.email@example.com", mockValidatePhoneUseCase)
+        val result = parseInviteUseCase.invoke("valid.email@example.com")
         assertEquals(1, result.size)
         assertEquals(true, result[0].isValid)
     }
@@ -38,7 +40,7 @@ class ParseInviteUseCaseTest {
     @Test
     fun givenValidPhone_whenInvoke_thenReturnTrue() = runBlocking {
 
-        val result = parseInviteUseCase.invoke("+911234567890", mockValidatePhoneUseCase)
+        val result = parseInviteUseCase.invoke("+911234567890")
         assertEquals(1, result.size)
         assertEquals(true, result[0].isValid)
     }
@@ -47,7 +49,7 @@ class ParseInviteUseCaseTest {
     fun givenMixedInput_whenInvoke_thenReturnMixedResults() = runBlocking {
 
         val text = "valid.email@example.com,  +911234567890"
-        val result = parseInviteUseCase.invoke(text, mockValidatePhoneUseCase)
+        val result = parseInviteUseCase.invoke(text)
 
         assertEquals(2, result.size)
         assertEquals(true, result[0].isValid)
