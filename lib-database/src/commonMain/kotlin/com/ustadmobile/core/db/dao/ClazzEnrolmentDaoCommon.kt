@@ -81,6 +81,7 @@ object ClazzEnrolmentDaoCommon {
                        OR Person.personUid = :accountPersonUid
                       )
     *
+    *
     */
     const val SELECT_BY_UID_AND_ROLE_SQL = """
         SELECT * 

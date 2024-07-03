@@ -5,6 +5,16 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.RawQuery
 import app.cash.paging.PagingSource
+import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.FILTER_ACTIVE_ONLY
+import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_DATE_LEFT_ASC
+import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_DATE_LEFT_DESC
+import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_DATE_REGISTERED_ASC
+import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_DATE_REGISTERED_DESC
+import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_FIRST_NAME_ASC
+import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_FIRST_NAME_DESC
+import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_LAST_NAME_ASC
+import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_LAST_NAME_DESC
+import com.ustadmobile.core.db.dao.CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CLAZZ_STUDENT
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CONTENT_ENTRY
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY_WHERE_MATCHES_ACCOUNT_PERSON_UID_AND_PARENT_CONTENT_ENTRY_ROOT
@@ -119,10 +129,64 @@ expect abstract class StatementDao {
                     LEFT JOIN ClazzAssignment
                          ON CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
                         AND ClazzAssignment.caUid = CourseBlock.cbEntityUid     
-              WHERE Person.personUid IN 
-                    (SELECT DISTINCT ClazzEnrolment.clazzEnrolmentPersonUid
-                       FROM ClazzEnrolment
-                      WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid)       
+              WHERE Person.personUid IN (
+                SELECT CourseMember.personUid 
+                  FROM (SELECT Person.*,
+                               (SELECT MIN(ClazzEnrolment.clazzEnrolmentDateJoined) 
+                                  FROM ClazzEnrolment 
+                                 WHERE Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid) AS earliestJoinDate, 
+                
+                               (SELECT MAX(ClazzEnrolment.clazzEnrolmentDateLeft) 
+                                  FROM ClazzEnrolment 
+                                 WHERE Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid) AS latestDateLeft, 
+                
+                               (SELECT ClazzEnrolment.clazzEnrolmentRole 
+                                  FROM ClazzEnrolment 
+                                 WHERE Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid 
+                                   AND ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid 
+                                   AND ClazzEnrolment.clazzEnrolmentActive
+                              ORDER BY ClazzEnrolment.clazzEnrolmentDateLeft DESC
+                                 LIMIT 1) AS enrolmentRole
+                          FROM Person
+                         WHERE Person.personUid IN 
+                               (SELECT DISTINCT ClazzEnrolment.clazzEnrolmentPersonUid 
+                                  FROM ClazzEnrolment 
+                                 WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid 
+                                   AND ClazzEnrolment.clazzEnrolmentActive 
+                                   AND ClazzEnrolment.clazzEnrolmentRole = :roleId 
+                                   AND (:filter != $FILTER_ACTIVE_ONLY 
+                                         OR (:currentTime 
+                                              BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined 
+                                              AND ClazzEnrolment.clazzEnrolmentDateLeft))) 
+                           /* Begin permission check */
+                           AND (
+                                   ($PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL)
+                                OR Person.personUid = :accountPersonUid
+                               )  
+                           /* End permission check */                   
+                           AND Person.firstNames || ' ' || Person.lastName LIKE :searchText
+                       GROUP BY Person.personUid) AS CourseMember
+              ORDER BY CASE(:sortOrder)
+                        WHEN $SORT_FIRST_NAME_ASC THEN CourseMember.firstNames
+                        WHEN $SORT_LAST_NAME_ASC THEN CourseMember.lastName
+                        ELSE ''
+                    END ASC,
+                    CASE(:sortOrder)
+                        WHEN $SORT_FIRST_NAME_DESC THEN CourseMember.firstNames
+                        WHEN $SORT_LAST_NAME_DESC THEN CourseMember.lastName
+                        ELSE ''
+                    END DESC,
+                    CASE(:sortOrder)
+                        WHEN $SORT_DATE_REGISTERED_ASC THEN CourseMember.earliestJoinDate
+                        WHEN $SORT_DATE_LEFT_ASC THEN CourseMember.latestDateLeft
+                        ELSE 0
+                    END ASC,
+                    CASE(:sortOrder)
+                        WHEN $SORT_DATE_REGISTERED_DESC THEN CourseMember.earliestJoinDate
+                        WHEN $SORT_DATE_LEFT_DESC THEN CourseMember.latestDateLeft
+                        ELSE 0
+                    END DESC)
+                                          
         ),
         
         ActorUidsForPersonUid(actorUid, actorPersonUid) AS(
@@ -238,6 +302,13 @@ expect abstract class StatementDao {
     """)
     abstract suspend fun findStatusForStudentsInClazzStatements(
         clazzUid: Long,
+        roleId: Int,
+        sortOrder: Int,
+        searchText: String? = "%",
+        filter: Int,
+        accountPersonUid: Long,
+        currentTime: Long,
+        permission: Long,
     ): List<StatementEntityAndRelated>
 
 

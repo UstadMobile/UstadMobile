@@ -234,6 +234,9 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
     /**
      * This is effectively the same query as above, however needs to trigger additional
      * http server function calls
+     *
+     * IMPORTANT: If this is changed, then StatementDao#findStatusForStudentsInClazzStatements
+     * should also be changed to ensure it finds the data for the same students.
      */
     @Query("""
         SELECT * 
@@ -315,6 +318,16 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
             HttpServerFunctionCall(
                 functionName = "findStatusForStudentsInClazzStatements",
                 functionDao = StatementDao::class,
+                functionArgs = arrayOf(
+//                    HttpServerFunctionParam(
+//                        name = "studentsOffset",
+//                        argType = HttpServerFunctionParam.ArgType.PAGING_OFFSET,
+//                    ),
+//                    HttpServerFunctionParam(
+//                        name = "studentsLimit",
+//                        argType = HttpServerFunctionParam.ArgType.PAGING_LIMIT,
+//                    )
+                )
             ),
             HttpServerFunctionCall(
                 functionName = "findActorEntitiesForGradebook"
