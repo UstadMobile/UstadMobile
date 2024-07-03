@@ -185,7 +185,10 @@ expect abstract class StatementDao {
                         WHEN $SORT_DATE_REGISTERED_DESC THEN CourseMember.earliestJoinDate
                         WHEN $SORT_DATE_LEFT_DESC THEN CourseMember.latestDateLeft
                         ELSE 0
-                    END DESC)
+                    END DESC
+                 LIMIT :studentsLimit
+                OFFSET :studentsOffset   
+             )
                                           
         ),
         
@@ -309,6 +312,8 @@ expect abstract class StatementDao {
         accountPersonUid: Long,
         currentTime: Long,
         permission: Long,
+        studentsLimit: Int,
+        studentsOffset: Int,
     ): List<StatementEntityAndRelated>
 
 

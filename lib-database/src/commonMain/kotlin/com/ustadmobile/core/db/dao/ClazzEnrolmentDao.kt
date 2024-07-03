@@ -319,14 +319,14 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
                 functionName = "findStatusForStudentsInClazzStatements",
                 functionDao = StatementDao::class,
                 functionArgs = arrayOf(
-//                    HttpServerFunctionParam(
-//                        name = "studentsOffset",
-//                        argType = HttpServerFunctionParam.ArgType.PAGING_OFFSET,
-//                    ),
-//                    HttpServerFunctionParam(
-//                        name = "studentsLimit",
-//                        argType = HttpServerFunctionParam.ArgType.PAGING_LIMIT,
-//                    )
+                    HttpServerFunctionParam(
+                        name = "studentsOffset",
+                        argType = HttpServerFunctionParam.ArgType.PAGING_OFFSET,
+                    ),
+                    HttpServerFunctionParam(
+                        name = "studentsLimit",
+                        argType = HttpServerFunctionParam.ArgType.PAGING_LIMIT,
+                    )
                 )
             ),
             HttpServerFunctionCall(
