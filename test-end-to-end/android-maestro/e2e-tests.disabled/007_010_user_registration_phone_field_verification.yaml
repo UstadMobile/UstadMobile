@@ -1,0 +1,40 @@
+appId: com.toughra.ustadmobile
+env:
+ TESTRESULTSDIR: "${TESTRESULTSDIR}/007_003_user_registration_below_age_13"
+ TESTNAME:  "007_003_user_registration_below_age_13"
+---
+- clearState: com.toughra.ustadmobile
+- runFlow:
+   file: "../common/startserver.yaml"
+   env:
+    CONTROLSERVER: ${CONTROLSERVER}
+    TESTSERIAL: ${TESTSERIAL}
+    TESTNAME: ${TESTNAME}
+
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+#admin login
+- runFlow:
+   file: "../common/user_login.yaml"
+- runFlow:
+   file: "../common/enable_user_registration.yaml"
+- assertVisible: "Yes"
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- assertVisible: "Create account"
+- tapOn: "Create account"
+- tapOn: 2024
+- longPressOn: 2024
+- inputText: 2021
+- hideKeyboard
+- tapOn: 2013
+- tapOn: "Next"
+- runFlow:
+   file: "../common/new-student-registration-details.yaml"
+   env:
+    FIRSTNAME: "Student"
+    LASTNAME: "1"
+    USERNAME: "s1"
+    PARENTEMAIL: "ustadtest@gmail.com"
+    GENDER: "Male"
+    PASSWORD: "tests1"
