@@ -337,7 +337,7 @@ expect abstract class StatementDao {
                                            FROM StatementEntity StatementEntity_Inner
                                                 $JOIN_ACTOR_TABLES_FROM_ACTOR_UIDS_FOR_PERSON_UID_INNER
                                           WHERE ($STATEMENT_MATCHES_PERSONUIDS_AND_COURSEBLOCKS_INNER)
-                                            AND StatementEntity_Inner.contextInstructorUid = StatementEntity.contextInstructorUid)
+                                            AND StatementEntity_Inner.contextInstructorActorUid = StatementEntity.contextInstructorActorUid)
                                    LIMIT 1)
                        -- When an assignment, but not peer marked, then the latest score     
                        WHEN PersonUidsAndCourseBlocks.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}

@@ -83,6 +83,10 @@ fun XapiStatement.toEntities(
         stringHasher, primaryKeyManager, hasherFactory, xapiSession.knownActorUidToPersonUidMap
     )
 
+    val authorityActor = authority?.toEntities(
+        stringHasher, primaryKeyManager, hasherFactory, xapiSession.knownActorUidToPersonUidMap
+    )
+
     val contextInstructorActorEntities = context?.instructor?.toEntities(
         stringHasher, primaryKeyManager, hasherFactory,
         xapiSession.knownActorUidToPersonUidMap
@@ -104,6 +108,7 @@ fun XapiStatement.toEntities(
                     0
                 },
                 statementActorUid = statementActorEntities.actor.actorUid,
+                authorityActorUid = authorityActor?.actor?.actorUid ?: 0,
                 statementVerbUid = stringHasher.hash(
                     xapiRequireValidIRI(verb.id,
                         "Statement $statementUuid VerbID ${verb.id} is not a valid IRI"
@@ -122,12 +127,11 @@ fun XapiStatement.toEntities(
                 contextRegistrationHi = contextRegistration?.mostSignificantBits ?: 0,
                 contextRegistrationLo = contextRegistration?.leastSignificantBits ?: 0,
                 contextPlatform = context?.platform,
-                contextInstructorUid = contextInstructorActorEntities?.actor?.actorUid ?: 0,
+                contextInstructorActorUid = contextInstructorActorEntities?.actor?.actorUid ?: 0,
                 statementContentEntryUid = xapiSession.contentEntryUid,
                 statementClazzUid = xapiSession.clazzUid,
                 statementCbUid = xapiSession.cbUid,
                 contentEntryRoot = (`object` as? XapiActivityStatementObject)?.id == xapiSession.rootActivityId,
-
                 extensionProgress = resultProgressExtension,
                 statementObjectType = `object`.objectTypeFlag,
                 statementObjectUid1 = statementObjectForeignKeys.first,

@@ -72,7 +72,7 @@ data class StatementEntity(
 
     var statementActorUid: Long = 0,
 
-    var authorityUid: Long = 0,
+    var authorityActorUid: Long = 0,
 
     var teamUid: Long = 0,
 
@@ -106,7 +106,7 @@ data class StatementEntity(
 
     var contextStatementRefIdLo: Long = 0,
 
-    var contextInstructorUid: Long = 0,
+    var contextInstructorActorUid: Long = 0,
 
     @ReplicateLastModified
     @ReplicateEtag

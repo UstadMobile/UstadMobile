@@ -1676,6 +1676,19 @@ val MIGRATION_190_191 = DoorMigrationStatementList(190, 191) { db ->
     }
 }
 
+//Updates naming of instructor and authority columns
+val MIGRATION_191_192 = DoorMigrationStatementList(191, 192) { db ->
+    buildList {
+        add("DROP TABLE StatementEntity")
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS StatementEntity (  statementIdHi  INTEGER  NOT NULL , statementIdLo  INTEGER  NOT NULL , statementActorPersonUid  INTEGER  NOT NULL , statementVerbUid  INTEGER  NOT NULL , statementObjectType  INTEGER  NOT NULL , statementObjectUid1  INTEGER  NOT NULL , statementObjectUid2  INTEGER  NOT NULL , statementActorUid  INTEGER  NOT NULL , authorityActorUid  INTEGER  NOT NULL , teamUid  INTEGER  NOT NULL , resultCompletion  INTEGER , resultSuccess  INTEGER , resultScoreScaled  REAl , resultScoreRaw  REAl , resultScoreMin  REAl , resultScoreMax  REAl , resultDuration  INTEGER , resultResponse  TEXT , timestamp  INTEGER  NOT NULL , stored  INTEGER  NOT NULL , contextRegistrationHi  INTEGER  NOT NULL , contextRegistrationLo  INTEGER  NOT NULL , contextPlatform  TEXT , contextStatementRefIdHi  INTEGER  NOT NULL , contextStatementRefIdLo  INTEGER  NOT NULL , contextInstructorActorUid  INTEGER  NOT NULL , statementLct  INTEGER  NOT NULL , extensionProgress  INTEGER , contentEntryRoot  INTEGER  NOT NULL , statementContentEntryUid  INTEGER  NOT NULL , statementLearnerGroupUid  INTEGER  NOT NULL , statementClazzUid  INTEGER  NOT NULL , statementCbUid  INTEGER  NOT NULL , statementDoorNode  INTEGER  NOT NULL , isSubStatement  INTEGER  NOT NULL , PRIMARY KEY (statementIdHi, statementIdLo) )")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS StatementEntity (  statementIdHi  BIGINT  NOT NULL , statementIdLo  BIGINT  NOT NULL , statementActorPersonUid  BIGINT  NOT NULL , statementVerbUid  BIGINT  NOT NULL , statementObjectType  INTEGER  NOT NULL , statementObjectUid1  BIGINT  NOT NULL , statementObjectUid2  BIGINT  NOT NULL , statementActorUid  BIGINT  NOT NULL , authorityActorUid  BIGINT  NOT NULL , teamUid  BIGINT  NOT NULL , resultCompletion  BOOL , resultSuccess  BOOL , resultScoreScaled  FLOAT , resultScoreRaw  FLOAT , resultScoreMin  FLOAT , resultScoreMax  FLOAT , resultDuration  BIGINT , resultResponse  TEXT , timestamp  BIGINT  NOT NULL , stored  BIGINT  NOT NULL , contextRegistrationHi  BIGINT  NOT NULL , contextRegistrationLo  BIGINT  NOT NULL , contextPlatform  TEXT , contextStatementRefIdHi  BIGINT  NOT NULL , contextStatementRefIdLo  BIGINT  NOT NULL , contextInstructorActorUid  BIGINT  NOT NULL , statementLct  BIGINT  NOT NULL , extensionProgress  INTEGER , contentEntryRoot  BOOL  NOT NULL , statementContentEntryUid  BIGINT  NOT NULL , statementLearnerGroupUid  BIGINT  NOT NULL , statementClazzUid  BIGINT  NOT NULL , statementCbUid  BIGINT  NOT NULL , statementDoorNode  BIGINT  NOT NULL , isSubStatement  BOOL  NOT NULL , PRIMARY KEY (statementIdHi, statementIdLo) )")
+        }
+
+        add("CREATE INDEX idx_stmt_actor_person ON StatementEntity (statementActorPersonUid)")
+    }
+}
 
 
 fun migrationList() = listOf<DoorMigration>(
@@ -1697,7 +1710,7 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_178_179, MIGRATION_179_180, MIGRATION_180_181, MIGRATION_181_182,
     MIGRATION_182_183, MIGRATION_183_184, MIGRATION_184_185, MIGRATION_185_186,
     MIGRATION_186_187, MIGRATION_187_188, MIGRATION_188_189, MIGRATION_189_190,
-    MIGRATION_190_191,
+    MIGRATION_190_191, MIGRATION_191_192,
 )
 
 
