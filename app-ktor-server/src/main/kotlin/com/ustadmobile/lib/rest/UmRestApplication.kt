@@ -41,6 +41,8 @@ import com.ustadmobile.core.domain.extractmediametadata.mediainfo.ExecuteMediaIn
 import com.ustadmobile.core.domain.extractmediametadata.mediainfo.ExtractMediaMetadataUseCaseMediaInfo
 import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCase
 import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCaseJvm
+import com.ustadmobile.core.domain.invite.CheckContactTypeUseCase
+import com.ustadmobile.core.domain.invite.ContactToServerUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonStatusMap
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsUseCase
@@ -107,6 +109,7 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.isWindowsOs
 import com.ustadmobile.door.log.NapierDoorLogger
 import com.ustadmobile.lib.rest.domain.contententry.importcontent.ContentEntryImportJobRoute
+import com.ustadmobile.lib.rest.domain.invite.ProcessInviteRoute
 import com.ustadmobile.lib.rest.domain.invite.ProcessInviteUseCase
 import com.ustadmobile.lib.rest.domain.invite.email.SendEmailUseCase
 import com.ustadmobile.lib.rest.domain.invite.message.SendMessageUseCase
@@ -585,11 +588,27 @@ fun Application.umRestApplication(
             SendMessageUseCase()
         }
 
+        bind<CheckContactTypeUseCase>() with provider {
+            CheckContactTypeUseCase(
+                validateEmailUseCase = instance(),
+                phoneNumValidatorUseCase = instance()
+                )
+        }
+
+        bind<ContactToServerUseCase>() with scoped(EndpointScope.Default).provider {
+            ContactToServerUseCase(
+                httpClient = instance(),
+                endpoint = context,
+                repo = null
+            )
+        }
+
         bind<ProcessInviteUseCase>() with scoped(EndpointScope.Default).provider {
             ProcessInviteUseCase(
                 sendEmailUseCase = instance(),
                 sendSmsUseCase = instance(),
                 sendMessageUseCase = instance(),
+                checkContactTypeUseCase = instance(),
                 db = instance(tag = DoorTag.TAG_DB),
                 endpoint = context,
 
@@ -804,6 +823,14 @@ fun Application.umRestApplication(
                         useCase = { call ->
                             di.on(call).direct.instance()
                         }
+                    )
+                }
+                route("inviteuser") {
+                    ProcessInviteRoute(
+                        useCase = { call ->
+                            di.on(call).direct.instance()
+                        },
+                        json = json,
                     )
                 }
 

@@ -80,6 +80,7 @@ class PersonListViewModel(
 ) {
 
     private val filterExcludeMembersOfClazz = savedStateHandle[ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ]?.toLong() ?: 0L
+    private val personRole = savedStateHandle[ARG_ROLE]?.toLong() ?: 0L
 
     private val filterAlreadySelectedList = savedStateHandle[ARG_EXCLUDE_PERSONUIDS_LIST]
         ?.split(",")?.filter { it.isNotEmpty() }?.map { it.trim().toLong() }
@@ -215,7 +216,15 @@ class PersonListViewModel(
         }
     }
     fun onClickInviteViaContact() {
-        navController.navigate(InviteViaContactViewModel.DEST_NAME, emptyMap())
+        val args = buildMap {
+            put(InviteViaContactViewModel.ARG_ROLE, personRole.toString())
+            put(InviteViaContactViewModel.ARG_CLAZZ_UID, filterExcludeMembersOfClazz.toString())
+        }
+
+        navController.navigate(
+            viewName = InviteViaContactViewModel.DEST_NAME,
+            args = args
+        )
 
 
     }
@@ -284,6 +293,7 @@ class PersonListViewModel(
          * to give this option only while adding users to course
          */
         const val ARG_SHOW_ADD_VIA_CONTACT= "showAddViaContact"
+        const val ARG_ROLE= "role"
 
         /**
          * Require a specific system permission to show the list. This has no security implication,

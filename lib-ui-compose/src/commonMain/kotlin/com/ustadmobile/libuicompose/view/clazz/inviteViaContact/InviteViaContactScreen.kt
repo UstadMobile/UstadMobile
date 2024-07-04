@@ -67,7 +67,6 @@ fun InviteViaContactScreen(
     onChipRemoved: (String) -> Unit,
 ) {
     val state = rememberChipTextFieldState<AvatarChip>()
-    val scrollState = rememberScrollState()
     UstadVerticalScrollColumn(
         modifier = Modifier
             .fillMaxSize(),

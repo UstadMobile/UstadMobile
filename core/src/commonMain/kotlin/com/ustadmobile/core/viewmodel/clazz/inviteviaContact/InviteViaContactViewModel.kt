@@ -4,25 +4,23 @@ import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import kotlinx.coroutines.flow.update
 import org.kodein.di.DI
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.invite.ContactToServerUseCase
 import com.ustadmobile.core.domain.invite.ParseInviteUseCase
-import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorUseCase
-import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.viewmodel.UstadViewModel
-import io.github.aakira.napier.Napier
-import io.ktor.util.logging.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import org.kodein.di.instance
 
 
 data class InviteViaContactChip(
     val text: String,
     val isValid: Boolean,
-    val inviteType:Int
+    val inviteType: Int
 )
 
 data class InviteViaContactUiState(
@@ -36,6 +34,9 @@ class InviteViaContactViewModel(
     savedStateHandle: UstadSavedStateHandle,
 ) : UstadViewModel(di, savedStateHandle, DEST_NAME) {
     private val parseInviteUseCase: ParseInviteUseCase by instance()
+    private val contactToServerUseCase: ContactToServerUseCase by instance()
+    private val clazzUid = savedStateHandle[ARG_CLAZZ_UID]?.toLong() ?: 0L
+    private val personRole = savedStateHandle[ARG_ROLE]?.toLong() ?: 0L
     private var _uiState = MutableStateFlow(InviteViaContactUiState())
 
     val uiState: Flow<InviteViaContactUiState> = _uiState.asStateFlow()
@@ -61,7 +62,14 @@ class InviteViaContactViewModel(
     }
 
     fun OnClickSend() {
-
+        viewModelScope.launch {
+            contactToServerUseCase.invoke(
+                _uiState.value.chips.map { it.text },
+                clazzUid,
+                personRole,
+                accountManager.currentUserSession.person.personUid
+            )
+        }
     }
 
     fun onContactError(error: String) {
@@ -91,6 +99,8 @@ class InviteViaContactViewModel(
 
     companion object {
         const val DEST_NAME = "invite_via_contact"
+        const val ARG_ROLE = "person_role"
+        const val ARG_CLAZZ_UID = "clazz_uid"
     }
 
 
