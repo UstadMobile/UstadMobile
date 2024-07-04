@@ -122,6 +122,8 @@ expect abstract class StatementDao {
     ): List<StatementEntity>
 
     @Query("""
+        -- Get the PersonUids for those that are within the current page as per studentsLimit and 
+        -- studentsOffset
         WITH PersonUids(personUid) AS (
             SELECT CourseMember.personUid 
               FROM (SELECT Person.*,
@@ -185,6 +187,7 @@ expect abstract class StatementDao {
             OFFSET :studentsOffset   
          ),
         
+        -- Get the ActorUids for the PersonUids See ActoryEntity doc for info on this join relationship
         AgentActorUidsForPersonUid(actorUid, actorPersonUid) AS(
              SELECT ActorEntity.actorUid AS actorUid, 
                     ActorEntity.actorPersonUid AS actorPersonUid
@@ -208,25 +211,26 @@ expect abstract class StatementDao {
         )
 
         -- Fetch all statements that could be completion or progress for the Gradebook report
-        SELECT StatementEntity_Outer.*, ActorEntity_Outer.*, GroupMemberActorJoin_Outer.*
-          FROM StatementEntity StatementEntity_Outer
-               JOIN ActorEntity ActorEntity_Outer
-                    ON ActorEntity_Outer.actorUid = StatementEntity_Outer.statementActorUid
-               LEFT JOIN GroupMemberActorJoin GroupMemberActorJoin_Outer
-                    ON ActorEntity_Outer.actorObjectType = ${XapiEntityObjectTypeFlags.GROUP}
-                       AND GroupMemberActorJoin_Outer.gmajGroupActorUid = StatementEntity_Outer.statementActorUid
-                       AND GroupMemberActorJoin_Outer.gmajMemberActorUid IN (
+        SELECT StatementEntity.*, ActorEntity.*, GroupMemberActorJoin.*
+          FROM StatementEntity
+               JOIN ActorEntity
+                    ON ActorEntity.actorUid = StatementEntity.statementActorUid
+               LEFT JOIN GroupMemberActorJoin
+                    ON ActorEntity.actorObjectType = ${XapiEntityObjectTypeFlags.GROUP}
+                       AND GroupMemberActorJoin.gmajGroupActorUid = StatementEntity.statementActorUid
+                       AND GroupMemberActorJoin.gmajMemberActorUid IN (
                            SELECT DISTINCT ActorUidsForPersonUid.actorUid
                              FROM ActorUidsForPersonUid)
-         WHERE StatementEntity_Outer.statementClazzUid = :clazzUid
-           AND StatementEntity_Outer.statementActorUid IN (
+         WHERE StatementEntity.statementClazzUid = :clazzUid
+           AND StatementEntity.statementActorUid IN (
                SELECT DISTINCT ActorUidsForPersonUid.actorUid
                  FROM ActorUidsForPersonUid)
-                 --Add check for contententryroot
-           AND (      StatementEntity_Outer.resultScoreScaled IS NOT NULL
-                   OR StatementEntity_Outer.resultCompletion IS NOT NULL
-                   OR StatementEntity_Outer.resultSuccess IS NOT NULL
-                   OR StatementEntity_Outer.extensionProgress IS NOT NULL 
+           AND (    StatementEntity.statementContentEntryUid = 0 
+                 OR CAST(StatementEntity.contentEntryRoot AS INTEGER) = 1)      
+           AND (      StatementEntity.resultScoreScaled IS NOT NULL
+                   OR StatementEntity.resultCompletion IS NOT NULL
+                   OR StatementEntity.resultSuccess IS NOT NULL
+                   OR StatementEntity.extensionProgress IS NOT NULL 
                )
     """)
     /**
@@ -236,7 +240,8 @@ expect abstract class StatementDao {
      * it needs to fetch statements for via a CTE (PersonUids) to match the page (using the
      * studentsLimit and studentsoffset arguments).
      *
-     * The query will match any statement that is matches students in the current page where
+     * The query will match any statement that is matches students in the current page where the
+     * statement provides a score, a completion status, or progress.
      */
     abstract suspend fun findStatusForStudentsInClazzStatements(
         clazzUid: Long,
