@@ -122,90 +122,76 @@ expect abstract class StatementDao {
     ): List<StatementEntity>
 
     @Query("""
-        WITH PersonUidsAndCourseBlocks(personUid, username, cbUid, cbType, caMarkingType) AS (
-             SELECT Person.personUid AS personUid, 
-                    Person.username AS username, 
-                    CourseBlock.cbUid AS cbUid,
-                    CourseBlock.cbType AS cbType,
-                    ClazzAssignment.caMarkingType AS caMarkingType
-               FROM Person
-                    JOIN CourseBlock
-                         ON CourseBlock.cbClazzUid = :clazzUid
-                    LEFT JOIN ClazzAssignment
-                         ON CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
-                        AND ClazzAssignment.caUid = CourseBlock.cbEntityUid     
-              WHERE Person.personUid IN (
-                SELECT CourseMember.personUid 
-                  FROM (SELECT Person.*,
-                               (SELECT MIN(ClazzEnrolment.clazzEnrolmentDateJoined) 
-                                  FROM ClazzEnrolment 
-                                 WHERE Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid) AS earliestJoinDate, 
-                
-                               (SELECT MAX(ClazzEnrolment.clazzEnrolmentDateLeft) 
-                                  FROM ClazzEnrolment 
-                                 WHERE Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid) AS latestDateLeft, 
-                
-                               (SELECT ClazzEnrolment.clazzEnrolmentRole 
-                                  FROM ClazzEnrolment 
-                                 WHERE Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid 
-                                   AND ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid 
-                                   AND ClazzEnrolment.clazzEnrolmentActive
-                              ORDER BY ClazzEnrolment.clazzEnrolmentDateLeft DESC
-                                 LIMIT 1) AS enrolmentRole
-                          FROM Person
-                         WHERE Person.personUid IN 
-                               (SELECT DISTINCT ClazzEnrolment.clazzEnrolmentPersonUid 
-                                  FROM ClazzEnrolment 
-                                 WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid 
-                                   AND ClazzEnrolment.clazzEnrolmentActive 
-                                   AND ClazzEnrolment.clazzEnrolmentRole = :roleId 
-                                   AND (:filter != $FILTER_ACTIVE_ONLY 
-                                         OR (:currentTime 
-                                              BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined 
-                                              AND ClazzEnrolment.clazzEnrolmentDateLeft))) 
-                           /* Begin permission check */
-                           AND (
-                                   ($PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT1 ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}
-                                    $PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT2 ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}
-                                    $PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT3)
-                                OR Person.personUid = :accountPersonUid
-                               )  
-                           /* End permission check */                   
-                           AND Person.firstNames || ' ' || Person.lastName LIKE :searchText
-                       GROUP BY Person.personUid) AS CourseMember
-              ORDER BY CASE(:sortOrder)
-                        WHEN $SORT_FIRST_NAME_ASC THEN CourseMember.firstNames
-                        WHEN $SORT_LAST_NAME_ASC THEN CourseMember.lastName
-                        ELSE ''
-                    END ASC,
-                    CASE(:sortOrder)
-                        WHEN $SORT_FIRST_NAME_DESC THEN CourseMember.firstNames
-                        WHEN $SORT_LAST_NAME_DESC THEN CourseMember.lastName
-                        ELSE ''
-                    END DESC,
-                    CASE(:sortOrder)
-                        WHEN $SORT_DATE_REGISTERED_ASC THEN CourseMember.earliestJoinDate
-                        WHEN $SORT_DATE_LEFT_ASC THEN CourseMember.latestDateLeft
-                        ELSE 0
-                    END ASC,
-                    CASE(:sortOrder)
-                        WHEN $SORT_DATE_REGISTERED_DESC THEN CourseMember.earliestJoinDate
-                        WHEN $SORT_DATE_LEFT_DESC THEN CourseMember.latestDateLeft
-                        ELSE 0
-                    END DESC
-                 LIMIT :studentsLimit
-                OFFSET :studentsOffset   
-             )
-                                          
-        ),
+        WITH PersonUids(personUid) AS (
+            SELECT CourseMember.personUid 
+              FROM (SELECT Person.*,
+                           (SELECT MIN(ClazzEnrolment.clazzEnrolmentDateJoined) 
+                              FROM ClazzEnrolment 
+                             WHERE Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid) AS earliestJoinDate, 
+            
+                           (SELECT MAX(ClazzEnrolment.clazzEnrolmentDateLeft) 
+                              FROM ClazzEnrolment 
+                             WHERE Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid) AS latestDateLeft, 
+            
+                           (SELECT ClazzEnrolment.clazzEnrolmentRole 
+                              FROM ClazzEnrolment 
+                             WHERE Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid 
+                               AND ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid 
+                               AND ClazzEnrolment.clazzEnrolmentActive
+                          ORDER BY ClazzEnrolment.clazzEnrolmentDateLeft DESC
+                             LIMIT 1) AS enrolmentRole
+                      FROM Person
+                     WHERE Person.personUid IN 
+                           (SELECT DISTINCT ClazzEnrolment.clazzEnrolmentPersonUid 
+                              FROM ClazzEnrolment 
+                             WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid 
+                               AND ClazzEnrolment.clazzEnrolmentActive 
+                               AND ClazzEnrolment.clazzEnrolmentRole = :roleId 
+                               AND (:filter != $FILTER_ACTIVE_ONLY 
+                                     OR (:currentTime 
+                                          BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined 
+                                          AND ClazzEnrolment.clazzEnrolmentDateLeft))) 
+                       /* Begin permission check */
+                       AND (
+                               ($PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT1 ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}
+                                $PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT2 ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}
+                                $PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT3)
+                            OR Person.personUid = :accountPersonUid
+                           )  
+                       /* End permission check */                   
+                       AND Person.firstNames || ' ' || Person.lastName LIKE :searchText
+                   GROUP BY Person.personUid) AS CourseMember
+          ORDER BY CASE(:sortOrder)
+                    WHEN $SORT_FIRST_NAME_ASC THEN CourseMember.firstNames
+                    WHEN $SORT_LAST_NAME_ASC THEN CourseMember.lastName
+                    ELSE ''
+                END ASC,
+                CASE(:sortOrder)
+                    WHEN $SORT_FIRST_NAME_DESC THEN CourseMember.firstNames
+                    WHEN $SORT_LAST_NAME_DESC THEN CourseMember.lastName
+                    ELSE ''
+                END DESC,
+                CASE(:sortOrder)
+                    WHEN $SORT_DATE_REGISTERED_ASC THEN CourseMember.earliestJoinDate
+                    WHEN $SORT_DATE_LEFT_ASC THEN CourseMember.latestDateLeft
+                    ELSE 0
+                END ASC,
+                CASE(:sortOrder)
+                    WHEN $SORT_DATE_REGISTERED_DESC THEN CourseMember.earliestJoinDate
+                    WHEN $SORT_DATE_LEFT_DESC THEN CourseMember.latestDateLeft
+                    ELSE 0
+                END DESC
+             LIMIT :studentsLimit
+            OFFSET :studentsOffset   
+         ),
         
         AgentActorUidsForPersonUid(actorUid, actorPersonUid) AS(
              SELECT ActorEntity.actorUid AS actorUid, 
                     ActorEntity.actorPersonUid AS actorPersonUid
                FROM ActorEntity
               WHERE ActorEntity.actorPersonUid IN
-                    (SELECT PersonUidsAndCourseBlocks.personUid
-                       FROM PersonUidsAndCourseBlocks)           
+                    (SELECT PersonUids.personUid
+                       FROM PersonUids)           
         ),
         
         -- Add in group actor uids
@@ -244,7 +230,13 @@ expect abstract class StatementDao {
                )
     """)
     /**
+     * This query will fetch the StatementEntity and related (e.g. ActorEntity, GroupMemberActorJoin)
+     * required by ClazzGradebook to show the Gradebook results. The query uses the same parameters
+     * as findByClazzUidAndRoleForGradebook (which is paged) so it can determine which PersonUids
+     * it needs to fetch statements for via a CTE (PersonUids) to match the page (using the
+     * studentsLimit and studentsoffset arguments).
      *
+     * The query will match any statement that is matches students in the current page where
      */
     abstract suspend fun findStatusForStudentsInClazzStatements(
         clazzUid: Long,
@@ -267,9 +259,8 @@ expect abstract class StatementDao {
               WHERE ActorEntity.actorPersonUid IN (:studentPersonUids)
         ),
         
-        PersonUidsAndCourseBlocks(personUid, username, cbUid, cbType, caMarkingType) AS (
-             SELECT Person.personUid AS personUid, 
-                    Person.username AS username, 
+        PersonUidsAndCourseBlocks(personUid, cbUid, cbType, caMarkingType) AS (
+             SELECT Person.personUid AS personUid,
                     CourseBlock.cbUid AS cbUid,
                     CourseBlock.cbType AS cbType,
                     ClazzAssignment.caMarkingType AS caMarkingType
