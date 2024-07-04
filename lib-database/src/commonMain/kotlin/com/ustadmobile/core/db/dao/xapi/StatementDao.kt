@@ -23,7 +23,6 @@ import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY_WHERE_MATCHES_ACCOUNT_PERSON_UID_AND_PARENT_CONTENT_ENTRY_ROOT
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.JOIN_ACTOR_TABLES_FROM_ACTOR_UIDS_FOR_PERSON_UID
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.JOIN_ACTOR_TABLES_FROM_ACTOR_UIDS_FOR_PERSON_UID_INNER
-import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.JOIN_ACTOR_TABLES_FROM_STATEMENT_OUTER
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.STATEMENT_MATCHES_PERSONUIDS_AND_COURSEBLOCKS
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.STATEMENT_MATCHES_PERSONUIDS_AND_COURSEBLOCKS_INNER
 import com.ustadmobile.door.DoorQuery
@@ -39,6 +38,7 @@ import com.ustadmobile.lib.db.entities.StatementEntityAndDisplayDetails
 import com.ustadmobile.lib.db.entities.StatementReportData
 import com.ustadmobile.lib.db.entities.XLangMapEntry
 import com.ustadmobile.lib.db.entities.xapi.StatementEntity
+import com.ustadmobile.lib.db.entities.xapi.XapiEntityObjectTypeFlags
 import kotlinx.coroutines.flow.Flow
 
 @DoorDao
@@ -199,117 +199,53 @@ expect abstract class StatementDao {
                                           
         ),
         
-        ActorUidsForPersonUid(actorUid, actorPersonUid) AS(
+        AgentActorUidsForPersonUid(actorUid, actorPersonUid) AS(
              SELECT ActorEntity.actorUid AS actorUid, 
                     ActorEntity.actorPersonUid AS actorPersonUid
                FROM ActorEntity
               WHERE ActorEntity.actorPersonUid IN
                     (SELECT PersonUidsAndCourseBlocks.personUid
-                       FROM PersonUidsAndCourseBlocks)
+                       FROM PersonUidsAndCourseBlocks)           
+        ),
+        
+        -- Add in group actor uids
+        ActorUidsForPersonUid(actorUid, actorPersonUid) AS (
+             SELECT AgentActorUidsForPersonUid.actorUid AS actorUid,
+                    AgentActorUidsForPersonUid.actorPersonUid AS actorPersonUid
+               FROM AgentActorUidsForPersonUid     
+              UNION 
+             SELECT GroupMemberActorJoin.gmajGroupActorUid AS actorUid,
+                    AgentActorUidsForPersonUid.actorPersonUid AS actorPersonUid
+               FROM AgentActorUidsForPersonUid
+                    JOIN GroupMemberActorJoin 
+                         ON GroupMemberActorJoin.gmajMemberActorUid = AgentActorUidsForPersonUid.actorUid
         )
-        
-        
-        -- Maximum score statement
+
+        -- Fetch all statements that could be completion or progress for the Gradebook report
         SELECT StatementEntity_Outer.*, ActorEntity_Outer.*, GroupMemberActorJoin_Outer.*
-          FROM PersonUidsAndCourseBlocks
-               JOIN StatementEntity StatementEntity_Outer
-                    ON (StatementEntity_Outer.statementIdHi, StatementEntity_Outer.statementIdLo) IN (
-                        SELECT StatementEntity.statementIdHi, StatementEntity.statementIdLo
-                          FROM StatementEntity
-                               $JOIN_ACTOR_TABLES_FROM_ACTOR_UIDS_FOR_PERSON_UID
-                         WHERE $STATEMENT_MATCHES_PERSONUIDS_AND_COURSEBLOCKS 
-                      ORDER BY StatementEntity.extensionProgress DESC
-                         LIMIT 1
-                    )
-               $JOIN_ACTOR_TABLES_FROM_STATEMENT_OUTER
-                    
-        UNION
-        
-        --Completed statement
-        SELECT StatementEntity_Outer.*, ActorEntity_Outer.*, GroupMemberActorJoin_Outer.*
-          FROM PersonUidsAndCourseBlocks
-               JOIN StatementEntity StatementEntity_Outer
-                    ON (StatementEntity_Outer.statementIdHi, StatementEntity_Outer.statementIdLo) IN (
-                          SELECT StatementEntity.statementIdHi, StatementEntity.statementIdLo
-                            FROM StatementEntity
-                                 $JOIN_ACTOR_TABLES_FROM_ACTOR_UIDS_FOR_PERSON_UID
-                           WHERE ($STATEMENT_MATCHES_PERSONUIDS_AND_COURSEBLOCKS)
-                             AND CAST(StatementEntity.resultCompletion AS INTEGER) = 1
-                           LIMIT 1     
-                    )
-               $JOIN_ACTOR_TABLES_FROM_STATEMENT_OUTER  
-        UNION 
-        
-        -- StatementEntity for success or fail e.g. resultSuccess is not null             
-        SELECT StatementEntity_Outer.*, ActorEntity_Outer.*, GroupMemberActorJoin_Outer.*
-          FROM PersonUidsAndCourseBlocks
-               JOIN StatementEntity StatementEntity_Outer
-                    ON (StatementEntity_Outer.statementIdHi, StatementEntity_Outer.statementIdLo) IN (
-                          SELECT StatementEntity.statementIdHi, StatementEntity.statementIdLo
-                            FROM StatementEntity
-                                 $JOIN_ACTOR_TABLES_FROM_ACTOR_UIDS_FOR_PERSON_UID
-                           WHERE ($STATEMENT_MATCHES_PERSONUIDS_AND_COURSEBLOCKS)
-                             AND StatementEntity.resultSuccess IS NOT NULL
-                        ORDER BY StatementEntity.resultSuccess DESC     
-                           LIMIT 1     
-                    )
-               $JOIN_ACTOR_TABLES_FROM_STATEMENT_OUTER
-        
-        UNION
-        
-        --StatementEntity for score
-        SELECT StatementEntity_Outer.*, ActorEntity_Outer.*, GroupMemberActorJoin_Outer.*
-          FROM PersonUidsAndCourseBlocks
-               JOIN StatementEntity StatementEntity_Outer
-                    ON (StatementEntity_Outer.statementIdHi, StatementEntity_Outer.statementIdLo) IN (
-                        SELECT StatementEntity.statementIdHi, StatementEntity.statementIdLo
-                          FROM StatementEntity
-                               $JOIN_ACTOR_TABLES_FROM_ACTOR_UIDS_FOR_PERSON_UID
-                               
-                         WHERE ($STATEMENT_MATCHES_PERSONUIDS_AND_COURSEBLOCKS)
-                               -- Where there is a peer marked assignment get the latest statement 
-                               -- for each distinct peer marker as per contextInstructorUid
-                           AND ((      PersonUidsAndCourseBlocks.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
-                                  AND PersonUidsAndCourseBlocks.caMarkingType = ${ClazzAssignment.MARKED_BY_PEERS}
-                                  AND StatementEntity.timestamp = 
-                                      (SELECT MAX(StatementEntity_Inner.timestamp)
-                                         FROM StatementEntity StatementEntity_Inner
-                                              $JOIN_ACTOR_TABLES_FROM_ACTOR_UIDS_FOR_PERSON_UID_INNER
-                                        WHERE ($STATEMENT_MATCHES_PERSONUIDS_AND_COURSEBLOCKS_INNER)
-                                          AND StatementEntity_Inner.contextInstructorUid = StatementEntity.contextInstructorUid))
-                               -- Where this is an assignment marked by teacher
-                              OR (    PersonUidsAndCourseBlocks.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
-                                  AND PersonUidsAndCourseBlocks.caMarkingType = ${ClazzAssignment.MARKED_BY_COURSE_LEADER}
-                                  AND StatementEntity.resultScoreScaled IS NOT NULL
-                                  AND StatementEntity.timestamp = (
-                                      SELECT MAX(StatementEntityInner.timestamp)
-                                        FROM StatementEntity StatementEntityInner
-                                             JOIN ActorEntity ActorEntityInner
-                                                  ON StatementEntityInner.statementActorUid = ActorEntityInner.actorUid
-                                       WHERE StatementEntityInner.statementCbUid = PersonUidsAndCourseBlocks.cbUid
-                                         AND (   ActorEntityInner.actorPersonUid = PersonUidsAndCourseBlocks.personUid
-                                              OR GroupMemberActorJoin.gmajGroupActorUid = StatementEntity.statementActorUid)
-                                         AND StatementEntityInner.resultScoreScaled IS NOT NULL
-                                      )
-                                  )
-                               -- This is self-paced content so take the best score
-                               -- note should check root attribute
-                              OR  (    PersonUidsAndCourseBlocks.cbType != ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
-                                   AND StatementEntity.resultScoreScaled IS NOT NULL
-                                   AND StatementEntity.resultScoreScaled = (
-                                       SELECT MAX(StatementEntityInner.resultScoreScaled)
-                                         FROM StatementEntity StatementEntityInner
-                                              JOIN ActorEntity ActorEntityInner
-                                                  ON StatementEntityInner.statementActorUid = ActorEntityInner.actorUid
-                                        WHERE StatementEntityInner.statementCbUid = PersonUidsAndCourseBlocks.cbUid
-                                          AND (   ActorEntityInner.actorPersonUid = PersonUidsAndCourseBlocks.personUid
-                                               OR GroupMemberActorJoin.gmajGroupActorUid = StatementEntity.statementActorUid)
-                                          AND StatementEntityInner.resultScoreScaled IS NOT NULL) 
-                                  )
-                              )
-                        )
-               $JOIN_ACTOR_TABLES_FROM_STATEMENT_OUTER
+          FROM StatementEntity StatementEntity_Outer
+               JOIN ActorEntity ActorEntity_Outer
+                    ON ActorEntity_Outer.actorUid = StatementEntity_Outer.statementActorUid
+               LEFT JOIN GroupMemberActorJoin GroupMemberActorJoin_Outer
+                    ON ActorEntity_Outer.actorObjectType = ${XapiEntityObjectTypeFlags.GROUP}
+                       AND GroupMemberActorJoin_Outer.gmajGroupActorUid = StatementEntity_Outer.statementActorUid
+                       AND GroupMemberActorJoin_Outer.gmajMemberActorUid IN (
+                           SELECT DISTINCT ActorUidsForPersonUid.actorUid
+                             FROM ActorUidsForPersonUid)
+         WHERE StatementEntity_Outer.statementClazzUid = :clazzUid
+           AND StatementEntity_Outer.statementActorUid IN (
+               SELECT DISTINCT ActorUidsForPersonUid.actorUid
+                 FROM ActorUidsForPersonUid)
+                 --Add check for contententryroot
+           AND (      StatementEntity_Outer.resultScoreScaled IS NOT NULL
+                   OR StatementEntity_Outer.resultCompletion IS NOT NULL
+                   OR StatementEntity_Outer.resultSuccess IS NOT NULL
+                   OR StatementEntity_Outer.extensionProgress IS NOT NULL 
+               )
     """)
+    /**
+     *
+     */
     abstract suspend fun findStatusForStudentsInClazzStatements(
         clazzUid: Long,
         roleId: Int,
