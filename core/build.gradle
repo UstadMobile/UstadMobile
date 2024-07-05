@@ -277,6 +277,8 @@ kotlin {
 
         androidUnitTest {
             dependencies {
+                implementation libs.kotlin.test
+                implementation libs.kotlin.test.junit
                 implementation libs.androidx.test.runner
                 implementation libs.junit
                 implementation libs.robolectric
