@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.DeveloperMode
 import androidx.compose.material.icons.filled.DisplaySettings
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.SdStorage
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Workspaces
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
@@ -52,49 +53,45 @@ fun SettingsScreen(
         onClickDeveloperOptions = viewModel::onClickDeveloperOptions,
         onClickDeletedItems = viewModel::onClickDeletedItems,
         onClickOfflineStorageOptionsDialog = viewModel::onClickOfflineStorageOptionsDialog,
-        folderPickLauncher = folderPickLauncher // <-- Pass the folderPickLauncher here
+        folderPickLauncher = folderPickLauncher,
+        onClickAppShare = viewModel::onClickAppShare
     )
-    if(uiState.langDialogVisible) {
+    if (uiState.langDialogVisible) {
         //As per https://developer.android.com/jetpack/compose/components/dialog
         SettingsDialog(
             onDismissRequest = viewModel::onDismissLangDialog,
         ) {
             uiState.availableLanguages.forEach { lang ->
-                ListItem(
-                    modifier = Modifier.clickable { viewModel.onClickLang(lang) },
-                    headlineContent = { Text(lang.langDisplay) }
-                )
+                ListItem(modifier = Modifier.clickable { viewModel.onClickLang(lang) },
+                    headlineContent = { Text(lang.langDisplay) })
             }
         }
     }
 
-    if(uiState.htmlContentDisplayDialogVisible) {
+    if (uiState.htmlContentDisplayDialogVisible) {
         SettingsDialog(
             onDismissRequest = viewModel::onDismissHtmlContentDisplayEngineDialog,
         ) {
             uiState.htmlContentDisplayOptions.forEach { engineOption ->
-                ListItem(
-                    modifier = Modifier.clickable {
-                        viewModel.onClickHtmlContentDisplayEngineOption(engineOption)
-                    },
+                ListItem(modifier = Modifier.clickable {
+                    viewModel.onClickHtmlContentDisplayEngineOption(engineOption)
+                },
                     headlineContent = { Text(stringResource(engineOption.stringResource)) },
                     supportingContent = engineOption.explanationStringResource?.let {
                         { Text(stringResource(it)) }
-                    }
-                )
+                    })
             }
         }
     }
 
-    if(uiState.storageOptionsDialogVisible) {
+    if (uiState.storageOptionsDialogVisible) {
         SettingsDialog(
             onDismissRequest = viewModel::onDismissOfflineStorageOptionsDialog
         ) {
             uiState.storageOptions.forEach { option ->
-                ListItem(
-                    modifier = Modifier.clickable {
-                        viewModel.onSelectOfflineStorageOption(option.option)
-                    },
+                ListItem(modifier = Modifier.clickable {
+                    viewModel.onSelectOfflineStorageOption(option.option)
+                },
                     headlineContent = { Text(stringResource(option.option.label)) },
                     supportingContent = {
                         Text(
@@ -103,13 +100,12 @@ fun SettingsScreen(
                                 UMFileUtil.formatFileSize(option.availableSpace)
                             )
                         )
-                    }
-                )
+                    })
             }
         }
     }
 
-    if(uiState.waitForRestartDialogVisible) {
+    if (uiState.waitForRestartDialogVisible) {
         UstadWaitForRestartDialog()
     }
 }
@@ -117,6 +113,7 @@ fun SettingsScreen(
 @Composable
 fun SettingsScreen(
     uiState: SettingsUiState,
+    onClickAppShare: () -> Unit = {},
     onClickAppLanguage: () -> Unit = {},
     onClickHtmlContentDisplayEngine: () -> Unit = {},
     onClickGoToHolidayCalendarList: () -> Unit = {},
@@ -131,11 +128,11 @@ fun SettingsScreen(
 ) {
     UstadVerticalScrollColumn(
         modifier = Modifier.fillMaxSize()
-    )  {
+    ) {
 
         UstadDetailField2(
             modifier = Modifier.clickable { onClickAppLanguage() },
-            icon= Icons.Default.Language,
+            icon = Icons.Default.Language,
             valueText = uiState.currentLanguage,
             labelText = stringResource(MR.strings.app_language),
         )
@@ -149,7 +146,7 @@ fun SettingsScreen(
             labelText = stringResource(MR.strings.create_backup_description),
         )
 
-        if(uiState.storageOptionsVisible) {
+        if (uiState.storageOptionsVisible) {
             UstadDetailField2(
                 modifier = Modifier.clickable {
                     onClickOfflineStorageOptionsDialog()
@@ -162,28 +159,24 @@ fun SettingsScreen(
             )
         }
 
-
-        if(uiState.storageOptionsVisible) {
-            UstadDetailField2(
-                modifier = Modifier.clickable {
-                    onClickOfflineStorageOptionsDialog()
-                },
-                labelText = stringResource(MR.strings.offline_items_storage),
-                valueText = uiState.selectedOfflineStorageOption?.label?.let {
-                    stringResource(it)
-                } ?: "",
-                icon = Icons.Default.SdStorage,
-            )
-        }
-
-        UstadDetailField2(
-            valueText = stringResource(MR.strings.deleted_items),
+        UstadDetailField2(valueText = stringResource(MR.strings.deleted_items),
             labelText = stringResource(MR.strings.delete_or_restore_items),
             icon = Icons.Default.Delete,
-            modifier = Modifier.clickable { onClickDeletedItems() }
-        )
+            modifier = Modifier.clickable { onClickDeletedItems() })
 
-        if (uiState.holidayCalendarVisible){
+
+        if (uiState.sendAppOptionVisible) {
+            UstadDetailField2(
+                modifier = Modifier.clickable {
+                    onClickAppShare()
+                },
+                valueText = "Share App",
+                labelText = "Share App with Others",
+                icon = Icons.Default.Share,
+            )
+        }
+
+        if (uiState.holidayCalendarVisible) {
             UstadDetailField2(
                 valueText = stringResource(MR.strings.holiday_calendars),
                 labelText = stringResource(MR.strings.holiday_calendars_desc),
@@ -211,15 +204,16 @@ fun SettingsScreen(
             )
         }
 
-        if(uiState.advancedSectionVisible) {
+        if (uiState.advancedSectionVisible) {
             UstadDetailHeader { Text(stringResource(MR.strings.advanced)) }
 
-            if(uiState.htmlContentDisplayEngineVisible) {
+            if (uiState.htmlContentDisplayEngineVisible) {
                 UstadDetailField2(
                     modifier = Modifier.clickable { onClickHtmlContentDisplayEngine() },
                     icon = Icons.Default.DisplaySettings,
-                    valueText = uiState.currentHtmlContentDisplayOption?.stringResource
-                        ?.let { stringResource(it) } ?: "",
+                    valueText = uiState.currentHtmlContentDisplayOption?.stringResource?.let {
+                        stringResource(it)
+                    } ?: "",
                     labelText = stringResource(MR.strings.html5_content_display_engine),
                 )
             }
@@ -227,7 +221,7 @@ fun SettingsScreen(
 
 
 
-        if(uiState.showDeveloperOptions) {
+        if (uiState.showDeveloperOptions) {
             //Developer settings are not translated
             UstadDetailField2(
                 modifier = Modifier.clickable(onClick = onClickDeveloperOptions),
@@ -239,10 +233,8 @@ fun SettingsScreen(
 
         HorizontalDivider(thickness = 1.dp)
 
-        ListItem(
-            modifier = Modifier.testTag("settings_version").clickable { onClickVersion() },
+        ListItem(modifier = Modifier.testTag("settings_version").clickable { onClickVersion() },
             headlineContent = { Text(uiState.version) },
-            supportingContent = { Text(stringResource(MR.strings.version)) }
-        )
+            supportingContent = { Text(stringResource(MR.strings.version)) })
     }
 }

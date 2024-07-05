@@ -7,8 +7,10 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.viewmodel.UstadViewModel
+import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -91,10 +93,24 @@ class IndividualLearnerViewModel(
         loadingState = LoadingUiState.INDETERMINATE
 
         viewModelScope.launch {
-            accountManager.createLocalAccount()
-            val goOptions = UstadMobileSystemCommon.UstadGoOptions(clearStack = true)
-            navController.navigate(ContentEntryListViewModel.DEST_NAME_HOME, emptyMap(), goOptions)
+            try {
+                accountManager.createLocalAccount()
 
+                val args = mapOf(
+                    ContentEntryEditViewModel.ARG_GO_TO_ON_CONTENT_ENTRY_DONE to
+                            ContentEntryEditViewModel.GO_TO_COURSE_BLOCK_EDIT.toString(),
+                    ContentEntryListViewModel.ARG_FILTER to
+                            ContentEntryListViewModel.FILTER_FROM_LIBRARY.toString(),
+
+                    )
+
+                val goOptions = UstadMobileSystemCommon.UstadGoOptions(clearStack = true)
+                navController.navigate(ContentEntryListViewModel.DEST_NAME_HOME, args, goOptions)
+            } catch (e: Exception) {
+                Napier.e("Error during login: ${e.message}", e)
+            } finally {
+                loadingState = LoadingUiState.NOT_LOADING
+            }
         }
     }
 
