@@ -143,6 +143,8 @@ class ClazzAssignmentEditViewModel(
                             cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
                             cbEntityUid = assignmentUid
                             cbCompletionCriteria = ClazzAssignment.COMPLETION_CRITERIA_GRADED
+                            cbMaxPoints = 10f
+                            cbMinPoints = 0f
                         },
                         assignment = ClazzAssignment().apply {
                             caUid = assignmentUid
