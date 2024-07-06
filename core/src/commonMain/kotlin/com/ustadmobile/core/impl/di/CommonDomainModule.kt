@@ -10,6 +10,7 @@ import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.RequestEnrolm
 import com.ustadmobile.core.domain.contententry.launchcontent.DefaultLaunchContentEntryVersionUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.LaunchContentEntryVersionUseCase
 import com.ustadmobile.core.domain.contententry.save.SaveContentEntryUseCase
+import com.ustadmobile.core.domain.invite.ContactToServerUseCase
 import com.ustadmobile.core.domain.invite.ParseInviteUseCase
 import com.ustadmobile.core.domain.makelink.MakeLinkUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
@@ -83,6 +84,13 @@ fun commonDomainDiModule(endpointScope: EndpointScope) = DI.Module("CommonDomain
     bind<CreateNewClazzUseCase>() with scoped(endpointScope).singleton {
         CreateNewClazzUseCase(
             repoOrDb = instance(tag = DoorTag.TAG_REPO)
+        )
+    }
+    bind<ContactToServerUseCase>() with scoped(endpointScope).singleton {
+        ContactToServerUseCase(
+            httpClient = instance(),
+            endpoint = context,
+            repo = instance(tag = DoorTag.TAG_REPO),
         )
     }
 

@@ -1,7 +1,6 @@
 package com.ustadmobile.lib.rest.domain.invite
 
 import com.ustadmobile.core.account.UnauthorizedException
-import com.ustadmobile.core.viewmodel.clazz.inviteviaContact.InviteViaContactChip
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
@@ -10,7 +9,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import kotlinx.serialization.json.Json
 
-
+//Handle incoming requests from existing user to invite people
 fun Route.ProcessInviteRoute(
     useCase: (ApplicationCall) -> ProcessInviteUseCase,
     json: Json

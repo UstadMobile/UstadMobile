@@ -595,13 +595,7 @@ fun Application.umRestApplication(
                 )
         }
 
-        bind<ContactToServerUseCase>() with scoped(EndpointScope.Default).provider {
-            ContactToServerUseCase(
-                httpClient = instance(),
-                endpoint = context,
-                repo = null
-            )
-        }
+
 
         bind<ProcessInviteUseCase>() with scoped(EndpointScope.Default).provider {
             ProcessInviteUseCase(

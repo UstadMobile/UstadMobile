@@ -7,8 +7,16 @@ import com.ustadmobile.door.ext.doorNodeAndVersionHeaders
 import io.ktor.client.HttpClient
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
-import io.ktor.client.statement.bodyAsText
 
+
+/**
+ * this usecase for a http api call to send all contact to server to send invite links to particular contacts
+ *
+ * @param contacts list of contacts like email , phone number or username
+ * @param clazzUid the clazzuid for which person will join course
+ * @param personUid the personUid from which invitation is sent
+ * @param role the roleid from which invitation is sent
+ */
 class ContactToServerUseCase(
     private val httpClient: HttpClient,
     private val endpoint: Endpoint,
@@ -27,6 +35,6 @@ class ContactToServerUseCase(
             parameter("clazzUid", clazzUid.toString())
             parameter("contacts", contacts.toString())
             doorNodeAndVersionHeaders(repo as DoorDatabaseRepository)
-        }.bodyAsText().toLong()
+        }
     }
 }
