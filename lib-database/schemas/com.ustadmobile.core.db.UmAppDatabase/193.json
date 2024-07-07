@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 193,
-    "identityHash": "d4a3e87046ab44151a1873fb67d5c46a",
+    "identityHash": "43d04d136180f86bf23ab477618d14cd",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -2738,6 +2738,16 @@
             ],
             "orders": [],
             "createSql": "CREATE INDEX IF NOT EXISTS `idx_statement_clazz_person` ON `${TABLE_NAME}` (`statementClazzUid`, `statementActorPersonUid`)"
+          },
+          {
+            "name": "idx_statement_cbuid_actor",
+            "unique": false,
+            "columnNames": [
+              "statementCbUid",
+              "statementActorUid"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `idx_statement_cbuid_actor` ON `${TABLE_NAME}` (`statementCbUid`, `statementActorUid`)"
           }
         ],
         "foreignKeys": []
@@ -7460,7 +7470,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd4a3e87046ab44151a1873fb67d5c46a')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '43d04d136180f86bf23ab477618d14cd')"
     ]
   }
 }
