@@ -8,6 +8,7 @@ import com.ustadmobile.door.annotation.*
 import app.cash.paging.PagingSource
 import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.FILTER_ACTIVE_ONLY
+import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.PERSON_UIDS_FOR_PAGED_GRADEBOOK_QUERY_CTE
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_DATE_LEFT_ASC
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_DATE_LEFT_DESC
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_DATE_REGISTERED_ASC
@@ -320,12 +321,20 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         pullQueriesToReplicate = arrayOf(
             HttpServerFunctionCall("findByClazzUidAndRoleForGradebook"),
             HttpServerFunctionCall(
-                functionName = "findEnrolmentsByClazzUidAndRole",
+                functionName = "findEnrolmentsByClazzUidAndRolePaged",
                 functionArgs = arrayOf(
                     HttpServerFunctionParam(
                         name = "permission",
                         argType = HttpServerFunctionParam.ArgType.LITERAL,
                         literalValue = "${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}"
+                    ),
+                    HttpServerFunctionParam(
+                        name = "studentsOffset",
+                        argType = HttpServerFunctionParam.ArgType.PAGING_OFFSET,
+                    ),
+                    HttpServerFunctionParam(
+                        name = "studentsLimit",
+                        argType = HttpServerFunctionParam.ArgType.PAGING_LIMIT,
                     )
                 )
             ),
@@ -349,8 +358,18 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
                 )
             ),
             HttpServerFunctionCall(
-                functionName = "findActorEntitiesForGradebook"
-            )
+                functionName = "findActorEntitiesForGradebook",
+                functionArgs = arrayOf(
+                    HttpServerFunctionParam(
+                        name = "studentsOffset",
+                        argType = HttpServerFunctionParam.ArgType.PAGING_OFFSET,
+                    ),
+                    HttpServerFunctionParam(
+                        name = "studentsLimit",
+                        argType = HttpServerFunctionParam.ArgType.PAGING_LIMIT,
+                    )
+                )
+            ),
         )
     )
     abstract fun findByClazzUidAndRoleForGradebook(
@@ -364,17 +383,25 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
     ): PagingSource<Int, PersonAndClazzMemberListDetails>
 
     @Query("""
+          WITH $PERSON_UIDS_FOR_PAGED_GRADEBOOK_QUERY_CTE
+          
+        
         SELECT ActorEntity.*
           FROM ActorEntity
          WHERE ActorEntity.actorPersonUid IN 
-               (SELECT DISTINCT ClazzEnrolment.clazzEnrolmentPersonUid 
-                  FROM ClazzEnrolment 
-                 WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid 
-                   AND ClazzEnrolment.clazzEnrolmentActive 
-                   AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT})
+               (SELECT PersonUids.personUid
+                  FROM PersonUids)
     """)
     abstract suspend fun findActorEntitiesForGradebook(
         clazzUid: Long,
+        roleId: Int,
+        sortOrder: Int,
+        searchText: String? = "%",
+        filter: Int,
+        accountPersonUid: Long,
+        currentTime: Long,
+        studentsLimit: Int,
+        studentsOffset: Int,
     ): List<ActorEntity>
 
     /**
@@ -438,6 +465,36 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         roleId: Int,
         permission: Long,
     ): List<ClazzEnrolment>
+
+    @Query("""
+         WITH $PERSON_UIDS_FOR_PAGED_GRADEBOOK_QUERY_CTE
+        
+       SELECT ClazzEnrolment.*
+         FROM ClazzEnrolment
+        WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid
+          AND ClazzEnrolment.clazzEnrolmentRole = :roleId
+          AND ClazzEnrolment.clazzEnrolmentPersonUid IN (
+              SELECT PersonUids.personUid
+                FROM PersonUids)
+              /* Begin permission check*/
+          AND (
+                   ($PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL)
+                OR ClazzEnrolment.clazzEnrolmentPersonUid = :accountPersonUid
+              )  
+    """)
+    abstract suspend fun findEnrolmentsByClazzUidAndRolePaged(
+        clazzUid: Long,
+        roleId: Int,
+        sortOrder: Int,
+        searchText: String? = "%",
+        filter: Int,
+        accountPersonUid: Long,
+        currentTime: Long,
+        permission: Long,
+        studentsLimit: Int,
+        studentsOffset: Int,
+    ): List<ClazzEnrolment>
+
 
 
 
