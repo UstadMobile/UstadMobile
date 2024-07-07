@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.db.entities.xapi
 
 import androidx.room.Entity
+import androidx.room.Index
 import com.ustadmobile.door.annotation.ReplicateEntity
 import com.ustadmobile.door.annotation.ReplicateEtag
 import com.ustadmobile.door.annotation.ReplicateLastModified
@@ -15,7 +16,14 @@ import kotlinx.serialization.Serializable
  * database entities.
  */
 @Entity(
-    primaryKeys = arrayOf("gmajGroupActorUid", "gmajMemberActorUid")
+    primaryKeys = arrayOf("gmajGroupActorUid", "gmajMemberActorUid"),
+    indices = arrayOf(
+        //Queries that join from statement will join using the actor uid for the group
+        Index("gmajGroupActorUid", name = "idx_groupmemberactorjoin_gmajgroupactoruid"),
+
+        //Queries that join from the actor (e.g. person related) will join using the actor uid
+        Index("gmajMemberActorUid", name = "idx_groupmemberactorjoin_gmajmemberactoruid")
+    )
 )
 @ReplicateEntity(
     tableId = GroupMemberActorJoin.TABLE_ID,

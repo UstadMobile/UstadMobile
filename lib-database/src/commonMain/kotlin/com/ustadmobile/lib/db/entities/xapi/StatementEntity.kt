@@ -30,11 +30,25 @@ import kotlinx.serialization.Serializable
  * @param statementObjectUid2 where the object type is an Activity, Agent, or Group, then 0. When a
  * StatementRef, the least significant uuid bits (lo). When a substatement, then statementIdLo + 1
  * @param isSubStatement if true, this is a substatement which cannot be independently retrieved.
+ * @param completionOrProgress Indicates whether or not the statement is completion or progress
+ * (excludes xAPI statements that are progress or completion of child activities for statements
+ * received over API) - e.g. the statement could be relevant to showing the progress of the learner.
+
+ * This is used as an index field so that the database can quickly filter out other types of
+ * statements (e.g. statements that are not for the top level activity, dont have a score,
+ * completion status, etc). Given that Statements are click stream level, there are a lot
+ * of them, so this index is important to help speed up queries on table that will get big.
+ *
+ * This is true if the statement has a result with a non null value for result score scaled
  */
 @Entity(
     primaryKeys = arrayOf("statementIdHi", "statementIdLo"),
     indices = arrayOf(
-        Index(value = arrayOf("statementActorPersonUid"), name = "idx_stmt_actor_person")
+        Index("statementActorPersonUid", name = "idx_stmt_actor_person"),
+        Index("statementClazzUid", "statementActorPersonUid", name = "idx_statement_clazz_person"),
+
+        //For gradebook report: searches first by courseblock, then actor
+        Index("statementCbUid", "statementActorUid", name = "idx_statement_cbuid_actor")
     )
 )
 @Serializable
@@ -114,12 +128,7 @@ data class StatementEntity(
 
     var extensionProgress: Int? = null,
 
-    /**
-     *  indicates whether or not the statement is about the root contentEntry or child entries
-     *  This is used by queries (e.g. for reports) e.g. to see if a "completed" verb applies
-     *  to the contententry itself, or only a subsection (child) of the content
-     */
-    var contentEntryRoot: Boolean = false,
+    var completionOrProgress: Boolean = false,
 
     /**
      * Though technically the XObject is what really links to ContentEntry, the ContentEntryUid is

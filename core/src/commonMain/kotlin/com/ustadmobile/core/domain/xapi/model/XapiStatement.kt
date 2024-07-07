@@ -51,6 +51,14 @@ data class StatementEntities(
 )
 
 /**
+ * Shorthand to determine if this statement contains completion or progress data.
+ */
+fun XapiStatement.isCompletionOrProgress(): Boolean {
+    return result?.completion != null || resultProgressExtension != null
+}
+
+
+/**
  * Convert xAPI Statement JSON instead entities that can be stored in the database.
  *
  * Most of the time the statement received will be when running an xAPI activity, and the actor will
@@ -131,7 +139,10 @@ fun XapiStatement.toEntities(
                 statementContentEntryUid = xapiSession.contentEntryUid,
                 statementClazzUid = xapiSession.clazzUid,
                 statementCbUid = xapiSession.cbUid,
-                contentEntryRoot = (`object` as? XapiActivityStatementObject)?.id == xapiSession.rootActivityId,
+                completionOrProgress = this.isCompletionOrProgress() && (
+                    xapiSession.contentEntryUid == 0L ||
+                            (`object` as? XapiActivityStatementObject)?.id == xapiSession.rootActivityId
+                ),
                 extensionProgress = resultProgressExtension,
                 statementObjectType = `object`.objectTypeFlag,
                 statementObjectUid1 = statementObjectForeignKeys.first,

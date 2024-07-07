@@ -12,7 +12,11 @@ import kotlinx.serialization.Serializable
 @Entity(
     indices = arrayOf(
         //Actor lookup will commonly be used to join to personuid
-        Index("actorPersonUid", name = "idx_actorentity_uid_personuid")
+        Index("actorPersonUid", name = "idx_actorentity_uid_personuid"),
+
+        //All queries that connect a statement and a person need to check the actor type to see if it
+        //is a group, so index this
+        Index("actorObjectType", name= "idx_actorentity_actorobjecttype")
     )
 )
 @ReplicateEntity(

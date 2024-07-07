@@ -18,6 +18,7 @@ import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_LAST_NAME_DESC
 import com.ustadmobile.core.db.dao.CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT1
 import com.ustadmobile.core.db.dao.CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT2
 import com.ustadmobile.core.db.dao.CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT3
+import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.ACTOR_UIDS_FOR_PERSONUIDS_CTE
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CLAZZ_STUDENT
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CONTENT_ENTRY
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY_WHERE_MATCHES_ACCOUNT_PERSON_UID_AND_PARENT_CONTENT_ENTRY_ROOT
@@ -90,7 +91,7 @@ expect abstract class StatementDao {
     /**
      * Find Xapi Statements that are relevant to determining the completion status of a
      * given ContentEntry for a given user (e.g. they match the content entry, person,
-     * StatementEntity.contentEntryRoot is true, and (progress > 0 OR completion = true)
+     * StatementEntity.completionOrProgress is true, and (progress > 0 OR completion = true)
      */
     @Query("""
         SELECT StatementEntity.*
@@ -187,28 +188,7 @@ expect abstract class StatementDao {
             OFFSET :studentsOffset   
          ),
         
-        -- Get the ActorUids for the PersonUids See ActoryEntity doc for info on this join relationship
-        AgentActorUidsForPersonUid(actorUid, actorPersonUid) AS(
-             SELECT ActorEntity.actorUid AS actorUid, 
-                    ActorEntity.actorPersonUid AS actorPersonUid
-               FROM ActorEntity
-              WHERE ActorEntity.actorPersonUid IN
-                    (SELECT PersonUids.personUid
-                       FROM PersonUids)           
-        ),
-        
-        -- Add in group actor uids
-        ActorUidsForPersonUid(actorUid, actorPersonUid) AS (
-             SELECT AgentActorUidsForPersonUid.actorUid AS actorUid,
-                    AgentActorUidsForPersonUid.actorPersonUid AS actorPersonUid
-               FROM AgentActorUidsForPersonUid     
-              UNION 
-             SELECT GroupMemberActorJoin.gmajGroupActorUid AS actorUid,
-                    AgentActorUidsForPersonUid.actorPersonUid AS actorPersonUid
-               FROM AgentActorUidsForPersonUid
-                    JOIN GroupMemberActorJoin 
-                         ON GroupMemberActorJoin.gmajMemberActorUid = AgentActorUidsForPersonUid.actorUid
-        )
+        $ACTOR_UIDS_FOR_PERSONUIDS_CTE
 
         -- Fetch all statements that could be completion or progress for the Gradebook report
         SELECT StatementEntity.*, ActorEntity.*, GroupMemberActorJoin.*
@@ -222,11 +202,10 @@ expect abstract class StatementDao {
                            SELECT DISTINCT ActorUidsForPersonUid.actorUid
                              FROM ActorUidsForPersonUid)
          WHERE StatementEntity.statementClazzUid = :clazzUid
+           AND StatementEntity.completionOrProgress = :completionOrProgressTrueVal
            AND StatementEntity.statementActorUid IN (
                SELECT DISTINCT ActorUidsForPersonUid.actorUid
-                 FROM ActorUidsForPersonUid)
-           AND (    StatementEntity.statementContentEntryUid = 0 
-                 OR CAST(StatementEntity.contentEntryRoot AS INTEGER) = 1)      
+                 FROM ActorUidsForPersonUid) 
            AND (      StatementEntity.resultScoreScaled IS NOT NULL
                    OR StatementEntity.resultCompletion IS NOT NULL
                    OR StatementEntity.resultSuccess IS NOT NULL
@@ -253,16 +232,18 @@ expect abstract class StatementDao {
         currentTime: Long,
         studentsLimit: Int,
         studentsOffset: Int,
+        completionOrProgressTrueVal: Boolean,
     ): List<StatementEntityAndRelated>
 
 
     @Query("""
-        WITH ActorUidsForPersonUid(actorUid, actorPersonUid) AS (
-             SELECT ActorEntity.actorUid AS actorUid, 
-                    ActorEntity.actorPersonUid AS actorPersonUid
-               FROM ActorEntity
-              WHERE ActorEntity.actorPersonUid IN (:studentPersonUids)
+        WITH PersonUids(personUid) AS (
+             SELECT Person.personUid
+               FROM Person
+              WHERE Person.personUid IN (:studentPersonUids)
         ),
+        
+        $ACTOR_UIDS_FOR_PERSONUIDS_CTE,
         
         PersonUidsAndCourseBlocks(personUid, cbUid, cbType, caMarkingType) AS (
              SELECT Person.personUid AS personUid,
@@ -277,7 +258,6 @@ expect abstract class StatementDao {
                         AND ClazzAssignment.caUid = CourseBlock.cbEntityUid     
               WHERE Person.personUid IN (:studentPersonUids)       
         )
-        
         
         SELECT PersonUidsAndCourseBlocks.personUid AS sPersonUid,
                PersonUidsAndCourseBlocks.cbUid AS sCbUid,

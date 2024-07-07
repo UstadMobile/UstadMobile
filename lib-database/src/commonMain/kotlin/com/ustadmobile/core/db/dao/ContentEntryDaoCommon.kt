@@ -18,7 +18,7 @@ object ContentEntryDaoCommon {
                     WHERE (SELECT includeResults FROM IncludeResults) = 1
                       AND StatementEntity.statementActorPersonUid = :accountPersonUid
                       AND StatementEntity.statementContentEntryUid = ContentEntry.contentEntryUid
-                      AND CAST(StatementEntity.contentEntryRoot AS INTEGER) = 1
+                      AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
                    ) AS sProgress,
                    (SELECT CASE
                        -- If a successful completion statement exists, then count as success
@@ -50,7 +50,7 @@ object ContentEntryDaoCommon {
                               AND StatementEntity.statementActorPersonUid = :accountPersonUid
                               AND StatementEntity.statementContentEntryUid = ContentEntry.contentEntryUid
                               AND CAST(StatementEntity.resultCompletion AS INTEGER) = 1
-                              AND CAST(StatementEntity.contentEntryRoot AS INTEGER) = 1)
+                              AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1)
                    ) AS sIsCompleted,
                    (SELECT MAX(StatementEntity.resultScoreScaled)
                       FROM StatementEntity

@@ -9,7 +9,7 @@ object StatementDaoCommon {
           FROM StatementEntity
          WHERE StatementEntity.statementActorPersonUid = :accountPersonUid
            AND StatementEntity.statementContentEntryUid = :contentEntryUid
-           AND CAST(StatementEntity.contentEntryRoot AS INTEGER) = 1
+           AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
            AND (:courseBlockUid = 0 OR StatementEntity.statementCbUid = :courseBlockUid)
     """
 
@@ -28,7 +28,7 @@ object StatementDaoCommon {
              SELECT ContentEntryParentChildJoin.cepcjChildContentEntryUid
                FROM ContentEntryParentChildJoin
               WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid)
-         AND CAST(StatementEntity.contentEntryRoot AS INTEGER) = 1
+         AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
          AND (    (CAST(StatementEntity.resultCompletion AS INTEGER) = 1)
               OR (StatementEntity.extensionProgress IS NOT NULL))     
     """
@@ -44,45 +44,50 @@ object StatementDaoCommon {
     """
 
     const val STATEMENT_ENTITY_IS_SUCCESSFUL_COMPLETION_CLAUSE = """
-              CAST(StatementEntity.contentEntryRoot AS INTEGER) = 1
+              CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
           AND CAST(StatementEntity.resultCompletion AS INTEGER) = 1    
           AND CAST(StatementEntity.resultSuccess AS INTEGER) = 1
     """
 
     //Exactly as above, changing only the table name to StatusStatements
     const val STATUS_STATEMENTS_IS_SUCCESSFUL_COMPLETION_CLAUSE = """
-              CAST(StatusStatements.contentEntryRoot AS INTEGER) = 1
+              CAST(StatusStatements.completionOrProgress AS INTEGER) = 1
           AND CAST(StatusStatements.resultCompletion AS INTEGER) = 1    
           AND CAST(StatusStatements.resultSuccess AS INTEGER) = 1
     """
 
 
     const val STATEMENT_ENTITY_IS_FAILED_COMPLETION_CLAUSE = """
-              CAST(StatementEntity.contentEntryRoot AS INTEGER) = 1
+              CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
           AND CAST(StatementEntity.resultCompletion AS INTEGER) = 1
           AND CAST(StatementEntity.resultSuccess AS INTEGER) = 0
     """
 
     const val STATUS_STATEMENTS_IS_FAILED_COMPLETION_CLAUSE = """
-              CAST(StatusStatements.contentEntryRoot AS INTEGER) = 1
+              CAST(StatusStatements.completionOrProgress AS INTEGER) = 1
           AND CAST(StatusStatements.resultCompletion AS INTEGER) = 1
           AND CAST(StatusStatements.resultSuccess AS INTEGER) = 0
     """
 
 
     //If the GroupMemberActorJoin does not match the statement and person, it will be null
+    // This should be optimized: use a CTE to find the actor uids for persons that in the query
     const val STATEMENT_MATCHES_PERSONUIDS_AND_COURSEBLOCKS = """
             StatementEntity.statementCbUid = PersonUidsAndCourseBlocks.cbUid
-        AND (    ActorEntity.actorPersonUid = PersonUidsAndCourseBlocks.personUid
-              OR GroupMemberActorJoin.gmajGroupActorUid = StatementEntity.statementActorUid)
+        AND StatementEntity.statementActorUid IN (
+            SELECT ActorUidsForPersonUid.actorUid
+              FROM ActorUidsForPersonUid
+             WHERE ActorUidsForPersonUid.actorPersonUid = PersonUidsAndCourseBlocks.personUid)  
                    
     """
 
     //Same as above, modified for where tables are using an _inner postfix
     const val STATEMENT_MATCHES_PERSONUIDS_AND_COURSEBLOCKS_INNER = """
             StatementEntity_Inner.statementCbUid = PersonUidsAndCourseBlocks.cbUid
-        AND (    ActorEntity_Inner.actorPersonUid = PersonUidsAndCourseBlocks.personUid
-              OR GroupMemberActorJoin_Inner.gmajGroupActorUid = StatementEntity.statementActorUid)
+        AND StatementEntity_Inner.statementActorUid IN (
+            SELECT ActorUidsForPersonUid.actorUid
+              FROM ActorUidsForPersonUid
+             WHERE ActorUidsForPersonUid.actorPersonUid = PersonUidsAndCourseBlocks.personUid)  
                    
     """
 
@@ -120,22 +125,31 @@ object StatementDaoCommon {
                            WHERE ActorUidsForPersonUid.actorPersonUid = PersonUidsAndCourseBlocks.personUid))
     """
 
-    const val JOIN_ACTOR_TABLES_FROM_STATEMENT_OUTER = """
-       JOIN ActorEntity ActorEntity_Outer
-            ON ActorEntity_Outer.actorUid = StatementEntity_Outer.statementActorUid
-       LEFT JOIN GroupMemberActorJoin GroupMemberActorJoin_Outer
-            ON ActorEntity_Outer.actorObjectType = ${XapiEntityObjectTypeFlags.GROUP}
-               AND (GroupMemberActorJoin_Outer.gmajGroupActorUid, GroupMemberActorJoin_Outer.gmajMemberActorUid) IN (
-                   SELECT GroupMemberActorJoin.gmajGroupActorUid, 
-                          GroupMemberActorJoin.gmajMemberActorUid
-                     FROM GroupMemberActorJoin
-                    WHERE GroupMemberActorJoin.gmajGroupActorUid = StatementEntity_Outer.statementActorUid
-                      AND GroupMemberActorJoin.gmajMemberActorUid IN (
-                          SELECT ActorUidsForPersonUid.actorUid
-                            FROM ActorUidsForPersonUid
-                           WHERE ActorUidsForPersonUid.actorPersonUid = PersonUidsAndCourseBlocks.personUid))
-    """
 
+    const val ACTOR_UIDS_FOR_PERSONUIDS_CTE = """
+        -- Get the ActorUids for the PersonUids See ActoryEntity doc for info on this join relationship
+        AgentActorUidsForPersonUid(actorUid, actorPersonUid) AS(
+             SELECT ActorEntity.actorUid AS actorUid, 
+                    ActorEntity.actorPersonUid AS actorPersonUid
+               FROM ActorEntity
+              WHERE ActorEntity.actorPersonUid IN
+                    (SELECT PersonUids.personUid
+                       FROM PersonUids)           
+        ),
+        
+        -- Add in group actor uids
+        ActorUidsForPersonUid(actorUid, actorPersonUid) AS (
+             SELECT AgentActorUidsForPersonUid.actorUid AS actorUid,
+                    AgentActorUidsForPersonUid.actorPersonUid AS actorPersonUid
+               FROM AgentActorUidsForPersonUid     
+              UNION 
+             SELECT GroupMemberActorJoin.gmajGroupActorUid AS actorUid,
+                    AgentActorUidsForPersonUid.actorPersonUid AS actorPersonUid
+               FROM AgentActorUidsForPersonUid
+                    JOIN GroupMemberActorJoin 
+                         ON GroupMemberActorJoin.gmajMemberActorUid = AgentActorUidsForPersonUid.actorUid
+        )
+    """
 
 
 }

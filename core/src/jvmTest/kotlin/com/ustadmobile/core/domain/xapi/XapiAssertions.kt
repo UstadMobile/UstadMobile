@@ -95,7 +95,7 @@ fun assertStatementStoredInDb(
             assertEquals(xapiSession.cbUid, statementInDb.statementCbUid)
             assertEquals(
                 (statement.`object` as? XapiActivityStatementObject)?.id == xapiSession.rootActivityId,
-                statementInDb.contentEntryRoot)
+                statementInDb.completionOrProgress)
         }
 
         assertActorStoredInDb(

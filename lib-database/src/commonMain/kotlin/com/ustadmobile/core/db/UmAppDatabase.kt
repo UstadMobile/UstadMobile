@@ -104,7 +104,7 @@ import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
     ReplicationOperation::class,
     PendingRepositorySession::class,
 
-], version = 192)
+], version = 193)
 expect abstract class UmAppDatabase : RoomDatabase {
 
     /*
