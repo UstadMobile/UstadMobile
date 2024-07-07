@@ -57,6 +57,12 @@ open class DiscussionPost() {
     @ReplicateEtag
     var discussionPostLct: Long = 0
 
+    @Deprecated("No longer used - will be removed Aug/24")
+    var discussionPostVisible: Boolean = false
+
+    @Deprecated("No longer used - will be removed Aug/24")
+    var discussionPostArchive: Boolean = false
+
     companion object{
         const val TABLE_ID = 132
     }

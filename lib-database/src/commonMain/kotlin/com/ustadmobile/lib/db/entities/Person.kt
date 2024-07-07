@@ -85,6 +85,36 @@ data class Person(
 
     @ColumnInfo(defaultValue = "${TYPE_NORMAL_PERSON}")
     var personType: Int = TYPE_NORMAL_PERSON,
+
+    @Deprecated("Will be removed in Aug/24 once door update that handles missing columns in replication goes online")
+    @MasterChangeSeqNum
+    var personMasterChangeSeqNum: Long = 0,
+
+    @Deprecated("Will be removed in Aug/24 once door update that handles missing columns in replication goes online")
+    @LocalChangeSeqNum
+    var personLocalChangeSeqNum: Long = 0,
+
+    @Deprecated("Will be removed in Aug/24 once door update that handles missing columns in replication goes online")
+    @LastChangedBy
+    var personLastChangedBy: Int = 0,
+
+    @Deprecated("Will be removed in Aug/24 once door update that handles missing columns in replication goes online")
+    var admin: Boolean = false,
+
+    @Deprecated("Will be removed in Aug/24 once door update that handles missing columns in replication goes online")
+    var personNotes: String? = null,
+
+    @Deprecated("Will be removed in Aug/24 once door update that handles missing columns in replication goes online")
+    var fatherName: String? = null,
+
+    @Deprecated("Will be removed in Aug/24 once door update that handles missing columns in replication goes online")
+    var fatherNumber: String? = null,
+
+    @Deprecated("Will be removed in Aug/24 once door update that handles missing columns in replication goes online")
+    var motherName: String? = null,
+
+    @Deprecated("Will be removed in Aug/24 once door update that handles missing columns in replication goes online")
+    var motherNum: String? = null,
 ) {
 
     fun fullName() = buildString {

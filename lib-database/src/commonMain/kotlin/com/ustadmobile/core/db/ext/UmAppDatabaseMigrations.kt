@@ -1649,7 +1649,7 @@ val MIGRATION_189_190 = DoorMigrationStatementList(189, 190) { db ->
 }
 
 /**
- * Adds personUid to ActorEntity and drops unused person columns.
+ * Adds personUid to ActorEntity.
  */
 val MIGRATION_190_191 = DoorMigrationStatementList(190, 191) { db ->
     buildList {
@@ -1657,19 +1657,8 @@ val MIGRATION_190_191 = DoorMigrationStatementList(190, 191) { db ->
 
         if(db.dbType() == DoorDbType.SQLITE) {
             add("CREATE TABLE IF NOT EXISTS ActorEntity (  actorPersonUid  INTEGER  NOT NULL , actorName  TEXT , actorMbox  TEXT , actorMbox_sha1sum  TEXT , actorOpenid  TEXT , actorAccountName  TEXT , actorAccountHomePage  TEXT , actorEtag  INTEGER  NOT NULL , actorLct  INTEGER  NOT NULL , actorObjectType  INTEGER  NOT NULL , actorUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
-            add("ALTER TABLE Person RENAME to Person_OLD")
-            add("CREATE TABLE IF NOT EXISTS Person (  username  TEXT , firstNames  TEXT , lastName  TEXT , emailAddr  TEXT , phoneNum  TEXT , gender  INTEGER  NOT NULL , active  INTEGER  NOT NULL , dateOfBirth  INTEGER  NOT NULL , personAddress  TEXT , personOrgId  TEXT , personGroupUid  INTEGER  NOT NULL , personLct  INTEGER  NOT NULL , personCountry  TEXT , personType  INTEGER  NOT NULL  DEFAULT 0 , personUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
-            add("INSERT INTO Person (username, firstNames, lastName, emailAddr, phoneNum, gender, active, dateOfBirth, personAddress, personOrgId, personGroupUid, personLct, personCountry, personType, personUid) SELECT username, firstNames, lastName, emailAddr, phoneNum, gender, active, dateOfBirth, personAddress, personOrgId, personGroupUid, personLct, personCountry, personType, personUid FROM Person_OLD")
-            add("DROP TABLE Person_OLD")
         }else {
             add("CREATE TABLE IF NOT EXISTS ActorEntity (  actorPersonUid  BIGINT  NOT NULL , actorName  TEXT , actorMbox  TEXT , actorMbox_sha1sum  TEXT , actorOpenid  TEXT , actorAccountName  TEXT , actorAccountHomePage  TEXT , actorEtag  BIGINT  NOT NULL , actorLct  BIGINT  NOT NULL , actorObjectType  INTEGER  NOT NULL , actorUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-            listOf(
-                "fatherName", "fatherNumber", "motherName", "mothernum",
-                "personMasterChangeSeqNum", "personLocalChangeSeqNum", "personLastChangedBy",
-                "personNotes", "admin"
-            ).forEach {
-                add("ALTER TABLE Person DROP COLUMN $it")
-            }
         }
 
         add("CREATE INDEX idx_actorentity_uid_personuid ON ActorEntity (actorPersonUid)")
@@ -1713,6 +1702,27 @@ val MIGRATION_192_193 = DoorMigrationStatementList(192, 193) { db ->
     }
 }
 
+/**
+ * 'Undo column removal on discussionpost. Earlier versions of Door could not handle an expected
+ * column missing when receiving a replication entity (e.g. as would happen when a column is removed
+ * and the server is updated before the client).
+ *
+ * App version 0.4.124 and higher will have this issue resolved. Once this fix is distributed,
+ * subsequent versions can then drop unused columns.
+ */
+val MIGRATION_193_194 = DoorMigrationStatementList(193, 194) { db ->
+    buildList {
+        val (boolColType, boolDefaultVal) = if(db.dbType() == DoorDbType.SQLITE) {
+            Pair("INTEGER", "0")
+        }else {
+            Pair("BOOL", "FALSE")
+        }
+
+        add("ALTER TABLE DiscussionPost ADD COLUMN discussionPostVisible $boolColType NOT NULL DEFAULT $boolDefaultVal")
+        add("ALTER TABLE DiscussionPost ADD COLUMN discussionPostArchive $boolColType NOT NULL DEFAULT $boolDefaultVal")
+    }
+}
+
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_105_106, MIGRATION_106_107,
     MIGRATION_107_108, MIGRATION_108_109,
@@ -1732,7 +1742,7 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_178_179, MIGRATION_179_180, MIGRATION_180_181, MIGRATION_181_182,
     MIGRATION_182_183, MIGRATION_183_184, MIGRATION_184_185, MIGRATION_185_186,
     MIGRATION_186_187, MIGRATION_187_188, MIGRATION_188_189, MIGRATION_189_190,
-    MIGRATION_190_191, MIGRATION_191_192, MIGRATION_192_193,
+    MIGRATION_190_191, MIGRATION_191_192, MIGRATION_192_193, MIGRATION_193_194,
 )
 
 
