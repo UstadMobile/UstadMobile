@@ -3,7 +3,7 @@ package com.ustadmobile.core.domain.xapi
 import com.benasher44.uuid.Uuid
 import com.benasher44.uuid.uuidFrom
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.xapi.StatementContextActivityJoin
+import com.ustadmobile.lib.db.entities.xapi.StatementContextActivityJoin
 import com.ustadmobile.core.domain.xapi.model.XapiActivity
 import com.ustadmobile.core.domain.xapi.model.XapiActivityStatementObject
 import com.ustadmobile.core.domain.xapi.model.XapiActor

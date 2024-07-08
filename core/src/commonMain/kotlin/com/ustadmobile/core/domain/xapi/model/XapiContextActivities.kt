@@ -1,7 +1,7 @@
 package com.ustadmobile.core.domain.xapi.model
 
 import com.benasher44.uuid.Uuid
-import com.ustadmobile.core.db.dao.xapi.StatementContextActivityJoin
+import com.ustadmobile.lib.db.entities.xapi.StatementContextActivityJoin
 import com.ustadmobile.core.domain.xxhash.XXStringHasher
 import com.ustadmobile.core.util.ext.decodeListOrSingleObjectAsList
 import com.ustadmobile.core.util.ext.toEmptyIfNull

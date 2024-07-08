@@ -1,4 +1,4 @@
-package com.ustadmobile.core.db.dao.xapi
+package com.ustadmobile.lib.db.entities.xapi
 
 import androidx.room.Entity
 import com.ustadmobile.door.annotation.ReplicateEntity

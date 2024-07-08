@@ -5,6 +5,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.ustadmobile.door.annotation.DoorDao
 import com.ustadmobile.door.annotation.Repository
+import com.ustadmobile.lib.db.entities.xapi.StatementContextActivityJoin
 
 @DoorDao
 @Repository

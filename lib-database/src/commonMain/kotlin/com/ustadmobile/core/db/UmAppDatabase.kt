@@ -23,7 +23,7 @@ import com.ustadmobile.lib.db.entities.xapi.ActivityEntity
 import com.ustadmobile.lib.db.entities.xapi.ActivityInteractionEntity
 import com.ustadmobile.lib.db.entities.xapi.ActivityLangMapEntry
 import com.ustadmobile.core.db.dao.xapi.ActivityLangMapEntryDao
-import com.ustadmobile.core.db.dao.xapi.StatementContextActivityJoin
+import com.ustadmobile.lib.db.entities.xapi.StatementContextActivityJoin
 import com.ustadmobile.core.db.dao.xapi.StatementContextActivityJoinDao
 import com.ustadmobile.core.db.dao.xapi.StatementEntityJsonDao
 import com.ustadmobile.core.db.dao.xapi.XapiSessionEntityDao
