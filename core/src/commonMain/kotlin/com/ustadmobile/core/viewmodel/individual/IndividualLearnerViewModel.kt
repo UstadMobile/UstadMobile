@@ -95,17 +95,8 @@ class IndividualLearnerViewModel(
         viewModelScope.launch {
             try {
                 accountManager.createLocalAccount()
-
-                val args = mapOf(
-                    ContentEntryEditViewModel.ARG_GO_TO_ON_CONTENT_ENTRY_DONE to
-                            ContentEntryEditViewModel.GO_TO_COURSE_BLOCK_EDIT.toString(),
-                    ContentEntryListViewModel.ARG_FILTER to
-                            ContentEntryListViewModel.FILTER_FROM_LIBRARY.toString(),
-
-                    )
-
                 val goOptions = UstadMobileSystemCommon.UstadGoOptions(clearStack = true)
-                navController.navigate(ContentEntryListViewModel.DEST_NAME_HOME, args, goOptions)
+                navController.navigate(ContentEntryListViewModel.DEST_NAME_HOME, emptyMap(), goOptions)
             } catch (e: Exception) {
                 Napier.e("Error during login: ${e.message}", e)
             } finally {

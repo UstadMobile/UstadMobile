@@ -1,6 +1,7 @@
 package com.ustadmobile.libuicompose.view.individual
 
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
@@ -28,6 +30,8 @@ import com.ustadmobile.core.viewmodel.individual.IndividualLearnerViewModel
 import com.ustadmobile.libuicompose.components.PickFileOptions
 import com.ustadmobile.libuicompose.components.PickType
 import com.ustadmobile.libuicompose.components.rememberUstadFilePickLauncher
+import com.ustadmobile.libuicompose.images.UstadImage
+import com.ustadmobile.libuicompose.images.ustadAppImagePainter
 import dev.icerock.moko.resources.compose.stringResource
 
 @Composable
@@ -52,6 +56,13 @@ fun IndividualLearnerScreenContent(viewModel: IndividualLearnerViewModel) {
         ) {
             item {
                 ListItem(
+                    leadingContent = {
+                        Image(
+                            painter = ustadAppImagePainter(UstadImage.INDIVIDUAL_NEW_ACCOUNT),
+                            contentDescription = null,
+                            modifier = Modifier.size(42.dp),
+                        )
+                    },
                     headlineContent = {
                         Text(
                             text = stringResource(MR.strings.create_new_local_account_title),
@@ -72,6 +83,14 @@ fun IndividualLearnerScreenContent(viewModel: IndividualLearnerViewModel) {
             }
             item {
                 ListItem(
+                    leadingContent = {
+                        Image(
+                            painter = ustadAppImagePainter(UstadImage.INDIVIDUAL_RESTORE_ACCOUNT),
+                            contentDescription = null,
+                            modifier = Modifier.size(42.dp),
+                        )
+                    },
+
                     headlineContent = {
                         Text(
                             text = stringResource(MR.strings.restore_local_account_title),

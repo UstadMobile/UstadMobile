@@ -1,5 +1,6 @@
 package com.ustadmobile.libuicompose.view.onboarding
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -38,6 +40,7 @@ import com.ustadmobile.core.viewmodel.OnboardingUiState
 import com.ustadmobile.libuicompose.components.UstadSetLanguageDropDown
 import com.ustadmobile.libuicompose.components.UstadWaitForRestartDialog
 import com.ustadmobile.libuicompose.images.UstadImage
+import com.ustadmobile.libuicompose.images.ustadAppImagePainter
 import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.compose.stringResource
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
@@ -147,9 +150,10 @@ private fun BottomRow(
         item {
             ListItem(
                 leadingContent = {
-                    Icon(
-                        imageVector = Icons.Default.School,
+                    Image(
+                        painter = ustadAppImagePainter(UstadImage.ONBOARDING_EXISTING),
                         contentDescription = null,
+                        modifier = Modifier.size(42.dp),
                     )
                 },
                 headlineContent = {
@@ -171,10 +175,10 @@ private fun BottomRow(
         item {
             ListItem(
                 leadingContent = {
-                    Icon(
-                        imageVector = Icons.Default.DomainAdd,
+                    Image(
+                        painter = ustadAppImagePainter(UstadImage.ONBOARDING_ADD_ORG),
                         contentDescription = null,
-
+                        modifier = Modifier.size(42.dp),
                     )
                 },
                 headlineContent = {
@@ -195,14 +199,13 @@ private fun BottomRow(
             )
             HorizontalDivider()
         }
-
         item {
             ListItem(
                 leadingContent = {
-                    Icon(
-                        imageVector = Icons.Default.Person,
+                    Image(
+                        painter = ustadAppImagePainter(UstadImage.ONBOARDING_INDIVIDUAL),
                         contentDescription = null,
-
+                        modifier = Modifier.size(42.dp),
                     )
                 },
                 headlineContent = {
