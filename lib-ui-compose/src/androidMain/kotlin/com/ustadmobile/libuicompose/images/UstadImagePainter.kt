@@ -11,6 +11,7 @@ private val nameMap = mapOf(
     UstadImage.ONBOARDING_INDIVIDUAL to R.drawable.onboarding_individual,
     UstadImage.ONBOARDING_EXISTING to R.drawable.onboarding_existing,
     UstadImage.ONBOARDING_ADD_ORG to R.drawable.onboarding_add_org,
+    UstadImage.ILLUSTRATION_CONNECT to R.drawable.illustration_connect,
     UstadImage.ILLUSTRATION_ONBOARDING1 to R.drawable.illustration_onboarding1,
     UstadImage.ILLUSTRATION_ONBOARDING2 to R.drawable.illustration_onboarding2,
     UstadImage.ILLUSTRATION_ONBOARDING3 to R.drawable.illustration_onboarding3,
