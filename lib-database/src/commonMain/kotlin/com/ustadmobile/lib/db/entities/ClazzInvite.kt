@@ -54,8 +54,8 @@ data class ClazzInvite(
     companion object {
         const val TABLE_ID = 521
 
-        const val PHONE = 1
-        const val EMAIL = 2
+        const val EMAIL = 1
+        const val PHONE = 2
         const val INTERNAL_MESSAGE = 3
 
 

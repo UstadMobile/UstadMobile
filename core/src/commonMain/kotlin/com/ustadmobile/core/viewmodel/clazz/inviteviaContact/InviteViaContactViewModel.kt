@@ -26,6 +26,8 @@ data class InviteViaContactChip(
 
 data class InviteViaContactUiState(
     private val fromContact: String? = null,
+    val contactError: String? = null,
+    val onSendClick: Boolean? = null,
     val chips: List<InviteViaContactChip> = emptyList()
 )
 
@@ -63,9 +65,32 @@ class InviteViaContactViewModel(
     }
 
     fun OnClickSend() {
+
         viewModelScope.launch {
+            _uiState.update { prev ->
+                prev.copy(onSendClick = true)
+            }
+
+            val contacts = _uiState.value.chips
+
+            if (contacts.isEmpty()) {
+                _uiState.update { prev ->
+                    prev.copy(contactError = systemImpl.getString(MR.strings.no_contact_found))
+                }
+                onContactError(systemImpl.getString(MR.strings.no_contact_found))
+                return@launch
+            }
+
+            if (contacts.none { it.isValid }) {
+                _uiState.update { prev ->
+                    prev.copy(contactError = systemImpl.getString(MR.strings.no_valid_contact_found))
+                }
+                onContactError(systemImpl.getString(MR.strings.no_valid_contact_found))
+                return@launch
+            }
+
             contactToServerUseCase.invoke(
-                _uiState.value.chips.map { it.text },
+                contacts.map { it.text },
                 clazzUid,
                 personRole,
                 accountManager.currentUserSession.person.personUid
@@ -94,6 +119,15 @@ class InviteViaContactViewModel(
         _uiState.update { prev ->
             prev.copy(
                 chips = newChips
+            )
+        }
+    }
+
+    fun onValueChanged() {
+        _uiState.update { prev ->
+            prev.copy(
+                onSendClick = false,
+                contactError = null
             )
         }
     }

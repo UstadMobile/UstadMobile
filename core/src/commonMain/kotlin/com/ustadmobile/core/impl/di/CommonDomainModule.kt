@@ -90,7 +90,7 @@ fun commonDomainDiModule(endpointScope: EndpointScope) = DI.Module("CommonDomain
         ContactToServerUseCase(
             httpClient = instance(),
             endpoint = context,
-            repo = instance(tag = DoorTag.TAG_REPO),
+            json = instance()
         )
     }
 

@@ -1929,5 +1929,9 @@
 
     <string name="add_username_email_phone">Add Username, Email or Phone</string>
 
+    <string name="no_valid_contact_found">No valid contact found</string>
+
+    <string name="no_contact_found">No contact found</string>
+
 
 </resources>

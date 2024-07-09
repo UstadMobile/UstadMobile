@@ -10,6 +10,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
@@ -31,8 +32,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import com.dokar.chiptextfield.m3.ChipTextFieldDefaults
 import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
@@ -52,7 +55,8 @@ fun InviteViaContactScreen(
             )
         },
         onContactError = { viewModel.onContactError(it) },
-        onChipRemoved = { viewModel.onChipRemoved(it) }
+        onChipRemoved = { viewModel.onChipRemoved(it) },
+        onValueChanged = { viewModel.onValueChanged() }
 
     )
 }
@@ -65,7 +69,10 @@ fun InviteViaContactScreen(
     onChipSubmitClick: (String) -> Unit,
     onContactError: (String) -> Unit,
     onChipRemoved: (String) -> Unit,
+    onValueChanged: () -> Unit,
 ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+
     val state = rememberChipTextFieldState<AvatarChip>()
     UstadVerticalScrollColumn(
         modifier = Modifier
@@ -78,13 +85,13 @@ fun InviteViaContactScreen(
             state = state,
             modifier = Modifier
                 .weight(1f)
-                .padding(10.dp).fillMaxWidth(),
-
+                .padding(10.dp).fillMaxWidth()
+                .verticalScroll(rememberScrollState()),
             onSubmit = {
                 onChipSubmitClick(it)
+                onValueChanged()
                 null
             },
-
             chipStyle = ChipTextFieldDefaults.chipStyle(shape = RoundedCornerShape(20.dp)),
             textStyle = MaterialTheme.typography.bodySmall,
             chipLeadingIcon = { chip -> Avatar(chip, modifier = Modifier) },
@@ -92,6 +99,7 @@ fun InviteViaContactScreen(
             chipHorizontalSpacing = 8.dp,
             chipVerticalSpacing = 10.dp,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+            isError = uiState.contactError != null,
         )
 
         UstadContactPickButton(
@@ -106,6 +114,12 @@ fun InviteViaContactScreen(
                 }
             }
         )
+    }
+
+    LaunchedEffect(uiState.onSendClick) {
+        uiState.onSendClick?.let {
+            if (it) keyboardController?.hide()
+        }
     }
 
     LaunchedEffect(uiState.chips) {

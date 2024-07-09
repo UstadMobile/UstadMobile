@@ -580,9 +580,7 @@ fun Application.umRestApplication(
         bind<ValidateEmailUseCase>() with provider {
             ValidateEmailUseCase()
         }
-        bind<SendEmailUseCase>() with provider {
-            SendEmailUseCase(notificationSender = instance())
-        }
+
 
         bind<SendMessageUseCase>() with provider {
             SendMessageUseCase()
@@ -592,20 +590,6 @@ fun Application.umRestApplication(
             CheckContactTypeUseCase(
                 validateEmailUseCase = instance(),
                 phoneNumValidatorUseCase = instance()
-                )
-        }
-
-
-
-        bind<ProcessInviteUseCase>() with scoped(EndpointScope.Default).provider {
-            ProcessInviteUseCase(
-                sendEmailUseCase = instance(),
-                sendSmsUseCase = instance(),
-                sendMessageUseCase = instance(),
-                checkContactTypeUseCase = instance(),
-                db = instance(tag = DoorTag.TAG_DB),
-                endpoint = context,
-
             )
         }
 
@@ -715,7 +699,21 @@ fun Application.umRestApplication(
         }catch(e: Exception) {
             Napier.w("WARNING: Email sending not configured")
         }
+        bind<SendEmailUseCase>() with scoped(EndpointScope.Default).provider {
+            SendEmailUseCase(NotificationSender(di))
+        }
 
+        bind<ProcessInviteUseCase>() with scoped(EndpointScope.Default).provider {
+            ProcessInviteUseCase(
+                sendEmailUseCase = instance(),
+                sendSmsUseCase = instance(),
+                sendMessageUseCase = instance(),
+                checkContactTypeUseCase = instance(),
+                db = instance(tag = DoorTag.TAG_DB),
+                endpoint = context,
+
+                )
+        }
         registerContextTranslator { call: ApplicationCall ->
             call.callEndpoint
         }
@@ -823,8 +821,7 @@ fun Application.umRestApplication(
                     ProcessInviteRoute(
                         useCase = { call ->
                             di.on(call).direct.instance()
-                        },
-                        json = json,
+                        }
                     )
                 }
 

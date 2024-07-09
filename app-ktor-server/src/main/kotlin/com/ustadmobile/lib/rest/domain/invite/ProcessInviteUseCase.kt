@@ -28,7 +28,7 @@ class ProcessInviteUseCase(
         clazzUid: Long,
         role: Long,
         personUid: Long
-    ) {
+    ):InviteResult {
 
         val token = uuid4().toString()
         val inviteLink = UstadUrlComponents(endpoint.url, ClazzInviteViewModel.DEST_NAME, token).fullUrl()
@@ -37,7 +37,7 @@ class ProcessInviteUseCase(
             val validContacts = checkContactTypeUseCase.invoke(contact=contact)
 
             if (validContacts != null) {
-                db.clazzInviteDao.insert(
+                db.clazzInviteDao.replace(
                     ClazzInvite(
                         ciPersonUid = personUid,
                         ciRoleId = role,
@@ -62,6 +62,7 @@ class ProcessInviteUseCase(
                 }
             }
         }
+        return InviteResult("invitation sent")
     }
 
 }
