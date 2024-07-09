@@ -126,7 +126,8 @@ class UstadAccountManager(
     init {
         val currentEndpointStr = settings.getStringOrNull(ACCOUNTS_ACTIVE_ENDPOINT_PREFKEY)
             ?: apiUrlConfig.presetApiUrl ?: MANIFEST_URL_FALLBACK
-        val currentDb: UmAppDatabase = di.direct.on(Endpoint(currentEndpointStr)).instance(tag = DoorTag.TAG_DB)
+        val currentDb: UmAppDatabase = di.direct.on(Endpoint(currentEndpointStr))
+            .instance(tag = DoorTag.TAG_DB)
 
         val initUserSession: UserSessionWithPersonAndEndpoint = settings.getStringOrNull(ACCOUNTS_ACTIVE_SESSION_PREFKEY)?.let {
             json.decodeFromString(it)
@@ -148,6 +149,18 @@ class UstadAccountManager(
          * all active accounts flow is being collected.
          */
         scope.launch {
+//            //Previous versions might not save this properly in settings
+//            //Added 7/Jul/24. Should be removed aug-sept.
+//            if(initUserSession.person.let { it.firstNames == null || it.lastName == null }) {
+//                val initSessionPerson = currentDb.personDao.findByUidAsync(
+//                    initUserSession.person.personUid)
+//                if(initSessionPerson?.firstNames != null && initSessionPerson.lastName != null) {
+//                    _currentUserSession.update { prev ->
+//                        prev.copy(person = initSessionPerson)
+//                    }
+//                }
+//            }
+
             _activeUserSessions.whenSubscribed {
                 _endpointsWithActiveSessions.collectLatest { endpointsWithSessions ->
                     endpointsWithSessions.forEach { endpoint ->

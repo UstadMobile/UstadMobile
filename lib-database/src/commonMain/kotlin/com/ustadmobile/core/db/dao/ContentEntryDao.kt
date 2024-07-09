@@ -298,39 +298,6 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @Query("SELECT * FROM ContentEntry WHERE sourceUrl LIKE :sourceUrl")
     abstract fun findSimilarIdEntryForKhan(sourceUrl: String): List<ContentEntry>
 
-    /**
-     * This query is used to tell the client how big a download job is, even if the client does
-     * not yet have the indexes
-     */
-    @Repository(methodType = Repository.METHOD_DELEGATE_TO_WEB)
-    @Query("""
-        WITH RECURSIVE 
-               ContentEntry_recursive(contentEntryUid, containerSize) AS (
-               SELECT contentEntryUid, 
-                            (SELECT COALESCE((SELECT fileSize 
-                                           FROM Container 
-                                          WHERE containerContentEntryUid = ContentEntry.contentEntryUid 
-                                       ORDER BY cntLastModified DESC LIMIT 1), 0)) AS containerSize 
-                 FROM ContentEntry 
-                WHERE contentEntryUid = :contentEntryUid
-                  AND NOT ceInactive
-        UNION 
-            SELECT ContentEntry.contentEntryUid, 
-                (SELECT COALESCE((SELECT fileSize 
-                                    FROM Container 
-                                   WHERE containerContentEntryUid = ContentEntry.contentEntryUid 
-                                ORDER BY cntLastModified DESC LIMIT 1), 0)) AS containerSize  
-                  FROM ContentEntry
-             LEFT JOIN ContentEntryParentChildJoin 
-                    ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid,
-                            ContentEntry_recursive
-                  WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = ContentEntry_recursive.contentEntryUid
-                    AND NOT ceInactive)
-        SELECT COUNT(*) AS numEntries, 
-               SUM(containerSize) AS totalSize 
-          FROM ContentEntry_recursive""")
-    abstract suspend fun getRecursiveDownloadTotals(contentEntryUid: Long): DownloadJobSizeInfo?
-
     @Query("""
             UPDATE ContentEntry 
                SET ceInactive = :ceInactive,
@@ -353,49 +320,8 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
         changedTime: Long
     )
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract fun replaceList(entries: List<ContentEntry>)
-
     @Query("""Select ContentEntry.contentEntryUid AS uid, ContentEntry.title As labelName 
                     from ContentEntry WHERE contentEntryUid IN (:contentEntryUids)""")
     abstract suspend fun getContentEntryFromUids(contentEntryUids: List<Long>): List<UidAndLabel>
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract fun insertWithReplace(entry: ContentEntry)
-
-    @Query("SELECT ContentEntry.*, Language.* FROM ContentEntry LEFT JOIN Language ON Language.langUid = ContentEntry.primaryLanguageUid")
-    abstract fun findAllLive(): Flow<List<ContentEntryWithLanguage>>
-
-    @Query("""
-        UPDATE ContentEntry 
-           SET ceInactive = :toggleVisibility, 
-               contentEntryLct = :changedTime 
-         WHERE contentEntryUid IN (:selectedItem)""")
-    abstract suspend fun toggleVisibilityContentEntryItems(
-        toggleVisibility: Boolean,
-        selectedItem: List<Long>,
-        changedTime: Long
-    )
-
-    @Query("""
-SELECT ContentEntry.*
-  FROM ContentEntry
-       JOIN Container ON Container.containerUid = 
-       (SELECT containerUid 
-          FROM Container
-         WHERE Container.containercontententryUid = ContentEntry.contentEntryUid
-           AND Container.cntLastModified = 
-               (SELECT MAX(ContainerInternal.cntLastModified)
-                  FROM Container ContainerInternal
-                 WHERE ContainerInternal.containercontententryUid = ContentEntry.contentEntryUid))
- WHERE ContentEntry.leaf 
-   AND NOT ContentEntry.ceInactive
-   AND (NOT EXISTS 
-       (SELECT ContainerEntry.ceUid
-          FROM ContainerEntry
-         WHERE ContainerEntry.ceContainerUid = Container.containerUid)
-        OR Container.fileSize = 0)   
-    """)
-    abstract suspend fun findContentEntriesWhereIsLeafAndLatestContainerHasNoEntriesOrHasZeroFileSize(): List<ContentEntry>
 
 }

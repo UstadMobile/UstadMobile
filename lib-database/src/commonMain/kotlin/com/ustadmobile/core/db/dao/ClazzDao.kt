@@ -90,7 +90,7 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
                LEFT JOIN CoursePicture
                          ON CoursePicture.coursePictureUid = :uid
          WHERE Clazz.clazzUid = :uid""")
-    abstract suspend fun findByUidWithHolidayCalendarAsync(uid: Long): ClazzWithHolidayCalendarAndSchoolAndTerminology?
+    abstract suspend fun findByUidWithHolidayCalendarAsync(uid: Long): ClazzWithHolidayCalendarAndAndTerminology?
 
     @Update
     abstract suspend fun updateAsync(entity: Clazz): Int
@@ -313,8 +313,7 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
     )
     @Query("""
         SELECT Clazz.*, 
-               HolidayCalendar.*, 
-               School.*,
+               HolidayCalendar.*,
                CoursePicture.*,
                (SELECT COUNT(DISTINCT ClazzEnrolment.clazzEnrolmentPersonUid) 
                   FROM ClazzEnrolment 
@@ -332,8 +331,6 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
          FROM Clazz 
               LEFT JOIN HolidayCalendar 
                         ON Clazz.clazzHolidayUMCalendarUid = HolidayCalendar.umCalendarUid
-              LEFT JOIN School 
-                        ON School.schoolUid = Clazz.clazzSchoolUid
               LEFT JOIN CourseTerminology
                         ON CourseTerminology.ctUid = Clazz.clazzTerminologyUid
               LEFT JOIN CoursePicture
@@ -349,8 +346,7 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
      */
     @Query("""
         SELECT Clazz.*, 
-               HolidayCalendar.*, 
-               School.*,
+               HolidayCalendar.*,
                CourseTerminology.*,
                CoursePicture.*
          FROM Clazz 
@@ -358,12 +354,7 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
               ON ((clazz.clazzHolidayUMCalendarUid != 0 
                 AND HolidayCalendar.umCalendarUid = clazz.clazzHolidayUMCalendarUid)
                 OR clazz.clazzHolidayUMCalendarUid = 0 AND clazz.clazzSchoolUid = 0 
-                AND HolidayCalendar.umCalendarUid = (SELECT schoolHolidayCalendarUid 
-                                                       FROM School 
-                                                      WHERE schoolUid = clazz.clazzSchoolUid))
-              LEFT JOIN School 
-              ON School.schoolUid = Clazz.clazzSchoolUid
-              
+                AND HolidayCalendar.umCalendarUid = 0) 
               LEFT JOIN CourseTerminology
               ON CourseTerminology.ctUid = Clazz.clazzTerminologyUid
               
@@ -373,10 +364,7 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
         WHERE :filterUid = 0 
            OR Clazz.clazzUid = :filterUid
     """)
-    abstract fun findClazzesWithEffectiveHolidayCalendarAndFilter(filterUid: Long): List<ClazzWithHolidayCalendarAndSchoolAndTerminology>
-
-    @Query("SELECT Clazz.*, School.* FROM Clazz LEFT JOIN School ON School.schoolUid = Clazz.clazzSchoolUid WHERE clazz.clazzUid = :clazzUid")
-    abstract suspend fun getClazzWithSchool(clazzUid: Long): ClazzWithSchool?
+    abstract fun findClazzesWithEffectiveHolidayCalendarAndFilter(filterUid: Long): List<ClazzWithHolidayCalendarAndAndTerminology>
 
     @HttpAccessible(
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,

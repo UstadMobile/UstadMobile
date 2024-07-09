@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.view
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -11,15 +12,23 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.russhwolf.settings.Settings
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.domain.blob.openblob.OpenBlobUiUseCase
 import com.ustadmobile.core.domain.contententry.move.MoveContentEntriesUseCase
+import com.ustadmobile.core.domain.dbpremigrate.DbPreMigrate
+import com.ustadmobile.core.domain.dbpremigrate.DbPreMigrateAndroid
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseAndroid
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCase
@@ -205,12 +214,30 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
                     color = MaterialTheme.colorScheme.background,
                 ) {
                     withDI(di) {
-                        PreComposeApp {
-                            App(
-                                widthClass = windowSizeClass.widthSizeClass.multiplatformSizeClass,
-                                navCommandFlow = commandFlowNavigator.commandFlow,
-                                initialRoute = initialRoute,
-                            )
+                        var dbMigrateCheckDone by remember {
+                            mutableStateOf(false)
+                        }
+
+                        LaunchedEffect(Unit) {
+                            DbPreMigrateAndroid(
+                                settings = di.direct.instance(),
+                                context = this@AbstractAppActivity,
+                                json = di.direct.instance()
+                            ).invoke()
+
+                            Log.i("PreMigrate", "all done setting check to true FFS")
+                            dbMigrateCheckDone = true
+
+                        }
+
+                        if(dbMigrateCheckDone) {
+                            PreComposeApp {
+                                App(
+                                    widthClass = windowSizeClass.widthSizeClass.multiplatformSizeClass,
+                                    navCommandFlow = commandFlowNavigator.commandFlow,
+                                    initialRoute = initialRoute,
+                                )
+                            }
                         }
                     }
                 }

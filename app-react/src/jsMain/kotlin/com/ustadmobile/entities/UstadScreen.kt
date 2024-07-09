@@ -80,8 +80,6 @@ import com.ustadmobile.core.viewmodel.HolidayCalendarEditViewModel
 import com.ustadmobile.core.viewmodel.parentalconsentmanagement.ParentalConsentManagementViewModel
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
 import com.ustadmobile.core.viewmodel.ReportFilterEditViewModel
-import com.ustadmobile.core.viewmodel.SchoolDetailOverviewViewModel
-import com.ustadmobile.core.viewmodel.SchoolEditViewModel
 import com.ustadmobile.core.viewmodel.ScopedGrantEditViewModel
 import com.ustadmobile.core.viewmodel.site.detail.SiteDetailViewModel
 import com.ustadmobile.core.viewmodel.site.edit.SiteEditViewModel
@@ -220,10 +218,6 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     ),
     UstadScreen(SiteDetailViewModel.DEST_NAME, name = "Site Detail", SiteDetailScreen),
     UstadScreen(SiteEditViewModel.DEST_NAME, name = "Site Edit Preview", SiteEditScreen),
-    UstadScreen(SchoolDetailOverviewViewModel.DEST_NAME, "SchoolDetailOverview Preview",
-        SchoolDetailOverviewScreenPreview),
-    UstadScreen(SchoolEditViewModel.DEST_NAME, "School Edit Preview",
-        SchoolEditScreenPreview),
     UstadScreen(LanguageDetailView.VIEW_NAME, name = "LanguageDetail Preview",
         LanguageDetailPreview),
     UstadScreen(ClazzEditViewModel.DEST_NAME, "Course Edit",

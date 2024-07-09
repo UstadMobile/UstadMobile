@@ -6,7 +6,6 @@ import com.ustadmobile.core.account.*
 import com.ustadmobile.core.contentformats.ContentImportersDiModuleJvm
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
-import com.ustadmobile.core.db.ext.MigrateContainerToContentEntryVersion
 import com.ustadmobile.core.domain.account.SetPasswordServerUseCase
 import com.ustadmobile.core.domain.account.SetPasswordUseCase
 import com.ustadmobile.core.domain.account.SetPasswordUseCaseCommonJvm
@@ -123,7 +122,6 @@ import org.kodein.di.ktor.closestDI
 import uk.co.caprica.vlcj.factory.discovery.NativeDiscovery
 import java.net.Inet6Address
 import java.net.NetworkInterface
-import java.util.concurrent.atomic.AtomicBoolean
 
 const val TAG_UPLOAD_DIR = 10
 
@@ -322,12 +320,11 @@ fun Application.umRestApplication(
 
     val apiKey = environment.config.propertyOrNull("ktor.ustad.googleApiKey")?.getString() ?: CONF_GOOGLE_API
 
-    val ranMvvmMigration = AtomicBoolean(false)
 
     di {
         import(
             makeJvmBackendDiModule(
-                config = environment.config, json = json, ranMvvmMigration = ranMvvmMigration
+                config = environment.config, json = json
             )
         )
         import(ContentImportersDiModuleJvm)
@@ -722,15 +719,7 @@ fun Application.umRestApplication(
                 di.on(endpoint).direct.instance<AuthManager>()
 
                 val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
-
-                if(ranMvvmMigration.get()) {
-                    runBlocking {
-                        db.MigrateContainerToContentEntryVersion(
-                            importUseCase = on(endpoint).instance(),
-                            importersManager = on(endpoint).instance(),
-                        )
-                    }
-                }
+                println("init db: $db")
             }
 
             instance<Scheduler>().start()

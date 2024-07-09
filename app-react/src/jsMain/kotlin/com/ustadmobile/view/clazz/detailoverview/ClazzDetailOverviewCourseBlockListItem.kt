@@ -39,12 +39,6 @@ external interface ClazzDetailOverviewCourseBlockListItemProps : Props {
 
     var onClickCourseBlock: (CourseBlock) -> Unit
 
-    var onClickContentEntry: (
-        ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer?) -> Unit
-
-    var onClickDownloadContentEntry: (
-        ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer?) -> Unit
-
 }
 
 val ClazzDetailOverviewCourseBlockListItem = FC<ClazzDetailOverviewCourseBlockListItemProps> { props ->

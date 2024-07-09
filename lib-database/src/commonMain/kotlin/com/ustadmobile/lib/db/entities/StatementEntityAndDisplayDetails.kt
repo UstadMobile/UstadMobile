@@ -13,6 +13,4 @@ data class StatementEntityAndDisplayDetails(
     @Embedded
     var person: Person? = null,
 
-    @Embedded
-    var xlangMapEntry: XLangMapEntry? = null
 )

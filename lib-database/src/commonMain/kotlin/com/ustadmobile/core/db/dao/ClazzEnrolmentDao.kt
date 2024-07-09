@@ -44,14 +44,12 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
 
     @Query("""
         SELECT ClazzEnrolment.*, LeavingReason.*, 
-               COALESCE(Clazz.clazzTimeZone, COALESCE(School.schoolTimeZone, 'UTC')) as timeZone
+               COALESCE(Clazz.clazzTimeZone, 'UTC') as timeZone
           FROM ClazzEnrolment 
                LEFT JOIN LeavingReason 
                          ON LeavingReason.leavingReasonUid = ClazzEnrolment.clazzEnrolmentLeavingReasonUid
                LEFT JOIN Clazz 
                          ON Clazz.clazzUid = ClazzEnrolment.clazzEnrolmentClazzUid
-               LEFT JOIN School 
-                         ON School.schoolUid = Clazz.clazzSchoolUid
          WHERE clazzEnrolmentPersonUid = :personUid 
            AND ClazzEnrolment.clazzEnrolmentActive 
            AND clazzEnrolmentClazzUid = :clazzUid 
@@ -67,14 +65,12 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
     @Query("""
             SELECT ClazzEnrolment.*, 
                    LeavingReason.*,
-                   COALESCE(Clazz.clazzTimeZone, COALESCE(School.schoolTimeZone, 'UTC')) AS timeZone
+                   COALESCE(Clazz.clazzTimeZone, 'UTC') AS timeZone
               FROM ClazzEnrolment 
                    LEFT JOIN LeavingReason 
                              ON LeavingReason.leavingReasonUid = ClazzEnrolment.clazzEnrolmentLeavingReasonUid
                    LEFT JOIN Clazz 
                              ON Clazz.clazzUid = ClazzEnrolment.clazzEnrolmentClazzUid
-                   LEFT JOIN School 
-                             ON School.schoolUid = Clazz.clazzSchoolUid
              WHERE ClazzEnrolment.clazzEnrolmentUid = :enrolmentUid
              """)
     abstract suspend fun findEnrolmentWithLeavingReason(

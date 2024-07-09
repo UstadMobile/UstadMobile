@@ -25,7 +25,6 @@ import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.StatementEntityAndDisplayDetails
 import com.ustadmobile.lib.db.entities.StatementReportData
-import com.ustadmobile.lib.db.entities.XLangMapEntry
 import com.ustadmobile.lib.db.entities.xapi.StatementEntity
 import com.ustadmobile.lib.db.entities.xapi.XapiEntityObjectTypeFlags
 import kotlinx.coroutines.flow.Flow
@@ -43,8 +42,8 @@ expect abstract class StatementDao {
     @RawQuery
     abstract suspend fun getResults(query: DoorQuery): List<StatementReportData>
 
-    @RawQuery(observedEntities = [StatementEntity::class, Person::class, XLangMapEntry::class])
-    @QueryLiveTables(["StatementEntity", "Person", "XLangMapEntry"])
+    @RawQuery(observedEntities = [StatementEntity::class, Person::class])
+    @QueryLiveTables(["StatementEntity", "Person"])
     abstract fun getListResults(query: DoorQuery): PagingSource<Int, StatementEntityAndDisplayDetails>
 
 

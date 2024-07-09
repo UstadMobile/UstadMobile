@@ -1496,6 +1496,18 @@ val MIGRATION_172_194 = DoorMigrationStatementList(172, 194) { db ->
 
         add("ALTER TABLE DiscussionPost ADD COLUMN discussionPostVisible $boolColType NOT NULL DEFAULT $boolDefaultVal")
         add("ALTER TABLE DiscussionPost ADD COLUMN discussionPostArchive $boolColType NOT NULL DEFAULT $boolDefaultVal")
+
+        //Drop old tables
+        listOf(
+            "NetworkNode", "AccessToken", "ScrapeQueueItem", "ContainerEntry",
+            "ContainerEntryFile", "LocallyAvailableContainer", "ContainerEtag",
+            "ContainerImportJob", "Role", "XLangMapEntry", "School", "SchoolMember",
+            "Chat", "ChatMember", "MessageRead", "StateEntity", "StateContentEntity",
+            "Container"
+        ).forEach {
+            add("DROP TABLE IF EXISTS $it")
+        }
+
     }
 }
 

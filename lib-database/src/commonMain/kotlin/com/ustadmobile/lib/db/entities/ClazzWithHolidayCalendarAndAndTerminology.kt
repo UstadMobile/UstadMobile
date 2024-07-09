@@ -4,7 +4,7 @@ import androidx.room.Embedded
 import kotlinx.serialization.Serializable
 
 @Serializable
-class ClazzWithHolidayCalendarAndSchoolAndTerminology: Clazz() {
+class ClazzWithHolidayCalendarAndAndTerminology: Clazz() {
 
     @Embedded
     var holidayCalendar: HolidayCalendar? = null
@@ -16,7 +16,7 @@ class ClazzWithHolidayCalendarAndSchoolAndTerminology: Clazz() {
     var coursePicture: CoursePicture? = null
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other !is ClazzWithHolidayCalendarAndSchoolAndTerminology) return false
+        if (other !is ClazzWithHolidayCalendarAndAndTerminology) return false
         if (!super.equals(other)) return false
 
         if (holidayCalendar != other.holidayCalendar) return false

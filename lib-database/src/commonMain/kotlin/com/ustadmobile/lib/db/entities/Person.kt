@@ -164,13 +164,8 @@ data class Person(
                           FROM ClazzEnrolment
                          WHERE clazzEnrolmentClazzUid =ScopedGrant.sgEntityUid 
                            AND ClazzEnrolment.clazzEnrolmentActive))
-                 OR (ScopedGrant.sgTableId = ${School.TABLE_ID}
-                    AND Person.personUid IN (
-                        SELECT DISTINCT schoolMemberPersonUid
-                          FROM SchoolMember
-                         WHERE schoolMemberSchoolUid = ScopedGrant.sgEntityUid
-                           AND schoolMemberActive))
-                           )    
+                 
+                 )    
         """
 
 

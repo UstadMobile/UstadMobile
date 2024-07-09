@@ -1,5 +1,6 @@
 package com.ustadmobile.core.util.ext
 
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_ABSENT
@@ -167,7 +168,7 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
     val personPermission = """
         FROM PersonGroupMember
             ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1} 
-                ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2}
+                ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW} ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2}
          """
 
     var sqlList = """SELECT  Person.* , XLangMapEntry.* ,StatementEntity.* 

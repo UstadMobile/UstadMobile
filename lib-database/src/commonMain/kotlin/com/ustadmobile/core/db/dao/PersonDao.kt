@@ -30,13 +30,6 @@ expect abstract class PersonDao : BaseDao<Person> {
     abstract suspend fun countUsername(username: String): Int
 
 
-    @Query("SELECT EXISTS(SELECT token FROM AccessToken WHERE token = :token " +
-            " and accessTokenPersonUid = :personUid)")
-    abstract fun isValidToken(token: String, personUid: Long): Boolean
-
-    @Insert
-    abstract fun insertAccessToken(token: AccessToken)
-
 
     @Query("""
         SELECT Person.personUid, Person.firstNames, Person.lastName, 

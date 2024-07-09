@@ -55,7 +55,7 @@ data class ClazzEditUiState(
 
     val fieldsEnabled: Boolean = false,
 
-    val entity: ClazzWithHolidayCalendarAndSchoolAndTerminology? = null,
+    val entity: ClazzWithHolidayCalendarAndAndTerminology? = null,
 
     val clazzStartDateError: String? = null,
 
@@ -162,7 +162,7 @@ class ClazzEditViewModel(
             awaitAll(
                 async {
                     loadEntity(
-                        serializer = ClazzWithHolidayCalendarAndSchoolAndTerminology.serializer(),
+                        serializer = ClazzWithHolidayCalendarAndAndTerminology.serializer(),
                         onLoadFromDb = {
                             it.clazzDao.takeIf { entityUidArg != 0L }
                                 ?.findByUidWithHolidayCalendarAsync(entityUidArg).let { dbResult ->
@@ -180,7 +180,7 @@ class ClazzEditViewModel(
                                 }
                         },
                         makeDefault = {
-                            ClazzWithHolidayCalendarAndSchoolAndTerminology().apply {
+                            ClazzWithHolidayCalendarAndAndTerminology().apply {
                                 clazzUid = effectiveClazzUid
                                 clazzName = ""
                                 isClazzActive = true
@@ -371,7 +371,7 @@ class ClazzEditViewModel(
         }
     }
 
-    fun onEntityChanged(entity: ClazzWithHolidayCalendarAndSchoolAndTerminology?) {
+    fun onEntityChanged(entity: ClazzWithHolidayCalendarAndAndTerminology?) {
         _uiState.update { prev ->
             prev.copy(
                 entity = entity,
@@ -385,7 +385,7 @@ class ClazzEditViewModel(
 
         scheduleEntityCommitToSavedState(
             entity = entity,
-            serializer = ClazzWithHolidayCalendarAndSchoolAndTerminology.serializer(),
+            serializer = ClazzWithHolidayCalendarAndAndTerminology.serializer(),
             commitDelay = 200,
         )
     }

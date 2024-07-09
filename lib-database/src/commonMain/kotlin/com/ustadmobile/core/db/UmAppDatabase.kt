@@ -31,27 +31,23 @@ import com.ustadmobile.lib.db.entities.xapi.ActivityExtensionEntity
 import com.ustadmobile.lib.db.entities.xapi.StatementEntityJson
 import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 
-@DoorDatabase(entities = [NetworkNode::class,
+@DoorDatabase(entities = [
     ClazzLog::class, ClazzLogAttendanceRecord::class,
     Schedule::class, HolidayCalendar::class, Holiday::class,
     Person::class,
     Clazz::class, ClazzEnrolment::class, LeavingReason::class,
     ContentEntry::class, ContentEntryContentCategoryJoin::class, ContentEntryParentChildJoin::class,
     ContentEntryRelatedEntryJoin::class, ContentCategorySchema::class, ContentCategory::class,
-    Language::class, LanguageVariant::class, AccessToken::class, PersonAuth::class, Role::class,
+    Language::class, LanguageVariant::class,
+    PersonAuth::class,
     PersonGroup::class, PersonGroupMember::class,
     PersonPicture::class,
-    ScrapeQueueItem::class, ScrapeRun::class, ConnectivityStatus::class,
-    Container::class, ContainerEntry::class, ContainerEntryFile::class,
     VerbEntity::class, ActivityEntity::class, StatementEntity::class,
     ActorEntity::class,
-    StateEntity::class, StateContentEntity::class, XLangMapEntry::class,
-    SyncNode::class, LocallyAvailableContainer::class, ContainerETag::class,
-    School::class,
-    SchoolMember::class, Comments::class,
+    SyncNode::class,
+    Comments::class,
     Report::class,
     Site::class,
-    ContainerImportJob::class,
     SiteTerms::class,
     PersonParentJoin::class,
     ScopedGrant::class,
@@ -63,20 +59,12 @@ import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
     UserSession::class,
     ContentJob::class, ContentEntryImportJob::class, CourseBlock::class, CourseTerminology::class,
     CourseGroupSet::class, CourseGroupMember::class,
-    Chat::class,
     ContentEntryPicture::class,
     ActivityInteractionEntity::class,
-
-    //Door Helper entities
-//    SqliteChangeSeqNums::class,
-//    UpdateNotification::class,
-    DoorNode::class,
     CoursePicture::class,
     DiscussionPost::class,
     ExternalAppPermission::class,
-    ChatMember::class,
     Message::class,
-    MessageRead::class,
     StudentResult::class,
     ContentEntryVersion::class,
     TransferJob::class,
@@ -103,6 +91,7 @@ import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
     OutgoingReplication::class,
     ReplicationOperation::class,
     PendingRepositorySession::class,
+    DoorNode::class,
 
 ], version = 194)
 expect abstract class UmAppDatabase : RoomDatabase {
@@ -125,8 +114,6 @@ expect abstract class UmAppDatabase : RoomDatabase {
         Added School and Assignment based entities
         Updated Clazz : added clazzFeatures and removed individual feature bits
      */
-
-    abstract val networkNodeDao: NetworkNodeDao
 
     abstract val personDao: PersonDao
 
@@ -152,8 +139,6 @@ expect abstract class UmAppDatabase : RoomDatabase {
 
     abstract val contentEntryRelatedEntryJoinDao: ContentEntryRelatedEntryJoinDao
 
-    // abstract val syncStatusDao: SyncStatusDao
-
     abstract val contentCategorySchemaDao: ContentCategorySchemaDao
 
     abstract val contentCategoryDao: ContentCategoryDao
@@ -161,8 +146,6 @@ expect abstract class UmAppDatabase : RoomDatabase {
     abstract val languageDao: LanguageDao
 
     abstract val languageVariantDao: LanguageVariantDao
-
-    abstract val scrapeQueueItemDao: ScrapeQueueItemDao
 
     abstract val personAuthDao: PersonAuthDao
 
@@ -172,29 +155,13 @@ expect abstract class UmAppDatabase : RoomDatabase {
 
     abstract val personPictureDao: PersonPictureDao
 
-    abstract val connectivityStatusDao: ConnectivityStatusDao
-
-    abstract val containerDao: ContainerDao
-
-    abstract val containerEntryDao: ContainerEntryDao
-
-    abstract val containerEntryFileDao: ContainerEntryFileDao
-
-    abstract val containerETagDao: ContainerETagDao
-
     abstract val verbDao: VerbDao
 
     abstract val activityEntityDao: ActivityEntityDao
 
     abstract val reportDao: ReportDao
 
-    abstract val containerImportJobDao: ContainerImportJobDao
-
     abstract val statementDao: StatementDao
-
-    abstract val stateDao: StateDao
-
-    abstract val stateContentDao: StateContentDao
 
     abstract val actorDao: ActorDao
 
@@ -205,13 +172,6 @@ expect abstract class UmAppDatabase : RoomDatabase {
 
     abstract val holidayCalendarDao: HolidayCalendarDao
     abstract val holidayDao: HolidayDao
-    abstract val schoolDao: SchoolDao
-
-    abstract val xLangMapEntryDao: XLangMapEntryDao
-
-    abstract val locallyAvailableContainerDao: LocallyAvailableContainerDao
-
-    abstract val schoolMemberDao: SchoolMemberDao
 
     abstract val clazzAssignmentDao: ClazzAssignmentDao
 
@@ -241,19 +201,11 @@ expect abstract class UmAppDatabase : RoomDatabase {
 
     abstract val contentEntryImportJobDao: ContentEntryImportJobDao
 
-    abstract val contentJobDao: ContentJobDao
-
     abstract val coursePictureDao: CoursePictureDao
 
     abstract val contentEntryPictureDao: ContentEntryPictureDao
 
-    abstract val chatDao: ChatDao
-
-    abstract val chatMemberDao: ChatMemberDao
-
     abstract val messageDao: MessageDao
-
-    abstract val messageReadDao: MessageReadDao
 
     abstract val peerReviewerAllocationDao: PeerReviewerAllocationDao
 

@@ -19,7 +19,6 @@ import com.ustadmobile.lib.db.entities.PersonGroupMember
 import com.ustadmobile.lib.db.entities.Report
 import com.ustadmobile.lib.db.entities.ReportSeries
 import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
-import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.ScopedGrant
 import com.ustadmobile.lib.db.entities.StatementEntityAndDisplayDetails
 import com.ustadmobile.lib.db.entities.StatementReportData
@@ -33,7 +32,6 @@ suspend fun <T: Person> UmAppDatabase.insertPersonAndGroup(
     entity: T,
     groupFlag: Int = PersonGroup.PERSONGROUP_FLAG_PERSONGROUP
 ): T{
-
     val groupPerson = PersonGroup().apply {
         groupName = "Person individual group"
         personGroupFlag = groupFlag
@@ -50,7 +48,8 @@ suspend fun <T: Person> UmAppDatabase.insertPersonAndGroup(
             PersonGroupMember(entity.personUid, entity.personGroupUid))
 
     //Grant the person all permissions on their own data
-    grantScopedPermission(entity, Role.ALL_PERMISSIONS, Person.TABLE_ID, entity.personUid)
+
+    grantScopedPermission(entity, Long.MAX_VALUE, Person.TABLE_ID, entity.personUid)
 
     return entity
 }
