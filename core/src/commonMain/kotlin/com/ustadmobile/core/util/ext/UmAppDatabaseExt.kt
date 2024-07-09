@@ -37,14 +37,14 @@ suspend fun <T: Person> UmAppDatabase.insertPersonAndGroup(
         personGroupFlag = groupFlag
     }
     //Create person's group
-    groupPerson.groupUid = personGroupDao.insertAsync(groupPerson)
+    groupPerson.groupUid = personGroupDao().insertAsync(groupPerson)
 
     //Assign to person
     entity.personGroupUid = groupPerson.groupUid
-    entity.personUid = personDao.insertAsync(entity)
+    entity.personUid = personDao().insertAsync(entity)
 
     //Assign person to PersonGroup ie: Create PersonGroupMember
-    personGroupMemberDao.insertAsync(
+    personGroupMemberDao().insertAsync(
             PersonGroupMember(entity.personUid, entity.personGroupUid))
 
     //Grant the person all permissions on their own data
@@ -70,7 +70,7 @@ suspend fun UmAppDatabase.generateChartData(
     val xAxisList = mutableSetOf<String>()
     queries.forEach {
 
-        val reportList = statementDao.getResults(it.value.sqlStr, it.value.queryParams)
+        val reportList = statementDao().getResults(it.value.sqlStr, it.value.queryParams)
         val series = it.key
 
         xAxisList.addAll(reportList.mapNotNull { it.xAxis }.toSet())
@@ -82,7 +82,7 @@ suspend fun UmAppDatabase.generateChartData(
         val subGroupFormatter = when(series.reportSeriesSubGroup){
             Report.CLASS -> {
                 val listOfUids = reportList.mapNotNull { it.subgroup?.toLong() }.toSet().toList()
-                val clazzLabelList = clazzDao.getClassNamesFromListOfIds(listOfUids)
+                val clazzLabelList = clazzDao().getClassNamesFromListOfIds(listOfUids)
                         .map { it.uid to it.labelName }.toMap()
                 UidAndLabelFormatter(clazzLabelList)
             }
@@ -94,13 +94,13 @@ suspend fun UmAppDatabase.generateChartData(
 //            }
             Report.CONTENT_ENTRY ->{
                 val listOfUids = reportList.mapNotNull { it.subgroup?.toLong() }.toSet().toList()
-                val entryLabelList = contentEntryDao.getContentEntryFromUids(listOfUids)
+                val entryLabelList = contentEntryDao().getContentEntryFromUids(listOfUids)
                         .map { it.uid to it.labelName }.toMap()
                 UidAndLabelFormatter(entryLabelList)
             }
             Report.ENROLMENT_LEAVING_REASON -> {
                 val listOfUids = reportList.mapNotNull { it.subgroup?.toLong() }.toSet().toList()
-                val reasonLabelList = leavingReasonDao.getReasonsFromUids(listOfUids)
+                val reasonLabelList = leavingReasonDao().getReasonsFromUids(listOfUids)
                         .map { it.uid to it.labelName }.toMap()
                 UidAndLabelFormatter(reasonLabelList)
             }
@@ -118,7 +118,7 @@ suspend fun UmAppDatabase.generateChartData(
 
     val xAxisFormatter = when(report.xAxis){
         Report.CLASS -> {
-            val clazzLabelList = clazzDao.getClassNamesFromListOfIds(xAxisList
+            val clazzLabelList = clazzDao().getClassNamesFromListOfIds(xAxisList
                     .map { it.toLong() }).map { it.uid to it.labelName }.toMap()
             UidAndLabelFormatter(clazzLabelList)
         }
@@ -129,7 +129,7 @@ suspend fun UmAppDatabase.generateChartData(
 //                    impl, context)
 //        }
         Report.CONTENT_ENTRY ->{
-            val entryLabelList = contentEntryDao.getContentEntryFromUids(xAxisList
+            val entryLabelList = contentEntryDao().getContentEntryFromUids(xAxisList
                     .map { it.toLong() }).map { it.uid to it.labelName }.toMap()
             UidAndLabelFormatter(entryLabelList)
         }
@@ -138,7 +138,7 @@ suspend fun UmAppDatabase.generateChartData(
                     OUTCOME_TO_MESSAGE_ID_MAP.mapKeys { it.key.toString() }, impl, context)
         }
         Report.ENROLMENT_LEAVING_REASON -> {
-            val reasonLabelList = leavingReasonDao.getReasonsFromUids(xAxisList
+            val reasonLabelList = leavingReasonDao().getReasonsFromUids(xAxisList
                     .map { it.toLong() }).map { it.uid to it.labelName }.toMap()
                     .plus(0L to impl.getString(MR.strings.unset))
             UidAndLabelFormatter(reasonLabelList)
@@ -157,7 +157,7 @@ fun UmAppDatabase.generateStatementList(report: ReportWithSeriesWithFilters, log
     val queries = report.generateSql(loggedInPersonUid, dbType())
     val statementDataSourceList = mutableListOf<PagingSource<Int, StatementEntityAndDisplayDetails>>()
     queries.forEach {
-        statementDataSourceList.add(statementDao.getListResults(SimpleDoorQuery(it.value.sqlListStr, it.value.queryParams)))
+        statementDataSourceList.add(statementDao().getListResults(SimpleDoorQuery(it.value.sqlListStr, it.value.queryParams)))
     }
     return statementDataSourceList.toList()
 }
@@ -186,7 +186,7 @@ data class ScopedGrantResult(val sgUid: Long)
 @Deprecated("This has been replaced with SystemPermission and CoursePermission")
 suspend fun UmAppDatabase.grantScopedPermission(toGroupUid: Long, permissions: Long,
                                                 scopeTableId: Int, scopeEntityUid: Long) : ScopedGrantResult{
-    val sgUid = scopedGrantDao.insertAsync(ScopedGrant().apply {
+    val sgUid = scopedGrantDao().insertAsync(ScopedGrant().apply {
         sgGroupUid = toGroupUid
         sgPermissions = permissions
         sgTableId = scopeTableId

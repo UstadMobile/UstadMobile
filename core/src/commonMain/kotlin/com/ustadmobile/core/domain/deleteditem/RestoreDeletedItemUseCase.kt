@@ -22,7 +22,7 @@ class RestoreDeletedItemUseCase(
             itemsByType.forEach { typeAndList ->
                 when(typeAndList.key) {
                     ContentEntryParentChildJoin.TABLE_ID -> {
-                        repoOrDb.contentEntryParentChildJoinDao.setEntriesDeleted(
+                        repoOrDb.contentEntryParentChildJoinDao().setEntriesDeleted(
                             selectedUids = typeAndList.value.map { it.delItemEntityUid },
                             isDeleted = false,
                             updateTime = timeNow
@@ -31,7 +31,7 @@ class RestoreDeletedItemUseCase(
                 }
             }
 
-            repoOrDb.deletedItemDao.updateStatusByUids(
+            repoOrDb.deletedItemDao().updateStatusByUids(
                 uidList = items.map { it.delItemUid },
                 newStatus = DeletedItem.STATUS_RESTORED,
                 updateTime = timeNow

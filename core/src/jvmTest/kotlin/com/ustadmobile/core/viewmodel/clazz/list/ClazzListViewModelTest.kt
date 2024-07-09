@@ -23,9 +23,9 @@ class ClazzListViewModelTest : AbstractMainDispatcherTest()  {
                 ClazzListViewModel(di, savedStateHandle)
             }
 
-            val clazzRepo = spy(activeRepo.clazzDao)
+            val clazzRepo = spy(activeRepo.clazzDao())
             activeRepo.stub {
-                on { clazzDao }.thenReturn(clazzRepo)
+                on { clazzDao() }.thenReturn(clazzRepo)
             }
 
             val accountPersonUid = accountManager.currentAccount.personUid
@@ -59,7 +59,7 @@ class ClazzListViewModelTest : AbstractMainDispatcherTest()  {
             }
 
             val testEntity = Clazz().apply {
-                clazzUid = activeDb.clazzDao.insert(this)
+                clazzUid = activeDb.clazzDao().insert(this)
             }
 
             val activeUser = setActiveUser(activeEndpoint)

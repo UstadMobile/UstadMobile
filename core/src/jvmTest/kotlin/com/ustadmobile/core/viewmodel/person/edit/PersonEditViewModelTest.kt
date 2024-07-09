@@ -163,7 +163,7 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
         initNapierLog()
         testViewModel<PersonEditViewModel> {
             val activeUser = setActiveUser(activeEndpoint)
-            activeDb.systemPermissionDao.upsertAsync(
+            activeDb.systemPermissionDao().upsertAsync(
                 SystemPermission(
                     spToPersonUid = activeUser.personUid,
                     spPermissionsFlag = PermissionFlags.ADD_PERSON
@@ -191,7 +191,7 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
 
 
             db.doorFlow(arrayOf("Person")) {
-                db.personDao.getAllPerson()
+                db.personDao().getAllPerson()
             }.assertItemReceived(timeout = 5.seconds) { list ->
                 list.any { it.lastName == "newtestuser" }
             }
@@ -344,9 +344,9 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
             }
 
             val db: UmAppDatabase = di.on(activeEndpoint).direct.instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
-            val personSavedInDb = db.personDao.findByUsername("newstudent")
+            val personSavedInDb = db.personDao().findByUsername("newstudent")
             assertTrue(
-                db.personParentJoinDao.isMinorApproved(personSavedInDb?.personUid ?: 0L),
+                db.personParentJoinDao().isMinorApproved(personSavedInDb?.personUid ?: 0L),
                 "When a new minor user is created manually, they are marked as approved")
         }
     }
@@ -355,7 +355,7 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
     fun givenInvalidPhoneNumberIncluded_whenSaved_shouldValidatePhoneNumberAndShowError() {
         testViewModel<PersonEditViewModel> {
             val activeUser = setActiveUser(activeEndpoint)
-            activeDb.systemPermissionDao.upsertAsync(
+            activeDb.systemPermissionDao().upsertAsync(
                 SystemPermission(
                     spToPersonUid = activeUser.personUid,
                     spPermissionsFlag = PermissionFlags.ADD_PERSON
@@ -405,7 +405,7 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
     fun givenValidPhoneNumberIncluded_whenSaved_shouldValidatePhoneNumberAndShowError() {
         testViewModel<PersonEditViewModel> {
             val activeUser = setActiveUser(activeEndpoint)
-            activeDb.systemPermissionDao.upsertAsync(
+            activeDb.systemPermissionDao().upsertAsync(
                 SystemPermission(
                     spToPersonUid = activeUser.personUid,
                     spPermissionsFlag = PermissionFlags.ADD_PERSON
@@ -444,7 +444,7 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
             verify(mockPhoneValidator).isValid(invalidNum)
 
             activeDb.doorFlow(arrayOf("Person")) {
-                activeDb.personDao.getAllPerson()
+                activeDb.personDao().getAllPerson()
             }.assertItemReceived(timeout = 5.seconds) { list ->
                 list.any { it.lastName == "newtestuser" }
             }

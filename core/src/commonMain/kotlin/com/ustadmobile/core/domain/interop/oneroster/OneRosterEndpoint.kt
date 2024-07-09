@@ -50,7 +50,7 @@ class OneRosterEndpoint(
         accountPersonUid: Long,
         userSourcedId: String,
     ) : List<Clazz> {
-        return repoOrDb.clazzDao.findOneRosterUserClazzes(
+        return repoOrDb.clazzDao().findOneRosterUserClazzes(
             accountPersonUid, userSourcedId.toLongOrNull() ?: 0
         ).map {
             it.toOneRosterClass()
@@ -66,7 +66,7 @@ class OneRosterEndpoint(
         val clazzUid = clazzSourcedId.toLongOrNull() ?: 0
         val studentPersonUid = studentSourcedId.toLongOrNull() ?: 0
 
-        return repoOrDb.studentResultDao.findByClazzAndStudent(
+        return repoOrDb.studentResultDao().findByClazzAndStudent(
             clazzUid, studentPersonUid, accountPersonUid
         ).map {
             it.toOneRosterResult(endpoint)
@@ -77,7 +77,7 @@ class OneRosterEndpoint(
         accountPersonUid: Long,
         lineItemSourcedId: String,
     ) : LineItem? {
-        return repoOrDb.courseBlockDao.findBySourcedId(
+        return repoOrDb.courseBlockDao().findBySourcedId(
             sourcedId = lineItemSourcedId,
             accountPersonUid = accountPersonUid
         )?.toOneRosterLineItem(endpoint, json)
@@ -99,15 +99,15 @@ class OneRosterEndpoint(
 
         if(
             !repoOrDb.localFirstThenRepoIfFalse {
-                it.clazzDao.clazzUidExistsAsync(courseBlock.cbClazzUid)
+                it.clazzDao().clazzUidExistsAsync(courseBlock.cbClazzUid)
             }
         ) {
             return PutResponse(400, "Clazz SourcedId does not exist: ${courseBlock.cbClazzUid}")
         }
 
-        val isUpdate = db.courseBlockDao.existsByUid(
+        val isUpdate = db.courseBlockDao().existsByUid(
             xxHasher.toLongOrHash(lineItemSourcedId))
-        repoOrDb.courseBlockDao.replaceListAsync(listOf(courseBlock))
+        repoOrDb.courseBlockDao().replaceListAsync(listOf(courseBlock))
 
         return if(isUpdate) {
             PutResponse(200, "")
@@ -127,10 +127,10 @@ class OneRosterEndpoint(
     ) : PutResponse {
         val srUid = xxHasher.toLongOrHash(resultSourcedId)
         val lineItemUid = xxHasher.toLongOrHash(result.lineItem.sourcedId)
-        val isUpdate = db.studentResultDao.existsByUid(srUid)
+        val isUpdate = db.studentResultDao().existsByUid(srUid)
 
         val blockUidAndClazzUid = repoOrDb.localFirstThenRepoIfNull {
-            it.courseBlockDao.findCourseBlockAndClazzUidByCbUid(
+            it.courseBlockDao().findCourseBlockAndClazzUidByCbUid(
                 lineItemUid, accountPersonUid
             )
         } ?: return PutResponse(400, "LineItem SourcedId does not exist: ${result.lineItem.sourcedId}")
@@ -141,13 +141,13 @@ class OneRosterEndpoint(
 
         if(
             repoOrDb.localFirstThenRepoIfNull {
-                it.personDao.findByUidAsync(studentResult.srStudentPersonUid)
+                it.personDao().findByUidAsync(studentResult.srStudentPersonUid)
             } == null
         ) {
             return PutResponse(400, "Invalid student sourcedId (not found): ${result.student.sourcedId}")
         }
 
-        repoOrDb.studentResultDao.upsertAsync(studentResult)
+        repoOrDb.studentResultDao().upsertAsync(studentResult)
 
         return if(isUpdate) {
             PutResponse(200, "")

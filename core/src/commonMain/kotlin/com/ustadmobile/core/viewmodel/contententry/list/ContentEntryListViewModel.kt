@@ -147,16 +147,16 @@ class ContentEntryListViewModel(
 
     private val pagingSourceFactory: ListPagingSourceFactory<ContentEntryAndListDetail> = {
         when(_uiState.value.selectedChipId) {
-            FILTER_MY_CONTENT -> activeRepo.contentEntryDao.getContentByOwner(
+            FILTER_MY_CONTENT -> activeRepo.contentEntryDao().getContentByOwner(
                 activeUserPersonUid
             )
 
-            FILTER_FROM_MY_COURSES -> activeRepo.contentEntryDao.getContentFromMyCourses(
+            FILTER_FROM_MY_COURSES -> activeRepo.contentEntryDao().getContentFromMyCourses(
                 activeUserPersonUid
             )
 
             FILTER_FROM_LIBRARY -> {
-                activeRepo.contentEntryDao.getChildrenByParentUidWithCategoryFilterOrderByName(
+                activeRepo.contentEntryDao().getChildrenByParentUidWithCategoryFilterOrderByName(
                     accountPersonUid = activeUserPersonUid,
                     parentUid = parentEntryUid,
                     langParam = 0,
@@ -167,7 +167,7 @@ class ContentEntryListViewModel(
             }
 
             FILTER_BY_PARENT_UID -> {
-                activeRepo.contentEntryDao.getChildrenByParentUidWithCategoryFilterOrderByName(
+                activeRepo.contentEntryDao().getChildrenByParentUidWithCategoryFilterOrderByName(
                     accountPersonUid = activeUserPersonUid,
                     parentUid = parentEntryUid,
                     langParam = 0,
@@ -244,7 +244,7 @@ class ContentEntryListViewModel(
             }
         }
 
-        val hasPermissionFlow = activeRepo.systemPermissionDao
+        val hasPermissionFlow = activeRepo.systemPermissionDao()
             .personHasSystemPermissionAsFlow(
                 accountManager.currentAccount.personUid, PermissionFlags.EDIT_LIBRARY_CONTENT
             ).shareIn(viewModelScope, SharingStarted.WhileSubscribed())
@@ -253,7 +253,7 @@ class ContentEntryListViewModel(
             defaultTitle = when {
                 (expectedResultDest != null && !selectFolderMode) -> systemImpl.getString(MR.strings.select_content)
                 parentEntryUid == LIBRARY_ROOT_CONTENT_ENTRY_UID -> systemImpl.getString(MR.strings.library)
-                else -> activeRepo.contentEntryDao.findTitleByUidAsync(parentEntryUid) ?: ""
+                else -> activeRepo.contentEntryDao().findTitleByUidAsync(parentEntryUid) ?: ""
             }
 
             _appUiState.update { prev ->

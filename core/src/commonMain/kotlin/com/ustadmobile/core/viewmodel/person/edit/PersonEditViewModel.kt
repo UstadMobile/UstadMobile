@@ -199,14 +199,14 @@ class PersonEditViewModel(
 
                     //If adding a new person, then ADD_PERSON permission is required
                     entityUidArg == 0L -> {
-                        db.systemPermissionDao.personHasSystemPermission(
+                        db.systemPermissionDao().personHasSystemPermission(
                             activeUserPersonUid, PermissionFlags.ADD_PERSON
                         )
                     }
 
                     //If editing an existing person, which is not the active user, require edit all person permission
                     else -> {
-                        db.systemPermissionDao.personHasSystemPermission(
+                        db.systemPermissionDao().personHasSystemPermission(
                             accountPersonUid = activeUserPersonUid,
                             permission = PermissionFlags.EDIT_ALL_PERSONS,
                         )
@@ -224,7 +224,7 @@ class PersonEditViewModel(
                         serializer = Person.serializer(),
                         //If in registration mode, we should avoid attempting to connect ot the database at all
                         onLoadFromDb = {
-                            it.personDao.takeIf { entityUid != 0L }?.findByUidAsync(entityUid)
+                            it.personDao().takeIf { entityUid != 0L }?.findByUidAsync(entityUid)
                         },
                         makeDefault = {
                             Person().also {
@@ -241,7 +241,7 @@ class PersonEditViewModel(
                         serializer = PersonPicture.serializer(),
                         loadFromStateKeys =listOf(STATE_KEY_PICTURE),
                         onLoadFromDb = if(entityUid != 0L){
-                            { it.personPictureDao.findByPersonUidAsync(entityUid) }
+                            { it.personPictureDao().findByPersonUidAsync(entityUid) }
                         } else {
                             null
                         },
@@ -551,7 +551,7 @@ class PersonEditViewModel(
                     !Instant.fromEpochMilliseconds(
                         savedStateHandle[KEY_INIT_DATE_OF_BIRTH]?.toLong() ?: 0
                     ).isDateOfBirthAMinor() &&
-                    !activeRepo.personParentJoinDao.isMinorApproved(savePerson.personUid)
+                    !activeRepo.personParentJoinDao().isMinorApproved(savePerson.personUid)
                 ) {
                     PersonParentJoin().apply {
                         ppjMinorPersonUid = savePerson.personUid
@@ -571,9 +571,9 @@ class PersonEditViewModel(
                             createPersonParentApprovalIfMinor = true,
                         )
                     }else {
-                        activeRepo.personDao.updateAsync(savePerson)
+                        activeRepo.personDao().updateAsync(savePerson)
                         consentToUpsert?.also {
-                            activeRepo.personParentJoinDao.upsertAsync(it)
+                            activeRepo.personParentJoinDao().upsertAsync(it)
                         }
                     }
                 }
@@ -587,7 +587,7 @@ class PersonEditViewModel(
                     val personPictureUriVal = personPictureVal.personPictureUri
                     if(initPictureUri != personPictureUriVal) {
                         //Save if changed
-                        activeDb.personPictureDao.upsert(personPictureVal)
+                        activeDb.personPictureDao().upsert(personPictureVal)
                         enqueueSavePictureUseCase(
                             entityUid = savePerson.personUid,
                             tableId = PersonPicture.TABLE_ID,

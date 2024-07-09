@@ -115,146 +115,146 @@ expect abstract class UmAppDatabase : RoomDatabase {
         Updated Clazz : added clazzFeatures and removed individual feature bits
      */
 
-    abstract val personDao: PersonDao
+    abstract fun personDao(): PersonDao
 
-    abstract val clazzDao: ClazzDao
+    abstract fun clazzDao(): ClazzDao
 
-    abstract val courseBlockDao: CourseBlockDao
+    abstract fun courseBlockDao(): CourseBlockDao
 
-    abstract val courseTerminologyDao: CourseTerminologyDao
+    abstract fun courseTerminologyDao(): CourseTerminologyDao
 
-    abstract val courseGroupSetDao: CourseGroupSetDao
+    abstract fun courseGroupSetDao(): CourseGroupSetDao
 
-    abstract val courseGroupMemberDao: CourseGroupMemberDao
+    abstract fun courseGroupMemberDao(): CourseGroupMemberDao
 
-    abstract val clazzEnrolmentDao: ClazzEnrolmentDao
+    abstract fun clazzEnrolmentDao(): ClazzEnrolmentDao
 
-    abstract val leavingReasonDao: LeavingReasonDao
+    abstract fun leavingReasonDao(): LeavingReasonDao
 
-    abstract val contentEntryDao: ContentEntryDao
+    abstract fun contentEntryDao(): ContentEntryDao
 
-    abstract val contentEntryContentCategoryJoinDao: ContentEntryContentCategoryJoinDao
+    abstract fun contentEntryContentCategoryJoinDao(): ContentEntryContentCategoryJoinDao
 
-    abstract val contentEntryParentChildJoinDao: ContentEntryParentChildJoinDao
+    abstract fun contentEntryParentChildJoinDao(): ContentEntryParentChildJoinDao
 
-    abstract val contentEntryRelatedEntryJoinDao: ContentEntryRelatedEntryJoinDao
+    abstract fun contentEntryRelatedEntryJoinDao(): ContentEntryRelatedEntryJoinDao
 
-    abstract val contentCategorySchemaDao: ContentCategorySchemaDao
+    abstract fun contentCategorySchemaDao(): ContentCategorySchemaDao
 
-    abstract val contentCategoryDao: ContentCategoryDao
+    abstract fun contentCategoryDao(): ContentCategoryDao
 
-    abstract val languageDao: LanguageDao
+    abstract fun languageDao(): LanguageDao
 
-    abstract val languageVariantDao: LanguageVariantDao
+    abstract fun languageVariantDao(): LanguageVariantDao
 
-    abstract val personAuthDao: PersonAuthDao
+    abstract fun personAuthDao(): PersonAuthDao
 
-    abstract val personGroupDao: PersonGroupDao
+    abstract fun personGroupDao(): PersonGroupDao
 
-    abstract val personGroupMemberDao: PersonGroupMemberDao
+    abstract fun personGroupMemberDao(): PersonGroupMemberDao
 
-    abstract val personPictureDao: PersonPictureDao
+    abstract fun personPictureDao(): PersonPictureDao
 
-    abstract val verbDao: VerbDao
+    abstract fun verbDao(): VerbDao
 
-    abstract val activityEntityDao: ActivityEntityDao
+    abstract fun activityEntityDao(): ActivityEntityDao
 
-    abstract val reportDao: ReportDao
+    abstract fun reportDao(): ReportDao
 
-    abstract val statementDao: StatementDao
+    abstract fun statementDao(): StatementDao
 
-    abstract val actorDao: ActorDao
+    abstract fun actorDao(): ActorDao
 
-    abstract val clazzLogAttendanceRecordDao: ClazzLogAttendanceRecordDao
-    abstract val clazzLogDao: ClazzLogDao
+    abstract fun clazzLogAttendanceRecordDao(): ClazzLogAttendanceRecordDao
+    abstract fun clazzLogDao(): ClazzLogDao
 
-    abstract val scheduleDao: ScheduleDao
+    abstract fun scheduleDao(): ScheduleDao
 
-    abstract val holidayCalendarDao: HolidayCalendarDao
-    abstract val holidayDao: HolidayDao
+    abstract fun holidayCalendarDao(): HolidayCalendarDao
+    abstract fun holidayDao(): HolidayDao
 
-    abstract val clazzAssignmentDao: ClazzAssignmentDao
+    abstract fun clazzAssignmentDao(): ClazzAssignmentDao
 
-    abstract val courseAssignmentSubmissionDao: CourseAssignmentSubmissionDao
+    abstract fun courseAssignmentSubmissionDao(): CourseAssignmentSubmissionDao
 
-    abstract val courseAssignmentSubmissionFileDao: CourseAssignmentSubmissionFileDao
+    abstract fun courseAssignmentSubmissionFileDao(): CourseAssignmentSubmissionFileDao
 
-    abstract val courseAssignmentMarkDao: CourseAssignmentMarkDao
+    abstract fun courseAssignmentMarkDao(): CourseAssignmentMarkDao
 
-    abstract val commentsDao: CommentsDao
+    abstract fun commentsDao(): CommentsDao
 
-    abstract val syncNodeDao: SyncNodeDao
+    abstract fun syncNodeDao(): SyncNodeDao
 
-    abstract val siteDao: SiteDao
+    abstract fun siteDao(): SiteDao
 
-    abstract val siteTermsDao: SiteTermsDao
+    abstract fun siteTermsDao(): SiteTermsDao
 
-    abstract val personParentJoinDao: PersonParentJoinDao
+    abstract fun personParentJoinDao(): PersonParentJoinDao
 
-    abstract val scopedGrantDao: ScopedGrantDao
+    abstract fun scopedGrantDao(): ScopedGrantDao
 
-    abstract val errorReportDao: ErrorReportDao
+    abstract fun errorReportDao(): ErrorReportDao
 
-    abstract val personAuth2Dao: PersonAuth2Dao
+    abstract fun personAuth2Dao(): PersonAuth2Dao
 
-    abstract val userSessionDao: UserSessionDao
+    abstract fun userSessionDao(): UserSessionDao
 
-    abstract val contentEntryImportJobDao: ContentEntryImportJobDao
+    abstract fun contentEntryImportJobDao(): ContentEntryImportJobDao
 
-    abstract val coursePictureDao: CoursePictureDao
+    abstract fun coursePictureDao(): CoursePictureDao
 
-    abstract val contentEntryPictureDao: ContentEntryPictureDao
+    abstract fun contentEntryPictureDao(): ContentEntryPictureDao
 
-    abstract val messageDao: MessageDao
+    abstract fun messageDao(): MessageDao
 
-    abstract val peerReviewerAllocationDao: PeerReviewerAllocationDao
+    abstract fun peerReviewerAllocationDao(): PeerReviewerAllocationDao
 
-    abstract val discussionPostDao: DiscussionPostDao
+    abstract fun discussionPostDao(): DiscussionPostDao
 
-    abstract val externalAppPermissionDao: ExternalAppPermissionDao
+    abstract fun externalAppPermissionDao(): ExternalAppPermissionDao
 
-    abstract val contentEntryVersionDao: ContentEntryVersionDao
+    abstract fun contentEntryVersionDao(): ContentEntryVersionDao
 
-    abstract val outgoingReplicationDao: OutgoingReplicationDao
+    abstract fun outgoingReplicationDao(): OutgoingReplicationDao
 
-    abstract val transferJobDao: TransferJobDao
+    abstract fun transferJobDao(): TransferJobDao
 
-    abstract val transferJobItemDao: TransferJobItemDao
+    abstract fun transferJobItemDao(): TransferJobItemDao
 
-    abstract val cacheLockJoinDao: CacheLockJoinDao
+    abstract fun cacheLockJoinDao(): CacheLockJoinDao
 
-    abstract val offlineItemDao: OfflineItemDao
+    abstract fun offlineItemDao(): OfflineItemDao
 
-    abstract val deletedItemDao: DeletedItemDao
+    abstract fun deletedItemDao(): DeletedItemDao
 
-    abstract val enrolmentRequestDao: EnrolmentRequestDao
+    abstract fun enrolmentRequestDao(): EnrolmentRequestDao
 
-    abstract val coursePermissionDao: CoursePermissionDao
+    abstract fun coursePermissionDao(): CoursePermissionDao
 
-    abstract val systemPermissionDao: SystemPermissionDao
+    abstract fun systemPermissionDao(): SystemPermissionDao
 
-    abstract val courseBlockPictureDao: CourseBlockPictureDao
+    abstract fun courseBlockPictureDao(): CourseBlockPictureDao
 
-    abstract val contentEntryPicture2Dao: ContentEntryPicture2Dao
+    abstract fun contentEntryPicture2Dao(): ContentEntryPicture2Dao
 
-    abstract val transferJobErrorDao: TransferJobErrorDao
+    abstract fun transferJobErrorDao(): TransferJobErrorDao
 
-    abstract val studentResultDao: StudentResultDao
+    abstract fun studentResultDao(): StudentResultDao
 
-    abstract val verbLangMapEntryDao: VerbLangMapEntryDao
+    abstract fun verbLangMapEntryDao(): VerbLangMapEntryDao
 
-    abstract val groupMemberActorJoinDao: GroupMemberActorJoinDao
+    abstract fun groupMemberActorJoinDao(): GroupMemberActorJoinDao
 
-    abstract val activityLangMapEntryDao: ActivityLangMapEntryDao
+    abstract fun activityLangMapEntryDao(): ActivityLangMapEntryDao
 
-    abstract val activityInteractionDao: ActivityInteractionDao
+    abstract fun activityInteractionDao(): ActivityInteractionDao
 
-    abstract val activityExtensionDao: ActivityExtensionDao
+    abstract fun activityExtensionDao(): ActivityExtensionDao
 
-    abstract val statementContextActivityJoinDao: StatementContextActivityJoinDao
+    abstract fun statementContextActivityJoinDao(): StatementContextActivityJoinDao
 
-    abstract val xapiSessionEntityDao: XapiSessionEntityDao
+    abstract fun xapiSessionEntityDao(): XapiSessionEntityDao
 
-    abstract val statementEntityJsonDao: StatementEntityJsonDao
+    abstract fun statementEntityJsonDao(): StatementEntityJsonDao
 
 }

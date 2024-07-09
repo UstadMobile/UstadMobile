@@ -192,7 +192,7 @@ class ClazzAssignmentEditViewModel(
             launch {
                 //If there are submissions, do not allow the user to change the groups
                 _uiState.whenSubscribed {
-                    activeDb.courseAssignmentSubmissionDao.checkNoSubmissionsMadeFlow(
+                    activeDb.courseAssignmentSubmissionDao().checkNoSubmissionsMadeFlow(
                         _uiState.value.entity?.assignment?.caUid ?: 0
                     ).collect { noSubmissions ->
                         if(!noSubmissions && _uiState.value.groupSetEnabled) {
@@ -409,7 +409,7 @@ class ClazzAssignmentEditViewModel(
 
 
     private suspend fun checkNoSubmissionsMade() : Boolean{
-        return activeDb.courseAssignmentSubmissionDao.checkNoSubmissionsMadeAsync(
+        return activeDb.courseAssignmentSubmissionDao().checkNoSubmissionsMadeAsync(
             _uiState.value.entity?.assignment?.caUid ?: 0L
         )
     }

@@ -218,7 +218,7 @@ class EpubContentImporterCommonJvmTest : AbstractContentImporterTest() {
                     .toString()
             )
 
-            val uid = db.contentEntryDao.insert(ContentEntry().apply{
+            val uid = db.contentEntryDao().insert(ContentEntry().apply{
                 title = "hello"
             })
             val contentEntryChildUid = 42L

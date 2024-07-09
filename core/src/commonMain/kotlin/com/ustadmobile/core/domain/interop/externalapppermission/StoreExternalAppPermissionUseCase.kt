@@ -24,7 +24,7 @@ class StoreExternalAppPermissionUseCase(
         )
 
         return permission.copy(
-            eapUid = db.externalAppPermissionDao.insertAsync(permission).toInt()
+            eapUid = db.externalAppPermissionDao().insertAsync(permission).toInt()
         )
     }
 

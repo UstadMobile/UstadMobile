@@ -75,7 +75,7 @@ fun main(args: Array<String>) {
 
 
     val db: UmAppDatabase = di.direct.on(endpoint).instance(tag = DoorTag.TAG_DB)
-    val person = db.personDao.findByUsername(ns.getString("username"))
+    val person = db.personDao().findByUsername(ns.getString("username"))
 
     if(person != null) {
         val authManager: AuthManager = di.direct.on(endpoint).instance()

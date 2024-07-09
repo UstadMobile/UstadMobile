@@ -152,7 +152,7 @@ class UstadAccountManager(
 //            //Previous versions might not save this properly in settings
 //            //Added 7/Jul/24. Should be removed aug-sept.
 //            if(initUserSession.person.let { it.firstNames == null || it.lastName == null }) {
-//                val initSessionPerson = currentDb.personDao.findByUidAsync(
+//                val initSessionPerson = currentDb.personDao().findByUidAsync(
 //                    initUserSession.person.personUid)
 //                if(initSessionPerson?.firstNames != null && initSessionPerson.lastName != null) {
 //                    _currentUserSession.update { prev ->
@@ -167,7 +167,7 @@ class UstadAccountManager(
                         scope.launch {
                             val endpointDb: UmAppDatabase = di.on(endpoint).direct
                                 .instance(tag = DoorTag.TAG_DB)
-                            endpointDb.userSessionDao.findAllLocalSessionsLive().collect { endpointSessions ->
+                            endpointDb.userSessionDao().findAllLocalSessionsLive().collect { endpointSessions ->
                                 _activeUserSessions.update { prev ->
                                     prev.filter {
                                         it.endpoint != endpoint
@@ -198,7 +198,7 @@ class UstadAccountManager(
             _currentUserSession.whenSubscribed {
                 _currentUserSession.collectLatest { session ->
                     val endpointDb: UmAppDatabase = di.on(session.endpoint).direct.instance(tag = DoorTag.TAG_DB)
-                    endpointDb.personDao.findByUidWithPictureAsFlow(
+                    endpointDb.personDao().findByUidWithPictureAsFlow(
                         session.userSession.usPersonUid
                     ).collect { personAndPictureFromDb ->
                         val nameChanged = personAndPictureFromDb?.person?.fullName() != session.person.fullName()
@@ -253,7 +253,7 @@ class UstadAccountManager(
             endpoint = Endpoint(endpointUrl),
         ).also {
             scope.launch {
-                currentDb.userSessionDao.insertSession(it.userSession)
+                currentDb.userSessionDao().insertSession(it.userSession)
             }
         }
     }
@@ -271,7 +271,7 @@ class UstadAccountManager(
     ): List<UserSessionWithPersonAndEndpoint> {
         return _endpointsWithActiveSessions.value.filter { endpointFilter.filterEndpoint(it.url) }.flatMap { endpoint ->
             val db: UmAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
-            db.userSessionDao.findAllLocalSessionsAsync().map { userSession ->
+            db.userSessionDao().findAllLocalSessionsAsync().map { userSession ->
                 userSession.withEndpoint(endpoint)
             }
         }
@@ -286,7 +286,7 @@ class UstadAccountManager(
     ): Int {
         return _endpointsWithActiveSessions.value.filter { endpointFilter.filterEndpoint(it.url) }.fold(0) { total, endpoint ->
             val db: UmAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
-            total + db.userSessionDao.countAllLocalSessionsAsync(maxDateOfBirth)
+            total + db.userSessionDao().countAllLocalSessionsAsync(maxDateOfBirth)
         }
     }
 
@@ -334,8 +334,8 @@ class UstadAccountManager(
             //If the person is not loaded into the database (probably not), then put in the db.
             val db: UmAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
             db.withDoorTransactionAsync {
-                if(db.personDao.findByUidAsync(registeredPerson.personUid) == null) {
-                    db.personDao.insertAsync(registeredPerson)
+                if(db.personDao().findByUidAsync(registeredPerson.personUid) == null) {
+                    db.personDao().insertAsync(registeredPerson)
                 }
             }
 
@@ -380,9 +380,9 @@ class UstadAccountManager(
                 usSessionType = UserSession.TYPE_STANDARD
                 usStatus = UserSession.STATUS_ACTIVE
                 usAuth = password?.let { authManager.encryptPbkdf2(it).toHexString() }
-                usUid = endpointRepo.userSessionDao.insertSession(this)
+                usUid = endpointRepo.userSessionDao().insertSession(this)
             }
-            val personPicture = endpointDb.personPictureDao.findByPersonUidAsync(
+            val personPicture = endpointDb.personPictureDao().findByPersonUidAsync(
                 person.personUid)
             userSession to personPicture
         }
@@ -438,7 +438,7 @@ class UstadAccountManager(
     ) {
         val endpointRepo: UmAppDatabase = di.on(session.endpoint)
             .direct.instance(tag = DoorTag.TAG_REPO)
-        endpointRepo.userSessionDao.endSession(
+        endpointRepo.userSessionDao().endSession(
             sessionUid = session.userSession.usUid,
             newStatus = endStatus,
             reason = endReason,
@@ -498,7 +498,7 @@ class UstadAccountManager(
         responseAccount.endpointUrl = endpointUrl
 
         //Make sure that we fetch the person and personpicture into the database.
-        val personAndPicture = repo.personDao.findByUidWithPicture(
+        val personAndPicture = repo.personDao().findByUidWithPicture(
             responseAccount.personUid) ?: throw IllegalStateException("Cannot find person in repo/db")
         val personInDb = personAndPicture.person!! //Cannot be null based on query
 
@@ -517,9 +517,9 @@ class UstadAccountManager(
         repo: UmAppDatabase
     ) {
         val db = (repo as DoorDatabaseRepository).db as UmAppDatabase
-        val siteInDb = db.siteDao.getSiteAsync()
+        val siteInDb = db.siteDao().getSiteAsync()
         if(siteInDb == null) {
-            repo.siteDao.getSiteAsync() ?: throw IllegalStateException("Internal error: no Site in database and could not fetch it from server")
+            repo.siteDao().getSiteAsync() ?: throw IllegalStateException("Internal error: no Site in database and could not fetch it from server")
         }
     }
 

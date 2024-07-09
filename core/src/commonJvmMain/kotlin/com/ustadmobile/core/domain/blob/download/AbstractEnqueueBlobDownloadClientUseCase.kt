@@ -18,7 +18,7 @@ abstract class AbstractEnqueueBlobDownloadClientUseCase(
     ): TransferJob {
         return db.withDoorTransactionAsync {
             val transferJob = if(existingTransferJobId != 0) {
-                db.transferJobDao.findByUid(existingTransferJobId)
+                db.transferJobDao().findByUid(existingTransferJobId)
                     ?: throw IllegalArgumentException("Transfer job does not exist")
             }else {
                 val newJob = TransferJob(
@@ -26,7 +26,7 @@ abstract class AbstractEnqueueBlobDownloadClientUseCase(
                     tjType = TransferJob.TYPE_DOWNLOAD,
                     tjTimeCreated = systemTimeInMillis(),
                 )
-                newJob.copy(tjUid = db.transferJobDao.insert(newJob).toInt())
+                newJob.copy(tjUid = db.transferJobDao().insert(newJob).toInt())
             }
             val transferJobItems = items.map { item ->
                 TransferJobItem(
@@ -40,7 +40,7 @@ abstract class AbstractEnqueueBlobDownloadClientUseCase(
                     tjiPartialTmpFile = item.partialTmpFile,
                 )
             }
-            db.transferJobItemDao.insertList(transferJobItems)
+            db.transferJobItemDao().insertList(transferJobItems)
             transferJob
         }
     }

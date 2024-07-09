@@ -6,8 +6,8 @@ import com.ustadmobile.core.db.dao.initPreloadedLeavingReasons
 import com.ustadmobile.core.db.dao.initPreloadedTemplates
 
 suspend fun UmAppDatabase.preload() {
-    reportDao.initPreloadedTemplates()
-    leavingReasonDao.initPreloadedLeavingReasons()
-    languageDao.initPreloadedLanguages()
+    reportDao().initPreloadedTemplates()
+    leavingReasonDao().initPreloadedLeavingReasons()
+    languageDao().initPreloadedLanguages()
 
 }

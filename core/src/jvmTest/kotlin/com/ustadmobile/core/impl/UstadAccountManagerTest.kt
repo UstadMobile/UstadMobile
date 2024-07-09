@@ -231,7 +231,7 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
 
 
         repo = di.on(Endpoint(mockServerUrl)).direct.instance(tag = DoorTag.TAG_REPO)
-        repo.siteDao.insert(Site().apply {
+        repo.siteDao().insert(Site().apply {
             siteUid = 10042
             siteLct = systemTimeInMillis()
             authSalt = randomString(20)
@@ -327,7 +327,7 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
 
         val savedSession = runBlocking {
             savedPerson.createTestUserSession(repo).apply {
-                usUid = repo.userSessionDao.insertSession(this)
+                usUid = repo.userSessionDao().insertSession(this)
             }
         }
 
@@ -453,8 +453,8 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
         val joePersonSession = joePerson.createTestUserSession(repo)
 
         runBlocking {
-            bobPersonSession.usUid = repo.userSessionDao.insertSession(bobPersonSession)
-            joePersonSession.usUid = repo.userSessionDao.insertSession(joePersonSession)
+            bobPersonSession.usUid = repo.userSessionDao().insertSession(bobPersonSession)
+            joePersonSession.usUid = repo.userSessionDao().insertSession(joePersonSession)
         }
 
         val activeUserSession = UserSessionWithPersonAndEndpoint(bobPersonSession, bobPerson,
@@ -531,7 +531,7 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
         Assert.assertEquals("Got expected register request", "mary",
             registerRequest.person.username)
         runBlocking {
-            assertNotNull(db.personDao.findByUsernameAsync(registerRequest.person.username ?: ""))
+            assertNotNull(db.personDao().findByUsernameAsync(registerRequest.person.username ?: ""))
         }
 
     }

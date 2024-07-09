@@ -92,11 +92,11 @@ class XapiStatementResource(
         }
 
         repoOrDb.withDoorTransactionAsync {
-            repoOrDb.statementDao.insertOrIgnoreListAsync(
+            repoOrDb.statementDao().insertOrIgnoreListAsync(
                 statementEntities.mapNotNull { it.statementEntity }
             )
 
-            repoOrDb.statementEntityJsonDao.insertOrIgnoreListAsync(
+            repoOrDb.statementEntityJsonDao().insertOrIgnoreListAsync(
                 statementEntities.mapNotNull { it.statementEntityJson }
             )
 
@@ -107,13 +107,13 @@ class XapiStatementResource(
                 ?.also { agents ->
                     //Name is the only property that could be updated on the Agent. All other
                     //properties are identifiers
-                    repoOrDb.actorDao.insertOrUpdateActorsIfNameChanged(agents)
+                    repoOrDb.actorDao().insertOrUpdateActorsIfNameChanged(agents)
                 }
 
             val groupEntities = actorEntities.map { it.actor }
                 .filter { it.actorObjectType == XapiEntityObjectTypeFlags.GROUP }
 
-            val existingGroupActorHashes = db.actorDao.findUidAndEtagByListAsync(
+            val existingGroupActorHashes = db.actorDao().findUidAndEtagByListAsync(
                 groupEntities.map { it.actorUid }
             )
 
@@ -146,7 +146,7 @@ class XapiStatementResource(
                 }
 
                 //Just in case we don't have the actor entity locally, run insert or ignore
-                repoOrDb.actorDao.insertOrUpdateActorsIfNameChanged(groupMemberActors)
+                repoOrDb.actorDao().insertOrUpdateActorsIfNameChanged(groupMemberActors)
 
                 if(!groupIsNewOrUpdated && existingEtagAndLct != null) {
                     //Run only insert or ignore statements for GroupMemberJoin. Set the last mod
@@ -154,7 +154,7 @@ class XapiStatementResource(
 
                     //Do not update the ActorEntity for the group itself - it hasn't changed.
 
-                    repoOrDb.groupMemberActorJoinDao.insertOrUpdateIfLastModChanged(
+                    repoOrDb.groupMemberActorJoinDao().insertOrUpdateIfLastModChanged(
                         memberJoins = groupMemberJoins.map {
                             it.copy(gmajLastMod = existingEtagAndLct.actorLct)
                         },
@@ -162,16 +162,16 @@ class XapiStatementResource(
                     )
                 }else {
                     //Group is new or has been updated.
-                    repoOrDb.actorDao.upsertListAsync(listOf(groupActorEntity))
-                    repoOrDb.groupMemberActorJoinDao.upsertListAsync(groupMemberJoins)
+                    repoOrDb.actorDao().upsertListAsync(listOf(groupActorEntity))
+                    repoOrDb.groupMemberActorJoinDao().upsertListAsync(groupMemberJoins)
                 }
             }
 
-            repoOrDb.verbDao.insertOrIgnoreAsync(
+            repoOrDb.verbDao().insertOrIgnoreAsync(
                 statementEntities.mapNotNull { it.verbEntities?.verbEntity }
             )
 
-            repoOrDb.verbLangMapEntryDao.upsertList(
+            repoOrDb.verbLangMapEntryDao().upsertList(
                 statementEntities.flatMap { it.verbEntities?.verbLangMapEntries ?: emptyList() }
             )
 
@@ -227,7 +227,7 @@ class XapiStatementResource(
             Pair(0L, 0L)
         }
 
-        val statements = repoOrDb.statementEntityJsonDao.getStatements(
+        val statements = repoOrDb.statementEntityJsonDao().getStatements(
             stmtJsonIdHi = statementIdHi,
             stmtJsonIdLo = statementIdLo,
         )

@@ -159,7 +159,7 @@ class ContentEntryDetailOverviewViewModel(
         viewModelScope.launch {
             _uiState.whenSubscribed {
                 launch {
-                    activeRepo.contentEntryDao.findByContentEntryUidWithDetailsAsFlow(
+                    activeRepo.contentEntryDao().findByContentEntryUidWithDetailsAsFlow(
                         contentEntryUid = entityUidArg,
                         clazzUid = clazzUid,
                         courseBlockUid = savedStateHandle[ARG_COURSE_BLOCK_UID]?.toLong() ?: 0,
@@ -179,7 +179,7 @@ class ContentEntryDetailOverviewViewModel(
                             systemImpl.getString(MR.strings.library)
                         }else {
                             activeRepo.localFirstThenRepoIfNull { db ->
-                                db.contentEntryDao.findTitleByUidAsync(parentEntryUid)
+                                db.contentEntryDao().findTitleByUidAsync(parentEntryUid)
                             }
                         }
 
@@ -192,7 +192,7 @@ class ContentEntryDetailOverviewViewModel(
                 }
 
                 launch {
-                    activeRepo.contentEntryVersionDao.findLatestByContentEntryUidAsFlow(
+                    activeRepo.contentEntryVersionDao().findLatestByContentEntryUidAsFlow(
                         contentEntryUid = entityUidArg
                     ).collect{
                         _uiState.update { prev ->
@@ -204,7 +204,7 @@ class ContentEntryDetailOverviewViewModel(
                 }
 
                 launch {
-                    activeDb.transferJobDao.findByContentEntryUidWithTotalsAsFlow(
+                    activeDb.transferJobDao().findByContentEntryUidWithTotalsAsFlow(
                         contentEntryUid = entityUidArg,
                         jobType = TransferJob.TYPE_BLOB_UPLOAD,
                     ).collect {
@@ -217,7 +217,7 @@ class ContentEntryDetailOverviewViewModel(
                 }
 
                 launch {
-                    activeDb.contentEntryImportJobDao.findInProgressJobsByContentEntryUid(
+                    activeDb.contentEntryImportJobDao().findInProgressJobsByContentEntryUid(
                         contentEntryUid = entityUidArg
                     ).collect {
                         _uiState.update { prev ->
@@ -229,7 +229,7 @@ class ContentEntryDetailOverviewViewModel(
                 }
 
                 launch {
-                    activeDb.offlineItemDao.findByContentEntryUid(
+                    activeDb.offlineItemDao().findByContentEntryUid(
                         contentEntryUid = entityUidArg,
                         nodeId = nodeIdAndAuth.nodeId
                     ).collect {
@@ -295,7 +295,7 @@ class ContentEntryDetailOverviewViewModel(
                 //remove CacheLockJoin(s) status to pending deletion so cache content becomes
                 // eligible for eviction as required.
                 offlineItemAndStateVal.readyForOffline -> {
-                    activeRepo.offlineItemDao.updateActiveByOfflineItemUid(offlineItemVal.oiUid, false)
+                    activeRepo.offlineItemDao().updateActiveByOfflineItemUid(offlineItemVal.oiUid, false)
                 }
             }
         }
@@ -309,7 +309,7 @@ class ContentEntryDetailOverviewViewModel(
                 Napier.d("ContentEntryDetailOverviewViewModel: onClickOpen launched")
                 _uiState.update { it.copy(openButtonEnabled = false) }
                 val latestContentEntryVersion = activeRepo.localFirstThenRepoIfNull {
-                    it.contentEntryVersionDao.findLatestVersionUidByContentEntryUidEntity(entityUidArg)
+                    it.contentEntryVersionDao().findLatestVersionUidByContentEntryUidEntity(entityUidArg)
                 }
 
                 val openTarget = target?.let {
@@ -365,7 +365,7 @@ class ContentEntryDetailOverviewViewModel(
 
     fun onDismissImportError(jobUid: Long) {
         viewModelScope.launch {
-            activeDb.contentEntryImportJobDao.updateErrorDismissed(jobUid, true)
+            activeDb.contentEntryImportJobDao().updateErrorDismissed(jobUid, true)
         }
     }
 
@@ -383,7 +383,7 @@ class ContentEntryDetailOverviewViewModel(
 
     fun onDismissUploadError(jobUid: Int) {
         viewModelScope.launch {
-            activeDb.transferJobErrorDao.dismissErrorByJobId(jobUid, true)
+            activeDb.transferJobErrorDao().dismissErrorByJobId(jobUid, true)
         }
     }
 

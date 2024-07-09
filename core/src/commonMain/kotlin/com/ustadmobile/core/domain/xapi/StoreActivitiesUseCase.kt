@@ -37,7 +37,7 @@ class StoreActivitiesUseCase(
                     actLct = timeNow
                 )
             }
-            dbOrRepo.activityEntityDao.insertOrIgnoreAsync(activities)
+            dbOrRepo.activityEntityDao().insertOrIgnoreAsync(activities)
 
             /**
              * A statement might have an object where the objectType is activity and it only includes
@@ -47,7 +47,7 @@ class StoreActivitiesUseCase(
              * An LRS SHOULD NOT make significant changes to its canonical definition for the Activity based on an updated definition e.g. changes to correct responses.
              */
             activities.filter { !it.isIdOnly }.forEach {
-                dbOrRepo.activityEntityDao.updateIfMoreInfoChanged(
+                dbOrRepo.activityEntityDao().updateIfMoreInfoChanged(
                     activityUid = it.actUid,
                     actMoreInfo = it.actMoreInfo,
                     actLct = timeNow
@@ -59,7 +59,7 @@ class StoreActivitiesUseCase(
                  * id was present. If that is the case, then we should now record the
                  * canonical definition.
                  */
-                dbOrRepo.activityEntityDao.updateIfNotYetDefined(
+                dbOrRepo.activityEntityDao().updateIfNotYetDefined(
                     actUid = it.actUid,
                     actType = it.actType,
                     actMoreInfo = it.actMoreInfo,
@@ -79,12 +79,12 @@ class StoreActivitiesUseCase(
             val activityInteractionEntities = activityEntities.flatMap {
                 it.activityInteractionEntities
             }
-            val activityUidsWithExistingInteractions = db.activityInteractionDao
+            val activityUidsWithExistingInteractions = db.activityInteractionDao()
                 .findActivityUidsWithInteractionEntitiesAsync(
                     activityUids = activityInteractionEntities.map { it.aieActivityUid }.distinct().toList()
                 ).toSet()
 
-            dbOrRepo.activityInteractionDao.insertOrIgnoreAsync(
+            dbOrRepo.activityInteractionDao().insertOrIgnoreAsync(
                 entities = activityInteractionEntities.filter {
                     it.aieActivityUid !in activityUidsWithExistingInteractions
                 }
@@ -103,9 +103,9 @@ class StoreActivitiesUseCase(
                     it.almeAieHash == 0L
                 }
 
-            dbOrRepo.activityLangMapEntryDao.upsertList(nameAndDescriptionLangMapEntities)
+            dbOrRepo.activityLangMapEntryDao().upsertList(nameAndDescriptionLangMapEntities)
             interactionLangMapEntities.forEach {
-                dbOrRepo.activityLangMapEntryDao.upsertIfInteractionEntityExists(
+                dbOrRepo.activityLangMapEntryDao().upsertIfInteractionEntityExists(
                     almeActivityUid = it.almeActivityUid,
                     almeAieHash = it.almeAieHash,
                     almeValue = it.almeValue,
@@ -116,7 +116,7 @@ class StoreActivitiesUseCase(
             }
 
             allLangMapEntries.forEach {
-                dbOrRepo.activityLangMapEntryDao.updateIfChanged(
+                dbOrRepo.activityLangMapEntryDao().updateIfChanged(
                     almeActivityUid = it.almeActivityUid,
                     almeHash = it.almeHash,
                     almeValue = it.almeValue,
@@ -124,14 +124,14 @@ class StoreActivitiesUseCase(
                 )
             }
 
-            dbOrRepo.activityExtensionDao.upsertListAsync(
+            dbOrRepo.activityExtensionDao().upsertListAsync(
                 activityEntities.flatMap { it.activityExtensionEntities }
             )
 
             activityEntities.mapNotNull { it.statementContextActivityJoin }
                 .takeIf { it.isNotEmpty() }
                 ?.also {
-                    dbOrRepo.statementContextActivityJoinDao.insertOrIgnoreListAsync(it)
+                    dbOrRepo.statementContextActivityJoinDao().insertOrIgnoreListAsync(it)
                 }
 
         }

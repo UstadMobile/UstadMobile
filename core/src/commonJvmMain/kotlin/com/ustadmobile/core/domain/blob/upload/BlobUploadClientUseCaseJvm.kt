@@ -258,9 +258,9 @@ class BlobUploadClientUseCaseJvm(
         transferJobUid: Int,
     ) {
         val logPrefix = "BlobUploadClientUseCaseJvm (#$transferJobUid):"
-        val transferJob = db.transferJobDao.findByUid(transferJobUid)
+        val transferJob = db.transferJobDao().findByUid(transferJobUid)
             ?: throw IllegalArgumentException("$logPrefix: TransferJob #$transferJobUid does not exist")
-        val transferJobItems = db.transferJobItemDao.findByJobUid(transferJobUid)
+        val transferJobItems = db.transferJobItemDao().findByJobUid(transferJobUid)
         val batchUuid = transferJob.tjUuid
             ?: throw IllegalArgumentException("$logPrefix TransferJob has no uuid")
 
@@ -298,7 +298,7 @@ class BlobUploadClientUseCaseJvm(
                 val numIncompleteItems = db.withDoorTransactionAsync {
                     transferJobItemStatusUpdater.commit(transferJobUid)
                     transferJobItemStatusUpdater.onFinished()
-                    db.transferJobItemDao.findNumberJobItemsNotComplete(transferJobUid)
+                    db.transferJobItemDao().findNumberJobItemsNotComplete(transferJobUid)
                 }
 
                 if(numIncompleteItems != 0) {
@@ -312,7 +312,7 @@ class BlobUploadClientUseCaseJvm(
 
                 withContext(NonCancellable) {
                     transferJobItemStatusUpdater.onFinished()
-                    db.transferJobErrorDao.insertAsync(
+                    db.transferJobErrorDao().insertAsync(
                         TransferJobError(
                             tjeTime = systemTimeInMillis(),
                             tjeErrorStr = e.message ?: e::class.java.name,

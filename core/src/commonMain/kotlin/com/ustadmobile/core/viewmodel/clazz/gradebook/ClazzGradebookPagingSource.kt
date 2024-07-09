@@ -60,7 +60,7 @@ class ClazzGradebookPagingSource(
 
         val studentListResult = studentListPagingSource.load(params)
 
-        val blockResults = db.statementDao.findStatusForStudentsInClazz(
+        val blockResults = db.statementDao().findStatusForStudentsInClazz(
             clazzUid = clazzUid,
             studentPersonUids = (studentListResult as? PagingSourceLoadResultPage<Int, PersonAndClazzMemberListDetails>)
                 ?.data?.mapNotNull { it.person?.personUid } ?: emptyList()

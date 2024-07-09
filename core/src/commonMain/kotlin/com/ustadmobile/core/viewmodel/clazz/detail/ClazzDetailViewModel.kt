@@ -86,7 +86,7 @@ class ClazzDetailViewModel(
         viewModelScope.launch {
             _uiState.whenSubscribed {
                 launch {
-                    activeDb.clazzDao.clazzAndDetailPermissionsAsFlow(
+                    activeDb.clazzDao().clazzAndDetailPermissionsAsFlow(
                         accountPersonUid = activeUserPersonUid,
                         clazzUid = entityUidArg
                     ).collect {

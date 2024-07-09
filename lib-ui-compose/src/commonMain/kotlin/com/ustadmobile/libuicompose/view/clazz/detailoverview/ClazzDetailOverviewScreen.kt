@@ -21,7 +21,6 @@ import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
@@ -174,16 +173,6 @@ fun ClazzDetailOverviewScreen(
                     leadingContent = {
                         Icon(Icons.AutoMirrored.Filled.Login, contentDescription = null)
                     },
-                )
-            }
-        }
-
-        if (uiState.clazzSchoolUidVisible){
-            item(key = "schoolname") {
-                UstadDetailField2(
-                    valueText = uiState.clazz?.clazzSchool?.schoolName ?: "",
-                    labelText = "",
-                    icon = Icons.Filled.School
                 )
             }
         }

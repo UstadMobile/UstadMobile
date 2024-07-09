@@ -170,7 +170,7 @@ class EpubContentViewModel(
             val (cevManifestUrl, cevOpenUri) = if(argManifestUrl != null && argCevOpenUri != null) {
                 argManifestUrl to argCevOpenUri
             }else {
-                val contentEntryVersion = activeRepo.contentEntryVersionDao
+                val contentEntryVersion = activeRepo.contentEntryVersionDao()
                     .findByUidAsync(entityUidArg) ?: return@launch
                 val entityCevManifestUrl = contentEntryVersion.cevManifestUrl ?: return@launch
                 val entityCevOpenUri = contentEntryVersion.cevOpenUri ?: return@launch

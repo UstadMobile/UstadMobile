@@ -61,7 +61,7 @@ class CourseGroupSetEditViewModel(
 
         launchIfHasPermission(
             permissionCheck = {db ->
-                db.coursePermissionDao.personHasPermissionWithClazzAsync2(
+                db.coursePermissionDao().personHasPermissionWithClazzAsync2(
                     activeUserPersonUid, clazzUidArg, PermissionFlags.COURSE_MANAGE_STUDENT_ENROLMENT,
                 )
             }
@@ -77,7 +77,7 @@ class CourseGroupSetEditViewModel(
                         serializer = ListSerializer(CourseGroupMemberAndName.serializer()),
                         loadFromStateKeys = listOf(KEY_COURSEGROUPMEMBERS),
                         onLoadFromDb = { db ->
-                            db.courseGroupMemberDao.findByCourseGroupSetAndClazz(
+                            db.courseGroupMemberDao().findByCourseGroupSetAndClazz(
                                 cgsUid = entityUidArg,
                                 clazzUid = clazzUidArg,
                                 time = systemTimeInMillis(),
@@ -120,7 +120,7 @@ class CourseGroupSetEditViewModel(
                     loadEntity(
                         serializer = CourseGroupSet.serializer(),
                         onLoadFromDb = {db ->
-                            db.takeIf { entityUidArg != 0L }?.courseGroupSetDao?.findByUidAsync(
+                            db.takeIf { entityUidArg != 0L }?.courseGroupSetDao()?.findByUidAsync(
                                 uid = entityUidArg
                             )
                         },
@@ -271,8 +271,8 @@ class CourseGroupSetEditViewModel(
 
         viewModelScope.launch {
             activeRepo.withDoorTransactionAsync {
-                activeRepo.courseGroupSetDao.upsertAsync(courseGroupSet)
-                activeRepo.courseGroupMemberDao.upsertListAsync(membersToSave)
+                activeRepo.courseGroupSetDao().upsertAsync(courseGroupSet)
+                activeRepo.courseGroupMemberDao().upsertListAsync(membersToSave)
             }
 
             finishWithResult(

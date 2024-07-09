@@ -99,7 +99,7 @@ class VideoContentViewModel(
         }
 
         viewModelScope.launch {
-            val contentEntryVersion = activeRepo.contentEntryVersionDao
+            val contentEntryVersion = activeRepo.contentEntryVersionDao()
                 .findByUidAsync(entityUidArg) ?: return@launch
 
             launch {
@@ -133,7 +133,7 @@ class VideoContentViewModel(
             }
 
             launch {
-                val contentEntry = activeRepo.contentEntryDao.findByUidAsync(
+                val contentEntry = activeRepo.contentEntryDao().findByUidAsync(
                     contentEntryVersion.cevContentEntryUid)
                 _uiState.update { prev ->
                     prev.copy(contentEntry = contentEntry)

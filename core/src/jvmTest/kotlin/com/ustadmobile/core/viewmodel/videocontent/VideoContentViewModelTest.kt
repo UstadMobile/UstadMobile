@@ -105,7 +105,7 @@ class VideoContentViewModelTest {
                 cevManifestUrl = mockWebServer.url("/$cevUid/${ContentConstants.MANIFEST_NAME}").toString(),
                 cevOpenUri = "mediainfo.json",
             )
-            activeDb.contentEntryVersionDao.insertAsync(contentEntryVersion)
+            activeDb.contentEntryVersionDao().insertAsync(contentEntryVersion)
 
             val contentManifest = ContentManifest(
                 version = 1,

@@ -152,7 +152,7 @@ class DbPreMigrateAndroid(
                     val db = Room.databaseBuilder(context, UmAppDatabase::class.java, name)
                         .addMigrations(migration)
                         .build()
-                    db.personDao.findByUidAsync(0)
+                    db.personDao().findByUidAsync(0)
                     db.close()
                     Log.i("PreMigrate", "Pre-migrated db $name")
                 }catch(e: Exception) {

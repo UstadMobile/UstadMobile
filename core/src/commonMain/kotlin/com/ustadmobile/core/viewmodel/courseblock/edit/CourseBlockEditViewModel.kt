@@ -153,7 +153,7 @@ class CourseBlockEditViewModel(
                     }
 
                     contentEntryVal.contentOwnerType == ContentEntry.OWNER_TYPE_COURSE -> {
-                        activeRepo.coursePermissionDao.personHasPermissionWithClazzAsync2(
+                        activeRepo.coursePermissionDao().personHasPermissionWithClazzAsync2(
                             accountPersonUid = activeUserPersonUid,
                             clazzUid = contentEntryVal.contentOwner,
                             permission = PermissionFlags.COURSE_EDIT

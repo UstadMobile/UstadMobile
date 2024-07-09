@@ -53,7 +53,7 @@ class PdfContentViewModel(
         }
 
         viewModelScope.launch {
-            val contentEntryVersion = activeRepo.contentEntryVersionDao
+            val contentEntryVersion = activeRepo.contentEntryVersionDao()
                 .findByUidAsync(entityUidArg) ?: return@launch
             val manifestUrl = contentEntryVersion.cevManifestUrl!!
             val manifest: ContentManifest = json.decodeFromString(
@@ -71,7 +71,7 @@ class PdfContentViewModel(
                 )
             }
 
-            val contentEntry = activeRepo.contentEntryDao.findByUidAsync(
+            val contentEntry = activeRepo.contentEntryDao().findByUidAsync(
                 contentEntryVersion.cevContentEntryUid
             )
             _appUiState.update { prev ->

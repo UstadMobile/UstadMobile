@@ -46,11 +46,11 @@ class ClazzAssignmentIntegrationTest: AbstractMainDispatcherTest() {
             val assignmentUid = serverDb.withDoorTransactionAsync {
                 CreateNewClazzUseCase(serverDb).invoke(testCourse)
 
-                val clazzAssignmentUid = serverDb.clazzAssignmentDao.insertAsync(ClazzAssignment().apply {
+                val clazzAssignmentUid = serverDb.clazzAssignmentDao().insertAsync(ClazzAssignment().apply {
                     caClazzUid = testCourse.clazzUid
                 })
 
-                serverDb.courseBlockDao.insertAsync(CourseBlock().apply {
+                serverDb.courseBlockDao().insertAsync(CourseBlock().apply {
                     cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
                     cbEntityUid = clazzAssignmentUid
                     cbMinPoints = 0f
@@ -117,7 +117,7 @@ class ClazzAssignmentIntegrationTest: AbstractMainDispatcherTest() {
             }
 
             //Server receives submission
-            serverDb.courseAssignmentSubmissionDao.getAllSubmissionsFromSubmitterAsFlow(
+            serverDb.courseAssignmentSubmissionDao().getAllSubmissionsFromSubmitterAsFlow(
                 submitterUid = studentPerson.personUid,
                 assignmentUid = assignmentUid
             ).assertItemReceived(timeout = 5.seconds, name = "submission received by server") {
@@ -163,7 +163,7 @@ class ClazzAssignmentIntegrationTest: AbstractMainDispatcherTest() {
             }
 
             //Wait for the mark to reach the server
-            serverDb.courseAssignmentMarkDao.getAllMarksForUserAsFlow(
+            serverDb.courseAssignmentMarkDao().getAllMarksForUserAsFlow(
                 studentPerson.personUid, assignmentUid
             ).assertItemReceived(timeout = 5.seconds, name = "wait for mark from teacher to reach server") {
                 it.isNotEmpty()

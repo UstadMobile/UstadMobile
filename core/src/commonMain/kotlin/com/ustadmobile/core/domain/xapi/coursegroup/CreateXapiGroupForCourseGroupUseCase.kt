@@ -30,7 +30,7 @@ class CreateXapiGroupForCourseGroupUseCase(
         assignmentUid: Long,
         accountPersonUid: Long,
     ): XapiGroupAndPersonUidMap {
-        val groupMembers = repo.courseGroupMemberDao
+        val groupMembers = repo.courseGroupMemberDao()
             .findByCourseGroupSetAndGroupNumAsync(
                 courseGroupSetUid = groupSetUid,
                 groupNum = groupNum,

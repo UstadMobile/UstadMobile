@@ -214,7 +214,7 @@ class ClazzAssignmentSubmitterDetailViewModel(
         ?: throw IllegalArgumentException("No clazzUid")
 
     private val privateCommentsPagingSourceFactory: ListPagingSourceFactory<CommentsAndName> = {
-        activeRepo.commentsDao.findPrivateCommentsForSubmitterByAssignmentUid(
+        activeRepo.commentsDao().findPrivateCommentsForSubmitterByAssignmentUid(
             submitterUid = submitterUid,
             assignmentUid = assignmentUid,
             includeDeleted = false,
@@ -238,7 +238,7 @@ class ClazzAssignmentSubmitterDetailViewModel(
             )
         }
 
-        val permissionFlow = activeRepo.coursePermissionDao
+        val permissionFlow = activeRepo.coursePermissionDao()
             .userPermissionsForAssignmentSubmitterUid(
                 accountPersonUid = activeUserPersonUid,
                 assignmentUid = assignmentUid,
@@ -281,7 +281,7 @@ class ClazzAssignmentSubmitterDetailViewModel(
 
                             launch {
                                 launch {
-                                    activeRepo.courseBlockDao.findCourseBlockByAssignmentUid(
+                                    activeRepo.courseBlockDao().findCourseBlockByAssignmentUid(
                                         assignmentUid
                                     ).collect {
                                         _uiState.update { prev ->
@@ -293,12 +293,12 @@ class ClazzAssignmentSubmitterDetailViewModel(
 
                             launch {
                                 val submissionsFlow = activeRepo
-                                    .courseAssignmentSubmissionDao.getAllSubmissionsFromSubmitterAsFlow(
+                                    .courseAssignmentSubmissionDao().getAllSubmissionsFromSubmitterAsFlow(
                                         submitterUid = submitterUid,
                                         assignmentUid = assignmentUid
                                     )
                                 val submissionFilesFlow = activeRepo
-                                    .courseAssignmentSubmissionFileDao.getAllSubmissionFilesFromSubmitterAsFlow(
+                                    .courseAssignmentSubmissionFileDao().getAllSubmissionFilesFromSubmitterAsFlow(
                                         submitterUid = submitterUid,
                                         assignmentUid = assignmentUid
                                     )
@@ -313,7 +313,7 @@ class ClazzAssignmentSubmitterDetailViewModel(
                             }
 
                             launch {
-                                activeRepo.courseAssignmentMarkDao.getAllMarksForSubmitterAsFlow(
+                                activeRepo.courseAssignmentMarkDao().getAllMarksForSubmitterAsFlow(
                                     submitterUid = submitterUid,
                                     assignmentUid = assignmentUid
                                 ).collect{
@@ -351,7 +351,7 @@ class ClazzAssignmentSubmitterDetailViewModel(
         loadingState = LoadingUiState.INDETERMINATE
         viewModelScope.launch {
             try {
-                activeRepo.commentsDao.insertAsync(Comments().apply {
+                activeRepo.commentsDao().insertAsync(Comments().apply {
                     commentsForSubmitterUid = submitterUid
                     commentsFromSubmitterUid = _uiState.value.activeUserSubmitterId
                     commentsFromPersonUid = activeUserPersonUid
@@ -501,7 +501,7 @@ class ClazzAssignmentSubmitterDetailViewModel(
 
     fun onDeleteComment(comments: Comments) {
         viewModelScope.launch {
-            activeRepo.commentsDao.updateDeletedByCommentUid(
+            activeRepo.commentsDao().updateDeletedByCommentUid(
                 uid = comments.commentsUid,
                 deleted = true,
                 changeTime = systemTimeInMillis()

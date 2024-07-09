@@ -70,7 +70,7 @@ class SubmitMarkUseCase(
         val applyPenalty = submissions.isNotEmpty() &&
             (submissions.maxOf { it.casTimestamp }) > courseBlock.cbDeadlineDate
 
-        val activeUserSubmitterUid = repo.clazzAssignmentDao.getSubmitterUid(
+        val activeUserSubmitterUid = repo.clazzAssignmentDao().getSubmitterUid(
             assignmentUid = assignment.caUid,
             clazzUid = clazzUid,
             accountPersonUid = activeUserPerson.personUid,
@@ -96,7 +96,7 @@ class SubmitMarkUseCase(
         }
 
         val (statementActor: XapiActor, actorToPersonUidMap) = if(assignment.caGroupUid == 0L) {
-            val stmtActor = (repo.personDao.findByUidAsync(submitterUid)?.toXapiAgent(endpoint)
+            val stmtActor = (repo.personDao().findByUidAsync(submitterUid)?.toXapiAgent(endpoint)
                 ?: throw IllegalStateException("Could not find person for $submitterUid"))
             stmtActor to mapOf(
                 stmtActor.identifierHash(xxStringHasher) to submitterUid
@@ -172,7 +172,7 @@ class SubmitMarkUseCase(
                 )
             )
 
-            repo.courseAssignmentMarkDao.insertAsync(markToRecord)
+            repo.courseAssignmentMarkDao().insertAsync(markToRecord)
         }
     }
 }

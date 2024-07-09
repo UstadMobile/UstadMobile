@@ -47,7 +47,7 @@ fun assertStatementStoredInDb(
 ) {
     runBlocking {
         val stmtUuid = subStatementUuid ?: uuidFrom(statement.id!!)
-        val statementInDb = db.statementDao.findById(
+        val statementInDb = db.statementDao().findById(
             statementIdHi = stmtUuid.mostSignificantBits,
             statementIdLo = stmtUuid.leastSignificantBits,
         )
@@ -170,7 +170,7 @@ fun assertStatementContextActivitiesInDb(
         return@runBlocking
 
     val stmtUuid = uuidFrom(statement.id!!)
-    val contextActivityEntities = db.statementContextActivityJoinDao.findAllByStatementId(
+    val contextActivityEntities = db.statementContextActivityJoinDao().findAllByStatementId(
         stmtUuid.mostSignificantBits, stmtUuid.leastSignificantBits, scajContextType
     )
     assertEquals(contextActivities.size, contextActivityEntities.size)
@@ -220,11 +220,11 @@ fun assertActivityStoredInDb(
     json: Json,
 ) = runBlocking {
     assertEquals(xxHasher.hash(activityId), activityUid)
-    val langMapEntries = db.activityLangMapEntryDao
+    val langMapEntries = db.activityLangMapEntryDao()
         .findAllByActivityUid(activityUid)
-    val interactionEntities = db.activityInteractionDao
+    val interactionEntities = db.activityInteractionDao()
         .findAllByActivityUidAsync(activityUid)
-    val extensionEntities = db.activityExtensionDao.findAllByActivityUid(activityUid)
+    val extensionEntities = db.activityExtensionDao().findAllByActivityUid(activityUid)
 
     fun List<XapiActivity.Interaction>.assertInteractionsStoredInDb(propName: String, propFlag: Int) {
         forEach { interaction ->
@@ -240,7 +240,7 @@ fun assertActivityStoredInDb(
         }
     }
 
-    val activityInDb = db.activityEntityDao.findByUidAsync(activityUid)
+    val activityInDb = db.activityEntityDao().findByUidAsync(activityUid)
     assertNotNull(activityInDb, "Activity $activityUid is in database")
     assertEquals(activityInDb.actIdIri, activityId)
     val responsePatternsFromDb = activityInDb.actCorrectResponsePatterns?.let {
@@ -285,11 +285,11 @@ fun assertVerbStoredInDb(
     db: UmAppDatabase,
     xxHasher: XXStringHasher,
 ) = runBlocking {
-    val verbInDb = db.verbDao.findByUid(verbUid)
+    val verbInDb = db.verbDao().findByUid(verbUid)
     assertNotNull(verbInDb, "Verb $verbUid is in database")
     assertEquals(verb.id, verbInDb.verbUrlId)
 
-    val verbLangMapEntries = db.verbLangMapEntryDao.findByVerbUidAsync(verbUid)
+    val verbLangMapEntries = db.verbLangMapEntryDao().findByVerbUidAsync(verbUid)
     verb.display?.forEach { displayEntry ->
         val langMapEntity = verbLangMapEntries.firstOrNull {
             it.vlmeLangCode == displayEntry.key
@@ -312,7 +312,7 @@ fun assertActorStoredInDb(
     db: UmAppDatabase,
     xxHasher: XXStringHasher,
 ) = runBlocking {
-    val agentInDb = db.actorDao.findByUidAsync(actorUid)
+    val agentInDb = db.actorDao().findByUidAsync(actorUid)
     assertNotNull(agentInDb, "Agent is in database")
 
     if(actor is XapiAgent) {
@@ -321,7 +321,7 @@ fun assertActorStoredInDb(
         assertEquals(actor.mbox, agentInDb.actorMbox)
         assertEquals(actor.openid, agentInDb.actorOpenid)
     }else if(actor is XapiGroup) {
-        val membersInDb = db.actorDao.findGroupMembers(actorUid)
+        val membersInDb = db.actorDao().findGroupMembers(actorUid)
         actor.member.forEach { member ->
             val memberInDb = membersInDb.firstOrNull { it.actorUid == member.identifierHash(xxHasher) }
             assertNotNull(memberInDb, "Member $member was found in db when querying for group members")

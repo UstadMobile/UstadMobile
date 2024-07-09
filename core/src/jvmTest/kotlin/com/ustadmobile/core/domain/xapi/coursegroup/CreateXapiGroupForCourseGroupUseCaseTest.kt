@@ -55,7 +55,7 @@ class CreateXapiGroupForCourseGroupUseCaseTest {
                 cgsClazzUid = clazz.clazzUid
                 cgsUid = 50L
             }
-            db.courseGroupSetDao.insertAsync(courseGroupSet)
+            db.courseGroupSetDao().insertAsync(courseGroupSet)
 
             val enrolUseCase = EnrolIntoCourseUseCase(db, null)
 
@@ -65,7 +65,7 @@ class CreateXapiGroupForCourseGroupUseCaseTest {
                 lastName = "K"
                 username = "ednak"
             }
-            db.personDao.insertAsync(teacherPerson)
+            db.personDao().insertAsync(teacherPerson)
             enrolUseCase(
                 enrolment = ClazzEnrolment(
                     clazzUid = clazz.clazzUid,
@@ -84,7 +84,7 @@ class CreateXapiGroupForCourseGroupUseCaseTest {
                         lastName = "$it"
                         username = "testperson$it"
                     }
-                    db.personDao.insertAsync(studentPerson)
+                    db.personDao().insertAsync(studentPerson)
 
                     enrolUseCase(
                         enrolment = ClazzEnrolment().apply {
@@ -100,7 +100,7 @@ class CreateXapiGroupForCourseGroupUseCaseTest {
                         cgmSetUid = courseGroupSet.cgsUid,
                         cgmPersonUid = studentPerson.personUid
                     )
-                    db.courseGroupMemberDao.insertAsync(courseGroupMember)
+                    db.courseGroupMemberDao().insertAsync(courseGroupMember)
 
                     studentPerson to courseGroupMember
                 }
@@ -110,7 +110,7 @@ class CreateXapiGroupForCourseGroupUseCaseTest {
                 caUid = 100L,
                 caClazzUid = clazz.clazzUid,
             )
-            db.clazzAssignmentDao.insertAsync(assignment)
+            db.clazzAssignmentDao().insertAsync(assignment)
 
             val useCase = CreateXapiGroupForCourseGroupUseCase(db, endpoint, stringHasher)
             val result = useCase(

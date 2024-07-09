@@ -103,12 +103,12 @@ class OneRosterEndpointTest {
         )
 
         return courseBlock.copy(
-            cbUid = db.courseBlockDao.insertAsync(courseBlock)
+            cbUid = db.courseBlockDao().insertAsync(courseBlock)
         )
     }
 
     private suspend fun grantExternalAppPermission() {
-        db.externalAppPermissionDao.insertAsync(
+        db.externalAppPermissionDao().insertAsync(
             ExternalAppPermission(
                 eapAuthToken = "test-token",
                 eapPersonUid = accountPerson.personUid,
@@ -157,7 +157,7 @@ class OneRosterEndpointTest {
                     srScore = score.toFloat()
                 )
             }
-            db.studentResultDao.insertListAsync(studentResults)
+            db.studentResultDao().insertListAsync(studentResults)
 
             val response = httpEndpoint.invoke(
                 StringSimpleTextRequest(
@@ -254,7 +254,7 @@ class OneRosterEndpointTest {
             )
 
             assertEquals(201, response.responseCode)
-            val courseBlockInDb = db.courseBlockDao.findBySourcedId(
+            val courseBlockInDb = db.courseBlockDao().findBySourcedId(
                 newLineItem.sourcedId, accountPerson.personUid)
             assertEquals(newLineItem.sourcedId, courseBlockInDb?.cbSourcedId)
             assertEquals(clazz.clazzUid, courseBlockInDb?.cbClazzUid ?: -1)
@@ -304,7 +304,7 @@ class OneRosterEndpointTest {
 
             assertEquals(201, response.responseCode,
                 "Response code should be 201. Body=${response.responseBody}")
-            val resultInDb = db.studentResultDao.findByClazzAndStudent(
+            val resultInDb = db.studentResultDao().findByClazzAndStudent(
                 clazz.clazzUid, accountPerson.personUid, accountPerson.personUid
             )
             assertEquals(oneRosterResult.score, resultInDb.first().studentResult.srScore)

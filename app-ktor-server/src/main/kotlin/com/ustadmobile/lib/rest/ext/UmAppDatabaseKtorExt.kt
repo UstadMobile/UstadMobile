@@ -22,7 +22,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 
 fun UmAppDatabase.insertCourseTerminology(di: DI){
-    val termList = courseTerminologyDao.findAllCourseTerminologyList()
+    val termList = courseTerminologyDao().findAllCourseTerminologyList()
     val supportLangConfig: SupportedLanguagesConfig = di.direct.instance()
 
     if(termList.isEmpty()) {
@@ -48,7 +48,7 @@ fun UmAppDatabase.insertCourseTerminology(di: DI){
             })
         }
 
-        courseTerminologyDao.insertList(terminologyList)
+        courseTerminologyDao().insertList(terminologyList)
     }
 }
 
@@ -64,7 +64,7 @@ suspend fun UmAppDatabase.initAdminUser(
     val passwordFilePath = di.on(endpoint).direct
         .instance<File>(tag = DiTag.TAG_CONTEXT_DATA_ROOT).absolutePath
 
-    val adminUser = personDao.findByUsername("admin")
+    val adminUser = personDao().findByUsername("admin")
 
     if (adminUser == null) {
         val addNewPersonUseCase: AddNewPersonUseCase = di.on(endpoint).direct.instance()
@@ -88,7 +88,7 @@ suspend fun UmAppDatabase.initAdminUser(
 
         val saltFile = File(passwordFilePath, "salt-${systemTimeInMillis()}.txt")
 
-        val salt = siteDao.getSiteAsync()!!.authSalt!!
+        val salt = siteDao().getSiteAsync()!!.authSalt!!
 
         saltFile.writeText("$salt / $adminPass")
 

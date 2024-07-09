@@ -82,7 +82,7 @@ class ClazzEnrolmentEditViewModelTest : AbstractMainDispatcherTest()  {
 
 
                 if(canAddTeacher)
-                    activeDb.coursePermissionDao.upsertAsync(
+                    activeDb.coursePermissionDao().upsertAsync(
                         CoursePermission(
                             cpClazzUid = clazz.clazzUid,
                             cpToPersonUid = activeUserPerson.personUid,
@@ -91,7 +91,7 @@ class ClazzEnrolmentEditViewModelTest : AbstractMainDispatcherTest()  {
                     )
 
                 if(canAddStudent)
-                    activeDb.coursePermissionDao.upsertAsync(
+                    activeDb.coursePermissionDao().upsertAsync(
                         CoursePermission(
                             cpClazzUid = clazz.clazzUid,
                             cpToPersonUid = activeUserPerson.personUid,
@@ -100,7 +100,7 @@ class ClazzEnrolmentEditViewModelTest : AbstractMainDispatcherTest()  {
                     )
 
                 if(canAddTeacher || canAddStudent) {
-                    activeDb.systemPermissionDao.upsertAsync(
+                    activeDb.systemPermissionDao().upsertAsync(
                         SystemPermission(
                             spToPersonUid = activeUserPerson.personUid,
                             spPermissionsFlag = PermissionFlags.DIRECT_ENROL,
@@ -143,7 +143,7 @@ class ClazzEnrolmentEditViewModelTest : AbstractMainDispatcherTest()  {
 
             readyAppUiState.actionBarButtonState.onClick()
 
-            activeDb.clazzEnrolmentDao.findAllByPersonUid(
+            activeDb.clazzEnrolmentDao().findAllByPersonUid(
                 testContext.personToEnrol.personUid
             ).assertItemReceived(timeout = 5.seconds, name = "found person enrolled in course") {
                 it.isNotEmpty() &&
@@ -189,7 +189,7 @@ class ClazzEnrolmentEditViewModelTest : AbstractMainDispatcherTest()  {
                 cancelAndIgnoreRemainingEvents()
             }
 
-            activeDb.clazzEnrolmentDao.findAllByPersonUid(
+            activeDb.clazzEnrolmentDao().findAllByPersonUid(
                 testContext.personToEnrol.personUid
             ).assertItemReceived(name = "enrolment date left is updated",timeout = 5.seconds) { enrolments ->
                 enrolments.any {

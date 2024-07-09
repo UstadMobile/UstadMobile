@@ -149,11 +149,11 @@ class ClazzEditViewModel(
         launchIfHasPermission(
             permissionCheck = {
                 if(entityUidArg != 0L) {
-                    it.coursePermissionDao.personHasPermissionWithClazzAsync2(
+                    it.coursePermissionDao().personHasPermissionWithClazzAsync2(
                         activeUserPersonUid, entityUidArg, PermissionFlags.COURSE_EDIT
                     )
                 }else {
-                    it.systemPermissionDao.personHasSystemPermission(
+                    it.systemPermissionDao().personHasSystemPermission(
                         activeUserPersonUid, PermissionFlags.ADD_COURSE
                     )
                 }
@@ -164,7 +164,7 @@ class ClazzEditViewModel(
                     loadEntity(
                         serializer = ClazzWithHolidayCalendarAndAndTerminology.serializer(),
                         onLoadFromDb = {
-                            it.clazzDao.takeIf { entityUidArg != 0L }
+                            it.clazzDao().takeIf { entityUidArg != 0L }
                                 ?.findByUidWithHolidayCalendarAsync(entityUidArg).let { dbResult ->
                                     val hasPicture = dbResult?.coursePicture != null
                                     //Add CoursePicture entity if not already present
@@ -187,7 +187,7 @@ class ClazzEditViewModel(
                                 clazzStartTime = systemTimeInMillis()
                                 clazzTimeZone = getDefaultTimeZoneId()
                                 clazzSchoolUid = savedStateHandle[UstadView.ARG_SCHOOL_UID]?.toLong() ?: 0L
-                                terminology = activeRepo.courseTerminologyDao
+                                terminology = activeRepo.courseTerminologyDao()
                                     .takeIf { clazzTerminologyUid != 0L }
                                     ?.findByUidAsync(clazzTerminologyUid)
                                 coursePicture = CoursePicture(
@@ -213,7 +213,7 @@ class ClazzEditViewModel(
                         serializer = ListSerializer(Schedule.serializer()),
                         loadFromStateKeys = listOf(STATE_KEY_SCHEDULES),
                         onLoadFromDb = {
-                            it.scheduleDao.takeIf { entityUidArg != 0L }
+                            it.scheduleDao().takeIf { entityUidArg != 0L }
                                 ?.findAllSchedulesByClazzUidAsync(entityUidArg)
                         },
                         makeDefault = {
@@ -231,11 +231,11 @@ class ClazzEditViewModel(
                         serializer = ListSerializer(CourseBlockAndEditEntities.serializer()),
                         loadFromStateKeys = listOf(STATE_KEY_COURSEBLOCKS),
                         onLoadFromDb = { db ->
-                            val courseBlocksDb = db.courseBlockDao
+                            val courseBlocksDb = db.courseBlockDao()
                                 .takeIf { entityUidArg != 0L }
                                 ?.findAllCourseBlockByClazzUidAsync(entityUidArg, false)
                                 ?: emptyList()
-                            val assignmentPeerAllocations = db.peerReviewerAllocationDao
+                            val assignmentPeerAllocations = db.peerReviewerAllocationDao()
                                 .takeIf { entityUidArg != 0L }?.getAllPeerReviewerAllocationsByClazzUid(
                                     clazzUid = entityUidArg,
                                     includeInactive = false
@@ -563,12 +563,12 @@ class ClazzEditViewModel(
                 if(entityUidArg == 0L) {
                     createNewClazzUseCase(initEntity)
                 }else {
-                    activeRepo.clazzDao.updateAsync(initEntity)
+                    activeRepo.clazzDao().updateAsync(initEntity)
                 }
 
                 if(updateImage && coursePictureVal != null) {
                     coursePictureVal.coursePictureLct = systemTimeInMillis()
-                    activeDb.coursePictureDao.upsertAsync(coursePictureVal)
+                    activeDb.coursePictureDao().upsertAsync(coursePictureVal)
                 }
 
                 val clazzUid = entity.clazzUid
@@ -577,8 +577,8 @@ class ClazzEditViewModel(
                     it.shallowCopy { scheduleClazzUid = clazzUid }
                 }
 
-                activeRepo.scheduleDao.upsertListAsync(schedulesToCommit)
-                activeRepo.scheduleDao.deactivateByUids(
+                activeRepo.scheduleDao().upsertListAsync(schedulesToCommit)
+                activeRepo.scheduleDao().deactivateByUids(
                     initState.clazzSchedules.findKeysNotInOtherList(schedulesToCommit) {
                         it.scheduleUid
                     }, systemTimeInMillis()
@@ -586,20 +586,20 @@ class ClazzEditViewModel(
 
                 val courseBlockModulesToCommit = updateCourseBlocksOnReorderOrCommitUseCase(
                     courseBlockListVal)
-                activeRepo.courseBlockDao.upsertListAsync(
+                activeRepo.courseBlockDao().upsertListAsync(
                     courseBlockModulesToCommit.map { it.courseBlock }
                 )
-                activeRepo.courseBlockDao.deactivateByUids(
+                activeRepo.courseBlockDao().deactivateByUids(
                     initState.courseBlockList.findKeysNotInOtherList(courseBlockModulesToCommit) {
                         it.courseBlock.cbUid
                     }, systemTimeInMillis()
                 )
 
                 val assignmentsToUpsert = courseBlockListVal.mapNotNull { it.assignment }
-                activeRepo.clazzAssignmentDao.upsertListAsync(assignmentsToUpsert)
+                activeRepo.clazzAssignmentDao().upsertListAsync(assignmentsToUpsert)
                 val assignmentsToDeactivate = initState.courseBlockList.mapNotNull { it.assignment}
                     .findKeysNotInOtherList(assignmentsToUpsert) { it.caUid }
-                activeRepo.clazzAssignmentDao.takeIf { assignmentsToDeactivate.isNotEmpty() }
+                activeRepo.clazzAssignmentDao().takeIf { assignmentsToDeactivate.isNotEmpty() }
                     ?.updateActiveByList(assignmentsToDeactivate, false, systemTimeInMillis())
 
                 val currentPeerReviewAllocations = courseBlockListVal.flatMap {
@@ -609,14 +609,14 @@ class ClazzEditViewModel(
                     it.assignmentPeerAllocations
                 }
 
-                activeRepo.peerReviewerAllocationDao.deactivateByUids(
+                activeRepo.peerReviewerAllocationDao().deactivateByUids(
                     uidList = prevPeerReviewerAllocations.findKeysNotInOtherList(
                         otherList = currentPeerReviewAllocations,
                         key = { it.praUid }
                     ),
                     changeTime = systemTimeInMillis()
                 )
-                activeRepo.peerReviewerAllocationDao.upsertList(currentPeerReviewAllocations)
+                activeRepo.peerReviewerAllocationDao().upsertList(currentPeerReviewAllocations)
 
                 //Run the ContentImport for any jobs where this is required.
                 courseBlockListVal.mapNotNull {
@@ -627,7 +627,7 @@ class ClazzEditViewModel(
                     )
                 }
 
-                activeDb.courseBlockPictureDao
+                activeDb.courseBlockPictureDao()
                     .takeIf { updatedCourseBlockPictures.isNotEmpty() }
                     ?.upsertListAsync(updatedCourseBlockPictures)
                 Napier.d("onClickSave: transaction block done")

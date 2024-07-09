@@ -85,7 +85,7 @@ class SiteEditViewModel(
                 _uiState.update { it.copy(fieldsEnabled = enabled) }
             },
             permissionCheck = { db ->
-                db.systemPermissionDao.personHasSystemPermission(
+                db.systemPermissionDao().personHasSystemPermission(
                     activeUserPersonUid, PermissionFlags.MANAGE_SITE_SETTINGS
                 )
             }
@@ -93,7 +93,7 @@ class SiteEditViewModel(
             loadEntity(
                 serializer = Site.serializer(),
                 onLoadFromDb = { db ->
-                    db.siteDao.getSiteAsync()
+                    db.siteDao().getSiteAsync()
                 },
                 makeDefault = {
                     Site()
@@ -112,7 +112,7 @@ class SiteEditViewModel(
                 loadFromStateKeys = listOf(KEY_SITE_TERMS_LIST),
                 savedStateKey = KEY_SITE_TERMS_LIST,
                 onLoadFromDb = {
-                    val termsLoadedFromDb = it.siteTermsDao.findAllTerms(1).filter {
+                    val termsLoadedFromDb = it.siteTermsDao().findAllTerms(1).filter {
                         it.sTermsLang in supportedLangCodes
                     }
                     val langsLoadedFromDb = termsLoadedFromDb.mapNotNull { it.sTermsLang }
@@ -251,8 +251,8 @@ class SiteEditViewModel(
             return
 
         viewModelScope.launch {
-            activeRepo.siteDao.updateAsync(siteToSave)
-            activeRepo.siteTermsDao.upsertList(
+            activeRepo.siteDao().updateAsync(siteToSave)
+            activeRepo.siteTermsDao().upsertList(
                 _uiState.value.siteTerms.filter {
                     (!it.termsHtml?.htmlToPlainText().isNullOrBlank() || it.sTermsUid != 0L)
                 }.map {

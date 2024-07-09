@@ -43,7 +43,7 @@ class MoveContentEntriesUseCase(
         if(uidsToMove.isEmpty())
             return
 
-        repo.contentEntryParentChildJoinDao.moveListOfEntriesToNewParent(
+        repo.contentEntryParentChildJoinDao().moveListOfEntriesToNewParent(
             contentEntryUid = destContentEntry.contentEntryUid,
             selectedItems = uidsToMove,
             updateTime = systemTimeInMillis()
