@@ -42,7 +42,6 @@ import com.ustadmobile.core.domain.extractmediametadata.mediainfo.ExtractMediaMe
 import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCase
 import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCaseJvm
 import com.ustadmobile.core.domain.invite.CheckContactTypeUseCase
-import com.ustadmobile.core.domain.invite.ContactToServerUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonStatusMap
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsUseCase
@@ -114,6 +113,9 @@ import com.ustadmobile.lib.rest.domain.invite.ProcessInviteUseCase
 import com.ustadmobile.lib.rest.domain.invite.email.SendEmailUseCase
 import com.ustadmobile.lib.rest.domain.invite.message.SendMessageUseCase
 import com.ustadmobile.lib.rest.domain.invite.sms.SendSmsUseCase
+import com.ustadmobile.lib.rest.domain.invite.sms.SendSmsUseCaseHttp
+import com.ustadmobile.lib.rest.domain.invite.sms.SmsProperties
+import com.ustadmobile.lib.rest.domain.invite.sms.twilio.TwilioHttpClient
 import com.ustadmobile.lib.rest.domain.person.bulkadd.BulkAddPersonRoute
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.headers.MimeTypeHelper
@@ -583,7 +585,7 @@ fun Application.umRestApplication(
 
 
         bind<SendMessageUseCase>() with provider {
-            SendMessageUseCase()
+            SendMessageUseCase(activeDb = instance(tag = DoorTag.TAG_DB),)
         }
 
         bind<CheckContactTypeUseCase>() with provider {
@@ -593,9 +595,7 @@ fun Application.umRestApplication(
             )
         }
 
-        bind<SendSmsUseCase>() with provider {
-            SendSmsUseCase()
-        }
+
 
         bind<IPhoneNumberUtil>() with provider {
             PhoneNumberUtilJvm(PhoneNumberUtil.getInstance())
@@ -699,10 +699,34 @@ fun Application.umRestApplication(
         }catch(e: Exception) {
             Napier.w("WARNING: Email sending not configured")
         }
+        try {
+            appConfig.config("sms")
+            bind<SmsProperties>() with singleton  {
+                SmsProperties(
+                    appConfig.property("sms.phone_number").getString(),
+                    appConfig.property("sms.provider_link").getString(),
+                    appConfig.property("sms.sid").getString(),
+                    appConfig.property("sms.token").getString(),
+                )
+            }
+
+            bind<TwilioHttpClient>() with singleton {
+                TwilioHttpClient(di)
+            }
+        }catch(e: Exception) {
+            Napier.w("WARNING: SMS. sending not configured ${e.message}")
+        }
+
+        bind<SendSmsUseCaseHttp>() with singleton {
+            SendSmsUseCaseHttp(di)
+        }
+
         bind<SendEmailUseCase>() with scoped(EndpointScope.Default).provider {
             SendEmailUseCase(NotificationSender(di))
         }
-
+        bind<SendSmsUseCase>() with singleton {
+            SendSmsUseCase(di)
+        }
         bind<ProcessInviteUseCase>() with scoped(EndpointScope.Default).provider {
             ProcessInviteUseCase(
                 sendEmailUseCase = instance(),

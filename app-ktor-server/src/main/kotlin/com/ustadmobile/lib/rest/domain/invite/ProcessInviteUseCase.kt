@@ -10,6 +10,11 @@ import com.ustadmobile.lib.rest.domain.invite.sms.SendSmsUseCase
 import com.ustadmobile.core.viewmodel.clazz.redeem.ClazzInviteViewModel
 import com.ustadmobile.lib.db.entities.ClazzInvite
 import com.ustadmobile.lib.rest.domain.invite.message.SendMessageUseCase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 
 class ProcessInviteUseCase(
     private val sendEmailUseCase: SendEmailUseCase,
@@ -28,40 +33,48 @@ class ProcessInviteUseCase(
         clazzUid: Long,
         role: Long,
         personUid: Long
-    ):InviteResult {
+    ): InviteResult {
 
-        val token = uuid4().toString()
-        val inviteLink = UstadUrlComponents(endpoint.url, ClazzInviteViewModel.DEST_NAME, token).fullUrl()
-        contacts.forEach { contact ->
+        val coroutineScope = CoroutineScope(Dispatchers.IO + Job())
+        coroutineScope.launch {
+            val token = uuid4().toString()
+            val inviteLink = UstadUrlComponents(endpoint.url, ClazzInviteViewModel.DEST_NAME, token).fullUrl()
+            contacts.forEach { contact ->
 
-            val validContacts = checkContactTypeUseCase.invoke(contact=contact)
+                val validContacts = checkContactTypeUseCase.invoke(contact = contact)
 
-            if (validContacts != null) {
-                db.clazzInviteDao.replace(
-                    ClazzInvite(
-                        ciPersonUid = personUid,
-                        ciRoleId = role,
-                        ciUid = clazzUid,
-                        inviteType = validContacts.inviteType,
-                        inviteToken = token
+                if (validContacts != null) {
+                    db.clazzInviteDao.replace(
+                        ClazzInvite(
+                            ciPersonUid = personUid,
+                            ciRoleId = role,
+                            ciUid = clazzUid,
+                            inviteType = validContacts.inviteType,
+                            inviteToken = token
+                        )
                     )
-                )
 
 
-                when (validContacts.inviteType) {
-                    1 -> {
-                        sendEmailUseCase.invoke(validContacts.text, inviteLink)
+                    when (validContacts.inviteType) {
+                        1 -> {
+                            sendEmailUseCase.invoke(validContacts.text, inviteLink)
+                        }
+
+                        2 -> {
+                            CoroutineScope(Dispatchers.IO).launch {
+                                sendSmsUseCase.invoke(validContacts.text, inviteLink)
+                            }
+                        }
+
+                        3 -> {
+                            sendMessageUseCase.invoke(validContacts.text, inviteLink, personUid)
+                        }
+
                     }
-
-                    2 -> {
-                    }
-
-                    3 -> {
-                    }
-
                 }
             }
         }
+        coroutineScope.cancel()
         return InviteResult("invitation sent")
     }
 

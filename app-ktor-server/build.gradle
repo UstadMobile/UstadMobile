@@ -85,6 +85,8 @@ dependencies {
 
     implementation libs.ktor.serialization.gson
     implementation libs.ktor.client.okhttp
+    implementation libs.ktor.auth.okhttp
+    implementation libs.ktor.serialization.okhttp
     implementation libs.ktor.server.html.builder
     implementation libs.kotlinx.serialization
 

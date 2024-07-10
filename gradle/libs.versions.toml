@@ -188,6 +188,8 @@ android-desugar-libs = { module = "com.android.tools:desugar_jdk_libs_nio", vers
 android-material = { module = "com.google.android.material:material", version.ref = "android-material" }
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
+ktor-auth-okhttp = { module = "io.ktor:ktor-client-auth", version.ref = "ktor" }
+ktor-serialization-okhttp = { module = "io.ktor:ktor-client-serialization", version.ref = "ktor" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
 richeditor-multiplatform-compose = { module = "com.mohamedrejeb.richeditor:richeditor-compose", version.ref = "richeditor-multiplatform" }
 reorderable-compose = { module = "org.burnoutcrew.composereorderable:reorderable", version.ref = "reorderable-compose" }
