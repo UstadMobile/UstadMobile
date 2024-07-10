@@ -5,12 +5,9 @@ appId: com.toughra.ustadmobile
 # launch app
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
-- repeat:
-    while:
-      notVisible: "Connect as Guest"
-    commands:
-      - swipe:
-          start: 100,400
-          end: 100,100
+- scrollUntilVisible:
+    element:
+      text:  "Connect as Guest"
+    direction: DOWN
 # press on guest login button
 - tapOn: "Connect as Guest"
