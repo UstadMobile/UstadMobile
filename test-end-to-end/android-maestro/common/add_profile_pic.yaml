@@ -1,20 +1,28 @@
 appId: com.toughra.ustadmobile
 
 ---
-# This test tests the Library page of app adding content
+# This test tests the adding profile pic to the profile
 # Test parameters needs to provide for this test :
- # 1) TESTFILENAME : provide the content name inside the 'test-files/content' folder
- # 2) TESTCONTENTNAME : provide the content title, it should be a string
+ # 1) TESTFILENAME : provide the profile pic file name
+ # 2)TESTRESULTSDIR : ${TESTRESULTSDIR} : provides the path to store test results
  # 3) CONTROLSERVER: ${CONTROLSERVER} : provides the test-control-server address
  # 4) TESTSERIAL: ${TESTSERIAL} : provides the device serial number
- # 5) TESTRESULTSDIR : ${TESTRESULTSDIR} : provides the path to store test results
+
 
 # clear the app
 - clearState: com.toughra.ustadmobile
+
 # clear the downloads
 - evalScript: ${http.get(CONTROLSERVER + "cleardownloads?device=" + TESTSERIAL)}
-# push the test file to the downloads
-- evalScript: ${http.get(CONTROLSERVER + "pushcontent?test-file-name=" + TESTFILENAME +"&device=" + TESTSERIAL)}
+
+# push the test file to the Pictures folder using URL encoding for dest parameter
+- evalScript: ${http.get(CONTROLSERVER + "pushcontent?test-file-name=" + TESTFILENAME + "&device=" + TESTSERIAL + "&dest=%2Fstorage%2Femulated%2F0%2FPictures")}
+
+# ensure the app has storage permissions
+- evalScript: adb shell pm grant com.toughra.ustadmobile android.permission.READ_EXTERNAL_STORAGE
+- evalScript: adb shell pm grant com.toughra.ustadmobile android.permission.WRITE_EXTERNAL_STORAGE
+
+
 # get started
 - launchApp
 - tapOn: "GET STARTED"
@@ -31,15 +39,16 @@ appId: com.toughra.ustadmobile
 - tapOn: "Select new photo from gallery"
 - runFlow:
     when:
-      notVisible: "Downloads"
-    file: redirect_to_downloads.yaml
+      visible: "Show roots"
+    file: select_picture_from_files.yaml
+    env:
+      TESTFILENAME: ${TESTFILENAME}
 - runFlow:
-      when:
-          notVisible: admin_pic.jpg
-      commands:
-          - tapOn:
-              id: com.google.android.documentsui:id/sub_menu
-- tapOn: admin_pic.jpg
+     when:
+       visible: Photos
+     commands:
+       - tapOn:
+           id: "com.google.android.providers.media.module:id/icon_thumbnail"
 - scrollUntilVisible:
     element:
       text: "Gender*"

@@ -6,8 +6,10 @@ appId: com.toughra.ustadmobile
 - tapOn: "Add Person"
 - tapOn: "First names*"
 - inputText: ${FIRSTNAME}
+- hideKeyboard
 - tapOn: "Last name*"
 - inputText: ${LASTNAME}
+- hideKeyboard
 - scrollUntilVisible:
       element:
           text: "Gender*"
