@@ -3,7 +3,9 @@ package com.ustadmobile.core.account
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.set
 import com.ustadmobile.core.account.UstadAccountManager.EndpointFilter
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.whenSubscribed
@@ -528,46 +530,58 @@ class UstadAccountManager(
     }
 
     suspend fun createLocalAccount(): UserSessionWithPersonAndEndpoint {
-        // Create a random IP and endpoint
         val randomIp = "169.${(0..255).random()}.${(0..255).random()}.${(0..255).random()}"
         val randomPort = (1000..9999).random()
         val fakeEndpoint = Endpoint("http://$randomIp:$randomPort/")
 
         val db: UmAppDatabase by di.on(fakeEndpoint).instance(tag = DoorTag.TAG_DB)
+        val repo: UmAppDatabase by di.on(fakeEndpoint).instance(tag = DoorTag.TAG_REPO)
+
+        // Manually create AddNewPersonUseCase
+        val addNewPersonUseCase = AddNewPersonUseCase(db, repo)
 
         return db.withDoorTransactionAsync {
-            val newSite = Site().apply {
-                siteName = "Local Site"
-                authSalt = "local_${randomString(10)}"
-            }
-            db.siteDao.insert(newSite)
+            try {
+                val newSite = Site().apply {
+                    siteName = "Local Site"
+                    authSalt = "local_${randomString(10)}"
+                }
+                db.siteDao.insert(newSite)
 
-            val newPerson = Person().apply {
-                personUid = db.doorPrimaryKeyManager.nextId(Person.TABLE_ID)
-                username = "local_user_${randomString(5)}"
-                firstNames = "Local"
-                lastName = "User"
-                personType = Person.TYPE_GUEST
-            }
-            db.personDao.insert(newPerson)
+                val newPerson = Person().apply {
+                    username = "local_user_${randomString(5)}"
+                    firstNames = "Local"
+                    lastName = "User"
+                    personType = Person.TYPE_GUEST
+                }
 
-            val newSession = UserSession().apply {
-                usUid = db.doorPrimaryKeyManager.nextId(UserSession.TABLE_ID)
-                usClientNodeId = db.doorWrapperNodeId
-                usStartTime = systemTimeInMillis()
-                usSessionType = UserSession.TYPE_TEMP_LOCAL or UserSession.TYPE_GUEST
-                usStatus = UserSession.STATUS_ACTIVE
-                usPersonUid = newPerson.personUid
-            }
-            db.userSessionDao.insertSession(newSession)
+                val personUid = addNewPersonUseCase(
+                    person = newPerson,
+                    systemPermissions = PermissionFlags.ALL
+                )
 
-            UserSessionWithPersonAndEndpoint(newSession, newPerson, fakeEndpoint)
+                val newSession = UserSession().apply {
+                    usUid = db.doorPrimaryKeyManager.nextId(UserSession.TABLE_ID)
+                    usClientNodeId = db.doorWrapperNodeId
+                    usStartTime = systemTimeInMillis()
+                    usSessionType = UserSession.TYPE_TEMP_LOCAL or UserSession.TYPE_GUEST
+                    usStatus = UserSession.STATUS_ACTIVE
+                    usPersonUid = personUid
+                }
+                db.userSessionDao.insertSession(newSession)
+
+                val insertedPerson = db.personDao.findByUid(personUid)
+                    ?: throw IllegalStateException("Failed to retrieve inserted person")
+
+                UserSessionWithPersonAndEndpoint(newSession, insertedPerson, fakeEndpoint)
+            } catch (e: Exception) {
+                throw IllegalStateException("Failed to create local account: ${e.message}", e)
+            }
         }.also { newSession ->
             addActiveEndpoint(fakeEndpoint)
             currentUserSession = newSession
         }
     }
-
 
 
     suspend fun startGuestSession(endpointUrl: String): UserSessionWithPersonAndEndpoint {

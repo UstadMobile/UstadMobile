@@ -4,8 +4,6 @@ import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.runtime.Composable
 import com.ustadmobile.core.viewmodel.settings.SettingsUiState
 
-
-
 @Preview
 @Composable
 fun SettingsPreview() {
@@ -13,7 +11,8 @@ fun SettingsPreview() {
         reasonLeavingVisible = true,
         holidayCalendarVisible = true,
         workspaceSettingsVisible = true,
-        langDialogVisible = true
+        langDialogVisible = true,
+        sendAppOptionVisible = true
     )
     SettingsScreen(
         uiState = uiState,
@@ -24,6 +23,8 @@ fun SettingsPreview() {
         onClickDeveloperOptions = { },
         onClickDeletedItems = { },
         onClickOfflineStorageOptionsDialog = { },
-        onClickCreateBackup = { }
+        onClickCreateBackup = { },
+        folderPickLauncher = { },
+        onClickAppShare = { }
     )
 }
