@@ -1507,9 +1507,11 @@ val MIGRATION_172_194 = DoorMigrationStatementList(172, 194) { db ->
         ).forEach {
             add("DROP TABLE IF EXISTS $it")
         }
-
     }
 }
+
+//Uncomment to reproduce migration issue
+//val MIGRATION_194_195 = DoorMigrationStatementList(194, 195) { emptyList() }
 
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_105_106, MIGRATION_106_107,
@@ -1526,6 +1528,7 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_160_161, MIGRATION_162_163, MIGRATION_163_164, MIGRATION_164_165,
     MIGRATION_165_166, MIGRATION_166_167, MIGRATION_167_168, MIGRATION_168_169,
     MIGRATION_170_171, MIGRATION_171_172, MIGRATION_172_194,
+    //MIGRATION_194_195,
 )
 
 
