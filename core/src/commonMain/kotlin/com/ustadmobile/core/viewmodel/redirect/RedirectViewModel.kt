@@ -2,7 +2,6 @@ package com.ustadmobile.core.viewmodel.redirect
 
 import com.russhwolf.settings.Settings
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.domain.dbpremigrate.DbPreMigrate
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.config.ApiUrlConfig
@@ -13,12 +12,10 @@ import com.ustadmobile.core.viewmodel.OnBoardingViewModel
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.door.ext.DoorTag
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
-import org.kodein.di.instanceOrNull
 import org.kodein.di.on
 
 /**
@@ -34,8 +31,6 @@ class RedirectViewModel(
     private val deepLink = savedStateHandle[UstadView.ARG_OPEN_LINK]
 
     private val apiUrlConfig: ApiUrlConfig by instance()
-
-    private val preMigrate: DbPreMigrate? by instanceOrNull()
 
     private val settings: Settings by instance()
 

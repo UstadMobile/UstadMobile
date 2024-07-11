@@ -98,8 +98,6 @@ import com.ustadmobile.core.domain.htmlcontentdisplayengine.GetHtmlContentDispla
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.HTML_CONTENT_OPTIONS_ANDROID
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.SetHtmlContentDisplayEngineUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.ResolveXapiLaunchHrefUseCase
-import com.ustadmobile.core.domain.dbpremigrate.DbPreMigrate
-import com.ustadmobile.core.domain.dbpremigrate.DbPreMigrateAndroid
 import com.ustadmobile.core.domain.deleteditem.DeletePermanentlyUseCase
 import com.ustadmobile.core.domain.deleteditem.RestoreDeletedItemUseCase
 import com.ustadmobile.core.domain.extractmediametadata.ExtractMediaMetadataUseCase
@@ -321,14 +319,6 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
         bind<UstadAccountManager>() with singleton {
             UstadAccountManager(settings = instance(), di = di)
-        }
-
-        bind<DbPreMigrate>() with singleton {
-            DbPreMigrateAndroid(
-                settings = instance(),
-                context = applicationContext,
-                json = instance()
-            )
         }
 
         bind<DbAndObservers>() with scoped(EndpointScope.Default).singleton {
