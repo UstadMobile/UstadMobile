@@ -153,3 +153,27 @@ Content assets will be compressed by the server itself.
 
 * Run the server using a script on startup or use the screen command.
 
+## Virtual Hosting Subdomains (Optional)
+
+The Ustad server supports running multiple subdomains (e.g. schoolname1.example.org, schoolname2.example.org),
+where each subdomain has a separate learning space (classes, users, content, etc) in a single JVM 
+(to significantly reduce memory/space overhead). Each learning space has its own database 
+(Postgres or SQLite). The server will then use a separate database for each learning space, and select
+the database to use for a request based on the virtual host name. 
+
+Steps required are as follows:
+
+* If using a reverse proxy (e.g. Apache, Nginx) configure the reverse proxy e.g. for Apache
+```
+ServerName example.org
+ServerAlias *.example.org
+```
+The reverse proxy directives above do not need to be modified. Install a wildcard SSL certificate 
+e.g. using certbot.
+
+* Update the ustad-server.conf : Set ```dbmode = virtualhost``` and ensure that you add ```(hostname)``` 
+  to the main ustad database url. 
+
+* When running the server DO NOT add the ```--siteUrl``` parameter or use the siteUrl parameter in 
+  ustad-server.conf
+
