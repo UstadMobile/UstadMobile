@@ -20,6 +20,8 @@ import com.ustadmobile.libuicompose.components.UstadPickFileOpts
 import com.ustadmobile.libuicompose.components.rememberUstadFilePickLauncher
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
+import com.ustadmobile.libuicompose.components.PickFileOptions
+import com.ustadmobile.libuicompose.components.PickType
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 
 @Composable
@@ -38,7 +40,7 @@ fun BulkAddPersonSelectFileScreen(viewModel: BulkAddPersonSelectFileViewModel) {
     BulkAddPersonSelectFileScreen(
         uiState = uiState,
         onClickSelectFile = {
-            filePickLauncher(UstadPickFileOpts())
+            filePickLauncher(PickFileOptions(pickType = PickType.FILE))
         },
         onFileSelected = viewModel::onFileSelected,
         onClickImportButton = viewModel::onClickImportButton,

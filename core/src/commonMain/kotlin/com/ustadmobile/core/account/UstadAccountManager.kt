@@ -2,25 +2,43 @@ package com.ustadmobile.core.account
 
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.set
+import com.ustadmobile.core.account.UstadAccountManager.EndpointFilter
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.util.ext.withEndpoint
-import com.ustadmobile.door.*
+import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.entities.NodeIdAndAuth
-import com.ustadmobile.door.ext.*
+import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.ext.doorPrimaryKeyManager
+import com.ustadmobile.door.ext.doorWrapperNodeId
+import com.ustadmobile.door.ext.setBodyJson
+import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.message.DoorMessage
 import com.ustadmobile.door.util.systemTimeInMillis
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonGroup.Companion.PERSONGROUP_FLAG_GUESTPERSON
 import com.ustadmobile.lib.db.entities.PersonGroup.Companion.PERSONGROUP_FLAG_PERSONGROUP
+import com.ustadmobile.lib.db.entities.PersonWithAccount
+import com.ustadmobile.lib.db.entities.Site
+import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.db.entities.UserSession
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import io.ktor.client.*
-import io.ktor.client.plugins.*
-import io.ktor.client.request.*
+import com.ustadmobile.lib.util.randomString
+import io.ktor.client.HttpClient
+import io.ktor.client.plugins.expectSuccess
+import io.ktor.client.request.header
+import io.ktor.client.request.parameter
+import io.ktor.client.request.post
+import io.ktor.client.request.preparePost
+import io.ktor.client.request.url
 import io.ktor.client.statement.bodyAsText
-import io.ktor.http.*
+import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentType
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -36,7 +54,10 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.*
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.intOrNull
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.longOrNull
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -248,6 +269,9 @@ class UstadAccountManager(
         if(closed.value)
             throw IllegalStateException("UstadAccountManager is closed")
     }
+
+
+
 
     /**
      * Get a list of all accounts that are on the system across all endpoints
@@ -504,6 +528,61 @@ class UstadAccountManager(
             repo.siteDao.getSiteAsync() ?: throw IllegalStateException("Internal error: no Site in database and could not fetch it from server")
         }
     }
+
+    suspend fun createLocalAccount(): UserSessionWithPersonAndEndpoint {
+        val randomIp = "169.${(0..255).random()}.${(0..255).random()}.${(0..255).random()}"
+        val randomPort = (1000..9999).random()
+        val fakeEndpoint = Endpoint("http://$randomIp:$randomPort/")
+
+        val db: UmAppDatabase by di.on(fakeEndpoint).instance(tag = DoorTag.TAG_DB)
+        val repo: UmAppDatabase by di.on(fakeEndpoint).instance(tag = DoorTag.TAG_REPO)
+
+        // Manually create AddNewPersonUseCase
+        val addNewPersonUseCase = AddNewPersonUseCase(db, repo)
+
+        return db.withDoorTransactionAsync {
+            try {
+                val newSite = Site().apply {
+                    siteName = "Local Site"
+                    authSalt = "local_${randomString(10)}"
+                }
+                db.siteDao.insert(newSite)
+
+                val newPerson = Person().apply {
+                    username = "local_user_${randomString(5)}"
+                    firstNames = "Local"
+                    lastName = "User"
+                    personType = Person.TYPE_GUEST
+                }
+
+                val personUid = addNewPersonUseCase(
+                    person = newPerson,
+                    systemPermissions = PermissionFlags.ALL
+                )
+
+                val newSession = UserSession().apply {
+                    usUid = db.doorPrimaryKeyManager.nextId(UserSession.TABLE_ID)
+                    usClientNodeId = db.doorWrapperNodeId
+                    usStartTime = systemTimeInMillis()
+                    usSessionType = UserSession.TYPE_TEMP_LOCAL or UserSession.TYPE_GUEST
+                    usStatus = UserSession.STATUS_ACTIVE
+                    usPersonUid = personUid
+                }
+                db.userSessionDao.insertSession(newSession)
+
+                val insertedPerson = db.personDao.findByUid(personUid)
+                    ?: throw IllegalStateException("Failed to retrieve inserted person")
+
+                UserSessionWithPersonAndEndpoint(newSession, insertedPerson, fakeEndpoint)
+            } catch (e: Exception) {
+                throw IllegalStateException("Failed to create local account: ${e.message}", e)
+            }
+        }.also { newSession ->
+            addActiveEndpoint(fakeEndpoint)
+            currentUserSession = newSession
+        }
+    }
+
 
     suspend fun startGuestSession(endpointUrl: String): UserSessionWithPersonAndEndpoint {
         val repo: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = DoorTag.TAG_REPO)

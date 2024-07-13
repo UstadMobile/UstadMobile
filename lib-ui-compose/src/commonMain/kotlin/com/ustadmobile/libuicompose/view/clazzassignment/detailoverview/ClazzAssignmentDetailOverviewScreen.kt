@@ -42,6 +42,8 @@ import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.viewmodel.clazzassignment.averageMark
 import com.ustadmobile.core.viewmodel.clazzassignment.detailoverview.ClazzAssignmentDetailoverviewSubmissionUiState
 import com.ustadmobile.lib.db.composites.CourseAssignmentSubmissionFileAndTransferJob
+import com.ustadmobile.libuicompose.components.PickFileOptions
+import com.ustadmobile.libuicompose.components.PickType
 import com.ustadmobile.libuicompose.components.UstadCourseBlockHeader
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadOpeningBlobInfoBottomSheet
@@ -98,7 +100,7 @@ fun ClazzAssignmentDetailOverviewScreen(viewModel: ClazzAssignmentDetailOverview
         onClickCourseGroupSet = viewModel::onClickCourseGroupSet,
         onClickMarksFilterChip = viewModel::onClickMarksFilterChip,
         onClickAddFileSubmission = {
-            filePickLauncher(UstadPickFileOpts())
+            filePickLauncher(PickFileOptions(pickType = PickType.FILE))
         },
         onRemoveSubmissionFile = viewModel::onRemoveSubmissionFile,
         onOpenSubmissionFile =  viewModel::onOpenSubmissionFile,

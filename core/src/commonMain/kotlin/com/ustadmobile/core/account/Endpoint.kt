@@ -12,5 +12,6 @@ data class Endpoint(
      */
     val url: String
 ) {
-
+    val isLocal
+        get() = url.startsWith("http://169")
 }

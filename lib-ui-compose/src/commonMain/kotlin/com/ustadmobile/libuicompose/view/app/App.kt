@@ -32,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
@@ -49,6 +50,9 @@ import moe.tlaster.precompose.navigation.NavOptions
 import moe.tlaster.precompose.navigation.Navigator
 import moe.tlaster.precompose.navigation.PopUpTo
 import moe.tlaster.precompose.navigation.rememberNavigator
+import org.kodein.di.compose.localDI
+import org.kodein.di.direct
+import org.kodein.di.instance
 
 data class TopNavigationItem(
     val destRoute: String,
@@ -94,6 +98,11 @@ fun App(
     navCommandFlow: Flow<NavCommand>? = null,
     initialRoute: String = "/${RedirectViewModel.DEST_NAME}",
 ) {
+    val di = localDI()
+    val accountManager: UstadAccountManager = di.direct.instance()
+    val currentSession by accountManager.currentUserSessionFlow
+        .collectAsState(null)
+
     val appUiState = remember {
         mutableStateOf(
             AppUiState(
@@ -119,6 +128,7 @@ fun App(
     }
 
 
+
     Scaffold(
         topBar = {
             if(!appUiStateVal.hideAppBar) {
@@ -132,7 +142,7 @@ fun App(
         bottomBar = {
             //As per https://developer.android.com/reference/kotlin/androidx/compose/material3/package-summary#navigationbar
             var selectedTopLevelItemIndex by remember { mutableIntStateOf(0) }
-            if(useBottomBar) {
+            if(useBottomBar && currentSession?.endpoint?.isLocal != true) {
                 val currentDestination by navigator.currentEntry.collectAsState(null)
 
                 /**
@@ -176,7 +186,7 @@ fun App(
                     modifier = Modifier.testTag("floating_action_button"),
                     onClick = appUiStateVal.fabState.onClick,
                     text = {
-                         Text(
+                        Text(
                             modifier = Modifier.testTag("floating_action_button_text"),
                             text = appUiStateVal.fabState.text ?: ""
                         )
