@@ -159,7 +159,6 @@ ksp {
     arg("doordb_postgres_user", rootProject.ext.buildConfigProperties.getProperty("door.postgresUser", ""))
     arg("doordb_postgres_password", rootProject.ext.buildConfigProperties.getProperty("door.postgresPass", ""))
     arg("room.schemaLocation", "$projectDir/schemas")
-    arg("room.generateKotlin", "true")
 }
 
 dependencies {

@@ -167,9 +167,7 @@ android {
             testCoverageEnabled = false
         }
     }
-    lint {
-        abortOnError false
-    }
+
     namespace 'com.toughra.ustadmobile'
 
     //See  Compose to Kotlin Compatibility Map
@@ -206,12 +204,6 @@ androidEmulator {
     headless true
 }
 
-tasks.configureEach { task ->
-    // TODO remove after merge with replication
-    if (task.name.equals("lint")) {
-        task.enabled = false
-    }
-}
 
 configurations.all {
     /**
