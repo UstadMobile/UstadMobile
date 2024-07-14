@@ -298,12 +298,8 @@ dependencies {
     //Image loading library
     implementation libs.picasso
 
-    // shake detector
-    implementation libs.seismic
-
     //Gson for JSON serializing and deserializing
     implementation libs.gson
-
 
     //KTOR
     implementation libs.ktor.serialization.gson
