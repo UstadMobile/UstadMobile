@@ -7,7 +7,7 @@ version-androidx-appcompat = "1.6.1"
 androidx-core = "1.12.0"
 kotlin = "1.9.23"
 okhttp = "4.12.0"
-door = "0.79.11"
+door = "0.79.12"
 coroutines = "1.8.0"
 atomicfu = "0.23.2"
 kotlinx-io = "0.3.0"
@@ -96,7 +96,6 @@ accompanist-themeadapter = "0.34.0"
 compose-accompanist = "0.34.0"
 picasso = "2.8"
 seismic = "1.0.3"
-android-play = "1.10.3"
 guardianproject-panic = "1.0"
 sqlite-jdbc = "3.42.0.0"
 postgresql = "42.6.0"
@@ -279,7 +278,6 @@ gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 ktor-serialization-gson = { module = "io.ktor:ktor-serialization-gson", version.ref = "ktor" }
 ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor"}
 ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor"}
-android-play-core = { module = "com.google.android.play:core", version.ref = "android-play"}
 guardianproject-panic = { module = "info.guardianproject.panic:panic", version.ref = "guardianproject-panic"}
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
 ktor-io = { module = "io.ktor:ktor-io", version.ref = "ktor" }

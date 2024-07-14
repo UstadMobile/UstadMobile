@@ -324,7 +324,6 @@ dependencies {
     implementation libs.nanohttpd.nanolets
 
     //Android play core for update support within the application
-    implementation libs.android.play.core
     implementation libs.androidx.navigation.fragment.ktx
     implementation libs.androidx.navigation.ui
     implementation libs.androidx.navigation.ui.ktx
