@@ -84,3 +84,9 @@ npm install -g generate-license-file
 ```
 ./generate-license-file.sh
 ```
+
+### Bundled resource notes
+
+* SQL.js used for database
+* PDF-js used to display PDFs and enable usage tracking (e.g. page count/position). Uses the stock
+  pdf.js with an event handler added in viewer.html
