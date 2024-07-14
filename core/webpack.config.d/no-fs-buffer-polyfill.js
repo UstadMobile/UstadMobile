@@ -3,5 +3,6 @@
  */
 config.resolve.fallback = {
     "fs": false,
-    "buffer": false
-}
+    "buffer": false,
+    "path": false
+};
