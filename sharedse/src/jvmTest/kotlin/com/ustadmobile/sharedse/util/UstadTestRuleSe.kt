@@ -8,11 +8,6 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.contentformats.xapi.ContextActivity
-import com.ustadmobile.core.contentformats.xapi.ContextDeserializer
-import com.ustadmobile.core.contentformats.xapi.Statement
-import com.ustadmobile.core.contentformats.xapi.StatementDeserializer
-import com.ustadmobile.core.contentformats.xapi.StatementSerializer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.preload
@@ -169,9 +164,6 @@ class UstadTestRule: TestWatcher() {
 
             bind<Gson>() with singleton {
                 val builder = GsonBuilder()
-                builder.registerTypeAdapter(Statement::class.java, StatementSerializer())
-                builder.registerTypeAdapter(Statement::class.java, StatementDeserializer())
-                builder.registerTypeAdapter(ContextActivity::class.java, ContextDeserializer())
                 builder.create()
             }
 

@@ -15,7 +15,7 @@ class ContentEntryDetailOverviewViewModelTest : AbstractMainDispatcherTest() {
         testViewModel<ContentEntryDetailOverviewViewModel> {
             val contentEntry = ContentEntry().apply {
                 title = "Test entry"
-                contentEntryUid = activeDb.contentEntryDao.insertAsync(this)
+                contentEntryUid = activeDb.contentEntryDao().insertAsync(this)
             }
 
             viewModelFactory {

@@ -127,6 +127,7 @@ kotlin {
                 api libs.cache4k
                 implementation libs.urlencoder
                 implementation libs.kotlin.csv
+                implementation libs.kmp.uuid
             }
         }
 
@@ -148,6 +149,7 @@ kotlin {
                 compileOnly libs.kxml2
                 implementation libs.nanohttpd
                 implementation libs.nanohttpd.nanolets
+                implementation libs.lz4.pure.java
             }
         }
 
@@ -275,6 +277,8 @@ kotlin {
 
         androidUnitTest {
             dependencies {
+                implementation libs.kotlin.test
+                implementation libs.kotlin.test.junit
                 implementation libs.androidx.test.runner
                 implementation libs.junit
                 implementation libs.robolectric
@@ -300,6 +304,8 @@ kotlin {
                 implementation npm("libphonenumber-js", "$version_npm_libphonenumber_js")
                 implementation npm("uuid", "$version_npm_uuid")
                 implementation npm("compressorjs", "$version_compressorjs")
+                implementation npm("xxhashjs", "$version_npm_xxhash")
+                implementation npm("cuint", "$version_npm_cuint")
             }
         }
 

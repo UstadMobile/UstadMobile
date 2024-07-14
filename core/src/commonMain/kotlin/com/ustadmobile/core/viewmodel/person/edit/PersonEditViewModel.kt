@@ -34,7 +34,6 @@ import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.Person.Companion.GENDER_UNSET
 import com.ustadmobile.lib.db.entities.PersonParentJoin
 import com.ustadmobile.lib.db.entities.PersonPicture
-import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -42,6 +41,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import org.kodein.di.DI
@@ -199,14 +199,14 @@ class PersonEditViewModel(
 
                     //If adding a new person, then ADD_PERSON permission is required
                     entityUidArg == 0L -> {
-                        db.systemPermissionDao.personHasSystemPermission(
+                        db.systemPermissionDao().personHasSystemPermission(
                             activeUserPersonUid, PermissionFlags.ADD_PERSON
                         )
                     }
 
                     //If editing an existing person, which is not the active user, require edit all person permission
                     else -> {
-                        db.systemPermissionDao.personHasSystemPermission(
+                        db.systemPermissionDao().personHasSystemPermission(
                             accountPersonUid = activeUserPersonUid,
                             permission = PermissionFlags.EDIT_ALL_PERSONS,
                         )
@@ -221,19 +221,13 @@ class PersonEditViewModel(
             awaitAll(
                 async {
                     loadEntity(
-                        serializer = PersonWithAccount.serializer(),
+                        serializer = Person.serializer(),
                         //If in registration mode, we should avoid attempting to connect ot the database at all
-                        onLoadFromDb = if(entityUid != 0L) {
-                            {
-                                it.personDao.findPersonAccountByUid(entityUid)?.also {
-                                    savedStateHandle[KEY_INIT_DATE_OF_BIRTH] = it.dateOfBirth.toString()
-                                }
-                            }
-                        }else {
-                             null
+                        onLoadFromDb = {
+                            it.personDao().takeIf { entityUid != 0L }?.findByUidAsync(entityUid)
                         },
                         makeDefault = {
-                            PersonWithAccount().also {
+                            Person().also {
                                 it.dateOfBirth = savedStateHandle[ARG_DATE_OF_BIRTH]?.toLong() ?: 0L
                             }
                         },
@@ -247,7 +241,7 @@ class PersonEditViewModel(
                         serializer = PersonPicture.serializer(),
                         loadFromStateKeys =listOf(STATE_KEY_PICTURE),
                         onLoadFromDb = if(entityUid != 0L){
-                            { it.personPictureDao.findByPersonUidAsync(entityUid) }
+                            { it.personPictureDao().findByPersonUidAsync(entityUid) }
                         } else {
                             null
                         },
@@ -461,14 +455,15 @@ class PersonEditViewModel(
         viewModelScope.launch {
             if(isRegistrationMode) {
                 val parentJoin = _uiState.value.approvalPersonParentJoin
-                _uiState.update { prev ->
+                val passwordVal = _uiState.value.password
+                val checkedUiState = _uiState.updateAndGet { prev ->
                     prev.copy(
                         usernameError = if(savePerson.username.isNullOrEmpty()) {
                             requiredFieldMessage
                         }else {
                             null
                         },
-                        passwordError = if(_uiState.value.password.isNullOrEmpty()) {
+                        passwordError = if(passwordVal.isNullOrEmpty()) {
                             requiredFieldMessage
                         }else {
                             null
@@ -489,27 +484,16 @@ class PersonEditViewModel(
                     )
                 }
 
-                if(_uiState.value.hasErrors()) {
+                if(checkedUiState.hasErrors() || passwordVal == null) {
                     loadingState = LoadingUiState.NOT_LOADING
                     _uiState.update { prev -> prev.copy(fieldsEnabled = true) }
                     return@launch
                 }
 
                 try {
-                    val personToRegister = PersonWithAccount().apply {
-                        firstNames = savePerson.firstNames
-                        lastName = savePerson.lastName
-                        dateOfBirth = savePerson.dateOfBirth
-                        username = savePerson.username
-                        emailAddr = savePerson.emailAddr
-                        personAddress = savePerson.personAddress
-                        gender = savePerson.gender
-                        newPassword = _uiState.value.password
-                        personUid = savePerson.personUid
-                    }
-
                     val registeredPerson = accountManager.register(
-                        person = personToRegister,
+                        person = savePerson,
+                        password = passwordVal,
                         endpointUrl = serverUrl,
                         accountRegisterOptions = AccountRegisterOptions(
                             makeAccountActive = !registrationModeFlags.hasFlag(REGISTER_MODE_MINOR)
@@ -567,7 +551,7 @@ class PersonEditViewModel(
                     !Instant.fromEpochMilliseconds(
                         savedStateHandle[KEY_INIT_DATE_OF_BIRTH]?.toLong() ?: 0
                     ).isDateOfBirthAMinor() &&
-                    !activeRepo.personParentJoinDao.isMinorApproved(savePerson.personUid)
+                    !activeRepo.personParentJoinDao().isMinorApproved(savePerson.personUid)
                 ) {
                     PersonParentJoin().apply {
                         ppjMinorPersonUid = savePerson.personUid
@@ -587,9 +571,9 @@ class PersonEditViewModel(
                             createPersonParentApprovalIfMinor = true,
                         )
                     }else {
-                        activeRepo.personDao.updateAsync(savePerson)
+                        activeRepo.personDao().updateAsync(savePerson)
                         consentToUpsert?.also {
-                            activeRepo.personParentJoinDao.upsertAsync(it)
+                            activeRepo.personParentJoinDao().upsertAsync(it)
                         }
                     }
                 }
@@ -603,7 +587,7 @@ class PersonEditViewModel(
                     val personPictureUriVal = personPictureVal.personPictureUri
                     if(initPictureUri != personPictureUriVal) {
                         //Save if changed
-                        activeDb.personPictureDao.upsert(personPictureVal)
+                        activeDb.personPictureDao().upsert(personPictureVal)
                         enqueueSavePictureUseCase(
                             entityUid = savePerson.personUid,
                             tableId = PersonPicture.TABLE_ID,
@@ -698,7 +682,7 @@ class PersonEditViewModel(
          * Used to store the date of birth on first load so that we can determine if a date of birth
          * update makes the person a minor.
          */
-        val KEY_INIT_DATE_OF_BIRTH = "initDob"
+        const val KEY_INIT_DATE_OF_BIRTH = "initDob"
 
     }
 

@@ -80,7 +80,7 @@ class ContentEntryVersionServerUseCase(
         pathInContentEntryVersion: String,
     ) : ContentManifestEntry? = withContext(Dispatchers.IO) {
         val manifest = manifestCache.get(contentEntryVersionUid) {
-            val contentEntryVersionEntity = (repo ?: db).contentEntryVersionDao
+            val contentEntryVersionEntity = (repo ?: db).contentEntryVersionDao()
                 .findByUidAsync(contentEntryVersionUid)
                 ?: throw IllegalArgumentException("No such ContentEntryVersion : $contentEntryVersionUid")
             val contentManifestUrl = contentEntryVersionEntity.cevManifestUrl!!

@@ -30,6 +30,10 @@ Windows:
 ```
 $ gradlew app-react:jsRun
 ```
+Both the webpack development server (started by ```app-react:jsRun```) _and_ the main http
+server (started by the runserver command as per main project README step 4) must run simultaneously
+to run the Javascript version from source in development mode.
+
 See [Kotlin/JS docs](https://kotlinlang.org/docs/running-kotlin-js.html#run-the-browser-target) for
 further info on Gradle commands if required.
 
@@ -80,3 +84,9 @@ npm install -g generate-license-file
 ```
 ./generate-license-file.sh
 ```
+
+### Bundled resource notes
+
+* SQL.js used for database
+* PDF-js used to display PDFs and enable usage tracking (e.g. page count/position). Uses the stock
+  pdf.js with an event handler added in viewer.html

@@ -10,7 +10,6 @@ import com.ustadmobile.core.viewmodel.person.edit.PersonEditUiState
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonParentJoin
-import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.ThemeContext
 import com.ustadmobile.mui.components.UstadDateField
@@ -273,7 +272,7 @@ val PersonEditScreenPreview = FC<Props> {
 
     var uiStateVar by useState {
         PersonEditUiState(
-            person = PersonWithAccount().apply {
+            person = Person().apply {
                 firstNames = "Bob"
                 lastName = "Jones"
                 phoneNum = "0799999"

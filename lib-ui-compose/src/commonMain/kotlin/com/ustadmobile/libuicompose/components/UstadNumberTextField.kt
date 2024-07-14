@@ -5,6 +5,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
+import com.ustadmobile.core.util.ext.toDisplayString
 
 /**
  * See
@@ -30,16 +31,23 @@ fun UstadNumberTextField(
     unsetDefault: Float = 0f,
     singleLine: Boolean = true,
 ) {
+    fun Float.numberString() = if(this == unsetDefault) "" else toDisplayString()
 
-    var rawValue by remember(value) {
-        mutableStateOf(if(value != unsetDefault) value.toInt().toString() else "")
+    var rawValue by remember {
+        mutableStateOf(value.numberString())
+    }
+
+    LaunchedEffect(value) {
+        if((rawValue.toFloatOrNull() ?: unsetDefault) != value) {
+            rawValue = value.numberString()
+        }
     }
 
     OutlinedTextField(
         value = rawValue,
         modifier = modifier,
         onValueChange = { text ->
-            val filteredText = text.filter { it.isDigit() }
+            val filteredText = text.filter { it.isDigit() || it == '.' }
             rawValue = filteredText
             val floatVal = filteredText.toFloatOrNull() ?: unsetDefault
             onValueChange(floatVal)

@@ -40,9 +40,25 @@ android {
         dataBinding false
     }
 
-    //APK splitting would interfere with sideloading the app between different targets and the size
-    //reduction will be minimal
+    /**
+     * APK splitting would interfere with sideloading the app between different targets and the size
+     * and size reduction will be minimal
+     *
+     * Official docs:
+     * https://developer.android.com/guide/app-bundle/configure-base#groovy
+     *
+     * Source code for config options:
+     * https://android.googlesource.com/platform/tools/base/+/studio-master-dev/build-system/gradle-core/src/main/java/com/android/build/gradle/internal/dsl/BundleOptions.kt
+     *
+     * FAQ on handling side-loading:
+     * https://developer.android.com/guide/app-bundle/faq#does_the_aab_prevent_users_from_sideloading_apps
+     */
     bundle {
+        //This is not in the main doc, but is in the source code.
+        texture {
+            enableSplit = false
+        }
+
         language {
             enableSplit = false
         }
@@ -308,7 +324,6 @@ dependencies {
     implementation libs.nanohttpd.nanolets
 
     //Android play core for update support within the application
-    implementation libs.android.play.core
     implementation libs.androidx.navigation.fragment.ktx
     implementation libs.androidx.navigation.ui
     implementation libs.androidx.navigation.ui.ktx

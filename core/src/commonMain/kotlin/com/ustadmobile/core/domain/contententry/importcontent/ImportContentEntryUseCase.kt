@@ -42,7 +42,7 @@ class ImportContentEntryUseCase(
     suspend operator fun invoke(
         contentEntryImportJobId: Long,
     ): ContentEntryVersion {
-        val job = db.contentEntryImportJobDao
+        val job = db.contentEntryImportJobDao()
             .findByUidAsync(contentEntryImportJobId) ?: throw IllegalArgumentException(
                 "$contentEntryImportJobId not found in db")
 
@@ -57,7 +57,7 @@ class ImportContentEntryUseCase(
                     while(isActive) {
                         Napier.v { "CompressVideo: update status = $latestJobStatus" }
                         latestJobStatus?.also { jobVal ->
-                            db.contentEntryImportJobDao.updateItemProgress(
+                            db.contentEntryImportJobDao().updateItemProgress(
                                 cjiUid = jobVal.cjiUid,
                                 cjiProgress = jobVal.cjiItemProgress,
                                 cjiTotal = jobVal.cjiItemTotal,
@@ -68,7 +68,7 @@ class ImportContentEntryUseCase(
                     }
                 }
 
-                db.contentEntryImportJobDao.updateItemStatus(
+                db.contentEntryImportJobDao().updateItemStatus(
                     cjiUid = job.cjiUid,
                     status = JobStatus.RUNNING
                 )
@@ -79,7 +79,7 @@ class ImportContentEntryUseCase(
                         latestJobStatus = it
                     }
                 ).also {
-                    db.contentEntryImportJobDao.updateItemStatus(
+                    db.contentEntryImportJobDao().updateItemStatus(
                         cjiUid = job.cjiUid,
                         status = JobStatus.COMPLETE
                     )
@@ -88,7 +88,7 @@ class ImportContentEntryUseCase(
             }
         }catch(e: Throwable) {
             withContext(NonCancellable) {
-                db.contentEntryImportJobDao.updateItemStatusAndError(
+                db.contentEntryImportJobDao().updateItemStatusAndError(
                     cjiUid = job.cjiUid,
                     status = if(e is CancellationException) {
                         JobStatus.CANCELED
@@ -102,7 +102,7 @@ class ImportContentEntryUseCase(
             throw e
         }
 
-        db.contentEntryVersionDao.insertAsync(contentEntryVersionEntity)
+        db.contentEntryVersionDao().insertAsync(contentEntryVersionEntity)
 
         val enqueueBlobUploadClientUseCaseVal = enqueueBlobUploadClientUseCase
         if(enqueueBlobUploadClientUseCaseVal != null && httpClient != null) {
