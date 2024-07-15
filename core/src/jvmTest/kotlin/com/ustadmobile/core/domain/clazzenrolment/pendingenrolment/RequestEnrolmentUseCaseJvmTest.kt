@@ -78,14 +78,14 @@ class RequestEnrolmentUseCaseJvmTest {
     ) {
         val code = "aa11"
         runBlocking {
-            val clazzUid = database.clazzDao.insert(
+            val clazzUid = database.clazzDao().insert(
                 Clazz().apply{
                     clazzName = "Test"
                     clazzCode = code
                 }
             )
 
-            database.enrolmentRequestDao.insert(
+            database.enrolmentRequestDao().insert(
                 EnrolmentRequest(
                     erClazzUid = clazzUid,
                     erPersonUid = requesterPerson.personUid
@@ -106,13 +106,13 @@ class RequestEnrolmentUseCaseJvmTest {
     ){
         val code = "1122"
         runBlocking {
-            val clazzUid = database.clazzDao.insert(
+            val clazzUid = database.clazzDao().insert(
                 Clazz().apply{
                     clazzName = "Test"
                     clazzCode = code
                 }
             )
-            database.clazzEnrolmentDao.insertAsync(
+            database.clazzEnrolmentDao().insertAsync(
                 ClazzEnrolment(
                     clazzUid = clazzUid,
                     personUid = requesterPerson.personUid,
@@ -133,7 +133,7 @@ class RequestEnrolmentUseCaseJvmTest {
     fun givenNoPendingEnrolmentsOrRequests_whenInvoked_thenRequestInserted() {
         runBlocking {
             val code = "aabb"
-            val clazzUid = database.clazzDao.insert(
+            val clazzUid = database.clazzDao().insert(
                 Clazz().apply {
                     clazzName = "Test"
                     clazzCode = code
@@ -144,7 +144,7 @@ class RequestEnrolmentUseCaseJvmTest {
                 code, requesterPerson, ClazzEnrolment.ROLE_STUDENT
             )
 
-            val pendingRequest = database.enrolmentRequestDao.findByClazzAndPerson(
+            val pendingRequest = database.enrolmentRequestDao().findByClazzAndPerson(
                 requesterPerson.personUid, clazzUid, 0
             )
 

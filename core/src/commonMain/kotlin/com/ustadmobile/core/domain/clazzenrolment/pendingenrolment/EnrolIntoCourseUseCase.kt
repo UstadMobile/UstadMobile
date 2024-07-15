@@ -37,7 +37,7 @@ class EnrolIntoCourseUseCase(
         val effectiveDb = (repo ?: db)
 
         return effectiveDb.withDoorTransactionAsync {
-            effectiveDb.clazzEnrolmentDao.insertAsync(enrolment)
+            effectiveDb.clazzEnrolmentDao().insertAsync(enrolment)
         }
     }
 

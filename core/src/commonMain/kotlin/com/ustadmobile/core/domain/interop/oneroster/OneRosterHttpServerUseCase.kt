@@ -35,7 +35,7 @@ class OneRosterHttpServerUseCase(
         val authToken = request.headers["Authorization"]?.substringAfter("Bearer ")?.trim()
             ?: return newPlainTextResponse(401, "No auth token")
 
-        val accountPersonUid = db.externalAppPermissionDao.getPersonUidByAuthToken(
+        val accountPersonUid = db.externalAppPermissionDao().getPersonUidByAuthToken(
             authToken, systemTimeInMillis()
         )
 

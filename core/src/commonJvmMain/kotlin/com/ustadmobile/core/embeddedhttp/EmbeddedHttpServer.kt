@@ -98,7 +98,7 @@ class EmbeddedHttpServer(
                         ).invoke(
                             request = request,
                             contentEntryVersionUid = contentEntryVersionUid,
-                            pathInContentEntryVersion = pathInContent
+                            pathInContentEntryVersion = pathInContent,
                         )
 
                         okHttpResponse.toHttpdResponse()

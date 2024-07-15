@@ -44,7 +44,7 @@ class ContentEntryEditViewModelTest : AbstractMainDispatcherTest(){
             val mockSaveContentEntryUseCase = mock<SaveContentEntryUseCase>()
             val mockImportContentUseCase = mock<EnqueueContentEntryImportUseCase>()
             val user = setActiveUser(activeEndpoint)
-            activeDb.systemPermissionDao.upsertAsync(
+            activeDb.systemPermissionDao().upsertAsync(
                 SystemPermission(
                     spToPersonUid = user.personUid,
                     spPermissionsFlag = PermissionFlags.EDIT_LIBRARY_CONTENT,

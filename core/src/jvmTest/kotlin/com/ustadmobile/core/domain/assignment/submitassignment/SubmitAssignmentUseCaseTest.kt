@@ -79,9 +79,9 @@ class SubmitAssignmentUseCaseTest {
                     }
 
                     assignment.caClazzUid = clazz.clazzUid
-                    assignment.caUid = db.clazzAssignmentDao.insertAsync(assignment)
+                    assignment.caUid = db.clazzAssignmentDao().insertAsync(assignment)
                     courseBlock.cbEntityUid = assignment.caUid
-                    courseBlock.cbUid = db.courseBlockDao.insertAsync(courseBlock)
+                    courseBlock.cbUid = db.courseBlockDao().insertAsync(courseBlock)
                 }
                 block(SubmitUseCaseContext(db, systemImpl, assignment, courseBlock, person))
             }
@@ -105,7 +105,7 @@ class SubmitAssignmentUseCaseTest {
                 }
             )
 
-            val submissionInDb = db.courseAssignmentSubmissionDao.getLatestSubmissionForUserAsync(
+            val submissionInDb = db.courseAssignmentSubmissionDao().getLatestSubmissionForUserAsync(
                 accountPersonUid = person.personUid, assignmentUid = assignment.caUid
             )
 
@@ -121,7 +121,7 @@ class SubmitAssignmentUseCaseTest {
                 caSubmissionPolicy = ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE
             }
         ) {
-            db.courseAssignmentSubmissionDao.insertAsync(CourseAssignmentSubmission().apply {
+            db.courseAssignmentSubmissionDao().insertAsync(CourseAssignmentSubmission().apply {
                 casAssignmentUid = assignment.caUid
                 casSubmitterUid = person.personUid
                 casText = "Burger!"
@@ -169,7 +169,7 @@ class SubmitAssignmentUseCaseTest {
                 caSubmissionPolicy = ClazzAssignment.SUBMISSION_POLICY_MULTIPLE_ALLOWED
             }
         ) {
-            db.courseAssignmentSubmissionDao.insertAsync(CourseAssignmentSubmission().apply {
+            db.courseAssignmentSubmissionDao().insertAsync(CourseAssignmentSubmission().apply {
                 casAssignmentUid = assignment.caUid
                 casSubmitterUid = person.personUid
                 casText = "Burger!"
@@ -188,7 +188,7 @@ class SubmitAssignmentUseCaseTest {
                 }
             )
 
-            val submissionInDb = db.courseAssignmentSubmissionDao.getLatestSubmissionForUserAsync(
+            val submissionInDb = db.courseAssignmentSubmissionDao().getLatestSubmissionForUserAsync(
                 accountPersonUid = person.personUid, assignmentUid = assignment.caUid
             )
 

@@ -16,7 +16,7 @@ class ApproveOrDeclinePendingEnrolmentUseCase(
         enrolmentRequest: EnrolmentRequest,
         approved: Boolean,
     ) {
-        val effectiveClazz = db.clazzDao.findByUidAsync(enrolmentRequest.erClazzUid)
+        val effectiveClazz = db.clazzDao().findByUidAsync(enrolmentRequest.erClazzUid)
             ?: throw IllegalStateException("Class does not exist")
 
         repo.withDoorTransactionAsync {
@@ -34,7 +34,7 @@ class ApproveOrDeclinePendingEnrolmentUseCase(
                 EnrolmentRequest.STATUS_REJECTED
             }
 
-            repo.enrolmentRequestDao.updateStatus(
+            repo.enrolmentRequestDao().updateStatus(
                 uid = enrolmentRequest.erUid,
                 status = requestStatus,
                 updateTime = systemTimeInMillis()

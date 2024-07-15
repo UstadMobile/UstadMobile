@@ -9,6 +9,7 @@ import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewViewModel
+import com.ustadmobile.core.viewmodel.clazz.gradebook.ClazzGradebookViewModel
 import com.ustadmobile.core.viewmodel.clazzenrolment.clazzmemberlist.ClazzMemberListViewModel
 import com.ustadmobile.core.viewmodel.clazzlog.attendancelist.ClazzLogListAttendanceViewModel
 import com.ustadmobile.core.viewmodel.coursegroupset.list.CourseGroupSetListViewModel
@@ -33,6 +34,7 @@ class ClazzDetailViewModel(
     private fun createTabList(
         showAttendance: Boolean,
         showMembers: Boolean,
+        showProgressReport: Boolean,
     ): List<TabItem> {
         val tabs = mutableListOf(
             TabItem(
@@ -47,6 +49,15 @@ class ClazzDetailViewModel(
                     viewName = ClazzMemberListViewModel.DEST_NAME,
                     args = mapOf(UstadView.ARG_CLAZZUID to entityUidArg.toString()),
                     label = systemImpl.getString(MR.strings.members_key).capitalizeFirstLetter(),
+                )
+            )
+        }
+        if(showProgressReport) {
+            tabs.add(
+                TabItem(
+                    viewName = ClazzGradebookViewModel.DEST_NAME,
+                    args = mapOf(UstadView.ARG_CLAZZUID to entityUidArg.toString()),
+                    label = systemImpl.getString(MR.strings.gradebook),
                 )
             )
         }
@@ -75,7 +86,7 @@ class ClazzDetailViewModel(
         viewModelScope.launch {
             _uiState.whenSubscribed {
                 launch {
-                    activeDb.clazzDao.clazzAndDetailPermissionsAsFlow(
+                    activeDb.clazzDao().clazzAndDetailPermissionsAsFlow(
                         accountPersonUid = activeUserPersonUid,
                         clazzUid = entityUidArg
                     ).collect {
@@ -86,6 +97,7 @@ class ClazzDetailViewModel(
                                 showAttendance = clazz.clazzFeatures.hasFlag(Clazz.CLAZZ_FEATURE_ATTENDANCE) &&
                                     it.hasAttendancePermission,
                                 showMembers = it.hasViewMembersPermission,
+                                showProgressReport = it.hasLearningRecordPermission,
                             )
                         }
 

@@ -149,12 +149,12 @@ fun UstadCourseBlockEdit(
             if (uiState.minScoreVisible) {
                 Spacer(modifier = Modifier.width(15.dp))
 
-                UstadNumberTextField(
+                UstadNullableNumberTextField(
                     modifier = Modifier
                         .testTag("points")
                         .weight(0.5F)
                         .defaultItemPadding(start = 0.dp),
-                    value = (uiState.block?.courseBlock?.cbMinPoints?.toFloat() ?: 0f),
+                    value = (uiState.block?.courseBlock?.cbMinPoints),
                     label = { Text(stringResource(MR.strings.points)) },
                     enabled = uiState.fieldsEnabled,
                     trailingIcon = {
@@ -165,7 +165,7 @@ fun UstadCourseBlockEdit(
                     },
                     onValueChange = {
                         onCourseBlockChange(
-                            uiState.block?.courseBlock?.copy(cbMinPoints = it.toInt())
+                            uiState.block?.courseBlock?.copy(cbMinPoints = it)
                         )
                     },
                 )
@@ -174,31 +174,46 @@ fun UstadCourseBlockEdit(
 
 
         if(uiState.maxPointsVisible) {
-            UstadInputFieldLayout(
-                modifier = Modifier.defaultItemPadding(),
-                errorText = uiState.caMaxPointsError,
-            ) {
-                UstadNumberTextField(
-                    modifier = Modifier
-                        .testTag("maximum_points")
-                        .fillMaxWidth(),
-                    value = (uiState.block?.courseBlock?.cbMaxPoints?.toFloat() ?: 0f),
-                    label = { Text(stringResource(MR.strings.maximum_points)) },
-                    trailingIcon = {
-                        Text(
-                            text = stringResource(MR.strings.points),
-                            modifier = Modifier.padding(end = 16.dp)
-                        )
-                    },
-                    isError = uiState.caMaxPointsError != null,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    onValueChange = {
-                        onCourseBlockChange(
-                            uiState.block?.courseBlock?.copy(cbMaxPoints = it.toInt())
-                        )
-                    },
-                )
-            }
+            UstadNullableNumberTextField(
+                modifier = Modifier
+                    .defaultItemPadding()
+                    .testTag("maximum_points")
+                    .fillMaxWidth(),
+                value = (uiState.block?.courseBlock?.cbMaxPoints),
+                label = {
+                    Text(
+                        buildString {
+                            append(stringResource(MR.strings.maximum_points))
+                            if(uiState.maxPointsRequired)
+                                append("*")
+                        }
+                    )
+                },
+                trailingIcon = {
+                    Text(
+                        text = stringResource(MR.strings.points),
+                        modifier = Modifier.padding(end = 16.dp)
+                    )
+                },
+                isError = uiState.caMaxPointsError != null,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                onValueChange = {
+                    onCourseBlockChange(
+                        uiState.block?.courseBlock?.copy(cbMaxPoints = it)
+                    )
+                },
+                supportingText = when {
+                    uiState.caMaxPointsError != null -> {
+                        { Text(uiState.caMaxPointsError ?: "") }
+                    }
+
+                    uiState.maxPointsRequired -> {
+                        { Text (stringResource(MR.strings.required)) }
+                    }
+
+                    else -> null
+                }
+            )
         }
 
 

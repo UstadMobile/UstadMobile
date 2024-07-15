@@ -10,7 +10,7 @@ import com.ustadmobile.door.paging.PagingSourceInterceptor
 import kotlinx.coroutines.flow.Flow
 import react.useMemo
 import react.useState
-import com.ustadmobile.door.paging.DoorRepositoryReplicatePullPagingSource
+import com.ustadmobile.door.paging.PagingSourceWithHttpLoader
 import com.ustadmobile.door.util.systemTimeInMillis
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.filter
@@ -60,7 +60,7 @@ fun <T:Any> useDoorRemoteMediator(
                 }
 
                 Napier.v { "useDoorRemoteMediator: fetch remote offset=$offset limit=$limit pagingSourceType=$pagingSourceType" }
-                (currentPagingSourceVal as? DoorRepositoryReplicatePullPagingSource)?.loadHttp(
+                (currentPagingSourceVal as? PagingSourceWithHttpLoader<Int>)?.loadHttp(
                     PagingSourceLoadParamsRefresh(offset, limit, false)
                 )
             }

@@ -45,7 +45,7 @@ class AuthManagerTest {
                 personUid = testUserUid
                 username = "testuser"
             })
-            repo.siteDao.insert(Site().apply {
+            repo.siteDao().insert(Site().apply {
                 siteName = "Site"
             })
 

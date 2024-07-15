@@ -13,7 +13,6 @@ import com.ustadmobile.core.db.ext.MIGRATION_148_149_NO_OFFLINE_ITEMS
 import com.ustadmobile.core.db.ext.MIGRATION_155_156_SERVER
 import com.ustadmobile.core.db.ext.MIGRATION_161_162_SERVER
 import com.ustadmobile.core.db.ext.MIGRATION_169_170_SERVER
-import com.ustadmobile.core.db.ext.MigrateMvvm
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.core.domain.cachelock.AddRetainAllActiveUriTriggersCallback
@@ -62,7 +61,6 @@ import java.io.FileReader
 import java.io.FileWriter
 import java.util.Locale
 import java.util.Properties
-import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * The database and use cases that need to start observing once the database is created
@@ -82,7 +80,6 @@ fun makeJvmBackendDiModule(
     config: ApplicationConfig,
     json: Json,
     contextScope: EndpointScope = EndpointScope.Default,
-    ranMvvmMigration: AtomicBoolean,
 ) = DI.Module("JvmBackendDiModule") {
     val dataDirPath = config.absoluteDataDir()
     dataDirPath.takeIf { !it.exists() }?.mkdirs()
@@ -162,11 +159,6 @@ fun makeJvmBackendDiModule(
             .addCallback(InsertDefaultSiteCallback())
             .addCallback(AddRetainAllActiveUriTriggersCallback())
             .addCallback(AddOutgoingReplicationForMessageTriggerCallback())
-            .addMigrations(
-                MigrateMvvm(
-                    onRan = { ranMvvmMigration.set(true) }
-                )
-            )
             .addMigrations(*migrationList().toTypedArray())
             .addMigrations(Migrate131to132AddRetainActiveUriTriggers)
             .addMigrations(MIGRATION_144_145_SERVER)

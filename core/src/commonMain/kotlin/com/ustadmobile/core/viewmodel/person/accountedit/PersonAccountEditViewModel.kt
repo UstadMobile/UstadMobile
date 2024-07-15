@@ -89,7 +89,7 @@ class PersonAccountEditViewModel(
                 if(entityUidArg == activeUserPersonUid) {
                     true
                 }else {
-                    db.systemPermissionDao.personHasSystemPermission(
+                    db.systemPermissionDao().personHasSystemPermission(
                         activeUserPersonUid, PermissionFlags.EDIT_ALL_PERSONS
                     )
                 }
@@ -98,8 +98,8 @@ class PersonAccountEditViewModel(
             loadEntity(
                 serializer = PersonUsernameAndPasswordModel.serializer(),
                 onLoadFromDb = { db ->
-                    val person = db.personDao.findByUidAsync(entityUidArg)
-                    val hasResetPermission = db.systemPermissionDao.personHasSystemPermission(
+                    val person = db.personDao().findByUidAsync(entityUidArg)
+                    val hasResetPermission = db.systemPermissionDao().personHasSystemPermission(
                         accountPersonUid = activeUserPersonUid,
                         permission = PermissionFlags.RESET_PASSWORDS,
                     )
@@ -219,11 +219,11 @@ class PersonAccountEditViewModel(
             if(entity.mode == MODE_CREATE_ACCOUNT) {
                 //This is a registration
                 try {
-                    val usernameCount = activeRepo.personDao.countUsername(entity.username)
+                    val usernameCount = activeRepo.personDao().countUsername(entity.username)
                     if(usernameCount == 0) {
                         activeRepo.withDoorTransactionAsync {
                             authManager.setAuth(entityUidArg, entity.newPassword)
-                            val numChanges = activeRepo.personDao.updateUsername(
+                            val numChanges = activeRepo.personDao().updateUsername(
                                 personUid = entityUidArg,
                                 username = entity.username,
                                 currentTime = systemTimeInMillis()
