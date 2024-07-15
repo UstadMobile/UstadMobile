@@ -9,7 +9,8 @@ appId: com.toughra.ustadmobile
       - tapOn:
           text: "Show roots"
       - tapOn:
-          text: "Downloads"
+          text: "Images"
+- tapOn: "Pictures"
 - runFlow:
     when:
       notVisible: ${TESTFILENAME}
