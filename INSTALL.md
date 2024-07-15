@@ -48,7 +48,11 @@ winget install -e --id HandBrake.HandBrake.CLI
 
 ### 3. Unzip ustad-server.zip and start server
 
-Unzip ustad-server.zip. Open the ustad-server.conf file and set the siteUrl property to the url that 
+Unzip ustad-server.zip. 
+
+#### Single learning space system configuration
+
+Open the ustad-server.conf file and set the siteUrl property to the url that 
 will be used to access the site e.g. https://ustad.yourdomain.com/ (e.g. using a reverse proxy setup
 with Apache or Nginx in a production setup) or http://your.ip.address:8087/ (for testing/evaluation).
 e.g.
@@ -63,13 +67,54 @@ ktor {
 }        
 ```
 
+#### Multi learning space system (virtual hosting) configuration
+
+The Ustad server supports running multiple subdomains (e.g. schoolname1.example.org, schoolname2.example.org),
+where each subdomain has a separate learning space (classes, users, content, etc) in a single JVM
+(to significantly reduce memory/space overhead). Each learning space has its own database
+(Postgres or SQLite). The server will then use a separate database for each learning space, and select
+the database to use for a request based on the virtual host name.
+
+This can be setup by setting dbmode to virtualhost and using (hostname) in the database url such that
+each virtual host maps to a different database:
+
+```
+ktor {
+  ..
+  ustad {
+    ..
+    dbmode = virtualhost
+    ..
+    database {
+       ..
+       # For SQLite 
+       url = "jdbc:sqlite:(datadir)/(hostname)/UmAppDatabase.sqlite?journal_mode=WAL&synchronous=OFF&busy_timeout=30000&recursive_triggers=true"
+       ..
+       
+       # For Postgres - the username/password must be granted permission on all databases to be used
+       url = "jdbc:postgresql:///ustad_(hostname)"
+       ..
+    }
+  }
+}
+```
+(hostname) will be automatically replaced with the hostname based on the incoming request - any
+non-alphanumeric character will be replaced with _.
+
+When using the virtual hosting mode, siteUrl is NOT set.
+
+#### Email configuration
+
 If your site will allow self-registration (which can be enabled by the admin user through settings
 after logging in), you must configure the email section of the config file. The Children's Online 
 Privacy Protection Act requires obtaining of parental consent, which is done by requesting a parental
 email address. Uncomment the mail section in ustad-server.conf and add an email account that can be
 used to send email.
 
-After setting the siteUrl in the configuration file (and email config if required), start the server:
+#### Running the server
+
+After setting the siteUrl (if not using virtual hosting) in the configuration file 
+(and email config if required), start the server:
 
 Linux/MacOS:
 ```
@@ -112,11 +157,13 @@ server data is stored, and other options.
 
 ## Production recommendations
 
-* Use an HTTP server such as Apache or Nginx with a reverse proxy. Apache or Nginx
-  should be used to provide https support e.g. as per [Apache Reverse Proxy Guide](https://httpd.apache.org/docs/2.4/howto/reverse_proxy.html).
-  The [Forwarded](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Forwarded) header must
-  include the protocol (e.g. http or https) or the [X-Forwarded-Proto](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-Proto)
-  header must be set. 
+### Use a reverse proxy
+
+Use an HTTP server such as Apache or Nginx with a reverse proxy. Apache or Nginx
+should be used to provide https support e.g. as per [Apache Reverse Proxy Guide](https://httpd.apache.org/docs/2.4/howto/reverse_proxy.html).
+The [Forwarded](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Forwarded) header must include the protocol (e.g. http or https) or 
+the [X-Forwarded-Proto](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-Proto) 
+header must be set. 
 
 Apache example:
 ```
@@ -138,6 +185,13 @@ ProxyPass /ustad/ http://localhost:8087/ustad/ nocanon
 ProxyPassReverse /ustad/ http://localhost:8087/ustad/
 ```
 
+If using virtual hosting, then set ServerName and ServerAlias e.g.
+
+```
+ServerName example.org
+ServerAlias *.example.org
+```
+
 Enable required Apache modules:
 ```
 a2enmod proxy headers
@@ -152,28 +206,3 @@ Content assets will be compressed by the server itself.
 * Setup a Postgres database and use this instead of the default (embedded) SQLite.
 
 * Run the server using a script on startup or use the screen command.
-
-## Virtual Hosting Subdomains (Optional)
-
-The Ustad server supports running multiple subdomains (e.g. schoolname1.example.org, schoolname2.example.org),
-where each subdomain has a separate learning space (classes, users, content, etc) in a single JVM 
-(to significantly reduce memory/space overhead). Each learning space has its own database 
-(Postgres or SQLite). The server will then use a separate database for each learning space, and select
-the database to use for a request based on the virtual host name. 
-
-Steps required are as follows:
-
-* If using a reverse proxy (e.g. Apache, Nginx) configure the reverse proxy e.g. for Apache
-```
-ServerName example.org
-ServerAlias *.example.org
-```
-The reverse proxy directives above do not need to be modified. Install a wildcard SSL certificate 
-e.g. using certbot.
-
-* Update the ustad-server.conf : Set ```dbmode = virtualhost``` and ensure that you add ```(hostname)``` 
-  to the main ustad database url. 
-
-* When running the server DO NOT add the ```--siteUrl``` parameter or use the siteUrl parameter in 
-  ustad-server.conf
-
