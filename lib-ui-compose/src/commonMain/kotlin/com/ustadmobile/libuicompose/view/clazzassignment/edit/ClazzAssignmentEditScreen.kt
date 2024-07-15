@@ -29,6 +29,8 @@ import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 import com.ustadmobile.libuicompose.util.compose.courseTerminologyEntryResource
 import com.ustadmobile.libuicompose.util.compose.rememberCourseTerminologyEntries
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
+import com.ustadmobile.libuicompose.view.app.LocalWidthClass
+import com.ustadmobile.libuicompose.view.app.SizeClass
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.Dispatchers
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
@@ -50,6 +52,7 @@ fun ClazzAssignmentEditScreen(viewModel: ClazzAssignmentEditViewModel) {
     )
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ClazzAssignmentEditScreen(
     uiState: ClazzAssignmentEditUiState,
@@ -293,19 +296,15 @@ fun ClazzAssignmentEditScreen(
         )
 
         if (uiState.peerMarkingVisible) {
-            Row(
-                modifier = Modifier.defaultItemPadding(),
-                horizontalArrangement = Arrangement.spacedBy(5.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                UstadInputFieldLayout(
-                    modifier = Modifier.weight(0.7F)
-                    ,
-                    errorText = uiState.reviewerCountError,
-                ) {
+            val sizeClass = LocalWidthClass.current
+
+            //This if-else can be replaced with a
+            if(sizeClass == SizeClass.COMPACT) {
+                Column(modifier = Modifier.fillMaxWidth()) {
                     UstadNumberTextField(
                         modifier = Modifier
                             .testTag("reviews_per_user_or_group")
+                            .defaultItemPadding()
                             .fillMaxWidth(),
                         value = (uiState.entity?.assignment?.caPeerReviewerCount ?: 0).toFloat(),
                         label = { Text(stringResource(MR.strings.reviews_per_user_group)) },
@@ -318,22 +317,62 @@ fun ClazzAssignmentEditScreen(
                                 }
                             )
                         },
+                        supportingText = uiState.reviewerCountError?.let {
+                            { Text(it) }
+                        },
                     )
+
+                    OutlinedButton(
+                        onClick = onClickAssignReviewers,
+                        modifier = Modifier
+                            .defaultItemPadding()
+                            .fillMaxWidth()
+                            .testTag("assign_reviewers_button"),
+                        enabled = uiState.fieldsEnabled,
+                    ) {
+                        Text(stringResource(MR.strings.assign_reviewers))
+                    }
                 }
-
-                Spacer(Modifier.width(16.dp))
-
-                OutlinedButton(
-                    onClick = onClickAssignReviewers,
-                    modifier = Modifier
-                        .weight(0.3F)
-                        .height(IntrinsicSize.Max)
-                        .testTag("assign_reviewers_button"),
-                    enabled = uiState.fieldsEnabled,
+            }else {
+                Row(
+                    modifier = Modifier.defaultItemPadding(),
+                    horizontalArrangement = Arrangement.spacedBy(5.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(stringResource(MR.strings.assign_reviewers))
+                    UstadNumberTextField(
+                        modifier = Modifier
+                            .testTag("reviews_per_user_or_group")
+                            .weight(0.7F),
+                        value = (uiState.entity?.assignment?.caPeerReviewerCount ?: 0).toFloat(),
+                        label = { Text(stringResource(MR.strings.reviews_per_user_group)) },
+                        enabled = uiState.fieldsEnabled,
+                        isError = uiState.reviewerCountError != null,
+                        onValueChange = {
+                            onChangeAssignment(
+                                uiState.entity?.assignment?.shallowCopy {
+                                    caPeerReviewerCount = it.toInt()
+                                }
+                            )
+                        },
+                        supportingText = { uiState.reviewerCountError?.also { Text(it) } }
+                    )
+
+
+                    Spacer(Modifier.width(16.dp))
+
+                    OutlinedButton(
+                        onClick = onClickAssignReviewers,
+                        modifier = Modifier
+                            .weight(0.3F)
+                            .height(IntrinsicSize.Max)
+                            .testTag("assign_reviewers_button"),
+                        enabled = uiState.fieldsEnabled,
+                    ) {
+                        Text(stringResource(MR.strings.assign_reviewers))
+                    }
                 }
             }
+
         }
 
         UstadSwitchField(
