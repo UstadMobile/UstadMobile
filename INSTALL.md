@@ -16,24 +16,28 @@ The server requires JDK17+. The __java__ command should be in the PATH or the JA
 be set (this is done automatically by default when you install Java from an installer package e.g. 
 using apt-get on Ubuntu or MSI/EXE for Windows).
 
-On Ubuntu:
-```
-apt-get install openjdk-17-jdk mediainfo sox libsox-fmt-all vlc
-```
-Note: if you have other Java versions, make sure you run the server jar using JDK17+. You can use 
-``sudo update-alternatives --config java`` to set the default java version to run.
+On Ubuntu 23.10+:
 
-If using Ubuntu 23.10+, you can use the HandBrakeCLI from the Ubuntu package manager (1.6.1):
+Install required packages:
 ```
-apt-get install handbrake-cli
+apt-get install openjdk-17-jdk mediainfo sox libsox-fmt-all vlc handbrake-cli
+```
+
+On Ubuntu (prior versions):
+
+Install required packages:
+```
+apt-get install openjdk-17-jdk mediainfo sox libsox-fmt-all vlc flatpak
 ```
 
 Previous versions (including 22.04 LTS) package HandBrake 1.5 (which is not supported due to lack of
-AV1 support). You can install the latest HandBrake CLI using flatpak as per [HandBrake website](https://handbrake.fr/downloads2.php):
+AV1 support). You need to install the latest HandBrake CLI using flatpak as per [HandBrake website](https://handbrake.fr/downloads2.php):
 ```
-apt-get install flatpak
 flatpak install /path/where/downloaded/HandBrakeCLI-1.7.3-x86_64.flatpak
 ```
+
+Note: if you have other Java versions, make sure you run the server jar using JDK17+. You can use 
+``sudo update-alternatives --config java`` to set the default java version to run.
 
 On Windows:
 * Download and install Java (JDK17+) if not already installed from the Java site [https://www.oracle.com/java/technologies/downloads/#jdk17-windows](https://www.oracle.com/java/technologies/downloads/#jdk17-windows)
