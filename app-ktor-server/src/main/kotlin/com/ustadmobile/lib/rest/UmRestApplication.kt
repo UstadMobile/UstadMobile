@@ -154,6 +154,7 @@ val KTOR_SERVER_ROUTES = listOf(
     "/ContainerEntryList", "/ContainerEntryFile", "/auth", "/ContainerMount",
     "/Site", "/import", "/contentupload", "/websocket", "/pdf",
     "/api", "/staticfiles"
+    ,"/.well-known"
 )
 
 
@@ -818,6 +819,7 @@ fun Application.umRestApplication(
      * in UstadAppReactProxy
      */
     install(Routing) {
+        staticFiles("/.well-known", File("src/main/resources/.well-known"))
         prefixRoute(sitePrefix) {
             addHostCheckIntercept()
             personAuthRegisterRoute()
@@ -841,6 +843,7 @@ fun Application.umRestApplication(
                         }
                     )
                 }
+
                 route("inviteuser") {
                     ProcessInviteRoute(
                         useCase = { call ->
@@ -953,4 +956,12 @@ fun Application.umRestApplication(
     println()
     println("Use [Ctrl+C] to stop.")
 }
-
+fun Route.staticContent() {
+    static {
+        resource("/", "assetlink.json")
+        resource("*", "assetlink.json")
+        static(".well-known") {
+            resources(".well-known")
+        }
+    }
+}

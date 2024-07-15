@@ -21,7 +21,7 @@
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
 
     <!-- This is required on android 12 to handle shake detection -->
-    <uses-permission android:name="android.permission.HIGH_SAMPLING_RATE_SENSORS"/>
+    <uses-permission android:name="android.permission.HIGH_SAMPLING_RATE_SENSORS" />
 
 
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
@@ -49,18 +49,18 @@
 
     Compose Video Player requires SDK 23. The VideoPlayer uses an if check for SDK version.
     -->
-    <uses-sdk tools:overrideLibrary="org.wordpress.aztec,org.wordpress.android.util,com.multiplatform.webview,io.sanghun.compose.video"/>
+    <uses-sdk tools:overrideLibrary="org.wordpress.aztec,org.wordpress.android.util,com.multiplatform.webview,io.sanghun.compose.video" />
 
     <!--
     Required to find PanicKit responders.
     -->
     <queries>
         <intent>
-            <action android:name="info.guardianproject.panic.action.CONNECT"/>
+            <action android:name="info.guardianproject.panic.action.CONNECT" />
         </intent>
 
         <intent>
-            <action android:name="info.guardianproject.panic.action.TRIGGER"/>
+            <action android:name="info.guardianproject.panic.action.TRIGGER" />
         </intent>
 
         <intent>
@@ -81,14 +81,15 @@
         tools:ignore="GoogleAppIndexingWarning"
         android:fullBackupContent="@xml/backup_rules"
         android:dataExtractionRules="@xml/data_extraction_rules"
-        android:localeConfig="@xml/locales_config"
-        >
+        android:localeConfig="@xml/locales_config">
 
         <!--
         The list of available UI languages as a comma separated list. See
         com.ustadmobile.core.impl.config.SupportedLanguagesConfig
         -->
-        <meta-data android:name="com.ustadmobile.uilanguages" android:value="${uiLanguages}"/>
+        <meta-data
+            android:name="com.ustadmobile.uilanguages"
+            android:value="${uiLanguages}" />
 
         <!--
         Preset locale setting: if present, this locale will be automatically set as the app locale
@@ -96,19 +97,25 @@
         for an area with one language, especially if that language is not supported as a locale by
         most operating systems.
         -->
-        <meta-data android:name="com.ustadmobile.presetlocale" android:value="${presetLocale}"/>
+        <meta-data
+            android:name="com.ustadmobile.presetlocale"
+            android:value="${presetLocale}" />
 
         <!--
         If true, add a small Powered by Ustad Mobile message on splash screen / login screen etc.
         -->
-        <meta-data android:name="com.ustadmobile.showpoweredbymsg" android:value="${showPoweredByMsg}"/>
+        <meta-data
+            android:name="com.ustadmobile.showpoweredbymsg"
+            android:value="${showPoweredByMsg}" />
 
 
         <!--
         The API url endpoint can be explicitly specified by setting it in buildconfig.properties. If
         it is not specified, the user will be prompted to enter the link.
         -->
-        <meta-data android:name="com.ustadmobile.apiurl" android:value="${apiUrl}"/>
+        <meta-data
+            android:name="com.ustadmobile.apiurl"
+            android:value="${apiUrl}" />
 
 
         <!--
@@ -138,6 +145,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
 
             </intent-filter>
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="http" />
+                <data android:host="*.applinktest.ustadmobile.com" />
+            </intent-filter>
         </activity>
 
         <!--
@@ -145,14 +161,17 @@
         https://developer.android.com/training/data-storage/shared/photopicker
         -->
         <!-- Trigger Google Play services to install the backported photo picker module. -->
-        <service android:name="com.google.android.gms.metadata.ModuleDependencies"
+        <service
+            android:name="com.google.android.gms.metadata.ModuleDependencies"
             android:enabled="false"
             android:exported="false"
             tools:ignore="MissingClass">
             <intent-filter>
                 <action android:name="com.google.android.gms.metadata.MODULE_DEPENDENCIES" />
             </intent-filter>
-            <meta-data android:name="photopicker_activity:0:required" android:value="" />
+            <meta-data
+                android:name="photopicker_activity:0:required"
+                android:value="" />
         </service>
 
 
@@ -184,13 +203,16 @@
             android:exported="true">
 
             <intent-filter>
-                <data android:host="*" android:pathPattern=".*" android:scheme="local-auth" />
-                <action android:name="com.ustadmobile.AUTH_GET_TOKEN"/>
+                <data
+                    android:host="*"
+                    android:pathPattern=".*"
+                    android:scheme="local-auth" />
+                <action android:name="com.ustadmobile.AUTH_GET_TOKEN" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        
-        
+
+
     </application>
 
 </manifest>

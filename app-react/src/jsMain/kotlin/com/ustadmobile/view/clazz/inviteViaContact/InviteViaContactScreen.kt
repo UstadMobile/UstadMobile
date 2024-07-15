@@ -40,10 +40,10 @@ private val InviteViaContactComponent2 = FC<InviteViaContactProps> { props ->
         maxWidth = "lg"
 
 
-        ChipTextField {
-            value = chips
-            onChange = handleChange
-        }
+//        ChipTextField {
+//            value = chips
+//            onChange = handleChange
+//        }
 
 
     }

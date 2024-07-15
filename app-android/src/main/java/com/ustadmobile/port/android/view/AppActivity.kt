@@ -23,6 +23,8 @@ import org.kodein.di.bind
 import org.kodein.di.instance
 import org.kodein.di.provider
 import org.kodein.di.scoped
+import android.content.Intent
+import android.net.Uri
 
 
 class AppActivity: AbstractAppActivity() {
@@ -31,6 +33,8 @@ class AppActivity: AbstractAppActivity() {
     private var mCustomTabsClient: CustomTabsClient? = null
 
     private var mCustomTabsSession: CustomTabsSession? = null
+
+
 
     override val di by DI.lazy {
         extend(super.di)
@@ -128,6 +132,11 @@ class AppActivity: AbstractAppActivity() {
         //Official docs make no mention of disconnecting, does not seem to be required
         // https://developer.chrome.com/docs/android/custom-tabs/guide-warmup-prefetch
         bindCustomTabsService()
+
+        // ATTENTION: This was auto-generated to handle app links.
+        val appLinkIntent: Intent = intent
+        val appLinkAction: String? = appLinkIntent.action
+        val appLinkData: Uri? = appLinkIntent.data
     }
 
     override fun onLocalesChanged(locales: LocaleListCompat) {
