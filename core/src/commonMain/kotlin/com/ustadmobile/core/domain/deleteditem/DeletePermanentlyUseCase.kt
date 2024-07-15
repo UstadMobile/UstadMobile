@@ -13,7 +13,7 @@ class DeletePermanentlyUseCase(
     ) {
         val timeNow = systemTimeInMillis()
 
-        repoOrDb.deletedItemDao.updateStatusByUids(
+        repoOrDb.deletedItemDao().updateStatusByUids(
             uidList = items.map { it.delItemUid },
             newStatus = DeletedItem.STATUS_DELETED_PERMANENTLY,
             updateTime = timeNow

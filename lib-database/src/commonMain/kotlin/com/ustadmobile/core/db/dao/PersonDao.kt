@@ -30,16 +30,9 @@ expect abstract class PersonDao : BaseDao<Person> {
     abstract suspend fun countUsername(username: String): Int
 
 
-    @Query("SELECT EXISTS(SELECT token FROM AccessToken WHERE token = :token " +
-            " and accessTokenPersonUid = :personUid)")
-    abstract fun isValidToken(token: String, personUid: Long): Boolean
-
-    @Insert
-    abstract fun insertAccessToken(token: AccessToken)
-
 
     @Query("""
-        SELECT Person.personUid, Person.admin, Person.firstNames, Person.lastName, 
+        SELECT Person.personUid, Person.firstNames, Person.lastName, 
                PersonAuth.passwordHash
           FROM Person
                JOIN PersonAuth
@@ -61,10 +54,6 @@ expect abstract class PersonDao : BaseDao<Person> {
     @Insert
     abstract fun insertPersonAuth(personAuth: PersonAuth)
 
-    @Query("SELECT COALESCE((SELECT admin FROM Person WHERE personUid = :accountPersonUid), 0)")
-    @PostgresQuery("SELECT COALESCE((SELECT admin FROM Person WHERE personUid = :accountPersonUid), FALSE)")
-    abstract suspend fun personIsAdmin(accountPersonUid: Long): Boolean
-
     @Query("SELECT Person.* FROM PERSON Where Person.username = :username")
     abstract fun findByUsername(username: String?): Person?
 
@@ -81,10 +70,6 @@ expect abstract class PersonDao : BaseDao<Person> {
 
     @Query("SELECT * FROM PERSON WHERE Person.personUid = :uid")
     abstract fun findByUid(uid: Long): Person?
-
-    @Query("SELECT Person.*, null as newPassword, null as currentPassword,null as confirmedPassword" +
-            " FROM PERSON WHERE Person.personUid = :uid")
-    abstract suspend fun findPersonAccountByUid(uid: Long): PersonWithAccount?
 
     @HttpAccessible(
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES

@@ -40,7 +40,7 @@ class CourseGroupSetDetailViewModel(
 
     init {
         viewModelScope.launch {
-            val permissionsFlow = activeRepo.coursePermissionDao
+            val permissionsFlow = activeRepo.coursePermissionDao()
                 .personHasPermissionWithClazzPairAsFlow(
                     accountPersonUid = activeUserPersonUid,
                     clazzUid = argClazzUid,
@@ -48,7 +48,7 @@ class CourseGroupSetDetailViewModel(
                     secondPermission = PermissionFlags.COURSE_MANAGE_STUDENT_ENROLMENT,
                 ).shareIn(viewModelScope, SharingStarted.WhileSubscribed())
 
-            val memberListFlow = activeRepo.courseGroupMemberDao
+            val memberListFlow = activeRepo.courseGroupMemberDao()
                 .findByCourseGroupSetAndClazzAsFlow(
                     cgsUid = entityUidArg,
                     clazzUid = argClazzUid,
@@ -57,7 +57,7 @@ class CourseGroupSetDetailViewModel(
                     accountPersonUid = activeUserPersonUid,
                 )
 
-            val entityFlow = activeRepo.courseGroupSetDao.findByUidAsFlow(
+            val entityFlow = activeRepo.courseGroupSetDao().findByUidAsFlow(
                 entityUidArg
             )
 

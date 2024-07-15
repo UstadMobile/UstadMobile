@@ -32,7 +32,7 @@ class PersonDetailViewModelTest: AbstractMainDispatcherTest() {
     fun givenPersonDetails_whenPersonUsernameIsNullAndCantManageAccount_thenCreateAccountShouldBeHidden() {
         testViewModel<PersonDetailViewModel>() {
             val userPerson = setActiveUser(endpoint)
-            activeDb.systemPermissionDao.upsertAsync(
+            activeDb.systemPermissionDao().upsertAsync(
                 SystemPermission(
                     spToPersonUid = userPerson.personUid,
                     spPermissionsFlag = PermissionFlags.PERSON_VIEW,
@@ -63,7 +63,7 @@ class PersonDetailViewModelTest: AbstractMainDispatcherTest() {
     fun givenPersonDetailsAndAdminLogged_whenPersonUsernameIsNullAndCanManageAccount_thenCreateAccountShouldBeShown() {
         testViewModel<PersonDetailViewModel> {
             val activeUser = setActiveUser(endpoint)
-            activeDb.systemPermissionDao.upsertAsync(
+            activeDb.systemPermissionDao().upsertAsync(
                 SystemPermission(
                     spToPersonUid = activeUser.personUid,
                     spPermissionsFlag = PermissionFlags.PERSON_VIEW or PermissionFlags.EDIT_ALL_PERSONS,
@@ -94,7 +94,7 @@ class PersonDetailViewModelTest: AbstractMainDispatcherTest() {
     fun givenPersonDetailsAndAdminLogged_whenPersonUsernameIsNotNullAndCanManageAccount_thenChangePasswordShouldBeShown() {
         testViewModel<PersonDetailViewModel> {
             val activeUser = setActiveUser(endpoint)
-            activeDb.systemPermissionDao.upsertAsync(
+            activeDb.systemPermissionDao().upsertAsync(
                 SystemPermission(
                     spToPersonUid = activeUser.personUid,
                     spPermissionsFlag = Long.MAX_VALUE,
@@ -155,7 +155,7 @@ class PersonDetailViewModelTest: AbstractMainDispatcherTest() {
 
                 childInDb.personUid = AddNewPersonUseCase(activeDb, null).invoke(childInDb)
 
-                activeDb.personParentJoinDao.upsertAsync(
+                activeDb.personParentJoinDao().upsertAsync(
                     PersonParentJoin().apply {
                         ppjMinorPersonUid = childInDb.personUid
                         ppjParentPersonUid = activeUser.personUid

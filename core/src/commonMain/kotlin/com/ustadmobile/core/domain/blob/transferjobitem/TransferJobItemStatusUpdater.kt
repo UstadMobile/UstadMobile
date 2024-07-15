@@ -86,14 +86,14 @@ class TransferJobItemStatusUpdater(
                     || updateTransferJobStatusUid != 0
         }?.withDoorTransactionAsync {
             progressUpdatesToCommit.forEach {
-                db.transferJobItemDao.updateTransferredProgress(
+                db.transferJobItemDao().updateTransferredProgress(
                     jobItemUid = it.transferItem.transferJobItemUid,
                     transferred = it.bytesTransferred,
                 )
             }
 
             statusUpdatesToCommit.forEach {
-                db.transferJobItemDao.updateStatus(
+                db.transferJobItemDao().updateStatus(
                     jobItemUid = it.transferItem.transferJobItemUid,
                     status = it.status
                 )
@@ -101,7 +101,7 @@ class TransferJobItemStatusUpdater(
                 //If the blob upload is complete and associated with an entityUid, then put in an
                 // OutgoingReplication so that the new value is sent to the server.
                 if(it.status == TransferJobItemStatus.COMPLETE.value && repoNodeId != null) {
-                    db.transferJobItemDao.insertOutgoingReplicationForTransferJobItemIfDone(
+                    db.transferJobItemDao().insertOutgoingReplicationForTransferJobItemIfDone(
                         destNodeId = repoNodeId,
                         transferJobItemUid = it.transferItem.transferJobItemUid
                     )
@@ -109,7 +109,7 @@ class TransferJobItemStatusUpdater(
             }
 
             if(updateTransferJobStatusUid != 0) {
-                val numUpdates = db.transferJobDao.updateStatusIfComplete(
+                val numUpdates = db.transferJobDao().updateStatusIfComplete(
                     jobUid = updateTransferJobStatusUid
                 )
                 Napier.d { "TransferJobItemStatusUpdater: update status complete for " +

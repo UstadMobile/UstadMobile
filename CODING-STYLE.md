@@ -1,19 +1,30 @@
 
-### Coding pattern
+# Coding pattern
 
 The app follows an MVVM pattern as follows:
+* View layer is built using:
+  * [UiState](#uistate-classes) classes contain all information needed to show a screen e.g. 
+  ```data class PersonDetailUiState(..)```. This often includes entity objects from the data layer.
+  * [ViewModels](#viewmodels) (e.g. ```class PersonDetailViewModel```) contain the logic and event handlers for the screen 
+   (e.g. onClickButton etc) and emit a flow of the UIState class.
+  * [Screens](#screens) (e.g. ```fun PersonDetailScreen(viewModel)``` observes the UIState flow from the ViewModel 
+  to render the user interface (using a Jetpack Compose function on Android and Desktop and a React 
+  Functional Component using the Kotlin/JS wrapper for the web).
+* Domain Layer that contains UseCase(s) as per [Android Achitecture Recommendations](https://developer.android.com/topic/architecture/domain-layer)
+  * [UseCase](#usecase): where a single class can work for all platforms then a single class can be added 
+   e.g. ```class AddNewPersonUseCase```. Where different implementations are needed for different
+   platforms then create an interface e..g. ```interface OpenExternalLinkUseCase```.
+* Data layer: this is the database provided using Room and [Door](https://www.github.com/UstadMobile/door/) found in the ```lib-database``` module.
 
-* UIState classes contain all information needed to show a screen. This often includes entity objects
-* ViewModels contain the logic and emit a flow of the UIState class.
-* Views observe the UIState flow to render the user interface (using Jetpack Compose or React/JS)
+All Kotlin code should follow [Kotlin coding conventions](https://kotlinlang.org/docs/coding-conventions.html). SQL queries should follow
+[SQLStyle.guide](https://www.sqlstyle.guide/).
+
+## View layer
 
 ### UiState classes
 
 The UiState class contains everything needed to render a screen. It is emitted as a flow from the
 ViewModel. It is a data class contained in the same file as the ViewModel.
-
-When converting an existing MVP screen, the ViewModel should generally have all the same properties that
-are found on the existing view interface (but properties should be non-mutable val instead of var).
 
 The UiState class should also contain the model entity. It should use the same model type as found
 on the view (e.g. because PersonDetailView uses PersonWithPersonParentJoin, PersonDetailUiState 
@@ -79,10 +90,10 @@ class PersonDetailViewModel: ViewModel {
 
 ```
 
-### Views
+### Screens
 
-Views are written using Jetpack Compose for Android and the Kotlin/JS MUI wrapper for Javascript. 
-The view function should use the UiState as an argument, 
+Screens are written using Jetpack Compose for Android and the Kotlin/JS MUI wrapper for Javascript. 
+The screen function should use the UiState as an argument, 
 
 Android Jetpack Compose:
 ```
@@ -143,6 +154,52 @@ function PersonDetailScreenPreview(
     )
 )
 ```
+
+## Domain Layer
+
+### UseCase
+
+A UseCase will be named as per the Android architecture recommendations in the form of Verb(Noun-optional)UseCase
+and will contain a single invoke function. A UseCase can depend on other UseCases which should be provided as 
+constructor parameters.
+
+e.g.
+```
+class DoThingsUseCase(
+   private val dependency: OtherUseCase,
+) {
+    data class WhatToDo(
+        val what: String,
+        val howMuch: Int,
+    )
+
+    data class DoThingsResult(
+         val howMuchDone: Int,
+         val notDone: List<String>
+    )
+
+    suspend operator fun invoke(
+        todo: List<WhatToDo>,
+        progressListener: (Int) -> Unit,
+    ) {
+        //.. do stuff here
+        return ToDoThingsResult(..)
+    }
+}
+```
+
+Where different implementations are required for different platforms the UseCase itself should be an 
+interface (e.g. ```interface DoThingsUseCase```) and then implementations for each platform should be
+in the same package (e.g. ```class DoThingsUseCaseJvm```, ```class DoThingsUseCaseAndroid```, 
+```class DoThingsUseCaseJs``` etc)
+
+The UseCase should be bound using the dependency injection (KodeIn-DI). If there is only one implementation
+it can normally be bound in CommonDomainDi. If there are different implementations for different platforms it
+be bound in the modules for each platform (e.g. UstadJsDi on Kotlin/JS, DesktopDomainDiModule on desktop, UstadApp
+and AbstractAppActivity on Android). On Andoid any UseCase that needs to use strings MUST be bound in the activity
+because per-app locales require the activity context and don't work with the application context.
+
+## Common situations
 
 ### Returning values from one screen to another
 
@@ -247,13 +304,15 @@ memberVar = SomeEntity()
 memberVar!!.someField = "aValue"
 ```
 
-### Conventions
+## Conventions
 
-#### Spelling
+All Kotlin code should follow [Kotlin coding conventions](https://kotlinlang.org/docs/coding-conventions.html)
+
+### Spelling
 
 Use US English spellings, the same as system libraries etc.
 
-#### Localization strings
+### Localization strings
 
 The name for the string should be just the string itself. Only add extra text if the translation would be different due to a different context.
 

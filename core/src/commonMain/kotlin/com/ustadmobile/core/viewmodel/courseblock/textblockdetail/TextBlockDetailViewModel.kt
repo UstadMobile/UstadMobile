@@ -32,7 +32,7 @@ class TextBlockDetailViewModel(
         viewModelScope.launch {
             _uiState.whenSubscribed {
                 launch {
-                    activeRepo.courseBlockDao.findByUidWithPictureAsFlow(entityUidArg).collect {
+                    activeRepo.courseBlockDao().findByUidWithPictureAsFlow(entityUidArg).collect {
                         _uiState.update { prev ->
                             prev.copy(courseBlock = it)
                         }

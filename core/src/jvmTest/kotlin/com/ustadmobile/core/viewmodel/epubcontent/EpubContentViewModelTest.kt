@@ -56,7 +56,7 @@ class EpubContentViewModelTest : AbstractMainDispatcherTest(){
                 cevUid = cevUid,
                 cevOpenUri = mockWebServer.url("/$cevUid/book.opf").toString()
             )
-            activeDb.contentEntryVersionDao.insertAsync(contentEntryVersion)
+            activeDb.contentEntryVersionDao().insertAsync(contentEntryVersion)
 
             viewModelFactory {
                 savedStateHandle[UstadViewModel.ARG_ENTITY_UID] = cevUid.toString()
