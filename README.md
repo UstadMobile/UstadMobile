@@ -211,6 +211,10 @@ Please see [app-android/README.md](app-android/README.md) instructions to setup 
 signing. Make sure you are running an SDK33+ device or emulator connected using ADB for the 
 [baseline profile](https://developer.android.com/topic/performance/baselineprofiles/overview) build.
 
+## Javascript package updates
+
+When prompted to run kotlinUpgradePackageLock, run kotlinUpgradeYarnLock instead.
+
 ### Code structure
 
 This multi-module Gradle project built using Kotlin Multiplatform. It builds for:

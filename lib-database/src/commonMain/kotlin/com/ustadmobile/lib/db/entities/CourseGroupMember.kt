@@ -21,21 +21,21 @@ import kotlinx.serialization.Serializable
     )
 ))
 @Serializable
-class CourseGroupMember {
-
+data class CourseGroupMember(
     @PrimaryKey(autoGenerate = true)
-    var cgmUid: Long = 0
+    var cgmUid: Long = 0,
 
-    var cgmSetUid: Long = 0
+    var cgmSetUid: Long = 0,
 
     // real group numbers start from 1, 0 means this person is not yet in a group
-    var cgmGroupNumber: Int = 0
+    var cgmGroupNumber: Int = 0,
 
-    var cgmPersonUid: Long = 0
+    var cgmPersonUid: Long = 0,
 
     @ReplicateLastModified
     @ReplicateEtag
-    var cgmLct: Long = 0
+    var cgmLct: Long = 0,
+) {
 
     companion object {
 

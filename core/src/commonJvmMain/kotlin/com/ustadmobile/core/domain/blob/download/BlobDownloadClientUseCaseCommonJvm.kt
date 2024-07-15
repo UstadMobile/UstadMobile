@@ -128,9 +128,9 @@ class BlobDownloadClientUseCaseCommonJvm(
 
     override suspend fun invoke(transferJobUid: Int) {
         val logPrefix = "BlobDownloadClientUseCaseCommonJvm (#$transferJobUid)"
-        val transferJob = db.transferJobDao.findByUid(transferJobUid)
+        val transferJob = db.transferJobDao().findByUid(transferJobUid)
             ?: throw IllegalArgumentException("$logPrefix: TransferJob #$transferJobUid does not exist")
-        val transferJobItems = db.transferJobItemDao.findPendingByJobUid(
+        val transferJobItems = db.transferJobItemDao().findPendingByJobUid(
             transferJobUid)
 
         coroutineScope {
@@ -155,7 +155,7 @@ class BlobDownloadClientUseCaseCommonJvm(
                 val numIncompleteItems = db.withDoorTransactionAsync {
                     transferJobItemStatusUpdater.onFinished()
                     transferJobItemStatusUpdater.commit(transferJobUid)
-                    db.transferJobItemDao.findNumberJobItemsNotComplete(transferJobUid)
+                    db.transferJobItemDao().findNumberJobItemsNotComplete(transferJobUid)
                 }
 
                 if(numIncompleteItems != 0) {

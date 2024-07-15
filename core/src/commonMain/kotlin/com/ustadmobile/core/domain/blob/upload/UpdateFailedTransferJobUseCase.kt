@@ -14,11 +14,11 @@ class UpdateFailedTransferJobUseCase (
 
     suspend operator fun invoke(jobUid : Int) {
         db.withDoorTransactionAsync {
-            db.transferJobItemDao.updateStatusIfNotCompleteForAllInJob(
+            db.transferJobItemDao().updateStatusIfNotCompleteForAllInJob(
                 jobUid = jobUid,
                 status = TransferJobItemStatus.FAILED.value
             )
-            db.transferJobDao.updateStatus(
+            db.transferJobDao().updateStatus(
                 jobUid = jobUid,
                 status = TransferJobItemStatus.FAILED.value
             )

@@ -28,16 +28,16 @@ class SaveContentEntryUseCase(
     ) {
         val effectiveDb = (repo ?: db)
         effectiveDb.withDoorTransactionAsync {
-            effectiveDb.contentEntryDao.upsertAsync(contentEntry)
+            effectiveDb.contentEntryDao().upsertAsync(contentEntry)
             if(picture != null && picture.cepPictureUri != initPictureUri) {
                 Napier.v {
                     "SavePictureUseCase: ContentEntry Set picture upsert uri = ${picture.cepPictureUri} uid=${picture.cepUid}"
                 }
-                db.contentEntryPicture2Dao.upsertListAsync(listOf(picture))
+                db.contentEntryPicture2Dao().upsertListAsync(listOf(picture))
             }
 
             if(joinToParentUid != null) {
-                effectiveDb.contentEntryParentChildJoinDao.insertAsync(
+                effectiveDb.contentEntryParentChildJoinDao().insertAsync(
                     ContentEntryParentChildJoin(
                         cepcjParentContentEntryUid = joinToParentUid,
                         cepcjChildContentEntryUid = contentEntry.contentEntryUid,

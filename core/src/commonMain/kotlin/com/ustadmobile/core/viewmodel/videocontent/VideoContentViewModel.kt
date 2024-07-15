@@ -9,13 +9,15 @@ import com.ustadmobile.core.util.ext.bodyAsDecodedText
 import com.ustadmobile.core.util.requireBodyUrlForUri
 import com.ustadmobile.core.util.requireEntryByUri
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.core.viewmodel.UstadViewModel
+import com.ustadmobile.core.viewmodel.noninteractivecontent.AbstractNonInteractiveContentViewModel
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ContentEntry
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -57,7 +59,29 @@ data class VideoContentUiState(
 class VideoContentViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
-): UstadViewModel(di, savedStateHandle, DEST_NAME) {
+): AbstractNonInteractiveContentViewModel(di, savedStateHandle, DEST_NAME) {
+
+    /**
+     * @param timestamp the system time (in millis) when video playing started
+     * @param timeInMillis the position within the video (in milliseconds) the video was at when play started
+     * @param totalDuration the total duration of the video (in milliseconds).
+     */
+    data class MediaPlayState(
+        val timestamp: Long = systemTimeInMillis(),
+        val timeInMillis: Long = 0,
+        val totalDuration: Long = 0,
+        val resumed: Boolean = false,
+    ) {
+        val progressPercent: Int
+            get() = if(totalDuration > 0) {
+                ((timeInMillis * 100) / totalDuration).toInt()
+            }else {
+                0
+            }
+
+    }
+
+    private val _mediaPlayState = MutableStateFlow(MediaPlayState())
 
     private val entityUidArg: Long = savedStateHandle[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0
 
@@ -75,7 +99,7 @@ class VideoContentViewModel(
         }
 
         viewModelScope.launch {
-            val contentEntryVersion = activeRepo.contentEntryVersionDao
+            val contentEntryVersion = activeRepo.contentEntryVersionDao()
                 .findByUidAsync(entityUidArg) ?: return@launch
 
             launch {
@@ -109,7 +133,7 @@ class VideoContentViewModel(
             }
 
             launch {
-                val contentEntry = activeRepo.contentEntryDao.findByUidAsync(
+                val contentEntry = activeRepo.contentEntryDao().findByUidAsync(
                     contentEntryVersion.cevContentEntryUid)
                 _uiState.update { prev ->
                     prev.copy(contentEntry = contentEntry)
@@ -125,10 +149,33 @@ class VideoContentViewModel(
         }
     }
 
+    override val titleAndLangCode: TitleAndLangCode?
+        get() {
+            return _uiState.value.contentEntry?.title?.let {
+                TitleAndLangCode(it, "en") //TODO: set language based on content entry
+            }
+        }
+
     fun onSetFullScreen(isFullScreen: Boolean) {
         _appUiState.update { it.copy(hideAppBar = isFullScreen) }
         _uiState.update { it.copy(isFullScreen = isFullScreen) }
     }
+
+    /**
+     * Called by the video player; allows the ViewModel to track playback duration and progress
+     * for progress tracking purposes.
+     */
+    fun onPlayStateChanged(playState: MediaPlayState) {
+        val prevState = _mediaPlayState.getAndUpdate { playState }
+        if(prevState.resumed != playState.resumed) {
+            onActiveChanged(playState.resumed)
+        }
+
+        onProgressed(playState.progressPercent)
+    }
+
+    internal fun onClear() = onCleared()
+
 
     companion object {
 

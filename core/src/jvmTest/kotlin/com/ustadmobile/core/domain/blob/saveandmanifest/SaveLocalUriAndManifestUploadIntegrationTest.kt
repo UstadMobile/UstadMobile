@@ -75,7 +75,7 @@ class SaveLocalUriAndManifestUploadIntegrationTest{
 
             runBlocking {
                 val clientDb: UmAppDatabase = clientNode.di.direct.on(endpoint).instance(tag = DoorTag.TAG_DB)
-                val jobUid = clientDb.contentEntryImportJobDao.insertJobItem(contentEntryImportJob)
+                val jobUid = clientDb.contentEntryImportJobDao().insertJobItem(contentEntryImportJob)
 
                 val entryVersion = importContentUseCase(jobUid)
                 clientNode.waitForContentUploadCompletion(
@@ -96,7 +96,7 @@ class SaveLocalUriAndManifestUploadIntegrationTest{
                 val serverDb: UmAppDatabase = serverNode.di.direct.on(endpoint)
                     .instance(tag = DoorTag.TAG_DB)
                 serverDb.doorFlow(arrayOf("ContentEntryVersion")) {
-                    serverDb.contentEntryVersionDao.findByUidAsync(entryVersion.cevUid)
+                    serverDb.contentEntryVersionDao().findByUidAsync(entryVersion.cevUid)
                 }.assertItemReceived(
                     timeout = timeout.seconds,
                     name = "Server should have ContentEntryVersion entity id #${entryVersion.cevUid}"
@@ -112,7 +112,7 @@ class SaveLocalUriAndManifestUploadIntegrationTest{
                  * All urls referenced in the manifest should marked on the server to be retained
                  */
                 serverDb.doorFlow(arrayOf("CacheLockJoin")) {
-                    serverDb.cacheLockJoinDao.findByTableIdAndEntityUid(
+                    serverDb.cacheLockJoinDao().findByTableIdAndEntityUid(
                         tableId  = ContentEntryVersion.TABLE_ID,
                         entityUid = entryVersion.cevUid
                     )

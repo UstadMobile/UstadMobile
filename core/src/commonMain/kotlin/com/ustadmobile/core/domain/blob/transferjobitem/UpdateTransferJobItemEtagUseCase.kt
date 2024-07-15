@@ -25,13 +25,13 @@ class UpdateTransferJobItemEtagUseCase {
     ) {
         when(tableId) {
             PersonPicture.TABLE_ID -> {
-                db.personPictureDao.updateTransferJobItemEtag(
+                db.personPictureDao().updateTransferJobItemEtag(
                     entityUid = entityUid,
                     transferJobItemUid = transferJobItemUid,
                 )
             }
             ContentEntryVersion.TABLE_ID -> {
-                db.contentEntryVersionDao.updateTransferJobItemEtag(
+                db.contentEntryVersionDao().updateTransferJobItemEtag(
                     entityUid = entityUid,
                     transferJobItemUid = transferJobItemUid,
                 )

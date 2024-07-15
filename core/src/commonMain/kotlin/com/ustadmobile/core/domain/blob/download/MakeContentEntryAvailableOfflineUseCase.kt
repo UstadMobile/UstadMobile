@@ -17,11 +17,11 @@ class MakeContentEntryAvailableOfflineUseCase(
 ) {
 
     suspend operator fun invoke(contentEntryUid: Long) {
-        val latestContentEntryVersion = repo.contentEntryVersionDao
+        val latestContentEntryVersion = repo.contentEntryVersionDao()
             .findLatestVersionUidByContentEntryUidEntity(contentEntryUid)
 
         repo.withDoorTransactionAsync {
-            val offlineItemUid = repo.offlineItemDao.insertAsync(
+            val offlineItemUid = repo.offlineItemDao().insertAsync(
                 OfflineItem(
                     oiNodeId = nodeIdAndAuth.nodeId,
                     oiContentEntryUid = contentEntryUid,

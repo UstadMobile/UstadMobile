@@ -12,8 +12,11 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -95,9 +98,13 @@ fun UstadScreenTabs(
         MutableStateFlow(mapOf<Int, AppUiState>())
     }
 
+    var appBarHidden by remember { mutableStateOf(false) }
+
     LaunchedEffect(pagerState.currentPage) {
         tabAppStateMap.map { it[pagerState.currentPage] }.filterNotNull().collect {
             onSetAppUiState(it)
+            appBarHidden = it.hideAppBar
+            pagerState.canScrollForward
         }
     }
 
@@ -107,7 +114,7 @@ fun UstadScreenTabs(
         mutableMapOf()
     }
 
-    val tabsHidden = autoHideIfOneTab && tabs.size <= 1
+    val tabsHidden = appBarHidden || (autoHideIfOneTab && tabs.size <= 1)
 
     Column {
         if (tabs.isNotEmpty()) {
@@ -149,6 +156,7 @@ fun UstadScreenTabs(
             HorizontalPager(
                 modifier = Modifier.fillMaxSize(),
                 state = pagerState,
+                userScrollEnabled = !appBarHidden,
             ) { tabIndex ->
                 val selectedTab = tabs[tabIndex]
                 val tabScope = TabScope(
