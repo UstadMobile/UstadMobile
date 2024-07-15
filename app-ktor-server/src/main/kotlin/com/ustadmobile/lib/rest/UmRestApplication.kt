@@ -321,6 +321,8 @@ fun Application.umRestApplication(
 
     val dataDirPath = environment.config.absoluteDataDir()
 
+    val  wellKnownDir  = environment.config.fileProperty("ktor.ustad.wellKnownDir","well-known")
+
     fun String.replaceDbUrlVars(): String {
         return replace("(datadir)", dataDirPath.absolutePath)
     }
@@ -840,7 +842,7 @@ fun Application.umRestApplication(
      * in UstadAppReactProxy
      */
     install(Routing) {
-        staticFiles("/.well-known", File("src/main/resources/.well-known"))
+        staticFiles("/.well-known",wellKnownDir)
         prefixRoute(sitePrefix) {
             addHostCheckIntercept()
             personAuthRegisterRoute()

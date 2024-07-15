@@ -93,7 +93,7 @@ import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
     PendingRepositorySession::class,
     DoorNode::class,
 
-], version = 194)
+], version = 195)
 expect abstract class UmAppDatabase : RoomDatabase {
 
     /*

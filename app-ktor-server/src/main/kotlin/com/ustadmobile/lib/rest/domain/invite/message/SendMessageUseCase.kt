@@ -11,9 +11,9 @@ class SendMessageUseCase(
     ) {
     suspend operator fun invoke(username: String, link: String, personUid: Long) {
         try {
-            val person = activeDb.personDao.findByUsername(username)
+            val person = activeDb.personDao().findByUsername(username)
             person?.let {
-                activeDb.messageDao.insert(
+                activeDb.messageDao().insert(
                     Message(
                         messageSenderPersonUid = personUid,
                         messageText = link,
