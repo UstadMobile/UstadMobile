@@ -4,6 +4,7 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.domain.contententry.launchcontent.LaunchContentEntryVersionUseCase
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.LaunchChromeUseCase
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
+import com.ustadmobile.core.domain.xapi.XapiSession
 import com.ustadmobile.core.embeddedhttp.EmbeddedHttpServer
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.lib.db.entities.ContentEntryVersion
@@ -24,7 +25,8 @@ class LaunchXapiUseCaseJvm(
     override suspend fun invoke(
         contentEntryVersion: ContentEntryVersion,
         navController: UstadNavController,
-        target: OpenExternalLinkUseCase.Companion.LinkTarget
+        target: OpenExternalLinkUseCase.Companion.LinkTarget,
+        xapiSession: XapiSession?,
     ): LaunchContentEntryVersionUseCase.LaunchResult {
         val resolveResult = resolveXapiLaunchHrefUseCase(
             contentEntryVersion.cevUid,

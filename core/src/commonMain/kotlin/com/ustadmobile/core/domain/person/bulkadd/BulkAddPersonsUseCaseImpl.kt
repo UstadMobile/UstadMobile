@@ -121,7 +121,7 @@ class BulkAddPersonsUseCaseImpl(
         val effectiveDb = activeRepo ?: activeDb
         val existingUsernames =  mutableSetOf<String>()
         allUsernames.chunked(100).forEach {
-            existingUsernames += effectiveDb.personDao.selectExistingUsernames(
+            existingUsernames += effectiveDb.personDao().selectExistingUsernames(
                 it.map { it.first.lowercase() }
             ).mapNotNull { it }
         }
@@ -133,7 +133,7 @@ class BulkAddPersonsUseCaseImpl(
         val courseUidMap = mutableMapOf<String, Clazz>()
         val missingCourseNames = mutableSetOf<String>()
         allCourseNames.chunked(100).forEach { nameList ->
-            val clazzesFound = effectiveDb.clazzDao.getCoursesByName(nameList)
+            val clazzesFound = effectiveDb.clazzDao().getCoursesByName(nameList)
             val clazzNamesFound = clazzesFound.mapNotNull { it.clazzName }.toSet()
 
             missingCourseNames.addAll(nameList.filter { it !in clazzNamesFound } )

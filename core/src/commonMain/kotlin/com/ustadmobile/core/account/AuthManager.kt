@@ -41,12 +41,12 @@ class AuthManager(
         password: String
     ): AuthResult {
         val passwordDoubleHashed = doublePbkdf2Hash(password)
-        val personAuth2 = (repo ?: db).personAuth2Dao.findByUsername(username)
+        val personAuth2 = (repo ?: db).personAuth2Dao().findByUsername(username)
         val authMatch = personAuth2?.pauthAuth?.base64StringToByteArray()
             .contentEquals(passwordDoubleHashed)
 
         val authorizedPerson = if(authMatch) {
-            db.personDao.findByUidAsync(personAuth2?.pauthUid ?: 0L)
+            db.personDao().findByUidAsync(personAuth2?.pauthUid ?: 0L)
         }else {
             null
         }
@@ -55,7 +55,7 @@ class AuthManager(
         if(authorizedPerson != null &&
             Instant.fromEpochMilliseconds(authorizedPerson.dateOfBirth).isDateOfBirthAMinor()
         ) {
-            val parentJoins = db.personParentJoinDao.findByMinorPersonUid(authorizedPerson.personUid)
+            val parentJoins = db.personParentJoinDao().findByMinorPersonUid(authorizedPerson.personUid)
 
             if(!parentJoins.any { it.ppjStatus == STATUS_APPROVED }) {
                 return AuthResult(null, false,
@@ -68,7 +68,7 @@ class AuthManager(
 
     suspend fun setAuth(personUid: Long, password: String) {
         val encryptedPass = doublePbkdf2HashAsBase64(password)
-        (repo ?: db).personAuth2Dao.insertAsync(PersonAuth2().apply {
+        (repo ?: db).personAuth2Dao().insertAsync(PersonAuth2().apply {
             pauthUid = personUid
             pauthMechanism = PersonAuth2.AUTH_MECH_PBKDF2_DOUBLE
             pauthAuth = encryptedPass

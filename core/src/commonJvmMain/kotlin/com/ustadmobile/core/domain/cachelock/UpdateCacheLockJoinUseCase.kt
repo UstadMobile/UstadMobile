@@ -79,7 +79,7 @@ class UpdateCacheLockJoinUseCase(
         Napier.v { "$logPrefix checking for pending lock changes" }
 
         db.withDoorTransactionAsync {
-            val pendingLocks = db.cacheLockJoinDao.findPendingLocks()
+            val pendingLocks = db.cacheLockJoinDao().findPendingLocks()
 
             if(pendingLocks.isEmpty())
                 return@withDoorTransactionAsync
@@ -97,7 +97,7 @@ class UpdateCacheLockJoinUseCase(
                         }
                     }
                 )
-                db.cacheLockJoinDao.deleteListAsync(locksToDelete)
+                db.cacheLockJoinDao().deleteListAsync(locksToDelete)
             }
 
             val createLockRequests = pendingLocks.filter {
@@ -113,7 +113,7 @@ class UpdateCacheLockJoinUseCase(
                 createLockRequests.forEach { createLockRequest ->
                     val urlKey = md5Digest.urlKey(createLockRequest.cljUrl!!)
                     val lockId = createdLocks[urlKey]?.second?.lockId ?: 0
-                    db.cacheLockJoinDao.updateLockIdAndStatus(
+                    db.cacheLockJoinDao().updateLockIdAndStatus(
                         uid = createLockRequest.cljId,
                         lockId = lockId,
                         status = if(lockId != 0L)

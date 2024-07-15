@@ -15,8 +15,8 @@ import app.cash.paging.PagingSource
 import app.cash.paging.PagingSourceLoadParamsRefresh
 import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.door.paging.DoorOffsetLimitRemoteMediator
-import com.ustadmobile.door.paging.DoorRepositoryReplicatePullPagingSource
 import com.ustadmobile.door.paging.PagingSourceInterceptor
+import com.ustadmobile.door.paging.PagingSourceWithHttpLoader
 import com.ustadmobile.door.util.systemTimeInMillis
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
@@ -56,11 +56,13 @@ fun <T: Any> rememberDoorRepositoryPager(
         mutableStateOf(pagingSourceFactory)
     }
 
+    //Unchecked cast is unavoidable here, and will always be correct.
+    @Suppress("UNCHECKED_CAST")
     val offsetLimitMediator = remember {
         DoorOffsetLimitRemoteMediator(
             onRemoteLoad = { offset, limit ->
                 Napier.v { "rememberDoorRepositoryPager: fetch remote offset=$offset limit=$limit" }
-                (currentPagingSource.get() as? DoorRepositoryReplicatePullPagingSource)?.loadHttp(
+                (currentPagingSource.get() as? PagingSourceWithHttpLoader<Int>)?.loadHttp(
                     PagingSourceLoadParamsRefresh(offset, limit, false)
                 )
             }

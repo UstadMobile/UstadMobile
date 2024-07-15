@@ -12,6 +12,7 @@ import com.ustadmobile.core.domain.htmlcontentdisplayengine.GetHtmlContentDispla
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.HTML_ENGINE_USE_CHROMETAB
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.HTML_ENGINE_USE_WEBVIEW
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
+import com.ustadmobile.core.domain.xapi.XapiSession
 import com.ustadmobile.core.embeddedhttp.EmbeddedHttpServer
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.viewmodel.UstadViewModel
@@ -33,7 +34,8 @@ class LaunchXapiUseCaseAndroid(
     override suspend fun invoke(
         contentEntryVersion: ContentEntryVersion,
         navController: UstadNavController,
-        target: OpenExternalLinkUseCase.Companion.LinkTarget
+        target: OpenExternalLinkUseCase.Companion.LinkTarget,
+        xapiSession: XapiSession?,
     ): LaunchContentEntryVersionUseCase.LaunchResult {
         val htmlContentEngine = getHtmlContentDisplayEngineUseCase()
         when(htmlContentEngine.code) {

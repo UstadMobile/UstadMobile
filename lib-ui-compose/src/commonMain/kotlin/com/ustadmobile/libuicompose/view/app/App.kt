@@ -5,9 +5,9 @@ import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Chat
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.outlined.Chat
 import androidx.compose.material.icons.outlined.LocalLibrary
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.School
@@ -69,7 +69,7 @@ val APP_TOP_LEVEL_NAV_ITEMS = listOf(
     ),
     TopNavigationItem(
         destRoute = ConversationListViewModel.DEST_NAME_HOME,
-        icon = Icons.Outlined.Chat,
+        icon = Icons.AutoMirrored.Outlined.Chat,
         label = MR.strings.messages,
     ),
     TopNavigationItem(
@@ -103,6 +103,8 @@ fun App(
         )
     }
 
+    val currentLocation by navigator.currentEntry.collectAsState(null)
+
     var appUiStateVal by appUiState
     LaunchedEffect(appUiStateVal) {
         onAppStateChanged(appUiStateVal)
@@ -126,6 +128,7 @@ fun App(
                     compactHeader = (widthClass != SizeClass.EXPANDED),
                     appUiState = appUiStateVal,
                     navigator = navigator,
+                    currentLocation = currentLocation,
                 )
             }
         },
@@ -133,14 +136,12 @@ fun App(
             //As per https://developer.android.com/reference/kotlin/androidx/compose/material3/package-summary#navigationbar
             var selectedTopLevelItemIndex by remember { mutableIntStateOf(0) }
             if(useBottomBar) {
-                val currentDestination by navigator.currentEntry.collectAsState(null)
-
                 /**
                  * Set the selected item. Relying on onClick misses when the user switches accounts
                  * and goes back to the start screen (courses).
                  */
-                LaunchedEffect(currentDestination?.path) {
-                    val pathVal = currentDestination?.path ?: return@LaunchedEffect
+                LaunchedEffect(currentLocation?.path) {
+                    val pathVal = currentLocation?.path ?: return@LaunchedEffect
                     val topLevelIndex = APP_TOP_LEVEL_NAV_ITEMS.indexOfFirst {
                         "/${it.destRoute}" == pathVal
                     }

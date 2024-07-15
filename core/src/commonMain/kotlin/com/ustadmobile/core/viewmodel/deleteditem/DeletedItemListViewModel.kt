@@ -29,7 +29,7 @@ class DeletedItemListViewModel(
 ): UstadListViewModel<DeletedItemListUiState>(di, savedStateHandle, DeletedItemListUiState(), DEST_NAME) {
 
     private val pagingSourceFactory: ListPagingSourceFactory<DeletedItem> = {
-        activeRepo.deletedItemDao.findDeletedItemsForUser(
+        activeRepo.deletedItemDao().findDeletedItemsForUser(
             personUid = activeUserPersonUid,
             includeActionedItems = false,
         )

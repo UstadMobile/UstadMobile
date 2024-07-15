@@ -29,11 +29,11 @@ import com.ustadmobile.core.impl.locale.entityconstants.FieldConstants
 import com.ustadmobile.core.viewmodel.ReportFilterEditUiState
 import com.ustadmobile.lib.db.entities.ReportFilter
 import com.ustadmobile.lib.db.entities.UidAndLabel
-import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
 import com.ustadmobile.libuicompose.components.UstadMessageIdOptionExposedDropDownMenuField
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
 
 
 @Composable

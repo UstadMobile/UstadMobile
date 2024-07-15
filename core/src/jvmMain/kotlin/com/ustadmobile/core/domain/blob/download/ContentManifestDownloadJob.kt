@@ -41,7 +41,7 @@ class ContentManifestDownloadJob: Job {
                 )
             }catch(e: Throwable) {
                 withContext(NonCancellable) {
-                    if(db.transferJobDao.isNotCancelled(jobUid)) {
+                    if(db.transferJobDao().isNotCancelled(jobUid)) {
                         try {
                             context.scheduleRetryOrThrow(this@ContentManifestDownloadJob::class.java,
                                 ContentManifestDownloadUseCase.DEFAULT_MAX_ATTEMPTS)

@@ -16,9 +16,9 @@ import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.core.viewmodel.clazzassignment.edit.ClazzAssignmentEditUiState
 import com.ustadmobile.core.viewmodel.clazzassignment.edit.ClazzAssignmentEditViewModel
 import com.ustadmobile.lib.db.entities.CourseBlock
-import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
 import com.ustadmobile.core.MR
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.libuicompose.components.UstadClickableTextField
 import com.ustadmobile.libuicompose.components.UstadCourseBlockEdit
 import com.ustadmobile.libuicompose.components.UstadExposedDropDownMenuField
@@ -88,8 +88,7 @@ fun ClazzAssignmentEditScreen(
             UstadClickableTextField(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .defaultItemPadding()
-                    .testTag("groups"),
+                    .defaultItemPadding(),
                 value = uiState.entity?.assignmentCourseGroupSetName
                     ?: "(${stringResource(MR.strings.unset)})",
                 label = { Text(stringResource(MR.strings.groups) + "*") },
@@ -99,7 +98,8 @@ fun ClazzAssignmentEditScreen(
                     Text(uiState.groupSetError ?: stringResource(MR.strings.required))
                 },
                 isError = uiState.groupSetError != null,
-                onValueChange = {}
+                onValueChange = {},
+                clickableTestTag = "groups",
             )
         }
 

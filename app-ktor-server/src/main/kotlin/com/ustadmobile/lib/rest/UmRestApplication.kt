@@ -6,7 +6,6 @@ import com.ustadmobile.core.account.*
 import com.ustadmobile.core.contentformats.ContentImportersDiModuleJvm
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
-import com.ustadmobile.core.db.ext.MigrateContainerToContentEntryVersion
 import com.ustadmobile.core.domain.account.SetPasswordServerUseCase
 import com.ustadmobile.core.domain.account.SetPasswordUseCase
 import com.ustadmobile.core.domain.account.SetPasswordUseCaseCommonJvm
@@ -58,10 +57,14 @@ import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseJvm
 import com.ustadmobile.core.domain.usersession.ValidateUserSessionOnServerUseCase
 import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
+import com.ustadmobile.core.domain.xapi.StoreActivitiesUseCase
+import com.ustadmobile.core.domain.xapi.XapiStatementResource
+import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
+import com.ustadmobile.core.domain.xxhash.XXHasher64FactoryCommonJvm
+import com.ustadmobile.core.domain.xxhash.XXStringHasher
+import com.ustadmobile.core.domain.xxhash.XXStringHasherCommonJvm
 import com.ustadmobile.core.util.DiTag
-import com.ustadmobile.core.util.DiTag.TAG_CONTEXT_DATA_ROOT
 import com.ustadmobile.door.ext.*
-import com.ustadmobile.core.impl.*
 import com.ustadmobile.lib.rest.ext.*
 import com.ustadmobile.lib.rest.messaging.MailProperties
 import com.ustadmobile.lib.util.ext.bindDataSourceIfNotExisting
@@ -110,6 +113,7 @@ import com.ustadmobile.core.util.ext.isWindowsOs
 import com.ustadmobile.door.log.NapierDoorLogger
 import com.ustadmobile.lib.rest.domain.contententry.importcontent.ContentEntryImportJobRoute
 import com.ustadmobile.lib.rest.domain.person.bulkadd.BulkAddPersonRoute
+import com.ustadmobile.lib.rest.domain.xapi.savestatementonclear.SaveStatementOnUnloadRoute
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.headers.MimeTypeHelper
 import kotlinx.coroutines.runBlocking
@@ -118,7 +122,6 @@ import org.kodein.di.ktor.closestDI
 import uk.co.caprica.vlcj.factory.discovery.NativeDiscovery
 import java.net.Inet6Address
 import java.net.NetworkInterface
-import java.util.concurrent.atomic.AtomicBoolean
 
 const val TAG_UPLOAD_DIR = 10
 
@@ -145,8 +148,7 @@ val REQUIRED_EXTERNAL_COMMANDS = emptyList<String>()
 val KTOR_SERVER_ROUTES = listOf(
     "/UmAppDatabase",
     "/ContainerEntryList", "/ContainerEntryFile", "/auth", "/ContainerMount",
-    "/Site", "/import", "/contentupload", "/websocket", "/pdf",
-    "/api", "/staticfiles"
+    "/Site", "/import", "/contentupload", "/websocket", "/api", "/staticfiles"
 )
 
 
@@ -318,12 +320,11 @@ fun Application.umRestApplication(
 
     val apiKey = environment.config.propertyOrNull("ktor.ustad.googleApiKey")?.getString() ?: CONF_GOOGLE_API
 
-    val ranMvvmMigration = AtomicBoolean(false)
 
     di {
         import(
             makeJvmBackendDiModule(
-                config = environment.config, json = json, ranMvvmMigration = ranMvvmMigration
+                config = environment.config, json = json
             )
         )
         import(ContentImportersDiModuleJvm)
@@ -338,28 +339,8 @@ fun Application.umRestApplication(
             }
         }
 
-        bind<ContainerStorageManager>() with scoped(EndpointScope.Default).singleton {
-            ContainerStorageManager(listOf(instance<File>(tag = TAG_CONTEXT_DATA_ROOT)))
-        }
-
         bind<NodeIdAuthCache>() with scoped(EndpointScope.Default).singleton {
             instance<UmAppDatabase>(tag = DoorTag.TAG_DB).nodeIdAuthCache
-        }
-
-        bind<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR) with scoped(EndpointScope.Default).singleton {
-            val containerDir = File(instance<File>(tag = TAG_CONTEXT_DATA_ROOT), "container")
-
-            //Move any old container directory to the new path (e.g. pre database v57)
-            if(context == Endpoint("localhost")){
-                val oldContainerDir = File("build/storage/singleton/container")
-                if(oldContainerDir.exists() && !oldContainerDir.renameTo(containerDir)) {
-                    throw IllegalStateException("Old singleton container dir present but cannot " +
-                            "rename from ${oldContainerDir.absolutePath} to ${containerDir.absolutePath}")
-                }
-            }
-
-            containerDir.takeIf { !it.exists() }?.mkdirs()
-            containerDir
         }
 
         bind<String>(tag = DiTag.TAG_GOOGLE_API) with singleton {
@@ -673,6 +654,33 @@ fun Application.umRestApplication(
             ExtractVideoThumbnailUseCaseJvm()
         }
 
+        bind<XXStringHasher>() with singleton {
+            XXStringHasherCommonJvm()
+        }
+
+        bind<XXHasher64Factory>() with singleton {
+            XXHasher64FactoryCommonJvm()
+        }
+
+        bind<StoreActivitiesUseCase>() with scoped(EndpointScope.Default).singleton {
+            StoreActivitiesUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = null,
+            )
+        }
+
+        bind<XapiStatementResource>() with scoped(EndpointScope.Default).singleton {
+            XapiStatementResource(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = null,
+                xxHasher = instance(),
+                endpoint = context,
+                json = instance(),
+                hasherFactory = instance(),
+                storeActivitiesUseCase = instance(),
+            )
+        }
+
         try {
             appConfig.config("mail")
 
@@ -706,21 +714,12 @@ fun Application.umRestApplication(
         onReady {
             if(dbMode == CONF_DBMODE_SINGLETON && siteUrl != null) {
                 val endpoint = Endpoint(siteUrl)
-                //Get the container dir so that any old directories (build/storage etc) are moved if required
-                di.on(endpoint).direct.instance<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
+
                 //Generate the admin username/password etc.
                 di.on(endpoint).direct.instance<AuthManager>()
 
                 val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
-
-                if(ranMvvmMigration.get()) {
-                    runBlocking {
-                        db.MigrateContainerToContentEntryVersion(
-                            importUseCase = on(endpoint).instance(),
-                            importersManager = on(endpoint).instance(),
-                        )
-                    }
-                }
+                println("init db: $db")
             }
 
             instance<Scheduler>().start()
@@ -851,6 +850,14 @@ fun Application.umRestApplication(
                         )
                     }
                 }
+
+                route("xapi") {
+                    SaveStatementOnUnloadRoute(
+                        statementResource = { call -> di.on(call).direct.instance() },
+                        json = json,
+                    )
+                }
+
 
                 CacheRoute(
                     cache = di.direct.instance()

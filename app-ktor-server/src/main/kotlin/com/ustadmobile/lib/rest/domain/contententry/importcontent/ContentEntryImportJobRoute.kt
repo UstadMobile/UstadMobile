@@ -25,7 +25,7 @@ fun Route.ContentEntryImportJobRoute(
     get("importjobs") {
         val contentEntryUid = call.request.queryParameters["contententryuid"]?.toLong() ?: 0
         val db = dbFn(call)
-        val inProgressJobs = db.contentEntryImportJobDao.findInProgressJobsByContentEntryUidAsync(
+        val inProgressJobs = db.contentEntryImportJobDao().findInProgressJobsByContentEntryUidAsync(
             contentEntryUid
         )
         call.response.header("cache-control", "no-store")
@@ -61,7 +61,7 @@ fun Route.ContentEntryImportJobRoute(
         val jobUid = call.request.queryParameters["jobUid"]?.toLong() ?: 0
 
         requireRemoteNodeIdAndAuth()
-        dbFn(call).contentEntryImportJobDao.updateErrorDismissed(jobUid, true)
+        dbFn(call).contentEntryImportJobDao().updateErrorDismissed(jobUid, true)
         call.response.header("cache-control", "no-store")
         call.respond(HttpStatusCode.OK, "")
     }

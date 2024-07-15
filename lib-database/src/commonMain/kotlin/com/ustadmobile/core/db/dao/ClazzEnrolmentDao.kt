@@ -4,7 +4,11 @@ import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
+import com.ustadmobile.door.annotation.*
+import app.cash.paging.PagingSource
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.FILTER_ACTIVE_ONLY
+import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.PERSON_UIDS_FOR_PAGED_GRADEBOOK_QUERY_CTE
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_DATE_LEFT_ASC
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_DATE_LEFT_DESC
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_DATE_REGISTERED_ASC
@@ -13,16 +17,18 @@ import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_FIRST_NAME_ASC
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_FIRST_NAME_DESC
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_LAST_NAME_ASC
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_LAST_NAME_DESC
-import com.ustadmobile.door.annotation.*
-import app.cash.paging.PagingSource
-import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.db.dao.CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL
+import com.ustadmobile.core.db.dao.CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT1
+import com.ustadmobile.core.db.dao.CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT2
+import com.ustadmobile.core.db.dao.CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT3
 import com.ustadmobile.core.db.dao.CoursePermissionDaoCommon.SELECT_COURSEPERMISSION_ENTITES_FOR_ACCOUNT_PERSON_UID_SQL
+import com.ustadmobile.core.db.dao.xapi.StatementDao
 import com.ustadmobile.lib.db.composites.ClazzEnrolmentAndPerson
 import com.ustadmobile.lib.db.composites.ClazzEnrolmentAndPersonDetailDetails
 import com.ustadmobile.lib.db.composites.CourseNameAndPersonName
 import com.ustadmobile.lib.db.composites.PersonAndClazzMemberListDetails
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.xapi.ActorEntity
 import kotlinx.coroutines.flow.Flow
 
 @Repository
@@ -38,14 +44,12 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
 
     @Query("""
         SELECT ClazzEnrolment.*, LeavingReason.*, 
-               COALESCE(Clazz.clazzTimeZone, COALESCE(School.schoolTimeZone, 'UTC')) as timeZone
+               COALESCE(Clazz.clazzTimeZone, 'UTC') as timeZone
           FROM ClazzEnrolment 
                LEFT JOIN LeavingReason 
                          ON LeavingReason.leavingReasonUid = ClazzEnrolment.clazzEnrolmentLeavingReasonUid
                LEFT JOIN Clazz 
                          ON Clazz.clazzUid = ClazzEnrolment.clazzEnrolmentClazzUid
-               LEFT JOIN School 
-                         ON School.schoolUid = Clazz.clazzSchoolUid
          WHERE clazzEnrolmentPersonUid = :personUid 
            AND ClazzEnrolment.clazzEnrolmentActive 
            AND clazzEnrolmentClazzUid = :clazzUid 
@@ -61,14 +65,12 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
     @Query("""
             SELECT ClazzEnrolment.*, 
                    LeavingReason.*,
-                   COALESCE(Clazz.clazzTimeZone, COALESCE(School.schoolTimeZone, 'UTC')) AS timeZone
+                   COALESCE(Clazz.clazzTimeZone, 'UTC') AS timeZone
               FROM ClazzEnrolment 
                    LEFT JOIN LeavingReason 
                              ON LeavingReason.leavingReasonUid = ClazzEnrolment.clazzEnrolmentLeavingReasonUid
                    LEFT JOIN Clazz 
                              ON Clazz.clazzUid = ClazzEnrolment.clazzEnrolmentClazzUid
-                   LEFT JOIN School 
-                             ON School.schoolUid = Clazz.clazzSchoolUid
              WHERE ClazzEnrolment.clazzEnrolmentUid = :enrolmentUid
              """)
     abstract suspend fun findEnrolmentWithLeavingReason(
@@ -208,22 +210,34 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
     @Query("SELECT * FROM ClazzEnrolment WHERE clazzEnrolmentUid = :uid")
     abstract fun findByUidLive(uid: Long): Flow<ClazzEnrolment?>
 
-    /*
-     * Note: SELECT * FROM (Subquery) AS CourseMember is needed so that sorting by
-     * earliestJoinDate/latestDateLeft will work as expected on postgres.
+
+    @Query(ClazzEnrolmentDaoCommon.SELECT_BY_UID_AND_ROLE_SQL)
+    @QueryLiveTables(value = ["Clazz", "Person", "ClazzEnrolment", "PersonPicture", "CoursePermission"])
+    @HttpAccessible(
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall("findByClazzUidAndRole"),
+            HttpServerFunctionCall("findEnrolmentsByClazzUidAndRole"),
+        )
+    )
+    abstract fun findByClazzUidAndRole(
+        clazzUid: Long,
+        roleId: Int,
+        sortOrder: Int,
+        searchText: String? = "%",
+        filter: Int,
+        accountPersonUid: Long,
+        currentTime: Long,
+        permission: Long,
+    ): PagingSource<Int, PersonAndClazzMemberListDetails>
+
+
+    /**
+     * This is effectively the same query as above, however needs to trigger additional
+     * http server function calls
      *
-     * This query uses a permission check so that users will only see participants that they have
-     * permission to see (e.g. on some courses / MOOC style students might not have permission to
-     * see other students etc).
-     *
-     * This Query is used by ClazzMemberListViewModel.
-     *
-     *
-     AND (
-                           ($PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL)
-                        OR Person.personUid = :accountPersonUid
-                       )
-     * */
+     * IMPORTANT: If this is changed, then StatementDao#findStatusForStudentsInClazzStatements
+     * should also be changed to ensure it finds the data for the same students.
+     */
     @Query("""
         SELECT * 
           FROM (SELECT Person.*, PersonPicture.*,
@@ -245,6 +259,13 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
                   FROM Person
                        LEFT JOIN PersonPicture
                                  ON PersonPicture.personPictureUid = Person.personUid
+                       --Dummy join so that invalidations of the StatementEntity table will trigger
+                       -- PagingSource invalidation of ClazzGradebookPagingSource
+                       LEFT JOIN StatementEntity
+                                 ON StatementEntity.statementIdHi = 0 
+                                    AND StatementEntity.statementIdLo = 0
+                       LEFT JOIN ActorEntity
+                                 ON ActorEntity.actorUid = 0
                  WHERE Person.personUid IN 
                        (SELECT DISTINCT ClazzEnrolment.clazzEnrolmentPersonUid 
                           FROM ClazzEnrolment 
@@ -257,7 +278,9 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
                                       AND ClazzEnrolment.clazzEnrolmentDateLeft))) 
                    /* Begin permission check */
                    AND (
-                           ($PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL)
+                           ($PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT1 ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}
+                            $PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT2 ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}
+                            $PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT3)
                         OR Person.personUid = :accountPersonUid
                        )  
                    /* End permission check */                   
@@ -284,14 +307,68 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
                 ELSE 0
             END DESC
     """)
-    @QueryLiveTables(value = ["Clazz", "Person", "ClazzEnrolment", "PersonPicture", "CoursePermission"])
+    @QueryLiveTables(
+        value = [
+            "Clazz", "Person", "ClazzEnrolment", "PersonPicture",
+            "CoursePermission", "StatementEntity", "ActorEntity"
+        ]
+    )
     @HttpAccessible(
         pullQueriesToReplicate = arrayOf(
-            HttpServerFunctionCall("findByClazzUidAndRole"),
-            HttpServerFunctionCall("findEnrolmentsByClazzUidAndRole"),
+            HttpServerFunctionCall("findByClazzUidAndRoleForGradebook"),
+            HttpServerFunctionCall(
+                functionName = "findEnrolmentsByClazzUidAndRolePaged",
+                functionArgs = arrayOf(
+                    HttpServerFunctionParam(
+                        name = "permission",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}"
+                    ),
+                    HttpServerFunctionParam(
+                        name = "studentsOffset",
+                        argType = HttpServerFunctionParam.ArgType.PAGING_OFFSET,
+                    ),
+                    HttpServerFunctionParam(
+                        name = "studentsLimit",
+                        argType = HttpServerFunctionParam.ArgType.PAGING_LIMIT,
+                    )
+                )
+            ),
+            HttpServerFunctionCall(
+                functionName = "findStatusForStudentsInClazzStatements",
+                functionDao = StatementDao::class,
+                functionArgs = arrayOf(
+                    HttpServerFunctionParam(
+                        name = "completionOrProgressTrueVal",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "true"
+                    ),
+                    HttpServerFunctionParam(
+                        name = "studentsOffset",
+                        argType = HttpServerFunctionParam.ArgType.PAGING_OFFSET,
+                    ),
+                    HttpServerFunctionParam(
+                        name = "studentsLimit",
+                        argType = HttpServerFunctionParam.ArgType.PAGING_LIMIT,
+                    )
+                )
+            ),
+            HttpServerFunctionCall(
+                functionName = "findActorEntitiesForGradebook",
+                functionArgs = arrayOf(
+                    HttpServerFunctionParam(
+                        name = "studentsOffset",
+                        argType = HttpServerFunctionParam.ArgType.PAGING_OFFSET,
+                    ),
+                    HttpServerFunctionParam(
+                        name = "studentsLimit",
+                        argType = HttpServerFunctionParam.ArgType.PAGING_LIMIT,
+                    )
+                )
+            ),
         )
     )
-    abstract fun findByClazzUidAndRole(
+    abstract fun findByClazzUidAndRoleForGradebook(
         clazzUid: Long,
         roleId: Int,
         sortOrder: Int,
@@ -299,8 +376,29 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         filter: Int,
         accountPersonUid: Long,
         currentTime: Long,
-        permission: Long,
     ): PagingSource<Int, PersonAndClazzMemberListDetails>
+
+    @Query("""
+          WITH $PERSON_UIDS_FOR_PAGED_GRADEBOOK_QUERY_CTE
+          
+        
+        SELECT ActorEntity.*
+          FROM ActorEntity
+         WHERE ActorEntity.actorPersonUid IN 
+               (SELECT PersonUids.personUid
+                  FROM PersonUids)
+    """)
+    abstract suspend fun findActorEntitiesForGradebook(
+        clazzUid: Long,
+        roleId: Int,
+        sortOrder: Int,
+        searchText: String? = "%",
+        filter: Int,
+        accountPersonUid: Long,
+        currentTime: Long,
+        studentsLimit: Int,
+        studentsOffset: Int,
+    ): List<ActorEntity>
 
     /**
      * Get a list of all enrolments with associated person entity that the given accountpersonuid
@@ -319,11 +417,11 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid
               /* Begin permission check*/
           AND (
-                   (${CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT1}
+                   ($PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT1
                     ${PermissionFlags.PERSON_VIEW}
-                    ${CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT2}
+                    $PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT2
                     ${PermissionFlags.PERSON_VIEW}
-                    ${CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT3})
+                    $PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT3)
               )  
               /* End permission check */
     """)
@@ -363,6 +461,36 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         roleId: Int,
         permission: Long,
     ): List<ClazzEnrolment>
+
+    @Query("""
+         WITH $PERSON_UIDS_FOR_PAGED_GRADEBOOK_QUERY_CTE
+        
+       SELECT ClazzEnrolment.*
+         FROM ClazzEnrolment
+        WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid
+          AND ClazzEnrolment.clazzEnrolmentRole = :roleId
+          AND ClazzEnrolment.clazzEnrolmentPersonUid IN (
+              SELECT PersonUids.personUid
+                FROM PersonUids)
+              /* Begin permission check*/
+          AND (
+                   ($PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL)
+                OR ClazzEnrolment.clazzEnrolmentPersonUid = :accountPersonUid
+              )  
+    """)
+    abstract suspend fun findEnrolmentsByClazzUidAndRolePaged(
+        clazzUid: Long,
+        roleId: Int,
+        sortOrder: Int,
+        searchText: String? = "%",
+        filter: Int,
+        accountPersonUid: Long,
+        currentTime: Long,
+        permission: Long,
+        studentsLimit: Int,
+        studentsOffset: Int,
+    ): List<ClazzEnrolment>
+
 
 
 

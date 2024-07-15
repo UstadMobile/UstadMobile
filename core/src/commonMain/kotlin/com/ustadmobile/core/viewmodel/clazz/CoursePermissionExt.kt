@@ -26,7 +26,7 @@ suspend fun UstadViewModel.getTitleForCoursePermission(entity: CoursePermission?
     val roleStringResource = entity?.titleStringResource()
     return if(roleStringResource != null) {
         val terminology = activeRepo.localFirstThenRepoIfNull {
-            it.courseTerminologyDao.findByUidAsync(entity.cpClazzUid)
+            it.courseTerminologyDao().findByUidAsync(entity.cpClazzUid)
         }
 
         val terminologyEntries = terminology?.toTerminologyEntries(
@@ -38,7 +38,7 @@ suspend fun UstadViewModel.getTitleForCoursePermission(entity: CoursePermission?
             ?.term ?: systemImpl.getString(roleStringResource)
     }else {
         activeRepo.localFirstThenRepoIfNull {
-            it.personDao.findByUidAsync(entity?.cpToPersonUid ?: 0)?.personFullName()
+            it.personDao().findByUidAsync(entity?.cpToPersonUid ?: 0)?.personFullName()
         } ?: ""
     }
 }

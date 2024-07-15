@@ -58,6 +58,8 @@ import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.Cours
 import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailViewModel
 import com.ustadmobile.core.viewmodel.discussionpost.edit.DiscussionPostEditViewModel
 import com.ustadmobile.core.viewmodel.epubcontent.EpubContentViewModel
+import com.ustadmobile.core.viewmodel.interop.externalapppermissionrequestredirect.GrantExternalAppPermissionRedirectViewModel
+import com.ustadmobile.core.viewmodel.interop.externalapppermissionrequest.ExternalAppPermissionRequestViewModel
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import com.ustadmobile.core.viewmodel.message.conversationlist.ConversationListViewModel
 import com.ustadmobile.core.viewmodel.message.messagelist.MessageListViewModel
@@ -149,6 +151,7 @@ import com.ustadmobile.libuicompose.view.courseterminology.list.CourseTerminolog
 import com.ustadmobile.libuicompose.view.deleteditem.list.DeletedItemListScreen
 import com.ustadmobile.libuicompose.view.epubcontent.EpubContentScreen
 import com.ustadmobile.libuicompose.view.clazzlog.edit.ClazzLogEditScreen
+import com.ustadmobile.libuicompose.view.interop.externalapppermissionrequest.ExternalAppPermissionRequestScreen
 import com.ustadmobile.libuicompose.view.message.conversationlist.ConversationListScreen
 import com.ustadmobile.libuicompose.view.message.messagelist.MessageListScreen
 import com.ustadmobile.libuicompose.view.parentalconsentmanagement.ParentalConsentManagementScreen
@@ -761,6 +764,20 @@ fun AppNavHost(
                         ::BulkAddPersonRunImportViewModel)
                 )
             }
+
+            contentScene("/${ExternalAppPermissionRequestViewModel.DEST_NAME}") { backStackEntry ->
+                ExternalAppPermissionRequestScreen(
+                    appViewModel(backStackEntry, ExternalAppPermissionRequestViewModel::class,
+                        ::ExternalAppPermissionRequestViewModel)
+                )
+            }
+
+            contentScene("/${GrantExternalAppPermissionRedirectViewModel.DEST_NAME}") { backStackEntry ->
+                appViewModel(backStackEntry, GrantExternalAppPermissionRedirectViewModel::class) { di, savedStateHandle ->
+                    GrantExternalAppPermissionRedirectViewModel(di, savedStateHandle)
+                }
+            }
+
 
         }
     }

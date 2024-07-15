@@ -106,7 +106,7 @@ class ClazzMemberListViewModel(
     private fun getMembersAsPagingSource(
         roleId: Int
     ) : PagingSource<Int, PersonAndClazzMemberListDetails>  {
-        return activeRepo.clazzEnrolmentDao.findByClazzUidAndRole(
+        return activeRepo.clazzEnrolmentDao().findByClazzUidAndRole(
             clazzUid = clazzUid,
             roleId = roleId,
             sortOrder = _uiState.value.activeSortOrderOption.flag,
@@ -127,7 +127,7 @@ class ClazzMemberListViewModel(
     }
 
     private val pendingStudentListPagingSource: ListPagingSourceFactory<EnrolmentRequestAndPersonDetails> = {
-        activeRepo.enrolmentRequestDao.findPendingEnrolmentsForCourse(
+        activeRepo.enrolmentRequestDao().findPendingEnrolmentsForCourse(
             clazzUid = clazzUid,
             includeDeleted = false,
             searchText = _appUiState.value.searchState.searchText.toQueryLikeParam(),
@@ -160,7 +160,7 @@ class ClazzMemberListViewModel(
         viewModelScope.launch {
             _uiState.whenSubscribed {
                 launch {
-                    activeRepo.clazzDao.getClazzNameAndTerminologyAsFlow(clazzUid).collect { nameAndTerminology ->
+                    activeRepo.clazzDao().getClazzNameAndTerminologyAsFlow(clazzUid).collect { nameAndTerminology ->
                         parseAndUpdateTerminologyStringsIfNeeded(
                             currentTerminologyStrings = _uiState.value.terminologyStrings,
                             terminology = nameAndTerminology?.terminology,
@@ -179,7 +179,7 @@ class ClazzMemberListViewModel(
                 launch {
                     //Note: we can use the db here, because the permission entities will be pulled
                     // down by the repo query that is running on the member list itself
-                    activeDb.coursePermissionDao.personHasPermissionWithClazzPairAsFlow(
+                    activeDb.coursePermissionDao().personHasPermissionWithClazzPairAsFlow(
                         accountPersonUid = activeUserPersonUid,
                         clazzUid = clazzUid,
                         firstPermission = PermissionFlags.COURSE_MANAGE_TEACHER_ENROLMENT,
@@ -241,7 +241,7 @@ class ClazzMemberListViewModel(
             val clazzCode = activeRepo
                 .takeIf { role == ClazzEnrolment.ROLE_STUDENT }
                 ?.localFirstThenRepoIfNull {
-                    it.clazzDao.findByUidAsync(clazzUid)?.clazzCode
+                    it.clazzDao().findByUidAsync(clazzUid)?.clazzCode
                 }
 
             val titleStringResource = if(role == ClazzEnrolment.ROLE_STUDENT) {

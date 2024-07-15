@@ -22,8 +22,8 @@ class AddNewPersonUseCase(
     ) : Long {
         val effectiveDb = (repo ?: db)
         return effectiveDb.withDoorTransactionAsync {
-            val personUid = effectiveDb.personDao.insertAsync(person)
-            effectiveDb.systemPermissionDao.upsertAsync(
+            val personUid = effectiveDb.personDao().insertAsync(person)
+            effectiveDb.systemPermissionDao().upsertAsync(
                 SystemPermission(
                     spToPersonUid = personUid,
                     spPermissionsFlag = systemPermissions,
@@ -34,7 +34,7 @@ class AddNewPersonUseCase(
                 Instant.fromEpochMilliseconds(person.dateOfBirth).isDateOfBirthAMinor()
                 && createPersonParentApprovalIfMinor
             ) {
-                effectiveDb.personParentJoinDao.upsertAsync(
+                effectiveDb.personParentJoinDao().upsertAsync(
                     PersonParentJoin(
                         ppjMinorPersonUid = personUid,
                         ppjParentPersonUid = addedByPersonUid,

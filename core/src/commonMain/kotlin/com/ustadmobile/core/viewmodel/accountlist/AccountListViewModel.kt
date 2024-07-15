@@ -72,7 +72,7 @@ class AccountListViewModel(
 
     private val activeAccountMode = savedStateHandle[ARG_ACTIVE_ACCOUNT_MODE] ?: ACTIVE_ACCOUNT_MODE_HEADER
 
-    private val maxDateOfBirth = savedStateHandle[UstadView.ARG_MAX_DATE_OF_BIRTH]?.toLong()
+    private val maxDateOfBirth = savedStateHandle[UstadView.ARG_MAX_DATE_OF_BIRTH]?.toLong() ?: 0
 
     private val apiUrlConfig: ApiUrlConfig by instance()
 
@@ -87,6 +87,9 @@ class AccountListViewModel(
     private val launchOpenLicensesUseCase: LaunchOpenLicensesUseCase? by instanceOrNull()
 
     private val getShowPoweredByUseCase: GetShowPoweredByUseCase? by instanceOrNull()
+
+    private val dontSetCurrentSession: Boolean = savedStateHandle[ARG_DONT_SET_CURRENT_SESSION]
+        ?.toBoolean() ?: false
 
     init {
         _appUiState.value = AppUiState(
@@ -123,7 +126,7 @@ class AccountListViewModel(
                             (activeAccountMode == ACTIVE_ACCOUNT_MODE_HEADER &&
                                     it.userSession.usUid == currentUserSessionUid)
                         val isFilteredOutByEndpoint = (endpointFilter != null && it.endpoint.url != endpointFilter)
-                        val isFilteredOutByDateOfBirth = (maxDateOfBirth != null && it.person.dateOfBirth > maxDateOfBirth)
+                        val isFilteredOutByDateOfBirth = (maxDateOfBirth > 0 && it.person.dateOfBirth > maxDateOfBirth)
 
                         !(isFilteredOutActiveAccount ||
                                 isFilteredOutByEndpoint ||
@@ -169,9 +172,8 @@ class AccountListViewModel(
             if(endpointFilter != null)
                 put(ARG_SERVER_URL, endpointFilter)
 
-            savedStateHandle[ARG_NEXT]?.also {
-                put(ARG_NEXT, it)
-            }
+            putFromSavedStateIfPresent(listOf(ARG_NEXT, ARG_DONT_SET_CURRENT_SESSION))
+
             put(ARG_MAX_DATE_OF_BIRTH, savedStateHandle[ARG_MAX_DATE_OF_BIRTH] ?: "0")
         }
         if(endpointFilter != null || !apiUrlConfig.canSelectServer) {
@@ -195,7 +197,8 @@ class AccountListViewModel(
         startUserSessionUseCase(
             session = sessionWithPersonAndEndpoint,
             navController = navController,
-            nextDest = savedStateHandle[ARG_NEXT] ?: ClazzListViewModel.DEST_NAME_HOME
+            nextDest = savedStateHandle[ARG_NEXT] ?: ClazzListViewModel.DEST_NAME_HOME,
+            dontSetCurrentSession = dontSetCurrentSession,
         )
     }
 

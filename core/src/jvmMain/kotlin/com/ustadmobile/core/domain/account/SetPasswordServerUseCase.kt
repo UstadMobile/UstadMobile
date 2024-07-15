@@ -35,7 +35,7 @@ class SetPasswordServerUseCase(
             validateUserSessionOnServerUseCase(fromNodeId, nodeAuth, nodeActiveUserUid)
 
             if(currentPassword == null) {
-                if(!db.systemPermissionDao.personHasSystemPermission(
+                if(!db.systemPermissionDao().personHasSystemPermission(
                         accountPersonUid = nodeActiveUserUid,
                         permission = PermissionFlags.RESET_PASSWORDS,
                     )

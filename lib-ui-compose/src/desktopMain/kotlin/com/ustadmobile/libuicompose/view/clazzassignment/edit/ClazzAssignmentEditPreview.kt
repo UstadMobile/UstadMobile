@@ -15,7 +15,7 @@ fun ClazzAssignmentEditScreenPreview() {
         courseBlockEditUiState = CourseBlockEditUiState(
             block = CourseBlockAndEditEntities(
                 courseBlock = CourseBlock().apply {
-                    cbMaxPoints = 78
+                    cbMaxPoints = 78f
                     cbCompletionCriteria = 14
                 },
                 assignment = ClazzAssignment().apply {

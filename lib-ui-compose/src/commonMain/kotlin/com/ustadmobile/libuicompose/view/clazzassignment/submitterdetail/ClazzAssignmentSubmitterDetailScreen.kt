@@ -108,8 +108,8 @@ fun ClazzAssignmentSubmitterDetailScreen(
         UstadAssignmentSubmissionStatusHeaderItems(
             submissionStatus = submissionStatusFor(uiState.marks, uiState.submissionList),
             averageMark = uiState.marks.averageMark(),
-            maxPoints = uiState.courseBlock?.cbMaxPoints ?: 0,
-            submissionPenaltyPercent = uiState.courseBlock?.cbLateSubmissionPenalty ?: 0
+            maxPoints = uiState.block?.courseBlock?.cbMaxPoints ?: 0f,
+            submissionPenaltyPercent = uiState.block?.courseBlock?.cbLateSubmissionPenalty ?: 0
         )
 
         item(key = "submissionheader") {
@@ -177,7 +177,7 @@ fun ClazzAssignmentSubmitterDetailScreen(
             item(key = "draftmark") {
                 CourseAssignmentMarkEdit(
                     draftMark = draftMarkVal,
-                    maxPoints = uiState.courseBlock?.cbMaxPoints?.toFloat() ?: 0f,
+                    maxPoints = uiState.block?.courseBlock?.cbMaxPoints ?: 0f,
                     scoreError = uiState.submitMarkError,
                     onChangeDraftMark = onChangeDraftMark,
                     onClickSubmitGrade = onClickSubmitGrade,

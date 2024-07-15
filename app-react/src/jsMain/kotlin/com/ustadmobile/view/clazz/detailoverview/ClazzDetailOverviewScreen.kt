@@ -57,12 +57,6 @@ external interface ClazzDetailOverviewProps : Props {
 
     var onClickCourseBlock: (CourseBlock) -> Unit
 
-    var onClickContentEntry: (
-        ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer?) -> Unit
-
-    var onClickDownloadContentEntry: (
-        ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer?) -> Unit
-
     var onClickPermissions: () -> Unit
 }
 
@@ -187,8 +181,6 @@ val ClazzDetailOverviewComponent2 = FC<ClazzDetailOverviewProps> { props ->
                 ClazzDetailOverviewCourseBlockListItem.create {
                     courseBlock = courseBlockItem
                     onClickCourseBlock = props.onClickCourseBlock
-                    onClickContentEntry = props.onClickContentEntry
-                    onClickDownloadContentEntry = props.onClickDownloadContentEntry
                 }
             }
         }
@@ -241,9 +233,6 @@ val ClazzDetailOverviewScreenPreview = FC<Props> {
                 clazzSchoolUid = 1
                 clazzStartTime = ((14 * MS_PER_HOUR) + (30 * MS_PER_MIN)).toLong()
                 clazzEndTime = 0
-                clazzSchool = School().apply {
-                    schoolName = "School Name"
-                }
                 clazzHolidayCalendar = HolidayCalendar().apply {
                     umCalendarName = "Holiday Calendar"
                 }
