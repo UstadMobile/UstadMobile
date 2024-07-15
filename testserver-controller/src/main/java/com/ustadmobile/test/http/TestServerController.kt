@@ -351,12 +351,16 @@ fun Application.testServerController() {
 
             process.waitFor(5, TimeUnit.SECONDS)
 
+            /*
+             * If uploading a video/image that needs to be selected from the gallery then we need to
+             * run a broadcast to ensure that it will appear in the gallery.
+             */
             if(scanMediaFile) {
                 ProcessBuilder(
                     listOf(
                         adbCommand.absolutePath, "-s", deviceSerial, "shell", "am", "broadcast", "-a",
                         "android.intent.action.MEDIA_SCANNER_SCAN_FILE", "-d",
-                        pushDest
+                        "file://$pushDest"
                     )
                 )
                 .directory(serverDir)
