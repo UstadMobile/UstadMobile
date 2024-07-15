@@ -19,7 +19,7 @@ class GrantExternalAppPermissionUseCaseAndroid(
     override suspend fun invoke(personUid: Long) {
         val permission = storeExternalAppPermissionUseCase(personUid)
 
-        val person = db.personDao.findByUidAsync(personUid)
+        val person = db.personDao().findByUidAsync(personUid)
             ?: throw IllegalStateException("Person not in db")
 
         val accountName = "${person.username}@${endpoint.url}"

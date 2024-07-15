@@ -64,7 +64,7 @@ class UpdatePeerReviewAllocationUseCaseTest {
     }
 
     private fun UmAppDatabase.insertPeopleIntoClass(clazzUid: Long, personUids: List<Long>) {
-        personDao.insertList(personUids.map {
+        personDao().insertList(personUids.map {
             Person().apply {
                 firstNames = "FirstName$it"
                 lastName = "LastName$it"
@@ -72,7 +72,7 @@ class UpdatePeerReviewAllocationUseCaseTest {
             }
         })
 
-        clazzEnrolmentDao.insertList(personUids.map {
+        clazzEnrolmentDao().insertList(personUids.map {
             ClazzEnrolment().apply {
                 clazzEnrolmentPersonUid = it.toLong()
                 clazzEnrolmentClazzUid = clazzUid

@@ -1,16 +1,10 @@
 package com.ustadmobile.util.test.ext
 
-import com.soywiz.klock.Date
-import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.door.util.randomUuid
-import com.ustadmobile.lib.db.entities.*
-
-
 
 
 fun UmAppDatabase.insertTestStatementsForReports() {
-
+/*
     val firstPerson = Person().apply {
         firstNames = "Bobb"
         lastName = "Ross"
@@ -87,27 +81,24 @@ fun UmAppDatabase.insertTestStatementsForReports() {
 
 
     val completedVerb = VerbEntity().apply {
-        urlId = VerbEntity.VERB_COMPLETED_URL
         verbUid = VerbEntity.VERB_COMPLETED_UID
-        verbDao.insert(this)
+
     }
 
     val firstVerbLangMap = XLangMapEntry(completedVerb.verbUid, 0, 0, 0, "completed Entry 1")
     firstVerbLangMap.languageLangMapUid = xLangMapEntryDao.insert(firstVerbLangMap)
 
     val passedVerb = VerbEntity().apply {
-        urlId = VerbEntity.VERB_PASSED_URL
         verbUid = VerbEntity.VERB_PASSED_UID
-        verbDao.insert(this)
     }
 
     val secondVerbLangMap = XLangMapEntry(passedVerb.verbUid, 0, 0, 0, "Passed Entry 1")
     secondVerbLangMap.languageLangMapUid = xLangMapEntryDao.insert(secondVerbLangMap)
 
     val failedVerb = VerbEntity().apply {
-        urlId = VerbEntity.VERB_FAILED_URL
+
         verbUid = VerbEntity.VERB_FAILED_UID
-        verbDao.insert(this)
+
     }
 
     val thirdVerbLangMap = XLangMapEntry(failedVerb.verbUid, 0, 0, 0, "Failed Entry 1")
@@ -184,169 +175,141 @@ fun UmAppDatabase.insertTestStatementsForReports() {
     khanclass2Join.cepcjChildContentEntryUid = khanclass2.contentEntryUid
     khanclass2Join.cepcjUid = contentEntryParentChildJoinDao.insert(khanclass2Join)
 
-    var firstObject = XObjectEntity()
+    var firstObject = ActivityEntity()
     firstObject.objectId = "hello"
-    firstObject.objectContentEntryUid = khanclass1.contentEntryUid
-    firstObject.xObjectUid =  xObjectDao.insert(firstObject)
+    
+    firstObject.activityUid =  activityEntityDao.insert(firstObject)
 
 
-    var firstObjectLangMap = XLangMapEntry(0, firstObject.xObjectUid, 0, 0, khanclass1.title!!)
+    var firstObjectLangMap = XLangMapEntry(0, firstObject.activityUid, 0, 0, khanclass1.title!!)
     firstObjectLangMap.languageLangMapUid = xLangMapEntryDao.insert(firstObjectLangMap)
 
-    var secondObject = XObjectEntity()
+    var secondObject = ActivityEntity()
     secondObject.objectId = "world"
-    secondObject.objectContentEntryUid = khanclass2.contentEntryUid
-    secondObject.xObjectUid =  xObjectDao.insert(secondObject)
+    secondObject.activityUid =  activityEntityDao.insert(secondObject)
 
 
-    var secondObjectLangMap = XLangMapEntry(0, secondObject.xObjectUid, 0, 0, khanclass2.title!!)
+    var secondObjectLangMap = XLangMapEntry(0, secondObject.activityUid, 0, 0, khanclass2.title!!)
     secondObjectLangMap.languageLangMapUid = xLangMapEntryDao.insert(secondObjectLangMap)
 
-    var thirdObject = XObjectEntity()
+    var thirdObject = ActivityEntity()
     thirdObject.objectId = "now"
-    thirdObject.objectContentEntryUid = khanclass1.contentEntryUid
-    thirdObject.xObjectUid =  xObjectDao.insert(thirdObject)
+    thirdObject.activityUid =  activityEntityDao.insert(thirdObject)
 
 
-    var thirdObjectLangMap = XLangMapEntry(0, thirdObject.xObjectUid, 0, 0, khanclass1.title!!)
+    var thirdObjectLangMap = XLangMapEntry(0, thirdObject.activityUid, 0, 0, khanclass1.title!!)
     thirdObjectLangMap.languageLangMapUid = xLangMapEntryDao.insert(thirdObjectLangMap)
     
     StatementEntity().apply {
-        statementPersonUid = firstPerson.personUid
+        statementActorPersonUid = firstPerson.personUid
         resultDuration = 2400000
         resultCompletion = true
         resultScoreScaled = 50f
-        contextRegistration = randomUuid().toString()
+        
         statementVerbUid = completedVerb.verbUid
-        xObjectUid = firstObject.xObjectUid
+        xObjectUid = firstObject.activityUid
         statementContentEntryUid = khanclass1.contentEntryUid
-        resultSuccess = StatementEntity.RESULT_FAILURE
         timestamp = DateTime(2019, 6, 11).unixMillisLong
-        statementId = randomUuid().toString()
         contentEntryRoot = true
-        statementUid = statementDao.insert(this)
     }
   
     StatementEntity().apply {
-        statementPersonUid = firstPerson.personUid
+        statementActorPersonUid = firstPerson.personUid
         resultDuration = 7200000
         resultScoreScaled = 100f
         resultCompletion = true
-        contextRegistration =randomUuid().toString()
+        
         statementVerbUid = passedVerb.verbUid
-        xObjectUid = firstObject.xObjectUid
+        xObjectUid = firstObject.activityUid
         statementContentEntryUid = khanclass1.contentEntryUid
-        resultSuccess = StatementEntity.RESULT_SUCCESS
-        statementId = randomUuid().toString()
+
         timestamp = DateTime(2019, 5, 1).unixMillisLong
         contentEntryRoot = false
-        statementUid = statementDao.insert(this)
     }
 
     val commonSessionForSecondPerson =randomUuid().toString()
 
     StatementEntity().apply {
-        statementPersonUid = secondPerson.personUid
+        statementActorPersonUid = secondPerson.personUid
         resultDuration = 600000
         resultScoreScaled = 50f
         resultCompletion = true
-        contextRegistration = commonSessionForSecondPerson
         statementVerbUid = completedVerb.verbUid
-        xObjectUid = secondObject.xObjectUid
+        xObjectUid = secondObject.activityUid
         statementContentEntryUid = khanclass2.contentEntryUid
-        resultSuccess = StatementEntity.RESULT_FAILURE
-        statementId = randomUuid().toString()
         timestamp = DateTime(2019, 4, 10).unixMillisLong
         contentEntryRoot = true
-        statementUid = statementDao.insert(this)
     }
     
 
     val commonSession =randomUuid().toString()
     StatementEntity().apply {
-        statementPersonUid = thirdPerson.personUid
+        statementActorPersonUid = thirdPerson.personUid
         resultDuration = 120000
         resultScoreScaled = 20f
         resultCompletion = true
-        contextRegistration = commonSession
         statementVerbUid = completedVerb.verbUid
-        xObjectUid = secondObject.xObjectUid
+        xObjectUid = secondObject.activityUid
         statementContentEntryUid = khanclass2.contentEntryUid
-        statementId = randomUuid().toString()
-        resultSuccess = StatementEntity.RESULT_SUCCESS
         timestamp = DateTime(2019, 6, 30).unixMillisLong
         contentEntryRoot = true
-        statementUid = statementDao.insert(this)
     }
     
 
 
     StatementEntity().apply {
-        statementPersonUid = fourthPerson.personUid
+        statementActorPersonUid = fourthPerson.personUid
         resultDuration = 100000
         resultScoreScaled = 85f
         resultCompletion = true
-        contextRegistration = randomUuid().toString()
+        
         statementVerbUid = failedVerb.verbUid
-        xObjectUid = firstObject.xObjectUid
+        xObjectUid = firstObject.activityUid
         statementContentEntryUid = khanclass1.contentEntryUid
-        statementId = randomUuid().toString()
-        resultSuccess = StatementEntity.RESULT_SUCCESS
         timestamp = DateTime(2019, 7, 10).unixMillisLong
         contentEntryRoot = true
-        statementUid = statementDao.insert(this)
     }
   
 
 
     StatementEntity().apply {
-        statementPersonUid = thirdPerson.personUid
+        statementActorPersonUid = thirdPerson.personUid
         resultDuration = 60000
         resultScoreScaled = 25f
         resultCompletion = true
-        contextRegistration = commonSession
         statementVerbUid = completedVerb.verbUid
-        statementId = randomUuid().toString()
-        resultSuccess = StatementEntity.RESULT_FAILURE
-        xObjectUid = secondObject.xObjectUid
+        xObjectUid = secondObject.activityUid
         statementContentEntryUid = khanclass2.contentEntryUid
         timestamp = DateTime(2019, 5, 25).unixMillisLong
         contentEntryRoot = true
-        statementUid = statementDao.insert(this)
     }
 
 
     StatementEntity().apply {
-        statementPersonUid = secondPerson.personUid
+        statementActorPersonUid = secondPerson.personUid
         resultDuration = 30000
         resultScoreScaled = 5f
         resultCompletion = true
-        contextRegistration = commonSessionForSecondPerson
         statementVerbUid = completedVerb.verbUid
-        xObjectUid = firstObject.xObjectUid
+        xObjectUid = firstObject.activityUid
         statementContentEntryUid = khanclass1.contentEntryUid
-        statementId = randomUuid().toString()
-        resultSuccess = StatementEntity.RESULT_FAILURE
         timestamp = DateTime(2019, 6, 11).unixMillisLong
         contentEntryRoot = true
-        statementUid = statementDao.insert(this)
+
     }
 
     for(i in 0..10){
         StatementEntity().apply {
-            statementPersonUid = secondPerson.personUid
+            statementActorPersonUid = secondPerson.personUid
             resultDuration = 30000
             resultScoreScaled = 5f
             resultCompletion = false
-            contextRegistration = randomUuid().toString()
+            
             statementVerbUid = completedVerb.verbUid
-            xObjectUid = thirdObject.xObjectUid
+            xObjectUid = thirdObject.activityUid
             statementContentEntryUid = khanclass1.contentEntryUid
-            statementId =randomUuid().toString()
-            resultSuccess = StatementEntity.RESULT_SUCCESS
             timestamp = DateTime(2019, 6, 11).unixMillisLong
-            statementUid = statementDao.insert(this)
         }
-    }
+    }*/
 }
 

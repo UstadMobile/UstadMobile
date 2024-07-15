@@ -77,6 +77,7 @@ kotlin {
                 implementation(libs.androidx.constraintlayout)
                 implementation(libs.androidx.media3.decoder.av1)
                 implementation(libs.accompanist.drawablepainter)
+                implementation(libs.zoomable)
             }
         }
 

@@ -1,6 +1,6 @@
 package com.ustadmobile.lib.db.entities
 
-import com.ustadmobile.lib.db.entities.StatementEntity.Companion.RESULT_UNSET
+import com.ustadmobile.lib.db.entities.xapi.StatementEntity.Companion.RESULT_UNSET
 import kotlinx.serialization.Serializable
 
 @Serializable

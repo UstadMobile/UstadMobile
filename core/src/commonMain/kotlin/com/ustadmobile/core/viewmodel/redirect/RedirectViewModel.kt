@@ -1,6 +1,7 @@
 package com.ustadmobile.core.viewmodel.redirect
 
 import com.russhwolf.settings.Settings
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.config.ApiUrlConfig
@@ -10,9 +11,12 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.OnBoardingViewModel
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
+import com.ustadmobile.door.ext.DoorTag
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
+import org.kodein.di.direct
 import org.kodein.di.instance
+import org.kodein.di.on
 
 /**
  * Redirect the user on first open. Take user to the first screen (if there is an active session),
@@ -37,6 +41,28 @@ class RedirectViewModel(
         )
         val destinationArg = deepLink ?: nextViewArg
 
+        /**
+         * "Thank you, Google"
+         * Using PagingSource immediately when an update is happening causes disaster
+         * https://issuetracker.google.com/issues/192269858
+         *
+         * Seems to be the same as :
+         * https://github.com/sqlcipher/android-database-sqlcipher/issues/640
+         *
+         * Which references:
+         * https://issuetracker.google.com/issues/65820362
+         *
+         * Says
+         *
+         */
+        val activeEndpoint = accountManager.activeEndpoint
+        if(!activeEndpoint.url.contains("localhost")) {
+            val db = di.direct.on(activeEndpoint).instance<UmAppDatabase>(
+                tag = DoorTag.TAG_DB
+            )
+            println(db)
+        }
+
         if(settings.getStringOrNull(OnBoardingViewModel.PREF_TAG) != true.toString()) {
             navController.navigate(OnBoardingViewModel.DEST_NAME, buildMap {
                 putFromSavedStateIfPresent(ARG_NEXT)
@@ -46,6 +72,8 @@ class RedirectViewModel(
             val destination = destinationArg ?: ClazzListViewModel.DEST_NAME_HOME
 
             viewModelScope.launch {
+                //preMigrate?.invoke()
+
                 navController.navigateToLink(
                     link = destination,
                     accountManager = accountManager,

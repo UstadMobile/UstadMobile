@@ -106,6 +106,7 @@ class ClazzAssignmentEditViewModel(
             courseBlockEditUiState = CourseBlockEditUiState(
                 completionCriteriaOptions = ASSIGNMENT_COMPLETION_CRITERIAS,
                 timeZone = TimeZone.currentSystemDefault().id,
+                maxPointsRequired = true,
             )
         )
     )
@@ -142,6 +143,8 @@ class ClazzAssignmentEditViewModel(
                             cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
                             cbEntityUid = assignmentUid
                             cbCompletionCriteria = ClazzAssignment.COMPLETION_CRITERIA_GRADED
+                            cbMaxPoints = 10f
+                            cbMinPoints = 0f
                         },
                         assignment = ClazzAssignment().apply {
                             caUid = assignmentUid
@@ -189,7 +192,7 @@ class ClazzAssignmentEditViewModel(
             launch {
                 //If there are submissions, do not allow the user to change the groups
                 _uiState.whenSubscribed {
-                    activeDb.courseAssignmentSubmissionDao.checkNoSubmissionsMadeFlow(
+                    activeDb.courseAssignmentSubmissionDao().checkNoSubmissionsMadeFlow(
                         _uiState.value.entity?.assignment?.caUid ?: 0
                     ).collect { noSubmissions ->
                         if(!noSubmissions && _uiState.value.groupSetEnabled) {
@@ -406,7 +409,7 @@ class ClazzAssignmentEditViewModel(
 
 
     private suspend fun checkNoSubmissionsMade() : Boolean{
-        return activeDb.courseAssignmentSubmissionDao.checkNoSubmissionsMadeAsync(
+        return activeDb.courseAssignmentSubmissionDao().checkNoSubmissionsMadeAsync(
             _uiState.value.entity?.assignment?.caUid ?: 0L
         )
     }
@@ -467,7 +470,7 @@ class ClazzAssignmentEditViewModel(
                 }
             }
 
-            if(courseBlock.cbMaxPoints <= 0) {
+            if(courseBlock.cbMaxPoints.let { it == null || it <= 0 } ) {
                 _uiState.update { prev ->
                     prev.copy(
                         courseBlockEditUiState = prev.courseBlockEditUiState.copy(

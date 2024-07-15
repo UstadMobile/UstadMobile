@@ -46,7 +46,7 @@ class ResolveXapiLaunchHrefUseCase(
         //make an http request
         Napier.v { "Resolving xAPI url for contentEntryVersion $contentEntryVersionUid" }
         val contentEntryVersion = activeRepo.localFirstThenRepoIfNull {
-            it.contentEntryVersionDao.findByUidAsync(contentEntryVersionUid)
+            it.contentEntryVersionDao().findByUidAsync(contentEntryVersionUid)
         } ?: throw IllegalArgumentException("could not load contententryversion $contentEntryVersionUid")
 
         val manifestUrl = contentEntryVersion.cevManifestUrl ?:

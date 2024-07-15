@@ -174,7 +174,7 @@ class XferTestClient(
     ) {
         val db: UmAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
         val transferJobFlow = db.doorFlow(arrayOf("TransferJob", "TransferJobItem")) {
-            db.transferJobDao.findJobByEntityAndTableUid(
+            db.transferJobDao().findJobByEntityAndTableUid(
                 tableId = ContentEntryVersion.TABLE_ID,
                 entityUid = contentEntryVersionUid,
             )

@@ -7,7 +7,7 @@ version-androidx-appcompat = "1.6.1"
 androidx-core = "1.12.0"
 kotlin = "1.9.23"
 okhttp = "4.12.0"
-door = "0.71"
+door = "0.79.12"
 coroutines = "1.8.0"
 atomicfu = "0.23.2"
 kotlinx-io = "0.3.0"
@@ -33,7 +33,7 @@ androidx-window = "1.2.0"
 quartz = "2.3.2"
 simplejndi = "0.23.0"
 htmltext-android = "2.0.0-beta01"
-aztec = "v1.9.0"
+aztec = "v2.1.3"
 androidx-constraintlayout = "2.1.4"
 libphonenumber-google = "8.13.26"
 libphonenumber-android = "8.13.25"
@@ -97,8 +97,6 @@ compose-bom = "2024.02.02"
 accompanist-themeadapter = "0.34.0"
 compose-accompanist = "0.34.0"
 picasso = "2.8"
-seismic = "1.0.3"
-android-play = "1.10.3"
 guardianproject-panic = "1.0"
 sqlite-jdbc = "3.42.0.0"
 postgresql = "42.6.0"
@@ -127,6 +125,9 @@ androidx-test-espresso = "3.5.1"
 androidx-test-uiautomator = "2.3.0"
 androidx-benchmark = "1.2.4"
 android-emulator-plugin = "0.4.5"
+lz4 = "1.8.0"
+kmp-uuid = "0.8.4"
+zoomable = "1.6.1"
 
 [plugins]
 
@@ -277,12 +278,10 @@ accompanist-pager-indicators = { module = "com.google.accompanist:accompanist-pa
 accompanist-flowlayout = { module = "com.google.accompanist:accompanist-flowlayout", version.ref = "compose-accompanist" }
 accompanist-drawablepainter = { module = "com.google.accompanist:accompanist-drawablepainter", version.ref= "compose-accompanist" }
 picasso = { module = "com.squareup.picasso:picasso", version.ref = "picasso" }
-seismic = { module = "com.squareup:seismic", version.ref = "seismic" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 ktor-serialization-gson = { module = "io.ktor:ktor-serialization-gson", version.ref = "ktor" }
 ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor"}
 ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor"}
-android-play-core = { module = "com.google.android.play:core", version.ref = "android-play"}
 guardianproject-panic = { module = "info.guardianproject.panic:panic", version.ref = "guardianproject-panic"}
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
 ktor-io = { module = "io.ktor:ktor-io", version.ref = "ktor" }
@@ -364,3 +363,6 @@ androidx-test-junit-ext = { module = "androidx.test.ext:junit", version.ref = "a
 androidx-test-espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "androidx-test-espresso" }
 androidx-test-uiautomator = { module = "androidx.test.uiautomator:uiautomator", version.ref = "androidx-test-uiautomator"}
 androidx-benchmark-macro-junit4 = { module = "androidx.benchmark:benchmark-macro-junit4", version.ref = "androidx-benchmark" }
+lz4-pure-java = { module = "org.lz4:lz4-pure-java", version.ref = "lz4" }
+kmp-uuid = { module = "com.benasher44:uuid", version.ref = "kmp-uuid" }
+zoomable = { module = "net.engawapg.lib:zoomable", version.ref = "zoomable" }

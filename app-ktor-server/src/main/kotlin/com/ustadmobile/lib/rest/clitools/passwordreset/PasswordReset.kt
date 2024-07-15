@@ -14,7 +14,6 @@ import net.sourceforge.argparse4j.ArgumentParsers
 import net.sourceforge.argparse4j.inf.ArgumentParserException
 import net.sourceforge.argparse4j.inf.Namespace
 import org.kodein.di.*
-import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.system.exitProcess
 
 /**
@@ -71,12 +70,12 @@ fun main(args: Array<String>) {
     }
 
     val di = DI {
-        import(makeJvmBackendDiModule(conf, json = json, ranMvvmMigration = AtomicBoolean()))
+        import(makeJvmBackendDiModule(conf, json = json))
     }
 
 
     val db: UmAppDatabase = di.direct.on(endpoint).instance(tag = DoorTag.TAG_DB)
-    val person = db.personDao.findByUsername(ns.getString("username"))
+    val person = db.personDao().findByUsername(ns.getString("username"))
 
     if(person != null) {
         val authManager: AuthManager = di.direct.on(endpoint).instance()

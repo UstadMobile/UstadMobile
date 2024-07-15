@@ -1919,6 +1919,16 @@
 
     <string name="grant_permission">Grant permission</string>
 
+    <string name="gradebook">Gradebook</string>
+
+    <string name="full_screen">Full screen</string>
+
+    <string name="exit_full_screen">Exit full screen</string>
+
+    <string name="increase_text_size">Increase text size</string>
+
+    <string name="decrease_text_size">Decrease text size</string>
+
     <string name="invite_via_contact">Invite Via Contact</string>
 
     <string name="invite_to_course">Invite to course</string>

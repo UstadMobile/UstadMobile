@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 
 /**
  * This provides a RecyclerView LinearLayout that will not scroll when the focus is changed. This
- * is needed by the EpubContentActivity so that it can change the focus to make sure views don't
+ * is needed for EpubContent so that it can change the focus to make sure views don't
  * jump around as WebViews load and their height changes.
  */
 class NoFocusScrollLinearLayoutManager(

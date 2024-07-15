@@ -19,7 +19,7 @@ import dev.icerock.moko.resources.compose.stringResource
 fun LazyListScope.UstadAssignmentSubmissionStatusHeaderItems(
     submissionStatus: Int?,
     averageMark: AverageCourseAssignmentMark?,
-    maxPoints: Int = 0,
+    maxPoints: Float = 0f,
     submissionPenaltyPercent: Int = 0,
 ) {
     item(key = "submission_status") {

@@ -87,7 +87,7 @@ allprojects {
 }
 
 //Major.minor.database version
-version = "0.4.123"
+version = "0.4.124"
 group = "com.ustadmobile.app"
 
 /**
@@ -97,7 +97,7 @@ group = "com.ustadmobile.app"
  */
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 347
+    ustadVersionCode = 348
 
 
     version_gradle_buildconfig_plugin = "1.1.7"
@@ -139,6 +139,8 @@ ext {
 
     version_npm_uuid = "^9.0.1"
     version_compressorjs = "^1.2.1"
+    version_npm_xxhash = "^0.2.2"
+    version_npm_cuint = "^0.2.2"
 }
 
 /*

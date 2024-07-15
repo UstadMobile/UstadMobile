@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.db.entities
 
 import androidx.room.Embedded
+import com.ustadmobile.lib.db.entities.xapi.VerbEntity
 import kotlinx.serialization.Serializable
 
 @Serializable
