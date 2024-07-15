@@ -7,8 +7,11 @@ been most extensively tested on Ubuntu Linux.
 
 ## Quickstart
 
-### 1. Download ustad-server.zip and app-android-release.apk from GitHub release
-See releases on [https://www.github.com/UstadMobile/UstadMobile/releases](https://www.github.com/UstadMobile/UstadMobile/releases)
+### 1. Get ustad-server.zip distribution
+
+Download from GitHub releases [https://www.github.com/UstadMobile/UstadMobile/releases](https://www.github.com/UstadMobile/UstadMobile/releases) or
+build ustad-server.zip from source as per the __Production build__ procedure in 
+[app-ktor-server/README.md](app-ktor-server/README.md).
 
 ### 2. Install server requirements:
 
