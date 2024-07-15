@@ -100,6 +100,15 @@ import com.ustadmobile.core.domain.upload.ChunkedUploadClientChunkGetterUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
 import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
+import com.ustadmobile.core.domain.xapi.StoreActivitiesUseCase
+import com.ustadmobile.core.domain.xapi.XapiStatementResource
+import com.ustadmobile.core.domain.xapi.noninteractivecontentusagestatementrecorder.NonInteractiveContentXapiStatementRecorderFactory
+import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnClearUseCase
+import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnClearUseCaseJvm
+import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
+import com.ustadmobile.core.domain.xxhash.XXHasher64FactoryCommonJvm
+import com.ustadmobile.core.domain.xxhash.XXStringHasher
+import com.ustadmobile.core.domain.xxhash.XXStringHasherCommonJvm
 import com.ustadmobile.core.impl.config.AppConfig
 import com.ustadmobile.core.impl.config.AppConfig.Companion.KEY_CONFIG_SHOW_POWERED_BY
 import com.ustadmobile.core.launchopenlicenses.LaunchOpenLicensesUseCaseJvm
@@ -523,6 +532,49 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
 
     bind<ExtractVideoThumbnailUseCase>() with singleton {
         ExtractVideoThumbnailUseCaseJvm()
+    }
+
+    bind<XXStringHasher>() with singleton {
+        XXStringHasherCommonJvm()
+    }
+
+    bind<XXHasher64Factory>() with singleton {
+        XXHasher64FactoryCommonJvm()
+    }
+
+    bind<StoreActivitiesUseCase>() with scoped(EndpointScope.Default).singleton {
+        StoreActivitiesUseCase(
+            db = instance(tag = DoorTag.TAG_DB),
+            repo = instance(tag = DoorTag.TAG_REPO),
+        )
+    }
+
+    bind<XapiStatementResource>() with scoped(EndpointScope.Default).singleton {
+        XapiStatementResource(
+            db = instance(tag = DoorTag.TAG_DB),
+            repo = instance(tag = DoorTag.TAG_REPO),
+            xxHasher = instance(),
+            endpoint = context,
+            json = instance(),
+            hasherFactory = instance(),
+            storeActivitiesUseCase = instance(),
+        )
+    }
+
+    bind<SaveStatementOnClearUseCase>() with scoped(EndpointScope.Default).singleton {
+        SaveStatementOnClearUseCaseJvm(
+            scheduler = instance(),
+            endpoint = context,
+            json = instance()
+        )
+    }
+
+    bind<NonInteractiveContentXapiStatementRecorderFactory>() with scoped(EndpointScope.Default).singleton {
+        NonInteractiveContentXapiStatementRecorderFactory(
+            saveStatementOnClearUseCase = instance(),
+            saveStatementOnUnloadUseCase = null,
+            xapiStatementResource = instance(),
+        )
     }
 
 }

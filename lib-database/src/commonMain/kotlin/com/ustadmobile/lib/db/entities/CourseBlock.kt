@@ -1,16 +1,29 @@
 package com.ustadmobile.lib.db.entities
 
-import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
+/**
+ * CourseBlock - Can be:
+ *  1) A Module (eg. use to collapse/expand other blocks)
+ *  2) Text, Content, Assignment, or Discussion blocks
+ *  3) Created by an external application via the OneRoster API
+ *
+ *  A CourseBlock is used as a LineItem in the OneRoster API. This allows OneRoster clients to access
+ *  the course structure and assignment marks etc.
+ *
+ * @param cbUid The primary key - auto-generated if created internally within the app or an externally
+ *         provided sourcedId is a valid long, otherwise the hash of cbSourcedId. See OneRosterEndpoint
+ *         on mapping sourcedId to uid methodology.
+ * @param cbMaxPoints The maximum points for this block, or null if this is not scored
+ * @param cbMinPoints The minimum points for this block, or null if this is not scored
+ */
 @Entity(
     indices = arrayOf(
         Index("cbClazzUid", name = "idx_courseblock_cbclazzuid"),
-        Index("cbSourcedId", name = "idx_courseblock_cbsourcedid"),
     )
 )
 @ReplicateEntity(
@@ -56,14 +69,15 @@ data class CourseBlock(
 
     var cbGracePeriodDate: Long = Long.MAX_VALUE,
 
-    var cbMaxPoints: Int = 10,
+    var cbMaxPoints: Float? = null,
 
-    var cbMinPoints: Int = 0,
+    var cbMinPoints: Float? = null,
 
     var cbIndex: Int = 0,
 
-    @ColumnInfo(index = true)
     var cbClazzUid: Long = 0,
+
+    var cbClazzSourcedId: String? = null,
 
     var cbActive: Boolean = true,
 
@@ -75,12 +89,11 @@ data class CourseBlock(
     @ReplicateEtag
     var cbLct: Long = 0,
 
-    /**
-     * The sourcedId as per the OneRoster API model e.g. as the CourseBlock is essentially a LineItem
-     * as per the data model
-     */
     var cbSourcedId: String? = null,
 
+    var cbMetadata: String? = null,
+
+    var cbCreatedByAppId: String? = null,
 ) {
 
     companion object {

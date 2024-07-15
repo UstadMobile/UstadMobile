@@ -38,7 +38,7 @@ class BlobDownloadJob : InterruptableCoroutineJob() {
         }catch(e: Throwable){
             Napier.w("$logPrefix : attempt exception", e)
             withContext(NonCancellable) {
-                if(db.transferJobDao.isNotCancelled(jobUid)) {
+                if(db.transferJobDao().isNotCancelled(jobUid)) {
                     try {
                         context.scheduleRetryOrThrow(
                             BlobDownloadJob::class.java, BlobDownloadClientUseCase.DEFAULT_MAX_ATTEMPTS

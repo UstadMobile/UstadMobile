@@ -66,7 +66,7 @@ class SiteTermsDetailViewModel(
             val localeArg = savedStateHandle[ARG_LOCALE]
             val termsLocale = localeArg ?: getLocaleForSiteTermsUseCase()
 
-            val displayTerms = repo.siteTermsDao.findLatestByLanguage(termsLocale)
+            val displayTerms = repo.siteTermsDao().findLatestByLanguage(termsLocale)
 
             if(displayTerms != null) {
                 _uiState.update { prev ->

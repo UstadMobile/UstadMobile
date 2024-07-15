@@ -7,7 +7,6 @@ import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewUi
 import com.ustadmobile.lib.db.entities.ClazzWithDisplayDetails
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.Schedule
-import com.ustadmobile.lib.db.entities.School
 
 @Composable
 @Preview
@@ -20,9 +19,6 @@ fun ClazzDetailOverviewScreenPreview() {
                 clazzSchoolUid = 1
                 clazzStartTime = 1682074513000
                 clazzEndTime = 1713682513000
-                clazzSchool = School().apply {
-                    schoolName = "School Name"
-                }
                 clazzHolidayCalendar = HolidayCalendar().apply {
                     umCalendarName = "Holiday Calendar"
                 }

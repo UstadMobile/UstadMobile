@@ -50,10 +50,10 @@ class SavePictureUseCase(
 
     private fun UmAppDatabase.imageDaoForTable(tableId: Int): ImageDao? {
         return when(tableId) {
-            PersonPicture.TABLE_ID -> personPictureDao
-            CoursePicture.TABLE_ID -> coursePictureDao
-            CourseBlockPicture.TABLE_ID -> courseBlockPictureDao
-            ContentEntryPicture2.TABLE_ID -> contentEntryPicture2Dao
+            PersonPicture.TABLE_ID -> personPictureDao()
+            CoursePicture.TABLE_ID -> coursePictureDao()
+            CourseBlockPicture.TABLE_ID -> courseBlockPictureDao()
+            ContentEntryPicture2.TABLE_ID -> contentEntryPicture2Dao()
             else -> null
         }
     }

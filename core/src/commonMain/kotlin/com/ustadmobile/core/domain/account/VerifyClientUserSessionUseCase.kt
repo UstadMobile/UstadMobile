@@ -25,7 +25,7 @@ class VerifyClientUserSessionUseCase(
             throw IllegalArgumentException("verifyclientsession: accountPersonUid = 0")
 
         //nodeActiveUserUid must have an active session
-        val sessionsForUser = db.userSessionDao.countActiveSessionsForUserAndNode(
+        val sessionsForUser = db.userSessionDao().countActiveSessionsForUserAndNode(
             personUid = accountPersonUid,
             nodeId = fromNodeId,
         )

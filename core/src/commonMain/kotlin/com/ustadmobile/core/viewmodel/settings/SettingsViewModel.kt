@@ -178,7 +178,7 @@ class SettingsViewModel(
         }
 
         viewModelScope.launch {
-            activeRepo.systemPermissionDao.personHasSystemPermissionAsFlow(
+            activeRepo.systemPermissionDao().personHasSystemPermissionAsFlow(
                 activeUserPersonUid, PermissionFlags.MANAGE_SITE_SETTINGS
             ).collect { siteAdminSettingsVisible ->
                 _uiState.update { prev ->

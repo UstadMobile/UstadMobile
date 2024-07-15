@@ -39,10 +39,10 @@ class CoursePermissionDetailViewModel(
     private val clazzUid = savedStateHandle[ARG_CLAZZUID]?.toLong() ?: 0L
 
     init {
-        val entityFlow = activeRepo.coursePermissionDao.findByUidAndClazzUidAsFlow(
+        val entityFlow = activeRepo.coursePermissionDao().findByUidAndClazzUidAsFlow(
             entityUidArg, clazzUid)
 
-        val permissionFlow = activeRepo.coursePermissionDao.personHasPermissionWithClazzPairAsFlow(
+        val permissionFlow = activeRepo.coursePermissionDao().personHasPermissionWithClazzPairAsFlow(
             accountPersonUid = activeUserPersonUid,
             clazzUid = clazzUid,
             firstPermission = PermissionFlags.COURSE_VIEW,

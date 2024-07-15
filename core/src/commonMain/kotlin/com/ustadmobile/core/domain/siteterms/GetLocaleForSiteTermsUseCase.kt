@@ -17,7 +17,7 @@ class GetLocaleForSiteTermsUseCase (
     suspend operator fun invoke() : String {
         val preferredLocales =  listOf(supportedLangConfig.displayedLocale) +
                 supportedLangConfig.systemLocales
-        val availableLocales = repo.siteTermsDao
+        val availableLocales = repo.siteTermsDao()
             .findAvailableSiteTermLanguages(1).filterNotNull()
         return preferredLocales.firstOrNull { it in availableLocales } ?: FALLBACK
     }

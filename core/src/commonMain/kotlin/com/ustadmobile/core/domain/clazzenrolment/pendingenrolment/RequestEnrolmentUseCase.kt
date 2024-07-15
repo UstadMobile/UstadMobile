@@ -22,12 +22,12 @@ class RequestEnrolmentUseCase(
         person: Person,
         roleId: Int,
     ) {
-        val clazz = activeRepo.clazzDao.findByClazzCode(clazzCode)
+        val clazz = activeRepo.clazzDao().findByClazzCode(clazzCode)
             ?: throw IllegalArgumentException()
 
         //check for already existing requests
         if(
-            activeRepo.enrolmentRequestDao.hasPendingRequests(
+            activeRepo.enrolmentRequestDao().hasPendingRequests(
                 personUid = person.personUid,
                 clazzUid = clazz.clazzUid
             )
@@ -36,7 +36,7 @@ class RequestEnrolmentUseCase(
         }
 
         if(
-            activeRepo.clazzEnrolmentDao.getAllEnrolmentsAtTimeByClazzAndPerson(
+            activeRepo.clazzEnrolmentDao().getAllEnrolmentsAtTimeByClazzAndPerson(
                 clazzUid = clazz.clazzUid,
                 accountPersonUid = person.personUid,
                 time = systemTimeInMillis()
@@ -46,7 +46,7 @@ class RequestEnrolmentUseCase(
         }
 
 
-        activeRepo.enrolmentRequestDao.insert(
+        activeRepo.enrolmentRequestDao().insert(
             EnrolmentRequest(
                 erClazzUid = clazz.clazzUid,
                 erClazzName = clazz.clazzName,

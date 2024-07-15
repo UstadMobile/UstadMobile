@@ -3,6 +3,7 @@ package com.ustadmobile.core.viewmodel
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.openlink.OnClickLinkUseCase
+import com.ustadmobile.core.domain.xapi.XapiSession
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -460,6 +461,25 @@ abstract class UstadViewModel(
         }
     }
 
+    /**
+     * Create a new Xapi session based on the accountmanager and argument values for this ViewModel
+     */
+    protected fun createXapiSession(
+        contentEntryUid: Long = 0,
+        clazzUid: Long = savedStateHandle[ARG_CLAZZUID]?.toLong() ?: 0,
+        cbUid: Long = savedStateHandle[ARG_COURSE_BLOCK_UID]?.toLong() ?: 0,
+    ): XapiSession {
+        return XapiSession(
+            endpoint = accountManager.activeEndpoint,
+            accountPersonUid = activeUserPersonUid,
+            accountUsername = accountManager.currentUserSession.person.username ?: "anonymous",
+            clazzUid = clazzUid,
+            cbUid = cbUid,
+            contentEntryUid = contentEntryUid,
+            rootActivityId = "${accountManager.activeEndpoint.url}ns/xapi/contentEntry/$contentEntryUid"
+        )
+    }
+
     companion object {
         /**
          * Saved state key for the current value of the entity itself. This is different to
@@ -535,6 +555,12 @@ abstract class UstadViewModel(
          * based on the Clazz) easier.
          */
         const val ARG_CLAZZUID = "clazzUid"
+
+        /**
+         * The ContentEntryUid for screens where the entity is not the content entry itself. This
+         * will be passed when viewing content (e.g. to the VideoContent, EpubContent, PdfContent, etc)
+         */
+        const val ARG_CONTENT_ENTRY_UID = "entryid"
 
         const val ARG_PERSON_UID = "personUid"
 
