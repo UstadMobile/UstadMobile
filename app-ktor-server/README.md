@@ -64,5 +64,5 @@ Windows:
 $ gradlew app-ktor-server:distZip -Pktorbundleproductionjs=true
 ```
 
-This will build the server distribution zip ( in ```build/distributions/ustad-server.zip`` ) which can
+This will build the server distribution zip ( in ```build/distributions/ustad-server.zip``` ) which can
 then be used as per the [INSTALL.md documentation](../INSTALL.md).
