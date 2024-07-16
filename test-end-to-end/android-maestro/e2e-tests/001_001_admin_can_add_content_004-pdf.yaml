@@ -13,12 +13,12 @@ env:
 - runFlow:
     file: "../common/clear_login_and_add_content.yaml"
     env:
-      TESTFILENAME: Epub_Content1.epub
+      TESTFILENAME: Pdf_Content.pdf
       CONTROLSERVER: ${CONTROLSERVER}
       TESTSERIAL: ${TESTSERIAL}
 - tapOn: "SAVE"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_add_to_library"
-- tapOn: "E-book"
+- tapOn: "Document"
 - extendedWaitUntil:
     notVisible: "Importing"
     timeout: 10000
@@ -26,17 +26,17 @@ env:
     notVisible: "Uploading"
     timeout: 10000
 - tapOn: Open
-- assertVisible: "Cover"
+- assertVisible: "PDF PAGE"
 - tapOn: "Back"
 - runFlow:
     file: "../common/login_download_and_open_content.yaml"
 #Download and open content
 - tapOn: "Library"
 - extendedWaitUntil:
-    visible: "E-book"
+    visible: "Document"
     timeout: 60000
-- tapOn: "E-book"
+- tapOn: "Document"
 - tapOn: Download
 - tapOn: Open
-- assertVisible: "Cover"
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/epub_content_download_and_open"
+- assertVisible: "PDF PAGE"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/pdf_content_download_and_open"
