@@ -24,6 +24,8 @@ import com.ustadmobile.core.domain.backup.UnzipFileUseCase
 import com.ustadmobile.core.domain.backup.ZipFileUseCase
 import com.ustadmobile.core.domain.blob.openblob.OpenBlobUiUseCase
 import com.ustadmobile.core.domain.contententry.move.MoveContentEntriesUseCase
+import com.ustadmobile.core.domain.export.AndroidExportContentEntryUstadZipUseCase
+import com.ustadmobile.core.domain.export.ExportContentEntryUstadZipUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseAndroid
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCase
@@ -89,6 +91,13 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
         import(commonDomainDiModule(EndpointScope.Default))
         import(AndroidDomainDiModule(applicationContext))
 
+        bind<ExportContentEntryUstadZipUseCase>() with provider {
+            AndroidExportContentEntryUstadZipUseCase(
+                context = instance(),
+                contentEntryDao = instance(),
+                json = instance()
+            )
+        }
 
         bind<UnzipFileUseCase>() with singleton { AndroidUnzipFileUseCase(applicationContext) }
         bind<ZipFileUseCase>() with singleton { AndroidZipFileUseCase(applicationContext) }

@@ -77,6 +77,8 @@ import com.ustadmobile.core.domain.contententry.launchcontent.xapi.ResolveXapiLa
 import com.ustadmobile.core.domain.contententry.move.MoveContentEntriesUseCase
 import com.ustadmobile.core.domain.deleteditem.DeletePermanentlyUseCase
 import com.ustadmobile.core.domain.deleteditem.RestoreDeletedItemUseCase
+import com.ustadmobile.core.domain.export.DesktopExportContentEntryUstadZipUseCase
+import com.ustadmobile.core.domain.export.ExportContentEntryUstadZipUseCase
 import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCase
 import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCaseJvm
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
@@ -126,6 +128,15 @@ import org.kodein.di.singleton
 import java.io.File
 
 val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
+
+
+    bind<ExportContentEntryUstadZipUseCase>() with provider {
+        DesktopExportContentEntryUstadZipUseCase(
+
+            contentEntryDao = instance(),
+            json = instance()
+        )
+    }
 
     bind<UnzipFileUseCase>() with singleton { JvmUnzipFileUseCase() }
     bind<ZipFileUseCase>() with singleton { JvmZipFileUseCase() }

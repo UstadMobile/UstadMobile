@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.Link
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
@@ -131,6 +132,7 @@ fun ContentEntryListScreen(
     onSetSelected: (entry: ContentEntryAndListDetail, selected: Boolean) -> Unit = { _, _ -> },
     onClickSelectThisFolder: () -> Unit = { },
     contextMenuItems: (ContentEntryAndListDetail) -> List<UstadContextMenuItem> = { emptyList() },
+    onExportContentEntry: (Long) -> Unit = { }
 ) {
     val repositoryResult = rememberDoorRepositoryPager(
         uiState.contentEntryList, refreshCommandFlow
@@ -195,7 +197,6 @@ fun ContentEntryListScreen(
                     }
                 }
 
-
                 ustadPagedItems(
                     pagingItems = lazyPagingItems,
                     key = { contentEntry ->
@@ -210,7 +211,14 @@ fun ContentEntryListScreen(
                         entry = entry,
                         onSetSelected = onSetSelected,
                         isSelected = (contentEntryUid in uiState.selectedEntryUids),
-                        contextMenuItems = contextMenuItems,
+                        contextMenuItems = { entryAndDetail ->
+                            val defaultItems = contextMenuItems(entryAndDetail)
+                            val exportItem = UstadContextMenuItem(
+                                label = "EXport COntent",
+                                onClick = { onExportContentEntry(entryAndDetail.contentEntry?.contentEntryUid ?: 0L) }
+                            )
+                            defaultItems + exportItem
+                        },
                     )
                 }
             }
@@ -226,6 +234,16 @@ fun ContentEntryListScreen(
                 Text(stringResource(MR.strings.move_entries_to_this_folder))
             }
         }
-    }
 
+        if (uiState.exportProgress != null) {
+            LinearProgressIndicator(
+                progress = uiState.exportProgress!!.progress,
+                modifier = Modifier.fillMaxWidth().padding(16.dp)
+            )
+            Text(
+                text = "exporting",
+                modifier = Modifier.padding(16.dp)
+            )
+        }
+    }
 }

@@ -22,7 +22,6 @@ import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonGroup.Companion.PERSONGROUP_FLAG_GUESTPERSON
 import com.ustadmobile.lib.db.entities.PersonGroup.Companion.PERSONGROUP_FLAG_PERSONGROUP
-import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.db.entities.UserSession
@@ -564,7 +563,7 @@ class UstadAccountManager(
                     siteName = "Local Site"
                     authSalt = "local_${randomString(10)}"
                 }
-                db.siteDao.insert(newSite)
+                db.siteDao().insert(newSite)
 
                 val newPerson = Person().apply {
                     username = "local_user_${randomString(5)}"
@@ -586,9 +585,9 @@ class UstadAccountManager(
                     usStatus = UserSession.STATUS_ACTIVE
                     usPersonUid = personUid
                 }
-                db.userSessionDao.insertSession(newSession)
+                db.userSessionDao().insertSession(newSession)
 
-                val insertedPerson = db.personDao.findByUid(personUid)
+                val insertedPerson = db.personDao().findByUid(personUid)
                     ?: throw IllegalStateException("Failed to retrieve inserted person")
 
                 UserSessionWithPersonAndEndpoint(newSession, insertedPerson, fakeEndpoint)
@@ -600,7 +599,6 @@ class UstadAccountManager(
             currentUserSession = newSession
         }
     }
-
 
     suspend fun startGuestSession(endpointUrl: String): UserSessionWithPersonAndEndpoint {
         val repo: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = DoorTag.TAG_REPO)
