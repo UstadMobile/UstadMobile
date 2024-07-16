@@ -28,6 +28,9 @@ env:
       USERNAME: "t1"
       GENDER: "Female"
       PASSWORD: "test"
+- tapOn:
+    text: "Courses"
+    index: 1
 - runFlow:
     file: "../common/add_new_student_inside_course.yaml"
     env:

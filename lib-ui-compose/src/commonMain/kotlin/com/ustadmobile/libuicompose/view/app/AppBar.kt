@@ -54,6 +54,7 @@ import com.ustadmobile.libuicompose.components.UstadTooltipBox
 import com.ustadmobile.libuicompose.theme.appBarSelectionModeBackgroundColor
 import com.ustadmobile.libuicompose.theme.appBarSelectionModeContentColor
 import dev.icerock.moko.resources.compose.stringResource
+import moe.tlaster.precompose.navigation.BackStackEntry
 import moe.tlaster.precompose.navigation.Navigator
 import org.kodein.di.compose.localDI
 import org.kodein.di.direct
@@ -69,10 +70,11 @@ fun UstadAppBar(
     compactHeader: Boolean,
     appUiState: AppUiState,
     navigator: Navigator,
+    currentLocation: BackStackEntry?,
 ) {
     val title = appUiState.title ?: stringResource(MR.strings.app_name)
     val canGoBack by navigator.canGoBack.collectAsState(false)
-    val currentLocation by navigator.currentEntry.collectAsState(null)
+
     val di = localDI()
     val accountManager: UstadAccountManager = di.direct.instance()
     val currentSession by accountManager.currentUserSessionFlow
@@ -154,7 +156,8 @@ fun UstadAppBar(
                 }
 
                 currentLocation?.path?.takeIf { path ->
-                    !appUiState.hideSettingsIcon && ROOT_LOCATIONS.any { it.startsWith(path) }
+                    val pathWithoutQuery = path.substringBefore("?")
+                    !appUiState.hideSettingsIcon && ROOT_LOCATIONS.any { it.startsWith(pathWithoutQuery) }
                 }?.also {
                     UstadTooltipBox(
                         tooltipText = stringResource(MR.strings.settings)

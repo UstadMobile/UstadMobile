@@ -6,8 +6,8 @@ appId: com.toughra.ustadmobile
 - tapOn:
     id: "floating_action_button"
 - tapOn: "Join existing course"
-- tapOn: "Invite code*"
 - longPressOn: "Invite code*"
 - tapOn: "Paste"
+- hideKeyboard
 - tapOn: "Submit"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/pending_student"
