@@ -98,10 +98,10 @@ fun PersonListScreen(
     onClickCopyInviteCode: () -> Unit = { },
 ){
 
-    val lazyPagingItems = rememberDoorRepositoryPager(
+    val doorRepoPager = rememberDoorRepositoryPager(
         pagingSourceFactory = uiState.personList,
         refreshCommandFlow = listRefreshCommand,
-    ).lazyPagingItems
+    )
 
     UstadLazyColumn(
         modifier = Modifier.fillMaxSize()
@@ -153,7 +153,7 @@ fun PersonListScreen(
         }
 
         ustadPagedItems(
-            pagingItems = lazyPagingItems,
+            pagingItems = doorRepoPager.lazyPagingItems,
             key = { it.person?.personUid ?: 0 },
         ) {  personAndDetails ->
             ListItem(
