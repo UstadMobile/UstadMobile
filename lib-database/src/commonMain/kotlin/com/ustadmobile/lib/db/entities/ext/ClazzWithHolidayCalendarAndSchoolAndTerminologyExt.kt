@@ -1,10 +1,10 @@
 package com.ustadmobile.lib.db.entities.ext
 
 import com.ustadmobile.door.annotation.ShallowCopy
-import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchoolAndTerminology
+import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndAndTerminology
 
 
 @ShallowCopy
-expect fun ClazzWithHolidayCalendarAndSchoolAndTerminology.shallowCopy(
-    block: ClazzWithHolidayCalendarAndSchoolAndTerminology.() -> Unit,
-): ClazzWithHolidayCalendarAndSchoolAndTerminology
+expect fun ClazzWithHolidayCalendarAndAndTerminology.shallowCopy(
+    block: ClazzWithHolidayCalendarAndAndTerminology.() -> Unit,
+): ClazzWithHolidayCalendarAndAndTerminology

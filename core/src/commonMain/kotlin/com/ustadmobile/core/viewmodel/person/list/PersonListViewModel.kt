@@ -87,7 +87,7 @@ class PersonListViewModel(
         savedStateHandle[ARG_REQUIRE_PERMISSION_TO_SHOW_LIST]?.toLong() ?: 0
 
     private val pagingSourceFactory: () -> PagingSource<Int, PersonAndListDisplayDetails> = {
-        activeRepo.personDao.findPersonsWithPermissionAsPagingSource(
+        activeRepo.personDao().findPersonsWithPermissionAsPagingSource(
             timestamp = getSystemTimeInMillis(),
             excludeClazz = filterExcludeMembersOfClazz,
             excludeSelected = filterAlreadySelectedList,
@@ -119,7 +119,7 @@ class PersonListViewModel(
         val hasPermissionToListFlow = if(permissionRequiredToShowList == 0L) {
             flowOf(true)
         }else {
-            activeRepo.systemPermissionDao.personHasSystemPermissionAsFlow(
+            activeRepo.systemPermissionDao().personHasSystemPermissionAsFlow(
                 accountPersonUid = activeUserPersonUid,
                 permission = permissionRequiredToShowList,
             )
@@ -152,7 +152,7 @@ class PersonListViewModel(
         }
 
         viewModelScope.launch {
-            activeRepo.systemPermissionDao.personHasSystemPermissionPairAsFlow(
+            activeRepo.systemPermissionDao().personHasSystemPermissionPairAsFlow(
                 accountPersonUid = activeUserPersonUid,
                 firstPermission = PermissionFlags.ADD_PERSON,
                 secondPermission = PermissionFlags.PERSON_VIEW

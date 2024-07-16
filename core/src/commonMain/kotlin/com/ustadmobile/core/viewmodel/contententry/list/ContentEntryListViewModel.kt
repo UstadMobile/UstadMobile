@@ -15,6 +15,8 @@ import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.domain.contententry.delete.DeleteContentEntryParentChildJoinUseCase
 import com.ustadmobile.core.domain.contententry.move.MoveContentEntriesUseCase
+import com.ustadmobile.core.domain.export.ExportContentEntryUstadZipUseCase
+import com.ustadmobile.core.domain.export.ExportProgress
 import com.ustadmobile.core.impl.appstate.AppActionButton
 import com.ustadmobile.core.impl.appstate.AppBarColors
 import com.ustadmobile.core.impl.appstate.AppStateIcon
@@ -45,7 +47,7 @@ import org.kodein.di.DI
 import org.kodein.di.instance
 
 data class ContentEntryListUiState(
-
+    val exportProgress: ExportProgress? = null,
     val filterMode: Int = FILTER_BY_PARENT_UID,
 
     val contentEntryList: ListPagingSourceFactory<ContentEntryAndListDetail> = { EmptyPagingSource() },
@@ -78,7 +80,7 @@ data class ContentEntryListUiState(
 
     val hasWritePermission: Boolean = false,
 
-) {
+    ) {
 
     val showChips: Boolean
         get() =filterOptions.isNotEmpty()
@@ -147,16 +149,17 @@ class ContentEntryListViewModel(
 
     private val pagingSourceFactory: ListPagingSourceFactory<ContentEntryAndListDetail> = {
         when(_uiState.value.selectedChipId) {
-            FILTER_MY_CONTENT -> activeRepo.contentEntryDao.getContentByOwner(
+            FILTER_MY_CONTENT -> activeRepo.contentEntryDao().getContentByOwner(
                 activeUserPersonUid
             )
 
-            FILTER_FROM_MY_COURSES -> activeRepo.contentEntryDao.getContentFromMyCourses(
+            FILTER_FROM_MY_COURSES -> activeRepo.contentEntryDao().getContentFromMyCourses(
                 activeUserPersonUid
             )
 
             FILTER_FROM_LIBRARY -> {
-                activeRepo.contentEntryDao.getChildrenByParentUidWithCategoryFilterOrderByName(
+                activeRepo.contentEntryDao().getChildrenByParentUidWithCategoryFilterOrderByName(
+                    accountPersonUid = activeUserPersonUid,
                     parentUid = parentEntryUid,
                     langParam = 0,
                     categoryParam0 = 0,
@@ -166,7 +169,8 @@ class ContentEntryListViewModel(
             }
 
             FILTER_BY_PARENT_UID -> {
-                activeRepo.contentEntryDao.getChildrenByParentUidWithCategoryFilterOrderByName(
+                activeRepo.contentEntryDao().getChildrenByParentUidWithCategoryFilterOrderByName(
+                    accountPersonUid = activeUserPersonUid,
                     parentUid = parentEntryUid,
                     langParam = 0,
                     categoryParam0 = 0,
@@ -191,6 +195,8 @@ class ContentEntryListViewModel(
     private val moveContentEntriesUseCase: MoveContentEntriesUseCase by di.onActiveEndpoint().instance()
 
     private val deleteEntriesUseCase: DeleteContentEntryParentChildJoinUseCase by di.onActiveEndpoint().instance()
+
+    private val exportContentEntryUseCase: ExportContentEntryUstadZipUseCase by di.instance()
 
     init {
         val savedStateSelectedEntries = savedStateHandle[KEY_SAVED_STATE_SELECTED_ENTRIES]?.let {
@@ -242,7 +248,7 @@ class ContentEntryListViewModel(
             }
         }
 
-        val hasPermissionFlow = activeRepo.systemPermissionDao
+        val hasPermissionFlow = activeRepo.systemPermissionDao()
             .personHasSystemPermissionAsFlow(
                 accountManager.currentAccount.personUid, PermissionFlags.EDIT_LIBRARY_CONTENT
             ).shareIn(viewModelScope, SharingStarted.WhileSubscribed())
@@ -251,7 +257,7 @@ class ContentEntryListViewModel(
             defaultTitle = when {
                 (expectedResultDest != null && !selectFolderMode) -> systemImpl.getString(MR.strings.select_content)
                 parentEntryUid == LIBRARY_ROOT_CONTENT_ENTRY_UID -> systemImpl.getString(MR.strings.library)
-                else -> activeRepo.contentEntryDao.findTitleByUidAsync(parentEntryUid) ?: ""
+                else -> activeRepo.contentEntryDao().findTitleByUidAsync(parentEntryUid) ?: ""
             }
 
             _appUiState.update { prev ->
@@ -408,6 +414,37 @@ class ContentEntryListViewModel(
         }
     }
 
+    fun onExportContentEntry(contentEntryUid: Long) {
+        viewModelScope.launch {
+            try {
+                val fileName = "export_$contentEntryUid.zip"
+                val destZipFilePath = "${exportContentEntryUseCase.getOutputDirectory()}/$fileName"
+
+                exportContentEntryUseCase(
+                    contentEntryUid = contentEntryUid,
+                    destZipFilePath = destZipFilePath,
+                    progressListener = { progress ->
+                        // Update UI with progress information
+                        _uiState.update { it.copy(exportProgress = progress) }
+                    }
+                )
+
+                // Handle successful export
+                snackDispatcher.showSnackBar(
+                    Snack("Successfully exported")
+                )
+            } catch (e: Exception) {
+                // Handle export error
+                Napier.e("Export failed", e)
+                snackDispatcher.showSnackBar(
+                    Snack("Exporting failed")
+                )
+            } finally {
+                // Reset export progress
+                _uiState.update { it.copy(exportProgress = null) }
+            }
+        }
+    }
     override fun onUpdateSearchResult(searchText: String) {
         //do nothing
     }

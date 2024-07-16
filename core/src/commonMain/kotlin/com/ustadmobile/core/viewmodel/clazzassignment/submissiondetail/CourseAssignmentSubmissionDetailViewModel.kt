@@ -38,7 +38,7 @@ class CourseAssignmentSubmissionDetailViewModel(
     init {
         viewModelScope.launch {
             _uiState.whenSubscribed {
-                activeRepo.courseAssignmentSubmissionDao.findByUidAsFlow(entityUidArg).collect {
+                activeRepo.courseAssignmentSubmissionDao().findByUidAsFlow(entityUidArg).collect {
                     val prevState = _uiState.getAndUpdate { prev ->
                         prev.copy(
                             submission = it

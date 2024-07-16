@@ -28,7 +28,7 @@ class EnqueueImportContentEntryUseCaseAndroid(
         if(sourceUri.isRemote()) {
             enqueueRemoteImport(contentJobItem)
         }else{
-            val uid = db.contentEntryImportJobDao.insertJobItem(contentJobItem)
+            val uid = db.contentEntryImportJobDao().insertJobItem(contentJobItem)
 
             val jobData = Data.Builder()
                 .putString(EnqueueContentEntryImportUseCase.DATA_ENDPOINT, endpoint.url)

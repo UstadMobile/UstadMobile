@@ -238,7 +238,7 @@ fun ClazzAssignmentDetailOverviewScreen(
         UstadAssignmentSubmissionStatusHeaderItems(
             submissionStatus = uiState.submissionStatus,
             averageMark = uiState.markList.averageMark(),
-            maxPoints = uiState.courseBlock?.cbMaxPoints ?: 0,
+            maxPoints = uiState.courseBlock?.cbMaxPoints ?: 0f,
             submissionPenaltyPercent = uiState.courseBlock?.cbLateSubmissionPenalty ?: 0,
         )
 

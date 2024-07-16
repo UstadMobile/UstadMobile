@@ -25,8 +25,8 @@ class CancelDownloadUseCaseAndroid(
 
         //mark transferJob as cancelled and offline item as inactive (which will release any retention locks)
         db.withDoorTransactionAsync {
-            db.transferJobDao.updateStatus(transferJobId, TransferJobItemStatus.STATUS_CANCELLED)
-            db.offlineItemDao.updateActiveByOfflineItemUid(offlineItemUid, false)
+            db.transferJobDao().updateStatus(transferJobId, TransferJobItemStatus.STATUS_CANCELLED)
+            db.offlineItemDao().updateActiveByOfflineItemUid(offlineItemUid, false)
         }
 
 

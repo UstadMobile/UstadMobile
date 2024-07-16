@@ -27,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
@@ -38,6 +39,7 @@ import com.ustadmobile.core.viewmodel.contententry.detailoverviewtab.progress
 import com.ustadmobile.lib.db.entities.ContentEntryImportJob
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 import com.ustadmobile.lib.db.entities.TransferJob
+import com.ustadmobile.libuicompose.components.UstadBlockStatusProgressBar
 import com.ustadmobile.libuicompose.components.UstadBlockIcon
 import com.ustadmobile.libuicompose.components.UstadHtmlText
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
@@ -95,12 +97,17 @@ fun ContentEntryDetailOverviewScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.padding(top = 8.dp)
             ) {
-                Box(Modifier.defaultItemPadding()) {
+                Box(Modifier.defaultItemPadding().size(80.dp)) {
                     UstadBlockIcon(
                         title = uiState.contentEntry?.entry?.title ?: "",
                         contentEntry = uiState.contentEntry?.entry,
                         pictureUri = uiState.contentEntry?.picture?.cepPictureUri,
                         modifier = Modifier.size(80.dp),
+                    )
+
+                    UstadBlockStatusProgressBar(
+                        blockStatus = uiState.contentEntry?.status,
+                        modifier = Modifier.align(Alignment.BottomCenter),
                     )
                 }
 

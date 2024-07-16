@@ -3,6 +3,8 @@ package com.ustadmobile.core.domain.interop.oneroster.model
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.domain.interop.timestamp.format8601Timestamp
 import com.ustadmobile.core.domain.interop.timestamp.parse8601Timestamp
+import com.ustadmobile.core.domain.xxhash.XXStringHasher
+import com.ustadmobile.core.domain.xxhash.toLongOrHash
 import com.ustadmobile.lib.db.composites.StudentResultAndCourseBlockSourcedId
 import com.ustadmobile.lib.db.entities.StudentResult
 
@@ -35,7 +37,7 @@ fun StudentResultAndCourseBlockSourcedId.toOneRosterResult(
 ): Result {
     return Result(
         sourcedId = studentResult.srSourcedId!!,
-        status = if(studentResult.srActive) Status.ACTIVE else Status.TOBEDELETED,
+        status = Status.fromIsDeletedBool(studentResult.srDeleted),
         dateLastModified = format8601Timestamp(studentResult.srScoreDate),
         metaData = studentResult.srMetaData,
         lineItem = GUIDRef(
@@ -55,17 +57,24 @@ fun StudentResultAndCourseBlockSourcedId.toOneRosterResult(
 }
 
 
-fun Result.toStudentResult() : StudentResult {
+fun Result.toStudentResult(
+    xxHasher: XXStringHasher,
+    clazzUid: Long,
+) : StudentResult {
     return StudentResult(
+        srUid = xxHasher.hash(sourcedId),
         srSourcedId = sourcedId,
-        srActive = status == Status.ACTIVE,
+        srLineItemSourcedId = lineItem.sourcedId,
+        srLineItemHref = lineItem.href,
+        srCourseBlockUid = xxHasher.toLongOrHash(lineItem.sourcedId),
+        srDeleted = status == Status.TOBEDELETED,
         srLastModified = parse8601Timestamp(dateLastModified),
         srMetaData = metaData,
-        srLineItemSourcedId = lineItem.sourcedId,
-        srStudentPersonUid = student.sourcedId.toLongOrNull() ?: 0,
+        srStudentPersonUid = xxHasher.toLongOrHash(student.sourcedId),
         srScore = score,
         srScoreDate = parse8601Timestamp(scoreDate),
-        srComment = comment
+        srComment = comment,
+        srClazzUid = clazzUid,
     )
 
 }

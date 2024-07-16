@@ -25,7 +25,6 @@ import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.toDoorUri
-import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.ContentEntryImportJob
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.UstadCache
@@ -98,8 +97,6 @@ class XapiZipContentImporterTest :AbstractMainDispatcherTest() {
         val accountManager: UstadAccountManager by di.instance()
         db = di.on(accountManager.activeEndpoint).direct.instance(tag = DoorTag.TAG_DB)
         activeEndpoint = accountManager.activeEndpoint
-        val connectivityStatus = ConnectivityStatus(ConnectivityStatus.STATE_UNMETERED, true, "NetworkSSID")
-        db.connectivityStatusDao.insert(connectivityStatus)
 
         mockWebServer = MockWebServer()
         mockWebServer.dispatcher = ContentDispatcher()

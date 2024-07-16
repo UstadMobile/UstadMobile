@@ -4,6 +4,9 @@ import androidx.room.*
 import com.ustadmobile.core.db.dao.ContentEntryDaoCommon.SORT_TITLE_ASC
 import com.ustadmobile.core.db.dao.ContentEntryDaoCommon.SORT_TITLE_DESC
 import app.cash.paging.PagingSource
+import com.ustadmobile.core.db.dao.ContentEntryDaoCommon.SELECT_ACCOUNT_PERSON_AND_STATUS_FIELDS
+import com.ustadmobile.core.db.dao.ContentEntryDaoCommon.SELECT_STATUS_FIELDS_FOR_CONTENT_ENTRY
+import com.ustadmobile.core.db.dao.xapi.StatementDao
 import kotlinx.coroutines.flow.Flow
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.composites.ContentEntryAndDetail
@@ -49,26 +52,59 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
         uid: Long,
     ): ContentEntryAndPicture?
 
+
+
     @HttpAccessible(
-        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall("findByContentEntryUidWithDetailsAsFlow"),
+            HttpServerFunctionCall(
+                functionName = "findStatusStatementsByContentEntryUid",
+                functionDao = StatementDao::class,
+            )
+        )
     )
     @Query("""
-            SELECT ContentEntry.*, ContentEntryVersion.*, ContentEntryPicture2.*
+              -- When the user is viewing ContentEntryDetail where the class is specified eg 
+              -- for a ContentEntry that is part of a Clazz then results information will only be
+              -- included if the user is a student in the class
+              -- If the user is viewing the ContentEntryDetail via the library then the results
+              -- information will always be included
+              WITH IncludeResults(includeResults) AS (
+                   SELECT CAST(
+                      (SELECT (:clazzUid = 0)
+                           OR (${ClazzEnrolmentDaoCommon.SELECT_ACCOUNT_PERSON_UID_IS_STUDENT_IN_CLAZZ_UID})
+                      ) AS INTEGER)
+                  )
+
+              SELECT ContentEntry.*, ContentEntryVersion.*, ContentEntryPicture2.*,
+                   :accountPersonUid AS sPersonUid,
+                   :courseBlockUid AS sCbUid,
+                   $SELECT_STATUS_FIELDS_FOR_CONTENT_ENTRY
               FROM ContentEntry
                    LEFT JOIN ContentEntryVersion
                              ON ContentEntryVersion.cevUid = 
                              (SELECT ContentEntryVersion.cevUid
                                 FROM ContentEntryVersion
-                               WHERE ContentEntryVersion.cevContentEntryUid = :entryUuid
+                               WHERE ContentEntryVersion.cevContentEntryUid = :contentEntryUid
                                  AND CAST(cevInActive AS INTEGER) = 0
                             ORDER BY ContentEntryVersion.cevLct DESC
                               LIMIT 1)
                    LEFT JOIN ContentEntryPicture2
-                             ON ContentEntryPicture2.cepUid = :entryUuid   
-             WHERE ContentEntry.contentEntryUid = :entryUuid
+                             ON ContentEntryPicture2.cepUid = :contentEntryUid   
+             WHERE ContentEntry.contentEntryUid = :contentEntryUid
             """)
-    abstract fun findEntryWithContainerByEntryIdLive(
-        entryUuid: Long
+    @QueryLiveTables(
+        arrayOf(
+            "ContentEntry", "ContentEntryVersion", "ContentEntryPicture2", "CourseBlock",
+            "ClazzEnrolment", "StatementEntity"
+        )
+    )
+    abstract fun findByContentEntryUidWithDetailsAsFlow(
+        contentEntryUid: Long,
+        clazzUid: Long,
+        courseBlockUid: Long,
+        accountPersonUid: Long,
     ): Flow<ContentEntryAndDetail?>
 
     @Query("SELECT * FROM ContentEntry WHERE sourceUrl = :sourceUrl LIMIT 1")
@@ -157,10 +193,17 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
                 functionName = "findListOfChildsByParentUuid",
                 functionDao = ContentEntryParentChildJoinDao::class,
             ),
+            HttpServerFunctionCall(
+                functionName = "findStatusStatementByParentContentEntryUid",
+                functionDao = StatementDao::class,
+            )
         )
     )
     @Query("""
-            SELECT ContentEntry.*, ContentEntryParentChildJoin.*, ContentEntryPicture2.*
+            WITH IncludeResults(includeResults) AS (SELECT 1)
+            
+            SELECT ContentEntry.*, ContentEntryParentChildJoin.*, ContentEntryPicture2.*,
+                   $SELECT_ACCOUNT_PERSON_AND_STATUS_FIELDS
               FROM ContentEntry 
                     LEFT JOIN ContentEntryParentChildJoin 
                          ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid 
@@ -184,6 +227,7 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
                      END DESC,             
                      ContentEntry.contentEntryUid""")
     abstract fun getChildrenByParentUidWithCategoryFilterOrderByName(
+        accountPersonUid: Long,
         parentUid: Long,
         langParam: Long,
         categoryParam0: Long,
@@ -192,7 +236,10 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
     ): PagingSource<Int, ContentEntryAndListDetail>
 
     @Query("""
-        SELECT ContentEntry.*, ContentEntryParentChildJoin.*, ContentEntryPicture2.*
+        WITH IncludeResults(includeResults) AS (SELECT 1)
+        
+        SELECT ContentEntry.*, ContentEntryParentChildJoin.*, ContentEntryPicture2.*,
+               $SELECT_ACCOUNT_PERSON_AND_STATUS_FIELDS
           FROM CourseBlock
                JOIN ContentEntry 
                     ON CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
@@ -205,24 +252,27 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
          WHERE CourseBlock.cbClazzUid IN
                (SELECT ClazzEnrolment.clazzEnrolmentClazzUid
                   FROM ClazzEnrolment
-                 WHERE ClazzEnrolment.clazzEnrolmentPersonUid = :personUid)
+                 WHERE ClazzEnrolment.clazzEnrolmentPersonUid = :accountPersonUid)
     """)
     abstract fun getContentFromMyCourses(
-        personUid: Long
+        accountPersonUid: Long
     ): PagingSource<Int, ContentEntryAndListDetail>
 
 
     @Query("""
-        SELECT ContentEntry.*, ContentEntryParentChildJoin.*, ContentEntryPicture2.*
+        WITH IncludeResults(includeResults) AS (SELECT 1)
+        
+        SELECT ContentEntry.*, ContentEntryParentChildJoin.*, ContentEntryPicture2.*, 
+               $SELECT_ACCOUNT_PERSON_AND_STATUS_FIELDS
           FROM ContentEntry
                LEFT JOIN ContentEntryParentChildJoin
                          ON ContentEntryParentChildJoin.cepcjParentContentEntryUid = 0
                LEFT JOIN ContentEntryPicture2
                          ON ContentEntryPicture2.cepUid = ContentEntry.contentEntryUid
-         WHERE ContentEntry.contentOwner = :personUid
+         WHERE ContentEntry.contentOwner = :accountPersonUid
     """)
     abstract fun getContentByOwner(
-        personUid: Long
+        accountPersonUid: Long
     ): PagingSource<Int, ContentEntryAndListDetail>
 
 
@@ -248,39 +298,6 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @Query("SELECT * FROM ContentEntry WHERE sourceUrl LIKE :sourceUrl")
     abstract fun findSimilarIdEntryForKhan(sourceUrl: String): List<ContentEntry>
 
-    /**
-     * This query is used to tell the client how big a download job is, even if the client does
-     * not yet have the indexes
-     */
-    @Repository(methodType = Repository.METHOD_DELEGATE_TO_WEB)
-    @Query("""
-        WITH RECURSIVE 
-               ContentEntry_recursive(contentEntryUid, containerSize) AS (
-               SELECT contentEntryUid, 
-                            (SELECT COALESCE((SELECT fileSize 
-                                           FROM Container 
-                                          WHERE containerContentEntryUid = ContentEntry.contentEntryUid 
-                                       ORDER BY cntLastModified DESC LIMIT 1), 0)) AS containerSize 
-                 FROM ContentEntry 
-                WHERE contentEntryUid = :contentEntryUid
-                  AND NOT ceInactive
-        UNION 
-            SELECT ContentEntry.contentEntryUid, 
-                (SELECT COALESCE((SELECT fileSize 
-                                    FROM Container 
-                                   WHERE containerContentEntryUid = ContentEntry.contentEntryUid 
-                                ORDER BY cntLastModified DESC LIMIT 1), 0)) AS containerSize  
-                  FROM ContentEntry
-             LEFT JOIN ContentEntryParentChildJoin 
-                    ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid,
-                            ContentEntry_recursive
-                  WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = ContentEntry_recursive.contentEntryUid
-                    AND NOT ceInactive)
-        SELECT COUNT(*) AS numEntries, 
-               SUM(containerSize) AS totalSize 
-          FROM ContentEntry_recursive""")
-    abstract suspend fun getRecursiveDownloadTotals(contentEntryUid: Long): DownloadJobSizeInfo?
-
     @Query("""
             UPDATE ContentEntry 
                SET ceInactive = :ceInactive,
@@ -303,49 +320,32 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
         changedTime: Long
     )
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract fun replaceList(entries: List<ContentEntry>)
-
     @Query("""Select ContentEntry.contentEntryUid AS uid, ContentEntry.title As labelName 
                     from ContentEntry WHERE contentEntryUid IN (:contentEntryUids)""")
     abstract suspend fun getContentEntryFromUids(contentEntryUids: List<Long>): List<UidAndLabel>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract fun insertWithReplace(entry: ContentEntry)
-
-    @Query("SELECT ContentEntry.*, Language.* FROM ContentEntry LEFT JOIN Language ON Language.langUid = ContentEntry.primaryLanguageUid")
-    abstract fun findAllLive(): Flow<List<ContentEntryWithLanguage>>
-
     @Query("""
-        UPDATE ContentEntry 
-           SET ceInactive = :toggleVisibility, 
-               contentEntryLct = :changedTime 
-         WHERE contentEntryUid IN (:selectedItem)""")
-    abstract suspend fun toggleVisibilityContentEntryItems(
-        toggleVisibility: Boolean,
-        selectedItem: List<Long>,
-        changedTime: Long
+    WITH RECURSIVE 
+    ContentEntry_recursive(contentEntryUid, title, leaf, ceInactive) AS (
+        SELECT contentEntryUid, title, leaf, ceInactive
+        FROM ContentEntry 
+        WHERE contentEntryUid = :rootContentEntryUid
+    UNION ALL
+        SELECT ContentEntry.contentEntryUid, ContentEntry.title, ContentEntry.leaf, ContentEntry.ceInactive
+        FROM ContentEntry
+        JOIN ContentEntryParentChildJoin ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid
+        JOIN ContentEntry_recursive ON ContentEntryParentChildJoin.cepcjParentContentEntryUid = ContentEntry_recursive.contentEntryUid
     )
-
-    @Query("""
-SELECT ContentEntry.*
-  FROM ContentEntry
-       JOIN Container ON Container.containerUid = 
-       (SELECT containerUid 
-          FROM Container
-         WHERE Container.containercontententryUid = ContentEntry.contentEntryUid
-           AND Container.cntLastModified = 
-               (SELECT MAX(ContainerInternal.cntLastModified)
-                  FROM Container ContainerInternal
-                 WHERE ContainerInternal.containercontententryUid = ContentEntry.contentEntryUid))
- WHERE ContentEntry.leaf 
-   AND NOT ContentEntry.ceInactive
-   AND (NOT EXISTS 
-       (SELECT ContainerEntry.ceUid
-          FROM ContainerEntry
-         WHERE ContainerEntry.ceContainerUid = Container.containerUid)
-        OR Container.fileSize = 0)   
+    SELECT * FROM ContentEntry_recursive
+    WHERE NOT ceInactive
+    ORDER BY title
     """)
-    abstract suspend fun findContentEntriesWhereIsLeafAndLatestContainerHasNoEntriesOrHasZeroFileSize(): List<ContentEntry>
+    suspend fun getRecursiveContentEntriesForExport(rootContentEntryUid: Long): List<ContentEntry>
+
+    @Query("INSERT INTO ContentEntryParentChildJoin(cepcjParentContentEntryUid, cepcjChildContentEntryUid) VALUES (:parentUid, :childUid)")
+    suspend fun insertParentChildJoin(parentUid: Long, childUid: Long)
+
+    @Query("SELECT * FROM ContentEntry WHERE contentEntryUid = :entryUid")
+    suspend fun getContentEntryByUid(entryUid: Long): ContentEntry?
 
 }

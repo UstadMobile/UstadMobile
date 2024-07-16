@@ -1,0 +1,38 @@
+{
+  "actor": {
+    "account" : {
+      "name": "user",
+      "homePage": "http://localhost/"
+    }
+  },
+  "verb" : {
+    "id":"http://example.com/planned",
+    "display":{
+      "en-US":"planned"
+    }
+  },
+  "object": {
+    "objectType": "SubStatement",
+    "actor": {
+      "account" : {
+        "name": "user",
+        "homePage": "http://localhost/"
+      }
+    },
+    "verb" : {
+      "id":"http://example.com/visited",
+      "display":{
+        "en-US":"will visit"
+      }
+    },
+    "object": {
+      "objectType": "Activity",
+      "id":"http://example.com/website",
+      "definition": {
+        "name" : {
+          "en-US":"Some Awesome Website"
+        }
+      }
+    }
+  }
+}

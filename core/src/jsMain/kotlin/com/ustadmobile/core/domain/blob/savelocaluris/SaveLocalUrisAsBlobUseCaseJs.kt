@@ -44,7 +44,7 @@ class SaveLocalUrisAsBlobUseCaseJs(
         onTransferJobItemCreated: (SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem, TransferJobItem) -> Unit,
     ): List<SaveLocalUrisAsBlobsUseCase.SavedBlob> {
         val uriToSaveQueueItems = db.withDoorTransactionAsync {
-            val transferJobUid = db.transferJobDao.insert(TransferJob()).toInt()
+            val transferJobUid = db.transferJobDao().insert(TransferJob()).toInt()
 
             localUrisToSave.map { localUriToSaveItem ->
                 val itemSize = fetchAsync(localUriToSaveItem.localUri).await()
@@ -57,7 +57,7 @@ class SaveLocalUrisAsBlobUseCaseJs(
                     tjiTableId = localUriToSaveItem.tableId,
                     tjiEntityUid = localUriToSaveItem.entityUid,
                 )
-                val transferJobItemUid = db.transferJobItemDao.insert(transferJobItem).toInt()
+                val transferJobItemUid = db.transferJobItemDao().insert(transferJobItem).toInt()
 
                 onTransferJobItemCreated(
                     localUriToSaveItem,
@@ -146,7 +146,7 @@ class SaveLocalUrisAsBlobUseCaseJs(
                 withContext(NonCancellable) {
                     db.withDoorTransactionAsync {
                         transferJobItemStatusUpdater.onFinished()
-                        db.transferJobItemDao.updateStatusIfNotCompleteForAllInJob(
+                        db.transferJobItemDao().updateStatusIfNotCompleteForAllInJob(
                             jobUid = uriToSaveQueueItems.firstOrNull()?.transferJobItem?.tjiTjUid ?: 0,
                             status = TransferJobItemStatus.FAILED.value
                         )

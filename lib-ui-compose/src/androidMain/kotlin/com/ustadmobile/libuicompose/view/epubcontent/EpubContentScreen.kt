@@ -36,6 +36,7 @@ import com.ustadmobile.core.viewmodel.epubcontent.EpubContentUiState
 import com.ustadmobile.core.viewmodel.epubcontent.EpubContentViewModel
 import com.ustadmobile.core.viewmodel.epubcontent.EpubScrollCommand
 import com.ustadmobile.core.viewmodel.epubcontent.EpubTocItem
+import com.ustadmobile.libuicompose.components.LifecycleActiveEffect
 import kotlinx.coroutines.flow.Flow
 import org.kodein.di.compose.localDI
 import org.kodein.di.direct
@@ -52,8 +53,10 @@ actual fun EpubContentScreen(
         onClickTocItem = viewModel::onClickTocItem,
         scrollCommandFlow = viewModel.epubScrollCommands,
         onClickLink = {
-            viewModel.onClickLink(it, it) //On Android it is already absolute
-        }
+            viewModel.onClickLink(it, it) //On Android it (the href) is already absolute
+        },
+        onSpineIndexChanged = viewModel::onSpineIndexChanged,
+        onActiveChanged = viewModel::onActiveChanged,
     )
 }
 
@@ -72,6 +75,8 @@ fun EpubContentScreen(
     onClickTocItem: (EpubTocItem) -> Unit,
     onClickLink: (String) -> Unit,
     scrollCommandFlow: Flow<EpubScrollCommand>,
+    onActiveChanged: (Boolean) -> Unit = { },
+    onSpineIndexChanged: (Int) -> Unit = { },
 ) {
     val di = localDI()
     val contentEntryVersionServer: ContentEntryVersionServerUseCase = remember {
@@ -95,6 +100,8 @@ fun EpubContentScreen(
     var recyclerViewLayoutRef: LinearLayoutManager? by remember {
         mutableStateOf(null)
     }
+
+    LifecycleActiveEffect(onActiveChanged)
 
     val drawerState = rememberDrawerState(
         initialValue = DrawerValue.Closed,
@@ -195,6 +202,15 @@ fun EpubContentScreen(
                     addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
                     adapter = recyclerViewAdapter
                     recyclerViewRef = this
+                    addOnScrollListener(
+                        object: RecyclerView.OnScrollListener() {
+                            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                                val layoutManager = recyclerView.layoutManager
+                                        as? LinearLayoutManager ?: return
+                                onSpineIndexChanged(layoutManager.findLastVisibleItemPosition())
+                            }
+                        }
+                    )
                 }
             },
             update = {

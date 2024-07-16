@@ -179,7 +179,7 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
                 .addMigrations(*migrationList().toTypedArray())
                 .build()
                 .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId).also {
-                    it.siteDao.insert(Site().apply {
+                    it.siteDao().insert(Site().apply {
                         siteUid = 1L
                         siteName = "My Site"
                         guestLogin = false

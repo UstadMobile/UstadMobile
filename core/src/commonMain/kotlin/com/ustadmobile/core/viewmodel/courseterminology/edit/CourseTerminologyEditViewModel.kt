@@ -58,7 +58,7 @@ class CourseTerminologyEditViewModel(
                     }
                 },
                 onLoadFromDb = {
-                    it.courseTerminologyDao.takeIf { entityUidArg != 0L }
+                    it.courseTerminologyDao().takeIf { entityUidArg != 0L }
                         ?.findByUidAsync(entityUidArg)
                 },
                 uiUpdate = { terminology ->
@@ -130,7 +130,7 @@ class CourseTerminologyEditViewModel(
 
         viewModelScope.launch {
             val terminology = _uiState.value.entity ?: return@launch
-            activeRepo.courseTerminologyDao.upsertAsync(terminology)
+            activeRepo.courseTerminologyDao().upsertAsync(terminology)
 
             _uiState.update { prev ->
                 prev.copy(fieldsEnabled = true)

@@ -47,6 +47,17 @@ import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
 import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseJs
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCaseJs
+import com.ustadmobile.core.domain.xapi.StoreActivitiesUseCase
+import com.ustadmobile.core.domain.xapi.XapiStatementResource
+import com.ustadmobile.core.domain.xapi.noninteractivecontentusagestatementrecorder.NonInteractiveContentXapiStatementRecorderFactory
+import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnClearUseCase
+import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnClearUseCaseJs
+import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnUnloadUseCase
+import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnUnloadUseCaseJs
+import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
+import com.ustadmobile.core.domain.xxhash.XXHasher64FactoryJs
+import com.ustadmobile.core.domain.xxhash.XXStringHasher
+import com.ustadmobile.core.domain.xxhash.XXStringHasherJs
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.ext.DoorTag
 import org.kodein.di.DI
@@ -240,4 +251,53 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
             repo = instance(tag = DoorTag.TAG_REPO),
         )
     }
+
+    bind<XXStringHasher>() with singleton {
+        XXStringHasherJs()
+    }
+
+    bind<XXHasher64Factory>() with singleton {
+        XXHasher64FactoryJs()
+    }
+
+    bind<StoreActivitiesUseCase>() with scoped(EndpointScope.Default).singleton {
+        StoreActivitiesUseCase(
+            db = instance(tag = DoorTag.TAG_DB),
+            repo = instance(tag = DoorTag.TAG_REPO),
+        )
+    }
+
+    bind<XapiStatementResource>() with scoped(EndpointScope.Default).singleton {
+        XapiStatementResource(
+            db = instance(tag = DoorTag.TAG_DB),
+            repo = instance(tag = DoorTag.TAG_REPO),
+            xxHasher = instance(),
+            endpoint = context,
+            json = instance(),
+            hasherFactory = instance(),
+            storeActivitiesUseCase = instance(),
+        )
+    }
+
+    bind<SaveStatementOnClearUseCase>() with scoped(EndpointScope.Default).singleton {
+        SaveStatementOnClearUseCaseJs(
+            xapiStatementResource = instance(),
+        )
+    }
+
+    bind<SaveStatementOnUnloadUseCase>() with scoped(EndpointScope.Default).singleton {
+        SaveStatementOnUnloadUseCaseJs(
+            endpoint = context,
+            json = instance(),
+        )
+    }
+
+    bind<NonInteractiveContentXapiStatementRecorderFactory>() with scoped(EndpointScope.Default).singleton {
+        NonInteractiveContentXapiStatementRecorderFactory(
+            saveStatementOnClearUseCase = instance(),
+            saveStatementOnUnloadUseCase = instance(),
+            xapiStatementResource = instance(),
+        )
+    }
+
 }

@@ -44,7 +44,7 @@ class UpdatePeerReviewAllocationUseCase(
         allocateRemaining: Boolean,
         resetAllocations: Boolean = false,
     ) : List<PeerReviewerAllocation>{
-        val submitterUids = db.clazzAssignmentDao.getSubmitterUidsByClazzOrGroupSetUid(
+        val submitterUids = db.clazzAssignmentDao().getSubmitterUidsByClazzOrGroupSetUid(
             clazzUid = clazzUid,
             groupSetUid = groupUid,
             time = systemTimeInMillis(),

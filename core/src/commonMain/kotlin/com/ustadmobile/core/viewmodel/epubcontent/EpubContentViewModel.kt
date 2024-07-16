@@ -7,7 +7,6 @@ import com.ustadmobile.core.impl.appstate.OverflowItem
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.url.UrlKmp
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.core.viewmodel.UstadViewModel
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import kotlinx.coroutines.Dispatchers
@@ -30,6 +29,7 @@ import com.ustadmobile.core.contentformats.manifest.ContentManifestEntry
 import com.ustadmobile.core.domain.epub.GetEpubTableOfContentsUseCase
 import com.ustadmobile.core.util.ext.bodyAsDecodedText
 import com.ustadmobile.core.util.requireEntryByUri
+import com.ustadmobile.core.viewmodel.noninteractivecontent.AbstractNonInteractiveContentViewModel
 import org.kodein.di.direct
 import kotlin.concurrent.Volatile
 
@@ -40,6 +40,7 @@ data class EpubContentUiState(
     val tableOfContentsOpen: Boolean = false,
     val collapsedTocUids: Set<Int> = emptySet(),
     val coverImageUrl: String? = null,
+    val langCode: String? = null,
 ) {
 
     /**
@@ -116,7 +117,7 @@ class EpubContentViewModel(
             xml = di.direct.instance()
         ),
     private val useBodyDataUrls: Boolean = false,
-) : UstadViewModel(di, savedStateHandle, DEST_NAME){
+) : AbstractNonInteractiveContentViewModel(di, savedStateHandle, DEST_NAME){
 
     private val entityUidArg: Long = savedStateHandle[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0
 
@@ -169,7 +170,7 @@ class EpubContentViewModel(
             val (cevManifestUrl, cevOpenUri) = if(argManifestUrl != null && argCevOpenUri != null) {
                 argManifestUrl to argCevOpenUri
             }else {
-                val contentEntryVersion = activeRepo.contentEntryVersionDao
+                val contentEntryVersion = activeRepo.contentEntryVersionDao()
                     .findByUidAsync(entityUidArg) ?: return@launch
                 val entityCevManifestUrl = contentEntryVersion.cevManifestUrl ?: return@launch
                 val entityCevOpenUri = contentEntryVersion.cevOpenUri ?: return@launch
@@ -216,7 +217,8 @@ class EpubContentViewModel(
                     _uiState.update { prev ->
                         prev.copy(
                             spineUrls = spineUrls,
-                            coverImageUrl = coverImageUrl
+                            coverImageUrl = coverImageUrl,
+                            langCode = opfPackage.metadata.languages.firstOrNull()?.content
                         )
                     }
 
@@ -271,6 +273,17 @@ class EpubContentViewModel(
             }
         }
     }
+
+    override val titleAndLangCode: TitleAndLangCode?
+        get() {
+            val langCodeVal = _uiState.value.langCode
+            val titleVal = _appUiState.value.title
+            return if(langCodeVal != null && titleVal != null) {
+                TitleAndLangCode(titleVal, langCodeVal)
+            }else {
+                null
+            }
+        }
 
     fun onClickLink(
         baseUrl: String,
@@ -330,6 +343,22 @@ class EpubContentViewModel(
         }
     }
 
+    /**
+     * Invoked by the platform Screen function, used to track user progress (e.g. xAPI progress
+     * extension)
+     */
+    fun onSpineIndexChanged(index: Int) {
+        val spineSize = _uiState.value.spineUrls.size
+        if(spineSize <= 0)
+            return //avoid any chance of div by zero
+
+        if(index == spineSize -1)
+            onComplete()
+        else
+            onProgressed((index * 100) / spineSize)
+    }
+
+
     companion object {
 
         const val ARG_MANIFEST_URL = "manifestUrl"
@@ -348,6 +377,12 @@ class EpubContentViewModel(
          * used when embedded via the desktop.
          */
         const val ARG_TOC_OPTIONS_STRING = "tocString"
+
+        /**
+         * Argument that can be used to specify the xAPI statements url. This is used when embedded
+         * via the desktop
+         */
+        const val ARG_XAPI_STATEMENTS_URL = "xapiStatementsUrl"
 
         const val DEST_NAME = "EpubContent"
     }
