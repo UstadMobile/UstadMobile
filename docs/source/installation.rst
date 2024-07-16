@@ -1,5 +1,5 @@
 =======================
-Installation
+INSTALLATION
 =======================
 
 Android Installation
