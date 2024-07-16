@@ -5,6 +5,12 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 
 val nameMap = mapOf(
+    UstadImage.ONBOARDING_ADD_ORG to "/img/onboarding_add_org.svg",
+    UstadImage.ONBOARDING_EXISTING to "/img/onboarding_existing.svg",
+    UstadImage.ONBOARDING_INDIVIDUAL to "/img/onboarding_individual.svg",
+    UstadImage.INDIVIDUAL_NEW_ACCOUNT to "/img/individual_create.svg",
+    UstadImage.INDIVIDUAL_RESTORE_ACCOUNT to "/img/individual_restore.svg",
+
     UstadImage.ILLUSTRATION_CONNECT to "/img/illustration_connect.png",
     UstadImage.ILLUSTRATION_ONBOARDING1 to "/img/illustration_onboarding1.png",
     UstadImage.ILLUSTRATION_ONBOARDING2 to "/img/illustration_onboarding2.png",

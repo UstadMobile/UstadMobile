@@ -6,6 +6,11 @@ import androidx.compose.ui.res.painterResource
 import com.ustadmobile.libuicompose.R
 
 private val nameMap = mapOf(
+    UstadImage.INDIVIDUAL_NEW_ACCOUNT to R.drawable.individual_create,
+    UstadImage.INDIVIDUAL_RESTORE_ACCOUNT to R.drawable.individual_restore,
+    UstadImage.ONBOARDING_INDIVIDUAL to R.drawable.onboarding_individual,
+    UstadImage.ONBOARDING_EXISTING to R.drawable.onboarding_existing,
+    UstadImage.ONBOARDING_ADD_ORG to R.drawable.onboarding_add_org,
     UstadImage.ILLUSTRATION_CONNECT to R.drawable.illustration_connect,
     UstadImage.ILLUSTRATION_ONBOARDING1 to R.drawable.illustration_onboarding1,
     UstadImage.ILLUSTRATION_ONBOARDING2 to R.drawable.illustration_onboarding2,

@@ -14,6 +14,10 @@ import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.domain.getversion.GetVersionUseCaseJvm
 import com.ustadmobile.core.domain.account.SetPasswordUseCase
 import com.ustadmobile.core.domain.account.SetPasswordUseCaseCommonJvm
+import com.ustadmobile.core.domain.backup.JvmUnzipFileUseCase
+import com.ustadmobile.core.domain.backup.JvmZipFileUseCase
+import com.ustadmobile.core.domain.backup.UnzipFileUseCase
+import com.ustadmobile.core.domain.backup.ZipFileUseCase
 import com.ustadmobile.core.domain.blob.download.BlobDownloadClientUseCase
 import com.ustadmobile.core.domain.blob.download.BlobDownloadClientUseCaseCommonJvm
 import com.ustadmobile.core.domain.blob.download.CancelDownloadUseCase
@@ -73,6 +77,8 @@ import com.ustadmobile.core.domain.contententry.launchcontent.xapi.ResolveXapiLa
 import com.ustadmobile.core.domain.contententry.move.MoveContentEntriesUseCase
 import com.ustadmobile.core.domain.deleteditem.DeletePermanentlyUseCase
 import com.ustadmobile.core.domain.deleteditem.RestoreDeletedItemUseCase
+import com.ustadmobile.core.domain.export.DesktopExportContentEntryUstadZipUseCase
+import com.ustadmobile.core.domain.export.ExportContentEntryUstadZipUseCase
 import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCase
 import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCaseJvm
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
@@ -122,6 +128,19 @@ import org.kodein.di.singleton
 import java.io.File
 
 val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
+
+
+    bind<ExportContentEntryUstadZipUseCase>() with provider {
+        DesktopExportContentEntryUstadZipUseCase(
+
+            contentEntryDao = instance(),
+            json = instance()
+        )
+    }
+
+    bind<UnzipFileUseCase>() with singleton { JvmUnzipFileUseCase() }
+    bind<ZipFileUseCase>() with singleton { JvmZipFileUseCase() }
+
     bind<OpenExternalLinkUseCase>() with provider {
         OpenExternalLinkUseCaseJvm()
     }

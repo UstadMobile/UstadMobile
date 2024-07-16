@@ -32,6 +32,8 @@ import org.kodein.di.singleton
  * at the Application level di.
  */
 fun commonDomainDiModule(endpointScope: EndpointScope) = DI.Module("CommonDomain") {
+
+
     bind<EnrolIntoCourseUseCase>() with scoped(endpointScope).provider {
         EnrolIntoCourseUseCase(
             db = instance(tag = DoorTag.TAG_DB),
