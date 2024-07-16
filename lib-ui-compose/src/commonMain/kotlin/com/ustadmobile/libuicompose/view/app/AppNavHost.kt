@@ -32,6 +32,7 @@ import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.clazz.permissiondetail.CoursePermissionDetailViewModel
 import com.ustadmobile.core.viewmodel.clazz.permissionedit.CoursePermissionEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.permissionlist.CoursePermissionListViewModel
+import com.ustadmobile.core.viewmodel.clazz.redeem.ClazzInviteViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.detail.ClazzAssignmentDetailViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.edit.ClazzAssignmentEditViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.peerreviewerallocationedit.PeerReviewerAllocationEditViewModel
@@ -144,6 +145,7 @@ import com.ustadmobile.libuicompose.view.clazz.joinwithcode.JoinWithCodeScreen
 import com.ustadmobile.libuicompose.view.clazz.permissiondetail.CoursePermissionDetailScreen
 import com.ustadmobile.libuicompose.view.clazz.permissionedit.CoursePermissionEditScreen
 import com.ustadmobile.libuicompose.view.clazz.permissionlist.CoursePermissionListScreen
+import com.ustadmobile.libuicompose.view.clazz.redeem.ClazzInviteRedeem
 import com.ustadmobile.libuicompose.view.contententry.detail.ContentEntryDetailScreen
 import com.ustadmobile.libuicompose.view.contententry.edit.ContentEntryEditScreen
 import com.ustadmobile.libuicompose.view.contententry.getmetadata.ContentEntryGetMetadataScreen
@@ -771,6 +773,13 @@ fun AppNavHost(
                 InviteViaContactScreen(
                     appViewModel(backStackEntry, InviteViaContactViewModel::class,
                         ::InviteViaContactViewModel)
+                )
+            }
+
+            contentScene("/${ClazzInviteViewModel.DEST_NAME}") { backStackEntry ->
+                ClazzInviteRedeem(
+                    appViewModel(backStackEntry, ClazzInviteViewModel::class,
+                        ::ClazzInviteViewModel)
                 )
             }
 

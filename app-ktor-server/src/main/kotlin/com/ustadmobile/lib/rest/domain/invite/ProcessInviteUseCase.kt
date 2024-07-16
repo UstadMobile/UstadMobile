@@ -37,10 +37,11 @@ class ProcessInviteUseCase(
 
         val coroutineScope = CoroutineScope(Dispatchers.IO + Job())
         coroutineScope.launch {
-            val token = uuid4().toString()
-            val inviteLink = UstadUrlComponents(endpoint.url, ClazzInviteViewModel.DEST_NAME, token).fullUrl()
-            contacts.forEach { contact ->
 
+            contacts.forEach { contact ->
+                val token = uuid4().toString()
+                val inviteLink = UstadUrlComponents(endpoint.url, ClazzInviteViewModel.DEST_NAME, "inviteCode=$token"
+                ).fullUrl()
                 val validContacts = checkContactTypeUseCase.invoke(contact = contact)
 
                 if (validContacts != null) {

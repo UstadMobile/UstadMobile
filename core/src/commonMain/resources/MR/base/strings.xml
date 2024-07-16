@@ -1943,5 +1943,9 @@
 
     <string name="no_contact_found">No contact found</string>
 
+    <string name="decline">Decline</string>
+
+    <string name="do_you_want_to_join_this_course">Do you want to join this course?</string>
+
 
 </resources>
