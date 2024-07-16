@@ -158,7 +158,7 @@ class H5PContentImporter(
         progressListener: ContentImportProgressListener
     ): ContentEntryVersion = withContext(Dispatchers.IO) {
         val jobUri = jobItem.requireSourceAsDoorUri()
-        val entry = db.contentEntryDao.findByUid(jobItem.cjiContentEntryUid)
+        val entry = db.contentEntryDao().findByUid(jobItem.cjiContentEntryUid)
         val params = CompressParams(
             compressionLevel = CompressionLevel.forValue(jobItem.cjiCompressionLevel)
         )

@@ -27,7 +27,7 @@ class EndSessionParentChildJoinSyncListener(
 
         GlobalScope.takeIf { consentRevokedChildPersonUidList.isNotEmpty() }?.launch {
             consentRevokedChildPersonUidList.forEach { childPersonUid ->
-                repo.userSessionDao.endOtherSessions(childPersonUid, 0,
+                repo.userSessionDao().endOtherSessions(childPersonUid, 0,
                     UserSession.STATUS_LOGGED_OUT, UserSession.REASON_CONSENT_REVOKED,
                     systemTimeInMillis())
             }

@@ -46,7 +46,7 @@ class CoursePermissionEditViewModel(
 
         launchIfHasPermission(
             permissionCheck = {
-                it.coursePermissionDao.personHasPermissionWithClazzAsync2(
+                it.coursePermissionDao().personHasPermissionWithClazzAsync2(
                     activeUserPersonUid, clazzUid, PermissionFlags.COURSE_EDIT
                 )
             },
@@ -57,7 +57,7 @@ class CoursePermissionEditViewModel(
             val entity = loadEntity(
                 serializer = CoursePermission.serializer(),
                 onLoadFromDb = { db ->
-                    db.coursePermissionDao.findByUidAndClazzUid(entityUidArg, clazzUid)
+                    db.coursePermissionDao().findByUidAndClazzUid(entityUidArg, clazzUid)
                 },
                 makeDefault = {
                     CoursePermission(
@@ -117,7 +117,7 @@ class CoursePermissionEditViewModel(
             val entity = _uiState.value.entity ?: return@launchWithLoadingIndicator
 
             activeRepo.withDoorTransactionAsync {
-                activeRepo.coursePermissionDao.upsertAsync(entity)
+                activeRepo.coursePermissionDao().upsertAsync(entity)
             }
 
             val popUpToOnFinish = savedStateHandle[UstadView.ARG_POPUPTO_ON_FINISH]

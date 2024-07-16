@@ -90,7 +90,7 @@ class ClazzMemberListViewModelTest : AbstractMainDispatcherTest() {
         testClazzMemberViewModel(
             activeUserRole = 0
         ) { testContext ->
-            activeDb.coursePermissionDao.upsertAsync(
+            activeDb.coursePermissionDao().upsertAsync(
                 CoursePermission(
                     cpToPersonUid = testContext.activeUserPerson.personUid,
                     cpPermissionsFlag = CoursePermission.TEACHER_DEFAULT_PERMISSIONS,

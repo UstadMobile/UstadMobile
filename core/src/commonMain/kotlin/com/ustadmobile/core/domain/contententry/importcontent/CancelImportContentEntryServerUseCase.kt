@@ -32,7 +32,7 @@ class CancelImportContentEntryServerUseCase(
 
         Napier.d { "CancelImportContentEntryServerUseCase: validating owner to cancel #$cjiUid"}
 
-        val ownerPersonUid = db.contentEntryImportJobDao.findOwnerByUidAsync(cjiUid)
+        val ownerPersonUid = db.contentEntryImportJobDao().findOwnerByUidAsync(cjiUid)
         if(ownerPersonUid != accountPersonUid)
             throw IllegalArgumentException("$accountPersonUid is not owner of the job $cjiUid ($ownerPersonUid)")
 

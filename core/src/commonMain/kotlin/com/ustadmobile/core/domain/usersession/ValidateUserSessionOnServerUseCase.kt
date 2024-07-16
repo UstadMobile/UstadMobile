@@ -26,7 +26,7 @@ class ValidateUserSessionOnServerUseCase(
         }
 
         //nodeActiveUserUid must have an active session
-        val sessionsForUser = db.userSessionDao.countActiveSessionsForUserAndNode(
+        val sessionsForUser = db.userSessionDao().countActiveSessionsForUserAndNode(
             personUid = accountPersonUid,
             nodeId = nodeId,
         )

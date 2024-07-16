@@ -9,5 +9,4 @@ class PersonUidAndPasswordHash {
 
     var lastName: String? = null
 
-    var admin: Boolean = false
 }

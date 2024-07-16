@@ -168,7 +168,7 @@ class UstadTestRule(): TestWatcher() {
 
                 })
                 ).also {
-                    it.siteDao.insert(Site().apply {
+                    it.siteDao().insert(Site().apply {
                         siteName = "Test"
                         authSalt = randomString(16)
                     })

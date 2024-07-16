@@ -13,6 +13,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -22,6 +23,7 @@ import com.ustadmobile.core.domain.contententry.getlocalurlforcontent.GetLocalUr
 import com.ustadmobile.core.util.ext.onActiveEndpoint
 import com.ustadmobile.core.viewmodel.videocontent.VideoContentUiState
 import com.ustadmobile.core.viewmodel.videocontent.VideoContentViewModel
+import com.ustadmobile.door.util.systemTimeInMillis
 import org.jetbrains.compose.videoplayer.VideoPlayer
 import org.jetbrains.compose.videoplayer.rememberVideoPlayerState
 import org.kodein.di.compose.localDI
@@ -38,12 +40,18 @@ actual fun VideoContentScreen(
 ) {
 
     val uiState by viewModel.uiState.collectAsState(VideoContentUiState())
-    VideoContentScreen(uiState)
+    VideoContentScreen(
+        uiState = uiState,
+        onPlayStateChanged = viewModel::onPlayStateChanged,
+        onCompleted = viewModel::onComplete,
+    )
 }
 
 @Composable
 fun VideoContentScreen(
-    uiState: VideoContentUiState
+    uiState: VideoContentUiState,
+    onPlayStateChanged: (VideoContentViewModel.MediaPlayState) -> Unit,
+    onCompleted: () ->  Unit,
 ) {
     val mediaSrc = uiState.firstMediaUri
     val endpoint = uiState.endpoint
@@ -60,6 +68,8 @@ fun VideoContentScreen(
             }
 
             val state = rememberVideoPlayerState()
+            val progress by state.progress
+
             val progressVal = state.progress.value
             val totalTime = remember(progressVal.length) {
                 if(progressVal.length > 0) {
@@ -76,6 +86,17 @@ fun VideoContentScreen(
                 }
             }
 
+            LaunchedEffect(state.isResumed, progress) {
+                onPlayStateChanged(
+                    VideoContentViewModel.MediaPlayState(
+                        timestamp = systemTimeInMillis(),
+                        timeInMillis = progress.timeMillis,
+                        totalDuration = progress.length,
+                        resumed = state.isResumed,
+                    )
+                )
+            }
+
             Column {
                 VideoPlayer(
                     modifier = Modifier
@@ -83,7 +104,10 @@ fun VideoContentScreen(
                         .fillMaxHeight(fraction = 0.8f),
                     url = url,
                     state = state,
-                    onFinish = state::stopPlayback
+                    onFinish = {
+                        onCompleted()
+                        state.stopPlayback()
+                    }
                 )
                 Row(
                     modifier = Modifier.fillMaxWidth(),

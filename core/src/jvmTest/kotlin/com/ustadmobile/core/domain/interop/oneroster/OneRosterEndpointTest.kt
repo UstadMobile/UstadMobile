@@ -12,10 +12,13 @@ import com.ustadmobile.core.domain.interop.oneroster.model.LineItem
 import com.ustadmobile.core.domain.interop.oneroster.model.Status
 import com.ustadmobile.core.domain.interop.timestamp.format8601Timestamp
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
+import com.ustadmobile.core.domain.xxhash.XXStringHasherCommonJvm
+import com.ustadmobile.core.domain.xxhash.toLongOrHash
 import com.ustadmobile.core.util.isimplerequest.StringSimpleTextRequest
 import com.ustadmobile.core.util.stringvalues.asIStringValues
 import com.ustadmobile.core.util.uuid.randomUuidAsString
 import com.ustadmobile.door.DatabaseBuilder
+import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Clazz as ClazzEntity
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
@@ -48,12 +51,14 @@ class OneRosterEndpointTest {
 
     private val endpoint = Endpoint("http://localhost:8087/")
 
+    private val xxHasher = XXStringHasherCommonJvm()
+
     @BeforeTest
     fun setup() {
         db = DatabaseBuilder.databaseBuilder(
             UmAppDatabase::class, "jdbc:sqlite::memory:", nodeId = 1L
         ).build()
-        oneRosterEndpoint = OneRosterEndpoint(db, null, endpoint)
+        oneRosterEndpoint = OneRosterEndpoint(db, null, endpoint, xxHasher, json)
         runBlocking {
             accountPerson = Person().apply {
                 firstNames = "One"
@@ -90,18 +95,20 @@ class OneRosterEndpointTest {
         sourcedId: String? = null,
     ) : CourseBlock{
         val courseBlock = CourseBlock(
+            cbUid = sourcedId?.let { xxHasher.toLongOrHash(sourcedId) }
+                ?: db.doorPrimaryKeyManager.nextId(CourseBlock.TABLE_ID),
             cbClazzUid = clazzUid,
             cbSourcedId = sourcedId,
             cbType = CourseBlock.BLOCK_EXTERNAL_APP,
         )
 
         return courseBlock.copy(
-            cbUid = db.courseBlockDao.insertAsync(courseBlock)
+            cbUid = db.courseBlockDao().insertAsync(courseBlock)
         )
     }
 
     private suspend fun grantExternalAppPermission() {
-        db.externalAppPermissionDao.insertAsync(
+        db.externalAppPermissionDao().insertAsync(
             ExternalAppPermission(
                 eapAuthToken = "test-token",
                 eapPersonUid = accountPerson.personUid,
@@ -141,15 +148,16 @@ class OneRosterEndpointTest {
             val courseBlock = createCourseBlock(clazz.clazzUid)
             grantExternalAppPermission()
 
-            val studentResults = (0 .. 2).map { score ->
+            val studentResults = (0 .. 2).mapIndexed { index, score ->
                 StudentResult(
+                    srUid = index.toLong(),
                     srStudentPersonUid = accountPerson.personUid,
                     srClazzUid = clazz.clazzUid,
                     srCourseBlockUid =  courseBlock.cbUid,
                     srScore = score.toFloat()
                 )
             }
-            db.studentResultDao.insertListAsync(studentResults)
+            db.studentResultDao().insertListAsync(studentResults)
 
             val response = httpEndpoint.invoke(
                 StringSimpleTextRequest(
@@ -246,7 +254,7 @@ class OneRosterEndpointTest {
             )
 
             assertEquals(201, response.responseCode)
-            val courseBlockInDb = db.courseBlockDao.findBySourcedId(
+            val courseBlockInDb = db.courseBlockDao().findBySourcedId(
                 newLineItem.sourcedId, accountPerson.personUid)
             assertEquals(newLineItem.sourcedId, courseBlockInDb?.cbSourcedId)
             assertEquals(clazz.clazzUid, courseBlockInDb?.cbClazzUid ?: -1)
@@ -294,8 +302,9 @@ class OneRosterEndpointTest {
                 )
             )
 
-            assertEquals(201, response.responseCode)
-            val resultInDb = db.studentResultDao.findByClazzAndStudent(
+            assertEquals(201, response.responseCode,
+                "Response code should be 201. Body=${response.responseBody}")
+            val resultInDb = db.studentResultDao().findByClazzAndStudent(
                 clazz.clazzUid, accountPerson.personUid, accountPerson.personUid
             )
             assertEquals(oneRosterResult.score, resultInDb.first().studentResult.srScore)

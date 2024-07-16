@@ -1,0 +1,20 @@
+appId: com.toughra.ustadmobile
+---
+# this flow directs the user to pictures screen
+
+- repeat:
+    while:
+      visible: "Recent"
+    commands:
+      - tapOn:
+          text: "Show roots"
+      - tapOn:
+          text: "Images"
+- tapOn: "Pictures"
+- runFlow:
+    when:
+      notVisible: ${TESTFILENAME}
+    commands:
+      - tapOn: "List view"
+- tapOn: ${TESTFILENAME}
+

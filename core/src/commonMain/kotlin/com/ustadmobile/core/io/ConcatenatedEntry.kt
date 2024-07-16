@@ -1,8 +1,5 @@
 package com.ustadmobile.core.io
 
-import com.ustadmobile.core.util.ext.encodeBase64
-import com.ustadmobile.lib.db.entities.ContainerEntryFile
-
 /**
  * Represents an entry in a ConcatenatedStream. It is similar to java.util.ZipEntry. As the
  * concatenated stream is designed to be fixed-length, it does not include a name. This means the
@@ -61,15 +58,6 @@ class ConcatenatedEntry(
         return result
     }
 
-
-    /**
-     * Convert this to a ContainerEntryFile
-     */
-    fun toContainerEntryFile(): ContainerEntryFile {
-        return ContainerEntryFile(md5 = md5.encodeBase64(), totalSize = totalSize,
-                compressedSize = compressedSize, compression = compression.toInt(),
-                lastModified = lastModified)
-    }
 
     companion object {
 

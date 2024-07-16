@@ -97,7 +97,7 @@ class PeerReviewerAllocationEditViewModel(
 
                     //get list of members
                     val submittersAndNames = db
-                        .clazzAssignmentDao.getSubmitterUidsAndNameByClazzOrGroupSetUid(
+                        .clazzAssignmentDao().getSubmitterUidsAndNameByClazzOrGroupSetUid(
                             clazzUid = clazzUid,
                             groupSetUid = groupUid,
                             date = systemTimeInMillis(),

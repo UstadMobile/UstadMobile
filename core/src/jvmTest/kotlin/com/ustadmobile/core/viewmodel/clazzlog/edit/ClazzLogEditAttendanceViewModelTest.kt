@@ -55,7 +55,7 @@ class ClazzLogEditAttendanceViewModelTest : AbstractMainDispatcherTest()  {
                 }
 
                 clazz.clazzUid = CreateNewClazzUseCase(activeDb).invoke(clazz)
-                activeDb.coursePermissionDao.upsertAsync(
+                activeDb.coursePermissionDao().upsertAsync(
                     CoursePermission(
                         cpClazzUid = clazz.clazzUid,
                         cpToPersonUid = person.personUid,
@@ -134,8 +134,8 @@ class ClazzLogEditAttendanceViewModelTest : AbstractMainDispatcherTest()  {
                     clazzLogNumPresent = testContext.enroledPersons.size
                     clazzLogUid = generateUid()
                 }
-                activeDb.clazzLogDao.insertAsync(clazzLog)
-                activeDb.clazzLogAttendanceRecordDao.insertListAsync(
+                activeDb.clazzLogDao().insertAsync(clazzLog)
+                activeDb.clazzLogAttendanceRecordDao().insertListAsync(
                     testContext.enroledPersons.map {
                         ClazzLogAttendanceRecord().apply {
                             clazzLogAttendanceRecordClazzLogUid = clazzLog.clazzLogUid
@@ -205,7 +205,7 @@ class ClazzLogEditAttendanceViewModelTest : AbstractMainDispatcherTest()  {
                     clazzLogUid = generateUid()
                 }
 
-                activeDb.clazzLogDao.insertAsync(clazzLog)
+                activeDb.clazzLogDao().insertAsync(clazzLog)
                 clazzLog
             }
 
@@ -243,7 +243,7 @@ class ClazzLogEditAttendanceViewModelTest : AbstractMainDispatcherTest()  {
                     clazzLogUid = generateUid()
                 }
 
-                activeDb.clazzLogDao.insertAsync(clazzLog)
+                activeDb.clazzLogDao().insertAsync(clazzLog)
                 clazzLog
             }
 
@@ -268,7 +268,7 @@ class ClazzLogEditAttendanceViewModelTest : AbstractMainDispatcherTest()  {
             }
 
             activeDb.doorFlow(arrayOf("ClazzLogAttendanceRecord")) {
-                activeDb.clazzLogAttendanceRecordDao.findByClazzLogUid(existingClazzLog.clazzLogUid)
+                activeDb.clazzLogAttendanceRecordDao().findByClazzLogUid(existingClazzLog.clazzLogUid)
             }.assertItemReceived(timeout = 5.seconds) { attendanceList ->
                 attendanceList.size == testContext.enroledPersons.size &&
                     attendanceList.all { it.attendanceStatus == ClazzLogAttendanceRecord.STATUS_ATTENDED }

@@ -29,8 +29,8 @@ fun UmAppDatabase.createClazzLogs(
     matchLocalFromDay: Boolean = false
 ) {
     val holidayCalendarHolidayLists = mutableMapOf<Long, List<Holiday>>()
-    clazzDao.findClazzesWithEffectiveHolidayCalendarAndFilter(clazzFilter).forEach { clazz ->
-        val alreadyCreatedClazzLogs = clazzLogDao.findByClazzUidWithinTimeRange(clazz.clazzUid,
+    clazzDao().findClazzesWithEffectiveHolidayCalendarAndFilter(clazzFilter).forEach { clazz ->
+        val alreadyCreatedClazzLogs = clazzLogDao().findByClazzUidWithinTimeRange(clazz.clazzUid,
                 fromTime, toTime)
 
 
@@ -45,10 +45,10 @@ fun UmAppDatabase.createClazzLogs(
 
         val holCalendarUid = clazz.holidayCalendar?.umCalendarUid ?: 0L
         val clazzHolidayList = holidayCalendarHolidayLists.getOrPut(holCalendarUid) {
-            holidayDao.findByHolidayCalendaUid(holCalendarUid)
+            holidayDao().findByHolidayCalendaUid(holCalendarUid)
         }
 
-        for (schedule in scheduleDao.findAllSchedulesByClazzUidAsList(clazz.clazzUid)) {
+        for (schedule in scheduleDao().findAllSchedulesByClazzUidAsList(clazz.clazzUid)) {
             val (scheduleNextStart, scheduleNextEnd) = schedule.nextOccurenceX(effectiveTimeZone,
                 Instant.fromEpochMilliseconds(fromTime).toLocalDateTime(effectiveTimeZone))
             if (scheduleNextStart.toEpochMilliseconds() >= toTime) {
@@ -102,14 +102,14 @@ fun UmAppDatabase.createClazzLogs(
             }
 
             logsToReschedule.forEach {
-                clazzLogDao.updateStatusByClazzLogUid(it.clazzLogUid, ClazzLog.STATUS_RESCHEDULED,
+                clazzLogDao().updateStatusByClazzLogUid(it.clazzLogUid, ClazzLog.STATUS_RESCHEDULED,
                     systemTimeInMillis())
-                clazzLogAttendanceRecordDao.updateRescheduledClazzLogUids(it.clazzLogUid,
+                clazzLogAttendanceRecordDao().updateRescheduledClazzLogUids(it.clazzLogUid,
                         clazzLog.clazzLogUid, systemTimeInMillis())
             }
 
             if (!alreadyCreatedClazzLogs.any { it.clazzLogUid == clazzLog.clazzLogUid }) {
-                clazzLogDao.insert(clazzLog)
+                clazzLogDao().insert(clazzLog)
             }
         }
 

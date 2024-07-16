@@ -41,6 +41,6 @@ env:
 - extendedWaitUntil:
     visible: "Check"
     timeout: 5000
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_download_and_open"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/h5p_content_download_and_open"
 - tapOn: "Close tab"
 - tapOn: "Back"

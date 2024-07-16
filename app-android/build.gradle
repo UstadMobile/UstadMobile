@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.jetbrains.compose)
     alias(libs.plugins.license)
     id 'androidx.baselineprofile'
+    alias(libs.plugins.android.emulator)
 }
 
 //As Per https://developer.android.com/studio/publish/app-signing.html#release-mode
@@ -39,9 +40,25 @@ android {
         dataBinding false
     }
 
-    //APK splitting would interfere with sideloading the app between different targets and the size
-    //reduction will be minimal
+    /**
+     * APK splitting would interfere with sideloading the app between different targets and the size
+     * and size reduction will be minimal
+     *
+     * Official docs:
+     * https://developer.android.com/guide/app-bundle/configure-base#groovy
+     *
+     * Source code for config options:
+     * https://android.googlesource.com/platform/tools/base/+/studio-master-dev/build-system/gradle-core/src/main/java/com/android/build/gradle/internal/dsl/BundleOptions.kt
+     *
+     * FAQ on handling side-loading:
+     * https://developer.android.com/guide/app-bundle/faq#does_the_aab_prevent_users_from_sideloading_apps
+     */
     bundle {
+        //This is not in the main doc, but is in the source code.
+        texture {
+            enableSplit = false
+        }
+
         language {
             enableSplit = false
         }
@@ -150,9 +167,7 @@ android {
             testCoverageEnabled = false
         }
     }
-    lint {
-        abortOnError false
-    }
+
     namespace 'com.toughra.ustadmobile'
 
     //See  Compose to Kotlin Compatibility Map
@@ -175,12 +190,20 @@ android {
     }
 }
 
-tasks.configureEach { task ->
-    // TODO remove after merge with replication
-    if (task.name.equals("lint")) {
-        task.enabled = false
+/*
+ * Android Emulator plugin will start the emulator required for baseline profile generation
+ */
+androidEmulator {
+    emulator {
+        sdkVersion 33
+        abi 'x86_64'
+        includeGoogleApis false
     }
+
+    enableForAndroidTests true
+    headless true
 }
+
 
 configurations.all {
     /**
@@ -275,12 +298,8 @@ dependencies {
     //Image loading library
     implementation libs.picasso
 
-    // shake detector
-    implementation libs.seismic
-
     //Gson for JSON serializing and deserializing
     implementation libs.gson
-
 
     //KTOR
     implementation libs.ktor.serialization.gson
@@ -293,7 +312,6 @@ dependencies {
     implementation libs.nanohttpd.nanolets
 
     //Android play core for update support within the application
-    implementation libs.android.play.core
     implementation libs.androidx.navigation.fragment.ktx
     implementation libs.androidx.navigation.ui
     implementation libs.androidx.navigation.ui.ktx

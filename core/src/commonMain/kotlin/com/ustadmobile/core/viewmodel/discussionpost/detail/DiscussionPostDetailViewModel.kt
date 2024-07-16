@@ -46,7 +46,7 @@ class DiscussionPostDetailViewModel(
 ): DetailViewModel<DiscussionPostWithDetails>(di, savedStateHandle, destinationName){
 
     private val pagingSourceFactory: ListPagingSourceFactory<DiscussionPostAndPosterNames> = {
-        activeRepo.discussionPostDao.findByPostIdWithAllReplies(entityUidArg, false)
+        activeRepo.discussionPostDao().findByPostIdWithAllReplies(entityUidArg, false)
     }
 
     private val _uiState = MutableStateFlow(DiscussionPostDetailUiState2())
@@ -64,7 +64,7 @@ class DiscussionPostDetailViewModel(
     init {
         viewModelScope.launch {
             _uiState.whenSubscribed {
-                activeRepo.coursePermissionDao.personHasPermissionWithClazzPairAsFlow(
+                activeRepo.coursePermissionDao().personHasPermissionWithClazzPairAsFlow(
                     accountPersonUid = activeUserPersonUid,
                     clazzUid = clazzUid,
                     firstPermission = PermissionFlags.COURSE_VIEW,
@@ -93,7 +93,7 @@ class DiscussionPostDetailViewModel(
                         }
 
                         launch {
-                            activeRepo.discussionPostDao.getTitleByUidAsFlow(entityUidArg).collect {postTitle ->
+                            activeRepo.discussionPostDao().getTitleByUidAsFlow(entityUidArg).collect {postTitle ->
                                 _appUiState.takeIf { it.value.title != postTitle }?.update { prev ->
                                     prev.copy(
                                         title = postTitle
@@ -157,14 +157,14 @@ class DiscussionPostDetailViewModel(
         try {
             //We probably have the course block in the local db, but check just in case. If we don't
             //have it, then load from repo
-            val clazzAndBlockUids = activeDb.courseBlockDao.findCourseBlockAndClazzUidByDiscussionPostUid(
+            val clazzAndBlockUids = activeDb.courseBlockDao().findCourseBlockAndClazzUidByDiscussionPostUid(
                 entityUidArg
             ).let {
                 //Double check that we
                 if(it != null && it.clazzUid != 0L && it.courseBlockUid != 0L)
                     it
                 else
-                    activeRepo.courseBlockDao.findCourseBlockAndClazzUidByDiscussionPostUid(entityUidArg)
+                    activeRepo.courseBlockDao().findCourseBlockAndClazzUidByDiscussionPostUid(entityUidArg)
             }
 
             if(clazzAndBlockUids == null || clazzAndBlockUids.courseBlockUid == 0L ||
@@ -175,7 +175,7 @@ class DiscussionPostDetailViewModel(
             }
 
             activeRepo.withDoorTransactionAsync {
-                activeRepo.discussionPostDao.insertAsync(DiscussionPost().apply {
+                activeRepo.discussionPostDao().insertAsync(DiscussionPost().apply {
                     discussionPostStartDate = systemTimeInMillis()
                     discussionPostReplyToPostUid = entityUidArg
                     discussionPostMessage = replyText
@@ -197,7 +197,7 @@ class DiscussionPostDetailViewModel(
 
     fun onDeletePost(post: DiscussionPost) {
         viewModelScope.launch {
-            activeRepo.discussionPostDao.setDeletedAsync(
+            activeRepo.discussionPostDao().setDeletedAsync(
                 uid = post.discussionPostUid, deleted = true, updateTime = systemTimeInMillis()
             )
             snackDispatcher.showSnackBar(Snack(systemImpl.getString(MR.strings.deleted)))

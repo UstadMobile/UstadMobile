@@ -16,7 +16,7 @@ class CancelDownloadUseCaseJvm(
 
     override suspend fun invoke(transferJobId: Int, offlineItemUid: Long) {
         //mark as canceled immediately so any interrupted job knows not to attempt a retry
-        db.transferJobDao.updateStatus(transferJobId, TransferJobItemStatus.STATUS_CANCELLED)
+        db.transferJobDao().updateStatus(transferJobId, TransferJobItemStatus.STATUS_CANCELLED)
 
         //uneschedule
         val triggerKeys = listOf(
@@ -33,6 +33,6 @@ class CancelDownloadUseCaseJvm(
         scheduler.interruptJobs(triggerKeys, "download cancel: $transferJobId/$offlineItemUid")
 
 
-        db.offlineItemDao.updateActiveByOfflineItemUid(offlineItemUid, false)
+        db.offlineItemDao().updateActiveByOfflineItemUid(offlineItemUid, false)
     }
 }

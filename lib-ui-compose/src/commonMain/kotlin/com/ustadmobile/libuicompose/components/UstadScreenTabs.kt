@@ -11,8 +11,12 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -25,6 +29,10 @@ import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.libuicompose.nav.UstadNavControllerPreCompose
 import com.ustadmobile.libuicompose.nav.UstadSavedStateHandlePreCompose
 import com.ustadmobile.libuicompose.viewmodel.ustadViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.navigation.BackStackEntry
 import org.kodein.di.DI
@@ -86,13 +94,27 @@ fun UstadScreenTabs(
         pageCount = { tabs.size }
     )
 
+    val tabAppStateMap = remember {
+        MutableStateFlow(mapOf<Int, AppUiState>())
+    }
+
+    var appBarHidden by remember { mutableStateOf(false) }
+
+    LaunchedEffect(pagerState.currentPage) {
+        tabAppStateMap.map { it[pagerState.currentPage] }.filterNotNull().collect {
+            onSetAppUiState(it)
+            appBarHidden = it.hideAppBar
+            pagerState.canScrollForward
+        }
+    }
+
     val coroutineScope = rememberCoroutineScope()
 
     val savedStateKeys: MutableMap<String, UstadSavedStateHandlePreCompose.SavedEntry> = remember {
         mutableMapOf()
     }
 
-    val tabsHidden = autoHideIfOneTab && tabs.size <= 1
+    val tabsHidden = appBarHidden || (autoHideIfOneTab && tabs.size <= 1)
 
     Column {
         if (tabs.isNotEmpty()) {
@@ -134,6 +156,7 @@ fun UstadScreenTabs(
             HorizontalPager(
                 modifier = Modifier.fillMaxSize(),
                 state = pagerState,
+                userScrollEnabled = !appBarHidden,
             ) { tabIndex ->
                 val selectedTab = tabs[tabIndex]
                 val tabScope = TabScope(
@@ -144,7 +167,13 @@ fun UstadScreenTabs(
                     ),
                     backStackEntry = backStackEntry,
                     navController = navController,
-                    onSetAppUiState = onSetAppUiState,
+                    onSetAppUiState = {
+                        tabAppStateMap.update { prev ->
+                            prev.toMutableMap().apply {
+                                put(tabIndex, it)
+                            }.toMap()
+                        }
+                    },
                     navResultReturner = navResultReturner,
                     onShowSnackBar = onShowSnackBar,
                 )

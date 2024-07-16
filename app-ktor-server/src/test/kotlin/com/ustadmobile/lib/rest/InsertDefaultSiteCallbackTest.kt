@@ -22,7 +22,7 @@ class InsertDefaultSiteCallbackTest {
             .addMigrations(*migrationList().toTypedArray())
             .build()
 
-        val defaultSite = umAppDb.siteDao.getSite()
+        val defaultSite = umAppDb.siteDao().getSite()
         Assert.assertNotNull(defaultSite)
     }
 

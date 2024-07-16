@@ -7,7 +7,7 @@ version-androidx-appcompat = "1.6.1"
 androidx-core = "1.12.0"
 kotlin = "1.9.23"
 okhttp = "4.12.0"
-door = "0.71"
+door = "0.79.12"
 coroutines = "1.8.0"
 atomicfu = "0.23.2"
 kotlinx-io = "0.3.0"
@@ -33,7 +33,7 @@ androidx-window = "1.2.0"
 quartz = "2.3.2"
 simplejndi = "0.23.0"
 htmltext-android = "2.0.0-beta01"
-aztec = "v1.9.0"
+aztec = "v2.1.3"
 androidx-constraintlayout = "2.1.4"
 libphonenumber-google = "8.13.26"
 libphonenumber-android = "8.13.25"
@@ -51,8 +51,7 @@ thumbnailator =  "0.4.20"
 webpimageio =  "0.6.0"
 compose-video =  "1.2.0a"
 androidx-media3 =  "1.3.0"
-jetpdfvue =  "1.0.5"
-pdfviewer =  "2.0.5"
+pdfviewer =  "2.1.1"
 urlencoder =  "1.4.0"
 nestedscroll-webview =  "0.1.6"
 androidx-webkit =  "1.10.0"
@@ -96,8 +95,6 @@ compose-bom = "2024.02.02"
 accompanist-themeadapter = "0.34.0"
 compose-accompanist = "0.34.0"
 picasso = "2.8"
-seismic = "1.0.3"
-android-play = "1.10.3"
 guardianproject-panic = "1.0"
 sqlite-jdbc = "3.42.0.0"
 postgresql = "42.6.0"
@@ -109,7 +106,6 @@ argparse4j = "0.9.0"
 commons-dbcp2 = "2.11.0"
 junit = "4.13.2"
 byte-buddy = "1.14.10"
-pdfview-android = "1.1.0"
 androidx-coordinatorlayout = "1.2.0"
 androidx-test-runner = "1.5.2"
 robolectric = "4.11.1"
@@ -122,6 +118,14 @@ nv-i18n = "1.29"
 semver = "2.0.0"
 httpoveripc = "0.0.3"
 rawhttp = "2.6.0"
+androidx-test-ext-junit = "1.1.5"
+androidx-test-espresso = "3.5.1"
+androidx-test-uiautomator = "2.3.0"
+androidx-benchmark = "1.2.4"
+android-emulator-plugin = "0.4.5"
+lz4 = "1.8.0"
+kmp-uuid = "0.8.4"
+zoomable = "1.6.1"
 
 [plugins]
 
@@ -132,6 +136,7 @@ serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref 
 conveyor = { id = "dev.hydraulic.conveyor", version.ref = "conveyor" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 license = { id = "com.jaredsburrows.license", version.ref = "plugin-license" }
+android-emulator = { id = "com.quittle.android-emulator", version.ref = "android-emulator-plugin" }
 
 
 [libraries]
@@ -212,7 +217,7 @@ androidx-media3-exoplayer = { module = "androidx.media3:media3-exoplayer", versi
 androidx-media3-session = { module = "androidx.media3:media3-session", version.ref = "androidx-media3"}
 androidx-media3-ui = { module = "androidx.media3:media3-ui", version.ref = "androidx-media3"}
 androidx-media3-datasource-okhttp = { module = "androidx.media3:media3-datasource-okhttp", version.ref = "androidx-media3"}
-pdfviewer = { module = "com.github.afreakyelf:Pdf-Viewer", version.ref = "pdfviewer"}
+pdfviewer = { module = "io.github.afreakyelf:Pdf-Viewer", version.ref = "pdfviewer"}
 urlencoder = { module = "net.thauvin.erik.urlencoder:urlencoder-lib", version.ref = "urlencoder"}
 nestedscroll-webview = { module = "com.telefonica:nestedscrollwebview", version.ref = "nestedscroll-webview"}
 androidx-webkit = { module = "androidx.webkit:webkit", version.ref = "androidx-webkit"}
@@ -267,12 +272,10 @@ accompanist-pager-indicators = { module = "com.google.accompanist:accompanist-pa
 accompanist-flowlayout = { module = "com.google.accompanist:accompanist-flowlayout", version.ref = "compose-accompanist" }
 accompanist-drawablepainter = { module = "com.google.accompanist:accompanist-drawablepainter", version.ref= "compose-accompanist" }
 picasso = { module = "com.squareup.picasso:picasso", version.ref = "picasso" }
-seismic = { module = "com.squareup:seismic", version.ref = "seismic" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 ktor-serialization-gson = { module = "io.ktor:ktor-serialization-gson", version.ref = "ktor" }
 ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor"}
 ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor"}
-android-play-core = { module = "com.google.android.play:core", version.ref = "android-play"}
 guardianproject-panic = { module = "info.guardianproject.panic:panic", version.ref = "guardianproject-panic"}
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
 ktor-io = { module = "io.ktor:ktor-io", version.ref = "ktor" }
@@ -320,7 +323,6 @@ coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", ve
 ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }
 junit = { module = "junit:junit", version.ref = "junit" }
 byte-buddy = { module = "net.bytebuddy:byte-buddy", version.ref = "byte-buddy" }
-pdfview-android = { module = "com.dmitryborodin:pdfview-android", version.ref = "pdfview-android" }
 androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref="androidx-lifecycle"}
 androidx-coordinatorlayout = { module = "androidx.coordinatorlayout:coordinatorlayout", version.ref = "androidx-coordinatorlayout"}
 ktor-client-android = { module = "io.ktor:ktor-client-android", version.ref = "ktor" }
@@ -351,3 +353,10 @@ semver = { module = "io.github.z4kn4fein:semver", version.ref = "semver" }
 httpoveripc-core = { module = "com.github.UstadMobile.httpoveripc:core", version.ref = "httpoveripc" }
 httpoveripc-server = { module = "com.github.UstadMobile.httpoveripc:server", version.ref = "httpoveripc" }
 rawhttp-core = { module = "com.athaydes.rawhttp:rawhttp-core", version.ref = "rawhttp" }
+androidx-test-junit-ext = { module = "androidx.test.ext:junit", version.ref = "androidx-test-ext-junit" }
+androidx-test-espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "androidx-test-espresso" }
+androidx-test-uiautomator = { module = "androidx.test.uiautomator:uiautomator", version.ref = "androidx-test-uiautomator"}
+androidx-benchmark-macro-junit4 = { module = "androidx.benchmark:benchmark-macro-junit4", version.ref = "androidx-benchmark" }
+lz4-pure-java = { module = "org.lz4:lz4-pure-java", version.ref = "lz4" }
+kmp-uuid = { module = "com.benasher44:uuid", version.ref = "kmp-uuid" }
+zoomable = { module = "net.engawapg.lib:zoomable", version.ref = "zoomable" }

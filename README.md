@@ -65,7 +65,9 @@ backend server source code in its modules. Android Studio is the development env
 entire project. 
 
 *  __Step 1: Download and install Android Studio__: If you don't already have the latest version, download 
-from [https://developer.android.com/studio](https://developer.android.com/studio).
+from [https://developer.android.com/studio](https://developer.android.com/studio). _Make sure Android SDK Command Line Tools are
+installed_. In Android Studio: Menu - Tools - SDK Manager - SDK Tools Tab - Check
+Android SDK Command Line Tools (Latest).
 
 * __Step 2: Install dependencies__
  
@@ -195,6 +197,23 @@ Android app, [app-react](app-react/) for the web app.
 Note: If self-registration is enabled, you must add an email server configuration to the 
 ustad-server.conf file. See [app-ktor-server/README.md](app-ktor-server/README.md) for details on
 using the ustad-server.conf file.
+
+To build the entire project (Android, Web, Desktop, everything) use the normal gradle build command:
+Linux: 
+```
+$ ./gradlew build
+```
+Windows:
+```
+$ gradlew build
+```
+Please see [app-android/README.md](app-android/README.md) instructions to setup release version
+signing. Make sure you are running an SDK33+ device or emulator connected using ADB for the 
+[baseline profile](https://developer.android.com/topic/performance/baselineprofiles/overview) build.
+
+## Javascript package updates
+
+When prompted to run kotlinUpgradePackageLock, run kotlinUpgradeYarnLock instead.
 
 ### Code structure
 

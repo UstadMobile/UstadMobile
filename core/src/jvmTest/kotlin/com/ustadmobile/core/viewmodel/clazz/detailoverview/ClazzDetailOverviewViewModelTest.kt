@@ -21,10 +21,10 @@ class ClazzDetailOverviewViewModelTest : AbstractMainDispatcherTest() {
             val user = setActiveUser(activeEndpoint)
             val testClazz = Clazz().apply {
                 clazzName = "Test"
-                clazzUid = activeDb.clazzDao.insert(this)
+                clazzUid = activeDb.clazzDao().insert(this)
             }
 
-            activeDb.coursePermissionDao.upsertAsync(
+            activeDb.coursePermissionDao().upsertAsync(
                 CoursePermission(
                     cpToPersonUid = user.personUid,
                     cpPermissionsFlag = CoursePermission.TEACHER_DEFAULT_PERMISSIONS,
@@ -50,10 +50,10 @@ class ClazzDetailOverviewViewModelTest : AbstractMainDispatcherTest() {
 
             val testClazz = Clazz().apply {
                 clazzName = "Test"
-                clazzUid = activeDb.clazzDao.insert(this)
+                clazzUid = activeDb.clazzDao().insert(this)
             }
 
-            activeDb.coursePermissionDao.upsertAsync(
+            activeDb.coursePermissionDao().upsertAsync(
                 CoursePermission(
                     cpToPersonUid = user.personUid,
                     cpPermissionsFlag = CoursePermission.TEACHER_DEFAULT_PERMISSIONS,

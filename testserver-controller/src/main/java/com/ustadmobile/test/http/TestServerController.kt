@@ -25,6 +25,10 @@ const val TESTNAME_PARAM = "testName"
 
 const val TEST_FILE_NAME_PARAM = "test-file-name"
 
+const val DEST_PARAM = "dest"
+
+const val PARAM_SCAN_MEDIA_FILE = "scanMedia"
+
 @Suppress("BlockingMethodInNonBlockingContext", "unused", "SdCardPath")
 fun Application.testServerController() {
 
@@ -308,7 +312,9 @@ fun Application.testServerController() {
         /**
          * Push file from the test content directory to the device Downloads directory using adb
          *
-         * /pushcontent?device=<serial>&test-file-name=file-name.ext
+         * /pushcontent?device=<serial>&test-file-name=file-name.ext&dest=/sdcard/Pictures
+         *
+         * dest parameter is optional. The argument MUST be url encoded.
          *
          * test-file-name should be the name of a file found in the test files directory (
          * test-end-to-end/test-files/content )
@@ -317,7 +323,10 @@ fun Application.testServerController() {
             val deviceSerial = call.request.queryParameters[DEVICE_SERIAL_PARAM]
             val fileName = call.request.queryParameters[TEST_FILE_NAME_PARAM]
                 ?: throw IllegalArgumentException("No filename specified")
+            val pushDest = call.request.queryParameters[DEST_PARAM] ?: "/sdcard/Download"
             val contentFile = File(testContentDir, fileName)
+            val scanMediaFile: Boolean = call.request.queryParameters[PARAM_SCAN_MEDIA_FILE]
+                ?.toBoolean() ?: false
 
             val adbCommand = SysPathUtil.findCommandInPath("adb")
                 ?: throw IllegalStateException("Cannot find adb in path")
@@ -334,13 +343,32 @@ fun Application.testServerController() {
             }
 
             val process = ProcessBuilder(listOf(adbCommand.absolutePath,
-                "-s", deviceSerial, "push", contentFile.absolutePath, "/sdcard/Download"))
+                "-s", deviceSerial, "push", contentFile.absolutePath, pushDest))
                 .directory(serverDir)
                 .redirectOutput(ProcessBuilder.Redirect.PIPE)
                 .redirectError(ProcessBuilder.Redirect.PIPE)
                 .start()
 
             process.waitFor(5, TimeUnit.SECONDS)
+
+            /*
+             * If uploading a video/image that needs to be selected from the gallery then we need to
+             * run a broadcast to ensure that it will appear in the gallery.
+             */
+            if(scanMediaFile) {
+                ProcessBuilder(
+                    listOf(
+                        adbCommand.absolutePath, "-s", deviceSerial, "shell", "am", "broadcast", "-a",
+                        "android.intent.action.MEDIA_SCANNER_SCAN_FILE", "-d",
+                        "file://$pushDest"
+                    )
+                )
+                .directory(serverDir)
+                .redirectOutput(ProcessBuilder.Redirect.PIPE)
+                .redirectError(ProcessBuilder.Redirect.PIPE)
+                .start()
+                .waitFor(5, TimeUnit.SECONDS)
+            }
 
             call.respondText(
                 text = "Pushed content to $deviceSerial ${contentFile.absolutePath} -> /sdcard/Download",
