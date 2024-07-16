@@ -10,6 +10,7 @@ appId: com.toughra.ustadmobile
 - tapOn: "Add a new course"
 - tapOn: "Name*"
 - inputText: ${TESTCOURSENAME}
+- hideKeyboard
 - tapOn: "Description"
 - tapOn:
       id: com.toughra.ustadmobile:id/editor

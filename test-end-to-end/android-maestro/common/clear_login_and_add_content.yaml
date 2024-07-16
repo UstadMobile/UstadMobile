@@ -30,6 +30,6 @@ appId: com.toughra.ustadmobile
 - tapOn: "From file"
 - runFlow:
     when:
-      notVisible: "Downloads"
+      visible: "Show roots"
     file: redirect_to_downloads.yaml
-- tapOn: ${TESTFILENAME}
+
