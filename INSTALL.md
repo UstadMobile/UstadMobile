@@ -140,6 +140,14 @@ Where C:\User\me\path\to\unzipped\ is where you unzipped ustad-server.zip
 This starts the server on the default port (8087). You can now open a browser, and use the url
 you specified as the siteUrl.
 
+If you are running a single learning space system, the random password will be automatically generated
+in ```data/singleton/admin.txt``` as soon as the server starts.
+
+If you are running a multiple learning space system, the random password will be generated in
+```data/(hostname)/admin.txt``` when the system is accessed for the first time. You might need to
+access the site (e.g. open https://subdomain.example.org/ ) in your browser and login using any 
+username/password to trigger this.
+
 A random admin password will be generated automatically. It will be placed in
 **data/singleton/admin.txt**.
 
