@@ -21,11 +21,6 @@ env:
 - tapOn: "E-book"
 - assertNotVisible: "Importing"
 - tapOn: Open
-- runFlow:
-    when:
-      visible: "Accept & continue"
-    file: "../common/google_permission.yaml"
-#- assertVisible: "Cover"
 - tapOn: "Back"
 - runFlow:
     file: "../common/login_download_and_open_content.yaml"

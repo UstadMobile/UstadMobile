@@ -18,6 +18,9 @@ env:
     file: "../common/create_course_with_1teacher_1student.yaml"
     env:
       TESTCOURSENAME: "Permission Test"
+- tapOn:
+    text: "Courses"
+    index: 1
 - runFlow:
     file: "../common/edit_course.yaml"
     env:
