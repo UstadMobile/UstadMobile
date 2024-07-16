@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.DeveloperMode
 import androidx.compose.material.icons.filled.DisplaySettings
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.SdStorage
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Workspaces
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
@@ -20,15 +21,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import com.ustadmobile.core.viewmodel.settings.SettingsUiState
-import com.ustadmobile.libuicompose.components.UstadDetailField2
-import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.viewmodel.settings.SettingsUiState
 import com.ustadmobile.core.viewmodel.settings.SettingsViewModel
+import com.ustadmobile.libuicompose.components.UstadDetailField2
 import com.ustadmobile.libuicompose.components.UstadDetailHeader
 import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 import com.ustadmobile.libuicompose.components.UstadWaitForRestartDialog
+import com.ustadmobile.libuicompose.components.rememberUstadFilePickLauncher
+import dev.icerock.moko.resources.compose.stringResource
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 
 @Composable
@@ -46,6 +48,7 @@ fun SettingsScreen(
         onClickDeveloperOptions = viewModel::onClickDeveloperOptions,
         onClickDeletedItems = viewModel::onClickDeletedItems,
         onClickOfflineStorageOptionsDialog = viewModel::onClickOfflineStorageOptionsDialog,
+        onClickAppShare = viewModel::onClickAppShare
     )
 
     if(uiState.langDialogVisible) {
@@ -112,6 +115,7 @@ fun SettingsScreen(
 @Composable
 fun SettingsScreen(
     uiState: SettingsUiState,
+    onClickAppShare: () -> Unit = {},
     onClickAppLanguage: () -> Unit = {},
     onClickHtmlContentDisplayEngine: () -> Unit = {},
     onClickGoToHolidayCalendarList: () -> Unit = {},
@@ -150,10 +154,11 @@ fun SettingsScreen(
             valueText = stringResource(MR.strings.deleted_items),
             labelText = stringResource(MR.strings.delete_or_restore_items),
             icon = Icons.Default.Delete,
-            modifier = Modifier.clickable { onClickDeletedItems() }
-        )
+            modifier = Modifier.clickable { onClickDeletedItems() })
 
-        if (uiState.holidayCalendarVisible){
+
+
+        if (uiState.holidayCalendarVisible) {
             UstadDetailField2(
                 valueText = stringResource(MR.strings.holiday_calendars),
                 labelText = stringResource(MR.strings.holiday_calendars_desc),
@@ -171,7 +176,16 @@ fun SettingsScreen(
                 modifier = Modifier.clickable { onClickWorkspace() },
             )
         }
-
+        if (uiState.sendAppOptionVisible) {
+            UstadDetailField2(
+                modifier = Modifier.clickable {
+                    onClickAppShare()
+                },
+                valueText = stringResource(MR.strings.share_app_title),
+                labelText = stringResource(MR.strings.share_app_description),
+                icon = Icons.Default.Share,
+            )
+        }
 
         if (uiState.reasonLeavingVisible){
             UstadDetailField2(

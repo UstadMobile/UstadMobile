@@ -28,6 +28,8 @@ import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsUseCaseImpl
 import com.ustadmobile.core.domain.process.CloseProcessUseCase
 import com.ustadmobile.core.domain.process.CloseProcessUseCaseAndroid
+import com.ustadmobile.core.domain.share.SendAppFileUseCase
+import com.ustadmobile.core.domain.share.SendAppFileUseCaseAndroid
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.config.ApiUrlConfig
@@ -82,6 +84,10 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
 
         import(commonDomainDiModule(EndpointScope.Default))
         import(AndroidDomainDiModule(applicationContext))
+
+
+        bind<SendAppFileUseCase>() with singleton { SendAppFileUseCaseAndroid(applicationContext) }
+
 
         bind<UstadMobileSystemImpl>() with singleton {
             /**

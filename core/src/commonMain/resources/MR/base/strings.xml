@@ -4,6 +4,8 @@
     <!--suppress CheckTagEmptyBody -->
     <string name="blank" translatable="false"></string>
     <string name="login">Login</string>
+    <string name="share_app_title">Share App</string>
+    <string name="share_app_description">Share App with Others</string>
     <string name="error">Error</string>
     <string name="err_registering_new_user">Error registering new user:</string>
     <string name="register_empty_fields">Please fill out all required fields</string>
