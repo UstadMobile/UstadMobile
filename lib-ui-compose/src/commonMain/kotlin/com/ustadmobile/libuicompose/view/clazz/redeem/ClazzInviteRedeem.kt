@@ -8,11 +8,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.viewmodel.clazz.inviteviaContact.InviteViaContactUiState
 import com.ustadmobile.core.viewmodel.clazz.redeem.ClazzInviteViewModel
+import com.ustadmobile.core.viewmodel.clazz.redeem.InviteRedeemUiState
 import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 import dev.icerock.moko.resources.compose.stringResource
 
@@ -21,15 +25,18 @@ import dev.icerock.moko.resources.compose.stringResource
 fun ClazzInviteRedeem(
     viewModel: ClazzInviteViewModel
 ) {
+    val uiState by viewModel.uiState.collectAsState(InviteRedeemUiState())
 
     InviteViaLinkScreen(
-        onAccept = {},
+        uiState = uiState,
+        onAccept = {viewModel.onAcceptInvite()},
         onDecline = {}
     )
 }
 
 @Composable
 fun InviteViaLinkScreen(
+    uiState: InviteRedeemUiState = InviteRedeemUiState(),
     onAccept: () -> Unit,
     onDecline: () -> Unit
 ) {
@@ -46,10 +53,11 @@ fun InviteViaLinkScreen(
         Row(
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Button(onClick = onAccept) {
+            Button(onClick = { onAccept()}) {
                 Text(text = stringResource(MR.strings.accept))
+
             }
-            Button(onClick = onDecline) {
+            Button(onClick = { onDecline() }) {
                 Text(text = stringResource(MR.strings.decline))
             }
         }

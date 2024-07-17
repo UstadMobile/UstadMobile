@@ -1449,10 +1449,17 @@ val MIGRATION_172_194 = DoorMigrationStatementList(172, 194) { db ->
 }
 
 val MIGRATION_194_195 = DoorMigrationStatementList(194, 195) { db ->
-    if (db.dbType() == DoorDbType.SQLITE) {
-        listOf("CREATE TABLE IF NOT EXISTS ClazzInvite (ciUid INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, ciPersonUid INTEGER NOT NULL, ciRoleId INTEGER NOT NULL, ciClazzUid INTEGER NOT NULL, inviteType INTEGER NOT NULL DEFAULT 1, inviteContact TEXT, inviteToken TEXT, inviteLct INTEGER NOT NULL)")
-    } else {
-        listOf("CREATE TABLE IF NOT EXISTS ClazzInvite (ciUid BIGINT PRIMARY KEY AUTOINCREMENT NOT NULL, ciPersonUid BIGINT NOT NULL, ciRoleId BIGINT NOT NULL, ciClazzUid BIGINT NOT NULL, inviteType INTEGER NOT NULL DEFAULT 1, inviteContact TEXT, inviteToken TEXT, inviteLct BIGINT NOT NULL)")
+    buildList {
+
+        if (db.dbType() == DoorDbType.SQLITE) {
+            add("ALTER TABLE ClazzEnrolment ADD COLUMN clazzEnrolmentInviteUid BIGINT NOT NULL DEFAULT 0")
+
+            listOf("CREATE TABLE IF NOT EXISTS ClazzInvite (ciUid INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, ciPersonUid INTEGER NOT NULL, ciRoleId INTEGER NOT NULL, ciClazzUid INTEGER NOT NULL, inviteType INTEGER NOT NULL DEFAULT 1, inviteContact TEXT, inviteToken TEXT, inviteLct INTEGER NOT NULL)")
+        } else {
+            add("ALTER TABLE ClazzEnrolment ADD COLUMN clazzEnrolmentInviteUid INTEGER NOT NULL DEFAULT 0")
+
+            listOf("CREATE TABLE IF NOT EXISTS ClazzInvite (ciUid BIGINT PRIMARY KEY AUTOINCREMENT NOT NULL, ciPersonUid BIGINT NOT NULL, ciRoleId BIGINT NOT NULL, ciClazzUid BIGINT NOT NULL, inviteType INTEGER NOT NULL DEFAULT 1, inviteContact TEXT, inviteToken TEXT, inviteLct BIGINT NOT NULL)")
+        }
     }
 }
 

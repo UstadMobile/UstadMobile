@@ -86,7 +86,6 @@ import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
     StatementContextActivityJoin::class,
     XapiSessionEntity::class,
     StatementEntityJson::class,
-
     //Door entities
     OutgoingReplication::class,
     ReplicationOperation::class,
@@ -257,6 +256,6 @@ expect abstract class UmAppDatabase : RoomDatabase {
 
     abstract fun statementEntityJsonDao(): StatementEntityJsonDao
 
-    abstract val clazzInviteDao:ClazzInviteDao
+    abstract fun clazzInviteDao() : ClazzInviteDao
 
 }

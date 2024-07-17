@@ -10,10 +10,10 @@ import com.ustadmobile.lib.rest.domain.invite.sms.SendSmsUseCase
 import com.ustadmobile.core.viewmodel.clazz.redeem.ClazzInviteViewModel
 import com.ustadmobile.lib.db.entities.ClazzInvite
 import com.ustadmobile.lib.rest.domain.invite.message.SendMessageUseCase
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
 class ProcessInviteUseCase(
@@ -23,6 +23,7 @@ class ProcessInviteUseCase(
     private val checkContactTypeUseCase: CheckContactTypeUseCase,
     private val db: UmAppDatabase,
     private val endpoint: Endpoint,
+    private val  repo: UmAppDatabase?,
 ) {
     data class InviteResult(
         val inviteSent: String
@@ -34,51 +35,60 @@ class ProcessInviteUseCase(
         role: Long,
         personUid: Long
     ): InviteResult {
+        try {
+            val effectiveDb = (repo ?: db)
 
-        val coroutineScope = CoroutineScope(Dispatchers.IO + Job())
-        coroutineScope.launch {
+            val coroutineScope = CoroutineScope(Dispatchers.IO + Job())
+            coroutineScope.launch {
 
-            contacts.forEach { contact ->
-                val token = uuid4().toString()
-                val inviteLink = UstadUrlComponents(endpoint.url, ClazzInviteViewModel.DEST_NAME, "inviteCode=$token"
-                ).fullUrl()
-                val validContacts = checkContactTypeUseCase.invoke(contact = contact)
+                contacts.forEach { contact ->
+                    val token = uuid4().toString()
+                    val inviteLink = UstadUrlComponents(
+                        endpoint.url, ClazzInviteViewModel.DEST_NAME, "inviteCode=$token"
+                    ).fullUrl()
+                    val validContacts = checkContactTypeUseCase.invoke(contact = contact)
 
-                if (validContacts != null) {
-                    db.clazzInviteDao.replace(
-                        ClazzInvite(
-                            ciPersonUid = personUid,
-                            ciRoleId = role,
-                            ciUid = clazzUid,
-                            inviteType = validContacts.inviteType,
-                            inviteToken = token
+
+                    if (validContacts != null) {
+                        val log = effectiveDb.clazzInviteDao().replace(
+                            ClazzInvite(
+                                ciPersonUid = personUid,
+                                ciRoleId = role,
+                                ciClazzUid = clazzUid,
+                                inviteType = validContacts.inviteType,
+                                inviteToken = token,
+                                inviteContact = validContacts.text
+                            )
                         )
-                    )
+
+                        Napier.d { "ProcessInviteUseCase $log" }
 
 
-                    when (validContacts.inviteType) {
-                        1 -> {
-                            sendEmailUseCase.invoke(validContacts.text, inviteLink)
-                        }
+                        when (validContacts.inviteType) {
+                            1 -> {
+                                sendEmailUseCase.invoke(validContacts.text, inviteLink)
+                            }
 
-                        2 -> {
-                            CoroutineScope(Dispatchers.IO).launch {
+                            2 -> {
                                 sendSmsUseCase.invoke(validContacts.text, inviteLink)
                             }
-                        }
 
-                        3 -> {
-                            sendMessageUseCase.invoke(validContacts.text, inviteLink, personUid)
-                        }
+                            3 -> {
+                                sendMessageUseCase.invoke(validContacts.text, inviteLink, personUid)
+                            }
 
+                        }
                     }
                 }
             }
+
+            return InviteResult("invitation sent")
+
+        } catch (e: Exception) {
+            Napier.d { "ProcessInviteUseCase ${e.message}" }
+            return InviteResult("invitation error :- ${e.message}")
         }
-        coroutineScope.cancel()
-        return InviteResult("invitation sent")
+
     }
-
 }
-
 
