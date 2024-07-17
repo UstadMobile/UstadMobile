@@ -324,28 +324,5 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
                     from ContentEntry WHERE contentEntryUid IN (:contentEntryUids)""")
     abstract suspend fun getContentEntryFromUids(contentEntryUids: List<Long>): List<UidAndLabel>
 
-    @Query("""
-    WITH RECURSIVE 
-    ContentEntry_recursive(contentEntryUid, title, leaf, ceInactive) AS (
-        SELECT contentEntryUid, title, leaf, ceInactive
-        FROM ContentEntry 
-        WHERE contentEntryUid = :rootContentEntryUid
-    UNION ALL
-        SELECT ContentEntry.contentEntryUid, ContentEntry.title, ContentEntry.leaf, ContentEntry.ceInactive
-        FROM ContentEntry
-        JOIN ContentEntryParentChildJoin ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid
-        JOIN ContentEntry_recursive ON ContentEntryParentChildJoin.cepcjParentContentEntryUid = ContentEntry_recursive.contentEntryUid
-    )
-    SELECT * FROM ContentEntry_recursive
-    WHERE NOT ceInactive
-    ORDER BY title
-    """)
-    suspend fun getRecursiveContentEntriesForExport(rootContentEntryUid: Long): List<ContentEntry>
-
-    @Query("INSERT INTO ContentEntryParentChildJoin(cepcjParentContentEntryUid, cepcjChildContentEntryUid) VALUES (:parentUid, :childUid)")
-    suspend fun insertParentChildJoin(parentUid: Long, childUid: Long)
-
-    @Query("SELECT * FROM ContentEntry WHERE contentEntryUid = :entryUid")
-    suspend fun getContentEntryByUid(entryUid: Long): ContentEntry?
 
 }
