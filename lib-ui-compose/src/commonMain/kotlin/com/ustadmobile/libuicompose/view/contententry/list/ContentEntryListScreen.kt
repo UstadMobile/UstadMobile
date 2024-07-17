@@ -235,15 +235,5 @@ fun ContentEntryListScreen(
             }
         }
 
-        if (uiState.exportProgress != null) {
-            LinearProgressIndicator(
-                progress = uiState.exportProgress!!.progress,
-                modifier = Modifier.fillMaxWidth().padding(16.dp)
-            )
-            Text(
-                text = "exporting",
-                modifier = Modifier.padding(16.dp)
-            )
-        }
     }
 }
