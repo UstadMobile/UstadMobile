@@ -1,7 +1,7 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/001_006_admin_can_cancel_content_download"
-  TESTNAME: "001_006_admin_can_cancel_content_download"
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/001_001_admin_can_add_content_003-video"
+  TESTNAME: "001_001_admin_can_add_content_003-video"
 ---
 - clearState: com.toughra.ustadmobile
 - runFlow:
@@ -13,26 +13,31 @@ env:
 - runFlow:
     file: "../common/clear_login_and_add_content.yaml"
     env:
-      TESTFILENAME: Epub_Content2.epub
+      TESTFILENAME: Video_Content.mp4
       CONTROLSERVER: ${CONTROLSERVER}
       TESTSERIAL: ${TESTSERIAL}
 - tapOn: "SAVE"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_add_to_library"
-- tapOn: "E-book"
-- assertNotVisible: "Importing"
+- tapOn: "Video"
+- extendedWaitUntil:
+    notVisible: "Importing"
+    timeout: 10000
+- extendedWaitUntil:
+    notVisible: "Uploading"
+    timeout: 10000
 - tapOn: Open
-- tapOn: "Back"
+- assertVisible: "Play"
 - runFlow:
     file: "../common/login_download_and_open_content.yaml"
-#Download and open content
 - tapOn: "Library"
 - extendedWaitUntil:
-    visible: "E-book"
-    timeout: 3000
-- tapOn: "E-book"
-- tapOn: Download
-- tapOn: Cancel
-- assertVisible: "Download"
+    visible: "Video"
+    timeout: 60000
+- tapOn: "Video"
 - tapOn: Download
 - tapOn: Open
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_download_and_open"
+- tapOn: "Play"
+- extendedWaitUntil:
+    visible: "Play"
+    timeout: 20000
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/video_content_download_and_open"

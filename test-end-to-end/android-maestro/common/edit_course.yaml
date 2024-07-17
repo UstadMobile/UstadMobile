@@ -4,7 +4,7 @@ appId: com.toughra.ustadmobile
 # test data required :
      # 1) TESTCOURSENAME: provide course name of string type
 
-- tapOn: "COURSES"
+
 - tapOn: ${TESTCOURSENAME}
 - assertVisible:
      id: "floating_action_button"

@@ -17,9 +17,9 @@ import kotlinx.coroutines.flow.filter
 import react.useEffect
 
 data class DoorRemoteMediatorResult<T: Any>(
-    val pagingSourceFactory: ListPagingSourceFactory<T>
+    val pagingSourceFactory: ListPagingSourceFactory<T>,
+    val mediatorState: DoorOffsetLimitRemoteMediator.OffsetLimitMediatorState,
 )
-
 /**
  * Use DoorOffsetLimitMediator with a given pagingSourceFactory to trigger loading remote data as
  * required.
@@ -37,8 +37,6 @@ fun <T:Any> useDoorRemoteMediator(
     refreshCommandFlow: Flow<RefreshCommand>,
     refreshCommandTimeout: Long = 2_000,
 ): DoorRemoteMediatorResult<T> {
-    var pagingSourceFactoryState by useState { pagingSourceFactory }
-
     /* This can't be done via useState because it would be set asynchronously. That would cause a
      * problem because:
      *  a) PagingSourceInterceptor would try and set the pagingSource state variable
@@ -73,26 +71,13 @@ fun <T:Any> useDoorRemoteMediator(
         }
     }
 
-    /**
-     * Detect when PagingSourceFactory has been changed. If that happens, then invalidate the
-     * offsetLimitMediator.
-     */
-    useEffect(pagingSourceFactory) {
-        if(pagingSourceFactoryState !== pagingSourceFactory) {
-            Napier.v {
-                "useDoorRemoteMediator: invalidating remote mediator because paging source factory changed"
-            }
-            offsetLimitMediator.invalidate()
-            pagingSourceFactoryState = pagingSourceFactory
-        }
-    }
-
     val pagingSourceWithIntercept: ListPagingSourceFactory<T> = useMemo(pagingSourceFactory) {
         {
             PagingSourceInterceptor(
                 src = pagingSourceFactory().also {
                     Napier.v { "useDoorRemoteMediator: set paging source to ${it::class.simpleName}" }
                     pagingSourceRef[0] = it
+                    offsetLimitMediator.invalidate()
                 },
                 onLoad = {
                     Napier.v { "useDoorRemoteMediator: load" }
@@ -112,7 +97,16 @@ fun <T:Any> useDoorRemoteMediator(
         }
     }
 
+    var mediatorState by useState { DoorOffsetLimitRemoteMediator.OffsetLimitMediatorState() }
+
+    useLaunchedEffect(dependencies = emptyArray()) {
+        offsetLimitMediator.state.collect {
+            mediatorState = it
+        }
+    }
+
     return DoorRemoteMediatorResult(
-        pagingSourceFactory = pagingSourceWithIntercept
+        pagingSourceFactory = pagingSourceWithIntercept,
+        mediatorState = mediatorState,
     )
 }
