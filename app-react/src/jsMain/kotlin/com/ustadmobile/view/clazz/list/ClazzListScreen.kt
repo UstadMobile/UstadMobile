@@ -48,6 +48,8 @@ import com.ustadmobile.hooks.useDateFormatter
 import com.ustadmobile.hooks.useDoorRemoteMediator
 import com.ustadmobile.hooks.useTimeFormatter
 import com.ustadmobile.lib.db.entities.EnrolmentRequest
+import com.ustadmobile.mui.components.UstadNothingHereYet
+import com.ustadmobile.util.ext.isSettledEmpty
 import com.ustadmobile.view.clazz.uriOrDefaultBanner
 import com.ustadmobile.view.components.UstadDetailHeader
 import kotlinx.coroutines.flow.Flow
@@ -83,6 +85,8 @@ private val ClazzListScreenComponent2 = FC<ClazzListScreenProps> { props ->
     val infiniteQueryResult = usePagingSource(
         remoteMediatorResult.pagingSourceFactory, true, 50
     )
+
+    val isSettledEmpty = infiniteQueryResult.isSettledEmpty(remoteMediatorResult)
 
     val containerRef = useRef<HTMLElement>(null)
     val containerDefaultPadding = 48
@@ -178,6 +182,12 @@ private val ClazzListScreenComponent2 = FC<ClazzListScreenProps> { props ->
                     selectedChipId = props.uiState.selectedChipId
                     enabled = props.uiState.fieldsEnabled
                     onClickFilterChip = props.onClickFilterChip
+                }
+            }
+
+            if(isSettledEmpty) {
+                item {
+                    UstadNothingHereYet.create()
                 }
             }
 
