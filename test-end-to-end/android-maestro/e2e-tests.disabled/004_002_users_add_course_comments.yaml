@@ -63,6 +63,7 @@ env:
 - tapOn: "Assignment"
 - tapOn: "Title*"
 - inputText: "Assignment 1"
+- hideKeyboard
 - tapOn: "Description"
 - tapOn:
     id: "com.toughra.ustadmobile:id/editor"
@@ -87,6 +88,7 @@ env:
 - tapOn: "Assignment 1"
 - tapOn: "Add a class comment"
 - inputText: "Comment from teacher"
+- hideKeyboard
 - tapOn: "Send"
 # student add course comment
 - runFlow: "../common/clear_state_and_get_started.yaml"
@@ -109,6 +111,7 @@ env:
     direction: DOWN
 - tapOn: "Add a class comment"
 - inputText: "Comment from student"
+- hideKeyboard
 - tapOn: "Send"
 - assertVisible: "Comment from student"
 - assertVisible: "Comment from teacher"

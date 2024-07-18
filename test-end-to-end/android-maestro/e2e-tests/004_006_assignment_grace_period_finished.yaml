@@ -63,6 +63,7 @@ env:
 - tapOn: "Assignment"
 - tapOn: "Title*"
 - inputText: "Assignment 1"
+- hideKeyboard
 - tapOn: "Description"
 - tapOn:
     id: "com.toughra.ustadmobile:id/editor"
@@ -71,9 +72,13 @@ env:
 - assertVisible: "Don't show before"
 - tapOn:
     text: "Don't show before"
-- inputText: "10/05/2024"
+- runScript:
+    file: "../common/setDate.js"
+- inputText: ${output.yesterday_Date}
 - tapOn: "hh:mm"
-- inputText: "23:45"
+- runScript:
+    file: "../common/setDate.js"
+- inputText: ${output.delay_1hr}
 - hideKeyboard
 - scrollUntilVisible:
     element:
@@ -86,16 +91,16 @@ env:
 - tapOn: "hh:mm"
 - runScript:
     file: "../common/setDate.js"
-- inputText: ${output.todayTime}
+- inputText: ${output.Time}
 - hideKeyboard
 - tapOn: "End of grace period"
 - runScript:
     file: "../common/setDate.js"
-- inputText: ${output.yesterday_Date}
+- inputText: ${output.todayDate}
 - tapOn: "hh:mm"
 - runScript:
     file: "../common/setDate.js"
-- inputText: ${output.after1HrTime}
+- inputText: ${output.delay_1hr}
 - hideKeyboard
 - tapOn: "Late submission penalty"
 - inputText: "10"

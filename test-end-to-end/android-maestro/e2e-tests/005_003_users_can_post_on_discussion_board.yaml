@@ -58,17 +58,23 @@ env:
 - tapOn: "Add block"
 - swipe:
     from:
-      text: "Drag handle" # From (x, y) center of element
-    direction: UP # To (50% of width, 10% of height)
+      text: "Drag handle"
+    direction: UP
 - tapOn: "Discussion board"
 - tapOn: "Title*"
 - inputText: "Discussion 1"
+- hideKeyboard
 - tapOn:
     text: "dd/mm/yyyy"
     index: "0"
-- inputText: "12/01/2024"
+- runScript:
+    file: "../common/setDate.js"
+- inputText: ${output.yesterday_Date}
 - tapOn: "hh:mm"
-- inputText: "23:45"
+- runScript:
+    file: "../common/setDate.js"
+- inputText: ${output.delay_1hr}
+- hideKeyboard
 - tapOn: "Description"
 - tapOn:
     id: "com.toughra.ustadmobile:id/editor"
@@ -161,11 +167,13 @@ env:
     text: "Post 1"
 - assertVisible:
     text: "Post 2"
-- tapOn: "Post 1"
-- extendedWaitUntil:
-    visible: "add_a_reply"
-    timeout: 10000
-- tapOn:
-    id: "add_a_reply"
-- inputText: "Comment from student"
-- tapOn: "Post"
+
+    # Add reply text field not accessible by maestro
+#- tapOn: "Post 1"
+#- extendedWaitUntil:
+#    visible: "add_a_reply"
+#    timeout: 10000
+#- tapOn:
+#    id: "add_a_reply"
+#- inputText: "Comment from student"
+#- tapOn: "Post"

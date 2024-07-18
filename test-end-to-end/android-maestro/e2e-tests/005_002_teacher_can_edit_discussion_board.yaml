@@ -1,6 +1,6 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/003_002_add_module_text_blocks_and_perform_indent_hide_delete_actions"
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/005_002_teacher_can_edit_discussion_board"
   TESTNAME:  "005_002_teacher_can_edit_discussion_board"
 ---
 - clearState: com.toughra.ustadmobile
@@ -38,22 +38,23 @@ env:
 - tapOn: "Add block"
 - swipe:
     from:
-      text: "Drag handle" # From (x, y) center of element
-    direction: UP # To (50% of width, 10% of height)
-
-#- longPressOn: Drag handle
-#- swipe:
-#    start: 50%, 50% # From (50% of width, 50% of height)
-#    end: 50%, 10% # To (50% of width, 10% of height)
+      text: "Drag handle"
+    direction: UP
 - tapOn: "Discussion board"
 - tapOn: "Title*"
 - inputText: "Discussion 1"
+- hideKeyboard
 - tapOn:
     text: "dd/mm/yyyy"
     index: "0"
-- inputText: "12/01/2024"
+- runScript:
+    file: "../common/setDate.js"
+- inputText: ${output.yesterday_Date}
 - tapOn: "hh:mm"
-- inputText: "23:45"
+- runScript:
+    file: "../common/setDate.js"
+- inputText: ${output.delay_1hr}
+- hideKeyboard
 - tapOn: "Description"
 - tapOn:
     id: "com.toughra.ustadmobile:id/editor"

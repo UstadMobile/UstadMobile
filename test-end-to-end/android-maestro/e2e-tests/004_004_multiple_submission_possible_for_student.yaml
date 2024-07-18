@@ -58,11 +58,12 @@ env:
 - tapOn: "Add block"
 - swipe:
     from:
-      text: "Drag handle" # From (x, y) center of element
-    direction: UP # To (50% of width, 10% of height)
+      text: "Drag handle"
+    direction: UP
 - tapOn: "Assignment"
 - tapOn: "Title*"
 - inputText: "Assignment 1"
+- hideKeyboard
 - tapOn: "Description"
 - tapOn:
     id: "com.toughra.ustadmobile:id/editor"
@@ -70,16 +71,17 @@ env:
 - tapOn: "Done"
 - scrollUntilVisible:
     element:
-      text: "Submission policy"
+      text: "Must submit all at once"
     direction: DOWN
 - tapOn: "Must submit all at once"
 - tapOn: "Can make multiple submissions"
 - assertVisible: "Done"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/added_assignment"
-- tapOn:
-    text: "Done"
-    delay: 1000
-- assertNotVisible: "Done"
+- repeat:
+    while:
+      visible: "Done"
+    commands:
+      - tapOn: Done+
 - tapOn: "Save"
 # student submit assignment
 - runFlow: "../common/clear_state_and_get_started.yaml"
@@ -147,18 +149,20 @@ env:
 - assertVisible: "Mark comment"
 - tapOn: "Mark comment"
 - inputText: "Good job"
+- hideKeyboard
 - scrollUntilVisible:
     element:
       text: "Mark*"
     direction: DOWN
 - tapOn: "Mark*"
 - inputText: "9"
+- hideKeyboard
 - tapOn: "Submit grade"
 - scrollUntilVisible:
     element:
       text: "Result"
     direction: UP
-- assertVisible: "9.0/10 Points"
+- assertVisible: "9.0/10.0 Points"
 # student able to view his grade
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"

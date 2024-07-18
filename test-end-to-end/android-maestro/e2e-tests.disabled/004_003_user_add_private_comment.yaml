@@ -63,6 +63,7 @@ env:
 - tapOn: "Assignment"
 - tapOn: "Title*"
 - inputText: "Assignment 1"
+- hideKeyboard
 - tapOn: "Description"
 - tapOn:
     id: "com.toughra.ustadmobile:id/editor"
@@ -87,6 +88,10 @@ env:
 - tapOn: "Assignment 1"
 - tapOn: "Submissions"
 - tapOn: "Student 1"
+- scrollUntilVisible:
+    element:
+      text: "Add a private comment"
+    direction: DOWN
 - tapOn: "Add a private comment"
 - inputText: "Private comment from teacher"
 - tapOn: "Send"

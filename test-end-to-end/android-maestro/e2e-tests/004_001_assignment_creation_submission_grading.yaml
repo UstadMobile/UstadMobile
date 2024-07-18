@@ -63,6 +63,7 @@ env:
 - tapOn: "Assignment"
 - tapOn: "Title*"
 - inputText: "Assignment 1"
+- hideKeyboard
 - tapOn: "Description"
 - tapOn:
     id: "com.toughra.ustadmobile:id/editor"
@@ -146,6 +147,7 @@ env:
 - assertVisible: "Mark comment"
 - tapOn: "Mark comment"
 - inputText: "Good job"
+- hideKeyboard
 - scrollUntilVisible:
     element:
       text: "Mark*"
@@ -153,11 +155,12 @@ env:
 - tapOn: "Mark*"
 - inputText: "9"
 - tapOn: "Submit grade"
+- hideKeyboard
 - scrollUntilVisible:
     element:
       text: "Result"
     direction: UP
-- assertVisible: "9.0/10 Points"
+- assertVisible: "9.0/10.0 Points"
 # student able to view his grade
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"

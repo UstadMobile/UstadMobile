@@ -63,6 +63,7 @@ env:
 - tapOn: "Assignment"
 - tapOn: "Title*"
 - inputText: "Assignment 1"
+- hideKeyboard
 - tapOn: "Description"
 - tapOn:
     id: "com.toughra.ustadmobile:id/editor"
@@ -71,14 +72,9 @@ env:
 - scrollUntilVisible:
     element:
       text: "Group submission"
-      point: 50%,57%
-
 - tapOn: "Group submission"
-- scrollUntilVisible:
-    element:
-      text: "Require file submission"
-    direction: DOWN
-- tapOn:- tapOn: "Add new groups"
+- tapOn: "Groups*"
+- tapOn: "Add new groups"
 - tapOn: "Title*"
 - inputText: Group A
 - tapOn:
