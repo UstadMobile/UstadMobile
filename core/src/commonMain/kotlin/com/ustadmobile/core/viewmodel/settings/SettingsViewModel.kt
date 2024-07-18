@@ -255,10 +255,10 @@ class SettingsViewModel(
         }
     }
 
-    fun onClickAppShare() {
+    fun onClickAppShare(shareLink: Boolean) {
         viewModelScope.launch {
             try {
-                sendAppFileUseCase.invoke()
+                sendAppFileUseCase.invoke(shareLink)
             } catch (e: IllegalArgumentException) {
                 snackDispatcher.showSnackBar(Snack(e.message.toString()))
             } catch (e: Exception) {
@@ -266,7 +266,6 @@ class SettingsViewModel(
             }
         }
     }
-
     fun onClickSiteSettings() {
         navController.navigate(SiteDetailViewModel.DEST_NAME, emptyMap())
     }

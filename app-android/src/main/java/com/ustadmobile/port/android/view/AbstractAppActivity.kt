@@ -86,7 +86,7 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
         import(AndroidDomainDiModule(applicationContext))
 
 
-        bind<SendAppFileUseCase>() with singleton { SendAppFileUseCaseAndroid(applicationContext) }
+        bind<SendAppFileUseCase>() with singleton { SendAppFileUseCaseAndroid(this@AbstractAppActivity) }
 
 
         bind<UstadMobileSystemImpl>() with singleton {
