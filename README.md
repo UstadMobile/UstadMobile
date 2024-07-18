@@ -171,7 +171,7 @@ https://github.com/UstadMobile/UstadMobile.git and wait for the project to impor
 
 Linux/MacOS:
 ```
-$ ./runserver.sh --siteUrl http://192.168.58.86:8087/
+$ ./runserver.sh --siteUrl http://your.ip.address:8087/
 ```
 
 Windows:
