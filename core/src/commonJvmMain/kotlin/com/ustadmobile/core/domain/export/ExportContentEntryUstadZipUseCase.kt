@@ -7,6 +7,7 @@ import java.rmi.server.ExportException
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
+
 abstract class CommonJvmExportContentEntryUstadZipUseCase(
     private val contentEntryDao: ContentEntryDao,
     private val json: Json
@@ -19,7 +20,7 @@ abstract class CommonJvmExportContentEntryUstadZipUseCase(
     ) {
         try {
             val entriesToExport = contentEntryDao.getRecursiveContentEntriesForExport(contentEntryUid)
-            requireNotNull(entriesToExport.firstOrNull()) { "Content entry not found for UID: $contentEntryUid" }
+            require(entriesToExport.isNotEmpty()) { "No content entries found." }
 
             openOutputStream(destZipFilePath).use { zipOut ->
                 entriesToExport.forEachIndexed { index, entry ->
@@ -28,7 +29,6 @@ abstract class CommonJvmExportContentEntryUstadZipUseCase(
                     zipOut.putNextEntry(zipEntry)
                     zipOut.write(entryJson.toByteArray())
                     zipOut.closeEntry()
-
                     val progress = (index + 1).toFloat() / entriesToExport.size
                     progressListener(ExportProgress(entry.title ?: "", entriesToExport.size, progress))
                 }
@@ -39,6 +39,5 @@ abstract class CommonJvmExportContentEntryUstadZipUseCase(
             throw ExportException("Error during export: ${e.message}", e)
         }
     }
-
     protected abstract fun openOutputStream(destZipFilePath: String): ZipOutputStream
 }
