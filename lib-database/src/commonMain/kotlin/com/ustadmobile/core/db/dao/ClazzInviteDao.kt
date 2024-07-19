@@ -15,7 +15,7 @@ import io.ktor.http.HttpMethod
 
 @DoorDao
 @Repository
-expect abstract class ClazzInviteDao: BaseDao<ClazzInvite> {
+expect abstract class ClazzInviteDao : BaseDao<ClazzInvite> {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun replace(entity: ClazzInvite): Long
@@ -25,7 +25,7 @@ expect abstract class ClazzInviteDao: BaseDao<ClazzInvite> {
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
     )
     @Query("SELECT * FROM ClazzInvite")
-    abstract suspend fun findInviteAsync() : List<ClazzInvite>
+    abstract suspend fun findInviteAsync(): List<ClazzInvite>
 
 
     @HttpAccessible(
@@ -43,5 +43,14 @@ expect abstract class ClazzInviteDao: BaseDao<ClazzInvite> {
     )
     abstract suspend fun findClazzInviteEntityForInviteToken(inviteTokenUid: String): ClazzInviteWithTimeZone?
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
+    )
+    @Query("""
+        UPDATE ClazzInvite SET inviteStatus = :status WHERE ClazzInvite.ciUid =:ciUid
+    """)
+    abstract suspend fun updateInviteStatus(status:Int,ciUid:Long)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract suspend fun insertAsyncAll(clazzInvites: List<ClazzInvite>): List<Long>
 }

@@ -31,7 +31,7 @@ class ClazzInviteViewModel(
 
     val uiState: Flow<InviteRedeemUiState> = _uiState.asStateFlow()
 
-    private val clazzRedeemUseCase: ClazzRedeemUseCase  by on(accountManager.activeEndpoint).instance()
+    private val clazzRedeemUseCase: ClazzRedeemUseCase by on(accountManager.activeEndpoint).instance()
 
     private val argInviteCode = savedStateHandle[ARG_INVITE_CODE]
         ?: throw IllegalArgumentException("no invite code")
@@ -45,12 +45,14 @@ class ClazzInviteViewModel(
         savedStateHandle[UstadView.ARG_RESULT_DEST_KEY]
     }
 
-    fun onAcceptInvite() {
+
+    fun processDecision(isAccepting:Boolean) {
         viewModelScope.launch {
-            val result = clazzRedeemUseCase.invoke(argInviteCode)
+
+            val result = clazzRedeemUseCase.invoke(argInviteCode,isAccepting)
             if (result.isCodeRedeem) {
                 snackDispatcher.showSnackBar(Snack(result.message))
-            }else{
+            } else {
                 snackDispatcher.showSnackBar(Snack(result.message))
             }
 

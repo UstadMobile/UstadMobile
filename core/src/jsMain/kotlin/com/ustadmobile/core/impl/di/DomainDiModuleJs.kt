@@ -47,6 +47,7 @@ import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
 import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseJs
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCaseJs
+import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.domain.xapi.StoreActivitiesUseCase
 import com.ustadmobile.core.domain.xapi.XapiStatementResource
 import com.ustadmobile.core.domain.xapi.noninteractivecontentusagestatementrecorder.NonInteractiveContentXapiStatementRecorderFactory
@@ -96,7 +97,9 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
     bind<PhoneNumValidatorUseCase>() with provider {
         PhoneNumValidatorUseCaseJs()
     }
-
+    bind<ValidateEmailUseCase>() with provider {
+        ValidateEmailUseCase()
+    }
     bind<OnClickPhoneNumUseCase>() with provider {
         OnClickPhoneNumUseCaseJs()
     }

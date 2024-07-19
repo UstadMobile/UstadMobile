@@ -165,9 +165,11 @@ import com.ustadmobile.core.viewmodel.person.bulkaddselectfile.BulkAddPersonSele
 import com.ustadmobile.view.person.bulkaddrunimport.BulkAddPersonRunImportScreen
 import com.ustadmobile.core.viewmodel.person.bulkaddrunimport.BulkAddPersonRunImportViewModel
 import com.ustadmobile.core.viewmodel.clazz.gradebook.ClazzGradebookViewModel
+import com.ustadmobile.core.viewmodel.clazz.redeem.ClazzInviteViewModel
 import com.ustadmobile.view.clazz.gradebook.ClazzGradebookScreen
 import com.ustadmobile.view.clazz.gradebook.ClazzGradebookPreview
 import com.ustadmobile.mui.components.UstadChipsDemo
+import com.ustadmobile.view.clazz.inviteViaContact.ClazzInviteRedeemScreen
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -387,6 +389,7 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(JoinWithCodeViewModel.DEST_NAME, "JoinWithCode", JoinWithCodeScreen),
     UstadScreen(InviteViaLinkViewModel.DEST_NAME, "InviteviaLink", InviteViaLinkScreen),
     UstadScreen(InviteViaContactViewModel.DEST_NAME, "InviteviaContact", InviteViaContactScreen),
+    UstadScreen(ClazzInviteViewModel.DEST_NAME, "ClazzInviteRedeem", ClazzInviteRedeemScreen),
     UstadScreen(CoursePermissionListViewModel.DEST_NAME, "CoursePermissionList", CoursePermissionListScreen),
     UstadScreen(CoursePermissionEditViewModel.DEST_NAME, "CoursePermissionEdit", CoursePermissionEditScreen),
     UstadScreen(CoursePermissionDetailViewModel.DEST_NAME, "CoursePermissionDetail", CoursePermissionDetailScreen),

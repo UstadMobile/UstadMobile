@@ -3,6 +3,7 @@ package com.ustadmobile.core.domain.invite
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.EnrolIntoCourseUseCase
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
+import com.ustadmobile.lib.db.entities.ClazzInvite
 
 class ClazzRedeemUseCase(
     private val enrolIntoCourseUseCase: EnrolIntoCourseUseCase,
@@ -10,7 +11,8 @@ class ClazzRedeemUseCase(
     private val repo: UmAppDatabase?
 ) {
     suspend operator fun invoke(
-        inviteCode: String
+        inviteCode: String,
+        isAccepting:Boolean
     ): ClazzRedeemResult {
         val effectiveDb = (repo ?: db)
         val clazzInviteWithTimeZone = effectiveDb.clazzInviteDao().findClazzInviteEntityForInviteToken(inviteCode)
@@ -25,22 +27,35 @@ class ClazzRedeemUseCase(
             return ClazzRedeemResult(false, "Invite code is already redeemed")
         } else {
             clazzInviteWithTimeZone.clazzInvite?.let { clazzInvite ->
-                enrolIntoCourseUseCase.invoke(
-                    enrolment = ClazzEnrolment(
-                        clazzUid = clazzInvite.ciClazzUid,
-                        personUid = clazzInvite.ciPersonUid,
-                        role = clazzInvite.ciRoleId.toInt()
-                    ), timeZoneId = clazzInviteWithTimeZone.timeZone ?: "UTC"
-                )
 
-                effectiveDb.clazzEnrolmentDao().updateClazzEnrolmentInviteUid(
-                    clazzInvite.ciUid,
-                    clazzInvite.ciClazzUid
-                )
+                if (isAccepting) {
+                    enrolIntoCourseUseCase.invoke(
+                        enrolment = ClazzEnrolment(
+                            clazzUid = clazzInvite.ciClazzUid,
+                            personUid = clazzInvite.ciPersonUid,
+                            role = clazzInvite.ciRoleId.toInt()
+                        ), timeZoneId = clazzInviteWithTimeZone.timeZone ?: "UTC"
+                    )
 
-            }
+                    //updating clazzEnrolment table by adding ciUid to clazzEnrolmentInviteUid
+                    effectiveDb.clazzEnrolmentDao().updateClazzEnrolmentInviteUid(
+                        clazzInvite.ciUid,
+                        clazzInvite.ciClazzUid
+                    )
 
-            return ClazzRedeemResult(true, "Invite code redeemed successfully")
+                    //Update the status of clazz invite that invite code is accepted
+                    effectiveDb.clazzInviteDao().updateInviteStatus(ClazzInvite.STATUS_ACCEPTED, clazzInvite.ciUid)
+                    return ClazzRedeemResult(true, "Invite code redeemed successfully")
+
+                }else{
+
+                    //Update the status of clazz invite that invite code is declined
+                    effectiveDb.clazzInviteDao().updateInviteStatus(ClazzInvite.STATUS_DECLINED, clazzInvite.ciUid)
+                    return ClazzRedeemResult(true, "Invitation Declined")
+
+                }
+            } ?: return ClazzRedeemResult(false, "Invite code is invalid")
+
         }
 
     }

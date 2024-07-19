@@ -89,7 +89,7 @@ fun commonDomainDiModule(endpointScope: EndpointScope) = DI.Module("CommonDomain
             repoOrDb = instance(tag = DoorTag.TAG_REPO)
         )
     }
-    bind<ContactToServerUseCase>() with scoped(endpointScope).singleton {
+    bind<ContactToServerUseCase>() with scoped(endpointScope).provider {
         ContactToServerUseCase(
             httpClient = instance(),
             endpoint = context,

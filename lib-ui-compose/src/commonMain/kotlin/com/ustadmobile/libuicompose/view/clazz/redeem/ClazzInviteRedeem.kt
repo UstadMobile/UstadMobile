@@ -29,16 +29,14 @@ fun ClazzInviteRedeem(
 
     InviteViaLinkScreen(
         uiState = uiState,
-        onAccept = {viewModel.onAcceptInvite()},
-        onDecline = {}
+        processDecision = {viewModel.processDecision(it)},
     )
 }
 
 @Composable
 fun InviteViaLinkScreen(
     uiState: InviteRedeemUiState = InviteRedeemUiState(),
-    onAccept: () -> Unit,
-    onDecline: () -> Unit
+    processDecision: (Boolean) -> Unit,
 ) {
     UstadVerticalScrollColumn(
         modifier = Modifier
@@ -53,11 +51,11 @@ fun InviteViaLinkScreen(
         Row(
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Button(onClick = { onAccept()}) {
+            Button(onClick = { processDecision(true)}) {
                 Text(text = stringResource(MR.strings.accept))
 
             }
-            Button(onClick = { onDecline() }) {
+            Button(onClick = { processDecision(false) }) {
                 Text(text = stringResource(MR.strings.decline))
             }
         }

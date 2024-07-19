@@ -767,7 +767,7 @@ fun Application.umRestApplication(
                 checkContactTypeUseCase = instance(),
                 db = instance(tag = DoorTag.TAG_DB),
                 endpoint = context,
-
+                repo = null
                 )
         }
         registerContextTranslator { call: ApplicationCall ->

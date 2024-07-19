@@ -45,21 +45,20 @@ data class ClazzInvite(
 
     var inviteToken: String? = null,
 
+    var inviteStatus: Int = STATUS_PENDING,
+
     @ReplicateEtag
     @ReplicateLastModified
     var inviteLct: Long = 0
 ) {
-
-
     companion object {
         const val TABLE_ID = 521
 
         const val EMAIL = 1
         const val PHONE = 2
         const val INTERNAL_MESSAGE = 3
-
-
+        const val STATUS_PENDING = 0
+        const val STATUS_ACCEPTED = 1
+        const val STATUS_DECLINED = 2
     }
-
-
 }

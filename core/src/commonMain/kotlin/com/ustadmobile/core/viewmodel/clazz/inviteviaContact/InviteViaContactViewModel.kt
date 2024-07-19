@@ -15,7 +15,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import org.kodein.di.instance
+import kotlinx.serialization.json.Json
+
 
 
 data class InviteViaContactChip(
@@ -74,27 +77,36 @@ class InviteViaContactViewModel(
             val contacts = _uiState.value.chips
 
             if (contacts.isEmpty()) {
+                val noContactFoundMessage = systemImpl.getString(MR.strings.no_contact_found)
                 _uiState.update { prev ->
-                    prev.copy(contactError = systemImpl.getString(MR.strings.no_contact_found))
+                    prev.copy(contactError = noContactFoundMessage)
                 }
-                onContactError(systemImpl.getString(MR.strings.no_contact_found))
+                onContactError(noContactFoundMessage)
                 return@launch
             }
 
-            if (contacts.none { it.isValid }) {
+            val validContacts = contacts.filter { it.isValid }
+
+            if (validContacts.isEmpty()) {
+                val noValidContactFoundMessage = systemImpl.getString(MR.strings.no_valid_contact_found)
                 _uiState.update { prev ->
-                    prev.copy(contactError = systemImpl.getString(MR.strings.no_valid_contact_found))
+                    prev.copy(contactError = noValidContactFoundMessage)
                 }
-                onContactError(systemImpl.getString(MR.strings.no_valid_contact_found))
+                onContactError(noValidContactFoundMessage)
                 return@launch
             }
 
-            contactToServerUseCase.invoke(
-                contacts.map { it.text },
+            val result = contactToServerUseCase.invoke(
+                validContacts.map { it.text },
                 clazzUid,
                 personRole,
                 accountManager.currentUserSession.person.personUid
             )
+
+            val invitation = Json.decodeFromString<InviteResult>(result)
+
+            snackDispatcher.showSnackBar(Snack(invitation.inviteSent))
+
         }
     }
 
@@ -138,7 +150,10 @@ class InviteViaContactViewModel(
         const val ARG_CLAZZ_UID = "clazz_uid"
     }
 
-
+   @Serializable
+    data class InviteResult(
+        val inviteSent: String
+    )
 }
 
 

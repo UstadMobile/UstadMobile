@@ -23,7 +23,7 @@ class ProcessInviteUseCase(
     private val checkContactTypeUseCase: CheckContactTypeUseCase,
     private val db: UmAppDatabase,
     private val endpoint: Endpoint,
-    private val  repo: UmAppDatabase?,
+    private val repo: UmAppDatabase?,
 ) {
     data class InviteResult(
         val inviteSent: String
@@ -40,45 +40,50 @@ class ProcessInviteUseCase(
 
             val coroutineScope = CoroutineScope(Dispatchers.IO + Job())
             coroutineScope.launch {
-
-                contacts.forEach { contact ->
+                val invites = contacts.map { contact ->
                     val token = uuid4().toString()
-                    val inviteLink = UstadUrlComponents(
-                        endpoint.url, ClazzInviteViewModel.DEST_NAME, "inviteCode=$token"
-                    ).fullUrl()
-                    val validContacts = checkContactTypeUseCase.invoke(contact = contact)
 
+                    val validContact = checkContactTypeUseCase.invoke(contact = contact)
 
-                    if (validContacts != null) {
-                        val log = effectiveDb.clazzInviteDao().replace(
-                            ClazzInvite(
-                                ciPersonUid = personUid,
-                                ciRoleId = role,
-                                ciClazzUid = clazzUid,
-                                inviteType = validContacts.inviteType,
-                                inviteToken = token,
-                                inviteContact = validContacts.text
-                            )
+                    if (validContact != null&&validContact.isValid) {
+                        ClazzInvite(
+                            ciPersonUid = personUid,
+                            ciRoleId = role,
+                            ciClazzUid = clazzUid,
+                            inviteType = validContact.inviteType,
+                            inviteToken = token,
+                            inviteContact = validContact.text
                         )
+                    } else {
+                        null
+                    }
+                }.filterNotNull()
 
-                        Napier.d { "ProcessInviteUseCase $log" }
+                if (invites.isNotEmpty()) {
+                    val log = effectiveDb.clazzInviteDao().insertAsyncAll(invites)
+                    Napier.d { "ProcessInviteUseCase $log" }
+
+                    invites.forEach { invite ->
+                        val inviteLink = UstadUrlComponents(endpoint.url, ClazzInviteViewModel.DEST_NAME, "inviteCode=${invite.inviteToken}").fullUrl()
 
 
-                        when (validContacts.inviteType) {
+                        when (invite.inviteType) {
                             1 -> {
-                                sendEmailUseCase.invoke(validContacts.text, inviteLink)
+                                invite.inviteContact?.let { sendEmailUseCase.invoke(it, inviteLink) }
                             }
 
                             2 -> {
-                                sendSmsUseCase.invoke(validContacts.text, inviteLink)
+                                invite.inviteContact?.let { sendSmsUseCase.invoke(it, inviteLink) }
                             }
 
                             3 -> {
-                                sendMessageUseCase.invoke(validContacts.text, inviteLink, personUid)
+                                invite.inviteContact?.let { sendMessageUseCase.invoke(it, inviteLink, personUid) }
                             }
-
                         }
                     }
+                }else{
+                    Napier.d { "ProcessInviteUseCase: No valid invites to send" }
+
                 }
             }
 
