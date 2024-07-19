@@ -54,7 +54,6 @@ fun SettingsScreen(
         onClickDeletedItems = viewModel::onClickDeletedItems,
         onClickOfflineStorageOptionsDialog = viewModel::onClickOfflineStorageOptionsDialog,
         folderPickLauncher = folderPickLauncher,
-        onClickAppShare = viewModel::onClickAppShare
     )
     if (uiState.langDialogVisible) {
         //As per https://developer.android.com/jetpack/compose/components/dialog
@@ -113,7 +112,6 @@ fun SettingsScreen(
 @Composable
 fun SettingsScreen(
     uiState: SettingsUiState,
-    onClickAppShare: () -> Unit = {},
     onClickAppLanguage: () -> Unit = {},
     onClickHtmlContentDisplayEngine: () -> Unit = {},
     onClickGoToHolidayCalendarList: () -> Unit = {},
@@ -164,17 +162,6 @@ fun SettingsScreen(
             icon = Icons.Default.Delete,
             modifier = Modifier.clickable { onClickDeletedItems() })
 
-
-        if (uiState.sendAppOptionVisible) {
-            UstadDetailField2(
-                modifier = Modifier.clickable {
-                    onClickAppShare()
-                },
-                valueText = "Share App",
-                labelText = "Share App with Others",
-                icon = Icons.Default.Share,
-            )
-        }
 
         if (uiState.holidayCalendarVisible) {
             UstadDetailField2(

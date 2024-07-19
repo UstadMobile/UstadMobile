@@ -9,40 +9,38 @@ import androidx.compose.material.icons.filled.Link
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
-import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListUiState
-import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
-import com.ustadmobile.libuicompose.view.contententry.UstadContentEntryListItem
-import com.ustadmobile.libuicompose.components.ustadPagedItems
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import com.ustadmobile.libuicompose.components.UstadBottomSheetOption
-import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.UstadContextMenuItem
 import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.MessageIdOption2
+import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListUiState
+import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.lib.db.composites.ContentEntryAndListDetail
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.libuicompose.components.PickFileOptions
 import com.ustadmobile.libuicompose.components.PickType
+import com.ustadmobile.libuicompose.components.UstadBottomSheetOption
 import com.ustadmobile.libuicompose.components.UstadFileDropZone
 import com.ustadmobile.libuicompose.components.UstadFilePickResult
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadListFilterChipsHeader
-import com.ustadmobile.libuicompose.components.UstadPickFileOpts
 import com.ustadmobile.libuicompose.components.rememberUstadFilePickLauncher
+import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.util.rememberEmptyFlow
+import com.ustadmobile.libuicompose.view.contententry.UstadContentEntryListItem
+import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.flow.Flow
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -132,7 +130,6 @@ fun ContentEntryListScreen(
     onSetSelected: (entry: ContentEntryAndListDetail, selected: Boolean) -> Unit = { _, _ -> },
     onClickSelectThisFolder: () -> Unit = { },
     contextMenuItems: (ContentEntryAndListDetail) -> List<UstadContextMenuItem> = { emptyList() },
-    onExportContentEntry: (Long) -> Unit = { }
 ) {
     val repositoryResult = rememberDoorRepositoryPager(
         uiState.contentEntryList, refreshCommandFlow
@@ -211,14 +208,7 @@ fun ContentEntryListScreen(
                         entry = entry,
                         onSetSelected = onSetSelected,
                         isSelected = (contentEntryUid in uiState.selectedEntryUids),
-                        contextMenuItems = { entryAndDetail ->
-                            val defaultItems = contextMenuItems(entryAndDetail)
-                            val exportItem = UstadContextMenuItem(
-                                label = "EXport COntent",
-                                onClick = { onExportContentEntry(entryAndDetail.contentEntry?.contentEntryUid ?: 0L) }
-                            )
-                            defaultItems + exportItem
-                        },
+                        contextMenuItems = contextMenuItems,
                     )
                 }
             }
@@ -234,16 +224,6 @@ fun ContentEntryListScreen(
                 Text(stringResource(MR.strings.move_entries_to_this_folder))
             }
         }
-
-        if (uiState.exportProgress != null) {
-            LinearProgressIndicator(
-                progress = uiState.exportProgress!!.progress,
-                modifier = Modifier.fillMaxWidth().padding(16.dp)
-            )
-            Text(
-                text = "exporting",
-                modifier = Modifier.padding(16.dp)
-            )
-        }
     }
+
 }

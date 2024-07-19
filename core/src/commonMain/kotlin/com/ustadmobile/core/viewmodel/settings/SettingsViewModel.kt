@@ -12,7 +12,6 @@ import com.ustadmobile.core.domain.htmlcontentdisplayengine.GetHtmlContentDispla
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.HtmlContentDisplayEngineOption
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.SetHtmlContentDisplayEngineUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
-import com.ustadmobile.core.domain.share.SendAppFileUseCase
 import com.ustadmobile.core.domain.storage.GetOfflineStorageAvailableSpace
 import com.ustadmobile.core.domain.storage.GetOfflineStorageOptionsUseCase
 import com.ustadmobile.core.domain.storage.GetOfflineStorageSettingUseCase
@@ -126,12 +125,8 @@ class SettingsViewModel(
 
     private val zipFileUseCase: ZipFileUseCase by instance()
 
-    private val sendAppFileUseCase: SendAppFileUseCase by instance()
-
 
     init {
-
-        _uiState.update { it.copy(sendAppOptionVisible = sendAppFileUseCase != null) }
 
         _appUiState.update { prev ->
             prev.copy(
@@ -299,18 +294,6 @@ class SettingsViewModel(
                 snackDispatcher.showSnackBar(Snack("Backup failed"))
                 e.printStackTrace()
                 println(e.message)
-            }
-        }
-    }
-
-    fun onClickAppShare() {
-        viewModelScope.launch {
-            try {
-                sendAppFileUseCase.invoke()
-            } catch (e: IllegalArgumentException) {
-                snackDispatcher.showSnackBar(Snack(e.message.toString()))
-            } catch (e: Exception) {
-                snackDispatcher.showSnackBar(Snack(e.message.toString()))
             }
         }
     }
