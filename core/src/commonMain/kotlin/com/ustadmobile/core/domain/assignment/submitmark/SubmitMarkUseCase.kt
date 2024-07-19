@@ -1,5 +1,6 @@
 package com.ustadmobile.core.domain.assignment.submitmark
 
+import com.benasher44.uuid.Uuid
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.xapi.XapiSession
@@ -168,6 +169,7 @@ class SubmitMarkUseCase(
                     clazzUid = clazzUid,
                     cbUid = courseBlock.cbUid,
                     rootActivityId = activityId,
+                    registrationUuid = Uuid(0L, 0L).toString(),
                     knownActorUidToPersonUidMap = instructorActorToPersonUidMap + actorToPersonUidMap,
                 )
             )

@@ -20,7 +20,7 @@ class DefaultLaunchContentEntryVersionUseCase: LaunchContentEntryVersionUseCase 
         contentEntryVersion: ContentEntryVersion,
         navController: UstadNavController,
         target: OpenExternalLinkUseCase.Companion.LinkTarget,
-        xapiSession: XapiSession?,
+        xapiSession: XapiSession,
     ): LaunchContentEntryVersionUseCase.LaunchResult {
         val destName = when(contentEntryVersion.cevContentType) {
             ContentEntryVersion.TYPE_XAPI -> XapiContentViewModel.DEST_NAME
@@ -35,9 +35,9 @@ class DefaultLaunchContentEntryVersionUseCase: LaunchContentEntryVersionUseCase 
                 viewName = destName,
                 args = mapOf(
                     UstadViewModel.ARG_ENTITY_UID to contentEntryVersion.cevUid.toString(),
-                    UstadViewModel.ARG_COURSE_BLOCK_UID to (xapiSession?.cbUid ?: 0).toString(),
-                    UstadViewModel.ARG_CLAZZUID to (xapiSession?.clazzUid ?: 0).toString(),
-                    UstadViewModel.ARG_CONTENT_ENTRY_UID to (xapiSession?.contentEntryUid ?: 0).toString(),
+                    UstadViewModel.ARG_COURSE_BLOCK_UID to xapiSession.cbUid.toString(),
+                    UstadViewModel.ARG_CLAZZUID to xapiSession.clazzUid.toString(),
+                    UstadViewModel.ARG_CONTENT_ENTRY_UID to xapiSession.contentEntryUid.toString(),
                 )
             )
         }

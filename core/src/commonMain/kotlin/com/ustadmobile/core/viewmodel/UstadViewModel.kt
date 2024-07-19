@@ -1,5 +1,6 @@
 package com.ustadmobile.core.viewmodel
 
+import com.benasher44.uuid.uuid4
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.openlink.OnClickLinkUseCase
@@ -477,7 +478,8 @@ abstract class UstadViewModel(
             clazzUid = clazzUid,
             cbUid = cbUid,
             contentEntryUid = contentEntryUid,
-            rootActivityId = "${accountManager.activeEndpoint.url}ns/xapi/contentEntry/$contentEntryUid"
+            rootActivityId = "${accountManager.activeEndpoint.url}ns/xapi/contentEntry/$contentEntryUid",
+            registrationUuid = uuid4().toString(),
         )
     }
 

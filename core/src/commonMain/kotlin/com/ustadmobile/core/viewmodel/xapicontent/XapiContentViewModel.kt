@@ -38,7 +38,8 @@ class XapiContentViewModel(
     init {
         viewModelScope.launch {
             try {
-                val launchHrefResult = resolveXapiLaunchHrefUseCase(entityUidArg)
+                val xapiSession = createXapiSession(entityUidArg)
+                val launchHrefResult = resolveXapiLaunchHrefUseCase(entityUidArg, xapiSession)
                 _uiState.update { prev ->
                     prev.copy(url = launchHrefResult.url)
                 }

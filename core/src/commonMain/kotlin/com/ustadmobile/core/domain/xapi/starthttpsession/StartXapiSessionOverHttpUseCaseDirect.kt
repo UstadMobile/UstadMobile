@@ -1,34 +1,28 @@
 package com.ustadmobile.core.domain.xapi.starthttpsession
 
 import com.benasher44.uuid.uuid4
-import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCase
 import com.ustadmobile.core.domain.xapi.XapiSession
+import com.ustadmobile.core.domain.xapi.starthttpsession.StartXapiSessionOverHttpUseCase.StartXapiSessionOverHttpResult
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.util.systemTimeInMillis
-import com.ustadmobile.lib.db.entities.UserSession
 import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 import com.ustadmobile.lib.util.randomString
-import io.ktor.util.encodeBase64
 
 /**
  * Start a Http Xapi session that will be recorded in the local database. Used on Android, desktop,
  * and server.
  */
-class StartXapiHttpSessionUseCaseLocal(
+class StartXapiSessionOverHttpUseCaseDirect(
     private val db: UmAppDatabase,
     private val repo: UmAppDatabase?,
-    private val endpoint: Endpoint,
-): StartXapiHttpSessionUseCase {
+    private val getApiUrlUseCase: GetApiUrlUseCase,
+): StartXapiSessionOverHttpUseCase {
 
     override suspend fun invoke(
-        userSession: UserSession,
-        accountUsername: String,
-        clazzUid: Long,
-        cbUid: Long,
-        contentEntryUid: Long,
-        rootActivityId: String?
-    ): XapiSession {
+        xapiSession: XapiSession,
+    ): StartXapiSessionOverHttpResult {
         val registrationUuid = uuid4()
         val xseUid = db.doorPrimaryKeyManager.nextIdAsync(XapiSessionEntity.TABLE_ID)
         val auth = randomString(16)
@@ -37,29 +31,23 @@ class StartXapiHttpSessionUseCaseLocal(
             XapiSessionEntity(
                 xseUid = xseUid,
                 xseLastMod = systemTimeInMillis(),
-                xseUsUid = userSession.usUid,
-                xseAccountPersonUid = userSession.usPersonUid,
-                xseAccountUsername = accountUsername,
-                xseClazzUid = clazzUid,
-                xseCbUid = cbUid,
-                xseContentEntryUid = contentEntryUid,
-                xseRootActivityId = rootActivityId,
+                xseUsUid = xapiSession.userSessionUid,
+                xseAccountPersonUid = xapiSession.accountPersonUid,
+                xseAccountUsername = xapiSession.accountUsername,
+                xseClazzUid = xapiSession.clazzUid,
+                xseCbUid = xapiSession.cbUid,
                 xseStartTime = systemTimeInMillis(),
                 xseRegistrationHi = registrationUuid.mostSignificantBits,
                 xseRegistrationLo = registrationUuid.leastSignificantBits,
+                xseContentEntryUid = xapiSession.contentEntryUid,
+                xseRootActivityId = xapiSession.rootActivityId,
                 xseAuth = auth,
             )
         )
 
-        return XapiSession(
-            endpoint = endpoint,
-            accountPersonUid = userSession.usPersonUid,
-            accountUsername = accountUsername,
-            clazzUid = clazzUid,
-            cbUid = cbUid,
-            contentEntryUid = contentEntryUid,
-            auth = "Basic ${"$xseUid:$auth".encodeBase64()}",
-            registrationUuid = uuid4().toString(),
+        return StartXapiSessionOverHttpResult(
+            basicAuth = auth,
+            httpUrl = getApiUrlUseCase("/api/xapi/")
         )
     }
 }

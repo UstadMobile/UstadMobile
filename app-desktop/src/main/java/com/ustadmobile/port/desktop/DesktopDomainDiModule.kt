@@ -103,6 +103,8 @@ import com.ustadmobile.core.domain.xapi.XapiStatementResource
 import com.ustadmobile.core.domain.xapi.noninteractivecontentusagestatementrecorder.NonInteractiveContentXapiStatementRecorderFactory
 import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnClearUseCase
 import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnClearUseCaseJvm
+import com.ustadmobile.core.domain.xapi.starthttpsession.StartXapiSessionOverHttpUseCase
+import com.ustadmobile.core.domain.xapi.starthttpsession.StartXapiSessionOverHttpUseCaseDirect
 import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
 import com.ustadmobile.core.domain.xxhash.XXHasher64FactoryCommonJvm
 import com.ustadmobile.core.domain.xxhash.XXStringHasher
@@ -329,6 +331,15 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             httpClient = instance(),
             json = instance(),
             xppFactory = instance(tag = DiTag.XPP_FACTORY_NSAWARE),
+            startXapiSessionOverHttpUseCase = instance(),
+        )
+    }
+
+    bind<StartXapiSessionOverHttpUseCase>() with scoped(EndpointScope.Default).singleton {
+        StartXapiSessionOverHttpUseCaseDirect(
+            db = instance(tag = DoorTag.TAG_DB),
+            repo = instance(tag = DoorTag.TAG_REPO),
+            getApiUrlUseCase = instance(),
         )
     }
 
@@ -338,9 +349,7 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
 
     bind<LaunchXapiUseCase>() with scoped(EndpointScope.Default).singleton {
         LaunchXapiUseCaseJvm(
-            endpoint = context,
             resolveXapiLaunchHrefUseCase = instance(),
-            embeddedHttpServer = instance(),
             launchChromeUseCase = instance(),
             getApiUrlUseCase = instance(),
         )

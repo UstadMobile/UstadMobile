@@ -53,6 +53,7 @@ class XapiStatementResourceTest {
             accountUsername = "user",
             clazzUid = 0L,
             contentEntryUid = 0L,
+            registrationUuid = uuid4().toString(),
         )
     }
 
@@ -81,6 +82,7 @@ class XapiStatementResourceTest {
             accountUsername = "user",
             clazzUid = 0L,
             contentEntryUid = 0L,
+            registrationUuid = uuid4().toString(),
         )
 
         val id = storeStatementAndAssert(

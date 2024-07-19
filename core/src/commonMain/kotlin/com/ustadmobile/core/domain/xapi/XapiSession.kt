@@ -22,12 +22,12 @@ data class XapiSession(
     val accountPersonUid: Long,
     val accountUsername: String,
     val clazzUid: Long,
+    val userSessionUid: Long = 0,
     val cbUid: Long = 0,
     val contentEntryUid: Long = 0,
+    val registrationUuid: String,
     val rootActivityId: String? = null,
-    val registrationUuid: String? = null,
     val knownActorUidToPersonUidMap: Map<Long, Long> = emptyMap(),
-    val auth: String? = null,
 ) {
 
     val agent: XapiAgent

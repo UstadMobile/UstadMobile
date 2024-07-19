@@ -5,6 +5,7 @@ import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.contentformats.manifest.ContentManifestEntry
 import com.ustadmobile.core.domain.contententry.ContentConstants
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.ResolveXapiLaunchHrefUseCase
+import com.ustadmobile.core.domain.xapi.starthttpsession.StartXapiSessionOverHttpUseCase
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.stringvalues.emptyStringValues
@@ -24,9 +25,11 @@ import org.kodein.di.bind
 import org.kodein.di.instance
 import org.kodein.di.scoped
 import org.kodein.di.singleton
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
 import org.xmlpull.v1.XmlPullParserFactory
 import kotlin.test.Test
-import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
 
 class XapiContentViewModelTest : AbstractMainDispatcherTest() {
@@ -54,8 +57,20 @@ class XapiContentViewModelTest : AbstractMainDispatcherTest() {
                         activeRepo = instance(tag = DoorTag.TAG_REPO),
                         httpClient = instance(),
                         json = instance(),
-                        xppFactory = instance(tag = DiTag.XPP_FACTORY_NSAWARE)
+                        xppFactory = instance(tag = DiTag.XPP_FACTORY_NSAWARE),
+                        startXapiSessionOverHttpUseCase = instance(),
                     )
+                }
+
+                bind<StartXapiSessionOverHttpUseCase>() with scoped(endpointScope).singleton {
+                    mock {
+                        onBlocking { invoke(any()) }.thenReturn(
+                            StartXapiSessionOverHttpUseCase.StartXapiSessionOverHttpResult(
+                                basicAuth = "secret",
+                                httpUrl = "http://localhost/e/endpoint/xapi"
+                            )
+                        )
+                    }
                 }
             }
 
@@ -113,10 +128,7 @@ class XapiContentViewModelTest : AbstractMainDispatcherTest() {
                 it.url != null
             }.test(timeout = 5.seconds, name = "url set should match that specified in Xml") {
                 val state = awaitItem()
-                assertEquals(
-                    mockWebServer.url("/$cevUid/tetris.html").toString(),
-                    state.url
-                )
+                assertTrue(state.url!!.startsWith(mockWebServer.url("/$cevUid/tetris.html").toString()))
                 cancelAndIgnoreRemainingEvents()
             }
         }

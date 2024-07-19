@@ -37,7 +37,7 @@ interface LaunchContentEntryVersionUseCase {
         contentEntryVersion: ContentEntryVersion,
         navController: UstadNavController,
         target: OpenExternalLinkUseCase.Companion.LinkTarget = OpenExternalLinkUseCase.Companion.LinkTarget.DEFAULT,
-        xapiSession: XapiSession? = null,
+        xapiSession: XapiSession,
     ): LaunchResult?
 
 

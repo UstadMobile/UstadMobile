@@ -37,13 +37,13 @@ class LaunchXapiUseCaseAndroid(
         contentEntryVersion: ContentEntryVersion,
         navController: UstadNavController,
         target: OpenExternalLinkUseCase.Companion.LinkTarget,
-        xapiSession: XapiSession?,
+        xapiSession: XapiSession,
     ): LaunchContentEntryVersionUseCase.LaunchResult {
         val htmlContentEngine = getHtmlContentDisplayEngineUseCase()
         when(htmlContentEngine.code) {
             HTML_ENGINE_USE_CHROMETAB -> {
                 val resolveResult = resolveXapiLaunchHrefUseCase(
-                    contentEntryVersion.cevUid,
+                    contentEntryVersion.cevUid, xapiSession
                 )
 
                 //Should be replaced with using GetApiUrlUseCase

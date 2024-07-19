@@ -17,9 +17,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryVersion
  * bar) and loaded from the embedded server.
  */
 class LaunchXapiUseCaseJvm(
-    private val endpoint: Endpoint,
     private val resolveXapiLaunchHrefUseCase: ResolveXapiLaunchHrefUseCase,
-    private val embeddedHttpServer: EmbeddedHttpServer,
     private val launchChromeUseCase: LaunchChromeUseCase,
     private val getApiUrlUseCase: GetApiUrlUseCase,
 ) : LaunchXapiUseCase {
@@ -28,10 +26,10 @@ class LaunchXapiUseCaseJvm(
         contentEntryVersion: ContentEntryVersion,
         navController: UstadNavController,
         target: OpenExternalLinkUseCase.Companion.LinkTarget,
-        xapiSession: XapiSession?,
+        xapiSession: XapiSession,
     ): LaunchContentEntryVersionUseCase.LaunchResult {
         val resolveResult = resolveXapiLaunchHrefUseCase(
-            contentEntryVersion.cevUid,
+            contentEntryVersion.cevUid, xapiSession
         )
 
         val url = getApiUrlUseCase(

@@ -2,9 +2,13 @@ package com.ustadmobile.core.domain.contententry.launchcontent.xapi
 
 import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.xapi.XapiSession
+import com.ustadmobile.core.domain.xapi.model.XapiAgent
+import com.ustadmobile.core.domain.xapi.starthttpsession.StartXapiSessionOverHttpUseCase
 import com.ustadmobile.core.tincan.Activity
 import com.ustadmobile.core.tincan.TinCanXML
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.ext.appendQueryArgs
 import com.ustadmobile.core.util.ext.bodyAsDecodedText
 import com.ustadmobile.core.util.ext.localFirstThenRepoIfNull
 import com.ustadmobile.core.util.requireEntryByUri
@@ -25,6 +29,7 @@ class ResolveXapiLaunchHrefUseCase(
     private val httpClient: HttpClient,
     private val json: Json,
     private val xppFactory: XmlPullParserFactory,
+    private val startXapiSessionOverHttpUseCase: StartXapiSessionOverHttpUseCase,
 ) {
 
     /**
@@ -40,7 +45,8 @@ class ResolveXapiLaunchHrefUseCase(
     )
 
     suspend operator fun invoke(
-        contentEntryVersionUid: Long
+        contentEntryVersionUid: Long,
+        xapiSession: XapiSession,
     ) : XapiLaunchHrefResult {
         //ContentEntryVersion is immutable, so if available in db, no need to go to repo which would
         //make an http request
@@ -52,8 +58,7 @@ class ResolveXapiLaunchHrefUseCase(
         val manifestUrl = contentEntryVersion.cevManifestUrl ?:
             throw IllegalStateException("ContentEntryVersion $contentEntryVersionUid manifesturl is null")
         val manifest: ContentManifest = json.decodeFromString(httpClient.get(manifestUrl).bodyAsDecodedText())
-        val tinCanEntry = manifest.requireEntryByUri(
-            contentEntryVersion.cevOpenUri!!)
+        val tinCanEntry = manifest.requireEntryByUri(contentEntryVersion.cevOpenUri!!)
 
         val tinCanXmlStr = httpClient.get(tinCanEntry.bodyDataUrl).bodyAsDecodedText()
 
@@ -62,7 +67,24 @@ class ResolveXapiLaunchHrefUseCase(
         val tinCanXml = TinCanXML.loadFromXML(xpp)
         val launchHref = tinCanXml.launchActivity?.launchUrl ?:
             throw IllegalStateException("ContentEntryVersion $contentEntryVersionUid manifesturl is null")
-        val url = UMFileUtil.resolveLink(manifestUrl, launchHref)
+        val launchActivityId = tinCanXml.launchActivity?.id ?:
+            throw IllegalStateException("Launch Activity must have id")
+
+        val xapiSessionWithActivityId = xapiSession.copy(
+            rootActivityId = launchActivityId
+        )
+
+        val httpSessionResult = startXapiSessionOverHttpUseCase(xapiSessionWithActivityId)
+
+        val queryParams: Map<String, String> = mapOf(
+            "endpoint" to httpSessionResult.httpUrl,
+            "auth" to httpSessionResult.basicAuth,
+            "actor" to json.encodeToString(XapiAgent.serializer(), xapiSession.agent),
+            "registration" to xapiSessionWithActivityId.registrationUuid,
+            "activity_id" to xapiSessionWithActivityId.rootActivityId!!,
+        )
+
+        val url = UMFileUtil.resolveLink(manifestUrl, launchHref).appendQueryArgs(queryParams)
 
         val tinCanXmlPathPrefix = contentEntryVersion.cevOpenUri!!
             .substringBeforeLast("/", "")
@@ -70,7 +92,7 @@ class ResolveXapiLaunchHrefUseCase(
         Napier.v { "Resolved xAPI url for contentEntryVersion $contentEntryVersionUid : $url" }
         return XapiLaunchHrefResult(
             url = url,
-            launchUriInContent = "$tinCanXmlPathPrefix${launchHref}",
+            launchUriInContent = "$tinCanXmlPathPrefix${launchHref}".appendQueryArgs(queryParams),
             launchActivity = tinCanXml.launchActivity!!,
             manifestUrl = manifestUrl,
         )
