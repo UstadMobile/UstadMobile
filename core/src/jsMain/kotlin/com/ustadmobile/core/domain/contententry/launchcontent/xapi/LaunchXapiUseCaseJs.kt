@@ -18,10 +18,10 @@ class LaunchXapiUseCaseJs(
         contentEntryVersion: ContentEntryVersion,
         navController: UstadNavController,
         target: OpenExternalLinkUseCase.Companion.LinkTarget,
-        xapiSession: XapiSession?,
+        xapiSession: XapiSession,
     ): LaunchContentEntryVersionUseCase.LaunchResult {
         val resolveResult = resolveXapiLaunchHrefUseCase(
-            contentEntryVersion.cevUid,
+            contentEntryVersion.cevUid, xapiSession
         )
 
         if(target != OpenExternalLinkUseCase.Companion.LinkTarget.TOP) {

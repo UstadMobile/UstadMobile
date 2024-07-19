@@ -40,6 +40,8 @@ import com.ustadmobile.core.domain.extractmediametadata.mediainfo.ExecuteMediaIn
 import com.ustadmobile.core.domain.extractmediametadata.mediainfo.ExtractMediaMetadataUseCaseMediaInfo
 import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCase
 import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCaseJvm
+import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCase
+import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCaseDirect
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonStatusMap
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsUseCase
@@ -59,6 +61,8 @@ import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
 import com.ustadmobile.core.domain.xapi.StoreActivitiesUseCase
 import com.ustadmobile.core.domain.xapi.XapiStatementResource
+import com.ustadmobile.core.domain.xapi.starthttpsession.StartXapiSessionOverHttpUseCase
+import com.ustadmobile.core.domain.xapi.starthttpsession.StartXapiSessionOverHttpUseCaseDirect
 import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
 import com.ustadmobile.core.domain.xxhash.XXHasher64FactoryCommonJvm
 import com.ustadmobile.core.domain.xxhash.XXStringHasher
@@ -114,6 +118,7 @@ import com.ustadmobile.door.log.NapierDoorLogger
 import com.ustadmobile.lib.rest.domain.contententry.importcontent.ContentEntryImportJobRoute
 import com.ustadmobile.lib.rest.domain.person.bulkadd.BulkAddPersonRoute
 import com.ustadmobile.lib.rest.domain.xapi.savestatementonclear.SaveStatementOnUnloadRoute
+import com.ustadmobile.lib.rest.domain.xapi.starthttpsession.StartHttpXapiSessionRoute
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.headers.MimeTypeHelper
 import kotlinx.coroutines.runBlocking
@@ -681,6 +686,18 @@ fun Application.umRestApplication(
             )
         }
 
+        bind<StartXapiSessionOverHttpUseCase>() with scoped(EndpointScope.Default).singleton {
+            StartXapiSessionOverHttpUseCaseDirect(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = null,
+                getApiUrlUseCase = instance(),
+            )
+        }
+
+        bind<GetApiUrlUseCase>() with scoped(EndpointScope.Default).singleton {
+            GetApiUrlUseCaseDirect(context)
+        }
+
         try {
             appConfig.config("mail")
 
@@ -854,6 +871,12 @@ fun Application.umRestApplication(
                 route("xapi") {
                     SaveStatementOnUnloadRoute(
                         statementResource = { call -> di.on(call).direct.instance() },
+                        json = json,
+                    )
+
+                    StartHttpXapiSessionRoute(
+                        startXapiSessionOverHttpUseCase = { call -> di.on(call).direct.instance() },
+                        verifyClientUserSessionUseCase  = { call -> di.on(call).direct.instance() },
                         json = json,
                     )
                 }

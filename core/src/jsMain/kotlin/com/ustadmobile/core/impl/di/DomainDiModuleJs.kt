@@ -54,6 +54,8 @@ import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnClea
 import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnClearUseCaseJs
 import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnUnloadUseCase
 import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnUnloadUseCaseJs
+import com.ustadmobile.core.domain.xapi.starthttpsession.StartXapiSessionOverHttpUseCase
+import com.ustadmobile.core.domain.xapi.starthttpsession.StartXapiSessionOverHttpUseCaseJs
 import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
 import com.ustadmobile.core.domain.xxhash.XXHasher64FactoryJs
 import com.ustadmobile.core.domain.xxhash.XXStringHasher
@@ -173,7 +175,17 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
             activeRepo = instance(tag = DoorTag.TAG_REPO),
             httpClient = instance(),
             json = instance(),
-            xppFactory = instance(tag = DiTag.XPP_FACTORY_NSAWARE)
+            xppFactory = instance(tag = DiTag.XPP_FACTORY_NSAWARE),
+            startXapiSessionOverHttpUseCase = instance(),
+        )
+    }
+
+    bind<StartXapiSessionOverHttpUseCase>() with scoped(EndpointScope.Default).singleton {
+        StartXapiSessionOverHttpUseCaseJs(
+            endpoint = context,
+            httpClient = instance(),
+            repo = instance(tag = DoorTag.TAG_REPO),
+            json = instance(),
         )
     }
 

@@ -1,6 +1,7 @@
 package com.ustadmobile.core.domain.xapi.starthttpsession
 
 import com.ustadmobile.core.domain.xapi.XapiSession
+import kotlinx.serialization.Serializable
 
 /**
  * Used to run an XapiSession over Http. Sometimes an XapiSession will be purely internal (e.g.
@@ -13,6 +14,7 @@ import com.ustadmobile.core.domain.xapi.XapiSession
  */
 interface StartXapiSessionOverHttpUseCase {
 
+    @Serializable
     data class StartXapiSessionOverHttpResult(
         val basicAuth: String,
         val httpUrl: String,
