@@ -105,6 +105,8 @@ import com.ustadmobile.core.domain.extractmediametadata.ExtractMediaMetadataUseC
 import com.ustadmobile.core.domain.extractmediametadata.ExtractMediaMetadataUseCaseAndroid
 import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCase
 import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCaseAndroid
+import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCase
+import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCaseEmbeddedServer
 import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCase
 import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCaseAndroid
 import com.ustadmobile.core.domain.interop.oneroster.OneRosterEndpoint
@@ -765,6 +767,13 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 },
                 staticUmAppFilesDir = null,
                 mimeTypeHelper = FileMimeTypeHelperImpl(),
+            )
+        }
+
+        bind<GetApiUrlUseCase>() with scoped(EndpointScope.Default).singleton {
+            GetApiUrlUseCaseEmbeddedServer(
+                embeddedServer = instance(),
+                endpoint = context,
             )
         }
 

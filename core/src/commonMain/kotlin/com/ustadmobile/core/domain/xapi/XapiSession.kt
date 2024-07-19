@@ -25,7 +25,9 @@ data class XapiSession(
     val cbUid: Long = 0,
     val contentEntryUid: Long = 0,
     val rootActivityId: String? = null,
-    val knownActorUidToPersonUidMap: Map<Long, Long> = emptyMap()
+    val registrationUuid: String? = null,
+    val knownActorUidToPersonUidMap: Map<Long, Long> = emptyMap(),
+    val auth: String? = null,
 ) {
 
     val agent: XapiAgent

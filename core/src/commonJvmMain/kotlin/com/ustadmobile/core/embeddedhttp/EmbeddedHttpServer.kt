@@ -36,7 +36,7 @@ class EmbeddedHttpServer(
     ): String {
         //Endpoint must be double encoded - see note on serveendpoint
         val endpointEncoded = UrlEncoderUtil.encode(UrlEncoderUtil.encode(endpoint.url))
-        return "http://127.0.0.1:$listeningPort$PATH_ENDPOINT_API$endpointEncoded/${path.removeSuffix("/")}"
+        return "http://127.0.0.1:$listeningPort$PATH_ENDPOINT_API$endpointEncoded/${path.removePrefix("/")}"
     }
 
     override fun serve(session: IHTTPSession): Response {

@@ -45,6 +45,7 @@ class AppActivity: AbstractAppActivity() {
                 session = { mCustomTabsSession },
                 getHtmlContentDisplayEngineUseCase = instance(),
                 embeddedHttpServer = instance(),
+                getApiUrlUseCase = instance(),
             )
         }
     }

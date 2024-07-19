@@ -66,7 +66,7 @@ data class XapiSessionEntity(
 
     var xseStartTime: Long = 0,
 
-    var xseExpireTime: Long = 0,
+    var xseExpireTime: Long = Long.MAX_VALUE,
 
     var xseAuth: String? = null,
 

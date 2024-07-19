@@ -2,6 +2,7 @@ package com.ustadmobile.core.domain.contententry.launchcontent.xapi
 
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.domain.contententry.launchcontent.LaunchContentEntryVersionUseCase
+import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCase
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.LaunchChromeUseCase
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
 import com.ustadmobile.core.domain.xapi.XapiSession
@@ -20,6 +21,7 @@ class LaunchXapiUseCaseJvm(
     private val resolveXapiLaunchHrefUseCase: ResolveXapiLaunchHrefUseCase,
     private val embeddedHttpServer: EmbeddedHttpServer,
     private val launchChromeUseCase: LaunchChromeUseCase,
+    private val getApiUrlUseCase: GetApiUrlUseCase,
 ) : LaunchXapiUseCase {
 
     override suspend fun invoke(
@@ -32,9 +34,8 @@ class LaunchXapiUseCaseJvm(
             contentEntryVersion.cevUid,
         )
 
-        val url = embeddedHttpServer.endpointUrl(
-            endpoint = endpoint,
-            path = "api/content/${contentEntryVersion.cevUid}/${resolveResult.launchUriInContent}"
+        val url = getApiUrlUseCase(
+            "api/content/${contentEntryVersion.cevUid}/${resolveResult.launchUriInContent}"
         )
 
         launchChromeUseCase(url)

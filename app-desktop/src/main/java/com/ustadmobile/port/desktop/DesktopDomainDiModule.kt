@@ -75,6 +75,8 @@ import com.ustadmobile.core.domain.deleteditem.DeletePermanentlyUseCase
 import com.ustadmobile.core.domain.deleteditem.RestoreDeletedItemUseCase
 import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCase
 import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCaseJvm
+import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCase
+import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCaseEmbeddedServer
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.launchopenlicenses.LaunchOpenLicensesUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCase
@@ -340,6 +342,14 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             resolveXapiLaunchHrefUseCase = instance(),
             embeddedHttpServer = instance(),
             launchChromeUseCase = instance(),
+            getApiUrlUseCase = instance(),
+        )
+    }
+
+    bind<GetApiUrlUseCase>() with scoped(EndpointScope.Default).singleton {
+        GetApiUrlUseCaseEmbeddedServer(
+            embeddedServer = instance(),
+            endpoint = context,
         )
     }
 
@@ -349,6 +359,7 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             embeddedHttpServer = instance(),
             endpoint = context,
             systemImpl = instance(),
+            getApiUrlUseCase = instance(),
         )
     }
 
@@ -363,10 +374,7 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
     }
 
     bind<GetLocalUrlForContentUseCase>() with scoped(EndpointScope.Default).provider {
-        GetLocalUrlForContentUseCaseCommonJvm(
-            endpoint = context,
-            embeddedHttpServer = instance(),
-        )
+        GetLocalUrlForContentUseCaseCommonJvm(getApiUrlUseCase = instance())
     }
 
     bind<GetVersionUseCase>() with singleton {

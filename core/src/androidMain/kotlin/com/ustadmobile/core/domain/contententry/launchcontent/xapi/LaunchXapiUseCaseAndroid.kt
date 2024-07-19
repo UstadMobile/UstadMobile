@@ -8,6 +8,7 @@ import androidx.browser.customtabs.CustomTabsIntent
 import androidx.browser.customtabs.CustomTabsSession
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.domain.contententry.launchcontent.LaunchContentEntryVersionUseCase
+import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCase
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.GetHtmlContentDisplayEngineUseCase
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.HTML_ENGINE_USE_CHROMETAB
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.HTML_ENGINE_USE_WEBVIEW
@@ -29,6 +30,7 @@ class LaunchXapiUseCaseAndroid(
     private val darkToolbarColor: Int,
     private val session: () -> CustomTabsSession?,
     private val embeddedHttpServer: EmbeddedHttpServer,
+    private val getApiUrlUseCase: GetApiUrlUseCase,
 ): LaunchXapiUseCase {
 
     override suspend fun invoke(
@@ -44,9 +46,9 @@ class LaunchXapiUseCaseAndroid(
                     contentEntryVersion.cevUid,
                 )
 
-                val url = embeddedHttpServer.endpointUrl(
-                    endpoint = endpoint,
-                    path = "api/content/${contentEntryVersion.cevUid}/${resolveResult.launchUriInContent}"
+                //Should be replaced with using GetApiUrlUseCase
+                val url = getApiUrlUseCase(
+                    "/api/content/${contentEntryVersion.cevUid}/${resolveResult.launchUriInContent}"
                 )
 
                 /**

@@ -10,6 +10,7 @@ import com.ustadmobile.core.viewmodel.epubcontent.EpubContentViewModel
 import com.ustadmobile.lib.db.entities.ContentEntryVersion
 import net.thauvin.erik.urlencoder.UrlEncoderUtil
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCase
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
 import com.ustadmobile.core.domain.xapi.XapiSession
 
@@ -27,6 +28,7 @@ class LaunchEpubUseCaseJvm(
     private val embeddedHttpServer: EmbeddedHttpServer,
     private val endpoint: Endpoint,
     private val systemImpl: UstadMobileSystemImpl,
+    private val getApiUrlUseCase: GetApiUrlUseCase,
 ): LaunchEpubUseCase {
 
     override suspend fun invoke(
@@ -37,20 +39,15 @@ class LaunchEpubUseCaseJvm(
     ): LaunchContentEntryVersionUseCase.LaunchResult {
         val manifestUrl = contentEntryVersion.cevManifestUrl ?:
             throw IllegalStateException("ContentEntryVersion $contentEntryVersion manifesturl is null")
-        val localManifestUrl = embeddedHttpServer.endpointUrl(
-            endpoint, manifestUrl.substringAfter(endpoint.url)
-        )
-        val xapiStatementsUrl = embeddedHttpServer.endpointUrl(
-            endpoint, "api/xapi/statement"
-        )
+        val localManifestUrl = getApiUrlUseCase(manifestUrl.substringAfter(endpoint.url))
+        val xapiStatementsUrl = getApiUrlUseCase("api/xapi/statement")
 
         val cevOpenUri = contentEntryVersion.cevOpenUri ?:
             throw IllegalStateException("ContentEntryVersion $contentEntryVersion openUri is null")
 
         val tocString = systemImpl.getString(MR.strings.table_of_contents)
-        val url = embeddedHttpServer.endpointUrl(
-            endpoint = endpoint,
-            path = "umapp/#/${EpubContentViewModel.DEST_NAME}?" +
+        val url = getApiUrlUseCase(
+             path = "umapp/#/${EpubContentViewModel.DEST_NAME}?" +
                     "${EpubContentViewModel.ARG_MANIFEST_URL}=${UrlEncoderUtil.encode(localManifestUrl)}&" +
                     "${EpubContentViewModel.ARG_CEV_URI}=${UrlEncoderUtil.encode(cevOpenUri)}&" +
                     "${EpubContentViewModel.ARG_NAVIGATION_VISIBLE}=false&" +
