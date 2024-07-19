@@ -8,6 +8,7 @@ import com.ustadmobile.core.util.UstadUrlComponents
 import com.ustadmobile.lib.rest.domain.invite.email.SendEmailUseCase
 import com.ustadmobile.lib.rest.domain.invite.sms.SendSmsUseCase
 import com.ustadmobile.core.viewmodel.clazz.redeem.ClazzInviteViewModel
+import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.entities.ClazzInvite
 import com.ustadmobile.lib.rest.domain.invite.message.SendMessageUseCase
 import io.github.aakira.napier.Napier
@@ -15,6 +16,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import org.sqlite.SQLiteException
+
+
+/**
+ * UseCase to send invite link to contacts link username , email and sms , contacts receive as link then these contact are
+ * are checked by CheckContactTypeUseCase to find valid contacts , then it store in clazzinvite db and each contact sent to particular
+ * contact channel
+ */
 
 class ProcessInviteUseCase(
     private val sendEmailUseCase: SendEmailUseCase,
@@ -29,71 +38,67 @@ class ProcessInviteUseCase(
         val inviteSent: String
     )
 
-    operator fun invoke(
+    suspend operator fun invoke(
         contacts: List<String>,
         clazzUid: Long,
         role: Long,
         personUid: Long
     ): InviteResult {
         try {
-            val effectiveDb = (repo ?: db)
+            val effectiveDb = repo ?: db
+            val invites = contacts.map { contact ->
+                val token = uuid4().toString()
+                val validContact = checkContactTypeUseCase.invoke(contact = contact)
 
-            val coroutineScope = CoroutineScope(Dispatchers.IO + Job())
-            coroutineScope.launch {
-                val invites = contacts.map { contact ->
-                    val token = uuid4().toString()
+                if (validContact != null && validContact.isValid) {
+                    ClazzInvite(
+                        ciPersonUid = personUid,
+                        ciRoleId = role,
+                        ciClazzUid = clazzUid,
+                        inviteType = validContact.inviteType,
+                        inviteToken = token,
+                        inviteContact = validContact.text
+                    )
+                } else {
+                    null
+                }
+            }.filterNotNull()
+            /**
+             * saving contact to clazzinvite
+             */
+            if (invites.isNotEmpty()) {
 
-                    val validContact = checkContactTypeUseCase.invoke(contact = contact)
+                effectiveDb.withDoorTransactionAsync {
+                    effectiveDb.clazzInviteDao().insertAll(invites)
+                }
 
-                    if (validContact != null&&validContact.isValid) {
-                        ClazzInvite(
-                            ciPersonUid = personUid,
-                            ciRoleId = role,
-                            ciClazzUid = clazzUid,
-                            inviteType = validContact.inviteType,
-                            inviteToken = token,
-                            inviteContact = validContact.text
-                        )
-                    } else {
-                        null
-                    }
-                }.filterNotNull()
+                invites.forEach { invite ->
+                    val inviteLink =
+                        UstadUrlComponents(endpoint.url, ClazzInviteViewModel.DEST_NAME, "inviteCode=${invite.inviteToken}").fullUrl()
 
-                if (invites.isNotEmpty()) {
-                    val log = effectiveDb.clazzInviteDao().insertAsyncAll(invites)
-                    Napier.d { "ProcessInviteUseCase $log" }
+                    when (invite.inviteType) {
+                        1 -> {
+                            invite.inviteContact?.let { sendEmailUseCase.invoke(it, inviteLink) }
+                        }
 
-                    invites.forEach { invite ->
-                        val inviteLink = UstadUrlComponents(endpoint.url, ClazzInviteViewModel.DEST_NAME, "inviteCode=${invite.inviteToken}").fullUrl()
+                        2 -> {
+                            invite.inviteContact?.let { sendSmsUseCase.invoke(it, inviteLink) }
+                        }
 
-
-                        when (invite.inviteType) {
-                            1 -> {
-                                invite.inviteContact?.let { sendEmailUseCase.invoke(it, inviteLink) }
-                            }
-
-                            2 -> {
-                                invite.inviteContact?.let { sendSmsUseCase.invoke(it, inviteLink) }
-                            }
-
-                            3 -> {
-                                invite.inviteContact?.let { sendMessageUseCase.invoke(it, inviteLink, personUid) }
-                            }
+                        3 -> {
+                            invite.inviteContact?.let { sendMessageUseCase.invoke(it, inviteLink, personUid) }
                         }
                     }
-                }else{
-                    Napier.d { "ProcessInviteUseCase: No valid invites to send" }
-
                 }
+            } else {
+                Napier.d { "ProcessInviteUseCase: No valid invites to send" }
             }
 
-            return InviteResult("invitation sent")
-
         } catch (e: Exception) {
-            Napier.d { "ProcessInviteUseCase ${e.message}" }
-            return InviteResult("invitation error :- ${e.message}")
+            Napier.e(e) { "ProcessInviteUseCase: ${e.message}" }
+            InviteResult("invitation error: ${e.message}")
         }
+        return InviteResult("invitation sent")
 
     }
 }
-

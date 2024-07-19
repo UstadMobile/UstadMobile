@@ -21,6 +21,11 @@ expect abstract class ClazzInviteDao : BaseDao<ClazzInvite> {
     abstract suspend fun replace(entity: ClazzInvite): Long
 
 
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    abstract suspend fun insertAll(entity: List<ClazzInvite>)
+
+
     @HttpAccessible(
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
     )
@@ -51,6 +56,6 @@ expect abstract class ClazzInviteDao : BaseDao<ClazzInvite> {
     """)
     abstract suspend fun updateInviteStatus(status:Int,ciUid:Long)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract suspend fun insertAsyncAll(clazzInvites: List<ClazzInvite>): List<Long>
+
+
 }
