@@ -1,6 +1,6 @@
-package com.ustadmobile.libcache.okhttp
+package com.ustadmobile.ihttp.okhttp.headers
 
-import com.ustadmobile.libcache.headers.HttpHeaders
+import com.ustadmobile.ihttp.headers.IHttpHeaders
 import okhttp3.Headers
 
 /**
@@ -9,7 +9,7 @@ import okhttp3.Headers
  * @param keepHostHeader Normally the host header should be added by OKHttp automatically to match
  *        the actual URL.
  */
-fun HttpHeaders.asOkHttpHeaders(
+fun IHttpHeaders.asOkHttpHeaders(
     keepHostHeader: Boolean = false,
 ): Headers {
     val headerLines = names().flatMap { name ->

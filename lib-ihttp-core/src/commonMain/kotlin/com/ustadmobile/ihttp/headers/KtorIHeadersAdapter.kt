@@ -1,8 +1,8 @@
-package com.ustadmobile.libcache.headers
+package com.ustadmobile.ihttp.headers
 
 import io.ktor.http.Headers
 
-class KtorHeadersAdapter(private val headers: Headers) :HttpHeaders {
+class KtorHeadersAdapter(private val headers: Headers) :IHttpHeaders {
 
     override fun get(name: String): String? {
         return headers[name]
@@ -18,5 +18,5 @@ class KtorHeadersAdapter(private val headers: Headers) :HttpHeaders {
 
 }
 
-fun Headers.asCacheHeaders(): HttpHeaders = KtorHeadersAdapter(this)
+fun Headers.asIHttpHeaders(): IHttpHeaders = KtorHeadersAdapter(this)
 

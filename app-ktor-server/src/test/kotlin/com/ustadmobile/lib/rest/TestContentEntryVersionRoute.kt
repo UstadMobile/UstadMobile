@@ -3,7 +3,7 @@ package com.ustadmobile.lib.rest
 import com.ustadmobile.libcache.CacheEntryToStore
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
-import com.ustadmobile.libcache.request.requestBuilder
+import com.ustadmobile.ihttp.request.requestBuilder
 import com.ustadmobile.libcache.response.HttpPathResponse
 import com.ustadmobile.util.test.ext.newFileFromResource
 import io.ktor.client.request.get

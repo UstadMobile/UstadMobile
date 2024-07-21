@@ -113,6 +113,7 @@ kotlin {
                 implementation libs.door.runtime
                 implementation libs.kodein.di
                 api project(':lib-database')
+                api project(":lib-ihttp-core")
                 implementation libs.door.runtime
                 implementation project(":lib-util")
                 implementation libs.xmlpullparsekmp
@@ -138,6 +139,7 @@ kotlin {
                 implementation kotlin('stdlib-common')
                 implementation project(":lib-database")
                 implementation project(":lib-cache")
+                implementation project(":lib-ihttp-okhttp")
                 implementation libs.coroutines
                 implementation libs.ktor.client.okhttp
                 implementation libs.ktor.client.cio

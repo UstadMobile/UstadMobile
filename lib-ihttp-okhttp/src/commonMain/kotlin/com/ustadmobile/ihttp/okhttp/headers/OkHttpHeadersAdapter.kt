@@ -1,11 +1,11 @@
-package com.ustadmobile.libcache.okhttp
+package com.ustadmobile.ihttp.okhttp.headers
 
-import com.ustadmobile.libcache.headers.HttpHeaders
+import com.ustadmobile.ihttp.headers.IHttpHeaders
 import okhttp3.Headers
 
 class OkHttpHeadersAdapter(
     private val okHttpHeaders: Headers
-): HttpHeaders {
+): IHttpHeaders {
     override fun get(name: String): String? {
         return okHttpHeaders[name]
     }
@@ -19,4 +19,4 @@ class OkHttpHeadersAdapter(
     }
 }
 
-fun Headers.asCacheHttpHeaders() = OkHttpHeadersAdapter(this)
+fun Headers.asIHttpHeaders() = OkHttpHeadersAdapter(this)

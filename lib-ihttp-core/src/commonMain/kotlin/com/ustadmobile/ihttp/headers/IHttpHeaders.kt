@@ -1,6 +1,6 @@
-package com.ustadmobile.libcache.headers
+package com.ustadmobile.ihttp.headers
 
-interface HttpHeaders {
+interface IHttpHeaders {
 
     operator fun get(name: String): String?
 
@@ -12,15 +12,15 @@ interface HttpHeaders {
 
         private val EMPTY_HEADERS = HttpHeadersImpl(emptyList())
 
-        fun fromString(headersString: String): HttpHeaders {
+        fun fromString(headersString: String): IHttpHeaders {
             return HttpHeadersImpl(
                 headers = headersString.split("\r\n").map {
-                    HttpHeader.fromString(it)
+                    IHttpHeader.fromString(it)
                 }
             )
         }
 
-        fun fromMap(map: Map<String, List<String>>): HttpHeaders {
+        fun fromMap(map: Map<String, List<String>>): IHttpHeaders {
             return MapHttpHeadersAdapter(map)
         }
 

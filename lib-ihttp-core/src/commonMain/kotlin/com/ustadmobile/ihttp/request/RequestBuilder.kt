@@ -1,19 +1,19 @@
-package com.ustadmobile.libcache.request
+package com.ustadmobile.ihttp.request
 
-import com.ustadmobile.libcache.headers.HttpHeader
-import com.ustadmobile.libcache.headers.HttpHeadersImpl
+import com.ustadmobile.ihttp.headers.HttpHeadersImpl
+import com.ustadmobile.ihttp.headers.IHttpHeader
 
-fun requestBuilder(
+fun iRequestBuilder(
     url: String,
     block: RequestBuilder.() -> Unit = { }
-) : HttpRequest = requestBuilder {
+) : IHttpRequest = requestBuilder {
     this.url = url
     block()
 }
 
 fun requestBuilder(
     block: RequestBuilder.() -> Unit
-) : HttpRequest {
+) : IHttpRequest {
     return RequestBuilder().also(block).let {
         BaseHttpRequest(
             it.url, HttpHeadersImpl(it.headers), it.method
@@ -26,12 +26,12 @@ class RequestBuilder internal constructor() {
 
     var url: String = ""
 
-    var method = HttpRequest.Companion.Method.GET
+    var method = IHttpRequest.Companion.Method.GET
 
-    internal val headers: MutableList<HttpHeader> = mutableListOf()
+    internal val headers: MutableList<IHttpHeader> = mutableListOf()
 
     fun header(headerName: String, headerVal: String) {
-        headers += HttpHeader(headerName, headerVal)
+        headers += IHttpHeader.fromNameAndValue(headerName, headerVal)
     }
 
 }

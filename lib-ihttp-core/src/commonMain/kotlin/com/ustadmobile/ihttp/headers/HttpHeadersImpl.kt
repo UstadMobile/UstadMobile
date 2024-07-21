@@ -1,8 +1,8 @@
-package com.ustadmobile.libcache.headers
+package com.ustadmobile.ihttp.headers
 
 class HttpHeadersImpl(
-    internal val headers: List<HttpHeader>
-) : HttpHeaders {
+    internal val headers: List<IHttpHeader>
+) : IHttpHeaders {
 
     override fun get(name: String): String? {
         return headers.firstOrNull { it.name.equals(name, ignoreCase = true) }?.value

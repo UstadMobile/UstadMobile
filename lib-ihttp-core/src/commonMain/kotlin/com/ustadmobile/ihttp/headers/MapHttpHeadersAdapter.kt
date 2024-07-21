@@ -1,8 +1,8 @@
-package com.ustadmobile.libcache.headers
+package com.ustadmobile.ihttp.headers
 
 internal class MapHttpHeadersAdapter(
     private val headersMap: Map<String, List<String>>
-) : HttpHeaders{
+) : IHttpHeaders {
 
     override fun get(name: String): String? {
         return headersMap.entries.firstOrNull {

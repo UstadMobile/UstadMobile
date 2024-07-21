@@ -3,8 +3,8 @@ package com.ustadmobile.core.embeddedhttp
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServerUseCase
 import com.ustadmobile.libcache.headers.MimeTypeHelper
-import com.ustadmobile.libcache.request.HttpRequest
-import com.ustadmobile.libcache.request.requestBuilder
+import com.ustadmobile.ihttp.request.IHttpRequest
+import com.ustadmobile.ihttp.request.iRequestBuilder
 import fi.iki.elonen.NanoHTTPD
 import io.github.aakira.napier.Napier
 import net.thauvin.erik.urlencoder.UrlEncoderUtil
@@ -78,10 +78,10 @@ class EmbeddedHttpServer(
 
                         val originalUrl = "${endpointUrl}api/content/$contentEntryVersionUid/" +
                                 pathInContentSegments.joinToString("/")
-                        val request = requestBuilder(originalUrl) {
+                        val request = iRequestBuilder(originalUrl) {
                             session.headers.forEach {
                                 header(it.key, it.value)
-                                method = HttpRequest.Companion.Method.valueOf(session.method.name)
+                                method = IHttpRequest.Companion.Method.valueOf(session.method.name)
                             }
 
                             if(!session.headers.any { it.key.equals("accept-encoding") }) {

@@ -1,11 +1,11 @@
 package com.ustadmobile.libcache.cachecontrol
 
-import com.ustadmobile.libcache.headers.HttpHeaders
+import com.ustadmobile.ihttp.headers.IHttpHeaders
 
 class ResponseCacheabilityCheckerImpl: ResponseCacheabilityChecker {
     override fun invoke(
         statusCode: Int,
-        responseHeaders: HttpHeaders,
+        responseHeaders: IHttpHeaders,
         responseCacheDirectives: ResponseCacheControlHeader?,
         acceptPartialContent: Boolean
     ): Boolean {

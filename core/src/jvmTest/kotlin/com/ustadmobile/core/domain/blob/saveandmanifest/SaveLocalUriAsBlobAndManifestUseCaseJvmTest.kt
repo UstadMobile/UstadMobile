@@ -16,7 +16,7 @@ import com.ustadmobile.libcache.UstadCacheBuilder
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.integrity.sha256Integrity
 import com.ustadmobile.libcache.logging.NapierLoggingAdapter
-import com.ustadmobile.libcache.request.requestBuilder
+import com.ustadmobile.ihttp.request.iRequestBuilder
 import com.ustadmobile.util.test.ext.newFileFromResource
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
@@ -138,7 +138,7 @@ class SaveLocalUriAsBlobAndManifestUseCaseJvmTest {
                 }
 
                 val cacheResponse = cache.retrieve(
-                    request = requestBuilder(resultEntry.manifestEntry.bodyDataUrl)
+                    request = iRequestBuilder(resultEntry.manifestEntry.bodyDataUrl)
                 )
 
                 assertEquals(200, cacheResponse!!.responseCode)

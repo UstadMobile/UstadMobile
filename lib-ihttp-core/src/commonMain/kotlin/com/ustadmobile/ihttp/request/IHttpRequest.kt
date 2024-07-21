@@ -1,10 +1,10 @@
-package com.ustadmobile.libcache.request
+package com.ustadmobile.ihttp.request
 
-import com.ustadmobile.libcache.headers.HttpHeaders
+import com.ustadmobile.ihttp.headers.IHttpHeaders
 
-interface HttpRequest {
+interface IHttpRequest {
 
-    val headers: HttpHeaders
+    val headers: IHttpHeaders
 
     val url: String
 

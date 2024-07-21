@@ -7,8 +7,8 @@ import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.lib.rest.CONF_DBMODE_SINGLETON
 import com.ustadmobile.lib.rest.CONF_DBMODE_VIRTUALHOST
 import com.ustadmobile.lib.rest.CONF_KEY_SITE_URL
-import com.ustadmobile.libcache.request.HttpRequest
-import com.ustadmobile.libcache.response.HttpResponse
+import com.ustadmobile.ihttp.request.IHttpRequest
+import com.ustadmobile.ihttp.response.IHttpResponse
 import io.github.aakira.napier.Napier
 import io.ktor.server.application.*
 import io.ktor.http.*
@@ -182,9 +182,9 @@ private val ktorReservedHeaders = listOf(
 /**
  * Send a response using a response from UstadCache. Test via TestContentEntryVersionRoute
  */
-suspend fun ApplicationCall.respondCacheResponse(
-    cacheResponse: HttpResponse?,
-    cacheRequest: HttpRequest? = null,
+suspend fun ApplicationCall.respondIHttpResponse(
+    cacheResponse: IHttpResponse?,
+    cacheRequest: IHttpRequest? = null,
 ) {
     if(cacheResponse != null) {
         cacheResponse.headers.names().filter { headerName ->

@@ -1,8 +1,8 @@
-package com.ustadmobile.libcache.headers
+package com.ustadmobile.ihttp.headers
 
 class MergedHeaders(
-    private vararg val sources: HttpHeaders
-) : HttpHeaders {
+    private vararg val sources: IHttpHeaders
+) : IHttpHeaders {
 
     /**
      * Returns the first non-null value available from sources, in order, if any

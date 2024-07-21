@@ -1,13 +1,13 @@
-package com.ustadmobile.libcache.headers
+package com.ustadmobile.ihttp.headers
 
 /**
  * Map http headers as required. This can be used to filter out headers e.g. when a validation
  * response is received that incorrectly specifies a content-length of zero etc.
  */
 internal class MappedHttpHeaders(
-    private val srcHeaders: HttpHeaders,
+    private val srcHeaders: IHttpHeaders,
     private val mapFn: (headerName: String, headerValue: String) -> String?
-) : HttpHeaders{
+) : IHttpHeaders{
 
     override fun get(name: String): String? {
         return srcHeaders[name]?.let { mapFn(name, it) }
@@ -27,6 +27,6 @@ internal class MappedHttpHeaders(
     }
 }
 
-fun HttpHeaders.mapHeaders(
+fun IHttpHeaders.mapHeaders(
     block:  (headerName: String, headerValue: String) -> String?
-): HttpHeaders = MappedHttpHeaders(this, block)
+): IHttpHeaders = MappedHttpHeaders(this, block)
