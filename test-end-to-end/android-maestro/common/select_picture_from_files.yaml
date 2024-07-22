@@ -4,13 +4,7 @@ appId: com.toughra.ustadmobile
 
 - repeat:
     while:
-      visible: "Recent"
-    commands:
-      - tapOn:
-          text: "Show roots"
-- repeat:
-    while:
-      visible: "Downloads"
+      notVisible: "Images"
     commands:
       - tapOn:
           text: "Show roots"
