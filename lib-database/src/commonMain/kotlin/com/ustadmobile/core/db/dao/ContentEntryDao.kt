@@ -324,4 +324,28 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
                     from ContentEntry WHERE contentEntryUid IN (:contentEntryUids)""")
     abstract suspend fun getContentEntryFromUids(contentEntryUids: List<Long>): List<UidAndLabel>
 
+    @Query(
+        """
+    WITH RECURSIVE ContentEntryRecursive AS (
+        SELECT 
+            ContentEntry.*,
+            0 AS level
+        FROM ContentEntry
+        WHERE contentEntryUid = :parentUid AND ceInactive = 0 AND leaf = 0
+        
+        UNION ALL
+        
+        SELECT 
+            ce.*,
+            cr.level + 1
+        FROM ContentEntryRecursive cr
+        JOIN ContentEntryParentChildJoin cj ON cj.cepcjParentContentEntryUid = cr.contentEntryUid
+        JOIN ContentEntry ce ON ce.contentEntryUid = cj.cepcjChildContentEntryUid
+        WHERE ce.ceInactive = 0 AND cr.level < 100
+    )
+    SELECT * FROM ContentEntryRecursive
+    ORDER BY level, title
+    """
+    )
+    abstract suspend fun getRecursiveContentEntriesForExport(parentUid: Long): List<ContentEntry>
 }
