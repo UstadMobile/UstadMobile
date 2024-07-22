@@ -74,11 +74,11 @@ env:
     text: "Don't show before"
 - runScript:
     file: "../common/setDate.js"
-- inputText: ${output.yesterday_Date}
+- inputText: ${output.yesterdayDate}
 - tapOn: "hh:mm"
 - runScript:
     file: "../common/setDate.js"
-- inputText: ${output.delay_1hr}
+- inputText: ${output.delayTime}
 - hideKeyboard
 - scrollUntilVisible:
     element:
@@ -87,20 +87,20 @@ env:
 - tapOn: "Deadline"
 - runScript:
     file: "../common/setDate.js"
-- inputText: ${output.yesterday_Date}
+- inputText: ${output.yesterdayDate}
 - tapOn: "hh:mm"
 - runScript:
     file: "../common/setDate.js"
-- inputText: ${output.Time}
+- inputText: ${output.currentTime}
 - hideKeyboard
 - tapOn: "End of grace period"
 - runScript:
     file: "../common/setDate.js"
-- inputText: ${output.tomorrow_Date}
+- inputText: ${output.tomorrowDate}
 - tapOn: "hh:mm"
 - runScript:
     file: "../common/setDate.js"
-- inputText: ${output.Time}
+- inputText: ${output.currentTime}
 - hideKeyboard
 - tapOn: "Late submission penalty"
 - inputText: "10"

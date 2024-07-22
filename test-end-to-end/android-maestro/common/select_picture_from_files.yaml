@@ -8,8 +8,14 @@ appId: com.toughra.ustadmobile
     commands:
       - tapOn:
           text: "Show roots"
+- repeat:
+    while:
+      visible: "Downloads"
+    commands:
       - tapOn:
-          text: "Images"
+          text: "Show roots"
+- tapOn:
+    text: "Images"
 - tapOn: "Pictures"
 - runFlow:
     when:
