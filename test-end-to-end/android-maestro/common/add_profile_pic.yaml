@@ -15,6 +15,9 @@ appId: com.toughra.ustadmobile
 # clear the downloads
 - evalScript: ${http.get(CONTROLSERVER + "cleardownloads?device=" + TESTSERIAL)}
 
+# push the test file to the downloads
+- evalScript: ${http.get(CONTROLSERVER + "pushcontent?test-file-name=" + TESTFILENAME +"&device=" + TESTSERIAL)}
+
 # push the test file to the Pictures folder using URL encoding for dest parameter
 - evalScript: ${http.get(CONTROLSERVER + "pushcontent?test-file-name=" + TESTFILENAME + "&device=" + TESTSERIAL + "&dest=%2Fstorage%2Femulated%2F0%2FPictures&scanMedia=true")}
 

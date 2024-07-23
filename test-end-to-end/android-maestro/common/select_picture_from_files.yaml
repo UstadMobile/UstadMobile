@@ -4,13 +4,12 @@ appId: com.toughra.ustadmobile
 
 - repeat:
     while:
-      notVisible: "Images"
+      notVisible: "Downloads"
     commands:
       - tapOn:
           text: "Show roots"
 - tapOn:
-    text: "Images"
-- tapOn: "Pictures"
+    text: "Downloads"
 - runFlow:
     when:
       notVisible: ${TESTFILENAME}
