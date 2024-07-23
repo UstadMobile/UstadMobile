@@ -25,6 +25,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_VIEWNAME
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.errors.ErrorViewModel
+import com.ustadmobile.core.viewmodel.message.conversationlist.ConversationListViewModel
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -517,8 +518,12 @@ abstract class UstadViewModel(
          */
         const val ARG_MAX_DATE_OF_BIRTH = "maxDob"
 
-        val ROOT_DESTINATIONS = listOf(ClazzListViewModel.DEST_NAME_HOME,
-            ContentEntryListViewModel.DEST_NAME_HOME, PersonListViewModel.DEST_NAME_HOME)
+        val ROOT_DESTINATIONS = listOf(
+            ClazzListViewModel.DEST_NAME_HOME,
+            ContentEntryListViewModel.DEST_NAME_HOME,
+            ConversationListViewModel.DEST_NAME_HOME,
+            PersonListViewModel.DEST_NAME_HOME
+        )
 
         /**
          * Can be used with any Android intent to provide a deep link to open within the app.
