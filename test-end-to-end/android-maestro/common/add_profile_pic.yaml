@@ -15,8 +15,6 @@ appId: com.toughra.ustadmobile
 # clear the downloads
 - evalScript: ${http.get(CONTROLSERVER + "cleardownloads?device=" + TESTSERIAL)}
 
-# clear the downloads
-- evalScript: ${http.get(CONTROLSERVER + "cleardownloads?device=" + TESTSERIAL)}
 # push the test file to the downloads
 - evalScript: ${http.get(CONTROLSERVER + "pushcontent?test-file-name=" + TESTFILENAME +"&device=" + TESTSERIAL)}
 
