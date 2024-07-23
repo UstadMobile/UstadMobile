@@ -559,6 +559,9 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
             contentEntryVersionServerUseCase = {
                 di.on(it).direct.instance()
             },
+            xapiServerUseCase = {
+                di.on(it).direct.instance()
+            },
             staticUmAppFilesDir = File(resourcesDir, "umapp"),
             mimeTypeHelper = instance()
         )

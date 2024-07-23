@@ -4,6 +4,7 @@ plugins {
 }
 
 kotlin {
+
     androidTarget {
 
     }
@@ -16,14 +17,15 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 api(project(":lib-ihttp-core"))
-                api(libs.okhttp)
+                implementation(libs.nanohttpd)
+                api(libs.kotlinxio.core)
             }
         }
     }
 }
 
 android {
-    namespace = "com.ustadmobile.ihttp.okhttp.android"
+    namespace = "com.ustadmobile.ihttp.nanohttpd"
     compileSdk = 34
 
     defaultConfig {

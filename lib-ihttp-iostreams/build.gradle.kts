@@ -15,15 +15,15 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                api(project(":lib-ihttp-core"))
                 api(libs.okhttp)
+                api(libs.kotlinxio.core)
             }
         }
     }
 }
 
 android {
-    namespace = "com.ustadmobile.ihttp.okhttp.android"
+    namespace = "com.ustadmobile.ihttp.iostreams"
     compileSdk = 34
 
     defaultConfig {

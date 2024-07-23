@@ -100,6 +100,7 @@ import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
 import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.domain.xapi.StoreActivitiesUseCase
 import com.ustadmobile.core.domain.xapi.XapiStatementResource
+import com.ustadmobile.core.domain.xapi.http.XapiHttpServerUseCase
 import com.ustadmobile.core.domain.xapi.noninteractivecontentusagestatementrecorder.NonInteractiveContentXapiStatementRecorderFactory
 import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnClearUseCase
 import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnClearUseCaseJvm
@@ -586,4 +587,12 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         )
     }
 
+    bind<XapiHttpServerUseCase>() with scoped(EndpointScope.Default).singleton {
+        XapiHttpServerUseCase(
+            statementResource = instance(),
+            db = instance(tag = DoorTag.TAG_DB),
+            json = instance(),
+            endpoint = context,
+        )
+    }
 }

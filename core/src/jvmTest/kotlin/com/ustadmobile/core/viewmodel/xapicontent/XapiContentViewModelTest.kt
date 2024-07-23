@@ -66,7 +66,7 @@ class XapiContentViewModelTest : AbstractMainDispatcherTest() {
                     mock {
                         onBlocking { invoke(any()) }.thenReturn(
                             StartXapiSessionOverHttpUseCase.StartXapiSessionOverHttpResult(
-                                basicAuth = "secret",
+                                auth = "secret",
                                 httpUrl = "http://localhost/e/endpoint/xapi"
                             )
                         )

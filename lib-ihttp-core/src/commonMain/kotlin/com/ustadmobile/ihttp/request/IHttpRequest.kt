@@ -10,6 +10,8 @@ interface IHttpRequest {
 
     val method: Method
 
+    fun queryParam(name: String): String?
+
     companion object {
 
         /**

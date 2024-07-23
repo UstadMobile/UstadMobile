@@ -78,7 +78,7 @@ class ResolveXapiLaunchHrefUseCase(
 
         val queryParams: Map<String, String> = mapOf(
             "endpoint" to httpSessionResult.httpUrl,
-            "auth" to httpSessionResult.basicAuth,
+            "auth" to httpSessionResult.auth,
             "actor" to json.encodeToString(XapiAgent.serializer(), xapiSession.agent),
             "registration" to xapiSessionWithActivityId.registrationUuid,
             "activity_id" to xapiSessionWithActivityId.rootActivityId!!,

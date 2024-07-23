@@ -43,6 +43,7 @@ kotlin {
         val jvmMain by getting {
             dependencies {
                 implementation(libs.okhttp)
+                implementation(project(":lib-ihttp-iostreams"))
             }
         }
 
@@ -55,7 +56,7 @@ kotlin {
 
         val androidMain by getting {
             dependencies {
-
+                implementation(project(":lib-ihttp-iostreams"))
             }
         }
 
@@ -64,7 +65,7 @@ kotlin {
 
 android {
     compileSdk = 34
-    namespace = "com.ustadmobile.ihttp"
+    namespace = "com.ustadmobile.ihttp.core"
 
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
 

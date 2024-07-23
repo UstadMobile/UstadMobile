@@ -14,9 +14,13 @@ import kotlinx.serialization.Serializable
  */
 interface StartXapiSessionOverHttpUseCase {
 
+    /**
+     * @param auth complete authorization header e.g. "Basic <username:password base64 encoded>"
+     * @param httpUrl the httpUrl that will be used to access the Xapi endpoint
+     */
     @Serializable
     data class StartXapiSessionOverHttpResult(
-        val basicAuth: String,
+        val auth: String,
         val httpUrl: String,
     )
 

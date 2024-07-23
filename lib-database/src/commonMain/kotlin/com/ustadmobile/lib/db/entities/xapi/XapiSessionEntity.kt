@@ -18,7 +18,9 @@ import kotlinx.serialization.Serializable
  *  b) The desktop version of the app is running an epub (which must submit xAPI statements over
  *     http without using the database in the browser).
  *
- * @param xseAuth - the expected authorization e.g. Basic (base64 username/password)
+ * @param xseAuth - the expected authorization - a randomly generated password to use for basic auth.
+ *        This is the password component ONLY. The client should send xseUid:xseAuth base64 encoded
+ *        so that the server can then lookup the session and validate the auth.
  */
 @Entity
 @Serializable

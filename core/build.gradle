@@ -140,6 +140,7 @@ kotlin {
                 implementation project(":lib-database")
                 implementation project(":lib-cache")
                 implementation project(":lib-ihttp-okhttp")
+                implementation project(":lib-ihttp-nanohttpd")
                 implementation libs.coroutines
                 implementation libs.ktor.client.okhttp
                 implementation libs.ktor.client.cio

@@ -5,10 +5,11 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCase
 import com.ustadmobile.core.domain.xapi.XapiSession
 import com.ustadmobile.core.domain.xapi.starthttpsession.StartXapiSessionOverHttpUseCase.StartXapiSessionOverHttpResult
+import com.ustadmobile.core.domain.xapi.toXapiSessionEntity
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
-import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 import com.ustadmobile.lib.util.randomString
+import io.ktor.util.encodeBase64
 
 /**
  * Start a Http Xapi session that will be recorded in the local database. Used on Android, desktop,
@@ -28,25 +29,11 @@ class StartXapiSessionOverHttpUseCaseDirect(
         val auth = randomString(16)
 
         (repo ?: db).xapiSessionEntityDao().insertAsync(
-            XapiSessionEntity(
-                xseUid = xseUid,
-                xseLastMod = systemTimeInMillis(),
-                xseUsUid = xapiSession.userSessionUid,
-                xseAccountPersonUid = xapiSession.accountPersonUid,
-                xseAccountUsername = xapiSession.accountUsername,
-                xseClazzUid = xapiSession.clazzUid,
-                xseCbUid = xapiSession.cbUid,
-                xseStartTime = systemTimeInMillis(),
-                xseRegistrationHi = registrationUuid.mostSignificantBits,
-                xseRegistrationLo = registrationUuid.leastSignificantBits,
-                xseContentEntryUid = xapiSession.contentEntryUid,
-                xseRootActivityId = xapiSession.rootActivityId,
-                xseAuth = auth,
-            )
+            xapiSession.toXapiSessionEntity(xseUid, registrationUuid, auth)
         )
 
         return StartXapiSessionOverHttpResult(
-            basicAuth = auth,
+            auth = "Basic " + "${xseUid}:$auth".encodeBase64(),
             httpUrl = getApiUrlUseCase("/api/xapi/")
         )
     }
