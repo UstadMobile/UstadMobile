@@ -28,6 +28,8 @@ class XapiStateUseCaseIntegrationTest {
 
     private lateinit var storeXapiStateUseCase: StoreXapiStateUseCase
 
+    private lateinit var retrieveXapiStateUseCase: RetrieveXapiStateUseCase
+
     private lateinit var xapiSession: XapiSession
 
     private lateinit var xapiAgent: XapiAgent
@@ -84,6 +86,13 @@ class XapiStateUseCaseIntegrationTest {
             xxStringHasher = XXStringHasherCommonJvm(),
             xxHasher64Factory = XXHasher64FactoryCommonJvm()
         )
+
+        retrieveXapiStateUseCase = RetrieveXapiStateUseCase(
+            db = db,
+            repo = null,
+            json = json,
+            xxStringHasher = XXStringHasherCommonJvm(),
+        )
     }
 
     @Test
@@ -97,30 +106,26 @@ class XapiStateUseCaseIntegrationTest {
         val stateId = "aStateId"
 
         runBlocking {
-            storeXapiStateUseCase(
-                xapiSession = xapiSession,
-                xapiStateParams = XapiStateParams(
-                    activityId = activityId,
-                    agent = json.encodeToString(xapiAgent),
-                    registration = xapiSession.registrationUuid,
-                    stateId = stateId,
-                ),
-                stateBody = json.encodeToString(doc)
-            )
-
-            val stateEntities = db.stateEntityDao().getByParams(
-                accountPersonUid = actorPersonUid,
-                agentActorUid = xapiAgent.identifierHash(xxStringHasher),
-                activityUid = xxStringHasher.hash(activityId),
-                registrationIdHi = null,
-                registrationIdLo = null,
+            val stateParams = XapiStateParams(
+                activityId = activityId,
+                agent = json.encodeToString(xapiAgent),
+                registration = xapiSession.registrationUuid,
                 stateId = stateId,
             )
 
-            assertEquals(doc.keys.size, stateEntities.size)
+            storeXapiStateUseCase(
+                xapiSession = xapiSession,
+                xapiStateParams = stateParams,
+                stateBody = json.encodeToString(doc)
+            )
+
+            val retrieveResult = retrieveXapiStateUseCase(
+                xapiSession = xapiSession,
+                xapiStateParams = stateParams
+            )
+
+            assertEquals(doc, retrieveResult?.doc)
         }
-
-
     }
 
 }
