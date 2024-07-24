@@ -136,7 +136,7 @@ class XapiStatementResource(
                 }
 
                 val groupMemberJoins = actorEntities.flatMap {
-                    it?.groupMemberJoins ?: emptyList()
+                    it.groupMemberJoins
                 }.filter {
                     it.gmajGroupActorUid == groupActorEntity.actorUid
                 }

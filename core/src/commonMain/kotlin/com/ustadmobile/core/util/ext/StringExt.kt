@@ -129,14 +129,8 @@ fun String.countWords(): Int {
     return wordCount
 }
 
-fun String.initials(): String {
-    return split(" ").map {
-        it.firstOrNull()?.uppercaseChar()
-    }.joinToString(separator = " ")
-}
-
 fun String.initial(): String {
-    return firstOrNull()?.uppercase() ?: ""
+    return firstNonWhiteSpaceChar()?.uppercase() ?: ""
 }
 
 /**

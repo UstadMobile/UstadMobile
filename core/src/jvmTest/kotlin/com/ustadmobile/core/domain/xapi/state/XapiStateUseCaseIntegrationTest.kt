@@ -7,10 +7,12 @@ import com.ustadmobile.core.domain.xapi.XapiSession
 import com.ustadmobile.core.domain.xapi.model.XapiAccount
 import com.ustadmobile.core.domain.xapi.model.XapiAgent
 import com.ustadmobile.core.domain.xapi.model.identifierHash
+import com.ustadmobile.core.domain.xapi.model.toEntities
 import com.ustadmobile.core.domain.xxhash.XXHasher64FactoryCommonJvm
 import com.ustadmobile.core.domain.xxhash.XXStringHasher
 import com.ustadmobile.core.domain.xxhash.XXStringHasherCommonJvm
 import com.ustadmobile.door.DatabaseBuilder
+import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -34,8 +36,11 @@ class XapiStateUseCaseIntegrationTest {
 
     private val json = Json { encodeDefaults = false }
 
+    val actorPersonUid  = 1L
+
     @BeforeTest
     fun setup() {
+        xxStringHasher = XXStringHasherCommonJvm()
         db = DatabaseBuilder.databaseBuilder(
             UmAppDatabase::class, "jdbc:sqlite::memory:", 1L
         ).build()
@@ -46,6 +51,23 @@ class XapiStateUseCaseIntegrationTest {
                 name = "username",
             )
         )
+
+
+
+        val actorEntities = xapiAgent.toEntities(
+            stringHasher = xxStringHasher,
+            primaryKeyManager = db.doorPrimaryKeyManager,
+            hasherFactory = XXHasher64FactoryCommonJvm(),
+            knownActorUidToPersonUidMap = mapOf(
+                xapiAgent.identifierHash(xxStringHasher) to actorPersonUid
+            )
+        )
+
+
+
+        runBlocking {
+            db.actorDao().insertOrIgnoreListAsync(listOf(actorEntities.actor))
+        }
 
         xapiSession = XapiSession(
             endpoint = Endpoint("https://example.org/"),
@@ -62,8 +84,6 @@ class XapiStateUseCaseIntegrationTest {
             xxStringHasher = XXStringHasherCommonJvm(),
             xxHasher64Factory = XXHasher64FactoryCommonJvm()
         )
-
-        xxStringHasher = XXStringHasherCommonJvm()
     }
 
     @Test
@@ -89,7 +109,7 @@ class XapiStateUseCaseIntegrationTest {
             )
 
             val stateEntities = db.stateEntityDao().getByParams(
-                accountPersonUid = 1L,
+                accountPersonUid = actorPersonUid,
                 agentActorUid = xapiAgent.identifierHash(xxStringHasher),
                 activityUid = xxStringHasher.hash(activityId),
                 registrationIdHi = null,

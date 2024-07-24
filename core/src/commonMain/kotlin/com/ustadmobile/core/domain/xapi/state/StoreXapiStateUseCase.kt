@@ -43,8 +43,14 @@ class StoreXapiStateUseCase(
         }
 
         val agentActorUid = xapiAgent.identifierHash(xxStringHasher)
-        val activityUid = xapiStateParams.activityUid(xxStringHasher)
 
+        if(xapiSession.agent.identifierHash(xxStringHasher) !=
+            xapiAgent.identifierHash(xxStringHasher)
+        ) {
+            throw HttpApiException(403, "Unauthorized: agent does not match with session")
+        }
+
+        val activityUid = xapiStateParams.activityUid(xxStringHasher)
         val registrationUuid = xapiStateParams.registrationUuid
 
         val hasher = xxHasher64Factory.newHasher(0)
