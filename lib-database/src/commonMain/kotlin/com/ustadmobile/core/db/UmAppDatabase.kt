@@ -23,11 +23,13 @@ import com.ustadmobile.lib.db.entities.xapi.ActivityEntity
 import com.ustadmobile.lib.db.entities.xapi.ActivityInteractionEntity
 import com.ustadmobile.lib.db.entities.xapi.ActivityLangMapEntry
 import com.ustadmobile.core.db.dao.xapi.ActivityLangMapEntryDao
+import com.ustadmobile.core.db.dao.xapi.StateEntityDao
 import com.ustadmobile.lib.db.entities.xapi.StatementContextActivityJoin
 import com.ustadmobile.core.db.dao.xapi.StatementContextActivityJoinDao
 import com.ustadmobile.core.db.dao.xapi.StatementEntityJsonDao
 import com.ustadmobile.core.db.dao.xapi.XapiSessionEntityDao
 import com.ustadmobile.lib.db.entities.xapi.ActivityExtensionEntity
+import com.ustadmobile.lib.db.entities.xapi.StateEntity
 import com.ustadmobile.lib.db.entities.xapi.StatementEntityJson
 import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 
@@ -86,6 +88,7 @@ import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
     StatementContextActivityJoin::class,
     XapiSessionEntity::class,
     StatementEntityJson::class,
+    StateEntity::class,
 
     //Door entities
     OutgoingReplication::class,
@@ -93,7 +96,7 @@ import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
     PendingRepositorySession::class,
     DoorNode::class,
 
-], version = 194)
+], version = 195)
 expect abstract class UmAppDatabase : RoomDatabase {
 
     /*
@@ -256,5 +259,7 @@ expect abstract class UmAppDatabase : RoomDatabase {
     abstract fun xapiSessionEntityDao(): XapiSessionEntityDao
 
     abstract fun statementEntityJsonDao(): StatementEntityJsonDao
+
+    abstract fun stateEntityDao(): StateEntityDao
 
 }
