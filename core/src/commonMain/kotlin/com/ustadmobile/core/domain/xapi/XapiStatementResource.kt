@@ -205,8 +205,8 @@ class XapiStatementResource(
     suspend fun post(
         statements: List<XapiStatement>,
         xapiSession: XapiSession
-    ) {
-        storeStatements(statements, xapiSession)
+    ): List<Uuid> {
+        return storeStatements(statements, xapiSession).statementUuids
     }
 
     /**

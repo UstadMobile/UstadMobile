@@ -205,3 +205,11 @@ fun String.substringUntilLastIndexOfInclusive(
         missingDelimiterValue
     }
 }
+
+fun String.firstNonWhiteSpaceChar(): Char? {
+    val index = indexOfFirst { !it.isWhitespace() }
+    return if(index != -1)
+        this[index]
+    else
+        null
+}

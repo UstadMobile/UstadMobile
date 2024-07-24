@@ -39,11 +39,13 @@ import kotlinx.serialization.Serializable
  * StateEntity for each top level property (the entities that make up a single state document will
  * have the same seAgentUid and the same seHash, but a different seKey and seKeyHash).
  *
- * @param seActorUid Uid of the related actor
+ * @param seActorUid Uid of the related actor entity (this MUST be an agent as per the spec Xapi
+ *        Spec - Communication section 2.3)
  * @param seHash - hash of other keys that are part of the identifier - activityId, registrationUuid,
  *        stateId
  * @param seKey - top level property name
- * @param seKeyHash xxhash64 of seKey
+ * @param seKeyHash xxhash64 of seKey (used as part of the composite primary key)
+ * @param seStateId the stateId as per the xAPI spec
  *
  */
 data class StateEntity(
