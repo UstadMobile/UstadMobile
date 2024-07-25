@@ -11,7 +11,7 @@ import com.ustadmobile.lib.db.entities.TRIGGER_UPSERT
 import kotlinx.serialization.Serializable
 
 @Entity(
-    primaryKeys = arrayOf("seActorUid", "seHash", "seKeyHash")
+    primaryKeys = arrayOf("seActorUid", "seHash")
 )
 @Serializable
 @ReplicateEntity(
@@ -35,27 +35,19 @@ import kotlinx.serialization.Serializable
  * Used to store the xAPI State for State Resource as per
  * https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Communication.md#23-state-resource
  *
- * xAPI state json documents are merged according to top level properties, therefor there is one
- * StateEntity for each top level property (the entities that make up a single state document will
- * have the same seAgentUid and the same seHash, but a different seKey and seKeyHash).
- *
  * @param seActorUid Uid of the related actor entity (this MUST be an agent as per the spec Xapi
  *        Spec - Communication section 2.3)
  * @param seHash - hash of other keys that are part of the identifier - activityId, registrationUuid,
  *        stateId
- * @param seKey - top level property name
- * @param seKeyHash xxhash64 of seKey (used as part of the composite primary key)
  * @param seStateId the stateId as per the xAPI spec
+ * @param seContent content itself. If the content is plain text (contentType = text/ * or application/json)
+ *        then this is stored as a simple string. If not, this will be Base64 encoded binary data.
  *
  */
 data class StateEntity(
     var seActorUid: Long = 0,
 
     var seHash: Long  = 0,
-
-    var seKey: String? = null,
-
-    var seKeyHash: Long = 0,
 
     var seActivityUid: Long  = 0,
 
@@ -67,6 +59,8 @@ data class StateEntity(
 
     //Reserved for future use
     var seTimeStored: Long = 0,
+
+    var seContentType: String? = null,
 
     var seContent: String? = null,
 
