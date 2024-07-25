@@ -2,6 +2,14 @@ package com.ustadmobile.core.viewmodel.settings
 
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.set
+import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.viewmodel.UstadViewModel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import org.kodein.di.DI
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
@@ -10,7 +18,6 @@ import com.ustadmobile.core.domain.htmlcontentdisplayengine.GetHtmlContentDispla
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.HtmlContentDisplayEngineOption
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.SetHtmlContentDisplayEngineUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
-import com.ustadmobile.core.domain.share.ShareAppUseCase
 import com.ustadmobile.core.domain.storage.GetOfflineStorageAvailableSpace
 import com.ustadmobile.core.domain.storage.GetOfflineStorageOptionsUseCase
 import com.ustadmobile.core.domain.storage.GetOfflineStorageSettingUseCase
@@ -19,18 +26,10 @@ import com.ustadmobile.core.domain.storage.SetOfflineStorageSettingUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
-import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.deleteditem.DeletedItemListViewModel
 import com.ustadmobile.core.viewmodel.settings.DeveloperSettingsViewModel.Companion.PREFKEY_DEVSETTINGS_ENABLED
 import com.ustadmobile.core.viewmodel.site.detail.SiteDetailViewModel
 import kotlinx.atomicfu.atomic
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
-import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.instanceOrNull
 
@@ -40,8 +39,11 @@ data class SettingsOfflineStorageOption(
 )
 
 data class SettingsUiState(
+
     val htmlContentDisplayOptions: List<HtmlContentDisplayEngineOption> = emptyList(),
+
     val currentHtmlContentDisplayOption: HtmlContentDisplayEngineOption? = null,
+
     val holidayCalendarVisible: Boolean = false,
 
     val workspaceSettingsVisible: Boolean = false,
@@ -68,7 +70,7 @@ data class SettingsUiState(
 
     val storageOptionsDialogVisible: Boolean = false,
 
-    ) {
+) {
     val htmlContentDisplayEngineVisible: Boolean
         get() = htmlContentDisplayOptions.isNotEmpty()
 
@@ -116,7 +118,6 @@ class SettingsViewModel(
     private val settings: Settings by instance()
 
     init {
-
         _appUiState.update { prev ->
             prev.copy(
                 title = systemImpl.getString(MR.strings.settings),
@@ -288,8 +289,10 @@ class SettingsViewModel(
         }
     }
 
+
     companion object {
         const val DEST_NAME = "Settings"
     }
+
 
 }
