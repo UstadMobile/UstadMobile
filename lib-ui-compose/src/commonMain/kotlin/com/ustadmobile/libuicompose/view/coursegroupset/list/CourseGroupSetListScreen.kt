@@ -17,6 +17,7 @@ import com.ustadmobile.lib.db.entities.CourseGroupSet
 import com.ustadmobile.libuicompose.components.UstadAddListItem
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadListSortHeader
+import com.ustadmobile.libuicompose.components.UstadNothingHereYet
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
@@ -73,6 +74,12 @@ fun CourseGroupSetListScreen(
                     text = stringResource(MR.strings.add_new_groups),
                     onClickAdd = onClickNewItem,
                 )
+            }
+        }
+
+        if(repositoryResult.isSettledEmpty){
+            item("empty_state") {
+                UstadNothingHereYet()
             }
         }
 

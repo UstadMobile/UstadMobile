@@ -31,6 +31,7 @@ import com.ustadmobile.core.viewmodel.clazzlog.attendancelist.ClazzLogListAttend
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.libuicompose.components.UstadBottomSheetOption
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
+import com.ustadmobile.libuicompose.components.UstadNothingHereYet
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
 import com.ustadmobile.libuicompose.util.rememberEmptyFlow
@@ -89,6 +90,12 @@ fun ClazzLogListAttendanceScreen(
     UstadLazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
+
+        if(repositoryPagerResult.isSettledEmpty) {
+            item("empty_state") {
+                UstadNothingHereYet()
+            }
+        }
 
         ustadPagedItems(
             pagingItems = lazyPagingItems,
