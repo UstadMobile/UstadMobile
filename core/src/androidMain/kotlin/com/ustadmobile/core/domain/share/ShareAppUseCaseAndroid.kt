@@ -3,16 +3,15 @@ package com.ustadmobile.core.domain.share
 import android.content.Context
 import android.content.Intent
 import androidx.core.content.FileProvider
-import com.ustadmobile.core.MR
 import com.ustadmobile.core.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 
 
-class SendAppFileUseCaseAndroid(
+class ShareAppUseCaseAndroid(
     private val activityContext: Context
-) : SendAppFileUseCase {
+) : ShareAppUseCase {
     override suspend operator fun invoke(shareLink: Boolean) {
         withContext(Dispatchers.Main) {
             if (shareLink) {
@@ -43,7 +42,7 @@ class SendAppFileUseCaseAndroid(
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
 
-        val chooserIntent = Intent.createChooser(intent, activityContext.getString(R.string.share_app_title))
+        val chooserIntent = Intent.createChooser(intent, activityContext.getString(R.string.share_app))
         chooserIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         activityContext.startActivity(chooserIntent)
     }
@@ -58,7 +57,7 @@ class SendAppFileUseCaseAndroid(
             )
         }
 
-        val chooserIntent = Intent.createChooser(intent, activityContext.getString(R.string.share_app_title))
+        val chooserIntent = Intent.createChooser(intent, activityContext.getString(R.string.share_app))
         chooserIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         activityContext.startActivity(chooserIntent)
     }

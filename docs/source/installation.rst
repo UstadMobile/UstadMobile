@@ -58,19 +58,31 @@ To install using QuickShare:
 6. Once the transfer is complete, tap on the received APK to install.
 
 .. image:: images/sharing1.jpg
-   :alt: Alternate text describing the image
+   :alt: The screenshot shows the app's Settings screen with options for language, backup, phone memory, deleted items, sharing the app, advanced settings, recommended Chrome, and version.
    :width: 400px
    :height: 700px
 
+
 .. image:: images/sharing2.jpg
-   :alt: Alternate text describing the image
+   :alt: The screenshot shows two option "Send apk" and "Send app store link"
    :width: 400px
    :height: 700px
 
 .. image:: images/sharing3.jpg
-   :alt: Alternate text describing the image
+   :alt: The screenshot shows the "Share App" option, displaying sharing options like Nearby Share, realme Share, WhatsApp, Slack, Gmail, Drive, and others.
    :width: 400px
    :height: 700px
+
+.. image:: images/sharing4.jpg
+   :alt: The screenshot shows the "Quick Share" screen, indicating that Prashant's phone is sharing to Sumit's phone, with the status "Sending."
+   :width: 400px
+   :height: 700px
+
+
+Share offline using Google Play
+"""""""""""""""""""""""""""""""
+You can share the app offline using Google Play as per `Google Play instructions <https://support.google.com/googleplay/answer/9283534?hl=en>`_.
+
 
 Other Sharing Apps
 """"""""""""""""""

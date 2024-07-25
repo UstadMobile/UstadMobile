@@ -211,8 +211,8 @@ fun SettingsScreen(
                 modifier = Modifier.clickable {
                     onClickAppShare()
                 },
-                valueText = stringResource(MR.strings.share_app_title),
-                labelText = stringResource(MR.strings.share_app_description),
+                valueText = stringResource(MR.strings.share_app),
+                labelText = stringResource(MR.strings.share_this_app_with_others),
                 icon = Icons.Default.Share,
             )
         }

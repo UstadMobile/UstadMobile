@@ -10,7 +10,7 @@ import com.ustadmobile.core.domain.htmlcontentdisplayengine.GetHtmlContentDispla
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.HtmlContentDisplayEngineOption
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.SetHtmlContentDisplayEngineUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
-import com.ustadmobile.core.domain.share.SendAppFileUseCase
+import com.ustadmobile.core.domain.share.ShareAppUseCase
 import com.ustadmobile.core.domain.storage.GetOfflineStorageAvailableSpace
 import com.ustadmobile.core.domain.storage.GetOfflineStorageOptionsUseCase
 import com.ustadmobile.core.domain.storage.GetOfflineStorageSettingUseCase
@@ -30,7 +30,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
 import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.instanceOrNull
@@ -122,12 +121,10 @@ class SettingsViewModel(
 
     private val settings: Settings by instance()
 
-    private val sendAppFileUseCase: SendAppFileUseCase by instance()
-
-
+    private val shareAppUseCase: ShareAppUseCase? by instanceOrNull()
     init {
 
-        _uiState.update { it.copy(sendAppOptionVisible = sendAppFileUseCase != null) }
+        _uiState.update { it.copy(sendAppOptionVisible = shareAppUseCase != null) }
 
         _appUiState.update { prev ->
             prev.copy(
@@ -258,7 +255,7 @@ class SettingsViewModel(
     fun onClickAppShare(shareLink: Boolean) {
         viewModelScope.launch {
             try {
-                sendAppFileUseCase.invoke(shareLink)
+                shareAppUseCase?.invoke(shareLink)
             } catch (e: IllegalArgumentException) {
                 snackDispatcher.showSnackBar(Snack(e.message.toString()))
             } catch (e: Exception) {

@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.ustadmobile.libuicompose.view.accountlist
 
 import androidx.compose.foundation.clickable
@@ -16,9 +18,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.outlined.Android
+import androidx.compose.material.icons.outlined.Link
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
@@ -29,6 +39,7 @@ import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
 import com.ustadmobile.libuicompose.components.UstadAddListItem
+import com.ustadmobile.libuicompose.components.UstadBottomSheetOption
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadPersonAvatar
 import kotlinx.coroutines.Dispatchers
@@ -39,7 +50,7 @@ fun AccountListScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState(
         AccountListUiState(), Dispatchers.Main.immediate)
-
+    var shareAppOptionsVisible by remember { mutableStateOf(false) }
     AccountListScreen(
         uiState = uiState,
         onAccountListItemClick = viewModel::onClickAccount,
@@ -48,7 +59,32 @@ fun AccountListScreen(
         onLogoutClick = viewModel::onClickLogout,
         onMyProfileClick = viewModel::onClickProfile,
         onClickOpenLicenses = viewModel::onClickOpenLicenses,
+        onClickAppShare = { shareAppOptionsVisible = true }
     )
+
+    if (shareAppOptionsVisible) {
+        ModalBottomSheet(onDismissRequest = { shareAppOptionsVisible = false }) {
+            UstadBottomSheetOption(
+                modifier = Modifier.clickable {
+                    shareAppOptionsVisible = false
+                    viewModel.onClickAppShare(false)
+                },
+                headlineContent = { Text(stringResource(MR.strings.send_apk_file)) },
+                leadingContent = { Icon(Icons.Outlined.Android, contentDescription = null) }
+            )
+
+            UstadBottomSheetOption(
+                modifier = Modifier.clickable {
+                    shareAppOptionsVisible = false
+                    viewModel.onClickAppShare(true)
+                },
+                headlineContent = { Text(stringResource(MR.strings.send_app_link)) },
+                leadingContent = {
+                    Icon(Icons.Outlined.Link, contentDescription = null)
+                }
+            )
+        }
+    }
 }
 
 @Composable
@@ -59,7 +95,8 @@ fun AccountListScreen(
     onClickOpenLicenses: () -> Unit = {},
     onAddItem: () -> Unit = {},
     onMyProfileClick: () -> Unit = {},
-    onLogoutClick: () -> Unit = {}
+    onLogoutClick: () -> Unit = {},
+    onClickAppShare: () -> Unit = {}
 ){
     val uriHandler = LocalUriHandler.current
 
@@ -67,7 +104,6 @@ fun AccountListScreen(
         modifier = Modifier
             .fillMaxWidth()
     ){
-
         if(uiState.headerAccount != null) {
             item(key = "header_account") {
                 AccountListItem(
@@ -96,7 +132,6 @@ fun AccountListScreen(
                     ) {
                         Text(stringResource(MR.strings.logout))
                     }
-
                 }
             }
 
@@ -138,6 +173,17 @@ fun AccountListScreen(
             )
         }
 
+        item(key = "share_app") {
+
+            ListItem(
+                modifier = Modifier.clickable { onClickAppShare() },
+                leadingContent = {
+                    Icon(Icons.Default.Share, contentDescription = null)
+                },
+                headlineContent = { Text(stringResource(MR.strings.share_app)) },
+            )
+        }
+
         item(key = "bottom_divider") {
             Divider(thickness = 1.dp)
         }
@@ -174,7 +220,6 @@ fun AccountListScreen(
                 },
             )
         }
-
     }
 }
 
@@ -190,7 +235,7 @@ fun AccountListItem(
                 onClickAccount(account)
             }
         }else {
-              Modifier
+            Modifier
         },
         leadingContent = {
             UstadPersonAvatar(

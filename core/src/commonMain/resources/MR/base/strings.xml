@@ -4,8 +4,8 @@
     <!--suppress CheckTagEmptyBody -->
     <string name="blank" translatable="false"></string>
     <string name="login">Login</string>
-    <string name="share_app_title">Share App</string>
-    <string name="share_app_description">Share App with Others</string>
+    <string name="share_app">Share app</string>
+    <string name="share_this_app_with_others">Share This App with Others</string>
     <string name="send_apk_file">Send app file (APK)</string>
     <string name="send_app_link">Share app store link</string>
     <string name="error">Error</string>

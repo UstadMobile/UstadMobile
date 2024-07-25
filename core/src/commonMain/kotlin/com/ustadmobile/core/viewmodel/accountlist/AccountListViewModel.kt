@@ -4,10 +4,12 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.launchopenlicenses.LaunchOpenLicensesUseCase
+import com.ustadmobile.core.domain.share.ShareAppUseCase
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
 import com.ustadmobile.core.domain.usersession.StartUserSessionUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.AppUiState
+import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.isGuestUser
@@ -91,7 +93,11 @@ class AccountListViewModel(
     private val dontSetCurrentSession: Boolean = savedStateHandle[ARG_DONT_SET_CURRENT_SESSION]
         ?.toBoolean() ?: false
 
+    private val shareAppUseCase: ShareAppUseCase? by instanceOrNull()
+    val sendAppOptionVisible = shareAppUseCase != null
+
     init {
+
         _appUiState.value = AppUiState(
             userAccountIconVisible = false,
             navigationVisible = false,
@@ -139,6 +145,18 @@ class AccountListViewModel(
                         )
                     }
                 }
+            }
+        }
+    }
+
+    fun onClickAppShare(shareLink: Boolean) {
+        viewModelScope.launch {
+            try {
+                shareAppUseCase?.invoke(shareLink)
+            } catch (e: IllegalArgumentException) {
+                snackDispatcher.showSnackBar(Snack(e.message.toString()))
+            } catch (e: Exception) {
+                snackDispatcher.showSnackBar(Snack(e.message.toString()))
             }
         }
     }

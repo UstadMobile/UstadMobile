@@ -1,5 +1,5 @@
 package com.ustadmobile.core.domain.share
 
-interface SendAppFileUseCase {
+interface ShareAppUseCase {
     suspend operator fun invoke(shareLink: Boolean)
 }
