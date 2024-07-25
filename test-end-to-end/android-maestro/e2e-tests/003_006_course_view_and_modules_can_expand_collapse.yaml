@@ -18,6 +18,8 @@ env:
     file: "../common/add_course.yaml"
     env:
       TESTCOURSENAME: "Course view Test"
+- tapOn:
+    text: "Courses"
 - runFlow:
     file: "../common/add_new_student_inside_course.yaml"
     env:
