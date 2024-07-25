@@ -157,13 +157,12 @@ class AccountListViewModel(
         viewModelScope.launch {
             try {
                 shareAppUseCase?.invoke(shareLink)
-            } catch (e: IllegalArgumentException) {
-                snackDispatcher.showSnackBar(Snack(e.message.toString()))
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 snackDispatcher.showSnackBar(Snack(e.message.toString()))
             }
         }
     }
+
 
     fun onClickLogout() {
         val currentSession = _uiState.value.headerAccount ?: return
