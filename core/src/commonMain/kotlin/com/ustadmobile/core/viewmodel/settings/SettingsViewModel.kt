@@ -40,12 +40,6 @@ data class SettingsOfflineStorageOption(
 )
 
 data class SettingsUiState(
-    val sendAppOptionVisible: Boolean = false,
-    val selectedBackupFolderUri: String? = null,
-    val selectedBackupFolderName: String? = null,
-    val isCreatingBackup: Boolean = false,
-    val backupProgress: Float = 0f,
-    val selectedBackupPath: String? = null,
     val htmlContentDisplayOptions: List<HtmlContentDisplayEngineOption> = emptyList(),
     val currentHtmlContentDisplayOption: HtmlContentDisplayEngineOption? = null,
     val holidayCalendarVisible: Boolean = false,
@@ -121,10 +115,7 @@ class SettingsViewModel(
 
     private val settings: Settings by instance()
 
-    private val shareAppUseCase: ShareAppUseCase? by instanceOrNull()
     init {
-
-        _uiState.update { it.copy(sendAppOptionVisible = shareAppUseCase != null) }
 
         _appUiState.update { prev ->
             prev.copy(
@@ -181,9 +172,6 @@ class SettingsViewModel(
         }
 
     }
-
-
-
 
     fun onClickLanguage() {
         _uiState.update { prev ->
@@ -252,17 +240,6 @@ class SettingsViewModel(
         }
     }
 
-    fun onClickAppShare(shareLink: Boolean) {
-        viewModelScope.launch {
-            try {
-                shareAppUseCase?.invoke(shareLink)
-            } catch (e: IllegalArgumentException) {
-                snackDispatcher.showSnackBar(Snack(e.message.toString()))
-            } catch (e: Exception) {
-                snackDispatcher.showSnackBar(Snack(e.message.toString()))
-            }
-        }
-    }
     fun onClickSiteSettings() {
         navController.navigate(SiteDetailViewModel.DEST_NAME, emptyMap())
     }

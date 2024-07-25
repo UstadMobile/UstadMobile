@@ -48,7 +48,6 @@ fun SettingsScreen(
     viewModel: SettingsViewModel
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle(SettingsUiState())
-    var shareAppOptionsVisible by remember { mutableStateOf(false) }
 
     SettingsScreen(uiState = uiState,
         onClickAppLanguage = viewModel::onClickLanguage,
@@ -58,7 +57,9 @@ fun SettingsScreen(
         onClickDeveloperOptions = viewModel::onClickDeveloperOptions,
         onClickDeletedItems = viewModel::onClickDeletedItems,
         onClickOfflineStorageOptionsDialog = viewModel::onClickOfflineStorageOptionsDialog,
-        onClickAppShare = { shareAppOptionsVisible = true })
+    )
+
+
 
     if (uiState.langDialogVisible) {
         // As per https://developer.android.com/jetpack/compose/components/dialog
@@ -112,42 +113,11 @@ fun SettingsScreen(
     if (uiState.waitForRestartDialogVisible) {
         UstadWaitForRestartDialog()
     }
-
-    if (shareAppOptionsVisible) {
-        ModalBottomSheet(onDismissRequest = { shareAppOptionsVisible = false }) {
-            UstadBottomSheetOption(
-                modifier = Modifier.clickable {
-                    shareAppOptionsVisible = false
-                    viewModel.onClickAppShare(false)
-                },
-                headlineContent = { Text(stringResource(MR.strings.send_apk_file)) },
-                leadingContent = { Icon(Icons.Outlined.Android, contentDescription = null) },
-
-
-                )
-
-            UstadBottomSheetOption(
-                modifier = Modifier.clickable {
-                    shareAppOptionsVisible = false
-                    viewModel.onClickAppShare(true)
-
-                },
-                headlineContent = { Text(stringResource(MR.strings.send_app_link)) },
-                leadingContent = {
-                Icon(
-                        Icons.Outlined.Link, contentDescription = null
-                    )
-                },
-
-                )
-        }
-    }
 }
 
 @Composable
 fun SettingsScreen(
     uiState: SettingsUiState,
-    onClickAppShare: () -> Unit = {},
     onClickAppLanguage: () -> Unit = {},
     onClickHtmlContentDisplayEngine: () -> Unit = {},
     onClickGoToHolidayCalendarList: () -> Unit = {},
@@ -206,17 +176,6 @@ fun SettingsScreen(
             )
         }
 
-        if (uiState.sendAppOptionVisible) {
-            UstadDetailField2(
-                modifier = Modifier.clickable {
-                    onClickAppShare()
-                },
-                valueText = stringResource(MR.strings.share_app),
-                labelText = stringResource(MR.strings.share_this_app_with_others),
-                icon = Icons.Default.Share,
-            )
-        }
-
         if (uiState.reasonLeavingVisible) {
             UstadDetailField2(
                 icon = Icons.AutoMirrored.Filled.Logout,
@@ -234,8 +193,8 @@ fun SettingsScreen(
                     modifier = Modifier.clickable { onClickHtmlContentDisplayEngine() },
                     icon = Icons.Default.DisplaySettings,
                     valueText = uiState.currentHtmlContentDisplayOption?.stringResource?.let {
-                            stringResource(it)
-                        } ?: "",
+                        stringResource(it)
+                    } ?: "",
                     labelText = stringResource(MR.strings.html5_content_display_engine),
                 )
             }

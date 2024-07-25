@@ -52,6 +52,7 @@ data class AccountListUiState(
     val showAccountEndpoint: Boolean = false,
     val version: String = "",
     val showPoweredBy: Boolean = false,
+    val shareAppOptionVisible: Boolean = false
 ) {
 
     val activeAccountButtonsEnabled: Boolean
@@ -68,19 +69,27 @@ class AccountListViewModel(
     private val startUserSessionUseCase: StartUserSessionUseCase = StartUserSessionUseCase(
         accountManager = di.direct.instance(),
     )
-): UstadViewModel(di, savedStateHandle, DEST_NAME) {
+) : UstadViewModel(di, savedStateHandle, DEST_NAME) {
 
     private val endpointFilter = savedStateHandle[ARG_FILTER_BY_ENDPOINT]
 
-    private val activeAccountMode = savedStateHandle[ARG_ACTIVE_ACCOUNT_MODE] ?: ACTIVE_ACCOUNT_MODE_HEADER
+    private val activeAccountMode =
+        savedStateHandle[ARG_ACTIVE_ACCOUNT_MODE] ?: ACTIVE_ACCOUNT_MODE_HEADER
 
     private val maxDateOfBirth = savedStateHandle[UstadView.ARG_MAX_DATE_OF_BIRTH]?.toLong() ?: 0
 
     private val apiUrlConfig: ApiUrlConfig by instance()
 
-    private val _uiState = MutableStateFlow(AccountListUiState(
-        showAccountEndpoint = apiUrlConfig.canSelectServer
-    ))
+    private val shareAppUseCase: ShareAppUseCase? by instanceOrNull()
+
+
+    private val _uiState = MutableStateFlow(
+        AccountListUiState(
+            showAccountEndpoint = apiUrlConfig.canSelectServer,
+            shareAppOptionVisible = shareAppUseCase != null
+
+        )
+    )
 
     val uiState: Flow<AccountListUiState> = _uiState.asStateFlow()
 
@@ -90,20 +99,17 @@ class AccountListViewModel(
 
     private val getShowPoweredByUseCase: GetShowPoweredByUseCase? by instanceOrNull()
 
-    private val dontSetCurrentSession: Boolean = savedStateHandle[ARG_DONT_SET_CURRENT_SESSION]
-        ?.toBoolean() ?: false
+    private val dontSetCurrentSession: Boolean =
+        savedStateHandle[ARG_DONT_SET_CURRENT_SESSION]?.toBoolean() ?: false
 
-    private val shareAppUseCase: ShareAppUseCase? by instanceOrNull()
-    val sendAppOptionVisible = shareAppUseCase != null
 
     init {
-
         _appUiState.value = AppUiState(
             userAccountIconVisible = false,
             navigationVisible = false,
-            title = if(savedStateHandle[UstadListViewModel.ARG_LISTMODE] == ListViewMode.PICKER.mode) {
+            title = if (savedStateHandle[UstadListViewModel.ARG_LISTMODE] == ListViewMode.PICKER.mode) {
                 systemImpl.getString(MR.strings.select_account)
-            }else {
+            } else {
                 systemImpl.getString(MR.strings.accounts)
             }
         )
@@ -129,15 +135,13 @@ class AccountListViewModel(
                     val accountsToDisplay = accountList.filter {
                         //Don't show current account when it is shown in the header
                         val isFilteredOutActiveAccount =
-                            (activeAccountMode == ACTIVE_ACCOUNT_MODE_HEADER &&
-                                    it.userSession.usUid == currentUserSessionUid)
-                        val isFilteredOutByEndpoint = (endpointFilter != null && it.endpoint.url != endpointFilter)
-                        val isFilteredOutByDateOfBirth = (maxDateOfBirth > 0 && it.person.dateOfBirth > maxDateOfBirth)
+                            (activeAccountMode == ACTIVE_ACCOUNT_MODE_HEADER && it.userSession.usUid == currentUserSessionUid)
+                        val isFilteredOutByEndpoint =
+                            (endpointFilter != null && it.endpoint.url != endpointFilter)
+                        val isFilteredOutByDateOfBirth =
+                            (maxDateOfBirth > 0 && it.person.dateOfBirth > maxDateOfBirth)
 
-                        !(isFilteredOutActiveAccount ||
-                                isFilteredOutByEndpoint ||
-                                isFilteredOutByDateOfBirth ||
-                                it.userSession.isTemporary())
+                        !(isFilteredOutActiveAccount || isFilteredOutByEndpoint || isFilteredOutByDateOfBirth || it.userSession.isTemporary())
                     }
                     _uiState.update { prev ->
                         prev.copy(
@@ -169,7 +173,7 @@ class AccountListViewModel(
             navController.navigateToLink(
                 link = ClazzListViewModel.DEST_NAME_HOME,
                 accountManager = accountManager,
-                openExternalLinkUseCase = { _, _ ->  },
+                openExternalLinkUseCase = { _, _ -> },
                 userCanSelectServer = apiUrlConfig.canSelectServer,
                 goOptions = UstadMobileSystemCommon.UstadGoOptions(
                     clearStack = true,
@@ -180,26 +184,26 @@ class AccountListViewModel(
 
     fun onClickProfile() {
         val personUid = _uiState.value.headerAccount?.person?.personUid ?: return
-        navController.navigate(PersonDetailViewModel.DEST_NAME, mapOf(
-            ARG_ENTITY_UID to personUid.toString()
-        ))
+        navController.navigate(
+            PersonDetailViewModel.DEST_NAME, mapOf(
+                ARG_ENTITY_UID to personUid.toString()
+            )
+        )
     }
 
-    fun onClickAddAccount(){
+    fun onClickAddAccount() {
         val args = buildMap {
-            if(endpointFilter != null)
-                put(ARG_SERVER_URL, endpointFilter)
+            if (endpointFilter != null) put(ARG_SERVER_URL, endpointFilter)
 
             putFromSavedStateIfPresent(listOf(ARG_NEXT, ARG_DONT_SET_CURRENT_SESSION))
 
             put(ARG_MAX_DATE_OF_BIRTH, savedStateHandle[ARG_MAX_DATE_OF_BIRTH] ?: "0")
         }
-        if(endpointFilter != null || !apiUrlConfig.canSelectServer) {
+        if (endpointFilter != null || !apiUrlConfig.canSelectServer) {
             navController.navigate(
-                viewName = LoginViewModel.DEST_NAME,
-                args = args
+                viewName = LoginViewModel.DEST_NAME, args = args
             )
-        }else {
+        } else {
             //Go to site enter link
             navController.navigate(
                 viewName = SiteEnterLinkViewModel.DEST_NAME,
@@ -229,13 +233,17 @@ class AccountListViewModel(
 
     fun onClickOpenLicenses() {
         val launchUseCaseVal = launchOpenLicensesUseCase
-        if(launchUseCaseVal != null) {
+        if (launchUseCaseVal != null) {
             viewModelScope.launch {
                 launchUseCaseVal()
             }
-        }else {
+        } else {
             navController.navigate(OpenLicensesViewModel.DEST_NAME, emptyMap())
         }
+    }
+
+    fun onToggleShareAppOptions() {
+        _uiState.update { it.copy(shareAppOptionVisible = !it.shareAppOptionVisible) }
     }
 
     companion object {

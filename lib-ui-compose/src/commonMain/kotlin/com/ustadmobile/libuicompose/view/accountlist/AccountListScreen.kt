@@ -49,40 +49,33 @@ fun AccountListScreen(
     viewModel: AccountListViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState(
-        AccountListUiState(), Dispatchers.Main.immediate)
-    var shareAppOptionsVisible by remember { mutableStateOf(false) }
-    AccountListScreen(
-        uiState = uiState,
+        AccountListUiState(), Dispatchers.Main.immediate
+    )
+
+    AccountListScreen(uiState = uiState,
         onAccountListItemClick = viewModel::onClickAccount,
         onDeleteListItemClick = viewModel::onClickDeleteAccount,
         onAddItem = viewModel::onClickAddAccount,
         onLogoutClick = viewModel::onClickLogout,
         onMyProfileClick = viewModel::onClickProfile,
         onClickOpenLicenses = viewModel::onClickOpenLicenses,
-        onClickAppShare = { shareAppOptionsVisible = true }
-    )
+        onClickAppShare = viewModel::onToggleShareAppOptions    )
 
-    if (shareAppOptionsVisible) {
-        ModalBottomSheet(onDismissRequest = { shareAppOptionsVisible = false }) {
-            UstadBottomSheetOption(
-                modifier = Modifier.clickable {
-                    shareAppOptionsVisible = false
-                    viewModel.onClickAppShare(false)
-                },
+    if (uiState.shareAppOptionVisible) {
+        ModalBottomSheet(onDismissRequest = { viewModel.onToggleShareAppOptions() }) {
+            UstadBottomSheetOption(modifier = Modifier.clickable {
+                viewModel.onClickAppShare(false)
+            },
                 headlineContent = { Text(stringResource(MR.strings.send_apk_file)) },
-                leadingContent = { Icon(Icons.Outlined.Android, contentDescription = null) }
-            )
+                leadingContent = { Icon(Icons.Outlined.Android, contentDescription = null) })
 
-            UstadBottomSheetOption(
-                modifier = Modifier.clickable {
-                    shareAppOptionsVisible = false
-                    viewModel.onClickAppShare(true)
-                },
+            UstadBottomSheetOption(modifier = Modifier.clickable {
+                viewModel.onClickAppShare(true)
+            },
                 headlineContent = { Text(stringResource(MR.strings.send_app_link)) },
                 leadingContent = {
                     Icon(Icons.Outlined.Link, contentDescription = null)
-                }
-            )
+                })
         }
     }
 }
@@ -97,14 +90,13 @@ fun AccountListScreen(
     onMyProfileClick: () -> Unit = {},
     onLogoutClick: () -> Unit = {},
     onClickAppShare: () -> Unit = {}
-){
+) {
     val uriHandler = LocalUriHandler.current
 
     UstadLazyColumn(
-        modifier = Modifier
-            .fillMaxWidth()
-    ){
-        if(uiState.headerAccount != null) {
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        if (uiState.headerAccount != null) {
             item(key = "header_account") {
                 AccountListItem(
                     account = uiState.headerAccount
@@ -112,11 +104,10 @@ fun AccountListScreen(
             }
 
             item(key = "header_buttons") {
-                Row (
-                    modifier = Modifier
-                        .padding(start = 72.dp, bottom = 16.dp)
-                ){
-                    if(uiState.myProfileButtonVisible) {
+                Row(
+                    modifier = Modifier.padding(start = 72.dp, bottom = 16.dp)
+                ) {
+                    if (uiState.myProfileButtonVisible) {
                         OutlinedButton(
                             onClick = onMyProfileClick,
                         ) {
@@ -125,9 +116,7 @@ fun AccountListScreen(
                     }
 
                     OutlinedButton(
-                        modifier = Modifier
-                            .padding(start = 10.dp)
-                            .testTag("logout_button"),
+                        modifier = Modifier.padding(start = 10.dp).testTag("logout_button"),
                         onClick = onLogoutClick,
                     ) {
                         Text(stringResource(MR.strings.logout))
@@ -140,23 +129,18 @@ fun AccountListScreen(
             }
         }
 
-        items(
-            uiState.accountsList,
-            key = {
-                "${it.person.personUid}@${it.endpoint}"
-            }
-        ){  account ->
+        items(uiState.accountsList, key = {
+            "${it.person.personUid}@${it.endpoint}"
+        }) { account ->
             AccountListItem(
                 account = account,
-                onClickAccount = {  selectedAccount ->
+                onClickAccount = { selectedAccount ->
                     selectedAccount?.also(onAccountListItemClick)
                 },
                 trailing = {
-                    IconButton(
-                        onClick = {
-                            onDeleteListItemClick(account)
-                        }
-                    ) {
+                    IconButton(onClick = {
+                        onDeleteListItemClick(account)
+                    }) {
                         Icon(
                             imageVector = Icons.Filled.Delete,
                             contentDescription = stringResource(MR.strings.remove),
@@ -189,25 +173,23 @@ fun AccountListScreen(
         }
 
         item(key = "about") {
-            ListItem(
-                modifier = if(uiState.showPoweredBy) {
-                    Modifier.clickable {
-                        uriHandler.openUri("https://www.ustadmobile.com/")
-                    }
-                }else {
-                    Modifier
-                },
+            ListItem(modifier = if (uiState.showPoweredBy) {
+                Modifier.clickable {
+                    uriHandler.openUri("https://www.ustadmobile.com/")
+                }
+            } else {
+                Modifier
+            },
                 headlineContent = { Text(stringResource(MR.strings.version)) },
                 supportingContent = {
-                    val versionStr = if(uiState.showPoweredBy) {
+                    val versionStr = if (uiState.showPoweredBy) {
                         "${uiState.version} ${stringResource(MR.strings.powered_by)}"
-                    }else {
+                    } else {
                         uiState.version
                     }
 
                     Text(text = versionStr)
-                }
-            )
+                })
         }
 
         item(key = "open_licenses") {
@@ -228,53 +210,46 @@ fun AccountListItem(
     account: UserSessionWithPersonAndEndpoint?,
     trailing: @Composable (() -> Unit)? = null,
     onClickAccount: ((UserSessionWithPersonAndEndpoint?) -> Unit)? = null
-){
-    ListItem(
-        modifier = if(onClickAccount != null) {
-            Modifier.clickable {
-                onClickAccount(account)
-            }
-        }else {
-            Modifier
-        },
-        leadingContent = {
-            UstadPersonAvatar(
-                personName = account?.person?.fullName(),
-                pictureUri = account?.personPicture?.personPictureThumbnailUri,
+) {
+    ListItem(modifier = if (onClickAccount != null) {
+        Modifier.clickable {
+            onClickAccount(account)
+        }
+    } else {
+        Modifier
+    }, leadingContent = {
+        UstadPersonAvatar(
+            personName = account?.person?.fullName(),
+            pictureUri = account?.personPicture?.personPictureThumbnailUri,
+        )
+    }, headlineContent = {
+        Text(
+            text = "${account?.person?.firstNames} ${account?.person?.lastName}",
+            maxLines = 1,
+        )
+    }, supportingContent = {
+        Row {
+            Icon(
+                imageVector = Icons.Default.Person,
+                contentDescription = null,
+                Modifier.size(16.dp)
             )
-        },
-        headlineContent = {
             Text(
-                text = "${account?.person?.firstNames} ${account?.person?.lastName}",
+                text = account?.person?.username ?: "",
                 maxLines = 1,
+                modifier = Modifier.padding(start = 8.dp, end = 8.dp)
             )
-        },
-        supportingContent = {
-            Row {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = null,
-                    Modifier.size(16.dp)
-                )
-                Text(
-                    text = account?.person?.username ?: "",
-                    maxLines = 1,
-                    modifier = Modifier
-                        .padding(start = 8.dp, end = 8.dp)
-                )
-                Icon(
-                    imageVector = Icons.Default.Link,
-                    contentDescription = null,
-                    Modifier.size(16.dp)
-                )
-                Text(
-                    text = account?.endpoint?.url ?: "",
-                    maxLines = 1,
-                    modifier = Modifier
-                        .padding(start = 8.dp)
-                )
-            }
-        },
-        trailingContent = trailing
+            Icon(
+                imageVector = Icons.Default.Link,
+                contentDescription = null,
+                Modifier.size(16.dp)
+            )
+            Text(
+                text = account?.endpoint?.url ?: "",
+                maxLines = 1,
+                modifier = Modifier.padding(start = 8.dp)
+            )
+        }
+    }, trailingContent = trailing
     )
 }
