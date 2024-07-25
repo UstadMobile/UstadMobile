@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
+
 
 package com.ustadmobile.libuicompose.view.accountlist
 
@@ -26,9 +26,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
@@ -44,6 +41,7 @@ import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadPersonAvatar
 import kotlinx.coroutines.Dispatchers
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountListScreen(
     viewModel: AccountListViewModel
@@ -52,30 +50,38 @@ fun AccountListScreen(
         AccountListUiState(), Dispatchers.Main.immediate
     )
 
-    AccountListScreen(uiState = uiState,
+    AccountListScreen(
+        uiState = uiState,
         onAccountListItemClick = viewModel::onClickAccount,
         onDeleteListItemClick = viewModel::onClickDeleteAccount,
         onAddItem = viewModel::onClickAddAccount,
         onLogoutClick = viewModel::onClickLogout,
         onMyProfileClick = viewModel::onClickProfile,
         onClickOpenLicenses = viewModel::onClickOpenLicenses,
-        onClickAppShare = viewModel::onToggleShareAppOptions    )
+        onClickAppShare = viewModel::onToggleShareAppOptions
+    )
 
     if (uiState.shareAppOptionVisible) {
-        ModalBottomSheet(onDismissRequest = { viewModel.onToggleShareAppOptions() }) {
-            UstadBottomSheetOption(modifier = Modifier.clickable {
-                viewModel.onClickAppShare(false)
-            },
+        ModalBottomSheet(
+            onDismissRequest = { viewModel.onToggleShareAppOptions() }
+        ) {
+            UstadBottomSheetOption(
+                modifier = Modifier.clickable {
+                    viewModel.onClickAppShare(false)
+                },
                 headlineContent = { Text(stringResource(MR.strings.send_apk_file)) },
-                leadingContent = { Icon(Icons.Outlined.Android, contentDescription = null) })
+                leadingContent = { Icon(Icons.Outlined.Android, contentDescription = null) }
+            )
 
-            UstadBottomSheetOption(modifier = Modifier.clickable {
-                viewModel.onClickAppShare(true)
-            },
+            UstadBottomSheetOption(
+                modifier = Modifier.clickable {
+                    viewModel.onClickAppShare(true)
+                },
                 headlineContent = { Text(stringResource(MR.strings.send_app_link)) },
                 leadingContent = {
                     Icon(Icons.Outlined.Link, contentDescription = null)
-                })
+                }
+            )
         }
     }
 }
@@ -129,18 +135,23 @@ fun AccountListScreen(
             }
         }
 
-        items(uiState.accountsList, key = {
-            "${it.person.personUid}@${it.endpoint}"
-        }) { account ->
+        items(
+            uiState.accountsList,
+            key = {
+                "${it.person.personUid}@${it.endpoint}"
+            }
+        ){  account ->
             AccountListItem(
                 account = account,
-                onClickAccount = { selectedAccount ->
+                onClickAccount = {  selectedAccount ->
                     selectedAccount?.also(onAccountListItemClick)
                 },
                 trailing = {
-                    IconButton(onClick = {
-                        onDeleteListItemClick(account)
-                    }) {
+                    IconButton(
+                        onClick = {
+                            onDeleteListItemClick(account)
+                        }
+                    ) {
                         Icon(
                             imageVector = Icons.Filled.Delete,
                             contentDescription = stringResource(MR.strings.remove),
@@ -158,7 +169,6 @@ fun AccountListScreen(
         }
 
         item(key = "share_app") {
-
             ListItem(
                 modifier = Modifier.clickable { onClickAppShare() },
                 leadingContent = {
@@ -173,13 +183,14 @@ fun AccountListScreen(
         }
 
         item(key = "about") {
-            ListItem(modifier = if (uiState.showPoweredBy) {
-                Modifier.clickable {
-                    uriHandler.openUri("https://www.ustadmobile.com/")
-                }
-            } else {
-                Modifier
-            },
+            ListItem(
+                modifier = if (uiState.showPoweredBy) {
+                    Modifier.clickable {
+                        uriHandler.openUri("https://www.ustadmobile.com/")
+                    }
+                } else {
+                    Modifier
+                },
                 headlineContent = { Text(stringResource(MR.strings.version)) },
                 supportingContent = {
                     val versionStr = if (uiState.showPoweredBy) {
@@ -189,7 +200,8 @@ fun AccountListScreen(
                     }
 
                     Text(text = versionStr)
-                })
+                }
+            )
         }
 
         item(key = "open_licenses") {
@@ -211,45 +223,50 @@ fun AccountListItem(
     trailing: @Composable (() -> Unit)? = null,
     onClickAccount: ((UserSessionWithPersonAndEndpoint?) -> Unit)? = null
 ) {
-    ListItem(modifier = if (onClickAccount != null) {
-        Modifier.clickable {
-            onClickAccount(account)
-        }
-    } else {
-        Modifier
-    }, leadingContent = {
-        UstadPersonAvatar(
-            personName = account?.person?.fullName(),
-            pictureUri = account?.personPicture?.personPictureThumbnailUri,
-        )
-    }, headlineContent = {
-        Text(
-            text = "${account?.person?.firstNames} ${account?.person?.lastName}",
-            maxLines = 1,
-        )
-    }, supportingContent = {
-        Row {
-            Icon(
-                imageVector = Icons.Default.Person,
-                contentDescription = null,
-                Modifier.size(16.dp)
+    ListItem(
+        modifier = if (onClickAccount != null) {
+            Modifier.clickable {
+                onClickAccount(account)
+            }
+        } else {
+            Modifier
+        },
+        leadingContent = {
+            UstadPersonAvatar(
+                personName = account?.person?.fullName(),
+                pictureUri = account?.personPicture?.personPictureThumbnailUri,
             )
+        },
+        headlineContent = {
             Text(
-                text = account?.person?.username ?: "",
+                text = "${account?.person?.firstNames} ${account?.person?.lastName}",
                 maxLines = 1,
-                modifier = Modifier.padding(start = 8.dp, end = 8.dp)
             )
-            Icon(
-                imageVector = Icons.Default.Link,
-                contentDescription = null,
-                Modifier.size(16.dp)
-            )
-            Text(
-                text = account?.endpoint?.url ?: "",
-                maxLines = 1,
-                modifier = Modifier.padding(start = 8.dp)
-            )
-        }
-    }, trailingContent = trailing
+        },
+        supportingContent = {
+            Row {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp)
+                )
+                Text(
+                    text = account?.person?.username ?: "",
+                    maxLines = 1,
+                    modifier = Modifier.padding(start = 8.dp, end = 8.dp)
+                )
+                Icon(
+                    imageVector = Icons.Default.Link,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp)
+                )
+                Text(
+                    text = account?.endpoint?.url ?: "",
+                    maxLines = 1,
+                    modifier = Modifier.padding(start = 8.dp)
+                )
+            }
+        },
+        trailingContent = trailing,
     )
 }
