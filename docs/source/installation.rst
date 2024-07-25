@@ -20,22 +20,22 @@ To install the application using an SD card or flash drive:
 6. Follow the on-screen instructions to complete the installation.
 
 .. image:: images/installation1.jpg
-   :alt: Alternate text describing the image
+   :alt: The screenshot shows file manager app showing categories and OTG storage.
    :width: 400px
    :height: 700px
 
 .. image:: images/installation2.jpg
-   :alt: Alternate text describing the image
+   :alt: The screenshot shows a file manager app displaying "app-android-debug.apk" in OTG storage.
    :width: 400px
    :height: 700px
 
 .. image:: images/installation3.jpg
-   :alt: Alternate text describing the image
+   :alt: The screenshot shows a popup to install application.
    :width: 400px
    :height: 700px
 
 .. image:: images/installation4.jpg
-   :alt: Alternate text describing the image
+   :alt: The screenshot shows a popup to open application
    :width: 400px
    :height: 700px
 
