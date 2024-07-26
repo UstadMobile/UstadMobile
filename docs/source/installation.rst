@@ -58,7 +58,7 @@ To install using QuickShare:
 6. Once the transfer is complete, tap on the received APK to install.
 
 .. image:: images/sharing1.jpg
-   :alt: The screenshot shows the app's Settings screen with options for language, backup, phone memory, deleted items, sharing the app, advanced settings, recommended Chrome, and version.
+   :alt: The screenshot shows the app's Account screen with options for user detail, sharing the app, advanced settings, recommended Chrome, and version.
    :width: 400px
    :height: 700px
 
