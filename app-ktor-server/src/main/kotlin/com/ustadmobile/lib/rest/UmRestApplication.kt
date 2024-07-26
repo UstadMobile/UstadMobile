@@ -691,6 +691,7 @@ fun Application.umRestApplication(
                 db = instance(tag = DoorTag.TAG_DB),
                 repo = null,
                 getApiUrlUseCase = instance(),
+                xxStringHasher = instance(),
             )
         }
 

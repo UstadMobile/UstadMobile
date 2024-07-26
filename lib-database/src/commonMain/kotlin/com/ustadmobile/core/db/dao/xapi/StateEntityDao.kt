@@ -15,7 +15,7 @@ expect abstract class StateEntityDao {
     abstract suspend fun upsertAsync(stateEntities: List<StateEntity>)
 
     /**
-     * Retrieve StateEntities to answer a GET request for a specific state document.
+     * Retrieve the StateEntity for a singular state retrieval.
      *
      * @param accountPersonUid personUid for the session / active user. This MUST be the personUid
      *        for the agentActorUid. Used for access control.
@@ -28,19 +28,12 @@ expect abstract class StateEntityDao {
                   FROM ActorEntity
                  WHERE ActorEntity.actorUid = :agentActorUid) = :accountPersonUid
            AND seActorUid = :agentActorUid
-           AND seActivityUid = :activityUid
-           AND seStateId = :stateId
-           AND (   (:registrationIdHi IS NULL AND :registrationIdLo IS NULL) 
-                OR (seRegistrationHi = :registrationIdHi AND seRegistrationLo = :registrationIdLo)
-               )
+           AND seHash = :seHash
     """)
     abstract suspend fun getByParams(
         accountPersonUid: Long,
         agentActorUid: Long,
-        activityUid: Long,
-        registrationIdHi: Long?,
-        registrationIdLo: Long?,
-        stateId: String,
-    ): List<StateEntity>
+        seHash: Long,
+    ): StateEntity?
 
 }

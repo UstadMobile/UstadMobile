@@ -42,6 +42,10 @@ import kotlinx.serialization.Serializable
  * @param seStateId the stateId as per the xAPI spec
  * @param seContent content itself. If the content is plain text (contentType = text/ * or application/json)
  *        then this is stored as a simple string. If not, this will be Base64 encoded binary data.
+ *        SCORM 1.2 had a 4KB limit and SCORM 2004 has a 64KB limit, so huge content is not expected.
+ *        See https://community.articulate.com/discussions/articulate-storyline/api-suspend-data-limit
+ *        https://community.articulate.com/articles/learning-more-about-your-lms-suspend-data-and-resume-behavior
+ *
  *
  */
 data class StateEntity(
@@ -61,6 +65,9 @@ data class StateEntity(
     var seTimeStored: Long = 0,
 
     var seContentType: String? = null,
+
+    //Reserved for future use
+    var seCompressed: Int = 0,
 
     var seContent: String? = null,
 

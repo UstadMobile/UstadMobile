@@ -5,6 +5,9 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.interop.HttpApiException
 import com.ustadmobile.core.domain.xapi.XapiStatementResource
 import com.ustadmobile.core.domain.xapi.model.XapiStatement
+import com.ustadmobile.core.domain.xapi.state.RetrieveXapiStateUseCase
+import com.ustadmobile.core.domain.xapi.state.StoreXapiStateUseCase
+import com.ustadmobile.core.domain.xapi.state.XapiStateParams
 import com.ustadmobile.core.domain.xapi.toXapiSession
 import com.ustadmobile.core.util.ext.firstNonWhiteSpaceChar
 import com.ustadmobile.ihttp.request.IHttpRequest
@@ -19,6 +22,8 @@ import kotlinx.serialization.json.Json
 
 class XapiHttpServerUseCase(
     private val statementResource: XapiStatementResource,
+    private val storeXapiStateUseCase: StoreXapiStateUseCase,
+    private val retrieveXapiStateUseCase: RetrieveXapiStateUseCase,
     private val db: UmAppDatabase,
     private val json: Json,
     private val endpoint: Endpoint,
@@ -26,6 +31,10 @@ class XapiHttpServerUseCase(
 
     //Simple split by whitespace
     private val authHeaderSplitRegex = Regex("\\s+")
+
+    private fun IHttpRequest.queryParamOrThrow(paramName: String): String {
+        return this.queryParam(paramName) ?: throw HttpApiException(400, "Missing $paramName")
+    }
 
     /**
      * @param pathSegments the segments of the path AFTER the xapi endpoint (exclusive)
@@ -104,13 +113,61 @@ class XapiHttpServerUseCase(
                     )
                 }
 
-                else -> {
-                    return StringResponse(
-                        request = request,
-                        mimeType = "text/plain",
-                        body = "Not found: ${request.method} ${request.url}",
-                        responseCode = 404,
+                //Xapi State Resource
+                resourceName == "activities" && pathSegments.getOrNull(1) == "state" -> {
+                    //HERE - check for list state ids case.
+
+
+                    val xapiStateParams = XapiStateParams(
+                        activityId = request.queryParamOrThrow("activityId"),
+                        agent = request.queryParamOrThrow("agent"),
+                        registration = request.queryParam("registration"),
+                        stateId = request.queryParamOrThrow("stateId")
                     )
+
+                    when {
+                        //Store state
+                        request.method == Method.POST || request.method == Method.PUT -> {
+                            storeXapiStateUseCase(
+                                xapiSession = xapiSession,
+                                stateBody = (request as IHttpRequestWithTextBody).bodyAsText()
+                                    ?: throw HttpApiException(401, "Store state: body missing"),
+                                method = request.method,
+                                contentType = request.headers["content-type"] ?: "application/octet-stream",
+                                xapiStateParams = xapiStateParams,
+                            )
+
+                            StringResponse(
+                                request = request,
+                                mimeType = "text/plain",
+                                responseCode = 204,
+                                body = "",
+                            )
+                        }
+
+                        request.method == Method.GET -> {
+                            val result = retrieveXapiStateUseCase(
+                                xapiSession = xapiSession,
+                                xapiStateParams = xapiStateParams,
+                            )
+                            return result?.let {
+                                StringResponse(
+                                    request = request,
+                                    mimeType = it.contentType,
+                                    responseCode = 200,
+                                    body = it.content
+                                )
+                            } ?: StringResponse(request, "text/plain", responseCode = 404, body = "not found")
+                        }
+
+                        else -> {
+                            throw HttpApiException(400, "Bad request: ${request.method} ${request.url}")
+                        }
+                    }
+                }
+
+                else -> {
+                    throw HttpApiException(404, "not found: ${request.url}")
                 }
             }
         }catch(e: HttpApiException) {

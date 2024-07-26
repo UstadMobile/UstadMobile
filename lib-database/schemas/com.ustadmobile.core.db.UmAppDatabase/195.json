@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 195,
-    "identityHash": "ac7fb4ce24b0dfe5ce6732babef4f41e",
+    "identityHash": "24c94565425cc20c516c6cf9e16d0a2e",
     "entities": [
       {
         "tableName": "ClazzLog",
@@ -5987,7 +5987,7 @@
       },
       {
         "tableName": "StateEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`seActorUid` INTEGER NOT NULL, `seHash` INTEGER NOT NULL, `seKey` TEXT, `seKeyHash` INTEGER NOT NULL, `seActivityUid` INTEGER NOT NULL, `seStateId` TEXT, `seLastMod` INTEGER NOT NULL, `seTimeStored` INTEGER NOT NULL, `seContent` TEXT, `seDeleted` INTEGER NOT NULL, `seRegistrationHi` INTEGER, `seRegistrationLo` INTEGER, PRIMARY KEY(`seActorUid`, `seHash`, `seKeyHash`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`seActorUid` INTEGER NOT NULL, `seHash` INTEGER NOT NULL, `seActivityUid` INTEGER NOT NULL, `seStateId` TEXT, `seLastMod` INTEGER NOT NULL, `seTimeStored` INTEGER NOT NULL, `seContentType` TEXT, `seCompressed` INTEGER NOT NULL, `seContent` TEXT, `seDeleted` INTEGER NOT NULL, `seRegistrationHi` INTEGER, `seRegistrationLo` INTEGER, PRIMARY KEY(`seActorUid`, `seHash`))",
         "fields": [
           {
             "fieldPath": "seActorUid",
@@ -5998,18 +5998,6 @@
           {
             "fieldPath": "seHash",
             "columnName": "seHash",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "seKey",
-            "columnName": "seKey",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "seKeyHash",
-            "columnName": "seKeyHash",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -6034,6 +6022,18 @@
           {
             "fieldPath": "seTimeStored",
             "columnName": "seTimeStored",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "seContentType",
+            "columnName": "seContentType",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "seCompressed",
+            "columnName": "seCompressed",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -6066,8 +6066,7 @@
           "autoGenerate": false,
           "columnNames": [
             "seActorUid",
-            "seHash",
-            "seKeyHash"
+            "seHash"
           ]
         },
         "indices": [],
@@ -6234,7 +6233,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ac7fb4ce24b0dfe5ce6732babef4f41e')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '24c94565425cc20c516c6cf9e16d0a2e')"
     ]
   }
 }

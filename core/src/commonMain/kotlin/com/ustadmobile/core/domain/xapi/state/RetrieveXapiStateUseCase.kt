@@ -5,21 +5,22 @@ import com.ustadmobile.core.domain.interop.HttpApiException
 import com.ustadmobile.core.domain.xapi.XapiSession
 import com.ustadmobile.core.domain.xapi.model.XapiAgent
 import com.ustadmobile.core.domain.xapi.model.identifierHash
+import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
 import com.ustadmobile.core.domain.xxhash.XXStringHasher
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.buildJsonObject
 
 class RetrieveXapiStateUseCase(
     private val db: UmAppDatabase,
     private val repo: UmAppDatabase?,
     private val json: Json,
     private val xxStringHasher: XXStringHasher,
+    private val xxHasher64Factory: XXHasher64Factory,
 ) {
 
     data class RetrieveXapiStateResult(
-        val doc: JsonObject,
+        val content: String,
+        val lastModified: Long,
+        val contentType: String,
     )
 
     suspend operator fun invoke(
@@ -32,26 +33,21 @@ class RetrieveXapiStateUseCase(
             throw HttpApiException(400, "Agent is not valid json: ${e.message}", e)
         }
 
-        val stateEntities = db.stateEntityDao().getByParams(
+        val hash = xapiStateParams.hash(xxHasher64Factory.newHasher(0L))
+
+        val stateEntity = db.stateEntityDao().getByParams(
             accountPersonUid = xapiSession.accountPersonUid,
             agentActorUid = xapiAgent.identifierHash(xxStringHasher),
-            activityUid = xxStringHasher.hash(xapiStateParams.activityId),
-            registrationIdHi = xapiStateParams.registrationUuid?.mostSignificantBits,
-            registrationIdLo = xapiStateParams.registrationUuid?.leastSignificantBits,
-            stateId = xapiStateParams.stateId
+            seHash = hash,
         )
-        if(stateEntities.isEmpty())
-            return null
 
-        val jsonObject = buildJsonObject {
-            stateEntities.forEach {
-                val key = it.seKey ?: throw IllegalArgumentException("no key")
-                val contentJson = it.seContent ?: throw IllegalArgumentException("no content")
-                put(key, json.decodeFromString(JsonElement.serializer(), contentJson))
-            }
+        return stateEntity?.let {
+            RetrieveXapiStateResult(
+                content = it.seContent!!,
+                lastModified = it.seLastMod,
+                contentType = it.seContentType!!
+            )
         }
-
-        return RetrieveXapiStateResult(doc = jsonObject)
     }
 
 }
