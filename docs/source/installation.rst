@@ -50,7 +50,7 @@ QuickShare
 
 To install using QuickShare:
 
-1. On the device with the app, open the app and go to "Share App" in settings.
+1. On the device with the app, open the app and go to "Share App" in account.
 2. Select "QuickShare" as the sharing method.
 3. On the receiving device, open QuickShare and scan for nearby devices.
 4. Select the sending device from the list of available devices.
