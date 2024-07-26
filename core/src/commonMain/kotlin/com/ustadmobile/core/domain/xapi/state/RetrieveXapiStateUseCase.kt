@@ -7,6 +7,7 @@ import com.ustadmobile.core.domain.xapi.model.XapiAgent
 import com.ustadmobile.core.domain.xapi.model.identifierHash
 import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
 import com.ustadmobile.core.domain.xxhash.XXStringHasher
+import com.ustadmobile.core.util.ext.base64StringToByteArray
 import kotlinx.serialization.json.Json
 
 class RetrieveXapiStateUseCase(
@@ -17,11 +18,40 @@ class RetrieveXapiStateUseCase(
     private val xxHasher64Factory: XXHasher64Factory,
 ) {
 
-    data class RetrieveXapiStateResult(
+    sealed interface RetrieveXapiStateResult {
+        val lastModified: Long
+        val contentType: String
+    }
+
+    data class TextRetrieveXapiStateResult(
         val content: String,
-        val lastModified: Long,
-        val contentType: String,
-    )
+        override val lastModified: Long,
+        override val contentType: String,
+    ): RetrieveXapiStateResult
+
+    data class ByteRetrieveXapiStateResult(
+        val content: ByteArray,
+        override val lastModified: Long,
+        override val contentType: String,
+    ): RetrieveXapiStateResult {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (other !is ByteRetrieveXapiStateResult) return false
+
+            if (!content.contentEquals(other.content)) return false
+            if (lastModified != other.lastModified) return false
+            if (contentType != other.contentType) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = content.contentHashCode()
+            result = 31 * result + lastModified.hashCode()
+            result = 31 * result + contentType.hashCode()
+            return result
+        }
+    }
 
     suspend operator fun invoke(
         xapiSession: XapiSession,
@@ -41,12 +71,26 @@ class RetrieveXapiStateUseCase(
             seHash = hash,
         )
 
-        return stateEntity?.let {
-            RetrieveXapiStateResult(
-                content = it.seContent!!,
-                lastModified = it.seLastMod,
-                contentType = it.seContentType!!
-            )
+        return when {
+            stateEntity == null -> null
+
+            stateEntity.seContentType?.let {
+                it.startsWith("text/") || it == "application/json"
+            } == true -> {
+                TextRetrieveXapiStateResult(
+                    content = stateEntity.seContent!!,
+                    lastModified = stateEntity.seLastMod,
+                    contentType = stateEntity.seContentType!!
+                )
+            }
+
+            else -> {
+                ByteRetrieveXapiStateResult(
+                    content = stateEntity.seContent!!.base64StringToByteArray(),
+                    lastModified = stateEntity.seLastMod,
+                    contentType = stateEntity.seContentType!!
+                )
+            }
         }
     }
 

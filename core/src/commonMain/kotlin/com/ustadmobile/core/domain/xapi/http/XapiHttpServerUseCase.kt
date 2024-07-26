@@ -13,6 +13,7 @@ import com.ustadmobile.core.util.ext.firstNonWhiteSpaceChar
 import com.ustadmobile.ihttp.request.IHttpRequest
 import com.ustadmobile.ihttp.request.IHttpRequest.Companion.Method
 import com.ustadmobile.ihttp.request.IHttpRequestWithTextBody
+import com.ustadmobile.ihttp.response.ByteArrayResponse
 import com.ustadmobile.ihttp.response.IHttpResponse
 import com.ustadmobile.ihttp.response.StringResponse
 import io.ktor.util.decodeBase64Bytes
@@ -130,11 +131,10 @@ class XapiHttpServerUseCase(
                         request.method == Method.POST || request.method == Method.PUT -> {
                             storeXapiStateUseCase(
                                 xapiSession = xapiSession,
-                                stateBody = (request as IHttpRequestWithTextBody).bodyAsText()
-                                    ?: throw HttpApiException(401, "Store state: body missing"),
                                 method = request.method,
                                 contentType = request.headers["content-type"] ?: "application/octet-stream",
                                 xapiStateParams = xapiStateParams,
+                                request = request,
                             )
 
                             StringResponse(
@@ -150,14 +150,18 @@ class XapiHttpServerUseCase(
                                 xapiSession = xapiSession,
                                 xapiStateParams = xapiStateParams,
                             )
-                            return result?.let {
-                                StringResponse(
-                                    request = request,
-                                    mimeType = it.contentType,
-                                    responseCode = 200,
-                                    body = it.content
-                                )
-                            } ?: StringResponse(request, "text/plain", responseCode = 404, body = "not found")
+
+                            when(result) {
+                                is RetrieveXapiStateUseCase.ByteRetrieveXapiStateResult -> {
+                                    ByteArrayResponse(request, result.contentType, bodyBytes = result.content)
+                                }
+                                is RetrieveXapiStateUseCase.TextRetrieveXapiStateResult -> {
+                                    StringResponse(request, result.contentType, body = result.content)
+                                }
+                                else -> {
+                                    throw HttpApiException(404, "not found")
+                                }
+                            }
                         }
 
                         else -> {

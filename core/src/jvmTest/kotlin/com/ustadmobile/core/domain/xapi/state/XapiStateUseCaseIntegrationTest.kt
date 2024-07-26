@@ -14,6 +14,7 @@ import com.ustadmobile.core.domain.xxhash.XXStringHasherCommonJvm
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.ihttp.request.IHttpRequest
+import com.ustadmobile.ihttp.request.iRequestBuilder
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -120,17 +121,21 @@ class XapiStateUseCaseIntegrationTest {
             storeXapiStateUseCase(
                 xapiSession = xapiSession,
                 xapiStateParams = stateParams,
-                stateBody = json.encodeToString(doc),
                 method = IHttpRequest.Companion.Method.PUT,
-                contentType = "application/json"
+                contentType = "application/json",
+                request = iRequestBuilder("http://localhost/xapi/activities/state") {
+                    method = IHttpRequest.Companion.Method.PUT
+                    header("content-type", "application/json")
+                    body(json.encodeToString(doc))
+                }
             )
 
             val retrieveResult = retrieveXapiStateUseCase(
                 xapiSession = xapiSession,
                 xapiStateParams = stateParams
-            )
+            ) as RetrieveXapiStateUseCase.TextRetrieveXapiStateResult
 
-            val docParsed = json.decodeFromString(JsonObject.serializer(), retrieveResult!!.content)
+            val docParsed = json.decodeFromString(JsonObject.serializer(), retrieveResult.content)
 
             assertEquals(doc, docParsed)
         }
@@ -157,9 +162,13 @@ class XapiStateUseCaseIntegrationTest {
             storeXapiStateUseCase(
                 xapiSession = xapiSession,
                 xapiStateParams = stateParams,
-                stateBody = json.encodeToString(doc1),
                 method = IHttpRequest.Companion.Method.POST,
-                contentType = "application/json"
+                contentType = "application/json",
+                request = iRequestBuilder("http://localhost/xapi/activities/state") {
+                    method = IHttpRequest.Companion.Method.PUT
+                    header("content-type", "application/json")
+                    body(json.encodeToString(doc1))
+                }
             )
 
             val doc2 = buildJsonObject {
@@ -170,17 +179,21 @@ class XapiStateUseCaseIntegrationTest {
             storeXapiStateUseCase(
                 xapiSession = xapiSession,
                 xapiStateParams = stateParams,
-                stateBody = json.encodeToString(doc2),
                 method = IHttpRequest.Companion.Method.POST,
-                contentType = "application/json"
+                contentType = "application/json",
+                request = iRequestBuilder("http://localhost/xapi/activities/state") {
+                    method = IHttpRequest.Companion.Method.PUT
+                    header("content-type", "application/json")
+                    body(json.encodeToString(doc2))
+                }
             )
 
             val retrieveResult = retrieveXapiStateUseCase(
                 xapiSession = xapiSession,
                 xapiStateParams = stateParams
-            )
+            ) as RetrieveXapiStateUseCase.TextRetrieveXapiStateResult
 
-            val docParsed = json.decodeFromString(JsonObject.serializer(), retrieveResult!!.content)
+            val docParsed = json.decodeFromString(JsonObject.serializer(), retrieveResult.content)
             assertEquals("A1", docParsed["a"]!!.jsonPrimitive.content)
             assertEquals("B", docParsed["b"]!!.jsonPrimitive.content)
             assertEquals("C1", docParsed["c"]!!.jsonPrimitive.content)

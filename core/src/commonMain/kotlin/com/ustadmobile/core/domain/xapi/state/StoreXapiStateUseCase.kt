@@ -7,6 +7,9 @@ import com.ustadmobile.core.domain.xapi.model.XapiAgent
 import com.ustadmobile.core.domain.xapi.model.identifierHash
 import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
 import com.ustadmobile.core.domain.xxhash.XXStringHasher
+import com.ustadmobile.core.util.ext.encodeBase64
+import com.ustadmobile.core.util.ext.requireBodyAsBytes
+import com.ustadmobile.core.util.ext.requireBodyAsText
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.ihttp.request.IHttpRequest
 import com.ustadmobile.lib.db.entities.xapi.StateEntity
@@ -34,7 +37,7 @@ class StoreXapiStateUseCase(
         xapiStateParams: XapiStateParams,
         method: IHttpRequest.Companion.Method,
         contentType: String,
-        stateBody: String,
+        request: IHttpRequest,
     ) {
         val hasher = xxHasher64Factory.newHasher(0)
         val seHash = xapiStateParams.hash(hasher)
@@ -49,13 +52,15 @@ class StoreXapiStateUseCase(
 
         val merge = method == IHttpRequest.Companion.Method.POST && contentType == "application/json"
         val content = if(merge) {
+            val requestBody = request.requireBodyAsText()
+
             val existingState = db.stateEntityDao().getByParams(
                 accountPersonUid = xapiSession.accountPersonUid,
                 agentActorUid = agentActorUid,
                 seHash = seHash
             )
             when {
-                existingState == null -> stateBody
+                existingState == null -> requestBody
 
                 /*
                  * As per the spec, if the content type is application/json and there is an existing
@@ -73,7 +78,7 @@ class StoreXapiStateUseCase(
                     }
 
                     val newStateJsonDoc = try {
-                        json.decodeFromString(JsonObject.serializer(), stateBody)
+                        json.decodeFromString(JsonObject.serializer(), requestBody)
                     }catch(e: Throwable) {
                         throw HttpApiException(400, "New state is not valid json: ${e.message}", e)
                     }
@@ -95,15 +100,21 @@ class StoreXapiStateUseCase(
         }else {
             //If the contentType is application/json then we should check it as per the spec
             // https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Communication.md#requirements-14
-            if(contentType == "application/json") {
+
+            if(
+                contentType == "application/json" || contentType.startsWith("text/")
+            ) {
+                val requestBodyText = request.requireBodyAsText()
                 try {
-                    json.decodeFromString(JsonObject.serializer(), stateBody)
+                    json.decodeFromString(JsonObject.serializer(), requestBodyText)
                 }catch(e: Throwable) {
                     throw HttpApiException(400, "Content-type is application/json, but not valid json: ${e.message}", e)
                 }
-            }
 
-            stateBody
+                requestBodyText
+            }else {
+                request.requireBodyAsBytes().encodeBase64()
+            }
         }
 
         if(xapiSession.agent.identifierHash(xxStringHasher) !=
