@@ -1,5 +1,3 @@
-
-
 package com.ustadmobile.libuicompose.view.accountlist
 
 import androidx.compose.foundation.clickable
@@ -61,22 +59,19 @@ fun AccountListScreen(
         onClickAppShare = viewModel::onToggleShareAppOptions
     )
 
-    if (uiState.shareAppOptionVisible) {
-        ModalBottomSheet(
-            onDismissRequest = { viewModel.onToggleShareAppOptions() }
-        ) {
-            UstadBottomSheetOption(
-                modifier = Modifier.clickable {
-                    viewModel.onClickAppShare(false)
-                },
+    if (uiState.shareAppBottomSheetVisible) {
+        ModalBottomSheet(onDismissRequest = { viewModel.onToggleShareAppOptions() }) {
+            UstadBottomSheetOption(modifier = Modifier.clickable {
+                viewModel.onClickAppShare(false)
+                viewModel.onToggleShareAppOptions()
+            },
                 headlineContent = { Text(stringResource(MR.strings.send_apk_file)) },
-                leadingContent = { Icon(Icons.Outlined.Android, contentDescription = null) }
-            )
+                leadingContent = { Icon(Icons.Outlined.Android, contentDescription = null) })
 
-            UstadBottomSheetOption(
-                modifier = Modifier.clickable {
-                    viewModel.onClickAppShare(true)
-                },
+            UstadBottomSheetOption(modifier = Modifier.clickable {
+                viewModel.onClickAppShare(true)
+                viewModel.onToggleShareAppOptions()
+            },
                 headlineContent = { Text(stringResource(MR.strings.send_app_link)) },
                 leadingContent = {
                     Icon(Icons.Outlined.Link, contentDescription = null)

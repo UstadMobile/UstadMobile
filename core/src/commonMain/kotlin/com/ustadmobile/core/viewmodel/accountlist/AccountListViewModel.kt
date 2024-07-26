@@ -52,7 +52,8 @@ data class AccountListUiState(
     val showAccountEndpoint: Boolean = false,
     val version: String = "",
     val showPoweredBy: Boolean = false,
-    val shareAppOptionVisible: Boolean = false
+    val shareAppOptionVisible: Boolean = false,
+    val shareAppBottomSheetVisible: Boolean = false
 ) {
 
     val activeAccountButtonsEnabled: Boolean
@@ -241,7 +242,9 @@ class AccountListViewModel(
     }
 
     fun onToggleShareAppOptions() {
-        _uiState.update { it.copy(shareAppOptionVisible = !it.shareAppOptionVisible) }
+        _uiState.update {
+            it.copy(shareAppBottomSheetVisible = !it.shareAppBottomSheetVisible)
+        }
     }
 
     companion object {
