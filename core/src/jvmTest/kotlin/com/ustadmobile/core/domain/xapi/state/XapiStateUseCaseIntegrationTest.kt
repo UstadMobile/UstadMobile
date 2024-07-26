@@ -22,6 +22,8 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import org.junit.Assert
+import kotlin.random.Random
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -197,6 +199,41 @@ class XapiStateUseCaseIntegrationTest {
             assertEquals("A1", docParsed["a"]!!.jsonPrimitive.content)
             assertEquals("B", docParsed["b"]!!.jsonPrimitive.content)
             assertEquals("C1", docParsed["c"]!!.jsonPrimitive.content)
+        }
+    }
+
+    @Test
+    fun givenBinaryStateStored_whenRetrieved_thenShouldMatch() {
+        val activityId = "http://example.org/id"
+        val stateId = "aStateId"
+
+        val binaryData = Random.nextBytes(ByteArray(200))
+        runBlocking {
+            val stateParams = XapiStateParams(
+                activityId = activityId,
+                agent = json.encodeToString(xapiAgent),
+                registration = xapiSession.registrationUuid,
+                stateId = stateId,
+            )
+            storeXapiStateUseCase(
+                xapiSession = xapiSession,
+                xapiStateParams = stateParams,
+                method = IHttpRequest.Companion.Method.PUT,
+                contentType = "application/octet-stream",
+                request = iRequestBuilder("http://localhost/xapi/activities/state") {
+                    method = IHttpRequest.Companion.Method.PUT
+                    body(binaryData)
+                }
+            )
+
+            val retrieveResult = retrieveXapiStateUseCase(
+                xapiSession = xapiSession,
+                xapiStateParams = stateParams,
+            )
+
+            Assert.assertArrayEquals(
+                binaryData, (retrieveResult as RetrieveXapiStateUseCase.ByteRetrieveXapiStateResult).content
+            )
         }
     }
 

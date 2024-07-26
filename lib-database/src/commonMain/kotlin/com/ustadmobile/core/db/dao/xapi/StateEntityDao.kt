@@ -4,6 +4,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.ustadmobile.door.annotation.DoorDao
+import com.ustadmobile.door.annotation.HttpAccessible
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.xapi.StateEntity
 
@@ -14,6 +15,9 @@ expect abstract class StateEntityDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun upsertAsync(stateEntities: List<StateEntity>)
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+    )
     /**
      * Retrieve the StateEntity for a singular state retrieval.
      *
