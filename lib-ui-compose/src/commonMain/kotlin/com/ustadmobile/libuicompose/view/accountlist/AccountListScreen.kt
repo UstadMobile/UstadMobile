@@ -168,14 +168,16 @@ fun AccountListScreen(
             )
         }
 
-        item(key = "share_app") {
-            ListItem(
-                modifier = Modifier.clickable { onClickAppShare() },
-                leadingContent = {
-                    Icon(Icons.Default.Share, contentDescription = null)
-                },
-                headlineContent = { Text(stringResource(MR.strings.share_app)) },
-            )
+        if (uiState.shareAppOptionVisible) {
+            item(key = "share_app") {
+                ListItem(
+                    modifier = Modifier.clickable { onClickAppShare() },
+                    leadingContent = {
+                        Icon(Icons.Default.Share, contentDescription = null)
+                    },
+                    headlineContent = { Text(stringResource(MR.strings.share_app)) },
+                )
+            }
         }
 
         item(key = "bottom_divider") {
