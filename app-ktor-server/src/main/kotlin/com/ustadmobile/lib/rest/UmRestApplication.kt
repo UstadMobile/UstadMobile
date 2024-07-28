@@ -714,12 +714,20 @@ fun Application.umRestApplication(
         onReady {
             if(dbMode == CONF_DBMODE_SINGLETON && siteUrl != null) {
                 val endpoint = Endpoint(siteUrl)
+                val passwordFile = di.on(endpoint).direct.instance<File>(tag = DiTag.TAG_ADMIN_PASS_FILE)
 
-                //Generate the admin username/password etc.
-                di.on(endpoint).direct.instance<AuthManager>()
+                /**
+                 * Eager initialization only if the initial admin password needs generated. This
+                 * avoids potential issue with startup script if this server starts before postgres
+                 * is ready.
+                 */
+                if(!passwordFile.exists()) {
+                    //Generate the admin username/password etc.
+                    di.on(endpoint).direct.instance<AuthManager>()
 
-                val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
-                println("init db: $db")
+                    val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
+                    println("init db: $db")
+                }
             }
 
             instance<Scheduler>().start()

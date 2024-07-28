@@ -221,3 +221,16 @@ Content assets will be compressed by the server itself.
 * Setup a Postgres database and use this instead of the default (embedded) SQLite.
 
 * Run the server using a script on startup or use the screen command.
+
+### Autostart using systemd
+
+This should be done using SystemD on most Linux distributions (including Ubuntu). Modify the paths
+and user (if needed) in systemd/ustad-server.service and then install the service:
+
+```
+$ cp unzip-path/systemd/ustad-server.service /etc/systemd/system/
+$ sudo systemctl daemon-reload
+$ sudo systemctl start ustad-server
+# Check status
+$ sudo systemctl status ustad-server
+```
