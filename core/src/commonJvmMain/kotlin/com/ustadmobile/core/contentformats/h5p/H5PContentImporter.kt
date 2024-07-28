@@ -4,6 +4,7 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentformats.ContentImporter
 import com.ustadmobile.core.contentformats.ContentImportProgressListener
 import com.ustadmobile.core.contentformats.manifest.ContentManifest
+import com.ustadmobile.core.contentformats.manifest.totalStorageSize
 import com.ustadmobile.core.contentformats.storeText
 import com.ustadmobile.core.contentjob.InvalidContentException
 import com.ustadmobile.core.contentjob.MetadataResult
@@ -157,7 +158,7 @@ class H5PContentImporter(
         progressListener: ContentImportProgressListener
     ): ContentEntryVersion = withContext(Dispatchers.IO) {
         val jobUri = jobItem.requireSourceAsDoorUri()
-        val entry = db.contentEntryDao.findByUid(jobItem.cjiContentEntryUid)
+        val entry = db.contentEntryDao().findByUid(jobItem.cjiContentEntryUid)
         val params = CompressParams(
             compressionLevel = CompressionLevel.forValue(jobItem.cjiCompressionLevel)
         )
@@ -338,9 +339,9 @@ class H5PContentImporter(
                 cevManifestUrl = manifestUrl,
                 cevContentEntryUid = jobItem.cjiContentEntryUid,
                 cevOpenUri = "tincan.xml",
-                cevStorageSize = h5pContentManifestEntries.sumOf { it.savedBlob.storageSize } +
-                    h5pStandAloneManifestEntries.sumOf { it.savedBlob.storageSize } +
-                    tinCanAndIndexEntries.sumOf { it.savedBlob.storageSize },
+                cevStorageSize = h5pContentManifestEntries.totalStorageSize() +
+                    h5pStandAloneManifestEntries.totalStorageSize() +
+                    tinCanAndIndexEntries.totalStorageSize(),
                 cevOriginalSize = uriHelper.getSize(jobUri),
             )
         }finally {

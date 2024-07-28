@@ -7,22 +7,22 @@ appId: com.toughra.ustadmobile
   # 3) TEXT: provide text to enter inside text box of string type
 
 # add module
-- repeat:
-      while:
-          notVisible: "Add block"
-      commands:
-          - swipe:
-                start: 100,400
-                end: 100,100
+- scrollUntilVisible:
+    element:
+      text: "Add block"
+    direction: DOWN
 - tapOn: "Add block"
 - tapOn: "Text"
-- tapOn: "Title"
+- tapOn: "Title*"
 - inputText: ${TEXTTITLE}
-- tapOn: "Don't show before (Optional)"
-- tapOn: "OK"
-# editor space on text module does not have text field, so we used its id
+- hideKeyboard
+- tapOn: "Description"
 - tapOn:
     id: "com.toughra.ustadmobile:id/editor"
-- inputText: ${TEXT}
-- tapOn: "SAVE"
+- inputText:  ${TEXT}
+- tapOn: "Done"
+- assertVisible:
+        id: "app_title"
+        text: "Add text"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/added_text_${TEXTTITLE}"
+- tapOn: "Done"

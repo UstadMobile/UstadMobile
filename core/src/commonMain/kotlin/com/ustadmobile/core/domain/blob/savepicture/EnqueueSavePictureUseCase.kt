@@ -19,6 +19,13 @@ package com.ustadmobile.core.domain.blob.savepicture
  */
 interface EnqueueSavePictureUseCase {
 
+    /**
+     * Enqueue saving the given picture. The entity (as per entityUid and tableId) MUST already exist.
+     * It will be updated as the the picture is processed (compressed/uploaded) as required.
+     *
+     * This should be invoked AFTER the completion of the transaction in which the entity itself
+     * was committed has completed.
+     */
     suspend operator fun invoke(
         entityUid: Long,
         tableId: Int,

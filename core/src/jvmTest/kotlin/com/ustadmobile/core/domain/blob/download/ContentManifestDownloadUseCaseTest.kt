@@ -93,13 +93,13 @@ class ContentManifestDownloadUseCaseTest {
         )
 
         val contentEntryVersionUid = runBlocking {
-            db.contentEntryVersionDao.insertAsync(ContentEntryVersion(
+            db.contentEntryVersionDao().insertAsync(ContentEntryVersion(
                 cevManifestUrl = mockWebServer.url("/manifest.json").toString()
             ))
         }
 
         val transferJobId = runBlocking {
-            db.transferJobDao.insert(
+            db.transferJobDao().insert(
                 TransferJob(
                     tjOiUid = offlineItemUid,
                     tjType = TransferJob.TYPE_DOWNLOAD
@@ -107,13 +107,13 @@ class ContentManifestDownloadUseCaseTest {
             ).toInt()
         }
 
+        val tmpResponseFolder = temporaryFolder.newFolder("cache-tmp-partial-responses")
         val useCase = ContentManifestDownloadUseCase(
             enqueueBlobDownloadClientUseCase = mockEnqueueBlobDownloadUseCase,
             db = db,
             httpClient = httpClient,
             json = json,
-            cacheTmpPath = temporaryFolder.newFolder("cache-tmp-partial-responses")
-                .absolutePath.requireFileSeparatorSuffix()
+            cacheTmpPath = { tmpResponseFolder.absolutePath.requireFileSeparatorSuffix() }
         )
 
         runBlocking {
@@ -132,7 +132,7 @@ class ContentManifestDownloadUseCaseTest {
                 )
             }
 
-            val cacheLockJoins = db.cacheLockJoinDao.findByTableIdAndEntityUid(
+            val cacheLockJoins = db.cacheLockJoinDao().findByTableIdAndEntityUid(
                 tableId = ContentEntryVersion.TABLE_ID,
                 entityUid = contentEntryVersionUid
             )

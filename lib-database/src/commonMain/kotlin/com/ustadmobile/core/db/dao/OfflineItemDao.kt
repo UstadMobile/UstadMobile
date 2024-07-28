@@ -37,7 +37,8 @@ expect abstract class OfflineItemDao {
                           AND CompletedJob.tjType = ${TransferJob.TYPE_DOWNLOAD}
                           AND CompletedJob.tjTimeCreated >= OfflineItem.oiLct
                         LIMIT 1      
-               )) AS readyForOffline
+               )) AS readyForOffline,
+               NULL AS latestErrorStr
           FROM OfflineItem
                LEFT JOIN TransferJob 
                          ON TransferJob.tjUid = 

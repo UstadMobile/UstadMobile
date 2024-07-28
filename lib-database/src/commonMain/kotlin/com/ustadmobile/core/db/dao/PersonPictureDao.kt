@@ -59,7 +59,12 @@ expect abstract class PersonPictureDao : BaseDao<PersonPicture>, ImageDao {
                personPictureLct = :time
          WHERE personPictureUid = :uid      
     """)
-    abstract override suspend fun updateUri(uid: Long, uri: String?, thumbnailUri: String?, time: Long)
+    abstract override suspend fun updateUri(
+        uid: Long,
+        uri: String?,
+        thumbnailUri: String?,
+        time: Long
+    )
 
 
     @Query("""

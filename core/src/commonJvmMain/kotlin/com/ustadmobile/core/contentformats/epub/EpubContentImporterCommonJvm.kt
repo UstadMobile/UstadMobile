@@ -8,6 +8,7 @@ import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.contentformats.ContentImporter
 import com.ustadmobile.core.contentformats.manifest.ContentManifest
+import com.ustadmobile.core.contentformats.manifest.totalStorageSize
 import com.ustadmobile.core.contentformats.storeText
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
@@ -24,14 +25,17 @@ import com.ustadmobile.core.util.ext.substringUntilLastIndexOfInclusive
 import com.ustadmobile.core.viewmodel.epubcontent.EpubContentViewModel
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
+import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.io.unzipTo
+import com.ustadmobile.libcache.uuid.randomUuid
 import io.github.aakira.napier.Napier
 import java.util.zip.ZipInputStream
 import kotlinx.coroutines.*
 import kotlinx.io.asInputStream
+import kotlinx.io.asOutputStream
 import kotlinx.io.buffered
 import kotlinx.io.files.FileSystem
 import kotlinx.io.files.Path
@@ -60,6 +64,7 @@ class EpubContentImporterCommonJvm(
     private val json: Json,
     private val getStoragePathForUrlUseCase: GetStoragePathForUrlUseCase,
     private val compressListUseCase: CompressListUseCase,
+    private val saveLocalUrisAsBlobsUseCase: SaveLocalUrisAsBlobsUseCase? = null,
 ) : ContentImporter(endpoint) {
 
     val viewName: String
@@ -138,13 +143,13 @@ class EpubContentImporterCommonJvm(
                  */
                 getEpubTableOfContentsUseCase(
                     opfPackage = opfPackageVal,
-                    readItemText = {
-                        val pathInZip = itemPathInZip(it.href)
+                    readItemText = { item ->
+                        val pathInZip = itemPathInZip(item.href)
                         ZipInputStream(uriHelper.openSource(localUri).asInputStream()).use { zipIn ->
                             if(zipIn.skipToEntry { it.name == pathInZip } != null)
                                 zipIn.bufferedReader().readText()
                             else
-                                throw IllegalArgumentException("$pathInZip not found for ${it.href}")
+                                throw IllegalArgumentException("$pathInZip not found for ${item.href}")
                         }
                     }
                 ) ?: throw IllegalStateException("EPUB table of contents/nav document not found.")
@@ -157,6 +162,45 @@ class EpubContentImporterCommonJvm(
                 if(missingItems.isNotEmpty()) {
                     throw IllegalStateException("Item(s) from manifest are missing: " +
                             missingItems.joinToString { it.href })
+                }
+
+                val coverImg = opfPackageVal.coverItem()
+                val coverImgBlob = if(coverImg != null) {
+                    val opfBasePath = opfPath.substringUntilLastIndexOfInclusive("/", "")
+                    val coverTmpPath = Path(tmpPath, randomUuid())
+                    fileSystem.takeIf { !it.exists(tmpPath) }?.createDirectories(tmpPath)
+
+                    val unzippedCoverPath = ZipInputStream(uriHelper.openSource(localUri).asInputStream()).use { zipIn ->
+                        val coverItemZipEntry = zipIn.skipToEntry {
+                            it.name == opfBasePath + coverImg.href
+                        }
+
+                        if(coverItemZipEntry != null) {
+                            fileSystem.sink(coverTmpPath).buffered().asOutputStream().use { coverTmpOut ->
+                                zipIn.copyTo(coverTmpOut)
+                                coverTmpOut.close()
+                            }
+
+                            coverTmpPath
+                        }else {
+                            null
+                        }
+                    }
+
+                    unzippedCoverPath?.let { path ->
+                        saveLocalUrisAsBlobsUseCase?.invoke(
+                            listOf(
+                                SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem(
+                                    localUri = File(path.toString()).toDoorUri().toString(),
+                                    mimeType = coverImg.mediaType,
+                                )
+                            )
+                        )?.firstOrNull()
+                    }?.also {
+                        fileSystem.delete(coverTmpPath, mustExist = false)
+                    }
+                }else {
+                    null
                 }
 
                 val entry = ContentEntryWithLanguage().apply {
@@ -178,8 +222,18 @@ class EpubContentImporterCommonJvm(
                         }
                     }
                 }
+                val picture = coverImgBlob?.let {
+                    ContentEntryPicture2(
+                        cepPictureUri = it.blobUrl,
+                        cepThumbnailUri = it.blobUrl,
+                    )
+                }
 
-                return@withContext MetadataResult(entry, PLUGIN_ID)
+                return@withContext MetadataResult(
+                    entry = entry,
+                    importerId = PLUGIN_ID,
+                    picture = picture,
+                )
             } catch (e: Exception) {
                 throw InvalidContentException("Invalid epub: ${e.message}", e)
             }
@@ -226,9 +280,9 @@ class EpubContentImporterCommonJvm(
                     } ?: throw IllegalArgumentException("Cannot find $pathInZip")
 
                     /* If this is XHTML, then use the xhtmlFixer to check for invalid XHTML
-                         * content (some content e.g. Storyweaver includes br's without the trailing
-                         * slash etc).
-                         */
+                     * content (some content e.g. Storyweaver includes br's without the trailing
+                     * slash etc).
+                     */
                     if (opfItem.mediaType == "application/xhtml+xml") {
                         val xhtmlText =
                             fileSystem.source(unzippedEntry.path).buffered().use { fileSource ->
@@ -306,9 +360,7 @@ class EpubContentImporterCommonJvm(
                     cevManifestUrl = manifestUrl,
                     cevOpenUri = opfPath,
                     cevOriginalSize = uriHelper.getSize(jobUri),
-                    cevStorageSize = manifestedItems.sumOf {
-                        it.savedBlob.storageSize
-                    }
+                    cevStorageSize = manifestedItems.totalStorageSize(),
                 )
             }catch(e: Exception) {
                 Napier.e("EpubTypePlugin: Exception importing epub", e)

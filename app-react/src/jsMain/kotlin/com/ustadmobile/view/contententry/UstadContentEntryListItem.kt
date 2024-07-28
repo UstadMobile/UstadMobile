@@ -8,15 +8,14 @@ import com.ustadmobile.hooks.useHtmlToPlainText
 import com.ustadmobile.lib.db.composites.ContentEntryAndListDetail
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.mui.common.justifyContent
+import com.ustadmobile.mui.components.UstadBlockIcon
+import com.ustadmobile.mui.components.UstadBlockStatusProgressBar
 import com.ustadmobile.mui.ext.paddingCourseBlockIndent
+import com.ustadmobile.util.ext.useAbsolutePositionBottom
 import com.ustadmobile.util.ext.useLineClamp
-import com.ustadmobile.view.contententry.detailoverviewtab.CONTENT_ENTRY_TYPE_ICON_MAP
 import js.objects.jso
 import web.cssom.*
 //WARNING: DO NOT Replace with import mui.icons.material.[*] - Leads to severe IDE performance issues 10/Apr/23 https://youtrack.jetbrains.com/issue/KT-57897/Intellisense-and-code-analysis-is-extremely-slow-and-unusable-on-Kotlin-JS
-import mui.icons.material.BookOutlined as BookOutlinedIcon
-import mui.icons.material.Folder as FolderIcon
-import mui.icons.material.TextSnippet as TextSnippetIcon
 import mui.material.*
 import mui.system.responsive
 import mui.system.sx
@@ -89,8 +88,28 @@ val UstadContentEntryListItem = FC<UstadContentEntryListItemProps> { props ->
             selected = props.selected
 
             ListItemIcon {
-                LeadingContent {
-                    contentEntryItem = props.contentEntry?.contentEntry
+                Box {
+                    sx {
+                        position = Position.relative
+                        width = 40.px
+                        height = 40.px
+                    }
+
+                    UstadBlockStatusProgressBar {
+                        sx {
+                            useAbsolutePositionBottom()
+                            width = 100.pct
+                        }
+
+                        blockStatus = props.contentEntry?.status
+                    }
+
+                    UstadBlockIcon {
+                        contentEntry = props.contentEntry?.contentEntry
+                        courseBlock = null
+                        title = props.contentEntry?.contentEntry?.title ?: ""
+                        pictureUri = props.contentEntry?.picture?.cepThumbnailUri
+                    }
                 }
             }
 
@@ -141,34 +160,6 @@ val UstadContentEntryListItem = FC<UstadContentEntryListItemProps> { props ->
 
 }
 
-private external interface LeadingContentProps: Props {
-
-    var contentEntryItem: ContentEntry?
-}
-
-private val LeadingContent = FC<LeadingContentProps> { props ->
-
-    val thumbnail = if (props.contentEntryItem?.leaf == true)
-        BookOutlinedIcon
-    else
-        FolderIcon
-
-    Stack {
-        direction = responsive(StackDirection.column)
-        spacing = responsive(10.px)
-        justifyContent = JustifyContent.center
-
-        thumbnail {
-            sx {
-                width = 40.px
-                height = 40.px
-            }
-        }
-    }
-}
-
-
-
 private external interface SecondaryContentProps: Props {
 
     var contentEntryItem: ContentEntry?
@@ -200,9 +191,8 @@ private val SecondaryContent = FC<SecondaryContentProps> { props ->
             direction = responsive(StackDirection.row)
 
             if (uiState?.mimetypeVisible == true){
-                Icon {
-                    + (CONTENT_ENTRY_TYPE_ICON_MAP[props.contentEntryItem
-                        ?.contentTypeFlag]?.create() ?: TextSnippetIcon.create())
+                uiState.contentEntry.contentTypeIconComponent()?.also {
+                    + it.create()
                 }
 
                 Typography {

@@ -44,7 +44,9 @@ class DefaultCacheCompressionFilter: CacheStorageCompressionFilter {
             "application/oebps-package+xml",//OPF package
             "image/svg+xml",//SVG - XML
             "application/vnd.ms-opentype",//OTF - Unlike WOFF (which has built in compression), OTF should be compressed
-            "font/ttf", //TTF - Unlike WOFF (which has built in compression), OTF should be compressed
+            "font/ttf", //TTF - Unlike WOFF (which has built in compression), OTF should be compressed,
+            "application/x-font-truetype", //other possibility for TTF (not entirely standardized).
+            "application/x-font-ttf", //other possibility for TTF (not entirely standardized).
         )
     }
 }

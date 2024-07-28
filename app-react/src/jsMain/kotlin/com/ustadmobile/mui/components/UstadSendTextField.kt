@@ -28,6 +28,7 @@ external interface UstadSendTextFieldProps: TextFieldProps {
 val UstadSendTextField = FC<UstadSendTextFieldProps> { props ->
     val strings = useStringProvider()
 
+    println("UstadSendTextField: value = ${props.value} / ${props.value as? String}")
     val isBlank = useMemo(props.value) {
         (props.value as? String).isNullOrBlank()
     }

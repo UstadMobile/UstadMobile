@@ -136,6 +136,8 @@ dependencies {
 
     implementation libs.hsqldb
 
+    implementation libs.vlcj
+
     //test
     testImplementation project(":lib-test-common")
     testImplementation project(":sharedse")

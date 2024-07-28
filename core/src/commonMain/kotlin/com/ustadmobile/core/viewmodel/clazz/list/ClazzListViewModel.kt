@@ -53,7 +53,6 @@ data class ClazzListUiState(
 
     val filterOptions: List<MessageIdOption2> = listOf(
         MessageIdOption2(MR.strings.currently_enrolled, ClazzDaoCommon.FILTER_CURRENTLY_ENROLLED),
-        MessageIdOption2(MR.strings.past_enrollments, ClazzDaoCommon.FILTER_PAST_ENROLLMENTS),
         MessageIdOption2(MR.strings.all, 0)
     ),
 
@@ -95,7 +94,7 @@ class ClazzListViewModel(
 
 
     private val pagingSourceFactory: () -> PagingSource<Int, ClazzWithListDisplayDetails> =  {
-        activeRepo.clazzDao.findClazzesWithPermission(
+        activeRepo.clazzDao().findClazzesWithPermission(
             searchQuery =  _appUiState.value.searchState.searchText.toQueryLikeParam(),
             accountPersonUid = accountManager.currentAccount.personUid,
             excludeSelectedClazzList = filterAlreadySelectedList,
@@ -130,7 +129,7 @@ class ClazzListViewModel(
 
         viewModelScope.launch {
             _uiState.whenSubscribed {
-                activeRepo.systemPermissionDao.personHasSystemPermissionAsFlow(
+                activeRepo.systemPermissionDao().personHasSystemPermissionAsFlow(
                     accountManager.currentAccount.personUid, PermissionFlags.ADD_COURSE
                 ).distinctUntilChanged().collect { hasPermission ->
                     _uiState.update { prev ->
@@ -145,7 +144,7 @@ class ClazzListViewModel(
 
         viewModelScope.launch {
             _uiState.whenSubscribed {
-                activeRepo.enrolmentRequestDao.findRequestsForUserAsFlow(
+                activeRepo.enrolmentRequestDao().findRequestsForUserAsFlow(
                     accountPersonUid = activeUserPersonUid,
                     statusFilter = EnrolmentRequest.STATUS_PENDING,
                 ).collect {
@@ -197,7 +196,7 @@ class ClazzListViewModel(
 
     fun onClickCancelEnrolmentRequest(enrolmentRequest: EnrolmentRequest) {
         viewModelScope.launch {
-            activeRepo.enrolmentRequestDao.updateStatus(
+            activeRepo.enrolmentRequestDao().updateStatus(
                 uid = enrolmentRequest.erUid,
                 status = EnrolmentRequest.STATUS_CANCELED,
                 updateTime = systemTimeInMillis(),

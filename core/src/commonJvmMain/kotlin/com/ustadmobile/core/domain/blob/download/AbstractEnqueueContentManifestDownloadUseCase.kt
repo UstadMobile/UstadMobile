@@ -21,7 +21,7 @@ abstract class AbstractEnqueueContentManifestDownloadUseCase(
         offlineItemUid: Long,
     ): TransferJob {
         return db.withDoorTransactionAsync {
-            val contentEntryVersion = db.contentEntryVersionDao.findByUidAsync(
+            val contentEntryVersion = db.contentEntryVersionDao().findByUidAsync(
                 contentEntryVersionUid) ?: throw IllegalArgumentException(
                 "Enqueue: Could not find ContentEntryVersion $contentEntryVersionUid")
 
@@ -33,14 +33,14 @@ abstract class AbstractEnqueueContentManifestDownloadUseCase(
                 tjTableId = ContentEntryVersion.TABLE_ID,
                 tjOiUid = offlineItemUid,
             )
-            val jobUid = db.transferJobDao.insert(transferJob).toInt()
+            val jobUid = db.transferJobDao().insert(transferJob).toInt()
             val manifestTransferJobItem = TransferJobItem(
                 tjiTjUid = jobUid,
                 tjiSrc = contentEntryVersion.cevManifestUrl,
                 tjiEntityUid = contentEntryVersion.cevUid,
                 tjiTableId = ContentEntryVersion.TABLE_ID,
             )
-            db.transferJobItemDao.insert(manifestTransferJobItem)
+            db.transferJobItemDao().insert(manifestTransferJobItem)
 
             transferJob.copy(
                 tjUid = jobUid

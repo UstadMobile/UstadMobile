@@ -13,17 +13,16 @@ import com.ustadmobile.lib.db.composites.CourseBlockAndEditEntities
 fun ClazzAssignmentEditScreenPreview() {
     val uiStateVal = ClazzAssignmentEditUiState(
         courseBlockEditUiState = CourseBlockEditUiState(
-            courseBlock = CourseBlock().apply {
-                cbMaxPoints = 78
-                cbCompletionCriteria = 14
-            },
+            block = CourseBlockAndEditEntities(
+                courseBlock = CourseBlock().apply {
+                    cbMaxPoints = 78f
+                    cbCompletionCriteria = 14
+                },
+                assignment = ClazzAssignment().apply {
+                    caMarkingType = ClazzAssignment.MARKED_BY_PEERS
+                }
+            ),
         ),
-        entity = CourseBlockAndEditEntities(
-            courseBlock = CourseBlock(),
-            assignment = ClazzAssignment().apply {
-                caMarkingType = ClazzAssignment.MARKED_BY_PEERS
-            }
-        )
     )
 
     ClazzAssignmentEditScreen(uiStateVal)

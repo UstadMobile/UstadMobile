@@ -7,6 +7,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -29,6 +30,7 @@ import com.ustadmobile.libuicompose.util.rememberEmptyFlow
 import com.ustadmobile.libuicompose.util.rememberTimeFormatter
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.TimeZone
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 
@@ -40,6 +42,7 @@ fun DiscussionPostDetailScreen(viewModel: DiscussionPostDetailViewModel){
 
     DiscussionPostDetailScreen(
         uiState = uiState,
+        replyText = viewModel.replyText,
         onClickAddReply = viewModel::onClickEditReplyHtml,
         onChangeReplyText = viewModel::onChangeReplyText,
         onClickReplyButton = viewModel::onClickPostReply,
@@ -50,6 +53,7 @@ fun DiscussionPostDetailScreen(viewModel: DiscussionPostDetailViewModel){
 @Composable
 fun DiscussionPostDetailScreen(
     uiState: DiscussionPostDetailUiState2,
+    replyText: Flow<String>,
     editReplyInNewScreen: Boolean = defaultEditHtmlInNewScreen(),
     onClickAddReply: () -> Unit = { },
     onChangeReplyText: (String) -> Unit = { },
@@ -94,7 +98,8 @@ fun DiscussionPostDetailScreen(
                             UstadClickableTextField(
                                 value = stringResource(MR.strings.add_a_reply) + "…",
                                 onValueChange = { },
-                                onClick = onClickAddReply
+                                onClick = onClickAddReply,
+                                clickableTestTag = "add_a_reply",
                             )
                         },
                         leadingContent = {
@@ -105,8 +110,10 @@ fun DiscussionPostDetailScreen(
                         }
                     )
                 }else {
+                    val replyTextVal by replyText.collectAsState("", Dispatchers.Main.immediate)
+
                     UstadRichTextEdit(
-                        html =uiState.replyText,
+                        html = replyTextVal,
                         onHtmlChange = onChangeReplyText,
                         onClickToEditInNewScreen =  { },
                         editInNewScreen = false,

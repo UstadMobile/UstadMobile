@@ -35,6 +35,7 @@ import okhttp3.Protocol
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.ResponseBody.Companion.asResponseBody
+import okhttp3.ResponseBody.Companion.toResponseBody
 import okhttp3.internal.headersContentLength
 import okio.buffer
 import okio.source
@@ -54,7 +55,7 @@ import java.util.concurrent.Executors
  */
 class UstadCacheInterceptor(
     private val cache: UstadCache,
-    private val tmpDir: File,
+    private val tmpDirProvider: () -> File,
     private val logger : UstadCacheLogger? = null,
     private val cacheControlFreshnessChecker: CacheControlFreshnessChecker =
         CacheControlFreshnessCheckerImpl(),
@@ -95,6 +96,7 @@ class UstadCacheInterceptor(
             val digest = MessageDigest.getInstance("SHA-256")
             val partialFile = call.request().headers[HEADER_X_INTERCEPTOR_PARTIAL_FILE]
 
+            val tmpDir = tmpDirProvider()
             val responseBodyFile = partialFile?.let { File(it) }
                 ?: File(tmpDir, UUID.randomUUID().toString())
             val partialFileMetadataFile = if(partialFile != null) {
@@ -314,16 +316,23 @@ class UstadCacheInterceptor(
 
         return when {
             /*
-             * When response isFresh - can immediately return the cached response
+             * When response isFresh - can immediately return the cached response.
+             * If the cache-control only-if-cached is set, then
              */
-            cacheResponse != null && cachedResponseStatus?.isFresh == true -> {
+            cacheResponse != null &&
+                    (cachedResponseStatus?.isFresh == true || requestCacheControlHeader?.onlyIfCached == true) -> {
                 newResponseFromCachedResponse(cacheResponse, call).also {
                     logger?.d(LOG_TAG, "$logPrefix HIT(valid) $url ${it.logSummary()}")
                 }
             }
 
             /**
-             * The request header specified only-if-cached, but we don't have it.
+             * The request header specified only-if-cached, but we don't have it. Returns 504 if
+             * not available as per
+             * https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
+             *
+             * OKHttp RealInterceptorChain does not allow a response without a body. This will throw
+             * a fatal exception.
              */
             requestCacheControlHeader?.onlyIfCached == true -> {
                 Response.Builder()
@@ -331,6 +340,7 @@ class UstadCacheInterceptor(
                     .protocol(Protocol.HTTP_1_1)
                     .message("Gateway Timeout")
                     .code(504)
+                    .body("Gateway Timeout: only-if-cached if true, but not available in cache".toResponseBody())
                     .build()
             }
 

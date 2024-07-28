@@ -1,0 +1,66 @@
+appId: com.toughra.ustadmobile
+env:
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/003_006_course_view_and_modules_can_expand_collapse"
+  TESTNAME: "003_006_course_view_and_modules_can_expand_collapse"
+---
+- clearState: com.toughra.ustadmobile
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+      TESTNAME: ${TESTNAME}
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+- runFlow:
+    file: "../common/add_course.yaml"
+    env:
+      TESTCOURSENAME: "Course view Test"
+- tapOn:
+    text: "Courses"
+- runFlow:
+    file: "../common/add_new_student_inside_course.yaml"
+    env:
+      TESTCOURSENAME: "Course view Test"
+      STUDENTFIRSTNAME: "Student"
+      STUDENTLASTNAME: "1"
+      USERNAME:  "s1"
+      GENDER: "Male"
+      PASSWORD: "test"
+- repeat:
+    while:
+      notVisible: "Course"
+    commands:
+      - back
+- tapOn: "Course"
+- runFlow:
+    file: "../common/add_demo_block_structure.yaml"
+    env:
+      MODULETITLE: "SEMESTER 1"
+      TEXTTITLE: "PRIMARY COLOURS"
+      TEXT: "RED,BLUE,GREEN"
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: "s1"
+      PASSWORD: "test"
+- tapOn: "courses"
+- tapOn: "Course view Test"
+# Collapse the module by tapping it
+- tapOn: "SEMESTER 1"
+- assertNotVisible:
+       text: "PRIMARY COLOURS"
+- takeScreenshot: "${TESTRESULTSDIR}/able_to_collapse_module"
+#--- expand the Module ---#
+- tapOn: "SEMESTER 1"
+- scrollUntilVisible:
+    element:
+      text: "PRIMARY COLOURS"
+    direction: DOWN
+- assertVisible:
+    text: "PRIMARY COLOURS"
+- takeScreenshot: "${TESTRESULTSDIR}/able_to_expand_module"

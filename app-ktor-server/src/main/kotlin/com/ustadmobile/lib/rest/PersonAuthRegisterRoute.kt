@@ -72,8 +72,7 @@ fun Route.personAuthRegisterRoute() {
             val registerRequest: RegisterRequest = call.receive()
 
             val mPerson = registerRequest.person
-            val newPassword = registerRequest.person.newPassword
-                ?: throw IllegalArgumentException("register request with no password!")
+            val newPassword = registerRequest.newPassword
 
             val mLangCode = call.request.queryParameters["locale"] ?: "en"
 
@@ -89,8 +88,8 @@ fun Route.personAuthRegisterRoute() {
                 return@post
             }
 
-            val existingPerson = if(mPerson.personUid != 0L) db.personDao.findByUid(mPerson.personUid)
-            else db.personDao.findByUsername(mPerson.username)
+            val existingPerson = if(mPerson.personUid != 0L) db.personDao().findByUid(mPerson.personUid)
+            else db.personDao().findByUsername(mPerson.username)
 
             if(existingPerson != null && mPerson.username == existingPerson.username){
                 call.respond(HttpStatusCode.Conflict, "Person already exists, change username")
@@ -106,7 +105,7 @@ fun Route.personAuthRegisterRoute() {
                     )
                 }
             } else {
-                db.personDao.update(mPerson)
+                db.personDao().update(mPerson)
             }
 
             if(Instant.fromEpochMilliseconds(mPerson.dateOfBirth).ageInYears() < UstadMobileConstants.MINOR_AGE_THRESHOLD) {
@@ -114,7 +113,7 @@ fun Route.personAuthRegisterRoute() {
                 val mParentContactVal = mParentContact ?: throw IllegalStateException("Minor without parent contact")
 
                 mParentJoinVal.ppjMinorPersonUid = mPerson.personUid
-                mParentJoinVal.ppjUid = db.personParentJoinDao.upsertAsync(mParentJoinVal)
+                mParentJoinVal.ppjUid = db.personParentJoinDao().upsertAsync(mParentJoinVal)
 
                 val systemImpl: UstadMobileSystemImpl by closestDI().instance()
                 val appName = systemImpl.getString(MR.strings.app_name, mLangCode)
@@ -148,7 +147,7 @@ fun Route.personAuthRegisterRoute() {
             val db: UmAppDatabase by di.on(call).instance(tag = DoorTag.TAG_DB)
             val personUid = call.request.queryParameters["personUid"]?.toLong() ?: 0
 
-            val person = db.personDao.findByUid(personUid)
+            val person = db.personDao().findByUid(personUid)
             if(person != null) {
                 call.respond(HttpStatusCode.OK, person)
             }else {
@@ -168,7 +167,7 @@ fun Route.personAuthRegisterRoute() {
             val password = call.request.queryParameters["password"]
                 ?: throw IllegalArgumentException("No password to hash")
 
-            val site: Site = db.siteDao.getSiteAsync() ?: throw IllegalStateException("No site!")
+            val site: Site = db.siteDao().getSiteAsync() ?: throw IllegalStateException("No site!")
             val authSalt = site.authSalt ?: throw IllegalStateException("No auth salt!")
 
             val passwordDoubleHashed = password.doubleEncryptWithPbkdf2V2(authSalt,

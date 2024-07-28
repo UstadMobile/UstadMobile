@@ -58,7 +58,7 @@ it('Teacher add assignment', () => {
   cy.contains("button","Members").should('be.visible')
 })
 
-it('Student submit assignment', () => {
+it('Student not able to submit assignment', () => {
 
   cy.ustadClearDbAndLogin('student1','test1234')
   cy.contains("Course").click()

@@ -6,18 +6,22 @@ appId: com.toughra.ustadmobile
   # 2) MODULETITLE : provide the title for module block of String type
 
 # add module
-- repeat:
-    while:
-      notVisible: "Add block"
-    commands:
-      - swipe:
-          start: 100,400
-          end: 100,100
+- scrollUntilVisible:
+    element:
+      text: "Add block"
+    direction: DOWN
 - tapOn: "Add block"
 - tapOn: "Module"
-- tapOn: "Title"
+- tapOn: "Title*"
 - inputText: ${MODULETITLE}
-- tapOn: "Don't show before (Optional)"
-- tapOn: "OK"
+- hideKeyboard
+- tapOn: "Description"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/editor"
+- inputText: "test block"
+- tapOn: "Done"
+- assertVisible:
+    id: "app_title"
+    text: "Add module"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/added_module_${MODULETITLE}"
-- tapOn: "SAVE"
+- tapOn: "Done"

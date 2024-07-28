@@ -355,12 +355,12 @@ class BlobUploadClientUseCaseJvmTest {
 
         runBlocking {
             val jobId = realDatabase.withDoorTransactionAsync {
-                val transferJobUid = realDatabase.transferJobDao.insert(
+                val transferJobUid = realDatabase.transferJobDao().insert(
                     TransferJob(
                         tjUuid = randomUuidAsString(),
                     )
                 ).toInt()
-                realDatabase.transferJobItemDao.insertList(
+                realDatabase.transferJobItemDao().insertList(
                     itemsToUpload.map {
                         TransferJobItem(
                             tjiTjUid =  transferJobUid,
@@ -385,6 +385,8 @@ class BlobUploadClientUseCaseJvmTest {
             }catch(e: Throwable) {
                 e.printStackTrace()
                 assertTrue(e is TestUploadException)
+                val errors = realDatabase.transferJobErrorDao().findByJobId(jobId)
+                assertEquals(1, errors.size)
             }
         }
     }

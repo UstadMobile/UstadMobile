@@ -87,7 +87,7 @@ class ClazzLogListAttendanceViewModel(
         ?: throw IllegalArgumentException("No clazzUid specified")
 
     private val pagingSourceFactory: ListPagingSourceFactory<ClazzLog> = {
-        activeRepo.clazzLogDao.findByClazzUidAsFactory(
+        activeRepo.clazzLogDao().findByClazzUidAsFactory(
             clazzUid = clazzUid,
             excludeStatus = ClazzLog.STATUS_RESCHEDULED,
         )
@@ -106,7 +106,7 @@ class ClazzLogListAttendanceViewModel(
         viewModelScope.launch {
             _uiState.whenSubscribed {
                 launch {
-                    activeRepo.clazzDao.findByUidAsFlow(clazzUid).collect {clazz ->
+                    activeRepo.clazzDao().findByUidAsFlow(clazzUid).collect {clazz ->
                         _uiState.takeIf {
                             it.value.timeZoneId != clazz?.clazzTimeZone
                         }?.update { prev ->
@@ -124,13 +124,13 @@ class ClazzLogListAttendanceViewModel(
                 }
 
                 launch {
-                    val hasPermissionFlow = activeRepo.coursePermissionDao.personHasPermissionWithClazzAsFlow2(
+                    val hasPermissionFlow = activeRepo.coursePermissionDao().personHasPermissionWithClazzAsFlow2(
                         accountPersonUid = activeUserPersonUid,
                         clazzUid = clazzUid,
                         permission = PermissionFlags.COURSE_ATTENDANCE_RECORD,
                     )
 
-                    val hasExistingLogs = activeRepo.clazzLogDao.clazzHasScheduleLive(
+                    val hasExistingLogs = activeRepo.clazzLogDao().clazzHasScheduleLive(
                         clazzUid = clazzUid,
                         excludeStatusFilter = ClazzLog.STATUS_RESCHEDULED,
                     )
@@ -211,7 +211,7 @@ class ClazzLogListAttendanceViewModel(
                 loadingState = LoadingUiState.INDETERMINATE
 
                 viewModelScope.launch {
-                    val mostRecentLogUid = activeRepo.clazzLogDao
+                    val mostRecentLogUid = activeRepo.clazzLogDao()
                         .findMostRecentClazzLogToEditUid(clazzUid)
                     navController.takeIf { mostRecentLogUid != 0L }?.navigate(
                         viewName = ClazzLogEditAttendanceViewModel.DEST_NAME,

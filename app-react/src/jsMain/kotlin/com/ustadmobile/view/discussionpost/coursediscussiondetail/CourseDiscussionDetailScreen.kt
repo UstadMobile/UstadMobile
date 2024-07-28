@@ -2,11 +2,9 @@ package com.ustadmobile.view.discussionpost.coursediscussiondetail
 
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.impl.appstate.AppUiState
-import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.CourseDiscussionDetailUiState
 import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.CourseDiscussionDetailViewModel
-import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.hooks.useDateFormatter
 import com.ustadmobile.hooks.useDoorRemoteMediator
 import com.ustadmobile.hooks.useEmptyFlow
@@ -28,6 +26,7 @@ import js.objects.jso
 import kotlinx.coroutines.flow.Flow
 import mui.material.*
 import mui.material.List
+import mui.system.sx
 import react.*
 
 external interface CourseDiscussionDetailProps: Props {
@@ -38,6 +37,7 @@ external interface CourseDiscussionDetailProps: Props {
 }
 
 val CourseDiscussionDetailComponent = FC<CourseDiscussionDetailProps> { props ->
+    val theme by useRequiredContext(ThemeContext)
 
     val emptyRefreshFlow = useEmptyFlow<RefreshCommand>()
 
@@ -64,9 +64,19 @@ val CourseDiscussionDetailComponent = FC<CourseDiscussionDetailProps> { props ->
         }
 
         content = virtualListContent {
+            item(key = "header") {
+                UstadCourseBlockHeader.create {
+                    sx {
+                        paddingTop = theme.spacing(1)
+                    }
+
+                    block = props.uiState.courseBlock?.block
+                    picture = props.uiState.courseBlock?.picture
+                }
+            }
             item(key = "description") {
                 UstadRawHtml.create {
-                    html = props.uiState.courseBlock?.cbDescription ?: ""
+                    html = props.uiState.courseBlock?.block?.cbDescription ?: ""
                 }
             }
             item(key = "divider") {
@@ -98,44 +108,6 @@ val CourseDiscussionDetailComponent = FC<CourseDiscussionDetailProps> { props ->
                 VirtualListOutlet()
             }
         }
-    }
-}
-@Suppress("unused")
-val CourseDiscussionDetailPreview = FC<Props> {
-    CourseDiscussionDetailComponent {
-        uiState = CourseDiscussionDetailUiState(
-
-            courseBlock = CourseBlock().apply {
-                cbTitle = "Sales and Marketting Discussion"
-                cbDescription =
-                    "This discussion group is for conversations and posts about Sales and Marketting course"
-
-            },
-            posts = {
-                ListPagingSource(listOf(
-                    DiscussionPostWithDetails().apply {
-                        discussionPostTitle = "Can I join after week 2?"
-                        discussionPostUid = 0L
-                        discussionPostMessage = "Iam late to class, CAn I join after?"
-                        postRepliesCount = 4
-                        postLatestMessage = "Just make sure you submit a late assignment."
-                        authorPersonFirstNames = "Mike"
-                        authorPersonLastName = "Jones"
-                        discussionPostStartDate = systemTimeInMillis()
-                    },
-                    DiscussionPostWithDetails().apply {
-                        discussionPostTitle = "How to install xlib?"
-                        discussionPostMessage = "Which version of python do I need?"
-                        discussionPostUid = 1L
-                        postRepliesCount = 2
-                        postLatestMessage = "I have the same question"
-                        authorPersonFirstNames = "Bodium"
-                        authorPersonLastName = "Carafe"
-                        discussionPostStartDate = systemTimeInMillis()
-                    }
-                ))
-            },
-        )
     }
 }
 

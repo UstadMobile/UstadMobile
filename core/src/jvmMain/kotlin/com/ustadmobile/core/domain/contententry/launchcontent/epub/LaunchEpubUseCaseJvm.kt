@@ -11,6 +11,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryVersion
 import net.thauvin.erik.urlencoder.UrlEncoderUtil
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
+import com.ustadmobile.core.domain.xapi.XapiSession
 
 /*
  * Launching EPUB on Compose/Desktop(JVM) is done by launching Chrome and using the app-react
@@ -32,11 +33,15 @@ class LaunchEpubUseCaseJvm(
         contentEntryVersion: ContentEntryVersion,
         navController: UstadNavController,
         target: OpenExternalLinkUseCase.Companion.LinkTarget,
+        xapiSession: XapiSession?,
     ): LaunchContentEntryVersionUseCase.LaunchResult {
         val manifestUrl = contentEntryVersion.cevManifestUrl ?:
             throw IllegalStateException("ContentEntryVersion $contentEntryVersion manifesturl is null")
         val localManifestUrl = embeddedHttpServer.endpointUrl(
             endpoint, manifestUrl.substringAfter(endpoint.url)
+        )
+        val xapiStatementsUrl = embeddedHttpServer.endpointUrl(
+            endpoint, "api/xapi/statement"
         )
 
         val cevOpenUri = contentEntryVersion.cevOpenUri ?:
@@ -49,7 +54,9 @@ class LaunchEpubUseCaseJvm(
                     "${EpubContentViewModel.ARG_MANIFEST_URL}=${UrlEncoderUtil.encode(localManifestUrl)}&" +
                     "${EpubContentViewModel.ARG_CEV_URI}=${UrlEncoderUtil.encode(cevOpenUri)}&" +
                     "${EpubContentViewModel.ARG_NAVIGATION_VISIBLE}=false&" +
-                    "${EpubContentViewModel.ARG_TOC_OPTIONS_STRING}=${UrlEncoderUtil.encode(tocString)}"
+                    "${EpubContentViewModel.ARG_TOC_OPTIONS_STRING}=${UrlEncoderUtil.encode(tocString)}&" +
+                    "${EpubContentViewModel.ARG_XAPI_STATEMENTS_URL}=${UrlEncoderUtil.encode(xapiStatementsUrl)}"
+
         )
         launchChromeUseCase(url)
         return LaunchContentEntryVersionUseCase.LaunchResult()

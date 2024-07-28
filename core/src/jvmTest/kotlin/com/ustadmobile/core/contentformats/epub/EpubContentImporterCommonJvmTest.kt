@@ -30,6 +30,7 @@ import org.junit.Test
 import java.util.zip.ZipFile
 import kotlin.test.AfterTest
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class EpubContentImporterCommonJvmTest : AbstractContentImporterTest() {
@@ -81,6 +82,7 @@ class EpubContentImporterCommonJvmTest : AbstractContentImporterTest() {
             json = json,
             getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
             compressListUseCase = compressListUseCase,
+            saveLocalUrisAsBlobsUseCase = saveLocalUrisUseCase,
         )
 
         runBlocking {
@@ -91,6 +93,11 @@ class EpubContentImporterCommonJvmTest : AbstractContentImporterTest() {
             Assert.assertEquals("Got ContentEntry with expected title",
                     "Children's Literature",
                     metadata!!.entry.title)
+
+            //After extracting metadata, the cache should have the cover image
+            val coverImgUrl = metadata.picture?.cepPictureUri
+            assertNotNull(coverImgUrl)
+            assertNotNull(ustadCache.getCacheEntry(coverImgUrl))
         }
     }
 
@@ -211,7 +218,7 @@ class EpubContentImporterCommonJvmTest : AbstractContentImporterTest() {
                     .toString()
             )
 
-            val uid = db.contentEntryDao.insert(ContentEntry().apply{
+            val uid = db.contentEntryDao().insert(ContentEntry().apply{
                 title = "hello"
             })
             val contentEntryChildUid = 42L

@@ -7,7 +7,6 @@ import kotlinx.serialization.Serializable
 
 @Entity
 @Serializable
-@EntityWithAttachment
 @ReplicateEntity(
     tableId = PersonPicture.TABLE_ID,
     remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW

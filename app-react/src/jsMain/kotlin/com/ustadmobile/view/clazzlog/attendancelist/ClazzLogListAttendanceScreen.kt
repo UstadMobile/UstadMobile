@@ -16,6 +16,8 @@ import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useTabAndAppBarHeight
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.ClazzLog
+import com.ustadmobile.mui.components.UstadNothingHereYet
+import com.ustadmobile.util.ext.isSettledEmpty
 import com.ustadmobile.view.components.UstadFab
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
@@ -134,6 +136,8 @@ private val ClazzLogListAttendanceScreenComponent = FC<ClazzLogListAttendanceScr
         mediatorResult.pagingSourceFactory, true
     )
 
+    val isSettledEmpty = infiniteQueryResult.isSettledEmpty(mediatorResult)
+
     VirtualList {
         style = jso {
             height = "calc(100vh - ${tabAndAppBarHeight}px)".unsafeCast<Height>()
@@ -143,11 +147,16 @@ private val ClazzLogListAttendanceScreenComponent = FC<ClazzLogListAttendanceScr
         }
 
         content = virtualListContent {
+            if(isSettledEmpty) {
+                item("empty_state") {
+                    UstadNothingHereYet.create()
+                }
+            }
+
             infiniteQueryPagingItems(
                 items = infiniteQueryResult,
                 key = { "${it.clazzLogUid}"}
             ) { clazzLogItem ->
-
                 ClazzLogListItem.create {
                     clazzLog = clazzLogItem
                     onClick = props.onClickEntry

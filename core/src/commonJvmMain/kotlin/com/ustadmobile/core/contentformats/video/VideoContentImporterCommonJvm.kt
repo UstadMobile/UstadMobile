@@ -20,6 +20,7 @@ import com.ustadmobile.core.domain.compress.CompressionLevel
 import com.ustadmobile.core.domain.compress.originalSizeHeaders
 import com.ustadmobile.core.domain.compress.video.CompressVideoUseCase
 import com.ustadmobile.core.domain.contententry.ContentConstants
+import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCase
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
 import com.ustadmobile.core.io.ext.toDoorUri
 import com.ustadmobile.core.uri.UriHelper
@@ -31,6 +32,7 @@ import com.ustadmobile.door.ext.toFile
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryImportJob
+import com.ustadmobile.lib.db.entities.ContentEntryPicture2
 import com.ustadmobile.lib.db.entities.ContentEntryVersion
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.libcache.UstadCache
@@ -46,6 +48,9 @@ import kotlinx.io.writeString
 import kotlinx.serialization.json.Json
 import java.io.File
 
+/**
+ * https://github.com/caprica/vlcj-examples/blob/master/src/main/java/uk/co/caprica/vlcj/test/snapshot/SnapshotTest.java
+ */
 class VideoContentImporterCommonJvm(
     endpoint: Endpoint,
     private val cache: UstadCache,
@@ -59,6 +64,8 @@ class VideoContentImporterCommonJvm(
     private val validateVideoFileUseCase: ValidateVideoFileUseCase,
     private val mimeTypeHelper: MimeTypeHelper,
     private val compressUseCase: CompressVideoUseCase? = null,
+    private val extractVideoThumbnailUseCase: ExtractVideoThumbnailUseCase? = null,
+    private val saveLocalUrisAsBlobsUseCase: SaveLocalUrisAsBlobsUseCase? = null,
 ) : ContentImporter(endpoint) {
 
 
@@ -223,6 +230,32 @@ class VideoContentImporterCommonJvm(
             val hasVideo = validateVideoFileUseCase(localUri)
 
             if(hasVideo) {
+                val thumbDestPath = Path(tmpPath, "video-import-thumbnail-${systemTimeInMillis()}.png")
+                val videoThumbnailUri = if(
+                    extractVideoThumbnailUseCase != null && saveLocalUrisAsBlobsUseCase != null
+                ) {
+                    try {
+                        val thumbnailResult = extractVideoThumbnailUseCase.invoke(
+                            videoUri = uri,
+                            position = 0.3f,
+                            destinationFilePath = thumbDestPath.toString()
+                        )
+                        saveLocalUrisAsBlobsUseCase.invoke(
+                            listOf(
+                                SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem(
+                                    localUri = thumbnailResult.uri.toString(),
+                                    mimeType = thumbnailResult.mimeType,
+                                )
+                            )
+                        ).firstOrNull()?.blobUrl
+                    }catch(e: Throwable){
+                        null
+                    }
+                }else {
+                    null
+                }
+
+
                 return@withContext MetadataResult(
                     entry = ContentEntryWithLanguage().apply {
                         title = originalFilename ?: uri.toString().substringAfterLast("/")
@@ -233,6 +266,12 @@ class VideoContentImporterCommonJvm(
                     },
                     importerId = importerId,
                     originalFilename = originalFilename,
+                    picture = videoThumbnailUri?.let {
+                        ContentEntryPicture2(
+                            cepPictureUri = it,
+                            cepThumbnailUri = it,
+                        )
+                    }
                 )
             }
 

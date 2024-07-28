@@ -30,6 +30,7 @@
  */
 package com.ustadmobile.core.util
 
+import com.ustadmobile.core.util.ext.roundTo
 import io.ktor.http.ContentType
 import kotlin.js.JsName
 import kotlin.jvm.JvmStatic
@@ -598,6 +599,11 @@ object UMFileUtil {
         var unitSize = fileSize.toDouble() / factor.toDouble()
         unitSize = round(unitSize * 100) / 100.0
         return "$unitSize $unit"
+    }
+
+    fun formatFileSizeMb(fileSize: Long) : String {
+        val fileSizeMb = (fileSize.toFloat() / (1024*1024)).roundTo(2)
+        return "$fileSizeMb MB"
     }
 
     fun stripExtensionIfPresent(uri: String): String {

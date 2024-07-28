@@ -4,6 +4,9 @@
     <!--suppress CheckTagEmptyBody -->
     <string name="blank" translatable="false"></string>
     <string name="login">Login</string>
+    <string name="share_app">Share app</string>
+    <string name="send_apk_file">Send app file (APK)</string>
+    <string name="send_app_link">Share app store link</string>
     <string name="error">Error</string>
     <string name="err_registering_new_user">Error registering new user:</string>
     <string name="register_empty_fields">Please fill out all required fields</string>
@@ -83,7 +86,6 @@
     <string name="notifications">Notifications</string>
     <string name="account">Account</string>
     <string name="accounts">Accounts</string>
-    <string name="share_application">Share App</string>
     <string name="share">Share</string>
     <string name="send">Send</string>
     <string name="open">Open</string>
@@ -1907,5 +1909,28 @@
     <string name="size">Size: %1$s</string>
 
     <string name="import_error">Import error</string>
+
+    <string name="upload_error">Upload error</string>
+
+    <string name="offline_items_storage">Offline items storage</string>
+
+    <!--
+    Tells the user how much space is available - %1$s will be replaced with available space e.g. 10GB etc.
+    -->
+    <string name="space_available">%1$s available</string>
+
+    <string name="grant_permission">Grant permission</string>
+
+    <string name="gradebook">Gradebook</string>
+
+    <string name="full_screen">Full screen</string>
+
+    <string name="exit_full_screen">Exit full screen</string>
+
+    <string name="increase_text_size">Increase text size</string>
+
+    <string name="decrease_text_size">Decrease text size</string>
+
+    <string name="nothing_here_yet">Nothing here, yet</string>
 
 </resources>

@@ -46,7 +46,7 @@ class ClazzLogListAttendanceViewModelTest  : AbstractMainDispatcherTest() {
                 clazz.clazzUid = CreateNewClazzUseCase(activeDb).invoke(clazz)
 
 
-                activeDb.takeIf { grantAttendancePermission }?.coursePermissionDao?.upsertAsync(
+                activeDb.takeIf { grantAttendancePermission }?.coursePermissionDao()?.upsertAsync(
                     CoursePermission(
                         cpToPersonUid = activePerson.personUid,
                         cpClazzUid = clazz.clazzUid,
@@ -54,7 +54,7 @@ class ClazzLogListAttendanceViewModelTest  : AbstractMainDispatcherTest() {
                     )
                 )
 
-                activeDb.takeIf { addExistingLog }?.clazzLogDao?.insertAsync(
+                activeDb.takeIf { addExistingLog }?.clazzLogDao()?.insertAsync(
                     ClazzLog().apply {
                         clazzLogClazzUid = clazz.clazzUid
                         logDate = systemTimeInMillis()

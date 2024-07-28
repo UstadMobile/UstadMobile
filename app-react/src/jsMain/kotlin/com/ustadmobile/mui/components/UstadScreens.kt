@@ -53,6 +53,7 @@ import com.ustadmobile.core.db.ext.MIGRATION_144_145_CLIENT
 import com.ustadmobile.core.db.ext.MIGRATION_148_149_NO_OFFLINE_ITEMS
 import com.ustadmobile.core.db.ext.MIGRATION_155_156_CLIENT
 import com.ustadmobile.core.db.ext.MIGRATION_161_162_CLIENT
+import com.ustadmobile.core.db.ext.MIGRATION_169_170_CLIENT
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.util.ext.deleteDatabaseAsync
 import mui.system.useMediaQuery
@@ -242,6 +243,7 @@ val ustadScreensLoader: LoaderFunction<Any?> = { args: LoaderFunctionArgs<Any?> 
         .addMigrations(MIGRATION_148_149_NO_OFFLINE_ITEMS)
         .addMigrations(MIGRATION_155_156_CLIENT)
         .addMigrations(MIGRATION_161_162_CLIENT)
+        .addMigrations(MIGRATION_169_170_CLIENT)
         .addMigrations()
 
     @OptIn(DelicateCoroutinesApi::class)

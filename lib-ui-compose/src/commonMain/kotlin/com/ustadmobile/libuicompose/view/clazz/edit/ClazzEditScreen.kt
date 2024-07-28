@@ -7,6 +7,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Article
+import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
@@ -22,7 +24,6 @@ import com.ustadmobile.core.viewmodel.clazz.ClazzScheduleConstants
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditUiState
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.libuicompose.components.UstadEditHeader
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
@@ -32,6 +33,8 @@ import dev.icerock.moko.parcelize.Parcelize
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
 import com.ustadmobile.lib.db.composites.CourseBlockAndEditEntities
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.libuicompose.components.UstadBlockIcon
 import com.ustadmobile.libuicompose.components.UstadBottomSheetOption
 import com.ustadmobile.libuicompose.components.UstadClickableTextField
 import com.ustadmobile.libuicompose.components.UstadDateField
@@ -76,7 +79,7 @@ fun ClazzEditScreen(viewModel: ClazzEditViewModel) {
                 text = stringResource(MR.strings.add_block)
             )
 
-            Divider(thickness = 1.dp)
+            HorizontalDivider(thickness = 1.dp)
 
             Column(
                 Modifier.verticalScroll(
@@ -92,7 +95,7 @@ fun ClazzEditScreen(viewModel: ClazzEditViewModel) {
                 UstadBottomSheetOption(
                     modifier = Modifier.addCourseBlockClickable(CourseBlock.BLOCK_TEXT_TYPE),
                     headlineContent = { Text(stringResource(MR.strings.text)) },
-                    leadingContent = { Icon(Icons.Default.Article, contentDescription = null) },
+                    leadingContent = { Icon(Icons.AutoMirrored.Filled.Article, contentDescription = null) },
                     secondaryContent = { Text(stringResource(MR.strings.formatted_text_to_show_to_course_participants ))},
                 )
                 UstadBottomSheetOption(
@@ -104,7 +107,7 @@ fun ClazzEditScreen(viewModel: ClazzEditViewModel) {
                 UstadBottomSheetOption(
                     modifier = Modifier.addCourseBlockClickable(CourseBlock.BLOCK_ASSIGNMENT_TYPE),
                     headlineContent = { Text(stringResource(MR.strings.assignment)) },
-                    leadingContent = { Icon(Icons.Default.Assignment, contentDescription = null)},
+                    leadingContent = { Icon(Icons.AutoMirrored.Filled.Assignment, contentDescription = null)},
                     secondaryContent = { Text(stringResource(MR.strings.add_assignment_block_content_desc))}
                 )
                 UstadBottomSheetOption(
@@ -157,7 +160,7 @@ class CourseBlockKey(val cbUid: Long): Parcelable {
 @Composable
 fun ClazzEditScreen(
     uiState: ClazzEditUiState = ClazzEditUiState(),
-    onClazzChanged: (ClazzWithHolidayCalendarAndSchoolAndTerminology?) -> Unit = {},
+    onClazzChanged: (ClazzWithHolidayCalendarAndAndTerminology?) -> Unit = {},
     onMoveCourseBlock: (from: ItemPosition, to: ItemPosition) -> Unit = {_, _ -> },
     onClickEditDescription: () -> Unit = {},
     onClickTimezone: () -> Unit = {},
@@ -254,17 +257,20 @@ fun ClazzEditScreen(
                         }
                         .alpha(courseBlockEditAlpha),
                     leadingContent ={
-                        Row{
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
                             Icon(
                                 imageVector = Icons.Filled.Reorder,
                                 contentDescription = null,
                                 modifier = Modifier.detectReorder(reorderLazyListState)
                             )
                             Spacer(modifier = Modifier.width(startPadding))
-                            Icon(
-                                imageVector = ClazzEditConstants.BLOCK_AND_ENTRY_ICON_MAP[block.courseBlock.cbType]
-                                    ?:  Icons.Filled.TextSnippet,
-                                contentDescription = null
+                            UstadBlockIcon(
+                                title = block.courseBlock.cbTitle ?: "",
+                                courseBlock = block.courseBlock,
+                                contentEntry = block.contentEntry,
+                                pictureUri = block.courseBlockPicture?.cbpPictureUri,
                             )
                         }
                     },
@@ -390,7 +396,7 @@ fun ClazzEditScreen(
 @Composable
 private fun ClazzEditBasicDetails(
     uiState: ClazzEditUiState,
-    onClazzChanged: (ClazzWithHolidayCalendarAndSchoolAndTerminology?) -> Unit = {},
+    onClazzChanged: (ClazzWithHolidayCalendarAndAndTerminology?) -> Unit = {},
     @Suppress("UNUSED_PARAMETER") onClickTimezone: () -> Unit = {},
     //Reserved for use when HTML editing is added to compose
     onClickEditDescription: () -> Unit = {},

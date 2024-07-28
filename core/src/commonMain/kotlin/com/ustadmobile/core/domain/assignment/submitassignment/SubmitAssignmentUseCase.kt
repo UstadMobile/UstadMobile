@@ -8,9 +8,9 @@ import com.ustadmobile.core.util.ext.lastPossibleSubmissionTime
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
-import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import io.github.aakira.napier.Napier
 import com.ustadmobile.core.MR
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
 
 /**
  * Handle submission of an assignment - checks to ensure that the submission is valid and then stores
@@ -41,13 +41,15 @@ class SubmitAssignmentUseCase(
         if(submitterUid == 0L)
             throw AccountIsNotSubmitterException("Not a valid submitter")
 
-        val assignment = repo.clazzAssignmentDao.findByUidWithBlockAsync(assignmentUid)
+        val assignmentAndBlock = repo.clazzAssignmentDao().findByUidWithBlockAsync(assignmentUid)
             ?: throw IllegalArgumentException("Could not find assignment uid $assignmentUid")
-        val courseBlock = assignment.block
+        val courseBlock = assignmentAndBlock.block
             ?: throw IllegalArgumentException("Could not load courseblock")
+        val assignment = assignmentAndBlock.assignment
+            ?: throw IllegalArgumentException("assignment cannot be null")
 
         if(assignment.caSubmissionPolicy == ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE
-            && repo.courseAssignmentSubmissionDao.doesUserHaveSubmissions(accountPersonUid, assignmentUid)
+            && repo.courseAssignmentSubmissionDao().doesUserHaveSubmissions(accountPersonUid, assignmentUid)
         ) {
             throw AssignmentAlreadySubmittedException(systemImpl.getString(MR.strings.already_submitted))
         }
@@ -83,7 +85,7 @@ class SubmitAssignmentUseCase(
         }
 
         Napier.d("SubmitAssignmentUseCase: save to repo for submitterUid=$submitterUid assignmentUid=$assignmentUid")
-        repo.courseAssignmentSubmissionDao.insertAsync(submissionToSave)
+        repo.courseAssignmentSubmissionDao().insertAsync(submissionToSave)
 
         return SubmitAssignmentResult(submissionToSave)
     }

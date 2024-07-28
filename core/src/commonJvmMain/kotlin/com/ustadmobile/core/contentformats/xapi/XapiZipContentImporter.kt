@@ -4,6 +4,7 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentformats.ContentImportProgressListener
 import com.ustadmobile.core.contentformats.ContentImporter
 import com.ustadmobile.core.contentformats.manifest.ContentManifest
+import com.ustadmobile.core.contentformats.manifest.totalStorageSize
 import com.ustadmobile.core.contentformats.storeText
 import com.ustadmobile.core.tincan.TinCanXML
 import java.util.zip.ZipInputStream
@@ -188,9 +189,7 @@ class XapiZipContentImporter(
                 cevContentEntryUid = jobItem.cjiContentEntryUid,
                 cevManifestUrl = manifestUrl,
                 cevOpenUri = tinCanEntry.name,
-                cevStorageSize = xapiManifestEntries.sumOf {
-                    it.savedBlob.storageSize
-                },
+                cevStorageSize = xapiManifestEntries.totalStorageSize(),
                 cevOriginalSize = uriHelper.getSize(jobUri)
             )
         }finally {

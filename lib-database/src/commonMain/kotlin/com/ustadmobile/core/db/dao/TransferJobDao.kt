@@ -76,12 +76,22 @@ expect abstract class TransferJobDao {
 
     @Query("""
         SELECT TransferJob.*,
-               $SELECT_TRANSFER_JOB_TOTALS_SQL  
+               $SELECT_TRANSFER_JOB_TOTALS_SQL,
+               TransferJobError.tjeErrorStr AS latestErrorStr
           FROM TransferJob
+               LEFT JOIN TransferJobError
+                         ON TransferJobError.tjeId = 
+                            (SELECT TransferJobError.tjeId
+                               FROM TransferJobError
+                              WHERE TransferJob.tjStatus = ${TransferJobItemStatus.STATUS_FAILED}
+                                AND TransferJobError.tjeTjUid = TransferJob.tjUid
+                           ORDER BY TransferJobError.tjeDismissed DESC 
+                              LIMIT 1)
          WHERE TransferJob.tjTableId = ${ContentEntryVersion.TABLE_ID}
            AND TransferJob.tjEntityUid IN 
                $SELECT_CONTENT_ENTRY_VERSION_UIDS_FOR_CONTENT_ENTRY_UID_SQL 
-           AND TransferJob.tjStatus < ${TransferJobItemStatus.STATUS_COMPLETE_INT}  
+           AND (   TransferJob.tjStatus < ${TransferJobItemStatus.STATUS_COMPLETE_INT}
+                OR (TransferJobError.tjeErrorStr IS NOT NULL AND NOT TransferJobError.tjeDismissed))
            AND TransferJob.tjType = :jobType   
     """)
     abstract fun findByContentEntryUidWithTotalsAsFlow(

@@ -14,11 +14,13 @@ appId: com.toughra.ustadmobile
 - tapOn: "MEMBERS"
 - tapOn: "Add a teacher"
 - tapOn: "Add a new person"
-- tapOn: "First names"
+- tapOn: "First names*"
 - inputText: ${TEACHERFIRSTNAME}
-- tapOn: "Last name"
+- hideKeyboard
+- tapOn: "Last name*"
 - inputText: ${TEACHERLASTNAME}
-- tapOn: "Gender"
+- hideKeyboard
+- tapOn: "Gender*"
 - tapOn: ${GENDER}
 - tapOn: "SAVE"
 - tapOn: "SAVE"
@@ -26,11 +28,9 @@ appId: com.toughra.ustadmobile
 - tapOn: "VIEW PROFILE"
   # add account
 - tapOn: "CREATE ACCOUNT"
-- tapOn: "Username"
+- tapOn: "Username*"
 - inputText: ${USERNAME}
-- tapOn: "New password"
-- inputText: ${PASSWORD}
-- tapOn: "Confirm password"
+- tapOn: "New password*"
 - inputText: ${PASSWORD}
 - tapOn: "SAVE"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/added_account_for_new_teacher-${TEACHERFIRSTNAME} ${TEACHERLASTNAME}"

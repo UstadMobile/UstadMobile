@@ -22,6 +22,7 @@ import com.ustadmobile.core.domain.blob.saveandupload.SaveAndUploadLocalUrisUseC
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
 import com.ustadmobile.core.util.ext.onActiveEndpoint
 import com.ustadmobile.core.util.ext.toggle
+import com.ustadmobile.core.viewmodel.clazz.launchSetTitleFromClazzUid
 import com.ustadmobile.core.viewmodel.clazzassignment.asBlobOpenItem
 import com.ustadmobile.core.viewmodel.clazzassignment.averageMark
 import com.ustadmobile.core.viewmodel.clazzassignment.combineWithSubmissionFiles
@@ -67,13 +68,14 @@ import org.kodein.di.instanceOrNull
 
 /**
  *
- * @param newPrivateCommentText the text in the textfield for a new private comment
  */
 data class ClazzAssignmentDetailOverviewUiState(
 
     val assignment: ClazzAssignment? = null,
 
     val courseBlock: CourseBlock? = null,
+
+    val courseBlockPicture: CourseBlockPicture? = null,
 
     val courseGroupSet: CourseGroupSet? = null,
 
@@ -109,10 +111,6 @@ data class ClazzAssignmentDetailOverviewUiState(
     val unassignedError: String? = null,
 
     val submissionError: String? = null,
-
-    val newPrivateCommentText: String = "",
-
-    val newCourseCommentText: String = "",
 
     val activeUserPersonUid: Long = 0,
 
@@ -250,13 +248,13 @@ data class ClazzAssignmentDetailOverviewUiState(
 }
 
 /**
- * Assignment text editing takes place inside a VirtualList. The Virtual List is not able to deliver
- * changes synchronously, so the state must be separated out
+ * Assignment text editing and comment editing takes place inside a VirtualList. The Virtual List is
+ * not able to deliver changes synchronously, so the state must be separated out so the child
+ * component can consume it independently of the main UI state.
  */
 data class ClazzAssignmentDetailoverviewSubmissionUiState(
     val editableSubmission: CourseAssignmentSubmission? = null,
 )
-
 
 class ClazzAssignmentDetailOverviewViewModel(
     di: DI,
@@ -282,9 +280,16 @@ class ClazzAssignmentDetailOverviewViewModel(
 
     val editableSubmissionUiState: Flow<ClazzAssignmentDetailoverviewSubmissionUiState> = _editableSubmissionUiState.asStateFlow()
 
+    private val _newPrivateCommentText = MutableStateFlow("")
+
+    val newPrivateCommentText: Flow<String> = _newPrivateCommentText.asStateFlow()
+
+    private val _newCourseCommentText = MutableStateFlow("")
+
+    val newCourseCommentText: Flow<String> = _newCourseCommentText.asStateFlow()
 
     private val privateCommentsPagingSourceFactory: () -> PagingSource<Int, CommentsAndName> = {
-        activeRepo.commentsDao.findPrivateCommentsForUserByAssignmentUid(
+        activeRepo.commentsDao().findPrivateCommentsForUserByAssignmentUid(
             accountPersonUid = activeUserPersonUid,
             assignmentUid = entityUidArg,
             includeDeleted = false,
@@ -292,7 +297,7 @@ class ClazzAssignmentDetailOverviewViewModel(
     }
 
     private val courseCommentsPagingSourceFactory: () -> PagingSource<Int, CommentsAndName> = {
-        activeRepo.commentsDao.findCourseCommentsByAssignmentUid(
+        activeRepo.commentsDao().findCourseCommentsByAssignmentUid(
             assignmentUid = entityUidArg,
             includeDeleted = false,
         )
@@ -322,7 +327,7 @@ class ClazzAssignmentDetailOverviewViewModel(
         }
 
         val entityFlow = activeRepo
-            .clazzAssignmentDao.findAssignmentCourseBlockAndSubmitterUidAsFlow(
+            .clazzAssignmentDao().findAssignmentCourseBlockAndSubmitterUidAsFlow(
                 assignmentUid = entityUidArg,
                 clazzUid = clazzUid,
                 accountPersonUid = accountManager.currentAccount.personUid,
@@ -351,6 +356,7 @@ class ClazzAssignmentDetailOverviewViewModel(
                             prev.copy(
                                 assignment = assignmentData?.clazzAssignment,
                                 courseBlock = assignmentData?.courseBlock,
+                                courseBlockPicture = assignmentData?.courseBlockPicture,
                                 submitterUid = assignmentData?.submitterUid ?: 0,
                                 courseGroupSet = assignmentData?.courseGroupSet,
                                 unassignedError = if(isEnrolledButNotInGroup) {
@@ -361,24 +367,22 @@ class ClazzAssignmentDetailOverviewViewModel(
                                 showModerateOptions = assignmentData?.hasModeratePermission ?: false,
                             )
                         }
-
-                        _appUiState.update { prev ->
-                            prev.copy(
-                                title = assignmentData?.courseBlock?.cbTitle ?: ""
-                            )
-                        }
                     }
+                }
+
+                launchSetTitleFromClazzUid(clazzUid) { title ->
+                    _appUiState.update { it.copy(title = title) }
                 }
 
                 launch {
                     val submissionFlow = activeRepo
-                        .courseAssignmentSubmissionDao.findByAssignmentUidAndAccountPersonUid(
+                        .courseAssignmentSubmissionDao().findByAssignmentUidAndAccountPersonUid(
                             accountPersonUid = activeUserPersonUid,
                             assignmentUid = entityUidArg,
                         )
 
                     val submissionFilesFlow = activeRepo
-                        .courseAssignmentSubmissionFileDao.getByAssignmentUidAndPersonUid(
+                        .courseAssignmentSubmissionFileDao().getByAssignmentUidAndPersonUid(
                             accountPersonUid = activeUserPersonUid,
                             assignmentUid = entityUidArg,
                         )
@@ -393,7 +397,7 @@ class ClazzAssignmentDetailOverviewViewModel(
                 }
 
                 launch {
-                    activeRepo.courseAssignmentMarkDao.getAllMarksForUserAsFlow(
+                    activeRepo.courseAssignmentMarkDao().getAllMarksForUserAsFlow(
                         accountPersonUid = activeUserPersonUid,
                         assignmentUid = entityUidArg
                     ).collect {
@@ -410,7 +414,7 @@ class ClazzAssignmentDetailOverviewViewModel(
                     _editableSubmissionUiState.map {
                         it.editableSubmission?.casUid ?: 0
                     }.distinctUntilChanged().collectLatest { submissionUid ->
-                        activeDb.courseAssignmentSubmissionFileDao.getBySubmissionUid(
+                        activeDb.courseAssignmentSubmissionFileDao().getBySubmissionUid(
                             submissionUid
                         ).distinctUntilChanged().collect {
                             _uiState.update { prev -> prev.copy(editableSubmissionFiles = it) }
@@ -483,11 +487,7 @@ class ClazzAssignmentDetailOverviewViewModel(
     }
 
     fun onChangePrivateCommentText(text: String) {
-        _uiState.update { prev ->
-            prev.copy(
-                newPrivateCommentText = text
-            )
-        }
+        _newPrivateCommentText.value = text
     }
 
     fun onClickSubmitPrivateComment() {
@@ -504,17 +504,15 @@ class ClazzAssignmentDetailOverviewViewModel(
 
         viewModelScope.launch {
             try {
-                activeRepo.commentsDao.insertAsync(Comments().apply {
+                activeRepo.commentsDao().insertAsync(Comments().apply {
                     commentsForSubmitterUid = submitterUid
                     commentsFromPersonUid = activeUserPersonUid
                     commentsFromSubmitterUid = _uiState.value.submitterUid
                     commentsEntityUid = entityUidArg
-                    commentsText = _uiState.value.newPrivateCommentText
+                    commentsText = _newPrivateCommentText.value
                     commentsDateTimeAdded = systemTimeInMillis()
                 })
-                _uiState.update { prev ->
-                    prev.copy(newPrivateCommentText = "")
-                }
+                _newPrivateCommentText.value = ""
             }finally {
                 loadingState = LoadingUiState.NOT_LOADING
             }
@@ -522,11 +520,7 @@ class ClazzAssignmentDetailOverviewViewModel(
     }
 
     fun onChangeCourseCommentText(text: String) {
-        _uiState.update { prev ->
-            prev.copy(
-                newCourseCommentText = text
-            )
-        }
+        _newCourseCommentText.value = text
     }
 
     fun onClickSubmitCourseComment() {
@@ -536,16 +530,15 @@ class ClazzAssignmentDetailOverviewViewModel(
         loadingState = LoadingUiState.INDETERMINATE
         viewModelScope.launch {
             try {
-                activeRepo.commentsDao.insertAsync(Comments().apply {
+                activeRepo.commentsDao().insertAsync(Comments().apply {
                     commentsForSubmitterUid = 0
                     commentsFromPersonUid = activeUserPersonUid
                     commentsEntityUid = entityUidArg
-                    commentsText = _uiState.value.newCourseCommentText
+                    commentsText = _newCourseCommentText.value
                     commentsDateTimeAdded = systemTimeInMillis()
                 })
-                _uiState.update { prev ->
-                    prev.copy(newCourseCommentText = "")
-                }
+
+                _newCourseCommentText.value = ""
             }finally {
                 loadingState = LoadingUiState.NOT_LOADING
             }
@@ -579,7 +572,7 @@ class ClazzAssignmentDetailOverviewViewModel(
                 casaClazzUid = clazzUid,
             )
 
-            activeDb.courseAssignmentSubmissionFileDao.insertListAsync(listOf(newAttachment))
+            activeDb.courseAssignmentSubmissionFileDao().insertListAsync(listOf(newAttachment))
 
             try {
                 saveAndUploadUseCase(
@@ -670,7 +663,7 @@ class ClazzAssignmentDetailOverviewViewModel(
     fun onRemoveSubmissionFile(file: CourseAssignmentSubmissionFileAndTransferJob) {
         viewModelScope.launch {
             activeRepo.withDoorTransactionAsync {
-                activeRepo.courseAssignmentSubmissionFileDao.setDeleted(
+                activeRepo.courseAssignmentSubmissionFileDao().setDeleted(
                     casaUid = file.submissionFile?.casaUid ?: 0,
                     deleted = true,
                     updateTime = systemTimeInMillis(),
@@ -720,7 +713,7 @@ class ClazzAssignmentDetailOverviewViewModel(
 
     fun onDeleteComment(comments: Comments) {
         viewModelScope.launch {
-            activeRepo.commentsDao.updateDeletedByCommentUid(
+            activeRepo.commentsDao().updateDeletedByCommentUid(
                 uid = comments.commentsUid,
                 deleted = true,
                 changeTime = systemTimeInMillis()

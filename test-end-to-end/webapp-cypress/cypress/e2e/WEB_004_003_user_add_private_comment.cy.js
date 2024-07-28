@@ -9,9 +9,6 @@ it('Admin add a course and Members', () => {
   cy.ustadClearDbAndLogin('admin','testpass')
  // Add a new course
   cy.ustadAddCourse('004_003')
- // Add module block
- // cy.contains('button','Edit').click()
- // cy.ustadAddModuleBlock('module 1')
  //Add a teacher
   cy.contains("button","Members").click()
   cy.contains("span","Add a teacher").click()
@@ -56,7 +53,8 @@ it('Teacher add assignment and course comment', () => {
   cy.contains("button","Members").should('be.visible')
   cy.contains("Assignment 1").click()
   cy.contains('Submissions').click()
-  cy.contains('Student 1').click()
+  cy.ustadReloadUntilVisible("Student 1")
+  cy.contains("Student 1").click()
   cy.ustadTypeAndSubmitAssignmentComment('#private_comment_textfield','#private_comment_textfield_send_button','comment1')
 
 })
@@ -67,7 +65,9 @@ it('Student add private comment', () => {
   cy.contains("Course").click()
   cy.contains("004_003").click()
   cy.contains('Assignment 1').click()
+  cy.get(".VirtualList").scrollTo('bottom')
   cy.ustadTypeAndSubmitAssignmentComment('#private_comment_textfield','#private_comment_textfield_send_button','comment2')
-  cy.contains("comment1").should('exist')
+  cy.contains("comment1").ustadScrollUntilVisible()
+  cy.contains("comment2").should('exist')
 })
 })

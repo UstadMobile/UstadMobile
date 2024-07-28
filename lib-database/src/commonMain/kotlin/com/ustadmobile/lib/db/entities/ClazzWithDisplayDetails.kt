@@ -10,9 +10,6 @@ class ClazzWithDisplayDetails() : Clazz(){
     var clazzHolidayCalendar: HolidayCalendar? = null
 
     @Embedded
-    var clazzSchool: School? = null
-
-    @Embedded
     var terminology: CourseTerminology? = null
 
     @Embedded

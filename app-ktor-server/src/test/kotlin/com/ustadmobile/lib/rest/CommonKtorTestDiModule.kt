@@ -16,7 +16,6 @@ import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
-import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.rest.ext.insertDefaultSite
 import kotlinx.coroutines.runBlocking
 import java.util.Locale
@@ -39,12 +38,6 @@ fun commonTestKtorDiModule(
             .build().also { db ->
                 db.clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
                 db.insertDefaultSite()
-                runBlocking {
-                    db.connectivityStatusDao.insertAsync(ConnectivityStatus().apply {
-                        connectivityState = ConnectivityStatus.STATE_UNMETERED
-                        connectedOrConnecting = true
-                    })
-                }
             }
     }
 

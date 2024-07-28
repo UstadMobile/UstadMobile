@@ -44,7 +44,7 @@ class ContentEntryEditViewModelTest : AbstractMainDispatcherTest(){
             val mockSaveContentEntryUseCase = mock<SaveContentEntryUseCase>()
             val mockImportContentUseCase = mock<EnqueueContentEntryImportUseCase>()
             val user = setActiveUser(activeEndpoint)
-            activeDb.systemPermissionDao.upsertAsync(
+            activeDb.systemPermissionDao().upsertAsync(
                 SystemPermission(
                     spToPersonUid = user.personUid,
                     spPermissionsFlag = PermissionFlags.EDIT_LIBRARY_CONTENT,
@@ -84,7 +84,7 @@ class ContentEntryEditViewModelTest : AbstractMainDispatcherTest(){
             var contentEntryUid: Long = 0
             argumentCaptor<ContentEntry> {
                 verifyBlocking(mockSaveContentEntryUseCase, timeout(5000)) {
-                    invoke(capture(), anyOrNull())
+                    invoke(capture(), anyOrNull(), anyOrNull(), anyOrNull())
                     contentEntryUid = firstValue.contentEntryUid
                     assertEquals("new description", firstValue.description)
                     assertEquals(metadata.entry.sourceUrl, firstValue.sourceUrl)

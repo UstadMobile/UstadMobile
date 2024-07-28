@@ -58,6 +58,7 @@ import com.ustadmobile.libuicompose.components.UstadDetailHeader
 import com.ustadmobile.libuicompose.components.UstadLazyVerticalGrid
 import com.ustadmobile.libuicompose.components.UstadListFilterChipsHeader
 import com.ustadmobile.libuicompose.components.UstadListSortHeader
+import com.ustadmobile.libuicompose.components.UstadNothingHereYet
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.nav.UstadNavControllerPreCompose
 import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
@@ -157,10 +158,10 @@ fun ClazzListScreen(
     onClickCancelEnrolmentRequest: (EnrolmentRequest) -> Unit = { },
     sortListMode: SortListMode = defaultSortListMode(),
 ) {
-    val lazyPagingItems = rememberDoorRepositoryPager(
+    val doorRepoPager = rememberDoorRepositoryPager(
         pagingSourceFactory = uiState.clazzList,
         refreshCommandFlow = refreshCommandFlow,
-    ).lazyPagingItems
+    )
 
     val hasPendingEnrolments = uiState.pendingEnrolments.isNotEmpty()
     val timeFormatter = rememberTimeFormatter()
@@ -220,7 +221,6 @@ fun ClazzListScreen(
 
         item(span = { GridItemSpan(maxLineSpan) }) {
             UstadListFilterChipsHeader(
-                modifier = Modifier.fillMaxWidth(),
                 filterOptions = uiState.filterOptions,
                 selectedChipId = uiState.selectedChipId,
                 enabled = uiState.fieldsEnabled,
@@ -228,8 +228,15 @@ fun ClazzListScreen(
             )
         }
 
+
+        if(!hasPendingEnrolments && doorRepoPager.isSettledEmpty) {
+            item(span = { GridItemSpan(maxLineSpan) }, key = "empty_message") {
+                UstadNothingHereYet()
+            }
+        }
+
         ustadPagedItems(
-            pagingItems = lazyPagingItems,
+            pagingItems = doorRepoPager.lazyPagingItems,
             key = { it.clazzUid }
         ){
             ClazzListItem(

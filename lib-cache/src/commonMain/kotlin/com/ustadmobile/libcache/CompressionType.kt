@@ -5,6 +5,9 @@ package com.ustadmobile.libcache
  * there is no Java/Kotlin encoder available as per :
  *
  *  https://github.com/google/brotli/issues/405
+ *
+ *  Could potentially use the JNI wrapper and compile for Android:
+ *  https://github.com/google/brotli/blob/master/java/org/brotli/wrapper/enc/Encoder.java
  */
 enum class CompressionType(
     val headerVal: String,

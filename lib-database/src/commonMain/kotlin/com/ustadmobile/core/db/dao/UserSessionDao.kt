@@ -121,38 +121,6 @@ expect abstract class UserSessionDao {
     """)
     abstract suspend fun findActiveNodesIdsByGroupUids(groupUids: List<Long>): List<Long>
 
-    /**
-     * This query will find the nodeids for all users where the device has permissions that are
-     * influenced by a given class.
-     */
-    @Query("""
-        SELECT UserSession.usClientNodeId
-          FROM ScopedGrant
-               JOIN PersonGroupMember 
-                    ON PersonGroupMember.groupMemberGroupUid = ScopedGrant.sgGroupUid
-               JOIN UserSession
-                    ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
-         WHERE (ScopedGrant.sgTableId = ${Clazz.TABLE_ID} AND ScopedGrant.sgEntityUid IN (:clazzUids))
-            OR (ScopedGrant.sgTableId = ${School.TABLE_ID} AND ScopedGrant.sgEntityUid IN 
-                (SELECT clazzSchoolUid
-                   FROM Clazz
-                  WHERE clazzUid IN (:clazzUids)))
-          
-    """)
-    abstract suspend fun findAllActiveNodeIdsWithClazzBasedPermission(clazzUids: List<Long>): List<Long>
-
-    @Query("""
-        SELECT UserSession.usClientNodeId
-          FROM ScopedGrant
-               JOIN PersonGroupMember 
-                    ON PersonGroupMember.groupMemberGroupUid = ScopedGrant.sgGroupUid
-               JOIN UserSession
-                    ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
-         WHERE ScopedGrant.sgTableId = ${School.TABLE_ID} 
-           AND ScopedGrant.sgEntityUid IN (:schoolUids) 
-    """)
-    abstract suspend fun findAllActiveNodeIdsWithSchoolBasedPermission(schoolUids: List<Long>): List<Long>
-
 
     @Query("""
         SELECT COUNT(*)

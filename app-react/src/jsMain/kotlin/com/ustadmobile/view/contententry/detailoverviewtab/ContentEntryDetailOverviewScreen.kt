@@ -1,27 +1,29 @@
 package com.ustadmobile.view.contententry.detailoverviewtab
 
-import com.ustadmobile.core.entityconstants.ProgressConstants
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.impl.locale.StringProviderJs
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.util.ext.progressBadge
 import com.ustadmobile.core.viewmodel.contententry.detailoverviewtab.ContentEntryDetailOverviewUiState
 import com.ustadmobile.core.viewmodel.contententry.detailoverviewtab.ContentEntryDetailOverviewViewModel
 import com.ustadmobile.core.viewmodel.contententry.detailoverviewtab.progress
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.composites.ContentEntryAndDetail
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.xapi.StatementEntity
 import com.ustadmobile.mui.common.md
 import com.ustadmobile.mui.common.xs
+import com.ustadmobile.mui.components.ThemeContext
+import com.ustadmobile.mui.components.UstadBlockIcon
+import com.ustadmobile.mui.components.UstadBlockStatusProgressBar
 import com.ustadmobile.mui.components.UstadLinearProgressListItem
 import com.ustadmobile.mui.components.UstadQuickActionButton
 import com.ustadmobile.mui.components.UstadRawHtml
+import com.ustadmobile.util.ext.useAbsolutePositionBottom
 import web.cssom.*
 import mui.material.*
-import mui.material.Badge
 import mui.material.styles.TypographyVariant
 import mui.system.Container
 import mui.system.responsive
@@ -32,31 +34,13 @@ import react.create
 import react.useState
 
 //WARNING: DO NOT Replace with import mui.icons.material.[*] - Leads to severe IDE performance issues 10/Apr/23 https://youtrack.jetbrains.com/issue/KT-57897/Intellisense-and-code-analysis-is-extremely-slow-and-unusable-on-Kotlin-JS
-import mui.icons.material.Book
-import mui.icons.material.SmartDisplay
-import mui.icons.material.TextSnippet
-import mui.icons.material.Article
-import mui.icons.material.Collections
-import mui.icons.material.TouchApp
-import mui.icons.material.Audiotrack
-import mui.icons.material.CheckCircle
-import mui.icons.material.Cancel
-import mui.icons.material.BookOutlined
 import mui.icons.material.EmojiEvents
 import mui.icons.material.CheckBoxOutlined
 import mui.icons.material.Delete
 import mui.icons.material.Download
 import react.ReactNode
+import react.useRequiredContext
 
-val CONTENT_ENTRY_TYPE_ICON_MAP = mapOf(
-    ContentEntry.TYPE_EBOOK to Book,
-    ContentEntry.TYPE_VIDEO to SmartDisplay,
-    ContentEntry.TYPE_DOCUMENT to TextSnippet,
-    ContentEntry.TYPE_ARTICLE to Article,
-    ContentEntry.TYPE_COLLECTION to Collections,
-    ContentEntry.TYPE_INTERACTIVE_EXERCISE to TouchApp,
-    ContentEntry.TYPE_AUDIO to Audiotrack,
-)
 
 external interface ContentEntryDetailOverviewScreenProps : Props {
 
@@ -90,13 +74,16 @@ val ContentEntryDetailOverviewComponent2 = FC<ContentEntryDetailOverviewScreenPr
                 uiState = props.uiState
             }
 
-            if (props.uiState.openButtonVisible){
-                Button {
-                    onClick = { props.onClickOpen() }
-                    variant = ButtonVariant.contained
 
-                    + strings[MR.strings.open].uppercase()
+            Button {
+                id = "open_button"
+                onClick = {
+                    console.log("ContentEntryDetailOverviewScreen: onClickOpen")
+                    props.onClickOpen()
                 }
+                variant = ButtonVariant.contained
+
+                + strings[MR.strings.open].uppercase()
             }
 
             Divider { orientation = Orientation.horizontal }
@@ -169,60 +156,43 @@ val ContentEntryDetailOverviewComponent2 = FC<ContentEntryDetailOverviewScreenPr
 }
 
 private val ContentDetails = FC<ContentEntryDetailOverviewScreenProps> { props ->
+    val theme by useRequiredContext(ThemeContext)
 
     Stack {
         direction = responsive(StackDirection.row)
-        spacing = responsive(20.px)
+        spacing = responsive(16.px)
+        sx {
+            paddingTop = theme.spacing(2)
+        }
 
-        ContentDetailLeftColumn {
-            uiState = props.uiState
+        Box {
+            sx {
+                width = 100.px
+                height = 100.px
+                position = Position.relative
+            }
+
+            UstadBlockStatusProgressBar {
+                sx {
+                    useAbsolutePositionBottom()
+                    width = 100.pct
+                }
+
+                blockStatus = props.uiState.contentEntry?.status
+            }
+
+            UstadBlockIcon {
+                title = props.uiState.contentEntry?.entry?.title ?: ""
+                contentEntry = props.uiState.contentEntry?.entry
+                pictureUri = props.uiState.contentEntry?.picture?.cepPictureUri
+                width = 100.px
+                height = 100.px
+                iconSize = SvgIconSize.large
+            }
         }
 
         ContentDetailRightColumn {
             uiState = props.uiState
-        }
-    }
-}
-
-private val ContentDetailLeftColumn = FC <ContentEntryDetailOverviewScreenProps> { props ->
-
-    var badgeIcon = CheckCircle.create()
-    var badgeColor = IconColor.success
-    if (props.uiState.scoreProgress?.progressBadge() == ProgressConstants.BADGE_CROSS) {
-        badgeIcon = Cancel.create()
-        badgeColor = IconColor.error
-    }
-
-    Stack {
-        direction = responsive(StackDirection.column)
-        spacing = responsive(10.px)
-
-        BookOutlined{
-            sx {
-                height = 110.px
-                width = 110.px
-            }
-        }
-
-        Badge {
-            if (props.uiState.scoreProgress?.progressBadge()
-                .let { it != null && it != ProgressConstants.BADGE_NONE }
-            ) {
-                badgeContent = Icon.create {
-                    + badgeIcon
-                    color = badgeColor
-                }
-            }
-
-            if (props.uiState.scoreProgressVisible){
-                LinearProgress {
-                    value = props.uiState.scoreProgress?.progress
-                    variant = LinearProgressVariant.determinate
-                    sx {
-                        width = 95.px
-                    }
-                }
-            }
         }
     }
 }
@@ -236,6 +206,7 @@ private val ContentDetailRightColumn = FC <ContentEntryDetailOverviewScreenProps
 
         Typography {
             variant = TypographyVariant.h4
+            id = "courseblock_title"
             + (props.uiState.contentEntry?.entry?.title ?: "")
         }
 
@@ -259,12 +230,14 @@ private val ContentDetailRightColumn = FC <ContentEntryDetailOverviewScreenProps
 
         if (props.uiState.authorVisible){
             Typography{
+                variant = TypographyVariant.caption
                 + (props.uiState.contentEntry?.entry?.author ?: "")
             }
         }
 
         if (props.uiState.publisherVisible){
             Typography{
+                variant = TypographyVariant.caption
                 + (props.uiState.contentEntry?.entry?.publisher ?: "")
             }
         }
@@ -278,11 +251,12 @@ private val ContentDetailRightColumn = FC <ContentEntryDetailOverviewScreenProps
                 }
 
                 Typography{
+                    variant = TypographyVariant.caption
                     + strings[MR.strings.entry_details_license]
                 }
 
                 Typography {
-                    variant = TypographyVariant.h6
+                    variant = TypographyVariant.caption
                     + (props.uiState.contentEntry?.entry?.licenseName ?: "")
                 }
             }

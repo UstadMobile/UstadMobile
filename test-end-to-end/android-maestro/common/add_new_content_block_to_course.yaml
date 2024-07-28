@@ -10,28 +10,22 @@ appId: com.toughra.ustadmobile
 # push the test file to the downloads
 - evalScript: ${http.get(CONTROLSERVER + "pushcontent?test-file-name=" + TESTFILENAME +"&device=" + TESTSERIAL)}
 # edit the course to add blocks
-- tapOn: "Edit"
-- swipe:
-    start: 100,400
-    end: 100,100
+- tapOn:
+    id: "floating_action_button"
+- scrollUntilVisible:
+    element:
+      text: "Add block"
+    direction: DOWN
 # add new content block inside course
 - tapOn: "Add block"
 - tapOn: "Content"
-- tapOn: "Add new content"
-- tapOn: "Add file"
+- tapOn: "Import from file"
 - runFlow:
       when:
           notVisible: "Downloads"
       file: redirect_to_downloads.yaml
 - tapOn: ${TESTFILENAME}
-  # id is  used for content title , text is not used because it keeps on changing
-- tapOn:
-      id: "com.toughra.ustadmobile:id/entry_title_text"
-- longPressOn:
-      id: "com.toughra.ustadmobile:id/entry_title_text"
-- eraseText
-- inputText: ${TESTCONTENTNAME}
-- hideKeyboard
-- tapOn: "SAVE"
+- tapOn: "Next"
+- tapOn: "Done"
 - tapOn: "SAVE"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/able_to_add_new_content_block_inside_course"

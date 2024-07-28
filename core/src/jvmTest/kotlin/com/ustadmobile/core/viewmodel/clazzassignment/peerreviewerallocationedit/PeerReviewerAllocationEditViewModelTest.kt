@@ -51,7 +51,7 @@ class PeerReviewerAllocationEditViewModelTest : AbstractMainDispatcherTest() {
                 }
 
                 CreateNewClazzUseCase(activeDb).invoke(clazz)
-                activeDb.coursePermissionDao.upsertAsync(
+                activeDb.coursePermissionDao().upsertAsync(
                     CoursePermission(
                         cpToPersonUid = activeUserPerson.personUid,
                         cpClazzUid = clazzUid,

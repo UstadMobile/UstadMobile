@@ -999,6 +999,516 @@ val MIGRATION_166_167 = DoorMigrationStatementList(166, 167) { db ->
     listOf("UPDATE ContentEntryImportJob SET cjiStatus = 24 WHERE cjiStatus = 4")
 }
 
+val MIGRATION_167_168 = DoorMigrationStatementList(167, 168) { db ->
+    if(db.dbType() == DoorDbType.SQLITE) {
+        listOf("CREATE TABLE IF NOT EXISTS CourseBlockPicture (  cbpUid  INTEGER  PRIMARY KEY  NOT NULL , cbpLct  INTEGER  NOT NULL , cbpPictureUri  TEXT , cbpThumbnailUri  TEXT )")
+    }else {
+        listOf("CREATE TABLE IF NOT EXISTS CourseBlockPicture (  cbpUid  BIGINT  PRIMARY KEY  NOT NULL , cbpLct  BIGINT  NOT NULL , cbpPictureUri  TEXT , cbpThumbnailUri  TEXT )")
+    }
+}
+
+val MIGRATION_168_169 = DoorMigrationStatementList(168, 169) { db ->
+    if(db.dbType() == DoorDbType.SQLITE) {
+        listOf("CREATE TABLE IF NOT EXISTS ContentEntryPicture2 (  cepUid  INTEGER  PRIMARY KEY  NOT NULL , cepLct  INTEGER  NOT NULL , cepPictureUri  TEXT , cepThumbnailUri  TEXT )")
+    }else {
+        listOf("CREATE TABLE IF NOT EXISTS ContentEntryPicture2 (  cepUid  BIGINT  PRIMARY KEY  NOT NULL , cepLct  BIGINT  NOT NULL , cepPictureUri  TEXT , cepThumbnailUri  TEXT )")
+    }
+}
+
+//Add retention lock creation for the new CourseBlockPicture table and ContentEntryPicture2 table
+//on server (only)
+val MIGRATION_169_170_SERVER = DoorMigrationStatementList(169, 170) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("""
+                        CREATE TRIGGER IF NOT EXISTS Retain_CourseBlockPicture_Ins_cbpPictureUri
+                        AFTER INSERT ON CourseBlockPicture
+                        FOR EACH ROW WHEN NEW.cbpPictureUri IS NOT NULL
+                        BEGIN
+                        INSERT OR REPLACE INTO CacheLockJoin(cljTableId, cljEntityUid, cljUrl, cljLockId, cljStatus, cljType)
+                        VALUES(6677, NEW.cbpUid, NEW.cbpPictureUri, 0, 1, 1);
+                        END
+                    """)
+
+            add("""
+                        CREATE TRIGGER IF NOT EXISTS Retain_CourseBlockPicture_Ins_cbpThumbnailUri
+                        AFTER INSERT ON CourseBlockPicture
+                        FOR EACH ROW WHEN NEW.cbpThumbnailUri IS NOT NULL
+                        BEGIN
+                        INSERT OR REPLACE INTO CacheLockJoin(cljTableId, cljEntityUid, cljUrl, cljLockId, cljStatus, cljType)
+                        VALUES(6677, NEW.cbpUid, NEW.cbpThumbnailUri, 0, 1, 1);
+                        END
+                    """)
+
+            add("""
+                    CREATE TRIGGER IF NOT EXISTS Retain_CourseBlockPicture_Upd_cbpPictureUri_New
+                    AFTER UPDATE ON CourseBlockPicture
+                    FOR EACH ROW WHEN NEW.cbpPictureUri != OLD.cbpPictureUri AND NEW.cbpPictureUri IS NOT NULL
+                    BEGIN
+                        INSERT OR REPLACE INTO CacheLockJoin(cljTableId, cljEntityUid, cljUrl, cljLockId, cljStatus, cljType)
+                        VALUES(6677, NEW.cbpUid, NEW.cbpPictureUri, 0, 1, 1);
+                    END   
+                """)
+
+            add("""CREATE TRIGGER IF NOT EXISTS Retain_CourseBlockPicture_Upd_cbpPictureUri_Old
+AFTER UPDATE ON CourseBlockPicture
+FOR EACH ROW WHEN NEW.cbpPictureUri != OLD.cbpPictureUri AND OLD.cbpPictureUri IS NOT NULL
+BEGIN
+    UPDATE CacheLockJoin 
+       SET cljStatus = 3
+     WHERE cljTableId = 6677
+       AND cljEntityUid = OLD.cbpUid
+       AND cljUrl = OLD.cbpPictureUri;
+END        """)
+
+            add("""
+                    CREATE TRIGGER IF NOT EXISTS Retain_CourseBlockPicture_Upd_cbpThumbnailUri_New
+                    AFTER UPDATE ON CourseBlockPicture
+                    FOR EACH ROW WHEN NEW.cbpThumbnailUri != OLD.cbpThumbnailUri AND NEW.cbpThumbnailUri IS NOT NULL
+                    BEGIN
+                        INSERT OR REPLACE INTO CacheLockJoin(cljTableId, cljEntityUid, cljUrl, cljLockId, cljStatus, cljType)
+                        VALUES(6677, NEW.cbpUid, NEW.cbpThumbnailUri, 0, 1, 1);
+                    END   
+                """)
+
+            add("""CREATE TRIGGER IF NOT EXISTS Retain_CourseBlockPicture_Upd_cbpThumbnailUri_Old
+AFTER UPDATE ON CourseBlockPicture
+FOR EACH ROW WHEN NEW.cbpThumbnailUri != OLD.cbpThumbnailUri AND OLD.cbpThumbnailUri IS NOT NULL
+BEGIN
+    UPDATE CacheLockJoin 
+       SET cljStatus = 3
+     WHERE cljTableId = 6677
+       AND cljEntityUid = OLD.cbpUid
+       AND cljUrl = OLD.cbpThumbnailUri;
+END        """)
+
+            add("""CREATE TRIGGER IF NOT EXISTS Retain_CourseBlockPicture_Del_cbpPictureUri
+AFTER DELETE ON CourseBlockPicture
+FOR EACH ROW WHEN OLD.cbpPictureUri IS NOT NULL
+BEGIN
+    UPDATE CacheLockJoin 
+       SET cljStatus = 3
+     WHERE cljTableId = 6677
+       AND cljEntityUid = OLD.cbpUid
+       AND cljUrl = OLD.cbpPictureUri;
+END       """)
+
+            add("""CREATE TRIGGER IF NOT EXISTS Retain_CourseBlockPicture_Del_cbpThumbnailUri
+AFTER DELETE ON CourseBlockPicture
+FOR EACH ROW WHEN OLD.cbpThumbnailUri IS NOT NULL
+BEGIN
+    UPDATE CacheLockJoin 
+       SET cljStatus = 3
+     WHERE cljTableId = 6677
+       AND cljEntityUid = OLD.cbpUid
+       AND cljUrl = OLD.cbpThumbnailUri;
+END       """)
+
+            add("""
+                        CREATE TRIGGER IF NOT EXISTS Retain_ContentEntryPicture2_Ins_cepPictureUri
+                        AFTER INSERT ON ContentEntryPicture2
+                        FOR EACH ROW WHEN NEW.cepPictureUri IS NOT NULL
+                        BEGIN
+                        INSERT OR REPLACE INTO CacheLockJoin(cljTableId, cljEntityUid, cljUrl, cljLockId, cljStatus, cljType)
+                        VALUES(6678, NEW.cepUid, NEW.cepPictureUri, 0, 1, 1);
+                        END
+                    """)
+
+            add("""
+                        CREATE TRIGGER IF NOT EXISTS Retain_ContentEntryPicture2_Ins_cepThumbnailUri
+                        AFTER INSERT ON ContentEntryPicture2
+                        FOR EACH ROW WHEN NEW.cepThumbnailUri IS NOT NULL
+                        BEGIN
+                        INSERT OR REPLACE INTO CacheLockJoin(cljTableId, cljEntityUid, cljUrl, cljLockId, cljStatus, cljType)
+                        VALUES(6678, NEW.cepUid, NEW.cepThumbnailUri, 0, 1, 1);
+                        END
+                    """)
+
+            add("""
+                    CREATE TRIGGER IF NOT EXISTS Retain_ContentEntryPicture2_Upd_cepPictureUri_New
+                    AFTER UPDATE ON ContentEntryPicture2
+                    FOR EACH ROW WHEN NEW.cepPictureUri != OLD.cepPictureUri AND NEW.cepPictureUri IS NOT NULL
+                    BEGIN
+                        INSERT OR REPLACE INTO CacheLockJoin(cljTableId, cljEntityUid, cljUrl, cljLockId, cljStatus, cljType)
+                        VALUES(6678, NEW.cepUid, NEW.cepPictureUri, 0, 1, 1);
+                    END   
+                """)
+
+            add("""CREATE TRIGGER IF NOT EXISTS Retain_ContentEntryPicture2_Upd_cepPictureUri_Old
+AFTER UPDATE ON ContentEntryPicture2
+FOR EACH ROW WHEN NEW.cepPictureUri != OLD.cepPictureUri AND OLD.cepPictureUri IS NOT NULL
+BEGIN
+    UPDATE CacheLockJoin 
+       SET cljStatus = 3
+     WHERE cljTableId = 6678
+       AND cljEntityUid = OLD.cepUid
+       AND cljUrl = OLD.cepPictureUri;
+END        """)
+
+            add("""
+                    CREATE TRIGGER IF NOT EXISTS Retain_ContentEntryPicture2_Upd_cepThumbnailUri_New
+                    AFTER UPDATE ON ContentEntryPicture2
+                    FOR EACH ROW WHEN NEW.cepThumbnailUri != OLD.cepThumbnailUri AND NEW.cepThumbnailUri IS NOT NULL
+                    BEGIN
+                        INSERT OR REPLACE INTO CacheLockJoin(cljTableId, cljEntityUid, cljUrl, cljLockId, cljStatus, cljType)
+                        VALUES(6678, NEW.cepUid, NEW.cepThumbnailUri, 0, 1, 1);
+                    END   
+                """)
+
+            add("""CREATE TRIGGER IF NOT EXISTS Retain_ContentEntryPicture2_Upd_cepThumbnailUri_Old
+AFTER UPDATE ON ContentEntryPicture2
+FOR EACH ROW WHEN NEW.cepThumbnailUri != OLD.cepThumbnailUri AND OLD.cepThumbnailUri IS NOT NULL
+BEGIN
+    UPDATE CacheLockJoin 
+       SET cljStatus = 3
+     WHERE cljTableId = 6678
+       AND cljEntityUid = OLD.cepUid
+       AND cljUrl = OLD.cepThumbnailUri;
+END        """)
+
+            add("""CREATE TRIGGER IF NOT EXISTS Retain_ContentEntryPicture2_Del_cepPictureUri
+AFTER DELETE ON ContentEntryPicture2
+FOR EACH ROW WHEN OLD.cepPictureUri IS NOT NULL
+BEGIN
+    UPDATE CacheLockJoin 
+       SET cljStatus = 3
+     WHERE cljTableId = 6678
+       AND cljEntityUid = OLD.cepUid
+       AND cljUrl = OLD.cepPictureUri;
+END       """)
+
+            add("""CREATE TRIGGER IF NOT EXISTS Retain_ContentEntryPicture2_Del_cepThumbnailUri
+AFTER DELETE ON ContentEntryPicture2
+FOR EACH ROW WHEN OLD.cepThumbnailUri IS NOT NULL
+BEGIN
+    UPDATE CacheLockJoin 
+       SET cljStatus = 3
+     WHERE cljTableId = 6678
+       AND cljEntityUid = OLD.cepUid
+       AND cljUrl = OLD.cepThumbnailUri;
+END       """)
+        }else {
+            add("""
+                            CREATE OR REPLACE FUNCTION retain_c_clj_6677_cbpPictureUri() RETURNS TRIGGER AS $$
+                            BEGIN
+                            INSERT INTO CacheLockJoin(cljTableId, cljEntityUid, cljUrl, cljLockId, cljStatus, cljType)
+                            VALUES(6677, NEW.cbpUid, NEW.cbpPictureUri, 0, 1, 1);
+                            RETURN NEW;
+                            END $$ LANGUAGE plpgsql
+                        """)
+
+            add("""
+                            CREATE OR REPLACE FUNCTION retain_d_clj_6677_cbpPictureUri() RETURNS TRIGGER AS $$
+                            BEGIN
+                            UPDATE CacheLockJoin 
+                               SET cljStatus = 3
+                             WHERE cljTableId = 6677
+                               AND cljEntityUid = OLD.cbpUid
+                               AND cljUrl = OLD.cbpPictureUri;
+                            RETURN OLD;
+                            END $$ LANGUAGE plpgsql   
+                        """)
+
+            add("""
+                            CREATE TRIGGER retain_c_clj_6677_cbpPictureUri_ins_t
+                            AFTER INSERT ON CourseBlockPicture
+                            FOR EACH ROW
+                            WHEN (NEW.cbpPictureUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_c_clj_6677_cbpPictureUri();
+                        """)
+
+            add("""
+                            CREATE TRIGGER retain_c_clj_6677_cbpPictureUri_upd_t
+                            AFTER UPDATE ON CourseBlockPicture
+                            FOR EACH ROW
+                            WHEN (NEW.cbpPictureUri IS DISTINCT FROM OLD.cbpPictureUri AND OLD.cbpPictureUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_c_clj_6677_cbpPictureUri();
+                        """)
+
+            add("""
+                            CREATE TRIGGER retain_d_clj_6677_cbpPictureUri_upd_t
+                            AFTER UPDATE ON CourseBlockPicture
+                            FOR EACH ROW
+                            WHEN (NEW.cbpPictureUri IS DISTINCT FROM OLD.cbpPictureUri AND NEW.cbpPictureUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_d_clj_6677_cbpPictureUri();
+                        """)
+
+            add("""
+                            CREATE OR REPLACE FUNCTION retain_c_clj_6677_cbpThumbnailUri() RETURNS TRIGGER AS $$
+                            BEGIN
+                            INSERT INTO CacheLockJoin(cljTableId, cljEntityUid, cljUrl, cljLockId, cljStatus, cljType)
+                            VALUES(6677, NEW.cbpUid, NEW.cbpThumbnailUri, 0, 1, 1);
+                            RETURN NEW;
+                            END $$ LANGUAGE plpgsql
+                        """)
+
+            add("""
+                            CREATE OR REPLACE FUNCTION retain_d_clj_6677_cbpThumbnailUri() RETURNS TRIGGER AS $$
+                            BEGIN
+                            UPDATE CacheLockJoin 
+                               SET cljStatus = 3
+                             WHERE cljTableId = 6677
+                               AND cljEntityUid = OLD.cbpUid
+                               AND cljUrl = OLD.cbpThumbnailUri;
+                            RETURN OLD;
+                            END $$ LANGUAGE plpgsql   
+                        """)
+
+            add("""
+                            CREATE TRIGGER retain_c_clj_6677_cbpThumbnailUri_ins_t
+                            AFTER INSERT ON CourseBlockPicture
+                            FOR EACH ROW
+                            WHEN (NEW.cbpThumbnailUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_c_clj_6677_cbpThumbnailUri();
+                        """)
+
+            add("""
+                            CREATE TRIGGER retain_c_clj_6677_cbpThumbnailUri_upd_t
+                            AFTER UPDATE ON CourseBlockPicture
+                            FOR EACH ROW
+                            WHEN (NEW.cbpThumbnailUri IS DISTINCT FROM OLD.cbpThumbnailUri AND OLD.cbpThumbnailUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_c_clj_6677_cbpThumbnailUri();
+                        """)
+
+            add("""
+                            CREATE TRIGGER retain_d_clj_6677_cbpThumbnailUri_upd_t
+                            AFTER UPDATE ON CourseBlockPicture
+                            FOR EACH ROW
+                            WHEN (NEW.cbpThumbnailUri IS DISTINCT FROM OLD.cbpThumbnailUri AND NEW.cbpThumbnailUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_d_clj_6677_cbpThumbnailUri();
+                        """)
+
+            add("""
+                            CREATE OR REPLACE FUNCTION retain_c_clj_6678_cepPictureUri() RETURNS TRIGGER AS $$
+                            BEGIN
+                            INSERT INTO CacheLockJoin(cljTableId, cljEntityUid, cljUrl, cljLockId, cljStatus, cljType)
+                            VALUES(6678, NEW.cepUid, NEW.cepPictureUri, 0, 1, 1);
+                            RETURN NEW;
+                            END $$ LANGUAGE plpgsql
+                        """)
+
+            add("""
+                            CREATE OR REPLACE FUNCTION retain_d_clj_6678_cepPictureUri() RETURNS TRIGGER AS $$
+                            BEGIN
+                            UPDATE CacheLockJoin 
+                               SET cljStatus = 3
+                             WHERE cljTableId = 6678
+                               AND cljEntityUid = OLD.cepUid
+                               AND cljUrl = OLD.cepPictureUri;
+                            RETURN OLD;
+                            END $$ LANGUAGE plpgsql   
+                        """)
+
+            add("""
+                            CREATE TRIGGER retain_c_clj_6678_cepPictureUri_ins_t
+                            AFTER INSERT ON ContentEntryPicture2
+                            FOR EACH ROW
+                            WHEN (NEW.cepPictureUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_c_clj_6678_cepPictureUri();
+                        """)
+
+            add("""
+                            CREATE TRIGGER retain_c_clj_6678_cepPictureUri_upd_t
+                            AFTER UPDATE ON ContentEntryPicture2
+                            FOR EACH ROW
+                            WHEN (NEW.cepPictureUri IS DISTINCT FROM OLD.cepPictureUri AND OLD.cepPictureUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_c_clj_6678_cepPictureUri();
+                        """)
+
+            add("""
+                            CREATE TRIGGER retain_d_clj_6678_cepPictureUri_upd_t
+                            AFTER UPDATE ON ContentEntryPicture2
+                            FOR EACH ROW
+                            WHEN (NEW.cepPictureUri IS DISTINCT FROM OLD.cepPictureUri AND NEW.cepPictureUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_d_clj_6678_cepPictureUri();
+                        """)
+
+            add("""
+                            CREATE OR REPLACE FUNCTION retain_c_clj_6678_cepThumbnailUri() RETURNS TRIGGER AS $$
+                            BEGIN
+                            INSERT INTO CacheLockJoin(cljTableId, cljEntityUid, cljUrl, cljLockId, cljStatus, cljType)
+                            VALUES(6678, NEW.cepUid, NEW.cepThumbnailUri, 0, 1, 1);
+                            RETURN NEW;
+                            END $$ LANGUAGE plpgsql
+                        """)
+
+            add("""
+                            CREATE OR REPLACE FUNCTION retain_d_clj_6678_cepThumbnailUri() RETURNS TRIGGER AS $$
+                            BEGIN
+                            UPDATE CacheLockJoin 
+                               SET cljStatus = 3
+                             WHERE cljTableId = 6678
+                               AND cljEntityUid = OLD.cepUid
+                               AND cljUrl = OLD.cepThumbnailUri;
+                            RETURN OLD;
+                            END $$ LANGUAGE plpgsql   
+                        """)
+
+            add("""
+                            CREATE TRIGGER retain_c_clj_6678_cepThumbnailUri_ins_t
+                            AFTER INSERT ON ContentEntryPicture2
+                            FOR EACH ROW
+                            WHEN (NEW.cepThumbnailUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_c_clj_6678_cepThumbnailUri();
+                        """)
+
+            add("""
+                            CREATE TRIGGER retain_c_clj_6678_cepThumbnailUri_upd_t
+                            AFTER UPDATE ON ContentEntryPicture2
+                            FOR EACH ROW
+                            WHEN (NEW.cepThumbnailUri IS DISTINCT FROM OLD.cepThumbnailUri AND OLD.cepThumbnailUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_c_clj_6678_cepThumbnailUri();
+                        """)
+
+            add("""
+                            CREATE TRIGGER retain_d_clj_6678_cepThumbnailUri_upd_t
+                            AFTER UPDATE ON ContentEntryPicture2
+                            FOR EACH ROW
+                            WHEN (NEW.cepThumbnailUri IS DISTINCT FROM OLD.cepThumbnailUri AND NEW.cepThumbnailUri IS NOT NULL)
+                            EXECUTE FUNCTION retain_d_clj_6678_cepThumbnailUri();
+                        """)
+        }
+    }
+}
+
+//Do nothing on client
+val MIGRATION_169_170_CLIENT = DoorMigrationStatementList(169, 170) { db ->
+    emptyList()
+}
+
+val MIGRATION_170_171 = DoorMigrationStatementList(170, 171) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS TransferJobError (  tjeTjUid  INTEGER  NOT NULL , tjeTime  INTEGER  NOT NULL , tjeErrorStr  TEXT , tjeDismissed  INTEGER  NOT NULL , tjeId  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS TransferJobError (  tjeTjUid  INTEGER  NOT NULL , tjeTime  BIGINT  NOT NULL , tjeErrorStr  TEXT , tjeDismissed  BOOL  NOT NULL , tjeId  SERIAL  PRIMARY KEY  NOT NULL )")
+        }
+        add("CREATE INDEX idx_transferjoberror_tjetjuid ON TransferJobError (tjeTjUid)")
+    }
+}
+
+val MIGRATION_171_172 = DoorMigrationStatementList(171, 172) { db ->
+    buildList {
+        add("ALTER TABLE CourseBlock ADD COLUMN cbSourcedId TEXT")
+        add("CREATE INDEX idx_courseblock_cbclazzuid ON CourseBlock (cbClazzUid)")
+        add("CREATE INDEX idx_courseblock_cbsourcedid ON CourseBlock (cbSourcedId)")
+    }
+}
+
+/**
+ * Consolidated migration that adds Xapi tables.
+ */
+val MIGRATION_172_194 = DoorMigrationStatementList(172, 194) { db ->
+    buildList {
+        add("ALTER TABLE CourseBlock ADD COLUMN cbClazzSourcedId TEXT")
+        add("ALTER TABLE CourseBlock ADD COLUMN cbCreatedByAppId TEXT")
+        add("ALTER TABLE CourseBlock ADD COLUMN cbMetadata TEXT")
+
+        //187
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("ALTER TABLE CourseBlock RENAME to CourseBlock_OLD")
+            add("CREATE TABLE IF NOT EXISTS CourseBlock (  cbType  INTEGER  NOT NULL , cbIndentLevel  INTEGER  NOT NULL , cbModuleParentBlockUid  INTEGER  NOT NULL , cbTitle  TEXT , cbDescription  TEXT , cbCompletionCriteria  INTEGER  NOT NULL , cbHideUntilDate  INTEGER  NOT NULL , cbDeadlineDate  INTEGER  NOT NULL , cbLateSubmissionPenalty  INTEGER  NOT NULL , cbGracePeriodDate  INTEGER  NOT NULL , cbMaxPoints  REAl , cbMinPoints  REAL , cbIndex  INTEGER  NOT NULL , cbClazzUid  INTEGER  NOT NULL , cbClazzSourcedId  TEXT , cbActive  INTEGER  NOT NULL , cbHidden  INTEGER  NOT NULL , cbEntityUid  INTEGER  NOT NULL , cbLct  INTEGER  NOT NULL , cbSourcedId  TEXT , cbMetadata  TEXT , cbCreatedByAppId  TEXT , cbUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+            add("INSERT INTO CourseBlock (cbType, cbIndentLevel, cbModuleParentBlockUid, cbTitle, cbDescription, cbCompletionCriteria, cbHideUntilDate, cbDeadlineDate, cbLateSubmissionPenalty, cbGracePeriodDate, cbMaxPoints, cbMinPoints, cbIndex, cbClazzUid, cbClazzSourcedId, cbActive, cbHidden, cbEntityUid, cbLct, cbSourcedId, cbMetadata, cbCreatedByAppId, cbUid) SELECT cbType, cbIndentLevel, cbModuleParentBlockUid, cbTitle, cbDescription, cbCompletionCriteria, cbHideUntilDate, cbDeadlineDate, cbLateSubmissionPenalty, cbGracePeriodDate, cbMaxPoints, cbMinPoints, cbIndex, cbClazzUid, cbClazzSourcedId, cbActive, cbHidden, cbEntityUid, cbLct, cbSourcedId, cbMetadata, cbCreatedByAppId, cbUid FROM CourseBlock_OLD")
+            add("DROP TABLE CourseBlock_OLD")
+            add("CREATE INDEX idx_courseblock_cbclazzuid ON CourseBlock (cbClazzUid)")
+            add("CREATE INDEX idx_courseblock_cbsourcedid ON CourseBlock (cbSourcedId)")
+        }else {
+            add("ALTER TABLE CourseBlock ALTER COLUMN cbMaxPoints TYPE FLOAT")
+            add("ALTER TABLE CourseBlock ALTER COLUMN cbMaxPoints DROP NOT NULL")
+            add("ALTER TABLE CourseBlock ALTER COLUMN cbMinPoints TYPE FLOAT")
+            add("ALTER TABLE CourseBlock ALTER COLUMN cbMinPoints DROP NOT NULL")
+        }
+
+        //Update for replication to handle multipe primary keys
+        val bigIntType = if(db.dbType() == DoorDbType.SQLITE) "INTEGER" else "BIGINT"
+        (3..4).forEach {
+            add("ALTER TABLE OutgoingReplication ADD COLUMN orPk$it $bigIntType NOT NULL DEFAULT 0")
+        }
+        if(db.dbType() == DoorDbType.SQLITE){
+            //Changes the defaultvalue of orPk2
+            add("ALTER TABLE OutgoingReplication RENAME to OutgoingReplication_OLD")
+            add("CREATE TABLE IF NOT EXISTS OutgoingReplication (  destNodeId  INTEGER  NOT NULL , orPk1  INTEGER  NOT NULL , orPk2  INTEGER  NOT NULL  DEFAULT 0 , orPk3  INTEGER  NOT NULL  DEFAULT 0 , orPk4  INTEGER  NOT NULL  DEFAULT 0 , orTableId  INTEGER  NOT NULL , orUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+            add("INSERT INTO OutgoingReplication (destNodeId, orPk1, orPk2, orPk3, orPk4, orTableId, orUid) SELECT destNodeId, orPk1, orPk2, orPk3, orPk4, orTableId, orUid FROM OutgoingReplication_OLD")
+            add("DROP TABLE OutgoingReplication_OLD")
+        }else {
+            add("ALTER TABLE OutgoingReplication ALTER COLUMN orPk2 SET DEFAULT 0")
+        }
+
+        //drop old versions of Xapi tables
+        listOf(
+            "StudentResult", "StatementEntity", "AgentEntity", "VerbLangMapEntry", "XObjectEntity",
+            "ContextXObjectStatementJoin", "VerbEntity"
+        ).forEach {
+            add("DROP TABLE IF EXISTS $it")
+        }
+
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS StudentResult (  srUid  INTEGER  PRIMARY KEY  NOT NULL , srSourcedId  TEXT , srCourseBlockUid  INTEGER  NOT NULL , srLineItemSourcedId  TEXT , srLineItemHref  TEXT , srClazzUid  INTEGER  NOT NULL , srAssignmentUid  INTEGER  NOT NULL , srStatus  INTEGER  NOT NULL , srMetaData  TEXT , srStudentPersonUid  INTEGER  NOT NULL , srStudentPersonSourcedId  TEXT , srStudentGroupId  INTEGER  NOT NULL , srMarkerPersonUid  INTEGER  NOT NULL , srMarkerGroupId  INTEGER  NOT NULL , srScoreStatus  INTEGER  NOT NULL , srScore  REAl  NOT NULL , srScoreDate  INTEGER  NOT NULL , srLastModified  INTEGER  NOT NULL , srComment  TEXT , srAppId  TEXT , srDeleted  INTEGER  NOT NULL )")
+
+            add("CREATE TABLE IF NOT EXISTS ActivityEntity (  actUid  INTEGER  PRIMARY KEY  NOT NULL , actIdIri  TEXT , actType  TEXT , actMoreInfo  TEXT , actInteractionType  INTEGER  NOT NULL , actCorrectResponsePatterns  TEXT , actLct  INTEGER  NOT NULL )")
+            add("CREATE TABLE IF NOT EXISTS ActivityExtensionEntity (  aeeActivityUid  INTEGER  NOT NULL , aeeKeyHash  INTEGER  NOT NULL , aeeKey  TEXT , aeeJson  TEXT , aeeLastMod  INTEGER  NOT NULL , aeeIsDeleted  INTEGER  NOT NULL , PRIMARY KEY (aeeActivityUid, aeeKeyHash) )")
+            add("CREATE TABLE IF NOT EXISTS ActivityInteractionEntity (  aieActivityUid  INTEGER  NOT NULL , aieHash  INTEGER  NOT NULL , aieProp  INTEGER  NOT NULL , aieId  TEXT , aieLastMod  INTEGER  NOT NULL , aieIsDeleted  INTEGER  NOT NULL , PRIMARY KEY (aieActivityUid, aieHash) )")
+            add("CREATE TABLE IF NOT EXISTS ActivityLangMapEntry (  almeActivityUid  INTEGER  NOT NULL , almeHash  INTEGER  NOT NULL , almeLangCode  TEXT , almeValue  TEXT , almeAieHash  INTEGER  NOT NULL , almeLastMod  INTEGER  NOT NULL , PRIMARY KEY (almeActivityUid, almeHash) )")
+            add("CREATE TABLE IF NOT EXISTS ActorEntity (  actorPersonUid  INTEGER  NOT NULL , actorName  TEXT , actorMbox  TEXT , actorMbox_sha1sum  TEXT , actorOpenid  TEXT , actorAccountName  TEXT , actorAccountHomePage  TEXT , actorEtag  INTEGER  NOT NULL , actorLct  INTEGER  NOT NULL , actorObjectType  INTEGER  NOT NULL , actorUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+            add("CREATE TABLE IF NOT EXISTS GroupMemberActorJoin (  gmajGroupActorUid  BIGINT  NOT NULL , gmajMemberActorUid  BIGINT  NOT NULL , gmajLastMod  BIGINT  NOT NULL , PRIMARY KEY (gmajGroupActorUid, gmajMemberActorUid) )")
+            add("CREATE TABLE IF NOT EXISTS StatementContextActivityJoin (  scajFromStatementIdHi  INTEGER  NOT NULL , scajFromStatementIdLo  INTEGER  NOT NULL , scajToHash  INTEGER  NOT NULL , scajContextType  INTEGER  NOT NULL , scajToActivityUid  INTEGER  NOT NULL , scajToActivityId  TEXT , scajEtag  INTEGER  NOT NULL , PRIMARY KEY (scajFromStatementIdHi, scajFromStatementIdLo, scajToHash) )")
+            add("CREATE TABLE IF NOT EXISTS StatementEntity (  statementIdHi  INTEGER  NOT NULL , statementIdLo  INTEGER  NOT NULL , statementActorPersonUid  INTEGER  NOT NULL , statementVerbUid  INTEGER  NOT NULL , statementObjectType  INTEGER  NOT NULL , statementObjectUid1  INTEGER  NOT NULL , statementObjectUid2  INTEGER  NOT NULL , statementActorUid  INTEGER  NOT NULL , authorityActorUid  INTEGER  NOT NULL , teamUid  INTEGER  NOT NULL , resultCompletion  INTEGER , resultSuccess  INTEGER , resultScoreScaled  REAl , resultScoreRaw  REAl , resultScoreMin  REAl , resultScoreMax  REAl , resultDuration  INTEGER , resultResponse  TEXT , timestamp  INTEGER  NOT NULL , stored  INTEGER  NOT NULL , contextRegistrationHi  INTEGER  NOT NULL , contextRegistrationLo  INTEGER  NOT NULL , contextPlatform  TEXT , contextStatementRefIdHi  INTEGER  NOT NULL , contextStatementRefIdLo  INTEGER  NOT NULL , contextInstructorActorUid  INTEGER  NOT NULL , statementLct  INTEGER  NOT NULL , extensionProgress  INTEGER , completionOrProgress  INTEGER  NOT NULL , statementContentEntryUid  INTEGER  NOT NULL , statementLearnerGroupUid  INTEGER  NOT NULL , statementClazzUid  INTEGER  NOT NULL , statementCbUid  INTEGER  NOT NULL , statementDoorNode  INTEGER  NOT NULL , isSubStatement  INTEGER  NOT NULL , PRIMARY KEY (statementIdHi, statementIdLo) )")
+            add("CREATE TABLE IF NOT EXISTS StatementEntityJson (  stmtJsonIdHi  INTEGER  NOT NULL , stmtJsonIdLo  INTEGER  NOT NULL , stmtEtag  INTEGER  NOT NULL , fullStatement  TEXT , PRIMARY KEY (stmtJsonIdHi, stmtJsonIdLo) )")
+            add("CREATE TABLE IF NOT EXISTS VerbEntity (  verbUid  INTEGER  PRIMARY KEY  NOT NULL , verbUrlId  TEXT , verbDeleted  INTEGER  NOT NULL , verbLct  INTEGER  NOT NULL )")
+            add("CREATE TABLE IF NOT EXISTS VerbLangMapEntry (  vlmeVerbUid  INTEGER  NOT NULL , vlmeLangHash  INTEGER  NOT NULL , vlmeLangCode  TEXT , vlmeEntryString  TEXT , vlmeLastModified  INTEGER  NOT NULL , PRIMARY KEY (vlmeVerbUid, vlmeLangHash) )")
+            add("CREATE TABLE IF NOT EXISTS XapiSessionEntity (  xseLastMod  INTEGER  NOT NULL , xseRegistrationHi  INTEGER  NOT NULL , xseRegistrationLo  INTEGER  NOT NULL , xseUsUid  INTEGER  NOT NULL , xseAccountPersonUid  INTEGER  NOT NULL , xseAccountUsername  TEXT , xseClazzUid  INTEGER  NOT NULL , xseCbUid  INTEGER  NOT NULL , xseContentEntryUid  INTEGER  NOT NULL , xseRootActivityId  TEXT , xseStartTime  INTEGER  NOT NULL , xseExpireTime  INTEGER  NOT NULL , xseAuth  TEXT , xseUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS StudentResult (  srUid  BIGINT  PRIMARY KEY  NOT NULL , srSourcedId  TEXT , srCourseBlockUid  BIGINT  NOT NULL , srLineItemSourcedId  TEXT , srLineItemHref  TEXT , srClazzUid  BIGINT  NOT NULL , srAssignmentUid  BIGINT  NOT NULL , srStatus  INTEGER  NOT NULL , srMetaData  TEXT , srStudentPersonUid  BIGINT  NOT NULL , srStudentPersonSourcedId  TEXT , srStudentGroupId  INTEGER  NOT NULL , srMarkerPersonUid  BIGINT  NOT NULL , srMarkerGroupId  INTEGER  NOT NULL , srScoreStatus  INTEGER  NOT NULL , srScore  FLOAT  NOT NULL , srScoreDate  BIGINT  NOT NULL , srLastModified  BIGINT  NOT NULL , srComment  TEXT , srAppId  TEXT , srDeleted  BOOL  NOT NULL )")
+
+            add("CREATE TABLE IF NOT EXISTS ActivityEntity (  actUid  BIGINT  PRIMARY KEY  NOT NULL , actIdIri  TEXT , actType  TEXT , actMoreInfo  TEXT , actInteractionType  INTEGER  NOT NULL , actCorrectResponsePatterns  TEXT , actLct  BIGINT  NOT NULL )")
+            add("CREATE TABLE IF NOT EXISTS ActivityExtensionEntity (  aeeActivityUid  BIGINT  NOT NULL , aeeKeyHash  BIGINT  NOT NULL , aeeKey  TEXT , aeeJson  TEXT , aeeLastMod  BIGINT  NOT NULL , aeeIsDeleted  BOOL  NOT NULL , PRIMARY KEY (aeeActivityUid, aeeKeyHash) )")
+            add("CREATE TABLE IF NOT EXISTS ActivityInteractionEntity (  aieActivityUid  BIGINT  NOT NULL , aieHash  BIGINT  NOT NULL , aieProp  INTEGER  NOT NULL , aieId  TEXT , aieLastMod  BIGINT  NOT NULL , aieIsDeleted  BOOL  NOT NULL , PRIMARY KEY (aieActivityUid, aieHash) )")
+            add("CREATE TABLE IF NOT EXISTS ActivityLangMapEntry (  almeActivityUid  BIGINT  NOT NULL , almeHash  BIGINT  NOT NULL , almeLangCode  TEXT , almeValue  TEXT , almeAieHash  BIGINT  NOT NULL , almeLastMod  BIGINT  NOT NULL , PRIMARY KEY (almeActivityUid, almeHash) )")
+            add("CREATE TABLE IF NOT EXISTS ActorEntity (  actorPersonUid  BIGINT  NOT NULL , actorName  TEXT , actorMbox  TEXT , actorMbox_sha1sum  TEXT , actorOpenid  TEXT , actorAccountName  TEXT , actorAccountHomePage  TEXT , actorEtag  BIGINT  NOT NULL , actorLct  BIGINT  NOT NULL , actorObjectType  INTEGER  NOT NULL , actorUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+            add("CREATE TABLE IF NOT EXISTS GroupMemberActorJoin (  gmajGroupActorUid  BIGINT  NOT NULL , gmajMemberActorUid  BIGINT  NOT NULL , gmajLastMod  BIGINT  NOT NULL , PRIMARY KEY (gmajGroupActorUid, gmajMemberActorUid) )")
+            add("CREATE TABLE IF NOT EXISTS StatementContextActivityJoin (  scajFromStatementIdHi  BIGINT  NOT NULL , scajFromStatementIdLo  BIGINT  NOT NULL , scajToHash  BIGINT  NOT NULL , scajContextType  INTEGER  NOT NULL , scajToActivityUid  BIGINT  NOT NULL , scajToActivityId  TEXT , scajEtag  BIGINT  NOT NULL , PRIMARY KEY (scajFromStatementIdHi, scajFromStatementIdLo, scajToHash) )")
+            add("CREATE TABLE IF NOT EXISTS StatementEntity (  statementIdHi  BIGINT  NOT NULL , statementIdLo  BIGINT  NOT NULL , statementActorPersonUid  BIGINT  NOT NULL , statementVerbUid  BIGINT  NOT NULL , statementObjectType  INTEGER  NOT NULL , statementObjectUid1  BIGINT  NOT NULL , statementObjectUid2  BIGINT  NOT NULL , statementActorUid  BIGINT  NOT NULL , authorityActorUid  BIGINT  NOT NULL , teamUid  BIGINT  NOT NULL , resultCompletion  BOOL , resultSuccess  BOOL , resultScoreScaled  FLOAT , resultScoreRaw  FLOAT , resultScoreMin  FLOAT , resultScoreMax  FLOAT , resultDuration  BIGINT , resultResponse  TEXT , timestamp  BIGINT  NOT NULL , stored  BIGINT  NOT NULL , contextRegistrationHi  BIGINT  NOT NULL , contextRegistrationLo  BIGINT  NOT NULL , contextPlatform  TEXT , contextStatementRefIdHi  BIGINT  NOT NULL , contextStatementRefIdLo  BIGINT  NOT NULL , contextInstructorActorUid  BIGINT  NOT NULL , statementLct  BIGINT  NOT NULL , extensionProgress  INTEGER , completionOrProgress  BOOL  NOT NULL , statementContentEntryUid  BIGINT  NOT NULL , statementLearnerGroupUid  BIGINT  NOT NULL , statementClazzUid  BIGINT  NOT NULL , statementCbUid  BIGINT  NOT NULL , statementDoorNode  BIGINT  NOT NULL , isSubStatement  BOOL  NOT NULL , PRIMARY KEY (statementIdHi, statementIdLo) )")
+            add("CREATE TABLE IF NOT EXISTS StatementEntityJson (  stmtJsonIdHi  BIGINT  NOT NULL , stmtJsonIdLo  BIGINT  NOT NULL , stmtEtag  BIGINT  NOT NULL , fullStatement  TEXT , PRIMARY KEY (stmtJsonIdHi, stmtJsonIdLo) )")
+            add("CREATE TABLE IF NOT EXISTS VerbEntity (  verbUid  BIGINT  PRIMARY KEY  NOT NULL , verbUrlId  TEXT , verbDeleted  BOOL  NOT NULL , verbLct  BIGINT  NOT NULL )")
+            add("CREATE TABLE IF NOT EXISTS VerbLangMapEntry (  vlmeVerbUid  BIGINT  NOT NULL , vlmeLangHash  BIGINT  NOT NULL , vlmeLangCode  TEXT , vlmeEntryString  TEXT , vlmeLastModified  BIGINT  NOT NULL , PRIMARY KEY (vlmeVerbUid, vlmeLangHash) )")
+            add("CREATE TABLE IF NOT EXISTS XapiSessionEntity (  xseLastMod  BIGINT  NOT NULL , xseRegistrationHi  BIGINT  NOT NULL , xseRegistrationLo  BIGINT  NOT NULL , xseUsUid  BIGINT  NOT NULL , xseAccountPersonUid  BIGINT  NOT NULL , xseAccountUsername  TEXT , xseClazzUid  BIGINT  NOT NULL , xseCbUid  BIGINT  NOT NULL , xseContentEntryUid  BIGINT  NOT NULL , xseRootActivityId  TEXT , xseStartTime  BIGINT  NOT NULL , xseExpireTime  BIGINT  NOT NULL , xseAuth  TEXT , xseUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+        }
+
+        //Indexes
+        add("CREATE INDEX idx_actorentity_actorobjecttype ON ActorEntity (actorObjectType)")
+        add("CREATE INDEX idx_actorentity_uid_personuid ON ActorEntity (actorPersonUid)")
+
+        add("CREATE INDEX idx_stmt_actor_person ON StatementEntity (statementActorPersonUid)")
+        add("CREATE INDEX idx_statement_clazz_person ON StatementEntity (statementClazzUid, statementActorPersonUid)")
+        add("CREATE INDEX idx_statement_cbuid_actor ON StatementEntity (statementCbUid, statementActorUid)")
+
+        add("CREATE INDEX idx_groupmemberactorjoin_gmajgroupactoruid ON GroupMemberActorJoin (gmajGroupActorUid)")
+        add("CREATE INDEX idx_groupmemberactorjoin_gmajmemberactoruid ON GroupMemberActorJoin (gmajMemberActorUid)")
+
+        add("DROP INDEX IF EXISTS idx_courseblock_cbsourcedid")
+
+        //Add columns back to discussion post
+        val (boolColType, boolDefaultVal) = if(db.dbType() == DoorDbType.SQLITE) {
+            Pair("INTEGER", "0")
+        }else {
+            Pair("BOOL", "FALSE")
+        }
+
+        add("ALTER TABLE DiscussionPost ADD COLUMN discussionPostVisible $boolColType NOT NULL DEFAULT $boolDefaultVal")
+        add("ALTER TABLE DiscussionPost ADD COLUMN discussionPostArchive $boolColType NOT NULL DEFAULT $boolDefaultVal")
+
+        //Drop old tables
+        listOf(
+            "NetworkNode", "AccessToken", "ScrapeQueueItem", "ContainerEntry",
+            "ContainerEntryFile", "LocallyAvailableContainer", "ContainerEtag",
+            "ContainerImportJob", "Role", "XLangMapEntry", "School", "SchoolMember",
+            "Chat", "ChatMember", "MessageRead", "StateEntity", "StateContentEntity",
+            "Container"
+        ).forEach {
+            add("DROP TABLE IF EXISTS $it")
+        }
+    }
+}
 
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_105_106, MIGRATION_106_107,
@@ -1013,7 +1523,8 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_151_152, MIGRATION_152_153, MIGRATION_153_154, MIGRATION_154_155,
     MIGRATION_156_157, MIGRATION_157_158, MIGRATION_158_159, MIGRATION_159_160,
     MIGRATION_160_161, MIGRATION_162_163, MIGRATION_163_164, MIGRATION_164_165,
-    MIGRATION_165_166, MIGRATION_166_167,
+    MIGRATION_165_166, MIGRATION_166_167, MIGRATION_167_168, MIGRATION_168_169,
+    MIGRATION_170_171, MIGRATION_171_172, MIGRATION_172_194,
 )
 
 

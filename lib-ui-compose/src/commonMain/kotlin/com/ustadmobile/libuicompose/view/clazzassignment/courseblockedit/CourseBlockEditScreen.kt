@@ -23,6 +23,7 @@ fun CourseBlockEditScreen(
     CourseBlockEditScreen(
         uiState = uiState,
         onCourseBlockChange = viewModel::onEntityChanged,
+        onPictureChanged = viewModel::onPictureChanged,
         onEditDescriptionInNewScreen = viewModel::onClickEditDescription,
         onClickEditContentEntry = viewModel::onClickEditContentEntry,
     )
@@ -32,6 +33,7 @@ fun CourseBlockEditScreen(
 fun CourseBlockEditScreen(
     uiState: CourseBlockEditUiState,
     onCourseBlockChange: (CourseBlock?) -> Unit,
+    onPictureChanged: (String?) -> Unit,
     onClickEditContentEntry: () -> Unit,
     onEditDescriptionInNewScreen: () -> Unit,
 ) {
@@ -41,6 +43,7 @@ fun CourseBlockEditScreen(
         UstadCourseBlockEdit(
             uiState = uiState,
             onCourseBlockChange = onCourseBlockChange,
+            onPictureChanged = onPictureChanged,
             onClickEditDescription = onEditDescriptionInNewScreen,
             onClickEditContentEntry = onClickEditContentEntry,
         )

@@ -4,7 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.ustadmobile.lib.db.entities.StatementEntity.Companion.RESULT_UNSET
+import com.ustadmobile.lib.db.entities.xapi.StatementEntity.Companion.RESULT_UNSET
 import kotlinx.serialization.Serializable
 
 @Entity(indices = [Index(value = ["cachePersonUid", "cacheContentEntryUid","cacheClazzAssignmentUid"],

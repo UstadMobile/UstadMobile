@@ -52,7 +52,7 @@ class CourseGroupSetEditViewModelTest : AbstractMainDispatcherTest()  {
             val testContext = activeDb.withDoorTransactionAsync {
                 clazz.clazzUid = CreateNewClazzUseCase(activeDb).invoke(clazz)
 
-                activeDb.coursePermissionDao.upsertAsync(
+                activeDb.coursePermissionDao().upsertAsync(
                     CoursePermission(
                         cpToPersonUid = activeUser.personUid,
                         cpClazzUid = clazz.clazzUid,
@@ -68,7 +68,7 @@ class CourseGroupSetEditViewModelTest : AbstractMainDispatcherTest()  {
 
                     personToEnrol.personUid = addPersonUseCase(personToEnrol)
 
-                    activeDb.clazzEnrolmentDao.insertAsync(
+                    activeDb.clazzEnrolmentDao().insertAsync(
                         ClazzEnrolment(
                             clazz.clazzUid, personToEnrol.personUid, ClazzEnrolment.ROLE_STUDENT
                         )
@@ -118,7 +118,7 @@ class CourseGroupSetEditViewModelTest : AbstractMainDispatcherTest()  {
 
                 var courseGroupSetUid = 0L
                 activeDb.doorFlow(arrayOf("CourseGroupSet")) {
-                    activeDb.courseGroupSetDao.findAllCourseGroupSetForClazzListAsync(
+                    activeDb.courseGroupSetDao().findAllCourseGroupSetForClazzListAsync(
                         testContext.clazz.clazzUid
                     )
                 }.test(timeout = 5.seconds) {
@@ -128,7 +128,7 @@ class CourseGroupSetEditViewModelTest : AbstractMainDispatcherTest()  {
                 }
 
                 val activeUserPersonUid = accountManager.currentUserSession.person.personUid
-                val members = activeDb.courseGroupMemberDao.findByCourseGroupSetAndClazz(
+                val members = activeDb.courseGroupMemberDao().findByCourseGroupSetAndClazz(
                     cgsUid = courseGroupSetUid,
                     clazzUid = testContext.clazz.clazzUid,
                     time = systemTimeInMillis(),

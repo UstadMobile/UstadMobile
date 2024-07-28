@@ -27,7 +27,9 @@ import com.ustadmobile.core.domain.upload.ChunkedUploadClientChunkGetterUseCase
 import com.ustadmobile.core.domain.upload.DEFAULT_CHUNK_SIZE
 import com.ustadmobile.door.ext.setBodyJson
 import com.ustadmobile.door.ext.withDoorTransactionAsync
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.TransferJobItemStatus
+import com.ustadmobile.lib.db.entities.TransferJobError
 import com.ustadmobile.libcache.RemoveLockRequest
 import com.ustadmobile.libcache.response.requireHeadersContentLength
 import io.github.aakira.napier.Napier
@@ -256,9 +258,9 @@ class BlobUploadClientUseCaseJvm(
         transferJobUid: Int,
     ) {
         val logPrefix = "BlobUploadClientUseCaseJvm (#$transferJobUid):"
-        val transferJob = db.transferJobDao.findByUid(transferJobUid)
+        val transferJob = db.transferJobDao().findByUid(transferJobUid)
             ?: throw IllegalArgumentException("$logPrefix: TransferJob #$transferJobUid does not exist")
-        val transferJobItems = db.transferJobItemDao.findByJobUid(transferJobUid)
+        val transferJobItems = db.transferJobItemDao().findByJobUid(transferJobUid)
         val batchUuid = transferJob.tjUuid
             ?: throw IllegalArgumentException("$logPrefix TransferJob has no uuid")
 
@@ -296,7 +298,7 @@ class BlobUploadClientUseCaseJvm(
                 val numIncompleteItems = db.withDoorTransactionAsync {
                     transferJobItemStatusUpdater.commit(transferJobUid)
                     transferJobItemStatusUpdater.onFinished()
-                    db.transferJobItemDao.findNumberJobItemsNotComplete(transferJobUid)
+                    db.transferJobItemDao().findNumberJobItemsNotComplete(transferJobUid)
                 }
 
                 if(numIncompleteItems != 0) {
@@ -310,6 +312,13 @@ class BlobUploadClientUseCaseJvm(
 
                 withContext(NonCancellable) {
                     transferJobItemStatusUpdater.onFinished()
+                    db.transferJobErrorDao().insertAsync(
+                        TransferJobError(
+                            tjeTime = systemTimeInMillis(),
+                            tjeErrorStr = e.message ?: e::class.java.name,
+                            tjeTjUid = transferJob.tjUid,
+                        )
+                    )
                 }
 
                 throw e

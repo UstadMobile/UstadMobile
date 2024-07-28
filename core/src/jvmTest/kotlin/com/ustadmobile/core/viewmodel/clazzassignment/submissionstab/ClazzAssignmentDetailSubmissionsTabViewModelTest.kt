@@ -96,7 +96,7 @@ class ClazzAssignmentDetailSubmissionsTabViewModelTest : AbstractMainDispatcherT
                 caMarkingType = ClazzAssignment.MARKED_BY_COURSE_LEADER
                 caGroupUid = 0
                 caClazzUid = testContext.clazz.clazzUid
-                caUid = activeDb.clazzAssignmentDao.insertAsync(this)
+                caUid = activeDb.clazzAssignmentDao().insertAsync(this)
             }
 
             val enrolIntoCourseUseCase = EnrolIntoCourseUseCase(activeDb, null)
@@ -116,7 +116,7 @@ class ClazzAssignmentDetailSubmissionsTabViewModelTest : AbstractMainDispatcherT
                 testContext.students.forEachIndexed { index, student ->
                     //put in submission for 2/3 of students
                     if(index % 3 == 1  || index % 3 == 2) {
-                        activeDb.courseAssignmentSubmissionDao.insertAsync(CourseAssignmentSubmission().apply {
+                        activeDb.courseAssignmentSubmissionDao().insertAsync(CourseAssignmentSubmission().apply {
                             casTimestamp = systemTimeInMillis()
                             casSubmitterUid = student.personUid
                             casSubmitterPersonUid = student.personUid
@@ -127,7 +127,7 @@ class ClazzAssignmentDetailSubmissionsTabViewModelTest : AbstractMainDispatcherT
 
                     //mark 1/3 of students
                     if(index % 3 == 2) {
-                        activeDb.courseAssignmentMarkDao.insertAsync(CourseAssignmentMark().apply {
+                        activeDb.courseAssignmentMarkDao().insertAsync(CourseAssignmentMark().apply {
                             camMark = 1.toFloat()
                             camSubmitterUid = student.personUid
                             camMarkerPersonUid = testContext.activeUserPerson.personUid

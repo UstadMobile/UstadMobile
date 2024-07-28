@@ -13,6 +13,7 @@ import com.ustadmobile.core.viewmodel.clazzassignment.detail.ClazzAssignmentDeta
 import com.ustadmobile.core.viewmodel.clazzassignment.submitterdetail.ClazzAssignmentSubmitterDetailViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.core.paging.RefreshCommand
+import com.ustadmobile.core.viewmodel.clazz.launchSetTitleFromClazzUid
 import com.ustadmobile.lib.db.entities.AssignmentProgressSummary
 import com.ustadmobile.lib.db.entities.AssignmentSubmitterSummary
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
@@ -82,7 +83,7 @@ class ClazzAssignmentDetailSubmissionsTabViewModel(
         ?: throw IllegalArgumentException("No ClazzUid provided")
 
     private val pagingSourceFactory: ListPagingSourceFactory<AssignmentSubmitterSummary> = {
-        activeRepo.clazzAssignmentDao.getAssignmentSubmitterSummaryListForAssignment(
+        activeRepo.clazzAssignmentDao().getAssignmentSubmitterSummaryListForAssignment(
             assignmentUid = argEntityUid,
             clazzUid = argClazzUid,
             accountPersonUid = activeUserPersonUid,
@@ -107,7 +108,7 @@ class ClazzAssignmentDetailSubmissionsTabViewModel(
 
         viewModelScope.launch {
             launch {
-                val terminology = activeRepo.courseTerminologyDao
+                val terminology = activeRepo.courseTerminologyDao()
                     .getTerminologyForAssignment(argEntityUid)
                 _uiState.update { prev ->
                     prev.copy(
@@ -118,7 +119,7 @@ class ClazzAssignmentDetailSubmissionsTabViewModel(
 
             _uiState.whenSubscribed {
                 launch {
-                    activeRepo.clazzAssignmentDao.getProgressSummaryForAssignment(
+                    activeRepo.clazzAssignmentDao().getProgressSummaryForAssignment(
                         assignmentUid = argEntityUid,
                         clazzUid = argClazzUid,
                         accountPersonUid = activeUserPersonUid,
@@ -132,12 +133,8 @@ class ClazzAssignmentDetailSubmissionsTabViewModel(
                     }
                 }
 
-                launch {
-                    activeRepo.courseBlockDao.getTitleByAssignmentUid(argEntityUid).collect {
-                        _appUiState.update { prev ->
-                            prev.copy(title = it)
-                        }
-                    }
+                launchSetTitleFromClazzUid(argClazzUid) { title ->
+                    _appUiState.update { it.copy(title = title) }
                 }
             }
         }

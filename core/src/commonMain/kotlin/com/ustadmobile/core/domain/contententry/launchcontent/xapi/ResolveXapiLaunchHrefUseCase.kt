@@ -10,6 +10,7 @@ import com.ustadmobile.core.util.ext.localFirstThenRepoIfNull
 import com.ustadmobile.core.util.requireEntryByUri
 import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
 import com.ustadmobile.xmlpullparserkmp.setInputString
+import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import kotlinx.serialization.json.Json
@@ -43,8 +44,9 @@ class ResolveXapiLaunchHrefUseCase(
     ) : XapiLaunchHrefResult {
         //ContentEntryVersion is immutable, so if available in db, no need to go to repo which would
         //make an http request
+        Napier.v { "Resolving xAPI url for contentEntryVersion $contentEntryVersionUid" }
         val contentEntryVersion = activeRepo.localFirstThenRepoIfNull {
-            it.contentEntryVersionDao.findByUidAsync(contentEntryVersionUid)
+            it.contentEntryVersionDao().findByUidAsync(contentEntryVersionUid)
         } ?: throw IllegalArgumentException("could not load contententryversion $contentEntryVersionUid")
 
         val manifestUrl = contentEntryVersion.cevManifestUrl ?:
@@ -65,6 +67,7 @@ class ResolveXapiLaunchHrefUseCase(
         val tinCanXmlPathPrefix = contentEntryVersion.cevOpenUri!!
             .substringBeforeLast("/", "")
 
+        Napier.v { "Resolved xAPI url for contentEntryVersion $contentEntryVersionUid : $url" }
         return XapiLaunchHrefResult(
             url = url,
             launchUriInContent = "$tinCanXmlPathPrefix${launchHref}",

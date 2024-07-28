@@ -18,6 +18,7 @@ import com.ustadmobile.libcache.headers.headersBuilder
 import com.ustadmobile.libcache.headers.integrity
 import com.ustadmobile.libcache.headers.mapHeaders
 import com.ustadmobile.libcache.integrity.sha256Integrity
+import com.ustadmobile.libcache.io.moveWithFallback
 import com.ustadmobile.libcache.io.requireMetadata
 import com.ustadmobile.libcache.io.useAndReadSha256
 import com.ustadmobile.libcache.io.transferToAndGetSha256
@@ -313,7 +314,7 @@ class UstadCacheImpl(
                     //If the entry to store is in a temporary path where it is acceptable to just
                     //move the file into the cache, and it is already compressed with the desired
                     // compression type for storage, then we will move (instead of copying) the file
-                    fileSystem.atomicMove(entryToStore.responseBodyTmpLocalPath, tmpFile)
+                    fileSystem.moveWithFallback(entryToStore.responseBodyTmpLocalPath, tmpFile)
                     val inflatedSize = if(storeCompressionType == CompressionType.NONE) {
                         fileSystem.requireMetadata(tmpFile).size
                     }else {
@@ -466,7 +467,7 @@ class UstadCacheImpl(
                         }
                         fileSystem.createDirectories(destPathParent)
                         val destPath = Path(destPathParent.toString(), randomUuid())
-                        fileSystem.atomicMove(entryInProgress.tmpFile, destPath)
+                        fileSystem.moveWithFallback(entryInProgress.tmpFile, destPath)
 
                         entryInProgress.copy(
                             cacheEntry = entryInProgress.cacheEntry.copy(
@@ -682,6 +683,11 @@ class UstadCacheImpl(
         }.toMap()
     }
 
+    private fun CacheEntry.isStoredIn(parent: Path): Boolean {
+        val currentPath = Path(storageUri)
+        return currentPath.toString().startsWith(parent.toString())
+    }
+
     /**
      * Used when an existing cache entry is locked or unlocked
      */
@@ -697,7 +703,7 @@ class UstadCacheImpl(
         return if(!currentPath.toString().startsWith(destParent.toString())) {
             val newDestPath = Path(destParent, currentPath.name)
             logger?.d(LOG_TAG, "$logPrefix moveToNewPath (${this.url}) $currentPath -> $newDestPath")
-            fileSystem.atomicMove(currentPath, newDestPath)
+            fileSystem.moveWithFallback(currentPath, newDestPath)
             copy(storageUri = newDestPath.toString())
         }else {
             this
@@ -706,18 +712,17 @@ class UstadCacheImpl(
 
     private fun addLockToLruMap(retentionLock: RetentionLock): CacheEntryAndLocks {
         return lruMap.compute(retentionLock.lockKey) { urlKey, entryAndLocks ->
-            entryAndLocks?.let {
-                val isNewlyLocked = it.locks.isEmpty()
+            entryAndLocks?.let { entryVal ->
+                val isNewlyLocked = entryVal.locks.isEmpty()
+                val persistentPath = pathsProvider().persistentPath
 
-                it.copy(
-                    locks = it.locks + retentionLock,
-                    entry = if(isNewlyLocked) {
-                        it.moveLock.withLock {
-                            it.entry?.moveToNewPath(pathsProvider().persistentPath)
-                        }
-                    }else {
-                        it.entry
-                    }
+                entryVal.copy(
+                    locks = entryVal.locks + retentionLock,
+                    entry = entryVal.takeIf {
+                        isNewlyLocked && it.entry?.isStoredIn(persistentPath) == false
+                    }?.moveLock?.withLock {
+                        entryVal.entry?.moveToNewPath(pathsProvider().persistentPath)
+                    } ?: entryVal.entry
                 )
             } ?: CacheEntryAndLocks(
                 urlKey = urlKey,
@@ -782,19 +787,16 @@ class UstadCacheImpl(
             lruMap.computeIfPresent(md5Digest.urlKey(removeRequest.url)) { key, prev ->
                 val newLockList = prev.locks.filter { it.lockId != removeRequest.lockId }
                 val isNewlyUnlocked = prev.locks.isNotEmpty() && newLockList.isEmpty()
+                val cachePath = pathsProvider().cachePath
 
                 prev.copy(
                     locks = prev.locks.filter { it.lockId != removeRequest.lockId },
 
-                    entry = if(isNewlyUnlocked) {
-                        prev.moveLock.withLock {
-                            prev.entry?.moveToNewPath(pathsProvider().cachePath)?.also { entry ->
-                                entriesWithLostLock += entry
-                            }
-                        }
-                    }else {
-                        prev.entry
-                    }
+                    entry = prev.takeIf {
+                        isNewlyUnlocked && it.entry?.isStoredIn(cachePath) == false
+                    }?.entry?.moveToNewPath(cachePath)?.also {
+                        entriesWithLostLock += it
+                    } ?: prev.entry
                 )
             }
         }

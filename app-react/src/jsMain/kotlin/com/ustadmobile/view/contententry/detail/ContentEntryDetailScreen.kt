@@ -15,6 +15,7 @@ external interface ContentEntryDetailProps : Props {
 val ContentEntryDetailComponent = FC<ContentEntryDetailProps> { props ->
     UstadScreenTabs {
         tabs = props.uiState.tabs
+        autoHideIfOneTab = true
     }
 }
 

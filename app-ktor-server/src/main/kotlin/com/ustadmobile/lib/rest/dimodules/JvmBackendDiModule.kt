@@ -12,7 +12,7 @@ import com.ustadmobile.core.db.ext.MIGRATION_144_145_SERVER
 import com.ustadmobile.core.db.ext.MIGRATION_148_149_NO_OFFLINE_ITEMS
 import com.ustadmobile.core.db.ext.MIGRATION_155_156_SERVER
 import com.ustadmobile.core.db.ext.MIGRATION_161_162_SERVER
-import com.ustadmobile.core.db.ext.MigrateMvvm
+import com.ustadmobile.core.db.ext.MIGRATION_169_170_SERVER
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.core.domain.cachelock.AddRetainAllActiveUriTriggersCallback
@@ -61,7 +61,6 @@ import java.io.FileReader
 import java.io.FileWriter
 import java.util.Locale
 import java.util.Properties
-import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * The database and use cases that need to start observing once the database is created
@@ -81,7 +80,6 @@ fun makeJvmBackendDiModule(
     config: ApplicationConfig,
     json: Json,
     contextScope: EndpointScope = EndpointScope.Default,
-    ranMvvmMigration: AtomicBoolean,
 ) = DI.Module("JvmBackendDiModule") {
     val dataDirPath = config.absoluteDataDir()
     dataDirPath.takeIf { !it.exists() }?.mkdirs()
@@ -96,6 +94,10 @@ fun makeJvmBackendDiModule(
         File(dataDirPath, context.identifier(dbMode)).also {
             it.takeIf { !it.exists() }?.mkdirs()
         }
+    }
+
+    bind<File>(tag = DiTag.TAG_ADMIN_PASS_FILE) with scoped(contextScope).singleton {
+        File(instance<File>(tag = DiTag.TAG_CONTEXT_DATA_ROOT), "admin.txt")
     }
 
     bind<Settings>() with singleton {
@@ -142,6 +144,8 @@ fun makeJvmBackendDiModule(
     }
 
     bind<DbAndObservers>() with scoped(contextScope).singleton {
+        instance<File>(DiTag.TAG_CONTEXT_DATA_ROOT) //Ensure data dir for context is created
+
         val dbHostName = context.identifier(dbMode, "UmAppDatabase")
         val nodeIdAndAuth: NodeIdAndAuth = instance()
         val dbUrl = config.property("ktor.database.url").getString()
@@ -159,17 +163,13 @@ fun makeJvmBackendDiModule(
             .addCallback(InsertDefaultSiteCallback())
             .addCallback(AddRetainAllActiveUriTriggersCallback())
             .addCallback(AddOutgoingReplicationForMessageTriggerCallback())
-            .addMigrations(
-                MigrateMvvm(
-                    onRan = { ranMvvmMigration.set(true) }
-                )
-            )
             .addMigrations(*migrationList().toTypedArray())
             .addMigrations(Migrate131to132AddRetainActiveUriTriggers)
             .addMigrations(MIGRATION_144_145_SERVER)
             .addMigrations(MIGRATION_148_149_NO_OFFLINE_ITEMS)
             .addMigrations(MIGRATION_155_156_SERVER)
             .addMigrations(MIGRATION_161_162_SERVER)
+            .addMigrations(MIGRATION_169_170_SERVER)
             .build().also {
                 it.ktorInitDb(di)
             }
@@ -254,7 +254,7 @@ fun makeJvmBackendDiModule(
             .addInterceptor(
                 UstadCacheInterceptor(
                     cache = instance(),
-                    tmpDir = File(config.absoluteDataDir(), "httpfiles"),
+                    tmpDirProvider = { File(config.absoluteDataDir(), "httpfiles") },
                     logger = NapierLoggingAdapter(),
                     json = json,
                 )

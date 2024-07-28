@@ -4,11 +4,22 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.door.DoorUri
 
+/**
+ * @param processedBytes the bytes uploaded (on JS)
+ */
 data class ContentEntryGetMetadataStatus(
     val indeterminate: Boolean = true,
-    val progress: Int = 0,
     val error: String? = null,
-)
+    val processedBytes: Long = 0,
+    val totalBytes: Long = 0,
+) {
+    val progress: Int
+        get() = if(totalBytes != 0L) {
+            ((processedBytes * 100) / totalBytes).toInt()
+        }else {
+            0
+        }
+}
 
 interface ContentEntryGetMetaDataFromUriUseCase {
 

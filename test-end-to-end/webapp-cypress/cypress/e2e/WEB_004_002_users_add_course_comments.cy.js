@@ -65,6 +65,6 @@ it('Student add course comment', () => {
   cy.contains("button","Course").click()
   cy.contains('Assignment 1').click()
   cy.ustadTypeAndSubmitAssignmentComment('#course_comment_textfield','#course_comment_textfield_send_button','comment2')
-  cy.contains("comment1").should('exist')
+  cy.contains("comment1").ustadScrollUntilVisible()
 })
 })

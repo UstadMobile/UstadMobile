@@ -42,6 +42,7 @@ import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.viewmodel.clazzassignment.averageMark
 import com.ustadmobile.core.viewmodel.clazzassignment.detailoverview.ClazzAssignmentDetailoverviewSubmissionUiState
 import com.ustadmobile.lib.db.composites.CourseAssignmentSubmissionFileAndTransferJob
+import com.ustadmobile.libuicompose.components.UstadCourseBlockHeader
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadOpeningBlobInfoBottomSheet
 import com.ustadmobile.libuicompose.components.UstadPickFileOpts
@@ -84,6 +85,8 @@ fun ClazzAssignmentDetailOverviewScreen(viewModel: ClazzAssignmentDetailOverview
 
     ClazzAssignmentDetailOverviewScreen(
         uiState = uiState,
+        newCourseCommentFlow = viewModel.newCourseCommentText,
+        newPrivateCommentFlow = viewModel.newPrivateCommentText,
         editableSubmissionFlow = viewModel.editableSubmissionUiState,
         onClickEditSubmission = viewModel::onClickEditSubmissionText,
         onChangeCourseComment = viewModel::onChangeCourseCommentText,
@@ -109,6 +112,8 @@ fun ClazzAssignmentDetailOverviewScreen(viewModel: ClazzAssignmentDetailOverview
 fun ClazzAssignmentDetailOverviewScreen(
     uiState: ClazzAssignmentDetailOverviewUiState,
     editableSubmissionFlow: Flow<ClazzAssignmentDetailoverviewSubmissionUiState>,
+    newPrivateCommentFlow: Flow<String>,
+    newCourseCommentFlow: Flow<String>,
     onClickMarksFilterChip: (MessageIdOption2) -> Unit = {},
     onChangeCourseComment: (String) -> Unit = {},
     onChangePrivateComment: (String) -> Unit = {},
@@ -162,6 +167,14 @@ fun ClazzAssignmentDetailOverviewScreen(
         modifier = Modifier
             .fillMaxSize()
     ) {
+        item(key = "header") {
+            UstadCourseBlockHeader(
+                block = uiState.courseBlock,
+                picture = uiState.courseBlockPicture,
+                modifier = Modifier.defaultItemPadding(top = 16.dp).fillMaxWidth()
+            )
+        }
+
         item(key = "cbDescription") {
             if (uiState.caDescriptionVisible){
                 UstadHtmlText(
@@ -223,7 +236,7 @@ fun ClazzAssignmentDetailOverviewScreen(
         UstadAssignmentSubmissionStatusHeaderItems(
             submissionStatus = uiState.submissionStatus,
             averageMark = uiState.markList.averageMark(),
-            maxPoints = uiState.courseBlock?.cbMaxPoints ?: 0,
+            maxPoints = uiState.courseBlock?.cbMaxPoints ?: 0f,
             submissionPenaltyPercent = uiState.courseBlock?.cbLateSubmissionPenalty ?: 0,
         )
 
@@ -388,7 +401,7 @@ fun ClazzAssignmentDetailOverviewScreen(
             item(key = "add_class_comment_item") {
                 UstadAddCommentListItem(
                     modifier = Modifier.testTag("add_class_comment"),
-                    commentText = uiState.newCourseCommentText,
+                    commentText = newCourseCommentFlow,
                     commentLabel = stringResource(MR.strings.add_class_comment),
                     enabled = uiState.fieldsEnabled,
                     currentUserPersonUid = uiState.activeUserPersonUid,
@@ -427,7 +440,7 @@ fun ClazzAssignmentDetailOverviewScreen(
             item(key = "add_private_comment_item") {
                 UstadAddCommentListItem(
                     modifier = Modifier.testTag("add_private_comment"),
-                    commentText = uiState.newPrivateCommentText,
+                    commentText = newPrivateCommentFlow,
                     commentLabel = stringResource(MR.strings.add_private_comment),
                     enabled = uiState.fieldsEnabled,
                     currentUserPersonUid = uiState.activeUserPersonUid,

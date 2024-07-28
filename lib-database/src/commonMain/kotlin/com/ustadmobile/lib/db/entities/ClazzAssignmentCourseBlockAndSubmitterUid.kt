@@ -15,13 +15,12 @@ data class ClazzAssignmentCourseBlockAndSubmitterUid(
     var courseBlock: CourseBlock? = null,
 
     @Embedded
+    var courseBlockPicture: CourseBlockPicture? = null,
+
+    @Embedded
     var courseGroupSet: CourseGroupSet? = null,
 
     var submitterUid: Long = 0,
 
     var hasModeratePermission: Boolean = false,
-) {
-
-
-
-}
+)

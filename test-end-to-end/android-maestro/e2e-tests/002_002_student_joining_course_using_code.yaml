@@ -1,0 +1,81 @@
+appId: com.toughra.ustadmobile
+env:
+  TESTNAME: "002_002_student_joining_course_using_code"
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/002_002_student_joining_course_using_code"
+---
+- clearState: com.toughra.ustadmobile
+
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+      CONTROLSERVER: ${CONTROLSERVER}
+#-------Launch App---------------#
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+#-------Admin Login---------------#
+- runFlow:
+    file: "../common/user_login.yaml"
+#---------Add Course with members------------------#
+# add new course
+- runFlow:
+    file: "../common/add_course.yaml"
+    env:
+      TESTCOURSENAME: "Test Course"
+- runFlow:
+    file: "../common/add_new_teacher_inside_course.yaml"
+    env:
+      TESTCOURSENAME: "Test Course"
+      TEACHERFIRSTNAME: "Teacher"
+      TEACHERLASTNAME: "1"
+      USERNAME: "t1"
+      GENDER: "Female"
+      PASSWORD: "test"
+- runFlow:
+    file: "../common/add_new_people.yaml"
+    env:
+      FIRSTNAME: "Student"
+      LASTNAME: "1"
+      USERNAME: "s1"
+      GENDER: "Male"
+      PASSWORD: "test"
+- back
+- tapOn: "Courses"
+- tapOn: ${TESTCOURSENAME}
+- scrollUntilVisible:
+    element:
+      text: "Invite code"
+    direction: DOWN
+- tapOn: "Invite code"
+- runFlow:
+    when:
+      visible:
+       id: "com.android.systemui:id/dismiss_image"
+    commands:
+      - tapOn:
+          id: "com.android.systemui:id/dismiss_image"
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: "s1"
+      PASSWORD: "test"
+- runFlow:  "../common/student_send_course_join_request_using_code.yaml"
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: "t1"
+      PASSWORD: "test"
+- runFlow: "../common/accepting_course_join_request.yaml"
+#---------Launch App & Student Login------------------#
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: "s1"
+      PASSWORD: "test"
+- tapOn: "Courses"
+- assertVisible: ${TESTCOURSENAME}

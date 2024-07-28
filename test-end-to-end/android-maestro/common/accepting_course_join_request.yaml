@@ -5,13 +5,14 @@ appId: com.toughra.ustadmobile
 # 1) TESTRESULTSDIR : ${TESTRESULTSDIR} : provides the path to store test results
 # 2) TESTCOURSENAME: provide course name of string type
 
--  tapOn: "Courses"
+- tapOn: "Courses"
 - tapOn: ${TESTCOURSENAME}
 - tapOn: "MEMBERS"
+- scrollUntilVisible:
+     element:
+        text:  "Student 1"
+     direction: DOWN
 - tapOn:
-    id: "com.toughra.ustadmobile:id/accept_icon"
-- extendedWaitUntil:
-    notVisible:
-      id: "com.toughra.ustadmobile:id/accept_icon"
-    timeout: 10000
+   text: "Accept"
+   rightOf: "Student 1"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/added_student_using _code"

@@ -6,9 +6,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Chat
+import androidx.compose.material.icons.automirrored.filled.Chat
+import androidx.compose.material.icons.automirrored.filled.ReplyAll
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.ReplyAll
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.IconButton
@@ -30,12 +30,14 @@ import com.ustadmobile.core.util.ext.htmlToPlainText
 import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.CourseDiscussionDetailUiState
 import com.ustadmobile.lib.db.entities.DiscussionPost
 import com.ustadmobile.lib.db.entities.DiscussionPostWithDetails
+import com.ustadmobile.libuicompose.components.UstadCourseBlockHeader
 import com.ustadmobile.libuicompose.components.UstadDetailHeader
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadListSpacerItem
 import com.ustadmobile.libuicompose.components.UstadPersonAvatar
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
+import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.util.rememberDateFormat
 import com.ustadmobile.libuicompose.util.rememberDayOrDate
 import com.ustadmobile.libuicompose.util.rememberEmptyFlow
@@ -83,9 +85,17 @@ fun CourseDiscussionDetailScreen(
     val dateFormatter = rememberDateFormat(TimeZone.getDefault().id)
 
     UstadLazyColumn{
+        item(key = "header") {
+            UstadCourseBlockHeader(
+                block = uiState.courseBlock?.block,
+                picture = uiState.courseBlock?.picture,
+                modifier = Modifier.defaultItemPadding(top = 16.dp).fillMaxWidth(),
+            )
+        }
+
         item(key = "description"){
             UstadHtmlText(
-                uiState.courseBlock?.cbDescription?:"",
+                uiState.courseBlock?.block?.cbDescription?:"",
                 modifier = Modifier.padding(top = 16.dp, bottom = 8.dp, start = 16.dp, end = 16.dp)
             )
         }
@@ -184,7 +194,7 @@ fun CourseDiscussionDetailDiscussionListItem(
                 Row {
                     Icon(
                         modifier = Modifier.size(16.dp),
-                        imageVector = Icons.Default.Chat,
+                        imageVector = Icons.AutoMirrored.Filled.Chat,
                         contentDescription = "",
                     )
 
@@ -200,7 +210,7 @@ fun CourseDiscussionDetailDiscussionListItem(
                 Row {
                     Icon(
                         modifier = Modifier.size(16.dp),
-                        imageVector = Icons.Filled.ReplyAll,
+                        imageVector = Icons.AutoMirrored.Filled.ReplyAll,
                         contentDescription = null,
                     )
 

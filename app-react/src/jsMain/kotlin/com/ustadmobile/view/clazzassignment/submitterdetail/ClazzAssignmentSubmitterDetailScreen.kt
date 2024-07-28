@@ -42,10 +42,13 @@ import com.ustadmobile.view.clazzassignment.CourseAssignmentSubmissionComponent
 import com.ustadmobile.view.clazzassignment.CourseAssignmentSubmissionFileListItem
 import com.ustadmobile.view.clazzassignment.UstadCommentListItem
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 
 external interface ClazzAssignmentSubmitterDetailProps : Props {
 
     var uiState: ClazzAssignmentSubmitterDetailUiState
+
+    var newPrivateCommentFlow: Flow<String>
 
     var onClickSubmitGrade: () -> Unit
 
@@ -189,7 +192,7 @@ val ClazzAssignmentSubmitterDetailComponent = FC<ClazzAssignmentSubmitterDetailP
                     CourseAssignmentMarkEdit.create {
                         draftMark = draftMarkVal
                         markFieldsEnabled = props.uiState.markFieldsEnabled
-                        maxPoints = props.uiState.courseBlock?.cbMaxPoints ?: 0
+                        maxPoints = props.uiState.block?.courseBlock?.cbMaxPoints ?: 0f
                         scoreError = props.uiState.submitMarkError
                         onChangeDraftMark = props.onChangeDraftMark
                         onClickSubmitGrade = props.onClickSubmitGrade
@@ -211,7 +214,7 @@ val ClazzAssignmentSubmitterDetailComponent = FC<ClazzAssignmentSubmitterDetailP
                     AssignmentCommentTextFieldListItem.create {
                         onChange = props.onChangePrivateComment
                         label = ReactNode(strings[MR.strings.add_private_comment])
-                        value = props.uiState.newPrivateCommentText
+                        value = props.newPrivateCommentFlow
                         activeUserPersonUid = props.uiState.activeUserPersonUid
                         activeUserPersonName = props.uiState.activeUserPersonName
                         activeUserPictureUri = props.uiState.activeUserPictureUri
@@ -256,6 +259,7 @@ val ClazzAssignmentSubmitterDetailScreen = FC<Props> {
 
     ClazzAssignmentSubmitterDetailComponent {
         uiState = uiStateVal
+        newPrivateCommentFlow = viewModel.newPrivateCommentText
         onChangePrivateComment = viewModel::onChangePrivateComment
         onClickSubmitPrivateComment = viewModel::onSubmitPrivateComment
         onChangeDraftMark = viewModel::onChangeDraftMark

@@ -28,14 +28,8 @@ class ContentManifestDownloadUseCase(
     private val db: UmAppDatabase,
     private val httpClient: HttpClient,
     private val json: Json,
-    private val cacheTmpPath: String,
+    private val cacheTmpPath: () -> String,
 ) {
-
-    init {
-        if(!cacheTmpPath.let { it.endsWith("/") || it.endsWith("\\") }) {
-            throw IllegalArgumentException("Cache tmp path must end with separator character")
-        }
-    }
 
     /**
      *
@@ -47,7 +41,14 @@ class ContentManifestDownloadUseCase(
         contentEntryVersionUid: Long,
         transferJobUid: Int,
     ) {
-        val contentEntryVersion = db.contentEntryVersionDao
+        val tmpPath = cacheTmpPath().let {
+            if(!it.endsWith("/") || it.endsWith("\\"))
+                "$it/"
+            else
+                it
+        }
+
+        val contentEntryVersion = db.contentEntryVersionDao()
             .findByUidAsync(contentEntryVersionUid)
                 ?: throw IllegalArgumentException("ContentEntryVersion $contentEntryVersionUid not in db")
 
@@ -56,7 +57,7 @@ class ContentManifestDownloadUseCase(
         val manifestSize = manifestResponse.headers["content-length"]?.toLong() ?: 0
         val manifest: ContentManifest = json.decodeFromString(manifestResponse.bodyAsDecodedText())
 
-        val offlineItemUid = db.transferJobDao.findOfflineItemUidForTransferJobUid(
+        val offlineItemUid = db.transferJobDao().findOfflineItemUidForTransferJobUid(
             transferJobUid)
 
         /*
@@ -69,7 +70,7 @@ class ContentManifestDownloadUseCase(
         }.distinctBy { it.first }
 
         if(offlineItemUid != 0L) {
-            db.cacheLockJoinDao.insertListAsync(
+            db.cacheLockJoinDao().insertListAsync(
                 (bodyDataUrlsAndStorageSizeToDownload + Pair(manifestUrl, manifestSize)).map {
                     CacheLockJoin(
                         cljEntityUid = contentEntryVersionUid,
@@ -90,7 +91,7 @@ class ContentManifestDownloadUseCase(
                     expectedSize = it.second,
                     entityUid = contentEntryVersion.cevUid,
                     tableId = ContentEntryVersion.TABLE_ID,
-                    partialTmpFile = "${cacheTmpPath}${randomUuidAsString()}"
+                    partialTmpFile = "${tmpPath}${randomUuidAsString()}"
                 )
             },
             existingTransferJobId = transferJobUid,

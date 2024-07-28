@@ -76,6 +76,10 @@ external interface ClazzAssignmentDetailOverviewScreenProps : Props {
 
     var editableSubmissionFlow: Flow<ClazzAssignmentDetailoverviewSubmissionUiState>
 
+    var newPrivateCommentFlow: Flow<String>
+
+    var newCourseCommentFlow: Flow<String>
+
     var onChangeSubmissionText: (String) -> Unit
 
     var onClickFilterChip: (MessageIdOption2) -> Unit
@@ -189,6 +193,17 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
         id = "VirtualList"
 
         content = virtualListContent {
+            item("block_header") {
+                UstadCourseBlockHeader.create {
+                    sx {
+                        paddingTop = theme.spacing(2)
+                    }
+
+                    block = props.uiState.courseBlock
+                    picture = props.uiState.courseBlockPicture
+                }
+            }
+
             //Header section - description, deadline, etc
             item("header_section_item") {
                 Stack.create {
@@ -423,7 +438,7 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                     AssignmentCommentTextFieldListItem.create {
                         onChange = props.onChangeCourseComment
                         label = ReactNode(strings[MR.strings.add_class_comment])
-                        value = props.uiState.newCourseCommentText
+                        value = props.newCourseCommentFlow
                         activeUserPersonName = props.uiState.activeUserPersonName
                         activeUserPictureUri = props.uiState.activeUserPictureUri
                         textFieldId = "course_comment_textfield"
@@ -468,7 +483,7 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
                     AssignmentCommentTextFieldListItem.create {
                         onChange = props.onChangePrivateComment
                         label = ReactNode(strings[MR.strings.add_private_comment])
-                        value = props.uiState.newPrivateCommentText
+                        value = props.newPrivateCommentFlow
                         activeUserPersonName = props.uiState.activeUserPersonName
                         activeUserPictureUri = props.uiState.activeUserPictureUri
                         textFieldId = "private_comment_textfield"
@@ -513,6 +528,8 @@ val ClazzAssignmentDetailOverviewScreen = FC<Props> {
     ClazzAssignmentDetailOverviewScreenComponent2 {
         uiState = uiStateVal
         editableSubmissionFlow = viewModel.editableSubmissionUiState
+        newCourseCommentFlow = viewModel.newCourseCommentText
+        newPrivateCommentFlow = viewModel.newPrivateCommentText
         onChangeSubmissionText = viewModel::onChangeSubmissionText
         onChangeCourseComment = viewModel::onChangeCourseCommentText
         onChangePrivateComment = viewModel::onChangePrivateCommentText

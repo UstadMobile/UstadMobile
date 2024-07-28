@@ -22,9 +22,9 @@ class CourseTerminologyListViewModelTest : AbstractMainDispatcherTest() {
                 CourseTerminologyListViewModel(di, savedStateHandle)
             }
 
-            val terminologyRepo = spy(activeRepo.courseTerminologyDao)
+            val terminologyRepo = spy(activeRepo.courseTerminologyDao())
             activeRepo.stub {
-                on { courseTerminologyDao }.thenReturn(terminologyRepo)
+                on { courseTerminologyDao() }.thenReturn(terminologyRepo)
             }
 
             viewModel.uiState
@@ -44,7 +44,7 @@ class CourseTerminologyListViewModelTest : AbstractMainDispatcherTest() {
 
             val testEntity = CourseTerminology().apply {
                 ctTitle = "Title"
-                ctUid = activeDb.courseTerminologyDao.insertAsync(this)
+                ctUid = activeDb.courseTerminologyDao().insertAsync(this)
             }
 
             viewModelFactory {

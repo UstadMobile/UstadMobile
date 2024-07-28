@@ -65,7 +65,7 @@ class XapiContentViewModelTest : AbstractMainDispatcherTest() {
                 cevManifestUrl = mockWebServer.url("/$cevUid/${ContentConstants.MANIFEST_NAME}").toString(),
                 cevOpenUri = "tincan.xml",
             )
-            activeDb.contentEntryVersionDao.insertAsync(contentEntryVersion)
+            activeDb.contentEntryVersionDao().insertAsync(contentEntryVersion)
             val contentManifest = ContentManifest(
                 version = 1,
                 metadata = emptyMap(),

@@ -29,7 +29,7 @@ class LeavingReasonEditViewModel(
         viewModelScope.launch {
             loadEntity(
                 onLoadFromDb = {
-                    it.leavingReasonDao.findByUidAsync(savedStateHandle[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0L)
+                    it.leavingReasonDao().findByUidAsync(savedStateHandle[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0L)
                 },
                 makeDefault = {
                     LeavingReason().apply {
@@ -71,9 +71,9 @@ class LeavingReasonEditViewModel(
             val leavingReason = _uiState.value.leavingReason ?: return@launch
 
             if(leavingReason.leavingReasonUid == 0L) {
-                activeDb.leavingReasonDao.insertAsync(leavingReason)
+                activeDb.leavingReasonDao().insertAsync(leavingReason)
             }else {
-                activeDb.leavingReasonDao.updateAsync(leavingReason)
+                activeDb.leavingReasonDao().updateAsync(leavingReason)
             }
         }
     }

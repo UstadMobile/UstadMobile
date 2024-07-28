@@ -9,7 +9,6 @@ appId: com.toughra.ustadmobile
 # 5) PASSWORD: provide STUDENT's account password of string type
 # 6) TESTRESULTSDIR : provides the path to store test results
 
-- tapOn: "Courses"
 - repeat:
     while:
        notVisible: ${TESTCOURSENAME}
@@ -19,27 +18,31 @@ appId: com.toughra.ustadmobile
 - tapOn: "MEMBERS"
 - tapOn: "Add a student"
 - tapOn: "Add a new person"
-- tapOn: "First names"
+- tapOn: "First names*"
 - inputText: ${STUDENTFIRSTNAME}
-- tapOn: "Last name"
+- hideKeyboard
+- tapOn: "Last name*"
 - inputText: ${STUDENTLASTNAME}
-- tapOn: "Gender"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      text: "Gender*"
+    direction: DOWN
+- tapOn: "Gender*"
 - tapOn: ${GENDER}
 - tapOn: "SAVE"
 - tapOn: "SAVE"
 # There is a known issue on maestro. Scroll functionality is not working for specific emulator using in jenkins
-- swipe:
-        start: 100,400
-        end: 100,100
+- scrollUntilVisible:
+      element: "${STUDENTFIRSTNAME} ${STUDENTLASTNAME}"
+      direction: DOWN
 - tapOn: "${STUDENTFIRSTNAME} ${STUDENTLASTNAME}"
 - tapOn: "VIEW PROFILE"
   # add account
 - tapOn: "CREATE ACCOUNT"
-- tapOn: "Username"
+- tapOn: "Username*"
 - inputText: ${USERNAME}
-- tapOn: "New password"
-- inputText: ${PASSWORD}
-- tapOn: "Confirm password"
+- tapOn: "New password*"
 - inputText: ${PASSWORD}
 - tapOn: "SAVE"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/added_account_for_new_student-${STUDENTFIRSTNAME} ${STUDENTLASTNAME}"
