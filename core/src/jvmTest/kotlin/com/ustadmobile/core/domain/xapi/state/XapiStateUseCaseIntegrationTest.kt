@@ -3,6 +3,7 @@ package com.ustadmobile.core.domain.xapi.state
 import com.benasher44.uuid.uuid4
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.interop.HttpApiException
 import com.ustadmobile.core.domain.xapi.XapiSession
 import com.ustadmobile.core.domain.xapi.model.XapiAccount
 import com.ustadmobile.core.domain.xapi.model.XapiAgent
@@ -234,6 +235,76 @@ class XapiStateUseCaseIntegrationTest {
             Assert.assertArrayEquals(
                 binaryData, (retrieveResult as RetrieveXapiStateUseCase.ByteRetrieveXapiStateResult).content
             )
+        }
+    }
+
+    @Test
+    fun givenTextBodyTooLarge_whenStored_thenShouldThrowException() {
+        val longString = "a".repeat(StoreXapiStateUseCase.MAX_STATE_SIZE + 1)
+
+        val activityId = "http://example.org/id"
+        val stateId = "aStateId"
+
+        runBlocking {
+            val stateParams = XapiStateParams(
+                activityId = activityId,
+                agent = json.encodeToString(xapiAgent),
+                registration = xapiSession.registrationUuid,
+                stateId = stateId,
+            )
+
+            try {
+                storeXapiStateUseCase(
+                    xapiSession = xapiSession,
+                    xapiStateParams = stateParams,
+                    method = IHttpRequest.Companion.Method.PUT,
+                    contentType = "text/plain",
+                    request = iRequestBuilder("http://localhost/xapi/activities/state") {
+                        method = IHttpRequest.Companion.Method.PUT
+                        header("content-type", "text/plain")
+                        body(longString)
+                    }
+                )
+                throw IllegalStateException("Must not store large text body without throwing exception")
+            }catch (e: HttpApiException) {
+                e.printStackTrace()
+                assertEquals(413, e.statusCode)
+            }
+        }
+    }
+
+    @Test
+    fun givenBinaryBodyTooLarge_whenStored_thenShouldThrowException() {
+        val activityId = "http://example.org/id"
+        val stateId = "aStateId"
+
+        val binaryData = Random.nextBytes(ByteArray(StoreXapiStateUseCase.MAX_STATE_SIZE + 1))
+
+        runBlocking {
+            val stateParams = XapiStateParams(
+                activityId = activityId,
+                agent = json.encodeToString(xapiAgent),
+                registration = xapiSession.registrationUuid,
+                stateId = stateId,
+            )
+
+            try {
+                storeXapiStateUseCase(
+                    xapiSession = xapiSession,
+                    xapiStateParams = stateParams,
+                    method = IHttpRequest.Companion.Method.PUT,
+                    contentType = "application/octet-stream",
+                    request = iRequestBuilder("http://localhost/xapi/activities/state") {
+                        method = IHttpRequest.Companion.Method.PUT
+                        body(binaryData)
+                    }
+                )
+
+                throw IllegalStateException("Should have thrown exception by now")
+            }catch(e: HttpApiException) {
+                assertEquals(413, e.statusCode)
+            }
+
         }
     }
 

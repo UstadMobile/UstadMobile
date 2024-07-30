@@ -50,8 +50,13 @@ class StoreXapiStateUseCase(
 
         val agentActorUid = xapiAgent.identifierHash(xxStringHasher)
 
-        val merge = method == IHttpRequest.Companion.Method.POST && contentType == "application/json"
-        val content = if(merge) {
+        /*
+         * As per the xAPI spec when using POST and content-type is application/json, we MUST merge
+         * https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Communication.md#json-procedure-with-requirements
+         */
+        val content = if(
+            method == IHttpRequest.Companion.Method.POST && contentType == "application/json"
+        ) {
             val requestBody = request.requireBodyAsText()
 
             val existingState = db.stateEntityDao().getByParams(
@@ -93,7 +98,10 @@ class StoreXapiStateUseCase(
                         }
                     }
 
-                    json.encodeToString(JsonObject.serializer(), mergedDoc)
+                    json.encodeToString(JsonObject.serializer(), mergedDoc).also {
+                        if(it.length > MAX_STATE_SIZE)
+                            throw HttpApiException(413, "State content too large: ${it.length} exceeds limit of $MAX_STATE_SIZE")
+                    }
                 }
             }
 
@@ -105,15 +113,25 @@ class StoreXapiStateUseCase(
                 contentType == "application/json" || contentType.startsWith("text/")
             ) {
                 val requestBodyText = request.requireBodyAsText()
-                try {
-                    json.decodeFromString(JsonObject.serializer(), requestBodyText)
-                }catch(e: Throwable) {
-                    throw HttpApiException(400, "Content-type is application/json, but not valid json: ${e.message}", e)
+
+                if(contentType == "application/json") {
+                    try {
+                        json.decodeFromString(JsonObject.serializer(), requestBodyText)
+                    }catch(e: Throwable) {
+                        throw HttpApiException(400, "Content-type is application/json, but not valid json: ${e.message}", e)
+                    }
+                }
+
+                if(requestBodyText.length > MAX_STATE_SIZE) {
+                    throw HttpApiException(413, "State content too large: ${requestBodyText.length} exceeds limit of $MAX_STATE_SIZE")
                 }
 
                 requestBodyText
             }else {
-                request.requireBodyAsBytes().encodeBase64()
+                request.requireBodyAsBytes().also {
+                    if(it.size > MAX_STATE_SIZE)
+                        throw HttpApiException(413, "State content too large: ${it.size} exceeds limit of $MAX_STATE_SIZE")
+                }.encodeBase64()
             }
         }
 
@@ -142,6 +160,20 @@ class StoreXapiStateUseCase(
         )
 
         (repo ?: db).stateEntityDao().upsertAsync(listOf(stateEntity))
+    }
+
+    companion object {
+
+        /**
+         * The suspend data limits are pretty small: SCORM 1.2 had a 4KB limit, 64KB limit for
+         * SCORM 2004. Because the suspend data is expected to be small, we don't use blob
+         * storage, we just save the string on the entity (base64 encoded for binary data).
+         *
+         * See
+         * https://access.articulate.com/support/article/exceeding-scorm-suspend-data-limits
+         */
+        const val MAX_STATE_SIZE = 256 * 1024
+
     }
 
 }
