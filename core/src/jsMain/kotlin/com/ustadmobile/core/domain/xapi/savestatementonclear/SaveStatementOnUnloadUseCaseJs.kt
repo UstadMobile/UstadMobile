@@ -18,7 +18,7 @@ class SaveStatementOnUnloadUseCaseJs(
 
     override fun invoke(statements: List<XapiStatement>, xapiSession: XapiSession) {
         navigator.sendBeacon(
-            "${endpoint.url}api/xapi/statementOnUnload",
+            "${endpoint.url}api/xapi-ext/statementOnUnload",
             BodyInit(
                 json.encodeToString(
                     XapiStatementsAndSession.serializer(),

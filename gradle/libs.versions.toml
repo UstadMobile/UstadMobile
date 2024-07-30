@@ -138,6 +138,7 @@ conveyor = { id = "dev.hydraulic.conveyor", version.ref = "conveyor" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 license = { id = "com.jaredsburrows.license", version.ref = "plugin-license" }
 android-emulator = { id = "com.quittle.android-emulator", version.ref = "android-emulator-plugin" }
+jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "jetbrains-kotlin-jvm" }
 
 
 [libraries]

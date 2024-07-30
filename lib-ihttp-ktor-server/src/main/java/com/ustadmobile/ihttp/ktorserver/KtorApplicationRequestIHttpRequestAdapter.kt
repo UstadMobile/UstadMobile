@@ -1,20 +1,23 @@
-package com.ustadmobile.lib.rest.util
+package com.ustadmobile.ihttp.ktorserver
 
 import com.ustadmobile.ihttp.headers.IHttpHeaders
 import com.ustadmobile.ihttp.headers.asIHttpHeaders
-import com.ustadmobile.lib.rest.ext.clientUrl
 import com.ustadmobile.ihttp.request.IHttpRequest
+import com.ustadmobile.ihttp.request.IHttpRequestWithByteBody
 import com.ustadmobile.ihttp.request.IHttpRequestWithTextBody
 import io.ktor.server.request.ApplicationRequest
 import io.ktor.server.request.httpMethod
+import io.ktor.server.request.receiveStream
 import io.ktor.server.request.receiveText
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /**
  * Adapter to convert the Ktor request into a cache request (including headers)
  */
-class KtorApplicationRequestIHttpRequestAdapter(
+internal class KtorApplicationRequestIHttpRequestAdapter(
     private val applicationRequest: ApplicationRequest
-) : IHttpRequestWithTextBody {
+) : IHttpRequestWithTextBody, IHttpRequestWithByteBody {
     override val headers: IHttpHeaders
         get() = applicationRequest.headers.asIHttpHeaders()
 
@@ -27,6 +30,16 @@ class KtorApplicationRequestIHttpRequestAdapter(
     override suspend fun bodyAsText(): String? {
         return try {
             applicationRequest.call.receiveText()
+        }catch(e: Throwable) {
+            null
+        }
+    }
+
+    override suspend fun bodyAsBytes(): ByteArray? {
+        return try {
+            withContext(Dispatchers.IO) {
+                applicationRequest.call.receiveStream().readAllBytes()
+            }
         }catch(e: Throwable) {
             null
         }

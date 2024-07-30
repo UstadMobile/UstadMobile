@@ -2,7 +2,7 @@ package com.ustadmobile.lib.rest.api.content
 
 import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServerUseCase
 import com.ustadmobile.lib.rest.ext.respondOkHttpResponse
-import com.ustadmobile.lib.rest.util.toIHttpRequest
+import com.ustadmobile.ihttp.ktorserver.toIHttpRequest
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.routing.Route

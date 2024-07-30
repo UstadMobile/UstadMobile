@@ -26,7 +26,7 @@ class StartXapiSessionOverHttpUseCaseJs(
         xapiSession: XapiSession
     ): StartXapiSessionOverHttpUseCase.StartXapiSessionOverHttpResult {
         val result: StartXapiSessionOverHttpUseCase.StartXapiSessionOverHttpResult = httpClient.post(
-            "${endpoint.url}api/xapi/startSession"
+            "${endpoint.url}api/xapi-ext/startSession"
         ) {
             doorNodeIdHeader(repo as DoorDatabaseRepository)
             setBodyJson(json, XapiSession.serializer(), xapiSession)

@@ -1,8 +1,8 @@
-package com.ustadmobile.core.util.ext
+package com.ustadmobile.ihttp.ext
 
+import com.ustadmobile.ihttp.headers.IHttpHeaders
 import com.ustadmobile.ihttp.headers.directives.directivesToMap
-import com.ustadmobile.core.util.stringvalues.IStringValues
-import com.ustadmobile.core.util.stringvalues.MapStringValues
+
 
 /**
  * Gets the protocol that the client used, using headers to adjust as needed when a reverse proxy
@@ -13,7 +13,7 @@ import com.ustadmobile.core.util.stringvalues.MapStringValues
  *
  * @receiver IStringValues representing request headers as received by the server
  */
-fun IStringValues.clientProtocol(): String? {
+fun IHttpHeaders.clientProtocol(): String? {
     return get("Forwarded")?.let {
         directivesToMap(it)
     }?.getCaseInsensitiveOrNull("proto") ?: get("X-Forwarded-Proto")
@@ -27,19 +27,25 @@ fun IStringValues.clientProtocol(): String? {
  *
  * @receiver IStringValues representing request headers as received by the server
  */
-fun IStringValues.clientHost(): String? {
+fun IHttpHeaders.clientHost(): String? {
     return get("Forwarded")?.let {
         directivesToMap(it)
     }?.getCaseInsensitiveOrNull("host") ?: get("X-Forwarded-Host") ?: get("Host")
 }
 
-fun IStringValues.toMap(): Map<String, List<String>> {
-    return if(this is MapStringValues) {
-        this.map
-    }else {
-        names().map { headerName ->
-            headerName to getAll(headerName)
-        }.toMap()
-    }
+/**
+ * Get the protocol and host being used e.g. http://ip.addr:8087/ https://server.tld/ etc. This
+ * will use the Forwarded header when available.
+ */
+fun IHttpHeaders.clientProtocolAndHost(
+    defaultProtocol: String = "http"
+): String {
+    return "${clientProtocol() ?: defaultProtocol}://${clientHost()}".requirePostfix("/")
+}
+
+fun IHttpHeaders.toMap(): Map<String, List<String>> {
+    return names().map { headerName ->
+        headerName to getAllByName(headerName)
+    }.toMap()
 }
 

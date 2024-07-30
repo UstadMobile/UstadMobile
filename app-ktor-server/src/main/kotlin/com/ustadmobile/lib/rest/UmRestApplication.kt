@@ -61,8 +61,11 @@ import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
 import com.ustadmobile.core.domain.xapi.StoreActivitiesUseCase
 import com.ustadmobile.core.domain.xapi.XapiStatementResource
+import com.ustadmobile.core.domain.xapi.http.XapiHttpServerUseCase
 import com.ustadmobile.core.domain.xapi.starthttpsession.StartXapiSessionOverHttpUseCase
 import com.ustadmobile.core.domain.xapi.starthttpsession.StartXapiSessionOverHttpUseCaseDirect
+import com.ustadmobile.core.domain.xapi.state.RetrieveXapiStateUseCase
+import com.ustadmobile.core.domain.xapi.state.StoreXapiStateUseCase
 import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
 import com.ustadmobile.core.domain.xxhash.XXHasher64FactoryCommonJvm
 import com.ustadmobile.core.domain.xxhash.XXStringHasher
@@ -117,6 +120,7 @@ import com.ustadmobile.core.util.ext.isWindowsOs
 import com.ustadmobile.door.log.NapierDoorLogger
 import com.ustadmobile.lib.rest.domain.contententry.importcontent.ContentEntryImportJobRoute
 import com.ustadmobile.lib.rest.domain.person.bulkadd.BulkAddPersonRoute
+import com.ustadmobile.lib.rest.domain.xapi.XapiRoute
 import com.ustadmobile.lib.rest.domain.xapi.savestatementonclear.SaveStatementOnUnloadRoute
 import com.ustadmobile.lib.rest.domain.xapi.starthttpsession.StartHttpXapiSessionRoute
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
@@ -695,6 +699,37 @@ fun Application.umRestApplication(
             )
         }
 
+        bind<XapiHttpServerUseCase>() with scoped(EndpointScope.Default).singleton {
+            XapiHttpServerUseCase(
+                statementResource = instance(),
+                storeXapiStateUseCase = instance(),
+                retrieveXapiStateUseCase = instance(),
+                db = instance(tag = DoorTag.TAG_DB),
+                json = instance(),
+                endpoint = context,
+            )
+        }
+
+        bind<StoreXapiStateUseCase>() with scoped(EndpointScope.Default).singleton {
+            StoreXapiStateUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = null,
+                json = instance(),
+                xxHasher64Factory = instance(),
+                xxStringHasher = instance()
+            )
+        }
+
+        bind<RetrieveXapiStateUseCase>() with scoped(EndpointScope.Default).singleton {
+            RetrieveXapiStateUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = null,
+                json = instance(),
+                xxStringHasher = instance(),
+                xxHasher64Factory = instance(),
+            )
+        }
+
         bind<GetApiUrlUseCase>() with scoped(EndpointScope.Default).singleton {
             GetApiUrlUseCaseDirect(context)
         }
@@ -869,7 +904,11 @@ fun Application.umRestApplication(
                     }
                 }
 
-                route("xapi") {
+                /**
+                 * Xapi-Ext contains non-standard xapi endpoint services that we use internally;
+                 * specfically SaveStatementOnUnload and StartHttpXapiSession
+                 */
+                route("xapi-ext") {
                     SaveStatementOnUnloadRoute(
                         statementResource = { call -> di.on(call).direct.instance() },
                         json = json,
@@ -882,6 +921,11 @@ fun Application.umRestApplication(
                     )
                 }
 
+                route("xapi/{pathSegments...}") {
+                    XapiRoute(
+                        xapiHttpServerUseCase = { call -> di.on(call).direct.instance() }
+                    )
+                }
 
                 CacheRoute(
                     cache = di.direct.instance()
