@@ -14,7 +14,7 @@ fun UstadViewModel.launchSetTitleFromClazzUid(
     val repo: UmAppDatabase by di.onActiveEndpoint().instance(tag = DoorTag.TAG_REPO)
 
     viewModelScope.takeIf { clazzUid != 0L }?.launch {
-        repo.clazzDao.getTitleByUidAsFlow(clazzUid).collect {
+        repo.clazzDao().getTitleByUidAsFlow(clazzUid).collect {
             updateUi(it)
         }
     }

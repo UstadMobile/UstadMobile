@@ -14,4 +14,8 @@ data class ContentEntryAndListDetail(
 
     @Embedded
     var contentEntryParentChildJoin: ContentEntryParentChildJoin? = null,
+
+    @Embedded
+    var status: BlockStatus? = null,
+
 )

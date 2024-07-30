@@ -66,7 +66,7 @@ class CreateCacheLocksForActiveContentEntryVersionUseCase(
     }
 
     suspend operator fun invoke(){
-        val versionsWithoutLocks = db.contentEntryVersionDao
+        val versionsWithoutLocks = db.contentEntryVersionDao()
             .findContentEntryVersionsWithoutCacheLock()
 
         val cacheLockJoins = versionsWithoutLocks.flatMap { contentEntryVersion ->
@@ -96,7 +96,7 @@ class CreateCacheLocksForActiveContentEntryVersionUseCase(
             }
         }
 
-        db.cacheLockJoinDao.insertListAsync(cacheLockJoins)
+        db.cacheLockJoinDao().insertListAsync(cacheLockJoins)
     }
 
     override fun close(){

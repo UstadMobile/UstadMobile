@@ -96,7 +96,7 @@ class ClazzLogEditAttendanceViewModel(
 
         launchIfHasPermission(
             permissionCheck = { db ->
-                db.coursePermissionDao.personHasPermissionWithClazzAsync2(
+                db.coursePermissionDao().personHasPermissionWithClazzAsync2(
                     activeUserPersonUid, clazzUid, PermissionFlags.COURSE_ATTENDANCE_VIEW,
                 )
             }
@@ -105,7 +105,7 @@ class ClazzLogEditAttendanceViewModel(
             val newClazzLogVal = newClazzLog
 
             //Note: required entities would be pulled down by the initial launch permission check
-            val hasEditPermission = activeDb.coursePermissionDao
+            val hasEditPermission = activeDb.coursePermissionDao()
                 .personHasPermissionWithClazzAsync2(
                     activeUserPersonUid, clazzUid, PermissionFlags.COURSE_ATTENDANCE_RECORD
                 )
@@ -113,7 +113,7 @@ class ClazzLogEditAttendanceViewModel(
             loadEntity(
                 serializer = ListSerializer(ClazzLog.serializer()),
                 onLoadFromDb = { db ->
-                    val dbLogList = db.clazzLogDao.findByClazzUidAsync(
+                    val dbLogList = db.clazzLogDao().findByClazzUidAsync(
                         clazzUid, ClazzLog.STATUS_RESCHEDULED
                     )
 
@@ -140,7 +140,7 @@ class ClazzLogEditAttendanceViewModel(
             )
 
             launch {
-                val timeZone = activeRepo.clazzDao.getClazzTimeZoneByClazzUidAsync(
+                val timeZone = activeRepo.clazzDao().getClazzTimeZoneByClazzUidAsync(
                     _uiState.value.currentClazzLog.clazzLogClazzUid
                 )
 
@@ -211,7 +211,7 @@ class ClazzLogEditAttendanceViewModel(
                 deserializer = ListSerializer(PersonAndClazzLogAttendanceRecord.serializer())
             )
             //If not in SavedState, then load from database, and put into savedStateHandle
-            ?: activeRepo.clazzLogAttendanceRecordDao.findByClazzAndTime(
+            ?: activeRepo.clazzLogAttendanceRecordDao().findByClazzAndTime(
                 clazzLog.clazzLogClazzUid, clazzLog.clazzLogUid, clazzLog.logDate
             ).map {
                 if(it.attendanceRecord == null) {
@@ -364,8 +364,8 @@ class ClazzLogEditAttendanceViewModel(
                 }
 
                 activeRepo.withDoorTransactionAsync {
-                    activeRepo.clazzLogDao.upsertListAsync(clazzLogsToSave)
-                    activeRepo.clazzLogAttendanceRecordDao.upsertListAsync(attendanceRecordsToSave)
+                    activeRepo.clazzLogDao().upsertListAsync(clazzLogsToSave)
+                    activeRepo.clazzLogAttendanceRecordDao().upsertListAsync(attendanceRecordsToSave)
                 }
             }
 

@@ -13,7 +13,7 @@ env:
 - runFlow:
     file: "../common/add_profile_pic.yaml"
     env:
-      TESTFILENAME: "admin_pic.jpg"
+      TESTFILENAME: "admin_profilePic.jpg"
       CONTROLSERVER: ${CONTROLSERVER}
       TESTSERIAL: ${TESTSERIAL}
 - assertVisible:

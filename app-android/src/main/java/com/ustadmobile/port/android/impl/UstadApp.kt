@@ -3,6 +3,7 @@ package com.ustadmobile.port.android.impl
 import android.app.Application
 import android.content.Context
 import android.content.res.AssetManager
+import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import coil.ImageLoader
@@ -128,6 +129,15 @@ import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
 import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
+import com.ustadmobile.core.domain.xapi.StoreActivitiesUseCase
+import com.ustadmobile.core.domain.xapi.XapiStatementResource
+import com.ustadmobile.core.domain.xapi.noninteractivecontentusagestatementrecorder.NonInteractiveContentXapiStatementRecorderFactory
+import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnClearUseCase
+import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnClearUseCaseAndroid
+import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
+import com.ustadmobile.core.domain.xxhash.XXHasher64FactoryCommonJvm
+import com.ustadmobile.core.domain.xxhash.XXStringHasherCommonJvm
+import com.ustadmobile.core.domain.xxhash.XXStringHasher
 import com.ustadmobile.core.embeddedhttp.EmbeddedHttpServer
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
@@ -314,7 +324,11 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
         bind<DbAndObservers>() with scoped(EndpointScope.Default).singleton {
             val dbName = sanitizeDbNameFromUrl(context.url)
+
+
             val nodeIdAndAuth: NodeIdAndAuth = instance()
+
+            Log.i("MigrateIssue", "Creating database name=$dbName")
             val db = DatabaseBuilder.databaseBuilder(
                 context = applicationContext,
                 dbClass = UmAppDatabase::class,
@@ -329,6 +343,8 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 .addMigrations(MIGRATION_161_162_CLIENT)
                 .addMigrations(MIGRATION_169_170_CLIENT)
                 .build()
+
+            Log.i("MigrateIssue", "Database built: name=$dbName")
 
             val cache: UstadCache = instance()
 
@@ -923,6 +939,8 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 db = instance(tag = DoorTag.TAG_DB),
                 repo = instance(tag = DoorTag.TAG_REPO),
                 endpoint = context,
+                xxHasher = instance(),
+                json = instance(),
             )
         }
 
@@ -931,6 +949,49 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 db = instance(tag = DoorTag.TAG_DB),
                 json = instance(),
                 oneRosterEndpoint = instance(),
+            )
+        }
+
+        bind<XXHasher64Factory>() with singleton {
+            XXHasher64FactoryCommonJvm()
+        }
+
+        bind<XXStringHasher>() with singleton {
+            XXStringHasherCommonJvm()
+        }
+
+        bind<StoreActivitiesUseCase>() with scoped(EndpointScope.Default).singleton {
+            StoreActivitiesUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = instance(tag = DoorTag.TAG_REPO),
+            )
+        }
+
+        bind<XapiStatementResource>() with scoped(EndpointScope.Default).singleton {
+            XapiStatementResource(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = instance(tag = DoorTag.TAG_REPO),
+                xxHasher = instance(),
+                endpoint = context,
+                json = instance(),
+                hasherFactory = instance(),
+                storeActivitiesUseCase = instance(),
+            )
+        }
+
+        bind<SaveStatementOnClearUseCase>() with scoped(EndpointScope.Default).singleton {
+            SaveStatementOnClearUseCaseAndroid(
+                appContext = applicationContext,
+                endpoint = context,
+                json = instance(),
+            )
+        }
+
+        bind<NonInteractiveContentXapiStatementRecorderFactory>() with scoped(EndpointScope.Default).provider {
+            NonInteractiveContentXapiStatementRecorderFactory(
+                saveStatementOnClearUseCase = instance(),
+                saveStatementOnUnloadUseCase = null,
+                xapiStatementResource = instance(),
             )
         }
 

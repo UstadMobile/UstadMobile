@@ -31,7 +31,7 @@ class CourseGroupSetListViewModelTest : AbstractMainDispatcherTest() {
                 }
                 clazz.clazzUid = CreateNewClazzUseCase(activeDb).invoke(clazz)
 
-                activeDb.coursePermissionDao.upsertAsync(
+                activeDb.coursePermissionDao().upsertAsync(
                     CoursePermission(
                         cpToPersonUid = activeUser.personUid,
                         cpClazzUid =  clazz.clazzUid,
@@ -39,7 +39,7 @@ class CourseGroupSetListViewModelTest : AbstractMainDispatcherTest() {
                     )
                 )
 
-                activeDb.courseGroupSetDao.insertAsync(CourseGroupSet().apply {
+                activeDb.courseGroupSetDao().insertAsync(CourseGroupSet().apply {
                     cgsName = "Assignment groups"
                     cgsClazzUid = clazz.clazzUid
                 })

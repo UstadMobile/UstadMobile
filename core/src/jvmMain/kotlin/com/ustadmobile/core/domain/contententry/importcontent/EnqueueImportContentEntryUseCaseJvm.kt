@@ -32,7 +32,7 @@ class EnqueueImportContentEntryUseCaseJvm(
         if(enqueueRemoteImportVal != null && jobUri.isRemote()) {
             enqueueRemoteImportVal(contentJobItem)
         }else {
-            val uid = db.contentEntryImportJobDao.insertJobItem(contentJobItem)
+            val uid = db.contentEntryImportJobDao().insertJobItem(contentJobItem)
             val quartzJob = JobBuilder.newJob(ImportContentEntryJob::class.java)
                 .usingJobData(EnqueueContentEntryImportUseCase.DATA_ENDPOINT, endpoint.url)
                 .usingJobData(EnqueueContentEntryImportUseCase.DATA_JOB_UID, uid)

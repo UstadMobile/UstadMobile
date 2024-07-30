@@ -69,7 +69,7 @@ class ParentalConsentManagementViewModelTest : AbstractMainDispatcherTest(){
 
             val personParentJoin = PersonParentJoin().apply {
                 ppjMinorPersonUid = minorPerson.personUid
-                ppjUid = activeDb.personParentJoinDao.upsertAsync(this)
+                ppjUid = activeDb.personParentJoinDao().upsertAsync(this)
             }
 
             val testContext = ParentalConsentTestContext(
@@ -107,7 +107,7 @@ class ParentalConsentManagementViewModelTest : AbstractMainDispatcherTest(){
             val joinFlow = activeDb.doorFlow(
                 arrayOf("PersonParentJoin"),
             ) {
-                activeDb.personParentJoinDao.findByUidWithMinorAsync(context.personParentJoin.ppjUid)
+                activeDb.personParentJoinDao().findByUidWithMinorAsync(context.personParentJoin.ppjUid)
             }
 
             joinFlow.filter {

@@ -117,8 +117,7 @@ class PersonAuthRegisterRouteTest {
     fun givenRegisterRequestFromMinor_whenRegisterCalled_thenShouldSendEmailAndReply(
 
     ) = testPersonAuthRegisterApplication { client ->
-        val registerPerson = PersonWithAccount().apply {
-            this.newPassword = "test"
+        val registerPerson = Person().apply {
             firstNames = "Bob"
             lastName = "Jones"
             username = "bobjones"
@@ -133,6 +132,7 @@ class PersonAuthRegisterRouteTest {
                 contentType(ContentType.Application.Json)
                 setBody(RegisterRequest(
                     person = registerPerson,
+                    newPassword = "test",
                     parent = registerParent,
                     endpointUrl = "https://org.ustadmobile.app/"
                 ))
@@ -150,13 +150,11 @@ class PersonAuthRegisterRouteTest {
     fun givenRegisterPersonWithAuth_whenRegisterCalled_thenShouldGenerateAuth(
 
     ) = testPersonAuthRegisterApplication { client ->
-        val registerPerson = PersonWithAccount().apply {
-            this.newPassword = "test"
+        val registerPerson = Person().apply {
             firstNames = "Bob"
             lastName = "Jones"
             username = "bobjones"
             dateOfBirth = systemTimeInMillis() - (20 * 365 * 24 * 60 * 60 * 1000L) //approx 20 years
-            newPassword = "secret23"
         }
 
         val httpResponse = runBlocking {
@@ -164,21 +162,22 @@ class PersonAuthRegisterRouteTest {
                 contentType(ContentType.Application.Json)
                 setBody(RegisterRequest(
                     person = registerPerson,
+                    newPassword = "secret23",
                     parent = null,
                     endpointUrl = "https://org.ustadmobile.app/"
                 ))
             }
         }
 
-        val createdAccount: PersonWithAccount = runBlocking { httpResponse.body() }
+        val createdAccount: Person = runBlocking { httpResponse.body() }
 
 
         val pbkdf2Params: Pbkdf2Params = serverDi.direct.instance()
 
         runBlocking {
             val db: UmAppDatabase = serverDi.direct.on(Endpoint("localhost")).instance(tag = DoorTag.TAG_DB)
-            val personAuth2 = db.personAuth2Dao.findByPersonUid(createdAccount.personUid)
-            val salt = db.siteDao.getSite()?.authSalt ?: throw IllegalStateException("No auth salt!")
+            val personAuth2 = db.personAuth2Dao().findByPersonUid(createdAccount.personUid)
+            val salt = db.siteDao().getSite()?.authSalt ?: throw IllegalStateException("No auth salt!")
             Assert.assertEquals("PersonAuth2 created with valid hashed password",
                 "secret23".doubleEncryptWithPbkdf2V2(salt, pbkdf2Params.iterations, pbkdf2Params.keyLength)
                     .encodeBase64(),
@@ -202,8 +201,8 @@ class PersonAuthRegisterRouteTest {
         }
 
         runBlocking {
-            val salt = db.siteDao.getSiteAuthSaltAsync()!!
-            db.personAuth2Dao.insertAsync(
+            val salt = db.siteDao().getSiteAuthSaltAsync()!!
+            db.personAuth2Dao().insertAsync(
                 PersonAuth2().apply {
                     pauthUid = person.personUid
                     pauthMechanism = PersonAuth2.AUTH_MECH_PBKDF2_DOUBLE
@@ -245,8 +244,8 @@ class PersonAuthRegisterRouteTest {
         }
 
         runBlocking {
-            val salt = db.siteDao.getSiteAuthSaltAsync()!!
-            db.personAuth2Dao.insertAsync(
+            val salt = db.siteDao().getSiteAuthSaltAsync()!!
+            db.personAuth2Dao().insertAsync(
                 PersonAuth2().apply {
                     pauthUid = person.personUid
                     pauthMechanism = PersonAuth2.AUTH_MECH_PBKDF2_DOUBLE
@@ -284,8 +283,8 @@ class PersonAuthRegisterRouteTest {
         }
 
         runBlocking {
-            val salt = db.siteDao.getSiteAuthSaltAsync()!!
-            db.personAuth2Dao.insertAsync(
+            val salt = db.siteDao().getSiteAuthSaltAsync()!!
+            db.personAuth2Dao().insertAsync(
                 PersonAuth2().apply {
                     pauthUid = person.personUid
                     pauthMechanism = PersonAuth2.AUTH_MECH_PBKDF2_DOUBLE
@@ -294,7 +293,7 @@ class PersonAuthRegisterRouteTest {
                     ).encodeBase64()
                 }
             )
-            db.personParentJoinDao.upsertAsync(PersonParentJoin().apply {
+            db.personParentJoinDao().upsertAsync(PersonParentJoin().apply {
                 ppjMinorPersonUid = person.personUid
                 ppjStatus = PersonParentJoin.STATUS_UNSET
             })

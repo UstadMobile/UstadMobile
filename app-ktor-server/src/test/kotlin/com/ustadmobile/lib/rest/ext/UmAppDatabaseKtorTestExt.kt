@@ -6,7 +6,7 @@ import com.ustadmobile.lib.util.randomString
 
 
 internal fun UmAppDatabase.insertDefaultSite() {
-    siteDao.insert(Site().apply {
+    siteDao().insert(Site().apply {
         siteUid = 1L
         siteName = "My Site"
         guestLogin = false

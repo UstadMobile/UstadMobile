@@ -7,6 +7,13 @@ appId: com.toughra.ustadmobile
      commands:
         - tapOn:
              text: "Show roots"
-        - tapOn: "Downloads"
-- tapOn: ${TESTFILENAME}
+        - tapOn:
+            text: "Downloads"
+- repeat:
+    while:
+      visible: "Downloads"
+    commands:
+      - tapOn:
+          text: ${TESTFILENAME}
+
 

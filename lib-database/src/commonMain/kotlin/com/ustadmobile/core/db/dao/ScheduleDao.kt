@@ -4,10 +4,7 @@ import app.cash.paging.PagingSource
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
 import com.ustadmobile.door.annotation.*
-import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.Schedule
-import com.ustadmobile.lib.db.entities.UserSession
 
 
 @Repository

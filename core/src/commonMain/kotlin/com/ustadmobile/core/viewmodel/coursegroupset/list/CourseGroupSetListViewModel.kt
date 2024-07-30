@@ -53,7 +53,7 @@ class CourseGroupSetListViewModel(
     private val clazzUid = savedStateHandle[UstadView.ARG_CLAZZUID]?.toLong() ?: 0L
 
     private val pagingSourceFactory: ListPagingSourceFactory<CourseGroupSet> = {
-        activeRepo.courseGroupSetDao.findAllCourseGroupSetForClazz(
+        activeRepo.courseGroupSetDao().findAllCourseGroupSetForClazz(
             clazzUid = clazzUid,
             searchText = _appUiState.value.searchState.searchText.toQueryLikeParam(),
             sortOrder = _uiState.value.sortOption.flag,
@@ -77,7 +77,7 @@ class CourseGroupSetListViewModel(
         viewModelScope.launch {
             collectHasPermissionFlowAndSetAddNewItemUiState(
                 hasPermissionFlow = {
-                    activeRepo.coursePermissionDao.personHasPermissionWithClazzAsFlow2(
+                    activeRepo.coursePermissionDao().personHasPermissionWithClazzAsFlow2(
                         activeUserPersonUid, clazzUid, PermissionFlags.COURSE_MANAGE_STUDENT_ENROLMENT
                     )
                 },

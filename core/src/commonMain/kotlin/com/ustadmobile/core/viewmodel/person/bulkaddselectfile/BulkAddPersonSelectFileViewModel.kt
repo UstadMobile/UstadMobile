@@ -49,7 +49,7 @@ class BulkAddPersonSelectFileViewModel(
 
         launchIfHasPermission(
             permissionCheck = { db ->
-                db.systemPermissionDao.personHasSystemPermissionPair(
+                db.systemPermissionDao().personHasSystemPermissionPair(
                     accountPersonUid = activeUserPersonUid,
                     firstPermission = PermissionFlags.ADD_PERSON,
                     secondPermission = PermissionFlags.PERSON_VIEW,

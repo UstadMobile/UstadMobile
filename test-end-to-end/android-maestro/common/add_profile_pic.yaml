@@ -11,15 +11,20 @@ appId: com.toughra.ustadmobile
 
 # clear the app
 - clearState: com.toughra.ustadmobile
+
 # clear the downloads
 - evalScript: ${http.get(CONTROLSERVER + "cleardownloads?device=" + TESTSERIAL)}
+
 # push the test file to the downloads
 - evalScript: ${http.get(CONTROLSERVER + "pushcontent?test-file-name=" + TESTFILENAME +"&device=" + TESTSERIAL)}
 
-- runFlow:
-      file: "./copy_image_file_to_picture_folder.yaml"
-      env:
-          TESTFILENAME: ${TESTFILENAME}
+# push the test file to the Pictures folder using URL encoding for dest parameter
+- evalScript: ${http.get(CONTROLSERVER + "pushcontent?test-file-name=" + TESTFILENAME + "&device=" + TESTSERIAL + "&dest=%2Fstorage%2Femulated%2F0%2FPictures&scanMedia=true")}
+
+# ensure the app has storage permissions
+- evalScript: adb shell pm grant com.toughra.ustadmobile android.permission.READ_EXTERNAL_STORAGE
+- evalScript: adb shell pm grant com.toughra.ustadmobile android.permission.WRITE_EXTERNAL_STORAGE
+
 
 # get started
 - launchApp
@@ -38,7 +43,7 @@ appId: com.toughra.ustadmobile
 - runFlow:
     when:
       visible: "Show roots"
-    file: redirect_to_downloads.yaml
+    file: select_picture_from_files.yaml
     env:
       TESTFILENAME: ${TESTFILENAME}
 - runFlow:
@@ -47,7 +52,6 @@ appId: com.toughra.ustadmobile
      commands:
        - tapOn:
            id: "com.google.android.providers.media.module:id/icon_thumbnail"
-           index: 0
 - scrollUntilVisible:
     element:
       text: "Gender*"
