@@ -25,9 +25,9 @@ env:
 - tapOn: "Create account"
 - tapOn: 2024
 - longPressOn: 2024
-- inputText: 2021
+- inputText: 2015
 - hideKeyboard
-- tapOn: 2013
+- tapOn: 2015
 - tapOn: "Next"
 - runFlow:
     file: "../common/new-student-registration-details.yaml"
