@@ -2,21 +2,23 @@ package com.ustadmobile.core.domain.xapi.state
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.interop.HttpApiException
+import com.ustadmobile.core.domain.xapi.XapiJson
 import com.ustadmobile.core.domain.xapi.XapiSession
 import com.ustadmobile.core.domain.xapi.model.XapiAgent
 import com.ustadmobile.core.domain.xapi.model.identifierHash
 import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
 import com.ustadmobile.core.domain.xxhash.XXStringHasher
 import com.ustadmobile.core.util.ext.base64StringToByteArray
-import kotlinx.serialization.json.Json
 
 class RetrieveXapiStateUseCase(
     private val db: UmAppDatabase,
     private val repo: UmAppDatabase?,
-    private val json: Json,
+    xapiJson: XapiJson,
     private val xxStringHasher: XXStringHasher,
     private val xxHasher64Factory: XXHasher64Factory,
 ) {
+
+    private val json = xapiJson.json
 
     sealed interface RetrieveXapiStateResult {
         val lastModified: Long

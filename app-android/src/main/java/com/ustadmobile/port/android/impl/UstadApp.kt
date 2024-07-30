@@ -132,6 +132,7 @@ import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
 import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
 import com.ustadmobile.core.domain.xapi.StoreActivitiesUseCase
+import com.ustadmobile.core.domain.xapi.XapiJson
 import com.ustadmobile.core.domain.xapi.XapiStatementResource
 import com.ustadmobile.core.domain.xapi.http.XapiHttpServerUseCase
 import com.ustadmobile.core.domain.xapi.noninteractivecontentusagestatementrecorder.NonInteractiveContentXapiStatementRecorderFactory
@@ -296,6 +297,8 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 ignoreUnknownKeys = true
             }
         }
+
+        bind<XapiJson>() with singleton { XapiJson() }
 
         bind<XML>() with singleton {
             XML {
@@ -794,7 +797,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 retrieveXapiStateUseCase = instance(),
                 storeXapiStateUseCase = instance(),
                 db = instance(tag = DoorTag.TAG_DB),
-                json = instance(),
+                xapiJson = instance(),
                 endpoint = context,
             )
         }
@@ -803,7 +806,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             StoreXapiStateUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
                 repo = instance(tag = DoorTag.TAG_REPO),
-                json = instance(),
+                xapiJson = instance(),
                 xxHasher64Factory = instance(),
                 xxStringHasher = instance(),
             )
@@ -813,7 +816,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             RetrieveXapiStateUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
                 repo = instance(tag = DoorTag.TAG_REPO),
-                json = instance(),
+                xapiJson = instance(),
                 xxStringHasher = instance(),
                 xxHasher64Factory = instance(),
             )
@@ -1031,7 +1034,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 repo = instance(tag = DoorTag.TAG_REPO),
                 xxHasher = instance(),
                 endpoint = context,
-                json = instance(),
+                xapiJson = instance(),
                 hasherFactory = instance(),
                 storeActivitiesUseCase = instance(),
             )

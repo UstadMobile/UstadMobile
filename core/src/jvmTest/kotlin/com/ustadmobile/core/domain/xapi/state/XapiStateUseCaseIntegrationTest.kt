@@ -4,6 +4,7 @@ import com.benasher44.uuid.uuid4
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.interop.HttpApiException
+import com.ustadmobile.core.domain.xapi.XapiJson
 import com.ustadmobile.core.domain.xapi.XapiSession
 import com.ustadmobile.core.domain.xapi.model.XapiAccount
 import com.ustadmobile.core.domain.xapi.model.XapiAgent
@@ -18,7 +19,6 @@ import com.ustadmobile.ihttp.request.IHttpRequest
 import com.ustadmobile.ihttp.request.iRequestBuilder
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
@@ -43,7 +43,7 @@ class XapiStateUseCaseIntegrationTest {
 
     private lateinit var xxStringHasher: XXStringHasher
 
-    private val json = Json { encodeDefaults = false }
+    private val xapiJson = XapiJson()
 
     val actorPersonUid  = 1L
 
@@ -61,8 +61,6 @@ class XapiStateUseCaseIntegrationTest {
             )
         )
 
-
-
         val actorEntities = xapiAgent.toEntities(
             stringHasher = xxStringHasher,
             primaryKeyManager = db.doorPrimaryKeyManager,
@@ -71,8 +69,6 @@ class XapiStateUseCaseIntegrationTest {
                 xapiAgent.identifierHash(xxStringHasher) to actorPersonUid
             )
         )
-
-
 
         runBlocking {
             db.actorDao().insertOrIgnoreListAsync(listOf(actorEntities.actor))
@@ -89,7 +85,7 @@ class XapiStateUseCaseIntegrationTest {
         storeXapiStateUseCase = StoreXapiStateUseCase(
             db = db,
             repo = null,
-            json = json,
+            xapiJson = xapiJson,
             xxStringHasher = XXStringHasherCommonJvm(),
             xxHasher64Factory = XXHasher64FactoryCommonJvm()
         )
@@ -97,7 +93,7 @@ class XapiStateUseCaseIntegrationTest {
         retrieveXapiStateUseCase = RetrieveXapiStateUseCase(
             db = db,
             repo = null,
-            json = json,
+            xapiJson = xapiJson,
             xxStringHasher = XXStringHasherCommonJvm(),
             xxHasher64Factory = XXHasher64FactoryCommonJvm(),
         )
@@ -116,7 +112,7 @@ class XapiStateUseCaseIntegrationTest {
         runBlocking {
             val stateParams = XapiStateParams(
                 activityId = activityId,
-                agent = json.encodeToString(xapiAgent),
+                agent = xapiJson.json.encodeToString(xapiAgent),
                 registration = xapiSession.registrationUuid,
                 stateId = stateId,
             )
@@ -129,7 +125,7 @@ class XapiStateUseCaseIntegrationTest {
                 request = iRequestBuilder("http://localhost/xapi/activities/state") {
                     method = IHttpRequest.Companion.Method.PUT
                     header("content-type", "application/json")
-                    body(json.encodeToString(doc))
+                    body(xapiJson.json.encodeToString(doc))
                 }
             )
 
@@ -138,7 +134,7 @@ class XapiStateUseCaseIntegrationTest {
                 xapiStateParams = stateParams
             ) as RetrieveXapiStateUseCase.TextRetrieveXapiStateResult
 
-            val docParsed = json.decodeFromString(JsonObject.serializer(), retrieveResult.content)
+            val docParsed = xapiJson.json.decodeFromString(JsonObject.serializer(), retrieveResult.content)
 
             assertEquals(doc, docParsed)
         }
@@ -152,7 +148,7 @@ class XapiStateUseCaseIntegrationTest {
         runBlocking {
             val stateParams = XapiStateParams(
                 activityId = activityId,
-                agent = json.encodeToString(xapiAgent),
+                agent = xapiJson.json.encodeToString(xapiAgent),
                 registration = xapiSession.registrationUuid,
                 stateId = stateId,
             )
@@ -170,7 +166,7 @@ class XapiStateUseCaseIntegrationTest {
                 request = iRequestBuilder("http://localhost/xapi/activities/state") {
                     method = IHttpRequest.Companion.Method.PUT
                     header("content-type", "application/json")
-                    body(json.encodeToString(doc1))
+                    body(xapiJson.json.encodeToString(doc1))
                 }
             )
 
@@ -187,7 +183,7 @@ class XapiStateUseCaseIntegrationTest {
                 request = iRequestBuilder("http://localhost/xapi/activities/state") {
                     method = IHttpRequest.Companion.Method.PUT
                     header("content-type", "application/json")
-                    body(json.encodeToString(doc2))
+                    body(xapiJson.json.encodeToString(doc2))
                 }
             )
 
@@ -196,7 +192,7 @@ class XapiStateUseCaseIntegrationTest {
                 xapiStateParams = stateParams
             ) as RetrieveXapiStateUseCase.TextRetrieveXapiStateResult
 
-            val docParsed = json.decodeFromString(JsonObject.serializer(), retrieveResult.content)
+            val docParsed = xapiJson.json.decodeFromString(JsonObject.serializer(), retrieveResult.content)
             assertEquals("A1", docParsed["a"]!!.jsonPrimitive.content)
             assertEquals("B", docParsed["b"]!!.jsonPrimitive.content)
             assertEquals("C1", docParsed["c"]!!.jsonPrimitive.content)
@@ -212,7 +208,7 @@ class XapiStateUseCaseIntegrationTest {
         runBlocking {
             val stateParams = XapiStateParams(
                 activityId = activityId,
-                agent = json.encodeToString(xapiAgent),
+                agent = xapiJson.json.encodeToString(xapiAgent),
                 registration = xapiSession.registrationUuid,
                 stateId = stateId,
             )
@@ -248,7 +244,7 @@ class XapiStateUseCaseIntegrationTest {
         runBlocking {
             val stateParams = XapiStateParams(
                 activityId = activityId,
-                agent = json.encodeToString(xapiAgent),
+                agent = xapiJson.json.encodeToString(xapiAgent),
                 registration = xapiSession.registrationUuid,
                 stateId = stateId,
             )
@@ -283,7 +279,7 @@ class XapiStateUseCaseIntegrationTest {
         runBlocking {
             val stateParams = XapiStateParams(
                 activityId = activityId,
-                agent = json.encodeToString(xapiAgent),
+                agent = xapiJson.json.encodeToString(xapiAgent),
                 registration = xapiSession.registrationUuid,
                 stateId = stateId,
             )

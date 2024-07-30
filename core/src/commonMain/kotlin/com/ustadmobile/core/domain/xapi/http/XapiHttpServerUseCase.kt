@@ -3,6 +3,7 @@ package com.ustadmobile.core.domain.xapi.http
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.interop.HttpApiException
+import com.ustadmobile.core.domain.xapi.XapiJson
 import com.ustadmobile.core.domain.xapi.XapiStatementResource
 import com.ustadmobile.core.domain.xapi.model.XapiStatement
 import com.ustadmobile.core.domain.xapi.state.RetrieveXapiStateUseCase
@@ -19,16 +20,17 @@ import com.ustadmobile.ihttp.response.StringResponse
 import io.ktor.util.decodeBase64Bytes
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
-import kotlinx.serialization.json.Json
 
 class XapiHttpServerUseCase(
     private val statementResource: XapiStatementResource,
     private val storeXapiStateUseCase: StoreXapiStateUseCase,
     private val retrieveXapiStateUseCase: RetrieveXapiStateUseCase,
     private val db: UmAppDatabase,
-    private val json: Json,
+    xapiJson: XapiJson,
     private val endpoint: Endpoint,
 ) {
+
+    private val json = xapiJson.json
 
     //Simple split by whitespace
     private val authHeaderSplitRegex = Regex("\\s+")

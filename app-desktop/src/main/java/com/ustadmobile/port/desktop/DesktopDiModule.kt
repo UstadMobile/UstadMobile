@@ -37,6 +37,7 @@ import com.ustadmobile.core.domain.extractmediametadata.mediainfo.ExtractMediaMe
 import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseJvm
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
+import com.ustadmobile.core.domain.xapi.XapiJson
 import com.ustadmobile.core.embeddedhttp.EmbeddedHttpServer
 import com.ustadmobile.core.getdeveloperinfo.GetDeveloperInfoUseCaseJvm
 import com.ustadmobile.core.impl.UstadMobileConstants
@@ -433,6 +434,8 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
             ignoreUnknownKeys = true
         }
     }
+
+    bind<XapiJson>() with singleton { XapiJson() }
 
 
     bind<XML>() with singleton {

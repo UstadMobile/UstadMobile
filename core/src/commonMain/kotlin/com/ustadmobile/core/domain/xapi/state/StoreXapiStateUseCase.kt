@@ -2,6 +2,7 @@ package com.ustadmobile.core.domain.xapi.state
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.interop.HttpApiException
+import com.ustadmobile.core.domain.xapi.XapiJson
 import com.ustadmobile.core.domain.xapi.XapiSession
 import com.ustadmobile.core.domain.xapi.model.XapiAgent
 import com.ustadmobile.core.domain.xapi.model.identifierHash
@@ -13,7 +14,6 @@ import com.ustadmobile.core.util.ext.requireBodyAsText
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.ihttp.request.IHttpRequest
 import com.ustadmobile.lib.db.entities.xapi.StateEntity
-import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 
@@ -23,10 +23,12 @@ import kotlinx.serialization.json.buildJsonObject
 class StoreXapiStateUseCase(
     private val db: UmAppDatabase,
     private val repo: UmAppDatabase?,
-    private val json: Json,
+    xapiJson: XapiJson,
     private val xxHasher64Factory: XXHasher64Factory,
     private val xxStringHasher: XXStringHasher,
 ) {
+
+    private val json = xapiJson.json
 
     /**
      * @param method as per the Xapi spec if this is a POST request and JSON content, then we will

@@ -568,7 +568,7 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             repo = instance(tag = DoorTag.TAG_REPO),
             xxHasher = instance(),
             endpoint = context,
-            json = instance(),
+            xapiJson = instance(),
             hasherFactory = instance(),
             storeActivitiesUseCase = instance(),
         )
@@ -596,7 +596,7 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             retrieveXapiStateUseCase = instance(),
             storeXapiStateUseCase = instance(),
             db = instance(tag = DoorTag.TAG_DB),
-            json = instance(),
+            xapiJson = instance(),
             endpoint = context,
         )
     }
@@ -605,7 +605,7 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         StoreXapiStateUseCase(
             db = instance(tag = DoorTag.TAG_DB),
             repo = instance(tag = DoorTag.TAG_REPO),
-            json = instance(),
+            xapiJson = instance(),
             xxHasher64Factory = instance(),
             xxStringHasher = instance(),
         )
@@ -615,7 +615,7 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         RetrieveXapiStateUseCase(
             db = instance(tag = DoorTag.TAG_DB),
             repo = instance(tag = DoorTag.TAG_REPO),
-            json = instance(),
+            xapiJson = instance(),
             xxStringHasher = instance(),
             xxHasher64Factory = instance(),
         )

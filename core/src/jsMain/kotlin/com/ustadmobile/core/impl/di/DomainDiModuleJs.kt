@@ -285,7 +285,7 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
             repo = instance(tag = DoorTag.TAG_REPO),
             xxHasher = instance(),
             endpoint = context,
-            json = instance(),
+            xapiJson = instance(),
             hasherFactory = instance(),
             storeActivitiesUseCase = instance(),
         )

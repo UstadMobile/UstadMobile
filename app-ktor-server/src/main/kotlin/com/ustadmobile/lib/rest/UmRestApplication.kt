@@ -684,7 +684,7 @@ fun Application.umRestApplication(
                 repo = null,
                 xxHasher = instance(),
                 endpoint = context,
-                json = instance(),
+                xapiJson = instance(),
                 hasherFactory = instance(),
                 storeActivitiesUseCase = instance(),
             )
@@ -705,7 +705,7 @@ fun Application.umRestApplication(
                 storeXapiStateUseCase = instance(),
                 retrieveXapiStateUseCase = instance(),
                 db = instance(tag = DoorTag.TAG_DB),
-                json = instance(),
+                xapiJson = instance(),
                 endpoint = context,
             )
         }
@@ -714,7 +714,7 @@ fun Application.umRestApplication(
             StoreXapiStateUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
                 repo = null,
-                json = instance(),
+                xapiJson = instance(),
                 xxHasher64Factory = instance(),
                 xxStringHasher = instance()
             )
@@ -724,7 +724,7 @@ fun Application.umRestApplication(
             RetrieveXapiStateUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
                 repo = null,
-                json = instance(),
+                xapiJson = instance(),
                 xxStringHasher = instance(),
                 xxHasher64Factory = instance(),
             )

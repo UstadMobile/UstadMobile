@@ -18,7 +18,6 @@ import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.entities.xapi.XapiEntityObjectTypeFlags
 import kotlinx.datetime.Clock
-import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 
 /**
@@ -29,12 +28,14 @@ class XapiStatementResource(
     repo: UmAppDatabase?,
     private val xxHasher: XXStringHasher,
     private val endpoint: Endpoint,
-    private val json: Json,
+    xapiJson: XapiJson,
     private val hasherFactory: XXHasher64Factory,
     private val storeActivitiesUseCase: StoreActivitiesUseCase,
 ) {
 
     private val repoOrDb = repo ?: db
+
+    private val json = xapiJson.json
 
     @Suppress("unused") //Some here reserved for future use
     enum class Format {

@@ -8,7 +8,6 @@ import com.ustadmobile.core.domain.xxhash.XXHasher64FactoryCommonJvm
 import com.ustadmobile.core.domain.xxhash.XXStringHasherCommonJvm
 import com.ustadmobile.door.DatabaseBuilder
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.json.Json
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -27,11 +26,7 @@ class XapiStatementResourceTest {
 
     private lateinit var defaultXapiSession: XapiSession
 
-    //Note: as per xAPI spec, we should NOT encode default (eg. null) key values
-    private val json = Json {
-        encodeDefaults = false
-        ignoreUnknownKeys = true
-    }
+    private val xapiJson = XapiJson()
 
     @BeforeTest
     fun setup() {
@@ -43,7 +38,7 @@ class XapiStatementResourceTest {
             repo = null,
             xxHasher = xxHasher,
             endpoint = endpoint,
-            json = json,
+            xapiJson = xapiJson,
             hasherFactory = XXHasher64FactoryCommonJvm(),
             storeActivitiesUseCase = storeActivitiesUseCase,
         )
@@ -63,13 +58,13 @@ class XapiStatementResourceTest {
     ) : String {
         val id = uuid4().toString()
         val stmtJson = this::class.java.getResource(resourcePath)!!.readText()
-        val stmt = json.decodeFromString(XapiStatement.serializer(), stmtJson)
+        val stmt = xapiJson.json.decodeFromString(XapiStatement.serializer(), stmtJson)
         xapiStatementResource.put(
             statement = stmt,
             statementIdParam = id,
             xapiSession = xapiSession
         )
-        assertStatementStoredInDb(stmt.copy(id = id), db, xxHasher, json)
+        assertStatementStoredInDb(stmt.copy(id = id), db, xxHasher, xapiJson.json)
 
         return id
     }
