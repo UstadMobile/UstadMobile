@@ -3,7 +3,7 @@ appId: com.toughra.ustadmobile
 # admin enable guest login button usin this flow
  # Test parameters needs to provide for this test :
   # 1) TESTRESULTSDIR : provide the path to store test results
-- tapOn: "Library"
+
 - tapOn: "Settings"
 - tapOn: "Site"
 - tapOn:
