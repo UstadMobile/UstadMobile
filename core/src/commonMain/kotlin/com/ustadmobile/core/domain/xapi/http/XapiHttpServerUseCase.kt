@@ -5,7 +5,9 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.interop.HttpApiException
 import com.ustadmobile.core.domain.xapi.XapiJson
 import com.ustadmobile.core.domain.xapi.XapiStatementResource
+import com.ustadmobile.core.domain.xapi.model.XapiAgent
 import com.ustadmobile.core.domain.xapi.model.XapiStatement
+import com.ustadmobile.core.domain.xapi.state.DeleteXapiStateUseCase
 import com.ustadmobile.core.domain.xapi.state.ListXapiStateIdsUseCase
 import com.ustadmobile.core.domain.xapi.state.RetrieveXapiStateUseCase
 import com.ustadmobile.core.domain.xapi.state.StoreXapiStateUseCase
@@ -31,6 +33,7 @@ class XapiHttpServerUseCase(
     private val storeXapiStateUseCase: StoreXapiStateUseCase,
     private val retrieveXapiStateUseCase: RetrieveXapiStateUseCase,
     private val listXapiStateIdsUseCase: ListXapiStateIdsUseCase,
+    private val deleteXapiStateRequest: DeleteXapiStateUseCase,
     private val db: UmAppDatabase,
     xapiJson: XapiJson,
     private val endpoint: Endpoint,
@@ -195,6 +198,26 @@ class XapiHttpServerUseCase(
                                 }
                             }
                         }
+
+                        Method.DELETE -> {
+                            deleteXapiStateRequest(
+                                request = DeleteXapiStateUseCase.DeleteXapiStateRequest(
+                                    activityId = request.queryParamOrThrow("activityId"),
+                                    agent = json.decodeFromString(XapiAgent.serializer(), request.queryParamOrThrow("agent")),
+                                    registration = request.queryParam("registration"),
+                                    stateId = request.queryParam("stateId")
+                                ),
+                                session = xapiSession
+                            )
+
+                            return StringResponse(
+                                request = request,
+                                mimeType = "text/plain",
+                                responseCode = 204,
+                                body = ""
+                            )
+                        }
+
                         else -> {
                             throw HttpApiException(400, "Bad request: ${request.method} ${request.url}")
                         }
