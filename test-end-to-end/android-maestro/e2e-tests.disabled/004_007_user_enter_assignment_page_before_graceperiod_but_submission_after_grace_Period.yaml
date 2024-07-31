@@ -1,7 +1,7 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/004_005_assignment_after_deadline_and_before_grace_Period"
-  TESTNAME:  "004_005_assignment_after_deadline_and_before_grace_Period"
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/004_007_user_enter_assignment_page_before_graceperiod_but_submission_after_grace_Period"
+  TESTNAME:  "004_007_user_enter_assignment_page_before_graceperiod_but_submission_after_grace_Period"
 ---
 # Admin login
 - clearState: com.toughra.ustadmobile
@@ -63,6 +63,7 @@ env:
 - tapOn: "Assignment"
 - tapOn: "Title*"
 - inputText: "Assignment 1"
+- hideKeyboard
 - tapOn: "Description"
 - tapOn:
     id: "com.toughra.ustadmobile:id/editor"
@@ -71,27 +72,35 @@ env:
 - assertVisible: "Don't show before"
 - tapOn:
     text: "Don't show before"
-- inputText: "14/05/2024"
+- runScript:
+    file: "../common/setDate.js"
+- inputText: ${output.yesterdayDate}
 - tapOn: "hh:mm"
-- inputText: "23:45"
+- runScript:
+    file: "../common/setDate.js"
+- inputText: ${output.delayTime}
 - hideKeyboard
 - scrollUntilVisible:
     element:
       text: "Deadline"
     direction: DOWN
 - tapOn: "Deadline"
-- inputText: "19/05/2024"
+- runScript:
+    file: "../common/setDate.js"
+- inputText: ${output.yesterdayDate}
 - tapOn: "hh:mm"
-- inputText: "23:45"
+- runScript:
+    file: "../common/setDate.js"
+- inputText: ${output.currentTime}
 - hideKeyboard
 - tapOn: "End of grace period"
 - runScript:
     file: "../common/setDate.js"
-- inputText: ${output.todayDate}
+- inputText: ${output.currentDate}
 - tapOn: "hh:mm"
 - runScript:
     file: "../common/setDate.js"
-- inputText: ${output.todayTime}
+- inputText: ${output.testTime}
 - hideKeyboard
 - tapOn: "Late submission penalty"
 - inputText: "10"
