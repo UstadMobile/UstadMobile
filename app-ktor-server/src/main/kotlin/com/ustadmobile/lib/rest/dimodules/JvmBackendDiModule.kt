@@ -96,6 +96,10 @@ fun makeJvmBackendDiModule(
         }
     }
 
+    bind<File>(tag = DiTag.TAG_ADMIN_PASS_FILE) with scoped(contextScope).singleton {
+        File(instance<File>(tag = DiTag.TAG_CONTEXT_DATA_ROOT), "admin.txt")
+    }
+
     bind<Settings>() with singleton {
         val propertiesFile = File(dataDirPath, UstadMobileSystemImpl.PREFS_FILENAME)
 
