@@ -106,6 +106,7 @@ import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnClea
 import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnClearUseCaseJvm
 import com.ustadmobile.core.domain.xapi.starthttpsession.StartXapiSessionOverHttpUseCase
 import com.ustadmobile.core.domain.xapi.starthttpsession.StartXapiSessionOverHttpUseCaseDirect
+import com.ustadmobile.core.domain.xapi.state.ListXapiStateIdsUseCase
 import com.ustadmobile.core.domain.xapi.state.RetrieveXapiStateUseCase
 import com.ustadmobile.core.domain.xapi.state.StoreXapiStateUseCase
 import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
@@ -595,6 +596,7 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             statementResource = instance(),
             retrieveXapiStateUseCase = instance(),
             storeXapiStateUseCase = instance(),
+            listXapiStateIdsUseCase = instance(),
             db = instance(tag = DoorTag.TAG_DB),
             xapiJson = instance(),
             endpoint = context,
@@ -618,6 +620,14 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             xapiJson = instance(),
             xxStringHasher = instance(),
             xxHasher64Factory = instance(),
+        )
+    }
+
+    bind<ListXapiStateIdsUseCase>() with scoped(EndpointScope.Default).singleton {
+        ListXapiStateIdsUseCase(
+            db = instance(tag = DoorTag.TAG_DB),
+            repo = instance(tag = DoorTag.TAG_REPO),
+            xxStringHasher = instance(),
         )
     }
 

@@ -28,6 +28,7 @@ import kotlin.random.Random
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class XapiStateUseCaseIntegrationTest {
 
@@ -36,6 +37,8 @@ class XapiStateUseCaseIntegrationTest {
     private lateinit var storeXapiStateUseCase: StoreXapiStateUseCase
 
     private lateinit var retrieveXapiStateUseCase: RetrieveXapiStateUseCase
+
+    private lateinit var listXapiStateIdsUseCase: ListXapiStateIdsUseCase
 
     private lateinit var xapiSession: XapiSession
 
@@ -86,7 +89,7 @@ class XapiStateUseCaseIntegrationTest {
             db = db,
             repo = null,
             xapiJson = xapiJson,
-            xxStringHasher = XXStringHasherCommonJvm(),
+            xxStringHasher = xxStringHasher,
             xxHasher64Factory = XXHasher64FactoryCommonJvm()
         )
 
@@ -94,8 +97,13 @@ class XapiStateUseCaseIntegrationTest {
             db = db,
             repo = null,
             xapiJson = xapiJson,
-            xxStringHasher = XXStringHasherCommonJvm(),
+            xxStringHasher = xxStringHasher,
             xxHasher64Factory = XXHasher64FactoryCommonJvm(),
+        )
+        listXapiStateIdsUseCase = ListXapiStateIdsUseCase(
+            db = db,
+            repo = null,
+            xxStringHasher = xxStringHasher,
         )
     }
 
@@ -137,6 +145,17 @@ class XapiStateUseCaseIntegrationTest {
             val docParsed = xapiJson.json.decodeFromString(JsonObject.serializer(), retrieveResult.content)
 
             assertEquals(doc, docParsed)
+
+            val stateIdResponse = listXapiStateIdsUseCase.invoke(
+                ListXapiStateIdsUseCase.ListXapiStateIdsRequest(
+                    activityId = activityId,
+                    agent = xapiAgent,
+                    registration = stateParams.registration
+                ),
+                xapiSession
+            )
+
+            assertTrue(stateId in stateIdResponse.stateIds)
         }
     }
 

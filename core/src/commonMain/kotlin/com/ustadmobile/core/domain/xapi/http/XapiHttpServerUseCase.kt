@@ -6,17 +6,22 @@ import com.ustadmobile.core.domain.interop.HttpApiException
 import com.ustadmobile.core.domain.xapi.XapiJson
 import com.ustadmobile.core.domain.xapi.XapiStatementResource
 import com.ustadmobile.core.domain.xapi.model.XapiStatement
+import com.ustadmobile.core.domain.xapi.state.ListXapiStateIdsUseCase
 import com.ustadmobile.core.domain.xapi.state.RetrieveXapiStateUseCase
 import com.ustadmobile.core.domain.xapi.state.StoreXapiStateUseCase
 import com.ustadmobile.core.domain.xapi.state.XapiStateParams
 import com.ustadmobile.core.domain.xapi.toXapiSession
 import com.ustadmobile.core.util.ext.firstNonWhiteSpaceChar
+import com.ustadmobile.ihttp.headers.iHeadersBuilder
 import com.ustadmobile.ihttp.request.IHttpRequest
 import com.ustadmobile.ihttp.request.IHttpRequest.Companion.Method
 import com.ustadmobile.ihttp.request.IHttpRequestWithTextBody
 import com.ustadmobile.ihttp.response.ByteArrayResponse
 import com.ustadmobile.ihttp.response.IHttpResponse
 import com.ustadmobile.ihttp.response.StringResponse
+import io.ktor.http.fromHttpToGmtDate
+import io.ktor.http.toHttpDate
+import io.ktor.util.date.GMTDate
 import io.ktor.util.decodeBase64Bytes
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
@@ -25,6 +30,7 @@ class XapiHttpServerUseCase(
     private val statementResource: XapiStatementResource,
     private val storeXapiStateUseCase: StoreXapiStateUseCase,
     private val retrieveXapiStateUseCase: RetrieveXapiStateUseCase,
+    private val listXapiStateIdsUseCase: ListXapiStateIdsUseCase,
     private val db: UmAppDatabase,
     xapiJson: XapiJson,
     private val endpoint: Endpoint,
@@ -118,24 +124,20 @@ class XapiHttpServerUseCase(
 
                 //Xapi State Resource
                 resourceName == "activities" && pathSegments.getOrNull(1) == "state" -> {
-                    //HERE - check for list state ids case.
-
-
-                    val xapiStateParams = XapiStateParams(
-                        activityId = request.queryParamOrThrow("activityId"),
-                        agent = request.queryParamOrThrow("agent"),
-                        registration = request.queryParam("registration"),
-                        stateId = request.queryParamOrThrow("stateId")
+                    fun IHttpRequest.xapiStateParams() = XapiStateParams(
+                        activityId = queryParamOrThrow("activityId"),
+                        agent = queryParamOrThrow("agent"),
+                        registration = queryParam("registration"),
+                        stateId = queryParamOrThrow("stateId")
                     )
 
-                    when {
-                        //Store state
-                        request.method == Method.POST || request.method == Method.PUT -> {
+                    when (request.method) {
+                        Method.POST, Method.PUT -> {
                             storeXapiStateUseCase(
                                 xapiSession = xapiSession,
                                 method = request.method,
                                 contentType = request.headers["content-type"] ?: "application/octet-stream",
-                                xapiStateParams = xapiStateParams,
+                                xapiStateParams = request.xapiStateParams(),
                                 request = request,
                             )
 
@@ -147,25 +149,52 @@ class XapiHttpServerUseCase(
                             )
                         }
 
-                        request.method == Method.GET -> {
+                        Method.GET -> {
+                            //if the stateId is not included in params, then list state ids as per the spec
+                            if(request.queryParam("stateId") == null) {
+                                val listResponse = listXapiStateIdsUseCase.invoke(
+                                    request = ListXapiStateIdsUseCase.ListXapiStateIdsRequest(
+                                        activityId = request.queryParamOrThrow("activityId"),
+                                        agent = xapiSession.agent,
+                                        registration = request.queryParam("registration"),
+                                        since = request.queryParam("since")?.fromHttpToGmtDate()?.timestamp ?: 0
+                                    ),
+                                    xapiSession = xapiSession
+                                )
+
+                                return StringResponse(
+                                    request = request,
+                                    mimeType = "application/json",
+                                    extraHeaders = iHeadersBuilder {
+                                        if(listResponse.lastModified > 0)
+                                            header("last-modified", GMTDate(listResponse.lastModified).toHttpDate())
+                                    },
+                                    body = json.encodeToString(
+                                        ListSerializer(String.serializer()), listResponse.stateIds
+                                    )
+                                )
+                            }
+
+
                             val result = retrieveXapiStateUseCase(
                                 xapiSession = xapiSession,
-                                xapiStateParams = xapiStateParams,
+                                xapiStateParams = request.xapiStateParams(),
                             )
 
                             when(result) {
                                 is RetrieveXapiStateUseCase.ByteRetrieveXapiStateResult -> {
                                     ByteArrayResponse(request, result.contentType, bodyBytes = result.content)
                                 }
+
                                 is RetrieveXapiStateUseCase.TextRetrieveXapiStateResult -> {
                                     StringResponse(request, result.contentType, body = result.content)
                                 }
+
                                 else -> {
                                     throw HttpApiException(404, "not found")
                                 }
                             }
                         }
-
                         else -> {
                             throw HttpApiException(400, "Bad request: ${request.method} ${request.url}")
                         }

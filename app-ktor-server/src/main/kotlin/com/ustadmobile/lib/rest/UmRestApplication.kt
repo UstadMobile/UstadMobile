@@ -64,6 +64,7 @@ import com.ustadmobile.core.domain.xapi.XapiStatementResource
 import com.ustadmobile.core.domain.xapi.http.XapiHttpServerUseCase
 import com.ustadmobile.core.domain.xapi.starthttpsession.StartXapiSessionOverHttpUseCase
 import com.ustadmobile.core.domain.xapi.starthttpsession.StartXapiSessionOverHttpUseCaseDirect
+import com.ustadmobile.core.domain.xapi.state.ListXapiStateIdsUseCase
 import com.ustadmobile.core.domain.xapi.state.RetrieveXapiStateUseCase
 import com.ustadmobile.core.domain.xapi.state.StoreXapiStateUseCase
 import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
@@ -704,6 +705,7 @@ fun Application.umRestApplication(
                 statementResource = instance(),
                 storeXapiStateUseCase = instance(),
                 retrieveXapiStateUseCase = instance(),
+                listXapiStateIdsUseCase = instance(),
                 db = instance(tag = DoorTag.TAG_DB),
                 xapiJson = instance(),
                 endpoint = context,
@@ -727,6 +729,14 @@ fun Application.umRestApplication(
                 xapiJson = instance(),
                 xxStringHasher = instance(),
                 xxHasher64Factory = instance(),
+            )
+        }
+
+        bind<ListXapiStateIdsUseCase>() with scoped(EndpointScope.Default).singleton {
+            ListXapiStateIdsUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = null,
+                xxStringHasher = instance(),
             )
         }
 

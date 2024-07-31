@@ -67,9 +67,9 @@ class RetrieveXapiStateUseCase(
 
         val hash = xapiStateParams.hash(xxHasher64Factory.newHasher(0L))
 
-        val stateEntity = db.stateEntityDao().getByParams(
+        val stateEntity = db.stateEntityDao().findByActorAndHash(
             accountPersonUid = xapiSession.accountPersonUid,
-            agentActorUid = xapiAgent.identifierHash(xxStringHasher),
+            actorUid = xapiAgent.identifierHash(xxStringHasher),
             seHash = hash,
         )
 
