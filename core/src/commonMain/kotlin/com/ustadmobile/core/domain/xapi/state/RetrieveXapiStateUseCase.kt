@@ -71,6 +71,7 @@ class RetrieveXapiStateUseCase(
             accountPersonUid = xapiSession.accountPersonUid,
             actorUid = xapiAgent.identifierHash(xxStringHasher),
             seHash = hash,
+            includeDeleted = false,
         )
 
         return when {

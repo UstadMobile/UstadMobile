@@ -64,7 +64,8 @@ class StoreXapiStateUseCase(
             val existingState = db.stateEntityDao().findByActorAndHash(
                 accountPersonUid = xapiSession.accountPersonUid,
                 actorUid = agentActorUid,
-                seHash = seHash
+                seHash = seHash,
+                includeDeleted = false,
             )
             when {
                 existingState == null -> requestBody

@@ -28,6 +28,8 @@ import kotlin.random.Random
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class XapiStateUseCaseIntegrationTest {
@@ -39,6 +41,8 @@ class XapiStateUseCaseIntegrationTest {
     private lateinit var retrieveXapiStateUseCase: RetrieveXapiStateUseCase
 
     private lateinit var listXapiStateIdsUseCase: ListXapiStateIdsUseCase
+
+    private lateinit var deleteXapiStateUseCase: DeleteXapiStateUseCase
 
     private lateinit var xapiSession: XapiSession
 
@@ -55,7 +59,8 @@ class XapiStateUseCaseIntegrationTest {
         xxStringHasher = XXStringHasherCommonJvm()
         db = DatabaseBuilder.databaseBuilder(
             UmAppDatabase::class, "jdbc:sqlite::memory:", 1L
-        ).build()
+        ).addCallback(DeleteXapiStateUseCase.AddXapiStateAddTriggersCallback())
+            .build()
 
         xapiAgent = XapiAgent(
             account = XapiAccount(
@@ -104,6 +109,12 @@ class XapiStateUseCaseIntegrationTest {
             db = db,
             repo = null,
             xxStringHasher = xxStringHasher,
+        )
+        deleteXapiStateUseCase = DeleteXapiStateUseCase(
+            db = db,
+            repo = null,
+            xxStringHasher = xxStringHasher,
+            xxHasher64Factory = XXHasher64FactoryCommonJvm(),
         )
     }
 
@@ -320,6 +331,118 @@ class XapiStateUseCaseIntegrationTest {
                 assertEquals(413, e.statusCode)
             }
 
+        }
+    }
+
+    @Test
+    fun givenStateCreated_whenDeletedById_thenShouldBeNotFound() {
+        val activityId = "http://example.org/id"
+        val stateId = "aStateId"
+        val otherStateId = "otherStateId"
+
+        runBlocking {
+            val stateParams = XapiStateParams(
+                activityId = activityId,
+                agent = xapiJson.json.encodeToString(xapiAgent),
+                registration = xapiSession.registrationUuid,
+                stateId = stateId,
+            )
+
+            val otherStateParams = XapiStateParams(
+                activityId = activityId,
+                agent = xapiJson.json.encodeToString(xapiAgent),
+                registration = xapiSession.registrationUuid,
+                stateId = otherStateId,
+            )
+
+            listOf(stateParams, otherStateParams).forEach {
+                storeXapiStateUseCase(
+                    xapiSession = xapiSession,
+                    xapiStateParams = it,
+                    method = IHttpRequest.Companion.Method.PUT,
+                    contentType = "text/plain",
+                    request = iRequestBuilder("http://localhost/xapi/activities/state") {
+                        method = IHttpRequest.Companion.Method.PUT
+                        header("content-type", "text/plain")
+                        body("Hello World")
+                    }
+                )
+            }
+
+            deleteXapiStateUseCase(
+                request = DeleteXapiStateUseCase.DeleteXapiStateRequest(
+                    activityId = activityId,
+                    agent = xapiAgent,
+                    registration = xapiSession.registrationUuid,
+                    stateId = stateId
+                ),
+                session = xapiSession,
+            )
+
+            val retrieveResult = retrieveXapiStateUseCase(
+                xapiSession = xapiSession,
+                xapiStateParams = stateParams
+            )
+
+            assertNull(retrieveResult)
+
+            val otherStateIdResult = retrieveXapiStateUseCase(
+                xapiSession = xapiSession,
+                xapiStateParams = otherStateParams
+            )
+            assertNotNull(otherStateIdResult)
+        }
+    }
+
+
+    @Test
+    fun givenStateCreated_whenDeletedAllByContext_thenShouldBeNotFound() {
+        val activityId = "http://example.org/id"
+        val stateId = "aStateId"
+        val otherStateId = "otherStateId"
+
+        runBlocking {
+            val stateParams = listOf(stateId, otherStateId).map {
+                XapiStateParams(
+                    activityId = activityId,
+                    agent = xapiJson.json.encodeToString(xapiAgent),
+                    registration = xapiSession.registrationUuid,
+                    stateId = it,
+                )
+            }
+
+            stateParams.forEach {
+                storeXapiStateUseCase(
+                    xapiSession = xapiSession,
+                    xapiStateParams = it,
+                    method = IHttpRequest.Companion.Method.PUT,
+                    contentType = "text/plain",
+                    request = iRequestBuilder("http://localhost/xapi/activities/state") {
+                        method = IHttpRequest.Companion.Method.PUT
+                        header("content-type", "text/plain")
+                        body("Hello World")
+                    }
+                )
+            }
+
+
+            deleteXapiStateUseCase(
+                request = DeleteXapiStateUseCase.DeleteXapiStateRequest(
+                    activityId = activityId,
+                    agent = xapiAgent,
+                    registration = xapiSession.registrationUuid,
+                    stateId = null
+                ),
+                session = xapiSession,
+            )
+
+            stateParams.forEach {
+                val retrieveResult = retrieveXapiStateUseCase(
+                    xapiSession = xapiSession,
+                    xapiStateParams = it
+                )
+                assertNull(retrieveResult)
+            }
         }
     }
 

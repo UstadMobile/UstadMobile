@@ -23,6 +23,8 @@ import com.ustadmobile.lib.db.entities.xapi.ActivityEntity
 import com.ustadmobile.lib.db.entities.xapi.ActivityInteractionEntity
 import com.ustadmobile.lib.db.entities.xapi.ActivityLangMapEntry
 import com.ustadmobile.core.db.dao.xapi.ActivityLangMapEntryDao
+import com.ustadmobile.core.db.dao.xapi.StateDeleteCommandDao
+import com.ustadmobile.lib.db.entities.xapi.StateDeleteCommand
 import com.ustadmobile.core.db.dao.xapi.StateEntityDao
 import com.ustadmobile.lib.db.entities.xapi.StatementContextActivityJoin
 import com.ustadmobile.core.db.dao.xapi.StatementContextActivityJoinDao
@@ -89,6 +91,7 @@ import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
     XapiSessionEntity::class,
     StatementEntityJson::class,
     StateEntity::class,
+    StateDeleteCommand::class,
 
     //Door entities
     OutgoingReplication::class,
@@ -96,7 +99,7 @@ import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
     PendingRepositorySession::class,
     DoorNode::class,
 
-], version = 195)
+], version = 196)
 expect abstract class UmAppDatabase : RoomDatabase {
 
     /*
@@ -261,5 +264,7 @@ expect abstract class UmAppDatabase : RoomDatabase {
     abstract fun statementEntityJsonDao(): StatementEntityJsonDao
 
     abstract fun stateEntityDao(): StateEntityDao
+
+    abstract fun stateDeleteCommandDao(): StateDeleteCommandDao
 
 }

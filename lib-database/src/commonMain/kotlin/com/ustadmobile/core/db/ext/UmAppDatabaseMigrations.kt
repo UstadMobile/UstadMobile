@@ -1520,6 +1520,75 @@ val MIGRATION_194_195 = DoorMigrationStatementList(194, 195) { db ->
     }
 }
 
+val MIGRATION_195_196 = DoorMigrationStatementList(195, 196) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS StateDeleteCommand (  sdcActorUid  INTEGER  NOT NULL , sdcHash  INTEGER  NOT NULL , sdcActivityUid  INTEGER  NOT NULL , sdcStateId  TEXT , sdcLastMod  INTEGER  NOT NULL , sdcRegistrationHi  INTEGER , sdcRegistrationLo  INTEGER , PRIMARY KEY (sdcActorUid, sdcHash) )")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS StateDeleteCommand (  sdcActorUid  BIGINT  NOT NULL , sdcHash  BIGINT  NOT NULL , sdcActivityUid  BIGINT  NOT NULL , sdcStateId  TEXT , sdcLastMod  BIGINT  NOT NULL , sdcRegistrationHi  BIGINT , sdcRegistrationLo  BIGINT , PRIMARY KEY (sdcActorUid, sdcHash) )")
+        }
+    }
+}
+
+//Add Xapi State Deletion Triggers - See DeleteXapiStateUseCase
+val MIGRATION_196_197 = DoorMigrationStatementList(196, 197) { db ->
+    buildList {
+        if (db.dbType() == DoorDbType.SQLITE) {
+            listOf("INSERT", "UPDATE").forEach { event ->
+                add("""
+                        CREATE TRIGGER IF NOT EXISTS xapi_state_delete_trig_${event.lowercase().substring(0, 3)}
+                        AFTER $event ON StateDeleteCommand
+                        FOR EACH ROW
+                        BEGIN
+                        UPDATE StateEntity
+                           SET seDeleted = 1,
+                               seLastMod = NEW.sdcLastMod
+                         WHERE seActorUid = NEW.sdcActorUid
+                           AND seActivityUid = NEW.sdcActivityUid
+                           AND seLastMod < NEW.sdcLastMod
+                           AND (    (      NEW.sdcRegistrationHi IS NULL 
+                                       AND seRegistrationHi IS NULL
+                                       AND NEW.sdcRegistrationLo IS NULL
+                                       AND seRegistrationLo IS NULL)
+                                 OR (     seRegistrationHi = NEW.sdcRegistrationHi
+                                      AND seRegistrationLo = NEW.sdcRegistrationLo))
+                           AND (    NEW.sdcStateId IS NULL
+                                 OR seStateId = NEW.sdcStateId);
+                        END         
+                """)
+            }
+        } else {
+            add("""
+                        CREATE OR REPLACE FUNCTION xapi_state_delete_fn() RETURNS TRIGGER AS ${'$'}${'$'}
+                        BEGIN
+                        UPDATE StateEntity
+                           SET seDeleted = TRUE,
+                               seLastMod = NEW.sdcLastMod
+                         WHERE seActorUid = NEW.sdcActorUid
+                           AND seActivityUid = NEW.sdcActivityUid
+                           AND seLastMod < NEW.sdcLastMod
+                           AND (    (      NEW.sdcRegistrationHi IS NULL 
+                                       AND seRegistrationHi IS NULL
+                                       AND NEW.sdcRegistrationLo IS NULL
+                                       AND seRegistrationLo IS NULL)
+                                 OR (     seRegistrationHi = NEW.sdcRegistrationHi
+                                      AND seRegistrationLo = NEW.sdcRegistrationLo))
+                           AND (    NEW.sdcStateId IS NULL
+                                 OR seStateId = NEW.sdcStateId);
+                         RETURN NEW;
+                         END ${'$'}${'$'} LANGUAGE plpgsql
+                    """)
+            add("""
+                    CREATE TRIGGER xapi_state_delete_trig
+                    AFTER INSERT OR UPDATE ON StateDeleteCommand
+                    FOR EACH ROW
+                    EXECUTE FUNCTION xapi_state_delete_fn();
+                """)
+        }
+    }
+}
+
+
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_105_106, MIGRATION_106_107,
     MIGRATION_107_108, MIGRATION_108_109,
@@ -1535,6 +1604,7 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_160_161, MIGRATION_162_163, MIGRATION_163_164, MIGRATION_164_165,
     MIGRATION_165_166, MIGRATION_166_167, MIGRATION_167_168, MIGRATION_168_169,
     MIGRATION_170_171, MIGRATION_171_172, MIGRATION_172_194, MIGRATION_194_195,
+    MIGRATION_195_196, MIGRATION_196_197,
 )
 
 
