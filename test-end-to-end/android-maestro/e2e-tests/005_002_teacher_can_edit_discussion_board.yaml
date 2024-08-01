@@ -49,11 +49,11 @@ env:
     index: "0"
 - runScript:
     file: "../common/setDate.js"
-- inputText: ${output.yesterday_Date}
+- inputText: ${output.yesterdayDate}
 - tapOn: "hh:mm"
 - runScript:
     file: "../common/setDate.js"
-- inputText: ${output.delay_1hr}
+- inputText: ${output.delayTime}
 - hideKeyboard
 - tapOn: "Description"
 - tapOn:

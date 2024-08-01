@@ -1,7 +1,7 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/005_001_add_discussionBoard"
-  TESTNAME:  "005_001_add_discussionBoard"
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/005_003_users_can_add_post_on_discussion_board"
+  TESTNAME:  "005_003_users_can_add_post_on_discussion_board"
 ---
 # Admin login
 - clearState: com.toughra.ustadmobile
@@ -37,6 +37,7 @@ env:
       TESTFILENAME: "Ustad_Students_List.csv"
       CONTROLSERVER: ${CONTROLSERVER}
       TESTSERIAL: ${TESTSERIAL}
+# teacher add an discussion board block
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
@@ -79,6 +80,9 @@ env:
     id: "com.toughra.ustadmobile:id/editor"
 - inputText: "test block"
 - tapOn: "Done"
+- assertVisible:
+    id: "app_title"
+    text: "Add discussion"
 - tapOn: "Done"
 - tapOn: "Save"
 - scrollUntilVisible:
@@ -88,3 +92,57 @@ env:
 - tapOn: "Discussion 1"
 - assertVisible:            #  +POST button
     id: "floating_action_button"
+- scrollUntilVisible:
+    element:
+      text: "Discussion 1"
+    direction: DOWN
+- tapOn: "Discussion 1"
+- tapOn:            #  +POST button
+    id: "floating_action_button"
+- tapOn: "Title*"
+- inputText: "Post 1"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/editor"
+- inputText: "This is post by teacher"
+- tapOn: "Post"
+- assertVisible:
+    id: "app_title"
+    text: "Post 1"
+- assertVisible:
+    text: "This is post by teacher"
+
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: "s1"
+      PASSWORD: "tests1"
+- tapOn: "Courses"
+- tapOn: "Test Course Block"
+- scrollUntilVisible:
+    element:
+      text: "Discussion 1"
+    direction: DOWN
+- tapOn: "Discussion 1"
+- tapOn:            #  +POST button
+    id: "floating_action_button"
+- tapOn: "Title*"
+- inputText: "Post 2"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/editor"
+- inputText: "This is post by student"
+- tapOn: "Post"
+- assertVisible:
+    id: "app_title"
+    text: "Post 2"
+- assertVisible:
+    text: "This is post by student"
+- back
+- assertVisible:
+    id: "app_title"
+    text: "Test Course Block"
+- assertVisible:
+    text: "Post 1"
+- assertVisible:
+    text: "Post 2"

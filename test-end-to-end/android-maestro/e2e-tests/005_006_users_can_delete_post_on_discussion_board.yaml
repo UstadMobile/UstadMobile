@@ -1,6 +1,6 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/003_002_add_module_text_blocks_and_perform_indent_hide_delete_actions"
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/005_003_users_can_post_on_discussion_board"
   TESTNAME:  "005_003_users_can_post_on_discussion_board"
 ---
 # Admin login
@@ -69,11 +69,11 @@ env:
     index: "0"
 - runScript:
     file: "../common/setDate.js"
-- inputText: ${output.yesterday_Date}
+- inputText: ${output.yesterdayDate}
 - tapOn: "hh:mm"
 - runScript:
     file: "../common/setDate.js"
-- inputText: ${output.delay_1hr}
+- inputText: ${output.delayTime}
 - hideKeyboard
 - tapOn: "Description"
 - tapOn:
@@ -83,31 +83,6 @@ env:
 - assertVisible:
     id: "app_title"
     text: "Add discussion"
-- tapOn: "Done"
-- tapOn: "Save"
-- scrollUntilVisible:
-    element:
-      text: "Discussion 1"
-    direction: DOWN
-- tapOn: "Discussion 1"
-- assertVisible:            #  +POST button
-    id: "floating_action_button"
-- back
-- tapOn:            #  Edit button
-    id: "floating_action_button"
-- scrollUntilVisible:
-    element:
-      text: "Discussion 1"
-    direction: DOWN
-- tapOn: "Discussion 1"
-- tapOn: "Description"
-- tapOn:
-    id: "com.toughra.ustadmobile:id/editor"
-- inputText: "test block"
-- tapOn: "Done"
-- assertVisible:
-    id: "app_title"
-    text: "Edit discussion"
 - tapOn: "Done"
 - tapOn: "Save"
 - assertVisible:
@@ -168,12 +143,25 @@ env:
 - assertVisible:
     text: "Post 2"
 
-    # Add reply text field not accessible by maestro
-#- tapOn: "Post 1"
-#- extendedWaitUntil:
-#    visible: "add_a_reply"
-#    timeout: 10000
-#- tapOn:
-#    id: "add_a_reply"
-#- inputText: "Comment from student"
-#- tapOn: "Post"
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: "t1"
+      PASSWORD: "test"
+- tapOn: "Courses"
+- tapOn: "Test Course Block"
+- scrollUntilVisible:
+    element:
+      text: "Discussion 1"
+    direction: DOWN
+- tapOn: "Discussion 1"
+- assertVisible:
+    text: "Post 2"
+- tapOn:
+    text: "More options"
+    index: 0
+- tapOn: "Delete"
+- assertNotVisible:
+      text: "Post 2"
