@@ -169,11 +169,11 @@ env:
     text: "Post 2"
 
     # Add reply text field not accessible by maestro
-#- tapOn: "Post 1"
-#- extendedWaitUntil:
-#    visible: "add_a_reply"
-#    timeout: 10000
-#- tapOn:
-#    id: "add_a_reply"
-#- inputText: "Comment from student"
-#- tapOn: "Post"
+- tapOn: "Post 1"
+- extendedWaitUntil:
+    visible: "add_a_reply"
+    timeout: 10000
+- tapOn:
+    id: "add_a_reply"
+- inputText: "Comment from student"
+- tapOn: "Post"
