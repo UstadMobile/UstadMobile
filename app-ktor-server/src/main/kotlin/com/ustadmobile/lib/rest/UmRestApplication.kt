@@ -745,7 +745,7 @@ fun Application.umRestApplication(
         bind<DeleteXapiStateUseCase>() with scoped(EndpointScope.Default).singleton {
             DeleteXapiStateUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
-                repo = instance(tag = DoorTag.TAG_REPO),
+                repo = null,
                 xxStringHasher = instance(),
                 xxHasher64Factory = instance(),
             )

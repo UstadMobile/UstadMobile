@@ -268,23 +268,49 @@ class H5PContentImporter(
                 <script src="dist/main.bundle.js" type="text/javascript">
                 </script>
                 </head>
-    
+                
                 <body>
                 <div id='h5p-container'>
                 </div>
-    
+                
                 <script type='text/javascript'>
-    
+                
+                let searchParams = new URLSearchParams(document.location.search);
+                
                 const el = document.getElementById('h5p-container');
+                
                 const options = {
                     h5pJsonPath: './h5p-folder',
                     frameJs: 'dist/frame.bundle.js',
                     frameCss: 'dist/styles/h5p.css',
+                    xAPIObjectIRI: searchParams.get("activity_id"),
                 };
-                new H5PStandalone.H5P(el, options);
+                
+                new H5PStandalone.H5P(el, options).then(function () {
+                    H5P.externalDispatcher.on("xAPI", (event) => {
+                      //do something useful with the event
+                      const newStatement = structuredClone(event.data.statement);
+                      newStatement.actor = JSON.parse(searchParams.get("actor"));
+                      
+                      let context = newStatement.context || {}
+                      context.registration = searchParams.get("registration");
+                      newStatement.context = context;
+                      
+                      console.log("xAPI statement: ", newStatement);
+                      
+                      fetch(searchParams.get("endpoint") + "statements?statementId=" + self.crypto.randomUUID(), {
+                        method: "PUT",
+                        headers: {
+                          "Content-Type": "application/json",
+                          "Authorization": searchParams.get("auth"),
+                        },
+                        body: JSON.stringify(newStatement),
+                      });
+                    });
+                });
                         
                 </script>
-    
+                
                 </body>
                 </html>
                 """.trimIndent()
