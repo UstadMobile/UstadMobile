@@ -155,6 +155,7 @@ env:
     text: "Post 1"
 - tapOn: "Post 1"
 - tapOn: "External link"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/verify_external_link"
 - scrollUntilVisible:
     element:
       text: "End-to-end tests"
