@@ -698,6 +698,7 @@ fun Application.umRestApplication(
                 repo = null,
                 getApiUrlUseCase = instance(),
                 xxStringHasher = instance(),
+                endpoint = context,
             )
         }
 
@@ -720,7 +721,8 @@ fun Application.umRestApplication(
                 repo = null,
                 xapiJson = instance(),
                 xxHasher64Factory = instance(),
-                xxStringHasher = instance()
+                xxStringHasher = instance(),
+                endpoint = context,
             )
         }
 
@@ -748,6 +750,7 @@ fun Application.umRestApplication(
                 repo = null,
                 xxStringHasher = instance(),
                 xxHasher64Factory = instance(),
+                endpoint = context,
             )
         }
 

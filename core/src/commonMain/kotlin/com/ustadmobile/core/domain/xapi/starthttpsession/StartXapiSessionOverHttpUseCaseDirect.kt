@@ -1,14 +1,13 @@
 package com.ustadmobile.core.domain.xapi.starthttpsession
 
-import com.benasher44.uuid.uuid4
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCase
-import com.ustadmobile.core.domain.xapi.XapiSession
+import com.ustadmobile.core.domain.xapi.ext.agent
 import com.ustadmobile.core.domain.xapi.ext.insertOrUpdateActorsIfNameChanged
 import com.ustadmobile.core.domain.xapi.model.identifierHash
 import com.ustadmobile.core.domain.xapi.model.toActorEntity
 import com.ustadmobile.core.domain.xapi.starthttpsession.StartXapiSessionOverHttpUseCase.StartXapiSessionOverHttpResult
-import com.ustadmobile.core.domain.xapi.toXapiSessionEntity
 import com.ustadmobile.core.domain.xxhash.XXStringHasher
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
@@ -23,26 +22,28 @@ class StartXapiSessionOverHttpUseCaseDirect(
     private val db: UmAppDatabase,
     private val repo: UmAppDatabase?,
     private val getApiUrlUseCase: GetApiUrlUseCase,
-    private val xxStringHasher: XXStringHasher
+    private val xxStringHasher: XXStringHasher,
+    private val endpoint: Endpoint,
 ): StartXapiSessionOverHttpUseCase {
 
     override suspend fun invoke(
-        xapiSession: XapiSession,
+        xapiSession: XapiSessionEntity,
     ): StartXapiSessionOverHttpResult {
-        val registrationUuid = uuid4()
         val xseUid = db.doorPrimaryKeyManager.nextIdAsync(XapiSessionEntity.TABLE_ID)
         val auth = randomString(16)
 
         (repo ?: db).xapiSessionEntityDao().insertAsync(
-            xapiSession.toXapiSessionEntity(xseUid, registrationUuid, auth)
+            xapiSession
         )
 
         //Ensure that the actor entity is stored and linked to the personuid so that storing and
         //retrieving state works as expected.
-        val actorEntity = xapiSession.agent.toActorEntity(
+        val agent = xapiSession.agent(endpoint)
+
+        val actorEntity = agent.toActorEntity(
             xxHasher = xxStringHasher,
             knownActorUidToPersonUidMap = mapOf(
-                xapiSession.agent.identifierHash(xxStringHasher) to xapiSession.accountPersonUid
+                agent.identifierHash(xxStringHasher) to xapiSession.xseAccountPersonUid
             )
         )
 

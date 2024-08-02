@@ -6,30 +6,26 @@ import android.net.Uri
 import androidx.browser.customtabs.CustomTabColorSchemeParams
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.browser.customtabs.CustomTabsSession
-import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.domain.contententry.launchcontent.LaunchContentEntryVersionUseCase
 import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCase
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.GetHtmlContentDisplayEngineUseCase
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.HTML_ENGINE_USE_CHROMETAB
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.HTML_ENGINE_USE_WEBVIEW
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
-import com.ustadmobile.core.domain.xapi.XapiSession
-import com.ustadmobile.core.embeddedhttp.EmbeddedHttpServer
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.xapicontent.XapiContentViewModel
 import com.ustadmobile.lib.db.entities.ContentEntryVersion
+import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 
 
 class LaunchXapiUseCaseAndroid(
     private val androidContext: Context,
-    private val endpoint: Endpoint,
     private val getHtmlContentDisplayEngineUseCase: GetHtmlContentDisplayEngineUseCase,
     private val resolveXapiLaunchHrefUseCase: ResolveXapiLaunchHrefUseCase,
     private val lightToolbarColor: Int, //Can use jetpack compose color .toArgb()
     private val darkToolbarColor: Int,
     private val session: () -> CustomTabsSession?,
-    private val embeddedHttpServer: EmbeddedHttpServer,
     private val getApiUrlUseCase: GetApiUrlUseCase,
 ): LaunchXapiUseCase {
 
@@ -37,7 +33,7 @@ class LaunchXapiUseCaseAndroid(
         contentEntryVersion: ContentEntryVersion,
         navController: UstadNavController,
         target: OpenExternalLinkUseCase.Companion.LinkTarget,
-        xapiSession: XapiSession,
+        xapiSession: XapiSessionEntity,
     ): LaunchContentEntryVersionUseCase.LaunchResult {
         val htmlContentEngine = getHtmlContentDisplayEngineUseCase()
         when(htmlContentEngine.code) {

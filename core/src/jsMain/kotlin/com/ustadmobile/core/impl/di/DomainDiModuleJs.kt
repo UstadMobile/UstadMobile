@@ -177,6 +177,8 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
             json = instance(),
             xppFactory = instance(tag = DiTag.XPP_FACTORY_NSAWARE),
             startXapiSessionOverHttpUseCase = instance(),
+            endpoint = context,
+            stringHasher = instance(),
         )
     }
 
@@ -309,6 +311,7 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
             saveStatementOnClearUseCase = instance(),
             saveStatementOnUnloadUseCase = instance(),
             xapiStatementResource = instance(),
+            endpoint = context,
         )
     }
 

@@ -4,8 +4,10 @@ import com.benasher44.uuid.Uuid
 import com.benasher44.uuid.uuidFrom
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.xapi.ext.agent
 import com.ustadmobile.core.domain.xapi.ext.insertOrUpdateActorsIfNameChanged
 import com.ustadmobile.core.domain.xapi.ext.insertOrUpdateIfLastModChanged
+import com.ustadmobile.core.domain.xapi.ext.knownActorUidToPersonUidsMap
 import com.ustadmobile.core.domain.xapi.model.XapiAccount
 import com.ustadmobile.core.domain.xapi.model.XapiAgent
 import com.ustadmobile.core.domain.xapi.model.XapiStatement
@@ -16,7 +18,9 @@ import com.ustadmobile.core.domain.xxhash.XXStringHasher
 import com.ustadmobile.core.util.uuid.randomUuidAsString
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.ext.withDoorTransactionAsync
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.xapi.XapiEntityObjectTypeFlags
+import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 import kotlinx.datetime.Clock
 import kotlinx.serialization.json.JsonObject
 
@@ -48,20 +52,27 @@ class XapiStatementResource(
 
     private suspend fun storeStatements(
         statements: List<XapiStatement>,
-        xapiSession: XapiSession,
+        xapiSession: XapiSessionEntity,
     ): StatementStoreResult {
-        val sessionActorUid = xapiSession.agent.identifierHash(xxHasher)
+        val sessionActorUid = xapiSession.agent(endpoint).identifierHash(xxHasher)
 
         //Ensure the known actor uid to person uid map has the person uid for the session actor uid
-        val effectiveSession = if(
-            !xapiSession.knownActorUidToPersonUidMap.containsKey(sessionActorUid)
-        ) {
-            xapiSession.copy(
-                knownActorUidToPersonUidMap = xapiSession.knownActorUidToPersonUidMap + (sessionActorUid to xapiSession.accountPersonUid)
-            )
-        }else {
-            xapiSession
+        val knownActorUidToPersonUidMap = xapiSession.knownActorUidToPersonUidsMap(json).let {
+            if(!it.containsKey(sessionActorUid)) {
+                it + (sessionActorUid to xapiSession.xseAccountPersonUid)
+            }else {
+                it
+            }
         }
+//        val effectiveSession = if(
+//            !sessionKnownActorUidToPersonUidMap.containsKey(sessionActorUid)
+//        ) {
+//            xapiSession.copy(
+//                knownActorUidToPersonUids = sessionKnownActorUidToPersonUidMap + (sessionActorUid to xapiSession.xseAccountPersonUid)
+//            )
+//        }else {
+//            xapiSession
+//        }
 
         val statementEntities = statements.flatMap { stmt ->
             val timeNowStr = Clock.System.now().toString()
@@ -75,24 +86,38 @@ class XapiStatementResource(
                 id = xapiRequireValidUuidOrNullAsString(stmt.id) ?: randomUuidAsString(),
                 authority = XapiAgent(
                     account = XapiAccount(
-                        name = effectiveSession.accountUsername,
-                        homePage = effectiveSession.endpoint.url,
+                        name = xapiSession.xseAccountUsername,
+                        homePage = endpoint.url,
                     )
                 )
             )
 
             exactStatement.toEntities(
                 stringHasher = xxHasher,
-                xapiSession = effectiveSession,
+                xapiSession = xapiSession,
+                knownActorUidToPersonUidMap = knownActorUidToPersonUidMap,
                 exactJson = json.encodeToString(XapiStatement.serializer(), exactStatement),
                 primaryKeyManager = db.doorPrimaryKeyManager,
                 hasherFactory = hasherFactory,
                 json = json,
                 isSubStatement = false,
+                endpoint = endpoint,
             )
         }
 
         repoOrDb.withDoorTransactionAsync {
+            if(
+                statementEntities.any { stmt ->
+                    stmt.statementEntity?.let { it.completionOrProgress && it.resultCompletion == true } == true
+                }
+            ) {
+                repoOrDb.xapiSessionEntityDao().updateLatestAsComplete(
+                    completed = true,
+                    xseUid = xapiSession.xseUid,
+                    time = systemTimeInMillis(),
+                )
+            }
+
             repoOrDb.statementDao().insertOrIgnoreListAsync(
                 statementEntities.mapNotNull { it.statementEntity }
             )
@@ -194,7 +219,7 @@ class XapiStatementResource(
     suspend fun put(
         statement: XapiStatement,
         statementIdParam: String,
-        xapiSession: XapiSession,
+        xapiSession: XapiSessionEntity,
     ): String {
         val storeResult = storeStatements(
             listOf(statement.copy(id = statementIdParam)), xapiSession
@@ -205,7 +230,7 @@ class XapiStatementResource(
 
     suspend fun post(
         statements: List<XapiStatement>,
-        xapiSession: XapiSession
+        xapiSession: XapiSessionEntity
     ): List<Uuid> {
         return storeStatements(statements, xapiSession).statementUuids
     }
@@ -217,7 +242,7 @@ class XapiStatementResource(
      * NOTE: X-Experience-API-Consistent-Through header needs considered.
      */
     suspend fun get(
-        xapiSession: XapiSession,
+        xapiSession: XapiSessionEntity,
         statementId: String?,
         format: Format = Format.EXACT
     ): List<JsonObject> {
@@ -233,8 +258,8 @@ class XapiStatementResource(
             stmtJsonIdLo = statementIdLo,
         )
 
-        return statements.mapNotNull {
-            it.fullStatement?.let {
+        return statements.mapNotNull { stmt ->
+            stmt.fullStatement?.let {
                 json.decodeFromString(JsonObject.serializer(), it)
             }
         }

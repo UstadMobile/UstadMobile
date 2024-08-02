@@ -20,4 +20,18 @@ expect abstract class XapiSessionEntityDao {
     """)
     abstract suspend fun findByUidAsync(uid: Long): XapiSessionEntity?
 
+    @Query("""
+        UPDATE XapiSessionEntity
+           SET xseCompleted = :completed,
+               xseLastMod = :time
+         WHERE xseUid = :xseUid
+
+    """)
+    abstract suspend fun updateLatestAsComplete(
+        completed: Boolean,
+        time: Long,
+        xseUid: Long,
+    )
+
+
 }

@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.interop.HttpApiException
 import com.ustadmobile.core.domain.xapi.XapiJson
 import com.ustadmobile.core.domain.xapi.XapiStatementResource
+import com.ustadmobile.core.domain.xapi.ext.agent
 import com.ustadmobile.core.domain.xapi.model.XapiAgent
 import com.ustadmobile.core.domain.xapi.model.XapiStatement
 import com.ustadmobile.core.domain.xapi.state.DeleteXapiStateUseCase
@@ -12,7 +13,6 @@ import com.ustadmobile.core.domain.xapi.state.ListXapiStateIdsUseCase
 import com.ustadmobile.core.domain.xapi.state.RetrieveXapiStateUseCase
 import com.ustadmobile.core.domain.xapi.state.StoreXapiStateUseCase
 import com.ustadmobile.core.domain.xapi.state.XapiStateParams
-import com.ustadmobile.core.domain.xapi.toXapiSession
 import com.ustadmobile.core.util.ext.firstNonWhiteSpaceChar
 import com.ustadmobile.ihttp.headers.iHeadersBuilder
 import com.ustadmobile.ihttp.request.IHttpRequest
@@ -74,7 +74,6 @@ class XapiHttpServerUseCase(
                 throw HttpApiException(401, "Unauthorized: invalid auth")
             }
 
-            val xapiSession = xapiSessionEntity.toXapiSession(endpoint)
             val resourceName = pathSegments.first()
             when {
                 resourceName == "statements" && request.method == Method.PUT -> {
@@ -88,7 +87,7 @@ class XapiHttpServerUseCase(
                     statementResource.put(
                         statement = statement,
                         statementIdParam = stmtId,
-                        xapiSession = xapiSession
+                        xapiSession = xapiSessionEntity,
                     )
 
                     StringResponse(
@@ -113,7 +112,7 @@ class XapiHttpServerUseCase(
                     }
 
                     val uuids = statementResource.post(
-                        statements = statements, xapiSession = xapiSession
+                        statements = statements, xapiSession = xapiSessionEntity
                     )
 
                     StringResponse(
@@ -137,7 +136,7 @@ class XapiHttpServerUseCase(
                     when (request.method) {
                         Method.POST, Method.PUT -> {
                             storeXapiStateUseCase(
-                                xapiSession = xapiSession,
+                                xapiSession = xapiSessionEntity,
                                 method = request.method,
                                 contentType = request.headers["content-type"] ?: "application/octet-stream",
                                 xapiStateParams = request.xapiStateParams(),
@@ -158,11 +157,11 @@ class XapiHttpServerUseCase(
                                 val listResponse = listXapiStateIdsUseCase.invoke(
                                     request = ListXapiStateIdsUseCase.ListXapiStateIdsRequest(
                                         activityId = request.queryParamOrThrow("activityId"),
-                                        agent = xapiSession.agent,
+                                        agent = xapiSessionEntity.agent(endpoint),
                                         registration = request.queryParam("registration"),
                                         since = request.queryParam("since")?.fromHttpToGmtDate()?.timestamp ?: 0
                                     ),
-                                    xapiSession = xapiSession
+                                    xapiSession = xapiSessionEntity
                                 )
 
                                 return StringResponse(
@@ -180,7 +179,7 @@ class XapiHttpServerUseCase(
 
 
                             val result = retrieveXapiStateUseCase(
-                                xapiSession = xapiSession,
+                                xapiSession = xapiSessionEntity,
                                 xapiStateParams = request.xapiStateParams(),
                             )
 
@@ -207,7 +206,7 @@ class XapiHttpServerUseCase(
                                     registration = request.queryParam("registration"),
                                     stateId = request.queryParam("stateId")
                                 ),
-                                session = xapiSession
+                                session = xapiSessionEntity
                             )
 
                             return StringResponse(

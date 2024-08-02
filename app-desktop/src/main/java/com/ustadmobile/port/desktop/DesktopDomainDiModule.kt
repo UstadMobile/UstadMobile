@@ -337,6 +337,8 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             json = instance(),
             xppFactory = instance(tag = DiTag.XPP_FACTORY_NSAWARE),
             startXapiSessionOverHttpUseCase = instance(),
+            endpoint = context,
+            stringHasher = instance(),
         )
     }
 
@@ -346,6 +348,7 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             repo = instance(tag = DoorTag.TAG_REPO),
             getApiUrlUseCase = instance(),
             xxStringHasher = instance(),
+            endpoint = context,
         )
     }
 
@@ -371,7 +374,6 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
     bind<LaunchEpubUseCase>() with scoped(EndpointScope.Default).singleton {
         LaunchEpubUseCaseJvm(
             launchChromeUseCase = instance(),
-            embeddedHttpServer = instance(),
             endpoint = context,
             systemImpl = instance(),
             getApiUrlUseCase = instance(),
@@ -589,6 +591,7 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             saveStatementOnClearUseCase = instance(),
             saveStatementOnUnloadUseCase = null,
             xapiStatementResource = instance(),
+            endpoint = context,
         )
     }
 
@@ -612,6 +615,7 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             xapiJson = instance(),
             xxHasher64Factory = instance(),
             xxStringHasher = instance(),
+            endpoint = context,
         )
     }
 
@@ -639,6 +643,7 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             repo = instance(tag = DoorTag.TAG_REPO),
             xxStringHasher = instance(),
             xxHasher64Factory = instance(),
+            endpoint = context,
         )
     }
 

@@ -19,6 +19,7 @@ import com.ustadmobile.lib.db.entities.xapi.ActivityInteractionEntity
 import com.ustadmobile.lib.db.entities.xapi.ActivityLangMapEntry
 import com.ustadmobile.lib.db.entities.xapi.ActivityLangMapEntry.Companion.PROPNAME_DESCRIPTION
 import com.ustadmobile.lib.db.entities.xapi.ActivityLangMapEntry.Companion.PROPNAME_NAME
+import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
@@ -42,7 +43,7 @@ fun assertStatementStoredInDb(
     db: UmAppDatabase,
     xxHasher: XXStringHasher,
     json: Json,
-    xapiSession: XapiSession? = null,
+    xapiSession: XapiSessionEntity? = null,
     subStatementUuid: Uuid? = null
 ) {
     runBlocking {
@@ -90,11 +91,11 @@ fun assertStatementStoredInDb(
             StatementContextActivityJoin.TYPE_OTHER)
 
         if(xapiSession != null) {
-            assertEquals(xapiSession.contentEntryUid, statementInDb.statementContentEntryUid)
-            assertEquals(xapiSession.clazzUid, statementInDb.statementClazzUid)
-            assertEquals(xapiSession.cbUid, statementInDb.statementCbUid)
+            assertEquals(xapiSession.xseContentEntryUid, statementInDb.statementContentEntryUid)
+            assertEquals(xapiSession.xseClazzUid, statementInDb.statementClazzUid)
+            assertEquals(xapiSession.xseCbUid, statementInDb.statementCbUid)
             assertEquals(
-                (statement.`object` as? XapiActivityStatementObject)?.id == xapiSession.rootActivityId,
+                (statement.`object` as? XapiActivityStatementObject)?.id == xapiSession.xseRootActivityId,
                 statementInDb.completionOrProgress)
         }
 

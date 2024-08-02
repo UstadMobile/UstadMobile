@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.xapi.starthttpsession
 
-import com.ustadmobile.core.domain.xapi.XapiSession
+import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 import kotlinx.serialization.Serializable
 
 /**
@@ -25,7 +25,7 @@ interface StartXapiSessionOverHttpUseCase {
     )
 
     suspend operator fun invoke(
-        xapiSession: XapiSession,
+        xapiSession: XapiSessionEntity,
     ): StartXapiSessionOverHttpResult
 
 }

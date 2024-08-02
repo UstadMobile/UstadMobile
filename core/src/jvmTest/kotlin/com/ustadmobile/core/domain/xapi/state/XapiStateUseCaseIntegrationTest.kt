@@ -5,7 +5,7 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.interop.HttpApiException
 import com.ustadmobile.core.domain.xapi.XapiJson
-import com.ustadmobile.core.domain.xapi.XapiSession
+import com.ustadmobile.core.domain.xapi.ext.registrationUuid
 import com.ustadmobile.core.domain.xapi.model.XapiAccount
 import com.ustadmobile.core.domain.xapi.model.XapiAgent
 import com.ustadmobile.core.domain.xapi.model.identifierHash
@@ -17,6 +17,7 @@ import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.ihttp.request.IHttpRequest
 import com.ustadmobile.ihttp.request.iRequestBuilder
+import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.JsonObject
@@ -44,7 +45,7 @@ class XapiStateUseCaseIntegrationTest {
 
     private lateinit var deleteXapiStateUseCase: DeleteXapiStateUseCase
 
-    private lateinit var xapiSession: XapiSession
+    private lateinit var xapiSession: XapiSessionEntity
 
     private lateinit var xapiAgent: XapiAgent
 
@@ -53,6 +54,8 @@ class XapiStateUseCaseIntegrationTest {
     private val xapiJson = XapiJson()
 
     val actorPersonUid  = 1L
+
+    private val endpoint = Endpoint("https://example.org/")
 
     @BeforeTest
     fun setup() {
@@ -82,12 +85,13 @@ class XapiStateUseCaseIntegrationTest {
             db.actorDao().insertOrIgnoreListAsync(listOf(actorEntities.actor))
         }
 
-        xapiSession = XapiSession(
-            endpoint = Endpoint("https://example.org/"),
-            accountPersonUid = 1L,
-            accountUsername = "username",
-            clazzUid = 0L,
-            registrationUuid = uuid4().toString(),
+        val uuid = uuid4()
+        xapiSession = XapiSessionEntity(
+            xseAccountPersonUid = 1L,
+            xseAccountUsername = "username",
+            xseClazzUid = 0L,
+            xseRegistrationHi = uuid.mostSignificantBits,
+            xseRegistrationLo = uuid.leastSignificantBits,
         )
 
         storeXapiStateUseCase = StoreXapiStateUseCase(
@@ -95,7 +99,8 @@ class XapiStateUseCaseIntegrationTest {
             repo = null,
             xapiJson = xapiJson,
             xxStringHasher = xxStringHasher,
-            xxHasher64Factory = XXHasher64FactoryCommonJvm()
+            xxHasher64Factory = XXHasher64FactoryCommonJvm(),
+            endpoint = endpoint,
         )
 
         retrieveXapiStateUseCase = RetrieveXapiStateUseCase(
@@ -115,6 +120,7 @@ class XapiStateUseCaseIntegrationTest {
             repo = null,
             xxStringHasher = xxStringHasher,
             xxHasher64Factory = XXHasher64FactoryCommonJvm(),
+            endpoint = endpoint,
         )
     }
 
@@ -132,7 +138,7 @@ class XapiStateUseCaseIntegrationTest {
             val stateParams = XapiStateParams(
                 activityId = activityId,
                 agent = xapiJson.json.encodeToString(xapiAgent),
-                registration = xapiSession.registrationUuid,
+                registration = xapiSession.registrationUuid.toString(),
                 stateId = stateId,
             )
 
@@ -179,7 +185,7 @@ class XapiStateUseCaseIntegrationTest {
             val stateParams = XapiStateParams(
                 activityId = activityId,
                 agent = xapiJson.json.encodeToString(xapiAgent),
-                registration = xapiSession.registrationUuid,
+                registration = xapiSession.registrationUuid.toString(),
                 stateId = stateId,
             )
 
@@ -239,7 +245,7 @@ class XapiStateUseCaseIntegrationTest {
             val stateParams = XapiStateParams(
                 activityId = activityId,
                 agent = xapiJson.json.encodeToString(xapiAgent),
-                registration = xapiSession.registrationUuid,
+                registration = xapiSession.registrationUuid.toString(),
                 stateId = stateId,
             )
             storeXapiStateUseCase(
@@ -275,7 +281,7 @@ class XapiStateUseCaseIntegrationTest {
             val stateParams = XapiStateParams(
                 activityId = activityId,
                 agent = xapiJson.json.encodeToString(xapiAgent),
-                registration = xapiSession.registrationUuid,
+                registration = xapiSession.registrationUuid.toString(),
                 stateId = stateId,
             )
 
@@ -310,7 +316,7 @@ class XapiStateUseCaseIntegrationTest {
             val stateParams = XapiStateParams(
                 activityId = activityId,
                 agent = xapiJson.json.encodeToString(xapiAgent),
-                registration = xapiSession.registrationUuid,
+                registration = xapiSession.registrationUuid.toString(),
                 stateId = stateId,
             )
 
@@ -344,14 +350,14 @@ class XapiStateUseCaseIntegrationTest {
             val stateParams = XapiStateParams(
                 activityId = activityId,
                 agent = xapiJson.json.encodeToString(xapiAgent),
-                registration = xapiSession.registrationUuid,
+                registration = xapiSession.registrationUuid.toString(),
                 stateId = stateId,
             )
 
             val otherStateParams = XapiStateParams(
                 activityId = activityId,
                 agent = xapiJson.json.encodeToString(xapiAgent),
-                registration = xapiSession.registrationUuid,
+                registration = xapiSession.registrationUuid.toString(),
                 stateId = otherStateId,
             )
 
@@ -373,7 +379,7 @@ class XapiStateUseCaseIntegrationTest {
                 request = DeleteXapiStateUseCase.DeleteXapiStateRequest(
                     activityId = activityId,
                     agent = xapiAgent,
-                    registration = xapiSession.registrationUuid,
+                    registration = xapiSession.registrationUuid.toString(),
                     stateId = stateId
                 ),
                 session = xapiSession,
@@ -406,7 +412,7 @@ class XapiStateUseCaseIntegrationTest {
                 XapiStateParams(
                     activityId = activityId,
                     agent = xapiJson.json.encodeToString(xapiAgent),
-                    registration = xapiSession.registrationUuid,
+                    registration = xapiSession.registrationUuid.toString(),
                     stateId = it,
                 )
             }
@@ -430,7 +436,7 @@ class XapiStateUseCaseIntegrationTest {
                 request = DeleteXapiStateUseCase.DeleteXapiStateRequest(
                     activityId = activityId,
                     agent = xapiAgent,
-                    registration = xapiSession.registrationUuid,
+                    registration = xapiSession.registrationUuid.toString(),
                     stateId = null
                 ),
                 session = xapiSession,

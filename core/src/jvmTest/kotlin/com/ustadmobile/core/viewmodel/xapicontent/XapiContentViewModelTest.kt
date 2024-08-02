@@ -59,6 +59,8 @@ class XapiContentViewModelTest : AbstractMainDispatcherTest() {
                         json = instance(),
                         xppFactory = instance(tag = DiTag.XPP_FACTORY_NSAWARE),
                         startXapiSessionOverHttpUseCase = instance(),
+                        stringHasher = instance(),
+                        endpoint = context,
                     )
                 }
 

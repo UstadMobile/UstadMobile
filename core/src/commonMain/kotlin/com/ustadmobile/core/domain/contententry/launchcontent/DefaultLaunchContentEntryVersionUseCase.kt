@@ -1,7 +1,6 @@
 package com.ustadmobile.core.domain.contententry.launchcontent
 
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
-import com.ustadmobile.core.domain.xapi.XapiSession
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.epubcontent.EpubContentViewModel
@@ -9,6 +8,7 @@ import com.ustadmobile.core.viewmodel.pdfcontent.PdfContentViewModel
 import com.ustadmobile.core.viewmodel.videocontent.VideoContentViewModel
 import com.ustadmobile.core.viewmodel.xapicontent.XapiContentViewModel
 import com.ustadmobile.lib.db.entities.ContentEntryVersion
+import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 
 /**
  * Default implementation of LaunchContentEntryVersionUseCase: works by navigating to the view for
@@ -20,7 +20,7 @@ class DefaultLaunchContentEntryVersionUseCase: LaunchContentEntryVersionUseCase 
         contentEntryVersion: ContentEntryVersion,
         navController: UstadNavController,
         target: OpenExternalLinkUseCase.Companion.LinkTarget,
-        xapiSession: XapiSession,
+        xapiSession: XapiSessionEntity,
     ): LaunchContentEntryVersionUseCase.LaunchResult {
         val destName = when(contentEntryVersion.cevContentType) {
             ContentEntryVersion.TYPE_XAPI -> XapiContentViewModel.DEST_NAME
@@ -35,9 +35,9 @@ class DefaultLaunchContentEntryVersionUseCase: LaunchContentEntryVersionUseCase 
                 viewName = destName,
                 args = mapOf(
                     UstadViewModel.ARG_ENTITY_UID to contentEntryVersion.cevUid.toString(),
-                    UstadViewModel.ARG_COURSE_BLOCK_UID to xapiSession.cbUid.toString(),
-                    UstadViewModel.ARG_CLAZZUID to xapiSession.clazzUid.toString(),
-                    UstadViewModel.ARG_CONTENT_ENTRY_UID to xapiSession.contentEntryUid.toString(),
+                    UstadViewModel.ARG_COURSE_BLOCK_UID to xapiSession.xseCbUid.toString(),
+                    UstadViewModel.ARG_CLAZZUID to xapiSession.xseClazzUid.toString(),
+                    UstadViewModel.ARG_CONTENT_ENTRY_UID to xapiSession.xseContentEntryUid.toString(),
                 )
             )
         }

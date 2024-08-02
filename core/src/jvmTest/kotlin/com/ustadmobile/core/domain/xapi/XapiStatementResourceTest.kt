@@ -7,6 +7,7 @@ import com.ustadmobile.core.domain.xapi.model.XapiStatement
 import com.ustadmobile.core.domain.xxhash.XXHasher64FactoryCommonJvm
 import com.ustadmobile.core.domain.xxhash.XXStringHasherCommonJvm
 import com.ustadmobile.door.DatabaseBuilder
+import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 import kotlinx.coroutines.runBlocking
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -24,7 +25,7 @@ class XapiStatementResourceTest {
 
     private lateinit var storeActivitiesUseCase: StoreActivitiesUseCase
 
-    private lateinit var defaultXapiSession: XapiSession
+    private lateinit var defaultXapiSession: XapiSessionEntity
 
     private val xapiJson = XapiJson()
 
@@ -42,19 +43,20 @@ class XapiStatementResourceTest {
             hasherFactory = XXHasher64FactoryCommonJvm(),
             storeActivitiesUseCase = storeActivitiesUseCase,
         )
-        defaultXapiSession = XapiSession(
-            endpoint = endpoint,
-            accountPersonUid = 42L,
-            accountUsername = "user",
-            clazzUid = 0L,
-            contentEntryUid = 0L,
-            registrationUuid = uuid4().toString(),
+        val registrationUuid = uuid4()
+        defaultXapiSession = XapiSessionEntity(
+            xseAccountPersonUid = 42L,
+            xseAccountUsername = "user",
+            xseClazzUid = 0L,
+            xseContentEntryUid = 0L,
+            xseRegistrationHi = registrationUuid.mostSignificantBits,
+            xseRegistrationLo = registrationUuid.leastSignificantBits,
         )
     }
 
-    suspend fun storeStatementAndAssert(
+    private suspend fun storeStatementAndAssert(
         resourcePath: String,
-        xapiSession: XapiSession,
+        xapiSession: XapiSessionEntity,
     ) : String {
         val id = uuid4().toString()
         val stmtJson = this::class.java.getResource(resourcePath)!!.readText()
@@ -71,13 +73,14 @@ class XapiStatementResourceTest {
 
     @Test
     fun givenStatementPut_whenGetCalled_thenShouldBeRetrieved() = runBlocking {
-        val xapiSession = XapiSession(
-            endpoint = endpoint,
-            accountPersonUid = 42L,
-            accountUsername = "user",
-            clazzUid = 0L,
-            contentEntryUid = 0L,
-            registrationUuid = uuid4().toString(),
+        val uuid = uuid4()
+        val xapiSession = XapiSessionEntity(
+            xseAccountPersonUid = 42L,
+            xseAccountUsername = "user",
+            xseClazzUid = 0L,
+            xseContentEntryUid = 0L,
+            xseRegistrationHi = uuid.mostSignificantBits,
+            xseRegistrationLo = uuid.leastSignificantBits,
         )
 
         val id = storeStatementAndAssert(

@@ -1,10 +1,13 @@
 package com.ustadmobile.core.domain.contententry.launchcontent.xapi
 
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.domain.xapi.XapiSession
+import com.ustadmobile.core.domain.xapi.ext.agent
+import com.ustadmobile.core.domain.xapi.ext.registrationUuid
 import com.ustadmobile.core.domain.xapi.model.XapiAgent
 import com.ustadmobile.core.domain.xapi.starthttpsession.StartXapiSessionOverHttpUseCase
+import com.ustadmobile.core.domain.xxhash.XXStringHasher
 import com.ustadmobile.core.tincan.Activity
 import com.ustadmobile.core.tincan.TinCanXML
 import com.ustadmobile.core.util.UMFileUtil
@@ -12,6 +15,7 @@ import com.ustadmobile.core.util.ext.appendQueryArgs
 import com.ustadmobile.core.util.ext.bodyAsDecodedText
 import com.ustadmobile.core.util.ext.localFirstThenRepoIfNull
 import com.ustadmobile.core.util.requireEntryByUri
+import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
 import com.ustadmobile.xmlpullparserkmp.setInputString
 import io.github.aakira.napier.Napier
@@ -30,6 +34,8 @@ class ResolveXapiLaunchHrefUseCase(
     private val json: Json,
     private val xppFactory: XmlPullParserFactory,
     private val startXapiSessionOverHttpUseCase: StartXapiSessionOverHttpUseCase,
+    private val stringHasher: XXStringHasher,
+    private val endpoint: Endpoint,
 ) {
 
     /**
@@ -46,7 +52,7 @@ class ResolveXapiLaunchHrefUseCase(
 
     suspend operator fun invoke(
         contentEntryVersionUid: Long,
-        xapiSession: XapiSession,
+        xapiSession: XapiSessionEntity,
     ) : XapiLaunchHrefResult {
         //ContentEntryVersion is immutable, so if available in db, no need to go to repo which would
         //make an http request
@@ -71,7 +77,8 @@ class ResolveXapiLaunchHrefUseCase(
             throw IllegalStateException("Launch Activity must have id")
 
         val xapiSessionWithActivityId = xapiSession.copy(
-            rootActivityId = launchActivityId
+            xseRootActivityId = launchActivityId,
+            xseRootActivityUid = stringHasher.hash(launchActivityId)
         )
 
         val httpSessionResult = startXapiSessionOverHttpUseCase(xapiSessionWithActivityId)
@@ -79,9 +86,9 @@ class ResolveXapiLaunchHrefUseCase(
         val queryParams: Map<String, String> = mapOf(
             "endpoint" to httpSessionResult.httpUrl,
             "auth" to httpSessionResult.auth,
-            "actor" to json.encodeToString(XapiAgent.serializer(), xapiSession.agent),
-            "registration" to xapiSessionWithActivityId.registrationUuid,
-            "activity_id" to xapiSessionWithActivityId.rootActivityId!!,
+            "actor" to json.encodeToString(XapiAgent.serializer(), xapiSession.agent(endpoint)),
+            "registration" to xapiSessionWithActivityId.registrationUuid.toString(),
+            "activity_id" to xapiSessionWithActivityId.xseRootActivityId,
         )
 
         val url = UMFileUtil.resolveLink(manifestUrl, launchHref).appendQueryArgs(queryParams)

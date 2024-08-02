@@ -1,9 +1,10 @@
 package com.ustadmobile.core.domain.xapi.state
 
 import com.benasher44.uuid.uuidFrom
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.interop.HttpApiException
-import com.ustadmobile.core.domain.xapi.XapiSession
+import com.ustadmobile.core.domain.xapi.ext.agent
 import com.ustadmobile.core.domain.xapi.model.XapiAgent
 import com.ustadmobile.core.domain.xapi.model.identifierHash
 import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
@@ -15,6 +16,7 @@ import com.ustadmobile.door.DoorSqlDatabase
 import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.xapi.StateDeleteCommand
+import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 import io.ktor.utils.io.core.toByteArray
 
 /**
@@ -35,6 +37,7 @@ class DeleteXapiStateUseCase(
     private val repo: UmAppDatabase?,
     private val xxStringHasher: XXStringHasher,
     private val xxHasher64Factory: XXHasher64Factory,
+    private val endpoint: Endpoint,
 ) {
 
     class AddXapiStateAddTriggersCallback(): DoorDatabaseCallbackStatementList {
@@ -126,12 +129,12 @@ class DeleteXapiStateUseCase(
 
     suspend operator fun invoke(
         request: DeleteXapiStateRequest,
-        session: XapiSession,
+        session: XapiSessionEntity,
     ) {
         val registrationUuid = request.registration?.let { uuidFrom(it) }
 
         val requestActorUid = request.agent.identifierHash(xxStringHasher)
-        val sessionActorUid = session.agent.identifierHash(xxStringHasher)
+        val sessionActorUid = session.agent(endpoint).identifierHash(xxStringHasher)
 
         if(requestActorUid != sessionActorUid)
                 throw HttpApiException(403, "Forbidden: Agent does not match session")

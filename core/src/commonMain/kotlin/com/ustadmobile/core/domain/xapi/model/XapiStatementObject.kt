@@ -2,12 +2,13 @@ package com.ustadmobile.core.domain.xapi.model
 
 import com.benasher44.uuid.Uuid
 import com.benasher44.uuid.uuidFrom
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.domain.xapi.XapiException
-import com.ustadmobile.core.domain.xapi.XapiSession
 import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
 import com.ustadmobile.core.domain.xxhash.XXStringHasher
 import com.ustadmobile.door.DoorPrimaryKeyManager
 import com.ustadmobile.lib.db.entities.xapi.XapiEntityObjectTypeFlags
+import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -91,8 +92,10 @@ fun XapiStatementObject.objectToEntities(
     primaryKeyManager: DoorPrimaryKeyManager,
     hasherFactory: XXHasher64Factory,
     json: Json,
-    xapiSession: XapiSession,
+    xapiSession: XapiSessionEntity,
+    knownActorUidToPersonUidMap: Map<Long, Long>,
     parentStatementUuid: Uuid,
+    endpoint: Endpoint,
 ) : List<StatementEntities> {
     @Suppress("REDUNDANT_ELSE_IN_WHEN")
     return when(this) {
@@ -109,7 +112,7 @@ fun XapiStatementObject.objectToEntities(
                 StatementEntities(
                     actorEntities = listOf(
                         toEntities(
-                            stringHasher, primaryKeyManager, hasherFactory, xapiSession.knownActorUidToPersonUidMap
+                            stringHasher, primaryKeyManager, hasherFactory, knownActorUidToPersonUidMap
                         )
                     )
                 )
@@ -133,8 +136,10 @@ fun XapiStatementObject.objectToEntities(
                 hasherFactory = hasherFactory,
                 json = json,
                 xapiSession = xapiSession,
+                knownActorUidToPersonUidMap = knownActorUidToPersonUidMap,
                 exactJson = null,
                 isSubStatement = true,
+                endpoint = endpoint,
             )
         }
 

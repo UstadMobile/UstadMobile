@@ -1588,6 +1588,18 @@ val MIGRATION_196_197 = DoorMigrationStatementList(196, 197) { db ->
     }
 }
 
+val MIGRATION_197_198 = DoorMigrationStatementList(197, 198) { db ->
+    buildList {
+        add("DROP TABLE XapiSessionEntity")
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS XapiSessionEntity (  xseLastMod  INTEGER  NOT NULL , xseRegistrationHi  INTEGER  NOT NULL , xseRegistrationLo  INTEGER  NOT NULL , xseUsUid  INTEGER  NOT NULL , xseAccountPersonUid  INTEGER  NOT NULL , xseAccountUsername  TEXT , xseClazzUid  INTEGER  NOT NULL , xseCbUid  INTEGER  NOT NULL , xseContentEntryUid  INTEGER  NOT NULL , xseRootActivityId  TEXT , xseStartTime  INTEGER  NOT NULL , xseExpireTime  INTEGER  NOT NULL , xseAuth  TEXT , xseCompleted  INTEGER  NOT NULL  DEFAULT 0 , xseUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS XapiSessionEntity (  xseLastMod  BIGINT  NOT NULL , xseRegistrationHi  BIGINT  NOT NULL , xseRegistrationLo  BIGINT  NOT NULL , xseUsUid  BIGINT  NOT NULL , xseAccountPersonUid  BIGINT  NOT NULL , xseAccountUsername  TEXT , xseClazzUid  BIGINT  NOT NULL , xseCbUid  BIGINT  NOT NULL , xseContentEntryUid  BIGINT  NOT NULL , xseRootActivityId  TEXT , xseStartTime  BIGINT  NOT NULL , xseExpireTime  BIGINT  NOT NULL , xseAuth  TEXT , xseCompleted  BOOL  NOT NULL  DEFAULT false, xseUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+        }
+    }
+}
+
+
 
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_105_106, MIGRATION_106_107,
@@ -1604,7 +1616,7 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_160_161, MIGRATION_162_163, MIGRATION_163_164, MIGRATION_164_165,
     MIGRATION_165_166, MIGRATION_166_167, MIGRATION_167_168, MIGRATION_168_169,
     MIGRATION_170_171, MIGRATION_171_172, MIGRATION_172_194, MIGRATION_194_195,
-    MIGRATION_195_196, MIGRATION_196_197,
+    MIGRATION_195_196, MIGRATION_196_197, MIGRATION_197_198
 )
 
 

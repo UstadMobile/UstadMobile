@@ -2,10 +2,10 @@ package com.ustadmobile.core.domain.xapi.state
 
 import com.benasher44.uuid.uuidFrom
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.domain.xapi.XapiSession
 import com.ustadmobile.core.domain.xapi.model.XapiAgent
 import com.ustadmobile.core.domain.xapi.model.identifierHash
 import com.ustadmobile.core.domain.xxhash.XXStringHasher
+import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 
 class ListXapiStateIdsUseCase(
     private val db: UmAppDatabase,
@@ -27,12 +27,12 @@ class ListXapiStateIdsUseCase(
 
     suspend operator fun invoke(
         request: ListXapiStateIdsRequest,
-        xapiSession: XapiSession,
+        xapiSession: XapiSessionEntity,
     ): ListXapiStateIdsResponse {
         val registrationUuid = request.registration?.let { uuidFrom(it) }
         
         val stateIdsAndLastMod =  (repo ?: db).stateEntityDao().getStateIds(
-            accountPersonUid = xapiSession.accountPersonUid,
+            accountPersonUid = xapiSession.xseAccountPersonUid,
             actorUid = request.agent.identifierHash(xxStringHasher),
             seActivityUid = xxStringHasher.hash(request.activityId),
             modifiedSince = request.since,

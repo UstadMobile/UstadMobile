@@ -1,8 +1,8 @@
 package com.ustadmobile.core.domain.xapi.savestatementonclear
 
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.domain.xapi.XapiSession
 import com.ustadmobile.core.domain.xapi.model.XapiStatement
+import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 import kotlinx.serialization.json.Json
 import web.http.BodyInit
 import web.navigator.navigator
@@ -16,7 +16,7 @@ class SaveStatementOnUnloadUseCaseJs(
     private val json: Json,
 ): SaveStatementOnUnloadUseCase {
 
-    override fun invoke(statements: List<XapiStatement>, xapiSession: XapiSession) {
+    override fun invoke(statements: List<XapiStatement>, xapiSession: XapiSessionEntity) {
         navigator.sendBeacon(
             "${endpoint.url}api/xapi-ext/statementOnUnload",
             BodyInit(

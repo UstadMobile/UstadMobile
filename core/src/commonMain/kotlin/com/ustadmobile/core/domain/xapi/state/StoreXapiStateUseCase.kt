@@ -1,9 +1,10 @@
 package com.ustadmobile.core.domain.xapi.state
 
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.interop.HttpApiException
 import com.ustadmobile.core.domain.xapi.XapiJson
-import com.ustadmobile.core.domain.xapi.XapiSession
+import com.ustadmobile.core.domain.xapi.ext.agent
 import com.ustadmobile.core.domain.xapi.model.XapiAgent
 import com.ustadmobile.core.domain.xapi.model.identifierHash
 import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
@@ -14,6 +15,7 @@ import com.ustadmobile.core.util.ext.requireBodyAsText
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.ihttp.request.IHttpRequest
 import com.ustadmobile.lib.db.entities.xapi.StateEntity
+import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 
@@ -26,6 +28,7 @@ class StoreXapiStateUseCase(
     xapiJson: XapiJson,
     private val xxHasher64Factory: XXHasher64Factory,
     private val xxStringHasher: XXStringHasher,
+    private val endpoint: Endpoint,
 ) {
 
     private val json = xapiJson.json
@@ -35,7 +38,7 @@ class StoreXapiStateUseCase(
      *        merge with the previous doc.
      */
     suspend operator fun invoke(
-        xapiSession: XapiSession,
+        xapiSession: XapiSessionEntity,
         xapiStateParams: XapiStateParams,
         method: IHttpRequest.Companion.Method,
         contentType: String,
@@ -62,7 +65,7 @@ class StoreXapiStateUseCase(
             val requestBody = request.requireBodyAsText()
 
             val existingState = db.stateEntityDao().findByActorAndHash(
-                accountPersonUid = xapiSession.accountPersonUid,
+                accountPersonUid = xapiSession.xseAccountPersonUid,
                 actorUid = agentActorUid,
                 seHash = seHash,
                 includeDeleted = false,
@@ -138,7 +141,7 @@ class StoreXapiStateUseCase(
             }
         }
 
-        if(xapiSession.agent.identifierHash(xxStringHasher) !=
+        if(xapiSession.agent(endpoint).identifierHash(xxStringHasher) !=
             xapiAgent.identifierHash(xxStringHasher)
         ) {
             throw HttpApiException(403, "Forbidden: agent does not match with session")

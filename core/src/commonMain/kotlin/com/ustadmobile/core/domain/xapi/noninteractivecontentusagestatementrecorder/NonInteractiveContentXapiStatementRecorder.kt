@@ -1,7 +1,8 @@
 package com.ustadmobile.core.domain.xapi.noninteractivecontentusagestatementrecorder
 
-import com.ustadmobile.core.domain.xapi.XapiSession
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.domain.xapi.XapiStatementResource
+import com.ustadmobile.core.domain.xapi.ext.agent
 import com.ustadmobile.core.domain.xapi.model.VERB_COMPLETED
 import com.ustadmobile.core.domain.xapi.model.VERB_PROGRESSED
 import com.ustadmobile.core.domain.xapi.model.XAPI_RESULT_EXTENSION_PROGRESS
@@ -12,6 +13,7 @@ import com.ustadmobile.core.domain.xapi.model.XapiVerb
 import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnClearUseCase
 import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnUnloadUseCase
 import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 import io.github.aakira.napier.Napier
 import kotlinx.atomicfu.atomic
 import kotlinx.atomicfu.getAndUpdate
@@ -29,9 +31,10 @@ class NonInteractiveContentXapiStatementRecorder(
     private val saveStatementOnClearUseCase: SaveStatementOnClearUseCase,
     private val saveStatementOnUnloadUseCase: SaveStatementOnUnloadUseCase?,
     private val xapiStatementResource: XapiStatementResource,
-    private val xapiSession: XapiSession,
+    private val xapiSession: XapiSessionEntity,
     private val scope: CoroutineScope,
     private val xapiActivityProvider: () -> XapiActivityStatementObject,
+    private val endpoint: Endpoint,
 ) {
 
     private val totalUsageTime = atomic(0L)
@@ -95,7 +98,7 @@ class NonInteractiveContentXapiStatementRecorder(
         isComplete: Boolean?,
     ): XapiStatement {
         return XapiStatement(
-            actor = xapiSession.agent,
+            actor = xapiSession.agent(endpoint),
             verb = XapiVerb(
                 id = if(isComplete == true) {
                     VERB_COMPLETED

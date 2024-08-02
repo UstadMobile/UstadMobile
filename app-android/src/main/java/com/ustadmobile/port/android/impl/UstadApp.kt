@@ -766,6 +766,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 repo = instance(tag = DoorTag.TAG_REPO),
                 getApiUrlUseCase = instance(),
                 xxStringHasher = instance(),
+                endpoint = context,
             )
         }
 
@@ -776,6 +777,8 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 json = instance(),
                 xppFactory = instance(tag = DiTag.XPP_FACTORY_NSAWARE),
                 startXapiSessionOverHttpUseCase = instance(),
+                endpoint = context,
+                stringHasher = instance()
             )
         }
 
@@ -813,6 +816,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 xapiJson = instance(),
                 xxHasher64Factory = instance(),
                 xxStringHasher = instance(),
+                endpoint = context,
             )
         }
 
@@ -840,6 +844,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 repo = instance(tag = DoorTag.TAG_REPO),
                 xxStringHasher = instance(),
                 xxHasher64Factory = instance(),
+                endpoint = context,
             )
         }
 
@@ -1074,6 +1079,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 saveStatementOnClearUseCase = instance(),
                 saveStatementOnUnloadUseCase = null,
                 xapiStatementResource = instance(),
+                endpoint = context,
             )
         }
 

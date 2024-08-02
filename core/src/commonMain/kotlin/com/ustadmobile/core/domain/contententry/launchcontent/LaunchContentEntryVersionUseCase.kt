@@ -1,9 +1,9 @@
 package com.ustadmobile.core.domain.contententry.launchcontent
 
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
-import com.ustadmobile.core.domain.xapi.XapiSession
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.lib.db.entities.ContentEntryVersion
+import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 
 /**
  * UseCase for opening content represented by a ContentEntryVersion. Normally this is done by
@@ -37,7 +37,7 @@ interface LaunchContentEntryVersionUseCase {
         contentEntryVersion: ContentEntryVersion,
         navController: UstadNavController,
         target: OpenExternalLinkUseCase.Companion.LinkTarget = OpenExternalLinkUseCase.Companion.LinkTarget.DEFAULT,
-        xapiSession: XapiSession,
+        xapiSession: XapiSessionEntity,
     ): LaunchResult?
 
 

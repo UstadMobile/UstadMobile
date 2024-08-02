@@ -2,10 +2,10 @@ package com.ustadmobile.core.domain.xapi.starthttpsession
 
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.domain.xapi.XapiSession
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.ext.doorNodeIdHeader
 import com.ustadmobile.door.ext.setBodyJson
+import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.post
@@ -23,13 +23,13 @@ class StartXapiSessionOverHttpUseCaseJs(
 ): StartXapiSessionOverHttpUseCase {
 
     override suspend fun invoke(
-        xapiSession: XapiSession
+        xapiSession: XapiSessionEntity
     ): StartXapiSessionOverHttpUseCase.StartXapiSessionOverHttpResult {
         val result: StartXapiSessionOverHttpUseCase.StartXapiSessionOverHttpResult = httpClient.post(
             "${endpoint.url}api/xapi-ext/startSession"
         ) {
             doorNodeIdHeader(repo as DoorDatabaseRepository)
-            setBodyJson(json, XapiSession.serializer(), xapiSession)
+            setBodyJson(json, XapiSessionEntity.serializer(), xapiSession)
         }.body()
 
         return result
