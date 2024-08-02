@@ -14,11 +14,7 @@ import com.ustadmobile.lib.db.entities.TRIGGER_UPSERT
 import kotlinx.serialization.Serializable
 
 /**
- * Represents an xAPI session - where a particular user launches a particular activity. An entity
- * is created in the database when:
- *  a) xAPI content is being served over http
- *  b) The desktop version of the app is running an epub (which must submit xAPI statements over
- *     http without using the database in the browser).
+ * Represents an xAPI session. U
  *
  * @param xseAuth - the expected authorization - a randomly generated password to use for basic auth.
  *        This is the password component ONLY. The client should send xseUid:xseAuth base64 encoded

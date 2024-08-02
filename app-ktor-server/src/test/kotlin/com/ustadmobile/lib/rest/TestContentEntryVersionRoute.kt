@@ -7,6 +7,7 @@ import com.ustadmobile.ihttp.request.requestBuilder
 import com.ustadmobile.libcache.response.HttpPathResponse
 import com.ustadmobile.util.test.ext.newFileFromResource
 import io.ktor.client.request.get
+import io.ktor.client.request.header
 import io.ktor.client.statement.readBytes
 import io.ktor.server.config.MapApplicationConfig
 import io.ktor.server.routing.routing
@@ -64,6 +65,7 @@ class TestContentEntryVersionRoute {
         val request = requestBuilder {
             url = fileUrl
         }
+
         val response = HttpPathResponse(
             path = Path(testFile.absolutePath),
             fileSystem = SystemFileSystem,
@@ -78,7 +80,11 @@ class TestContentEntryVersionRoute {
         )
 
         testContentEntryVersionRoute {
-            val serverResponse = client.get(fileUrl)
+            val serverResponse = client.get(fileUrl) {
+                //Note: because we are using the test client, there is no real host. So we need to set this to match the request.
+                header("X-Forwarded-Host", "localhost")
+            }
+
             Assert.assertEquals("text/html", serverResponse.headers["content-type"])
             Assert.assertEquals(testFile.length().toString(), serverResponse.headers["content-length"])
             val responseBytes = serverResponse.readBytes()
