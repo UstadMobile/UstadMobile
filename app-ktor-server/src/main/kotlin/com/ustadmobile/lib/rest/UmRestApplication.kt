@@ -40,6 +40,7 @@ import com.ustadmobile.core.domain.extractmediametadata.mediainfo.ExecuteMediaIn
 import com.ustadmobile.core.domain.extractmediametadata.mediainfo.ExtractMediaMetadataUseCaseMediaInfo
 import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCase
 import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCaseJvm
+import com.ustadmobile.core.domain.invite.CheckContactTypeUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonStatusMap
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsUseCase
@@ -112,6 +113,14 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.isWindowsOs
 import com.ustadmobile.door.log.NapierDoorLogger
 import com.ustadmobile.lib.rest.domain.contententry.importcontent.ContentEntryImportJobRoute
+import com.ustadmobile.lib.rest.domain.invite.ProcessInviteRoute
+import com.ustadmobile.lib.rest.domain.invite.ProcessInviteUseCase
+import com.ustadmobile.lib.rest.domain.invite.email.SendEmailUseCase
+import com.ustadmobile.lib.rest.domain.invite.message.SendMessageUseCase
+import com.ustadmobile.lib.rest.domain.invite.sms.SendSmsUseCase
+import com.ustadmobile.lib.rest.domain.invite.sms.SendSmsUseCaseHttp
+import com.ustadmobile.lib.rest.domain.invite.sms.SmsProperties
+import com.ustadmobile.lib.rest.domain.invite.sms.twilio.TwilioHttpClient
 import com.ustadmobile.lib.rest.domain.person.bulkadd.BulkAddPersonRoute
 import com.ustadmobile.lib.rest.domain.xapi.savestatementonclear.SaveStatementOnUnloadRoute
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
@@ -148,7 +157,7 @@ val REQUIRED_EXTERNAL_COMMANDS = emptyList<String>()
 val KTOR_SERVER_ROUTES = listOf(
     "/UmAppDatabase",
     "/ContainerEntryList", "/ContainerEntryFile", "/auth", "/ContainerMount",
-    "/Site", "/import", "/contentupload", "/websocket", "/api", "/staticfiles"
+    "/Site", "/import", "/contentupload", "/websocket", "/api", "/staticfiles","/.well-known"
 )
 
 
@@ -311,6 +320,8 @@ fun Application.umRestApplication(
     install(ConditionalHeaders)
 
     val dataDirPath = environment.config.absoluteDataDir()
+
+    val  wellKnownDir  = environment.config.fileProperty("ktor.ustad.wellKnownDir","well-known")
 
     fun String.replaceDbUrlVars(): String {
         return replace("(datadir)", dataDirPath.absolutePath)
@@ -577,6 +588,20 @@ fun Application.umRestApplication(
             ValidateEmailUseCase()
         }
 
+
+        bind<SendMessageUseCase>() with provider {
+            SendMessageUseCase(activeDb = instance(tag = DoorTag.TAG_DB),)
+        }
+
+        bind<CheckContactTypeUseCase>() with provider {
+            CheckContactTypeUseCase(
+                validateEmailUseCase = instance(),
+                phoneNumValidatorUseCase = instance()
+            )
+        }
+
+
+
         bind<IPhoneNumberUtil>() with provider {
             PhoneNumberUtilJvm(PhoneNumberUtil.getInstance())
         }
@@ -706,7 +731,45 @@ fun Application.umRestApplication(
         }catch(e: Exception) {
             Napier.w("WARNING: Email sending not configured")
         }
+        try {
+            appConfig.config("sms")
+            bind<SmsProperties>() with singleton  {
+                SmsProperties(
+                    appConfig.property("sms.phone_number").getString(),
+                    appConfig.property("sms.provider_link").getString(),
+                    appConfig.property("sms.sid").getString(),
+                    appConfig.property("sms.token").getString(),
+                )
+            }
 
+            bind<TwilioHttpClient>() with singleton {
+                TwilioHttpClient(di)
+            }
+        }catch(e: Exception) {
+            Napier.w("WARNING: SMS. sending not configured ${e.message}")
+        }
+
+        bind<SendSmsUseCaseHttp>() with singleton {
+            SendSmsUseCaseHttp(di)
+        }
+
+        bind<SendEmailUseCase>() with scoped(EndpointScope.Default).provider {
+            SendEmailUseCase(NotificationSender(di))
+        }
+        bind<SendSmsUseCase>() with singleton {
+            SendSmsUseCase(di)
+        }
+        bind<ProcessInviteUseCase>() with scoped(EndpointScope.Default).provider {
+            ProcessInviteUseCase(
+                sendEmailUseCase = instance(),
+                sendSmsUseCase = instance(),
+                sendMessageUseCase = instance(),
+                checkContactTypeUseCase = instance(),
+                db = instance(tag = DoorTag.TAG_DB),
+                endpoint = context,
+                repo = null
+                )
+        }
         registerContextTranslator { call: ApplicationCall ->
             call.callEndpoint
         }
@@ -787,6 +850,7 @@ fun Application.umRestApplication(
      * in UstadAppReactProxy
      */
     install(Routing) {
+        staticFiles("/.well-known",wellKnownDir)
         prefixRoute(sitePrefix) {
             addHostCheckIntercept()
             personAuthRegisterRoute()
@@ -805,6 +869,14 @@ fun Application.umRestApplication(
 
                 route("account"){
                     SetPasswordRoute(
+                        useCase = { call ->
+                            di.on(call).direct.instance()
+                        }
+                    )
+                }
+
+                route("inviteuser") {
+                    ProcessInviteRoute(
                         useCase = { call ->
                             di.on(call).direct.instance()
                         }

@@ -129,6 +129,7 @@ ext {
 
     version_npm_striptags = "^3.2.0"
     version_npm_react_easy_sort = "^1.5.1"
+    version_npm_react_mui_chip = "2.1.4"
     version_npm_mui_tel_input = "4.0.1"
     version_npm_libphonenumber_js = "^1.10.47"
     version_npm_linkify = "^4.1.3"

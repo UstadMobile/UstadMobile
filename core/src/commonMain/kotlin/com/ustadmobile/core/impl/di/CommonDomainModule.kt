@@ -11,6 +11,9 @@ import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.RequestEnrolm
 import com.ustadmobile.core.domain.contententry.launchcontent.DefaultLaunchContentEntryVersionUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.LaunchContentEntryVersionUseCase
 import com.ustadmobile.core.domain.contententry.save.SaveContentEntryUseCase
+import com.ustadmobile.core.domain.invite.ClazzRedeemUseCase
+import com.ustadmobile.core.domain.invite.ContactToServerUseCase
+import com.ustadmobile.core.domain.invite.ParseInviteUseCase
 import com.ustadmobile.core.domain.makelink.MakeLinkUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.siteterms.GetLocaleForSiteTermsUseCase
@@ -86,11 +89,24 @@ fun commonDomainDiModule(endpointScope: EndpointScope) = DI.Module("CommonDomain
             repoOrDb = instance(tag = DoorTag.TAG_REPO)
         )
     }
+    bind<ContactToServerUseCase>() with scoped(endpointScope).provider {
+        ContactToServerUseCase(
+            httpClient = instance(),
+            endpoint = context,
+            json = instance()
+        )
+    }
 
     bind<AddNewPersonUseCase>() with scoped(endpointScope).singleton {
         AddNewPersonUseCase(
             db = instance(tag = DoorTag.TAG_DB),
             repo = instance(tag = DoorTag.TAG_REPO),
+        )
+    }
+    bind<ParseInviteUseCase>() with singleton {
+        ParseInviteUseCase(
+            phoneNumValidatorUseCase = instance(),
+            validateEmailUseCase = instance()
         )
     }
 
@@ -111,5 +127,11 @@ fun commonDomainDiModule(endpointScope: EndpointScope) = DI.Module("CommonDomain
             stringHasher = instance(),
         )
     }
-
+    bind<ClazzRedeemUseCase>() with scoped(endpointScope).provider {
+        ClazzRedeemUseCase(
+            enrolIntoCourseUseCase = instance(),
+            db = instance(tag = DoorTag.TAG_DB),
+            repo = instance(tag = DoorTag.TAG_REPO),
+        )
+    }
 }

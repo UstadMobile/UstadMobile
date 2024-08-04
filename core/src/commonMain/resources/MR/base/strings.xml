@@ -1933,4 +1933,23 @@
 
     <string name="nothing_here_yet">Nothing here, yet</string>
 
+    <string name="invite_via_contact">Invite Via Contact</string>
+
+    <string name="invite_to_course">Invite to course</string>
+
+    <string name="use_email">Use email</string>
+
+    <string name="use_phone_number">Use phone number</string>
+
+    <string name="add_username_email_phone">Add Username, Email or Phone</string>
+
+    <string name="no_valid_contact_found">No valid contact found</string>
+
+    <string name="no_contact_found">No contact found</string>
+
+    <string name="decline">Decline</string>
+
+    <string name="do_you_want_to_join_this_course">Do you want to join this course?</string>
+
+
 </resources>

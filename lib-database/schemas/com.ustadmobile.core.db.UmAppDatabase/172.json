@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 172,
-    "identityHash": "829e8698cb188ffa8e47fafe2dcd44d7",
+    "identityHash": "f9850a5c083043c2dcb6cddfd3cd979a",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -1033,6 +1033,69 @@
           "autoGenerate": true,
           "columnNames": [
             "leavingReasonUid"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "ClazzInvite",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ciUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ciPersonUid` INTEGER NOT NULL, `ciRoleId` INTEGER NOT NULL, `ciClazzUid` INTEGER NOT NULL, `inviteType` INTEGER NOT NULL DEFAULT 1, `inviteContact` TEXT, `inviteToken` TEXT, `inviteLct` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "ciUid",
+            "columnName": "ciUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ciPersonUid",
+            "columnName": "ciPersonUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ciRoleId",
+            "columnName": "ciRoleId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ciClazzUid",
+            "columnName": "ciClazzUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "inviteType",
+            "columnName": "inviteType",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "1"
+          },
+          {
+            "fieldPath": "inviteContact",
+            "columnName": "inviteContact",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "inviteToken",
+            "columnName": "inviteToken",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "inviteLct",
+            "columnName": "inviteLct",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "ciUid"
           ]
         },
         "indices": [],
@@ -7146,7 +7209,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '829e8698cb188ffa8e47fafe2dcd44d7')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f9850a5c083043c2dcb6cddfd3cd979a')"
     ]
   }
 }

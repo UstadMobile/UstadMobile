@@ -35,7 +35,7 @@ import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
     ClazzLog::class, ClazzLogAttendanceRecord::class,
     Schedule::class, HolidayCalendar::class, Holiday::class,
     Person::class,
-    Clazz::class, ClazzEnrolment::class, LeavingReason::class,
+    Clazz::class, ClazzEnrolment::class, LeavingReason::class,ClazzInvite::class,
     ContentEntry::class, ContentEntryContentCategoryJoin::class, ContentEntryParentChildJoin::class,
     ContentEntryRelatedEntryJoin::class, ContentCategorySchema::class, ContentCategory::class,
     Language::class, LanguageVariant::class,
@@ -86,14 +86,13 @@ import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
     StatementContextActivityJoin::class,
     XapiSessionEntity::class,
     StatementEntityJson::class,
-
     //Door entities
     OutgoingReplication::class,
     ReplicationOperation::class,
     PendingRepositorySession::class,
     DoorNode::class,
 
-], version = 194)
+], version = 195)
 expect abstract class UmAppDatabase : RoomDatabase {
 
     /*
@@ -256,5 +255,7 @@ expect abstract class UmAppDatabase : RoomDatabase {
     abstract fun xapiSessionEntityDao(): XapiSessionEntityDao
 
     abstract fun statementEntityJsonDao(): StatementEntityJsonDao
+
+    abstract fun clazzInviteDao() : ClazzInviteDao
 
 }
