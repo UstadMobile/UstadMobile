@@ -6,7 +6,7 @@ import com.ustadmobile.core.contentformats.manifest.ContentManifestEntry
 import com.ustadmobile.core.domain.contententry.ContentConstants
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.ResolveXapiLaunchHrefUseCase
 import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCase
-import com.ustadmobile.core.domain.xapi.starthttpsession.ResumeOrStartXapiSessionUseCase
+import com.ustadmobile.core.domain.xapi.session.ResumeOrStartXapiSessionUseCase
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.stringvalues.emptyStringValues

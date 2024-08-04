@@ -1,7 +1,6 @@
-package com.ustadmobile.core.domain.xapi.starthttpsession
+package com.ustadmobile.core.domain.xapi.session
 
 import com.benasher44.uuid.uuid4
-import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.xapi.model.XapiActor
 import com.ustadmobile.core.domain.xapi.model.identifierHash
@@ -15,7 +14,6 @@ import com.ustadmobile.lib.util.randomString
  * desktop, and server.
  */
 class ResumeOrStartXapiSessionUseCaseLocal(
-    private val accountManager: UstadAccountManager,
     private val activeDb: UmAppDatabase,
     private val activeRepo: UmAppDatabase?,
     private val xxStringHasher: XXStringHasher,
@@ -45,8 +43,8 @@ class ResumeOrStartXapiSessionUseCaseLocal(
 
             XapiSessionEntity(
                 xseUid = activeDb.doorPrimaryKeyManager.nextIdAsync(XapiSessionEntity.TABLE_ID),
-                xseAccountPersonUid = accountManager.currentUserSession.userSession.usPersonUid,
-                xseAccountUsername = accountManager.currentUserSession.person.username ?: "anonymous",
+                xseAccountPersonUid = accountPersonUid,
+                xseAccountUsername = actor.account?.name ?: "anonymous",
                 xseActorUid = actorUid,
                 xseClazzUid = clazzUid,
                 xseCbUid = cbUid,

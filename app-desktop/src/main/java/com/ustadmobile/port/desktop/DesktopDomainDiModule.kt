@@ -104,8 +104,8 @@ import com.ustadmobile.core.domain.xapi.http.XapiHttpServerUseCase
 import com.ustadmobile.core.domain.xapi.noninteractivecontentusagestatementrecorder.NonInteractiveContentXapiStatementRecorderFactory
 import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnClearUseCase
 import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnClearUseCaseJvm
-import com.ustadmobile.core.domain.xapi.starthttpsession.ResumeOrStartXapiSessionUseCase
-import com.ustadmobile.core.domain.xapi.starthttpsession.ResumeOrStartXapiSessionUseCaseLocal
+import com.ustadmobile.core.domain.xapi.session.ResumeOrStartXapiSessionUseCase
+import com.ustadmobile.core.domain.xapi.session.ResumeOrStartXapiSessionUseCaseLocal
 import com.ustadmobile.core.domain.xapi.state.DeleteXapiStateUseCase
 import com.ustadmobile.core.domain.xapi.state.ListXapiStateIdsUseCase
 import com.ustadmobile.core.domain.xapi.state.RetrieveXapiStateUseCase
@@ -345,7 +345,6 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
 
     bind<ResumeOrStartXapiSessionUseCase>() with scoped(EndpointScope.Default).singleton {
         ResumeOrStartXapiSessionUseCaseLocal(
-            accountManager = instance(),
             activeDb = instance(tag = DoorTag.TAG_DB),
             activeRepo = instance(tag = DoorTag.TAG_REPO),
             xxStringHasher = instance(),

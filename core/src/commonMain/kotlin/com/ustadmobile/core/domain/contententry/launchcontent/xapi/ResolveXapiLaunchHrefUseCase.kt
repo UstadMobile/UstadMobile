@@ -9,7 +9,7 @@ import com.ustadmobile.core.domain.xapi.ext.agent
 import com.ustadmobile.core.domain.xapi.ext.authorizationHeader
 import com.ustadmobile.core.domain.xapi.ext.registrationUuid
 import com.ustadmobile.core.domain.xapi.model.XapiAgent
-import com.ustadmobile.core.domain.xapi.starthttpsession.ResumeOrStartXapiSessionUseCase
+import com.ustadmobile.core.domain.xapi.session.ResumeOrStartXapiSessionUseCase
 import com.ustadmobile.core.tincan.Activity
 import com.ustadmobile.core.tincan.TinCanXML
 import com.ustadmobile.core.util.UMFileUtil

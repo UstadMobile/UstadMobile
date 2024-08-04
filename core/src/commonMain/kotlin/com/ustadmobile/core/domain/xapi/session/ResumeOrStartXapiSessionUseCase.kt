@@ -1,4 +1,4 @@
-package com.ustadmobile.core.domain.xapi.starthttpsession
+package com.ustadmobile.core.domain.xapi.session
 
 import com.ustadmobile.core.domain.xapi.model.XapiActor
 import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity

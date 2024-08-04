@@ -5,7 +5,6 @@ import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.ext.asWindowTarget
 import com.ustadmobile.lib.db.entities.ContentEntryVersion
-import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 import io.github.aakira.napier.Napier
 import web.location.location
 import web.window.window
@@ -17,11 +16,14 @@ class LaunchXapiUseCaseJs(
     override suspend fun invoke(
         contentEntryVersion: ContentEntryVersion,
         navController: UstadNavController,
+        clazzUid: Long,
+        cbUid: Long,
         target: OpenExternalLinkUseCase.Companion.LinkTarget,
-        xapiSession: XapiSessionEntity,
     ): LaunchContentEntryVersionUseCase.LaunchResult {
         val resolveResult = resolveXapiLaunchHrefUseCase(
-            contentEntryVersion.cevUid, xapiSession
+            contentEntryVersionUid = contentEntryVersion.cevUid,
+            clazzUid = clazzUid,
+            cbUid = cbUid,
         )
 
         if(target != OpenExternalLinkUseCase.Companion.LinkTarget.TOP) {

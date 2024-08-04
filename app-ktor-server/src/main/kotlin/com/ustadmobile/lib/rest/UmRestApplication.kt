@@ -62,8 +62,8 @@ import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
 import com.ustadmobile.core.domain.xapi.StoreActivitiesUseCase
 import com.ustadmobile.core.domain.xapi.XapiStatementResource
 import com.ustadmobile.core.domain.xapi.http.XapiHttpServerUseCase
-import com.ustadmobile.core.domain.xapi.starthttpsession.StartXapiSessionOverHttpUseCase
-import com.ustadmobile.core.domain.xapi.starthttpsession.StartXapiSessionOverHttpUseCaseDirect
+import com.ustadmobile.core.domain.xapi.session.ResumeOrStartXapiSessionUseCase
+import com.ustadmobile.core.domain.xapi.session.ResumeOrStartXapiSessionUseCaseLocal
 import com.ustadmobile.core.domain.xapi.state.DeleteXapiStateUseCase
 import com.ustadmobile.core.domain.xapi.state.ListXapiStateIdsUseCase
 import com.ustadmobile.core.domain.xapi.state.RetrieveXapiStateUseCase
@@ -124,7 +124,7 @@ import com.ustadmobile.lib.rest.domain.contententry.importcontent.ContentEntryIm
 import com.ustadmobile.lib.rest.domain.person.bulkadd.BulkAddPersonRoute
 import com.ustadmobile.lib.rest.domain.xapi.XapiRoute
 import com.ustadmobile.lib.rest.domain.xapi.savestatementonclear.SaveStatementOnUnloadRoute
-import com.ustadmobile.lib.rest.domain.xapi.starthttpsession.StartHttpXapiSessionRoute
+import com.ustadmobile.lib.rest.domain.xapi.session.ResumeOrStartXapiSessionRoute
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.headers.MimeTypeHelper
 import kotlinx.coroutines.runBlocking
@@ -692,13 +692,11 @@ fun Application.umRestApplication(
             )
         }
 
-        bind<StartXapiSessionOverHttpUseCase>() with scoped(EndpointScope.Default).singleton {
-            StartXapiSessionOverHttpUseCaseDirect(
-                db = instance(tag = DoorTag.TAG_DB),
-                repo = null,
-                getApiUrlUseCase = instance(),
+        bind<ResumeOrStartXapiSessionUseCase>() with scoped(EndpointScope.Default).singleton {
+            ResumeOrStartXapiSessionUseCaseLocal(
+                activeDb = instance(tag = DoorTag.TAG_DB),
+                activeRepo = null,
                 xxStringHasher = instance(),
-                endpoint = context,
             )
         }
 
@@ -938,8 +936,8 @@ fun Application.umRestApplication(
                         json = json,
                     )
 
-                    StartHttpXapiSessionRoute(
-                        startXapiSessionOverHttpUseCase = { call -> di.on(call).direct.instance() },
+                    ResumeOrStartXapiSessionRoute(
+                        resumeOrStartXapiSessionUseCase = { call -> di.on(call).direct.instance() },
                         verifyClientUserSessionUseCase  = { call -> di.on(call).direct.instance() },
                         json = json,
                     )

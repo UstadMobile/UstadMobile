@@ -138,10 +138,8 @@ import com.ustadmobile.core.domain.xapi.http.XapiHttpServerUseCase
 import com.ustadmobile.core.domain.xapi.noninteractivecontentusagestatementrecorder.NonInteractiveContentXapiStatementRecorderFactory
 import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnClearUseCase
 import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnClearUseCaseAndroid
-import com.ustadmobile.core.domain.xapi.starthttpsession.ResumeOrStartXapiSessionUseCase
-import com.ustadmobile.core.domain.xapi.starthttpsession.ResumeOrStartXapiSessionUseCaseLocal
-import com.ustadmobile.core.domain.xapi.starthttpsession.StartXapiSessionOverHttpUseCase
-import com.ustadmobile.core.domain.xapi.starthttpsession.StartXapiSessionOverHttpUseCaseDirect
+import com.ustadmobile.core.domain.xapi.session.ResumeOrStartXapiSessionUseCase
+import com.ustadmobile.core.domain.xapi.session.ResumeOrStartXapiSessionUseCaseLocal
 import com.ustadmobile.core.domain.xapi.state.DeleteXapiStateUseCase
 import com.ustadmobile.core.domain.xapi.state.ListXapiStateIdsUseCase
 import com.ustadmobile.core.domain.xapi.state.RetrieveXapiStateUseCase
@@ -762,16 +760,6 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             )
         }
 
-        bind<StartXapiSessionOverHttpUseCase>() with scoped(EndpointScope.Default).singleton {
-            StartXapiSessionOverHttpUseCaseDirect(
-                db = instance(tag = DoorTag.TAG_DB),
-                repo = instance(tag = DoorTag.TAG_REPO),
-                getApiUrlUseCase = instance(),
-                xxStringHasher = instance(),
-                endpoint = context,
-            )
-        }
-
         bind<ResolveXapiLaunchHrefUseCase>() with scoped(EndpointScope.Default).singleton {
             ResolveXapiLaunchHrefUseCase(
                 activeRepo = instance(tag = DoorTag.TAG_REPO),
@@ -790,7 +778,6 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 activeDb = instance(tag = DoorTag.TAG_DB),
                 activeRepo = instance(tag = DoorTag.TAG_REPO),
                 xxStringHasher= instance(),
-                accountManager = instance(),
             )
         }
 
