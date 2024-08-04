@@ -64,15 +64,6 @@ class XapiStatementResource(
                 it
             }
         }
-//        val effectiveSession = if(
-//            !sessionKnownActorUidToPersonUidMap.containsKey(sessionActorUid)
-//        ) {
-//            xapiSession.copy(
-//                knownActorUidToPersonUids = sessionKnownActorUidToPersonUidMap + (sessionActorUid to xapiSession.xseAccountPersonUid)
-//            )
-//        }else {
-//            xapiSession
-//        }
 
         val statementEntities = statements.flatMap { stmt ->
             val timeNowStr = Clock.System.now().toString()
@@ -108,7 +99,9 @@ class XapiStatementResource(
         repoOrDb.withDoorTransactionAsync {
             if(
                 statementEntities.any { stmt ->
-                    stmt.statementEntity?.let { it.completionOrProgress && it.resultCompletion == true } == true
+                    stmt.statementEntity?.let {
+                        it.completionOrProgress && it.resultCompletion == true
+                    } == true
                 }
             ) {
                 repoOrDb.xapiSessionEntityDao().updateLatestAsComplete(

@@ -22,6 +22,14 @@ import kotlinx.serialization.json.Json
 
 const val XAPI_RESULT_EXTENSION_PROGRESS = "https://w3id.org/xapi/cmi5/result/extensions/progress"
 
+//This extension is wrong, but it is used by Articulate content
+const val XAPI_RESULT_EXTENSION_PROGRESS_NON_HTTPS = "http://w3id.org/xapi/cmi5/result/extensions/progress"
+
+val XAPI_PROGRESSED_EXTENSIONS = listOf(
+    XAPI_RESULT_EXTENSION_PROGRESS, XAPI_RESULT_EXTENSION_PROGRESS_NON_HTTPS
+)
+
+
 /**
  * XapiStatement represents both a Statement and a SubStatement, therefor it implements the sealed
  * interface XapiStatementObject
