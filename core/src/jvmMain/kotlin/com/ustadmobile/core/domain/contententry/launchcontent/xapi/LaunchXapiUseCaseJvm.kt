@@ -7,7 +7,6 @@ import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
 
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.lib.db.entities.ContentEntryVersion
-import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 
 /**
  * LaunchXapiUseCaseJvm
@@ -24,11 +23,14 @@ class LaunchXapiUseCaseJvm(
     override suspend fun invoke(
         contentEntryVersion: ContentEntryVersion,
         navController: UstadNavController,
+        clazzUid: Long,
+        cbUid: Long,
         target: OpenExternalLinkUseCase.Companion.LinkTarget,
-        xapiSession: XapiSessionEntity,
     ): LaunchContentEntryVersionUseCase.LaunchResult {
         val resolveResult = resolveXapiLaunchHrefUseCase(
-            contentEntryVersion.cevUid, xapiSession
+            contentEntryVersionUid = contentEntryVersion.cevUid,
+            clazzUid = clazzUid,
+            cbUid = cbUid,
         )
 
         val url = getApiUrlUseCase(

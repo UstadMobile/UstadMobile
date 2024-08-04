@@ -8,7 +8,6 @@ import com.ustadmobile.core.viewmodel.pdfcontent.PdfContentViewModel
 import com.ustadmobile.core.viewmodel.videocontent.VideoContentViewModel
 import com.ustadmobile.core.viewmodel.xapicontent.XapiContentViewModel
 import com.ustadmobile.lib.db.entities.ContentEntryVersion
-import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 
 /**
  * Default implementation of LaunchContentEntryVersionUseCase: works by navigating to the view for
@@ -19,8 +18,9 @@ class DefaultLaunchContentEntryVersionUseCase: LaunchContentEntryVersionUseCase 
     override suspend fun invoke(
         contentEntryVersion: ContentEntryVersion,
         navController: UstadNavController,
+        clazzUid: Long,
+        cbUid: Long,
         target: OpenExternalLinkUseCase.Companion.LinkTarget,
-        xapiSession: XapiSessionEntity,
     ): LaunchContentEntryVersionUseCase.LaunchResult {
         val destName = when(contentEntryVersion.cevContentType) {
             ContentEntryVersion.TYPE_XAPI -> XapiContentViewModel.DEST_NAME
@@ -35,9 +35,9 @@ class DefaultLaunchContentEntryVersionUseCase: LaunchContentEntryVersionUseCase 
                 viewName = destName,
                 args = mapOf(
                     UstadViewModel.ARG_ENTITY_UID to contentEntryVersion.cevUid.toString(),
-                    UstadViewModel.ARG_COURSE_BLOCK_UID to xapiSession.xseCbUid.toString(),
-                    UstadViewModel.ARG_CLAZZUID to xapiSession.xseClazzUid.toString(),
-                    UstadViewModel.ARG_CONTENT_ENTRY_UID to xapiSession.xseContentEntryUid.toString(),
+                    UstadViewModel.ARG_COURSE_BLOCK_UID to cbUid.toString(),
+                    UstadViewModel.ARG_CLAZZUID to clazzUid.toString(),
+                    UstadViewModel.ARG_CONTENT_ENTRY_UID to contentEntryVersion.cevContentEntryUid.toString(),
                 )
             )
         }

@@ -3,7 +3,6 @@ package com.ustadmobile.core.domain.contententry.launchcontent
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.lib.db.entities.ContentEntryVersion
-import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 
 /**
  * UseCase for opening content represented by a ContentEntryVersion. Normally this is done by
@@ -30,14 +29,13 @@ interface LaunchContentEntryVersionUseCase {
      * @param target this is optional, and will normally be ignored. Its primary purpose is to
      *        make xAPI content that would normally open in a new tab in the browser open in the same
      *        window during end-to-end tests (as Cypress cannot work with popups).
-     * @param xapiSession the XapiSession that will be used by the content to store usage information
-     *        as xapi statements.
      */
     suspend operator fun invoke(
         contentEntryVersion: ContentEntryVersion,
         navController: UstadNavController,
+        clazzUid: Long,
+        cbUid: Long,
         target: OpenExternalLinkUseCase.Companion.LinkTarget = OpenExternalLinkUseCase.Companion.LinkTarget.DEFAULT,
-        xapiSession: XapiSessionEntity,
     ): LaunchResult?
 
 

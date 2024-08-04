@@ -1,13 +1,15 @@
 package com.ustadmobile.core.domain.contententry.launchcontent.xapi
 
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCase
 import com.ustadmobile.core.domain.xapi.ext.agent
+import com.ustadmobile.core.domain.xapi.ext.authorizationHeader
 import com.ustadmobile.core.domain.xapi.ext.registrationUuid
 import com.ustadmobile.core.domain.xapi.model.XapiAgent
-import com.ustadmobile.core.domain.xapi.starthttpsession.StartXapiSessionOverHttpUseCase
-import com.ustadmobile.core.domain.xxhash.XXStringHasher
+import com.ustadmobile.core.domain.xapi.starthttpsession.ResumeOrStartXapiSessionUseCase
 import com.ustadmobile.core.tincan.Activity
 import com.ustadmobile.core.tincan.TinCanXML
 import com.ustadmobile.core.util.UMFileUtil
@@ -15,7 +17,6 @@ import com.ustadmobile.core.util.ext.appendQueryArgs
 import com.ustadmobile.core.util.ext.bodyAsDecodedText
 import com.ustadmobile.core.util.ext.localFirstThenRepoIfNull
 import com.ustadmobile.core.util.requireEntryByUri
-import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
 import com.ustadmobile.xmlpullparserkmp.setInputString
 import io.github.aakira.napier.Napier
@@ -26,15 +27,17 @@ import kotlinx.serialization.json.Json
 /**
  * Shared logic that will open the TinCan XML for a given ContentEntryVersionUid and work out
  * the launch Url, title, etc. This is used by LaunchXapiUseCase to determine the URL when launching
- * Xapi content in external systems (e.g. ChromeTabs) and XapiContentViewModel.
+ * Xapi content in external systems (e.g. ChromeTabs, Chrome or other external browser on desktop,
+ * and new window on JS) and XapiContentViewModel.
  */
 class ResolveXapiLaunchHrefUseCase(
     private val activeRepo: UmAppDatabase,
     private val httpClient: HttpClient,
     private val json: Json,
     private val xppFactory: XmlPullParserFactory,
-    private val startXapiSessionOverHttpUseCase: StartXapiSessionOverHttpUseCase,
-    private val stringHasher: XXStringHasher,
+    private val resumeOrStartXapiSessionUseCase: ResumeOrStartXapiSessionUseCase,
+    private val getApiUrlUseCase: GetApiUrlUseCase,
+    private val accountManager: UstadAccountManager,
     private val endpoint: Endpoint,
 ) {
 
@@ -52,7 +55,8 @@ class ResolveXapiLaunchHrefUseCase(
 
     suspend operator fun invoke(
         contentEntryVersionUid: Long,
-        xapiSession: XapiSessionEntity,
+        clazzUid: Long,
+        cbUid: Long,
     ) : XapiLaunchHrefResult {
         //ContentEntryVersion is immutable, so if available in db, no need to go to repo which would
         //make an http request
@@ -75,20 +79,23 @@ class ResolveXapiLaunchHrefUseCase(
             throw IllegalStateException("ContentEntryVersion $contentEntryVersionUid manifesturl is null")
         val launchActivityId = tinCanXml.launchActivity?.id ?:
             throw IllegalStateException("Launch Activity must have id")
+        val accountPersonUid = accountManager.currentUserSession.person.personUid
 
-        val xapiSessionWithActivityId = xapiSession.copy(
-            xseRootActivityId = launchActivityId,
-            xseRootActivityUid = stringHasher.hash(launchActivityId)
+        val xapiSession = resumeOrStartXapiSessionUseCase(
+            accountPersonUid = accountPersonUid,
+            actor = accountManager.currentUserSession.toXapiAgent(),
+            activityId = launchActivityId,
+            clazzUid = clazzUid,
+            cbUid = cbUid,
+            contentEntryUid = contentEntryVersion.cevContentEntryUid,
         )
 
-        val httpSessionResult = startXapiSessionOverHttpUseCase(xapiSessionWithActivityId)
-
         val queryParams: Map<String, String> = mapOf(
-            "endpoint" to httpSessionResult.httpUrl,
-            "auth" to httpSessionResult.auth,
+            "endpoint" to getApiUrlUseCase("/api/xapi/"),
+            "auth" to xapiSession.authorizationHeader(),
             "actor" to json.encodeToString(XapiAgent.serializer(), xapiSession.agent(endpoint)),
-            "registration" to xapiSessionWithActivityId.registrationUuid.toString(),
-            "activity_id" to xapiSessionWithActivityId.xseRootActivityId,
+            "registration" to xapiSession.registrationUuid.toString(),
+            "activity_id" to xapiSession.xseRootActivityId,
         )
 
         val url = UMFileUtil.resolveLink(manifestUrl, launchHref).appendQueryArgs(queryParams)

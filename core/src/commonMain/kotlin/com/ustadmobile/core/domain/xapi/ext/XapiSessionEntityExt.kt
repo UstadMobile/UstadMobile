@@ -6,6 +6,7 @@ import com.ustadmobile.core.domain.xapi.model.XapiAccount
 import com.ustadmobile.core.domain.xapi.model.XapiAgent
 import com.ustadmobile.core.domain.xapi.model.XapiObjectType
 import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
+import io.ktor.util.encodeBase64
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
@@ -34,5 +35,9 @@ fun XapiSessionEntity.knownActorUidToPersonUidsMap(json: Json): Map<Long, Long> 
     }else {
         emptyMap()
     }
+}
+
+fun XapiSessionEntity.authorizationHeader() : String {
+    return "Basic " + "${xseUid}:$xseAuth".encodeBase64()
 }
 

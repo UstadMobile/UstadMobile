@@ -5,7 +5,8 @@ import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.contentformats.manifest.ContentManifestEntry
 import com.ustadmobile.core.domain.contententry.ContentConstants
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.ResolveXapiLaunchHrefUseCase
-import com.ustadmobile.core.domain.xapi.starthttpsession.StartXapiSessionOverHttpUseCase
+import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCase
+import com.ustadmobile.core.domain.xapi.starthttpsession.ResumeOrStartXapiSessionUseCase
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.stringvalues.emptyStringValues
@@ -14,6 +15,7 @@ import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.lib.db.entities.ContentEntryVersion
+import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 import com.ustadmobile.util.test.ext.newFileFromResource
 import kotlinx.coroutines.flow.filter
 import okhttp3.mockwebserver.Dispatcher
@@ -58,18 +60,27 @@ class XapiContentViewModelTest : AbstractMainDispatcherTest() {
                         httpClient = instance(),
                         json = instance(),
                         xppFactory = instance(tag = DiTag.XPP_FACTORY_NSAWARE),
-                        startXapiSessionOverHttpUseCase = instance(),
-                        stringHasher = instance(),
+                        getApiUrlUseCase = instance(),
                         endpoint = context,
+                        accountManager = instance(),
+                        resumeOrStartXapiSessionUseCase = instance(),
                     )
                 }
 
-                bind<StartXapiSessionOverHttpUseCase>() with scoped(endpointScope).singleton {
+                bind<GetApiUrlUseCase>() with scoped(endpointScope).singleton {
                     mock {
                         onBlocking { invoke(any()) }.thenReturn(
-                            StartXapiSessionOverHttpUseCase.StartXapiSessionOverHttpResult(
-                                auth = "secret",
-                                httpUrl = "http://localhost/e/endpoint/xapi"
+                            "http://localhost/e/endpoint/xapi"
+                        )
+                    }
+                }
+
+                bind<ResumeOrStartXapiSessionUseCase>() with scoped(endpointScope).singleton {
+                    mock {
+                        onBlocking { invoke(any(), any(), any(), any(), any(), any()) }.thenReturn(
+                            XapiSessionEntity(
+                                xseAccountUsername = "admin",
+
                             )
                         )
                     }

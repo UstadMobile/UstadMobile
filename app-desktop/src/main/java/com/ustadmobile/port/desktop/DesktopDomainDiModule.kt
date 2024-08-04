@@ -104,8 +104,8 @@ import com.ustadmobile.core.domain.xapi.http.XapiHttpServerUseCase
 import com.ustadmobile.core.domain.xapi.noninteractivecontentusagestatementrecorder.NonInteractiveContentXapiStatementRecorderFactory
 import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnClearUseCase
 import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnClearUseCaseJvm
-import com.ustadmobile.core.domain.xapi.starthttpsession.StartXapiSessionOverHttpUseCase
-import com.ustadmobile.core.domain.xapi.starthttpsession.StartXapiSessionOverHttpUseCaseDirect
+import com.ustadmobile.core.domain.xapi.starthttpsession.ResumeOrStartXapiSessionUseCase
+import com.ustadmobile.core.domain.xapi.starthttpsession.ResumeOrStartXapiSessionUseCaseLocal
 import com.ustadmobile.core.domain.xapi.state.DeleteXapiStateUseCase
 import com.ustadmobile.core.domain.xapi.state.ListXapiStateIdsUseCase
 import com.ustadmobile.core.domain.xapi.state.RetrieveXapiStateUseCase
@@ -336,19 +336,19 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             httpClient = instance(),
             json = instance(),
             xppFactory = instance(tag = DiTag.XPP_FACTORY_NSAWARE),
-            startXapiSessionOverHttpUseCase = instance(),
+            resumeOrStartXapiSessionUseCase  = instance(),
+            getApiUrlUseCase = instance(),
+            accountManager = instance(),
             endpoint = context,
-            stringHasher = instance(),
         )
     }
 
-    bind<StartXapiSessionOverHttpUseCase>() with scoped(EndpointScope.Default).singleton {
-        StartXapiSessionOverHttpUseCaseDirect(
-            db = instance(tag = DoorTag.TAG_DB),
-            repo = instance(tag = DoorTag.TAG_REPO),
-            getApiUrlUseCase = instance(),
+    bind<ResumeOrStartXapiSessionUseCase>() with scoped(EndpointScope.Default).singleton {
+        ResumeOrStartXapiSessionUseCaseLocal(
+            accountManager = instance(),
+            activeDb = instance(tag = DoorTag.TAG_DB),
+            activeRepo = instance(tag = DoorTag.TAG_REPO),
             xxStringHasher = instance(),
-            endpoint = context,
         )
     }
 

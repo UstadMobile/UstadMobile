@@ -138,6 +138,8 @@ import com.ustadmobile.core.domain.xapi.http.XapiHttpServerUseCase
 import com.ustadmobile.core.domain.xapi.noninteractivecontentusagestatementrecorder.NonInteractiveContentXapiStatementRecorderFactory
 import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnClearUseCase
 import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnClearUseCaseAndroid
+import com.ustadmobile.core.domain.xapi.starthttpsession.ResumeOrStartXapiSessionUseCase
+import com.ustadmobile.core.domain.xapi.starthttpsession.ResumeOrStartXapiSessionUseCaseLocal
 import com.ustadmobile.core.domain.xapi.starthttpsession.StartXapiSessionOverHttpUseCase
 import com.ustadmobile.core.domain.xapi.starthttpsession.StartXapiSessionOverHttpUseCaseDirect
 import com.ustadmobile.core.domain.xapi.state.DeleteXapiStateUseCase
@@ -776,9 +778,19 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 httpClient = instance(),
                 json = instance(),
                 xppFactory = instance(tag = DiTag.XPP_FACTORY_NSAWARE),
-                startXapiSessionOverHttpUseCase = instance(),
                 endpoint = context,
-                stringHasher = instance()
+                accountManager = instance(),
+                getApiUrlUseCase = instance(),
+                resumeOrStartXapiSessionUseCase = instance(),
+            )
+        }
+
+        bind<ResumeOrStartXapiSessionUseCase>() with scoped(EndpointScope.Default).singleton {
+            ResumeOrStartXapiSessionUseCaseLocal(
+                activeDb = instance(tag = DoorTag.TAG_DB),
+                activeRepo = instance(tag = DoorTag.TAG_REPO),
+                xxStringHasher= instance(),
+                accountManager = instance(),
             )
         }
 

@@ -178,7 +178,6 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
             xppFactory = instance(tag = DiTag.XPP_FACTORY_NSAWARE),
             startXapiSessionOverHttpUseCase = instance(),
             endpoint = context,
-            stringHasher = instance(),
         )
     }
 

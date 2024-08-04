@@ -33,5 +33,18 @@ expect abstract class XapiSessionEntityDao {
         xseUid: Long,
     )
 
+    @Query("""
+        SELECT XapiSessionEntity.*
+          FROM XapiSessionEntity
+         WHERE XapiSessionEntity.xseRootActivityUid = :xseRootActivityUid
+           AND XapiSessionEntity.xseActorUid = :xseActorUid
+           AND (   CAST(:requireNotCompleted AS INTEGER) = 0 
+                OR CAST(XapiSessionEntity.xseCompleted AS INTEGER) = 0)
+    """)
+    abstract suspend fun findPendingSessionByActorAndActivityUid(
+        xseActorUid: Long,
+        xseRootActivityUid: Long,
+        requireNotCompleted: Boolean,
+    ): XapiSessionEntity?
 
 }
