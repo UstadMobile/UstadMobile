@@ -121,7 +121,7 @@ env:
     id: "com.toughra.ustadmobile:id/editor"
 - tapOn: "Link"
 - tapOn: "URL"
-- inputText: "https://github.com/UstadMobile/UstadMobile/blob/primary/test-end-to-end/README.md"
+- inputText: "https://pixabay.com/"
 - hideKeyboard
 - tapOn: "Link text (optional)"
 - inputText: "External link"
@@ -160,7 +160,9 @@ env:
       visible: "Accept & continue"
     file: "../common/google_permission.yaml"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/verify_external_link"
-- scrollUntilVisible:
-    element:
-      text: "End-to-end tests"
-    direction: DOWN
+- extendedWaitUntil:
+    visible: "pixabay"
+    timeout: 10000
+- tapOn: "Accept All Cookies"
+- assertVisible: "Log in"
+
