@@ -39,7 +39,7 @@ expect abstract class XapiSessionEntityDao {
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
         pullQueriesToReplicate = arrayOf(
             HttpServerFunctionCall(
-                functionName = "findPendingSessionByActorAndActivityUid"
+                functionName = "findMostRecentSessionByActorAndActivity"
             ),
             HttpServerFunctionCall(
                 functionName ="findByUidAndPersonUidAsync",
