@@ -235,6 +235,7 @@ and user (if needed) in systemd/ustad-server.service and then install the servic
 $ cp unzip-path/systemd/ustad-server.service /etc/systemd/system/
 $ sudo systemctl daemon-reload
 $ sudo systemctl start ustad-server
+$ sudo systemctl enable ustad-server
 # Check status
 $ sudo systemctl status ustad-server
 ```

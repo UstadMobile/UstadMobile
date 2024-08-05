@@ -7,11 +7,11 @@ import com.ustadmobile.core.domain.upload.ChunkedUploadResponse
 import com.ustadmobile.core.domain.upload.ChunkedUploadServerUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadServerUseCaseJvm
 import com.ustadmobile.core.io.ext.toDoorUri
+import com.ustadmobile.ihttp.headers.IHttpHeaders
+import com.ustadmobile.ihttp.headers.iHeadersBuilder
 import com.ustadmobile.libcache.CacheEntryToStore
 import com.ustadmobile.libcache.UstadCache
-import com.ustadmobile.libcache.headers.HttpHeaders
-import com.ustadmobile.libcache.headers.headersBuilder
-import com.ustadmobile.libcache.request.requestBuilder
+import com.ustadmobile.ihttp.request.iRequestBuilder
 import com.ustadmobile.libcache.response.HttpPathResponse
 import io.github.aakira.napier.Napier
 import io.github.reactivecircus.cache4k.Cache
@@ -78,7 +78,7 @@ class BlobUploadServerUseCase(
             onStoreItem(
                 blobUrl = blobToUploadResponseItem.blobUrl,
                 bodyPath = completedChunkedUpload.path,
-                requestHeaders = HttpHeaders.fromMap(completedChunkedUpload.request.headers)
+                requestHeaders = IHttpHeaders.fromMap(completedChunkedUpload.request.headers)
             )
 
             ChunkedUploadResponse(
@@ -225,9 +225,9 @@ class BlobUploadServerUseCase(
     fun onStoreItem(
         blobUrl: String,
         bodyPath: Path,
-        requestHeaders: HttpHeaders,
+        requestHeaders: IHttpHeaders,
     ) {
-        val request = requestBuilder(blobUrl)
+        val request = iRequestBuilder(blobUrl)
         val mimeType = requestHeaders["${BLOB_RESPONSE_HEADER_PREFIX}content-type"]
             ?: "application/octet-stream"
 
@@ -240,7 +240,7 @@ class BlobUploadServerUseCase(
                         fileSystem = fileSystem,
                         mimeType = mimeType,
                         request = request,
-                        extraHeaders = headersBuilder {
+                        extraHeaders = iHeadersBuilder {
                             requestHeaders.names().filter {
                                 it.startsWith(BLOB_RESPONSE_HEADER_PREFIX)
                             }.forEach { headerName ->

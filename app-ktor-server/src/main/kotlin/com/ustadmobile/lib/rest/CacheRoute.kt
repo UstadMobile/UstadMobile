@@ -1,8 +1,8 @@
 package com.ustadmobile.lib.rest
 
-import com.ustadmobile.lib.rest.ext.respondCacheResponse
-import com.ustadmobile.lib.rest.ext.clientUrl
-import com.ustadmobile.lib.rest.util.toCacheHttpRequest
+import com.ustadmobile.ihttp.ktorserver.clientUrl
+import com.ustadmobile.ihttp.ktorserver.respondIHttpResponse
+import com.ustadmobile.ihttp.ktorserver.toIHttpRequest
 import com.ustadmobile.libcache.UstadCache
 import io.github.aakira.napier.Napier
 import io.ktor.http.ContentType
@@ -18,9 +18,9 @@ fun Route.CacheRoute(
 ){
     get("{...}") {
         try {
-            val cacheRequest = call.request.toCacheHttpRequest()
+            val cacheRequest = call.request.toIHttpRequest()
             val cacheResponse = cache.retrieve(cacheRequest)
-            call.respondCacheResponse(cacheResponse, cacheRequest = cacheRequest)
+            call.respondIHttpResponse(cacheResponse, iRequest = cacheRequest)
         }catch (e: Throwable) {
             Napier.e("CacheRoute: Exception serving ${call.request.clientUrl()}", e)
             call.respondText(

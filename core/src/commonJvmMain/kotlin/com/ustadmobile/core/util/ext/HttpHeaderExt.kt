@@ -1,9 +1,9 @@
 package com.ustadmobile.core.util.ext
 
 import com.ustadmobile.core.util.stringvalues.IStringValues
-import com.ustadmobile.libcache.headers.HttpHeaders
+import com.ustadmobile.ihttp.headers.IHttpHeaders
 
-class CacheHttpHeadersIStringValues(private val headers: HttpHeaders) : IStringValues{
+class CacheHttpHeadersIStringValues(private val headers: IHttpHeaders) : IStringValues{
 
     override fun get(key: String) = headers[key]
 
@@ -11,4 +11,4 @@ class CacheHttpHeadersIStringValues(private val headers: HttpHeaders) : IStringV
     override fun names() = headers.names()
 }
 
-fun HttpHeaders.asIStringValues(): IStringValues = CacheHttpHeadersIStringValues(this)
+fun IHttpHeaders.asIStringValues(): IStringValues = CacheHttpHeadersIStringValues(this)

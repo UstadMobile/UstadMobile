@@ -267,5 +267,47 @@ expect abstract class StatementDao {
         studentPersonUids: List<Long>,
     ): List<BlockStatus>
 
+    /**
+     * Look for a registration that has not been completed.
+     */
+    @Query("""
+        WITH MostRecentRegistration(statementIdHi, statementIdLo, contextRegistrationHi, contextRegistrationLo) AS (
+             SELECT StatementEntity.statementIdHi, StatementEntity.contextRegistrationLo,
+                    StatementEntity.contextRegistrationHi, StatementEntity.contextRegistrationLo
+               FROM StatementEntity
+              WHERE StatementEntity.statementActorUid = :actorUid
+                AND StatementEntity.statementObjectUid1 = :activityUid
+                AND StatementEntity.contextRegistrationHi != 0
+           ORDER BY StatementEntity.timestamp DESC
+              LIMIT 1
+        )
+        
+        SELECT StatementEntity.*
+          FROM StatementEntity
+         WHERE StatementEntity.statementIdHi = (SELECT statementIdHi FROM MostRecentRegistration)
+           AND StatementEntity.statementIdLo = (SELECT statementIdLo FROM MostRecentRegistration)
+           AND NOT EXISTS(
+                   SELECT 1
+                     FROM StatementEntity StatementEntity_Inner
+                    WHERE StatementEntity_Inner.statementActorUid = :actorUid
+                      AND StatementEntity_Inner.statementObjectUid1 = :activityUid
+                      AND StatementEntity_Inner.contextRegistrationHi = (SELECT contextRegistrationHi FROM MostRecentRegistration)
+                      AND StatementEntity_Inner.contextRegistrationLo = (SELECT contextRegistrationLo FROM MostRecentRegistration)
+                      AND CAST(StatementEntity_Inner.completionOrProgress AS INTEGER) = 1
+                      AND (     StatementEntity_Inner.resultCompletion IS NOT NULL 
+                            AND CAST(StatementEntity_Inner.resultCompletion AS INTEGER) = 1)
+                     )
+           AND :accountPersonUid IN 
+               (SELECT ActorEntity.actorPersonUid
+                  FROM ActorEntity
+                 WHERE ActorEntity.actorUid = :actorUid)          
+                     
+    """)
+    abstract suspend fun findResumableRegistration(
+        activityUid: Long,
+        accountPersonUid: Long,
+        actorUid: Long,
+    ): StatementEntity?
+
 
 }

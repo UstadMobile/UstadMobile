@@ -7,7 +7,7 @@ version-androidx-appcompat = "1.6.1"
 androidx-core = "1.12.0"
 kotlin = "1.9.23"
 okhttp = "4.12.0"
-door = "0.79.14"
+door = "0.79.15"
 coroutines = "1.8.0"
 atomicfu = "0.23.2"
 kotlinx-io = "0.3.0"
@@ -126,6 +126,7 @@ android-emulator-plugin = "0.4.5"
 lz4 = "1.8.0"
 kmp-uuid = "0.8.4"
 zoomable = "1.6.1"
+jetbrains-kotlin-jvm = "1.9.23"
 
 [plugins]
 
@@ -137,6 +138,7 @@ conveyor = { id = "dev.hydraulic.conveyor", version.ref = "conveyor" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 license = { id = "com.jaredsburrows.license", version.ref = "plugin-license" }
 android-emulator = { id = "com.quittle.android-emulator", version.ref = "android-emulator-plugin" }
+jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "jetbrains-kotlin-jvm" }
 
 
 [libraries]

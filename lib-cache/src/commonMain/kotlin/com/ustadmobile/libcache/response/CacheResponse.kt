@@ -1,14 +1,15 @@
 package com.ustadmobile.libcache.response
 
+import com.ustadmobile.ihttp.headers.IHttpHeaders
+import com.ustadmobile.ihttp.headers.MergedHeaders
 import com.ustadmobile.libcache.CompressionType
-import com.ustadmobile.libcache.headers.HttpHeaders
-import com.ustadmobile.libcache.headers.MergedHeaders
 import com.ustadmobile.libcache.io.asKotlinxIoSource
 import com.ustadmobile.libcache.io.range
 import com.ustadmobile.libcache.io.uncompress
 import com.ustadmobile.libcache.partial.ContentRange
 import com.ustadmobile.libcache.partial.RangeRequestNotSatisfiableException
-import com.ustadmobile.libcache.request.HttpRequest
+import com.ustadmobile.ihttp.request.IHttpRequest
+import com.ustadmobile.ihttp.response.IHttpResponse
 import kotlinx.io.Source
 import kotlinx.io.buffered
 import kotlinx.io.files.FileSystem
@@ -16,20 +17,20 @@ import kotlinx.io.files.Path
 
 class CacheResponse(
     private val fileSystem: FileSystem,
-    override val request: HttpRequest,
-    headers: HttpHeaders,
+    override val request: IHttpRequest,
+    headers: IHttpHeaders,
     private val storageUri: String,
     uncompressedSize: Long,
     @Volatile
     private var httpResponseCode: Int = 200,
-): HttpResponse {
+): IHttpResponse {
 
     override val responseCode: Int
         get() = httpResponseCode
 
     private val rangeResponse: ContentRange?
 
-    override val headers: HttpHeaders
+    override val headers: IHttpHeaders
 
     private val errorBody: ByteArray?
 
@@ -84,14 +85,14 @@ class CacheResponse(
 
         this.rangeResponse = rangeResponse
         this.headers = MergedHeaders(
-            HttpHeaders.fromMap(overrideHeadersMap.toMap()), headers
+            IHttpHeaders.fromMap(overrideHeadersMap.toMap()), headers
         )
         this.errorBody = errorBody
     }
 
     override fun bodyAsSource(): Source {
         return when {
-            request.method == HttpRequest.Companion.Method.HEAD -> {
+            request.method == IHttpRequest.Companion.Method.HEAD -> {
                 ByteArray(0).asKotlinxIoSource().buffered()
             }
             errorBody != null -> errorBody.asKotlinxIoSource().buffered()
