@@ -8,6 +8,7 @@ import com.ustadmobile.core.domain.xxhash.XXStringHasher
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 import com.ustadmobile.lib.util.randomString
+import io.github.aakira.napier.Napier
 
 /**
  * Start or resume an Xapi session that will be recorded in the local database. Used on Android,
@@ -28,13 +29,30 @@ class ResumeOrStartXapiSessionUseCaseLocal(
         contentEntryUid: Long
     ): XapiSessionEntity {
         val actorUid = actor.identifierHash(xxStringHasher)
+        val rootActivityUid = xxStringHasher.hash(activityId)
 
         val pendingSession = (activeRepo ?: activeDb).xapiSessionEntityDao()
-            .findPendingSessionByActorAndActivityUid(
-                xseActorUid = actorUid,
-                xseRootActivityUid = xxStringHasher.hash(activityId),
-                requireNotCompleted = true
+            .findMostRecentSessionByActorAndActivity(
+                accountPersonUid = accountPersonUid,
+                actorUid = actorUid,
+                xseRootActivityUid = rootActivityUid,
             )
+
+        activeRepo?.also { repo ->
+            //Load/validate state associated with this activity and actor
+            try {
+                repo.stateEntityDao().findByAgentAndActivity(
+                    accountPersonUid = accountPersonUid,
+                    actorUid = actorUid,
+                    seActivityUid = rootActivityUid,
+                    registrationUuidHi = pendingSession?.xseRegistrationHi,
+                    registrationUuidLo = pendingSession?.xseRegistrationLo,
+                    modifiedSince = 0
+                )
+            }catch(e: Throwable) {
+                Napier.w("ResumeOrStartXapiSession: attempted to load state for actor/activity: failed", e)
+            }
+        }
 
         return if(pendingSession != null) {
             pendingSession

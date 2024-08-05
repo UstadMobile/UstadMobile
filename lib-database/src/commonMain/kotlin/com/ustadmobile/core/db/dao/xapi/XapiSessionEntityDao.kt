@@ -3,6 +3,8 @@ package com.ustadmobile.core.db.dao.xapi
 import androidx.room.Insert
 import androidx.room.Query
 import com.ustadmobile.door.annotation.DoorDao
+import com.ustadmobile.door.annotation.HttpAccessible
+import com.ustadmobile.door.annotation.HttpServerFunctionCall
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 
@@ -33,18 +35,33 @@ expect abstract class XapiSessionEntityDao {
         xseUid: Long,
     )
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall(
+                functionName = "findPendingSessionByActorAndActivityUid"
+            ),
+            HttpServerFunctionCall(
+                functionName ="findByUidAndPersonUidAsync",
+                functionDao = ActorDao::class,
+            ),
+        )
+    )
     @Query("""
         SELECT XapiSessionEntity.*
           FROM XapiSessionEntity
          WHERE XapiSessionEntity.xseRootActivityUid = :xseRootActivityUid
-           AND XapiSessionEntity.xseActorUid = :xseActorUid
-           AND (   CAST(:requireNotCompleted AS INTEGER) = 0 
-                OR CAST(XapiSessionEntity.xseCompleted AS INTEGER) = 0)
+           AND XapiSessionEntity.xseActorUid = :actorUid
+           AND EXISTS(
+               SELECT 1
+                 FROM ActorEntity
+                WHERE ActorEntity.actorUid = :actorUid
+                  AND ActorEntity.actorPersonUid = :accountPersonUid)     
     """)
-    abstract suspend fun findPendingSessionByActorAndActivityUid(
-        xseActorUid: Long,
+    abstract suspend fun findMostRecentSessionByActorAndActivity(
+        accountPersonUid: Long,
+        actorUid: Long,
         xseRootActivityUid: Long,
-        requireNotCompleted: Boolean,
     ): XapiSessionEntity?
 
 }
