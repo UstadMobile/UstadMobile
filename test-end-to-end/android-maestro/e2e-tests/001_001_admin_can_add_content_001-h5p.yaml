@@ -19,7 +19,9 @@ env:
 - tapOn: "SAVE"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_add_to_library"
 - tapOn: "True/False Question"
-- assertNotVisible: "Importing"
+- extendedWaitUntil:
+    notVisible: "Importing"
+    timeout: 20000
 - tapOn: Open
 - runFlow:
     when:

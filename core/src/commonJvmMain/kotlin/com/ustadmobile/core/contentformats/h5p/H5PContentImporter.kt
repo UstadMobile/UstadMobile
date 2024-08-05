@@ -289,7 +289,8 @@ class H5PContentImporter(
                 new H5PStandalone.H5P(el, options).then(function () {
                     H5P.externalDispatcher.on("xAPI", (event) => {
                       //do something useful with the event
-                      const newStatement = structuredClone(event.data.statement);
+                      const newStatement = (typeof(structuredClone) != "undefined") ? 
+                        structuredClone(event.data.statement) : JSON.parse(JSON.stringify(event.data.statement));
                       newStatement.actor = JSON.parse(searchParams.get("actor"));
                       
                       let context = newStatement.context || {}

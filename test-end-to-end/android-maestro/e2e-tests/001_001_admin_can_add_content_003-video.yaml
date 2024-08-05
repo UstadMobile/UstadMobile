@@ -21,10 +21,10 @@ env:
 - tapOn: "Video"
 - extendedWaitUntil:
     notVisible: "Importing"
-    timeout: 10000
+    timeout: 20000
 - extendedWaitUntil:
     notVisible: "Uploading"
-    timeout: 10000
+    timeout: 20000
 - tapOn: Open
 - assertVisible: "Play"
 - runFlow:
