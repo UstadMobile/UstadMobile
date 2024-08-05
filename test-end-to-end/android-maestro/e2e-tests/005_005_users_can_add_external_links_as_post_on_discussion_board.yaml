@@ -133,7 +133,6 @@ env:
     text: "Post 1"
 - assertVisible:
     text: "External link"
-
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
@@ -165,7 +164,6 @@ env:
     commands:
       - tapOn: "No thanks"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/verify_external_link"
-
 - extendedWaitUntil:
     visible: "pixabay"
     timeout: 10000
