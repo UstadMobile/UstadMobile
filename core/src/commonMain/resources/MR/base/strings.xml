@@ -4,6 +4,9 @@
     <!--suppress CheckTagEmptyBody -->
     <string name="blank" translatable="false"></string>
     <string name="login">Login</string>
+    <string name="share_app">Share app</string>
+    <string name="send_apk_file">Send app file (APK)</string>
+    <string name="send_app_link">Share app store link</string>
     <string name="error">Error</string>
     <string name="err_registering_new_user">Error registering new user:</string>
     <string name="register_empty_fields">Please fill out all required fields</string>
@@ -83,7 +86,6 @@
     <string name="notifications">Notifications</string>
     <string name="account">Account</string>
     <string name="accounts">Accounts</string>
-    <string name="share_application">Share App</string>
     <string name="share">Share</string>
     <string name="send">Send</string>
     <string name="open">Open</string>
