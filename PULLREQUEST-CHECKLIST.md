@@ -31,6 +31,8 @@ should display it. The ViewModel should tell the view what to display, and recei
 * If adding any third-party assets via any system other than Gradle dependencies you must check to ensure it is available under a compatible open license. If the license is not contained in the file itself, you must place a text file in the same directory in the source code with a link to its original URL and the license under which it is used.
 
 * If new strings are added you must screenshot the string as it is used within the app and save the screenshot into translate-screenshots where the filename must be ```string_name.png``` (string_name as per name of the string in the XML file).
+  
+* There must be no hardcoded strings that should be variables. Strings may be hardcoded if they will never change e.g. when path segments based on a API specificiation. They must not be hardcoded where they might change (e.g. server endpoints etc).
 
 #### Automated tests
 
