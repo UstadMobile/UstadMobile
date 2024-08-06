@@ -2,7 +2,7 @@
 
 #### Coding style
 
-* Ensure all classes follow the [Coding Style](CODING-STYLE.md)
+* Ensure all code follows the [Coding Style](CODING-STYLE.md)
 
 * Ensure that all new variables and functions have **meaningful** names. The name should make the purpose clear.
 
@@ -23,13 +23,24 @@ Not good (unspecific)
 var fieldsVisible = false
 ```
 
-* Ensure that logic and display are not mixed. Business logic should be in the ViewModel, and the view
+* Ensure that logic and display are not mixed. Business logic should be in the ViewModel and/or domain UseCase, and the view
 should display it. The ViewModel should tell the view what to display, and receive events
 
+* Commented out code is not acceptable. Git is used to track revisions. Unused code must be deleted.
+
+* If adding any third-party assets via any system other than Gradle dependencies you must check to ensure it is available under a compatible open license. If the license is not contained in the file itself, you must place a text file in the same directory in the source code with a link to its original URL and the license under which it is used.
+
+* If new strings are added you must screenshot the string as it is used within the app and save the screenshot into translate-screenshots where the filename must be ```string_name.png``` (string_name as per name of the string in the XML file).
+
+#### Automated tests
+
+* If the same text is clicked twice (or more) in a row (e.g. clicking done twice), then you must use a check/wait condition to ensure that the screen has changed following the first click. This avoids accidentally clicking twice on the same button.
+
+* The test must not depend on any external websites or services which, if they fail, would cause the test to (incorrectly) fail.
 
 ### Testing
 
-* Ensure all screens have unit tests and end-to-end tests. All tests should run to completion and pass.
+* Ensure all screens have unit tests and end-to-end tests. All tests must run to completion and pass.
 
 * Ensure that the test assertion validates what is being tested. E.g. if a particular result is
 expected, do not just use assertNotNull. Check the actual result.
@@ -41,13 +52,4 @@ no logic change (e.g. if an entity edit field has multiple fields (e.g. author, 
 those fields have no impact on the logic, you don't need individual tests for each one being filled.
 If those fields have an impact on the logic (e.g. title is a required field, and the form should not
 be saved if the title is empty), then this does require an extra test scenario.
-
-### Leaks
-
-* Ensure that there are **no memory leaks detected by Leak Canary.**. You need to navigate to each
-screen and wait for at least 5 seconds. If Leak Canary "sings", then ensure the leak is removed. Make
-sure to implement onDestroyView in all fragments. Make sure that all RecyclerViewAdapters are detached
-and any reference to the presenter, fragment, or context are set to null. See the UstadListViewFragment
-for a reference on dealing with RecyclerViews
-
 
