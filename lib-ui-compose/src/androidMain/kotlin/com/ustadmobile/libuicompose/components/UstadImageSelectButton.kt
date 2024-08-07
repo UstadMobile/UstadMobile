@@ -59,6 +59,14 @@ actual fun UstadImageSelectButton(
         }
     }
 
+    val fileLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if(uri != null) {
+            onImageUriChanged(uri.toString())
+        }
+    }
+
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
@@ -122,6 +130,16 @@ actual fun UstadImageSelectButton(
                     },
                     headlineContent = {
                         Text(stringResource(MR.strings.select_new_photo_from_gallery))
+                    }
+                )
+
+                ListItem(
+                    modifier = Modifier.clickable {
+                        dialogVisible = false
+                        fileLauncher.launch(arrayOf("image/*"))
+                    },
+                    headlineContent = {
+                        Text(stringResource(MR.strings.select_file))
                     }
                 )
 
