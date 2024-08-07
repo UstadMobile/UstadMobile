@@ -86,6 +86,7 @@ import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
     StatementContextActivityJoin::class,
     XapiSessionEntity::class,
     StatementEntityJson::class,
+    PersonPasskey::class,
 
     //Door entities
     OutgoingReplication::class,
@@ -93,7 +94,7 @@ import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
     PendingRepositorySession::class,
     DoorNode::class,
 
-], version = 194)
+], version = 195)
 expect abstract class UmAppDatabase : RoomDatabase {
 
     /*
@@ -256,5 +257,7 @@ expect abstract class UmAppDatabase : RoomDatabase {
     abstract fun xapiSessionEntityDao(): XapiSessionEntityDao
 
     abstract fun statementEntityJsonDao(): StatementEntityJsonDao
+
+    abstract fun personPasskeyDao():PersonPasskeyDao
 
 }

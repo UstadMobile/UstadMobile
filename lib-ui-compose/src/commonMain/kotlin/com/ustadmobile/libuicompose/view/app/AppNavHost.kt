@@ -9,6 +9,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
+import com.ustadmobile.core.account.PassKeyPromptData
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.nav.NavCommand
@@ -132,10 +134,12 @@ import org.kodein.di.instance
 import kotlin.reflect.KClass
 import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel
 import com.ustadmobile.core.viewmodel.settings.DeveloperSettingsViewModel
+import com.ustadmobile.core.viewmodel.signup.SignUpViewModel
 import com.ustadmobile.core.viewmodel.systempermission.detail.SystemPermissionDetailViewModel
 import com.ustadmobile.core.viewmodel.systempermission.edit.SystemPermissionEditViewModel
 import com.ustadmobile.core.viewmodel.videocontent.VideoContentViewModel
 import com.ustadmobile.core.viewmodel.xapicontent.XapiContentViewModel
+import com.ustadmobile.libuicompose.util.passkey.CreatePasskeyPrompt
 import com.ustadmobile.libuicompose.view.about.OpenLicensesScreen
 import com.ustadmobile.libuicompose.view.clazz.invitevialink.InviteViaLinkScreen
 import com.ustadmobile.libuicompose.view.clazz.joinwithcode.JoinWithCodeScreen
@@ -160,6 +164,7 @@ import com.ustadmobile.libuicompose.view.person.bulkaddrunimport.BulkAddPersonRu
 import com.ustadmobile.libuicompose.view.person.bulkaddselectfile.BulkAddPersonSelectFileScreen
 import com.ustadmobile.libuicompose.view.person.registerminorwaitforparent.RegisterMinorWaitForParentScreen
 import com.ustadmobile.libuicompose.view.settings.DeveloperSettingsScreen
+import com.ustadmobile.libuicompose.view.signup.SignUpScreen
 import com.ustadmobile.libuicompose.view.systempermission.detail.SystemPermissionDetailScreen
 import com.ustadmobile.libuicompose.view.systempermission.edit.SystemPermissionEditScreen
 import com.ustadmobile.libuicompose.view.videocontent.VideoContentScreen
@@ -181,6 +186,9 @@ fun AppNavHost(
     navCommandFlow: Flow<NavCommand>? = null,
     initialRoute: String = "/${RedirectViewModel.DEST_NAME}",
 ) {
+    val di = localDI()
+     val accountManager: UstadAccountManager = di.direct.instance()
+
     val popCommandFlow = remember {
         MutableSharedFlow<PopNavCommand>(
             replay = 1,
@@ -201,6 +209,28 @@ fun AppNavHost(
         navCommandFlow?.collect {
             ustadNavController.onCollectNavCommand(it)
         }
+    }
+
+
+    var passkeyPromptData by remember{ mutableStateOf<PassKeyPromptData?>(null) }
+
+    LaunchedEffect(accountManager.passKeyPromptFlow) {
+        accountManager.passKeyPromptFlow.collect {
+            passkeyPromptData = it
+        }
+    }
+
+
+    passkeyPromptData?.let {
+        CreatePasskeyPrompt(
+            username = it.username,
+            personUid = it.personUid.toString(),
+            doorNodeId = it.doorNodeId,
+            usStartTime = it.usStartTime,
+            serverUrl = it.serverUrl,
+            passkeyData = {},
+            passkeyError = {}
+        )
     }
 
     val navResultReturner: NavResultReturner = remember {
@@ -251,7 +281,7 @@ fun AppNavHost(
         }
     }
 
-    val di = localDI()
+
 
     val navControllerUriHandler = remember {
         NavControllerUriHandler(
@@ -303,6 +333,17 @@ fun AppNavHost(
                         backStackEntry, LoginViewModel::class,
                     ) { di, savedStateHandle ->
                         LoginViewModel(di, savedStateHandle)
+                    }
+                )
+            }
+            contentScene(
+                route = "/${SignUpViewModel.DEST_NAME}"
+            ) { backStackEntry ->
+                SignUpScreen (
+                    viewModel = appViewModel(
+                        backStackEntry, SignUpViewModel::class,
+                    ) { di, savedStateHandle ->
+                        SignUpViewModel(di, savedStateHandle)
                     }
                 )
             }

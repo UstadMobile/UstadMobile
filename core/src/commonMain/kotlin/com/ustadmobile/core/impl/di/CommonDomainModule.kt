@@ -12,6 +12,7 @@ import com.ustadmobile.core.domain.contententry.launchcontent.DefaultLaunchConte
 import com.ustadmobile.core.domain.contententry.launchcontent.LaunchContentEntryVersionUseCase
 import com.ustadmobile.core.domain.contententry.save.SaveContentEntryUseCase
 import com.ustadmobile.core.domain.makelink.MakeLinkUseCase
+import com.ustadmobile.core.domain.passkey.SavePersonPasskeyUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.siteterms.GetLocaleForSiteTermsUseCase
 import com.ustadmobile.core.domain.xapi.coursegroup.CreateXapiGroupForCourseGroupUseCase
@@ -89,6 +90,12 @@ fun commonDomainDiModule(endpointScope: EndpointScope) = DI.Module("CommonDomain
 
     bind<AddNewPersonUseCase>() with scoped(endpointScope).singleton {
         AddNewPersonUseCase(
+            db = instance(tag = DoorTag.TAG_DB),
+            repo = instance(tag = DoorTag.TAG_REPO),
+        )
+    }
+    bind<SavePersonPasskeyUseCase>() with scoped(endpointScope).singleton {
+        SavePersonPasskeyUseCase(
             db = instance(tag = DoorTag.TAG_DB),
             repo = instance(tag = DoorTag.TAG_REPO),
         )

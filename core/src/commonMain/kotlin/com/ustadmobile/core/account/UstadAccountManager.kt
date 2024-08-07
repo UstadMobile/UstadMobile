@@ -3,6 +3,7 @@ package com.ustadmobile.core.account
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.set
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.passkey.PassKeySignInData
 import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.whenSubscribed
@@ -16,6 +17,7 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.PersonGroup.Companion.PERSONGROUP_FLAG_GUESTPERSON
 import com.ustadmobile.lib.db.entities.PersonGroup.Companion.PERSONGROUP_FLAG_PERSONGROUP
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import io.github.aakira.napier.Napier
 import io.ktor.client.*
 import io.ktor.client.plugins.*
 import io.ktor.client.request.*
@@ -27,6 +29,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -98,6 +101,15 @@ class UstadAccountManager(
     val activeUserSessionsFlow: Flow<List<UserSessionWithPersonAndEndpoint>>
         get() = _activeUserSessions.asStateFlow()
 
+    /**
+     * Flow that is use to show prompt to compose ui , to tell user that option to create passkey for
+     * easy login
+     */
+
+    private val _passKeyPromptFlow = MutableSharedFlow<PassKeyPromptData>()
+
+    val passKeyPromptFlow: Flow<PassKeyPromptData>
+        get() = _passKeyPromptFlow
 
 
     val activeEndpoint: Endpoint
@@ -290,7 +302,24 @@ class UstadAccountManager(
         }
     }
 
+   suspend fun createPassKeyPrompt(
+       username: String,
+       personUid: Long,
+       doorNodeId: String,
+       usStartTime: Long,
+       serverUrl: String
+   ) {
+        val promptData = PassKeyPromptData(
+            username = username,
+            personUid = personUid,
+            doorNodeId=doorNodeId,
+            usStartTime=usStartTime,
+            serverUrl=serverUrl
+        )
 
+       _passKeyPromptFlow.emit(promptData)
+
+   }
 
     suspend fun register(
         person: Person,
@@ -455,6 +484,55 @@ class UstadAccountManager(
         if(activeSessionsList { it == session.endpoint.url }.isEmpty()) {
             removeActiveEndpoint(session.endpoint)
         }
+    }
+    suspend fun loginWithPasskey(
+        passKeySignInData: PassKeySignInData,
+        endpointUrl: String,
+    ) = withContext(Dispatchers.Default){
+        assertNotClosed()
+        val repo: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = DoorTag.TAG_REPO)
+        val db: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = DoorTag.TAG_DB)
+
+        val loginResponse = httpClient.post {
+            url("${endpointUrl.removeSuffix("/")}/api/passkey/verifypasskey")
+            parameter("id", passKeySignInData.credentialId)
+            parameter("userHandle", passKeySignInData.userHandle)
+            parameter("authenticatorData", passKeySignInData.authenticatorData)
+            parameter("clientDataJSON", passKeySignInData.clientDataJSON)
+            parameter("signature", passKeySignInData.signature)
+            parameter("origin", passKeySignInData.origin)
+            parameter("rpId", passKeySignInData.rpId)
+            parameter("challenge", passKeySignInData.challenge)
+        }
+        Napier.d { "passkeyres"+loginResponse.toString() }
+
+//        if(loginResponse.status.value == 403) {
+//            throw UnauthorizedException("Access denied")
+//        }else if(loginResponse.status == HttpStatusCode.FailedDependency) {
+//            //Used to indicate where parental consent is required, but not granted
+//            throw ConsentNotGrantedException("Parental consent required but not granted")
+//        }else if(loginResponse.status == HttpStatusCode.Conflict) {
+//            throw AdultAccountRequiredException("Adult account required, credentials for child account")
+//        }else if(loginResponse.status.value != 200){
+//            throw IllegalStateException("Server error - response ${loginResponse.status.value}")
+//        }
+//
+//        val responseAccount: UmAccount = json.decodeFromString(loginResponse.bodyAsText())
+//        responseAccount.endpointUrl = endpointUrl
+//
+//        //Make sure that we fetch the person and personpicture into the database.
+//        val personAndPicture = repo.personDao().findByUidWithPicture(
+//            responseAccount.personUid) ?: throw IllegalStateException("Cannot find person in repo/db")
+//        val personInDb = personAndPicture.person!! //Cannot be null based on query
+//
+//        getSiteFromDbOrLoadFromHttp(repo)
+//
+//        val newSession = addSession(personInDb, endpointUrl, "")
+//            currentUserSession = newSession
+//
+//
+//        //This should not be needed - as responseAccount can be smartcast, but will not otherwise compile
+//        responseAccount
     }
 
 

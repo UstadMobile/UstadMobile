@@ -1,8 +1,8 @@
 {
   "formatVersion": 1,
   "database": {
-    "version": 194,
-    "identityHash": "bc10ca86f0f2ebd9255e20cb1f6ab737",
+    "version": 195,
+    "identityHash": "eaa3d73219e1f9c96ecdce3734a01917",
     "entities": [
       {
         "tableName": "ClazzLog",
@@ -5987,7 +5987,7 @@
       },
       {
         "tableName": "PersonPasskey",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personPasskeyUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `personUid` INTEGER NOT NULL, `attestationObj` TEXT, `clientDataJson` TEXT, `originString` TEXT, `rpid` TEXT, `id` TEXT, `challengeString` TEXT, `publicKey` TEXT, `isRevoked` INTEGER, `passkeyLct` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personPasskeyUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `personUid` INTEGER NOT NULL, `attestationObj` TEXT, `clientDataJson` TEXT, `originString` TEXT, `rpid` TEXT, `id` TEXT, `challengeString` TEXT, `publicKey` TEXT, `isRevoked` INTEGER NOT NULL, `passkeyLct` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "personPasskeyUid",
@@ -6047,7 +6047,7 @@
             "fieldPath": "isRevoked",
             "columnName": "isRevoked",
             "affinity": "INTEGER",
-            "notNull": false
+            "notNull": true
           },
           {
             "fieldPath": "passkeyLct",
@@ -6226,7 +6226,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'bc10ca86f0f2ebd9255e20cb1f6ab737')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'eaa3d73219e1f9c96ecdce3734a01917')"
     ]
   }
 }

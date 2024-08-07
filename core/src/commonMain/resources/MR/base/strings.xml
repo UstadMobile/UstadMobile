@@ -1931,4 +1931,12 @@
 
     <string name="nothing_here_yet">Nothing here, yet</string>
 
+    <string name="signup_with_passkey">Sign-up with passkey</string>
+
+    <string name="other_options">Other options</string>
+
+    <string name="i_am_teacher">I\'m a teacher</string>
+
+    <string name="i_am_parent">I\'m a parent</string>
+
 </resources>

@@ -41,7 +41,9 @@ autolink = "0.11.0"
 process-phoenix =  "2.1.2"
 multiplatformsettings =  "1.1.1"
 coil =  "2.5.0"
+credentials =  "1.3.0-rc01"
 mpfilepicker =  "3.1.0"
+webauthn4j =  "0.25.0.RELEASE"
 kamel =  "0.9.0"
 mockwebserver =  "4.12.0"
 mockito-kotlin =  "5.1.0"
@@ -126,6 +128,7 @@ android-emulator-plugin = "0.4.5"
 lz4 = "1.8.0"
 kmp-uuid = "0.8.4"
 zoomable = "1.6.1"
+credentials-version = "1.2.2"
 
 [plugins]
 
@@ -203,6 +206,10 @@ autolink = { module = "org.nibor.autolink:autolink", version.ref = "autolink" }
 process-phoenix = { module = "com.jakewharton:process-phoenix", version.ref = "process-phoenix"}
 multiplatformsettings = { module = "com.russhwolf:multiplatform-settings", version.ref = "multiplatformsettings"}
 coil = { module = "io.coil-kt:coil", version.ref = "coil"}
+credentials = { module = "androidx.credentials:credentials", version.ref = "credentials"}
+credentialsplay = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentials"}
+webauthn4j = { module="com.webauthn4j:webauthn4j-core", version.ref = "webauthn4j"}
+
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil"}
 mpfilepicker = { module = "com.darkrockstudios:mpfilepicker", version.ref = "mpfilepicker"}
 kamel = { module = "media.kamel:kamel-image", version.ref = "kamel"}
@@ -360,3 +367,4 @@ androidx-benchmark-macro-junit4 = { module = "androidx.benchmark:benchmark-macro
 lz4-pure-java = { module = "org.lz4:lz4-pure-java", version.ref = "lz4" }
 kmp-uuid = { module = "com.benasher44:uuid", version.ref = "kmp-uuid" }
 zoomable = { module = "net.engawapg.lib:zoomable", version.ref = "zoomable" }
+androidx-credentials = { group = "androidx.credentials", name = "credentials", version.ref = "credentials-version" }
