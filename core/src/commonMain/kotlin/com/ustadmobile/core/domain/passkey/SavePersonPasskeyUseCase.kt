@@ -18,14 +18,14 @@ class SavePersonPasskeyUseCase(
 
             val personPasskey = passkeyData.personUid?.let { personUid ->
                 PersonPasskey(
-                    personUid = personUid,
-                    attestationObj = passkeyData.attestationObj,
-                    clientDataJson = passkeyData.clientDataJson,
-                    originString = passkeyData.originString,
-                    rpid = passkeyData.rpid,
-                    id = passkeyData.id,
-                    challengeString = passkeyData.challengeString,
-                    publicKey = passkeyData.publicKey
+                    ppPersonUid = personUid,
+                    ppAttestationObj = passkeyData.attestationObj,
+                    ppClientDataJson = passkeyData.clientDataJson,
+                    ppOriginString = passkeyData.originString,
+                    ppRpid = passkeyData.rpid,
+                    ppId = passkeyData.id,
+                    ppChallengeString = passkeyData.challengeString,
+                    ppPublicKey = passkeyData.publicKey
                 )
             }
             personPasskey?.let { it1 -> effectiveDb.personPasskeyDao().insertAsync(it1) }

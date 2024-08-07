@@ -26,27 +26,27 @@ data class PersonPasskey(
     @PrimaryKey(autoGenerate = true)
     var personPasskeyUid: Long = 0,
 
-    var personUid: Long = 0,
+    var ppPersonUid: Long = 0,
 
-    var attestationObj: String? = null,
+    var ppAttestationObj: String? = null,
 
-    var clientDataJson: String? = null,
+    var ppClientDataJson: String? = null,
 
-    var originString: String? = null,
+    var ppOriginString: String? = null,
 
-    var rpid: String? = null,
+    var ppRpid: String? = null,
 
-    var id: String? = null,
+    var ppId: String? = null,
 
-    var challengeString: String? = null,
+    var ppChallengeString: String? = null,
 
-    var publicKey: String? = null,
+    var ppPublicKey: String? = null,
 
     var isRevoked: Int = NOT_REVOKED,
 
     @ReplicateLastModified
     @ReplicateEtag
-    var passkeyLct: Long = 0
+    var ppPasskeyLct: Long = 0
 
 ){
     companion object {

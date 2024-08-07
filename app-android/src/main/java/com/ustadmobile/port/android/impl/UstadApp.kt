@@ -109,6 +109,7 @@ import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCase
 import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCaseAndroid
 import com.ustadmobile.core.domain.interop.oneroster.OneRosterEndpoint
 import com.ustadmobile.core.domain.interop.oneroster.OneRosterHttpServerUseCase
+import com.ustadmobile.core.domain.passkey.SavePersonPasskeyUseCase
 import com.ustadmobile.core.domain.share.ShareTextUseCase
 import com.ustadmobile.core.domain.share.ShareTextUseCaseAndroid
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
@@ -689,6 +690,12 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 db = instance(tag = DoorTag.TAG_DB),
                 repo = instance(tag = DoorTag.TAG_REPO),
                 httpCache = instance(),
+            )
+        }
+        bind<SavePersonPasskeyUseCase>() with scoped(EndpointScope.Default).singleton {
+            SavePersonPasskeyUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = instance(tag = DoorTag.TAG_REPO),
             )
         }
 

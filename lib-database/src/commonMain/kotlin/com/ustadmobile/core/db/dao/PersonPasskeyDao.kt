@@ -13,7 +13,7 @@ expect abstract class PersonPasskeyDao : BaseDao<PersonPasskey> {
 
     @Query(
         """
-        SELECT PersonPasskey.id
+        SELECT PersonPasskey.ppId
           FROM PersonPasskey
               """
     )
@@ -22,7 +22,7 @@ expect abstract class PersonPasskeyDao : BaseDao<PersonPasskey> {
         """
         SELECT *
           FROM PersonPasskey
-         WHERE PersonPasskey.id = :id 
+         WHERE PersonPasskey.ppId = :id 
               """
     )
     abstract suspend fun findPersonPasskeyFromClientDataJson(id: String): PersonPasskey?

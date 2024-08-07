@@ -98,13 +98,13 @@ class VerifySignInWithPasskeyUseCase(
         val passkeyData = effectiveDb.withDoorTransactionAsync { effectiveDb.personPasskeyDao().findPersonPasskeyFromClientDataJson(credentialId)}
         val passkeId =  effectiveDb.personPasskeyDao().allPasskey()
         var credentialRecord: CredentialRecord? = null
-        Napier.d { "passkeyress"+passkeyData?.id}
+        Napier.d { "passkeyress"+passkeyData?.ppId}
         Napier.d { "passkeyress_ids $passkeId" }
 
         passkeyData?.let {
             // Client properties
-            val attestationObject = Base64.getUrlDecoder().decode(it.attestationObj)
-            val clientDataJSON = Base64.getUrlDecoder().decode(it.clientDataJson)
+            val attestationObject = Base64.getUrlDecoder().decode(it.ppAttestationObj)
+            val clientDataJSON = Base64.getUrlDecoder().decode(it.ppClientDataJson)
             val clientExtensionJSON: String? = null
             val transports: Set<String> = setOf("internal", "hybrid")
 

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 195,
-    "identityHash": "eaa3d73219e1f9c96ecdce3734a01917",
+    "identityHash": "9e2a043a6c038c54a054bf55eeb97f5f",
     "entities": [
       {
         "tableName": "ClazzLog",
@@ -5987,7 +5987,7 @@
       },
       {
         "tableName": "PersonPasskey",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personPasskeyUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `personUid` INTEGER NOT NULL, `attestationObj` TEXT, `clientDataJson` TEXT, `originString` TEXT, `rpid` TEXT, `id` TEXT, `challengeString` TEXT, `publicKey` TEXT, `isRevoked` INTEGER NOT NULL, `passkeyLct` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personPasskeyUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ppPersonUid` INTEGER NOT NULL, `ppAttestationObj` TEXT, `ppClientDataJson` TEXT, `ppOriginString` TEXT, `ppRpid` TEXT, `ppId` TEXT, `ppChallengeString` TEXT, `ppPublicKey` TEXT, `isRevoked` INTEGER NOT NULL, `ppPasskeyLct` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "personPasskeyUid",
@@ -5996,50 +5996,50 @@
             "notNull": true
           },
           {
-            "fieldPath": "personUid",
-            "columnName": "personUid",
+            "fieldPath": "ppPersonUid",
+            "columnName": "ppPersonUid",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "attestationObj",
-            "columnName": "attestationObj",
+            "fieldPath": "ppAttestationObj",
+            "columnName": "ppAttestationObj",
             "affinity": "TEXT",
             "notNull": false
           },
           {
-            "fieldPath": "clientDataJson",
-            "columnName": "clientDataJson",
+            "fieldPath": "ppClientDataJson",
+            "columnName": "ppClientDataJson",
             "affinity": "TEXT",
             "notNull": false
           },
           {
-            "fieldPath": "originString",
-            "columnName": "originString",
+            "fieldPath": "ppOriginString",
+            "columnName": "ppOriginString",
             "affinity": "TEXT",
             "notNull": false
           },
           {
-            "fieldPath": "rpid",
-            "columnName": "rpid",
+            "fieldPath": "ppRpid",
+            "columnName": "ppRpid",
             "affinity": "TEXT",
             "notNull": false
           },
           {
-            "fieldPath": "id",
-            "columnName": "id",
+            "fieldPath": "ppId",
+            "columnName": "ppId",
             "affinity": "TEXT",
             "notNull": false
           },
           {
-            "fieldPath": "challengeString",
-            "columnName": "challengeString",
+            "fieldPath": "ppChallengeString",
+            "columnName": "ppChallengeString",
             "affinity": "TEXT",
             "notNull": false
           },
           {
-            "fieldPath": "publicKey",
-            "columnName": "publicKey",
+            "fieldPath": "ppPublicKey",
+            "columnName": "ppPublicKey",
             "affinity": "TEXT",
             "notNull": false
           },
@@ -6050,8 +6050,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "passkeyLct",
-            "columnName": "passkeyLct",
+            "fieldPath": "ppPasskeyLct",
+            "columnName": "ppPasskeyLct",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -6226,7 +6226,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'eaa3d73219e1f9c96ecdce3734a01917')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9e2a043a6c038c54a054bf55eeb97f5f')"
     ]
   }
 }

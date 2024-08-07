@@ -1,14 +1,18 @@
 package com.ustadmobile.core.db.ext
 
+import androidx.room.PrimaryKey
 import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.door.migration.DoorMigrationStatementList
 import com.ustadmobile.door.DoorDbType
+import com.ustadmobile.door.annotation.ReplicateEtag
+import com.ustadmobile.door.annotation.ReplicateLastModified
 import com.ustadmobile.door.migration.DoorMigration
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.CacheLockJoin
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.CoursePermission
 import com.ustadmobile.lib.db.entities.Message
+import com.ustadmobile.lib.db.entities.PersonPasskey.Companion.NOT_REVOKED
 import com.ustadmobile.lib.db.entities.UserSession
 
 
@@ -1509,19 +1513,17 @@ val MIGRATION_172_194 = DoorMigrationStatementList(172, 194) { db ->
         }
     }
 }
+
 val MIGRATION_194_195 = DoorMigrationStatementList(194, 195) { db ->
     buildList {
         if (db.dbType() == DoorDbType.SQLITE) {
-            add(
-                """ CREATE TABLE IF NOT EXISTS PersonPasskey (personPasskeyUid NTEGER PRIMARY KEY AUTOINCREMENT NOT NULL , personUid INTEGER NOT NULL, attestationObj TEXT, clientDataJson TEXT, originString TEXT, rpid TEXT, id TEXT, challengeString TEXT, publicKey TEXT, isRevoked INTEGER NOT NULL DEFAULT 0, passkeyLct INTEGER NOT NULL)""".trimIndent()
-            )
+            add(""" CREATE TABLE IF NOT EXISTS PersonPasskey (personPasskeyUid INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL , ppPersonUid INTEGER NOT NULL, ppAttestationObj TEXT, clientDataJson TEXT, ppOriginString TEXT, ppRpid TEXT, ppId TEXT, ppChallengeString TEXT, ppPublicKey TEXT, isRevoked INTEGER NOT NULL DEFAULT 0, ppPasskeyLct INTEGER NOT NULL)""")
         } else {
-            add(
-                """CREATE TABLE IF NOT EXISTS PersonPasskey (personPasskeyUid BIGINT PRIMARY KEY AUTOINCREMENT NOT NUL , personUid BIGINT NOT NULL, attestationObj TEXT, clientDataJson TEXT, originString TEXT, rpid TEXT, id TEXT, challengeString TEXT, publicKey TEXT, isRevoked INTEGER NOT NULL DEFAULT 0  , passkeyLct BIGINT NOT NULL)""".trimIndent()
-            )
+            add("""CREATE TABLE IF NOT EXISTS PersonPasskey (personPasskeyUid BIGINT PRIMARY KEY AUTOINCREMENT NOT NUL , ppPersonUid BIGINT NOT NULL, ppAttestationObj TEXT, clientDataJson TEXT, ppOriginString TEXT, ppRpid TEXT, ppId TEXT, ppChallengeString TEXT, ppPublicKey TEXT, isRevoked INTEGER NOT NULL DEFAULT 0  , ppPasskeyLct BIGINT NOT NULL)""")
         }
     }
 }
+
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_105_106, MIGRATION_106_107,
     MIGRATION_107_108, MIGRATION_108_109,
