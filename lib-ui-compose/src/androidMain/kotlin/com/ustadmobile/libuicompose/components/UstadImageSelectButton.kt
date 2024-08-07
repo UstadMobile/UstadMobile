@@ -129,7 +129,7 @@ actual fun UstadImageSelectButton(
                         galleryLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
                     },
                     headlineContent = {
-                        Text(stringResource(MR.strings.select_new_photo_from_gallery))
+                        Text(stringResource(MR.strings.select_picture_from_gallery))
                     }
                 )
 
@@ -139,7 +139,7 @@ actual fun UstadImageSelectButton(
                         fileLauncher.launch(arrayOf("image/*"))
                     },
                     headlineContent = {
-                        Text(stringResource(MR.strings.select_file))
+                        Text(stringResource(MR.strings.select_picture_from_files))
                     }
                 )
 
@@ -171,7 +171,7 @@ actual fun UstadImageSelectButton(
                             onImageUriChanged(null)
                         },
                         headlineContent = {
-                            Text(stringResource(MR.strings.remove_photo))
+                            Text(stringResource(MR.strings.remove_picture))
                         }
                     )
                 }
