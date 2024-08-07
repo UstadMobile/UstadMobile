@@ -1,6 +1,6 @@
 appId: com.toughra.ustadmobile
 ---
 # this flow gives google permission to open a content for 1st time
-- tapOn: Accept & continue
-- tapOn: No thanks
+- tapOn: "Use without an account"
+
 

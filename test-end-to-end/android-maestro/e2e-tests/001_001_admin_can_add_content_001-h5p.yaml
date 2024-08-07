@@ -19,11 +19,16 @@ env:
 - tapOn: "SAVE"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_add_to_library"
 - tapOn: "True/False Question"
-- assertNotVisible: "Importing"
+- extendedWaitUntil:
+    notVisible: "Importing"
+    timeout: 10000
+- extendedWaitUntil:
+    notVisible: "Uploading"
+    timeout: 10000
 - tapOn: Open
 - runFlow:
     when:
-      visible: "Accept & continue"
+      visible: "Welcome to Chrome"
     file: "../common/google_permission.yaml"
 - assertVisible: "Check"
 - tapOn: "Close tab"
