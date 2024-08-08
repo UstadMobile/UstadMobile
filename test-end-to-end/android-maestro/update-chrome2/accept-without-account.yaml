@@ -1,7 +1,0 @@
-appId: com.android.chrome
----
-
-- launchApp
-- tapOn: "Use without an account"
-- tapOn: "More"
-- tapOn: "Got it"
