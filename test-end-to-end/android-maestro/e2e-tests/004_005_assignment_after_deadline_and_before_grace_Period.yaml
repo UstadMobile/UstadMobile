@@ -30,9 +30,9 @@ env:
       USERNAME: "t1"
       GENDER: "Female"
       PASSWORD: "test"
-# add 6 students to the course through bulk import using .csv file
+# add students to the course through bulk import using .csv file
 - runFlow:
-    file: "../common/add_6_students_by_bulk_import.yaml"
+    file: "../common/student_bulk_upload_csv.yaml"
     env:
       TESTFILENAME: "Ustad_Students_List.csv"
       CONTROLSERVER: ${CONTROLSERVER}
@@ -56,10 +56,15 @@ env:
       text: "Add block"
     direction: DOWN
 - tapOn: "Add block"
-- swipe:
-    from:
-      text: "Drag handle" # From (x, y) center of element
-    direction: UP # To (50% of width, 10% of height)
+- runFlow:
+    when:
+      notVisible:
+        text: "Assignment"
+    commands:
+      - swipe:
+          from:
+            text: "Drag handle"
+          direction: UP
 - tapOn: "Assignment"
 - tapOn: "Title*"
 - inputText: "Assignment 1"
@@ -69,17 +74,6 @@ env:
     id: "com.toughra.ustadmobile:id/editor"
 - inputText: "test block"
 - tapOn: "Done"
-- assertVisible: "Don't show before"
-- tapOn:
-    text: "Don't show before"
-- runScript:
-    file: "../common/setDate.js"
-- inputText: ${output.yesterdayDate}
-- tapOn: "hh:mm"
-- runScript:
-    file: "../common/setDate.js"
-- inputText: ${output.delayTime}
-- hideKeyboard
 - scrollUntilVisible:
     element:
       text: "Deadline"
@@ -114,12 +108,6 @@ env:
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/added_assignment"
 - tapOn:
     text: "Done"
-    delay: 1000
-- repeat:
-    while:
-      visible: "Done"
-    commands:
-      - tapOn: Done
 - assertNotVisible: "Done"
 - tapOn: "Save"
 # student submit assignment

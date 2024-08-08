@@ -2,6 +2,7 @@ appId: com.toughra.ustadmobile
 env:
   TESTRESULTSDIR: "${TESTRESULTSDIR}/005_005_users_can_add_external_links_as_post_on_discussion_board"
   TESTNAME:  "005_005_users_can_add_external_links_as_post_on_discussion_board"
+  EXTERNALURL: "${CONTROLSERVER}/"
 ---
 # Admin login
 - clearState: com.toughra.ustadmobile
@@ -30,9 +31,9 @@ env:
       USERNAME: "t1"
       GENDER: "Female"
       PASSWORD: "test"
-# add 6 students to the course through bulk import using .csv file
+# add students to the course through bulk import using .csv file
 - runFlow:
-    file: "../common/add_6_students_by_bulk_import.yaml"
+    file: "../common/student_bulk_upload_csv.yaml"
     env:
       TESTFILENAME: "Ustad_Students_List.csv"
       CONTROLSERVER: ${CONTROLSERVER}
@@ -56,24 +57,18 @@ env:
       text: "Add block"
     direction: DOWN
 - tapOn: "Add block"
-- swipe:
-    from:
-      text: "Drag handle"
-    direction: UP
+- runFlow:
+    when:
+      notVisible:
+        text: "Discussion board"
+    commands:
+      - swipe:
+          from:
+            text: "Drag handle"
+          direction: UP
 - tapOn: "Discussion board"
 - tapOn: "Title*"
 - inputText: "Discussion 1"
-- hideKeyboard
-- tapOn:
-    text: "dd/mm/yyyy"
-    index: "0"
-- runScript:
-    file: "../common/setDate.js"
-- inputText: ${output.yesterdayDate}
-- tapOn: "hh:mm"
-- runScript:
-    file: "../common/setDate.js"
-- inputText: ${output.delayTime}
 - hideKeyboard
 - assertVisible:
     id: "app_title"
@@ -121,7 +116,7 @@ env:
     id: "com.toughra.ustadmobile:id/editor"
 - tapOn: "Link"
 - tapOn: "URL"
-- inputText: "https://pixabay.com/"
+- inputText: "${EXTERNALURL}"
 - hideKeyboard
 - tapOn: "Link text (optional)"
 - inputText: "External link"
@@ -165,8 +160,7 @@ env:
       - tapOn: "No thanks"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/verify_external_link"
 - extendedWaitUntil:
-    visible: "pixabay"
+    visible: "Start or restart server now"
     timeout: 10000
-- tapOn: "Accept All Cookies"
-- assertVisible: "Log in"
+
 

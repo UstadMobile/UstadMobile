@@ -30,9 +30,9 @@ env:
       USERNAME: "t1"
       GENDER: "Female"
       PASSWORD: "test"
-# add 6 students to the course through bulk import using .csv file
+# add students to the course through bulk import using .csv file
 - runFlow:
-    file: "../common/add_6_students_by_bulk_import.yaml"
+    file: "../common/student_bulk_upload_csv.yaml"
     env:
       TESTFILENAME: "Ustad_Students_List.csv"
       CONTROLSERVER: ${CONTROLSERVER}
@@ -55,24 +55,18 @@ env:
       text: "Add block"
     direction: DOWN
 - tapOn: "Add block"
-- swipe:
-    from:
-      text: "Drag handle"
-    direction: UP
+- runFlow:
+    when:
+      notVisible:
+        text: "Discussion board"
+    commands:
+      - swipe:
+          from:
+            text: "Drag handle"
+          direction: UP
 - tapOn: "Discussion board"
 - tapOn: "Title*"
 - inputText: "Discussion 1"
-- hideKeyboard
-- tapOn:
-    text: "dd/mm/yyyy"
-    index: "0"
-- runScript:
-    file: "../common/setDate.js"
-- inputText: ${output.yesterdayDate}
-- tapOn: "hh:mm"
-- runScript:
-    file: "../common/setDate.js"
-- inputText: ${output.delayTime}
 - hideKeyboard
 - tapOn: "Description"
 - tapOn:
