@@ -39,6 +39,10 @@ should display it. The ViewModel should tell the view what to display, and recei
 * If the same text is clicked twice (or more) in a row (e.g. clicking done twice), then you must use a check/wait condition to ensure that the screen has changed following the first click. This avoids accidentally clicking twice on the same button.
 
 * The test must not depend on any external websites or services which, if they fail, would cause the test to (incorrectly) fail.
+  
+* No use of automatically generated selectors (e.g. automatically generated css classes)
+  
+* Selectors must be consistent and predicatable e.g. must not use index:0 unless we can be certain that an item will always be first in the list
 
 ### Testing
 
