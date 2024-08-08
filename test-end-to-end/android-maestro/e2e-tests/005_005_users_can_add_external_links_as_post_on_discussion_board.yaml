@@ -150,17 +150,9 @@ env:
 - tapOn: "Post 1"
 - tapOn: "External link"
 - runFlow:
-    when:
-      visible: "Accept & continue"
-    file: "../common/google_permission.yaml"
-- runFlow:
-    when:
-      visible: "Chrome notifications make things easier"
-    commands:
-      - tapOn: "No thanks"
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/verify_external_link"
+    file: "../common/chrome-first-run-check.yaml"
 - extendedWaitUntil:
     visible: "Start or restart server now"
     timeout: 10000
-
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/verify_external_link"
 
