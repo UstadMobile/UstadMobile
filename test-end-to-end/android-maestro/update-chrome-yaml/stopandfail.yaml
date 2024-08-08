@@ -1,7 +1,0 @@
-appId: com.android.vending
-
-# Updates Google Chrome - see README.md
-
----
-- stopApp
-- assertVisible: "THIS DOES NOT EXISTS DAMN GOOGLE"

@@ -1,5 +1,0 @@
-appId: com.android.vending
----
-- extendedWaitUntil:
-    notVisible: "Create account"
-    timeout: 60000

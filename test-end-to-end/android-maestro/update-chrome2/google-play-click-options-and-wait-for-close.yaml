@@ -1,7 +1,0 @@
-appId: com.android.vending
----
-- tapOn: "Options"
-- tapOn: "Updates"
-- extendedWaitUntil:
-    notVisible: "Update"
-    timeout: 60000
