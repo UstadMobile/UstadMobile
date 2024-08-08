@@ -1,7 +1,9 @@
 package com.ustadmobile.core.domain.passkey
 
+import com.ustadmobile.lib.db.entities.Person
 
-data class PasskeyData(
+
+data class PasskeyResult(
     val attestationObj: String,
     val clientDataJson: String,
     val originString: String,
@@ -9,5 +11,6 @@ data class PasskeyData(
     val challengeString: String,
     val publicKey: String,
     val id: String,
-    val personUid :Long?=0
+    val personUid: Long,
+    val person: Person
 )

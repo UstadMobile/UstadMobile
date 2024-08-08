@@ -13,7 +13,7 @@ import kotlinx.serialization.Serializable
 )
 @Triggers(arrayOf(
     Trigger(
-        name = "person_passkey",
+        name = "person_passkey_remote_insert",
         order = Trigger.Order.INSTEAD_OF,
         on = Trigger.On.RECEIVEVIEW,
         events = [Trigger.Event.INSERT],

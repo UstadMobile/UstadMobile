@@ -33,7 +33,8 @@ class VerifySignInWithPasskeyUseCase(
         origin: String,
         rpId: String,
         challenge: String,
-    ): AuthenticationData? {
+    ): Boolean {
+
         val effectiveDb = repo ?: db
 
         // Client properties
@@ -88,7 +89,7 @@ class VerifySignInWithPasskeyUseCase(
         } catch (e: Exception) {
             throw e
         }
-        return result
+        return result!=null
     }
 
     private suspend fun loadCredentialRecord(

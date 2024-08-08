@@ -22,6 +22,7 @@ import com.ustadmobile.core.domain.blob.openblob.OpenBlobUiUseCase
 import com.ustadmobile.core.domain.contententry.move.MoveContentEntriesUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseAndroid
+import com.ustadmobile.core.domain.passkey.CreatePasskeyUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCaseCommonJvm
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsUseCase
@@ -47,6 +48,7 @@ import com.ustadmobile.core.viewmodel.redirect.RedirectViewModel
 import com.ustadmobile.door.NanoHttpdCall
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.libuicompose.theme.UstadAppTheme
+import com.ustadmobile.libuicompose.util.passkey.CreatePasskeyUseCaseImpl
 import com.ustadmobile.libuicompose.view.app.App
 import com.ustadmobile.libuicompose.view.app.SizeClass
 import com.ustadmobile.port.android.util.ext.getUstadDeepLink
@@ -109,6 +111,10 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
 
         bind<ClazzLogCreatorManager>() with singleton {
             ClazzLogCreatorManagerAndroidImpl(applicationContext)
+        }
+
+        bind<CreatePasskeyUseCase>() with singleton {
+            CreatePasskeyUseCaseImpl(applicationContext)
         }
 
         constant(UstadMobileSystemCommon.TAG_DOWNLOAD_ENABLED) with true

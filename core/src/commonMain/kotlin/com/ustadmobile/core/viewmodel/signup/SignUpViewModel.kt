@@ -1,9 +1,11 @@
 package com.ustadmobile.core.viewmodel.signup
 
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
-import com.ustadmobile.core.domain.passkey.PasskeyData
-import com.ustadmobile.core.domain.passkey.SavePersonPasskeyUseCase
+import com.ustadmobile.core.domain.passkey.CreatePasskeyParams
+import com.ustadmobile.core.domain.passkey.CreatePasskeyUseCase
+import com.ustadmobile.core.domain.passkey.PasskeyResult
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
@@ -13,17 +15,15 @@ import com.ustadmobile.core.impl.config.GenderConfig
 import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.MessageIdOption2
-import com.ustadmobile.core.util.ext.isDateSet
-import com.ustadmobile.core.util.ext.onActiveEndpoint
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.doorIdentityHashCode
+import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.Person.Companion.GENDER_UNSET
-import com.ustadmobile.lib.db.entities.PersonParentJoin
 import com.ustadmobile.lib.db.entities.PersonPicture
-import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
+import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 
@@ -90,6 +91,9 @@ class SignUpViewModel(
 
     private val _uiState: MutableStateFlow<SignUpUiState> = MutableStateFlow(SignUpUiState())
 
+    val createPasskeyUseCase: CreatePasskeyUseCase by di.instance()
+
+
     val uiState: Flow<SignUpUiState> = _uiState.asStateFlow()
 
     private val apiUrlConfig: ApiUrlConfig by instance()
@@ -99,22 +103,13 @@ class SignUpViewModel(
 
     private val serverUrl = savedStateHandle[UstadView.ARG_API_URL]
         ?: apiUrlConfig.presetApiUrl ?: "http://localhost"
-
-    private val nextDestination =
-        savedStateHandle[UstadView.ARG_NEXT] ?: systemImpl.getDefaultFirstDest()
-
+    val addNewPersonUseCase: AddNewPersonUseCase = di.on(Endpoint(serverUrl)).direct.instance()
 
     private val genderConfig: GenderConfig by instance()
 
     private val enqueueSavePictureUseCase: EnqueueSavePictureUseCase by
     on(accountManager.activeEndpoint).instance()
 
-    private val addNewPersonUseCase: AddNewPersonUseCase by di.onActiveEndpoint().instance()
-    private val savePersonPasskeyUseCase: SavePersonPasskeyUseCase by di.onActiveEndpoint()
-        .instance()
-
-    private val dontSetCurrentSession: Boolean = savedStateHandle[ARG_DONT_SET_CURRENT_SESSION]
-        ?.toBoolean() ?: false
 
     init {
         loadingState = LoadingUiState.INDETERMINATE
@@ -281,22 +276,34 @@ class SignUpViewModel(
 
             try {
 
-                val registeredPerson = addNewPersonUseCase(
+                val uid = activeDb.doorPrimaryKeyManager.nextIdAsync(Person.TABLE_ID)
+                Napier.e { "person uid $uid" }
+                val passkeyCreated = createPasskeyUseCase.invoke(
+                    CreatePasskeyParams
+                        (
+                        username = savePerson.firstNames.toString(),
+                        personUid = uid.toString(),
+                        doorNodeId = di.doorIdentityHashCode.toString(),
+                        usStartTime = systemTimeInMillis(),
+                        serverUrl = serverUrl,
+                        person = savePerson
+                    )
+                )
+                val result = passkeyCreated?.let {
+                    accountManager.registerWithPasskey(
+                        serverUrl,
+                        it
+                    )
+                }
+                Napier.e { "passkeyuid $result" }
+
+                val personid = addNewPersonUseCase(
                     person = savePerson,
                     addedByPersonUid = activeUserPersonUid,
                     createPersonParentApprovalIfMinor = true,
                 )
+                Napier.e { "person uid $personid" }
 
-                _uiState.update { prev ->
-                    prev.person?.shallowCopy {
-                        personUid = registeredPerson
-                    }
-                    prev.copy(
-                        showCreatePasskeyPrompt = true,
-                        doorNodeId = di.doorIdentityHashCode.toString()
-                    )
-
-                }
 
             } catch (e: Exception) {
                 if (e is IllegalStateException) {
@@ -318,20 +325,26 @@ class SignUpViewModel(
 
     }
 
-    fun onPassKeyDataReceived(passkeyData: PasskeyData) {
+    fun onPassKeyDataReceived(passkeyResult: PasskeyResult) {
         viewModelScope.launch {
-          val result=  savePersonPasskeyUseCase.invoke(passkeyData)
-            if (result!=0L){
-                Snack("Passkey saved")
-            }else{
-                Snack(systemImpl.getString(MR.strings.error) )
+            val result = accountManager.registerWithPasskey(serverUrl, passkeyResult)
+            if (result != 0L) {
+                snackDispatcher.showSnackBar(
+                    Snack("Passkey saved")
+                )
+            } else {
+                snackDispatcher.showSnackBar(
+                    Snack(systemImpl.getString(MR.strings.error))
+                )
             }
         }
 
     }
 
     fun onPassKeyError(passkeyError: String) {
-        Snack(passkeyError)
+        snackDispatcher.showSnackBar(
+            Snack(passkeyError)
+        )
     }
 
 

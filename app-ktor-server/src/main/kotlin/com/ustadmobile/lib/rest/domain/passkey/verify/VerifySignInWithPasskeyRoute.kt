@@ -34,7 +34,7 @@ fun Route.VerifySignInWithPasskeyRoute(
                 rpId = rpId,
                 challenge = challenge,
             )
-            call.respond(response.toString())
+            call.respond(response)
 
         } catch (e: UnauthorizedException) {
             call.respond(HttpStatusCode.Unauthorized)

@@ -4,6 +4,8 @@ import com.russhwolf.settings.Settings
 import com.russhwolf.settings.set
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.passkey.PassKeySignInData
+import com.ustadmobile.core.domain.passkey.PasskeyResult
+import com.ustadmobile.core.domain.passkey.SavePersonPasskeyUseCase
 import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.whenSubscribed
@@ -320,6 +322,13 @@ class UstadAccountManager(
        _passKeyPromptFlow.emit(promptData)
 
    }
+    suspend fun registerWithPasskey(
+        endpointUrl: String,
+        passkeyResult: PasskeyResult,
+    ): Long {
+        val savePassKeyUseCase: SavePersonPasskeyUseCase = di.on(Endpoint(endpointUrl)).direct.instance()
+        return  savePassKeyUseCase.invoke(passkeyResult)
+    }
 
     suspend fun register(
         person: Person,

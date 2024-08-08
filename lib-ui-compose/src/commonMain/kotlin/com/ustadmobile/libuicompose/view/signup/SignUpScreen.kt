@@ -12,14 +12,13 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.domain.passkey.PasskeyData
+import com.ustadmobile.core.domain.passkey.PasskeyResult
 import com.ustadmobile.core.viewmodel.signup.SignUpUiState
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -31,7 +30,6 @@ import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.util.passkey.CreatePasskeyPrompt
 import dev.icerock.moko.resources.compose.stringResource
-import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Dispatchers
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 
@@ -63,7 +61,7 @@ fun SignUpScreen(
     onPersonPictureUriChanged: (String?) -> Unit = { },
     onTeacherCheckChanged: (Boolean) -> Unit = { },
     onParentCheckChanged: (Boolean) -> Unit = { },
-    onPassKeyDataReceived: (PasskeyData) -> Unit = { },
+    onPassKeyDataReceived: (PasskeyResult) -> Unit = { },
     onPassKeyError: (String) -> Unit = { },
 ) {
     UstadVerticalScrollColumn(
@@ -165,26 +163,6 @@ fun SignUpScreen(
             Text(stringResource(MR.strings.other_options))
         }
 
-        uiState.showCreatePasskeyPrompt?.also { showPrompt ->
-            if (showPrompt) {
-                uiState.serverUrl_?.let {serverUrl->
-                    CreatePasskeyPrompt(
-                        username = uiState.person?.username ?: uiState.person?.firstNames?:"",
-                        personUid = uiState.person?.personUid.toString(),
-                        doorNodeId = uiState.doorNodeId.toString(),
-                        usStartTime = systemTimeInMillis(),
-                        serverUrl = serverUrl,
-                        passkeyData = {
-                            onPassKeyDataReceived(it,)
-                        },
-                        passkeyError = {
-                            onPassKeyError(it)
-                        }
-                    )
-                }
-
-            }
-        }
 
 
     }

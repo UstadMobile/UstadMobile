@@ -11,7 +11,8 @@ import androidx.credentials.CreatePublicKeyCredentialRequest
 import androidx.credentials.CreatePublicKeyCredentialResponse
 import androidx.credentials.CredentialManager
 import androidx.credentials.exceptions.CreateCredentialException
-import com.ustadmobile.core.domain.passkey.PasskeyData
+import com.ustadmobile.core.domain.passkey.PasskeyResult
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.libuicompose.util.ext.getActivityContext
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.launch
@@ -29,7 +30,7 @@ actual fun CreatePasskeyPrompt(
     doorNodeId: String,
     usStartTime: Long,
     serverUrl:String,
-    passkeyData: (PasskeyData) -> Unit,
+    passkeyData: (PasskeyResult) -> Unit,
     passkeyError: (String) -> Unit
 ) {
     val activity = LocalContext.current.getActivityContext()
@@ -56,7 +57,7 @@ private suspend fun createPasskey(
     usStartTime: Long,
     passkeyError: (String) -> Unit,
     serverUrl:String
-): PasskeyData? {
+): PasskeyResult? {
 
     val request = CreatePublicKeyCredentialRequest(
         PasskeyUtil.createPasskeyRequestJson(
@@ -67,7 +68,7 @@ private suspend fun createPasskey(
             serverUrl
         )
     )
-    var passkeyData: PasskeyData? = null
+    var passkeyResult: PasskeyResult? = null
     try {
         val response = credentialManager.createCredential(
             activity,
@@ -91,7 +92,7 @@ private suspend fun createPasskey(
         val originString = clientDataJsonObject.optString("origin", "")
         val challengeString = clientDataJsonObject.optString("challenge", "")
 
-        passkeyData = PasskeyData(
+        passkeyResult = PasskeyResult(
             attestationObj = attestationObject,
             clientDataJson = clientDataJsonString,
             originString = originString,
@@ -99,12 +100,13 @@ private suspend fun createPasskey(
             challengeString = challengeString,
             publicKey = publicKey,
             id = id,
-            personUid = personUid.toLong()
+            personUid = personUid.toLong(),
+            person = Person()
         )
     } catch (e: CreateCredentialException) {
         Napier.e(e) { "Failed to create passkey: ${e.message}" }
         passkeyError(e.message ?: "error occurred while creating the passkey")
     }
 
-    return passkeyData
+    return passkeyResult
 }

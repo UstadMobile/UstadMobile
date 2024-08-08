@@ -29,20 +29,22 @@ object PasskeyUtil {
         val userId = randomString(16)
         val challenge = Json.encodeToString(
             UserPasskeyChallenge(
-                username = "$username@$serverUrl",
+                username = username,
                 personUid = personUid,
                 doorNodeId = doorNodeId,
                 usStartTime = usStartTime
             )
         )
+
         val challengeBase64Encoded = Base64.getEncoder().encodeToString(challenge.toByteArray())
+        val useridBase64Encoded = Base64.getEncoder().encodeToString("$userId@$serverUrl".toByteArray())
 
         val requestJson = """
                   {
                     "challenge": "${challengeBase64Encoded}",
                     "rp": {
                       "id": "credential-manager-subdomain.applinktest.ustadmobile.com",
-                      "name": "Learning tree"
+                      "name": "Ustad Mobile"
                     },
                     "pubKeyCredParams": [
                       {
@@ -59,7 +61,7 @@ object PasskeyUtil {
                       "residentKey": "required"
                     },
                     "user": {
-                      "id": "$userId",
+                      "id": "$useridBase64Encoded",
                       "name": "$username",
                       "displayName": "$username"
                     }

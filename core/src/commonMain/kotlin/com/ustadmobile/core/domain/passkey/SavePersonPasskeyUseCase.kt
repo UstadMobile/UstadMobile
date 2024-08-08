@@ -1,7 +1,6 @@
 package com.ustadmobile.core.domain.passkey
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.entities.PersonPasskey
 
 
@@ -9,29 +8,26 @@ class SavePersonPasskeyUseCase(
     private val db: UmAppDatabase,
     private val repo: UmAppDatabase?
 ) {
-
     suspend operator fun invoke(
-        passkeyData: PasskeyData,
+        passkeyResult: PasskeyResult,
     ): Long {
         val effectiveDb = (repo ?: db)
-        return effectiveDb.withDoorTransactionAsync {
 
-            val personPasskey = passkeyData.personUid?.let { personUid ->
-                PersonPasskey(
-                    ppPersonUid = personUid,
-                    ppAttestationObj = passkeyData.attestationObj,
-                    ppClientDataJson = passkeyData.clientDataJson,
-                    ppOriginString = passkeyData.originString,
-                    ppRpid = passkeyData.rpid,
-                    ppId = passkeyData.id,
-                    ppChallengeString = passkeyData.challengeString,
-                    ppPublicKey = passkeyData.publicKey
-                )
-            }
-            personPasskey?.let { it1 -> effectiveDb.personPasskeyDao().insertAsync(it1) }
+        val personPasskey = PersonPasskey(
+            ppPersonUid = passkeyResult.personUid,
+            ppAttestationObj = passkeyResult.attestationObj,
+            ppClientDataJson = passkeyResult.clientDataJson,
+            ppOriginString = passkeyResult.originString,
+            ppRpid = passkeyResult.rpid,
+            ppId = passkeyResult.id,
+            ppChallengeString = passkeyResult.challengeString,
+            ppPublicKey = passkeyResult.publicKey
+        )
+
+        return effectiveDb.personPasskeyDao().insertAsync(personPasskey)
 
 
-        } ?:0L
     }
+
 
 }

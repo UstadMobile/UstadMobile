@@ -1,5 +1,6 @@
 package com.ustadmobile.core.db.dao
 
+import androidx.room.Insert
 import androidx.room.Query
 import com.ustadmobile.door.annotation.DoorDao
 import com.ustadmobile.door.annotation.HttpAccessible
@@ -8,8 +9,11 @@ import com.ustadmobile.lib.db.entities.PersonPasskey
 
 @DoorDao
 @Repository
-expect abstract class PersonPasskeyDao : BaseDao<PersonPasskey> {
+expect abstract class PersonPasskeyDao{
 
+
+    @Insert
+    abstract suspend fun insertAsync(personPasskey: PersonPasskey):Long
 
     @Query(
         """
