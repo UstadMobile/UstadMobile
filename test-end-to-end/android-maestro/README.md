@@ -12,7 +12,9 @@ but that has not been thoroughly tested.
   **gradlew build** command.
 * Start an Android emulator or connect a physical device and get the serial of the device (e.g. using the **adb devices** command)
 * MacOS only: install the realpath command.
-
+* Chrome browser **must** be updated otherwise H5P tests will fail. This can be done using 
+  ```maestro test update-chrome.yaml``` if needed.
+ 
 ### Run all tests:
 
 ```
@@ -96,4 +98,9 @@ PersonEdit: phone number is split into country code dropdown ( tag: country_code
 number ( tag: phone_number_text )
 
 
-
+PENDING:
+1. Run install.sh
+2. Launch chrome
+3. If Update Google Play services dialog shows - tap update
+  a. Wait for Cancel updates to be not visible
+  

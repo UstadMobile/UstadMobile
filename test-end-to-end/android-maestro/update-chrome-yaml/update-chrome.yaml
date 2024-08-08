@@ -1,0 +1,24 @@
+appId: com.android.vending
+
+# Updates Google Chrome - see README.md
+
+---
+- launchApp: com.android.vending
+# When launched for the first time we must wait for the Google Play Services update to finish
+- extendedWaitUntil:
+    notVisible: "Cancel update"
+    timeout: 120000
+- tapOn: "Options"
+- tapOn: "Updates"
+- extendedWaitUntil:
+    visible: "Google Chrome"
+    timeout: 30000
+- tapOn:
+    text: "Update"
+    childOf:
+      containsDescendants:
+        - text: "Google Chrome"
+- extendedWaitUntil:
+    notVisible: "Google Chrome"
+    timeout: 120000
+
