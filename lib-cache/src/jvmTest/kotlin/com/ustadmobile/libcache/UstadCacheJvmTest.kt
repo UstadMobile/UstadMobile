@@ -1,16 +1,17 @@
 package com.ustadmobile.libcache
 
 import com.ustadmobile.door.DatabaseBuilder
+import com.ustadmobile.ihttp.headers.IHttpHeader
 import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.db.entities.RetentionLock
-import com.ustadmobile.libcache.headers.HttpHeader
 import com.ustadmobile.libcache.headers.requireIntegrity
 import com.ustadmobile.libcache.integrity.sha256Integrity
 import com.ustadmobile.libcache.io.RangeInputStream
 import com.ustadmobile.libcache.io.uncompress
 import com.ustadmobile.libcache.md5.Md5Digest
 import com.ustadmobile.libcache.md5.urlKey
-import com.ustadmobile.libcache.request.requestBuilder
+import com.ustadmobile.ihttp.request.requestBuilder
+import com.ustadmobile.ihttp.request.iRequestBuilder
 import com.ustadmobile.libcache.response.HttpPathResponse
 import com.ustadmobile.libcache.response.StringResponse
 import com.ustadmobile.libcache.response.bodyAsUncompressedSourceIfContentEncoded
@@ -65,7 +66,7 @@ class UstadCacheJvmTest {
         testUrl: String,
         mimeType: String,
         expectedContentEncoding: String? = null,
-        requestHeaders: List<HttpHeader> = emptyList(),
+        requestHeaders: List<IHttpHeader> = emptyList(),
     ) {
         val request = requestBuilder {
             url = testUrl
@@ -136,7 +137,7 @@ class UstadCacheJvmTest {
         testUrl: String,
         mimeType: String,
         expectContentEncoding: String? = null,
-        requestHeaders: List<HttpHeader> = emptyList(),
+        requestHeaders: List<IHttpHeader> = emptyList(),
         createLock: Boolean = false,
         block: FileCanBeCachedAndRetrievedContext.() -> Unit = { },
     ) {
@@ -247,7 +248,7 @@ class UstadCacheJvmTest {
             testUrl = "http://www.server.com/ustadmobile-epub.js",
             mimeType = "application/javascript",
             expectContentEncoding = "gzip",
-            requestHeaders = listOf(HttpHeader("accept-encoding", "gzip, br, deflate"))
+            requestHeaders = listOf(IHttpHeader.fromNameAndValue("accept-encoding", "gzip, br, deflate"))
         )
     }
 
@@ -284,7 +285,7 @@ class UstadCacheJvmTest {
         val payloads = listOf("font-weight: bold", "font-weight: bold !important")
         payloads.forEachIndexed { index, payload ->
             ustadCache.store(listOf(
-                requestBuilder(url).let {
+                iRequestBuilder(url).let {
                     CacheEntryToStore(
                         request = it,
                         response = StringResponse(
@@ -297,7 +298,7 @@ class UstadCacheJvmTest {
             ))
         }
 
-        val response = ustadCache.retrieve(requestBuilder(url))
+        val response = ustadCache.retrieve(iRequestBuilder(url))
         val responseBytes = response?.bodyAsUncompressedSourceIfContentEncoded()
             ?.asInputStream()?.readAllBytes()
         val responseStr = responseBytes?.let { String(it) }
@@ -316,7 +317,7 @@ class UstadCacheJvmTest {
         )
 
         val url = "http://server.com/file.css"
-        assertNull(ustadCache.retrieve(requestBuilder(url)))
+        assertNull(ustadCache.retrieve(iRequestBuilder(url)))
     }
 
     @Test
@@ -367,10 +368,10 @@ class UstadCacheJvmTest {
         ) {
             val resourceBytes = this::class.java.getResourceAsStream(
                 "/testfile1.png")!!.readAllBytes()
-            val etag = cache.retrieve(requestBuilder(testUrl))?.headers?.get("etag")
+            val etag = cache.retrieve(iRequestBuilder(testUrl))?.headers?.get("etag")
             assertNotNull(etag)
 
-            val partialResponse = cache.retrieve(requestBuilder(testUrl) {
+            val partialResponse = cache.retrieve(iRequestBuilder(testUrl) {
                 header("Range", "bytes=1000-")
                 header("If-Range", etag)
             })
@@ -400,7 +401,7 @@ class UstadCacheJvmTest {
         ) {
             val resourceBytes = this::class.java.getResourceAsStream(
                 "/testfile1.png")!!.readAllBytes()
-            val fullResponse = cache.retrieve(requestBuilder(testUrl) {
+            val fullResponse = cache.retrieve(iRequestBuilder(testUrl) {
                 header("Range", "bytes=1000-")
                 header("If-Range", "something-else")
             })

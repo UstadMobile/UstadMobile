@@ -255,6 +255,7 @@ fun clientServerIntegrationTest(
                         createXapiGroupUseCase = instance(),
                         xapiStatementResource = mock { },
                         xxStringHasher = instance(),
+                        json = instance(),
                     )
                 }
 

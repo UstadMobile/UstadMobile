@@ -10,7 +10,7 @@ import com.ustadmobile.core.tincan.TinCanXML
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryImportJob
-import com.ustadmobile.libcache.request.requestBuilder
+import com.ustadmobile.ihttp.request.iRequestBuilder
 import com.ustadmobile.libcache.response.bodyAsString
 import com.ustadmobile.util.test.ext.newFileFromResource
 import com.ustadmobile.xmlpullparserkmp.setInputString
@@ -124,7 +124,7 @@ class H5PContentImporterTest : AbstractContentImporterTest() {
 
         val expectedUrlPrefix = "${activeEndpoint.url}api/content/${result.cevUid}/"
         val manifestResponse = ustadCache.retrieve(
-            requestBuilder("$expectedUrlPrefix$MANIFEST_NAME")
+            iRequestBuilder("$expectedUrlPrefix$MANIFEST_NAME")
         )
         val manifest = json.decodeFromString(
             ContentManifest.serializer(), manifestResponse!!.bodyAsString()!!
@@ -143,7 +143,7 @@ class H5PContentImporterTest : AbstractContentImporterTest() {
 
         //Check we can parse the tincan xml
         val tinCanXmlResponse = ustadCache.retrieve(
-            requestBuilder(manifest.entries.first { it.uri == "tincan.xml" }.bodyDataUrl)
+            iRequestBuilder(manifest.entries.first { it.uri == "tincan.xml" }.bodyDataUrl)
         )
         val tinCanStr = tinCanXmlResponse?.bodyAsSource()?.asInputStream()?.readString()
         val xppFactory = XmlPullParserFactory.newInstance()
@@ -154,7 +154,7 @@ class H5PContentImporterTest : AbstractContentImporterTest() {
         assertEquals("index.html", tinCanXml.launchActivity?.launchUrl)
 
         val htmlResponse = ustadCache.retrieve(
-            requestBuilder(manifest.entries.first { it.uri == "index.html"}.bodyDataUrl)
+            iRequestBuilder(manifest.entries.first { it.uri == "index.html"}.bodyDataUrl)
         )
         assertNotNull(htmlResponse)
     }

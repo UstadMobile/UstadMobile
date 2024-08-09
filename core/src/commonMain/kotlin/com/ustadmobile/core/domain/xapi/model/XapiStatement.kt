@@ -1,8 +1,8 @@
 package com.ustadmobile.core.domain.xapi.model
 
 import com.benasher44.uuid.uuidFrom
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.domain.xapi.XapiException
-import com.ustadmobile.core.domain.xapi.XapiSession
 import com.ustadmobile.core.domain.xapi.ext.resultProgressExtension
 import com.ustadmobile.core.domain.xapi.xapiRequireDurationOrNullAsLong
 import com.ustadmobile.core.domain.xapi.xapiRequireTimestampAsLong
@@ -15,11 +15,20 @@ import com.ustadmobile.door.DoorPrimaryKeyManager
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.xapi.StatementEntity
 import com.ustadmobile.lib.db.entities.xapi.StatementEntityJson
+import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 const val XAPI_RESULT_EXTENSION_PROGRESS = "https://w3id.org/xapi/cmi5/result/extensions/progress"
+
+//This extension is wrong, but it is used by Articulate content
+const val XAPI_RESULT_EXTENSION_PROGRESS_NON_HTTPS = "http://w3id.org/xapi/cmi5/result/extensions/progress"
+
+val XAPI_PROGRESSED_EXTENSIONS = listOf(
+    XAPI_RESULT_EXTENSION_PROGRESS, XAPI_RESULT_EXTENSION_PROGRESS_NON_HTTPS
+)
+
 
 /**
  * XapiStatement represents both a Statement and a SubStatement, therefor it implements the sealed
@@ -75,9 +84,11 @@ fun XapiStatement.toEntities(
     primaryKeyManager: DoorPrimaryKeyManager,
     hasherFactory: XXHasher64Factory,
     json: Json,
-    xapiSession: XapiSession,
+    xapiSession: XapiSessionEntity,
+    knownActorUidToPersonUidMap: Map<Long, Long>,
     exactJson: String?,
     isSubStatement: Boolean = false,
+    endpoint: Endpoint,
 ): List<StatementEntities> {
     val statementUuid = id?.let { uuidFrom(it) } ?: throw IllegalArgumentException("id is null")
     if(isSubStatement && `object` is XapiStatement)
@@ -88,16 +99,16 @@ fun XapiStatement.toEntities(
     )
 
     val statementActorEntities = actor.toEntities(
-        stringHasher, primaryKeyManager, hasherFactory, xapiSession.knownActorUidToPersonUidMap
+        stringHasher, primaryKeyManager, hasherFactory, knownActorUidToPersonUidMap
     )
 
     val authorityActor = authority?.toEntities(
-        stringHasher, primaryKeyManager, hasherFactory, xapiSession.knownActorUidToPersonUidMap
+        stringHasher, primaryKeyManager, hasherFactory, knownActorUidToPersonUidMap
     )
 
     val contextInstructorActorEntities = context?.instructor?.toEntities(
         stringHasher, primaryKeyManager, hasherFactory,
-        xapiSession.knownActorUidToPersonUidMap
+        knownActorUidToPersonUidMap
     )
 
     val statementObjectForeignKeys = `object`.objectForeignKeys(stringHasher, statementUuid)
@@ -108,10 +119,10 @@ fun XapiStatement.toEntities(
                 statementIdHi = statementUuid.mostSignificantBits,
                 statementIdLo = statementUuid.leastSignificantBits,
                 statementActorPersonUid = if(
-                    actor.account?.homePage == xapiSession.endpoint.url &&
-                    actor.account?.name == xapiSession.accountUsername
+                    actor.account?.homePage == endpoint.url &&
+                    actor.account?.name == xapiSession.xseAccountUsername
                 ) {
-                    xapiSession.accountPersonUid
+                    xapiSession.xseAccountPersonUid
                 }else {
                     0
                 },
@@ -136,12 +147,12 @@ fun XapiStatement.toEntities(
                 contextRegistrationLo = contextRegistration?.leastSignificantBits ?: 0,
                 contextPlatform = context?.platform,
                 contextInstructorActorUid = contextInstructorActorEntities?.actor?.actorUid ?: 0,
-                statementContentEntryUid = xapiSession.contentEntryUid,
-                statementClazzUid = xapiSession.clazzUid,
-                statementCbUid = xapiSession.cbUid,
+                statementContentEntryUid = xapiSession.xseContentEntryUid,
+                statementClazzUid = xapiSession.xseClazzUid,
+                statementCbUid = xapiSession.xseCbUid,
                 completionOrProgress = this.isCompletionOrProgress() && (
-                    xapiSession.contentEntryUid == 0L ||
-                            (`object` as? XapiActivityStatementObject)?.id == xapiSession.rootActivityId
+                    xapiSession.xseContentEntryUid == 0L ||
+                            (`object` as? XapiActivityStatementObject)?.id == xapiSession.xseRootActivityId
                 ),
                 extensionProgress = resultProgressExtension,
                 statementObjectType = `object`.objectTypeFlag,
@@ -172,7 +183,9 @@ fun XapiStatement.toEntities(
         hasherFactory = hasherFactory,
         json = json,
         xapiSession = xapiSession,
+        knownActorUidToPersonUidMap = knownActorUidToPersonUidMap,
         parentStatementUuid = statementUuid,
+        endpoint = endpoint,
     )
 
 }

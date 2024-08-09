@@ -4,6 +4,11 @@ import com.ustadmobile.door.ext.concurrentSafeMapOf
 import com.ustadmobile.door.ext.withDoorTransaction
 import com.ustadmobile.door.util.NullOutputStream
 import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.ihttp.headers.IHttpHeaders
+import com.ustadmobile.ihttp.headers.MergedHeaders
+import com.ustadmobile.ihttp.headers.asString
+import com.ustadmobile.ihttp.headers.iHeadersBuilder
+import com.ustadmobile.ihttp.headers.mapHeaders
 import com.ustadmobile.libcache.UstadCache.Companion.HEADER_LAST_VALIDATED_TIMESTAMP
 import com.ustadmobile.libcache.cachecontrol.ResponseValidityChecker
 import com.ustadmobile.libcache.db.UstadCacheDb
@@ -11,12 +16,6 @@ import com.ustadmobile.libcache.db.entities.CacheEntry
 import com.ustadmobile.libcache.db.entities.CacheEntryAndLocks
 import com.ustadmobile.libcache.db.entities.RetentionLock
 import com.ustadmobile.libcache.db.entities.RequestedEntry
-import com.ustadmobile.libcache.headers.MergedHeaders
-import com.ustadmobile.libcache.headers.HttpHeaders
-import com.ustadmobile.libcache.headers.asString
-import com.ustadmobile.libcache.headers.headersBuilder
-import com.ustadmobile.libcache.headers.integrity
-import com.ustadmobile.libcache.headers.mapHeaders
 import com.ustadmobile.libcache.integrity.sha256Integrity
 import com.ustadmobile.libcache.io.moveWithFallback
 import com.ustadmobile.libcache.io.requireMetadata
@@ -26,9 +25,10 @@ import com.ustadmobile.libcache.io.uncompress
 import com.ustadmobile.libcache.logging.UstadCacheLogger
 import com.ustadmobile.libcache.md5.Md5Digest
 import com.ustadmobile.libcache.md5.urlKey
-import com.ustadmobile.libcache.request.HttpRequest
+import com.ustadmobile.ihttp.request.IHttpRequest
 import com.ustadmobile.libcache.response.CacheResponse
-import com.ustadmobile.libcache.response.HttpResponse
+import com.ustadmobile.ihttp.response.IHttpResponse
+import com.ustadmobile.libcache.headers.integrity
 import com.ustadmobile.libcache.util.LruMap
 import com.ustadmobile.libcache.uuid.randomUuid
 import kotlinx.atomicfu.atomic
@@ -125,7 +125,7 @@ class UstadCacheImpl(
         val cacheEntry: CacheEntry,
         val entryToStore: CacheEntryToStore,
         val tmpFile: Path,
-        val responseHeaders: HttpHeaders,
+        val responseHeaders: IHttpHeaders,
         val tmpFileNeedsDeleted: Boolean = false,
         val lockId: Long = 0,
         val previousStorageUriToDelete: String? = null,
@@ -352,7 +352,7 @@ class UstadCacheImpl(
                     ?: sha256Integrity(fileSystem.source(tmpFile).buffered().useAndReadSha256())
 
                 val effectiveHeaders = if(overrideHeaders.isNotEmpty()) {
-                    MergedHeaders(HttpHeaders.fromMap(overrideHeaders), response.headers)
+                    MergedHeaders(IHttpHeaders.fromMap(overrideHeaders), response.headers)
                 }else {
                     response.headers
                 }
@@ -415,7 +415,7 @@ class UstadCacheImpl(
                 val entriesToSave = entriesWithTmpFileAndIntegrityInfo.map { entryInProgress ->
                     val storedEntry = entriesInCacheMap[entryInProgress.cacheEntry.key]
                     val storedEntryHeaders = storedEntry?.responseHeaders?.let {
-                        HttpHeaders.fromString(it)
+                        IHttpHeaders.fromString(it)
                     }
 
                     val etagOrLastModifiedMatches = if(storedEntryHeaders != null) {
@@ -448,7 +448,7 @@ class UstadCacheImpl(
                                 storageUri = storedEntry.storageUri,
                                 storageSize = storedEntry.storageSize,
                                 responseHeaders = MergedHeaders(
-                                    HttpHeaders.fromMap(overrideHeaders),
+                                    IHttpHeaders.fromMap(overrideHeaders),
                                     entryInProgress.responseHeaders,
                                     storedEntryHeaders,
                                 ).asString()
@@ -562,7 +562,7 @@ class UstadCacheImpl(
      * a statusCheckCache to avoid running 100s-1000+ SQL queries for tiny jsons etc.
      *
      */
-    override fun retrieve(request: HttpRequest): HttpResponse? {
+    override fun retrieve(request: IHttpRequest): IHttpResponse? {
         logger?.i(LOG_TAG, "$logPrefix Retrieve ${request.url}")
 
         val key = Md5Digest().urlKey(request.url)
@@ -578,8 +578,8 @@ class UstadCacheImpl(
                 return CacheResponse(
                     fileSystem = fileSystem,
                     request = request,
-                    headers = headersBuilder {
-                        takeFrom(HttpHeaders.fromString(entry.responseHeaders))
+                    headers = iHeadersBuilder {
+                        takeFrom(IHttpHeaders.fromString(entry.responseHeaders))
                         header(HEADER_LAST_VALIDATED_TIMESTAMP, entry.lastValidated.toString())
                     },
                     storageUri = entry.storageUri,
@@ -625,7 +625,7 @@ class UstadCacheImpl(
         lruMap.compute(urlKey) { _, prevEntry ->
             val existingEntry = prevEntry?.entry
             if(existingEntry != null) {
-                val existingHeaders = HttpHeaders.fromString(existingEntry.responseHeaders)
+                val existingHeaders = IHttpHeaders.fromString(existingEntry.responseHeaders)
 
                 val newHeadersCorrected = validatedEntry.headers.mapHeaders { headerName, headerValue ->
                     when {

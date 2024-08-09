@@ -1,5 +1,7 @@
 package com.ustadmobile.core.account
 
+import com.ustadmobile.core.domain.xapi.model.XapiAccount
+import com.ustadmobile.core.domain.xapi.model.XapiAgent
 import com.ustadmobile.core.util.ext.toUmAccount
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonPicture
@@ -25,6 +27,12 @@ data class UserSessionWithPersonAndEndpoint (
 
     fun toUmAccount() = person.toUmAccount(endpoint.url)
 
+    fun toXapiAgent() = XapiAgent(
+        account = XapiAccount(
+            homePage = endpoint.url,
+            name = person.username ?: "anonymous",
+        )
+    )
 
 
 }

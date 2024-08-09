@@ -7,8 +7,8 @@ import com.ustadmobile.core.domain.xapi.model.XapiStatement
 import com.ustadmobile.core.domain.xxhash.XXHasher64FactoryCommonJvm
 import com.ustadmobile.core.domain.xxhash.XXStringHasherCommonJvm
 import com.ustadmobile.door.DatabaseBuilder
+import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.json.Json
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -25,13 +25,9 @@ class XapiStatementResourceTest {
 
     private lateinit var storeActivitiesUseCase: StoreActivitiesUseCase
 
-    private lateinit var defaultXapiSession: XapiSession
+    private lateinit var defaultXapiSession: XapiSessionEntity
 
-    //Note: as per xAPI spec, we should NOT encode default (eg. null) key values
-    private val json = Json {
-        encodeDefaults = false
-        ignoreUnknownKeys = true
-    }
+    private val xapiJson = XapiJson()
 
     @BeforeTest
     fun setup() {
@@ -43,44 +39,48 @@ class XapiStatementResourceTest {
             repo = null,
             xxHasher = xxHasher,
             endpoint = endpoint,
-            json = json,
+            xapiJson = xapiJson,
             hasherFactory = XXHasher64FactoryCommonJvm(),
             storeActivitiesUseCase = storeActivitiesUseCase,
         )
-        defaultXapiSession = XapiSession(
-            endpoint = endpoint,
-            accountPersonUid = 42L,
-            accountUsername = "user",
-            clazzUid = 0L,
-            contentEntryUid = 0L,
+        val registrationUuid = uuid4()
+        defaultXapiSession = XapiSessionEntity(
+            xseAccountPersonUid = 42L,
+            xseAccountUsername = "user",
+            xseClazzUid = 0L,
+            xseContentEntryUid = 0L,
+            xseRegistrationHi = registrationUuid.mostSignificantBits,
+            xseRegistrationLo = registrationUuid.leastSignificantBits,
         )
     }
 
-    suspend fun storeStatementAndAssert(
+    private suspend fun storeStatementAndAssert(
         resourcePath: String,
-        xapiSession: XapiSession,
+        xapiSession: XapiSessionEntity,
     ) : String {
         val id = uuid4().toString()
         val stmtJson = this::class.java.getResource(resourcePath)!!.readText()
-        val stmt = json.decodeFromString(XapiStatement.serializer(), stmtJson)
+        val stmt = xapiJson.json.decodeFromString(XapiStatement.serializer(), stmtJson)
         xapiStatementResource.put(
             statement = stmt,
             statementIdParam = id,
             xapiSession = xapiSession
         )
-        assertStatementStoredInDb(stmt.copy(id = id), db, xxHasher, json)
+        assertStatementStoredInDb(stmt.copy(id = id), db, xxHasher, xapiJson.json)
 
         return id
     }
 
     @Test
     fun givenStatementPut_whenGetCalled_thenShouldBeRetrieved() = runBlocking {
-        val xapiSession = XapiSession(
-            endpoint = endpoint,
-            accountPersonUid = 42L,
-            accountUsername = "user",
-            clazzUid = 0L,
-            contentEntryUid = 0L,
+        val uuid = uuid4()
+        val xapiSession = XapiSessionEntity(
+            xseAccountPersonUid = 42L,
+            xseAccountUsername = "user",
+            xseClazzUid = 0L,
+            xseContentEntryUid = 0L,
+            xseRegistrationHi = uuid.mostSignificantBits,
+            xseRegistrationLo = uuid.leastSignificantBits,
         )
 
         val id = storeStatementAndAssert(

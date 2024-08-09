@@ -37,7 +37,7 @@ import com.ustadmobile.libcache.integrity.sha256Integrity
 import com.ustadmobile.libcache.io.useAndReadSha256
 import com.ustadmobile.libcache.logging.NapierLoggingAdapter
 import com.ustadmobile.libcache.okhttp.UstadCacheInterceptor
-import com.ustadmobile.libcache.request.requestBuilder
+import com.ustadmobile.ihttp.request.iRequestBuilder
 import com.ustadmobile.libcache.response.bodyAsUncompressedSourceIfContentEncoded
 import io.ktor.client.HttpClient
 import kotlinx.io.files.Path
@@ -234,7 +234,7 @@ class XferTestNode(
     }
 
     fun getManifest(url: String): ContentManifest {
-        return httpCache.retrieve(requestBuilder(url))
+        return httpCache.retrieve(iRequestBuilder(url))
             ?.bodyAsUncompressedSourceIfContentEncoded()
             ?.readString()?.let {
                 json.decodeFromString(ContentManifest.serializer(), it)
@@ -247,7 +247,7 @@ class XferTestNode(
         url: String,
         expectedDefaultContentType: Boolean = true,
     ) {
-        val manifestResponse = httpCache.retrieve(requestBuilder(url))
+        val manifestResponse = httpCache.retrieve(iRequestBuilder(url))
         assertNotNull(manifestResponse, "Manifest response for $url should not be null")
         val manifestStored: ContentManifest = json.decodeFromString(
             manifestResponse.bodyAsUncompressedSourceIfContentEncoded()!!.readString())
@@ -256,7 +256,7 @@ class XferTestNode(
             "Manifest stored on node should have same number of entries")
         val mimeTypeHelper = FileMimeTypeHelperImpl()
         manifest.entries.forEach { entry ->
-            val cacheResponse = httpCache.retrieve(requestBuilder(entry.bodyDataUrl))
+            val cacheResponse = httpCache.retrieve(iRequestBuilder(entry.bodyDataUrl))
             assertNotNull(cacheResponse,
                 "Cache response for ${entry.uri} must not be null on node $name")
             val integrityStored = sha256Integrity(

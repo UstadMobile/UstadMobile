@@ -4,9 +4,9 @@ import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.domain.xapi.XapiSession
 import com.ustadmobile.core.domain.xapi.XapiStatementResource
 import com.ustadmobile.core.domain.xapi.model.XapiStatement
+import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
@@ -36,7 +36,7 @@ class SaveStatementOnClearWorker(
 
         statementResource.post(
             statements = json.decodeFromString(ListSerializer(XapiStatement.serializer()), statementsStr),
-            xapiSession = json.decodeFromString(XapiSession.serializer(), xapiSessionStr),
+            xapiSession = json.decodeFromString(XapiSessionEntity.serializer(), xapiSessionStr),
         )
 
         return Result.success()

@@ -5,8 +5,8 @@ import androidx.work.Data
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.domain.xapi.XapiSession
 import com.ustadmobile.core.domain.xapi.model.XapiStatement
+import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 
@@ -16,7 +16,7 @@ class SaveStatementOnClearUseCaseAndroid(
     private val json: Json,
 ): SaveStatementOnClearUseCase {
 
-    override fun invoke(statements: List<XapiStatement>, xapiSession: XapiSession) {
+    override fun invoke(statements: List<XapiStatement>, xapiSession: XapiSessionEntity) {
         val jobData = Data.Builder()
             .putString(SaveStatementOnClearUseCase.KEY_ENDPOINT, endpoint.url)
             .putString(
@@ -25,7 +25,7 @@ class SaveStatementOnClearUseCaseAndroid(
             )
             .putString(
                 SaveStatementOnClearUseCase.KEY_XAPI_SESSION,
-                json.encodeToString(XapiSession.serializer(), xapiSession)
+                json.encodeToString(XapiSessionEntity.serializer(), xapiSession)
             ).build()
 
         val workRequest = OneTimeWorkRequestBuilder<SaveStatementOnClearWorker>()

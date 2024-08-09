@@ -1,13 +1,13 @@
 package com.ustadmobile.libcache.cachecontrol
 
-import com.ustadmobile.libcache.headers.HttpHeaders
+import com.ustadmobile.ihttp.headers.IHttpHeaders
 
 class ResponseValidityChecker {
 
     /**
      * Check if headers1 matches headers2 as per the etag and last modified date.
      */
-    fun isMatchingEtagOrLastModified(headers1: HttpHeaders, headers2: HttpHeaders) : Boolean {
+    fun isMatchingEtagOrLastModified(headers1: IHttpHeaders, headers2: IHttpHeaders) : Boolean {
         val headers1Etag = headers1["etag"]
         val headers2Etag = headers2["etag"]
         if(headers1Etag != null && headers1Etag == headers2Etag) {
