@@ -3,6 +3,7 @@ package com.ustadmobile.ihttp.nanohttpd
 import com.ustadmobile.ihttp.headers.IHttpHeaders
 import com.ustadmobile.ihttp.request.IHttpRequest
 import com.ustadmobile.ihttp.request.IHttpRequestWithByteBody
+import com.ustadmobile.ihttp.request.IHttpRequestWithFormUrlEncodedData
 import com.ustadmobile.ihttp.request.IHttpRequestWithTextBody
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.NanoHTTPD.Method
@@ -11,7 +12,7 @@ import java.io.File
 internal class NanoHttpdRequestAdapter(
     private val session: NanoHTTPD.IHTTPSession,
     private val server: NanoHTTPD,
-): IHttpRequestWithTextBody, IHttpRequestWithByteBody {
+): IHttpRequestWithTextBody, IHttpRequestWithByteBody, IHttpRequestWithFormUrlEncodedData {
 
     override val headers: IHttpHeaders = IHttpHeaders.fromMap(
         session.headers.map { it.key to listOf(it.value) }.toMap()
@@ -52,6 +53,12 @@ internal class NanoHttpdRequestAdapter(
     override suspend fun bodyAsText(): String? {
         return bodyAsBytes()?.decodeToString()
     }
+
+    override suspend fun bodyAsFormUrlEncodedDataMap(): Map<String, List<String>> {
+        session.parseBody(mutableMapOf())
+        return session.parameters
+    }
+
 }
 
 fun NanoHTTPD.IHTTPSession.asIHttpRequest(server: NanoHTTPD): IHttpRequest {

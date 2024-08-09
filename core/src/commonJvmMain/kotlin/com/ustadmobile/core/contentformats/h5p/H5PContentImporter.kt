@@ -284,6 +284,21 @@ class H5PContentImporter(
                     frameJs: 'dist/frame.bundle.js',
                     frameCss: 'dist/styles/h5p.css',
                     xAPIObjectIRI: searchParams.get("activity_id"),
+                    saveFreq: 10,
+                    ajax: {
+                        contentUserDataUrl: searchParams.get("endpoint") + 
+                            "activities/h5p-userdata?" + 
+                            "Authorization=" + encodeURIComponent(searchParams.get("auth")) +
+                            "&stateId=:dataType" +
+                            "&activityId=" + encodeURIComponent(searchParams.get("activity_id")) + 
+                            "&subContentId=:subContentId" +
+                            "&agent=" + encodeURIComponent(searchParams.get("actor")) + 
+                            "&registration=" + searchParams.get("registration")
+                    },
+                    user: {
+                        name : "a user",
+                        email: "user@example.org",
+                    }
                 };
                 
                 new H5PStandalone.H5P(el, options).then(function () {

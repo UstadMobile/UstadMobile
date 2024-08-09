@@ -13,6 +13,7 @@ import com.ustadmobile.core.domain.xapi.state.ListXapiStateIdsUseCase
 import com.ustadmobile.core.domain.xapi.state.RetrieveXapiStateUseCase
 import com.ustadmobile.core.domain.xapi.state.StoreXapiStateUseCase
 import com.ustadmobile.core.domain.xapi.state.XapiStateParams
+import com.ustadmobile.core.domain.xapi.state.h5puserdata.H5PUserDataEndpointUseCase
 import com.ustadmobile.core.util.ext.firstNonWhiteSpaceChar
 import com.ustadmobile.ihttp.headers.iHeadersBuilder
 import com.ustadmobile.ihttp.request.IHttpRequest
@@ -34,6 +35,7 @@ class XapiHttpServerUseCase(
     private val retrieveXapiStateUseCase: RetrieveXapiStateUseCase,
     private val listXapiStateIdsUseCase: ListXapiStateIdsUseCase,
     private val deleteXapiStateRequest: DeleteXapiStateUseCase,
+    private val h5PUserDataEndpointUseCase: H5PUserDataEndpointUseCase,
     private val db: UmAppDatabase,
     xapiJson: XapiJson,
     private val endpoint: Endpoint,
@@ -48,6 +50,13 @@ class XapiHttpServerUseCase(
         return this.queryParam(paramName) ?: throw HttpApiException(400, "Missing $paramName")
     }
 
+    private fun IHttpRequest.xapiStateParams() = XapiStateParams(
+        activityId = queryParamOrThrow("activityId"),
+        agent = queryParamOrThrow("agent"),
+        registration = queryParam("registration"),
+        stateId = queryParamOrThrow("stateId")
+    )
+
     /**
      * @param pathSegments the segments of the path AFTER the xapi endpoint (exclusive)
      */
@@ -55,8 +64,12 @@ class XapiHttpServerUseCase(
         pathSegments: List<String>,
         request: IHttpRequest
     ): IHttpResponse {
+
         return try {
+            //Allow use of Authorization as a query parameter - needed for h5puserdata where it is
+            //not possible to set a header
             val authHeader = request.headers["Authorization"]?.trim()
+                ?: request.queryParam("Authorization")
                 ?: throw HttpApiException(401, "Missing auth")
 
             val (authScheme, authData) = authHeaderSplitRegex.split(authHeader, limit = 2)
@@ -126,13 +139,6 @@ class XapiHttpServerUseCase(
 
                 //Xapi State Resource
                 resourceName == "activities" && pathSegments.getOrNull(1) == "state" -> {
-                    fun IHttpRequest.xapiStateParams() = XapiStateParams(
-                        activityId = queryParamOrThrow("activityId"),
-                        agent = queryParamOrThrow("agent"),
-                        registration = queryParam("registration"),
-                        stateId = queryParamOrThrow("stateId")
-                    )
-
                     when (request.method) {
                         Method.POST, Method.PUT -> {
                             storeXapiStateUseCase(
@@ -221,6 +227,14 @@ class XapiHttpServerUseCase(
                             throw HttpApiException(400, "Bad request: ${request.method} ${request.url}")
                         }
                     }
+                }
+
+                resourceName == "activities" && pathSegments.getOrNull(1) == "h5p-userdata" -> {
+                    h5PUserDataEndpointUseCase(
+                        request = request,
+                        xapiStateParams = request.xapiStateParams(),
+                        xapiSessionEntity = xapiSessionEntity,
+                    )
                 }
 
                 else -> {

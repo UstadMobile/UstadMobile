@@ -110,6 +110,7 @@ import com.ustadmobile.core.domain.xapi.state.DeleteXapiStateUseCase
 import com.ustadmobile.core.domain.xapi.state.ListXapiStateIdsUseCase
 import com.ustadmobile.core.domain.xapi.state.RetrieveXapiStateUseCase
 import com.ustadmobile.core.domain.xapi.state.StoreXapiStateUseCase
+import com.ustadmobile.core.domain.xapi.state.h5puserdata.H5PUserDataEndpointUseCase
 import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
 import com.ustadmobile.core.domain.xxhash.XXHasher64FactoryCommonJvm
 import com.ustadmobile.core.domain.xxhash.XXStringHasher
@@ -601,9 +602,20 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             storeXapiStateUseCase = instance(),
             listXapiStateIdsUseCase = instance(),
             deleteXapiStateRequest = instance(),
+            h5PUserDataEndpointUseCase = instance(),
             db = instance(tag = DoorTag.TAG_DB),
             xapiJson = instance(),
             endpoint = context,
+        )
+    }
+
+    bind<H5PUserDataEndpointUseCase>() with scoped(EndpointScope.Default).singleton {
+        H5PUserDataEndpointUseCase(
+            db = instance(tag = DoorTag.TAG_DB),
+            repo = instanceOrNull(tag = DoorTag.TAG_REPO),
+            xapiJson = instance(),
+            xxStringHasher = instance(),
+            xxHasher64Factory = instance(),
         )
     }
 

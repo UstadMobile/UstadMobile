@@ -99,27 +99,8 @@ import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
     PendingRepositorySession::class,
     DoorNode::class,
 
-], version = 198)
+], version = 199)
 expect abstract class UmAppDatabase : RoomDatabase {
-
-    /*
-        Changes from 38-39:
-        1. Added personGroupUid to Person
-        2. Added personGroupFlag to PersonGroup
-        3. Removed groupPersonUid from PersonGroup
-
-        Changes from 36:
-        1. Added school uid to Clazz
-        2. Added school Phone number to School
-        3. Added schoolGender to School
-        4. Added schoolHolidayCalendar to School
-        5. Added SchoolMember and SchoolMemberDao
-        6. Added ClazzWork, ClazzWorkContentJoin, Comments,ClazzWorkQuestion,ClazzWorkQuestionOption
-        7. Added ContainerUploadJob
-        Changes in 34:
-        Added School and Assignment based entities
-        Updated Clazz : added clazzFeatures and removed individual feature bits
-     */
 
     abstract fun personDao(): PersonDao
 
