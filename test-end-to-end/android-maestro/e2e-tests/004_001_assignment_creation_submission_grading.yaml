@@ -140,13 +140,7 @@ env:
 # assert that teacher able to open and view file submitted by student
 - assertVisible: "Assignment_File.pdf"
 - tapOn: "Assignment_File.pdf"
-- assertVisible: "Early Childhood\r
-
-    Development Kit:\r
-
-    ATreasure Box of Activities\r
-
-    Activity Guide\r\n"
+- assertVisible: "Assignment test Pdf\r\n"
 - back
 - assertVisible: "Mark comment"
 - tapOn: "Mark comment"
