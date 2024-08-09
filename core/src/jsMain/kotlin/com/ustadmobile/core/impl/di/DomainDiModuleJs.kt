@@ -30,6 +30,8 @@ import com.ustadmobile.core.domain.contententry.launchcontent.xapi.ResolveXapiLa
 import com.ustadmobile.core.domain.contententry.move.MoveContentEntriesUseCase
 import com.ustadmobile.core.domain.deleteditem.DeletePermanentlyUseCase
 import com.ustadmobile.core.domain.deleteditem.RestoreDeletedItemUseCase
+import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCase
+import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCaseDirect
 import com.ustadmobile.core.domain.openlink.OnClickLinkUseCase
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCaseJs
@@ -48,12 +50,15 @@ import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseJs
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCaseJs
 import com.ustadmobile.core.domain.xapi.StoreActivitiesUseCase
+import com.ustadmobile.core.domain.xapi.XapiJson
 import com.ustadmobile.core.domain.xapi.XapiStatementResource
 import com.ustadmobile.core.domain.xapi.noninteractivecontentusagestatementrecorder.NonInteractiveContentXapiStatementRecorderFactory
 import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnClearUseCase
 import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnClearUseCaseJs
 import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnUnloadUseCase
 import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnUnloadUseCaseJs
+import com.ustadmobile.core.domain.xapi.session.ResumeOrStartXapiSessionUseCase
+import com.ustadmobile.core.domain.xapi.session.ResumeOrStartXapiSessionUseCaseJs
 import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
 import com.ustadmobile.core.domain.xxhash.XXHasher64FactoryJs
 import com.ustadmobile.core.domain.xxhash.XXStringHasher
@@ -173,7 +178,28 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
             activeRepo = instance(tag = DoorTag.TAG_REPO),
             httpClient = instance(),
             json = instance(),
-            xppFactory = instance(tag = DiTag.XPP_FACTORY_NSAWARE)
+            xppFactory = instance(tag = DiTag.XPP_FACTORY_NSAWARE),
+            endpoint = context,
+            resumeOrStartXapiSessionUseCase = instance(),
+            accountManager = instance(),
+            getApiUrlUseCase = instance(),
+        )
+    }
+
+    bind<XapiJson>() with singleton {
+        XapiJson()
+    }
+
+    bind<GetApiUrlUseCase>() with scoped(endpointScope).singleton {
+        GetApiUrlUseCaseDirect(context)
+    }
+
+    bind<ResumeOrStartXapiSessionUseCase>() with scoped(endpointScope).singleton {
+        ResumeOrStartXapiSessionUseCaseJs(
+            endpoint = context,
+            httpClient = instance(),
+            repo = instance(tag = DoorTag.TAG_REPO),
+            xapiJson = instance()
         )
     }
 
@@ -273,7 +299,7 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
             repo = instance(tag = DoorTag.TAG_REPO),
             xxHasher = instance(),
             endpoint = context,
-            json = instance(),
+            xapiJson = instance(),
             hasherFactory = instance(),
             storeActivitiesUseCase = instance(),
         )
@@ -297,6 +323,7 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
             saveStatementOnClearUseCase = instance(),
             saveStatementOnUnloadUseCase = instance(),
             xapiStatementResource = instance(),
+            endpoint = context,
         )
     }
 

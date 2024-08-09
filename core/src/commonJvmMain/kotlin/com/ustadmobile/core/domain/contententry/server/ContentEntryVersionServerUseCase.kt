@@ -11,9 +11,9 @@ import com.ustadmobile.core.util.stringvalues.asIStringValues
 import com.ustadmobile.core.util.stringvalues.asOkHttpHeaders
 import com.ustadmobile.core.util.stringvalues.filtered
 import com.ustadmobile.core.util.stringvalues.withOverrides
-import com.ustadmobile.libcache.okhttp.asOkHttpHeaders
-import com.ustadmobile.libcache.okhttp.asOkHttpRequest
-import com.ustadmobile.libcache.request.HttpRequest
+import com.ustadmobile.ihttp.okhttp.headers.asOkHttpHeaders
+import com.ustadmobile.ihttp.okhttp.request.asOkHttpRequest
+import com.ustadmobile.ihttp.request.IHttpRequest
 import io.github.aakira.napier.Napier
 import io.github.reactivecircus.cache4k.Cache
 import kotlinx.coroutines.Dispatchers
@@ -114,7 +114,7 @@ class ContentEntryVersionServerUseCase(
      *        (which is done by both NanoHTTPD and KTOR)
      */
     operator fun invoke(
-        request: HttpRequest,
+        request: IHttpRequest,
         contentEntryVersionUid: Long,
         pathInContentEntryVersion: String,
     ) : Response {
