@@ -81,7 +81,7 @@ class RetrieveXapiStateUseCase(
                 it.startsWith("text/") || it == "application/json"
             } == true -> {
                 TextRetrieveXapiStateResult(
-                    content = stateEntity.seContent!!,
+                    content = stateEntity.seContent,
                     lastModified = stateEntity.seLastMod,
                     contentType = stateEntity.seContentType!!
                 )
@@ -89,7 +89,7 @@ class RetrieveXapiStateUseCase(
 
             else -> {
                 ByteRetrieveXapiStateResult(
-                    content = stateEntity.seContent!!.base64StringToByteArray(),
+                    content = stateEntity.seContent.base64StringToByteArray(),
                     lastModified = stateEntity.seLastMod,
                     contentType = stateEntity.seContentType!!
                 )
