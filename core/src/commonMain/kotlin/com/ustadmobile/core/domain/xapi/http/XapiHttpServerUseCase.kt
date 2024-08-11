@@ -12,7 +12,6 @@ import com.ustadmobile.core.domain.xapi.state.DeleteXapiStateUseCase
 import com.ustadmobile.core.domain.xapi.state.ListXapiStateIdsUseCase
 import com.ustadmobile.core.domain.xapi.state.RetrieveXapiStateUseCase
 import com.ustadmobile.core.domain.xapi.state.StoreXapiStateUseCase
-import com.ustadmobile.core.domain.xapi.state.XapiStateParams
 import com.ustadmobile.core.domain.xapi.state.h5puserdata.H5PUserDataEndpointUseCase
 import com.ustadmobile.core.util.ext.firstNonWhiteSpaceChar
 import com.ustadmobile.ihttp.headers.iHeadersBuilder
@@ -45,17 +44,6 @@ class XapiHttpServerUseCase(
 
     //Simple split by whitespace
     private val authHeaderSplitRegex = Regex("\\s+")
-
-    private fun IHttpRequest.queryParamOrThrow(paramName: String): String {
-        return this.queryParam(paramName) ?: throw HttpApiException(400, "Missing $paramName")
-    }
-
-    private fun IHttpRequest.xapiStateParams() = XapiStateParams(
-        activityId = queryParamOrThrow("activityId"),
-        agent = queryParamOrThrow("agent"),
-        registration = queryParam("registration"),
-        stateId = queryParamOrThrow("stateId")
-    )
 
     /**
      * @param pathSegments the segments of the path AFTER the xapi endpoint (exclusive)
@@ -232,7 +220,6 @@ class XapiHttpServerUseCase(
                 resourceName == "activities" && pathSegments.getOrNull(1) == "h5p-userdata" -> {
                     h5PUserDataEndpointUseCase(
                         request = request,
-                        xapiStateParams = request.xapiStateParams(),
                         xapiSessionEntity = xapiSessionEntity,
                     )
                 }

@@ -63,7 +63,7 @@ data class StateEntity(
 
     var seActivityUid: Long  = 0,
 
-    var seStateId: String? = null,
+    var seStateId: String = "",
 
     @ReplicateEtag
     @ReplicateLastModified
@@ -77,7 +77,7 @@ data class StateEntity(
     //Reserved for future use
     var seCompressed: Int = 0,
 
-    var seContent: String? = null,
+    var seContent: String = "",
 
     var seDeleted: Boolean = false,
 
