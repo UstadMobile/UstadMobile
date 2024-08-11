@@ -298,14 +298,10 @@ dependencies {
     //Image loading library
     implementation libs.picasso
 
-    //Gson for JSON serializing and deserializing
-    implementation libs.gson
-
     //KTOR
-    implementation libs.ktor.serialization.gson
     implementation libs.ktor.client.okhttp
     implementation libs.ktor.client.content.negotiation
-    implementation libs.ktor.client.cio
+
 
     //http server
     implementation libs.nanohttpd
