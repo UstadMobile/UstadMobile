@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 199,
-    "identityHash": "e9515b1c6ca9327542fa10f463c09418",
+    "identityHash": "ba912f37337119dbd28d7b21c7942193",
     "entities": [
       {
         "tableName": "ClazzLog",
@@ -6012,7 +6012,7 @@
       },
       {
         "tableName": "StateEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`seActorUid` INTEGER NOT NULL, `seHash` INTEGER NOT NULL, `seActivityUid` INTEGER NOT NULL, `seStateId` TEXT NOT NULL, `seLastMod` INTEGER NOT NULL, `seTimeStored` INTEGER NOT NULL, `seContentType` TEXT, `seCompressed` INTEGER NOT NULL, `seContent` TEXT NOT NULL, `seDeleted` INTEGER NOT NULL, `seRegistrationHi` INTEGER, `seRegistrationLo` INTEGER, `seH5PPreloaded` INTEGER NOT NULL, `seH5PSubContentId` TEXT, PRIMARY KEY(`seActorUid`, `seHash`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`seActorUid` INTEGER NOT NULL, `seHash` INTEGER NOT NULL, `seActivityUid` INTEGER NOT NULL, `seStateId` TEXT NOT NULL, `seLastMod` INTEGER NOT NULL, `seTimeStored` INTEGER NOT NULL, `seContentType` TEXT NOT NULL, `seCompressed` INTEGER NOT NULL, `seContent` TEXT NOT NULL, `seDeleted` INTEGER NOT NULL, `seRegistrationHi` INTEGER, `seRegistrationLo` INTEGER, `seH5PPreloaded` INTEGER NOT NULL, `seH5PSubContentId` TEXT, PRIMARY KEY(`seActorUid`, `seHash`))",
         "fields": [
           {
             "fieldPath": "seActorUid",
@@ -6054,7 +6054,7 @@
             "fieldPath": "seContentType",
             "columnName": "seContentType",
             "affinity": "TEXT",
-            "notNull": false
+            "notNull": true
           },
           {
             "fieldPath": "seCompressed",
@@ -6327,7 +6327,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e9515b1c6ca9327542fa10f463c09418')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ba912f37337119dbd28d7b21c7942193')"
     ]
   }
 }

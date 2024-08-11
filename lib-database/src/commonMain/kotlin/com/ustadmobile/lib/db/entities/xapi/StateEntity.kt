@@ -72,7 +72,7 @@ data class StateEntity(
     //Reserved for future use
     var seTimeStored: Long = 0,
 
-    var seContentType: String? = null,
+    var seContentType: String = "",
 
     //Reserved for future use
     var seCompressed: Int = 0,
