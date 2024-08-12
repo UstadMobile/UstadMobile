@@ -151,8 +151,9 @@ env:
 - tapOn: "External link"
 - runFlow:
     file: "../common/chrome-first-run-check.yaml"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/verify_external_link"
 - extendedWaitUntil:
     visible: "Start or restart server now"
     timeout: 10000
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/verify_external_link"
+
 
