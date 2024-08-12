@@ -22,7 +22,9 @@ class AddNewPersonUseCase(
     ) : Long {
         val effectiveDb = (repo ?: db)
         return effectiveDb.withDoorTransactionAsync {
-            val personUid = effectiveDb.personDao().insertAsync(person)
+            val insertedUid = effectiveDb.personDao().insertAsync(person)
+            val personUid = if(person.personUid  == 0L) insertedUid else person.personUid
+
             effectiveDb.systemPermissionDao().upsertAsync(
                 SystemPermission(
                     spToPersonUid = personUid,
