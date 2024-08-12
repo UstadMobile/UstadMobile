@@ -1,6 +1,5 @@
 package com.ustadmobile.core.util
 
-import com.google.gson.Gson
 import com.russhwolf.settings.PropertiesSettings
 import com.russhwolf.settings.Settings
 import com.ustadmobile.core.account.*
@@ -43,7 +42,7 @@ import java.io.File
 import java.nio.file.Files
 import kotlin.random.Random
 import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.serialization.gson.*
+import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
 import nl.adaptivity.xmlutil.serialization.XML
@@ -57,14 +56,6 @@ fun DI.onActiveAccount(): DI {
 }
 
 fun DI.onActiveAccountDirect() = direct.on(direct.instance<UstadAccountManager>().activeEndpoint)
-
-fun DI.activeDbInstance() = onActiveAccount().instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
-
-fun DI.activeRepoInstance() = onActiveAccount().instance<UmAppDatabase>(tag = DoorTag.TAG_REPO)
-
-fun DI.directActiveDbInstance() = onActiveAccountDirect().instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
-
-fun DI.directActiveRepoInstance() = onActiveAccountDirect().instance<UmAppDatabase>(tag = DoorTag.TAG_REPO)
 
 /**
  * UstadTestRule makes a fresh almost-ready-to-go DI module for each test run. The DB and SystemImpl
@@ -105,7 +96,7 @@ class UstadTestRule(): TestWatcher() {
         )
 
         val langConfig = SupportedLanguagesConfig(
-            systemLocales = kotlin.collections.listOf("en-US"),
+            systemLocales = listOf("en-US"),
             settings = settings,
         )
 
@@ -116,7 +107,7 @@ class UstadTestRule(): TestWatcher() {
 
         httpClient = HttpClient(OkHttp) {
             install(ContentNegotiation) {
-                gson()
+                json()
             }
             install(HttpTimeout)
 
@@ -186,9 +177,6 @@ class UstadTestRule(): TestWatcher() {
                 ClientId(nodeId.toInt())
             }
 
-            bind<Gson>() with singleton {
-                Gson()
-            }
 
             bind<OkHttpClient>() with singleton {
                 okHttpClient

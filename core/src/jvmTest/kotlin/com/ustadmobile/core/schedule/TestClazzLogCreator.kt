@@ -17,7 +17,7 @@ import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.serialization.gson.*
+import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import org.junit.After
@@ -51,7 +51,7 @@ class TestClazzLogCreator {
         okHttpClient = OkHttpClient()
         httpClient = HttpClient(OkHttp) {
             install(ContentNegotiation) {
-                gson()
+                json()
             }
             install(HttpTimeout)
 
@@ -114,11 +114,11 @@ class TestClazzLogCreator {
 
             val createdLogs = db.clazzLogDao().findByClazzUidWithinTimeRange(testClazz.clazzUid,
                     fromTime, toTime)
-            Assert.assertEquals("Created one clazz log for clazz schedule", 1,
+            assertEquals("Created one clazz log for clazz schedule", 1,
                     createdLogs.size)
-            Assert.assertEquals("Log date is as expected", "Fri, 15 May 2020 06:00:00 UTC",
+            assertEquals("Log date is as expected", "Fri, 15 May 2020 06:00:00 UTC",
                     DateTime.fromUnix(createdLogs[0].logDate).format(dateFormat))
-            Assert.assertEquals("Created log has correctly set schedule uid",
+            assertEquals("Created log has correctly set schedule uid",
                     createdLogs[0].clazzLogScheduleUid, testClazzSchedule.scheduleUid)
 
         }
@@ -237,7 +237,7 @@ class TestClazzLogCreator {
             val clazzLogsCreated = db.clazzLogDao().findByClazzUidWithinTimeRange(testClazz.clazzUid,
                     fromTime, toTime)
 
-            Assert.assertEquals("No clazz logs were created because it was not yet the same day " +
+            assertEquals("No clazz logs were created because it was not yet the same day " +
                     "as per the local time for the class",
                     0, clazzLogsCreated.size)
         }
