@@ -16,7 +16,7 @@ import com.ustadmobile.lib.db.entities.TransferJobItem
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.io.range
 import com.ustadmobile.libcache.partial.ContentRange
-import com.ustadmobile.libcache.request.HttpRequest
+import com.ustadmobile.ihttp.request.IHttpRequest
 import com.ustadmobile.libcache.response.ByteArrayResponse
 import com.ustadmobile.util.test.ext.newFileFromResource
 import io.ktor.client.HttpClient
@@ -115,7 +115,7 @@ class BlobUploadClientUseCaseJvmTest {
         mockCache = mock { }
         mockCache.stub {
             on { retrieve(any()) }.thenAnswer { invocation ->
-                val request: HttpRequest = invocation.arguments.first() as HttpRequest
+                val request: IHttpRequest = invocation.arguments.first() as IHttpRequest
                 val url = request.url
                 val blobFile = blobFileMap[url]!!
 

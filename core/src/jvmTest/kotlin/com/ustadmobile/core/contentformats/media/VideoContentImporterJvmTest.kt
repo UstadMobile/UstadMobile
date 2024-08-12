@@ -16,7 +16,7 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryImportJob
 import com.ustadmobile.lib.util.SysPathUtil
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
-import com.ustadmobile.libcache.request.requestBuilder
+import com.ustadmobile.ihttp.request.iRequestBuilder
 import com.ustadmobile.libcache.response.bodyAsString
 import com.ustadmobile.util.test.ext.newFileFromResource
 import kotlinx.coroutines.runBlocking
@@ -170,7 +170,7 @@ class VideoContentImporterJvmTest : AbstractContentImporterTest() {
             )
         }
         val manifestResponse = ustadCache.retrieve(
-            requestBuilder(result.cevManifestUrl!!)
+            iRequestBuilder(result.cevManifestUrl!!)
         )
         val manifest = json.decodeFromString(
             ContentManifest.serializer(), manifestResponse!!.bodyAsString()!!
@@ -185,7 +185,7 @@ class VideoContentImporterJvmTest : AbstractContentImporterTest() {
         assertEquals("video/mp4", videoManifestItem.responseHeaders["content-type"])
 
         val mediaInfoResponse = ustadCache.retrieve(
-            requestBuilder(
+            iRequestBuilder(
                 url = manifest.entries.first {
                     it.uri == "media.json"
                 }.bodyDataUrl

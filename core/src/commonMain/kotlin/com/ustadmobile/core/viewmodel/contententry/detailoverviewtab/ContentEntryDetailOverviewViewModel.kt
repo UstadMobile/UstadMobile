@@ -328,8 +328,9 @@ class ContentEntryDetailOverviewViewModel(
                     launcher(
                         contentEntryVersion = latestContentEntryVersion,
                         navController = navController,
+                        clazzUid = clazzUid,
+                        cbUid = savedStateHandle[ARG_COURSE_BLOCK_UID]?.toLong() ?: 0,
                         target = openTarget,
-                        xapiSession = createXapiSession(contentEntryUid = entityUidArg),
                     )
                 }else {
                     Napier.d("ContentEntryDetailOverviewViewModel: onClickOpen: latestContentEntryVersion = null")

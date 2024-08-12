@@ -23,11 +23,15 @@ import com.ustadmobile.lib.db.entities.xapi.ActivityEntity
 import com.ustadmobile.lib.db.entities.xapi.ActivityInteractionEntity
 import com.ustadmobile.lib.db.entities.xapi.ActivityLangMapEntry
 import com.ustadmobile.core.db.dao.xapi.ActivityLangMapEntryDao
+import com.ustadmobile.core.db.dao.xapi.StateDeleteCommandDao
+import com.ustadmobile.lib.db.entities.xapi.StateDeleteCommand
+import com.ustadmobile.core.db.dao.xapi.StateEntityDao
 import com.ustadmobile.lib.db.entities.xapi.StatementContextActivityJoin
 import com.ustadmobile.core.db.dao.xapi.StatementContextActivityJoinDao
 import com.ustadmobile.core.db.dao.xapi.StatementEntityJsonDao
 import com.ustadmobile.core.db.dao.xapi.XapiSessionEntityDao
 import com.ustadmobile.lib.db.entities.xapi.ActivityExtensionEntity
+import com.ustadmobile.lib.db.entities.xapi.StateEntity
 import com.ustadmobile.lib.db.entities.xapi.StatementEntityJson
 import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 
@@ -86,6 +90,8 @@ import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
     StatementContextActivityJoin::class,
     XapiSessionEntity::class,
     StatementEntityJson::class,
+    StateEntity::class,
+    StateDeleteCommand::class,
 
     //Door entities
     OutgoingReplication::class,
@@ -93,27 +99,8 @@ import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
     PendingRepositorySession::class,
     DoorNode::class,
 
-], version = 194)
+], version = 199)
 expect abstract class UmAppDatabase : RoomDatabase {
-
-    /*
-        Changes from 38-39:
-        1. Added personGroupUid to Person
-        2. Added personGroupFlag to PersonGroup
-        3. Removed groupPersonUid from PersonGroup
-
-        Changes from 36:
-        1. Added school uid to Clazz
-        2. Added school Phone number to School
-        3. Added schoolGender to School
-        4. Added schoolHolidayCalendar to School
-        5. Added SchoolMember and SchoolMemberDao
-        6. Added ClazzWork, ClazzWorkContentJoin, Comments,ClazzWorkQuestion,ClazzWorkQuestionOption
-        7. Added ContainerUploadJob
-        Changes in 34:
-        Added School and Assignment based entities
-        Updated Clazz : added clazzFeatures and removed individual feature bits
-     */
 
     abstract fun personDao(): PersonDao
 
@@ -256,5 +243,9 @@ expect abstract class UmAppDatabase : RoomDatabase {
     abstract fun xapiSessionEntityDao(): XapiSessionEntityDao
 
     abstract fun statementEntityJsonDao(): StatementEntityJsonDao
+
+    abstract fun stateEntityDao(): StateEntityDao
+
+    abstract fun stateDeleteCommandDao(): StateDeleteCommandDao
 
 }

@@ -3,9 +3,9 @@ package com.ustadmobile.core.embeddedhttp
 import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServerUseCase
 import com.ustadmobile.core.io.ext.readString
 import com.ustadmobile.core.util.newTestOkHttpClient
+import com.ustadmobile.ihttp.okhttp.request.asOkHttpRequest
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
-import com.ustadmobile.libcache.okhttp.asOkHttpRequest
-import com.ustadmobile.libcache.request.HttpRequest
+import com.ustadmobile.ihttp.request.IHttpRequest
 import kotlinx.serialization.json.Json
 import net.thauvin.erik.urlencoder.UrlEncoderUtil
 import okhttp3.MediaType.Companion.toMediaType
@@ -51,7 +51,7 @@ class EmbeddedHttpServerTest {
     private fun ContentEntryVersionServerUseCase.stubTextResponse(text: String) {
         stub {
             onBlocking { invoke(any(), any(), any()) }.thenAnswer {
-                val httpCacheRequest = it.arguments.first() as HttpRequest
+                val httpCacheRequest = it.arguments.first() as IHttpRequest
                 OkHttpResponse.Builder()
                     .request(httpCacheRequest.asOkHttpRequest())
                     .body(text.toResponseBody("text/plain".toMediaType()))
@@ -73,6 +73,7 @@ class EmbeddedHttpServerTest {
             contentEntryVersionServerUseCase =  { mockUseCase },
             staticUmAppFilesDir = temporaryFolder.newFolder(),
             mimeTypeHelper = FileMimeTypeHelperImpl(),
+            xapiServerUseCase = { mock { /* not used for this test */ } }
         )
         httpServer.start()
         val contentEntryVersionUid = 1234L

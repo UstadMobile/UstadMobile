@@ -8,7 +8,7 @@ import io.ktor.client.call.*
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
-import io.ktor.serialization.gson.*
+import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert
@@ -52,7 +52,7 @@ class IHTTPSessionExtTest  {
         embeddedHttpd.start()
         httpClient = HttpClient(OkHttp) {
             install(ContentNegotiation) {
-                gson()
+                json()
             }
         }
     }

@@ -1,15 +1,16 @@
 package com.ustadmobile.libcache.response
 
 import com.ustadmobile.door.util.systemTimeInMillis
-import com.ustadmobile.libcache.headers.HttpHeaders
+import com.ustadmobile.ihttp.headers.IHttpHeaders
+import com.ustadmobile.ihttp.headers.iHeadersBuilder
 import com.ustadmobile.libcache.headers.addIntegrity
 import com.ustadmobile.libcache.headers.containsHeader
-import com.ustadmobile.libcache.headers.headersBuilder
 import com.ustadmobile.libcache.headers.integrity
 import com.ustadmobile.libcache.integrity.sha256Integrity
 import com.ustadmobile.libcache.io.lastModified
 import com.ustadmobile.libcache.io.useAndReadSha256
-import com.ustadmobile.libcache.request.HttpRequest
+import com.ustadmobile.ihttp.request.IHttpRequest
+import com.ustadmobile.ihttp.response.IHttpResponse
 import kotlinx.atomicfu.atomic
 import kotlinx.io.IOException
 import kotlinx.io.Source
@@ -21,19 +22,19 @@ class HttpPathResponse(
     private val path: Path,
     private val fileSystem: FileSystem,
     mimeType: String,
-    override val request: HttpRequest,
+    override val request: IHttpRequest,
     integrity: String? = null,
-    extraHeaders: HttpHeaders? = null,
-): HttpResponse {
+    extraHeaders: IHttpHeaders? = null,
+): IHttpResponse {
 
     private val bodyRead = atomic(false)
 
-    override val headers: HttpHeaders
+    override val headers: IHttpHeaders
 
     init {
         val metadata = fileSystem.metadataOrNull(path)
             ?: throw IOException("Cannot read from path")
-        headers = headersBuilder {
+        headers = iHeadersBuilder {
             header("Content-Length", metadata.size.toString())
             header("Content-Type", mimeType)
             header("Accept-Ranges", "bytes")

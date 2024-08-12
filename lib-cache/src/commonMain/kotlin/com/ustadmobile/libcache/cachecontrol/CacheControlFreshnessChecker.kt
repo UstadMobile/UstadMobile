@@ -1,6 +1,7 @@
 package com.ustadmobile.libcache.cachecontrol
 
-import com.ustadmobile.libcache.headers.HttpHeaders
+import com.ustadmobile.ihttp.headers.IHttpHeaders
+
 
 /**
  * Interface that checks a request and cached response to determine if the response is fresh or stale,
@@ -22,11 +23,11 @@ interface CacheControlFreshnessChecker {
      * @param responseFirstStoredTime the time the response was first
      */
     operator fun invoke(
-        requestHeaders: HttpHeaders,
+        requestHeaders: IHttpHeaders,
         requestDirectives: RequestCacheControlHeader? = requestHeaders["cache-control"]?.let {
             RequestCacheControlHeader.parse(it)
         },
-        responseHeaders: HttpHeaders,
+        responseHeaders: IHttpHeaders,
         responseDirectives: ResponseCacheControlHeader? = responseHeaders["cache-control"]?.let {
             ResponseCacheControlHeader.parse(it)
         },

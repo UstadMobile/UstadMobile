@@ -1,7 +1,7 @@
 package com.ustadmobile.core.domain.xapi.savestatementonclear
 
-import com.ustadmobile.core.domain.xapi.XapiSession
 import com.ustadmobile.core.domain.xapi.model.XapiStatement
+import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 
 /**
  * Save xAPI statement(s) when a ViewModel is being cleared e.g. when the user navigates away
@@ -18,7 +18,7 @@ interface SaveStatementOnClearUseCase {
 
     operator fun invoke(
         statements: List<XapiStatement>,
-        xapiSession: XapiSession,
+        xapiSession: XapiSessionEntity,
     )
 
     companion object {
