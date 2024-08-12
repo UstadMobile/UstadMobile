@@ -1,6 +1,7 @@
 package com.ustadmobile.libcache.cachecontrol
 
-import com.ustadmobile.libcache.headers.HttpHeaders
+import com.ustadmobile.ihttp.headers.IHttpHeaders
+
 
 /**
  * Determine if the given response can be stored. Responses that can be cached must:
@@ -12,7 +13,7 @@ interface ResponseCacheabilityChecker {
 
     operator fun invoke(
         statusCode: Int,
-        responseHeaders: HttpHeaders,
+        responseHeaders: IHttpHeaders,
         responseCacheDirectives: ResponseCacheControlHeader? = responseHeaders["cache-control"]?.let {
             ResponseCacheControlHeader.parse(it)
         },

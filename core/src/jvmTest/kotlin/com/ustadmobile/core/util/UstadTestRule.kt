@@ -12,6 +12,7 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
+import com.ustadmobile.core.domain.xapi.XapiJson
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.config.ApiUrlConfig
@@ -136,6 +137,8 @@ class UstadTestRule(): TestWatcher() {
             bind<Json>() with singleton {
                 Json { encodeDefaults = true }
             }
+
+            bind<XapiJson>() with singleton { XapiJson() }
 
             bind<Settings>() with singleton {
                 settings

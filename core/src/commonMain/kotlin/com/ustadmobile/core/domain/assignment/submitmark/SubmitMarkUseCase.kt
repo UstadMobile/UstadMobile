@@ -1,8 +1,8 @@
 package com.ustadmobile.core.domain.assignment.submitmark
 
+import com.benasher44.uuid.uuid4
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.domain.xapi.XapiSession
 import com.ustadmobile.core.domain.xapi.XapiStatementResource
 import com.ustadmobile.core.domain.xapi.coursegroup.CreateXapiGroupForCourseGroupUseCase
 import com.ustadmobile.core.domain.xapi.model.VERB_COMPLETED
@@ -29,6 +29,10 @@ import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.Json
 
 /**
  * Handle submitting a mark. Record the mark in the repository, and then generate an appropriate
@@ -56,6 +60,7 @@ class SubmitMarkUseCase(
     private val createXapiGroupUseCase: CreateXapiGroupForCourseGroupUseCase,
     private val xapiStatementResource: XapiStatementResource,
     private val xxStringHasher: XXStringHasher,
+    private val json: Json,
 ) {
 
     suspend operator fun invoke(
@@ -159,16 +164,21 @@ class SubmitMarkUseCase(
         )
 
         repo.withDoorTransactionAsync {
+            val registrationUuid = uuid4()
             xapiStatementResource.post(
                 statements = listOf(stmt),
-                xapiSession = XapiSession(
-                    endpoint = endpoint,
-                    accountPersonUid = activeUserPerson.personUid,
-                    accountUsername = activeUserPerson.username!!,
-                    clazzUid = clazzUid,
-                    cbUid = courseBlock.cbUid,
-                    rootActivityId = activityId,
-                    knownActorUidToPersonUidMap = instructorActorToPersonUidMap + actorToPersonUidMap,
+                xapiSession = XapiSessionEntity(
+                    xseAccountPersonUid = activeUserPerson.personUid,
+                    xseAccountUsername = activeUserPerson.username!!,
+                    xseClazzUid = clazzUid,
+                    xseCbUid = courseBlock.cbUid,
+                    xseRootActivityId = activityId,
+                    xseRegistrationHi = registrationUuid.mostSignificantBits,
+                    xseRegistrationLo = registrationUuid.leastSignificantBits,
+                    knownActorUidToPersonUids = json.encodeToString(
+                        MapSerializer(Long.serializer(), Long.serializer()),
+                        instructorActorToPersonUidMap + actorToPersonUidMap
+                    ),
                 )
             )
 
