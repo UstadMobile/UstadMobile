@@ -2,11 +2,16 @@ package com.ustadmobile.core.embeddedhttp
 
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServerUseCase
+import com.ustadmobile.core.domain.interop.HttpApiException
+import com.ustadmobile.core.domain.xapi.http.XapiHttpServerUseCase
+import com.ustadmobile.ihttp.nanohttpd.asIHttpRequest
+import com.ustadmobile.ihttp.nanohttpd.toNanoHttpdResponse
 import com.ustadmobile.libcache.headers.MimeTypeHelper
-import com.ustadmobile.libcache.request.HttpRequest
-import com.ustadmobile.libcache.request.requestBuilder
+import com.ustadmobile.ihttp.request.IHttpRequest
+import com.ustadmobile.ihttp.request.iRequestBuilder
 import fi.iki.elonen.NanoHTTPD
 import io.github.aakira.napier.Napier
+import kotlinx.coroutines.runBlocking
 import net.thauvin.erik.urlencoder.UrlEncoderUtil
 import java.io.File
 
@@ -16,6 +21,7 @@ import java.io.File
 class EmbeddedHttpServer(
     port: Int,
     private val contentEntryVersionServerUseCase: (Endpoint) -> ContentEntryVersionServerUseCase,
+    private val xapiServerUseCase: (Endpoint) -> XapiHttpServerUseCase,
     private val staticUmAppFilesDir: File?,
     private val mimeTypeHelper: MimeTypeHelper,
 ) : NanoHTTPD(port) {
@@ -36,7 +42,7 @@ class EmbeddedHttpServer(
     ): String {
         //Endpoint must be double encoded - see note on serveendpoint
         val endpointEncoded = UrlEncoderUtil.encode(UrlEncoderUtil.encode(endpoint.url))
-        return "http://127.0.0.1:$listeningPort$PATH_ENDPOINT_API$endpointEncoded/${path.removeSuffix("/")}"
+        return "http://127.0.0.1:$listeningPort$PATH_ENDPOINT_API$endpointEncoded/${path.removePrefix("/")}"
     }
 
     override fun serve(session: IHTTPSession): Response {
@@ -65,71 +71,105 @@ class EmbeddedHttpServer(
         session: IHTTPSession,
         pathSegments: List<String>,
     ): Response {
+        session.parameters
         val endpointUrl = UrlEncoderUtil.decode(pathSegments[1])
         val endpoint = Endpoint(endpointUrl)
 
-        return when(pathSegments.getOrNull(2)) {
-            "api" -> {
-                when (pathSegments.getOrNull(3)) {
-                    "content" -> {
-                        val contentEntryVersionUid = pathSegments[4].toLong()
-                        val pathInContentSegments = pathSegments.subList(5, pathSegments.size)
-                        val pathInContent = pathInContentSegments.joinToString(separator = "/")
+        return try {
+            when(pathSegments.getOrNull(2)) {
+                "api" -> {
+                    when (pathSegments.getOrNull(3)) {
+                        "content" -> {
+                            val contentEntryVersionUid = pathSegments[4].toLong()
+                            val pathInContentSegments = pathSegments.subList(5, pathSegments.size)
+                            val pathInContent = pathInContentSegments.joinToString(separator = "/")
 
-                        val originalUrl = "${endpointUrl}api/content/$contentEntryVersionUid/" +
-                                pathInContentSegments.joinToString("/")
-                        val request = requestBuilder(originalUrl) {
-                            session.headers.forEach {
-                                header(it.key, it.value)
-                                method = HttpRequest.Companion.Method.valueOf(session.method.name)
+                            val originalUrl = "${endpointUrl}api/content/$contentEntryVersionUid/" +
+                                    pathInContentSegments.joinToString("/")
+                            val request = iRequestBuilder(originalUrl) {
+                                session.headers.forEach {
+                                    header(it.key, it.value)
+                                    method =
+                                        IHttpRequest.Companion.Method.valueOf(session.method.name)
+                                }
+
+                                if (!session.headers.any { it.key.equals("accept-encoding") }) {
+                                    header("accept-encoding", "gzip")
+                                }
+                            }
+                            Napier.v {
+                                "EmbeddedHttpServer: content: endpoint=${endpointUrl} " +
+                                        "versionUid=$contentEntryVersionUid path=$pathInContent"
                             }
 
-                            if(!session.headers.any { it.key.equals("accept-encoding") }) {
-                                header("accept-encoding", "gzip")
+                            val okHttpResponse = contentEntryVersionServerUseCase(
+                                endpoint
+                            ).invoke(
+                                request = request,
+                                contentEntryVersionUid = contentEntryVersionUid,
+                                pathInContentEntryVersion = pathInContent,
+                            )
+
+                            okHttpResponse.toHttpdResponse()
+                        }
+
+                        "xapi" -> {
+                            val xapiHttpForEndpoint = xapiServerUseCase(endpoint)
+
+                            try {
+                                runBlocking {
+                                    xapiHttpForEndpoint(
+                                        pathSegments = pathSegments.subList(4, pathSegments.size),
+                                        request = session.asIHttpRequest(this@EmbeddedHttpServer)
+                                    ).toNanoHttpdResponse()
+                                }
+                            } catch (e: HttpApiException) {
+                                newFixedLengthResponse(
+                                    Response.Status.lookup(e.statusCode),
+                                    "text/plain", e.message ?: e.toString()
+                                )
+                            }
+
+                        }
+
+                        else -> newNotFoundResponse(session)
+                    }
+                }
+                /*
+                 * Serve the Kotlin/JS version of the app. Used to display epubs. See
+                 * LaunchEpubUseCaseJvm.
+                 */
+                "umapp" -> {
+                    if (staticUmAppFilesDir == null)
+                        return newNotFoundResponse("Static umapp files not enabled")
+
+                    val responseFile =
+                        File(staticUmAppFilesDir, pathSegments.joinPathSegments(3)).let {
+                            if (pathSegments.last().isEmpty()) {
+                                File(it, "index.html")
+                            } else {
+                                it
                             }
                         }
-                        Napier.v {
-                            "EmbeddedHttpServer: content: endpoint=${endpointUrl} " +
-                                "versionUid=$contentEntryVersionUid path=$pathInContent"
-                        }
 
-                        val okHttpResponse = contentEntryVersionServerUseCase(
-                            endpoint
-                        ).invoke(
-                            request = request,
-                            contentEntryVersionUid = contentEntryVersionUid,
-                            pathInContentEntryVersion = pathInContent,
-                        )
-
-                        okHttpResponse.toHttpdResponse()
-                    }
-
-                    else -> newNotFoundResponse(session)
-                }
-            }
-            /*
-             * Serve the Kotlin/JS version of the app. Used to display epubs. See
-             * LaunchEpubUseCaseJvm.
-             */
-            "umapp" -> {
-                if(staticUmAppFilesDir == null)
-                    return newNotFoundResponse("Static umapp files not enabled")
-
-                val responseFile = File(staticUmAppFilesDir, pathSegments.joinPathSegments(3)).let {
-                    if(pathSegments.last().isEmpty()) {
-                        File(it, "index.html")
-                    }else {
-                        it
-                    }
+                    return responseFile.toHttpdResponse(
+                        session = session,
+                        contentType = mimeTypeHelper.guessByExtension(responseFile.extension)
+                            ?: "application/octet-stream"
+                    )
                 }
 
-                return responseFile.toHttpdResponse(
-                    session = session,
-                    contentType = mimeTypeHelper.guessByExtension(responseFile.extension) ?: "application/octet-stream"
-                )
+                else -> newNotFoundResponse(session)
             }
-
-            else -> newNotFoundResponse(session)
+        }catch(e: HttpApiException) {
+            newFixedLengthResponse(
+                Response.Status.lookup(e.statusCode),
+                "text/plain", e.message ?: e.toString()
+            )
+        }catch(t: Throwable) {
+            newFixedLengthResponse(Response.Status.INTERNAL_ERROR,
+                "text/plain", t.message ?: t.toString()
+            )
         }
    }
 

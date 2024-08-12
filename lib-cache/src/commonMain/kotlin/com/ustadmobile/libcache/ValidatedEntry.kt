@@ -1,6 +1,7 @@
 package com.ustadmobile.libcache
 
-import com.ustadmobile.libcache.headers.HttpHeaders
+import com.ustadmobile.ihttp.headers.IHttpHeaders
+
 
 /**
  * Tells the cache to mark an entry as newly validated and accessed (e.g. after an http not modified
@@ -8,6 +9,5 @@ import com.ustadmobile.libcache.headers.HttpHeaders
  */
 data class ValidatedEntry(
     val url: String,
-    val headers: HttpHeaders,
-) {
-}
+    val headers: IHttpHeaders,
+)

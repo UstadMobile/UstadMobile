@@ -42,7 +42,6 @@
     <string name="confirm_password">Emeza ijambobanga</string>
     <string name="memory_card">Ikarita mbikamakuru</string>
     <string name="year">Umwaka</string>
-    <string name="share_application">Sangiza porogaramu</string>
     <string name="from">Kuva</string>
     <string name="waiting">Tegereza</string>
     <string name="done">Byakozwe</string>
@@ -95,7 +94,6 @@
     <string name="content_entry_export_inprogress">Iri koherezwa hanze</string>
     <string name="show_hidden_items">Erekana ibihishwe</string>
     <string name="open_folder">Fungura ububiko</string>
-    <string name="invalid_register_code">ikodi ukoresheje kwiyandikisha ntabwo zihuye</string>
     <string name="enter_register_code">Injiza kode zo kwiyandikisha</string>
     <string name="bar_chart">Imbonerahamwe</string>
     <string name="line_chart">Ishusho nyamirongo</string>
@@ -588,7 +586,6 @@
     <string name="num_items_with_name_with_comma">%1$d %2$s, %3$d %4$s</string>
     <string name="add_to">Ongeraho %1$s</string>
     <string name="remove_from">Kuraho kuva kuri%1$s</string>
-    <string name="select_new_photo_from_gallery">Hitamo ifoto nshya mububiko bw\'amafoto</string>
     <string name="permission_clazz_asignment_edit">Hanga unahindure imikoro y\'ishuri</string>
     <string name="add_new">Ongeraho igishya</string>
     <string name="staff">Abakozi</string>
@@ -687,7 +684,6 @@
     <string name="permission_sel_select">Reba ibisubizo byo ku myigire y\'imibanire n\'abandi n\'imbamutima</string>
     <string name="join_existing_school">Jya mu kigo gisanzweho</string>
     <string name="change_photo">Hindura ifoto</string>
-    <string name="remove_photo">Kuraho ifoto</string>
     <string name="use_public_library_site">Koresha urubuga rw\'isomero ya rubanda</string>
     <string name="add_a_new_clazzwork">Ongeraho umwitozo w\'ishuri</string>
     <string name="edit_clazzwork">Hindura umyitozo w\'ishuri</string>
@@ -698,7 +694,6 @@
     <string name="scope_description">Hitamo imiterere(e.g. Ishuri, ikigo cg umuntu runaka) uzahabwa uburenganzira.</string>
     <string name="pending_requests">Abasabye kwiga bataremererwa</string>
     <string name="more_information">Amakuru menshi</string>
-    <string name="class_code">Ikode y\'ishuri ihabwa abanyeshuri</string>
     <string name="reject">Hakana</string>
     <string name="yes">Yego</string>
     <string name="onboarding_get_started_label">Tangira</string>
@@ -897,7 +892,6 @@
     <string name="deleting_content">Irigusibwa%1$s</string>
     <string name="individual">Buri muntu</string>
     <string name="edit_after_submission">Guhindura nyuma yo kohereza</string>
-    <string name="max_number_of_files">Umubare munini ntarengwa wa dosiye: %1$s</string>
     <string name="add_block">Ongeraho ibigize isomo</string>
     <string name="formatted_text_to_show_to_course_participants">Ikigize isomo cyerekana inyadiko yemewe</string>
     <string name="enrolment_requests_must_be_approved">Ubusabe bwo kwiyandikisha bugomba kwemererwa</string>
@@ -934,7 +928,6 @@
     <string name="past_enrolments">Abanyeshuri ba kera</string>
     <string name="standard">Ikigero</string>
     <string name="group_number" formatted="false">Itsinda %1$s</string>
-    <string name="course_code">Kode y\' isomo</string>
     <string name="add_group">Ongera ho itsinda</string>
     <string name="edit_group">Hindura itsinda</string>
     <string name="new_group_set">Itsinda rishya</string>

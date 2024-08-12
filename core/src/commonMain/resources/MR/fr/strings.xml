@@ -69,7 +69,6 @@
     <string name="forgot_password">Mot de passe oublié</string>
     <string name="account">Compte</string>
     <string name="accounts">Comptes</string>
-    <string name="share_application">Partager l\'appli</string>
     <string name="share">Partager</string>
     <string name="send">Envoyer</string>
     <string name="open">Ouvrir</string>
@@ -264,7 +263,6 @@
     <string name="last_two_week_date_range">Deux dernières semaines</string>
     <string name="entry_details_publisher">Éditeur</string>
     <string name="multiple_choice">Choix multiples</string>
-    <string name="invalid_register_code">Code d\'inscription invalide</string>
     <string name="xapi_week">Semaine</string>
     <string name="last_month_date_range">Mois dernier</string>
     <string name="verb">Verbe</string>
@@ -300,7 +298,6 @@
     <string name="measurement_type">Type de mesure</string>
     <string name="marked_cap">Noté</string>
     <string name="content">Contenu</string>
-    <string name="remove_photo">Supprimer la photo</string>
     <string name="answer">Réponse</string>
     <string name="mark_penalty">Marquer une pénalité</string>
     <string name="x_teachers_y_students">%1$d enseignants, %2$d étudiants</string>
@@ -472,7 +469,6 @@
     <string name="remove_from">Retirer de %1$s</string>
     <string name="change_photo">Modifier la photo</string>
     <string name="take_new_photo_from_camera">Prendre une nouvelle photo</string>
-    <string name="select_new_photo_from_gallery">Sélectionner une photo depuis la galerie</string>
     <string name="overview">Aperrçu</string>
     <string name="add_new">Ajouter un nouveau</string>
     <string name="staff">Personnel</string>
@@ -516,7 +512,6 @@
     <string name="scope_description">Sélectionnez la portée (par exemple une classe, une école ou une personne en particulier) pour laquelle seront appliquées les permissions.</string>
     <string name="assign_role">Assigner le rôle</string>
     <string name="more_information">Plus d\'informations</string>
-    <string name="class_code">Code de la classe</string>
     <string name="pending_requests">Demandes en attente</string>
     <string name="pending">En attente</string>
     <string name="ask_your_teacher_for_code">Demandez le code à votre enseignant, saisissez le ci-dessous :</string>

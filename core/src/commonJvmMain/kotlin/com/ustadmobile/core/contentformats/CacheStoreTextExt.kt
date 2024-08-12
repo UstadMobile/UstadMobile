@@ -1,9 +1,9 @@
 package com.ustadmobile.core.contentformats
 
+import com.ustadmobile.ihttp.headers.iHeadersBuilder
 import com.ustadmobile.libcache.CacheEntryToStore
 import com.ustadmobile.libcache.UstadCache
-import com.ustadmobile.libcache.headers.headersBuilder
-import com.ustadmobile.libcache.request.requestBuilder
+import com.ustadmobile.ihttp.request.iRequestBuilder
 import com.ustadmobile.libcache.response.StringResponse
 
 /**
@@ -15,7 +15,7 @@ fun UstadCache.storeText(
     mimeType: String,
     cacheControl: String = "immutable"
 ) {
-    val request = requestBuilder(url)
+    val request = iRequestBuilder(url)
     store(
         storeRequest = listOf(
             CacheEntryToStore(
@@ -24,7 +24,7 @@ fun UstadCache.storeText(
                     request = request,
                     mimeType = mimeType,
                     body = text,
-                    extraHeaders = headersBuilder {
+                    extraHeaders = iHeadersBuilder {
                         header("cache-control", cacheControl)
                     }
                 )

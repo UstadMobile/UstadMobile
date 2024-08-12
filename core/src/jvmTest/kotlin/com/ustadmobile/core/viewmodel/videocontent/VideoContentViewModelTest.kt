@@ -7,8 +7,6 @@ import com.ustadmobile.core.contentformats.media.MediaSource
 import com.ustadmobile.core.domain.contententry.ContentConstants
 import com.ustadmobile.core.domain.xapi.XapiStatementResource
 import com.ustadmobile.core.domain.xapi.ext.resultDurationMillis
-import com.ustadmobile.core.domain.xapi.ext.resultProgressExtension
-import com.ustadmobile.core.domain.xapi.model.XapiStatement
 import com.ustadmobile.core.domain.xapi.noninteractivecontentusagestatementrecorder.NonInteractiveContentXapiStatementRecorderFactory
 import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnClearUseCase
 import com.ustadmobile.core.test.isWithinThreshold
@@ -94,7 +92,8 @@ class VideoContentViewModelTest {
                     NonInteractiveContentXapiStatementRecorderFactory(
                         saveStatementOnClearUseCase = instance(),
                         saveStatementOnUnloadUseCase = null,
-                        xapiStatementResource = instance()
+                        xapiStatementResource = instance(),
+                        endpoint = context,
                     )
                 }
             }

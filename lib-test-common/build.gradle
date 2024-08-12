@@ -81,8 +81,6 @@ kotlin {
         commonJvmMain {
             dependencies {
                 implementation libs.ktor.client.okhttp
-                implementation libs.ktor.client.cio
-                implementation libs.ktor.serialization.gson
 
                 compileOnly libs.door.runtime
                 compileOnly project(":lib-util")
@@ -94,7 +92,6 @@ kotlin {
             dependencies {
                 implementation libs.ktor.server.servlet
                 implementation libs.ktor.server.netty
-                implementation libs.ktor.serialization.gson
 
                 implementation libs.klock.jvm
                 implementation libs.okhttp
