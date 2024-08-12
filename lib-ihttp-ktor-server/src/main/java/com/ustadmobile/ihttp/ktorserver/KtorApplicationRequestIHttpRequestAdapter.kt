@@ -4,11 +4,14 @@ import com.ustadmobile.ihttp.headers.IHttpHeaders
 import com.ustadmobile.ihttp.headers.asIHttpHeaders
 import com.ustadmobile.ihttp.request.IHttpRequest
 import com.ustadmobile.ihttp.request.IHttpRequestWithByteBody
+import com.ustadmobile.ihttp.request.IHttpRequestWithFormUrlEncodedData
 import com.ustadmobile.ihttp.request.IHttpRequestWithTextBody
 import io.ktor.server.request.ApplicationRequest
 import io.ktor.server.request.httpMethod
+import io.ktor.server.request.receiveParameters
 import io.ktor.server.request.receiveStream
 import io.ktor.server.request.receiveText
+import io.ktor.util.toMap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -17,7 +20,7 @@ import kotlinx.coroutines.withContext
  */
 internal class KtorApplicationRequestIHttpRequestAdapter(
     private val applicationRequest: ApplicationRequest
-) : IHttpRequestWithTextBody, IHttpRequestWithByteBody {
+) : IHttpRequestWithTextBody, IHttpRequestWithByteBody, IHttpRequestWithFormUrlEncodedData {
     override val headers: IHttpHeaders
         get() = applicationRequest.headers.asIHttpHeaders()
 
@@ -43,6 +46,10 @@ internal class KtorApplicationRequestIHttpRequestAdapter(
         }catch(e: Throwable) {
             null
         }
+    }
+
+    override suspend fun bodyAsFormUrlEncodedDataMap(): Map<String, List<String>> {
+        return applicationRequest.call.receiveParameters().toMap()
     }
 
     override fun queryParam(name: String): String? {

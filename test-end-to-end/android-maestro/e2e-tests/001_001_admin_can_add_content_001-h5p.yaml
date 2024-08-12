@@ -22,11 +22,12 @@ env:
 - extendedWaitUntil:
     notVisible: "Importing"
     timeout: 20000
+- extendedWaitUntil:
+    notVisible: "Uploading"
+    timeout: 20000
 - tapOn: Open
 - runFlow:
-    when:
-      visible: "Accept & continue"
-    file: "../common/google_permission.yaml"
+    file: "../common/chrome-first-run-check.yaml"
 - assertVisible: "Check"
 - tapOn: "Close tab"
 - runFlow:

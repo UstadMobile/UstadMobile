@@ -1,0 +1,14 @@
+appId: com.toughra.ustadmobile
+---
+
+# This flow is run conditionally by chrome-first-run-check.yaml. Selects what to click next based on
+# available options. This might be "Accept & continue" or "Use without an account", "No thanks"
+# depending on the version
+- runFlow:
+    when:
+      visible: "Accept & continue"
+    file: "chrome-first-run-accept-and-continue.yaml"
+- runFlow:
+    when:
+      visible: "Use without an account"
+    file: "chrome-first-run-without-account.yaml"

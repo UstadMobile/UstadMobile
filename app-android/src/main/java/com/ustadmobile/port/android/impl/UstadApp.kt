@@ -8,8 +8,6 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import coil.ImageLoader
 import coil.ImageLoaderFactory
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.SharedPreferencesSettings
 import com.toughra.ustadmobile.BuildConfig
@@ -144,6 +142,7 @@ import com.ustadmobile.core.domain.xapi.state.DeleteXapiStateUseCase
 import com.ustadmobile.core.domain.xapi.state.ListXapiStateIdsUseCase
 import com.ustadmobile.core.domain.xapi.state.RetrieveXapiStateUseCase
 import com.ustadmobile.core.domain.xapi.state.StoreXapiStateUseCase
+import com.ustadmobile.core.domain.xapi.state.h5puserdata.H5PUserDataEndpointUseCase
 import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
 import com.ustadmobile.core.domain.xxhash.XXHasher64FactoryCommonJvm
 import com.ustadmobile.core.domain.xxhash.XXStringHasherCommonJvm
@@ -308,11 +307,6 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                     unknownChildHandler  = XmlConfig.IGNORING_UNKNOWN_CHILD_HANDLER
                 }
             }
-        }
-
-        bind<Gson>() with singleton {
-            val builder = GsonBuilder()
-            builder.create()
         }
 
         bind<XmlPullParserFactory>(tag = DiTag.XPP_FACTORY_NSUNAWARE) with singleton {
@@ -802,9 +796,21 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 storeXapiStateUseCase = instance(),
                 listXapiStateIdsUseCase = instance(),
                 deleteXapiStateRequest = instance(),
+                h5PUserDataEndpointUseCase = instance(),
                 db = instance(tag = DoorTag.TAG_DB),
                 xapiJson = instance(),
                 endpoint = context,
+                xxStringHasher = instance(),
+            )
+        }
+
+        bind<H5PUserDataEndpointUseCase>() with scoped(EndpointScope.Default).singleton {
+            H5PUserDataEndpointUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = instanceOrNull(tag = DoorTag.TAG_REPO),
+                xxStringHasher = instance(),
+                xxHasher64Factory = instance(),
+                xapiJson = instance(),
             )
         }
 

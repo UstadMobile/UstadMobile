@@ -2,7 +2,7 @@ package com.ustadmobile.test.http
 
 import com.ustadmobile.lib.util.SysPathUtil
 import io.ktor.http.*
-import io.ktor.serialization.gson.*
+import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.*
 import io.ktor.server.http.content.*
 import io.ktor.server.plugins.callloging.*
@@ -27,7 +27,6 @@ const val TEST_FILE_NAME_PARAM = "test-file-name"
 
 const val DEST_PARAM = "dest"
 
-const val PARAM_SCAN_MEDIA_FILE = "scanMedia"
 
 @Suppress("BlockingMethodInNonBlockingContext", "unused", "SdCardPath")
 fun Application.testServerController() {
@@ -127,10 +126,7 @@ fun Application.testServerController() {
     install(CallLogging)
 
     install(ContentNegotiation) {
-        gson {
-            register(ContentType.Application.Json, GsonConverter())
-            register(ContentType.Any, GsonConverter())
-        }
+        json()
     }
 
 
@@ -325,8 +321,6 @@ fun Application.testServerController() {
                 ?: throw IllegalArgumentException("No filename specified")
             val pushDest = call.request.queryParameters[DEST_PARAM] ?: "/sdcard/Download"
             val contentFile = File(testContentDir, fileName)
-            val scanMediaFile: Boolean = call.request.queryParameters[PARAM_SCAN_MEDIA_FILE]
-                ?.toBoolean() ?: false
 
             val adbCommand = SysPathUtil.findCommandInPath("adb")
                 ?: throw IllegalStateException("Cannot find adb in path")
@@ -350,25 +344,6 @@ fun Application.testServerController() {
                 .start()
 
             process.waitFor(5, TimeUnit.SECONDS)
-
-            /*
-             * If uploading a video/image that needs to be selected from the gallery then we need to
-             * run a broadcast to ensure that it will appear in the gallery.
-             */
-            if(scanMediaFile) {
-                ProcessBuilder(
-                    listOf(
-                        adbCommand.absolutePath, "-s", deviceSerial, "shell", "am", "broadcast", "-a",
-                        "android.intent.action.MEDIA_SCANNER_SCAN_FILE", "-d",
-                        "file://$pushDest"
-                    )
-                )
-                .directory(serverDir)
-                .redirectOutput(ProcessBuilder.Redirect.PIPE)
-                .redirectError(ProcessBuilder.Redirect.PIPE)
-                .start()
-                .waitFor(5, TimeUnit.SECONDS)
-            }
 
             call.respondText(
                 text = "Pushed content to $deviceSerial ${contentFile.absolutePath} -> /sdcard/Download",
