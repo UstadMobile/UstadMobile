@@ -8,11 +8,13 @@ import com.ustadmobile.core.domain.xapi.XapiStatementResource
 import com.ustadmobile.core.domain.xapi.ext.agent
 import com.ustadmobile.core.domain.xapi.model.XapiAgent
 import com.ustadmobile.core.domain.xapi.model.XapiStatement
+import com.ustadmobile.core.domain.xapi.model.identifierHash
 import com.ustadmobile.core.domain.xapi.state.DeleteXapiStateUseCase
 import com.ustadmobile.core.domain.xapi.state.ListXapiStateIdsUseCase
 import com.ustadmobile.core.domain.xapi.state.RetrieveXapiStateUseCase
 import com.ustadmobile.core.domain.xapi.state.StoreXapiStateUseCase
 import com.ustadmobile.core.domain.xapi.state.h5puserdata.H5PUserDataEndpointUseCase
+import com.ustadmobile.core.domain.xxhash.XXStringHasher
 import com.ustadmobile.core.util.ext.firstNonWhiteSpaceChar
 import com.ustadmobile.ihttp.headers.iHeadersBuilder
 import com.ustadmobile.ihttp.request.IHttpRequest
@@ -38,6 +40,7 @@ class XapiHttpServerUseCase(
     private val db: UmAppDatabase,
     xapiJson: XapiJson,
     private val endpoint: Endpoint,
+    private val xxStringHasher: XXStringHasher,
 ) {
 
     private val json = xapiJson.json
@@ -73,6 +76,22 @@ class XapiHttpServerUseCase(
 
             if (xapiSessionEntity.xseAuth != auth) {
                 throw HttpApiException(401, "Unauthorized: invalid auth")
+            }
+
+            /**
+             * Check the agent parameter (if provided) matches the session. This protects the state
+             * APIs against access by unauthorized users
+             */
+            val agent = try {
+                request.queryParam("agent")?.let {
+                    json.decodeFromString(XapiAgent.serializer(), it)
+                }
+            }catch(e: Throwable) {
+                throw HttpApiException(400, "Agent is not valid json: ${e.message}", e)
+            }
+
+            if(agent != null && agent.identifierHash(xxStringHasher) != xapiSessionEntity.xseActorUid) {
+                throw HttpApiException(403, "Unauthorized: Agent does not match session")
             }
 
             val resourceName = pathSegments.first()
@@ -118,7 +137,7 @@ class XapiHttpServerUseCase(
 
                     StringResponse(
                         request = request,
-                        mimeType = "application/json",
+                        mimeType = "application/json; charset=utf-8",
                         body = json.encodeToString(
                             ListSerializer(String.serializer()), uuids.map { it.toString() }
                         )
@@ -170,7 +189,6 @@ class XapiHttpServerUseCase(
                                     )
                                 )
                             }
-
 
                             val result = retrieveXapiStateUseCase(
                                 xapiSession = xapiSessionEntity,

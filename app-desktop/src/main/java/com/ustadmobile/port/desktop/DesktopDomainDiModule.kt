@@ -606,6 +606,7 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             db = instance(tag = DoorTag.TAG_DB),
             xapiJson = instance(),
             endpoint = context,
+            xxStringHasher = instance(),
         )
     }
 

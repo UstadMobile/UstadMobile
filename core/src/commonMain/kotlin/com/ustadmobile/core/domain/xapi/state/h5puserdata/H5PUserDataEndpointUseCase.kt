@@ -118,7 +118,7 @@ class H5PUserDataEndpointUseCase(
                     seHash = xapiStateParams.hash(hasher, h5pSubContentId = subContentId),
                     seActivityUid = xapiStateParams.activityUid(xxStringHasher),
                     seStateId = xapiStateParams.stateId,
-                    seContentType = "application/json",
+                    seContentType = "application/json; charset=utf-8",
                     seLastMod = systemTimeInMillis(),
                     seContent = requestData["data"]?.firstOrNull()
                         ?: throw HttpApiException(400, "PUT H5P state: no data"),
@@ -166,7 +166,7 @@ class H5PUserDataEndpointUseCase(
 
                 return StringResponse(
                     request = request,
-                    mimeType = "application/json",
+                    mimeType = "application/json; charset=utf-8",
                     responseCode = 200,
                     body = json.encodeToString(JsonArray.serializer(), userDataJsonArray),
                 )
@@ -190,7 +190,7 @@ class H5PUserDataEndpointUseCase(
                  */
                 StringResponse(
                     request = request,
-                    mimeType = "application/json",
+                    mimeType = "application/json; charset=utf-8",
                     responseCode = 200,
                     body = json.encodeToString(
                         serializer = JsonObject.serializer(),

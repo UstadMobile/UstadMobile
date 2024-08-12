@@ -800,6 +800,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 db = instance(tag = DoorTag.TAG_DB),
                 xapiJson = instance(),
                 endpoint = context,
+                xxStringHasher = instance(),
             )
         }
 
