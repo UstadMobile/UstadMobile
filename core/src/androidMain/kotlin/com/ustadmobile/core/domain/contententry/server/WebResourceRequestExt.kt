@@ -1,14 +1,14 @@
 package com.ustadmobile.core.domain.contententry.server
 
 import android.webkit.WebResourceRequest
-import com.ustadmobile.libcache.request.HttpRequest
-import com.ustadmobile.libcache.request.requestBuilder
+import com.ustadmobile.ihttp.request.IHttpRequest
+import com.ustadmobile.ihttp.request.iRequestBuilder
 
 
-fun WebResourceRequest.toCacheRequest(): HttpRequest {
+fun WebResourceRequest.toCacheRequest(): IHttpRequest {
     val methodName = method
-    return requestBuilder(url.toString()) {
-        method = HttpRequest.Companion.Method.valueOf(methodName)
+    return iRequestBuilder(url.toString()) {
+        method = IHttpRequest.Companion.Method.valueOf(methodName)
         requestHeaders.forEach {
             header(it.key, it.value)
         }

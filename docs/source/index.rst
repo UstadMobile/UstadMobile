@@ -5,6 +5,9 @@
 
 Welcome to Ustad Mobile
 ========================
+.. toctree::
+
+   installation
 
 .. toctree::
    

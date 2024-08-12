@@ -2,10 +2,10 @@ package com.ustadmobile.core.domain.xapi.savestatementonclear
 
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.domain.blob.InterruptableCoroutineJob
-import com.ustadmobile.core.domain.xapi.XapiSession
 import com.ustadmobile.core.domain.xapi.XapiStatementResource
 import com.ustadmobile.core.domain.xapi.model.XapiStatement
 import com.ustadmobile.core.util.ext.di
+import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 import io.github.aakira.napier.Napier
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
@@ -28,7 +28,7 @@ class SaveStatementOnClearJob: InterruptableCoroutineJob() {
                 jobDataMap.getString(SaveStatementOnClearUseCase.KEY_STATEMENTS)
             )
             val xapiSession = json.decodeFromString(
-                XapiSession.serializer(),
+                XapiSessionEntity.serializer(),
                 jobDataMap.getString(SaveStatementOnClearUseCase.KEY_XAPI_SESSION)
             )
 

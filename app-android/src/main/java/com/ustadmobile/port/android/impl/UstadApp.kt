@@ -8,8 +8,6 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import coil.ImageLoader
 import coil.ImageLoaderFactory
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.SharedPreferencesSettings
 import com.toughra.ustadmobile.BuildConfig
@@ -105,6 +103,8 @@ import com.ustadmobile.core.domain.extractmediametadata.ExtractMediaMetadataUseC
 import com.ustadmobile.core.domain.extractmediametadata.ExtractMediaMetadataUseCaseAndroid
 import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCase
 import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCaseAndroid
+import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCase
+import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCaseEmbeddedServer
 import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCase
 import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCaseAndroid
 import com.ustadmobile.core.domain.interop.oneroster.OneRosterEndpoint
@@ -131,10 +131,19 @@ import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
 import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
 import com.ustadmobile.core.domain.xapi.StoreActivitiesUseCase
+import com.ustadmobile.core.domain.xapi.XapiJson
 import com.ustadmobile.core.domain.xapi.XapiStatementResource
+import com.ustadmobile.core.domain.xapi.http.XapiHttpServerUseCase
 import com.ustadmobile.core.domain.xapi.noninteractivecontentusagestatementrecorder.NonInteractiveContentXapiStatementRecorderFactory
 import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnClearUseCase
 import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnClearUseCaseAndroid
+import com.ustadmobile.core.domain.xapi.session.ResumeOrStartXapiSessionUseCase
+import com.ustadmobile.core.domain.xapi.session.ResumeOrStartXapiSessionUseCaseLocal
+import com.ustadmobile.core.domain.xapi.state.DeleteXapiStateUseCase
+import com.ustadmobile.core.domain.xapi.state.ListXapiStateIdsUseCase
+import com.ustadmobile.core.domain.xapi.state.RetrieveXapiStateUseCase
+import com.ustadmobile.core.domain.xapi.state.StoreXapiStateUseCase
+import com.ustadmobile.core.domain.xapi.state.h5puserdata.H5PUserDataEndpointUseCase
 import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
 import com.ustadmobile.core.domain.xxhash.XXHasher64FactoryCommonJvm
 import com.ustadmobile.core.domain.xxhash.XXStringHasherCommonJvm
@@ -291,17 +300,14 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             }
         }
 
+        bind<XapiJson>() with singleton { XapiJson() }
+
         bind<XML>() with singleton {
             XML {
                 defaultPolicy {
                     unknownChildHandler  = XmlConfig.IGNORING_UNKNOWN_CHILD_HANDLER
                 }
             }
-        }
-
-        bind<Gson>() with singleton {
-            val builder = GsonBuilder()
-            builder.create()
         }
 
         bind<XmlPullParserFactory>(tag = DiTag.XPP_FACTORY_NSUNAWARE) with singleton {
@@ -761,6 +767,18 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 httpClient = instance(),
                 json = instance(),
                 xppFactory = instance(tag = DiTag.XPP_FACTORY_NSAWARE),
+                endpoint = context,
+                accountManager = instance(),
+                getApiUrlUseCase = instance(),
+                resumeOrStartXapiSessionUseCase = instance(),
+            )
+        }
+
+        bind<ResumeOrStartXapiSessionUseCase>() with scoped(EndpointScope.Default).singleton {
+            ResumeOrStartXapiSessionUseCaseLocal(
+                activeDb = instance(tag = DoorTag.TAG_DB),
+                activeRepo = instance(tag = DoorTag.TAG_REPO),
+                xxStringHasher= instance(),
             )
         }
 
@@ -770,8 +788,82 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 contentEntryVersionServerUseCase = {
                     di.on(it).direct.instance()
                 },
+                xapiServerUseCase = {
+                    di.on(it).direct.instance()
+                },
                 staticUmAppFilesDir = null,
                 mimeTypeHelper = FileMimeTypeHelperImpl(),
+            )
+        }
+
+        bind<XapiHttpServerUseCase>() with scoped(EndpointScope.Default).singleton {
+            XapiHttpServerUseCase(
+                statementResource = instance(),
+                retrieveXapiStateUseCase = instance(),
+                storeXapiStateUseCase = instance(),
+                listXapiStateIdsUseCase = instance(),
+                deleteXapiStateRequest = instance(),
+                h5PUserDataEndpointUseCase = instance(),
+                db = instance(tag = DoorTag.TAG_DB),
+                xapiJson = instance(),
+                endpoint = context,
+                xxStringHasher = instance(),
+            )
+        }
+
+        bind<H5PUserDataEndpointUseCase>() with scoped(EndpointScope.Default).singleton {
+            H5PUserDataEndpointUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = instanceOrNull(tag = DoorTag.TAG_REPO),
+                xxStringHasher = instance(),
+                xxHasher64Factory = instance(),
+                xapiJson = instance(),
+            )
+        }
+
+        bind<StoreXapiStateUseCase>() with scoped(EndpointScope.Default).singleton {
+            StoreXapiStateUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = instance(tag = DoorTag.TAG_REPO),
+                xapiJson = instance(),
+                xxHasher64Factory = instance(),
+                xxStringHasher = instance(),
+                endpoint = context,
+            )
+        }
+
+        bind<RetrieveXapiStateUseCase>() with scoped(EndpointScope.Default).singleton {
+            RetrieveXapiStateUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = instance(tag = DoorTag.TAG_REPO),
+                xapiJson = instance(),
+                xxStringHasher = instance(),
+                xxHasher64Factory = instance(),
+            )
+        }
+
+        bind<ListXapiStateIdsUseCase>() with scoped(EndpointScope.Default).singleton {
+            ListXapiStateIdsUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = instance(tag = DoorTag.TAG_REPO),
+                xxStringHasher = instance(),
+            )
+        }
+
+        bind<DeleteXapiStateUseCase>() with scoped(EndpointScope.Default).singleton {
+            DeleteXapiStateUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = instance(tag = DoorTag.TAG_REPO),
+                xxStringHasher = instance(),
+                xxHasher64Factory = instance(),
+                endpoint = context,
+            )
+        }
+
+        bind<GetApiUrlUseCase>() with scoped(EndpointScope.Default).singleton {
+            GetApiUrlUseCaseEmbeddedServer(
+                embeddedServer = instance(),
+                endpoint = context,
             )
         }
 
@@ -980,7 +1072,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 repo = instance(tag = DoorTag.TAG_REPO),
                 xxHasher = instance(),
                 endpoint = context,
-                json = instance(),
+                xapiJson = instance(),
                 hasherFactory = instance(),
                 storeActivitiesUseCase = instance(),
             )
@@ -999,6 +1091,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 saveStatementOnClearUseCase = instance(),
                 saveStatementOnUnloadUseCase = null,
                 xapiStatementResource = instance(),
+                endpoint = context,
             )
         }
 

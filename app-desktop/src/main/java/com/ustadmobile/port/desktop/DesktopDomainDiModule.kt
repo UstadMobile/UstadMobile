@@ -75,6 +75,8 @@ import com.ustadmobile.core.domain.deleteditem.DeletePermanentlyUseCase
 import com.ustadmobile.core.domain.deleteditem.RestoreDeletedItemUseCase
 import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCase
 import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCaseJvm
+import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCase
+import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCaseEmbeddedServer
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.launchopenlicenses.LaunchOpenLicensesUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCase
@@ -98,9 +100,17 @@ import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
 import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.domain.xapi.StoreActivitiesUseCase
 import com.ustadmobile.core.domain.xapi.XapiStatementResource
+import com.ustadmobile.core.domain.xapi.http.XapiHttpServerUseCase
 import com.ustadmobile.core.domain.xapi.noninteractivecontentusagestatementrecorder.NonInteractiveContentXapiStatementRecorderFactory
 import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnClearUseCase
 import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnClearUseCaseJvm
+import com.ustadmobile.core.domain.xapi.session.ResumeOrStartXapiSessionUseCase
+import com.ustadmobile.core.domain.xapi.session.ResumeOrStartXapiSessionUseCaseLocal
+import com.ustadmobile.core.domain.xapi.state.DeleteXapiStateUseCase
+import com.ustadmobile.core.domain.xapi.state.ListXapiStateIdsUseCase
+import com.ustadmobile.core.domain.xapi.state.RetrieveXapiStateUseCase
+import com.ustadmobile.core.domain.xapi.state.StoreXapiStateUseCase
+import com.ustadmobile.core.domain.xapi.state.h5puserdata.H5PUserDataEndpointUseCase
 import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
 import com.ustadmobile.core.domain.xxhash.XXHasher64FactoryCommonJvm
 import com.ustadmobile.core.domain.xxhash.XXStringHasher
@@ -327,6 +337,18 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             httpClient = instance(),
             json = instance(),
             xppFactory = instance(tag = DiTag.XPP_FACTORY_NSAWARE),
+            resumeOrStartXapiSessionUseCase  = instance(),
+            getApiUrlUseCase = instance(),
+            accountManager = instance(),
+            endpoint = context,
+        )
+    }
+
+    bind<ResumeOrStartXapiSessionUseCase>() with scoped(EndpointScope.Default).singleton {
+        ResumeOrStartXapiSessionUseCaseLocal(
+            activeDb = instance(tag = DoorTag.TAG_DB),
+            activeRepo = instance(tag = DoorTag.TAG_REPO),
+            xxStringHasher = instance(),
         )
     }
 
@@ -336,19 +358,25 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
 
     bind<LaunchXapiUseCase>() with scoped(EndpointScope.Default).singleton {
         LaunchXapiUseCaseJvm(
-            endpoint = context,
             resolveXapiLaunchHrefUseCase = instance(),
-            embeddedHttpServer = instance(),
             launchChromeUseCase = instance(),
+            getApiUrlUseCase = instance(),
+        )
+    }
+
+    bind<GetApiUrlUseCase>() with scoped(EndpointScope.Default).singleton {
+        GetApiUrlUseCaseEmbeddedServer(
+            embeddedServer = instance(),
+            endpoint = context,
         )
     }
 
     bind<LaunchEpubUseCase>() with scoped(EndpointScope.Default).singleton {
         LaunchEpubUseCaseJvm(
             launchChromeUseCase = instance(),
-            embeddedHttpServer = instance(),
             endpoint = context,
             systemImpl = instance(),
+            getApiUrlUseCase = instance(),
         )
     }
 
@@ -363,10 +391,7 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
     }
 
     bind<GetLocalUrlForContentUseCase>() with scoped(EndpointScope.Default).provider {
-        GetLocalUrlForContentUseCaseCommonJvm(
-            endpoint = context,
-            embeddedHttpServer = instance(),
-        )
+        GetLocalUrlForContentUseCaseCommonJvm(getApiUrlUseCase = instance())
     }
 
     bind<GetVersionUseCase>() with singleton {
@@ -547,7 +572,7 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             repo = instance(tag = DoorTag.TAG_REPO),
             xxHasher = instance(),
             endpoint = context,
-            json = instance(),
+            xapiJson = instance(),
             hasherFactory = instance(),
             storeActivitiesUseCase = instance(),
         )
@@ -566,6 +591,71 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             saveStatementOnClearUseCase = instance(),
             saveStatementOnUnloadUseCase = null,
             xapiStatementResource = instance(),
+            endpoint = context,
+        )
+    }
+
+    bind<XapiHttpServerUseCase>() with scoped(EndpointScope.Default).singleton {
+        XapiHttpServerUseCase(
+            statementResource = instance(),
+            retrieveXapiStateUseCase = instance(),
+            storeXapiStateUseCase = instance(),
+            listXapiStateIdsUseCase = instance(),
+            deleteXapiStateRequest = instance(),
+            h5PUserDataEndpointUseCase = instance(),
+            db = instance(tag = DoorTag.TAG_DB),
+            xapiJson = instance(),
+            endpoint = context,
+            xxStringHasher = instance(),
+        )
+    }
+
+    bind<H5PUserDataEndpointUseCase>() with scoped(EndpointScope.Default).singleton {
+        H5PUserDataEndpointUseCase(
+            db = instance(tag = DoorTag.TAG_DB),
+            repo = instanceOrNull(tag = DoorTag.TAG_REPO),
+            xapiJson = instance(),
+            xxStringHasher = instance(),
+            xxHasher64Factory = instance(),
+        )
+    }
+
+    bind<StoreXapiStateUseCase>() with scoped(EndpointScope.Default).singleton {
+        StoreXapiStateUseCase(
+            db = instance(tag = DoorTag.TAG_DB),
+            repo = instance(tag = DoorTag.TAG_REPO),
+            xapiJson = instance(),
+            xxHasher64Factory = instance(),
+            xxStringHasher = instance(),
+            endpoint = context,
+        )
+    }
+
+    bind<RetrieveXapiStateUseCase>() with scoped(EndpointScope.Default).singleton {
+        RetrieveXapiStateUseCase(
+            db = instance(tag = DoorTag.TAG_DB),
+            repo = instance(tag = DoorTag.TAG_REPO),
+            xapiJson = instance(),
+            xxStringHasher = instance(),
+            xxHasher64Factory = instance(),
+        )
+    }
+
+    bind<ListXapiStateIdsUseCase>() with scoped(EndpointScope.Default).singleton {
+        ListXapiStateIdsUseCase(
+            db = instance(tag = DoorTag.TAG_DB),
+            repo = instance(tag = DoorTag.TAG_REPO),
+            xxStringHasher = instance(),
+        )
+    }
+
+    bind<DeleteXapiStateUseCase>() with scoped(EndpointScope.Default).singleton {
+        DeleteXapiStateUseCase(
+            db = instance(tag = DoorTag.TAG_DB),
+            repo = instance(tag = DoorTag.TAG_REPO),
+            xxStringHasher = instance(),
+            xxHasher64Factory = instance(),
+            endpoint = context,
         )
     }
 

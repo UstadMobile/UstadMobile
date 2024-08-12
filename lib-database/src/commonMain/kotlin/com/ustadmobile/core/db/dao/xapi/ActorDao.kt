@@ -39,6 +39,18 @@ expect abstract class ActorDao {
     abstract suspend fun findByUidAsync(uid: Long): ActorEntity?
 
     @Query("""
+        SELECT ActorEntity.*
+          FROM ActorEntity
+         WHERE ActorEntity.actorUid = :actorUid
+           AND ActorEntity.actorPersonUid = :accountPersonUid  
+    """)
+    abstract suspend fun findByUidAndPersonUidAsync(
+        actorUid: Long,
+        accountPersonUid: Long,
+    ): ActorEntity?
+
+
+    @Query("""
         SELECT ActorEntity.actorUid, ActorEntity.actorEtag, ActorEntity.actorLct
           FROM ActorEntity
          WHERE ActorEntity.actorUid IN (:uidList)

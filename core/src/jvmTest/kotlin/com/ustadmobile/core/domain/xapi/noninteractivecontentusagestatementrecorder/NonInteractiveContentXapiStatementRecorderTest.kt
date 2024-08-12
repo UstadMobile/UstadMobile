@@ -1,14 +1,16 @@
 package com.ustadmobile.core.domain.xapi.noninteractivecontentusagestatementrecorder
 
+import com.benasher44.uuid.uuid4
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.domain.xapi.XapiSession
 import com.ustadmobile.core.domain.xapi.XapiStatementResource
 import com.ustadmobile.core.domain.xapi.ext.resultDurationMillis
 import com.ustadmobile.core.domain.xapi.ext.resultProgressExtension
 import com.ustadmobile.core.domain.xapi.model.XapiActivity
 import com.ustadmobile.core.domain.xapi.model.XapiActivityStatementObject
 import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnClearUseCase
+import com.ustadmobile.core.domain.xxhash.XXStringHasherCommonJvm
 import com.ustadmobile.core.test.isWithinThreshold
+import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -29,7 +31,7 @@ class NonInteractiveContentXapiStatementRecorderTest {
 
     private lateinit var xapiStatementResource: XapiStatementResource
 
-    private lateinit var xapiSession: XapiSession
+    private lateinit var xapiSession: XapiSessionEntity
 
     private lateinit var scope: CoroutineScope
 
@@ -38,12 +40,16 @@ class NonInteractiveContentXapiStatementRecorderTest {
         saveStatementOnClearUseCase = mock {  }
         xapiStatementResource = mock { }
         val rootActivityId = "http://localhost:8087/activity/the-meaning-of-life"
-        xapiSession = XapiSession(
-            endpoint = Endpoint("http://localhost:8087/"),
-            accountPersonUid = 42L,
-            accountUsername = "test",
-            clazzUid = 1042L,
-            rootActivityId = rootActivityId,
+        val uuid = uuid4()
+        val stringHasher = XXStringHasherCommonJvm()
+        xapiSession = XapiSessionEntity(
+            xseAccountPersonUid = 42L,
+            xseAccountUsername = "test",
+            xseClazzUid = 1042L,
+            xseRootActivityId = rootActivityId,
+            xseRootActivityUid = stringHasher.hash(rootActivityId),
+            xseRegistrationHi = uuid.mostSignificantBits,
+            xseRegistrationLo = uuid.leastSignificantBits,
         )
         scope = CoroutineScope(Dispatchers.Default + Job())
 
@@ -60,7 +66,8 @@ class NonInteractiveContentXapiStatementRecorderTest {
                         name = mapOf("en" to "The Meaning of Life")
                     )
                 )
-            }
+            },
+            endpoint = Endpoint("http://example.org/")
         )
     }
 

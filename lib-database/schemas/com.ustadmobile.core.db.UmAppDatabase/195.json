@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 195,
-    "identityHash": "9e2a043a6c038c54a054bf55eeb97f5f",
+    "identityHash": "24c94565425cc20c516c6cf9e16d0a2e",
     "entities": [
       {
         "tableName": "ClazzLog",
@@ -5986,80 +5986,87 @@
         "foreignKeys": []
       },
       {
-        "tableName": "PersonPasskey",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personPasskeyUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ppPersonUid` INTEGER NOT NULL, `ppAttestationObj` TEXT, `ppClientDataJson` TEXT, `ppOriginString` TEXT, `ppRpid` TEXT, `ppId` TEXT, `ppChallengeString` TEXT, `ppPublicKey` TEXT, `isRevoked` INTEGER NOT NULL, `ppPasskeyLct` INTEGER NOT NULL)",
+        "tableName": "StateEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`seActorUid` INTEGER NOT NULL, `seHash` INTEGER NOT NULL, `seActivityUid` INTEGER NOT NULL, `seStateId` TEXT, `seLastMod` INTEGER NOT NULL, `seTimeStored` INTEGER NOT NULL, `seContentType` TEXT, `seCompressed` INTEGER NOT NULL, `seContent` TEXT, `seDeleted` INTEGER NOT NULL, `seRegistrationHi` INTEGER, `seRegistrationLo` INTEGER, PRIMARY KEY(`seActorUid`, `seHash`))",
         "fields": [
           {
-            "fieldPath": "personPasskeyUid",
-            "columnName": "personPasskeyUid",
+            "fieldPath": "seActorUid",
+            "columnName": "seActorUid",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "ppPersonUid",
-            "columnName": "ppPersonUid",
+            "fieldPath": "seHash",
+            "columnName": "seHash",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "ppAttestationObj",
-            "columnName": "ppAttestationObj",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "ppClientDataJson",
-            "columnName": "ppClientDataJson",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "ppOriginString",
-            "columnName": "ppOriginString",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "ppRpid",
-            "columnName": "ppRpid",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "ppId",
-            "columnName": "ppId",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "ppChallengeString",
-            "columnName": "ppChallengeString",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "ppPublicKey",
-            "columnName": "ppPublicKey",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "isRevoked",
-            "columnName": "isRevoked",
+            "fieldPath": "seActivityUid",
+            "columnName": "seActivityUid",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "ppPasskeyLct",
-            "columnName": "ppPasskeyLct",
+            "fieldPath": "seStateId",
+            "columnName": "seStateId",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "seLastMod",
+            "columnName": "seLastMod",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "seTimeStored",
+            "columnName": "seTimeStored",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "seContentType",
+            "columnName": "seContentType",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "seCompressed",
+            "columnName": "seCompressed",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "seContent",
+            "columnName": "seContent",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "seDeleted",
+            "columnName": "seDeleted",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "seRegistrationHi",
+            "columnName": "seRegistrationHi",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "seRegistrationLo",
+            "columnName": "seRegistrationLo",
+            "affinity": "INTEGER",
+            "notNull": false
           }
         ],
         "primaryKey": {
-          "autoGenerate": true,
+          "autoGenerate": false,
           "columnNames": [
-            "personPasskeyUid"
+            "seActorUid",
+            "seHash"
           ]
         },
         "indices": [],
@@ -6226,7 +6233,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9e2a043a6c038c54a054bf55eeb97f5f')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '24c94565425cc20c516c6cf9e16d0a2e')"
     ]
   }
 }

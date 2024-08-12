@@ -1,14 +1,14 @@
 package com.ustadmobile.libcache.cachecontrol
 
 import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.ihttp.headers.IHttpHeaders
 import com.ustadmobile.libcache.date.fromHttpDateToMillis
-import com.ustadmobile.libcache.headers.HttpHeaders
 
 class CacheControlFreshnessCheckerImpl: CacheControlFreshnessChecker {
     override fun invoke(
-        requestHeaders: HttpHeaders,
+        requestHeaders: IHttpHeaders,
         requestDirectives: RequestCacheControlHeader?,
-        responseHeaders: HttpHeaders,
+        responseHeaders: IHttpHeaders,
         responseDirectives: ResponseCacheControlHeader?,
         responseFirstStoredTime: Long,
         responseLastValidated: Long

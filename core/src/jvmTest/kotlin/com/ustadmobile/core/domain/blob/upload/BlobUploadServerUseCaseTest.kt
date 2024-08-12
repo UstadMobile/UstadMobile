@@ -4,9 +4,9 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
 import com.ustadmobile.core.io.ext.readSha256
 import com.ustadmobile.core.util.ext.encodeBase64
+import com.ustadmobile.ihttp.headers.iHeadersBuilder
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.db.entities.CacheEntry
-import com.ustadmobile.libcache.headers.headersBuilder
 import com.ustadmobile.libcache.io.range
 import com.ustadmobile.util.test.ext.newFileFromResource
 import kotlinx.coroutines.runBlocking
@@ -127,7 +127,7 @@ class BlobUploadServerUseCaseTest {
                 batchUploadEndpoint.onStoreItem(
                     blobToUpload.blobUrl,
                     bodyPath = bodyPath,
-                    requestHeaders = headersBuilder {  }
+                    requestHeaders = iHeadersBuilder {  }
                 )
 
                 verify(cache).store(

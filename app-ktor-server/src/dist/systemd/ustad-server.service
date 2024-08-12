@@ -1,0 +1,17 @@
+[Unit]
+Description=Ustad Server
+After=syslog.target network.target
+
+[Service]
+SuccessExitStatus=143
+
+User=ustad
+Group=ustad
+
+Type=exec
+
+ExecStart=/home/ustad/ustad-server/bin/ustad-server
+ExecStop=/bin/kill -15 $MAINPID
+
+[Install]
+WantedBy=multi-user.target

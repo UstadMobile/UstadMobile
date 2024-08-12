@@ -1,6 +1,10 @@
 package com.ustadmobile.libcache.okhttp
 
 import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.ihttp.headers.iHeadersBuilder
+import com.ustadmobile.ihttp.okhttp.headers.asIHttpHeaders
+import com.ustadmobile.ihttp.okhttp.headers.asOkHttpHeaders
+import com.ustadmobile.ihttp.okhttp.request.asIHttpRequest
 import com.ustadmobile.libcache.CacheEntryToStore
 import com.ustadmobile.libcache.CompressionType
 import com.ustadmobile.libcache.UstadCache
@@ -16,11 +20,10 @@ import com.ustadmobile.libcache.cachecontrol.ResponseCacheabilityCheckerImpl
 import com.ustadmobile.libcache.headers.CouponHeader.Companion.HEADER_ETAG_IS_INTEGRITY
 import com.ustadmobile.libcache.headers.CouponHeader.Companion.HEADER_X_INTEGRITY
 import com.ustadmobile.libcache.headers.CouponHeader.Companion.HEADER_X_INTERCEPTOR_PARTIAL_FILE
-import com.ustadmobile.libcache.headers.headersBuilder
 import com.ustadmobile.libcache.integrity.sha256Integrity
 import com.ustadmobile.libcache.logging.UstadCacheLogger
 import com.ustadmobile.libcache.response.HttpPathResponse
-import com.ustadmobile.libcache.response.HttpResponse
+import com.ustadmobile.ihttp.response.IHttpResponse
 import kotlinx.io.asInputStream
 import kotlinx.io.files.FileSystem
 import kotlinx.io.files.Path
@@ -137,7 +140,7 @@ class UstadCacheInterceptor(
                     fileOutStream.flush()
                     fileOutStream.close()
 
-                    val cacheRequest = call.request().asCacheHttpRequest()
+                    val cacheRequest = call.request().asIHttpRequest()
 
                     if(!call.isCanceled()) {
                         cache.store(listOf(
@@ -149,11 +152,11 @@ class UstadCacheInterceptor(
                                     mimeType = response.header("content-type")
                                         ?: "application/octet-stream",
                                     request = cacheRequest,
-                                    extraHeaders = headersBuilder {
+                                    extraHeaders = iHeadersBuilder {
                                         takeFrom(response.headers.newBuilder()
                                             .removeAll("range")
                                             .build()
-                                            .asCacheHttpHeaders())
+                                            .asIHttpHeaders())
 
                                         val etagIsIntegrity = response
                                             .header(HEADER_ETAG_IS_INTEGRITY)?.toBooleanStrictOrNull()
@@ -239,7 +242,7 @@ class UstadCacheInterceptor(
     }
 
     private fun newResponseFromCachedResponse(
-        cacheResponse: HttpResponse,
+        cacheResponse: IHttpResponse,
         call: Call
     ) : Response {
         val responseMediaType = cacheResponse.headers["content-type"]?.toMediaTypeOrNull()
@@ -285,7 +288,7 @@ class UstadCacheInterceptor(
         val url = request.url.toString()
         val call = chain.call()
         logger?.v(LOG_TAG, "$logPrefix intercept: ${request.method} $url")
-        val requestHeaders = request.headers.asCacheHttpHeaders()
+        val requestHeaders = request.headers.asIHttpHeaders()
         val requestCacheControlHeader = requestHeaders["cache-control"]?.let {
             RequestCacheControlHeader.parse(it)
         }
@@ -299,12 +302,12 @@ class UstadCacheInterceptor(
             File(it)
         }
 
-        val cacheRequest = request.asCacheHttpRequest()
+        val cacheRequest = request.asIHttpRequest()
         val cacheResponse = cache.retrieve(cacheRequest)
 
         val cachedResponseStatus = cacheResponse?.let {
             cacheControlFreshnessChecker(
-                requestHeaders = request.headers.asCacheHttpHeaders(),
+                requestHeaders = request.headers.asIHttpHeaders(),
                 requestDirectives = requestCacheControlHeader,
                 responseHeaders = cacheResponse.headers,
                 responseFirstStoredTime = cacheResponse.headers[HEADER_FIRST_STORED_TIMESTAMP]?.toLong()
@@ -361,7 +364,7 @@ class UstadCacheInterceptor(
                 if(validationResponse.code == 304) {
                     validationResponse.close()
                     cache.updateLastValidated(
-                        ValidatedEntry(url, validationResponse.headers.asCacheHttpHeaders())
+                        ValidatedEntry(url, validationResponse.headers.asIHttpHeaders())
                     )
                     newResponseFromCachedResponse(cacheResponse, call).also {
                         logger?.d(LOG_TAG, "$logPrefix HIT(validated) $url ${it.logSummary()}")

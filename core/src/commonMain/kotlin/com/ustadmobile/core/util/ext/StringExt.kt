@@ -129,14 +129,8 @@ fun String.countWords(): Int {
     return wordCount
 }
 
-fun String.initials(): String {
-    return split(" ").map {
-        it.firstOrNull()?.uppercaseChar()
-    }.joinToString(separator = " ")
-}
-
 fun String.initial(): String {
-    return firstOrNull()?.uppercase() ?: ""
+    return firstNonWhiteSpaceChar()?.uppercase() ?: ""
 }
 
 /**
@@ -204,4 +198,12 @@ fun String.substringUntilLastIndexOfInclusive(
     }else {
         missingDelimiterValue
     }
+}
+
+fun String.firstNonWhiteSpaceChar(): Char? {
+    val index = indexOfFirst { !it.isWhitespace() }
+    return if(index != -1)
+        this[index]
+    else
+        null
 }

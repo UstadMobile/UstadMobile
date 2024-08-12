@@ -1,2 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <plurals name="number_of_attempts">
+        <item quantity="one">%d кушиш</item>
+        <item quantity="other"/>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="one">%d соат</item>
+        <item quantity="other"/>
+    </plurals>
+    <plurals name="duration_minutes">
+        <item quantity="one">%d дақиқа</item>
+        <item quantity="other"/>
+    </plurals>
+    <plurals name="duration_seconds">
+        <item quantity="one">%d сония</item>
+        <item quantity="other"/>
+    </plurals>
+    <plurals name="items_selected">
+        <item quantity="one">%d secs</item>
+        <item quantity="other"/>
+    </plurals>
+    <plurals name="items_deleted">
+        <item quantity="one">%d ашё нест карда шуд</item>
+        <item quantity="other"></item>
+    </plurals>
+    <plurals name="items_restored">
+        <item quantity="one">%d ашё барқарор карда шуд</item>
+        <item quantity="other"></item>
+    </plurals>
+    <plurals name="are_you_sure_you_want_to_permanently_delete">
+        <item quantity="one">Шумо мутмаин ҳастед, ки мехоҳед %d ашёро ба таври доимӣ нест кунед?</item>
+        <item quantity="other"></item>
+    </plurals>
+</resources>
