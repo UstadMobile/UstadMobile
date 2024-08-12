@@ -1,7 +1,9 @@
 package com.ustadmobile.lib.rest.domain.passkey.verify
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.passkey.PasskeyVerifyResult
 import com.ustadmobile.door.ext.withDoorTransactionAsync
+import com.ustadmobile.lib.db.entities.PersonPasskey
 import com.webauthn4j.WebAuthnManager
 import com.webauthn4j.converter.exception.DataConversionException
 import com.webauthn4j.credential.CredentialRecord
@@ -14,7 +16,6 @@ import com.webauthn4j.data.RegistrationRequest
 import com.webauthn4j.data.client.Origin
 import com.webauthn4j.data.client.challenge.DefaultChallenge
 import com.webauthn4j.server.ServerProperty
-import io.github.aakira.napier.Napier
 import java.util.Base64
 
 class VerifySignInWithPasskeyUseCase(
@@ -33,7 +34,7 @@ class VerifySignInWithPasskeyUseCase(
         origin: String,
         rpId: String,
         challenge: String,
-    ): Boolean {
+    ): PasskeyVerifyResult {
 
         val effectiveDb = repo ?: db
 
@@ -55,7 +56,10 @@ class VerifySignInWithPasskeyUseCase(
         val userVerificationRequired = true
         val userPresenceRequired = true
 
-        val credentialRecord = loadCredentialRecord(credentialId, effectiveDb)
+        val passkeyData = effectiveDb.withDoorTransactionAsync {
+            effectiveDb.personPasskeyDao().findPersonPasskeyFromClientDataJson(credentialId)
+        }
+        val credentialRecord = createCredentialRecord( passkeyData)
 
         val authenticationRequest = AuthenticationRequest(
             credentialIdByte,
@@ -89,18 +93,18 @@ class VerifySignInWithPasskeyUseCase(
         } catch (e: Exception) {
             throw e
         }
-        return result!=null
+        return if (result != null) {
+            PasskeyVerifyResult(isVerified = true,passkeyData?.ppPersonUid?:0L)
+        } else {
+            PasskeyVerifyResult(isVerified = false,0L)
+        }
     }
 
-    private suspend fun loadCredentialRecord(
-        credentialId: String,
-        effectiveDb: UmAppDatabase
-    ): CredentialRecord? {
-        val passkeyData = effectiveDb.withDoorTransactionAsync { effectiveDb.personPasskeyDao().findPersonPasskeyFromClientDataJson(credentialId)}
-        val passkeId =  effectiveDb.personPasskeyDao().allPasskey()
+    private  fun createCredentialRecord(
+        passkeyData: PersonPasskey?,
+    ): CredentialRecord?{
+
         var credentialRecord: CredentialRecord? = null
-        Napier.d { "passkeyress"+passkeyData?.ppId}
-        Napier.d { "passkeyress_ids $passkeId" }
 
         passkeyData?.let {
             // Client properties

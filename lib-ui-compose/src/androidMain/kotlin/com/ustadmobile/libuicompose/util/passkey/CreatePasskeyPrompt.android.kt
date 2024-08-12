@@ -60,7 +60,7 @@ private suspend fun createPasskey(
 ): PasskeyResult? {
 
     val request = CreatePublicKeyCredentialRequest(
-        PasskeyUtil.createPasskeyRequestJson(
+        PasskeyRequestJsonUseCase.createPasskeyRequestJson(
             username,
             personUid,
             doorNodeId,

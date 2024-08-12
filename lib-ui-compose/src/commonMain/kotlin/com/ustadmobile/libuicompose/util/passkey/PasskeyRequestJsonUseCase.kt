@@ -7,7 +7,7 @@ import kotlinx.serialization.json.Json
 import java.util.Base64
 import kotlin.random.Random
 
-object PasskeyUtil {
+object PasskeyRequestJsonUseCase {
 
     /**
      * https://developer.android.com/identity/sign-in/credential-manager#format-json-request

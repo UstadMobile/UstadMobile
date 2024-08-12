@@ -31,7 +31,7 @@ actual fun SignInWithPasskey(
 
             // Get passkey from the user's public key credential provider.
             val getPublicKeyCredentialOption = GetPublicKeyCredentialOption(
-                requestJson = PasskeyUtil.requestJsonForSignIn()
+                requestJson = PasskeyRequestJsonUseCase.requestJsonForSignIn()
             )
             val getCredRequest = GetCredentialRequest(
                 listOf(getPasswordOption, getPublicKeyCredentialOption)

@@ -5,8 +5,10 @@ import com.russhwolf.settings.set
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.passkey.PassKeySignInData
 import com.ustadmobile.core.domain.passkey.PasskeyResult
+import com.ustadmobile.core.domain.passkey.PasskeyVerifyResult
 import com.ustadmobile.core.domain.passkey.SavePersonPasskeyUseCase
 import com.ustadmobile.core.impl.config.ApiUrlConfig
+import com.ustadmobile.core.util.ext.base64StringToByteArray
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.util.ext.withEndpoint
@@ -46,6 +48,7 @@ import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
+import kotlin.io.encoding.Base64
 
 /**
  * The app AccountManager. Users can have multiple accounts with active sessions at any given time.
@@ -496,12 +499,11 @@ class UstadAccountManager(
     }
     suspend fun loginWithPasskey(
         passKeySignInData: PassKeySignInData,
-        endpointUrl: String,
+        currentServerUrl:String
     ) = withContext(Dispatchers.Default){
         assertNotClosed()
-        val repo: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = DoorTag.TAG_REPO)
-        val db: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = DoorTag.TAG_DB)
-
+        val userHandle = passKeySignInData.userHandle.base64StringToByteArray()
+        val endpointUrl= userHandle.decodeToString().substringAfter("@")
         val loginResponse = httpClient.post {
             url("${endpointUrl.removeSuffix("/")}/api/passkey/verifypasskey")
             parameter("id", passKeySignInData.credentialId)
@@ -512,36 +514,30 @@ class UstadAccountManager(
             parameter("origin", passKeySignInData.origin)
             parameter("rpId", passKeySignInData.rpId)
             parameter("challenge", passKeySignInData.challenge)
-        }
+        }.bodyAsText()
+
+       val passkeyVerifyResult= Json.decodeFromString<PasskeyVerifyResult>(loginResponse)
         Napier.d { "passkeyres"+loginResponse.toString() }
 
-//        if(loginResponse.status.value == 403) {
-//            throw UnauthorizedException("Access denied")
-//        }else if(loginResponse.status == HttpStatusCode.FailedDependency) {
-//            //Used to indicate where parental consent is required, but not granted
-//            throw ConsentNotGrantedException("Parental consent required but not granted")
-//        }else if(loginResponse.status == HttpStatusCode.Conflict) {
-//            throw AdultAccountRequiredException("Adult account required, credentials for child account")
-//        }else if(loginResponse.status.value != 200){
-//            throw IllegalStateException("Server error - response ${loginResponse.status.value}")
-//        }
-//
-//        val responseAccount: UmAccount = json.decodeFromString(loginResponse.bodyAsText())
-//        responseAccount.endpointUrl = endpointUrl
-//
-//        //Make sure that we fetch the person and personpicture into the database.
-//        val personAndPicture = repo.personDao().findByUidWithPicture(
-//            responseAccount.personUid) ?: throw IllegalStateException("Cannot find person in repo/db")
-//        val personInDb = personAndPicture.person!! //Cannot be null based on query
-//
-//        getSiteFromDbOrLoadFromHttp(repo)
-//
-//        val newSession = addSession(personInDb, endpointUrl, "")
-//            currentUserSession = newSession
-//
-//
-//        //This should not be needed - as responseAccount can be smartcast, but will not otherwise compile
-//        responseAccount
+        if(!passkeyVerifyResult.isVerified) {
+            throw UnauthorizedException("Account not found")
+        }
+        val repo: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = DoorTag.TAG_REPO)
+
+        //Make sure that we fetch the person and personpicture into the database.
+        val personAndPicture = repo.personDao().findByUidWithPicture(
+            passkeyVerifyResult.personUid) ?: throw IllegalStateException("Cannot find person in repo/db")
+        val personInDb = personAndPicture.person!! //Cannot be null based on query
+
+
+        val repoWithCurrentUrl: UmAppDatabase by di.on(Endpoint(currentServerUrl)).instance(tag = DoorTag.TAG_REPO)
+
+        getSiteFromDbOrLoadFromHttp(repoWithCurrentUrl)
+
+        val newSession = addSession(personInDb, currentServerUrl, "")
+            currentUserSession = newSession
+
+
     }
 
 

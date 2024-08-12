@@ -108,7 +108,7 @@ class SignUpViewModel(
     private val genderConfig: GenderConfig by instance()
 
     private val enqueueSavePictureUseCase: EnqueueSavePictureUseCase by
-    on(accountManager.activeEndpoint).instance()
+    on(Endpoint(serverUrl)).instance()
 
 
     init {
@@ -302,6 +302,21 @@ class SignUpViewModel(
                     addedByPersonUid = activeUserPersonUid,
                     createPersonParentApprovalIfMinor = true,
                 )
+                val personPictureVal = _uiState.value.personPicture
+
+                if (personPictureVal != null) {
+                    personPictureVal.personPictureUid = savePerson.personUid
+                    personPictureVal.personPictureLct = systemTimeInMillis()
+                    val personPictureUriVal = personPictureVal.personPictureUri
+
+                    activeDb.personPictureDao().upsert(personPictureVal)
+                    enqueueSavePictureUseCase(
+                        entityUid = savePerson.personUid,
+                        tableId = PersonPicture.TABLE_ID,
+                        pictureUri = personPictureUriVal
+                    )
+
+                }
                 Napier.e { "person uid $personid" }
 
 
