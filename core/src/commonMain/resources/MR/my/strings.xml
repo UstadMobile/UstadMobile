@@ -66,7 +66,6 @@
     <string name="phone">ဖုန်းကို</string>
     <string name="exams">စာမေးပွဲများ</string>
     <string name="add_a_student">ကျောင်းသားတစ်ယောက်ထည့်ပါ</string>
-    <string name="share_application">မျှဝေပါအက်ပလီကေးရှင်း</string>
     <string name="waiting">စောင့်နေတယ်</string>
     <string name="queued">တန်းစီထဲမှ</string>
     <string name="failed">မအောင်မြင်ဘူး</string>
@@ -560,8 +559,6 @@
     <string name="add_to">%1$s သို့ထည့်ပါ</string>
     <string name="remove_from">%1$s မှဖယ်ရှား</string>
     <string name="change_photo">ဓာတ်ပုံပြောင်းပါ</string>
-    <string name="remove_photo">ဓာတ်ပုံဖယ်ရှားပါ</string>
-    <string name="select_new_photo_from_gallery">ပြခန်းမှဓာတ်ပုံအသစ်ကိုရွေးချယ်ပါ</string>
     <string name="permission_clazz_asignment_edit">လူတန်းစားတာဝန်များကိုဖန်တီးတည်းဖြတ်ပါ</string>
     <string name="overview">ခြုံငုံသုံးသပ်ချက်</string>
     <string name="add_new">အသစ်ထည့်ပါ</string>

@@ -42,7 +42,6 @@
     <string name="confirm_password">Emeza ijambobanga</string>
     <string name="memory_card">Ikarita mbikamakuru</string>
     <string name="year">Umwaka</string>
-    <string name="share_application">Sangiza porogaramu</string>
     <string name="from">Kuva</string>
     <string name="waiting">Tegereza</string>
     <string name="done">Byakozwe</string>
@@ -587,7 +586,6 @@
     <string name="num_items_with_name_with_comma">%1$d %2$s, %3$d %4$s</string>
     <string name="add_to">Ongeraho %1$s</string>
     <string name="remove_from">Kuraho kuva kuri%1$s</string>
-    <string name="select_new_photo_from_gallery">Hitamo ifoto nshya mububiko bw\'amafoto</string>
     <string name="permission_clazz_asignment_edit">Hanga unahindure imikoro y\'ishuri</string>
     <string name="add_new">Ongeraho igishya</string>
     <string name="staff">Abakozi</string>
@@ -686,7 +684,6 @@
     <string name="permission_sel_select">Reba ibisubizo byo ku myigire y\'imibanire n\'abandi n\'imbamutima</string>
     <string name="join_existing_school">Jya mu kigo gisanzweho</string>
     <string name="change_photo">Hindura ifoto</string>
-    <string name="remove_photo">Kuraho ifoto</string>
     <string name="use_public_library_site">Koresha urubuga rw\'isomero ya rubanda</string>
     <string name="add_a_new_clazzwork">Ongeraho umwitozo w\'ishuri</string>
     <string name="edit_clazzwork">Hindura umyitozo w\'ishuri</string>

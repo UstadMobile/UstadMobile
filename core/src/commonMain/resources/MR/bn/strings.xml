@@ -32,7 +32,6 @@
     <string name="contents">বিষয়বস্তু</string>
     <string name="students">ছাত্র</string>
     <string name="account">হিসাব</string>
-    <string name="share_application">অ্যাপ্লিকেশন ভাগ করা</string>
     <string name="share">ভাগ করুন</string>
     <string name="send">প্রেরণ</string>
     <string name="open">খোলা</string>
@@ -393,9 +392,7 @@
     <string name="remove_from">%1$s থেকে সরান</string>
     <string name="change_photo">ছবি পরিবর্তন</string>
     <string name="holiday_calendar">ছুটির পঞ্জিকা</string>
-    <string name="remove_photo">ফটো সরান</string>
     <string name="take_new_photo_from_camera">ক্যামেরা থেকে নতুন ছবি তুলুন</string>
-    <string name="select_new_photo_from_gallery">গ্যালারী থেকে নতুন ছবি নির্বাচন করুন</string>
     <string name="permission_clazz_assignment_view">ক্লাস অ্যাসাইনমেন্ট দেখুন</string>
     <string name="monday">সোমবার</string>
     <string name="permission_clazz_asignment_edit">ক্লাস অ্যাসাইনমেন্ট তৈরি এবং সম্পাদনা করুন</string>

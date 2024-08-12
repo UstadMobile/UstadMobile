@@ -69,7 +69,6 @@
     <string name="forgot_password">Mot de passe oublié</string>
     <string name="account">Compte</string>
     <string name="accounts">Comptes</string>
-    <string name="share_application">Partager l\'appli</string>
     <string name="share">Partager</string>
     <string name="send">Envoyer</string>
     <string name="open">Ouvrir</string>
@@ -299,7 +298,6 @@
     <string name="measurement_type">Type de mesure</string>
     <string name="marked_cap">Noté</string>
     <string name="content">Contenu</string>
-    <string name="remove_photo">Supprimer la photo</string>
     <string name="answer">Réponse</string>
     <string name="mark_penalty">Marquer une pénalité</string>
     <string name="x_teachers_y_students">%1$d enseignants, %2$d étudiants</string>
@@ -471,7 +469,6 @@
     <string name="remove_from">Retirer de %1$s</string>
     <string name="change_photo">Modifier la photo</string>
     <string name="take_new_photo_from_camera">Prendre une nouvelle photo</string>
-    <string name="select_new_photo_from_gallery">Sélectionner une photo depuis la galerie</string>
     <string name="overview">Aperrçu</string>
     <string name="add_new">Ajouter un nouveau</string>
     <string name="staff">Personnel</string>

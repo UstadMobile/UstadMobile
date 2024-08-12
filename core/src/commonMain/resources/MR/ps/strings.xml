@@ -99,7 +99,6 @@
     <string name="canceled">ړنګول</string>
     <string name="deleted">ړنګول/حذف کول</string>
     <string name="deleting">ړنګوی</string>
-    <string name="share_application">د اپلیکیشن شریکول</string>
     <string name="share">شریک کول</string>
     <string name="download_summary_title">%1$s فعاله کښته کېدل</string>
     <string name="download_pause_download">ځنډ</string>
@@ -550,7 +549,6 @@
     <string name="not_submitted_cap">نه دی لیږل شوی</string>
     <string name="submitliteral">لیږل</string>
     <string name="x_percent_attended">%1.0f%% حاضری</string>
-    <string name="select_new_photo_from_gallery">له انځورغالی څخه نوی انځور غوره کول</string>
     <string name="of_content">د محتوا</string>
     <string name="nothing_here">دلته هیڅ شی نشته</string>
     <string name="not_answered">ځواب نه دی ورکول شوی</string>
@@ -608,7 +606,6 @@
     <string name="use_device_language">د وزلې ژبه څخه ګټه اخیستل</string>
     <string name="select_item">غوره کول %1$s</string>
     <string name="from_to_date">%1$s - %2$s</string>
-    <string name="remove_photo">د انځور لیری کول</string>
     <string name="staff">مامور</string>
     <string name="contact_details">د اړیکی نیولو تفصیل</string>
     <string name="untitled">بغیر له عنوان</string>

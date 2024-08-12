@@ -61,7 +61,6 @@
     <string name="students">Хонандагон</string>
     <string name="forgot_password">Паролро фаромӯш кардед</string>
     <string name="account">Ҳисоб</string>
-    <string name="share_application">Мубодилаи барнома</string>
     <string name="share">Мубодила намоед</string>
     <string name="send">Фиристонед</string>
     <string name="open">Кушоед</string>
@@ -410,9 +409,7 @@
     <string name="add_new">Иловаи нав</string>
     <string name="overview">Шарҳ</string>
     <string name="permission_clazz_asignment_edit">Вазифаҳои синфҳоро таҳия ва таҳрир намоед</string>
-    <string name="select_new_photo_from_gallery">Акси навро аз галерея интихоб намоед</string>
     <string name="take_new_photo_from_camera">Акси навро аз камера гиред</string>
-    <string name="remove_photo">Тоза кардани акс</string>
     <string name="change_photo">Ивази акс</string>
     <string name="remove_from">Аз %1$s тоза намоед</string>
     <string name="add_to">Ба %1$s илова намоед</string>

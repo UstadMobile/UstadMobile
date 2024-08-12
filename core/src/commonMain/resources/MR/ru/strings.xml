@@ -145,7 +145,6 @@
         \nдеятельность</string>
     <string name="select_group_members">Выберите участников группы</string>
     <string name="ok">ОК</string>
-    <string name="share_application">Поделиться приложением</string>
     <string name="from">Из</string>
     <string name="confirm">Подтверждать</string>
     <string name="waiting">Ожидающий</string>
@@ -540,9 +539,7 @@
     <string name="add_to">Добавить в %1$s</string>
     <string name="remove_from">Удалить из %1$s</string>
     <string name="change_photo">Измени фотографию</string>
-    <string name="remove_photo">Удалить фото</string>
     <string name="take_new_photo_from_camera">Сделать новое фото с камеры</string>
-    <string name="select_new_photo_from_gallery">Выбрать новую фотографию из галереи</string>
     <string name="permission_clazz_assignment_view">Просмотр заданий курса</string>
     <string name="permission_clazz_asignment_edit">Создавать и редактировать задания курса</string>
     <string name="add_new">Добавить новое</string>

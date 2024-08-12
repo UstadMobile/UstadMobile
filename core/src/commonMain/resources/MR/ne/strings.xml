@@ -173,7 +173,6 @@
     <string name="sel_question_set">SEL प्रश्न सेट</string>
     <string name="sel_question_set_desc">SEL प्रश्नहरू व्यवस्थापन गरौं</string>
     <string name="save_as_template">टेम्प्लेटको रुपमा सेभ गरौं</string>
-    <string name="share_application">एप सेयर गरौं</string>
     <string name="waiting">पर्खंदै</string>
     <string name="account">अकाउन्ट/खाता</string>
     <string name="passed">सफल भयो</string>
@@ -389,9 +388,7 @@
     <string name="import_content">विषयसामग्री इन्पोर्ट गरौं</string>
     <string name="monthly">मासिक</string>
     <string name="last_three_months">गत तीन महिना</string>
-    <string name="remove_photo">फोटो हटाऔं</string>
     <string name="take_new_photo_from_camera">क्यामेराबाट नयाँ फोटो खिचौं</string>
-    <string name="select_new_photo_from_gallery">ग्यालरीबाट नयाँ फोटो लिऔं</string>
     <string name="permission_clazz_assignment_view">कक्षा गृहकार्य हेरौं</string>
     <string name="publicly_accessible">सबै पहुँच भएको</string>
     <string name="friday">शुक्रबार</string>

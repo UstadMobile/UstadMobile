@@ -44,7 +44,6 @@
     <string name="classes">الحصص</string>
     <string name="exams">اختبارات</string>
     <string name="forgot_password">نسيت كلمة المرور</string>
-    <string name="share_application">شارك التطبيق</string>
     <string name="share">مشاركة</string>
     <string name="downloading">جاري التنزيل</string>
     <string name="waiting">بالانتظار</string>
@@ -435,9 +434,7 @@
     <string name="overview">نظرة عامة</string>
     <string name="permission_clazz_asignment_edit">انشاء و تعديل واجبات الصف</string>
     <string name="permission_clazz_assignment_view">عرض واجبات الصف</string>
-    <string name="select_new_photo_from_gallery">اختيار صورة جديدة من معرض الصور</string>
     <string name="take_new_photo_from_camera">التقاط صورة جديدة بواسطة الكاميرا</string>
-    <string name="remove_photo">ازالة الصورة</string>
     <string name="change_photo">تغيير الصورة</string>
     <string name="use_device_language">استخدم لغة الجهاز</string>
     <string name="content">محتوى</string>

@@ -41,7 +41,6 @@
     <string name="forgot_password">فراموشی رمزکاربری</string>
     <string name="account">حساب</string>
     <string name="open">باز کردن</string>
-    <string name="share_application">اپلکیشن را شریک سازید</string>
     <string name="share">شریک کردن</string>
     <string name="send">فرستادن</string>
     <string name="passed">موفق شد</string>
@@ -395,8 +394,6 @@
     <string name="school">مکتب</string>
     <string name="assignments">کار خانگی</string>
     <string name="remove_from">حذف نمودن از %1$s</string>
-    <string name="remove_photo">حذف تصویر</string>
-    <string name="select_new_photo_from_gallery">انتخاب تصویر جدید از گالری</string>
     <string name="toC">به</string>
     <string name="instructions_for_students">رهنمایی‌هایی برای شاگردان</string>
     <string name="call">تماس</string>
