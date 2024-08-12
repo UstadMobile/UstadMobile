@@ -8,11 +8,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -54,6 +54,7 @@ import com.ustadmobile.libuicompose.components.UstadTooltipBox
 import com.ustadmobile.libuicompose.theme.appBarSelectionModeBackgroundColor
 import com.ustadmobile.libuicompose.theme.appBarSelectionModeContentColor
 import dev.icerock.moko.resources.compose.stringResource
+import moe.tlaster.precompose.navigation.BackStackEntry
 import moe.tlaster.precompose.navigation.Navigator
 import org.kodein.di.compose.localDI
 import org.kodein.di.direct
@@ -69,10 +70,11 @@ fun UstadAppBar(
     compactHeader: Boolean,
     appUiState: AppUiState,
     navigator: Navigator,
+    currentLocation: BackStackEntry?,
 ) {
     val title = appUiState.title ?: stringResource(MR.strings.app_name)
     val canGoBack by navigator.canGoBack.collectAsState(false)
-    val currentLocation by navigator.currentEntry.collectAsState(null)
+
     val di = localDI()
     val accountManager: UstadAccountManager = di.direct.instance()
     val currentSession by accountManager.currentUserSessionFlow
@@ -124,6 +126,9 @@ fun UstadAppBar(
             navigationIcon = {
                 val leadingActionButton = appUiState.leadingActionButton
                 when {
+                    compactHeader && searchHasFocus -> {
+                        //Space needed for search.
+                    }
                     leadingActionButton != null -> {
                         UstadActionButtonIcon(leadingActionButton)
                     }
@@ -135,7 +140,7 @@ fun UstadAppBar(
                             }
                         ) {
                             Icon(
-                                imageVector = Icons.Outlined.ArrowBack,
+                                imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
                                 contentDescription = stringResource(MR.strings.back)
                             )
                         }
@@ -148,7 +153,8 @@ fun UstadAppBar(
                 }
 
                 currentLocation?.path?.takeIf { path ->
-                    !appUiState.hideSettingsIcon && ROOT_LOCATIONS.any { it.startsWith(path) }
+                    val pathWithoutQuery = path.substringBefore("?")
+                    !appUiState.hideSettingsIcon && ROOT_LOCATIONS.any { it.startsWith(pathWithoutQuery) }
                 }?.also {
                     UstadTooltipBox(
                         tooltipText = stringResource(MR.strings.settings)

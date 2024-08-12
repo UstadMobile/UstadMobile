@@ -9,7 +9,7 @@ import app.cash.paging.PagingSourceLoadResult
 import app.cash.paging.PagingSourceLoadResultPage
 import com.ustadmobile.core.hooks.useCoroutineScope
 import com.ustadmobile.door.util.systemTimeInMillis
-import js.core.jso
+import js.objects.jso
 import kotlinx.coroutines.promise
 import react.useEffect
 import react.useMemo

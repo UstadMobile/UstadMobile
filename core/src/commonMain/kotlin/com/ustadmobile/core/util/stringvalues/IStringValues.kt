@@ -18,4 +18,16 @@ interface IStringValues {
 
     fun names(): Set<String>
 
+    companion object {
+
+        fun empty(): IStringValues = MapStringValues(emptyMap())
+
+        fun contentType(contentType: String) = MapStringValues(
+            mapOf(
+                "content-type" to listOf(contentType),
+            )
+        )
+
+    }
+
 }

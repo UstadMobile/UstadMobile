@@ -46,13 +46,15 @@ class ClazzAssignmentIntegrationTest: AbstractMainDispatcherTest() {
             val assignmentUid = serverDb.withDoorTransactionAsync {
                 CreateNewClazzUseCase(serverDb).invoke(testCourse)
 
-                val clazzAssignmentUid = serverDb.clazzAssignmentDao.insertAsync(ClazzAssignment().apply {
+                val clazzAssignmentUid = serverDb.clazzAssignmentDao().insertAsync(ClazzAssignment().apply {
                     caClazzUid = testCourse.clazzUid
                 })
 
-                serverDb.courseBlockDao.insertAsync(CourseBlock().apply {
+                serverDb.courseBlockDao().insertAsync(CourseBlock().apply {
                     cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
                     cbEntityUid = clazzAssignmentUid
+                    cbMinPoints = 0f
+                    cbMaxPoints = 10f
                 })
 
                 clazzAssignmentUid
@@ -93,8 +95,13 @@ class ClazzAssignmentIntegrationTest: AbstractMainDispatcherTest() {
                 viewModel.uiState.test(timeout = 10.seconds, name = "student can submit") {
                     awaitItemWhere {
                         it.activeUserCanSubmit && it.submissionTextFieldVisible &&
-                            it.fieldsEnabled && it.editableSubmission != null
+                            it.fieldsEnabled
                     }
+
+                    viewModel.editableSubmissionUiState.assertItemReceived(
+                        timeout = 10.seconds, name = "editable submission received"
+                    ) { it.editableSubmission != null }
+
                     viewModel.onChangeSubmissionText("I can has cheezburger")
                     viewModel.onClickSubmit()
 
@@ -110,7 +117,7 @@ class ClazzAssignmentIntegrationTest: AbstractMainDispatcherTest() {
             }
 
             //Server receives submission
-            serverDb.courseAssignmentSubmissionDao.getAllSubmissionsFromSubmitterAsFlow(
+            serverDb.courseAssignmentSubmissionDao().getAllSubmissionsFromSubmitterAsFlow(
                 submitterUid = studentPerson.personUid,
                 assignmentUid = assignmentUid
             ).assertItemReceived(timeout = 5.seconds, name = "submission received by server") {
@@ -132,7 +139,7 @@ class ClazzAssignmentIntegrationTest: AbstractMainDispatcherTest() {
                     //this is too long... should be on the uistate itself.
                     val uiState = awaitItemWhere {
                         it.draftMark != null &&
-                        it.courseBlock != null &&
+                        it.block != null &&
                         it.submissionList.isNotEmpty() &&
                         it.submissionList.first().submission.casText == "I can has cheezburger" &&
                         it.markFieldsEnabled
@@ -156,7 +163,7 @@ class ClazzAssignmentIntegrationTest: AbstractMainDispatcherTest() {
             }
 
             //Wait for the mark to reach the server
-            serverDb.courseAssignmentMarkDao.getAllMarksForUserAsFlow(
+            serverDb.courseAssignmentMarkDao().getAllMarksForUserAsFlow(
                 studentPerson.personUid, assignmentUid
             ).assertItemReceived(timeout = 5.seconds, name = "wait for mark from teacher to reach server") {
                 it.isNotEmpty()

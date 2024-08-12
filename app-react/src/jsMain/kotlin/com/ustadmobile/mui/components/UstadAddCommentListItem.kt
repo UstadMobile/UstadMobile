@@ -2,7 +2,7 @@ package com.ustadmobile.mui.components
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.useStringProvider
-import js.core.jso
+import js.objects.jso
 import mui.icons.material.AccountCircle
 import mui.icons.material.Send
 import mui.material.*

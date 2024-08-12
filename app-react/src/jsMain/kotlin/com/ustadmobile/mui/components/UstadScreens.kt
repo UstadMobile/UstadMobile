@@ -53,12 +53,14 @@ import com.ustadmobile.core.db.ext.MIGRATION_144_145_CLIENT
 import com.ustadmobile.core.db.ext.MIGRATION_148_149_NO_OFFLINE_ITEMS
 import com.ustadmobile.core.db.ext.MIGRATION_155_156_CLIENT
 import com.ustadmobile.core.db.ext.MIGRATION_161_162_CLIENT
+import com.ustadmobile.core.db.ext.MIGRATION_169_170_CLIENT
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.util.ext.deleteDatabaseAsync
-import mui.material.useMediaQuery
+import mui.system.useMediaQuery
 import org.kodein.di.direct
 import org.kodein.di.instance
 import react.router.useLocation
+import remix.run.router.LoaderFunctionArgs
 import web.dom.document
 import web.idb.indexedDB
 
@@ -213,7 +215,7 @@ val UstadScreens = FC<Props> {
  * Use the router loader function to initialize things that require asynchronous initialization e.g.
  * the database, loading strings / appconfig etc.
  */
-val ustadScreensLoader: LoaderFunction<*> = {
+val ustadScreensLoader: LoaderFunction<Any?> = { args: LoaderFunctionArgs<Any?> ->
     Napier.base(UstadAntilog())
     Napier.d("Index: Window.onLoad")
 
@@ -241,6 +243,7 @@ val ustadScreensLoader: LoaderFunction<*> = {
         .addMigrations(MIGRATION_148_149_NO_OFFLINE_ITEMS)
         .addMigrations(MIGRATION_155_156_CLIENT)
         .addMigrations(MIGRATION_161_162_CLIENT)
+        .addMigrations(MIGRATION_169_170_CLIENT)
         .addMigrations()
 
     @OptIn(DelicateCoroutinesApi::class)
@@ -289,4 +292,4 @@ val ustadScreensLoader: LoaderFunction<*> = {
 
         UstadScreensLoaderData(di)
     }
-}
+}.unsafeCast<LoaderFunction<Any?>>()

@@ -3,11 +3,11 @@ plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.plugin.serialization'
     id 'org.jetbrains.kotlin.android'
-    id 'org.jetbrains.kotlin.kapt'
     id 'kotlin-parcelize'
     alias(libs.plugins.jetbrains.compose)
     alias(libs.plugins.license)
     id 'androidx.baselineprofile'
+    alias(libs.plugins.android.emulator)
 }
 
 //As Per https://developer.android.com/studio/publish/app-signing.html#release-mode
@@ -18,7 +18,6 @@ if(keyStoreFile == null) {
 
 def keyStorePropertiesExists = rootProject.file(keyStoreFile).exists()
 def keystoreProperties = new Properties()
-def baseAppId = "com.toughra.ustadmobile"
 
 if (keyStorePropertiesExists) {
     keystoreProperties.load(new FileInputStream(rootProject.file(keyStoreFile)))
@@ -36,22 +35,30 @@ configurations.all {
     resolutionStrategy.force 'org.objenesis:objenesis:2.6'
 }
 
-kapt {
-    javacOptions {
-        // Increase the max count of errors from annotation processors.
-        // Default is 100.
-        option("-Xmaxerrs", 500)
-    }
-}
-
 android {
     buildFeatures {
-        dataBinding true
+        dataBinding false
     }
 
-    //APK splitting would interfere with sideloading the app between different targets and the size
-    //reduction will be minimal
+    /**
+     * APK splitting would interfere with sideloading the app between different targets and the size
+     * and size reduction will be minimal
+     *
+     * Official docs:
+     * https://developer.android.com/guide/app-bundle/configure-base#groovy
+     *
+     * Source code for config options:
+     * https://android.googlesource.com/platform/tools/base/+/studio-master-dev/build-system/gradle-core/src/main/java/com/android/build/gradle/internal/dsl/BundleOptions.kt
+     *
+     * FAQ on handling side-loading:
+     * https://developer.android.com/guide/app-bundle/faq#does_the_aab_prevent_users_from_sideloading_apps
+     */
     bundle {
+        //This is not in the main doc, but is in the source code.
+        texture {
+            enableSplit = false
+        }
+
         language {
             enableSplit = false
         }
@@ -109,7 +116,8 @@ android {
             "presetLocale" : rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.presetlocale"),
             "uiLanguages": rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.uilanguages"),
             "showPoweredByMsg": rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.showpoweredbymsg"),
-            "gopts": rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.gopts")
+            "gopts": rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.gopts"),
+            "apiUrl": rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.apiurl"),
         ]
 
         //When using variables the build analyzer reports that major tasks reran because of a
@@ -159,9 +167,7 @@ android {
             testCoverageEnabled = false
         }
     }
-    lint {
-        abortOnError false
-    }
+
     namespace 'com.toughra.ustadmobile'
 
     //See  Compose to Kotlin Compatibility Map
@@ -184,12 +190,20 @@ android {
     }
 }
 
-tasks.configureEach { task ->
-    // TODO remove after merge with replication
-    if (task.name.equals("lint")) {
-        task.enabled = false
+/*
+ * Android Emulator plugin will start the emulator required for baseline profile generation
+ */
+androidEmulator {
+    emulator {
+        sdkVersion 33
+        abi 'x86_64'
+        includeGoogleApis false
     }
+
+    enableForAndroidTests true
+    headless true
 }
+
 
 configurations.all {
     /**
@@ -197,15 +211,10 @@ configurations.all {
      * duplicate class error
      */
     exclude group: "com.github.UstadMobile.door", module: "room-annotations"
-    resolutionStrategy {
-        force "androidx.lifecycle:lifecycle-livedata-core:$version_androidx_lifecycle"
-        force "androidx.lifecycle:lifecycle-runtime:$version_androidx_lifecycle"
-        force "androidx.arch.core:core-runtime:$version_androidx_arch"
-    }
 }
 
 dependencies {
-    implementation 'androidx.profileinstaller:profileinstaller:1.3.1'
+    implementation libs.androidx.profileinstaller
     baselineProfile project(':app-android-baselineprofile')
     coreLibraryDesugaring libs.android.desugar.libs
 
@@ -222,28 +231,25 @@ dependencies {
     api libs.moko.resources.compose
 
     implementation libs.napier
-    implementation libs.androidx.constraintlayout
-    implementation "androidx.activity:activity:$version_androidx_activity"
-    implementation "androidx.activity:activity-ktx:$version_androidx_activity"
-    implementation "androidx.fragment:fragment:$version_androidx_fragment"
-    implementation "androidx.legacy:legacy-support-v4:$version_androidx_legacy_support"
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
-    implementation "commons-io:commons-io:$version_commons_io"
+    implementation libs.androidx.activity
+    implementation libs.androidx.activity.ktx
+    implementation libs.androidx.fragment
+    implementation libs.androidx.legacy.support.v4
+    implementation libs.kotlinx.serialization
+    implementation libs.kotlinx.coroutines.android
+    implementation libs.commons.io
 
     //ViewModel and LiveData
-    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$version_androidx_lifecycle"
-    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$version_androidx_lifecycle"
-    implementation "androidx.lifecycle:lifecycle-common-java8:$version_androidx_lifecycle"
+    implementation libs.androidx.lifecycle.livedata.ktx
+    implementation libs.androidx.lifecycle.runtime.ktx
+    implementation libs.androidx.lifecycle.common.java8
 
     //Provides ProcessLifecycleOwner
-    implementation "androidx.lifecycle:lifecycle-process:$version_androidx_lifecycle"
+    implementation libs.androidx.lifecycle.process
 
-    //Provides findViewTreeLifecycleOwner useful for two-way data binding that uses prepareCall (e.g. images/files)
-    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$version_androidx_lifecycle"
 
     // Room (annotation processing takes place only on lib-database to improve build times)
-    implementation "androidx.room:room-runtime:$version_android_room"
+    implementation libs.androidx.room.runtime
 
     implementation libs.androidx.core.ktx
 
@@ -251,112 +257,72 @@ dependencies {
     implementation(libs.androidx.paging.runtime)
     implementation(libs.androidx.paging.compose)
 
-    implementation "androidx.annotation:annotation:$version_androidx_annotation"
+    implementation libs.androidx.annotation
 
     //Work manager
-    implementation "androidx.work:work-runtime:$version_android_workmanager"
+    implementation libs.androidx.work.runtime
 
     //Klock
-    implementation "com.soywiz.korlibs.klock:klock-android:$version_klock"
+    implementation libs.klock.android
 
     //Crash reporting
-    implementation "ch.acra:acra-http:$version_android_acra"
+    implementation libs.acra.http
 
     //DataStore
-    implementation "androidx.datastore:datastore-preferences:$version_android_datastore"
+    implementation  libs.androidx.datastore.preferences
 
-    implementation "com.linkedin.android.litr:litr:$version_android_litr"
-
-
-    implementation "androidx.legacy:legacy-support-core-utils:$version_androidx_legacy"
+    implementation libs.androidx.legacy.core.utils
     implementation libs.androidx.appcompat
-    implementation "androidx.cardview:cardview:$version_androidx_cardview"
     implementation libs.android.material
-    implementation "androidx.legacy:legacy-support-v4:$version_androidx_legacy"
-    implementation "androidx.recyclerview:recyclerview:$version_androidx_recyclerview"
+    implementation libs.androidx.legacy.support.v4
+    implementation libs.androidx.recyclerview
 
     //Compose
+    implementation platform(libs.androidx.compose.bom)
 
-    def composeBom = platform("androidx.compose:compose-bom:$version_compose_bom")
-    implementation composeBom
-    androidTestImplementation composeBom
+    implementation libs.androidx.compose.material
+    implementation libs.androidx.compose.ui.tooling.preview
+    debugImplementation libs.androidx.compose.ui.tooling
 
-    implementation "androidx.compose.material:material"
-    implementation "androidx.compose.ui:ui-tooling-preview"
-    debugImplementation "androidx.compose.ui:ui-tooling"
-
-    //implementation "androidx.activity:activity-compose:$version_activity_compose"
     implementation libs.activity.compose
     implementation libs.androidx.window
-    implementation "androidx.compose.material:material-icons-extended"
-    implementation "androidx.compose.material3:material3-window-size-class"
-    implementation "com.google.accompanist:accompanist-themeadapter-material:$version_compose_theme_adapter"
-    implementation "com.google.accompanist:accompanist-pager:$version_compose_accompanist"
-    implementation "com.google.accompanist:accompanist-pager-indicators:$version_compose_accompanist"
-    implementation "org.burnoutcrew.composereorderable:reorderable:$version_composereorderable"
-    implementation "com.google.accompanist:accompanist-flowlayout:$version_compose_accompanist"
+    implementation libs.androidx.compose.material.icons.extended
+    implementation libs.androidx.compose.material3.window.size.clazz
+    implementation libs.accompanist.themeadapter.material
+    implementation libs.accompanist.pager
+    implementation libs.accompanist.pager.indicators
+    implementation libs.reorderable.compose
+    implementation libs.accompanist.flowlayout
 
     //Image loading library
-    implementation "com.squareup.picasso:picasso:$version_android_picasso"
-
-    //Page indicator
-    // Should be replaced with https://github.com/tommybuonomo/dotsindicator
-    //implementation 'com.romandanylyk:pageindicatorview:1.0.0@aar'
-
-    // shake detector
-    implementation "com.squareup:seismic:$version_android_seismic"
-
-    implementation "de.hdodenhof:circleimageview:$version_android_circleimageview"
-
-    //used for learner progress view - needs removed because this clashes with material dependency.
-    //implementation 'com.txusballesteros:FitChart:1.0'
-
-    //Chart library
-    implementation "com.github.PhilJay:MPAndroidChart:$version_mpandroidchart"
-
-    implementation "com.google.android.flexbox:flexbox:$version_android_flexbox"
-
-    //Gson for JSON serializing and deserializing
-    implementation "com.google.code.gson:gson:$version_gson"
-
+    implementation libs.picasso
 
     //KTOR
-    implementation "io.ktor:ktor-serialization-gson:$version_ktor"
     implementation libs.ktor.client.okhttp
-    implementation "io.ktor:ktor-client-content-negotiation:$version_ktor"
-    implementation "io.ktor:ktor-client-cio:$version_ktor"
+    implementation libs.ktor.client.content.negotiation
+
 
     //http server
-    implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
-    implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
+    implementation libs.nanohttpd
+    implementation libs.nanohttpd.nanolets
 
-    //Android play core for update support within the application
-    implementation "com.google.android.play:core:$version_play_core"
     implementation libs.androidx.navigation.fragment.ktx
     implementation libs.androidx.navigation.ui
     implementation libs.androidx.navigation.ui.ktx
 
     //dependency injection
-    implementation "org.kodein.di:kodein-di-framework-android-x:$version_kodein_di"
-
-    //Persian-Date-Picker
-    implementation 'com.github.varunasingh:Persian-Date-Picker-Dialog-Strings:primary-SNAPSHOT'
+    implementation libs.kodein.di.framework.android.x
 
     implementation libs.dragdropswiperecyclerview
 
-    //Better Link Movement Method
-    implementation "me.saket:better-link-movement-method:$version_better_link_movement"
-
-    implementation "com.dmitryborodin:pdfview-android:$version_pdfview_android"
-
     //PanicKit (PanicButton) integration
-    implementation "info.guardianproject.panic:panic:$version_android_panickit"
+    implementation libs.guardianproject.panic
 
     //Image loading
     implementation libs.coil
     implementation libs.coil.compose
 
-    implementation "org.jetbrains.kotlinx:kotlinx-datetime:$version_kotlinx_datetime"
+    implementation libs.kotlinx.datetime
 
     //Xml processing
     implementation libs.xmlutil.core
@@ -369,68 +335,13 @@ dependencies {
     implementation libs.androidx.browser
     implementation libs.androidx.core.splashscreen
 
-    implementation libs.androidx.profileinstaller
+    implementation libs.rawhttp.core
 
-    testImplementation project(":lib-test-common")
-    testImplementation "org.mockito:mockito-core:$version_android_mockito"
-    testImplementation "androidx.test:core:$version_androidx_test_core"
-    testImplementation "androidx.test:runner:$version_android_junit_runner"
-    testImplementation "androidx.test.ext:junit:$version_androidx_test_ext_junit"
-    testImplementation "androidx.fragment:fragment-testing:$version_androidx_fragment"
-    testImplementation libs.androidx.navigation.testing
 
-    testImplementation "org.robolectric:robolectric:$version_android_roboelectric"
-    testImplementation "junit:junit:$version_junit"
-    testImplementation "com.squareup.okhttp3:okhttp:$version_okhttp"
-    testImplementation libs.mockito.kotlin
-    testImplementation "androidx.test.espresso:espresso-core:$version_android_espresso"
-    testImplementation "androidx.test.espresso:espresso-contrib:$version_android_espresso"
-
-    //Required for databinding to work using JVM tests
-    kaptTest "androidx.databinding:databinding-compiler:$version_androidx_databinding"
-
-    androidTestImplementation project(":lib-test-common")
-    androidTestImplementation "androidx.test:core:$version_androidx_test_core"
-    androidTestImplementation "androidx.test:core-ktx:$version_androidx_test_core"
-
-    androidTestImplementation "io.ktor:ktor-server-servlet:$version_ktor"
-    androidTestImplementation "junit:junit:$version_junit"
-    androidTestImplementation group: 'androidx.annotation', name: 'annotation', version: "$version_androidx_annotation"
-
-    //As per: https://developer.android.com/topic/libraries/testing-support-library/packages.html#gradle-dependencies
-    androidTestImplementation "androidx.test:runner:$version_android_junit_runner"
-    androidTestImplementation "androidx.test:rules:$version_androidx_test_rules"
-    androidTestUtil "androidx.test:orchestrator:$version_androidx_orchestrator"
-
-    //As per
-    androidTestImplementation ("androidx.test.espresso:espresso-core:$version_android_espresso")  {
-        exclude group: "org.checkerframework", module: "checker"
-        exclude group: "org.checkerframework", module: "check-qual"
-    }
-    androidTestImplementation("androidx.test.espresso:espresso-contrib:$version_android_espresso") {
-        exclude group: "org.checkerframework", module: "checker"
-        exclude group: "org.checkerframework", module: "check-qual"
-    }
-    androidTestImplementation ("androidx.test.espresso:espresso-intents:$version_android_espresso") {
-        exclude group: "org.checkerframework", module: "checker"
-        exclude group: "org.checkerframework", module: "check-qual"
-    }
-    androidTestImplementation ("androidx.test.espresso:espresso-web:$version_android_espresso") {
-        exclude group: "org.checkerframework", module: "checker"
-        exclude group: "org.checkerframework", module: "check-qual"
-    }
-    androidTestImplementation "androidx.fragment:fragment-testing:$version_androidx_fragment"
-    androidTestImplementation libs.androidx.navigation.testing
-    androidTestImplementation "androidx.test.ext:junit:$version_androidx_test_ext_junit"
-
-    androidTestImplementation "androidx.test.uiautomator:uiautomator:$version_android_uiautomator"
-
-    androidTestImplementation "org.mockito:mockito-android:$version_android_mockito"
-    androidTestImplementation libs.mockito.kotlin
-    androidTestImplementation libs.mockwebserver
-    androidTestImplementation "commons-io:commons-io:$version_commons_io"
-
-    kaptAndroidTest "androidx.databinding:databinding-compiler:$version_androidx_databinding"
+    androidTestImplementation libs.androidx.test.runner
+    androidTestImplementation libs.junit
+    androidTestImplementation libs.androidx.test.core
+    androidTestUtil libs.androidx.test.orchestrator
 }
 
 licenseReport {

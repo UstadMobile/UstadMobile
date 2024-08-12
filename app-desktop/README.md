@@ -29,7 +29,9 @@ Install conveyor as per [Conveyor - Getting Started](https://conveyor.hydraulic.
 Make installer for local use:
 
 ```
-export CONVEYOR_SITE_URL=https://server.com/to/conveyor/
+export CONVEYOR_SITE_URL=http://localhost/
+export CONVEYOR_APP_DISPLAY_NAME="Ustad Mobile"
+export CONVEYOR_APP_FS_NAME="ustad-mobile"
 conveyor make site
 ```
 

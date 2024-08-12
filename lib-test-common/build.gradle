@@ -64,14 +64,14 @@ kotlin {
         commonMain {
             dependencies {
                 implementation project(":core")
-                implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$version_kotlin"
-                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
-                implementation "com.soywiz.korlibs.klock:klock:$version_klock"
-                implementation "io.ktor:ktor-client-core:$version_ktor"
-                implementation "io.ktor:ktor-client-json:$version_ktor"
-                implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
+                implementation libs.kotlin.stdlib.common
+                implementation libs.coroutines
+                implementation libs.klock
+                implementation libs.ktor.client.core
+                implementation libs.ktor.client.json
+                implementation libs.kotlinx.serialization
                 implementation libs.napier
-                implementation "org.kodein.di:kodein-di:$version_kodein_di"
+                implementation libs.kodein.di
                 implementation project(":lib-database")
                 compileOnly libs.door.runtime
                 compileOnly project(":lib-util")
@@ -81,8 +81,6 @@ kotlin {
         commonJvmMain {
             dependencies {
                 implementation libs.ktor.client.okhttp
-                implementation "io.ktor:ktor-client-cio:$version_ktor"
-                implementation "io.ktor:ktor-serialization-gson:$version_ktor"
 
                 compileOnly libs.door.runtime
                 compileOnly project(":lib-util")
@@ -92,14 +90,13 @@ kotlin {
         jvmMain {
             dependsOn commonJvmMain
             dependencies {
-                implementation "io.ktor:ktor-server-servlet:$version_ktor"
-                implementation "io.ktor:ktor-server-netty:$version_ktor"
-                implementation "io.ktor:ktor-serialization-gson:$version_ktor"
+                implementation libs.ktor.server.servlet
+                implementation libs.ktor.server.netty
 
-                implementation "com.soywiz.korlibs.klock:klock-jvm:$version_klock"
-                implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
+                implementation libs.klock.jvm
+                implementation libs.okhttp
                 implementation libs.mockwebserver
-                implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
+                implementation libs.sqlite.jdbc
                 implementation libs.mockito.kotlin
             }
         }
@@ -107,9 +104,9 @@ kotlin {
         androidMain {
             dependsOn commonJvmMain
             dependencies {
-                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
-                implementation "com.soywiz.korlibs.klock:klock-android:$version_klock"
-                implementation "androidx.room:room-runtime:$version_android_room"
+                implementation libs.kotlinx.coroutines.android
+                implementation libs.klock.android
+                implementation libs.androidx.room.runtime
             }
         }
 

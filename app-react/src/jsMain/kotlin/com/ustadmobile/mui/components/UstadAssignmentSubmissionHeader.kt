@@ -7,7 +7,7 @@ import com.ustadmobile.core.viewmodel.clazzassignment.detailoverview.ClazzAssign
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission.Companion.NOT_SUBMITTED
 import com.ustadmobile.view.clazzassignment.detailoverview.ASSIGNMENT_STATUS_MAP
 import web.cssom.rgb
-import js.core.jso
+import js.objects.jso
 import mui.icons.material.Done as DoneIcon
 import mui.icons.material.EmojiEvents as EmojiEventsIcon
 import mui.material.ListItem

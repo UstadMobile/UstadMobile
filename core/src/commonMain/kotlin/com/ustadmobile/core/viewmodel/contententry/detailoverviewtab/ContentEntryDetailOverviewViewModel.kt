@@ -13,19 +13,32 @@ import org.kodein.di.DI
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.blob.download.CancelDownloadUseCase
 import com.ustadmobile.core.domain.blob.download.MakeContentEntryAvailableOfflineUseCase
+import com.ustadmobile.core.domain.contententry.importcontent.CancelImportContentEntryUseCase
+import com.ustadmobile.core.domain.contententry.importcontent.CancelRemoteContentEntryImportUseCase
+import com.ustadmobile.core.domain.contententry.importcontent.DismissRemoteContentEntryImportErrorUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.LaunchContentEntryVersionUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.epub.LaunchEpubUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.LaunchXapiUseCase
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.Snack
+import com.ustadmobile.core.util.ext.bodyAsDecodedText
 import com.ustadmobile.core.util.ext.localFirstThenRepoIfNull
 import com.ustadmobile.core.util.ext.onActiveEndpoint
+import com.ustadmobile.core.viewmodel.clazz.launchSetTitleFromClazzUid
+import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.lib.db.composites.ContentEntryAndDetail
+import com.ustadmobile.lib.db.composites.ContentEntryImportJobProgress
 import com.ustadmobile.lib.db.composites.OfflineItemAndState
 import com.ustadmobile.lib.db.composites.TransferJobAndTotals
 import io.github.aakira.napier.Napier
+import io.ktor.client.HttpClient
+import io.ktor.client.request.get
+import io.ktor.client.request.header
+import io.ktor.client.request.parameter
+import kotlinx.coroutines.flow.updateAndGet
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.instance
 import org.kodein.di.instanceOrNull
 
@@ -34,6 +47,8 @@ data class ContentEntryDetailOverviewUiState(
     val scoreProgress: ContentEntryStatementScoreProgress? = null,
 
     val contentEntry: ContentEntryAndDetail? = null,
+
+    val latestContentEntryVersion: ContentEntryVersion? = null,
 
     val contentEntryButtons: ContentEntryButtonModel? = null,
 
@@ -45,13 +60,17 @@ data class ContentEntryDetailOverviewUiState(
 
     val availableTranslations: List<ContentEntryRelatedEntryJoinWithLanguage> = emptyList(),
 
-    val activeContentJobItems: List<ContentJobItemProgress> = emptyList(),
+    val activeImportJobs: List<ContentEntryImportJobProgress> = emptyList(),
+
+    val remoteImportJobs: List<ContentEntryImportJobProgress> = emptyList(),
 
     val activeUploadJobs: List<TransferJobAndTotals> = emptyList(),
 
     val offlineItemAndState: OfflineItemAndState? = null,
 
     val openButtonEnabled: Boolean = true,
+
+    val activeUserPersonUid: Long = 0,
 ) {
     val scoreProgressVisible: Boolean
         get() = scoreProgress?.progress != null && scoreProgress.progress > 0
@@ -73,6 +92,20 @@ data class ContentEntryDetailOverviewUiState(
 
     val openButtonVisible: Boolean
         get() = true
+
+    val compressedSizeVisible: Boolean
+        get() = latestContentEntryVersion?.let {
+            it.cevStorageSize > 0 && it.cevStorageSize > 0 && it.cevStorageSize < it.cevOriginalSize
+        } ?: false
+
+    val sizeVisible: Boolean
+        get() = latestContentEntryVersion?.let {
+            it.cevStorageSize > 0
+        } ?: false
+
+    fun canCancelRemoteImportJob(importJobProgress: ContentEntryImportJobProgress): Boolean {
+        return importJobProgress.cjiOwnerPersonUid == activeUserPersonUid
+    }
 
 }
 
@@ -105,30 +138,73 @@ class ContentEntryDetailOverviewViewModel(
 
     private val target = savedStateHandle[ARG_TARGET]
 
+    private val cancelImportContentEntryUseCase: CancelImportContentEntryUseCase? by
+        di.onActiveEndpoint().instanceOrNull()
+
+    private val cancelRemoteContentEntryImportUseCase: CancelRemoteContentEntryImportUseCase by
+        di.onActiveEndpoint().instance()
+
+    private val dismissRemoteContentEntryImportErrorUseCase: DismissRemoteContentEntryImportErrorUseCase by
+        di.onActiveEndpoint().instance()
+
+    private val httpClient: HttpClient by di.instance()
+
+    private val clazzUid = savedStateHandle[ARG_CLAZZUID]?.toLong() ?: 0
+
+    private val parentEntryUid = savedStateHandle[ARG_PARENT_UID]?.toLong() ?: 0
 
     init {
+        _uiState.update { it.copy(activeUserPersonUid = activeUserPersonUid) }
+
         viewModelScope.launch {
             _uiState.whenSubscribed {
                 launch {
-                    activeRepo.contentEntryDao.findEntryWithContainerByEntryIdLive(
-                        entryUuid = entityUidArg
+                    activeRepo.contentEntryDao().findByContentEntryUidWithDetailsAsFlow(
+                        contentEntryUid = entityUidArg,
+                        clazzUid = clazzUid,
+                        courseBlockUid = savedStateHandle[ARG_COURSE_BLOCK_UID]?.toLong() ?: 0,
+                        accountPersonUid = activeUserPersonUid,
                     ).collect {
                         _uiState.update { prev ->
                             prev.copy(
                                 contentEntry = it
                             )
                         }
+                    }
+                }
 
-                        _appUiState.update { prev ->
+                if(clazzUid == 0L && parentEntryUid != 0L) {
+                    launch {
+                        val parentTitle = if(parentEntryUid == ContentEntryListViewModel.LIBRARY_ROOT_CONTENT_ENTRY_UID) {
+                            systemImpl.getString(MR.strings.library)
+                        }else {
+                            activeRepo.localFirstThenRepoIfNull { db ->
+                                db.contentEntryDao().findTitleByUidAsync(parentEntryUid)
+                            }
+                        }
+
+                        _appUiState.update { it.copy(title = parentTitle) }
+                    }
+                }
+
+                launchSetTitleFromClazzUid(clazzUid) { title ->
+                    _appUiState.update { it.copy(title = title) }
+                }
+
+                launch {
+                    activeRepo.contentEntryVersionDao().findLatestByContentEntryUidAsFlow(
+                        contentEntryUid = entityUidArg
+                    ).collect{
+                        _uiState.update { prev ->
                             prev.copy(
-                                title = it?.entry?.title ?: ""
+                                latestContentEntryVersion = it
                             )
                         }
                     }
                 }
 
                 launch {
-                    activeDb.transferJobDao.findByContentEntryUidWithTotalsAsFlow(
+                    activeDb.transferJobDao().findByContentEntryUidWithTotalsAsFlow(
                         contentEntryUid = entityUidArg,
                         jobType = TransferJob.TYPE_BLOB_UPLOAD,
                     ).collect {
@@ -141,7 +217,19 @@ class ContentEntryDetailOverviewViewModel(
                 }
 
                 launch {
-                    activeDb.offlineItemDao.findByContentEntryUid(
+                    activeDb.contentEntryImportJobDao().findInProgressJobsByContentEntryUid(
+                        contentEntryUid = entityUidArg
+                    ).collect {
+                        _uiState.update { prev ->
+                            prev.copy(
+                                activeImportJobs = it
+                            )
+                        }
+                    }
+                }
+
+                launch {
+                    activeDb.offlineItemDao().findByContentEntryUid(
                         contentEntryUid = entityUidArg,
                         nodeId = nodeIdAndAuth.nodeId
                     ).collect {
@@ -152,12 +240,33 @@ class ContentEntryDetailOverviewViewModel(
                         }
                     }
                 }
+
+                launch {
+                    try {
+                        do {
+                            val remoteImportJobsJson = httpClient.get(
+                                "${accountManager.activeEndpoint.url}api/contententryimportjob/importjobs"
+                            ) {
+                                parameter("contententryuid", entityUidArg.toString())
+                                header("cache-control", "no-store")
+                            }.bodyAsDecodedText()
+                            val remoteImportJobs = json.decodeFromString(
+                                ListSerializer(ContentEntryImportJobProgress.serializer()),
+                                remoteImportJobsJson
+                            )
+
+                            val state = _uiState.updateAndGet { prev ->
+                                prev.copy(
+                                    remoteImportJobs = remoteImportJobs
+                                )
+                            }
+                        } while(state.remoteImportJobs.isNotEmpty())
+                    }catch(e: Throwable) {
+                        Napier.d { "Could not get list of jobs" }
+                    }
+                }
             }
         }
-    }
-
-    fun onClickEdit() {
-
     }
 
 
@@ -186,19 +295,21 @@ class ContentEntryDetailOverviewViewModel(
                 //remove CacheLockJoin(s) status to pending deletion so cache content becomes
                 // eligible for eviction as required.
                 offlineItemAndStateVal.readyForOffline -> {
-                    activeRepo.offlineItemDao.updateActiveByOfflineItemUid(offlineItemVal.oiUid, false)
+                    activeRepo.offlineItemDao().updateActiveByOfflineItemUid(offlineItemVal.oiUid, false)
                 }
             }
         }
     }
 
     fun onClickOpen() {
+        Napier.d("ContentEntryDetailOverviewViewModel: onClickOpen")
         viewModelScope.launch {
             try {
                 loadingState = LoadingUiState.INDETERMINATE
+                Napier.d("ContentEntryDetailOverviewViewModel: onClickOpen launched")
                 _uiState.update { it.copy(openButtonEnabled = false) }
                 val latestContentEntryVersion = activeRepo.localFirstThenRepoIfNull {
-                    it.contentEntryVersionDao.findLatestVersionUidByContentEntryUidEntity(entityUidArg)
+                    it.contentEntryVersionDao().findLatestVersionUidByContentEntryUidEntity(entityUidArg)
                 }
 
                 val openTarget = target?.let {
@@ -213,8 +324,16 @@ class ContentEntryDetailOverviewViewModel(
                     }
 
                     val launcher = (contentSpecificLauncher ?: defaultLaunchContentEntryUseCase)
-                    launcher(latestContentEntryVersion, navController, openTarget)
+                    Napier.d("ContentEntryDetailOverviewViewModel: onClickOpen : Launching using $launcher")
+                    launcher(
+                        contentEntryVersion = latestContentEntryVersion,
+                        navController = navController,
+                        clazzUid = clazzUid,
+                        cbUid = savedStateHandle[ARG_COURSE_BLOCK_UID]?.toLong() ?: 0,
+                        target = openTarget,
+                    )
                 }else {
+                    Napier.d("ContentEntryDetailOverviewViewModel: onClickOpen: latestContentEntryVersion = null")
                     snackDispatcher.showSnackBar(Snack(systemImpl.getString(MR.strings.content_not_ready_try_later)))
                 }
             }catch(e: Throwable) {
@@ -224,6 +343,48 @@ class ContentEntryDetailOverviewViewModel(
                 loadingState = LoadingUiState.NOT_LOADING
                 _uiState.update { it.copy(openButtonEnabled = true) }
             }
+        }
+    }
+
+    fun onCancelImport(jobUid: Long) {
+        viewModelScope.launch {
+            cancelImportContentEntryUseCase?.invoke(jobUid)
+            snackDispatcher.showSnackBar(Snack(systemImpl.getString(MR.strings.canceled)))
+        }
+    }
+
+    fun onCancelRemoteImport(jobUid: Long) {
+        viewModelScope.launch {
+            try {
+                cancelRemoteContentEntryImportUseCase(jobUid, activeUserPersonUid)
+                snackDispatcher.showSnackBar(Snack(systemImpl.getString(MR.strings.canceled)))
+            }catch(e: Throwable) {
+                snackDispatcher.showSnackBar(Snack(systemImpl.getString(MR.strings.error)))
+            }
+        }
+    }
+
+    fun onDismissImportError(jobUid: Long) {
+        viewModelScope.launch {
+            activeDb.contentEntryImportJobDao().updateErrorDismissed(jobUid, true)
+        }
+    }
+
+    fun onDismissRemoteImportError(jobUid: Long) {
+        viewModelScope.launch {
+            try{
+                dismissRemoteContentEntryImportErrorUseCase(jobUid, activeUserPersonUid)
+            }catch(e: Throwable) {
+                //Error dismissing error? Unlucky day
+                Napier.w { "ContentEntryDetailoverview: could not dismiss remote error message"}
+                snackDispatcher.showSnackBar(Snack(systemImpl.getString(MR.strings.error)))
+            }
+        }
+    }
+
+    fun onDismissUploadError(jobUid: Int) {
+        viewModelScope.launch {
+            activeDb.transferJobErrorDao().dismissErrorByJobId(jobUid, true)
         }
     }
 

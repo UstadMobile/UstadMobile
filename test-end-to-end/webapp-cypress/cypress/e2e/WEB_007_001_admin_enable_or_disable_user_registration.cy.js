@@ -1,4 +1,4 @@
-describe('007_001_admin_enable_or_disable_user_registration', () => {
+describe('WEB_007_001_admin_enable_or_disable_user_registration', () => {
  it('Start Ustad Test Server ', () => {
   // Start Test Server
     cy.ustadStartTestServer()

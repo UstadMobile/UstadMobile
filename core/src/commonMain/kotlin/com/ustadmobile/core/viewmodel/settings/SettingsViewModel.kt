@@ -18,6 +18,11 @@ import com.ustadmobile.core.domain.htmlcontentdisplayengine.GetHtmlContentDispla
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.HtmlContentDisplayEngineOption
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.SetHtmlContentDisplayEngineUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
+import com.ustadmobile.core.domain.storage.GetOfflineStorageAvailableSpace
+import com.ustadmobile.core.domain.storage.GetOfflineStorageOptionsUseCase
+import com.ustadmobile.core.domain.storage.GetOfflineStorageSettingUseCase
+import com.ustadmobile.core.domain.storage.OfflineStorageOption
+import com.ustadmobile.core.domain.storage.SetOfflineStorageSettingUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
@@ -27,6 +32,11 @@ import com.ustadmobile.core.viewmodel.site.detail.SiteDetailViewModel
 import kotlinx.atomicfu.atomic
 import org.kodein.di.instance
 import org.kodein.di.instanceOrNull
+
+data class SettingsOfflineStorageOption(
+    val option: OfflineStorageOption,
+    val availableSpace: Long,
+)
 
 data class SettingsUiState(
 
@@ -54,12 +64,21 @@ data class SettingsUiState(
 
     val version: String = "",
 
+    val storageOptions: List<SettingsOfflineStorageOption> = emptyList(),
+
+    val selectedOfflineStorageOption: OfflineStorageOption? = null,
+
+    val storageOptionsDialogVisible: Boolean = false,
+
 ) {
     val htmlContentDisplayEngineVisible: Boolean
         get() = htmlContentDisplayOptions.isNotEmpty()
 
     val advancedSectionVisible: Boolean
         get() = htmlContentDisplayEngineVisible
+
+    val storageOptionsVisible: Boolean
+        get() = storageOptions.isNotEmpty() && selectedOfflineStorageOption != null
 
 }
 
@@ -85,6 +104,14 @@ class SettingsViewModel(
     private val setHtmlContentDisplaySettingUseCase: SetHtmlContentDisplayEngineUseCase? by instanceOrNull()
 
     private val getVersionUseCase: GetVersionUseCase by instance()
+
+    private val getStorageOptionsUseCase: GetOfflineStorageOptionsUseCase? by instanceOrNull()
+
+    private val getOfflineStorageSettingUseCase: GetOfflineStorageSettingUseCase? by instanceOrNull()
+
+    private val setOfflineStorageSettingUseCase: SetOfflineStorageSettingUseCase? by instanceOrNull()
+
+    private val getOfflineStorageAvailableSpace: GetOfflineStorageAvailableSpace? by instanceOrNull()
 
     private val versionClickCount = atomic(0)
 
@@ -116,7 +143,27 @@ class SettingsViewModel(
         }
 
         viewModelScope.launch {
-            activeRepo.systemPermissionDao.personHasSystemPermissionAsFlow(
+            val offlineStorageOptions = getStorageOptionsUseCase?.invoke()
+            val selectedOfflineStorage = getOfflineStorageSettingUseCase?.invoke()
+            if(offlineStorageOptions != null) {
+                val optionsWithSpace = offlineStorageOptions.map {
+                    SettingsOfflineStorageOption(
+                        option = it,
+                        availableSpace = getOfflineStorageAvailableSpace?.invoke(it) ?: 0
+                    )
+                }
+
+                _uiState.update {
+                    it.copy(
+                        storageOptions = optionsWithSpace,
+                        selectedOfflineStorageOption = selectedOfflineStorage ?: offlineStorageOptions.first(),
+                    )
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            activeRepo.systemPermissionDao().personHasSystemPermissionAsFlow(
                 activeUserPersonUid, PermissionFlags.MANAGE_SITE_SETTINGS
             ).collect { siteAdminSettingsVisible ->
                 _uiState.update { prev ->
@@ -217,6 +264,28 @@ class SettingsViewModel(
                 prev.copy(showDeveloperOptions = true)
             }
             snackDispatcher.showSnackBar(Snack("Developer options enabled"))
+        }
+    }
+
+    fun onClickOfflineStorageOptionsDialog() {
+        _uiState.update {
+            it.copy(storageOptionsDialogVisible = true)
+        }
+    }
+
+    fun onDismissOfflineStorageOptionsDialog() {
+        _uiState.update {
+            it.copy(storageOptionsDialogVisible = false)
+        }
+    }
+
+    fun onSelectOfflineStorageOption(option: OfflineStorageOption) {
+        onDismissOfflineStorageOptionsDialog()
+        setOfflineStorageSettingUseCase?.invoke(option)
+        _uiState.update {
+            it.copy(
+                selectedOfflineStorageOption = getOfflineStorageSettingUseCase?.invoke()
+            )
         }
     }
 

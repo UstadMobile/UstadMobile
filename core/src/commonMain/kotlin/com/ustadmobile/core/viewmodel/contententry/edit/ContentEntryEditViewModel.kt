@@ -3,6 +3,7 @@ package com.ustadmobile.core.viewmodel.contententry.edit
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.db.PermissionFlags
+import com.ustadmobile.core.domain.compress.CompressionLevel
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
 import com.ustadmobile.core.domain.contententry.save.SaveContentEntryUseCase
 import com.ustadmobile.core.impl.ContainerStorageDir
@@ -11,28 +12,29 @@ import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.ext.onActiveEndpoint
+import com.ustadmobile.core.util.ext.setIfNoValueSetYet
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditUiState
+import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
-import com.ustadmobile.lib.db.composites.ContentEntryBlockLanguageAndContentJob
+import com.ustadmobile.lib.db.composites.ContentEntryAndContentJob
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentJob
 import com.ustadmobile.lib.db.entities.ContentEntryImportJob
-import com.ustadmobile.lib.db.entities.CourseBlock
+import com.ustadmobile.lib.db.entities.ContentEntryPicture2
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
-import kotlinx.datetime.TimeZone
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
 
 data class ContentEntryEditUiState(
 
-    val entity: ContentEntryBlockLanguageAndContentJob? = null,
+    val entity: ContentEntryAndContentJob? = null,
 
     val licenceOptions: List<MessageIdOption2> = emptyList(),
 
@@ -54,68 +56,39 @@ data class ContentEntryEditUiState(
 
     val compressionEnabled: Boolean = false,
 
-) {
-    val contentCompressVisible: Boolean
-        get() = metadataResult != null
-
-    val courseBlockVisible: Boolean
-        get() = entity?.block != null
-
-    //Where a CourseBlock is being edited, then the title/description will be taken from the
-    //CourseBlock
-    val contentEntryTitleVisible: Boolean
-        get() = !courseBlockVisible
-
-    val contentEntryDescriptionVisible: Boolean
-        get() = !courseBlockVisible
-
-    fun copyWithFieldsEnabled(fieldsEnabled: Boolean) : ContentEntryEditUiState{
-        return copy(
-            fieldsEnabled = fieldsEnabled,
-            courseBlockEditUiState = courseBlockEditUiState.copy(
-                fieldsEnabled = fieldsEnabled
-            )
-        )
-    }
-
-}
+)
 
 /**
  * When there is no associated CourseBlock
  *    Show only the ContentEntryEdit part
  *
- * When there is an associated CourseBlock and the user has permission to edit the ContentEntry itself:
- *    The title and description will be shown only once (e.g. as part of CourseBlockEdit). The title
- *    and description will be copied from CourseBlock to ContentEntry
+ * When adding a new ContentEntry as a CourseBlock:
+ *   User selects ContentEntry, sees imported data. Then clicks NEXT
+ *   Goes to CourseBlockEdit
+ *   Clicks DONE
  *
- * When there is an associated CourseBlock and the user does not have permission to edit the ContentEntry itself:
- *    Only the CourseBlock part of the screen will be displayed. ContentEntry specific fields (e.g.
- *    license, author, etc) will not be displayed. This would probably be the case if a teacher
- *    selects a content item from the library.
- *
- * Only a user with permission to edit the ContentEntry can update the file associated with the
- * ContentEntry. This ensures that the ContentEntryVersionUid when used for usage data tracking
- * will be accurate and include usage from all courses.
-
+ * When editing a ContentEntry that was added to a CourseBlock
+ *   In ClazzEdit, user clicks on the CourseBlock, goes to CourseBlockEdit
+ *   User clicks on edit icon next to "Selected Content"
  */
 class ContentEntryEditViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
     private val saveContentEntryUseCase: SaveContentEntryUseCase =
         di.onActiveEndpoint().direct.instance(),
-    private val enqueueContentEntryImporseUseCase: EnqueueContentEntryImportUseCase =
+    private val enqueueContentEntryImportUseCase: EnqueueContentEntryImportUseCase =
         di.onActiveEndpoint().direct.instance(),
 ) : UstadEditViewModel(di, savedStateHandle, DEST_NAME){
 
     private val _uiState = MutableStateFlow(
-        ContentEntryEditUiState(
-            courseBlockEditUiState = CourseBlockEditUiState(
-                timeZone = TimeZone.currentSystemDefault().id
-            )
-        )
+        ContentEntryEditUiState()
     )
 
     val uiState: Flow<ContentEntryEditUiState> = _uiState.asStateFlow()
+
+    private val goToOnContentEntryDone = savedStateHandle[ARG_GO_TO_ON_CONTENT_ENTRY_DONE]?.toInt() ?: 0
+
+    private val goingToCourseBlockEdit = goToOnContentEntryDone == GO_TO_COURSE_BLOCK_EDIT
 
     init {
         _appUiState.update { prev ->
@@ -124,24 +97,31 @@ class ContentEntryEditViewModel(
             )
         }
 
-        val courseBlockArgVal = savedStateHandle[ARG_COURSEBLOCK]?.let {
-            json.decodeFromString(CourseBlock.serializer(),  it)
-        }
-
         launchIfHasPermission(
             permissionCheck = { db ->
-                courseBlockArgVal != null || db.systemPermissionDao.personHasSystemPermission(
-                    activeUserPersonUid, PermissionFlags.EDIT_LIBRARY_CONTENT
-                )
+                goingToCourseBlockEdit ||
+                    db.systemPermissionDao().personHasSystemPermission(
+                        activeUserPersonUid, PermissionFlags.EDIT_LIBRARY_CONTENT
+                    )
             }
         ) {
             loadEntity(
-                serializer = ContentEntryBlockLanguageAndContentJob.serializer(),
+                serializer = ContentEntryAndContentJob.serializer(),
                 onLoadFromDb = { db ->
                     //Check if the user can edit the content entry itself...
-                    db.takeIf { entityUidArg != 0L }?.contentEntryDao
-                        ?.findEntryWithLanguageByEntryIdAsync(entityUidArg)
-                        ?.toContentEntryAndBlock(courseBlockArgVal)
+                    db.takeIf { entityUidArg != 0L }?.contentEntryDao()
+                        ?.findByUidWithEditDetails(entityUidArg)?.let { entryAndPicture ->
+                            if (entryAndPicture.entry != null) {
+                                ContentEntryAndContentJob(
+                                    entry = entryAndPicture.entry,
+                                    picture = entryAndPicture.picture ?: ContentEntryPicture2(
+                                        cepUid = entityUidArg
+                                    )
+                                )
+                            }else {
+                                null
+                            }
+                        }
                 },
                 makeDefault = {
                     val newContentEntryUid = activeDb.doorPrimaryKeyManager.nextId(ContentEntry.TABLE_ID)
@@ -151,34 +131,49 @@ class ContentEntryEditViewModel(
                     )
 
                     if(importedMetaData != null) {
-                        ContentEntryBlockLanguageAndContentJob(
+                        val pictureUri = importedMetaData.picture?.cepPictureUri
+                        if(pictureUri != null) {
+                            //Ensure that the
+                            savedStateHandle[INIT_PIC_URI] = ""
+                        }
+
+                        ContentEntryAndContentJob(
                             entry = importedMetaData.entry.shallowCopy {
                                 contentEntryUid = newContentEntryUid
-                                contentOwner = activeUserPersonUid
-                            },
-                            block = courseBlockArgVal?.shallowCopy {
-                                cbTitle = importedMetaData.entry.title
-                                cbDescription = importedMetaData.entry.description
+                                if(goingToCourseBlockEdit) {
+                                    contentOwnerType = ContentEntry.OWNER_TYPE_COURSE
+                                    contentOwner = savedStateHandle[ARG_CLAZZUID]?.toLong() ?: 0
+                                }else {
+                                    contentOwnerType = ContentEntry.OWNER_TYPE_LIBRARY
+                                    contentOwner = activeUserPersonUid
+                                }
                             },
                             contentJobItem = ContentEntryImportJob(
                                 cjiPluginId = importedMetaData.importerId,
                                 cjiContentEntryUid = newContentEntryUid,
                                 sourceUri = importedMetaData.entry.sourceUrl,
                                 cjiOriginalFilename = importedMetaData.originalFilename,
+                                cjiOwnerPersonUid = activeUserPersonUid,
                             ),
-                            contentJob = ContentJob()
+                            picture = importedMetaData.picture?.copy(
+                                cepUid = newContentEntryUid,
+                            ) ?: ContentEntryPicture2(
+                                cepUid = newContentEntryUid,
+                            )
                         ).also {
                             savedStateHandle[KEY_TITLE] = systemImpl.formatString(MR.strings.importing,
                                 (importedMetaData.originalFilename ?: importedMetaData.entry.sourceUrl ?: ""))
                         }
                     }else {
-                        ContentEntryBlockLanguageAndContentJob(
+                        ContentEntryAndContentJob(
                             entry = ContentEntry().apply {
                                 contentEntryUid = newContentEntryUid
                                 leaf = savedStateHandle[ARG_LEAF]?.toBoolean() == true
                                 contentOwner = activeUserPersonUid
                             },
-                            block = courseBlockArgVal,
+                            picture = ContentEntryPicture2(
+                                cepUid = newContentEntryUid,
+                            )
                         )
                     }
                 },
@@ -186,13 +181,12 @@ class ContentEntryEditViewModel(
                     _uiState.update { prev ->
                         prev.copy(
                             entity = it,
-                            courseBlockEditUiState = prev.courseBlockEditUiState.copy(
-                                courseBlock = it?.block
-                            )
                         )
                     }
                 }
-            )
+            ).also {
+                savedStateHandle.setIfNoValueSetYet(INIT_PIC_URI, it?.picture?.cepPictureUri ?: "")
+            }
 
             val isLeaf = _uiState.value.entity?.entry?.leaf == true
             val savedStateTitle = savedStateHandle[KEY_TITLE]
@@ -212,10 +206,11 @@ class ContentEntryEditViewModel(
                         text = systemImpl.getString(
                             //If the CourseBlock arg is provided, then the actual save to db is
                             // done by ClazzEdit, not here
-                            if(_uiState.value.entity?.block != null)
-                                MR.strings.done
-                            else
-                                MR.strings.save
+                            when (goToOnContentEntryDone) {
+                                GO_TO_COURSE_BLOCK_EDIT -> MR.strings.next
+                                FINISH_WITHOUT_SAVE_TO_DB -> MR.strings.done
+                                else -> MR.strings.save
+                            }
                         ),
                         onClick = this@ContentEntryEditViewModel::onClickSave,
                     )
@@ -223,7 +218,18 @@ class ContentEntryEditViewModel(
             }
 
             _uiState.update { prev ->
-                prev.copyWithFieldsEnabled(true)
+                prev.copy(fieldsEnabled = true)
+            }
+
+            launch {
+                navResultReturner.filteredResultFlowForKey(KEY_HTML_DESCRIPTION).collect {
+                    val newDecription =it.result as? String ?: return@collect
+                    onContentEntryChanged(
+                        _uiState.value.entity?.entry?.shallowCopy {
+                            description = newDecription
+                        }
+                    )
+                }
             }
         }
     }
@@ -231,42 +237,66 @@ class ContentEntryEditViewModel(
     fun onContentEntryChanged(
         contentEntry: ContentEntry?
     ) {
-        _uiState.update { prev ->
+        val updatedState = _uiState.updateAndGet { prev ->
             prev.copy(
                 entity = prev.entity?.copy(
                     entry = contentEntry,
                 )
             )
         }
+
+        scheduleEntityCommit(updatedState.entity)
+    }
+
+    fun onPictureChanged(pictureUri: String?) {
+        val updatedState = _uiState.updateAndGet { prev ->
+            prev.copy(
+                entity = prev.entity?.copy(
+                    picture = prev.entity.picture?.copy(
+                        cepPictureUri = pictureUri,
+                    )
+                )
+            )
+        }
+
+        scheduleEntityCommit(updatedState.entity)
+    }
+
+    private fun scheduleEntityCommit(entity: ContentEntryAndContentJob?) {
+        scheduleEntityCommitToSavedState(
+            entity = entity,
+            serializer = ContentEntryAndContentJob.serializer(),
+            commitDelay = 200,
+        )
     }
 
     private fun ContentEntryEditUiState.hasErrors(): Boolean {
         return titleError != null
     }
 
-    fun onCourseBlockChanged(
-        courseBlock: CourseBlock?
-    ) {
+    fun onEditDescriptionInNewWindow() {
+        navigateToEditHtml(
+            currentValue = _uiState.value.entity?.entry?.description ?: "",
+            resultKey = KEY_HTML_DESCRIPTION,
+            title = systemImpl.getString(MR.strings.description),
+        )
+    }
+
+    fun onSetCompressionLevel(compressionLevel: CompressionLevel) {
         _uiState.update { prev ->
             prev.copy(
                 entity = prev.entity?.copy(
-                    block = courseBlock,
-                ),
-                courseBlockEditUiState = prev.courseBlockEditUiState.copy(
-                    courseBlock = courseBlock
+                    contentJobItem = prev.entity.contentJobItem?.copy(
+                        cjiCompressionLevel = compressionLevel.value
+                    )
                 )
             )
         }
     }
 
+
     fun onClickSave() {
-        val entityVal = _uiState.value.entity?.copy(
-            block = _uiState.value.entity?.block?.shallowCopy {
-                //Make sure that the CourseBlock (if provided) has the cbEntityUid and cbType set correctly
-                cbType = CourseBlock.BLOCK_CONTENT_TYPE
-                cbEntityUid = _uiState.value.entity?.entry?.contentEntryUid ?: 0L
-            }
-        )
+        val entityVal = _uiState.value.entity
 
         val contentEntry = _uiState.value.entity?.entry
         _uiState.update { prev ->
@@ -292,54 +322,79 @@ class ContentEntryEditViewModel(
             return
         }
 
-        _uiState.update { prev -> prev.copyWithFieldsEnabled(false) }
+        _uiState.update { prev -> prev.copy(fieldsEnabled = false) }
 
-        if(entityVal.block != null) {
-            //This is being edited as part of a course. We won't save anything here. Saving will
-            //be done in ClazzEditViewModel
-            finishWithResult(entityVal)
-        }else {
-            viewModelScope.launch {
-                val parentUidArg = savedStateHandle[ARG_PARENT_UID]?.toLong()
-                saveContentEntryUseCase(
-                    contentEntry = contentEntryVal,
-                    //Where this is a new ContentEntry (e.g. entityUidArg == 0), it should be
-                    // joined to the parentUidArg
-                    joinToParentUid = if(entityUidArg == 0L) parentUidArg else null
+        when {
+            /* When a new ContentEntry is being added to a course, then the newly created ContentEntry,
+             * associated import job, and courseblock are all passed along to CourseBlockEdit
+             * e.g. ClazzEdit -> ContentEntryList -> ContentEntryEdit -> CourseBlockEdit -> return to ClazzEdit
+             */
+            goToOnContentEntryDone == GO_TO_COURSE_BLOCK_EDIT -> {
+                navController.navigate(
+                    CourseBlockEditViewModel.DEST_NAME,
+                    args = buildMap {
+                        this[CourseBlockEditViewModel.ARG_SELECTED_CONTENT_ENTRY] = json.encodeToString(
+                            ContentEntryAndContentJob.serializer(), entityVal
+                        )
+
+                        putFromSavedStateIfPresent(CourseBlockEditViewModel.COURSE_BLOCK_CONTENT_ENTRY_PASS_THROUGH_ARGS)
+                    }
                 )
+            }
 
-                val contentJobItemVal = entityVal.contentJobItem
-                if(contentJobItemVal != null) {
-                    enqueueContentEntryImporseUseCase(
-                        contentJobItem = contentJobItemVal
+            /* When an existing CourseBlock is edited, we return the ContentEntry and any associated
+             * import job back to CourseBlockEdit
+             * e.g. ClazzEdit -> CourseBlockEdit -> Content Entry Edit -> return to CourseBlockEdit -> return to ClazzEdit
+             */
+            goToOnContentEntryDone == FINISH_WITHOUT_SAVE_TO_DB -> {
+                finishWithResult(entityVal)
+            }
+
+            else -> {
+                viewModelScope.launch {
+                    val parentUidArg = savedStateHandle[ARG_PARENT_UID]?.toLong()
+                    saveContentEntryUseCase(
+                        contentEntry = contentEntryVal,
+                        //Where this is a new ContentEntry (e.g. entityUidArg == 0), it should be
+                        // joined to the parentUidArg
+                        joinToParentUid = if(entityUidArg == 0L) parentUidArg else null,
+                        picture = entityVal.picture,
+                        initPictureUri = savedStateHandle[INIT_PIC_URI],
                     )
-                }
 
-                val popUpToOnFinish = savedStateHandle[ARG_POPUPTO_ON_FINISH]
-                when {
-                    expectedResultDest != null -> {
-                        finishWithResult(contentEntryVal)
-                    }
-
-                    //Here, we don't go to the detail view. We go back to where the user came from
-                    // That is correct for folders. For leaf nodes, maybe should change
-                    else -> {
-                        navController.popBackStack(
-                            viewName = popUpToOnFinish ?: destinationName,
-                            inclusive = true
-                        )
-                    }
-                }
-
-                if (_uiState.value.hasErrors()) {
-                    loadingState = LoadingUiState.NOT_LOADING
-                    _uiState.update { prev ->
-                        prev.copy(
-                            fieldsEnabled = true
+                    val contentJobItemVal = entityVal.contentJobItem
+                    if(contentJobItemVal != null) {
+                        enqueueContentEntryImportUseCase(
+                            contentJobItem = contentJobItemVal
                         )
                     }
 
-                    return@launch
+                    val popUpToOnFinish = savedStateHandle[ARG_POPUPTO_ON_FINISH]
+                    when {
+                        expectedResultDest != null -> {
+                            finishWithResult(contentEntryVal)
+                        }
+
+                        //Here, we don't go to the detail view. We go back to where the user came from
+                        // That is correct for folders. For leaf nodes, maybe should change
+                        else -> {
+                            navController.popBackStack(
+                                viewName = popUpToOnFinish ?: destinationName,
+                                inclusive = true
+                            )
+                        }
+                    }
+
+                    if (_uiState.value.hasErrors()) {
+                        loadingState = LoadingUiState.NOT_LOADING
+                        _uiState.update { prev ->
+                            prev.copy(
+                                fieldsEnabled = true
+                            )
+                        }
+
+                        return@launch
+                    }
                 }
             }
         }
@@ -357,6 +412,14 @@ class ContentEntryEditViewModel(
 
         //Used to save the title after parsing metadata
         private const val KEY_TITLE = "savedTitle"
+
+        const val ARG_GO_TO_ON_CONTENT_ENTRY_DONE = "goToOnContentEntryDone"
+
+        const val KEY_HTML_DESCRIPTION = "contentEntryDesc"
+
+        const val GO_TO_COURSE_BLOCK_EDIT = 1
+
+        const val FINISH_WITHOUT_SAVE_TO_DB = 2
 
     }
 

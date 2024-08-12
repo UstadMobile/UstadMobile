@@ -67,7 +67,7 @@ class ClazzEnrolmentListViewModel(
 
     init {
         viewModelScope.launch {
-            val permissionFlow = activeDb.coursePermissionDao.personHasPermissionWithClazzTripleAsFlow(
+            val permissionFlow = activeDb.coursePermissionDao().personHasPermissionWithClazzTripleAsFlow(
                 accountPersonUid = activeUserPersonUid,
                 clazzUid = argClazzUid,
                 firstPermission = PermissionFlags.COURSE_MANAGE_TEACHER_ENROLMENT,
@@ -79,7 +79,7 @@ class ClazzEnrolmentListViewModel(
 
             _uiState.whenSubscribed {
                 launch {
-                    val terminology = activeRepo.courseTerminologyDao
+                    val terminology = activeRepo.courseTerminologyDao()
                         .getTerminologyForClazz(argClazzUid)
                     _uiState.update { prev ->
                         prev.copy(courseTerminology = terminology)
@@ -102,7 +102,7 @@ class ClazzEnrolmentListViewModel(
                 launch {
                     canViewMembersFlow.distinctUntilChanged().collectLatest { canViewMembers ->
                         val enrolmentsListFlow = if(canViewMembers) {
-                            activeRepo.clazzEnrolmentDao.findAllEnrolmentsByPersonAndClazzUid(
+                            activeRepo.clazzEnrolmentDao().findAllEnrolmentsByPersonAndClazzUid(
                                 personUid = argPersonUid,
                                 clazzUid = argClazzUid,
                             )
@@ -124,7 +124,7 @@ class ClazzEnrolmentListViewModel(
                     canViewMembersFlow.distinctUntilChanged().filter { it }.collectLatest { canViewMembers ->
                         if(canViewMembers) {
                             val courseAndPersonName = activeRepo
-                                .clazzEnrolmentDao.getClazzNameAndPersonName(
+                                .clazzEnrolmentDao().getClazzNameAndPersonName(
                                     personUid = argPersonUid,
                                     clazzUid = argClazzUid,
                                 )

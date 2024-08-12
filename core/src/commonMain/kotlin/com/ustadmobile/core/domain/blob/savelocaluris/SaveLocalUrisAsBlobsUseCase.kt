@@ -1,5 +1,6 @@
 package com.ustadmobile.core.domain.blob.savelocaluris
 
+import com.ustadmobile.core.util.stringvalues.IStringValues
 import com.ustadmobile.lib.db.entities.TransferJobItem
 import kotlinx.serialization.Serializable
 
@@ -41,6 +42,7 @@ interface SaveLocalUrisAsBlobsUseCase {
         val mimeType: String? = null,
         val deleteLocalUriAfterSave: Boolean = false,
         val createRetentionLock: Boolean = false,
+        val extraHeaders: IStringValues = IStringValues.empty(),
     )
 
     /**

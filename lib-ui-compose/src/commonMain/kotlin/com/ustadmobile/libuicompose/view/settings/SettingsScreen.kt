@@ -5,13 +5,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeveloperMode
 import androidx.compose.material.icons.filled.DisplaySettings
 import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.filled.SdStorage
 import androidx.compose.material.icons.filled.Workspaces
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,6 +24,7 @@ import com.ustadmobile.core.viewmodel.settings.SettingsUiState
 import com.ustadmobile.libuicompose.components.UstadDetailField2
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.viewmodel.settings.SettingsViewModel
 import com.ustadmobile.libuicompose.components.UstadDetailHeader
 import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
@@ -43,6 +45,7 @@ fun SettingsScreen(
         onClickVersion = viewModel::onClickVersion,
         onClickDeveloperOptions = viewModel::onClickDeveloperOptions,
         onClickDeletedItems = viewModel::onClickDeletedItems,
+        onClickOfflineStorageOptionsDialog = viewModel::onClickOfflineStorageOptionsDialog,
     )
 
     if(uiState.langDialogVisible) {
@@ -77,6 +80,29 @@ fun SettingsScreen(
         }
     }
 
+    if(uiState.storageOptionsDialogVisible) {
+        SettingsDialog(
+            onDismissRequest = viewModel::onDismissOfflineStorageOptionsDialog
+        ) {
+            uiState.storageOptions.forEach { option ->
+                ListItem(
+                    modifier = Modifier.clickable {
+                        viewModel.onSelectOfflineStorageOption(option.option)
+                    },
+                    headlineContent = { Text(stringResource(option.option.label)) },
+                    supportingContent = {
+                        Text(
+                            stringResource(
+                                MR.strings.space_available,
+                                UMFileUtil.formatFileSize(option.availableSpace)
+                            )
+                        )
+                    }
+                )
+            }
+        }
+    }
+
     if(uiState.waitForRestartDialogVisible) {
         UstadWaitForRestartDialog()
     }
@@ -94,6 +120,7 @@ fun SettingsScreen(
     onClickVersion: () -> Unit = { },
     onClickDeveloperOptions: () -> Unit = { },
     onClickDeletedItems: () -> Unit = { },
+    onClickOfflineStorageOptionsDialog: () -> Unit = { },
 ) {
     UstadVerticalScrollColumn(
         modifier = Modifier.fillMaxSize()
@@ -105,6 +132,19 @@ fun SettingsScreen(
             valueText = uiState.currentLanguage,
             labelText = stringResource(MR.strings.app_language),
         )
+
+        if(uiState.storageOptionsVisible) {
+            UstadDetailField2(
+                modifier = Modifier.clickable {
+                    onClickOfflineStorageOptionsDialog()
+                },
+                labelText = stringResource(MR.strings.offline_items_storage),
+                valueText = uiState.selectedOfflineStorageOption?.label?.let {
+                    stringResource(it)
+                } ?: "",
+                icon = Icons.Default.SdStorage,
+            )
+        }
 
         UstadDetailField2(
             valueText = stringResource(MR.strings.deleted_items),
@@ -135,7 +175,7 @@ fun SettingsScreen(
 
         if (uiState.reasonLeavingVisible){
             UstadDetailField2(
-                icon = Icons.Default.Logout,
+                icon = Icons.AutoMirrored.Filled.Logout,
                 valueText = stringResource(MR.strings.leaving_reason),
                 labelText = stringResource(MR.strings.leaving_reason_manage),
                 modifier = Modifier.clickable { onClickLeavingReason() },
@@ -166,7 +206,7 @@ fun SettingsScreen(
             )
         }
 
-        Divider(modifier = Modifier.height(1.dp))
+        HorizontalDivider(thickness = 1.dp)
 
         ListItem(
             modifier = Modifier.testTag("settings_version").clickable { onClickVersion() },

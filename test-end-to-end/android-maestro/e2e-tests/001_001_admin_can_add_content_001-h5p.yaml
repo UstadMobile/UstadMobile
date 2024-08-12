@@ -1,0 +1,47 @@
+appId: com.toughra.ustadmobile
+env:
+  TESTNAME: "001_001_admin_can_add_content_001-h5p"
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/001_001_admin_can_add_content_001-h5p"
+---
+- clearState: com.toughra.ustadmobile
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+     CONTROLSERVER: ${CONTROLSERVER}
+     TESTSERIAL: ${TESTSERIAL}
+     TESTNAME: ${TESTNAME}
+- runFlow:
+    file: "../common/clear_login_and_add_content.yaml"
+    env:
+      TESTFILENAME: "H5p_Content.h5p"
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+- tapOn: "SAVE"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_add_to_library"
+- tapOn: "True/False Question"
+- extendedWaitUntil:
+    notVisible: "Importing"
+    timeout: 20000
+- extendedWaitUntil:
+    notVisible: "Uploading"
+    timeout: 20000
+- tapOn: Open
+- runFlow:
+    file: "../common/chrome-first-run-check.yaml"
+- assertVisible: "Check"
+- tapOn: "Close tab"
+- runFlow:
+    file: "../common/login_download_and_open_content.yaml"
+- tapOn: "Library"
+- extendedWaitUntil:
+    visible: "True/False Question"
+    timeout: 60000
+- tapOn: "True/False Question"
+- tapOn: Download
+- tapOn: Open
+- extendedWaitUntil:
+    visible: "Check"
+    timeout: 5000
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/h5p_content_download_and_open"
+- tapOn: "Close tab"
+- tapOn: "Back"

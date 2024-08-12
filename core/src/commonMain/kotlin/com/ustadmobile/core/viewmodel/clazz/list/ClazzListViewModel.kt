@@ -13,6 +13,7 @@ import com.ustadmobile.core.viewmodel.UstadListViewModel
 import app.cash.paging.PagingSource
 import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.impl.appstate.Snack
+import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.ext.dayStringResource
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
@@ -52,7 +53,6 @@ data class ClazzListUiState(
 
     val filterOptions: List<MessageIdOption2> = listOf(
         MessageIdOption2(MR.strings.currently_enrolled, ClazzDaoCommon.FILTER_CURRENTLY_ENROLLED),
-        MessageIdOption2(MR.strings.past_enrollments, ClazzDaoCommon.FILTER_PAST_ENROLLMENTS),
         MessageIdOption2(MR.strings.all, 0)
     ),
 
@@ -92,10 +92,9 @@ class ClazzListViewModel(
     private val filterByPermission = savedStateHandle[UstadView.ARG_FILTER_BY_PERMISSION]?.toLong()
         ?: PermissionFlags.COURSE_VIEW
 
-    private var lastPagingSource: PagingSource<Int, ClazzWithListDisplayDetails>? = null
 
     private val pagingSourceFactory: () -> PagingSource<Int, ClazzWithListDisplayDetails> =  {
-        activeRepo.clazzDao.findClazzesWithPermission(
+        activeRepo.clazzDao().findClazzesWithPermission(
             searchQuery =  _appUiState.value.searchState.searchText.toQueryLikeParam(),
             accountPersonUid = accountManager.currentAccount.personUid,
             excludeSelectedClazzList = filterAlreadySelectedList,
@@ -103,9 +102,7 @@ class ClazzListViewModel(
             filter = _uiState.value.selectedChipId,
             currentTime = systemTimeInMillis(),
             permission = filterByPermission,
-        ).also {
-            lastPagingSource = it
-        }
+        )
     }
 
     init {
@@ -132,7 +129,7 @@ class ClazzListViewModel(
 
         viewModelScope.launch {
             _uiState.whenSubscribed {
-                activeRepo.systemPermissionDao.personHasSystemPermissionAsFlow(
+                activeRepo.systemPermissionDao().personHasSystemPermissionAsFlow(
                     accountManager.currentAccount.personUid, PermissionFlags.ADD_COURSE
                 ).distinctUntilChanged().collect { hasPermission ->
                     _uiState.update { prev ->
@@ -147,7 +144,7 @@ class ClazzListViewModel(
 
         viewModelScope.launch {
             _uiState.whenSubscribed {
-                activeRepo.enrolmentRequestDao.findRequestsForUserAsFlow(
+                activeRepo.enrolmentRequestDao().findRequestsForUserAsFlow(
                     accountPersonUid = activeUserPersonUid,
                     statusFilter = EnrolmentRequest.STATUS_PENDING,
                 ).collect {
@@ -160,7 +157,7 @@ class ClazzListViewModel(
     }
 
     override fun onUpdateSearchResult(searchText: String) {
-        lastPagingSource?.invalidate()
+        _refreshCommandFlow.tryEmit(RefreshCommand())
     }
 
     override fun onClickAdd() {
@@ -183,7 +180,7 @@ class ClazzListViewModel(
                 activeSortOrderOption = sortOption
             )
         }
-        lastPagingSource?.invalidate()
+        _refreshCommandFlow.tryEmit(RefreshCommand())
     }
 
     fun onClickFilterChip(filterOption: MessageIdOption2) {
@@ -193,13 +190,13 @@ class ClazzListViewModel(
             )
         }
 
-        lastPagingSource?.invalidate()
+        _refreshCommandFlow.tryEmit(RefreshCommand())
     }
 
 
     fun onClickCancelEnrolmentRequest(enrolmentRequest: EnrolmentRequest) {
         viewModelScope.launch {
-            activeRepo.enrolmentRequestDao.updateStatus(
+            activeRepo.enrolmentRequestDao().updateStatus(
                 uid = enrolmentRequest.erUid,
                 status = EnrolmentRequest.STATUS_CANCELED,
                 updateTime = systemTimeInMillis(),

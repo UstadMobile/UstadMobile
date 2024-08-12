@@ -80,8 +80,6 @@ import com.ustadmobile.core.viewmodel.HolidayCalendarEditViewModel
 import com.ustadmobile.core.viewmodel.parentalconsentmanagement.ParentalConsentManagementViewModel
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
 import com.ustadmobile.core.viewmodel.ReportFilterEditViewModel
-import com.ustadmobile.core.viewmodel.SchoolDetailOverviewViewModel
-import com.ustadmobile.core.viewmodel.SchoolEditViewModel
 import com.ustadmobile.core.viewmodel.ScopedGrantEditViewModel
 import com.ustadmobile.core.viewmodel.site.detail.SiteDetailViewModel
 import com.ustadmobile.core.viewmodel.site.edit.SiteEditViewModel
@@ -99,7 +97,6 @@ import com.ustadmobile.core.viewmodel.schedule.edit.ScheduleEditViewModel
 import com.ustadmobile.view.dbexport.DbExportScreen
 import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditViewModel
 import com.ustadmobile.view.accountlist.AccountListScreen
-import com.ustadmobile.view.person.accountedit.PersonAccountEditPreview
 import com.ustadmobile.view.person.accountedit.PersonAccountEditScreen
 import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
 import com.ustadmobile.view.contententry.importlink.ContentEntryImportLinkScreen
@@ -161,7 +158,14 @@ import com.ustadmobile.core.viewmodel.systempermission.detail.SystemPermissionDe
 import com.ustadmobile.view.systempermission.detail.SystemPermissionDetailScreen
 import com.ustadmobile.view.systempermission.edit.SystemPermissionEditScreen
 import com.ustadmobile.core.viewmodel.systempermission.edit.SystemPermissionEditViewModel
-
+import com.ustadmobile.view.person.bulkaddselectfile.BulkAddPersonSelectFileScreen
+import com.ustadmobile.core.viewmodel.person.bulkaddselectfile.BulkAddPersonSelectFileViewModel
+import com.ustadmobile.view.person.bulkaddrunimport.BulkAddPersonRunImportScreen
+import com.ustadmobile.core.viewmodel.person.bulkaddrunimport.BulkAddPersonRunImportViewModel
+import com.ustadmobile.core.viewmodel.clazz.gradebook.ClazzGradebookViewModel
+import com.ustadmobile.view.clazz.gradebook.ClazzGradebookScreen
+import com.ustadmobile.view.clazz.gradebook.ClazzGradebookPreview
+import com.ustadmobile.mui.components.UstadChipsDemo
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -184,9 +188,6 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     ),
     UstadScreen(PersonEditViewModel.DEST_NAME, "PersonEdit", PersonEditScreen),
     UstadScreen(PersonEditViewModel.DEST_NAME_REGISTER, "Register", PersonEditScreen),
-    UstadScreen(PersonAccountEditView.VIEW_NAME, "Person Account Edit Preview",
-        PersonAccountEditPreview
-    ),
     UstadScreen(LoginViewModel.DEST_NAME, "Login Preview",
         LoginScreen
     ),
@@ -218,10 +219,6 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     ),
     UstadScreen(SiteDetailViewModel.DEST_NAME, name = "Site Detail", SiteDetailScreen),
     UstadScreen(SiteEditViewModel.DEST_NAME, name = "Site Edit Preview", SiteEditScreen),
-    UstadScreen(SchoolDetailOverviewViewModel.DEST_NAME, "SchoolDetailOverview Preview",
-        SchoolDetailOverviewScreenPreview),
-    UstadScreen(SchoolEditViewModel.DEST_NAME, "School Edit Preview",
-        SchoolEditScreenPreview),
     UstadScreen(LanguageDetailView.VIEW_NAME, name = "LanguageDetail Preview",
         LanguageDetailPreview),
     UstadScreen(ClazzEditViewModel.DEST_NAME, "Course Edit",
@@ -269,8 +266,6 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(CourseGroupSetDetailViewModel.DEST_NAME, "CourseGroupSetDetail Preview",
         CourseGroupSetDetailScreen
     ),
-    UstadScreen("UstadClazzAssignmentListItem", "UstadClazzAssignmentListItem Preview",
-        UstadClazzAssignmentListItemPreview),
     UstadScreen(HolidayCalendarListViewModel.DEST_NAME, "HolidayCalendarList Preview",
         HolidayCalendarListScreenPreview),
     UstadScreen(LanguageListViewModel.DEST_NAME, "LanguageList Preview",
@@ -394,6 +389,11 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(CoursePermissionDetailViewModel.DEST_NAME, "CoursePermissionDetail", CoursePermissionDetailScreen),
     UstadScreen(SystemPermissionDetailViewModel.DEST_NAME, "SystemPermissionDetail", SystemPermissionDetailScreen),
     UstadScreen(SystemPermissionEditViewModel.DEST_NAME, "SystemPermissionEdit", SystemPermissionEditScreen),
+    UstadScreen(BulkAddPersonSelectFileViewModel.DEST_NAME, "BulkAddPersonSelectFile", BulkAddPersonSelectFileScreen),
+    UstadScreen(BulkAddPersonRunImportViewModel.DEST_NAME, "BulkAddPersonRunImport", BulkAddPersonRunImportScreen),
+    UstadScreen(ClazzGradebookViewModel.DEST_NAME, "ClazzProgressReport", ClazzGradebookScreen),
+    UstadScreen("ClazzGradebookPreview", "ClazzGradebookPreview", ClazzGradebookPreview),
+    UstadScreen("UstadChipsDemo", "UstadChipsDemo", UstadChipsDemo),
 )
 
 //Here as per the MUI showcase template

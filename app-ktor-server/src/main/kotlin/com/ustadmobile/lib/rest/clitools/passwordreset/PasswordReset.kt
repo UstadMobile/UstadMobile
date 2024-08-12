@@ -9,6 +9,7 @@ import com.ustadmobile.lib.rest.dimodules.makeJvmBackendDiModule
 import com.ustadmobile.lib.rest.ext.dbModeProperty
 import io.ktor.server.config.*
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.Json
 import net.sourceforge.argparse4j.ArgumentParsers
 import net.sourceforge.argparse4j.inf.ArgumentParserException
 import net.sourceforge.argparse4j.inf.Namespace
@@ -63,13 +64,18 @@ fun main(args: Array<String>) {
         Endpoint(endpointArg)
     }
 
+    val json = Json {
+        encodeDefaults = true
+        ignoreUnknownKeys = true
+    }
+
     val di = DI {
-        import(makeJvmBackendDiModule(conf))
+        import(makeJvmBackendDiModule(conf, json = json))
     }
 
 
     val db: UmAppDatabase = di.direct.on(endpoint).instance(tag = DoorTag.TAG_DB)
-    val person = db.personDao.findByUsername(ns.getString("username"))
+    val person = db.personDao().findByUsername(ns.getString("username"))
 
     if(person != null) {
         val authManager: AuthManager = di.direct.on(endpoint).instance()

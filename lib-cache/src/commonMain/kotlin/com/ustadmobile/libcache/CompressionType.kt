@@ -1,5 +1,14 @@
 package com.ustadmobile.libcache
 
+/**
+ * Supports Gzip and Identity (e.g. not compressed). It would be nice to add Brotli, unfortunately,
+ * there is no Java/Kotlin encoder available as per :
+ *
+ *  https://github.com/google/brotli/issues/405
+ *
+ *  Could potentially use the JNI wrapper and compile for Android:
+ *  https://github.com/google/brotli/blob/master/java/org/brotli/wrapper/enc/Encoder.java
+ */
 enum class CompressionType(
     val headerVal: String,
 ) {

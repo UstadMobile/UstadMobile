@@ -11,7 +11,7 @@ import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryImportJob
-import com.ustadmobile.libcache.request.requestBuilder
+import com.ustadmobile.ihttp.request.iRequestBuilder
 import com.ustadmobile.libcache.response.bodyAsUncompressedSourceIfContentEncoded
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe.copyInputStreamToFile
 import com.ustadmobile.util.test.ext.newFileFromResource
@@ -30,6 +30,7 @@ import org.junit.Test
 import java.util.zip.ZipFile
 import kotlin.test.AfterTest
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class EpubContentImporterCommonJvmTest : AbstractContentImporterTest() {
@@ -80,6 +81,8 @@ class EpubContentImporterCommonJvmTest : AbstractContentImporterTest() {
             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
             json = json,
             getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
+            compressListUseCase = compressListUseCase,
+            saveLocalUrisAsBlobsUseCase = saveLocalUrisUseCase,
         )
 
         runBlocking {
@@ -90,6 +93,11 @@ class EpubContentImporterCommonJvmTest : AbstractContentImporterTest() {
             Assert.assertEquals("Got ContentEntry with expected title",
                     "Children's Literature",
                     metadata!!.entry.title)
+
+            //After extracting metadata, the cache should have the cover image
+            val coverImgUrl = metadata.picture?.cepPictureUri
+            assertNotNull(coverImgUrl)
+            assertNotNull(ustadCache.getCacheEntry(coverImgUrl))
         }
     }
 
@@ -109,6 +117,7 @@ class EpubContentImporterCommonJvmTest : AbstractContentImporterTest() {
             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
             json = json,
             getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
+            compressListUseCase = compressListUseCase,
         )
 
         runBlocking {
@@ -139,6 +148,7 @@ class EpubContentImporterCommonJvmTest : AbstractContentImporterTest() {
             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
             json = json,
             getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
+            compressListUseCase = compressListUseCase,
         )
 
         runBlocking {
@@ -170,6 +180,7 @@ class EpubContentImporterCommonJvmTest : AbstractContentImporterTest() {
             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
             json = json,
             getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
+            compressListUseCase = compressListUseCase,
         )
 
         runBlocking {
@@ -198,6 +209,7 @@ class EpubContentImporterCommonJvmTest : AbstractContentImporterTest() {
             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
             json = json,
             getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
+            compressListUseCase = compressListUseCase,
         )
 
         runBlocking{
@@ -206,7 +218,7 @@ class EpubContentImporterCommonJvmTest : AbstractContentImporterTest() {
                     .toString()
             )
 
-            val uid = db.contentEntryDao.insert(ContentEntry().apply{
+            val uid = db.contentEntryDao().insert(ContentEntry().apply{
                 title = "hello"
             })
             val contentEntryChildUid = 42L
@@ -231,7 +243,7 @@ class EpubContentImporterCommonJvmTest : AbstractContentImporterTest() {
 
                 val expectedUrlPrefix = "${activeEndpoint.url}api/content/${result.cevUid}/"
                 val manifestResponse = ustadCache.retrieve(
-                    requestBuilder("$expectedUrlPrefix${ContentConstants.MANIFEST_NAME}")
+                    iRequestBuilder("$expectedUrlPrefix${ContentConstants.MANIFEST_NAME}")
                 )
                 val manifest = json.decodeFromString(
                     ContentManifest.serializer(), manifestResponse!!.bodyAsUncompressedSourceIfContentEncoded()!!.readString()
@@ -252,7 +264,7 @@ class EpubContentImporterCommonJvmTest : AbstractContentImporterTest() {
                         pathInZip = opfPathInZip
                     )
 
-                    val opfResponse = ustadCache.retrieve(requestBuilder(manifestOpfEntry.bodyDataUrl))
+                    val opfResponse = ustadCache.retrieve(iRequestBuilder(manifestOpfEntry.bodyDataUrl))
                     val opfPackage = xml.decodeFromString(
                         deserializer = PackageDocument.serializer(),
                         string = opfResponse?.bodyAsSource()!!.readString()

@@ -7,9 +7,11 @@ import com.ustadmobile.core.domain.cachelock.CreateCacheLocksForActiveContentEnt
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.http.DoorHttpServerConfig
+import com.ustadmobile.door.log.NapierDoorLogger
+import com.ustadmobile.ihttp.ext.clientProtocolAndHost
+import com.ustadmobile.ihttp.headers.asIHttpHeaders
 import com.ustadmobile.lib.rest.CacheRoute
 import com.ustadmobile.lib.rest.api.blob.BlobUploadServerRoute
-import com.ustadmobile.lib.rest.ext.clientProtocolAndHost
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.ApplicationCallPipeline
@@ -85,7 +87,7 @@ class XferTestServer(
             }
 
             registerContextTranslator { call: ApplicationCall ->
-                Endpoint(call.request.clientProtocolAndHost())
+                Endpoint(call.request.headers.asIHttpHeaders().clientProtocolAndHost())
             }
 
             onReady {
@@ -128,7 +130,7 @@ class XferTestServer(
 
                 route("UmAppDatabase") {
                     UmAppDatabase_KtorRoute(
-                        DoorHttpServerConfig(json = di.direct.instance())
+                        DoorHttpServerConfig(json = di.direct.instance(), logger = NapierDoorLogger())
                     ) { call ->
                         di.on(call).direct.instance(tag = DoorTag.TAG_DB)
                     }

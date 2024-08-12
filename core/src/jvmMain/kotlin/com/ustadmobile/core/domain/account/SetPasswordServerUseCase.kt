@@ -2,7 +2,7 @@ package com.ustadmobile.core.domain.account
 
 import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.door.util.NodeIdAuthCache
+import com.ustadmobile.core.domain.usersession.ValidateUserSessionOnServerUseCase
 import io.github.aakira.napier.Napier
 
 /**
@@ -18,7 +18,7 @@ import io.github.aakira.napier.Napier
 class SetPasswordServerUseCase(
     private val db: UmAppDatabase,
     private val setPasswordUseCase: SetPasswordUseCase,
-    private val nodeIdAndAuthCache: NodeIdAuthCache,
+    private val validateUserSessionOnServerUseCase: ValidateUserSessionOnServerUseCase,
 ) {
 
     suspend operator fun invoke(
@@ -32,21 +32,10 @@ class SetPasswordServerUseCase(
     ) {
         try {
             //Validate from node credentials and run permission check
-            if(!nodeIdAndAuthCache.verify(fromNodeId, nodeAuth)) {
-                throw IllegalArgumentException("Invalid nodeId/nodeauth")
-            }
-            //nodeActiveUserUid must have an active session
-            val sessionsForUser = db.userSessionDao.countActiveSessionsForUserAndNode(
-                personUid = nodeActiveUserUid,
-                nodeId = fromNodeId,
-            )
-
-            if(sessionsForUser < 1) {
-                throw IllegalArgumentException("User $nodeActiveUserUid does not have an active session on $fromNodeId")
-            }
+            validateUserSessionOnServerUseCase(fromNodeId, nodeAuth, nodeActiveUserUid)
 
             if(currentPassword == null) {
-                if(!db.systemPermissionDao.personHasSystemPermission(
+                if(!db.systemPermissionDao().personHasSystemPermission(
                         accountPersonUid = nodeActiveUserUid,
                         permission = PermissionFlags.RESET_PASSWORDS,
                     )

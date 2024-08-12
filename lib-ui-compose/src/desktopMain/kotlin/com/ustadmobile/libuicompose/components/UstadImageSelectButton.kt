@@ -87,7 +87,7 @@ actual fun UstadImageSelectButton(
                         showFilePicker = true
                     },
                     headlineContent = {
-                        Text(stringResource(MR.strings.select_file))
+                        Text(stringResource(MR.strings.select_picture_from_files))
                     }
                 )
                 ListItem(
@@ -96,7 +96,7 @@ actual fun UstadImageSelectButton(
                         onImageUriChanged(null)
                     },
                     headlineContent = {
-                        Text(stringResource(MR.strings.remove_photo))
+                        Text(stringResource(MR.strings.remove_picture))
                     }
                 )
             }

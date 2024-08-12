@@ -5,17 +5,17 @@ import com.ustadmobile.core.domain.compress.CompressResult
 import com.ustadmobile.core.domain.compress.CompressUseCase
 import com.ustadmobile.core.wrappers.compressorjs.Compressor
 import io.github.aakira.napier.Napier
-import js.core.jso
+import js.objects.jso
 import js.promise.await
 import kotlinx.coroutines.CompletableDeferred
-import web.buffer.Blob
+import web.blob.Blob
 import web.http.fetchAsync
 import web.url.URL
 
 /**
  * Implementation of image compression for Javascript. Uses compressorjs.
  */
-class CompressImageUseCaseJs : CompressUseCase {
+class CompressImageUseCaseJs : CompressImageUseCase {
     override suspend fun invoke(
         fromUri: String,
         toUri: String?,
@@ -50,6 +50,8 @@ class CompressImageUseCaseJs : CompressUseCase {
             return CompressResult(
                 uri = resultUri,
                 mimeType = compressedBlob.type,
+                originalSize = blob.size.toLong(),
+                compressedSize = compressedBlob.size.toLong(),
             )
         }catch(e: Throwable) {
             Napier.e("CompressImageUseCase: Exception caught: ", e)

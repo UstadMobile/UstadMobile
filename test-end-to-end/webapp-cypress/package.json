@@ -1,7 +1,8 @@
 {
   "devDependencies": {
-     "cypress": "^13.3.0",
+    "cypress": "^13.6.6",
     "cypress-multi-reporters": "^1.6.3",
+    "cypress-recurse": "^1.35.3",
     "cypress-terminal-report": "^5.3.10",
     "mocha": "^10.2.0",
     "mocha-junit-reporter": "^2.2.1"

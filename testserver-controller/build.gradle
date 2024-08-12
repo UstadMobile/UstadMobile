@@ -18,26 +18,25 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(":lib-util")
     implementation libs.mockwebserver
-    implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
-    implementation "org.json:json:$version_json"
-    implementation "commons-cli:commons-cli:$version_apache_commons_cli"
-    implementation "io.ktor:ktor-server-netty:$version_ktor"
-    implementation "io.ktor:ktor-server-core:$version_ktor"
-    implementation "io.ktor:ktor-server-cors:$version_ktor"
-    implementation "io.ktor:ktor-server-call-logging:$version_ktor"
-    implementation "io.ktor:ktor-server-content-negotiation:$version_ktor"
-    implementation "io.ktor:ktor-server-conditional-headers:$version_ktor"
-    implementation "ch.qos.logback:logback-classic:$version_logback"
-    implementation "io.ktor:ktor-serialization-gson:$version_ktor"
-    implementation "com.google.code.gson:gson:$version_gson"
-    implementation "org.jetbrains.kotlinx:kotlinx-html-jvm:$version_kotlinx_html"
+    implementation libs.nanohttpd
+    implementation libs.json
+    implementation libs.commons.cli
+    implementation libs.ktor.serialization.kotlinx.json
+    implementation libs.ktor.server.netty
+    implementation libs.ktor.server.core
+    implementation libs.ktor.server.cors
+    implementation libs.ktor.server.call.logging
+    implementation libs.ktor.server.content.negotiation
+    implementation libs.ktor.server.conditional.headers
+    implementation libs.logback.classic
+    implementation libs.kotlinx.html.jvm
     implementation libs.xmlutil.core.jvm
     implementation libs.xmlutil.serialization.jvm
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
-    implementation "org.postgresql:postgresql:$version_postgres_jdbc"
+    implementation libs.kotlinx.serialization
+    implementation libs.postgresql
     implementation libs.door.runtime
 
-    testImplementation "junit:junit:$version_junit"
+    testImplementation libs.junit
 }
 
 ext.buildConfigProperties = new Properties()

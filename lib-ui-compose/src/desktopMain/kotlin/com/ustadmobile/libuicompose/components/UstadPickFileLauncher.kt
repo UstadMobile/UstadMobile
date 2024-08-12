@@ -13,6 +13,8 @@ import java.io.File
 
 @Composable
 actual fun rememberUstadFilePickLauncher(
+    fileExtensions: List<String>,
+    mimeTypes: List<String>,
     onFileSelected: (UstadFilePickResult) -> Unit
 ): LaunchFilePickFn {
     var filePickerVisible: Boolean by remember {
@@ -25,6 +27,7 @@ actual fun rememberUstadFilePickLauncher(
 
     FilePicker(
         show = filePickerVisible,
+        fileExtensions = fileExtensions,
     ) { file ->
         filePickerVisible = false
         if(file != null) {

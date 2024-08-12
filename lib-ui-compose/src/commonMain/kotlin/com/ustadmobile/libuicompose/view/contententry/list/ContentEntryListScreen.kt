@@ -19,18 +19,15 @@ import androidx.compose.ui.Modifier
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListUiState
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.libuicompose.view.contententry.UstadContentEntryListItem
-import app.cash.paging.Pager
-import app.cash.paging.PagingConfig
 import com.ustadmobile.libuicompose.components.ustadPagedItems
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import androidx.paging.compose.collectAsLazyPagingItems
 import com.ustadmobile.libuicompose.components.UstadBottomSheetOption
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.UstadContextMenuItem
+import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.lib.db.composites.ContentEntryAndListDetail
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -38,9 +35,13 @@ import com.ustadmobile.libuicompose.components.UstadFileDropZone
 import com.ustadmobile.libuicompose.components.UstadFilePickResult
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadListFilterChipsHeader
+import com.ustadmobile.libuicompose.components.UstadNothingHereYet
 import com.ustadmobile.libuicompose.components.UstadPickFileOpts
 import com.ustadmobile.libuicompose.components.rememberUstadFilePickLauncher
+import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
+import com.ustadmobile.libuicompose.util.rememberEmptyFlow
+import kotlinx.coroutines.flow.Flow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,6 +68,7 @@ fun ContentEntryListScreenForViewModel(
         onSetSelected = viewModel::onSetSelected,
         onClickSelectThisFolder = viewModel::onClickSelectThisFolder,
         contextMenuItems = viewModel::createContextMenuItemsForEntry,
+        refreshCommandFlow = viewModel.refreshCommandFlow,
     )
 
     if(uiState.createNewOptionsVisible) {
@@ -88,6 +90,7 @@ fun ContentEntryListScreenForViewModel(
 
             UstadBottomSheetOption(
                 modifier = Modifier.clickable {
+                    viewModel.onDismissCreateNewOptions()
                     filePickLauncher(UstadPickFileOpts())
                 },
                 headlineContent = {
@@ -118,6 +121,7 @@ fun ContentEntryListScreenForViewModel(
 @Composable
 fun ContentEntryListScreen(
     uiState: ContentEntryListUiState = ContentEntryListUiState(),
+    refreshCommandFlow: Flow<RefreshCommand> = rememberEmptyFlow(),
     onClickContentEntry: (ContentEntry?) -> Unit = { },
     onFileDropped: (UstadFilePickResult) -> Unit = { },
     onClickFilterChip: (MessageIdOption2) -> Unit = { },
@@ -127,13 +131,10 @@ fun ContentEntryListScreen(
     onClickSelectThisFolder: () -> Unit = { },
     contextMenuItems: (ContentEntryAndListDetail) -> List<UstadContextMenuItem> = { emptyList() },
 ) {
-    val pager = remember(uiState.contentEntryList) {
-        Pager(
-            pagingSourceFactory = uiState.contentEntryList,
-            config = PagingConfig(pageSize = 20, enablePlaceholders = true)
-        )
-    }
-    val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
+    val repositoryResult = rememberDoorRepositoryPager(
+        uiState.contentEntryList, refreshCommandFlow
+    )
+    val lazyPagingItems = repositoryResult.lazyPagingItems
 
     Column(
         modifier = Modifier.fillMaxSize()
@@ -148,7 +149,6 @@ fun ContentEntryListScreen(
                 if(uiState.showChips) {
                     item(key = "filterchips") {
                         UstadListFilterChipsHeader(
-                            modifier = Modifier.defaultItemPadding(),
                             filterOptions = uiState.filterOptions,
                             selectedChipId = uiState.selectedChipId,
                             onClickFilterChip = onClickFilterChip,
@@ -194,6 +194,11 @@ fun ContentEntryListScreen(
                     }
                 }
 
+                if(repositoryResult.isSettledEmpty) {
+                    item("empty_state") {
+                        UstadNothingHereYet()
+                    }
+                }
 
                 ustadPagedItems(
                     pagingItems = lazyPagingItems,

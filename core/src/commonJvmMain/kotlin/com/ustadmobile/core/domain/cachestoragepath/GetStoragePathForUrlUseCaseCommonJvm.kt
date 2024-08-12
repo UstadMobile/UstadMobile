@@ -72,12 +72,13 @@ class GetStoragePathForUrlUseCaseCommonJvm (
             }
             progressUpdateJob.cancel()
 
-            val expectedFileSize = totalBytes.get()
-
             val responseFile = retryAsync(maxAttempts = 10, interval = 200) {
-                val filePath = cache.getCacheEntry(url)?.storageUri
+                val cacheEntry = cache.getCacheEntry(url)
+                val filePath = cacheEntry?.storageUri
                     ?: throw IllegalStateException("no filepath for $url")
                 val currentSize = File(filePath).length()
+                val expectedFileSize = cacheEntry.storageSize
+
                 if(expectedFileSize > 0 && currentSize != expectedFileSize)
                     throw IllegalStateException("File $filePath not ready")
 

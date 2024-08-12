@@ -21,12 +21,14 @@ class EnqueueImportContentEntryUseCaseAndroid(
     private val enqueueRemoteImport: EnqueueContentEntryImportUseCase,
 ) : EnqueueContentEntryImportUseCase {
 
-    override suspend fun invoke(contentJobItem: ContentEntryImportJob) {
+    override suspend fun invoke(
+        contentJobItem: ContentEntryImportJob,
+    ) {
         val sourceUri = DoorUri.parse(contentJobItem.sourceUri!!)
         if(sourceUri.isRemote()) {
             enqueueRemoteImport(contentJobItem)
         }else{
-            val uid = db.contentEntryImportJobDao.insertJobItem(contentJobItem)
+            val uid = db.contentEntryImportJobDao().insertJobItem(contentJobItem)
 
             val jobData = Data.Builder()
                 .putString(EnqueueContentEntryImportUseCase.DATA_ENDPOINT, endpoint.url)
@@ -37,8 +39,8 @@ class EnqueueImportContentEntryUseCaseAndroid(
                 .setInputData(jobData)
                 .build()
 
-            val workName = "import-content-entry-${endpoint.url}-$uid"
-            WorkManager.getInstance(appContext).enqueueUniqueWork(workName,
+            WorkManager.getInstance(appContext).enqueueUniqueWork(
+                EnqueueContentEntryImportUseCase.uniqueNameFor(endpoint, uid),
                 ExistingWorkPolicy.REPLACE, workRequest)
         }
     }

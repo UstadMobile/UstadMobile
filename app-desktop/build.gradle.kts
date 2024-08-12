@@ -51,6 +51,8 @@ tasks.withType<Jar> {
         attributes["com-ustadmobile-gopts"] = buildConfigProps?.getProperty("com.ustadmobile.gopts") ?: ""
 
         attributes["com-ustadmobile-showpoweredbymsg"] = buildConfigProps?.getProperty("com.ustadmobile.showpoweredbymsg") ?: ""
+
+        attributes["com-ustadmobile-apiurl"] = buildConfigProps?.getProperty("com.ustadmobile.apiurl") ?: ""
     }
 }
 
@@ -124,6 +126,7 @@ dependencies {
     implementation(libs.kxml2)
     implementation(libs.logback.classic)
     implementation(libs.junique)
+    implementation(libs.hsqldb)
 
     //as per https://conveyor.hydraulic.dev/13.0/tutorial/tortoise/2-gradle/#adapting-a-compose-desktop-app
     linuxAmd64(compose.desktop.linux_x64)

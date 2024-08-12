@@ -3,9 +3,12 @@ package com.ustadmobile.view.message.conversationlist
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.paging.ListPagingSource
+import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.viewmodel.message.conversationlist.ConversationListUiState
 import com.ustadmobile.core.viewmodel.message.conversationlist.ConversationListViewModel
 import com.ustadmobile.hooks.useDateFormatter
+import com.ustadmobile.hooks.useDoorRemoteMediator
+import com.ustadmobile.hooks.useEmptyFlow
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useTimeFormatter
@@ -13,11 +16,14 @@ import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.composites.MessageAndOtherPerson
 import com.ustadmobile.lib.db.entities.Message
 import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.mui.components.UstadNothingHereYet
+import com.ustadmobile.util.ext.isSettledEmpty
 import com.ustadmobile.view.components.UstadFab
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
-import js.core.jso
+import js.objects.jso
+import kotlinx.coroutines.flow.Flow
 import mui.material.Container
 import react.FC
 import react.Props
@@ -32,6 +38,8 @@ external interface ConversationListScreenProps : Props {
 
     var uiState: ConversationListUiState
 
+    var refreshCommandFlow: Flow<RefreshCommand>?
+
     var onClickEntry: (MessageAndOtherPerson) -> Unit
 
 }
@@ -39,9 +47,18 @@ external interface ConversationListScreenProps : Props {
 
 private val ConversationListScreenComponent2 = FC<ConversationListScreenProps> { props ->
 
-    val infiniteQueryResult = usePagingSource(
-        props.uiState.conversations, true, 50
+    val emptyRefreshFlow = useEmptyFlow<RefreshCommand>()
+
+    val mediatorResult = useDoorRemoteMediator(
+        props.uiState.conversations, props.refreshCommandFlow ?: emptyRefreshFlow
     )
+
+    val infiniteQueryResult = usePagingSource(
+        mediatorResult.pagingSourceFactory, true, 50
+    )
+
+    val isSettledEmpty = infiniteQueryResult.isSettledEmpty(mediatorResult)
+
     val muiAppState = useMuiAppState()
     val dateFormatterVal = useDateFormatter()
     val timeFormatterVal = useTimeFormatter()
@@ -55,6 +72,12 @@ private val ConversationListScreenComponent2 = FC<ConversationListScreenProps> {
         }
 
         content = virtualListContent {
+
+            if(isSettledEmpty) {
+                item("empty_state") {
+                    UstadNothingHereYet.create()
+                }
+            }
 
             infiniteQueryPagingItems(
                 items = infiniteQueryResult,
@@ -116,6 +139,7 @@ val ConversationListScreen = FC<Props> {
 
     ConversationListScreenComponent2 {
         uiState = uiStateVal
+        refreshCommandFlow = viewModel.refreshCommandFlow
         onClickEntry = viewModel::onClickEntry
     }
 }

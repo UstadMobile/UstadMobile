@@ -1,4 +1,4 @@
-describe('004_001_assignment_creation_submission_grading', () => {
+describe('WEB_004_001_assignment_creation_submission_grading', () => {
 it('Start Ustad Test Server ', () => {
  // Start Test Server
   cy.ustadStartTestServer()
@@ -64,10 +64,12 @@ it('Student submit assignment', () => {
   cy.contains('Assignment 1').click()
   cy.get('#assignment_text').get('div[contenteditable="true"]',{timeout:6000}).should('be.visible')
   cy.get('#assignment_text').click()
-  cy.get('#assignment_text').type("Text 1")
-  cy.contains('SUBMIT',{timeout:5000}).click()
+  cy.get('.ql-editor').ustadTypeAndVerify('Text 1')
+  cy.contains('SUBMIT').click()
+  cy.get('#assignment_text').get('div[contenteditable="true"]').should('not.exist')
+  cy.contains("Not submitted").should('not.exist')
   cy.go('back')
-  cy.contains('Assignment 1',{timeout:1000}).click()
+  cy.contains('Assignment 1').click()
   cy.contains("Not submitted").should('not.exist')
 })
 
@@ -80,8 +82,8 @@ it('Teacher add assignment mark and course comment', () => {
   cy.contains("button","Course").click()
   cy.contains("Assignment 1").click()
   cy.contains('Submissions').click()
-  cy.contains('Student 1').click()
-  cy.contains("Text 1").should('be.visible')
+  cy.ustadReloadUntilVisible("Student 1")
+  cy.contains("Student 1").click()
   cy.get('#marker_comment').type("Keep it up")
   cy.get('#marker_mark').type('9')
   cy.get('#submit_mark_button').click()

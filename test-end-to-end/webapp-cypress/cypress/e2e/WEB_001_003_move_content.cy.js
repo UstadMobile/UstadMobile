@@ -1,4 +1,4 @@
-describe('001_003_move_content', () => {
+describe('WEB_001_003_move_content', () => {
  it('Start Ustad Test Server ', () => {
   // Start Test Server
     cy.ustadStartTestServer()

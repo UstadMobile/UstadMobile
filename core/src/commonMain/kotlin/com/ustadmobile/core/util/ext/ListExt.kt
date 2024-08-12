@@ -93,3 +93,10 @@ fun List<Pair<StringResource, Long>>.filterByFlags(value: Long) : List<Pair<Stri
     return filter { value.hasFlag(it.second) }
 }
 
+fun <T> List<T>.duplicates() : List<T> {
+    return filter { item ->
+        count { it == item }  > 1
+    }
+}
+
+fun <T> List<T>?.toEmptyIfNull(): List<T> = this ?: emptyList()

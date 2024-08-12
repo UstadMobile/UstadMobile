@@ -11,7 +11,7 @@ import com.ustadmobile.lib.db.entities.DeletedItem
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
-import js.core.jso
+import js.objects.jso
 import mui.material.Button
 import mui.material.Container
 import mui.material.Dialog
@@ -26,9 +26,15 @@ import web.cssom.Height
 import web.cssom.Overflow
 import web.cssom.pct
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.paging.RefreshCommand
+import com.ustadmobile.hooks.useDoorRemoteMediator
+import com.ustadmobile.hooks.useEmptyFlow
+import kotlinx.coroutines.flow.Flow
 
 external interface DeletedItemListProps: Props {
     var uiState: DeletedItemListUiState
+
+    var refreshCommandFlow: Flow<RefreshCommand>?
 
     var onClickRestore: (DeletedItem) -> Unit
 
@@ -39,8 +45,14 @@ external interface DeletedItemListProps: Props {
 val DeletedItemListComponent = FC<DeletedItemListProps> { props ->
     val muiAppState = useMuiAppState()
 
+    val emptyRefreshCommandFlow = useEmptyFlow<RefreshCommand>()
+
+    val mediatorResult = useDoorRemoteMediator(
+        props.uiState.deletedItemsList, props.refreshCommandFlow ?: emptyRefreshCommandFlow
+    )
+
     val infiniteQueryResult = usePagingSource(
-        pagingSourceFactory = props.uiState.deletedItemsList,
+        pagingSourceFactory = mediatorResult.pagingSourceFactory,
         placeholdersEnabled = true
     )
 

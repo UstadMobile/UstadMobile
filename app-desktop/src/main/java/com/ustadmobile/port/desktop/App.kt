@@ -342,7 +342,8 @@ fun main() {
     }
 
     //Now shutdown and exit
-    Napier.i("Shutdown: shutting down scheduler on app finished")
+    Napier.i("Shutdown: shutting down scheduler on app finished: scheduler=${schedulerRef.get()}")
     schedulerRef.get()?.shutdown()
+    Napier.i("Shutdown: invoke exit process")
     exitProcess(0)
 }

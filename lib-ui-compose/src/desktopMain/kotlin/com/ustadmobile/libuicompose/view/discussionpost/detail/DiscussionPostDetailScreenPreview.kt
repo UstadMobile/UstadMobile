@@ -3,6 +3,7 @@ package com.ustadmobile.libuicompose.view.discussionpost.detail
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.runtime.*
 import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailUiState2
+import kotlinx.coroutines.flow.flowOf
 
 @Composable
 @Preview
@@ -66,5 +67,5 @@ fun DiscussionPostDetailScreenPreview(){
         loggedInPersonUid = 1
     )
 
-    DiscussionPostDetailScreen(uiState)
+    DiscussionPostDetailScreen(uiState, flowOf(""))
 }

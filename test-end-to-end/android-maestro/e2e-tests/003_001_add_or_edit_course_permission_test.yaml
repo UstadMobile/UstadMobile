@@ -1,0 +1,52 @@
+appId: com.toughra.ustadmobile
+env:
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/003_001_add_or_edit_course_permission_test"
+  TESTNAME: "003_001_add_or_edit_course_permission_test"
+---
+- clearState: com.toughra.ustadmobile
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+      TESTNAME: ${TESTNAME}
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+- runFlow:
+    file: "../common/create_course_with_1teacher_1student.yaml"
+    env:
+      TESTCOURSENAME: "Permission Test"
+- tapOn:
+    text: "Courses"
+    index: 1
+- runFlow:
+    file: "../common/edit_course.yaml"
+    env:
+      TESTCOURSENAME: "Permission Test"
+# teacher should be able to edit a course
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: "t1"
+      PASSWORD: "test"
+- runFlow:
+    file: "../common/edit_course.yaml"
+    env:
+      TESTCOURSENAME: "Permission Test"
+- tapOn: "SAVE"
+#student should not be able to edit a course
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: "s1"
+      PASSWORD: "test"
+- tapOn: "Courses"
+- tapOn: "Permission Test"
+- assertNotVisible:
+            id: "floating_action_button"

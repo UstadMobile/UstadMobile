@@ -1,4 +1,4 @@
-describe('002_001_admin_add_new_course_and_teacher ', () => {
+describe('WEB_002_001_admin_add_new_course_and_teacher ', () => {
  it('Start Ustad Test Server ', () => {
  // Start Test Server
   cy.ustadStartTestServer()

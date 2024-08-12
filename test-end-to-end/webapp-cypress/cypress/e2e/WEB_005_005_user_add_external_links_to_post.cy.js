@@ -21,10 +21,10 @@ it('Admin add discussion board and post', () => {
   cy.contains("button","Save").click()
   // Add post to the discussion
   cy.contains('005_005').should('be.visible')
-  cy.get('[data-testid="ForumIcon"]').click()
+  cy.contains('Discussion 1').click()
   cy.contains('Post').click()
   cy.get('#discussion_post_title').type('Topic 1')
-  cy.get('#discussion_post_message .ql-editor').type('Discusssion post')
+  cy.get('.ql-editor').ustadTypeAndVerify('Discusssion post')
   cy.get('#actionBarButton').click()
   cy.go('back')
   cy.go('back')
@@ -52,7 +52,7 @@ it('Teacher able to add external link as reply to the post', () => {
   cy.contains("Courses").should('be.visible')
   cy.contains('005_005').click()
   // Add reply to the post board
-  cy.get('[data-testid="ForumIcon"]').click()
+  cy.contains('Discussion 1').click()
   cy.contains('Topic 1').click()
   cy.get('[data-placeholder="Add a reply"]').type('External link');
   cy.get('[data-placeholder="Add a reply"]').type('{selectall}')
@@ -71,7 +71,7 @@ it('Student able to open the external link in the reply', () => {
   cy.contains("Courses").should('be.visible')
   cy.contains('005_005').click()
   // Open link on the post board
-  cy.get('[data-testid="ForumIcon"]').click()
+  cy.contains('Discussion 1').click()
   cy.contains('Topic 1').click()
   cy.contains('External link').invoke('attr','target', '_self').click()
   cy.url().should('include','https://github.com/UstadMobile/UstadMobile/blob/primary/test-end-to-end/README.md')

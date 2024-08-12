@@ -4,7 +4,7 @@ import com.ustadmobile.mui.common.Sizes
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.view.redirect.RedirectScreen
 import com.ustadmobile.wrappers.jsjodatime.jsJodaTz
-import js.core.jso
+import js.objects.jso
 import react.FC
 import react.Props
 import react.create

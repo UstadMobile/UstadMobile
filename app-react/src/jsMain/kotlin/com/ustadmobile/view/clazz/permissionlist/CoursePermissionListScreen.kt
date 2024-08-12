@@ -3,9 +3,11 @@ package com.ustadmobile.view.clazz.permissionlist
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.locale.TerminologyEntry
+import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.viewmodel.clazz.permissionlist.CoursePermissionListUiState
 import com.ustadmobile.core.viewmodel.clazz.permissionlist.CoursePermissionListViewModel
 import com.ustadmobile.hooks.useCourseTerminologyEntries
+import com.ustadmobile.hooks.useDoorRemoteMediator
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useUstadViewModel
@@ -15,11 +17,13 @@ import com.ustadmobile.view.components.UstadFab
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
-import js.core.jso
+import js.objects.jso
+import kotlinx.coroutines.flow.emptyFlow
 import mui.material.List
 import react.FC
 import react.Props
 import react.create
+import react.useMemo
 import web.cssom.Contain
 import web.cssom.Height
 import web.cssom.Overflow
@@ -63,7 +67,17 @@ external interface CoursePermissionListProps: Props {
 
 val CoursePermissionListComponent = FC<CoursePermissionListProps> { props ->
 
-    val infiniteQueryResult = usePagingSource(props.uiState.permissionsList, true)
+    val refreshFlow = useMemo(dependencies = emptyArray()) {
+        emptyFlow<RefreshCommand>()
+    }
+
+    val mediatorResult = useDoorRemoteMediator(
+        props.uiState.permissionsList, refreshFlow
+    )
+
+    val infiniteQueryResult = usePagingSource(
+        mediatorResult.pagingSourceFactory, true
+    )
 
     val muiAppState = useMuiAppState()
 

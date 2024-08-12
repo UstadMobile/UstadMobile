@@ -1,14 +1,15 @@
 package com.ustadmobile.libcache
 
+import com.ustadmobile.ihttp.headers.IHttpHeaders
 import com.ustadmobile.libcache.cachecontrol.RequestCacheControlHeader
-import com.ustadmobile.libcache.headers.HttpHeaders
+
 
 class DefaultCacheCompressionFilter: CacheStorageCompressionFilter {
 
     override fun invoke(
         url: String,
-        requestHeaders: HttpHeaders,
-        responseHeaders: HttpHeaders,
+        requestHeaders: IHttpHeaders,
+        responseHeaders: IHttpHeaders,
     ): CompressionType {
         val requestCacheControl = requestHeaders["cache-control"]?.let {
             RequestCacheControlHeader.parse(it)
@@ -43,6 +44,10 @@ class DefaultCacheCompressionFilter: CacheStorageCompressionFilter {
             "application/xhtml+xml", "application/json", "application/javascript",
             "application/oebps-package+xml",//OPF package
             "image/svg+xml",//SVG - XML
+            "application/vnd.ms-opentype",//OTF - Unlike WOFF (which has built in compression), OTF should be compressed
+            "font/ttf", //TTF - Unlike WOFF (which has built in compression), OTF should be compressed,
+            "application/x-font-truetype", //other possibility for TTF (not entirely standardized).
+            "application/x-font-ttf", //other possibility for TTF (not entirely standardized).
         )
     }
 }

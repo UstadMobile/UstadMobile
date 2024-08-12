@@ -58,12 +58,16 @@ import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.Cours
 import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailViewModel
 import com.ustadmobile.core.viewmodel.discussionpost.edit.DiscussionPostEditViewModel
 import com.ustadmobile.core.viewmodel.epubcontent.EpubContentViewModel
+import com.ustadmobile.core.viewmodel.interop.externalapppermissionrequestredirect.GrantExternalAppPermissionRedirectViewModel
+import com.ustadmobile.core.viewmodel.interop.externalapppermissionrequest.ExternalAppPermissionRequestViewModel
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import com.ustadmobile.core.viewmodel.message.conversationlist.ConversationListViewModel
 import com.ustadmobile.core.viewmodel.message.messagelist.MessageListViewModel
 import com.ustadmobile.core.viewmodel.parentalconsentmanagement.ParentalConsentManagementViewModel
 import com.ustadmobile.core.viewmodel.pdfcontent.PdfContentViewModel
 import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditViewModel
+import com.ustadmobile.core.viewmodel.person.bulkaddrunimport.BulkAddPersonRunImportViewModel
+import com.ustadmobile.core.viewmodel.person.bulkaddselectfile.BulkAddPersonSelectFileViewModel
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
@@ -147,10 +151,13 @@ import com.ustadmobile.libuicompose.view.courseterminology.list.CourseTerminolog
 import com.ustadmobile.libuicompose.view.deleteditem.list.DeletedItemListScreen
 import com.ustadmobile.libuicompose.view.epubcontent.EpubContentScreen
 import com.ustadmobile.libuicompose.view.clazzlog.edit.ClazzLogEditScreen
+import com.ustadmobile.libuicompose.view.interop.externalapppermissionrequest.ExternalAppPermissionRequestScreen
 import com.ustadmobile.libuicompose.view.message.conversationlist.ConversationListScreen
 import com.ustadmobile.libuicompose.view.message.messagelist.MessageListScreen
 import com.ustadmobile.libuicompose.view.parentalconsentmanagement.ParentalConsentManagementScreen
 import com.ustadmobile.libuicompose.view.pdfcontent.PdfContentScreen
+import com.ustadmobile.libuicompose.view.person.bulkaddrunimport.BulkAddPersonRunImportScreen
+import com.ustadmobile.libuicompose.view.person.bulkaddselectfile.BulkAddPersonSelectFileScreen
 import com.ustadmobile.libuicompose.view.person.registerminorwaitforparent.RegisterMinorWaitForParentScreen
 import com.ustadmobile.libuicompose.view.settings.DeveloperSettingsScreen
 import com.ustadmobile.libuicompose.view.systempermission.detail.SystemPermissionDetailScreen
@@ -743,6 +750,34 @@ fun AppNavHost(
                         ::SystemPermissionEditViewModel)
                 )
             }
+
+            contentScene("/${BulkAddPersonSelectFileViewModel.DEST_NAME}") { backStackEntry ->
+                BulkAddPersonSelectFileScreen(
+                    appViewModel(backStackEntry, BulkAddPersonSelectFileViewModel::class,
+                        ::BulkAddPersonSelectFileViewModel)
+                )
+            }
+
+            contentScene("/${BulkAddPersonRunImportViewModel.DEST_NAME}") { backStackEntry ->
+                BulkAddPersonRunImportScreen(
+                    appViewModel(backStackEntry, BulkAddPersonRunImportViewModel::class,
+                        ::BulkAddPersonRunImportViewModel)
+                )
+            }
+
+            contentScene("/${ExternalAppPermissionRequestViewModel.DEST_NAME}") { backStackEntry ->
+                ExternalAppPermissionRequestScreen(
+                    appViewModel(backStackEntry, ExternalAppPermissionRequestViewModel::class,
+                        ::ExternalAppPermissionRequestViewModel)
+                )
+            }
+
+            contentScene("/${GrantExternalAppPermissionRedirectViewModel.DEST_NAME}") { backStackEntry ->
+                appViewModel(backStackEntry, GrantExternalAppPermissionRedirectViewModel::class) { di, savedStateHandle ->
+                    GrantExternalAppPermissionRedirectViewModel(di, savedStateHandle)
+                }
+            }
+
 
         }
     }

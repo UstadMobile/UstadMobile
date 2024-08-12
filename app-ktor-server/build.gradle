@@ -70,47 +70,43 @@ tasks.configureEach {
 }
 
 dependencies {
-    implementation "io.ktor:ktor-client-core:$version_ktor"
-    implementation "io.ktor:ktor-serialization-kotlinx-json:$version_ktor"
-    implementation "io.ktor:ktor-client-content-negotiation:$version_ktor"
-    implementation "io.ktor:ktor-io:$version_ktor"
+    implementation libs.ktor.client.core
+    implementation libs.ktor.serialization.kotlinx.json
+    implementation libs.ktor.client.content.negotiation
+    implementation libs.ktor.io
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation "io.ktor:ktor-server-netty:$version_ktor"
-    implementation "io.ktor:ktor-server-cors:$version_ktor"
-    implementation "io.ktor:ktor-server-call-logging:$version_ktor"
-    implementation "io.ktor:ktor-server-content-negotiation:$version_ktor"
-    implementation "io.ktor:ktor-server-conditional-headers:$version_ktor"
-    implementation "io.ktor:ktor-server-status-pages:$version_ktor"
+    implementation libs.ktor.server.netty
+    implementation libs.ktor.server.cors
+    implementation libs.ktor.server.call.logging
+    implementation libs.ktor.server.content.negotiation
+    implementation libs.ktor.server.conditional.headers
+    implementation libs.ktor.server.status.pages
 
-    implementation "io.ktor:ktor-serialization-gson:$version_ktor"
-    implementation "io.ktor:ktor-client-core:$version_ktor"
     implementation libs.ktor.client.okhttp
-    implementation "io.ktor:ktor-server-html-builder:$version_ktor"
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
+    implementation libs.ktor.server.html.builder
+    implementation libs.kotlinx.serialization
 
     implementation libs.simplejndi
-    implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
-    implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
-    implementation "org.postgresql:postgresql:$version_postgres_jdbc"
+    implementation libs.apache.commons.pool2
+    implementation libs.sqlite.jdbc
+    implementation libs.postgresql
 
+    implementation libs.commons.io
+    implementation libs.jsoup
+    implementation libs.commons.lang3
+    implementation libs.logback.classic
 
-    implementation "commons-io:commons-io:$version_commons_io"
-    implementation "org.jsoup:jsoup:$version_jsoup"
-    implementation "com.google.code.gson:gson:$version_gson"
-    implementation "org.apache.commons:commons-lang3:$version_apache_commons_lang"
-    implementation "ch.qos.logback:logback-classic:$version_logback"
-
-    implementation "org.kodein.di:kodein-di:$version_kodein_di"
-    implementation "org.kodein.di:kodein-di-framework-ktor-server-jvm:$version_kodein_di"
+    implementation libs.kodein.di
+    implementation libs.kodein.di.framework.ktor.server.jvm
 
     implementation libs.napier
 
-    implementation "com.github.UstadMobile:xmlpullparserkmp:$version_xmlpullparserkmp"
-    implementation "net.sf.kxml:kxml2:$version_kxml"
+    implementation libs.xmlpullparsekmp
+    implementation libs.kxml2
 
     implementation libs.quartz
-    implementation "io.ktor:ktor-server-websockets:$version_ktor"
+    implementation libs.ktor.server.websockets
 
 
     implementation project(":core")
@@ -120,41 +116,49 @@ dependencies {
     implementation libs.door.runtime
     implementation project(":lib-util")
 
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
+    implementation libs.kotlin.stdlib.jdk8
 
-    implementation "io.netty:netty-tcnative-boringssl-static:$version_netty_tcnative"
+    implementation libs.netty.tcnative.boring.ssl.static
 
-    implementation "com.sun.mail:jakarta.mail:$version_jakartamail"
+    implementation libs.jakarta.mail
 
-    implementation "net.sourceforge.argparse4j:argparse4j:$version_argparse4j"
-    implementation "org.jetbrains.kotlinx:kotlinx-datetime:$version_kotlinx_datetime"
+    implementation libs.argparse4j
+    implementation libs.kotlinx.datetime
     implementation libs.javaffmpeg
 
     api libs.moko.resources
 
     implementation project(":lib-cache")
 
+    implementation(libs.libphonenumber.google)
+
+    implementation libs.hsqldb
+
+    implementation libs.vlcj
+
+    implementation project(":lib-ihttp-ktor-server")
+
     //test
     testImplementation project(":lib-test-common")
     testImplementation project(":sharedse")
 
-    testImplementation "io.ktor:ktor-server-test-host:$version_ktor"
+    testImplementation libs.ktor.server.test.host
     testImplementation libs.mockito.kotlin
 
     testImplementation libs.simplejndi
-    testImplementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
-    testImplementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
-    testImplementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
-    testImplementation "io.ktor:ktor-server-netty:$version_ktor"
+    testImplementation libs.apache.commons.pool2
+    testImplementation libs.sqlite.jdbc
+    testImplementation libs.commons.dbcp2
+    testImplementation libs.ktor.server.netty
     testImplementation libs.mockwebserver
 
     testImplementation libs.ktor.client.okhttp
-    testImplementation "io.ktor:ktor-serialization-gson:$version_ktor"
 
-    testImplementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
-    testImplementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
-    testImplementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
-    testImplementation "org.postgresql:postgresql:$version_postgres_jdbc"
+
+    testImplementation libs.apache.commons.pool2
+    testImplementation libs.sqlite.jdbc
+    testImplementation libs.commons.dbcp2
+    testImplementation libs.postgresql
 
 }
 

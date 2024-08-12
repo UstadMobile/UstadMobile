@@ -19,7 +19,7 @@ fun Route.SiteRoute() {
             val _di = closestDI()
             val db: UmAppDatabase by _di.on(call).instance(tag = DoorTag.TAG_DB)
 
-            val site = db.siteDao.getSite()
+            val site = db.siteDao().getSite()
             call.respond(if(site != null)  HttpStatusCode.OK else HttpStatusCode.NotFound,
                     site?: Site())
         }

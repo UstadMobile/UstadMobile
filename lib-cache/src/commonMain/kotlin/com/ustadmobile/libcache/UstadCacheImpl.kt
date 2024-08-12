@@ -4,6 +4,11 @@ import com.ustadmobile.door.ext.concurrentSafeMapOf
 import com.ustadmobile.door.ext.withDoorTransaction
 import com.ustadmobile.door.util.NullOutputStream
 import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.ihttp.headers.IHttpHeaders
+import com.ustadmobile.ihttp.headers.MergedHeaders
+import com.ustadmobile.ihttp.headers.asString
+import com.ustadmobile.ihttp.headers.iHeadersBuilder
+import com.ustadmobile.ihttp.headers.mapHeaders
 import com.ustadmobile.libcache.UstadCache.Companion.HEADER_LAST_VALIDATED_TIMESTAMP
 import com.ustadmobile.libcache.cachecontrol.ResponseValidityChecker
 import com.ustadmobile.libcache.db.UstadCacheDb
@@ -11,13 +16,8 @@ import com.ustadmobile.libcache.db.entities.CacheEntry
 import com.ustadmobile.libcache.db.entities.CacheEntryAndLocks
 import com.ustadmobile.libcache.db.entities.RetentionLock
 import com.ustadmobile.libcache.db.entities.RequestedEntry
-import com.ustadmobile.libcache.headers.MergedHeaders
-import com.ustadmobile.libcache.headers.HttpHeaders
-import com.ustadmobile.libcache.headers.asString
-import com.ustadmobile.libcache.headers.headersBuilder
-import com.ustadmobile.libcache.headers.integrity
-import com.ustadmobile.libcache.headers.mapHeaders
 import com.ustadmobile.libcache.integrity.sha256Integrity
+import com.ustadmobile.libcache.io.moveWithFallback
 import com.ustadmobile.libcache.io.requireMetadata
 import com.ustadmobile.libcache.io.useAndReadSha256
 import com.ustadmobile.libcache.io.transferToAndGetSha256
@@ -25,9 +25,10 @@ import com.ustadmobile.libcache.io.uncompress
 import com.ustadmobile.libcache.logging.UstadCacheLogger
 import com.ustadmobile.libcache.md5.Md5Digest
 import com.ustadmobile.libcache.md5.urlKey
-import com.ustadmobile.libcache.request.HttpRequest
+import com.ustadmobile.ihttp.request.IHttpRequest
 import com.ustadmobile.libcache.response.CacheResponse
-import com.ustadmobile.libcache.response.HttpResponse
+import com.ustadmobile.ihttp.response.IHttpResponse
+import com.ustadmobile.libcache.headers.integrity
 import com.ustadmobile.libcache.util.LruMap
 import com.ustadmobile.libcache.uuid.randomUuid
 import kotlinx.atomicfu.atomic
@@ -124,7 +125,7 @@ class UstadCacheImpl(
         val cacheEntry: CacheEntry,
         val entryToStore: CacheEntryToStore,
         val tmpFile: Path,
-        val responseHeaders: HttpHeaders,
+        val responseHeaders: IHttpHeaders,
         val tmpFileNeedsDeleted: Boolean = false,
         val lockId: Long = 0,
         val previousStorageUriToDelete: String? = null,
@@ -313,7 +314,7 @@ class UstadCacheImpl(
                     //If the entry to store is in a temporary path where it is acceptable to just
                     //move the file into the cache, and it is already compressed with the desired
                     // compression type for storage, then we will move (instead of copying) the file
-                    fileSystem.atomicMove(entryToStore.responseBodyTmpLocalPath, tmpFile)
+                    fileSystem.moveWithFallback(entryToStore.responseBodyTmpLocalPath, tmpFile)
                     val inflatedSize = if(storeCompressionType == CompressionType.NONE) {
                         fileSystem.requireMetadata(tmpFile).size
                     }else {
@@ -351,7 +352,7 @@ class UstadCacheImpl(
                     ?: sha256Integrity(fileSystem.source(tmpFile).buffered().useAndReadSha256())
 
                 val effectiveHeaders = if(overrideHeaders.isNotEmpty()) {
-                    MergedHeaders(HttpHeaders.fromMap(overrideHeaders), response.headers)
+                    MergedHeaders(IHttpHeaders.fromMap(overrideHeaders), response.headers)
                 }else {
                     response.headers
                 }
@@ -414,7 +415,7 @@ class UstadCacheImpl(
                 val entriesToSave = entriesWithTmpFileAndIntegrityInfo.map { entryInProgress ->
                     val storedEntry = entriesInCacheMap[entryInProgress.cacheEntry.key]
                     val storedEntryHeaders = storedEntry?.responseHeaders?.let {
-                        HttpHeaders.fromString(it)
+                        IHttpHeaders.fromString(it)
                     }
 
                     val etagOrLastModifiedMatches = if(storedEntryHeaders != null) {
@@ -447,7 +448,7 @@ class UstadCacheImpl(
                                 storageUri = storedEntry.storageUri,
                                 storageSize = storedEntry.storageSize,
                                 responseHeaders = MergedHeaders(
-                                    HttpHeaders.fromMap(overrideHeaders),
+                                    IHttpHeaders.fromMap(overrideHeaders),
                                     entryInProgress.responseHeaders,
                                     storedEntryHeaders,
                                 ).asString()
@@ -466,7 +467,7 @@ class UstadCacheImpl(
                         }
                         fileSystem.createDirectories(destPathParent)
                         val destPath = Path(destPathParent.toString(), randomUuid())
-                        fileSystem.atomicMove(entryInProgress.tmpFile, destPath)
+                        fileSystem.moveWithFallback(entryInProgress.tmpFile, destPath)
 
                         entryInProgress.copy(
                             cacheEntry = entryInProgress.cacheEntry.copy(
@@ -561,7 +562,7 @@ class UstadCacheImpl(
      * a statusCheckCache to avoid running 100s-1000+ SQL queries for tiny jsons etc.
      *
      */
-    override fun retrieve(request: HttpRequest): HttpResponse? {
+    override fun retrieve(request: IHttpRequest): IHttpResponse? {
         logger?.i(LOG_TAG, "$logPrefix Retrieve ${request.url}")
 
         val key = Md5Digest().urlKey(request.url)
@@ -577,8 +578,8 @@ class UstadCacheImpl(
                 return CacheResponse(
                     fileSystem = fileSystem,
                     request = request,
-                    headers = headersBuilder {
-                        takeFrom(HttpHeaders.fromString(entry.responseHeaders))
+                    headers = iHeadersBuilder {
+                        takeFrom(IHttpHeaders.fromString(entry.responseHeaders))
                         header(HEADER_LAST_VALIDATED_TIMESTAMP, entry.lastValidated.toString())
                     },
                     storageUri = entry.storageUri,
@@ -624,7 +625,7 @@ class UstadCacheImpl(
         lruMap.compute(urlKey) { _, prevEntry ->
             val existingEntry = prevEntry?.entry
             if(existingEntry != null) {
-                val existingHeaders = HttpHeaders.fromString(existingEntry.responseHeaders)
+                val existingHeaders = IHttpHeaders.fromString(existingEntry.responseHeaders)
 
                 val newHeadersCorrected = validatedEntry.headers.mapHeaders { headerName, headerValue ->
                     when {
@@ -682,6 +683,11 @@ class UstadCacheImpl(
         }.toMap()
     }
 
+    private fun CacheEntry.isStoredIn(parent: Path): Boolean {
+        val currentPath = Path(storageUri)
+        return currentPath.toString().startsWith(parent.toString())
+    }
+
     /**
      * Used when an existing cache entry is locked or unlocked
      */
@@ -697,7 +703,7 @@ class UstadCacheImpl(
         return if(!currentPath.toString().startsWith(destParent.toString())) {
             val newDestPath = Path(destParent, currentPath.name)
             logger?.d(LOG_TAG, "$logPrefix moveToNewPath (${this.url}) $currentPath -> $newDestPath")
-            fileSystem.atomicMove(currentPath, newDestPath)
+            fileSystem.moveWithFallback(currentPath, newDestPath)
             copy(storageUri = newDestPath.toString())
         }else {
             this
@@ -706,18 +712,17 @@ class UstadCacheImpl(
 
     private fun addLockToLruMap(retentionLock: RetentionLock): CacheEntryAndLocks {
         return lruMap.compute(retentionLock.lockKey) { urlKey, entryAndLocks ->
-            entryAndLocks?.let {
-                val isNewlyLocked = it.locks.isEmpty()
+            entryAndLocks?.let { entryVal ->
+                val isNewlyLocked = entryVal.locks.isEmpty()
+                val persistentPath = pathsProvider().persistentPath
 
-                it.copy(
-                    locks = it.locks + retentionLock,
-                    entry = if(isNewlyLocked) {
-                        it.moveLock.withLock {
-                            it.entry?.moveToNewPath(pathsProvider().persistentPath)
-                        }
-                    }else {
-                        it.entry
-                    }
+                entryVal.copy(
+                    locks = entryVal.locks + retentionLock,
+                    entry = entryVal.takeIf {
+                        isNewlyLocked && it.entry?.isStoredIn(persistentPath) == false
+                    }?.moveLock?.withLock {
+                        entryVal.entry?.moveToNewPath(pathsProvider().persistentPath)
+                    } ?: entryVal.entry
                 )
             } ?: CacheEntryAndLocks(
                 urlKey = urlKey,
@@ -776,24 +781,28 @@ class UstadCacheImpl(
             prev + locksToRemove.map { it.lockId }
         }
         val md5Digest = Md5Digest()
+        val entriesWithLostLock = mutableListOf<CacheEntry>()
 
         locksToRemove.forEach { removeRequest ->
             lruMap.computeIfPresent(md5Digest.urlKey(removeRequest.url)) { key, prev ->
                 val newLockList = prev.locks.filter { it.lockId != removeRequest.lockId }
                 val isNewlyUnlocked = prev.locks.isNotEmpty() && newLockList.isEmpty()
+                val cachePath = pathsProvider().cachePath
 
                 prev.copy(
                     locks = prev.locks.filter { it.lockId != removeRequest.lockId },
 
-                    entry = if(isNewlyUnlocked) {
-                        prev.moveLock.withLock {
-                            prev.entry?.moveToNewPath(pathsProvider().cachePath)
-                        }
-                    }else {
-                        prev.entry
-                    }
+                    entry = prev.takeIf {
+                        isNewlyUnlocked && it.entry?.isStoredIn(cachePath) == false
+                    }?.entry?.moveToNewPath(cachePath)?.also {
+                        entriesWithLostLock += it
+                    } ?: prev.entry
                 )
             }
+        }
+
+        pendingCacheEntryUpdates.update { prev ->
+            prev +  entriesWithLostLock
         }
     }
 

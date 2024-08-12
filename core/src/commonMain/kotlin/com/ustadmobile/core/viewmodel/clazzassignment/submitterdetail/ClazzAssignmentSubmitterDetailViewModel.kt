@@ -13,7 +13,6 @@ import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.clazzassignment.UstadCourseAssignmentMarkListItemUiState
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
-import app.cash.paging.PagingSource
 import com.ustadmobile.core.domain.assignment.submittername.GetAssignmentSubmitterNameUseCase
 import com.ustadmobile.core.domain.blob.openblob.OpenBlobUiUseCase
 import com.ustadmobile.core.domain.blob.openblob.OpenBlobUseCase
@@ -30,6 +29,7 @@ import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.CommentsAndName
 import com.ustadmobile.lib.db.composites.CourseAssignmentMarkAndMarkerName
 import com.ustadmobile.lib.db.composites.CourseAssignmentSubmissionFileAndTransferJob
+import com.ustadmobile.lib.db.composites.CourseBlockAndAssignment
 import com.ustadmobile.lib.db.composites.SubmissionAndFiles
 import com.ustadmobile.lib.db.entities.*
 import dev.icerock.moko.resources.StringResource
@@ -65,13 +65,12 @@ import kotlin.math.max
  * @param markNextStudentVisible if true, show a button for the marker to record the mark for the
  * current submitter and move to the next submission that requires marking.
  * @param privateCommentsList list of private comments for this submitter
- * @param newPrivateCommentText private comment text currently being drafted by user on screen
  */
 data class ClazzAssignmentSubmitterDetailUiState(
 
     val submitMarkError: String? = null,
 
-    val courseBlock: CourseBlock? = null,
+    val block: CourseBlockAndAssignment? = null,
 
     val gradeFilterChips: List<ListFilterIdOption> = emptyList(),
 
@@ -83,11 +82,7 @@ data class ClazzAssignmentSubmitterDetailUiState(
 
     val draftMark: CourseAssignmentMark? = null,
 
-    /**
-     * Whether or not the mark fields (e.g. score itself, comment, and button) are enabled. This is
-     * independent of comments
-     */
-    val markFieldsEnabled: Boolean = true,
+    val markSubmissionInProgress: Boolean = false,
 
     val markNextStudentVisible: Boolean =  true,
 
@@ -103,8 +98,6 @@ data class ClazzAssignmentSubmitterDetailUiState(
     val privateCommentsList: ListPagingSourceFactory<CommentsAndName> = { EmptyPagingSource() },
 
     val newPrivateCommentTextVisible: Boolean = false,
-
-    val newPrivateCommentText: String = "",
 
     val activeUserPersonUid: Long = 0,
 
@@ -127,8 +120,14 @@ data class ClazzAssignmentSubmitterDetailUiState(
     val openingFileState: OpeningBlobState? = null,
 
     val showModerateOptions: Boolean = false,
-
 ) {
+
+    /**
+     * Whether or not the mark fields (e.g. score itself, comment, and button) are enabled. This is
+     * independent of comments
+     */
+    val markFieldsEnabled: Boolean
+        get() = !markSubmissionInProgress && block.let { it?.assignment != null && it.courseBlock != null }
 
     val submissionStatus: Int
         get() {
@@ -140,8 +139,10 @@ data class ClazzAssignmentSubmitterDetailUiState(
 
     val averageScore: Float
         get() {
-            return latestUniqueMarksByMarker.let {
-                it.sumOf { it.courseAssignmentMark?.camMark?.toDouble() ?: 0.0 }.toFloat() / max(it.size, 1)
+            return latestUniqueMarksByMarker.let { latestUniqueMarks ->
+                latestUniqueMarks.sumOf {
+                    it.courseAssignmentMark?.camMark?.toDouble() ?: 0.0
+                }.toFloat() / max(latestUniqueMarks.size, 1)
             }
         }
 
@@ -188,7 +189,6 @@ data class ClazzAssignmentSubmitterDetailUiState(
 class ClazzAssignmentSubmitterDetailViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
-    private val submitMarkUseCase: SubmitMarkUseCase = SubmitMarkUseCase(),
 ): DetailViewModel<CourseAssignmentSubmission>(di, savedStateHandle, DEST_NAME) {
 
     private val _uiState = MutableStateFlow(
@@ -197,6 +197,12 @@ class ClazzAssignmentSubmitterDetailViewModel(
         )
     )
     val uiState: Flow<ClazzAssignmentSubmitterDetailUiState> = _uiState.asStateFlow()
+
+    //This is its own flow because it is used within a virtuallist which would deliver changes
+    //asynchronously to the text field if it was part of the main ui state
+    private val _newPrivateCommentText = MutableStateFlow("")
+
+    val newPrivateCommentText: Flow<String> = _newPrivateCommentText.asStateFlow()
 
     private val assignmentUid = savedStateHandle[ARG_ASSIGNMENT_UID]?.toLong()
         ?: throw IllegalArgumentException("No assignmentUid")
@@ -208,16 +214,12 @@ class ClazzAssignmentSubmitterDetailViewModel(
         ?: throw IllegalArgumentException("No clazzUid")
 
     private val privateCommentsPagingSourceFactory: ListPagingSourceFactory<CommentsAndName> = {
-        activeRepo.commentsDao.findPrivateCommentsForSubmitterByAssignmentUid(
+        activeRepo.commentsDao().findPrivateCommentsForSubmitterByAssignmentUid(
             submitterUid = submitterUid,
             assignmentUid = assignmentUid,
             includeDeleted = false,
-        ).also {
-            lastPrivateCommentsPagingSource = it
-        }
+        )
     }
-
-    private var lastPrivateCommentsPagingSource: PagingSource<Int, CommentsAndName>? = null
 
     private val assignmentSubmitterNameUseCase: GetAssignmentSubmitterNameUseCase by
         on(accountManager.activeEndpoint).instance()
@@ -225,6 +227,8 @@ class ClazzAssignmentSubmitterDetailViewModel(
     private var openBlobJob: Job? = null
 
     private val openBlobUiUseCase: OpenBlobUiUseCase? by di.onActiveEndpoint().instanceOrNull()
+
+    private val submitMarkUseCase: SubmitMarkUseCase by di.onActiveEndpoint().instance()
 
     init {
         _uiState.update { prev ->
@@ -234,7 +238,7 @@ class ClazzAssignmentSubmitterDetailViewModel(
             )
         }
 
-        val permissionFlow = activeRepo.coursePermissionDao
+        val permissionFlow = activeRepo.coursePermissionDao()
             .userPermissionsForAssignmentSubmitterUid(
                 accountPersonUid = activeUserPersonUid,
                 assignmentUid = assignmentUid,
@@ -277,11 +281,11 @@ class ClazzAssignmentSubmitterDetailViewModel(
 
                             launch {
                                 launch {
-                                    activeRepo.courseBlockDao.findCourseBlockByAssignmentUid(
+                                    activeRepo.courseBlockDao().findCourseBlockByAssignmentUid(
                                         assignmentUid
                                     ).collect {
                                         _uiState.update { prev ->
-                                            prev.copy(courseBlock = it)
+                                            prev.copy(block = it)
                                         }
                                     }
                                 }
@@ -289,12 +293,12 @@ class ClazzAssignmentSubmitterDetailViewModel(
 
                             launch {
                                 val submissionsFlow = activeRepo
-                                    .courseAssignmentSubmissionDao.getAllSubmissionsFromSubmitterAsFlow(
+                                    .courseAssignmentSubmissionDao().getAllSubmissionsFromSubmitterAsFlow(
                                         submitterUid = submitterUid,
                                         assignmentUid = assignmentUid
                                     )
                                 val submissionFilesFlow = activeRepo
-                                    .courseAssignmentSubmissionFileDao.getAllSubmissionFilesFromSubmitterAsFlow(
+                                    .courseAssignmentSubmissionFileDao().getAllSubmissionFilesFromSubmitterAsFlow(
                                         submitterUid = submitterUid,
                                         assignmentUid = assignmentUid
                                     )
@@ -309,7 +313,7 @@ class ClazzAssignmentSubmitterDetailViewModel(
                             }
 
                             launch {
-                                activeRepo.courseAssignmentMarkDao.getAllMarksForSubmitterAsFlow(
+                                activeRepo.courseAssignmentMarkDao().getAllMarksForSubmitterAsFlow(
                                     submitterUid = submitterUid,
                                     assignmentUid = assignmentUid
                                 ).collect{
@@ -325,7 +329,7 @@ class ClazzAssignmentSubmitterDetailViewModel(
                                     submissionList = emptyList(),
                                     marks = emptyList(),
                                     newPrivateCommentTextVisible = false,
-                                    courseBlock = null,
+                                    block = null,
                                     activeUserSubmitterId = 0
                                 )
                             }
@@ -337,11 +341,7 @@ class ClazzAssignmentSubmitterDetailViewModel(
     }
 
     fun onChangePrivateComment(text: String) {
-        _uiState.update { prev ->
-            prev.copy(
-                newPrivateCommentText = text
-            )
-        }
+        _newPrivateCommentText.value = text
     }
 
     fun onSubmitPrivateComment() {
@@ -351,17 +351,15 @@ class ClazzAssignmentSubmitterDetailViewModel(
         loadingState = LoadingUiState.INDETERMINATE
         viewModelScope.launch {
             try {
-                activeRepo.commentsDao.insertAsync(Comments().apply {
+                activeRepo.commentsDao().insertAsync(Comments().apply {
                     commentsForSubmitterUid = submitterUid
                     commentsFromSubmitterUid = _uiState.value.activeUserSubmitterId
                     commentsFromPersonUid = activeUserPersonUid
                     commentsEntityUid = assignmentUid
-                    commentsText = _uiState.value.newPrivateCommentText
+                    commentsText = _newPrivateCommentText.value
                     commentsDateTimeAdded = systemTimeInMillis()
                 })
-                _uiState.update { prev ->
-                    prev.copy(newPrivateCommentText = "")
-                }
+                _newPrivateCommentText.value = ""
             }finally {
                 loadingState = LoadingUiState.NOT_LOADING
             }
@@ -387,7 +385,9 @@ class ClazzAssignmentSubmitterDetailViewModel(
 
         val draftMark = _uiState.value.draftMark ?: return
         val submissions = _uiState.value.submissionList // note: this would be better to check by making it nullable
-        val courseBlock = _uiState.value.courseBlock ?: return
+        val block = _uiState.value.block ?: return
+        val courseBlock = block.courseBlock ?: return
+        val assignment = block.assignment ?: return
 
         if(draftMark.camMark == (-1).toFloat()) {
             _uiState.update { prev ->
@@ -403,7 +403,7 @@ class ClazzAssignmentSubmitterDetailViewModel(
                 )
             }
             return
-        }else if(draftMark.camMark > courseBlock.cbMaxPoints){
+        }else if(draftMark.camMark > (courseBlock.cbMaxPoints ?: 0f)){
             _uiState.update { prev ->
                 prev.copy(
                     submitMarkError = systemImpl.getString(MR.strings.too_high),
@@ -412,14 +412,13 @@ class ClazzAssignmentSubmitterDetailViewModel(
             return
         }
 
-        _uiState.update { prev -> prev.copy(markFieldsEnabled = false) }
+        _uiState.update { prev -> prev.copy(markSubmissionInProgress = true) }
 
         viewModelScope.launch {
             try {
                 submitMarkUseCase(
-                    repo = activeRepo,
-                    activeUserPersonUid = activeUserPersonUid,
-                    assignmentUid = assignmentUid,
+                    activeUserPerson = accountManager.currentUserSession.person,
+                    assignment = assignment,
                     clazzUid = clazzUid,
                     submitterUid = submitterUid,
                     draftMark = draftMark,
@@ -438,7 +437,7 @@ class ClazzAssignmentSubmitterDetailViewModel(
                 snackDispatcher.showSnackBar(Snack("Error: ${e.message}"))
                 Napier.w("Exception submitting mark:", e)
             }finally {
-                _uiState.update { prev -> prev.copy(markFieldsEnabled = true) }
+                _uiState.update { prev -> prev.copy(markSubmissionInProgress = false) }
             }
         }
     }
@@ -502,7 +501,7 @@ class ClazzAssignmentSubmitterDetailViewModel(
 
     fun onDeleteComment(comments: Comments) {
         viewModelScope.launch {
-            activeRepo.commentsDao.updateDeletedByCommentUid(
+            activeRepo.commentsDao().updateDeletedByCommentUid(
                 uid = comments.commentsUid,
                 deleted = true,
                 changeTime = systemTimeInMillis()

@@ -65,24 +65,52 @@ backend server source code in its modules. Android Studio is the development env
 entire project. 
 
 *  __Step 1: Download and install Android Studio__: If you don't already have the latest version, download 
-from [https://developer.android.com/studio](https://developer.android.com/studio).
+from [https://developer.android.com/studio](https://developer.android.com/studio). _Make sure Android SDK Command Line Tools are
+installed_. In Android Studio: Menu - Tools - SDK Manager - SDK Tools Tab - Check
+Android SDK Command Line Tools (Latest).
 
-* __Step 2: Make sure that java is on your system path__: If you already have OpenJDK17, you can 
-  use that, otherwise you need to download from the Java website or install using your system package
-  manager.
-
-Supported JDK Version: JDK17 (only). JDK21 not supported yet due to Proguard issues on app-desktop.
+* __Step 2: Install dependencies__
+ 
+Development requirements are:
+* JDK17 (only): JDK21 not supported yet due to Proguard issues on app-desktop.
+* MediaInfo: MediaInfo is used by the server and desktop version to validate media files and extract
+  metadata
+* VLC (3.0.0)+ : VLC is used on the desktop version (via VLC4J) to play videos and by both the server
+  and desktop version to extract video thumbnails
+* HandBrakeCLI (1.6.0+): HandBrake (Command Line Interface) is used by the server and desktop version 
+  to compress videos.
+* SOX (14+) : Sox is used to transcode audio files
 
 Linux:
 
-Install OpenJDK17, ffmpeg, and mediainfo using the system package manager e.g.
+If you already have JDK 17 installed, you can use it.
+
+OpenJDK17, mediainfo, and vlc, can be installed using the system package manager e.g.
 
 ```
-sudo apt-get install openjdk-17-jdk ffmpeg mediainfo
+sudo apt-get install openjdk-17-jdk mediainfo vlc sox libsox-fmt-all
+```
+
+If using Ubuntu 23.10+, you can use the HandBrakeCLI from the Ubuntu package manager (1.6.1):
+```
+apt-get install handbrake-cli
+```
+
+Previous versions (including 22.04 LTS) has HandBrake 1.5 (which is not supported due to lack of 
+AV1 support). You can install the latest HandBrake CLI using flatpak as per [HandBrake website](https://handbrake.fr/downloads2.php):
+```
+apt-get install flatpak
+flatpak install /path/where/downloaded/HandBrakeCLI-1.7.3-x86_64.flatpak
+```
+
+Ghostscript (optional): The ghostscript (gs) command can be used to compress PDFs. 
+```
+apt-get install ghostscript
 ```
 
 Windows: 
 
+__JDK__
 Download and install Java (JDK17) if not already installed from the Java site
 [https://www.oracle.com/java/technologies/downloads/#jdk17-windows](https://www.oracle.com/java/technologies/downloads/#jdk17-windows)
 
@@ -96,8 +124,44 @@ Now find the PATH variable. Append ```;%JAVA_HOME%\bin``` to the value and save 
 
 Further details: see the [Java website](https://www.java.com/en/download/help/path.html).
 
-If you don't have ffmpeg installed, the server can download it for you when you run it for the first
-time.
+__VLC__
+Download and install from [https://www.videolan.org/](https://www.videolan.org/). Make sure to choose
+a 64bit version (using a non-64bit version will fail). VLC is used by the Desktop version to play 
+videos via VLCJ.
+
+__MediaInfo__
+Download and install such that the MediaInfo command is in the PATH. This can be done using winget:
+
+```
+winget install -e --id MediaArea.MediaInfo
+```
+
+__HandBrakeCLI__
+Download and install such that the HandBrakeCLI command is in the PATH. This can be done using winget:
+
+```
+winget install -e --id HandBrake.HandBrake.CLI
+```
+
+__Sox__
+Download and install from the [Sox website](https://sourceforge.net/projects/sox/files/sox/14.4.2/) (the Winget package does not work because it does not get
+added to the path).
+
+__Mpg123__
+
+Mpg123 is required on Windows because the SoX Windows binary cannot read mp3 files. Download it from 
+the [Mpg123 Website](https://www.mpg123.de/download/win32/) and unzip it into the commands directory.
+Alternatively, you can put it in your PATH environment variable or manually specify the location in
+ustad-server.conf.
+
+__GhostScript (optional)__
+Ghostscript (if installed and detected on the system path) can be used to compress PDFs. It can be 
+installed using winget:
+```
+winget install -e --id ArtifexSoftware.GhostScript
+```
+
+
 
 * __Step 3: Import the project in Android Studio__: Select File, New, Project from Version Control. Enter
 https://github.com/UstadMobile/UstadMobile.git and wait for the project to import. Switch to the
@@ -134,6 +198,23 @@ Note: If self-registration is enabled, you must add an email server configuratio
 ustad-server.conf file. See [app-ktor-server/README.md](app-ktor-server/README.md) for details on
 using the ustad-server.conf file.
 
+To build the entire project (Android, Web, Desktop, everything) use the normal gradle build command:
+Linux: 
+```
+$ ./gradlew build
+```
+Windows:
+```
+$ gradlew build
+```
+Please see [app-android/README.md](app-android/README.md) instructions to setup release version
+signing. Make sure you are running an SDK33+ device or emulator connected using ADB for the 
+[baseline profile](https://developer.android.com/topic/performance/baselineprofiles/overview) build.
+
+## Javascript package updates
+
+When prompted to run kotlinUpgradePackageLock, run kotlinUpgradeYarnLock instead.
+
 ### Code structure
 
 This multi-module Gradle project built using Kotlin Multiplatform. It builds for:
@@ -157,7 +238,7 @@ Code is contained (mostly) in the following modules:
 * [core](core/) : Contains view models, ui state, core business logic.
 * [sharedse](sharedse/): Contains some shared implementations for operating systems with a disk (JVM/Android)
 * [lib-database](lib-database/): contains the database: DAOs (e.g. SQL queries), and entity classes.
-* [lib-ui-compose](lib-ui-compose/): contains Compose multiplatform UI code used by app-android and app-desktop
+* [lib-ui-compose](lib-ui-compose/): contains Compose multiplatform UI code used by app-android and app-desktop.
 * [lib-util](lib-util/): Small utility functions
 * [test-end-to-end](test-end-to-end/) End-to-end tests that run the app and server.
 * [testserver-controller](testserver-controller/) An HTTP server that can control starting and 

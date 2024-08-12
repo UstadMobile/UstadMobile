@@ -18,7 +18,7 @@ fun newTestOkHttpClient(
             .addInterceptor(
                 UstadCacheInterceptor(
                     cache = cache,
-                    tmpDir = File(temporaryFolder.newFolder(), "okhttp-tmp"),
+                    tmpDirProvider = { File(temporaryFolder.newFolder(), "okhttp-tmp") },
                     logger = NapierLoggingAdapter(),
                     json = json,
                 )

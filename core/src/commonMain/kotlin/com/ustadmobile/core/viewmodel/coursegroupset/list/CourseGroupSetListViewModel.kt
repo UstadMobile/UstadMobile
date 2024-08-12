@@ -13,8 +13,8 @@ import com.ustadmobile.core.viewmodel.clazz.collectClazzNameAndUpdateTitle
 import com.ustadmobile.core.viewmodel.coursegroupset.detail.CourseGroupSetDetailViewModel
 import com.ustadmobile.core.viewmodel.coursegroupset.edit.CourseGroupSetEditViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
-import app.cash.paging.PagingSource
 import com.ustadmobile.core.db.PermissionFlags
+import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.lib.db.entities.CourseGroupSet
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.update
@@ -53,16 +53,12 @@ class CourseGroupSetListViewModel(
     private val clazzUid = savedStateHandle[UstadView.ARG_CLAZZUID]?.toLong() ?: 0L
 
     private val pagingSourceFactory: ListPagingSourceFactory<CourseGroupSet> = {
-        activeRepo.courseGroupSetDao.findAllCourseGroupSetForClazz(
+        activeRepo.courseGroupSetDao().findAllCourseGroupSetForClazz(
             clazzUid = clazzUid,
             searchText = _appUiState.value.searchState.searchText.toQueryLikeParam(),
             sortOrder = _uiState.value.sortOption.flag,
-        ).also {
-            mLastPagingSource = it
-        }
+        )
     }
-
-    private var mLastPagingSource: PagingSource<Int, CourseGroupSet>? = null
 
     init {
         _uiState.update { prev ->
@@ -81,7 +77,7 @@ class CourseGroupSetListViewModel(
         viewModelScope.launch {
             collectHasPermissionFlowAndSetAddNewItemUiState(
                 hasPermissionFlow = {
-                    activeRepo.coursePermissionDao.personHasPermissionWithClazzAsFlow2(
+                    activeRepo.coursePermissionDao().personHasPermissionWithClazzAsFlow2(
                         activeUserPersonUid, clazzUid, PermissionFlags.COURSE_MANAGE_STUDENT_ENROLMENT
                     )
                 },
@@ -105,14 +101,14 @@ class CourseGroupSetListViewModel(
     }
 
     override fun onUpdateSearchResult(searchText: String) {
-        mLastPagingSource?.invalidate()
+        _refreshCommandFlow.tryEmit(RefreshCommand())
     }
 
     fun onSortOptionChanged(sortOption: SortOrderOption) {
         _uiState.update { prev ->
             prev.copy(sortOption = sortOption)
         }
-        mLastPagingSource?.invalidate()
+        _refreshCommandFlow.tryEmit(RefreshCommand())
     }
 
     override fun onClickAdd() {

@@ -1,0 +1,38 @@
+appId: com.toughra.ustadmobile
+env:
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/001_004_admin_can_move_content"
+  TESTNAME: "001_004_admin_can_move_content"
+---
+- clearState: com.toughra.ustadmobile
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+      TESTNAME: ${TESTNAME}
+- runFlow:
+    file: "../common/clear_login_and_add_content.yaml"
+    env:
+      TESTFILENAME: Epub_Content1.epub
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+- tapOn: "SAVE"
+# Add new folder to move content
+- tapOn:
+    id: "floating_action_button"
+- tapOn: "New folder"
+- tapOn: "Title*"
+- inputText: "Test Folder"
+- tapOn: "SAVE"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/before_moving_content_to_new_folder"
+- longPressOn:
+    text: "E-book"
+- tapOn: "Move"
+- tapOn: "Folder"
+- tapOn: "Move entries to this folder"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/after_moving_content_to_new_folder_test"
+- tapOn: "Folder"
+- assertVisible:
+      id: "app_title"
+      text: "Test Folder"
+- assertVisible: "E-book"

@@ -82,16 +82,16 @@ kotlin {
             dependencies {
                 implementation kotlin('stdlib-common')
                 implementation libs.napier
-                implementation "io.ktor:ktor-client-core:$version_ktor"
-                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
+                implementation libs.ktor.client.core
+                implementation libs.coroutines
                 implementation libs.door.runtime
-                implementation "com.github.UstadMobile:xmlpullparserkmp:$version_xmlpullparserkmp"
+                implementation libs.xmlpullparsekmp
             }
         }
 
         commonJvmMain {
             dependencies {
-                compileOnly "net.sf.kxml:kxml2:$version_kxml"
+                compileOnly libs.kxml2
             }
         }
 
@@ -112,15 +112,15 @@ kotlin {
 
         jvmTest {
             dependencies {
-                implementation "org.jetbrains.kotlin:kotlin-test:$version_kotlin"
-                implementation "org.jetbrains.kotlin:kotlin-test-junit:$version_kotlin"
+                implementation libs.kotlin.test
+                implementation libs.kotlin.test.junit
             }
         }
 
         androidMain {
             dependencies {
-                implementation "androidx.lifecycle:lifecycle-livedata-ktx:$version_androidx_lifecycle"
-                implementation "androidx.room:room-runtime:$version_android_room"
+                implementation libs.androidx.lifecycle.livedata.ktx
+                implementation libs.androidx.room.runtime
             }
 
             dependsOn commonJvmMain

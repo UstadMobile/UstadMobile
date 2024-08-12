@@ -17,7 +17,7 @@ import com.ustadmobile.mui.components.UstadQuickActionButton
 import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.mui.components.UstadTransferStatusIcon
 import com.ustadmobile.view.components.UstadFab
-import js.core.jso
+import js.objects.jso
 import mui.material.List
 //WARNING: DO NOT Replace with import mui.icons.material.[*] - Leads to severe IDE performance issues 10/Apr/23 https://youtrack.jetbrains.com/issue/KT-57897/Intellisense-and-code-analysis-is-extremely-slow-and-unusable-on-Kotlin-JS
 import mui.material.*
@@ -112,7 +112,7 @@ val PersonDetailComponent2 = FC<PersonDetailProps> { props ->
             spacing = responsive(8.px)
 
 
-            props.uiState.personPicture?.personPictureUri?.also { imgSrc ->
+            props.uiState.person?.personPicture?.personPictureUri?.also { imgSrc ->
                 mui.material.Box {
                     sx {
                         justifyContent = JustifyContent.center

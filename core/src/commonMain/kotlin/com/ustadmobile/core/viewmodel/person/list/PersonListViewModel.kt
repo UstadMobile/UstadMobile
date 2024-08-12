@@ -22,10 +22,13 @@ import app.cash.paging.PagingState
 import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
+import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.impl.appstate.Snack
+import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.viewmodel.clazz.invitevialink.InviteViaLinkViewModel
 import com.ustadmobile.core.viewmodel.person.PersonViewModelConstants.ARG_POPUP_TO_ON_PERSON_SELECTED
+import com.ustadmobile.core.viewmodel.person.bulkaddselectfile.BulkAddPersonSelectFileViewModel
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.lib.db.composites.PersonAndListDisplayDetails
@@ -44,9 +47,11 @@ data class PersonListUiState(
     val showInviteViaLink: Boolean = false,
     val inviteCode: String? = null,
     val showSortOptions: Boolean = true,
+    val addSheetOrDialogVisible: Boolean = false,
+    val hasBulkImportPermission: Boolean = false,
 )
 
-class EmptyPagingSource<Key: Any, Value: Any>(): PagingSource<Key, Value>() {
+class EmptyPagingSource<Key: Any, Value: Any>: PagingSource<Key, Value>() {
 
     override fun getRefreshKey(state: PagingState<Key, Value>): Key? {
         return null
@@ -82,37 +87,39 @@ class PersonListViewModel(
         savedStateHandle[ARG_REQUIRE_PERMISSION_TO_SHOW_LIST]?.toLong() ?: 0
 
     private val pagingSourceFactory: () -> PagingSource<Int, PersonAndListDisplayDetails> = {
-        activeRepo.personDao.findPersonsWithPermissionAsPagingSource(
+        activeRepo.personDao().findPersonsWithPermissionAsPagingSource(
             timestamp = getSystemTimeInMillis(),
             excludeClazz = filterExcludeMembersOfClazz,
             excludeSelected = filterAlreadySelectedList,
             accountPersonUid = activeUserPersonUid,
             sortOrder = _uiState.value.sortOption.flag,
             searchText = _appUiState.value.searchState.searchText.toQueryLikeParam()
-        ).also {
-            lastPagingSource = it
-        }
+        )
     }
-
-    private var lastPagingSource: PagingSource<Int, PersonAndListDisplayDetails>? = null
 
     private val inviteCode = savedStateHandle[ARG_SHOW_ADD_VIA_INVITE_LINK_CODE]
 
     private val setClipboardStringUseCase: SetClipboardStringUseCase by instance()
+
 
     init {
         _appUiState.update { prev ->
             prev.copy(
                 navigationVisible = true,
                 searchState = createSearchEnabledState(visible = false),
-                title = savedStateHandle[ARG_TITLE] ?: listTitle(MR.strings.people, MR.strings.select_person)
+                title = savedStateHandle[ARG_TITLE] ?: listTitle(MR.strings.people, MR.strings.select_person),
+                fabState = FabUiState(
+                    text = systemImpl.getString(MR.strings.person),
+                    icon = FabUiState.FabIcon.ADD,
+                    onClick = this::onClickFab,
+                )
             )
         }
 
         val hasPermissionToListFlow = if(permissionRequiredToShowList == 0L) {
             flowOf(true)
         }else {
-            activeRepo.systemPermissionDao.personHasSystemPermissionAsFlow(
+            activeRepo.systemPermissionDao().personHasSystemPermissionAsFlow(
                 accountPersonUid = activeUserPersonUid,
                 permission = permissionRequiredToShowList,
             )
@@ -144,26 +151,35 @@ class PersonListViewModel(
             }
         }
 
-
         viewModelScope.launch {
-            collectHasPermissionFlowAndSetAddNewItemUiState(
-                hasPermissionFlow = {
-                    activeRepo.systemPermissionDao.personHasSystemPermissionAsFlow(
-                        activeUserPersonUid, PermissionFlags.ADD_PERSON
+            activeRepo.systemPermissionDao().personHasSystemPermissionPairAsFlow(
+                accountPersonUid = activeUserPersonUid,
+                firstPermission = PermissionFlags.ADD_PERSON,
+                secondPermission = PermissionFlags.PERSON_VIEW
+            ).collect {
+                val (hasAddPermission, hasViewAllPermission) = it
+                val hasBulkAddPermission = hasAddPermission && hasViewAllPermission
+                _uiState.update { prev ->
+                    prev.copy(
+                        showAddItem = listMode == ListViewMode.PICKER && hasAddPermission,
+                        hasBulkImportPermission = hasBulkAddPermission,
                     )
-                },
-                fabStringResource = MR.strings.person,
-                onSetAddListItemVisibility = { visible ->
-                    _uiState.update { prev -> prev.copy(showAddItem = visible) }
                 }
-            )
+                _appUiState.update { prev ->
+                    prev.copy(
+                        fabState = prev.fabState.copy(
+                            visible = listMode == ListViewMode.BROWSER && hasAddPermission
+                        )
+                    )
+                }
+            }
         }
     }
 
 
     override fun onUpdateSearchResult(searchText: String) {
         //will use the searchText as per the appUiState
-        lastPagingSource?.invalidate()
+        _refreshCommandFlow.tryEmit(RefreshCommand())
     }
 
     fun onSortOrderChanged(sortOption: SortOrderOption) {
@@ -172,7 +188,7 @@ class PersonListViewModel(
                 sortOption = sortOption
             )
         }
-        lastPagingSource?.invalidate()
+        _refreshCommandFlow.tryEmit(RefreshCommand())
     }
 
     fun onClickInviteWithLink() {
@@ -192,6 +208,18 @@ class PersonListViewModel(
             setClipboardStringUseCase(inviteCode)
             snackDispatcher.showSnackBar(Snack(systemImpl.getString(MR.strings.copied_to_clipboard)))
         }
+    }
+
+    private fun onClickFab() {
+        if(_uiState.value.hasBulkImportPermission) {
+            _uiState.update { prev -> prev.copy(addSheetOrDialogVisible = true) }
+        }else {
+            onClickAdd()
+        }
+    }
+
+    fun onClickBulkAdd() {
+        navController.navigate(BulkAddPersonSelectFileViewModel.DEST_NAME, emptyMap())
     }
 
     override fun onClickAdd() {
@@ -217,6 +245,10 @@ class PersonListViewModel(
         }else {
             navigateOnItemClicked(PersonDetailViewModel.DEST_NAME, entry.personUid, entry)
         }
+    }
+
+    fun onDismissAddSheetOrDialog() {
+        _uiState.update { it.copy(addSheetOrDialogVisible = false) }
     }
 
     companion object {

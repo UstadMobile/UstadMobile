@@ -12,18 +12,15 @@ import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.paging.compose.collectAsLazyPagingItems
-import app.cash.paging.Pager
-import app.cash.paging.PagingConfig
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.clazzenrolment.clazzmemberlist.ClazzMemberListUiState
 import com.ustadmobile.core.viewmodel.clazzenrolment.clazzmemberlist.ClazzMemberListViewModel
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.lib.db.composites.EnrolmentRequestAndPersonDetails
 import com.ustadmobile.lib.db.composites.PersonAndClazzMemberListDetails
@@ -34,11 +31,14 @@ import com.ustadmobile.libuicompose.components.UstadListSortHeader
 import com.ustadmobile.libuicompose.components.UstadPersonAvatar
 import com.ustadmobile.libuicompose.components.UstadTooltipBox
 import com.ustadmobile.libuicompose.components.ustadPagedItems
+import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.util.rememberDateFormat
 import com.ustadmobile.libuicompose.util.rememberDayOrDate
+import com.ustadmobile.libuicompose.util.rememberEmptyFlow
 import com.ustadmobile.libuicompose.util.rememberTimeFormatter
 import dev.icerock.moko.resources.compose.stringResource
+import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDateTime
 import java.text.DateFormat
@@ -52,6 +52,7 @@ fun ClazzMemberListScreen(
 
     ClazzMemberListScreen(
         uiState = uiState,
+        refreshCommandFlow = viewModel.refreshCommandFlow,
         onClickEntry = viewModel::onClickEntry,
         onClickAddNewMember = viewModel::onClickAddNewMember,
         onClickPendingRequest = viewModel::onClickRespondToPendingEnrolment,
@@ -63,6 +64,7 @@ fun ClazzMemberListScreen(
 @Composable
 fun ClazzMemberListScreen(
     uiState: ClazzMemberListUiState = ClazzMemberListUiState(),
+    refreshCommandFlow: Flow<RefreshCommand> = rememberEmptyFlow(),
     onClickEntry: (PersonAndClazzMemberListDetails) -> Unit = {},
     onClickAddNewMember: (role: Int) -> Unit = {},
     onClickPendingRequest: (
@@ -73,29 +75,18 @@ fun ClazzMemberListScreen(
     onClickFilterChip: (MessageIdOption2) -> Unit = {},
 ) {
 
-    val teacherListPager = remember(uiState.teacherList) {
-        Pager(
-            pagingSourceFactory = uiState.teacherList,
-            config = PagingConfig(pageSize = 20, enablePlaceholders = true)
-        )
-    }
-    val teacherListItems = teacherListPager.flow.collectAsLazyPagingItems()
+    val teacherListPager = rememberDoorRepositoryPager(
+        uiState.teacherList, refreshCommandFlow
+    )
+    val teacherListItems = teacherListPager.lazyPagingItems
 
-    val studentListPager = remember(uiState.studentList) {
-        Pager(
-            pagingSourceFactory = uiState.studentList,
-            config = PagingConfig(pageSize = 20, enablePlaceholders = true)
-        )
-    }
-    val studentListItems = studentListPager.flow.collectAsLazyPagingItems()
+    val studentListPager = rememberDoorRepositoryPager(uiState.studentList, refreshCommandFlow)
+    val studentListItems = studentListPager.lazyPagingItems
 
-    val pendingStudentListPager = remember(uiState.pendingStudentList) {
-        Pager(
-            pagingSourceFactory = uiState.pendingStudentList,
-            config = PagingConfig(pageSize = 20, enablePlaceholders = true)
-        )
-    }
-    val pendingStudentListItems = pendingStudentListPager.flow.collectAsLazyPagingItems()
+    val pendingStudentListPager = rememberDoorRepositoryPager(
+        uiState.pendingStudentList, refreshCommandFlow
+    )
+    val pendingStudentListItems = pendingStudentListPager.lazyPagingItems
 
     val timeFormatter = rememberTimeFormatter()
     val dateFormatter = rememberDateFormat(TimeZone.getDefault().id)

@@ -1,4 +1,4 @@
-describe('004_005_assignment_after_deadline_and_before_grace_Period', () => {
+describe('WEB_004_005_assignment_after_deadline_and_before_grace_Period', () => {
 it('Start Ustad Test Server ', () => {
  // Start Test Server
   cy.ustadStartTestServer()
@@ -67,7 +67,7 @@ it('Student submit assignment', () => {
   cy.contains('Assignment 1').click()
   cy.get('#assignment_text').get('div[contenteditable="true"]',{timeout:6000}).should('be.visible')
   cy.get('#assignment_text').click()
-  cy.get('#assignment_text').type("Text 1")
+  cy.get('.ql-editor').ustadTypeAndVerify('Text 1')
   cy.contains('SUBMIT',{timeout:5000}).click()
   cy.go('back')
   cy.contains('Assignment 1',{timeout:1000}).click()
@@ -83,8 +83,8 @@ it('Teacher add assignment mark and course comment', () => {
   cy.contains("button","Course").click()
   cy.contains("Assignment 1").click()
   cy.contains('Submissions').click()
-  cy.contains('Student 1').click()
-  cy.contains("Text 1").should('be.visible')
+  cy.ustadReloadUntilVisible("Student 1")
+  cy.contains("Student 1").click()
   cy.get('#marker_comment').type("Keep it up")
   cy.get('#marker_mark').type('10')
   cy.get('#submit_mark_button').click()

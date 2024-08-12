@@ -26,7 +26,7 @@ class CompressImageUseCaseJvmTest {
             val result = CompressImageUseCaseJvm().invoke(
                 fromUri = testImage.toDoorUri().toString()
             )
-            val resultFile = DoorUri.parse(result.uri).toFile()
+            val resultFile = DoorUri.parse(result!!.uri).toFile()
             assertTrue(resultFile.length() > 0)
             //Validate that the result can be read
             ImageIO.read(resultFile)

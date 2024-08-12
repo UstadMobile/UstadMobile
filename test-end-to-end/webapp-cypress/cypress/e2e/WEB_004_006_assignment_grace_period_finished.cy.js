@@ -1,4 +1,4 @@
-describe('004_006_assignment_after_deadline_and_before_grace_Period', () => {
+describe('WEB_004_006_assignment_after_deadline_and_before_grace_Period', () => {
 it('Start Ustad Test Server ', () => {
  // Start Test Server
   cy.ustadStartTestServer()
@@ -58,7 +58,7 @@ it('Teacher add assignment', () => {
   cy.contains("button","Members").should('be.visible')
 })
 
-it('Student submit assignment', () => {
+it('Student not able to submit assignment', () => {
 
   cy.ustadClearDbAndLogin('student1','test1234')
   cy.contains("Course").click()

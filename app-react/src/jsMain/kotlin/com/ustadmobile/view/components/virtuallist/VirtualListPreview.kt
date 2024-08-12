@@ -4,9 +4,9 @@ import app.cash.paging.PagingSourceLoadResultPage
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
-import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
+import com.ustadmobile.lib.db.entities.Person
 import web.cssom.*
-import js.core.jso
+import js.objects.jso
 import mui.material.Container
 import mui.material.ListItem
 import mui.material.ListItemText
@@ -16,7 +16,7 @@ import web.cssom.Contain
 import web.cssom.Overflow
 
 val demoPersonList = (0..100).map {
-    PersonWithDisplayDetails().apply {
+    Person().apply {
         firstNames = "Person"
         lastName = "$it"
         personUid = it.toLong()
@@ -62,7 +62,7 @@ val VirtualListPreview = FC<Props> {
             infiniteQueryItems(
                 infiniteQueryResult = infiniteQueryResult,
                 dataPagesToItems = { pages ->
-                    pages.mapNotNull { it as? PagingSourceLoadResultPage<Int, PersonWithDisplayDetails> }.flatMap {
+                    pages.mapNotNull { it as? PagingSourceLoadResultPage<Int, Person> }.flatMap {
                         it.data
                     }
                 },
@@ -79,7 +79,6 @@ val VirtualListPreview = FC<Props> {
         Container {
             VirtualListOutlet()
         }
-
     }
 }
 

@@ -1,4 +1,4 @@
-describe('004_004_multiple_submission_possible _for_student', () => {
+describe('WEB_004_004_multiple_submission_possible _for_student', () => {
 it('Start Ustad Test Server ', () => {
  // Start Test Server
   cy.ustadStartTestServer()
@@ -64,8 +64,9 @@ it('Student submit assignment', () => {
   cy.contains("004_004").click()
   cy.contains('Assignment 1').click()
   cy.get('#assignment_text').get('div[contenteditable="true"]',{timeout:5000}).should('be.visible')
-  cy.get('#assignment_text').type("Text 1")
+  cy.get('.ql-editor').ustadTypeAndVerify('Text 1')
   cy.contains('SUBMIT').click()
+  cy.contains("Submission 1").should("be.visible")
   cy.contains("Text 1").should('be.visible')
 })
 
@@ -76,7 +77,8 @@ it('Teacher can mark assignment and add course comment', () => {
   cy.contains("button","Course").click()
   cy.contains("Assignment 1").click()
   cy.contains('Submissions').click()
-  cy.contains('Student 1').click()
+  cy.ustadReloadUntilVisible("Student 1")
+  cy.contains("Student 1").click()
   cy.get('#marker_comment').type("Keep it up")
   cy.get('#marker_mark').type('9')
   cy.get('#submit_mark_button').click()
@@ -89,6 +91,7 @@ it('Student can add another submission', () => {
   cy.contains("Course").click()
   cy.contains("004_004").click()
   cy.contains('Assignment 1').click()
+  cy.get(".VirtualList").scrollTo('bottom')
   cy.contains('Keep it up').should('exist')
   cy.contains('9/10 Points').should('exist')
   cy.get('#assignment_text').get('div[contenteditable="true"]',{timeout:5000}).should('exist')

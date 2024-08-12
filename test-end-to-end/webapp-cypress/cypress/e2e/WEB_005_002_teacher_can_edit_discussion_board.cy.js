@@ -1,4 +1,4 @@
-describe('005_002_teacher_can_edit_discussion_board', () => {
+describe('WEB_005_002_teacher_can_edit_discussion_board', () => {
 it('Start Ustad Test Server ', () => {
   // Start Test Server
   cy.ustadStartTestServer()
@@ -16,10 +16,10 @@ it('Admin add discussion board and a post', () => {
   cy.contains("button","Save").click()
   // Add post to the discussion
   cy.contains('005_002').should('be.visible')
-  cy.get('[data-testid="ForumIcon"]').click()
+  cy.contains('.MuiTypography-root','Discussion 1').click()
   cy.contains('Post').click()
   cy.get('#discussion_post_title').type('Post Title')
-  cy.get('#discussion_post_message .ql-editor').type('Discusssion post')
+  cy.get('.ql-editor').ustadTypeAndVerify('Discusssion post')
   cy.get('#actionBarButton').click()
   cy.go('back')
   cy.go('back')
@@ -40,8 +40,9 @@ it('Teacher able to edit discussion board ', () => {
   cy.contains('005_002').click()
   // Add discussion board
   cy.contains('button','Edit').click()
-  cy.get('[data-testid="ForumIcon"]').eq(0).click()
+  cy.contains('Discussion 1').click()
   cy.get('div[data-placeholder="Description"]').clear().type("teacher edit discussion description")
+  cy.get('div[data-placeholder="Description"]').ustadTypeAndVerify("teacher edit discussion description")
   cy.contains("button","Done").click()
 })
 })

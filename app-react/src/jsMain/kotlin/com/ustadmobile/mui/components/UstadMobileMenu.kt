@@ -1,7 +1,7 @@
 package com.ustadmobile.mui.components
 
 import com.ustadmobile.mui.common.Sizes
-import js.core.jso
+import js.objects.jso
 import mui.material.Box
 import mui.material.DrawerAnchor
 import mui.material.List
@@ -76,6 +76,7 @@ val UstadMobileMenu = FC<UstadMobileMenuProps> { props ->
 
                     UstadRootScreenNavLinks {
                         selectedItem = props.selectedRootItemIndex
+                        idPrefix = "mobilemenu"
                         onClick = {
                             props.onSetOpen(false)
                         }

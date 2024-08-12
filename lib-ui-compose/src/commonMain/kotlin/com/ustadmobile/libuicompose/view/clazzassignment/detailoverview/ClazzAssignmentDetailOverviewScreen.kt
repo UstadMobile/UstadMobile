@@ -37,27 +37,28 @@ import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
 import com.ustadmobile.libuicompose.view.clazzassignment.UstadCourseAssignmentMarkListItem
 import com.ustadmobile.libuicompose.view.clazzassignment.detailoverview.ClazzAssignmentDetailOverviewConstants.SUBMISSION_POLICY_MAP
 import dev.icerock.moko.resources.compose.stringResource
-import app.cash.paging.Pager
-import app.cash.paging.PagingConfig
 import com.ustadmobile.libuicompose.components.ustadPagedItems
-import androidx.compose.runtime.remember
-import androidx.paging.compose.collectAsLazyPagingItems
+import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.viewmodel.clazzassignment.averageMark
+import com.ustadmobile.core.viewmodel.clazzassignment.detailoverview.ClazzAssignmentDetailoverviewSubmissionUiState
 import com.ustadmobile.lib.db.composites.CourseAssignmentSubmissionFileAndTransferJob
+import com.ustadmobile.libuicompose.components.UstadCourseBlockHeader
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadOpeningBlobInfoBottomSheet
 import com.ustadmobile.libuicompose.components.UstadPickFileOpts
-import com.ustadmobile.libuicompose.components.UstadRichTextEdit
 import com.ustadmobile.libuicompose.components.isDesktop
 import com.ustadmobile.libuicompose.components.rememberUstadFilePickLauncher
+import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
 import com.ustadmobile.libuicompose.util.linkify.rememberLinkExtractor
 import com.ustadmobile.libuicompose.util.rememberDateFormat
+import com.ustadmobile.libuicompose.util.rememberEmptyFlow
 import com.ustadmobile.libuicompose.util.rememberTimeFormatter
 import com.ustadmobile.libuicompose.view.clazzassignment.CommentListItem
 import com.ustadmobile.libuicompose.view.clazzassignment.CourseAssignmentSubmissionComponent
 import com.ustadmobile.libuicompose.view.clazzassignment.CourseAssignmentSubmissionFileListItem
 import com.ustadmobile.libuicompose.view.clazzassignment.UstadAssignmentSubmissionStatusHeaderItems
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 
 @Composable
@@ -84,6 +85,9 @@ fun ClazzAssignmentDetailOverviewScreen(viewModel: ClazzAssignmentDetailOverview
 
     ClazzAssignmentDetailOverviewScreen(
         uiState = uiState,
+        newCourseCommentFlow = viewModel.newCourseCommentText,
+        newPrivateCommentFlow = viewModel.newPrivateCommentText,
+        editableSubmissionFlow = viewModel.editableSubmissionUiState,
         onClickEditSubmission = viewModel::onClickEditSubmissionText,
         onChangeCourseComment = viewModel::onChangeCourseCommentText,
         onChangePrivateComment = viewModel::onChangePrivateCommentText,
@@ -107,6 +111,9 @@ fun ClazzAssignmentDetailOverviewScreen(viewModel: ClazzAssignmentDetailOverview
 @Composable
 fun ClazzAssignmentDetailOverviewScreen(
     uiState: ClazzAssignmentDetailOverviewUiState,
+    editableSubmissionFlow: Flow<ClazzAssignmentDetailoverviewSubmissionUiState>,
+    newPrivateCommentFlow: Flow<String>,
+    newCourseCommentFlow: Flow<String>,
     onClickMarksFilterChip: (MessageIdOption2) -> Unit = {},
     onChangeCourseComment: (String) -> Unit = {},
     onChangePrivateComment: (String) -> Unit = {},
@@ -123,22 +130,17 @@ fun ClazzAssignmentDetailOverviewScreen(
     onToggleSubmissionExpandCollapse: (CourseAssignmentSubmission) -> Unit = { },
     onDeleteComment: (Comments) -> Unit = { },
 ){
+    val refreshCommandFlow = rememberEmptyFlow<RefreshCommand>()
 
-    val privateCommentsPager = remember(uiState.privateComments) {
-        Pager(
-            config = PagingConfig(pageSize = 20, enablePlaceholders = true, maxSize = 200),
-            pagingSourceFactory = uiState.privateComments
-        )
-    }
-    val privateCommentsLazyPagingItems = privateCommentsPager.flow.collectAsLazyPagingItems()
+    val privateCommentsRepoResult = rememberDoorRepositoryPager(
+        uiState.privateComments, refreshCommandFlow
+    )
+    val privateCommentsLazyPagingItems = privateCommentsRepoResult.lazyPagingItems
 
-    val courseCommentsPager = remember(uiState.courseComments) {
-        Pager(
-            config = PagingConfig(pageSize = 20, enablePlaceholders = true, maxSize = 200),
-            pagingSourceFactory = uiState.courseComments
-        )
-    }
-    val courseCommentsLazyPagingItems = courseCommentsPager.flow.collectAsLazyPagingItems()
+    val courseCommentsRepoResult = rememberDoorRepositoryPager(
+        uiState.courseComments, refreshCommandFlow
+    )
+    val courseCommentsLazyPagingItems = courseCommentsRepoResult.lazyPagingItems
 
     val formattedDateTime = rememberFormattedDateTime(
         timeInMillis = uiState.courseBlock?.cbDeadlineDate ?: 0,
@@ -165,6 +167,14 @@ fun ClazzAssignmentDetailOverviewScreen(
         modifier = Modifier
             .fillMaxSize()
     ) {
+        item(key = "header") {
+            UstadCourseBlockHeader(
+                block = uiState.courseBlock,
+                picture = uiState.courseBlockPicture,
+                modifier = Modifier.defaultItemPadding(top = 16.dp).fillMaxWidth()
+            )
+        }
+
         item(key = "cbDescription") {
             if (uiState.caDescriptionVisible){
                 UstadHtmlText(
@@ -226,7 +236,7 @@ fun ClazzAssignmentDetailOverviewScreen(
         UstadAssignmentSubmissionStatusHeaderItems(
             submissionStatus = uiState.submissionStatus,
             averageMark = uiState.markList.averageMark(),
-            maxPoints = uiState.courseBlock?.cbMaxPoints ?: 0,
+            maxPoints = uiState.courseBlock?.cbMaxPoints ?: 0f,
             submissionPenaltyPercent = uiState.courseBlock?.cbLateSubmissionPenalty ?: 0,
         )
 
@@ -254,18 +264,10 @@ fun ClazzAssignmentDetailOverviewScreen(
 
             if(uiState.submissionTextFieldVisible) {
                 item(key = "submission") {
-                    UstadRichTextEdit(
-                        modifier = Modifier
-                            .testTag("submission_text_field")
-                            .defaultItemPadding()
-                            .fillMaxWidth(),
-                        html = uiState.editableSubmission?.casText ?: "",
-                        editInNewScreenLabel = stringResource(MR.strings.text),
-                        placeholderText = stringResource(MR.strings.text),
-                        onHtmlChange = {
-                            onChangeSubmissionText(it)
-                        },
-                        onClickToEditInNewScreen = onClickEditSubmission
+                    CourseAssignmentSubmissionEdit(
+                        stateFlow = editableSubmissionFlow,
+                        onChangeSubmissionText = onChangeSubmissionText,
+                        onClickEditSubmission = onClickEditSubmission,
                     )
                 }
             }
@@ -399,7 +401,7 @@ fun ClazzAssignmentDetailOverviewScreen(
             item(key = "add_class_comment_item") {
                 UstadAddCommentListItem(
                     modifier = Modifier.testTag("add_class_comment"),
-                    commentText = uiState.newCourseCommentText,
+                    commentText = newCourseCommentFlow,
                     commentLabel = stringResource(MR.strings.add_class_comment),
                     enabled = uiState.fieldsEnabled,
                     currentUserPersonUid = uiState.activeUserPersonUid,
@@ -438,7 +440,7 @@ fun ClazzAssignmentDetailOverviewScreen(
             item(key = "add_private_comment_item") {
                 UstadAddCommentListItem(
                     modifier = Modifier.testTag("add_private_comment"),
-                    commentText = uiState.newPrivateCommentText,
+                    commentText = newPrivateCommentFlow,
                     commentLabel = stringResource(MR.strings.add_private_comment),
                     enabled = uiState.fieldsEnabled,
                     currentUserPersonUid = uiState.activeUserPersonUid,

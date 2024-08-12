@@ -1,4 +1,4 @@
-describe('005_004_user_add_internal_links_post_reply', () => {
+describe('WEB_005_004_user_add_internal_links_post_reply', () => {
 it('Start Ustad Test Server ', () => {
   // Start Test Server
   cy.ustadStartTestServer()
@@ -16,10 +16,10 @@ it('Admin add discussion board and post', () => {
   cy.contains("button","Save").click()
   // Add post to the discussion
   cy.contains('005_003').should('be.visible')
-  cy.get('[data-testid="ForumIcon"]').click()
+  cy.contains('Discussion 1').click()
   cy.contains('Post').click()
   cy.get('#discussion_post_title').type('Topic 1')
-  cy.get('#discussion_post_message .ql-editor').type('Discusssion post')
+  cy.get('.ql-editor').ustadTypeAndVerify('Discusssion post')
   cy.get('#actionBarButton').click()
   cy.go('back')
   cy.go('back')
@@ -47,7 +47,7 @@ it('Teacher able to add an internal link as reply to the post', () => {
   cy.contains("Courses").should('be.visible')
   cy.contains('005_003').click()
   // Add reply to the post board
-  cy.get('[data-testid="ForumIcon"]').click()
+  cy.contains('Discussion 1').click()
   cy.contains('Topic 1').click()
   cy.get('[data-placeholder="Add a reply"]').type('Internal link');
   cy.get('[data-placeholder="Add a reply"]').type('{selectall}')
@@ -66,7 +66,7 @@ it('Student able to open the internal link in the reply', () => {
   cy.contains("Courses").should('be.visible')
   cy.contains('005_003').click()
   // Open link on the post board
-  cy.get('[data-testid="ForumIcon"]').click()
+  cy.contains('Discussion 1').click()
   cy.contains('Topic 1').click()
   cy.contains('Internal link').invoke('removeAttr','target').click()
   cy.url().should('include','http://localhost:8087/umapp/#/ContentEntries')

@@ -57,56 +57,55 @@ kotlin {
                 api libs.moko.resources
 
                 implementation enforcedPlatform("org.jetbrains.kotlin-wrappers:kotlin-wrappers-bom:$kotlinWrappersVersion")
-                implementation "org.jetbrains.kotlin-wrappers:kotlin-react"
-                implementation "org.jetbrains.kotlin-wrappers:kotlin-react-dom"
-                implementation "org.jetbrains.kotlin-wrappers:kotlin-styled"
-                implementation "org.jetbrains.kotlin-wrappers:kotlin-react-router-dom"
-                implementation "org.jetbrains.kotlin-wrappers:kotlin-remix-run-router"
-                implementation "org.jetbrains.kotlin-wrappers:kotlin-mui-base"
-                implementation "org.jetbrains.kotlin-wrappers:kotlin-mui-material"
-                implementation "org.jetbrains.kotlin-wrappers:kotlin-mui-lab"
-                implementation "org.jetbrains.kotlin-wrappers:kotlin-mui-system"
-                implementation "org.jetbrains.kotlin-wrappers:kotlin-mui-icons-material"
-                implementation "org.jetbrains.kotlin-wrappers:kotlin-muix-date-pickers"
-                implementation "org.jetbrains.kotlin-wrappers:kotlin-emotion"
-                implementation "org.jetbrains.kotlin-wrappers:kotlin-tanstack-query-core"
-                implementation "org.jetbrains.kotlin-wrappers:kotlin-tanstack-react-query"
-                implementation "org.jetbrains.kotlin-wrappers:kotlin-tanstack-virtual-core"
-                implementation "org.jetbrains.kotlin-wrappers:kotlin-tanstack-react-virtual"
-                implementation "org.jetbrains.kotlinx:kotlinx-datetime:$version_kotlinx_datetime"
+                implementation libs.kotlin.wrappers.kotlin.react
+                implementation libs.kotlin.wrappers.kotlin.react.dom
+                implementation libs.kotlin.wrappers.kotlin.react.router.dom
+                implementation libs.kotlin.wrappers.kotlin.remix.run.router
+                implementation libs.kotlin.wrappers.kotlin.mui.base
+                implementation libs.kotlin.wrappers.kotlin.mui.material
+                implementation libs.kotlin.wrappers.kotlin.mui.lab
+                implementation libs.kotlin.wrappers.kotlin.mui.system
+                implementation libs.kotlin.wrappers.kotlin.mui.icons.material
+                implementation libs.kotlin.wrappers.kotlin.muix.date.pickers
+                implementation libs.kotlin.wrappers.kotlin.emotion
+                implementation libs.kotlin.wrappers.kotlin.tanstack.query.core
+                implementation libs.kotlin.wrappers.kotlin.tanstack.react.query
+                implementation libs.kotlin.wrappers.kotlin.tanstack.virtual.core
+                implementation libs.kotlin.wrappers.kotlin.tanstack.react.virtual
+                implementation libs.kotlinx.datetime
                 implementation libs.multiplatformsettings
+                implementation libs.kotlin.wrappers.kotlin.extensions
 
                 implementation npm("@js-joda/timezone", "$version_npm_joda_timezone")
 
                 implementation npm("@date-io/moment","$version_npm_mement_io")
                 implementation npm("date-fns","$version_npm_date_fns")
-                implementation npm("html-to-image","$version_npm_html_to_image")
                 implementation libs.door.room.annotations
-                implementation "org.kodein.di:kodein-di:$version_kodein_di"
-                implementation npm("react-google-charts","$version_npm_google_charts")
+                implementation libs.kodein.di
                 implementation libs.door.runtime
-                implementation "io.ktor:ktor-client-content-negotiation:$version_ktor"
-                implementation "io.ktor:ktor-client-js:$version_ktor"
-                implementation "io.ktor:ktor-serialization-kotlinx-json:$version_ktor"
+                implementation libs.ktor.client.content.negotiation
+                implementation libs.ktor.client.js
+                implementation libs.ktor.serialization.kotlinx.json
                 implementation npm("timezones.json","$version_npm_timezones")
                 implementation npm("striptags","$version_npm_striptags")
                 implementation npm("mime-matcher","$version_npm_mime_matcher")
                 implementation npm("react-quill", "$version_npm_react_quill")
                 implementation npm("react-easy-sort","$version_npm_react_easy_sort")
-                implementation "com.github.UstadMobile:xmlpullparserkmp:$version_xmlpullparserkmp"
+                implementation libs.xmlpullparsekmp
                 implementation libs.napier
                 implementation npm("linkifyjs", "$version_npm_linkify")
                 implementation npm("linkify-react", "$version_npm_linkify")
 
                 implementation npm("mui-tel-input", "$version_npm_mui_tel_input")
                 implementation npm("libphonenumber-js", "$version_npm_libphonenumber_js")
+                implementation npm("dompurify", "$version_npm_dompurify")
 
             }
         }
 
         jsTest {
             dependencies {
-                implementation 'org.jetbrains.kotlin:kotlin-test'
+                implementation libs.kotlin.test
             }
         }
     }

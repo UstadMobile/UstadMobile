@@ -2,39 +2,44 @@ package com.ustadmobile.libuicompose.view.clazzlog.attendancelist
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Text
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Icon
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CalendarToday
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.paging.RefreshCommand
+import com.ustadmobile.core.schedule.totalAttendeeStatusRecorded
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.clazzlog.attendancelist.ClazzLogListAttendanceUiState
-import com.ustadmobile.lib.db.entities.ClazzLog
-import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
-import java.util.*
-import com.ustadmobile.core.schedule.totalAttendeeStatusRecorded
 import com.ustadmobile.core.viewmodel.clazzlog.attendancelist.ClazzLogListAttendanceViewModel
-import kotlin.math.max
-import com.ustadmobile.core.MR
-import dev.icerock.moko.resources.compose.colorResource
-import dev.icerock.moko.resources.compose.stringResource
-import app.cash.paging.Pager
-import app.cash.paging.PagingConfig
-import com.ustadmobile.libuicompose.components.ustadPagedItems
-import androidx.compose.runtime.remember
-import androidx.paging.compose.collectAsLazyPagingItems
+import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.libuicompose.components.UstadBottomSheetOption
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
+import com.ustadmobile.libuicompose.components.UstadNothingHereYet
+import com.ustadmobile.libuicompose.components.ustadPagedItems
+import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
+import com.ustadmobile.libuicompose.util.rememberEmptyFlow
+import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
+import dev.icerock.moko.resources.compose.colorResource
+import dev.icerock.moko.resources.compose.stringResource
+import kotlinx.coroutines.flow.Flow
+import kotlin.math.max
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -63,6 +68,7 @@ fun ClazzLogListAttendanceScreen(
 
     ClazzLogListAttendanceScreen(
         uiState = uiState,
+        refreshCommandFlow = viewModel.refreshCommandFlow,
         onClickClazz = viewModel::onClickEntry,
     )
 }
@@ -70,22 +76,26 @@ fun ClazzLogListAttendanceScreen(
 @Composable
 fun ClazzLogListAttendanceScreen(
     uiState: ClazzLogListAttendanceUiState = ClazzLogListAttendanceUiState(),
+    refreshCommandFlow: Flow<RefreshCommand> = rememberEmptyFlow(),
     onClickClazz: (ClazzLog) -> Unit = {},
     onClickFilterChip: (MessageIdOption2) -> Unit = {},
 ) {
 
-    val pager = remember(uiState.clazzLogsList) {
-        Pager(
-            pagingSourceFactory = uiState.clazzLogsList,
-            config = PagingConfig(pageSize = 50, enablePlaceholders = true, maxSize = 200)
-        )
-    }
+    val repositoryPagerResult = rememberDoorRepositoryPager(
+        uiState.clazzLogsList, refreshCommandFlow
+    )
 
-    val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
+    val lazyPagingItems = repositoryPagerResult.lazyPagingItems
 
     UstadLazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
+
+        if(repositoryPagerResult.isSettledEmpty) {
+            item("empty_state") {
+                UstadNothingHereYet()
+            }
+        }
 
         ustadPagedItems(
             pagingItems = lazyPagingItems,

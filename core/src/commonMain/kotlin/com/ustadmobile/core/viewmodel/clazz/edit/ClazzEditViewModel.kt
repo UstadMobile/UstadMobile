@@ -30,7 +30,6 @@ import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
-import com.ustadmobile.lib.db.composites.ContentEntryBlockLanguageAndContentJob
 import com.ustadmobile.lib.db.composites.CourseBlockAndEditEntities
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.Clazz.Companion.CLAZZ_FEATURE_ATTENDANCE
@@ -56,7 +55,7 @@ data class ClazzEditUiState(
 
     val fieldsEnabled: Boolean = false,
 
-    val entity: ClazzWithHolidayCalendarAndSchoolAndTerminology? = null,
+    val entity: ClazzWithHolidayCalendarAndAndTerminology? = null,
 
     val clazzStartDateError: String? = null,
 
@@ -116,6 +115,7 @@ class ClazzEditViewModel(
     private val saveContentEntryUseCase: SaveContentEntryUseCase = SaveContentEntryUseCase(
         db = di.onActiveEndpoint().direct.instance(tag = DoorTag.TAG_DB),
         repo = di.onActiveEndpoint().direct.instanceOrNull(tag = DoorTag.TAG_REPO),
+        enqueueSavePictureUseCase = di.onActiveEndpoint().direct.instance(),
     ),
     private val importContentUseCase: EnqueueContentEntryImportUseCase = di.onActiveEndpoint().direct.instance(),
     private val enqueueSavePictureUseCase: EnqueueSavePictureUseCase = di.onActiveEndpoint().direct
@@ -149,11 +149,11 @@ class ClazzEditViewModel(
         launchIfHasPermission(
             permissionCheck = {
                 if(entityUidArg != 0L) {
-                    it.coursePermissionDao.personHasPermissionWithClazzAsync2(
+                    it.coursePermissionDao().personHasPermissionWithClazzAsync2(
                         activeUserPersonUid, entityUidArg, PermissionFlags.COURSE_EDIT
                     )
                 }else {
-                    it.systemPermissionDao.personHasSystemPermission(
+                    it.systemPermissionDao().personHasSystemPermission(
                         activeUserPersonUid, PermissionFlags.ADD_COURSE
                     )
                 }
@@ -162,9 +162,9 @@ class ClazzEditViewModel(
             awaitAll(
                 async {
                     loadEntity(
-                        serializer = ClazzWithHolidayCalendarAndSchoolAndTerminology.serializer(),
+                        serializer = ClazzWithHolidayCalendarAndAndTerminology.serializer(),
                         onLoadFromDb = {
-                            it.clazzDao.takeIf { entityUidArg != 0L }
+                            it.clazzDao().takeIf { entityUidArg != 0L }
                                 ?.findByUidWithHolidayCalendarAsync(entityUidArg).let { dbResult ->
                                     val hasPicture = dbResult?.coursePicture != null
                                     //Add CoursePicture entity if not already present
@@ -180,14 +180,14 @@ class ClazzEditViewModel(
                                 }
                         },
                         makeDefault = {
-                            ClazzWithHolidayCalendarAndSchoolAndTerminology().apply {
+                            ClazzWithHolidayCalendarAndAndTerminology().apply {
                                 clazzUid = effectiveClazzUid
                                 clazzName = ""
                                 isClazzActive = true
                                 clazzStartTime = systemTimeInMillis()
                                 clazzTimeZone = getDefaultTimeZoneId()
                                 clazzSchoolUid = savedStateHandle[UstadView.ARG_SCHOOL_UID]?.toLong() ?: 0L
-                                terminology = activeRepo.courseTerminologyDao
+                                terminology = activeRepo.courseTerminologyDao()
                                     .takeIf { clazzTerminologyUid != 0L }
                                     ?.findByUidAsync(clazzTerminologyUid)
                                 coursePicture = CoursePicture(
@@ -213,7 +213,7 @@ class ClazzEditViewModel(
                         serializer = ListSerializer(Schedule.serializer()),
                         loadFromStateKeys = listOf(STATE_KEY_SCHEDULES),
                         onLoadFromDb = {
-                            it.scheduleDao.takeIf { entityUidArg != 0L }
+                            it.scheduleDao().takeIf { entityUidArg != 0L }
                                 ?.findAllSchedulesByClazzUidAsync(entityUidArg)
                         },
                         makeDefault = {
@@ -231,11 +231,11 @@ class ClazzEditViewModel(
                         serializer = ListSerializer(CourseBlockAndEditEntities.serializer()),
                         loadFromStateKeys = listOf(STATE_KEY_COURSEBLOCKS),
                         onLoadFromDb = { db ->
-                            val courseBlocksDb = db.courseBlockDao
+                            val courseBlocksDb = db.courseBlockDao()
                                 .takeIf { entityUidArg != 0L }
                                 ?.findAllCourseBlockByClazzUidAsync(entityUidArg, false)
                                 ?: emptyList()
-                            val assignmentPeerAllocations = db.peerReviewerAllocationDao
+                            val assignmentPeerAllocations = db.peerReviewerAllocationDao()
                                 .takeIf { entityUidArg != 0L }?.getAllPeerReviewerAllocationsByClazzUid(
                                     clazzUid = entityUidArg,
                                     includeInactive = false
@@ -244,6 +244,9 @@ class ClazzEditViewModel(
                             courseBlocksDb.map {
                                 CourseBlockAndEditEntities(
                                     courseBlock = it.courseBlock!!, //CourseBlock can't be null as per query
+                                    courseBlockPicture = it.courseBlockPicture ?: CourseBlockPicture(
+                                        cbpUid = it.courseBlock!!.cbUid
+                                    ),
                                     contentEntry = it.contentEntry,
                                     contentEntryLang = it.contentEntryLang,
                                     assignment = it.assignment,
@@ -295,48 +298,13 @@ class ClazzEditViewModel(
                 //Handle text, module, and discussion topic (e.g. plain CourseBlock that does not
                 // include any other entities)
                 resultReturner.filteredResultFlowForKey(RESULT_KEY_COURSEBLOCK).collect { result ->
-                    val courseBlockResult = result.result as? CourseBlock
+                    val courseBlockResult = result.result as? CourseBlockAndEditEntities
                         ?: return@collect
 
                     val newCourseBlockList = addOrUpdateCourseBlockUseCase(
                         currentList = _uiState.value.courseBlockList,
                         clazzUid = _uiState.value.entity?.clazzUid ?: 0L,
-                        addOrUpdateBlock = CourseBlockAndEditEntities(
-                            courseBlock = courseBlockResult
-                        ),
-                    )
-
-                    updateCourseBlockList(newCourseBlockList)
-                }
-            }
-
-            launch {
-                resultReturner.filteredResultFlowForKey(RESULT_KEY_ASSIGNMENT).collect { result ->
-                    val assignmentResultBlock = result.result as? CourseBlockAndEditEntities ?: return@collect
-
-                    val newCourseBlockList = addOrUpdateCourseBlockUseCase(
-                        currentList = _uiState.value.courseBlockList,
-                        clazzUid = _uiState.value.entity?.clazzUid ?: 0L,
-                        addOrUpdateBlock = assignmentResultBlock
-                    )
-
-                    updateCourseBlockList(newCourseBlockList)
-                }
-            }
-
-            launch {
-                resultReturner.filteredResultFlowForKey(RESULT_KEY_CONTENTENTRY).collect { result ->
-                    val contentEntryResult = result.result as? ContentEntryBlockLanguageAndContentJob ?: return@collect
-                    val block = contentEntryResult.block ?: return@collect //Block must not be null
-                    val newCourseBlockList = addOrUpdateCourseBlockUseCase(
-                        currentList = _uiState.value.courseBlockList,
-                        clazzUid = _uiState.value.entity?.clazzUid ?: 0L,
-                        addOrUpdateBlock = CourseBlockAndEditEntities(
-                            courseBlock = block,
-                            contentEntry = contentEntryResult.entry,
-                            contentJobItem = contentEntryResult.contentJobItem,
-                            contentJob = contentEntryResult.contentJob,
-                        )
+                        addOrUpdateBlock = courseBlockResult,
                     )
 
                     updateCourseBlockList(newCourseBlockList)
@@ -403,7 +371,7 @@ class ClazzEditViewModel(
         }
     }
 
-    fun onEntityChanged(entity: ClazzWithHolidayCalendarAndSchoolAndTerminology?) {
+    fun onEntityChanged(entity: ClazzWithHolidayCalendarAndAndTerminology?) {
         _uiState.update { prev ->
             prev.copy(
                 entity = entity,
@@ -417,7 +385,7 @@ class ClazzEditViewModel(
 
         scheduleEntityCommitToSavedState(
             entity = entity,
-            serializer = ClazzWithHolidayCalendarAndSchoolAndTerminology.serializer(),
+            serializer = ClazzWithHolidayCalendarAndAndTerminology.serializer(),
             commitDelay = 200,
         )
     }
@@ -471,19 +439,14 @@ class ClazzEditViewModel(
         if(blockType == CourseBlock.BLOCK_CONTENT_TYPE) {
             navigateForResult(
                 nextViewName = ContentEntryListViewModel.DEST_NAME,
-                key = RESULT_KEY_CONTENTENTRY,
+                key = RESULT_KEY_COURSEBLOCK,
                 currentValue = null,
-                serializer = ContentEntryBlockLanguageAndContentJob.serializer(),
+                serializer = CourseBlockAndEditEntities.serializer(),
                 args = mapOf(
                     UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString(),
-                    ContentEntryEditViewModel.ARG_COURSEBLOCK to json.encodeToString(
-                        serializer = CourseBlock.serializer(),
-                        value = CourseBlock().apply {
-                            cbUid = activeDb.doorPrimaryKeyManager.nextId(CourseBlock.TABLE_ID)
-                            cbClazzUid = _uiState.value.entity?.clazzUid ?: 0L
-                            cbType = CourseBlock.BLOCK_CONTENT_TYPE
-                        }
-                    )
+                    UstadView.ARG_CLAZZUID to effectiveClazzUid.toString(),
+                    CourseBlockEditViewModel.ARG_BLOCK_TYPE to CourseBlock.BLOCK_CONTENT_TYPE.toString(),
+                    ContentEntryEditViewModel.ARG_GO_TO_ON_CONTENT_ENTRY_DONE to ContentEntryEditViewModel.GO_TO_COURSE_BLOCK_EDIT.toString(),
                 ),
             )
 
@@ -497,7 +460,7 @@ class ClazzEditViewModel(
             CourseBlock.BLOCK_MODULE_TYPE ->
                 CourseBlockEditViewModel.DEST_NAME to RESULT_KEY_COURSEBLOCK
             CourseBlock.BLOCK_ASSIGNMENT_TYPE ->
-                ClazzAssignmentEditViewModel.DEST_NAME to RESULT_KEY_ASSIGNMENT
+                ClazzAssignmentEditViewModel.DEST_NAME to RESULT_KEY_COURSEBLOCK
             else -> return
         }
 
@@ -587,16 +550,25 @@ class ClazzEditViewModel(
             val updateImage = coursePictureVal != null &&
                     savedStateHandle[INIT_PIC_URI] != (entity.coursePicture?.coursePictureUri ?: "")
 
+            val updatedCourseBlockPictures = courseBlockListVal.mapNotNull { block ->
+                val imageUriNow = block.courseBlockPicture?.cbpPictureUri
+                val initImageUri = initState.courseBlockList.firstOrNull {
+                    it.courseBlockPicture?.cbpUid == block.courseBlockPicture?.cbpUid
+                }?.courseBlockPicture?.cbpPictureUri
+
+                block.courseBlockPicture?.takeIf { imageUriNow != initImageUri }
+            }
+
             activeDb.withDoorTransactionAsync {
                 if(entityUidArg == 0L) {
                     createNewClazzUseCase(initEntity)
                 }else {
-                    activeRepo.clazzDao.updateAsync(initEntity)
+                    activeRepo.clazzDao().updateAsync(initEntity)
                 }
 
                 if(updateImage && coursePictureVal != null) {
                     coursePictureVal.coursePictureLct = systemTimeInMillis()
-                    activeDb.coursePictureDao.upsertAsync(coursePictureVal)
+                    activeDb.coursePictureDao().upsertAsync(coursePictureVal)
                 }
 
                 val clazzUid = entity.clazzUid
@@ -605,8 +577,8 @@ class ClazzEditViewModel(
                     it.shallowCopy { scheduleClazzUid = clazzUid }
                 }
 
-                activeRepo.scheduleDao.upsertListAsync(schedulesToCommit)
-                activeRepo.scheduleDao.deactivateByUids(
+                activeRepo.scheduleDao().upsertListAsync(schedulesToCommit)
+                activeRepo.scheduleDao().deactivateByUids(
                     initState.clazzSchedules.findKeysNotInOtherList(schedulesToCommit) {
                         it.scheduleUid
                     }, systemTimeInMillis()
@@ -614,27 +586,22 @@ class ClazzEditViewModel(
 
                 val courseBlockModulesToCommit = updateCourseBlocksOnReorderOrCommitUseCase(
                     courseBlockListVal)
-                activeRepo.courseBlockDao.upsertListAsync(
+                activeRepo.courseBlockDao().upsertListAsync(
                     courseBlockModulesToCommit.map { it.courseBlock }
                 )
-                activeRepo.courseBlockDao.deactivateByUids(
+                activeRepo.courseBlockDao().deactivateByUids(
                     initState.courseBlockList.findKeysNotInOtherList(courseBlockModulesToCommit) {
                         it.courseBlock.cbUid
                     }, systemTimeInMillis()
                 )
 
                 val assignmentsToUpsert = courseBlockListVal.mapNotNull { it.assignment }
-                activeRepo.clazzAssignmentDao.upsertListAsync(assignmentsToUpsert)
+                activeRepo.clazzAssignmentDao().upsertListAsync(assignmentsToUpsert)
                 val assignmentsToDeactivate = initState.courseBlockList.mapNotNull { it.assignment}
                     .findKeysNotInOtherList(assignmentsToUpsert) { it.caUid }
-                activeRepo.clazzAssignmentDao.takeIf { assignmentsToDeactivate.isNotEmpty() }
+                activeRepo.clazzAssignmentDao().takeIf { assignmentsToDeactivate.isNotEmpty() }
                     ?.updateActiveByList(assignmentsToDeactivate, false, systemTimeInMillis())
-                courseBlockListVal.mapNotNull { it.contentEntry }.forEach {
-                    saveContentEntryUseCase.invoke(
-                        contentEntry = it,
-                        joinToParentUid = null,
-                    )
-                }
+
                 val currentPeerReviewAllocations = courseBlockListVal.flatMap {
                     it.assignmentPeerAllocations
                 }
@@ -642,14 +609,14 @@ class ClazzEditViewModel(
                     it.assignmentPeerAllocations
                 }
 
-                activeRepo.peerReviewerAllocationDao.deactivateByUids(
+                activeRepo.peerReviewerAllocationDao().deactivateByUids(
                     uidList = prevPeerReviewerAllocations.findKeysNotInOtherList(
                         otherList = currentPeerReviewAllocations,
                         key = { it.praUid }
                     ),
                     changeTime = systemTimeInMillis()
                 )
-                activeRepo.peerReviewerAllocationDao.upsertList(currentPeerReviewAllocations)
+                activeRepo.peerReviewerAllocationDao().upsertList(currentPeerReviewAllocations)
 
                 //Run the ContentImport for any jobs where this is required.
                 courseBlockListVal.mapNotNull {
@@ -660,15 +627,43 @@ class ClazzEditViewModel(
                     )
                 }
 
+                activeDb.courseBlockPictureDao()
+                    .takeIf { updatedCourseBlockPictures.isNotEmpty() }
+                    ?.upsertListAsync(updatedCourseBlockPictures)
                 Napier.d("onClickSave: transaction block done")
             }
             Napier.d("onClickSave: transaction done")
+
+            //Saving the ContentEntry entity can include saving the picture for the content entry.
+            //Because enqueueing a save picture must be done only after the entity with the picture
+            //itself is committed, SaveContentEntry must be invoked outside the main transaction so
+            //that SaveContentEntryUseCase can control the transactions.
+            courseBlockListVal.forEach { block ->
+                block.contentEntry?.also { contentEntry ->
+                    saveContentEntryUseCase(
+                        contentEntry = contentEntry,
+                        joinToParentUid = null,
+                        picture = block.contentEntryPicture,
+                        initPictureUri = initState.courseBlockList.firstOrNull {
+                            it.courseBlockPicture?.cbpUid == block.courseBlockPicture?.cbpUid
+                        }?.courseBlockPicture?.cbpPictureUri
+                    )
+                }
+            }
 
             enqueueSavePictureUseCase.takeIf { updateImage }?.invoke(
                 entityUid = entity.clazzUid,
                 tableId = CoursePicture.TABLE_ID,
                 pictureUri = coursePictureVal?.coursePictureUri
             )
+
+            updatedCourseBlockPictures.forEach {
+                enqueueSavePictureUseCase(
+                    entityUid = it.cbpUid,
+                    tableId = CourseBlockPicture.TABLE_ID,
+                    pictureUri = it.cbpPictureUri
+                )
+            }
 
             val entityTimeZone = TimeZone.of(entity.effectiveTimeZone)
             val fromLocalDate = Clock.System.now().toLocalDateTime(entityTimeZone)
@@ -732,9 +727,9 @@ class ClazzEditViewModel(
     fun onClickHideBlockPopupMenu(block: CourseBlockAndEditEntities) {
         updateCourseBlock(
             block.copy(
-                courseBlock = block.courseBlock.shallowCopy {
+                courseBlock = block.courseBlock.copy(
                     cbHidden = true
-                }
+                )
             )
         )
     }
@@ -742,9 +737,9 @@ class ClazzEditViewModel(
     fun onClickUnHideBlockPopupMenu(block: CourseBlockAndEditEntities) {
         updateCourseBlock(
             block.copy(
-                courseBlock = block.courseBlock.shallowCopy {
+                courseBlock = block.courseBlock.copy(
                     cbHidden = false
-                }
+                )
             )
         )
     }
@@ -752,9 +747,9 @@ class ClazzEditViewModel(
     fun onClickIndentBlockPopupMenu(block: CourseBlockAndEditEntities) {
         updateCourseBlock(
             block.copy(
-                courseBlock = block.courseBlock.shallowCopy {
+                courseBlock = block.courseBlock.copy(
                     cbIndentLevel = block.courseBlock.cbIndentLevel + 1
-                }
+                )
             )
         )
     }
@@ -762,9 +757,9 @@ class ClazzEditViewModel(
     fun onClickUnIndentBlockPopupMenu(block: CourseBlockAndEditEntities) {
         updateCourseBlock(
             block.copy(
-                courseBlock = block.courseBlock.shallowCopy {
+                courseBlock = block.courseBlock.copy(
                     cbIndentLevel = block.courseBlock.cbIndentLevel - 1
-                }
+                )
             )
         )
     }
@@ -778,37 +773,22 @@ class ClazzEditViewModel(
     }
 
     fun onClickEditCourseBlock(block: CourseBlockAndEditEntities) {
-        if(block.courseBlock.cbType == CourseBlock.BLOCK_CONTENT_TYPE) {
-            navigateForResult(
-                nextViewName = ContentEntryEditViewModel.DEST_NAME,
-                key = RESULT_KEY_CONTENTENTRY,
-                currentValue =  ContentEntryBlockLanguageAndContentJob(
-                    entry = block.contentEntry,
-                    block = block.courseBlock,
-                    contentJob = block.contentJob,
-                    contentJobItem = block.contentJobItem,
-                ),
-                serializer = ContentEntryBlockLanguageAndContentJob.serializer(),
-            )
-            return
-        }
-
-
         when(block.courseBlock.cbType) {
+            CourseBlock.BLOCK_CONTENT_TYPE,
             CourseBlock.BLOCK_DISCUSSION_TYPE,
             CourseBlock.BLOCK_TEXT_TYPE,
             CourseBlock.BLOCK_MODULE_TYPE -> {
                 navigateForResult(
                     nextViewName = CourseBlockEditViewModel.DEST_NAME,
                     key = RESULT_KEY_COURSEBLOCK,
-                    serializer = CourseBlock.serializer(),
-                    currentValue = block.courseBlock,
+                    serializer = CourseBlockAndEditEntities.serializer(),
+                    currentValue = block,
                 )
             }
             CourseBlock.BLOCK_ASSIGNMENT_TYPE -> {
                 navigateForResult(
                     nextViewName = ClazzAssignmentEditViewModel.DEST_NAME,
-                    key = RESULT_KEY_ASSIGNMENT,
+                    key = RESULT_KEY_COURSEBLOCK,
                     serializer = CourseBlockAndEditEntities.serializer(),
                     currentValue = block,
                     args = buildMap {
@@ -837,10 +817,6 @@ class ClazzEditViewModel(
          * Plain CourseBlock will be returned
          */
         const val RESULT_KEY_COURSEBLOCK = "courseblock"
-
-        const val RESULT_KEY_ASSIGNMENT = "assignmentResult"
-
-        const val RESULT_KEY_CONTENTENTRY = "contentEntryResult"
 
         const val RESULT_KEY_TIMEZONE = "timeZone"
 

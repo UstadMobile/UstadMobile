@@ -21,6 +21,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.contentjob.InvalidContentException
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.UnsupportedContentException
 import com.ustadmobile.core.util.ext.onActiveEndpoint
+import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
 
 data class ContentEntryGetMetadataUiState(
     val status: ContentEntryGetMetadataStatus = ContentEntryGetMetadataStatus(),
@@ -64,7 +65,7 @@ class ContentEntryGetMetadataViewModel(
                                 value = metadataResult
                             )
                         )
-                        putFromSavedStateIfPresent(ContentEntryEditViewModel.ARG_COURSEBLOCK)
+                        putFromSavedStateIfPresent(CourseBlockEditViewModel.COURSE_BLOCK_CONTENT_ENTRY_PASS_THROUGH_ARGS)
                         putFromSavedStateIfPresent(UstadView.ARG_RESULT_DEST_VIEWNAME)
                         putFromSavedStateIfPresent(UstadView.ARG_RESULT_DEST_KEY)
                         putFromSavedStateIfPresent(ARG_PARENT_UID)

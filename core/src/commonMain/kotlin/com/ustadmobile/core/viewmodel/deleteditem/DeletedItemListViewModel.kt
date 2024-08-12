@@ -1,6 +1,5 @@
 package com.ustadmobile.core.viewmodel.deleteditem
 
-import app.cash.paging.PagingSource
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.UstadListViewModel
@@ -30,15 +29,11 @@ class DeletedItemListViewModel(
 ): UstadListViewModel<DeletedItemListUiState>(di, savedStateHandle, DeletedItemListUiState(), DEST_NAME) {
 
     private val pagingSourceFactory: ListPagingSourceFactory<DeletedItem> = {
-        activeRepo.deletedItemDao.findDeletedItemsForUser(
+        activeRepo.deletedItemDao().findDeletedItemsForUser(
             personUid = activeUserPersonUid,
             includeActionedItems = false,
-        ).also {
-            lastPagingSource = it
-        }
+        )
     }
-
-    private var lastPagingSource: PagingSource<Int, DeletedItem>? = null
 
     private val restoreDeletedItemUseCase: RestoreDeletedItemUseCase by di.onActiveEndpoint()
         .instance()

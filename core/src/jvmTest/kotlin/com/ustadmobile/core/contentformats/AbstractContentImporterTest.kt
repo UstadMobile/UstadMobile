@@ -8,6 +8,7 @@ import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCas
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCaseJvm
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCaseCommonJvm
+import com.ustadmobile.core.domain.compress.list.CompressListUseCase
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.uri.UriHelperJvm
 import com.ustadmobile.core.util.UstadTestRule
@@ -65,6 +66,8 @@ abstract class AbstractContentImporterTest: AbstractMainDispatcherTest() {
 
     protected lateinit var rootTmpFolder: File
 
+    protected lateinit var compressListUseCase: CompressListUseCase
+
     @BeforeTest
     fun setup() {
         rootTmpFolder = temporaryFolder.newFolder("video-import-test")
@@ -74,6 +77,7 @@ abstract class AbstractContentImporterTest: AbstractMainDispatcherTest() {
 
         json = Json {
             encodeDefaults = true
+            ignoreUnknownKeys = true
         }
 
         ustadCache = newTestUstadCache(temporaryFolder)
@@ -105,6 +109,11 @@ abstract class AbstractContentImporterTest: AbstractMainDispatcherTest() {
             okHttpClient = okHttpClient,
             cache = ustadCache,
             tmpDir = temporaryFolder.newFolder(),
+        )
+        compressListUseCase = CompressListUseCase(
+            compressVideoUseCase = null,
+            mimeTypeHelper = FileMimeTypeHelperImpl(),
+            compressImageUseCase = null,
         )
     }
 

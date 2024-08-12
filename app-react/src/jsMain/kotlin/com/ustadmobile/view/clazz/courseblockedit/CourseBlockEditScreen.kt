@@ -21,6 +21,8 @@ val CourseBlockEditScreen = FC<Props> {
         UstadCourseBlockEdit {
             uiState = uiStateVar
             onCourseBlockChange = viewModel::onEntityChanged
+            onClickEditSelectedContentEntry = viewModel::onClickEditContentEntry
+            onPictureChanged = viewModel::onPictureChanged
         }
     }
 

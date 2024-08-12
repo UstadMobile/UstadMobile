@@ -20,8 +20,8 @@
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
 
-    <!-- This is required on android 12 to handle shake detection -->
-    <uses-permission android:name="android.permission.HIGH_SAMPLING_RATE_SENSORS"/>
+    <!-- Appears to be required by Aztec HTML editor as per lint error messages -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
 
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
@@ -105,12 +105,11 @@
 
 
         <!--
-        The API url endpoint can be explicitly specified by uncommenting the metadata key here. If
+        The API url endpoint can be explicitly specified by setting it in buildconfig.properties. If
         it is not specified, the user will be prompted to enter the link.
-
-        <meta-data android:name="com.ustadmobile.apiurl"
-            android:value="https://myserver.domain.com/"/>
         -->
+        <meta-data android:name="com.ustadmobile.apiurl" android:value="${apiUrl}"/>
+
 
         <!--
         When the app APK itself is shared locally (eg. using the share app menu which

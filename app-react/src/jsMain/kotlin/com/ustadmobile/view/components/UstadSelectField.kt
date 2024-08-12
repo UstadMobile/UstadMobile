@@ -1,6 +1,6 @@
 package com.ustadmobile.view.components
 
-import js.core.jso
+import js.objects.jso
 import mui.material.*
 import react.*
 

@@ -6,7 +6,7 @@ import web.cssom.Position
 import web.cssom.pct
 import web.cssom.px
 import web.cssom.translatey
-import js.core.jso
+import js.objects.jso
 import react.*
 import react.dom.html.ReactHTML
 import web.cssom.TransformFunction

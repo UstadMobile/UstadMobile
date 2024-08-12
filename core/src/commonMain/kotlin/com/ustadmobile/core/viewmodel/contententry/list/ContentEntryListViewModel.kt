@@ -12,7 +12,6 @@ import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel.Companion.FILTER_BY_PARENT_UID
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
-import app.cash.paging.PagingSource
 import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.domain.contententry.delete.DeleteContentEntryParentChildJoinUseCase
 import com.ustadmobile.core.domain.contententry.move.MoveContentEntriesUseCase
@@ -21,6 +20,7 @@ import com.ustadmobile.core.impl.appstate.AppBarColors
 import com.ustadmobile.core.impl.appstate.AppStateIcon
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.appstate.UstadContextMenuItem
+import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.ext.onActiveEndpoint
 import com.ustadmobile.core.view.ListViewMode
@@ -28,11 +28,11 @@ import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
 import com.ustadmobile.core.viewmodel.contententry.detail.ContentEntryDetailViewModel
 import com.ustadmobile.core.viewmodel.contententry.getmetadata.ContentEntryGetMetadataViewModel
 import com.ustadmobile.core.viewmodel.contententry.importlink.ContentEntryImportLinkViewModel
+import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
+import com.ustadmobile.lib.db.composites.ContentEntryAndContentJob
 import com.ustadmobile.lib.db.composites.ContentEntryAndListDetail
-import com.ustadmobile.lib.db.composites.ContentEntryBlockLanguageAndContentJob
+import com.ustadmobile.lib.db.composites.CourseBlockAndEditEntities
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.CourseBlock
-import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
@@ -140,49 +140,47 @@ class ContentEntryListViewModel(
     /**
      * This will be true when the user is selecting content as part of selecting it from ClazzEdit
      */
-    private val hasCourseBlockArg: Boolean = savedStateHandle[ContentEntryEditViewModel.ARG_COURSEBLOCK] != null
+    private val hasCourseBlockArg: Boolean =
+        savedStateHandle[ContentEntryEditViewModel.ARG_GO_TO_ON_CONTENT_ENTRY_DONE]?.toInt() == ContentEntryEditViewModel.GO_TO_COURSE_BLOCK_EDIT
 
     private val selectFolderMode: Boolean = savedStateHandle[ARG_SELECT_FOLDER_MODE]?.toBoolean() ?: false
 
     private val pagingSourceFactory: ListPagingSourceFactory<ContentEntryAndListDetail> = {
         when(_uiState.value.selectedChipId) {
-            FILTER_MY_CONTENT -> activeRepo.contentEntryDao.getContentByOwner(
+            FILTER_MY_CONTENT -> activeRepo.contentEntryDao().getContentByOwner(
                 activeUserPersonUid
             )
 
-            FILTER_FROM_MY_COURSES -> activeRepo.contentEntryDao.getContentFromMyCourses(
+            FILTER_FROM_MY_COURSES -> activeRepo.contentEntryDao().getContentFromMyCourses(
                 activeUserPersonUid
             )
 
             FILTER_FROM_LIBRARY -> {
-                activeRepo.contentEntryDao.getChildrenByParentUidWithCategoryFilterOrderByName(
+                activeRepo.contentEntryDao().getChildrenByParentUidWithCategoryFilterOrderByName(
+                    accountPersonUid = activeUserPersonUid,
                     parentUid = parentEntryUid,
                     langParam = 0,
                     categoryParam0 = 0,
-                    personUid = activeUserPersonUid,
                     sortOrder = _uiState.value.activeSortOption.flag,
                     includeDeleted = false,
                 )
             }
 
             FILTER_BY_PARENT_UID -> {
-                activeRepo.contentEntryDao.getChildrenByParentUidWithCategoryFilterOrderByName(
+                activeRepo.contentEntryDao().getChildrenByParentUidWithCategoryFilterOrderByName(
+                    accountPersonUid = activeUserPersonUid,
                     parentUid = parentEntryUid,
                     langParam = 0,
                     categoryParam0 = 0,
-                    personUid = activeUserPersonUid,
                     sortOrder = _uiState.value.activeSortOption.flag,
                     includeDeleted = false,
                 )
             }
 
             else -> EmptyPagingSource()
-        }.also {
-            lastPagingSource = it
         }
     }
 
-    private var lastPagingSource: PagingSource<Int, ContentEntryAndListDetail>? = null
 
     private var defaultTitle: String = ""
 
@@ -246,7 +244,7 @@ class ContentEntryListViewModel(
             }
         }
 
-        val hasPermissionFlow = activeRepo.systemPermissionDao
+        val hasPermissionFlow = activeRepo.systemPermissionDao()
             .personHasSystemPermissionAsFlow(
                 accountManager.currentAccount.personUid, PermissionFlags.EDIT_LIBRARY_CONTENT
             ).shareIn(viewModelScope, SharingStarted.WhileSubscribed())
@@ -255,7 +253,7 @@ class ContentEntryListViewModel(
             defaultTitle = when {
                 (expectedResultDest != null && !selectFolderMode) -> systemImpl.getString(MR.strings.select_content)
                 parentEntryUid == LIBRARY_ROOT_CONTENT_ENTRY_UID -> systemImpl.getString(MR.strings.library)
-                else -> activeRepo.contentEntryDao.findTitleByUidAsync(parentEntryUid) ?: ""
+                else -> activeRepo.contentEntryDao().findTitleByUidAsync(parentEntryUid) ?: ""
             }
 
             _appUiState.update { prev ->
@@ -447,7 +445,7 @@ class ContentEntryListViewModel(
                 put(ContentEntryEditViewModel.ARG_LEAF, true.toString())
                 put(ARG_PARENT_UID, parentEntryUid.toString())
                 put(ARG_NEXT, ContentEntryEditViewModel.DEST_NAME)
-                putFromSavedStateIfPresent(ContentEntryEditViewModel.ARG_COURSEBLOCK)
+                putFromSavedStateIfPresent(CourseBlockEditViewModel.COURSE_BLOCK_CONTENT_ENTRY_PASS_THROUGH_ARGS)
             }
         )
     }
@@ -460,7 +458,7 @@ class ContentEntryListViewModel(
                 put(ContentEntryGetMetadataViewModel.ARG_URI, fileUri)
                 put(ContentEntryGetMetadataViewModel.ARG_FILENAME, fileName)
                 put(ARG_PARENT_UID, parentEntryUid.toString())
-                putFromSavedStateIfPresent(ContentEntryEditViewModel.ARG_COURSEBLOCK)
+                putFromSavedStateIfPresent(CourseBlockEditViewModel.COURSE_BLOCK_CONTENT_ENTRY_PASS_THROUGH_ARGS)
             }
         )
     }
@@ -469,41 +467,43 @@ class ContentEntryListViewModel(
         if(entry == null)
             return
 
-        //When the user is selecting content from ClazzEdit
-        val courseBlockArg = savedStateHandle[ContentEntryEditViewModel.ARG_COURSEBLOCK]
+        val goToOnContentEntryEdit = savedStateHandle[ContentEntryEditViewModel.ARG_GO_TO_ON_CONTENT_ENTRY_DONE]?.toInt() ?: 0
 
         when {
             //If user is selecting a folder, and they have clicked on something that is not a folder, do nothing
             entry.leaf && showSelectFolderButton -> return
 
-            entry.leaf && courseBlockArg != null -> {
-                val courseBlock = json.decodeFromString(
-                    deserializer = CourseBlock.serializer(),
-                    string = courseBlockArg,
-                ).shallowCopy {
-                    cbTitle = entry.title
-                    cbDescription = entry.description
-                }
+            //When the user is selecting a ContentEntry and then going onwards to CourseBlockEdit
+            //As part of adding a content course block
+            listMode == ListViewMode.PICKER && entry.leaf &&
+                    goToOnContentEntryEdit == ContentEntryEditViewModel.GO_TO_COURSE_BLOCK_EDIT -> {
 
                 navigateForResult(
-                    nextViewName = ContentEntryEditViewModel.DEST_NAME,
-                    key = ClazzEditViewModel.RESULT_KEY_CONTENTENTRY,
-                    currentValue = ContentEntryBlockLanguageAndContentJob(
-                        entry = entry,
-                        block = courseBlock,
-                        contentJob = null,
-                        contentJobItem = null,
-                    ),
-                    serializer = ContentEntryBlockLanguageAndContentJob.serializer(),
-                    overwriteDestination = false
+                    nextViewName = CourseBlockEditViewModel.DEST_NAME,
+                    key = ClazzEditViewModel.RESULT_KEY_COURSEBLOCK,
+                    currentValue = null,
+                    serializer = CourseBlockAndEditEntities.serializer(),
+                    overwriteDestination = false,
+                    args = buildMap {
+                        putFromSavedStateIfPresent(CourseBlockEditViewModel.COURSE_BLOCK_CONTENT_ENTRY_PASS_THROUGH_ARGS)
+                        put(
+                            CourseBlockEditViewModel.ARG_SELECTED_CONTENT_ENTRY,
+                            json.encodeToString(
+                                ContentEntryAndContentJob.serializer(),
+                                ContentEntryAndContentJob(entry)
+                            )
+                        )
+                    }
                 )
-                return
             }
 
             entry.leaf -> {
                 navController.navigate(
                     viewName = ContentEntryDetailViewModel.DEST_NAME,
-                    args = mapOf(UstadView.ARG_ENTITY_UID to entry.contentEntryUid.toString())
+                    args = mapOf(
+                        UstadView.ARG_ENTITY_UID to entry.contentEntryUid.toString(),
+                        ARG_PARENT_UID to parentEntryUid.toString(),
+                    )
                 )
             }
 
@@ -517,10 +517,10 @@ class ContentEntryListViewModel(
                     args = buildMap {
                         put(ARG_FILTER, FILTER_BY_PARENT_UID.toString())
                         put(ARG_PARENT_UID, entry.contentEntryUid.toString())
-                        putFromSavedStateIfPresent(ContentEntryEditViewModel.ARG_COURSEBLOCK)
                         putFromSavedStateIfPresent(UstadView.ARG_RESULT_DEST_KEY)
                         putFromSavedStateIfPresent(UstadView.ARG_RESULT_DEST_VIEWNAME)
                         putFromSavedStateIfPresent(ARG_SELECT_FOLDER_MODE)
+                        putFromSavedStateIfPresent(ContentEntryEditViewModel.ARG_GO_TO_ON_CONTENT_ENTRY_DONE)
                     }
                 )
             }
@@ -649,7 +649,7 @@ class ContentEntryListViewModel(
             )
         }
         savedStateHandle[KEY_FILTER_CHIP_ID] = filterOption.value.toString()
-        lastPagingSource?.invalidate()
+        _refreshCommandFlow.tryEmit(RefreshCommand())
     }
 
     companion object {

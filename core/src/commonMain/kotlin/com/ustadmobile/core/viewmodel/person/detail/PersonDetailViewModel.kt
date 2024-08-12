@@ -38,8 +38,6 @@ data class PersonDetailUiState(
 
     val displayPhoneNum: String? = null,
 
-    val personPicture: PersonPicture? = null,
-
     val canSendSms: Boolean = false,
 
     val clazzes: List<ClazzEnrolmentAndPersonDetailDetails> = emptyList(),
@@ -134,12 +132,12 @@ class PersonDetailViewModel(
         }
 
         viewModelScope.launch {
-            val entityFlow = activeRepo.personDao.findByUidWithDisplayDetailsFlow(
+            val entityFlow = activeRepo.personDao().findByUidWithDisplayDetailsFlow(
                 personUid = entityUidArg,
                 accountPersonUid = activeUserPersonUid,
             )
 
-            val viewAndEditPermissionFlow = activeRepo.systemPermissionDao
+            val viewAndEditPermissionFlow = activeRepo.systemPermissionDao()
                 .personHasEditAndViewPermissionForPersonAsFlow(
                     accountPersonUid = activeUserPersonUid,
                     otherPersonUid = entityUidArg
@@ -147,7 +145,7 @@ class PersonDetailViewModel(
 
             //Any required SystemPermission entities will be pulled down by viewAndEditPermissionFlow
             //So hasSystemPermissionFlow can use db instead of repo
-            val hasManagePermissionsPermissionFlow = activeDb.systemPermissionDao
+            val hasManagePermissionsPermissionFlow = activeDb.systemPermissionDao()
                 .personHasSystemPermissionAsFlow(
                     accountPersonUid = activeUserPersonUid,
                     permission = PermissionFlags.MANAGE_USER_PERMISSIONS,
@@ -208,7 +206,7 @@ class PersonDetailViewModel(
                 }
 
                 launch {
-                    activeDb.clazzEnrolmentDao.findAllClazzesByPersonWithClazz(
+                    activeDb.clazzEnrolmentDao().findAllClazzesByPersonWithClazz(
                         accountPersonUid = activeUserPersonUid,
                         otherPersonUid = entityUidArg
                     ).collect {

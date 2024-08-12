@@ -1,4 +1,4 @@
-describe('003_001_add_or_edit_course_permission_test', () => {
+describe('WEB_003_001_add_or_edit_course_permission_test', () => {
 it('Start Ustad Test Server ', () => {
   // Start Test Server
   cy.ustadStartTestServer()
@@ -11,7 +11,8 @@ it('Admin has course edit permission', () => {
   cy.ustadAddCourse('003_001')
   // Admin test the course edit permission
   cy.contains('button','Edit').click()
-  cy.get('div[data-placeholder="Description"]').clear().type("Admin has edit permission")
+  cy.get('div[data-placeholder="Description"][contenteditable="true"]',{timeout: 5000}).clear()
+  cy.get('div[data-placeholder="Description"][contenteditable="true"]').type("Admin has edit permission")
   cy.contains("button","Save").click()
   cy.contains("Admin has edit permission").should('be.visible')
   //Add a teacher
@@ -38,7 +39,7 @@ it('Teacher have the permission to edit the course ', () => {
   cy.contains('003_001').click()
   // Teacher test the course edit permission
   cy.contains('button','Edit').click()
-  cy.get('div[data-placeholder="Description"]').clear().type("Teacher has edit permission")
+  cy.get('div[data-placeholder="Description"][contenteditable="true"]').clear().type("Teacher has edit permission")
   cy.contains("button","Save").click()
   cy.contains("Teacher has edit permission").should('be.visible')
 })

@@ -3,7 +3,7 @@ package com.ustadmobile.hooks
 import com.ustadmobile.mui.components.UstadLanguageConfigContext
 import com.ustadmobile.wrappers.intl.Intl
 import com.ustadmobile.wrappers.intl.IntlDateTimeNumericProp
-import js.core.jso
+import js.objects.jso
 import react.useContext
 import react.useMemo
 

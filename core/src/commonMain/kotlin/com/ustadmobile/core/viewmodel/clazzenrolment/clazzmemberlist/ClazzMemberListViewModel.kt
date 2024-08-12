@@ -24,6 +24,7 @@ import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import app.cash.paging.PagingSource
 import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.impl.appstate.Snack
+import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.ext.dayStringResource
 import com.ustadmobile.core.util.ext.localFirstThenRepoIfNull
 import com.ustadmobile.core.viewmodel.clazz.parseAndUpdateTerminologyStringsIfNeeded
@@ -102,16 +103,10 @@ class ClazzMemberListViewModel(
     private val clazzUid = savedStateHandle[UstadView.ARG_CLAZZUID]?.toLong()
         ?: throw IllegalArgumentException("No clazzuid")
 
-    private var lastTeacherListPagingSource: PagingSource<Int, PersonAndClazzMemberListDetails>? = null
-
-    private var lastStudentListPagingsource: PagingSource<Int, PersonAndClazzMemberListDetails>? = null
-
-    private var lastPendingEnrolmentRequestsPagingSource: PagingSource<Int, EnrolmentRequestAndPersonDetails>? = null
-
     private fun getMembersAsPagingSource(
         roleId: Int
     ) : PagingSource<Int, PersonAndClazzMemberListDetails>  {
-        return activeRepo.clazzEnrolmentDao.findByClazzUidAndRole(
+        return activeRepo.clazzEnrolmentDao().findByClazzUidAndRole(
             clazzUid = clazzUid,
             roleId = roleId,
             sortOrder = _uiState.value.activeSortOrderOption.flag,
@@ -124,27 +119,21 @@ class ClazzMemberListViewModel(
     }
 
     private val teacherListPagingSource: ListPagingSourceFactory<PersonAndClazzMemberListDetails> = {
-        getMembersAsPagingSource(ClazzEnrolment.ROLE_TEACHER).also {
-            lastTeacherListPagingSource = it
-        }
+        getMembersAsPagingSource(ClazzEnrolment.ROLE_TEACHER)
     }
 
     private val studentListPagingSource: ListPagingSourceFactory<PersonAndClazzMemberListDetails> = {
-        getMembersAsPagingSource(ClazzEnrolment.ROLE_STUDENT).also {
-            lastStudentListPagingsource = it
-        }
+        getMembersAsPagingSource(ClazzEnrolment.ROLE_STUDENT)
     }
 
     private val pendingStudentListPagingSource: ListPagingSourceFactory<EnrolmentRequestAndPersonDetails> = {
-        activeRepo.enrolmentRequestDao.findPendingEnrolmentsForCourse(
+        activeRepo.enrolmentRequestDao().findPendingEnrolmentsForCourse(
             clazzUid = clazzUid,
             includeDeleted = false,
             searchText = _appUiState.value.searchState.searchText.toQueryLikeParam(),
             statusFilter = EnrolmentRequest.STATUS_PENDING,
             sortOrder = _uiState.value.activeSortOrderOption.flag,
-        ).also {
-            lastPendingEnrolmentRequestsPagingSource = it
-        }
+        )
     }
 
 
@@ -171,7 +160,7 @@ class ClazzMemberListViewModel(
         viewModelScope.launch {
             _uiState.whenSubscribed {
                 launch {
-                    activeRepo.clazzDao.getClazzNameAndTerminologyAsFlow(clazzUid).collect { nameAndTerminology ->
+                    activeRepo.clazzDao().getClazzNameAndTerminologyAsFlow(clazzUid).collect { nameAndTerminology ->
                         parseAndUpdateTerminologyStringsIfNeeded(
                             currentTerminologyStrings = _uiState.value.terminologyStrings,
                             terminology = nameAndTerminology?.terminology,
@@ -190,7 +179,7 @@ class ClazzMemberListViewModel(
                 launch {
                     //Note: we can use the db here, because the permission entities will be pulled
                     // down by the repo query that is running on the member list itself
-                    activeDb.coursePermissionDao.personHasPermissionWithClazzPairAsFlow(
+                    activeDb.coursePermissionDao().personHasPermissionWithClazzPairAsFlow(
                         accountPersonUid = activeUserPersonUid,
                         clazzUid = clazzUid,
                         firstPermission = PermissionFlags.COURSE_MANAGE_TEACHER_ENROLMENT,
@@ -208,14 +197,8 @@ class ClazzMemberListViewModel(
         }
     }
 
-    private fun invalidatePagingSources(){
-        lastTeacherListPagingSource?.invalidate()
-        lastStudentListPagingsource?.invalidate()
-        lastPendingEnrolmentRequestsPagingSource?.invalidate()
-    }
-
     override fun onUpdateSearchResult(searchText: String) {
-        invalidatePagingSources()
+        _refreshCommandFlow.tryEmit(RefreshCommand())
     }
 
     override fun onClickAdd() {
@@ -227,7 +210,7 @@ class ClazzMemberListViewModel(
             prev.copy(selectedChipId = filterOption.value)
         }
 
-        invalidatePagingSources()
+        _refreshCommandFlow.tryEmit(RefreshCommand())
     }
 
     fun onClickRespondToPendingEnrolment(
@@ -258,7 +241,7 @@ class ClazzMemberListViewModel(
             val clazzCode = activeRepo
                 .takeIf { role == ClazzEnrolment.ROLE_STUDENT }
                 ?.localFirstThenRepoIfNull {
-                    it.clazzDao.findByUidAsync(clazzUid)?.clazzCode
+                    it.clazzDao().findByUidAsync(clazzUid)?.clazzCode
                 }
 
             val titleStringResource = if(role == ClazzEnrolment.ROLE_STUDENT) {
@@ -314,7 +297,7 @@ class ClazzMemberListViewModel(
         _uiState.update { prev ->
             prev.copy(activeSortOrderOption = sortOption)
         }
-        invalidatePagingSources()
+        _refreshCommandFlow.tryEmit(RefreshCommand())
     }
 
     companion object {

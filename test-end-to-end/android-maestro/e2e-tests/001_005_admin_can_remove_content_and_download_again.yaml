@@ -1,0 +1,38 @@
+appId: com.toughra.ustadmobile
+env:
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/001_001_admin_can_add_content_002-epub"
+  TESTNAME: "001_006_admin_can_cancel_content_download"
+---
+- clearState: com.toughra.ustadmobile
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+      TESTNAME: ${TESTNAME}
+- runFlow:
+    file: "../common/clear_login_and_add_content.yaml"
+    env:
+      TESTFILENAME: Epub_Content2.epub
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+- tapOn: "SAVE"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_add_to_library"
+- tapOn: "E-book"
+- assertNotVisible: "Importing"
+- tapOn: Open
+- tapOn: "Back"
+- runFlow:
+    file: "../common/login_download_and_open_content.yaml"
+#Download and open content
+- tapOn: "Library"
+- extendedWaitUntil:
+    visible: "E-book"
+    timeout: 3000
+- tapOn: "E-book"
+- tapOn: Download
+- assertVisible: "Remove"
+- tapOn: Remove
+- tapOn: Download
+- tapOn: Open
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_download_and_open"

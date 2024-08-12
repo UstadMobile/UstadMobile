@@ -1,8 +1,10 @@
 package com.ustadmobile.core.viewmodel
 
+import com.benasher44.uuid.uuid4
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.openlink.OnClickLinkUseCase
+import com.ustadmobile.core.domain.xxhash.XXStringHasher
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -24,9 +26,12 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_VIEWNAME
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.errors.ErrorViewModel
+import com.ustadmobile.core.viewmodel.message.conversationlist.ConversationListViewModel
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
@@ -460,6 +465,32 @@ abstract class UstadViewModel(
         }
     }
 
+    /**
+     * Create a new Xapi session based on the accountmanager and argument values for this ViewModel
+     */
+    protected fun createXapiSession(
+        contentEntryUid: Long = 0,
+        clazzUid: Long = savedStateHandle[ARG_CLAZZUID]?.toLong() ?: 0,
+        cbUid: Long = savedStateHandle[ARG_COURSE_BLOCK_UID]?.toLong() ?: 0,
+    ): XapiSessionEntity {
+        val registrationUuid = uuid4()
+        val activityId = "${accountManager.activeEndpoint.url}ns/xapi/contentEntry/$contentEntryUid"
+        val xxStringHasher: XXStringHasher = di.direct.instance()
+
+        return XapiSessionEntity(
+            xseUid = activeDb.doorPrimaryKeyManager.nextId(XapiSessionEntity.TABLE_ID),
+            xseAccountPersonUid = activeUserPersonUid,
+            xseAccountUsername = accountManager.currentUserSession.person.username ?: "anonymous",
+            xseClazzUid = clazzUid,
+            xseCbUid = cbUid,
+            xseContentEntryUid = contentEntryUid,
+            xseRootActivityId = activityId,
+            xseRootActivityUid = xxStringHasher.hash(activityId),
+            xseRegistrationHi = registrationUuid.mostSignificantBits,
+            xseRegistrationLo = registrationUuid.leastSignificantBits,
+        )
+    }
+
     companion object {
         /**
          * Saved state key for the current value of the entity itself. This is different to
@@ -497,8 +528,12 @@ abstract class UstadViewModel(
          */
         const val ARG_MAX_DATE_OF_BIRTH = "maxDob"
 
-        val ROOT_DESTINATIONS = listOf(ClazzListViewModel.DEST_NAME_HOME,
-            ContentEntryListViewModel.DEST_NAME_HOME, PersonListViewModel.DEST_NAME_HOME)
+        val ROOT_DESTINATIONS = listOf(
+            ClazzListViewModel.DEST_NAME_HOME,
+            ContentEntryListViewModel.DEST_NAME_HOME,
+            ConversationListViewModel.DEST_NAME_HOME,
+            PersonListViewModel.DEST_NAME_HOME
+        )
 
         /**
          * Can be used with any Android intent to provide a deep link to open within the app.
@@ -536,9 +571,35 @@ abstract class UstadViewModel(
          */
         const val ARG_CLAZZUID = "clazzUid"
 
+        /**
+         * The ContentEntryUid for screens where the entity is not the content entry itself. This
+         * will be passed when viewing content (e.g. to the VideoContent, EpubContent, PdfContent, etc)
+         */
+        const val ARG_CONTENT_ENTRY_UID = "entryid"
+
         const val ARG_PERSON_UID = "personUid"
 
         const val ARG_TITLE = "t"
+
+        /**
+         * Screens that handle selecting an account (e.g. AccountList, Login, Register) in some rare
+         * scenarios should not change the active session e.g. when the user is granting or denying
+         * a request for external app permission (in a separate activity) we don't want the session
+         * for the main activity to be changed.
+         */
+        const val ARG_DONT_SET_CURRENT_SESSION = "noSessionChange"
+
+        /**
+         * Where the current user session is not changed, the next view needs to know which account
+         * was selected (e.g. by UstadAccountManager, Login, Register, etc).
+         */
+        const val ARG_SELECTED_ACCOUNT_PERSON_UID = "selectedAccountPersonUid"
+
+        /**
+         * Where the current user session is not changed, the next view needs to know which account
+         * was selected (e.g. by UstadAccountManager, Login, Register, etc).
+         */
+        const val ARG_SELECTED_ACCOUNT_ENDPOINT_URL = "selectedAccountEndpointUrl"
 
     }
 

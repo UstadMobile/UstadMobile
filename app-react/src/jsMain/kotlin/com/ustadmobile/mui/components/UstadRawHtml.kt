@@ -1,14 +1,18 @@
 package com.ustadmobile.mui.components
 
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase.Companion.LinkTarget
-import js.core.jso
+import com.ustadmobile.wrappers.dompurify.sanitize
+import js.objects.jso
 import react.FC
 import react.Props
 import react.dom.html.ReactHTML.div
 import react.useContext
 import react.useEffect
+import react.useMemo
 import react.useRef
+import web.events.addEventListener
 import web.html.HTMLDivElement
+import web.html.HTMLElement
 
 external interface UstadRawHtmlProps: Props {
 
@@ -20,15 +24,21 @@ external interface UstadRawHtmlProps: Props {
 
 }
 
+/**
+ * Displays raw HTML. HTML will be put through DOMPurify to remove any potential XSS attacks.
+ */
 val UstadRawHtml = FC<UstadRawHtmlProps> { props ->
-    //Add https://github.com/cure53/DOMPurify
+    val cleanHtml = useMemo(props.html) {
+        sanitize(props.html)
+    }
+
     val divRef = useRef<HTMLDivElement>(null)
     val linkOpener = useContext(OnClickLinkContext)
 
     div {
         ref = divRef
         dangerouslySetInnerHTML = jso {
-            __html = props.html
+            __html = cleanHtml
         }
 
         style = props.style
@@ -39,8 +49,8 @@ val UstadRawHtml = FC<UstadRawHtmlProps> { props ->
         divRef.current?.querySelectorAll("a")?.iterator()?.forEach { anchorEl ->
             if(!anchorEl.hasAttribute("ustadlink")) {
                 anchorEl.addEventListener(
-                    type = web.uievents.MouseEvent.Companion.CLICK,
-                    callback = { evt ->
+                    type = web.uievents.MouseEvent.Companion.click<HTMLElement>(),
+                    handler = { evt ->
                         evt.preventDefault()
                         evt.stopPropagation()
                         val href = anchorEl.getAttribute("href")

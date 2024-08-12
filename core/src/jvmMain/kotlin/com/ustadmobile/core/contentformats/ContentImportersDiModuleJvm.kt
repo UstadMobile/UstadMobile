@@ -14,11 +14,13 @@ import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.libcache.UstadCache
+import com.ustadmobile.libcache.headers.MimeTypeHelper
 import kotlinx.io.files.Path
 import nl.adaptivity.xmlutil.serialization.XML
 import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.instance
+import org.kodein.di.instanceOrNull
 import org.kodein.di.scoped
 import org.kodein.di.singleton
 import java.io.File
@@ -37,6 +39,7 @@ val ContentImportersDiModuleJvm = DI.Module("ContentImporters-Jvm"){
         val tmpRoot: File = instance(tag = DiTag.TAG_TMP_DIR)
         val contentImportTmpPath = Path(tmpRoot.absolutePath, "contentimport")
         val getStoragePathForUrlUseCase: GetStoragePathForUrlUseCase = instance()
+        val mimeTypeHelper: MimeTypeHelper = instance()
 
         ContentImportersManager(
             buildList {
@@ -52,6 +55,8 @@ val ContentImportersDiModuleJvm = DI.Module("ContentImporters-Jvm"){
                         saveLocalUriAsBlobAndManifestUseCase =  saveAndManifestUseCase,
                         json = instance(),
                         getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
+                        compressListUseCase = instance(),
+                        saveLocalUrisAsBlobsUseCase = instance(),
                     )
                 )
                 add(
@@ -63,6 +68,7 @@ val ContentImportersDiModuleJvm = DI.Module("ContentImporters-Jvm"){
                         json = instance(),
                         tmpPath = contentImportTmpPath,
                         saveLocalUriAsBlobAndManifestUseCase =  saveAndManifestUseCase,
+                        compressListUseCase = instance(),
                     )
                 )
                 add(
@@ -74,6 +80,9 @@ val ContentImportersDiModuleJvm = DI.Module("ContentImporters-Jvm"){
                         uriHelper = uriHelper,
                         json = instance(),
                         getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
+                        compressPdfUseCase = instanceOrNull(),
+                        saveLocalUriAsBlobUseCase = instance(),
+                        tmpPath = instance(tag = DiTag.TAG_TMP_DIR),
                     ),
                 )
                 add(
@@ -84,6 +93,7 @@ val ContentImportersDiModuleJvm = DI.Module("ContentImporters-Jvm"){
                         uriHelper = uriHelper,
                         tmpPath = contentImportTmpPath,
                         saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
+                        compressListUseCase = instance(),
                         json = instance(),
                     ),
                 )
@@ -99,6 +109,10 @@ val ContentImportersDiModuleJvm = DI.Module("ContentImporters-Jvm"){
                         tmpPath = contentImportTmpPath,
                         saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
                         getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
+                        mimeTypeHelper = mimeTypeHelper,
+                        compressUseCase = instanceOrNull(),
+                        extractVideoThumbnailUseCase = instanceOrNull(),
+                        saveLocalUrisAsBlobsUseCase = instanceOrNull(),
                     )
                 )
             }

@@ -12,7 +12,7 @@ env:
       TESTSERIAL: ${TESTSERIAL}
       TESTNAME: ${TESTNAME}
 - runFlow:
-      file: "../common/add_content.yaml"
+      file: "../common/clear_login_and_add_content.yaml"
       env:
           TESTFILENAME: "H5p_Content.h5p"
           TESTCONTENTNAME: "PubliclyNotAccessibleContentTest"

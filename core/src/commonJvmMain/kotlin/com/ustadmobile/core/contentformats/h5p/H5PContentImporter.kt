@@ -4,12 +4,18 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentformats.ContentImporter
 import com.ustadmobile.core.contentformats.ContentImportProgressListener
 import com.ustadmobile.core.contentformats.manifest.ContentManifest
+import com.ustadmobile.core.contentformats.manifest.totalStorageSize
 import com.ustadmobile.core.contentformats.storeText
 import com.ustadmobile.core.contentjob.InvalidContentException
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
+import com.ustadmobile.core.domain.compress.CompressParams
+import com.ustadmobile.core.domain.compress.CompressionLevel
+import com.ustadmobile.core.domain.compress.list.CompressListUseCase
+import com.ustadmobile.core.domain.compress.list.toItemToCompress
+import com.ustadmobile.core.domain.compress.originalSizeHeaders
 import com.ustadmobile.core.domain.contententry.ContentConstants
 import com.ustadmobile.core.io.ext.readString
 import com.ustadmobile.core.io.ext.skipToEntry
@@ -72,6 +78,7 @@ class H5PContentImporter(
     private val json: Json,
     private val tmpPath: Path,
     private val saveLocalUriAsBlobAndManifestUseCase: SaveLocalUriAsBlobAndManifestUseCase,
+    private val compressListUseCase: CompressListUseCase,
     private val fileSystem: FileSystem = SystemFileSystem,
     private val h5pInStream: () -> InputStream = {
         this::class.java.getResourceAsStream(
@@ -151,7 +158,10 @@ class H5PContentImporter(
         progressListener: ContentImportProgressListener
     ): ContentEntryVersion = withContext(Dispatchers.IO) {
         val jobUri = jobItem.requireSourceAsDoorUri()
-        val entry = db.contentEntryDao.findByUid(jobItem.cjiContentEntryUid)
+        val entry = db.contentEntryDao().findByUid(jobItem.cjiContentEntryUid)
+        val params = CompressParams(
+            compressionLevel = CompressionLevel.forValue(jobItem.cjiCompressionLevel)
+        )
 
         val contentEntryVersionUid = db.doorPrimaryKeyManager.nextIdAsync(
             ContentEntryVersion.TABLE_ID)
@@ -166,15 +176,32 @@ class H5PContentImporter(
                 zipSource.unzipTo(h5pUnzippedPath)
             }
 
+            val compressedEntries = compressListUseCase(
+                items = h5pZipEntries.map { it.toItemToCompress() },
+                params = params,
+                workDir = workTmpPath,
+                onProgress = {
+                    progressListener.onProgress(
+                        jobItem.copy(
+                            cjiItemTotal = it.total,
+                            cjiItemProgress = it.completed
+                        )
+                    )
+                }
+            )
+
             val h5pContentManifestEntries = saveLocalUriAsBlobAndManifestUseCase(
-                items = h5pZipEntries.map { unzippedEntry ->
+                items = compressedEntries.map { compressedEntry ->
                     SaveLocalUriAsBlobAndManifestUseCase.SaveLocalUriAsBlobAndManifestItem(
                         blobItem = SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem(
-                            localUri = unzippedEntry.path.toDoorUri().toString(),
+                            localUri = compressedEntry.localUri,
                             entityUid = contentEntryVersionUid,
                             tableId = ContentEntryVersion.TABLE_ID,
+                            mimeType = compressedEntry.mimeType,
+                            extraHeaders = compressedEntry.compressedResult.originalSizeHeaders(),
                         ),
-                        manifestUri = "h5p-folder/${unzippedEntry.name}"
+                        manifestUri = "h5p-folder/${compressedEntry.originalItem.name}",
+                        manifestMimeType = compressedEntry.mimeType,
                     )
                 }
             )
@@ -236,27 +263,76 @@ class H5PContentImporter(
                     """
                 <html>
                 <head>
+                <meta charset="utf-8"/> 
                 <title>${h5pTitle.escapeHTML()}</title>
                 <script src="dist/main.bundle.js" type="text/javascript">
                 </script>
                 </head>
-    
+                
                 <body>
                 <div id='h5p-container'>
                 </div>
-    
+                
                 <script type='text/javascript'>
-    
+                
+                let searchParams = new URLSearchParams(document.location.search);
                 const el = document.getElementById('h5p-container');
-                const options = {
-                    h5pJsonPath: './h5p-folder',
-                    frameJs: 'dist/frame.bundle.js',
-                    frameCss: 'dist/styles/h5p.css',
-                };
-                new H5PStandalone.H5P(el, options);
+                const baseUserDataUrl = searchParams.get("endpoint") + 
+                            "activities/h5p-userdata?" + 
+                            "Authorization=" + encodeURIComponent(searchParams.get("auth")) +
+                            "&activityId=" + encodeURIComponent(searchParams.get("activity_id")) + 
+                            "&agent=" + encodeURIComponent(searchParams.get("actor")) + 
+                            "&registration=" + searchParams.get("registration");
+                
+                fetch(baseUserDataUrl + "&preload=1").then((preloadResponse) => {
+                    preloadResponse.json().then((preloadedUserData) => {
+                        console.log("Preloaded data: " + JSON.stringify(preloadedUserData));
+                        const options = {
+                            h5pJsonPath: './h5p-folder',
+                            frameJs: 'dist/frame.bundle.js',
+                            frameCss: 'dist/styles/h5p.css',
+                            xAPIObjectIRI: searchParams.get("activity_id"),
+                            contentUserData: preloadedUserData,
+                            saveFreq: 2,
+                            ajax: {
+                                contentUserDataUrl: baseUserDataUrl + 
+                                   "&stateId=:dataType" +
+                                   "&subContentId=:subContentId" 
+                            },
+                            user: {
+                                name : "a user",
+                                email: "user@example.org",
+                            }
+                        };
+                        
+                        new H5PStandalone.H5P(el, options).then(function () {
+                            H5P.externalDispatcher.on("xAPI", (event) => {
+                              //do something useful with the event
+                              const newStatement = (typeof(structuredClone) != "undefined") ? 
+                                structuredClone(event.data.statement) : JSON.parse(JSON.stringify(event.data.statement));
+                              newStatement.actor = JSON.parse(searchParams.get("actor"));
+                              
+                              let context = newStatement.context || {};
+                              context.registration = searchParams.get("registration");
+                              newStatement.context = context;
+                              
+                              console.log("xAPI statement: ", newStatement);
+                              
+                              fetch(searchParams.get("endpoint") + "statements?statementId=" + self.crypto.randomUUID(), {
+                                method: "PUT",
+                                headers: {
+                                  "Content-Type": "application/json",
+                                  "Authorization": searchParams.get("auth"),
+                                },
+                                body: JSON.stringify(newStatement),
+                              });
+                            });
+                        });
+                    });
+                });
                         
                 </script>
-    
+                
                 </body>
                 </html>
                 """.trimIndent()
@@ -310,7 +386,11 @@ class H5PContentImporter(
                 cevContentType = ContentEntryVersion.TYPE_XAPI,
                 cevManifestUrl = manifestUrl,
                 cevContentEntryUid = jobItem.cjiContentEntryUid,
-                cevOpenUri = "tincan.xml"
+                cevOpenUri = "tincan.xml",
+                cevStorageSize = h5pContentManifestEntries.totalStorageSize() +
+                    h5pStandAloneManifestEntries.totalStorageSize() +
+                    tinCanAndIndexEntries.totalStorageSize(),
+                cevOriginalSize = uriHelper.getSize(jobUri),
             )
         }finally {
             File(workTmpPath.toString()).deleteRecursively()

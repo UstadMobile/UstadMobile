@@ -1,0 +1,2 @@
+username,givenName,familyName,sex,dateOfBirth,identifier,email,phone,password,courses
+newuser,Bob,Jones,male,2023-01-01,Project-007,bob@email.com,971555997040,test23,

@@ -4,6 +4,7 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentformats.ContentImportProgressListener
 import com.ustadmobile.core.contentformats.ContentImporter
 import com.ustadmobile.core.contentformats.manifest.ContentManifest
+import com.ustadmobile.core.contentformats.manifest.totalStorageSize
 import com.ustadmobile.core.contentformats.storeText
 import com.ustadmobile.core.tincan.TinCanXML
 import java.util.zip.ZipInputStream
@@ -11,6 +12,11 @@ import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
+import com.ustadmobile.core.domain.compress.CompressParams
+import com.ustadmobile.core.domain.compress.CompressionLevel
+import com.ustadmobile.core.domain.compress.list.CompressListUseCase
+import com.ustadmobile.core.domain.compress.list.toItemToCompress
+import com.ustadmobile.core.domain.compress.originalSizeHeaders
 import com.ustadmobile.core.domain.contententry.ContentConstants
 import com.ustadmobile.core.io.ext.*
 import com.ustadmobile.core.uri.UriHelper
@@ -37,6 +43,7 @@ class XapiZipContentImporter(
     private val json: Json,
     private val tmpPath: Path,
     private val saveLocalUriAsBlobAndManifestUseCase: SaveLocalUriAsBlobAndManifestUseCase,
+    private val compressListUseCase: CompressListUseCase,
 ) : ContentImporter(endpoint) {
 
     val viewName: String
@@ -111,6 +118,10 @@ class XapiZipContentImporter(
         progressListener: ContentImportProgressListener
     ): ContentEntryVersion {
         val jobUri = jobItem.requireSourceAsDoorUri()
+        val compressParams = CompressParams(
+            compressionLevel = CompressionLevel.forValue(jobItem.cjiCompressionLevel)
+        )
+
         val tinCanEntry = ZipInputStream(
             uriHelper.openSource(jobUri).asInputStream()
         ).use { zipIn ->
@@ -123,33 +134,41 @@ class XapiZipContentImporter(
         val urlPrefix = createContentUrlPrefix(contentEntryVersionUid)
         val manifestUrl = "$urlPrefix${ContentConstants.MANIFEST_NAME}"
 
-        val contentEntryVersion = ContentEntryVersion(
-            cevUid = contentEntryVersionUid,
-            cevContentType = ContentEntryVersion.TYPE_XAPI,
-            cevContentEntryUid = jobItem.cjiContentEntryUid,
-            cevManifestUrl = manifestUrl,
-            cevOpenUri = tinCanEntry.name,
-        )
-
         val workTmpPath = Path(tmpPath, "xapi-import-${systemTimeInMillis()}")
         val xapiZipEntries = uriHelper.openSource(jobUri).use { zipSource ->
             zipSource.unzipTo(workTmpPath)
         }
 
+        val compressedEntries = compressListUseCase(
+            items = xapiZipEntries.map { it.toItemToCompress() },
+            params = compressParams,
+            workDir = tmpPath,
+            onProgress = {
+                progressListener.onProgress(
+                    jobItem.copy(
+                        cjiItemTotal = it.total,
+                        cjiItemProgress = it.completed
+                    )
+                )
+            }
+        )
+
         return try {
             val xapiManifestEntries = saveLocalUriAsBlobAndManifestUseCase(
-                items = xapiZipEntries.map { unzippedEntry ->
+                items = compressedEntries.map { compressListResult ->
                     SaveLocalUriAsBlobAndManifestUseCase.SaveLocalUriAsBlobAndManifestItem(
                         blobItem = SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem(
-                            localUri = unzippedEntry.path.toDoorUri().toString(),
+                            localUri = compressListResult.localUri,
                             entityUid = contentEntryVersionUid,
                             tableId = ContentEntryVersion.TABLE_ID,
+                            mimeType = compressListResult.mimeType,
+                            extraHeaders = compressListResult.compressedResult.originalSizeHeaders(),
                         ),
-                        manifestUri = unzippedEntry.name,
+                        manifestUri = compressListResult.originalItem.name,
+                        manifestMimeType = compressListResult.mimeType,
                     )
                 }
             )
-
 
             val manifest = ContentManifest(
                 version = 1,
@@ -164,7 +183,15 @@ class XapiZipContentImporter(
                 cacheControl = "immutable"
             )
 
-            contentEntryVersion
+            ContentEntryVersion(
+                cevUid = contentEntryVersionUid,
+                cevContentType = ContentEntryVersion.TYPE_XAPI,
+                cevContentEntryUid = jobItem.cjiContentEntryUid,
+                cevManifestUrl = manifestUrl,
+                cevOpenUri = tinCanEntry.name,
+                cevStorageSize = xapiManifestEntries.totalStorageSize(),
+                cevOriginalSize = uriHelper.getSize(jobUri)
+            )
         }finally {
             File(workTmpPath.toString()).deleteRecursively()
         }
@@ -176,7 +203,7 @@ class XapiZipContentImporter(
 
         const val PLUGIN_ID = 8
 
-        private const val MAX_SIZE_LIMIT: Long = 100 * 1024 * 1024 //100MB
+        private const val MAX_SIZE_LIMIT: Long = 500 * 1024 * 1024 //500MB
 
     }
 }

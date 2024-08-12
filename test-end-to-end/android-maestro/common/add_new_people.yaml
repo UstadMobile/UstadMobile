@@ -1,20 +1,26 @@
 appId: com.toughra.ustadmobile
 ---
 - tapOn: "People"
-- tapOn: "PERSON"
-- tapOn: "First names"
+- tapOn:
+    id: "floating_action_button"
+- tapOn: "Add Person"
+- tapOn: "First names*"
 - inputText: ${FIRSTNAME}
-- tapOn: "Last name"
+- hideKeyboard
+- tapOn: "Last name*"
 - inputText: ${LASTNAME}
-- tapOn: "Gender"
+- hideKeyboard
+- scrollUntilVisible:
+      element:
+          text: "Gender*"
+      direction: DOWN
+- tapOn: "Gender*"
 - tapOn: ${GENDER}
 - tapOn: "SAVE"
 - tapOn: "${FIRSTNAME} ${LASTNAME}"
 - tapOn: "CREATE ACCOUNT"
-- tapOn: "Username"
+- tapOn: "Username*"
 - inputText: ${USERNAME}
-- tapOn: "New password"
-- inputText: ${PASSWORD}
-- tapOn: "Confirm password"
+- tapOn: "New password*"
 - inputText: ${PASSWORD}
 - tapOn: "SAVE"

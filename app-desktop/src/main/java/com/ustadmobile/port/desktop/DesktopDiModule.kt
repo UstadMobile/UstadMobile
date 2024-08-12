@@ -16,17 +16,28 @@ import com.ustadmobile.core.db.ext.MIGRATION_144_145_CLIENT
 import com.ustadmobile.core.db.ext.MIGRATION_148_149_CLIENT_WITH_OFFLINE_ITEMS
 import com.ustadmobile.core.db.ext.MIGRATION_155_156_CLIENT
 import com.ustadmobile.core.db.ext.MIGRATION_161_162_CLIENT
+import com.ustadmobile.core.db.ext.MIGRATION_169_170_CLIENT
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.core.domain.cachelock.AddOfflineItemInactiveTriggersCallback
 import com.ustadmobile.core.domain.cachelock.UpdateCacheLockJoinUseCase
+import com.ustadmobile.core.domain.compress.audio.CompressAudioUseCase
+import com.ustadmobile.core.domain.compress.audio.CompressAudioUseCaseSox
+import com.ustadmobile.core.domain.compress.pdf.CompressPdfUseCase
+import com.ustadmobile.core.domain.compress.pdf.CompressPdfUseCaseJvm
+import com.ustadmobile.core.domain.compress.video.CompressVideoUseCase
+import com.ustadmobile.core.domain.compress.video.CompressVideoUseCaseHandbrake
+import com.ustadmobile.core.domain.compress.video.FindHandBrakeUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseJvm
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseRemote
+import com.ustadmobile.core.domain.extractmediametadata.ExtractMediaMetadataUseCase
+import com.ustadmobile.core.domain.extractmediametadata.mediainfo.ExecuteMediaInfoUseCase
+import com.ustadmobile.core.domain.extractmediametadata.mediainfo.ExtractMediaMetadataUseCaseMediaInfo
 import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseJvm
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
-import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCaseMediaInfo
+import com.ustadmobile.core.domain.xapi.XapiJson
 import com.ustadmobile.core.embeddedhttp.EmbeddedHttpServer
 import com.ustadmobile.core.getdeveloperinfo.GetDeveloperInfoUseCaseJvm
 import com.ustadmobile.core.impl.UstadMobileConstants
@@ -63,6 +74,8 @@ import org.kodein.di.singleton
 import java.io.File
 import java.util.Locale
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
+import com.ustadmobile.libcache.CachePaths
+import com.ustadmobile.libcache.CachePathsProvider
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
@@ -75,6 +88,7 @@ import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.runBlocking
 import kotlinx.io.files.Path
 import kotlinx.serialization.json.Json
 import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
@@ -84,6 +98,7 @@ import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
 import org.kodein.di.direct
 import org.kodein.di.on
+import org.kodein.di.provider
 import org.quartz.Scheduler
 import org.quartz.impl.StdSchedulerFactory
 import org.xmlpull.v1.XmlPullParserFactory
@@ -97,6 +112,8 @@ import javax.naming.InitialContext
 const val TAG_DATA_DIR = "DataDir"
 
 const val TAG_CACHE_DIR = "CacheDir"
+
+const val TAG_CACHE_STORAGE_PATH = "CacheStoragePath"
 
 const val CONNECTIVITY_CHECK_HOST = "google.com"
 
@@ -172,17 +189,44 @@ val DesktopHttpModule = DI.Module("Desktop-HTTP") {
         )
     }
 
-    bind<UstadCache>() with singleton {
+    bind<Path>(tag = TAG_CACHE_STORAGE_PATH) with singleton {
         val dataDir: File = instance(tag = TAG_DATA_DIR)
         dataDir.takeIf { !it.exists() }?.mkdirs()
 
+        Path(File(dataDir, "httpfiles").absolutePath.toString())
+    }
+
+    bind<CachePathsProvider>() with singleton {
+        val cacheStoragePath: Path = instance(tag = TAG_CACHE_STORAGE_PATH)
+
+        CachePathsProvider {
+            CachePaths(
+                tmpWorkPath = Path(cacheStoragePath, "tmpWork"),
+                persistentPath = Path(cacheStoragePath, "cache"),
+                cachePath = Path(cacheStoragePath, "cache")
+            )
+        }
+    }
+
+    bind<UstadCache>() with singleton {
+        val cacheStoragePath: Path = instance(tag = TAG_CACHE_STORAGE_PATH)
+
+        val dataDir: File = instance(tag = TAG_DATA_DIR)
+        dataDir.takeIf { !it.exists() }?.mkdirs()
         val dbUrl = "jdbc:sqlite:(datadir)/ustadcache.db"
             .replace("(datadir)", dataDir.absolutePath)
+
+        /* Persistent path and cache path are the same. Trying to move files on Windows has caused
+         * resulted in errors appearing in logs where files apparently weren't released quickly
+         * enough (never seen on Linux).
+         *
+         * There is no need on the desktop to separate the persistent and cache path on desktop,
+         * as is required on Android (where the OS provides a dedicated cache dir for each app).
+         */
         UstadCacheBuilder(
             dbUrl = dbUrl,
-            storagePath = Path(
-                File(dataDir, "httpfiles").absolutePath.toString()
-            ),
+            storagePath = cacheStoragePath,
+            pathsProvider = instance(),
             logger = cacheLogger,
 
         ).build()
@@ -201,7 +245,7 @@ val DesktopHttpModule = DI.Module("Desktop-HTTP") {
             .addInterceptor(
                 UstadCacheInterceptor(
                     cache = instance(),
-                    tmpDir = interceptorTmpDir,
+                    tmpDirProvider = { interceptorTmpDir },
                     logger = cacheLogger,
                     json = instance(),
                 )
@@ -242,11 +286,37 @@ data class DbAndObservers(
 val DesktopDiModule = DI.Module("Desktop-Main") {
     val resourcesDir = ustadAppResourcesDir()
     val mediaInfoResourcesDir = File(resourcesDir, "mediainfo")
+    val soxResourcesDir = File(resourcesDir, "sox")
+    val mpg123ResourcesDir = File(resourcesDir, "mpg123")
 
     val mediaInfoFile = SysPathUtil.findCommandInPath(
         commandName = "mediainfo",
         manuallySpecifiedLocation = File(mediaInfoResourcesDir, "mediainfo").getCommandFile(),
     ) ?: throw IllegalStateException("No MediaInfo found")
+
+    val handbrakeResourcesDir = File(resourcesDir, "handbrakecli")
+    val findHandBrakeResult = runBlocking {
+        FindHandBrakeUseCase(
+            specifiedLocation = File(handbrakeResourcesDir, "HandBrakeCLI").getCommandFile()?.absolutePath,
+        ).invoke()
+    }
+
+    val soxCommand = SysPathUtil.findCommandInPath(
+        commandName = "sox",
+        manuallySpecifiedLocation = File(soxResourcesDir, "sox").getCommandFile(),
+    ) ?: throw IllegalArgumentException("sox command not found")
+
+    val mpg123Command = SysPathUtil.findCommandInPath(
+        commandName = "mpg123",
+        pathVar = "",
+        manuallySpecifiedLocation = File(mpg123ResourcesDir, "mpg123.exe")
+    )
+
+    if(isWindowsOs() && mpg123Command == null) {
+        throw IllegalStateException("Could not find mpg123.exe : this is required when running on Windows")
+    }
+
+    val gsPath = SysPathUtil.findCommandInPath("gs")
 
     bind<AppConfig>() with singleton {
         ManifestAppConfig()
@@ -269,7 +339,8 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
     }
 
     bind<ApiUrlConfig>() with singleton {
-        ApiUrlConfig(presetApiUrl = null)
+        val appConfig : AppConfig = instance()
+        ApiUrlConfig(presetApiUrl = appConfig[AppConfig.KEY_API_URL]?.ifBlank { null })
     }
 
     bind<File>(tag = TAG_DATA_DIR) with singleton {
@@ -337,6 +408,7 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
             .addMigrations(MIGRATION_148_149_CLIENT_WITH_OFFLINE_ITEMS)
             .addMigrations(MIGRATION_155_156_CLIENT)
             .addMigrations(MIGRATION_161_162_CLIENT)
+            .addMigrations(MIGRATION_169_170_CLIENT)
             .addCallback(AddOfflineItemInactiveTriggersCallback())
             .build()
 
@@ -362,6 +434,8 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
             ignoreUnknownKeys = true
         }
     }
+
+    bind<XapiJson>() with singleton { XapiJson() }
 
 
     bind<XML>() with singleton {
@@ -411,11 +485,11 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
 
     bind<Scheduler>() with singleton {
         val dataDir: File = instance(tag = TAG_DATA_DIR)
-        val dbUrl = "jdbc:sqlite:${dataDir.absolutePath}/quartz.db"
+        val dbUrl = "jdbc:hsqldb:file:${dataDir.absolutePath}/quartz"
         val dbProperties = Properties().also {
             it["url"] = dbUrl
-            it["driver"] = "org.sqlite.JDBC"
-            it["user"] = ""
+            it["driver"] = "org.hsqldb.jdbc.JDBCDriver"
+            it["user"] = "SA"
             it["password"] = ""
         }
 
@@ -425,7 +499,7 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         }
 
         StdSchedulerFactory.getDefaultScheduler().also {
-            it.context.put("di", di)
+            it.context["di"] = di
         }
     }
 
@@ -454,11 +528,25 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         )
     }
 
-    bind<ValidateVideoFileUseCase>() with singleton {
-        ValidateVideoFileUseCaseMediaInfo(
+    bind<ExecuteMediaInfoUseCase>() with singleton {
+        ExecuteMediaInfoUseCase(
             mediaInfoPath = mediaInfoFile.absolutePath,
             workingDir = ustadAppDataDir(),
             json = instance(),
+        )
+    }
+
+    bind<ExtractMediaMetadataUseCase>() with singleton {
+        ExtractMediaMetadataUseCaseMediaInfo(
+            executeMediaInfoUseCase = instance(),
+            getStoragePathForUrlUseCase = instance(),
+        )
+    }
+
+
+    bind<ValidateVideoFileUseCase>() with singleton {
+        ValidateVideoFileUseCase(
+            extractMediaMetadataUseCase = instance(),
         )
     }
 
@@ -474,6 +562,9 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
             contentEntryVersionServerUseCase = {
                 di.on(it).direct.instance()
             },
+            xapiServerUseCase = {
+                di.on(it).direct.instance()
+            },
             staticUmAppFilesDir = File(resourcesDir, "umapp"),
             mimeTypeHelper = instance()
         )
@@ -486,6 +577,35 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         )
     }
 
+    if(findHandBrakeResult != null) {
+        bind<CompressVideoUseCase>() with provider {
+            CompressVideoUseCaseHandbrake(
+                handbrakeCommand = findHandBrakeResult.command,
+                extractMediaMetadataUseCase = instance(),
+                workDir = instance(tag = TAG_DATA_DIR),
+                json = instance(),
+            )
+        }
+    }
+
+    bind<CompressAudioUseCase>() with singleton {
+        CompressAudioUseCaseSox(
+            soxPath = soxCommand.absolutePath,
+            mpg123Path = mpg123Command?.absolutePath,
+            executeMediaInfoUseCase = instance(),
+            workDir = instance(tag = DiTag.TAG_TMP_DIR),
+        )
+    }
+
+
+    gsPath?.also {
+        bind<CompressPdfUseCase>() with provider {
+            CompressPdfUseCaseJvm(
+                gsPath = it,
+                workDir = instance(tag = TAG_DATA_DIR),
+            )
+        }
+    }
 
     onReady {
         instance<File>(tag = TAG_DATA_DIR).takeIf { !it.exists() }?.mkdirs()

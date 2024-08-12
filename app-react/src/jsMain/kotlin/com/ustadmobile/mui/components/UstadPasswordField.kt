@@ -3,7 +3,7 @@ package com.ustadmobile.mui.components
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.util.ext.assignPropsTo
-import js.core.jso
+import js.objects.jso
 import mui.icons.material.Visibility
 import mui.icons.material.VisibilityOff
 import mui.material.IconButton

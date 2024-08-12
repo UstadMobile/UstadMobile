@@ -16,20 +16,29 @@ fun ktorAppHomeDir(): File {
 }
 
 /**
- * The FFMPEG dir within the app directory itself (e.g. installpath/ffmpeg). This will be searched by
- * default for ffmpeg and ffprobe
+ * Get a File for a property e.g. for the data directory or well known directory
+ *
+ * @param propertyName the config property name
+ * @param defaultPath default value of property is null
+ *
+ * @return File object - if the path is absolute, returns the absolute File as is. If not, then will
+ * return file relative to the server path as per ktorAppHomeDir()
  */
-fun ktorAppHomeFfmpegDir(): File = File(ktorAppHomeDir(), "ffmpeg")
+fun ApplicationConfig.fileProperty(
+    propertyName: String, defaultPath: String
+): File {
+    val path = propertyOrNull(propertyName)?.getString() ?: defaultPath
+    val file = File(propertyName)
 
-
-fun ApplicationConfig.absoluteDataDir(): File {
-    val dataDirPropValue = propertyOrNull("ktor.ustad.datadir")?.getString() ?: "data"
-    val dataDirConf = File(dataDirPropValue)
-
-    return if(dataDirConf.isAbsolute) {
-        dataDirConf
+    return if(file.isAbsolute) {
+        file
     }else {
-        File(ktorAppHomeDir(), dataDirPropValue)
+        File(ktorAppHomeDir(), path)
     }
 }
+
+
+fun ApplicationConfig.absoluteDataDir() = fileProperty(
+    propertyName = "ktor.ustad.datadir", defaultPath = "data"
+)
 

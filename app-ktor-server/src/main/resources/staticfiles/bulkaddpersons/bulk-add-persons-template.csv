@@ -1,0 +1,2 @@
+username,givenName,familyName,sex,dateOfBirth,identifier,email,phone,password,courses
+newuser,Jane,Doe,female,2000-01-01,Project-ID,jane@email.com,+12345678900,test23,Course 1; Course 2

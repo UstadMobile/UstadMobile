@@ -7,17 +7,17 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import app.cash.paging.Pager
-import app.cash.paging.PagingConfig
-import app.cash.paging.compose.collectAsLazyPagingItems
 import com.ustadmobile.core.impl.locale.TerminologyEntry
+import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.viewmodel.clazz.permissionlist.CoursePermissionListUiState
 import com.ustadmobile.core.viewmodel.clazz.permissionlist.CoursePermissionListViewModel
 import com.ustadmobile.lib.db.composites.CoursePermissionAndListDetail
 import com.ustadmobile.lib.db.entities.CoursePermission
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.ustadPagedItems
+import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
 import com.ustadmobile.libuicompose.util.compose.rememberCourseTerminologyEntries
+import kotlinx.coroutines.flow.emptyFlow
 
 @Composable
 fun CoursePermissionListScreen(
@@ -44,14 +44,15 @@ fun CoursePermissionListScreen(
     onClickEntry: (CoursePermission) -> Unit = { },
     onClickDeleteEntry: (CoursePermission) -> Unit = { },
 ) {
-    val pager = remember(uiState.permissionsList) {
-        Pager(
-            pagingSourceFactory = uiState.permissionsList,
-            config = PagingConfig(20, enablePlaceholders = true)
-        )
+    val refreshFlow = remember {
+        emptyFlow<RefreshCommand>()
     }
 
-    val pagingItems = pager.flow.collectAsLazyPagingItems()
+    val result = rememberDoorRepositoryPager(
+        uiState.permissionsList, refreshFlow
+    )
+
+    val pagingItems = result.lazyPagingItems
 
     UstadLazyColumn(
         modifier = Modifier.fillMaxSize()

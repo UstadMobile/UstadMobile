@@ -1,33 +1,36 @@
 package com.ustadmobile.libuicompose.view.discussionpost.detail
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Button
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import androidx.paging.compose.collectAsLazyPagingItems
-import app.cash.paging.Pager
-import app.cash.paging.PagingConfig
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailUiState2
 import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailViewModel
+import com.ustadmobile.lib.db.entities.DiscussionPost
 import com.ustadmobile.libuicompose.components.UstadClickableTextField
+import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadListSpacerItem
 import com.ustadmobile.libuicompose.components.UstadPersonAvatar
+import com.ustadmobile.libuicompose.components.UstadRichTextEdit
 import com.ustadmobile.libuicompose.components.defaultEditHtmlInNewScreen
 import com.ustadmobile.libuicompose.components.ustadPagedItems
-import dev.icerock.moko.resources.compose.stringResource
-import com.ustadmobile.core.MR
-import com.ustadmobile.lib.db.entities.DiscussionPost
-import com.ustadmobile.libuicompose.components.UstadLazyColumn
-import com.ustadmobile.libuicompose.components.UstadRichTextEdit
+import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.util.rememberDateFormat
+import com.ustadmobile.libuicompose.util.rememberEmptyFlow
 import com.ustadmobile.libuicompose.util.rememberTimeFormatter
+import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.TimeZone
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 
@@ -39,6 +42,7 @@ fun DiscussionPostDetailScreen(viewModel: DiscussionPostDetailViewModel){
 
     DiscussionPostDetailScreen(
         uiState = uiState,
+        replyText = viewModel.replyText,
         onClickAddReply = viewModel::onClickEditReplyHtml,
         onChangeReplyText = viewModel::onChangeReplyText,
         onClickReplyButton = viewModel::onClickPostReply,
@@ -49,6 +53,7 @@ fun DiscussionPostDetailScreen(viewModel: DiscussionPostDetailViewModel){
 @Composable
 fun DiscussionPostDetailScreen(
     uiState: DiscussionPostDetailUiState2,
+    replyText: Flow<String>,
     editReplyInNewScreen: Boolean = defaultEditHtmlInNewScreen(),
     onClickAddReply: () -> Unit = { },
     onChangeReplyText: (String) -> Unit = { },
@@ -56,14 +61,11 @@ fun DiscussionPostDetailScreen(
     onDeletePost: (DiscussionPost) -> Unit = { },
 ) {
 
-    val pager = remember(uiState.discussionPosts) {
-        Pager(
-            pagingSourceFactory = uiState.discussionPosts,
-            config = PagingConfig(pageSize = 50, enablePlaceholders = true)
-        )
-    }
+    val repositoryResult = rememberDoorRepositoryPager(
+        uiState.discussionPosts, rememberEmptyFlow()
+    )
 
-    val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
+    val lazyPagingItems = repositoryResult.lazyPagingItems
 
     val timeFormatter = rememberTimeFormatter()
     val dateFormatter = rememberDateFormat(TimeZone.currentSystemDefault().id)
@@ -96,7 +98,8 @@ fun DiscussionPostDetailScreen(
                             UstadClickableTextField(
                                 value = stringResource(MR.strings.add_a_reply) + "…",
                                 onValueChange = { },
-                                onClick = onClickAddReply
+                                onClick = onClickAddReply,
+                                clickableTestTag = "add_a_reply",
                             )
                         },
                         leadingContent = {
@@ -107,8 +110,10 @@ fun DiscussionPostDetailScreen(
                         }
                     )
                 }else {
+                    val replyTextVal by replyText.collectAsState("", Dispatchers.Main.immediate)
+
                     UstadRichTextEdit(
-                        html =uiState.replyText,
+                        html = replyTextVal,
                         onHtmlChange = onChangeReplyText,
                         onClickToEditInNewScreen =  { },
                         editInNewScreen = false,
@@ -129,9 +134,7 @@ fun DiscussionPostDetailScreen(
 
                 }
 
-                Divider(
-                    thickness = 1.dp
-                )
+                HorizontalDivider(thickness = 1.dp)
             }
         }
 

@@ -5,5 +5,7 @@ import androidx.compose.runtime.Composable
 
 @Composable
 expect fun rememberUstadFilePickLauncher(
-    onFileSelected: (UstadFilePickResult) -> Unit
+    fileExtensions: List<String> = emptyList(),
+    mimeTypes: List<String> = emptyList(),
+    onFileSelected: (UstadFilePickResult) -> Unit,
 ): LaunchFilePickFn

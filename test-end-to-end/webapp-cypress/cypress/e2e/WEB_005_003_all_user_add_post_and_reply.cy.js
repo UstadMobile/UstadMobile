@@ -1,4 +1,4 @@
-describe('005_003_all_user_add_post_and_reply', () => {
+describe('WEB_005_003_all_user_add_post_and_reply', () => {
 it('Start Ustad Test Server ', () => {
   // Start Test Server
   cy.ustadStartTestServer()
@@ -16,10 +16,10 @@ it('Admin add discussion board and post', () => {
   cy.contains("button","Save").click()
   // Add post to the discussion
   cy.contains('005_003').should('be.visible')
-  cy.get('[data-testid="ForumIcon"]').click()
+  cy.contains('.MuiTypography-root','Discussion 1').click()
   cy.contains('Post').click()
   cy.get('#discussion_post_title').type('Topic 1')
-  cy.get('#discussion_post_message .ql-editor').type('Discusssion post')
+  cy.get('.ql-editor').ustadTypeAndVerify('Discusssion post')
   cy.get('#actionBarButton').click()
   cy.go('back')
   cy.go('back')
@@ -47,18 +47,18 @@ it('Teacher able to add a new post and reply', () => {
   cy.contains("Courses").should('be.visible')
   cy.contains('005_003').click()
   // Add reply to the post board
-  cy.get('[data-testid="ForumIcon"]').click()
+  cy.contains('.MuiTypography-root','Discussion 1').click()
   cy.contains('Topic 1').click()
-  cy.get('[data-placeholder="Add a reply"]').type('Reply from teacher')
+  cy.get('[data-placeholder="Add a reply"]').type('Reply from teacher',{delay : 20})
   cy.contains('button','Post').click()
   cy.contains('Reply from teacher').should('be.visible')
   cy.go('back')
   cy.go('back')
   // Teacher add new post -2
-  cy.get('[data-testid="ForumIcon"]').click()
-  cy.get('[data-testid="AddIcon"]').click()
+  cy.contains('Discussion 1').click()
+  cy.contains('.MuiButtonBase-root','Post').click()
   cy.get('#discussion_post_title').type('Topic 2')
-  cy.get('.ql-editor.ql-blank').type('Discusssion post')
+  cy.get('.ql-editor').ustadTypeAndVerify('Discusssion post')
   cy.get('#actionBarButton').click()
 })
 
@@ -68,19 +68,19 @@ it('Student able to add a post and reply', () => {
   cy.contains("Courses").should('be.visible')
   cy.contains('005_003').click()
   // Add reply to the post board
-  cy.get('[data-testid="ForumIcon"]').click()
+  cy.contains('Discussion 1').click()
   cy.contains('Topic 1').click()
-  cy.get('[data-placeholder="Add a reply"]').type('Reply from Student')
+  cy.get('[data-placeholder="Add a reply"]').type('Reply from Student',{delay : 20})
   cy.contains('button','Post').click()
   cy.contains('Reply from teacher').should('be.visible')
   cy.contains('Reply from Student').should('be.visible')
   cy.go('back')
   cy.go('back')
   // Student add new post -3
-  cy.get('[data-testid="ForumIcon"]').click()
-  cy.get('[data-testid="AddIcon"]').click()
+  cy.contains('Discussion 1').click()
+  cy.contains('.MuiButtonBase-root','Post').click()
   cy.get('#discussion_post_title').type('Topic 3')
-  cy.get('.ql-editor.ql-blank').type('Discusssion post')
+  cy.get('.ql-editor').ustadTypeAndVerify('Discusssion post')
   cy.get('#actionBarButton').click()
   cy.contains('Topic 3').should('be.visible')
 })

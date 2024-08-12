@@ -85,16 +85,16 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
                 )
 
                 if(groupSet != null) {
-                    groupSet.cgsUid = activeDb.courseGroupSetDao.insertAsync(groupSet)
+                    groupSet.cgsUid = activeDb.courseGroupSetDao().insertAsync(groupSet)
                     assignment.caGroupUid = groupSet.cgsUid
                 }
 
                 assignment.caClazzUid = clazzUid
-                assignment.caUid = activeDb.clazzAssignmentDao.insertAsync(assignment)
+                assignment.caUid = activeDb.clazzAssignmentDao().insertAsync(assignment)
 
                 courseBlock.cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
                 courseBlock.cbEntityUid = assignment.caUid
-                courseBlock.cbEntityUid = activeDb.courseBlockDao.insertAsync(courseBlock)
+                courseBlock.cbEntityUid = activeDb.courseBlockDao().insertAsync(courseBlock)
 
                 AssignmentDetailOverviewTestContext(
                     clazz, assignment, courseBlock,
@@ -124,14 +124,17 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
 
             viewModel.uiState.test(timeout = 5.seconds) {
                 val readyState = awaitItemWhere {
-                    it.assignment != null && it.courseBlock != null && it.editableSubmission != null
+                    it.assignment != null && it.courseBlock != null
                 }
                 assertTrue(readyState.activeUserIsSubmitter)
                 assertTrue(readyState.activeUserCanSubmit)
                 assertTrue(readyState.addFileSubmissionVisible)
                 assertTrue(readyState.canEditSubmissionText)
-                assertEquals(0L, readyState.editableSubmission?.casTimestamp)
                 cancelAndIgnoreRemainingEvents()
+            }
+
+            viewModel.editableSubmissionUiState.assertItemReceived {
+                it.editableSubmission?.casTimestamp == 0L
             }
         }
     }
@@ -149,7 +152,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
         ) { testContext ->
 
             //insert a submission for this student
-            activeDb.courseAssignmentSubmissionDao.insert(CourseAssignmentSubmission().apply {
+            activeDb.courseAssignmentSubmissionDao().insert(CourseAssignmentSubmission().apply {
                 casSubmitterPersonUid = testContext.person.personUid
                 casSubmitterUid = testContext.person.personUid
                 casText = "I can has cheezburger"
@@ -185,7 +188,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
                 caRequireTextSubmission = true
             }
         ) { testContext ->
-            activeDb.courseAssignmentSubmissionDao.insertAsync(CourseAssignmentSubmission().apply {
+            activeDb.courseAssignmentSubmissionDao().insertAsync(CourseAssignmentSubmission().apply {
                 casSubmitterUid = testContext.person.personUid
                 casSubmitterPersonUid = testContext.person.personUid
                 casText = "Test text"
@@ -237,9 +240,15 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
                 )
             }
 
-            viewModel.uiState.test(timeout = 500.seconds) {
+            viewModel.uiState.test(timeout = 10.seconds) {
                 awaitItemWhere {
-                    it.assignment != null && it.courseBlock != null && it.editableSubmission != null
+                    it.assignment != null && it.courseBlock != null
+                }
+
+                viewModel.editableSubmissionUiState.assertItemReceived(
+                    timeout = 10.seconds, name = "editable submission not null"
+                ) {
+                    it.editableSubmission != null
                 }
 
                 viewModel.onChangeSubmissionText("I can has cheezburger")
@@ -264,7 +273,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
             }
         ) { testContext ->
             //insert submission
-            activeDb.courseAssignmentSubmissionDao.insert(CourseAssignmentSubmission().apply {
+            activeDb.courseAssignmentSubmissionDao().insert(CourseAssignmentSubmission().apply {
                 casSubmitterPersonUid = testContext.person.personUid
                 casSubmitterUid = testContext.person.personUid
                 casText = "I can has cheezburger"
@@ -272,7 +281,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
             })
 
             //insert mark
-            activeDb.courseAssignmentMarkDao.insert(CourseAssignmentMark().apply {
+            activeDb.courseAssignmentMarkDao().insert(CourseAssignmentMark().apply {
                 camMark = 5f
                 camSubmitterUid = testContext.person.personUid
                 camAssignmentUid = testContext.assignment.caUid
@@ -307,14 +316,14 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
             }
         ) { testContext ->
             //insert submission
-            activeDb.courseAssignmentSubmissionDao.insert(CourseAssignmentSubmission().apply {
+            activeDb.courseAssignmentSubmissionDao().insert(CourseAssignmentSubmission().apply {
                 casSubmitterPersonUid = testContext.person.personUid
                 casSubmitterUid = testContext.person.personUid
                 casText = "I can has cheezburger"
             })
 
             //insert mark
-            activeDb.courseAssignmentMarkDao.insert(CourseAssignmentMark().apply {
+            activeDb.courseAssignmentMarkDao().insert(CourseAssignmentMark().apply {
                 camMark = 5f
                 camSubmitterUid = testContext.person.personUid
                 camAssignmentUid = testContext.assignment.caUid
@@ -353,7 +362,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
             val mockSubmitterUseCase = mock<SubmitAssignmentUseCase> {
                 onBlocking { invoke(any(), any(), any(), any(), any()) }.thenAnswer {
                     val submission = it.arguments.last() as CourseAssignmentSubmission
-                    activeDb.courseAssignmentSubmissionDao.insert(
+                    activeDb.courseAssignmentSubmissionDao().insert(
                         submission.shallowCopy {
                             casAssignmentUid = testContext.assignment.caUid
                             casSubmitterUid = testContext.person.personUid
@@ -376,8 +385,13 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
 
             viewModel.uiState.test(timeout = 5.seconds, name = "Wait for loading") {
                 awaitItemWhere {
-                    it.assignment != null && it.courseBlock != null && it.editableSubmission != null
-                            && it.submitterUid != 0L
+                    it.assignment != null && it.courseBlock != null && it.submitterUid != 0L
+                }
+
+                viewModel.editableSubmissionUiState.assertItemReceived (
+                    timeout = 5.seconds, name = "editable submission not null"
+                ) {
+                    it.editableSubmission != null
                 }
 
                 viewModel.onChangeSubmissionText(submissionText)
@@ -538,7 +552,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
         ) { testContext ->
             val teacherComment = "You want burger?"
             val replyComment = "I can has cheezburger"
-            activeDb.commentsDao.insertAsync(Comments().apply {
+            activeDb.commentsDao().insertAsync(Comments().apply {
                 commentsText = teacherComment
                 commentsEntityUid = testContext.assignment.caUid
                 commentsForSubmitterUid = testContext.person.personUid
@@ -564,7 +578,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
             viewModel.onClickSubmitPrivateComment()
             viewModel.uiState.test(timeout = 5.seconds) {
                 val commentReadyState = awaitItemWhere {
-                    it.privateComments() !is EmptyPagingSource<*, *> && it.newPrivateCommentText == ""
+                    it.privateComments() !is EmptyPagingSource<*, *>
                 }
                 val commentsAfterReply = commentReadyState.privateComments().loadFirstList()
                 assertEquals(replyComment, commentsAfterReply.first().comment.commentsText)
@@ -586,7 +600,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
             val startComment = "I can has cheezburger"
             val replyComment = "Yes you kan"
 
-            activeDb.commentsDao.insertAsync(Comments().apply {
+            activeDb.commentsDao().insertAsync(Comments().apply {
                 commentsText = startComment
                 commentsEntityUid = testContext.assignment.caUid
                 commentsForSubmitterUid = 0
@@ -612,7 +626,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
 
             viewModel.uiState.test(timeout = 5.seconds) {
                 val commentReadyState = awaitItemWhere {
-                    it.courseComments() !is EmptyPagingSource<*, *> && it.newCourseCommentText == ""
+                    it.courseComments() !is EmptyPagingSource<*, *>
                 }
                 val commentsAfterReply = commentReadyState.courseComments().loadFirstList()
                 assertEquals(replyComment, commentsAfterReply.first().comment.commentsText)

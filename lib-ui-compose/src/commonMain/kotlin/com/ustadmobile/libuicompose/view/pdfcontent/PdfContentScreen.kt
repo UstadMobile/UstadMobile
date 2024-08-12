@@ -27,13 +27,21 @@ fun PdfContentScreen(
     viewModel: PdfContentViewModel
 ) {
     val uiState: PdfContentUiState by viewModel.uiState.collectAsState(PdfContentUiState())
-    PdfContentScreen(uiState)
+    PdfContentScreen(
+        uiState = uiState,
+        onActiveChanged = viewModel::onActiveChanged,
+        onProgressed = viewModel::onProgressed,
+        onComplete = viewModel::onComplete,
+    )
 }
 
 
 @Composable
 fun PdfContentScreen(
-    uiState: PdfContentUiState
+    uiState: PdfContentUiState,
+    onActiveChanged: (Boolean) -> Unit,
+    onProgressed: (Int) -> Unit,
+    onComplete: () -> Unit,
 ) {
     val di = localDI()
 
@@ -63,7 +71,10 @@ fun PdfContentScreen(
         file != null -> {
             PdfFileComponent(
                 modifier = Modifier.fillMaxSize(),
-                pdfFile = file
+                pdfFile = file,
+                onActiveChanged = onActiveChanged,
+                onProgressed = onProgressed,
+                onCompleted = onComplete,
             )
         }
         else -> {

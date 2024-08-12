@@ -2,7 +2,7 @@
 
 package com.ustadmobile.core.wrappers.compressorjs
 
-import web.buffer.Blob
+import web.blob.Blob
 
 //Declarations are as per https://www.npmjs.com/package/compressorjs
 @Suppress("unused")

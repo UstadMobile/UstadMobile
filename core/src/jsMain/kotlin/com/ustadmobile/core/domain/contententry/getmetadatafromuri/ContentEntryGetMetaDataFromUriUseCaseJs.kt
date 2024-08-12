@@ -47,7 +47,8 @@ class ContentEntryGetMetaDataFromUriUseCaseJs(
                         onProgress(
                             ContentEntryGetMetadataStatus(
                                 indeterminate = false,
-                                progress = ((it.bytesTransferred * 100) / it.totalBytes).toInt()
+                                processedBytes = it.bytesTransferred,
+                                totalBytes = it.totalBytes,
                             )
                         )
                     }

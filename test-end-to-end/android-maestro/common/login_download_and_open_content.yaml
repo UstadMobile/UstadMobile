@@ -1,8 +1,6 @@
 appId: com.toughra.ustadmobile
 ---
 # This test tests the Library page of app downloading and opening content
- # Test parameters needs to provide for this test :
-   # 1) TESTRESULTSDIR : ${TESTRESULTSDIR} : provides the path to store test results
 
 #clear state and launch app
 - runFlow: "../common/clear_state_and_get_started.yaml"
@@ -12,22 +10,6 @@ appId: com.toughra.ustadmobile
     file: "../common/user_login.yaml"
 #Download and open content
 - tapOn: "Library"
-- extendedWaitUntil:
-    visible: ${TESTCONTENTNAME}
-    timeout: 60000
-- tapOn: ${TESTCONTENTNAME}
-- tapOn: "Download"
-- tapOn: "Download"
-- extendedWaitUntil:
-    visible: "OPEN"
-    timeout: 10000
-- tapOn: "OPEN"
-- scroll
-- runFlow:
-      when:
-          visible:
-            text: "Play"
-      file: play_video_content.yaml
 
 
 

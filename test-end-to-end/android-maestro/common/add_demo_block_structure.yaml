@@ -5,7 +5,8 @@ appId: com.toughra.ustadmobile
 # 1) TESTRESULTSDIR : ${TESTRESULTSDIR} : provides the path to store test results
 
 # edit the course to add blocks
-- tapOn: "Edit"
+- tapOn:
+    id: "floating_action_button"
 # add module ------ 1
 - runFlow:
     file: "./add_module_block.yaml"
@@ -18,17 +19,13 @@ appId: com.toughra.ustadmobile
       TEXTTITLE: ${TEXTTITLE}
       TEXT: ${TEXT}
 # indent the text block ----- 1
-- repeat:
-    while:
-      notVisible:
-        id: "com.toughra.ustadmobile:id/item_course_block_more_option"
-        index: 1
-    commands:
-      - swipe:
-          start: 100,400
-          end: 100,100
+- scrollUntilVisible:
+    element:
+      text: "More options"
+      index: 1
+    direction: DOWN
 - tapOn:
-    id: "com.toughra.ustadmobile:id/item_course_block_more_option"
+    text: "More options"
     index: 1
 - tapOn: "Indent"
 - tapOn: "SAVE"

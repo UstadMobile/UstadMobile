@@ -11,17 +11,28 @@ env:
       TESTSERIAL: ${TESTSERIAL}
       TESTNAME: ${TESTNAME}
 - runFlow:
-    file: "../common/add_content.yaml"
+    file: "../common/clear_login_and_add_content.yaml"
     env:
       TESTFILENAME: Video_Content.mp4
-      TESTCONTENTNAME: AddContentVideoTest
       CONTROLSERVER: ${CONTROLSERVER}
       TESTSERIAL: ${TESTSERIAL}
+- tapOn: "SAVE"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_add_to_library"
+- tapOn: "Video"
+- tapOn: Open
 - runFlow:
     file: "../common/login_download_and_open_content.yaml"
-    env:
-       TESTCONTENTNAME: AddContentVideoTest
+- tapOn: "Library"
+- extendedWaitUntil:
+    visible: "Video"
+    timeout: 60000
+- tapOn: "Video"
+- tapOn: Download
+- tapOn: Open
+- doubleTapOn:
+    id: "com.toughra.ustadmobile:id/exo_ad_overlay"
+    delay: 100
+- extendedWaitUntil:
+    visible: "Play"
+    timeout: 20000
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_download_and_open"
-- back
-- tapOn: "ATTEMPTS"
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/video_attempts_page"

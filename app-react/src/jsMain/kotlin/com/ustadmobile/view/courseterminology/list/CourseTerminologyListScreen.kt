@@ -12,7 +12,7 @@ import com.ustadmobile.lib.db.entities.CourseTerminology
 import com.ustadmobile.view.components.UstadBlankIcon
 import web.cssom.Height
 import web.cssom.pct
-import js.core.jso
+import js.objects.jso
 import react.FC
 import react.Props
 import com.ustadmobile.view.components.virtuallist.VirtualList

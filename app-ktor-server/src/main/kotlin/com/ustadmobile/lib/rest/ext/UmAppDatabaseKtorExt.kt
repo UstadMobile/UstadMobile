@@ -22,7 +22,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 
 fun UmAppDatabase.insertCourseTerminology(di: DI){
-    val termList = courseTerminologyDao.findAllCourseTerminologyList()
+    val termList = courseTerminologyDao().findAllCourseTerminologyList()
     val supportLangConfig: SupportedLanguagesConfig = di.direct.instance()
 
     if(termList.isEmpty()) {
@@ -48,7 +48,7 @@ fun UmAppDatabase.insertCourseTerminology(di: DI){
             })
         }
 
-        courseTerminologyDao.insertList(terminologyList)
+        courseTerminologyDao().insertList(terminologyList)
     }
 }
 
@@ -61,14 +61,12 @@ suspend fun UmAppDatabase.initAdminUser(
     di: DI,
     defaultPassword: String? = null,
 ) {
-    val passwordFilePath = di.on(endpoint).direct
-        .instance<File>(tag = DiTag.TAG_CONTEXT_DATA_ROOT).absolutePath
-    val addNewPersonUseCase: AddNewPersonUseCase = di.on(endpoint).direct.instance()
-
-    val adminUser = personDao.findByUsername("admin")
+    val adminUser = personDao().findByUsername("admin")
 
     if (adminUser == null) {
-        val adminPerson = Person("admin", "Admin", "User")
+        val addNewPersonUseCase: AddNewPersonUseCase = di.on(endpoint).direct.instance()
+
+        val adminPerson = Person(username = "admin", firstNames = "Admin", lastName = "User")
 
         adminPerson.personUid = addNewPersonUseCase(
             adminPerson, systemPermissions = Long.MAX_VALUE,
@@ -80,14 +78,14 @@ suspend fun UmAppDatabase.initAdminUser(
 
         authManager.setAuth(adminPerson.personUid, adminPass)
 
-        val adminPassFile = File(passwordFilePath, "admin.txt")
+        val adminPassFile = di.on(endpoint).direct.instance<File>(tag = DiTag.TAG_ADMIN_PASS_FILE)
         if (!adminPassFile.parentFile.isDirectory) {
             adminPassFile.parentFile.mkdirs()
         }
 
-        val saltFile = File(passwordFilePath, "salt-${systemTimeInMillis()}.txt")
+        val saltFile = File(adminPassFile.parentFile, "salt-${systemTimeInMillis()}.txt")
 
-        val salt = siteDao.getSiteAsync()!!.authSalt!!
+        val salt = siteDao().getSiteAsync()!!.authSalt!!
 
         saltFile.writeText("$salt / $adminPass")
 

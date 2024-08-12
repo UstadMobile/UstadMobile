@@ -27,15 +27,17 @@ fun ApplicationConfig.toProperties(propertyNames: List<String>): Properties {
  */
 fun ApplicationConfig.databasePropertiesFromSection(
     section: String,
-    defaultUrl : String
+    defaultUrl : String,
+    defaultDriver: String = "org.sqlite.JDBC",
+    defaultUser: String = "",
 ) : Properties {
     return Properties().apply {
         setProperty("driver",
-            propertyOrNull("$section.driver")?.getString() ?: "org.sqlite.JDBC")
+            propertyOrNull("$section.driver")?.getString() ?: defaultDriver)
         setProperty("url",
             propertyOrNull("$section.url")?.getString() ?: defaultUrl)
         setProperty("user",
-            propertyOrNull("$section.user")?.getString() ?: "")
+            propertyOrNull("$section.user")?.getString() ?: defaultUser)
         setProperty("password",
             propertyOrNull("$section.password")?.getString() ?: "")
     }

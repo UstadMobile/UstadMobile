@@ -3,12 +3,11 @@ package com.ustadmobile.port.android.impl
 import android.app.Application
 import android.content.Context
 import android.content.res.AssetManager
+import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import coil.ImageLoader
 import coil.ImageLoaderFactory
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.SharedPreferencesSettings
 import com.toughra.ustadmobile.BuildConfig
@@ -26,6 +25,7 @@ import com.ustadmobile.core.db.ext.MIGRATION_144_145_CLIENT
 import com.ustadmobile.core.db.ext.MIGRATION_148_149_CLIENT_WITH_OFFLINE_ITEMS
 import com.ustadmobile.core.db.ext.MIGRATION_155_156_CLIENT
 import com.ustadmobile.core.db.ext.MIGRATION_161_162_CLIENT
+import com.ustadmobile.core.db.ext.MIGRATION_169_170_CLIENT
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.util.DiTag
@@ -69,12 +69,22 @@ import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCaseCommonJvm
 import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCase
 import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCaseAndroid
+import com.ustadmobile.core.domain.compress.audio.CompressAudioUseCase
+import com.ustadmobile.core.domain.compress.audio.CompressAudioUseCaseAndroid
+import com.ustadmobile.core.domain.compress.image.CompressImageUseCase
 import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseAndroid
+import com.ustadmobile.core.domain.compress.list.CompressListUseCase
+import com.ustadmobile.core.domain.compress.video.CompressVideoUseCase
+import com.ustadmobile.core.domain.compress.video.CompressVideoUseCaseAndroid
 import com.ustadmobile.core.domain.contententry.delete.DeleteContentEntryParentChildJoinUseCase
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCase
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCaseCommonJvm
+import com.ustadmobile.core.domain.contententry.importcontent.CancelImportContentEntryUseCase
+import com.ustadmobile.core.domain.contententry.importcontent.CancelImportContentEntryUseCaseAndroid
+import com.ustadmobile.core.domain.contententry.importcontent.CancelRemoteContentEntryImportUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCaseCommonJvm
+import com.ustadmobile.core.domain.contententry.importcontent.DismissRemoteContentEntryImportErrorUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseAndroid
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseRemote
@@ -89,11 +99,27 @@ import com.ustadmobile.core.domain.htmlcontentdisplayengine.SetHtmlContentDispla
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.ResolveXapiLaunchHrefUseCase
 import com.ustadmobile.core.domain.deleteditem.DeletePermanentlyUseCase
 import com.ustadmobile.core.domain.deleteditem.RestoreDeletedItemUseCase
+import com.ustadmobile.core.domain.extractmediametadata.ExtractMediaMetadataUseCase
+import com.ustadmobile.core.domain.extractmediametadata.ExtractMediaMetadataUseCaseAndroid
+import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCase
+import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCaseAndroid
+import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCase
+import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCaseEmbeddedServer
 import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCase
 import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCaseAndroid
+import com.ustadmobile.core.domain.interop.oneroster.OneRosterEndpoint
+import com.ustadmobile.core.domain.interop.oneroster.OneRosterHttpServerUseCase
 import com.ustadmobile.core.domain.share.ShareTextUseCase
 import com.ustadmobile.core.domain.share.ShareTextUseCaseAndroid
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
+import com.ustadmobile.core.domain.storage.CachePathsProviderAndroid
+import com.ustadmobile.core.domain.storage.GetAndroidSdCardDirUseCase
+import com.ustadmobile.core.domain.storage.GetOfflineStorageAvailableSpace
+import com.ustadmobile.core.domain.storage.GetOfflineStorageAvailableSpaceAndroid
+import com.ustadmobile.core.domain.storage.GetOfflineStorageOptionsUseCase
+import com.ustadmobile.core.domain.storage.GetOfflineStorageOptionsUseCaseAndroid
+import com.ustadmobile.core.domain.storage.GetOfflineStorageSettingUseCase
+import com.ustadmobile.core.domain.storage.SetOfflineStorageSettingUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseCommonJvm
 import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
@@ -101,8 +127,26 @@ import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseAndroid
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientChunkGetterUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
+import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
-import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCaseAndroid
+import com.ustadmobile.core.domain.xapi.StoreActivitiesUseCase
+import com.ustadmobile.core.domain.xapi.XapiJson
+import com.ustadmobile.core.domain.xapi.XapiStatementResource
+import com.ustadmobile.core.domain.xapi.http.XapiHttpServerUseCase
+import com.ustadmobile.core.domain.xapi.noninteractivecontentusagestatementrecorder.NonInteractiveContentXapiStatementRecorderFactory
+import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnClearUseCase
+import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnClearUseCaseAndroid
+import com.ustadmobile.core.domain.xapi.session.ResumeOrStartXapiSessionUseCase
+import com.ustadmobile.core.domain.xapi.session.ResumeOrStartXapiSessionUseCaseLocal
+import com.ustadmobile.core.domain.xapi.state.DeleteXapiStateUseCase
+import com.ustadmobile.core.domain.xapi.state.ListXapiStateIdsUseCase
+import com.ustadmobile.core.domain.xapi.state.RetrieveXapiStateUseCase
+import com.ustadmobile.core.domain.xapi.state.StoreXapiStateUseCase
+import com.ustadmobile.core.domain.xapi.state.h5puserdata.H5PUserDataEndpointUseCase
+import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
+import com.ustadmobile.core.domain.xxhash.XXHasher64FactoryCommonJvm
+import com.ustadmobile.core.domain.xxhash.XXStringHasherCommonJvm
+import com.ustadmobile.core.domain.xxhash.XXStringHasher
 import com.ustadmobile.core.embeddedhttp.EmbeddedHttpServer
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
@@ -124,12 +168,13 @@ import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.uri.UriHelperAndroid
 import com.ustadmobile.core.util.ext.appMetaData
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
-import com.ustadmobile.core.util.ext.requireFileSeparatorSuffix
 import com.ustadmobile.core.util.ext.toNullIfBlank
 import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.libcache.CachePathsProvider
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
+import com.ustadmobile.libcache.headers.MimeTypeHelper
 import com.ustadmobile.libcache.logging.NapierLoggingAdapter
 import com.ustadmobile.libcache.okhttp.UstadCacheInterceptor
 import io.ktor.client.HttpClient
@@ -152,6 +197,7 @@ import org.acra.config.httpSender
 import org.acra.data.StringFormat
 import org.acra.ktx.initAcra
 import org.acra.sender.HttpSender
+import rawhttp.core.RawHttp
 
 class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
@@ -168,7 +214,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
     @OptIn(ExperimentalXmlUtilApi::class)
     override val di: DI by DI.lazy {
         bind<OkHttpClient>() with singleton {
-            val rootTmpDir: File = instance(tag = DiTag.TAG_TMP_DIR)
+            val cachePathProvider: CachePathsProvider = instance()
 
             OkHttpClient.Builder()
                 .dispatcher(
@@ -180,7 +226,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 .addInterceptor(
                     UstadCacheInterceptor(
                         cache = instance(),
-                        tmpDir = File(rootTmpDir, "okhttp-tmp"),
+                        tmpDirProvider = { File(cachePathProvider().tmpWorkPath.toString()) },
                         logger = NapierLoggingAdapter(),
                         json = instance(),
                     )
@@ -241,7 +287,8 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
         bind<ApiUrlConfig>() with singleton {
             ApiUrlConfig(
-                presetApiUrl = applicationContext.appMetaData?.getString(METADATA_KEY_API_URL)
+                presetApiUrl = applicationContext.appMetaData?.getString(AppConfig.KEY_API_URL)
+                    ?.ifBlank { null }
             )
         }
 
@@ -252,17 +299,14 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             }
         }
 
+        bind<XapiJson>() with singleton { XapiJson() }
+
         bind<XML>() with singleton {
             XML {
                 defaultPolicy {
                     unknownChildHandler  = XmlConfig.IGNORING_UNKNOWN_CHILD_HANDLER
                 }
             }
-        }
-
-        bind<Gson>() with singleton {
-            val builder = GsonBuilder()
-            builder.create()
         }
 
         bind<XmlPullParserFactory>(tag = DiTag.XPP_FACTORY_NSUNAWARE) with singleton {
@@ -286,7 +330,11 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
         bind<DbAndObservers>() with scoped(EndpointScope.Default).singleton {
             val dbName = sanitizeDbNameFromUrl(context.url)
+
+
             val nodeIdAndAuth: NodeIdAndAuth = instance()
+
+            Log.i("MigrateIssue", "Creating database name=$dbName")
             val db = DatabaseBuilder.databaseBuilder(
                 context = applicationContext,
                 dbClass = UmAppDatabase::class,
@@ -299,7 +347,10 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 .addMigrations(MIGRATION_148_149_CLIENT_WITH_OFFLINE_ITEMS)
                 .addMigrations(MIGRATION_155_156_CLIENT)
                 .addMigrations(MIGRATION_161_162_CLIENT)
+                .addMigrations(MIGRATION_169_170_CLIENT)
                 .build()
+
+            Log.i("MigrateIssue", "Database built: name=$dbName")
 
             val cache: UstadCache = instance()
 
@@ -340,14 +391,25 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             XhtmlFixerJsoup(xml = instance())
         }
 
+        bind<CachePathsProvider>() with singleton {
+            CachePathsProviderAndroid(
+                appContext = applicationContext,
+                getAndroidSdCardPathUseCase = instance(),
+                getOfflineStorageSettingUseCase = instance()
+            )
+        }
+
         bind<UstadCache>() with singleton {
             val httpCacheDir =  applicationContext.httpPersistentFilesDir
             val storagePath = Path(httpCacheDir.absolutePath)
+
+
             UstadCacheBuilder(
                 appContext = applicationContext,
                 storagePath = storagePath,
                 logger = NapierLoggingAdapter(),
                 sizeLimit = { 100_000_000L },
+                cachePathsProvider = instance(),
             ).build()
         }
 
@@ -361,6 +423,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             val tmpRoot: File = instance(tag = DiTag.TAG_TMP_DIR)
             val contentImportTmpPath = Path(tmpRoot.absolutePath, "contentimport")
             val getStoragePathForUrlUseCase: GetStoragePathForUrlUseCase= instance()
+            val mimeTypeHelper: MimeTypeHelper = instance()
 
             ContentImportersManager(
                 buildList {
@@ -376,6 +439,8 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
                             json = instance(),
                             getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
+                            compressListUseCase = instance(),
+                            saveLocalUrisAsBlobsUseCase = instance(),
                         )
                     )
                     add(
@@ -387,6 +452,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                             json = instance(),
                             tmpPath = contentImportTmpPath,
                             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
+                            compressListUseCase = instance(),
                         )
                     )
 
@@ -399,6 +465,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                             tmpPath = contentImportTmpPath,
                             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
                             json = instance(),
+                            compressListUseCase = instance(),
                             h5pInStream = {
                                 applicationContext.assets.open("h5p/h5p-standalone-3.6.0.zip",
                                     AssetManager.ACCESS_STREAMING)
@@ -417,6 +484,10 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
                             json = instance(),
                             getStoragePathForUrlUseCase  = getStoragePathForUrlUseCase,
+                            mimeTypeHelper = mimeTypeHelper,
+                            compressUseCase = instance(),
+                            extractVideoThumbnailUseCase = instance(),
+                            saveLocalUrisAsBlobsUseCase = instance(),
                         )
                     )
 
@@ -431,10 +502,29 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                             json = instance(),
                             appContext = applicationContext,
                             tmpDir = File(contentImportTmpPath.toString()),
+                            saveLocalUriAsBlobUseCase = instance(),
                         )
                     )
                 }
             )
+        }
+
+        bind<CompressVideoUseCase>() with singleton {
+            CompressVideoUseCaseAndroid(
+                appContext = applicationContext,
+                uriHelper = instance(),
+            )
+        }
+
+        bind<CompressAudioUseCase>() with singleton {
+            CompressAudioUseCaseAndroid(
+                appContext = applicationContext,
+                uriHelper = instance(),
+            )
+        }
+
+        bind<CompressImageUseCase>() with singleton {
+            CompressImageUseCaseAndroid(applicationContext)
         }
 
         bind<XmlPullParserFactory>(tag  = DiTag.XPP_FACTORY_NSAWARE) with singleton {
@@ -471,10 +561,14 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             )
         }
 
+        bind<MimeTypeHelper>() with singleton {
+            FileMimeTypeHelperImpl()
+        }
+
         bind<SaveLocalUriAsBlobAndManifestUseCase>() with scoped(EndpointScope.Default).singleton {
             SaveLocalUriAsBlobAndManifestUseCaseJvm(
                 saveLocalUrisAsBlobsUseCase = instance(),
-                mimeTypeHelper = FileMimeTypeHelperImpl(),
+                mimeTypeHelper = instance(),
             )
         }
 
@@ -524,8 +618,9 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 db = on(context).instance(tag = DoorTag.TAG_DB),
                 repo = on(context).instance(tag = DoorTag.TAG_REPO),
                 enqueueBlobUploadClientUseCase = on(context).instance(),
-                compressImageUseCase = CompressImageUseCaseAndroid(applicationContext),
+                compressImageUseCase = instance(),
                 deleteUrisUseCase = instance(),
+                getStoragePathForUrlUseCase = instance(),
             )
         }
 
@@ -570,6 +665,13 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             )
         }
 
+        bind<CancelImportContentEntryUseCase>() with scoped(EndpointScope.Default).provider {
+            CancelImportContentEntryUseCaseAndroid(
+                appContext = applicationContext,
+                endpoint = context,
+            )
+        }
+
         bind<ImportContentEntryUseCase>() with scoped(EndpointScope.Default).provider {
             ImportContentEntryUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
@@ -605,15 +707,14 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
         }
 
         bind<ContentManifestDownloadUseCase>() with scoped(EndpointScope.Default).singleton {
+            val cachePathsProvider: CachePathsProvider = instance()
+
             ContentManifestDownloadUseCase(
                 enqueueBlobDownloadClientUseCase = instance(),
                 db = instance(tag = DoorTag.TAG_DB),
                 httpClient = instance(),
                 json = instance(),
-                cacheTmpPath = File(
-                    applicationContext.httpPersistentFilesDir,
-                    UstadCacheBuilder.DEFAULT_SUBPATH_WORK
-                ).absolutePath.requireFileSeparatorSuffix(),
+                cacheTmpPath = { cachePathsProvider().tmpWorkPath.toString() }
             )
         }
 
@@ -659,6 +760,18 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 httpClient = instance(),
                 json = instance(),
                 xppFactory = instance(tag = DiTag.XPP_FACTORY_NSAWARE),
+                endpoint = context,
+                accountManager = instance(),
+                getApiUrlUseCase = instance(),
+                resumeOrStartXapiSessionUseCase = instance(),
+            )
+        }
+
+        bind<ResumeOrStartXapiSessionUseCase>() with scoped(EndpointScope.Default).singleton {
+            ResumeOrStartXapiSessionUseCaseLocal(
+                activeDb = instance(tag = DoorTag.TAG_DB),
+                activeRepo = instance(tag = DoorTag.TAG_REPO),
+                xxStringHasher= instance(),
             )
         }
 
@@ -668,8 +781,82 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 contentEntryVersionServerUseCase = {
                     di.on(it).direct.instance()
                 },
+                xapiServerUseCase = {
+                    di.on(it).direct.instance()
+                },
                 staticUmAppFilesDir = null,
                 mimeTypeHelper = FileMimeTypeHelperImpl(),
+            )
+        }
+
+        bind<XapiHttpServerUseCase>() with scoped(EndpointScope.Default).singleton {
+            XapiHttpServerUseCase(
+                statementResource = instance(),
+                retrieveXapiStateUseCase = instance(),
+                storeXapiStateUseCase = instance(),
+                listXapiStateIdsUseCase = instance(),
+                deleteXapiStateRequest = instance(),
+                h5PUserDataEndpointUseCase = instance(),
+                db = instance(tag = DoorTag.TAG_DB),
+                xapiJson = instance(),
+                endpoint = context,
+                xxStringHasher = instance(),
+            )
+        }
+
+        bind<H5PUserDataEndpointUseCase>() with scoped(EndpointScope.Default).singleton {
+            H5PUserDataEndpointUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = instanceOrNull(tag = DoorTag.TAG_REPO),
+                xxStringHasher = instance(),
+                xxHasher64Factory = instance(),
+                xapiJson = instance(),
+            )
+        }
+
+        bind<StoreXapiStateUseCase>() with scoped(EndpointScope.Default).singleton {
+            StoreXapiStateUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = instance(tag = DoorTag.TAG_REPO),
+                xapiJson = instance(),
+                xxHasher64Factory = instance(),
+                xxStringHasher = instance(),
+                endpoint = context,
+            )
+        }
+
+        bind<RetrieveXapiStateUseCase>() with scoped(EndpointScope.Default).singleton {
+            RetrieveXapiStateUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = instance(tag = DoorTag.TAG_REPO),
+                xapiJson = instance(),
+                xxStringHasher = instance(),
+                xxHasher64Factory = instance(),
+            )
+        }
+
+        bind<ListXapiStateIdsUseCase>() with scoped(EndpointScope.Default).singleton {
+            ListXapiStateIdsUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = instance(tag = DoorTag.TAG_REPO),
+                xxStringHasher = instance(),
+            )
+        }
+
+        bind<DeleteXapiStateUseCase>() with scoped(EndpointScope.Default).singleton {
+            DeleteXapiStateUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = instance(tag = DoorTag.TAG_REPO),
+                xxStringHasher = instance(),
+                xxHasher64Factory = instance(),
+                endpoint = context,
+            )
+        }
+
+        bind<GetApiUrlUseCase>() with scoped(EndpointScope.Default).singleton {
+            GetApiUrlUseCaseEmbeddedServer(
+                embeddedServer = instance(),
+                endpoint = context,
             )
         }
 
@@ -689,7 +876,13 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
         }
 
         bind<ValidateVideoFileUseCase>() with singleton {
-            ValidateVideoFileUseCaseAndroid(appContext = applicationContext)
+            ValidateVideoFileUseCase(
+                extractMediaMetadataUseCase = instance()
+            )
+        }
+
+        bind<ExtractMediaMetadataUseCase>() with singleton {
+            ExtractMediaMetadataUseCaseAndroid(applicationContext)
         }
 
         bind<GetShowPoweredByUseCase>() with singleton {
@@ -768,6 +961,133 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             )
         }
 
+        bind<ValidateEmailUseCase>() with provider {
+            ValidateEmailUseCase()
+        }
+
+        bind<CancelRemoteContentEntryImportUseCase>() with scoped(EndpointScope.Default).singleton {
+            CancelRemoteContentEntryImportUseCase(
+                endpoint = context,
+                httpClient = instance(),
+                repo = instance(tag = DoorTag.TAG_REPO),
+            )
+        }
+
+        bind<DismissRemoteContentEntryImportErrorUseCase>() with scoped(EndpointScope.Default).singleton {
+            DismissRemoteContentEntryImportErrorUseCase(
+                endpoint = context,
+                httpClient = instance(),
+                repo = instance(tag = DoorTag.TAG_REPO),
+            )
+        }
+
+        bind<CompressListUseCase>() with singleton {
+            CompressListUseCase(
+                compressVideoUseCase = instance(),
+                compressImageUseCase = instance(),
+                compressAudioUseCase = instance(),
+                mimeTypeHelper = instance(),
+            )
+        }
+
+        bind<ExtractVideoThumbnailUseCase>() with singleton {
+            ExtractVideoThumbnailUseCaseAndroid(applicationContext)
+        }
+
+        bind<GetAndroidSdCardDirUseCase>() with singleton {
+            GetAndroidSdCardDirUseCase(applicationContext)
+        }
+
+        bind<GetOfflineStorageOptionsUseCase>() with singleton {
+            GetOfflineStorageOptionsUseCaseAndroid(
+                getAndroidSdCardDirUseCase = instance()
+            )
+        }
+
+        bind<GetOfflineStorageSettingUseCase>() with singleton {
+            GetOfflineStorageSettingUseCase(
+                getOfflineStorageOptionsUseCase = instance(),
+                settings = instance(),
+            )
+        }
+
+        bind<SetOfflineStorageSettingUseCase>() with singleton {
+            SetOfflineStorageSettingUseCase(settings = instance())
+        }
+
+        bind<GetOfflineStorageAvailableSpace>() with singleton {
+            GetOfflineStorageAvailableSpaceAndroid(
+                getAndroidSdCardDirUseCase = instance(),
+                appContext = applicationContext,
+            )
+        }
+
+        bind<RawHttp>() with singleton {
+            RawHttp()
+        }
+
+        bind<OneRosterEndpoint>() with scoped(EndpointScope.Default).singleton {
+            OneRosterEndpoint(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = instance(tag = DoorTag.TAG_REPO),
+                endpoint = context,
+                xxHasher = instance(),
+                json = instance(),
+            )
+        }
+
+        bind<OneRosterHttpServerUseCase>() with scoped(EndpointScope.Default).singleton {
+            OneRosterHttpServerUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                json = instance(),
+                oneRosterEndpoint = instance(),
+            )
+        }
+
+        bind<XXHasher64Factory>() with singleton {
+            XXHasher64FactoryCommonJvm()
+        }
+
+        bind<XXStringHasher>() with singleton {
+            XXStringHasherCommonJvm()
+        }
+
+        bind<StoreActivitiesUseCase>() with scoped(EndpointScope.Default).singleton {
+            StoreActivitiesUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = instance(tag = DoorTag.TAG_REPO),
+            )
+        }
+
+        bind<XapiStatementResource>() with scoped(EndpointScope.Default).singleton {
+            XapiStatementResource(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = instance(tag = DoorTag.TAG_REPO),
+                xxHasher = instance(),
+                endpoint = context,
+                xapiJson = instance(),
+                hasherFactory = instance(),
+                storeActivitiesUseCase = instance(),
+            )
+        }
+
+        bind<SaveStatementOnClearUseCase>() with scoped(EndpointScope.Default).singleton {
+            SaveStatementOnClearUseCaseAndroid(
+                appContext = applicationContext,
+                endpoint = context,
+                json = instance(),
+            )
+        }
+
+        bind<NonInteractiveContentXapiStatementRecorderFactory>() with scoped(EndpointScope.Default).provider {
+            NonInteractiveContentXapiStatementRecorderFactory(
+                saveStatementOnClearUseCase = instance(),
+                saveStatementOnUnloadUseCase = null,
+                xapiStatementResource = instance(),
+                endpoint = context,
+            )
+        }
+
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
     }
 
@@ -825,7 +1145,6 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
         const val METADATA_KEY_SUPPORTED_LANGS = "com.ustadmobile.uilanguages"
 
-        const val METADATA_KEY_API_URL = "com.ustadmobile.apiurl"
     }
 
 }

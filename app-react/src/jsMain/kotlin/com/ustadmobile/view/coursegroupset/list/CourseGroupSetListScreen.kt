@@ -4,9 +4,12 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.appstate.AppUiState
+import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.viewmodel.coursegroupset.list.CourseGroupSetListUiState
 import com.ustadmobile.core.viewmodel.coursegroupset.list.CourseGroupSetListViewModel
+import com.ustadmobile.hooks.useDoorRemoteMediator
+import com.ustadmobile.hooks.useEmptyFlow
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useTabAndAppBarHeight
 import com.ustadmobile.hooks.useUstadViewModel
@@ -14,6 +17,8 @@ import com.ustadmobile.lib.db.entities.CourseGroupSet
 import com.ustadmobile.mui.components.UstadListSortHeader
 import com.ustadmobile.view.components.UstadFab
 import com.ustadmobile.mui.components.UstadAddListItem
+import com.ustadmobile.mui.components.UstadNothingHereYet
+import com.ustadmobile.util.ext.isSettledEmpty
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
@@ -22,7 +27,8 @@ import web.cssom.Contain
 import web.cssom.Height
 import web.cssom.Overflow
 import web.cssom.pct
-import js.core.jso
+import js.objects.jso
+import kotlinx.coroutines.flow.Flow
 import mui.material.Container
 import mui.material.ListItem
 import mui.material.ListItemButton
@@ -40,6 +46,8 @@ external interface CourseGroupSetListComponentProps: Props {
 
     var uiState: CourseGroupSetListUiState
 
+    var refreshCommandFlow: Flow<RefreshCommand>?
+
     var onClickEntry: (CourseGroupSet) -> Unit
 
     var onChangeSortOption: (SortOrderOption) -> Unit
@@ -53,10 +61,18 @@ val CourseGroupSetListComponent = FC<CourseGroupSetListComponentProps> { props -
     val tabAndAppBarHeight = useTabAndAppBarHeight()
     val strings = useStringProvider()
 
+    val emptyRefreshCommandFlow = useEmptyFlow<RefreshCommand>()
+
+    val mediatorResult = useDoorRemoteMediator(
+        props.uiState.courseGroupSets, props.refreshCommandFlow ?: emptyRefreshCommandFlow
+    )
+
     val infiniteQueryResult = usePagingSource(
-        pagingSourceFactory = props.uiState.courseGroupSets,
+        pagingSourceFactory = mediatorResult.pagingSourceFactory,
         placeholdersEnabled = true
     )
+
+    val isSettledEmpty = infiniteQueryResult.isSettledEmpty(mediatorResult)
 
     VirtualList {
         style = jso {
@@ -97,6 +113,12 @@ val CourseGroupSetListComponent = FC<CourseGroupSetListComponentProps> { props -
                 }
             }
 
+
+            if(isSettledEmpty) {
+                item("empty_state") {
+                    UstadNothingHereYet.create()
+                }
+            }
 
             infiniteQueryPagingItems(
                 items = infiniteQueryResult,

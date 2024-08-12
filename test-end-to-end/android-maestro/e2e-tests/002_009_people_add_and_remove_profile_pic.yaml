@@ -1,0 +1,27 @@
+appId: com.toughra.ustadmobile
+env:
+  TESTNAME: "002_009_people_add_and_remove_profile_pic"
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/002_009_people_add_and_remove_profile_pic"
+---
+- clearState: com.toughra.ustadmobile
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+      TESTNAME: ${TESTNAME}
+- runFlow:
+    file: "../common/add_profile_pic.yaml"
+    env:
+      TESTFILENAME: "admin_profilePic.jpg"
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+- assertVisible:
+    id: "person_picture"
+- tapOn:
+    id: "floating_action_button"
+- tapOn: "Add"
+- tapOn: "Remove picture"
+- tapOn: "Save"
+- assertNotVisible:
+    id: "person_picture"

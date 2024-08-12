@@ -42,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.controller.PersonConstants
@@ -109,6 +110,7 @@ fun PersonDetailScreen(
                         contentDescription = "",
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.clip(CircleShape).width(256.dp).height(256.dp)
+                            .testTag("person_picture")
                     )
 
                     uiState.person?.personPictureTransferJobItem?.also {

@@ -18,7 +18,9 @@ class DefaultLaunchContentEntryVersionUseCase: LaunchContentEntryVersionUseCase 
     override suspend fun invoke(
         contentEntryVersion: ContentEntryVersion,
         navController: UstadNavController,
-        target: OpenExternalLinkUseCase.Companion.LinkTarget
+        clazzUid: Long,
+        cbUid: Long,
+        target: OpenExternalLinkUseCase.Companion.LinkTarget,
     ): LaunchContentEntryVersionUseCase.LaunchResult {
         val destName = when(contentEntryVersion.cevContentType) {
             ContentEntryVersion.TYPE_XAPI -> XapiContentViewModel.DEST_NAME
@@ -32,7 +34,10 @@ class DefaultLaunchContentEntryVersionUseCase: LaunchContentEntryVersionUseCase 
             navController.navigate(
                 viewName = destName,
                 args = mapOf(
-                    UstadViewModel.ARG_ENTITY_UID to contentEntryVersion.cevUid.toString()
+                    UstadViewModel.ARG_ENTITY_UID to contentEntryVersion.cevUid.toString(),
+                    UstadViewModel.ARG_COURSE_BLOCK_UID to cbUid.toString(),
+                    UstadViewModel.ARG_CLAZZUID to clazzUid.toString(),
+                    UstadViewModel.ARG_CONTENT_ENTRY_UID to contentEntryVersion.cevContentEntryUid.toString(),
                 )
             )
         }

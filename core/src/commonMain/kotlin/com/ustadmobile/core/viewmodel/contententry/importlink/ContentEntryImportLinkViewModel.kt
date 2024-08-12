@@ -145,6 +145,7 @@ class ContentEntryImportLinkViewModel(
                                     )
                                 )
                                 putFromSavedStateIfPresent(ContentEntryEditViewModel.ARG_COURSEBLOCK)
+                                putFromSavedStateIfPresent(ContentEntryEditViewModel.ARG_GO_TO_ON_CONTENT_ENTRY_DONE)
                                 putFromSavedStateIfPresent(UstadView.ARG_RESULT_DEST_VIEWNAME)
                                 putFromSavedStateIfPresent(UstadView.ARG_RESULT_DEST_KEY)
                                 putFromSavedStateIfPresent(ARG_PARENT_UID)

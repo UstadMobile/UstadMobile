@@ -1,0 +1,24 @@
+{
+  "actor": {
+    "account" : {
+      "name": "user",
+      "homePage": "http://localhost/"
+    }
+  },
+  "verb" : {
+    "id":"http://example.com/commented",
+    "display": {
+      "en-US":"commented"
+    }
+  },
+  "object" : {
+    "objectType":"Agent",
+    "account" : {
+      "name": "teacher",
+      "homePage": "http://localhost/"
+    }
+  },
+  "result" : {
+    "response" : "Wow, nice work!"
+  }
+}

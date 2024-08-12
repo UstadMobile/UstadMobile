@@ -8,7 +8,6 @@ import com.ustadmobile.core.viewmodel.HtmlEditViewModel
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.door.ext.withDoorTransactionAsync
-import app.cash.paging.PagingSource
 import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.util.ext.whenSubscribed
@@ -30,7 +29,6 @@ data class DiscussionPostDetailUiState2(
     val discussionPosts: ListPagingSourceFactory<DiscussionPostAndPosterNames> = {
         EmptyPagingSource()
     },
-    val replyText: String = "",
     val loggedInPersonUid: Long = 0L,
     val loggedInPersonName: String = "",
     val loggedInPersonPictureUri: String? = null,
@@ -48,16 +46,16 @@ class DiscussionPostDetailViewModel(
 ): DetailViewModel<DiscussionPostWithDetails>(di, savedStateHandle, destinationName){
 
     private val pagingSourceFactory: ListPagingSourceFactory<DiscussionPostAndPosterNames> = {
-        activeRepo.discussionPostDao.findByPostIdWithAllReplies(entityUidArg, false).also {
-            lastPagingSource = it
-        }
+        activeRepo.discussionPostDao().findByPostIdWithAllReplies(entityUidArg, false)
     }
-
-    private var lastPagingSource: PagingSource<Int, DiscussionPostAndPosterNames>? = null
 
     private val _uiState = MutableStateFlow(DiscussionPostDetailUiState2())
 
     val uiState: Flow<DiscussionPostDetailUiState2> = _uiState.asStateFlow()
+
+    private val _replyText = MutableStateFlow("")
+
+    val replyText: Flow<String> = _replyText.asStateFlow()
 
     private var saveReplyJob: Job? = null
 
@@ -66,7 +64,7 @@ class DiscussionPostDetailViewModel(
     init {
         viewModelScope.launch {
             _uiState.whenSubscribed {
-                activeRepo.coursePermissionDao.personHasPermissionWithClazzPairAsFlow(
+                activeRepo.coursePermissionDao().personHasPermissionWithClazzPairAsFlow(
                     accountPersonUid = activeUserPersonUid,
                     clazzUid = clazzUid,
                     firstPermission = PermissionFlags.COURSE_VIEW,
@@ -81,10 +79,11 @@ class DiscussionPostDetailViewModel(
                                 loggedInPersonUid = activeUserPersonUid,
                                 loggedInPersonName = accountManager.currentUserSession.person.fullName(),
                                 loggedInPersonPictureUri = accountManager.currentUserSession.personPicture?.personPictureThumbnailUri,
-                                replyText = savedStateHandle[STATE_KEY_REPLY_TEXT] ?: "",
                                 showModerateOptions = hasModeratePermission,
                             )
                         }
+
+                        _replyText.value = savedStateHandle[STATE_KEY_REPLY_TEXT] ?: ""
 
                         launch {
                             resultReturner.filteredResultFlowForKey(RESULT_KEY_REPLY_TEXT).collect { result ->
@@ -94,7 +93,7 @@ class DiscussionPostDetailViewModel(
                         }
 
                         launch {
-                            activeRepo.discussionPostDao.getTitleByUidAsFlow(entityUidArg).collect {postTitle ->
+                            activeRepo.discussionPostDao().getTitleByUidAsFlow(entityUidArg).collect {postTitle ->
                                 _appUiState.takeIf { it.value.title != postTitle }?.update { prev ->
                                     prev.copy(
                                         title = postTitle
@@ -109,10 +108,10 @@ class DiscussionPostDetailViewModel(
                                 loggedInPersonUid = activeUserPersonUid,
                                 loggedInPersonName = accountManager.currentUserSession.person.fullName(),
                                 loggedInPersonPictureUri = accountManager.currentUserSession.personPicture?.personPictureThumbnailUri,
-                                replyText = savedStateHandle[STATE_KEY_REPLY_TEXT] ?: "",
                                 showModerateOptions = false,
                             )
                         }
+                        _replyText.value = savedStateHandle[STATE_KEY_REPLY_TEXT] ?: ""
                     }
                 }
             }
@@ -121,9 +120,7 @@ class DiscussionPostDetailViewModel(
     }
 
     fun onChangeReplyText(replyText: String) {
-        _uiState.update { prev ->
-            prev.copy(replyText = replyText)
-        }
+        _replyText.value = replyText
 
         saveReplyJob?.cancel()
         saveReplyJob = viewModelScope.launch {
@@ -136,7 +133,7 @@ class DiscussionPostDetailViewModel(
     //On Android - take the user to a new fullscreen richtext editor
     fun onClickEditReplyHtml() {
         navigateToEditHtml(
-            currentValue = _uiState.value.replyText,
+            currentValue = _replyText.value,
             resultKey = RESULT_KEY_REPLY_TEXT,
             extraArgs = mapOf(
                 HtmlEditViewModel.ARG_DONE_STR to systemImpl.getString(MR.strings.post),
@@ -147,7 +144,7 @@ class DiscussionPostDetailViewModel(
 
     fun onClickPostReply() {
         viewModelScope.launch {
-            submitReply(_uiState.value.replyText)
+            submitReply(_replyText.value)
         }
     }
 
@@ -160,14 +157,14 @@ class DiscussionPostDetailViewModel(
         try {
             //We probably have the course block in the local db, but check just in case. If we don't
             //have it, then load from repo
-            val clazzAndBlockUids = activeDb.courseBlockDao.findCourseBlockAndClazzUidByDiscussionPostUid(
+            val clazzAndBlockUids = activeDb.courseBlockDao().findCourseBlockAndClazzUidByDiscussionPostUid(
                 entityUidArg
             ).let {
                 //Double check that we
                 if(it != null && it.clazzUid != 0L && it.courseBlockUid != 0L)
                     it
                 else
-                    activeRepo.courseBlockDao.findCourseBlockAndClazzUidByDiscussionPostUid(entityUidArg)
+                    activeRepo.courseBlockDao().findCourseBlockAndClazzUidByDiscussionPostUid(entityUidArg)
             }
 
             if(clazzAndBlockUids == null || clazzAndBlockUids.courseBlockUid == 0L ||
@@ -178,7 +175,7 @@ class DiscussionPostDetailViewModel(
             }
 
             activeRepo.withDoorTransactionAsync {
-                activeRepo.discussionPostDao.insertAsync(DiscussionPost().apply {
+                activeRepo.discussionPostDao().insertAsync(DiscussionPost().apply {
                     discussionPostStartDate = systemTimeInMillis()
                     discussionPostReplyToPostUid = entityUidArg
                     discussionPostMessage = replyText
@@ -200,7 +197,7 @@ class DiscussionPostDetailViewModel(
 
     fun onDeletePost(post: DiscussionPost) {
         viewModelScope.launch {
-            activeRepo.discussionPostDao.setDeletedAsync(
+            activeRepo.discussionPostDao().setDeletedAsync(
                 uid = post.discussionPostUid, deleted = true, updateTime = systemTimeInMillis()
             )
             snackDispatcher.showSnackBar(Snack(systemImpl.getString(MR.strings.deleted)))

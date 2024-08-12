@@ -1,0 +1,115 @@
+appId: com.toughra.ustadmobile
+env:
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/003_002_add_module_text_blocks_and_perform_indent_hide_delete_actions"
+  TESTNAME:  "003_002_add_module_text_blocks_and_perform_indent_hide_delete_actions"
+---
+- clearState: com.toughra.ustadmobile
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+      TESTNAME: ${TESTNAME}
+
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+#admin login
+- runFlow:
+    file: "../common/user_login.yaml"
+- runFlow:
+    file: "../common/add_course.yaml"
+    env:
+     TESTCOURSENAME: "Test Course Block Test"
+# edit the course to add blocks
+- tapOn:
+    id: "floating_action_button"
+# add module ------ 1
+- runFlow:
+    file: "../common/add_module_block.yaml"
+    env:
+      MODULETITLE: "SEMESTER 1"
+#add text block ------ 1
+- runFlow:
+    file: "../common/add_text_block.yaml"
+    env:
+      TEXTTITLE: "PRIMARY COLOURS"
+      TEXT: "RED,BLUE,GREEN"
+# hide the block- module
+- scrollUntilVisible:
+    element:
+      text: "More options"
+      index: 0
+    direction: DOWN
+- tapOn:
+    text: "More options"
+    index: 0
+- tapOn: "Hide"
+- tapOn: "SAVE"
+- assertNotVisible:
+    text: "SEMESTER 1"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/module_block_is_hidden"
+- tapOn:
+    id: "floating_action_button"
+#  swipe down to  view  added  blocks
+- scrollUntilVisible:
+    element:
+      text: "More options"
+      index: 0
+    direction: DOWN
+# unhide the module
+- tapOn:
+    text: "More options"
+    index: 0
+- tapOn: "Unhide"
+- tapOn: "SAVE"
+- scrollUntilVisible:
+    element:
+      text: "SEMESTER 1"
+    direction: DOWN
+- assertVisible:
+    text: "SEMESTER 1"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/module_block_unhide"
+- tapOn:
+    id: "floating_action_button"
+# indent the text block ----- 1
+- scrollUntilVisible:
+    element:
+      text: "More options"
+      index: 1
+    direction: DOWN
+- tapOn:
+    text: "More options"
+    index: 1
+- tapOn: "Indent"
+- tapOn: "SAVE"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/text_block_indented"
+# unindent text block ----- 1
+- tapOn:
+    id: "floating_action_button"
+- scrollUntilVisible:
+    element:
+      text: "More options"
+      index: 1
+    direction: DOWN
+- tapOn:
+    text: "More options"
+    index: 1
+- tapOn: "Unindent"
+- tapOn: "SAVE"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/text_block_unindented"
+# Delete text block --- 1
+- tapOn:
+    id: "floating_action_button"
+- scrollUntilVisible:
+    element:
+      text: "More options"
+      index: 1
+    direction: DOWN
+- tapOn:
+    text: "More options"
+    index: 1
+- tapOn: "Delete"
+- tapOn: "SAVE"
+- assertNotVisible:
+    text: "PRIMARY COLOURS"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/text_block_deleted"

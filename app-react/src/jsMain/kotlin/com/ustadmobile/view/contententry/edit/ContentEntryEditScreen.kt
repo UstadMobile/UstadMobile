@@ -1,23 +1,29 @@
 package com.ustadmobile.view.contententry.edit
 
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.compress.CompressionLevel
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.locale.entityconstants.LicenceConstants
 import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditUiState
 import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewModel
+import com.ustadmobile.core.viewmodel.contententry.stringResource
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.mui.components.UstadCourseBlockEdit
 import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.mui.components.UstadTextEditField
 import com.ustadmobile.util.ext.onTextChange
+import com.ustadmobile.view.components.UstadImageSelectButton
 import com.ustadmobile.view.components.UstadMessageIdSelectField
-import com.ustadmobile.view.components.UstadSwitchField
+import com.ustadmobile.wrappers.quill.ReactQuill
+import kotlinx.coroutines.Dispatchers
 import mui.material.Button
 import mui.material.ButtonVariant
+import mui.material.FormControl
+import mui.material.InputLabel
+import mui.material.MenuItem
+import mui.material.Select
 import mui.material.Stack
 import mui.material.TextField
 import mui.material.Typography
@@ -31,13 +37,13 @@ external interface ContentEntryEditScreenProps : Props {
 
     var uiState: ContentEntryEditUiState
 
-    var onCourseBlockChanged: (CourseBlock?) -> Unit
-
     var onClickUpdateContent: () -> Unit
 
     var onContentEntryChanged: (ContentEntry?) -> Unit
 
-    var onChangeCompress: (Boolean) -> Unit
+    var onSetCompressionLevel: (CompressionLevel) -> Unit
+
+    var onPictureChanged: (String?) -> Unit
 
 }
 
@@ -46,12 +52,15 @@ val ContentEntryEditScreen = FC<Props> {
         ContentEntryEditViewModel(di, savedStateHandle)
     }
 
-    val uiStateVal by viewModel.uiState.collectAsState(ContentEntryEditUiState())
+    val uiStateVal by viewModel.uiState.collectAsState(
+        ContentEntryEditUiState(), Dispatchers.Main.immediate
+    )
 
     ContentEntryEditScreenComponent {
         uiState = uiStateVal
         onContentEntryChanged = viewModel::onContentEntryChanged
-        onCourseBlockChanged = viewModel::onCourseBlockChanged
+        onSetCompressionLevel = viewModel::onSetCompressionLevel
+        onPictureChanged = viewModel::onPictureChanged
     }
 }
 
@@ -82,50 +91,49 @@ private val ContentEntryEditScreenComponent = FC<ContentEntryEditScreenProps> { 
                 }
             }
 
+            UstadImageSelectButton {
+                imageUri = props.uiState.entity?.picture?.cepPictureUri
+                onImageUriChanged = props.onPictureChanged
+                id = "content_entry_image"
+                disabled = !props.uiState.fieldsEnabled
+            }
+
             if (props.uiState.entity?.entry?.leaf == true){
                 Typography {
                     + strings[MR.strings.supported_files]
                 }
             }
 
-            if(props.uiState.contentEntryTitleVisible) {
-                TextField {
-                    value = props.uiState.entity?.entry?.title ?: ""
-                    id = "content_title"
-                    label = ReactNode(strings[MR.strings.title]  + "*")
-                    helperText = ReactNode(props.uiState.titleError ?: strings[MR.strings.required])
-                    error = props.uiState.titleError != null
-                    disabled = !props.uiState.fieldsEnabled
-                    onTextChange = {
-                        props.onContentEntryChanged(
-                            props.uiState.entity?.entry?.shallowCopy {
-                                title = it
-                            }
-                        )
-                    }
+
+            TextField {
+                value = props.uiState.entity?.entry?.title ?: ""
+                id = "content_title"
+                label = ReactNode(strings[MR.strings.title]  + "*")
+                helperText = ReactNode(props.uiState.titleError ?: strings[MR.strings.required])
+                error = props.uiState.titleError != null
+                disabled = !props.uiState.fieldsEnabled
+                onTextChange = {
+                    props.onContentEntryChanged(
+                        props.uiState.entity?.entry?.shallowCopy {
+                            title = it
+                        }
+                    )
                 }
             }
 
-            if(props.uiState.contentEntryDescriptionVisible) {
-                UstadTextEditField {
-                    value = props.uiState.entity?.entry?.description ?: ""
-                    id = "content_description"
-                    label = strings[MR.strings.description]
-                    enabled = props.uiState.fieldsEnabled
-                    onChange = {
-                        props.onContentEntryChanged(
-                            props.uiState.entity?.entry?.shallowCopy {
-                                description = it
-                            }
-                        )
-                    }
-                }
-            }
 
-            if(props.uiState.courseBlockVisible) {
-                UstadCourseBlockEdit {
-                    uiState = props.uiState.courseBlockEditUiState
-                    onCourseBlockChange = props.onCourseBlockChanged
+
+            ReactQuill {
+                value = props.uiState.entity?.entry?.description ?: ""
+                id = "description_quill"
+                placeholder = strings[MR.strings.description]
+                readOnly = !props.uiState.fieldsEnabled
+                onChange = {
+                    props.onContentEntryChanged(
+                        props.uiState.entity?.entry?.shallowCopy {
+                            description = it
+                        }
+                    )
                 }
             }
 
@@ -171,13 +179,35 @@ private val ContentEntryEditScreenComponent = FC<ContentEntryEditScreenProps> { 
                 }
             }
 
-            if (props.uiState.contentCompressVisible){
-                UstadSwitchField {
-                    id = "content_compression_enabled"
-                    checked= props.uiState.compressionEnabled
-                    onChanged = { props.onChangeCompress(it) }
-                    label = strings[MR.strings.compress]
-                    enabled = props.uiState.fieldsEnabled
+            FormControl {
+                fullWidth = true
+
+                InputLabel {
+                    id = "compression_label"
+                    + strings[MR.strings.compression]
+                }
+
+                Select {
+                    value = props.uiState.entity?.contentJobItem?.cjiCompressionLevel?.toString()
+                        ?: CompressionLevel.MEDIUM.value.toString()
+                    id = "compression"
+                    labelId = "compression_label"
+                    label = ReactNode(strings[MR.strings.compression])
+                    disabled = !props.uiState.fieldsEnabled
+                    fullWidth = true
+                    onChange = { event, _ ->
+                        val selectedVal = ("" + event.target.value)
+                        selectedVal.toIntOrNull()?.also {
+                            props.onSetCompressionLevel(CompressionLevel.forValue(it))
+                        }
+                    }
+
+                    CompressionLevel.entries.forEach {
+                        MenuItem {
+                            value = it.value.toString()
+                            + strings[it.stringResource]
+                        }
+                    }
                 }
             }
         }

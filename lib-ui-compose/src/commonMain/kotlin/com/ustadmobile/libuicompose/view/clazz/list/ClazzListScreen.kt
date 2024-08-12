@@ -17,13 +17,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Badge
-import androidx.compose.material.icons.filled.Login
 import androidx.compose.material3.Badge
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.runtime.Composable
@@ -37,9 +37,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.paging.compose.collectAsLazyPagingItems
-import app.cash.paging.Pager
-import app.cash.paging.PagingConfig
 import com.ustadmobile.core.impl.locale.entityconstants.RoleConstants
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListUiState
@@ -51,6 +48,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.nav.NavResultReturner
+import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.EnrolmentRequest
@@ -60,8 +58,10 @@ import com.ustadmobile.libuicompose.components.UstadDetailHeader
 import com.ustadmobile.libuicompose.components.UstadLazyVerticalGrid
 import com.ustadmobile.libuicompose.components.UstadListFilterChipsHeader
 import com.ustadmobile.libuicompose.components.UstadListSortHeader
+import com.ustadmobile.libuicompose.components.UstadNothingHereYet
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.nav.UstadNavControllerPreCompose
+import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
 import com.ustadmobile.libuicompose.util.compose.courseTerminologyEntryResource
 import com.ustadmobile.libuicompose.util.compose.rememberCourseTerminologyEntries
 import com.ustadmobile.libuicompose.util.ext.copyWithNewFabOnClick
@@ -72,6 +72,8 @@ import com.ustadmobile.libuicompose.util.rememberHtmlToPlainText
 import com.ustadmobile.libuicompose.util.rememberTimeFormatter
 import com.ustadmobile.libuicompose.view.clazz.CourseImage
 import com.ustadmobile.libuicompose.viewmodel.ustadViewModel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import moe.tlaster.precompose.navigation.BackStackEntry
 import java.util.TimeZone
 
@@ -120,7 +122,7 @@ fun ClazzListScreen(
                     viewModel.onClickJoinExistingClazz()
                 },
                 headlineContent = { Text(stringResource(MR.strings.join_existing_course)) },
-                leadingContent = { Icon(Icons.Default.Login, contentDescription = null) },
+                leadingContent = { Icon(Icons.AutoMirrored.Default.Login, contentDescription = null) },
             )
 
             if(uiState.canAddNewCourse) {
@@ -138,6 +140,7 @@ fun ClazzListScreen(
 
     ClazzListScreen(
         uiState = uiState,
+        refreshCommandFlow = viewModel.refreshCommandFlow,
         onClickClazz = viewModel::onClickEntry,
         onClickFilterChip = viewModel::onClickFilterChip,
         onClickSortOption = viewModel::onSortOrderChanged,
@@ -148,21 +151,17 @@ fun ClazzListScreen(
 @Composable
 fun ClazzListScreen(
     uiState: ClazzListUiState = ClazzListUiState(),
+    refreshCommandFlow: Flow<RefreshCommand> = emptyFlow(),
     onClickClazz: (Clazz) -> Unit = {},
     onClickFilterChip: (MessageIdOption2) -> Unit = {},
     onClickSortOption: (SortOrderOption) -> Unit = { },
     onClickCancelEnrolmentRequest: (EnrolmentRequest) -> Unit = { },
     sortListMode: SortListMode = defaultSortListMode(),
 ) {
-
-    val pager = remember(uiState.clazzList){
-        Pager(
-            config = PagingConfig(pageSize = 20, enablePlaceholders = true, maxSize = 200),
-            pagingSourceFactory = uiState.clazzList
-        )
-    }
-
-    val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
+    val doorRepoPager = rememberDoorRepositoryPager(
+        pagingSourceFactory = uiState.clazzList,
+        refreshCommandFlow = refreshCommandFlow,
+    )
 
     val hasPendingEnrolments = uiState.pendingEnrolments.isNotEmpty()
     val timeFormatter = rememberTimeFormatter()
@@ -204,7 +203,7 @@ fun ClazzListScreen(
                 key = "pending_divider",
                 span = { GridItemSpan(maxLineSpan) },
             ) {
-                Divider(modifier = Modifier.fillMaxWidth(), thickness = 1.dp)
+                HorizontalDivider(modifier = Modifier.fillMaxWidth(), thickness = 1.dp)
             }
         }
 
@@ -222,7 +221,6 @@ fun ClazzListScreen(
 
         item(span = { GridItemSpan(maxLineSpan) }) {
             UstadListFilterChipsHeader(
-                modifier = Modifier.defaultItemPadding(),
                 filterOptions = uiState.filterOptions,
                 selectedChipId = uiState.selectedChipId,
                 enabled = uiState.fieldsEnabled,
@@ -230,8 +228,15 @@ fun ClazzListScreen(
             )
         }
 
+
+        if(!hasPendingEnrolments && doorRepoPager.isSettledEmpty) {
+            item(span = { GridItemSpan(maxLineSpan) }, key = "empty_message") {
+                UstadNothingHereYet()
+            }
+        }
+
         ustadPagedItems(
-            pagingItems = lazyPagingItems,
+            pagingItems = doorRepoPager.lazyPagingItems,
             key = { it.clazzUid }
         ){
             ClazzListItem(

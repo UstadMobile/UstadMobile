@@ -1,6 +1,6 @@
 package com.ustadmobile.util
 
-import js.core.tupleOf
+import js.array.tupleOf
 import web.url.URLSearchParams
 import kotlin.test.Test
 import kotlin.test.assertEquals

@@ -4,10 +4,12 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetadataStatus
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
+import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.viewmodel.contententry.getmetadata.ContentEntryGetMetadataUiState
 import com.ustadmobile.core.viewmodel.contententry.getmetadata.ContentEntryGetMetadataViewModel
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.useUstadViewModel
+import com.ustadmobile.util.ext.useCenterAlignGridContainer
 import mui.material.CircularProgress
 import mui.material.CircularProgressVariant
 import mui.material.Grid
@@ -17,11 +19,7 @@ import mui.system.responsive
 import mui.system.sx
 import react.FC
 import react.Props
-import web.cssom.AlignItems
-import web.cssom.Height
-import web.cssom.JustifyContent
 import web.cssom.PaddingLeft
-import web.cssom.TextAlign
 import mui.icons.material.ErrorOutline as ErrorIcon
 
 external interface ContentEntryGetMetadataProps: Props {
@@ -30,15 +28,13 @@ external interface ContentEntryGetMetadataProps: Props {
 
 val ContentEntryGetMetadataComponent = FC<ContentEntryGetMetadataProps> {props ->
     val muiAppState = useMuiAppState()
+    val strings = useStringProvider()
 
     Grid {
         container = true
         direction = responsive(GridDirection.column)
         sx {
-            alignItems = AlignItems.center
-            justifyContent = JustifyContent.center
-            height = "calc(100vh - ${muiAppState.appBarHeight}px)".unsafeCast<Height>()
-            textAlign = TextAlign.center
+            useCenterAlignGridContainer(muiAppState)
         }
 
         val errorStr = props.uiState.status.error
@@ -64,10 +60,11 @@ val ContentEntryGetMetadataComponent = FC<ContentEntryGetMetadataProps> {props -
             }
 
             Grid {
-                val strings = useStringProvider()
                 item = true
 
-                + strings[MR.strings.uploading]
+                + "${strings[MR.strings.uploading]}: "
+                + "${UMFileUtil.formatFileSizeMb(props.uiState.status.processedBytes)} /"
+                + "${UMFileUtil.formatFileSizeMb(props.uiState.status.totalBytes)} "
             }
         }else {
             Grid {
@@ -107,7 +104,6 @@ val ContentEntryGetMetadataPreview = FC<Props> {
         uiState = ContentEntryGetMetadataUiState(
             status = ContentEntryGetMetadataStatus(
                 indeterminate = true,
-                progress = 25,
                 error = "SNAFU"
             ),
         )

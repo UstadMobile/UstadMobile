@@ -3,13 +3,12 @@ package com.ustadmobile.mui.components
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.util.ext.assignPropsTo
-import js.core.jso
+import js.objects.jso
 import mui.icons.material.Send as SendIcon
 import mui.material.IconButton
 import mui.material.InputAdornment
 import mui.material.InputAdornmentPosition
 import mui.material.InputBaseProps
-import mui.material.TextField
 import mui.material.TextFieldProps
 import react.FC
 import react.create
@@ -29,6 +28,7 @@ external interface UstadSendTextFieldProps: TextFieldProps {
 val UstadSendTextField = FC<UstadSendTextFieldProps> { props ->
     val strings = useStringProvider()
 
+    println("UstadSendTextField: value = ${props.value} / ${props.value as? String}")
     val isBlank = useMemo(props.value) {
         (props.value as? String).isNullOrBlank()
     }

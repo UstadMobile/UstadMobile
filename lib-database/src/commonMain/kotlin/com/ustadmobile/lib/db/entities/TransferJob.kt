@@ -47,6 +47,8 @@ data class TransferJob(
     var tjOiUid: Long = 0,
 ) {
     companion object {
+        //This entity is not replicated, however, this can be used as part of the key in lists
+        const val TABLE_ID = 1081
 
         const val TYPE_BLOB_UPLOAD = 1
 

@@ -23,6 +23,11 @@ expect abstract class CoursePictureDao: ImageDao {
                coursePictureLct = :time
         WHERE coursePictureUid = :uid       
     """)
-    abstract override suspend fun updateUri(uid: Long, uri: String?, thumbnailUri: String?, time: Long)
+    abstract override suspend fun updateUri(
+        uid: Long,
+        uri: String?,
+        thumbnailUri: String?,
+        time: Long
+    )
 
 }

@@ -4,6 +4,7 @@ import app.cash.paging.PagingSource
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.dayStringResource
 import com.ustadmobile.core.util.ext.toQueryLikeParam
@@ -40,15 +41,11 @@ class ConversationListViewModel(
 ) {
 
     private val pagingSourceFactory: () -> PagingSource<Int, MessageAndOtherPerson> = {
-        activeRepo.messageDao.conversationsForUserAsPagingSource(
+        activeRepo.messageDao().conversationsForUserAsPagingSource(
             searchQuery =  _appUiState.value.searchState.searchText.toQueryLikeParam(),
             accountPersonUid = activeUserPersonUid,
-        ).also {
-            lastPagingSource = it
-        }
+        )
     }
-
-    private var lastPagingSource: PagingSource<Int, MessageAndOtherPerson>? = null
 
     init {
         _uiState.update { prev ->
@@ -77,7 +74,7 @@ class ConversationListViewModel(
 
     override fun onUpdateSearchResult(searchText: String) {
         //will use the searchText as per the appUiState
-        lastPagingSource?.invalidate()
+        _refreshCommandFlow.tryEmit(RefreshCommand())
     }
 
     override fun onClickAdd() {

@@ -7,7 +7,7 @@ import com.ustadmobile.mui.common.md
 import com.ustadmobile.mui.common.xs
 import com.ustadmobile.view.components.UstadBlankIcon
 import web.cssom.*
-import js.core.jso
+import js.objects.jso
 import mui.icons.material.AccountCircle
 import mui.icons.material.CalendarToday
 import mui.icons.material.Visibility

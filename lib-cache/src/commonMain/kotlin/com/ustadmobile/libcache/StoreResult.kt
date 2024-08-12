@@ -1,7 +1,7 @@
 package com.ustadmobile.libcache
 
-import com.ustadmobile.libcache.request.HttpRequest
-import com.ustadmobile.libcache.response.HttpResponse
+import com.ustadmobile.ihttp.request.IHttpRequest
+import com.ustadmobile.ihttp.response.IHttpResponse
 
 /**
  * @param storageSize the size as stored on disk. If the item was compressed using gzip, then this
@@ -9,8 +9,8 @@ import com.ustadmobile.libcache.response.HttpResponse
  */
 data class StoreResult(
     val urlKey: String,
-    val request: HttpRequest,
-    val response: HttpResponse,
+    val request: IHttpRequest,
+    val response: IHttpResponse,
     val integrity: String,
     val storageSize: Long,
     val lockId: Long = 0,

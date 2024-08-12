@@ -3,21 +3,37 @@ package com.ustadmobile.core.contentformats.pdf
 import com.ustadmobile.core.contentformats.AbstractContentImporterTest
 import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.contentjob.InvalidContentException
+import com.ustadmobile.core.domain.compress.pdf.CompressPdfUseCase
+import com.ustadmobile.core.domain.compress.pdf.CompressPdfUseCaseJvm
 import com.ustadmobile.core.test.assertCachedBodyMatchesFileContent
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.ContentEntryImportJob
-import com.ustadmobile.libcache.request.requestBuilder
+import com.ustadmobile.lib.util.SysPathUtil
+import com.ustadmobile.ihttp.request.iRequestBuilder
 import com.ustadmobile.libcache.response.bodyAsString
 import com.ustadmobile.util.test.ResourcesDispatcher
 import com.ustadmobile.util.test.ext.newFileFromResource
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockWebServer
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
 class PdfContentImporterJvmTest : AbstractContentImporterTest() {
+
+    private var compressPdfUseCase: CompressPdfUseCase? = null
+
+    @BeforeTest
+    fun setupPdf() {
+        val gsPath = SysPathUtil.findCommandInPath("gs")
+        compressPdfUseCase = if(gsPath != null) {
+            CompressPdfUseCaseJvm(gsPath, temporaryFolder.newFolder())
+        }else {
+            null
+        }
+    }
 
     @Test
     fun givenValidPdf_whenExtractMetadataCalled_thenWillReturnMetadataEntry() {
@@ -32,6 +48,7 @@ class PdfContentImporterJvmTest : AbstractContentImporterTest() {
             json = json,
             getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
             uriHelper = uriHelper,
+            compressPdfUseCase = compressPdfUseCase,
         )
 
         val metadata = runBlocking {
@@ -56,6 +73,7 @@ class PdfContentImporterJvmTest : AbstractContentImporterTest() {
             json = json,
             getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
             uriHelper = uriHelper,
+            compressPdfUseCase = compressPdfUseCase,
         )
 
         val metadata = runBlocking {
@@ -79,6 +97,7 @@ class PdfContentImporterJvmTest : AbstractContentImporterTest() {
             json = json,
             getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
             uriHelper = uriHelper,
+            compressPdfUseCase = compressPdfUseCase,
         )
 
         runBlocking {
@@ -104,6 +123,7 @@ class PdfContentImporterJvmTest : AbstractContentImporterTest() {
             json = json,
             getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
             uriHelper = uriHelper,
+            compressPdfUseCase = compressPdfUseCase,
         )
 
         val result = runBlocking {
@@ -117,7 +137,7 @@ class PdfContentImporterJvmTest : AbstractContentImporterTest() {
         }
 
         val manifestUrl = result.cevManifestUrl
-        val manifestResponse = ustadCache.retrieve(requestBuilder(manifestUrl!!))
+        val manifestResponse = ustadCache.retrieve(iRequestBuilder(manifestUrl!!))
         val manifest = json.decodeFromString(
             ContentManifest.serializer(),
             manifestResponse!!.bodyAsString()!!
@@ -146,6 +166,7 @@ class PdfContentImporterJvmTest : AbstractContentImporterTest() {
                 json = json,
                 getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
                 uriHelper = uriHelper,
+                compressPdfUseCase = compressPdfUseCase,
             )
 
             val result = runBlocking {
@@ -159,7 +180,7 @@ class PdfContentImporterJvmTest : AbstractContentImporterTest() {
             }
 
             val manifestUrl = result.cevManifestUrl
-            val manifestResponse = ustadCache.retrieve(requestBuilder(manifestUrl!!))
+            val manifestResponse = ustadCache.retrieve(iRequestBuilder(manifestUrl!!))
             val manifest = json.decodeFromString(
                 ContentManifest.serializer(),
                 manifestResponse!!.bodyAsString()!!

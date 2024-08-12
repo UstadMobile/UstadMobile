@@ -2,7 +2,7 @@
 
 #Parse command line arguments as per
 # /usr/share/doc/util-linux/examples/getopt-example.bash
-TEMP=$(getopt -o 's:u:p:e:t:a:c:r' --long 'serial1:,username:,password:,endpoint:,test:,apk:,console-output,result:' -n 'run-maestro-tests.sh' -- "$@")
+TEMP=$(getopt -o 'hs:u:p:e:t:a:c:r' --long 'help,serial1:,username:,password:,endpoint:,test:,apk:,console-output,result:' -n 'run-maestro-tests.sh' -- "$@")
 
 
 eval set -- "$TEMP"
@@ -20,6 +20,20 @@ USECONSOLEOUTPUT=0
 echo $SCRIPTDIR
 while true; do
         case "$1" in
+             '-h'|'--help')
+                  echo "run-maestro-test.sh"
+                  echo "-h | --help print this help message"
+                  echo "-s | --serial1 (serial) the android device serial (as per adb devices) - required"
+                  echo "-u | --username (username)  admin username"
+                  echo "-p | --password (password) admin password"
+                  echo "-e | --endpoint (http-endpoint) the endpoint of the server to connect to"
+                  echo "-t | --test (testname) specify a specific test to run e.g. the filename of a test in e2e-tests (without .yaml extension)"
+                  echo "-a | --apk (apk-path) apk to install (defaults to release apk from app-android module)"
+                  echo "-c | --console-output use console output mode with Maestro"
+                  echo "-r | --result (result-dir) directory to save junit test results"
+                  exit 0
+                  ;;
+
              '-s'|'--serial1')
                 	TESTSERIAL=$2
                         shift 2
@@ -74,7 +88,7 @@ while true; do
 done
 
 if [ "$TESTSERIAL" == "" ]; then
-  echo "Please specify adb device serial usign --serial1 param"
+  echo "Please specify adb device serial usign --serial1 param or use --help to see all options"
   exit 1
 fi
 
@@ -138,8 +152,7 @@ fi
 
 maestro  --device=$TESTSERIAL  test -e ENDPOINT=$ENDPOINT -e USERNAME=$TESTUSER \
          -e PASSWORD=$TESTPASS -e CONTROLSERVER=$CONTROLSERVER \
-         -e TESTSERIAL=$TESTSERIAL \
-         $TESTARG -e TEST=$TEST -e TESTRESULTSDIR=$TESTRESULTSDIR  $OUTPUTARGS\
+         -e TESTSERIAL=$TESTSERIAL $TESTARG -e TEST=$TEST -e TESTRESULTSDIR=$TESTRESULTSDIR $OUTPUTARGS
 
 
 TESTSTATUS=$?

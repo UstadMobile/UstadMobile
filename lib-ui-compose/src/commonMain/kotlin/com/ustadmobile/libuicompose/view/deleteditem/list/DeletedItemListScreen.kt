@@ -8,18 +8,18 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import app.cash.paging.Pager
-import app.cash.paging.PagingConfig
-import app.cash.paging.compose.collectAsLazyPagingItems
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.viewmodel.deleteditem.DeletedItemListUiState
 import com.ustadmobile.core.viewmodel.deleteditem.DeletedItemListViewModel
-import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.lib.db.entities.DeletedItem
+import com.ustadmobile.libuicompose.components.ustadPagedItems
+import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
+import com.ustadmobile.libuicompose.util.rememberEmptyFlow
 import dev.icerock.moko.resources.compose.stringResource
-import com.ustadmobile.core.MR
+import kotlinx.coroutines.flow.Flow
 
 @Composable
 fun DeletedItemListScreen(
@@ -62,17 +62,15 @@ fun DeletedItemListScreen(
 @Composable
 fun DeletedItemListScreen(
     uiState: DeletedItemListUiState,
+    refreshCommandFlow: Flow<RefreshCommand> = rememberEmptyFlow(),
     onClickRestore: (DeletedItem) -> Unit = { },
     onClickDeletePermanently: (DeletedItem) -> Unit = { },
 ) {
-    val pager = remember(uiState.deletedItemsList) {
-        Pager(
-            pagingSourceFactory = uiState.deletedItemsList,
-            config = PagingConfig(pageSize = 20, enablePlaceholders = true)
-        )
-    }
+    val repositoryResult = rememberDoorRepositoryPager(
+        uiState.deletedItemsList, refreshCommandFlow
+    )
 
-    val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
+    val lazyPagingItems = repositoryResult.lazyPagingItems
 
     LazyColumn(
         modifier = Modifier.fillMaxSize()

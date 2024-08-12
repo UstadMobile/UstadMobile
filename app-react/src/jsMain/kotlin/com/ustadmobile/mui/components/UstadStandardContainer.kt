@@ -1,7 +1,7 @@
 package com.ustadmobile.mui.components
 
 import csstype.PropertiesBuilder
-import js.core.jso
+import js.objects.jso
 import mui.material.Container
 import mui.material.ContainerProps
 import react.FC

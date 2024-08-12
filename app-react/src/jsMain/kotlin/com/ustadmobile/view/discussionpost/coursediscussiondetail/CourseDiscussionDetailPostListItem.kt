@@ -8,7 +8,7 @@ import com.ustadmobile.lib.db.entities.DiscussionPostWithDetails
 import com.ustadmobile.mui.components.ThemeContext
 import com.ustadmobile.view.components.UstadPersonAvatar
 import com.ustadmobile.wrappers.intl.Intl
-import js.core.jso
+import js.objects.jso
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDateTime
 import web.cssom.Overflow

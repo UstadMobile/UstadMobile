@@ -1,10 +1,10 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
-    ext.version_kotlin = '1.9.21'
+    ext.version_kotlin = '1.9.23'
     ext.version_shadow = "8.1.1"
-    ext.atomicfu_version = '0.23.1'
-    ext.version_ktor = "2.3.6"
+    ext.atomicfu_version = '0.23.2'
+    ext.version_ktor = "2.3.9"
     ext.version_moko_resources = "0.23.0"
 
     repositories {
@@ -21,8 +21,8 @@ buildscript {
 }
 
 plugins {
-    id 'com.android.application' version '8.2.2' apply false
-    id 'com.android.library' version '8.2.2' apply false
+    id 'com.android.application' version '8.5.0' apply false
+    id 'com.android.library' version '8.5.0' apply false
     id 'org.jetbrains.kotlin.android' version "$version_kotlin" apply false
     id 'org.jetbrains.kotlin.plugin.serialization' version "$version_kotlin" apply false
     id 'org.jetbrains.kotlin.plugin.atomicfu' version "$version_kotlin" apply false
@@ -31,8 +31,11 @@ plugins {
     id 'org.jetbrains.kotlin.jvm' version "$version_kotlin" apply false
     alias(libs.plugins.jetbrains.compose) apply false
     id 'com.github.gmazzo.buildconfig' version '5.3.5' apply false
-    id 'com.android.test' version '8.2.2' apply false
-    id 'androidx.baselineprofile' version '1.2.2' apply false
+    id 'com.android.test' version '8.5.0' apply false
+    // Version of Android.baselineprofile as per
+    // https://mvnrepository.com/artifact/androidx.baselineprofile/androidx.baselineprofile.gradle.plugin
+    id 'androidx.baselineprofile' version '1.2.4' apply false
+    id 'base'
 }
 
 
@@ -43,7 +46,8 @@ allprojects {
         mavenCentral()
         mavenLocal()
 
-        //Temp jitpack substitute
+        //Primary Maven repository for artifacts built on UstadMobile Jenkins
+        // Includes Door and Jetpack Media3 AV1 decoder
         maven {
             url "https://devserver3.ustadmobile.com/maven2"
         }
@@ -83,7 +87,7 @@ allprojects {
 }
 
 //Major.minor.database version
-version = "0.4.99"
+version = "0.4.127"
 group = "com.ustadmobile.app"
 
 /**
@@ -93,135 +97,23 @@ group = "com.ustadmobile.app"
  */
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 323
+    ustadVersionCode = 351
 
-    version_retriever = "0.0.1e"
-    version_xmlpullparserkmp = '0.0.26'
 
     version_gradle_buildconfig_plugin = "1.1.7"
-    version_ksp = "1.0.15"
-    version_jacoco_tool = "0.8.5"
+    version_ksp = "1.0.19"
     version_kotlin_jvmTarget = "17"
-    version_kotlinx_serialization = "1.6.1"
-    version_xmlutil = "0.86.2"
-    version_klock = "2.4.13"
-    version_ktor = "2.3.6"
-    version_coroutines = "1.7.3"
-    version_atomicfu = "0.22.0"
-    version_kotlinx_html = "0.9.1"
-    version_kotlinx_datetime = "0.4.1"
-    version_moko_resources = "0.23.0"
+    //We need to use an exclude on this dependency, so cannot use only the TOML
+    version_jcabi_manifests = "2.1.0"
 
-
-    version_junit = "4.13.2"
-    version_nanohttpd = "2.3.1"
-    version_kxml = "2.3.0"
-    version_json = "20231013"
-    version_byte_buddy = "1.14.10"
-
-    version_okhttp = "4.12.0"
-    version_commons_io = "2.15.0"
-    version_gson = "2.10.1"
-    version_apache_commons_cli = "1.6.0"
-    version_apache_commons_lang = "3.14.0"
-    version_apache_commons_text = "1.8"
-    version_apache_commons_dbcp2 = "2.11.0"
-    version_mpandroidchart = "v3.1.0"
-
-    version_sqlite_jdbc = "3.42.0.0"
-    version_kotlin_mockito = "5.1.0"
-    version_apache_commons_pool2 = "2.12.0"
-    version_jsoup = "1.17.1"
-    version_selenium = "4.15.0"
-    version_nv_lang = "1.29"
-    version_web_driver = "5.6.2"
-    version_postgres_jdbc = "42.6.0"
-    version_log4j = "2.21.1"
-    version_browser_proxy = "2.1.5"
-    version_logback = "1.4.13"
-    version_kodein_di = "7.21.0"
-    version_netty_tcnative = "2.0.62.Final"
-    version_httpcomponents_core5 = "5.2.3"
-    version_argparse4j = "0.9.0"
 
     version_android_buildtools = "30.0.2"
     version_android_compile_sdk = 34
     version_android_target_sdk = 34
     version_android_min_sdk = 21
-    version_android_picasso = "2.8"
-    version_android_desugar_jdk_libs = "2.0.4"
-
-    //Androidx versions as per https://developer.android.com/jetpack/androidx/versions
-    version_androidx_annotation = "1.7.0"
-
-    version_androidx_appcompat = "1.6.1"
-
-    version_compose_bom = "2023.10.01"
-
-    version_compose_accompanist = "0.32.0"
-
-    //As per https://github.com/material-components/material-components-android-compose-theme-adapter/releases
-    version_compose_theme_adapter = "0.32.0"
-
-    //List reordering for compose: https://github.com/aclassen/ComposeReorderable
-    version_composereorderable = "0.9.6"
-
-    version_androidx_legacy_support = "1.0.0"
-    version_androidx_activity = "1.8.1"
-    version_androidx_fragment = "1.6.2"
-    version_androidx_core = '1.12.0'
-    version_androidx_cardview = "1.0.0"
-    version_androidx_coordinatorlayout = "1.2.0"
-    version_androidx_lifecycle = "2.6.2"
-    version_androidx_legacy = "1.0.0"
-    version_android_room = "2.6.0"
-    version_androidx_arch = "2.1.0"
-    version_androidx_recyclerview = "1.3.2"
-    version_android_multidex = "2.0.1"
-    version_android_workmanager = "2.8.1"
-    version_android_datastore = "1.0.0"
-    version_android_flexbox = "3.0.0"
-    version_android_espresso = "3.5.1"
-    version_android_acra = "5.11.3"
-    version_androidx_test_core = "1.5.0"
-    version_androidx_orchestrator = "1.4.2"
-    version_androidx_test_rules = "1.5.0"
-    version_android_junit_runner = "1.5.2"
-    version_androidx_test_ext_junit = "1.1.5" //see https://mvnrepository.com/artifact/androidx.test.ext/junit
-    version_android_espresso_recyclerviewchildactions = "1.0"
-    version_androidx_databinding = "7.0.4"
-    version_android_mockito = "5.7.0"
-    version_android_roboelectric = "4.10.3"
-    version_android_uiautomator = "2.2.0"
-    version_android_firebase_auth = "16.0.4"
-    version_android_facebook_login = "4.37.0"
-    version_android_twitter_login = "3.3.0"
-    version_android_seismic = "1.0.3"
-    version_play_core = "1.10.3"
-    version_android_leakcanary = "2.10"
-    version_android_play_services_safetynet = "17.0.0"
-    version_android_circleimageview = "3.1.0"
-    version_androidx_viewpager2 = "1.1.0-rc01"
-    version_android_wordpress_utils = "2.0.0"
-
-    version_android_litr = "1.5.5"  //see https://github.com/linkedin/LiTr
-    version_android_sharp = "1.1.3@aar"
-
-    version_android_panickit = "1.0"
-
-    version_js_node = "10.15.1"
-    version_js_yarn="1.13.0"
-
-    version_jakartamail="2.0.1"
-
-    version_persian_date_picker_aliab="1.7.1"
-    version_better_link_movement="2.2.0"
-
-    version_jcabi_manifests = "2.1.0"
-
 
     /*Kotlin react web app*/
-    kotlinWrappersVersion = "1.0.0-pre.651"
+    kotlinWrappersVersion = "1.0.0-pre.721"
 
     version_npm_mement_io = "^2.14.0"
 
@@ -231,8 +123,6 @@ ext {
     version_npm_timezones = "^1.6.1"
 
     version_npm_emotion = "11.10.5"
-    version_npm_google_charts = "^3.0.15"
-    version_npm_html_to_image = "^1.9.0"
     version_npm_date_fns = "2.29.1"
     version_npm_mime_matcher = "^1.0.5"
     version_npm_react_quill = "2.0.0"
@@ -242,11 +132,14 @@ ext {
     version_npm_mui_tel_input = "4.0.1"
     version_npm_libphonenumber_js = "^1.10.47"
     version_npm_linkify = "^4.1.3"
+    version_npm_dompurify = "^3.0.11"
     version_pdfview_android = "1.1.0"
     version_pdfview_android = "1.1.0"
 
     version_npm_uuid = "^9.0.1"
     version_compressorjs = "^1.2.1"
+    version_npm_xxhash = "^0.2.2"
+    version_npm_cuint = "^0.2.2"
 }
 
 /*
@@ -324,3 +217,12 @@ tasks.named("dependencyUpdates").configure {
         isNonStable(it.candidate.version)
     }
 }
+
+clean {
+    delete("test-end-to-end/android-maestro/build",
+            "test-end-to-end/webapp-cypress/cypress/videos",
+            "test-end-to-end/webapp-cypress/cypress/screenshots",
+            "test-end-to-end/webapp-cypress/results",
+            "test-end-to-end/webapp-cypress/logs")
+}
+

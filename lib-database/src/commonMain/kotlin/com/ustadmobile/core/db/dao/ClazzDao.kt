@@ -53,6 +53,21 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
 
     @HttpAccessible(
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall("findByUidAsync")
+        )
+    )
+    @Query("""
+        SELECT EXISTS(
+               SELECT Clazz.clazzUid
+                 FROM Clazz
+                WHERE Clazz.clazzUid = :clazzUid)
+    """)
+    abstract suspend fun clazzUidExistsAsync(clazzUid: Long): Boolean
+
+
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
     )
     @Query("SELECT * FROM Clazz WHERE clazzUid = :uid")
     abstract fun findByUidAsFlow(uid: Long): Flow<Clazz?>
@@ -75,7 +90,7 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
                LEFT JOIN CoursePicture
                          ON CoursePicture.coursePictureUid = :uid
          WHERE Clazz.clazzUid = :uid""")
-    abstract suspend fun findByUidWithHolidayCalendarAsync(uid: Long): ClazzWithHolidayCalendarAndSchoolAndTerminology?
+    abstract suspend fun findByUidWithHolidayCalendarAsync(uid: Long): ClazzWithHolidayCalendarAndAndTerminology?
 
     @Update
     abstract suspend fun updateAsync(entity: Clazz): Int
@@ -270,7 +285,13 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
                   $PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT2
                   ${PermissionFlags.PERSON_VIEW}
                   $PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT3
-               ) AS hasViewMembersPermission
+               ) AS hasViewMembersPermission,
+               (  $PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT1 
+                  ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}
+                  $PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT2
+                  ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}
+                  $PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT3
+               ) AS hasLearningRecordPermission
           FROM Clazz
          WHERE Clazz.clazzUid = :clazzUid
            AND (  $PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT1 
@@ -292,8 +313,7 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
     )
     @Query("""
         SELECT Clazz.*, 
-               HolidayCalendar.*, 
-               School.*,
+               HolidayCalendar.*,
                CoursePicture.*,
                (SELECT COUNT(DISTINCT ClazzEnrolment.clazzEnrolmentPersonUid) 
                   FROM ClazzEnrolment 
@@ -311,8 +331,6 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
          FROM Clazz 
               LEFT JOIN HolidayCalendar 
                         ON Clazz.clazzHolidayUMCalendarUid = HolidayCalendar.umCalendarUid
-              LEFT JOIN School 
-                        ON School.schoolUid = Clazz.clazzSchoolUid
               LEFT JOIN CourseTerminology
                         ON CourseTerminology.ctUid = Clazz.clazzTerminologyUid
               LEFT JOIN CoursePicture
@@ -328,8 +346,7 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
      */
     @Query("""
         SELECT Clazz.*, 
-               HolidayCalendar.*, 
-               School.*,
+               HolidayCalendar.*,
                CourseTerminology.*,
                CoursePicture.*
          FROM Clazz 
@@ -337,12 +354,7 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
               ON ((clazz.clazzHolidayUMCalendarUid != 0 
                 AND HolidayCalendar.umCalendarUid = clazz.clazzHolidayUMCalendarUid)
                 OR clazz.clazzHolidayUMCalendarUid = 0 AND clazz.clazzSchoolUid = 0 
-                AND HolidayCalendar.umCalendarUid = (SELECT schoolHolidayCalendarUid 
-                                                       FROM School 
-                                                      WHERE schoolUid = clazz.clazzSchoolUid))
-              LEFT JOIN School 
-              ON School.schoolUid = Clazz.clazzSchoolUid
-              
+                AND HolidayCalendar.umCalendarUid = 0) 
               LEFT JOIN CourseTerminology
               ON CourseTerminology.ctUid = Clazz.clazzTerminologyUid
               
@@ -352,10 +364,7 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
         WHERE :filterUid = 0 
            OR Clazz.clazzUid = :filterUid
     """)
-    abstract fun findClazzesWithEffectiveHolidayCalendarAndFilter(filterUid: Long): List<ClazzWithHolidayCalendarAndSchoolAndTerminology>
-
-    @Query("SELECT Clazz.*, School.* FROM Clazz LEFT JOIN School ON School.schoolUid = Clazz.clazzSchoolUid WHERE clazz.clazzUid = :clazzUid")
-    abstract suspend fun getClazzWithSchool(clazzUid: Long): ClazzWithSchool?
+    abstract fun findClazzesWithEffectiveHolidayCalendarAndFilter(filterUid: Long): List<ClazzWithHolidayCalendarAndAndTerminology>
 
     @HttpAccessible(
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
@@ -389,6 +398,21 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
     abstract fun getClazzNameAndTerminologyAsFlow(clazzUid: Long): Flow<ClazzNameAndTerminology?>
 
     @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall("getClazzNameAndTerminologyAsFlow"),
+            HttpServerFunctionCall("findByUidAsync")
+        )
+    )
+    @Query("""
+        SELECT Clazz.clazzName AS clazzName
+          FROM Clazz
+         WHERE Clazz.clazzUid = :clazzUid                
+    """)
+    abstract fun getClazzNameAsFlow(clazzUid: Long): Flow<String?>
+
+
+    @HttpAccessible(
         pullQueriesToReplicate = arrayOf(
             HttpServerFunctionCall("findByUidAsync")
         ),
@@ -399,4 +423,88 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
          WHERE Clazz.clazzUid = :clazzUid 
     """)
     abstract suspend fun getClazzTimeZoneByClazzUidAsync(clazzUid: Long): String?
+
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+    )
+    @Query("""
+        SELECT Clazz.*
+          FROM Clazz
+         WHERE Clazz.clazzName IN (:names) 
+    """)
+    abstract suspend fun getCoursesByName(names: List<String>): List<Clazz>
+
+
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall("findOneRosterUserClazzes"),
+            HttpServerFunctionCall(
+                functionName = "personHasPermissionWithClazzEntities2",
+                functionDao = CoursePermissionDao::class,
+                functionArgs = arrayOf(
+                    HttpServerFunctionParam(
+                        name = "clazzUid",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "0",
+                    )
+                )
+            ),
+            HttpServerFunctionCall(
+                functionName = "findAllByPersonUid",
+                functionDao = SystemPermissionDao::class,
+                functionArgs = arrayOf(
+                    HttpServerFunctionParam(
+                        name = "includeDeleted",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "true",
+                    )
+                )
+            ),
+        )
+    )
+    /**
+     *
+     * @param accountPersonUid the personuid for the auth token holder
+     * @param filterByEnrolledMemberPersonUid the sourcedid of the user
+     */
+    @Query("""
+        SELECT Clazz.*
+          FROM CLAZZ
+               LEFT JOIN ClazzEnrolment 
+                    ON ClazzEnrolment.clazzEnrolmentUid =
+                       COALESCE(
+                       (SELECT ClazzEnrolment.clazzEnrolmentUid 
+                          FROM ClazzEnrolment
+                         WHERE ClazzEnrolment.clazzEnrolmentPersonUid = :accountPersonUid
+                           AND ClazzEnrolment.clazzEnrolmentActive
+                           AND ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid 
+                      ORDER BY ClazzEnrolment.clazzEnrolmentDateLeft DESC   
+                         LIMIT 1), 0)
+          WHERE (   Clazz.clazzOwnerPersonUid = :accountPersonUid
+                 OR EXISTS(SELECT CoursePermission.cpUid
+                             FROM CoursePermission
+                            WHERE CoursePermission.cpClazzUid = Clazz.clazzUid
+                              AND (   CoursePermission.cpToPersonUid = :accountPersonUid 
+                                   OR CoursePermission.cpToEnrolmentRole = ClazzEnrolment.clazzEnrolmentRole )
+                              AND (CoursePermission.cpPermissionsFlag & ${PermissionFlags.COURSE_VIEW}) > 0 
+                              AND NOT CoursePermission.cpIsDeleted)   
+                 OR (${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT1}
+                     ${PermissionFlags.COURSE_VIEW}
+                     ${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT2}
+                    )             
+                )
+           AND EXISTS 
+                (SELECT ClazzEnrolment.clazzEnrolmentUid
+                   FROM ClazzEnrolment
+                  WHERE ClazzEnrolment.clazzEnrolmentPersonUid = :filterByEnrolledMemberPersonUid
+                    AND ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid
+                )  
+    """)
+    abstract suspend fun findOneRosterUserClazzes(
+        accountPersonUid: Long,
+        filterByEnrolledMemberPersonUid: Long,
+    ): List<Clazz>
+
+
 }

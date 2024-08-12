@@ -43,9 +43,12 @@ class ClazzAssignmentEditViewModelTest  : AbstractMainDispatcherTest() {
                     caPrivateCommentsEnabled = false
                 })
 
-                viewModel.onCourseBlockChanged(readyState.courseBlockEditUiState.courseBlock?.shallowCopy {
-                    cbTitle = "Assignment"
-                })
+                viewModel.onCourseBlockChanged(
+                    readyState.entity?.courseBlock?.copy(
+                        cbTitle = "Assignment",
+                        cbMaxPoints = 10f,
+                    )
+                )
 
                 viewModel.onClickSave()
                 cancelAndIgnoreRemainingEvents()
@@ -94,9 +97,11 @@ class ClazzAssignmentEditViewModelTest  : AbstractMainDispatcherTest() {
 
             viewModel.uiState.test(timeout = 5.seconds) {
                 val readyState = awaitItemWhere { it.fieldsEnabled }
-                viewModel.onCourseBlockChanged(readyState.courseBlockEditUiState.courseBlock?.shallowCopy {
-                    cbMaxPoints = 0
-                })
+                viewModel.onCourseBlockChanged(
+                    readyState.entity?.courseBlock?.copy(
+                        cbMaxPoints = 0f
+                    )
+                )
                 viewModel.onClickSave()
                 cancelAndIgnoreRemainingEvents()
             }
@@ -117,10 +122,12 @@ class ClazzAssignmentEditViewModelTest  : AbstractMainDispatcherTest() {
 
             viewModel.uiState.test(timeout = 5.seconds) {
                 val readyState = awaitItemWhere { it.fieldsEnabled }
-                viewModel.onCourseBlockChanged(readyState.courseBlockEditUiState.courseBlock?.shallowCopy {
-                    cbHideUntilDate = systemTimeInMillis()
-                    cbDeadlineDate = systemTimeInMillis() - 100000
-                })
+                viewModel.onCourseBlockChanged(
+                    readyState.entity?.courseBlock?.copy(
+                        cbHideUntilDate = systemTimeInMillis(),
+                        cbDeadlineDate = systemTimeInMillis() - 100000
+                    )
+                )
                 viewModel.onClickSave()
 
                 cancelAndIgnoreRemainingEvents()
@@ -142,10 +149,12 @@ class ClazzAssignmentEditViewModelTest  : AbstractMainDispatcherTest() {
             viewModel.uiState.test(timeout = 5.seconds) {
                 val readyState = awaitItemWhere { it.fieldsEnabled }
 
-                viewModel.onCourseBlockChanged(readyState.courseBlockEditUiState.courseBlock?.shallowCopy {
-                    cbDeadlineDate = systemTimeInMillis() + 100000
-                    cbGracePeriodDate = systemTimeInMillis()
-                })
+                viewModel.onCourseBlockChanged(
+                    readyState.entity?.courseBlock?.copy(
+                        cbDeadlineDate = systemTimeInMillis() + 100000,
+                        cbGracePeriodDate = systemTimeInMillis()
+                    )
+                )
 
                 viewModel.onClickSave()
                 cancelAndIgnoreRemainingEvents()
@@ -164,7 +173,7 @@ class ClazzAssignmentEditViewModelTest  : AbstractMainDispatcherTest() {
             val testAssignment = ClazzAssignment().apply {
                 caGroupUid = 0//individual submission
             }
-            val clazzAssignmentUid = activeDb.clazzAssignmentDao.insert(testAssignment)
+            val clazzAssignmentUid = activeDb.clazzAssignmentDao().insert(testAssignment)
             testAssignment.caUid = clazzAssignmentUid
             val testBlock = CourseBlockAndEditEntities(
                 courseBlock = CourseBlock().apply {
@@ -183,7 +192,7 @@ class ClazzAssignmentEditViewModelTest  : AbstractMainDispatcherTest() {
             viewModel.uiState.test(timeout = 5.seconds) {
                 val readyState = awaitItemWhere { it.fieldsEnabled }
 
-                activeDb.courseAssignmentSubmissionDao.insert(CourseAssignmentSubmission().apply {
+                activeDb.courseAssignmentSubmissionDao().insert(CourseAssignmentSubmission().apply {
                     casAssignmentUid = clazzAssignmentUid
                     casSubmitterUid = 1
                 })
@@ -210,7 +219,7 @@ class ClazzAssignmentEditViewModelTest  : AbstractMainDispatcherTest() {
                 caMarkingType = ClazzAssignment.MARKED_BY_COURSE_LEADER
                 caGroupUid = 0//individual submission
             }
-            val clazzAssignmentUid = activeDb.clazzAssignmentDao.insert(testAssignment)
+            val clazzAssignmentUid = activeDb.clazzAssignmentDao().insert(testAssignment)
             testAssignment.caUid = clazzAssignmentUid
             val testBlock = CourseBlockAndEditEntities(
                 courseBlock = CourseBlock().apply {
@@ -228,7 +237,7 @@ class ClazzAssignmentEditViewModelTest  : AbstractMainDispatcherTest() {
             viewModel.uiState.test(timeout = 5.seconds) {
                 val readyState = awaitItemWhere { it.fieldsEnabled }
 
-                activeDb.courseAssignmentSubmissionDao.insert(CourseAssignmentSubmission().apply {
+                activeDb.courseAssignmentSubmissionDao().insert(CourseAssignmentSubmission().apply {
                     casAssignmentUid = clazzAssignmentUid
                     casSubmitterUid = 1
                 })

@@ -1,6 +1,7 @@
 package com.ustadmobile.util.ext
 
 import kotlinx.coroutines.CompletableDeferred
+import web.events.EventHandler
 import web.idb.IDBFactory
 
 /**
@@ -9,8 +10,8 @@ import web.idb.IDBFactory
 suspend fun IDBFactory.deleteDatabaseAsync(name: String) {
     val completable = CompletableDeferred<Unit>()
     val request = deleteDatabase(name)
-    request.onsuccess = { completable.complete(Unit) }
-    request.onerror = {
+    request.onsuccess = EventHandler { completable.complete(Unit) }
+    request.onerror = EventHandler {
         completable.completeExceptionally(Exception("Error deleting database: $name"))
     }
     completable.await()

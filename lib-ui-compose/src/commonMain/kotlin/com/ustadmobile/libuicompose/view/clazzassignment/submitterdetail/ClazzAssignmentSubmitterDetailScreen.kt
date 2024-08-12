@@ -5,12 +5,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.paging.compose.collectAsLazyPagingItems
-import app.cash.paging.Pager
-import app.cash.paging.PagingConfig
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.clazzassignment.averageMark
@@ -29,9 +25,11 @@ import com.ustadmobile.libuicompose.components.UstadListSpacerItem
 import com.ustadmobile.libuicompose.components.UstadOpeningBlobInfoBottomSheet
 import com.ustadmobile.libuicompose.components.isDesktop
 import com.ustadmobile.libuicompose.components.ustadPagedItems
+import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
 import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
 import com.ustadmobile.libuicompose.util.linkify.rememberLinkExtractor
 import com.ustadmobile.libuicompose.util.rememberDateFormat
+import com.ustadmobile.libuicompose.util.rememberEmptyFlow
 import com.ustadmobile.libuicompose.util.rememberTimeFormatter
 import com.ustadmobile.libuicompose.view.clazzassignment.CommentListItem
 import com.ustadmobile.libuicompose.view.clazzassignment.CourseAssignmentSubmissionComponent
@@ -40,6 +38,7 @@ import com.ustadmobile.libuicompose.view.clazzassignment.UstadAssignmentSubmissi
 import com.ustadmobile.libuicompose.view.clazzassignment.UstadCourseAssignmentMarkListItem
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 import java.util.TimeZone
 
@@ -53,6 +52,7 @@ fun ClazzAssignmentSubmitterDetailScreen(
 
     ClazzAssignmentSubmitterDetailScreen(
         uiState = uiState,
+        newPrivateCommentText = viewModel.newPrivateCommentText,
         onClickSubmitGrade = viewModel::onClickSubmitMark,
         onClickSubmitGradeAndMarkNext = viewModel::onClickSubmitMarkAndGoNext,
         onChangePrivateComment = viewModel::onChangePrivateComment,
@@ -76,6 +76,7 @@ fun ClazzAssignmentSubmitterDetailScreen(
 @Composable
 fun ClazzAssignmentSubmitterDetailScreen(
     uiState: ClazzAssignmentSubmitterDetailUiState,
+    newPrivateCommentText: Flow<String>,
     onClickSubmitGrade: () -> Unit = {},
     onClickSubmitGradeAndMarkNext: () -> Unit = {},
     onChangePrivateComment: (String) -> Unit = {},
@@ -88,14 +89,11 @@ fun ClazzAssignmentSubmitterDetailScreen(
     onDeleteComment: (Comments) -> Unit = { },
 ){
 
-    val privateCommentsPager = remember(uiState.privateCommentsList) {
-        Pager(
-            pagingSourceFactory = uiState.privateCommentsList,
-            config = PagingConfig(pageSize = 50, enablePlaceholders = true)
-        )
-    }
+    val privateCommentsPager = rememberDoorRepositoryPager(
+        uiState.privateCommentsList, rememberEmptyFlow()
+    )
 
-    val privateCommentsLazyPagingItems = privateCommentsPager.flow.collectAsLazyPagingItems()
+    val privateCommentsLazyPagingItems = privateCommentsPager.lazyPagingItems
 
     val linkExtractor = rememberLinkExtractor()
 
@@ -110,8 +108,8 @@ fun ClazzAssignmentSubmitterDetailScreen(
         UstadAssignmentSubmissionStatusHeaderItems(
             submissionStatus = submissionStatusFor(uiState.marks, uiState.submissionList),
             averageMark = uiState.marks.averageMark(),
-            maxPoints = uiState.courseBlock?.cbMaxPoints ?: 0,
-            submissionPenaltyPercent = uiState.courseBlock?.cbLateSubmissionPenalty ?: 0
+            maxPoints = uiState.block?.courseBlock?.cbMaxPoints ?: 0f,
+            submissionPenaltyPercent = uiState.block?.courseBlock?.cbLateSubmissionPenalty ?: 0
         )
 
         item(key = "submissionheader") {
@@ -179,7 +177,7 @@ fun ClazzAssignmentSubmitterDetailScreen(
             item(key = "draftmark") {
                 CourseAssignmentMarkEdit(
                     draftMark = draftMarkVal,
-                    maxPoints = uiState.courseBlock?.cbMaxPoints?.toFloat() ?: 0f,
+                    maxPoints = uiState.block?.courseBlock?.cbMaxPoints ?: 0f,
                     scoreError = uiState.submitMarkError,
                     onChangeDraftMark = onChangeDraftMark,
                     onClickSubmitGrade = onClickSubmitGrade,
@@ -200,7 +198,7 @@ fun ClazzAssignmentSubmitterDetailScreen(
             item(key = "new_private_comment") {
                 UstadAddCommentListItem(
                     modifier = Modifier.testTag("add_private_comment"),
-                    commentText = uiState.newPrivateCommentText,
+                    commentText = newPrivateCommentText,
                     commentLabel = stringResource(MR.strings.add_private_comment),
                     enabled = uiState.fieldsEnabled,
                     currentUserPersonUid = uiState.activeUserPersonUid,

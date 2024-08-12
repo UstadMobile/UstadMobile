@@ -28,7 +28,7 @@
 #Quartz does not seem like to like being obfuscated
 -keep class org.quartz.** { *; }
 -keep class org.quartz.impl.jdbcjobstore.JobStoreTX { * ; }
--keep class com.ustadmobile.core.schedule.SqliteJDBCDelegate { * ; }
+-keep class org.quartz.impl.jdbcjobstore.HSQLDBDelegate { * ; }
 
 #not using terracotta...
 -dontwarn org.terracotta.toolkit.**
@@ -275,6 +275,7 @@
 # For enumeration classes, see http://proguard.sourceforge.net/manual/examples.html#enumerations
 -keepclassmembers,allowoptimization enum * {
     public static **[] values();
+    public static **[] entries();
     public static ** valueOf(java.lang.String);
 }
 
@@ -332,3 +333,59 @@
 -keep class ch.qos.** { *; }
 -keep class org.slf4j.** { *; }
 
+
+# HSQLDB
+-dontwarn org.hsqldb.util.Transfer
+-keep class org.hsqldb.jdbc.JDBCDriver {
+    public <init>(...);
+}
+
+-keep class org.hsqldb.dbinfo.DatabaseInformationFull { *; }
+
+
+
+# Begin XXHash rules
+# XXHash factories uses reflection
+-keep class net.jpountz.xxhash.XXHash32JavaSafe {
+    public <init>(...);
+    public static ** INSTANCE;
+}
+
+-keep class net.jpountz.xxhash.XXHash32JavaSafe$Factory {
+    public <init>(...);
+    public static ** INSTANCE;
+}
+
+# XXHash : XXHashFactory uses reflection
+-keep class net.jpountz.xxhash.XXHash64JavaSafe {
+    public <init>(...);
+    public static ** INSTANCE;
+}
+
+-keep class net.jpountz.xxhash.XXHash64JavaSafe$Factory {
+    public <init>(...);
+    public static ** INSTANCE;
+}
+
+-keep class net.jpountz.xxhash.StreamingXXHash32JavaSafe {
+    public <init>(...);
+    public static ** INSTANCE;
+}
+
+-keep class net.jpountz.xxhash.StreamingXXHash32JavaSafe$Factory {
+    public <init>(...);
+    public static ** INSTANCE;
+}
+
+# XXHash : XXHashFactory uses reflection
+-keep class net.jpountz.xxhash.StreamingXXHash64JavaSafe {
+    public <init>(...);
+    public static ** INSTANCE;
+}
+
+-keep class net.jpountz.xxhash.StreamingXXHash64JavaSafe$Factory {
+    public <init>(...);
+    public static ** INSTANCE;
+}
+
+# End XXHash rules

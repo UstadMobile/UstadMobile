@@ -8,9 +8,11 @@ import com.ustadmobile.core.hooks.ustadViewName
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.paging.ListPagingSource
+import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.viewmodel.person.list.PersonListUiState
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
+import com.ustadmobile.hooks.useDoorRemoteMediator
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.lib.db.composites.PersonAndListDisplayDetails
@@ -26,7 +28,9 @@ import web.cssom.Contain
 import web.cssom.Height
 import web.cssom.Overflow
 import web.cssom.pct
-import js.core.jso
+import js.objects.jso
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import mui.material.*
 import react.FC
 import react.Props
@@ -36,10 +40,13 @@ import react.router.useLocation
 import tanstack.react.query.UseInfiniteQueryResult
 import mui.icons.material.Link as LinkIcon
 import mui.icons.material.CopyAll as CopyAllIcon
+import mui.icons.material.PersonAdd as PersonAddIcon
+import mui.icons.material.GroupAdd as GroupAddIcon
 
 
 external interface PersonListProps: Props {
     var uiState: PersonListUiState
+    var refreshCommandFlow: Flow<RefreshCommand> ?
     var onSortOrderChanged: (SortOrderOption) -> Unit
     var onListItemClick: (Person) -> Unit
     var onClickAddItem: () -> Unit
@@ -50,8 +57,13 @@ external interface PersonListProps: Props {
 val PersonListComponent2 = FC<PersonListProps> { props ->
     val strings = useStringProvider()
 
+    val remoteMediatorResult = useDoorRemoteMediator(
+        pagingSourceFactory = props.uiState.personList,
+        refreshCommandFlow = (props.refreshCommandFlow ?: emptyFlow())
+    )
+
     val infiniteQueryResult : UseInfiniteQueryResult<PagingSourceLoadResult<Int, PersonAndListDisplayDetails>, Throwable> = usePagingSource(
-        props.uiState.personList, true, 50
+        remoteMediatorResult.pagingSourceFactory, true, 50
     )
     val muiAppState = useMuiAppState()
 
@@ -178,6 +190,8 @@ val PersonListScreenPreview = FC<Props> { props ->
 
 val PersonListScreen = FC<Props> {
     val location = useLocation()
+    val strings = useStringProvider()
+
     val viewModel = useUstadViewModel {di, savedStateHandle ->
         PersonListViewModel(di, savedStateHandle, location.ustadViewName)
     }
@@ -189,8 +203,55 @@ val PersonListScreen = FC<Props> {
         fabState = appState.fabState
     }
 
+
+    Dialog {
+        open = uiState.addSheetOrDialogVisible
+
+        onClose = { _, _ ->
+            viewModel.onDismissAddSheetOrDialog()
+        }
+
+        List {
+            ListItem {
+                ListItemButton {
+                    id = "add_person_button"
+                    onClick = {
+                        viewModel.onClickAdd()
+                    }
+
+                    ListItemIcon {
+                        PersonAddIcon()
+                    }
+
+                    ListItemText {
+                        primary = ReactNode(strings[MR.strings.add_person])
+                    }
+                }
+            }
+
+            ListItem {
+                ListItemButton {
+                    id = "bulk_import_button"
+
+                    onClick = {
+                        viewModel.onClickBulkAdd()
+                    }
+
+                    ListItemIcon {
+                        GroupAddIcon()
+                    }
+
+                    ListItemText {
+                        primary = ReactNode(strings[MR.strings.bulk_import])
+                    }
+                }
+            }
+        }
+    }
+
     PersonListComponent2 {
         this.uiState = uiState
+        refreshCommandFlow = viewModel.refreshCommandFlow
         onListItemClick = viewModel::onClickEntry
         onSortOrderChanged = viewModel::onSortOrderChanged
         onClickAddItem = viewModel::onClickAdd

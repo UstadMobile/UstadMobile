@@ -15,6 +15,7 @@ import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCase
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.locale.CourseTerminologyStrings
+import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.parseAndUpdateTerminologyStringsIfNeeded
 import com.ustadmobile.core.viewmodel.clazz.permissionlist.CoursePermissionListViewModel
@@ -24,9 +25,12 @@ import com.ustadmobile.core.viewmodel.courseblock.textblockdetail.TextBlockDetai
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.CourseBlockAndDisplayDetails
 import com.ustadmobile.lib.db.entities.*
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -89,21 +93,24 @@ class ClazzDetailOverviewViewModel(
 
     val uiState: Flow<ClazzDetailOverviewUiState> = _uiState.asStateFlow()
 
-    private var lastCourseBlockPagingSource: PagingSource<Int, CourseBlockAndDisplayDetails>? = null
-
     private val setClipboardStringUseCase: SetClipboardStringUseCase by instance()
 
     private val pagingSourceFactory: () -> PagingSource<Int, CourseBlockAndDisplayDetails> = {
-        activeRepo.courseBlockDao.findAllCourseBlockByClazzUidAsPagingSource(
+        activeRepo.courseBlockDao().findAllCourseBlockByClazzUidAsPagingSource(
             clazzUid = entityUidArg,
             collapseList = _uiState.value.collapsedBlockUids.toList(),
             includeInactive = false,
             includeHidden = false,
             hideUntilFilterTime = systemTimeInMillis(),
-        ).also {
-            lastCourseBlockPagingSource = it
-        }
+            accountPersonUid = activeUserPersonUid,
+        )
     }
+
+    private val _listRefreshCommandFlow = MutableSharedFlow<RefreshCommand>(
+        replay = 1, extraBufferCapacity = 0, onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
+    val listRefreshCommandFlow: Flow<RefreshCommand> = _listRefreshCommandFlow.asSharedFlow()
 
     init {
         _appUiState.update { prev ->
@@ -118,7 +125,7 @@ class ClazzDetailOverviewViewModel(
         }
 
 
-        val permissionFlow = activeRepo.coursePermissionDao
+        val permissionFlow = activeRepo.coursePermissionDao()
             .personHasPermissionWithClazzTripleAsFlow(
                 accountPersonUid = activeUserPersonUid,
                 clazzUid = entityUidArg,
@@ -146,7 +153,7 @@ class ClazzDetailOverviewViewModel(
                 }
 
                 launch {
-                    activeRepo.clazzDao.getClazzWithDisplayDetails(
+                    activeRepo.clazzDao().getClazzWithDisplayDetails(
                         entityUidArg, systemTimeInMillis()
                     ).combine(permissionFlow) { clazzWithDisplayDetails, permissions ->
                         clazzWithDisplayDetails.takeIf { permissions.firstPermission }
@@ -209,6 +216,11 @@ class ClazzDetailOverviewViewModel(
     }
 
     fun onClickCourseBlock(courseBlock: CourseBlock) {
+        val navArgs = mapOf(
+            ARG_ENTITY_UID to courseBlock.cbUid.toString(),
+            ARG_CLAZZUID to entityUidArg.toString(),
+        )
+
         when(courseBlock.cbType) {
             CourseBlock.BLOCK_MODULE_TYPE -> {
                 _uiState.update { prev ->
@@ -216,33 +228,16 @@ class ClazzDetailOverviewViewModel(
                         collapsedBlockUids = prev.collapsedBlockUids.toggle(courseBlock.cbUid)
                     )
                 }
-                lastCourseBlockPagingSource?.invalidate()
+                _listRefreshCommandFlow.tryEmit(RefreshCommand())
             }
             CourseBlock.BLOCK_TEXT_TYPE -> {
-                navController.navigate(
-                    TextBlockDetailViewModel.DEST_NAME,
-                    mapOf(
-                        ARG_ENTITY_UID to courseBlock.cbUid.toString(),
-                        ARG_CLAZZUID to entityUidArg.toString(),
-                    )
-                )
+                navController.navigate(TextBlockDetailViewModel.DEST_NAME, navArgs)
             }
             CourseBlock.BLOCK_ASSIGNMENT_TYPE -> {
-                navController.navigate(ClazzAssignmentDetailViewModel.DEST_NAME,
-                    mapOf(
-                        ARG_ENTITY_UID to courseBlock.cbEntityUid.toString(),
-                        ARG_CLAZZUID to entityUidArg.toString(),
-                    )
-                )
+                navController.navigate(ClazzAssignmentDetailViewModel.DEST_NAME, navArgs)
             }
             CourseBlock.BLOCK_DISCUSSION_TYPE -> {
-                navController.navigate(
-                    viewName = CourseDiscussionDetailViewModel.DEST_NAME,
-                    args = mapOf(
-                        ARG_ENTITY_UID to courseBlock.cbUid.toString(),
-                        ARG_CLAZZUID to entityUidArg.toString(),
-                    )
-                )
+                navController.navigate(CourseDiscussionDetailViewModel.DEST_NAME, navArgs)
             }
             CourseBlock.BLOCK_CONTENT_TYPE -> {
                 navController.navigate(
@@ -250,6 +245,7 @@ class ClazzDetailOverviewViewModel(
                     args = mapOf(
                         ARG_ENTITY_UID to courseBlock.cbEntityUid.toString(),
                         ARG_CLAZZUID to entityUidArg.toString(),
+                        ARG_COURSE_BLOCK_UID to courseBlock.cbUid.toString(),
                     )
                 )
             }

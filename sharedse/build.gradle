@@ -89,40 +89,36 @@ kotlin {
                 implementation project(":core")
                 implementation project(":lib-util")
 
-                implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$version_kotlin"
-                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
-                implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
-                implementation "io.ktor:ktor-client-core:$version_ktor"
-                implementation "io.ktor:ktor-client-json:$version_ktor"
-                implementation "io.ktor:ktor-io:$version_ktor"
-                implementation "io.ktor:ktor-client-content-negotiation:$version_ktor"
-                implementation "io.ktor:ktor-serialization-gson:$version_ktor"
+                implementation libs.kotlin.stdlib.common
+                implementation libs.coroutines
+                implementation libs.kotlinx.serialization
+                implementation libs.ktor.client.core
+                implementation libs.ktor.client.json
+                implementation libs.ktor.io
+                implementation libs.ktor.client.content.negotiation
                 implementation libs.napier
-                implementation "org.kodein.di:kodein-di:$version_kodein_di"
-                implementation "org.jetbrains.kotlinx:atomicfu:$version_atomicfu"
+                implementation libs.kodein.di
+                implementation libs.atomicfu
 
 
                 implementation libs.door.runtime
                 implementation project(':lib-database')
-                implementation "com.github.UstadMobile:xmlpullparserkmp:$version_xmlpullparserkmp"
+                implementation libs.xmlpullparsekmp
             }
         }
 
         commonJvmMain {
             dependencies {
-                implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
-                implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
-                implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
-                implementation "net.sf.kxml:kxml2:$version_kxml"
-                implementation "com.google.code.gson:gson:$version_gson"
-                implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
-                implementation "com.neovisionaries:nv-i18n:$version_nv_lang"
+                implementation libs.nanohttpd
+                implementation libs.nanohttpd.nanolets
+                implementation libs.okhttp
+                implementation libs.kxml2
+                implementation libs.kotlinx.serialization
+                implementation libs.nv.i18n
                 implementation libs.ktor.client.okhttp
-                implementation "io.ktor:ktor-client-cio:$version_ktor"
-                implementation "io.ktor:ktor-serialization-gson:$version_ktor"
-                implementation "io.ktor:ktor-io-jvm:$version_ktor"
-                implementation "org.kodein.di:kodein-di:$version_kodein_di"
-                implementation "com.github.UstadMobile:xmlpullparserkmp:$version_xmlpullparserkmp"
+                implementation libs.ktor.io.jvm
+                implementation libs.kodein.di
+                implementation libs.xmlpullparsekmp
 
             }
         }
@@ -136,32 +132,20 @@ kotlin {
             dependsOn commonJvmMain
 
             dependencies {
-                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
-                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
-                implementation "androidx.lifecycle:lifecycle-livedata:$version_androidx_lifecycle"
-                implementation "androidx.lifecycle:lifecycle-livedata-ktx:$version_androidx_lifecycle"
-                implementation "androidx.work:work-runtime:$version_android_workmanager"
-                implementation "org.kodein.di:kodein-di-framework-android-x:$version_kodein_di"
-
-
-                implementation "androidx.room:room-runtime:$version_android_room"
-
+                implementation libs.kotlin.stdlib.jdk8
+                implementation libs.kotlinx.coroutines.android
+                implementation libs.androidx.lifecycle.livedata
+                implementation libs.androidx.lifecycle.livedata.ktx
+                implementation libs.androidx.work.runtime
+                implementation libs.kodein.di.framework.android.x
+                implementation libs.androidx.room.runtime
                 implementation libs.android.material
-
                 implementation libs.ktor.client.okhttp
-                implementation "io.ktor:ktor-client-cio:$version_ktor"
-                implementation "io.ktor:ktor-serialization-gson:$version_ktor"
-
-                implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
-                implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
-
-
+                implementation libs.nanohttpd
+                implementation libs.nanohttpd.nanolets
 
                 //Begin SharedSE Android and JVM dependencies
-                implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
-                implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
-                implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
-                implementation "com.google.code.gson:gson:$version_gson"
+                implementation libs.okhttp
                 //end SharedSE Android and JVM dependencies
             }
         }
@@ -172,19 +156,15 @@ kotlin {
             dependsOn commonJvmMain
 
             dependencies {
-                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
-
-
-                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
+                implementation libs.kotlin.stdlib.jdk8
+                implementation libs.coroutines
                 implementation libs.ktor.client.okhttp
-                implementation "io.ktor:ktor-serialization-gson:$version_ktor"
 
 
                 //Begin Android and JVM dependencies
-                implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
-                implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
-                implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
-                implementation "com.google.code.gson:gson:$version_gson"
+                implementation libs.nanohttpd
+                implementation libs.nanohttpd.nanolets
+                implementation libs.okhttp
                 //end Android and JVM dependencies
             }
         }
@@ -201,18 +181,18 @@ kotlin {
 
                 implementation libs.napier
 
-                implementation "junit:junit:$version_junit"
-                implementation "io.ktor:ktor-server-netty:$version_ktor"
+                implementation libs.junit
+                implementation libs.ktor.server.netty
                 implementation libs.mockwebserver
-                implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
+                implementation libs.okhttp
                 implementation libs.napier.jvm
                 implementation libs.mockito.kotlin
                 implementation libs.simplejndi
-                implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
-                implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
-                implementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
+                implementation libs.apache.commons.pool2
+                implementation libs.sqlite.jdbc
+                implementation libs.commons.dbcp2
 
-                implementation "org.kodein.di:kodein-di-framework-ktor-server-jvm:$version_kodein_di"
+                implementation libs.kodein.di.framework.ktor.server.jvm
 
                 api project(":sharedse")
                 api project(":app-ktor-server")

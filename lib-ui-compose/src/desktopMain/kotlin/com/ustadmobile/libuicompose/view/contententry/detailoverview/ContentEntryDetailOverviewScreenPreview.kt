@@ -8,9 +8,8 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryButtonModel
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 import com.ustadmobile.lib.db.entities.ContentEntryStatementScoreProgress
-import com.ustadmobile.lib.db.entities.ContentJobItemProgress
 import com.ustadmobile.lib.db.entities.Language
-import com.ustadmobile.lib.db.entities.StatementEntity
+import com.ustadmobile.lib.db.entities.xapi.StatementEntity
 import com.ustadmobile.libuicompose.view.contententry.detailoverviewtab.ContentEntryDetailOverviewScreen
 
 
@@ -125,23 +124,6 @@ fun ContentEntryDetailOverviewScreenPreview() {
                     langUid = 13
                     name = "Hindi"
                 }
-            }
-        ),
-        activeContentJobItems = listOf(
-            ContentJobItemProgress().apply {
-                cjiUid = 0
-                progressTitle = "First"
-                progress = 30
-            },
-            ContentJobItemProgress().apply {
-                cjiUid = 1
-                progressTitle = "Second"
-                progress = 10
-            },
-            ContentJobItemProgress().apply {
-                cjiUid = 2
-                progressTitle = "Third"
-                progress = 70
             }
         ),
         locallyAvailable = true,

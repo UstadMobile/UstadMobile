@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.db.entities
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
@@ -72,7 +73,8 @@ data class ContentEntryImportJob(
     var cjiItemTotal: Long = 0,
 
     /**
-     * Represents the status to the process of this job item and not including any child items.
+     * Represents the status to the process of this job item and not including any child items (as
+     * per JobStatus).
      * Status set to default JobStatus.QUEUED
      */
     var cjiStatus: Int = 4,
@@ -111,6 +113,18 @@ data class ContentEntryImportJob(
      *  don't make the contententry inactive
      */
     var cjiContentDeletedOnCancellation:  Boolean = false,
+
+    /**
+     * CompressionLevel to use for import - integer constants as per CompressionLevel (on core)
+     */
+    @ColumnInfo(defaultValue = "3")
+    var cjiCompressionLevel: Int = 3,
+
+    var cjiError: String? = null,
+
+    var cjiErrorDismissed: Boolean = false,
+
+    var cjiOwnerPersonUid: Long = 0,
 
 ) {
     companion object {

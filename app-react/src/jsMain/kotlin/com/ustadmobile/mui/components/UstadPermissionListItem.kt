@@ -19,7 +19,7 @@ import mui.icons.material.Group as GroupIcon
 import com.ustadmobile.core.MR
 import com.ustadmobile.util.ext.useLineClamp
 import emotion.react.css
-import js.core.jso
+import js.objects.jso
 import mui.material.IconButton
 import react.create
 import react.dom.aria.ariaLabel

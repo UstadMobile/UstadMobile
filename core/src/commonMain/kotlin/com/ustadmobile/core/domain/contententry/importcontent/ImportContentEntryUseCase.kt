@@ -2,13 +2,23 @@ package com.ustadmobile.core.domain.contententry.importcontent
 
 import com.ustadmobile.core.contentformats.ContentImportersManager
 import com.ustadmobile.core.contentformats.manifest.ContentManifest
+import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCase
 import com.ustadmobile.core.util.ext.bodyAsDecodedText
 import com.ustadmobile.core.util.uuid.randomUuidAsString
+import com.ustadmobile.lib.db.entities.ContentEntryImportJob
 import com.ustadmobile.lib.db.entities.ContentEntryVersion
+import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 
 /**
@@ -32,21 +42,67 @@ class ImportContentEntryUseCase(
     suspend operator fun invoke(
         contentEntryImportJobId: Long,
     ): ContentEntryVersion {
-        val job = db.contentEntryImportJobDao
+        val job = db.contentEntryImportJobDao()
             .findByUidAsync(contentEntryImportJobId) ?: throw IllegalArgumentException(
                 "$contentEntryImportJobId not found in db")
 
         //In future should handle situation where importer is not already specified.
         val importer = importersManager.requireImporterById(job.cjiPluginId)
 
-        val contentEntryVersionEntity = importer.importContent(
-            jobItem = job,
-            progressListener = {
+        var latestJobStatus: ContentEntryImportJob? = null
 
+        val contentEntryVersionEntity =  try {
+            coroutineScope {
+                val updaterJob = launch {
+                    while(isActive) {
+                        Napier.v { "CompressVideo: update status = $latestJobStatus" }
+                        latestJobStatus?.also { jobVal ->
+                            db.contentEntryImportJobDao().updateItemProgress(
+                                cjiUid = jobVal.cjiUid,
+                                cjiProgress = jobVal.cjiItemProgress,
+                                cjiTotal = jobVal.cjiItemTotal,
+                            )
+                        }
+
+                        delay(PROGRESS_UPDATE_INTERVAL)
+                    }
+                }
+
+                db.contentEntryImportJobDao().updateItemStatus(
+                    cjiUid = job.cjiUid,
+                    status = JobStatus.RUNNING
+                )
+
+                importer.importContent(
+                    jobItem = job,
+                    progressListener = {
+                        latestJobStatus = it
+                    }
+                ).also {
+                    db.contentEntryImportJobDao().updateItemStatus(
+                        cjiUid = job.cjiUid,
+                        status = JobStatus.COMPLETE
+                    )
+                    updaterJob.cancel()
+                }
             }
-        )
+        }catch(e: Throwable) {
+            withContext(NonCancellable) {
+                db.contentEntryImportJobDao().updateItemStatusAndError(
+                    cjiUid = job.cjiUid,
+                    status = if(e is CancellationException) {
+                        JobStatus.CANCELED
+                    }else {
+                        JobStatus.FAILED
+                    },
+                    error = if(e !is CancellationException) e.message else null
+                )
+            }
 
-        db.contentEntryVersionDao.insertAsync(contentEntryVersionEntity)
+            throw e
+        }
+
+        db.contentEntryVersionDao().insertAsync(contentEntryVersionEntity)
 
         val enqueueBlobUploadClientUseCaseVal = enqueueBlobUploadClientUseCase
         if(enqueueBlobUploadClientUseCaseVal != null && httpClient != null) {
@@ -90,6 +146,12 @@ class ImportContentEntryUseCase(
         }
 
         return contentEntryVersionEntity
+    }
+
+    companion object {
+
+        const val PROGRESS_UPDATE_INTERVAL = 1_000L
+
     }
 
 }

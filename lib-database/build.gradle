@@ -88,14 +88,14 @@ kotlin {
 
             dependencies {
                 implementation kotlin('stdlib-common')
-                implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
-                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
+                implementation libs.kotlinx.serialization
+                implementation libs.coroutines
                 implementation project(":lib-util")
-                implementation "io.ktor:ktor-client-core:$version_ktor"
+                implementation libs.ktor.client.core
 
                 api libs.door.runtime
                 implementation libs.napier
-                implementation "org.kodein.di:kodein-di:$version_kodein_di"
+                implementation libs.kodein.di
                 compileOnly libs.door.room.annotations
  
             }
@@ -110,23 +110,22 @@ kotlin {
             dependsOn commonJvmMain
 
             dependencies {
-                api "androidx.room:room-runtime:$version_android_room"
-                api "androidx.room:room-paging:$version_android_room"
-                api "androidx.room:room-ktx:$version_android_room"
-                api "androidx.lifecycle:lifecycle-livedata-ktx:$version_androidx_lifecycle"
-                api(libs.androidx.paging.runtime)
+                api libs.androidx.room.runtime
+                api libs.androidx.room.paging
+                api libs.androidx.room.ktx
+                api libs.androidx.lifecycle.livedata.ktx
+                api libs.androidx.paging.runtime
 
-                implementation "com.google.code.gson:gson:$version_gson"
-                implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
-                implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
+                implementation libs.nanohttpd
+                implementation libs.nanohttpd.nanolets
             }
         }
 
         androidTest {
             dependencies {
-                implementation "androidx.room:room-testing:$version_android_room"
-                implementation "androidx.test:runner:$version_android_junit_runner"
-                implementation "junit:junit:$version_junit"
+                implementation libs.androidx.room.testing
+                implementation libs.androidx.test.runner
+                implementation libs.junit
             }
         }
 
@@ -134,9 +133,8 @@ kotlin {
             dependsOn commonJvmMain
             kotlin.srcDir("build/generated/ksp/jvm/jvmMain/kotlin")
             dependencies {
-                implementation "io.ktor:ktor-server-core:$version_ktor"
-                implementation "org.kodein.di:kodein-di-framework-ktor-server-jvm:$version_kodein_di"
-                implementation "com.google.code.gson:gson:$version_gson"
+                implementation libs.ktor.server.core
+                implementation libs.kodein.di.framework.ktor.server.jvm
             }
         }
 
@@ -167,6 +165,6 @@ dependencies {
     kspJs libs.door.compiler
     kspJs libs.door.shallowcopy
     kspAndroid libs.door.compiler
-    kspAndroid "androidx.room:room-compiler:$version_android_room"
+    kspAndroid libs.androidx.room.compiler
     kspAndroid libs.door.shallowcopy
 }

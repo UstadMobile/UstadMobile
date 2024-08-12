@@ -4,6 +4,9 @@
     <!--suppress CheckTagEmptyBody -->
     <string name="blank" translatable="false"></string>
     <string name="login">Login</string>
+    <string name="share_app">Share app</string>
+    <string name="send_apk_file">Send app file (APK)</string>
+    <string name="send_app_link">Share app store link</string>
     <string name="error">Error</string>
     <string name="err_registering_new_user">Error registering new user:</string>
     <string name="register_empty_fields">Please fill out all required fields</string>
@@ -83,7 +86,6 @@
     <string name="notifications">Notifications</string>
     <string name="account">Account</string>
     <string name="accounts">Accounts</string>
-    <string name="share_application">Share App</string>
     <string name="share">Share</string>
     <string name="send">Send</string>
     <string name="open">Open</string>
@@ -678,9 +680,9 @@
     <string name="add_to">Add to %1$s</string>
     <string name="remove_from">Remove from %1$s</string>
     <string name="change_photo">Change photo</string>
-    <string name="remove_photo">Remove photo</string>
+    <string name="remove_picture">Remove picture</string>
     <string name="take_new_photo_from_camera">Take new photo from camera</string>
-    <string name="select_new_photo_from_gallery">Select new photo from gallery</string>
+    <string name="select_picture_from_gallery">Select picture from gallery</string>
     <string name="select_file">Select file</string>
     <string name="permission_clazz_assignment_view">View class assignments</string>
     <string name="permission_clazz_asignment_edit">Create and edit class assignments</string>
@@ -1861,5 +1863,76 @@
     <string name="opening_name">Opening %1$s</string>
 
     <string name="invalid_invite_code">Invalid invite code</string>
+
+    <string name="bulk_import">Bulk import</string>
+
+    <string name="import_key">Import</string>
+
+    <string name="imported">Imported</string>
+
+    <string name="you_can_import_users_using_a_csv_file">You can import users using a CSV file exported from a spreadsheet</string>
+
+    <string name="get_template">Get template</string>
+
+    <string name="importing">Importing</string>
+
+    <!--
+    If there is an error with a file the user is importing, this is used to tell the user which
+    line has the error
+    -->
+    <string name="line_number">Line number</string>
+
+    <string name="selected_content">Selected content</string>
+
+    <string name="edit_content_block">Edit content block</string>
+
+    <string name="compression">Compression</string>
+
+    <string name="compression_highest">Highest (smallest file size)</string>
+
+    <string name="compression_high">High</string>
+
+    <string name="compression_medium">Medium</string>
+
+    <string name="compression_low">Low</string>
+
+    <string name="compression_lowest">Lowest (highest quality)</string>
+
+    <string name="compression_none">None (original quality and file size)</string>
+
+    <!--
+    Tells the user the size of a piece of content. %1$s will be replaced with the current (compressed)
+    size. %2$s will be replaced with the original (e.g. larger) size.
+    -->
+    <string name="size_compressed_was">Size: %1$s (compressed, was %2$s)</string>
+
+    <string name="size">Size: %1$s</string>
+
+    <string name="import_error">Import error</string>
+
+    <string name="upload_error">Upload error</string>
+
+    <string name="offline_items_storage">Offline items storage</string>
+
+    <!--
+    Tells the user how much space is available - %1$s will be replaced with available space e.g. 10GB etc.
+    -->
+    <string name="space_available">%1$s available</string>
+
+    <string name="grant_permission">Grant permission</string>
+
+    <string name="gradebook">Gradebook</string>
+
+    <string name="full_screen">Full screen</string>
+
+    <string name="exit_full_screen">Exit full screen</string>
+
+    <string name="increase_text_size">Increase text size</string>
+
+    <string name="decrease_text_size">Decrease text size</string>
+
+    <string name="nothing_here_yet">Nothing here, yet</string>
+
+    <string name="select_picture_from_files">Select picture from files</string>
 
 </resources>

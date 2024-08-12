@@ -19,16 +19,15 @@ import com.ustadmobile.libuicompose.components.UstadListSortHeader
 import com.ustadmobile.libuicompose.components.UstadListSpacerItem
 import com.ustadmobile.libuicompose.util.compose.courseTerminologyEntryResource
 import com.ustadmobile.libuicompose.util.compose.rememberCourseTerminologyEntries
-import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
 import dev.icerock.moko.resources.compose.stringResource
-import app.cash.paging.Pager
-import app.cash.paging.PagingConfig
 import com.ustadmobile.libuicompose.components.ustadPagedItems
-import androidx.compose.runtime.remember
-import androidx.paging.compose.collectAsLazyPagingItems
+import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
+import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 
 
 @Composable
@@ -39,6 +38,7 @@ fun ClazzAssignmentDetailSubmissionsTabScreen(
 
     ClazzAssignmentDetailSubmissionsTabScreen(
         uiState = uiState,
+        refreshCommandFlow = viewModel.refreshCommandFlow,
         onClickPerson = viewModel::onClickSubmitter,
         onChangeSortOption = viewModel::onChangeSortOption
     )
@@ -47,18 +47,16 @@ fun ClazzAssignmentDetailSubmissionsTabScreen(
 @Composable
 fun ClazzAssignmentDetailSubmissionsTabScreen(
     uiState: ClazzAssignmentDetailSubmissionsTabUiState,
+    refreshCommandFlow: Flow<RefreshCommand> = emptyFlow(),
     onClickPerson: (AssignmentSubmitterSummary) -> Unit = {},
     onChangeSortOption: (SortOrderOption) -> Unit = {}
 ) {
 
-    val pager = remember(uiState.assignmentSubmitterList) {
-        Pager(
-            pagingSourceFactory = uiState.assignmentSubmitterList,
-            config = PagingConfig(pageSize = 20, enablePlaceholders = true)
-        )
-    }
+    val mediatorResult = rememberDoorRepositoryPager(
+        uiState.assignmentSubmitterList, refreshCommandFlow
+    )
 
-    val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
+    val lazyPagingItems = mediatorResult.lazyPagingItems
 
     val courseTerminologyEntries = rememberCourseTerminologyEntries(
         courseTerminology = uiState.courseTerminology
@@ -73,9 +71,7 @@ fun ClazzAssignmentDetailSubmissionsTabScreen(
     }
 
     UstadLazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .defaultScreenPadding()
+        modifier = Modifier.fillMaxSize()
     ) {
 
         item(key = "header") {

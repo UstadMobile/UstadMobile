@@ -1,5 +1,6 @@
 package com.ustadmobile.core.contentjob
 
+import com.ustadmobile.lib.db.entities.ContentEntryPicture2
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import kotlinx.serialization.Serializable
 
@@ -18,6 +19,8 @@ data class MetadataResult(
      * URIs where the filename is retrieved via Android-specific functions).
      */
     val originalFilename: String? = null,
+
+    val picture: ContentEntryPicture2? = null,
 ) {
 
     companion object {

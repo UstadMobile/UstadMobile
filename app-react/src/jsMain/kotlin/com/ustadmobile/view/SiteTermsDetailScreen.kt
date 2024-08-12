@@ -3,7 +3,7 @@ package com.ustadmobile.view
 import com.ustadmobile.core.viewmodel.site.termsdetail.SiteTermsDetailUiState
 import com.ustadmobile.lib.db.entities.SiteTerms
 import web.cssom.px
-import js.core.jso
+import js.objects.jso
 import mui.material.Container
 import mui.system.Stack
 import mui.system.StackDirection
@@ -11,6 +11,7 @@ import mui.system.responsive
 import react.FC
 import react.Props
 import react.dom.html.ReactHTML.div
+import react.useMemo
 import react.useState
 
 external interface SiteTermsDetailScreenProps : Props {
@@ -20,6 +21,9 @@ external interface SiteTermsDetailScreenProps : Props {
 }
 
 val SiteTermsDetailScreenComponent2 = FC<SiteTermsDetailScreenProps> { props ->
+    val termsCleanHtml = useMemo(props.uiState.siteTerms?.termsHtml ?: "") {
+        props.uiState.siteTerms?.termsHtml ?: ""
+    }
 
     Container {
         Stack {
@@ -28,7 +32,7 @@ val SiteTermsDetailScreenComponent2 = FC<SiteTermsDetailScreenProps> { props ->
 
             div {
                 dangerouslySetInnerHTML = jso {
-                    __html = props.uiState.siteTerms?.termsHtml ?: ""
+                    __html = termsCleanHtml
                 }
             }
         }

@@ -103,21 +103,22 @@ kotlin {
             dependencies {
                 api libs.moko.resources
                 implementation kotlin('stdlib-common')
-                implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
-                api "io.ktor:ktor-client-core:$version_ktor"
-                api "io.ktor:ktor-client-json:$version_ktor"
-                api "io.ktor:ktor-client-content-negotiation:$version_ktor"
-                api "io.ktor:ktor-io:$version_ktor"
+                implementation libs.kotlinx.serialization
+                api libs.ktor.client.core
+                api libs.ktor.client.json
+                api libs.ktor.client.content.negotiation
+                api libs.ktor.io
                 implementation libs.napier
-                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
+                implementation libs.coroutines
                 implementation libs.door.runtime
-                implementation "org.kodein.di:kodein-di:$version_kodein_di"
+                implementation libs.kodein.di
                 api project(':lib-database')
+                api project(":lib-ihttp-core")
                 implementation libs.door.runtime
                 implementation project(":lib-util")
-                implementation "com.github.UstadMobile:xmlpullparserkmp:$version_xmlpullparserkmp"
-                implementation "org.jetbrains.kotlinx:atomicfu:$version_atomicfu"
-                implementation "org.jetbrains.kotlinx:kotlinx-datetime:$version_kotlinx_datetime"
+                implementation libs.xmlpullparsekmp
+                implementation libs.atomicfu
+                implementation libs.kotlinx.datetime
                 api libs.kotlinxio.core
                 api libs.xmlutil.core
                 api libs.xmlutil.serialization
@@ -126,6 +127,8 @@ kotlin {
                 api libs.multiplatformsettings
                 api libs.cache4k
                 implementation libs.urlencoder
+                implementation libs.kotlin.csv
+                implementation libs.kmp.uuid
             }
         }
 
@@ -136,18 +139,18 @@ kotlin {
                 implementation kotlin('stdlib-common')
                 implementation project(":lib-database")
                 implementation project(":lib-cache")
-                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
+                implementation project(":lib-ihttp-okhttp")
+                implementation project(":lib-ihttp-nanohttpd")
+                implementation libs.coroutines
                 implementation libs.ktor.client.okhttp
-                implementation "io.ktor:ktor-client-cio:$version_ktor"
-                implementation "io.ktor:ktor-serialization-gson:$version_ktor"
-                implementation "org.kodein.di:kodein-di:$version_kodein_di"
-                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
-                implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
-                implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
-                api "io.ktor:ktor-serialization-kotlinx-json:$version_ktor"
-                compileOnly "net.sf.kxml:kxml2:$version_kxml"
-                implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
-                implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
+                implementation libs.kodein.di
+                implementation libs.kotlinx.serialization
+                implementation libs.okhttp
+                api libs.ktor.serialization.kotlinx.json
+                compileOnly libs.kxml2
+                implementation libs.nanohttpd
+                implementation libs.nanohttpd.nanolets
+                implementation libs.lz4.pure.java
             }
         }
 
@@ -155,7 +158,7 @@ kotlin {
             dependencies {
                 implementation kotlin('test-common')
                 implementation kotlin('test-annotations-common')
-                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$version_coroutines"
+                implementation libs.coroutines.test
             }
         }
 
@@ -166,12 +169,11 @@ kotlin {
 
             dependencies {
                 implementation libs.pdfbox
-                implementation "org.jsoup:jsoup:$version_jsoup"
-                implementation "com.google.code.gson:gson:$version_gson"
-                implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
+                implementation libs.jsoup
+                implementation libs.okhttp
                 implementation libs.quartz
-                implementation "io.ktor:ktor-server-core:$version_ktor"
-                implementation "org.kodein.di:kodein-di-framework-ktor-server-jvm:$version_kodein_di"
+                implementation libs.ktor.server.core
+                implementation libs.kodein.di.framework.ktor.server.jvm
                 implementation libs.javaffmpeg
                 implementation libs.libphonenumber.google
                 implementation libs.thumbnailator
@@ -180,41 +182,41 @@ kotlin {
                     exclude group: "org.mockito"
                     exclude group: "org.mockito.kotlin"
                 }
+                implementation libs.semver
+                implementation libs.vlcj
             }
         }
 
         jvmTest {
             dependencies {
-                implementation "org.jetbrains.kotlin:kotlin-test:$version_kotlin"
-                implementation "org.jetbrains.kotlin:kotlin-test-junit:$version_kotlin"
+                implementation libs.kotlin.test
+                implementation libs.kotlin.test.junit
                 implementation libs.mockito.kotlin
-                implementation "com.soywiz.korlibs.klock:klock:$version_klock"
-                implementation "junit:junit:$version_junit"
-                implementation "io.ktor:ktor-server-content-negotiation:$version_ktor"
+                implementation libs.klock
+                implementation libs.junit
+                implementation libs.ktor.server.content.negotiation
 
                 implementation project(":sharedse")
                 implementation project(":lib-test-common")
                 implementation project(":app-ktor-server")
 
                 implementation libs.simplejndi
-                implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
-                implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
-                implementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
+                implementation libs.apache.commons.pool2
+                implementation libs.sqlite.jdbc
+                implementation libs.commons.dbcp2
 
-                api "org.nanohttpd:nanohttpd:$version_nanohttpd"
-                api "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
+                api libs.nanohttpd
+                api libs.nanohttpd.nanolets
 
                 implementation libs.mockwebserver
-                implementation "io.ktor:ktor-server-netty:$version_ktor"
-                implementation "io.ktor:ktor-serialization-gson:$version_ktor"
-                implementation "io.ktor:ktor-serialization-gson:$version_ktor"
+                implementation libs.ktor.server.netty
 
-                implementation "org.kodein.di:kodein-di-framework-ktor-server-jvm:$version_kodein_di"
+                implementation libs.kodein.di.framework.ktor.server.jvm
 
-                implementation "net.bytebuddy:byte-buddy:$version_byte_buddy"
+                implementation libs.byte.buddy
                 implementation libs.turbine
 
-                implementation "io.ktor:ktor-server-call-logging:$version_ktor"
+                implementation libs.ktor.server.call.logging
             }
         }
 
@@ -222,36 +224,30 @@ kotlin {
             dependsOn commonJvmMain
 
             dependencies {
-
-                implementation "com.dmitryborodin:pdfview-android:$version_pdfview_android"
-
-                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
-                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
-                implementation "androidx.lifecycle:lifecycle-livedata-ktx:$version_androidx_lifecycle"
-                implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$version_androidx_lifecycle"
-                implementation "androidx.room:room-runtime:$version_android_room"
-                implementation "com.google.code.gson:gson:$version_gson"
+                implementation libs.kotlin.stdlib.jdk8
+                implementation libs.kotlinx.coroutines.android
+                implementation libs.androidx.lifecycle.livedata.ktx
+                implementation libs.androidx.lifecycle.viewmodel.ktx
+                implementation libs.androidx.room.runtime
 
                 implementation libs.androidx.appcompat
-                implementation "androidx.legacy:legacy-support-v4:$version_androidx_legacy"
+                implementation libs.androidx.legacy.support.v4
 
                 //Seems to fix things when we put a specific dependency here
-                implementation "androidx.coordinatorlayout:coordinatorlayout:$version_androidx_coordinatorlayout"
-                implementation "androidx.recyclerview:recyclerview:$version_androidx_recyclerview"
-                implementation "androidx.room:room-runtime:$version_android_room"
+                implementation libs.androidx.coordinatorlayout
+                implementation libs.androidx.recyclerview
+                implementation libs.androidx.room.runtime
                 implementation(libs.androidx.paging.runtime)
-                implementation "androidx.work:work-runtime:$version_android_workmanager"
-                implementation "androidx.work:work-runtime-ktx:$version_android_workmanager"
-                implementation "org.jsoup:jsoup:$version_jsoup"
+                implementation libs.androidx.work.runtime
+                implementation libs.androidx.work.runtime.ktx
+                implementation libs.jsoup
                 //Image loading library
-                implementation "com.squareup.picasso:picasso:$version_android_picasso"
-                implementation "io.ktor:ktor-client-android:$version_ktor"
-                implementation "io.ktor:ktor-serialization-gson:$version_ktor"
+                implementation libs.picasso
+                implementation libs.ktor.client.android
 
-                implementation "com.linkedin.android.litr:litr:$version_android_litr"
 
                 //dependency injection
-                implementation "org.kodein.di:kodein-di-framework-android-x:$version_kodein_di"
+                implementation libs.kodein.di.framework.android.x
 
                 implementation libs.okhttp
 
@@ -265,15 +261,25 @@ kotlin {
                 implementation libs.compressor
                 implementation libs.coil
                 implementation libs.androidx.browser
+
+                implementation libs.androidx.media3.transformer
+                implementation libs.androidx.media3.effect
+                implementation libs.androidx.media3.common
+
+                implementation libs.httpoveripc.core
+                implementation libs.httpoveripc.server
+                implementation libs.rawhttp.core
             }
         }
 
         androidUnitTest {
             dependencies {
-                implementation "androidx.test:runner:$version_android_junit_runner"
-                implementation "junit:junit:$version_junit"
-                implementation "org.robolectric:robolectric:$version_android_roboelectric"
-                implementation "androidx.test:core:$version_androidx_test_core"
+                implementation libs.kotlin.test
+                implementation libs.kotlin.test.junit
+                implementation libs.androidx.test.runner
+                implementation libs.junit
+                implementation libs.robolectric
+                implementation libs.androidx.test.core
             }
         }
 
@@ -283,18 +289,20 @@ kotlin {
             dependsOn commonMain
 
             dependencies {
-                implementation "io.ktor:ktor-client-js:$version_ktor"
-                implementation "io.ktor:ktor-client-json-js:$version_ktor"
-                implementation "io.ktor:ktor-client-serialization-js:$version_ktor"
+                implementation libs.ktor.client.js
+                implementation libs.ktor.client.json.js
+                implementation libs.ktor.client.serialization.js
 
                 implementation enforcedPlatform("org.jetbrains.kotlin-wrappers:kotlin-wrappers-bom:$kotlinWrappersVersion")
-                implementation "org.jetbrains.kotlin-wrappers:kotlin-extensions"
-                implementation "org.jetbrains.kotlin-wrappers:kotlin-react"
-                implementation "org.jetbrains.kotlin-wrappers:kotlin-react-router-dom"
+                implementation libs.kotlin.wrappers.kotlin.extensions
+                implementation libs.kotlin.wrappers.kotlin.react
+                implementation libs.kotlin.wrappers.kotlin.react.router.dom
 
                 implementation npm("libphonenumber-js", "$version_npm_libphonenumber_js")
                 implementation npm("uuid", "$version_npm_uuid")
                 implementation npm("compressorjs", "$version_compressorjs")
+                implementation npm("xxhashjs", "$version_npm_xxhash")
+                implementation npm("cuint", "$version_npm_cuint")
             }
         }
 

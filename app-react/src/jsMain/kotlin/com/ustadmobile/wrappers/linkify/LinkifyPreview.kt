@@ -1,6 +1,6 @@
 package com.ustadmobile.wrappers.linkify
 
-import js.core.jso
+import js.objects.jso
 import react.FC
 import react.Props
 import web.events.Event
