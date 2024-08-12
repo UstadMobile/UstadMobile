@@ -143,8 +143,6 @@ kotlin {
                 implementation project(":lib-ihttp-nanohttpd")
                 implementation libs.coroutines
                 implementation libs.ktor.client.okhttp
-                implementation libs.ktor.client.cio
-                implementation libs.ktor.serialization.gson
                 implementation libs.kodein.di
                 implementation libs.kotlinx.serialization
                 implementation libs.okhttp
@@ -172,7 +170,6 @@ kotlin {
             dependencies {
                 implementation libs.pdfbox
                 implementation libs.jsoup
-                implementation libs.gson
                 implementation libs.okhttp
                 implementation libs.quartz
                 implementation libs.ktor.server.core
@@ -213,7 +210,6 @@ kotlin {
 
                 implementation libs.mockwebserver
                 implementation libs.ktor.server.netty
-                implementation libs.ktor.serialization.gson
 
                 implementation libs.kodein.di.framework.ktor.server.jvm
 
@@ -233,7 +229,6 @@ kotlin {
                 implementation libs.androidx.lifecycle.livedata.ktx
                 implementation libs.androidx.lifecycle.viewmodel.ktx
                 implementation libs.androidx.room.runtime
-                implementation libs.gson
 
                 implementation libs.androidx.appcompat
                 implementation libs.androidx.legacy.support.v4
@@ -249,7 +244,6 @@ kotlin {
                 //Image loading library
                 implementation libs.picasso
                 implementation libs.ktor.client.android
-                implementation libs.ktor.serialization.gson
 
 
                 //dependency injection

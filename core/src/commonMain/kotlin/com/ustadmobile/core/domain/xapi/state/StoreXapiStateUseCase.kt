@@ -83,7 +83,7 @@ class StoreXapiStateUseCase(
 
                 else -> {
                     val existingStateJsonDoc = try {
-                        json.decodeFromString(JsonObject.serializer(), existingState.seContent!!)
+                        json.decodeFromString(JsonObject.serializer(), existingState.seContent)
                     }catch(e: Throwable) {
                         throw HttpApiException(400, "Existing state is not valid json: ${e.message}", e)
                     }
@@ -139,12 +139,6 @@ class StoreXapiStateUseCase(
                         throw HttpApiException(413, "State content too large: ${it.size} exceeds limit of $MAX_STATE_SIZE")
                 }.encodeBase64()
             }
-        }
-
-        if(xapiSession.agent(endpoint).identifierHash(xxStringHasher) !=
-            xapiAgent.identifierHash(xxStringHasher)
-        ) {
-            throw HttpApiException(403, "Forbidden: agent does not match with session")
         }
 
         val activityUid = xapiStateParams.activityUid(xxStringHasher)

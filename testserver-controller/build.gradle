@@ -21,6 +21,7 @@ dependencies {
     implementation libs.nanohttpd
     implementation libs.json
     implementation libs.commons.cli
+    implementation libs.ktor.serialization.kotlinx.json
     implementation libs.ktor.server.netty
     implementation libs.ktor.server.core
     implementation libs.ktor.server.cors
@@ -28,8 +29,6 @@ dependencies {
     implementation libs.ktor.server.content.negotiation
     implementation libs.ktor.server.conditional.headers
     implementation libs.logback.classic
-    implementation libs.ktor.serialization.gson
-    implementation libs.gson
     implementation libs.kotlinx.html.jvm
     implementation libs.xmlutil.core.jvm
     implementation libs.xmlutil.serialization.jvm

@@ -83,7 +83,6 @@ dependencies {
     implementation libs.ktor.server.conditional.headers
     implementation libs.ktor.server.status.pages
 
-    implementation libs.ktor.serialization.gson
     implementation libs.ktor.client.okhttp
     implementation libs.ktor.server.html.builder
     implementation libs.kotlinx.serialization
@@ -95,7 +94,6 @@ dependencies {
 
     implementation libs.commons.io
     implementation libs.jsoup
-    implementation libs.gson
     implementation libs.commons.lang3
     implementation libs.logback.classic
 
@@ -155,7 +153,7 @@ dependencies {
     testImplementation libs.mockwebserver
 
     testImplementation libs.ktor.client.okhttp
-    testImplementation libs.ktor.serialization.gson
+
 
     testImplementation libs.apache.commons.pool2
     testImplementation libs.sqlite.jdbc

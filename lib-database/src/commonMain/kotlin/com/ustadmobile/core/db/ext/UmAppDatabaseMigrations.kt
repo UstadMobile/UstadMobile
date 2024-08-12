@@ -1600,6 +1600,17 @@ val MIGRATION_197_198 = DoorMigrationStatementList(197, 198) { db ->
 }
 
 
+val MIGRATION_198_199 = DoorMigrationStatementList(198, 199) { db ->
+    buildList {
+        add("DROP TABLE StateEntity")
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS StateEntity (  seActorUid  INTEGER  NOT NULL , seHash  INTEGER  NOT NULL , seActivityUid  INTEGER  NOT NULL , seStateId  TEXT  NOT NULL , seLastMod  INTEGER  NOT NULL , seTimeStored  INTEGER  NOT NULL , seContentType  TEXT  NOT NULL , seCompressed  INTEGER  NOT NULL , seContent  TEXT  NOT NULL , seDeleted  INTEGER  NOT NULL , seRegistrationHi  INTEGER , seRegistrationLo  INTEGER , seH5PPreloaded  INTEGER  NOT NULL , seH5PSubContentId  TEXT , PRIMARY KEY (seActorUid, seHash) )")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS StateEntity (  seActorUid  BIGINT  NOT NULL , seHash  BIGINT  NOT NULL , seActivityUid  BIGINT  NOT NULL , seStateId  TEXT  NOT NULL , seLastMod  BIGINT  NOT NULL , seTimeStored  BIGINT  NOT NULL , seContentType  TEXT  NOT NULL , seCompressed  INTEGER  NOT NULL , seContent  TEXT  NOT NULL , seDeleted  BOOL  NOT NULL , seRegistrationHi  BIGINT , seRegistrationLo  BIGINT , seH5PPreloaded  BOOL  NOT NULL , seH5PSubContentId  TEXT , PRIMARY KEY (seActorUid, seHash) )")
+        }
+    }
+}
+
 
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_105_106, MIGRATION_106_107,
@@ -1616,7 +1627,7 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_160_161, MIGRATION_162_163, MIGRATION_163_164, MIGRATION_164_165,
     MIGRATION_165_166, MIGRATION_166_167, MIGRATION_167_168, MIGRATION_168_169,
     MIGRATION_170_171, MIGRATION_171_172, MIGRATION_172_194, MIGRATION_194_195,
-    MIGRATION_195_196, MIGRATION_196_197, MIGRATION_197_198
+    MIGRATION_195_196, MIGRATION_196_197, MIGRATION_197_198, MIGRATION_198_199,
 )
 
 

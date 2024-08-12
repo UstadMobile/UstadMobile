@@ -2,7 +2,7 @@ package com.ustadmobile.test.http
 
 import com.ustadmobile.lib.util.SysPathUtil
 import io.ktor.http.*
-import io.ktor.serialization.gson.*
+import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.*
 import io.ktor.server.http.content.*
 import io.ktor.server.plugins.callloging.*
@@ -126,10 +126,7 @@ fun Application.testServerController() {
     install(CallLogging)
 
     install(ContentNegotiation) {
-        gson {
-            register(ContentType.Application.Json, GsonConverter())
-            register(ContentType.Any, GsonConverter())
-        }
+        json()
     }
 
 

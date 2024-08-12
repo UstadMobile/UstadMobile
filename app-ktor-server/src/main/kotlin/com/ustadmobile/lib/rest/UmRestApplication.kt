@@ -68,6 +68,7 @@ import com.ustadmobile.core.domain.xapi.state.DeleteXapiStateUseCase
 import com.ustadmobile.core.domain.xapi.state.ListXapiStateIdsUseCase
 import com.ustadmobile.core.domain.xapi.state.RetrieveXapiStateUseCase
 import com.ustadmobile.core.domain.xapi.state.StoreXapiStateUseCase
+import com.ustadmobile.core.domain.xapi.state.h5puserdata.H5PUserDataEndpointUseCase
 import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
 import com.ustadmobile.core.domain.xxhash.XXHasher64FactoryCommonJvm
 import com.ustadmobile.core.domain.xxhash.XXStringHasher
@@ -80,7 +81,6 @@ import com.ustadmobile.lib.util.ext.bindDataSourceIfNotExisting
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import io.github.aakira.napier.Napier
 import io.ktor.server.application.*
-import io.ktor.serialization.gson.*
 import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.routing.*
@@ -127,6 +127,7 @@ import com.ustadmobile.lib.rest.domain.xapi.savestatementonclear.SaveStatementOn
 import com.ustadmobile.lib.rest.domain.xapi.session.ResumeOrStartXapiSessionRoute
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.headers.MimeTypeHelper
+import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.files.Path
 import org.kodein.di.ktor.closestDI
@@ -312,10 +313,10 @@ fun Application.umRestApplication(
     Napier.base(LogbackAntiLog())
 
     install(ContentNegotiation) {
-        gson {
-            register(ContentType.Application.Json, GsonConverter())
-            register(ContentType.Any, GsonConverter())
-        }
+        json(
+            json = json,
+            contentType = ContentType.Application.Json
+        )
     }
 
     //Avoid sending the body of content if it has not changed since the client last requested it.
@@ -707,9 +708,21 @@ fun Application.umRestApplication(
                 retrieveXapiStateUseCase = instance(),
                 listXapiStateIdsUseCase = instance(),
                 deleteXapiStateRequest = instance(),
+                h5PUserDataEndpointUseCase = instance(),
                 db = instance(tag = DoorTag.TAG_DB),
                 xapiJson = instance(),
                 endpoint = context,
+                xxStringHasher = instance(),
+            )
+        }
+
+        bind<H5PUserDataEndpointUseCase>() with scoped(EndpointScope.Default).singleton {
+            H5PUserDataEndpointUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = null,
+                xapiJson = instance(),
+                xxStringHasher = instance(),
+                xxHasher64Factory = instance(),
             )
         }
 

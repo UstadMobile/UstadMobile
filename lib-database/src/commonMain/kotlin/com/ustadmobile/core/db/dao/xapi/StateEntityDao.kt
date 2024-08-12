@@ -125,4 +125,29 @@ expect abstract class StateEntityDao {
     ): List<StateIdAndLastModified>
 
 
+    @Query("""
+        SELECT StateEntity.*
+          FROM StateEntity
+         WHERE (SELECT ActorEntity.actorPersonUid
+                  FROM ActorEntity
+                 WHERE ActorEntity.actorUid = :actorUid) = :accountPersonUid
+           AND seActorUid = :actorUid
+           AND seActivityUid = :seActivityUid 
+           AND ((    :registrationUuidHi IS NULL
+                 AND StateEntity.seRegistrationHi IS NULL
+                 AND :registrationUuidLo IS NULL 
+                 AND StateEntity.seRegistrationLo IS NULL)
+             OR (    StateEntity.seRegistrationHi = :registrationUuidHi 
+                 AND StateEntity.seRegistrationLo = :registrationUuidLo))
+           AND StateEntity.seH5PSubContentId IS NOT NULL      
+           AND CAST(StateEntity.seH5PPreloaded AS INTEGER) = 1      
+    """)
+    abstract suspend fun getH5PPreload(
+        accountPersonUid: Long,
+        actorUid: Long,
+        seActivityUid: Long,
+        registrationUuidHi: Long?,
+        registrationUuidLo: Long?,
+    ): List<StateEntity>
+
 }
