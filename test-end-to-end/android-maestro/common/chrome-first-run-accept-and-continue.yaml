@@ -2,8 +2,3 @@ appId: com.toughra.ustadmobile
 ---
 - tapOn: "Accept & continue"
 - tapOn: "No thanks"
-- runFlow:
-    when:
-        visible: "Chrome notifications make things easier"
-    commands:
-        - tapOn: "No thanks"
