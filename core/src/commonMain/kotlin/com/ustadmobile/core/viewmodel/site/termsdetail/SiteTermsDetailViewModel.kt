@@ -59,7 +59,7 @@ class SiteTermsDetailViewModel(
             val repo: UmAppDatabase = if(acceptButtonMode && apiUrl != null) {
                 di.direct.on(Endpoint(apiUrl)).instance(tag = DoorTag.TAG_REPO)
             }else {
-                activeRepo
+                activeRepoWithFallback
             }
 
 

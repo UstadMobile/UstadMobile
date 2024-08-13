@@ -29,9 +29,11 @@ import kotlinx.serialization.json.Json
  * the launch Url, title, etc. This is used by LaunchXapiUseCase to determine the URL when launching
  * Xapi content in external systems (e.g. ChromeTabs, Chrome or other external browser on desktop,
  * and new window on JS) and XapiContentViewModel.
+ *
+ * @param activeRepoOrDb if the active account has a repository, then the repository, otherwise local db
  */
 class ResolveXapiLaunchHrefUseCase(
-    private val activeRepo: UmAppDatabase,
+    private val activeRepoOrDb: UmAppDatabase,
     private val httpClient: HttpClient,
     private val json: Json,
     private val xppFactory: XmlPullParserFactory,
@@ -61,7 +63,7 @@ class ResolveXapiLaunchHrefUseCase(
         //ContentEntryVersion is immutable, so if available in db, no need to go to repo which would
         //make an http request
         Napier.v { "Resolving xAPI url for contentEntryVersion $contentEntryVersionUid" }
-        val contentEntryVersion = activeRepo.localFirstThenRepoIfNull {
+        val contentEntryVersion = activeRepoOrDb.localFirstThenRepoIfNull {
             it.contentEntryVersionDao().findByUidAsync(contentEntryVersionUid)
         } ?: throw IllegalArgumentException("could not load contententryversion $contentEntryVersionUid")
 

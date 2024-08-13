@@ -270,9 +270,9 @@ class CourseGroupSetEditViewModel(
 
 
         viewModelScope.launch {
-            activeRepo.withDoorTransactionAsync {
-                activeRepo.courseGroupSetDao().upsertAsync(courseGroupSet)
-                activeRepo.courseGroupMemberDao().upsertListAsync(membersToSave)
+            activeRepoWithFallback.withDoorTransactionAsync {
+                activeRepoWithFallback.courseGroupSetDao().upsertAsync(courseGroupSet)
+                activeRepoWithFallback.courseGroupMemberDao().upsertListAsync(membersToSave)
             }
 
             finishWithResult(

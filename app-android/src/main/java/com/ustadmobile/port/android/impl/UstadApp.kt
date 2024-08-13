@@ -756,7 +756,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
         bind<ResolveXapiLaunchHrefUseCase>() with scoped(EndpointScope.Default).singleton {
             ResolveXapiLaunchHrefUseCase(
-                activeRepo = instance(tag = DoorTag.TAG_REPO),
+                activeRepoOrDb = instanceOrNull(tag = DoorTag.TAG_REPO) ?: instance(tag = DoorTag.TAG_DB),
                 httpClient = instance(),
                 json = instance(),
                 xppFactory = instance(tag = DiTag.XPP_FACTORY_NSAWARE),

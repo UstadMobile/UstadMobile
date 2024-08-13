@@ -25,6 +25,5 @@ fun SettingsPreview() {
         onClickOfflineStorageOptionsDialog = { },
         onClickCreateBackup = { },
         folderPickLauncher = { },
-        onClickAppShare = { }
     )
 }

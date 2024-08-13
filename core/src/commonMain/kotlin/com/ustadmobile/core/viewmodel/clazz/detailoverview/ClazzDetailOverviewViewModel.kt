@@ -96,7 +96,7 @@ class ClazzDetailOverviewViewModel(
     private val setClipboardStringUseCase: SetClipboardStringUseCase by instance()
 
     private val pagingSourceFactory: () -> PagingSource<Int, CourseBlockAndDisplayDetails> = {
-        activeRepo.courseBlockDao().findAllCourseBlockByClazzUidAsPagingSource(
+        activeRepoWithFallback.courseBlockDao().findAllCourseBlockByClazzUidAsPagingSource(
             clazzUid = entityUidArg,
             collapseList = _uiState.value.collapsedBlockUids.toList(),
             includeInactive = false,
@@ -125,7 +125,7 @@ class ClazzDetailOverviewViewModel(
         }
 
 
-        val permissionFlow = activeRepo.coursePermissionDao()
+        val permissionFlow = activeRepoWithFallback.coursePermissionDao()
             .personHasPermissionWithClazzTripleAsFlow(
                 accountPersonUid = activeUserPersonUid,
                 clazzUid = entityUidArg,
@@ -153,7 +153,7 @@ class ClazzDetailOverviewViewModel(
                 }
 
                 launch {
-                    activeRepo.clazzDao().getClazzWithDisplayDetails(
+                    activeRepoWithFallback.clazzDao().getClazzWithDisplayDetails(
                         entityUidArg, systemTimeInMillis()
                     ).combine(permissionFlow) { clazzWithDisplayDetails, permissions ->
                         clazzWithDisplayDetails.takeIf { permissions.firstPermission }

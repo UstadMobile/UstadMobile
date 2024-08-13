@@ -41,7 +41,7 @@ class ConversationListViewModel(
 ) {
 
     private val pagingSourceFactory: () -> PagingSource<Int, MessageAndOtherPerson> = {
-        activeRepo.messageDao().conversationsForUserAsPagingSource(
+        activeRepoWithFallback.messageDao().conversationsForUserAsPagingSource(
             searchQuery =  _appUiState.value.searchState.searchText.toQueryLikeParam(),
             accountPersonUid = activeUserPersonUid,
         )

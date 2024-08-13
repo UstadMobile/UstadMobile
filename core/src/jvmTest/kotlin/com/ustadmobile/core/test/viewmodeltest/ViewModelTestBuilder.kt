@@ -94,8 +94,11 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
     val activeDb: UmAppDatabase
         get() = di.direct.on(activeEndpoint).instance(tag= DoorTag.TAG_DB)
 
-    val activeRepo: UmAppDatabase
-        get() = di.direct.on(activeEndpoint).instance(tag = DoorTag.TAG_REPO)
+    val activeRepo: UmAppDatabase?
+        get() = di.direct.on(activeEndpoint).instanceOrNull(tag = DoorTag.TAG_REPO)
+
+    val activeRepoWithFallback: UmAppDatabase
+        get() = activeRepo ?: activeDb
 
     val systemImpl: UstadMobileSystemImpl
         get() = di.direct.instance()

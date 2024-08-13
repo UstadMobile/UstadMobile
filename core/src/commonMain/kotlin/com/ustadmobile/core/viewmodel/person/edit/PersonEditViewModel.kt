@@ -551,7 +551,7 @@ class PersonEditViewModel(
                     !Instant.fromEpochMilliseconds(
                         savedStateHandle[KEY_INIT_DATE_OF_BIRTH]?.toLong() ?: 0
                     ).isDateOfBirthAMinor() &&
-                    !activeRepo.personParentJoinDao().isMinorApproved(savePerson.personUid)
+                    !activeRepoWithFallback.personParentJoinDao().isMinorApproved(savePerson.personUid)
                 ) {
                     PersonParentJoin().apply {
                         ppjMinorPersonUid = savePerson.personUid
@@ -563,7 +563,7 @@ class PersonEditViewModel(
                     null
                 }
 
-                activeRepo.withDoorTransactionAsync {
+                activeRepoWithFallback.withDoorTransactionAsync {
                     if(entityUidArg == 0L) {
                         addNewPersonUseCase(
                             person = savePerson,
@@ -571,9 +571,9 @@ class PersonEditViewModel(
                             createPersonParentApprovalIfMinor = true,
                         )
                     }else {
-                        activeRepo.personDao().updateAsync(savePerson)
+                        activeRepoWithFallback.personDao().updateAsync(savePerson)
                         consentToUpsert?.also {
-                            activeRepo.personParentJoinDao().upsertAsync(it)
+                            activeRepoWithFallback.personParentJoinDao().upsertAsync(it)
                         }
                     }
                 }

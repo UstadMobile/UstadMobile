@@ -83,8 +83,17 @@ abstract class UstadViewModel(
     internal val activeDb: UmAppDatabase by on(accountManager.activeEndpoint)
         .instance(tag = DoorTag.TAG_DB)
 
-    internal val activeRepo: UmAppDatabase by on(accountManager.activeEndpoint)
+    /**
+     * The repository will be null if this is a local only account (e.g. there is no server)
+     */
+    internal val activeRepo: UmAppDatabase? by on(accountManager.activeEndpoint)
         .instance(tag = DoorTag.TAG_REPO)
+
+    /**
+     * Use the repository (if any as above), otherwise fallback to using the local database
+     */
+    internal val activeRepoWithFallback: UmAppDatabase
+        get() = activeRepo ?: activeDb
 
     protected val navResultReturner: NavResultReturner by instance()
 
@@ -332,7 +341,9 @@ abstract class UstadViewModel(
         }
 
         return try {
-            val repoVal = onLoadFromDb?.invoke(activeRepo) ?: makeDefault()
+            val repoVal =  activeRepo?.let { repo ->
+                onLoadFromDb?.invoke(repo)
+            } ?: makeDefault()
             if(repoVal != null)
                 savedStateHandle.setJson(savedStateKey, serializer, repoVal)
             uiUpdate(repoVal)
@@ -362,7 +373,7 @@ abstract class UstadViewModel(
 
         viewModelScope.launch {
             try {
-                if(!activeRepo.localFirstThenRepoIfFalse(permissionCheck)) {
+                if(activeRepo?.localFirstThenRepoIfFalse(permissionCheck) == false) {
                     navController.navigate(
                         ErrorViewModel.DEST_NAME,
                         emptyMap(),

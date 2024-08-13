@@ -56,7 +56,7 @@ class XapiContentViewModelTest : AbstractMainDispatcherTest() {
 
                 bind<ResolveXapiLaunchHrefUseCase>() with scoped(endpointScope).singleton {
                     ResolveXapiLaunchHrefUseCase(
-                        activeRepo = instance(tag = DoorTag.TAG_REPO),
+                        activeRepoOrDb = instance(tag = DoorTag.TAG_REPO),
                         httpClient = instance(),
                         json = instance(),
                         xppFactory = instance(tag = DiTag.XPP_FACTORY_NSAWARE),

@@ -251,8 +251,8 @@ class SiteEditViewModel(
             return
 
         viewModelScope.launch {
-            activeRepo.siteDao().updateAsync(siteToSave)
-            activeRepo.siteTermsDao().upsertList(
+            activeRepoWithFallback.siteDao().updateAsync(siteToSave)
+            activeRepoWithFallback.siteTermsDao().upsertList(
                 _uiState.value.siteTerms.filter {
                     (!it.termsHtml?.htmlToPlainText().isNullOrBlank() || it.sTermsUid != 0L)
                 }.map {

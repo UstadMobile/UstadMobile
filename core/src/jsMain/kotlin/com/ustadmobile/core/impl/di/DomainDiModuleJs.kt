@@ -68,6 +68,7 @@ import com.ustadmobile.door.ext.DoorTag
 import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.instance
+import org.kodein.di.instanceOrNull
 import org.kodein.di.provider
 import org.kodein.di.scoped
 import org.kodein.di.singleton
@@ -175,7 +176,7 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
 
     bind<ResolveXapiLaunchHrefUseCase>() with scoped(endpointScope).provider {
         ResolveXapiLaunchHrefUseCase(
-            activeRepo = instance(tag = DoorTag.TAG_REPO),
+            activeRepoOrDb = instanceOrNull(tag = DoorTag.TAG_REPO) ?: instance(tag = DoorTag.TAG_DB),
             httpClient = instance(),
             json = instance(),
             xppFactory = instance(tag = DiTag.XPP_FACTORY_NSAWARE),

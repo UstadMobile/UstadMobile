@@ -40,7 +40,7 @@ class SystemPermissionEditViewModel(
 
         launchIfHasPermission(
             permissionCheck = {
-                activeRepo.systemPermissionDao().personHasSystemPermission(activeUserPersonUid,
+                activeRepoWithFallback.systemPermissionDao().personHasSystemPermission(activeUserPersonUid,
                     PermissionFlags.MANAGE_USER_PERMISSIONS)
             },
             onSetFieldsEnabled = {
@@ -78,7 +78,7 @@ class SystemPermissionEditViewModel(
             }
 
 
-            val title = activeRepo.personDao().getNamesByUidAsync(argPersonUid)
+            val title = activeRepoWithFallback.personDao().getNamesByUidAsync(argPersonUid)
 
             _appUiState.update { prev -> prev.copy(title = title?.toString() ?: "") }
 
@@ -101,8 +101,8 @@ class SystemPermissionEditViewModel(
         ) {
             val entity = _uiState.value.entity ?: return@launchWithLoadingIndicator
 
-            activeRepo.withDoorTransactionAsync {
-                activeRepo.systemPermissionDao().upsertAsync(entity)
+            activeRepoWithFallback.withDoorTransactionAsync {
+                activeRepoWithFallback.systemPermissionDao().upsertAsync(entity)
             }
 
             //There is no case where a new system permission is created by the user.
