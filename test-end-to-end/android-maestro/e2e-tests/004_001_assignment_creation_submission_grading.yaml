@@ -1,0 +1,204 @@
+appId: com.toughra.ustadmobile
+env:
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/004_001_assignment_creation_submission_grading"
+  TESTNAME:  "004_001_assignment_creation_submission_grading"
+---
+# Admin login
+- clearState: com.toughra.ustadmobile
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+      TESTNAME: ${TESTNAME}
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+# add new course
+- runFlow:
+    file: "../common/add_course.yaml"
+    env:
+      TESTCOURSENAME: "Test Course Block"
+# add new teacher using flow - add_new_teacher_inside_course ---------
+- runFlow:
+    file: "../common/add_new_teacher_inside_course.yaml"
+    env:
+      TESTCOURSENAME: ${TESTCOURSENAME}
+      TEACHERFIRSTNAME: "Teacher"
+      TEACHERLASTNAME: "1"
+      USERNAME: "t1"
+      GENDER: "Female"
+      PASSWORD: "test"
+# add students to the course through bulk import using .csv file
+- runFlow:
+    file: "../common/student_bulk_upload_csv.yaml"
+    env:
+      TESTFILENAME: "Ustad_Students_List.csv"
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+# teacher add an assignment block
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: "t1"
+      PASSWORD: "test"
+- tapOn: "Courses"
+- tapOn: "Test Course Block"
+# edit the course to add blocks
+- tapOn:
+    id: "floating_action_button"
+# add assignment block ------ 1
+- scrollUntilVisible:
+    element:
+      text: "Add block"
+    direction: DOWN
+- tapOn: "Add block"
+- runFlow:
+    when:
+      notVisible:
+        text: "Assignment"
+    commands:
+      - swipe:
+          from:
+            text: "Drag handle"
+          direction: UP
+- tapOn: "Assignment"
+- tapOn: "Title*"
+- inputText: "Assignment 1"
+- hideKeyboard
+- tapOn: "Description"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/editor"
+- inputText: "test block"
+- tapOn: "Done"
+- scrollUntilVisible:
+    element:
+      text: "Submission policy"
+    direction: DOWN
+- assertVisible: "Must submit all at once"
+- assertVisible: "Done"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/added_assignment"
+- tapOn:
+    text: "Done"
+- assertNotVisible: "Done"
+- tapOn: "Save"
+# student submit assignment
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: "s1"
+      PASSWORD: "tests1"
+- tapOn: "Courses"
+- tapOn: "Test Course Block"
+- scrollUntilVisible:
+    element:
+      text: "Assignment 1"
+    direction: DOWN
+- tapOn: "Assignment 1"
+- tapOn: "Text"
+- tapOn:
+     id: "com.toughra.ustadmobile:id/editor"
+- inputText: "Assignment done by student 1"
+- tapOn: "Done"
+- runFlow:
+    file: "../common/add_assignment_file.yaml"
+    env:
+      TESTFILENAME: "Assignment_File.pdf"
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+- scrollUntilVisible:
+    element:
+      text: "Submit"
+    direction: DOWN
+- tapOn: "Submit"
+- assertVisible: "Submitted"
+# teacher view and mark the assignment submitted by student
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: "t1"
+      PASSWORD: "test"
+- tapOn: "Courses"
+- tapOn: "Test Course Block"
+- scrollUntilVisible:
+    element:
+      text: "Assignment 1"
+    direction: DOWN
+- tapOn: "Assignment 1"
+- tapOn: "Submissions"
+- assertVisible: "Student 1"
+- tapOn: "Student 1"
+# assert that teacher able to view text submitted by student
+- assertVisible: "Assignment done by student 1"
+# assert that teacher able to open and view file submitted by student
+- assertVisible: "Assignment_File.pdf"
+- tapOn: "Assignment_File.pdf"
+- assertVisible: "Assignment test Pdf\r\n"
+- back
+- assertVisible: "Mark comment"
+- tapOn: "Mark comment"
+- inputText: "Good job"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      text: "Mark*"
+    direction: DOWN
+- tapOn: "Mark*"
+- inputText: "9"
+- tapOn: "Submit grade"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      text: "Result"
+    direction: UP
+- assertVisible: "9.0/10.0 Points"
+# student able to view his grade
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: "s1"
+      PASSWORD: "tests1"
+- tapOn: "Courses"
+- tapOn: "Test Course Block"
+- scrollUntilVisible:
+    element:
+      text: "Assignment 1"
+    direction: DOWN
+- tapOn: "Assignment 1"
+- assertVisible: "Marked"
+- scrollUntilVisible:
+    element:
+      text: "Grades"
+    direction: DOWN
+- assertVisible: "9.0/10.0 Points"
+#  Submission policy - Must submit all at once , so make sure Submit button is not visible
+- assertNotVisible: "Submit"
+# teacher can delete the course
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: "t1"
+      PASSWORD: "test"
+- tapOn: "Courses"
+- tapOn: "Test Course Block"
+- tapOn:
+    id: "floating_action_button"
+- scrollUntilVisible:
+    element:
+      text: "Assignment 1"
+    direction: DOWN
+- tapOn: "More options"
+- tapOn: "Delete"
+- tapOn: "Save"
+- assertNotVisible: "Assignment 1"
