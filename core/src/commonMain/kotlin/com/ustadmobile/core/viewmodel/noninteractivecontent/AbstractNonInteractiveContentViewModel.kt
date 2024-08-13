@@ -48,7 +48,7 @@ abstract class AbstractNonInteractiveContentViewModel(
                 val titleAndLangCodeVal = titleAndLangCode
 
                 XapiActivityStatementObject(
-                    id = xapiSession.rootActivityId!!, //This is set in init
+                    id = xapiSession.xseRootActivityId,
                     definition = XapiActivity(
                         name = if(titleAndLangCodeVal != null) {
                             mapOf(titleAndLangCodeVal.langCode to titleAndLangCodeVal.title)

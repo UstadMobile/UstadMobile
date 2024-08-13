@@ -1,11 +1,14 @@
 package com.ustadmobile.libcache.headers
 
+import com.ustadmobile.ihttp.headers.IHeadersBuilder
+import com.ustadmobile.ihttp.headers.IHttpHeaders
+
 /**
  * Add the integrity:  if the etag header is not already taken, then use the etag field. Otherwise
  * use x-integrity.
  */
-internal fun HeadersBuilder.addIntegrity(
-    extraHeaders: HttpHeaders?,
+internal fun IHeadersBuilder.addIntegrity(
+    extraHeaders: IHttpHeaders?,
     integrity: String
 ) {
     if(extraHeaders?.containsHeader("etag") != true) {

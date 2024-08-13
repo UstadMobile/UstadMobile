@@ -7,9 +7,7 @@ import com.ustadmobile.lib.db.entities.Site
 import io.ktor.client.HttpClient
 import io.ktor.client.call.*
 import io.ktor.client.request.get
-import io.ktor.serialization.gson.GsonConverter
-import io.ktor.serialization.gson.gson
-import io.ktor.http.ContentType
+import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.*
 import io.ktor.server.config.*
 import io.ktor.server.plugins.contentnegotiation.*
@@ -57,16 +55,13 @@ class TestSiteRoute {
 
             val client = createClient {
                 install(io.ktor.client.plugins.contentnegotiation.ContentNegotiation) {
-                    gson()
+                    json()
                 }
             }
 
             application {
                 install(ContentNegotiation) {
-                    gson {
-                        register(ContentType.Application.Json, GsonConverter())
-                        register(ContentType.Any, GsonConverter())
-                    }
+                    json()
                 }
 
                 di {

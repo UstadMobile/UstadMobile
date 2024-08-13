@@ -34,6 +34,8 @@ import com.ustadmobile.libuicompose.components.UstadFileDropZone
 import com.ustadmobile.libuicompose.components.UstadFilePickResult
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadListFilterChipsHeader
+import com.ustadmobile.libuicompose.components.UstadNothingHereYet
+import com.ustadmobile.libuicompose.components.UstadPickFileOpts
 import com.ustadmobile.libuicompose.components.rememberUstadFilePickLauncher
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
@@ -191,6 +193,12 @@ fun ContentEntryListScreen(
                                 }
                             }
                         )
+                    }
+                }
+
+                if(repositoryResult.isSettledEmpty) {
+                    item("empty_state") {
+                        UstadNothingHereYet()
                     }
                 }
 

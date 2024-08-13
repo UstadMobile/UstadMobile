@@ -21,6 +21,7 @@ import com.ustadmobile.core.domain.cachelock.Migrate131to132AddRetainActiveUriTr
 import com.ustadmobile.core.domain.cachelock.UpdateCacheLockJoinUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCaseCommonJvm
 import com.ustadmobile.core.domain.message.AddOutgoingReplicationForMessageTriggerCallback
+import com.ustadmobile.core.domain.xapi.XapiJson
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
@@ -90,10 +91,16 @@ fun makeJvmBackendDiModule(
         json
     }
 
+    bind<XapiJson>() with singleton { XapiJson() }
+
     bind<File>(tag = DiTag.TAG_CONTEXT_DATA_ROOT) with scoped(contextScope).singleton {
         File(dataDirPath, context.identifier(dbMode)).also {
             it.takeIf { !it.exists() }?.mkdirs()
         }
+    }
+
+    bind<File>(tag = DiTag.TAG_ADMIN_PASS_FILE) with scoped(contextScope).singleton {
+        File(instance<File>(tag = DiTag.TAG_CONTEXT_DATA_ROOT), "admin.txt")
     }
 
     bind<Settings>() with singleton {

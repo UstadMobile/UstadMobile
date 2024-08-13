@@ -1,14 +1,15 @@
 package com.ustadmobile.libcache
 
+import com.ustadmobile.ihttp.headers.IHttpHeaders
 import com.ustadmobile.libcache.cachecontrol.RequestCacheControlHeader
-import com.ustadmobile.libcache.headers.HttpHeaders
+
 
 class DefaultCacheCompressionFilter: CacheStorageCompressionFilter {
 
     override fun invoke(
         url: String,
-        requestHeaders: HttpHeaders,
-        responseHeaders: HttpHeaders,
+        requestHeaders: IHttpHeaders,
+        responseHeaders: IHttpHeaders,
     ): CompressionType {
         val requestCacheControl = requestHeaders["cache-control"]?.let {
             RequestCacheControlHeader.parse(it)

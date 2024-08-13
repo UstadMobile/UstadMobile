@@ -15,6 +15,7 @@ appId: com.toughra.ustadmobile
 - tapOn: "Text"
 - tapOn: "Title*"
 - inputText: ${TEXTTITLE}
+- hideKeyboard
 - tapOn: "Description"
 - tapOn:
     id: "com.toughra.ustadmobile:id/editor"

@@ -1,9 +1,10 @@
 package com.ustadmobile.core.viewmodel
 
+import com.benasher44.uuid.uuid4
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.openlink.OnClickLinkUseCase
-import com.ustadmobile.core.domain.xapi.XapiSession
+import com.ustadmobile.core.domain.xxhash.XXStringHasher
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -25,9 +26,12 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_VIEWNAME
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.errors.ErrorViewModel
+import com.ustadmobile.core.viewmodel.message.conversationlist.ConversationListViewModel
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
@@ -468,15 +472,22 @@ abstract class UstadViewModel(
         contentEntryUid: Long = 0,
         clazzUid: Long = savedStateHandle[ARG_CLAZZUID]?.toLong() ?: 0,
         cbUid: Long = savedStateHandle[ARG_COURSE_BLOCK_UID]?.toLong() ?: 0,
-    ): XapiSession {
-        return XapiSession(
-            endpoint = accountManager.activeEndpoint,
-            accountPersonUid = activeUserPersonUid,
-            accountUsername = accountManager.currentUserSession.person.username ?: "anonymous",
-            clazzUid = clazzUid,
-            cbUid = cbUid,
-            contentEntryUid = contentEntryUid,
-            rootActivityId = "${accountManager.activeEndpoint.url}ns/xapi/contentEntry/$contentEntryUid"
+    ): XapiSessionEntity {
+        val registrationUuid = uuid4()
+        val activityId = "${accountManager.activeEndpoint.url}ns/xapi/contentEntry/$contentEntryUid"
+        val xxStringHasher: XXStringHasher = di.direct.instance()
+
+        return XapiSessionEntity(
+            xseUid = activeDb.doorPrimaryKeyManager.nextId(XapiSessionEntity.TABLE_ID),
+            xseAccountPersonUid = activeUserPersonUid,
+            xseAccountUsername = accountManager.currentUserSession.person.username ?: "anonymous",
+            xseClazzUid = clazzUid,
+            xseCbUid = cbUid,
+            xseContentEntryUid = contentEntryUid,
+            xseRootActivityId = activityId,
+            xseRootActivityUid = xxStringHasher.hash(activityId),
+            xseRegistrationHi = registrationUuid.mostSignificantBits,
+            xseRegistrationLo = registrationUuid.leastSignificantBits,
         )
     }
 
@@ -517,8 +528,12 @@ abstract class UstadViewModel(
          */
         const val ARG_MAX_DATE_OF_BIRTH = "maxDob"
 
-        val ROOT_DESTINATIONS = listOf(ClazzListViewModel.DEST_NAME_HOME,
-            ContentEntryListViewModel.DEST_NAME_HOME, PersonListViewModel.DEST_NAME_HOME)
+        val ROOT_DESTINATIONS = listOf(
+            ClazzListViewModel.DEST_NAME_HOME,
+            ContentEntryListViewModel.DEST_NAME_HOME,
+            ConversationListViewModel.DEST_NAME_HOME,
+            PersonListViewModel.DEST_NAME_HOME
+        )
 
         /**
          * Can be used with any Android intent to provide a deep link to open within the app.

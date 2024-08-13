@@ -103,6 +103,7 @@ fun commonDomainDiModule(endpointScope: EndpointScope) = DI.Module("CommonDomain
             createXapiGroupUseCase = instance(),
             xapiStatementResource = instance(),
             xxStringHasher = instance(),
+            json = instance()
         )
     }
 

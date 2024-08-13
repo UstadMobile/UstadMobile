@@ -1510,6 +1510,120 @@ val MIGRATION_172_194 = DoorMigrationStatementList(172, 194) { db ->
     }
 }
 
+val MIGRATION_194_195 = DoorMigrationStatementList(194, 195) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS StateEntity (  seActorUid  INTEGER  NOT NULL , seHash  INTEGER  NOT NULL , seActivityUid  INTEGER  NOT NULL , seStateId  TEXT , seLastMod  INTEGER  NOT NULL , seTimeStored  INTEGER  NOT NULL , seContentType  TEXT , seCompressed  INTEGER  NOT NULL , seContent  TEXT , seDeleted  INTEGER  NOT NULL , seRegistrationHi  INTEGER , seRegistrationLo  INTEGER , PRIMARY KEY (seActorUid, seHash) )")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS StateEntity (  seActorUid  BIGINT  NOT NULL , seHash  BIGINT  NOT NULL , seActivityUid  BIGINT  NOT NULL , seStateId  TEXT , seLastMod  BIGINT  NOT NULL , seTimeStored  BIGINT  NOT NULL , seContentType  TEXT , seCompressed  INTEGER  NOT NULL , seContent  TEXT , seDeleted  BOOL  NOT NULL , seRegistrationHi  BIGINT , seRegistrationLo  BIGINT , PRIMARY KEY (seActorUid, seHash) )")
+        }
+    }
+}
+
+val MIGRATION_195_196 = DoorMigrationStatementList(195, 196) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS StateDeleteCommand (  sdcActorUid  INTEGER  NOT NULL , sdcHash  INTEGER  NOT NULL , sdcActivityUid  INTEGER  NOT NULL , sdcStateId  TEXT , sdcLastMod  INTEGER  NOT NULL , sdcRegistrationHi  INTEGER , sdcRegistrationLo  INTEGER , PRIMARY KEY (sdcActorUid, sdcHash) )")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS StateDeleteCommand (  sdcActorUid  BIGINT  NOT NULL , sdcHash  BIGINT  NOT NULL , sdcActivityUid  BIGINT  NOT NULL , sdcStateId  TEXT , sdcLastMod  BIGINT  NOT NULL , sdcRegistrationHi  BIGINT , sdcRegistrationLo  BIGINT , PRIMARY KEY (sdcActorUid, sdcHash) )")
+        }
+    }
+}
+
+//Add Xapi State Deletion Triggers - See DeleteXapiStateUseCase
+val MIGRATION_196_197 = DoorMigrationStatementList(196, 197) { db ->
+    buildList {
+        if (db.dbType() == DoorDbType.SQLITE) {
+            listOf("INSERT", "UPDATE").forEach { event ->
+                add("""
+                        CREATE TRIGGER IF NOT EXISTS xapi_state_delete_trig_${event.lowercase().substring(0, 3)}
+                        AFTER $event ON StateDeleteCommand
+                        FOR EACH ROW
+                        BEGIN
+                        UPDATE StateEntity
+                           SET seDeleted = 1,
+                               seLastMod = NEW.sdcLastMod
+                         WHERE seActorUid = NEW.sdcActorUid
+                           AND seActivityUid = NEW.sdcActivityUid
+                           AND seLastMod < NEW.sdcLastMod
+                           AND (    (      NEW.sdcRegistrationHi IS NULL 
+                                       AND seRegistrationHi IS NULL
+                                       AND NEW.sdcRegistrationLo IS NULL
+                                       AND seRegistrationLo IS NULL)
+                                 OR (     seRegistrationHi = NEW.sdcRegistrationHi
+                                      AND seRegistrationLo = NEW.sdcRegistrationLo))
+                           AND (    NEW.sdcStateId IS NULL
+                                 OR seStateId = NEW.sdcStateId);
+                        END         
+                """)
+            }
+        } else {
+            add("""
+                        CREATE OR REPLACE FUNCTION xapi_state_delete_fn() RETURNS TRIGGER AS ${'$'}${'$'}
+                        BEGIN
+                        UPDATE StateEntity
+                           SET seDeleted = TRUE,
+                               seLastMod = NEW.sdcLastMod
+                         WHERE seActorUid = NEW.sdcActorUid
+                           AND seActivityUid = NEW.sdcActivityUid
+                           AND seLastMod < NEW.sdcLastMod
+                           AND (    (      NEW.sdcRegistrationHi IS NULL 
+                                       AND seRegistrationHi IS NULL
+                                       AND NEW.sdcRegistrationLo IS NULL
+                                       AND seRegistrationLo IS NULL)
+                                 OR (     seRegistrationHi = NEW.sdcRegistrationHi
+                                      AND seRegistrationLo = NEW.sdcRegistrationLo))
+                           AND (    NEW.sdcStateId IS NULL
+                                 OR seStateId = NEW.sdcStateId);
+                         RETURN NEW;
+                         END ${'$'}${'$'} LANGUAGE plpgsql
+                    """)
+            add("""
+                    CREATE TRIGGER xapi_state_delete_trig
+                    AFTER INSERT OR UPDATE ON StateDeleteCommand
+                    FOR EACH ROW
+                    EXECUTE FUNCTION xapi_state_delete_fn();
+                """)
+        }
+    }
+}
+
+val MIGRATION_197_198 = DoorMigrationStatementList(197, 198) { db ->
+    buildList {
+        add("DROP TABLE XapiSessionEntity")
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS XapiSessionEntity (  xseLastMod  INTEGER  NOT NULL , xseRegistrationHi  INTEGER  NOT NULL , xseRegistrationLo  INTEGER  NOT NULL , xseUsUid  INTEGER  NOT NULL , xseAccountPersonUid  INTEGER  NOT NULL , xseAccountUsername  TEXT , xseClazzUid  INTEGER  NOT NULL , xseCbUid  INTEGER  NOT NULL , xseContentEntryUid  INTEGER  NOT NULL , xseRootActivityId  TEXT , xseStartTime  INTEGER  NOT NULL , xseExpireTime  INTEGER  NOT NULL , xseAuth  TEXT , xseCompleted  INTEGER  NOT NULL  DEFAULT 0 , xseUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS XapiSessionEntity (  xseLastMod  BIGINT  NOT NULL , xseRegistrationHi  BIGINT  NOT NULL , xseRegistrationLo  BIGINT  NOT NULL , xseUsUid  BIGINT  NOT NULL , xseAccountPersonUid  BIGINT  NOT NULL , xseAccountUsername  TEXT , xseClazzUid  BIGINT  NOT NULL , xseCbUid  BIGINT  NOT NULL , xseContentEntryUid  BIGINT  NOT NULL , xseRootActivityId  TEXT , xseStartTime  BIGINT  NOT NULL , xseExpireTime  BIGINT  NOT NULL , xseAuth  TEXT , xseCompleted  BOOL  NOT NULL  DEFAULT false, xseUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+        }
+    }
+}
+
+
+val MIGRATION_198_199 = DoorMigrationStatementList(198, 199) { db ->
+    buildList {
+        add("DROP TABLE StateEntity")
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS StateEntity (  seActorUid  INTEGER  NOT NULL , seHash  INTEGER  NOT NULL , seActivityUid  INTEGER  NOT NULL , seStateId  TEXT  NOT NULL , seLastMod  INTEGER  NOT NULL , seTimeStored  INTEGER  NOT NULL , seContentType  TEXT  NOT NULL , seCompressed  INTEGER  NOT NULL , seContent  TEXT  NOT NULL , seDeleted  INTEGER  NOT NULL , seRegistrationHi  INTEGER , seRegistrationLo  INTEGER , seH5PPreloaded  INTEGER  NOT NULL , seH5PSubContentId  TEXT , PRIMARY KEY (seActorUid, seHash) )")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS StateEntity (  seActorUid  BIGINT  NOT NULL , seHash  BIGINT  NOT NULL , seActivityUid  BIGINT  NOT NULL , seStateId  TEXT  NOT NULL , seLastMod  BIGINT  NOT NULL , seTimeStored  BIGINT  NOT NULL , seContentType  TEXT  NOT NULL , seCompressed  INTEGER  NOT NULL , seContent  TEXT  NOT NULL , seDeleted  BOOL  NOT NULL , seRegistrationHi  BIGINT , seRegistrationLo  BIGINT , seH5PPreloaded  BOOL  NOT NULL , seH5PSubContentId  TEXT , PRIMARY KEY (seActorUid, seHash) )")
+        }
+    }
+}
+
+val MIGRATION_199_200 = DoorMigrationStatementList(199, 200) { db ->
+    buildList {
+        add("DROP TABLE XapiSessionEntity")
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS XapiSessionEntity (  xseLastMod  INTEGER  NOT NULL , xseRegistrationHi  INTEGER  NOT NULL , xseRegistrationLo  INTEGER  NOT NULL , xseUsUid  INTEGER  NOT NULL , xseAccountPersonUid  INTEGER  NOT NULL , xseActorUid  INTEGER  NOT NULL , xseAccountUsername  TEXT  NOT NULL , xseClazzUid  INTEGER  NOT NULL , xseCbUid  INTEGER  NOT NULL , xseContentEntryUid  INTEGER  NOT NULL , xseRootActivityId  TEXT  NOT NULL , xseRootActivityUid  INTEGER  NOT NULL , xseStartTime  INTEGER  NOT NULL , xseExpireTime  INTEGER  NOT NULL , xseAuth  TEXT , xseCompleted  INTEGER  NOT NULL  DEFAULT 0 , knownActorUidToPersonUids  TEXT  NOT NULL , xseUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS XapiSessionEntity (  xseLastMod  BIGINT  NOT NULL , xseRegistrationHi  BIGINT  NOT NULL , xseRegistrationLo  BIGINT  NOT NULL , xseUsUid  BIGINT  NOT NULL , xseAccountPersonUid  BIGINT  NOT NULL , xseActorUid  BIGINT  NOT NULL , xseAccountUsername  TEXT  NOT NULL , xseClazzUid  BIGINT  NOT NULL , xseCbUid  BIGINT  NOT NULL , xseContentEntryUid  BIGINT  NOT NULL , xseRootActivityId  TEXT  NOT NULL , xseRootActivityUid  BIGINT  NOT NULL , xseStartTime  BIGINT  NOT NULL , xseExpireTime  BIGINT  NOT NULL , xseAuth  TEXT , xseCompleted  BOOL  NOT NULL  DEFAULT false, knownActorUidToPersonUids  TEXT  NOT NULL , xseUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+        }
+    }
+}
+
+
+
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_105_106, MIGRATION_106_107,
     MIGRATION_107_108, MIGRATION_108_109,
@@ -1524,7 +1638,9 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_156_157, MIGRATION_157_158, MIGRATION_158_159, MIGRATION_159_160,
     MIGRATION_160_161, MIGRATION_162_163, MIGRATION_163_164, MIGRATION_164_165,
     MIGRATION_165_166, MIGRATION_166_167, MIGRATION_167_168, MIGRATION_168_169,
-    MIGRATION_170_171, MIGRATION_171_172, MIGRATION_172_194,
+    MIGRATION_170_171, MIGRATION_171_172, MIGRATION_172_194, MIGRATION_194_195,
+    MIGRATION_195_196, MIGRATION_196_197, MIGRATION_197_198, MIGRATION_198_199,
+    MIGRATION_199_200,
 )
 
 

@@ -36,6 +36,7 @@ import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.viewmodel.clazz.gradebook.ClazzGradebookUiState
 import com.ustadmobile.core.viewmodel.clazz.gradebook.ClazzGradebookViewModel
 import com.ustadmobile.libuicompose.components.ScaledListItem
+import com.ustadmobile.libuicompose.components.UstadNothingHereYet
 import com.ustadmobile.libuicompose.components.UstadPersonAvatar
 import com.ustadmobile.libuicompose.components.scaledTextStyle
 import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
@@ -104,29 +105,37 @@ fun ClazzGradebookScreen(
             scale = animatedScale,
             modifier = Modifier.fillMaxSize()
         ) {
-            stickyHeader {
-                Row(
-                    modifier = Modifier
-                        .background(MaterialTheme.colorScheme.background)
-                        .fillMaxWidth()
-                        .height(scaledHeaderHeight)
-                ) {
-                    Spacer(Modifier.width(nameColWidth))
-
+            if(!listResult.isSettledEmpty) {
+                stickyHeader {
                     Row(
                         modifier = Modifier
-                            .weight(1.0f)
-                            .horizontalScroll(horizontalScrollState)
+                            .background(MaterialTheme.colorScheme.background)
+                            .fillMaxWidth()
+                            .height(scaledHeaderHeight)
                     ) {
-                        uiState.courseBlocks.forEach { block ->
-                            GradebookCourseBlockHeader(
-                                courseBlock = block,
-                                width = scaledColumnWidth,
-                                height = scaledHeaderHeight,
-                                scale = animatedScale
-                            )
+                        Spacer(Modifier.width(nameColWidth))
+
+                        Row(
+                            modifier = Modifier
+                                .weight(1.0f)
+                                .horizontalScroll(horizontalScrollState)
+                        ) {
+                            uiState.courseBlocks.forEach { block ->
+                                GradebookCourseBlockHeader(
+                                    courseBlock = block,
+                                    width = scaledColumnWidth,
+                                    height = scaledHeaderHeight,
+                                    scale = animatedScale
+                                )
+                            }
                         }
                     }
+                }
+            }
+
+            if(listResult.isSettledEmpty) {
+                item("empty_state") {
+                    UstadNothingHereYet()
                 }
             }
 

@@ -1,6 +1,7 @@
 package com.ustadmobile.libcache
 
-import com.ustadmobile.libcache.headers.HttpHeaders
+import com.ustadmobile.ihttp.headers.IHttpHeaders
+
 
 /**
  * Filter that will be used by the cache to determine if a given entry should be stored using
@@ -25,8 +26,8 @@ fun interface CacheStorageCompressionFilter {
 
     operator fun invoke(
         url: String,
-        requestHeaders: HttpHeaders,
-        responseHeaders: HttpHeaders,
+        requestHeaders: IHttpHeaders,
+        responseHeaders: IHttpHeaders,
     ): CompressionType
 
 }

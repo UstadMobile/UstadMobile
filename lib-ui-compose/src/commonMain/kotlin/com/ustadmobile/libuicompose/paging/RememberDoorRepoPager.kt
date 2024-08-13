@@ -3,6 +3,7 @@ package com.ustadmobile.libuicompose.paging
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,7 +27,17 @@ import java.util.concurrent.atomic.AtomicReference
 class DoorRepositoryPagerResult<T : Any>(
     val pager: Pager<Int, T>,
     val lazyPagingItems: LazyPagingItems<T>,
-)
+    val mediatorState: DoorOffsetLimitRemoteMediator.OffsetLimitMediatorState,
+) {
+
+    /**
+     * True when loading has been finished and the list is empty.
+     */
+    val isSettledEmpty: Boolean
+        get() = lazyPagingItems.itemCount == 0 && mediatorState.loadingStarted &&
+                mediatorState.loadingRangesInProgress.isEmpty()
+
+}
 
 /**
  * Use DoorOffsetLimitRemoteMediator to trigger remote paged loads as required
@@ -68,6 +79,10 @@ fun <T: Any> rememberDoorRepositoryPager(
             }
         )
     }
+
+    val mediatorState by offsetLimitMediator.state.collectAsState(
+        DoorOffsetLimitRemoteMediator.OffsetLimitMediatorState()
+    )
 
     DisposableEffect(Unit) {
         onDispose {
@@ -120,5 +135,5 @@ fun <T: Any> rememberDoorRepositoryPager(
         }
     }
 
-    return DoorRepositoryPagerResult(pager, lazyPagingItems)
+    return DoorRepositoryPagerResult(pager, lazyPagingItems, mediatorState)
 }

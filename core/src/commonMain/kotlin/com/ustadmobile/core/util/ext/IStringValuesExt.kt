@@ -1,7 +1,6 @@
 package com.ustadmobile.core.util.ext
 
-import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.util.directivesToMap
+import com.ustadmobile.ihttp.headers.directives.directivesToMap
 import com.ustadmobile.core.util.stringvalues.IStringValues
 import com.ustadmobile.core.util.stringvalues.MapStringValues
 
@@ -32,22 +31,6 @@ fun IStringValues.clientHost(): String? {
     return get("Forwarded")?.let {
         directivesToMap(it)
     }?.getCaseInsensitiveOrNull("host") ?: get("X-Forwarded-Host") ?: get("Host")
-}
-
-/**
- * Get the protocol and host being used e.g. http://ip.addr:8087/ https://server.tld/ etc. This
- * will use the Forwarded header when available.
- */
-fun IStringValues.clientProtocolAndHost(
-    defaultProtocol: String = "http"
-): String {
-    return "${clientProtocol() ?: defaultProtocol}://${clientHost()}".requirePostfix("/")
-}
-
-fun IStringValues.clientEndpoint(
-    defaultProtocol: String = "http"
-): Endpoint {
-    return Endpoint(clientProtocolAndHost(defaultProtocol = defaultProtocol))
 }
 
 fun IStringValues.toMap(): Map<String, List<String>> {

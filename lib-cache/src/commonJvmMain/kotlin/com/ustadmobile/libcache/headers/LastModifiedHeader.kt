@@ -1,5 +1,6 @@
 package com.ustadmobile.libcache.headers
 
+import com.ustadmobile.ihttp.headers.IHttpHeader
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -17,8 +18,8 @@ val LAST_MODIFIED_FORMATTER = SimpleDateFormat(
 
 actual fun lastModifiedHeader(
     time: Long
-): HttpHeader {
-    return HttpHeader(
+): IHttpHeader {
+    return IHttpHeader.fromNameAndValue(
         name = "Last-Modified",
         value = LAST_MODIFIED_FORMATTER.format(Date(time))
     )

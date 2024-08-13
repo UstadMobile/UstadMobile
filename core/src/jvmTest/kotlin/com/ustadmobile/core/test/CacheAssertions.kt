@@ -5,7 +5,7 @@ import com.ustadmobile.core.io.ext.readSha256
 import com.ustadmobile.door.util.NullOutputStream
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.io.useAndReadSha256
-import com.ustadmobile.libcache.request.requestBuilder
+import com.ustadmobile.ihttp.request.iRequestBuilder
 import com.ustadmobile.libcache.response.bodyAsUncompressedSourceIfContentEncoded
 import kotlinx.io.asInputStream
 import org.junit.Assert
@@ -31,7 +31,7 @@ fun UstadCache.assertCachedBodyMatchesZipEntry(
     pathInZip: String,
 ) {
     val digest = MessageDigest.getInstance("SHA-256")
-    val response = retrieve(requestBuilder(url))
+    val response = retrieve(iRequestBuilder(url))
     val responseSha256 = response?.bodyAsSource()?.asInputStream()?.useAndDigest(digest)
         ?: throw AssertionError("assertCachedBodyMatchesZipEntry: no body for $url")
     digest.reset()
@@ -47,7 +47,7 @@ fun UstadCache.assertCachedBodyMatchesFileContent(
     file: File
 ) {
     val digest = MessageDigest.getInstance("SHA-256")
-    val response = retrieve(requestBuilder(url))
+    val response = retrieve(iRequestBuilder(url))
     val responseSha256 = response?.bodyAsSource()?.asInputStream()?.useAndDigest(digest)
         ?: throw AssertionError("assertCachedBodyMatchesZipEntry: no body for $url")
     digest.reset()
@@ -65,7 +65,7 @@ fun UstadCache.assertManifestEntryIsStored(
     val manifestEntry = manifest.entries.first {
         it.uri == uriInManifest
     }
-    val cacheResponse = retrieve(requestBuilder(manifestEntry.bodyDataUrl))
+    val cacheResponse = retrieve(iRequestBuilder(manifestEntry.bodyDataUrl))
     assertNotNull(cacheResponse)
     val responseSha256 = cacheResponse.bodyAsUncompressedSourceIfContentEncoded()!!.useAndReadSha256()
     val originalDataSha256 = originalData().use { it.readSha256() }

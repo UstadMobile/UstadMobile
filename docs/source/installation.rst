@@ -1,5 +1,5 @@
 =======================
-Installation
+INSTALLATION
 =======================
 
 Android Installation
@@ -20,22 +20,22 @@ To install the application using an SD card or flash drive:
 6. Follow the on-screen instructions to complete the installation.
 
 .. image:: images/installation1.jpg
-   :alt: Alternate text describing the image
+   :alt: The screenshot shows file manager app showing categories and OTG storage.
    :width: 400px
    :height: 700px
 
 .. image:: images/installation2.jpg
-   :alt: Alternate text describing the image
+   :alt: The screenshot shows a file manager app displaying "app-android-debug.apk" in OTG storage.
    :width: 400px
    :height: 700px
 
 .. image:: images/installation3.jpg
-   :alt: Alternate text describing the image
+   :alt: The screenshot shows a popup to install application.
    :width: 400px
    :height: 700px
 
 .. image:: images/installation4.jpg
-   :alt: Alternate text describing the image
+   :alt: The screenshot shows a popup to open application
    :width: 400px
    :height: 700px
 
@@ -50,7 +50,7 @@ QuickShare
 
 To install using QuickShare:
 
-1. On the device with the app, open the app and go to "Share App" in settings.
+1. On the device with the app, open the app and go to "Share App" in account.
 2. Select "QuickShare" as the sharing method.
 3. On the receiving device, open QuickShare and scan for nearby devices.
 4. Select the sending device from the list of available devices.
@@ -58,19 +58,31 @@ To install using QuickShare:
 6. Once the transfer is complete, tap on the received APK to install.
 
 .. image:: images/sharing1.jpg
-   :alt: Alternate text describing the image
+   :alt: The screenshot shows the app's Account screen with options for user detail, sharing the app, advanced settings, recommended Chrome, and version.
    :width: 400px
    :height: 700px
 
+
 .. image:: images/sharing2.jpg
-   :alt: Alternate text describing the image
+   :alt: The screenshot shows two option "Send apk" and "Send app store link"
    :width: 400px
    :height: 700px
 
 .. image:: images/sharing3.jpg
-   :alt: Alternate text describing the image
+   :alt: The screenshot shows the "Share App" option, displaying sharing options like Nearby Share, realme Share, WhatsApp, Slack, Gmail, Drive, and others.
    :width: 400px
    :height: 700px
+
+.. image:: images/sharing4.jpg
+   :alt: The screenshot shows the "Quick Share" screen, indicating that Prashant's phone is sharing to Sumit's phone, with the status "Sending."
+   :width: 400px
+   :height: 700px
+
+
+Share offline using Google Play
+"""""""""""""""""""""""""""""""
+You can share the app offline using Google Play as per `Google Play instructions <https://support.google.com/googleplay/answer/9283534?hl=en>`_.
+
 
 Other Sharing Apps
 """"""""""""""""""

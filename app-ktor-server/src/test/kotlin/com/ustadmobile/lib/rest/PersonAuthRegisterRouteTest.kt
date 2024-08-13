@@ -21,7 +21,7 @@ import io.github.aakira.napier.Napier
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
-import io.ktor.serialization.gson.*
+import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.plugins.contentnegotiation.*
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
@@ -86,13 +86,13 @@ class PersonAuthRegisterRouteTest {
 
             val client = createClient {
                 install(io.ktor.client.plugins.contentnegotiation.ContentNegotiation) {
-                    gson()
+                    json()
                 }
             }
 
             application {
                 install(ContentNegotiation) {
-                    gson()
+                    json()
                 }
                 install(CallLogging) {
                     level = Level.DEBUG
