@@ -9,25 +9,13 @@ appId: com.toughra.ustadmobile
  # 4) TESTSERIAL: ${TESTSERIAL} : provides the device serial number
 
 
-# clear the app
-- clearState: com.toughra.ustadmobile
-
 # clear the downloads
 - evalScript: ${http.get(CONTROLSERVER + "cleardownloads?device=" + TESTSERIAL)}
 
 # push the test file to the downloads
 - evalScript: ${http.get(CONTROLSERVER + "pushcontent?test-file-name=" + TESTFILENAME +"&device=" + TESTSERIAL)}
 
-# get started
-- launchApp
-- tapOn: "GET STARTED"
-# select site
-- runFlow: "./select_site.yaml"
-# admin login
-- runFlow:
-    file: "./user_login.yaml"
-- tapOn: "People"
-- tapOn: "Admin User"
+
 - tapOn:
     id: "floating_action_button"
 - tapOn: "Add"
@@ -38,10 +26,3 @@ appId: com.toughra.ustadmobile
     file: select_picture_from_files.yaml
     env:
       TESTFILENAME: ${TESTFILENAME}
-- scrollUntilVisible:
-    element:
-      text: "Gender*"
-    direction: DOWN
-- tapOn: "Gender*"
-- tapOn: "Male"
-- tapOn: "SAVE"

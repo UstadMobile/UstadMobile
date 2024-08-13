@@ -1,0 +1,31 @@
+appId: com.toughra.ustadmobile
+env:
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/002_005_course_title_is_mandatory"
+  TESTNAME: "002_005_course_title_is_mandatory"
+---
+- clearState: com.toughra.ustadmobile
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+      TESTNAME: ${TESTNAME}
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+- runFlow:
+    file: "../common/add_course.yaml"
+    env:
+      TESTCOURSENAME: " "
+# assert to make sure the course is not saved because of blank course title
+- assertVisible:
+    id: "app_title"
+    text: "Add a new course"
+# add course name and save
+- tapOn: "Name*"
+- inputText: "TEST COURSE"
+- tapOn: "SAVE"
+- assertVisible:
+    id: "app_title"
+    text: " TEST COURSE"

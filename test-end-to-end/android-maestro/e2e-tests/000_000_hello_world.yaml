@@ -1,5 +1,7 @@
 appId: com.toughra.ustadmobile
-
+env:
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/000_000_hello_world"
+  TESTNAME: "000_000_hello_world"
 ---
 - clearState: com.toughra.ustadmobile
 - runFlow:
@@ -8,6 +10,7 @@ appId: com.toughra.ustadmobile
      CONTROLSERVER: ${CONTROLSERVER}
      TESTSERIAL: ${TESTSERIAL}
      TESTNAME: ${TESTNAME}
+- startRecording: "${TESTRESULTSDIR}/${TESTNAME}"
 - launchApp
 - tapOn: "GET STARTED"
 - tapOn: Site link
@@ -21,3 +24,4 @@ appId: com.toughra.ustadmobile
 - hideKeyboard
 - tapOn: "LOGIN"
 - tapOn: "Library"
+- stopRecording

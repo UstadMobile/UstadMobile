@@ -10,12 +10,25 @@ env:
       CONTROLSERVER: ${CONTROLSERVER}
       TESTSERIAL: ${TESTSERIAL}
       TESTNAME: ${TESTNAME}
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
 - runFlow:
-    file: "../common/add_profile_pic.yaml"
+    file: "../common/user_login.yaml"
+- tapOn: "People"
+- tapOn: "Admin User"
+- runFlow:
+    file: "../common/add_picture.yaml"
     env:
       TESTFILENAME: "admin_profilePic.jpg"
       CONTROLSERVER: ${CONTROLSERVER}
       TESTSERIAL: ${TESTSERIAL}
+- scrollUntilVisible:
+    element:
+      text: "Gender*"
+    direction: DOWN
+- tapOn: "Gender*"
+- tapOn: "Male"
+- tapOn: "SAVE"
 - assertVisible:
     id: "person_picture"
 - tapOn:
