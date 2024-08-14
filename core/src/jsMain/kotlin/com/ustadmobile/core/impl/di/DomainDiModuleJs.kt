@@ -36,6 +36,7 @@ import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCaseDirect
 import com.ustadmobile.core.domain.openlink.OnClickLinkUseCase
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCaseJs
+import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.phonenumber.IPhoneNumberUtil
 import com.ustadmobile.core.domain.phonenumber.OnClickPhoneNumUseCase
 import com.ustadmobile.core.domain.phonenumber.OnClickPhoneNumUseCaseJs
@@ -325,6 +326,13 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
             saveStatementOnUnloadUseCase = instance(),
             xapiStatementResource = instance(),
             endpoint = context,
+        )
+    }
+
+    bind<AddNewPersonUseCase>() with scoped(EndpointScope.Default).singleton {
+        AddNewPersonUseCase(
+            db = instance(tag = DoorTag.TAG_DB),
+            repo = instance<UmAppDataLayer>().repository,
         )
     }
 

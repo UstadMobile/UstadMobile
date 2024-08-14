@@ -35,6 +35,7 @@ import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.core.db.ext.migrationList
+import com.ustadmobile.core.domain.account.CreateNewLocalAccountUseCase
 import com.ustadmobile.core.domain.account.SetPasswordUseCase
 import com.ustadmobile.core.domain.account.SetPasswordUseCaseCommonJvm
 import com.ustadmobile.core.domain.blob.download.BlobDownloadClientUseCase
@@ -109,6 +110,7 @@ import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCase
 import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCaseAndroid
 import com.ustadmobile.core.domain.interop.oneroster.OneRosterEndpoint
 import com.ustadmobile.core.domain.interop.oneroster.OneRosterHttpServerUseCase
+import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.share.ShareTextUseCase
 import com.ustadmobile.core.domain.share.ShareTextUseCaseAndroid
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
@@ -1098,6 +1100,17 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 xapiStatementResource = instance(),
                 endpoint = context,
             )
+        }
+
+        bind<AddNewPersonUseCase>() with scoped(EndpointScope.Default).singleton {
+            AddNewPersonUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = instance<UmAppDataLayer>().repository,
+            )
+        }
+
+        bind<CreateNewLocalAccountUseCase>() with singleton {
+            CreateNewLocalAccountUseCase(di)
         }
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }

@@ -85,6 +85,7 @@ import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCase
 import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCaseEmbeddedServer
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.launchopenlicenses.LaunchOpenLicensesUseCase
+import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCaseCommonJvm
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsUseCase
@@ -668,6 +669,13 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             xxStringHasher = instance(),
             xxHasher64Factory = instance(),
             endpoint = context,
+        )
+    }
+
+    bind<AddNewPersonUseCase>() with scoped(EndpointScope.Default).singleton {
+        AddNewPersonUseCase(
+            db = instance(tag = DoorTag.TAG_DB),
+            repo = instance<UmAppDataLayer>().repository,
         )
     }
 

@@ -13,7 +13,6 @@ import com.ustadmobile.core.domain.contententry.launchcontent.DefaultLaunchConte
 import com.ustadmobile.core.domain.contententry.launchcontent.LaunchContentEntryVersionUseCase
 import com.ustadmobile.core.domain.contententry.save.SaveContentEntryUseCase
 import com.ustadmobile.core.domain.makelink.MakeLinkUseCase
-import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.siteterms.GetLocaleForSiteTermsUseCase
 import com.ustadmobile.core.domain.xapi.coursegroup.CreateXapiGroupForCourseGroupUseCase
 import com.ustadmobile.door.ext.DoorTag
@@ -90,12 +89,6 @@ fun commonDomainDiModule(endpointScope: EndpointScope) = DI.Module("CommonDomain
         )
     }
 
-    bind<AddNewPersonUseCase>() with scoped(endpointScope).singleton {
-        AddNewPersonUseCase(
-            db = instance(tag = DoorTag.TAG_DB),
-            repo = instance<UmAppDataLayer>().repository,
-        )
-    }
 
     bind<SubmitMarkUseCase>() with scoped(endpointScope).provider {
         SubmitMarkUseCase(
