@@ -1,6 +1,5 @@
 package com.ustadmobile.lib.rest
 
-import com.google.gson.Gson
 import com.russhwolf.settings.PropertiesSettings
 import com.russhwolf.settings.Settings
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -43,10 +42,6 @@ fun commonTestKtorDiModule(
 
     bind<UmAppDataLayer>() with scoped(endpointScope).singleton {
         UmAppDataLayer(localDb = instance(tag = DoorTag.TAG_DB), repository = null)
-    }
-
-    bind<Gson>() with singleton {
-        Gson()
     }
 
     bind<XmlPullParserFactory>(tag  = DiTag.XPP_FACTORY_NSAWARE) with singleton {
