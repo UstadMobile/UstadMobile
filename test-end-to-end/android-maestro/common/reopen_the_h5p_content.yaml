@@ -19,3 +19,6 @@ appId: com.toughra.ustadmobile
       visible: "Open"
     commands:
       - tapOn: "Open"
+- tapOn: "Blank input 1 of 3"
+- inputText: "Blue"
+- hideKeyboard
