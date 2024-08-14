@@ -41,10 +41,6 @@ env:
 - assertVisible: "Blank input 1 of 3. Answered correctly"
 - tapOn: "Close tab"
 - runFlow:
-    file: "../common/add_course.yaml"
-    env:
-      TESTCOURSENAME: "Status Test"
-- runFlow:
     file: "../common/login_download_and_open_content.yaml"
 - tapOn: "Library"
 - extendedWaitUntil:
@@ -58,5 +54,9 @@ env:
 - tapOn: Open
 - assertVisible: "Blank input 1 of 3. Answered correctly"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/h5p_content_state_visible"
+- tapOn: "Blank input 3 of 3"
+- inputText: "yellow"
+- tapOn: "The bananas are "
+- assertVisible: "You got 3 out of 3 points"
 - tapOn: "Close tab"
-- tapOn: "Back"
+
