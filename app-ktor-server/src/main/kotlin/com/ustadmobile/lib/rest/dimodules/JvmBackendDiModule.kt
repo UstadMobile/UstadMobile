@@ -7,6 +7,7 @@ import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.contentformats.epub.XhtmlFixer
 import com.ustadmobile.core.contentformats.epub.XhtmlFixerJsoup
+import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.MIGRATION_144_145_SERVER
 import com.ustadmobile.core.db.ext.MIGRATION_148_149_NO_OFFLINE_ITEMS
@@ -200,6 +201,10 @@ fun makeJvmBackendDiModule(
     bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(contextScope).singleton {
         Napier.d("creating database for context: ${context.url}")
         instance<DbAndObservers>().db
+    }
+
+    bind<UmAppDataLayer>() with scoped(contextScope).singleton {
+        UmAppDataLayer(localDb = instance(tag = DoorTag.TAG_DB), repository = null)
     }
 
     bind<NodeIdAndAuth>() with scoped(EndpointScope.Default).singleton {
