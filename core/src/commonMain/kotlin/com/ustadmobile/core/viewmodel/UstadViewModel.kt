@@ -2,6 +2,7 @@ package com.ustadmobile.core.viewmodel
 
 import com.benasher44.uuid.uuid4
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.openlink.OnClickLinkUseCase
 import com.ustadmobile.core.domain.xxhash.XXStringHasher
@@ -80,20 +81,22 @@ abstract class UstadViewModel(
     protected val activeUserPersonUid: Long
         get() = accountManager.currentUserSession.person.personUid
 
+    internal val activeDataLayer: UmAppDataLayer by on(accountManager.activeEndpoint).instance()
+
     internal val activeDb: UmAppDatabase by on(accountManager.activeEndpoint)
         .instance(tag = DoorTag.TAG_DB)
 
     /**
      * The repository will be null if this is a local only account (e.g. there is no server)
      */
-    internal val activeRepo: UmAppDatabase? by on(accountManager.activeEndpoint)
-        .instance(tag = DoorTag.TAG_REPO)
+    internal val activeRepo: UmAppDatabase?
+        get() = activeDataLayer.repository
 
     /**
      * Use the repository (if any as above), otherwise fallback to using the local database
      */
     internal val activeRepoWithFallback: UmAppDatabase
-        get() = activeRepo ?: activeDb
+        get() = activeDataLayer.repositoryOrLocalDb
 
     protected val navResultReturner: NavResultReturner by instance()
 

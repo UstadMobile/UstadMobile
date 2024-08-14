@@ -13,11 +13,11 @@ import org.kodein.di.DI
 import org.kodein.di.instance
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.siteterms.GetLocaleForSiteTermsUseCase
 import com.ustadmobile.core.view.UstadView.Companion.ARG_API_URL
 import com.ustadmobile.core.viewmodel.DetailViewModel
-import com.ustadmobile.door.ext.DoorTag
 import org.kodein.di.direct
 import org.kodein.di.on
 
@@ -57,7 +57,7 @@ class SiteTermsDetailViewModel(
 
         viewModelScope.launch {
             val repo: UmAppDatabase = if(acceptButtonMode && apiUrl != null) {
-                di.direct.on(Endpoint(apiUrl)).instance(tag = DoorTag.TAG_REPO)
+                di.direct.on(Endpoint(apiUrl)).instance<UmAppDataLayer>().repositoryOrLocalDb
             }else {
                 activeRepoWithFallback
             }

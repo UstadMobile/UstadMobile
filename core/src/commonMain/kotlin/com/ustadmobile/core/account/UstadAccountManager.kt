@@ -4,6 +4,7 @@ import com.russhwolf.settings.Settings
 import com.russhwolf.settings.set
 import com.ustadmobile.core.account.UstadAccountManager.EndpointFilter
 import com.ustadmobile.core.db.PermissionFlags
+import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.impl.config.ApiUrlConfig
@@ -349,7 +350,8 @@ class UstadAccountManager(
 
         if(status == 200 && registeredPerson != null) {
             //Must ensure that the site object is loaded to get auth salt.
-            val repo: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_REPO)
+            val repo: UmAppDatabase = di.on(endpoint).direct.instance<UmAppDataLayer>()
+                .requireRepository()
             getSiteFromDbOrLoadFromHttp(repo)
 
             val session = addSession(registeredPerson, endpointUrl, password)
@@ -382,10 +384,7 @@ class UstadAccountManager(
     ) : UserSessionWithPersonAndEndpoint{
         assertNotClosed()
         val endpoint = Endpoint(endpointUrl)
-        val endpointRepo: UmAppDatabase = di.on(endpoint).direct
-            .instance(tag = DoorTag.TAG_REPO)
-        val endpointDb: UmAppDatabase = di.on(endpoint).direct
-            .instance(tag = DoorTag.TAG_DB)
+        val dataLayer: UmAppDataLayer = di.on(endpoint).direct.instance()
 
         if(endpoint !in _endpointsWithActiveSessions.value) {
             addActiveEndpoint(endpoint, commit = false)
@@ -394,7 +393,7 @@ class UstadAccountManager(
 
         val authManager: AuthManager = di.on(endpoint).direct.instance()
 
-        val (userSession, personPicture) = endpointRepo.withDoorTransactionAsync {
+        val (userSession, personPicture) = dataLayer.repositoryOrLocalDb.withDoorTransactionAsync {
             val nodeId = di.on(endpoint).direct.instance<NodeIdAndAuth>().nodeId
             val userSession = UserSession().apply {
                 usClientNodeId = nodeId
@@ -403,9 +402,10 @@ class UstadAccountManager(
                 usSessionType = UserSession.TYPE_STANDARD
                 usStatus = UserSession.STATUS_ACTIVE
                 usAuth = password?.let { authManager.encryptPbkdf2(it).toHexString() }
-                usUid = endpointRepo.userSessionDao().insertSession(this)
+                usUid = dataLayer.repositoryOrLocalDb.userSessionDao().insertSession(this)
             }
-            val personPicture = endpointDb.personPictureDao().findByPersonUidAsync(
+
+            val personPicture = dataLayer.localDb.personPictureDao().findByPersonUidAsync(
                 person.personUid)
             userSession to personPicture
         }
@@ -459,9 +459,9 @@ class UstadAccountManager(
         endStatus: Int = UserSession.STATUS_LOGGED_OUT,
         endReason: Int = UserSession.REASON_LOGGED_OUT
     ) {
-        val endpointRepo: UmAppDatabase = di.on(session.endpoint)
-            .direct.instance(tag = DoorTag.TAG_REPO)
-        endpointRepo.userSessionDao().endSession(
+        val dataLayer: UmAppDataLayer = di.on(session.endpoint).direct.instance()
+
+        dataLayer.repositoryOrLocalDb.userSessionDao().endSession(
             sessionUid = session.userSession.usUid,
             newStatus = endStatus,
             reason = endReason,
@@ -471,7 +471,7 @@ class UstadAccountManager(
         //check if the active session has been ended.
         if(currentUserSession.userSession.usUid == session.userSession.usUid
             && currentUserSession.endpoint == session.endpoint) {
-            currentUserSession = makeNewTempGuestSession(session.endpoint.url, endpointRepo)
+            currentUserSession = makeNewTempGuestSession(session.endpoint.url, dataLayer.repositoryOrLocalDb)
         }
 
 
@@ -491,10 +491,9 @@ class UstadAccountManager(
     ): UmAccount = withContext(Dispatchers.Default){
         assertNotClosed()
 
-        val repo: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = DoorTag.TAG_REPO)
-        val db: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = DoorTag.TAG_DB)
+        val dataLayer: UmAppDataLayer = di.direct.on(Endpoint(endpointUrl)).instance()
 
-        val nodeId = (repo as? DoorDatabaseRepository)?.config?.nodeId
+        val nodeId = (dataLayer.repository as? DoorDatabaseRepository)?.config?.nodeId
             ?: throw IllegalStateException("Could not open repo for endpoint $endpointUrl")
 
         val loginResponse = httpClient.post {
@@ -521,11 +520,11 @@ class UstadAccountManager(
         responseAccount.endpointUrl = endpointUrl
 
         //Make sure that we fetch the person and personpicture into the database.
-        val personAndPicture = repo.personDao().findByUidWithPicture(
+        val personAndPicture = dataLayer.repositoryOrLocalDb.personDao().findByUidWithPicture(
             responseAccount.personUid) ?: throw IllegalStateException("Cannot find person in repo/db")
         val personInDb = personAndPicture.person!! //Cannot be null based on query
 
-        getSiteFromDbOrLoadFromHttp(repo)
+        getSiteFromDbOrLoadFromHttp(dataLayer.repositoryOrLocalDb)
 
         val newSession = addSession(personInDb, endpointUrl, password)
         if(!dontSetCurrentSession) {
@@ -551,19 +550,18 @@ class UstadAccountManager(
         val randomPort = (1000..9999).random()
         val fakeEndpoint = Endpoint("http://$randomIp:$randomPort/")
 
-        val db: UmAppDatabase by di.on(fakeEndpoint).instance(tag = DoorTag.TAG_DB)
-        val repo: UmAppDatabase by di.on(fakeEndpoint).instance(tag = DoorTag.TAG_REPO)
+        val dataLayer: UmAppDataLayer = di.on(fakeEndpoint).direct.instance()
 
         // Manually create AddNewPersonUseCase
-        val addNewPersonUseCase = AddNewPersonUseCase(db, repo)
+        val addNewPersonUseCase: AddNewPersonUseCase = di.direct.instance()
 
-        return db.withDoorTransactionAsync {
+        return dataLayer.localDb.withDoorTransactionAsync {
             try {
                 val newSite = Site().apply {
                     siteName = "Local Site"
                     authSalt = "local_${randomString(10)}"
                 }
-                db.siteDao().insert(newSite)
+                dataLayer.localDb.siteDao().insert(newSite)
 
                 val newPerson = Person().apply {
                     username = "local_user_${randomString(5)}"
@@ -578,16 +576,16 @@ class UstadAccountManager(
                 )
 
                 val newSession = UserSession().apply {
-                    usUid = db.doorPrimaryKeyManager.nextId(UserSession.TABLE_ID)
-                    usClientNodeId = db.doorWrapperNodeId
+                    usUid = dataLayer.localDb.doorPrimaryKeyManager.nextId(UserSession.TABLE_ID)
+                    usClientNodeId = dataLayer.localDb.doorWrapperNodeId
                     usStartTime = systemTimeInMillis()
                     usSessionType = UserSession.TYPE_TEMP_LOCAL or UserSession.TYPE_GUEST
                     usStatus = UserSession.STATUS_ACTIVE
                     usPersonUid = personUid
                 }
-                db.userSessionDao().insertSession(newSession)
+                dataLayer.localDb.userSessionDao().insertSession(newSession)
 
-                val insertedPerson = db.personDao().findByUid(personUid)
+                val insertedPerson = dataLayer.localDb.personDao().findByUid(personUid)
                     ?: throw IllegalStateException("Failed to retrieve inserted person")
 
                 UserSessionWithPersonAndEndpoint(newSession, insertedPerson, fakeEndpoint)
@@ -601,15 +599,15 @@ class UstadAccountManager(
     }
 
     suspend fun startGuestSession(endpointUrl: String): UserSessionWithPersonAndEndpoint {
-        val repo: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = DoorTag.TAG_REPO)
-        val guestPerson = repo.insertPersonAndGroup(Person().apply {
+        val dataLayer: UmAppDataLayer = di.on(Endpoint(endpointUrl)).direct.instance()
+        val guestPerson = dataLayer.repositoryOrLocalDb.insertPersonAndGroup(Person().apply {
             username = null
             firstNames = "Guest"
             lastName = "User"
             personType = Person.TYPE_GUEST
         }, groupFlag = PERSONGROUP_FLAG_PERSONGROUP or PERSONGROUP_FLAG_GUESTPERSON)
 
-        getSiteFromDbOrLoadFromHttp(repo)
+        getSiteFromDbOrLoadFromHttp(dataLayer.repositoryOrLocalDb)
 
         val guestSession = addSession(guestPerson, endpointUrl, null)
         currentUserSession = guestSession

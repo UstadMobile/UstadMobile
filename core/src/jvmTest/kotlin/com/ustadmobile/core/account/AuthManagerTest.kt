@@ -1,9 +1,9 @@
 package com.ustadmobile.core.account
 
+import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
-import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.Site
 import kotlinx.coroutines.runBlocking
@@ -26,6 +26,8 @@ class AuthManagerTest {
     @Rule
     val ustadTestRule = UstadTestRule()
 
+    lateinit var dataLayer: UmAppDataLayer
+
     lateinit var repo: UmAppDatabase
 
     private val testUserUid = 42L
@@ -38,7 +40,8 @@ class AuthManagerTest {
             import(ustadTestRule.diModule)
         }
 
-        repo = di.on(endpoint).direct.instance(tag = DoorTag.TAG_REPO)
+        dataLayer = di.on(endpoint).direct.instance()
+        repo = dataLayer.repository!!
 
         runBlocking {
             repo.insertPersonAndGroup(Person().apply {

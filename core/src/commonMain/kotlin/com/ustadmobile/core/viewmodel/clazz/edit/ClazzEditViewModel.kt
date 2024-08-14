@@ -5,6 +5,7 @@ import com.ustadmobile.core.domain.courseblockupdate.AddOrUpdateCourseBlockUseCa
 import com.ustadmobile.core.domain.courseblockupdate.UpdateCourseBlocksOnReorderOrCommitUseCase
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.db.PermissionFlags
+import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
 import com.ustadmobile.core.domain.clazz.CreateNewClazzUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
@@ -48,7 +49,6 @@ import org.kodein.di.DI
 import org.kodein.di.instance
 import io.github.aakira.napier.Napier
 import org.kodein.di.direct
-import org.kodein.di.instanceOrNull
 
 @Serializable
 data class ClazzEditUiState(
@@ -114,7 +114,7 @@ class ClazzEditViewModel(
         UpdateCourseBlocksOnReorderOrCommitUseCase(),
     private val saveContentEntryUseCase: SaveContentEntryUseCase = SaveContentEntryUseCase(
         db = di.onActiveEndpoint().direct.instance(tag = DoorTag.TAG_DB),
-        repo = di.onActiveEndpoint().direct.instanceOrNull(tag = DoorTag.TAG_REPO),
+        repo = di.onActiveEndpoint().direct.instance<UmAppDataLayer>().repository,
         enqueueSavePictureUseCase = di.onActiveEndpoint().direct.instance(),
     ),
     private val importContentUseCase: EnqueueContentEntryImportUseCase = di.onActiveEndpoint().direct.instance(),

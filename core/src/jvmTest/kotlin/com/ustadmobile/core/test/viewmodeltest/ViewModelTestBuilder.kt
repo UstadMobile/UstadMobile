@@ -7,6 +7,7 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
@@ -23,11 +24,14 @@ import com.ustadmobile.core.impl.di.CommonJvmDiModule
 import com.ustadmobile.core.impl.nav.NavResultReturner
 import com.ustadmobile.core.impl.nav.NavResultReturnerImpl
 import com.ustadmobile.core.impl.nav.UstadNavController
+import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.isLazyInitialized
 import com.ustadmobile.door.DatabaseBuilder
+import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.util.test.nav.TestUstadSavedStateHandle
@@ -91,14 +95,17 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
     val accountManager: UstadAccountManager
         get() = di.direct.instance()
 
+    val activeDataLayer: UmAppDataLayer
+        get() = di.direct.on(activeEndpoint).instance()
+
     val activeDb: UmAppDatabase
-        get() = di.direct.on(activeEndpoint).instance(tag= DoorTag.TAG_DB)
+        get() = activeDataLayer.localDb
 
     val activeRepo: UmAppDatabase?
-        get() = di.direct.on(activeEndpoint).instanceOrNull(tag = DoorTag.TAG_REPO)
+        get() = activeDataLayer.repository
 
     val activeRepoWithFallback: UmAppDatabase
-        get() = activeRepo ?: activeDb
+        get() = activeDataLayer.repositoryOrLocalDb
 
     val systemImpl: UstadMobileSystemImpl
         get() = di.direct.instance()
@@ -200,10 +207,27 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
             }
         }
 
-        if(repoConfig.useDbAsRepo) {
-            bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(endpointScope).singleton {
-                instance(tag = DoorTag.TAG_DB)
+        bind<UmAppDataLayer>() with scoped(endpointScope).singleton {
+            val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
+
+            val repo = if(repoConfig.useDbAsRepo) {
+                db
+            }else if(!context.isLocal) {
+                val nodeIdAndAuth: NodeIdAndAuth = instance()
+
+                spy(
+                    db.asRepository(
+                        repositoryConfig(
+                            Any(), UMFileUtil.joinPaths(context.url, "UmAppDatabase/"),
+                            nodeIdAndAuth.nodeId, nodeIdAndAuth.auth, instance(), instance()
+                        )
+                    )
+                )
+            }else {
+                null
             }
+
+            UmAppDataLayer(db, repo)
         }
 
         bind<SnackBarDispatcher>() with singleton {
@@ -229,7 +253,7 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
         bind<AddNewPersonUseCase>() with scoped(endpointScope).singleton {
             AddNewPersonUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
-                repo = instance(tag = DoorTag.TAG_REPO),
+                repo = instance<UmAppDataLayer>().repository,
             )
         }
     }

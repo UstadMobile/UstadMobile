@@ -2,6 +2,7 @@ package com.ustadmobile.core.viewmodel.clazz.edit
 
 import app.cash.turbine.test
 import com.ustadmobile.core.db.PermissionFlags
+import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
 import com.ustadmobile.core.domain.clazz.CreateNewClazzUseCase
@@ -47,7 +48,7 @@ class ClazzEditViewModelTest : AbstractMainDispatcherTest() {
             extendDi {
                 bind<CreateNewClazzUseCase>() with scoped(endpointScope).singleton {
                     CreateNewClazzUseCase(
-                        repoOrDb = instance(tag = DoorTag.TAG_REPO)
+                        repoOrDb = instance<UmAppDataLayer>().repositoryOrLocalDb,
                     )
                 }
 

@@ -7,6 +7,7 @@ import com.ustadmobile.core.account.*
 import com.ustadmobile.core.account.UstadAccountManager.Companion.ACCOUNTS_ACTIVE_ENDPOINT_PREFKEY
 import com.ustadmobile.core.account.UstadAccountManager.Companion.ACCOUNTS_ACTIVE_SESSION_PREFKEY
 import com.ustadmobile.core.account.UstadAccountManager.Companion.ACCOUNTS_ENDPOINTS_WITH_ACTIVE_SESSION
+import com.ustadmobile.core.db.UmAppDataLayer
 import org.mockito.kotlin.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.addSyncCallback
@@ -193,15 +194,19 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
                     .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
             }
 
-            bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(endpointScope).singleton {
-                spy(instance<UmAppDatabase>(tag = DoorTag.TAG_DB).asRepository(
-                    RepositoryConfig.repositoryConfig(
-                        Any(), "${context.url}UmAppDatabase/", nodeIdAndAuth.nodeId, nodeIdAndAuth.auth,
-                        instance(), instance()
-                    ) {
+            bind<UmAppDataLayer>() with scoped(endpointScope).singleton {
+                val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
 
-                    }
-                ))
+                val repo = spy(
+                    db.asRepository(
+                        RepositoryConfig.repositoryConfig(
+                            Any(), "${context.url}UmAppDatabase/", nodeIdAndAuth.nodeId, nodeIdAndAuth.auth,
+                            instance(), instance()
+                        )
+                    )
+                )
+
+                UmAppDataLayer(localDb = db, repository = repo)
             }
 
             bind<OkHttpClient>() with singleton {
@@ -230,7 +235,7 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
         }
 
 
-        repo = di.on(Endpoint(mockServerUrl)).direct.instance(tag = DoorTag.TAG_REPO)
+        repo = di.on(Endpoint(mockServerUrl)).direct.instance<UmAppDataLayer>().requireRepository()
         repo.siteDao().insert(Site().apply {
             siteUid = 10042
             siteLct = systemTimeInMillis()

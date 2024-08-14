@@ -11,6 +11,7 @@ import com.ustadmobile.core.connectivitymonitor.ConnectivityTriggerGroupControll
 import com.ustadmobile.core.contentformats.ContentImportersDiModuleJvm
 import com.ustadmobile.core.contentformats.epub.XhtmlFixer
 import com.ustadmobile.core.contentformats.epub.XhtmlFixerJsoup
+import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.MIGRATION_144_145_CLIENT
 import com.ustadmobile.core.db.ext.MIGRATION_148_149_CLIENT_WITH_OFFLINE_ITEMS
@@ -49,8 +50,6 @@ import com.ustadmobile.core.impl.config.ManifestAppConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.impl.locale.StringProviderJvm
-import com.ustadmobile.core.schedule.ClazzLogCreatorManager
-import com.ustadmobile.core.schedule.ClazzLogCreatorManagerJvm
 import com.ustadmobile.core.schedule.initQuartzDb
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.uri.UriHelperJvm
@@ -450,19 +449,27 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         XhtmlFixerJsoup(xml = instance())
     }
 
-    bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(EndpointScope.Default).singleton {
-        val nodeIdAndAuth: NodeIdAndAuth = instance()
+    bind<UmAppDataLayer>() with scoped(EndpointScope.Default).singleton {
         val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
-        db.asRepository(
-            RepositoryConfig.repositoryConfig(
-                context = Any(),
-                endpoint = "${context.url}UmAppDatabase/",
-                nodeId = nodeIdAndAuth.nodeId,
-                auth = nodeIdAndAuth.auth,
-                httpClient = instance(),
-                okHttpClient = instance(),
-                json = instance()
+        val repo = if(!context.isLocal) {
+            val nodeIdAndAuth: NodeIdAndAuth = instance()
+            db.asRepository(
+                RepositoryConfig.repositoryConfig(
+                    context = Any(),
+                    endpoint = "${context.url}UmAppDatabase/",
+                    nodeId = nodeIdAndAuth.nodeId,
+                    auth = nodeIdAndAuth.auth,
+                    httpClient = instance(),
+                    okHttpClient = instance(),
+                    json = instance()
+                )
             )
+        }else {
+            null
+        }
+
+        UmAppDataLayer(
+            localDb = db, repository = repo
         )
     }
 
@@ -479,9 +486,6 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         )
     }
 
-    bind<ClazzLogCreatorManager>() with singleton {
-        ClazzLogCreatorManagerJvm(di)
-    }
 
     bind<Scheduler>() with singleton {
         val dataDir: File = instance(tag = TAG_DATA_DIR)

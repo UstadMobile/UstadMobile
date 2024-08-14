@@ -1,6 +1,7 @@
 package com.ustadmobile.core.impl.di
 
 import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.domain.account.SetPasswordUseCase
 import com.ustadmobile.core.domain.account.SetPasswordUseCaseJs
 import com.ustadmobile.core.domain.blob.openblob.OpenBlobUiUseCase
@@ -68,7 +69,6 @@ import com.ustadmobile.door.ext.DoorTag
 import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.instance
-import org.kodein.di.instanceOrNull
 import org.kodein.di.provider
 import org.kodein.di.scoped
 import org.kodein.di.singleton
@@ -143,7 +143,7 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
             saveLocalUrisAsBlobUseCase = instance(),
             enqueueBlobUploadClientUseCase = null,
             db = instance(tag = DoorTag.TAG_DB),
-            repo = instance(tag = DoorTag.TAG_REPO),
+            repo = instance<UmAppDataLayer>().repository,
             compressImageUseCase = CompressImageUseCaseJs(),
             deleteUrisUseCase = instance(),
         )
@@ -169,14 +169,14 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
     bind<SetPasswordUseCase>() with scoped(endpointScope).provider {
         SetPasswordUseCaseJs(
             endpoint = context,
-            repo = instance(tag = DoorTag.TAG_REPO),
+            repo = instance<UmAppDataLayer>().requireRepository(),
             httpClient = instance()
         )
     }
 
     bind<ResolveXapiLaunchHrefUseCase>() with scoped(endpointScope).provider {
         ResolveXapiLaunchHrefUseCase(
-            activeRepoOrDb = instanceOrNull(tag = DoorTag.TAG_REPO) ?: instance(tag = DoorTag.TAG_DB),
+            activeRepoOrDb = instance<UmAppDataLayer>().repositoryOrLocalDb,
             httpClient = instance(),
             json = instance(),
             xppFactory = instance(tag = DiTag.XPP_FACTORY_NSAWARE),
@@ -199,7 +199,7 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
         ResumeOrStartXapiSessionUseCaseJs(
             endpoint = context,
             httpClient = instance(),
-            repo = instance(tag = DoorTag.TAG_REPO),
+            repo = instance<UmAppDataLayer>().requireRepository(),
             xapiJson = instance()
         )
     }
@@ -212,26 +212,26 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
 
     bind<MoveContentEntriesUseCase>() with scoped(EndpointScope.Default).provider {
         MoveContentEntriesUseCase(
-            repo = instance(tag = DoorTag.TAG_REPO),
+            repo = instance<UmAppDataLayer>().repositoryOrLocalDb,
             systemImpl = instance()
         )
     }
 
     bind<DeleteContentEntryParentChildJoinUseCase>() with scoped(EndpointScope.Default).provider {
         DeleteContentEntryParentChildJoinUseCase(
-            repoOrDb = instance(tag = DoorTag.TAG_REPO),
+            repoOrDb = instance<UmAppDataLayer>().repositoryOrLocalDb,
         )
     }
 
     bind<RestoreDeletedItemUseCase>() with scoped(EndpointScope.Default).provider {
         RestoreDeletedItemUseCase(
-            repoOrDb = instance(tag = DoorTag.TAG_REPO),
+            repoOrDb = instance<UmAppDataLayer>().repositoryOrLocalDb,
         )
     }
 
     bind<DeletePermanentlyUseCase>() with scoped(EndpointScope.Default).provider {
         DeletePermanentlyUseCase(
-            repoOrDb = instance(tag = DoorTag.TAG_REPO),
+            repoOrDb = instance<UmAppDataLayer>().repositoryOrLocalDb,
         )
     }
 
@@ -248,7 +248,7 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
             saveLocalUrisAsBlobsUseCase = instance(),
             enqueueBlobUploadClientUseCase = null,
             activeDb = instance(tag = DoorTag.TAG_DB),
-            activeRepo = instance(tag = DoorTag.TAG_REPO),
+            activeRepo = instance<UmAppDataLayer>().repository,
         )
     }
 
@@ -267,7 +267,7 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
         CancelRemoteContentEntryImportUseCase(
             endpoint = context,
             httpClient = instance(),
-            repo = instance(tag = DoorTag.TAG_REPO),
+            repo = instance<UmAppDataLayer>().requireRepository(),
         )
     }
 
@@ -275,7 +275,7 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
         DismissRemoteContentEntryImportErrorUseCase(
             endpoint = context,
             httpClient = instance(),
-            repo = instance(tag = DoorTag.TAG_REPO),
+            repo = instance<UmAppDataLayer>().requireRepository(),
         )
     }
 
@@ -290,14 +290,14 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
     bind<StoreActivitiesUseCase>() with scoped(EndpointScope.Default).singleton {
         StoreActivitiesUseCase(
             db = instance(tag = DoorTag.TAG_DB),
-            repo = instance(tag = DoorTag.TAG_REPO),
+            repo = instance<UmAppDataLayer>().repository,
         )
     }
 
     bind<XapiStatementResource>() with scoped(EndpointScope.Default).singleton {
         XapiStatementResource(
             db = instance(tag = DoorTag.TAG_DB),
-            repo = instance(tag = DoorTag.TAG_REPO),
+            repo = instance<UmAppDataLayer>().repository,
             xxHasher = instance(),
             endpoint = context,
             xapiJson = instance(),

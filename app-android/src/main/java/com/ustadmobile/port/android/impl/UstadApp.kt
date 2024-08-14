@@ -367,19 +367,28 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             instance<DbAndObservers>().db
         }
 
-        bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(EndpointScope.Default).singleton {
-            val nodeIdAndAuth: NodeIdAndAuth = instance()
-            val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
-            db.asRepository(
-                RepositoryConfig.repositoryConfig(
-                    context = applicationContext,
-                    endpoint = "${context.url}UmAppDatabase/",
-                    nodeId = nodeIdAndAuth.nodeId,
-                    auth = nodeIdAndAuth.auth,
-                    httpClient = instance(),
-                    okHttpClient = instance(),
-                    json = instance()
+        bind<UmAppDataLayer>() with scoped(EndpointScope.Default).singleton {
+            val db: UmAppDatabase = instance(tag = DoorTag.TAG_DB)
+            val repo: UmAppDatabase? = if(!context.isLocal) {
+                val nodeIdAndAuth: NodeIdAndAuth = instance()
+                db.asRepository(
+                    RepositoryConfig.repositoryConfig(
+                        context = applicationContext,
+                        endpoint = "${context.url}UmAppDatabase/",
+                        nodeId = nodeIdAndAuth.nodeId,
+                        auth = nodeIdAndAuth.auth,
+                        httpClient = instance(),
+                        okHttpClient = instance(),
+                        json = instance()
+                    )
                 )
+            }else {
+                null
+            }
+
+            UmAppDataLayer(
+                localDb  = db,
+                repository = repo,
             )
         }
 
@@ -582,13 +591,16 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
         }
 
         bind<BlobUploadClientUseCase>() with scoped(EndpointScope.Default).singleton {
+            val repo = instance<UmAppDataLayer>().repository
+                ?: throw IllegalStateException("Cannot BlobUploadClientUseCase for local endpoint")
+
             BlobUploadClientUseCaseJvm(
                 chunkedUploadUseCase = on(context).instance(),
                 httpClient = instance(),
                 httpCache = instance(),
                 json = instance(),
-                db = on(context).instance(tag = DoorTag.TAG_DB),
-                repo = on(context).instance(tag = DoorTag.TAG_REPO),
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = repo,
                 endpoint = context,
             )
         }
@@ -614,10 +626,10 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
         bind<SavePictureUseCase>() with scoped(EndpointScope.Default).singleton {
             SavePictureUseCase(
-                saveLocalUrisAsBlobUseCase = on(context).instance(),
-                db = on(context).instance(tag = DoorTag.TAG_DB),
-                repo = on(context).instance(tag = DoorTag.TAG_REPO),
-                enqueueBlobUploadClientUseCase = on(context).instance(),
+                saveLocalUrisAsBlobUseCase = instance(),
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = instance<UmAppDataLayer>().repository,
+                enqueueBlobUploadClientUseCase = takeIf { !context.isLocal }?.instance(),
                 compressImageUseCase = instance(),
                 deleteUrisUseCase = instance(),
                 getStoragePathForUrlUseCase = instance(),
@@ -693,7 +705,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             BlobDownloadClientUseCaseCommonJvm(
                 okHttpClient = instance(),
                 db = instance(tag = DoorTag.TAG_DB),
-                repo = instance(tag = DoorTag.TAG_REPO),
+                repo = instance<UmAppDataLayer>().requireRepository(),
                 httpCache = instance(),
             )
         }
@@ -729,7 +741,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
         bind<ContentEntryVersionServerUseCase>() with scoped(EndpointScope.Default).singleton {
             ContentEntryVersionServerUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
-                repo = instance(tag = DoorTag.TAG_REPO),
+                repo = instance<UmAppDataLayer>().repository,
                 okHttpClient = instance(),
                 json = instance(),
                 onlyIfCached = false,
@@ -756,7 +768,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
         bind<ResolveXapiLaunchHrefUseCase>() with scoped(EndpointScope.Default).singleton {
             ResolveXapiLaunchHrefUseCase(
-                activeRepoOrDb = instanceOrNull(tag = DoorTag.TAG_REPO) ?: instance(tag = DoorTag.TAG_DB),
+                activeRepoOrDb = instance<UmAppDataLayer>().repositoryOrLocalDb,
                 httpClient = instance(),
                 json = instance(),
                 xppFactory = instance(tag = DiTag.XPP_FACTORY_NSAWARE),
@@ -770,7 +782,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
         bind<ResumeOrStartXapiSessionUseCase>() with scoped(EndpointScope.Default).singleton {
             ResumeOrStartXapiSessionUseCaseLocal(
                 activeDb = instance(tag = DoorTag.TAG_DB),
-                activeRepo = instance(tag = DoorTag.TAG_REPO),
+                activeRepo = instance<UmAppDataLayer>().repository,
                 xxStringHasher= instance(),
             )
         }
@@ -807,7 +819,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
         bind<H5PUserDataEndpointUseCase>() with scoped(EndpointScope.Default).singleton {
             H5PUserDataEndpointUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
-                repo = instanceOrNull(tag = DoorTag.TAG_REPO),
+                repo = instance<UmAppDataLayer>().repository,
                 xxStringHasher = instance(),
                 xxHasher64Factory = instance(),
                 xapiJson = instance(),
@@ -817,7 +829,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
         bind<StoreXapiStateUseCase>() with scoped(EndpointScope.Default).singleton {
             StoreXapiStateUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
-                repo = instance(tag = DoorTag.TAG_REPO),
+                repo = instance<UmAppDataLayer>().repository,
                 xapiJson = instance(),
                 xxHasher64Factory = instance(),
                 xxStringHasher = instance(),
@@ -828,7 +840,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
         bind<RetrieveXapiStateUseCase>() with scoped(EndpointScope.Default).singleton {
             RetrieveXapiStateUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
-                repo = instance(tag = DoorTag.TAG_REPO),
+                repo = instance<UmAppDataLayer>().repository,
                 xapiJson = instance(),
                 xxStringHasher = instance(),
                 xxHasher64Factory = instance(),
@@ -838,7 +850,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
         bind<ListXapiStateIdsUseCase>() with scoped(EndpointScope.Default).singleton {
             ListXapiStateIdsUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
-                repo = instance(tag = DoorTag.TAG_REPO),
+                repo = instance<UmAppDataLayer>().repository,
                 xxStringHasher = instance(),
             )
         }
@@ -846,7 +858,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
         bind<DeleteXapiStateUseCase>() with scoped(EndpointScope.Default).singleton {
             DeleteXapiStateUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
-                repo = instance(tag = DoorTag.TAG_REPO),
+                repo = instance<UmAppDataLayer>().repository,
                 xxStringHasher = instance(),
                 xxHasher64Factory = instance(),
                 endpoint = context,
@@ -901,25 +913,25 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
         bind<DeleteContentEntryParentChildJoinUseCase>() with scoped(EndpointScope.Default).provider {
             DeleteContentEntryParentChildJoinUseCase(
-                repoOrDb = instance(tag = DoorTag.TAG_REPO),
+                repoOrDb = instance<UmAppDataLayer>().repositoryOrLocalDb,
             )
         }
 
         bind<RestoreDeletedItemUseCase>() with scoped(EndpointScope.Default).provider {
             RestoreDeletedItemUseCase(
-                repoOrDb = instance(tag = DoorTag.TAG_REPO),
+                repoOrDb = instance<UmAppDataLayer>().repositoryOrLocalDb,
             )
         }
 
         bind<DeletePermanentlyUseCase>() with scoped(EndpointScope.Default).provider {
             DeletePermanentlyUseCase(
-                repoOrDb = instance(tag = DoorTag.TAG_REPO),
+                repoOrDb = instance<UmAppDataLayer>().repositoryOrLocalDb,
             )
         }
 
         bind<MakeContentEntryAvailableOfflineUseCase>() with scoped(EndpointScope.Default).singleton {
             MakeContentEntryAvailableOfflineUseCase(
-                repo = instance(tag = DoorTag.TAG_REPO),
+                repo = instance<UmAppDataLayer>().requireRepository(),
                 nodeIdAndAuth = instance(),
                 enqueueContentManifestDownloadUseCase = instance(),
             )
@@ -942,7 +954,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 saveLocalUrisAsBlobsUseCase = instance(),
                 enqueueBlobUploadClientUseCase = instance(),
                 activeDb = instance(tag = DoorTag.TAG_DB),
-                activeRepo = instance(tag = DoorTag.TAG_REPO),
+                activeRepo = instance<UmAppDataLayer>().repository,
             )
         }
 
@@ -969,7 +981,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             CancelRemoteContentEntryImportUseCase(
                 endpoint = context,
                 httpClient = instance(),
-                repo = instance(tag = DoorTag.TAG_REPO),
+                repo = instance<UmAppDataLayer>().requireRepository(),
             )
         }
 
@@ -977,7 +989,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             DismissRemoteContentEntryImportErrorUseCase(
                 endpoint = context,
                 httpClient = instance(),
-                repo = instance(tag = DoorTag.TAG_REPO),
+                repo = instance<UmAppDataLayer>().requireRepository(),
             )
         }
 
@@ -1029,7 +1041,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
         bind<OneRosterEndpoint>() with scoped(EndpointScope.Default).singleton {
             OneRosterEndpoint(
                 db = instance(tag = DoorTag.TAG_DB),
-                repo = instance(tag = DoorTag.TAG_REPO),
+                repo = instance<UmAppDataLayer>().repository,
                 endpoint = context,
                 xxHasher = instance(),
                 json = instance(),
@@ -1055,14 +1067,14 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
         bind<StoreActivitiesUseCase>() with scoped(EndpointScope.Default).singleton {
             StoreActivitiesUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
-                repo = instance(tag = DoorTag.TAG_REPO),
+                repo = instance<UmAppDataLayer>().repository,
             )
         }
 
         bind<XapiStatementResource>() with scoped(EndpointScope.Default).singleton {
             XapiStatementResource(
                 db = instance(tag = DoorTag.TAG_DB),
-                repo = instance(tag = DoorTag.TAG_REPO),
+                repo = instance<UmAppDataLayer>().repository,
                 xxHasher = instance(),
                 endpoint = context,
                 xapiJson = instance(),

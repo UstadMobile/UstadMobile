@@ -4,6 +4,7 @@ import com.ustadmobile.core.account.AuthManager
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.door.ext.DoorTag
@@ -54,7 +55,7 @@ class ClientServerTestClient(
     fun close() {
         diEndpointScope.activeEndpointUrls.forEach {
             di.direct.instance<UstadAccountManager>().close()
-            di.on(Endpoint(it)).direct.instance<UmAppDatabase>(tag = DoorTag.TAG_REPO).close()
+            di.on(Endpoint(it)).direct.instance<UmAppDataLayer>().repository?.close()
             di.on(Endpoint(it)).direct.instance<UmAppDatabase>(tag = DoorTag.TAG_DB).close()
         }
     }

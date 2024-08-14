@@ -8,6 +8,7 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
@@ -153,14 +154,17 @@ class UstadTestRule(): TestWatcher() {
             }
 
 
-            bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(endpointScope).singleton {
+            bind<UmAppDataLayer>() with scoped(endpointScope).singleton {
                 val nodeIdAndAuth: NodeIdAndAuth = instance()
-                spy(instance<UmAppDatabase>(tag = DoorTag.TAG_DB).asRepository(repositoryConfig(
-                    Any(), UMFileUtil.joinPaths(context.url, "UmAppDatabase/"), nodeIdAndAuth.nodeId,
-                    nodeIdAndAuth.auth, instance(), instance()
-                ) {
-
-                })
+                val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
+                val repo = spy(
+                    db.asRepository(
+                        repositoryConfig(
+                            Any(), UMFileUtil.joinPaths(context.url, "UmAppDatabase/"), nodeIdAndAuth.nodeId,
+                            nodeIdAndAuth.auth, instance(), instance()
+                        ) {
+                        }
+                    )
                 ).also {
                     it.siteDao().insert(Site().apply {
                         siteName = "Test"
@@ -168,6 +172,8 @@ class UstadTestRule(): TestWatcher() {
                     })
                     dbsToClose.add(it)
                 }
+
+                UmAppDataLayer(localDb = db, repository = repo)
             }
 
             bind<ClientId>(tag = UstadMobileSystemCommon.TAG_CLIENT_ID) with scoped(EndpointScope.Default).singleton {

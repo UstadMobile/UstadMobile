@@ -4,6 +4,7 @@ import com.russhwolf.settings.StorageSettings
 import com.russhwolf.settings.set
 import com.ustadmobile.BuildConfigJs
 import com.ustadmobile.core.account.*
+import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCase
@@ -137,7 +138,7 @@ internal fun ustadJsDi(
         dbBuilt
     }
 
-    bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(EndpointScope.Default).singleton {
+    bind<UmAppDataLayer>() with scoped(EndpointScope.Default).singleton {
         val nodeIdAndAuth: NodeIdAndAuth = instance()
         val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
         val repositoryConfig =  RepositoryConfig.repositoryConfig(
@@ -148,7 +149,10 @@ internal fun ustadJsDi(
         ){
 
         }
-        db.asRepository(repositoryConfig)
+        UmAppDataLayer(
+            localDb = db,
+            repository = db.asRepository(repositoryConfig)
+        )
     }
 
     constant(UstadMobileSystemCommon.TAG_DOWNLOAD_ENABLED) with false
@@ -217,7 +221,7 @@ internal fun ustadJsDi(
             httpClient = instance(),
             endpoint = context,
             json = instance(),
-            repo = instance(tag = DoorTag.TAG_REPO),
+            repo = instance<UmAppDataLayer>().repositoryOrLocalDb,
         )
     }
 

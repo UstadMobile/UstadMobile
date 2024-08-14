@@ -3,6 +3,7 @@ package com.ustadmobile.core.viewmodel.xapicontent
 import app.cash.turbine.test
 import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.contentformats.manifest.ContentManifestEntry
+import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.domain.contententry.ContentConstants
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.ResolveXapiLaunchHrefUseCase
 import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCase
@@ -12,7 +13,6 @@ import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.stringvalues.emptyStringValues
 import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.core.viewmodel.UstadViewModel
-import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.lib.db.entities.ContentEntryVersion
 import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
@@ -56,7 +56,7 @@ class XapiContentViewModelTest : AbstractMainDispatcherTest() {
 
                 bind<ResolveXapiLaunchHrefUseCase>() with scoped(endpointScope).singleton {
                     ResolveXapiLaunchHrefUseCase(
-                        activeRepoOrDb = instance(tag = DoorTag.TAG_REPO),
+                        activeRepoOrDb = instance<UmAppDataLayer>().repositoryOrLocalDb,
                         httpClient = instance(),
                         json = instance(),
                         xppFactory = instance(tag = DiTag.XPP_FACTORY_NSAWARE),

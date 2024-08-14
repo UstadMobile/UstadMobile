@@ -4,6 +4,7 @@ import app.cash.turbine.test
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.MAX_VALID_DATE
 import com.ustadmobile.core.db.PermissionFlags
+import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.domain.clazz.CreateNewClazzUseCase
 import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.EnrolIntoCourseUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
@@ -63,7 +64,7 @@ class ClazzEnrolmentEditViewModelTest : AbstractMainDispatcherTest()  {
                 bind<EnrolIntoCourseUseCase>() with scoped(endpointScope).singleton {
                     EnrolIntoCourseUseCase(
                         db = instance(tag = DoorTag.TAG_DB),
-                        repo = instance(tag = DoorTag.TAG_REPO),
+                        repo = instance<UmAppDataLayer>().repository
                     )
                 }
             }
