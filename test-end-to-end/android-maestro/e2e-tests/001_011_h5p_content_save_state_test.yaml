@@ -1,7 +1,7 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTNAME: "001_001_admin_can_add_content_001-h5p"
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/001_001_admin_can_add_content_001-h5p"
+  TESTNAME: "001_011_h5p_content_save_state_test"
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/001_011_h5p_content_save_state_test"
 ---
 - clearState: com.toughra.ustadmobile
 - runFlow:
