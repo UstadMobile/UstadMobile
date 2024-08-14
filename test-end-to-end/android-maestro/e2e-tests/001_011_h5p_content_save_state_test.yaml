@@ -20,7 +20,7 @@ env:
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_add_to_library"
 - tapOn: "The colours"
 - extendedWaitUntil:
-    notVisible: "Importing"
+    visible: "Uploading"
     timeout: 20000
 - extendedWaitUntil:
     notVisible: "Uploading"
@@ -31,6 +31,10 @@ env:
 - tapOn: "Blank input 1 of 3"
 - inputText: "Blue"
 - hideKeyboard
+- runFlow:
+    when:
+      notVisible: "Blank input 2 of 3"
+    file: "../common/reopen_the_h5p_content.yaml"
 - tapOn: "Blank input 2 of 3"
 - inputText: "red"
 - hideKeyboard
