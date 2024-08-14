@@ -44,7 +44,7 @@ fun IndividualLearnerScreenContent(viewModel: IndividualLearnerViewModel) {
     val uiState by viewModel.uiState.collectAsState()
 
     val filePickLauncher = rememberUstadFilePickLauncher { result ->
-        viewModel.onRestoreFileSelected(fileUri = result.uri, fileName = result.fileName)
+
     }
 
     Column(

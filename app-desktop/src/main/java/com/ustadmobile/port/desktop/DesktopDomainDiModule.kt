@@ -12,6 +12,7 @@ import org.kodein.di.provider
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.db.UmAppDataLayer
+import com.ustadmobile.core.domain.account.CreateNewLocalAccountUseCase
 import com.ustadmobile.core.domain.getversion.GetVersionUseCaseJvm
 import com.ustadmobile.core.domain.account.SetPasswordUseCase
 import com.ustadmobile.core.domain.account.SetPasswordUseCaseCommonJvm
@@ -668,6 +669,10 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             xxHasher64Factory = instance(),
             endpoint = context,
         )
+    }
+
+    bind<CreateNewLocalAccountUseCase>() with singleton {
+        CreateNewLocalAccountUseCase(di)
     }
 
 }

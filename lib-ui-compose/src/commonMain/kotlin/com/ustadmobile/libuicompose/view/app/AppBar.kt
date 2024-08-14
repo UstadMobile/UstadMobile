@@ -77,8 +77,7 @@ fun UstadAppBar(
 
     val di = localDI()
     val accountManager: UstadAccountManager = di.direct.instance()
-    val currentSession by accountManager.currentUserSessionFlow
-        .collectAsState(null)
+    val currentSession by accountManager.currentUserSessionFlow.collectAsState(null)
 
     var searchActive by remember {
         mutableStateOf(false)

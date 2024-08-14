@@ -29,6 +29,9 @@ expect abstract class SiteDao {
     @Insert
     abstract fun insert(site: Site): Long
 
+    @Insert
+    abstract suspend fun insertAsync(site: Site): Long
+
     @Update
     abstract suspend fun updateAsync(workspace: Site)
 

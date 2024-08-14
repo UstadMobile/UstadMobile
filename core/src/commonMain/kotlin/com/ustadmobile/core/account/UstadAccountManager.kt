@@ -3,10 +3,9 @@ package com.ustadmobile.core.account
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.set
 import com.ustadmobile.core.account.UstadAccountManager.EndpointFilter
-import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.domain.person.AddNewPersonUseCase
+import com.ustadmobile.core.domain.account.CreateNewLocalAccountUseCase
 import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.whenSubscribed
@@ -23,11 +22,9 @@ import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonGroup.Companion.PERSONGROUP_FLAG_GUESTPERSON
 import com.ustadmobile.lib.db.entities.PersonGroup.Companion.PERSONGROUP_FLAG_PERSONGROUP
-import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.db.entities.UserSession
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.lib.util.randomString
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.expectSuccess
 import io.ktor.client.request.header
@@ -127,6 +124,8 @@ class UstadAccountManager(
     val activeEndpoints: List<Endpoint>
         get() = _endpointsWithActiveSessions.value
 
+
+    private val createNewLocalAccountUseCase: CreateNewLocalAccountUseCase by di.instance()
 
     fun interface EndpointFilter {
 
@@ -546,55 +545,13 @@ class UstadAccountManager(
     }
 
     suspend fun createLocalAccount(): UserSessionWithPersonAndEndpoint {
-        val randomIp = "169.${(0..255).random()}.${(0..255).random()}.${(0..255).random()}"
-        val randomPort = (1000..9999).random()
-        val fakeEndpoint = Endpoint("http://$randomIp:$randomPort/")
-
-        val dataLayer: UmAppDataLayer = di.on(fakeEndpoint).direct.instance()
-
-        // Manually create AddNewPersonUseCase
-        val addNewPersonUseCase: AddNewPersonUseCase = di.direct.instance()
-
-        return dataLayer.localDb.withDoorTransactionAsync {
-            try {
-                val newSite = Site().apply {
-                    siteName = "Local Site"
-                    authSalt = "local_${randomString(10)}"
-                }
-                dataLayer.localDb.siteDao().insert(newSite)
-
-                val newPerson = Person().apply {
-                    username = "local_user_${randomString(5)}"
-                    firstNames = "Local"
-                    lastName = "User"
-                    personType = Person.TYPE_GUEST
-                }
-
-                val personUid = addNewPersonUseCase(
-                    person = newPerson,
-                    systemPermissions = PermissionFlags.ALL
-                )
-
-                val newSession = UserSession().apply {
-                    usUid = dataLayer.localDb.doorPrimaryKeyManager.nextId(UserSession.TABLE_ID)
-                    usClientNodeId = dataLayer.localDb.doorWrapperNodeId
-                    usStartTime = systemTimeInMillis()
-                    usSessionType = UserSession.TYPE_TEMP_LOCAL or UserSession.TYPE_GUEST
-                    usStatus = UserSession.STATUS_ACTIVE
-                    usPersonUid = personUid
-                }
-                dataLayer.localDb.userSessionDao().insertSession(newSession)
-
-                val insertedPerson = dataLayer.localDb.personDao().findByUid(personUid)
-                    ?: throw IllegalStateException("Failed to retrieve inserted person")
-
-                UserSessionWithPersonAndEndpoint(newSession, insertedPerson, fakeEndpoint)
-            } catch (e: Exception) {
-                throw IllegalStateException("Failed to create local account: ${e.message}", e)
-            }
-        }.also { newSession ->
-            addActiveEndpoint(fakeEndpoint)
-            currentUserSession = newSession
+        val localAccountResult = createNewLocalAccountUseCase(Person())
+        return addSession(
+            person = localAccountResult.person,
+            endpointUrl = localAccountResult.endpoint.url,
+            password = null
+        ).also {
+            currentUserSession = it
         }
     }
 

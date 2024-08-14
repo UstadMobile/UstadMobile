@@ -1,13 +1,11 @@
 package com.ustadmobile.core.viewmodel.individual
 
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.domain.backup.UnzipFileUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.viewmodel.UstadViewModel
-import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import io.github.aakira.napier.Napier
@@ -39,9 +37,8 @@ class IndividualLearnerViewModel(
 
     private val impl: UstadMobileSystemImpl by instance()
 
-    private val unzipFileUseCase: UnzipFileUseCase by instance()
-
     private val _uiState = MutableStateFlow(IndividualLearnerUiState())
+
     val uiState: StateFlow<IndividualLearnerUiState> = _uiState.asStateFlow()
 
 
@@ -53,39 +50,6 @@ class IndividualLearnerViewModel(
                 navigationVisible = false,
                 hideBottomNavigation = true,
             )
-        }
-    }
-
-    fun onRestoreFileSelected(fileUri: String, fileName: String) {
-        _uiState.update {
-            it.copy(
-                selectedFileUri = fileUri,
-                selectedFileName = fileName,
-                extractionStatus = ExtractionStatus.Extracting,
-                extractionProgress = 0f
-            )
-        }
-        extractZipFile(fileUri)
-    }
-
-    private fun extractZipFile(fileUri: String) {
-        viewModelScope.launch {
-            try {
-                unzipFileUseCase(fileUri).collect { progress ->
-                    _uiState.update {
-                        it.copy(
-                            extractionStatus = ExtractionStatus.Extracting,
-                            extractionProgress = progress.progress
-                        )
-                    }
-                }
-                _uiState.update { it.copy(extractionStatus = ExtractionStatus.Completed) }
-                println("Extraction Completed Successfully")
-            } catch (e: Exception) {
-                println("Extraction Failed: ${e.message}")
-                e.printStackTrace()
-                _uiState.update { it.copy(extractionStatus = ExtractionStatus.Error) }
-            }
         }
     }
 

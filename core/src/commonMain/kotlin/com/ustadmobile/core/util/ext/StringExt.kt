@@ -207,3 +207,7 @@ fun String.firstNonWhiteSpaceChar(): Char? {
     else
         null
 }
+
+fun String?.ifNullOrBlank(defaultValue: () -> String): String {
+    return this?.ifBlank(defaultValue) ?: defaultValue()
+}

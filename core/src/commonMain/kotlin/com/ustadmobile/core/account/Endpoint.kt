@@ -1,5 +1,6 @@
 package com.ustadmobile.core.account
 
+import io.ktor.http.Url
 import kotlinx.serialization.Serializable
 
 /**
@@ -18,6 +19,8 @@ data class Endpoint(
      * Local account endpoints are non-reachable internal IP addresses/domains that are generated
      * for local device-only accounts.
      */
-    val isLocal
-        get() = url.startsWith("http://169")
+    val isLocal: Boolean by lazy(LazyThreadSafetyMode.NONE) {
+        Url(url).host.endsWith(".local")
+    }
+
 }
