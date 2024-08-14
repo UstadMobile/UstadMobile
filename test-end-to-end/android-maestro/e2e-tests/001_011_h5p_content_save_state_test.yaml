@@ -20,9 +20,6 @@ env:
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_add_to_library"
 - tapOn: "The colours"
 - extendedWaitUntil:
-    visible: "Uploading"
-    timeout: 20000
-- extendedWaitUntil:
     notVisible: "Uploading"
     timeout: 20000
 - tapOn: Open
