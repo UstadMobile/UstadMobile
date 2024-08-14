@@ -30,9 +30,9 @@ env:
       USERNAME: "t1"
       GENDER: "Female"
       PASSWORD: "test"
-# add 6 students to the course through bulk import using .csv file
+# add students to the course through bulk import using .csv file
 - runFlow:
-    file: "../common/add_6_students_by_bulk_import.yaml"
+    file: "../common/student_bulk_upload_csv.yaml"
     env:
       TESTFILENAME: "Ustad_Students_List.csv"
       CONTROLSERVER: ${CONTROLSERVER}
@@ -56,10 +56,15 @@ env:
       text: "Add block"
     direction: DOWN
 - tapOn: "Add block"
-- swipe:
-    from:
-      text: "Drag handle" # From (x, y) center of element
-    direction: UP # To (50% of width, 10% of height)
+- runFlow:
+    when:
+      notVisible:
+        text: "Assignment"
+    commands:
+      - swipe:
+          from:
+            text: "Drag handle"
+          direction: UP
 - tapOn: "Assignment"
 - tapOn: "Title*"
 - inputText: "Assignment 1"
@@ -78,7 +83,6 @@ env:
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/added_assignment"
 - tapOn:
     text: "Done"
-    delay: 1000
 - assertNotVisible: "Done"
 - tapOn: "Save"
 # student submit assignment
@@ -136,13 +140,7 @@ env:
 # assert that teacher able to open and view file submitted by student
 - assertVisible: "Assignment_File.pdf"
 - tapOn: "Assignment_File.pdf"
-- assertVisible: "Early Childhood\r
-
-    Development Kit:\r
-
-    ATreasure Box of Activities\r
-
-    Activity Guide\r\n"
+- assertVisible: "Assignment test Pdf\r\n"
 - back
 - assertVisible: "Mark comment"
 - tapOn: "Mark comment"

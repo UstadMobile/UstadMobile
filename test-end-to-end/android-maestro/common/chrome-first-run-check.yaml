@@ -8,3 +8,7 @@ appId: com.toughra.ustadmobile
     when:
       visible: "Welcome to Chrome"
     file: "chrome-first-run-tap-accept-or-use-without-account.yaml"
+- runFlow:
+    when:
+      visible: "Chrome notifications make things easier"
+    file: "chrome-first-run-tap-notification-no-thanks.yaml"

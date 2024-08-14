@@ -1,7 +1,7 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/004_003_user_add_private_comment"
-  TESTNAME:  "004_003_user_add_private_comment"
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/005_006_users_can_delete_post_on_discussion_board"
+  TESTNAME:  "005_006_users_can_delete_post_on_discussion_board"
 ---
 # Admin login
 - clearState: com.toughra.ustadmobile
@@ -30,14 +30,14 @@ env:
       USERNAME: "t1"
       GENDER: "Female"
       PASSWORD: "test"
-# add 6 students to the course through bulk import using .csv file
+# add students to the course through bulk import using .csv file
 - runFlow:
     file: "../common/student_bulk_upload_csv.yaml"
     env:
       TESTFILENAME: "Ustad_Students_List.csv"
       CONTROLSERVER: ${CONTROLSERVER}
       TESTSERIAL: ${TESTSERIAL}
-# teacher add an assignment block
+# teacher add an discussion board block
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
@@ -59,47 +59,48 @@ env:
 - runFlow:
     when:
       notVisible:
-        text: "Assignment"
+        text: "Discussion board"
     commands:
       - swipe:
           from:
             text: "Drag handle"
           direction: UP
-- tapOn: "Assignment"
+- tapOn: "Discussion board"
 - tapOn: "Title*"
-- inputText: "Assignment 1"
+- inputText: "Discussion 1"
 - hideKeyboard
 - tapOn: "Description"
 - tapOn:
     id: "com.toughra.ustadmobile:id/editor"
 - inputText: "test block"
 - tapOn: "Done"
-- scrollUntilVisible:
-    element:
-      text: "Submission policy"
-    direction: DOWN
-- assertVisible: "Must submit all at once"
-- assertVisible: "Done"
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/added_assignment"
-- tapOn:
-    text: "Done"
-- assertNotVisible: "Done"
+- assertVisible:
+    id: "app_title"
+    text: "Add discussion"
+- tapOn: "Done"
 - tapOn: "Save"
+- assertVisible:
+    id: "app_title"
+    text: "Test Course Block"
 - scrollUntilVisible:
     element:
-      text: "Assignment 1"
+      text: "Discussion 1"
     direction: DOWN
-- tapOn: "Assignment 1"
-- tapOn: "Submissions"
-- tapOn: "Student 1"
-- scrollUntilVisible:
-    element:
-      text: "Add a private comment"
-    direction: DOWN
-- tapOn: "Add a private comment"
-- inputText: "Private comment from teacher"
-- tapOn: "Send"
-# student add course comment
+- tapOn: "Discussion 1"
+- tapOn:            #  +POST button
+    id: "floating_action_button"
+- tapOn: "Title*"
+- inputText: "Post 1"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/editor"
+- inputText: "This is post by teacher"
+- tapOn: "Post"
+- assertVisible:
+    id: "app_title"
+    text: "Post 1"
+- assertVisible:
+    text: "This is post by teacher"
+# Student added a post
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
@@ -111,15 +112,50 @@ env:
 - tapOn: "Test Course Block"
 - scrollUntilVisible:
     element:
-      text: "Assignment 1"
+      text: "Discussion 1"
     direction: DOWN
-- tapOn: "Assignment 1"
+- tapOn: "Discussion 1"
+- tapOn:            #  +POST button
+    id: "floating_action_button"
+- tapOn: "Title*"
+- inputText: "Post 2"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/editor"
+- inputText: "This is post by student"
+- tapOn: "Post"
+- assertVisible:
+    id: "app_title"
+    text: "Post 2"
+- assertVisible:
+    text: "This is post by student"
+- back
+- assertVisible:
+    id: "app_title"
+    text: "Test Course Block"
+- assertVisible:
+    text: "Post 1"
+- assertVisible:
+    text: "Post 2"
+# teacher delete a post
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: "t1"
+      PASSWORD: "test"
+- tapOn: "Courses"
+- tapOn: "Test Course Block"
 - scrollUntilVisible:
     element:
-      text: "Add a private comment"
+      text: "Discussion 1"
     direction: DOWN
-- tapOn: "Add a private comment"
-- inputText: "Private comment from student"
-- tapOn: "Send"
-- assertVisible: "Private comment from student"
-- assertVisible: "Private comment from teacher"
+- tapOn: "Discussion 1"
+- assertVisible:
+    text: "Post 2"
+- tapOn:
+    text: "More options"
+    index: 0
+- tapOn: "Delete"
+- assertNotVisible:
+      text: "Post 2"

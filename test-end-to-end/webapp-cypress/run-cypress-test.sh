@@ -1,4 +1,4 @@
-S#!/bin/bash
+#!/bin/bash
 
 # Function to display an error message and exit with an error code
 exit_with_error() {

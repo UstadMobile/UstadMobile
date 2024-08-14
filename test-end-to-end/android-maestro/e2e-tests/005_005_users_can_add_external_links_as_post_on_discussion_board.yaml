@@ -1,7 +1,8 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/003_002_add_module_text_blocks_and_perform_indent_hide_delete_actions"
-  TESTNAME:  "005_003_users_can_post_on_discussion_board"
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/005_005_users_can_add_external_links_as_post_on_discussion_board"
+  TESTNAME:  "005_005_users_can_add_external_links_as_post_on_discussion_board"
+  EXTERNALURL: "${CONTROLSERVER}/"
 ---
 # Admin login
 - clearState: com.toughra.ustadmobile
@@ -30,9 +31,9 @@ env:
       USERNAME: "t1"
       GENDER: "Female"
       PASSWORD: "test"
-# add 6 students to the course through bulk import using .csv file
+# add students to the course through bulk import using .csv file
 - runFlow:
-    file: "../common/add_6_students_by_bulk_import.yaml"
+    file: "../common/student_bulk_upload_csv.yaml"
     env:
       TESTFILENAME: "Ustad_Students_List.csv"
       CONTROLSERVER: ${CONTROLSERVER}
@@ -56,30 +57,19 @@ env:
       text: "Add block"
     direction: DOWN
 - tapOn: "Add block"
-- swipe:
-    from:
-      text: "Drag handle"
-    direction: UP
+- runFlow:
+    when:
+      notVisible:
+        text: "Discussion board"
+    commands:
+      - swipe:
+          from:
+            text: "Drag handle"
+          direction: UP
 - tapOn: "Discussion board"
 - tapOn: "Title*"
 - inputText: "Discussion 1"
 - hideKeyboard
-- tapOn:
-    text: "dd/mm/yyyy"
-    index: "0"
-- runScript:
-    file: "../common/setDate.js"
-- inputText: ${output.yesterday_Date}
-- tapOn: "hh:mm"
-- runScript:
-    file: "../common/setDate.js"
-- inputText: ${output.delay_1hr}
-- hideKeyboard
-- tapOn: "Description"
-- tapOn:
-    id: "com.toughra.ustadmobile:id/editor"
-- inputText: "test block"
-- tapOn: "Done"
 - assertVisible:
     id: "app_title"
     text: "Add discussion"
@@ -124,14 +114,20 @@ env:
 - inputText: "Post 1"
 - tapOn:
     id: "com.toughra.ustadmobile:id/editor"
-- inputText: "This is post by teacher"
+- tapOn: "Link"
+- tapOn: "URL"
+- inputText: "${EXTERNALURL}"
+- hideKeyboard
+- tapOn: "Link text (optional)"
+- inputText: "External link"
+- hideKeyboard
+- tapOn: "OK"
 - tapOn: "Post"
 - assertVisible:
     id: "app_title"
     text: "Post 1"
 - assertVisible:
-    text: "This is post by teacher"
-
+    text: "External link"
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
@@ -146,34 +142,18 @@ env:
       text: "Discussion 1"
     direction: DOWN
 - tapOn: "Discussion 1"
-- tapOn:            #  +POST button
-    id: "floating_action_button"
-- tapOn: "Title*"
-- inputText: "Post 2"
-- tapOn:
-    id: "com.toughra.ustadmobile:id/editor"
-- inputText: "This is post by student"
-- tapOn: "Post"
-- assertVisible:
-    id: "app_title"
-    text: "Post 2"
-- assertVisible:
-    text: "This is post by student"
-- back
 - assertVisible:
     id: "app_title"
     text: "Test Course Block"
 - assertVisible:
     text: "Post 1"
-- assertVisible:
-    text: "Post 2"
-
-    # Add reply text field not accessible by maestro
 - tapOn: "Post 1"
+- tapOn: "External link"
+- runFlow:
+    file: "../common/chrome-first-run-check.yaml"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/verify_external_link"
 - extendedWaitUntil:
-    visible: "add_a_reply"
+    visible: "Start or restart server now"
     timeout: 10000
-- tapOn:
-    id: "add_a_reply"
-- inputText: "Comment from student"
-- tapOn: "Post"
+
+
