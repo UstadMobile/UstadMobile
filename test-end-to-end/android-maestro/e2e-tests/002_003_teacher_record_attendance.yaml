@@ -23,8 +23,8 @@ env:
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: "t1"
-      PASSWORD: "test"
+      USERNAME: "ta"
+      PASSWORD: "testta"
 - runFlow:
     file: "../common/record_attendance.yaml"
     env:

@@ -25,10 +25,10 @@ appId: com.toughra.ustadmobile
     env:
       TESTCOURSENAME: ${TESTCOURSENAME}
       TEACHERFIRSTNAME: "Teacher"
-      TEACHERLASTNAME: "1"
-      USERNAME: "t1"
+      TEACHERLASTNAME: "A"
+      USERNAME: "ta"
       GENDER: "Female"
-      PASSWORD: "test"
+      PASSWORD: "testta"
 - tapOn:
     text: "Courses"
     index: 1
@@ -38,10 +38,10 @@ appId: com.toughra.ustadmobile
     env:
       TESTCOURSENAME: ${TESTCOURSENAME}
       STUDENTFIRSTNAME: "Student"
-      STUDENTLASTNAME: "1"
-      USERNAME: "s1"
+      STUDENTLASTNAME: "A"
+      USERNAME: "sa"
       GENDER: "Male"
-      PASSWORD: "test"
+      PASSWORD: "testsa"
 - tapOn:
     text: "Courses"
     index: 1
@@ -51,9 +51,9 @@ appId: com.toughra.ustadmobile
     env:
       TESTCOURSENAME: ${TESTCOURSENAME}
       STUDENTFIRSTNAME: "Student"
-      STUDENTLASTNAME: "2"
-      USERNAME: "s2"
+      STUDENTLASTNAME: "B"
+      USERNAME: "sb"
       GENDER: "Female"
-      PASSWORD: "test"
+      PASSWORD: "testsb"
 
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/member_list_of_new_test_course"
