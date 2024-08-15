@@ -28,10 +28,12 @@ env:
 - tapOn: "Blank input 1 of 3"
 - inputText: "Blue"
 - hideKeyboard
-- runFlow:
-    when:
+- repeat:
+    while:
       notVisible: "Blank input 2 of 3"
-    file: "../common/reopen_the_h5p_content.yaml"
+    commands:
+      - runFlow:
+          file: "../common/reopen_the_h5p_content.yaml"
 - tapOn: "Blank input 2 of 3"
 - inputText: "red"
 - hideKeyboard

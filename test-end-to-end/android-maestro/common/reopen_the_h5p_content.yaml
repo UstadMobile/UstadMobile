@@ -1,14 +1,6 @@
 appId: com.toughra.ustadmobile
 
 ---
-# This test tests the adding profile pic to the profile
-# Test parameters needs to provide for this test :
- # 1) TESTFILENAME : provide the profile pic file name
- # 2)TESTRESULTSDIR : ${TESTRESULTSDIR} : provides the path to store test results
- # 3) CONTROLSERVER: ${CONTROLSERVER} : provides the test-control-server address
- # 4) TESTSERIAL: ${TESTSERIAL} : provides the device serial number
-
-
 - runFlow:
     when:
       visible: "Close tab"
@@ -19,6 +11,10 @@ appId: com.toughra.ustadmobile
       visible: "Open"
     commands:
       - tapOn: "Open"
-- tapOn: "Blank input 1 of 3"
-- inputText: "Blue"
-- hideKeyboard
+- runFlow:
+    when:
+      visible: "Blank input 1 of 3"
+    commands:
+       - tapOn: "Blank input 1 of 3"
+       - inputText: "Blue"
+       - hideKeyboard
