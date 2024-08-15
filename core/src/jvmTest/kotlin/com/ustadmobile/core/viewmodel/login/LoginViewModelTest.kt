@@ -1,7 +1,7 @@
 package com.ustadmobile.core.viewmodel.login
 
 import app.cash.turbine.test
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.MR
@@ -57,7 +57,7 @@ class LoginViewModelTest : AbstractMainDispatcherTest(){
                     username = VALID_USER, firstName = "user", lastName = "last", endpointUrl = url)
             }
 
-            on { activeEndpoint }.thenReturn(Endpoint("http://localhost:8087/"))
+            on { activeLearningSpace }.thenReturn(LearningSpace("http://localhost:8087/"))
         }
     }
 
@@ -178,7 +178,7 @@ class LoginViewModelTest : AbstractMainDispatcherTest(){
             onBlocking { login(any(), any(), any(), any(), any()) }.then {
                 throw UnauthorizedException("Access denied")
             }
-            on { activeEndpoint }.thenReturn(Endpoint("http://localhost:8087/"))
+            on { activeLearningSpace }.thenReturn(LearningSpace("http://localhost:8087/"))
         }
 
         testViewModel<LoginViewModel> {
@@ -225,7 +225,7 @@ class LoginViewModelTest : AbstractMainDispatcherTest(){
             onBlocking { login(any(), any(), any(), any(), any()) }.then {
                 throw IOException("Server offline")
             }
-            on { activeEndpoint }.thenReturn(Endpoint("http://localhost:79/"))
+            on { activeLearningSpace }.thenReturn(LearningSpace("http://localhost:79/"))
         }
 
 

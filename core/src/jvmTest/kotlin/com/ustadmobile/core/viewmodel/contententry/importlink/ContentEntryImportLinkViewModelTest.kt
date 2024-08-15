@@ -1,7 +1,7 @@
 package com.ustadmobile.core.viewmodel.contententry.importlink
 
 import app.cash.turbine.test
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.contentformats.epub.EpubContentImporterCommonJvm
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.impl.nav.NavigateNavCommand
@@ -48,7 +48,7 @@ class ContentEntryImportLinkViewModelTest: AbstractMainDispatcherTest() {
             }
 
             setActiveUser(
-                endpoint = Endpoint(mockWebServer.url("/").toString()),
+                learningSpace = LearningSpace(mockWebServer.url("/").toString()),
             )
 
             val mockContentTitle = "Ebook Title"
@@ -85,7 +85,7 @@ class ContentEntryImportLinkViewModelTest: AbstractMainDispatcherTest() {
             }
 
             setActiveUser(
-                endpoint = Endpoint(mockWebServer.url("/").toString()),
+                learningSpace = LearningSpace(mockWebServer.url("/").toString()),
             )
 
             val mockResponse = MockResponse()
@@ -122,7 +122,7 @@ class ContentEntryImportLinkViewModelTest: AbstractMainDispatcherTest() {
             }
 
             setActiveUser(
-                endpoint = Endpoint(mockWebServer.url("/").toString()),
+                learningSpace = LearningSpace(mockWebServer.url("/").toString()),
             )
 
 

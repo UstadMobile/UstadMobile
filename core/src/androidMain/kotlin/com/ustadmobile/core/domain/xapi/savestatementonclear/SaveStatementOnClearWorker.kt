@@ -3,7 +3,7 @@ package com.ustadmobile.core.domain.xapi.savestatementonclear
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.xapi.XapiStatementResource
 import com.ustadmobile.core.domain.xapi.model.XapiStatement
 import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
@@ -23,7 +23,7 @@ class SaveStatementOnClearWorker(
     private val di: DI by closestDI { applicationContext }
 
     override suspend fun doWork(): Result {
-        val endpointUrl = inputData.getString(SaveStatementOnClearUseCase.KEY_ENDPOINT)
+        val learningSpaceUrl = inputData.getString(SaveStatementOnClearUseCase.KEY_LEARNINGSPACE)
             ?: throw IllegalArgumentException("no endpoint")
         val statementsStr = inputData.getString(SaveStatementOnClearUseCase.KEY_STATEMENTS)
             ?: throw IllegalArgumentException("no statements")
@@ -31,7 +31,7 @@ class SaveStatementOnClearWorker(
             ?: throw IllegalArgumentException("no xapisession")
 
         val json: Json = di.direct.instance()
-        val statementResource: XapiStatementResource = di.on(Endpoint(endpointUrl))
+        val statementResource: XapiStatementResource = di.on(LearningSpace(learningSpaceUrl))
             .direct.instance()
 
         statementResource.post(

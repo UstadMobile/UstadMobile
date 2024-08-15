@@ -4,8 +4,8 @@ import com.russhwolf.settings.PropertiesSettings
 import com.russhwolf.settings.Settings
 import com.ustadmobile.core.account.*
 import org.mockito.kotlin.spy
-import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.account.LearningSpace
+import com.ustadmobile.core.account.LearningSpaceScope
 import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDataLayer
@@ -51,13 +51,6 @@ import nl.adaptivity.xmlutil.serialization.XmlConfig
 import java.util.Properties
 import java.util.concurrent.CopyOnWriteArrayList
 
-fun DI.onActiveAccount(): DI {
-    val accountManager: UstadAccountManager by instance()
-    return on(accountManager.activeEndpoint)
-}
-
-fun DI.onActiveAccountDirect() = direct.on(direct.instance<UstadAccountManager>().activeEndpoint)
-
 /**
  * UstadTestRule makes a fresh almost-ready-to-go DI module for each test run. The DB and SystemImpl
  * are wrapped with spy, so they can be used to in verify calls.
@@ -66,7 +59,7 @@ fun DI.onActiveAccountDirect() = direct.on(direct.instance<UstadAccountManager>(
  */
 class UstadTestRule(): TestWatcher() {
 
-    lateinit var endpointScope: EndpointScope
+    lateinit var learningSpaceScope: LearningSpaceScope
 
     private lateinit var systemImplSpy: UstadMobileSystemImpl
 
@@ -88,7 +81,7 @@ class UstadTestRule(): TestWatcher() {
     override fun starting(description: Description) {
         tempFolder = Files.createTempDirectory("ustadtestrule").toFile()
 
-        endpointScope = EndpointScope()
+        learningSpaceScope = LearningSpaceScope()
         val settings: Settings = PropertiesSettings(
             delegate = Properties(),
             onModify = {
@@ -136,11 +129,11 @@ class UstadTestRule(): TestWatcher() {
                 settings
             }
 
-            bind<NodeIdAndAuth>() with scoped(endpointScope).singleton {
+            bind<NodeIdAndAuth>() with scoped(learningSpaceScope).singleton {
                 NodeIdAndAuth(Random.nextLong(0, Long.MAX_VALUE), randomUuid().toString())
             }
 
-            bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(endpointScope).singleton {
+            bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(learningSpaceScope).singleton {
                 val dbName = sanitizeDbNameFromUrl(context.url)
                 val nodeIdAndAuth: NodeIdAndAuth = instance()
                 spy(DatabaseBuilder.databaseBuilder(UmAppDatabase::class,
@@ -154,7 +147,7 @@ class UstadTestRule(): TestWatcher() {
             }
 
 
-            bind<UmAppDataLayer>() with scoped(endpointScope).singleton {
+            bind<UmAppDataLayer>() with scoped(learningSpaceScope).singleton {
                 val nodeIdAndAuth: NodeIdAndAuth = instance()
                 val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
                 val repo = spy(
@@ -176,8 +169,8 @@ class UstadTestRule(): TestWatcher() {
                 UmAppDataLayer(localDb = db, repository = repo)
             }
 
-            bind<ClientId>(tag = UstadMobileSystemCommon.TAG_CLIENT_ID) with scoped(EndpointScope.Default).singleton {
-                val repo: UmAppDatabase by di.on(Endpoint(context.url)).instance(tag = DoorTag.TAG_REPO)
+            bind<ClientId>(tag = UstadMobileSystemCommon.TAG_CLIENT_ID) with scoped(LearningSpaceScope.Default).singleton {
+                val repo: UmAppDatabase by di.on(LearningSpace(context.url)).instance(tag = DoorTag.TAG_REPO)
                 val nodeId = (repo as? DoorDatabaseRepository)?.config?.nodeId
                     ?: throw IllegalStateException("Could not open repo for endpoint ${context.url}")
                 ClientId(nodeId.toInt())
@@ -216,7 +209,7 @@ class UstadTestRule(): TestWatcher() {
                 }
             }
 
-            registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
+            registerContextTranslator { account: UmAccount -> LearningSpace(account.endpointUrl) }
         }
     }
 

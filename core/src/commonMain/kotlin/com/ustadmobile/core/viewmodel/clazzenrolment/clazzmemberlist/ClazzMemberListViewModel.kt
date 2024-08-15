@@ -98,7 +98,7 @@ class ClazzMemberListViewModel(
 ) {
 
     private val approveOrDeclinePendingEnrolmentUseCase: IApproveOrDeclinePendingEnrolmentRequestUseCase by
-        on(accountManager.activeEndpoint).instance()
+        on(accountManager.activeLearningSpace).instance()
 
     private val clazzUid = savedStateHandle[UstadView.ARG_CLAZZUID]?.toLong()
         ?: throw IllegalArgumentException("No clazzuid")

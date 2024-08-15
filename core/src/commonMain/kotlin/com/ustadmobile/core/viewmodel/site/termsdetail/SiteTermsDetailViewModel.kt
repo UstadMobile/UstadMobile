@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.siteterms.GetLocaleForSiteTermsUseCase
@@ -41,7 +41,7 @@ class SiteTermsDetailViewModel(
     val uiState: Flow<SiteTermsDetailUiState> = _uiState.asStateFlow()
 
     private val getLocaleForSiteTermsUseCase: GetLocaleForSiteTermsUseCase by
-        on(accountManager.activeEndpoint).instance()
+        on(accountManager.activeLearningSpace).instance()
 
     init {
         val acceptButtonMode = savedStateHandle[ARG_SHOW_ACCEPT_BUTTON]?.toBoolean() ?: false
@@ -57,7 +57,7 @@ class SiteTermsDetailViewModel(
 
         viewModelScope.launch {
             val repo: UmAppDatabase = if(acceptButtonMode && apiUrl != null) {
-                di.direct.on(Endpoint(apiUrl)).instance<UmAppDataLayer>().repositoryOrLocalDb
+                di.direct.on(LearningSpace(apiUrl)).instance<UmAppDataLayer>().repositoryOrLocalDb
             }else {
                 activeRepoWithFallback
             }

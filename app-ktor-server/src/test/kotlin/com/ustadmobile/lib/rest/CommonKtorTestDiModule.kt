@@ -24,7 +24,7 @@ import java.util.Properties
  * Creates a KodeIn DI Module that will contain most of what the test application engine needs to run
  */
 fun commonTestKtorDiModule(
-    endpointScope: EndpointScope
+    endpointScope: LearningSpaceScope
 ) = DI.Module("Common Ktor Test Module") {
     bind<NodeIdAndAuth>() with scoped(endpointScope).singleton {
         NodeIdAndAuth(Random.nextLong(0, Long.MAX_VALUE), randomUuid().toString())

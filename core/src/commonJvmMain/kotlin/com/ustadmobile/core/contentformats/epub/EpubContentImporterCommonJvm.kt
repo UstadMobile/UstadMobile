@@ -1,6 +1,6 @@
 package com.ustadmobile.core.contentformats.epub
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.contentformats.ContentImportProgressListener
 import com.ustadmobile.core.contentformats.epub.ocf.Container
 import com.ustadmobile.core.contentformats.epub.opf.PackageDocument
@@ -50,7 +50,7 @@ import java.net.URLDecoder
 import java.util.zip.ZipEntry
 
 class EpubContentImporterCommonJvm(
-    endpoint: Endpoint,
+    learningSpace: LearningSpace,
     private val db: UmAppDatabase,
     private val cache: UstadCache,
     private val uriHelper: UriHelper,
@@ -65,7 +65,7 @@ class EpubContentImporterCommonJvm(
     private val getStoragePathForUrlUseCase: GetStoragePathForUrlUseCase,
     private val compressListUseCase: CompressListUseCase,
     private val saveLocalUrisAsBlobsUseCase: SaveLocalUrisAsBlobsUseCase? = null,
-) : ContentImporter(endpoint) {
+) : ContentImporter(learningSpace) {
 
     val viewName: String
         get() = EpubContentViewModel.DEST_NAME

@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.contententry.launchcontent.epub
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.contententry.launchcontent.LaunchContentEntryVersionUseCase
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.LaunchChromeUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -23,7 +23,7 @@ import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
  */
 class LaunchEpubUseCaseJvm(
     private val launchChromeUseCase: LaunchChromeUseCase,
-    private val endpoint: Endpoint,
+    private val endpoint: LearningSpace,
     private val systemImpl: UstadMobileSystemImpl,
     private val getApiUrlUseCase: GetApiUrlUseCase,
 ): LaunchEpubUseCase {

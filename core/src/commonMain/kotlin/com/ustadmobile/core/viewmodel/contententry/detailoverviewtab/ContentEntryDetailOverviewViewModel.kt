@@ -245,7 +245,7 @@ class ContentEntryDetailOverviewViewModel(
                     try {
                         do {
                             val remoteImportJobsJson = httpClient.get(
-                                "${accountManager.activeEndpoint.url}api/contententryimportjob/importjobs"
+                                "${accountManager.activeLearningSpace.url}api/contententryimportjob/importjobs"
                             ) {
                                 parameter("contententryuid", entityUidArg.toString())
                                 header("cache-control", "no-store")

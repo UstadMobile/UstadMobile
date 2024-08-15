@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.interop.externalapppermission.DeclineExternalAppPermissionUseCase
 import com.ustadmobile.core.domain.interop.externalapppermission.GrantExternalAppPermissionUseCase
 import com.ustadmobile.core.impl.appstate.Snack
@@ -45,7 +45,7 @@ class ExternalAppPermissionRequestViewModel(
 
     private val permissionForPersonUid = savedStateHandle[ARG_SELECTED_ACCOUNT_PERSON_UID]?.toLong() ?: 0
 
-    private val permissionForEndpoint = savedStateHandle[ARG_SELECTED_ACCOUNT_ENDPOINT_URL]
+    private val permissionForLearningSpace = savedStateHandle[ARG_SELECTED_ACCOUNT_LEARNINGSPACE_URL]
 
     init {
         viewModelScope.launch {
@@ -70,9 +70,9 @@ class ExternalAppPermissionRequestViewModel(
 
     fun onClickAccept() {
         viewModelScope.launch {
-            if(permissionForPersonUid != 0L && permissionForEndpoint != null) {
+            if(permissionForPersonUid != 0L && permissionForLearningSpace != null) {
                 val grantExternalAppPermissionUseCase: GrantExternalAppPermissionUseCase =
-                    di.on(Endpoint(permissionForEndpoint)).direct.instance()
+                    di.on(LearningSpace(permissionForLearningSpace)).direct.instance()
 
                 grantExternalAppPermissionUseCase(permissionForPersonUid)
             }else {

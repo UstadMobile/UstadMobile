@@ -43,7 +43,7 @@ class SaveLocalUrisAsBlobsUseCaseJvmIntegrationTest : AbstractSaveLocalUrisInteg
         )
 
         val saveLocalUrisAsBlobsUseCase = SaveLocalUrisAsBlobsUseCaseJvm(
-            endpoint = endpoint,
+            learningSpace = learningSpace,
             cache = clientCache,
             uriHelper = uriHelper,
             tmpDir = Path(clientRootTmpDir.absolutePath),
@@ -57,7 +57,7 @@ class SaveLocalUrisAsBlobsUseCaseJvmIntegrationTest : AbstractSaveLocalUrisInteg
             httpCache = clientCache,
             db = mockUmAppDatabase,
             repo = mockUmAppDatabase,
-            endpoint = endpoint,
+            learningSpace = learningSpace,
         )
 
         val blobsToSave = listOf(
@@ -79,7 +79,7 @@ class SaveLocalUrisAsBlobsUseCaseJvmIntegrationTest : AbstractSaveLocalUrisInteg
                     BlobTransferJobItem(it.blobUrl, transferJobItemUid = 0)
                 },
                 batchUuid = UUID.randomUUID().toString(),
-                endpoint = endpoint,
+                learningSpace = learningSpace,
                 onProgress = {
 
                 }
@@ -90,7 +90,7 @@ class SaveLocalUrisAsBlobsUseCaseJvmIntegrationTest : AbstractSaveLocalUrisInteg
         val sha256 = pdfFile.inputStream().use { it.readSha256() }.encodeBase64()
         val blobHttpResponse = okHttpClient.newCall(
             Request.Builder()
-                .url("${endpoint.url}api/blob/${URLEncoder.encode(sha256, "UTF-8")}")
+                .url("${learningSpace.url}api/blob/${URLEncoder.encode(sha256, "UTF-8")}")
                 .build()
         ).execute()
 

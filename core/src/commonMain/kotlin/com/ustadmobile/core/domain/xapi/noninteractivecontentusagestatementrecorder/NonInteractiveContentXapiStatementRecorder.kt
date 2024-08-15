@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.xapi.noninteractivecontentusagestatementrecorder
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.xapi.XapiStatementResource
 import com.ustadmobile.core.domain.xapi.ext.agent
 import com.ustadmobile.core.domain.xapi.model.VERB_COMPLETED
@@ -34,7 +34,7 @@ class NonInteractiveContentXapiStatementRecorder(
     private val xapiSession: XapiSessionEntity,
     private val scope: CoroutineScope,
     private val xapiActivityProvider: () -> XapiActivityStatementObject,
-    private val endpoint: Endpoint,
+    private val learningSpace: LearningSpace,
 ) {
 
     private val totalUsageTime = atomic(0L)
@@ -98,7 +98,7 @@ class NonInteractiveContentXapiStatementRecorder(
         isComplete: Boolean?,
     ): XapiStatement {
         return XapiStatement(
-            actor = xapiSession.agent(endpoint),
+            actor = xapiSession.agent(learningSpace),
             verb = XapiVerb(
                 id = if(isComplete == true) {
                     VERB_COMPLETED

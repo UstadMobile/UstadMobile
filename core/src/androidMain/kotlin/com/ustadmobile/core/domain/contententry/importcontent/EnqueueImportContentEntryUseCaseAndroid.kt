@@ -5,7 +5,7 @@ import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.isRemote
 import com.ustadmobile.door.DoorUri
@@ -17,7 +17,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryImportJob
 class EnqueueImportContentEntryUseCaseAndroid(
     private val db: UmAppDatabase,
     private val appContext: Context,
-    private val endpoint: Endpoint,
+    private val learningSpace: LearningSpace,
     private val enqueueRemoteImport: EnqueueContentEntryImportUseCase,
 ) : EnqueueContentEntryImportUseCase {
 
@@ -31,7 +31,7 @@ class EnqueueImportContentEntryUseCaseAndroid(
             val uid = db.contentEntryImportJobDao().insertJobItem(contentJobItem)
 
             val jobData = Data.Builder()
-                .putString(EnqueueContentEntryImportUseCase.DATA_ENDPOINT, endpoint.url)
+                .putString(EnqueueContentEntryImportUseCase.DATA_LEARNINGSPACE, learningSpace.url)
                 .putLong(EnqueueContentEntryImportUseCase.DATA_JOB_UID, uid)
                 .build()
 
@@ -40,7 +40,7 @@ class EnqueueImportContentEntryUseCaseAndroid(
                 .build()
 
             WorkManager.getInstance(appContext).enqueueUniqueWork(
-                EnqueueContentEntryImportUseCase.uniqueNameFor(endpoint, uid),
+                EnqueueContentEntryImportUseCase.uniqueNameFor(learningSpace, uid),
                 ExistingWorkPolicy.REPLACE, workRequest)
         }
     }

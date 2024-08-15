@@ -16,8 +16,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.account.LearningSpace
+import com.ustadmobile.core.account.LearningSpaceScope
 import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.domain.blob.openblob.OpenBlobUiUseCase
 import com.ustadmobile.core.domain.contententry.move.MoveContentEntriesUseCase
@@ -81,7 +81,7 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
     override val di by  DI.lazy {
         extend(appContextDi)
 
-        import(commonDomainDiModule(EndpointScope.Default))
+        import(commonDomainDiModule(LearningSpaceScope.Default))
         import(AndroidDomainDiModule(applicationContext))
 
 
@@ -120,25 +120,25 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
 
 
 
-        bind<MoveContentEntriesUseCase>() with scoped(EndpointScope.Default).provider {
+        bind<MoveContentEntriesUseCase>() with scoped(LearningSpaceScope.Default).provider {
             MoveContentEntriesUseCase(
                 repo = instance<UmAppDataLayer>().repositoryOrLocalDb,
                 systemImpl = instance()
             )
         }
 
-        bind<CloseProcessUseCase>() with scoped(EndpointScope.Default).provider {
+        bind<CloseProcessUseCase>() with scoped(LearningSpaceScope.Default).provider {
             CloseProcessUseCaseAndroid(this@AbstractAppActivity)
         }
 
-        bind<OpenBlobUiUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<OpenBlobUiUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             OpenBlobUiUseCase(
                 openBlobUseCase = instance(),
                 systemImpl = instance(),
             )
         }
 
-        bind<BulkAddPersonsUseCase>() with scoped(EndpointScope.Default).provider {
+        bind<BulkAddPersonsUseCase>() with scoped(LearningSpaceScope.Default).provider {
             BulkAddPersonsUseCaseImpl(
                 addNewPersonUseCase = instance(),
                 validateEmailUseCase = instance(),
@@ -150,14 +150,14 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
             )
         }
 
-        bind<BulkAddPersonsFromLocalUriUseCase>() with scoped(EndpointScope.Default).provider {
+        bind<BulkAddPersonsFromLocalUriUseCase>() with scoped(LearningSpaceScope.Default).provider {
             BulkAddPersonsFromLocalUriUseCaseCommonJvm(
                 bulkAddPersonsUseCase = instance(),
                 uriHelper = instance(),
             )
         }
 
-        registerContextTranslator { call: NanoHttpdCall -> Endpoint(call.urlParams["endpoint"] ?: "notfound") }
+        registerContextTranslator { call: NanoHttpdCall -> LearningSpace(call.urlParams["endpoint"] ?: "notfound") }
 
         onReady {
             instance<ConnectionManager>().start()

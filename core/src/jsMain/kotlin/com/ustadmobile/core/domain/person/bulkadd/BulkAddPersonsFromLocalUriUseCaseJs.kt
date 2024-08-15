@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.person.bulkadd
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.viewmodel.person.bulkaddrunimport.BulkAddPersonRunImportUiState
 import com.ustadmobile.door.DoorDatabaseRepository
@@ -24,7 +24,7 @@ import kotlinx.coroutines.isActive
 
 class BulkAddPersonsFromLocalUriUseCaseJs(
     private val httpClient: HttpClient,
-    private val endpoint: Endpoint,
+    private val learningSpace: LearningSpace,
     private val json: Json,
     private val repo: UmAppDatabase,
 ): BulkAddPersonsFromLocalUriUseCase {
@@ -38,7 +38,7 @@ class BulkAddPersonsFromLocalUriUseCaseJs(
         val text = fetch(uri.toString()).text().await()
         console.log("csv text = $text")
         return coroutineScope {
-            val jobId = httpClient.post("${endpoint.url}api/person/bulkadd/enqueue") {
+            val jobId = httpClient.post("${learningSpace.url}api/person/bulkadd/enqueue") {
                 setBody(TextContent(text, ContentType.Text.CSV))
                 parameter("accountPersonUid", accountPersonUid.toString())
                 doorNodeAndVersionHeaders(repo as DoorDatabaseRepository)
@@ -46,7 +46,7 @@ class BulkAddPersonsFromLocalUriUseCaseJs(
 
             while(isActive) {
                 try {
-                    val statusResponse = httpClient.get("${endpoint.url}api/person/bulkadd/status") {
+                    val statusResponse = httpClient.get("${learningSpace.url}api/person/bulkadd/status") {
                         parameter("timestamp", jobId.toString())
                     }
 

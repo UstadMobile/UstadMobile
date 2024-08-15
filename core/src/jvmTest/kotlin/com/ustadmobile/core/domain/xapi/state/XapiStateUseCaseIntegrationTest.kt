@@ -1,7 +1,7 @@
 package com.ustadmobile.core.domain.xapi.state
 
 import com.benasher44.uuid.uuid4
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.interop.HttpApiException
 import com.ustadmobile.core.domain.xapi.XapiJson
@@ -55,7 +55,7 @@ class XapiStateUseCaseIntegrationTest {
 
     val actorPersonUid  = 1L
 
-    private val endpoint = Endpoint("https://example.org/")
+    private val learningSpace = LearningSpace("https://example.org/")
 
     @BeforeTest
     fun setup() {
@@ -100,7 +100,7 @@ class XapiStateUseCaseIntegrationTest {
             xapiJson = xapiJson,
             xxStringHasher = xxStringHasher,
             xxHasher64Factory = XXHasher64FactoryCommonJvm(),
-            endpoint = endpoint,
+            learningSpace = learningSpace,
         )
 
         retrieveXapiStateUseCase = RetrieveXapiStateUseCase(
@@ -120,7 +120,7 @@ class XapiStateUseCaseIntegrationTest {
             repo = null,
             xxStringHasher = xxStringHasher,
             xxHasher64Factory = XXHasher64FactoryCommonJvm(),
-            endpoint = endpoint,
+            learningSpace = learningSpace,
         )
     }
 

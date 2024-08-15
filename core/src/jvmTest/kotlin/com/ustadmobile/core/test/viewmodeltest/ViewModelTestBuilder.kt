@@ -3,8 +3,8 @@ package com.ustadmobile.core.test.viewmodeltest
 import com.russhwolf.settings.PropertiesSettings
 import com.russhwolf.settings.Settings
 import com.ustadmobile.core.account.AuthManager
-import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.account.LearningSpace
+import com.ustadmobile.core.account.LearningSpaceScope
 import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDataLayer
@@ -70,7 +70,7 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
 
     private lateinit var viewModelFactoryVar: TestViewModelFactory<T>
 
-    val endpointScope = EndpointScope()
+    val learningSpaceScope = LearningSpaceScope()
 
     /**
      * Temporary directory that can be used by a test. It will be deleted when the test is finished
@@ -89,14 +89,14 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
     /**
      * Shorthand to get the active endpoint
      */
-    val activeEndpoint: Endpoint
-        get() = di.direct.instance<UstadAccountManager>().activeEndpoint
+    val activeLearningSpace: LearningSpace
+        get() = di.direct.instance<UstadAccountManager>().activeLearningSpace
 
     val accountManager: UstadAccountManager
         get() = di.direct.instance()
 
     val activeDataLayer: UmAppDataLayer
-        get() = di.direct.on(activeEndpoint).instance()
+        get() = di.direct.on(activeLearningSpace).instance()
 
     val activeDb: UmAppDatabase
         get() = activeDataLayer.localDb
@@ -172,7 +172,7 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
             }
         }
 
-        bind<NodeIdAndAuth>() with scoped(endpointScope).singleton {
+        bind<NodeIdAndAuth>() with scoped(learningSpaceScope).singleton {
             NodeIdAndAuth(Random.nextLong(0, Long.MAX_VALUE), randomUuid().toString())
         }
 
@@ -180,11 +180,11 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
             Pbkdf2Params(iterations = 10000, keyLength = 512)
         }
 
-        bind<AuthManager>() with scoped(endpointScope).singleton {
+        bind<AuthManager>() with scoped(learningSpaceScope).singleton {
             AuthManager(context, di)
         }
 
-        bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(endpointScope).singleton {
+        bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(learningSpaceScope).singleton {
             val dbUrl = "jdbc:sqlite::memory:"
             val nodeIdAndAuth: NodeIdAndAuth = instance()
             spy(
@@ -207,7 +207,7 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
             }
         }
 
-        bind<UmAppDataLayer>() with scoped(endpointScope).singleton {
+        bind<UmAppDataLayer>() with scoped(learningSpaceScope).singleton {
             val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
 
             val repo = if(repoConfig.useDbAsRepo) {
@@ -250,7 +250,7 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
             XXStringHasherCommonJvm()
         }
 
-        bind<AddNewPersonUseCase>() with scoped(endpointScope).singleton {
+        bind<AddNewPersonUseCase>() with scoped(learningSpaceScope).singleton {
             AddNewPersonUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
                 repo = instance<UmAppDataLayer>().repository,
@@ -291,20 +291,20 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
      * Sets the active session
      */
     suspend fun setActiveUser(
-        endpoint: Endpoint,
+        learningSpace: LearningSpace,
         person: Person = Person().apply {
             firstNames = "Test"
             lastName = "User"
             username = "testuser"
         }
     ): Person {
-        val db: UmAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
+        val db: UmAppDatabase = di.on(learningSpace).direct.instance(tag = DoorTag.TAG_DB)
 
         val accountManager = di.direct.instance<UstadAccountManager>()
 
         db.withDoorTransactionAsync {
             val personInDb = db.insertPersonAndGroup(person)
-            val session = accountManager.addSession(personInDb, endpoint.url, "dummypassword")
+            val session = accountManager.addSession(personInDb, learningSpace.url, "dummypassword")
             accountManager.currentUserSession = session
         }
 

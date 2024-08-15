@@ -3,8 +3,8 @@ package com.ustadmobile.core.domain.blob.download
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.domain.blob.download.AbstractEnqueueBlobDownloadClientUseCase.Companion.DATA_ENDPOINT
+import com.ustadmobile.core.account.LearningSpace
+import com.ustadmobile.core.domain.blob.download.AbstractEnqueueBlobDownloadClientUseCase.Companion.DATA_LEARNINGSPACE
 import com.ustadmobile.core.domain.blob.download.AbstractEnqueueBlobDownloadClientUseCase.Companion.DATA_JOB_UID
 import com.ustadmobile.core.domain.blob.upload.UpdateFailedTransferJobUseCase
 import kotlinx.coroutines.NonCancellable
@@ -23,12 +23,12 @@ class BlobDownloadClientWorker(
     private val di: DI by closestDI { applicationContext }
 
     override suspend fun doWork(): Result {
-        val endpointUrl = inputData.getString(DATA_ENDPOINT) ?: return Result.failure()
+        val endpointUrl = inputData.getString(DATA_LEARNINGSPACE) ?: return Result.failure()
         val jobUid = inputData.getInt(DATA_JOB_UID, 0)
 
-        val endpoint = Endpoint(endpointUrl)
-        val blobDownloadUseCase: BlobDownloadClientUseCase = di.on(endpoint).direct.instance()
-        val updateFailedTransferJobUseCase: UpdateFailedTransferJobUseCase by di.on(endpoint)
+        val learningSpace = LearningSpace(endpointUrl)
+        val blobDownloadUseCase: BlobDownloadClientUseCase = di.on(learningSpace).direct.instance()
+        val updateFailedTransferJobUseCase: UpdateFailedTransferJobUseCase by di.on(learningSpace)
             .instance()
 
         return try {

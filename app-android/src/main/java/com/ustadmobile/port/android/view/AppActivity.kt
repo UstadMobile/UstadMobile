@@ -1,9 +1,7 @@
 package com.ustadmobile.port.android.view
 
 import android.content.ComponentName
-import android.os.Build
 import android.os.Bundle
-import androidx.annotation.RequiresApi
 import androidx.browser.customtabs.CustomTabsCallback
 import androidx.browser.customtabs.CustomTabsClient
 import androidx.browser.customtabs.CustomTabsServiceConnection
@@ -12,7 +10,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.lifecycleScope
 import com.jakewharton.processphoenix.ProcessPhoenix
-import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.account.LearningSpaceScope
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.LaunchXapiUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.LaunchXapiUseCaseAndroid
 import com.ustadmobile.libuicompose.theme.md_theme_dark_primaryContainer
@@ -37,7 +35,7 @@ class AppActivity: AbstractAppActivity() {
     override val di by DI.lazy {
         extend(super.di)
 
-        bind<LaunchXapiUseCase>() with scoped(EndpointScope.Default).provider {
+        bind<LaunchXapiUseCase>() with scoped(LearningSpaceScope.Default).provider {
             LaunchXapiUseCaseAndroid(
                 androidContext = this@AppActivity,
                 resolveXapiLaunchHrefUseCase = instance(),

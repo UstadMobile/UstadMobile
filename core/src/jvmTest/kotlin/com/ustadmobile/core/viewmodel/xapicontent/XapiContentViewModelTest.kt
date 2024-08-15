@@ -54,20 +54,20 @@ class XapiContentViewModelTest : AbstractMainDispatcherTest() {
                     }
                 }
 
-                bind<ResolveXapiLaunchHrefUseCase>() with scoped(endpointScope).singleton {
+                bind<ResolveXapiLaunchHrefUseCase>() with scoped(learningSpaceScope).singleton {
                     ResolveXapiLaunchHrefUseCase(
                         activeRepoOrDb = instance<UmAppDataLayer>().repositoryOrLocalDb,
                         httpClient = instance(),
                         json = instance(),
                         xppFactory = instance(tag = DiTag.XPP_FACTORY_NSAWARE),
                         getApiUrlUseCase = instance(),
-                        endpoint = context,
+                        learningSpace = context,
                         accountManager = instance(),
                         resumeOrStartXapiSessionUseCase = instance(),
                     )
                 }
 
-                bind<GetApiUrlUseCase>() with scoped(endpointScope).singleton {
+                bind<GetApiUrlUseCase>() with scoped(learningSpaceScope).singleton {
                     mock {
                         onBlocking { invoke(any()) }.thenReturn(
                             "http://localhost/e/endpoint/xapi"
@@ -75,7 +75,7 @@ class XapiContentViewModelTest : AbstractMainDispatcherTest() {
                     }
                 }
 
-                bind<ResumeOrStartXapiSessionUseCase>() with scoped(endpointScope).singleton {
+                bind<ResumeOrStartXapiSessionUseCase>() with scoped(learningSpaceScope).singleton {
                     mock {
                         onBlocking { invoke(any(), any(), any(), any(), any(), any()) }.thenReturn(
                             XapiSessionEntity(

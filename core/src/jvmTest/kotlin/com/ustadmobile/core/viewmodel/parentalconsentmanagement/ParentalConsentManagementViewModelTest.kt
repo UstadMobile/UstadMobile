@@ -40,7 +40,7 @@ class ParentalConsentManagementViewModelTest : AbstractMainDispatcherTest(){
         block: suspend ViewModelTestBuilder<ParentalConsentManagementViewModel>.(ParentalConsentTestContext) -> Unit
     ) {
         testViewModel<ParentalConsentManagementViewModel> {
-            val parentPerson = setActiveUser(activeEndpoint, Person().apply {
+            val parentPerson = setActiveUser(activeLearningSpace, Person().apply {
                 firstNames = "Pit"
                 lastName = "The Older"
                 username = "pittheolder"
@@ -48,7 +48,7 @@ class ParentalConsentManagementViewModelTest : AbstractMainDispatcherTest(){
             })
 
             extendDi {
-                bind<GetLocaleForSiteTermsUseCase>() with scoped(endpointScope).provider {
+                bind<GetLocaleForSiteTermsUseCase>() with scoped(learningSpaceScope).provider {
                     GetLocaleForSiteTermsUseCase(
                         supportedLangConfig = instance(),
                         repo = on(context).instance(tag = DoorTag.TAG_REPO)

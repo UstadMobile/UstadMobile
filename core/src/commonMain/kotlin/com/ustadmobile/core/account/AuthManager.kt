@@ -26,11 +26,11 @@ import org.kodein.di.on
  * ALL auth related requests run through this manager.
  */
 class AuthManager(
-    internal val endpoint: Endpoint,
+    internal val learningSpace: LearningSpace,
     override val di: DI
 ) : DIAware {
 
-    private val dataLayer: UmAppDataLayer by on(endpoint).instance()
+    private val dataLayer: UmAppDataLayer by on(learningSpace).instance()
 
     suspend fun authenticate(
         username: String,

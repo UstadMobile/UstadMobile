@@ -55,9 +55,9 @@ class RedirectViewModel(
          * Says
          *
          */
-        val activeEndpoint = accountManager.activeEndpoint
-        if(!activeEndpoint.url.contains("localhost")) {
-            val db = di.direct.on(activeEndpoint).instance<UmAppDatabase>(
+        val activeLearningSpace = accountManager.activeLearningSpace
+        if(!activeLearningSpace.url.contains("localhost")) {
+            val db = di.direct.on(activeLearningSpace).instance<UmAppDatabase>(
                 tag = DoorTag.TAG_DB
             )
             println(db)

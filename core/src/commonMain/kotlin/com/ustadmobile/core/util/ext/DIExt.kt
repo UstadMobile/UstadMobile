@@ -6,4 +6,4 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 
-fun DI.onActiveEndpoint() = this.on(this.direct.instance<UstadAccountManager>().activeEndpoint)
+fun DI.onActiveEndpoint() = this.on(this.direct.instance<UstadAccountManager>().activeLearningSpace)

@@ -20,7 +20,7 @@ class AuthManagerTest {
 
     lateinit var di: DI
 
-    val endpoint = Endpoint("https://test.ustadmobile.app/")
+    val learningSpace = LearningSpace("https://test.ustadmobile.app/")
 
     @JvmField
     @Rule
@@ -40,7 +40,7 @@ class AuthManagerTest {
             import(ustadTestRule.diModule)
         }
 
-        dataLayer = di.on(endpoint).direct.instance()
+        dataLayer = di.on(learningSpace).direct.instance()
         repo = dataLayer.repository!!
 
         runBlocking {
@@ -57,7 +57,7 @@ class AuthManagerTest {
 
     @Test
     fun givenAuthSet_whenAuthenticatedWithValidPassword_thenShouldAccept() {
-        val authManager = AuthManager(endpoint, di)
+        val authManager = AuthManager(learningSpace, di)
 
         runBlocking {
             authManager.setAuth(testUserUid, testUserPassword)
@@ -72,7 +72,7 @@ class AuthManagerTest {
 
     @Test
     fun givenAuthSet_whenAuthenticatedWithWrongPassword_thenShouldReject() {
-        val authManager = AuthManager(endpoint, di)
+        val authManager = AuthManager(learningSpace, di)
 
         runBlocking {
             authManager.setAuth(testUserUid, testUserPassword)

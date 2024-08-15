@@ -75,9 +75,9 @@ class PersonAccountEditViewModel(
 
     val uiState: Flow<PersonAccountEditUiState> = _uiState.asStateFlow()
 
-    private val authManager: AuthManager by on(accountManager.activeEndpoint).instance()
+    private val authManager: AuthManager by on(accountManager.activeLearningSpace).instance()
 
-    private val setPasswordUseCase: SetPasswordUseCase by on(accountManager.activeEndpoint).instance()
+    private val setPasswordUseCase: SetPasswordUseCase by on(accountManager.activeLearningSpace).instance()
 
     init {
         _appUiState.value = AppUiState(

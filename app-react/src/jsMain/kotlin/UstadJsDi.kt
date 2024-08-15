@@ -62,8 +62,8 @@ internal fun ustadJsDi(
     configMap: Map<String, String>,
     stringsProvider: JsStringProvider,
 ) = DI {
-    import(commonDomainDiModule(EndpointScope.Default))
-    import(DomainDiModuleJs(EndpointScope.Default))
+    import(commonDomainDiModule(LearningSpaceScope.Default))
+    import(DomainDiModuleJs(LearningSpaceScope.Default))
 
     val apiUrl = resolveEndpoint(location.href, URLSearchParams(location.search))
     console.log("Api URL = $apiUrl (location.href = ${location.href}")
@@ -130,15 +130,15 @@ internal fun ustadJsDi(
         UstadAccountManager(settings = instance(), di = di)
     }
 
-    bind<NodeIdAndAuth>() with scoped(EndpointScope.Default).singleton {
+    bind<NodeIdAndAuth>() with scoped(LearningSpaceScope.Default).singleton {
         dbNodeIdAndAuth
     }
 
-    bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(EndpointScope.Default).singleton {
+    bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(LearningSpaceScope.Default).singleton {
         dbBuilt
     }
 
-    bind<UmAppDataLayer>() with scoped(EndpointScope.Default).singleton {
+    bind<UmAppDataLayer>() with scoped(LearningSpaceScope.Default).singleton {
         val nodeIdAndAuth: NodeIdAndAuth = instance()
         val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
         val repositoryConfig =  RepositoryConfig.repositoryConfig(
@@ -180,10 +180,10 @@ internal fun ustadJsDi(
     }
 
     registerContextTranslator {
-            account: UmAccount -> Endpoint(account.endpointUrl)
+            account: UmAccount -> LearningSpace(account.endpointUrl)
     }
 
-    bind<AuthManager>() with scoped(EndpointScope.Default).singleton {
+    bind<AuthManager>() with scoped(LearningSpaceScope.Default).singleton {
         AuthManager(context, di)
     }
 
@@ -216,10 +216,10 @@ internal fun ustadJsDi(
         GetShowPoweredByUseCase(BuildConfigJs.APP_UI_SHOW_POWERED_BY.toBoolean())
     }
 
-    bind<BulkAddPersonsFromLocalUriUseCase>() with scoped(EndpointScope.Default).provider {
+    bind<BulkAddPersonsFromLocalUriUseCase>() with scoped(LearningSpaceScope.Default).provider {
         BulkAddPersonsFromLocalUriUseCaseJs(
             httpClient = instance(),
-            endpoint = context,
+            learningSpace = context,
             json = instance(),
             repo = instance<UmAppDataLayer>().repositoryOrLocalDb,
         )

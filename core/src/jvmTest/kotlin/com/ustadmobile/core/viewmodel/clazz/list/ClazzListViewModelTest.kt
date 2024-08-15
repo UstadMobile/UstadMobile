@@ -62,7 +62,7 @@ class ClazzListViewModelTest : AbstractMainDispatcherTest()  {
                 clazzUid = activeDb.clazzDao().insert(this)
             }
 
-            val activeUser = setActiveUser(activeEndpoint)
+            val activeUser = setActiveUser(activeLearningSpace)
             activeRepoWithFallback.grantScopedPermission(activeUser, Long.MAX_VALUE,
                 Clazz.TABLE_ID, testEntity.clazzUid)
 

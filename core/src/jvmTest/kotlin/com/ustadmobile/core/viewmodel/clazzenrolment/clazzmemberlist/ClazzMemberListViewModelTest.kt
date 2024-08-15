@@ -1,7 +1,7 @@
 package com.ustadmobile.core.viewmodel.clazzenrolment.clazzmemberlist
 
 import app.cash.turbine.test
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.clazz.CreateNewClazzUseCase
 import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.EnrolIntoCourseUseCase
 import com.ustadmobile.core.test.viewmodeltest.ViewModelTestBuilder
@@ -28,14 +28,14 @@ class ClazzMemberListViewModelTest : AbstractMainDispatcherTest() {
         val activeUserPerson: Person,
     )
 
-    val endpoint = Endpoint("https://www.test.com/")
+    val learningSpace = LearningSpace("https://www.test.com/")
 
     private fun testClazzMemberViewModel(
         activeUserRole: Int,
         block: suspend ViewModelTestBuilder<ClazzMemberListViewModel>.(ClazzMemberViewModelTestContext) -> Unit,
     ) {
         testViewModel {
-            val activePerson = setActiveUser(endpoint)
+            val activePerson = setActiveUser(learningSpace)
 
             val context = activeDb.withDoorTransactionAsync {
                 val clazzUid = activeDb.doorPrimaryKeyManager.nextId(Clazz.TABLE_ID)

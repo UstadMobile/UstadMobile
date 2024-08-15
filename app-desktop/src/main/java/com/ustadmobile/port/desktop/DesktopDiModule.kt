@@ -3,7 +3,7 @@ package com.ustadmobile.port.desktop
 import com.russhwolf.settings.PropertiesSettings
 import com.russhwolf.settings.Settings
 import com.ustadmobile.core.account.AuthManager
-import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.account.LearningSpaceScope
 import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.connectivitymonitor.ConnectivityMonitorJvm
@@ -346,7 +346,7 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         ustadAppDataDir().also { it.takeIf { !it.exists() }?.mkdirs() }
     }
 
-    bind<File>(tag = DiTag.TAG_CONTEXT_DATA_ROOT) with scoped(EndpointScope.Default).singleton {
+    bind<File>(tag = DiTag.TAG_CONTEXT_DATA_ROOT) with scoped(LearningSpaceScope.Default).singleton {
         val dataDir: File = instance(tag = TAG_DATA_DIR)
         File(dataDir, sanitizeDbNameFromUrl(context.url)).also {
             it.takeIf { !it.exists() }?.mkdirs()
@@ -380,7 +380,7 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         )
     }
 
-    bind<AuthManager>() with scoped(EndpointScope.Default).singleton {
+    bind<AuthManager>() with scoped(LearningSpaceScope.Default).singleton {
         AuthManager(context, di)
     }
 
@@ -391,11 +391,11 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         Pbkdf2Params(numIterations, keyLength)
     }
 
-    bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(EndpointScope.Default).singleton {
+    bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(LearningSpaceScope.Default).singleton {
         instance<DbAndObservers>().db
     }
 
-    bind<DbAndObservers>() with scoped(EndpointScope.Default).singleton {
+    bind<DbAndObservers>() with scoped(LearningSpaceScope.Default).singleton {
         val contextDataDir: File = on(context).instance(tag = DiTag.TAG_CONTEXT_DATA_ROOT)
         val dbUrl = "jdbc:sqlite:${contextDataDir.absolutePath}/UmAppDatabase.db"
         val nodeIdAndAuth: NodeIdAndAuth = instance()
@@ -421,7 +421,7 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         )
     }
 
-    bind<NodeIdAndAuth>() with scoped(EndpointScope.Default).singleton {
+    bind<NodeIdAndAuth>() with scoped(LearningSpaceScope.Default).singleton {
         val settings: Settings = instance()
         val contextIdentifier = sanitizeDbNameFromUrl(context.url)
         settings.getOrGenerateNodeIdAndAuth(contextIdentifier)
@@ -449,7 +449,7 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         XhtmlFixerJsoup(xml = instance())
     }
 
-    bind<UmAppDataLayer>() with scoped(EndpointScope.Default).singleton {
+    bind<UmAppDataLayer>() with scoped(LearningSpaceScope.Default).singleton {
         val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
         val repo = if(!context.isLocal) {
             val nodeIdAndAuth: NodeIdAndAuth = instance()
@@ -473,13 +473,13 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         )
     }
 
-    bind<EnqueueContentEntryImportUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<EnqueueContentEntryImportUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         EnqueueImportContentEntryUseCaseJvm(
             db = instance(tag = DoorTag.TAG_DB),
             scheduler = instance(),
-            endpoint = context,
+            learningSpace = context,
             enqueueRemoteImport = EnqueueImportContentEntryUseCaseRemote(
-                endpoint = context,
+                learningSpace = context,
                 httpClient = instance(),
                 json = instance(),
             )

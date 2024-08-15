@@ -1,7 +1,7 @@
 package com.ustadmobile.core.domain.xapi.ext
 
 import com.benasher44.uuid.Uuid
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.xapi.model.XapiAccount
 import com.ustadmobile.core.domain.xapi.model.XapiAgent
 import com.ustadmobile.core.domain.xapi.model.XapiObjectType
@@ -12,11 +12,11 @@ import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 
 fun XapiSessionEntity.agent(
-    endpoint: Endpoint,
+    learningSpace: LearningSpace,
 ) : XapiAgent {
     return XapiAgent(
         account = XapiAccount(
-            homePage = endpoint.url,
+            homePage = learningSpace.url,
             name = xseAccountUsername,
         ),
         objectType = XapiObjectType.Agent

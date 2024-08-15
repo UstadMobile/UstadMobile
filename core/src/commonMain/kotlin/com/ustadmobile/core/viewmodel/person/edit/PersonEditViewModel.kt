@@ -2,7 +2,7 @@ package com.ustadmobile.core.viewmodel.person.edit
 
 import com.ustadmobile.core.account.AccountRegisterOptions
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
@@ -155,7 +155,7 @@ class PersonEditViewModel(
     private val genderConfig : GenderConfig by instance()
 
     private val enqueueSavePictureUseCase: EnqueueSavePictureUseCase by
-        on(accountManager.activeEndpoint).instance()
+        on(accountManager.activeLearningSpace).instance()
 
     private val addNewPersonUseCase: AddNewPersonUseCase by di.onActiveEndpoint().instance()
 
@@ -494,7 +494,7 @@ class PersonEditViewModel(
                     val registeredPerson = accountManager.register(
                         person = savePerson,
                         password = passwordVal,
-                        endpointUrl = serverUrl,
+                        learningSpaceUrl = serverUrl,
                         accountRegisterOptions = AccountRegisterOptions(
                             makeAccountActive = !registrationModeFlags.hasFlag(REGISTER_MODE_MINOR)
                                     && !dontSetCurrentSession,
@@ -518,7 +518,7 @@ class PersonEditViewModel(
                     }else {
                         navController.navigateToViewUri(
                             viewUri = nextDestination.appendSelectedAccount(
-                                registeredPerson.personUid, Endpoint(serverUrl)
+                                registeredPerson.personUid, LearningSpace(serverUrl)
                             ),
                             goOptions = UstadMobileSystemCommon.UstadGoOptions(
                                 clearStack = true

@@ -18,7 +18,7 @@ class ClazzDetailOverviewViewModelTest : AbstractMainDispatcherTest() {
     @Test
     fun givenClazzExists_whenOnCreateCalled_thenClazzIsSetOnView() {
         testViewModel<ClazzDetailOverviewViewModel> {
-            val user = setActiveUser(activeEndpoint)
+            val user = setActiveUser(activeLearningSpace)
             val testClazz = Clazz().apply {
                 clazzName = "Test"
                 clazzUid = activeDb.clazzDao().insert(this)
@@ -46,7 +46,7 @@ class ClazzDetailOverviewViewModelTest : AbstractMainDispatcherTest() {
     @Test
     fun givenClazzExists_whenOnClickEditcalled_thenShouldGoToEdit() {
         testViewModel<ClazzDetailOverviewViewModel> {
-            val user = setActiveUser(activeEndpoint)
+            val user = setActiveUser(activeLearningSpace)
 
             val testClazz = Clazz().apply {
                 clazzName = "Test"

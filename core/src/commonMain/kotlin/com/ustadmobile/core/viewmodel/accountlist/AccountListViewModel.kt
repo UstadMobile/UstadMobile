@@ -1,7 +1,7 @@
 package com.ustadmobile.core.viewmodel.accountlist
 
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
+import com.ustadmobile.core.account.UserSessionWithPersonAndLearningSpace
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.launchopenlicenses.LaunchOpenLicensesUseCase
 import com.ustadmobile.core.domain.share.ShareAppUseCase
@@ -47,8 +47,8 @@ import org.kodein.di.instanceOrNull
  *        show the url that each account is associated with. Otherwise not shown.
  */
 data class AccountListUiState(
-    val headerAccount: UserSessionWithPersonAndEndpoint? = null,
-    val accountsList: List<UserSessionWithPersonAndEndpoint> = emptyList(),
+    val headerAccount: UserSessionWithPersonAndLearningSpace? = null,
+    val accountsList: List<UserSessionWithPersonAndLearningSpace> = emptyList(),
     val showAccountEndpoint: Boolean = false,
     val version: String = "",
     val showPoweredBy: Boolean = false,
@@ -72,7 +72,7 @@ class AccountListViewModel(
     )
 ): UstadViewModel(di, savedStateHandle, DEST_NAME) {
 
-    private val endpointFilter = savedStateHandle[ARG_FILTER_BY_ENDPOINT]
+    private val endpointFilter = savedStateHandle[ARG_FILTER_BY_LEARNINGSPACE]
 
     private val activeAccountMode =
         savedStateHandle[ARG_ACTIVE_ACCOUNT_MODE] ?: ACTIVE_ACCOUNT_MODE_HEADER
@@ -135,7 +135,7 @@ class AccountListViewModel(
                         val isFilteredOutActiveAccount =
                             (activeAccountMode == ACTIVE_ACCOUNT_MODE_HEADER &&
                                     it.userSession.usUid == currentUserSessionUid)
-                        val isFilteredOutByEndpoint = (endpointFilter != null && it.endpoint.url != endpointFilter)
+                        val isFilteredOutByEndpoint = (endpointFilter != null && it.learningSpace.url != endpointFilter)
                         val isFilteredOutByDateOfBirth = (maxDateOfBirth > 0 && it.person.dateOfBirth > maxDateOfBirth)
 
                         !(isFilteredOutActiveAccount ||
@@ -214,16 +214,16 @@ class AccountListViewModel(
     /**
      * Switch accounts
      */
-    fun onClickAccount(sessionWithPersonAndEndpoint: UserSessionWithPersonAndEndpoint) {
+    fun onClickAccount(sessionWithPersonAndLearningSpace: UserSessionWithPersonAndLearningSpace) {
         startUserSessionUseCase(
-            session = sessionWithPersonAndEndpoint,
+            session = sessionWithPersonAndLearningSpace,
             navController = navController,
             nextDest = savedStateHandle[ARG_NEXT] ?: ClazzListViewModel.DEST_NAME_HOME,
             dontSetCurrentSession = dontSetCurrentSession,
         )
     }
 
-    fun onClickDeleteAccount(session: UserSessionWithPersonAndEndpoint) {
+    fun onClickDeleteAccount(session: UserSessionWithPersonAndLearningSpace) {
         viewModelScope.launch {
             accountManager.endSession(session)
         }
@@ -256,7 +256,7 @@ class AccountListViewModel(
          * displayed. If the user clicks 'add account', the user will be taken directly to the
          * login screen for that server (e.g. they will never be taken to the server selection screen)
          */
-        const val ARG_FILTER_BY_ENDPOINT = "filterByEndpoint"
+        const val ARG_FILTER_BY_LEARNINGSPACE = "filterByLearningSpace"
 
         /**
          * The Active Account mode can be "header" or "inlist".

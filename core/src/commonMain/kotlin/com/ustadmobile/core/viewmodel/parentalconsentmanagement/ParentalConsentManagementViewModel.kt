@@ -85,7 +85,7 @@ class ParentalConsentManagementViewModel(
     val uiState: Flow<ParentalConsentManagementUiState> = _uiState.asStateFlow()
 
     private val getLocaleForSiteTermsUseCase: GetLocaleForSiteTermsUseCase by
-        on(accountManager.activeEndpoint).instance()
+        on(accountManager.activeLearningSpace).instance()
 
     init {
         ifLoggedInElseNavigateToLoginWithNextDestSet(

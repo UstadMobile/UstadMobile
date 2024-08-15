@@ -75,14 +75,14 @@ fun UstadNavController.navigateToLink(
     linkTarget: LinkTarget = LinkTarget.DEFAULT,
     dontSetCurrentSession: Boolean = false,
 ) : Job? {
-    var endpointUrl: String? = null
+    var learningSpaceUrl: String? = null
     var viewUri: String? = null
 
 
     when {
         link.startsWithHttpProtocol() && link.contains(DEFAULT_DIVIDER) -> {
             val urlComponents = UstadUrlComponents.parse(link)
-            endpointUrl = urlComponents.endpoint
+            learningSpaceUrl = urlComponents.learningSpace
             viewUri = urlComponents.viewUri
         }
 
@@ -104,7 +104,7 @@ fun UstadNavController.navigateToLink(
      * via openExternalLinkUseCase
      */
     return if(viewUri == null ||
-        !userCanSelectServer && endpointUrl != null && endpointUrl != accountManager.activeEndpoint.url
+        !userCanSelectServer && learningSpaceUrl != null && learningSpaceUrl != accountManager.activeLearningSpace.url
     ) {
         //when the link is not an ustad link, open in browser
         openExternalLinkUseCase(link, linkTarget)
@@ -113,9 +113,9 @@ fun UstadNavController.navigateToLink(
         scope.launch {
             when {
                 //When the account has already been selected and the endpoint url is known.
-                accountName != null && endpointUrl != null -> {
+                accountName != null && learningSpaceUrl != null -> {
                     val session = accountManager.activeSessionsList { filterUrl ->
-                        filterUrl == endpointUrl
+                        filterUrl == learningSpaceUrl
                     }.firstOrNull {
                         it.person.username == accountName.substringBefore("@")
                     }
@@ -130,18 +130,18 @@ fun UstadNavController.navigateToLink(
                 //is set)
                 !forceAccountSelection
                         && !accountManager.currentUserSession.userSession.isTemporary()
-                        && (endpointUrl == null || accountManager.activeEndpoint.url == endpointUrl) ->
+                        && (learningSpaceUrl == null || accountManager.activeLearningSpace.url == learningSpaceUrl) ->
                 {
                     navigateToViewUri(viewUri, goOptions)
                 }
 
                 //If the endpoint Url is known and there are no active accounts for this server,
                 // go directly to login
-                (endpointUrl != null
-                        && accountManager.activeSessionCount(maxDateOfBirth) { it == endpointUrl } == 0 ) ||
+                (learningSpaceUrl != null
+                        && accountManager.activeSessionCount(maxDateOfBirth) { it == learningSpaceUrl } == 0 ) ||
                 //... or when the endpoint url is not known, but there are no accounts at all, and the user cannot
                 ///select a server, go directly to login
-                (endpointUrl == null && accountManager.activeSessionCount(maxDateOfBirth) == 0
+                (learningSpaceUrl == null && accountManager.activeSessionCount(maxDateOfBirth) == 0
                 && !userCanSelectServer) ->
                 {
                     val args = mutableMapOf(
@@ -149,13 +149,13 @@ fun UstadNavController.navigateToLink(
                         ARG_DONT_SET_CURRENT_SESSION to dontSetCurrentSession.toString(),
                     )
 
-                    if(endpointUrl != null)
-                        args[ARG_API_URL] = endpointUrl
+                    if(learningSpaceUrl != null)
+                        args[ARG_API_URL] = learningSpaceUrl
 
                     navigate(LoginViewModel.DEST_NAME, args.toMap(), goOptions)
                 }
                 //If there are no accounts, the endpoint url is not specified, and the user can select the server, go to EnterLink
-                endpointUrl == null && accountManager.activeSessionCount(maxDateOfBirth) == 0 && userCanSelectServer -> {
+                learningSpaceUrl == null && accountManager.activeSessionCount(maxDateOfBirth) == 0 && userCanSelectServer -> {
                     navigate(
                         viewName = SiteEnterLinkViewModel.DEST_NAME,
                         args = mapOf(
@@ -173,8 +173,8 @@ fun UstadNavController.navigateToLink(
                         ARG_DONT_SET_CURRENT_SESSION to dontSetCurrentSession.toString(),
                     )
 
-                    if(endpointUrl != null)
-                        args[AccountListViewModel.ARG_FILTER_BY_ENDPOINT] = endpointUrl
+                    if(learningSpaceUrl != null)
+                        args[AccountListViewModel.ARG_FILTER_BY_LEARNINGSPACE] = learningSpaceUrl
 
                     args[AccountListViewModel.ARG_ACTIVE_ACCOUNT_MODE] = AccountListViewModel.ACTIVE_ACCOUNT_MODE_INLIST
                     args[UstadView.ARG_LISTMODE] = ListViewMode.PICKER.toString()

@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.makelink
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.appendQueryArgs
@@ -14,12 +14,12 @@ import com.ustadmobile.core.util.ext.toQueryString
  *
  */
 class MakeLinkUseCase(
-    private val endpoint: Endpoint,
+    private val learningSpace: LearningSpace,
 ) {
 
     operator fun invoke(destName: String, args: Map<String, String>): String {
         return (UMFileUtil.joinPaths(
-            endpoint.url,
+            learningSpace.url,
             UstadMobileSystemCommon.LINK_ENDPOINT_VIEWNAME_DIVIDER
         ) + destName).appendQueryArgs(args.toQueryString())
     }

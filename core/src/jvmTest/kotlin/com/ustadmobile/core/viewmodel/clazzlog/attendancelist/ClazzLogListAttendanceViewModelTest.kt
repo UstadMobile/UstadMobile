@@ -1,7 +1,7 @@
 package com.ustadmobile.core.viewmodel.clazzlog.attendancelist
 
 import app.cash.turbine.test
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.clazz.CreateNewClazzUseCase
 import com.ustadmobile.core.schedule.generateUid
 import com.ustadmobile.core.test.viewmodeltest.ViewModelTestBuilder
@@ -24,7 +24,7 @@ import kotlin.time.Duration.Companion.seconds
 
 class ClazzLogListAttendanceViewModelTest  : AbstractMainDispatcherTest() {
 
-    val endpoint = Endpoint("https://test.com/")
+    val learningSpace = LearningSpace("https://test.com/")
 
     private data class ClazzLogListAttendanceTestContext(
         val clazz: Clazz,
@@ -37,7 +37,7 @@ class ClazzLogListAttendanceViewModelTest  : AbstractMainDispatcherTest() {
         block: suspend ViewModelTestBuilder<ClazzLogListAttendanceViewModel>.(ClazzLogListAttendanceTestContext) -> Unit
     ) {
         testViewModel {
-            val activePerson = setActiveUser(endpoint)
+            val activePerson = setActiveUser(learningSpace)
             val clazz = Clazz().apply {
                 clazzTimeZone = "UTC"
             }

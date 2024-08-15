@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.person.bulkadd
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.person.bulkadd.EnqueueBulkAddPersonUseCase.Companion.TMP_FILE_PREFIX
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.di
@@ -22,13 +22,13 @@ class BulkAddPersonJob: Job {
 
     override fun execute(context: JobExecutionContext) {
         //Use di to get status holder
-        val endpointUrl = context.jobDetail.jobDataMap.getString(EnqueueBulkAddPersonUseCase.DATA_ENDPOINT)
+        val endpointUrl = context.jobDetail.jobDataMap.getString(EnqueueBulkAddPersonUseCase.DATA_LEARNINGSPACE)
         val timestamp = context.jobDetail.jobDataMap.getLong(EnqueueBulkAddPersonUseCase.DATA_TIMESTAMP)
         val di = context.scheduler.di
-        val endpoint = Endpoint(endpointUrl)
+        val learningSpace = LearningSpace(endpointUrl)
 
-        val statusMap: BulkAddPersonStatusMap = di.direct.on(endpoint).instance()
-        val bulkAddPersonUseCase: BulkAddPersonsUseCase = di.direct.on(endpoint).instance()
+        val statusMap: BulkAddPersonStatusMap = di.direct.on(learningSpace).instance()
+        val bulkAddPersonUseCase: BulkAddPersonsUseCase = di.direct.on(learningSpace).instance()
         val tmpDir: File = di.direct.instance(tag = DiTag.TAG_TMP_DIR)
 
         val initUiState = BulkAddPersonRunImportUiState()

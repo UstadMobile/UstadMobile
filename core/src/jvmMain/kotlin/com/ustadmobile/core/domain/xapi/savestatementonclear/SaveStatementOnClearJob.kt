@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.xapi.savestatementonclear
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.blob.InterruptableCoroutineJob
 import com.ustadmobile.core.domain.xapi.XapiStatementResource
 import com.ustadmobile.core.domain.xapi.model.XapiStatement
@@ -18,8 +18,8 @@ class SaveStatementOnClearJob: InterruptableCoroutineJob() {
     override suspend fun executeAsync(context: JobExecutionContext) {
         val di = context.scheduler.di
         val jobDataMap = context.jobDetail.jobDataMap
-        val endpoint = Endpoint(jobDataMap.getString(SaveStatementOnClearUseCase.KEY_ENDPOINT))
-        val statementResource: XapiStatementResource by di.on(endpoint).instance()
+        val learningSpace = LearningSpace(jobDataMap.getString(SaveStatementOnClearUseCase.KEY_LEARNINGSPACE))
+        val statementResource: XapiStatementResource by di.on(learningSpace).instance()
         val json: Json by di.instance()
 
         try {

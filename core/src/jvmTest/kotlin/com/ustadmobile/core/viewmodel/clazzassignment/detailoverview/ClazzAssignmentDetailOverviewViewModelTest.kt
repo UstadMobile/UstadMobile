@@ -1,7 +1,7 @@
 package com.ustadmobile.core.viewmodel.clazzassignment.detailoverview
 
 import app.cash.turbine.test
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.assignment.submitassignment.AssignmentDeadlinePassedException
 import com.ustadmobile.core.domain.assignment.submitassignment.SubmitAssignmentUseCase
 import com.ustadmobile.core.domain.clazz.CreateNewClazzUseCase
@@ -45,7 +45,7 @@ import kotlin.time.Duration.Companion.seconds
 @Suppress("USELESS_IS_CHECK")
 class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest()  {
 
-    val endpoint = Endpoint("http://test.com/")
+    val learningSpace = LearningSpace("http://test.com/")
 
     class AssignmentDetailOverviewTestContext(
         val clazz: Clazz,
@@ -63,7 +63,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
         block: suspend ViewModelTestBuilder<ClazzAssignmentDetailOverviewViewModel>.(AssignmentDetailOverviewTestContext) -> Unit
     ) {
         testViewModel {
-            val activePerson = setActiveUser(endpoint)
+            val activePerson = setActiveUser(learningSpace)
             val context = activeDb.withDoorTransactionAsync {
                 val clazzUid = activeDb.doorPrimaryKeyManager.nextId(Clazz.TABLE_ID)
                 val clazz = Clazz().apply {

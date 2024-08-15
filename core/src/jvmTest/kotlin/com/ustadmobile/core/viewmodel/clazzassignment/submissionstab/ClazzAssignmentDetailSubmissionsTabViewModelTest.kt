@@ -1,7 +1,7 @@
 package com.ustadmobile.core.viewmodel.clazzassignment.submissionstab
 
 import app.cash.turbine.test
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.clazz.CreateNewClazzUseCase
 import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.EnrolIntoCourseUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
@@ -37,7 +37,7 @@ class ClazzAssignmentDetailSubmissionsTabViewModelTest : AbstractMainDispatcherT
         "Terri Mackleberry"
     )
 
-    val endpoint = Endpoint("https://test.com/")
+    val learningSpace = LearningSpace("https://test.com/")
 
     private class TestContext(
         val activeUserPerson: Person,
@@ -49,7 +49,7 @@ class ClazzAssignmentDetailSubmissionsTabViewModelTest : AbstractMainDispatcherT
         block: suspend ViewModelTestBuilder<ClazzAssignmentDetailSubmissionsTabViewModel>.(TestContext) -> Unit
     ) {
         testViewModel<ClazzAssignmentDetailSubmissionsTabViewModel> {
-            val activeUser = setActiveUser(endpoint)
+            val activeUser = setActiveUser(learningSpace)
             val testContext = activeDb.withDoorTransactionAsync {
                 val clazz = Clazz().apply {
                     clazzName = "Test clazz"

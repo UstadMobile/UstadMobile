@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.interop.oneroster.model
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.interop.timestamp.format8601Timestamp
 import com.ustadmobile.core.domain.interop.timestamp.parse8601Timestamp
 import com.ustadmobile.core.domain.xxhash.XXStringHasher
@@ -33,7 +33,7 @@ data class Result(
  * Convert the StudentResult database entitiy to a OneRoster result
  */
 fun StudentResultAndCourseBlockSourcedId.toOneRosterResult(
-    endpoint: Endpoint,
+    learningSpace: LearningSpace,
 ): Result {
     return Result(
         sourcedId = studentResult.srSourcedId!!,
@@ -41,12 +41,12 @@ fun StudentResultAndCourseBlockSourcedId.toOneRosterResult(
         dateLastModified = format8601Timestamp(studentResult.srScoreDate),
         metaData = studentResult.srMetaData,
         lineItem = GUIDRef(
-            href = "${endpoint.url}/orhref/lineitem/$cbSourcedId/",
+            href = "${learningSpace.url}/orhref/lineitem/$cbSourcedId/",
             sourcedId = cbSourcedId ?: studentResult.srCourseBlockUid.toString(),
             type = GuidRefType.lineItem
         ),
         student = GUIDRef(
-            href = "${endpoint.url}/orhref/person/${studentResult.srStudentPersonUid}",
+            href = "${learningSpace.url}/orhref/person/${studentResult.srStudentPersonUid}",
             sourcedId = studentResult.srStudentPersonUid.toString(),
             type = GuidRefType.student,
         ),

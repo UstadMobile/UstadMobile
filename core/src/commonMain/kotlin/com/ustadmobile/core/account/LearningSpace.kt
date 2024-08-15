@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
  *
  */
 @Serializable
-data class Endpoint(
+data class LearningSpace(
     /**
      * Must end with a "/". Cannot automatically adjust this due to serialization requirements
      */

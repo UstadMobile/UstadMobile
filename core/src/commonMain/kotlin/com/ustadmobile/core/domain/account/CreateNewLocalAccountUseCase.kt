@@ -1,7 +1,7 @@
 package com.ustadmobile.core.domain.account
 
 import com.benasher44.uuid.uuid4
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
@@ -23,16 +23,16 @@ import org.kodein.di.on
 class CreateNewLocalAccountUseCase(private val di: DI) {
 
     data class NewLocalAccountResult(
-        val endpoint: Endpoint,
+        val learningSpace: LearningSpace,
         val person: Person,
     )
 
     suspend operator fun invoke(
         person: Person
     ): NewLocalAccountResult {
-        val localEndpoint = Endpoint("http://${uuid4()}.local/")
-        val dataLayer: UmAppDataLayer = di.on(localEndpoint).direct.instance()
-        val addNewPersonUseCase: AddNewPersonUseCase = di.on(localEndpoint).direct.instance()
+        val localLearningSpace = LearningSpace("http://${uuid4()}.local/")
+        val dataLayer: UmAppDataLayer = di.on(localLearningSpace).direct.instance()
+        val addNewPersonUseCase: AddNewPersonUseCase = di.on(localLearningSpace).direct.instance()
 
         return dataLayer.localDb.withDoorTransactionAsync {
             val newSite = Site().apply {
@@ -54,7 +54,7 @@ class CreateNewLocalAccountUseCase(private val di: DI) {
             )
 
             NewLocalAccountResult(
-                endpoint = localEndpoint,
+                learningSpace = localLearningSpace,
                 person = newPerson.copy(personUid = personUid)
             )
         }

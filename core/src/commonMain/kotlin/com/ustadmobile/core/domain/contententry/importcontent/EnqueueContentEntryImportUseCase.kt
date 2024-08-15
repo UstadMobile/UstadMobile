@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.contententry.importcontent
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.lib.db.entities.ContentEntryImportJob
 
 /**
@@ -22,12 +22,12 @@ interface EnqueueContentEntryImportUseCase {
 
     companion object {
 
-        const val DATA_ENDPOINT = "endpoint"
+        const val DATA_LEARNINGSPACE = "endpoint"
 
         const val DATA_JOB_UID = "jobUid"
 
-        fun uniqueNameFor(endpoint: Endpoint, uid: Long) : String {
-            return "import-content-entry-${endpoint.url}-$uid"
+        fun uniqueNameFor(learningSpace: LearningSpace, uid: Long) : String {
+            return "import-content-entry-${learningSpace.url}-$uid"
         }
 
 

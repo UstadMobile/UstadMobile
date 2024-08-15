@@ -81,9 +81,9 @@ abstract class UstadViewModel(
     protected val activeUserPersonUid: Long
         get() = accountManager.currentUserSession.person.personUid
 
-    internal val activeDataLayer: UmAppDataLayer by on(accountManager.activeEndpoint).instance()
+    internal val activeDataLayer: UmAppDataLayer by on(accountManager.activeLearningSpace).instance()
 
-    internal val activeDb: UmAppDatabase by on(accountManager.activeEndpoint)
+    internal val activeDb: UmAppDatabase by on(accountManager.activeLearningSpace)
         .instance(tag = DoorTag.TAG_DB)
 
     /**
@@ -488,7 +488,7 @@ abstract class UstadViewModel(
         cbUid: Long = savedStateHandle[ARG_COURSE_BLOCK_UID]?.toLong() ?: 0,
     ): XapiSessionEntity {
         val registrationUuid = uuid4()
-        val activityId = "${accountManager.activeEndpoint.url}ns/xapi/contentEntry/$contentEntryUid"
+        val activityId = "${accountManager.activeLearningSpace.url}ns/xapi/contentEntry/$contentEntryUid"
         val xxStringHasher: XXStringHasher = di.direct.instance()
 
         return XapiSessionEntity(
@@ -613,7 +613,7 @@ abstract class UstadViewModel(
          * Where the current user session is not changed, the next view needs to know which account
          * was selected (e.g. by UstadAccountManager, Login, Register, etc).
          */
-        const val ARG_SELECTED_ACCOUNT_ENDPOINT_URL = "selectedAccountEndpointUrl"
+        const val ARG_SELECTED_ACCOUNT_LEARNINGSPACE_URL = "selectedAccountEndpointUrl"
 
     }
 

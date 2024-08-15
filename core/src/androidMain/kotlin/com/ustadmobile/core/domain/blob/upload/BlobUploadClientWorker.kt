@@ -3,7 +3,7 @@ package com.ustadmobile.core.domain.blob.upload
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import io.github.aakira.napier.Napier
 import org.kodein.di.DI
 import org.kodein.di.android.closestDI
@@ -19,10 +19,10 @@ class BlobUploadClientWorker(
     private val di: DI by closestDI { applicationContext }
 
     override suspend fun doWork(): Result {
-        val endpointUrl = inputData.getString(AbstractEnqueueBlobUploadClientUseCase.DATA_ENDPOINT)
+        val learningSpaceUrl = inputData.getString(AbstractEnqueueBlobUploadClientUseCase.DATA_LEARNINGSPACE)
             ?: return Result.failure()
         val jobUid = inputData.getInt(AbstractEnqueueBlobUploadClientUseCase.DATA_JOB_UID, 0)
-        val endpoint = Endpoint(endpointUrl)
+        val endpoint = LearningSpace(learningSpaceUrl)
         val blobUploadClientUseCase: BlobUploadClientUseCase = di.on(endpoint).direct
             .instance()
         val updateFailedTransferJobUseCase: UpdateFailedTransferJobUseCase by di.on(endpoint).instance()

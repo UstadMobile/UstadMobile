@@ -1,6 +1,6 @@
 package com.ustadmobile.core.embeddedhttp
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServerUseCase
 import com.ustadmobile.core.domain.interop.HttpApiException
 import com.ustadmobile.core.domain.xapi.http.XapiHttpServerUseCase
@@ -20,8 +20,8 @@ import java.io.File
  */
 class EmbeddedHttpServer(
     port: Int,
-    private val contentEntryVersionServerUseCase: (Endpoint) -> ContentEntryVersionServerUseCase,
-    private val xapiServerUseCase: (Endpoint) -> XapiHttpServerUseCase,
+    private val contentEntryVersionServerUseCase: (LearningSpace) -> ContentEntryVersionServerUseCase,
+    private val xapiServerUseCase: (LearningSpace) -> XapiHttpServerUseCase,
     private val staticUmAppFilesDir: File?,
     private val mimeTypeHelper: MimeTypeHelper,
 ) : NanoHTTPD(port) {
@@ -36,12 +36,12 @@ class EmbeddedHttpServer(
     /**
      *
      */
-    fun endpointUrl(
-        endpoint: Endpoint,
+    fun learningSpaceUrl(
+        learningSpace: LearningSpace,
         path: String,
     ): String {
-        //Endpoint must be double encoded - see note on serveendpoint
-        val endpointEncoded = UrlEncoderUtil.encode(UrlEncoderUtil.encode(endpoint.url))
+        //LearningSpace must be double encoded - see note on serveendpoint
+        val endpointEncoded = UrlEncoderUtil.encode(UrlEncoderUtil.encode(learningSpace.url))
         return "http://127.0.0.1:$listeningPort$PATH_ENDPOINT_API$endpointEncoded/${path.removePrefix("/")}"
     }
 
@@ -72,8 +72,8 @@ class EmbeddedHttpServer(
         pathSegments: List<String>,
     ): Response {
         session.parameters
-        val endpointUrl = UrlEncoderUtil.decode(pathSegments[1])
-        val endpoint = Endpoint(endpointUrl)
+        val learningSpaceUrl = UrlEncoderUtil.decode(pathSegments[1])
+        val learningSpace = LearningSpace(learningSpaceUrl)
 
         return try {
             when(pathSegments.getOrNull(2)) {
@@ -84,7 +84,7 @@ class EmbeddedHttpServer(
                             val pathInContentSegments = pathSegments.subList(5, pathSegments.size)
                             val pathInContent = pathInContentSegments.joinToString(separator = "/")
 
-                            val originalUrl = "${endpointUrl}api/content/$contentEntryVersionUid/" +
+                            val originalUrl = "${learningSpaceUrl}api/content/$contentEntryVersionUid/" +
                                     pathInContentSegments.joinToString("/")
                             val request = iRequestBuilder(originalUrl) {
                                 session.headers.forEach {
@@ -98,12 +98,12 @@ class EmbeddedHttpServer(
                                 }
                             }
                             Napier.v {
-                                "EmbeddedHttpServer: content: endpoint=${endpointUrl} " +
+                                "EmbeddedHttpServer: content: endpoint=${learningSpaceUrl} " +
                                         "versionUid=$contentEntryVersionUid path=$pathInContent"
                             }
 
                             val okHttpResponse = contentEntryVersionServerUseCase(
-                                endpoint
+                                learningSpace
                             ).invoke(
                                 request = request,
                                 contentEntryVersionUid = contentEntryVersionUid,
@@ -114,11 +114,11 @@ class EmbeddedHttpServer(
                         }
 
                         "xapi" -> {
-                            val xapiHttpForEndpoint = xapiServerUseCase(endpoint)
+                            val xapiHttpForLearningSpace = xapiServerUseCase(learningSpace)
 
                             try {
                                 runBlocking {
-                                    xapiHttpForEndpoint(
+                                    xapiHttpForLearningSpace(
                                         pathSegments = pathSegments.subList(4, pathSegments.size),
                                         request = session.asIHttpRequest(this@EmbeddedHttpServer)
                                     ).toNanoHttpdResponse()

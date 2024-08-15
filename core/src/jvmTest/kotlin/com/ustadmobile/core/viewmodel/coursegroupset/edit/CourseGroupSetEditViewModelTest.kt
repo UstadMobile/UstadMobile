@@ -46,7 +46,7 @@ class CourseGroupSetEditViewModelTest : AbstractMainDispatcherTest()  {
                 clazzName = "Test"
             }
             val addPersonUseCase = AddNewPersonUseCase(activeDb, null)
-            val activeUser = setActiveUser(activeEndpoint)
+            val activeUser = setActiveUser(activeLearningSpace)
 
 
             val testContext = activeDb.withDoorTransactionAsync {

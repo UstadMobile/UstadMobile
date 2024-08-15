@@ -32,7 +32,7 @@ class ClazzEditViewModelTest : AbstractMainDispatcherTest() {
     fun givenNoExistingEntity_whenOnCreateAndHandleClickSaveCalled_thenShouldSaveToDatabase() {
         initNapierLog()
         testViewModel<ClazzEditViewModel> {
-            val user = setActiveUser(activeEndpoint)
+            val user = setActiveUser(activeLearningSpace)
 
             viewModelFactory {
                 ClazzEditViewModel(di, savedStateHandle)
@@ -46,7 +46,7 @@ class ClazzEditViewModelTest : AbstractMainDispatcherTest() {
             )
 
             extendDi {
-                bind<CreateNewClazzUseCase>() with scoped(endpointScope).singleton {
+                bind<CreateNewClazzUseCase>() with scoped(learningSpaceScope).singleton {
                     CreateNewClazzUseCase(
                         repoOrDb = instance<UmAppDataLayer>().repositoryOrLocalDb,
                     )
@@ -56,11 +56,11 @@ class ClazzEditViewModelTest : AbstractMainDispatcherTest() {
                     mock { }
                 }
 
-                bind<EnqueueContentEntryImportUseCase>() with scoped(endpointScope).singleton {
+                bind<EnqueueContentEntryImportUseCase>() with scoped(learningSpaceScope).singleton {
                     mock { }
                 }
 
-                bind<EnqueueSavePictureUseCase>() with scoped(endpointScope).singleton {
+                bind<EnqueueSavePictureUseCase>() with scoped(learningSpaceScope).singleton {
                     mock { }
                 }
             }
@@ -80,7 +80,7 @@ class ClazzEditViewModelTest : AbstractMainDispatcherTest() {
 
                 readyAppUiState.actionBarButtonState.onClick()
 
-                val db = di.direct.on(activeEndpoint).instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
+                val db = di.direct.on(activeLearningSpace).instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
 
                 db.doorFlow(arrayOf("Clazz")) {
                     db.clazzDao().findAll()

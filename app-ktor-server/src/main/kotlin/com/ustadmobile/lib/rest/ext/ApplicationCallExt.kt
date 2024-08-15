@@ -1,6 +1,6 @@
 package com.ustadmobile.lib.rest.ext
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.contentformats.ContentImportersManager
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.util.ext.requirePostfix
@@ -127,15 +127,15 @@ suspend fun ApplicationCall.respondOkHttpResponse(
  * If the ContentRoute cache were to retrieve content without considering the host (e.g. just use
  * the contentEntryVersion), this could lead to conflicts when there is content on different servers.
  */
-val ApplicationCall.callEndpoint: Endpoint
+val ApplicationCall.callEndpoint: LearningSpace
     get() {
         val config = this.application.environment.config
         val dbMode = config.dbModeProperty()
 
         return if(dbMode == CONF_DBMODE_SINGLETON) {
-            Endpoint(config.property(CONF_KEY_SITE_URL).getString().requirePostfix("/"))
+            LearningSpace(config.property(CONF_KEY_SITE_URL).getString().requirePostfix("/"))
         }else {
-            Endpoint(request.headers.asIHttpHeaders().clientProtocolAndHost())
+            LearningSpace(request.headers.asIHttpHeaders().clientProtocolAndHost())
         }
     }
 

@@ -3,8 +3,8 @@ package com.ustadmobile.core.test.clientservertest
 import com.russhwolf.settings.PropertiesSettings
 import com.russhwolf.settings.Settings
 import com.ustadmobile.core.account.AuthManager
-import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.account.LearningSpace
+import com.ustadmobile.core.account.LearningSpaceScope
 import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDataLayer
@@ -66,7 +66,7 @@ import java.util.Properties
 import kotlin.random.Random
 
 private fun clientServerCommonDiModule(
-    endpointScope: EndpointScope,
+    endpointScope: LearningSpaceScope,
     baseTmpDir: File,
     db: UmAppDatabase,
     name: String,
@@ -156,7 +156,7 @@ fun clientServerIntegrationTest(
     val mockSnackBarDispatcher: SnackBarDispatcher = mock { }
     val tempDir = Files.createTempDirectory("client-server-integration-test").toFile()
 
-    val serverEndpointScope = EndpointScope()
+    val serverEndpointScope = LearningSpaceScope()
     val serverDi = DI {
         bind<OkHttpClient>() with singleton { okHttpClient }
         bind<HttpClient>() with singleton { httpClient }
@@ -175,12 +175,12 @@ fun clientServerIntegrationTest(
         }
 
         registerContextTranslator { call: ApplicationCall ->
-            Endpoint("localhost")
+            LearningSpace("localhost")
         }
 
         onReady {
-            val localhostEndpoint = Endpoint("localhost")
-            val authManager: AuthManager = on(localhostEndpoint).instance()
+            val localhostLearningSpace = LearningSpace("localhost")
+            val authManager: AuthManager = on(localhostLearningSpace).instance()
             val adminPerson = Person(username = adminUsername, firstNames = "Admin", lastName = "User")
             runBlocking {
                 val adminPersonUid = serverDb.insertPersonAndGroup(adminPerson).personUid
@@ -209,7 +209,7 @@ fun clientServerIntegrationTest(
     val serverUrl = "http://localhost:8094/"
 
     val clients = (0..numClients).map {
-        val clientEndpointScope = EndpointScope()
+        val clientEndpointScope = LearningSpaceScope()
         val clientDb = DatabaseBuilder.databaseBuilder(
             UmAppDatabase::class,
             "jdbc:sqlite::memory:", nodeId = it.toLong())
@@ -260,7 +260,7 @@ fun clientServerIntegrationTest(
                 bind<SubmitMarkUseCase>() with scoped(clientEndpointScope).provider {
                     SubmitMarkUseCase(
                         repo = clientRepo,
-                        endpoint = context,
+                        learningSpace = context,
                         createXapiGroupUseCase = instance(),
                         xapiStatementResource = mock { },
                         xxStringHasher = instance(),
@@ -271,7 +271,7 @@ fun clientServerIntegrationTest(
                 bind<CreateXapiGroupForCourseGroupUseCase>() with scoped(clientEndpointScope).provider {
                     CreateXapiGroupForCourseGroupUseCase(
                         repo = clientRepo,
-                        endpoint = context,
+                        learningSpace = context,
                         stringHasher = instance(),
                     )
                 }
@@ -280,7 +280,7 @@ fun clientServerIntegrationTest(
                     XXStringHasherCommonJvm()
                 }
 
-                registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
+                registerContextTranslator { account: UmAccount -> LearningSpace(account.endpointUrl) }
             },
             serverDi = serverDi,
             diEndpointScope = clientEndpointScope,

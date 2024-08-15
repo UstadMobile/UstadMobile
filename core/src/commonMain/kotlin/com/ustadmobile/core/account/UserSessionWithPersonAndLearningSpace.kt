@@ -9,27 +9,27 @@ import com.ustadmobile.lib.db.entities.UserSession
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class UserSessionWithPersonAndEndpoint (
+data class UserSessionWithPersonAndLearningSpace (
     val userSession: UserSession,
     val person: Person,
-    val endpoint: Endpoint,
+    val learningSpace: LearningSpace,
     val personPicture: PersonPicture? = null,
 ) {
 
     val displayName: String
         get() {
-            val displayUrl = endpoint.url
+            val displayUrl = learningSpace.url
                 .removePrefix("http://")
                 .removePrefix("https://")
                 .removeSuffix("/")
             return "${person.username}@$displayUrl"
         }
 
-    fun toUmAccount() = person.toUmAccount(endpoint.url)
+    fun toUmAccount() = person.toUmAccount(learningSpace.url)
 
     fun toXapiAgent() = XapiAgent(
         account = XapiAccount(
-            homePage = endpoint.url,
+            homePage = learningSpace.url,
             name = person.username ?: "anonymous",
         )
     )

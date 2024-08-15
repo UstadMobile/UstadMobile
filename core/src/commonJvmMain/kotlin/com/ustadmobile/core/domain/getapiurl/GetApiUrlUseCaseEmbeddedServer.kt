@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.getapiurl
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.embeddedhttp.EmbeddedHttpServer
 
 /**
@@ -8,10 +8,10 @@ import com.ustadmobile.core.embeddedhttp.EmbeddedHttpServer
  */
 class GetApiUrlUseCaseEmbeddedServer(
     private val embeddedServer: EmbeddedHttpServer,
-    private val endpoint: Endpoint,
+    private val learningSpace: LearningSpace,
 ): GetApiUrlUseCase {
 
     override fun invoke(path: String): String {
-        return embeddedServer.endpointUrl(endpoint, path)
+        return embeddedServer.learningSpaceUrl(learningSpace, path)
     }
 }

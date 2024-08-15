@@ -1,7 +1,7 @@
 package com.ustadmobile.core.io.ext
 import java.io.File
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import java.io.IOException
 import java.util.zip.GZIPInputStream.GZIP_MAGIC
@@ -9,9 +9,9 @@ import java.util.zip.GZIPInputStream.GZIP_MAGIC
 /**
  * Gets a standard subdirectory to use for data that is specific to a given endpoint
  */
-fun File.siteDataSubDir(siteEndpoint: Endpoint): File {
+fun File.siteDataSubDir(learningSpace: LearningSpace): File {
     return File(File(this, UstadMobileSystemCommon.SUBDIR_SITEDATA_NAME),
-            sanitizeDbNameFromUrl(siteEndpoint.url))
+            sanitizeDbNameFromUrl(learningSpace.url))
 }
 
 fun File.isParentOf(parent: File): Boolean {

@@ -1,6 +1,6 @@
 package com.ustadmobile.core.impl.di
 
-import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.account.LearningSpaceScope
 import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.domain.assignment.submitmark.SubmitMarkUseCase
 import com.ustadmobile.core.domain.assignment.submittername.GetAssignmentSubmitterNameUseCase
@@ -29,7 +29,7 @@ import org.kodein.di.singleton
  * Includes items that require systemImpl, so cannot be used on Android for dependencies that are
  * at the Application level di.
  */
-fun commonDomainDiModule(endpointScope: EndpointScope) = DI.Module("CommonDomain") {
+fun commonDomainDiModule(endpointScope: LearningSpaceScope) = DI.Module("CommonDomain") {
 
 
     bind<EnrolIntoCourseUseCase>() with scoped(endpointScope).provider {
@@ -93,7 +93,7 @@ fun commonDomainDiModule(endpointScope: EndpointScope) = DI.Module("CommonDomain
     bind<SubmitMarkUseCase>() with scoped(endpointScope).provider {
         SubmitMarkUseCase(
             repo = instance<UmAppDataLayer>().repositoryOrLocalDb,
-            endpoint = context,
+            learningSpace = context,
             createXapiGroupUseCase = instance(),
             xapiStatementResource = instance(),
             xxStringHasher = instance(),
@@ -104,7 +104,7 @@ fun commonDomainDiModule(endpointScope: EndpointScope) = DI.Module("CommonDomain
     bind<CreateXapiGroupForCourseGroupUseCase>() with scoped(endpointScope).provider {
         CreateXapiGroupForCourseGroupUseCase(
             repo = instance<UmAppDataLayer>().repositoryOrLocalDb,
-            endpoint = context,
+            learningSpace = context,
             stringHasher = instance(),
         )
     }

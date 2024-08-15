@@ -1,6 +1,6 @@
 package com.ustadmobile.core.contentformats
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.lib.db.entities.*
@@ -18,7 +18,7 @@ import com.ustadmobile.lib.db.entities.*
  *
  */
 abstract class ContentImporter(
-    protected val endpoint: Endpoint,
+    protected val learningSpace: LearningSpace,
 )  {
 
     /**
@@ -77,7 +77,7 @@ abstract class ContentImporter(
      * https://endpointserer.com/api/content/contentEntryVersionUid/
      */
     protected fun createContentUrlPrefix(contentEntryVersionUid: Long): String {
-        return endpoint.url + ContentEntryVersion.PATH_POSTFIX + contentEntryVersionUid + "/"
+        return learningSpace.url + ContentEntryVersion.PATH_POSTFIX + contentEntryVersionUid + "/"
     }
 
 

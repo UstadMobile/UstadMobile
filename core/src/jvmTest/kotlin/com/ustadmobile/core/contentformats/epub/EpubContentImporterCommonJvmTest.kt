@@ -71,7 +71,7 @@ class EpubContentImporterCommonJvmTest : AbstractContentImporterTest() {
         tempEpubFile.copyInputStreamToFile(inputStream)
 
         val epubPlugin = EpubContentImporterCommonJvm(
-            endpoint = activeEndpoint,
+            learningSpace = activeLearningSpace,
             db = db,
             cache = ustadCache,
             uriHelper = uriHelper,
@@ -107,7 +107,7 @@ class EpubContentImporterCommonJvmTest : AbstractContentImporterTest() {
             "/com/ustadmobile/core/contenttype/epub-with-no-opf.epub")
 
         val epubPlugin = EpubContentImporterCommonJvm(
-            endpoint = activeEndpoint,
+            learningSpace = activeLearningSpace,
             db = db,
             cache = ustadCache,
             uriHelper = uriHelper,
@@ -138,7 +138,7 @@ class EpubContentImporterCommonJvmTest : AbstractContentImporterTest() {
             "/com/ustadmobile/core/contenttype/epub-with-no-nav.epub")
 
         val epubPlugin = EpubContentImporterCommonJvm(
-            endpoint = activeEndpoint,
+            learningSpace = activeLearningSpace,
             db = db,
             cache = ustadCache,
             uriHelper = uriHelper,
@@ -170,7 +170,7 @@ class EpubContentImporterCommonJvmTest : AbstractContentImporterTest() {
             "/com/ustadmobile/core/contenttype/epub-with-missing-item.epub")
 
         val epubPlugin = EpubContentImporterCommonJvm(
-            endpoint = activeEndpoint,
+            learningSpace = activeLearningSpace,
             db = db,
             cache = ustadCache,
             uriHelper = uriHelper,
@@ -199,7 +199,7 @@ class EpubContentImporterCommonJvmTest : AbstractContentImporterTest() {
     @Test
     fun givenValidEpubLink_whenExtractMetadataAndProcessJobComplete_thenDataShouldBeDownloaded(){
         val epubPlugin = EpubContentImporterCommonJvm(
-            endpoint = activeEndpoint,
+            learningSpace = activeLearningSpace,
             db = db,
             cache = ustadCache,
             uriHelper = uriHelper,
@@ -241,7 +241,7 @@ class EpubContentImporterCommonJvmTest : AbstractContentImporterTest() {
                     "/com/ustadmobile/core/contenttype/childrens-literature.epub")
 
 
-                val expectedUrlPrefix = "${activeEndpoint.url}api/content/${result.cevUid}/"
+                val expectedUrlPrefix = "${activeLearningSpace.url}api/content/${result.cevUid}/"
                 val manifestResponse = ustadCache.retrieve(
                     iRequestBuilder("$expectedUrlPrefix${ContentConstants.MANIFEST_NAME}")
                 )

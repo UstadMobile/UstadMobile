@@ -3,7 +3,7 @@ package com.ustadmobile.lib.rest.dimodules
 import com.russhwolf.settings.PropertiesSettings
 import com.russhwolf.settings.Settings
 import com.ustadmobile.core.account.AuthManager
-import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.account.LearningSpaceScope
 import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.contentformats.epub.XhtmlFixer
 import com.ustadmobile.core.contentformats.epub.XhtmlFixerJsoup
@@ -81,7 +81,7 @@ data class DbAndObservers(
 fun makeJvmBackendDiModule(
     config: ApplicationConfig,
     json: Json,
-    contextScope: EndpointScope = EndpointScope.Default,
+    contextScope: LearningSpaceScope = LearningSpaceScope.Default,
 ) = DI.Module("JvmBackendDiModule") {
     val dataDirPath = config.absoluteDataDir()
     dataDirPath.takeIf { !it.exists() }?.mkdirs()
@@ -190,7 +190,7 @@ fun makeJvmBackendDiModule(
                 db = db,
                 httpClient = instance(),
                 json = instance(),
-                endpoint = context,
+                learningSpace = context,
                 createRetentionLocksForManifestUseCase = CreateRetentionLocksForManifestUseCaseCommonJvm(
                     cache = cache,
                 ),
@@ -207,7 +207,7 @@ fun makeJvmBackendDiModule(
         UmAppDataLayer(localDb = instance(tag = DoorTag.TAG_DB), repository = null)
     }
 
-    bind<NodeIdAndAuth>() with scoped(EndpointScope.Default).singleton {
+    bind<NodeIdAndAuth>() with scoped(LearningSpaceScope.Default).singleton {
         val settings: Settings = instance()
         val contextIdentifier: String = context.identifier(dbMode)
         settings.getOrGenerateNodeIdAndAuth(contextIdentifier)

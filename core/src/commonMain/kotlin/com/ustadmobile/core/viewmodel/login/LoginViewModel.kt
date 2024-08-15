@@ -4,7 +4,7 @@ import com.ustadmobile.core.account.AdultAccountRequiredException
 import com.ustadmobile.core.account.ConsentNotGrantedException
 import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
@@ -177,7 +177,7 @@ class LoginViewModel(
         val goOptions = UstadMobileSystemCommon.UstadGoOptions(clearStack = true)
         Napier.d { "LoginPresenter: go to next destination: $nextDestination" }
         navController.navigateToViewUri(
-            nextDestination.appendSelectedAccount(personUid, Endpoint(serverUrl)),
+            nextDestination.appendSelectedAccount(personUid, LearningSpace(serverUrl)),
             goOptions
         )
     }

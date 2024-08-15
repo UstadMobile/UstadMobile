@@ -1,6 +1,6 @@
 package com.ustadmobile.core.viewmodel.videocontent
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.contentformats.media.MediaContentInfo
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
@@ -37,7 +37,7 @@ data class VideoContentUiState(
 
     val contentEntryVersionUid: Long = 0,
 
-    val endpoint: Endpoint? = null,
+    val learningSpace: LearningSpace? = null,
 
     val mediaSrc: String? = null,
 
@@ -123,7 +123,7 @@ class VideoContentViewModel(
                 _uiState.update { prev ->
                     prev.copy(
                         contentEntryVersionUid = entityUidArg,
-                        endpoint = accountManager.activeEndpoint,
+                        learningSpace = accountManager.activeLearningSpace,
                         mediaContentInfo = mediaInfo,
                         mediaDataUrl = dataUrl,
                         mediaSrc = mediaSrc,

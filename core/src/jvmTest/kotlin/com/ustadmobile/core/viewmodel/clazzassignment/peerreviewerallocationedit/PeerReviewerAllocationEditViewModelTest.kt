@@ -1,7 +1,7 @@
 package com.ustadmobile.core.viewmodel.clazzassignment.peerreviewerallocationedit
 
 import app.cash.turbine.test
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.clazz.CreateNewClazzUseCase
 import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.EnrolIntoCourseUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
@@ -27,7 +27,7 @@ import kotlin.time.Duration.Companion.seconds
 
 class PeerReviewerAllocationEditViewModelTest : AbstractMainDispatcherTest() {
 
-    val endpoint = Endpoint("https://app.test.com/")
+    val learningSpace = LearningSpace("https://app.test.com/")
 
     class PeerReviewerAllocationEditViewModelTestContext(
         val clazz: Clazz,
@@ -40,7 +40,7 @@ class PeerReviewerAllocationEditViewModelTest : AbstractMainDispatcherTest() {
         block: suspend ViewModelTestBuilder<PeerReviewerAllocationEditViewModel>.(PeerReviewerAllocationEditViewModelTestContext) -> Unit
     ) {
         testViewModel<PeerReviewerAllocationEditViewModel> {
-            val activeUserPerson = setActiveUser(endpoint)
+            val activeUserPerson = setActiveUser(learningSpace)
 
             val context = activeDb.withDoorTransactionAsync {
                 val clazzUid = activeDb.doorPrimaryKeyManager.nextId(Clazz.TABLE_ID)

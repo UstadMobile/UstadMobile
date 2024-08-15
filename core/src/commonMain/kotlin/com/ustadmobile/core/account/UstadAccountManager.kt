@@ -9,7 +9,7 @@ import com.ustadmobile.core.domain.account.CreateNewLocalAccountUseCase
 import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.whenSubscribed
-import com.ustadmobile.core.util.ext.withEndpoint
+import com.ustadmobile.core.util.ext.withLearningSpace
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
@@ -74,25 +74,25 @@ class UstadAccountManager(
 )  {
 
 
-    private val _currentUserSession : MutableStateFlow<UserSessionWithPersonAndEndpoint>
+    private val _currentUserSession : MutableStateFlow<UserSessionWithPersonAndLearningSpace>
 
     /**
      * The current user session is the one for the currently selected account
      */
-    var currentUserSession: UserSessionWithPersonAndEndpoint
+    var currentUserSession: UserSessionWithPersonAndLearningSpace
         get() = _currentUserSession.value
         set(value) {
             _currentUserSession.value = value
 
             val activeAccountJson = json.encodeToString(value)
             settings[ACCOUNTS_ACTIVE_SESSION_PREFKEY] = activeAccountJson
-            settings[ACCOUNTS_ACTIVE_ENDPOINT_PREFKEY] = value.endpoint.url
+            settings[ACCOUNTS_ACTIVE_ENDPOINT_PREFKEY] = value.learningSpace.url
         }
 
     /**
      * The account that is currently the selected account on screen
      */
-    val currentUserSessionFlow: Flow<UserSessionWithPersonAndEndpoint>
+    val currentUserSessionFlow: Flow<UserSessionWithPersonAndLearningSpace>
         get() = _currentUserSession.asStateFlow()
 
     //This is the older way of doing things now.
@@ -104,25 +104,25 @@ class UstadAccountManager(
      * Endpoint urls that have active sessions that are on the device. This is stored in preferences
      * so that we know what databases we need to collect from
      */
-    private val _endpointsWithActiveSessions: MutableStateFlow<List<Endpoint>>
+    private val _learningSpacesWithActiveSessions: MutableStateFlow<List<LearningSpace>>
 
     /**
      * Flow that can be accessed to access all active accounts (e.g. the current user session AND
      * all accounts that are stored on this device that the user could switch to).
      */
-    private val _activeUserSessions: MutableStateFlow<List<UserSessionWithPersonAndEndpoint>>
+    private val _activeUserSessions: MutableStateFlow<List<UserSessionWithPersonAndLearningSpace>>
 
 
-    val activeUserSessionsFlow: Flow<List<UserSessionWithPersonAndEndpoint>>
+    val activeUserSessionsFlow: Flow<List<UserSessionWithPersonAndLearningSpace>>
         get() = _activeUserSessions.asStateFlow()
 
 
 
-    val activeEndpoint: Endpoint
-        get() = _currentUserSession.value.endpoint
+    val activeLearningSpace: LearningSpace
+        get() = _currentUserSession.value.learningSpace
 
-    val activeEndpoints: List<Endpoint>
-        get() = _endpointsWithActiveSessions.value
+    val activeLearningSpaces: List<LearningSpace>
+        get() = _learningSpacesWithActiveSessions.value
 
 
     private val createNewLocalAccountUseCase: CreateNewLocalAccountUseCase by di.instance()
@@ -146,17 +146,17 @@ class UstadAccountManager(
     init {
         val currentEndpointStr = settings.getStringOrNull(ACCOUNTS_ACTIVE_ENDPOINT_PREFKEY)
             ?: apiUrlConfig.presetApiUrl ?: MANIFEST_URL_FALLBACK
-        val currentDb: UmAppDatabase = di.direct.on(Endpoint(currentEndpointStr))
+        val currentDb: UmAppDatabase = di.direct.on(LearningSpace(currentEndpointStr))
             .instance(tag = DoorTag.TAG_DB)
 
-        val initUserSession: UserSessionWithPersonAndEndpoint = settings.getStringOrNull(ACCOUNTS_ACTIVE_SESSION_PREFKEY)?.let {
+        val initUserSession: UserSessionWithPersonAndLearningSpace = settings.getStringOrNull(ACCOUNTS_ACTIVE_SESSION_PREFKEY)?.let {
             json.decodeFromString(it)
         } ?: makeNewTempGuestSession(currentEndpointStr,  currentDb)
         _currentUserSession = MutableStateFlow(initUserSession)
         val initEndpoints: List<String> = settings.getStringOrNull(ACCOUNTS_ENDPOINTS_WITH_ACTIVE_SESSION)?.let {
             json.decodeFromString(ListSerializer(String.serializer()), it)
         } ?: listOf(currentEndpointStr)
-        _endpointsWithActiveSessions = MutableStateFlow(initEndpoints.map { Endpoint(it) })
+        _learningSpacesWithActiveSessions = MutableStateFlow(initEndpoints.map { LearningSpace(it) })
 
         _activeUserSessions = MutableStateFlow(listOf(initUserSession))
 
@@ -182,20 +182,20 @@ class UstadAccountManager(
 //            }
 
             _activeUserSessions.whenSubscribed {
-                _endpointsWithActiveSessions.collectLatest { endpointsWithSessions ->
-                    endpointsWithSessions.forEach { endpoint ->
+                _learningSpacesWithActiveSessions.collectLatest { learningSpacesWithSessions ->
+                    learningSpacesWithSessions.forEach { learningSpace ->
                         scope.launch {
-                            val endpointDb: UmAppDatabase = di.on(endpoint).direct
+                            val endpointDb: UmAppDatabase = di.on(learningSpace).direct
                                 .instance(tag = DoorTag.TAG_DB)
-                            endpointDb.userSessionDao().findAllLocalSessionsLive().collect { endpointSessions ->
+                            endpointDb.userSessionDao().findAllLocalSessionsLive().collect { learningSpaceSessions ->
                                 _activeUserSessions.update { prev ->
                                     prev.filter {
-                                        it.endpoint != endpoint
-                                    } +  endpointSessions.map {
-                                        UserSessionWithPersonAndEndpoint(
+                                        it.learningSpace != learningSpace
+                                    } +  learningSpaceSessions.map {
+                                        UserSessionWithPersonAndLearningSpace(
                                             userSession = it.userSession ?: UserSession(),
                                             person = it.person ?: Person(),
-                                            endpoint = endpoint,
+                                            learningSpace = learningSpace,
                                             personPicture = it.personPicture
                                         )
                                     }.sortedBy { it.displayName }
@@ -217,8 +217,9 @@ class UstadAccountManager(
         scope.launch {
             _currentUserSession.whenSubscribed {
                 _currentUserSession.collectLatest { session ->
-                    val endpointDb: UmAppDatabase = di.on(session.endpoint).direct.instance(tag = DoorTag.TAG_DB)
-                    endpointDb.personDao().findByUidWithPictureAsFlow(
+                    val learningSpaceDb: UmAppDatabase = di.on(session.learningSpace).direct
+                        .instance(tag = DoorTag.TAG_DB)
+                    learningSpaceDb.personDao().findByUidWithPictureAsFlow(
                         session.userSession.usPersonUid
                     ).collect { personAndPictureFromDb ->
                         val nameChanged = personAndPictureFromDb?.person?.fullName() != session.person.fullName()
@@ -258,10 +259,10 @@ class UstadAccountManager(
      * (e.g. to be included in statistics on total number of users etc).
      */
     private fun makeNewTempGuestSession(
-        endpointUrl: String,
+        learningSpaceUrl: String,
         currentDb: UmAppDatabase
-    ): UserSessionWithPersonAndEndpoint {
-        return UserSessionWithPersonAndEndpoint(
+    ): UserSessionWithPersonAndLearningSpace {
+        return UserSessionWithPersonAndLearningSpace(
             userSession = UserSession().apply {
                 usUid = currentDb.doorPrimaryKeyManager.nextId(UserSession.TABLE_ID)
                 usClientNodeId = currentDb.doorWrapperNodeId
@@ -270,7 +271,7 @@ class UstadAccountManager(
                 usStatus = UserSession.STATUS_ACTIVE
             },
             person = GUEST_PERSON,
-            endpoint = Endpoint(endpointUrl),
+            learningSpace = LearningSpace(learningSpaceUrl),
         ).also {
             scope.launch {
                 currentDb.userSessionDao().insertSession(it.userSession)
@@ -291,11 +292,11 @@ class UstadAccountManager(
      */
     suspend fun activeSessionsList(
         endpointFilter: EndpointFilter = EndpointFilter { true }
-    ): List<UserSessionWithPersonAndEndpoint> {
-        return _endpointsWithActiveSessions.value.filter { endpointFilter.filterEndpoint(it.url) }.flatMap { endpoint ->
+    ): List<UserSessionWithPersonAndLearningSpace> {
+        return _learningSpacesWithActiveSessions.value.filter { endpointFilter.filterEndpoint(it.url) }.flatMap { endpoint ->
             val db: UmAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
             db.userSessionDao().findAllLocalSessionsAsync().map { userSession ->
-                userSession.withEndpoint(endpoint)
+                userSession.withLearningSpace(endpoint)
             }
         }
     }
@@ -307,7 +308,7 @@ class UstadAccountManager(
         maxDateOfBirth: Long = 0,
         endpointFilter: EndpointFilter = EndpointFilter { true }
     ): Int {
-        return _endpointsWithActiveSessions.value.filter { endpointFilter.filterEndpoint(it.url) }.fold(0) { total, endpoint ->
+        return _learningSpacesWithActiveSessions.value.filter { endpointFilter.filterEndpoint(it.url) }.fold(0) { total, endpoint ->
             val db: UmAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
             total + db.userSessionDao().countAllLocalSessionsAsync(maxDateOfBirth)
         }
@@ -318,14 +319,14 @@ class UstadAccountManager(
     suspend fun register(
         person: Person,
         password: String,
-        endpointUrl: String,
+        learningSpaceUrl: String,
         accountRegisterOptions: AccountRegisterOptions = AccountRegisterOptions()
     ): Person = withContext(Dispatchers.Default){
         assertNotClosed()
-        val endpoint = Endpoint(endpointUrl)
+        val learningSpace = LearningSpace(learningSpaceUrl)
         val parentVal = accountRegisterOptions.parentJoin
         val httpStmt = httpClient.preparePost {
-            url("${endpointUrl.removeSuffix("/")}/auth/register")
+            url("${learningSpaceUrl.removeSuffix("/")}/auth/register")
             contentType(ContentType.Application.Json)
             setBodyJson(
                 json = json,
@@ -334,7 +335,7 @@ class UstadAccountManager(
                     person = person,
                     newPassword = password,
                     parent = parentVal,
-                    endpointUrl = endpointUrl
+                    learningSpaceUrl = learningSpaceUrl
                 )
             )
         }
@@ -349,14 +350,14 @@ class UstadAccountManager(
 
         if(status == 200 && registeredPerson != null) {
             //Must ensure that the site object is loaded to get auth salt.
-            val repo: UmAppDatabase = di.on(endpoint).direct.instance<UmAppDataLayer>()
+            val repo: UmAppDatabase = di.on(learningSpace).direct.instance<UmAppDataLayer>()
                 .requireRepository()
             getSiteFromDbOrLoadFromHttp(repo)
 
-            val session = addSession(registeredPerson, endpointUrl, password)
+            val session = addSession(registeredPerson, learningSpaceUrl, password)
 
             //If the person is not loaded into the database (probably not), then put in the db.
-            val db: UmAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
+            val db: UmAppDatabase = di.on(learningSpace).direct.instance(tag = DoorTag.TAG_DB)
             db.withDoorTransactionAsync {
                 if(db.personDao().findByUidAsync(registeredPerson.personUid) == null) {
                     db.personDao().insertAsync(registeredPerson)
@@ -378,22 +379,22 @@ class UstadAccountManager(
     @OptIn(ExperimentalStdlibApi::class)
     suspend fun addSession(
         person: Person,
-        endpointUrl: String,
+        learningSpaceUrl: String,
         password: String?
-    ) : UserSessionWithPersonAndEndpoint{
+    ) : UserSessionWithPersonAndLearningSpace{
         assertNotClosed()
-        val endpoint = Endpoint(endpointUrl)
-        val dataLayer: UmAppDataLayer = di.on(endpoint).direct.instance()
+        val learningSpace = LearningSpace(learningSpaceUrl)
+        val dataLayer: UmAppDataLayer = di.on(learningSpace).direct.instance()
 
-        if(endpoint !in _endpointsWithActiveSessions.value) {
-            addActiveEndpoint(endpoint, commit = false)
+        if(learningSpace !in _learningSpacesWithActiveSessions.value) {
+            addActiveLearningSpace(learningSpace, commit = false)
             commitActiveEndpointsToPref()
         }
 
-        val authManager: AuthManager = di.on(endpoint).direct.instance()
+        val authManager: AuthManager = di.on(learningSpace).direct.instance()
 
         val (userSession, personPicture) = dataLayer.repositoryOrLocalDb.withDoorTransactionAsync {
-            val nodeId = di.on(endpoint).direct.instance<NodeIdAndAuth>().nodeId
+            val nodeId = di.on(learningSpace).direct.instance<NodeIdAndAuth>().nodeId
             val userSession = UserSession().apply {
                 usClientNodeId = nodeId
                 usPersonUid = person.personUid
@@ -409,22 +410,22 @@ class UstadAccountManager(
             userSession to personPicture
         }
 
-        return UserSessionWithPersonAndEndpoint(userSession, person, endpoint, personPicture)
+        return UserSessionWithPersonAndLearningSpace(userSession, person, learningSpace, personPicture)
     }
 
     @Suppress("RedundantSuspendModifier") // Reserved for use if required as per previous api
-    private suspend fun addActiveEndpoint(endpoint: Endpoint, commit: Boolean = true) {
-        _endpointsWithActiveSessions.update { prev ->
-            prev + listOf(endpoint)
+    private suspend fun addActiveLearningSpace(learningSpace: LearningSpace, commit: Boolean = true) {
+        _learningSpacesWithActiveSessions.update { prev ->
+            prev + listOf(learningSpace)
         }
 
         if(commit)
             commitActiveEndpointsToPref()
     }
 
-    private fun removeActiveEndpoint(endpoint: Endpoint, commit: Boolean = true) {
-        _endpointsWithActiveSessions.update { prev ->
-            prev.filter { it != endpoint }
+    private fun removeActiveLearningSpace(learningSpace: LearningSpace, commit: Boolean = true) {
+        _learningSpacesWithActiveSessions.update { prev ->
+            prev.filter { it != learningSpace }
         }
         if(commit)
             commitActiveEndpointsToPref()
@@ -432,7 +433,7 @@ class UstadAccountManager(
 
     private fun commitActiveEndpointsToPref() {
         val json = Json.encodeToString(ListSerializer(String.serializer()),
-            _endpointsWithActiveSessions.value.toSet().map { it.url }.toList())
+            _learningSpacesWithActiveSessions.value.toSet().map { it.url }.toList())
         settings[ACCOUNTS_ENDPOINTS_WITH_ACTIVE_SESSION] = json
     }
 
@@ -449,16 +450,16 @@ class UstadAccountManager(
 
         if(deactivatedCurrentSession != null) {
             //current session was deactivated. The session itself will be updated on the underlying database
-            startGuestSession(currentUserSession.endpoint.url)
+            startGuestSession(currentUserSession.learningSpace.url)
         }
     }
 
     suspend fun endSession(
-        session: UserSessionWithPersonAndEndpoint,
+        session: UserSessionWithPersonAndLearningSpace,
         endStatus: Int = UserSession.STATUS_LOGGED_OUT,
         endReason: Int = UserSession.REASON_LOGGED_OUT
     ) {
-        val dataLayer: UmAppDataLayer = di.on(session.endpoint).direct.instance()
+        val dataLayer: UmAppDataLayer = di.on(session.learningSpace).direct.instance()
 
         dataLayer.repositoryOrLocalDb.userSessionDao().endSession(
             sessionUid = session.userSession.usUid,
@@ -469,13 +470,13 @@ class UstadAccountManager(
 
         //check if the active session has been ended.
         if(currentUserSession.userSession.usUid == session.userSession.usUid
-            && currentUserSession.endpoint == session.endpoint) {
-            currentUserSession = makeNewTempGuestSession(session.endpoint.url, dataLayer.repositoryOrLocalDb)
+            && currentUserSession.learningSpace == session.learningSpace) {
+            currentUserSession = makeNewTempGuestSession(session.learningSpace.url, dataLayer.repositoryOrLocalDb)
         }
 
 
-        if(activeSessionsList { it == session.endpoint.url }.isEmpty()) {
-            removeActiveEndpoint(session.endpoint)
+        if(activeSessionsList { it == session.learningSpace.url }.isEmpty()) {
+            removeActiveLearningSpace(session.learningSpace)
         }
     }
 
@@ -490,7 +491,7 @@ class UstadAccountManager(
     ): UmAccount = withContext(Dispatchers.Default){
         assertNotClosed()
 
-        val dataLayer: UmAppDataLayer = di.direct.on(Endpoint(endpointUrl)).instance()
+        val dataLayer: UmAppDataLayer = di.direct.on(LearningSpace(endpointUrl)).instance()
 
         val nodeId = (dataLayer.repository as? DoorDatabaseRepository)?.config?.nodeId
             ?: throw IllegalStateException("Could not open repo for endpoint $endpointUrl")
@@ -544,19 +545,19 @@ class UstadAccountManager(
         }
     }
 
-    suspend fun createLocalAccount(): UserSessionWithPersonAndEndpoint {
+    suspend fun createLocalAccount(): UserSessionWithPersonAndLearningSpace {
         val localAccountResult = createNewLocalAccountUseCase(Person())
         return addSession(
             person = localAccountResult.person,
-            endpointUrl = localAccountResult.endpoint.url,
+            learningSpaceUrl = localAccountResult.learningSpace.url,
             password = null
         ).also {
             currentUserSession = it
         }
     }
 
-    suspend fun startGuestSession(endpointUrl: String): UserSessionWithPersonAndEndpoint {
-        val dataLayer: UmAppDataLayer = di.on(Endpoint(endpointUrl)).direct.instance()
+    suspend fun startGuestSession(learningSpaceUrl: String): UserSessionWithPersonAndLearningSpace {
+        val dataLayer: UmAppDataLayer = di.on(LearningSpace(learningSpaceUrl)).direct.instance()
         val guestPerson = dataLayer.repositoryOrLocalDb.insertPersonAndGroup(Person().apply {
             username = null
             firstNames = "Guest"
@@ -566,7 +567,7 @@ class UstadAccountManager(
 
         getSiteFromDbOrLoadFromHttp(dataLayer.repositoryOrLocalDb)
 
-        val guestSession = addSession(guestPerson, endpointUrl, null)
+        val guestSession = addSession(guestPerson, learningSpaceUrl, null)
         currentUserSession = guestSession
         return guestSession
     }

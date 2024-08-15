@@ -35,7 +35,7 @@ class LeavingReasonEditViewModelTest: AbstractMainDispatcherTest() {
                 cancelAndIgnoreRemainingEvents()
             }
 
-            val db = di.direct.on(activeEndpoint).instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
+            val db = di.direct.on(activeLearningSpace).instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
             db.doorFlow(arrayOf("LeavingReason")) {
                 db.leavingReasonDao().findAllReasonsAsync()
             }.assertItemReceived { list ->

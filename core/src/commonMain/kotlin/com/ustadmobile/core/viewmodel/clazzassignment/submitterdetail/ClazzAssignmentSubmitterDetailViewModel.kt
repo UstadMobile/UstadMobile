@@ -222,7 +222,7 @@ class ClazzAssignmentSubmitterDetailViewModel(
     }
 
     private val assignmentSubmitterNameUseCase: GetAssignmentSubmitterNameUseCase by
-        on(accountManager.activeEndpoint).instance()
+        on(accountManager.activeLearningSpace).instance()
 
     private var openBlobJob: Job? = null
 

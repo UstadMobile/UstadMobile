@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.contententry.importcontent
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.ext.doorNodeIdHeader
@@ -14,7 +14,7 @@ import io.ktor.client.request.parameter
  */
 class DismissRemoteContentEntryImportErrorUseCase(
     private val httpClient: HttpClient,
-    private val endpoint: Endpoint,
+    private val learningSpace: LearningSpace,
     private val repo: UmAppDatabase,
 ) {
 
@@ -25,7 +25,7 @@ class DismissRemoteContentEntryImportErrorUseCase(
         val repoVal = repo as? DoorDatabaseRepository
             ?: throw IllegalArgumentException("no repo")
 
-        httpClient.get("${endpoint.url}api/contententryimportjob/dismissError") {
+        httpClient.get("${learningSpace.url}api/contententryimportjob/dismissError") {
             parameter("jobUid", cjiUid)
             doorNodeIdHeader(repoVal)
             parameter("accountPersonUid", activeUserPersonUid)

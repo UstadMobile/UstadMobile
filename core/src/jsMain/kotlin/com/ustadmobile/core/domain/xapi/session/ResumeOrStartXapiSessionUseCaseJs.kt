@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.xapi.session
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.xapi.XapiJson
 import com.ustadmobile.core.domain.xapi.model.XapiActor
@@ -17,7 +17,7 @@ import io.ktor.client.request.post
  * processed using ResumeOrStartXapiSessionRoute) so that Xapi content can then use basic auth
  */
 class ResumeOrStartXapiSessionUseCaseJs(
-    private val endpoint: Endpoint,
+    private val learningSpace: LearningSpace,
     private val httpClient: HttpClient,
     private val repo: UmAppDatabase,
     xapiJson: XapiJson,
@@ -34,7 +34,7 @@ class ResumeOrStartXapiSessionUseCaseJs(
         contentEntryUid: Long
     ): XapiSessionEntity {
         val result: XapiSessionEntity = httpClient.post(
-            "${endpoint.url}api/xapi-ext/resumeOrStartSession"
+            "${learningSpace.url}api/xapi-ext/resumeOrStartSession"
         ) {
             doorNodeIdHeader(repo as DoorDatabaseRepository)
             parameter("accountPersonUid", accountPersonUid.toString())

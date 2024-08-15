@@ -33,7 +33,7 @@ class CourseAssignmentSubmissionDetailViewModel(
     val uiState: Flow<CourseAssignmentSubmissionDetailUiState> = _uiState.asStateFlow()
 
     private val getAssignmentSubmitterNameUseCase: GetAssignmentSubmitterNameUseCase by
-        on(accountManager.activeEndpoint).instance()
+        on(accountManager.activeLearningSpace).instance()
 
     init {
         viewModelScope.launch {

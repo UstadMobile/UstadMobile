@@ -3,7 +3,7 @@ package com.ustadmobile.core.domain.contententry.importcontent
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import io.github.aakira.napier.Napier
 import org.kodein.di.DI
 import org.kodein.di.android.closestDI
@@ -19,11 +19,11 @@ class ImportContentEntryWorker(
     private val di: DI by closestDI { applicationContext }
 
     override suspend fun doWork(): Result {
-        val endpointUrl = inputData.getString(EnqueueContentEntryImportUseCase.DATA_ENDPOINT)
+        val learningSpaceUrl = inputData.getString(EnqueueContentEntryImportUseCase.DATA_LEARNINGSPACE)
             ?: throw IllegalArgumentException("Endpoint url not specified")
         val jobUid = inputData.getLong(EnqueueContentEntryImportUseCase.DATA_JOB_UID, 0)
 
-        val importUseCase: ImportContentEntryUseCase = di.on(Endpoint(endpointUrl)).direct.instance()
+        val importUseCase: ImportContentEntryUseCase = di.on(LearningSpace(learningSpaceUrl)).direct.instance()
         return try {
             importUseCase(jobUid)
             Result.success()

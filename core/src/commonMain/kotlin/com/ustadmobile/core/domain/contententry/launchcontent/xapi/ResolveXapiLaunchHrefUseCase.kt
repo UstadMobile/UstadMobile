@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.contententry.launchcontent.xapi
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.db.UmAppDatabase
@@ -40,7 +40,7 @@ class ResolveXapiLaunchHrefUseCase(
     private val resumeOrStartXapiSessionUseCase: ResumeOrStartXapiSessionUseCase,
     private val getApiUrlUseCase: GetApiUrlUseCase,
     private val accountManager: UstadAccountManager,
-    private val endpoint: Endpoint,
+    private val learningSpace: LearningSpace,
 ) {
 
     /**
@@ -95,7 +95,7 @@ class ResolveXapiLaunchHrefUseCase(
         val queryParams: Map<String, String> = mapOf(
             "endpoint" to getApiUrlUseCase("/api/xapi/"),
             "auth" to xapiSession.authorizationHeader(),
-            "actor" to json.encodeToString(XapiAgent.serializer(), xapiSession.agent(endpoint)),
+            "actor" to json.encodeToString(XapiAgent.serializer(), xapiSession.agent(learningSpace)),
             "registration" to xapiSession.registrationUuid.toString(),
             "activity_id" to xapiSession.xseRootActivityId,
         )

@@ -1,9 +1,9 @@
 package com.ustadmobile.core.domain.blob.download
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.download.AbstractEnqueueContentManifestDownloadUseCase.Companion.DATA_CONTENTENTRYVERSION_UID
-import com.ustadmobile.core.domain.blob.download.AbstractEnqueueContentManifestDownloadUseCase.Companion.DATA_ENDPOINT
+import com.ustadmobile.core.domain.blob.download.AbstractEnqueueContentManifestDownloadUseCase.Companion.DATA_LEARNINGSPACE
 import com.ustadmobile.core.domain.blob.download.AbstractEnqueueContentManifestDownloadUseCase.Companion.DATA_JOB_UID
 import com.ustadmobile.core.domain.blob.upload.UpdateFailedTransferJobUseCase
 import com.ustadmobile.core.util.ext.di
@@ -24,14 +24,14 @@ class ContentManifestDownloadJob: Job {
     override fun execute(context: JobExecutionContext) {
         val di = context.scheduler.di
         val jobDataMap = context.jobDetail.jobDataMap
-        val endpoint = Endpoint(jobDataMap.getString(DATA_ENDPOINT))
+        val learningSpace = LearningSpace(jobDataMap.getString(DATA_LEARNINGSPACE))
         val jobUid = jobDataMap.getInt(DATA_JOB_UID)
         val contentEntryVersionUid = jobDataMap.getLong(DATA_CONTENTENTRYVERSION_UID)
 
-        val db: UmAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
-        val contentManifestDownloadUseCase: ContentManifestDownloadUseCase = di.on(endpoint).
+        val db: UmAppDatabase = di.on(learningSpace).direct.instance(tag = DoorTag.TAG_DB)
+        val contentManifestDownloadUseCase: ContentManifestDownloadUseCase = di.on(learningSpace).
                 direct.instance()
-        val updateFailedTransferJobUseCase: UpdateFailedTransferJobUseCase by di.on(endpoint)
+        val updateFailedTransferJobUseCase: UpdateFailedTransferJobUseCase by di.on(learningSpace)
             .instance()
         runBlocking {
             try {

@@ -1,7 +1,7 @@
 package com.ustadmobile.lib.rest.ext
 
 import com.ustadmobile.core.account.AuthManager
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
@@ -56,7 +56,7 @@ fun UmAppDatabase.insertCourseTerminology(di: DI){
  * Initialize the admin account.
  */
 suspend fun UmAppDatabase.initAdminUser(
-    endpoint: Endpoint,
+    learningSpace: LearningSpace,
     authManager: AuthManager,
     di: DI,
     defaultPassword: String? = null,
@@ -64,7 +64,7 @@ suspend fun UmAppDatabase.initAdminUser(
     val adminUser = personDao().findByUsername("admin")
 
     if (adminUser == null) {
-        val addNewPersonUseCase: AddNewPersonUseCase = di.on(endpoint).direct.instance()
+        val addNewPersonUseCase: AddNewPersonUseCase = di.on(learningSpace).direct.instance()
 
         val adminPerson = Person(username = "admin", firstNames = "Admin", lastName = "User")
 
@@ -78,7 +78,7 @@ suspend fun UmAppDatabase.initAdminUser(
 
         authManager.setAuth(adminPerson.personUid, adminPass)
 
-        val adminPassFile = di.on(endpoint).direct.instance<File>(tag = DiTag.TAG_ADMIN_PASS_FILE)
+        val adminPassFile = di.on(learningSpace).direct.instance<File>(tag = DiTag.TAG_ADMIN_PASS_FILE)
         if (!adminPassFile.parentFile.isDirectory) {
             adminPassFile.parentFile.mkdirs()
         }

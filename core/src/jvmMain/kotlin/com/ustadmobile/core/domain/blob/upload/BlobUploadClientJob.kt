@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.blob.upload
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.InterruptableCoroutineJob
 import com.ustadmobile.core.util.ext.di
@@ -22,8 +22,8 @@ class BlobUploadClientJob: InterruptableCoroutineJob() {
     override suspend fun executeAsync(context: JobExecutionContext) {
         val di = context.scheduler.di
         val jobDataMap = context.jobDetail.jobDataMap
-        val endpoint = Endpoint(
-            jobDataMap.getString(AbstractEnqueueBlobUploadClientUseCase.DATA_ENDPOINT))
+        val endpoint = LearningSpace(
+            jobDataMap.getString(AbstractEnqueueBlobUploadClientUseCase.DATA_LEARNINGSPACE))
         val blobUploadClientUseCase: BlobUploadClientUseCase = di.on(endpoint).direct.instance()
         val updateFailedTransferJobUseCase: UpdateFailedTransferJobUseCase by di.on(endpoint)
             .instance()
