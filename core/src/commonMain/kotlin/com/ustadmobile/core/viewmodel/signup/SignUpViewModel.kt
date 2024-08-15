@@ -16,7 +16,10 @@ import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_SITE
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
+import com.ustadmobile.core.viewmodel.login.LoginViewModel
+import com.ustadmobile.core.viewmodel.person.child.AddChildProfileViewModel
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.doorIdentityHashCode
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
@@ -31,6 +34,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
+import kotlinx.serialization.encodeToString
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -277,6 +281,7 @@ class SignUpViewModel(
             try {
 
                 val uid = activeDb.doorPrimaryKeyManager.nextIdAsync(Person.TABLE_ID)
+                savePerson.personUid = uid
                 Napier.e { "person uid $uid" }
                 val passkeyCreated = createPasskeyUseCase.invoke(
                     CreatePasskeyParams
@@ -296,28 +301,29 @@ class SignUpViewModel(
                     )
                 }
                 Napier.e { "passkeyuid $result" }
-
-                val personid = addNewPersonUseCase(
-                    person = savePerson,
-                    addedByPersonUid = activeUserPersonUid,
-                    createPersonParentApprovalIfMinor = true,
-                )
-                val personPictureVal = _uiState.value.personPicture
-
-                if (personPictureVal != null) {
-                    personPictureVal.personPictureUid = savePerson.personUid
-                    personPictureVal.personPictureLct = systemTimeInMillis()
-                    val personPictureUriVal = personPictureVal.personPictureUri
-
-                    activeDb.personPictureDao().upsert(personPictureVal)
-                    enqueueSavePictureUseCase(
-                        entityUid = savePerson.personUid,
-                        tableId = PersonPicture.TABLE_ID,
-                        pictureUri = personPictureUriVal
+                if (result != null) {
+                    val personid = addNewPersonUseCase(
+                        person = savePerson,
+                        addedByPersonUid = activeUserPersonUid,
+                        createPersonParentApprovalIfMinor = true,
                     )
+                    val personPictureVal = _uiState.value.personPicture
 
+                    if (personPictureVal != null) {
+                        personPictureVal.personPictureUid = savePerson.personUid
+                        personPictureVal.personPictureLct = systemTimeInMillis()
+                        val personPictureUriVal = personPictureVal.personPictureUri
+
+                        activeDb.personPictureDao().upsert(personPictureVal)
+                        enqueueSavePictureUseCase(
+                            entityUid = savePerson.personUid,
+                            tableId = PersonPicture.TABLE_ID,
+                            pictureUri = personPictureUriVal
+                        )
+
+                    }
+                    Napier.e { "person uid $personid" }
                 }
-                Napier.e { "person uid $personid" }
 
 
             } catch (e: Exception) {
@@ -361,7 +367,11 @@ class SignUpViewModel(
             Snack(passkeyError)
         )
     }
+    fun onClickOtherOption(){
 
+        navController.navigate(AddChildProfileViewModel.DEST_NAME, emptyMap())
+
+    }
 
     companion object {
 

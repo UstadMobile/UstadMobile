@@ -515,9 +515,8 @@ class UstadAccountManager(
             parameter("rpId", passKeySignInData.rpId)
             parameter("challenge", passKeySignInData.challenge)
         }.bodyAsText()
-
-       val passkeyVerifyResult= Json.decodeFromString<PasskeyVerifyResult>(loginResponse)
         Napier.d { "passkeyres"+loginResponse.toString() }
+       val passkeyVerifyResult= Json.decodeFromString<PasskeyVerifyResult>(loginResponse)
 
         if(!passkeyVerifyResult.isVerified) {
             throw UnauthorizedException("Account not found")

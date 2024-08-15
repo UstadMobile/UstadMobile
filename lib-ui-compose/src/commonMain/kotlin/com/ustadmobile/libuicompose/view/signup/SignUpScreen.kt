@@ -48,6 +48,7 @@ fun SignUpScreen(viewModel: SignUpViewModel) {
         onclickSignUpWithPasskey = viewModel::onSignUpWithPasskey,
         onPassKeyDataReceived = viewModel::onPassKeyDataReceived,
         onPassKeyError = viewModel::onPassKeyError,
+        onclickOtherOptions=viewModel::onClickOtherOption
     )
 
 }

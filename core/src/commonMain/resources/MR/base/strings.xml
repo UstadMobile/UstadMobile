@@ -1943,4 +1943,12 @@
 
     <string name="select_picture_from_files">Select picture from files</string>
 
+    <string name="your_date_of_birth">Your date of birth</string>
+
+    <string name="add_child_profiles">Add Child Profiles</string>
+
+    <string name="child_profile">Child profile</string>
+
+    <string name="finish">Finish</string>
+
 </resources>

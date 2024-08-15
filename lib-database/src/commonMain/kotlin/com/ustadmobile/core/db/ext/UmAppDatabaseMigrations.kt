@@ -1614,7 +1614,15 @@ val MIGRATION_198_199 = DoorMigrationStatementList(198, 199) { db ->
         }
     }
 }
-
+val MIGRATION_199_200 = DoorMigrationStatementList(199, 200) { db ->
+    buildList {
+        if (db.dbType() == DoorDbType.SQLITE) {
+            add(""" CREATE TABLE IF NOT EXISTS PersonPasskey (personPasskeyUid INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL , ppPersonUid INTEGER NOT NULL, ppAttestationObj TEXT, clientDataJson TEXT, ppOriginString TEXT, ppRpid TEXT, ppId TEXT, ppChallengeString TEXT, ppPublicKey TEXT, isRevoked INTEGER NOT NULL DEFAULT 0, ppPasskeyLct INTEGER NOT NULL)""")
+        } else {
+            add("""CREATE TABLE IF NOT EXISTS PersonPasskey (personPasskeyUid BIGINT PRIMARY KEY AUTOINCREMENT NOT NUL , ppPersonUid BIGINT NOT NULL, ppAttestationObj TEXT, clientDataJson TEXT, ppOriginString TEXT, ppRpid TEXT, ppId TEXT, ppChallengeString TEXT, ppPublicKey TEXT, isRevoked INTEGER NOT NULL DEFAULT 0  , ppPasskeyLct BIGINT NOT NULL)""")
+        }
+    }
+}
 
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_105_106, MIGRATION_106_107,
@@ -1632,6 +1640,6 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_165_166, MIGRATION_166_167, MIGRATION_167_168, MIGRATION_168_169,
     MIGRATION_170_171, MIGRATION_171_172, MIGRATION_172_194, MIGRATION_194_195,
     MIGRATION_195_196, MIGRATION_196_197, MIGRATION_197_198, MIGRATION_198_199,
-)
+    MIGRATION_199_200)
 
 
