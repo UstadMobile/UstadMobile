@@ -13,7 +13,7 @@ class CancelBlobUploadClientUseCaseJvm(
 ) : CancelBlobUploadClientUseCase{
 
     override suspend fun invoke(transferJobUid: Int) {
-        db.transferJobDao.updateStatus(transferJobUid, TransferJobItemStatus.STATUS_CANCELLED)
+        db.transferJobDao().updateStatus(transferJobUid, TransferJobItemStatus.STATUS_CANCELLED)
 
         val triggerKey = EnqueueBlobUploadClientUseCaseJvm.triggerKeyFor(
             endpoint, transferJobUid)

@@ -18,7 +18,8 @@ suspend fun HttpClient.verifySite(
 ): Site {
     val siteVerifyUrl = UMFileUtil.joinPaths(endpointUrl, "Site","verify")
     val responseStr = get(siteVerifyUrl) {
-        header("cache-control", "must-revalidate")
+        //This actually means must be validated as per https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
+        header("cache-control", "no-cache")
         timeout {
             requestTimeoutMillis = timeout
         }

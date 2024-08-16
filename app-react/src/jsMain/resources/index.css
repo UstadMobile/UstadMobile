@@ -6,7 +6,10 @@
     box-sizing: border-box;
 }
 
-*::-webkit-scrollbar {
+/* The MUI showcase template uses *::-webkit-scrollbar. Some elements need to be
+ * exempted from this behavior, so this has been changed to use a not selector.
+ */
+:not(.scrollbarAlwaysVisible)::-webkit-scrollbar {
     display: none;
 }
 

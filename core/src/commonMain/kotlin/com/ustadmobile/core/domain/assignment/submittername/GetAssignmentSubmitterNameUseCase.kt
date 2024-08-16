@@ -16,7 +16,7 @@ class GetAssignmentSubmitterNameUseCase(
         return if(submitterUid < CourseAssignmentSubmission.MIN_SUBMITTER_UID_FOR_PERSON) {
             systemImpl.getString(MR.strings.group) + " " + submitterUid
         }else {
-            repo.personDao.getNamesByUid(submitterUid).filter {
+            repo.personDao().getNamesByUid(submitterUid).filter {
                 it?.firstNames != null
             }.first().let {  "${it?.firstNames} ${it?.lastName}" }
         }

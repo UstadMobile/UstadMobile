@@ -1,14 +1,14 @@
 package com.ustadmobile.libcache.cachecontrol
 
 import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.ihttp.headers.IHttpHeaders
 import com.ustadmobile.libcache.date.fromHttpDateToMillis
-import com.ustadmobile.libcache.headers.HttpHeaders
 
 class CacheControlFreshnessCheckerImpl: CacheControlFreshnessChecker {
     override fun invoke(
-        requestHeaders: HttpHeaders,
+        requestHeaders: IHttpHeaders,
         requestDirectives: RequestCacheControlHeader?,
-        responseHeaders: HttpHeaders,
+        responseHeaders: IHttpHeaders,
         responseDirectives: ResponseCacheControlHeader?,
         responseFirstStoredTime: Long,
         responseLastValidated: Long
@@ -29,6 +29,7 @@ class CacheControlFreshnessCheckerImpl: CacheControlFreshnessChecker {
         val requestMaxStale = requestDirectives?.maxStale ?: 0
         val isExplicitlyStale = requestDirectives?.noCache == true ||
                 responseDirectives?.let { it.noCache || it.mustRevalidate } == true ||
+                requestDirectives?.noCache == true ||
                 requestDirectives?.let { requestDir ->
                     requestDir.staleAtAge?.let { age > (it + requestMaxStale)  }
                 } == true

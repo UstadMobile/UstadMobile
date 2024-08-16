@@ -37,6 +37,7 @@ import com.ustadmobile.core.domain.extractmediametadata.mediainfo.ExtractMediaMe
 import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseJvm
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
+import com.ustadmobile.core.domain.xapi.XapiJson
 import com.ustadmobile.core.embeddedhttp.EmbeddedHttpServer
 import com.ustadmobile.core.getdeveloperinfo.GetDeveloperInfoUseCaseJvm
 import com.ustadmobile.core.impl.UstadMobileConstants
@@ -74,6 +75,7 @@ import java.io.File
 import java.util.Locale
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.libcache.CachePaths
+import com.ustadmobile.libcache.CachePathsProvider
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
@@ -110,6 +112,8 @@ import javax.naming.InitialContext
 const val TAG_DATA_DIR = "DataDir"
 
 const val TAG_CACHE_DIR = "CacheDir"
+
+const val TAG_CACHE_STORAGE_PATH = "CacheStoragePath"
 
 const val CONNECTIVITY_CHECK_HOST = "google.com"
 
@@ -185,15 +189,32 @@ val DesktopHttpModule = DI.Module("Desktop-HTTP") {
         )
     }
 
-    bind<UstadCache>() with singleton {
+    bind<Path>(tag = TAG_CACHE_STORAGE_PATH) with singleton {
         val dataDir: File = instance(tag = TAG_DATA_DIR)
         dataDir.takeIf { !it.exists() }?.mkdirs()
 
+        Path(File(dataDir, "httpfiles").absolutePath.toString())
+    }
+
+    bind<CachePathsProvider>() with singleton {
+        val cacheStoragePath: Path = instance(tag = TAG_CACHE_STORAGE_PATH)
+
+        CachePathsProvider {
+            CachePaths(
+                tmpWorkPath = Path(cacheStoragePath, "tmpWork"),
+                persistentPath = Path(cacheStoragePath, "cache"),
+                cachePath = Path(cacheStoragePath, "cache")
+            )
+        }
+    }
+
+    bind<UstadCache>() with singleton {
+        val cacheStoragePath: Path = instance(tag = TAG_CACHE_STORAGE_PATH)
+
+        val dataDir: File = instance(tag = TAG_DATA_DIR)
+        dataDir.takeIf { !it.exists() }?.mkdirs()
         val dbUrl = "jdbc:sqlite:(datadir)/ustadcache.db"
             .replace("(datadir)", dataDir.absolutePath)
-        val cacheStoragePath = Path(
-            File(dataDir, "httpfiles").absolutePath.toString()
-        )
 
         /* Persistent path and cache path are the same. Trying to move files on Windows has caused
          * resulted in errors appearing in logs where files apparently weren't released quickly
@@ -205,13 +226,7 @@ val DesktopHttpModule = DI.Module("Desktop-HTTP") {
         UstadCacheBuilder(
             dbUrl = dbUrl,
             storagePath = cacheStoragePath,
-            pathsProvider = {
-                CachePaths(
-                    tmpWorkPath = Path(cacheStoragePath, "tmpWork"),
-                    persistentPath = Path(cacheStoragePath, "cache"),
-                    cachePath = Path(cacheStoragePath, "cache")
-                )
-            },
+            pathsProvider = instance(),
             logger = cacheLogger,
 
         ).build()
@@ -420,6 +435,8 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         }
     }
 
+    bind<XapiJson>() with singleton { XapiJson() }
+
 
     bind<XML>() with singleton {
         XML {
@@ -543,6 +560,9 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         EmbeddedHttpServer(
             port = 0,
             contentEntryVersionServerUseCase = {
+                di.on(it).direct.instance()
+            },
+            xapiServerUseCase = {
                 di.on(it).direct.instance()
             },
             staticUmAppFilesDir = File(resourcesDir, "umapp"),

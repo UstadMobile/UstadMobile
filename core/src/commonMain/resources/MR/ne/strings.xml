@@ -173,7 +173,6 @@
     <string name="sel_question_set">SEL प्रश्न सेट</string>
     <string name="sel_question_set_desc">SEL प्रश्नहरू व्यवस्थापन गरौं</string>
     <string name="save_as_template">टेम्प्लेटको रुपमा सेभ गरौं</string>
-    <string name="share_application">एप सेयर गरौं</string>
     <string name="waiting">पर्खंदै</string>
     <string name="account">अकाउन्ट/खाता</string>
     <string name="passed">सफल भयो</string>
@@ -325,7 +324,6 @@
     <string name="choose_template">टेम्प्लेट छानौं</string>
     <string name="accounts">अकाउन्टहरू/खाताहरू</string>
     <string name="lets_get_started_label">ल अब सुरू गरौं</string>
-    <string name="invalid_register_code">अमान्य दर्ता कोड</string>
     <string name="xapi_score">स्कोर (%)</string>
     <string name="import_title_not_entered">शीर्षक हालिएको छैन</string>
     <string name="invalid_link">अमान्य लिंक</string>
@@ -390,9 +388,7 @@
     <string name="import_content">विषयसामग्री इन्पोर्ट गरौं</string>
     <string name="monthly">मासिक</string>
     <string name="last_three_months">गत तीन महिना</string>
-    <string name="remove_photo">फोटो हटाऔं</string>
     <string name="take_new_photo_from_camera">क्यामेराबाट नयाँ फोटो खिचौं</string>
-    <string name="select_new_photo_from_gallery">ग्यालरीबाट नयाँ फोटो लिऔं</string>
     <string name="permission_clazz_assignment_view">कक्षा गृहकार्य हेरौं</string>
     <string name="publicly_accessible">सबै पहुँच भएको</string>
     <string name="friday">शुक्रबार</string>
@@ -593,7 +589,6 @@
     <string name="percentage_complete" formatted="false">%1$s%% पूरा</string>
     <string name="started_date" formatted="false">सुरू गरेको %1$s%</string>
     <string name="due_date">अन्तिम मिति</string>
-    <string name="class_code">कक्षा कोड</string>
     <string name="copy_link">लिंक कपी गरौं</string>
     <string name="copy_code">कोड कपी गरौं</string>
     <string name="share_link">लिंक सेयर गरौं</string>
@@ -877,7 +872,6 @@
     <string name="score_greater_than_zero">० भन्दा बढि हुनु पर्दछ</string>
     <string name="file_document">कागजात (pdf, docx, odt)</string>
     <string name="file_image">छवि (image)</string>
-    <string name="max_number_of_files">फाइलहरूको अधिकतम सङ्ख्या:%1$s</string>
     <string name="submit_grade">प्राप्ताङ्क पेश गर्नुहोस्</string>
     <string name="submit_grade_and_mark_next">प्राप्ताङ्क पेश गर्नुहोस् र अर्को परिक्षण गर्नुहोस्</string>
     <string name="submissions">पेसगरिएका कागजातहरु</string>
@@ -997,7 +991,6 @@
     <string name="assign_to_random_groups">अनियमित समूहहरूमा (random group) निर्दिष्ट गर्नुहोस्</string>
     <string name="course_comments">पाठ्यक्रम (कोर्स)को बारे टिप्पनीहरु</string>
     <string name="submit_all_at_once_submission_policy">सबै एकसाथ पेश गर्नु पर्दछ</string>
-    <string name="course_code">कोर्स कोड</string>
     <string name="add_a_new_course">नयाँ कोर्स थप्नुहोस्</string>
     <string name="join_existing_course">हाल उपलब्ध कोर्समा सामेल हुनुहोस्</string>
     <string name="edit_course">कोर्स सम्पादन गर्नुहोस्</string>

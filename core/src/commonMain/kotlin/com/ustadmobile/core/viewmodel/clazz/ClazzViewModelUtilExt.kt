@@ -17,7 +17,7 @@ suspend fun collectClazzNameAndUpdateTitle(
     activeDb: UmAppDatabase,
     appUiState: MutableStateFlow<AppUiState>,
 ) {
-    activeDb.clazzDao.getTitleByUidAsFlow(clazzUid).collect { clazzTitle ->
+    activeDb.clazzDao().getTitleByUidAsFlow(clazzUid).collect { clazzTitle ->
         appUiState.takeIf { appUiState.value.title != clazzTitle }?.update { prev ->
             prev.copy(title = clazzTitle)
         }

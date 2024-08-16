@@ -18,7 +18,6 @@ import com.ustadmobile.lib.db.composites.CourseBlockAndEditEntities
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.CourseBlockPicture
-import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -46,6 +45,8 @@ data class CourseBlockEditUiState(
     val caDeadlineError: String? = null,
 
     val caMaxPointsError: String? = null,
+
+    val maxPointsRequired: Boolean = false,
 
     val caGracePeriodError: String? = null,
 
@@ -152,7 +153,7 @@ class CourseBlockEditViewModel(
                     }
 
                     contentEntryVal.contentOwnerType == ContentEntry.OWNER_TYPE_COURSE -> {
-                        activeRepo.coursePermissionDao.personHasPermissionWithClazzAsync2(
+                        activeRepo.coursePermissionDao().personHasPermissionWithClazzAsync2(
                             accountPersonUid = activeUserPersonUid,
                             clazzUid = contentEntryVal.contentOwner,
                             permission = PermissionFlags.COURSE_EDIT
@@ -191,9 +192,9 @@ class CourseBlockEditViewModel(
             launch {
                 resultReturner.filteredResultFlowForKey(KEY_HTML_DESCRIPTION).collect { result ->
                     val descriptionHtml = result.result as? String ?: return@collect
-                    onEntityChanged(_uiState.value.block?.courseBlock?.shallowCopy {
-                        cbDescription = descriptionHtml
-                    })
+                    onEntityChanged(
+                        _uiState.value.block?.courseBlock?.copy(cbDescription = descriptionHtml)
+                    )
                 }
             }
 

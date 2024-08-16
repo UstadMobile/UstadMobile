@@ -158,7 +158,7 @@ class H5PContentImporter(
         progressListener: ContentImportProgressListener
     ): ContentEntryVersion = withContext(Dispatchers.IO) {
         val jobUri = jobItem.requireSourceAsDoorUri()
-        val entry = db.contentEntryDao.findByUid(jobItem.cjiContentEntryUid)
+        val entry = db.contentEntryDao().findByUid(jobItem.cjiContentEntryUid)
         val params = CompressParams(
             compressionLevel = CompressionLevel.forValue(jobItem.cjiCompressionLevel)
         )
@@ -268,23 +268,71 @@ class H5PContentImporter(
                 <script src="dist/main.bundle.js" type="text/javascript">
                 </script>
                 </head>
-    
+                
                 <body>
                 <div id='h5p-container'>
                 </div>
-    
+                
                 <script type='text/javascript'>
-    
+                
+                let searchParams = new URLSearchParams(document.location.search);
                 const el = document.getElementById('h5p-container');
-                const options = {
-                    h5pJsonPath: './h5p-folder',
-                    frameJs: 'dist/frame.bundle.js',
-                    frameCss: 'dist/styles/h5p.css',
-                };
-                new H5PStandalone.H5P(el, options);
+                const baseUserDataUrl = searchParams.get("endpoint") + 
+                            "activities/h5p-userdata?" + 
+                            "Authorization=" + encodeURIComponent(searchParams.get("auth")) +
+                            "&activityId=" + encodeURIComponent(searchParams.get("activity_id")) + 
+                            "&agent=" + encodeURIComponent(searchParams.get("actor")) + 
+                            "&registration=" + searchParams.get("registration");
+                
+                fetch(baseUserDataUrl + "&preload=1").then((preloadResponse) => {
+                    preloadResponse.json().then((preloadedUserData) => {
+                        console.log("Preloaded data: " + JSON.stringify(preloadedUserData));
+                        const options = {
+                            h5pJsonPath: './h5p-folder',
+                            frameJs: 'dist/frame.bundle.js',
+                            frameCss: 'dist/styles/h5p.css',
+                            xAPIObjectIRI: searchParams.get("activity_id"),
+                            contentUserData: preloadedUserData,
+                            saveFreq: 2,
+                            ajax: {
+                                contentUserDataUrl: baseUserDataUrl + 
+                                   "&stateId=:dataType" +
+                                   "&subContentId=:subContentId" 
+                            },
+                            user: {
+                                name : "a user",
+                                email: "user@example.org",
+                            }
+                        };
+                        
+                        new H5PStandalone.H5P(el, options).then(function () {
+                            H5P.externalDispatcher.on("xAPI", (event) => {
+                              //do something useful with the event
+                              const newStatement = (typeof(structuredClone) != "undefined") ? 
+                                structuredClone(event.data.statement) : JSON.parse(JSON.stringify(event.data.statement));
+                              newStatement.actor = JSON.parse(searchParams.get("actor"));
+                              
+                              let context = newStatement.context || {};
+                              context.registration = searchParams.get("registration");
+                              newStatement.context = context;
+                              
+                              console.log("xAPI statement: ", newStatement);
+                              
+                              fetch(searchParams.get("endpoint") + "statements?statementId=" + self.crypto.randomUUID(), {
+                                method: "PUT",
+                                headers: {
+                                  "Content-Type": "application/json",
+                                  "Authorization": searchParams.get("auth"),
+                                },
+                                body: JSON.stringify(newStatement),
+                              });
+                            });
+                        });
+                    });
+                });
                         
                 </script>
-    
+                
                 </body>
                 </html>
                 """.trimIndent()

@@ -2,6 +2,7 @@ package com.ustadmobile.libuicompose.view.clazz.detailoverview
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,11 +16,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Login
+import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
@@ -43,11 +44,13 @@ import com.ustadmobile.core.viewmodel.clazz.ClazzScheduleConstants
 import com.ustadmobile.core.viewmodel.clazz.blockTypeStringResource
 import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewUiState
 import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewViewModel
+import com.ustadmobile.core.viewmodel.clazz.detailoverview.getScoreInPointsStr
 import com.ustadmobile.core.viewmodel.contententry.contentTypeStringResource
 import com.ustadmobile.lib.db.composites.CourseBlockAndDisplayDetails
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.libuicompose.components.UstadAsyncImage
 import com.ustadmobile.libuicompose.components.UstadBlockIcon
+import com.ustadmobile.libuicompose.components.UstadBlockStatusProgressBar
 import com.ustadmobile.libuicompose.components.UstadHtmlText
 import com.ustadmobile.libuicompose.components.UstadDetailField2
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
@@ -174,16 +177,6 @@ fun ClazzDetailOverviewScreen(
             }
         }
 
-        if (uiState.clazzSchoolUidVisible){
-            item(key = "schoolname") {
-                UstadDetailField2(
-                    valueText = uiState.clazz?.clazzSchool?.schoolName ?: "",
-                    labelText = "",
-                    icon = Icons.Filled.School
-                )
-            }
-        }
-
         if (uiState.clazzDateVisible){
             item(key = "daterange") {
                 UstadDetailField2(
@@ -287,11 +280,10 @@ fun CourseBlockListItem(
             Text(courseBlock?.courseBlock?.cbTitle ?: "")
         },
         supportingContent = {
+            val contentEntryVal = courseBlock?.contentEntry
+            val courseBlockVal = courseBlock?.courseBlock
             Column {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    val contentEntryVal = courseBlock?.contentEntry
-                    val courseBlockVal = courseBlock?.courseBlock
-
                     when {
                         contentEntryVal != null -> {
                             Icon(contentEntryVal.contentTypeImageVector, "",
@@ -310,16 +302,35 @@ fun CourseBlockListItem(
                     }
                 }
                 Text(descriptionPlainText, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                courseBlock?.getScoreInPointsStr()?.also { scoreInPoints ->
+                    Row {
+                        Icon(Icons.Filled.EmojiEvents, contentDescription = null)
+                        Spacer(Modifier.width(8.dp))
+                        Text("$scoreInPoints/${courseBlockVal?.cbMaxPoints} ${stringResource(MR.strings.points)}")
+                    }
+                }
             }
         },
         leadingContent = {
-            UstadBlockIcon(
-                title = courseBlock?.courseBlock?.cbTitle ?: "",
-                courseBlock = courseBlock?.courseBlock,
-                contentEntry = courseBlock?.contentEntry,
-                pictureUri = courseBlock?.courseBlockPicture?.cbpThumbnailUri
-                    ?: courseBlock?.contentEntryPicture2?.cepThumbnailUri,
-            )
+            Box(
+                Modifier.size(40.dp)
+            ) {
+                UstadBlockIcon(
+                    title = courseBlock?.courseBlock?.cbTitle ?: "",
+                    courseBlock = courseBlock?.courseBlock,
+                    contentEntry = courseBlock?.contentEntry,
+                    pictureUri = courseBlock?.courseBlockPicture?.cbpThumbnailUri
+                        ?: courseBlock?.contentEntryPicture2?.cepThumbnailUri,
+                )
+
+
+
+                UstadBlockStatusProgressBar(
+                    blockStatus = courseBlock?.status,
+                    modifier = Modifier.align(Alignment.BottomCenter),
+                )
+            }
+
         },
         trailingContent = {
             if(courseBlock?.courseBlock?.cbType == CourseBlock.BLOCK_MODULE_TYPE) {

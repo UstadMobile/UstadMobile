@@ -32,4 +32,19 @@ expect abstract class ExternalAppPermissionDao {
     """)
     abstract suspend fun getExternalAccessPermissionByUid(eapUid: Int): ExternalAppPermission?
 
+    @Query("""
+        SELECT COALESCE(
+               (SELECT eapPersonUid
+                  FROM ExternalAppPermission
+                 WHERE eapAuthToken = :token
+                   AND :currentTime BETWEEN eapStartTime AND eapExpireTime
+               ),
+               0)    
+    """)
+    abstract suspend fun getPersonUidByAuthToken(
+        token: String,
+        currentTime: Long,
+    ): Long
+
+
 }

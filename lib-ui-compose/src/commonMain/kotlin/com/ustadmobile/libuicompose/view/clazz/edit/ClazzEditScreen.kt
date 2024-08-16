@@ -24,7 +24,6 @@ import com.ustadmobile.core.viewmodel.clazz.ClazzScheduleConstants
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditUiState
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.libuicompose.components.UstadEditHeader
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
@@ -34,6 +33,7 @@ import dev.icerock.moko.parcelize.Parcelize
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
 import com.ustadmobile.lib.db.composites.CourseBlockAndEditEntities
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.libuicompose.components.UstadBlockIcon
 import com.ustadmobile.libuicompose.components.UstadBottomSheetOption
 import com.ustadmobile.libuicompose.components.UstadClickableTextField
@@ -160,7 +160,7 @@ class CourseBlockKey(val cbUid: Long): Parcelable {
 @Composable
 fun ClazzEditScreen(
     uiState: ClazzEditUiState = ClazzEditUiState(),
-    onClazzChanged: (ClazzWithHolidayCalendarAndSchoolAndTerminology?) -> Unit = {},
+    onClazzChanged: (ClazzWithHolidayCalendarAndAndTerminology?) -> Unit = {},
     onMoveCourseBlock: (from: ItemPosition, to: ItemPosition) -> Unit = {_, _ -> },
     onClickEditDescription: () -> Unit = {},
     onClickTimezone: () -> Unit = {},
@@ -396,7 +396,7 @@ fun ClazzEditScreen(
 @Composable
 private fun ClazzEditBasicDetails(
     uiState: ClazzEditUiState,
-    onClazzChanged: (ClazzWithHolidayCalendarAndSchoolAndTerminology?) -> Unit = {},
+    onClazzChanged: (ClazzWithHolidayCalendarAndAndTerminology?) -> Unit = {},
     @Suppress("UNUSED_PARAMETER") onClickTimezone: () -> Unit = {},
     //Reserved for use when HTML editing is added to compose
     onClickEditDescription: () -> Unit = {},

@@ -1,12 +1,31 @@
 package com.ustadmobile.lib.db.entities
 
-import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
-@Entity
+/**
+ * CourseBlock - Can be:
+ *  1) A Module (eg. use to collapse/expand other blocks)
+ *  2) Text, Content, Assignment, or Discussion blocks
+ *  3) Created by an external application via the OneRoster API
+ *
+ *  A CourseBlock is used as a LineItem in the OneRoster API. This allows OneRoster clients to access
+ *  the course structure and assignment marks etc.
+ *
+ * @param cbUid The primary key - auto-generated if created internally within the app or an externally
+ *         provided sourcedId is a valid long, otherwise the hash of cbSourcedId. See OneRosterEndpoint
+ *         on mapping sourcedId to uid methodology.
+ * @param cbMaxPoints The maximum points for this block, or null if this is not scored
+ * @param cbMinPoints The minimum points for this block, or null if this is not scored
+ */
+@Entity(
+    indices = arrayOf(
+        Index("cbClazzUid", name = "idx_courseblock_cbclazzuid"),
+    )
+)
 @ReplicateEntity(
     tableId = CourseBlock.TABLE_ID,
     remoteInsertStrategy = ReplicateEntity.RemoteInsertStrategy.INSERT_INTO_RECEIVE_VIEW
@@ -22,103 +41,60 @@ import kotlinx.serialization.Serializable
         )
 ))
 @Serializable
-open class CourseBlock {
-
+data class CourseBlock(
     @PrimaryKey(autoGenerate = true)
-    var cbUid: Long = 0
+    var cbUid: Long = 0,
 
     /**
      * If cbType is ContentEntry or Assignment
      * then cbEntityUid is the uid for the respective entity
      */
-    var cbType: Int = 0
+    var cbType: Int = 0,
 
-    var cbIndentLevel: Int = 0
+    var cbIndentLevel: Int = 0,
 
-    var cbModuleParentBlockUid: Long = 0
+    var cbModuleParentBlockUid: Long = 0,
 
-    var cbTitle: String? = null
+    var cbTitle: String? = null,
 
-    var cbDescription: String? = null
+    var cbDescription: String? = null,
 
-    var cbCompletionCriteria: Int = 0
+    var cbCompletionCriteria: Int = 0,
 
-    var cbHideUntilDate: Long = 0
+    var cbHideUntilDate: Long = 0,
 
-    var cbDeadlineDate: Long = Long.MAX_VALUE
+    var cbDeadlineDate: Long = Long.MAX_VALUE,
 
-    var cbLateSubmissionPenalty: Int = 0
+    var cbLateSubmissionPenalty: Int = 0,
 
-    var cbGracePeriodDate: Long = Long.MAX_VALUE
+    var cbGracePeriodDate: Long = Long.MAX_VALUE,
 
-    var cbMaxPoints: Int = 10
+    var cbMaxPoints: Float? = null,
 
-    var cbMinPoints: Int = 0
+    var cbMinPoints: Float? = null,
 
-    var cbIndex: Int = 0
+    var cbIndex: Int = 0,
 
-    @ColumnInfo(index = true)
-    var cbClazzUid: Long = 0
+    var cbClazzUid: Long = 0,
 
-    var cbActive: Boolean = true
+    var cbClazzSourcedId: String? = null,
 
-    var cbHidden: Boolean = false
+    var cbActive: Boolean = true,
 
-    var cbEntityUid: Long = 0
+    var cbHidden: Boolean = false,
+
+    var cbEntityUid: Long = 0,
 
     @ReplicateLastModified
     @ReplicateEtag
-    var cbLct: Long = 0
+    var cbLct: Long = 0,
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is CourseBlock) return false
+    var cbSourcedId: String? = null,
 
-        if (cbUid != other.cbUid) return false
-        if (cbType != other.cbType) return false
-        if (cbIndentLevel != other.cbIndentLevel) return false
-        if (cbModuleParentBlockUid != other.cbModuleParentBlockUid) return false
-        if (cbTitle != other.cbTitle) return false
-        if (cbDescription != other.cbDescription) return false
-        if (cbCompletionCriteria != other.cbCompletionCriteria) return false
-        if (cbHideUntilDate != other.cbHideUntilDate) return false
-        if (cbDeadlineDate != other.cbDeadlineDate) return false
-        if (cbLateSubmissionPenalty != other.cbLateSubmissionPenalty) return false
-        if (cbGracePeriodDate != other.cbGracePeriodDate) return false
-        if (cbMaxPoints != other.cbMaxPoints) return false
-        if (cbMinPoints != other.cbMinPoints) return false
-        if (cbIndex != other.cbIndex) return false
-        if (cbClazzUid != other.cbClazzUid) return false
-        if (cbActive != other.cbActive) return false
-        if (cbHidden != other.cbHidden) return false
-        if (cbEntityUid != other.cbEntityUid) return false
-        if (cbLct != other.cbLct) return false
+    var cbMetadata: String? = null,
 
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = cbUid.hashCode()
-        result = 31 * result + cbType
-        result = 31 * result + cbIndentLevel
-        result = 31 * result + cbModuleParentBlockUid.hashCode()
-        result = 31 * result + (cbTitle?.hashCode() ?: 0)
-        result = 31 * result + (cbDescription?.hashCode() ?: 0)
-        result = 31 * result + cbCompletionCriteria
-        result = 31 * result + cbHideUntilDate.hashCode()
-        result = 31 * result + cbDeadlineDate.hashCode()
-        result = 31 * result + cbLateSubmissionPenalty
-        result = 31 * result + cbGracePeriodDate.hashCode()
-        result = 31 * result + cbMaxPoints
-        result = 31 * result + cbMinPoints
-        result = 31 * result + cbIndex
-        result = 31 * result + cbClazzUid.hashCode()
-        result = 31 * result + cbActive.hashCode()
-        result = 31 * result + cbHidden.hashCode()
-        result = 31 * result + cbEntityUid.hashCode()
-        result = 31 * result + cbLct.hashCode()
-        return result
-    }
+    var cbCreatedByAppId: String? = null,
+) {
 
     companion object {
 
@@ -133,6 +109,11 @@ open class CourseBlock {
         const val BLOCK_CONTENT_TYPE = 104
 
         const val BLOCK_DISCUSSION_TYPE = 105
+
+        /**
+         * Represents a LineItme created using the OneRoster API by an external app.
+         */
+        const val BLOCK_EXTERNAL_APP = 300
 
     }
 

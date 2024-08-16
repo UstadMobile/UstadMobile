@@ -9,7 +9,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryButtonModel
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 import com.ustadmobile.lib.db.entities.ContentEntryStatementScoreProgress
 import com.ustadmobile.lib.db.entities.Language
-import com.ustadmobile.lib.db.entities.StatementEntity
+import com.ustadmobile.lib.db.entities.xapi.StatementEntity
 import com.ustadmobile.libuicompose.view.contententry.detailoverviewtab.ContentEntryDetailOverviewScreen
 
 

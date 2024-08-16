@@ -10,11 +10,10 @@ env:
       CONTROLSERVER: ${CONTROLSERVER}
       TESTSERIAL: ${TESTSERIAL}
       TESTNAME: ${TESTNAME}
-
 - runFlow:
     file: "../common/add_profile_pic.yaml"
     env:
-      TESTFILENAME: "admin_pic.jpg"
+      TESTFILENAME: "admin_profilePic.jpg"
       CONTROLSERVER: ${CONTROLSERVER}
       TESTSERIAL: ${TESTSERIAL}
 - assertVisible:
@@ -22,7 +21,7 @@ env:
 - tapOn:
     id: "floating_action_button"
 - tapOn: "Add"
-- tapOn: "Remove photo"
+- tapOn: "Remove picture"
 - tapOn: "Save"
 - assertNotVisible:
     id: "person_picture"

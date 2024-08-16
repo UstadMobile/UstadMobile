@@ -1387,6 +1387,242 @@ val MIGRATION_170_171 = DoorMigrationStatementList(170, 171) { db ->
     }
 }
 
+val MIGRATION_171_172 = DoorMigrationStatementList(171, 172) { db ->
+    buildList {
+        add("ALTER TABLE CourseBlock ADD COLUMN cbSourcedId TEXT")
+        add("CREATE INDEX idx_courseblock_cbclazzuid ON CourseBlock (cbClazzUid)")
+        add("CREATE INDEX idx_courseblock_cbsourcedid ON CourseBlock (cbSourcedId)")
+    }
+}
+
+/**
+ * Consolidated migration that adds Xapi tables.
+ */
+val MIGRATION_172_194 = DoorMigrationStatementList(172, 194) { db ->
+    buildList {
+        add("ALTER TABLE CourseBlock ADD COLUMN cbClazzSourcedId TEXT")
+        add("ALTER TABLE CourseBlock ADD COLUMN cbCreatedByAppId TEXT")
+        add("ALTER TABLE CourseBlock ADD COLUMN cbMetadata TEXT")
+
+        //187
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("ALTER TABLE CourseBlock RENAME to CourseBlock_OLD")
+            add("CREATE TABLE IF NOT EXISTS CourseBlock (  cbType  INTEGER  NOT NULL , cbIndentLevel  INTEGER  NOT NULL , cbModuleParentBlockUid  INTEGER  NOT NULL , cbTitle  TEXT , cbDescription  TEXT , cbCompletionCriteria  INTEGER  NOT NULL , cbHideUntilDate  INTEGER  NOT NULL , cbDeadlineDate  INTEGER  NOT NULL , cbLateSubmissionPenalty  INTEGER  NOT NULL , cbGracePeriodDate  INTEGER  NOT NULL , cbMaxPoints  REAl , cbMinPoints  REAL , cbIndex  INTEGER  NOT NULL , cbClazzUid  INTEGER  NOT NULL , cbClazzSourcedId  TEXT , cbActive  INTEGER  NOT NULL , cbHidden  INTEGER  NOT NULL , cbEntityUid  INTEGER  NOT NULL , cbLct  INTEGER  NOT NULL , cbSourcedId  TEXT , cbMetadata  TEXT , cbCreatedByAppId  TEXT , cbUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+            add("INSERT INTO CourseBlock (cbType, cbIndentLevel, cbModuleParentBlockUid, cbTitle, cbDescription, cbCompletionCriteria, cbHideUntilDate, cbDeadlineDate, cbLateSubmissionPenalty, cbGracePeriodDate, cbMaxPoints, cbMinPoints, cbIndex, cbClazzUid, cbClazzSourcedId, cbActive, cbHidden, cbEntityUid, cbLct, cbSourcedId, cbMetadata, cbCreatedByAppId, cbUid) SELECT cbType, cbIndentLevel, cbModuleParentBlockUid, cbTitle, cbDescription, cbCompletionCriteria, cbHideUntilDate, cbDeadlineDate, cbLateSubmissionPenalty, cbGracePeriodDate, cbMaxPoints, cbMinPoints, cbIndex, cbClazzUid, cbClazzSourcedId, cbActive, cbHidden, cbEntityUid, cbLct, cbSourcedId, cbMetadata, cbCreatedByAppId, cbUid FROM CourseBlock_OLD")
+            add("DROP TABLE CourseBlock_OLD")
+            add("CREATE INDEX idx_courseblock_cbclazzuid ON CourseBlock (cbClazzUid)")
+            add("CREATE INDEX idx_courseblock_cbsourcedid ON CourseBlock (cbSourcedId)")
+        }else {
+            add("ALTER TABLE CourseBlock ALTER COLUMN cbMaxPoints TYPE FLOAT")
+            add("ALTER TABLE CourseBlock ALTER COLUMN cbMaxPoints DROP NOT NULL")
+            add("ALTER TABLE CourseBlock ALTER COLUMN cbMinPoints TYPE FLOAT")
+            add("ALTER TABLE CourseBlock ALTER COLUMN cbMinPoints DROP NOT NULL")
+        }
+
+        //Update for replication to handle multipe primary keys
+        val bigIntType = if(db.dbType() == DoorDbType.SQLITE) "INTEGER" else "BIGINT"
+        (3..4).forEach {
+            add("ALTER TABLE OutgoingReplication ADD COLUMN orPk$it $bigIntType NOT NULL DEFAULT 0")
+        }
+        if(db.dbType() == DoorDbType.SQLITE){
+            //Changes the defaultvalue of orPk2
+            add("ALTER TABLE OutgoingReplication RENAME to OutgoingReplication_OLD")
+            add("CREATE TABLE IF NOT EXISTS OutgoingReplication (  destNodeId  INTEGER  NOT NULL , orPk1  INTEGER  NOT NULL , orPk2  INTEGER  NOT NULL  DEFAULT 0 , orPk3  INTEGER  NOT NULL  DEFAULT 0 , orPk4  INTEGER  NOT NULL  DEFAULT 0 , orTableId  INTEGER  NOT NULL , orUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+            add("INSERT INTO OutgoingReplication (destNodeId, orPk1, orPk2, orPk3, orPk4, orTableId, orUid) SELECT destNodeId, orPk1, orPk2, orPk3, orPk4, orTableId, orUid FROM OutgoingReplication_OLD")
+            add("DROP TABLE OutgoingReplication_OLD")
+        }else {
+            add("ALTER TABLE OutgoingReplication ALTER COLUMN orPk2 SET DEFAULT 0")
+        }
+
+        //drop old versions of Xapi tables
+        listOf(
+            "StudentResult", "StatementEntity", "AgentEntity", "VerbLangMapEntry", "XObjectEntity",
+            "ContextXObjectStatementJoin", "VerbEntity"
+        ).forEach {
+            add("DROP TABLE IF EXISTS $it")
+        }
+
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS StudentResult (  srUid  INTEGER  PRIMARY KEY  NOT NULL , srSourcedId  TEXT , srCourseBlockUid  INTEGER  NOT NULL , srLineItemSourcedId  TEXT , srLineItemHref  TEXT , srClazzUid  INTEGER  NOT NULL , srAssignmentUid  INTEGER  NOT NULL , srStatus  INTEGER  NOT NULL , srMetaData  TEXT , srStudentPersonUid  INTEGER  NOT NULL , srStudentPersonSourcedId  TEXT , srStudentGroupId  INTEGER  NOT NULL , srMarkerPersonUid  INTEGER  NOT NULL , srMarkerGroupId  INTEGER  NOT NULL , srScoreStatus  INTEGER  NOT NULL , srScore  REAl  NOT NULL , srScoreDate  INTEGER  NOT NULL , srLastModified  INTEGER  NOT NULL , srComment  TEXT , srAppId  TEXT , srDeleted  INTEGER  NOT NULL )")
+
+            add("CREATE TABLE IF NOT EXISTS ActivityEntity (  actUid  INTEGER  PRIMARY KEY  NOT NULL , actIdIri  TEXT , actType  TEXT , actMoreInfo  TEXT , actInteractionType  INTEGER  NOT NULL , actCorrectResponsePatterns  TEXT , actLct  INTEGER  NOT NULL )")
+            add("CREATE TABLE IF NOT EXISTS ActivityExtensionEntity (  aeeActivityUid  INTEGER  NOT NULL , aeeKeyHash  INTEGER  NOT NULL , aeeKey  TEXT , aeeJson  TEXT , aeeLastMod  INTEGER  NOT NULL , aeeIsDeleted  INTEGER  NOT NULL , PRIMARY KEY (aeeActivityUid, aeeKeyHash) )")
+            add("CREATE TABLE IF NOT EXISTS ActivityInteractionEntity (  aieActivityUid  INTEGER  NOT NULL , aieHash  INTEGER  NOT NULL , aieProp  INTEGER  NOT NULL , aieId  TEXT , aieLastMod  INTEGER  NOT NULL , aieIsDeleted  INTEGER  NOT NULL , PRIMARY KEY (aieActivityUid, aieHash) )")
+            add("CREATE TABLE IF NOT EXISTS ActivityLangMapEntry (  almeActivityUid  INTEGER  NOT NULL , almeHash  INTEGER  NOT NULL , almeLangCode  TEXT , almeValue  TEXT , almeAieHash  INTEGER  NOT NULL , almeLastMod  INTEGER  NOT NULL , PRIMARY KEY (almeActivityUid, almeHash) )")
+            add("CREATE TABLE IF NOT EXISTS ActorEntity (  actorPersonUid  INTEGER  NOT NULL , actorName  TEXT , actorMbox  TEXT , actorMbox_sha1sum  TEXT , actorOpenid  TEXT , actorAccountName  TEXT , actorAccountHomePage  TEXT , actorEtag  INTEGER  NOT NULL , actorLct  INTEGER  NOT NULL , actorObjectType  INTEGER  NOT NULL , actorUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+            add("CREATE TABLE IF NOT EXISTS GroupMemberActorJoin (  gmajGroupActorUid  BIGINT  NOT NULL , gmajMemberActorUid  BIGINT  NOT NULL , gmajLastMod  BIGINT  NOT NULL , PRIMARY KEY (gmajGroupActorUid, gmajMemberActorUid) )")
+            add("CREATE TABLE IF NOT EXISTS StatementContextActivityJoin (  scajFromStatementIdHi  INTEGER  NOT NULL , scajFromStatementIdLo  INTEGER  NOT NULL , scajToHash  INTEGER  NOT NULL , scajContextType  INTEGER  NOT NULL , scajToActivityUid  INTEGER  NOT NULL , scajToActivityId  TEXT , scajEtag  INTEGER  NOT NULL , PRIMARY KEY (scajFromStatementIdHi, scajFromStatementIdLo, scajToHash) )")
+            add("CREATE TABLE IF NOT EXISTS StatementEntity (  statementIdHi  INTEGER  NOT NULL , statementIdLo  INTEGER  NOT NULL , statementActorPersonUid  INTEGER  NOT NULL , statementVerbUid  INTEGER  NOT NULL , statementObjectType  INTEGER  NOT NULL , statementObjectUid1  INTEGER  NOT NULL , statementObjectUid2  INTEGER  NOT NULL , statementActorUid  INTEGER  NOT NULL , authorityActorUid  INTEGER  NOT NULL , teamUid  INTEGER  NOT NULL , resultCompletion  INTEGER , resultSuccess  INTEGER , resultScoreScaled  REAl , resultScoreRaw  REAl , resultScoreMin  REAl , resultScoreMax  REAl , resultDuration  INTEGER , resultResponse  TEXT , timestamp  INTEGER  NOT NULL , stored  INTEGER  NOT NULL , contextRegistrationHi  INTEGER  NOT NULL , contextRegistrationLo  INTEGER  NOT NULL , contextPlatform  TEXT , contextStatementRefIdHi  INTEGER  NOT NULL , contextStatementRefIdLo  INTEGER  NOT NULL , contextInstructorActorUid  INTEGER  NOT NULL , statementLct  INTEGER  NOT NULL , extensionProgress  INTEGER , completionOrProgress  INTEGER  NOT NULL , statementContentEntryUid  INTEGER  NOT NULL , statementLearnerGroupUid  INTEGER  NOT NULL , statementClazzUid  INTEGER  NOT NULL , statementCbUid  INTEGER  NOT NULL , statementDoorNode  INTEGER  NOT NULL , isSubStatement  INTEGER  NOT NULL , PRIMARY KEY (statementIdHi, statementIdLo) )")
+            add("CREATE TABLE IF NOT EXISTS StatementEntityJson (  stmtJsonIdHi  INTEGER  NOT NULL , stmtJsonIdLo  INTEGER  NOT NULL , stmtEtag  INTEGER  NOT NULL , fullStatement  TEXT , PRIMARY KEY (stmtJsonIdHi, stmtJsonIdLo) )")
+            add("CREATE TABLE IF NOT EXISTS VerbEntity (  verbUid  INTEGER  PRIMARY KEY  NOT NULL , verbUrlId  TEXT , verbDeleted  INTEGER  NOT NULL , verbLct  INTEGER  NOT NULL )")
+            add("CREATE TABLE IF NOT EXISTS VerbLangMapEntry (  vlmeVerbUid  INTEGER  NOT NULL , vlmeLangHash  INTEGER  NOT NULL , vlmeLangCode  TEXT , vlmeEntryString  TEXT , vlmeLastModified  INTEGER  NOT NULL , PRIMARY KEY (vlmeVerbUid, vlmeLangHash) )")
+            add("CREATE TABLE IF NOT EXISTS XapiSessionEntity (  xseLastMod  INTEGER  NOT NULL , xseRegistrationHi  INTEGER  NOT NULL , xseRegistrationLo  INTEGER  NOT NULL , xseUsUid  INTEGER  NOT NULL , xseAccountPersonUid  INTEGER  NOT NULL , xseAccountUsername  TEXT , xseClazzUid  INTEGER  NOT NULL , xseCbUid  INTEGER  NOT NULL , xseContentEntryUid  INTEGER  NOT NULL , xseRootActivityId  TEXT , xseStartTime  INTEGER  NOT NULL , xseExpireTime  INTEGER  NOT NULL , xseAuth  TEXT , xseUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS StudentResult (  srUid  BIGINT  PRIMARY KEY  NOT NULL , srSourcedId  TEXT , srCourseBlockUid  BIGINT  NOT NULL , srLineItemSourcedId  TEXT , srLineItemHref  TEXT , srClazzUid  BIGINT  NOT NULL , srAssignmentUid  BIGINT  NOT NULL , srStatus  INTEGER  NOT NULL , srMetaData  TEXT , srStudentPersonUid  BIGINT  NOT NULL , srStudentPersonSourcedId  TEXT , srStudentGroupId  INTEGER  NOT NULL , srMarkerPersonUid  BIGINT  NOT NULL , srMarkerGroupId  INTEGER  NOT NULL , srScoreStatus  INTEGER  NOT NULL , srScore  FLOAT  NOT NULL , srScoreDate  BIGINT  NOT NULL , srLastModified  BIGINT  NOT NULL , srComment  TEXT , srAppId  TEXT , srDeleted  BOOL  NOT NULL )")
+
+            add("CREATE TABLE IF NOT EXISTS ActivityEntity (  actUid  BIGINT  PRIMARY KEY  NOT NULL , actIdIri  TEXT , actType  TEXT , actMoreInfo  TEXT , actInteractionType  INTEGER  NOT NULL , actCorrectResponsePatterns  TEXT , actLct  BIGINT  NOT NULL )")
+            add("CREATE TABLE IF NOT EXISTS ActivityExtensionEntity (  aeeActivityUid  BIGINT  NOT NULL , aeeKeyHash  BIGINT  NOT NULL , aeeKey  TEXT , aeeJson  TEXT , aeeLastMod  BIGINT  NOT NULL , aeeIsDeleted  BOOL  NOT NULL , PRIMARY KEY (aeeActivityUid, aeeKeyHash) )")
+            add("CREATE TABLE IF NOT EXISTS ActivityInteractionEntity (  aieActivityUid  BIGINT  NOT NULL , aieHash  BIGINT  NOT NULL , aieProp  INTEGER  NOT NULL , aieId  TEXT , aieLastMod  BIGINT  NOT NULL , aieIsDeleted  BOOL  NOT NULL , PRIMARY KEY (aieActivityUid, aieHash) )")
+            add("CREATE TABLE IF NOT EXISTS ActivityLangMapEntry (  almeActivityUid  BIGINT  NOT NULL , almeHash  BIGINT  NOT NULL , almeLangCode  TEXT , almeValue  TEXT , almeAieHash  BIGINT  NOT NULL , almeLastMod  BIGINT  NOT NULL , PRIMARY KEY (almeActivityUid, almeHash) )")
+            add("CREATE TABLE IF NOT EXISTS ActorEntity (  actorPersonUid  BIGINT  NOT NULL , actorName  TEXT , actorMbox  TEXT , actorMbox_sha1sum  TEXT , actorOpenid  TEXT , actorAccountName  TEXT , actorAccountHomePage  TEXT , actorEtag  BIGINT  NOT NULL , actorLct  BIGINT  NOT NULL , actorObjectType  INTEGER  NOT NULL , actorUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+            add("CREATE TABLE IF NOT EXISTS GroupMemberActorJoin (  gmajGroupActorUid  BIGINT  NOT NULL , gmajMemberActorUid  BIGINT  NOT NULL , gmajLastMod  BIGINT  NOT NULL , PRIMARY KEY (gmajGroupActorUid, gmajMemberActorUid) )")
+            add("CREATE TABLE IF NOT EXISTS StatementContextActivityJoin (  scajFromStatementIdHi  BIGINT  NOT NULL , scajFromStatementIdLo  BIGINT  NOT NULL , scajToHash  BIGINT  NOT NULL , scajContextType  INTEGER  NOT NULL , scajToActivityUid  BIGINT  NOT NULL , scajToActivityId  TEXT , scajEtag  BIGINT  NOT NULL , PRIMARY KEY (scajFromStatementIdHi, scajFromStatementIdLo, scajToHash) )")
+            add("CREATE TABLE IF NOT EXISTS StatementEntity (  statementIdHi  BIGINT  NOT NULL , statementIdLo  BIGINT  NOT NULL , statementActorPersonUid  BIGINT  NOT NULL , statementVerbUid  BIGINT  NOT NULL , statementObjectType  INTEGER  NOT NULL , statementObjectUid1  BIGINT  NOT NULL , statementObjectUid2  BIGINT  NOT NULL , statementActorUid  BIGINT  NOT NULL , authorityActorUid  BIGINT  NOT NULL , teamUid  BIGINT  NOT NULL , resultCompletion  BOOL , resultSuccess  BOOL , resultScoreScaled  FLOAT , resultScoreRaw  FLOAT , resultScoreMin  FLOAT , resultScoreMax  FLOAT , resultDuration  BIGINT , resultResponse  TEXT , timestamp  BIGINT  NOT NULL , stored  BIGINT  NOT NULL , contextRegistrationHi  BIGINT  NOT NULL , contextRegistrationLo  BIGINT  NOT NULL , contextPlatform  TEXT , contextStatementRefIdHi  BIGINT  NOT NULL , contextStatementRefIdLo  BIGINT  NOT NULL , contextInstructorActorUid  BIGINT  NOT NULL , statementLct  BIGINT  NOT NULL , extensionProgress  INTEGER , completionOrProgress  BOOL  NOT NULL , statementContentEntryUid  BIGINT  NOT NULL , statementLearnerGroupUid  BIGINT  NOT NULL , statementClazzUid  BIGINT  NOT NULL , statementCbUid  BIGINT  NOT NULL , statementDoorNode  BIGINT  NOT NULL , isSubStatement  BOOL  NOT NULL , PRIMARY KEY (statementIdHi, statementIdLo) )")
+            add("CREATE TABLE IF NOT EXISTS StatementEntityJson (  stmtJsonIdHi  BIGINT  NOT NULL , stmtJsonIdLo  BIGINT  NOT NULL , stmtEtag  BIGINT  NOT NULL , fullStatement  TEXT , PRIMARY KEY (stmtJsonIdHi, stmtJsonIdLo) )")
+            add("CREATE TABLE IF NOT EXISTS VerbEntity (  verbUid  BIGINT  PRIMARY KEY  NOT NULL , verbUrlId  TEXT , verbDeleted  BOOL  NOT NULL , verbLct  BIGINT  NOT NULL )")
+            add("CREATE TABLE IF NOT EXISTS VerbLangMapEntry (  vlmeVerbUid  BIGINT  NOT NULL , vlmeLangHash  BIGINT  NOT NULL , vlmeLangCode  TEXT , vlmeEntryString  TEXT , vlmeLastModified  BIGINT  NOT NULL , PRIMARY KEY (vlmeVerbUid, vlmeLangHash) )")
+            add("CREATE TABLE IF NOT EXISTS XapiSessionEntity (  xseLastMod  BIGINT  NOT NULL , xseRegistrationHi  BIGINT  NOT NULL , xseRegistrationLo  BIGINT  NOT NULL , xseUsUid  BIGINT  NOT NULL , xseAccountPersonUid  BIGINT  NOT NULL , xseAccountUsername  TEXT , xseClazzUid  BIGINT  NOT NULL , xseCbUid  BIGINT  NOT NULL , xseContentEntryUid  BIGINT  NOT NULL , xseRootActivityId  TEXT , xseStartTime  BIGINT  NOT NULL , xseExpireTime  BIGINT  NOT NULL , xseAuth  TEXT , xseUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+        }
+
+        //Indexes
+        add("CREATE INDEX idx_actorentity_actorobjecttype ON ActorEntity (actorObjectType)")
+        add("CREATE INDEX idx_actorentity_uid_personuid ON ActorEntity (actorPersonUid)")
+
+        add("CREATE INDEX idx_stmt_actor_person ON StatementEntity (statementActorPersonUid)")
+        add("CREATE INDEX idx_statement_clazz_person ON StatementEntity (statementClazzUid, statementActorPersonUid)")
+        add("CREATE INDEX idx_statement_cbuid_actor ON StatementEntity (statementCbUid, statementActorUid)")
+
+        add("CREATE INDEX idx_groupmemberactorjoin_gmajgroupactoruid ON GroupMemberActorJoin (gmajGroupActorUid)")
+        add("CREATE INDEX idx_groupmemberactorjoin_gmajmemberactoruid ON GroupMemberActorJoin (gmajMemberActorUid)")
+
+        add("DROP INDEX IF EXISTS idx_courseblock_cbsourcedid")
+
+        //Add columns back to discussion post
+        val (boolColType, boolDefaultVal) = if(db.dbType() == DoorDbType.SQLITE) {
+            Pair("INTEGER", "0")
+        }else {
+            Pair("BOOL", "FALSE")
+        }
+
+        add("ALTER TABLE DiscussionPost ADD COLUMN discussionPostVisible $boolColType NOT NULL DEFAULT $boolDefaultVal")
+        add("ALTER TABLE DiscussionPost ADD COLUMN discussionPostArchive $boolColType NOT NULL DEFAULT $boolDefaultVal")
+
+        //Drop old tables
+        listOf(
+            "NetworkNode", "AccessToken", "ScrapeQueueItem", "ContainerEntry",
+            "ContainerEntryFile", "LocallyAvailableContainer", "ContainerEtag",
+            "ContainerImportJob", "Role", "XLangMapEntry", "School", "SchoolMember",
+            "Chat", "ChatMember", "MessageRead", "StateEntity", "StateContentEntity",
+            "Container"
+        ).forEach {
+            add("DROP TABLE IF EXISTS $it")
+        }
+    }
+}
+
+val MIGRATION_194_195 = DoorMigrationStatementList(194, 195) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS StateEntity (  seActorUid  INTEGER  NOT NULL , seHash  INTEGER  NOT NULL , seActivityUid  INTEGER  NOT NULL , seStateId  TEXT , seLastMod  INTEGER  NOT NULL , seTimeStored  INTEGER  NOT NULL , seContentType  TEXT , seCompressed  INTEGER  NOT NULL , seContent  TEXT , seDeleted  INTEGER  NOT NULL , seRegistrationHi  INTEGER , seRegistrationLo  INTEGER , PRIMARY KEY (seActorUid, seHash) )")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS StateEntity (  seActorUid  BIGINT  NOT NULL , seHash  BIGINT  NOT NULL , seActivityUid  BIGINT  NOT NULL , seStateId  TEXT , seLastMod  BIGINT  NOT NULL , seTimeStored  BIGINT  NOT NULL , seContentType  TEXT , seCompressed  INTEGER  NOT NULL , seContent  TEXT , seDeleted  BOOL  NOT NULL , seRegistrationHi  BIGINT , seRegistrationLo  BIGINT , PRIMARY KEY (seActorUid, seHash) )")
+        }
+    }
+}
+
+val MIGRATION_195_196 = DoorMigrationStatementList(195, 196) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS StateDeleteCommand (  sdcActorUid  INTEGER  NOT NULL , sdcHash  INTEGER  NOT NULL , sdcActivityUid  INTEGER  NOT NULL , sdcStateId  TEXT , sdcLastMod  INTEGER  NOT NULL , sdcRegistrationHi  INTEGER , sdcRegistrationLo  INTEGER , PRIMARY KEY (sdcActorUid, sdcHash) )")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS StateDeleteCommand (  sdcActorUid  BIGINT  NOT NULL , sdcHash  BIGINT  NOT NULL , sdcActivityUid  BIGINT  NOT NULL , sdcStateId  TEXT , sdcLastMod  BIGINT  NOT NULL , sdcRegistrationHi  BIGINT , sdcRegistrationLo  BIGINT , PRIMARY KEY (sdcActorUid, sdcHash) )")
+        }
+    }
+}
+
+//Add Xapi State Deletion Triggers - See DeleteXapiStateUseCase
+val MIGRATION_196_197 = DoorMigrationStatementList(196, 197) { db ->
+    buildList {
+        if (db.dbType() == DoorDbType.SQLITE) {
+            listOf("INSERT", "UPDATE").forEach { event ->
+                add("""
+                        CREATE TRIGGER IF NOT EXISTS xapi_state_delete_trig_${event.lowercase().substring(0, 3)}
+                        AFTER $event ON StateDeleteCommand
+                        FOR EACH ROW
+                        BEGIN
+                        UPDATE StateEntity
+                           SET seDeleted = 1,
+                               seLastMod = NEW.sdcLastMod
+                         WHERE seActorUid = NEW.sdcActorUid
+                           AND seActivityUid = NEW.sdcActivityUid
+                           AND seLastMod < NEW.sdcLastMod
+                           AND (    (      NEW.sdcRegistrationHi IS NULL 
+                                       AND seRegistrationHi IS NULL
+                                       AND NEW.sdcRegistrationLo IS NULL
+                                       AND seRegistrationLo IS NULL)
+                                 OR (     seRegistrationHi = NEW.sdcRegistrationHi
+                                      AND seRegistrationLo = NEW.sdcRegistrationLo))
+                           AND (    NEW.sdcStateId IS NULL
+                                 OR seStateId = NEW.sdcStateId);
+                        END         
+                """)
+            }
+        } else {
+            add("""
+                        CREATE OR REPLACE FUNCTION xapi_state_delete_fn() RETURNS TRIGGER AS ${'$'}${'$'}
+                        BEGIN
+                        UPDATE StateEntity
+                           SET seDeleted = TRUE,
+                               seLastMod = NEW.sdcLastMod
+                         WHERE seActorUid = NEW.sdcActorUid
+                           AND seActivityUid = NEW.sdcActivityUid
+                           AND seLastMod < NEW.sdcLastMod
+                           AND (    (      NEW.sdcRegistrationHi IS NULL 
+                                       AND seRegistrationHi IS NULL
+                                       AND NEW.sdcRegistrationLo IS NULL
+                                       AND seRegistrationLo IS NULL)
+                                 OR (     seRegistrationHi = NEW.sdcRegistrationHi
+                                      AND seRegistrationLo = NEW.sdcRegistrationLo))
+                           AND (    NEW.sdcStateId IS NULL
+                                 OR seStateId = NEW.sdcStateId);
+                         RETURN NEW;
+                         END ${'$'}${'$'} LANGUAGE plpgsql
+                    """)
+            add("""
+                    CREATE TRIGGER xapi_state_delete_trig
+                    AFTER INSERT OR UPDATE ON StateDeleteCommand
+                    FOR EACH ROW
+                    EXECUTE FUNCTION xapi_state_delete_fn();
+                """)
+        }
+    }
+}
+
+val MIGRATION_197_198 = DoorMigrationStatementList(197, 198) { db ->
+    buildList {
+        add("DROP TABLE XapiSessionEntity")
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS XapiSessionEntity (  xseLastMod  INTEGER  NOT NULL , xseRegistrationHi  INTEGER  NOT NULL , xseRegistrationLo  INTEGER  NOT NULL , xseUsUid  INTEGER  NOT NULL , xseAccountPersonUid  INTEGER  NOT NULL , xseAccountUsername  TEXT , xseClazzUid  INTEGER  NOT NULL , xseCbUid  INTEGER  NOT NULL , xseContentEntryUid  INTEGER  NOT NULL , xseRootActivityId  TEXT , xseStartTime  INTEGER  NOT NULL , xseExpireTime  INTEGER  NOT NULL , xseAuth  TEXT , xseCompleted  INTEGER  NOT NULL  DEFAULT 0 , xseUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS XapiSessionEntity (  xseLastMod  BIGINT  NOT NULL , xseRegistrationHi  BIGINT  NOT NULL , xseRegistrationLo  BIGINT  NOT NULL , xseUsUid  BIGINT  NOT NULL , xseAccountPersonUid  BIGINT  NOT NULL , xseAccountUsername  TEXT , xseClazzUid  BIGINT  NOT NULL , xseCbUid  BIGINT  NOT NULL , xseContentEntryUid  BIGINT  NOT NULL , xseRootActivityId  TEXT , xseStartTime  BIGINT  NOT NULL , xseExpireTime  BIGINT  NOT NULL , xseAuth  TEXT , xseCompleted  BOOL  NOT NULL  DEFAULT false, xseUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+        }
+    }
+}
+
+
+val MIGRATION_198_199 = DoorMigrationStatementList(198, 199) { db ->
+    buildList {
+        add("DROP TABLE StateEntity")
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS StateEntity (  seActorUid  INTEGER  NOT NULL , seHash  INTEGER  NOT NULL , seActivityUid  INTEGER  NOT NULL , seStateId  TEXT  NOT NULL , seLastMod  INTEGER  NOT NULL , seTimeStored  INTEGER  NOT NULL , seContentType  TEXT  NOT NULL , seCompressed  INTEGER  NOT NULL , seContent  TEXT  NOT NULL , seDeleted  INTEGER  NOT NULL , seRegistrationHi  INTEGER , seRegistrationLo  INTEGER , seH5PPreloaded  INTEGER  NOT NULL , seH5PSubContentId  TEXT , PRIMARY KEY (seActorUid, seHash) )")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS StateEntity (  seActorUid  BIGINT  NOT NULL , seHash  BIGINT  NOT NULL , seActivityUid  BIGINT  NOT NULL , seStateId  TEXT  NOT NULL , seLastMod  BIGINT  NOT NULL , seTimeStored  BIGINT  NOT NULL , seContentType  TEXT  NOT NULL , seCompressed  INTEGER  NOT NULL , seContent  TEXT  NOT NULL , seDeleted  BOOL  NOT NULL , seRegistrationHi  BIGINT , seRegistrationLo  BIGINT , seH5PPreloaded  BOOL  NOT NULL , seH5PSubContentId  TEXT , PRIMARY KEY (seActorUid, seHash) )")
+        }
+    }
+}
+
+val MIGRATION_199_200 = DoorMigrationStatementList(199, 200) { db ->
+    buildList {
+        add("DROP TABLE XapiSessionEntity")
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS XapiSessionEntity (  xseLastMod  INTEGER  NOT NULL , xseRegistrationHi  INTEGER  NOT NULL , xseRegistrationLo  INTEGER  NOT NULL , xseUsUid  INTEGER  NOT NULL , xseAccountPersonUid  INTEGER  NOT NULL , xseActorUid  INTEGER  NOT NULL , xseAccountUsername  TEXT  NOT NULL , xseClazzUid  INTEGER  NOT NULL , xseCbUid  INTEGER  NOT NULL , xseContentEntryUid  INTEGER  NOT NULL , xseRootActivityId  TEXT  NOT NULL , xseRootActivityUid  INTEGER  NOT NULL , xseStartTime  INTEGER  NOT NULL , xseExpireTime  INTEGER  NOT NULL , xseAuth  TEXT , xseCompleted  INTEGER  NOT NULL  DEFAULT 0 , knownActorUidToPersonUids  TEXT  NOT NULL , xseUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS XapiSessionEntity (  xseLastMod  BIGINT  NOT NULL , xseRegistrationHi  BIGINT  NOT NULL , xseRegistrationLo  BIGINT  NOT NULL , xseUsUid  BIGINT  NOT NULL , xseAccountPersonUid  BIGINT  NOT NULL , xseActorUid  BIGINT  NOT NULL , xseAccountUsername  TEXT  NOT NULL , xseClazzUid  BIGINT  NOT NULL , xseCbUid  BIGINT  NOT NULL , xseContentEntryUid  BIGINT  NOT NULL , xseRootActivityId  TEXT  NOT NULL , xseRootActivityUid  BIGINT  NOT NULL , xseStartTime  BIGINT  NOT NULL , xseExpireTime  BIGINT  NOT NULL , xseAuth  TEXT , xseCompleted  BOOL  NOT NULL  DEFAULT false, knownActorUidToPersonUids  TEXT  NOT NULL , xseUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+        }
+    }
+}
+
+
 
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_105_106, MIGRATION_106_107,
@@ -1402,7 +1638,9 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_156_157, MIGRATION_157_158, MIGRATION_158_159, MIGRATION_159_160,
     MIGRATION_160_161, MIGRATION_162_163, MIGRATION_163_164, MIGRATION_164_165,
     MIGRATION_165_166, MIGRATION_166_167, MIGRATION_167_168, MIGRATION_168_169,
-    MIGRATION_170_171,
+    MIGRATION_170_171, MIGRATION_171_172, MIGRATION_172_194, MIGRATION_194_195,
+    MIGRATION_195_196, MIGRATION_196_197, MIGRATION_197_198, MIGRATION_198_199,
+    MIGRATION_199_200,
 )
 
 

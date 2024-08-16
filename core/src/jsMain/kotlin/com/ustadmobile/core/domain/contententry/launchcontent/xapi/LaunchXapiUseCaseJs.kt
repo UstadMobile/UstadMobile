@@ -16,10 +16,14 @@ class LaunchXapiUseCaseJs(
     override suspend fun invoke(
         contentEntryVersion: ContentEntryVersion,
         navController: UstadNavController,
-        target: OpenExternalLinkUseCase.Companion.LinkTarget
+        clazzUid: Long,
+        cbUid: Long,
+        target: OpenExternalLinkUseCase.Companion.LinkTarget,
     ): LaunchContentEntryVersionUseCase.LaunchResult {
         val resolveResult = resolveXapiLaunchHrefUseCase(
-            contentEntryVersion.cevUid,
+            contentEntryVersionUid = contentEntryVersion.cevUid,
+            clazzUid = clazzUid,
+            cbUid = cbUid,
         )
 
         if(target != OpenExternalLinkUseCase.Companion.LinkTarget.TOP) {

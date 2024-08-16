@@ -22,6 +22,12 @@ interface IStringValues {
 
         fun empty(): IStringValues = MapStringValues(emptyMap())
 
+        fun contentType(contentType: String) = MapStringValues(
+            mapOf(
+                "content-type" to listOf(contentType),
+            )
+        )
+
     }
 
 }

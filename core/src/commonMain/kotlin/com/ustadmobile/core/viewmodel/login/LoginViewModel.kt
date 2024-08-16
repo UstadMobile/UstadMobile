@@ -4,6 +4,7 @@ import com.ustadmobile.core.account.AdultAccountRequiredException
 import com.ustadmobile.core.account.ConsentNotGrantedException
 import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
@@ -14,6 +15,7 @@ import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.util.ext.appendSelectedAccount
 import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.core.util.ext.verifySite
 import com.ustadmobile.core.view.*
@@ -80,6 +82,9 @@ class LoginViewModel(
     private val getVersionUseCase: GetVersionUseCase? by instanceOrNull()
 
     private val getShowPoweredByUseCase: GetShowPoweredByUseCase? by instanceOrNull()
+
+    private val dontSetCurrentSession: Boolean = savedStateHandle[ARG_DONT_SET_CURRENT_SESSION]
+        ?.toBoolean() ?: false
 
     init {
         nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?: ClazzListViewModel.DEST_NAME_HOME
@@ -168,10 +173,13 @@ class LoginViewModel(
      * destination as per the arguments. This includes popping off the stack (using ARG_POPUPTO_ON_FINISH
      * or at least removing the login screen itself from the stack).
      */
-    private fun goToNextDestAfterLoginOrGuestSelected() {
+    private fun goToNextDestAfterLoginOrGuestSelected(personUid: Long) {
         val goOptions = UstadMobileSystemCommon.UstadGoOptions(clearStack = true)
         Napier.d { "LoginPresenter: go to next destination: $nextDestination" }
-        navController.navigateToViewUri(nextDestination, goOptions)
+        navController.navigateToViewUri(
+            nextDestination.appendSelectedAccount(personUid, Endpoint(serverUrl)),
+            goOptions
+        )
     }
 
     fun onClickLogin(){
@@ -193,9 +201,14 @@ class LoginViewModel(
             viewModelScope.launch {
                 var errorMessage: String? = null
                 try {
-                    accountManager.login(username.trim(), password.trim(), serverUrl,
-                        savedStateHandle[UstadView.ARG_MAX_DATE_OF_BIRTH]?.toLong() ?: 0L)
-                    goToNextDestAfterLoginOrGuestSelected()
+                    val account = accountManager.login(
+                        username = username.trim(),
+                        password = password.trim(),
+                        endpointUrl = serverUrl,
+                        maxDateOfBirth = savedStateHandle[UstadView.ARG_MAX_DATE_OF_BIRTH]?.toLong() ?: 0L,
+                        dontSetCurrentSession = dontSetCurrentSession,
+                    )
+                    goToNextDestAfterLoginOrGuestSelected(account.personUid)
                 }catch(e: AdultAccountRequiredException) {
                     errorMessage = impl.getString(MR.strings.adult_account_required)
                 } catch(e: UnauthorizedException) {
@@ -270,8 +283,8 @@ class LoginViewModel(
 
     fun onClickConnectAsGuest(){
         viewModelScope.launch {
-            accountManager.startGuestSession(serverUrl)
-            goToNextDestAfterLoginOrGuestSelected()
+            val guestPerson = accountManager.startGuestSession(serverUrl)
+            goToNextDestAfterLoginOrGuestSelected(guestPerson.person.personUid)
         }
     }
 

@@ -116,7 +116,6 @@ kotlin {
                 api libs.androidx.lifecycle.livedata.ktx
                 api libs.androidx.paging.runtime
 
-                implementation libs.gson
                 implementation libs.nanohttpd
                 implementation libs.nanohttpd.nanolets
             }
@@ -136,7 +135,6 @@ kotlin {
             dependencies {
                 implementation libs.ktor.server.core
                 implementation libs.kodein.di.framework.ktor.server.jvm
-                implementation libs.gson
             }
         }
 

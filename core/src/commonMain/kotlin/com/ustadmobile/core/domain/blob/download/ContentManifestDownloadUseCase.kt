@@ -48,7 +48,7 @@ class ContentManifestDownloadUseCase(
                 it
         }
 
-        val contentEntryVersion = db.contentEntryVersionDao
+        val contentEntryVersion = db.contentEntryVersionDao()
             .findByUidAsync(contentEntryVersionUid)
                 ?: throw IllegalArgumentException("ContentEntryVersion $contentEntryVersionUid not in db")
 
@@ -57,7 +57,7 @@ class ContentManifestDownloadUseCase(
         val manifestSize = manifestResponse.headers["content-length"]?.toLong() ?: 0
         val manifest: ContentManifest = json.decodeFromString(manifestResponse.bodyAsDecodedText())
 
-        val offlineItemUid = db.transferJobDao.findOfflineItemUidForTransferJobUid(
+        val offlineItemUid = db.transferJobDao().findOfflineItemUidForTransferJobUid(
             transferJobUid)
 
         /*
@@ -70,7 +70,7 @@ class ContentManifestDownloadUseCase(
         }.distinctBy { it.first }
 
         if(offlineItemUid != 0L) {
-            db.cacheLockJoinDao.insertListAsync(
+            db.cacheLockJoinDao().insertListAsync(
                 (bodyDataUrlsAndStorageSizeToDownload + Pair(manifestUrl, manifestSize)).map {
                     CacheLockJoin(
                         cljEntityUid = contentEntryVersionUid,

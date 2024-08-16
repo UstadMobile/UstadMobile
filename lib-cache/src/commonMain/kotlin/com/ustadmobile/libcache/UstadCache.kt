@@ -2,8 +2,8 @@ package com.ustadmobile.libcache
 
 import com.ustadmobile.libcache.db.entities.CacheEntry
 import com.ustadmobile.libcache.db.entities.RetentionLock
-import com.ustadmobile.libcache.request.HttpRequest
-import com.ustadmobile.libcache.response.HttpResponse
+import com.ustadmobile.ihttp.request.IHttpRequest
+import com.ustadmobile.ihttp.response.IHttpResponse
 
 data class EntryLockRequest(
     val url: String,
@@ -79,8 +79,8 @@ interface UstadCache {
      * @return HttpResponse if the entry is in the cache, null otherwise
      */
     fun retrieve(
-        request: HttpRequest,
-    ): HttpResponse?
+        request: IHttpRequest,
+    ): IHttpResponse?
 
     fun getCacheEntry(url: String): CacheEntry?
 

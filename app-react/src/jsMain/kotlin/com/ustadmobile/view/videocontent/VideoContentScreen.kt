@@ -1,6 +1,7 @@
 package com.ustadmobile.view.videocontent
 
 import com.ustadmobile.core.hooks.collectAsState
+import com.ustadmobile.core.hooks.useOnUnloadEffect
 import com.ustadmobile.core.viewmodel.videocontent.VideoContentUiState
 import com.ustadmobile.core.viewmodel.videocontent.VideoContentViewModel
 import com.ustadmobile.hooks.useUstadViewModel
@@ -18,14 +19,35 @@ import web.cssom.vh
 import mui.material.Typography
 import mui.material.styles.TypographyVariant
 import mui.system.responsive
+import web.html.HTMLVideoElement
 
 external interface VideoContentProps: Props {
 
     var uiState: VideoContentUiState
 
+    var onPlayStateChanged: (VideoContentViewModel.MediaPlayState) -> Unit
+
+    var onComplete: () -> Unit
+
+    var onUnload: () -> Unit
+
 }
 
+
+fun HTMLVideoElement.mediaPlayState(): VideoContentViewModel.MediaPlayState {
+    return VideoContentViewModel.MediaPlayState(
+        timeInMillis = currentTime.toLong(),
+        totalDuration = duration.toLong(),
+        resumed = currentTime > 0 && !paused && !ended
+    )
+}
+
+
 val VideoContentComponent = FC<VideoContentProps> { props ->
+
+    useOnUnloadEffect {
+        props.onUnload()
+    }
 
     Container {
         Stack {
@@ -36,6 +58,23 @@ val VideoContentComponent = FC<VideoContentProps> { props ->
                 video {
                     src = mediaSrc
                     controls = true
+                    onTimeUpdate = {
+                        props.onPlayStateChanged(it.currentTarget.mediaPlayState())
+                    }
+
+                    onPlay = {
+                        props.onPlayStateChanged(it.currentTarget.mediaPlayState())
+                    }
+
+                    onPause = {
+                        props.onPlayStateChanged(it.currentTarget.mediaPlayState())
+                    }
+
+                    onEnded = {
+                        props.onPlayStateChanged(it.currentTarget.mediaPlayState())
+                        props.onComplete()
+                    }
+
                     css {
                         maxHeight = 80.vh
                         width = 100.pct
@@ -67,6 +106,9 @@ val VideoContentScreen = FC<Props> {
 
     VideoContentComponent {
         uiState = uiStateVal
+        onPlayStateChanged = viewModel::onPlayStateChanged
+        onComplete = viewModel::onComplete
+        onUnload = viewModel::onUnload
     }
 
 }
