@@ -6,7 +6,6 @@ import com.ustadmobile.core.account.*
 import com.ustadmobile.core.contentformats.ContentImportersDiModuleJvm
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
-import com.ustadmobile.core.db.ext.MigrateContainerToContentEntryVersion
 import com.ustadmobile.core.domain.account.SetPasswordServerUseCase
 import com.ustadmobile.core.domain.account.SetPasswordUseCase
 import com.ustadmobile.core.domain.account.SetPasswordUseCaseCommonJvm
@@ -41,6 +40,8 @@ import com.ustadmobile.core.domain.extractmediametadata.mediainfo.ExecuteMediaIn
 import com.ustadmobile.core.domain.extractmediametadata.mediainfo.ExtractMediaMetadataUseCaseMediaInfo
 import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCase
 import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCaseJvm
+import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCase
+import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCaseDirect
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonStatusMap
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsUseCase
@@ -58,17 +59,28 @@ import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseJvm
 import com.ustadmobile.core.domain.usersession.ValidateUserSessionOnServerUseCase
 import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
+import com.ustadmobile.core.domain.xapi.StoreActivitiesUseCase
+import com.ustadmobile.core.domain.xapi.XapiStatementResource
+import com.ustadmobile.core.domain.xapi.http.XapiHttpServerUseCase
+import com.ustadmobile.core.domain.xapi.session.ResumeOrStartXapiSessionUseCase
+import com.ustadmobile.core.domain.xapi.session.ResumeOrStartXapiSessionUseCaseLocal
+import com.ustadmobile.core.domain.xapi.state.DeleteXapiStateUseCase
+import com.ustadmobile.core.domain.xapi.state.ListXapiStateIdsUseCase
+import com.ustadmobile.core.domain.xapi.state.RetrieveXapiStateUseCase
+import com.ustadmobile.core.domain.xapi.state.StoreXapiStateUseCase
+import com.ustadmobile.core.domain.xapi.state.h5puserdata.H5PUserDataEndpointUseCase
+import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
+import com.ustadmobile.core.domain.xxhash.XXHasher64FactoryCommonJvm
+import com.ustadmobile.core.domain.xxhash.XXStringHasher
+import com.ustadmobile.core.domain.xxhash.XXStringHasherCommonJvm
 import com.ustadmobile.core.util.DiTag
-import com.ustadmobile.core.util.DiTag.TAG_CONTEXT_DATA_ROOT
 import com.ustadmobile.door.ext.*
-import com.ustadmobile.core.impl.*
 import com.ustadmobile.lib.rest.ext.*
 import com.ustadmobile.lib.rest.messaging.MailProperties
 import com.ustadmobile.lib.util.ext.bindDataSourceIfNotExisting
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import io.github.aakira.napier.Napier
 import io.ktor.server.application.*
-import io.ktor.serialization.gson.*
 import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.routing.*
@@ -110,15 +122,18 @@ import com.ustadmobile.core.util.ext.isWindowsOs
 import com.ustadmobile.door.log.NapierDoorLogger
 import com.ustadmobile.lib.rest.domain.contententry.importcontent.ContentEntryImportJobRoute
 import com.ustadmobile.lib.rest.domain.person.bulkadd.BulkAddPersonRoute
+import com.ustadmobile.lib.rest.domain.xapi.XapiRoute
+import com.ustadmobile.lib.rest.domain.xapi.savestatementonclear.SaveStatementOnUnloadRoute
+import com.ustadmobile.lib.rest.domain.xapi.session.ResumeOrStartXapiSessionRoute
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.headers.MimeTypeHelper
+import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.files.Path
 import org.kodein.di.ktor.closestDI
 import uk.co.caprica.vlcj.factory.discovery.NativeDiscovery
 import java.net.Inet6Address
 import java.net.NetworkInterface
-import java.util.concurrent.atomic.AtomicBoolean
 
 const val TAG_UPLOAD_DIR = 10
 
@@ -145,8 +160,7 @@ val REQUIRED_EXTERNAL_COMMANDS = emptyList<String>()
 val KTOR_SERVER_ROUTES = listOf(
     "/UmAppDatabase",
     "/ContainerEntryList", "/ContainerEntryFile", "/auth", "/ContainerMount",
-    "/Site", "/import", "/contentupload", "/websocket", "/pdf",
-    "/api", "/staticfiles"
+    "/Site", "/import", "/contentupload", "/websocket", "/api", "/staticfiles"
 )
 
 
@@ -299,10 +313,10 @@ fun Application.umRestApplication(
     Napier.base(LogbackAntiLog())
 
     install(ContentNegotiation) {
-        gson {
-            register(ContentType.Application.Json, GsonConverter())
-            register(ContentType.Any, GsonConverter())
-        }
+        json(
+            json = json,
+            contentType = ContentType.Application.Json
+        )
     }
 
     //Avoid sending the body of content if it has not changed since the client last requested it.
@@ -318,12 +332,11 @@ fun Application.umRestApplication(
 
     val apiKey = environment.config.propertyOrNull("ktor.ustad.googleApiKey")?.getString() ?: CONF_GOOGLE_API
 
-    val ranMvvmMigration = AtomicBoolean(false)
 
     di {
         import(
             makeJvmBackendDiModule(
-                config = environment.config, json = json, ranMvvmMigration = ranMvvmMigration
+                config = environment.config, json = json
             )
         )
         import(ContentImportersDiModuleJvm)
@@ -338,28 +351,8 @@ fun Application.umRestApplication(
             }
         }
 
-        bind<ContainerStorageManager>() with scoped(EndpointScope.Default).singleton {
-            ContainerStorageManager(listOf(instance<File>(tag = TAG_CONTEXT_DATA_ROOT)))
-        }
-
         bind<NodeIdAuthCache>() with scoped(EndpointScope.Default).singleton {
             instance<UmAppDatabase>(tag = DoorTag.TAG_DB).nodeIdAuthCache
-        }
-
-        bind<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR) with scoped(EndpointScope.Default).singleton {
-            val containerDir = File(instance<File>(tag = TAG_CONTEXT_DATA_ROOT), "container")
-
-            //Move any old container directory to the new path (e.g. pre database v57)
-            if(context == Endpoint("localhost")){
-                val oldContainerDir = File("build/storage/singleton/container")
-                if(oldContainerDir.exists() && !oldContainerDir.renameTo(containerDir)) {
-                    throw IllegalStateException("Old singleton container dir present but cannot " +
-                            "rename from ${oldContainerDir.absolutePath} to ${containerDir.absolutePath}")
-                }
-            }
-
-            containerDir.takeIf { !it.exists() }?.mkdirs()
-            containerDir
         }
 
         bind<String>(tag = DiTag.TAG_GOOGLE_API) with singleton {
@@ -673,6 +666,109 @@ fun Application.umRestApplication(
             ExtractVideoThumbnailUseCaseJvm()
         }
 
+        bind<XXStringHasher>() with singleton {
+            XXStringHasherCommonJvm()
+        }
+
+        bind<XXHasher64Factory>() with singleton {
+            XXHasher64FactoryCommonJvm()
+        }
+
+        bind<StoreActivitiesUseCase>() with scoped(EndpointScope.Default).singleton {
+            StoreActivitiesUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = null,
+            )
+        }
+
+        bind<XapiStatementResource>() with scoped(EndpointScope.Default).singleton {
+            XapiStatementResource(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = null,
+                xxHasher = instance(),
+                endpoint = context,
+                xapiJson = instance(),
+                hasherFactory = instance(),
+                storeActivitiesUseCase = instance(),
+            )
+        }
+
+        bind<ResumeOrStartXapiSessionUseCase>() with scoped(EndpointScope.Default).singleton {
+            ResumeOrStartXapiSessionUseCaseLocal(
+                activeDb = instance(tag = DoorTag.TAG_DB),
+                activeRepo = null,
+                xxStringHasher = instance(),
+            )
+        }
+
+        bind<XapiHttpServerUseCase>() with scoped(EndpointScope.Default).singleton {
+            XapiHttpServerUseCase(
+                statementResource = instance(),
+                storeXapiStateUseCase = instance(),
+                retrieveXapiStateUseCase = instance(),
+                listXapiStateIdsUseCase = instance(),
+                deleteXapiStateRequest = instance(),
+                h5PUserDataEndpointUseCase = instance(),
+                db = instance(tag = DoorTag.TAG_DB),
+                xapiJson = instance(),
+                endpoint = context,
+                xxStringHasher = instance(),
+            )
+        }
+
+        bind<H5PUserDataEndpointUseCase>() with scoped(EndpointScope.Default).singleton {
+            H5PUserDataEndpointUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = null,
+                xapiJson = instance(),
+                xxStringHasher = instance(),
+                xxHasher64Factory = instance(),
+            )
+        }
+
+        bind<StoreXapiStateUseCase>() with scoped(EndpointScope.Default).singleton {
+            StoreXapiStateUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = null,
+                xapiJson = instance(),
+                xxHasher64Factory = instance(),
+                xxStringHasher = instance(),
+                endpoint = context,
+            )
+        }
+
+        bind<RetrieveXapiStateUseCase>() with scoped(EndpointScope.Default).singleton {
+            RetrieveXapiStateUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = null,
+                xapiJson = instance(),
+                xxStringHasher = instance(),
+                xxHasher64Factory = instance(),
+            )
+        }
+
+        bind<ListXapiStateIdsUseCase>() with scoped(EndpointScope.Default).singleton {
+            ListXapiStateIdsUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = null,
+                xxStringHasher = instance(),
+            )
+        }
+
+        bind<DeleteXapiStateUseCase>() with scoped(EndpointScope.Default).singleton {
+            DeleteXapiStateUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = null,
+                xxStringHasher = instance(),
+                xxHasher64Factory = instance(),
+                endpoint = context,
+            )
+        }
+
+        bind<GetApiUrlUseCase>() with scoped(EndpointScope.Default).singleton {
+            GetApiUrlUseCaseDirect(context)
+        }
+
         try {
             appConfig.config("mail")
 
@@ -706,20 +802,19 @@ fun Application.umRestApplication(
         onReady {
             if(dbMode == CONF_DBMODE_SINGLETON && siteUrl != null) {
                 val endpoint = Endpoint(siteUrl)
-                //Get the container dir so that any old directories (build/storage etc) are moved if required
-                di.on(endpoint).direct.instance<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
-                //Generate the admin username/password etc.
-                di.on(endpoint).direct.instance<AuthManager>()
+                val passwordFile = di.on(endpoint).direct.instance<File>(tag = DiTag.TAG_ADMIN_PASS_FILE)
 
-                val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
+                /**
+                 * Eager initialization only if the initial admin password needs generated. This
+                 * avoids potential issue with startup script if this server starts before postgres
+                 * is ready.
+                 */
+                if(!passwordFile.exists()) {
+                    //Generate the admin username/password etc.
+                    di.on(endpoint).direct.instance<AuthManager>()
 
-                if(ranMvvmMigration.get()) {
-                    runBlocking {
-                        db.MigrateContainerToContentEntryVersion(
-                            importUseCase = on(endpoint).instance(),
-                            importersManager = on(endpoint).instance(),
-                        )
-                    }
+                    val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
+                    println("init db: $db")
                 }
             }
 
@@ -850,6 +945,29 @@ fun Application.umRestApplication(
                             json = json,
                         )
                     }
+                }
+
+                /**
+                 * Xapi-Ext contains non-standard xapi endpoint services that we use internally;
+                 * specfically SaveStatementOnUnload and StartHttpXapiSession
+                 */
+                route("xapi-ext") {
+                    SaveStatementOnUnloadRoute(
+                        statementResource = { call -> di.on(call).direct.instance() },
+                        json = json,
+                    )
+
+                    ResumeOrStartXapiSessionRoute(
+                        resumeOrStartXapiSessionUseCase = { call -> di.on(call).direct.instance() },
+                        verifyClientUserSessionUseCase  = { call -> di.on(call).direct.instance() },
+                        json = json,
+                    )
+                }
+
+                route("xapi/{pathSegments...}") {
+                    XapiRoute(
+                        xapiHttpServerUseCase = { call -> di.on(call).direct.instance() }
+                    )
                 }
 
                 CacheRoute(

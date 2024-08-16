@@ -19,6 +19,15 @@ fun Modifier.defaultItemPadding(
     bottom: Dp = 8.dp,
 ): Modifier = padding(start = start, top = top, end = end, bottom = bottom)
 
+
+fun Modifier.scaledDefaultItemPadding(
+    scale: Float,
+    start: Dp = (16 * scale).dp,
+    top: Dp = (8 * scale).dp,
+    end: Dp = (16 * scale).dp,
+    bottom: Dp = (8 * scale).dp,
+) = padding(start = start, top = top, end = end, bottom = bottom)
+
 /**
  * Default padding for a screen. This is 8dp at the top and bottom. Horizontal padding is handled
  * by components themselves.

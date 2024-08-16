@@ -9,7 +9,7 @@ import com.ustadmobile.core.test.assertCachedBodyMatchesFileContent
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.ContentEntryImportJob
 import com.ustadmobile.lib.util.SysPathUtil
-import com.ustadmobile.libcache.request.requestBuilder
+import com.ustadmobile.ihttp.request.iRequestBuilder
 import com.ustadmobile.libcache.response.bodyAsString
 import com.ustadmobile.util.test.ResourcesDispatcher
 import com.ustadmobile.util.test.ext.newFileFromResource
@@ -137,7 +137,7 @@ class PdfContentImporterJvmTest : AbstractContentImporterTest() {
         }
 
         val manifestUrl = result.cevManifestUrl
-        val manifestResponse = ustadCache.retrieve(requestBuilder(manifestUrl!!))
+        val manifestResponse = ustadCache.retrieve(iRequestBuilder(manifestUrl!!))
         val manifest = json.decodeFromString(
             ContentManifest.serializer(),
             manifestResponse!!.bodyAsString()!!
@@ -180,7 +180,7 @@ class PdfContentImporterJvmTest : AbstractContentImporterTest() {
             }
 
             val manifestUrl = result.cevManifestUrl
-            val manifestResponse = ustadCache.retrieve(requestBuilder(manifestUrl!!))
+            val manifestResponse = ustadCache.retrieve(iRequestBuilder(manifestUrl!!))
             val manifest = json.decodeFromString(
                 ContentManifest.serializer(),
                 manifestResponse!!.bodyAsString()!!

@@ -6,7 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditUiState
-import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchoolAndTerminology
+import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndAndTerminology
 import com.ustadmobile.lib.db.entities.Schedule
 
 @Composable
@@ -15,7 +15,7 @@ fun ClazzEditScreenPreview() {
     val uiState: ClazzEditUiState by remember {
         mutableStateOf(
             ClazzEditUiState(
-                entity = ClazzWithHolidayCalendarAndSchoolAndTerminology().apply {
+                entity = ClazzWithHolidayCalendarAndAndTerminology().apply {
 
                 },
                 clazzSchedules = listOf(

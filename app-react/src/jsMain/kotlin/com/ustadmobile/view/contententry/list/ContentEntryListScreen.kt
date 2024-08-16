@@ -18,6 +18,8 @@ import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.composites.ContentEntryAndListDetail
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.mui.components.UstadListFilterChipsHeader
+import com.ustadmobile.mui.components.UstadNothingHereYet
+import com.ustadmobile.util.ext.isSettledEmpty
 import com.ustadmobile.view.contententry.UstadContentEntryListItem
 import com.ustadmobile.view.components.UstadFab
 import com.ustadmobile.view.components.virtuallist.VirtualList
@@ -220,6 +222,8 @@ private val ContentEntryListScreenComponent = FC<ContentEntryListScreenProps> { 
         placeholdersEnabled = true
     )
 
+    val isSettledEmpty = infiniteQueryResult.isSettledEmpty(mediatorResult)
+
     val muiAppState = useMuiAppState()
 
     val strings = useStringProvider()
@@ -295,6 +299,12 @@ private val ContentEntryListScreenComponent = FC<ContentEntryListScreenProps> { 
                             }
                         }
                     }
+                }
+            }
+
+            if(isSettledEmpty) {
+                item("empty_state") {
+                    UstadNothingHereYet.create()
                 }
             }
 

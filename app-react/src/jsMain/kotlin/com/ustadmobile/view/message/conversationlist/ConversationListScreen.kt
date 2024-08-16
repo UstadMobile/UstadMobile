@@ -16,6 +16,8 @@ import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.composites.MessageAndOtherPerson
 import com.ustadmobile.lib.db.entities.Message
 import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.mui.components.UstadNothingHereYet
+import com.ustadmobile.util.ext.isSettledEmpty
 import com.ustadmobile.view.components.UstadFab
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
@@ -55,6 +57,8 @@ private val ConversationListScreenComponent2 = FC<ConversationListScreenProps> {
         mediatorResult.pagingSourceFactory, true, 50
     )
 
+    val isSettledEmpty = infiniteQueryResult.isSettledEmpty(mediatorResult)
+
     val muiAppState = useMuiAppState()
     val dateFormatterVal = useDateFormatter()
     val timeFormatterVal = useTimeFormatter()
@@ -68,6 +72,12 @@ private val ConversationListScreenComponent2 = FC<ConversationListScreenProps> {
         }
 
         content = virtualListContent {
+
+            if(isSettledEmpty) {
+                item("empty_state") {
+                    UstadNothingHereYet.create()
+                }
+            }
 
             infiniteQueryPagingItems(
                 items = infiniteQueryResult,

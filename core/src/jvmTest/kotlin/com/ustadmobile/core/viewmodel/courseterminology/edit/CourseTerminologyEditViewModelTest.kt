@@ -46,7 +46,7 @@ class CourseTerminologyEditViewModelTest : AbstractMainDispatcherTest() {
             }
 
             activeDb.doorFlow(arrayOf("CourseTerminology")) {
-                activeDb.courseTerminologyDao.findAllCourseTerminologyList()
+                activeDb.courseTerminologyDao().findAllCourseTerminologyList()
             }.assertItemReceived(timeout = 5.seconds) { list ->
                 list.any {
                     val terms = it.toTerminologyEntries(json, systemImpl)
@@ -66,7 +66,7 @@ class CourseTerminologyEditViewModelTest : AbstractMainDispatcherTest() {
                 ctTerminology = json.encodeStringMapToString(
                     mapOf(TEACHER_KEY to "Professor")
                 )
-                ctUid = activeDb.courseTerminologyDao.insertAsync(this)
+                ctUid = activeDb.courseTerminologyDao().insertAsync(this)
             }
 
             viewModelFactory {
@@ -93,7 +93,7 @@ class CourseTerminologyEditViewModelTest : AbstractMainDispatcherTest() {
 
 
             activeDb.doorFlow(arrayOf("CourseTerminology")) {
-                activeDb.courseTerminologyDao.findAllCourseTerminologyList()
+                activeDb.courseTerminologyDao().findAllCourseTerminologyList()
             }.assertItemReceived(timeout = 5.seconds) { list ->
                 list.any {
                     val terms = it.toTerminologyEntries(json, systemImpl)

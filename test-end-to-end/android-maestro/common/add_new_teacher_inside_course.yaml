@@ -16,6 +16,7 @@ appId: com.toughra.ustadmobile
 - tapOn: "Add a new person"
 - tapOn: "First names*"
 - inputText: ${TEACHERFIRSTNAME}
+- hideKeyboard
 - tapOn: "Last name*"
 - inputText: ${TEACHERLASTNAME}
 - hideKeyboard

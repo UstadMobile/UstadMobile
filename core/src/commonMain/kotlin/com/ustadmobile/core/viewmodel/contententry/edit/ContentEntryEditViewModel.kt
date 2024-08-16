@@ -100,7 +100,7 @@ class ContentEntryEditViewModel(
         launchIfHasPermission(
             permissionCheck = { db ->
                 goingToCourseBlockEdit ||
-                    db.systemPermissionDao.personHasSystemPermission(
+                    db.systemPermissionDao().personHasSystemPermission(
                         activeUserPersonUid, PermissionFlags.EDIT_LIBRARY_CONTENT
                     )
             }
@@ -109,7 +109,7 @@ class ContentEntryEditViewModel(
                 serializer = ContentEntryAndContentJob.serializer(),
                 onLoadFromDb = { db ->
                     //Check if the user can edit the content entry itself...
-                    db.takeIf { entityUidArg != 0L }?.contentEntryDao
+                    db.takeIf { entityUidArg != 0L }?.contentEntryDao()
                         ?.findByUidWithEditDetails(entityUidArg)?.let { entryAndPicture ->
                             if (entryAndPicture.entry != null) {
                                 ContentEntryAndContentJob(

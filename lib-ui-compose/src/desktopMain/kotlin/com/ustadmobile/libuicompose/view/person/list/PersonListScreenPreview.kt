@@ -3,7 +3,6 @@ package com.ustadmobile.libuicompose.view.person.list
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.runtime.Composable
 import com.ustadmobile.core.viewmodel.person.list.PersonListUiState
-import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
 @Preview
 @Composable
 private fun PersonEditPreview() {

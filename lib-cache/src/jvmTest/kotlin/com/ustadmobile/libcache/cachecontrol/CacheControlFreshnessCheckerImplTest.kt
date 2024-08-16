@@ -1,7 +1,7 @@
 package com.ustadmobile.libcache.cachecontrol
 
 import com.ustadmobile.door.util.systemTimeInMillis
-import com.ustadmobile.libcache.headers.headersBuilder
+import com.ustadmobile.ihttp.headers.iHeadersBuilder
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -11,10 +11,10 @@ class CacheControlFreshnessCheckerImplTest {
 
     @Test
     fun givenResponseWithinMaxAge_whenChecked_isFresh() {
-        val responseHeaders = headersBuilder {
+        val responseHeaders = iHeadersBuilder {
             header("cache-control", "max-age=86400")
         }
-        val requestHeaders = headersBuilder {
+        val requestHeaders = iHeadersBuilder {
             header("cache-control", "cache")
         }
 
@@ -31,12 +31,12 @@ class CacheControlFreshnessCheckerImplTest {
     fun givenResponseHasMustRevalidate_whenChecked_isStale() {
         val etag = "tagged"
         val lastModified = "Tue, 22 Feb 2022 20:20:20 GMT"
-        val responseHeaders = headersBuilder {
+        val responseHeaders = iHeadersBuilder {
             header("cache-control", "must-revalidate")
             header("etag", etag)
             header("last-modified", lastModified)
         }
-        val requestHeaders = headersBuilder {
+        val requestHeaders = iHeadersBuilder {
 
         }
 
@@ -54,10 +54,10 @@ class CacheControlFreshnessCheckerImplTest {
 
     @Test
     fun givenResponseIsImmutable_whenChecked_isFresh() {
-        val responseHeaders = headersBuilder {
+        val responseHeaders = iHeadersBuilder {
             header("cache-control", "immutable")
         }
-        val requestHeaders = headersBuilder {  }
+        val requestHeaders = iHeadersBuilder {  }
 
         val status = CacheControlFreshnessCheckerImpl().invoke(
             requestHeaders = requestHeaders,
@@ -71,10 +71,10 @@ class CacheControlFreshnessCheckerImplTest {
 
     @Test
     fun givenRequestHasNoCacheDirective_whenChecked_isStale() {
-        val responseHeaders = headersBuilder {
+        val responseHeaders = iHeadersBuilder {
             header("cache-control", "max-age=86400")
         }
-        val requestHeaders = headersBuilder {
+        val requestHeaders = iHeadersBuilder {
             header("cache-control", "no-cache")
         }
         val cachedResponseTime = systemTimeInMillis() - 60000

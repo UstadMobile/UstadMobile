@@ -2,7 +2,7 @@ package com.ustadmobile.test.http
 
 import com.ustadmobile.lib.util.SysPathUtil
 import io.ktor.http.*
-import io.ktor.serialization.gson.*
+import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.*
 import io.ktor.server.http.content.*
 import io.ktor.server.plugins.callloging.*
@@ -24,6 +24,9 @@ const val DEVICE_SERIAL_PARAM = "device"
 const val TESTNAME_PARAM = "testName"
 
 const val TEST_FILE_NAME_PARAM = "test-file-name"
+
+const val DEST_PARAM = "dest"
+
 
 @Suppress("BlockingMethodInNonBlockingContext", "unused", "SdCardPath")
 fun Application.testServerController() {
@@ -123,10 +126,7 @@ fun Application.testServerController() {
     install(CallLogging)
 
     install(ContentNegotiation) {
-        gson {
-            register(ContentType.Application.Json, GsonConverter())
-            register(ContentType.Any, GsonConverter())
-        }
+        json()
     }
 
 
@@ -308,7 +308,9 @@ fun Application.testServerController() {
         /**
          * Push file from the test content directory to the device Downloads directory using adb
          *
-         * /pushcontent?device=<serial>&test-file-name=file-name.ext
+         * /pushcontent?device=<serial>&test-file-name=file-name.ext&dest=/sdcard/Pictures
+         *
+         * dest parameter is optional. The argument MUST be url encoded.
          *
          * test-file-name should be the name of a file found in the test files directory (
          * test-end-to-end/test-files/content )
@@ -317,6 +319,7 @@ fun Application.testServerController() {
             val deviceSerial = call.request.queryParameters[DEVICE_SERIAL_PARAM]
             val fileName = call.request.queryParameters[TEST_FILE_NAME_PARAM]
                 ?: throw IllegalArgumentException("No filename specified")
+            val pushDest = call.request.queryParameters[DEST_PARAM] ?: "/sdcard/Download"
             val contentFile = File(testContentDir, fileName)
 
             val adbCommand = SysPathUtil.findCommandInPath("adb")
@@ -334,7 +337,7 @@ fun Application.testServerController() {
             }
 
             val process = ProcessBuilder(listOf(adbCommand.absolutePath,
-                "-s", deviceSerial, "push", contentFile.absolutePath, "/sdcard/Download"))
+                "-s", deviceSerial, "push", contentFile.absolutePath, pushDest))
                 .directory(serverDir)
                 .redirectOutput(ProcessBuilder.Redirect.PIPE)
                 .redirectError(ProcessBuilder.Redirect.PIPE)

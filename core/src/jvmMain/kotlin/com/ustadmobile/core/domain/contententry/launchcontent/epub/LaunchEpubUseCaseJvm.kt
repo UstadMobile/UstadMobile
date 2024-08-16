@@ -3,13 +3,13 @@ package com.ustadmobile.core.domain.contententry.launchcontent.epub
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.domain.contententry.launchcontent.LaunchContentEntryVersionUseCase
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.LaunchChromeUseCase
-import com.ustadmobile.core.embeddedhttp.EmbeddedHttpServer
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.viewmodel.epubcontent.EpubContentViewModel
 import com.ustadmobile.lib.db.entities.ContentEntryVersion
 import net.thauvin.erik.urlencoder.UrlEncoderUtil
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCase
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
 
 /*
@@ -23,33 +23,35 @@ import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
  */
 class LaunchEpubUseCaseJvm(
     private val launchChromeUseCase: LaunchChromeUseCase,
-    private val embeddedHttpServer: EmbeddedHttpServer,
     private val endpoint: Endpoint,
     private val systemImpl: UstadMobileSystemImpl,
+    private val getApiUrlUseCase: GetApiUrlUseCase,
 ): LaunchEpubUseCase {
 
     override suspend fun invoke(
         contentEntryVersion: ContentEntryVersion,
         navController: UstadNavController,
+        clazzUid: Long,
+        cbUid: Long,
         target: OpenExternalLinkUseCase.Companion.LinkTarget,
     ): LaunchContentEntryVersionUseCase.LaunchResult {
         val manifestUrl = contentEntryVersion.cevManifestUrl ?:
             throw IllegalStateException("ContentEntryVersion $contentEntryVersion manifesturl is null")
-        val localManifestUrl = embeddedHttpServer.endpointUrl(
-            endpoint, manifestUrl.substringAfter(endpoint.url)
-        )
+        val localManifestUrl = getApiUrlUseCase(manifestUrl.substringAfter(endpoint.url))
+        val xapiStatementsUrl = getApiUrlUseCase("api/xapi/statement")
 
         val cevOpenUri = contentEntryVersion.cevOpenUri ?:
             throw IllegalStateException("ContentEntryVersion $contentEntryVersion openUri is null")
 
         val tocString = systemImpl.getString(MR.strings.table_of_contents)
-        val url = embeddedHttpServer.endpointUrl(
-            endpoint = endpoint,
-            path = "umapp/#/${EpubContentViewModel.DEST_NAME}?" +
+        val url = getApiUrlUseCase(
+             path = "umapp/#/${EpubContentViewModel.DEST_NAME}?" +
                     "${EpubContentViewModel.ARG_MANIFEST_URL}=${UrlEncoderUtil.encode(localManifestUrl)}&" +
                     "${EpubContentViewModel.ARG_CEV_URI}=${UrlEncoderUtil.encode(cevOpenUri)}&" +
                     "${EpubContentViewModel.ARG_NAVIGATION_VISIBLE}=false&" +
-                    "${EpubContentViewModel.ARG_TOC_OPTIONS_STRING}=${UrlEncoderUtil.encode(tocString)}"
+                    "${EpubContentViewModel.ARG_TOC_OPTIONS_STRING}=${UrlEncoderUtil.encode(tocString)}&" +
+                    "${EpubContentViewModel.ARG_XAPI_STATEMENTS_URL}=${UrlEncoderUtil.encode(xapiStatementsUrl)}"
+
         )
         launchChromeUseCase(url)
         return LaunchContentEntryVersionUseCase.LaunchResult()

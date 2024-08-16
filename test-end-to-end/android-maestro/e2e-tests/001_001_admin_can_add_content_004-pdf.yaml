@@ -1,0 +1,42 @@
+appId: com.toughra.ustadmobile
+env:
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/001_001_admin_can_add_content_004-pdf"
+  TESTNAME: "001_001_admin_can_add_content_004-pdf"
+---
+- clearState: com.toughra.ustadmobile
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+      TESTNAME: ${TESTNAME}
+- runFlow:
+    file: "../common/clear_login_and_add_content.yaml"
+    env:
+      TESTFILENAME: Pdf_Content.pdf
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+- tapOn: "SAVE"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_add_to_library"
+- tapOn: "Document"
+- extendedWaitUntil:
+    notVisible: "Importing"
+    timeout: 10000
+- extendedWaitUntil:
+    notVisible: "Uploading"
+    timeout: 10000
+- tapOn: Open
+- assertVisible: "PDF PAGE"
+- tapOn: "Back"
+- runFlow:
+    file: "../common/login_download_and_open_content.yaml"
+#Download and open content
+- tapOn: "Library"
+- extendedWaitUntil:
+    visible: "Document"
+    timeout: 60000
+- tapOn: "Document"
+- tapOn: Download
+- tapOn: Open
+- assertVisible: "PDF PAGE"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/pdf_content_download_and_open"

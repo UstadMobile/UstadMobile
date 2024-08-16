@@ -25,7 +25,7 @@ class EnqueueBulkAddPersonServerUseCase(
             accountPersonUid = accountPersonUid,
         )
 
-        if(!activeDb.systemPermissionDao.personHasSystemPermission(
+        if(!activeDb.systemPermissionDao().personHasSystemPermission(
                 accountPersonUid,
                 PermissionFlags.ADD_PERSON
         )) {

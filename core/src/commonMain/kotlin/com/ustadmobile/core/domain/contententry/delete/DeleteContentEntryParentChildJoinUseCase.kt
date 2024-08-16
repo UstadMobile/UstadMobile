@@ -15,14 +15,14 @@ class DeleteContentEntryParentChildJoinUseCase(
     ){
         val timeNow = systemTimeInMillis()
         repoOrDb.withDoorTransactionAsync {
-            repoOrDb.contentEntryParentChildJoinDao.setEntriesDeleted(
+            repoOrDb.contentEntryParentChildJoinDao().setEntriesDeleted(
                 selectedUids = entries.map { it.contentEntryParentChildJoinUid },
                 isDeleted = true,
                 updateTime = timeNow,
             )
 
             entries.forEach {
-                repoOrDb.deletedItemDao.insertDeletedItemForContentEntryParentChildJoin(
+                repoOrDb.deletedItemDao().insertDeletedItemForContentEntryParentChildJoin(
                     cepcjUid = it.contentEntryParentChildJoinUid,
                     time = timeNow,
                     deletedByPersonUid = activeUserPersonUid,

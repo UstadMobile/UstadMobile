@@ -9,7 +9,6 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.Role
 import kotlinx.coroutines.flow.filter
 import org.mockito.kotlin.*
 import kotlin.test.Test
@@ -24,9 +23,9 @@ class ClazzListViewModelTest : AbstractMainDispatcherTest()  {
                 ClazzListViewModel(di, savedStateHandle)
             }
 
-            val clazzRepo = spy(activeRepo.clazzDao)
+            val clazzRepo = spy(activeRepo.clazzDao())
             activeRepo.stub {
-                on { clazzDao }.thenReturn(clazzRepo)
+                on { clazzDao() }.thenReturn(clazzRepo)
             }
 
             val accountPersonUid = accountManager.currentAccount.personUid
@@ -60,11 +59,11 @@ class ClazzListViewModelTest : AbstractMainDispatcherTest()  {
             }
 
             val testEntity = Clazz().apply {
-                clazzUid = activeDb.clazzDao.insert(this)
+                clazzUid = activeDb.clazzDao().insert(this)
             }
 
             val activeUser = setActiveUser(activeEndpoint)
-            activeRepo.grantScopedPermission(activeUser, Role.PERMISSION_CLAZZ_OPEN,
+            activeRepo.grantScopedPermission(activeUser, Long.MAX_VALUE,
                 Clazz.TABLE_ID, testEntity.clazzUid)
 
 

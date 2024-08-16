@@ -35,7 +35,7 @@ class BlobUploadClientJob: InterruptableCoroutineJob() {
             blobUploadClientUseCase(jobUid)
         }catch(e: Throwable) {
             withContext(NonCancellable) {
-                if (db.transferJobDao.isNotCancelled(jobUid)) {
+                if (db.transferJobDao().isNotCancelled(jobUid)) {
                     try {
                         context.scheduleRetryOrThrow(
                             BlobUploadClientJob::class.java, BlobUploadClientUseCaseJvm.MAX_ATTEMPTS_DEFAULT

@@ -3,6 +3,7 @@ package com.ustadmobile.libuicompose.paging
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -15,8 +16,8 @@ import app.cash.paging.PagingSource
 import app.cash.paging.PagingSourceLoadParamsRefresh
 import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.door.paging.DoorOffsetLimitRemoteMediator
-import com.ustadmobile.door.paging.DoorRepositoryReplicatePullPagingSource
 import com.ustadmobile.door.paging.PagingSourceInterceptor
+import com.ustadmobile.door.paging.PagingSourceWithHttpLoader
 import com.ustadmobile.door.util.systemTimeInMillis
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
@@ -26,7 +27,17 @@ import java.util.concurrent.atomic.AtomicReference
 class DoorRepositoryPagerResult<T : Any>(
     val pager: Pager<Int, T>,
     val lazyPagingItems: LazyPagingItems<T>,
-)
+    val mediatorState: DoorOffsetLimitRemoteMediator.OffsetLimitMediatorState,
+) {
+
+    /**
+     * True when loading has been finished and the list is empty.
+     */
+    val isSettledEmpty: Boolean
+        get() = lazyPagingItems.itemCount == 0 && mediatorState.loadingStarted &&
+                mediatorState.loadingRangesInProgress.isEmpty()
+
+}
 
 /**
  * Use DoorOffsetLimitRemoteMediator to trigger remote paged loads as required
@@ -56,16 +67,22 @@ fun <T: Any> rememberDoorRepositoryPager(
         mutableStateOf(pagingSourceFactory)
     }
 
+    //Unchecked cast is unavoidable here, and will always be correct.
+    @Suppress("UNCHECKED_CAST")
     val offsetLimitMediator = remember {
         DoorOffsetLimitRemoteMediator(
             onRemoteLoad = { offset, limit ->
                 Napier.v { "rememberDoorRepositoryPager: fetch remote offset=$offset limit=$limit" }
-                (currentPagingSource.get() as? DoorRepositoryReplicatePullPagingSource)?.loadHttp(
+                (currentPagingSource.get() as? PagingSourceWithHttpLoader<Int>)?.loadHttp(
                     PagingSourceLoadParamsRefresh(offset, limit, false)
                 )
             }
         )
     }
+
+    val mediatorState by offsetLimitMediator.state.collectAsState(
+        DoorOffsetLimitRemoteMediator.OffsetLimitMediatorState()
+    )
 
     DisposableEffect(Unit) {
         onDispose {
@@ -118,5 +135,5 @@ fun <T: Any> rememberDoorRepositoryPager(
         }
     }
 
-    return DoorRepositoryPagerResult(pager, lazyPagingItems)
+    return DoorRepositoryPagerResult(pager, lazyPagingItems, mediatorState)
 }

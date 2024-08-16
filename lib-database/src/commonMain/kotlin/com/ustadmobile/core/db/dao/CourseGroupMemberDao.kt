@@ -5,9 +5,11 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.db.dao.CourseGroupMemberDaoCommon.CASE_CLAZZ_UID_WHEN_NOT_ZERO_USEIT_ELSE_LOOKUP_CGS_UID_SQL
 import com.ustadmobile.core.db.dao.CourseGroupMemberDaoCommon.FIND_BY_COURSEGROUPSET_AND_CLAZZ_SQL
 import com.ustadmobile.door.annotation.*
+import com.ustadmobile.lib.db.composites.CourseGroupMemberAndPerson
 import com.ustadmobile.lib.db.composites.PersonAndPicture
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.flow.Flow
@@ -18,46 +20,11 @@ expect abstract class CourseGroupMemberDao: BaseDao<CourseGroupMember> {
 
 
     @Query("""
-        SELECT Person.*, CourseGroupMember.* 
-          FROM Person
-               JOIN ClazzEnrolment 
-               ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
-               AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
-               AND ClazzEnrolment.clazzEnrolmentOutcome = ${ClazzEnrolment.OUTCOME_IN_PROGRESS}
-               
-               LEFT JOIN CourseGroupMember
-               ON CourseGroupMember.cgmPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid
-               AND CourseGroupMember.cgmSetUid = :setUid
-               
-         WHERE clazzEnrolmentClazzUid = :clazzUid
-      ORDER BY Person.firstNames
-    """)
-    abstract suspend fun findByGroupSetAsync(setUid: Long, clazzUid: Long): List<CourseGroupMemberPerson>
-
-    @Query("""
         SELECT CourseGroupMember.*
           FROM CourseGroupMember
          WHERE cgmSetUid = :groupSetUid 
     """)
     abstract suspend fun findByGroupSetUidAsync(groupSetUid: Long): List<CourseGroupMember>
-
-
-    @Query("""
-        SELECT Person.*, CourseGroupMember.* 
-          FROM Person
-               JOIN ClazzEnrolment 
-               ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
-               AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT} 
-               AND ClazzEnrolment.clazzEnrolmentOutcome = ${ClazzEnrolment.OUTCOME_IN_PROGRESS}
-               
-               LEFT JOIN CourseGroupMember
-               ON CourseGroupMember.cgmPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid
-               AND CourseGroupMember.cgmSetUid = :setUid
-               
-         WHERE clazzEnrolmentClazzUid = :clazzUid
-      ORDER BY CourseGroupMember.cgmGroupNumber, Person.firstNames
-    """)
-    abstract suspend fun findByGroupSetOrderedAsync(setUid: Long, clazzUid: Long): List<CourseGroupMemberPerson>
 
     @Query("""
         SELECT * 
@@ -155,5 +122,45 @@ expect abstract class CourseGroupMemberDao: BaseDao<CourseGroupMember> {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun upsertListAsync(list: List<CourseGroupMember>)
+
+
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
+    )
+    @Query("""
+        SELECT CourseGroupMember.*, Person.*
+          FROM CourseGroupMember
+               JOIN Person 
+                    ON Person.personUid = CourseGroupMember.cgmPersonUid
+         WHERE (    CourseGroupMember.cgmSetUid = :courseGroupSetUid
+                AND CourseGroupMember.cgmGroupNumber = :groupNum)
+           AND (    /* Grant permission where the active person is in the group */ 
+                    EXISTS(SELECT 1
+                             FROM CourseGroupMember CourseGroupMemberInternal
+                            WHERE CourseGroupMemberInternal.cgmSetUid = :courseGroupSetUid
+                              AND CourseGroupMemberInternal.cgmPersonUid = :accountPersonUid)
+                    /* Grant permission where the activepersonuid is in a group assigned to mark this group */
+                 OR EXISTS(SELECT 1
+                             FROM PeerReviewerAllocation
+                            WHERE PeerReviewerAllocation.praAssignmentUid = :assignmentUid
+                              AND PeerReviewerAllocation.praMarkerSubmitterUid = :groupNum
+                              AND EXISTS(SELECT 1
+                                           FROM CourseGroupMember CourseGroupMemberInternal
+                                          WHERE CourseGroupMemberInternal.cgmSetUid = PeerReviewerAllocation.praMarkerSubmitterUid
+                                            AND CourseGroupMemberInternal.cgmPersonUid = :accountPersonUid)) 
+                    /* Grant permission where the active person has the select person permission for the class */                        
+                 OR (${CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT1} ${PermissionFlags.PERSON_VIEW}
+                     ${CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT2} ${PermissionFlags.PERSON_VIEW}
+                     ${CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT3})    
+               )
+               
+    """)
+    abstract suspend fun findByCourseGroupSetAndGroupNumAsync(
+        courseGroupSetUid: Long,
+        groupNum: Int,
+        clazzUid: Long,
+        assignmentUid: Long,
+        accountPersonUid: Long,
+    ): List<CourseGroupMemberAndPerson>
 
 }

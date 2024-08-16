@@ -31,7 +31,7 @@ class SaveAndUploadLocalUrisUseCase(
             blobs.forEach {
                 when(it.tableId) {
                     CourseAssignmentSubmissionFile.TABLE_ID -> {
-                        courseAssignmentSubmissionFileDao.updateUri(
+                        courseAssignmentSubmissionFileDao().updateUri(
                             casaUid = it.entityUid, uri = it.blobUrl, updateTime = timeNow
                         )
                     }

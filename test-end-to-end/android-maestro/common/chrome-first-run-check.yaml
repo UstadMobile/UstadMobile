@@ -1,0 +1,14 @@
+appId: com.toughra.ustadmobile
+---
+
+# This flow will check if Chrome is showing its first run screen. What to do next varies depending
+# on the version. If the "Welcome to Chrome" first run screen is showing, then run the
+# chrome-first-run-tap-accept-or-use-without-account.yaml flow to proceed.
+- runFlow:
+    when:
+      visible: "Welcome to Chrome"
+    file: "chrome-first-run-tap-accept-or-use-without-account.yaml"
+- runFlow:
+    when:
+      visible: "Chrome notifications make things easier"
+    file: "chrome-first-run-tap-notification-no-thanks.yaml"

@@ -29,7 +29,9 @@ appId: com.toughra.ustadmobile
       USERNAME: "t1"
       GENDER: "Female"
       PASSWORD: "test"
-
+- tapOn:
+    text: "Courses"
+    index: 1
 # add new student using flow - add_new_student_inside_course ----------- Justin Joe  - Justin/test
 - runFlow:
     file: "./add_new_student_inside_course.yaml"
@@ -38,7 +40,7 @@ appId: com.toughra.ustadmobile
       STUDENTFIRSTNAME: "Student"
       STUDENTLASTNAME: "1"
       USERNAME: "s1"
-      GENDER: "Male"
+      GENDER: "Female"
       PASSWORD: "test"
 
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/member_list_of_new_test_course"

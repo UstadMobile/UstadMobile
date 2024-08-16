@@ -2,7 +2,6 @@ package com.ustadmobile.core.domain.courseblockupdate
 
 import com.ustadmobile.lib.db.composites.CourseBlockAndEditEntities
 import com.ustadmobile.lib.db.entities.CourseBlock
-import com.ustadmobile.lib.db.entities.ext.shallowCopy
 
 fun List<CourseBlockAndEditEntities>.findParentModule(
     forBlock: CourseBlockAndEditEntities
@@ -32,10 +31,10 @@ fun List<CourseBlockAndEditEntities>.updateParentModuleUidsAndIndex(): List<Cour
         val parentModUid = findParentModule(block)
         if(block.courseBlock.cbModuleParentBlockUid != parentModUid || block.courseBlock.cbIndex != index){
             block.copy(
-                courseBlock = block.courseBlock.shallowCopy {
-                    cbModuleParentBlockUid = parentModUid
+                courseBlock = block.courseBlock.copy(
+                    cbModuleParentBlockUid = parentModUid,
                     cbIndex = index
-                }
+                )
             )
         }else {
             block
@@ -67,9 +66,9 @@ fun List<CourseBlockAndEditEntities>.autoIndent(
     return if(block.cbIndentLevel != autoIndent) {
         toMutableList().apply {
             this[index] = this[index].copy(
-                courseBlock = this[index].courseBlock.shallowCopy {
+                courseBlock = this[index].courseBlock.copy(
                     cbIndentLevel = autoIndent
-                }
+                )
             )
         }.toList()
     } else {

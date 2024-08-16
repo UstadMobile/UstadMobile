@@ -5,7 +5,6 @@ import com.russhwolf.settings.set
 import com.ustadmobile.BuildConfigJs
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.domain.contententry.importcontent.CancelRemoteContentEntryImportUseCase
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCaseJs
@@ -174,10 +173,6 @@ internal fun ustadJsDi(
 
     bind<HttpClient>() with singleton {
         httpClient
-    }
-
-    bind<ContainerStorageManager> () with scoped(EndpointScope.Default).singleton{
-        ContainerStorageManager(context, di)
     }
 
     registerContextTranslator {

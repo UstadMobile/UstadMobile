@@ -102,7 +102,7 @@ class ParentalConsentManagementViewModel(
                 loadEntity(
                     serializer = PersonParentJoinAndMinorPerson.serializer(),
                     onLoadFromDb = { db ->
-                        db.personParentJoinDao.findByUidWithMinorAsync(entityUidArg)?.takeIf { ppjAndMinor ->
+                        db.personParentJoinDao().findByUidWithMinorAsync(entityUidArg)?.takeIf { ppjAndMinor ->
                             ppjAndMinor.personParentJoin?.let {
                                 //If the join has already been claimed - and the active user is not the
                                 //parent/guardian, stop.
@@ -129,7 +129,7 @@ class ParentalConsentManagementViewModel(
             }
 
             viewModelScope.launch {
-                val terms = activeRepo.siteTermsDao.findLatestByLanguage(
+                val terms = activeRepo.siteTermsDao().findLatestByLanguage(
                     getLocaleForSiteTermsUseCase()
                 )
 
@@ -174,7 +174,7 @@ class ParentalConsentManagementViewModel(
 
         newState.parentJoinAndMinor?.personParentJoin?.also { personParentJoin ->
             viewModelScope.launch {
-                activeRepo.personParentJoinDao.updateAsync(personParentJoin)
+                activeRepo.personParentJoinDao().updateAsync(personParentJoin)
             }
         }
 

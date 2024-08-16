@@ -37,7 +37,7 @@ class ClazzEditViewModelTest : AbstractMainDispatcherTest() {
                 ClazzEditViewModel(di, savedStateHandle)
             }
 
-            activeDb.systemPermissionDao.upsertAsync(
+            activeDb.systemPermissionDao().upsertAsync(
                 SystemPermission(
                     spToPersonUid = user.personUid,
                     spPermissionsFlag = PermissionFlags.ADD_COURSE or PermissionFlags.COURSE_EDIT
@@ -82,7 +82,7 @@ class ClazzEditViewModelTest : AbstractMainDispatcherTest() {
                 val db = di.direct.on(activeEndpoint).instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
 
                 db.doorFlow(arrayOf("Clazz")) {
-                    db.clazzDao.findAll()
+                    db.clazzDao().findAll()
                 }.assertItemReceived(timeout = 5.seconds) { allClazzes ->
                     allClazzes.any {
                         it.clazzName == "Test course" && it.clazzDesc == "Test description"
