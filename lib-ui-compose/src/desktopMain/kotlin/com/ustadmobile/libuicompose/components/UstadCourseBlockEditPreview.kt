@@ -13,7 +13,7 @@ private fun CourseBlockEditPreview() {
     val uiState = CourseBlockEditUiState(
         block = CourseBlockAndEditEntities(
             courseBlock = CourseBlock().apply {
-                cbMaxPoints = 78
+                cbMaxPoints = 78f
                 cbCompletionCriteria = 14
                 cbCompletionCriteria = ContentEntry.COMPLETION_CRITERIA_MIN_SCORE
             }

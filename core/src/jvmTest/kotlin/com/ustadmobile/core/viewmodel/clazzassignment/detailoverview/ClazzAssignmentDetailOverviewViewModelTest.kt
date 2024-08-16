@@ -85,16 +85,16 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
                 )
 
                 if(groupSet != null) {
-                    groupSet.cgsUid = activeDb.courseGroupSetDao.insertAsync(groupSet)
+                    groupSet.cgsUid = activeDb.courseGroupSetDao().insertAsync(groupSet)
                     assignment.caGroupUid = groupSet.cgsUid
                 }
 
                 assignment.caClazzUid = clazzUid
-                assignment.caUid = activeDb.clazzAssignmentDao.insertAsync(assignment)
+                assignment.caUid = activeDb.clazzAssignmentDao().insertAsync(assignment)
 
                 courseBlock.cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
                 courseBlock.cbEntityUid = assignment.caUid
-                courseBlock.cbEntityUid = activeDb.courseBlockDao.insertAsync(courseBlock)
+                courseBlock.cbEntityUid = activeDb.courseBlockDao().insertAsync(courseBlock)
 
                 AssignmentDetailOverviewTestContext(
                     clazz, assignment, courseBlock,
@@ -152,7 +152,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
         ) { testContext ->
 
             //insert a submission for this student
-            activeDb.courseAssignmentSubmissionDao.insert(CourseAssignmentSubmission().apply {
+            activeDb.courseAssignmentSubmissionDao().insert(CourseAssignmentSubmission().apply {
                 casSubmitterPersonUid = testContext.person.personUid
                 casSubmitterUid = testContext.person.personUid
                 casText = "I can has cheezburger"
@@ -188,7 +188,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
                 caRequireTextSubmission = true
             }
         ) { testContext ->
-            activeDb.courseAssignmentSubmissionDao.insertAsync(CourseAssignmentSubmission().apply {
+            activeDb.courseAssignmentSubmissionDao().insertAsync(CourseAssignmentSubmission().apply {
                 casSubmitterUid = testContext.person.personUid
                 casSubmitterPersonUid = testContext.person.personUid
                 casText = "Test text"
@@ -273,7 +273,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
             }
         ) { testContext ->
             //insert submission
-            activeDb.courseAssignmentSubmissionDao.insert(CourseAssignmentSubmission().apply {
+            activeDb.courseAssignmentSubmissionDao().insert(CourseAssignmentSubmission().apply {
                 casSubmitterPersonUid = testContext.person.personUid
                 casSubmitterUid = testContext.person.personUid
                 casText = "I can has cheezburger"
@@ -281,7 +281,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
             })
 
             //insert mark
-            activeDb.courseAssignmentMarkDao.insert(CourseAssignmentMark().apply {
+            activeDb.courseAssignmentMarkDao().insert(CourseAssignmentMark().apply {
                 camMark = 5f
                 camSubmitterUid = testContext.person.personUid
                 camAssignmentUid = testContext.assignment.caUid
@@ -316,14 +316,14 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
             }
         ) { testContext ->
             //insert submission
-            activeDb.courseAssignmentSubmissionDao.insert(CourseAssignmentSubmission().apply {
+            activeDb.courseAssignmentSubmissionDao().insert(CourseAssignmentSubmission().apply {
                 casSubmitterPersonUid = testContext.person.personUid
                 casSubmitterUid = testContext.person.personUid
                 casText = "I can has cheezburger"
             })
 
             //insert mark
-            activeDb.courseAssignmentMarkDao.insert(CourseAssignmentMark().apply {
+            activeDb.courseAssignmentMarkDao().insert(CourseAssignmentMark().apply {
                 camMark = 5f
                 camSubmitterUid = testContext.person.personUid
                 camAssignmentUid = testContext.assignment.caUid
@@ -362,7 +362,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
             val mockSubmitterUseCase = mock<SubmitAssignmentUseCase> {
                 onBlocking { invoke(any(), any(), any(), any(), any()) }.thenAnswer {
                     val submission = it.arguments.last() as CourseAssignmentSubmission
-                    activeDb.courseAssignmentSubmissionDao.insert(
+                    activeDb.courseAssignmentSubmissionDao().insert(
                         submission.shallowCopy {
                             casAssignmentUid = testContext.assignment.caUid
                             casSubmitterUid = testContext.person.personUid
@@ -552,7 +552,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
         ) { testContext ->
             val teacherComment = "You want burger?"
             val replyComment = "I can has cheezburger"
-            activeDb.commentsDao.insertAsync(Comments().apply {
+            activeDb.commentsDao().insertAsync(Comments().apply {
                 commentsText = teacherComment
                 commentsEntityUid = testContext.assignment.caUid
                 commentsForSubmitterUid = testContext.person.personUid
@@ -600,7 +600,7 @@ class ClazzAssignmentDetailOverviewViewModelTest : AbstractMainDispatcherTest() 
             val startComment = "I can has cheezburger"
             val replyComment = "Yes you kan"
 
-            activeDb.commentsDao.insertAsync(Comments().apply {
+            activeDb.commentsDao().insertAsync(Comments().apply {
                 commentsText = startComment
                 commentsEntityUid = testContext.assignment.caUid
                 commentsForSubmitterUid = 0

@@ -23,13 +23,13 @@ class DeleteContentEntryParentChildJoinUseCaseTest {
         runBlocking {
             val contentEntryTitle = "Title"
             val contentEntryParentChildJoinUid = db.withDoorTransactionAsync {
-                val childContentEntryUid = db.contentEntryDao.insertAsync(
+                val childContentEntryUid = db.contentEntryDao().insertAsync(
                     ContentEntry().apply {
                         title = contentEntryTitle
                     }
                 )
 
-                val contentEntryParentChildJoinUid = db.contentEntryParentChildJoinDao.insertAsync(
+                val contentEntryParentChildJoinUid = db.contentEntryParentChildJoinDao().insertAsync(
                     ContentEntryParentChildJoin(
                         cepcjParentContentEntryUid = 42L,
                         cepcjChildContentEntryUid = childContentEntryUid,
@@ -52,11 +52,11 @@ class DeleteContentEntryParentChildJoinUseCaseTest {
                 contentEntryParentChildJoinUid
             }
 
-            val joinInDb = db.contentEntryParentChildJoinDao
+            val joinInDb = db.contentEntryParentChildJoinDao()
                 .findByUid(contentEntryParentChildJoinUid)
             assertTrue(joinInDb?.cepcjDeleted ?: false)
 
-            val delItemsInDb = db.deletedItemDao.findByTableIdAndEntityUid(
+            val delItemsInDb = db.deletedItemDao().findByTableIdAndEntityUid(
                 ContentEntryParentChildJoin.TABLE_ID,
                 contentEntryParentChildJoinUid
             )

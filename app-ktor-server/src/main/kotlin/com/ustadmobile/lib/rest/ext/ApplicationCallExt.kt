@@ -4,11 +4,12 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentformats.ContentImportersManager
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.util.ext.requirePostfix
+import com.ustadmobile.ihttp.ext.clientProtocolAndHost
+import com.ustadmobile.ihttp.headers.asIHttpHeaders
+import com.ustadmobile.ihttp.ktorserver.clientUrl
 import com.ustadmobile.lib.rest.CONF_DBMODE_SINGLETON
 import com.ustadmobile.lib.rest.CONF_DBMODE_VIRTUALHOST
 import com.ustadmobile.lib.rest.CONF_KEY_SITE_URL
-import com.ustadmobile.libcache.request.HttpRequest
-import com.ustadmobile.libcache.response.HttpResponse
 import io.github.aakira.napier.Napier
 import io.ktor.server.application.*
 import io.ktor.http.*
@@ -17,7 +18,6 @@ import io.ktor.server.response.*
 import io.ktor.utils.io.core.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.io.asSink
 import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
@@ -135,7 +135,7 @@ val ApplicationCall.callEndpoint: Endpoint
         return if(dbMode == CONF_DBMODE_SINGLETON) {
             Endpoint(config.property(CONF_KEY_SITE_URL).getString().requirePostfix("/"))
         }else {
-            Endpoint(request.clientProtocolAndHost())
+            Endpoint(request.headers.asIHttpHeaders().clientProtocolAndHost())
         }
     }
 
@@ -175,56 +175,6 @@ suspend fun ApplicationCall.respondRequestUrlNotMatchingSiteConfUrl() {
     )
 }
 
-private val ktorReservedHeaders = listOf(
-    "content-type", "transfer-encoding", "content-length"
-)
-
-/**
- * Send a response using a response from UstadCache. Test via TestContentEntryVersionRoute
- */
-suspend fun ApplicationCall.respondCacheResponse(
-    cacheResponse: HttpResponse?,
-    cacheRequest: HttpRequest? = null,
-) {
-    if(cacheResponse != null) {
-        cacheResponse.headers.names().filter { headerName ->
-            ! ktorReservedHeaders.any { it.equals(headerName, ignoreCase = true) }
-        }.forEach { headerName ->
-            cacheResponse.headers.getAllByName(headerName).forEach {headerValue ->
-                response.headers.append(headerName, headerValue)
-            }
-        }
-        val contentLength = cacheResponse.headers["content-length"]?.toLong()
-        val contentType = cacheResponse.headers["content-type"]
-
-        val responseSource = cacheResponse.bodyAsSource()
-        if(responseSource != null) {
-            responseSource.use { source ->
-                respondOutputStream(
-                    contentType = contentType?.let { ContentType.parse(it) },
-                    status = HttpStatusCode.fromValue(cacheResponse.responseCode),
-                    contentLength = contentLength
-                ) {
-                    withContext(Dispatchers.IO) {
-                        source.transferTo(this@respondOutputStream.asSink())
-                        flush()
-                    }
-                }
-            }
-        }else {
-            respondBytes(
-                bytes = byteArrayOf(),
-                contentType = contentType?.let { ContentType.parse(it) },
-                status = HttpStatusCode.OK
-            )
-        }
-    }else {
-        respondText(
-            text = "Not found: ${cacheRequest?.url ?: ""}",
-            status = HttpStatusCode.NotFound
-        )
-    }
-}
 
 suspend fun ApplicationCall.respondContentEntryMetaDataResult(
     metadata: MetadataResult?,

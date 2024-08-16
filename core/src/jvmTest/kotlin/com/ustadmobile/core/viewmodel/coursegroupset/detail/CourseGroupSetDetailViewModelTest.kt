@@ -48,7 +48,7 @@ class CourseGroupSetDetailViewModelTest : AbstractMainDispatcherTest()  {
                 val courseGroupSet = CourseGroupSet().apply {
                     cgsName = "Assignment groups"
                     cgsClazzUid = clazz.clazzUid
-                    cgsUid = activeDb.courseGroupSetDao.insertAsync(this)
+                    cgsUid = activeDb.courseGroupSetDao().insertAsync(this)
                 }
 
                 studentNames.forEachIndexed { index, name ->
@@ -59,13 +59,13 @@ class CourseGroupSetDetailViewModelTest : AbstractMainDispatcherTest()  {
 
                     person.personUid = AddNewPersonUseCase(activeDb, null).invoke(person)
 
-                    activeDb.clazzEnrolmentDao.insertAsync(
+                    activeDb.clazzEnrolmentDao().insertAsync(
                         ClazzEnrolment(
                             clazz.clazzUid, person.personUid, ClazzEnrolment.ROLE_STUDENT
                         )
                     )
 
-                    activeDb.courseGroupMemberDao.upsertListAsync(listOf(
+                    activeDb.courseGroupMemberDao().upsertListAsync(listOf(
                         CourseGroupMember().apply {
                             cgmSetUid = courseGroupSet.cgsUid
                             cgmGroupNumber = index % 2
@@ -74,7 +74,7 @@ class CourseGroupSetDetailViewModelTest : AbstractMainDispatcherTest()  {
                     ))
                 }
 
-                activeDb.coursePermissionDao.upsertAsync(
+                activeDb.coursePermissionDao().upsertAsync(
                     CoursePermission(
                         cpToPersonUid = activeUser.personUid,
                         cpClazzUid = clazz.clazzUid,

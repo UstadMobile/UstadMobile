@@ -19,6 +19,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(kotlin("stdlib-common"))
+                api(project(":lib-ihttp-core"))
                 implementation(libs.coroutines)
                 implementation(libs.door.runtime)
                 implementation(libs.atomicfu)
@@ -41,6 +42,7 @@ kotlin {
         val commonJvmMain by creating {
             dependsOn(commonMain)
             dependencies {
+                implementation(project(":lib-ihttp-okhttp"))
                 implementation(libs.okhttp)
             }
         }
@@ -75,6 +77,7 @@ kotlin {
 }
 
 dependencies {
+    implementation(project(":lib-ihttp-core"))
     add("kspJvm", libs.door.compiler)
     add("kspAndroid", libs.door.compiler)
     add("kspAndroid", libs.androidx.room.compiler)

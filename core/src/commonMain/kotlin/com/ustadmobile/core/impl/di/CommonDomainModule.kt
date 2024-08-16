@@ -1,6 +1,7 @@
 package com.ustadmobile.core.impl.di
 
 import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.domain.assignment.submitmark.SubmitMarkUseCase
 import com.ustadmobile.core.domain.assignment.submittername.GetAssignmentSubmitterNameUseCase
 import com.ustadmobile.core.domain.clazz.CreateNewClazzUseCase
 import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.ApproveOrDeclinePendingEnrolmentUseCase
@@ -13,6 +14,7 @@ import com.ustadmobile.core.domain.contententry.save.SaveContentEntryUseCase
 import com.ustadmobile.core.domain.makelink.MakeLinkUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.siteterms.GetLocaleForSiteTermsUseCase
+import com.ustadmobile.core.domain.xapi.coursegroup.CreateXapiGroupForCourseGroupUseCase
 import com.ustadmobile.door.ext.DoorTag
 import org.kodein.di.DI
 import org.kodein.di.bind
@@ -89,6 +91,25 @@ fun commonDomainDiModule(endpointScope: EndpointScope) = DI.Module("CommonDomain
         AddNewPersonUseCase(
             db = instance(tag = DoorTag.TAG_DB),
             repo = instance(tag = DoorTag.TAG_REPO),
+        )
+    }
+
+    bind<SubmitMarkUseCase>() with scoped(endpointScope).provider {
+        SubmitMarkUseCase(
+            repo = instance(tag = DoorTag.TAG_REPO),
+            endpoint = context,
+            createXapiGroupUseCase = instance(),
+            xapiStatementResource = instance(),
+            xxStringHasher = instance(),
+            json = instance()
+        )
+    }
+
+    bind<CreateXapiGroupForCourseGroupUseCase>() with scoped(endpointScope).provider {
+        CreateXapiGroupForCourseGroupUseCase(
+            repo = instance(tag = DoorTag.TAG_REPO),
+            endpoint = context,
+            stringHasher = instance(),
         )
     }
 

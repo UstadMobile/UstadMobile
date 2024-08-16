@@ -70,7 +70,7 @@ class ClazzEnrolmentEditViewModel(
 
         launchIfHasPermission(
             permissionCheck = { db ->
-                db.coursePermissionDao.userHasEnrolmentEditPermission(
+                db.coursePermissionDao().userHasEnrolmentEditPermission(
                     accountPersonUid = activeUserPersonUid,
                     clazzEnrolmentUid = entityUidArg,
                 )
@@ -79,7 +79,7 @@ class ClazzEnrolmentEditViewModel(
             loadEntity(
                 serializer = ClazzEnrolmentWithLeavingReason.serializer(),
                 onLoadFromDb = { db ->
-                    db.clazzEnrolmentDao.takeIf { entityUidArg != 0L }
+                    db.clazzEnrolmentDao().takeIf { entityUidArg != 0L }
                         ?.findEnrolmentWithLeavingReason(entityUidArg)
                 },
                 makeDefault = {
@@ -91,7 +91,7 @@ class ClazzEnrolmentEditViewModel(
                         clazzEnrolmentDateJoined = systemTimeInMillis()
                         clazzEnrolmentRole = savedStateHandle[ARG_ROLE]?.toInt()
                             ?: ClazzEnrolment.ROLE_STUDENT
-                        timeZone = activeRepo.clazzDao.getClazzTimeZoneByClazzUidAsync(
+                        timeZone = activeRepo.clazzDao().getClazzTimeZoneByClazzUidAsync(
                             clazzEnrolmentClazzUid
                         ) ?: throw IllegalStateException("Could not find timezone for clazzUid")
                     }
@@ -107,7 +107,7 @@ class ClazzEnrolmentEditViewModel(
 
             //This can be run directly against the database, because any entities required would
             // already have been pulled down by the inital launch permission check
-            val (canManageStudentEnrolment, canManageTeacherEnrolment) = activeDb.coursePermissionDao.personHasPermissionWithClazzPairAsync(
+            val (canManageStudentEnrolment, canManageTeacherEnrolment) = activeDb.coursePermissionDao().personHasPermissionWithClazzPairAsync(
                 accountPersonUid = activeUserPersonUid,
                 clazzUid = _uiState.value.clazzEnrolment?.clazzEnrolmentClazzUid ?: 0L,
                 firstPermission = PermissionFlags.COURSE_MANAGE_STUDENT_ENROLMENT,
@@ -116,7 +116,7 @@ class ClazzEnrolmentEditViewModel(
 
 
             val terminology = async {
-                activeRepo.courseTerminologyDao.getTerminologyForClazz(
+                activeRepo.courseTerminologyDao().getTerminologyForClazz(
                     _uiState.value.clazzEnrolment?.clazzEnrolmentClazzUid ?: 0
                 )
             }
@@ -240,7 +240,7 @@ class ClazzEnrolmentEditViewModel(
                     timeZoneId = timeZoneVal
                 )
             }else {
-                activeDb.clazzEnrolmentDao.updateAsync(entity)
+                activeDb.clazzEnrolmentDao().updateAsync(entity)
             }
 
             val popUpToOnFinish = savedStateHandle[UstadView.ARG_POPUPTO_ON_FINISH]

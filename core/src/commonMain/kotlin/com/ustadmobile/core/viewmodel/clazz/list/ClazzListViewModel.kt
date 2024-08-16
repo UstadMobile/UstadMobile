@@ -94,7 +94,7 @@ class ClazzListViewModel(
 
 
     private val pagingSourceFactory: () -> PagingSource<Int, ClazzWithListDisplayDetails> =  {
-        activeRepo.clazzDao.findClazzesWithPermission(
+        activeRepo.clazzDao().findClazzesWithPermission(
             searchQuery =  _appUiState.value.searchState.searchText.toQueryLikeParam(),
             accountPersonUid = accountManager.currentAccount.personUid,
             excludeSelectedClazzList = filterAlreadySelectedList,
@@ -129,7 +129,7 @@ class ClazzListViewModel(
 
         viewModelScope.launch {
             _uiState.whenSubscribed {
-                activeRepo.systemPermissionDao.personHasSystemPermissionAsFlow(
+                activeRepo.systemPermissionDao().personHasSystemPermissionAsFlow(
                     accountManager.currentAccount.personUid, PermissionFlags.ADD_COURSE
                 ).distinctUntilChanged().collect { hasPermission ->
                     _uiState.update { prev ->
@@ -144,7 +144,7 @@ class ClazzListViewModel(
 
         viewModelScope.launch {
             _uiState.whenSubscribed {
-                activeRepo.enrolmentRequestDao.findRequestsForUserAsFlow(
+                activeRepo.enrolmentRequestDao().findRequestsForUserAsFlow(
                     accountPersonUid = activeUserPersonUid,
                     statusFilter = EnrolmentRequest.STATUS_PENDING,
                 ).collect {
@@ -196,7 +196,7 @@ class ClazzListViewModel(
 
     fun onClickCancelEnrolmentRequest(enrolmentRequest: EnrolmentRequest) {
         viewModelScope.launch {
-            activeRepo.enrolmentRequestDao.updateStatus(
+            activeRepo.enrolmentRequestDao().updateStatus(
                 uid = enrolmentRequest.erUid,
                 status = EnrolmentRequest.STATUS_CANCELED,
                 updateTime = systemTimeInMillis(),

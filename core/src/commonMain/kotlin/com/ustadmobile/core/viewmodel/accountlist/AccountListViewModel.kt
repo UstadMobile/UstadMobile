@@ -4,10 +4,12 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.launchopenlicenses.LaunchOpenLicensesUseCase
+import com.ustadmobile.core.domain.share.ShareAppUseCase
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
 import com.ustadmobile.core.domain.usersession.StartUserSessionUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.AppUiState
+import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.isGuestUser
@@ -50,6 +52,8 @@ data class AccountListUiState(
     val showAccountEndpoint: Boolean = false,
     val version: String = "",
     val showPoweredBy: Boolean = false,
+    val shareAppOptionVisible: Boolean = false,
+    val shareAppBottomSheetVisible: Boolean = false
 ) {
 
     val activeAccountButtonsEnabled: Boolean
@@ -70,15 +74,21 @@ class AccountListViewModel(
 
     private val endpointFilter = savedStateHandle[ARG_FILTER_BY_ENDPOINT]
 
-    private val activeAccountMode = savedStateHandle[ARG_ACTIVE_ACCOUNT_MODE] ?: ACTIVE_ACCOUNT_MODE_HEADER
+    private val activeAccountMode =
+        savedStateHandle[ARG_ACTIVE_ACCOUNT_MODE] ?: ACTIVE_ACCOUNT_MODE_HEADER
 
-    private val maxDateOfBirth = savedStateHandle[UstadView.ARG_MAX_DATE_OF_BIRTH]?.toLong()
+    private val maxDateOfBirth = savedStateHandle[UstadView.ARG_MAX_DATE_OF_BIRTH]?.toLong() ?: 0
 
     private val apiUrlConfig: ApiUrlConfig by instance()
 
-    private val _uiState = MutableStateFlow(AccountListUiState(
-        showAccountEndpoint = apiUrlConfig.canSelectServer
-    ))
+    private val shareAppUseCase: ShareAppUseCase? by instanceOrNull()
+
+    private val _uiState = MutableStateFlow(
+        AccountListUiState(
+            showAccountEndpoint = apiUrlConfig.canSelectServer,
+            shareAppOptionVisible = shareAppUseCase != null
+        )
+    )
 
     val uiState: Flow<AccountListUiState> = _uiState.asStateFlow()
 
@@ -87,6 +97,9 @@ class AccountListViewModel(
     private val launchOpenLicensesUseCase: LaunchOpenLicensesUseCase? by instanceOrNull()
 
     private val getShowPoweredByUseCase: GetShowPoweredByUseCase? by instanceOrNull()
+
+    private val dontSetCurrentSession: Boolean = savedStateHandle[ARG_DONT_SET_CURRENT_SESSION]
+        ?.toBoolean() ?: false
 
     init {
         _appUiState.value = AppUiState(
@@ -123,7 +136,7 @@ class AccountListViewModel(
                             (activeAccountMode == ACTIVE_ACCOUNT_MODE_HEADER &&
                                     it.userSession.usUid == currentUserSessionUid)
                         val isFilteredOutByEndpoint = (endpointFilter != null && it.endpoint.url != endpointFilter)
-                        val isFilteredOutByDateOfBirth = (maxDateOfBirth != null && it.person.dateOfBirth > maxDateOfBirth)
+                        val isFilteredOutByDateOfBirth = (maxDateOfBirth > 0 && it.person.dateOfBirth > maxDateOfBirth)
 
                         !(isFilteredOutActiveAccount ||
                                 isFilteredOutByEndpoint ||
@@ -139,6 +152,17 @@ class AccountListViewModel(
             }
         }
     }
+
+    fun onClickAppShare(shareLink: Boolean) {
+        viewModelScope.launch {
+            try {
+                shareAppUseCase?.invoke(shareLink)
+            } catch (e: Throwable) {
+                snackDispatcher.showSnackBar(Snack(e.message.toString()))
+            }
+        }
+    }
+
 
     fun onClickLogout() {
         val currentSession = _uiState.value.headerAccount ?: return
@@ -169,9 +193,8 @@ class AccountListViewModel(
             if(endpointFilter != null)
                 put(ARG_SERVER_URL, endpointFilter)
 
-            savedStateHandle[ARG_NEXT]?.also {
-                put(ARG_NEXT, it)
-            }
+            putFromSavedStateIfPresent(listOf(ARG_NEXT, ARG_DONT_SET_CURRENT_SESSION))
+
             put(ARG_MAX_DATE_OF_BIRTH, savedStateHandle[ARG_MAX_DATE_OF_BIRTH] ?: "0")
         }
         if(endpointFilter != null || !apiUrlConfig.canSelectServer) {
@@ -195,7 +218,8 @@ class AccountListViewModel(
         startUserSessionUseCase(
             session = sessionWithPersonAndEndpoint,
             navController = navController,
-            nextDest = savedStateHandle[ARG_NEXT] ?: ClazzListViewModel.DEST_NAME_HOME
+            nextDest = savedStateHandle[ARG_NEXT] ?: ClazzListViewModel.DEST_NAME_HOME,
+            dontSetCurrentSession = dontSetCurrentSession,
         )
     }
 
@@ -214,6 +238,12 @@ class AccountListViewModel(
             }
         }else {
             navController.navigate(OpenLicensesViewModel.DEST_NAME, emptyMap())
+        }
+    }
+
+    fun onToggleShareAppOptions() {
+        _uiState.update {
+            it.copy(shareAppBottomSheetVisible = !it.shareAppBottomSheetVisible)
         }
     }
 

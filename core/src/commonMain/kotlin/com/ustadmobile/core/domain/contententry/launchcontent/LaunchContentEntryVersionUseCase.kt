@@ -33,7 +33,9 @@ interface LaunchContentEntryVersionUseCase {
     suspend operator fun invoke(
         contentEntryVersion: ContentEntryVersion,
         navController: UstadNavController,
-        target: OpenExternalLinkUseCase.Companion.LinkTarget = OpenExternalLinkUseCase.Companion.LinkTarget.DEFAULT
+        clazzUid: Long,
+        cbUid: Long,
+        target: OpenExternalLinkUseCase.Companion.LinkTarget = OpenExternalLinkUseCase.Companion.LinkTarget.DEFAULT,
     ): LaunchResult?
 
 

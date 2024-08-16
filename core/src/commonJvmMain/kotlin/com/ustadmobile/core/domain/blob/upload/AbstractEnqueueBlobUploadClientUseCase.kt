@@ -7,7 +7,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.transferjobitem.UpdateTransferJobItemEtagUseCase
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.libcache.UstadCache
-import com.ustadmobile.libcache.request.requestBuilder
+import com.ustadmobile.ihttp.request.iRequestBuilder
 
 abstract class AbstractEnqueueBlobUploadClientUseCase(
     private val db: UmAppDatabase,
@@ -31,13 +31,13 @@ abstract class AbstractEnqueueBlobUploadClientUseCase(
                 tjTableId = tableId,
                 tjEntityUid = entityUid,
             )
-            val jobUid = db.transferJobDao.insert(transferJob).toInt()
+            val jobUid = db.transferJobDao().insert(transferJob).toInt()
 
             blobUrls.forEach { enqueueUploadItem ->
-                val httpResponse = cache.retrieve(requestBuilder(enqueueUploadItem.blobUrl))
+                val httpResponse = cache.retrieve(iRequestBuilder(enqueueUploadItem.blobUrl))
 
                 if(httpResponse != null) {
-                    val transferJobItemUid = db.transferJobItemDao.insert(
+                    val transferJobItemUid = db.transferJobItemDao().insert(
                         TransferJobItem(
                             tjiTjUid = jobUid,
                             tjiSrc = enqueueUploadItem.blobUrl,

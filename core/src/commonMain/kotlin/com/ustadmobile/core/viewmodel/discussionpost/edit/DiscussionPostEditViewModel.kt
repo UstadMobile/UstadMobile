@@ -70,7 +70,7 @@ class DiscussionPostEditViewModel (
                     loadEntity(
                         serializer = DiscussionPost.serializer(),
                         onLoadFromDb = {
-                            it.discussionPostDao.takeIf { entityUidArg != 0L }
+                            it.discussionPostDao().takeIf { entityUidArg != 0L }
                                 ?.findByUid(entityUidArg)
                         },
                         makeDefault = {
@@ -173,15 +173,15 @@ class DiscussionPostEditViewModel (
             if(_uiState.value.discussionPostTitleError == null
                 && _uiState.value.discussionPostDescError == null){
 
-                post.discussionPostClazzUid = activeDb.courseBlockDao
+                post.discussionPostClazzUid = activeDb.courseBlockDao()
                     .findClazzUidByCourseBlockUid(post.discussionPostCourseBlockUid)
                 if(post.discussionPostClazzUid == 0L) {
-                    post.discussionPostClazzUid = activeRepo.courseBlockDao
+                    post.discussionPostClazzUid = activeRepo.courseBlockDao()
                         .findClazzUidByCourseBlockUid(post.discussionPostCourseBlockUid)
                 }
 
                 activeRepo.withDoorTransactionAsync {
-                    activeRepo.discussionPostDao.upsertAsync(post)
+                    activeRepo.discussionPostDao().upsertAsync(post)
                 }
 
                 finishWithResult(

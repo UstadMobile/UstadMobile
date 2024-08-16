@@ -6,7 +6,8 @@ import com.ustadmobile.core.url.UrlKmp
 import com.ustadmobile.core.util.bodyDataUrlForUri
 import com.ustadmobile.core.util.ext.bodyAsDecodedText
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.core.viewmodel.UstadViewModel
+import com.ustadmobile.core.viewmodel.noninteractivecontent.AbstractNonInteractiveContentViewModel
+import com.ustadmobile.lib.db.entities.ContentEntry
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import kotlinx.coroutines.flow.Flow
@@ -28,12 +29,13 @@ import org.kodein.di.instance
 data class PdfContentUiState(
     val pdfUrl: String? = null,
     val dataUrl: String? = null,
+    val contentEntry: ContentEntry? = null,
 )
 
 class PdfContentViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
-) : UstadViewModel(di, savedStateHandle, DEST_NAME){
+) : AbstractNonInteractiveContentViewModel(di, savedStateHandle, DEST_NAME){
 
     private val entityUidArg: Long = savedStateHandle[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0
 
@@ -51,7 +53,7 @@ class PdfContentViewModel(
         }
 
         viewModelScope.launch {
-            val contentEntryVersion = activeRepo.contentEntryVersionDao
+            val contentEntryVersion = activeRepo.contentEntryVersionDao()
                 .findByUidAsync(entityUidArg) ?: return@launch
             val manifestUrl = contentEntryVersion.cevManifestUrl!!
             val manifest: ContentManifest = json.decodeFromString(
@@ -69,7 +71,7 @@ class PdfContentViewModel(
                 )
             }
 
-            val contentEntry = activeRepo.contentEntryDao.findByUidAsync(
+            val contentEntry = activeRepo.contentEntryDao().findByUidAsync(
                 contentEntryVersion.cevContentEntryUid
             )
             _appUiState.update { prev ->
@@ -77,6 +79,19 @@ class PdfContentViewModel(
             }
         }
     }
+
+
+    override val titleAndLangCode: TitleAndLangCode?
+        get() = _uiState.value.contentEntry?.let {
+            val titleVal = it.title
+            val langVal = "en"
+            @Suppress("SENSELESS_COMPARISON") //reserved for future use
+            if(titleVal != null && langVal != null) {
+                TitleAndLangCode(titleVal, langVal)
+            }else {
+                null
+            }
+        }
 
     companion object {
 

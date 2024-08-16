@@ -39,7 +39,7 @@ external interface ClazzEditScreenProps : Props {
 
     var uiState: ClazzEditUiState
 
-    var onClazzChanged: (ClazzWithHolidayCalendarAndSchoolAndTerminology?) -> Unit
+    var onClazzChanged: (ClazzWithHolidayCalendarAndAndTerminology?) -> Unit
 
     var onCourseBlockMoved: (from: Int, to: Int) -> Unit
 

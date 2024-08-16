@@ -1,19 +1,20 @@
 package com.ustadmobile.libcache.response
 
-import com.ustadmobile.libcache.headers.HttpHeaders
-import com.ustadmobile.libcache.request.HttpRequest
+import com.ustadmobile.ihttp.headers.IHttpHeaders
+import com.ustadmobile.ihttp.request.IHttpRequest
+import com.ustadmobile.ihttp.response.IHttpResponse
 import kotlinx.io.Source
 
 internal class HeaderOverrideHttpResponse(
-    private val srcResponse: HttpResponse,
-    private val overrideHeaders: HttpHeaders,
-) : HttpResponse {
+    private val srcResponse: IHttpResponse,
+    private val overrideHeaders: IHttpHeaders,
+) : IHttpResponse {
 
     override val responseCode: Int
         get() = srcResponse.responseCode
-    override val request: HttpRequest
+    override val request: IHttpRequest
         get() = srcResponse.request
-    override val headers: HttpHeaders
+    override val headers: IHttpHeaders
         get() = overrideHeaders
 
     override fun bodyAsSource(): Source? {
@@ -21,6 +22,6 @@ internal class HeaderOverrideHttpResponse(
     }
 }
 
-fun HttpResponse.withOverridenHeaders(
-    newHeaders: HttpHeaders
-): HttpResponse = HeaderOverrideHttpResponse(this, newHeaders)
+fun IHttpResponse.withOverridenHeaders(
+    newHeaders: IHttpHeaders
+): IHttpResponse = HeaderOverrideHttpResponse(this, newHeaders)

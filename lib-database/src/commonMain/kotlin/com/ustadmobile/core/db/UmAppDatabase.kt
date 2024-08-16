@@ -2,32 +2,56 @@ package com.ustadmobile.core.db
 
 import com.ustadmobile.door.annotation.DoorDatabase
 import com.ustadmobile.core.db.dao.*
+import com.ustadmobile.core.db.dao.xapi.ActivityEntityDao
+import com.ustadmobile.core.db.dao.xapi.ActivityExtensionDao
+import com.ustadmobile.core.db.dao.xapi.ActivityInteractionDao
+import com.ustadmobile.core.db.dao.xapi.ActorDao
+import com.ustadmobile.core.db.dao.xapi.GroupMemberActorJoinDao
+import com.ustadmobile.core.db.dao.xapi.StatementDao
+import com.ustadmobile.core.db.dao.xapi.VerbDao
+import com.ustadmobile.core.db.dao.xapi.VerbLangMapEntryDao
 import com.ustadmobile.door.SyncNode
 import com.ustadmobile.door.entities.*
 import com.ustadmobile.door.room.RoomDatabase
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.xapi.ActorEntity
+import com.ustadmobile.lib.db.entities.xapi.GroupMemberActorJoin
+import com.ustadmobile.lib.db.entities.xapi.StatementEntity
+import com.ustadmobile.lib.db.entities.xapi.VerbEntity
+import com.ustadmobile.lib.db.entities.xapi.VerbLangMapEntry
+import com.ustadmobile.lib.db.entities.xapi.ActivityEntity
+import com.ustadmobile.lib.db.entities.xapi.ActivityInteractionEntity
+import com.ustadmobile.lib.db.entities.xapi.ActivityLangMapEntry
+import com.ustadmobile.core.db.dao.xapi.ActivityLangMapEntryDao
+import com.ustadmobile.core.db.dao.xapi.StateDeleteCommandDao
+import com.ustadmobile.lib.db.entities.xapi.StateDeleteCommand
+import com.ustadmobile.core.db.dao.xapi.StateEntityDao
+import com.ustadmobile.lib.db.entities.xapi.StatementContextActivityJoin
+import com.ustadmobile.core.db.dao.xapi.StatementContextActivityJoinDao
+import com.ustadmobile.core.db.dao.xapi.StatementEntityJsonDao
+import com.ustadmobile.core.db.dao.xapi.XapiSessionEntityDao
+import com.ustadmobile.lib.db.entities.xapi.ActivityExtensionEntity
+import com.ustadmobile.lib.db.entities.xapi.StateEntity
+import com.ustadmobile.lib.db.entities.xapi.StatementEntityJson
+import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 
-@DoorDatabase(entities = [NetworkNode::class,
+@DoorDatabase(entities = [
     ClazzLog::class, ClazzLogAttendanceRecord::class,
     Schedule::class, HolidayCalendar::class, Holiday::class,
     Person::class,
     Clazz::class, ClazzEnrolment::class, LeavingReason::class,
     ContentEntry::class, ContentEntryContentCategoryJoin::class, ContentEntryParentChildJoin::class,
     ContentEntryRelatedEntryJoin::class, ContentCategorySchema::class, ContentCategory::class,
-    Language::class, LanguageVariant::class, AccessToken::class, PersonAuth::class, Role::class,
+    Language::class, LanguageVariant::class,
+    PersonAuth::class,
     PersonGroup::class, PersonGroupMember::class,
     PersonPicture::class,
-    ScrapeQueueItem::class, ScrapeRun::class, ConnectivityStatus::class,
-    Container::class, ContainerEntry::class, ContainerEntryFile::class,
-    VerbEntity::class, XObjectEntity::class, StatementEntity::class,
-    ContextXObjectStatementJoin::class, AgentEntity::class,
-    StateEntity::class, StateContentEntity::class, XLangMapEntry::class,
-    SyncNode::class, LocallyAvailableContainer::class, ContainerETag::class,
-    School::class,
-    SchoolMember::class, Comments::class,
+    VerbEntity::class, ActivityEntity::class, StatementEntity::class,
+    ActorEntity::class,
+    SyncNode::class,
+    Comments::class,
     Report::class,
     Site::class,
-    ContainerImportJob::class,
     SiteTerms::class,
     PersonParentJoin::class,
     ScopedGrant::class,
@@ -39,19 +63,12 @@ import com.ustadmobile.lib.db.entities.*
     UserSession::class,
     ContentJob::class, ContentEntryImportJob::class, CourseBlock::class, CourseTerminology::class,
     CourseGroupSet::class, CourseGroupMember::class,
-    Chat::class,
     ContentEntryPicture::class,
-
-    //Door Helper entities
-//    SqliteChangeSeqNums::class,
-//    UpdateNotification::class,
-    DoorNode::class,
+    ActivityInteractionEntity::class,
     CoursePicture::class,
     DiscussionPost::class,
     ExternalAppPermission::class,
-    ChatMember::class,
     Message::class,
-    MessageRead::class,
     StudentResult::class,
     ContentEntryVersion::class,
     TransferJob::class,
@@ -66,195 +83,169 @@ import com.ustadmobile.lib.db.entities.*
     CourseBlockPicture::class,
     ContentEntryPicture2::class,
     TransferJobError::class,
+    VerbLangMapEntry::class,
+    GroupMemberActorJoin::class,
+    ActivityLangMapEntry::class,
+    ActivityExtensionEntity::class,
+    StatementContextActivityJoin::class,
+    XapiSessionEntity::class,
+    StatementEntityJson::class,
+    StateEntity::class,
+    StateDeleteCommand::class,
 
     //Door entities
     OutgoingReplication::class,
     ReplicationOperation::class,
     PendingRepositorySession::class,
+    DoorNode::class,
 
-], version = 171)
+], version = 200)
 expect abstract class UmAppDatabase : RoomDatabase {
 
-    /*
-        Changes from 38-39:
-        1. Added personGroupUid to Person
-        2. Added personGroupFlag to PersonGroup
-        3. Removed groupPersonUid from PersonGroup
+    abstract fun personDao(): PersonDao
 
-        Changes from 36:
-        1. Added school uid to Clazz
-        2. Added school Phone number to School
-        3. Added schoolGender to School
-        4. Added schoolHolidayCalendar to School
-        5. Added SchoolMember and SchoolMemberDao
-        6. Added ClazzWork, ClazzWorkContentJoin, Comments,ClazzWorkQuestion,ClazzWorkQuestionOption
-        7. Added ContainerUploadJob
-        Changes in 34:
-        Added School and Assignment based entities
-        Updated Clazz : added clazzFeatures and removed individual feature bits
-     */
+    abstract fun clazzDao(): ClazzDao
 
-    abstract val networkNodeDao: NetworkNodeDao
+    abstract fun courseBlockDao(): CourseBlockDao
 
-    abstract val personDao: PersonDao
+    abstract fun courseTerminologyDao(): CourseTerminologyDao
 
-    abstract val clazzDao: ClazzDao
+    abstract fun courseGroupSetDao(): CourseGroupSetDao
 
-    abstract val courseBlockDao: CourseBlockDao
+    abstract fun courseGroupMemberDao(): CourseGroupMemberDao
 
-    abstract val courseTerminologyDao: CourseTerminologyDao
+    abstract fun clazzEnrolmentDao(): ClazzEnrolmentDao
 
-    abstract val courseGroupSetDao: CourseGroupSetDao
+    abstract fun leavingReasonDao(): LeavingReasonDao
 
-    abstract val courseGroupMemberDao: CourseGroupMemberDao
+    abstract fun contentEntryDao(): ContentEntryDao
 
-    abstract val clazzEnrolmentDao: ClazzEnrolmentDao
+    abstract fun contentEntryContentCategoryJoinDao(): ContentEntryContentCategoryJoinDao
 
-    abstract val leavingReasonDao: LeavingReasonDao
+    abstract fun contentEntryParentChildJoinDao(): ContentEntryParentChildJoinDao
 
-    abstract val contentEntryDao: ContentEntryDao
+    abstract fun contentEntryRelatedEntryJoinDao(): ContentEntryRelatedEntryJoinDao
 
-    abstract val contentEntryContentCategoryJoinDao: ContentEntryContentCategoryJoinDao
+    abstract fun contentCategorySchemaDao(): ContentCategorySchemaDao
 
-    abstract val contentEntryParentChildJoinDao: ContentEntryParentChildJoinDao
+    abstract fun contentCategoryDao(): ContentCategoryDao
 
-    abstract val contentEntryRelatedEntryJoinDao: ContentEntryRelatedEntryJoinDao
+    abstract fun languageDao(): LanguageDao
 
-    // abstract val syncStatusDao: SyncStatusDao
+    abstract fun languageVariantDao(): LanguageVariantDao
 
-    abstract val contentCategorySchemaDao: ContentCategorySchemaDao
+    abstract fun personAuthDao(): PersonAuthDao
 
-    abstract val contentCategoryDao: ContentCategoryDao
+    abstract fun personGroupDao(): PersonGroupDao
 
-    abstract val languageDao: LanguageDao
+    abstract fun personGroupMemberDao(): PersonGroupMemberDao
 
-    abstract val languageVariantDao: LanguageVariantDao
+    abstract fun personPictureDao(): PersonPictureDao
 
-    abstract val scrapeQueueItemDao: ScrapeQueueItemDao
+    abstract fun verbDao(): VerbDao
 
-    abstract val personAuthDao: PersonAuthDao
+    abstract fun activityEntityDao(): ActivityEntityDao
 
-    abstract val personGroupDao: PersonGroupDao
+    abstract fun reportDao(): ReportDao
 
-    abstract val personGroupMemberDao: PersonGroupMemberDao
+    abstract fun statementDao(): StatementDao
 
-    abstract val personPictureDao: PersonPictureDao
+    abstract fun actorDao(): ActorDao
 
-    abstract val connectivityStatusDao: ConnectivityStatusDao
+    abstract fun clazzLogAttendanceRecordDao(): ClazzLogAttendanceRecordDao
+    abstract fun clazzLogDao(): ClazzLogDao
 
-    abstract val containerDao: ContainerDao
+    abstract fun scheduleDao(): ScheduleDao
 
-    abstract val containerEntryDao: ContainerEntryDao
+    abstract fun holidayCalendarDao(): HolidayCalendarDao
+    abstract fun holidayDao(): HolidayDao
 
-    abstract val containerEntryFileDao: ContainerEntryFileDao
+    abstract fun clazzAssignmentDao(): ClazzAssignmentDao
 
-    abstract val containerETagDao: ContainerETagDao
+    abstract fun courseAssignmentSubmissionDao(): CourseAssignmentSubmissionDao
 
-    abstract val verbDao: VerbDao
+    abstract fun courseAssignmentSubmissionFileDao(): CourseAssignmentSubmissionFileDao
 
-    abstract val xObjectDao: XObjectDao
+    abstract fun courseAssignmentMarkDao(): CourseAssignmentMarkDao
 
-    abstract val reportDao: ReportDao
+    abstract fun commentsDao(): CommentsDao
 
-    abstract val containerImportJobDao: ContainerImportJobDao
+    abstract fun syncNodeDao(): SyncNodeDao
 
-    abstract val statementDao: StatementDao
+    abstract fun siteDao(): SiteDao
 
-    abstract val contextXObjectStatementJoinDao: ContextXObjectStatementJoinDao
+    abstract fun siteTermsDao(): SiteTermsDao
 
-    abstract val stateDao: StateDao
+    abstract fun personParentJoinDao(): PersonParentJoinDao
 
-    abstract val stateContentDao: StateContentDao
+    abstract fun scopedGrantDao(): ScopedGrantDao
 
-    abstract val agentDao: AgentDao
+    abstract fun errorReportDao(): ErrorReportDao
 
-    abstract val clazzLogAttendanceRecordDao: ClazzLogAttendanceRecordDao
-    abstract val clazzLogDao: ClazzLogDao
+    abstract fun personAuth2Dao(): PersonAuth2Dao
 
-    abstract val scheduleDao: ScheduleDao
+    abstract fun userSessionDao(): UserSessionDao
 
-    abstract val holidayCalendarDao: HolidayCalendarDao
-    abstract val holidayDao: HolidayDao
-    abstract val schoolDao: SchoolDao
+    abstract fun contentEntryImportJobDao(): ContentEntryImportJobDao
 
-    abstract val xLangMapEntryDao: XLangMapEntryDao
+    abstract fun coursePictureDao(): CoursePictureDao
 
-    abstract val locallyAvailableContainerDao: LocallyAvailableContainerDao
+    abstract fun contentEntryPictureDao(): ContentEntryPictureDao
 
-    abstract val schoolMemberDao: SchoolMemberDao
+    abstract fun messageDao(): MessageDao
 
-    abstract val clazzAssignmentDao: ClazzAssignmentDao
+    abstract fun peerReviewerAllocationDao(): PeerReviewerAllocationDao
 
-    abstract val courseAssignmentSubmissionDao: CourseAssignmentSubmissionDao
+    abstract fun discussionPostDao(): DiscussionPostDao
 
-    abstract val courseAssignmentSubmissionFileDao: CourseAssignmentSubmissionFileDao
+    abstract fun externalAppPermissionDao(): ExternalAppPermissionDao
 
-    abstract val courseAssignmentMarkDao: CourseAssignmentMarkDao
+    abstract fun contentEntryVersionDao(): ContentEntryVersionDao
 
-    abstract val commentsDao: CommentsDao
+    abstract fun outgoingReplicationDao(): OutgoingReplicationDao
 
-    abstract val syncNodeDao: SyncNodeDao
+    abstract fun transferJobDao(): TransferJobDao
 
-    abstract val siteDao: SiteDao
+    abstract fun transferJobItemDao(): TransferJobItemDao
 
-    abstract val siteTermsDao: SiteTermsDao
+    abstract fun cacheLockJoinDao(): CacheLockJoinDao
 
-    abstract val personParentJoinDao: PersonParentJoinDao
+    abstract fun offlineItemDao(): OfflineItemDao
 
-    abstract val scopedGrantDao: ScopedGrantDao
+    abstract fun deletedItemDao(): DeletedItemDao
 
-    abstract val errorReportDao: ErrorReportDao
+    abstract fun enrolmentRequestDao(): EnrolmentRequestDao
 
-    abstract val personAuth2Dao: PersonAuth2Dao
+    abstract fun coursePermissionDao(): CoursePermissionDao
 
-    abstract val userSessionDao: UserSessionDao
+    abstract fun systemPermissionDao(): SystemPermissionDao
 
-    abstract val contentEntryImportJobDao: ContentEntryImportJobDao
+    abstract fun courseBlockPictureDao(): CourseBlockPictureDao
 
-    abstract val contentJobDao: ContentJobDao
+    abstract fun contentEntryPicture2Dao(): ContentEntryPicture2Dao
 
-    abstract val coursePictureDao: CoursePictureDao
+    abstract fun transferJobErrorDao(): TransferJobErrorDao
 
-    abstract val contentEntryPictureDao: ContentEntryPictureDao
+    abstract fun studentResultDao(): StudentResultDao
 
-    abstract val chatDao: ChatDao
+    abstract fun verbLangMapEntryDao(): VerbLangMapEntryDao
 
-    abstract val chatMemberDao: ChatMemberDao
+    abstract fun groupMemberActorJoinDao(): GroupMemberActorJoinDao
 
-    abstract val messageDao: MessageDao
+    abstract fun activityLangMapEntryDao(): ActivityLangMapEntryDao
 
-    abstract val messageReadDao: MessageReadDao
+    abstract fun activityInteractionDao(): ActivityInteractionDao
 
-    abstract val peerReviewerAllocationDao: PeerReviewerAllocationDao
+    abstract fun activityExtensionDao(): ActivityExtensionDao
 
-    abstract val discussionPostDao: DiscussionPostDao
+    abstract fun statementContextActivityJoinDao(): StatementContextActivityJoinDao
 
-    abstract val externalAppPermissionDao: ExternalAppPermissionDao
+    abstract fun xapiSessionEntityDao(): XapiSessionEntityDao
 
-    abstract val contentEntryVersionDao: ContentEntryVersionDao
+    abstract fun statementEntityJsonDao(): StatementEntityJsonDao
 
-    abstract val outgoingReplicationDao: OutgoingReplicationDao
+    abstract fun stateEntityDao(): StateEntityDao
 
-    abstract val transferJobDao: TransferJobDao
-
-    abstract val transferJobItemDao: TransferJobItemDao
-
-    abstract val cacheLockJoinDao: CacheLockJoinDao
-
-    abstract val offlineItemDao: OfflineItemDao
-
-    abstract val deletedItemDao: DeletedItemDao
-
-    abstract val enrolmentRequestDao: EnrolmentRequestDao
-
-    abstract val coursePermissionDao: CoursePermissionDao
-
-    abstract val systemPermissionDao: SystemPermissionDao
-
-    abstract val courseBlockPictureDao: CourseBlockPictureDao
-
-    abstract val contentEntryPicture2Dao: ContentEntryPicture2Dao
-
-    abstract val transferJobErrorDao: TransferJobErrorDao
+    abstract fun stateDeleteCommandDao(): StateDeleteCommandDao
 
 }

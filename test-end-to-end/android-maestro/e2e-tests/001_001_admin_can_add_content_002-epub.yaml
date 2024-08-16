@@ -19,12 +19,13 @@ env:
 - tapOn: "SAVE"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_add_to_library"
 - tapOn: "E-book"
-- assertNotVisible: "Importing"
+- extendedWaitUntil:
+    notVisible: "Importing"
+    timeout: 10000
+- extendedWaitUntil:
+    notVisible: "Uploading"
+    timeout: 10000
 - tapOn: Open
-- runFlow:
-    when:
-      visible: "Accept & continue"
-    file: "../common/google_permission.yaml"
 - assertVisible: "Cover"
 - tapOn: "Back"
 - runFlow:
@@ -38,4 +39,4 @@ env:
 - tapOn: Download
 - tapOn: Open
 - assertVisible: "Cover"
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_download_and_open"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/epub_content_download_and_open"

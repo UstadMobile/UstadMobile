@@ -42,6 +42,15 @@ For further information on installing / configuration please see:
 
 https://github.com/UstadMobile/UstadMobile/blob/primary/INSTALL.md
 
+Start on system boot:
 
+This should be done using SystemD on most Linux distributions (including Ubuntu). Modify the paths
+and user (if needed) in systemd/ustad-server.service and then install the service:
 
+cp unzip-path/systemd/ustad-server.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl start ustad-server
+sudo systemctl enable ustad-server
 
+#Check status
+sudo systemctl status ustad-server

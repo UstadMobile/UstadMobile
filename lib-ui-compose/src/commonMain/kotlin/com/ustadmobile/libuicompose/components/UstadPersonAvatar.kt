@@ -32,6 +32,7 @@ fun UstadPersonAvatar(
     personName: String? = null,
     colorName: String? = personName,
     modifier: Modifier = Modifier.size(40.dp),
+    fontScale: Float = 1.0f,
 ) {
     if(pictureUri == null) {
        if(personName != null && colorName != null) {
@@ -45,8 +46,10 @@ fun UstadPersonAvatar(
                }
 
                Text(
-                   color = androidx.compose.ui.graphics.Color.White,
-                   style = MaterialTheme.typography.titleMedium,
+                   style = MaterialTheme.typography.titleMedium.copy(
+                       color = androidx.compose.ui.graphics.Color.White,
+                       fontSize = MaterialTheme.typography.titleMedium.fontSize * fontScale
+                   ),
                    text=  personName.initial(),
                )
            }

@@ -66,7 +66,6 @@
     <string name="phone">ဖုန်းကို</string>
     <string name="exams">စာမေးပွဲများ</string>
     <string name="add_a_student">ကျောင်းသားတစ်ယောက်ထည့်ပါ</string>
-    <string name="share_application">မျှဝေပါအက်ပလီကေးရှင်း</string>
     <string name="waiting">စောင့်နေတယ်</string>
     <string name="queued">တန်းစီထဲမှ</string>
     <string name="failed">မအောင်မြင်ဘူး</string>
@@ -188,7 +187,6 @@
     <string name="show_hidden_items">ဝှက်ထားသောပစ္စည်းများကိုပြရန်</string>
     <string name="open_folder">ဖိုင်ကိုဖွင့်</string>
     <string name="action_hidden">ဝှက်ထား</string>
-    <string name="invalid_register_code">မမှန်ကန်သောမှတ်ပုံတင်နံပါတ်</string>
     <string name="enter_register_code">မှတ်ပုံတင်နံပါတ်ထည့်ပါ</string>
     <string name="bar_chart" value="100">ဘားဇယား</string>
     <string name="line_chart" value="101">လိုင်းဇယား</string>
@@ -561,8 +559,6 @@
     <string name="add_to">%1$s သို့ထည့်ပါ</string>
     <string name="remove_from">%1$s မှဖယ်ရှား</string>
     <string name="change_photo">ဓာတ်ပုံပြောင်းပါ</string>
-    <string name="remove_photo">ဓာတ်ပုံဖယ်ရှားပါ</string>
-    <string name="select_new_photo_from_gallery">ပြခန်းမှဓာတ်ပုံအသစ်ကိုရွေးချယ်ပါ</string>
     <string name="permission_clazz_asignment_edit">လူတန်းစားတာဝန်များကိုဖန်တီးတည်းဖြတ်ပါ</string>
     <string name="overview">ခြုံငုံသုံးသပ်ချက်</string>
     <string name="add_new">အသစ်ထည့်ပါ</string>
@@ -613,7 +609,6 @@
     <string name="scope">နယ်ပယ်</string>
     <string name="assign_role">အခန်းကဏ္ဍတာဝန်ကျတဲ့နေရာ</string>
     <string name="more_information">ပိုမိုသိရှိလိုပါက</string>
-    <string name="class_code">အတန်းကုဒ်</string>
     <string name="pending_requests">တောင်းဆိုမှုများကိုဆိုင်းငံ့ထား</string>
     <string name="pending">အတွင်းမှာ</string>
     <string name="please_wait_for_approval">သင်၏တောင်းဆိုချက်ကိုသင်၏ဆရာ၊ ဆရာမမှအတည်ပြုရန်စောင့်ဆိုင်းပါ။.</string>

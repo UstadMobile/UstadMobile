@@ -32,7 +32,6 @@
     <string name="contents">বিষয়বস্তু</string>
     <string name="students">ছাত্র</string>
     <string name="account">হিসাব</string>
-    <string name="share_application">অ্যাপ্লিকেশন ভাগ করা</string>
     <string name="share">ভাগ করুন</string>
     <string name="send">প্রেরণ</string>
     <string name="open">খোলা</string>
@@ -339,7 +338,6 @@
     <string name="percentage_complete" formatted="false">%1$s% সম্পূর্ণ</string>
     <string name="started_date" formatted="false">%1$s% শুরু হয়েছে</string>
     <string name="started">শুরু হয়েছে</string>
-    <string name="invalid_register_code">অবৈধ নিবন্ধকরণ কোড</string>
     <string name="mixed">মিশ্রিত</string>
     <string name="store_description_short">অ্যাক্সেস এবং শিক্ষাগত সামগ্রী অফলাইনে ভাগ করুন</string>
     <string name="submit_your_answer">আপনার উত্তর জমা দিন</string>
@@ -394,9 +392,7 @@
     <string name="remove_from">%1$s থেকে সরান</string>
     <string name="change_photo">ছবি পরিবর্তন</string>
     <string name="holiday_calendar">ছুটির পঞ্জিকা</string>
-    <string name="remove_photo">ফটো সরান</string>
     <string name="take_new_photo_from_camera">ক্যামেরা থেকে নতুন ছবি তুলুন</string>
-    <string name="select_new_photo_from_gallery">গ্যালারী থেকে নতুন ছবি নির্বাচন করুন</string>
     <string name="permission_clazz_assignment_view">ক্লাস অ্যাসাইনমেন্ট দেখুন</string>
     <string name="monday">সোমবার</string>
     <string name="permission_clazz_asignment_edit">ক্লাস অ্যাসাইনমেন্ট তৈরি এবং সম্পাদনা করুন</string>
@@ -467,7 +463,6 @@
     <string name="question_text">প্রশ্ন পাঠ্য</string>
     <string name="question_type">প্রশ্নের ধরন</string>
     <string name="add_option">বিকল্প যুক্ত করুন</string>
-    <string name="class_code">ক্লাস কোড</string>
     <string name="pending_requests">অনুরোধ অপেক্ষারত</string>
     <string name="pending">বিচারাধীন</string>
     <string name="please_wait_for_approval">আপনার অনুরোধটি আপনার শিক্ষক বা প্রশাসকের দ্বারা অনুমোদিত হওয়ার জন্য অপেক্ষা করুন।</string>

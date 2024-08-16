@@ -11,6 +11,9 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
+import com.ustadmobile.core.domain.xapi.XapiJson
+import com.ustadmobile.core.domain.xxhash.XXStringHasher
+import com.ustadmobile.core.domain.xxhash.XXStringHasherCommonJvm
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.config.ApiUrlConfig
@@ -116,6 +119,8 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
             }
         }
 
+        bind<XapiJson>() with singleton { XapiJson() }
+
         bind<ApiUrlConfig>() with singleton {
             ApiUrlConfig(presetApiUrl = null)
         }
@@ -179,7 +184,7 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
                 .addMigrations(*migrationList().toTypedArray())
                 .build()
                 .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId).also {
-                    it.siteDao.insert(Site().apply {
+                    it.siteDao().insert(Site().apply {
                         siteUid = 1L
                         siteName = "My Site"
                         guestLogin = false
@@ -212,6 +217,10 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
 
         bind<GenderConfig>() with singleton {
             GenderConfig()
+        }
+
+        bind<XXStringHasher>() with singleton {
+            XXStringHasherCommonJvm()
         }
 
         bind<AddNewPersonUseCase>() with scoped(endpointScope).singleton {

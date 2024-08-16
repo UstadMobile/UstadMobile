@@ -10,6 +10,7 @@ import com.ustadmobile.core.viewmodel.message.conversationlist.ConversationListU
 import com.ustadmobile.core.viewmodel.message.conversationlist.ConversationListViewModel
 import com.ustadmobile.lib.db.composites.MessageAndOtherPerson
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
+import com.ustadmobile.libuicompose.components.UstadNothingHereYet
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
 import com.ustadmobile.libuicompose.util.rememberDateFormat
@@ -50,6 +51,12 @@ fun ConversationListScreen(
     UstadLazyColumn(
         modifier = Modifier.fillMaxSize()
     ){
+        if(repositoryResult.isSettledEmpty) {
+            item("empty_state") {
+                UstadNothingHereYet()
+            }
+        }
+
         ustadPagedItems(
             pagingItems = lazyPagingItems,
             key = { it.message?.messageUid ?: 0 },

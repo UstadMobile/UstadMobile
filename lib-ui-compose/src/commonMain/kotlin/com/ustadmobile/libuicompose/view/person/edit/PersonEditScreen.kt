@@ -15,10 +15,10 @@ import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditUiState
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.lib.db.entities.PersonParentJoin
-import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.libuicompose.components.UstadDateField
 import com.ustadmobile.libuicompose.components.UstadImageSelectButton
 import com.ustadmobile.libuicompose.components.UstadMessageIdOptionExposedDropDownMenuField

@@ -1,7 +1,7 @@
 package com.ustadmobile.libcache
 
-import com.ustadmobile.libcache.request.HttpRequest
-import com.ustadmobile.libcache.response.HttpResponse
+import com.ustadmobile.ihttp.request.IHttpRequest
+import com.ustadmobile.ihttp.response.IHttpResponse
 import kotlinx.io.files.Path
 
 /**
@@ -17,8 +17,8 @@ import kotlinx.io.files.Path
  * @param createRetentionLock if true, then a retention lock will be created
  */
 data class CacheEntryToStore(
-    val request: HttpRequest,
-    val response: HttpResponse,
+    val request: IHttpRequest,
+    val response: IHttpResponse,
     val responseBodyTmpLocalPath: Path? = null,
     val skipChecksumIfProvided: Boolean = false,
     val createRetentionLock: Boolean = false,

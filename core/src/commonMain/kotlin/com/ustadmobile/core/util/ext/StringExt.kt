@@ -2,6 +2,9 @@
 
 package com.ustadmobile.core.util.ext
 
+import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.viewmodel.UstadViewModel.Companion.ARG_SELECTED_ACCOUNT_ENDPOINT_URL
+import com.ustadmobile.core.viewmodel.UstadViewModel.Companion.ARG_SELECTED_ACCOUNT_PERSON_UID
 import com.ustadmobile.door.ext.hexStringToByteArray
 import kotlin.text.Typography.ellipsis
 
@@ -79,6 +82,20 @@ fun String.appendQueryArgs(queryArgs: String): String {
 }
 
 /**
+ * Adds ARG_SELECTED_ACCOUNT_PERSON_UID and ARG_SELECTED_ACCOUNT_ENDPOINT_URL to the given string
+ * Useful where ARG_NEXT needs to have the selected account information appended.
+ */
+fun String.appendSelectedAccount(personUid: Long, endpoint: Endpoint) : String {
+    return appendQueryArgs(
+        mapOf(
+            ARG_SELECTED_ACCOUNT_PERSON_UID to personUid.toString(),
+            ARG_SELECTED_ACCOUNT_ENDPOINT_URL to endpoint.url,
+        )
+    )
+}
+
+
+/**
  * Where this string is a URI of some kind, append query arguments to it. If the string
  * already contains a ?, then the arguments will be appended after an &amp;
  * Otherwise, a ? will be added and then the query args
@@ -112,14 +129,8 @@ fun String.countWords(): Int {
     return wordCount
 }
 
-fun String.initials(): String {
-    return split(" ").map {
-        it.firstOrNull()?.uppercaseChar()
-    }.joinToString(separator = " ")
-}
-
 fun String.initial(): String {
-    return firstOrNull()?.uppercase() ?: ""
+    return firstNonWhiteSpaceChar()?.uppercase() ?: ""
 }
 
 /**
@@ -187,4 +198,12 @@ fun String.substringUntilLastIndexOfInclusive(
     }else {
         missingDelimiterValue
     }
+}
+
+fun String.firstNonWhiteSpaceChar(): Char? {
+    val index = indexOfFirst { !it.isWhitespace() }
+    return if(index != -1)
+        this[index]
+    else
+        null
 }
