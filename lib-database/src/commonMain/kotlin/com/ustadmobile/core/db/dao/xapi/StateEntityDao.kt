@@ -59,6 +59,7 @@ expect abstract class StateEntityDao {
     ): StateEntity?
 
 
+    @HttpAccessible
     @Query("""
         SELECT StateEntity.*
           FROM StateEntity
