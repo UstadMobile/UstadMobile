@@ -125,6 +125,7 @@ dependencies {
     implementation libs.argparse4j
     implementation libs.kotlinx.datetime
     implementation libs.javaffmpeg
+    implementation libs.webauthn4j
 
     api libs.moko.resources
 

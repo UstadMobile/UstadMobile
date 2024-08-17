@@ -1950,6 +1950,22 @@
 
     <string name="nothing_here_yet">Nothing here, yet</string>
 
+    <string name="signup_with_passkey">Sign-up with passkey</string>
+
+    <string name="other_options">Other options</string>
+
+    <string name="i_am_teacher">I\'m a teacher</string>
+
+    <string name="i_am_parent">I\'m a parent</string>
+
     <string name="select_picture_from_files">Select picture from files</string>
+
+    <string name="your_date_of_birth">Your date of birth</string>
+
+    <string name="add_child_profiles">Add Child Profiles</string>
+
+    <string name="child_profile">Child profile</string>
+
+    <string name="finish">Finish</string>
 
 </resources>

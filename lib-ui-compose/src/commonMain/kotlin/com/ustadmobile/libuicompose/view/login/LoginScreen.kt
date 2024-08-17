@@ -30,6 +30,8 @@ import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import com.ustadmobile.libuicompose.components.UstadPasswordField
 import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
+import com.ustadmobile.core.domain.passkey.PassKeySignInData
+import com.ustadmobile.libuicompose.util.passkey.SignInWithPasskey
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.Dispatchers
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
@@ -48,6 +50,8 @@ fun LoginScreen(
         onClickConnectAsGuest = viewModel::onClickConnectAsGuest,
         onUsernameValueChange = viewModel::onUsernameChanged,
         onPasswordValueChange = viewModel::onPasswordChanged,
+        onSignInWithPasskey = viewModel::onSignInWithPassKey,
+        onClickSignUp = viewModel::onClickSignUp,
     )
 }
 
@@ -57,9 +61,12 @@ fun LoginScreen(
     onClickLogin: () -> Unit = {},
     onClickCreateAccount: () -> Unit = {},
     onClickConnectAsGuest: () -> Unit = {},
+    onClickSignUp: () -> Unit = {},
     onUsernameValueChange: (String) -> Unit = {},
     onPasswordValueChange: (String) -> Unit = {},
+    onSignInWithPasskey: (PassKeySignInData) -> Unit = {},
 ) {
+
     UstadVerticalScrollColumn(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -108,7 +115,6 @@ fun LoginScreen(
         )
 
         Spacer(modifier = Modifier.height(10.dp))
-
         Text(text = uiState.errorMessage ?: "")
 
         Button(
@@ -135,6 +141,21 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(10.dp))
         }
 
+        SignInWithPasskey(
+            onSignInWithPasskey={
+                onSignInWithPasskey(it)
+            }
+        )
+        OutlinedButton(
+            onClick = onClickSignUp,
+            modifier = Modifier
+                .testTag("connect_as_guest_button")
+                .defaultItemPadding()
+                .fillMaxWidth(),
+        ) {
+            Text("Sign Up")
+        }
+        Spacer(modifier = Modifier.height(10.dp))
         if(uiState.connectAsGuestVisible) {
             OutlinedButton(
                 onClick = onClickConnectAsGuest,

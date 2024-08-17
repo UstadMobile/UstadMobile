@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 194,
-    "identityHash": "e7a9ab2a112884c6bee5f0ec9357f8ae",
+    "identityHash": "bc10ca86f0f2ebd9255e20cb1f6ab737",
     "entities": [
       {
         "tableName": "ClazzLog",
@@ -5986,6 +5986,86 @@
         "foreignKeys": []
       },
       {
+        "tableName": "PersonPasskey",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personPasskeyUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `personUid` INTEGER NOT NULL, `attestationObj` TEXT, `clientDataJson` TEXT, `originString` TEXT, `rpid` TEXT, `id` TEXT, `challengeString` TEXT, `publicKey` TEXT, `isRevoked` INTEGER, `passkeyLct` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "personPasskeyUid",
+            "columnName": "personPasskeyUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "personUid",
+            "columnName": "personUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "attestationObj",
+            "columnName": "attestationObj",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "clientDataJson",
+            "columnName": "clientDataJson",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "originString",
+            "columnName": "originString",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "rpid",
+            "columnName": "rpid",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "challengeString",
+            "columnName": "challengeString",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "publicKey",
+            "columnName": "publicKey",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "isRevoked",
+            "columnName": "isRevoked",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "passkeyLct",
+            "columnName": "passkeyLct",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "personPasskeyUid"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
         "tableName": "OutgoingReplication",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`orUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `destNodeId` INTEGER NOT NULL, `orTableId` INTEGER NOT NULL, `orPk1` INTEGER NOT NULL, `orPk2` INTEGER NOT NULL DEFAULT 0, `orPk3` INTEGER NOT NULL DEFAULT 0, `orPk4` INTEGER NOT NULL DEFAULT 0)",
         "fields": [
@@ -6146,7 +6226,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e7a9ab2a112884c6bee5f0ec9357f8ae')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'bc10ca86f0f2ebd9255e20cb1f6ab737')"
     ]
   }
 }

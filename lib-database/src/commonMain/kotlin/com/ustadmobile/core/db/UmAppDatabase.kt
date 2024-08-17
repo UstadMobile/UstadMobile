@@ -90,6 +90,7 @@ import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
     StatementContextActivityJoin::class,
     XapiSessionEntity::class,
     StatementEntityJson::class,
+    PersonPasskey::class,
     StateEntity::class,
     StateDeleteCommand::class,
 
@@ -243,6 +244,8 @@ expect abstract class UmAppDatabase : RoomDatabase {
     abstract fun xapiSessionEntityDao(): XapiSessionEntityDao
 
     abstract fun statementEntityJsonDao(): StatementEntityJsonDao
+
+    abstract fun personPasskeyDao():PersonPasskeyDao
 
     abstract fun stateEntityDao(): StateEntityDao
 

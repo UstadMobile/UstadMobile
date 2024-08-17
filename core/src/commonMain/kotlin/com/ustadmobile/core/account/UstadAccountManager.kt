@@ -6,7 +6,12 @@ import com.ustadmobile.core.account.UstadAccountManager.EndpointFilter
 import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.account.CreateNewLocalAccountUseCase
+import com.ustadmobile.core.domain.passkey.PassKeySignInData
+import com.ustadmobile.core.domain.passkey.PasskeyResult
+import com.ustadmobile.core.domain.passkey.PasskeyVerifyResult
+import com.ustadmobile.core.domain.passkey.SavePersonPasskeyUseCase
 import com.ustadmobile.core.impl.config.ApiUrlConfig
+import com.ustadmobile.core.util.ext.base64StringToByteArray
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.util.ext.withLearningSpace
@@ -32,6 +37,10 @@ import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.preparePost
 import io.ktor.client.request.url
+import io.github.aakira.napier.Napier
+import io.ktor.client.*
+import io.ktor.client.plugins.*
+import io.ktor.client.request.*
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
@@ -42,6 +51,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -59,6 +69,7 @@ import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
+import kotlin.io.encoding.Base64
 
 /**
  * The app AccountManager. Users can have multiple accounts with active sessions at any given time.
@@ -116,6 +127,15 @@ class UstadAccountManager(
     val activeUserSessionsFlow: Flow<List<UserSessionWithPersonAndLearningSpace>>
         get() = _activeUserSessions.asStateFlow()
 
+    /**
+     * Flow that is use to show prompt to compose ui , to tell user that option to create passkey for
+     * easy login
+     */
+
+    private val _passKeyPromptFlow = MutableSharedFlow<PassKeyPromptData>()
+
+    val passKeyPromptFlow: Flow<PassKeyPromptData>
+        get() = _passKeyPromptFlow
 
 
     val activeLearningSpace: LearningSpace
@@ -314,7 +334,31 @@ class UstadAccountManager(
         }
     }
 
+   suspend fun createPassKeyPrompt(
+       username: String,
+       personUid: Long,
+       doorNodeId: String,
+       usStartTime: Long,
+       serverUrl: String
+   ) {
+        val promptData = PassKeyPromptData(
+            username = username,
+            personUid = personUid,
+            doorNodeId=doorNodeId,
+            usStartTime=usStartTime,
+            serverUrl=serverUrl
+        )
 
+       _passKeyPromptFlow.emit(promptData)
+
+   }
+    suspend fun registerWithPasskey(
+        endpointUrl: String,
+        passkeyResult: PasskeyResult,
+    ): Long {
+        val savePassKeyUseCase: SavePersonPasskeyUseCase = di.on(Endpoint(endpointUrl)).direct.instance()
+        return  savePassKeyUseCase.invoke(passkeyResult)
+    }
 
     suspend fun register(
         person: Person,
@@ -354,7 +398,7 @@ class UstadAccountManager(
                 .requireRepository()
             getSiteFromDbOrLoadFromHttp(repo)
 
-            val session = addSession(registeredPerson, learningSpaceUrl, password)
+            val session = addSession(registeredPerson, endpointUrl, password)
 
             //If the person is not loaded into the database (probably not), then put in the db.
             val db: UmAppDatabase = di.on(learningSpace).direct.instance(tag = DoorTag.TAG_DB)
@@ -478,6 +522,47 @@ class UstadAccountManager(
         if(activeSessionsList { it == session.learningSpace.url }.isEmpty()) {
             removeActiveLearningSpace(session.learningSpace)
         }
+    }
+    suspend fun loginWithPasskey(
+        passKeySignInData: PassKeySignInData,
+        currentServerUrl:String
+    ) = withContext(Dispatchers.Default){
+        assertNotClosed()
+        val userHandle = passKeySignInData.userHandle.base64StringToByteArray()
+        val endpointUrl= userHandle.decodeToString().substringAfter("@")
+        val loginResponse = httpClient.post {
+            url("${endpointUrl.removeSuffix("/")}/api/passkey/verifypasskey")
+            parameter("id", passKeySignInData.credentialId)
+            parameter("userHandle", passKeySignInData.userHandle)
+            parameter("authenticatorData", passKeySignInData.authenticatorData)
+            parameter("clientDataJSON", passKeySignInData.clientDataJSON)
+            parameter("signature", passKeySignInData.signature)
+            parameter("origin", passKeySignInData.origin)
+            parameter("rpId", passKeySignInData.rpId)
+            parameter("challenge", passKeySignInData.challenge)
+        }.bodyAsText()
+        Napier.d { "passkeyres"+loginResponse.toString() }
+       val passkeyVerifyResult= Json.decodeFromString<PasskeyVerifyResult>(loginResponse)
+
+        if(!passkeyVerifyResult.isVerified) {
+            throw UnauthorizedException("Account not found")
+        }
+        val repo: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = DoorTag.TAG_REPO)
+
+        //Make sure that we fetch the person and personpicture into the database.
+        val personAndPicture = repo.personDao().findByUidWithPicture(
+            passkeyVerifyResult.personUid) ?: throw IllegalStateException("Cannot find person in repo/db")
+        val personInDb = personAndPicture.person!! //Cannot be null based on query
+
+
+        val repoWithCurrentUrl: UmAppDatabase by di.on(Endpoint(currentServerUrl)).instance(tag = DoorTag.TAG_REPO)
+
+        getSiteFromDbOrLoadFromHttp(repoWithCurrentUrl)
+
+        val newSession = addSession(personInDb, currentServerUrl, "")
+            currentUserSession = newSession
+
+
     }
 
 

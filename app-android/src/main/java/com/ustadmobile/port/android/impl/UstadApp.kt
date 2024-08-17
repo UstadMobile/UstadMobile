@@ -7,6 +7,7 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import coil.ImageLoader
+import com.ustadmobile.core.domain.account.CreateNewLocalAccountUseCase
 import coil.ImageLoaderFactory
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.SharedPreferencesSettings
@@ -930,7 +931,12 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 repoOrDb = instance<UmAppDataLayer>().repositoryOrLocalDb,
             )
         }
-
+        bind<SavePersonPasskeyUseCase>() with scoped(EndpointScope.Default).singleton {
+            SavePersonPasskeyUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = instance(tag = DoorTag.TAG_REPO),
+            )
+        }
         bind<MakeContentEntryAvailableOfflineUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             MakeContentEntryAvailableOfflineUseCase(
                 repo = instance<UmAppDataLayer>().requireRepository(),

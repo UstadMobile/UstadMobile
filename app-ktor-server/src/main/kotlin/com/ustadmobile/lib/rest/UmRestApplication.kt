@@ -121,6 +121,8 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.isWindowsOs
 import com.ustadmobile.door.log.NapierDoorLogger
 import com.ustadmobile.lib.rest.domain.contententry.importcontent.ContentEntryImportJobRoute
+import com.ustadmobile.lib.rest.domain.passkey.verify.VerifySignInWithPasskeyRoute
+import com.ustadmobile.lib.rest.domain.passkey.verify.VerifySignInWithPasskeyUseCase
 import com.ustadmobile.lib.rest.domain.person.bulkadd.BulkAddPersonRoute
 import com.ustadmobile.lib.rest.domain.xapi.XapiRoute
 import com.ustadmobile.lib.rest.domain.xapi.savestatementonclear.SaveStatementOnUnloadRoute
@@ -467,7 +469,12 @@ fun Application.umRestApplication(
                 onlyIfCached = true,
             )
         }
-
+        bind<VerifySignInWithPasskeyUseCase>() with scoped(EndpointScope.Default).singleton {
+            VerifySignInWithPasskeyUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = null,
+            )
+        }
         bind<IsTempFileCheckerUseCase>() with singleton {
             IsTempFileCheckerUseCaseJvm(
                 tmpRootDir = instance<File>(tag = DiTag.TAG_TMP_DIR)
@@ -500,6 +507,7 @@ fun Application.umRestApplication(
                 validateUserSessionOnServerUseCase = instance()
             )
         }
+
 
         bind<GetStoragePathForUrlUseCase>() with singleton {
             GetStoragePathForUrlUseCaseCommonJvm(
@@ -898,7 +906,14 @@ fun Application.umRestApplication(
                         }
                     )
                 }
+                route("passkey"){
 
+                    VerifySignInWithPasskeyRoute(
+                        useCase = { call ->
+                            di.on(call).direct.instance()
+                        }
+                    )
+                }
                 route("pbkdf2"){
                     Pbkdf2Route()
                 }

@@ -7,6 +7,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
+import com.ustadmobile.core.domain.passkey.PassKeySignInData
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -16,6 +17,7 @@ import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.appendSelectedAccount
+import com.ustadmobile.core.util.ext.requireHttpPrefix
 import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.core.util.ext.verifySite
 import com.ustadmobile.core.view.*
@@ -23,6 +25,9 @@ import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.core.viewmodel.person.registerageredirect.RegisterAgeRedirectViewModel
+import com.ustadmobile.core.viewmodel.signup.SignUpViewModel
+import com.ustadmobile.door.ext.doorIdentityHashCode
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Site
 import io.github.aakira.napier.Napier
 import io.ktor.client.*
@@ -79,6 +84,7 @@ class LoginViewModel(
 
     private val languagesConfig: SupportedLanguagesConfig by instance()
 
+
     private val getVersionUseCase: GetVersionUseCase? by instanceOrNull()
 
     private val getShowPoweredByUseCase: GetShowPoweredByUseCase? by instanceOrNull()
@@ -99,7 +105,7 @@ class LoginViewModel(
                 loginIntentMessage = savedStateHandle[UstadView.ARG_INTENT_MESSAGE],
                 currentLanguage = languagesConfig.getCurrentLanguage(systemImpl),
                 languageList = languagesConfig.supportedUiLanguagesAndSysDefault(systemImpl),
-                showPoweredBy = getShowPoweredByUseCase?.invoke() ?: false
+                showPoweredBy = getShowPoweredByUseCase?.invoke() ?: false,
             )
         }
 
@@ -208,6 +214,11 @@ class LoginViewModel(
                         maxDateOfBirth = savedStateHandle[UstadView.ARG_MAX_DATE_OF_BIRTH]?.toLong() ?: 0L,
                         dontSetCurrentSession = dontSetCurrentSession,
                     )
+                    //this emit the passkeydata to show prompt to user to create passkey
+                    accountManager.createPassKeyPrompt(username.trim(),account.personUid,di.doorIdentityHashCode.toString(),
+                        systemTimeInMillis(),serverUrl
+                    )
+
                     goToNextDestAfterLoginOrGuestSelected(account.personUid)
                 }catch(e: AdultAccountRequiredException) {
                     errorMessage = impl.getString(MR.strings.adult_account_required)
@@ -285,6 +296,21 @@ class LoginViewModel(
         viewModelScope.launch {
             val guestPerson = accountManager.startGuestSession(serverUrl)
             goToNextDestAfterLoginOrGuestSelected(guestPerson.person.personUid)
+        }
+    }
+
+
+    fun onClickSignUp(){
+        val endpointUrl = serverUrl.requireHttpPrefix()
+            .requirePostfix("/")
+        val args = mutableMapOf(
+            UstadView.ARG_API_URL to endpointUrl)
+        navController.navigate(SignUpViewModel.DEST_NAME, args)
+    }
+
+    fun onSignInWithPassKey(passKeySignInData: PassKeySignInData){
+        viewModelScope.launch {
+         accountManager.loginWithPasskey(passKeySignInData,serverUrl)
         }
     }
 
