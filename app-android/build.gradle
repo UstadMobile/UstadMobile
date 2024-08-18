@@ -262,9 +262,6 @@ dependencies {
     //Work manager
     implementation libs.androidx.work.runtime
 
-    //Klock
-    implementation libs.klock.android
-
     //Crash reporting
     implementation libs.acra.http
 

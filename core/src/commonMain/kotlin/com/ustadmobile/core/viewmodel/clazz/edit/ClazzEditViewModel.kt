@@ -14,7 +14,6 @@ import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.core.schedule.ClazzLogCreatorManager
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.viewmodel.courseterminology.list.CourseTerminologyListViewModel
@@ -665,16 +664,6 @@ class ClazzEditViewModel(
                 )
             }
 
-            val entityTimeZone = TimeZone.of(entity.effectiveTimeZone)
-            val fromLocalDate = Clock.System.now().toLocalDateTime(entityTimeZone)
-                .toLocalMidnight()
-            val clazzLogCreatorManager: ClazzLogCreatorManager by di.instance()
-            clazzLogCreatorManager.requestClazzLogCreation(
-                entity.clazzUid,
-                accountManager.currentAccount.endpointUrl,
-                fromLocalDate.toInstant(entityTimeZone).toEpochMilliseconds(),
-                fromLocalDate.toLocalEndOfDay().toInstant(entityTimeZone).toEpochMilliseconds()
-            )
             Napier.d("onClickSave: done")
 
             finishWithResult(ClazzDetailViewModel.DEST_NAME, entity.clazzUid, entity)

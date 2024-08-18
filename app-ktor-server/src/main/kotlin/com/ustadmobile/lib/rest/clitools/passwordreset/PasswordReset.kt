@@ -28,8 +28,8 @@ fun main(args: Array<String>) {
         .setDefault("ustad-server.conf")
         .help("Server config file path")
 
-    parser.addArgument("-e", "--endpoint")
-        .help("Server endpoint url e.g. https://ustad.servername.com/")
+    parser.addArgument("-l", "--learningspace")
+        .help("Server learning sapce url e.g. https://ustad.servername.com/")
     parser.addArgument("-u", "--username")
         .required(true)
         .help("Username to reset password for")

@@ -2,6 +2,7 @@ package com.ustadmobile.lib.rest
 
 import com.google.gson.Gson
 import com.google.i18n.phonenumbers.PhoneNumberUtil
+import com.ustadmobile.centraldb.CentralDb
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.contentformats.ContentImportersDiModuleJvm
 import com.ustadmobile.core.db.UmAppDatabase
@@ -119,8 +120,11 @@ import java.util.*
 import com.ustadmobile.core.logging.LogbackAntiLog
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.isWindowsOs
+import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.log.NapierDoorLogger
 import com.ustadmobile.lib.rest.domain.contententry.importcontent.ContentEntryImportJobRoute
+import com.ustadmobile.lib.rest.domain.learningspace.LearningSpaceRoute
+import com.ustadmobile.lib.rest.domain.learningspace.create.CreateLearningSpaceUseCase
 import com.ustadmobile.lib.rest.domain.person.bulkadd.BulkAddPersonRoute
 import com.ustadmobile.lib.rest.domain.xapi.XapiRoute
 import com.ustadmobile.lib.rest.domain.xapi.savestatementonclear.SaveStatementOnUnloadRoute
@@ -132,8 +136,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.io.files.Path
 import org.kodein.di.ktor.closestDI
 import uk.co.caprica.vlcj.factory.discovery.NativeDiscovery
-import java.net.Inet6Address
-import java.net.NetworkInterface
 
 const val TAG_UPLOAD_DIR = 10
 
@@ -191,19 +193,19 @@ fun Application.umRestApplication(
 
     val ktorAppHome = ktorAppHomeDir()
 
-    if(dbMode != CONF_DBMODE_VIRTUALHOST && siteUrl.isNullOrBlank()) {
-        val likelyAddr = NetworkInterface.getNetworkInterfaces().toList().filter {
-            !it.isLoopback
-        }.flatMap { netInterface ->
-            netInterface.inetAddresses.toList().filter { it !is Inet6Address }
-        }.firstOrNull()?.let { "http://${it.hostAddress}:${appConfig.port}/"} ?: ""
-
-        throw SiteConfigException("ERROR: Site URL is not set. You MUST specify the site url e.g. $likelyAddr \n" +
-                "Please specify using the url parameter in command line e.g. add " +
-                "--siteUrl $likelyAddr \n" +
-                "to the command you are running or \n" +
-                "set this in the config file e.g. uncomment siteUrl and set as siteUrl = \"$likelyAddr\"")
-    }
+//    if(dbMode != CONF_DBMODE_VIRTUALHOST && siteUrl.isNullOrBlank()) {
+//        val likelyAddr = NetworkInterface.getNetworkInterfaces().toList().filter {
+//            !it.isLoopback
+//        }.flatMap { netInterface ->
+//            netInterface.inetAddresses.toList().filter { it !is Inet6Address }
+//        }.firstOrNull()?.let { "http://${it.hostAddress}:${appConfig.port}/"} ?: ""
+//
+//        throw SiteConfigException("ERROR: Site URL is not set. You MUST specify the site url e.g. $likelyAddr \n" +
+//                "Please specify using the url parameter in command line e.g. add " +
+//                "--siteUrl $likelyAddr \n" +
+//                "to the command you are running or \n" +
+//                "set this in the config file e.g. uncomment siteUrl and set as siteUrl = \"$likelyAddr\"")
+//    }
 
     val mediaInfoFile = SysPathUtil.findCommandInPath(
         commandName = "mediainfo",
@@ -769,6 +771,23 @@ fun Application.umRestApplication(
             GetApiUrlUseCaseDirect(context)
         }
 
+        bind<CentralDb>() with singleton {
+            val dataDir = appConfig.absoluteDataDir()
+
+            DatabaseBuilder.databaseBuilder(
+                dbClass = CentralDb::class,
+                dbUrl = "jdbc:sqlite:${dataDir.absolutePath}/centraldb.sqlite",
+                nodeId = 1L
+            ).build()
+        }
+
+        bind<CreateLearningSpaceUseCase>() with singleton {
+            CreateLearningSpaceUseCase(
+                xxStringHasher = instance(),
+                centralDb = instance()
+            )
+        }
+
         try {
             appConfig.config("mail")
 
@@ -796,7 +815,7 @@ fun Application.umRestApplication(
         }
 
         registerContextTranslator { call: ApplicationCall ->
-            call.callEndpoint
+            call.callLearningSpace
         }
 
         onReady {
@@ -819,6 +838,8 @@ fun Application.umRestApplication(
             }
 
             instance<Scheduler>().start()
+            instance<CentralDb>()
+
             Runtime.getRuntime().addShutdownHook(Thread{
                 instance<Scheduler>().shutdown()
             })
@@ -875,12 +896,13 @@ fun Application.umRestApplication(
      * in UstadAppReactProxy
      */
     install(Routing) {
+        val di by closestDI()
+
         prefixRoute(sitePrefix) {
             addHostCheckIntercept()
             personAuthRegisterRoute()
             route("UmAppDatabase") {
                 UmAppDatabase_KtorRoute(DoorHttpServerConfig(json = json, logger = NapierDoorLogger())) { call ->
-                    val di: DI by call.closestDI()
                     di.on(call).direct.instance(tag = DoorTag.TAG_DB)
                 }
             }
@@ -888,9 +910,17 @@ fun Application.umRestApplication(
 
             GetAppRoute()
 
-            route("api") {
-                val di: DI by closestDI()
+            route("server-manager") {
+                route("api"){
+                    route("learningspaces") {
+                        LearningSpaceRoute(
+                            createLearningSpaceUseCase = di.direct.instance()
+                        )
+                    }
+                }
+            }
 
+            route("api") {
                 route("account"){
                     SetPasswordRoute(
                         useCase = { call ->

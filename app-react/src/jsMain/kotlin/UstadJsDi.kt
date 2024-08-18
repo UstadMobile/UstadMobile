@@ -20,8 +20,6 @@ import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.PREFK
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.PREFKEY_LOCALE
 import com.ustadmobile.core.impl.di.DomainDiModuleJs
 import com.ustadmobile.core.impl.di.commonDomainDiModule
-import com.ustadmobile.core.schedule.ClazzLogCreatorManager
-import com.ustadmobile.core.schedule.ClazzLogCreatorManagerJs
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.RepositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
@@ -193,8 +191,6 @@ internal fun ustadJsDi(
 
         Pbkdf2Params(numIterations, keyLength)
     }
-
-    bind<ClazzLogCreatorManager>() with singleton { ClazzLogCreatorManagerJs() }
 
     bind<Json>() with singleton {
         json

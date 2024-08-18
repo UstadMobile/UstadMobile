@@ -1,6 +1,7 @@
 package com.ustadmobile.centraldb
 
-import com.ustadmobile.centraldb.daos.LearningSpaceDao
+import com.ustadmobile.centraldb.daos.LearningSpaceConfigDao
+import com.ustadmobile.centraldb.daos.LearningSpaceInfoDao
 import com.ustadmobile.centraldb.entities.LearningSpaceInfo
 import com.ustadmobile.door.annotation.DoorDatabase
 import com.ustadmobile.door.room.RoomDatabase
@@ -11,6 +12,8 @@ import com.ustadmobile.door.room.RoomDatabase
 )
 expect abstract class CentralDb : RoomDatabase {
 
-    abstract fun learningSpaceDao(): LearningSpaceDao
+    abstract fun learningSpaceInfoDao(): LearningSpaceInfoDao
+
+    abstract fun learningSpaceConfigDao(): LearningSpaceConfigDao
 
 }

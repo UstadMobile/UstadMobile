@@ -1,8 +1,6 @@
 package com.ustadmobile.core.viewmodel.person.edit
 
 import app.cash.turbine.test
-import com.soywiz.klock.DateTime
-import com.soywiz.klock.years
 import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
@@ -29,6 +27,10 @@ import com.ustadmobile.lib.db.entities.SystemPermission
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.util.test.initNapierLog
+import kotlinx.datetime.Clock
+import kotlinx.datetime.DateTimePeriod
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.minus
 import org.kodein.di.*
 import org.mockito.kotlin.*
 import kotlin.test.Test
@@ -200,7 +202,9 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
 
     @Test
     fun givenPresenterCreatedInRegisterMinorMode_whenFormFilledAndClickSave_thenShouldGoToWaitForParentScreen() {
-        val minorDateOfBirth = (DateTime.now() - 10.years).unixMillisLong
+        val minorDateOfBirth = Clock.System.now().minus(
+            DateTimePeriod(years = 10), TimeZone.currentSystemDefault()
+        ).toEpochMilliseconds()
 
         testViewModel<PersonEditViewModel> {
             val accountManager = createMockAccountManager(activeLearningSpace.url)
@@ -268,7 +272,9 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
 
     @Test
     fun givenPresenterCreatedInRegisterMinorMode_whenNoParentEmailGiven_thenShouldShowFieldRequiredError() {
-        val minorDateOfBirth = (DateTime.now() - 10.years).unixMillisLong
+        val minorDateOfBirth = Clock.System.now().minus(
+            DateTimePeriod(years = 10), TimeZone.currentSystemDefault()
+        ).toEpochMilliseconds()
 
         testViewModel<PersonEditViewModel> {
             val accountManager = createMockAccountManager(activeLearningSpace.url)

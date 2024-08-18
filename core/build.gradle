@@ -192,7 +192,6 @@ kotlin {
                 implementation libs.kotlin.test
                 implementation libs.kotlin.test.junit
                 implementation libs.mockito.kotlin
-                implementation libs.klock
                 implementation libs.junit
                 implementation libs.ktor.server.content.negotiation
 

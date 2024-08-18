@@ -6,7 +6,7 @@ import com.ustadmobile.centraldb.entities.LearningSpaceInfo
 import com.ustadmobile.door.annotation.DoorDao
 
 @DoorDao
-expect abstract class LearningSpaceDao {
+expect abstract class LearningSpaceInfoDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun upsertAsync(learningSpace: LearningSpaceInfo)
