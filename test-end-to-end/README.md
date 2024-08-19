@@ -18,19 +18,13 @@ trickle -s -d 128 -u 128 bash
 ./startserver.sh ...
 ```
 
-## Tests
+## Scenarios
 
 ### 1 : Library
 
-1.1 Admin can add H5P, video, EPUB and Experience API zip files from the device and by using a link. 
-    Once added the content can be opened. If added on Mobile or Desktop app from the device, testing 
-    opening should be from another device or after clearing the app on the device used to upload it.
-    [001_001_admin_can_add_content](test-descriptions/001_001_admin_can_add_content_test_description.md)
+1.1 [Admin uploads valid content](test-descriptions/001_001_admin_can_add_content_test_description.md)
 
-1.2 If admin uploads an invalid file where the file extension / mime type indicate that it should be 
-    a supported file, but the file content is not valid (e.g. a file with the name video.mp4 that is 
-    not actually a video), then an error message will be displayed to notify that the content is 
-    invalid. [001_002_admin_add_invalid_content_gets_error_message](test-descriptions/test-descriptions/001_002_admin_add_invalid_content_gets_error_message.md)
+1.2 [Admin uploads invalid content](test-descriptions/test-descriptions/001_002_admin_add_invalid_content_gets_error_message.md)
 
 1.3 Admin can hide and unhide content. After hiding on admin device, the content is hidden on other device.
 
