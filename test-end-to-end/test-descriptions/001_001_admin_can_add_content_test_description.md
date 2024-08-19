@@ -2,7 +2,7 @@
 
 ## Description:
 
-Admin can add an H5P/Epub/Video/Pdf content file from the device. Once added, the content can be accessed and opened, even after the app has been cleared.
+Admin can add an H5P, Epub, Video, and Pdf content file from the device. Once added, the content can be accessed and opened, even after the app has been cleared.
 
 ## Step-by-step procedure:
 
