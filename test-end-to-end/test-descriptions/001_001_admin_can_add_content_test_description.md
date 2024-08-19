@@ -16,7 +16,7 @@ Admin can add an H5P/Epub/Video/Pdf content file from the device. Once added, th
 8. Click on the content.
 9. Wait for the importing and uploading to complete.
 10. Click the "Open" button.
-11. Verify the content.
+11. Verify the content appears as expected.
 12. Close the content.
 13. Clear the app storage.
 14. Log in as admin.
@@ -24,4 +24,4 @@ Admin can add an H5P/Epub/Video/Pdf content file from the device. Once added, th
 16. Click on the content.
 17. Click the "Download" button.
 18. Click the "Open" button.
-19. Verify the content is visible.
+19. Verify the content appears as expected.
