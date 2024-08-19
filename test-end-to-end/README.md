@@ -24,7 +24,7 @@ trickle -s -d 128 -u 128 bash
 
 1.1 [Admin uploads valid content](test-descriptions/001_001_admin_can_add_content_test_description.md)
 
-1.2 [Admin uploads invalid content](test-descriptions/test-descriptions/001_002_admin_add_invalid_content_gets_error_message.md)
+1.2 [Admin uploads invalid content](test-descriptions/001_002_admin_add_invalid_content_gets_error_message.md)
 
 1.3 Admin can hide and unhide content. After hiding on admin device, the content is hidden on other device.
 
