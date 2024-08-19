@@ -4,7 +4,7 @@
 
 Admin can add an H5P/Epub/Video/Pdf content file from the device. Once added, the content can be accessed and opened, even after the app has been cleared.
 
-## Step-by-Step Test Flow:
+## Step-by-step procedure:
 
 1. Log in as admin.
 2. Click on "Library."
