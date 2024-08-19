@@ -65,7 +65,7 @@ kotlin {
 
 android {
     compileSdk = 34
-    namespace = "com.ustadmobile.centraldb"
+    namespace = "com.ustadmobile.ihttp.core"
 
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
 

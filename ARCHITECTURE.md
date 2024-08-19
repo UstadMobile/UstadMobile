@@ -101,7 +101,6 @@ dependency injection.
 
 One server process (in one JVM instance) can host multiple learning spaces with minimal overhead. 
 HTTP requests are matched to the relevant learning space, and each learning space is mapped to a 
-separate database. The CentralDb is used to maintain a database of all learning spaces available on
-the server.
-
+separate database. [lib-systemdb](lib-systemdb/) is used to maintain a database of all learning 
+spaces available on the system.
 

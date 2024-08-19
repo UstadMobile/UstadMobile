@@ -2,7 +2,7 @@ package com.ustadmobile.lib.rest
 
 import com.google.gson.Gson
 import com.google.i18n.phonenumbers.PhoneNumberUtil
-import com.ustadmobile.centraldb.CentralDb
+import com.ustadmobile.appconfigdb.SystemDb
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.contentformats.ContentImportersDiModuleJvm
 import com.ustadmobile.core.db.UmAppDatabase
@@ -120,7 +120,6 @@ import java.util.*
 import com.ustadmobile.core.logging.LogbackAntiLog
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.isWindowsOs
-import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.log.NapierDoorLogger
 import com.ustadmobile.lib.rest.domain.contententry.importcontent.ContentEntryImportJobRoute
 import com.ustadmobile.lib.rest.domain.learningspace.LearningSpaceRoute
@@ -160,7 +159,7 @@ val REQUIRED_EXTERNAL_COMMANDS = emptyList<String>()
  * other url will be sent to the JS dev proxy
  */
 val KTOR_SERVER_ROUTES = listOf(
-    "/UmAppDatabase",
+    "/UmAppDatabase", "/config",
     "/ContainerEntryList", "/ContainerEntryFile", "/auth", "/ContainerMount",
     "/Site", "/import", "/contentupload", "/websocket", "/api", "/staticfiles"
 )
@@ -771,20 +770,10 @@ fun Application.umRestApplication(
             GetApiUrlUseCaseDirect(context)
         }
 
-        bind<CentralDb>() with singleton {
-            val dataDir = appConfig.absoluteDataDir()
-
-            DatabaseBuilder.databaseBuilder(
-                dbClass = CentralDb::class,
-                dbUrl = "jdbc:sqlite:${dataDir.absolutePath}/centraldb.sqlite",
-                nodeId = 1L
-            ).build()
-        }
-
         bind<CreateLearningSpaceUseCase>() with singleton {
             CreateLearningSpaceUseCase(
                 xxStringHasher = instance(),
-                centralDb = instance()
+                systemDb = instance()
             )
         }
 
@@ -838,7 +827,7 @@ fun Application.umRestApplication(
             }
 
             instance<Scheduler>().start()
-            instance<CentralDb>()
+            instance<SystemDb>()
 
             Runtime.getRuntime().addShutdownHook(Thread{
                 instance<Scheduler>().shutdown()
@@ -910,7 +899,7 @@ fun Application.umRestApplication(
 
             GetAppRoute()
 
-            route("server-manager") {
+            route("config") {
                 route("api"){
                     route("learningspaces") {
                         LearningSpaceRoute(

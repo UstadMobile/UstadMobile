@@ -1,8 +1,7 @@
-package com.ustadmobile.centraldb.daos
+package com.ustadmobile.appconfigdb.daos
 
 import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import com.ustadmobile.centraldb.entities.LearningSpaceConfig
+import com.ustadmobile.appconfigdb.entities.LearningSpaceConfig
 import com.ustadmobile.door.annotation.DoorDao
 
 @DoorDao

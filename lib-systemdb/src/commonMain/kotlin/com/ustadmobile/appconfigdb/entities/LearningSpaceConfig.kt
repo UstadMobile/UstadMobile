@@ -1,4 +1,4 @@
-package com.ustadmobile.centraldb.entities
+package com.ustadmobile.appconfigdb.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

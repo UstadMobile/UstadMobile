@@ -137,7 +137,7 @@ dependencies {
     implementation libs.vlcj
 
     implementation project(":lib-ihttp-ktor-server")
-    implementation project(":lib-centraldb")
+    implementation project(':lib-systemdb')
 
     //test
     testImplementation project(":lib-test-common")
