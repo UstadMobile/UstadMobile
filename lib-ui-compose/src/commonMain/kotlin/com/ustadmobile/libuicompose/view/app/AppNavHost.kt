@@ -18,12 +18,14 @@ import com.ustadmobile.core.impl.nav.NavResultReturner
 import com.ustadmobile.core.impl.nav.NavResultReturnerImpl
 import com.ustadmobile.core.impl.nav.PopNavCommand
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.viewmodel.AddAccountExistingUserViewModel
 import com.ustadmobile.core.viewmodel.HtmlEditViewModel
+import com.ustadmobile.core.viewmodel.AddAccountSelectNewUserTypeViewModel
 import com.ustadmobile.core.viewmodel.clazz.invitevialink.InviteViaLinkViewModel
-import com.ustadmobile.core.viewmodel.OnBoardingViewModel
 import com.ustadmobile.core.viewmodel.person.registerageredirect.RegisterAgeRedirectViewModel
 import com.ustadmobile.core.viewmodel.site.termsdetail.SiteTermsDetailViewModel
 import com.ustadmobile.core.viewmodel.UstadViewModel
+import com.ustadmobile.core.viewmodel.AddAccountSelectNewOrExistingViewModel
 import com.ustadmobile.core.viewmodel.about.OpenLicensesViewModel
 import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
@@ -110,7 +112,6 @@ import com.ustadmobile.libuicompose.view.discussionpost.detail.DiscussionPostDet
 import com.ustadmobile.libuicompose.view.discussionpost.edit.DiscussionPostEditScreen
 import com.ustadmobile.libuicompose.view.htmledit.HtmlEditScreen
 import com.ustadmobile.libuicompose.view.login.LoginScreen
-import com.ustadmobile.libuicompose.view.onboarding.OnboardingScreen
 import com.ustadmobile.libuicompose.view.person.accountedit.PersonAccountEditScreen
 import com.ustadmobile.libuicompose.view.person.detail.PersonDetailScreen
 import com.ustadmobile.libuicompose.view.person.edit.PersonEditScreen
@@ -143,6 +144,7 @@ import com.ustadmobile.core.viewmodel.systempermission.edit.SystemPermissionEdit
 import com.ustadmobile.core.viewmodel.videocontent.VideoContentViewModel
 import com.ustadmobile.core.viewmodel.xapicontent.XapiContentViewModel
 import com.ustadmobile.libuicompose.util.passkey.CreatePasskeyPrompt
+import com.ustadmobile.libuicompose.view.ExistingUser.AddAccountExistingUserScreen
 import com.ustadmobile.libuicompose.view.about.OpenLicensesScreen
 import com.ustadmobile.libuicompose.view.clazz.invitevialink.InviteViaLinkScreen
 import com.ustadmobile.libuicompose.view.clazz.joinwithcode.JoinWithCodeScreen
@@ -162,6 +164,7 @@ import com.ustadmobile.libuicompose.view.individual.IndividualLearnerScreen
 import com.ustadmobile.libuicompose.view.interop.externalapppermissionrequest.ExternalAppPermissionRequestScreen
 import com.ustadmobile.libuicompose.view.message.conversationlist.ConversationListScreen
 import com.ustadmobile.libuicompose.view.message.messagelist.MessageListScreen
+import com.ustadmobile.libuicompose.view.newuser.AddAccountSelectNewUserTypeScreen
 import com.ustadmobile.libuicompose.view.parentalconsentmanagement.ParentalConsentManagementScreen
 import com.ustadmobile.libuicompose.view.pdfcontent.PdfContentScreen
 import com.ustadmobile.libuicompose.view.person.bulkaddrunimport.BulkAddPersonRunImportScreen
@@ -174,6 +177,7 @@ import com.ustadmobile.libuicompose.view.signup.SignUpScreen
 import com.ustadmobile.libuicompose.view.systempermission.detail.SystemPermissionDetailScreen
 import com.ustadmobile.libuicompose.view.systempermission.edit.SystemPermissionEditScreen
 import com.ustadmobile.libuicompose.view.videocontent.VideoContentScreen
+import com.ustadmobile.libuicompose.view.person.addaccount.AddAccountSelectNewOrExistingScreen
 import com.ustadmobile.libuicompose.view.xapicontent.XapiContentScreen
 import kotlinx.coroutines.flow.Flow
 
@@ -313,12 +317,21 @@ fun AppNavHost(
                 }
             }
 
-            contentScene("/${OnBoardingViewModel.DEST_NAME}") { backStackEntry ->
-                OnboardingScreen(
-                    appViewModel(backStackEntry, OnBoardingViewModel::class, ::OnBoardingViewModel)
+            contentScene("/${AddAccountExistingUserViewModel.DEST_NAME}") { backStackEntry ->
+                AddAccountExistingUserScreen(
+                    appViewModel(backStackEntry, AddAccountExistingUserViewModel::class, ::AddAccountExistingUserViewModel)
                 )
             }
-
+            contentScene("/${AddAccountSelectNewOrExistingViewModel.DEST_NAME}") { backStackEntry ->
+                AddAccountSelectNewOrExistingScreen(
+                    appViewModel(backStackEntry, AddAccountSelectNewOrExistingViewModel::class, ::AddAccountSelectNewOrExistingViewModel)
+                )
+            }
+            contentScene("/${AddAccountSelectNewUserTypeViewModel.DEST_NAME}") { backStackEntry ->
+                AddAccountSelectNewUserTypeScreen(
+                    appViewModel(backStackEntry, AddAccountSelectNewUserTypeViewModel::class, ::AddAccountSelectNewUserTypeViewModel)
+                )
+            }
             contentScene("/${IndividualLearnerViewModel.DEST_NAME}") { backStackEntry ->
                 IndividualLearnerScreen(
                     appViewModel(backStackEntry, IndividualLearnerViewModel::class) { di, savedStateHandle ->

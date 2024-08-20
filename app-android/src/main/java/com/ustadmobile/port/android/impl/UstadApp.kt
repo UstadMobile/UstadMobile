@@ -7,7 +7,6 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import coil.ImageLoader
-import com.ustadmobile.core.domain.account.CreateNewLocalAccountUseCase
 import coil.ImageLoaderFactory
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.SharedPreferencesSettings
@@ -111,6 +110,7 @@ import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCase
 import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCaseAndroid
 import com.ustadmobile.core.domain.interop.oneroster.OneRosterEndpoint
 import com.ustadmobile.core.domain.interop.oneroster.OneRosterHttpServerUseCase
+import com.ustadmobile.core.domain.passkey.SavePersonPasskeyUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.share.ShareTextUseCase
 import com.ustadmobile.core.domain.share.ShareTextUseCaseAndroid
@@ -288,13 +288,21 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             )
         }
 
+        //commenting to add testing url
+//        bind<ApiUrlConfig>() with singleton {
+//            ApiUrlConfig(
+//                presetApiUrl = applicationContext.appMetaData?.getString(AppConfig.KEY_API_URL)
+//                    ?.ifBlank { null }
+//            )
+//        }
+
+
         bind<ApiUrlConfig>() with singleton {
             ApiUrlConfig(
-                presetApiUrl = applicationContext.appMetaData?.getString(AppConfig.KEY_API_URL)
+                presetApiUrl = "http://192.168.1.52:8087/"
                     ?.ifBlank { null }
             )
         }
-
         bind<Json>() with singleton {
             Json {
                 encodeDefaults = true
@@ -931,10 +939,10 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 repoOrDb = instance<UmAppDataLayer>().repositoryOrLocalDb,
             )
         }
-        bind<SavePersonPasskeyUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<SavePersonPasskeyUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             SavePersonPasskeyUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
-                repo = instance(tag = DoorTag.TAG_REPO),
+                repo = instance<UmAppDataLayer>().repository,
             )
         }
         bind<MakeContentEntryAvailableOfflineUseCase>() with scoped(LearningSpaceScope.Default).singleton {

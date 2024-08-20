@@ -241,6 +241,13 @@ expect abstract class PersonDao : BaseDao<Person> {
     """)
     abstract suspend fun getNamesByUidAsync(uid: Long): PersonNames?
 
+    @Query("""
+          SELECT Person.*
+             FROM Person
+             LEFT JOIN PersonParentJoin ON Person.personUid = PersonParentJoin.ppjMinorPersonUid
+              WHERE PersonParentJoin.ppjParentPersonUid =  :uid  
+     """)
+    abstract suspend fun getMinorByParentPersonUidAsync(uid: Long): List<Person>?
 
 
     @Query("""

@@ -4,23 +4,24 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.viewmodel.UstadViewModel
+import com.ustadmobile.lib.db.entities.Person
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import org.kodein.di.DI
-
 
 
 data class AddChildProfileUiState(
     val onAddChildProfile: String? = null,
-
+    val childProfiles: List<Person> = emptyList(),
 )
 
 class AddChildProfileViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
-) : UstadViewModel(di, savedStateHandle, DEST_NAME){
+) : UstadViewModel(di, savedStateHandle, DEST_NAME) {
 
     private val _uiState = MutableStateFlow(
         AddChildProfileUiState()
@@ -45,6 +46,18 @@ class AddChildProfileViewModel(
                     onClick = this@AddChildProfileViewModel::onClickFinish
                 )
             )
+        }
+        viewModelScope.launch {
+            val effectiveDb = activeRepo ?: activeDb
+            val persons = effectiveDb.personDao()
+                .getMinorByParentPersonUidAsync(accountManager.currentUserSession.person.personUid)
+            persons?.let {
+              _uiState.update { prev->
+                  prev.copy(
+                      childProfiles = it
+                  )
+              }
+            }
         }
     }
 

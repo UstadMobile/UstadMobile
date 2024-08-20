@@ -27,6 +27,7 @@ import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonGroup.Companion.PERSONGROUP_FLAG_GUESTPERSON
 import com.ustadmobile.lib.db.entities.PersonGroup.Companion.PERSONGROUP_FLAG_PERSONGROUP
+import com.ustadmobile.lib.db.entities.PersonPicture
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.db.entities.UserSession
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
@@ -38,9 +39,6 @@ import io.ktor.client.request.post
 import io.ktor.client.request.preparePost
 import io.ktor.client.request.url
 import io.github.aakira.napier.Napier
-import io.ktor.client.*
-import io.ktor.client.plugins.*
-import io.ktor.client.request.*
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
@@ -69,7 +67,6 @@ import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
-import kotlin.io.encoding.Base64
 
 /**
  * The app AccountManager. Users can have multiple accounts with active sessions at any given time.
@@ -353,11 +350,28 @@ class UstadAccountManager(
 
    }
     suspend fun registerWithPasskey(
-        endpointUrl: String,
+        learningSpaceUrl: String,
         passkeyResult: PasskeyResult,
-    ): Long {
-        val savePassKeyUseCase: SavePersonPasskeyUseCase = di.on(Endpoint(endpointUrl)).direct.instance()
-        return  savePassKeyUseCase.invoke(passkeyResult)
+        person: Person,
+        personPicture: PersonPicture?,
+    ) {
+        val learningSpace = LearningSpace(learningSpaceUrl)
+
+        val savePassKeyUseCase: SavePersonPasskeyUseCase = di.on(learningSpace).direct.instance()
+        savePassKeyUseCase.invoke(passkeyResult)
+
+        //Must ensure that the site object is loaded to get auth salt.
+        val repo: UmAppDatabase = di.on(learningSpace).direct.instance<UmAppDataLayer>()
+            .repositoryOrLocalDb
+        getSiteFromDbOrLoadFromHttp(repo)
+        if(repo.personDao().findByUidAsync(person.personUid) == null) {
+            repo.personDao().insertAsync(person)
+        }
+        val session = addSession(person, learningSpaceUrl, null)
+
+        currentUserSession = session
+
+
     }
 
     suspend fun register(
@@ -398,7 +412,7 @@ class UstadAccountManager(
                 .requireRepository()
             getSiteFromDbOrLoadFromHttp(repo)
 
-            val session = addSession(registeredPerson, endpointUrl, password)
+            val session = addSession(registeredPerson, learningSpaceUrl, password)
 
             //If the person is not loaded into the database (probably not), then put in the db.
             val db: UmAppDatabase = di.on(learningSpace).direct.instance(tag = DoorTag.TAG_DB)
@@ -448,7 +462,6 @@ class UstadAccountManager(
                 usAuth = password?.let { authManager.encryptPbkdf2(it).toHexString() }
                 usUid = dataLayer.repositoryOrLocalDb.userSessionDao().insertSession(this)
             }
-
             val personPicture = dataLayer.localDb.personPictureDao().findByPersonUidAsync(
                 person.personUid)
             userSession to personPicture
@@ -547,7 +560,7 @@ class UstadAccountManager(
         if(!passkeyVerifyResult.isVerified) {
             throw UnauthorizedException("Account not found")
         }
-        val repo: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = DoorTag.TAG_REPO)
+        val repo: UmAppDatabase by di.on(LearningSpace(endpointUrl)).instance(tag = DoorTag.TAG_REPO)
 
         //Make sure that we fetch the person and personpicture into the database.
         val personAndPicture = repo.personDao().findByUidWithPicture(
@@ -555,7 +568,7 @@ class UstadAccountManager(
         val personInDb = personAndPicture.person!! //Cannot be null based on query
 
 
-        val repoWithCurrentUrl: UmAppDatabase by di.on(Endpoint(currentServerUrl)).instance(tag = DoorTag.TAG_REPO)
+        val repoWithCurrentUrl: UmAppDatabase by di.on(LearningSpace(currentServerUrl)).instance(tag = DoorTag.TAG_REPO)
 
         getSiteFromDbOrLoadFromHttp(repoWithCurrentUrl)
 

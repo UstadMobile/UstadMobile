@@ -1,7 +1,7 @@
 package com.ustadmobile.core.viewmodel.signup
 
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
 import com.ustadmobile.core.domain.passkey.CreatePasskeyParams
 import com.ustadmobile.core.domain.passkey.CreatePasskeyUseCase
@@ -16,11 +16,9 @@ import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.core.view.UstadView.Companion.ARG_SITE
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
-import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import com.ustadmobile.core.viewmodel.person.child.AddChildProfileViewModel
-import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.door.ext.doorIdentityHashCode
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -32,9 +30,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
-import kotlinx.serialization.encodeToString
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -107,12 +103,12 @@ class SignUpViewModel(
 
     private val serverUrl = savedStateHandle[UstadView.ARG_API_URL]
         ?: apiUrlConfig.presetApiUrl ?: "http://localhost"
-    val addNewPersonUseCase: AddNewPersonUseCase = di.on(Endpoint(serverUrl)).direct.instance()
+    val addNewPersonUseCase: AddNewPersonUseCase = di.on(LearningSpace(serverUrl)).direct.instance()
 
     private val genderConfig: GenderConfig by instance()
 
     private val enqueueSavePictureUseCase: EnqueueSavePictureUseCase by
-    on(Endpoint(serverUrl)).instance()
+    on(LearningSpace(serverUrl)).instance()
 
 
     init {
@@ -131,7 +127,7 @@ class SignUpViewModel(
             prev.copy(
                 genderOptions = genderConfig.genderMessageIdsAndUnset,
                 showCreatePasskeyPrompt = false,
-                person = Person(),
+                person = Person(dateOfBirth = savedStateHandle[PersonEditViewModel.ARG_DATE_OF_BIRTH]?.toLong() ?: 0L),
                 serverUrl_ = serverUrl
 
             )
@@ -252,31 +248,31 @@ class SignUpViewModel(
 
         viewModelScope.launch {
             val passwordVal = _uiState.value.password
-            val checkedUiState = _uiState.updateAndGet { prev ->
-                prev.copy(
-                    usernameError = if (savePerson.username.isNullOrEmpty()) {
-                        requiredFieldMessage
-                    } else {
-                        null
-                    },
-                    passwordError = if (passwordVal.isNullOrEmpty()) {
-                        requiredFieldMessage
-                    } else {
-                        null
-                    },
-
-                    dateOfBirthError = if (savePerson.dateOfBirth == 0L) {
-                        requiredFieldMessage
-                    } else {
-                        null
-                    }
-                )
-            }
-
-            if (checkedUiState.hasErrors()) {
-                loadingState = LoadingUiState.NOT_LOADING
-                return@launch
-            }
+//            val checkedUiState = _uiState.updateAndGet { prev ->
+//                prev.copy(
+//                    usernameError = if (savePerson.username.isNullOrEmpty()) {
+//                        requiredFieldMessage
+//                    } else {
+//                        null
+//                    },
+//                    passwordError = if (passwordVal.isNullOrEmpty()) {
+//                        requiredFieldMessage
+//                    } else {
+//                        null
+//                    },
+//
+//                    dateOfBirthError = if (savePerson.dateOfBirth == 0L) {
+//                        requiredFieldMessage
+//                    } else {
+//                        null
+//                    }
+//                )
+//            }
+//
+//            if (checkedUiState.hasErrors()) {
+//                loadingState = LoadingUiState.NOT_LOADING
+//                return@launch
+//            }
 
             try {
 
@@ -297,16 +293,18 @@ class SignUpViewModel(
                 val result = passkeyCreated?.let {
                     accountManager.registerWithPasskey(
                         serverUrl,
-                        it
+                        it,
+                        savePerson,
+                        _uiState.value.personPicture
                     )
                 }
                 Napier.e { "passkeyuid $result" }
                 if (result != null) {
-                    val personid = addNewPersonUseCase(
-                        person = savePerson,
-                        addedByPersonUid = activeUserPersonUid,
-                        createPersonParentApprovalIfMinor = true,
-                    )
+//                    val personid = addNewPersonUseCase(
+//                        person = savePerson,
+//                        addedByPersonUid = activeUserPersonUid,
+//                        createPersonParentApprovalIfMinor = true,
+//                    )
                     val personPictureVal = _uiState.value.personPicture
 
                     if (personPictureVal != null) {
@@ -314,15 +312,15 @@ class SignUpViewModel(
                         personPictureVal.personPictureLct = systemTimeInMillis()
                         val personPictureUriVal = personPictureVal.personPictureUri
 
-                        activeDb.personPictureDao().upsert(personPictureVal)
+                       // activeDb.personPictureDao().upsert(personPictureVal)
                         enqueueSavePictureUseCase(
                             entityUid = savePerson.personUid,
                             tableId = PersonPicture.TABLE_ID,
                             pictureUri = personPictureUriVal
                         )
+                        navController.navigate(AddChildProfileViewModel.DEST_NAME, emptyMap())
 
                     }
-                    Napier.e { "person uid $personid" }
                 }
 
 
@@ -347,18 +345,7 @@ class SignUpViewModel(
     }
 
     fun onPassKeyDataReceived(passkeyResult: PasskeyResult) {
-        viewModelScope.launch {
-            val result = accountManager.registerWithPasskey(serverUrl, passkeyResult)
-            if (result != 0L) {
-                snackDispatcher.showSnackBar(
-                    Snack("Passkey saved")
-                )
-            } else {
-                snackDispatcher.showSnackBar(
-                    Snack(systemImpl.getString(MR.strings.error))
-                )
-            }
-        }
+
 
     }
 
@@ -378,6 +365,9 @@ class SignUpViewModel(
         const val STATE_KEY_PICTURE = "picState"
 
         const val DEST_NAME = "SignUp"
+
+        const val ARG_DATE_OF_BIRTH = "DateOfBirth"
+
 
     }
 

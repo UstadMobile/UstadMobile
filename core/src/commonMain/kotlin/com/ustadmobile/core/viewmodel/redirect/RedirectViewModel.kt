@@ -8,8 +8,8 @@ import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.navigateToLink
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.core.viewmodel.OnBoardingViewModel
 import com.ustadmobile.core.viewmodel.UstadViewModel
+import com.ustadmobile.core.viewmodel.AddAccountSelectNewOrExistingViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.door.ext.DoorTag
 import kotlinx.coroutines.launch
@@ -63,8 +63,8 @@ class RedirectViewModel(
             println(db)
         }
 
-        if(settings.getStringOrNull(OnBoardingViewModel.PREF_TAG) != true.toString()) {
-            navController.navigate(OnBoardingViewModel.DEST_NAME, buildMap {
+        if(settings.getStringOrNull(AddAccountSelectNewOrExistingViewModel.PREF_TAG) != true.toString()) {
+            navController.navigate(AddAccountSelectNewOrExistingViewModel.DEST_NAME, buildMap {
                 putFromSavedStateIfPresent(ARG_NEXT)
                 putFromSavedStateIfPresent(ARG_OPEN_LINK)
             })

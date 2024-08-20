@@ -1968,4 +1968,17 @@
 
     <string name="finish">Finish</string>
 
+    <string name="scan_badge_qr_code">Scan Badge/QR code</string>
+
+    <string name="new_user">New user</string>
+
+    <string name="existing_user">Existing user</string>
+
+    <string name="personal_account">Personal Account</string>
+    <string name="access_educational_content_download_offline">Access educational content and download for use offline for you, family members, etc.</string>
+    <string name="join_learning_space">Join Learning Space</string>
+    <string name="learning_space">Learning Space</string>
+    <string name="individual">Individual</string>
+    <string name="eg_for_your_school_organization">e.g. for your school/organization</string>
+    <string name="new_learning_space">New learning space</string>
 </resources>

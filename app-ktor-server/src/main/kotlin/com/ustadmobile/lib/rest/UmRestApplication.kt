@@ -469,7 +469,7 @@ fun Application.umRestApplication(
                 onlyIfCached = true,
             )
         }
-        bind<VerifySignInWithPasskeyUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<VerifySignInWithPasskeyUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             VerifySignInWithPasskeyUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
                 repo = null,

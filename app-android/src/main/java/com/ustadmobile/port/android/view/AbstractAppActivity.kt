@@ -41,6 +41,7 @@ import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.impl.locale.StringProviderAndroid
 import com.ustadmobile.core.impl.nav.CommandFlowUstadNavController
 import com.ustadmobile.core.networkmanager.ConnectionManager
+import com.ustadmobile.core.schedule.ClazzLogCreatorManager
 import com.ustadmobile.core.util.ext.appendQueryArgs
 import com.ustadmobile.core.util.ext.navigateToLink
 import com.ustadmobile.core.view.UstadView
@@ -112,10 +113,6 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
             SetLanguageUseCaseAndroid(
                 languagesConfig = instance()
             )
-        }
-
-        bind<ClazzLogCreatorManager>() with singleton {
-            ClazzLogCreatorManagerAndroidImpl(applicationContext)
         }
 
         bind<CreatePasskeyUseCase>() with singleton {

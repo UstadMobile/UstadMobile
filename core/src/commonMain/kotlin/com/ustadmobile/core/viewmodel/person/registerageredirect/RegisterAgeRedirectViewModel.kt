@@ -7,11 +7,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import org.kodein.di.DI
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.util.MS_PER_HOUR
 import com.ustadmobile.core.util.ext.isDateOfBirthAMinor
 import com.ustadmobile.core.viewmodel.site.termsdetail.SiteTermsDetailViewModel
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
+import com.ustadmobile.core.viewmodel.signup.SignUpViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
 import kotlinx.datetime.Instant
 
@@ -54,8 +56,13 @@ class RegisterAgeRedirectViewModel(
         _appUiState.update { prev ->
             prev.copy(
                 navigationVisible = false,
-                title = systemImpl.getString(MR.strings.register),
+                title = systemImpl.getString(MR.strings.your_date_of_birth),
                 userAccountIconVisible = false,
+                actionBarButtonState = ActionBarButtonUiState(
+                    visible = true,
+                    text = systemImpl.getString(MR.strings.next),
+                    onClick = this::onClickNext
+                )
             )
         }
     }
@@ -100,11 +107,14 @@ class RegisterAgeRedirectViewModel(
             put(PersonEditViewModel.ARG_DATE_OF_BIRTH, date.toString())
         }
 
-        if(isMinor) {
-            navController.navigate(PersonEditViewModel.DEST_NAME_REGISTER, args)
-        }else {
-            navController.navigate(SiteTermsDetailViewModel.DEST_NAME, args)
-        }
+//        if(isMinor) {
+         navController.navigate(PersonEditViewModel.DEST_NAME_REGISTER, args)
+//        }else {
+//            navController.navigate(SiteTermsDetailViewModel.DEST_NAME, args)
+//        }
+
+        navController.navigate(SignUpViewModel.DEST_NAME, args)
+
     }
 
 
