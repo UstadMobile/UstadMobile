@@ -10,6 +10,7 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
+import io.ktor.util.encodeBase64
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import net.sourceforge.argparse4j.ArgumentParsers
@@ -36,16 +37,22 @@ fun main(args: Array<String>) {
         subParsers.title("subcommands")
         subParsers.dest("subparser_name")
         subParsers.addParser("newlearningspace").also {
+            it.addArgument("-p", "--password")
+                .required(true)
+                .help("System admin password")
             it.addArgument("-t", "--title")
+                .required(true)
                 .help("Learning Space title")
             it.addArgument("-u", "--url")
+                .required(true)
                 .help("Learning Space url")
             it.addArgument("-d", "--dburl")
+                .required(true)
                 .help("Database JDBC URL")
             it.addArgument("-n", "--dbusername")
                 .setDefault("")
                 .help("Database username")
-            it.addArgument("-p", "--dbpassword")
+            it.addArgument("-w", "--dbpassword")
                 .setDefault("")
                 .help("Database password")
         }
@@ -58,6 +65,7 @@ fun main(args: Array<String>) {
         runBlocking {
             when(ns.getString("subparser_name")) {
                 "newlearningspace" -> {
+                    val adminPassword = ns.getString("password")
                     val request = CreateLearningSpaceUseCase.CreateLearningSpaceRequest(
                         url = ns.getString("url"),
                         title = ns.getString("title"),
@@ -67,6 +75,8 @@ fun main(args: Array<String>) {
                     )
 
                     val response = httpClient.post("${serverUrl}config/api/learningspaces/create") {
+                        headers["Authorization"] = "Basic ${("admin:$adminPassword").encodeBase64()}"
+
                         contentType(ContentType.Application.Json)
                         setBody(request)
                     }
