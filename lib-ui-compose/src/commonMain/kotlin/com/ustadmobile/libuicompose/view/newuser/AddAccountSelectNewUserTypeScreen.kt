@@ -68,34 +68,36 @@ fun AddAccountSelectNewUserTypeScreen(
         LazyColumn(
             modifier = Modifier.fillMaxSize()
         ) {
+            if (uiState.showAddPersonalAccount) {
+                item {
+                    ListItem(
+                        leadingContent = {
+                            Image(
+                                painter = ustadAppImagePainter(UstadImage.ONBOARDING_EXISTING),
+                                contentDescription = null,
+                                modifier = Modifier.size(42.dp),
+                            )
+                        },
+                        headlineContent = {
+                            Text(
+                                text = stringResource(MR.strings.personal_account),
+                                fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+                            )
+                        },
+                        supportingContent = {
+                            Text(
+                                text = stringResource(MR.strings.access_educational_content_download_offline),
+                                fontSize = 12.sp,
+                            )
+                        },
+                        modifier = Modifier.clip(RoundedCornerShape(12.dp)).padding(8.dp)
+                            .clickable { onClickPersonalAccount() }
 
-            item {
-                ListItem(
-                    leadingContent = {
-                        Image(
-                            painter = ustadAppImagePainter(UstadImage.ONBOARDING_EXISTING),
-                            contentDescription = null,
-                            modifier = Modifier.size(42.dp),
-                        )
-                    },
-                    headlineContent = {
-                        Text(
-                            text = stringResource(MR.strings.personal_account),
-                            fontSize = MaterialTheme.typography.bodyMedium.fontSize,
-                        )
-                    },
-                    supportingContent = {
-                        Text(
-                            text = stringResource(MR.strings.access_educational_content_download_offline),
-                            fontSize = 12.sp,
-                        )
-                    },
-                    modifier = Modifier.clip(RoundedCornerShape(12.dp)).padding(8.dp)
-                        .clickable { onClickPersonalAccount() }
-
-                )
-                HorizontalDivider()
+                    )
+                    HorizontalDivider()
+                }
             }
+
             item {
                 ListItem(
                     leadingContent = {

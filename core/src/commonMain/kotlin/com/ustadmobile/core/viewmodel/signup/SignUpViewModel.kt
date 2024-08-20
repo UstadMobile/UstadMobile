@@ -10,8 +10,8 @@ import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.Snack
-import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.config.GenderConfig
+import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.MessageIdOption2
@@ -96,13 +96,12 @@ class SignUpViewModel(
 
     val uiState: Flow<SignUpUiState> = _uiState.asStateFlow()
 
-    private val apiUrlConfig: ApiUrlConfig by instance()
+    private val apiUrlConfig: SystemUrlConfig by instance()
 
     private val entityUid: Long
         get() = savedStateHandle[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0
 
-    private val serverUrl = savedStateHandle[UstadView.ARG_API_URL]
-        ?: apiUrlConfig.presetApiUrl ?: "http://localhost"
+    private val serverUrl = apiUrlConfig.newPersonalAccountsLearningSpaceUrl ?: "http://localhost"
     val addNewPersonUseCase: AddNewPersonUseCase = di.on(LearningSpace(serverUrl)).direct.instance()
 
     private val genderConfig: GenderConfig by instance()
