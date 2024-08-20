@@ -1,4 +1,4 @@
-package com.ustadmobile.centraldb.entities
+package com.ustadmobile.appconfigdb.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -11,9 +11,14 @@ import androidx.room.PrimaryKey
 data class LearningSpaceInfo(
     @PrimaryKey
     var lsUid: Long = 0,
+
     var lsUrl: String = "",
+
     var lsName: String = "",
+
     var lsDescription: String = "",
+
     var lsLastModified: Long = 0,
+
     var lsStored: Long = 0,
 )

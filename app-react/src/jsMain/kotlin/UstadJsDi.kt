@@ -11,17 +11,15 @@ import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseC
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCaseJs
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
 import com.ustadmobile.core.impl.*
-import com.ustadmobile.core.impl.config.ApiUrlConfig
-import com.ustadmobile.core.impl.config.AppConfig
-import com.ustadmobile.core.impl.config.AppConfigMap
+import com.ustadmobile.core.impl.config.SystemUrlConfig
+import com.ustadmobile.core.impl.config.UstadBuildConfig
+import com.ustadmobile.core.impl.config.BuildConfigMap
 import com.ustadmobile.core.impl.config.GenderConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.PREFKEY_ACTIONED_PRESET
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.PREFKEY_LOCALE
 import com.ustadmobile.core.impl.di.DomainDiModuleJs
 import com.ustadmobile.core.impl.di.commonDomainDiModule
-import com.ustadmobile.core.schedule.ClazzLogCreatorManager
-import com.ustadmobile.core.schedule.ClazzLogCreatorManagerJs
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.RepositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
@@ -59,17 +57,25 @@ internal fun ustadJsDi(
     dbNodeIdAndAuth: NodeIdAndAuth,
     json: Json,
     httpClient: HttpClient,
-    configMap: Map<String, String>,
     stringsProvider: JsStringProvider,
 ) = DI {
     import(commonDomainDiModule(LearningSpaceScope.Default))
     import(DomainDiModuleJs(LearningSpaceScope.Default))
 
-    val apiUrl = resolveEndpoint(location.href, URLSearchParams(location.search))
-    console.log("Api URL = $apiUrl (location.href = ${location.href}")
+    val learningSpaceUrl = resolveEndpoint(location.href, URLSearchParams(location.search))
+    console.log("Learning Space URL = $learningSpaceUrl (location.href = ${location.href}")
 
-    bind<AppConfig>() with singleton {
-        AppConfigMap(configMap)
+    bind<UstadBuildConfig>() with singleton {
+        BuildConfigMap(
+            buildMap {
+                put(UstadBuildConfig.KEY_SYSTEM_URL, BuildConfigJs.SYSTEM_URL)
+                put(UstadBuildConfig.KEY_PASSKEY_RP_ID, BuildConfigJs.PASSKEY_RP_ID)
+                put(UstadBuildConfig.KEY_PRESET_LEARNING_SPACE_URL,
+                    BuildConfigJs.PRESET_LEARNING_SPACE_URL)
+                put(UstadBuildConfig.KEY_NEW_PERSONAL_ACCOUNT_LEARNING_SPACE_URL,
+                    BuildConfigJs.NEW_PERSONAL_ACCOUNT_LEARNING_SPACE_URL)
+            }
+        )
     }
 
     bind<GenderConfig>() with singleton {
@@ -113,8 +119,10 @@ internal fun ustadJsDi(
         )
     }
 
-    bind<ApiUrlConfig>() with singleton {
-        ApiUrlConfig(apiUrl)
+    bind<SystemUrlConfig>() with singleton {
+        SystemUrlConfig.fromUstadBuildConfig(instance()).copy(
+            presetLearningSpaceUrl = learningSpaceUrl
+        )
     }
 
     bind<UstadMobileSystemImpl>() with singleton {
@@ -193,8 +201,6 @@ internal fun ustadJsDi(
 
         Pbkdf2Params(numIterations, keyLength)
     }
-
-    bind<ClazzLogCreatorManager>() with singleton { ClazzLogCreatorManagerJs() }
 
     bind<Json>() with singleton {
         json

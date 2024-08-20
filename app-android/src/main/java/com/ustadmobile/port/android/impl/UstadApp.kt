@@ -10,7 +10,6 @@ import coil.ImageLoader
 import coil.ImageLoaderFactory
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.SharedPreferencesSettings
-import com.toughra.ustadmobile.BuildConfig
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.contentformats.epub.XhtmlFixer
 import com.ustadmobile.core.contentformats.epub.XhtmlFixerJsoup
@@ -158,14 +157,14 @@ import org.kodein.di.*
 import org.xmlpull.v1.XmlPullParserFactory
 import org.xmlpull.v1.XmlSerializer
 import java.io.File
-import com.ustadmobile.core.impl.config.ApiUrlConfig
-import com.ustadmobile.core.impl.config.AppConfig
-import com.ustadmobile.core.impl.config.BundleAppConfig
+import com.ustadmobile.core.impl.config.SystemUrlConfig
+import com.ustadmobile.core.impl.config.BundleBuildConfig
 import com.ustadmobile.core.impl.config.GenderConfig
 import com.ustadmobile.core.impl.config.LocaleSettingDelegateAndroid
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.APPCONFIG_KEY_PRESET_LANG
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.PREFKEY_ACTIONED_PRESET
+import com.ustadmobile.core.impl.config.UstadBuildConfig
 import com.ustadmobile.core.impl.nav.NavCommandExecutionTracker
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.uri.UriHelperAndroid
@@ -201,6 +200,7 @@ import org.acra.data.StringFormat
 import org.acra.ktx.initAcra
 import org.acra.sender.HttpSender
 import rawhttp.core.RawHttp
+import com.toughra.ustadmobile.BuildConfig
 
 class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
@@ -260,8 +260,8 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             File(applicationContext.filesDir, "tmp")
         }
 
-        bind<AppConfig>() with singleton {
-            BundleAppConfig(appMetaData)
+        bind<UstadBuildConfig>() with singleton {
+            BundleBuildConfig(appMetaData)
         }
 
         bind<Settings>() with singleton {
@@ -288,21 +288,10 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             )
         }
 
-        //commenting to add testing url
-//        bind<ApiUrlConfig>() with singleton {
-//            ApiUrlConfig(
-//                presetApiUrl = applicationContext.appMetaData?.getString(AppConfig.KEY_API_URL)
-//                    ?.ifBlank { null }
-//            )
-//        }
-
-
-        bind<ApiUrlConfig>() with singleton {
-            ApiUrlConfig(
-                presetApiUrl = "http://192.168.1.52:8087/"
-                    ?.ifBlank { null }
-            )
+        bind<SystemUrlConfig>() with singleton {
+            SystemUrlConfig.fromUstadBuildConfig(instance())
         }
+
         bind<Json>() with singleton {
             Json {
                 encodeDefaults = true
@@ -910,7 +899,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
         bind<GetShowPoweredByUseCase>() with singleton {
             GetShowPoweredByUseCase(
-                applicationContext.appMetaData?.getBoolean(AppConfig.KEY_CONFIG_SHOW_POWERED_BY) ?: false,
+                applicationContext.appMetaData?.getBoolean(UstadBuildConfig.KEY_CONFIG_SHOW_POWERED_BY) ?: false,
             )
         }
 

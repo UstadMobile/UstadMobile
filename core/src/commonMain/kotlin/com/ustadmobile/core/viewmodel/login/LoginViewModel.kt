@@ -13,7 +13,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
-import com.ustadmobile.core.impl.config.ApiUrlConfig
+import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.appendSelectedAccount
@@ -76,7 +76,7 @@ class LoginViewModel(
 
     private val httpClient: HttpClient by instance()
 
-    private val apiUrlConfig: ApiUrlConfig by instance()
+    private val apiUrlConfig: SystemUrlConfig by instance()
 
     private var verifiedSite: Site? = null
 
@@ -95,7 +95,7 @@ class LoginViewModel(
     init {
         nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?: ClazzListViewModel.DEST_NAME_HOME
 
-        serverUrl = savedStateHandle[UstadView.ARG_API_URL] ?: apiUrlConfig.presetApiUrl
+        serverUrl = savedStateHandle[UstadView.ARG_API_URL] ?: apiUrlConfig.presetLearningSpaceUrl
             ?: "http://localhost"
 
         _uiState.update { prev ->

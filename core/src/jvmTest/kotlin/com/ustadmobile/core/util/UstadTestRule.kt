@@ -15,7 +15,7 @@ import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.core.domain.xapi.XapiJson
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.impl.config.ApiUrlConfig
+import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.door.DatabaseBuilder
@@ -113,8 +113,11 @@ class UstadTestRule(): TestWatcher() {
 
         diModule = DI.Module("UstadTestRule") {
             bind<UstadMobileSystemImpl>() with singleton { systemImplSpy }
-            bind<ApiUrlConfig>() with singleton {
-                ApiUrlConfig(presetApiUrl = null)
+            bind<SystemUrlConfig>() with singleton {
+                SystemUrlConfig(
+                    systemBaseUrl = "http://localhost:8087/",
+                    passkeyRpId = "localhost",
+                )
             }
             bind<UstadAccountManager>() with singleton {
                 UstadAccountManager(instance(), di)

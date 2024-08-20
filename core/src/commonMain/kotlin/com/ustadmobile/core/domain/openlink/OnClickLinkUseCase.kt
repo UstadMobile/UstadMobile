@@ -1,7 +1,7 @@
 package com.ustadmobile.core.domain.openlink
 
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.impl.config.ApiUrlConfig
+import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.ext.navigateToLink
 
@@ -16,7 +16,7 @@ class OnClickLinkUseCase(
         navController: UstadNavController,
         accountManager: UstadAccountManager,
         openExternalLinkUseCase: OpenExternalLinkUseCase,
-        apiUrlConfig: ApiUrlConfig
+        apiUrlConfig: SystemUrlConfig
     ): this(navController, accountManager, openExternalLinkUseCase, apiUrlConfig.canSelectServer)
 
     operator fun invoke(

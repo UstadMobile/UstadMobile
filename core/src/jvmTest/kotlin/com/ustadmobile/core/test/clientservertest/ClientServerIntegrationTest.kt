@@ -17,7 +17,7 @@ import com.ustadmobile.core.domain.xxhash.XXStringHasher
 import com.ustadmobile.core.domain.xxhash.XXStringHasherCommonJvm
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
-import com.ustadmobile.core.impl.config.ApiUrlConfig
+import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.nav.NavResultReturner
 import com.ustadmobile.core.impl.nav.NavResultReturnerImpl
@@ -120,8 +120,12 @@ private fun clientServerCommonDiModule(
         UstadAccountManager(settings = instance(), di)
     }
 
-    bind<ApiUrlConfig>() with singleton {
-        ApiUrlConfig(presetApiUrl = null)
+    bind<SystemUrlConfig>() with singleton {
+        SystemUrlConfig(
+            systemBaseUrl = "http://localhost:8087/",
+            passkeyRpId = "localhost",
+            presetLearningSpaceUrl = null
+        )
     }
 }
 

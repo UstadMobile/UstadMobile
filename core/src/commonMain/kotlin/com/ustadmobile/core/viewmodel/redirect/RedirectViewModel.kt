@@ -4,7 +4,7 @@ import com.russhwolf.settings.Settings
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.AppUiState
-import com.ustadmobile.core.impl.config.ApiUrlConfig
+import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.navigateToLink
 import com.ustadmobile.core.view.UstadView
@@ -30,7 +30,7 @@ class RedirectViewModel(
     private val nextViewArg = savedStateHandle[UstadView.ARG_NEXT]
     private val deepLink = savedStateHandle[UstadView.ARG_OPEN_LINK]
 
-    private val apiUrlConfig: ApiUrlConfig by instance()
+    private val apiUrlConfig: SystemUrlConfig by instance()
 
     private val settings: Settings by instance()
 

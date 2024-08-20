@@ -34,7 +34,7 @@ import com.ustadmobile.core.domain.share.ShareAppUseCase
 import com.ustadmobile.core.domain.share.ShareAppUseCaseAndroid
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.impl.config.ApiUrlConfig
+import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.di.AndroidDomainDiModule
 import com.ustadmobile.core.impl.di.commonDomainDiModule
 import com.ustadmobile.core.impl.locale.StringProvider
@@ -234,7 +234,7 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
         val argAccountName = intent?.getStringExtra(UstadViewModel.ARG_ACCOUNT_NAME)
 
         if(uri != null) {
-            val apiUrlConfig: ApiUrlConfig = di.direct.instance()
+            val apiUrlConfig: SystemUrlConfig = di.direct.instance()
 
             commandFlowNavigator.navigateToLink(
                 link = uri,

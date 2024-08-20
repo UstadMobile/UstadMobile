@@ -122,8 +122,8 @@ import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
 import com.ustadmobile.core.domain.xxhash.XXHasher64FactoryCommonJvm
 import com.ustadmobile.core.domain.xxhash.XXStringHasher
 import com.ustadmobile.core.domain.xxhash.XXStringHasherCommonJvm
-import com.ustadmobile.core.impl.config.AppConfig
-import com.ustadmobile.core.impl.config.AppConfig.Companion.KEY_CONFIG_SHOW_POWERED_BY
+import com.ustadmobile.core.impl.config.UstadBuildConfig
+import com.ustadmobile.core.impl.config.UstadBuildConfig.Companion.KEY_CONFIG_SHOW_POWERED_BY
 import com.ustadmobile.core.launchopenlicenses.LaunchOpenLicensesUseCaseJvm
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.ext.DoorTag
@@ -420,7 +420,7 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
 
     bind<GetShowPoweredByUseCase>() with provider {
         GetShowPoweredByUseCase(
-            instance<AppConfig>()[KEY_CONFIG_SHOW_POWERED_BY]?.toBoolean() ?: false
+            instance<UstadBuildConfig>()[KEY_CONFIG_SHOW_POWERED_BY]?.toBoolean() ?: false
         )
     }
 

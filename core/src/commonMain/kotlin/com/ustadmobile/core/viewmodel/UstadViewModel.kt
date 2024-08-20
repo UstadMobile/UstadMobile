@@ -11,7 +11,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
-import com.ustadmobile.core.impl.config.ApiUrlConfig
+import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.nav.*
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.isDateOfBirthAnAdult
@@ -457,7 +457,7 @@ abstract class UstadViewModel(
         args: Map<String, String>,
         block: () -> Unit
     ) {
-        val apiUrlConfig: ApiUrlConfig by instance()
+        val apiUrlConfig: SystemUrlConfig by instance()
 
         if(
             accountManager.currentUserSession.person.let {

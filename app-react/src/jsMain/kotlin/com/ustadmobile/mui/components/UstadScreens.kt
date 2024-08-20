@@ -31,11 +31,9 @@ import web.cssom.Auto
 import web.cssom.GridTemplateAreas
 import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
-import io.ktor.client.call.body
 import io.ktor.client.engine.js.Js
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.request.get
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.browser.localStorage
 import kotlinx.browser.window
@@ -45,8 +43,6 @@ import mui.material.Snackbar
 import react.*
 import react.router.useLoaderData
 import ustadJsDi
-import web.location.location
-import web.url.URL
 import kotlin.random.Random
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.db.ext.MIGRATION_144_145_CLIENT
@@ -275,8 +271,6 @@ val ustadScreensLoader: LoaderFunction<Any?> = { args: LoaderFunctionArgs<Any?> 
         }
 
 
-        val ustadConfigHref = URL("ustad-config.json", location.href).href
-        val configJson: Map<String, String> = httpClient.get(ustadConfigHref).body()
         val jsStringsProvider = MR.stringsLoader.getOrLoad()
 
         val di = ustadJsDi(
@@ -284,7 +278,6 @@ val ustadScreensLoader: LoaderFunction<Any?> = { args: LoaderFunctionArgs<Any?> 
             dbNodeIdAndAuth = dbNodeIdAndAuth,
             json = json,
             httpClient = httpClient,
-            configMap = configJson,
             stringsProvider = jsStringsProvider,
         )
 

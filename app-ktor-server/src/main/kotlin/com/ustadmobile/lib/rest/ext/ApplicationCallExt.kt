@@ -127,7 +127,7 @@ suspend fun ApplicationCall.respondOkHttpResponse(
  * If the ContentRoute cache were to retrieve content without considering the host (e.g. just use
  * the contentEntryVersion), this could lead to conflicts when there is content on different servers.
  */
-val ApplicationCall.callEndpoint: LearningSpace
+val ApplicationCall.callLearningSpace: LearningSpace
     get() {
         val config = this.application.environment.config
         val dbMode = config.dbModeProperty()

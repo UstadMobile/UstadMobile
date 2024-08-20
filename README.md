@@ -17,6 +17,8 @@ include:
 * Offline sync that works via any Internet connection or via nearby devices (e.g. from teacher device
   to student device etc). With a class of 30 students this reduces bandwidth consumption 97%+ whilst
   supporting data sync to the Internet when a connection is available.
+* Support for multiple learning spaces: each learning space has its own users, classes, 
+  content library, etc.
 
 Want to collaborate on development? Join us on discord: [https://discord.gg/WHe35Sbsg4](https://discord.gg/WHe35Sbsg4).  
 
@@ -237,7 +239,10 @@ Code is contained (mostly) in the following modules:
 * [app-ktor-server](app-ktor-server/): Contains the HTTP rest server (implemented using KTOR)
 * [core](core/) : Contains view models, ui state, core business logic.
 * [sharedse](sharedse/): Contains some shared implementations for operating systems with a disk (JVM/Android)
-* [lib-database](lib-database/): contains the database: DAOs (e.g. SQL queries), and entity classes.
+* [lib-database](lib-database/): contains DAOs and entities for the primary database. This is the database 
+  that represents the learning space and contains classes, users, etc. 
+* [lib-systemdb](lib-systemdb/): contains a system-wide database that includes system settings and a
+  list of available learning spaces.
 * [lib-ui-compose](lib-ui-compose/): contains Compose multiplatform UI code used by app-android and app-desktop.
 * [lib-util](lib-util/): Small utility functions
 * [test-end-to-end](test-end-to-end/) End-to-end tests that run the app and server.

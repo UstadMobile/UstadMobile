@@ -7,7 +7,6 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
 import com.ustadmobile.core.domain.clazz.CreateNewClazzUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
-import com.ustadmobile.core.schedule.ClazzLogCreatorManager
 import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.ext.awaitItemWhere
@@ -52,9 +51,6 @@ class ClazzEditViewModelTest : AbstractMainDispatcherTest() {
                     )
                 }
 
-                bind<ClazzLogCreatorManager>() with singleton {
-                    mock { }
-                }
 
                 bind<EnqueueContentEntryImportUseCase>() with scoped(learningSpaceScope).singleton {
                     mock { }

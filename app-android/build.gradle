@@ -117,7 +117,10 @@ android {
             "uiLanguages": rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.uilanguages"),
             "showPoweredByMsg": rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.showpoweredbymsg"),
             "gopts": rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.gopts"),
-            "apiUrl": rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.apiurl"),
+            "systemBaseUrl": rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.system.systemBaseUrl"),
+            "passkeyRpId": rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.system.passkeyRpId"),
+            "presetLsUrl": rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.system.presetLsUrl"),
+            "newPersonalAccountsLsUrl": rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.system.newPersonalAccountsLsUrl"),
         ]
 
         //When using variables the build analyzer reports that major tasks reran because of a
@@ -164,7 +167,8 @@ android {
 
         debug {
             minifyEnabled false
-            testCoverageEnabled = false
+            enableUnitTestCoverage false
+            enableAndroidTestCoverage false
         }
     }
 
@@ -261,9 +265,6 @@ dependencies {
 
     //Work manager
     implementation libs.androidx.work.runtime
-
-    //Klock
-    implementation libs.klock.android
 
     //Crash reporting
     implementation libs.acra.http

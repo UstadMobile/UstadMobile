@@ -66,7 +66,6 @@ kotlin {
                 implementation project(":core")
                 implementation libs.kotlin.stdlib.common
                 implementation libs.coroutines
-                implementation libs.klock
                 implementation libs.ktor.client.core
                 implementation libs.ktor.client.json
                 implementation libs.kotlinx.serialization
@@ -93,7 +92,6 @@ kotlin {
                 implementation libs.ktor.server.servlet
                 implementation libs.ktor.server.netty
 
-                implementation libs.klock.jvm
                 implementation libs.okhttp
                 implementation libs.mockwebserver
                 implementation libs.sqlite.jdbc
@@ -105,7 +103,6 @@ kotlin {
             dependsOn commonJvmMain
             dependencies {
                 implementation libs.kotlinx.coroutines.android
-                implementation libs.klock.android
                 implementation libs.androidx.room.runtime
             }
         }

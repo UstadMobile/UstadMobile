@@ -85,7 +85,6 @@ androidx-legacy-support = "1.0.0"
 commons-io = "2.15.0"
 androidx-annotation = "1.7.1"
 androidx-work = "2.9.0"
-klock = "2.4.13"
 acra = "5.11.3"
 androidx-datastore = "1.0.0"
 # Dependencies of Aztec: Versions must be fixed to ensure that they point to versions available
@@ -260,9 +259,6 @@ androidx-lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", 
 androidx-annotation = { module = "androidx.annotation:annotation", version.ref = "androidx-annotation"}
 androidx-work-runtime = { module = "androidx.work:work-runtime", version.ref = "androidx-work"}
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "androidx-work" }
-klock-android = { module = "com.soywiz.korlibs.klock:klock-android", version.ref = "klock" }
-klock-jvm = { module = "com.soywiz.korlibs.klock:klock-jvm", version.ref = "klock" }
-klock = { module = "com.soywiz.korlibs.klock:klock", version.ref = "klock"}
 acra-http = { module = "ch.acra:acra-http", version.ref = "acra" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "androidx-datastore" }
 androidx-legacy-core-utils = { module = "androidx.legacy:legacy-support-core-utils", version.ref = "androidx-legacy-support"}

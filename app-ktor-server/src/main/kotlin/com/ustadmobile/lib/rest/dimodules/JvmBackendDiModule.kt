@@ -2,6 +2,7 @@ package com.ustadmobile.lib.rest.dimodules
 
 import com.russhwolf.settings.PropertiesSettings
 import com.russhwolf.settings.Settings
+import com.ustadmobile.appconfigdb.SystemDb
 import com.ustadmobile.core.account.AuthManager
 import com.ustadmobile.core.account.LearningSpaceScope
 import com.ustadmobile.core.account.Pbkdf2Params
@@ -121,6 +122,12 @@ fun makeJvmBackendDiModule(
                 }
             }
         )
+    }
+
+    bind<SystemDb>() with singleton {
+        val dbUrl = "jdbc:sqlite:${config.absoluteDataDir().absolutePath}/system.db"
+        DatabaseBuilder.databaseBuilder(SystemDb::class, dbUrl, nodeId = 1L)
+            .build()
     }
 
     bind<UstadMobileSystemImpl>() with singleton {
