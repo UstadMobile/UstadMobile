@@ -6,7 +6,7 @@ import com.ustadmobile.core.account.UstadAccountManager.EndpointFilter
 import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.account.CreateNewLocalAccountUseCase
-import com.ustadmobile.core.impl.config.ApiUrlConfig
+import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.util.ext.withLearningSpace
@@ -137,7 +137,7 @@ class UstadAccountManager(
 
     private val json: Json by di.instance()
 
-    private val apiUrlConfig: ApiUrlConfig by di.instance()
+    private val apiUrlConfig: SystemUrlConfig by di.instance()
 
     private val closed = atomic(false)
 
@@ -145,7 +145,7 @@ class UstadAccountManager(
 
     init {
         val currentEndpointStr = settings.getStringOrNull(ACCOUNTS_ACTIVE_ENDPOINT_PREFKEY)
-            ?: apiUrlConfig.presetApiUrl ?: MANIFEST_URL_FALLBACK
+            ?: apiUrlConfig.presetLearningSpaceUrl ?: MANIFEST_URL_FALLBACK
         val currentDb: UmAppDatabase = di.direct.on(LearningSpace(currentEndpointStr))
             .instance(tag = DoorTag.TAG_DB)
 

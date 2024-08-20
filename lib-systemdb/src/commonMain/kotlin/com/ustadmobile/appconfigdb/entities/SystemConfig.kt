@@ -6,13 +6,9 @@ import androidx.room.PrimaryKey
 /**
  * @param scPasskeyRpId
  *
- * @param scPrimaryUrl The primary URL of the server : this will be used for
+ * @param scSystemBaseUrl The primary URL of the server : this will be used for
  *   Asset urls for web clients
- *   Android and desktop apps will download this config (as a JSON), which will then determine
- *   certain app behaviors
- *      Whether or not to allow users to create a new account
- *      Whether or not to show users the option to create a personal account
- *      Whether users can select specific learning spaces or always use a preset learning space.
+ *   Client apps will use it as the repository url for lib-systemdb
  *
  * @param scNewPersonalAccountLsUrl the learning space that should be used for creation of personal
  * accounts
@@ -28,7 +24,7 @@ data class SystemConfig(
     var scPasskeyRpId: String = "",
 
     //This should match the scPasskeyRpId e.g. https://example.org/
-    var scPrimaryUrl: String = "",
+    var scSystemBaseUrl: String = "",
 
     var scNewPersonalAccountLsUrl: String? = null,
 

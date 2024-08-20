@@ -242,12 +242,12 @@ Here, a 'system' refers to a branch of Ustad Mobile; including the backend HTTP 
 clients for Android, desktop, and the web. Each system may contain multiple learning spaces. 
 Configurations options are:
 
-* __Primary URL__: The primary URL must be compiled into Android and desktop clients. It is required
-for [verified app links](https://developer.android.com/training/app-links/verify-android-applinks)
-which are mandatory on Android 12 and above. If a system uses multiple learning spaces, then the 
-learning spaces should be subdomains of the primary URL.
+* __System Base URL__: In the perfect world, no system base URL would be needed. The user could just 
+use any URL they want. Opening a link on Android 12+ requires declaring a specific domain in the
+AndroidManifest and verifying domain ownership. Using passkeys also requires using verified applinks
+declared in the AndroidManifest.xml.
 * __rpId__: The passkeys relying party ID : the domain name (without protocol and slash), as per the 
-primary URL (e.g. if the Primary URL is https://example.org/, then the rpId is example.org)
+primary URL (e.g. if the Primary URL is https://example.org/, then the rpId is example.org).
 * __New personal account learning space URL__: If enabled, then the client app will show a 'personal 
 account' option for users if they select to create a new account. Some use cases (e.g. content 
 access by individuals) shouldn't include features for interacting with other users. 

@@ -17,7 +17,7 @@ import com.ustadmobile.core.domain.xxhash.XXStringHasher
 import com.ustadmobile.core.domain.xxhash.XXStringHasherCommonJvm
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
-import com.ustadmobile.core.impl.config.ApiUrlConfig
+import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.config.GenderConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.di.CommonJvmDiModule
@@ -131,8 +131,11 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
 
         bind<XapiJson>() with singleton { XapiJson() }
 
-        bind<ApiUrlConfig>() with singleton {
-            ApiUrlConfig(presetApiUrl = null)
+        bind<SystemUrlConfig>() with singleton {
+            SystemUrlConfig(
+                systemBaseUrl = "http://localhost:8087/",
+                passkeyRpId = "localhost",
+            )
         }
 
         bind<UstadAccountManager>() with singleton {

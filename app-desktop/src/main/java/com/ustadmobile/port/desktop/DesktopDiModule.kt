@@ -43,8 +43,8 @@ import com.ustadmobile.core.embeddedhttp.EmbeddedHttpServer
 import com.ustadmobile.core.getdeveloperinfo.GetDeveloperInfoUseCaseJvm
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.impl.config.ApiUrlConfig
-import com.ustadmobile.core.impl.config.AppConfig
+import com.ustadmobile.core.impl.config.SystemUrlConfig
+import com.ustadmobile.core.impl.config.UstadBuildConfig
 import com.ustadmobile.core.impl.config.GenderConfig
 import com.ustadmobile.core.impl.config.ManifestAppConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
@@ -317,12 +317,12 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
 
     val gsPath = SysPathUtil.findCommandInPath("gs")
 
-    bind<AppConfig>() with singleton {
+    bind<UstadBuildConfig>() with singleton {
         ManifestAppConfig()
     }
 
     bind<SupportedLanguagesConfig>() with singleton {
-        val appConfig = instance<AppConfig>()
+        val appConfig = instance<UstadBuildConfig>()
         SupportedLanguagesConfig(
             systemLocales = listOf(SetLanguageUseCaseJvm.REAL_SYSTEM_DEFAULT.language),
             settings = instance(),
@@ -337,9 +337,8 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         UstadAccountManager(instance(), di)
     }
 
-    bind<ApiUrlConfig>() with singleton {
-        val appConfig : AppConfig = instance()
-        ApiUrlConfig(presetApiUrl = appConfig[AppConfig.KEY_API_URL]?.ifBlank { null })
+    bind<SystemUrlConfig>() with singleton {
+        SystemUrlConfig.fromUstadBuildConfig(instance())
     }
 
     bind<File>(tag = TAG_DATA_DIR) with singleton {

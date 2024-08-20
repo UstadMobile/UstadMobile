@@ -10,7 +10,7 @@ import com.ustadmobile.core.domain.usersession.StartUserSessionUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.Snack
-import com.ustadmobile.core.impl.config.ApiUrlConfig
+import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.isGuestUser
 import com.ustadmobile.core.util.ext.isTemporary
@@ -79,7 +79,7 @@ class AccountListViewModel(
 
     private val maxDateOfBirth = savedStateHandle[UstadView.ARG_MAX_DATE_OF_BIRTH]?.toLong() ?: 0
 
-    private val apiUrlConfig: ApiUrlConfig by instance()
+    private val apiUrlConfig: SystemUrlConfig by instance()
 
     private val shareAppUseCase: ShareAppUseCase? by instanceOrNull()
 

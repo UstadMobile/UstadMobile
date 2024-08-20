@@ -13,7 +13,7 @@ import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.Snack
-import com.ustadmobile.core.impl.config.ApiUrlConfig
+import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.config.GenderConfig
 import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
@@ -138,13 +138,13 @@ class PersonEditViewModel(
     private val registrationModeFlags = savedStateHandle[ARG_REGISTRATION_MODE]?.toInt()
         ?: REGISTER_MODE_NONE
 
-    private val apiUrlConfig: ApiUrlConfig by instance()
+    private val apiUrlConfig: SystemUrlConfig by instance()
 
     private val entityUid: Long
         get() = savedStateHandle[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0
 
     private val serverUrl = savedStateHandle[UstadView.ARG_API_URL]
-        ?: apiUrlConfig.presetApiUrl ?: "http://localhost"
+        ?: apiUrlConfig.presetLearningSpaceUrl ?: "http://localhost"
 
     private val nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?: systemImpl.getDefaultFirstDest()
 

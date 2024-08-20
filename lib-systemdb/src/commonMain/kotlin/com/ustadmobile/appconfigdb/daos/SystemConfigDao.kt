@@ -8,10 +8,10 @@ import com.ustadmobile.door.annotation.DoorDao
 expect abstract class SystemConfigDao {
 
     @Query("""
-        SELECT ServerConfig.*
-          FROM ServerConfig
-         WHERE ServerConfig.scUid = ${SystemConfig.SC_UID} 
+        SELECT SystemConfig.*
+          FROM SystemConfig
+         WHERE SystemConfig.scUid = ${SystemConfig.SC_UID} 
     """)
-    abstract suspend fun getServerConfigAsync(): SystemConfig?
+    abstract suspend fun getSystemConfigAsync(): SystemConfig?
 
 }

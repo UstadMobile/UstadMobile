@@ -8,7 +8,7 @@ import java.util.concurrent.CopyOnWriteArrayList
  * Implementation of AppConfig that reads values from the Jar manifest. The use of . is not valid
  * for keys, so any '.' is replaced with '-'
  */
-class ManifestAppConfig : AppConfig{
+class ManifestAppConfig : UstadBuildConfig{
 
     private val valueCache = ConcurrentHashMap<String, String?>()
 

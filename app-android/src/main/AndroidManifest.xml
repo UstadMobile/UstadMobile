@@ -105,10 +105,15 @@
 
 
         <!--
-        The API url endpoint can be explicitly specified by setting it in buildconfig.properties. If
-        it is not specified, the user will be prompted to enter the link.
+        UstadBuildConfig options - see buildconfig.default.properties and UstadBuildConfig.kt .
         -->
-        <meta-data android:name="com.ustadmobile.apiurl" android:value="${apiUrl}"/>
+        <meta-data android:name="com.ustadmobile.system.presetLsUrl" android:value="${presetLsUrl}"/>
+
+        <meta-data android:name="com.ustadmobile.system.systemBaseUrl" android:value="${systemBaseUrl}"/>
+
+        <meta-data android:name="com.ustadmobile.system.passkeyRpId" android:value="${passkeyRpId}"/>
+
+        <meta-data android:name="com.ustadmobile.system.newPersonalAccountsLsUrl" android:value="${newPersonalAccountsLsUrl}"/>
 
 
         <!--

@@ -11,7 +11,7 @@ import com.ustadmobile.core.db.UmAppDataLayer
 import org.mockito.kotlin.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.addSyncCallback
-import com.ustadmobile.core.impl.config.ApiUrlConfig
+import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.userAtServer
 import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
@@ -132,7 +132,7 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
 
     lateinit var mockSettings: Settings
 
-    lateinit var apiUrlConfig: ApiUrlConfig
+    lateinit var systemUrlConfig: SystemUrlConfig
 
     lateinit var mockWebServer: MockWebServer
 
@@ -152,7 +152,10 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
 
     @Before
     fun setup() {
-        apiUrlConfig = ApiUrlConfig("http://app.ustadmobile.com/")
+        systemUrlConfig = SystemUrlConfig(
+            "http://app.ustadmobile.com/", "app.ustadmobile.com",
+            presetLearningSpaceUrl = "http://app.ustadmobile.com/"
+        )
         mockSettings = mock { }
 
         mockWebServer = MockWebServer().also {
@@ -178,7 +181,7 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
                 AuthManager(context, di)
             }
 
-            bind<ApiUrlConfig>() with singleton { apiUrlConfig }
+            bind<SystemUrlConfig>() with singleton { systemUrlConfig }
 
             bind<Pbkdf2Params>() with singleton {
                 Pbkdf2Params(iterations = 10000, keyLength = 512)
@@ -260,7 +263,7 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
         val accountManager = UstadAccountManager(mockSettings, di)
         val activeAccount = accountManager.currentAccount
         Assert.assertEquals("Initial account has personUid = 0", 0L, activeAccount.personUid)
-        Assert.assertEquals("Initial account uses default apiUrl",
+        Assert.assertEquals("Initial account uses default presetLsUrl",
                 "http://app.ustadmobile.com/", activeAccount.endpointUrl)
     }
 
