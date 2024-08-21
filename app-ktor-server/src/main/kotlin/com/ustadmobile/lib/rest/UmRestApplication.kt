@@ -125,8 +125,10 @@ import com.ustadmobile.lib.rest.domain.contententry.importcontent.ContentEntryIm
 import com.ustadmobile.lib.rest.domain.passkey.verify.VerifySignInWithPasskeyRoute
 import com.ustadmobile.lib.rest.domain.passkey.verify.VerifySignInWithPasskeyUseCase
 import com.ustadmobile.lib.rest.domain.learningspace.LearningSpaceRoute
+import com.ustadmobile.lib.rest.domain.learningspace.LearningSpaceApiRoute
 import com.ustadmobile.lib.rest.domain.learningspace.create.CreateLearningSpaceUseCase
 import com.ustadmobile.lib.rest.domain.person.bulkadd.BulkAddPersonRoute
+import com.ustadmobile.lib.rest.domain.systemconfig.verifyauth.VerifySystemConfigAuthUseCase
 import com.ustadmobile.lib.rest.domain.xapi.XapiRoute
 import com.ustadmobile.lib.rest.domain.xapi.savestatementonclear.SaveStatementOnUnloadRoute
 import com.ustadmobile.lib.rest.domain.xapi.session.ResumeOrStartXapiSessionRoute
@@ -777,6 +779,13 @@ fun Application.umRestApplication(
             GetApiUrlUseCaseDirect(context)
         }
 
+        bind<VerifySystemConfigAuthUseCase>() with singleton {
+            VerifySystemConfigAuthUseCase(
+                systemDb = instance(),
+                pbkdf2AuthenticateUseCase = instance()
+            )
+        }
+
         bind<CreateLearningSpaceUseCase>() with singleton {
             CreateLearningSpaceUseCase(
                 xxStringHasher = instance(),
@@ -873,10 +882,10 @@ fun Application.umRestApplication(
             }
 
             //If the request is not using the correct url as per system config, reject it and finish
-            if(!context.urlMatchesConfig()) {
-                call.respondRequestUrlNotMatchingSiteConfUrl()
-                return@intercept finish()
-            }
+//            if(!context.urlMatchesConfig()) {
+//                call.respondRequestUrlNotMatchingSiteConfUrl()
+//                return@intercept finish()
+//            }
 
             //If the request is not matching any API route, then use the reverse proxy to send the
             // request to the javascript development server.
@@ -895,7 +904,7 @@ fun Application.umRestApplication(
         val di by closestDI()
 
         prefixRoute(sitePrefix) {
-            addHostCheckIntercept()
+            //addHostCheckIntercept()
             personAuthRegisterRoute()
             route("UmAppDatabase") {
                 UmAppDatabase_KtorRoute(DoorHttpServerConfig(json = json, logger = NapierDoorLogger())) { call ->
@@ -909,7 +918,8 @@ fun Application.umRestApplication(
             route("config") {
                 route("api"){
                     route("learningspaces") {
-                        LearningSpaceRoute(
+                        LearningSpaceApiRoute(
+                            verifySystemConfigAuthUseCase = di.direct.instance(),
                             createLearningSpaceUseCase = di.direct.instance()
                         )
                     }
