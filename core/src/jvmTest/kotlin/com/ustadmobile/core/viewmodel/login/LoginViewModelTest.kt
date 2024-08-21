@@ -66,7 +66,7 @@ class LoginViewModelTest : AbstractMainDispatcherTest(){
         listOf(true, false).forEach { testRegistrationAllowed ->
             testViewModel<LoginViewModel> {
                 viewModelFactory {
-                    savedStateHandle[UstadView.ARG_API_URL] = "http://localhost:8087/"
+                    savedStateHandle[UstadView.ARG_LEARNINGSPACE_URL] = "http://localhost:8087/"
                     savedStateHandle[UstadView.ARG_SITE] = json.encodeToString(Site().apply {
                         registrationAllowed = testRegistrationAllowed
                     })
@@ -85,7 +85,7 @@ class LoginViewModelTest : AbstractMainDispatcherTest(){
         listOf(true, false).forEach { testGuestAllowed ->
             testViewModel<LoginViewModel> {
                 viewModelFactory {
-                    savedStateHandle[UstadView.ARG_API_URL] = "http://localhost:8087/"
+                    savedStateHandle[UstadView.ARG_LEARNINGSPACE_URL] = "http://localhost:8087/"
                     savedStateHandle[UstadView.ARG_SITE] = json.encodeToString(Site().apply {
                         guestLogin = testGuestAllowed
                     })
@@ -106,7 +106,7 @@ class LoginViewModelTest : AbstractMainDispatcherTest(){
     fun givenCreateAccountVisible_whenClickCreateAccount_thenShouldNavigateToAgeRedirect() {
         testViewModel<LoginViewModel> {
             viewModelFactory {
-                savedStateHandle[UstadView.ARG_API_URL] = "http://localhost:8087/"
+                savedStateHandle[UstadView.ARG_LEARNINGSPACE_URL] = "http://localhost:8087/"
                 savedStateHandle[UstadView.ARG_SITE] = json.encodeToString(Site().apply {
                     registrationAllowed = true
                 })
@@ -143,7 +143,7 @@ class LoginViewModelTest : AbstractMainDispatcherTest(){
                 mockWebServer.start()
                 mockWebServer.enqueueSiteResponse(Site())
 
-                savedStateHandle[UstadView.ARG_API_URL] = mockWebServer
+                savedStateHandle[UstadView.ARG_LEARNINGSPACE_URL] = mockWebServer
                     .url("/").toString()
                 savedStateHandle[UstadView.ARG_NEXT] = nextDestination
                 LoginViewModel(di, savedStateHandle)
@@ -191,7 +191,7 @@ class LoginViewModelTest : AbstractMainDispatcherTest(){
             viewModelFactory {
                 mockWebServer.start()
                 mockWebServer.enqueueSiteResponse(Site())
-                savedStateHandle[UstadView.ARG_API_URL] = mockWebServer
+                savedStateHandle[UstadView.ARG_LEARNINGSPACE_URL] = mockWebServer
                     .url("/").toString()
                 LoginViewModel(di, savedStateHandle)
             }
@@ -237,7 +237,7 @@ class LoginViewModelTest : AbstractMainDispatcherTest(){
             }
 
             viewModelFactory {
-                savedStateHandle[UstadView.ARG_API_URL] = "http://localhost:79/"
+                savedStateHandle[UstadView.ARG_LEARNINGSPACE_URL] = "http://localhost:79/"
                 LoginViewModel(di, savedStateHandle)
             }
 
@@ -266,7 +266,7 @@ class LoginViewModelTest : AbstractMainDispatcherTest(){
                 mockWebServer.start()
                 mockWebServer.enqueueSiteResponse(Site())
 
-                savedStateHandle[UstadView.ARG_API_URL] = mockWebServer
+                savedStateHandle[UstadView.ARG_LEARNINGSPACE_URL] = mockWebServer
                     .url("/").toString()
                 LoginViewModel(di, savedStateHandle)
             }
@@ -294,7 +294,7 @@ class LoginViewModelTest : AbstractMainDispatcherTest(){
             viewModelFactory {
                 mockWebServer.start()
                 mockWebServer.enqueueSiteResponse(Site())
-                savedStateHandle[UstadView.ARG_API_URL] = mockWebServer
+                savedStateHandle[UstadView.ARG_LEARNINGSPACE_URL] = mockWebServer
                     .url("/").toString()
                 LoginViewModel(di, savedStateHandle)
             }

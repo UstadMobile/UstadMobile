@@ -20,6 +20,28 @@ data class AddAccountSelectNewOrExistingUiState(
     val showWaitForRestart: Boolean = false,
 )
 
+/**
+ * Allow the user to select "new user" or "existing user" and then take them to the appropriate next
+ * screen.
+ *
+ * Where the learning space URL is known (by ARG_LEARNINGSPACE_URL argument or
+ * SystemUrlConfig.presetLearningSpaceUrl is not null):
+ *    a) If new account creation is supported by the given learning space, then show the new user
+ *       / existing user buttons and allow user to select. When they click an option, take them
+ *       directly to the login or signup screen for the given learning space URL.
+ *    b) If new account creation is not supported by the given learning space, go directly to the
+ *       login screen for the given learning space url. The navigation should pop this screen off (
+ *       e.g. going back will not return here)
+ *
+ * Where the learning space URL is not known (argument not provided and
+ * SystemUrlConfig.presetLearningSpaceUrl is null):
+ *    a) Show the new user / existing user buttons
+ *    b) If SystemUrlConfig.newPersonalAccountsLearningSpaceUrl != null, then go to the Select
+ *       personal account or learning space screen.
+ *    c) If SystemUrlConfig.newPersonalAccountsLearningSpaceUrl is null, then the system does not
+ *       support personal accounts. Go directly to LearningSpaceList screen for the user to select
+ *       a learning space.
+ */
 class AddAccountSelectNewOrExistingViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle

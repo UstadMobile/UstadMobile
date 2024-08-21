@@ -95,7 +95,7 @@ class LoginViewModel(
     init {
         nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?: ClazzListViewModel.DEST_NAME_HOME
 
-        serverUrl = savedStateHandle[UstadView.ARG_API_URL] ?: apiUrlConfig.presetLearningSpaceUrl
+        serverUrl = savedStateHandle[UstadView.ARG_LEARNINGSPACE_URL] ?: apiUrlConfig.presetLearningSpaceUrl
             ?: "http://localhost"
 
         _uiState.update { prev ->
@@ -260,7 +260,7 @@ class LoginViewModel(
 
     fun onClickCreateAccount(){
         val args = mutableMapOf(
-            UstadView.ARG_API_URL to serverUrl,
+            UstadView.ARG_LEARNINGSPACE_URL to serverUrl,
             SiteTermsDetailView.ARG_SHOW_ACCEPT_BUTTON to true.toString(),
             UstadView.ARG_POPUPTO_ON_FINISH to
                     (savedStateHandle[UstadView.ARG_POPUPTO_ON_FINISH] ?: DEST_NAME))
@@ -278,7 +278,7 @@ class LoginViewModel(
                 uiLanguage, DEST_NAME, navController,
                 navArgs = buildMap {
                     putFromSavedStateIfPresent(UstadView.ARG_NEXT)
-                    putFromSavedStateIfPresent(UstadView.ARG_API_URL)
+                    putFromSavedStateIfPresent(UstadView.ARG_LEARNINGSPACE_URL)
                     putFromSavedStateIfPresent(UstadView.ARG_SITE)
                 }
             )
@@ -304,7 +304,7 @@ class LoginViewModel(
         val endpointUrl = serverUrl.requireHttpPrefix()
             .requirePostfix("/")
         val args = mutableMapOf(
-            UstadView.ARG_API_URL to endpointUrl)
+            UstadView.ARG_LEARNINGSPACE_URL to endpointUrl)
         navController.navigate(SignUpViewModel.DEST_NAME, args)
     }
 

@@ -143,7 +143,7 @@ class PersonEditViewModel(
     private val entityUid: Long
         get() = savedStateHandle[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0
 
-    private val serverUrl = savedStateHandle[UstadView.ARG_API_URL]
+    private val serverUrl = savedStateHandle[UstadView.ARG_LEARNINGSPACE_URL]
         ?: apiUrlConfig.presetLearningSpaceUrl ?: "http://localhost"
 
     private val nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?: systemImpl.getDefaultFirstDest()
@@ -668,7 +668,7 @@ class PersonEditViewModel(
          * acceptance to this screen (PersonEdit) in order to register.
          */
         val REGISTRATION_ARGS_TO_PASS = listOf(
-            UstadView.ARG_API_URL,
+            UstadView.ARG_LEARNINGSPACE_URL,
             SiteTermsDetailView.ARG_SHOW_ACCEPT_BUTTON,
             UstadView.ARG_POPUPTO_ON_FINISH,
             ARG_NEXT,

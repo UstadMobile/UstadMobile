@@ -16,7 +16,7 @@ import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.siteterms.GetLocaleForSiteTermsUseCase
-import com.ustadmobile.core.view.UstadView.Companion.ARG_API_URL
+import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNINGSPACE_URL
 import com.ustadmobile.core.viewmodel.DetailViewModel
 import org.kodein.di.direct
 import org.kodein.di.on
@@ -45,7 +45,7 @@ class SiteTermsDetailViewModel(
 
     init {
         val acceptButtonMode = savedStateHandle[ARG_SHOW_ACCEPT_BUTTON]?.toBoolean() ?: false
-        val apiUrl = savedStateHandle[ARG_API_URL]
+        val apiUrl = savedStateHandle[ARG_LEARNINGSPACE_URL]
 
         _appUiState.update { prev ->
             prev.copy(

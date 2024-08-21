@@ -17,7 +17,7 @@ import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel.Companion.
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel.Companion.ARG_REGISTRATION_MODE
 import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel.Companion.ARG_PARENT_CONTACT
 import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel.Companion.ARG_USERNAME
-import com.ustadmobile.core.view.UstadView.Companion.ARG_API_URL
+import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNINGSPACE_URL
 import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.flow.doorFlow
@@ -129,7 +129,7 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
 
             viewModelFactory {
                 savedStateHandle[ARG_REGISTRATION_MODE] = PersonEditViewModel.REGISTER_MODE_ENABLED.toString()
-                savedStateHandle[ARG_API_URL] = serverUrl
+                savedStateHandle[ARG_LEARNINGSPACE_URL] = serverUrl
                 PersonEditViewModel(di, savedStateHandle)
             }
 
@@ -218,7 +218,7 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
             viewModelFactory {
                 savedStateHandle[ARG_REGISTRATION_MODE] =
                     (PersonEditViewModel.REGISTER_MODE_ENABLED or PersonEditViewModel.REGISTER_MODE_MINOR).toString()
-                savedStateHandle[ARG_API_URL] = activeLearningSpace.url
+                savedStateHandle[ARG_LEARNINGSPACE_URL] = activeLearningSpace.url
                 savedStateHandle[ARG_DATE_OF_BIRTH] = minorDateOfBirth.toString()
                 PersonEditViewModel(di, savedStateHandle)
             }
@@ -288,7 +288,7 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
             viewModelFactory {
                 savedStateHandle[ARG_REGISTRATION_MODE] =
                     (PersonEditViewModel.REGISTER_MODE_ENABLED or PersonEditViewModel.REGISTER_MODE_MINOR).toString()
-                savedStateHandle[ARG_API_URL] = activeLearningSpace.url
+                savedStateHandle[ARG_LEARNINGSPACE_URL] = activeLearningSpace.url
                 savedStateHandle[ARG_DATE_OF_BIRTH] = minorDateOfBirth.toString()
                 PersonEditViewModel(di, savedStateHandle)
             }

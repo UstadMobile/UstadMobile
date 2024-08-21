@@ -67,7 +67,7 @@ class SiteEnterLinkViewModel(
             try {
                 val site = httpClient.verifySite(endpointUrl, json = json)
                 val args = mutableMapOf(
-                    UstadView.ARG_API_URL to endpointUrl,
+                    UstadView.ARG_LEARNINGSPACE_URL to endpointUrl,
                     ARG_SITE to json.encodeToString(site),
                 )
                 ARGS_TO_PASS_THROUGH.forEach { argName ->

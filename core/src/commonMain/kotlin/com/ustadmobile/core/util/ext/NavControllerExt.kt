@@ -11,12 +11,11 @@ import com.ustadmobile.core.util.UstadUrlComponents
 import com.ustadmobile.core.util.UstadUrlComponents.Companion.DEFAULT_DIVIDER
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
-import com.ustadmobile.core.view.UstadView.Companion.ARG_API_URL
+import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNINGSPACE_URL
+import com.ustadmobile.core.viewmodel.AddAccountSelectNewOrExistingViewModel
 import com.ustadmobile.core.viewmodel.UstadViewModel.Companion.ARG_DONT_SET_CURRENT_SESSION
 import com.ustadmobile.core.viewmodel.parentalconsentmanagement.ParentalConsentManagementViewModel
 import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
-import com.ustadmobile.core.viewmodel.login.LoginViewModel
-import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -112,7 +111,7 @@ fun UstadNavController.navigateToLink(
     }else {
         scope.launch {
             when {
-                //When the account has already been selected and the endpoint url is known.
+                //When the account has already been selected and the learning space url is known.
                 accountName != null && learningSpaceUrl != null -> {
                     val session = accountManager.activeSessionsList { filterUrl ->
                         filterUrl == learningSpaceUrl
@@ -125,8 +124,8 @@ fun UstadNavController.navigateToLink(
                     }
                 }
 
-                //when the current account is already on the given endpoint, or there is no endpoint
-                //specified, then go directly to the given view (unless the force account selection option
+                //when the current account is already on the given learning space, or there is no learning space
+                //specified, then go directly to the destination viewUri (unless the force account selection option
                 //is set)
                 !forceAccountSelection
                         && !accountManager.currentUserSession.userSession.isTemporary()
@@ -135,35 +134,23 @@ fun UstadNavController.navigateToLink(
                     navigateToViewUri(viewUri, goOptions)
                 }
 
-                //If the endpoint Url is known and there are no active accounts for this server,
-                // go directly to login
+                //If the learning space Url is known and there are no active accounts for that
+                // learning space, go to new or existing account selector, and set the learning space
+                // url argument.
                 (learningSpaceUrl != null
                         && accountManager.activeSessionCount(maxDateOfBirth) { it == learningSpaceUrl } == 0 ) ||
-                //... or when the endpoint url is not known, but there are no accounts at all, and the user cannot
-                ///select a server, go directly to login
-                (learningSpaceUrl == null && accountManager.activeSessionCount(maxDateOfBirth) == 0
-                && !userCanSelectServer) ->
-                {
+                //When the learning space url is not known, but there are no accounts at all, go to
+                // new or existing account selector screen
+                (learningSpaceUrl == null && accountManager.activeSessionCount(maxDateOfBirth) == 0) -> {
                     val args = mutableMapOf(
                         ARG_NEXT to viewUri,
                         ARG_DONT_SET_CURRENT_SESSION to dontSetCurrentSession.toString(),
                     )
 
                     if(learningSpaceUrl != null)
-                        args[ARG_API_URL] = learningSpaceUrl
+                        args[ARG_LEARNINGSPACE_URL] = learningSpaceUrl
 
-                    navigate(LoginViewModel.DEST_NAME, args.toMap(), goOptions)
-                }
-                //If there are no accounts, the endpoint url is not specified, and the user can select the server, go to EnterLink
-                learningSpaceUrl == null && accountManager.activeSessionCount(maxDateOfBirth) == 0 && userCanSelectServer -> {
-                    navigate(
-                        viewName = SiteEnterLinkViewModel.DEST_NAME,
-                        args = mapOf(
-                            ARG_NEXT to viewUri,
-                            ARG_DONT_SET_CURRENT_SESSION to dontSetCurrentSession.toString(),
-                        ),
-                        goOptions = goOptions
-                    )
+                    navigate(AddAccountSelectNewOrExistingViewModel.DEST_NAME, args.toMap(), goOptions)
                 }
 
                 //else - go to the account manager
