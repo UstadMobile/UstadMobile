@@ -124,7 +124,6 @@ import com.ustadmobile.door.log.NapierDoorLogger
 import com.ustadmobile.lib.rest.domain.contententry.importcontent.ContentEntryImportJobRoute
 import com.ustadmobile.lib.rest.domain.passkey.verify.VerifySignInWithPasskeyRoute
 import com.ustadmobile.lib.rest.domain.passkey.verify.VerifySignInWithPasskeyUseCase
-import com.ustadmobile.lib.rest.domain.learningspace.LearningSpaceRoute
 import com.ustadmobile.lib.rest.domain.learningspace.LearningSpaceApiRoute
 import com.ustadmobile.lib.rest.domain.learningspace.create.CreateLearningSpaceUseCase
 import com.ustadmobile.lib.rest.domain.person.bulkadd.BulkAddPersonRoute
