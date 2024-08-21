@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -48,7 +49,6 @@ fun AddAccountSelectNewOrExistingScreen(
         onSetLanguage = viewModel::onLanguageSelected,
         onClickNewUser = viewModel::onClickNewUser,
         onClickExistingUser = viewModel::onClickExistingUser,
-        onClickBadgeQrCode = viewModel::onClickBadgeQrCode,
     )
 }
 
@@ -72,14 +72,8 @@ fun AddAccountSelectNewOrExistingScreen(
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-        Image(
-            painter = ustadAppImagePainter(UstadImage.APP_LOGO),
-            contentDescription = "",
-            modifier = Modifier.height(100.dp).fillMaxWidth()
-                .padding(horizontal = 20.dp),
-
-            )
+        Spacer(modifier = Modifier.height(36.dp))
+        AppIcon()
 
         Column(
             modifier = Modifier.padding(16.dp),
@@ -96,24 +90,18 @@ fun AddAccountSelectNewOrExistingScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Button(
+        OutlinedButton(
             onClick = onClickNewUser,
             modifier = Modifier.fillMaxWidth().defaultItemPadding()
         ) {
             Text(stringResource(MR.strings.new_user))
         }
 
-        Button(
+        OutlinedButton(
             onClick = onClickExistingUser,
             modifier = Modifier.fillMaxWidth().defaultItemPadding()
         ) {
             Text(stringResource(MR.strings.existing_user))
-        }
-        Button(
-            onClick = onClickBadgeQrCode,
-            modifier = Modifier.fillMaxWidth().defaultItemPadding()
-        ) {
-            Text(stringResource(MR.strings.scan_badge_qr_code))
         }
     }
 }

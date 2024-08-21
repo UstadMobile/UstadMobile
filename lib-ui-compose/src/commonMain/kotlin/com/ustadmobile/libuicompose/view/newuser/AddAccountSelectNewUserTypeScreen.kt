@@ -56,14 +56,10 @@ fun AddAccountSelectNewUserTypeScreen(
 ) {
 
     Column(
-        modifier = Modifier.fillMaxHeight().padding(2.dp),
+        modifier = Modifier.fillMaxHeight().padding(16.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
-
-        Spacer(modifier = Modifier.height(16.dp))
-
 
         LazyColumn(
             modifier = Modifier.fillMaxSize()
@@ -81,16 +77,14 @@ fun AddAccountSelectNewUserTypeScreen(
                         headlineContent = {
                             Text(
                                 text = stringResource(MR.strings.personal_account),
-                                fontSize = MaterialTheme.typography.bodyMedium.fontSize,
                             )
                         },
                         supportingContent = {
                             Text(
                                 text = stringResource(MR.strings.access_educational_content_download_offline),
-                                fontSize = 12.sp,
                             )
                         },
-                        modifier = Modifier.clip(RoundedCornerShape(12.dp)).padding(8.dp)
+                        modifier = Modifier.padding(8.dp)
                             .clickable { onClickPersonalAccount() }
 
                     )
@@ -119,7 +113,7 @@ fun AddAccountSelectNewUserTypeScreen(
                             fontSize = 12.sp,
                         )
                     },
-                    modifier = Modifier.clip(RoundedCornerShape(12.dp)).padding(8.dp).clickable {
+                    modifier = Modifier.padding(8.dp).clickable {
                         onClickJoinLearningSpace()
                     }
                 )
@@ -146,7 +140,7 @@ fun AddAccountSelectNewUserTypeScreen(
                             fontSize = 12.sp,
                         )
                     },
-                    modifier = Modifier.clip(RoundedCornerShape(12.dp)).padding(8.dp).clickable {
+                    modifier = Modifier.padding(8.dp).clickable {
                         onClickNewLearningSpace()
                     }
                 )

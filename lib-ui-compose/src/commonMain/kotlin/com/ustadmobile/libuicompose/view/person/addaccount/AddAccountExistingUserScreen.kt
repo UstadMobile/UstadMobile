@@ -86,14 +86,11 @@ fun AddAccountExistingUserScreen(
                     headlineContent = {
                         Text(
                             text = stringResource(MR.strings.individual),
-                            fontSize = MaterialTheme.typography.bodyMedium.fontSize,
                         )
                     },
                     supportingContent = {
                         Text(
-
                             text = stringResource(MR.strings.access_educational_content_download_offline),
-                            fontSize = 11.sp,
                         )
                     },
                     modifier = Modifier.clickable { onClickIndividual() }
@@ -112,13 +109,11 @@ fun AddAccountExistingUserScreen(
                     headlineContent = {
                         Text(
                             text = stringResource(MR.strings.learning_space),
-                            fontSize = MaterialTheme.typography.bodyMedium.fontSize,
                         )
                     },
                     supportingContent = {
                         Text(
                             text = stringResource(MR.strings.eg_for_your_school_organization),
-                            fontSize = 11.sp,
                         )
                     },
                     modifier = Modifier.clickable {
