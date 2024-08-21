@@ -29,7 +29,7 @@ able to login to the app.
 20. Click on the "View profile" button.
 21. Click on the "Create account" button.
 22. Enter the username.
-23. Enter the password
+23. Enter the password.
 24. Click on the "Save button"
 25. Click on the "Courses"
 26. Click on the course name. 

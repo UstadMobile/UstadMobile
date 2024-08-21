@@ -66,24 +66,21 @@ trickle -s -d 128 -u 128 bash
 
 ### 3: Course block editing
 
-3.1 Admin or teacher can edit the course. Other users cannot edit
+3.1 [Admin or teacher can edit the course](test-descriptions/003_001_add_or_edit_course_permission_test_description.md)
 
-3.2 Admin or teacher can add module and text blocks. Blocks can be reordered and hidden, indented, 
-    unindented, edited, deleted.
+3.2 [Admin or teacher can add module and text blocks](test-descriptions/003_002_add_module_text_blocks_and_perform_indent_hide_delete_actions_test_description.md)
 
-3.3 Admin or teacher can add a content block and link existing content. Block can be edited (title, description, other metadata, not the content itself within app) or deleted from course.
+3.3 [Admin or teacher can add a content block and link existing content](test-descriptions/003_003_add_existing_content_in_library_as_block_test_description.md)
 
 3.4 Admin or teacher can add a content block and upload new content via link
 
-3.5 Admin or teacher can add a content block and upload new content via file upload
+3.5 [Admin or teacher can add a content block and upload new content via file upload](test-descriptions/003_005_add_new_content_block_inside_course_test_description.md)
 
-3.6 All users on course should be able to view the course blocks as they were added. Modules can 
-    expand/collapse.
+3.6 [Course Modules can be expand/collapse](test-descriptions/003_006_course_view_and_modules_can_expand_collapse_test_description.md)
 
-3.7 All users on course should be able to open text blocks to see all text.
+3.7 [Text blocks can open and all text is visible](test-descriptions/003_007_all_user_able_to_open_text_block_test_description.md)
 
-3.8 The course block title is mandatory. If save is clicked when the title is blank, then the field is
-highlighted as required and it is not saved. The user can then add a title and save successfully.
+3.8 [The course block title is mandatory.d](test-descriptions/003_008_course_blocks_title_field_is_mandatory_test_description.md)
 
 
 ### 4: Assignments
