@@ -1,0 +1,109 @@
+appId: com.toughra.ustadmobile
+env:
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/003_007_all_user_able_to_open_text_block"
+  TESTNAME: "003_007_all_user_able_to_open_text_block"
+  TEXTTITLE: "PRIMARY COLOURS"
+---
+- clearState: com.toughra.ustadmobile
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+      TESTNAME: ${TESTNAME}
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+- runFlow:
+    file: "../common/add_course.yaml"
+    env:
+      TESTCOURSENAME: "Text Block Test"
+- runFlow:
+    file: "../common/add_new_teacher_inside_course.yaml"
+    env:
+      TESTCOURSENAME: "Text Block Test"
+      TEACHERFIRSTNAME: "Teacher"
+      TEACHERLASTNAME: "1"
+      USERNAME: "t1"
+      GENDER: "Female"
+      PASSWORD: "test"
+- tapOn:
+    text: "Courses"
+    index: 1
+- runFlow:
+    file: "../common/add_new_student_inside_course.yaml"
+    env:
+      TESTCOURSENAME: "Text Block Test"
+      STUDENTFIRSTNAME: "Student"
+      STUDENTLASTNAME: "1"
+      USERNAME: "s1"
+      GENDER: "Male"
+      PASSWORD: "test"
+- repeat:
+    while:
+      notVisible: "Course"
+    commands:
+      - back
+- tapOn: "Course"
+- runFlow:
+    file: "../common/add_demo_block_structure.yaml"
+    env:
+      MODULETITLE: "SEMESTER 1"
+      TEXTTITLE: "PRIMARY COLOURS"
+      TEXT: "RED,BLUE,GREEN"
+- scrollUntilVisible:
+    element:
+      text: ${TEXTTITLE}
+    direction: DOWN
+- tapOn:
+    text: ${TEXTTITLE}
+- extendedWaitUntil:
+    visible: ${TEXTTITLE}
+    timeout: 1000
+- assertVisible:
+          text: "RED,BLUE,GREEN"
+- takeScreenshot: "${TESTRESULTSDIR}/text_block_admin_view"
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: "s1"
+      PASSWORD: "test"
+- tapOn: "courses"
+- tapOn: "Text Block Test"
+#--- open text block by student---#
+- scrollUntilVisible:
+    element:
+      text: ${TEXTTITLE}
+    direction: DOWN
+- tapOn: "PRIMARY COLOURS"
+- extendedWaitUntil:
+    visible: ${TEXTTITLE}
+    timeout: 1000
+- assertVisible:
+    text: "RED,BLUE,GREEN"
+- takeScreenshot: "${TESTRESULTSDIR}/text_block_student_view"
+#---------Launch App & Teacher Login------------------#
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: "t1"
+      PASSWORD: "test"
+- tapOn: "courses"
+- tapOn: "Text Block Test"
+#--- open text block by teacher ---#
+- scrollUntilVisible:
+    element:
+      text: ${TEXTTITLE}
+    direction: DOWN
+- tapOn: "PRIMARY COLOURS"
+- extendedWaitUntil:
+    visible: ${TEXTTITLE}
+    timeout: 1000
+- assertVisible:
+    text: "RED,BLUE,GREEN"
+- takeScreenshot: "${TESTRESULTSDIR}/text_block_teacher_view"

@@ -1,4 +1,4 @@
-# 001_001_admin_can_add_content
+# Admin uploads valid content
 
 ## Description:
 

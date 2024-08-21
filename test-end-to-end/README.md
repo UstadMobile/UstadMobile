@@ -24,17 +24,16 @@ trickle -s -d 128 -u 128 bash
 
 1.1 [Admin uploads valid content](test-descriptions/001_001_admin_can_add_content_test_description.md)
 
-1.2 [Admin uploads invalid content](test-descriptions/001_002_admin_add_invalid_content_gets_error_message.md)
+1.2 [Admin uploads invalid content](test-descriptions/001_002_admin_add_invalid_content_gets_error_message_test_description)
 
-1.3 Admin can hide and unhide content. After hiding on admin device, the content is hidden on other device.
+1.3 a) [Admin can delete content and restore it later](test-descriptions/001_003_admin_can_delete_and_restore_content_001_test_description.md)
+    b) [Admin can permanently delete content](test-descriptions/001_003_admin_can_permenantly_delete_the_content_002_test_description.md)
 
-1.4 Admin can move content to another folder in Library. After moving, content is shown as moved on other device. 
+1.4 [Admin can move content](test-descriptions/001_004_admin_can_move_content_test_description.md)
 
-1.5 Content can be deleted from a device. After deletion, it can be downloaded again and opened as 
-    before. (Android only).
+1.5 [Admin can remove content and download it again](test-descriptions/001_005_admin_can_remove_content_and_download_again_test_description.md)(Android only).
 
-1.6 Content download can be canceled. After cancellation, the download stops and it can be 
-    downloaded again. (Android only).
+1.6 [Admin can cancel content download and download it again](test-descriptions/001_006_admin_can_cancel_content_download_test_description.md)
 
 1.7 If a download is started on WiFi and WiFi is stopped midway, the download will stop and then 
     resume when WiFi is resumed. (Android only).
@@ -47,17 +46,15 @@ trickle -s -d 128 -u 128 bash
 
 ### 2: Course creation, enrolment, attendance, progress
 
-2.1 Admin can create a new course, add a new teacher, and create an account for that teacher. It is 
-    possible to login as the teacher.
+2.1 [Admin add new course and new members to that course](test-descriptions%2F002_001_admin_add_new_course_and_teacher_test_description.md)
 
-2.2 Teacher can login. Students can join class using class code or link.
+2.2 [Students can join class using class code or link](test-descriptions/002_002_student_joining_course_using_code_test_description.md)
 
-2.3 Teacher can record attendance. Teacher can edit attendance after recordings
+2.3 [Teacher can record attendance.](test-descriptions/002_003_teacher_record_attendance_test_description.md)
 
 2.4 Teacher can view progress report showing each students' result for each block in the course.
 
-2.5 The course title is mandatory. If save is clicked when the title is blank, then the field is
-    highlighted as required and it is not saved. The user can then add a title and save successfully.
+2.5 [The course title is mandatory](test-descriptions/002_005_course_title_is_mandatory_test_description.md)
 
 2.6 Teacher/admin can remove people from a course (e.g. delete their enrolment). This removes any permissions that were associated with their enrolment.    
 
@@ -65,7 +62,7 @@ trickle -s -d 128 -u 128 bash
 
 2.8 Teacher/admin can add banner photo to the course that is displayed in the course list screen and course detail screen.
 
-2.9 Teacher/admin, or the user themselves, can select or remove a profile photo. Photo can be taken from camera or gallery on Android.
+2.9 [The user can add a profile photo](test-descriptions/002_009_people_add_and_remove_profile_pic_test_description.md)
 
 ### 3: Course block editing
 

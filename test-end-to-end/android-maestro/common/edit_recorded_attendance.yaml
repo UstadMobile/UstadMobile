@@ -10,7 +10,7 @@ appId: com.toughra.ustadmobile
 - swipe:
       start: 100,400
       end: 100,100
-- tapOn: "1 Present, 1 Partial, 0 Absent"
+- tapOn: "5 Present, 1 Partial, 0 Absent"
 - tapOn: "Mark all present"
 - tapOn:
     id: "com.toughra.ustadmobile:id/absent_button"

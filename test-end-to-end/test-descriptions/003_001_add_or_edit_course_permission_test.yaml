@@ -1,7 +1,7 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/002_003_teacher_record_attendance"
-  TESTNAME: "002_003_teacher_record_attendance"
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/003_001_add_or_edit_course_permission_test"
+  TESTNAME: "003_001_add_or_edit_course_permission_test"
 ---
 - clearState: com.toughra.ustadmobile
 - runFlow:
@@ -14,6 +14,12 @@ env:
 - runFlow: "../common/select_site.yaml"
 - runFlow:
     file: "../common/user_login.yaml"
+# add new course
+- runFlow:
+    file: "../common/add_course.yaml"
+    env:
+      TESTCOURSENAME: "Test Course Block"
+# add new teacher using flow - add_new_teacher_inside_course ---------
 - runFlow:
     file: "../common/add_new_teacher_inside_course.yaml"
     env:
@@ -23,13 +29,20 @@ env:
       USERNAME: "t1"
       GENDER: "Female"
       PASSWORD: "test"
-# add students to the course through bulk import using .csv file
+# add 6 students to the course through bulk import using .csv file
 - runFlow:
     file: "../common/student_bulk_upload_csv.yaml"
     env:
       TESTFILENAME: "Ustad_Students_List.csv"
       CONTROLSERVER: ${CONTROLSERVER}
       TESTSERIAL: ${TESTSERIAL}
+- tapOn:
+    text: "Courses"
+- runFlow:
+    file: "../common/edit_course.yaml"
+    env:
+      TESTCOURSENAME: "Test Course Block"
+# teacher should be able to edit a course
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
@@ -38,11 +51,19 @@ env:
       USERNAME: "t1"
       PASSWORD: "test"
 - runFlow:
-    file: "../common/record_attendance.yaml"
+    file: "../common/edit_course.yaml"
     env:
       TESTCOURSENAME: "Test Course Block"
+- tapOn: "SAVE"
+#student should not be able to edit a course
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
 - runFlow:
-    file: "../common/edit_recorded_attendance.yaml"
+    file: "../common/user_login.yaml"
     env:
-      TESTCOURSENAME: "Test Course Block"
-- assertVisible: "6 Present, 0 Partial, 0 Absent"
+      USERNAME: "s1"
+      PASSWORD: "tests1"
+- tapOn: "Courses"
+- tapOn: "Test Course Block"
+- assertNotVisible:
+            id: "floating_action_button"

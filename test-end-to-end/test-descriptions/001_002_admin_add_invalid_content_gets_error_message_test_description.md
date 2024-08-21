@@ -1,4 +1,4 @@
-# 001_002_admin_add_invalid_content_gets_error_message
+# Admin uploads invalid content
 
 ## Description:
 
@@ -6,7 +6,7 @@ Admin add an invalid content file from the device. Once added, the user gets an 
 invalid.
 
 
-## Step-by-Step Test Flow:
+## Step-by-step procedure:
 
 1. Log in as admin.
 2. Click on "Library."
