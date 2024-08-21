@@ -52,8 +52,6 @@ class RedirectViewModel(
          * Which references:
          * https://issuetracker.google.com/issues/65820362
          *
-         * Says
-         *
          */
         val activeLearningSpace = accountManager.activeLearningSpace
         if(!activeLearningSpace.url.contains("localhost")) {
@@ -72,8 +70,6 @@ class RedirectViewModel(
             val destination = destinationArg ?: ClazzListViewModel.DEST_NAME_HOME
 
             viewModelScope.launch {
-                //preMigrate?.invoke()
-
                 navController.navigateToLink(
                     link = destination,
                     accountManager = accountManager,

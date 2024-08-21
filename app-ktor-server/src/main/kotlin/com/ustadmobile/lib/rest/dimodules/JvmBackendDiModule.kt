@@ -3,6 +3,8 @@ package com.ustadmobile.lib.rest.dimodules
 import com.russhwolf.settings.PropertiesSettings
 import com.russhwolf.settings.Settings
 import com.ustadmobile.appconfigdb.SystemDb
+import com.ustadmobile.appconfigdb.entities.SystemConfig
+import com.ustadmobile.appconfigdb.entities.SystemConfigAuth
 import com.ustadmobile.core.account.AuthManager
 import com.ustadmobile.core.account.LearningSpaceScope
 import com.ustadmobile.core.account.Pbkdf2Params
@@ -23,6 +25,8 @@ import com.ustadmobile.core.domain.cachelock.Migrate131to132AddRetainActiveUriTr
 import com.ustadmobile.core.domain.cachelock.UpdateCacheLockJoinUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCaseCommonJvm
 import com.ustadmobile.core.domain.message.AddOutgoingReplicationForMessageTriggerCallback
+import com.ustadmobile.core.domain.pbkdf2.Pbkdf2AuthenticateUseCase
+import com.ustadmobile.core.domain.pbkdf2.Pbkdf2EncryptUseCase
 import com.ustadmobile.core.domain.xapi.XapiJson
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -33,6 +37,7 @@ import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.rest.InsertDefaultSiteCallback
+import com.ustadmobile.lib.rest.domain.systemconfig.sysconfiginit.GenerateSystemConfigAuthCallback
 import com.ustadmobile.lib.rest.ext.dbModeProperty
 import com.ustadmobile.lib.rest.ext.initAdminUser
 import com.ustadmobile.lib.rest.identifier
@@ -124,10 +129,20 @@ fun makeJvmBackendDiModule(
         )
     }
 
+    bind<Pbkdf2EncryptUseCase>() with singleton { Pbkdf2EncryptUseCase() }
+
+    bind<Pbkdf2AuthenticateUseCase>() with singleton {
+        Pbkdf2AuthenticateUseCase(encryptUseCase = instance())
+    }
+
     bind<SystemDb>() with singleton {
-        val dbUrl = "jdbc:sqlite:${config.absoluteDataDir().absolutePath}/system.db"
-        DatabaseBuilder.databaseBuilder(SystemDb::class, dbUrl, nodeId = 1L)
-            .build()
+        DatabaseBuilder.databaseBuilder(
+            dbClass = SystemDb::class,
+            dbUrl = "jdbc:sqlite:${config.absoluteDataDir().absolutePath}/system.db",
+            nodeId = 1L
+        ).addCallback(
+            GenerateSystemConfigAuthCallback(encryptor = instance(), dataDirPath = dataDirPath)
+        ).build()
     }
 
     bind<UstadMobileSystemImpl>() with singleton {
