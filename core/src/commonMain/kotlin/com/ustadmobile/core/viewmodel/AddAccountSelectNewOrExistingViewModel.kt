@@ -61,9 +61,7 @@ class AddAccountSelectNewOrExistingViewModel(
         navController.navigate(AddAccountExistingUserViewModel.DEST_NAME, emptyMap())
 
     }
-    fun onClickBadgeQrCode(){
 
-    }
 
 
     fun onLanguageSelected(uiLanguage: UstadMobileSystemCommon.UiLanguage) {

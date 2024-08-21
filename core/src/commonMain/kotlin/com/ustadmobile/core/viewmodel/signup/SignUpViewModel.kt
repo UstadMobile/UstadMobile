@@ -317,11 +317,11 @@ class SignUpViewModel(
                             tableId = PersonPicture.TABLE_ID,
                             pictureUri = personPictureUriVal
                         )
-                        navController.navigate(AddChildProfileViewModel.DEST_NAME, emptyMap())
 
                     }
                 }
 
+                navController.navigate(AddChildProfileViewModel.DEST_NAME, emptyMap())
 
             } catch (e: Exception) {
                 if (e is IllegalStateException) {
