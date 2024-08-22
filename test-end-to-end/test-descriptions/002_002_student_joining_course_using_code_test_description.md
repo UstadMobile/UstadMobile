@@ -1,4 +1,4 @@
-# Students can join class using class code or link.
+[# Students can join class using class code or link.
 
 ## Description:
 
@@ -64,3 +64,4 @@ Students can join class using class code or link.
 56. Student login to the app.
 57. Click on "Courses".
 58. Verify that that the student able to see course name.
+]()

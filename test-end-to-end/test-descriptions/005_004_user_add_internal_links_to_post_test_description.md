@@ -1,8 +1,8 @@
-# Users can include external links to websites in their post
+# Users can include internal links in their post
 
 ## Description:
 
-Users can include external links to websites in their post. Clicking the link opens the browser (e.g. Chrome on Android, new tab in web) for the link
+Users can include a link from within the app (e.g. to a course or content piece) in their post. Clicking the link opens the item directly.
 
 ## Step-by-Step Procedure:
 
@@ -57,17 +57,17 @@ Users can include external links to websites in their post. Clicking the link op
 49. Enter a title for the post.
 50. Click on "Add Link" icon.
 51. Click on "URL" field.
-52. Enter the "External Link" to a external website.
+52. Enter the "Internal Link" to the Library in the app.
 53. Click on "Link text (optional)" field.
 54. Enter the text.
 55. Click on "Ok" button.
 56. Click on "Post" button.
 57. Verify the post is visible.
 58. Clear the app storage.
-59. Login as student user. 
+59. Login as student user.
 60. Click on courses.
-61. Click on course name. 
+61. Click on course name.
 62. Click on the existing discussion board.
 63. Click on the existing post.
 64. Click on link.
-65. Verify the link is open.
+65. Verify the link is opening the Library page of the app.

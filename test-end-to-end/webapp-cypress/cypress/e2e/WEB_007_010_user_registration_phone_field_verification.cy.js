@@ -24,7 +24,7 @@ it('Admin enable registration', () => {
   cy.contains("label", "Username*").parent().find("input").clear().type('studentc')
   cy.contains("label", "Password").parent().find("input").clear().type('test1234')
   cy.contains('Register').click()
-  cy.get('.Mui-error').contains('Phone').should('exist') //Email error
+  cy.get('.Mui-error').contains('Phone').should('exist') //phone error
   cy.contains('Invalid').should('be.visible')
     cy.get('#person_phone_num').click().clear().type('+971544021476')
   cy.contains('Register').click()
