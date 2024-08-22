@@ -1,9 +1,8 @@
-# Admin add new course and new members to that course
+# Teacher can add discussion board to course
 
 ## Description:
 
-Admin can create a new course, add a new teacher,add a new student and create an account for them. Teacher is
-able to login to the app.
+Teacher can add discussion board to course
 
 ## Step-by-Step Procedure:
 
@@ -31,13 +30,19 @@ able to login to the app.
 22. Enter the username.
 23. Enter the password.
 24. Click on the "Save button"
-25. Click on "People".
-26. Click on "+ Person" button. 
-27. Click on "Bulk import" button. 
-28. Click on "Select file" button. 
-29. Select the csv file. 
-30. Click on "Import"
-31. Verify the import success message. 
-32. Clear the app storage. 
-33. Login as teacher 
-34. Verify the teacher able to see the course
+25. Clear the app storage. 
+26. Login as teacher 
+27. Click on "Courses"
+28. Click on Course name. 
+29. Click on the "Edit" button. 
+30. Click on the "Add block" button. 
+31. Click on the "Discussion board" button. 
+32. Enter "Title" for the discussion board. 
+33. Click on "Description"
+34. Enter description 
+35. Click on "Done" to save the description. 
+36. Click on "Done" to save the discussion board. 
+37. Click on "Save" to save the course changes. 
+38. Verify the "Discussion board" is visible inside the course. 
+39. Click on the discussion board name. 
+40. Verify the "+ Post" button is visible inside the discussion board.

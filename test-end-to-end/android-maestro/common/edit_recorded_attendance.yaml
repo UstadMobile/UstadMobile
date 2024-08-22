@@ -7,9 +7,10 @@ appId: com.toughra.ustadmobile
 - tapOn: "Courses"
 - tapOn: ${TESTCOURSENAME}
 - tapOn: "ATTENDANCE"
-- swipe:
-      start: 100,400
-      end: 100,100
+- scrollUntilVisible:
+    element:
+      text: "5 Present, 1 Partial, 0 Absent"
+    direction: DOWN
 - tapOn: "5 Present, 1 Partial, 0 Absent"
 - tapOn: "Mark all present"
 - tapOn:

@@ -124,17 +124,18 @@ trickle -s -d 128 -u 128 bash
 4.15 Students may upload attachments for assignment submissions if enabled by the teacher, up to the maximum file size limit set by the teacher. 
 
 ### 5	Discussion board
-5.1 Teacher can add discussion board to course
 
-5.2 Teacher can edit discussion board
+5.1 [Teacher can add discussion board to course](test-descriptions/005_001_add_discussionBoard_test_description.md)
 
-5.3 All users on course can post on discussion board, see posts from other users. Each topic and post shows last active date and number of replies.
+5.2 [Teacher can edit discussion board](test-descriptions/005_002_teacher_can_edit_discussion_board_test_description.md)
+
+5.3 [All users on course can post on discussion board](test-descriptions/005_003_users_can_add_post_on_discussion_board_test_description.md)
 
 5.4 Users can include a link from within the app (e.g. to a course or content piece) in their post. Clicking the link opens the item directly.
 
-5.5 Users can include external links to websites in their post. Clicking the link opens the browser (e.g. Chrome on Android, new tab in web) for the link
+5.5 [Users can include external links to websites in their post](test-descriptions/005_005_users_can_add_external_links_as_post_on_discussion_board_test_description.md)
 
-5.6 Teacher/admin (any user with permission to edit the course itself) can delete posts and replies. 
+5.6 [All users with permission can delete posts and replies](test-descriptions/005_006_users_can_delete_post_on_discussion_board_test_description.md)
 
 ### 6 Messaging
 

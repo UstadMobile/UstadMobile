@@ -14,6 +14,11 @@ env:
 - runFlow: "../common/select_site.yaml"
 - runFlow:
     file: "../common/user_login.yaml"
+# add new course
+- runFlow:
+    file: "../common/add_course.yaml"
+    env:
+      TESTCOURSENAME: "Test Course Block"
 - runFlow:
     file: "../common/add_new_teacher_inside_course.yaml"
     env:
