@@ -3,13 +3,9 @@ package com.ustadmobile.lib.rest.ext
 import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.contentformats.ContentImportersManager
 import com.ustadmobile.core.contentjob.MetadataResult
-import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.ihttp.ext.clientProtocolAndHost
 import com.ustadmobile.ihttp.headers.asIHttpHeaders
 import com.ustadmobile.ihttp.ktorserver.clientUrl
-import com.ustadmobile.lib.rest.CONF_DBMODE_SINGLETON
-import com.ustadmobile.lib.rest.CONF_DBMODE_VIRTUALHOST
-import com.ustadmobile.lib.rest.CONF_KEY_SITE_URL
 import io.github.aakira.napier.Napier
 import io.ktor.server.application.*
 import io.ktor.http.*
@@ -129,30 +125,26 @@ suspend fun ApplicationCall.respondOkHttpResponse(
  */
 val ApplicationCall.callLearningSpace: LearningSpace
     get() {
-        val config = this.application.environment.config
-        val dbMode = config.dbModeProperty()
-
-        return if(dbMode == CONF_DBMODE_SINGLETON) {
-            LearningSpace(config.property(CONF_KEY_SITE_URL).getString().requirePostfix("/"))
-        }else {
-            LearningSpace(request.headers.asIHttpHeaders().clientProtocolAndHost())
-        }
+        return LearningSpace(request.headers.asIHttpHeaders().clientProtocolAndHost())
     }
 
 /**
  * Determine if the request made on the receiver ApplicationCall matches the configuration.
+ * TODO: Use the LearningSpaceServerRepo to do this
  */
-fun ApplicationCall.urlMatchesConfig(): Boolean {
-    val dbMode = application.environment.config
-        .dbModeProperty()
-    if(dbMode == CONF_DBMODE_VIRTUALHOST)
-        return true
-
+fun ApplicationCall.urlMatchesLearningSpace(): Boolean {
     val requestUrl = request.clientUrl()
-    val siteUrl = application.environment.config.property(CONF_KEY_SITE_URL)
-        .getString()
-
-    return requestUrl.startsWith(siteUrl)
+    return true
+//
+//    val dbMode = application.environment.config.dbModeProperty()
+//    if(dbMode == CONF_DBMODE_VIRTUALHOST)
+//        return true
+//
+//    val requestUrl = request.clientUrl()
+//    val siteUrl = application.environment.config.property(CONF_KEY_SITE_URL)
+//        .getString()
+//
+//    return requestUrl.startsWith(siteUrl)
 }
 
 suspend fun ApplicationCall.respondRequestUrlNotMatchingSiteConfUrl() {

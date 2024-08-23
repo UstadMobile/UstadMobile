@@ -1,25 +1,16 @@
 package com.ustadmobile.lib.rest.ext
 
-import com.ustadmobile.core.account.AuthManager
-import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
-import com.ustadmobile.core.util.DiTag
-import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.lib.util.randomString
-import io.github.aakira.napier.Napier
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
-import org.kodein.di.on
-import java.io.File
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 
 fun UmAppDatabase.insertCourseTerminology(di: DI){
     val termList = courseTerminologyDao().findAllCourseTerminologyList()
@@ -49,49 +40,6 @@ fun UmAppDatabase.insertCourseTerminology(di: DI){
         }
 
         courseTerminologyDao().insertList(terminologyList)
-    }
-}
-
-/**
- * Initialize the admin account.
- */
-suspend fun UmAppDatabase.initAdminUser(
-    learningSpace: LearningSpace,
-    authManager: AuthManager,
-    di: DI,
-    defaultPassword: String? = null,
-) {
-    val adminUser = personDao().findByUsername("admin")
-
-    if (adminUser == null) {
-        val addNewPersonUseCase: AddNewPersonUseCase = di.on(learningSpace).direct.instance()
-
-        val adminPerson = Person(username = "admin", firstNames = "Admin", lastName = "User")
-
-        adminPerson.personUid = addNewPersonUseCase(
-            adminPerson, systemPermissions = Long.MAX_VALUE,
-        )
-
-        //Remove lower case l, upper case I, and the number 1
-        val adminPass = defaultPassword
-            ?: randomString(10, "abcdefghijkmnpqrstuvxwyzABCDEFGHJKLMNPQRSTUVWXYZ23456789")
-
-        authManager.setAuth(adminPerson.personUid, adminPass)
-
-        val adminPassFile = di.on(learningSpace).direct.instance<File>(tag = DiTag.TAG_ADMIN_PASS_FILE)
-        if (!adminPassFile.parentFile.isDirectory) {
-            adminPassFile.parentFile.mkdirs()
-        }
-
-        val saltFile = File(adminPassFile.parentFile, "salt-${systemTimeInMillis()}.txt")
-
-        val salt = siteDao().getSiteAsync()!!.authSalt!!
-
-        saltFile.writeText("$salt / $adminPass")
-
-
-        adminPassFile.writeText(adminPass)
-        Napier.i("Saved admin password to ${adminPassFile.absolutePath}")
     }
 }
 

@@ -125,6 +125,7 @@ import com.ustadmobile.lib.rest.domain.contententry.importcontent.ContentEntryIm
 import com.ustadmobile.lib.rest.domain.passkey.verify.VerifySignInWithPasskeyRoute
 import com.ustadmobile.lib.rest.domain.passkey.verify.VerifySignInWithPasskeyUseCase
 import com.ustadmobile.lib.rest.domain.learningspace.LearningSpaceApiRoute
+import com.ustadmobile.lib.rest.domain.learningspace.LearningSpaceServerRepo
 import com.ustadmobile.lib.rest.domain.learningspace.create.CreateLearningSpaceUseCase
 import com.ustadmobile.lib.rest.domain.person.bulkadd.BulkAddPersonRoute
 import com.ustadmobile.lib.rest.domain.systemconfig.verifyauth.VerifySystemConfigAuthUseCase
@@ -172,22 +173,13 @@ val KTOR_SERVER_ROUTES = listOf(
  * Returns an identifier that is used as a subdirectory for data storage (e.g. attachments,
  * containers, etc).
  */
-fun LearningSpace.identifier(
-    dbMode: String,
-    singletonName: String = CONF_DBMODE_SINGLETON
-) = if(dbMode == CONF_DBMODE_SINGLETON) {
-    singletonName
-}else {
-    sanitizeDbNameFromUrl(url)
-}
+fun LearningSpace.sanitizedUrlForPaths() = sanitizeDbNameFromUrl(url)
 
 @Suppress("unused") // This is used as the KTOR server main module via application.conf
 fun Application.umRestApplication(
     dbModeOverride: String? = null,
 ) {
     val appConfig = environment.config
-
-    val siteUrl = environment.config.propertyOrNull(CONF_KEY_SITE_URL)?.getString()
 
     val sitePrefix = environment.config.propertyOrNull(CONF_KEY_URL_PREFIX)?.getString()
 
@@ -350,7 +342,7 @@ fun Application.umRestApplication(
 
         bind<File>(tag = TAG_UPLOAD_DIR) with scoped(LearningSpaceScope.Default).singleton {
             val mainTmpDir = instance<File>(tag = DiTag.TAG_TMP_DIR)
-            File(mainTmpDir, context.identifier(dbMode)).also {
+            File(mainTmpDir, context.sanitizedUrlForPaths()).also {
                 it.takeIf { !it.exists() }?.mkdirs()
             }
         }
@@ -788,8 +780,13 @@ fun Application.umRestApplication(
         bind<CreateLearningSpaceUseCase>() with singleton {
             CreateLearningSpaceUseCase(
                 xxStringHasher = instance(),
-                systemDb = instance()
+                learningSpaceServerRepo = instance(),
+                di = di,
             )
+        }
+
+        bind<LearningSpaceServerRepo>() with singleton {
+            LearningSpaceServerRepo(systemDb = instance())
         }
 
         try {
@@ -823,24 +820,6 @@ fun Application.umRestApplication(
         }
 
         onReady {
-            if(dbMode == CONF_DBMODE_SINGLETON && siteUrl != null) {
-                val learningSpace = LearningSpace(siteUrl)
-                val passwordFile = di.on(learningSpace).direct.instance<File>(tag = DiTag.TAG_ADMIN_PASS_FILE)
-
-                /**
-                 * Eager initialization only if the initial admin password needs generated. This
-                 * avoids potential issue with startup script if this server starts before postgres
-                 * is ready.
-                 */
-                if(!passwordFile.exists()) {
-                    //Generate the admin username/password etc.
-                    di.on(learningSpace).direct.instance<AuthManager>()
-
-                    val db: UmAppDatabase by di.on(learningSpace).instance(tag = DoorTag.TAG_DB)
-                    println("init db: $db")
-                }
-            }
-
             instance<Scheduler>().start()
             instance<SystemDb>()
 

@@ -34,7 +34,7 @@ import kotlinx.serialization.Serializable
          sqlStatements = [ TRIGGER_UPSERT ]
      )
 ))
-open class Site {
+class Site {
 
     @PrimaryKey(autoGenerate = true)
     var siteUid: Long = 0

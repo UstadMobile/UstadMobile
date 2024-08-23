@@ -1,7 +1,7 @@
 package com.ustadmobile.lib.rest
 
 import com.ustadmobile.lib.rest.ext.respondRequestUrlNotMatchingSiteConfUrl
-import com.ustadmobile.lib.rest.ext.urlMatchesConfig
+import com.ustadmobile.lib.rest.ext.urlMatchesLearningSpace
 import io.ktor.server.application.ApplicationCallPipeline
 import io.ktor.server.routing.Route
 
@@ -12,7 +12,7 @@ import io.ktor.server.routing.Route
  */
 fun Route.addHostCheckIntercept() {
     intercept(ApplicationCallPipeline.Plugins) {
-        if(!context.urlMatchesConfig()) {
+        if(!context.urlMatchesLearningSpace()) {
             context.respondRequestUrlNotMatchingSiteConfUrl()
             return@intercept finish()
         }

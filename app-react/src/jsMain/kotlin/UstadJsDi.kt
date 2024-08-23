@@ -35,7 +35,6 @@ import kotlinx.serialization.json.Json
 import org.kodein.di.*
 import com.ustadmobile.core.impl.locale.StringProviderJs
 import com.ustadmobile.core.util.ext.toNullIfBlank
-import com.ustadmobile.core.viewmodel.OnBoardingViewModel
 import com.ustadmobile.domain.getversion.GetVersionUseCaseJs
 import com.ustadmobile.util.resolveEndpoint
 import dev.icerock.moko.resources.provider.JsStringProvider
@@ -86,9 +85,6 @@ internal fun ustadJsDi(
 
     bind<Settings>() with singleton {
         StorageSettings().also {
-            //We don't use onboarding on the web, so mark this as completed
-            it[OnBoardingViewModel.PREF_TAG] = "true"
-
             /*
              * Check if there is a preset default language, and apply if not already actioned
              */

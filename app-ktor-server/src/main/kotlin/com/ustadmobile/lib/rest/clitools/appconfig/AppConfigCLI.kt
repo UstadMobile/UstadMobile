@@ -32,14 +32,14 @@ fun main(args: Array<String>) {
 
     parser.addArgument("-s", "--server")
         .setDefault("http://localhost:8087/")
+    parser.addArgument("-a", "--password")
+        .required(true)
+        .help("System admin password")
 
     parser.addSubparsers().also { subParsers ->
         subParsers.title("subcommands")
         subParsers.dest("subparser_name")
         subParsers.addParser("newlearningspace").also {
-            it.addArgument("-p", "--password")
-                .required(true)
-                .help("System admin password")
             it.addArgument("-t", "--title")
                 .required(true)
                 .help("Learning Space title")
@@ -55,6 +55,13 @@ fun main(args: Array<String>) {
             it.addArgument("-w", "--dbpassword")
                 .setDefault("")
                 .help("Database password")
+            it.addArgument("-a", "--adminuser")
+                .setDefault("admin")
+                .help("Username for learning space admin")
+            it.addArgument("-p", "--adminpassword")
+                .required(true)
+                .help("Initial password for learning space admin")
+
         }
     }
 
@@ -62,16 +69,19 @@ fun main(args: Array<String>) {
     try {
         ns = parser.parseArgs(args)
         val serverUrl = ns.getString("server")
+        val adminPassword = ns.getString("password")
+
         runBlocking {
             when(ns.getString("subparser_name")) {
                 "newlearningspace" -> {
-                    val adminPassword = ns.getString("password")
                     val request = CreateLearningSpaceUseCase.CreateLearningSpaceRequest(
                         url = ns.getString("url"),
                         title = ns.getString("title"),
                         dbUrl = ns.getString("dburl"),
                         dbUsername = ns.getString("dbusername"),
                         dbPassword = ns.getString("dbpassword"),
+                        adminUsername = ns.getString("adminuser"),
+                        adminPassword = ns.getString("adminpassword")
                     )
 
                     val response = httpClient.post("${serverUrl}config/api/learningspaces/create") {
@@ -94,6 +104,7 @@ fun main(args: Array<String>) {
         exitProcess(1)
     }catch(e: Throwable) {
         System.err.println("Error: ${e.message}")
+        e.printStackTrace()
         exitProcess(2)
     }finally {
         httpClient.close()
