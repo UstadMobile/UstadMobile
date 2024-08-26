@@ -1,0 +1,63 @@
+appId: com.toughra.ustadmobile
+env:
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/002_007_admin_grant_permissions_test"
+  TESTNAME:  "002_007_admin_grant_permissions_test"
+---
+# Admin login
+- clearState: com.toughra.ustadmobile
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+      TESTNAME: ${TESTNAME}
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+# add new course
+- runFlow:
+    file: "../common/add_course.yaml"
+    env:
+      TESTCOURSENAME: "Test Course Block"
+# add new teacher using flow - add_new_teacher_inside_course ---------
+- runFlow:
+    file: "../common/add_new_teacher_inside_course.yaml"
+    env:
+      TESTCOURSENAME: ${TESTCOURSENAME}
+      TEACHERFIRSTNAME: "Teacher"
+      TEACHERLASTNAME: "1"
+      USERNAME: "t1"
+      GENDER: "Female"
+      PASSWORD: "testt1"
+# add students to the course through bulk import using .csv file
+- runFlow:
+    file: "../common/student_bulk_upload_csv.yaml"
+    env:
+      TESTFILENAME: "Ustad_Students_List.csv"
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+# admin and another course with another teacher and students
+- runFlow:
+    file: "../common/create_course_with_1teacher_2students.yaml"
+    env:
+      TESTCOURSENAME: "Attendance Test"
+- runFlow:
+    file: "../common/record_attendance.yaml"
+    env:
+      TESTCOURSENAME: "Attendance Test"
+
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: "t1"
+      PASSWORD: "testt1"
+- tapOn: "Courses"
+- assertNotVisible: "Attendance Test"
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+# admin give permission to T1 , can view attendance for all courses
