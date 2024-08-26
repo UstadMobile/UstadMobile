@@ -15,9 +15,26 @@ env:
 - runFlow:
     file: "../common/user_login.yaml"
 - runFlow:
-    file: "../common/create_course_with_1teacher_1student.yaml"
+    file: "../common/add_course.yaml"
     env:
-      TESTCOURSENAME: "Test Course"
+      TESTCOURSENAME: "Test Course Block"
+# add new teacher using flow - add_new_teacher_inside_course ---------
+- runFlow:
+    file: "../common/add_new_teacher_inside_course.yaml"
+    env:
+      TESTCOURSENAME: ${TESTCOURSENAME}
+      TEACHERFIRSTNAME: "Teacher"
+      TEACHERLASTNAME: "1"
+      USERNAME: "t1"
+      GENDER: "Female"
+      PASSWORD: "testt1"
+# add students to the course through bulk import using .csv file
+- runFlow:
+    file: "../common/student_bulk_upload_csv.yaml"
+    env:
+      TESTFILENAME: "Ustad_Students_List.csv"
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
 - tapOn: "Messages"
 - tapOn:
     id: "floating_action_button"
@@ -32,7 +49,7 @@ env:
     file: "../common/user_login.yaml"
     env:
       USERNAME: "s1"
-      PASSWORD: "test"
+      PASSWORD: "tests1"
 - tapOn: "Messages"
 - assertVisible: "Admin User"
 - tapOn: "Admin User"

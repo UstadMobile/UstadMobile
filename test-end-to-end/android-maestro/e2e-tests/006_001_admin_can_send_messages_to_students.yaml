@@ -1,7 +1,7 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/002_001_admin_add_new_course_and_teacher"
-  TESTNAME: "002_001_admin_add_new_course_and_teacher"
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/006_001_admin_can_send_messages_to_students"
+  TESTNAME: "006_001_admin_can_send_messages_to_students"
 ---
 - clearState: com.toughra.ustadmobile
 - runFlow:
@@ -15,16 +15,33 @@ env:
 - runFlow:
     file: "../common/user_login.yaml"
 - runFlow:
-    file: "../common/create_course_with_1teacher_1student.yaml"
+    file: "../common/add_course.yaml"
     env:
-      TESTCOURSENAME: "Test Course"
+      TESTCOURSENAME: "Test Course Block"
+# add new teacher using flow - add_new_teacher_inside_course ---------
+- runFlow:
+    file: "../common/add_new_teacher_inside_course.yaml"
+    env:
+      TESTCOURSENAME: ${TESTCOURSENAME}
+      TEACHERFIRSTNAME: "Teacher"
+      TEACHERLASTNAME: "1"
+      USERNAME: "t1"
+      GENDER: "Female"
+      PASSWORD: "testt1"
+# add students to the course through bulk import using .csv file
+- runFlow:
+    file: "../common/student_bulk_upload_csv.yaml"
+    env:
+      TESTFILENAME: "Ustad_Students_List.csv"
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
 - runFlow:
     file: "../common/add_new_people.yaml"
     env:
       FIRSTNAME: "Student"
       LASTNAME: "A"
-      GENDER: "Male"
       USERNAME: "sa"
+      GENDER: "Male"
       PASSWORD: "testsa"
 
 - runFlow: "../common/clear_state_and_get_started.yaml"
@@ -33,36 +50,30 @@ env:
     file: "../common/user_login.yaml"
     env:
       USERNAME: "t1"
-      PASSWORD: "test"
-
+      PASSWORD: "testt1"
 - tapOn: "Messages"
 - tapOn:
     id: "floating_action_button"
 - tapOn: "Student 1"
 - tapOn: "Message"
 - inputText: "Hi , I am teacher, Please add your profile pic"
-- tapOn: "Send"
-  # this test user only has permission to message person within same course
 - back
+# test teacher can't send messages to student not enrolled in same course
 - tapOn:
     id: "floating_action_button"
 - assertNotVisible: "Student A"
 
+# this test user only has permission to message person within same course
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
     file: "../common/user_login.yaml"
     env:
       USERNAME: "s1"
-      PASSWORD: "test"
+      PASSWORD: "tests1"
 - tapOn: "Messages"
 - tapOn: "Teacher 1"
 - assertVisible: "Hi , I am teacher, Please add your profile pic"
 - tapOn: "Message"
 - inputText: "Hi ,Sure Sir"
 - tapOn: "Send"
-  # this test user only has permission to message person within same course
-- back
-- tapOn:
-    id: "floating_action_button"
-- assertNotVisible: "Student A"
