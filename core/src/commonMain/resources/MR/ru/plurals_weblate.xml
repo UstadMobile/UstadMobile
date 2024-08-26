@@ -1,2 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <plurals name="number_of_attempts">
+        <item quantity="one">%d попытка</item>
+        <item quantity="few">%d попыток</item>
+        <item quantity="many">%d попытки</item>
+        <item quantity="other">%d попытки</item>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="one">%d час</item>
+        <item quantity="few">%d часа</item>
+        <item quantity="many">%d часов</item>
+        <item quantity="other">%d часов</item>
+    </plurals>
+    <plurals name="duration_minutes">
+        <item quantity="one">%d минута</item>
+        <item quantity="few">%d минуты</item>
+        <item quantity="many">%d минут</item>
+        <item quantity="other">%d минут</item>
+    </plurals>
+    <plurals name="duration_seconds">
+        <item quantity="one">%d секунда</item>
+        <item quantity="few">%d секунды</item>
+        <item quantity="many">%d секунд</item>
+        <item quantity="other">%d секунд</item>
+    </plurals>
+    <plurals name="items_selected">
+        <item quantity="one">%d элемент выделен</item>
+        <item quantity="few">%d элемента выделено</item>
+        <item quantity="many">%d элементов выделено</item>
+        <item quantity="other">%d элементов выделено</item>
+    </plurals>
+    <plurals name="items_deleted">
+        <item quantity="one">%d элементов удален</item>
+        <item quantity="few">%d элементов удалены</item>
+        <item quantity="many">%d элементов удалено</item>
+        <item quantity="other">%d элементов удалено</item>
+    </plurals>
+    <plurals name="items_restored">
+        <item quantity="one">%d элементов восстановлен</item>
+        <item quantity="few">%d элементов восстановлено</item>
+        <item quantity="many">%d элементов восстановлено</item>
+        <item quantity="other">%d элементов восстановлено</item>
+    </plurals>
+    <plurals name="are_you_sure_you_want_to_permanently_delete">
+        <item quantity="one">Вы уверены, что хотите навсегда удалить %d элемент?</item>
+        <item quantity="few">Вы уверены, что хотите навсегда удалить %d элементов?</item>
+        <item quantity="many">Вы уверены, что хотите навсегда удалить %d элементов?</item>
+        <item quantity="other">Вы уверены, что хотите навсегда удалить %d элементов?</item>
+    </plurals>
+</resources>

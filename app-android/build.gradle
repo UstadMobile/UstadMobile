@@ -164,7 +164,8 @@ android {
 
         debug {
             minifyEnabled false
-            testCoverageEnabled = false
+            enableUnitTestCoverage false
+            enableAndroidTestCoverage false
         }
     }
 
@@ -284,7 +285,6 @@ dependencies {
     implementation libs.androidx.compose.ui.tooling.preview
     debugImplementation libs.androidx.compose.ui.tooling
 
-    //implementation "androidx.activity:activity-compose:$version_activity_compose"
     implementation libs.activity.compose
     implementation libs.androidx.window
     implementation libs.androidx.compose.material.icons.extended
@@ -298,20 +298,15 @@ dependencies {
     //Image loading library
     implementation libs.picasso
 
-    //Gson for JSON serializing and deserializing
-    implementation libs.gson
-
     //KTOR
-    implementation libs.ktor.serialization.gson
     implementation libs.ktor.client.okhttp
     implementation libs.ktor.client.content.negotiation
-    implementation libs.ktor.client.cio
+
 
     //http server
     implementation libs.nanohttpd
     implementation libs.nanohttpd.nanolets
 
-    //Android play core for update support within the application
     implementation libs.androidx.navigation.fragment.ktx
     implementation libs.androidx.navigation.ui
     implementation libs.androidx.navigation.ui.ktx

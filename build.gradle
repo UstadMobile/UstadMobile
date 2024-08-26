@@ -21,8 +21,8 @@ buildscript {
 }
 
 plugins {
-    id 'com.android.application' version '8.5.0' apply false
-    id 'com.android.library' version '8.5.0' apply false
+    id 'com.android.application' version '8.5.2' apply false
+    id 'com.android.library' version '8.5.2' apply false
     id 'org.jetbrains.kotlin.android' version "$version_kotlin" apply false
     id 'org.jetbrains.kotlin.plugin.serialization' version "$version_kotlin" apply false
     id 'org.jetbrains.kotlin.plugin.atomicfu' version "$version_kotlin" apply false
@@ -31,7 +31,7 @@ plugins {
     id 'org.jetbrains.kotlin.jvm' version "$version_kotlin" apply false
     alias(libs.plugins.jetbrains.compose) apply false
     id 'com.github.gmazzo.buildconfig' version '5.3.5' apply false
-    id 'com.android.test' version '8.5.0' apply false
+    id 'com.android.test' version '8.5.2' apply false
     // Version of Android.baselineprofile as per
     // https://mvnrepository.com/artifact/androidx.baselineprofile/androidx.baselineprofile.gradle.plugin
     id 'androidx.baselineprofile' version '1.2.4' apply false
@@ -87,7 +87,7 @@ allprojects {
 }
 
 //Major.minor.database version
-version = "0.4.125"
+version = "0.4.132"
 group = "com.ustadmobile.app"
 
 /**
@@ -97,7 +97,7 @@ group = "com.ustadmobile.app"
  */
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 349
+    ustadVersionCode = 356
 
 
     version_gradle_buildconfig_plugin = "1.1.7"

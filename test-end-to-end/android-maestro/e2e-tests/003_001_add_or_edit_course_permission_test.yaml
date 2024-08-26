@@ -14,17 +14,34 @@ env:
 - runFlow: "../common/select_site.yaml"
 - runFlow:
     file: "../common/user_login.yaml"
+# add new course
 - runFlow:
-    file: "../common/create_course_with_1teacher_1student.yaml"
+    file: "../common/add_course.yaml"
     env:
-      TESTCOURSENAME: "Permission Test"
+      TESTCOURSENAME: "Test Course Block"
+# add new teacher using flow - add_new_teacher_inside_course ---------
+- runFlow:
+    file: "../common/add_new_teacher_inside_course.yaml"
+    env:
+      TESTCOURSENAME: ${TESTCOURSENAME}
+      TEACHERFIRSTNAME: "Teacher"
+      TEACHERLASTNAME: "1"
+      USERNAME: "t1"
+      GENDER: "Female"
+      PASSWORD: "test"
+# add 6 students to the course through bulk import using .csv file
+- runFlow:
+    file: "../common/student_bulk_upload_csv.yaml"
+    env:
+      TESTFILENAME: "Ustad_Students_List.csv"
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
 - tapOn:
     text: "Courses"
-    index: 1
 - runFlow:
     file: "../common/edit_course.yaml"
     env:
-      TESTCOURSENAME: "Permission Test"
+      TESTCOURSENAME: "Test Course Block"
 # teacher should be able to edit a course
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
@@ -36,7 +53,7 @@ env:
 - runFlow:
     file: "../common/edit_course.yaml"
     env:
-      TESTCOURSENAME: "Permission Test"
+      TESTCOURSENAME: "Test Course Block"
 - tapOn: "SAVE"
 #student should not be able to edit a course
 - runFlow: "../common/clear_state_and_get_started.yaml"
@@ -45,8 +62,8 @@ env:
     file: "../common/user_login.yaml"
     env:
       USERNAME: "s1"
-      PASSWORD: "test"
+      PASSWORD: "tests1"
 - tapOn: "Courses"
-- tapOn: "Permission Test"
+- tapOn: "Test Course Block"
 - assertNotVisible:
             id: "floating_action_button"

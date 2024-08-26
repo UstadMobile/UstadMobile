@@ -7,7 +7,7 @@ version-androidx-appcompat = "1.6.1"
 androidx-core = "1.12.0"
 kotlin = "1.9.23"
 okhttp = "4.12.0"
-door = "0.79.14"
+door = "0.79.17"
 coroutines = "1.8.0"
 atomicfu = "0.23.2"
 kotlinx-io = "0.3.0"
@@ -81,7 +81,6 @@ ksp = "1.9.23-1.0.19"
 androidx-fragment = "1.6.2"
 androidx-legacy-support = "1.0.0"
 commons-io = "2.15.0"
-gson = "2.10.1"
 androidx-annotation = "1.7.1"
 androidx-work = "2.9.0"
 klock = "2.4.13"
@@ -126,6 +125,7 @@ android-emulator-plugin = "0.4.5"
 lz4 = "1.8.0"
 kmp-uuid = "0.8.4"
 zoomable = "1.6.1"
+jetbrains-kotlin-jvm = "1.9.23"
 
 [plugins]
 
@@ -137,6 +137,7 @@ conveyor = { id = "dev.hydraulic.conveyor", version.ref = "conveyor" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 license = { id = "com.jaredsburrows.license", version.ref = "plugin-license" }
 android-emulator = { id = "com.quittle.android-emulator", version.ref = "android-emulator-plugin" }
+jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "jetbrains-kotlin-jvm" }
 
 
 [libraries]
@@ -272,10 +273,7 @@ accompanist-pager-indicators = { module = "com.google.accompanist:accompanist-pa
 accompanist-flowlayout = { module = "com.google.accompanist:accompanist-flowlayout", version.ref = "compose-accompanist" }
 accompanist-drawablepainter = { module = "com.google.accompanist:accompanist-drawablepainter", version.ref= "compose-accompanist" }
 picasso = { module = "com.squareup.picasso:picasso", version.ref = "picasso" }
-gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
-ktor-serialization-gson = { module = "io.ktor:ktor-serialization-gson", version.ref = "ktor" }
 ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor"}
-ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor"}
 guardianproject-panic = { module = "info.guardianproject.panic:panic", version.ref = "guardianproject-panic"}
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
 ktor-io = { module = "io.ktor:ktor-io", version.ref = "ktor" }

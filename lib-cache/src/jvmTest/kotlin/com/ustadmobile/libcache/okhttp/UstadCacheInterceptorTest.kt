@@ -1,6 +1,7 @@
 package com.ustadmobile.libcache.okhttp
 
 import com.ustadmobile.door.DatabaseBuilder
+import com.ustadmobile.ihttp.headers.IHttpHeaders
 import com.ustadmobile.libcache.CachePaths
 import com.ustadmobile.libcache.CachePathsProvider
 import com.ustadmobile.libcache.CompressionType
@@ -11,13 +12,12 @@ import com.ustadmobile.libcache.assertTempDirectoryIsEmptied
 import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.headers.CouponHeader.Companion.HEADER_ETAG_IS_INTEGRITY
 import com.ustadmobile.libcache.headers.CouponHeader.Companion.HEADER_X_INTERCEPTOR_PARTIAL_FILE
-import com.ustadmobile.libcache.headers.HttpHeaders
 import com.ustadmobile.libcache.integrity.sha256Integrity
 import com.ustadmobile.libcache.io.RangeInputStream
 import com.ustadmobile.libcache.md5.Md5Digest
 import com.ustadmobile.libcache.md5.urlKey
 import com.ustadmobile.libcache.partial.ContentRange.Companion.parseRangeHeader
-import com.ustadmobile.libcache.request.requestBuilder
+import com.ustadmobile.ihttp.request.iRequestBuilder
 import com.ustadmobile.libcache.response.bodyAsUncompressedSourceIfContentEncoded
 import com.ustadmobile.util.test.ResourcesDispatcher
 import com.ustadmobile.util.test.initNapierLog
@@ -152,7 +152,7 @@ class UstadCacheInterceptorTest {
         Assert.assertArrayEquals(resourceBytes, responseBytes)
         ustadCache.verifyUrlStored(requestUrl)
 
-        val cacheResponse = ustadCache.retrieve(requestBuilder(requestUrl))
+        val cacheResponse = ustadCache.retrieve(iRequestBuilder(requestUrl))
         assertEquals(CompressionType.NONE,
             CompressionType.byHeaderVal(cacheResponse!!.headers["content-encoding"]),
             "Non-compressable mime type should not be encoded"
@@ -182,7 +182,7 @@ class UstadCacheInterceptorTest {
 
         //Now check the cached response is compressed
         val cacheResponse = ustadCache.retrieve(
-            requestBuilder(requestUrl) {
+            iRequestBuilder(requestUrl) {
                 header("accept-encoding", "gzip, br, deflate")
             }
         )
@@ -215,7 +215,7 @@ class UstadCacheInterceptorTest {
 
         //Now check the cached response is compressed
         val cacheResponse = ustadCache.retrieve(
-            requestBuilder(requestUrl) {
+            iRequestBuilder(requestUrl) {
                 header("accept-encoding", "gzip, deflate, br")
             }
         )
@@ -329,7 +329,7 @@ class UstadCacheInterceptorTest {
         assertNotNull(storedEntryAfterRequest)
         assertTrue(storedEntryAfterValidation.lastValidated > storedEntryAfterRequest.lastValidated,
             "Last validated time in cache db should be updated")
-        val headersAfterValidation = HttpHeaders.fromString(
+        val headersAfterValidation = IHttpHeaders.fromString(
             storedEntryAfterValidation.responseHeaders)
         assertEquals("image/png", headersAfterValidation["content-type"])
         assertEquals(resourceBytes.size.toString(), headersAfterValidation["content-length"])
@@ -430,7 +430,7 @@ class UstadCacheInterceptorTest {
 
 
         val cacheResponse = ustadCache.retrieve(
-            requestBuilder(requestUrl) {
+            iRequestBuilder(requestUrl) {
                 header("accept-encoding", "gzip, br, deflate")
             }
         )

@@ -1,6 +1,6 @@
 package com.ustadmobile.libcache.cachecontrol
 
-import com.ustadmobile.libcache.headers.headersBuilder
+import com.ustadmobile.ihttp.headers.iHeadersBuilder
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -12,7 +12,7 @@ class ResponseCacheabilityCheckerImplTest {
         assertTrue(
             ResponseCacheabilityCheckerImpl().invoke(
                 200,
-                headersBuilder {  },
+                iHeadersBuilder {  },
             )
         )
     }
@@ -22,7 +22,7 @@ class ResponseCacheabilityCheckerImplTest {
         assertFalse(
             ResponseCacheabilityCheckerImpl().invoke(
                 206,
-                headersBuilder {  },
+                iHeadersBuilder {  },
             )
         )
     }
@@ -32,7 +32,7 @@ class ResponseCacheabilityCheckerImplTest {
         assertFalse(
             ResponseCacheabilityCheckerImpl().invoke(
                 200,
-                headersBuilder {
+                iHeadersBuilder {
                     header("cache-control", "no-store")
                 }
             )

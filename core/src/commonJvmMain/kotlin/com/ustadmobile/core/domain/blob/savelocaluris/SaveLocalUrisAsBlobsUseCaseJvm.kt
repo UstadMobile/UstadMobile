@@ -15,9 +15,9 @@ import com.ustadmobile.libcache.io.transferToAndGetSha256
 import kotlinx.io.files.Path
 import java.util.UUID
 import com.ustadmobile.core.util.ext.encodeBase64
+import com.ustadmobile.ihttp.headers.iHeadersBuilder
 import com.ustadmobile.lib.db.entities.TransferJobItem
-import com.ustadmobile.libcache.headers.headersBuilder
-import com.ustadmobile.libcache.request.requestBuilder
+import com.ustadmobile.ihttp.request.iRequestBuilder
 import com.ustadmobile.libcache.response.HttpPathResponse
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Dispatchers
@@ -85,7 +85,7 @@ class SaveLocalUrisAsBlobsUseCaseJvm(
                     UMURLEncoder.encodeUTF8(sha256Base64))
 
             val blobUrlStr = blobUrl.toString()
-            val blobRequest = requestBuilder(blobUrlStr) {  }
+            val blobRequest = iRequestBuilder(blobUrlStr) {  }
             val mimeType = saveItem.mimeType ?: uriHelper.getMimeType(blobDoorUri)
                 ?: "application/octet-stream"
 
@@ -98,7 +98,7 @@ class SaveLocalUrisAsBlobsUseCaseJvm(
                         fileSystem = fileSystem,
                         mimeType = mimeType,
                         request = blobRequest,
-                        extraHeaders = headersBuilder {
+                        extraHeaders = iHeadersBuilder {
                             header("cache-control", "immutable")
                             saveItem.extraHeaders.names().forEach { extraHeaderName ->
                                 saveItem.extraHeaders[extraHeaderName]?.also {

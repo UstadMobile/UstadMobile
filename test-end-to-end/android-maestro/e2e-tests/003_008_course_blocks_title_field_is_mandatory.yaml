@@ -32,12 +32,14 @@ env:
 - tapOn: "Module"
 - tapOn: "Title*"
 - inputText: " "
+- hideKeyboard
 - tapOn: "Done"
 #Assertion to make sure the page is not saved because title is blank
 - assertNotVisible:
     text: "Add block"
 - tapOn: "Title*"
 - inputText: "Module block title"
+- hideKeyboard
 - tapOn: "Description"
 - tapOn:
     id: "com.toughra.ustadmobile:id/editor"
@@ -53,12 +55,14 @@ env:
 - tapOn: "Text"
 - tapOn: "Title*"
 - inputText: " "
+- hideKeyboard
 - tapOn: "Done"
 #Assertion to make sure the page is not saved because title is blank
 - assertNotVisible:
     text: "Add block"
 - tapOn: "Title*"
 - inputText: "Text block title"
+- hideKeyboard
 - tapOn: "Description"
 - tapOn:
     id: "com.toughra.ustadmobile:id/editor"
@@ -97,6 +101,7 @@ env:
     id: "app_title"
     text: "Edit content block"
 - inputText: H5p Content
+- hideKeyboard
 - tapOn: "Description"
 - tapOn:
     id: "com.toughra.ustadmobile:id/editor"

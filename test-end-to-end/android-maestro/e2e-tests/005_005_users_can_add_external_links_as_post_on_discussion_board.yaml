@@ -1,0 +1,159 @@
+appId: com.toughra.ustadmobile
+env:
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/005_005_users_can_add_external_links_as_post_on_discussion_board"
+  TESTNAME:  "005_005_users_can_add_external_links_as_post_on_discussion_board"
+  EXTERNALURL: "${CONTROLSERVER}/"
+---
+# Admin login
+- clearState: com.toughra.ustadmobile
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+      TESTNAME: ${TESTNAME}
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+# add new course
+- runFlow:
+    file: "../common/add_course.yaml"
+    env:
+      TESTCOURSENAME: "Test Course Block"
+# add new teacher using flow - add_new_teacher_inside_course ---------
+- runFlow:
+    file: "../common/add_new_teacher_inside_course.yaml"
+    env:
+      TESTCOURSENAME: ${TESTCOURSENAME}
+      TEACHERFIRSTNAME: "Teacher"
+      TEACHERLASTNAME: "1"
+      USERNAME: "t1"
+      GENDER: "Female"
+      PASSWORD: "test"
+# add students to the course through bulk import using .csv file
+- runFlow:
+    file: "../common/student_bulk_upload_csv.yaml"
+    env:
+      TESTFILENAME: "Ustad_Students_List.csv"
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+# teacher add an discussion board block
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: "t1"
+      PASSWORD: "test"
+- tapOn: "Courses"
+- tapOn: "Test Course Block"
+# edit the course to add blocks
+- tapOn:
+    id: "floating_action_button"
+# add assignment block ------ 1
+- scrollUntilVisible:
+    element:
+      text: "Add block"
+    direction: DOWN
+- tapOn: "Add block"
+- runFlow:
+    when:
+      notVisible:
+        text: "Discussion board"
+    commands:
+      - swipe:
+          from:
+            text: "Drag handle"
+          direction: UP
+- tapOn: "Discussion board"
+- tapOn: "Title*"
+- inputText: "Discussion 1"
+- hideKeyboard
+- assertVisible:
+    id: "app_title"
+    text: "Add discussion"
+- tapOn: "Done"
+- tapOn: "Save"
+- scrollUntilVisible:
+    element:
+      text: "Discussion 1"
+    direction: DOWN
+- tapOn: "Discussion 1"
+- assertVisible:            #  +POST button
+    id: "floating_action_button"
+- back
+- tapOn:            #  Edit button
+    id: "floating_action_button"
+- scrollUntilVisible:
+    element:
+      text: "Discussion 1"
+    direction: DOWN
+- tapOn: "Discussion 1"
+- tapOn: "Description"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/editor"
+- inputText: "test block"
+- tapOn: "Done"
+- assertVisible:
+    id: "app_title"
+    text: "Edit discussion"
+- tapOn: "Done"
+- tapOn: "Save"
+- assertVisible:
+    id: "app_title"
+    text: "Test Course Block"
+- scrollUntilVisible:
+    element:
+      text: "Discussion 1"
+    direction: DOWN
+- tapOn: "Discussion 1"
+- tapOn:            #  +POST button
+    id: "floating_action_button"
+- tapOn: "Title*"
+- inputText: "Post 1"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/editor"
+- tapOn: "Link"
+- tapOn: "URL"
+- inputText: "${EXTERNALURL}"
+- hideKeyboard
+- tapOn: "Link text (optional)"
+- inputText: "External link"
+- hideKeyboard
+- tapOn: "OK"
+- tapOn: "Post"
+- assertVisible:
+    id: "app_title"
+    text: "Post 1"
+- assertVisible:
+    text: "External link"
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: "s1"
+      PASSWORD: "tests1"
+- tapOn: "Courses"
+- tapOn: "Test Course Block"
+- scrollUntilVisible:
+    element:
+      text: "Discussion 1"
+    direction: DOWN
+- tapOn: "Discussion 1"
+- assertVisible:
+    id: "app_title"
+    text: "Test Course Block"
+- assertVisible:
+    text: "Post 1"
+- tapOn: "Post 1"
+- tapOn: "External link"
+- runFlow:
+    file: "../common/chrome-first-run-check.yaml"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/verify_external_link"
+- extendedWaitUntil:
+    visible: "Start or restart server now"
+    timeout: 10000
+
+

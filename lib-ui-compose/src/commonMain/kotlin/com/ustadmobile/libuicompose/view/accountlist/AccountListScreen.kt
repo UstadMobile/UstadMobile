@@ -16,6 +16,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.outlined.Android
+import androidx.compose.material.icons.outlined.Link
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -29,16 +34,19 @@ import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
 import com.ustadmobile.libuicompose.components.UstadAddListItem
+import com.ustadmobile.libuicompose.components.UstadBottomSheetOption
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadPersonAvatar
 import kotlinx.coroutines.Dispatchers
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountListScreen(
     viewModel: AccountListViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState(
-        AccountListUiState(), Dispatchers.Main.immediate)
+        AccountListUiState(), Dispatchers.Main.immediate
+    )
 
     AccountListScreen(
         uiState = uiState,
@@ -48,7 +56,29 @@ fun AccountListScreen(
         onLogoutClick = viewModel::onClickLogout,
         onMyProfileClick = viewModel::onClickProfile,
         onClickOpenLicenses = viewModel::onClickOpenLicenses,
+        onClickAppShare = viewModel::onToggleShareAppOptions
     )
+
+    if (uiState.shareAppBottomSheetVisible) {
+        ModalBottomSheet(onDismissRequest = { viewModel.onToggleShareAppOptions() }) {
+            UstadBottomSheetOption(modifier = Modifier.clickable {
+                viewModel.onClickAppShare(false)
+                viewModel.onToggleShareAppOptions()
+            },
+                headlineContent = { Text(stringResource(MR.strings.send_apk_file)) },
+                leadingContent = { Icon(Icons.Outlined.Android, contentDescription = null) })
+
+            UstadBottomSheetOption(modifier = Modifier.clickable {
+                viewModel.onClickAppShare(true)
+                viewModel.onToggleShareAppOptions()
+            },
+                headlineContent = { Text(stringResource(MR.strings.send_app_link)) },
+                leadingContent = {
+                    Icon(Icons.Outlined.Link, contentDescription = null)
+                }
+            )
+        }
+    }
 }
 
 @Composable
@@ -59,16 +89,15 @@ fun AccountListScreen(
     onClickOpenLicenses: () -> Unit = {},
     onAddItem: () -> Unit = {},
     onMyProfileClick: () -> Unit = {},
-    onLogoutClick: () -> Unit = {}
-){
+    onLogoutClick: () -> Unit = {},
+    onClickAppShare: () -> Unit = {}
+) {
     val uriHandler = LocalUriHandler.current
 
     UstadLazyColumn(
-        modifier = Modifier
-            .fillMaxWidth()
-    ){
-
-        if(uiState.headerAccount != null) {
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        if (uiState.headerAccount != null) {
             item(key = "header_account") {
                 AccountListItem(
                     account = uiState.headerAccount
@@ -76,11 +105,10 @@ fun AccountListScreen(
             }
 
             item(key = "header_buttons") {
-                Row (
-                    modifier = Modifier
-                        .padding(start = 72.dp, bottom = 16.dp)
-                ){
-                    if(uiState.myProfileButtonVisible) {
+                Row(
+                    modifier = Modifier.padding(start = 72.dp, bottom = 16.dp)
+                ) {
+                    if (uiState.myProfileButtonVisible) {
                         OutlinedButton(
                             onClick = onMyProfileClick,
                         ) {
@@ -89,14 +117,11 @@ fun AccountListScreen(
                     }
 
                     OutlinedButton(
-                        modifier = Modifier
-                            .padding(start = 10.dp)
-                            .testTag("logout_button"),
+                        modifier = Modifier.padding(start = 10.dp).testTag("logout_button"),
                         onClick = onLogoutClick,
                     ) {
                         Text(stringResource(MR.strings.logout))
                     }
-
                 }
             }
 
@@ -138,24 +163,36 @@ fun AccountListScreen(
             )
         }
 
+        if (uiState.shareAppOptionVisible) {
+            item(key = "share_app") {
+                ListItem(
+                    modifier = Modifier.clickable { onClickAppShare() },
+                    leadingContent = {
+                        Icon(Icons.Default.Share, contentDescription = null)
+                    },
+                    headlineContent = { Text(stringResource(MR.strings.share_app)) },
+                )
+            }
+        }
+
         item(key = "bottom_divider") {
             Divider(thickness = 1.dp)
         }
 
         item(key = "about") {
             ListItem(
-                modifier = if(uiState.showPoweredBy) {
+                modifier = if (uiState.showPoweredBy) {
                     Modifier.clickable {
                         uriHandler.openUri("https://www.ustadmobile.com/")
                     }
-                }else {
+                } else {
                     Modifier
                 },
                 headlineContent = { Text(stringResource(MR.strings.version)) },
                 supportingContent = {
-                    val versionStr = if(uiState.showPoweredBy) {
+                    val versionStr = if (uiState.showPoweredBy) {
                         "${uiState.version} ${stringResource(MR.strings.powered_by)}"
-                    }else {
+                    } else {
                         uiState.version
                     }
 
@@ -174,7 +211,6 @@ fun AccountListScreen(
                 },
             )
         }
-
     }
 }
 
@@ -183,14 +219,14 @@ fun AccountListItem(
     account: UserSessionWithPersonAndEndpoint?,
     trailing: @Composable (() -> Unit)? = null,
     onClickAccount: ((UserSessionWithPersonAndEndpoint?) -> Unit)? = null
-){
+) {
     ListItem(
-        modifier = if(onClickAccount != null) {
+        modifier = if (onClickAccount != null) {
             Modifier.clickable {
                 onClickAccount(account)
             }
-        }else {
-              Modifier
+        } else {
+            Modifier
         },
         leadingContent = {
             UstadPersonAvatar(
@@ -209,27 +245,25 @@ fun AccountListItem(
                 Icon(
                     imageVector = Icons.Default.Person,
                     contentDescription = null,
-                    Modifier.size(16.dp)
+                    modifier = Modifier.size(16.dp)
                 )
                 Text(
                     text = account?.person?.username ?: "",
                     maxLines = 1,
-                    modifier = Modifier
-                        .padding(start = 8.dp, end = 8.dp)
+                    modifier = Modifier.padding(start = 8.dp, end = 8.dp)
                 )
                 Icon(
                     imageVector = Icons.Default.Link,
                     contentDescription = null,
-                    Modifier.size(16.dp)
+                    modifier = Modifier.size(16.dp)
                 )
                 Text(
                     text = account?.endpoint?.url ?: "",
                     maxLines = 1,
-                    modifier = Modifier
-                        .padding(start = 8.dp)
+                    modifier = Modifier.padding(start = 8.dp)
                 )
             }
         },
-        trailingContent = trailing
+        trailingContent = trailing,
     )
 }

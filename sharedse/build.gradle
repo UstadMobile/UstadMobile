@@ -96,7 +96,6 @@ kotlin {
                 implementation libs.ktor.client.json
                 implementation libs.ktor.io
                 implementation libs.ktor.client.content.negotiation
-                implementation libs.ktor.serialization.gson
                 implementation libs.napier
                 implementation libs.kodein.di
                 implementation libs.atomicfu
@@ -114,12 +113,9 @@ kotlin {
                 implementation libs.nanohttpd.nanolets
                 implementation libs.okhttp
                 implementation libs.kxml2
-                implementation libs.gson
                 implementation libs.kotlinx.serialization
                 implementation libs.nv.i18n
                 implementation libs.ktor.client.okhttp
-                implementation libs.ktor.client.cio
-                implementation libs.ktor.serialization.gson
                 implementation libs.ktor.io.jvm
                 implementation libs.kodein.di
                 implementation libs.xmlpullparsekmp
@@ -142,24 +138,14 @@ kotlin {
                 implementation libs.androidx.lifecycle.livedata.ktx
                 implementation libs.androidx.work.runtime
                 implementation libs.kodein.di.framework.android.x
-
-
                 implementation libs.androidx.room.runtime
-
                 implementation libs.android.material
-
                 implementation libs.ktor.client.okhttp
-                implementation libs.ktor.client.cio
-                implementation libs.ktor.serialization.gson
-
                 implementation libs.nanohttpd
                 implementation libs.nanohttpd.nanolets
 
-
-
                 //Begin SharedSE Android and JVM dependencies
                 implementation libs.okhttp
-                implementation libs.gson
                 //end SharedSE Android and JVM dependencies
             }
         }
@@ -173,14 +159,12 @@ kotlin {
                 implementation libs.kotlin.stdlib.jdk8
                 implementation libs.coroutines
                 implementation libs.ktor.client.okhttp
-                implementation libs.ktor.serialization.gson
 
 
                 //Begin Android and JVM dependencies
                 implementation libs.nanohttpd
                 implementation libs.nanohttpd.nanolets
                 implementation libs.okhttp
-                implementation libs.gson
                 //end Android and JVM dependencies
             }
         }

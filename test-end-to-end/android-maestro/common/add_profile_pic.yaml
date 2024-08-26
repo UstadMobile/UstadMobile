@@ -18,14 +18,6 @@ appId: com.toughra.ustadmobile
 # push the test file to the downloads
 - evalScript: ${http.get(CONTROLSERVER + "pushcontent?test-file-name=" + TESTFILENAME +"&device=" + TESTSERIAL)}
 
-# push the test file to the Pictures folder using URL encoding for dest parameter
-- evalScript: ${http.get(CONTROLSERVER + "pushcontent?test-file-name=" + TESTFILENAME + "&device=" + TESTSERIAL + "&dest=%2Fstorage%2Femulated%2F0%2FPictures&scanMedia=true")}
-
-# ensure the app has storage permissions
-- evalScript: adb shell pm grant com.toughra.ustadmobile android.permission.READ_EXTERNAL_STORAGE
-- evalScript: adb shell pm grant com.toughra.ustadmobile android.permission.WRITE_EXTERNAL_STORAGE
-
-
 # get started
 - launchApp
 - tapOn: "GET STARTED"
@@ -39,19 +31,13 @@ appId: com.toughra.ustadmobile
 - tapOn:
     id: "floating_action_button"
 - tapOn: "Add"
-- tapOn: "Select new photo from gallery"
+- tapOn: "Select picture from files"
 - runFlow:
     when:
       visible: "Show roots"
     file: select_picture_from_files.yaml
     env:
       TESTFILENAME: ${TESTFILENAME}
-- runFlow:
-     when:
-       visible: Photos
-     commands:
-       - tapOn:
-           id: "com.google.android.providers.media.module:id/icon_thumbnail"
 - scrollUntilVisible:
     element:
       text: "Gender*"

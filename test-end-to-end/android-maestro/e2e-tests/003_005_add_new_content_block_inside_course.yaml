@@ -62,9 +62,13 @@ env:
       TESTSERIAL: ${TESTSERIAL}
 - scrollUntilVisible:
     element:
-      text:  "True/False Question"
+      text:  "The Adopting of Rosa Marie / (A Sequel to Dandelion Cottage)"
     direction: DOWN
 - assertVisible:
     text:  "True/False Question"
+- scrollUntilVisible:
+    element:
+      text:  "The Adopting of Rosa Marie / (A Sequel to Dandelion Cottage)"
+    direction: DOWN
 - assertVisible:
     text: "The Adopting of Rosa Marie / (A Sequel to Dandelion Cottage)"

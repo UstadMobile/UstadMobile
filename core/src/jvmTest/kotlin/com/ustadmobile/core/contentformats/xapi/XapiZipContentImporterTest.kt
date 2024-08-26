@@ -29,7 +29,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryImportJob
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
-import com.ustadmobile.libcache.request.requestBuilder
+import com.ustadmobile.ihttp.request.iRequestBuilder
 import com.ustadmobile.libcache.response.bodyAsString
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.files.Path
@@ -236,7 +236,7 @@ class XapiZipContentImporterTest :AbstractMainDispatcherTest() {
 
         val json : Json = di.direct.instance()
         val manifestResponse = ustadCache.retrieve(
-            requestBuilder("$expectedUrlPrefix${ContentConstants.MANIFEST_NAME}")
+            iRequestBuilder("$expectedUrlPrefix${ContentConstants.MANIFEST_NAME}")
         )
         val manifest = json.decodeFromString(
             ContentManifest.serializer(), manifestResponse!!.bodyAsString()!!

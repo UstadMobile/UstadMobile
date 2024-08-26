@@ -1,0 +1,146 @@
+appId: com.toughra.ustadmobile
+env:
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/004_007_user_enter_assignment_page_before_graceperiod_but_submission_after_grace_Period"
+  TESTNAME:  "004_007_user_enter_assignment_page_before_graceperiod_but_submission_after_grace_Period"
+---
+# Admin login
+- clearState: com.toughra.ustadmobile
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+      TESTNAME: ${TESTNAME}
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+# add new course
+- runFlow:
+    file: "../common/add_course.yaml"
+    env:
+      TESTCOURSENAME: "Test Course Block"
+# add new teacher using flow - add_new_teacher_inside_course ---------
+- runFlow:
+    file: "../common/add_new_teacher_inside_course.yaml"
+    env:
+      TESTCOURSENAME: ${TESTCOURSENAME}
+      TEACHERFIRSTNAME: "Teacher"
+      TEACHERLASTNAME: "1"
+      USERNAME: "t1"
+      GENDER: "Female"
+      PASSWORD: "test"
+# add students to the course through bulk import using .csv file
+- runFlow:
+    file: "../common/student_bulk_upload_csv.yaml"
+    env:
+      TESTFILENAME: "Ustad_Students_List.csv"
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+# teacher add an assignment block
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: "t1"
+      PASSWORD: "test"
+- tapOn: "Courses"
+- tapOn: "Test Course Block"
+# edit the course to add blocks
+- tapOn:
+    id: "floating_action_button"
+# add assignment block ------ 1
+- scrollUntilVisible:
+    element:
+      text: "Add block"
+    direction: DOWN
+- tapOn: "Add block"
+- runFlow:
+    when:
+      notVisible:
+        text: "Assignment"
+    commands:
+      - swipe:
+         from:
+           text: "Drag handle"
+         direction: UP
+- tapOn: "Assignment"
+- tapOn: "Title*"
+- inputText: "Assignment 1"
+- hideKeyboard
+- tapOn: "Description"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/editor"
+- inputText: "test block"
+- tapOn: "Done"
+- scrollUntilVisible:
+    element:
+      text: "Deadline"
+    direction: DOWN
+- tapOn: "Deadline"
+- runScript:
+    file: "../common/setDate.js"
+- inputText: ${output.yesterdayDate}
+- tapOn: "hh:mm"
+- runScript:
+    file: "../common/setDate.js"
+- inputText: ${output.currentTime}
+- hideKeyboard
+- tapOn: "End of grace period"
+- runScript:
+    file: "../common/setDate.js"
+- inputText: ${output.currentDate}
+- tapOn: "hh:mm"
+- runScript:
+    file: "../common/setDate.js"
+- inputText: ${output.testTime}
+- hideKeyboard
+- tapOn: "Late submission penalty"
+- inputText: "10"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      text: "Submission policy"
+    direction: DOWN
+- assertVisible: "Must submit all at once"
+- assertVisible: "Done"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/added_assignment"
+- tapOn:
+    text: "Done"
+- assertNotVisible: "Done"
+- tapOn: "Save"
+# student open the assignment submission page before the deadline
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: "s1"
+      PASSWORD: "tests1"
+- tapOn: "Courses"
+- tapOn: "Test Course Block"
+- scrollUntilVisible:
+    element:
+      text: "Assignment 1"
+    direction: DOWN
+- tapOn: "Assignment 1"
+- tapOn: "Text"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/editor"
+- inputText: "Assignment done by student 1"
+- tapOn: "Done"
+# #928
+- extendedWaitUntil:
+    visible:
+      text: "Submit"
+    timeout: 120000
+# attempt to submit after deadline has passed
+- scrollUntilVisible:
+    element:
+      text: "Submit"
+    direction: DOWN
+- tapOn: "Submit"
+- assertNotVisible: "Submitted"
+- assertVisible: "Deadline has passed"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/submission_after_deadline"

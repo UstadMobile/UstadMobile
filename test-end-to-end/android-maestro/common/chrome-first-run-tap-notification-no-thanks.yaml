@@ -1,0 +1,8 @@
+appId: com.toughra.ustadmobile
+---
+
+# This flow will check if Chrome is showing its chrome notification permission screen.
+# If the "Chrome notifications make things easier" screen is showing,
+# then click on "No Thanks" button to proceed to next page
+
+- tapOn: "No thanks"

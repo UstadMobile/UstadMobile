@@ -7,12 +7,18 @@ but that has not been thoroughly tested.
 ### Prerequisites:
 
 * Install Maestro as per the [official instructions](https://maestro.mobile.dev/getting-started/installing-maestro).
-* Build the android release apk from the [app-android](../app-android/) module and the
-  HTTP server from the [app-ktor-server](../app-ktor-server/) module. This would be done by the normal
+* Build the android release apk from the [app-android](../../app-android/) module and the
+  HTTP server from the [app-ktor-server](../../app-ktor-server/) module. This would be done by the normal
   **gradlew build** command.
-* Start an Android emulator or connect a physical device and get the serial of the device (e.g. using the **adb devices** command)
+* Start an Android emulator or connect a physical device and get the serial of the device 
+  (e.g. using the **adb devices** command). It is highly recommended to use a device created by the
+  [Meastro start-device command](https://maestro.mobile.dev/cli/start-device). 
 * MacOS only: install the realpath command.
-
+* Chrome browser **must** be updated otherwise H5P tests will fail. The version of Chrome that is
+  included with SDK33 will work. To test on devices running earlier versions of Android:
+    * Update Google Play Services (e.g. from [APKMirror](https://www.apkmirror.com/apk/google-inc/google-play-services/google-play-services-24-31-33-release/))
+    * Update Chrome (e.g. from [APKMirror](https://www.apkmirror.com/apk/google-inc/chrome/chrome-127-0-6533-103-release/))
+ 
 ### Run all tests:
 
 ```
@@ -94,6 +100,3 @@ Message list (chat) screen (no label): textfield: message_text
 
 PersonEdit: phone number is split into country code dropdown ( tag: country_code ) and the in country
 number ( tag: phone_number_text )
-
-
-
