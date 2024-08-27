@@ -18,6 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -140,13 +141,15 @@ fun UstadScreenTabs(
                 ScrollableTabRow(
                     selectedTabIndex = pagerState.currentPage,
                     edgePadding = 0.dp,
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth()
+                        .testTag("ustad_screen_tabs"),
                 ){
                     tabContent()
                 }
             }else if(!tabsHidden) {
                 TabRow(
-                    selectedTabIndex = pagerState.currentPage
+                    selectedTabIndex = pagerState.currentPage,
+                    modifier = Modifier.testTag("ustad_screen_tabs"),
                 ) {
                     tabContent()
                 }
