@@ -58,7 +58,7 @@ trickle -s -d 128 -u 128 bash
 
 2.6 Teacher/admin can remove people from a course (e.g. delete their enrolment). This removes any permissions that were associated with their enrolment.    
 
-2.7 Teacher and admin user can grant permission for the course to other users. Permissions that can be granted include view attendance, edit attendance, view learning records, edit learning records, view details (name, date of birth, phone number etc) of members, edit details of members, view course, edit course.
+2.7 [Teacher and admin user can grant permission for the course to other users](test-descriptions/002_007_admin_grant_permissions_test_description.md)
 
 2.8 Teacher/admin can add banner photo to the course that is displayed in the course list screen and course detail screen.
 

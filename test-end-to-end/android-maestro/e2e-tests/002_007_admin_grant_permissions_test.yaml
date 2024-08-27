@@ -37,15 +37,21 @@ env:
       TESTFILENAME: "Ustad_Students_List.csv"
       CONTROLSERVER: ${CONTROLSERVER}
       TESTSERIAL: ${TESTSERIAL}
-# admin and another course with another teacher and students
+
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
 - runFlow:
-    file: "../common/create_course_with_1teacher_2students.yaml"
+    file: "../common/user_login.yaml"
     env:
-      TESTCOURSENAME: "Attendance Test"
-- runFlow:
-    file: "../common/record_attendance.yaml"
-    env:
-      TESTCOURSENAME: "Attendance Test"
+      USERNAME: "s1"
+      PASSWORD: "tests1"
+- tapOn: "Courses"
+- tapOn: "Test Course Block"
+- assertVisible:
+    containsDescendants:
+      - text: "Members"
+- tapOn: "Members"
+- assertVisible: "Student 2"
 
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
@@ -55,9 +61,23 @@ env:
       USERNAME: "t1"
       PASSWORD: "testt1"
 - tapOn: "Courses"
-- assertNotVisible: "Attendance Test"
+- tapOn: "Test Course Block"
+- tapOn: "Permissions"
+- tapOn: "Students"
+- tapOn:
+    id: "floating_action_button"
+- tapOn: "View members"
+- tapOn: "Save"
+
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
     file: "../common/user_login.yaml"
-# admin give permission to T1 , can view attendance for all courses
+    env:
+      USERNAME: "s1"
+      PASSWORD: "tests1"
+- tapOn: "Courses"
+- tapOn: "Test Course Block"
+- assertNotVisible:
+    containsDescendants:
+       - text: "Members"
