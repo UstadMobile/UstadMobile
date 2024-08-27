@@ -42,7 +42,8 @@ env:
 - tapOn: "Message"
 - inputText: "Hi , I am admin, Please add your profile pic"
 - tapOn: "Send"
-- back
+- tapOn:
+    id: "back_button"
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
