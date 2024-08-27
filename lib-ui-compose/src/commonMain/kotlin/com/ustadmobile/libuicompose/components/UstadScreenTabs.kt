@@ -117,9 +117,7 @@ fun UstadScreenTabs(
 
     val tabsHidden = appBarHidden || (autoHideIfOneTab && tabs.size <= 1)
 
-    Column(
-        modifier = Modifier.testTag("ustad_screen_tabs")
-    ) {
+    Column {
         if (tabs.isNotEmpty()) {
             val tabContent : @Composable () -> Unit = {
                 tabs.forEachIndexed { index, tabItem ->
@@ -143,13 +141,15 @@ fun UstadScreenTabs(
                 ScrollableTabRow(
                     selectedTabIndex = pagerState.currentPage,
                     edgePadding = 0.dp,
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth()
+                        .testTag("ustad_screen_tabs"),
                 ){
                     tabContent()
                 }
             }else if(!tabsHidden) {
                 TabRow(
-                    selectedTabIndex = pagerState.currentPage
+                    selectedTabIndex = pagerState.currentPage,
+                    modifier = Modifier.testTag("ustad_screen_tabs"),
                 ) {
                     tabContent()
                 }
