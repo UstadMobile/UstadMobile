@@ -57,7 +57,9 @@ env:
 - tapOn: "Student 1"
 - tapOn: "Message"
 - inputText: "Hi , I am teacher, Please add your profile pic"
-- back
+- tapOn: "Send"
+- tapOn:
+    id: "back_button"
 # test teacher can't send messages to student not enrolled in same course
 - tapOn:
     id: "floating_action_button"
