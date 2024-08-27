@@ -18,6 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -116,7 +117,9 @@ fun UstadScreenTabs(
 
     val tabsHidden = appBarHidden || (autoHideIfOneTab && tabs.size <= 1)
 
-    Column {
+    Column(
+        modifier = Modifier.testTag("ustad_screen_tabs")
+    ) {
         if (tabs.isNotEmpty()) {
             val tabContent : @Composable () -> Unit = {
                 tabs.forEachIndexed { index, tabItem ->
