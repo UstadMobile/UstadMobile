@@ -19,6 +19,15 @@ The app follows an MVVM pattern as follows:
 All Kotlin code should follow [Kotlin coding conventions](https://kotlinlang.org/docs/coding-conventions.html). SQL queries should follow
 [SQLStyle.guide](https://www.sqlstyle.guide/).
 
+## Use of AI tools
+
+AI generated code is prone to errors, and the code generated often looks like it _should_ be right, but
+isn't. AI tools should be used _only when the author is confident that they can inspect the generated
+code and spot such mistakes/errors_. All code must still adhere to this coding style and meet the
+requirements in [PULLREQUEST-CHECKLIST.md]. Sometimes it will be quicker to spend one hour writing
+something manually, rather than spending many more hours trying to debug the code the AI wrote in 
+30 seconds.
+
 ## View layer
 
 ### UiState classes
