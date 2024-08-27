@@ -26,6 +26,7 @@ import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.libuicompose.components.UstadImageSelectButton
 import com.ustadmobile.libuicompose.components.UstadMessageIdOptionExposedDropDownMenuField
+import com.ustadmobile.libuicompose.components.UstadPasswordField
 import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.util.passkey.CreatePasskeyPrompt
@@ -46,10 +47,11 @@ fun SignUpScreen(viewModel: SignUpViewModel) {
         onTeacherCheckChanged = viewModel::onTeacherCheckChanged,
         onParentCheckChanged = viewModel::onParentCheckChanged,
         onclickSignUpWithPasskey = viewModel::onSignUpWithPasskey,
-        onPassKeyDataReceived = viewModel::onPassKeyDataReceived,
-        onPassKeyError = viewModel::onPassKeyError,
-        onclickOtherOptions=viewModel::onClickOtherOption
-    )
+        onclickOtherOptions = viewModel::onClickOtherOption,
+        onPasswordChanged = viewModel::onPasswordChanged,
+        onFullNameValueChange = viewModel::onFullNameValueChange,
+
+        )
 
 }
 
@@ -62,9 +64,10 @@ fun SignUpScreen(
     onPersonPictureUriChanged: (String?) -> Unit = { },
     onTeacherCheckChanged: (Boolean) -> Unit = { },
     onParentCheckChanged: (Boolean) -> Unit = { },
-    onPassKeyDataReceived: (PasskeyResult) -> Unit = { },
-    onPassKeyError: (String) -> Unit = { },
-) {
+    onPasswordChanged: (String) -> Unit = { },
+    onFullNameValueChange: (String) -> Unit = { },
+
+    ) {
     UstadVerticalScrollColumn(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -76,37 +79,21 @@ fun SignUpScreen(
             modifier = Modifier.size(60.dp),
         )
 
+
         OutlinedTextField(
-            modifier = Modifier.testTag("first_names").fillMaxWidth()
+            modifier = Modifier
+                .testTag("full_name")
+                .fillMaxWidth()
                 .defaultItemPadding(),
-            value = uiState.person?.firstNames ?: "",
-            label = { Text(stringResource(MR.strings.first_names) + "*") },
+            value =uiState.fullName?:"",
+            label = { Text(stringResource(MR.strings.full_name) + "*") },
             isError = uiState.firstNameError != null,
             singleLine = true,
-            onValueChange = {
-                onPersonChanged(uiState.person?.shallowCopy {
-                    firstNames = it
-                })
+            onValueChange = { fullName ->
+                onFullNameValueChange(fullName)
             },
             supportingText = {
                 Text(uiState.firstNameError ?: stringResource(MR.strings.required))
-            }
-        )
-
-        OutlinedTextField(
-            modifier = Modifier.testTag("last_name").fillMaxWidth()
-                .defaultItemPadding(),
-            value = uiState.person?.lastName ?: "",
-            label = { Text(stringResource(MR.strings.last_name) + "*") },
-            isError = uiState.lastNameError != null,
-            singleLine = true,
-            onValueChange = {
-                onPersonChanged(uiState.person?.shallowCopy {
-                    lastName = it
-                })
-            },
-            supportingText = {
-                Text(uiState.lastNameError ?: stringResource(MR.strings.required))
             }
         )
 
@@ -128,13 +115,48 @@ fun SignUpScreen(
                 Text(uiState.genderError ?: stringResource(MR.strings.required))
             }
         )
+
+        if (!uiState.signupWithPasskey) {
+            OutlinedTextField(
+                modifier = Modifier.testTag("username").fillMaxWidth().defaultItemPadding(),
+                value = uiState.person?.username ?: "",
+                label = { Text(stringResource(MR.strings.username)) },
+                isError = uiState.usernameError != null,
+                singleLine = true,
+                onValueChange = {
+                    onPersonChanged(uiState.person?.shallowCopy {
+                        username = it
+                    })
+                },
+                supportingText = {
+                    Text(uiState.usernameError ?: stringResource(MR.strings.required))
+                }
+            )
+        }
+
+        if (!uiState.signupWithPasskey) {
+            UstadPasswordField(
+                modifier = Modifier.testTag("password").fillMaxWidth().defaultItemPadding(),
+                value = uiState.password ?: "",
+                label = { Text(stringResource(MR.strings.password)) },
+                onValueChange = {
+                    onPasswordChanged(it)
+                },
+                supportingText = {
+                    Text(stringResource(MR.strings.required))
+                }
+            )
+        }
         Row(
             modifier = Modifier.padding(vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Checkbox(
-                checked = uiState.isTeacher ?: false,
-                onCheckedChange = { onTeacherCheckChanged(it) }
+                checked = uiState.isTeacher,
+                onCheckedChange = {
+                    onTeacherCheckChanged(it)
+                    onParentCheckChanged(!it)
+                }
             )
             Text(
                 text = stringResource(MR.strings.i_am_teacher),
@@ -142,8 +164,11 @@ fun SignUpScreen(
             )
 
             Checkbox(
-                checked = uiState.isParent ?: false,
-                onCheckedChange = { onParentCheckChanged(it) }
+                checked = uiState.isParent,
+                onCheckedChange = {
+                    onParentCheckChanged(it)
+                    onTeacherCheckChanged(!it)
+                }
             )
             Text(
                 text = stringResource(MR.strings.i_am_parent),
@@ -152,10 +177,18 @@ fun SignUpScreen(
         }
         Button(
             onClick = onclickSignUpWithPasskey,
-            modifier = Modifier.fillMaxWidth().defaultItemPadding()
+            modifier = Modifier
+                .fillMaxWidth()
+                .defaultItemPadding()
                 .testTag("signup_passkey_button"),
         ) {
-            Text(stringResource(MR.strings.signup_with_passkey))
+            Text(
+                text = if (uiState.signupWithPasskey) {
+                    stringResource(MR.strings.signup_with_passkey)
+                } else {
+                    stringResource(MR.strings.signup)
+                }
+            )
         }
         OutlinedButton(
             onClick = onclickOtherOptions,
@@ -163,7 +196,6 @@ fun SignUpScreen(
         ) {
             Text(stringResource(MR.strings.other_options))
         }
-
 
 
     }

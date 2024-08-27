@@ -61,12 +61,7 @@ class RedirectViewModel(
             println(db)
         }
 
-        if(settings.getStringOrNull(AddAccountSelectNewOrExistingViewModel.PREF_TAG) != true.toString()) {
-            navController.navigate(AddAccountSelectNewOrExistingViewModel.DEST_NAME, buildMap {
-                putFromSavedStateIfPresent(ARG_NEXT)
-                putFromSavedStateIfPresent(ARG_OPEN_LINK)
-            })
-        }else {
+
             val destination = destinationArg ?: ClazzListViewModel.DEST_NAME_HOME
 
             viewModelScope.launch {
@@ -81,7 +76,7 @@ class RedirectViewModel(
                     forceAccountSelection = destinationArg != null,
                 )
             }
-        }
+
     }
 
     companion object {

@@ -12,7 +12,7 @@ import kotlinx.serialization.Serializable
 data class UserSessionWithPersonAndLearningSpace (
     val userSession: UserSession,
     val person: Person,
-    val learningSpace: LearningSpace,
+    val learningSpace: LearningSpace=LearningSpace("http://192.168.1.52:8087/"),
     val personPicture: PersonPicture? = null,
 ) {
 

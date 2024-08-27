@@ -23,14 +23,18 @@ import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.viewmodel.person.child.AddChildProfileUiState
 import com.ustadmobile.core.viewmodel.person.child.AddChildProfileViewModel
+import com.ustadmobile.lib.db.composites.CourseBlockAndEditEntities
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.libuicompose.components.UstadAddListItem
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadPersonAvatar
 import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
+import com.ustadmobile.libuicompose.view.person.addaccount.ParentAndChildrenProfileSelectionDialog
+import com.ustadmobile.libuicompose.view.settings.SettingsDialog
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.Dispatchers
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
+import moe.tlaster.precompose.viewmodel.viewModel
 import java.util.UUID
 
 @Composable
@@ -40,14 +44,33 @@ fun AddChildProfileScreen(viewModel: AddChildProfileViewModel) {
     )
     AddChildProfileScreen(
         uiState = uiState,
-        onClickAddChild = viewModel::onClickAddChileProfile
+        onClickAddChild = viewModel::onClickAddChileProfile,
+        onClickEditChild = viewModel::onClickEditChileProfile,
+        onClickDeleteChileProfile = viewModel::onClickDeleteChildProfile
     )
+
+    if (uiState.showProfileSelectionDialog) {
+        //As per https://developer.android.com/jetpack/compose/components/dialog
+        ParentAndChildrenProfileSelectionDialog(
+            onDismissRequest = viewModel::onDismissLangDialog,
+
+            ) {
+            Text(text = stringResource(MR.strings.which_profile_do_you_want_to_start), modifier = Modifier.padding(16.dp))
+            uiState.profileIncludingParentAndChildren.forEach { profile ->
+                ListItem(modifier = Modifier.clickable { viewModel.onProfileSelected(profile) },
+                    headlineContent = { Text(profile.fullName()) },)
+            }
+        }
+
+    }
 }
 
 @Composable
 fun AddChildProfileScreen(
     uiState: AddChildProfileUiState,
     onClickAddChild: () -> Unit = {},
+    onClickEditChild: (Person) -> Unit = {},
+    onClickDeleteChileProfile: (Person) -> Unit = {},
 ) {
     UstadLazyColumn(
         modifier = Modifier.fillMaxWidth()
@@ -55,7 +78,7 @@ fun AddChildProfileScreen(
         item(key = "add_account") {
             UstadAddListItem(
                 text = stringResource(MR.strings.child_profile),
-                icon =  Icons.Default.Add,
+                icon = Icons.Default.Add,
                 onClickAdd = { onClickAddChild() },
             )
         }
@@ -68,7 +91,12 @@ fun AddChildProfileScreen(
             }
         ) { childProfile ->
 
-            childProfileItem(childProfile = childProfile)
+            childProfileItem(
+                childProfile = childProfile,
+                onClickEditChild = onClickEditChild,
+                onClickDeleteChileProfile = onClickDeleteChileProfile
+            )
+
         }
     }
 
@@ -77,8 +105,11 @@ fun AddChildProfileScreen(
 
 @Composable
 fun childProfileItem(
-    childProfile: Person
-) {
+    childProfile: Person,
+    onClickEditChild: (Person) -> Unit = {},
+    onClickDeleteChileProfile: (Person) -> Unit = {},
+
+    ) {
     ListItem(
         leadingContent = {
             UstadPersonAvatar(
@@ -95,7 +126,11 @@ fun childProfileItem(
             Icon(
                 imageVector = Icons.Default.Delete,
                 contentDescription = null,
+                modifier = Modifier.clickable { onClickDeleteChileProfile(childProfile) }
             )
+        },
+        modifier = Modifier.clickable {
+            onClickEditChild(childProfile)
         }
     )
 

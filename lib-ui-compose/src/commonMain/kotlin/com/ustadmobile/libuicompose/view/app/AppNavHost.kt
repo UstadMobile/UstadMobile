@@ -138,6 +138,7 @@ import org.kodein.di.instance
 import kotlin.reflect.KClass
 import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel
 import com.ustadmobile.core.viewmodel.settings.DeveloperSettingsViewModel
+import com.ustadmobile.core.viewmodel.signup.OtherSignUpOptionSelectionViewModel
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel
 import com.ustadmobile.core.viewmodel.systempermission.detail.SystemPermissionDetailViewModel
 import com.ustadmobile.core.viewmodel.systempermission.edit.SystemPermissionEditViewModel
@@ -178,6 +179,7 @@ import com.ustadmobile.libuicompose.view.systempermission.detail.SystemPermissio
 import com.ustadmobile.libuicompose.view.systempermission.edit.SystemPermissionEditScreen
 import com.ustadmobile.libuicompose.view.videocontent.VideoContentScreen
 import com.ustadmobile.libuicompose.view.person.addaccount.AddAccountSelectNewOrExistingScreen
+import com.ustadmobile.libuicompose.view.signup.OtherSignUpOptionSelectionScreen
 import com.ustadmobile.libuicompose.view.xapicontent.XapiContentScreen
 import kotlinx.coroutines.flow.Flow
 
@@ -371,6 +373,17 @@ fun AppNavHost(
                         backStackEntry, SignUpViewModel::class,
                     ) { di, savedStateHandle ->
                         SignUpViewModel(di, savedStateHandle)
+                    }
+                )
+            }
+            contentScene(
+                route = "/${OtherSignUpOptionSelectionViewModel.DEST_NAME}"
+            ) { backStackEntry ->
+                OtherSignUpOptionSelectionScreen (
+                    viewModel = appViewModel(
+                        backStackEntry, OtherSignUpOptionSelectionViewModel::class,
+                    ) { di, savedStateHandle ->
+                        OtherSignUpOptionSelectionViewModel(di, savedStateHandle)
                     }
                 )
             }

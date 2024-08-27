@@ -356,18 +356,42 @@ class UstadAccountManager(
         personPicture: PersonPicture?,
     ) {
         val learningSpace = LearningSpace(learningSpaceUrl)
+        val dataLayer: UmAppDataLayer = di.direct.on(LearningSpace(learningSpaceUrl)).instance()
+
+        val nodeId = (dataLayer.repository as? DoorDatabaseRepository)?.config?.nodeId
+            ?: throw IllegalStateException("Could not open repo for endpoint $learningSpaceUrl")
 
         val savePassKeyUseCase: SavePersonPasskeyUseCase = di.on(learningSpace).direct.instance()
         savePassKeyUseCase.invoke(passkeyResult)
 
-        //Must ensure that the site object is loaded to get auth salt.
-        val repo: UmAppDatabase = di.on(learningSpace).direct.instance<UmAppDataLayer>()
-            .repositoryOrLocalDb
-        getSiteFromDbOrLoadFromHttp(repo)
-        if(repo.personDao().findByUidAsync(person.personUid) == null) {
-            repo.personDao().insertAsync(person)
-        }
+
+
+
+//        //Must ensure that the site object is loaded to get auth salt.
+//        val repo: UmAppDatabase = di.on(learningSpace).direct.instance<UmAppDataLayer>()
+//            .requireRepository()
+//        getSiteFromDbOrLoadFromHttp(repo)
+
         val session = addSession(person, learningSpaceUrl, null)
+
+        //If the person is not loaded into the database (probably not), then put in the db.
+        val db: UmAppDatabase = di.on(learningSpace).direct.instance(tag = DoorTag.TAG_DB)
+        db.withDoorTransactionAsync {
+            if(db.personDao().findByUidAsync(person.personUid) == null) {
+                db.personDao().insertAsync(person)
+            }
+        }
+
+
+
+//        //Must ensure that the site object is loaded to get auth salt.
+//        val repo: UmAppDatabase = di.on(learningSpace).direct.instance<UmAppDataLayer>()
+//            .repositoryOrLocalDb
+//        getSiteFromDbOrLoadFromHttp(repo)
+//        if(repo.personDao().findByUidAsync(person.personUid) == null) {
+//            repo.personDao().insertAsync(person)
+//        }
+     //   val session = addSession(person, learningSpaceUrl, null)
 
         currentUserSession = session
 
