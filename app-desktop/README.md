@@ -69,7 +69,7 @@ mode in the IDE. There are two ways to do this:
   ```gradlew app-desktop:run```. Hit enter to run the app. Then app-desktop will appear in the 
   configurations dropdown (next to run and debug) in the top right. It can then be run or debugged.
 * Configurations menu:  
-![runtime configurations screenshot](doc-img/ide-configurations.png)
+![runtime configurations screenshot](doc-img/ide-configurations.png)  
 Click the configurations dropdown as above, click Edit Configurations, then click add. Select Gradle
 from the list of task types. In the run field enter ```app-desktop:run```. You can now use this
 configuration to run or debug the desktop version.
