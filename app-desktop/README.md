@@ -59,8 +59,8 @@ Napier, so can be very useful for diagnosing any edge case or hard to reproduce 
 
 Running in IDE:
 
-Clicking on the run button that appears in the source code next to the main function  **WILL NOT WORK**
-- it will not find the resource bundles required (probably due to the joys of Modular Java).
+Clicking on the run button that appears in the source code next to the main function  **WILL NOT WORK**, 
+it will not find the resource bundles required (probably due to the joys of Modular Java).
 
 Use ./gradlew app-desktop:run to run it. To debug, run the Gradle app-desktop:run task in debug
 mode in the IDE. There are two ways to do this:
