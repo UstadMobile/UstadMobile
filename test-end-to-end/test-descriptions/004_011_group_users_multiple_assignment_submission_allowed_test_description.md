@@ -38,7 +38,7 @@ If assignment is set to allow multiple submissions, student can make another sub
 30. Click on "Import"
 31. Verify the import success message.
 32. Clear the app storage
-33. Login as a teacher.
+33. Login to the app using the teacher username and password.
 34. Click on "Courses" tab.
 35. Click on the course name.
 36. Click on "Edit" button.
@@ -58,7 +58,7 @@ If assignment is set to allow multiple submissions, student can make another sub
 50. Click on the "Done" button.
 51. Click on the "Save" button.
 52. Clear the app storage
-53. Login as a student from group 1.
+53. Login to the app using the student username and password in group 1.
 54. Click on "Courses" tab.
 55. Click on the course name.
 56. Click on the assignment added by teacher.
@@ -66,7 +66,7 @@ If assignment is set to allow multiple submissions, student can make another sub
 58. Click on the "Submit" button.
 59. Verify the submit status changed to "Submitted".
 60. Clear the app storage
-61. Login as another student from same group 1.
+61. Login to the app using the another student username and password in same group 1.
 62. Click on "Courses" tab.
 63. Click on the course name.
 64. Click on the assignment added by teacher. 

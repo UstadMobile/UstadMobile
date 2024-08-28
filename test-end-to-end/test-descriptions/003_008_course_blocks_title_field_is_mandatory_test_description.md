@@ -7,7 +7,7 @@ highlighted as required and it is not saved. The user can then add a title and s
 
 ## Step-by-Step Procedure:
 
-1. Log in as admin.
+1. Login as admin.
 2. Click on "Courses."
 3. Click on the "+ Course" button.
 4. Click on the "Add a new course" button.

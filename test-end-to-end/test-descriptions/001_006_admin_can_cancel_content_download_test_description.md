@@ -3,11 +3,11 @@
 ## Description:
 
 Content download can be canceled. After cancellation, the download stops and it can be
-downloaded again. (Android only).
+downloaded again. (Android and Desktop only).
 
 ## Step-by-Step Procedure:
 
-1. Log in as admin.
+1. Login as admin.
 2. Click on "Library."
 3. Click on the "+ Content" button.
 4. Click on the "From file" button.

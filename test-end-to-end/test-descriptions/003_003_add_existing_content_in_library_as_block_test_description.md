@@ -7,7 +7,7 @@ Admin or teacher can add a content block and link existing content. Block can be
 ## Step-by-Step Procedure:
 
 
-1. Log in as admin.
+1. Login as admin.
 2. Click on "Library."
 3. Click on the "+ Content" button.
 4. Click on the "From file" button.
@@ -51,7 +51,7 @@ Admin or teacher can add a content block and link existing content. Block can be
 42. Click on "Done" to save the module block.
 43. Click on "Save" to save the course.
 44. Clear app storage.
-45. Login as teacher.
+45. Login to the app using the teacher username and password.
 46. Click on "Courses"
 47. Click on Course name. 
 48. Click on the "Edit" button. 

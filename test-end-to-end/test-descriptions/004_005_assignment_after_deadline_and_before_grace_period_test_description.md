@@ -39,7 +39,7 @@ If assignment is submitted after the deadline but before the grace period, the s
 30. Click on "Import"
 31. Verify the import success message.
 32. Clear the app storage
-33. Login as a teacher.
+33. Login to the app using the teacher username and password.
 34. Click on "Courses" tab.
 35. Click on the course name.
 36. Click on "Edit" button.
@@ -54,7 +54,7 @@ If assignment is submitted after the deadline but before the grace period, the s
 45. Click on the "Done" button. 
 46. Click on the "Save" button. 
 47. Clear the app storage
-48. Login as a student. 
+48. Login to the app using the student username and password.
 49. Click on "Courses" tab. 
 50. Click on the course name. 
 51. Click on the assignment added by teacher. 
@@ -64,7 +64,7 @@ If assignment is submitted after the deadline but before the grace period, the s
 55. Click on the "Submit" button. 
 56. Verify the submit status changed to "Submitted". 
 57. Clear the app storage 
-58. Login as a teacher. 
+58. Login to the app using the teacher username and password.
 59. Click on "Courses" tab. 
 60. Click on the course name. 
 61. Click on the assignment. 
@@ -77,7 +77,7 @@ If assignment is submitted after the deadline but before the grace period, the s
 68. Click on the "Submit grade" button.
 69. Verify that the mark is reduced according to the late penalty percentage.
 70. Clear the app storage. 
-71. Login as a student. 
+71. Login to the app using the student username and password.
 72. Click on "Courses" tab. 
 73. Click on the course name. 
 74. Click on the assignment. 

@@ -6,7 +6,7 @@ All users on course should be able to open text blocks to see all text.
 
 ## Step-by-Step Procedure:
 
-1. Log in as admin.
+1. Login as admin.
 2. Click on "Courses."
 3. Click on the "+ Course" button.
 4. Click on the "Add a new course" button.
@@ -65,13 +65,13 @@ All users on course should be able to open text blocks to see all text.
 57. Click on the text block
 58. verify texts inside the test block is visible to admin user 
 59. Clear app storage 
-60. Login as student 
+60. Login to the app using the student username and password.
 61. Click on "Courses"
 62. Click on course name. 
 63. Click on the text block 
 64. verify texts inside the test block is visible to student user 
 65. Clear app storage 
-66. Login as teacher 
+66. Login to the app using the teacher username and password.
 67. Click on "Courses"
 68. Click on course name. 
 69. Click on the text block 

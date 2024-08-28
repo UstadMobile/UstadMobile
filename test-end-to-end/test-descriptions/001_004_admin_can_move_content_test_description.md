@@ -6,7 +6,7 @@ Admin can move content to another folder in the Library. After moving, the conte
 
 ## Step-by-Step Procedure:
 
-1. Log in as admin.
+1. Login as admin.
 2. Click on "Library."
 3. Click on the "+ Content" button.
 4. Click on the "From file" button.

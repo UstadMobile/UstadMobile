@@ -38,7 +38,7 @@ Teacher/admin (any user with permission to edit the course itself) can delete po
 30. Click on "Import"
 31. Verify the import success message.
 32. Clear the app storage.
-33. Login as teacher
+33. Login to the app using the teacher username and password.
 34. Click on "Courses"
 35. Click on Course name.
 36. Click on the "Edit" button.
@@ -59,7 +59,7 @@ Teacher/admin (any user with permission to edit the course itself) can delete po
 51. Click on the "Post" button.
 52. Verify the post is visible.
 53. Clear the app storage.
-54. login as a student.
+54. Login to the app using the student username and password.
 55. Click on "Courses".
 56. Click on course name.
 57. Click on the existing discussion board.
@@ -70,7 +70,7 @@ Teacher/admin (any user with permission to edit the course itself) can delete po
 62. Click "Back" icon.
 63. Verify the 2 posts are visible to the student.
 64. Clear the app storage.
-65. Login as teacher.
+65. Login to the app using the teacher username and password.
 66. Click on "Courses."
 67. Click on course name.
 68. Click on the discussion board.

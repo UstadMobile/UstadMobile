@@ -41,7 +41,7 @@ it is graded. Assignment can be edited or deleted from course.
 30. Click on "Import"
 31. Verify the import success message.
 32. Clear the app storage
-33. Login as a teacher.
+33. Login to the app using the teacher username and password.
 34. Click on "Courses" tab.
 35. Click on the course name.
 36. Click on "Edit" button.
@@ -53,7 +53,7 @@ it is graded. Assignment can be edited or deleted from course.
 42. Click on the "Done" button.
 43. Click on the "Save" button.
 44. Clear the app storage 
-45. Login as a student.
+45. Login to the app using the student username and password.
 46. Click on "Courses" tab. 
 47. Click on the course name.
 48. Click on the assignment added by teacher.
@@ -63,7 +63,7 @@ it is graded. Assignment can be edited or deleted from course.
 52. Click on the "Submit" button.
 53. Verify the submit status changed to "Submitted".
 54. Clear the app storage 
-55. Login as a teacher. 
+55. Login to the app using the teacher username and password.
 56. Click on "Courses" tab. 
 57. Click on the course name.
 58. Click on the assignment.
@@ -75,13 +75,13 @@ it is graded. Assignment can be edited or deleted from course.
 64. Enter the mark
 65. Click on the "Submit grade" button.
 66. Clear the app storage. 
-67. Login as a student. 
+67. Login to the app using the student username and password.
 68. Click on "Courses" tab. 
 69. Click on the course name. 
 70. Click on the assignment. 
 71. The student should see their graded assignment and the marks. 
 72. Clear the app storage.
-73. Login as a teacher.
+73. Login to the app using the teacher username and password.
 74. Click on "Courses" tab. 
 75. Click on the course name. 
 76. Click on the "More options" icon next to assignment name.

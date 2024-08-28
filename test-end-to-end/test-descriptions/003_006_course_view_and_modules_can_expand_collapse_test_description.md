@@ -6,7 +6,7 @@ All users on course should be able to view the course blocks as they were added.
 
 ## Step-by-Step Procedure:
 
-1. Log in as admin.
+1. Login as admin.
 2. Click on "Courses."
 3. Click on the "+ Course" button.
 4. Click on the "Add a new course" button.
@@ -50,7 +50,7 @@ All users on course should be able to view the course blocks as they were added.
 42. Click on "Indent" button. 
 43. Click on "Save" to save the course.
 44. Clear app storage
-45. Login as student
+45. Login to the app using the student username and password.
 46. Click on "Courses"
 47. Click on course name.
 48. Click on "Collapse" icon next to module block

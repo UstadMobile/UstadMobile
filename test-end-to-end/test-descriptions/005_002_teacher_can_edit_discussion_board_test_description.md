@@ -31,7 +31,7 @@ Teacher can edit discussion board
 23. Enter the password.
 24. Click on the "Save button"
 25. Clear the app storage. 
-26. Login as teacher 
+26. Login to the app using the teacher username and password.
 27. Click on "Courses"
 28. Click on Course name. 
 29. Click on the "Edit" button. 

@@ -38,7 +38,7 @@ Teacher can create assignment as per 4.1 by groups. When another group member lo
 30. Click on "Import"
 31. Verify the import success message.
 32. Clear the app storage
-33. Login as a teacher.
+33. Login to the app using the teacher username and password.
 34. Click on "Courses" tab.
 35. Click on the course name.
 36. Click on "Edit" button.
@@ -61,14 +61,14 @@ Teacher can create assignment as per 4.1 by groups. When another group member lo
 53. Enter a comment on "Add a class comment" field. 
 54. Click on "Send" icon. 
 55. Clear the app storage 
-56. Login as a student from group 1. 
+56. Login to the app using the student username and password in group 1.
 57. Click on "Courses" tab. 
 58. Click on the course name. 
 59. Click on the assignment added by teacher.
 60. Enter a comment on "Add a class comment" field. 
 61. Click on "Send" icon. 
 62. Verify that student's and teacher's class comment is visible for the student in group 1.
-63. Login as a student from group 2. 
+63. Login to the app using the student username and password in group 2.
 64. Click on "Courses" tab. 
 65. Click on the course name. 
 66. Click on the assignment added by teacher. 

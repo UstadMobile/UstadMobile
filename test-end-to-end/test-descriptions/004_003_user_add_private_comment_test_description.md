@@ -38,7 +38,7 @@ Teachers and students can submit and view private comments. Student can submit a
 30. Click on "Import"
 31. Verify the import success message.
 32. Clear the app storage
-33. Login as a teacher.
+33. Login to the app using the teacher username and password.
 34. Click on "Courses" tab.
 35. Click on the course name.
 36. Click on "Edit" button.
@@ -55,7 +55,7 @@ Teachers and students can submit and view private comments. Student can submit a
 47. Enter a comment on "Add a private comment" field.
 48. Click on "Send" icon. 
 49. Clear the app storage
-50. Login as a student. 
+50. Login to the app using the student username and password.
 51. Click on "Courses" tab. 
 52. Click on the course name. 
 53. Click on the assignment added by teacher. 

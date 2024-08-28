@@ -45,8 +45,8 @@ Students can join class using class code or link.
 37. Scroll down to view "Invite code".
 38. Click on "Invite code" button
 39. Invite code gets saved.
-40. Clear the app storage.
-41. Student user login to the app.
+40. Clear the app storage. 
+41. Login to the app using the student username and password.
 42. Click on "Courses".
 43. Click on "Join existing course".
 44. Click on "Invite code" field.
@@ -54,14 +54,13 @@ Students can join class using class code or link.
 46. Click on "Submit" button.
 47. Student sent invite to join the course.
 48. Clear the app storage.
-49. Login as teacher.
+49. Login to the app using the teacher username and password.
 50. Click on "Courses".
 51. Click on Course name.
 52. Click on "Members".
 53. Scroll down to see student request list.
 54. Click on "Accept" button next to student name. 
 55. Clear the app storage. 
-56. Student login to the app.
+56. Login to the app using the student username and password.
 57. Click on "Courses".
 58. Verify that that the student able to see course name.
-]()

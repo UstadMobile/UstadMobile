@@ -38,7 +38,7 @@ If assignment is set to be marked by peers, where each assignment is marked by t
 30. Click on "Import"
 31. Verify the import success message.
 32. Clear the app storage
-33. Login as a teacher.
+33. Login to the app using the teacher username and password.
 34. Click on "Courses" tab.
 35. Click on the course name.
 36. Click on "Edit" button.
@@ -57,7 +57,7 @@ If assignment is set to be marked by peers, where each assignment is marked by t
 49. Click on the "Done" button to save assignment 
 50. Click on the "Save" button to save course. 
 51. Clear the app storage 
-52. Login as a student 1. 
+52. Login to the app using the student 1 username and password.
 53. Click on "Courses" tab. 
 54. Click on the course name. 
 55. Click on the assignment. 
@@ -65,7 +65,7 @@ If assignment is set to be marked by peers, where each assignment is marked by t
 57. Click on the "Submit" button. 
 58. Verify the submit status changed to "Submitted". 
 59. Clear the app storage 
-60. Login as student who's reviewer for Student 1. 
+60. Login to the app using the student username and password who's reviewer for Student 1. 
 61. Click on "Courses" tab. 
 62. Click on the course name. 
 63. Click on the assignment added by teacher. 
@@ -76,7 +76,7 @@ If assignment is set to be marked by peers, where each assignment is marked by t
 68. Enter the mark 
 69. Click on the "Submit grade" button. 
 70. Clear the app storage 
-71. Login as a student 1. 
+71. Login to the app using the student 1 username and password.
 72. Click on "Courses" tab. 
 73. Click on the course name. 
 74. Click on the assignment. 

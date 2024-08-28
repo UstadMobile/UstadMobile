@@ -37,7 +37,7 @@ Teacher can record attendance. Teacher can edit attendance after recordings
 29. Click on "Import"
 30. Verify the import success message.
 31. Clear the app storage.
-32. Login as teacher user.
+32. Login to the app using the teacher username and password.
 33. Click on "Courses".
 34. Click on course name.
 35. Click on "Attendance".

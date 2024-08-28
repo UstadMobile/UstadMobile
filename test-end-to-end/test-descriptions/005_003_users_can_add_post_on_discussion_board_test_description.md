@@ -38,7 +38,7 @@ All users on course can post on discussion board, see posts from other users. Ea
 30. Click on "Import"
 31. Verify the import success message.
 32. Clear the app storage.
-33. Login as teacher
+33. Login to the app using the teacher username and password.
 34. Click on "Courses"
 35. Click on Course name.
 36. Click on the "Edit" button.
@@ -59,7 +59,7 @@ All users on course can post on discussion board, see posts from other users. Ea
 51. Click on the "Post" button.
 52. Verify the post is visible.
 53. Clear the app storage.
-54. login as a student.
+54. Login to the app using the student username and password.
 55. Click on "Courses".
 56. Click on course name.
 57. Click on the existing discussion board.

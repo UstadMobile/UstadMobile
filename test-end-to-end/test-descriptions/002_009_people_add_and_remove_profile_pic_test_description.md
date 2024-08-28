@@ -6,7 +6,7 @@ A teacher, admin, or the user themselves can select or remove a profile photo. T
 
 ## Step-by-Step Procedure:
 
-1. Log in as admin.
+1. Login as admin.
 2. Click on "People."
 3. Click on the user's name.
 4. Click on the "Edit" button.

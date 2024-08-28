@@ -38,7 +38,7 @@ Users can include a link from within the app (e.g. to a course or content piece)
 30. Click on "Import"
 31. Verify the import success message.
 32. Clear the app storage.
-33. Login as teacher
+33. Login to the app using the teacher username and password.
 34. Click on "Courses"
 35. Click on Course name.
 36. Click on the "Edit" button.
@@ -64,7 +64,7 @@ Users can include a link from within the app (e.g. to a course or content piece)
 56. Click on "Post" button.
 57. Verify the post is visible.
 58. Clear the app storage.
-59. Login as student user.
+59. Login to the app using the student username and password.
 60. Click on courses.
 61. Click on course name.
 62. Click on the existing discussion board.

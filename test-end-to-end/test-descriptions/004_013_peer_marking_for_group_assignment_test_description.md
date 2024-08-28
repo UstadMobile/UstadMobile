@@ -38,7 +38,7 @@ If assignment is set to be marked by peers and submitted by groups, where each a
 30. Click on "Import"
 31. Verify the import success message.
 32. Clear the app storage
-33. Login as a teacher.
+33. Login to the app using the teacher username and password.
 34. Click on "Courses" tab.
 35. Click on the course name.
 36. Click on "Edit" button.
@@ -64,7 +64,7 @@ If assignment is set to be marked by peers and submitted by groups, where each a
 56. Click on the "Done" button to save assignment
 57. Click on the "Save" button to save course.
 58. Clear the app storage 
-59. Login as a student from group 1. 
+59. Login to the app using the student username and password in group 1. 
 60. Click on "Courses" tab. 
 61. Click on the course name. 
 62. Click on the assignment added by teacher. 
@@ -72,7 +72,7 @@ If assignment is set to be marked by peers and submitted by groups, where each a
 64. Click on the "Submit" button. 
 65. Verify the submit status changed to "Submitted". 
 66. Clear the app storage 
-67. Login as another student from group 2. 
+67. Login to the app using the student username and password in group 2. 
 68. Click on "Courses" tab. 
 69. Click on the course name. 
 70. Click on the assignment added by teacher. 
@@ -83,7 +83,7 @@ If assignment is set to be marked by peers and submitted by groups, where each a
 75. Enter the mark 
 76. Click on the "Submit grade" button.
 77. Clear the app storage 
-78. Login as a student from group 1. 
+78. Login to the app using the student username and password in group 1. 
 79. Click on "Courses" tab. 
 80. Click on the course name. 
 81. Click on the assignment. 

@@ -31,13 +31,23 @@ able to login to the app.
 22. Enter the username.
 23. Enter the password.
 24. Click on the "Save button"
-25. Click on "People".
-26. Click on "+ Person" button. 
-27. Click on "Bulk import" button. 
-28. Click on "Select file" button. 
-29. Select the csv file. 
-30. Click on "Import"
-31. Verify the import success message. 
-32. Clear the app storage. 
-33. Login as teacher 
-34. Verify the teacher able to see the course
+25. Click on the "Courses"
+26. Click on the course name. 
+27. Click on the "Members" tab. 
+28. Click on the "Add a teacher" button 
+29. Click on "Add a new person" button 
+30. Enter the teacher's first name, last name and Gender. 
+31. Click on the "Save" button and save the person details. 
+32. Click on the "Save" button to save the enrollment details. 
+33. Click on the teacher name. 
+34. Click on the "View profile" button. 
+35. Click on the "Create account" button. 
+36. Enter the username. 
+37. Enter the password. 
+38. Click on the "Save button"
+39. Clear the app storage. 
+40. Login to the app using the teacher username and password.
+41. Verify the teacher able to see the course 
+42. Clear the app storage. 
+43. Login to the app using the student username and password. 
+44. Verify the student able to see the course

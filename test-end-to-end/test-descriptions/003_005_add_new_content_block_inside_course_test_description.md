@@ -6,7 +6,7 @@ Admin or teacher can add a content block and upload new content via file upload
 
 ## Step-by-Step Procedure:
 
-1. Log in as admin.
+1. Login as admin.
 2. Click on "Courses."
 3. Click on the "+ Course" button. 
 4. Click on the "Add a new course" button. 
@@ -38,7 +38,7 @@ Admin or teacher can add a content block and upload new content via file upload
 30. Click on "Done" to save the module block.
 31. Click on "Save" to save the course. 
 32. Clear app storage. 
-33. Login as teacher. 
+33. Login to the app using the teacher username and password.
 34. Click on "Courses"
 35. Click on Course name. 
 36. Click on the "Edit" button. 

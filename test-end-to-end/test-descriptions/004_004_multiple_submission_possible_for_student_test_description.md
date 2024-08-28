@@ -38,7 +38,7 @@ If assignment is set to allow multiple submissions, student can make another sub
 30. Click on "Import"
 31. Verify the import success message.
 32. Clear the app storage
-33. Login as a teacher.
+33. Login to the app using the teacher username and password.
 34. Click on "Courses" tab.
 35. Click on the course name.
 36. Click on "Edit" button.
@@ -50,7 +50,7 @@ If assignment is set to allow multiple submissions, student can make another sub
 42. Click on the "Done" button.
 43. Click on the "Save" button.
 44. Clear the app storage
-45. Login as a student.
+45. Login to the app using the student username and password.
 46. Click on "Courses" tab.
 47. Click on the course name.
 48. Click on the assignment added by teacher.
@@ -60,7 +60,7 @@ If assignment is set to allow multiple submissions, student can make another sub
 52. Click on the "Submit" button.
 53. Verify the submit status changed to "Submitted".
 54. Clear the app storage
-55. Login as a teacher.
+55. Login to the app using the teacher username and password.
 56. Click on "Courses" tab.
 57. Click on the course name.
 58. Click on the assignment.
@@ -72,7 +72,7 @@ If assignment is set to allow multiple submissions, student can make another sub
 64. Enter the mark
 65. Click on the "Submit grade" button.
 66. Clear the app storage.
-67. Login as a student.
+67. Login to the app using the student username and password.
 68. Click on "Courses" tab.
 69. Click on the course name.
 70. Click on the assignment.
@@ -83,7 +83,7 @@ If assignment is set to allow multiple submissions, student can make another sub
 75. Click on "Submit" button. 
 76. Verify the 2 submissions are visible to the user.
 77. Clear the app storage 
-78. Login as a teacher. 
+78. Login to the app using the teacher username and password.
 79. Click on "Courses" tab. 
 80. Click on the course name. 
 81. Click on the assignment. 
@@ -94,7 +94,7 @@ If assignment is set to allow multiple submissions, student can make another sub
 86. Enter the new mark 
 87. Click on the "Update grade" button. 
 88. Clear the app storage. 
-89. Login as a student. 
+89. Login to the app using the student username and password.
 90. Click on "Courses" tab. 
 91. Click on the course name. 
 92. Click on the assignment. 

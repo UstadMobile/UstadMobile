@@ -38,7 +38,7 @@ If assignment submission page is open after the deadline the submit button shoul
 30. Click on "Import"
 31. Verify the import success message.
 32. Clear the app storage
-33. Login as a teacher.
+33. Login to the app using the teacher username and password.
 34. Click on "Courses" tab.
 35. Click on the course name.
 36. Click on "Edit" button.
@@ -53,7 +53,7 @@ If assignment submission page is open after the deadline the submit button shoul
 45. Click on the "Done" button.
 46. Click on the "Save" button.
 47. Clear the app storage
-48. Login as a student.
+48. Login to the app using the student username and password.
 49. Click on "Courses" tab.
 50. Click on the course name.
 51. Click on the assignment added by teacher.

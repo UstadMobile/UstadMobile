@@ -4,7 +4,6 @@
 
 Teachers and students can add course comments which are visible for all who can view the assignment.
 
-
 ## Step-by-Step Procedure:
 
 1. Login as admin.
@@ -39,7 +38,7 @@ Teachers and students can add course comments which are visible for all who can 
 30. Click on "Import"
 31. Verify the import success message.
 32. Clear the app storage
-33. Login as a teacher.
+33. Login to the app using the teacher username and password.
 34. Click on "Courses" tab.
 35. Click on the course name.
 36. Click on "Edit" button.
@@ -54,7 +53,7 @@ Teachers and students can add course comments which are visible for all who can 
 45. Enter a comment on "Add a class comment" field.
 46. Click on "Send" icon.
 47. Clear the app storage
-48. Login as a student.
+48. Login to the app using the student username and password.
 49. Click on "Courses" tab.
 50. Click on the course name.
 51. Click on the assignment added by teacher.
