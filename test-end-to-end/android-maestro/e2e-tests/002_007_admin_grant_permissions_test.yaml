@@ -47,9 +47,6 @@ env:
       PASSWORD: "tests1"
 - tapOn: "Courses"
 - tapOn: "Test Course Block"
-- assertVisible:
-    containsDescendants:
-      - text: "Members"
 - tapOn: "Members"
 - assertVisible: "Student 2"
 
@@ -79,5 +76,5 @@ env:
 - tapOn: "Courses"
 - tapOn: "Test Course Block"
 - assertNotVisible:
-    containsDescendants:
-       - text: "Members"
+    id: "ustad_screen_tabs"
+    text: "Members"
