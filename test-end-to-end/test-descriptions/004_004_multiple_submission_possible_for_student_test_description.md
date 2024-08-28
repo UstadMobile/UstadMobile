@@ -82,3 +82,20 @@ If assignment is set to allow multiple submissions, student can make another sub
 74. CLick on "Done" button. 
 75. Click on "Submit" button. 
 76. Verify the 2 submissions are visible to the user.
+77. Clear the app storage 
+78. Login as a teacher. 
+79. Click on "Courses" tab. 
+80. Click on the course name. 
+81. Click on the assignment. 
+82. Click on the "Submissions" tab. 
+83. Click on the specific student's name.. 
+84. Review the submitted text 
+85. Click on "Mark" field. 
+86. Enter the new mark 
+87. Click on the "Update grade" button. 
+88. Clear the app storage. 
+89. Login as a student. 
+90. Click on "Courses" tab. 
+91. Click on the course name. 
+92. Click on the assignment. 
+93. Verify the student able see their updated mark.
