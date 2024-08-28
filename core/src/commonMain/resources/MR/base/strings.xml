@@ -522,7 +522,7 @@
     <string name="nomination">Nomination</string>
     <string name="active">Active</string>
     <string name="class_id">Class ID</string>
-    <string name="gender_literal">Gender</string>
+    <string name="gender_literal">लिंग</string>
     <string name="country">Country</string>
     <string name="connectivity">Connectivity</string>
     <string name="home_internet_access">Home Internet access</string>
@@ -1952,7 +1952,7 @@
 
     <string name="signup_with_passkey">Sign-up with passkey</string>
 
-    <string name="other_options">Other options</string>
+    <string name="other_options">अन्य विकल्प</string>
 
     <string name="i_am_teacher">I\'m a teacher</string>
 
@@ -1970,32 +1970,43 @@
 
     <string name="scan_badge_qr_code">Scan Badge/QR code</string>
 
-    <string name="new_user">New user</string>
-
-    <string name="existing_user">Existing user</string>
-
-    <string name="personal_account">Personal Account</string>
+    <string name="new_user">नया यूजर</string>
+    <string name="existing_user">मौजूदा यूजर</string>
+    <string name="personal_account">व्यक्तिगत खाता</string>
+    <string name="access_educational_content_download_offline">शैक्षिक सामग्री तक पहुँचें और इसे ऑफ़लाइन उपयोग के लिए डाउनलोड करें, जैसे कि आपके लिए, परिवार के सदस्यों के लिए आदि।</string>
+    <string name="join_learning_space">लर्निंग स्पेस से जुड़ें</string>
+    <string name="eg_for_your_school_organization">उदाहरण के लिए, आपके स्कूल/संगठन के लिए</string>
+    <string name="new_learning_space">नया लर्निंग स्पेस</string>
+    <string name="first_name">पहला नाम</string>
+    <string name="last_name">अंतिम नाम</string>
+    <string name="which_profile_do_you_want_to_start">Which profile do you want to start with?</string>
     <string name="signup">Sign-up</string>
 
-    <string name="access_educational_content_download_offline">Access educational content and download for use offline for you, family members, etc.</string>
+    <string name="gender">लिंग</string>
+    <string name="male">पुरुष</string>
+    <string name="female">महिला</string>
+    <string name="other">अन्य</string>
+    <string name="im_a_teacher">मैं एक शिक्षक हूँ</string>
 
-    <string name="join_learning_space">Join Learning Space</string>
-
+    <string name="im_a_parent">मैं एक अभिभावक हूँ</string>
     <string name="learning_space">Learning Space</string>
+    <string name="signup_with_passkey">पास की के साथ साइन-अप करें</string>
+    <string name="other_options">अन्य विकल्प</string>
+    <string name="new_user_alternative">नया उपयोगकर्ता</string>
+    <string name="your_date_of_birth">आपकी जन्म तिथि</string>
+    <string name="next">आगे</string>
+    <string name="create_account">खाता बनाएँ</string>
+    <string name="with_passkeys_no_complex_passwords_needed">पासकी के साथ, आपको जटिल पासवर्ड याद रखने की ज़रूरत नहीं है। इसके बजाय, आप साइन-इन करने के लिए अपनी उंगली का निशान, चेहरा या स्क्रीन का उपयोग कर सकते हैं।
+    </string>
 
     <string name="individual">Individual</string>
 
-    <string name="eg_for_your_school_organization">e.g. for your school/organization</string>
 
-    <string name="new_learning_space">New learning space</string>
-    <string name="full_name">Full name</string>
+    <string name="full_name">पूरा नाम</string>
 
     <string name="which_profile_do_you_want_to_start">Which profile do you want to start with?</string>
-    <string name="create_passkey_for_faster_and_easier_signin">Create a passkey for faster, easier sign-in</string>
-    <string name="create_username_and_password">Create username and password</string>
-    <string name="create_local_account">Create local account</string>
-    <string name="create_passkey_for_faster_and_easier_signin">Create a passkey for faster, easier sign-in</string>
-    <string name="with_passkeys_no_complex_passwords_needed">With passkeys, you don\'t need to remember complex passwords. Instead, you can use your fingerprint, face, or screen to sign in.</string>
-
+    <string name="create_username_and_password">उपयोगकर्ता नाम और पासवर्ड बनाएं</string>
+    <string name="create_local_account">स्थानीय खाता बनाएं</string>
+    <string name="create_passkey_for_faster_and_easier_signin">तेज़ और आसान साइन-इन के लिए पासकी बनाएं</string>
 
 </resources>

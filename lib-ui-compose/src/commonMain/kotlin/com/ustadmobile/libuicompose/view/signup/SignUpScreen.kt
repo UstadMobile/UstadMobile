@@ -159,7 +159,7 @@ fun SignUpScreen(
                 }
             )
             Text(
-                text = stringResource(MR.strings.i_am_teacher),
+                text = stringResource(MR.strings.im_a_teacher),
                 modifier = Modifier.padding(start = 4.dp, end = 16.dp)
             )
 
@@ -171,7 +171,7 @@ fun SignUpScreen(
                 }
             )
             Text(
-                text = stringResource(MR.strings.i_am_parent),
+                text = stringResource(MR.strings.im_a_parent),
                 modifier = Modifier.padding(start = 4.dp)
             )
         }
