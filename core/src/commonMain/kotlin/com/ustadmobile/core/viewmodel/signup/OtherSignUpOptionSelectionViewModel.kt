@@ -4,6 +4,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.MR.strings.date
 import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
+import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
 import com.ustadmobile.core.domain.passkey.CreatePasskeyParams
 import com.ustadmobile.core.domain.passkey.CreatePasskeyUseCase
 import com.ustadmobile.core.domain.passkey.PasskeyResult
@@ -44,7 +45,7 @@ import org.kodein.di.on
 
 
 data class OtherSignUpOptionSelectionUiState(
-    val error: String? = null
+    val showCreateLocaleAccount: Boolean = false
 )
 
 class OtherSignUpOptionSelectionViewModel(
@@ -56,6 +57,8 @@ class OtherSignUpOptionSelectionViewModel(
     private val _uiState: MutableStateFlow<OtherSignUpOptionSelectionUiState> =
         MutableStateFlow(OtherSignUpOptionSelectionUiState())
 
+    private val getLocalAccountsSupportedUseCase: GetLocalAccountsSupportedUseCase by instance()
+
     val uiState: Flow<OtherSignUpOptionSelectionUiState> = _uiState.asStateFlow()
 
 
@@ -63,7 +66,13 @@ class OtherSignUpOptionSelectionViewModel(
         loadingState = LoadingUiState.INDETERMINATE
         val title =
             systemImpl.getString(MR.strings.other_options)
-
+        if (getLocalAccountsSupportedUseCase.invoke()) {
+            _uiState.update { prev->
+                prev.copy(
+                    showCreateLocaleAccount = true
+                )
+            }
+        }
         _appUiState.update {
             AppUiState(
                 title = title,

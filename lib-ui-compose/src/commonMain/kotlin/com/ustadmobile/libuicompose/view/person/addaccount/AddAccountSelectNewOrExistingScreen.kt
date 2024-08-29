@@ -1,6 +1,5 @@
 package com.ustadmobile.libuicompose.view.person.addaccount
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,8 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -28,8 +25,6 @@ import com.ustadmobile.core.viewmodel.AddAccountSelectNewOrExistingViewModel
 import com.ustadmobile.core.viewmodel.AddAccountSelectNewOrExistingUiState
 import com.ustadmobile.libuicompose.components.UstadSetLanguageDropDown
 import com.ustadmobile.libuicompose.components.UstadWaitForRestartDialog
-import com.ustadmobile.libuicompose.images.UstadImage
-import com.ustadmobile.libuicompose.images.ustadAppImagePainter
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import dev.icerock.moko.resources.compose.stringResource
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
@@ -59,7 +54,6 @@ fun AddAccountSelectNewOrExistingScreen(
     onSetLanguage: (UstadMobileSystemCommon.UiLanguage) -> Unit = { },
     onClickNewUser: () -> Unit = { },
     onClickExistingUser: () -> Unit = { },
-    onClickBadgeQrCode: () -> Unit = { },
 ) {
 
     Column(

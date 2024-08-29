@@ -18,6 +18,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.siteterms.GetLocaleForSiteTermsUseCase
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNINGSPACE_URL
 import com.ustadmobile.core.viewmodel.DetailViewModel
+import com.ustadmobile.core.viewmodel.signup.SignUpViewModel
 import org.kodein.di.direct
 import org.kodein.di.on
 
@@ -45,12 +46,14 @@ class SiteTermsDetailViewModel(
 
     init {
         val acceptButtonMode = savedStateHandle[ARG_SHOW_ACCEPT_BUTTON]?.toBoolean() ?: false
+
         val apiUrl = savedStateHandle[ARG_LEARNINGSPACE_URL]
 
         _appUiState.update { prev ->
             prev.copy(
                 navigationVisible = !acceptButtonMode,
-                userAccountIconVisible = !acceptButtonMode,
+                userAccountIconVisible = false,
+                hideBottomNavigation = true,
                 title = systemImpl.getString(MR.strings.terms_and_policies)
             )
         }
@@ -88,9 +91,9 @@ class SiteTermsDetailViewModel(
 
     fun onClickAccept() {
         navController.navigate(
-            PersonEditViewModel.DEST_NAME_REGISTER,
+            SignUpViewModel.DEST_NAME,
             args = buildMap {
-                putFromSavedStateIfPresent(PersonEditViewModel.REGISTRATION_ARGS_TO_PASS)
+                putFromSavedStateIfPresent(SignUpViewModel.REGISTRATION_ARGS_TO_PASS)
             }
         )
     }

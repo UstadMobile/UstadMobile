@@ -201,6 +201,7 @@ import org.acra.ktx.initAcra
 import org.acra.sender.HttpSender
 import rawhttp.core.RawHttp
 import com.toughra.ustadmobile.BuildConfig
+import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
 
 class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
@@ -902,7 +903,9 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 applicationContext.appMetaData?.getBoolean(UstadBuildConfig.KEY_CONFIG_SHOW_POWERED_BY) ?: false,
             )
         }
-
+        bind<GetLocalAccountsSupportedUseCase>() with singleton {
+            GetLocalAccountsSupportedUseCase(true)
+        }
         bind<SetClipboardStringUseCase>() with provider {
             SetClipboardStringUseCaseAndroid(applicationContext)
         }

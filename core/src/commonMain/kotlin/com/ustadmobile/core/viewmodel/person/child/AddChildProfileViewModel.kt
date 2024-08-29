@@ -2,9 +2,7 @@ package com.ustadmobile.core.viewmodel.person.child
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.LearningSpace
-import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
@@ -12,7 +10,6 @@ import com.ustadmobile.core.util.ext.appendSelectedAccount
 import com.ustadmobile.core.util.ext.onActiveEndpoint
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
-import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Person
@@ -29,7 +26,6 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 import org.kodein.di.instance
-import org.kodein.di.on
 
 
 data class AddChildProfileUiState(

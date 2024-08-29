@@ -85,6 +85,7 @@ import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCase
 import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCaseEmbeddedServer
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.launchopenlicenses.LaunchOpenLicensesUseCase
+import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCaseCommonJvm
@@ -422,6 +423,10 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         GetShowPoweredByUseCase(
             instance<UstadBuildConfig>()[KEY_CONFIG_SHOW_POWERED_BY]?.toBoolean() ?: false
         )
+    }
+
+    bind<GetLocalAccountsSupportedUseCase>() with provider {
+        GetLocalAccountsSupportedUseCase(true)
     }
 
     bind<SetClipboardStringUseCase>() with provider {

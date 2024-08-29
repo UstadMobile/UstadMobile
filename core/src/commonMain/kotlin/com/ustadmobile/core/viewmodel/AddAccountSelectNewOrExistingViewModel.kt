@@ -55,7 +55,6 @@ class AddAccountSelectNewOrExistingViewModel(
 
     private val openExternalLinkUseCase: OpenExternalLinkUseCase by instance()
 
-    private val settings: Settings by instance()
 
     val uiState: Flow<AddAccountSelectNewOrExistingUiState>
         get() = _uiState.asStateFlow()

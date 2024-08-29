@@ -20,6 +20,7 @@ class AddAccountSelectNewUserTypeViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle
 ): UstadViewModel(di, savedStateHandle, DEST_NAME) {
+
     private val apiUrlConfig: SystemUrlConfig by instance()
 
     private val _uiState = MutableStateFlow(AddAccountSelectNewUserTypeUiState())
@@ -34,7 +35,7 @@ class AddAccountSelectNewUserTypeViewModel(
             userAccountIconVisible = false,
             title = systemImpl.getString(MR.strings.new_user),
         )
-        if (apiUrlConfig.newPersonalAccountsLearningSpaceUrl == null) {
+        if (apiUrlConfig.newPersonalAccountsLearningSpaceUrl != null) {
             _uiState.update { prev->
                 prev.copy(
                    showAddPersonalAccount = true
@@ -60,7 +61,6 @@ class AddAccountSelectNewUserTypeViewModel(
     companion object {
 
         const val DEST_NAME = "AddAccountSelectNewUserType"
-        const val PREF_TAG = "AddAccountSelectNewUserType_screen"
 
     }
 }

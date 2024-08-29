@@ -77,11 +77,13 @@ fun OtherSignUpOptionSelectionScreen(
         ) {
             Text(stringResource(MR.strings.create_username_and_password))
         }
-        OutlinedButton(
-            onClick = onClickCreateLocalAccount,
-            modifier = Modifier.fillMaxWidth().defaultItemPadding()
-        ) {
-            Text(stringResource(MR.strings.create_local_account))
+        if (uiState.showCreateLocaleAccount) {
+            OutlinedButton(
+                onClick = onClickCreateLocalAccount,
+                modifier = Modifier.fillMaxWidth().defaultItemPadding()
+            ) {
+                Text(stringResource(MR.strings.create_local_account))
+            }
         }
     }
 }
