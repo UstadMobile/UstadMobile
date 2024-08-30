@@ -1,8 +1,8 @@
-# Admin can remove content and download it again
+# Content download is started on WiFi,the download will stop when wifi off and then resume when WiFi is resumed.
 
 ## Description:
 
-Admin can delete content from the Library on a device. After deletion, the content can be re-downloaded and opened as before.
+If a download is started on WiFi and WiFi is stopped midway, the download will stop and then resume when WiFi is resumed. (Android only).
 
 ## Step-by-Step Procedure:
 
@@ -21,9 +21,9 @@ Admin can delete content from the Library on a device. After deletion, the conte
 13. Click on "Library" 
 14. Click on the content to select it. 
 15. Click the "Download" button.
-16. After download the "Remove" button will be visible.
-17. Click the "Remove" button.
-18. The download button will be visible again.
-19. Click on the "Download" button.
-20. Click on the "Open" button.  
+16. Switch off the wifi/data on the device. 
+17. Verify the downloading got paused.
+18. Reconnect the wifi/data on the device.
+19. Verify the downloading got resumed. 
+20. Once "Remove" button is visible, Click on the "Open" button.  
 21. Verify the content appears as expected.

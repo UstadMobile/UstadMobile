@@ -29,11 +29,11 @@ env:
       GENDER: "Female"
       PASSWORD: "test"
 - runFlow:
-    file: "../common/add_new_teacher_inside_course.yaml"
+    file: "../common/add_new_student_inside_course.yaml"
     env:
       TESTCOURSENAME: ${TESTCOURSENAME}
-      TEACHERFIRSTNAME: "Student"
-      TEACHERLASTNAME: "1"
+      STUDENTFIRSTNAME: "Student"
+      STUDENTLASTNAME: "1"
       USERNAME: "s1"
       GENDER: "Female"
       PASSWORD: "test"

@@ -31,18 +31,15 @@ trickle -s -d 128 -u 128 bash
 
 1.4 [Admin can move content](test-descriptions/001_004_admin_can_move_content_test_description.md)
 
-1.5 [Admin can remove content and download it again](test-descriptions/001_005_admin_can_remove_content_and_download_again_test_description.md)(Android only).
+1.5 [Content download is started on WiFi,the download will stop when wifi off and then resume when WiFi is resumed.](test-descriptions%2F001_005_content_download_will_stop_when_wifi_stop_then_resume_when_WiFi_is_resumed%20_test_description.md)
 
 1.6 [Admin can cancel content download and download it again](test-descriptions/001_006_admin_can_cancel_content_download_test_description.md)
 
-1.7 If a download is started on WiFi and WiFi is stopped midway, the download will stop and then 
-    resume when WiFi is resumed. (Android only).
+1.7 [H5P and Video Content Compression](test-descriptions/001_007_H5P_and_Video_content_compression_test_description.md)
 
-1.8 H5P and video content can be automatically compressed using high, medium, and low quality presets. 
+1.8 [Deleting content will remove the files associated with the content from the server](test-descriptions/001_008_deleting_content_will_remove_the_files_associated_with_the_content_from_the_serve%20_test_description.md)
 
-1.9 Admin can delete content from library. Deleting content will remove the files associated with the content from the server. Client devices will recognize any files that are associated with deleted content as eligible for eviction from the cache.
-
-1.10 User can select (in settings) to store content on device storage or memory card (if available - Android apps can only use storage on memory cards that are reformatted on the device to use as storage (not FAT32 etc)). Any subsequent download is saved on the selected storage medium. (Android only).
+1.9 [User can store offline content on device storage or memory card](test-descriptions/001_009_user_can_store_offline_content_on_device_storage_or_memory_card_test_description.md)
 
 ### 2: Course creation, enrolment, attendance, progress
 
@@ -172,82 +169,34 @@ trickle -s -d 128 -u 128 bash
      use the single sign-on, enter the site link, login with their username/password, then click approve, 
      and receive an auth token.
 
-### 8 App panic response (Android only)
-
-8.1 When a panic trigger app is installed and selected, when the app is set to delete all data on panic trigger and the panic app is triggered, then all local data is deleted and the user is logged out.
-
-8.2 When a panic trigger app is installed and selected, when the app is set to hide on panic trigger, the app launch disappears from the home screen. A notepad app is visible instead. The app is restored by entering the code into the notepad.
-
-### 9 Peer-to-peer (Android and desktop only)
-
-9.1 If a user is connected to the same network (e.g. LAN) as another user they can request to use the other device as a proxy. If the other user approves, they will be able to login and access and edit their data the same as if they were connected directly to the server provided that a) the other device already has the relevant data or b) the other device has an Internet connection
-
-9.2 If a user is connected to the same network as another user and downloads content (e.g. supported content types such as H5P, EPUB, Video, as above) and another device on the smae network has those content files, then the content will be downloaded from the other device instead of from the Internet.
-
-9.3 A user on an Android device may create a new mesh hotspot (e.g. if there is not an existing WiFi access point). Users on other devices may join the hotspot by scanning a QR code. Devices can simultaneously provide a hotspot for other devices and connect to one other hotspot on Android versions that support this (Android 10+ that supports IPv6 and WiFi direct, which includes almost all Android 10+ devices, or those that support Wifi Station/Access point concurrency which is limited to those that have chipset support on Android 11+). All devices connected can communicate with each other (e.g. over multiple hops).
-    
-### 10 Accessibility
-
-10.1 Video content can have subtitles added using an WebVTT file. The subtitles will be displayed 
-    with the video if uploaded.
-
-10.2 Screens support the use of text-to-speech as provided by the operating system (e.g. Windows, 
-    Android). Image buttons are labeled appropriately for speech readers.
-
-### 11 Administration
-
-11.1 Server can be installed via script.
-
-11.2 Server data can be backed up via script.
-
-### 12 Language support
-
-12.1 When first starting the app it will load in the default system language if the system is set to a supported language.
-
-12.2 If the system is set to an unsupported language, the app will be displayed in English (fallback language).
-
-12.3 After login, user can go to settings, and select any supported language, or to use the system device language. The user interface will change to the selected language. The language setting is applied to the whole app, not per-user (if a user switched accounts, the language does not change - language setting is stored locally).
-
-12.4 Android: Android 13+ users can select language in app settings using [per-app language preferences](https://developer.android.com/guide/topics/resources/app-languages) 
 
 
-### 13 Reporting
+### 8 Accessibility
 
-13.1 Users can generate a bar chart or line chart.
+8.1 [Admin uploads valid content with video subtitles](test-descriptions/008_001_admin_uploads_valid_content_with_video_subtitles_test_description.md)
 
-Y-axis data options:
+8.2 [Accessibility: Text-to-Speech and Image Button Labels](test-descriptions/008_002_accessibility_text-to-Speech_image_button_labels_test_description.md)
 
-a. Content usage - total duration<br/>
-b. Content usage - average duration per session<br/>
-c. Content usage - number of sessions<br/>
-d. Content usage - number of interactions recorded<br/>
-e. Content usage - number of active users<br/>
-f. Content usage - average usage time per user<br/>
-g. Content usage - number of students who completed content<br/>
-h. Content usage - percentage of students who completed content (out of those who attempted)<br/>
-i. Attendance - total attendances<br/>
-j. Attendance - total absences<br/>
-k. Attendance - total lates<br/>
-l. Attendance - Percentage of students who attended<br/>
-m. Attendance - Percentage of students who attended or were late<br/>
-n. Attendance - Total number of classes<br/>
-o. Attendance - Number of unique students attending.<br/>
+### 9 Administration
 
-X-axis options: day, week, month, content entry, gender, class, class enrolment outcome, class enrolment reason for leaving<br/>
+9.1 [Server can be installed via script.](test-descriptions/009_001_server_can_be_installed_via_script._test_description.md)
 
-Subgroup options: content entry (content usage reports only), gender, course, enrolment outcome (attendance reports only), reason for leaving (attendance reports only)
+### 10 Language support
 
-Filter options: gender, completion status, content completion status, content entry,  content progress, attendance percentage, class enrolment outcome, class enrolment reason for leaving.
+10.1 [Default system language is used on app if the language is supported by the app](test-descriptions/010_001_default_system_language_if_language_is_supported_by_app_test_description.md)
 
-Data is derived only from data the active user has permission to see (e.g. if admin, from all data. If a teacher, from those courses they teach, if a student, only from their own data).
+10.2 [Default English language is used on app if the language is not supported by the app](test-descriptions/010_002_english_language_used_if_system_language_not_supported_by_the_app_test_description.md)
 
-### 14 Offline behavior (Android and Desktop only)
+10.3 [Language Selection in App Settings](test-descriptions/010_003_language_selection_in_app_settings_test_description.md)
 
-14.1. If the user visits a screen whilst online, and then returns whilst offline, the screen will load using cached data.
+10.4 [Android 13+ users can select language in app settings](test-descriptions/010_004_android_13%2B_users_can_select_language_in_app_settings_test_description.md)
 
-14.2. If the user edits data offline, the data will be sent to the server as soon as the app is open and a connection is available.
+### 11 Offline behavior (Android and Desktop only)
 
-14.3 If the same piece of data was edited by two users offline simultaneously, the edit that was performed most recently will take effect.
+11.1. [Screen Caching for Offline Access](test-descriptions/011_001_screen_caching_for_offline_access_test_description.md)
 
-14.4 If a user visits a screen whilst offline that cannot be loaded (because the data is not available), an error message will be displayed.
+11.2. [Offline Data Editing and Syncing](test-descriptions/011_002_Offline_data_editing_and_syncing_test_description.md)
 
+11.3 [Handling conflicting offline edits](test-descriptions/011_003_handling_conflicting_offline_edits_test_description.md)
+
+11.4 [User visits a screen whilst offline that cannot be loaded gets an error](test-descriptions/011_004_user_visits_a_screen_whilst_offline_that_cannot_be_loaded_gets_an_error_test_description.md)

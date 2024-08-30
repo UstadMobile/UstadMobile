@@ -34,12 +34,12 @@ able to login to the app.
 25. Click on the "Courses"
 26. Click on the course name. 
 27. Click on the "Members" tab. 
-28. Click on the "Add a teacher" button 
+28. Click on the "Add a student" button 
 29. Click on "Add a new person" button 
-30. Enter the teacher's first name, last name and Gender. 
+30. Enter the student's first name, last name and Gender. 
 31. Click on the "Save" button and save the person details. 
 32. Click on the "Save" button to save the enrollment details. 
-33. Click on the teacher name. 
+33. Click on the student name. 
 34. Click on the "View profile" button. 
 35. Click on the "Create account" button. 
 36. Enter the username. 
