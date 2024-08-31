@@ -137,7 +137,7 @@ trickle -s -d 128 -u 128 bash
 
 7.2 [When registration is enabled: Users over 13 can register directly](test-descriptions/007_002_user_registration_above_age_13_test_description.md)
 
-7.3 When registration is enabled: Users under 13 can register using parental approval link
+7.3 [When registration is enabled: Users under 13 can register using parental approval link](test-descriptions/007_003_users_under_13_can_register_using_parental_approval_link_test_description.md)
 
 7.4 [For user registration date of birth field is mandatory](test-descriptions/007_004_user_registration_dob_field_is_mandatory_test_description.md)
 
