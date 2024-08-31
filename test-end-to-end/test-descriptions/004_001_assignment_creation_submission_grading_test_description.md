@@ -62,7 +62,7 @@ it is graded. Assignment can be edited or deleted from course.
 51. Attach the required file. 
 52. Click on the "Submit" button.
 53. Verify the submit status changed to "Submitted".
-54. Clear the app storage 
+54. **Clear the app storage 
 55. Login to the app using the teacher username and password.
 56. Click on "Courses" tab. 
 57. Click on the course name.

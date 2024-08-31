@@ -35,7 +35,7 @@ trickle -s -d 128 -u 128 bash
 
 1.6 [Admin can cancel content download and download it again](test-descriptions/001_006_admin_can_cancel_content_download_test_description.md)
 
-1.7 [H5P and Video Content Compression](test-descriptions/001_007_H5P_and_Video_content_compression_test_description.md)
+1.7 [H5P and Video Content Compression](test-descriptions/001_007_h5p_and_video_content_compression_test_description.md)
 
 1.8 [Deleting content will remove the files associated with the content from the server](test-descriptions/001_008_deleting_content_will_remove_the_files_associated_with_the_content_from_the_serve%20_test_description.md)
 
@@ -49,15 +49,15 @@ trickle -s -d 128 -u 128 bash
 
 2.3 [Teacher can record attendance.](test-descriptions/002_003_teacher_record_attendance_test_description.md)
 
-2.4 Teacher can view progress report showing each students' result for each block in the course.
+2.4 [Teacher can view progress report showing each students' result in Gradebook](test-descriptions/002_004_teacher_can_view_progress_report_showing_each_students_result_in_gradebook_test_description.md)
 
 2.5 [The course title is mandatory](test-descriptions/002_005_course_title_is_mandatory_test_description.md)
 
-2.6 Teacher/admin can remove people from a course (e.g. delete their enrolment). This removes any permissions that were associated with their enrolment.    
+2.6 [Teacher/admin can remove people from a course](test-descriptions/002_006_teacher_or_admin_can%20remove_people_from_a_course_test_description.md)
 
 2.7 [Teacher and admin user can grant permission for the course to other users](test-descriptions/002_007_admin_grant_permissions_test_description.md)
 
-2.8 Teacher/admin can add banner photo to the course that is displayed in the course list screen and course detail screen.
+2.8 [Teacher/admin can add banner photo to the course](test-descriptions/002_008_teacher_or_admin_can_add_banner_photo_to_the_course_test_description.md)
 
 2.9 [The user can add a profile photo](test-descriptions/002_009_people_add_and_remove_profile_pic_test_description.md)
 
@@ -69,7 +69,7 @@ trickle -s -d 128 -u 128 bash
 
 3.3 [Admin or teacher can add a content block and link existing content](test-descriptions/003_003_add_existing_content_in_library_as_block_test_description.md)
 
-3.4 Admin or teacher can add a content block and upload new content via link
+3.4 [Admin or teacher can add a content block and upload new content via link](test-descriptions/003_004_admin_or_teacher_can_add_a_content_block_and_upload_new_content_via_link_test_description.md)
 
 3.5 [Admin or teacher can add a content block and upload new content via file upload](test-descriptions/003_005_add_new_content_block_inside_course_test_description.md)
 
@@ -78,7 +78,6 @@ trickle -s -d 128 -u 128 bash
 3.7 [Text blocks can open and all text is visible](test-descriptions/003_007_all_user_able_to_open_text_block_test_description.md)
 
 3.8 [The course block title is mandatory.d](test-descriptions/003_008_course_blocks_title_field_is_mandatory_test_description.md)
-
 
 ### 4: Assignments
 
@@ -108,9 +107,9 @@ trickle -s -d 128 -u 128 bash
 
 4.13 [Assignment is set to be marked by peers and submitted by groups](test-descriptions/004_013_peer_marking_for_group_assignment_test_description.md)
 
-4.14 Teacher/admin (any user with permission to edit the course itself) can delete private comments and course comments.
+4.14 [Teacher or admin can delete private comments and course comments](test-descriptions/004_014_teacher_or_admin_can_delete_private_comments_and_course_comments_test_description.md)
 
-4.15 Students may upload attachments for assignment submissions if enabled by the teacher, up to the maximum file size limit set by the teacher. 
+4.15 [Admin or teacher can enable or disable the file submission and can limit maximum file size](test-descriptions/004_015_teacher_or_admin_enable_or_disable_file_submission_test_description.md)
 
 ### 5	Discussion board
 
@@ -128,14 +127,9 @@ trickle -s -d 128 -u 128 bash
 
 ### 6 Messaging
 
-6.1 Users can send a chat message (plain text) to any other user that they have permission to see (
-    teachers and students can see those who are part of their courses by default). The recipient can
-    reply to the message. Messages/replies are delivered instantly when the app is open. Note: 
-    Messages are only delivered if the app is open and notifications are not displayed.
+6.1 [Users on same course can send a chat message](test-descriptions/006_001_users_on_same_course_can_send_a_chat_message_test_description.md)
 
-6.2 When a user receives a chat message from a user that they could not normally see (e.g. when the
-    admin sends them a message), they will be able to see the name of the sender.
-
+6.2 [Admin user can send a chat message to students](test-descriptions/006_002_admin_user_can_send_a_chat_message_to_students_test_description.md)
 	
 ### 7	User accounts:
 
@@ -168,8 +162,6 @@ trickle -s -d 128 -u 128 bash
 7.12 If no user is logged into the Ustad app, they can use an api consumer (e.g. UstadApiConsumerDemo), 
      use the single sign-on, enter the site link, login with their username/password, then click approve, 
      and receive an auth token.
-
-
 
 ### 8 Accessibility
 

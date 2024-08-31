@@ -35,7 +35,7 @@ Admin or teacher can add a content block and upload new content via file upload
 27. Click on the "Content" button. 
 28. Click on "Import from file".
 29. Select the H5p content.
-30. Click on "Done" to save the module block.
+30. Click on "Done" to save the content block.
 31. Click on "Save" to save the course. 
 32. Clear app storage. 
 33. Login to the app using the teacher username and password.
@@ -46,7 +46,7 @@ Admin or teacher can add a content block and upload new content via file upload
 38. Click on the "Content" button.
 39. Click on "Import from file".
 40. Select the epub content. 
-41. Click on "Done" to save the module block. 
+41. Click on "Done" to save the content block. 
 42. Click on "Save" to save the course. 
 43. Verify the course contains both H5p and Epub content.
 
