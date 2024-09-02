@@ -145,23 +145,13 @@ trickle -s -d 128 -u 128 bash
 
 7.6 [Admin can enable/disable guest login](test-descriptions/007_006_admin_enable_or_disable_guest_login_test_description.md)
 
-7.7 Teacher (course leader) or admin can send an invitation to a list of users by providing phone 
-    numbers (SMS) or email addresses. User can open the invitation, create a new account if this is 
-    allowed by admin policy and they don't have an existing account, and join a course.
+7.7 [Admin or teacher send invitation via message or phone numbers or email addresses](test-descriptions/007_007_admin_or_teacher_send_group_invitation_to_join_course_test_description.md)
 
 7.8 [On user registration page first name, last name, gender, username and password are mandatory fields](test-descriptions/007_008_user_registration_mandatory_fields_test_description.md)
 
 7.9 [For user registration email id field should have valid email address](test-descriptions/007_009_user_registration_email_field_verification_test_description.md)
 
 7.10 [For user registration phone number field should have valid phone number](test-descriptions/007_010_user_registration_phone_field_verification_test_description.md)
-
-7.11 If a user is logged into the Ustad app, they can use an api consumer (e.g. UstadApiConsumerDemo), 
-    use the single sign-on, see a list of logged in accounts, select their account, click approve, 
-    and receive an auth token.
-
-7.12 If no user is logged into the Ustad app, they can use an api consumer (e.g. UstadApiConsumerDemo), 
-     use the single sign-on, enter the site link, login with their username/password, then click approve, 
-     and receive an auth token.
 
 ### 8 Accessibility
 
