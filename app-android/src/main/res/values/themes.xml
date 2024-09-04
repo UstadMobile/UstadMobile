@@ -14,12 +14,10 @@
         -->
         <item name="windowSplashScreenAnimatedIcon">@drawable/splash_inset</item>
 
-
         <!--
         Use this version to provide a powered by (branded image) credit on pre-SDK31 devices
-        <item name="android:windowBackground">@drawable/splash_background</item>
         -->
-
+        <item name="android:windowBackground">@drawable/splash_brand_img</item>
     </style>
 
 </resources>

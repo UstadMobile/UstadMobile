@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">استاد موبايل‬</string>
+    <string name="app_name">Learning Tree</string>
     <string name="login">وارد شدن</string>
     <string name="error">خطا</string>
     <string name="err_registering_new_user">خطا در ثبت نام کاربر جدید:</string>

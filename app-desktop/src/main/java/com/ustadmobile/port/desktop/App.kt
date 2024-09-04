@@ -83,7 +83,7 @@ import java.util.concurrent.atomic.AtomicReference
 import kotlin.system.exitProcess
 import com.ustadmobile.libuicompose.view.app.App as UstadPrecomposeApp
 
-const val JUNIQUE_LOCK_ID = "com.ustadmobile.apprun.lock"
+const val JUNIQUE_LOCK_ID = "com.ustadmobile.apprunlearningtree.lock"
 
 /*
  * Note this is called by AppRun.kt to ensure that if the user has multiple versions (e.g. multiple

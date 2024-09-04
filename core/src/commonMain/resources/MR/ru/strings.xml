@@ -126,7 +126,7 @@
     <string name="saturday">Суббота</string>
     <string name="error">Ошибка</string>
     <string name="register_empty_fields">Пожалуйста, заполните все обязательные поля</string>
-    <string name="app_name">Ustad Mobile</string>
+    <string name="app_name">Learning Tree</string>
     <string name="err_registering_new_user">Ошибка регистрации нового пользователя:</string>
     <string name="last_month_date_range">Прошлый месяц</string>
     <string name="wrong_user_pass_combo">Неверное имя пользователя/пароль: попробуйте еще раз.</string>

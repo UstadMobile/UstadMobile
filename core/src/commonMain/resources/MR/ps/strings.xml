@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">موبایل ښوونکی</string>
+    <string name="app_name">Learning Tree</string>
     <string name="login"> ننوتون</string>
     <string name="error"> تېروتنه</string>
     <string name="err_registering_new_user">د نوی کارونکی په ثبت کې تیروتنه:</string>

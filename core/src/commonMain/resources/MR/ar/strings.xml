@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">‫أستاد موبايل‬</string>
+    <string name="app_name">Learning Tree</string>
     <!--Content editor-->
     <string name="multiple_choice">متعدد الخيارات</string>
     <string name="video">فيديو</string>

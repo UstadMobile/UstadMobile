@@ -2,7 +2,7 @@ package com.ustadmobile.mui.theme
 
 //As per MUI showcase
 
-import js.objects.jso
+import js.core.jso
 import mui.material.PaletteMode.Companion.dark
 import mui.material.PaletteMode.Companion.light
 import mui.material.styles.createTheme
@@ -20,10 +20,10 @@ object Themes {
             palette = jso {
                 mode = light
                 primary = json(
-                    "main" to Color("#00796b")
+                    "main" to Color("#D9291C")
                 )
                 secondary = json(
-                    "main" to Color("#ff9800")
+                    "main" to Color("#45B383")
                 )
             }
         }

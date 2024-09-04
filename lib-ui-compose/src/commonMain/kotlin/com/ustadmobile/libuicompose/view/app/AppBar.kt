@@ -105,8 +105,8 @@ fun UstadAppBar(
         TopAppBar(
             colors = if(appUiState.appBarColors == AppBarColors.STANDARD) {
                 TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    titleContentColor = MaterialTheme.colorScheme.primary,
                 )
             }else {
                 val contentColor = MaterialTheme.colorScheme.appBarSelectionModeContentColor
