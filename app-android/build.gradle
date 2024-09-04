@@ -109,7 +109,7 @@ android {
     compileSdk rootProject.ext.version_android_compile_sdk
 
     defaultConfig {
-        applicationId 'com.toughra.ustadmobile'
+        applicationId 'com.savethechildren.learning_tree'
         testInstrumentationRunnerArguments clearPackageData: 'true', notAnnotation: 'com.ustadmobile.test.core.annotation.PeerServerRequiredTest,com.ustadmobile.test.core.annotation.ImplementationRequiredTest'
 
         manifestPlaceholders = [

@@ -1,4 +1,4 @@
-package com.ustadmobile.port.desktop.apprun
+package com.ustadmobile.port.desktop.apprunlearningtree
 
 import com.ustadmobile.port.desktop.main as appMain
 

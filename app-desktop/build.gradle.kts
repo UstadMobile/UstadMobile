@@ -145,7 +145,7 @@ configurations.all {
 compose.desktop {
     application {
         //might check https://conveyor.hydraulic.dev/13.0/troubleshooting/troubleshooting-jvm/#localization-doesnt-work-when-packaged
-        mainClass = "com.ustadmobile.port.desktop.apprun.AppRunKt"
+        mainClass = "com.ustadmobile.port.desktop.apprunlearningtree.AppRunKt"
 
         //https://blog.jetbrains.com/kotlin/2022/10/compose-multiplatform-1-2-is-out/#proguard
         // https://conveyor.hydraulic.dev/13.0/configs/jvm/#proguard-obfuscation

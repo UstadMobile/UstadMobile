@@ -5,9 +5,9 @@
         <item name="windowSplashScreenAnimatedIcon">@drawable/splash_inset</item>
 
         <!-- Use this on versions that include a powered by credit -->
-        <!--
+
         <item name="android:windowSplashScreenBrandingImage">@drawable/splash_brand_img</item>
-        -->
+
 
         <item name="postSplashScreenTheme">@style/UmTheme.App</item>
     </style>
