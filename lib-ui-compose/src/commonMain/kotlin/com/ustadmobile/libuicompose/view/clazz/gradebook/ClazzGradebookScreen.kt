@@ -54,7 +54,6 @@ fun ClazzGradebookScreen(
         onClickFullScreen = viewModel::onClickFullScreen,
         onClickZoomIn =  viewModel::onClickZoomIn,
         onClickZoomOut = viewModel::onClickZoomOut,
-        onToggleZoom = viewModel::onToggleZoom,
     )
 }
 
@@ -75,7 +74,6 @@ fun ClazzGradebookScreen(
     onClickFullScreen: () -> Unit,
     onClickZoomIn: () -> Unit,
     onClickZoomOut: () -> Unit,
-    onToggleZoom: () -> Unit,
 ) {
     val listResult = rememberDoorRepositoryPager(
         pagingSourceFactory = uiState.results,
@@ -87,6 +85,8 @@ fun ClazzGradebookScreen(
     val animatedScale by animateFloatAsState(
         targetValue = uiState.scale
     )
+
+    val courseBlocks = uiState.courseBlocks.mapNotNull { it.block }
 
     BoxWithConstraints(
         modifier = Modifier.fillMaxSize()
@@ -123,6 +123,7 @@ fun ClazzGradebookScreen(
                             uiState.courseBlocks.forEach { block ->
                                 GradebookCourseBlockHeader(
                                     courseBlock = block,
+                                    allBlocks = uiState.courseBlocks,
                                     width = scaledColumnWidth,
                                     height = scaledHeaderHeight,
                                     scale = animatedScale
@@ -176,13 +177,10 @@ fun ClazzGradebookScreen(
                             .horizontalScroll(horizontalScrollState)
                     ) {
                         uiState.courseBlocks.forEach { block ->
-                            val result = rowItem?.blockStatuses?.firstOrNull {
-                                it.sCbUid == block.block?.cbUid
-                            }
-
                             ClazzGradebookCell(
-                                blockStatus = result,
-                                block = block.block,
+                                blockUid = block.block?.cbUid ?: 0,
+                                blocks = courseBlocks,
+                                blockStatuses = rowItem?.blockStatuses ?: emptyList(),
                                 scale = animatedScale,
                                 modifier = Modifier.width(scaledColumnWidth)
                                     .height(scaledRowHeight)

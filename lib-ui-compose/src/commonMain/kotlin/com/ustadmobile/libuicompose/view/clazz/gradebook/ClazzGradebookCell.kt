@@ -16,19 +16,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.viewmodel.clazz.gradebook.displayMarkFor
 import com.ustadmobile.lib.db.composites.BlockStatus
-import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.libuicompose.components.scaledTextStyle
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
+import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.libuicompose.components.UstadTooltipBox
 
 @Composable
 fun ClazzGradebookCell(
-    blockStatus: BlockStatus?,
-    block: CourseBlock?,
+    blockUid: Long,
+    blockStatuses: List<BlockStatus>,
+    blocks: List<CourseBlock>,
     scale: Float,
     modifier: Modifier = Modifier,
 ) {
+    val blockStatus = blockStatuses.firstOrNull { it.sCbUid == blockUid }
+    val block = blocks.firstOrNull { it.cbUid == blockUid }
+
     val markColors = blockStatus?.sScoreScaled?.let {
         block?.colorsForMark(it)
     }
