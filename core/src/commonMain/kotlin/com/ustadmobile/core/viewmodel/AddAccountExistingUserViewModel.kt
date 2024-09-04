@@ -4,6 +4,8 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.viewmodel.individual.IndividualLearnerViewModel
+import com.ustadmobile.core.viewmodel.person.learningspacelist.LearningSpaceListViewModel
+import com.ustadmobile.core.viewmodel.signup.SignUpViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -37,6 +39,12 @@ class AddAccountExistingUserViewModel(
     }
 
     fun onClickLearningSpace() {
+        navController.navigate(
+            LearningSpaceListViewModel.DEST_NAME,
+            args = buildMap {
+                putFromSavedStateIfPresent(SignUpViewModel.REGISTRATION_ARGS_TO_PASS)
+            }
+        )
     }
 
 

@@ -19,8 +19,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkUiState
-import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
+import com.ustadmobile.core.viewmodel.siteenterlink.LearningSpaceEnterLinkUiState
+import com.ustadmobile.core.viewmodel.siteenterlink.LearningSpaceEnterLinkViewModel
 import com.ustadmobile.libuicompose.components.UstadErrorText
 import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 import com.ustadmobile.libuicompose.images.UstadImage
@@ -31,14 +31,14 @@ import kotlinx.coroutines.Dispatchers
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 
 @Composable
-fun SiteEnterLinkScreen(
-    viewModel: SiteEnterLinkViewModel
+fun LearningSpaceEnterLinkScreen(
+    viewModel: LearningSpaceEnterLinkViewModel
 ) {
-    val uiState: SiteEnterLinkUiState by viewModel.uiState.collectAsStateWithLifecycle(
-        initial = SiteEnterLinkUiState(),  context = Dispatchers.Main.immediate
+    val uiState: LearningSpaceEnterLinkUiState by viewModel.uiState.collectAsStateWithLifecycle(
+        initial = LearningSpaceEnterLinkUiState(),  context = Dispatchers.Main.immediate
     )
 
-    SiteEnterLinkScreen(
+    LearningSpaceEnterLinkScreen(
         uiState = uiState,
         onClickNext = viewModel::onClickNext,
         onEditTextValueChange = viewModel::onSiteLinkUpdated,
@@ -46,8 +46,8 @@ fun SiteEnterLinkScreen(
 }
 
 @Composable
-fun SiteEnterLinkScreen(
-    uiState: SiteEnterLinkUiState,
+fun LearningSpaceEnterLinkScreen(
+    uiState: LearningSpaceEnterLinkUiState,
     onClickNext: () -> Unit = {},
     onEditTextValueChange: (String) -> Unit = {},
 ) {

@@ -7,6 +7,9 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.view.SiteTermsDetailView.Companion.ARG_SHOW_ACCEPT_BUTTON
+import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
+import com.ustadmobile.core.viewmodel.signup.SignUpViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -75,11 +78,19 @@ class AddAccountSelectNewOrExistingViewModel(
         }
     }
     fun onClickNewUser(){
-        navController.navigate(AddAccountSelectNewUserTypeViewModel.DEST_NAME, emptyMap())
+        val arg = buildMap {
+            putFromSavedStateIfPresent(SignUpViewModel.REGISTRATION_ARGS_TO_PASS)
+            put(SignUpViewModel.ARG_NEW_OR_EXISTING_USER,"new")
+        }
+        navController.navigate(AddAccountSelectNewUserTypeViewModel.DEST_NAME,arg)
 
     }
     fun onClickExistingUser(){
-        navController.navigate(AddAccountExistingUserViewModel.DEST_NAME, emptyMap())
+        val arg = buildMap {
+            putFromSavedStateIfPresent(SignUpViewModel.REGISTRATION_ARGS_TO_PASS)
+            put(SignUpViewModel.ARG_NEW_OR_EXISTING_USER,"existing")
+        }
+        navController.navigate(AddAccountExistingUserViewModel.DEST_NAME, arg)
 
     }
 

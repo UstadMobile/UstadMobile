@@ -2,6 +2,7 @@ package com.ustadmobile.core.viewmodel.signup
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.LearningSpace
+import com.ustadmobile.core.domain.ValidateUsername.ValidateUsernameUseCase
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
 import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
 import com.ustadmobile.core.domain.passkey.CreatePasskeyParams
@@ -21,7 +22,7 @@ import com.ustadmobile.core.view.SiteTermsDetailView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
-import com.ustadmobile.core.viewmodel.person.child.AddChildProfileViewModel
+import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel.Companion.ARG_REGISTRATION_MODE
 import com.ustadmobile.door.ext.doorIdentityHashCode
@@ -58,7 +59,7 @@ data class SignUpUiState(
 
     val usernameError: String? = null,
 
-    val fullName: String? = null,
+    val firstName: String? = null,
 
     val passwordError: String? = null,
 
@@ -68,23 +69,21 @@ data class SignUpUiState(
 
     val genderError: String? = null,
 
-    val firstNameError: String? = null,
-
-    val lastNameError: String? = null,
+    val fullNameError: String? = null,
 
     val isParent: Boolean = false,
 
     val isTeacher: Boolean = false,
 
-    val signupWithPasskey: Boolean = true,
-
-    val showCreatePasskeyPrompt: Boolean? = false,
+    val passkeySupported: Boolean = true,
 
     val doorNodeId: String? = null,
 
     val serverUrl_: String? = null,
 
-    val showOtherOption: Boolean = true
+    val showOtherOption: Boolean = true,
+
+    val isPersonalAccount: Boolean = false,
 ) {
 
 
@@ -99,6 +98,8 @@ class SignUpViewModel(
     private val _uiState: MutableStateFlow<SignUpUiState> = MutableStateFlow(SignUpUiState())
 
     private val createPasskeyUseCase: CreatePasskeyUseCase? by instanceOrNull()
+
+    private val validateUsernameUseCase: ValidateUsernameUseCase = ValidateUsernameUseCase()
 
     private var nextDestination: String =
         savedStateHandle[UstadView.ARG_NEXT] ?: ClazzListViewModel.DEST_NAME_HOME
@@ -115,6 +116,7 @@ class SignUpViewModel(
 
     private val genderConfig: GenderConfig by instance()
 
+    //Run EnqueueSavePictureUseCase after the database transaction has finished.
     private val enqueueSavePictureUseCase: EnqueueSavePictureUseCase by
     on(LearningSpace(serverUrl)).instance()
 
@@ -134,26 +136,31 @@ class SignUpViewModel(
         _uiState.update { prev ->
             prev.copy(
                 genderOptions = genderConfig.genderMessageIdsAndUnset,
-                showCreatePasskeyPrompt = false,
                 person = Person(
                     dateOfBirth = savedStateHandle[PersonEditViewModel.ARG_DATE_OF_BIRTH]?.toLong()
                         ?: 0L
                 ),
                 serverUrl_ = serverUrl,
-                signupWithPasskey = createPasskeyUseCase != null,
-                showOtherOption = createPasskeyUseCase == null && getLocalAccountsSupportedUseCase.invoke()
+                passkeySupported = createPasskeyUseCase != null,
+                showOtherOption = createPasskeyUseCase == null && getLocalAccountsSupportedUseCase.invoke(),
 
-            )
+
+                )
         }
         if (savedStateHandle[SIGN_WITH_USERNAME_AND_PASSWORD] == "true") {
             _uiState.update { prev ->
                 prev.copy(
-                    signupWithPasskey = false
+                    passkeySupported = false
                 )
             }
         }
-
-
+        if (savedStateHandle[ARG_IS_PERSONAL_ACCOUNT] == "true") {
+            _uiState.update { prev ->
+                prev.copy(
+                    isPersonalAccount = true
+                )
+            }
+        }
     }
 
     fun onEntityChanged(entity: Person?) {
@@ -164,9 +171,9 @@ class SignUpViewModel(
                     prev.person?.gender,
                     entity?.gender, prev.genderError
                 ),
-                firstNameError = updateErrorMessageOnChange(
+                fullNameError = updateErrorMessageOnChange(
                     prev.person?.firstNames,
-                    entity?.firstNames, prev.firstNameError
+                    entity?.firstNames, prev.fullNameError
                 ),
                 usernameError = updateErrorMessageOnChange(
                     prev.person?.username,
@@ -182,15 +189,15 @@ class SignUpViewModel(
     }
 
 
-    fun onParentCheckChanged(check: Boolean) {
+    fun onParentCheckChanged(checked: Boolean) {
         _uiState.update { prev ->
-            prev.copy(isParent = check)
+            prev.copy(isParent = checked)
         }
     }
 
-    fun onTeacherCheckChanged(check: Boolean) {
+    fun onTeacherCheckChanged(checked: Boolean) {
         _uiState.update { prev ->
-            prev.copy(isTeacher = check)
+            prev.copy(isTeacher = checked)
         }
     }
 
@@ -223,7 +230,7 @@ class SignUpViewModel(
     fun onFullNameValueChange(fullName: String) {
         _uiState.update { prev ->
             prev.copy(
-                fullName = fullName
+                firstName = fullName
             )
         }
 
@@ -232,44 +239,18 @@ class SignUpViewModel(
     private fun SignUpUiState.hasErrors(): Boolean {
         return usernameError != null ||
                 passwordError != null ||
-                firstNameError != null ||
+                fullNameError != null ||
                 genderError != null
     }
 
-    private fun validateUsername(username: String): Boolean {
-        var isValid = true
 
-        if (username.isEmpty()) {
-            isValid = false
-        }
-
-        if (isValid) {
-            if (username.contains(" ")) {
-                isValid = false
-            }
-        }
-
-        if (isValid) {
-            var usernameChars = username.toCharArray()
-
-            for (i in 1..<usernameChars.count()) {
-                if (usernameChars[i].isUpperCase()) {
-                    isValid = false
-                }
-            }
-        }
-
-        return isValid
-    }
-
-
-    fun onSignUpWithPasskey() {
+    fun onClickedSignup() {
 
 
         loadingState = LoadingUiState.INDETERMINATE
 
         // full name splitting into first name and last name
-        val fullName = _uiState.value.fullName?.trim()
+        val fullName = _uiState.value.firstName?.trim()
         val parts = fullName?.trim()?.split(" ", limit = 2)
         val firstName = parts?.get(0)
         val lastName = parts?.getOrElse(1) { "" }
@@ -286,9 +267,9 @@ class SignUpViewModel(
 
         _uiState.update { prev ->
             prev.copy(
-                firstNameError = if (savePerson.firstNames.isNullOrEmpty()) requiredFieldMessage else null,
+                fullNameError = if (savePerson.firstNames.isNullOrEmpty()) requiredFieldMessage else null,
                 genderError = if (savePerson.gender == GENDER_UNSET) requiredFieldMessage else null,
-                usernameError = if (!_uiState.value.signupWithPasskey && !validateUsername(
+                usernameError = if (!_uiState.value.passkeySupported && !validateUsernameUseCase.invoke(
                         savePerson.username ?: ""
                     )
                 ) {
@@ -296,7 +277,7 @@ class SignUpViewModel(
                 } else {
                     null
                 },
-                passwordError = if (!_uiState.value.signupWithPasskey && savePerson.username.isNullOrBlank()) {
+                passwordError = if (!_uiState.value.passkeySupported && savePerson.username.isNullOrBlank()) {
                     systemImpl.getString(MR.strings.field_required_prompt)
                 } else {
                     null
@@ -316,10 +297,9 @@ class SignUpViewModel(
                 val uid = activeDb.doorPrimaryKeyManager.nextIdAsync(Person.TABLE_ID)
                 savePerson.personUid = uid
 
-                if (_uiState.value.signupWithPasskey) {
+                if (_uiState.value.passkeySupported) {
                     val passkeyCreated = createPasskeyUseCase?.invoke(
-                        CreatePasskeyParams
-                            (
+                        CreatePasskeyParams(
                             username = savePerson.firstNames.toString(),
                             personUid = uid.toString(),
                             doorNodeId = di.doorIdentityHashCode.toString(),
@@ -336,8 +316,10 @@ class SignUpViewModel(
                             _uiState.value.personPicture
                         )
                     }
-                    if (passkeyCreated != null) {
-                        navigateToAppropriateScreen(savePerson)
+                    if (passkeyCreated == null) {
+                        snackDispatcher.showSnackBar(Snack(message = systemImpl.getString(MR.strings.sorry_something_went_wrong)))
+                        Napier.e { "Error occurred during creating passkey" }
+                        return@launch
                     }
                 } else {
                     val passwordVal = _uiState.value.password ?: return@launch
@@ -383,7 +365,12 @@ class SignUpViewModel(
     }
 
     private fun navigateToAppropriateScreen(savePerson: Person) {
-        if (_uiState.value.isTeacher) {
+
+        if (_uiState.value.isParent) {
+            navController.navigate(AddChildProfilesViewModel.DEST_NAME, emptyMap())
+
+        } else {
+
             val goOptions = UstadMobileSystemCommon.UstadGoOptions(clearStack = true)
             Napier.d { "AddSignUpPresenter: go to next destination: $nextDestination" }
             navController.navigateToViewUri(
@@ -393,15 +380,17 @@ class SignUpViewModel(
                 ),
                 goOptions
             )
-        }
-        if (_uiState.value.isParent) {
-            navController.navigate(AddChildProfileViewModel.DEST_NAME, emptyMap())
+
         }
     }
 
     fun onClickOtherOption() {
 
-        navController.navigate(OtherSignUpOptionSelectionViewModel.DEST_NAME, emptyMap())
+        navController.navigate(OtherSignUpOptionSelectionViewModel.DEST_NAME,
+            args = buildMap {
+                putFromSavedStateIfPresent(REGISTRATION_ARGS_TO_PASS)
+            }
+        )
 
     }
 
@@ -413,12 +402,19 @@ class SignUpViewModel(
 
         const val ARG_DATE_OF_BIRTH = "DateOfBirth"
 
+
+        const val ARG_IS_PERSONAL_ACCOUNT = "personalAccount"
+
+        const val ARG_NEW_OR_EXISTING_USER = "NewOrExistingUser"
+
         val REGISTRATION_ARGS_TO_PASS = listOf(
             UstadView.ARG_LEARNINGSPACE_URL,
             SiteTermsDetailView.ARG_SHOW_ACCEPT_BUTTON,
             UstadView.ARG_POPUPTO_ON_FINISH,
             ARG_DATE_OF_BIRTH,
             ARG_REGISTRATION_MODE,
+            ARG_NEW_OR_EXISTING_USER,
+            ARG_IS_PERSONAL_ACCOUNT
         )
 
         const val SIGN_WITH_USERNAME_AND_PASSWORD = "SignupWithUsernameAndPassowrd"

@@ -58,6 +58,12 @@ class EditChildProfileViewModel(
     }
 
     init {
+        _uiState.update { prev ->
+            prev.copy(
+                genderOptions = genderConfig.genderMessageIdsAndUnset,
+            )
+        }
+
         _appUiState.update { prev ->
             prev.copy(
 
@@ -65,13 +71,7 @@ class EditChildProfileViewModel(
                 hideBottomNavigation = true,
             )
         }
-        _uiState.update { prev ->
-            prev.copy(
-                person = Person(),
-                genderOptions = genderConfig.genderMessageIdsAndUnset,
 
-                )
-        }
 
         _appUiState.update { prev ->
             prev.copy(
@@ -83,23 +83,17 @@ class EditChildProfileViewModel(
             )
         }
         viewModelScope.launch {
-            val selectedContentEntry = savedStateHandle.getJson(
-                ARG_SELECTED_PERSON_ENTRY, Person.serializer()
-            )
 
-            val loadedEntity = loadEntity(
+            loadEntity(
                 serializer = Person.serializer(),
                 makeDefault = {
                     val newUid = activeDb.doorPrimaryKeyManager.nextIdAsync(Person.TABLE_ID)
                     Person(
                         personUid = newUid,
-                        firstNames = selectedContentEntry?.firstNames,
-                        lastName = selectedContentEntry?.lastName,
-                        gender = selectedContentEntry?.gender?:0,
-                        dateOfBirth = selectedContentEntry?.dateOfBirth?:0L,
+
                     )
                 },
-                onLoadFromDb = { null }, //Does not load from database - always JSON passed from ClazzEdit
+                onLoadFromDb = { null },
                 uiUpdate = {
                     _uiState.update { prev ->
                         prev.copy(person = it)

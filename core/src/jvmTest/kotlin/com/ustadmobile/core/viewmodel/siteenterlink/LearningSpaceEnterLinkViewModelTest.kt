@@ -14,20 +14,19 @@ import okhttp3.mockwebserver.MockResponse
 import okio.Buffer
 import org.junit.Test
 import org.kodein.di.*
-import org.mockito.kotlin.*
 import kotlin.test.assertNotNull
 
 @Suppress("RemoveExplicitTypeArguments")
-class SiteEnterLinkViewModelTest : AbstractMainDispatcherTest(){
+class LearningSpaceEnterLinkViewModelTest : AbstractMainDispatcherTest(){
 
     @Test
     fun givenValidLinkEntered_whenOnClickNextCalled_thenShouldNavigateToNextScreen(
 
-    ) = testViewModel<SiteEnterLinkViewModel>(
+    ) = testViewModel<LearningSpaceEnterLinkViewModel>(
 
     ) {
         viewModelFactory {
-            SiteEnterLinkViewModel(di, savedStateHandle)
+            LearningSpaceEnterLinkViewModel(di, savedStateHandle)
         }
 
         mockWebServer.start()
@@ -63,11 +62,11 @@ class SiteEnterLinkViewModelTest : AbstractMainDispatcherTest(){
     @Test
     fun givenInvalidLinkEntered_whenOnClickNextCalled_thenShouldShowError(
 
-    ) = testViewModel<SiteEnterLinkViewModel> {
+    ) = testViewModel<LearningSpaceEnterLinkViewModel> {
         val siteLink = "invalid"
 
         viewModelFactory {
-            SiteEnterLinkViewModel(di, savedStateHandle)
+            LearningSpaceEnterLinkViewModel(di, savedStateHandle)
         }
 
         viewModel.onSiteLinkUpdated("invalid")

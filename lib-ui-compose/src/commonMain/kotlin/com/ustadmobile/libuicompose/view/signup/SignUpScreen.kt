@@ -18,10 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.domain.passkey.PasskeyResult
 import com.ustadmobile.core.viewmodel.signup.SignUpUiState
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel
-import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.libuicompose.components.UstadImageSelectButton
@@ -29,7 +27,6 @@ import com.ustadmobile.libuicompose.components.UstadMessageIdOptionExposedDropDo
 import com.ustadmobile.libuicompose.components.UstadPasswordField
 import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
-import com.ustadmobile.libuicompose.util.passkey.CreatePasskeyPrompt
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.Dispatchers
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
@@ -46,7 +43,7 @@ fun SignUpScreen(viewModel: SignUpViewModel) {
         onPersonPictureUriChanged = viewModel::onPersonPictureChanged,
         onTeacherCheckChanged = viewModel::onTeacherCheckChanged,
         onParentCheckChanged = viewModel::onParentCheckChanged,
-        onclickSignUpWithPasskey = viewModel::onSignUpWithPasskey,
+        onclickSignUpWithPasskey = viewModel::onClickedSignup,
         onclickOtherOptions = viewModel::onClickOtherOption,
         onPasswordChanged = viewModel::onPasswordChanged,
         onFullNameValueChange = viewModel::onFullNameValueChange,
@@ -85,15 +82,15 @@ fun SignUpScreen(
                 .testTag("full_name")
                 .fillMaxWidth()
                 .defaultItemPadding(),
-            value =uiState.fullName?:"",
+            value =uiState.firstName?:"",
             label = { Text(stringResource(MR.strings.full_name) + "*") },
-            isError = uiState.firstNameError != null,
+            isError = uiState.fullNameError != null,
             singleLine = true,
             onValueChange = { fullName ->
                 onFullNameValueChange(fullName)
             },
             supportingText = {
-                Text(uiState.firstNameError ?: stringResource(MR.strings.required))
+                Text(uiState.fullNameError ?: stringResource(MR.strings.required))
             }
         )
 
@@ -116,7 +113,7 @@ fun SignUpScreen(
             }
         )
 
-        if (!uiState.signupWithPasskey) {
+        if (!uiState.passkeySupported) {
             OutlinedTextField(
                 modifier = Modifier.testTag("username").fillMaxWidth().defaultItemPadding(),
                 value = uiState.person?.username ?: "",
@@ -134,7 +131,7 @@ fun SignUpScreen(
             )
         }
 
-        if (!uiState.signupWithPasskey) {
+        if (!uiState.passkeySupported) {
             UstadPasswordField(
                 modifier = Modifier.testTag("password").fillMaxWidth().defaultItemPadding(),
                 value = uiState.password ?: "",
@@ -147,33 +144,35 @@ fun SignUpScreen(
                 }
             )
         }
-        Row(
-            modifier = Modifier.padding(vertical = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Checkbox(
-                checked = uiState.isTeacher,
-                onCheckedChange = {
-                    onTeacherCheckChanged(it)
-                    onParentCheckChanged(!it)
-                }
-            )
-            Text(
-                text = stringResource(MR.strings.i_am_teacher),
-                modifier = Modifier.padding(start = 4.dp, end = 16.dp)
-            )
+        if (uiState.isPersonalAccount) {
+            Row(
+                modifier = Modifier.padding(vertical = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Checkbox(
+                    checked = uiState.isTeacher,
+                    onCheckedChange = {
+                        onTeacherCheckChanged(it)
+                        onParentCheckChanged(!it)
+                    }
+                )
+                Text(
+                    text = stringResource(MR.strings.i_am_teacher),
+                    modifier = Modifier.padding(start = 4.dp, end = 16.dp)
+                )
 
-            Checkbox(
-                checked = uiState.isParent,
-                onCheckedChange = {
-                    onParentCheckChanged(it)
-                    onTeacherCheckChanged(!it)
-                }
-            )
-            Text(
-                text = stringResource(MR.strings.i_am_parent),
-                modifier = Modifier.padding(start = 4.dp)
-            )
+                Checkbox(
+                    checked = uiState.isParent,
+                    onCheckedChange = {
+                        onParentCheckChanged(it)
+                        onTeacherCheckChanged(!it)
+                    }
+                )
+                Text(
+                    text = stringResource(MR.strings.i_am_parent),
+                    modifier = Modifier.padding(start = 4.dp)
+                )
+            }
         }
         Button(
             onClick = onclickSignUpWithPasskey,
@@ -183,7 +182,7 @@ fun SignUpScreen(
                 .testTag("signup_passkey_button"),
         ) {
             Text(
-                text = if (uiState.signupWithPasskey) {
+                text = if (uiState.passkeySupported) {
                     stringResource(MR.strings.signup_with_passkey)
                 } else {
                     stringResource(MR.strings.signup)

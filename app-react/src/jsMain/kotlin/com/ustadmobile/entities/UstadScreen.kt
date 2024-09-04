@@ -115,7 +115,7 @@ import com.ustadmobile.core.viewmodel.epubcontent.EpubContentViewModel
 import com.ustadmobile.view.epubcontent.EpubContentScreen
 import com.ustadmobile.core.viewmodel.videocontent.VideoContentViewModel
 import com.ustadmobile.view.videocontent.VideoContentScreen
-import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
+import com.ustadmobile.core.viewmodel.siteenterlink.LearningSpaceEnterLinkViewModel
 import com.ustadmobile.view.clazz.courseblockedit.CourseBlockEditScreen
 import com.ustadmobile.core.viewmodel.clazzassignment.peerreviewerallocationedit.PeerReviewerAllocationEditViewModel
 import com.ustadmobile.view.clazzassignment.peerreviewerallocationedit.PeerReviewerAllocationEditScreen
@@ -191,7 +191,7 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(LoginViewModel.DEST_NAME, "Login Preview",
         LoginScreen
     ),
-    UstadScreen(SiteEnterLinkViewModel.DEST_NAME, "Site Enter Link Preview",
+    UstadScreen(LearningSpaceEnterLinkViewModel.DEST_NAME, "Site Enter Link Preview",
         SiteEnterLinkScreen
     ),
     UstadScreen(

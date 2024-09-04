@@ -1,48 +1,38 @@
 package com.ustadmobile.libuicompose.view.person.chlid
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Link
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.viewmodel.person.child.AddChildProfileUiState
-import com.ustadmobile.core.viewmodel.person.child.AddChildProfileViewModel
-import com.ustadmobile.lib.db.composites.CourseBlockAndEditEntities
+import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesUiState
+import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesViewModel
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.libuicompose.components.UstadAddListItem
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadPersonAvatar
-import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 import com.ustadmobile.libuicompose.view.person.addaccount.ParentAndChildrenProfileSelectionDialog
-import com.ustadmobile.libuicompose.view.settings.SettingsDialog
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.Dispatchers
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
-import moe.tlaster.precompose.viewmodel.viewModel
 import java.util.UUID
 
 @Composable
-fun AddChildProfileScreen(viewModel: AddChildProfileViewModel) {
-    val uiState: AddChildProfileUiState by viewModel.uiState.collectAsStateWithLifecycle(
-        AddChildProfileUiState(), Dispatchers.Main.immediate
+fun AddChildProfilesScreen(viewModel: AddChildProfilesViewModel) {
+    val uiState: AddChildProfilesUiState by viewModel.uiState.collectAsStateWithLifecycle(
+        AddChildProfilesUiState(), Dispatchers.Main.immediate
     )
-    AddChildProfileScreen(
+    AddChildProfilesScreen(
         uiState = uiState,
         onClickAddChild = viewModel::onClickAddChileProfile,
         onClickEditChild = viewModel::onClickEditChileProfile,
@@ -56,7 +46,7 @@ fun AddChildProfileScreen(viewModel: AddChildProfileViewModel) {
 
             ) {
             Text(text = stringResource(MR.strings.which_profile_do_you_want_to_start), modifier = Modifier.padding(16.dp))
-            uiState.profileIncludingParentAndChildren.forEach { profile ->
+            uiState.personAndChildrenList.forEach { profile ->
                 ListItem(modifier = Modifier.clickable { viewModel.onProfileSelected(profile) },
                     headlineContent = { Text(profile.fullName()) },)
             }
@@ -66,8 +56,8 @@ fun AddChildProfileScreen(viewModel: AddChildProfileViewModel) {
 }
 
 @Composable
-fun AddChildProfileScreen(
-    uiState: AddChildProfileUiState,
+fun AddChildProfilesScreen(
+    uiState: AddChildProfilesUiState,
     onClickAddChild: () -> Unit = {},
     onClickEditChild: (Person) -> Unit = {},
     onClickDeleteChileProfile: (Person) -> Unit = {},

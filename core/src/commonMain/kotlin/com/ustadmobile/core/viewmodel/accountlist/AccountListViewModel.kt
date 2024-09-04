@@ -24,7 +24,7 @@ import com.ustadmobile.core.viewmodel.about.OpenLicensesViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
-import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
+import com.ustadmobile.core.viewmodel.siteenterlink.LearningSpaceEnterLinkViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -205,7 +205,7 @@ class AccountListViewModel(
         }else {
             //Go to site enter link
             navController.navigate(
-                viewName = SiteEnterLinkViewModel.DEST_NAME,
+                viewName = LearningSpaceEnterLinkViewModel.DEST_NAME,
                 args = args,
             )
         }

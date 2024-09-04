@@ -354,7 +354,7 @@ class UstadAccountManager(
         passkeyResult: PasskeyResult,
         person: Person,
         personPicture: PersonPicture?,
-    ) {
+    ) = withContext(Dispatchers.Default) {
         val learningSpace = LearningSpace(learningSpaceUrl)
 
         val savePassKeyUseCase: SavePersonPasskeyUseCase = di.on(learningSpace).direct.instance()
@@ -364,17 +364,17 @@ class UstadAccountManager(
             .requireRepository()
         getSiteFromDbOrLoadFromHttp(repo)
 
-        val session = addSession(person, learningSpaceUrl, null)
 
-        val db: UmAppDatabase = di.on(learningSpace).direct.instance(tag = DoorTag.TAG_DB)
-        db.withDoorTransactionAsync {
-            if(db.personDao().findByUidAsync(person.personUid) == null) {
-                db.personDao().insertAsync(person)
+        val session = addSession(person, learningSpaceUrl, null)
+        repo.withDoorTransactionAsync {
+            if (repo.personDao().findByUidAsync(person.personUid) == null) {
+                repo.personDao().insertAsync(person)
             }
         }
+        val db: UmAppDatabase = di.on(learningSpace).direct.instance(tag = DoorTag.TAG_DB)
+
 
         currentUserSession = session
-
 
     }
 
@@ -540,13 +540,22 @@ class UstadAccountManager(
             removeActiveLearningSpace(session.learningSpace)
         }
     }
+
+    /**
+     *  with login with passkey ,it returns passKeySignInData , in the passKeySignInData there is
+     *  field userhandle , during creation of passkey we added the learning space url staring with @
+     *  so during login it return so endpointUrl we can get after @ , so with this url we can check in
+     *  that database where person is added.
+     */
     suspend fun loginWithPasskey(
         passKeySignInData: PassKeySignInData,
         currentServerUrl:String
-    ) = withContext(Dispatchers.Default){
+    ) : UmAccount = withContext(Dispatchers.Default){
         assertNotClosed()
+
         val userHandle = passKeySignInData.userHandle.base64StringToByteArray()
         val endpointUrl= userHandle.decodeToString().substringAfter("@")
+
         val loginResponse = httpClient.post {
             url("${endpointUrl.removeSuffix("/")}/api/passkey/verifypasskey")
             parameter("id", passKeySignInData.credentialId)
@@ -564,7 +573,10 @@ class UstadAccountManager(
         if(!passkeyVerifyResult.isVerified) {
             throw UnauthorizedException("Account not found")
         }
-        val repo: UmAppDatabase by di.on(LearningSpace(endpointUrl)).instance(tag = DoorTag.TAG_REPO)
+        val responseAccount=UmAccount(personUid = passkeyVerifyResult.personUid)
+        responseAccount.endpointUrl=currentServerUrl
+        val repo: UmAppDatabase = di.on(LearningSpace(endpointUrl)).direct.instance<UmAppDataLayer>()
+            .requireRepository()
 
         //Make sure that we fetch the person and personpicture into the database.
         val personAndPicture = repo.personDao().findByUidWithPicture(
@@ -572,13 +584,14 @@ class UstadAccountManager(
         val personInDb = personAndPicture.person!! //Cannot be null based on query
 
 
-        val repoWithCurrentUrl: UmAppDatabase by di.on(LearningSpace(currentServerUrl)).instance(tag = DoorTag.TAG_REPO)
+       // val repoWithCurrentUrl: UmAppDatabase by di.on(LearningSpace(currentServerUrl)).instance(tag = DoorTag.TAG_REPO)
 
-        getSiteFromDbOrLoadFromHttp(repoWithCurrentUrl)
+        getSiteFromDbOrLoadFromHttp(repo)
 
-        val newSession = addSession(personInDb, currentServerUrl, "")
+        val newSession = addSession(personInDb, currentServerUrl, null)
             currentUserSession = newSession
 
+        responseAccount
 
     }
 

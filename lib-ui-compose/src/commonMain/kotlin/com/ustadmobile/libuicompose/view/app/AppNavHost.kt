@@ -73,17 +73,18 @@ import com.ustadmobile.core.viewmodel.pdfcontent.PdfContentViewModel
 import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditViewModel
 import com.ustadmobile.core.viewmodel.person.bulkaddrunimport.BulkAddPersonRunImportViewModel
 import com.ustadmobile.core.viewmodel.person.bulkaddselectfile.BulkAddPersonSelectFileViewModel
-import com.ustadmobile.core.viewmodel.person.child.AddChildProfileViewModel
+import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesViewModel
 import com.ustadmobile.core.viewmodel.person.child.EditChildProfileViewModel
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
+import com.ustadmobile.core.viewmodel.person.learningspacelist.LearningSpaceListViewModel
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import com.ustadmobile.core.viewmodel.redirect.RedirectViewModel
 import com.ustadmobile.core.viewmodel.schedule.edit.ScheduleEditViewModel
 import com.ustadmobile.core.viewmodel.settings.SettingsViewModel
 import com.ustadmobile.core.viewmodel.site.detail.SiteDetailViewModel
 import com.ustadmobile.core.viewmodel.site.edit.SiteEditViewModel
-import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
+import com.ustadmobile.core.viewmodel.siteenterlink.LearningSpaceEnterLinkViewModel
 import com.ustadmobile.core.viewmodel.timezone.TimeZoneListViewModel
 import com.ustadmobile.libuicompose.nav.UstadNavControllerPreCompose
 import com.ustadmobile.libuicompose.util.NavControllerUriHandler
@@ -122,7 +123,7 @@ import com.ustadmobile.libuicompose.view.settings.SettingsScreen
 import com.ustadmobile.libuicompose.view.site.detail.SiteDetailScreen
 import com.ustadmobile.libuicompose.view.site.edit.SiteEditScreen
 import com.ustadmobile.libuicompose.view.site.termsdetail.SiteTermsDetailScreen
-import com.ustadmobile.libuicompose.view.siteenterlink.SiteEnterLinkScreen
+import com.ustadmobile.libuicompose.view.siteenterlink.LearningSpaceEnterLinkScreen
 import com.ustadmobile.libuicompose.view.timezone.TimeZoneListScreen
 import com.ustadmobile.libuicompose.viewmodel.ustadViewModel
 import kotlinx.coroutines.channels.BufferOverflow
@@ -170,7 +171,7 @@ import com.ustadmobile.libuicompose.view.parentalconsentmanagement.ParentalConse
 import com.ustadmobile.libuicompose.view.pdfcontent.PdfContentScreen
 import com.ustadmobile.libuicompose.view.person.bulkaddrunimport.BulkAddPersonRunImportScreen
 import com.ustadmobile.libuicompose.view.person.bulkaddselectfile.BulkAddPersonSelectFileScreen
-import com.ustadmobile.libuicompose.view.person.chlid.AddChildProfileScreen
+import com.ustadmobile.libuicompose.view.person.chlid.AddChildProfilesScreen
 import com.ustadmobile.libuicompose.view.person.chlid.EditChildProfileScreen
 import com.ustadmobile.libuicompose.view.person.registerminorwaitforparent.RegisterMinorWaitForParentScreen
 import com.ustadmobile.libuicompose.view.settings.DeveloperSettingsScreen
@@ -179,6 +180,7 @@ import com.ustadmobile.libuicompose.view.systempermission.detail.SystemPermissio
 import com.ustadmobile.libuicompose.view.systempermission.edit.SystemPermissionEditScreen
 import com.ustadmobile.libuicompose.view.videocontent.VideoContentScreen
 import com.ustadmobile.libuicompose.view.person.addaccount.AddAccountSelectNewOrExistingScreen
+import com.ustadmobile.libuicompose.view.person.learningspacelist.LearningSpaceListScreen
 import com.ustadmobile.libuicompose.view.signup.OtherSignUpOptionSelectionScreen
 import com.ustadmobile.libuicompose.view.xapicontent.XapiContentScreen
 import kotlinx.coroutines.flow.Flow
@@ -343,13 +345,13 @@ fun AppNavHost(
             }
 
             contentScene(
-                route = "/${SiteEnterLinkViewModel.DEST_NAME}"
+                route = "/${LearningSpaceEnterLinkViewModel.DEST_NAME}"
             ) { backStackEntry ->
-                SiteEnterLinkScreen(
+                LearningSpaceEnterLinkScreen(
                     viewModel = appViewModel(
-                        backStackEntry, SiteEnterLinkViewModel::class
+                        backStackEntry, LearningSpaceEnterLinkViewModel::class
                     ) { di, savedStateHandle ->
-                        SiteEnterLinkViewModel(di, savedStateHandle)
+                        LearningSpaceEnterLinkViewModel(di, savedStateHandle)
                     }
                 )
             }
@@ -388,13 +390,24 @@ fun AppNavHost(
                 )
             }
             contentScene(
-                route = "/${AddChildProfileViewModel.DEST_NAME}"
+                route = "/${AddChildProfilesViewModel.DEST_NAME}"
             ) { backStackEntry ->
-                AddChildProfileScreen (
+                AddChildProfilesScreen (
                     viewModel = appViewModel(
-                        backStackEntry, AddChildProfileViewModel::class,
+                        backStackEntry, AddChildProfilesViewModel::class,
                     ) { di, savedStateHandle ->
-                        AddChildProfileViewModel(di, savedStateHandle)
+                        AddChildProfilesViewModel(di, savedStateHandle)
+                    }
+                )
+            }
+            contentScene(
+                route = "/${LearningSpaceListViewModel.DEST_NAME}"
+            ) { backStackEntry ->
+                LearningSpaceListScreen (
+                    viewModel = appViewModel(
+                        backStackEntry, LearningSpaceListViewModel::class,
+                    ) { di, savedStateHandle ->
+                        LearningSpaceListViewModel(di, savedStateHandle)
                     }
                 )
             }

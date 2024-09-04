@@ -8,12 +8,15 @@ import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.appendSelectedAccount
 import com.ustadmobile.core.util.ext.onActiveEndpoint
+import com.ustadmobile.core.util.ext.replaceOrAppend
+import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonParentJoin
+import com.ustadmobile.lib.db.entities.Schedule
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -28,45 +31,47 @@ import org.kodein.di.DI
 import org.kodein.di.instance
 
 
-data class AddChildProfileUiState(
+data class AddChildProfilesUiState(
     val onAddChildProfile: String? = null,
     val childProfiles: List<Person> = emptyList(),
     val personParenJoinList: List<PersonParentJoin> = emptyList(),
-    val profileIncludingParentAndChildren: List<Person> = emptyList(),
-    val showProfileSelectionDialog: Boolean = false
-)
+    val showProfileSelectionDialog: Boolean = false,
+    val parent:Person?=null
+){
+    val personAndChildrenList:List<Person>
+        get() =( parent?.let { listOf(it) }?: emptyList())+childProfiles
+}
 
-class AddChildProfileViewModel(
+class AddChildProfilesViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
 ) : UstadEditViewModel(di, savedStateHandle, DEST_NAME) {
 
     private val _uiState = MutableStateFlow(
-        AddChildProfileUiState()
+        AddChildProfilesUiState()
     )
     private var nextDestination: String = savedStateHandle[UstadView.ARG_NEXT] ?: ClazzListViewModel.DEST_NAME_HOME
      val repo: UmAppDatabase by di.onActiveEndpoint().instance()
 
-    val uiState: Flow<AddChildProfileUiState> = _uiState.asStateFlow()
+    val uiState: Flow<AddChildProfilesUiState> = _uiState.asStateFlow()
 
-    private val parentToList: MutableList<Person> = mutableListOf(accountManager.currentUserSession.person)
+     val parentToList: MutableList<Person> = mutableListOf(accountManager.currentUserSession.person)
 
     init {
-        accountManager.activeLearningSpace.url
-
+        _uiState.update { prev ->
+            prev.copy(
+                parent = accountManager.currentUserSession.person,
+            )
+        }
         _appUiState.update { prev ->
             prev.copy(
                 title = systemImpl.getString(MR.strings.add_child_profiles),
                 hideBottomNavigation = true,
-            )
-        }
-
-        _appUiState.update { prev ->
-            prev.copy(
                 actionBarButtonState = ActionBarButtonUiState(
                     visible = true,
                     text = systemImpl.getString(MR.strings.finish),
-                    onClick = this@AddChildProfileViewModel::onClickFinish
+                    onClick = this@AddChildProfilesViewModel::onClickFinish,
+
                 )
             )
         }
@@ -80,19 +85,9 @@ class AddChildProfileViewModel(
                 loadEntity(
                     serializer = ListSerializer(Person.serializer()),
                     loadFromStateKeys = listOf(STATE_KEY_PERSONS),
-                    onLoadFromDb = { db ->
-                        val ChildProfilesDb = db.personDao()
-                            .takeIf { entityUidArg != 0L }
-                            ?.getMinorByParentPersonUidAsync(accountManager.currentUserSession.person.personUid)
-                            ?: emptyList()
-                        ChildProfilesDb.map {
-                            Person(
-                                firstNames = it.firstNames,
-                                lastName = it.lastName,
-                                dateOfBirth = it.dateOfBirth
+                    onLoadFromDb = {
+                     emptyList()
 
-                            )
-                        }
                     },
                     makeDefault = {
                         emptyList()
@@ -111,10 +106,9 @@ class AddChildProfileViewModel(
                     val childProfileResult = result.result as? Person
                         ?: return@collect
 
-                    val newChildProfileList = AddOrUpdatedChildProfileUseCase().invoke(
-                        currentList = _uiState.value.childProfiles,
-                        addOrUpdateChildProfile = childProfileResult,
-                    )
+                    val newChildProfileList = _uiState.value.childProfiles.replaceOrAppend(childProfileResult) {
+                        it.personUid == childProfileResult.personUid
+                    }
 
                     updateChildProfileList(newChildProfileList)
                 }
@@ -146,7 +140,6 @@ class AddChildProfileViewModel(
             _uiState.update { prev ->
                 prev.copy(
                     showProfileSelectionDialog = true,
-                    profileIncludingParentAndChildren = parentToList + prev.childProfiles
                 )
             }
         } else {
@@ -161,7 +154,7 @@ class AddChildProfileViewModel(
             key = RESULT_KEY_PERSON,
             currentValue = null,
             args = buildMap {
-
+                savedStateHandle[ARG_ENTITY_JSON]
             },
             serializer = Person.serializer(),
         )
@@ -172,6 +165,9 @@ class AddChildProfileViewModel(
             nextViewName = EditChildProfileViewModel.DEST_NAME,
             key = RESULT_KEY_PERSON,
             serializer = Person.serializer(),
+            args = buildMap {
+                savedStateHandle[ARG_ENTITY_JSON]
+            },
             currentValue = person,
         )
     }

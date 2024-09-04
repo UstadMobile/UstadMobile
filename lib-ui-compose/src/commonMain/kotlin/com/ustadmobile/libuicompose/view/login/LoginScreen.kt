@@ -51,7 +51,6 @@ fun LoginScreen(
         onUsernameValueChange = viewModel::onUsernameChanged,
         onPasswordValueChange = viewModel::onPasswordChanged,
         onSignInWithPasskey = viewModel::onSignInWithPassKey,
-        onClickSignUp = viewModel::onClickSignUp,
     )
 }
 
@@ -61,7 +60,6 @@ fun LoginScreen(
     onClickLogin: () -> Unit = {},
     onClickCreateAccount: () -> Unit = {},
     onClickConnectAsGuest: () -> Unit = {},
-    onClickSignUp: () -> Unit = {},
     onUsernameValueChange: (String) -> Unit = {},
     onPasswordValueChange: (String) -> Unit = {},
     onSignInWithPasskey: (PassKeySignInData) -> Unit = {},
@@ -146,15 +144,6 @@ fun LoginScreen(
                 onSignInWithPasskey(it)
             }
         )
-        OutlinedButton(
-            onClick = onClickSignUp,
-            modifier = Modifier
-                .testTag("connect_as_guest_button")
-                .defaultItemPadding()
-                .fillMaxWidth(),
-        ) {
-            Text("Sign Up")
-        }
         Spacer(modifier = Modifier.height(10.dp))
         if(uiState.connectAsGuestVisible) {
             OutlinedButton(

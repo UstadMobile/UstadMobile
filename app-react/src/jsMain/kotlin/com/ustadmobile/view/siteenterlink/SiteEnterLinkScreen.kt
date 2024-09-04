@@ -5,8 +5,8 @@ import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.core.impl.locale.StringProvider
-import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkUiState
-import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
+import com.ustadmobile.core.viewmodel.siteenterlink.LearningSpaceEnterLinkUiState
+import com.ustadmobile.core.viewmodel.siteenterlink.LearningSpaceEnterLinkViewModel
 import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.mui.components.UstadTextField
 import react.dom.html.ReactHTML.img
@@ -19,7 +19,7 @@ import mui.system.sx
 import react.*
 
 external interface SiteEnterLinkProps : Props {
-    var uiState: SiteEnterLinkUiState
+    var uiState: LearningSpaceEnterLinkUiState
 
     var onClickNext: () -> Unit
 
@@ -30,10 +30,10 @@ external interface SiteEnterLinkProps : Props {
 
 val SiteEnterLinkScreen = FC<Props> {
     val viewModel = useUstadViewModel { di, savedStateHandle ->
-        SiteEnterLinkViewModel(di, savedStateHandle)
+        LearningSpaceEnterLinkViewModel(di, savedStateHandle)
     }
 
-    val uiState by viewModel.uiState.collectAsState(SiteEnterLinkUiState())
+    val uiState by viewModel.uiState.collectAsState(LearningSpaceEnterLinkUiState())
 
     SiteEnterLinkComponent2 {
         this.uiState = uiState

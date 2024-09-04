@@ -13,6 +13,8 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
+import com.ustadmobile.core.impl.appstate.Snack
+import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
@@ -299,18 +301,15 @@ class LoginViewModel(
         }
     }
 
-
-    fun onClickSignUp(){
-        val endpointUrl = serverUrl.requireHttpPrefix()
-            .requirePostfix("/")
-        val args = mutableMapOf(
-            UstadView.ARG_LEARNINGSPACE_URL to endpointUrl)
-        navController.navigate(SignUpViewModel.DEST_NAME, args)
-    }
-
     fun onSignInWithPassKey(passKeySignInData: PassKeySignInData){
         viewModelScope.launch {
-         accountManager.loginWithPasskey(passKeySignInData,serverUrl)
+            try {
+                val account = accountManager.loginWithPasskey(passKeySignInData, serverUrl)
+                goToNextDestAfterLoginOrGuestSelected(account.personUid)
+            } catch(e: Exception) {
+                snackDispatcher.showSnackBar(Snack(message ="error occurred :"+e.message))
+
+            }
         }
     }
 
