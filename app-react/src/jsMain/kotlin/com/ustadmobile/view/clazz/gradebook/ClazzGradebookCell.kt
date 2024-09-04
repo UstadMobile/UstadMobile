@@ -8,9 +8,7 @@ import com.ustadmobile.mui.components.ThemeContext
 import mui.material.Box
 import mui.material.CircularProgress
 import mui.material.CircularProgressVariant
-import mui.material.Stack
 import mui.material.Typography
-import mui.system.responsive
 import mui.system.sx
 import react.FC
 import react.Props
@@ -24,14 +22,18 @@ import web.cssom.translate
 import mui.icons.material.Check as CheckIcon
 import mui.icons.material.Close as CloseIcon
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.util.ext.maxScoreSummedIfModule
+import com.ustadmobile.core.viewmodel.clazz.gradebook.aggregateIfModule
 import mui.material.Tooltip
 import react.ReactNode
 
 external interface ClazzGradebookCellProps: Props {
 
-    var blockStatus: BlockStatus?
+    var blockUid: Long
 
-    var block: CourseBlock?
+    var blockStatuses: List<BlockStatus>
+
+    var blocks: List<CourseBlock>
 
     var width: Int
 
@@ -46,6 +48,10 @@ val ClazzGradebookCell = FC<ClazzGradebookCellProps> { props ->
     val scoreMarginVal = (props.scoreMargin ?: 8)
     val strings = useStringProvider()
 
+    val block = props.blocks.firstOrNull { it.cbUid == props.blockUid }
+    val blockStatus = props.blockStatuses.aggregateIfModule(props.blockUid, props.blocks)
+    val maxPoints = block?.maxScoreSummedIfModule(allBlocks = props.blocks)
+
     Box {
         sx {
             position = Position.relative
@@ -54,13 +60,13 @@ val ClazzGradebookCell = FC<ClazzGradebookCellProps> { props ->
             textAlign = TextAlign.center
         }
 
-        val displayMark = props.blockStatus?.displayMarkFor(props.block)
-        val progress = props.blockStatus?.sProgress
+        val displayMark = blockStatus?.displayMarkFor(maxPoints)
+        val progress = blockStatus?.sProgress
 
         when {
             displayMark != null -> {
-                val markColor = props.blockStatus?.sScoreScaled?.let {
-                    props.block?.colorForMark(theme, it)
+                val markColor = blockStatus.sScoreScaled?.let { scoreScaled ->
+                    block?.takeIf { blockStatus.sIsCompleted }?.colorForMark(theme, scoreScaled)
                 }
 
                 val scoreMargin = 8
@@ -78,7 +84,7 @@ val ClazzGradebookCell = FC<ClazzGradebookCellProps> { props ->
                 }
             }
 
-            props.blockStatus?.sIsCompleted == true || props.blockStatus?.sIsSuccess == true -> {
+            blockStatus?.sIsCompleted == true || blockStatus?.sIsSuccess == true -> {
                 Tooltip {
                     title = ReactNode(strings[MR.strings.completed])
 
@@ -96,7 +102,7 @@ val ClazzGradebookCell = FC<ClazzGradebookCellProps> { props ->
 
             }
 
-            props.blockStatus?.sIsSuccess == false -> {
+            blockStatus?.sIsSuccess == false -> {
                 Tooltip {
                     title = ReactNode(strings[MR.strings.failed])
 
@@ -138,56 +144,4 @@ val ClazzGradebookCell = FC<ClazzGradebookCellProps> { props ->
         }
 
     }
-}
-
-val ClazzGradebookPreview = FC<Props> {
-    Stack {
-        spacing = responsive(2)
-
-        //Marked
-        ClazzGradebookCell {
-            blockStatus = BlockStatus(
-                sIsCompleted = true,
-                sProgress = 100,
-                sScoreScaled = 0.8f
-            )
-            block = CourseBlock(
-                cbMaxPoints = 10f,
-            )
-            width = 56
-            height = 56
-        }
-
-        //Completed without mark
-        ClazzGradebookCell {
-            blockStatus = BlockStatus(
-                sIsCompleted = true,
-                sProgress = 100,
-            )
-            block = CourseBlock(
-                cbMaxPoints = null,
-            )
-            width = 56
-            height = 56
-        }
-
-        //Progressed without mark
-        ClazzGradebookCell {
-            blockStatus = BlockStatus(
-                sProgress = 60,
-            )
-            block = CourseBlock(cbMaxPoints = null)
-            width = 56
-            height = 56
-        }
-
-        //Empty
-        ClazzGradebookCell {
-            blockStatus = BlockStatus()
-            block = CourseBlock(cbMaxPoints = null)
-            width = 56
-            height = 56
-        }
-    }
-
 }

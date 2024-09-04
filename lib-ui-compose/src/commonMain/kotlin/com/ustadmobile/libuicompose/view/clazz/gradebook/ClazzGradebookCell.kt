@@ -19,6 +19,8 @@ import com.ustadmobile.lib.db.composites.BlockStatus
 import com.ustadmobile.libuicompose.components.scaledTextStyle
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.util.ext.maxScoreSummedIfModule
+import com.ustadmobile.core.viewmodel.clazz.gradebook.aggregateIfModule
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.libuicompose.components.UstadTooltipBox
 
@@ -30,15 +32,18 @@ fun ClazzGradebookCell(
     scale: Float,
     modifier: Modifier = Modifier,
 ) {
-    val blockStatus = blockStatuses.firstOrNull { it.sCbUid == blockUid }
     val block = blocks.firstOrNull { it.cbUid == blockUid }
 
+    val blockStatus = blockStatuses.aggregateIfModule(blockUid, blocks)
+
     val markColors = blockStatus?.sScoreScaled?.let {
-        block?.colorsForMark(it)
+        block?.takeIf { blockStatus.sIsCompleted  }?.colorsForMark(it)
     }
 
+    val maxPoints = block?.maxScoreSummedIfModule(allBlocks = blocks)
+
     Box(modifier) {
-        val displayMark = blockStatus?.displayMarkFor(block)
+        val displayMark = blockStatus?.displayMarkFor(maxPoints)
         val progress = blockStatus?.sProgress
 
         when {
@@ -115,6 +120,5 @@ fun ClazzGradebookCell(
                 )
             }
         }
-
     }
 }

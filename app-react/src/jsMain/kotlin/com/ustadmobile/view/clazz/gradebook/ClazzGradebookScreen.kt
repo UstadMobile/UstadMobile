@@ -85,6 +85,8 @@ val ClazzGradebookComponent = FC<ClazzGradebookProps> { props ->
     //account for half of scrollbar height?
     val heightMargin = 4
 
+    val allCourseBlocks = props.uiState.courseBlocks.mapNotNull { it.block }
+
     VirtualList {
         style = jso {
             height = "calc(100vh - ${tabAndAppBarHeight + heightMargin}px)".unsafeCast<Height>()
@@ -150,10 +152,9 @@ val ClazzGradebookComponent = FC<ClazzGradebookProps> { props ->
                     //Progress blocks for each here.
                     props.uiState.courseBlocks.forEach { blockVal ->
                         ClazzGradebookCell {
-                            blockStatus = item?.blockStatuses?.firstOrNull {
-                                it.sCbUid == blockVal.block?.cbUid
-                            }
-                            block = blockVal.block
+                            blockUid = blockVal.block?.cbUid ?: 0L
+                            blockStatuses = item?.blockStatuses ?: emptyList()
+                            blocks = allCourseBlocks
                             width = COLUMN_WIDTH
                             height = COLUMN_HEIGHT
                         }
