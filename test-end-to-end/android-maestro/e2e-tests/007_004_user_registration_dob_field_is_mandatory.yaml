@@ -1,0 +1,27 @@
+appId: com.toughra.ustadmobile
+env:
+ TESTRESULTSDIR: "${TESTRESULTSDIR}/007_004_user_registration_dob_field_is_mandatory"
+ TESTNAME:  "007_004_user_registration_dob_field_is_mandatory"
+---
+- clearState: com.toughra.ustadmobile
+- runFlow:
+   file: "../common/startserver.yaml"
+   env:
+    CONTROLSERVER: ${CONTROLSERVER}
+    TESTSERIAL: ${TESTSERIAL}
+    TESTNAME: ${TESTNAME}
+
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+#admin login
+- runFlow:
+   file: "../common/user_login.yaml"
+- runFlow:
+   file: "../common/enable_user_registration.yaml"
+- assertVisible: "Yes"
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- assertVisible: "Create account"
+- tapOn: "Create account"
+- tapOn: "Next"
+- assertVisible: "This field is required"
