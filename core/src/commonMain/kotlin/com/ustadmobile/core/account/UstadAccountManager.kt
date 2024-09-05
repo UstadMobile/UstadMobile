@@ -362,7 +362,12 @@ class UstadAccountManager(
 
         val repo: UmAppDatabase = di.on(learningSpace).direct.instance<UmAppDataLayer>()
             .requireRepository()
-        getSiteFromDbOrLoadFromHttp(repo)
+        try {
+            getSiteFromDbOrLoadFromHttp(repo)
+        }catch (e:Exception){
+
+        }
+
 
 
         val session = addSession(person, learningSpaceUrl, null)
