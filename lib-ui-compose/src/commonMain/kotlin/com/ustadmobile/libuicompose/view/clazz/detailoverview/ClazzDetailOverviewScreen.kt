@@ -36,7 +36,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.ext.UNSET_DISTANT_FUTURE
 import com.ustadmobile.core.util.ext.capitalizeFirstLetter
 import com.ustadmobile.core.util.ext.htmlToPlainText
@@ -55,8 +54,6 @@ import com.ustadmobile.libuicompose.components.UstadHtmlText
 import com.ustadmobile.libuicompose.components.UstadDetailField2
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadQuickActionButton
-import com.ustadmobile.libuicompose.components.ustadPagedItems
-import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
 import com.ustadmobile.libuicompose.util.compose.stringIdMapResource
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.util.rememberFormattedDateRange
@@ -66,8 +63,6 @@ import com.ustadmobile.libuicompose.view.clazz.paddingCourseBlockIndent
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.libuicompose.view.clazz.painterForDefaultCourseImage
 import com.ustadmobile.libuicompose.view.contententry.contentTypeImageVector
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
 
 @Composable
 fun ClazzDetailOverviewScreen(viewModel: ClazzDetailOverviewViewModel) {
@@ -77,7 +72,6 @@ fun ClazzDetailOverviewScreen(viewModel: ClazzDetailOverviewViewModel) {
 
     ClazzDetailOverviewScreen(
         uiState = uiState,
-        refreshCommandFlow = viewModel.listRefreshCommandFlow,
         onClickCourseBlock = viewModel::onClickCourseBlock,
         onClickClassCode = viewModel::onClickClazzCode,
         onClickPermissions = viewModel::onClickPermissions,
@@ -87,16 +81,10 @@ fun ClazzDetailOverviewScreen(viewModel: ClazzDetailOverviewViewModel) {
 @Composable
 fun ClazzDetailOverviewScreen(
     uiState: ClazzDetailOverviewUiState = ClazzDetailOverviewUiState(),
-    refreshCommandFlow: Flow<RefreshCommand> = emptyFlow(),
     onClickClassCode: (String) -> Unit = {},
     onClickCourseBlock: (CourseBlock) -> Unit = {},
     onClickPermissions: () -> Unit = { },
 ) {
-    val mediatorResult = rememberDoorRepositoryPager(
-        uiState.courseBlockList, refreshCommandFlow,
-    )
-
-    val lazyPagingItems = mediatorResult.lazyPagingItems
 
     val clazzDateRange = rememberFormattedDateRange(
         startTimeInMillis = uiState.clazz?.clazzStartTime ?: 0L,
@@ -247,15 +235,16 @@ fun ClazzDetailOverviewScreen(
             HorizontalDivider(thickness = 1.dp)
         }
 
-        ustadPagedItems(
-            pagingItems = lazyPagingItems,
-            key = { it.courseBlock?.cbUid ?: -1 }
+        items(
+            items = uiState.displayBlockList,
+            key = { it.courseBlock?.cbUid ?: it.hashCode() }
         ) {
             CourseBlockListItem(
                 courseBlock = it,
                 onClick = {
-                    it?.courseBlock?.also(onClickCourseBlock)
-                }
+                    it.courseBlock?.also(onClickCourseBlock)
+                },
+                expanded = (it.courseBlock?.cbUid ?: 0) !in uiState.collapsedBlockUids
             )
         }
     }
@@ -264,6 +253,7 @@ fun ClazzDetailOverviewScreen(
 @Composable
 fun CourseBlockListItem(
     courseBlock: CourseBlockAndDisplayDetails?,
+    expanded: Boolean = true,
     onClick: () -> Unit,
 ){
 
@@ -334,7 +324,7 @@ fun CourseBlockListItem(
         },
         trailingContent = {
             if(courseBlock?.courseBlock?.cbType == CourseBlock.BLOCK_MODULE_TYPE) {
-                val trailingIcon = if(courseBlock.expanded)
+                val trailingIcon = if(expanded)
                     Icons.Default.KeyboardArrowUp
                 else
                     Icons.Default.KeyboardArrowDown
@@ -345,7 +335,7 @@ fun CourseBlockListItem(
                     Icon(
                         imageVector = trailingIcon,
                         contentDescription = stringResource(
-                            if(courseBlock.expanded)
+                            if(expanded)
                                 MR.strings.collapse
                             else
                                 MR.strings.expand

@@ -37,6 +37,8 @@ external interface ClazzDetailOverviewCourseBlockListItemProps : Props {
 
     var courseBlock: CourseBlockAndDisplayDetails?
 
+    var expanded: Boolean?
+
     var onClickCourseBlock: (CourseBlock) -> Unit
 
 }
@@ -158,7 +160,7 @@ val ClazzDetailOverviewCourseBlockListItem = FC<ClazzDetailOverviewCourseBlockLi
         }
 
         secondaryAction = Tooltip.create {
-            val labelText = if(props.courseBlock?.expanded == true) {
+            val labelText = if(props.expanded != false) {
                 strings[MR.strings.collapse]
             }else {
                 strings[MR.strings.expand]
@@ -168,7 +170,7 @@ val ClazzDetailOverviewCourseBlockListItem = FC<ClazzDetailOverviewCourseBlockLi
 
             IconButton {
                 if(courseBlockVal?.cbType == CourseBlock.BLOCK_MODULE_TYPE) {
-                    val trailingIcon = if(props.courseBlock?.expanded == true)
+                    val trailingIcon = if(props.expanded != false)
                         KeyboardArrowUp
                     else
                         KeyboardArrowDown

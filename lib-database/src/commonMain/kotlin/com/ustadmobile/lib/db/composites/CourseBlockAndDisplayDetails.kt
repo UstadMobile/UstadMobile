@@ -17,7 +17,7 @@ data class CourseBlockAndDisplayDetails (
     var contentEntry: ContentEntry? = null,
     @Embedded
     var contentEntryPicture2: ContentEntryPicture2? = null,
-    var expanded: Boolean = false,
+
     @Embedded
     var status: BlockStatus? = null,
 )

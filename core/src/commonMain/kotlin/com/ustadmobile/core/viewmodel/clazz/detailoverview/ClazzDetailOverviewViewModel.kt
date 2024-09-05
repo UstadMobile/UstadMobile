@@ -9,8 +9,6 @@ import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.CourseDiscussionDetailViewModel
-import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
-import app.cash.paging.PagingSource
 import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCase
 import com.ustadmobile.core.impl.appstate.Snack
@@ -32,6 +30,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -47,7 +46,7 @@ data class ClazzDetailOverviewUiState(
 
     val scheduleList: List<Schedule> = emptyList(),
 
-    val courseBlockList: () -> PagingSource<Int, CourseBlockAndDisplayDetails> = { EmptyPagingSource() },
+    val courseBlockList: List<CourseBlockAndDisplayDetails> = emptyList(),
 
     val clazzCodeVisible: Boolean = false,
 
@@ -58,8 +57,6 @@ data class ClazzDetailOverviewUiState(
     val managePermissionVisible: Boolean = false,
 
 ) {
-    val clazzSchoolUidVisible: Boolean
-        get() = clazz?.clazzSchoolUid != null && clazz.clazzSchoolUid != 0L
 
     val clazzDateVisible: Boolean
         get() = clazz?.clazzStartTime.isDateSet()
@@ -81,6 +78,12 @@ data class ClazzDetailOverviewUiState(
     val quickActionBarVisible: Boolean
         get() = managePermissionVisible
 
+    val displayBlockList: List<CourseBlockAndDisplayDetails> by lazy(LazyThreadSafetyMode.NONE) {
+        courseBlockList.filter {
+            !collapsedBlockUids.contains(it.courseBlock?.cbModuleParentBlockUid ?: 0)
+        }
+    }
+
 }
 
 class ClazzDetailOverviewViewModel(
@@ -94,17 +97,6 @@ class ClazzDetailOverviewViewModel(
     val uiState: Flow<ClazzDetailOverviewUiState> = _uiState.asStateFlow()
 
     private val setClipboardStringUseCase: SetClipboardStringUseCase by instance()
-
-    private val pagingSourceFactory: () -> PagingSource<Int, CourseBlockAndDisplayDetails> = {
-        activeRepo.courseBlockDao().findAllCourseBlockByClazzUidAsPagingSource(
-            clazzUid = entityUidArg,
-            collapseList = _uiState.value.collapsedBlockUids.toList(),
-            includeInactive = false,
-            includeHidden = false,
-            hideUntilFilterTime = systemTimeInMillis(),
-            accountPersonUid = activeUserPersonUid,
-        )
-    }
 
     private val _listRefreshCommandFlow = MutableSharedFlow<RefreshCommand>(
         replay = 1, extraBufferCapacity = 0, onBufferOverflow = BufferOverflow.DROP_OLDEST
@@ -139,15 +131,23 @@ class ClazzDetailOverviewViewModel(
                 launch {
                     permissionFlow.map {
                         it.firstPermission
-                    }.distinctUntilChanged().collect { hasViewPermission ->
-                        _uiState.update { prev ->
-                            prev.copy(
-                                courseBlockList = if(hasViewPermission) {
-                                    pagingSourceFactory
-                                }else {
-                                    { EmptyPagingSource() }
-                                },
-                            )
+                    }.distinctUntilChanged().collectLatest { hasViewPermission ->
+                        if(hasViewPermission) {
+                            activeRepo.courseBlockDao().findAllCourseBlockByClazzUidAsFlow(
+                                clazzUid = entityUidArg,
+                                includeInactive = false,
+                                includeHidden = false,
+                                hideUntilFilterTime = systemTimeInMillis(),
+                                accountPersonUid = activeUserPersonUid,
+                            ).collect { courseBlockList ->
+                                _uiState.update { prev ->
+                                    prev.copy(courseBlockList = courseBlockList)
+                                }
+                            }
+                        }else{
+                            _uiState.update { prev ->
+                                prev.copy(courseBlockList = emptyList())
+                            }
                         }
                     }
                 }
