@@ -8,6 +8,7 @@ import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
+import com.ustadmobile.core.viewmodel.signup.SignUpViewModel.Companion.REGISTRATION_ARGS_TO_PASS
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -59,6 +60,7 @@ class OtherSignUpOptionSelectionViewModel(
     }
 
     fun onSignUpWithPasskey() {
+
         navController.popBackStack(SignUpViewModel.DEST_NAME,false)
 
     }
@@ -81,9 +83,11 @@ class OtherSignUpOptionSelectionViewModel(
 
         val args = buildMap {
             put(SignUpViewModel.SIGN_WITH_USERNAME_AND_PASSWORD, "true")
+            putFromSavedStateIfPresent(REGISTRATION_ARGS_TO_PASS)
+
         }
 
-            navController.navigate(SignUpViewModel.DEST_NAME, args)
+        navController.navigate(SignUpViewModel.DEST_NAME, args)
 
 
     }

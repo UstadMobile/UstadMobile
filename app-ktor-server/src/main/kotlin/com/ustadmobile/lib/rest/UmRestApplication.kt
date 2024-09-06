@@ -164,7 +164,7 @@ val REQUIRED_EXTERNAL_COMMANDS = emptyList<String>()
 val KTOR_SERVER_ROUTES = listOf(
     "/UmAppDatabase", "/config",
     "/ContainerEntryList", "/ContainerEntryFile", "/auth", "/ContainerMount",
-    "/Site", "/import", "/contentupload", "/websocket", "/api", "/staticfiles"
+    "/Site", "/import", "/contentupload", "/websocket", "/api", "/staticfiles","/.well-known"
 )
 
 
@@ -327,6 +327,9 @@ fun Application.umRestApplication(
     install(ConditionalHeaders)
 
     val dataDirPath = environment.config.absoluteDataDir()
+
+    val  wellKnownDir  = environment.config.fileProperty("ktor.ustad.wellKnownDir","well-known")
+
 
     fun String.replaceDbUrlVars(): String {
         return replace("(datadir)", dataDirPath.absolutePath)
@@ -902,6 +905,7 @@ fun Application.umRestApplication(
     install(Routing) {
         val di by closestDI()
 
+
         prefixRoute(sitePrefix) {
             //addHostCheckIntercept()
             personAuthRegisterRoute()
@@ -913,6 +917,8 @@ fun Application.umRestApplication(
             SiteRoute()
 
             GetAppRoute()
+
+            staticFiles("/.well-known",wellKnownDir)
 
             route("config") {
                 route("api"){

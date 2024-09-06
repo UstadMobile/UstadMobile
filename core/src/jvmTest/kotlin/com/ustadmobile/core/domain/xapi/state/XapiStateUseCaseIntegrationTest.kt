@@ -299,8 +299,9 @@ class XapiStateUseCaseIntegrationTest {
                 )
                 throw IllegalStateException("Must not store large text body without throwing exception")
             }catch (e: HttpApiException) {
-                e.printStackTrace()
                 assertEquals(413, e.statusCode)
+                e.printStackTrace()
+
             }
         }
     }
