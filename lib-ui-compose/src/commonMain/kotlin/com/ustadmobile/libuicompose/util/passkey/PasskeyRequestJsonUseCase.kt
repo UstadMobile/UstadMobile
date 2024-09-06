@@ -1,5 +1,6 @@
 package com.ustadmobile.libuicompose.util.passkey
 
+import com.ustadmobile.core.domain.passkey.CreatePasskeyParams
 import com.ustadmobile.core.domain.passkey.UserPasskeyChallenge
 import io.github.aakira.napier.Napier
 import kotlinx.serialization.encodeToString
@@ -20,30 +21,26 @@ object PasskeyRequestJsonUseCase {
      * so adding @serverUrl in id we can check during signin which domain user registered
      */
     fun createPasskeyRequestJson(
-        username: String,
-        personUid: String,
-        doorNodeId: String,
-        usStartTime: Long,
-        serverUrl: String
+        createPasskeyParams: CreatePasskeyParams
     ): String {
         val userId = randomString(16)
         val challenge = Json.encodeToString(
             UserPasskeyChallenge(
-                username = username,
-                personUid = personUid,
-                doorNodeId = doorNodeId,
-                usStartTime = usStartTime
+                username = createPasskeyParams.username,
+                personUid = createPasskeyParams.personUid,
+                doorNodeId = createPasskeyParams.doorNodeId,
+                usStartTime = createPasskeyParams.usStartTime
             )
         )
 
         val challengeBase64Encoded = Base64.getEncoder().encodeToString(challenge.toByteArray())
-        val useridBase64Encoded = Base64.getEncoder().encodeToString("$userId@$serverUrl".toByteArray())
+        val useridBase64Encoded = Base64.getEncoder().encodeToString("$userId@${createPasskeyParams.serverUrl}".toByteArray())
 
         val requestJson = """
                   {
                     "challenge": "${challengeBase64Encoded}",
                     "rp": {
-                      "id": "credential-manager-subdomain.applinktest.ustadmobile.com",
+                      "id": "credential-manager-${createPasskeyParams.domainName},
                       "name": "Ustad Mobile"
                     },
                     "pubKeyCredParams": [
@@ -62,8 +59,8 @@ object PasskeyRequestJsonUseCase {
                     },
                     "user": {
                       "id": "$useridBase64Encoded",
-                      "name": "$username",
-                      "displayName": "$username"
+                      "name": "${createPasskeyParams.username}" z,
+                      "displayName": "${createPasskeyParams.username}"
                     }
                   }
               """.trimIndent()
@@ -79,7 +76,7 @@ object PasskeyRequestJsonUseCase {
         return (1..length).map { i -> charPool.get(Random.nextInt(0, charPool.length)) }
             .joinToString(separator = "")
     }
-    fun requestJsonForSignIn(): String {
+    fun requestJsonForSignIn(domain: String): String {
         val challenge = randomString(16)
 
         val requestJson = """
@@ -88,7 +85,7 @@ object PasskeyRequestJsonUseCase {
     "allowCredentials": [],
     "timeout": 1800000,
     "userVerification": "required",
-    "rpId": "credential-manager-subdomain.applinktest.ustadmobile.com"
+    "rpId": "credential-manager-${domain}"
 }
 """.trimIndent()
         Napier.e { requestJson }

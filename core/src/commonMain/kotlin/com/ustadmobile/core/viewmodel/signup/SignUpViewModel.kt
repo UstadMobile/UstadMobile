@@ -133,20 +133,6 @@ class SignUpViewModel(
                 hideBottomNavigation = true,
             )
         }
-        _uiState.update { prev ->
-            prev.copy(
-                genderOptions = genderConfig.genderMessageIdsAndUnset,
-                person = Person(
-                    dateOfBirth = savedStateHandle[PersonEditViewModel.ARG_DATE_OF_BIRTH]?.toLong()
-                        ?: 0L
-                ),
-                serverUrl_ = serverUrl,
-                passkeySupported = createPasskeyUseCase != null,
-                showOtherOption = createPasskeyUseCase == null && getLocalAccountsSupportedUseCase.invoke(),
-
-
-                )
-        }
         if (savedStateHandle[SIGN_WITH_USERNAME_AND_PASSWORD] == "true") {
             _uiState.update { prev ->
                 prev.copy(
@@ -161,6 +147,22 @@ class SignUpViewModel(
                 )
             }
         }
+        _uiState.update { prev ->
+            prev.copy(
+                genderOptions = genderConfig.genderMessageIdsAndUnset,
+                person = Person(
+                    dateOfBirth = savedStateHandle[PersonEditViewModel.ARG_DATE_OF_BIRTH]?.toLong()
+                        ?: 0L,
+                    isPersonalAccount = _uiState.value.isPersonalAccount
+                ),
+                serverUrl_ = serverUrl,
+                passkeySupported = createPasskeyUseCase != null,
+                showOtherOption = createPasskeyUseCase == null && getLocalAccountsSupportedUseCase.invoke(),
+
+
+                )
+        }
+
     }
 
     fun onEntityChanged(entity: Person?) {

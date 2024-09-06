@@ -28,11 +28,7 @@ class CreatePasskeyUseCaseImpl(val context: Context) : CreatePasskeyUseCase {
          */
         val request = CreatePublicKeyCredentialRequest(
             PasskeyRequestJsonUseCase.createPasskeyRequestJson(
-                createPassKeyParams.username,
-                createPassKeyParams.personUid,
-                createPassKeyParams.doorNodeId,
-                createPassKeyParams.usStartTime,
-                createPassKeyParams.serverUrl
+               createPassKeyParams
             )
         )
         var passkeyResult: PasskeyResult? = null

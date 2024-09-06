@@ -234,18 +234,18 @@ fun AppNavHost(
         }
     }
 
-
-    passkeyPromptData?.let {
-        CreatePasskeyPrompt(
-            username = it.username,
-            personUid = it.personUid.toString(),
-            doorNodeId = it.doorNodeId,
-            usStartTime = it.usStartTime,
-            serverUrl = it.serverUrl,
-            passkeyData = {},
-            passkeyError = {}
-        )
-    }
+// commenting app getting crash will check this
+//    passkeyPromptData?.let {
+//        CreatePasskeyPrompt(
+//            username = it.username,
+//            personUid = it.personUid.toString(),
+//            doorNodeId = it.doorNodeId,
+//            usStartTime = it.usStartTime,
+//            serverUrl = it.serverUrl,
+//            passkeyData = {},
+//            passkeyError = {}
+//        )
+//    }
 
     val navResultReturner: NavResultReturner = remember {
         NavResultReturnerImpl()

@@ -19,6 +19,7 @@ data class UserSessionWithPersonAndLearningSpace (
     val displayName: String
         get() {
             val displayUrl = learningSpace.url
+
                 .removePrefix("http://")
                 .removePrefix("https://")
                 .removeSuffix("/")
