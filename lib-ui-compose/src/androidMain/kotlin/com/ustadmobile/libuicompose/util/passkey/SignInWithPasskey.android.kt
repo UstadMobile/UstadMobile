@@ -66,7 +66,7 @@ actual fun SignInWithPasskey(
                         clientDataJSON = clientDataJsonString,
                         signature = responseObject.getString("signature"),
                         origin = clientDataJson.getString("origin"),
-                        rpId = "credential-manager-subdomain.applinktest.ustadmobile.com",  // Replace with the actual rpId if needed.
+                        rpId = "credential-manager-learningtree.ustadmobile.com",  // Replace with the actual rpId if needed.
                         challenge = clientDataJson.getString("challenge"),
                     )
 

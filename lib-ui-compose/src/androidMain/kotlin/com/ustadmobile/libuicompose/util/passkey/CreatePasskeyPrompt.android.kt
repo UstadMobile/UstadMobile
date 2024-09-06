@@ -96,7 +96,7 @@ private suspend fun createPasskey(
             attestationObj = attestationObject,
             clientDataJson = clientDataJsonString,
             originString = originString,
-            rpid = "credential-manager-subdomain.applinktest.ustadmobile.com",
+            rpid = "credential-manager-learningtree.ustadmobile.com",
             challengeString = challengeString,
             publicKey = publicKey,
             id = id,
