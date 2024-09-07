@@ -40,7 +40,7 @@ object PasskeyRequestJsonUseCase {
                   {
                     "challenge": "${challengeBase64Encoded}",
                     "rp": {
-                      "id": "credential-manager-${createPasskeyParams.domainName},
+                      "id": "credential-manager-${createPasskeyParams.domainName}",
                       "name": "Ustad Mobile"
                     },
                     "pubKeyCredParams": [
@@ -59,7 +59,7 @@ object PasskeyRequestJsonUseCase {
                     },
                     "user": {
                       "id": "$useridBase64Encoded",
-                      "name": "${createPasskeyParams.username}" z,
+                      "name": "${createPasskeyParams.username}",
                       "displayName": "${createPasskeyParams.username}"
                     }
                   }

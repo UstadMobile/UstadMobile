@@ -26,13 +26,14 @@ class CreatePasskeyUseCaseImpl(val context: Context) : CreatePasskeyUseCase {
         /**credentialManager to create credential requires a request
          * https://developer.android.com/identity/sign-in/credential-manager#format-json-request
          */
-        val request = CreatePublicKeyCredentialRequest(
-            PasskeyRequestJsonUseCase.createPasskeyRequestJson(
-               createPassKeyParams
-            )
-        )
+
         var passkeyResult: PasskeyResult? = null
         try {
+            val request = CreatePublicKeyCredentialRequest(
+                PasskeyRequestJsonUseCase.createPasskeyRequestJson(
+                    createPassKeyParams
+                )
+            )
             val response = credentialManager.createCredential(
                 context,
                 request
