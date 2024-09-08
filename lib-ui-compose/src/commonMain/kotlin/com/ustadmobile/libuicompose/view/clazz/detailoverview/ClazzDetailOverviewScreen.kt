@@ -94,7 +94,7 @@ fun ClazzDetailOverviewScreen(
 
     val courseBlocks = uiState.courseBlockList.mapNotNull { it.courseBlock }
 
-    val hasModules = uiState.courseBlockList.hasModules
+    val hasModules = uiState.hasModules
 
     UstadLazyColumn(
         modifier = Modifier.fillMaxSize()

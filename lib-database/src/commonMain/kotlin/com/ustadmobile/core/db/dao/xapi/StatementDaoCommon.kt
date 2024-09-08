@@ -53,24 +53,10 @@ object StatementDaoCommon {
           AND CAST(StatementEntity.resultSuccess AS INTEGER) = 1
     """
 
-    //Exactly as above, changing only the table name to StatusStatements
-    const val STATUS_STATEMENTS_IS_SUCCESSFUL_COMPLETION_CLAUSE = """
-              CAST(StatusStatements.completionOrProgress AS INTEGER) = 1
-          AND CAST(StatusStatements.resultCompletion AS INTEGER) = 1    
-          AND CAST(StatusStatements.resultSuccess AS INTEGER) = 1
-    """
-
-
     const val STATEMENT_ENTITY_IS_FAILED_COMPLETION_CLAUSE = """
               CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
           AND CAST(StatementEntity.resultCompletion AS INTEGER) = 1
           AND CAST(StatementEntity.resultSuccess AS INTEGER) = 0
-    """
-
-    const val STATUS_STATEMENTS_IS_FAILED_COMPLETION_CLAUSE = """
-              CAST(StatusStatements.completionOrProgress AS INTEGER) = 1
-          AND CAST(StatusStatements.resultCompletion AS INTEGER) = 1
-          AND CAST(StatusStatements.resultSuccess AS INTEGER) = 0
     """
 
 
@@ -255,6 +241,32 @@ object StatementDaoCommon {
                        END
                ) AS sScoreScaled
           FROM PersonUidsAndCourseBlocks
+         WHERE :accountPersonUid = :accountPersonUid 
     """
+
+    const val SELECT_STATUS_STATEMENTS_FOR_ACTOR_PERSON_UIDS = """
+        -- Fetch all statements that could be completion or progress for the Gradebook report
+        SELECT StatementEntity.*, ActorEntity.*, GroupMemberActorJoin.*
+          FROM StatementEntity
+               JOIN ActorEntity
+                    ON ActorEntity.actorUid = StatementEntity.statementActorUid
+               LEFT JOIN GroupMemberActorJoin
+                    ON ActorEntity.actorObjectType = ${XapiEntityObjectTypeFlags.GROUP}
+                       AND GroupMemberActorJoin.gmajGroupActorUid = StatementEntity.statementActorUid
+                       AND GroupMemberActorJoin.gmajMemberActorUid IN (
+                           SELECT DISTINCT ActorUidsForPersonUid.actorUid
+                             FROM ActorUidsForPersonUid)
+         WHERE StatementEntity.statementClazzUid = :clazzUid
+           AND StatementEntity.completionOrProgress = :completionOrProgressTrueVal
+           AND StatementEntity.statementActorUid IN (
+               SELECT DISTINCT ActorUidsForPersonUid.actorUid
+                 FROM ActorUidsForPersonUid) 
+           AND (      StatementEntity.resultScoreScaled IS NOT NULL
+                   OR StatementEntity.resultCompletion IS NOT NULL
+                   OR StatementEntity.resultSuccess IS NOT NULL
+                   OR StatementEntity.extensionProgress IS NOT NULL 
+               )
+    """
+
 
 }

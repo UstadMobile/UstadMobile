@@ -10,8 +10,12 @@ import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.ACTOR_UIDS_FOR_PERSON
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CLAZZ_STUDENT
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CONTENT_ENTRY
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY_WHERE_MATCHES_ACCOUNT_PERSON_UID_AND_PARENT_CONTENT_ENTRY_ROOT
+import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.SELECT_STATUS_STATEMENTS_FOR_ACTOR_PERSON_UIDS
 import com.ustadmobile.door.DoorQuery
 import com.ustadmobile.door.annotation.DoorDao
+import com.ustadmobile.door.annotation.HttpAccessible
+import com.ustadmobile.door.annotation.HttpServerFunctionCall
+import com.ustadmobile.door.annotation.HttpServerFunctionParam
 import com.ustadmobile.door.annotation.QueryLiveTables
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.composites.BlockStatus
@@ -19,8 +23,8 @@ import com.ustadmobile.lib.db.composites.xapi.StatementEntityAndRelated
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.StatementEntityAndDisplayDetails
 import com.ustadmobile.lib.db.entities.StatementReportData
+import com.ustadmobile.lib.db.entities.xapi.ActorEntity
 import com.ustadmobile.lib.db.entities.xapi.StatementEntity
-import com.ustadmobile.lib.db.entities.xapi.XapiEntityObjectTypeFlags
 import kotlinx.coroutines.flow.Flow
 
 @DoorDao
@@ -116,27 +120,7 @@ expect abstract class StatementDao {
         
         $ACTOR_UIDS_FOR_PERSONUIDS_CTE
 
-        -- Fetch all statements that could be completion or progress for the Gradebook report
-        SELECT StatementEntity.*, ActorEntity.*, GroupMemberActorJoin.*
-          FROM StatementEntity
-               JOIN ActorEntity
-                    ON ActorEntity.actorUid = StatementEntity.statementActorUid
-               LEFT JOIN GroupMemberActorJoin
-                    ON ActorEntity.actorObjectType = ${XapiEntityObjectTypeFlags.GROUP}
-                       AND GroupMemberActorJoin.gmajGroupActorUid = StatementEntity.statementActorUid
-                       AND GroupMemberActorJoin.gmajMemberActorUid IN (
-                           SELECT DISTINCT ActorUidsForPersonUid.actorUid
-                             FROM ActorUidsForPersonUid)
-         WHERE StatementEntity.statementClazzUid = :clazzUid
-           AND StatementEntity.completionOrProgress = :completionOrProgressTrueVal
-           AND StatementEntity.statementActorUid IN (
-               SELECT DISTINCT ActorUidsForPersonUid.actorUid
-                 FROM ActorUidsForPersonUid) 
-           AND (      StatementEntity.resultScoreScaled IS NOT NULL
-                   OR StatementEntity.resultCompletion IS NOT NULL
-                   OR StatementEntity.resultSuccess IS NOT NULL
-                   OR StatementEntity.extensionProgress IS NOT NULL 
-               )
+        $SELECT_STATUS_STATEMENTS_FOR_ACTOR_PERSON_UIDS
     """)
     /**
      * This query will fetch the StatementEntity and related (e.g. ActorEntity, GroupMemberActorJoin)
@@ -162,16 +146,94 @@ expect abstract class StatementDao {
     ): List<StatementEntityAndRelated>
 
 
+    /**
+     * Get all the xapi statements required to determine the status of each block for a
+     * given list of students in a given class.
+     */
+    @Query("""
+        WITH PersonUids(personUid) AS (
+            SELECT Person.personUid
+              FROM Person
+             WHERE Person.personUid IN (:studentPersonUids) 
+        ),
+        
+        $ACTOR_UIDS_FOR_PERSONUIDS_CTE
+        
+        $SELECT_STATUS_STATEMENTS_FOR_ACTOR_PERSON_UIDS
+    """)
+    abstract suspend fun findStatusForStudentsInClazzByUidList(
+        clazzUid: Long,
+        studentPersonUids: List<Long>,
+        completionOrProgressTrueVal: Boolean,
+    ): List<StatementEntityAndRelated>
+
+    /**
+     * Select the actor entities required for findStatusForStudentsInClazzByUidList .
+     * When handling GroupAssignments the ActorEntity in StatementEntityAndRelated will be the
+     * ActorEntity representing the group, so we need to get (separately) the ActorEntity that
+     * represents the student.
+     */
+    @Query("""
+        WITH PersonUids(personUid) AS (
+            SELECT Person.personUid
+              FROM Person
+             WHERE Person.personUid IN (:studentPersonUids) 
+        ),
+        
+        $ACTOR_UIDS_FOR_PERSONUIDS_CTE
+        
+        SELECT ActorEntity.*
+          FROM ActorEntity
+         WHERE ActorEntity.actorPersonUid IN 
+               (SELECT PersonUids.personUid
+                  FROM PersonUids)
+           AND :clazzUid = :clazzUid
+           AND :accountPersonUid = :accountPersonUid
+    """)
+    abstract suspend fun findActorEntitiesForStudentInClazzByUidList(
+        clazzUid: Long,
+        studentPersonUids: List<Long>,
+        accountPersonUid: Long,
+    ): List<ActorEntity>
+
+
     @Query(StatementDaoCommon.FIND_STATUS_FOR_STUDENTS_SQL)
     abstract suspend fun findStatusForStudentsInClazz(
         clazzUid: Long,
         studentPersonUids: List<Long>,
+        accountPersonUid: Long,
     ): List<BlockStatus>
 
+    /**
+     * Used by ClazzDetailOverview to retrieve the BlockStatus for the current active user (if they
+     * are student of the Clazz). We don't need to pull permission entities as this is already done
+     * by ClazzDetailOverview checking for permission.
+     *
+     * NOTE: In next release accountpersonuid param will be used to enforce http permissions
+     */
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall(
+                functionName = "findStatusForStudentsInClazzByUidList",
+                functionArgs = arrayOf(
+                    HttpServerFunctionParam(
+                        name = "completionOrProgressTrueVal",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "true",
+                    )
+                )
+            ),
+            HttpServerFunctionCall(
+                functionName = "findActorEntitiesForStudentInClazzByUidList",
+            )
+        )
+    )
     @Query(StatementDaoCommon.FIND_STATUS_FOR_STUDENTS_SQL)
-    abstract suspend fun findStatusForStudentsInClazzAsFlow(
+    abstract fun findStatusForStudentsInClazzAsFlow(
         clazzUid: Long,
         studentPersonUids: List<Long>,
+        accountPersonUid: Long,
     ): Flow<List<BlockStatus>>
 
     /**

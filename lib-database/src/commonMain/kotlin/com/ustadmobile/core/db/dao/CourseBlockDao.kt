@@ -163,7 +163,8 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
                 (SELECT CourseBlockParent.cbHideUntilDate
                    FROM CourseBlock CourseBlockParent
                   WHERE CourseBlockParent.cbUid = CourseBlock.cbModuleParentBlockUid), 0))
-           AND (CourseBlock.cbType != ${CourseBlock.BLOCK_EXTERNAL_APP})        
+           AND (CourseBlock.cbType != ${CourseBlock.BLOCK_EXTERNAL_APP})
+           AND :accountPersonUid = :accountPersonUid        
       ORDER BY CourseBlock.cbIndex       
     """)
     abstract fun findAllCourseBlockByClazzUidAsFlow(
@@ -234,7 +235,8 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
                 (SELECT CourseBlockParent.cbHideUntilDate
                    FROM CourseBlock CourseBlockParent
                   WHERE CourseBlockParent.cbUid = CourseBlock.cbModuleParentBlockUid), 0))
-           AND (CourseBlock.cbType != ${CourseBlock.BLOCK_EXTERNAL_APP})        
+           AND (CourseBlock.cbType != ${CourseBlock.BLOCK_EXTERNAL_APP}) 
+           AND :accountPersonUid = :accountPersonUid       
       ORDER BY CourseBlock.cbIndex       
     """)
     abstract fun findAllCourseBlockByClazzUidAsPagingSource(
