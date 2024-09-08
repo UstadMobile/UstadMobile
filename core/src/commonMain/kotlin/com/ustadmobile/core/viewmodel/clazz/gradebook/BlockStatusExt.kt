@@ -75,7 +75,11 @@ fun List<BlockStatus>.aggregateIfModule(
         BlockStatus(
             sPersonUid = this.firstOrNull()?.sPersonUid ?: 0,
             sCbUid = blockUid,
-            sScoreScaled = (totalPointsScored / maxPointsInModule),
+            sScoreScaled = if(maxPointsInModule != 0f) {
+                (totalPointsScored / maxPointsInModule)
+            }else {
+                null
+            },
             sIsCompleted = isModuleComplete,
             sIsSuccess = when {
                 isModuleComplete && numBlocksSuccess == numBlocksSuccessSet -> true

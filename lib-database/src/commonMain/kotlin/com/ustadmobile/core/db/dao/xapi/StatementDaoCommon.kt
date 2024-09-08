@@ -1,6 +1,8 @@
 package com.ustadmobile.core.db.dao.xapi
 
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon
+import com.ustadmobile.lib.db.entities.ClazzAssignment
+import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.xapi.XapiEntityObjectTypeFlags
 
 object StatementDaoCommon {
@@ -37,7 +39,9 @@ object StatementDaoCommon {
     const val FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CLAZZ_STUDENT = """
                FROM StatementEntity
               WHERE (${ClazzEnrolmentDaoCommon.SELECT_ACCOUNT_PERSON_UID_IS_STUDENT_IN_CLAZZ_UID})
-                AND StatementEntity.statementActorPersonUid = :accountPersonUid
+                AND StatementEntity.statementActorUid IN (
+                    SELECT ActorUidsForPersonUid.actorUid
+                      FROM ActorUidsForPersonUid)
                 AND StatementEntity.statementClazzUid = :clazzUid
                 AND (    (CAST(StatementEntity.resultCompletion AS INTEGER) = 1)
                       OR (StatementEntity.extensionProgress IS NOT NULL))
@@ -151,5 +155,106 @@ object StatementDaoCommon {
         )
     """
 
+
+    const val FIND_STATUS_FOR_STUDENTS_SQL = """
+        WITH PersonUids(personUid) AS (
+             SELECT Person.personUid
+               FROM Person
+              WHERE Person.personUid IN (:studentPersonUids)
+        ),
+        
+        $ACTOR_UIDS_FOR_PERSONUIDS_CTE,
+        
+        PersonUidsAndCourseBlocks(personUid, cbUid, cbType, caMarkingType) AS (
+             SELECT Person.personUid AS personUid,
+                    CourseBlock.cbUid AS cbUid,
+                    CourseBlock.cbType AS cbType,
+                    ClazzAssignment.caMarkingType AS caMarkingType
+               FROM Person
+                    JOIN CourseBlock
+                         ON CourseBlock.cbClazzUid = :clazzUid
+                    LEFT JOIN ClazzAssignment
+                         ON CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
+                        AND ClazzAssignment.caUid = CourseBlock.cbEntityUid     
+              WHERE Person.personUid IN (:studentPersonUids)       
+        )
+        
+        SELECT PersonUidsAndCourseBlocks.personUid AS sPersonUid,
+               PersonUidsAndCourseBlocks.cbUid AS sCbUid,
+               (SELECT MAX(StatementEntity.extensionProgress)
+                  FROM StatementEntity
+                       $JOIN_ACTOR_TABLES_FROM_ACTOR_UIDS_FOR_PERSON_UID
+                 WHERE $STATEMENT_MATCHES_PERSONUIDS_AND_COURSEBLOCKS 
+               ) AS sProgress,
+               (SELECT EXISTS(
+                       SELECT 1
+                         FROM StatementEntity
+                              $JOIN_ACTOR_TABLES_FROM_ACTOR_UIDS_FOR_PERSON_UID
+                        WHERE ($STATEMENT_MATCHES_PERSONUIDS_AND_COURSEBLOCKS)
+                          AND CAST(StatementEntity.resultCompletion AS INTEGER) = 1
+               )) AS sIsCompleted,
+               (SELECT CASE
+                       /*If there is a statement marked as success, then count as successful even if
+                        *there were subsequent failed attempts
+                        */
+                       WHEN (
+                            SELECT EXISTS(
+                                    SELECT 1
+                                      FROM StatementEntity
+                                           $JOIN_ACTOR_TABLES_FROM_ACTOR_UIDS_FOR_PERSON_UID
+                                    WHERE ($STATEMENT_MATCHES_PERSONUIDS_AND_COURSEBLOCKS)
+                                      AND CAST(StatementEntity.resultSuccess AS INTEGER) = 1
+                                   )                           
+                       ) THEN 1
+                       /*If there are no statements marked as success, however there are statements marekd as fail,
+                        *then count as fail 
+                        */
+                       WHEN (
+                            SELECT EXISTS(
+                                    SELECT 1
+                                      FROM StatementEntity
+                                           $JOIN_ACTOR_TABLES_FROM_ACTOR_UIDS_FOR_PERSON_UID
+                                    WHERE ($STATEMENT_MATCHES_PERSONUIDS_AND_COURSEBLOCKS)
+                                      AND CAST(StatementEntity.resultSuccess AS INTEGER) = 0
+                                   )                           
+                       ) THEN 0
+                       /* Else there is no known success/fail result*/
+                       ELSE NULL
+                       END
+               ) AS sIsSuccess,
+               -- See ClazzGradebookScreen for info on which score is selected
+               (SELECT CASE
+                       -- When there is a peer marked assignment, take the average of the latest distinct ...
+                       WHEN (     PersonUidsAndCourseBlocks.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
+                              AND PersonUidsAndCourseBlocks.caMarkingType = ${ClazzAssignment.MARKED_BY_PEERS}
+                            ) 
+                            THEN (SELECT AVG(StatementEntity.resultScoreScaled)
+                                    FROM StatementEntity
+                                         $JOIN_ACTOR_TABLES_FROM_ACTOR_UIDS_FOR_PERSON_UID
+                                   WHERE ($STATEMENT_MATCHES_PERSONUIDS_AND_COURSEBLOCKS)
+                                     AND StatementEntity.timestamp = (
+                                         SELECT MAX(StatementEntity_Inner.timestamp)
+                                           FROM StatementEntity StatementEntity_Inner
+                                                $JOIN_ACTOR_TABLES_FROM_ACTOR_UIDS_FOR_PERSON_UID_INNER
+                                          WHERE ($STATEMENT_MATCHES_PERSONUIDS_AND_COURSEBLOCKS_INNER)
+                                            AND StatementEntity_Inner.contextInstructorActorUid = StatementEntity.contextInstructorActorUid)
+                                   LIMIT 1)
+                       -- When an assignment, but not peer marked, then the latest score     
+                       WHEN PersonUidsAndCourseBlocks.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
+                            THEN (SELECT StatementEntity.resultScoreScaled
+                                    FROM StatementEntity
+                                         $JOIN_ACTOR_TABLES_FROM_ACTOR_UIDS_FOR_PERSON_UID
+                                   WHERE ($STATEMENT_MATCHES_PERSONUIDS_AND_COURSEBLOCKS)
+                                ORDER BY StatementEntity.timestamp DESC
+                                   LIMIT 1)
+                       -- else the best score accomplished so far            
+                       ELSE (SELECT MAX(StatementEntity.resultScoreScaled) 
+                               FROM StatementEntity
+                                    $JOIN_ACTOR_TABLES_FROM_ACTOR_UIDS_FOR_PERSON_UID
+                              WHERE ($STATEMENT_MATCHES_PERSONUIDS_AND_COURSEBLOCKS))            
+                       END
+               ) AS sScoreScaled
+          FROM PersonUidsAndCourseBlocks
+    """
 
 }

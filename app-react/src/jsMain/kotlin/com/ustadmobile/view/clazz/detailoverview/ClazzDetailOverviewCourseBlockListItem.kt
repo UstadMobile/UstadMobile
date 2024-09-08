@@ -16,13 +16,14 @@ import react.dom.aria.ariaLabel
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.viewmodel.clazz.blockTypeStringResource
-import com.ustadmobile.core.viewmodel.clazz.detailoverview.getScoreInPointsStr
 import com.ustadmobile.core.viewmodel.contententry.contentTypeStringResource
 import com.ustadmobile.hooks.useHtmlToPlainText
+import com.ustadmobile.lib.db.composites.BlockStatus
 import com.ustadmobile.mui.components.UstadBlockIcon
 import com.ustadmobile.mui.components.UstadBlockStatusProgressBar
 import com.ustadmobile.util.ext.useAbsolutePositionBottom
 import com.ustadmobile.util.ext.useLineClamp
+import com.ustadmobile.view.clazz.gradebook.ClazzGradebookCell
 import com.ustadmobile.view.clazz.iconComponent
 import com.ustadmobile.view.contententry.contentTypeIconComponent
 import emotion.react.css
@@ -31,13 +32,20 @@ import mui.system.responsive
 import react.dom.html.ReactHTML.div
 import web.cssom.Position
 import web.cssom.pct
-import mui.icons.material.EmojiEvents as EmojiEventsIcon
 
 external interface ClazzDetailOverviewCourseBlockListItemProps : Props {
 
     var courseBlock: CourseBlockAndDisplayDetails?
 
+    var allCourseBlocks: List<CourseBlock>
+
+    var blockStatuses: List<BlockStatus>
+
     var expanded: Boolean?
+
+    var showExpandCollapse: Boolean
+
+    var showGrade: Boolean
 
     var onClickCourseBlock: (CourseBlock) -> Unit
 
@@ -137,21 +145,6 @@ val ClazzDetailOverviewCourseBlockListItem = FC<ClazzDetailOverviewCourseBlockLi
                         }
                         + blockDescription
                     }
-
-                    div {
-                        props.courseBlock?.getScoreInPointsStr()?.also { scoreInPts ->
-                            EmojiEventsIcon {
-                                fontSize = SvgIconSize.small
-                                ariaLabel = ""
-                                sx {
-                                    marginRight = 8.px
-                                    padding = 1.px
-                                }
-                            }
-
-                            + "$scoreInPts/ ${courseBlockVal?.cbMaxPoints} ${strings[MR.strings.points]}"
-                        }
-                    }
                 }
                 secondaryTypographyProps = jso {
                     component = div
@@ -159,28 +152,52 @@ val ClazzDetailOverviewCourseBlockListItem = FC<ClazzDetailOverviewCourseBlockLi
             }
         }
 
-        secondaryAction = Tooltip.create {
-            val labelText = if(props.expanded != false) {
-                strings[MR.strings.collapse]
-            }else {
-                strings[MR.strings.expand]
+        secondaryAction = Stack.create {
+            direction = responsive(StackDirection.row)
+
+            if(props.showGrade) {
+                ClazzGradebookCell {
+                    blockUid = props.courseBlock?.courseBlock?.cbUid ?: 0
+                    blockStatuses = props.blockStatuses
+                    blocks = props.allCourseBlocks
+                    showMaxScore = true
+                }
             }
 
-            title = ReactNode(labelText)
+            if(props.showExpandCollapse) {
+                if(props.courseBlock?.courseBlock?.cbType == CourseBlock.BLOCK_MODULE_TYPE) {
+                    Tooltip {
+                        val labelText = if(props.expanded != false) {
+                            strings[MR.strings.collapse]
+                        }else {
+                            strings[MR.strings.expand]
+                        }
 
-            IconButton {
-                if(courseBlockVal?.cbType == CourseBlock.BLOCK_MODULE_TYPE) {
-                    val trailingIcon = if(props.expanded != false)
-                        KeyboardArrowUp
-                    else
-                        KeyboardArrowDown
+                        title = ReactNode(labelText)
 
-                    ariaLabel = labelText
+                        IconButton {
+                            if(courseBlockVal?.cbType == CourseBlock.BLOCK_MODULE_TYPE) {
+                                val trailingIcon = if(props.expanded != false)
+                                    KeyboardArrowUp
+                                else
+                                    KeyboardArrowDown
 
-                    onClick = {
-                        props.courseBlock?.courseBlock?.also { props.onClickCourseBlock(it) }
+                                ariaLabel = labelText
+
+                                onClick = {
+                                    props.courseBlock?.courseBlock?.also { props.onClickCourseBlock(it) }
+                                }
+                                + trailingIcon.create()
+                            }
+                        }
                     }
-                    + trailingIcon.create()
+                }else {
+                    div {
+                        css {
+                            width = 56.px
+                            height = 56.px
+                        }
+                    }
                 }
             }
         }

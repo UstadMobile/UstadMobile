@@ -10,6 +10,7 @@ import com.ustadmobile.door.annotation.DoorDao
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.core.db.UNSET_DISTANT_FUTURE
 import com.ustadmobile.core.db.dao.xapi.StatementDao
+import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.ACTOR_UIDS_FOR_PERSONUIDS_CTE
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CLAZZ_STUDENT
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.STATUS_STATEMENTS_IS_FAILED_COMPLETION_CLAUSE
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.STATUS_STATEMENTS_IS_SUCCESSFUL_COMPLETION_CLAUSE
@@ -148,7 +149,14 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
         )
     )
     @Query("""
-        WITH StatusStatements AS (
+        WITH PersonUids(personUid) AS (
+            SELECT :accountPersonUid AS personUid
+        ),
+        
+        $ACTOR_UIDS_FOR_PERSONUIDS_CTE,
+        
+        
+        StatusStatements AS (
              SELECT StatementEntity.*
                     $FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CLAZZ_STUDENT
         )
@@ -260,7 +268,13 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
         )
     )
     @Query("""
-        WITH StatusStatements AS (
+        WITH PersonUids(personUid) AS (
+            SELECT :accountPersonUid AS personUid
+        ),
+        
+        $ACTOR_UIDS_FOR_PERSONUIDS_CTE,
+        
+        StatusStatements AS (
              SELECT StatementEntity.*
                     $FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CLAZZ_STUDENT
         )

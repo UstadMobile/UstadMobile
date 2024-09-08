@@ -27,6 +27,11 @@ import com.ustadmobile.core.viewmodel.clazz.gradebook.aggregateIfModule
 import mui.material.Tooltip
 import react.ReactNode
 
+private const val DEFAULT_COLUMN_WIDTH = 56
+
+private const val DEFAULT_COLUMN_HEIGHT = 56
+
+
 external interface ClazzGradebookCellProps: Props {
 
     var blockUid: Long
@@ -35,11 +40,13 @@ external interface ClazzGradebookCellProps: Props {
 
     var blocks: List<CourseBlock>
 
-    var width: Int
+    var width: Int?
 
-    var height: Int
+    var height: Int?
 
     var scoreMargin: Int?
+
+    var showMaxScore: Boolean?
 
 }
 
@@ -47,6 +54,8 @@ val ClazzGradebookCell = FC<ClazzGradebookCellProps> { props ->
     val theme by useRequiredContext(ThemeContext)
     val scoreMarginVal = (props.scoreMargin ?: 8)
     val strings = useStringProvider()
+    val widthVal = props.width ?: DEFAULT_COLUMN_WIDTH
+    val heightVal = props.height ?: DEFAULT_COLUMN_HEIGHT
 
     val block = props.blocks.firstOrNull { it.cbUid == props.blockUid }
     val blockStatus = props.blockStatuses.aggregateIfModule(props.blockUid, props.blocks)
@@ -55,8 +64,8 @@ val ClazzGradebookCell = FC<ClazzGradebookCellProps> { props ->
     Box {
         sx {
             position = Position.relative
-            width = props.width.px
-            height = props.height.px
+            width = widthVal.px
+            height = heightVal.px
             textAlign = TextAlign.center
         }
 
@@ -73,8 +82,8 @@ val ClazzGradebookCell = FC<ClazzGradebookCellProps> { props ->
                 Typography {
                     sx {
                         textAlign = TextAlign.center
-                        lineHeight = (props.height - (scoreMarginVal*2)).px
-                        width = (props.width - (scoreMarginVal *2)).px
+                        lineHeight = (heightVal - (scoreMarginVal*2)).px
+                        width = (widthVal - (scoreMarginVal *2)).px
                         margin = scoreMargin.px
                         backgroundColor = markColor?.main
                         color = markColor?.contrastText
@@ -122,8 +131,8 @@ val ClazzGradebookCell = FC<ClazzGradebookCellProps> { props ->
             progress != null -> {
                 CircularProgress {
                     sx {
-                        width = props.width.px
-                        height = props.height.px
+                        width = widthVal.px
+                        height = heightVal.px
                         padding = 8.px
                     }
                     variant = CircularProgressVariant.determinate
@@ -135,7 +144,7 @@ val ClazzGradebookCell = FC<ClazzGradebookCellProps> { props ->
                 Typography {
                     sx {
                         textAlign = TextAlign.center
-                        lineHeight = props.height.px
+                        lineHeight = heightVal.px
                     }
 
                     + "-"

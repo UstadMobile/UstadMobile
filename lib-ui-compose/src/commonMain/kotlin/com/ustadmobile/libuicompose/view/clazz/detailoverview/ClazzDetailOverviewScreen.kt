@@ -13,16 +13,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Login
-import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,8 +42,8 @@ import com.ustadmobile.core.viewmodel.clazz.ClazzScheduleConstants
 import com.ustadmobile.core.viewmodel.clazz.blockTypeStringResource
 import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewUiState
 import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewViewModel
-import com.ustadmobile.core.viewmodel.clazz.detailoverview.getScoreInPointsStr
 import com.ustadmobile.core.viewmodel.contententry.contentTypeStringResource
+import com.ustadmobile.lib.db.composites.BlockStatus
 import com.ustadmobile.lib.db.composites.CourseBlockAndDisplayDetails
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.libuicompose.components.UstadAsyncImage
@@ -59,6 +58,7 @@ import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.util.rememberFormattedDateRange
 import com.ustadmobile.libuicompose.util.rememberFormattedTime
 import com.ustadmobile.libuicompose.view.clazz.blockTypeImageVector
+import com.ustadmobile.libuicompose.view.clazz.gradebook.ClazzGradebookCell
 import com.ustadmobile.libuicompose.view.clazz.paddingCourseBlockIndent
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.libuicompose.view.clazz.painterForDefaultCourseImage
@@ -92,11 +92,14 @@ fun ClazzDetailOverviewScreen(
         timeZoneId = uiState.clazz?.clazzTimeZone ?: "UTC",
     )
 
-    val courseBannerUri = uiState.clazz?.coursePicture?.coursePictureUri
+    val courseBannerUri = uiState.clazzAndDetail?.coursePicture?.coursePictureUri
+
+    val courseBlocks = uiState.courseBlockList.mapNotNull { it.courseBlock }
+
+    val hasModules = uiState.courseBlockList.hasModules
 
     UstadLazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
+        modifier = Modifier.fillMaxSize()
     ){
         item(key = "banner") {
             if(courseBannerUri != null){
@@ -176,16 +179,6 @@ fun ClazzDetailOverviewScreen(
             }
         }
 
-        if (uiState.clazzHolidayCalendarVisible){
-            item(key = "holcal") {
-                UstadDetailField2(
-                    valueText = uiState.clazz?.clazzHolidayCalendar?.umCalendarName ?: "",
-                    labelText = stringResource(MR.strings.holiday_calendar),
-                    icon = Icons.Filled.Event
-                )
-            }
-        }
-
         item {
             HorizontalDivider(thickness = 1.dp)
             Spacer(modifier = Modifier.height(16.dp))
@@ -241,10 +234,14 @@ fun ClazzDetailOverviewScreen(
         ) {
             CourseBlockListItem(
                 courseBlock = it,
+                showGrade = uiState.clazzAndDetail?.activeUserIsStudent ?: false,
                 onClick = {
                     it.courseBlock?.also(onClickCourseBlock)
                 },
-                expanded = (it.courseBlock?.cbUid ?: 0) !in uiState.collapsedBlockUids
+                expanded = (it.courseBlock?.cbUid ?: 0) !in uiState.collapsedBlockUids,
+                showExpandCollapse = hasModules,
+                blockStatuses = uiState.blockStatusesForActiveUser,
+                allCourseBlocks = courseBlocks,
             )
         }
     }
@@ -253,7 +250,11 @@ fun ClazzDetailOverviewScreen(
 @Composable
 fun CourseBlockListItem(
     courseBlock: CourseBlockAndDisplayDetails?,
+    allCourseBlocks: List<CourseBlock>,
+    blockStatuses: List<BlockStatus>,
+    showExpandCollapse: Boolean = true,
     expanded: Boolean = true,
+    showGrade: Boolean = false,
     onClick: () -> Unit,
 ){
 
@@ -267,7 +268,11 @@ fun CourseBlockListItem(
         }
         .paddingCourseBlockIndent(courseBlock?.courseBlock?.cbIndentLevel ?: 0),
         headlineContent = {
-            Text(courseBlock?.courseBlock?.cbTitle ?: "")
+            Text(
+                text = courseBlock?.courseBlock?.cbTitle ?: "",
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
         },
         supportingContent = {
             val contentEntryVal = courseBlock?.contentEntry
@@ -279,7 +284,7 @@ fun CourseBlockListItem(
                             Icon(contentEntryVal.contentTypeImageVector, "",
                                 modifier = Modifier.size(16.dp))
                             Spacer(Modifier.width(8.dp))
-                            Text(stringResource(contentEntryVal.contentTypeStringResource))
+                            Text(stringResource(contentEntryVal.contentTypeStringResource), maxLines = 1)
                         }
 
                         courseBlockVal != null -> {
@@ -287,18 +292,11 @@ fun CourseBlockListItem(
                                 Icon(it, "", modifier = Modifier.size(16.dp))
                             }
                             Spacer(Modifier.width(8.dp))
-                            Text(stringResource(courseBlockVal.blockTypeStringResource))
+                            Text(stringResource(courseBlockVal.blockTypeStringResource), maxLines = 1)
                         }
                     }
                 }
                 Text(descriptionPlainText, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                courseBlock?.getScoreInPointsStr()?.also { scoreInPoints ->
-                    Row {
-                        Icon(Icons.Filled.EmojiEvents, contentDescription = null)
-                        Spacer(Modifier.width(8.dp))
-                        Text("$scoreInPoints/${courseBlockVal?.cbMaxPoints} ${stringResource(MR.strings.points)}")
-                    }
-                }
             }
         },
         leadingContent = {
@@ -323,26 +321,42 @@ fun CourseBlockListItem(
 
         },
         trailingContent = {
-            if(courseBlock?.courseBlock?.cbType == CourseBlock.BLOCK_MODULE_TYPE) {
-                val trailingIcon = if(expanded)
-                    Icons.Default.KeyboardArrowUp
-                else
-                    Icons.Default.KeyboardArrowDown
-
-                IconButton(
-                    onClick = onClick
-                ) {
-                    Icon(
-                        imageVector = trailingIcon,
-                        contentDescription = stringResource(
-                            if(expanded)
-                                MR.strings.collapse
-                            else
-                                MR.strings.expand
-                        )
+            Row {
+                if(showGrade) {
+                    ClazzGradebookCell(
+                        blockUid = courseBlock?.courseBlock?.cbUid ?: 0,
+                        blockStatuses = blockStatuses,
+                        blocks = allCourseBlocks,
+                        scale = 1f,
+                        modifier = Modifier.width(56.dp).height(56.dp),
+                        showMaxScore = true,
                     )
                 }
 
+                if(showExpandCollapse) {
+                    if(courseBlock?.courseBlock?.cbType == CourseBlock.BLOCK_MODULE_TYPE) {
+                        val trailingIcon = if(expanded)
+                            Icons.Default.KeyboardArrowUp
+                        else
+                            Icons.Default.KeyboardArrowDown
+
+                        IconButton(
+                            onClick = onClick
+                        ) {
+                            Icon(
+                                imageVector = trailingIcon,
+                                contentDescription = stringResource(
+                                    if(expanded)
+                                        MR.strings.collapse
+                                    else
+                                        MR.strings.expand
+                                )
+                            )
+                        }
+                    }else {
+                        Spacer(Modifier.width(48.dp))
+                    }
+                }
             }
         }
     )

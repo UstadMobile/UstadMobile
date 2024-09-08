@@ -53,7 +53,7 @@ external interface ClazzDetailOverviewProps : Props {
     var onClickPermissions: () -> Unit
 }
 
-val ClazzDetailOverviewComponent2 = FC<ClazzDetailOverviewProps> { props ->
+val ClazzDetailOverviewComponent = FC<ClazzDetailOverviewProps> { props ->
 
     val strings = useStringProvider()
 
@@ -63,9 +63,13 @@ val ClazzDetailOverviewComponent2 = FC<ClazzDetailOverviewProps> { props ->
         props.uiState.clazz?.clazzTimeZone ?: "UTC"
     )
 
+    val courseBlocks = props.uiState.courseBlockList.mapNotNull { it.courseBlock }
+
+    val hasModules = props.uiState.hasModules
+
     val tabAndAppBarHeight = useTabAndAppBarHeight()
 
-    val coursePictureUri = props.uiState.clazz?.coursePicture?.coursePictureUri
+    val coursePictureUri = props.uiState.clazzAndDetail?.coursePicture?.coursePictureUri
         ?: "img/default_course_banners/${defaultCourseBannerImageIndex(props.uiState.clazz?.clazzName)}.webp"
 
 
@@ -165,6 +169,10 @@ val ClazzDetailOverviewComponent2 = FC<ClazzDetailOverviewProps> { props ->
             ) { courseBlockItem ->
                 ClazzDetailOverviewCourseBlockListItem.create {
                     courseBlock = courseBlockItem
+                    showGrade = props.uiState.clazzAndDetail?.activeUserIsStudent ?: false
+                    allCourseBlocks = courseBlocks
+                    blockStatuses = props.uiState.blockStatusesForActiveUser
+                    showExpandCollapse = hasModules
                     onClickCourseBlock = props.onClickCourseBlock
                     expanded = (courseBlockItem.courseBlock?.cbUid ?: 0) !in props.uiState.collapsedBlockUids
                 }
@@ -196,7 +204,7 @@ val ClazzDetailOverviewScreen = FC<Props> {
         fabState = appState.fabState
     }
 
-    ClazzDetailOverviewComponent2 {
+    ClazzDetailOverviewComponent {
         uiState = uiStateVal
         listRefreshCommandFlow = viewModel.listRefreshCommandFlow
         onClickCourseBlock = viewModel::onClickCourseBlock

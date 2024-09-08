@@ -21,6 +21,8 @@ import com.ustadmobile.core.viewmodel.clazzassignment.detail.ClazzAssignmentDeta
 import com.ustadmobile.core.viewmodel.contententry.detail.ContentEntryDetailViewModel
 import com.ustadmobile.core.viewmodel.courseblock.textblockdetail.TextBlockDetailViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.lib.db.composites.BlockStatus
+import com.ustadmobile.lib.db.composites.ClazzAndDisplayDetails
 import com.ustadmobile.lib.db.composites.CourseBlockAndDisplayDetails
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.channels.BufferOverflow
@@ -42,11 +44,13 @@ import org.kodein.di.instance
 
 data class ClazzDetailOverviewUiState(
 
-    val clazz: ClazzWithDisplayDetails? = null,
+    val clazzAndDetail: ClazzAndDisplayDetails? = null,
 
     val scheduleList: List<Schedule> = emptyList(),
 
     val courseBlockList: List<CourseBlockAndDisplayDetails> = emptyList(),
+
+    val blockStatusesForActiveUser: List<BlockStatus> = emptyList(),
 
     val clazzCodeVisible: Boolean = false,
 
@@ -57,19 +61,22 @@ data class ClazzDetailOverviewUiState(
     val managePermissionVisible: Boolean = false,
 
 ) {
+    val clazz: Clazz?
+        get() = clazzAndDetail?.clazz
+
 
     val clazzDateVisible: Boolean
-        get() = clazz?.clazzStartTime.isDateSet()
-                || clazz?.clazzEndTime.isDateSet()
-
-    val clazzHolidayCalendarVisible: Boolean
-        get() = clazz?.clazzHolidayCalendar != null
+        get() = clazzAndDetail?.clazz?.clazzStartTime.isDateSet()
+                || clazzAndDetail?.clazz?.clazzEndTime.isDateSet()
 
     val numStudents: Int
-        get() = clazz?.numStudents ?: 0
+        get() = clazzAndDetail?.numStudents ?: 0
 
     val numTeachers: Int
-        get() = clazz?.numTeachers ?: 0
+        get() = clazzAndDetail?.numTeachers ?: 0
+
+    val hasModules: Boolean
+        get() = courseBlockList.any { it.courseBlock?.cbType == CourseBlock.BLOCK_MODULE_TYPE }
 
     val membersString: String
         get() = "${terminologyStrings?.get(MR.strings.teachers_literal) ?: ""}: $numTeachers, " +
@@ -133,15 +140,28 @@ class ClazzDetailOverviewViewModel(
                         it.firstPermission
                     }.distinctUntilChanged().collectLatest { hasViewPermission ->
                         if(hasViewPermission) {
-                            activeRepo.courseBlockDao().findAllCourseBlockByClazzUidAsFlow(
-                                clazzUid = entityUidArg,
-                                includeInactive = false,
-                                includeHidden = false,
-                                hideUntilFilterTime = systemTimeInMillis(),
-                                accountPersonUid = activeUserPersonUid,
-                            ).collect { courseBlockList ->
-                                _uiState.update { prev ->
-                                    prev.copy(courseBlockList = courseBlockList)
+                            launch {
+                                activeRepo.courseBlockDao().findAllCourseBlockByClazzUidAsFlow(
+                                    clazzUid = entityUidArg,
+                                    includeInactive = false,
+                                    includeHidden = false,
+                                    hideUntilFilterTime = systemTimeInMillis(),
+                                    accountPersonUid = activeUserPersonUid,
+                                ).collect { courseBlockList ->
+                                    _uiState.update { prev ->
+                                        prev.copy(courseBlockList = courseBlockList)
+                                    }
+                                }
+                            }
+
+                            launch {
+                                activeRepo.statementDao().findStatusForStudentsInClazzAsFlow(
+                                    clazzUid = entityUidArg,
+                                    studentPersonUids = listOf(activeUserPersonUid)
+                                ).collect { blockStatuses ->
+                                    _uiState.update { prev ->
+                                        prev.copy(blockStatusesForActiveUser = blockStatuses)
+                                    }
                                 }
                             }
                         }else{
@@ -154,12 +174,14 @@ class ClazzDetailOverviewViewModel(
 
                 launch {
                     activeRepo.clazzDao().getClazzWithDisplayDetails(
-                        entityUidArg, systemTimeInMillis()
+                        clazzUid = entityUidArg,
+                        currentTime = systemTimeInMillis(),
+                        accountPersonUid = activeUserPersonUid,
                     ).combine(permissionFlow) { clazzWithDisplayDetails, permissions ->
                         clazzWithDisplayDetails.takeIf { permissions.firstPermission }
                     }.collect {
                         _uiState.update { prev ->
-                            prev.copy(clazz = it)
+                            prev.copy(clazzAndDetail = it)
                         }
 
                         parseAndUpdateTerminologyStringsIfNeeded(
@@ -172,7 +194,7 @@ class ClazzDetailOverviewViewModel(
                         }
 
                         _appUiState.update { prev ->
-                            prev.copy(title = it?.clazzName ?: "")
+                            prev.copy(title = it?.clazz?.clazzName ?: "")
                         }
                     }
                 }
