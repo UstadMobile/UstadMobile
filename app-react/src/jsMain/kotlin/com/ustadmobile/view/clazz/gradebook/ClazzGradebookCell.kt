@@ -24,8 +24,11 @@ import mui.icons.material.Close as CloseIcon
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.util.ext.maxScoreSummedIfModule
 import com.ustadmobile.core.viewmodel.clazz.gradebook.aggregateIfModule
+import emotion.react.css
 import mui.material.Tooltip
 import react.ReactNode
+import react.dom.html.ReactHTML.span
+import web.cssom.FontSize
 
 private const val DEFAULT_COLUMN_WIDTH = 56
 
@@ -90,6 +93,17 @@ val ClazzGradebookCell = FC<ClazzGradebookCellProps> { props ->
                     }
 
                     + displayMark
+
+                    if(props.showMaxScore == true) {
+                        span {
+                            css {
+                                fontSize = FontSize.smaller
+                            }
+
+                            + "/${maxPoints}"
+                        }
+
+                    }
                 }
             }
 

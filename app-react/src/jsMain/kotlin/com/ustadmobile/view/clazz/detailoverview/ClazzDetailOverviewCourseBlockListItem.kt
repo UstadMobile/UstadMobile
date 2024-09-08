@@ -20,8 +20,6 @@ import com.ustadmobile.core.viewmodel.contententry.contentTypeStringResource
 import com.ustadmobile.hooks.useHtmlToPlainText
 import com.ustadmobile.lib.db.composites.BlockStatus
 import com.ustadmobile.mui.components.UstadBlockIcon
-import com.ustadmobile.mui.components.UstadBlockStatusProgressBar
-import com.ustadmobile.util.ext.useAbsolutePositionBottom
 import com.ustadmobile.util.ext.useLineClamp
 import com.ustadmobile.view.clazz.gradebook.ClazzGradebookCell
 import com.ustadmobile.view.clazz.iconComponent
@@ -30,8 +28,6 @@ import emotion.react.css
 import js.objects.jso
 import mui.system.responsive
 import react.dom.html.ReactHTML.div
-import web.cssom.Position
-import web.cssom.pct
 
 external interface ClazzDetailOverviewCourseBlockListItemProps : Props {
 
@@ -69,29 +65,12 @@ val ClazzDetailOverviewCourseBlockListItem = FC<ClazzDetailOverviewCourseBlockLi
             }
 
             ListItemIcon {
-                Box {
-                    sx {
-                        position = Position.relative
-                        width = 40.px
-                        height = 40.px
-                    }
-
-                    UstadBlockStatusProgressBar {
-                        sx {
-                            useAbsolutePositionBottom()
-                            width = 100.pct
-                        }
-
-                        blockStatus = props.courseBlock?.status
-                    }
-
-                    UstadBlockIcon {
-                        title = courseBlockVal?.cbTitle ?: ""
-                        pictureUri = props.courseBlock?.courseBlockPicture?.cbpThumbnailUri
-                            ?: props.courseBlock?.contentEntryPicture2?.cepThumbnailUri
-                        courseBlock = props.courseBlock?.courseBlock
-                        contentEntry = props.courseBlock?.contentEntry
-                    }
+                UstadBlockIcon {
+                    title = courseBlockVal?.cbTitle ?: ""
+                    pictureUri = props.courseBlock?.courseBlockPicture?.cbpThumbnailUri
+                        ?: props.courseBlock?.contentEntryPicture2?.cepThumbnailUri
+                    courseBlock = props.courseBlock?.courseBlock
+                    contentEntry = props.courseBlock?.contentEntry
                 }
             }
 
@@ -194,8 +173,8 @@ val ClazzDetailOverviewCourseBlockListItem = FC<ClazzDetailOverviewCourseBlockLi
                 }else {
                     div {
                         css {
-                            width = 56.px
-                            height = 56.px
+                            width = 40.px
+                            height = 40.px
                         }
                     }
                 }
