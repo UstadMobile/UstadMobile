@@ -10,10 +10,6 @@ import com.ustadmobile.door.annotation.DoorDao
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.core.db.UNSET_DISTANT_FUTURE
 import com.ustadmobile.core.db.dao.xapi.StatementDao
-import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.ACTOR_UIDS_FOR_PERSONUIDS_CTE
-import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CLAZZ_STUDENT
-import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.STATUS_STATEMENTS_IS_FAILED_COMPLETION_CLAUSE
-import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.STATUS_STATEMENTS_IS_SUCCESSFUL_COMPLETION_CLAUSE
 import com.ustadmobile.door.annotation.HttpAccessible
 import com.ustadmobile.door.annotation.HttpServerFunctionCall
 import com.ustadmobile.door.annotation.HttpServerFunctionParam
@@ -149,57 +145,7 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
         )
     )
     @Query("""
-        WITH PersonUids(personUid) AS (
-            SELECT :accountPersonUid AS personUid
-        ),
-        
-        $ACTOR_UIDS_FOR_PERSONUIDS_CTE,
-        
-        
-        StatusStatements AS (
-             SELECT StatementEntity.*
-                    $FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CLAZZ_STUDENT
-        )
-        
-        SELECT CourseBlock.*, ContentEntry.*, CourseBlockPicture.*, ContentEntryPicture2.*,
-               --Begin BlockStatus fields
-               :accountPersonUid AS sPersonUid,
-               CourseBlock.cbUid AS sCbUid,
-               (SELECT MAX(StatusStatements.extensionProgress)
-                  FROM StatusStatements
-                 WHERE StatusStatements.statementCbUid = CourseBlock.cbUid
-               ) AS sProgress,
-               (SELECT CASE
-                       -- If a successful completion statement exists, then count as success
-                       WHEN (SELECT EXISTS(
-                                    SELECT 1
-                                      FROM StatusStatements
-                                     WHERE StatusStatements.statementCbUid = CourseBlock.cbUid 
-                                       AND ($STATUS_STATEMENTS_IS_SUCCESSFUL_COMPLETION_CLAUSE)))
-                            THEN 1
-                       -- Else if a record exsits where      
-                       WHEN (SELECT EXISTS(
-                                    SELECT 1
-                                      FROM StatusStatements
-                                     WHERE StatusStatements.statementCbUid = CourseBlock.cbUid 
-                                       AND ($STATUS_STATEMENTS_IS_FAILED_COMPLETION_CLAUSE)))
-                            THEN 0
-                            
-                       ELSE NULL
-                       END                    
-               ) AS sIsSuccess,
-               (SELECT EXISTS(
-                       SELECT 1
-                         FROM StatusStatements
-                        WHERE StatusStatements.statementCbUid = CourseBlock.cbUid
-                          AND CAST(StatusStatements.resultCompletion AS INTEGER) = 1)
-               ) AS sIsCompleted,
-               (SELECT MAX(StatusStatements.resultScoreScaled)
-                  FROM StatusStatements
-                 WHERE StatusStatements.statementCbUid = CourseBlock.cbUid
-               ) AS sScoreScaled
-               -- End block status fields
-               
+        SELECT CourseBlock.*, ContentEntry.*, CourseBlockPicture.*, ContentEntryPicture2.*
           FROM CourseBlock
                LEFT JOIN ContentEntry
                          ON CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
@@ -268,58 +214,8 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
         )
     )
     @Query("""
-        WITH PersonUids(personUid) AS (
-            SELECT :accountPersonUid AS personUid
-        ),
-        
-        $ACTOR_UIDS_FOR_PERSONUIDS_CTE,
-        
-        StatusStatements AS (
-             SELECT StatementEntity.*
-                    $FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CLAZZ_STUDENT
-        )
-        
         SELECT CourseBlock.*, ContentEntry.*, CourseBlockPicture.*, ContentEntryPicture2.*,
-               CourseBlock.cbUid NOT IN(:collapseList) AS expanded,
-               
-               --Begin BlockStatus fields
-               :accountPersonUid AS sPersonUid,
-               CourseBlock.cbUid AS sCbUid,
-               (SELECT MAX(StatusStatements.extensionProgress)
-                  FROM StatusStatements
-                 WHERE StatusStatements.statementCbUid = CourseBlock.cbUid
-               ) AS sProgress,
-               (SELECT CASE
-                       -- If a successful completion statement exists, then count as success
-                       WHEN (SELECT EXISTS(
-                                    SELECT 1
-                                      FROM StatusStatements
-                                     WHERE StatusStatements.statementCbUid = CourseBlock.cbUid 
-                                       AND ($STATUS_STATEMENTS_IS_SUCCESSFUL_COMPLETION_CLAUSE)))
-                            THEN 1
-                       -- Else if a record exsits where      
-                       WHEN (SELECT EXISTS(
-                                    SELECT 1
-                                      FROM StatusStatements
-                                     WHERE StatusStatements.statementCbUid = CourseBlock.cbUid 
-                                       AND ($STATUS_STATEMENTS_IS_FAILED_COMPLETION_CLAUSE)))
-                            THEN 0
-                            
-                       ELSE NULL
-                       END                    
-               ) AS sIsSuccess,
-               (SELECT EXISTS(
-                       SELECT 1
-                         FROM StatusStatements
-                        WHERE StatusStatements.statementCbUid = CourseBlock.cbUid
-                          AND CAST(StatusStatements.resultCompletion AS INTEGER) = 1)
-               ) AS sIsCompleted,
-               (SELECT MAX(StatusStatements.resultScoreScaled)
-                  FROM StatusStatements
-                 WHERE StatusStatements.statementCbUid = CourseBlock.cbUid
-               ) AS sScoreScaled
-               -- End block status fields
-               
+               CourseBlock.cbUid NOT IN(:collapseList) AS expanded
           FROM CourseBlock
                LEFT JOIN ContentEntry
                          ON CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}

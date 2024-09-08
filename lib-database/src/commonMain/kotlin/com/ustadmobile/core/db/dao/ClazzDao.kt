@@ -197,7 +197,7 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
                ELSE ''
                END DESC
     """)
-    @QueryLiveTables(["Clazz", "ClazzEnrolment", "ScopedGrant", "PersonGroupMember","CourseTerminology"])
+    @QueryLiveTables(["Clazz", "ClazzEnrolment", "CoursePermission", "SystemPermission", "CourseTerminology", "CoursePicture"])
     abstract fun findClazzesWithPermission(
         searchQuery: String,
         accountPersonUid: Long,

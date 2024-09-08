@@ -2,7 +2,6 @@ package com.ustadmobile.libuicompose.view.clazz.detailoverview
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -48,7 +47,6 @@ import com.ustadmobile.lib.db.composites.CourseBlockAndDisplayDetails
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.libuicompose.components.UstadAsyncImage
 import com.ustadmobile.libuicompose.components.UstadBlockIcon
-import com.ustadmobile.libuicompose.components.UstadBlockStatusProgressBar
 import com.ustadmobile.libuicompose.components.UstadHtmlText
 import com.ustadmobile.libuicompose.components.UstadDetailField2
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
@@ -300,25 +298,13 @@ fun CourseBlockListItem(
             }
         },
         leadingContent = {
-            Box(
-                Modifier.size(40.dp)
-            ) {
-                UstadBlockIcon(
-                    title = courseBlock?.courseBlock?.cbTitle ?: "",
-                    courseBlock = courseBlock?.courseBlock,
-                    contentEntry = courseBlock?.contentEntry,
-                    pictureUri = courseBlock?.courseBlockPicture?.cbpThumbnailUri
-                        ?: courseBlock?.contentEntryPicture2?.cepThumbnailUri,
-                )
-
-
-
-                UstadBlockStatusProgressBar(
-                    blockStatus = courseBlock?.status,
-                    modifier = Modifier.align(Alignment.BottomCenter),
-                )
-            }
-
+            UstadBlockIcon(
+                title = courseBlock?.courseBlock?.cbTitle ?: "",
+                courseBlock = courseBlock?.courseBlock,
+                contentEntry = courseBlock?.contentEntry,
+                pictureUri = courseBlock?.courseBlockPicture?.cbpThumbnailUri
+                    ?: courseBlock?.contentEntryPicture2?.cepThumbnailUri,
+            )
         },
         trailingContent = {
             Row {
