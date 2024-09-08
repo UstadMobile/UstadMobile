@@ -157,7 +157,8 @@ class ClazzDetailOverviewViewModel(
                             launch {
                                 activeRepo.statementDao().findStatusForStudentsInClazzAsFlow(
                                     clazzUid = entityUidArg,
-                                    studentPersonUids = listOf(activeUserPersonUid)
+                                    studentPersonUids = listOf(activeUserPersonUid),
+                                    accountPersonUid = activeUserPersonUid,
                                 ).collect { blockStatuses ->
                                     _uiState.update { prev ->
                                         prev.copy(blockStatusesForActiveUser = blockStatuses)
