@@ -11,6 +11,7 @@ import androidx.credentials.exceptions.GetCredentialException
 import com.google.common.collect.DiscreteDomain
 import com.ustadmobile.core.domain.passkey.LoginWithPasskeyUseCase
 import com.ustadmobile.core.domain.passkey.PassKeySignInData
+import com.ustadmobile.core.util.ext.base64StringToByteArray
 import io.github.aakira.napier.Napier
 import org.json.JSONObject
 
@@ -50,6 +51,11 @@ class LoginWithPasskeyUseCaseImpl(val context: Context) : LoginWithPasskeyUseCas
                 val decodedJson = String(decodedBytes)
                 val clientDataJson = JSONObject(decodedJson)
 
+                val userHandle = responseObject.getString("userHandle").base64StringToByteArray()
+                val domain= userHandle.decodeToString().substringAfter("@").removePrefix("http://")
+                    .removePrefix("https://")
+                    .removeSuffix("/")
+
                 // Create the PassKeySignInData object.
                 passKeySignInData = PassKeySignInData(
                     credentialId = jsonObject.getString("id"),
@@ -58,7 +64,7 @@ class LoginWithPasskeyUseCaseImpl(val context: Context) : LoginWithPasskeyUseCas
                     clientDataJSON = clientDataJsonString,
                     signature = responseObject.getString("signature"),
                     origin = clientDataJson.getString("origin"),
-                    rpId = "credential-manager-subdomain.applinktest.ustadmobile.com",  // Replace with the actual rpId if needed.
+                    rpId = "credential-manager-$domain",
                     challenge = clientDataJson.getString("challenge"),
                 )
 
