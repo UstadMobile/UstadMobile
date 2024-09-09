@@ -234,7 +234,6 @@ fun AppNavHost(
         }
     }
 
-
     passkeyPromptData?.let {
         CreatePasskeyPrompt(
             username = it.username,

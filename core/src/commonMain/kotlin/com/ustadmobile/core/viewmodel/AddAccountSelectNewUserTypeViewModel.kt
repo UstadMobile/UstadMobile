@@ -16,7 +16,7 @@ import org.kodein.di.DI
 import org.kodein.di.instance
 
 data class AddAccountSelectNewUserTypeUiState(
-    val showAddPersonalAccount: Boolean = true,
+    val showAddPersonalAccount: Boolean = false,
 )
 
 class AddAccountSelectNewUserTypeViewModel(

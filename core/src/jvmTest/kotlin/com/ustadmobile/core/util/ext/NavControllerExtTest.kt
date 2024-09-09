@@ -10,6 +10,7 @@ import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMURLEncoder
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.viewmodel.AddAccountSelectNewOrExistingViewModel
 import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import com.ustadmobile.lib.db.entities.Person
@@ -189,7 +190,7 @@ class NavControllerExtTest {
             mockNavController.navigateToLink(link, mockAccountManager, mockOpenLinkUseCase)
         }
 
-        verify(mockNavController, timeout(5000)).navigate(eq(LoginViewModel.DEST_NAME), argWhere { args ->
+        verify(mockNavController, timeout(5000)).navigate(eq(AddAccountSelectNewOrExistingViewModel.DEST_NAME), argWhere { args ->
             UMURLEncoder.decodeUTF8(args[UstadView.ARG_NEXT]!!).let {
                 it.substringBefore("?") == "ContentEntryList" &&
                     UMFileUtil.parseURLQueryString(it)["parentUid"] == "1234"
@@ -211,7 +212,7 @@ class NavControllerExtTest {
                 userCanSelectServer = false, forceAccountSelection = true)
         }
 
-        verify(mockNavController, timeout(5000)).navigate(eq(LoginViewModel.DEST_NAME), argWhere { args->
+        verify(mockNavController, timeout(5000)).navigate(eq(AddAccountSelectNewOrExistingViewModel.DEST_NAME), argWhere { args->
             UMURLEncoder.decodeUTF8(args[UstadView.ARG_NEXT]!!).let {
                 it.substringBefore("?") == "ContentEntryList" &&
                     UMFileUtil.parseURLQueryString(it)["parentUid"] == "1234"
