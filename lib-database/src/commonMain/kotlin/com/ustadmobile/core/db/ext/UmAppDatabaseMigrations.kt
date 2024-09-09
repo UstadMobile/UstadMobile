@@ -1630,9 +1630,10 @@ val MIGRATION_199_200 = DoorMigrationStatementList(199, 200) { db ->
 val MIGRATION_200_201 = DoorMigrationStatementList(200, 201) { db ->
     buildList {
         if (db.dbType() == DoorDbType.SQLITE) {
-            add("CREATE TABLE IF NOT EXISTS PersonPasskey (personPasskeyUid INTEGER NOT NULL , ppPersonUid INTEGER NOT NULL, ppAttestationObj TEXT, clientDataJson TEXT, ppOriginString TEXT, ppRpid TEXT, ppId TEXT, ppChallengeString TEXT, ppPublicKey TEXT, isRevoked INTEGER NOT NULL DEFAULT 0, ppPasskeyLct INTEGER NOT NULL)")
+            add("CREATE TABLE IF NOT EXISTS PersonPasskey (  ppPersonUid  INTEGER  NOT NULL , ppAttestationObj  TEXT , ppClientDataJson  TEXT , ppOriginString  TEXT , ppRpid  TEXT , ppId  TEXT , ppChallengeString  TEXT , ppPublicKey  TEXT , isRevoked  INTEGER  NOT NULL , ppPasskeyLct  INTEGER  NOT NULL , personPasskeyUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+
         } else {
-            add("CREATE TABLE IF NOT EXISTS PersonPasskey (personPasskeyUid BIGINT NOT NUL , ppPersonUid BIGINT NOT NULL, ppAttestationObj TEXT, clientDataJson TEXT, ppOriginString TEXT, ppRpid TEXT, ppId TEXT, ppChallengeString TEXT, ppPublicKey TEXT, isRevoked INTEGER NOT NULL DEFAULT 0  , ppPasskeyLct BIGINT NOT NULL)")
+            add("CREATE TABLE IF NOT EXISTS PersonPasskey (  ppPersonUid  BIGINT  NOT NULL , ppAttestationObj  TEXT , ppClientDataJson  TEXT , ppOriginString  TEXT , ppRpid  TEXT , ppId  TEXT , ppChallengeString  TEXT , ppPublicKey  TEXT , isRevoked  INTEGER  NOT NULL , ppPasskeyLct  BIGINT  NOT NULL , personPasskeyUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
         }
     }
 }
