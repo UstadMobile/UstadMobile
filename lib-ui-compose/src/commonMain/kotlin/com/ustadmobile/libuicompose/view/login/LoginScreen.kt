@@ -121,24 +121,6 @@ fun LoginScreen(
             Text(stringResource(MR.strings.login))
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        if(uiState.createAccountVisible) {
-            OutlinedButton(
-                onClick = onClickCreateAccount,
-                modifier = Modifier
-                    .testTag("create_account_button")
-                    .fillMaxWidth().defaultItemPadding(),
-                enabled = uiState.fieldsEnabled,
-            ) {
-                Text(stringResource(MR.strings.create_account))
-            }
-
-            Spacer(modifier = Modifier.height(10.dp))
-        }
-
-
-
         Spacer(modifier = Modifier.height(10.dp))
         if(uiState.connectAsGuestVisible) {
             OutlinedButton(
