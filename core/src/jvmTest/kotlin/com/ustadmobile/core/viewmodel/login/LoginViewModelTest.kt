@@ -62,25 +62,6 @@ class LoginViewModelTest : AbstractMainDispatcherTest(){
     }
 
     @Test
-    fun givenRegistrationIsAllowedOrNot_whenCreated_thenRegistrationButtonVisibilityShouldMatch() {
-        listOf(true, false).forEach { testRegistrationAllowed ->
-            testViewModel<LoginViewModel> {
-                viewModelFactory {
-                    savedStateHandle[UstadView.ARG_LEARNINGSPACE_URL] = "http://localhost:8087/"
-                    savedStateHandle[UstadView.ARG_SITE] = json.encodeToString(Site().apply {
-                        registrationAllowed = testRegistrationAllowed
-                    })
-                    LoginViewModel(di, savedStateHandle)
-                }
-
-                viewModel.uiState.assertItemReceived(name = "Create account button visible") {
-                    it.createAccountVisible == testRegistrationAllowed
-                }
-            }
-        }
-    }
-
-    @Test
     fun givenGuestConnectionAllowedOrNot_whenCreated_thenGuestButtonVisibiltyShouldMatch() {
         listOf(true, false).forEach { testGuestAllowed ->
             testViewModel<LoginViewModel> {
@@ -101,31 +82,6 @@ class LoginViewModelTest : AbstractMainDispatcherTest(){
             }
         }
     }
-
-    @Test
-    fun givenCreateAccountVisible_whenClickCreateAccount_thenShouldNavigateToAgeRedirect() {
-        testViewModel<LoginViewModel> {
-            viewModelFactory {
-                savedStateHandle[UstadView.ARG_LEARNINGSPACE_URL] = "http://localhost:8087/"
-                savedStateHandle[UstadView.ARG_SITE] = json.encodeToString(Site().apply {
-                    registrationAllowed = true
-                })
-                LoginViewModel(di, savedStateHandle)
-            }
-
-            val stateFlow = stateInViewModelScope(viewModel.uiState)
-            stateFlow.assertItemReceived { it.createAccountVisible }
-
-            viewModel.navCommandFlow.filter {
-                (it as? NavigateNavCommand)?.viewName == RegisterAgeRedirectViewModel.DEST_NAME
-            }.test(name = "receive navigate to age redirect screen") {
-                viewModel.onClickCreateAccount()
-                assertNotNull(awaitItem())
-            }
-        }
-    }
-
-
 
     @Test
     fun givenValidUsernameAndPassword_whenFromDestinationArgumentIsProvidedAndHandleLoginClicked_shouldGoToNextScreenAndInvalidateSync() {

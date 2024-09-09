@@ -54,7 +54,6 @@ data class LoginUiState(
     val usernameError: String? = null,
     val passwordError: String? = null,
     val versionInfo: String = "v42",
-    val createAccountVisible: Boolean = false,
     val connectAsGuestVisible: Boolean = false,
     val loginIntentMessage: String? = null,
     val errorMessage: String? = null,
@@ -164,7 +163,6 @@ class LoginViewModel(
         loadingState = LoadingUiState.NOT_LOADING
         _uiState.update { prev ->
             prev.copy(
-                createAccountVisible = false,
                 connectAsGuestVisible = site.guestLogin,
                 fieldsEnabled = true,
                 errorMessage = null,
