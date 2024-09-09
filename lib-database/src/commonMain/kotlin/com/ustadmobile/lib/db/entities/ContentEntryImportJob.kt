@@ -19,23 +19,26 @@ import kotlinx.serialization.Serializable
     ]
 )
 
+/**
+ * @param sourceUri Where data is being taken from, this could be
+ *  - ContentEntry (leaf)
+ *     e.g. https://server.com/endpoint/umapp/index.html#ContentEntryDetail?entityUid=1234
+ *  - A plain HTTP file that can be imported
+ *     e.g. https://server.com/dir/file.epub
+ *  - Web resource that needs scraped
+ *     e.g. https://khanacademy.org/topic/exercise
+ *  - A local file URI that can be imported
+ *     e.g. file:///dir/file.epub
+ *
+ *  @param cjiParams if not null, then this is a simple Json key-value map that can be used to pass
+ *  import parameters (e.g. subtitles to add etc).
+ */
 @Serializable
 data class ContentEntryImportJob(
 
     @PrimaryKey(autoGenerate = true)
     var cjiUid: Long = 0,
 
-    /**
-     * Where data is being taken from, this could be
-     *  - ContentEntry (leaf)
-     *     e.g. https://server.com/endpoint/umapp/index.html#ContentEntryDetail?entityUid=1234
-     *  - A plain HTTP file that can be imported
-     *     e.g. https://server.com/dir/file.epub
-     *  - Web resource that needs scraped
-     *     e.g. https://khanacademy.org/topic/exercise
-     *  - A local file URI that can be imported
-     *     e.g. file:///dir/file.epub
-     */
     var sourceUri: String? = null,
 
     /**
@@ -125,6 +128,8 @@ data class ContentEntryImportJob(
     var cjiErrorDismissed: Boolean = false,
 
     var cjiOwnerPersonUid: Long = 0,
+
+    var cjiParams: String? = null,
 
 ) {
     companion object {

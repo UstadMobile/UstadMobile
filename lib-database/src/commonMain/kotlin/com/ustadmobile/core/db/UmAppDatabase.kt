@@ -99,7 +99,7 @@ import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
     PendingRepositorySession::class,
     DoorNode::class,
 
-], version = 200)
+], version = 201)
 expect abstract class UmAppDatabase : RoomDatabase {
 
     abstract fun personDao(): PersonDao
