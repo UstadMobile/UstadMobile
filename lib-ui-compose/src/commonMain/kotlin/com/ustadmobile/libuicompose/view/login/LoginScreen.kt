@@ -30,8 +30,6 @@ import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import com.ustadmobile.libuicompose.components.UstadPasswordField
 import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
-import com.ustadmobile.core.domain.passkey.PassKeySignInData
-import com.ustadmobile.libuicompose.util.passkey.SignInWithPasskey
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.Dispatchers
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
@@ -62,7 +60,7 @@ fun LoginScreen(
     onClickConnectAsGuest: () -> Unit = {},
     onUsernameValueChange: (String) -> Unit = {},
     onPasswordValueChange: (String) -> Unit = {},
-    onSignInWithPasskey: (PassKeySignInData) -> Unit = {},
+    onSignInWithPasskey: () -> Unit = {},
 ) {
 
     UstadVerticalScrollColumn(
@@ -139,11 +137,8 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(10.dp))
         }
 
-        SignInWithPasskey(
-            onSignInWithPasskey={
-                onSignInWithPasskey(it)
-            }
-        )
+
+
         Spacer(modifier = Modifier.height(10.dp))
         if(uiState.connectAsGuestVisible) {
             OutlinedButton(

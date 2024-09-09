@@ -11,6 +11,7 @@ import androidx.credentials.CreatePublicKeyCredentialRequest
 import androidx.credentials.CreatePublicKeyCredentialResponse
 import androidx.credentials.CredentialManager
 import androidx.credentials.exceptions.CreateCredentialException
+import com.ustadmobile.core.domain.passkey.CreatePasskeyParams
 import com.ustadmobile.core.domain.passkey.PasskeyResult
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.libuicompose.util.ext.getActivityContext
@@ -61,11 +62,14 @@ private suspend fun createPasskey(
 
     val request = CreatePublicKeyCredentialRequest(
         PasskeyRequestJsonUseCase.createPasskeyRequestJson(
-            username,
-            personUid,
-            doorNodeId,
-            usStartTime,
-            serverUrl
+            CreatePasskeyParams(
+                username=username?:"",
+                personUid=personUid,
+                doorNodeId = doorNodeId,
+                serverUrl = serverUrl,
+                person = Person(),
+                usStartTime = usStartTime
+            )
         )
     )
     var passkeyResult: PasskeyResult? = null

@@ -22,6 +22,7 @@ import com.ustadmobile.core.view.SiteTermsDetailView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
+import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel.Companion.ARG_REGISTRATION_MODE
@@ -110,7 +111,8 @@ class SignUpViewModel(
 
     private val getLocalAccountsSupportedUseCase: GetLocalAccountsSupportedUseCase by instance()
 
-    private val serverUrl = apiUrlConfig.newPersonalAccountsLearningSpaceUrl ?: "http://localhost"
+    private val serverUrl = savedStateHandle[UstadView.ARG_LEARNINGSPACE_URL]
+        ?: apiUrlConfig.newPersonalAccountsLearningSpaceUrl ?: "http://localhost"
 
     val addNewPersonUseCase: AddNewPersonUseCase = di.on(LearningSpace(serverUrl)).direct.instance()
 
@@ -133,20 +135,6 @@ class SignUpViewModel(
                 hideBottomNavigation = true,
             )
         }
-        _uiState.update { prev ->
-            prev.copy(
-                genderOptions = genderConfig.genderMessageIdsAndUnset,
-                person = Person(
-                    dateOfBirth = savedStateHandle[PersonEditViewModel.ARG_DATE_OF_BIRTH]?.toLong()
-                        ?: 0L
-                ),
-                serverUrl_ = serverUrl,
-                passkeySupported = createPasskeyUseCase != null,
-                showOtherOption = createPasskeyUseCase == null && getLocalAccountsSupportedUseCase.invoke(),
-
-
-                )
-        }
         if (savedStateHandle[SIGN_WITH_USERNAME_AND_PASSWORD] == "true") {
             _uiState.update { prev ->
                 prev.copy(
@@ -160,7 +148,23 @@ class SignUpViewModel(
                     isPersonalAccount = true
                 )
             }
+            nextDestination = ContentEntryListViewModel.DEST_NAME_HOME
         }
+        _uiState.update { prev ->
+            prev.copy(
+                genderOptions = genderConfig.genderMessageIdsAndUnset,
+                person = Person(
+                    dateOfBirth = savedStateHandle[PersonEditViewModel.ARG_DATE_OF_BIRTH]?.toLong()
+                        ?: 0L,
+                    isPersonalAccount = _uiState.value.isPersonalAccount
+                ),
+                serverUrl_ = serverUrl,
+                passkeySupported = createPasskeyUseCase != null,
+                showOtherOption = createPasskeyUseCase == null && getLocalAccountsSupportedUseCase.invoke(),
+
+                )
+        }
+
     }
 
     fun onEntityChanged(entity: Person?) {
@@ -367,7 +371,11 @@ class SignUpViewModel(
     private fun navigateToAppropriateScreen(savePerson: Person) {
 
         if (_uiState.value.isParent) {
-            navController.navigate(AddChildProfilesViewModel.DEST_NAME, emptyMap())
+            navController.navigate(AddChildProfilesViewModel.DEST_NAME,
+                args = buildMap {
+                    putFromSavedStateIfPresent(REGISTRATION_ARGS_TO_PASS)
+                }
+            )
 
         } else {
 

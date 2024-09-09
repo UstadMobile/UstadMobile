@@ -9,4 +9,13 @@ data class CreatePasskeyParams(
     val usStartTime: Long,
     val serverUrl: String,
     val person: Person
-)
+){
+    val domainName: String
+        get() {
+            val domain = serverUrl
+                .removePrefix("http://")
+                .removePrefix("https://")
+                .removeSuffix("/")
+            return domain
+        }
+}

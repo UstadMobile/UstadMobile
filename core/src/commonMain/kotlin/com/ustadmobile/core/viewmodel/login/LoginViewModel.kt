@@ -7,6 +7,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
+import com.ustadmobile.core.domain.passkey.LoginWithPasskeyUseCase
 import com.ustadmobile.core.domain.passkey.PassKeySignInData
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
@@ -25,12 +26,15 @@ import com.ustadmobile.core.util.ext.verifySite
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
+import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.core.viewmodel.person.registerageredirect.RegisterAgeRedirectViewModel
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel
 import com.ustadmobile.door.ext.doorIdentityHashCode
 import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.Site
+import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import io.github.aakira.napier.Napier
 import io.ktor.client.*
 import kotlinx.coroutines.delay
@@ -64,7 +68,7 @@ data class LoginUiState(
 class LoginViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
-) : UstadViewModel(di, savedStateHandle, DEST_NAME){
+) : UstadViewModel(di, savedStateHandle, DEST_NAME) {
 
     private val _uiState = MutableStateFlow(LoginUiState())
 
@@ -75,6 +79,8 @@ class LoginViewModel(
     private var serverUrl: String
 
     private val impl: UstadMobileSystemImpl by instance()
+
+    private val loginWithPasskeyUseCase: LoginWithPasskeyUseCase? by instanceOrNull()
 
     private val httpClient: HttpClient by instance()
 
@@ -97,8 +103,9 @@ class LoginViewModel(
     init {
         nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?: ClazzListViewModel.DEST_NAME_HOME
 
-        serverUrl = savedStateHandle[UstadView.ARG_LEARNINGSPACE_URL] ?: apiUrlConfig.presetLearningSpaceUrl
-            ?: "http://localhost"
+        serverUrl =
+            savedStateHandle[UstadView.ARG_LEARNINGSPACE_URL] ?: apiUrlConfig.presetLearningSpaceUrl
+                    ?: "http://localhost"
 
         _uiState.update { prev ->
             prev.copy(
@@ -119,10 +126,10 @@ class LoginViewModel(
 
         serverUrl = serverUrl.requirePostfix("/")
         val siteJsonStr: String? = savedStateHandle[UstadView.ARG_SITE]
-        if(siteJsonStr != null){
+        if (siteJsonStr != null) {
             _appUiState.value = baseAppUiState
             onSiteVerified(json.decodeFromString(siteJsonStr))
-        }else{
+        } else {
             _uiState.update { prev ->
                 prev.copy(
                     fieldsEnabled = false,
@@ -133,11 +140,11 @@ class LoginViewModel(
             )
 
             viewModelScope.launch {
-                while(verifiedSite == null) {
+                while (verifiedSite == null) {
                     try {
                         val site = httpClient.verifySite(serverUrl, 10000, json)
                         onSiteVerified(site) // onSiteVerified will set the workspace var, and exit the loop
-                    }catch(e: Exception) {
+                    } catch (e: Exception) {
                         Napier.w("Could not load site object for $serverUrl", e)
                         _uiState.update { prev ->
                             prev.copy(
@@ -149,6 +156,7 @@ class LoginViewModel(
                 }
             }
         }
+        onSignInWithPassKey()
     }
 
     private fun onSiteVerified(site: Site) {
@@ -156,7 +164,7 @@ class LoginViewModel(
         loadingState = LoadingUiState.NOT_LOADING
         _uiState.update { prev ->
             prev.copy(
-                createAccountVisible = site.registrationAllowed,
+                createAccountVisible = false,
                 connectAsGuestVisible = site.guestLogin,
                 fieldsEnabled = true,
                 errorMessage = null,
@@ -181,16 +189,19 @@ class LoginViewModel(
      * destination as per the arguments. This includes popping off the stack (using ARG_POPUPTO_ON_FINISH
      * or at least removing the login screen itself from the stack).
      */
-    private fun goToNextDestAfterLoginOrGuestSelected(personUid: Long) {
+    private fun goToNextDestAfterLoginOrGuestSelected(person: Person) {
         val goOptions = UstadMobileSystemCommon.UstadGoOptions(clearStack = true)
         Napier.d { "LoginPresenter: go to next destination: $nextDestination" }
+        if (person.isPersonalAccount){
+            nextDestination= ContentEntryListViewModel.DEST_NAME_HOME
+        }
         navController.navigateToViewUri(
-            nextDestination.appendSelectedAccount(personUid, LearningSpace(serverUrl)),
+            nextDestination.appendSelectedAccount(person.personUid, LearningSpace(serverUrl)),
             goOptions
         )
     }
 
-    fun onClickLogin(){
+    fun onClickLogin() {
         _uiState.update { prev ->
             prev.copy(
                 username = prev.username.trim(),
@@ -204,7 +215,7 @@ class LoginViewModel(
         val username = _uiState.value.username
         val password = _uiState.value.password
 
-        if(username.isNotEmpty() && password.isNotEmpty()){
+        if (username.isNotEmpty() && password.isNotEmpty()) {
             loadingState = LoadingUiState.INDETERMINATE
             viewModelScope.launch {
                 var errorMessage: String? = null
@@ -213,24 +224,26 @@ class LoginViewModel(
                         username = username.trim(),
                         password = password.trim(),
                         endpointUrl = serverUrl,
-                        maxDateOfBirth = savedStateHandle[UstadView.ARG_MAX_DATE_OF_BIRTH]?.toLong() ?: 0L,
+                        maxDateOfBirth = savedStateHandle[UstadView.ARG_MAX_DATE_OF_BIRTH]?.toLong()
+                            ?: 0L,
                         dontSetCurrentSession = dontSetCurrentSession,
                     )
                     //this emit the passkeydata to show prompt to user to create passkey
-                    accountManager.createPassKeyPrompt(username.trim(),account.personUid,di.doorIdentityHashCode.toString(),
-                        systemTimeInMillis(),serverUrl
+                    accountManager.createPassKeyPrompt(
+                        username.trim(), account.personUid, di.doorIdentityHashCode.toString(),
+                        systemTimeInMillis(), serverUrl
                     )
 
-                    goToNextDestAfterLoginOrGuestSelected(account.personUid)
-                }catch(e: AdultAccountRequiredException) {
+                    goToNextDestAfterLoginOrGuestSelected(account.toPerson())
+                } catch (e: AdultAccountRequiredException) {
                     errorMessage = impl.getString(MR.strings.adult_account_required)
-                } catch(e: UnauthorizedException) {
+                } catch (e: UnauthorizedException) {
                     errorMessage = impl.getString(MR.strings.wrong_user_pass_combo)
-                } catch(e: ConsentNotGrantedException) {
-                    errorMessage =  impl.getString(MR.strings.your_account_needs_approved)
-                }catch(e: Exception) {
+                } catch (e: ConsentNotGrantedException) {
+                    errorMessage = impl.getString(MR.strings.your_account_needs_approved)
+                } catch (e: Exception) {
                     errorMessage = impl.getString(MR.strings.login_network_error)
-                }finally {
+                } finally {
                     loadingState = LoadingUiState.NOT_LOADING
                     _uiState.update { prev ->
                         prev.copy(
@@ -240,19 +253,19 @@ class LoginViewModel(
                     }
                 }
             }
-        }else{
+        } else {
             loadingState = LoadingUiState.NOT_LOADING
             _uiState.update { prev ->
                 prev.copy(
                     fieldsEnabled = true,
-                    usernameError = if(prev.username.isEmpty()) {
+                    usernameError = if (prev.username.isEmpty()) {
                         impl.getString(MR.strings.field_required_prompt)
                     } else {
                         null
                     },
-                    passwordError = if(prev.password.isEmpty()) {
+                    passwordError = if (prev.password.isEmpty()) {
                         impl.getString(MR.strings.field_required_prompt)
-                    }else {
+                    } else {
                         null
                     }
                 )
@@ -260,12 +273,13 @@ class LoginViewModel(
         }
     }
 
-    fun onClickCreateAccount(){
+    fun onClickCreateAccount() {
         val args = mutableMapOf(
             UstadView.ARG_LEARNINGSPACE_URL to serverUrl,
             SiteTermsDetailView.ARG_SHOW_ACCEPT_BUTTON to true.toString(),
             UstadView.ARG_POPUPTO_ON_FINISH to
-                    (savedStateHandle[UstadView.ARG_POPUPTO_ON_FINISH] ?: DEST_NAME))
+                    (savedStateHandle[UstadView.ARG_POPUPTO_ON_FINISH] ?: DEST_NAME)
+        )
 
         args.putFromSavedStateIfPresent(PersonEditViewModel.REGISTRATION_ARGS_TO_PASS)
 
@@ -275,7 +289,7 @@ class LoginViewModel(
     fun onChangeLanguage(
         uiLanguage: UstadMobileSystemCommon.UiLanguage
     ) {
-        if(uiLanguage != _uiState.value.currentLanguage) {
+        if (uiLanguage != _uiState.value.currentLanguage) {
             val result = setLanguageUseCase(
                 uiLanguage, DEST_NAME, navController,
                 navArgs = buildMap {
@@ -287,27 +301,42 @@ class LoginViewModel(
 
             _uiState.update { previous ->
                 previous.copy(
-                    currentLanguage =  uiLanguage,
+                    currentLanguage = uiLanguage,
                     showWaitForRestart = result.waitForRestart
                 )
             }
         }
     }
 
-    fun onClickConnectAsGuest(){
+    fun onClickConnectAsGuest() {
         viewModelScope.launch {
             val guestPerson = accountManager.startGuestSession(serverUrl)
-            goToNextDestAfterLoginOrGuestSelected(guestPerson.person.personUid)
+            goToNextDestAfterLoginOrGuestSelected(guestPerson.person)
         }
     }
 
-    fun onSignInWithPassKey(passKeySignInData: PassKeySignInData){
+     fun onSignInWithPassKey() {
         viewModelScope.launch {
             try {
-                val account = accountManager.loginWithPasskey(passKeySignInData, serverUrl)
-                goToNextDestAfterLoginOrGuestSelected(account.personUid)
-            } catch(e: Exception) {
-                snackDispatcher.showSnackBar(Snack(message ="error occurred :"+e.message))
+
+                loginWithPasskeyUseCase?.let {
+                    val passKeySignInData = it.invoke(
+                        serverUrl.removePrefix("http://")
+                            .removePrefix("https://")
+                            .removeSuffix("/")
+                    )
+                    if (passKeySignInData != null) {
+                        val account = accountManager.loginWithPasskey(passKeySignInData, serverUrl)
+                        goToNextDestAfterLoginOrGuestSelected(account.toPerson())
+
+
+                    } else {
+                        snackDispatcher.showSnackBar(Snack("Account not found"))
+                    }
+                }
+
+            } catch (e: Exception) {
+                snackDispatcher.showSnackBar(Snack(message = "error occurred :" + e.message))
 
             }
         }
