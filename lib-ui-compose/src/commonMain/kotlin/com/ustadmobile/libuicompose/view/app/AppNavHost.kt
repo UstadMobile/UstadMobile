@@ -146,7 +146,6 @@ import com.ustadmobile.core.viewmodel.systempermission.edit.SystemPermissionEdit
 import com.ustadmobile.core.viewmodel.videocontent.VideoContentViewModel
 import com.ustadmobile.core.viewmodel.xapicontent.XapiContentViewModel
 import com.ustadmobile.libuicompose.util.passkey.CreatePasskeyPrompt
-import com.ustadmobile.libuicompose.view.ExistingUser.AddAccountExistingUserScreen
 import com.ustadmobile.libuicompose.view.about.OpenLicensesScreen
 import com.ustadmobile.libuicompose.view.clazz.invitevialink.InviteViaLinkScreen
 import com.ustadmobile.libuicompose.view.clazz.joinwithcode.JoinWithCodeScreen
@@ -169,6 +168,7 @@ import com.ustadmobile.libuicompose.view.message.messagelist.MessageListScreen
 import com.ustadmobile.libuicompose.view.newuser.AddAccountSelectNewUserTypeScreen
 import com.ustadmobile.libuicompose.view.parentalconsentmanagement.ParentalConsentManagementScreen
 import com.ustadmobile.libuicompose.view.pdfcontent.PdfContentScreen
+import com.ustadmobile.libuicompose.view.person.addaccount.AddAccountExistingUserScreen
 import com.ustadmobile.libuicompose.view.person.bulkaddrunimport.BulkAddPersonRunImportScreen
 import com.ustadmobile.libuicompose.view.person.bulkaddselectfile.BulkAddPersonSelectFileScreen
 import com.ustadmobile.libuicompose.view.person.chlid.AddChildProfilesScreen

@@ -41,13 +41,19 @@ class SiteTermsDetailViewModel(
 
     val uiState: Flow<SiteTermsDetailUiState> = _uiState.asStateFlow()
 
-    private val getLocaleForSiteTermsUseCase: GetLocaleForSiteTermsUseCase by
-        on(accountManager.activeLearningSpace).instance()
 
     init {
         val acceptButtonMode = savedStateHandle[ARG_SHOW_ACCEPT_BUTTON]?.toBoolean() ?: false
 
         val apiUrl = savedStateHandle[ARG_LEARNINGSPACE_URL]
+
+        val learningSpace=if(acceptButtonMode && apiUrl != null) {
+            LearningSpace(apiUrl)
+        }else{
+            accountManager.activeLearningSpace
+        }
+
+        val getLocaleForSiteTermsUseCase: GetLocaleForSiteTermsUseCase by on(learningSpace).instance()
 
         _appUiState.update { prev ->
             prev.copy(
@@ -60,7 +66,7 @@ class SiteTermsDetailViewModel(
 
         viewModelScope.launch {
             val repo: UmAppDatabase = if(acceptButtonMode && apiUrl != null) {
-                di.direct.on(LearningSpace(apiUrl)).instance<UmAppDataLayer>().repositoryOrLocalDb
+                di.direct.on(learningSpace).instance<UmAppDataLayer>().repositoryOrLocalDb
             }else {
                 activeRepoWithFallback
             }

@@ -4,6 +4,9 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.util.ext.requireHttpPrefix
+import com.ustadmobile.core.util.ext.requirePostfix
+import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNINGSPACE_URL
 import com.ustadmobile.core.viewmodel.person.learningspacelist.LearningSpaceListViewModel
 import com.ustadmobile.core.viewmodel.person.registerageredirect.RegisterAgeRedirectViewModel
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel
@@ -54,6 +57,8 @@ class AddAccountSelectNewUserTypeViewModel(
             args = buildMap {
                 putFromSavedStateIfPresent(SignUpViewModel.REGISTRATION_ARGS_TO_PASS)
                 put(ARG_IS_PERSONAL_ACCOUNT,true.toString())
+                put(ARG_LEARNINGSPACE_URL,apiUrlConfig.newPersonalAccountsLearningSpaceUrl?.requireHttpPrefix()
+                    ?.requirePostfix("/")?:"")
             }
         )
 
