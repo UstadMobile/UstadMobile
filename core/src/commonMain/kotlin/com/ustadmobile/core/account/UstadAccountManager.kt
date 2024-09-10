@@ -587,7 +587,7 @@ class UstadAccountManager(
         val personAndPicture = repo.personDao().findByUidWithPicture(
             passkeyVerifyResult.personUid) ?: throw IllegalStateException("Cannot find person in repo/db")
         val personInDb = personAndPicture.person!! //Cannot be null based on query
-
+        responseAccount.isPersonalAccount=personInDb.isPersonalAccount
 
        // val repoWithCurrentUrl: UmAppDatabase by di.on(LearningSpace(currentServerUrl)).instance(tag = DoorTag.TAG_REPO)
 
@@ -643,7 +643,7 @@ class UstadAccountManager(
         val personAndPicture = dataLayer.repositoryOrLocalDb.personDao().findByUidWithPicture(
             responseAccount.personUid) ?: throw IllegalStateException("Cannot find person in repo/db")
         val personInDb = personAndPicture.person!! //Cannot be null based on query
-
+        responseAccount.isPersonalAccount=personInDb.isPersonalAccount
         getSiteFromDbOrLoadFromHttp(dataLayer.repositoryOrLocalDb)
 
         val newSession = addSession(personInDb, endpointUrl, password)

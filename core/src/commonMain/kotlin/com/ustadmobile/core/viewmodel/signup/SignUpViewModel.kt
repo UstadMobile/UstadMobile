@@ -135,13 +135,6 @@ class SignUpViewModel(
                 hideBottomNavigation = true,
             )
         }
-        if (savedStateHandle[SIGN_WITH_USERNAME_AND_PASSWORD] == "true") {
-            _uiState.update { prev ->
-                prev.copy(
-                    passkeySupported = false
-                )
-            }
-        }
         if (savedStateHandle[ARG_IS_PERSONAL_ACCOUNT] == "true") {
             _uiState.update { prev ->
                 prev.copy(
@@ -164,7 +157,13 @@ class SignUpViewModel(
 
                 )
         }
-
+        if (savedStateHandle[SIGN_WITH_USERNAME_AND_PASSWORD] == "true") {
+            _uiState.update { prev ->
+                prev.copy(
+                    passkeySupported = false
+                )
+            }
+        }
     }
 
     fun onEntityChanged(entity: Person?) {
@@ -373,6 +372,7 @@ class SignUpViewModel(
         if (_uiState.value.isParent) {
             navController.navigate(AddChildProfilesViewModel.DEST_NAME,
                 args = buildMap {
+                    put(ARG_NEXT,nextDestination)
                     putFromSavedStateIfPresent(REGISTRATION_ARGS_TO_PASS)
                 }
             )
