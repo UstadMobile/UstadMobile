@@ -21,6 +21,7 @@ env:
 - longPressOn:
     text: "E-book"
 - tapOn: "Delete"
+- assertNotVisible: "E-book"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/screen_after_deleting_content_from_library"
 
 # login to make sure the content is hidden
