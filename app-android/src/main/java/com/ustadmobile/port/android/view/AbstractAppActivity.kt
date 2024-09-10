@@ -117,10 +117,10 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
         }
 
         bind<CreatePasskeyUseCase>() with singleton {
-            CreatePasskeyUseCaseImpl(applicationContext)
+            CreatePasskeyUseCaseImpl(this@AbstractAppActivity)
         }
         bind<LoginWithPasskeyUseCase>() with singleton {
-            LoginWithPasskeyUseCaseImpl(applicationContext)
+            LoginWithPasskeyUseCaseImpl(this@AbstractAppActivity)
         }
 
         constant(UstadMobileSystemCommon.TAG_DOWNLOAD_ENABLED) with true
