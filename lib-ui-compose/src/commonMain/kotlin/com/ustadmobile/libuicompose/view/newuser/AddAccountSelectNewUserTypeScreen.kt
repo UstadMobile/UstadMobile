@@ -142,9 +142,3 @@ fun AddAccountSelectNewUserTypeScreen(
         }
     }
 }
-
-
-
-
-
-

@@ -44,7 +44,7 @@ class AddAccountSelectNewUserTypeViewModel(
         if (apiUrlConfig.newPersonalAccountsLearningSpaceUrl != null) {
             _uiState.update { prev->
                 prev.copy(
-                   showAddPersonalAccount = true
+                    showAddPersonalAccount = true
                 )
             }
         }

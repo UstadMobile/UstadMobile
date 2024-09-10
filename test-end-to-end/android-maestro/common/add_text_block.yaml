@@ -6,7 +6,7 @@ appId: com.toughra.ustadmobile
   # 2) TEXTTITLE: provide text title of string type
   # 3) TEXT: provide text to enter inside text box of string type
 
-# add module
+# add text
 - scrollUntilVisible:
     element:
       text: "Add block"

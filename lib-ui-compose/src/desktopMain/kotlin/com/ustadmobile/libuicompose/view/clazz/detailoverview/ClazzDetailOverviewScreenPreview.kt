@@ -1,11 +1,10 @@
 package com.ustadmobile.libuicompose.view.clazz.detailoverview
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.material.icons.filled.School
 import androidx.compose.runtime.Composable
 import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewUiState
-import com.ustadmobile.lib.db.entities.ClazzWithDisplayDetails
-import com.ustadmobile.lib.db.entities.HolidayCalendar
+import com.ustadmobile.lib.db.composites.ClazzAndDisplayDetails
+import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Schedule
 
 @Composable
@@ -13,16 +12,15 @@ import com.ustadmobile.lib.db.entities.Schedule
 fun ClazzDetailOverviewScreenPreview() {
     ClazzDetailOverviewScreen(
         uiState = ClazzDetailOverviewUiState(
-            clazz = ClazzWithDisplayDetails().apply {
-                clazzDesc = "Description"
-                clazzCode = "abc123"
-                clazzSchoolUid = 1
-                clazzStartTime = 1682074513000
-                clazzEndTime = 1713682513000
-                clazzHolidayCalendar = HolidayCalendar().apply {
-                    umCalendarName = "Holiday Calendar"
+            clazzAndDetail = ClazzAndDisplayDetails(
+                clazz = Clazz().apply {
+                    clazzDesc = "Description"
+                    clazzCode = "abc123"
+                    clazzSchoolUid = 1
+                    clazzStartTime = 1682074513000
+                    clazzEndTime = 1713682513000
                 }
-            },
+            ),
             scheduleList = listOf(
                 Schedule().apply {
                     scheduleUid = 1

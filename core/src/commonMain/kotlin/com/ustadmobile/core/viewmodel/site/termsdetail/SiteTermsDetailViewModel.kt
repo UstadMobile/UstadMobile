@@ -30,7 +30,7 @@ data class SiteTermsDetailUiState(
 
     val error: String? = null,
 
-)
+    )
 
 class SiteTermsDetailViewModel(
     di: DI,

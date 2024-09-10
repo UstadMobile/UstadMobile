@@ -68,6 +68,7 @@ class ClazzGradebookViewModel(
             ),
             db = activeDb,
             clazzUid = clazzUid,
+            accountPersonUid = activeUserPersonUid,
         )
     }
 
@@ -140,18 +141,6 @@ class ClazzGradebookViewModel(
             )
         }
     }
-
-    /**
-     * Triggered by double tap on mobile
-     */
-    fun onToggleZoom() {
-        _uiState.update {
-            it.copy(
-                scale = if(it.scale != 0.5f) 0.5f else 1.0f
-            )
-        }
-    }
-
 
     companion object {
 

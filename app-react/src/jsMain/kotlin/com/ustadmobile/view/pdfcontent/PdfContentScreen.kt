@@ -82,7 +82,7 @@ val PdfContentComponent = FC<PdfContentScreenProps> { props ->
 
     props.uiState.pdfUrl?.also { pdfUrl ->
         UstadFullSizeIframe {
-            src = "${learningSpace.url}pdf-js/web/viewer.html?file=${encodeURIComponent(pdfUrl)}"
+            src = "${learningSpace.url}umapp/pdf-js/web/viewer.html?file=${encodeURIComponent(pdfUrl)}"
             id = "pdf_js"
         }
     }
