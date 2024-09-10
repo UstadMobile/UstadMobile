@@ -55,8 +55,6 @@ class AddChildProfilesViewModel(
 
     val uiState: Flow<AddChildProfilesUiState> = _uiState.asStateFlow()
 
-     val parentToList: MutableList<Person> = mutableListOf(accountManager.currentUserSession.person)
-
     init {
         _uiState.update { prev ->
             prev.copy(
