@@ -9,8 +9,6 @@ import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.CourseDiscussionDetailViewModel
-import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
-import app.cash.paging.PagingSource
 import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCase
 import com.ustadmobile.core.impl.appstate.Snack
@@ -23,6 +21,8 @@ import com.ustadmobile.core.viewmodel.clazzassignment.detail.ClazzAssignmentDeta
 import com.ustadmobile.core.viewmodel.contententry.detail.ContentEntryDetailViewModel
 import com.ustadmobile.core.viewmodel.courseblock.textblockdetail.TextBlockDetailViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.lib.db.composites.BlockStatus
+import com.ustadmobile.lib.db.composites.ClazzAndDisplayDetails
 import com.ustadmobile.lib.db.composites.CourseBlockAndDisplayDetails
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.channels.BufferOverflow
@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -43,11 +44,13 @@ import org.kodein.di.instance
 
 data class ClazzDetailOverviewUiState(
 
-    val clazz: ClazzWithDisplayDetails? = null,
+    val clazzAndDetail: ClazzAndDisplayDetails? = null,
 
     val scheduleList: List<Schedule> = emptyList(),
 
-    val courseBlockList: () -> PagingSource<Int, CourseBlockAndDisplayDetails> = { EmptyPagingSource() },
+    val courseBlockList: List<CourseBlockAndDisplayDetails> = emptyList(),
+
+    val blockStatusesForActiveUser: List<BlockStatus> = emptyList(),
 
     val clazzCodeVisible: Boolean = false,
 
@@ -58,21 +61,22 @@ data class ClazzDetailOverviewUiState(
     val managePermissionVisible: Boolean = false,
 
 ) {
-    val clazzSchoolUidVisible: Boolean
-        get() = clazz?.clazzSchoolUid != null && clazz.clazzSchoolUid != 0L
+    val clazz: Clazz?
+        get() = clazzAndDetail?.clazz
+
 
     val clazzDateVisible: Boolean
-        get() = clazz?.clazzStartTime.isDateSet()
-                || clazz?.clazzEndTime.isDateSet()
-
-    val clazzHolidayCalendarVisible: Boolean
-        get() = clazz?.clazzHolidayCalendar != null
+        get() = clazzAndDetail?.clazz?.clazzStartTime.isDateSet()
+                || clazzAndDetail?.clazz?.clazzEndTime.isDateSet()
 
     val numStudents: Int
-        get() = clazz?.numStudents ?: 0
+        get() = clazzAndDetail?.numStudents ?: 0
 
     val numTeachers: Int
-        get() = clazz?.numTeachers ?: 0
+        get() = clazzAndDetail?.numTeachers ?: 0
+
+    val hasModules: Boolean
+        get() = courseBlockList.any { it.courseBlock?.cbType == CourseBlock.BLOCK_MODULE_TYPE }
 
     val membersString: String
         get() = "${terminologyStrings?.get(MR.strings.teachers_literal) ?: ""}: $numTeachers, " +
@@ -80,6 +84,12 @@ data class ClazzDetailOverviewUiState(
 
     val quickActionBarVisible: Boolean
         get() = managePermissionVisible
+
+    val displayBlockList: List<CourseBlockAndDisplayDetails> by lazy(LazyThreadSafetyMode.NONE) {
+        courseBlockList.filter {
+            !collapsedBlockUids.contains(it.courseBlock?.cbModuleParentBlockUid ?: 0)
+        }
+    }
 
 }
 
@@ -94,17 +104,6 @@ class ClazzDetailOverviewViewModel(
     val uiState: Flow<ClazzDetailOverviewUiState> = _uiState.asStateFlow()
 
     private val setClipboardStringUseCase: SetClipboardStringUseCase by instance()
-
-    private val pagingSourceFactory: () -> PagingSource<Int, CourseBlockAndDisplayDetails> = {
-        activeRepoWithFallback.courseBlockDao().findAllCourseBlockByClazzUidAsPagingSource(
-            clazzUid = entityUidArg,
-            collapseList = _uiState.value.collapsedBlockUids.toList(),
-            includeInactive = false,
-            includeHidden = false,
-            hideUntilFilterTime = systemTimeInMillis(),
-            accountPersonUid = activeUserPersonUid,
-        )
-    }
 
     private val _listRefreshCommandFlow = MutableSharedFlow<RefreshCommand>(
         replay = 1, extraBufferCapacity = 0, onBufferOverflow = BufferOverflow.DROP_OLDEST
@@ -125,7 +124,7 @@ class ClazzDetailOverviewViewModel(
         }
 
 
-        val permissionFlow = activeRepoWithFallback.coursePermissionDao()
+        val permissionFlow = activeRepo.coursePermissionDao()
             .personHasPermissionWithClazzTripleAsFlow(
                 accountPersonUid = activeUserPersonUid,
                 clazzUid = entityUidArg,
@@ -139,27 +138,51 @@ class ClazzDetailOverviewViewModel(
                 launch {
                     permissionFlow.map {
                         it.firstPermission
-                    }.distinctUntilChanged().collect { hasViewPermission ->
-                        _uiState.update { prev ->
-                            prev.copy(
-                                courseBlockList = if(hasViewPermission) {
-                                    pagingSourceFactory
-                                }else {
-                                    { EmptyPagingSource() }
-                                },
-                            )
+                    }.distinctUntilChanged().collectLatest { hasViewPermission ->
+                        if(hasViewPermission) {
+                            launch {
+                                activeRepo.courseBlockDao().findAllCourseBlockByClazzUidAsFlow(
+                                    clazzUid = entityUidArg,
+                                    includeInactive = false,
+                                    includeHidden = false,
+                                    hideUntilFilterTime = systemTimeInMillis(),
+                                    accountPersonUid = activeUserPersonUid,
+                                ).collect { courseBlockList ->
+                                    _uiState.update { prev ->
+                                        prev.copy(courseBlockList = courseBlockList)
+                                    }
+                                }
+                            }
+
+                            launch {
+                                activeRepo.statementDao().findStatusForStudentsInClazzAsFlow(
+                                    clazzUid = entityUidArg,
+                                    studentPersonUids = listOf(activeUserPersonUid),
+                                    accountPersonUid = activeUserPersonUid,
+                                ).collect { blockStatuses ->
+                                    _uiState.update { prev ->
+                                        prev.copy(blockStatusesForActiveUser = blockStatuses)
+                                    }
+                                }
+                            }
+                        }else{
+                            _uiState.update { prev ->
+                                prev.copy(courseBlockList = emptyList())
+                            }
                         }
                     }
                 }
 
                 launch {
-                    activeRepoWithFallback.clazzDao().getClazzWithDisplayDetails(
-                        entityUidArg, systemTimeInMillis()
+                    activeRepo.clazzDao().getClazzWithDisplayDetails(
+                        clazzUid = entityUidArg,
+                        currentTime = systemTimeInMillis(),
+                        accountPersonUid = activeUserPersonUid,
                     ).combine(permissionFlow) { clazzWithDisplayDetails, permissions ->
                         clazzWithDisplayDetails.takeIf { permissions.firstPermission }
                     }.collect {
                         _uiState.update { prev ->
-                            prev.copy(clazz = it)
+                            prev.copy(clazzAndDetail = it)
                         }
 
                         parseAndUpdateTerminologyStringsIfNeeded(
@@ -172,7 +195,7 @@ class ClazzDetailOverviewViewModel(
                         }
 
                         _appUiState.update { prev ->
-                            prev.copy(title = it?.clazzName ?: "")
+                            prev.copy(title = it?.clazz?.clazzName ?: "")
                         }
                     }
                 }

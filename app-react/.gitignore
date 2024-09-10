@@ -1,3 +1,6 @@
 # Ignore moko-resources generated files
 karma.config.d/moko-resource-generated.js
 webpack.config.d/moko-resources-generated.js
+
+#PDF-JS distribution includes a 'build' directory that we must include as a resource
+!src/jsMain/resources/pdf-js/build

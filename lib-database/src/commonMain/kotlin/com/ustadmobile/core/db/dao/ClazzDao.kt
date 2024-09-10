@@ -17,6 +17,7 @@ import com.ustadmobile.core.db.dao.CoursePermissionDaoCommon.PERSON_COURSE_PERMI
 import com.ustadmobile.core.db.dao.CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT2
 import com.ustadmobile.core.db.dao.CoursePermissionDaoCommon.PERSON_COURSE_PERMISSION_CLAUSE_FOR_ACCOUNT_PERSON_UID_AND_CLAZZUID_SQL_PT3
 import com.ustadmobile.lib.db.composites.ClazzAndDetailPermissions
+import com.ustadmobile.lib.db.composites.ClazzAndDisplayDetails
 import com.ustadmobile.lib.db.composites.ClazzNameAndTerminology
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.ROLE_STUDENT
@@ -196,7 +197,7 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
                ELSE ''
                END DESC
     """)
-    @QueryLiveTables(["Clazz", "ClazzEnrolment", "ScopedGrant", "PersonGroupMember","CourseTerminology"])
+    @QueryLiveTables(["Clazz", "ClazzEnrolment", "CoursePermission", "SystemPermission", "CourseTerminology", "CoursePicture"])
     abstract fun findClazzesWithPermission(
         searchQuery: String,
         accountPersonUid: Long,
@@ -313,7 +314,6 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
     )
     @Query("""
         SELECT Clazz.*, 
-               HolidayCalendar.*,
                CoursePicture.*,
                (SELECT COUNT(DISTINCT ClazzEnrolment.clazzEnrolmentPersonUid) 
                   FROM ClazzEnrolment 
@@ -327,16 +327,26 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
                    AND clazzEnrolmentRole = $ROLE_TEACHER 
                    AND :currentTime BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined 
                        AND ClazzEnrolment.clazzEnrolmentDateLeft) AS numTeachers,
-                CourseTerminology.*      
+                CourseTerminology.*,
+                (SELECT EXISTS(
+                        SELECT 1
+                          FROM ClazzEnrolment
+                         WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid
+                           AND ClazzEnrolment.clazzEnrolmentPersonUid = :accountPersonUid
+                           AND ClazzEnrolment.clazzEnrolmentRole = $ROLE_STUDENT
+)
+                ) AS activeUserIsStudent
          FROM Clazz 
-              LEFT JOIN HolidayCalendar 
-                        ON Clazz.clazzHolidayUMCalendarUid = HolidayCalendar.umCalendarUid
               LEFT JOIN CourseTerminology
                         ON CourseTerminology.ctUid = Clazz.clazzTerminologyUid
               LEFT JOIN CoursePicture
                         ON CoursePicture.coursePictureUid = :clazzUid
         WHERE Clazz.clazzUid = :clazzUid""")
-    abstract fun getClazzWithDisplayDetails(clazzUid: Long, currentTime: Long): Flow<ClazzWithDisplayDetails?>
+    abstract fun getClazzWithDisplayDetails(
+        clazzUid: Long,
+        currentTime: Long,
+        accountPersonUid: Long,
+    ): Flow<ClazzAndDisplayDetails?>
 
 
     /**
