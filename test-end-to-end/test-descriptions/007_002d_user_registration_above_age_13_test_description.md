@@ -33,4 +33,6 @@ When personal accounts are enabled by setting a personal learning space URL: use
 25. Enter a username and password
 26. Click signup
 26. Verify user is directed to library. Courses, messages, and people tabs (bottom nav bar) should not be visible.
-
+27. Close the app
+28. Open the app
+29. Verify user is directed to library. Courses, messages, and people tabs (bottom nav bar) should not be visible.
