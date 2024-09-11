@@ -40,3 +40,7 @@ When registration is enabled: Users over 13 can register directly
 32. User logged into the app
 33. User directed to library
 34. Verify user able to view Courses, Messages and People tabs
+35. Close the app
+36. Launch the app.
+37. Verify that the user is brought to the courses screen.
+
