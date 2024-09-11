@@ -7,7 +7,7 @@ assignees: ''
 projects: ["UstadMobile/3",]
 ---
 
-** User story **
+**User story**
 
 As a _user type_ I want _feature_ so that _benefit_.
 
@@ -23,7 +23,7 @@ Background info on user story
 When design is complete: attach PDF of prototype that includes _all_ screens added/modified here.
 
 
-** Implementation tasks**
+**Implementation tasks**
 Each task max one day
 
 - [ ]  ...
@@ -31,7 +31,7 @@ Each task max one day
 
 When implementation is complete: developer to attach video showing completion of acceptance criteria
 
-** Acceptance criteria**
+**Acceptance criteria**
 
 * Objective acceptance criteria items for this task...
 * Standard criteria: all existing unit / end-to-end tests must pass unless explicitly noted otherwise due to behavior changes etc. Jenkins build must pass.
