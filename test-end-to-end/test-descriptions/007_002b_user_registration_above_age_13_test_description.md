@@ -38,3 +38,6 @@ When registration is enabled: Users over 13 can register directly
 30. User logged into the app
 31. User directed to courses section
 32. Verify user able to view Courses, Messages and People tabs
+33. Close the app
+34. Launch the app
+35. Verify that the user is on the courses section - able to view courses, messages, and people tabs
