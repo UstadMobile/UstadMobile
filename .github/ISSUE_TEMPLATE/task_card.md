@@ -14,7 +14,8 @@ As a _user type_ I want _feature_ so that _benefit_.
 (If work duration will exceed five days, must be broken down into multiple)
 
 Background info on user story
-* 
+* info1
+* info2
 
 **Design tasks** 
 
