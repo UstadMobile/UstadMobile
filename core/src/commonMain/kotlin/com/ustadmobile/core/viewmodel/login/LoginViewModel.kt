@@ -30,6 +30,7 @@ import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewMode
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.core.viewmodel.person.registerageredirect.RegisterAgeRedirectViewModel
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel
+import com.ustadmobile.core.viewmodel.signup.SignUpViewModel.Companion.ARG_IS_PERSONAL_ACCOUNT
 import com.ustadmobile.door.ext.doorIdentityHashCode
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Person
@@ -62,7 +63,9 @@ data class LoginUiState(
     val languageList: List<UstadMobileSystemCommon.UiLanguage> = listOf(currentLanguage),
     val showWaitForRestart: Boolean = false,
     val showPoweredBy: Boolean = false,
-)
+    val isPersonalAccount: Boolean = false,
+
+    )
 
 class LoginViewModel(
     di: DI,
@@ -115,6 +118,14 @@ class LoginViewModel(
                 languageList = languagesConfig.supportedUiLanguagesAndSysDefault(systemImpl),
                 showPoweredBy = getShowPoweredByUseCase?.invoke() ?: false,
             )
+        }
+
+        if (savedStateHandle[ARG_IS_PERSONAL_ACCOUNT] == "true") {
+            _uiState.update { prev ->
+                prev.copy(
+                    isPersonalAccount = true
+                )
+            }
         }
 
         val baseAppUiState = AppUiState(
@@ -329,7 +340,7 @@ class LoginViewModel(
 
 
                     } else {
-                        snackDispatcher.showSnackBar(Snack("Account not found"))
+                      //  snackDispatcher.showSnackBar(Snack("Account not found"))
                     }
                 }
 

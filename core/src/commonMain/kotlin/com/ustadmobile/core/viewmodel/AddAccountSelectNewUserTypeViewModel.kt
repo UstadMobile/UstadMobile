@@ -7,6 +7,7 @@ import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.requireHttpPrefix
 import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNINGSPACE_URL
+import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import com.ustadmobile.core.viewmodel.person.learningspacelist.LearningSpaceListViewModel
 import com.ustadmobile.core.viewmodel.person.registerageredirect.RegisterAgeRedirectViewModel
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel
@@ -30,6 +31,7 @@ class AddAccountSelectNewUserTypeViewModel(
     private val apiUrlConfig: SystemUrlConfig by instance()
 
     private val _uiState = MutableStateFlow(AddAccountSelectNewUserTypeUiState())
+    private val isNewUser = savedStateHandle[SignUpViewModel.ARG_NEW_OR_EXISTING_USER]=="new"
 
     val uiState: Flow<AddAccountSelectNewUserTypeUiState>
         get() = _uiState.asStateFlow()
@@ -39,7 +41,7 @@ class AddAccountSelectNewUserTypeViewModel(
             navigationVisible = false,
             hideAppBar =false,
             userAccountIconVisible = false,
-            title = systemImpl.getString(MR.strings.new_user),
+            title =if (isNewUser) systemImpl.getString(MR.strings.new_user) else systemImpl.getString(MR.strings.existing_user)  ,
         )
         if (apiUrlConfig.newPersonalAccountsLearningSpaceUrl != null) {
             _uiState.update { prev->
@@ -52,8 +54,13 @@ class AddAccountSelectNewUserTypeViewModel(
 
     }
     fun onClickPersonalAccount(){
+        val viewName =if(savedStateHandle[SignUpViewModel.ARG_NEW_OR_EXISTING_USER]=="new"){
+            RegisterAgeRedirectViewModel.DEST_NAME
+        }else{
+            LoginViewModel.DEST_NAME
+        }
         navController.navigate(
-            RegisterAgeRedirectViewModel.DEST_NAME,
+            viewName,
             args = buildMap {
                 putFromSavedStateIfPresent(SignUpViewModel.REGISTRATION_ARGS_TO_PASS)
                 put(ARG_IS_PERSONAL_ACCOUNT,true.toString())
