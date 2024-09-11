@@ -1,4 +1,4 @@
-# When registration is enabled: Users over 13 can register directly
+# When registration is enabled: Users over 13 can register directly using a passkey on learning space
 
 ## Description:
 
