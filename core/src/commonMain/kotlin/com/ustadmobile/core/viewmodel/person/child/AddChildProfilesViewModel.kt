@@ -36,10 +36,10 @@ data class AddChildProfilesUiState(
     val childProfiles: List<Person> = emptyList(),
     val personParenJoinList: List<PersonParentJoin> = emptyList(),
     val showProfileSelectionDialog: Boolean = false,
-    val parent:Person?=null
-){
-    val personAndChildrenList:List<Person>
-        get() =( parent?.let { listOf(it) }?: emptyList())+childProfiles
+    val parent: Person? = null
+) {
+    val personAndChildrenList: List<Person>
+        get() = (parent?.let { listOf(it) } ?: emptyList()) + childProfiles
 }
 
 class AddChildProfilesViewModel(
@@ -50,8 +50,9 @@ class AddChildProfilesViewModel(
     private val _uiState = MutableStateFlow(
         AddChildProfilesUiState()
     )
-    private var nextDestination: String = savedStateHandle[UstadView.ARG_NEXT] ?: ClazzListViewModel.DEST_NAME_HOME
-     val repo: UmAppDatabase by di.onActiveEndpoint().instance()
+    private var nextDestination: String =
+        savedStateHandle[UstadView.ARG_NEXT] ?: ClazzListViewModel.DEST_NAME_HOME
+    val repo: UmAppDatabase by di.onActiveEndpoint().instance()
 
     val uiState: Flow<AddChildProfilesUiState> = _uiState.asStateFlow()
 
@@ -70,7 +71,7 @@ class AddChildProfilesViewModel(
                     text = systemImpl.getString(MR.strings.finish),
                     onClick = this@AddChildProfilesViewModel::onClickFinish,
 
-                )
+                    )
             )
         }
 
@@ -84,7 +85,7 @@ class AddChildProfilesViewModel(
                     serializer = ListSerializer(Person.serializer()),
                     loadFromStateKeys = listOf(STATE_KEY_PERSONS),
                     onLoadFromDb = {
-                     emptyList()
+                        emptyList()
 
                     },
                     makeDefault = {
@@ -104,9 +105,10 @@ class AddChildProfilesViewModel(
                     val childProfileResult = result.result as? Person
                         ?: return@collect
 
-                    val newChildProfileList = _uiState.value.childProfiles.replaceOrAppend(childProfileResult) {
-                        it.personUid == childProfileResult.personUid
-                    }
+                    val newChildProfileList =
+                        _uiState.value.childProfiles.replaceOrAppend(childProfileResult) {
+                            it.personUid == childProfileResult.personUid
+                        }
 
                     updateChildProfileList(newChildProfileList)
                 }
@@ -141,7 +143,7 @@ class AddChildProfilesViewModel(
                 )
             }
         } else {
-             onProfileSelected(accountManager.currentAccount.toPerson())
+            onProfileSelected(accountManager.currentAccount.toPerson())
         }
 
     }
@@ -187,8 +189,9 @@ class AddChildProfilesViewModel(
     }
 
     fun onProfileSelected(profile: Person) {
-        if (_uiState.value.childProfiles.isNotEmpty()){
-            viewModelScope.launch {
+        viewModelScope.launch {
+            if (_uiState.value.childProfiles.isNotEmpty()) {
+
                 val effectiveDb = activeRepo ?: activeDb
 
                 effectiveDb.personDao().insertListAsync(_uiState.value.childProfiles)
@@ -205,12 +208,17 @@ class AddChildProfilesViewModel(
 
                 effectiveDb.personParentJoinDao().insertListAsync(personParenJoinList)
 
+                accountManager.addSession(profile, accountManager.activeLearningSpace.url, null)
+
             }
         }
         val goOptions = UstadMobileSystemCommon.UstadGoOptions(clearStack = true)
         Napier.d { "AddChildPresenter: go to next destination: $nextDestination" }
         navController.navigateToViewUri(
-            nextDestination.appendSelectedAccount(profile.personUid, LearningSpace(accountManager.activeLearningSpace.url)),
+            nextDestination.appendSelectedAccount(
+                profile.personUid,
+                LearningSpace(accountManager.activeLearningSpace.url)
+            ),
             goOptions
         )
 
