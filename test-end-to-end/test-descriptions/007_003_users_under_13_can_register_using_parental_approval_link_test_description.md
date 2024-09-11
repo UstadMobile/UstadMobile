@@ -49,23 +49,21 @@ When registration is enabled: Users under 13 can register using parental approva
 41. Select the date of birth, age 13+ 
 42. Read company terms and policies. 
 43. Click on "Accept" button. 
-44. Enter First name 
-45. Enter Last name 
-46. Select Gender. 
-47. Select country code 
-48. Enter Phone number. 
-49. Enter email id. 
-50. Enter Address. 
-51. Enter username. 
-52. Enter password. 
-53. Click on "Register" button. 
-54. Verify that user is parental consent page. 
-55. User clicks on "Approve" button. 
-56. Clear the app storage. 
-57. Click on "Existing user" button 
-58. Click on "Learning Space" button 
-59. Click on "Enter link manually" button 
-60. Enter the link in "Site link" field 
-61. Click on "Next" button 
-62. Login using student username and password to the app. 
-63. Verify the student user is able to login and view the app features.
+44. Enter Full name. 
+45. Select Gender 
+46. Click on "Sign-up with passkey"
+47. Create a passkey prompt appears 
+48. Click on "Continue" button 
+49. Screen lock appears 
+50. Unlock the screen 
+51. User logged into the app 
+52. Verify that user is parental consent page. 
+53. User clicks on "Approve" button. 
+54. Clear the app storage. 
+55. Click on "Existing user" button 
+56. Click on "Learning Space" button 
+57. Click on "Enter link manually" button 
+58. Enter the link in "Site link" field 
+59. Click on "Next" button 
+60. Login using student username and password to the app. 
+61. Verify the student user is able to login and view the app features.
