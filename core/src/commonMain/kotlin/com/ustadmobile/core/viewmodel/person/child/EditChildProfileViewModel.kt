@@ -90,7 +90,7 @@ class EditChildProfileViewModel(
                     val newUid = activeDb.doorPrimaryKeyManager.nextIdAsync(Person.TABLE_ID)
                     Person(
                         personUid = newUid,
-
+                        isPersonalAccount = true
                     )
                 },
                 onLoadFromDb = { null },

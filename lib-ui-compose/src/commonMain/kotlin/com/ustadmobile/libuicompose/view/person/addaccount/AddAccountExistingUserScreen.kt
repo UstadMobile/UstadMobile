@@ -37,7 +37,9 @@ fun AddAccountExistingUserScreen(
         uiState = uiState,
         onClickIndividual = viewModel::onClickIndividual,
         onClickLearningSpace = viewModel::onClickLearningSpace,
-    )
+        onClickPersonalAccount = viewModel::onClickPersonalAccount,
+
+        )
 }
 
 
@@ -47,7 +49,10 @@ fun AddAccountExistingUserScreen(
     uiState: AddAccountExistingUserUiState,
     onClickIndividual: () -> Unit = { },
     onClickLearningSpace: () -> Unit = { },
-) {
+    onClickPersonalAccount: () -> Unit = { },
+
+
+    ) {
 
     Column(
         modifier = Modifier.fillMaxHeight(),
@@ -66,7 +71,33 @@ fun AddAccountExistingUserScreen(
         LazyColumn(
             modifier = Modifier.fillMaxSize()
         ) {
+            if (uiState.showAddPersonalAccount) {
+                item {
+                    ListItem(
+                        leadingContent = {
+                            Image(
+                                painter = ustadAppImagePainter(UstadImage.ONBOARDING_EXISTING),
+                                contentDescription = null,
+                                modifier = Modifier.size(42.dp),
+                            )
+                        },
+                        headlineContent = {
+                            Text(
+                                text = stringResource(MR.strings.personal_account),
+                            )
+                        },
+                        supportingContent = {
+                            Text(
+                                text = stringResource(MR.strings.access_educational_content_download_offline),
+                            )
+                        },
+                        modifier = Modifier.defaultItemPadding()
+                            .clickable { onClickPersonalAccount() }
 
+                    )
+                    HorizontalDivider()
+                }
+            }
             item {
                 ListItem(
                     leadingContent = {
