@@ -31,4 +31,6 @@ When personal accounts are enabled by setting a personal learning space URL: use
 23. Select Gender
 27. Click signup with passkey
 28. Verify user is directed to library. Courses, messages, and people tabs (bottom nav bar) should not be visible.
-
+29. Close the app
+30. Open the app
+31. Verify user is directed to library. Courses, messages, and people tabs (bottom nav bar) should not be visible.
