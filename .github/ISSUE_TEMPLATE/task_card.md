@@ -25,6 +25,7 @@ When design is complete: attach PDF of prototype that includes _all_ screens add
 
 
 **Implementation tasks**
+
 Each task max one day
 
 - [ ]  ...
@@ -34,6 +35,8 @@ When implementation is complete: developer to attach video showing completion of
 
 **Acceptance criteria**
 
-* Objective acceptance criteria items for this task...
-* Standard criteria: all existing unit / end-to-end tests must pass unless explicitly noted otherwise due to behavior changes etc. Jenkins build must pass.
+A new branch should be created and [end-to-end testing scenarios](https://github.com/UstadMobile/UstadMobile/tree/primary/test-end-to-end) should be added or modified as required for the user story. Then add links below for all testing scenarios that are newly added or significantly modified:
+
+* [scenario link1](link-to-markdown-for-scenario-in-branch.md) 
+* [scenario link2](link-to-markdown-for-scenario-in-branch.md)
 
