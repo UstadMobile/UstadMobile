@@ -126,7 +126,7 @@ fun LoginScreen(
         ) {
             Text(stringResource(MR.strings.login))
         }
-        if(uiState.isPersonalAccount) {
+        if(false) {
             Spacer(modifier = Modifier.height(10.dp))
 
             OutlinedButton(
