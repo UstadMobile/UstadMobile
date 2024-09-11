@@ -1,3 +1,12 @@
+---
+name: User Story Task Card
+about: Create a task card for a specific user story 
+title: ''
+labels: enhancement
+assignees: ''
+projects: ["UstadMobile/3",]
+---
+
 ** User story **
 
 As a _user type_ I want _feature_ so that _benefit_.
