@@ -76,44 +76,46 @@ fun SignUpScreen(
             modifier = Modifier.size(60.dp),
         )
 
+        if (!uiState.signupWithUsernameAndPassword) {
+            OutlinedTextField(
+                modifier = Modifier
+                    .testTag("full_name")
+                    .fillMaxWidth()
+                    .defaultItemPadding(),
+                value = uiState.firstName ?: "",
+                label = { Text(stringResource(MR.strings.full_name) + "*") },
+                isError = uiState.fullNameError != null,
+                singleLine = true,
+                onValueChange = { fullName ->
+                    onFullNameValueChange(fullName)
+                },
+                supportingText = {
+                    Text(uiState.fullNameError ?: stringResource(MR.strings.required))
+                }
+            )
+        }
+        if (!uiState.signupWithUsernameAndPassword) {
+            UstadMessageIdOptionExposedDropDownMenuField(
+                value = uiState.person?.gender ?: 0,
+                modifier = Modifier
+                    .testTag("gender")
+                    .defaultItemPadding()
+                    .fillMaxWidth(),
+                label = stringResource(MR.strings.gender_literal) + "*",
+                options = uiState.genderOptions.filter { it.stringResource != MR.strings.blank },
+                onOptionSelected = {
+                    onPersonChanged(uiState.person?.shallowCopy {
+                        gender = it.value
+                    })
+                },
+                isError = uiState.genderError != null,
+                supportingText = {
+                    Text(uiState.genderError ?: stringResource(MR.strings.required))
+                }
+            )
+        }
 
-        OutlinedTextField(
-            modifier = Modifier
-                .testTag("full_name")
-                .fillMaxWidth()
-                .defaultItemPadding(),
-            value =uiState.firstName?:"",
-            label = { Text(stringResource(MR.strings.full_name) + "*") },
-            isError = uiState.fullNameError != null,
-            singleLine = true,
-            onValueChange = { fullName ->
-                onFullNameValueChange(fullName)
-            },
-            supportingText = {
-                Text(uiState.fullNameError ?: stringResource(MR.strings.required))
-            }
-        )
-
-        UstadMessageIdOptionExposedDropDownMenuField(
-            value = uiState.person?.gender ?: 0,
-            modifier = Modifier
-                .testTag("gender")
-                .defaultItemPadding()
-                .fillMaxWidth(),
-            label = stringResource(MR.strings.gender_literal) + "*",
-            options = uiState.genderOptions.filter { it.stringResource != MR.strings.blank },
-            onOptionSelected = {
-                onPersonChanged(uiState.person?.shallowCopy {
-                    gender = it.value
-                })
-            },
-            isError = uiState.genderError != null,
-            supportingText = {
-                Text(uiState.genderError ?: stringResource(MR.strings.required))
-            }
-        )
-
-        if (!uiState.passkeySupported) {
+        if (!uiState.passkeySupported || uiState.signupWithUsernameAndPassword) {
             OutlinedTextField(
                 modifier = Modifier.testTag("username").fillMaxWidth().defaultItemPadding(),
                 value = uiState.person?.username ?: "",
@@ -131,7 +133,7 @@ fun SignUpScreen(
             )
         }
 
-        if (!uiState.passkeySupported) {
+        if (!uiState.passkeySupported || uiState.signupWithUsernameAndPassword) {
             UstadPasswordField(
                 modifier = Modifier.testTag("password").fillMaxWidth().defaultItemPadding(),
                 value = uiState.password ?: "",
@@ -182,7 +184,7 @@ fun SignUpScreen(
                 .testTag("signup_passkey_button"),
         ) {
             Text(
-                text = if (uiState.passkeySupported) {
+                text = if (uiState.passkeySupported&&!uiState.signupWithUsernameAndPassword) {
                     stringResource(MR.strings.signup_with_passkey)
                 } else {
                     stringResource(MR.strings.signup)

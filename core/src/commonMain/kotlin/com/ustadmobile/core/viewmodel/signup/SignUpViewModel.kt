@@ -26,6 +26,7 @@ import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewMode
 import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel.Companion.ARG_REGISTRATION_MODE
+import com.ustadmobile.core.viewmodel.signup.OtherSignUpOptionSelectionViewModel.Companion.IS_PARENT
 import com.ustadmobile.door.ext.doorIdentityHashCode
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -78,6 +79,8 @@ data class SignUpUiState(
 
     val passkeySupported: Boolean = true,
 
+    val signupWithUsernameAndPassword: Boolean = false,
+
     val doorNodeId: String? = null,
 
     val serverUrl_: String? = null,
@@ -127,7 +130,27 @@ class SignUpViewModel(
         loadingState = LoadingUiState.INDETERMINATE
         val title =
             systemImpl.getString(MR.strings.create_account)
+        viewModelScope.launch {
+            val person = savedStateHandle.getJson(
+                OtherSignUpOptionSelectionViewModel.ARG_PERSON, Person.serializer(),
+            ) ?: Person()
+            val personPicture = savedStateHandle.getJson(
+                OtherSignUpOptionSelectionViewModel.ARG_PERSON_PROFILE_PIC, PersonPicture.serializer(),
+            )
+            _uiState.update { prev ->
+                prev.copy(
+                    person = person,
+                    personPicture=personPicture,
+                    firstName = if (person.firstNames == "") {
+                        null
+                    }else{
+                        person.fullName()
+                    }
 
+
+                )
+            }
+        }
         _appUiState.update {
             AppUiState(
                 title = title,
@@ -160,7 +183,7 @@ class SignUpViewModel(
         if (savedStateHandle[SIGN_WITH_USERNAME_AND_PASSWORD] == "true") {
             _uiState.update { prev ->
                 prev.copy(
-                    passkeySupported = false
+                    signupWithUsernameAndPassword = true
                 )
             }
         }
@@ -272,7 +295,7 @@ class SignUpViewModel(
             prev.copy(
                 fullNameError = if (savePerson.firstNames.isNullOrEmpty()) requiredFieldMessage else null,
                 genderError = if (savePerson.gender == GENDER_UNSET) requiredFieldMessage else null,
-                usernameError = if (!_uiState.value.passkeySupported && !validateUsernameUseCase.invoke(
+                usernameError = if ((!_uiState.value.passkeySupported||_uiState.value.signupWithUsernameAndPassword )&& !validateUsernameUseCase.invoke(
                         savePerson.username ?: ""
                     )
                 ) {
@@ -280,7 +303,7 @@ class SignUpViewModel(
                 } else {
                     null
                 },
-                passwordError = if (!_uiState.value.passkeySupported && savePerson.username.isNullOrBlank()) {
+                passwordError = if ((!_uiState.value.passkeySupported ||_uiState.value.signupWithUsernameAndPassword )&& savePerson.username.isNullOrBlank()) {
                     systemImpl.getString(MR.strings.field_required_prompt)
                 } else {
                     null
@@ -300,7 +323,7 @@ class SignUpViewModel(
                 val uid = activeDb.doorPrimaryKeyManager.nextIdAsync(Person.TABLE_ID)
                 savePerson.personUid = uid
 
-                if (_uiState.value.passkeySupported) {
+                if ((_uiState.value.passkeySupported&&!_uiState.value.signupWithUsernameAndPassword )) {
                     val passkeyCreated = createPasskeyUseCase?.invoke(
                         CreatePasskeyParams(
                             username = savePerson.firstNames.toString(),
@@ -372,7 +395,7 @@ class SignUpViewModel(
         if (_uiState.value.isParent) {
             navController.navigate(AddChildProfilesViewModel.DEST_NAME,
                 args = buildMap {
-                    put(ARG_NEXT,nextDestination)
+                    put(ARG_NEXT, nextDestination)
                     putFromSavedStateIfPresent(REGISTRATION_ARGS_TO_PASS)
                 }
             )
@@ -393,10 +416,59 @@ class SignUpViewModel(
     }
 
     fun onClickOtherOption() {
+        // full name splitting into first name and last name
+        val fullName = _uiState.value.firstName?.trim()
+        val parts = fullName?.trim()?.split(" ", limit = 2)
+        val firstName = parts?.get(0)
+        val lastName = parts?.getOrElse(1) { "" }
+        onEntityChanged(
+            _uiState.value.person?.shallowCopy {
+                this.firstNames = firstName
+                this.lastName = lastName
+            }
+        )
 
+        val savePerson = _uiState.value.person ?: return
+
+        val requiredFieldMessage = systemImpl.getString(MR.strings.field_required_prompt)
+
+        _uiState.update { prev ->
+            prev.copy(
+                fullNameError = if (savePerson.firstNames.isNullOrEmpty()) requiredFieldMessage else null,
+                genderError = if (savePerson.gender == GENDER_UNSET) requiredFieldMessage else null,
+                usernameError = if ((!_uiState.value.passkeySupported ||_uiState.value.signupWithUsernameAndPassword )&& !validateUsernameUseCase.invoke(
+                        savePerson.username ?: ""
+                    )
+                ) {
+                    systemImpl.getString(MR.strings.invalid)
+                } else {
+                    null
+                },
+                passwordError = if ((!_uiState.value.passkeySupported ||_uiState.value.signupWithUsernameAndPassword )&& savePerson.username.isNullOrBlank()) {
+                    systemImpl.getString(MR.strings.field_required_prompt)
+                } else {
+                    null
+                }
+            )
+        }
+        if (_uiState.value.hasErrors()) {
+            return
+        }
         navController.navigate(OtherSignUpOptionSelectionViewModel.DEST_NAME,
             args = buildMap {
                 putFromSavedStateIfPresent(REGISTRATION_ARGS_TO_PASS)
+                put(
+                    OtherSignUpOptionSelectionViewModel.ARG_PERSON,
+                    json.encodeToString( Person.serializer(),savePerson)
+                )
+                put(
+                    OtherSignUpOptionSelectionViewModel.ARG_PERSON_PROFILE_PIC,
+                    json.encodeToString( PersonPicture.serializer(),_uiState.value.personPicture?: PersonPicture())
+                )
+
+                put(IS_PARENT,
+                    _uiState.value.isParent.toString()
+                )
             }
         )
 
