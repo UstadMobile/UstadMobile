@@ -102,7 +102,11 @@ class PersonDetailViewModel: ViewModel {
 ### Screens
 
 Screens are written using Jetpack Compose for Android and the Kotlin/JS MUI wrapper for Javascript. 
-The screen function should use the UiState as an argument, 
+The screen function should use the UiState as an argument.
+
+Screens must use default margins and colors provided by the platform theme (Jetpack Compose or MUI) unless specifically noted otherwise. On Jetpack compose
+this is 16.dp between screen edge and components, and between components. ```ListItem``` already includes padding so it should not be added. Components other
+than ListItem should use ```Modifier.defaultItemPadding()``` for this.
 
 Android Jetpack Compose:
 ```
@@ -163,6 +167,7 @@ function PersonDetailScreenPreview(
     )
 )
 ```
+
 
 ## Domain Layer
 
