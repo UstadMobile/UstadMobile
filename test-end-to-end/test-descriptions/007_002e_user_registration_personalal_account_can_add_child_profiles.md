@@ -36,4 +36,7 @@ When personal accounts are enabled by setting a personal learning space URL: par
 29. Select the child's name in the popup to start using the app with the child's profile
 30. Verify user is directed to library. Courses, messages, and people tabs (bottom nav bar) should not be visible.
 31. Click profile button (top right). Verify that the child's account is the current active profile.
-
+32. Close the app
+33. Open the app
+34. Verify user is directed to library. Courses, messages, and people tabs (bottom nav bar) should not be visible.
+35. Click profile button (top right). Verify that the child's account is the current active profile.
