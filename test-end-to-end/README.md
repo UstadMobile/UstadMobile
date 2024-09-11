@@ -141,6 +141,10 @@ trickle -s -d 128 -u 128 bash
 
 7.2c [When personal accounts are enabled by setting a personal learning space URL: users over 13 can register a personal account directly by creating a passkey](test-descriptions/007_002c_user_registration_above_age_13_test_description.md)
 
+7.2d [When personal accounts are enabled by setting a personal learning space URL: users over 13 can register a personal account directly by creating a username and password](test-descriptions/007_002c_user_registration_above_age_13_test_description.md)
+
+7.2e [When personal accounts are enabled by setting a personal learning space URL: parents can register and add child profiles](test-descriptions/007_002e_user_registration_personalal_account_can_add_child_profiles.md)
+
 7.3 [When registration is enabled: Users under 13 can register using parental approval link](test-descriptions/007_003_users_under_13_can_register_using_parental_approval_link_test_description.md)
 
 7.4 [For user registration date of birth field is mandatory](test-descriptions/007_004_user_registration_dob_field_is_mandatory_test_description.md)
