@@ -45,7 +45,6 @@ fun SignUpScreen(viewModel: SignUpViewModel) {
         onParentCheckChanged = viewModel::onParentCheckChanged,
         onclickSignUpWithPasskey = viewModel::onClickedSignup,
         onclickOtherOptions = viewModel::onClickOtherOption,
-        onPasswordChanged = viewModel::onPasswordChanged,
         onFullNameValueChange = viewModel::onFullNameValueChange,
 
         )
@@ -61,7 +60,6 @@ fun SignUpScreen(
     onPersonPictureUriChanged: (String?) -> Unit = { },
     onTeacherCheckChanged: (Boolean) -> Unit = { },
     onParentCheckChanged: (Boolean) -> Unit = { },
-    onPasswordChanged: (String) -> Unit = { },
     onFullNameValueChange: (String) -> Unit = { },
 
     ) {
@@ -76,7 +74,6 @@ fun SignUpScreen(
             modifier = Modifier.size(60.dp),
         )
 
-        if (!uiState.signupWithUsernameAndPassword) {
             OutlinedTextField(
                 modifier = Modifier
                     .testTag("full_name")
@@ -93,8 +90,7 @@ fun SignUpScreen(
                     Text(uiState.fullNameError ?: stringResource(MR.strings.required))
                 }
             )
-        }
-        if (!uiState.signupWithUsernameAndPassword) {
+
             UstadMessageIdOptionExposedDropDownMenuField(
                 value = uiState.person?.gender ?: 0,
                 modifier = Modifier
@@ -113,39 +109,7 @@ fun SignUpScreen(
                     Text(uiState.genderError ?: stringResource(MR.strings.required))
                 }
             )
-        }
 
-        if (!uiState.passkeySupported || uiState.signupWithUsernameAndPassword) {
-            OutlinedTextField(
-                modifier = Modifier.testTag("username").fillMaxWidth().defaultItemPadding(),
-                value = uiState.person?.username ?: "",
-                label = { Text(stringResource(MR.strings.username)) },
-                isError = uiState.usernameError != null,
-                singleLine = true,
-                onValueChange = {
-                    onPersonChanged(uiState.person?.shallowCopy {
-                        username = it
-                    })
-                },
-                supportingText = {
-                    Text(uiState.usernameError ?: stringResource(MR.strings.required))
-                }
-            )
-        }
-
-        if (!uiState.passkeySupported || uiState.signupWithUsernameAndPassword) {
-            UstadPasswordField(
-                modifier = Modifier.testTag("password").fillMaxWidth().defaultItemPadding(),
-                value = uiState.password ?: "",
-                label = { Text(stringResource(MR.strings.password)) },
-                onValueChange = {
-                    onPasswordChanged(it)
-                },
-                supportingText = {
-                    Text(stringResource(MR.strings.required))
-                }
-            )
-        }
         if (uiState.isPersonalAccount) {
             Row(
                 modifier = Modifier.padding(vertical = 16.dp),
@@ -155,7 +119,7 @@ fun SignUpScreen(
                     checked = uiState.isTeacher,
                     onCheckedChange = {
                         onTeacherCheckChanged(it)
-                        onParentCheckChanged(!it)
+
                     }
                 )
                 Text(
@@ -167,7 +131,6 @@ fun SignUpScreen(
                     checked = uiState.isParent,
                     onCheckedChange = {
                         onParentCheckChanged(it)
-                        onTeacherCheckChanged(!it)
                     }
                 )
                 Text(
@@ -184,10 +147,10 @@ fun SignUpScreen(
                 .testTag("signup_passkey_button"),
         ) {
             Text(
-                text = if (uiState.passkeySupported&&!uiState.signupWithUsernameAndPassword) {
+                text = if (uiState.passkeySupported) {
                     stringResource(MR.strings.signup_with_passkey)
                 } else {
-                    stringResource(MR.strings.signup)
+                    stringResource(MR.strings.next)
                 }
             )
         }

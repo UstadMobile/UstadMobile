@@ -180,9 +180,12 @@ class OtherSignUpOptionSelectionViewModel(
                 ARG_PERSON_PROFILE_PIC,
                 json.encodeToString( PersonPicture.serializer(),_uiState.value.personPicture?:PersonPicture())
             )
+            put(IS_PARENT,
+                savedStateHandle[IS_PARENT].toString()
+            )
         }
 
-        navController.navigate(SignUpViewModel.DEST_NAME, args)
+        navController.navigate(SignupEnterUsernamePasswordViewModel.DEST_NAME, args)
 
 
     }
