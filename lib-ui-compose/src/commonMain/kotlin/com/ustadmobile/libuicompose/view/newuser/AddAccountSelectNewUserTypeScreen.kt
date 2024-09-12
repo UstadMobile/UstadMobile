@@ -80,7 +80,7 @@ fun AddAccountSelectNewUserTypeScreen(
                                 text = stringResource(MR.strings.access_educational_content_download_offline),
                             )
                         },
-                        modifier = Modifier.defaultItemPadding()
+                        modifier = Modifier
                             .clickable { onClickPersonalAccount() }
 
                     )
@@ -108,7 +108,7 @@ fun AddAccountSelectNewUserTypeScreen(
                             text = stringResource(MR.strings.eg_for_your_school_organization),
                         )
                     },
-                    modifier = Modifier.defaultItemPadding().clickable {
+                    modifier = Modifier.clickable {
                         onClickJoinLearningSpace()
                     }
                 )
@@ -134,7 +134,7 @@ fun AddAccountSelectNewUserTypeScreen(
                             text = "NA",
                         )
                     },
-                    modifier = Modifier.defaultItemPadding().clickable {
+                    modifier = Modifier.clickable {
                         onClickNewLearningSpace()
                     }
                 )

@@ -11,6 +11,7 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.AddAccountSelectNewOrExistingViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
+import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.door.ext.DoorTag
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -61,21 +62,27 @@ class RedirectViewModel(
             println(db)
         }
 
+        val clazzType =if (accountManager.currentUserSession.person.isPersonalAccount){
+            ContentEntryListViewModel.DEST_NAME_HOME
+        }else{
+            ClazzListViewModel.DEST_NAME_HOME
+        }
 
-            val destination = destinationArg ?: ClazzListViewModel.DEST_NAME_HOME
 
-            viewModelScope.launch {
-                navController.navigateToLink(
-                    link = destination,
-                    accountManager = accountManager,
-                    openExternalLinkUseCase = { _, _ ->  },
-                    userCanSelectServer = apiUrlConfig.canSelectServer,
-                    goOptions = UstadMobileSystemCommon.UstadGoOptions(
-                        clearStack = false
-                    ),
-                    forceAccountSelection = destinationArg != null,
-                )
-            }
+        val destination = destinationArg ?: clazzType
+
+        viewModelScope.launch {
+            navController.navigateToLink(
+                link = destination,
+                accountManager = accountManager,
+                openExternalLinkUseCase = { _, _ ->  },
+                userCanSelectServer = apiUrlConfig.canSelectServer,
+                goOptions = UstadMobileSystemCommon.UstadGoOptions(
+                    clearStack = true
+                ),
+                forceAccountSelection = destinationArg != null,
+            )
+        }
 
     }
 
@@ -85,3 +92,4 @@ class RedirectViewModel(
 
     }
 }
+
