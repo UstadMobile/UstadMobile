@@ -2,7 +2,9 @@ package com.ustadmobile.core.viewmodel.person.child
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.LearningSpace
+import com.ustadmobile.core.account.UserSessionWithPersonAndLearningSpace
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.usersession.StartUserSessionUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
@@ -16,7 +18,6 @@ import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonParentJoin
-import com.ustadmobile.lib.db.entities.Schedule
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -28,6 +29,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
+import org.kodein.di.direct
 import org.kodein.di.instance
 
 
@@ -46,7 +48,9 @@ class AddChildProfilesViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
 ) : UstadEditViewModel(di, savedStateHandle, DEST_NAME) {
-
+    val startUserSessionUseCase: StartUserSessionUseCase = StartUserSessionUseCase(
+        accountManager = di.direct.instance(),
+    )
     private val _uiState = MutableStateFlow(
         AddChildProfilesUiState()
     )
@@ -190,6 +194,8 @@ class AddChildProfilesViewModel(
 
     fun onProfileSelected(profile: Person) {
         viewModelScope.launch {
+            val goOptions = UstadMobileSystemCommon.UstadGoOptions(clearStack = true)
+
             if (_uiState.value.childProfiles.isNotEmpty()) {
 
                 val effectiveDb = activeRepo ?: activeDb
@@ -204,23 +210,43 @@ class AddChildProfilesViewModel(
                         ppjApprovalTiemstamp = systemTimeInMillis()
                     )
                 }
-
+                _uiState.value.childProfiles.forEach {
+                    if (it != profile && it != accountManager.currentUserSession.person) {
+                        accountManager.addSession(it, accountManager.activeLearningSpace.url, null)
+                    }
+                }
 
                 effectiveDb.personParentJoinDao().insertListAsync(personParenJoinList)
+                if (profile != accountManager.currentUserSession.person) {
+                    val sessionWithPersonAndLearningSpace =
+                        accountManager.addSession(
+                            profile,
+                            accountManager.activeLearningSpace.url,
+                            null
+                        )
+                    accountManager.currentUserSession = sessionWithPersonAndLearningSpace
+                }
+                navController.navigateToViewUri(
+                    nextDestination.appendSelectedAccount(
+                        profile.personUid,
+                        LearningSpace(accountManager.activeLearningSpace.url)
+                    ),
+                    goOptions
+                )
 
-                accountManager.addSession(profile, accountManager.activeLearningSpace.url, null)
+            } else {
+                accountManager.currentUserSession = accountManager.currentUserSession
 
+                navController.navigateToViewUri(
+                    nextDestination.appendSelectedAccount(
+                        profile.personUid,
+                        LearningSpace(accountManager.activeLearningSpace.url)
+                    ),
+                    goOptions
+                )
             }
         }
-        val goOptions = UstadMobileSystemCommon.UstadGoOptions(clearStack = true)
-        Napier.d { "AddChildPresenter: go to next destination: $nextDestination" }
-        navController.navigateToViewUri(
-            nextDestination.appendSelectedAccount(
-                profile.personUid,
-                LearningSpace(accountManager.activeLearningSpace.url)
-            ),
-            goOptions
-        )
+
 
     }
 

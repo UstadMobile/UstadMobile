@@ -38,7 +38,7 @@ When registration is enabled: Users over 13 can register directly
 30. Screen lock appears
 31. Unlock the screen
 32. User logged into the app
-33. User directed to library
+33. User directed to courses
 34. Verify user able to view Courses, Messages and People tabs
 35. Close the app
 36. Launch the app.
