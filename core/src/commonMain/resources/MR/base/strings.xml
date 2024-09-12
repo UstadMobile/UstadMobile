@@ -1997,6 +1997,7 @@
     <string name="create_passkey_for_faster_and_easier_signin">Create a passkey for faster, easier sign-in</string>
     <string name="with_passkeys_no_complex_passwords_needed">With passkeys, you don\'t need to remember complex passwords. Instead, you can use your fingerprint, face, or screen to sign in.</string>
     <string name="enter_link_manually">Enter link manually</string>
+    <string name="registration_not_allowed">Learning space does not allow new user registration</string>
 
 
 </resources>
