@@ -77,6 +77,7 @@ class LearningSpaceEnterLinkViewModel(
                     UstadView.ARG_LEARNINGSPACE_URL to endpointUrl,
                     ARG_SITE to json.encodeToString(site),
                 )
+                site.registrationAllowed
                 ARGS_TO_PASS_THROUGH.forEach { argName ->
                     args.putFromSavedStateIfPresent(argName)
                 }
@@ -85,7 +86,18 @@ class LearningSpaceEnterLinkViewModel(
                 _uiState.update { previous ->
                     previous.copy(validLink =  true, linkError = null, fieldsEnabled = true)
                 }
-
+                if (viewName.equals(RegisterAgeRedirectViewModel.DEST_NAME)&&!site.registrationAllowed){
+                    loadingState = LoadingUiState.NOT_LOADING
+                    _uiState.update { previous ->
+                        loadingState = LoadingUiState.NOT_LOADING
+                        previous.copy(
+                            validLink = true,
+                            fieldsEnabled = true,
+                            linkError = impl.getString(MR.strings.registration_not_allowed)
+                        )
+                    }
+                    return@launch
+                }
                 navController.navigate(viewName, args)
             }catch(e: Throwable) {
                 Napier.d(throwable = e) { "LearningSpaceEnterLink: not working: $endpointUrl" }
