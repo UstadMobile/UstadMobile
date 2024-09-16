@@ -330,7 +330,7 @@ This code will silently fail to do anything. A situation like this should normal
 
 #### Never hardcode any literal values
 
-Any literal other than 0, 1, -1, true, or false. Any other literal value MUST be defined as a constant with a meaningful name.
+Any literal other than 0, 1, -1, true, false, or null. Any other literal value MUST be defined as a constant with a meaningful name.
 
 e.g. 
 Do not do this:
