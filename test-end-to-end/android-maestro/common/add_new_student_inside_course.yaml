@@ -9,8 +9,11 @@ appId: com.toughra.ustadmobile
 # 5) PASSWORD: provide STUDENT's account password of string type
 # 6) TESTRESULTSDIR : provides the path to store test results
 
-- back
-- tapOn: "Courses"
+- repeat:
+    while:
+      notVisible: ${TESTCOURSENAME}
+    commands:
+      - tapOn: "Courses"
 - tapOn: ${TESTCOURSENAME}
 - tapOn: "MEMBERS"
 - tapOn: "Add a student"
