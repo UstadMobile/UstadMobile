@@ -356,6 +356,10 @@ class MyClass {
 Any code sequence more than one line should not be copied. Simple trivial functions may be top level or extension functions. Other code that needs to
 be reused should normally be turned into a domain usecase (as above).
 
+#### Cite references in comments where needed to understand or verify the code 
+
+If a section of code is following a particular official reference (e.g. Android, Kotlin, API specification), that is important to verifying that the code is correct, sensible, etc. then cite the reference in comments.
+
 ## Conventions
 
 All Kotlin code should follow [Kotlin coding conventions](https://kotlinlang.org/docs/coding-conventions.html)
