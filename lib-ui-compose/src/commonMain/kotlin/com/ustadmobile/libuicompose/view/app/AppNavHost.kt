@@ -141,12 +141,12 @@ import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.Register
 import com.ustadmobile.core.viewmodel.settings.DeveloperSettingsViewModel
 import com.ustadmobile.core.viewmodel.signup.OtherSignUpOptionSelectionViewModel
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel
+import com.ustadmobile.core.viewmodel.signup.SignupEnterUsernamePasswordViewModel
 import com.ustadmobile.core.viewmodel.systempermission.detail.SystemPermissionDetailViewModel
 import com.ustadmobile.core.viewmodel.systempermission.edit.SystemPermissionEditViewModel
 import com.ustadmobile.core.viewmodel.videocontent.VideoContentViewModel
 import com.ustadmobile.core.viewmodel.xapicontent.XapiContentViewModel
 import com.ustadmobile.libuicompose.util.passkey.CreatePasskeyPrompt
-import com.ustadmobile.libuicompose.view.ExistingUser.AddAccountExistingUserScreen
 import com.ustadmobile.libuicompose.view.about.OpenLicensesScreen
 import com.ustadmobile.libuicompose.view.clazz.invitevialink.InviteViaLinkScreen
 import com.ustadmobile.libuicompose.view.clazz.joinwithcode.JoinWithCodeScreen
@@ -169,6 +169,7 @@ import com.ustadmobile.libuicompose.view.message.messagelist.MessageListScreen
 import com.ustadmobile.libuicompose.view.newuser.AddAccountSelectNewUserTypeScreen
 import com.ustadmobile.libuicompose.view.parentalconsentmanagement.ParentalConsentManagementScreen
 import com.ustadmobile.libuicompose.view.pdfcontent.PdfContentScreen
+import com.ustadmobile.libuicompose.view.person.addaccount.AddAccountExistingUserScreen
 import com.ustadmobile.libuicompose.view.person.bulkaddrunimport.BulkAddPersonRunImportScreen
 import com.ustadmobile.libuicompose.view.person.bulkaddselectfile.BulkAddPersonSelectFileScreen
 import com.ustadmobile.libuicompose.view.person.chlid.AddChildProfilesScreen
@@ -182,6 +183,7 @@ import com.ustadmobile.libuicompose.view.videocontent.VideoContentScreen
 import com.ustadmobile.libuicompose.view.person.addaccount.AddAccountSelectNewOrExistingScreen
 import com.ustadmobile.libuicompose.view.person.learningspacelist.LearningSpaceListScreen
 import com.ustadmobile.libuicompose.view.signup.OtherSignUpOptionSelectionScreen
+import com.ustadmobile.libuicompose.view.signup.SignUpEnterUsernamePasswordScreen
 import com.ustadmobile.libuicompose.view.xapicontent.XapiContentScreen
 import kotlinx.coroutines.flow.Flow
 
@@ -374,6 +376,17 @@ fun AppNavHost(
                         backStackEntry, SignUpViewModel::class,
                     ) { di, savedStateHandle ->
                         SignUpViewModel(di, savedStateHandle)
+                    }
+                )
+            }
+            contentScene(
+                route = "/${SignupEnterUsernamePasswordViewModel.DEST_NAME}"
+            ) { backStackEntry ->
+                SignUpEnterUsernamePasswordScreen (
+                    viewModel = appViewModel(
+                        backStackEntry, SignupEnterUsernamePasswordViewModel::class,
+                    ) { di, savedStateHandle ->
+                        SignupEnterUsernamePasswordViewModel(di, savedStateHandle)
                     }
                 )
             }

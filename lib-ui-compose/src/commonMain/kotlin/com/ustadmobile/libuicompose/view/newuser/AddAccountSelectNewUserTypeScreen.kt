@@ -23,6 +23,7 @@ import com.ustadmobile.core.viewmodel.AddAccountSelectNewUserTypeUiState
 import com.ustadmobile.core.viewmodel.AddAccountSelectNewUserTypeViewModel
 import com.ustadmobile.libuicompose.images.UstadImage
 import com.ustadmobile.libuicompose.images.ustadAppImagePainter
+import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import dev.icerock.moko.resources.compose.stringResource
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 
@@ -51,7 +52,7 @@ fun AddAccountSelectNewUserTypeScreen(
 ) {
 
     Column(
-        modifier = Modifier.fillMaxHeight().padding(16.dp),
+        modifier = Modifier.fillMaxHeight(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -79,7 +80,7 @@ fun AddAccountSelectNewUserTypeScreen(
                                 text = stringResource(MR.strings.access_educational_content_download_offline),
                             )
                         },
-                        modifier = Modifier.padding(8.dp)
+                        modifier = Modifier
                             .clickable { onClickPersonalAccount() }
 
                     )
@@ -107,7 +108,7 @@ fun AddAccountSelectNewUserTypeScreen(
                             text = stringResource(MR.strings.eg_for_your_school_organization),
                         )
                     },
-                    modifier = Modifier.padding(8.dp).clickable {
+                    modifier = Modifier.clickable {
                         onClickJoinLearningSpace()
                     }
                 )
@@ -133,7 +134,7 @@ fun AddAccountSelectNewUserTypeScreen(
                             text = "NA",
                         )
                     },
-                    modifier = Modifier.padding(8.dp).clickable {
+                    modifier = Modifier.clickable {
                         onClickNewLearningSpace()
                     }
                 )
@@ -141,9 +142,3 @@ fun AddAccountSelectNewUserTypeScreen(
         }
     }
 }
-
-
-
-
-
-

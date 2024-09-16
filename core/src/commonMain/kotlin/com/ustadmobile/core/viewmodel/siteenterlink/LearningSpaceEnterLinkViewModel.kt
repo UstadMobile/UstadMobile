@@ -12,6 +12,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_SITE
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
+import com.ustadmobile.core.viewmodel.person.registerageredirect.RegisterAgeRedirectViewModel
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel
 import io.github.aakira.napier.Napier
 import io.ktor.client.*
@@ -61,7 +62,7 @@ class LearningSpaceEnterLinkViewModel(
             it.copy(fieldsEnabled = false)
         }
         val viewName =if(savedStateHandle[SignUpViewModel.ARG_NEW_OR_EXISTING_USER]=="new"){
-            SignUpViewModel.DEST_NAME
+            RegisterAgeRedirectViewModel.DEST_NAME
         }else{
             LoginViewModel.DEST_NAME
         }
@@ -76,6 +77,7 @@ class LearningSpaceEnterLinkViewModel(
                     UstadView.ARG_LEARNINGSPACE_URL to endpointUrl,
                     ARG_SITE to json.encodeToString(site),
                 )
+                site.registrationAllowed
                 ARGS_TO_PASS_THROUGH.forEach { argName ->
                     args.putFromSavedStateIfPresent(argName)
                 }
@@ -84,7 +86,18 @@ class LearningSpaceEnterLinkViewModel(
                 _uiState.update { previous ->
                     previous.copy(validLink =  true, linkError = null, fieldsEnabled = true)
                 }
-
+                if (viewName.equals(RegisterAgeRedirectViewModel.DEST_NAME)&&!site.registrationAllowed){
+                    loadingState = LoadingUiState.NOT_LOADING
+                    _uiState.update { previous ->
+                        loadingState = LoadingUiState.NOT_LOADING
+                        previous.copy(
+                            validLink = true,
+                            fieldsEnabled = true,
+                            linkError = impl.getString(MR.strings.registration_not_allowed)
+                        )
+                    }
+                    return@launch
+                }
                 navController.navigate(viewName, args)
             }catch(e: Throwable) {
                 Napier.d(throwable = e) { "LearningSpaceEnterLink: not working: $endpointUrl" }

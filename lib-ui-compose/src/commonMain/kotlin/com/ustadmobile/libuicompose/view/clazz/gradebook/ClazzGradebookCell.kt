@@ -13,28 +13,42 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.viewmodel.clazz.gradebook.displayMarkFor
 import com.ustadmobile.lib.db.composites.BlockStatus
-import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.libuicompose.components.scaledTextStyle
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.util.ext.maxScoreSummedIfModule
+import com.ustadmobile.core.util.ext.toDisplayString
+import com.ustadmobile.core.viewmodel.clazz.gradebook.aggregateIfModule
+import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.libuicompose.components.UstadTooltipBox
 
 @Composable
 fun ClazzGradebookCell(
-    blockStatus: BlockStatus?,
-    block: CourseBlock?,
+    blockUid: Long,
+    blockStatuses: List<BlockStatus>,
+    blocks: List<CourseBlock>,
     scale: Float,
     modifier: Modifier = Modifier,
+    showMaxScore: Boolean = false,
 ) {
+    val block = blocks.firstOrNull { it.cbUid == blockUid }
+
+    val blockStatus = blockStatuses.aggregateIfModule(blockUid, blocks)
+
     val markColors = blockStatus?.sScoreScaled?.let {
-        block?.colorsForMark(it)
+        block?.takeIf { blockStatus.sIsCompleted  }?.colorsForMark(it)
     }
 
+    val maxPoints = block?.maxScoreSummedIfModule(allBlocks = blocks)
+
     Box(modifier) {
-        val displayMark = blockStatus?.displayMarkFor(block)
+        val displayMark = blockStatus?.displayMarkFor(maxPoints)
         val progress = blockStatus?.sProgress
 
         when {
@@ -42,7 +56,8 @@ fun ClazzGradebookCell(
              * When mark is available - show it with colored background
              */
             displayMark != null -> {
-                val textStyle = scaledTextStyle(scale)
+                val scaledTextStyle = scaledTextStyle(scale)
+
                 Box(
                     Modifier
                         .fillMaxSize()
@@ -53,10 +68,19 @@ fun ClazzGradebookCell(
                 )
 
                 Text(
-                    text = displayMark,
+                    text = buildAnnotatedString {
+                        withStyle(SpanStyle(fontSize = scaledTextStyle.fontSize)) {
+                            append(displayMark)
+                        }
+                        if(showMaxScore) {
+                            withStyle(SpanStyle(fontSize = scaledTextStyle.fontSize * 0.75)) {
+                                append("/${maxPoints?.toDisplayString()}")
+                            }
+                        }
+                    },
                     modifier = Modifier.align(Alignment.Center),
-                    style = textStyle.copy(
-                        color = markColors?.first ?: textStyle.color
+                    style = scaledTextStyle.copy(
+                        color = markColors?.first ?: scaledTextStyle.color
                     )
                 )
             }
@@ -111,6 +135,5 @@ fun ClazzGradebookCell(
                 )
             }
         }
-
     }
 }

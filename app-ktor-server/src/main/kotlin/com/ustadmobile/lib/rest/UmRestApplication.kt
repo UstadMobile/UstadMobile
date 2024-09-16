@@ -1023,12 +1023,11 @@ fun Application.umRestApplication(
                 )
             }
 
-            static("umapp") {
-                resources("umapp")
-                static("/") {
-                    defaultResource("umapp/index.html")
-                }
-            }
+            staticResources(
+                remotePath = "umapp",
+                basePackage = "umapp",
+                index = "index.html",
+            )
 
             staticResources(
                 remotePath = "staticfiles",

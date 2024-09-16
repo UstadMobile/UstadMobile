@@ -22,6 +22,7 @@ import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.about.OpenLicensesViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
+import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
 import com.ustadmobile.core.viewmodel.siteenterlink.LearningSpaceEnterLinkViewModel
@@ -215,10 +216,15 @@ class AccountListViewModel(
      * Switch accounts
      */
     fun onClickAccount(sessionWithPersonAndLearningSpace: UserSessionWithPersonAndLearningSpace) {
+        val viewName= if (sessionWithPersonAndLearningSpace.person.isPersonalAccount) {
+            ContentEntryListViewModel.DEST_NAME_HOME
+        }else{
+            ClazzListViewModel.DEST_NAME_HOME
+        }
         startUserSessionUseCase(
             session = sessionWithPersonAndLearningSpace,
             navController = navController,
-            nextDest = savedStateHandle[ARG_NEXT] ?: ClazzListViewModel.DEST_NAME_HOME,
+            nextDest = savedStateHandle[ARG_NEXT] ?: viewName,
             dontSetCurrentSession = dontSetCurrentSession,
         )
     }

@@ -129,15 +129,6 @@ private val LoginComponent2 = FC<LoginProps> { props ->
             }
 
 
-            if(props.uiState.createAccountVisible) {
-                Button {
-                    id = "create_account_button"
-                    onClick = { props.onClickCreateAccount() }
-                    variant = ButtonVariant.outlined
-                    + strings[MR.strings.create_account].uppercase()
-                }
-            }
-
             if(props.uiState.connectAsGuestVisible) {
                 Button {
                     id = "connect_as_guest_button"

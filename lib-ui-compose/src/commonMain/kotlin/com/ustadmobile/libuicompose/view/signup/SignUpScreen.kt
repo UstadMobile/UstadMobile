@@ -45,7 +45,6 @@ fun SignUpScreen(viewModel: SignUpViewModel) {
         onParentCheckChanged = viewModel::onParentCheckChanged,
         onclickSignUpWithPasskey = viewModel::onClickedSignup,
         onclickOtherOptions = viewModel::onClickOtherOption,
-        onPasswordChanged = viewModel::onPasswordChanged,
         onFullNameValueChange = viewModel::onFullNameValueChange,
 
         )
@@ -61,7 +60,6 @@ fun SignUpScreen(
     onPersonPictureUriChanged: (String?) -> Unit = { },
     onTeacherCheckChanged: (Boolean) -> Unit = { },
     onParentCheckChanged: (Boolean) -> Unit = { },
-    onPasswordChanged: (String) -> Unit = { },
     onFullNameValueChange: (String) -> Unit = { },
 
     ) {
@@ -76,74 +74,42 @@ fun SignUpScreen(
             modifier = Modifier.size(60.dp),
         )
 
-
-        OutlinedTextField(
-            modifier = Modifier
-                .testTag("full_name")
-                .fillMaxWidth()
-                .defaultItemPadding(),
-            value =uiState.firstName?:"",
-            label = { Text(stringResource(MR.strings.full_name) + "*") },
-            isError = uiState.fullNameError != null,
-            singleLine = true,
-            onValueChange = { fullName ->
-                onFullNameValueChange(fullName)
-            },
-            supportingText = {
-                Text(uiState.fullNameError ?: stringResource(MR.strings.required))
-            }
-        )
-
-        UstadMessageIdOptionExposedDropDownMenuField(
-            value = uiState.person?.gender ?: 0,
-            modifier = Modifier
-                .testTag("gender")
-                .defaultItemPadding()
-                .fillMaxWidth(),
-            label = stringResource(MR.strings.gender_literal) + "*",
-            options = uiState.genderOptions.filter { it.stringResource != MR.strings.blank },
-            onOptionSelected = {
-                onPersonChanged(uiState.person?.shallowCopy {
-                    gender = it.value
-                })
-            },
-            isError = uiState.genderError != null,
-            supportingText = {
-                Text(uiState.genderError ?: stringResource(MR.strings.required))
-            }
-        )
-
-        if (!uiState.passkeySupported) {
             OutlinedTextField(
-                modifier = Modifier.testTag("username").fillMaxWidth().defaultItemPadding(),
-                value = uiState.person?.username ?: "",
-                label = { Text(stringResource(MR.strings.username)) },
-                isError = uiState.usernameError != null,
+                modifier = Modifier
+                    .testTag("full_name")
+                    .fillMaxWidth()
+                    .defaultItemPadding(),
+                value = uiState.firstName ?: "",
+                label = { Text(stringResource(MR.strings.full_name) + "*") },
+                isError = uiState.fullNameError != null,
                 singleLine = true,
-                onValueChange = {
+                onValueChange = { fullName ->
+                    onFullNameValueChange(fullName)
+                },
+                supportingText = {
+                    Text(uiState.fullNameError ?: stringResource(MR.strings.required))
+                }
+            )
+
+            UstadMessageIdOptionExposedDropDownMenuField(
+                value = uiState.person?.gender ?: 0,
+                modifier = Modifier
+                    .testTag("gender")
+                    .defaultItemPadding()
+                    .fillMaxWidth(),
+                label = stringResource(MR.strings.gender_literal) + "*",
+                options = uiState.genderOptions.filter { it.stringResource != MR.strings.blank },
+                onOptionSelected = {
                     onPersonChanged(uiState.person?.shallowCopy {
-                        username = it
+                        gender = it.value
                     })
                 },
+                isError = uiState.genderError != null,
                 supportingText = {
-                    Text(uiState.usernameError ?: stringResource(MR.strings.required))
+                    Text(uiState.genderError ?: stringResource(MR.strings.required))
                 }
             )
-        }
 
-        if (!uiState.passkeySupported) {
-            UstadPasswordField(
-                modifier = Modifier.testTag("password").fillMaxWidth().defaultItemPadding(),
-                value = uiState.password ?: "",
-                label = { Text(stringResource(MR.strings.password)) },
-                onValueChange = {
-                    onPasswordChanged(it)
-                },
-                supportingText = {
-                    Text(stringResource(MR.strings.required))
-                }
-            )
-        }
         if (uiState.isPersonalAccount) {
             Row(
                 modifier = Modifier.padding(vertical = 16.dp),
@@ -153,7 +119,7 @@ fun SignUpScreen(
                     checked = uiState.isTeacher,
                     onCheckedChange = {
                         onTeacherCheckChanged(it)
-                        onParentCheckChanged(!it)
+
                     }
                 )
                 Text(
@@ -165,7 +131,6 @@ fun SignUpScreen(
                     checked = uiState.isParent,
                     onCheckedChange = {
                         onParentCheckChanged(it)
-                        onTeacherCheckChanged(!it)
                     }
                 )
                 Text(
@@ -185,7 +150,7 @@ fun SignUpScreen(
                 text = if (uiState.passkeySupported) {
                     stringResource(MR.strings.signup_with_passkey)
                 } else {
-                    stringResource(MR.strings.signup)
+                    stringResource(MR.strings.next)
                 }
             )
         }

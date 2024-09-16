@@ -90,7 +90,7 @@ class AddAccountSelectNewOrExistingViewModel(
             putFromSavedStateIfPresent(SignUpViewModel.REGISTRATION_ARGS_TO_PASS)
             put(SignUpViewModel.ARG_NEW_OR_EXISTING_USER,"existing")
         }
-        navController.navigate(AddAccountExistingUserViewModel.DEST_NAME, arg)
+        navController.navigate(AddAccountSelectNewUserTypeViewModel.DEST_NAME, arg)
 
     }
 
