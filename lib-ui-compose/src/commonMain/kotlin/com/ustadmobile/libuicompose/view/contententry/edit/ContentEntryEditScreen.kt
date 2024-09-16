@@ -8,6 +8,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,8 +32,12 @@ import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.core.viewmodel.contententry.stringResource
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.libuicompose.components.UstadAddListItem
+import com.ustadmobile.libuicompose.components.UstadFileDropZone
 import com.ustadmobile.libuicompose.components.UstadImageSelectButton
+import com.ustadmobile.libuicompose.components.UstadPickFileOpts
 import dev.icerock.moko.resources.compose.stringResource
+import com.ustadmobile.libuicompose.components.rememberUstadFilePickLauncher
 
 @Composable
 fun ContentEntryEditScreen(
@@ -46,6 +51,7 @@ fun ContentEntryEditScreen(
         onClickEditDescription = viewModel::onEditDescriptionInNewWindow,
         onSetCompressionLevel = viewModel::onSetCompressionLevel,
         onPictureChanged = viewModel::onPictureChanged,
+        onSubtitleFileSelected = viewModel::onSubtitleFileAdded,
     )
 }
 
@@ -58,7 +64,16 @@ fun ContentEntryEditScreen(
     onContentEntryChanged: (ContentEntry?) -> Unit = {},
     onSetCompressionLevel: (CompressionLevel) -> Unit = { },
     onPictureChanged: (String?) -> Unit = { },
+    onSubtitleFileSelected: (uri: String, filename: String) -> Unit = { _, _ -> },
 ) {
+    val fileLauncher = rememberUstadFilePickLauncher(
+        fileExtensions = listOf("vtt"),
+        mimeTypes = listOf("text/vtt"),
+        onFileSelected = {
+            onSubtitleFileSelected(it.uri, it.fileName)
+        }
+    )
+
     UstadVerticalScrollColumn(
         modifier = Modifier.fillMaxSize()
     )  {
@@ -132,6 +147,29 @@ fun ContentEntryEditScreen(
             editInNewScreenLabel = stringResource(MR.strings.description),
             placeholderText = stringResource(MR.strings.description),
         )
+
+        if(uiState.canModifySubtitles) {
+            UstadFileDropZone(
+                onFileDropped = {
+                    onSubtitleFileSelected(it.uri, it.fileName)
+                }
+            ) {
+                UstadAddListItem(
+                    text = stringResource(MR.strings.add_subtitles),
+                    onClickAdd = {
+                        fileLauncher(UstadPickFileOpts())
+                    }
+                )
+            }
+        }
+
+        uiState.subtitles.forEach {
+            ListItem(
+                headlineContent = {
+                    Text(it.title ?: "")
+                }
+            )
+        }
 
         OutlinedTextField(
             modifier = Modifier.testTag("author").fillMaxWidth().defaultItemPadding(),

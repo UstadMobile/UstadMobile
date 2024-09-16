@@ -80,5 +80,12 @@ abstract class ContentImporter(
         return endpoint.url + ContentEntryVersion.PATH_POSTFIX + contentEntryVersionUid + "/"
     }
 
+    companion object {
+
+        const val VIDEO_IMPORTER_PLUGIN_ID = 101
+
+
+    }
+
 
 }

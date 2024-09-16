@@ -1935,4 +1935,6 @@
 
     <string name="select_picture_from_files">Select picture from files</string>
 
+    <string name="add_subtitles">Add subtitles</string>
+
 </resources>

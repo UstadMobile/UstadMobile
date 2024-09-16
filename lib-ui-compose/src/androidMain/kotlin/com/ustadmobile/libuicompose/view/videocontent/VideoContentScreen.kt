@@ -57,17 +57,9 @@ actual fun VideoContentScreen(
 }
 
 /**
- * See
- * https://medium.com/@munbonecci/how-to-display-videos-using-exoplayer-on-android-with-jetpack-compose-1fb4d57778f4
  *
- * Full screen - can use
- * https://developer.android.com/develop/ui/views/layout/immersive
- *
- * Click listener can be set using
- *
- * https://developer.android.com/reference/androidx/media3/ui/PlayerView#setFullscreenButtonClickListener(androidx.media3.ui.PlayerView.FullscreenButtonClickListener)
- *
- * ... which should make the button appear.
+ * Could sideload extra subtitles as per :
+ * https://developer.android.com/media/media3/exoplayer/media-items#sideloading-subtitle-tracks
  */
 @OptIn(UnstableApi::class)
 @Composable

@@ -70,7 +70,8 @@ class VideoContentImporterCommonJvm(
 
 
     override val importerId: Int
-        get() = IMPORTER_ID
+        get() = VIDEO_IMPORTER_PLUGIN_ID
+
     override val supportedMimeTypes: List<String>
         get() = listOf("video/mpeg")
 
@@ -282,8 +283,4 @@ class VideoContentImporterCommonJvm(
         }
     }
 
-    companion object {
-
-        const val IMPORTER_ID = 101
-    }
 }

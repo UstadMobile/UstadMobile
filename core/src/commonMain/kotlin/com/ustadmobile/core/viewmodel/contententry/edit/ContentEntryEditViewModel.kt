@@ -2,6 +2,8 @@ package com.ustadmobile.core.viewmodel.contententry.edit
 
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.contentformats.ContentImporter
+import com.ustadmobile.core.contentformats.media.SubtitleTrack
 import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.domain.compress.CompressionLevel
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
@@ -14,6 +16,8 @@ import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.ext.onActiveEndpoint
 import com.ustadmobile.core.util.ext.setIfNoValueSetYet
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
+import com.ustadmobile.core.viewmodel.contententry.getsubtitle.GetSubtitleViewModel
+import com.ustadmobile.core.viewmodel.contententry.subtitleedit.SubtitleEditViewModel
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditUiState
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
@@ -56,7 +60,13 @@ data class ContentEntryEditUiState(
 
     val compressionEnabled: Boolean = false,
 
-)
+    val subtitles: List<SubtitleTrack> = emptyList(),
+
+) {
+    val canModifySubtitles: Boolean
+        get() = entity?.contentJobItem?.cjiPluginId == ContentImporter.VIDEO_IMPORTER_PLUGIN_ID
+
+}
 
 /**
  * When there is no associated CourseBlock
@@ -294,6 +304,18 @@ class ContentEntryEditViewModel(
         }
     }
 
+    fun onSubtitleFileAdded(uri: String, fileName: String) {
+        navigateForResult(
+            nextViewName = GetSubtitleViewModel.DEST_NAME,
+            key = KEY_SUBTITLE,
+            currentValue = null,
+            serializer = SubtitleTrack.serializer(),
+            args = buildMap {
+                this[SubtitleEditViewModel.ARG_URI] = uri
+                this[SubtitleEditViewModel.ARG_FILENAME] = fileName
+            }
+        )
+    }
 
     fun onClickSave() {
         val entityVal = _uiState.value.entity
@@ -416,6 +438,8 @@ class ContentEntryEditViewModel(
         const val ARG_GO_TO_ON_CONTENT_ENTRY_DONE = "goToOnContentEntryDone"
 
         const val KEY_HTML_DESCRIPTION = "contentEntryDesc"
+
+        const val KEY_SUBTITLE = "subtitleKey"
 
         const val GO_TO_COURSE_BLOCK_EDIT = 1
 
