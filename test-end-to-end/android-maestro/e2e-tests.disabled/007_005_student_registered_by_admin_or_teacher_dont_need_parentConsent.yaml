@@ -11,7 +11,7 @@ env:
     TESTSERIAL: ${TESTSERIAL}
     TESTNAME: ${TESTNAME}
 
-- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "../common/select_site.yaml"
 #admin add a student aged below 13
 - runFlow:
@@ -33,7 +33,7 @@ env:
 
 #student aged below 13, added by admin, can login to account without parental consent
 
-- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
     file: "../common/user_login.yaml"

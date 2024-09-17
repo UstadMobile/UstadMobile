@@ -3,7 +3,7 @@ appId: com.toughra.ustadmobile
 # user able to login as a guest using this flow
 
 # launch app
-- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "../common/select_site.yaml"
 - scrollUntilVisible:
     element:

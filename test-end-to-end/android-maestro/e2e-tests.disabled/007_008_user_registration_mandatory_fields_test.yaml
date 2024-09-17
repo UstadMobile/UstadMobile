@@ -11,7 +11,7 @@ env:
     TESTSERIAL: ${TESTSERIAL}
     TESTNAME: ${TESTNAME}
 
-- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "../common/select_site.yaml"
 #admin login
 - runFlow:
@@ -19,7 +19,7 @@ env:
 - runFlow:
    file: "../common/enable_user_registration.yaml"
 - assertVisible: "Yes"
-- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "../common/select_site.yaml"
 - assertVisible: "Create account"
 - tapOn: "Create account"
