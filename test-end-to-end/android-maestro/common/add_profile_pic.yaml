@@ -20,7 +20,9 @@ appId: com.toughra.ustadmobile
 
 # get started
 - launchApp
-- tapOn: "GET STARTED"
+- tapOn: "Existing user"
+- tapOn: "Join Learning Space"
+- tapOn: "Enter link manually"
 # select site
 - runFlow: "./select_site.yaml"
 # admin login
