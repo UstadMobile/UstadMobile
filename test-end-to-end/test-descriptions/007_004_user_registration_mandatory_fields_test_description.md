@@ -1,4 +1,4 @@
-# For user registration date of birth field is mandatory
+# User registration above age 13 join learning space mandatory fields test
 
 ## Description:
 
@@ -31,4 +31,17 @@ When registration is enabled: If a user does not specify their date of birth, an
 23. Verify user gets an error "This field is required."
 24. Select date of birth , age 13+ 
 25. Click on the "Next" button. 
-26. Verify user in Terms and policies page.
+26. Verify user in Terms and policies page. 
+27. Click on the "Accept" button
+28. If platform supports passkeys, click on "Other options"
+29. Verify user gets an error "This field is required." just below Full name and gender fields. 
+30. Enter Full name. 
+31. Select Gender 
+32. If platform supports passkeys, click on "Other options". 
+33. Click on "Signup" button 
+34. Verify user gets an error "This field is required." just below Username and password fields. 
+35. Enter username and password 
+36. Click on "Signup" button 
+37. User logged into the app 
+38. User directed to courses section 
+39. Verify user able to view Courses, Messages and People tabs

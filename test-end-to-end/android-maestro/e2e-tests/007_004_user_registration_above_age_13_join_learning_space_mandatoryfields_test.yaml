@@ -19,7 +19,10 @@ env:
 - runFlow:
     file: "../common/enable_user_registration.yaml"
 - assertVisible: "Yes"
-- runFlow: "../common/clear_state_and_personal_account_new_user_flow.yaml"
+- runFlow: "../common/clear_state_and_learning_space_new_userflow.yaml"
+- runFlow: "../common/select_site.yaml"
+- tapOn: "Next"
+- assertVisible: "This field is required" #verify the DOB field is mandatory
 - tapOn: 2024
 - longPressOn: 2024
 - inputText: 2009
@@ -31,17 +34,31 @@ env:
     visible:  "Terms and company policies"
     timeout: 10000
 - tapOn: "Accept"
+- tapOn: "Other options"
+- assertVisible:
+    below:  "Full name*"
+    text: "This field is required" #verify the Fullname field's mandatory
+- assertVisible:
+    below:  "Gender*"
+    text: "This field is required" #verify the Gender field's mandatory
 - tapOn: "Full name*"
 - inputText: "User ABC"
 - tapOn: "Gender*"
 - tapOn: "Female"
 - tapOn: "Other options"
 - tapOn: "Create username and password"
+- tapOn: "Sign-up"
+- assertVisible:
+    below:  "Username"
+    text: "This field is required" #verify the Username field's mandatory
+- assertVisible:
+    below:  "Password"
+    text: "This field is required" #verify the Password field's mandatory
 - tapOn: "Username"
 - inputText: "userabc"
 - tapOn: "Password"
 - inputText: "test1234"
 - tapOn: "Sign-up"
-- assertVisible: "Library"
+- assertVisible: "Courses"
 
 

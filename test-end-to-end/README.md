@@ -147,19 +147,13 @@ trickle -s -d 128 -u 128 bash
 
 7.3 [When registration is enabled: Users under 13 can register using parental approval link](test-descriptions/007_003_users_under_13_can_register_using_parental_approval_link_test_description.md)
 
-7.4 [For user registration date of birth field is mandatory](test-descriptions/007_004_user_registration_dob_field_is_mandatory_test_description.md)
+7.4 [User registration above age 13 join learning space mandatory fields test](test-descriptions/007_004_user_registration_mandatory_fields_test_description.md)
 
 7.5 [Students user under 13 is added by a teacher/admin, don't require parental approval](test-descriptions/007_005_student_registered_by_admin_or_teacher_dont_need_parentConsent_test_description.md)
 
 7.6 [Admin can enable/disable guest login](test-descriptions/007_006_admin_enable_or_disable_guest_login_test_description.md)
 
 7.7 [Admin or teacher send invitation via message or phone numbers or email addresses](test-descriptions/007_007_admin_or_teacher_send_group_invitation_to_join_course_test_description.md)
-
-7.8 [On user registration page first name, last name, gender, username and password are mandatory fields](test-descriptions/007_008_user_registration_mandatory_fields_test_description.md)
-
-7.9 [For user registration email id field should have valid email address](test-descriptions/007_009_user_registration_email_field_verification_test_description.md)
-
-7.10 [For user registration phone number field should have valid phone number](test-descriptions/007_010_user_registration_phone_field_verification_test_description.md)
 
 ### 8 Accessibility
 
