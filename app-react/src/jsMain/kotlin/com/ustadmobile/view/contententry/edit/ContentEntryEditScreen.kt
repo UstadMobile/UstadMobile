@@ -11,12 +11,14 @@ import com.ustadmobile.core.viewmodel.contententry.stringResource
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.mui.components.UstadAddListItem
 import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.mui.components.UstadTextEditField
 import com.ustadmobile.util.ext.onTextChange
 import com.ustadmobile.view.components.UstadImageSelectButton
 import com.ustadmobile.view.components.UstadMessageIdSelectField
 import com.ustadmobile.wrappers.quill.ReactQuill
+import emotion.react.css
 import kotlinx.coroutines.Dispatchers
 import mui.material.Button
 import mui.material.ButtonVariant
@@ -31,7 +33,13 @@ import mui.system.responsive
 import react.FC
 import react.Props
 import react.ReactNode
+import react.useRef
 import web.cssom.px
+import web.html.HTMLInputElement
+import react.dom.html.ReactHTML.input
+import web.cssom.Display
+import web.html.InputType
+import web.url.URL
 
 external interface ContentEntryEditScreenProps : Props {
 
@@ -44,6 +52,8 @@ external interface ContentEntryEditScreenProps : Props {
     var onSetCompressionLevel: (CompressionLevel) -> Unit
 
     var onPictureChanged: (String?) -> Unit
+
+    var onSubtitleFileSelected: (uri: String, filename: String) -> Unit
 
 }
 
@@ -61,6 +71,7 @@ val ContentEntryEditScreen = FC<Props> {
         onContentEntryChanged = viewModel::onContentEntryChanged
         onSetCompressionLevel = viewModel::onSetCompressionLevel
         onPictureChanged = viewModel::onPictureChanged
+        onSubtitleFileSelected = viewModel::onSubtitleFileAdded
     }
 }
 
@@ -72,6 +83,23 @@ private val ContentEntryEditScreenComponent = FC<ContentEntryEditScreenProps> { 
             strings[MR.strings.file_required_prompt]
         else
             strings[MR.strings.file_selected]
+
+    val fileInputRef = useRef<HTMLInputElement>(null)
+
+    input {
+        ref = fileInputRef
+        type = InputType.file
+        id = "subtitle_input_file"
+        css {
+            display = "none".unsafeCast<Display>()
+        }
+
+        onChange = {
+            it.target.files?.item(0)?.also { file ->
+                props.onSubtitleFileSelected(URL.createObjectURL(file), file.name)
+            }
+        }
+    }
 
     UstadStandardContainer {
 
@@ -134,6 +162,16 @@ private val ContentEntryEditScreenComponent = FC<ContentEntryEditScreenProps> { 
                             description = it
                         }
                     )
+                }
+            }
+
+            if(props.uiState.canModifySubtitles) {
+                UstadAddListItem {
+                    text = strings[MR.strings.add_subtitles]
+                    enabled = props.uiState.fieldsEnabled && fileInputRef.current != null
+                    onClickAdd = {
+                        fileInputRef.current?.click()
+                    }
                 }
             }
 

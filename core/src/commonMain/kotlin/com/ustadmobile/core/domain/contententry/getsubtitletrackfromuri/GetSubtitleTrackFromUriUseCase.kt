@@ -17,6 +17,9 @@ interface GetSubtitleTrackFromUriUseCase {
 
         const val VTT_MIME_TYPE = "text/vtt"
 
+        const val PARAM_TRACK_FILENAME = "filename"
+
+        const val VTT_HEADER_LINE = "WEBVTT"
     }
 
 

@@ -1,6 +1,7 @@
 package com.ustadmobile.core.domain.contententry.getsubtitletrackfromuri
 
 import com.ustadmobile.core.contentformats.media.SubtitleTrack
+import com.ustadmobile.core.domain.contententry.getsubtitletrackfromuri.GetSubtitleTrackFromUriUseCase.Companion.VTT_HEADER_LINE
 import com.ustadmobile.core.domain.contententry.getsubtitletrackfromuri.GetSubtitleTrackFromUriUseCase.Companion.VTT_MIME_TYPE
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.door.DoorUri
@@ -19,7 +20,7 @@ class GetSubtitleTrackFromUriUseCaseLocal(
         filename: String
     ): SubtitleTrack = withContext(dispatcher){
         val text = uriHelper.openSource(subtitleTrackUri).readString(byteCount = HEADER_BYTECOUNT)
-        if(!text.trimStart().startsWith(HEADER_LINE, ignoreCase = true)) {
+        if(!text.trimStart().startsWith(VTT_HEADER_LINE, ignoreCase = true)) {
             throw IllegalArgumentException("Text does not start with WEBVTT")
         }
 
@@ -33,9 +34,6 @@ class GetSubtitleTrackFromUriUseCaseLocal(
 
     companion object {
 
-
-
-        const val HEADER_LINE = "WEBVTT"
 
         const val HEADER_BYTECOUNT = 32L
 
