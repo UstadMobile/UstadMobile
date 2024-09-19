@@ -146,8 +146,9 @@ class SignUpViewModel(
         _appUiState.update {
             AppUiState(
                 title = title,
+                hideAppBar =false,
+                navigationVisible = false,
                 userAccountIconVisible = false,
-                hideBottomNavigation = true,
             )
         }
         if (savedStateHandle[ARG_IS_PERSONAL_ACCOUNT] == "true") {

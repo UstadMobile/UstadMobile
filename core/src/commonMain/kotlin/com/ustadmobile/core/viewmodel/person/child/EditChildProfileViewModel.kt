@@ -44,7 +44,6 @@ class EditChildProfileViewModel(
     private val _uiState = MutableStateFlow(
         EditChildProfileUiState()
     )
-    private val addNewPersonUseCase: AddNewPersonUseCase by di.onActiveEndpoint().instance()
 
     val uiState: Flow<EditChildProfileUiState> = _uiState.asStateFlow()
 
@@ -66,7 +65,9 @@ class EditChildProfileViewModel(
 
         _appUiState.update { prev ->
             prev.copy(
-
+                hideAppBar =false,
+                navigationVisible = false,
+                userAccountIconVisible = false,
                 title = systemImpl.getString(MR.strings.child_profile),
                 hideBottomNavigation = true,
             )
@@ -164,8 +165,6 @@ class EditChildProfileViewModel(
     companion object {
 
         const val DEST_NAME = "EditChildProfile"
-        const val STATE_KEY_PERSON = "person"
-        const val ARG_SELECTED_PERSON_ENTRY = "SelectedPersonEntry"
 
     }
 }

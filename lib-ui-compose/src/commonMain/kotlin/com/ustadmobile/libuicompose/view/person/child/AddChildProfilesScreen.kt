@@ -1,4 +1,4 @@
-package com.ustadmobile.libuicompose.view.person.chlid
+package com.ustadmobile.libuicompose.view.person.child
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -98,7 +98,6 @@ fun childProfileItem(
     childProfile: Person,
     onClickEditChild: (Person) -> Unit = {},
     onClickDeleteChileProfile: (Person) -> Unit = {},
-
     ) {
     ListItem(
         leadingContent = {

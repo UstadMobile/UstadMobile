@@ -1,4 +1,4 @@
-package com.ustadmobile.libuicompose.view.person.chlid
+package com.ustadmobile.libuicompose.view.person.child
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth

@@ -70,13 +70,6 @@ val RegisterAgeRedirectComponent2 = FC<RegisterAgeRedirectProps> { props ->
                 helperText = ReactNode(props.uiState.dateOfBirthError ?: strings[MR.strings.required])
             }
 
-            Button {
-                id = "next_button"
-                variant = ButtonVariant.contained
-                onClick = { props.onClickNext() }
-
-                + strings[MR.strings.next]
-            }
         }
     }
 }

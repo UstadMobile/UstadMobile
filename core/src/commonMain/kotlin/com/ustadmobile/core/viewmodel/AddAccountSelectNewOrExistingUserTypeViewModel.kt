@@ -19,21 +19,21 @@ import kotlinx.coroutines.flow.update
 import org.kodein.di.DI
 import org.kodein.di.instance
 
-data class AddAccountSelectNewUserTypeUiState(
+data class AddAccountSelectNewOrExistingUserTypeUiState(
     val showAddPersonalAccount: Boolean = false,
 )
 
-class AddAccountSelectNewUserTypeViewModel(
+class AddAccountSelectNewOrExistingUserTypeViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle
 ): UstadViewModel(di, savedStateHandle, DEST_NAME) {
 
     private val apiUrlConfig: SystemUrlConfig by instance()
 
-    private val _uiState = MutableStateFlow(AddAccountSelectNewUserTypeUiState())
+    private val _uiState = MutableStateFlow(AddAccountSelectNewOrExistingUserTypeUiState())
     private val isNewUser = savedStateHandle[SignUpViewModel.ARG_NEW_OR_EXISTING_USER]=="new"
 
-    val uiState: Flow<AddAccountSelectNewUserTypeUiState>
+    val uiState: Flow<AddAccountSelectNewOrExistingUserTypeUiState>
         get() = _uiState.asStateFlow()
 
     init {

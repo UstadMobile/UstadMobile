@@ -48,14 +48,13 @@ class AddChildProfilesViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
 ) : UstadEditViewModel(di, savedStateHandle, DEST_NAME) {
-    val startUserSessionUseCase: StartUserSessionUseCase = StartUserSessionUseCase(
-        accountManager = di.direct.instance(),
-    )
+
     private val _uiState = MutableStateFlow(
         AddChildProfilesUiState()
     )
     private var nextDestination: String =
         savedStateHandle[UstadView.ARG_NEXT] ?: ClazzListViewModel.DEST_NAME_HOME
+
     val repo: UmAppDatabase by di.onActiveEndpoint().instance()
 
     val uiState: Flow<AddChildProfilesUiState> = _uiState.asStateFlow()
@@ -75,7 +74,9 @@ class AddChildProfilesViewModel(
                     text = systemImpl.getString(MR.strings.finish),
                     onClick = this@AddChildProfilesViewModel::onClickFinish,
 
-                    )
+                    ),
+                navigationVisible = false,
+                userAccountIconVisible = false,
             )
         }
 
@@ -101,10 +102,8 @@ class AddChildProfilesViewModel(
                         }
                     }
                 )
-            }
-            launch {
-                //Handle text, module, and discussion topic (e.g. plain ChildProfile that does not
-                // include any other entities)
+
+
                 navResultReturner.filteredResultFlowForKey(RESULT_KEY_PERSON).collect { result ->
                     val childProfileResult = result.result as? Person
                         ?: return@collect
@@ -116,8 +115,11 @@ class AddChildProfilesViewModel(
 
                     updateChildProfileList(newChildProfileList)
                 }
+
             }
+
         }
+
 
     }
 
@@ -211,40 +213,31 @@ class AddChildProfilesViewModel(
                     )
                 }
                 _uiState.value.childProfiles.forEach {
-                    if (it != profile && it != accountManager.currentUserSession.person) {
+                    if (it != profile) {
                         accountManager.addSession(it, accountManager.activeLearningSpace.url, null)
                     }
                 }
 
                 effectiveDb.personParentJoinDao().insertListAsync(personParenJoinList)
-                if (profile != accountManager.currentUserSession.person) {
-                    val sessionWithPersonAndLearningSpace =
-                        accountManager.addSession(
-                            profile,
-                            accountManager.activeLearningSpace.url,
-                            null
-                        )
-                    accountManager.currentUserSession = sessionWithPersonAndLearningSpace
-                }
-                navController.navigateToViewUri(
-                    nextDestination.appendSelectedAccount(
-                        profile.personUid,
-                        LearningSpace(accountManager.activeLearningSpace.url)
-                    ),
-                    goOptions
-                )
 
-            } else {
-                accountManager.currentUserSession = accountManager.currentUserSession
 
-                navController.navigateToViewUri(
-                    nextDestination.appendSelectedAccount(
-                        profile.personUid,
-                        LearningSpace(accountManager.activeLearningSpace.url)
-                    ),
-                    goOptions
-                )
             }
+            if (profile != accountManager.currentUserSession.person) {
+                val sessionWithPersonAndLearningSpace =
+                    accountManager.addSession(
+                        profile,
+                        accountManager.activeLearningSpace.url,
+                        null
+                    )
+                accountManager.currentUserSession = sessionWithPersonAndLearningSpace
+            }
+            navController.navigateToViewUri(
+                nextDestination.appendSelectedAccount(
+                    profile.personUid,
+                    LearningSpace(accountManager.activeLearningSpace.url)
+                ),
+                goOptions
+            )
         }
 
 

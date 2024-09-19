@@ -18,7 +18,7 @@ import mui.system.responsive
 import mui.system.sx
 import react.*
 
-external interface SiteEnterLinkProps : Props {
+external interface LearningSpaceEnterLinkProps : Props {
     var uiState: LearningSpaceEnterLinkUiState
 
     var onClickNext: () -> Unit
@@ -28,14 +28,14 @@ external interface SiteEnterLinkProps : Props {
     var onEditTextValueChange: (String) -> Unit
 }
 
-val SiteEnterLinkScreen = FC<Props> {
+val LearningSpaceEnterLinkScreen = FC<Props> {
     val viewModel = useUstadViewModel { di, savedStateHandle ->
         LearningSpaceEnterLinkViewModel(di, savedStateHandle)
     }
 
     val uiState by viewModel.uiState.collectAsState(LearningSpaceEnterLinkUiState())
 
-    SiteEnterLinkComponent2 {
+    LearningSpaceEnterLinkComponent2 {
         this.uiState = uiState
         onClickNext = viewModel::onClickNext
         onClickNewLearningEnvironment = { }
@@ -44,7 +44,7 @@ val SiteEnterLinkScreen = FC<Props> {
 
 }
 
-val SiteEnterLinkComponent2 = FC <SiteEnterLinkProps> { props ->
+val LearningSpaceEnterLinkComponent2 = FC <LearningSpaceEnterLinkProps> { props ->
 
     val strings: StringProvider = useStringProvider()
 

@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.HorizontalDivider
@@ -19,22 +18,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.viewmodel.AddAccountSelectNewUserTypeUiState
-import com.ustadmobile.core.viewmodel.AddAccountSelectNewUserTypeViewModel
+import com.ustadmobile.core.viewmodel.AddAccountSelectNewOrExistingUserTypeUiState
+import com.ustadmobile.core.viewmodel.AddAccountSelectNewOrExistingUserTypeViewModel
 import com.ustadmobile.libuicompose.images.UstadImage
 import com.ustadmobile.libuicompose.images.ustadAppImagePainter
-import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import dev.icerock.moko.resources.compose.stringResource
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 
 
 @Composable
-fun AddAccountSelectNewUserTypeScreen(
-    viewModel: AddAccountSelectNewUserTypeViewModel,
+fun AddAccountSelectNewOrExistingUserTypeScreen(
+    viewModel: AddAccountSelectNewOrExistingUserTypeViewModel,
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle(AddAccountSelectNewUserTypeUiState())
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle(AddAccountSelectNewOrExistingUserTypeUiState())
 
-    AddAccountSelectNewUserTypeScreen(
+    AddAccountSelectNewOrExistingUserTypeScreen(
         uiState = uiState,
         onClickPersonalAccount = viewModel::onClickPersonalAccount,
         onClickJoinLearningSpace = viewModel::onClickJoinLearningSpace,
@@ -44,8 +42,8 @@ fun AddAccountSelectNewUserTypeScreen(
 
 
 @Composable
-fun AddAccountSelectNewUserTypeScreen(
-    uiState: AddAccountSelectNewUserTypeUiState,
+fun AddAccountSelectNewOrExistingUserTypeScreen(
+    uiState: AddAccountSelectNewOrExistingUserTypeUiState,
     onClickPersonalAccount: () -> Unit = { },
     onClickJoinLearningSpace: () -> Unit = { },
     onClickNewLearningSpace: () -> Unit = { },

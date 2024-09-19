@@ -306,6 +306,7 @@ fun Application.umRestApplication(
             allowHeader("X-nid")
             allowHeader("door-dbversion")
             allowHeader("door-node")
+            allowHeader("access-control-allow-origin")
             anyHost()
         }
     }

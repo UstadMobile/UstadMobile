@@ -18,9 +18,8 @@ import com.ustadmobile.core.impl.nav.NavResultReturner
 import com.ustadmobile.core.impl.nav.NavResultReturnerImpl
 import com.ustadmobile.core.impl.nav.PopNavCommand
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.core.viewmodel.AddAccountExistingUserViewModel
 import com.ustadmobile.core.viewmodel.HtmlEditViewModel
-import com.ustadmobile.core.viewmodel.AddAccountSelectNewUserTypeViewModel
+import com.ustadmobile.core.viewmodel.AddAccountSelectNewOrExistingUserTypeViewModel
 import com.ustadmobile.core.viewmodel.clazz.invitevialink.InviteViaLinkViewModel
 import com.ustadmobile.core.viewmodel.person.registerageredirect.RegisterAgeRedirectViewModel
 import com.ustadmobile.core.viewmodel.site.termsdetail.SiteTermsDetailViewModel
@@ -166,14 +165,13 @@ import com.ustadmobile.libuicompose.view.individual.IndividualLearnerScreen
 import com.ustadmobile.libuicompose.view.interop.externalapppermissionrequest.ExternalAppPermissionRequestScreen
 import com.ustadmobile.libuicompose.view.message.conversationlist.ConversationListScreen
 import com.ustadmobile.libuicompose.view.message.messagelist.MessageListScreen
-import com.ustadmobile.libuicompose.view.newuser.AddAccountSelectNewUserTypeScreen
+import com.ustadmobile.libuicompose.view.newuser.AddAccountSelectNewOrExistingUserTypeScreen
 import com.ustadmobile.libuicompose.view.parentalconsentmanagement.ParentalConsentManagementScreen
 import com.ustadmobile.libuicompose.view.pdfcontent.PdfContentScreen
-import com.ustadmobile.libuicompose.view.person.addaccount.AddAccountExistingUserScreen
 import com.ustadmobile.libuicompose.view.person.bulkaddrunimport.BulkAddPersonRunImportScreen
 import com.ustadmobile.libuicompose.view.person.bulkaddselectfile.BulkAddPersonSelectFileScreen
-import com.ustadmobile.libuicompose.view.person.chlid.AddChildProfilesScreen
-import com.ustadmobile.libuicompose.view.person.chlid.EditChildProfileScreen
+import com.ustadmobile.libuicompose.view.person.child.AddChildProfilesScreen
+import com.ustadmobile.libuicompose.view.person.child.EditChildProfileScreen
 import com.ustadmobile.libuicompose.view.person.registerminorwaitforparent.RegisterMinorWaitForParentScreen
 import com.ustadmobile.libuicompose.view.settings.DeveloperSettingsScreen
 import com.ustadmobile.libuicompose.view.signup.SignUpScreen
@@ -322,19 +320,14 @@ fun AppNavHost(
                 }
             }
 
-            contentScene("/${AddAccountExistingUserViewModel.DEST_NAME}") { backStackEntry ->
-                AddAccountExistingUserScreen(
-                    appViewModel(backStackEntry, AddAccountExistingUserViewModel::class, ::AddAccountExistingUserViewModel)
-                )
-            }
             contentScene("/${AddAccountSelectNewOrExistingViewModel.DEST_NAME}") { backStackEntry ->
                 AddAccountSelectNewOrExistingScreen(
                     appViewModel(backStackEntry, AddAccountSelectNewOrExistingViewModel::class, ::AddAccountSelectNewOrExistingViewModel)
                 )
             }
-            contentScene("/${AddAccountSelectNewUserTypeViewModel.DEST_NAME}") { backStackEntry ->
-                AddAccountSelectNewUserTypeScreen(
-                    appViewModel(backStackEntry, AddAccountSelectNewUserTypeViewModel::class, ::AddAccountSelectNewUserTypeViewModel)
+            contentScene("/${AddAccountSelectNewOrExistingUserTypeViewModel.DEST_NAME}") { backStackEntry ->
+                AddAccountSelectNewOrExistingUserTypeScreen(
+                    appViewModel(backStackEntry, AddAccountSelectNewOrExistingUserTypeViewModel::class, ::AddAccountSelectNewOrExistingUserTypeViewModel)
                 )
             }
             contentScene("/${IndividualLearnerViewModel.DEST_NAME}") { backStackEntry ->

@@ -1,14 +1,11 @@
 package com.ustadmobile.core.viewmodel
 
-import com.russhwolf.settings.Settings
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.core.view.SiteTermsDetailView.Companion.ARG_SHOW_ACCEPT_BUTTON
-import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -66,7 +63,9 @@ class AddAccountSelectNewOrExistingViewModel(
         _appUiState.value = AppUiState(
             navigationVisible = false,
             hideAppBar = true,
-        )
+            userAccountIconVisible = false,
+
+            )
 
         val allLanguages = supportLangConfig
             .supportedUiLanguagesAndSysDefault(systemImpl)
@@ -82,7 +81,7 @@ class AddAccountSelectNewOrExistingViewModel(
             putFromSavedStateIfPresent(SignUpViewModel.REGISTRATION_ARGS_TO_PASS)
             put(SignUpViewModel.ARG_NEW_OR_EXISTING_USER,"new")
         }
-        navController.navigate(AddAccountSelectNewUserTypeViewModel.DEST_NAME,arg)
+        navController.navigate(AddAccountSelectNewOrExistingUserTypeViewModel.DEST_NAME,arg)
 
     }
     fun onClickExistingUser(){
@@ -90,7 +89,7 @@ class AddAccountSelectNewOrExistingViewModel(
             putFromSavedStateIfPresent(SignUpViewModel.REGISTRATION_ARGS_TO_PASS)
             put(SignUpViewModel.ARG_NEW_OR_EXISTING_USER,"existing")
         }
-        navController.navigate(AddAccountSelectNewUserTypeViewModel.DEST_NAME, arg)
+        navController.navigate(AddAccountSelectNewOrExistingUserTypeViewModel.DEST_NAME, arg)
 
     }
 

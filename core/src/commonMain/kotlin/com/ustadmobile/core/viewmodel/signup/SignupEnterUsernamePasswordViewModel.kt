@@ -4,8 +4,6 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.ValidateUsername.ValidateUsernameUseCase
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
-import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
-import com.ustadmobile.core.domain.passkey.CreatePasskeyUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -88,7 +86,6 @@ class SignupEnterUsernamePasswordViewModel(
         SignupEnterUsernamePasswordUiState()
     )
 
-    private val createPasskeyUseCase: CreatePasskeyUseCase? by instanceOrNull()
 
     private val validateUsernameUseCase: ValidateUsernameUseCase = ValidateUsernameUseCase()
 
@@ -122,15 +119,16 @@ class SignupEnterUsernamePasswordViewModel(
                 OtherSignUpOptionSelectionViewModel.ARG_PERSON, Person.serializer(),
             ) ?: Person()
             val personPicture = savedStateHandle.getJson(
-                OtherSignUpOptionSelectionViewModel.ARG_PERSON_PROFILE_PIC, PersonPicture.serializer(),
+                OtherSignUpOptionSelectionViewModel.ARG_PERSON_PROFILE_PIC,
+                PersonPicture.serializer(),
             )
             _uiState.update { prev ->
                 prev.copy(
                     person = person,
-                    personPicture=personPicture,
+                    personPicture = personPicture,
                     firstName = if (person.firstNames == "") {
                         null
-                    }else{
+                    } else {
                         person.fullName()
                     }
 
@@ -143,6 +141,8 @@ class SignupEnterUsernamePasswordViewModel(
                 title = title,
                 userAccountIconVisible = false,
                 hideBottomNavigation = true,
+                hideAppBar =false,
+                navigationVisible = false,
             )
         }
         if (savedStateHandle[ARG_IS_PERSONAL_ACCOUNT] == "true") {
@@ -157,13 +157,10 @@ class SignupEnterUsernamePasswordViewModel(
             prev.copy(
                 genderOptions = genderConfig.genderMessageIdsAndUnset,
                 person = Person(
-                    dateOfBirth = savedStateHandle[PersonEditViewModel.ARG_DATE_OF_BIRTH]?.toLong()
-                        ?: 0L,
+                    dateOfBirth = savedStateHandle[PersonEditViewModel.ARG_DATE_OF_BIRTH]?.toLong() ?: 0L,
                     isPersonalAccount = _uiState.value.isPersonalAccount
                 ),
-                passkeySupported = createPasskeyUseCase != null,
-
-                )
+            )
         }
 
     }
@@ -178,7 +175,7 @@ class SignupEnterUsernamePasswordViewModel(
                 ),
 
 
-            )
+                )
         }
 
         scheduleEntityCommitToSavedState(
@@ -253,13 +250,12 @@ class SignupEnterUsernamePasswordViewModel(
                 val uid = activeDb.doorPrimaryKeyManager.nextIdAsync(Person.TABLE_ID)
                 savePerson.personUid = uid
 
-                    val passwordVal = _uiState.value.password ?: return@launch
-                    accountManager.register(
-                        person = savePerson,
-                        password = passwordVal,
-                        learningSpaceUrl = serverUrl
-                    )
-
+                val passwordVal = _uiState.value.password ?: return@launch
+                accountManager.register(
+                    person = savePerson,
+                    password = passwordVal,
+                    learningSpaceUrl = serverUrl
+                )
 
 
                 val personPictureVal = _uiState.value.personPicture
@@ -325,7 +321,6 @@ class SignupEnterUsernamePasswordViewModel(
 
 
         const val DEST_NAME = "SignupEnterUsernamePassword"
-
 
 
     }
