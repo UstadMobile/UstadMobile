@@ -3,4 +3,6 @@ appId: com.toughra.ustadmobile
 # this test clear app data and start app
 - clearState: com.toughra.ustadmobile
 - launchApp
-- tapOn: "GET STARTED"
+- tapOn: "New user"
+- tapOn: "Join Learning Space"
+- tapOn: "Enter link manually"

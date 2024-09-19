@@ -10,7 +10,7 @@ env:
     env:
       CONTROLSERVER: ${CONTROLSERVER}
 #-------Launch App---------------#
-- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "../common/select_site.yaml"
 #-------Admin Login---------------#
 - runFlow:
@@ -53,7 +53,7 @@ env:
     commands:
       - tapOn:
           id: "com.android.systemui:id/dismiss_image"
-- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
     file: "../common/user_login.yaml"
@@ -61,7 +61,7 @@ env:
       USERNAME: "s1"
       PASSWORD: "test"
 - runFlow:  "../common/student_send_course_join_request_using_code.yaml"
-- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
     file: "../common/user_login.yaml"
@@ -70,7 +70,7 @@ env:
       PASSWORD: "test"
 - runFlow: "../common/accepting_course_join_request.yaml"
 #---------Launch App & Student Login------------------#
-- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
     file: "../common/user_login.yaml"
