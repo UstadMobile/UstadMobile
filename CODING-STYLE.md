@@ -113,7 +113,7 @@ be reused should normally be turned into a domain usecase (as above).
 
 If a section of code is following a particular official reference (e.g. Android, Kotlin, API specification), that is important to verifying that the code is correct, sensible, etc. then cite the reference in comments.
 
-#### Don't consume (hide) exceptions 
+#### Don't hide exceptions 
 
 If a function's signature is doSomething, when something cannot be done as expected, it _should_ throw an exception. The exception should be
 caught and explicitly handled where appropriate (e.g. in the viewmodel to show that an operation failed, retry logic, etc). Just printing/logging
