@@ -371,6 +371,21 @@ class ContentEntryEditViewModel(
         )
     }
 
+    fun onClickEditSubtitleTrack(subtitleTrack: SubtitleTrack) {
+        navigateForResult(
+            nextViewName = SubtitleEditViewModel.DEST_NAME,
+            key = KEY_RESULT_SUBTITLE,
+            currentValue = subtitleTrack,
+            serializer = SubtitleTrack.serializer(),
+        )
+    }
+
+    fun onClickDeleteSubtitleTrack(subtitleTrack: SubtitleTrack) {
+        updateSubtitles { prev ->
+            prev.filter { it.uri != subtitleTrack.uri }
+        }
+    }
+
     fun onClickSave() {
         val entityVal = _uiState.value.entity
 

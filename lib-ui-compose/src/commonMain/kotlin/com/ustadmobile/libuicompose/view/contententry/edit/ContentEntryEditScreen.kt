@@ -1,9 +1,11 @@
 package com.ustadmobile.libuicompose.view.contententry.edit
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Subtitles
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
@@ -11,6 +13,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -24,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.contentformats.media.SubtitleTrack
 import com.ustadmobile.core.domain.compress.CompressionLevel
 import com.ustadmobile.core.impl.locale.entityconstants.LicenceConstants
 import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditUiState
@@ -55,6 +59,8 @@ fun ContentEntryEditScreen(
         onSetCompressionLevel = viewModel::onSetCompressionLevel,
         onPictureChanged = viewModel::onPictureChanged,
         onSubtitleFileSelected = viewModel::onSubtitleFileAdded,
+        onClickDeleteSubtitleTrack = viewModel::onClickDeleteSubtitleTrack,
+        onClickEditSubtitleTrack = viewModel::onClickEditSubtitleTrack,
     )
 }
 
@@ -68,6 +74,8 @@ fun ContentEntryEditScreen(
     onSetCompressionLevel: (CompressionLevel) -> Unit = { },
     onPictureChanged: (String?) -> Unit = { },
     onSubtitleFileSelected: (uri: String, filename: String) -> Unit = { _, _ -> },
+    onClickDeleteSubtitleTrack: (SubtitleTrack) -> Unit = { },
+    onClickEditSubtitleTrack: (SubtitleTrack) -> Unit = { },
 ) {
     val fileLauncher = rememberUstadFilePickLauncher(
         fileExtensions = listOf("vtt"),
@@ -170,11 +178,21 @@ fun ContentEntryEditScreen(
 
         uiState.subtitles.forEach {
             ListItem(
+                modifier = Modifier.clickable {
+                    onClickEditSubtitleTrack(it)
+                },
                 leadingContent = {
                     Icon(Icons.Default.Subtitles, contentDescription = null)
                 },
                 headlineContent = {
                     Text(it.title ?: "")
+                },
+                trailingContent = {
+                    IconButton(
+                        onClick = { onClickDeleteSubtitleTrack(it) },
+                    ) {
+                        Icon(Icons.Default.Delete, contentDescription = stringResource(MR.strings.delete))
+                    }
                 }
             )
         }

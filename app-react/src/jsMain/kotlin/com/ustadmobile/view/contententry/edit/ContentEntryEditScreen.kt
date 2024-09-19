@@ -1,6 +1,7 @@
 package com.ustadmobile.view.contententry.edit
 
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.contentformats.media.SubtitleTrack
 import com.ustadmobile.core.domain.compress.CompressionLevel
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
@@ -23,6 +24,7 @@ import kotlinx.coroutines.Dispatchers
 import mui.material.Button
 import mui.material.ButtonVariant
 import mui.material.FormControl
+import mui.material.IconButton
 import mui.material.InputLabel
 import mui.material.ListItem
 import mui.material.ListItemButton
@@ -34,11 +36,13 @@ import mui.material.TextField
 import mui.material.Typography
 import mui.material.List
 import mui.material.ListItemIcon
+import mui.material.ListItemSecondaryAction
 import mui.icons.material.Subtitles as SubtitlesIcon
 import mui.system.responsive
 import react.FC
 import react.Props
 import react.ReactNode
+import react.dom.aria.ariaLabel
 import react.useRef
 import web.cssom.px
 import web.html.HTMLInputElement
@@ -46,6 +50,7 @@ import react.dom.html.ReactHTML.input
 import web.cssom.Display
 import web.html.InputType
 import web.url.URL
+import mui.icons.material.Delete as DeleteButton
 
 external interface ContentEntryEditScreenProps : Props {
 
@@ -60,6 +65,10 @@ external interface ContentEntryEditScreenProps : Props {
     var onPictureChanged: (String?) -> Unit
 
     var onSubtitleFileSelected: (uri: String, filename: String) -> Unit
+
+    var onClickDeleteSubtitleTrack: (SubtitleTrack) -> Unit
+
+    var onClickEditSubtitleTrack: (SubtitleTrack) -> Unit
 
 }
 
@@ -78,6 +87,8 @@ val ContentEntryEditScreen = FC<Props> {
         onSetCompressionLevel = viewModel::onSetCompressionLevel
         onPictureChanged = viewModel::onPictureChanged
         onSubtitleFileSelected = viewModel::onSubtitleFileAdded
+        onClickDeleteSubtitleTrack = viewModel::onClickDeleteSubtitleTrack
+        onClickEditSubtitleTrack = viewModel::onClickEditSubtitleTrack
     }
 }
 
@@ -184,12 +195,28 @@ private val ContentEntryEditScreenComponent = FC<ContentEntryEditScreenProps> { 
                     props.uiState.subtitles.forEach { subtitleTrack ->
                         ListItem {
                             ListItemButton {
+                                onClick = {
+                                    props.onClickEditSubtitleTrack(subtitleTrack)
+                                }
+
                                 ListItemIcon {
                                     SubtitlesIcon()
                                 }
 
                                 ListItemText {
                                     primary = ReactNode(subtitleTrack.title)
+                                }
+                            }
+
+                            ListItemSecondaryAction {
+                                IconButton {
+                                    ariaLabel = strings[MR.strings.delete]
+
+                                    onClick = {
+                                        props.onClickDeleteSubtitleTrack(subtitleTrack)
+                                    }
+
+                                    DeleteButton()
                                 }
                             }
                         }
