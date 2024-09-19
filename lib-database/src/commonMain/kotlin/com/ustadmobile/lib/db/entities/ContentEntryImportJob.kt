@@ -134,5 +134,7 @@ data class ContentEntryImportJob(
 ) {
     companion object {
         const val TABLE_ID = 720
+
+        const val PARAM_KEY_SUBTITLES = "subtitles"
     }
 }

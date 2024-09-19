@@ -24,11 +24,17 @@ import mui.material.Button
 import mui.material.ButtonVariant
 import mui.material.FormControl
 import mui.material.InputLabel
+import mui.material.ListItem
+import mui.material.ListItemButton
+import mui.material.ListItemText
 import mui.material.MenuItem
 import mui.material.Select
 import mui.material.Stack
 import mui.material.TextField
 import mui.material.Typography
+import mui.material.List
+import mui.material.ListItemIcon
+import mui.icons.material.Subtitles as SubtitlesIcon
 import mui.system.responsive
 import react.FC
 import react.Props
@@ -166,11 +172,27 @@ private val ContentEntryEditScreenComponent = FC<ContentEntryEditScreenProps> { 
             }
 
             if(props.uiState.canModifySubtitles) {
-                UstadAddListItem {
-                    text = strings[MR.strings.add_subtitles]
-                    enabled = props.uiState.fieldsEnabled && fileInputRef.current != null
-                    onClickAdd = {
-                        fileInputRef.current?.click()
+                List {
+                    UstadAddListItem {
+                        text = strings[MR.strings.add_subtitles]
+                        enabled = props.uiState.fieldsEnabled && fileInputRef.current != null
+                        onClickAdd = {
+                            fileInputRef.current?.click()
+                        }
+                    }
+
+                    props.uiState.subtitles.forEach { subtitleTrack ->
+                        ListItem {
+                            ListItemButton {
+                                ListItemIcon {
+                                    SubtitlesIcon()
+                                }
+
+                                ListItemText {
+                                    primary = ReactNode(subtitleTrack.title)
+                                }
+                            }
+                        }
                     }
                 }
             }

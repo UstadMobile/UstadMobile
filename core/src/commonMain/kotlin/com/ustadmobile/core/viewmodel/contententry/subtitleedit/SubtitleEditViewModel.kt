@@ -11,9 +11,13 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 
 data class SubtitleEditUiState(
     val entity: SubtitleTrack? = null,
+    val titleError: String? = null,
+    val fieldsEnabled: Boolean = false,
 )
 
 /**
@@ -21,7 +25,8 @@ data class SubtitleEditUiState(
  * to validate
  */
 class SubtitleEditViewModel(
-    di: DI, savedStateHandle: UstadSavedStateHandle
+    di: DI,
+    savedStateHandle: UstadSavedStateHandle
 ): UstadEditViewModel(
     di = di,
     savedStateHandle = savedStateHandle,
@@ -35,6 +40,16 @@ class SubtitleEditViewModel(
     val uiState: Flow<SubtitleEditUiState> = _uiState.asSharedFlow()
 
     init {
+        _appUiState.update {
+            it.copy(
+                title = systemImpl.getString(MR.strings.edit_subtitles),
+                actionBarButtonState = ActionBarButtonUiState(
+                    text = systemImpl.getString(MR.strings.done),
+                    onClick = this::onClickDone
+                )
+            )
+        }
+
         viewModelScope.launch {
             loadEntity(
                 serializer = SubtitleTrack.serializer(),
@@ -53,7 +68,31 @@ class SubtitleEditViewModel(
                     _uiState.update { prev -> prev.copy(entity = it) }
                 }
             )
+
+            _uiState.update { prev -> prev.copy(fieldsEnabled = true) }
+
+            _appUiState.update {
+                it.copy(
+                    actionBarButtonState = it.actionBarButtonState.copy(visible = true)
+                )
+            }
         }
+    }
+
+    fun onEntityChanged(entity: SubtitleTrack?) {
+        _uiState.update { prev ->
+            prev.copy(entity = entity)
+        }
+
+        scheduleEntityCommitToSavedState(
+            entity = entity,
+            serializer = SubtitleTrack.serializer(),
+            commitDelay = 200,
+        )
+    }
+
+    fun onClickDone() {
+        finishWithResult(_uiState.value.entity)
     }
 
     companion object {
