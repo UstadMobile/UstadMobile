@@ -31,6 +31,9 @@ env:
 - tapOn:
     text: "Courses"
     index: 1
+- assertVisible:
+    id: "app_title"
+    text: "Courses"
 - runFlow:
     file: "../common/add_new_student_inside_course.yaml"
     env:

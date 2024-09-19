@@ -32,6 +32,9 @@ appId: com.toughra.ustadmobile
 - tapOn:
     text: "Courses"
     index: 1
+- assertVisible:
+    id: "app_title"
+    text: "Courses"
 # add new student using flow - add_new_student_inside_course ----------- Justin Joe  - Justin/test
 - runFlow:
     file: "./add_new_student_inside_course.yaml"
