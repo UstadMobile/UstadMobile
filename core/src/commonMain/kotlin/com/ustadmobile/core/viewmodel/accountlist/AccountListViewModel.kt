@@ -18,6 +18,7 @@ import com.ustadmobile.core.util.ext.navigateToLink
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.viewmodel.AddAccountSelectNewOrExistingViewModel
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.about.OpenLicensesViewModel
@@ -206,7 +207,7 @@ class AccountListViewModel(
         }else {
             //Go to site enter link
             navController.navigate(
-                viewName = LearningSpaceEnterLinkViewModel.DEST_NAME,
+                viewName = AddAccountSelectNewOrExistingViewModel.DEST_NAME,
                 args = args,
             )
         }
