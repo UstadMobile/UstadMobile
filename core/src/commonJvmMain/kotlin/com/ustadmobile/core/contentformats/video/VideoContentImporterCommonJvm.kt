@@ -24,7 +24,9 @@ import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUs
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
 import com.ustadmobile.core.io.ext.toDoorUri
 import com.ustadmobile.core.uri.UriHelper
+import com.ustadmobile.core.util.UMURLEncoder
 import com.ustadmobile.core.util.ext.fileExtensionOrNull
+import com.ustadmobile.core.util.ext.paramSubtitles
 import com.ustadmobile.core.util.ext.requireSourceAsDoorUri
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
@@ -128,6 +130,8 @@ class VideoContentImporterCommonJvm(
             Pair(fromUri, fromMimeType)
         }
 
+        val subtitles = jobItem.paramSubtitles(json) ?: emptyList()
+
         val contentEntryVersionUid = db.doorPrimaryKeyManager.nextId(ContentEntryVersion.TABLE_ID)
         val urlPrefix = createContentUrlPrefix(contentEntryVersionUid)
         val manifestUrl = "$urlPrefix${ContentConstants.MANIFEST_NAME}"
@@ -140,9 +144,14 @@ class VideoContentImporterCommonJvm(
             sources = listOf(
                 MediaSource(
                     uri = videoEntryUri,
-                    mimeType = mimeType
+                    mimeType = mimeType,
                 )
-            )
+            ),
+            subtitles = subtitles.map { subtitle ->
+                subtitle.copy(
+                    uri = UMURLEncoder.encodeUTF8(subtitle.title),
+                )
+            },
         )
 
         val mediaInfoTmpFile = Path(workDir, "media.json")
@@ -178,7 +187,18 @@ class VideoContentImporterCommonJvm(
                         ),
                         manifestUri = mediaInfoEntryUri,
                     )
-                )
+                ) + subtitles.map { subtitle ->
+                    SaveLocalUriAsBlobAndManifestUseCase.SaveLocalUriAsBlobAndManifestItem(
+                        blobItem = SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem(
+                            localUri = subtitle.uri,
+                            entityUid = contentEntryVersionUid,
+                            tableId = ContentEntryVersion.TABLE_ID,
+                            mimeType = subtitle.mimeType,
+                            deleteLocalUriAfterSave = true,
+                        ),
+                        manifestUri = UMURLEncoder.encodeUTF8(subtitle.title)
+                    )
+                }
             )
 
             //Now that the video has been saved as a local URI, delete the temporary copy

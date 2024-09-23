@@ -7,5 +7,5 @@ data class SubtitleTrack(
     val uri: String,
     val mimeType: String,
     val langCode: String?,
-    val title: String?,
+    val title: String,
 )

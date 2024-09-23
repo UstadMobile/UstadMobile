@@ -162,14 +162,17 @@ fun VideoContentScreen(
     onPlayStateChanged: (VideoContentViewModel.MediaPlayState) -> Unit = { },
     onComplete: () -> Unit,
 ) {
-    //val mediaSrc = uiState.mediaSrc
-    val mediaSrc = uiState.mediaDataUrl
-    val mimeType = uiState.mediaMimeType
+    val mediaContentMap = uiState.contentManifestMap
+    val firstMediaSrc = uiState.mediaContentInfo?.sources?.firstOrNull()
+    val mediaDataUrl = remember(mediaContentMap, firstMediaSrc) {
+        firstMediaSrc?.let {
+            mediaContentMap?.get(it.uri)?.bodyDataUrl
+        }
+    }
 
-
-    if(mediaSrc != null && mimeType != null) {
+    if(mediaDataUrl != null) {
         ExoPlayerView(
-            mediaSrc  = mediaSrc,
+            mediaSrc  = mediaDataUrl,
             modifier = Modifier.fillMaxWidth().let {
                 if(uiState.isFullScreen) it.fillMaxHeight() else it.height(200.dp)
             },
