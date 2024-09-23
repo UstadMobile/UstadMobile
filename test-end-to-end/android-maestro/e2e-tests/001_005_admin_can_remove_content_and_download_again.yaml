@@ -1,7 +1,7 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/001_001_admin_can_add_content_002-epub"
-  TESTNAME: "001_006_admin_can_cancel_content_download"
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/001_005_admin_can_remove_content_and_download_again"
+  TESTNAME: "001_005_admin_can_remove_content_and_download_again"
 ---
 - clearState: com.toughra.ustadmobile
 - runFlow:

@@ -1,7 +1,7 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/001_003_admin_can_permenantly_delete_the_content_002"
-  TESTNAME: "001_003_admin_can_permenantly_delete_the_content_002"
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/001_003_admin_can_permanently_delete_the_content_002"
+  TESTNAME: "001_003_admin_can_permanently_delete_the_content_002"
 ---
 - clearState: com.toughra.ustadmobile
 - runFlow:
@@ -21,6 +21,7 @@ env:
 - longPressOn:
     text: "E-book"
 - tapOn: "Delete"
+- assertNotVisible: "E-book"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/screen_after_deleting_content_from_library"
 
 # login to make sure the content is hidden
