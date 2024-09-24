@@ -10,6 +10,11 @@ appId: com.toughra.ustadmobile
      TESTNAME: ${TESTNAME}
 - launchApp
 - tapOn: "Existing user"
+- runFlow:
+    when:
+      visible: "Personal"
+    commands:
+      - tapOn: "Join Learning Space"
 - tapOn: "Enter link manually"
 - tapOn: Site link
 - inputText: ${ENDPOINT}
