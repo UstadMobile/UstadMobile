@@ -4,5 +4,4 @@ appId: com.toughra.ustadmobile
 - clearState: com.toughra.ustadmobile
 - launchApp
 - tapOn: "New user"
-- tapOn: "Join Learning Space"
 - tapOn: "Enter link manually"
