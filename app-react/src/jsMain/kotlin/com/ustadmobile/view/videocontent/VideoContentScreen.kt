@@ -19,7 +19,6 @@ import web.cssom.vh
 import mui.material.Typography
 import mui.material.styles.TypographyVariant
 import mui.system.responsive
-import react.dom.html.ReactHTML.track
 import react.useMemo
 import web.html.HTMLVideoElement
 
@@ -51,13 +50,13 @@ val VideoContentComponent = FC<VideoContentProps> { props ->
         props.onUnload()
     }
 
-    val manifestUrl = props.uiState.manifestUrl
+    val manifestUrlVal = props.uiState.manifestUrl
     val firstSrcUrl = props.uiState.mediaContentInfo?.sources?.firstOrNull()?.uri
     val contentManifestMap = props.uiState.contentManifestMap
 
-    val mediaSrc = useMemo(props.uiState.contentManifestMap, manifestUrl, firstSrcUrl) {
-        if(contentManifestMap != null && firstSrcUrl != null && manifestUrl != null) {
-            contentManifestMap.resolveUrl(manifestUrl, firstSrcUrl)
+    val mediaSrc = useMemo(props.uiState.contentManifestMap, manifestUrlVal, firstSrcUrl) {
+        if(contentManifestMap != null && firstSrcUrl != null && manifestUrlVal != null) {
+            contentManifestMap.resolveUrl(manifestUrlVal, firstSrcUrl)
         }else {
             null
         }
@@ -96,6 +95,14 @@ val VideoContentComponent = FC<VideoContentProps> { props ->
                         marginLeft = Auto.auto
                         marginRight = Auto.auto
                     }
+
+                    props.uiState.mediaContentInfo?.subtitles?.forEach { subtitle ->
+                        UstadVideoContentSubtitleTrack {
+                            subtitleTrack = subtitle
+                            manifestUrl = props.uiState.manifestUrl
+                            manifestMap = props.uiState.contentManifestMap
+                        }
+                    }
                 }
             }
 
@@ -107,8 +114,6 @@ val VideoContentComponent = FC<VideoContentProps> { props ->
         }
 
     }
-
-
 }
 
 val VideoContentScreen = FC<Props> {
