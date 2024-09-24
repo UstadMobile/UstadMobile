@@ -1,6 +1,8 @@
 package com.ustadmobile.core.util.ext
 
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase.Companion.LinkTarget
 import com.ustadmobile.core.impl.UstadMobileConstants
@@ -16,6 +18,9 @@ import com.ustadmobile.core.viewmodel.AddAccountSelectNewOrExistingViewModel
 import com.ustadmobile.core.viewmodel.UstadViewModel.Companion.ARG_DONT_SET_CURRENT_SESSION
 import com.ustadmobile.core.viewmodel.parentalconsentmanagement.ParentalConsentManagementViewModel
 import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
+import com.ustadmobile.core.viewmodel.login.LoginViewModel
+import com.ustadmobile.core.viewmodel.signup.SignUpViewModel
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -73,6 +78,8 @@ fun UstadNavController.navigateToLink(
     scope: CoroutineScope = GlobalScope,
     linkTarget: LinkTarget = LinkTarget.DEFAULT,
     dontSetCurrentSession: Boolean = false,
+    repo: ((LearningSpace) -> UmAppDatabase)? = null,
+    presetLearningSpaceUrl:String?=null
 ) : Job? {
     var learningSpaceUrl: String? = null
     var viewUri: String? = null
@@ -147,8 +154,29 @@ fun UstadNavController.navigateToLink(
                         ARG_DONT_SET_CURRENT_SESSION to dontSetCurrentSession.toString(),
                     )
 
-                    if(learningSpaceUrl != null)
-                        args[ARG_LEARNINGSPACE_URL] = learningSpaceUrl
+                    if(learningSpaceUrl != null) args[ARG_LEARNINGSPACE_URL] = learningSpaceUrl
+
+
+                    if (presetLearningSpaceUrl!=null){
+                        val repository= repo?.let { it(LearningSpace(presetLearningSpaceUrl)) }
+                          if (repository!=null){
+                              val site = repository.siteDao().getSiteAsync()
+
+                              if (site?.registrationAllowed != true) {
+                                  val arg = buildMap {
+                                      put(SignUpViewModel.ARG_NEW_OR_EXISTING_USER, "existing")
+                                      put(ARG_LEARNINGSPACE_URL, presetLearningSpaceUrl)
+
+                                  }
+                                  navigate(LoginViewModel.DEST_NAME, arg)
+                                  return@launch
+                              }
+                          }else{
+                              Napier.e { "Navcontroller repo is null" }
+                          }
+
+                    }
+
 
                     navigate(AddAccountSelectNewOrExistingViewModel.DEST_NAME, args.toMap(), goOptions)
                 }

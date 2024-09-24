@@ -1,6 +1,7 @@
 package com.ustadmobile.core.viewmodel.redirect
 
 import com.russhwolf.settings.Settings
+import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.makelink.MakeLinkUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
@@ -16,11 +17,8 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNINGSPACE_URL
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
-import com.ustadmobile.core.viewmodel.person.registerageredirect.RegisterAgeRedirectViewModel
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel
-import com.ustadmobile.core.viewmodel.signup.SignUpViewModel.Companion.ARG_IS_PERSONAL_ACCOUNT
 import com.ustadmobile.door.ext.DoorTag
-import io.github.aakira.napier.Napier
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.direct
@@ -110,6 +108,8 @@ class RedirectViewModel(
                     clearStack = true
                 ),
                 forceAccountSelection = destinationArg != null,
+                repo = { di.on(it).direct.instance<UmAppDataLayer>().requireRepository()},
+                presetLearningSpaceUrl = apiUrlConfig.presetLearningSpaceUrl
             )
         }
 

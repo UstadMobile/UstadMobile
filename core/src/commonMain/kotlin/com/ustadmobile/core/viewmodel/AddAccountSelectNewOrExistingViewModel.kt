@@ -1,8 +1,5 @@
 package com.ustadmobile.core.viewmodel
 
-import com.ustadmobile.core.account.LearningSpace
-import com.ustadmobile.core.db.UmAppDataLayer
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
@@ -15,17 +12,12 @@ import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import com.ustadmobile.core.viewmodel.person.learningspacelist.LearningSpaceListViewModel
 import com.ustadmobile.core.viewmodel.person.registerageredirect.RegisterAgeRedirectViewModel
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel
-import com.ustadmobile.door.ext.DoorTag
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import org.kodein.di.DI
-import org.kodein.di.direct
 import org.kodein.di.instance
-import org.kodein.di.on
 
 data class AddAccountSelectNewOrExistingUiState(
     val currentLanguage: UstadMobileSystemCommon.UiLanguage = UstadMobileSystemCommon.UiLanguage(
@@ -91,32 +83,6 @@ class AddAccountSelectNewOrExistingViewModel(
 
         _uiState.update {
             AddAccountSelectNewOrExistingUiState(currentLanguage, allLanguages)
-        }
-
-        if (!apiUrlConfig.presetLearningSpaceUrl.isNullOrEmpty()) {
-
-            viewModelScope.launch {
-                apiUrlConfig.presetLearningSpaceUrl?.let { presetLearningSpaceUrl->
-                    val learningSpace = LearningSpace(presetLearningSpaceUrl)
-                    val repo: UmAppDatabase = di.on(learningSpace).direct.instance<UmAppDataLayer>()
-                        .requireRepository()
-
-                    val site = repo.siteDao().getSiteAsync()
-
-                    if (site?.registrationAllowed != true) {
-                        val arg = buildMap {
-                            putFromSavedStateIfPresent(SignUpViewModel.REGISTRATION_ARGS_TO_PASS)
-                            put(SignUpViewModel.ARG_NEW_OR_EXISTING_USER, "existing")
-                            put(ARG_LEARNINGSPACE_URL, apiUrlConfig.presetLearningSpaceUrl.toString())
-
-                        }
-                        navController.navigate(
-                            LoginViewModel.DEST_NAME,
-                            arg,UstadMobileSystemCommon.UstadGoOptions(clearStack = true)
-                        )
-                    }
-                }
-            }
         }
     }
 
