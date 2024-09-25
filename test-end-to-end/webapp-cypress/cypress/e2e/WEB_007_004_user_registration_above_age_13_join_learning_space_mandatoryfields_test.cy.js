@@ -1,4 +1,4 @@
-describe('WEB_007_004_user_registration_dob_field_is_mandatory', () => {
+describe('WEB_007_004_user_registration_above_age_13_join_learning_space_mandatoryfields_test', () => {
  it('Start Ustad Test Server ', () => {
   // Start Test Server
     cy.ustadStartTestServer()

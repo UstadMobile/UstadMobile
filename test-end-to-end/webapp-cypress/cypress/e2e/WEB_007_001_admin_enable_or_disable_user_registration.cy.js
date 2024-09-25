@@ -31,11 +31,12 @@ it('Admin disable registration', () => {
 //https://docs.cypress.io/api/commands/should#Assert-the-href-attribute-is-equal-to-users
   cy.get('#terms_html_edit .ql-editor').as('editor')
   cy.get('@editor').click().clear()
-  cy.get('.Mui-checked.PrivateSwitchBase-root').should('exist') //verified registration_allowed switch is on
-  cy.get('#registration_allowed').click({force:true})
-  cy.get('.Mui-checked.PrivateSwitchBase-root').should('not.exist') //verified registration_allowed switch is off
+  cy.get('.Mui-checked.PrivateSwitchBase-root', { timeout: 5000 }).should('exist') //verified registration_allowed switch is on
+  cy.get('#registration_allowed').click()
+  cy.get('.Mui-checked.PrivateSwitchBase-root', { timeout: 5000 }).should('not.exist') //verified registration_allowed switch is off
   cy.get('#actionBarButton').click()
-  cy.contains('No').should('exist')
+  cy.contains('Yes', { timeout: 5000 }).should('not.exist')
+  cy.contains('No', { timeout: 10000 }).should('exist')
 })
 
 it('Verify New user registration is disabled', () => {
