@@ -20,7 +20,6 @@ import com.ustadmobile.core.viewmodel.parentalconsentmanagement.ParentalConsentM
 import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel
-import io.github.aakira.napier.Napier
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -156,29 +155,28 @@ fun UstadNavController.navigateToLink(
 
                     if(learningSpaceUrl != null) args[ARG_LEARNINGSPACE_URL] = learningSpaceUrl
 
-
-                    if (presetLearningSpaceUrl!=null){
-                        val repository= repo?.let { it(LearningSpace(presetLearningSpaceUrl)) }
-                          if (repository!=null){
-                              val site = repository.siteDao().getSiteAsync()
-
-                              if (site?.registrationAllowed != true) {
-                                  val arg = buildMap {
-                                      put(SignUpViewModel.ARG_NEW_OR_EXISTING_USER, "existing")
-                                      put(ARG_LEARNINGSPACE_URL, presetLearningSpaceUrl)
-
-                                  }
-                                  navigate(LoginViewModel.DEST_NAME, arg)
-                                  return@launch
-                              }
-                          }else{
-                              Napier.e { "Navcontroller repo is null" }
-                          }
-
+                    val presetRepo = presetLearningSpaceUrl?.let {presetUrl->
+                        repo?.let { it(LearningSpace(presetUrl)) }
                     }
 
+                    if(presetRepo != null && presetRepo.siteDao().getSiteAsync()?.registrationAllowed == false) {
+                        val arg = buildMap {
+                            put(SignUpViewModel.ARG_NEW_OR_EXISTING_USER, "existing")
+                            put(
+                                ARG_LEARNINGSPACE_URL,
+                                presetLearningSpaceUrl.toString()
+                            )
 
-                    navigate(AddAccountSelectNewOrExistingViewModel.DEST_NAME, args.toMap(), goOptions)
+                        }
+                        navigate(
+                            LoginViewModel.DEST_NAME, arg
+                        )
+                    }else {
+                        navigate(
+                            viewName = AddAccountSelectNewOrExistingViewModel.DEST_NAME,
+                            args = args,
+                        )
+                    }
                 }
 
                 //else - go to the account manager

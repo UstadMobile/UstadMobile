@@ -37,6 +37,7 @@ data class OtherSignUpOptionSelectionUiState(
     val showCreateLocaleAccount: Boolean = false,
     val person: Person? = null,
     val personPicture: PersonPicture? = null,
+    val passkeySupported: Boolean = true,
 
     )
 
@@ -70,6 +71,7 @@ class OtherSignUpOptionSelectionViewModel(
                 prev.copy(
                     person = person,
                     personPicture = personPic,
+                    passkeySupported = createPasskeyUseCase != null,
                 )
             }
         }
@@ -89,6 +91,8 @@ class OtherSignUpOptionSelectionViewModel(
                 title = title,
                 userAccountIconVisible = false,
                 hideBottomNavigation = true,
+                hideAppBar =false,
+                navigationVisible = false,
             )
         }
 

@@ -78,7 +78,6 @@ class RedirectViewModel(
         } else {
             ClazzListViewModel.DEST_NAME_HOME
         }
-        println("presetLearningSpaceUrl url = ${apiUrlConfig.presetLearningSpaceUrl}")
 
         val destination = if (!apiUrlConfig.presetLearningSpaceUrl.isNullOrEmpty()) {
             makeLinkUseCase.invoke(
@@ -96,7 +95,6 @@ class RedirectViewModel(
             destinationArg ?: clazzType
         }
 
-        println("makeLinkUseCase url = ${destination}")
 
         viewModelScope.launch {
             navController.navigateToLink(

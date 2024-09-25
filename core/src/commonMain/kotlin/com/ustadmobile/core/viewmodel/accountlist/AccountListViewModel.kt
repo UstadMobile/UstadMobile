@@ -4,7 +4,6 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.account.UserSessionWithPersonAndLearningSpace
 import com.ustadmobile.core.db.UmAppDataLayer
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.launchopenlicenses.LaunchOpenLicensesUseCase
 import com.ustadmobile.core.domain.share.ShareAppUseCase
@@ -106,12 +105,15 @@ class AccountListViewModel(
 
     private val getShowPoweredByUseCase: GetShowPoweredByUseCase? by instanceOrNull()
 
-    val repo = di.onActiveEndpoint().direct.instance<UmAppDataLayer>().repository
+    val presetRepo = apiUrlConfig.presetLearningSpaceUrl?.let {
+        di.on(LearningSpace(it)).direct.instance<UmAppDataLayer>().repository
+    }
 
     private val dontSetCurrentSession: Boolean = savedStateHandle[ARG_DONT_SET_CURRENT_SESSION]
         ?.toBoolean() ?: false
 
     init {
+
         _appUiState.value = AppUiState(
             userAccountIconVisible = false,
             navigationVisible = false,
@@ -214,37 +216,30 @@ class AccountListViewModel(
             put(ARG_MAX_DATE_OF_BIRTH, savedStateHandle[ARG_MAX_DATE_OF_BIRTH] ?: "0")
         }
 
-        if (!apiUrlConfig.presetLearningSpaceUrl.isNullOrEmpty()) {
+        viewModelScope.launch {
+            if (presetRepo != null && presetRepo.siteDao()
+                    .getSiteAsync()?.registrationAllowed == false
+            ) {
+                val arg = buildMap {
+                    putFromSavedStateIfPresent(SignUpViewModel.REGISTRATION_ARGS_TO_PASS)
+                    put(SignUpViewModel.ARG_NEW_OR_EXISTING_USER, "existing")
+                    put(
+                        ARG_LEARNINGSPACE_URL,
+                        apiUrlConfig.presetLearningSpaceUrl.toString()
+                    )
 
-            viewModelScope.launch {
-                apiUrlConfig.presetLearningSpaceUrl?.let { presetLearningSpaceUrl ->
-                    val site = repo?.siteDao()?.getSiteAsync()
-                    if (site?.registrationAllowed != true) {
-                        val arg = buildMap {
-                            putFromSavedStateIfPresent(SignUpViewModel.REGISTRATION_ARGS_TO_PASS)
-                            put(SignUpViewModel.ARG_NEW_OR_EXISTING_USER, "existing")
-                            put(
-                                ARG_LEARNINGSPACE_URL,
-                                apiUrlConfig.presetLearningSpaceUrl.toString()
-                            )
-
-                        }
-                        navController.navigate(
-                            LoginViewModel.DEST_NAME,
-                            arg
-                        )
-                        return@launch
-                    }
                 }
+                navController.navigate(
+                    LoginViewModel.DEST_NAME,
+                    arg
+                )
+            } else {
+                navController.navigate(
+                    viewName = AddAccountSelectNewOrExistingViewModel.DEST_NAME,
+                    args = args,
+                )
             }
         }
-
-
-        navController.navigate(
-            viewName = AddAccountSelectNewOrExistingViewModel.DEST_NAME,
-            args = args,
-        )
-
 
     }
 

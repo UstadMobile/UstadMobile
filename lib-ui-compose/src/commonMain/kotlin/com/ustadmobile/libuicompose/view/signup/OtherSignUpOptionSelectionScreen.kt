@@ -44,32 +44,35 @@ fun OtherSignUpOptionSelectionScreen(
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        if (uiState.passkeySupported) {
+            LazyColumn {
 
-        LazyColumn {
+                item {
+                    ListItem(
+                        leadingContent = {},
+                        headlineContent = {
+                            Text(
+                                text = stringResource(MR.strings.create_passkey_for_faster_and_easier_signin),
+                            )
+                        },
+                        supportingContent = {
+                            Text(
+                                text = stringResource(MR.strings.with_passkeys_no_complex_passwords_needed),
+                            )
+                        },
 
-            item {
-                ListItem(
-                    leadingContent = {},
-                    headlineContent = {
-                        Text(
-                            text = stringResource(MR.strings.create_passkey_for_faster_and_easier_signin),
                         )
-                    },
-                    supportingContent = {
-                        Text(
-                            text = stringResource(MR.strings.with_passkeys_no_complex_passwords_needed),
-                        )
-                    },
-
-                    )
+                }
+            }
+            Button(
+                onClick = onclickSignUpWithPasskey,
+                modifier = Modifier.fillMaxWidth().defaultItemPadding()
+            ) {
+                Text(stringResource(MR.strings.signup_with_passkey))
             }
         }
-        Button(
-            onClick = onclickSignUpWithPasskey,
-            modifier = Modifier.fillMaxWidth().defaultItemPadding()
-        ) {
-            Text(stringResource(MR.strings.signup_with_passkey))
-        }
+
+
 
         OutlinedButton(
             onClick = onclickSignUpWithUsernameAdPassword,
