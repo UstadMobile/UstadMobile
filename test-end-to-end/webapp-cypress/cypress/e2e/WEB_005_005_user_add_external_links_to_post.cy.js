@@ -3,7 +3,7 @@
  * the target attribute. There will need to be some workaround added to the JS code.
  */
 
-describe('005_005_user_add_external_links_to_post', () => {
+describe('WEB_005_005_user_add_external_links_to_post', () => {
 it('Start Ustad Test Server ', () => {
   // Start Test Server
   cy.ustadStartTestServer()
