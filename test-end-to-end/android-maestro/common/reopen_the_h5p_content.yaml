@@ -1,0 +1,20 @@
+appId: com.toughra.ustadmobile
+
+---
+- runFlow:
+    when:
+      visible: "Close tab"
+    commands:
+      - tapOn: "Close tab"
+- runFlow:
+    when:
+      visible: "Open"
+    commands:
+      - tapOn: "Open"
+- runFlow:
+    when:
+      visible: "Blank input 1 of 3"
+    commands:
+       - tapOn: "Blank input 1 of 3"
+       - inputText: "Blue"
+       - hideKeyboard
