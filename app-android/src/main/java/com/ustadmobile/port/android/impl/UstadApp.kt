@@ -329,6 +329,16 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             UstadAccountManager(settings = instance(), di = di)
         }
 
+
+        //TODO: Add systemdb module as a dependency
+        //TODO: Create SystemDbDataLayer following the same pattern
+        //TODO: Bind the SystemDb (e.g. local)
+        //TODO: to create repository - use SystemApiUrlConfig
+        //TODO: Create a data class called SystemDbNodeIdAndAuth - with one member variable - type NodeIdAndAuth
+        //Then use the same logic to create it as used for the main nodeidandauth
+        //TODO: That will provide the SystemDb in the DI for the app client - then we can use
+        // learningspaceinfo.findallaspagingsource etc. to list available learning spaces.
+
         bind<DbAndObservers>() with scoped(LearningSpaceScope.Default).singleton {
             val dbName = sanitizeDbNameFromUrl(context.url)
 

@@ -3,6 +3,7 @@ package com.ustadmobile.lib.rest
 import com.google.gson.Gson
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.ustadmobile.appconfigdb.SystemDb
+import com.ustadmobile.appconfigdb.SystemDb_KtorRoute
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.contentformats.ContentImportersDiModuleJvm
 import com.ustadmobile.core.db.UmAppDatabase
@@ -894,6 +895,7 @@ fun Application.umRestApplication(
                     di.on(call).direct.instance(tag = DoorTag.TAG_DB)
                 }
             }
+
             SiteRoute()
 
             GetAppRoute()
@@ -912,6 +914,18 @@ fun Application.umRestApplication(
             }
 
             route("api") {
+                route("SystemDb") {
+                    SystemDb_KtorRoute(
+                        serverConfig = DoorHttpServerConfig(
+                            json = json,
+                            logger = NapierDoorLogger(),
+                        ),
+                        dbCallAdapter = {
+                            di.direct.instance()
+                        }
+                    )
+                }
+
                 route("account"){
                     SetPasswordRoute(
                         useCase = { call ->

@@ -2,11 +2,13 @@ package com.ustadmobile.appconfigdb.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import kotlinx.serialization.Serializable
 
 /**
  * @param lsiUid the XX64 hash of lsUrl
  * @param lsiUrl the full url e.g. https://subdomain.example.org/ . MUST end with a trailing slash
  */
+@Serializable
 @Entity
 data class LearningSpaceInfo(
     @PrimaryKey
