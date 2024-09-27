@@ -202,6 +202,7 @@ import org.acra.sender.HttpSender
 import rawhttp.core.RawHttp
 import com.toughra.ustadmobile.BuildConfig
 import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
+import com.ustadmobile.core.domain.passkey.PasskeyRequestJsonUseCase
 
 class UstadApp : Application(), DIAware, ImageLoaderFactory{
 

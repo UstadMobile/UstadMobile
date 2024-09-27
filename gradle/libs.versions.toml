@@ -206,7 +206,7 @@ autolink = { module = "org.nibor.autolink:autolink", version.ref = "autolink" }
 process-phoenix = { module = "com.jakewharton:process-phoenix", version.ref = "process-phoenix"}
 multiplatformsettings = { module = "com.russhwolf:multiplatform-settings", version.ref = "multiplatformsettings"}
 coil = { module = "io.coil-kt:coil", version.ref = "coil"}
-credentials = { module = "androidx.credentials:credentials", version.ref = "credentials"}
+credentials-androidx = { module = "androidx.credentials:credentials", version.ref = "credentials"}
 credentialsplay = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentials"}
 webauthn4j = { module="com.webauthn4j:webauthn4j-core", version.ref = "webauthn4j"}
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil"}

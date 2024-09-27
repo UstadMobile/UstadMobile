@@ -19,7 +19,7 @@ class AddNewPersonUseCase(
         addedByPersonUid: Long = 0,
         createPersonParentApprovalIfMinor: Boolean = true,
         systemPermissions: Long = SystemPermission.PERSON_DEFAULT_PERMISSIONS,
-        accountType: Int = PersonParentJoin.RELATIONSHIP_OTHER,
+        relationship: Int = PersonParentJoin.RELATIONSHIP_OTHER,
     ) : Long {
         val effectiveDb = (repo ?: db)
         return effectiveDb.withDoorTransactionAsync {
@@ -42,7 +42,7 @@ class AddNewPersonUseCase(
                         ppjMinorPersonUid = personUid,
                         ppjParentPersonUid = addedByPersonUid,
                         ppjStatus = PersonParentJoin.STATUS_APPROVED,
-                        ppjRelationship = accountType,
+                        ppjRelationship = relationship,
                         ppjApprovalTiemstamp = systemTimeInMillis(),
                     )
                 )

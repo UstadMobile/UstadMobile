@@ -9,28 +9,32 @@ import androidx.credentials.CredentialManager
 import androidx.credentials.exceptions.CreateCredentialException
 import com.ustadmobile.core.domain.passkey.CreatePasskeyParams
 import com.ustadmobile.core.domain.passkey.CreatePasskeyUseCase
-import com.ustadmobile.core.domain.passkey.PasskeyResult
 import io.github.aakira.napier.Napier
 import org.json.JSONObject
+import com.ustadmobile.core.domain.passkey.CreatePasskeyUseCase.CreatePasskeyResult
+import com.ustadmobile.core.domain.passkey.PasskeyRequestJsonUseCase
 
 
 /**
  * the CreatePasskeyPrompt will show the google bottomsheet to create passkey
  * https://developer.android.com/identity/sign-in/credential-manager#create-passkey
  */
-class CreatePasskeyUseCaseImpl(val context: Context) : CreatePasskeyUseCase {
+class CreatePasskeyUseCaseImpl(
+    val context: Context,
+    val passkeyRequestJsonUseCase: PasskeyRequestJsonUseCase
+) : CreatePasskeyUseCase {
     @SuppressLint("PublicKeyCredential")
-    override suspend fun invoke(createPassKeyParams: CreatePasskeyParams): PasskeyResult? {
+    override suspend fun invoke(createPassKeyParams: CreatePasskeyParams): CreatePasskeyResult? {
         val credentialManager = CredentialManager.create(context)
 
         /**credentialManager to create credential requires a request
          * https://developer.android.com/identity/sign-in/credential-manager#format-json-request
          */
 
-        var passkeyResult: PasskeyResult? = null
+        var passkeyResult: CreatePasskeyResult? = null
         try {
             val request = CreatePublicKeyCredentialRequest(
-                PasskeyRequestJsonUseCase.createPasskeyRequestJson(
+                passkeyRequestJsonUseCase.createPasskeyRequestJson(
                     createPassKeyParams
                 )
             )
@@ -56,7 +60,7 @@ class CreatePasskeyUseCaseImpl(val context: Context) : CreatePasskeyUseCase {
             val originString = clientDataJsonObject.optString("origin", "")
             val challengeString = clientDataJsonObject.optString("challenge", "")
 
-            passkeyResult = PasskeyResult(
+            passkeyResult = CreatePasskeyResult(
                 attestationObj = attestationObject,
                 clientDataJson = clientDataJsonString,
                 originString = originString,

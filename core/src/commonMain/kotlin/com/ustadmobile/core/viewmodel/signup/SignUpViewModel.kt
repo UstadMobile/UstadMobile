@@ -345,6 +345,7 @@ class SignUpViewModel(
 
 
             } catch (e: Exception) {
+                Napier.d { "exception ${e.message}" }
                     snackDispatcher.showSnackBar(
                         Snack(systemImpl.getString(MR.strings.login_network_error))
                     )

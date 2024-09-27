@@ -6,8 +6,8 @@ import com.ustadmobile.core.account.UstadAccountManager.EndpointFilter
 import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.account.CreateNewLocalAccountUseCase
+import com.ustadmobile.core.domain.passkey.CreatePasskeyUseCase.CreatePasskeyResult
 import com.ustadmobile.core.domain.passkey.PassKeySignInData
-import com.ustadmobile.core.domain.passkey.PasskeyResult
 import com.ustadmobile.core.domain.passkey.PasskeyVerifyResult
 import com.ustadmobile.core.domain.passkey.SavePersonPasskeyUseCase
 import com.ustadmobile.core.util.ext.base64StringToByteArray
@@ -351,7 +351,7 @@ class UstadAccountManager(
    }
     suspend fun registerWithPasskey(
         learningSpaceUrl: String,
-        passkeyResult: PasskeyResult,
+        passkeyResult: CreatePasskeyResult,
         person: Person,
         personPicture: PersonPicture?,
     ) = withContext(Dispatchers.Default) {

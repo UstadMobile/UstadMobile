@@ -201,8 +201,8 @@ class LoginViewModel(
     private fun goToNextDestAfterLoginOrGuestSelected(person: Person) {
         val goOptions = UstadMobileSystemCommon.UstadGoOptions(clearStack = true)
         Napier.d { "LoginPresenter: go to next destination: $nextDestination" }
-        if (person.isPersonalAccount){
-            nextDestination= ContentEntryListViewModel.DEST_NAME_HOME
+        if (person.isPersonalAccount) {
+            nextDestination = ContentEntryListViewModel.DEST_NAME_HOME
         }
         navController.navigateToViewUri(
             nextDestination.appendSelectedAccount(person.personUid, LearningSpace(serverUrl)),
@@ -282,18 +282,6 @@ class LoginViewModel(
         }
     }
 
-    fun onClickCreateAccount() {
-        val args = mutableMapOf(
-            UstadView.ARG_LEARNINGSPACE_URL to serverUrl,
-            SiteTermsDetailView.ARG_SHOW_ACCEPT_BUTTON to true.toString(),
-            UstadView.ARG_POPUPTO_ON_FINISH to
-                    (savedStateHandle[UstadView.ARG_POPUPTO_ON_FINISH] ?: DEST_NAME)
-        )
-
-        args.putFromSavedStateIfPresent(PersonEditViewModel.REGISTRATION_ARGS_TO_PASS)
-
-        navController.navigate(RegisterAgeRedirectViewModel.DEST_NAME, args)
-    }
 
     fun onChangeLanguage(
         uiLanguage: UstadMobileSystemCommon.UiLanguage
@@ -324,7 +312,7 @@ class LoginViewModel(
         }
     }
 
-     fun onSignInWithPassKey() {
+    private fun onSignInWithPassKey() {
         viewModelScope.launch {
             try {
 
@@ -339,8 +327,6 @@ class LoginViewModel(
                         goToNextDestAfterLoginOrGuestSelected(account.toPerson())
 
 
-                    } else {
-                      //  snackDispatcher.showSnackBar(Snack("Account not found"))
                     }
                 }
 

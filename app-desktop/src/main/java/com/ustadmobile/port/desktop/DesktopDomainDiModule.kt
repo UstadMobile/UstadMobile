@@ -86,6 +86,7 @@ import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCaseEmbeddedServer
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.launchopenlicenses.LaunchOpenLicensesUseCase
 import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
+import com.ustadmobile.core.domain.passkey.PasskeyRequestJsonUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCaseCommonJvm
@@ -499,6 +500,13 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         OpenBlobUseCaseJvm(
             getStoragePathForUrlUseCase = instance(),
             rootTmpDir = instance(tag = DiTag.TAG_TMP_DIR)
+        )
+    }
+
+    bind<PasskeyRequestJsonUseCase>()  with provider {
+        PasskeyRequestJsonUseCase(
+            systemImpl = instance(),
+            json = instance()
         )
     }
 

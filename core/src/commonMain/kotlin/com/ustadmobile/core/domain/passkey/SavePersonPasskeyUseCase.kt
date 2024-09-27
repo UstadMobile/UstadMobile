@@ -2,6 +2,7 @@ package com.ustadmobile.core.domain.passkey
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.db.entities.PersonPasskey
+import com.ustadmobile.core.domain.passkey.CreatePasskeyUseCase.CreatePasskeyResult
 
 
 class SavePersonPasskeyUseCase(
@@ -9,7 +10,7 @@ class SavePersonPasskeyUseCase(
     private val repo: UmAppDatabase?
 ) {
     suspend operator fun invoke(
-        passkeyResult: PasskeyResult,
+        passkeyResult: CreatePasskeyResult,
     ): Long {
         val effectiveDb = (repo ?: db)
 

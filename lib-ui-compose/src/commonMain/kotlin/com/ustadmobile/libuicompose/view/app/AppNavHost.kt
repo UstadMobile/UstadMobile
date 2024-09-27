@@ -145,7 +145,6 @@ import com.ustadmobile.core.viewmodel.systempermission.detail.SystemPermissionDe
 import com.ustadmobile.core.viewmodel.systempermission.edit.SystemPermissionEditViewModel
 import com.ustadmobile.core.viewmodel.videocontent.VideoContentViewModel
 import com.ustadmobile.core.viewmodel.xapicontent.XapiContentViewModel
-import com.ustadmobile.libuicompose.util.passkey.CreatePasskeyPrompt
 import com.ustadmobile.libuicompose.view.about.OpenLicensesScreen
 import com.ustadmobile.libuicompose.view.clazz.invitevialink.InviteViaLinkScreen
 import com.ustadmobile.libuicompose.view.clazz.joinwithcode.JoinWithCodeScreen
@@ -226,25 +225,6 @@ fun AppNavHost(
     }
 
 
-    var passkeyPromptData by remember{ mutableStateOf<PassKeyPromptData?>(null) }
-
-    LaunchedEffect(accountManager.passKeyPromptFlow) {
-        accountManager.passKeyPromptFlow.collect {
-            passkeyPromptData = it
-        }
-    }
-
-    passkeyPromptData?.let {
-        CreatePasskeyPrompt(
-            username = it.username,
-            personUid = it.personUid.toString(),
-            doorNodeId = it.doorNodeId,
-            usStartTime = it.usStartTime,
-            serverUrl = it.serverUrl,
-            passkeyData = {},
-            passkeyError = {}
-        )
-    }
 
     val navResultReturner: NavResultReturner = remember {
         NavResultReturnerImpl()

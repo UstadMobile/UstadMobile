@@ -25,6 +25,7 @@ import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseAndroid
 import com.ustadmobile.core.domain.passkey.CreatePasskeyUseCase
 import com.ustadmobile.core.domain.passkey.LoginWithPasskeyUseCase
+import com.ustadmobile.core.domain.passkey.PasskeyRequestJsonUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCaseCommonJvm
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsUseCase
@@ -115,12 +116,25 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
                 languagesConfig = instance()
             )
         }
+        bind<PasskeyRequestJsonUseCase>()  with provider {
+            PasskeyRequestJsonUseCase(
+                systemImpl = instance(),
+                json = instance()
+            )
+        }
+
 
         bind<CreatePasskeyUseCase>() with singleton {
-            CreatePasskeyUseCaseImpl(this@AbstractAppActivity)
+            CreatePasskeyUseCaseImpl(
+                context=this@AbstractAppActivity,
+                passkeyRequestJsonUseCase = instance()
+            )
         }
         bind<LoginWithPasskeyUseCase>() with singleton {
-            LoginWithPasskeyUseCaseImpl(this@AbstractAppActivity)
+            LoginWithPasskeyUseCaseImpl(
+                context=this@AbstractAppActivity,
+                passkeyRequestJsonUseCase = instance()
+            )
         }
 
         constant(UstadMobileSystemCommon.TAG_DOWNLOAD_ENABLED) with true

@@ -1,3 +1,5 @@
+import com.android.build.gradle.internal.ide.kmp.KotlinAndroidSourceSetMarker.Companion.android
+
 plugins {
     kotlin("multiplatform")
     id("com.android.library")
@@ -62,7 +64,7 @@ kotlin {
                 implementation(libs.volley)
                 implementation(libs.aztec)
 
-                implementation(libs.credentials)
+                implementation(libs.credentials.androidx)
                 implementation(libs.credentialsplay)
                 implementation(libs.android.material)
                 implementation(libs.libphonenumber.android)

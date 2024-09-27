@@ -31,7 +31,6 @@ import com.ustadmobile.libuicompose.components.PickFileOptions
 import com.ustadmobile.libuicompose.components.PickType
 import com.ustadmobile.libuicompose.components.UstadPasswordField
 import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
-import com.ustadmobile.libuicompose.components.rememberUstadFilePickLauncher
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.Dispatchers
@@ -47,11 +46,9 @@ fun LoginScreen(
     LoginScreen(
         uiState = uiState,
         onClickLogin = viewModel::onClickLogin,
-        onClickCreateAccount = viewModel::onClickCreateAccount,
         onClickConnectAsGuest = viewModel::onClickConnectAsGuest,
         onUsernameValueChange = viewModel::onUsernameChanged,
         onPasswordValueChange = viewModel::onPasswordChanged,
-        onSignInWithPasskey = viewModel::onSignInWithPassKey,
     )
 }
 
@@ -59,16 +56,12 @@ fun LoginScreen(
 fun LoginScreen(
     uiState: LoginUiState = LoginUiState(),
     onClickLogin: () -> Unit = {},
-    onClickCreateAccount: () -> Unit = {},
     onClickConnectAsGuest: () -> Unit = {},
     onUsernameValueChange: (String) -> Unit = {},
     onPasswordValueChange: (String) -> Unit = {},
-    onSignInWithPasskey: () -> Unit = {},
 ) {
 
-    val filePickLauncher = rememberUstadFilePickLauncher { result ->
 
-    }
     UstadVerticalScrollColumn(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -116,7 +109,7 @@ fun LoginScreen(
             }
         )
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(8.dp))
         Text(text = uiState.errorMessage ?: "")
 
         Button(
@@ -126,21 +119,8 @@ fun LoginScreen(
         ) {
             Text(stringResource(MR.strings.login))
         }
-        if(uiState.isPersonalAccount) {
-            Spacer(modifier = Modifier.height(10.dp))
 
-            OutlinedButton(
-                onClick = { filePickLauncher(PickFileOptions(pickType = PickType.FILE)) },
-                modifier = Modifier
-                    .testTag("restore_local_account")
-                    .defaultItemPadding()
-                    .fillMaxWidth(),
-            ) {
-                Text(stringResource(MR.strings.restore_local_account_title))
-            }
-        }
-
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(8.dp))
         if(uiState.connectAsGuestVisible) {
             OutlinedButton(
                 onClick = onClickConnectAsGuest,
@@ -152,7 +132,7 @@ fun LoginScreen(
             ) {
                 Text(stringResource(MR.strings.connect_as_guest))
             }
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(8.dp))
         }
 
         Text(
